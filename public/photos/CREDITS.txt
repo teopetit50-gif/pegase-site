@@ -1,0 +1,238 @@
+CRÉDITS PHOTOS — fiches moteurs Pegase
+==============================================================
+
+Toutes les photos proviennent d'Unsplash et sont couvertes par la
+licence Unsplash (https://unsplash.com/license) : usage gratuit, y
+compris commercial, sans autorisation préalable ni redevance.
+L'attribution n'est pas juridiquement exigée par cette licence mais
+reste demandée par Unsplash et due aux auteurs — d'où ce fichier.
+
+Les photos Unsplash+ (bibliothèque payante) ont été EXCLUES du
+sourcing : seules figurent ici des photos de la bibliothèque gratuite.
+
+Mise à jour du 23/07/2026 — 8 fichiers, largeur 1600 px, qualité 78.
+
+==============================================================
+
+answr.jpg  (1600x1067, 129 Ko)
+    Auteur  : freestocks
+    Profil  : https://unsplash.com/@freestocks
+    Photo   : https://unsplash.com/photos/selective-focus-photography-of-person-using-smartphone-mw6Onwg4frY
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : selective focus photography of person using smartphone
+
+brief.jpg  (1600x1067, 160 Ko)
+    Auteur  : Parker Byrd
+    Profil  : https://unsplash.com/@parkerabyrd
+    Photo   : https://unsplash.com/photos/gray-laptop-computer-on-brown-wooden-table-beside-person-sitting-on-chair-gxD8hCmi0IQ
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : gray laptop computer on brown wooden table beside person sitting on chair
+
+hired.jpg  (1600x900, 109 Ko)
+    Auteur  : Vitaly Gariev
+    Profil  : https://unsplash.com/@silverkblack
+    Photo   : https://unsplash.com/photos/woman-in-glasses-interviews-man-at-office-desk-pg2eJwNVpvY
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : Woman in glasses interviews man at office desk.
+
+offload.jpg  (1600x1067, 96 Ko)
+    Auteur  : Anastassia Anufrieva
+    Profil  : https://unsplash.com/@antoie
+    Photo   : https://unsplash.com/photos/a-woman-sitting-at-a-table-reading-a-paper-ecHGTPfjNfA
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : a woman sitting at a table reading a paper
+
+payd.jpg  (1600x1068, 176 Ko)
+    Auteur  : Mina Rad
+    Profil  : https://unsplash.com/@miinrad
+    Photo   : https://unsplash.com/photos/a-man-sitting-in-front-of-a-laptop-computer-TRNRxPvnF_g
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : a man sitting in front of a laptop computer
+
+postd.jpg  (1600x1067, 190 Ko)
+    Auteur  : Lance Reis
+    Profil  : https://unsplash.com/@lancereis
+    Photo   : https://unsplash.com/photos/a-cell-phone-sitting-on-top-of-a-wooden-table-OzsBetYNt1I
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : a cell phone sitting on top of a wooden table
+
+reach.jpg  (1600x1067, 207 Ko)
+    Auteur  : Rodeo Project Management Software
+    Profil  : https://unsplash.com/@getrodeo
+    Photo   : https://unsplash.com/photos/people-sitting-on-chair-inside-building-ONe-snuCaqQ
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : people sitting on chair inside building
+
+revive.jpg  (1600x1067, 373 Ko)
+    Auteur  : Laura Peruchi
+    Profil  : https://unsplash.com/@lauraperuchi
+    Photo   : https://unsplash.com/photos/a-clothing-store-with-clothes-and-hats-on-display-2gLL2ZgBlcU
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : A clothing store with clothes and hats on display
+
+
+==============================================================
+AJOUT DU 25/07/2026 — visuels produit « tech » des onglets /solutions
+==============================================================
+
+Cinq photos produit/tech (paiement, hardware, mobile) façon Qonto,
+sélectionnées par Teo, servent de bannières aux onglets de la page
+/solutions (composant ServicesTabs — image en fond + voile réglé par
+image + logo/titre/pitch blancs par-dessus). Largeur 1600 px (le
+terminal, en portrait, fait 1600 px de haut), qualité 78. Toutes issues
+de la bibliothèque gratuite Unsplash.
+
+Note : les huit photos ci-dessus restent en place sur les pages de
+détail /solutions/[moteur] (FicheHero, non modifiées). Ces cinq-ci sont
+un ajout distinct, réservé aux bannières des onglets.
+
+payd-card.jpg  (1600x1060)  — onglet PAYD
+    Sujet   : carte de paiement noire tenue à la main, fond sombre
+    Source  : Unsplash — https://images.unsplash.com/photo-1537724326059-2ea20251b9c8
+    Auteur  : à confirmer sur la page Unsplash de la photo
+    Licence : Unsplash License — https://unsplash.com/license
+
+answr-phone.jpg  (1600x1066)  — onglet ANSWR
+    Sujet   : smartphone à l'écran vierge, mockup sur fond clair
+    Auteur  : @mockupnest — https://unsplash.com/@mockupnest
+    Photo   : https://unsplash.com/photos/a-black-and-white-cell-phone-with-a-blank-screen-z1Hq3zufiW8
+    Licence : Unsplash License — https://unsplash.com/license
+
+offload-chip.jpg  (1600x1066)  — onglet OFFLOAD
+    Sujet   : processeur (CPU) sur carte mère, gros plan sombre
+    Auteur  : @tdx_104 — https://unsplash.com/@tdx_104
+    Photo   : https://unsplash.com/photos/a-close-up-of-a-cpu-on-top-of-a-motherboard-R9ed2PUrL_w
+    Licence : Unsplash License — https://unsplash.com/license
+
+revive-chip.jpg  (1600x1200)  — onglet REVIVE
+    Sujet   : processeur AMD Ryzen 7 3700X sur carte mère
+    Auteur  : @ocollet — https://unsplash.com/@ocollet
+    Photo   : https://unsplash.com/photos/white-and-green-hard-disk-drive-JMwCe3w7qKk
+    Licence : Unsplash License — https://unsplash.com/license
+
+paiement-terminal.jpg  (1067x1600)  — RÉSERVE (non utilisée pour l'instant)
+    Sujet   : terminal de paiement sans contact + carte (type SumUp)
+    Source  : Unsplash — https://images.unsplash.com/photo-1726065235173-46a7690366b4
+    Auteur  : à confirmer sur la page Unsplash de la photo
+    Licence : Unsplash License — https://unsplash.com/license
+
+==============================================================
+
+Ajout du 25/07/2026 — 4 fichiers, largeur 1600 px, qualité 78.
+Les quatre moteurs « pépites » n'avaient aucune photo ; leurs
+fiches en affichent désormais une, comme les huit autres.
+Même règle de sourcing : bibliothèque GRATUITE uniquement, aucun
+Unsplash+ (vérifié sur chaque page — « Free … Image on Unsplash »).
+
+billd.jpg  (1600 px, 79 Ko)
+    Auteur  : Kelly Sikkema
+    Profil  : https://unsplash.com/@kellysikkema
+    Photo   : https://unsplash.com/photos/coffee-mug-near-open-folder-with-tax-withholding-paper-wgcUx0kR1ps
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : coffee mug near open folder with tax withholding paper
+
+publiq.jpg  (1600 px, 312 Ko)
+    Auteur  : Elijah Mears
+    Profil  : https://unsplash.com/@elijahjmears
+    Photo   : https://unsplash.com/photos/brown-and-white-concrete-building-under-blue-sky-during-daytime-JnIJeq_EDgE
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : brown and white concrete building under blue sky during daytime
+
+stayd.jpg  (1600 px, 95 Ko)
+    Auteur  : Jakub Zerdzicki
+    Profil  : https://unsplash.com/@jakubzerdzicki
+    Photo   : https://unsplash.com/photos/holding-house-keys-in-front-of-the-entrance-bqUZEAeWuok
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : holding house keys in front of the entrance
+
+collect.jpg  (1600 px, 199 Ko)
+    Auteur  : Vitaly Gariev
+    Profil  : https://unsplash.com/@silverkblack
+    Photo   : https://unsplash.com/photos/a-man-sitting-at-a-table-in-front-of-a-laptop-hPDJdl8mfI8
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : a man sitting at a table in front of a laptop
+
+==============================================================
+VISUELS DÉRIVÉS — maquettes produit, hors Unsplash
+==============================================================
+
+answr-conversation.jpg  (941x1672, portrait — MASTER)
+    Origine : maquette produit réalisée en interne (rendu iPhone
+              tenu à deux mains, conversation ANSWR composée sur
+              l'écran). Aucune source Unsplash, aucune attribution
+              due.
+    Usage   : master de travail. N'est plus servi par le site.
+
+answr-carte.jpg  (1400x1125, ratio 1,2444)
+    Dérivé de : answr-conversation.jpg
+    Servi par : app/offres/page.tsx — carton « 24 h/24 » de /offres
+    Pourquoi  : le master est portrait (0,563) et le cadre .o-photo
+                est paysage (560/450 = 1,244). En object-fit: cover
+                le master était agrandi à 995 px de haut pour 450
+                visibles — 55 % hors champ, téléphone démesuré
+                (Teo, 29/07 : « la photo est trop grosse »).
+    Recette   : îlot propre du sujet cherché dans la bande
+                (150, 172, 941, 1360) — au-delà de y≈1350 les poignets
+                touchent les deux bords latéraux et la découpe cesse
+                d'être invisible — puis resserré sur la bbox RÉELLE du
+                sujet (la bande gardait 13 px de blanc à droite, ce qui
+                décalait le sujet de 5 px après centrage) ;
+                remis à l'échelle à 82 % de la hauteur du cadre,
+                ancré en bas (la coupe tombe sur le bord, donc ne se
+                voit pas) et CENTRÉ horizontalement — 398 px de marge
+                à gauche, 398 à droite, écart nul (Teo, 29/07 : « c'est
+                pas centrée » ; la version précédente était décalée à
+                droite pour dégager le titre) ;
+                fond #FEFEFE, le blanc mesuré du master. JPEG q84.
+    Contrôlé  : ratio identique au cadre → cover ne recadre plus rien.
+                Contraste du titre blanc 4,29:1 (seuil AA grand texte
+                3,0) et du lien 7,34:1 (seuil 4,5), voile .o-photo
+                inclus dans la mesure.
+
+==============================================================
+Ajout du 30/07/2026 — page À propos (architecture hyperstack)
+4 fichiers, largeur 1600 px, qualité 78, bibliothèque gratuite.
+==============================================================
+
+regle-execution.jpg  (348 Ko)
+    Auteur  : Kato Blackmore
+    Profil  : https://unsplash.com/@katoblackmore
+    Photo   : https://unsplash.com/photos/1676018366904-c083ed678e60
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : a man working on a machine in a garage
+
+regle-resultat.jpg  (206 Ko)
+    Auteur  : Vitaly Gariev
+    Profil  : https://unsplash.com/@silverkblack
+    Photo   : https://unsplash.com/photos/1753351054581-783229e920fa
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : two cafe workers standing behind a counter
+
+regle-proximite.jpg  (211 Ko)
+    Auteur  : Rock Staar
+    Profil  : https://unsplash.com/@rockstaar_
+    Photo   : https://unsplash.com/photos/1638262052640-82e94d64664a
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : two people shaking hands over a wooden table
+
+histoire-constat.jpg  (276 Ko)
+    Auteur  : Wesley Tingey
+    Profil  : https://unsplash.com/@wesleyphotography
+    Photo   : https://unsplash.com/photos/1583521214690-73421a1829a9
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : stacks of paper documents and file folders
+
+==============================================================
+Ajout du 31/07/2026 — carte « Trésorerie » de /offres
+1 fichier, largeur 1600 px, qualité 78, bibliothèque gratuite.
+payd-card.jpg (carte noire sur fond sombre) se confondait avec
+la bande noire de la section (demande Teo) ; elle reste servie
+par ServiceDetail. La carte de /offres passe sur :
+==============================================================
+
+payd-comptoir.jpg  (1600x1200, 247 Ko)
+    Auteur  : SpotOn
+    Profil  : https://unsplash.com/@spotonpos
+    Photo   : https://unsplash.com/photos/1778790508237-3c6cb00f152a
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : A man pays a smiling woman at a cafe counter.

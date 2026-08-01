@@ -1,0 +1,53 @@
+import PageShell from "@/components/PageShell";
+import Hero from "@/components/Hero";
+import Tools from "@/components/Tools";
+import FeatureSection from "@/components/FeatureSection";
+import Working from "@/components/Working";
+import Articles from "@/components/Articles";
+import Machine from "@/components/Machine";
+import FinancementSection from "@/components/FinancementSection";
+import { DashboardMockup, ChatMockup } from "@/components/mockups";
+import Fondu from "@/components/Fondu";
+import { FAMILLES } from "@/lib/content";
+
+const VEDETTES = ["PAYD", "ANSWR", "OFFLOAD", "REVIVE"];
+
+const MOCKUPS = [
+  <DashboardMockup key="dashboard" />,
+  <ChatMockup key="chat" />,
+];
+
+export default function Home() {
+  return (
+    <PageShell>
+      <Hero />
+      <Tools />
+      <Fondu vers="clair" />
+      {/* offre resserrée (21/07, conseil externe « trop de services ») : la
+          vitrine ne montre que les 4 moteurs les plus importants — PAYD,
+          ANSWR, OFFLOAD, REVIVE. Les autres fiches restent servies par URL. */}
+      {FAMILLES.filter((f) => f.id !== "pepites").map((f, i) => {
+        const vedettes = FAMILLES.flatMap((x) => x.moteurs).filter((m) =>
+          VEDETTES.includes(m.system)
+        );
+        return (
+          <FeatureSection
+            key={f.id}
+            famille={{ ...f, moteurs: f.id === "defensifs" ? vedettes : [] }}
+            mockup={MOCKUPS[i]}
+          />
+        );
+      })}
+      {/* section autonome — une seule ligne à déplacer pour la repositionner.
+          Remontée juste sous les cartes moteurs (22/07) : elle reste dans le
+          monde clair ouvert par le Fondu ci-dessus. */}
+      <FinancementSection />
+      <Fondu vers="sombre" />
+      <Machine />
+      <Fondu vers="clair" />
+      <Working />
+      <Fondu vers="sombre" />
+      <Articles />
+    </PageShell>
+  );
+}

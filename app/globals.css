@@ -1,26 +1,2135 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #08090c;
+  --panel: #000000;
+  --line: rgba(255, 255, 255, 0.1);
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --text: #f5f5f5;
+  --muted: #9b9ba3;
+  --gold: #f78320;
+  --mint: #2fe6a8;
+  --sky: #67caf2;
+  /* Radius unique du site — toutes les cartes et panneaux (cartes moteurs,
+     journal de nuit, formulaires). */
+  --radius-card: 12px;
+  /* Radius des CTA (23/07, Teo : « ils sont trop arrondis »). Les boutons
+     étaient en pilule (rounded-full) ; ils s'alignent désormais sur le radius
+     des cartes. Un seul token pour les ~25 CTA du site : régler ici suffit à
+     tous les faire bouger ensemble. Les pastilles, badges et pastilles
+     numérotées restent ronds — ce token ne concerne que les boutons. */
+  --radius-btn: 12px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-mint: var(--mint);
+  --color-sky: var(--sky);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, SFMono-Regular, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Soft radial glow behind the mockup bands */
+.glow-band {
+  background: radial-gradient(
+    60% 85% at 50% 50%,
+    rgba(255, 255, 255, 0.04),
+    transparent 70%
+  );
+}
+
+/* Noms des moteurs (PAYD, ANSWR…) — gris métallique pailleté :
+   dégradé argenté clippé sur le texte + reflet qui balaye en continu */
+.metal-text {
+  background: linear-gradient(
+    100deg,
+    #83878f 0%,
+    #d9dde3 22%,
+    #f7f9fc 38%,
+    #9ca3ad 54%,
+    #e6e9ee 74%,
+    #83878f 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: metalShine 3.4s linear infinite;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+@keyframes metalShine {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Number styling — sans géométrique tabulaire façon Qonto (Teo 21/07 :
+   le mono JetBrains sur les chiffres est abandonné, réf. screens 600,000+
+   et 24/7). Le mono reste pour les vignettes terminal via font-mono. */
+.num {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Courbes d'easing fortes (les easings CSS natifs manquent de punch) */
+:root {
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Press feedback : tous les CTA pilule répondent au clic */
+a.rounded-full,
+button.rounded-full {
+  transition:
+    transform 160ms var(--ease-out-strong),
+    background-color 160ms ease;
+}
+a.rounded-full:active,
+button.rounded-full:active {
+  transform: scale(0.97);
+}
+
+/* Jauge du carrousel « Le parcours » (ParcoursSlider) — c'est elle qui fait
+   office de minuteur : sa fin déclenche le passage à la carte suivante. En
+   scaleX (composite) plutôt qu'en width, pour ne pas relayouter à chaque
+   frame pendant 6,5 s. */
+@keyframes jauge-carrousel {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Marquee outils — mouvement constant donc timing linéaire */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 30s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* Halos lumineux dérivants du hero */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Hero entrance on page load */
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sparklePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+/* Cartes moteurs signature — lueur qui respire au fond du verre.
+   Lente et quasi imperceptible au repos ; l'opacité du calque parent
+   monte au survol. Coupée par le bloc reduced-motion ci-dessous. */
+@keyframes cardGlowBreathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18) translateY(-4%);
+  }
+}
+.card-breathe {
+  animation: cardGlowBreathe 7s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+::selection {
+  background: var(--gold);
+  color: #000;
+}
+
+/* Vignettes /solutions — frappe terminal (clip-path, jamais de layout) + curseur */
+@keyframes vType {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes vBlink {
+  50% { opacity: 0; }
+}
+
+/* /solutions v3 — pin horizontal desktop (classes activées par GSAP matchMedia,
+   défaut sans JS / reduced-motion = tuiles empilées statiques) */
+.off-pin {
+  height: 100svh;
+  overflow: hidden;
+}
+.off-pin .off-track {
+  display: flex;
+  width: 400%;
+  height: 100%;
+}
+.off-pin .off-slide {
+  width: 25%;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.off-pin .off-progress {
+  opacity: 1;
+}
+
+/* CTA de la tuile claire — reflet or au survol (shiny sobre, charte) */
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+}
+.cta-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -70%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(224, 179, 65, 0.4), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.65s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.cta-shine:hover::after {
+  left: 130%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-shine::after {
+    display: none;
+  }
+}
+
+/* ——— CHARTE V2 (21/07/2026) : le monde CLAIR — alternance sombre/clair
+   façon Qonto. Or texte sur clair : le #a67c1e du brief échoue AA (3.8:1
+   sur blanc) → ajusté #8a6519 (5.3:1 blanc / 4.75:1 #f4f1ec). Le #e0b341
+   reste réservé aux éléments graphiques. ——— */
+:root {
+  /* 22/07 (Teo — « les fonds blancs tirent plus beige clair que blanc ») :
+     le monde clair est neutralisé. Le beige #edece8 devient un blanc cassé
+     quasi neutre, les cartes passent au blanc pur pour rester détachées du
+     fond. Les couleurs de texte ne bougent pas : elles étaient validées AA
+     sur #f4f1ec, un fond plus clair ne fait qu'augmenter les ratios. */
+  --clair-bg: #f6f6f5;
+  --clair-carte: #ffffff;
+  --clair-texte: #0f1013;
+  --clair-muted: #52555c;
+  --clair-or: #8a6519;
+  --clair-hairline: rgba(15, 16, 19, 0.08);
+}
+/* Le monde clair déborde sur toute la largeur de l'écran (22/07, Teo : « sur
+   ordi les couleurs ne vont pas à 100 %, ça s'arrête »). Le contenu du site
+   vit dans une colonne de 1440 px (main, PageShell) : au-delà, le noir de la
+   page réapparaissait sur les côtés et coupait les sections claires.
+
+   Technique : une ombre portée géante de la MÊME couleur, écrêtée
+   horizontalement seulement. Aucun impact sur la mise en page — ni marge
+   négative (qui entrerait en conflit avec les px-6/px-10 posés directement
+   sur certaines sections, ex. la FAQ de /solutions), ni débordement
+   horizontal, ni barre de défilement parasite. Le contenu reste aligné sur
+   la colonne, seul le fond s'étend. */
+.monde-clair {
+  background: var(--clair-bg);
+  color: var(--clair-texte);
+  box-shadow: 0 0 0 100vmax var(--clair-bg);
+  clip-path: inset(0 -100vmax);
+}
+/* carte blanche : ombre douce large + dégradé radial subtil (réf. Qonto) */
+.carte-claire {
+  background:
+    radial-gradient(130% 90% at 50% 0%, #ffffff, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #ffffff, #f2f2f0);
+  border: 1px solid rgba(15, 16, 19, 0.06);
+  box-shadow:
+    0 28px 56px -20px rgba(15, 16, 19, 0.17),
+    0 4px 14px rgba(15, 16, 19, 0.06);
+}
+
+/* Variante interactive de la carte claire (22/07) : élévation + ouverture de
+   l'ombre au survol, pour les cartes entièrement cliquables (journal). On
+   n'anime que transform et box-shadow — jamais la géométrie. */
+.carte-claire-lien {
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.carte-claire-lien:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 40px 70px -24px rgba(15, 16, 19, 0.22),
+    0 8px 20px rgba(15, 16, 19, 0.08);
+}
+@media (prefers-reduced-motion: reduce) {
+  .carte-claire-lien {
+    transition: none;
+  }
+  .carte-claire-lien:hover {
+    transform: none;
+  }
+}
+
+/* Charnières entre les deux mondes (charte v2.3) — coupe droite nette,
+   façon Qonto : ni dégradé (gris sales), ni coins arrondis (rejetés).
+   La frontière est franche ; la respiration vient du padding des sections. */
+.fondu-clair,
+.fondu-sombre {
+  height: 0;
+}
+
+.metal-text-dark {
+  background: linear-gradient(
+    100deg,
+    #33363c 0%,
+    #5a5f69 22%,
+    #9aa1ad 38%,
+    #2c2f35 54%,
+    #767d89 74%,
+    #33363c 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: metalShine 3.4s linear infinite;
+  font-weight: 600;
+}
+
+/* Reflet métal pour PETIT texte sur fond clair (onglets « Nos services »,
+   22/07). Pourquoi une variante plutôt que .metal-text-dark : cette dernière
+   monte jusqu'à #9aa1ad (2,6:1 sur blanc) et #767d89 (4,15:1) — deux stops
+   qui ne tiennent que le seuil « grand texte », alors que les libellés
+   d'onglet font 15 px. La rampe est donc bornée à #5f656e (5,88:1) : tous
+   les stops passent AA en petit texte, le balayage reste lisible. */
+.metal-text-sm-dark {
+  background: linear-gradient(
+    100deg,
+    #2c2f35 0%,
+    #3d424a 22%,
+    #5f656e 38%,
+    #2c2f35 54%,
+    #4d525a 74%,
+    #2c2f35 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: metalShine 3.4s linear infinite;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .metal-text-sm-dark {
+    animation: none;
+  }
+}
+
+/* Étincelle qui parcourt la bordure en continu (réf. tuile IA Qonto) —
+   conic-gradient or tournant, masqué sur l'anneau de bordure seulement */
+@property --beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes beamSpin {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+.border-beam {
+  position: relative;
+}
+.border-beam::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg,
+    transparent 290deg,
+    rgba(224, 179, 65, 0.15) 315deg,
+    rgba(224, 179, 65, 0.95) 340deg,
+    rgba(255, 240, 200, 1) 350deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: beamSpin 3.6s linear infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .border-beam::before {
+    animation: none;
+  }
+}
+
+/* Surface métal sombre — gris foncé légèrement métallisé pour les objets
+   sombres posés sur le monde clair (panneaux logos, fenêtres mockup) */
+.surface-metal {
+  background: linear-gradient(
+    100deg,
+    #7e848f 0%,
+    #a4a9b1 14%,
+    #c2c5cb 30%,
+    #91969f 47%,
+    #b5b9c0 62%,
+    #878d98 80%,
+    #bcc0c6 93%,
+    #8f95a0 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.16);
+}
+
+/* ——— Timeline « mise en place » à révélation au scroll (EtapesTimeline) ———
+   État piloté par l'attribut data-on sur .etape (valeurs "on"/"off"). Écrit
+   à la main ici plutôt qu'en variantes Tailwind data-[on=…] : ces dernières
+   ne sont pas générées de façon fiable, et un sélecteur d'attribut avec
+   guillemets ([data-on="off"]) est lui toujours valide. Repli sans JS :
+   data-on="on" en dur → tout est actif. */
+/* Pas de transition CSS ici : quand le JS tourne, GSAP anime l'inline (une
+   transition CSS rappelée à chaque frame de scrub gelait la valeur). Ces
+   règles ne servent QU'au repli sans JS. */
+.etape {
+  opacity: 1;
+}
+.etape[data-on="off"] {
+  opacity: 0.4;
+}
+.etape-noeud {
+  background: #f6f6f5;
+  color: rgba(15, 16, 19, 0.5);
+  border-color: rgba(15, 16, 19, 0.18);
+}
+.etape[data-on="on"] .etape-noeud {
+  background: #0f1013;
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 0 0 4px rgba(183, 134, 31, 0.18);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /offres — système de design isolé (25/07/2026)
+
+   Teo a demandé la reproduction à l'identique d'une page de référence
+   (ocoya.com/features/create) pour « Nos offres ». Ce monde-là ne partage
+   RIEN avec la charte v2 du reste du site : deux familles de caractères
+   propres (Plus Jakarta Sans / Inter Tight), une échelle typo plus grande,
+   un blanc pur au lieu du #f6f6f5, des rayons de 15 px et un fond pointillé.
+   Tout est donc préfixé `--o-` / `.o-` et vit sous `.offres` : aucune règle
+   ne peut fuir sur les autres pages, et supprimer ce bloc supprime la page
+   sans effet de bord.
+
+   Valeurs relevées au pixel sur la page de référence (viewport 1440) :
+   colonne de contenu 1200, H1 60/72 ls -1.8, H2 48/67.2 ls -1.92,
+   cartes 580×472 r15 padding 50, section sombre 2×560 gap 80,
+   cartes photo 560×450 r10 padding 30, CTA 1200×440 r15 padding 80.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.offres {
+  --demo-fond: #ffffff;
+  --demo-tete: #fbfbfb;
+  --demo-ligne: #fcfcfc;
+  --demo-filet: rgba(9, 9, 11, 0.06);
+  --demo-fort: #09090b;
+  --demo-doux: #52525b;
+  --demo-faible: #a1a1aa;
+  --demo-bulle: #f4f4f5;
+  --demo-bulle-texte: #3f3f46;
+  --demo-envoi: #18181b;
+  --demo-envoi-texte: #ffffff;
+  --demo-ok-fond: #ecfdf5;
+  --demo-ok-texte: #047857;
+  --demo-warn-fond: #fffbeb;
+  --demo-warn-texte: #b45309;
+  --demo-off-fond: #f4f4f5;
+  --demo-off-texte: #52525b;
+  --o-text: #09090b;
+  --o-muted: #71717a;
+  --o-muted-strong: #52525b;
+  --o-line: #e4e4e7;
+  --o-soft: #fafafa;
+  --o-btn: #27272a;
+  --o-dot: rgba(9, 9, 11, 0.12);
+
+  background: #ffffff;
+  color: var(--o-text);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  /* le monde blanc déborde jusqu'aux bords de l'écran — même technique que
+     .monde-clair : le contenu vit dans la colonne 1440 de <main>, l'ombre
+     écrêtée horizontalement peint le reste sans toucher au layout.
+     30/07 — étalement ramené de 100vmax à 50vw : la gouttière à couvrir vaut
+     (100vw − 1440)/2 = 50vw − 720, donc 50vw suffit toujours. Rendu
+     identique, rectangle de peinture quatre fois plus petit. */
+  box-shadow: 0 0 0 50vw #ffffff;
+  clip-path: inset(0 -50vw);
+}
+
+/* colonne de contenu : 1200 px exactement, soit 120 px de gouttière dans la
+   colonne 1440 de <main> — la mesure de la page de référence.
+   `padding-inline` et NON le raccourci `padding` : ce sélecteur pèse (0,2,0),
+   il écraserait sinon tous les `py-*` Tailwind posés sur les mêmes sections
+   (bug constaté au premier rendu — toutes les sections se touchaient). */
+.offres .o-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+@media (min-width: 1248px) {
+  .offres .o-wrap {
+    padding-inline: 0;
+  }
+}
+
+/* ——— titres : Plus Jakarta Sans 600, interlignes et chasses relevés ——— */
+.offres .o-h1,
+.offres .o-h2,
+.offres .o-h4,
+.offres .o-h5 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--o-text);
+}
+.offres .o-h1 {
+  font-size: clamp(38px, 5.6vw, 60px);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+.offres .o-h2 {
+  font-size: clamp(32px, 4.4vw, 48px);
+  line-height: 1.4;
+  letter-spacing: -0.04em;
+}
+.offres .o-h4 {
+  font-size: clamp(24px, 2.6vw, 30px);
+  line-height: 1.4;
+  letter-spacing: -0.04em;
+}
+.offres .o-h5 {
+  font-size: clamp(20px, 1.9vw, 24px);
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+}
+
+/* ——— corps : Inter Tight, trois graduations ——— */
+.offres .o-lead,
+.offres .o-body,
+.offres .o-small {
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  color: var(--o-muted);
+}
+.offres .o-lead {
+  font-size: 18px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+.offres .o-body {
+  font-size: 16px;
+  line-height: 1.8;
+  letter-spacing: 0.03em;
+}
+.offres .o-small {
+  font-size: 14px;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+/* ——— pastille d'intertitre (« Nos offres », « Moteurs »…) ——— */
+.offres .o-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--o-line);
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--o-text);
+  box-shadow: 0 1px 2px rgba(9, 9, 11, 0.04);
+}
+.offres .o-pill--xs {
+  height: 28px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+}
+/* variante posée sur la bande noire */
+.offres .o-pill--dark {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  box-shadow: none;
+}
+/* variante posée SUR une photo : le fond translucide clair de --dark
+   disparaît dès que la photo est claire (cas ANSWR). Fond sombre opaque à
+   55 % + flou : lisible sur photo noire comme sur photo blanche. */
+.offres .o-pill--verre {
+  background: rgba(9, 9, 11, 0.55);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ——— boutons ——— */
+.offres .o-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 15px;
+  border-radius: 8px;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  transition:
+    background-color 0.2s ease,
+    transform 0.16s var(--ease-out-strong);
+}
+.offres .o-btn:active {
+  transform: scale(0.97);
+}
+.offres .o-btn--primary {
+  background: var(--o-btn);
+  color: #ffffff;
+}
+.offres .o-btn--primary:hover {
+  background: #3f3f46;
+}
+.offres .o-btn--ghost {
+  background: #ffffff;
+  color: var(--o-text);
+  border: 1px solid var(--o-line);
+}
+.offres .o-btn--ghost:hover {
+  background: #fafafa;
+}
+
+/* ——— lien fléché (« Voir PAYD › ») ——— */
+.offres .o-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--o-text);
+}
+.offres .o-link svg {
+  transition: transform 0.25s var(--ease-out-strong);
+}
+.offres .o-link:hover svg {
+  transform: translateX(3px);
+}
+.offres .o-link--light {
+  color: #ffffff;
+}
+
+/* ——— cartes ——— */
+/* carte bento blanche : l'ombre est un empilement de 4 passes très courtes,
+   c'est elle qui donne le relief « produit » sans halo gris */
+.offres .o-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow:
+    0 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.11),
+    0 2.29px 2.29px -2.5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -3.75px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(9, 9, 11, 0.05);
+}
+/* carte du bloc « mise en place » : plate, gris très clair, filet 1 px */
+.offres .o-card-soft {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid var(--o-line);
+  background: var(--o-soft);
+}
+
+/* ——— fond pointillé ———
+   la référence sert une tuile SVG de 96 px affichée en 41 px, soit un pas de
+   20,5 px entre deux points. Reproduit ici en radial-gradient : un seul point
+   par tuile de 20,5 px, même densité, zéro requête réseau. */
+.offres .o-dots {
+  background-image: radial-gradient(var(--o-dot) 1px, transparent 1px);
+  background-size: 20.5px 20.5px;
+  background-position: 0 0;
+}
+/* dégradé d'extinction vers le bas — les points ne doivent jamais rencontrer
+   franchement le blanc, sinon la coupe se voit */
+.offres .o-dots-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+}
+.offres .o-dots-fade-up {
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 40%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, #000 40%, transparent 100%);
+}
+
+/* ——— carte photo de la bande noire ——— */
+.offres .o-photo {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  aspect-ratio: 560 / 450;
+}
+.offres .o-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-out-strong);
+}
+.offres .o-photo:hover img {
+  transform: scale(1.04);
+}
+/* voile bas : sans lui les titres blancs passent sous le seuil AA dès qu'une
+   photo est claire en bas de cadre */
+.offres .o-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.45) 32%,
+    rgba(0, 0, 0, 0) 62%
+  );
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /offres/moteurs — extensions du même système
+   (25/07/2026, seconde page de référence : la home ocoya.com)
+
+   Même famille de caractères, même colonne 1200, mêmes pastilles/boutons
+   que `.offres` : cette page réutilise la classe. Ce bloc n'ajoute que les
+   objets absents de la première page — fond gris pointillé, carte plate
+   grise, pastille ronde d'outil, bandeaux défilants, nœuds de workflow,
+   cartes de formule, accordéon. Tout reste préfixé `.o-`.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* le hero de la home est posé sur un gris, pas sur du blanc */
+.offres .o-gris {
+  background: #f5f5f5;
+  box-shadow: 0 0 0 100vmax #f5f5f5;
+  clip-path: inset(0 -100vmax);
+}
+
+/* carte plate grise : le contenant par défaut de la home (cartes moteurs,
+   bento, FAQ). Pas d'ombre — un filet 1 px et un gris légèrement plus clair
+   que le fond suffisent, c'est ce qui la distingue de .o-card */
+.offres .o-card-plate {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid #ededed;
+  background: #f9f9f9;
+}
+/* posée sur un fond déjà gris, la carte s'éclaircit au lieu de s'assombrir */
+.offres .o-gris .o-card-plate {
+  background: #fafafa;
+  border-color: #e8e8e8;
+}
+
+/* pastille ronde d'outil — 60 px, blanche, ombre courte */
+.offres .o-chip {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(9, 9, 11, 0.05),
+    0 8px 18px -12px rgba(9, 9, 11, 0.22);
+}
+.offres .o-chip svg,
+.offres .o-chip img {
+  width: 26px;
+  height: 26px;
+}
+
+/* bandeaux défilants — le contenu déborde de la colonne et s'éteint sur les
+   bords ; masque symétrique pour que rien ne soit coupé net */
+.offres .o-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+}
+.offres .o-marquee-piste {
+  display: flex;
+  width: max-content;
+  animation: o-defile 42s linear infinite;
+  /* 30/07 — la piste tourne en permanence sous un masque en dégradé. Sans
+     couche dédiée, le compositeur réapplique le masque sur du contenu
+     repeint à chaque image, et ça s'entend au défilement. `will-change`
+     promeut la piste : elle n'est rasterisée qu'une fois puis translatée. */
+  will-change: transform;
+}
+.offres .o-marquee-piste--lent {
+  animation-duration: 64s;
+}
+.offres .o-marquee-piste--inverse {
+  animation-direction: reverse;
+}
+@keyframes o-defile {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.offres .o-marquee:hover .o-marquee-piste {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .offres .o-marquee-piste {
+    animation: none;
+  }
+}
+
+/* nœud de workflow — pastille blanche à carré d'icône coloré, posée sur un
+   rail vertical fin */
+.offres .o-noeud {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 16px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(9, 9, 11, 0.06),
+    0 10px 22px -14px rgba(9, 9, 11, 0.25);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--o-text);
+}
+.offres .o-noeud-icone {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  color: #ffffff;
+}
+/* nœud « déclencheur » : effacé, il n'est pas une action */
+.offres .o-noeud--source {
+  box-shadow: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--o-muted);
+}
+.offres .o-noeud--source .o-noeud-icone {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+/* carte de formule — blanche, filet, radius 15 (celui des cartes) */
+.offres .o-formule {
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  border: 1px solid var(--o-line);
+  background: #ffffff;
+  padding: 30px;
+}
+.offres .o-formule--phare {
+  border-color: #d4d4d8;
+  box-shadow: 0 18px 40px -24px rgba(9, 9, 11, 0.25);
+}
+
+/* sélecteur segmenté (Mensuel / Annuel de la référence) */
+.offres .o-segments {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: #f4f4f5;
+}
+.offres .o-segment {
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--o-muted-strong);
+}
+.offres .o-segment[data-actif="true"] {
+  background: #ffffff;
+  color: var(--o-text);
+  box-shadow: 0 1px 2px rgba(9, 9, 11, 0.08);
+}
+
+/* accordéon FAQ — filets seuls, le « + » bascule en « × » à l'ouverture */
+.offres .o-faq-item {
+  border-bottom: 1px solid rgba(9, 9, 11, 0.08);
+}
+.offres .o-faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  cursor: pointer;
+  list-style: none;
+  padding: 22px 0;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--o-text);
+}
+.offres .o-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.offres .o-faq-croix {
+  flex-shrink: 0;
+  transition: transform 0.3s var(--ease-out-strong);
+}
+.offres .o-faq-item[open] .o-faq-croix {
+  transform: rotate(45deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Monde NUIT — 30/07/2026 (4ᵉ page de référence : ocoya.com/affiliates)
+
+   Cette référence-là alterne une bande noire et des sections claires ;
+   c'est ce qui la distingue des trois autres, toutes blanches. Plutôt que
+   de dupliquer chaque règle en version sombre, `.o-nuit` se contente de
+   réécrire les variables du monde : tous les .o-h1 / .o-lead / .o-small
+   posés dessous suivent sans une ligne de plus, puisqu'ils tirent déjà
+   leur couleur de var(--o-text) et var(--o-muted).
+
+   Le débordement plein écran reprend l'ombre géante écrêtée de `.offres` —
+   sans elle la bande noire s'arrêterait à la colonne 1440 de <main> et on
+   verrait deux liserés blancs sur les côtés.
+   ═══════════════════════════════════════════════════════════════════════ */
+.offres .o-nuit {
+  --o-text: #ffffff;
+  --o-muted: #a1a1aa;
+  --o-muted-strong: #d4d4d8;
+  --o-line: rgba(255, 255, 255, 0.14);
+  --o-soft: #18181b;
+  --o-dot: rgba(255, 255, 255, 0.14);
+  position: relative;
+  background: #09090b;
+  color: #ffffff;
+  /* 30/07 — étalement ramené de 100vmax à 50vw. Le débord n'a besoin de
+     couvrir que la gouttière, soit (100vw − 1440)/2 = 50vw − 720 : 50vw est
+     donc toujours suffisant, sur n'importe quel écran. 100vmax faisait
+     peindre un rectangle quatre fois plus grand à chaque repeinte, pour un
+     rendu strictement identique. */
+  box-shadow: 0 0 0 50vw #09090b;
+  clip-path: inset(0 -50vw);
+}
+
+/* Calque de décor — 30/07, correctif de fluidité.
+   Halo et filets vivaient en z-index:-1 directement dans la section, ce qui
+   obligeait `.o-nuit` à créer un contexte isolé : chaque bande devenait une
+   couche non cachable, et le dégradé radial de 1306 px se re-rasterisait à
+   chaque image de défilement. Ils sont désormais réunis dans ce calque, à
+   qui `translateZ(0)` donne sa propre couche de composition : le dégradé
+   n'est peint qu'une fois, le défilement ne fait plus que le translater.
+   C'est aussi lui qui porte l'overflow, la section n'a plus à clipper. */
+.offres .o-deco {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+/* de nuit, le bouton plein s'inverse en blanc et le fantôme se fait verre */
+.offres .o-nuit .o-btn--primary {
+  background: #ffffff;
+  color: #09090b;
+}
+.offres .o-nuit .o-btn--primary:hover {
+  background: #e4e4e7;
+}
+.offres .o-nuit .o-btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+.offres .o-nuit .o-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.offres .o-nuit .o-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  box-shadow: none;
+}
+.offres .o-nuit .o-link {
+  color: #ffffff;
+}
+.offres .o-nuit .o-carte-nuit {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Halo : le disque géant de la référence, relevé à 1306 px pour une
+   opacité mesurée de 0,054. Il monte du bas du hero et n'éclaire que le
+   centre — c'est lui qui empêche le noir plein de paraître plat. */
+.offres .o-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1306px;
+  height: 1306px;
+  transform: translate(-50%, -30%);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.025) 40%,
+    transparent 66%
+  );
+  pointer-events: none;
+}
+/* Traits de vitesse : filets d'1 px qui traversent le hero, dégradés aux
+   deux bouts pour qu'aucun ne commence ni ne finisse net. Positions figées
+   en dur — un aléatoire au rendu casserait l'hydratation. */
+.offres .o-trait {
+  position: absolute;
+  height: 1px;
+  top: calc(var(--trait-t, 50) * 1%);
+  width: calc(var(--trait-w, 20) * 1vw);
+  opacity: var(--trait-op, 0.35);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  pointer-events: none;
+}
+/* Sur téléphone, les stries redeviennent des mouchetures.
+   Deux essais ratés le 30/07 — largeurs en vw puis suppression pure et
+   simple — avant d'aller regarder la référence à 390 px. Ocoya ne dessine
+   pas des lignes : c'est un CHAMP D'ÉTOILES. Sur grand écran les points
+   s'étirent en stries (effet vitesse), sur téléphone ils se réduisent à des
+   points de quelques pixels — c'est pour ça qu'ils ne barrent jamais leur
+   texte. Le facteur 0,085 reproduit ce comportement : la plus longue strie
+   (29,2 vw, soit 420 px à 1440) tombe à 2,5 vw, environ 10 px sur un écran
+   de 390. La composition reste, la barre disparaît. */
+/* Sur téléphone : des STRIES CONTINUES, pas des mouchetures.
+   Arbitrage de Teo (30/07) après l'essai en points — « des points perdus,
+   c'est moche ». On garde donc le même dessin qu'en grand écran, dégradé
+   compris, avec deux ajustements imposés par la taille.
+
+   La longueur d'abord : à l'échelle proportionnelle du desktop, les stries
+   feraient 39 à 114 px sur un écran de 390 — trop court pour que le fondu
+   transparent → blanc → transparent ait la place d'exister, et c'est
+   exactement ce qui les faisait paraître hachées. On les allonge donc de
+   2,2×, ce qui donne 89 à 250 px : le fondu respire et la strie se lit
+   d'un bout à l'autre.
+
+   L'opacité ensuite : ces stries croisent forcément le texte, puisqu'à
+   cette largeur la colonne va d'un bord à l'autre. Divisée par presque
+   deux, elles passent derrière le texte au lieu de le barrer. */
+@media (max-width: 767px) {
+  .offres .o-trait {
+    /* jeu de positions propre au téléphone : les bandes libres n'y sont pas
+       les mêmes qu'en grand écran (voir le tableau TRAITS) */
+    top: calc(var(--trait-tm, var(--trait-t, 50)) * 1%);
+    width: calc(var(--trait-w, 20) * 2.2vw);
+    opacity: calc(var(--trait-op, 0.35) * 0.55);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Gabarit « intégration » — 25/07/2026
+   (3ᵉ page de référence : ocoya.com/integrations/[marque])
+
+   Teo veut désormais UN design par fiche moteur : PAYD garde le gabarit
+   « home », ANSWR / OFFLOAD / REVIVE prennent celui-ci. Vérifié sur
+   /facebook, /x et /linkedin : les trois pages sont un seul gabarit,
+   paramétré par la couleur de marque. Mêmes fondations `.offres` ; ce bloc
+   n'ajoute que les objets propres à cette page.
+
+   Fond relevé sur la référence : BLANC, recouvert d'une trame pointillée
+   sur toute la hauteur du hero (1100 px) — c'est elle qui donne la
+   perception grise. Une seule bande est réellement teintée (#fafafa).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* la bande teintée de la référence */
+.offres .o-bande {
+  background: #fafafa;
+  box-shadow: 0 0 0 100vmax #fafafa;
+  clip-path: inset(0 -100vmax);
+}
+
+/* tuile app-icon 70 px du hero — « MOTEUR × PEGASE » */
+.offres .o-tuile {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(9, 9, 11, 0.06),
+    0 12px 26px -14px rgba(9, 9, 11, 0.24);
+}
+
+/* carte à icône de la rangée « ce qu'il apporte » : l'icône prend l'accent
+   du moteur, comme la référence colore les siennes à la marque */
+.offres .o-carte-icone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 32px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(9, 9, 11, 0.05),
+    0 18px 38px -22px rgba(9, 9, 11, 0.2);
+}
+
+/* grand bloc alterné texte / média */
+.offres .o-bloc {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid #ededed;
+  background: #fafafa;
+}
+/* le média du bloc : panneau à dégradé, arrimé dans la carte. Pas d'ombre
+   portée — il est DANS la carte, une ombre le décollerait du fond. */
+.offres .o-bloc-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(155deg, #f4f4f5 0%, #e9e9ec 55%, #dededf 100%);
+}
+
+
+/* carte de la grande citation */
+.offres .o-citation {
+  position: relative;
+  border-radius: 24px;
+  background: #fafafa;
+  padding: 56px;
+}
+@media (max-width: 640px) {
+  .offres .o-citation {
+    padding: 32px 24px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Gabarit « intégration » — VARIANTE SOMBRE (25/07/2026)
+
+   La page de référence a un sélecteur de thème ; Teo la regarde en SOMBRE,
+   et c'est cette version qu'il veut. Palette relevée dans les tokens de
+   thème de la référence (`darkThemeVars` en localStorage), qui inverse
+   proprement l'échelle de gris :
+
+     fond      #fff    → #09090b        texte      #09090b → #fafafa
+     surface   #fafafa → #18181b        secondaire #52525b → #a1a1aa
+     bordure   #e4e4e7 → #27272a        bouton     #27272a → #424242
+
+   Les tuiles de marque restent BLANCHES sur le fond noir — c'est le cas sur
+   la référence, et c'est ce qui les fait ressortir.
+
+   Une seule classe à poser sur la racine du gabarit : `.offres--sombre`.
+   Aucune règle `.offres` de base n'est modifiée, la variante claire reste
+   disponible telle quelle.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.offres.offres--sombre {
+  --o-text: #fafafa;
+  --o-muted: #a1a1aa;
+  --o-muted-strong: #d4d4d8;
+  --o-line: #27272a;
+  --o-soft: #18181b;
+  --o-btn: #424242;
+  /* les points doivent se lire SUR le noir : ils passent en blanc translucide */
+  --o-dot: rgba(255, 255, 255, 0.14);
+
+  background: #09090b;
+  color: var(--o-text);
+  box-shadow: 0 0 0 100vmax #09090b;
+}
+
+/* pastille : plus de fond blanc, un filet clair suffit */
+.offres--sombre .o-pill {
+  background: transparent;
+  border-color: #3f3f46;
+  color: #fafafa;
+  box-shadow: none;
+}
+
+/* boutons */
+.offres--sombre .o-btn--primary {
+  background: #424242;
+  color: #ffffff;
+}
+.offres--sombre .o-btn--primary:hover {
+  background: #52525b;
+}
+.offres--sombre .o-btn--ghost {
+  background: transparent;
+  border-color: #3f3f46;
+  color: #fafafa;
+}
+.offres--sombre .o-btn--ghost:hover {
+  background: #18181b;
+}
+
+/* liens fléchés */
+.offres--sombre .o-link {
+  color: #fafafa;
+}
+
+/* surfaces */
+.offres--sombre .o-bande {
+  background: #18181b;
+  box-shadow: 0 0 0 100vmax #18181b;
+}
+.offres--sombre .o-carte-icone {
+  background: #18181b;
+  box-shadow: inset 0 0 0 1px #27272a;
+}
+.offres--sombre .o-bloc {
+  background: #18181b;
+  border-color: #27272a;
+}
+.offres--sombre .o-bloc-media {
+  background: linear-gradient(155deg, #27272a 0%, #1c1c1f 55%, #131316 100%);
+}
+.offres--sombre .o-citation {
+  background: #18181b;
+}
+.offres--sombre .o-card-plate {
+  background: #18181b;
+  border-color: #27272a;
+}
+
+/* la tuile de marque et la pastille flottante restent claires — c'est leur
+   contraste avec le fond noir qui les fait exister */
+.offres--sombre .o-tuile,
+.offres--sombre .o-flottant {
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 14px 30px -16px rgba(0, 0, 0, 0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Maquette de démo — surfaces déclarées (25/07/2026)
+
+   La carte de démo était en blanc dur. Sur le gabarit sombre elle ressortait
+   comme un bloc blanc posé sur le noir (Teo : « ça dénature »). Ses couleurs
+   passent donc par des variables, que `.offres--sombre` redéfinit en bloc :
+   une seule bascule, aucune classe utilitaire à réécrire dans le composant.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.offres .o-demo {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  /* fond et filet LISENT les variables sans les redéclarer : c'est ce qui
+     permet à un ancêtre (.offres--sombre) de les basculer d'un bloc */
+  border: 1px solid var(--demo-filet);
+  background: var(--demo-fond);
+  box-shadow:
+    0 1px 2px rgba(9, 9, 11, 0.05),
+    0 16px 34px -18px rgba(9, 9, 11, 0.2);
+}
+
+.offres--sombre .o-demo {
+  --demo-fond: #141417;
+  --demo-tete: #1b1b1f;
+  --demo-ligne: #0d0d10;
+  --demo-filet: rgba(255, 255, 255, 0.08);
+  --demo-fort: #fafafa;
+  --demo-doux: #d4d4d8;
+  --demo-faible: #71717a;
+  --demo-bulle: #26262a;
+  --demo-bulle-texte: #d4d4d8;
+  --demo-envoi: #3f3f46;
+  --demo-envoi-texte: #fafafa;
+  --demo-ok-fond: rgba(52, 211, 153, 0.14);
+  --demo-ok-texte: #34d399;
+  --demo-warn-fond: rgba(245, 158, 11, 0.14);
+  --demo-warn-texte: #f59e0b;
+  --demo-off-fond: rgba(255, 255, 255, 0.07);
+  --demo-off-texte: #a1a1aa;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 20px 40px -20px rgba(0, 0, 0, 0.7);
+}
+
+.offres .o-demo-tete {
+  background: var(--demo-tete);
+  border-bottom: 1px solid var(--demo-filet);
+}
+.offres .o-demo-pied {
+  border-top: 1px solid var(--demo-filet);
+}
+.offres .o-demo-ligne {
+  background: var(--demo-ligne);
+  border: 1px solid var(--demo-filet);
+}
+.offres .o-demo-sep {
+  border-bottom: 1px solid var(--demo-filet);
+}
+.offres .o-demo-fort { color: var(--demo-fort); }
+.offres .o-demo-doux { color: var(--demo-doux); }
+.offres .o-demo-faible { color: var(--demo-faible); }
+.offres .o-demo-recu {
+  background: var(--demo-bulle);
+  color: var(--demo-bulle-texte);
+}
+.offres .o-demo-envoi {
+  background: var(--demo-envoi);
+  color: var(--demo-envoi-texte);
+}
+.offres .o-demo-jalon {
+  background: var(--demo-envoi);
+  color: var(--demo-envoi-texte);
+}
+.offres .o-demo-jeton--ok { background: var(--demo-ok-fond); color: var(--demo-ok-texte); }
+.offres .o-demo-jeton--warn { background: var(--demo-warn-fond); color: var(--demo-warn-texte); }
+.offres .o-demo-jeton--off { background: var(--demo-off-fond); color: var(--demo-off-texte); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Variante sombre — surfaces oubliées au premier passage (25/07/2026)
+
+   Bug remonté par Teo sur /offres/offload : les cartes de jalon restaient
+   blanches, avec un titre `--o-text` désormais blanc dessus — donc du blanc
+   sur blanc. Toute règle de base qui pose un fond clair DOIT avoir son
+   pendant ici ; l'audit qui a trouvé celle-ci se refait avec :
+
+     grep '.offres .o-' globals.css | fond clair → chercher son .offres--sombre
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.offres--sombre .o-formule {
+  background: #18181b;
+  border-color: #27272a;
+}
+.offres--sombre .o-formule--phare {
+  border-color: #3f3f46;
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
+}
+.offres--sombre .o-card {
+  background: #18181b;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 20px 40px -20px rgba(0, 0, 0, 0.7),
+    0 0 0 1px #27272a;
+}
+.offres--sombre .o-noeud {
+  background: #18181b;
+  color: #fafafa;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 10px 22px -14px rgba(0, 0, 0, 0.7);
+}
+.offres--sombre .o-noeud--source {
+  background: transparent;
+  color: #a1a1aa;
+}
+/* l'anneau des pastilles d'outils reprend le fond de la page : clair sur
+   clair, noir sur noir — sinon il dessine un halo blanc sur le sombre */
+.offres .o-chip { --chip-anneau: #f5f5f5; }
+.offres--sombre .o-chip { --chip-anneau: #09090b; }
+
+/* le hero du gabarit « home » repose sur .o-gris : sans variante sombre il
+   restait gris clair au milieu d'une page noire (bascule du 25/07) */
+.offres--sombre .o-gris {
+  background: #0d0d10;
+  box-shadow: 0 0 0 100vmax #0d0d10;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Bande noire pleine largeur au milieu d'une page claire (25/07/2026)
+
+   Teo : « rends cette partie jusqu'en bas de Chèque TIC en fond noir ».
+   Même technique que `.monde-clair` : une ombre géante écrêtée
+   horizontalement peint jusqu'aux bords de l'écran sans toucher au layout,
+   puisque le contenu vit dans la colonne 1440 de <main>.
+
+   La classe redéfinit aussi les tokens de texte : tout ce qu'elle contient
+   suit, sans qu'aucune classe utilitaire ne soit à réécrire.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.offres .o-nuit {
+  --o-text: #fafafa;
+  --o-muted: #a1a1aa;
+  --o-muted-strong: #d4d4d8;
+  --o-line: #27272a;
+  --o-dot: rgba(255, 255, 255, 0.12);
+
+  background: #09090b;
+  color: var(--o-text);
+  box-shadow: 0 0 0 100vmax #09090b;
+  clip-path: inset(0 -100vmax);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /reserver-un-audit — système de design isolé (26/07/2026)
+
+   Troisième page de référence demandée par Teo : la page tarifs de Qonto
+   (qonto.com/en/pricing). Même exigence que pour /offres — mêmes sections
+   dans le même ordre, mêmes proportions — mais le SUJET change : on ne vend
+   pas des formules d'abonnement, on fait réserver un audit. Le contenu est
+   donc entièrement Pegase ; seule l'architecture visuelle est reprise.
+
+   Valeurs relevées au computed style sur la référence (viewport 1280) :
+     colonne 1280, gouttière 48 → contenu 1184
+     grand titre de section  56/64  600
+     titre moyen             40/48  600
+     nom de formule (h3)     28/36  600
+     grand chiffre           40/48  600      suffixe 12/18 400
+     sous-ligne prix         14/22  400  #3d3d3d
+     mention sous CTA        12/16  300  #616161
+     carte  blanc  r16  padding 8 8 28
+     tête de carte  #f5f5f5  r8  padding 12   (carte phare : dégradé)
+     bouton  16/24  r8  padding 11 16
+     segmenté  fond #e8e8e8  r16  padding 4   —  segment r12
+     fond de page #f5f5f5, texte #050505
+
+   Tout est préfixé `--r-` / `.r-` sous `.resa` : aucune règle ne peut fuir
+   sur le reste du site, et supprimer ce bloc supprime la page sans effet de
+   bord. Les polices sont celles déjà chargées par le layout — Plus Jakarta
+   Sans porte les titres (c'est la plus proche du QontoSans de la référence,
+   géométrique et ouverte), Inter tout le reste.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.resa {
+  --r-texte: #050505;
+  --r-doux: #3d3d3d;
+  --r-faible: #616161;
+  --r-fond: #f5f5f5;
+  --r-filet: #e3e3e3;
+  --r-seg: #e8e8e8;
+  /* accent Pegase — la référence tient sa carte phare en bleu/lilas ; ici
+     c'est l'or de la charte, décliné en dégradé très clair pour que le texte
+     reste NOIR dessus (le blanc sur or clair tombe sous AA). */
+  --r-or-clair: #fdf3dd;
+  --r-or-mid: #f4e0ae;
+  --r-or-fonce: #e9cd91;
+
+  background: var(--r-fond);
+  color: var(--r-texte);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* même technique que .monde-clair : le contenu vit dans la colonne 1440 de
+     <main>, une ombre géante écrêtée horizontalement peint jusqu'aux bords
+     de l'écran sans toucher à la mise en page */
+  box-shadow: 0 0 0 100vmax var(--r-fond);
+  clip-path: inset(0 -100vmax);
+}
+
+/* bandes qui changent de fond à l'intérieur de la page */
+.resa .r-blanc {
+  background: #ffffff;
+  box-shadow: 0 0 0 100vmax #ffffff;
+  clip-path: inset(0 -100vmax);
+}
+.resa .r-nuit {
+  --r-texte: #ffffff;
+  --r-doux: #d4d4d8;
+  --r-faible: #a1a1aa;
+  --r-filet: #27272a;
+
+  background: #050505;
+  color: var(--r-texte);
+  box-shadow: 0 0 0 100vmax #050505;
+  clip-path: inset(0 -100vmax);
+}
+
+/* ——— colonne de contenu : 1184 utiles dans 1280 ——— */
+.resa .r-wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+@media (min-width: 1024px) {
+  .resa .r-wrap {
+    padding-inline: 48px;
+  }
+}
+
+/* ——— titres ——— */
+.resa .r-h1,
+.resa .r-h2,
+.resa .r-h3,
+.resa .r-h4 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--r-texte);
+  letter-spacing: -0.02em;
+}
+/* 56/64 sur la référence — clampé pour ne pas déborder en dessous de 400 px */
+.resa .r-h1,
+.resa .r-h2 {
+  font-size: clamp(34px, 4.6vw, 56px);
+  line-height: 1.14;
+}
+.resa .r-h3 {
+  font-size: clamp(28px, 3.2vw, 40px);
+  line-height: 1.2;
+}
+.resa .r-h4 {
+  font-size: clamp(21px, 1.9vw, 24px);
+  line-height: 1.33;
+  letter-spacing: -0.01em;
+}
+
+/* ——— corps ——— */
+.resa .r-lead {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--r-doux);
+}
+.resa .r-body {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--r-doux);
+}
+.resa .r-note {
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 300;
+  color: var(--r-faible);
+}
+
+/* ——— sélecteur segmenté (Self-employed / Business teams de la référence) ——— */
+.resa .r-seg {
+  display: inline-flex;
+  gap: 0;
+  padding: 4px;
+  border-radius: 16px;
+  background: var(--r-seg);
+}
+.resa .r-seg-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--r-doux);
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease;
+}
+.resa .r-seg-btn[data-actif="true"] {
+  background: #ffffff;
+  color: var(--r-texte);
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.1);
+}
+
+/* ——— carte de formule ——— */
+.resa .r-carte {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 8px 8px 28px;
+}
+/* la tête grise qui contient nom + durée + promesse.
+   Hauteur plancher dès que les trois cartes sont côte à côte : sur la
+   référence les têtes font toutes 208 px, ce qui aligne les trois CTA sur
+   la même ligne. En français les libellés sont plus longs et se replient
+   différemment d'une carte à l'autre — sans plancher, les boutons se
+   décalent de 30 à 40 px. Deux paliers : les cartes sont plus étroites
+   entre 1024 et 1280, donc le texte y prend une ligne de plus. */
+.resa .r-carte-tete {
+  border-radius: 8px;
+  background: var(--r-fond);
+  padding: 16px 12px 20px;
+}
+@media (min-width: 1024px) {
+  .resa .r-carte-tete {
+    min-height: 360px;
+  }
+}
+@media (min-width: 1280px) {
+  .resa .r-carte-tete {
+    min-height: 304px;
+  }
+}
+/* carte phare : la tête prend le dégradé or. Les cartes elles-mêmes restent
+   blanches — sur la référence aussi, seule la tête est colorée. */
+.resa .r-carte--phare .r-carte-tete {
+  background: linear-gradient(
+    140deg,
+    var(--r-or-clair) 0%,
+    var(--r-or-mid) 46%,
+    var(--r-or-fonce) 100%
+  );
+}
+/* bandeau de rappel dans la liste (les lignes surlignées de la référence) */
+.resa .r-carte--phare .r-surligne,
+.resa .r-carte--haut .r-surligne {
+  background: rgba(233, 205, 145, 0.28);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-inline: -10px;
+}
+
+/* ——— pastille « Le plus demandé » ——— */
+.resa .r-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: #ffffff;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--r-texte);
+  white-space: nowrap;
+}
+
+/* ——— boutons ——— */
+.resa .r-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.16s var(--ease-out-strong);
+}
+.resa .r-btn:active {
+  transform: scale(0.98);
+}
+.resa .r-btn--noir {
+  background: #050505;
+  color: #ffffff;
+}
+.resa .r-btn--noir:hover {
+  background: #262626;
+}
+.resa .r-btn--fil {
+  background: #ffffff;
+  color: #050505;
+  border: 1px solid #050505;
+}
+.resa .r-btn--fil:hover {
+  background: #f5f5f5;
+}
+.resa .r-btn--blanc {
+  background: #ffffff;
+  color: #050505;
+}
+.resa .r-btn--blanc:hover {
+  background: #e8e8e8;
+}
+
+/* ——— lien souligné de la référence (« Help me find my price plan ») ——— */
+.resa .r-lien {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--r-texte);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(5, 5, 5, 0.28);
+  transition: text-decoration-color 0.2s ease;
+}
+.resa .r-lien:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ——— tableau comparatif : une grille 6 colonnes, pas un <table> ———
+   (la référence fait pareil : le libellé occupe 3 colonnes, chaque formule
+   une seule, ce qui laisse la ligne se replier proprement en mobile) */
+.resa .r-grille {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px 24px;
+  align-items: start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .r-grille-libelle {
+  grid-column: span 3 / span 3;
+}
+@media (max-width: 767px) {
+  /* en mobile la grille 6 colonnes devient : libellé pleine largeur, puis
+     les trois valeurs côte à côte, chacune coiffée du nom de sa formule */
+  .resa .r-grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .resa .r-grille-libelle {
+    grid-column: span 3 / span 3;
+  }
+}
+
+/* repli du comparatif — la référence masque la fin du tableau derrière un
+   dégradé et un bouton « Show all features ». Le voile est porté par le
+   ::before du <summary> lui-même : il remonte SUR les dernières lignes
+   visibles et disparaît à l'ouverture. Aucun JS, aucun :has(). */
+.resa .r-plus > summary {
+  position: relative;
+  list-style: none;
+  cursor: pointer;
+  display: block;
+}
+.resa .r-plus > summary::-webkit-details-marker {
+  display: none;
+}
+.resa .r-plus > summary::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #ffffff 78%);
+  pointer-events: none;
+}
+.resa .r-plus[open] > summary::before {
+  display: none;
+}
+/* un seul bouton, deux libellés : celui qui ne correspond pas à l'état est
+   retiré du flux (et pas seulement masqué, sinon il garde sa largeur) */
+.resa .r-plus > summary .r-plus-fermer,
+.resa .r-plus[open] > summary .r-plus-ouvrir {
+  display: none;
+}
+.resa .r-plus[open] > summary .r-plus-fermer {
+  display: inline;
+}
+
+/* ——— accordéon FAQ ——— */
+.resa .r-faq {
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .r-faq summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  cursor: pointer;
+  list-style: none;
+  padding: 24px 0;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(18px, 1.8vw, 24px);
+  line-height: 1.33;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .r-faq summary::-webkit-details-marker {
+  display: none;
+}
+.resa .r-faq-croix {
+  flex-shrink: 0;
+  margin-top: 4px;
+  transition: transform 0.3s var(--ease-out-strong);
+}
+.resa .r-faq[open] .r-faq-croix {
+  transform: rotate(45deg);
+}
+
+/* ——— champs du simulateur ——— */
+.resa .r-champ {
+  width: 100%;
+  border: 1px solid var(--r-filet);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 11px 14px;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--r-texte);
+  font-variant-numeric: tabular-nums;
+}
+.resa .r-champ:focus {
+  outline: 2px solid #050505;
+  outline-offset: -1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /blog — extension du système .offres (30/07/2026)
+
+   Teo a demandé la reproduction à l'identique du blog de la même référence
+   (blog.ocoya.com : liste + pages article). Le monde blanc, les deux
+   familles (Plus Jakarta Sans / Inter Tight), la colonne 1200 et le fond
+   pointillé existent déjà dans `.offres` — ce bloc n'ajoute que les objets
+   propres au blog, préfixés `.b-`.
+
+   Valeurs relevées au pixel sur la référence (viewport 1280) :
+   H1/H2 de section 48/67.2 ls -1.92, cartes 260 gap 40, vignette 260×140
+   r16, pastille verre blanc 70 % + blur 10 r100 padding 6/11, titre de
+   carte 24/36 ls -0.72, extrait 14/21 #a1a1aa, pied 18 (#0c1d37 date /
+   #09090b lien), article : conteneur 760, cover r30 ratio ~1.9, corps
+   16/28.8 #71717a mb28, h2 38/53.2 ls -0.7 mb24, partage 44×44 r20
+   #f4f4f5, CTA #fafafa r16.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ——— titres du blog : la référence pèse ses titres en 700, pas en 600 ——— */
+.offres .b-h1 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(36px, 4.4vw, 48px);
+  line-height: 1.4;
+  letter-spacing: -0.04em;
+  color: var(--o-text);
+}
+
+/* ——— grille de cartes : 260 px de pas sur la colonne 1200, gap 40 ——— */
+.offres .b-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+@media (min-width: 640px) {
+  .offres .b-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .offres .b-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ——— carte : bloc-lien nu, tout le relief vient de la vignette ——— */
+.offres .b-card {
+  display: flex;
+  flex-direction: column;
+}
+.offres .b-media {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+}
+/* la pastille catégorie flotte sur la vignette — verre blanc, jamais opaque */
+.offres .b-tag {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 2;
+  padding: 6px 11px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: #0c1d37;
+}
+.offres .b-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 20px;
+}
+.offres .b-card-title {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  color: var(--o-text);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.offres .b-card-excerpt {
+  margin-top: 10px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--o-faible, #a1a1aa);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+.offres .b-card-foot {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.offres .b-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  color: #0c1d37;
+}
+.offres .b-more {
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  color: var(--o-text);
+}
+.offres .b-card:hover .b-more {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ——— cover composée (vignette ET bandeau d'article) ———
+   la référence sert des images pré-composées : fond blanc, logotype,
+   titre gras, badge « N MIN READ », photo à droite sous une pastille
+   catégorie, astérisque décoratif. Recomposée ici en CSS — les tailles
+   suivent la largeur du conteneur (unités cqw), la même cover sert donc
+   à 260 px dans la grille et à 760 px en tête d'article. */
+/* pas de liseré : chez la référence la cover blanche FOND dans la page,
+   seuls le texte et la photo la dessinent */
+.offres .b-compo {
+  container-type: inline-size;
+  position: relative;
+  aspect-ratio: 190 / 100;
+  background: #ffffff;
+  overflow: hidden;
+  display: block;
+}
+.offres .b-compo-logo {
+  position: absolute;
+  top: 6cqw;
+  left: 6cqw;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 4.6cqw;
+  letter-spacing: -0.02em;
+  color: #09090b;
+  line-height: 1;
+}
+.offres .b-compo-title {
+  position: absolute;
+  top: 13.5cqw;
+  left: 6cqw;
+  width: 41cqw;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 4.9cqw;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  color: #09090b;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+.offres .b-compo-badge {
+  position: absolute;
+  bottom: 6cqw;
+  left: 6cqw;
+  padding: 1.7cqw 2.3cqw;
+  border-radius: 1.2cqw;
+  background: #09090b;
+  color: #ffffff;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 2.5cqw;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.offres .b-compo-photo {
+  position: absolute;
+  top: 3cqw;
+  right: 3cqw;
+  bottom: 3cqw;
+  width: 47cqw;
+  border-radius: 4.4cqw;
+  overflow: hidden;
+}
+.offres .b-compo-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.offres .b-compo-tag {
+  position: absolute;
+  top: 5.5cqw;
+  right: 5.5cqw;
+  z-index: 2;
+  padding: 1.9cqw 3cqw;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 3.4cqw;
+  line-height: 1;
+  color: #0c1d37;
+}
+.offres .b-compo-star {
+  position: absolute;
+  left: 44cqw;
+  bottom: 1.2cqw;
+  width: 9cqw;
+  height: 9cqw;
+  color: #09090b;
+  z-index: 2;
+}
+
+/* ——— page article ——— */
+.offres .b-article-h1 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(32px, 4.4vw, 48px);
+  line-height: 1.4;
+  letter-spacing: -0.04em;
+  color: var(--o-text);
+}
+/* pastille catégorie posée sur fond clair (tête d'article) */
+.offres .b-tag-plate {
+  display: inline-flex;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #ededf8;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: #2f2f5e;
+}
+.offres .b-cover {
+  border-radius: 30px;
+  overflow: hidden;
+}
+@media (max-width: 640px) {
+  .offres .b-cover {
+    border-radius: 16px;
+  }
+}
+/* boutons de partage — cercles 44 px, gris zinc, à gauche du corps */
+.offres .b-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 20px;
+  background: #f4f4f5;
+  color: #09090b;
+  transition: background-color 0.2s ease, transform 0.16s var(--ease-out-strong);
+}
+.offres .b-share:hover {
+  background: #e4e4e7;
+}
+.offres .b-share:active {
+  transform: scale(0.94);
+}
+/* corps de l'article : la typo exacte du rich text de la référence */
+.offres .b-rte {
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+}
+.offres .b-rte p {
+  font-size: 16px;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  color: var(--o-muted);
+  margin-bottom: 28px;
+}
+.offres .b-rte h2 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.4;
+  letter-spacing: -0.018em;
+  color: var(--o-text);
+  margin-top: 48px;
+  margin-bottom: 24px;
+}
+.offres .b-rte > *:first-child {
+  margin-top: 0;
 }

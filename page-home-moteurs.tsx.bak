@@ -1,0 +1,732 @@
+import Link from "next/link";
+import PageShell from "@/components/PageShell";
+import PageMotion from "@/components/PageMotion";
+import { SystemLogo } from "@/components/logos";
+import {
+  BandeauMessages,
+  BandeauOutils,
+  ChaineWorkflow,
+  CHAINES,
+  Chevron,
+  Eclair,
+  GrilleOutils,
+  HeroPile,
+  IllustrationAnswr,
+  IllustrationOffload,
+  IllustrationPayd,
+  MaqCheque,
+  MaqEtapes,
+  MaqJournal,
+  MaqLocal,
+  MaqOutils,
+  MaqValidation,
+  PileOutils,
+} from "@/components/offres/MediaMoteurs";
+
+/* ══════════════════════════════════════════════════════════════════════
+   / — la page d'accueil (design remonté le 30/07/2026)
+
+   Ce fichier EST l'ancienne page /offres/moteurs, supprimée le 25/07 parce
+   qu'elle doublonnait la fiche /offres/payd. Teo l'a redemandée le 30/07
+   comme page d'accueil : code restauré à l'identique depuis l'historique,
+   seuls les liens fiches (/solutions/:system → /offres/:system) et le bloc
+   metadata (hérité du layout racine) ont bougé.
+
+   Origine du design — « Les moteurs » (25/07/2026)
+
+   Seconde reprise à l'identique demandée par Teo : la page d'accueil
+   ocoya.com. Mêmes sections dans le même ordre, mêmes proportions relevées
+   au pixel sur viewport 1440 —
+
+     hero asymétrique (texte 700 à gauche, pile de cartes à droite) sur fond
+     gris pointillé · bandeau de logos · rangée de 3 cartes 343 px (pas 413,
+     défilement horizontal) · grille de pastilles rondes 60 px sur 3 rangées
+     défilantes · 3 cartes à chaîne de workflow · bento 2×2 de cartes plates
+     520 px · rangée de 3 cartes · bandeau de cartes 400 px · bento 2 colonnes
+     580 px décalées · 4 cartes de formule 275 px · FAQ en carte grise 800 px
+     centrée · CTA en carte grise.
+
+   Le CONTENU est celui de Pegase : les douze moteurs du catalogue, les
+   outils sur lesquels ils se branchent, ce qui est compris dans chacun.
+
+   Un écart assumé sur la section « chiffrage » : la page de référence
+   affiche quatre formules à prix fixes. Pegase ne publie pas de prix — le
+   chiffrage sort de l'audit. La structure des quatre cartes est conservée,
+   l'emplacement du prix porte « Chiffré à l'audit ». Aucun montant inventé.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— rangée 1 : les trois moteurs les plus installés ——— */
+const DEFENSIFS = [
+  {
+    system: "PAYD",
+    titre: "PAYD",
+    role: "Relance devis & factures",
+    texte:
+      "Vos devis en attente et vos factures échues relancés à J+3, J+7 et J+21, personnalisés pour chaque client.",
+    illustration: <IllustrationPayd />,
+  },
+  {
+    system: "ANSWR",
+    titre: "ANSWR",
+    role: "Réceptionniste 24/7",
+    texte:
+      "Les demandes WhatsApp et mail trouvent une réponse à toute heure. Hors périmètre, ANSWR transfère au lieu d'approximer.",
+    illustration: <IllustrationAnswr />,
+  },
+  {
+    system: "OFFLOAD",
+    titre: "OFFLOAD",
+    role: "Factures fournisseurs",
+    texte:
+      "Chaque pièce extraite, classée, horodatée, transmise au cabinet comptable en dossier complet.",
+    illustration: <IllustrationOffload />,
+  },
+  {
+    system: "BRIEF",
+    titre: "BRIEF",
+    role: "La matinale du dirigeant",
+    texte:
+      "Chaque matin à 7 h : encaissements de la veille, relances en cours, retards critiques, clients à rappeler.",
+    illustration: <MaqJournal />,
+  },
+];
+
+/* ——— bento : les moteurs offensifs ——— */
+const OFFENSIFS = [
+  {
+    system: "REVIVE",
+    titre: "REVIVE",
+    role: "Clients dormants",
+    texte:
+      "Le chiffre le moins cher à aller chercher dort déjà dans votre fichier. REVIVE le réveille, dans un cadre traçable et sous votre contrôle.",
+  },
+  {
+    system: "POSTD",
+    titre: "POSTD",
+    role: "Studio de contenu",
+    texte:
+      "Construit le calendrier du mois, rédige dans votre ton, décline par réseau et programme aux heures d'audience.",
+  },
+  {
+    system: "REACH",
+    titre: "REACH",
+    role: "Prospection B2B",
+    texte:
+      "Constitue un fichier d'entreprises cibles, envoie des séquences personnalisées, gère les relances et classe les réponses par niveau d'intérêt.",
+  },
+  {
+    system: "HIRED",
+    titre: "HIRED",
+    role: "Tri de candidatures",
+    texte:
+      "Réceptionne les CV, vérifie les critères éliminatoires, évalue l'adéquation et argumente une shortlist avec les points à creuser.",
+  },
+];
+
+/* ——— rangée 2 : les pépites, produits d'envergure ——— */
+const PEPITES = [
+  {
+    system: "BILLD",
+    titre: "BILLD",
+    role: "Conformité facture électronique",
+    texte:
+      "Convertit votre facturation au format Factur-X, raccorde l'entreprise au portail public et contrôle chaque pièce émise.",
+  },
+  {
+    system: "PUBLIQ",
+    titre: "PUBLIQ",
+    role: "Marchés publics",
+    texte:
+      "Surveille les appels d'offres de votre secteur, retient ceux qui correspondent à vos capacités réelles et prépare les pièces du dossier.",
+  },
+  {
+    system: "STAYD",
+    titre: "STAYD",
+    role: "Locations saisonnières",
+    texte:
+      "Centralise les réservations, envoie les instructions d'arrivée, coordonne les ménages et sollicite l'avis des voyageurs au bon moment.",
+  },
+  {
+    system: "COLLECT",
+    titre: "COLLECT",
+    role: "Recouvrement en marque blanche",
+    texte:
+      "Opéré pour les cabinets comptables : le cabinet le propose sous sa marque, Pegase assure relances, suivi et reporting.",
+  },
+];
+
+/* ——— chaînes de déclenchement ——— */
+const CHAINE_CARTES = [
+  {
+    titre: "Une facture arrive à échéance",
+    texte:
+      "Le moteur attend la date, rédige la relance au ton de la maison, et la pose dans votre file de validation.",
+    noeuds: CHAINES.facture,
+  },
+  {
+    titre: "Un client écrit à 21 h",
+    texte:
+      "ANSWR identifie le type de demande, cherche la réponse dans VOTRE base, et transfère s'il sort de son périmètre.",
+    noeuds: CHAINES.message,
+  },
+  {
+    titre: "Une facture fournisseur tombe",
+    texte:
+      "La pièce est extraite du mail, contrôlée, renommée, horodatée, puis versée au dossier du cabinet.",
+    noeuds: CHAINES.piece,
+  },
+];
+
+/* ——— chiffrage : structure de la référence, contenu honnête ——— */
+const FORMULES = [
+  {
+    famille: "Défensif",
+    phare: false,
+    accroche: "Pour arrêter ce qui fuit.",
+    lignes: [
+      ["Moteurs", "4"],
+      ["Installation", "Quelques jours"],
+      ["Chèque TIC", "Éligible"],
+      ["Engagement", "Aucun"],
+    ],
+  },
+  {
+    famille: "Offensif",
+    phare: true,
+    accroche: "Pour aller chercher du chiffre.",
+    lignes: [
+      ["Moteurs", "4"],
+      ["Installation", "Quelques jours"],
+      ["Chèque TIC", "Éligible"],
+      ["Engagement", "Aucun"],
+    ],
+  },
+  {
+    famille: "Pépite",
+    phare: false,
+    accroche: "Un produit par métier ou échéance.",
+    lignes: [
+      ["Moteurs", "4"],
+      ["Installation", "Plusieurs sem."],
+      ["Chèque TIC", "Selon dossier"],
+      ["Engagement", "Par jalons"],
+    ],
+  },
+  {
+    famille: "Sur mesure",
+    phare: false,
+    accroche: "Quand aucun moteur du catalogue ne colle.",
+    lignes: [
+      ["Moteurs", "Construit"],
+      ["Installation", "Au cadrage"],
+      ["Chèque TIC", "Selon dossier"],
+      ["Engagement", "Par jalons"],
+    ],
+  },
+];
+
+const FAQ = [
+  {
+    q: "Il faut installer les douze moteurs ?",
+    a: "Non, et c'est même l'inverse. L'audit sert à désigner celui qui a le meilleur retour chez vous, compte tenu de ce que votre problème n°1 vous coûte. La plupart des installations commencent par un seul moteur ; les suivants s'ajoutent quand le premier a fait ses preuves.",
+  },
+  {
+    q: "Qu'est-ce qui différencie un moteur d'une pépite ?",
+    a: "Un moteur défensif ou offensif se branche sur vos outils en quelques jours et traite une tâche récurrente. Une pépite est un produit d'envergure construit pour un secteur ou une échéance réglementaire — facturation électronique, marchés publics, saisonnier, recouvrement. Elle se déploie en plusieurs semaines, avec des jalons que vous validez un par un.",
+  },
+  {
+    q: "Et si je n'ai ni logiciel ni CRM ?",
+    a: "C'est justement le principe : mail, tableur et WhatsApp suffisent. Les moteurs sont construits pour travailler sur ces outils-là, tels que vous les tenez déjà. Pas besoin d'acheter un CRM pour commencer.",
+  },
+  {
+    q: "Les messages partent sans moi ?",
+    a: "Non. Chaque message s'approuve, se corrige ou se suspend d'un clic. Les premières semaines, tout vous est soumis avant envoi ; ensuite vous choisissez ce qui part seul et ce qui attend votre accord. Les clients que vous excluez ne sont jamais contactés.",
+  },
+  {
+    q: "Où vont mes données ?",
+    a: "Nulle part : les moteurs tournent sur une infrastructure auto-hébergée et viennent lire vos données là où elles sont — votre tableur, votre messagerie — au lieu de les copier dans un cloud tiers. Les modèles reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier. Le tout documenté, conforme RGPD.",
+  },
+];
+
+/* ——— en-tête de section : pastille, titre, chapô, centrés ——— */
+function EnTete({
+  pastille,
+  titre,
+  chapo,
+  lien,
+}: {
+  pastille: string;
+  titre: string;
+  chapo: string;
+  lien?: { label: string; href: string };
+}) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <div data-reveal>
+        <span className="o-pill">{pastille}</span>
+      </div>
+      <h2 data-reveal className="o-h2 mt-2.5 max-w-[600px]">
+        {titre}
+      </h2>
+      <p data-reveal className="o-lead mt-4 max-w-[650px]">
+        {chapo}
+      </p>
+      {lien ? (
+        <div data-reveal className="mt-5">
+          <Link href={lien.href} className="o-link">
+            {lien.label}
+            <Chevron />
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/* ——— carte moteur de rangée : 343 px, illustration optionnelle ——— */
+function CarteMoteur({
+  system,
+  titre,
+  role,
+  texte,
+  illustration,
+}: {
+  system: string;
+  titre: string;
+  role: string;
+  texte: string;
+  illustration?: React.ReactNode;
+}) {
+  return (
+    <div data-reveal className="o-card-plate flex w-[300px] shrink-0 flex-col px-7 pt-9 sm:w-[343px] sm:px-8 sm:pt-10">
+      <div className="flex justify-center">
+        <SystemLogo system={system} />
+      </div>
+      <h3 className="o-h4 mt-5 text-center">{titre}</h3>
+      <p className="o-small mt-1 text-center font-medium !text-[#52525b]">{role}</p>
+      <p className="o-body mt-3 text-center">{texte}</p>
+      <Link
+        href={`/offres/${system.toLowerCase()}`}
+        className="o-link mx-auto mt-5"
+      >
+        Voir la fiche
+        <Chevron />
+      </Link>
+      {illustration ? (
+        <div className="mt-8 w-full pb-0">{illustration}</div>
+      ) : (
+        <div className="pb-10" />
+      )}
+    </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <PageShell>
+      <PageMotion />
+
+      <div className="offres">
+        {/* ════════ HERO — texte à gauche, pile de cartes à droite ════════ */}
+        <section
+          data-monde="clair"
+          className="o-gris relative overflow-hidden pb-[90px] pt-[40px] sm:pb-[120px] sm:pt-[81px]"
+        >
+          <div
+            aria-hidden
+            className="o-dots o-dots-fade pointer-events-none absolute inset-x-0 top-0 h-[900px]"
+          />
+          <div className="o-wrap relative">
+            <div className="grid grid-cols-1 items-start gap-14 pt-[60px] lg:grid-cols-[700px_minmax(0,1fr)] lg:gap-[76px]">
+              {/* colonne gauche.
+                  Le H1 de la page de référence est en 48/67,2 ls −1,92 — soit
+                  l'échelle des H2, pas celle du H1 de /offres (60/72). D'où
+                  la classe .o-h2 sur une balise h1 : le niveau sémantique
+                  reste juste, la mesure typographique aussi. */}
+              <div>
+                <h1 data-reveal className="o-h2">
+                  Douze moteurs. Un par corvée.
+                </h1>
+                <p data-reveal className="o-lead mt-5 max-w-[608px]">
+                  N&apos;embauchez pas pour des tâches qui se répètent. Chaque
+                  moteur en prend une, tourne sur vos outils actuels et ne fait
+                  rien partir sans votre accord.
+                </p>
+                <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
+                  <Link href="/audit" className="o-btn o-btn--primary">
+                    Audit gratuit
+                  </Link>
+                  <Link href="#familles" className="o-btn o-btn--ghost">
+                    Voir le catalogue
+                    <Chevron taille={13} />
+                  </Link>
+                </div>
+
+                <div data-reveal className="mt-10">
+                  <PileOutils />
+                </div>
+
+                <div data-reveal className="mt-6 flex flex-wrap items-center gap-3">
+                  <span className="o-pill o-pill--xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
+                    CATALOGUE
+                  </span>
+                  <span className="o-small !text-[#52525b]">
+                    Douze moteurs au catalogue — on n&apos;en installe qu&apos;un
+                    au départ.
+                  </span>
+                </div>
+              </div>
+
+              {/* colonne droite */}
+              <div data-reveal className="w-full lg:max-w-[404px]">
+                <HeroPile />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ BANDEAU DE CONFIANCE — logos défilants ════════ */}
+        <section data-monde="clair" className="pb-[40px] pt-[70px]">
+          <p data-reveal className="o-lead mb-10 text-center">
+            Branché sur les outils que vous tenez déjà
+          </p>
+          <div data-reveal>
+            <BandeauOutils />
+          </div>
+        </section>
+
+        {/* ════════ MOTEURS DÉFENSIFS — rangée de cartes 343 px ════════ */}
+        <section id="familles" data-monde="clair" className="scroll-mt-24 py-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille="Moteurs défensifs"
+              titre="Ce qui fuit, colmaté."
+              chapo="Trésorerie qui traîne, demandes sans réponse, comptabilité en retard : quatre moteurs qui tiennent l'existant pendant que vous faites le métier."
+            />
+          </div>
+          {/* défilement horizontal : quatre cartes de 343 px ne tiennent pas
+              dans la colonne de 1200 — c'est le comportement de la référence,
+              la quatrième s'éteint sur le bord droit */}
+          <div className="o-marquee mt-20">
+            <div className="o-wrap flex gap-[70px] overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {DEFENSIFS.map((m) => (
+                <CarteMoteur key={m.system} {...m} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ INTÉGRATIONS — pastilles rondes sur trois rangées ════════ */}
+        <section data-monde="clair" className="pb-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille="Intégrations"
+              titre="Branché sur ce que vous avez."
+              chapo="Messagerie, tableur, paiement, e-commerce, agenda : les moteurs lisent et écrivent là où vous travaillez déjà. Ni compte à créer, ni migration."
+            />
+          </div>
+          <div data-reveal className="mt-16">
+            <GrilleOutils />
+          </div>
+        </section>
+
+        {/* ════════ AUTOMATISATION — trois chaînes de déclenchement ════════ */}
+        <section data-monde="clair" className="o-wrap pb-[110px]">
+          <EnTete
+            pastille="Automatisation"
+            titre="Un déclencheur, une chaîne, votre validation."
+            chapo="Un moteur n'est pas une boîte noire : c'est une suite d'étapes lisibles, déclenchée par un événement de votre activité, qui s'arrête sur votre accord."
+          />
+          <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-3">
+            {CHAINE_CARTES.map((c) => (
+              <div key={c.titre} data-reveal className="o-card-plate px-8 pb-10 pt-10">
+                <h3 className="o-h4">{c.titre}</h3>
+                <p className="o-body mt-3">{c.texte}</p>
+                <div className="mt-8">
+                  <ChaineWorkflow noeuds={c.noeuds} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ════════ MOTEURS OFFENSIFS — bento 2×2 ════════ */}
+        <section data-monde="clair" className="o-wrap pb-[110px]">
+          <EnTete
+            pastille="Moteurs offensifs"
+            titre="Le chiffre qui dort déjà."
+            chapo="Clients sans commande depuis des mois, prospects jamais relancés, candidatures qui s'empilent : ces moteurs exploitent ce que l'entreprise possède déjà."
+          />
+          <div className="mx-auto mt-20 grid max-w-[1040px] grid-cols-1 gap-8 lg:grid-cols-2">
+            {OFFENSIFS.map((m) => (
+              <div key={m.system} data-reveal className="o-card-plate flex flex-col p-8 sm:p-10">
+                <SystemLogo system={m.system} />
+                <h3 className="o-h5 mt-6">
+                  {m.titre} <span className="font-normal !text-[#71717a]">— {m.role}</span>
+                </h3>
+                <p className="o-body mt-2.5">{m.texte}</p>
+                <Link
+                  href={`/offres/${m.system.toLowerCase()}`}
+                  className="o-link mt-7"
+                >
+                  Voir la fiche
+                  <Chevron />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ════════ PÉPITES — rangée de cartes ════════ */}
+        <section data-monde="clair" className="pb-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille="Pépites"
+              titre="Des produits, pas des automatisations génériques."
+              chapo="Certains problèmes ne se règlent pas avec un moteur générique. Ils exigent un produit construit pour le métier ou pour une échéance réglementaire."
+            />
+          </div>
+          <div className="o-marquee mt-20">
+            <div className="o-wrap flex gap-[70px] overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {PEPITES.map((m) => (
+                <CarteMoteur key={m.system} {...m} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ CE QUI PART — bandeau de messages ════════ */}
+        <section data-monde="clair" className="pb-[110px]">
+          <div className="o-wrap flex flex-col items-center text-center">
+            <div data-reveal className="flex items-center gap-2 text-[15px] font-semibold text-[#09090b]">
+              <Eclair taille={16} />
+              Rien ne part sans vous
+            </div>
+            <h2 data-reveal className="o-h2 mt-4 max-w-[600px]">
+              Écrit dans votre ton, validé par vous.
+            </h2>
+            <p data-reveal className="o-lead mt-4 max-w-[650px]">
+              Voilà à quoi ressemble ce que les moteurs produisent. Chaque
+              message se relit, se corrige ou se suspend d&apos;un clic avant de
+              partir.
+            </p>
+            <div data-reveal className="mt-5">
+              <Link href="/audit" className="o-link">
+                Voir sur vos propres cas
+                <Chevron />
+              </Link>
+            </div>
+          </div>
+          <div data-reveal className="mt-16">
+            <BandeauMessages />
+          </div>
+        </section>
+
+        {/* ════════ COMPRIS DANS CHAQUE MOTEUR — bento 2 colonnes ════════ */}
+        <section data-monde="clair" className="o-wrap pb-[110px]">
+          <EnTete
+            pastille="Compris"
+            titre="Ce qui vient avec, quel que soit le moteur."
+            chapo="Le moteur n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
+          />
+          <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-2">
+            <div className="flex flex-col gap-10">
+              <div data-reveal className="o-card-plate p-8 sm:p-10">
+                <h3 className="o-h5">Une file de validation</h3>
+                <p className="o-body mt-2.5">
+                  Tout ce qui doit partir passe par là. Vous approuvez,
+                  corrigez ou suspendez — aussi longtemps que vous le voulez.
+                </p>
+                <div className="mt-7">
+                  <MaqValidation />
+                </div>
+              </div>
+              <div data-reveal className="o-card-plate p-8 sm:p-10">
+                <div className="mb-7">
+                  <MaqOutils />
+                </div>
+                <h3 className="o-h5">Vos outils, pas les nôtres</h3>
+                <p className="o-body mt-2.5">
+                  Le moteur se branche sur ce que vous utilisez déjà. Ni compte
+                  à créer, ni colonne à renommer, ni habitude à changer.
+                </p>
+              </div>
+              <div data-reveal className="o-card-plate p-8 sm:p-10">
+                <h3 className="o-h5">Le Chèque TIC vérifié</h3>
+                <p className="o-body mt-2.5">
+                  Pour les TPE guadeloupéennes éligibles, une partie de
+                  l&apos;installation est financée. L&apos;éligibilité se
+                  vérifie pendant l&apos;audit, avant tout engagement.
+                </p>
+                <div className="mt-7">
+                  <MaqCheque />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-10">
+              <div data-reveal className="o-card-plate p-8 sm:p-10">
+                <h3 className="o-h5">Un journal de tout ce qui est parti</h3>
+                <p className="o-body mt-2.5">
+                  Chaque envoi est daté et consultable. Rien ne se passe dont
+                  vous ne puissiez retrouver la trace.
+                </p>
+                <div className="mt-7">
+                  <MaqJournal />
+                </div>
+              </div>
+              <div data-reveal className="o-card-plate p-8 sm:p-10">
+                <h3 className="o-h5">Vos données restent chez vous</h3>
+                <p className="o-body mt-2.5">
+                  Infrastructure auto-hébergée, lecture en place plutôt que
+                  copie dans un cloud tiers, et le strict nécessaire transmis
+                  aux modèles.
+                </p>
+                <div className="mt-7">
+                  <MaqLocal />
+                </div>
+              </div>
+              <div data-reveal className="o-card-plate p-8 sm:p-10">
+                <h3 className="o-h5">Une mise en place jalonnée</h3>
+                <p className="o-body mt-2.5">
+                  De l&apos;audit au premier cycle supervisé, chaque étape se
+                  valide avant la suivante. Vous gardez la main à chacune.
+                </p>
+                <div className="mt-7">
+                  <MaqEtapes />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ CHIFFRAGE — quatre cartes, sans prix inventé ════════ */}
+        <section data-monde="clair" className="o-wrap pb-[110px]">
+          <EnTete
+            pastille="Chiffrage"
+            titre="Ce que ça coûte."
+            chapo="Ça dépend du moteur et de votre situation — c'est précisément ce que l'audit chiffre en trente minutes : ce que le problème vous coûte, ce que le moteur coûterait, et le retour attendu."
+          />
+
+          {/* le sélecteur de la référence bascule mensuel/annuel ; ici il sert
+              de repère de famille et renvoie aux trois sections ci-dessus */}
+          <div data-reveal className="mt-9 flex justify-center">
+            <div className="o-segments">
+              <a href="#familles" className="o-segment" data-actif="true">
+                Défensifs
+              </a>
+              <a href="#familles" className="o-segment">
+                Offensifs
+              </a>
+              <a href="#familles" className="o-segment">
+                Pépites
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {FORMULES.map((f) => (
+              <div
+                key={f.famille}
+                data-reveal
+                className={`o-formule ${f.phare ? "o-formule--phare" : ""}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="o-pill o-pill--xs">{f.famille}</span>
+                  {f.phare ? (
+                    <span className="rounded-[7px] bg-[#f0fdf4] px-2.5 py-1 text-[11px] font-semibold text-[#15803d]">
+                      Le plus demandé
+                    </span>
+                  ) : null}
+                </div>
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="o-h5">Chiffré à l&apos;audit</span>
+                </div>
+                <p className="o-body mt-3 min-h-[54px] !text-[15px]">{f.accroche}</p>
+                <div className="mt-7 space-y-3 border-t border-[var(--o-line)] pt-6">
+                  {f.lignes.map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between gap-3">
+                      <span className="o-small whitespace-nowrap">{k}</span>
+                      <span className="o-small whitespace-nowrap font-semibold !text-[#09090b]">{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/audit"
+                  className="o-btn o-btn--primary mt-8 w-full"
+                >
+                  Demander l&apos;audit
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div data-reveal className="mt-10 flex justify-center">
+            <Link href="/audit" className="o-link">
+              Comment se déroule l&apos;audit
+              <Chevron />
+            </Link>
+          </div>
+        </section>
+
+        {/* ════════ FAQ — carte grise centrée ════════ */}
+        <section data-monde="clair" className="o-wrap pb-[110px]">
+          <div data-reveal className="o-card-plate mx-auto max-w-[800px] px-6 py-14 sm:px-[100px] sm:py-[76px]">
+            <h3
+              className="o-h4 text-center"
+              style={{ fontSize: "36px", lineHeight: "1.4" }}
+            >
+              Questions directes
+            </h3>
+            <p className="o-body mt-2.5 text-center">
+              Ce qu&apos;on nous demande avant de se lancer — répondu ici.
+            </p>
+            <div className="mt-9">
+              {FAQ.map((f) => (
+                <details key={f.q} className="o-faq-item">
+                  <summary>
+                    {f.q}
+                    <span className="o-faq-croix" aria-hidden>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                    </span>
+                  </summary>
+                  <p className="o-body pb-6 pr-10">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ CTA FINAL ════════ */}
+        <section data-monde="clair" className="o-wrap pb-[120px]">
+          <div
+            data-reveal
+            className="relative overflow-hidden rounded-[15px] bg-[#fafafa] px-6 py-16 text-center sm:px-20 sm:py-20"
+          >
+            <div
+              aria-hidden
+              className="o-dots o-dots-fade-up pointer-events-none absolute inset-x-0 bottom-0 top-1/2"
+            />
+            <h2 className="o-h2 relative mx-auto max-w-[1040px]">
+              Douze moteurs. Un seul à installer.
+            </h2>
+            <p className="o-lead relative mx-auto mt-4 max-w-[610px]">
+              Trente minutes pour désigner lequel, chiffrer ce qu&apos;il
+              rapporte, et vérifier votre éligibilité au Chèque TIC. Sans
+              engagement.
+            </p>
+            <div className="relative mt-8">
+              <Link href="/audit" className="o-btn o-btn--primary">
+                Audit gratuit
+                <Chevron taille={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </PageShell>
+  );
+}

@@ -1,0 +1,569 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import PageShell from "@/components/PageShell";
+import PageMotion from "@/components/PageMotion";
+import Fondu from "@/components/Fondu";
+import Equipe from "@/components/apropos/Equipe";
+import Quand from "@/components/apropos/Quand";
+import Spotlight from "@/components/apropos/Spotlight";
+
+/* ══════════════════════════════════════════════════════════════════════
+   /contact — page À PROPOS, architecture hyperstack.studio/a-propos
+   (30/07/2026, Teo : « exactement la même page, sauf le code couleur »)
+
+   Les neuf sections de la référence, dans son ordre exact :
+     1  hero sombre centré : titre 2 lignes, chapô, 4 tuiles chiffrées, 2 CTA
+     2  « Notre vision »  → Pourquoi nous choisir ?      — 3 cartes
+     3  « Nos valeurs »   → Comment nous travaillons     — 3 blocs alternés
+     4  « Histoire »      → Comment tout a commencé      — prose + CTA
+     5  « L'équipe »      → Qui sommes-nous ?            — grille portraits
+     6  « Nos services »  → Ce que nous faisons          — SECTION SOMBRE
+     7                      Quand faire appel ?          — 4 onglets + panneau
+     8  « Cas clients »   → Ils ont transformé…          — carrousel citations
+     9  CTA final en grand panneau arrondi sombre
+
+   CODE COULEUR : celui de Pegase, pas celui d'hyperstack. Leur bleu nuit
+   #1a1a5e devient le noir #000 du site, leur orange devient --gold #f78320,
+   leurs surfaces #f5f5fa deviennent .monde-clair #f6f6f5 + .carte-claire.
+   Aucune classe nouvelle : tout sort de la charte v2 existante.
+
+   TEXTE : réécrit pour Pegase. La mise en page vient de la référence, la
+   prose non — recopier leurs paragraphes serait de la contrefaçon, et leur
+   contenu (100 clients, 10 personnes, no-code/data) ne décrit pas Pegase.
+
+   PHOTOS : Unsplash bibliothèque gratuite, sourcées le 30/07 et créditées
+   dans public/photos/CREDITS.txt (même convention que les fiches moteurs).
+
+   La ROUTE reste /contact — header et footer y pointent, le libellé de nav
+   est « À propos » depuis le 29/07. Les canaux de contact vivent en section
+   #nous-joindre, conservés de la version précédente.
+   ══════════════════════════════════════════════════════════════════════ */
+
+export const metadata: Metadata = {
+  title: "À propos — Pegase",
+  description:
+    "Qui est derrière Pegase : un desk d'automatisation établi en Guadeloupe, douze moteurs branchés sur les outils que les TPE utilisent déjà. Réponse sous 24 h ouvrées.",
+};
+
+/* ——— 1 · les quatre tuiles du hero ———
+   Équivalent des « 30-70% / 5-10x / 100+ / IA ready » d'hyperstack. Chez eux
+   ce sont des mesures de performance ; ici des faits du site, puisque Pegase
+   n'a pas encore de résultats clients à publier. */
+const CHIFFRES: { n: string; unite?: string; label: string }[] = [
+  { n: "12", label: "moteurs au catalogue" },
+  { n: "30", unite: "min", label: "d'audit, gratuit" },
+  { n: "24", unite: "h", label: "ouvrées pour répondre" },
+  { n: "2026", label: "conformité facture élec." },
+];
+
+/* ——— 2 · « Pourquoi nous choisir ? » — trois cartes ——— */
+const RAISONS: { titre: string; texte: string }[] = [
+  {
+    titre: "Un seul moteur à la fois",
+    texte:
+      "On n'installe pas une suite. On installe celui que l'audit a désigné comme le plus coûteux, on attend qu'il ait fait ses preuves, et on parle du suivant seulement après. Vous ne payez jamais pour un chantier que vous n'avez pas encore rentabilisé.",
+  },
+  {
+    titre: "Vos outils, pas les nôtres",
+    texte:
+      "Aucun logiciel à adopter, aucune migration, aucune formation d'équipe. Le raccordement se fait sur votre boîte mail, votre tableur, votre agenda et WhatsApp. Vos clients ne voient aucune différence, sinon qu'on leur répond plus vite.",
+  },
+  {
+    titre: "Le chiffre avant le devis",
+    texte:
+      "L'audit précède toujours la proposition, il est gratuit, et il peut parfaitement conclure qu'aucun moteur n'est justifié chez vous. Un moteur qui ne rembourse pas son installation n'a pas à être installé.",
+  },
+];
+
+/* ——— 3 · « Comment nous travaillons » — trois blocs alternés ——— */
+const REGLES: { titre: string; texte: string; photo: string; alt: string }[] = [
+  {
+    titre: "On livre en jours, pas en trimestres",
+    texte:
+      "Un moteur se branche en quelques jours sur des outils qui existent déjà — c'est précisément pour cela qu'on ne construit pas de logiciel sur mesure. Vous voyez tourner la première relance, la première réponse client ou la première facture classée dans la semaine qui suit l'installation, pas au bout d'un cycle projet.",
+    photo: "/photos/regle-execution.jpg",
+    alt: "Un mécanicien au travail dans son atelier",
+  },
+  {
+    titre: "Votre résultat est le seul indicateur",
+    texte:
+      "Un moteur installé qui ne change rien à votre trésorerie ou à votre charge de travail est un échec, quelle que soit sa qualité technique. On mesure ce qui rentre et ce qui vous est retiré des épaules, on le compare au chiffre de l'audit, et on ajuste tant que l'écart n'est pas comblé.",
+    photo: "/photos/regle-resultat.jpg",
+    alt: "Deux commerçants derrière le comptoir de leur établissement",
+  },
+  {
+    titre: "Vous gardez la main, toujours",
+    texte:
+      "Vous fixez la frontière entre ce que le moteur traite seul et ce qui vous est transmis. Les premières semaines, tout vous est soumis avant envoi ; ensuite vous choisissez. Chaque message envoyé reste archivé et consultable, et si vous arrêtez un moteur vous récupérez vos outils exactement dans l'état où ils étaient.",
+    photo: "/photos/regle-proximite.jpg",
+    alt: "Deux personnes se serrant la main au-dessus d'une table",
+  },
+];
+
+/* ——— 6 · « Ce que nous faisons » — deux cartes de la section sombre ——— */
+const METIERS: { titre: string; texte: string }[] = [
+  {
+    titre: "Installer",
+    texte:
+      "On conçoit et on branche le moteur sur vos outils : relance de devis et de factures, réception des demandes clients, classement des factures fournisseurs, réactivation du fichier dormant. Les choix techniques vous sont expliqués et les réglages documentés — vous n'héritez pas d'une boîte noire.",
+  },
+  {
+    titre: "Accompagner",
+    texte:
+      "On règle les cadences et les circuits au fil de votre activité, on ajoute un second moteur seulement quand le premier a fait ses preuves, et on reste joignable. L'objectif n'est pas de vous rendre dépendant d'une agence : c'est que le système tienne sans nous entre deux ajustements.",
+  },
+];
+
+export default function AProposPage() {
+  return (
+    <PageShell>
+      {/* couche motion commune : lenis + reveals GSAP */}
+      <PageMotion />
+
+      {/* ════════ 1 · HERO SOMBRE CENTRÉ + QUATRE TUILES ════════ */}
+      <div className="px-6 pb-16 pt-16 text-center sm:px-10 sm:pb-24 sm:pt-28">
+        <h1
+          data-reveal
+          /* deux lignes comme la référence : le titre est verrouillé par les
+             <span block>, la largeur doit donc juste laisser passer la plus
+             longue (« automatiser sans embaucher », 26 signes) sans la couper */
+          className="mx-auto max-w-[26ch] text-[38px] font-bold leading-[1.03] tracking-[-0.035em] text-white sm:text-[62px] lg:text-[74px]"
+        >
+          <span className="block">Pegase :</span>
+          <span className="block text-balance">automatiser sans embaucher</span>
+        </h1>
+        <p
+          data-reveal
+          className="mx-auto mt-7 max-w-2xl text-[16px] leading-relaxed text-muted sm:text-[19px]"
+        >
+          Pegase installe, chez les TPE des Antilles, des moteurs qui prennent
+          en charge le travail répétitif : relancer les impayés, répondre aux
+          demandes, classer la compta, réveiller les clients dormants. Branchés
+          sur les outils que vous utilisez déjà, en quelques jours.
+        </p>
+
+        {/* les quatre tuiles chiffrées */}
+        <div
+          data-reveal
+          className="mx-auto mt-10 grid max-w-[900px] grid-cols-2 gap-3 sm:mt-12 sm:gap-4 lg:grid-cols-4"
+        >
+          {CHIFFRES.map((c) => (
+            <div
+              key={c.label}
+              className="rounded-[var(--radius-card)] border border-white/[0.09] bg-white/[0.03] px-4 py-6 sm:px-5"
+            >
+              <div className="num flex items-baseline justify-center gap-1 text-[30px] font-semibold tracking-[-0.03em] text-white sm:text-[38px]">
+                {c.n}
+                {c.unite && (
+                  <span className="text-[16px] font-medium text-white/55 sm:text-[19px]">
+                    {c.unite}
+                  </span>
+                )}
+              </div>
+              <div className="mt-2 text-[13px] leading-snug text-white/50">
+                {c.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div
+          data-reveal
+          className="mt-9 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4"
+        >
+          <Link
+            href="/reserver-un-audit"
+            className="rounded-[var(--radius-btn)] px-7 py-3.5 text-[16px] font-semibold text-white transition hover:brightness-110 active:scale-[0.97]"
+            style={{ background: "#f78320" }}
+          >
+            Réserver l&apos;audit gratuit
+          </Link>
+          <Link
+            href="/offres"
+            className="rounded-[var(--radius-btn)] border border-white/15 px-7 py-3.5 text-[16px] font-medium text-white transition hover:border-white/40"
+          >
+            Voir les douze moteurs
+          </Link>
+        </div>
+      </div>
+
+      {/* ════════ 2 · « POURQUOI NOUS CHOISIR ? » — TROIS CARTES ════════ */}
+      <Fondu vers="clair" />
+      <section
+        data-monde="clair"
+        className="monde-clair px-6 pb-20 pt-20 sm:px-10 sm:pb-28 sm:pt-28"
+      >
+        <div className="mx-auto max-w-[1120px] text-center">
+          <span
+            data-reveal
+            className="inline-block rounded-full border border-black/10 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em]"
+            style={{ color: "#8a6519" }}
+          >
+            Notre parti pris
+          </span>
+          <h2
+            data-intertitre
+            className="mx-auto mt-6 max-w-[20ch] text-[30px] font-bold leading-[1.06] tracking-[-0.03em] text-[#0f1013] sm:text-[52px]"
+          >
+            Pourquoi nous choisir ?
+          </h2>
+        </div>
+
+        <div className="mx-auto mt-12 grid max-w-[1120px] gap-5 sm:mt-14 sm:gap-6 lg:grid-cols-3">
+          {RAISONS.map((r) => (
+            <div
+              key={r.titre}
+              data-reveal
+              className="carte-claire flex h-full flex-col rounded-[var(--radius-card)] p-7 sm:p-8"
+            >
+              <span
+                aria-hidden
+                className="grid h-11 w-11 place-items-center rounded-[12px] text-[17px]"
+                style={{ background: "rgba(247,131,32,0.12)", color: "#8a6519" }}
+              >
+                ◆
+              </span>
+              <h3 className="mt-6 text-[20px] font-semibold tracking-[-0.02em] text-[#0f1013] sm:text-[22px]">
+                {r.titre}
+              </h3>
+              <p className="mt-3 text-[15px] leading-[1.8] text-[#52555c]">
+                {r.texte}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ════════ 3 · « COMMENT NOUS TRAVAILLONS » — BLOCS ALTERNÉS ════════ */}
+      <section
+        data-monde="clair"
+        className="monde-clair px-6 pb-20 pt-4 sm:px-10 sm:pb-28"
+      >
+        <div className="mx-auto max-w-[1120px] text-center">
+          <span
+            data-reveal
+            className="inline-block rounded-full border border-black/10 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em]"
+            style={{ color: "#8a6519" }}
+          >
+            Nos règles
+          </span>
+          <h2
+            data-intertitre
+            className="mx-auto mt-6 max-w-[22ch] text-[30px] font-bold leading-[1.06] tracking-[-0.03em] text-[#0f1013] sm:text-[52px]"
+          >
+            Comment nous travaillons
+          </h2>
+        </div>
+
+        <div className="mx-auto mt-14 max-w-[1120px] space-y-14 sm:mt-16 sm:space-y-20">
+          {REGLES.map((r, i) => (
+            <div
+              key={r.titre}
+              data-reveal
+              className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14"
+            >
+              <div className={i % 2 === 1 ? "lg:order-2" : ""}>
+                <span
+                  aria-hidden
+                  className="num grid h-11 w-11 place-items-center rounded-[12px] text-[14px] font-semibold"
+                  style={{ background: "rgba(247,131,32,0.12)", color: "#8a6519" }}
+                >
+                  {`0${i + 1}`}
+                </span>
+                <h3 className="mt-6 text-[23px] font-semibold leading-snug tracking-[-0.025em] text-[#0f1013] sm:text-[30px]">
+                  {r.titre}
+                </h3>
+                <p className="mt-4 text-[15px] leading-[1.85] text-[#52555c] sm:text-[16px]">
+                  {r.texte}
+                </p>
+              </div>
+              <div
+                className={`overflow-hidden rounded-[var(--radius-card)] ${
+                  i % 2 === 1 ? "lg:order-1" : ""
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={r.photo}
+                  alt={r.alt}
+                  className="aspect-[4/3] w-full object-cover"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ════════ 4 · « HISTOIRE » — COMMENT ÇA A COMMENCÉ ════════ */}
+      <section
+        data-monde="clair"
+        className="monde-clair px-6 pb-20 pt-4 sm:px-10 sm:pb-28"
+      >
+        <div className="mx-auto max-w-[1120px]">
+          <span
+            data-reveal
+            className="inline-block rounded-full border border-black/10 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em]"
+            style={{ color: "#8a6519" }}
+          >
+            Histoire
+          </span>
+          <h2
+            data-intertitre
+            className="mt-6 max-w-[20ch] text-[30px] font-bold leading-[1.06] tracking-[-0.03em] text-[#0f1013] sm:text-[52px]"
+          >
+            Comment ça a commencé
+          </h2>
+
+          <div className="mt-12 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+            <div>
+              <h3 className="text-[19px] font-semibold leading-snug text-[#0f1013] sm:text-[22px]">
+                Le constat : ce n&apos;est pas le chiffre qui manque, c&apos;est
+                le temps de le récupérer
+              </h3>
+              <p className="mt-5 text-[15px] leading-[1.85] text-[#52555c] sm:text-[16px]">
+                Une entreprise ne perd pas son chiffre d&apos;un coup. Elle le
+                perd par un devis resté sans réponse, un appel manqué un samedi
+                matin, une facture échue que personne n&apos;a relancée parce
+                que la semaine a été chargée. Pris un par un, ces trous
+                paraissent négligeables ; mis bout à bout sur douze mois, ils
+                pèsent souvent plus lourd qu&apos;un salaire.
+              </p>
+              <p className="mt-5 text-[15px] leading-[1.85] text-[#52555c] sm:text-[16px]">
+                Le même schéma revient chez le garage, chez l&apos;artisan et
+                chez le restaurateur : les outils existent — une boîte mail, un
+                tableur, WhatsApp — mais rien ne les relie, et c&apos;est le
+                dirigeant qui fait le lien, le soir, quand l&apos;atelier est
+                fermé. Ce travail-là ne demande pas de jugement. Il demande de
+                la régularité, et c&apos;est exactement ce qu&apos;un humain
+                fatigué fait le moins bien.
+              </p>
+              <p className="mt-5 text-[15px] leading-[1.85] text-[#52555c] sm:text-[16px]">
+                Pegase est né de ce constat, avec un parti pris de méthode :
+                d&apos;abord chiffrer ce que la fuite coûte réellement, ensuite
+                seulement décider s&apos;il faut installer quelque chose. Pas
+                l&apos;inverse.
+              </p>
+              <Link
+                href="/reserver-un-audit"
+                className="mt-9 inline-flex items-center gap-2 rounded-[var(--radius-btn)] px-6 py-3.5 text-[15px] font-semibold text-white transition hover:brightness-110 active:scale-[0.97]"
+                style={{ background: "#f78320" }}
+              >
+                Chiffrer mon cas
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+            <div
+              data-reveal
+              className="overflow-hidden rounded-[var(--radius-card)] lg:sticky lg:top-28 lg:self-start"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/photos/histoire-constat.jpg"
+                alt="Piles de documents et de dossiers empilés sur un bureau"
+                className="aspect-[4/5] w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════ 5 · « QUI EST DERRIÈRE » — GRILLE ÉQUIPE ════════ */}
+      <Equipe />
+
+      {/* ════════ 6 · « CE QUE NOUS FAISONS » — SECTION SOMBRE ════════
+          Chez hyperstack c'est le seul bloc bleu nuit au milieu du clair ;
+          ici c'est le seul bloc noir. Deux cartes, puis un panneau large. */}
+      <Fondu vers="sombre" />
+      <section className="bg-black px-6 py-20 sm:px-10 sm:py-28">
+        <div className="mx-auto max-w-[1120px]">
+          <div className="text-center">
+            <span
+              data-reveal
+              className="inline-block rounded-full border border-white/12 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-gold"
+            >
+              Nos services
+            </span>
+            <h2
+              data-intertitre
+              className="mx-auto mt-6 max-w-[20ch] text-[30px] font-bold leading-[1.06] tracking-[-0.03em] text-white sm:text-[52px]"
+            >
+              Ce que nous faisons
+            </h2>
+          </div>
+
+          <div className="mt-12 grid gap-5 sm:mt-14 sm:gap-6 lg:grid-cols-2">
+            {METIERS.map((m) => (
+              <div
+                key={m.titre}
+                data-reveal
+                className="flex h-full flex-col rounded-[var(--radius-card)] border border-white/[0.09] bg-white/[0.03] p-7 sm:p-8"
+              >
+                <span
+                  aria-hidden
+                  className="grid h-11 w-11 place-items-center rounded-[12px] text-[17px] text-gold"
+                  style={{ background: "rgba(247,131,32,0.14)" }}
+                >
+                  ◆
+                </span>
+                <h3 className="mt-6 text-[20px] font-semibold tracking-[-0.02em] text-white sm:text-[22px]">
+                  {m.titre}
+                </h3>
+                <p className="mt-3 text-[15px] leading-[1.8] text-muted">
+                  {m.texte}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* le panneau large — équivalent du bloc « Le Studio » */}
+          <div
+            data-reveal
+            className="relative mt-5 overflow-hidden rounded-[var(--radius-card)] border border-white/[0.09] px-7 py-12 text-center sm:mt-6 sm:px-10 sm:py-16"
+            style={{
+              background:
+                "radial-gradient(80% 120% at 50% 0%, rgba(247,131,32,0.16), transparent 62%), #08090c",
+            }}
+          >
+            <h3 className="text-[22px] font-semibold tracking-[-0.025em] text-white sm:text-[28px]">
+              Douze moteurs au catalogue
+            </h3>
+            <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-[1.8] text-muted sm:text-[16px]">
+              Quatre moteurs défensifs qui protègent la trésorerie et
+              déchargent le quotidien, quatre offensifs qui travaillent le
+              fichier que vous possédez déjà, et quatre pépites bâties pour un
+              métier ou une échéance précise — dont la conformité facture
+              électronique du 1ᵉʳ septembre 2026.
+            </p>
+            <Link
+              href="/offres"
+              className="mt-8 inline-flex items-center gap-2 rounded-[var(--radius-btn)] bg-white px-6 py-3.5 text-[15px] font-semibold text-black transition hover:bg-neutral-200 active:scale-[0.97]"
+            >
+              Découvrir les moteurs
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════ 7 · « QUAND NOUS APPELER ? » — QUATRE ONGLETS ════════ */}
+      <Fondu vers="clair" />
+      <div className="monde-clair pt-20 sm:pt-28" data-monde="clair" />
+      <Quand />
+
+      {/* ════════ 8 · « CAS CLIENTS » — CARROUSEL DE CITATIONS ════════
+          Invisible tant que SPOTLIGHT est vide dans lib/temoignages.ts. */}
+      <Spotlight />
+
+      {/* ════════ 8bis · LES CANAUX — conservés de la version Contact ════════ */}
+      <section
+        id="nous-joindre"
+        data-monde="clair"
+        className="monde-clair scroll-mt-24 px-6 pb-20 pt-4 sm:px-10 sm:pb-28"
+      >
+        <div className="mx-auto max-w-[1120px]">
+          <h2
+            data-intertitre
+            className="text-[24px] font-bold tracking-[-0.025em] text-[#0f1013] sm:text-[34px]"
+          >
+            Nous joindre
+          </h2>
+          <p
+            data-reveal
+            className="mt-5 max-w-2xl text-[16px] leading-relaxed text-[#52555c] sm:text-[17px]"
+          >
+            Le point d&apos;entrée le plus utile reste l&apos;audit. Pour toute
+            autre demande, le courriel reçoit une réponse sous 24 heures
+            ouvrées.
+          </p>
+          <div className="mt-10 grid gap-5 sm:mt-12 sm:gap-6 lg:grid-cols-3">
+            {[
+              {
+                label: "Par courriel",
+                valeur: "contact@pegase.gp",
+                href: "mailto:contact@pegase.gp",
+                texte:
+                  "Le canal le plus direct pour une demande d'audit, un devis ou une question sur un moteur en particulier. Deux lignes suffisent : votre activité et la difficulté qui vous coûte le plus cher.",
+              },
+              {
+                label: "WhatsApp",
+                valeur: "Sur demande lors de l'audit",
+                texte:
+                  "Le suivi par WhatsApp s'ouvre à l'issue de l'audit, pour les entreprises accompagnées. D'ici là, le courriel reste le canal le plus rapide et conserve une trace écrite des échanges.",
+              },
+              {
+                label: "Zone d'intervention",
+                valeur: "Guadeloupe & Antilles",
+                texte:
+                  "Interventions sur site en Guadeloupe, à distance pour le reste de l'arc antillais. L'installation d'un moteur ne requiert aucune présence permanente : le raccordement se fait sur vos outils existants.",
+              },
+            ].map((c) => (
+              <div
+                key={c.label}
+                data-reveal
+                className="carte-claire flex h-full flex-col rounded-[var(--radius-card)] p-7"
+              >
+                <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-black/55">
+                  {c.label}
+                </div>
+                {c.href ? (
+                  <a
+                    href={c.href}
+                    className="mt-3 text-[19px] font-medium tracking-[-0.01em] text-[#0f1013] underline decoration-black/15 underline-offset-4 transition hover:decoration-black/50"
+                  >
+                    {c.valeur}
+                  </a>
+                ) : (
+                  <div className="mt-3 text-[19px] font-medium tracking-[-0.01em] text-[#0f1013]">
+                    {c.valeur}
+                  </div>
+                )}
+                <p className="mt-4 text-[15px] leading-[1.8] text-[#52555c]">
+                  {c.texte}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════ 9 · CTA FINAL — GRAND PANNEAU ARRONDI SOMBRE ════════ */}
+      <section
+        data-monde="clair"
+        className="monde-clair px-6 pb-24 sm:px-10 sm:pb-32"
+      >
+        <div
+          data-reveal
+          className="relative mx-auto max-w-[1120px] overflow-hidden rounded-[20px] px-7 py-20 text-center sm:px-10 sm:py-24"
+          style={{
+            background:
+              "radial-gradient(70% 110% at 50% 0%, rgba(247,131,32,0.20), transparent 60%), linear-gradient(180deg, #101216, #000)",
+          }}
+        >
+          <h2 className="mx-auto max-w-[18ch] text-[28px] font-bold leading-[1.08] tracking-[-0.03em] text-white sm:text-[46px]">
+            Prêt à récupérer votre temps ?
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed text-muted sm:text-[17px]">
+            Trente minutes pour identifier la difficulté qui vous coûte le
+            plus, la chiffrer, et désigner le moteur au meilleur retour sur
+            investissement. Gratuit, sans engagement — et parfois la conclusion
+            est qu&apos;il n&apos;y a rien à installer.
+          </p>
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            <Link
+              href="/reserver-un-audit"
+              className="rounded-[var(--radius-btn)] bg-white px-7 py-3.5 text-[16px] font-semibold text-black transition hover:bg-neutral-200 active:scale-[0.97]"
+            >
+              Réserver l&apos;audit gratuit
+            </Link>
+            <a
+              href="mailto:contact@pegase.gp"
+              className="rounded-[var(--radius-btn)] bg-white/[0.08] px-6 py-3.5 text-[15px] font-medium text-white transition hover:bg-white/[0.14]"
+            >
+              Écrire directement
+            </a>
+          </div>
+        </div>
+      </section>
+    </PageShell>
+  );
+}
