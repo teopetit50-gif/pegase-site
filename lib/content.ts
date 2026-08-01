@@ -212,16 +212,16 @@ export const POSTS: Post[] = [
     date: "15 juil. 2026",
     cat: "Financement",
     cover: "/photos/paiement-terminal.jpg",
-    title: "Chèque TIC : financer jusqu'à 80 % de votre installation",
+    title: "Chèque TIC : jusqu'à 10 000 € pour votre installation",
     excerpt:
       "Le dispositif régional couvre l'essentiel du coût d'une automatisation pour les TPE de Guadeloupe. Qui est éligible, quels montants, et comment on monte le dossier avec vous.",
     body: [
       {
-        p: "La Région Guadeloupe soutient la transformation numérique des petites entreprises à travers le dispositif Chèque TIC : une subvention qui couvre jusqu'à 80 % du coût d'un projet numérique porté par une TPE éligible. Un projet d'automatisation Omega — installation d'un moteur, raccordement aux outils, formation — entre précisément dans le champ de ce dispositif.",
+        p: "La Région Guadeloupe soutient la transformation numérique des petites entreprises à travers le dispositif Chèque TIC : une subvention plafonnée à 10 000 €, qui couvre de 40 à 80 % du coût d'un projet numérique selon la nature des dépenses — 80 % sur la présence web et la sécurité, 40 % sur les logiciels de gestion et le matériel. Un projet d'automatisation Omega — installation d'un moteur, raccordement aux outils, formation — entre précisément dans le champ de ce dispositif.",
       },
       {
         h: "Qui est éligible",
-        p: "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe, à jour de leurs obligations sociales et fiscales. Les critères précis — effectif, chiffre d'affaires, secteurs prioritaires, plafonds — sont fixés par la Région et évoluent selon les enveloppes votées. C'est la première chose que nous vérifions lors de l'audit : votre éligibilité est confirmée avant tout engagement, pas après.",
+        p: "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe depuis au moins un an, à jour de leurs obligations sociales et fiscales. Les critères précis — effectif, chiffre d'affaires, secteurs prioritaires, plafonds — sont fixés par la Région et évoluent selon les enveloppes votées. C'est la première chose que nous vérifions lors de l'audit : votre éligibilité est confirmée avant tout engagement, pas après.",
       },
       {
         h: "Ce que le dispositif couvre",
@@ -295,7 +295,7 @@ export const POSTS: Post[] = [
         p: "Un moteur comme PAYD ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà — chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. Les entreprises qui passent à la relance systématique constatent le même phénomène : ce ne sont pas les clients qui manquent de trésorerie qui paient plus vite, ce sont les clients qui payaient en dernier ceux qui ne relançaient pas.",
       },
       {
-        p: "Le calcul à faire est simple : additionnez vos factures échues de plus de trente jours, ajoutez les devis restés sans réponse le mois dernier, et comparez au coût d'un moteur de relance — financé jusqu'à 80 % par le Chèque TIC pour les TPE éligibles. C'est précisément le chiffre que l'audit gratuit établit en trente minutes.",
+        p: "Le calcul à faire est simple : additionnez vos factures échues de plus de trente jours, ajoutez les devis restés sans réponse le mois dernier, et comparez au coût d'un moteur de relance — financé en partie par le Chèque TIC, jusqu'à 10 000 €, pour les TPE éligibles. C'est précisément le chiffre que l'audit gratuit établit en trente minutes.",
       },
     ],
   },

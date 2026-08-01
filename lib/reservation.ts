@@ -415,7 +415,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Dossier Chèque TIC",
-        aide: "Le dispositif de la Région Guadeloupe couvre jusqu'à 80 % d'un projet numérique porté par une TPE éligible.",
+        aide: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique selon le poste, jusqu'à 10 000 €, pour une TPE éligible.",
         valeurs: [
           "Éligibilité vérifiée",
           "Dossier monté",
@@ -518,7 +518,7 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "Le Chèque TIC, c'est automatique ?",
     r: [
-      "Non. C'est un dispositif de la Région Guadeloupe qui couvre jusqu'à 80 % d'un projet numérique porté par une TPE éligible, sous conditions d'immatriculation et de régularité sociale et fiscale. Les critères et les enveloppes évoluent.",
+      "Non. C'est un dispositif de la Région Guadeloupe qui finance de 40 à 80 % d'un projet numérique selon le poste, dans la limite de 10 000 €, pour une TPE immatriculée depuis au moins un an et à jour de ses obligations sociales et fiscales. Les critères et les enveloppes évoluent.",
       "Votre éligibilité est vérifiée pendant l'audit, avant tout engagement. Si vous n'êtes pas éligible, on vous le dit à ce moment-là plutôt qu'après signature.",
     ],
   },

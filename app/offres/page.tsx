@@ -70,7 +70,7 @@ const ARGUMENTS = [
     icone: <IconeAide />,
     titre: "Chèque TIC",
     texte:
-      "Jusqu'à 80 % de l'installation financée par la Région pour les TPE éligibles. Vérifié pendant l'audit.",
+      "Jusqu'à 10 000 € financés par la Région pour les TPE éligibles, selon le poste. Vérifié pendant l'audit.",
   },
 ];
 
@@ -381,9 +381,9 @@ export default function OffresPage() {
                   </p>
                 </div>
                 <div>
-                  <div className="o-h2 !text-white">80 %</div>
+                  <div className="o-h2 !text-white">10 000 €</div>
                   <p className="o-body mt-2 !text-white/60">
-                    De l&apos;installation financée par le Chèque TIC pour les
+                    Le plafond de financement Chèque TIC pour les
                     TPE guadeloupéennes éligibles. Vérifié pendant l&apos;audit.
                   </p>
                 </div>

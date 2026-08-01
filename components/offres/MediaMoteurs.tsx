@@ -675,7 +675,7 @@ export function MaqCheque() {
           className="mt-2 text-[30px] font-semibold tracking-[-0.03em] text-[#09090b]"
           style={{ fontFamily: "var(--font-jakarta)" }}
         >
-          jusqu&apos;à 80 %
+          jusqu&apos;à 10 000 €
         </div>
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#f4f4f5]">
           <div className="h-full w-[80%] rounded-full bg-[#18181b]" />

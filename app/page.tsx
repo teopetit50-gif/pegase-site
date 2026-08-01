@@ -59,7 +59,7 @@ const HERO = {
    site (articles) ou dans le catalogue lui-même. */
 const FAITS = [
   "12 moteurs au catalogue",
-  "Chèque TIC — jusqu'à 80 % financé",
+  "Chèque TIC — jusqu'à 10 000 € financés",
   "Audit gratuit de 30 minutes",
   "Vos données restent dans vos outils",
   "Facture électronique — 1ᵉʳ septembre 2026",
@@ -160,9 +160,9 @@ const ETAPES = [
 const GARANTIES = [
   {
     label: "Financement",
-    titre: "Le Chèque TIC couvre jusqu'à 80 %",
+    titre: "Le Chèque TIC finance jusqu'à 10 000 €",
     texte:
-      "La Région Guadeloupe subventionne la transformation numérique des TPE, et une installation Omega entre dans le champ du dispositif. On vérifie votre éligibilité pendant l'audit, avant tout engagement, puis on monte le dossier avec vous — description technique, devis au format attendu, suivi jusqu'à la décision.",
+      "La Région Guadeloupe subventionne la transformation numérique des TPE — de 40 à 80 % du projet selon le poste, dans la limite de 10 000 € — et une installation Omega entre dans le champ du dispositif. On vérifie votre éligibilité pendant l'audit, avant tout engagement, puis on monte le dossier avec vous — description technique, devis au format attendu, suivi jusqu'à la décision.",
     lien: {
       label: "Lire le détail du dispositif",
       href: "/blog/cheque-tic-financement",
@@ -194,7 +194,7 @@ const FAQ = [
   },
   {
     q: "Combien ça coûte ?",
-    a: "Le chiffrage sort de l'audit, parce qu'il dépend de vos outils, de votre volume et du moteur retenu. Un prix affiché ici ne voudrait pas dire grand-chose. Ce qui est certain, c'est que le Chèque TIC peut en couvrir jusqu'à 80 % si vous êtes éligible.",
+    a: "Le chiffrage sort de l'audit, parce qu'il dépend de vos outils, de votre volume et du moteur retenu. Un prix affiché ici ne voudrait pas dire grand-chose. Ce qui est certain, c'est que le Chèque TIC peut en financer une partie — de 40 à 80 % selon le poste, jusqu'à 10 000 € — si vous êtes éligible.",
   },
   {
     q: "Où sont hébergées mes données ?",

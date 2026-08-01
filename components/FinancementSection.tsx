@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Reveal from "./Reveal";
 
-/* CHIFFRES À CONFIRMER auprès de la Région Guadeloupe : 80%, 10 000€/an,
+/* Chiffres confirmés 01/08/2026 (fiche Infogreffe màj 23/06/2026) : 40-80 % selon poste, 10 000€/an,
    3 devis */
 
 /* Section « Chèque TIC » — v4 ÉDITORIALE (22/07). Composant AUTONOME : il
@@ -52,15 +52,15 @@ export default function FinancementSection() {
         </Reveal>
         <Reveal delay={90}>
           <h2 className="mt-5 max-w-3xl text-[28px] font-bold leading-[1.08] tracking-[-0.025em] text-[#0f1013] sm:text-[44px]">
-            Jusqu&apos;à 80 % de votre installation, financés par la Région.
+            Jusqu&apos;à 10 000 € de votre installation, financés par la Région.
           </h2>
         </Reveal>
         <Reveal delay={180}>
           <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-[#52555c] sm:text-[18px]">
             Le Chèque TIC est le dispositif par lequel la Région Guadeloupe
             soutient la transformation numérique des petites entreprises. Il
-            couvre jusqu&apos;à 80 % du coût d&apos;un projet numérique porté
-            par une TPE éligible, dans la limite de 10 000 € par an. Un projet
+            finance de 40 à 80 % du coût d&apos;un projet numérique selon le
+            poste, dans la limite de 10 000 € par an. Un projet
             d&apos;automatisation Omega — installation d&apos;un moteur,
             raccordement à vos outils, formation — entre précisément dans le
             champ de ce dispositif.

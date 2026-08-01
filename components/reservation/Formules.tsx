@@ -177,7 +177,7 @@ export default function Formules() {
                 Chèque TIC
               </div>
               <p className="mt-1.5 text-[13px] leading-[20px] text-[#616161]">
-                Jusqu&apos;à 80 % d&apos;une installation financés par la Région Guadeloupe
+                Jusqu&apos;à 10 000 € d&apos;une installation financés par la Région Guadeloupe
                 pour les TPE éligibles. Votre éligibilité est vérifiée pendant
                 l&apos;audit, avant tout engagement.
               </p>

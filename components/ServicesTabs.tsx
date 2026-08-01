@@ -106,7 +106,7 @@ export default function ServicesTabs() {
           className="text-[13px] font-medium tracking-tight text-[#52555c] sm:text-[14px]"
         >
           <span aria-hidden className="mr-2 inline-block h-1.5 w-1.5 -translate-y-[2px] rounded-full align-middle" style={{ background: "#8a6519" }} />
-          Chèque TIC — <span className="font-semibold text-[#0f1013]">jusqu&apos;à 80 % de l&apos;installation financée</span> pour les TPE éligibles
+          Chèque TIC — <span className="font-semibold text-[#0f1013]">jusqu&apos;à 10 000 € financés</span> pour les TPE éligibles
         </p>
 
         <h1

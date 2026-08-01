@@ -18,9 +18,9 @@ const STATS = [
     sub: "L'obligation entre en vigueur pour toutes les entreprises — BILLD met votre facturation en conformité avant la date.",
   },
   {
-    n: "80 %",
-    label: "de l'installation financée par le Chèque TIC",
-    sub: "Le dispositif régional couvre l'essentiel du coût d'installation pour les TPE éligibles de Guadeloupe.",
+    n: "10 000 €",
+    label: "de financement Chèque TIC au maximum",
+    sub: "Le dispositif régional finance de 40 à 80 % d'un projet numérique selon le poste, pour les TPE éligibles de Guadeloupe.",
   },
 ];
 
