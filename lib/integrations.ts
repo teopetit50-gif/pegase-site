@@ -190,7 +190,7 @@ export const MOTEUR_OUTILS = [
   },
 ];
 
-/* Les quatre étapes du raccordement — développement propre à Pegase, la
+/* Les quatre étapes du raccordement — développement propre à Omega, la
    référence n'a pas cette section. */
 export const RACCORDEMENT = [
   {

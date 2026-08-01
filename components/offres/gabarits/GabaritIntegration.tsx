@@ -38,7 +38,7 @@ import type { GabaritProps } from "./types";
    comme la référence à cette largeur.
 
    Deux écarts assumés sur la section 5 (« User feedback » sur la
-   référence) : pas d'étoiles et pas de témoignage nominatif. Pegase n'a
+   référence) : pas d'étoiles et pas de témoignage nominatif. Omega n'a
    aucun avis client au dépôt et en fabriquer un serait un faux. La forme
    est conservée, le contenu devient l'engagement de contrôle du moteur,
    signé par le desk.
@@ -182,7 +182,7 @@ export default function GabaritIntegration({
                 {fiche.pitch}
               </p>
 
-              {/* les deux tuiles : le moteur × Pegase */}
+              {/* les deux tuiles : le moteur × Omega */}
               <div data-reveal className="mt-8 flex items-center justify-center gap-5 lg:justify-start">
                 <span className="o-tuile">
                   <span className="scale-[0.86]">
@@ -195,7 +195,7 @@ export default function GabaritIntegration({
                     className="text-[15px] font-bold tracking-[-0.02em] text-[#09090b]"
                     style={{ fontFamily: "var(--font-jakarta)" }}
                   >
-                    Pegase
+                    Omega
                   </span>
                 </span>
               </div>
@@ -315,7 +315,7 @@ export default function GabaritIntegration({
       </section>
 
       {/* ════════ 5 · L'ENGAGEMENT ════════
-          La référence place ici un témoignage noté. Pegase n'a pas d'avis
+          La référence place ici un témoignage noté. Omega n'a pas d'avis
           client au dépôt : la forme est gardée, le contenu devient
           l'engagement de contrôle — vrai, vérifiable, et signé par le desk
           plutôt que par un client inventé. */}
@@ -355,7 +355,7 @@ export default function GabaritIntegration({
             </span>
             <div>
               <div className="text-[16px] font-semibold text-[#fafafa]">
-                Le desk Pegase
+                Le desk Omega
               </div>
               <div className="o-small">Guadeloupe — installation et supervision</div>
             </div>

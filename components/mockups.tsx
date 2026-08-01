@@ -160,7 +160,7 @@ export function DashboardMockup() {
       </div>
       </BrowserFrame>
       <Caption>
-        Le tableau de bord Pegase — le cash récupéré par PAYD et les relances
+        Le tableau de bord Omega — le cash récupéré par PAYD et les relances
         de la semaine, en temps réel.
       </Caption>
     </div>
@@ -192,7 +192,7 @@ export function ChatMockup() {
     { scope: ref }
   );
 
-  /* Conversation client — interface de messagerie PRO au langage Pegase
+  /* Conversation client — interface de messagerie PRO au langage Omega
      (pas une réplique grand public) : fenêtre sombre épurée, header canal +
      badge moteur, bulles sobres, horodatage Mono, trace système en pied. */
   return (

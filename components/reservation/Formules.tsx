@@ -164,7 +164,7 @@ export default function Formules() {
 
         <div className="mt-10 grid gap-4 sm:mt-12 lg:grid-cols-4">
           {/* colonne de gauche — la référence y loge sa preuve sociale ;
-              Pegase n'en a pas d'authentique, on y met donc les deux faits
+              Omega n'en a pas d'authentique, on y met donc les deux faits
               qui décident réellement : c'est gratuit, et c'est financé. */}
           <div className="flex flex-col justify-start gap-8 pr-2 lg:pt-2">
             <p className="text-[19px] font-medium leading-[27px] text-[#050505] sm:text-[21px] sm:leading-[29px]">

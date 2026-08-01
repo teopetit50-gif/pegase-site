@@ -61,7 +61,7 @@ export default function FinancementSection() {
             soutient la transformation numérique des petites entreprises. Il
             couvre jusqu&apos;à 80 % du coût d&apos;un projet numérique porté
             par une TPE éligible, dans la limite de 10 000 € par an. Un projet
-            d&apos;automatisation Pegase — installation d&apos;un moteur,
+            d&apos;automatisation Omega — installation d&apos;un moteur,
             raccordement à vos outils, formation — entre précisément dans le
             champ de ce dispositif.
           </p>

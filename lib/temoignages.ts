@@ -133,7 +133,7 @@ export const DEMO = false;
 
 if (DEMO && A_DES_AVIS && typeof window === "undefined") {
   console.warn(
-    "\n⛔  PEGASE — /contact contient des AVIS DE DÉMONSTRATION (lib/temoignages.ts).\n" +
+    "\n⛔  OMEGA — /contact contient des AVIS DE DÉMONSTRATION (lib/temoignages.ts).\n" +
       "    Entreprises, personnes, citations et notes sont inventées.\n" +
       "    Avant toute mise en ligne publique : remplacer par de vrais avis,\n" +
       "    ou vider NOTES / SPOTLIGHT / HISTOIRES, puis passer DEMO à false.\n"

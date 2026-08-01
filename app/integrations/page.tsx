@@ -41,9 +41,9 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "Intégrations — Pegase",
+  title: "Intégrations — Omega",
   description:
-    "Les moteurs Pegase se branchent sur les outils que vous avez déjà : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Ni compte à créer, ni migration, et vos données restent en local.",
+    "Les moteurs Omega se branchent sur les outils que vous avez déjà : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Ni compte à créer, ni migration, et vos données restent en local.",
 };
 
 type Marque = (typeof OUTILS)[number];

@@ -4,7 +4,7 @@ import { SITE_BASELINE, SITE_NOM } from "@/lib/site";
 /* ══════════════════════════════════════════════════════════════════════
    Image Open Graph (30/07/2026)
 
-   Un lien partagé sur WhatsApp — le canal principal de Pegase depuis
+   Un lien partagé sur WhatsApp — le canal principal de Omega depuis
    aujourd'hui — s'affichait sans vignette. Cette image est celle que
    verront WhatsApp, LinkedIn, Facebook et l'aperçu iMessage.
 

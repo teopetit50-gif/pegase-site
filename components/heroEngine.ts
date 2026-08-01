@@ -179,7 +179,7 @@ void main(){
   // sinon l'additif sature en blanc)
   float nearFade = smoothstep(1.8, 6.0, -mv.z);
 
-  // rampe stricte Pegase : ~88 % de poussière froide FAIBLE, braises réservées
+  // rampe stricte Omega : ~88 % de poussière froide FAIBLE, braises réservées
   // au cœur du ruban, blanc pur limité aux pics (~1.5 %)
   float cs = fract(aSeed * 17.31);
   vec3 col; float amp;

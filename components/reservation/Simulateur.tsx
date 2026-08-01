@@ -5,7 +5,7 @@
 
    Équivalent du simulateur de rémunération de la page de référence, même
    place et même découpe (colonne de réglages à gauche, panneau de résultat
-   à droite). Le sujet change : on n'estime pas un gain versé par Pegase,
+   à droite). Le sujet change : on n'estime pas un gain versé par Omega,
    on estime ce que la situation actuelle coûte sur douze mois.
 
    Toutes les hypothèses de calcul sont AFFICHÉES sous le résultat. Un

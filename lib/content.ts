@@ -148,8 +148,8 @@ export const FAMILLES: Famille[] = [
       {
         system: "COLLECT",
         title: "COLLECT — recouvrement",
-        job: "Le recouvrement est opéré en marque blanche pour les cabinets comptables : le cabinet le propose sous sa propre marque, Pegase exécute relances, suivi et reporting selon le protocole que le cabinet a validé.",
-        benefit: "Le cabinet signe, Pegase relance — sous sa marque à lui.",
+        job: "Le recouvrement est opéré en marque blanche pour les cabinets comptables : le cabinet le propose sous sa propre marque, Omega exécute relances, suivi et reporting selon le protocole que le cabinet a validé.",
+        benefit: "Le cabinet signe, Omega relance — sous sa marque à lui.",
       },
     ],
   },
@@ -217,7 +217,7 @@ export const POSTS: Post[] = [
       "Le dispositif régional couvre l'essentiel du coût d'une automatisation pour les TPE de Guadeloupe. Qui est éligible, quels montants, et comment on monte le dossier avec vous.",
     body: [
       {
-        p: "La Région Guadeloupe soutient la transformation numérique des petites entreprises à travers le dispositif Chèque TIC : une subvention qui couvre jusqu'à 80 % du coût d'un projet numérique porté par une TPE éligible. Un projet d'automatisation Pegase — installation d'un moteur, raccordement aux outils, formation — entre précisément dans le champ de ce dispositif.",
+        p: "La Région Guadeloupe soutient la transformation numérique des petites entreprises à travers le dispositif Chèque TIC : une subvention qui couvre jusqu'à 80 % du coût d'un projet numérique porté par une TPE éligible. Un projet d'automatisation Omega — installation d'un moteur, raccordement aux outils, formation — entre précisément dans le champ de ce dispositif.",
       },
       {
         h: "Qui est éligible",
@@ -229,7 +229,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Comment le dossier se monte",
-        p: "Un dossier de subvention demande des pièces administratives, un devis détaillé, une description du projet et de son impact. C'est un travail que la plupart des dirigeants repoussent — et c'est exactement pour cela que nous le prenons en charge. Pegase constitue le dossier avec vous : nous rédigeons la description technique, préparons le devis au format attendu, et suivons l'instruction jusqu'à la décision.",
+        p: "Un dossier de subvention demande des pièces administratives, un devis détaillé, une description du projet et de son impact. C'est un travail que la plupart des dirigeants repoussent — et c'est exactement pour cela que nous le prenons en charge. Omega constitue le dossier avec vous : nous rédigeons la description technique, préparons le devis au format attendu, et suivons l'instruction jusqu'à la décision.",
       },
       {
         p: "Le calendrier joue un rôle : les enveloppes régionales sont votées puis consommées, et les dossiers déposés tôt dans l'exercice sont instruits plus vite. Si votre entreprise est éligible, chaque mois d'attente est un mois de subvention potentiellement perdue et de problème non traité. L'audit gratuit inclut la vérification d'éligibilité — c'est le point de départ.",
@@ -259,7 +259,7 @@ export const POSTS: Post[] = [
         p: "La plupart des outils d'automatisation grand public commencent par importer vos données : le fichier clients est recopié dans leur base, enrichi chez eux, et il y reste souvent après la résiliation. Vous voilà avec un double de votre actif le plus sensible chez un tiers — à devoir vérifier qui y accède, et comment le faire supprimer. Pour un fichier de clients guadeloupéens avec noms, téléphones et historiques d'achats, c'est une exposition que rien n'oblige à accepter.",
       },
       {
-        h: "Le choix Pegase : lire sur place, ne rien recopier",
+        h: "Le choix Omega : lire sur place, ne rien recopier",
         p: "Nos moteurs travaillent dans l'autre sens : vos données restent dans vos outils — votre tableur, votre messagerie — et le moteur vient les lire là où elles sont, au moment où la tâche l'exige. Aucune base parallèle n'est constituée. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
       },
       {

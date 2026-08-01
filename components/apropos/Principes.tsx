@@ -4,7 +4,7 @@
    spotlight » : une grande citation en avant, l'attribution dessous, et une
    pagination « 1 sur 3 » qui fait défiler.
 
-   Chez Qonto les trois citations sont des clients nommés. Pegase n'en a pas à
+   Chez Qonto les trois citations sont des clients nommés. Omega n'en a pas à
    montrer, et refs-qonto/NOTES-DESIGN.md interdit d'en fabriquer : les trois
    énoncés ci-dessous sont les règles du desk, dans les mots déjà employés sur
    les fiches moteurs, attribuées au desk lui-même. Rien d'inventé, rien mis
@@ -113,7 +113,7 @@ export default function Principes() {
                 {p.titre}
               </div>
               <div className="text-[13px] text-black/50">
-                Règle du desk Pegase — Guadeloupe
+                Règle du desk Omega — Guadeloupe
               </div>
             </div>
           </div>

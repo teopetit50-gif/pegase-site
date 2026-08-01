@@ -15,18 +15,18 @@ import { CANAL_VALEUR } from "@/lib/reservation";
    du représentant légal, et capital social s'il y a société. */
 
 export const metadata: Metadata = {
-  title: "Mentions légales — Pegase",
-  description: "Mentions légales du site Pegase.",
+  title: "Mentions légales — Omega",
+  description: "Mentions légales du site Omega.",
 };
 
 const SECTIONS: { h: string; p: string }[] = [
   {
     h: "Éditeur du site",
-    p: `Le site est édité par Pegase, entreprise établie en Guadeloupe. Immatriculation et coordonnées complètes : [à compléter — forme juridique, SIRET, adresse du siège]. Téléphone : ${CANAL_VALEUR}.`,
+    p: `Le site est édité par Omega, entreprise établie en Guadeloupe. Immatriculation et coordonnées complètes : [à compléter — forme juridique, SIRET, adresse du siège]. Téléphone : ${CANAL_VALEUR}.`,
   },
   {
     h: "Directeur de la publication",
-    p: "Le directeur de la publication est le représentant légal de Pegase : [à compléter].",
+    p: "Le directeur de la publication est le représentant légal de Omega : [à compléter].",
   },
   {
     h: "Hébergement",
@@ -38,7 +38,7 @@ const SECTIONS: { h: string; p: string }[] = [
   },
   {
     h: "Propriété intellectuelle",
-    p: "L'ensemble des contenus du site — textes, marques des moteurs (PAYD, ANSWR, OFFLOAD, BRIEF, REVIVE, POSTD, REACH, HIRED, BILLD, PUBLIQ, STAYD, COLLECT), éléments graphiques — est la propriété de Pegase. Toute reproduction sans autorisation écrite préalable est interdite. Les données de démonstration présentées sur ce site (tableaux de bord, conversations, montants) sont fictives.",
+    p: "L'ensemble des contenus du site — textes, marques des moteurs (PAYD, ANSWR, OFFLOAD, BRIEF, REVIVE, POSTD, REACH, HIRED, BILLD, PUBLIQ, STAYD, COLLECT), éléments graphiques — est la propriété de Omega. Toute reproduction sans autorisation écrite préalable est interdite. Les données de démonstration présentées sur ce site (tableaux de bord, conversations, montants) sont fictives.",
   },
 ];
 

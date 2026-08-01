@@ -19,11 +19,11 @@ import { POSTS } from "@/lib/content";
    sur la première ligne, H1 48 Jakarta 700, cover composée 760 arrondie
    30, rail de partage en cercles gris à gauche du corps, rich text
    16/1.8 muted avec intertitres 38, rangée « à lire ensuite » puis CTA.
-   Le contenu (textes, photos) reste celui de Pegase — même règle que
+   Le contenu (textes, photos) reste celui de Omega — même règle que
    /offres et /blog.
 
    Le rail de partage de la référence pointe vers ses profils sociaux ;
-   Pegase n'en a pas — les trois cercles partagent donc L'ARTICLE
+   Omega n'en a pas — les trois cercles partagent donc L'ARTICLE
    (sharer Facebook / intent X / partage LinkedIn), même dessin, geste
    utile. Sous 1280 px le rail disparaît, comme chez la référence dont
    la colonne absorbe le gabarit mobile.
@@ -44,8 +44,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = POSTS.find((p) => p.slug === slug);
-  if (!post) return { title: "Article — Pegase" };
-  return { title: `${post.title} — Pegase`, description: post.excerpt };
+  if (!post) return { title: "Article — Omega" };
+  return { title: `${post.title} — Omega`, description: post.excerpt };
 }
 
 /* pictos de partage — traits simples, 16 px dans un cercle 44 */

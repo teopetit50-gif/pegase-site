@@ -5,9 +5,9 @@ import { BlogCard, BlogCta } from "@/components/blog/BlogKit";
 import { POSTS } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Blog — Pegase",
+  title: "Blog — Omega",
   description:
-    "Conformité facture électronique, financement Chèque TIC, RGPD et données locales, impayés aux Antilles : les analyses du desk Pegase pour les dirigeants de TPE.",
+    "Conformité facture électronique, financement Chèque TIC, RGPD et données locales, impayés aux Antilles : les analyses du desk Omega pour les dirigeants de TPE.",
 };
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
    articles, dupliquer la grille ou paginer serait un bug visible, pas une
    fidélité. Une seule grille, donc, entre le hero et le CTA.
 
-   Le contenu reste celui de Pegase : reprendre les textes ou les visuels
+   Le contenu reste celui de Omega : reprendre les textes ou les visuels
    du tiers n'aurait ni sens commercial ni base légale (même règle que
    /offres). L'ancienne URL /articles est redirigée en 308 par
    next.config.ts, fiches et accueil pointent désormais vers /blog.

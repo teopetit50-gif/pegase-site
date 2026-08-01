@@ -66,7 +66,7 @@ export function BlogCover({
 }) {
   return (
     <div className="b-compo">
-      <div className="b-compo-logo">Pegase</div>
+      <div className="b-compo-logo">Omega</div>
       <div className="b-compo-title">{post.title}</div>
       <div className="b-compo-badge">
         {tempsLecture(post)} min de lecture

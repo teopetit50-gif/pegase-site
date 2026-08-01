@@ -31,7 +31,7 @@ import {
    pour les tokens.
 
    Ce qui change par rapport à la référence : le CONTENU. Textes, moteurs,
-   chiffres et visuels sont ceux de Pegase — reprendre la copie et les
+   chiffres et visuels sont ceux de Omega — reprendre la copie et les
    captures produit d'un tiers n'aurait ni sens commercial ni base légale.
    Les trois photos viennent de la bibliothèque déjà présente dans
    public/photos (Unsplash, licence et crédits dans CREDITS.txt).
@@ -41,7 +41,7 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "Nos offres — Pegase",
+  title: "Nos offres — Omega",
   description:
     "Un moteur par corvée : relance d'impayés, réponses clients 24/7, factures fournisseurs classées. Installés sur vos outils actuels — mail, tableur, WhatsApp — sous votre validation.",
 };

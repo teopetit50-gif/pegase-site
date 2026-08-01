@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
    CC BY 3.0) est retiré du header ET du footer à la demande de Teo. Le crédit
    aux mentions légales n'a plus lieu d'être si l'icône ne réapparaît nulle
    part : à vérifier avant de la réintroduire. La marque ne vit plus que par
-   le mot « Pegase ». */
+   le mot « Omega ». */
 
 /* 25/07 — « Solutions » retiré : la page liste ET les fiches moteurs vivent
    désormais sous /offres (/offres, /offres/payd…). Les anciennes URL
@@ -175,7 +175,7 @@ export default function Header() {
               clair && !open ? "text-[#0f1013]" : "text-white"
             }`}
           >
-            Pegase
+            Omega
           </span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-4">
@@ -270,7 +270,7 @@ export default function Header() {
         {/* 26/07 — panneau recalibré sur la référence, relevée au pixel sur
             ocoya.com à 414 px de large : rangées de 46 px de pas, texte de
             corps (pas de titre), boutons de 35 px à rayon 8, 10 px entre les
-            deux. Pegase gardait un panneau nettement plus gros et plus gras
+            deux. Omega gardait un panneau nettement plus gros et plus gras
             (Teo, « regarde la taille des écritures, regarde la grosseur »).
             Seul écart assumé : 44 px de hauteur utile au lieu de 35/36 — la
             référence passe sous la cible tactile, pas nous. */}
@@ -315,7 +315,7 @@ export default function Header() {
             Audit gratuit
           </Link>
           {/* Second bouton, gris — la référence en a deux (Login / Try free).
-              Pegase n'a pas de compte utilisateur : la paire devient
+              Omega n'a pas de compte utilisateur : la paire devient
               « Audit gratuit » (l'action principale) et « Nous contacter ».
               #27272a est le gris exact du « Try free » de la référence. */}
           <Link

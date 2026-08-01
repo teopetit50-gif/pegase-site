@@ -865,7 +865,7 @@ export const FICHES: Record<string, Fiche> = {
     sections: {
       pointsTitre: "Ce que le cabinet garde.",
       pointsChapo:
-        "Sa marque, sa relation client, son protocole et sa facturation. Pegase n'apparaît nulle part dans les échanges avec le débiteur.",
+        "Sa marque, sa relation client, son protocole et sa facturation. Omega n'apparaît nulle part dans les échanges avec le débiteur.",
       detailChapo:
         "Comment le protocole du cabinet encadre chaque action, et où s'arrête COLLECT quand un dossier durcit.",
       cibleChapo:
@@ -873,15 +873,15 @@ export const FICHES: Record<string, Fiche> = {
       faqChapo: "Responsabilité, marque blanche, contentieux : les trois points.",
     },
     fonctionnement:
-      "COLLECT s'adresse aux cabinets : ils proposent le recouvrement à leurs clients sous leur propre marque, Pegase opère en arrière-plan — relances, suivi, reporting — selon un protocole que le cabinet a validé. Le client final ne voit que son cabinet.",
+      "COLLECT s'adresse aux cabinets : ils proposent le recouvrement à leurs clients sous leur propre marque, Omega opère en arrière-plan — relances, suivi, reporting — selon un protocole que le cabinet a validé. Le client final ne voit que son cabinet.",
     points: [
-      "Service porté par la marque du cabinet — Pegase reste invisible pour le client final",
+      "Service porté par la marque du cabinet — Omega reste invisible pour le client final",
       "Protocole de relance validé par le cabinet : tons, cadences, seuils d'escalade",
       "Reporting mensuel par dossier : encours, sommes récupérées, cas sensibles",
       "Facturation portée par le cabinet, marge incluse",
     ],
     controle:
-      "Le cabinet garde la relation et la décision ; Pegase exécute et rend compte. Un dossier se suspend à tout moment, d'un simple message.",
+      "Le cabinet garde la relation et la décision ; Omega exécute et rend compte. Un dossier se suspend à tout moment, d'un simple message.",
     outils: ["Outils du cabinet", "Gmail / Outlook", "Google Sheets"],
     cible: ["Cabinets d'expertise comptable", "Centres de gestion agréés"],
     etapes: [
@@ -895,17 +895,17 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Opération et reporting",
-        d: "Pegase opère les relances et livre un reporting mensuel par dossier. Le cabinet facture son client, marge comprise.",
+        d: "Omega opère les relances et livre un reporting mensuel par dossier. Le cabinet facture son client, marge comprise.",
       },
     ],
     faq: [
       {
         q: "Qui est responsable vis-à-vis du client final ?",
-        a: "Le cabinet — c'est son service et sa marque. Le protocole qu'il a validé encadre chaque action de Pegase, et tout est traçable.",
+        a: "Le cabinet — c'est son service et sa marque. Le protocole qu'il a validé encadre chaque action de Omega, et tout est traçable.",
       },
       {
         q: "La marque blanche est-elle vraiment invisible ?",
-        a: "Oui : adresses d'envoi, signatures et documents sont au nom du cabinet. Pegase n'apparaît nulle part dans les échanges avec le débiteur.",
+        a: "Oui : adresses d'envoi, signatures et documents sont au nom du cabinet. Omega n'apparaît nulle part dans les échanges avec le débiteur.",
       },
       {
         q: "Et si un dossier part au contentieux ?",

@@ -54,9 +54,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { system } = await params;
   const m = ALL.find((x) => x.system.toLowerCase() === system);
-  if (!m) return { title: "Moteur — Pegase" };
+  if (!m) return { title: "Moteur — Omega" };
   const fiche = FICHES[m.system];
-  return { title: `${m.title} — Pegase`, description: fiche?.pitch };
+  return { title: `${m.title} — Omega`, description: fiche?.pitch };
 }
 
 export default async function FicheMoteurPage({

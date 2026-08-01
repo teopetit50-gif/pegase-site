@@ -245,7 +245,7 @@ function Calques({ active, reduced }: { active: boolean; reduced: boolean }) {
         style={{ transform: slid ? "translate(12px, 8px)" : "none" }}
       >
         <span className="absolute bottom-2 right-3.5 text-[11px] font-medium tracking-wide text-sky/80">
-          PEGASE
+          OMEGA
         </span>
       </div>
       <div

@@ -5,7 +5,7 @@
    pastilles-onglets, puis un panneau deux colonnes — visuel sombre à gauche,
    texte + liste à cocher + CTA à droite.
 
-   Code couleur Pegase : le panneau visuel passe du bleu nuit hyperstack au
+   Code couleur Omega : le panneau visuel passe du bleu nuit hyperstack au
    noir du site, l'orange #f78320 (--gold) prend la place de leur orange, les
    surfaces claires sont celles de la charte (.carte-claire, .monde-clair).
 
@@ -165,7 +165,7 @@ export default function Quand() {
             className="h-full w-full object-cover opacity-70"
           />
           {/* voile noir + halo or : le panneau bleu nuit d'hyperstack, au code
-              couleur Pegase */}
+              couleur Omega */}
           <div
             aria-hidden
             className="absolute inset-0"

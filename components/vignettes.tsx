@@ -159,7 +159,7 @@ export function VChat({
   );
 }
 
-/* cadre téléphone pour ANSWR (réf. mockup agent Qonto → WhatsApp Pegase) */
+/* cadre téléphone pour ANSWR (réf. mockup agent Qonto → WhatsApp Omega) */
 export function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto w-[248px] rounded-[36px] border border-white/[0.12] bg-[#0e1116] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_56px_-6px_rgba(15,16,19,0.45),0_14px_36px_-12px_rgba(15,16,19,0.3)]">
@@ -243,7 +243,7 @@ export function VEmail({
     <div ref={ref} onPointerEnter={replay} className={`${PANEL} min-h-[140px] w-full max-w-md overflow-hidden`}>
       <div className="border-b border-white/[0.07] px-5 py-2.5">
         <div className="text-[12px] text-white/50">
-          De : <span className="text-white/75">Pegase</span>
+          De : <span className="text-white/75">Omega</span>
         </div>
         <div className="mt-0.5 text-[13px] font-medium text-white/85">Objet : {objet}</div>
       </div>

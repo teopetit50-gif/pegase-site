@@ -24,7 +24,7 @@ import {
 
    Ce qui change : le SUJET. On ne compare pas des abonnements, on fait
    choisir un format d'audit et réserver un créneau. Textes, formats et
-   chiffres sont ceux de Pegase.
+   chiffres sont ceux de Omega.
 
    Deux emplacements de la référence n'ont PAS d'équivalent honnête ici et
    ont été remplacés plutôt que meublés (règle refs-qonto/NOTES-DESIGN.md,
@@ -40,13 +40,13 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "Réserver un audit — Pegase",
+  title: "Réserver un audit — Omega",
   description:
     "Trois formats d'audit pour mesurer ce que votre difficulté principale vous coûte : impayés, demandes perdues, heures de saisie. Gratuit à partir de 30 minutes, sans engagement, avec vérification de l'éligibilité au Chèque TIC.",
 };
 
 /* Les engagements tenus, à la place des témoignages de la référence. Ce
-   sont des phrases que Pegase applique — pas des citations attribuées à
+   sont des phrases que Omega applique — pas des citations attribuées à
    des clients qui n'existent pas. */
 const ENGAGEMENTS: { texte: string; sous: string }[] = [
   {

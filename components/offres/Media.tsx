@@ -1,6 +1,6 @@
 /* Visuels de /offres — 25/07/2026.
 
-   La page de référence pose des captures produit dans ses cartes. Pegase n'a
+   La page de référence pose des captures produit dans ses cartes. Omega n'a
    pas de produit à capturer : ces maquettes sont donc dessinées en HTML/CSS,
    au même format et à la même place (largeur pleine de la carte, arrimées au
    bord bas, écrêtées par l'overflow de .o-card). Aucun asset externe, aucun
@@ -200,7 +200,7 @@ export function HeroCollage() {
     <div className="relative mx-auto w-full max-w-[900px] lg:h-[590px]">
       {/* panneau principal — le tableau de bord */}
       <Fenetre className="!relative z-10 mx-auto w-full max-w-[660px] lg:!absolute lg:left-1/2 lg:top-0 lg:w-[640px] lg:-translate-x-1/2">
-        <BarreFenetre titre="Pegase — tableau de bord" />
+        <BarreFenetre titre="Omega — tableau de bord" />
         <div className="px-5 pb-6 pt-5">
           {/* en-tête : une seule ligne dès 480 px, empilée en dessous — à
               375 px la ligne unique cassait « 12 480 € » et « Tout valider »

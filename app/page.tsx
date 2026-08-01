@@ -44,7 +44,7 @@ import { FAMILLES, POSTS } from "@/lib/content";
 
    Aucun chiffre inventé : la rangée du hero ne porte que des faits
    vérifiables (le catalogue, l'échéance légale, le taux du Chèque TIC,
-   l'hébergement). Pegase ne publie ni nombre de clients ni euros récupérés
+   l'hébergement). Omega ne publie ni nombre de clients ni euros récupérés
    tant qu'ils ne sont pas sourcés.
    ══════════════════════════════════════════════════════════════════════ */
 
@@ -52,7 +52,7 @@ const HERO = {
   pastille: "Agence d'automatisation · Guadeloupe",
   titre: "Ce qui se répète n'a plus à passer par vous.",
   chapo:
-    "Pegase installe des moteurs d'automatisation chez les TPE des Antilles : relance des impayés, réponses clients, factures fournisseurs, prospection. Ils tournent sur les outils que vous avez déjà et ne font rien partir sans votre accord.",
+    "Omega installe des moteurs d'automatisation chez les TPE des Antilles : relance des impayés, réponses clients, factures fournisseurs, prospection. Ils tournent sur les outils que vous avez déjà et ne font rien partir sans votre accord.",
 };
 
 /* Faits, pas statistiques maison : chacun est vérifiable ailleurs sur le
@@ -162,7 +162,7 @@ const GARANTIES = [
     label: "Financement",
     titre: "Le Chèque TIC couvre jusqu'à 80 %",
     texte:
-      "La Région Guadeloupe subventionne la transformation numérique des TPE, et une installation Pegase entre dans le champ du dispositif. On vérifie votre éligibilité pendant l'audit, avant tout engagement, puis on monte le dossier avec vous — description technique, devis au format attendu, suivi jusqu'à la décision.",
+      "La Région Guadeloupe subventionne la transformation numérique des TPE, et une installation Omega entre dans le champ du dispositif. On vérifie votre éligibilité pendant l'audit, avant tout engagement, puis on monte le dossier avec vous — description technique, devis au format attendu, suivi jusqu'à la décision.",
     lien: {
       label: "Lire le détail du dispositif",
       href: "/blog/cheque-tic-financement",

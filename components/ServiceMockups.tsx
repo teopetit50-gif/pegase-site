@@ -11,7 +11,7 @@
    et beaucoup de vide autour.
 
    Ce qu'on ne reprend pas : aucun visuel, logo ou capture de Qonto. Tout est
-   redessiné en HTML/CSS/SVG avec le contenu Pegase. Règle
+   redessiné en HTML/CSS/SVG avec le contenu Omega. Règle
    refs-qonto/NOTES-DESIGN.md.
 
    Les scènes sombres réintroduisent volontairement du noir sur la page
@@ -440,7 +440,7 @@ function MockPAYD() {
 
 /* ——————————————————————————————————————————————————————————
    REVIVE — le fichier client dormant, sur fond clair
-   Accent : or (la charte Pegase)
+   Accent : or (la charte Omega)
    —————————————————————————————————————————————————————————— */
 
 const OR = "#b7861f";

@@ -25,19 +25,19 @@ export const metadata: Metadata = {
      app/opengraph-image.tsx n'est pas résolue et les aperçus de partage
      restent vides — précisément sur WhatsApp, devenu le canal principal. */
   metadataBase: new URL(SITE_URL),
-  title: "Pegase — Automatisation pour les TPE des Antilles",
+  title: "Omega — Automatisation pour les TPE des Antilles",
   description: DESCRIPTION,
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Pegase",
-    title: "Pegase — Automatisation pour les TPE des Antilles",
+    siteName: "Omega",
+    title: "Omega — Automatisation pour les TPE des Antilles",
     description: DESCRIPTION,
     url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pegase — Automatisation pour les TPE des Antilles",
+    title: "Omega — Automatisation pour les TPE des Antilles",
     description: DESCRIPTION,
   },
 };

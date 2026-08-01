@@ -57,7 +57,7 @@ export default function Machine() {
           </Reveal>
           <Reveal delay={180}>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              Les moteurs Pegase ne construisent pas de base de données
+              Les moteurs Omega ne construisent pas de base de données
               parallèle. Vos données restent dans vos propres outils —
               messagerie, tableur — que les moteurs consultent sur place,
               tâche par tâche, plutôt que de les recopier dans une base à eux.
@@ -92,7 +92,7 @@ export default function Machine() {
           />
           <Image
             src="/machine-pegase.png"
-            alt="L'unité de calcul Pegase en vue éclatée — processeur AMD, refroidissement et châssis"
+            alt="L'unité de calcul Omega en vue éclatée — processeur AMD, refroidissement et châssis"
             width={513}
             height={675}
             className="relative mx-auto w-full max-w-[380px] sm:max-w-[440px]"

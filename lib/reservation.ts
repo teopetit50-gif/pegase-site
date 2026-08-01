@@ -389,7 +389,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Conformité facturation électronique",
-        aide: "L'échéance concerne toutes les entreprises. On regarde où vous en êtes ; Pegase n'est pas une plateforme agréée et ne le prétend pas.",
+        aide: "L'échéance concerne toutes les entreprises. On regarde où vous en êtes ; Omega n'est pas une plateforme agréée et ne le prétend pas.",
         valeurs: ["Point de situation", "Point de situation", "Plan de mise en conformité"],
       },
     ],
@@ -467,7 +467,7 @@ export const COMPLEMENTS: { titre: string; texte: string; conditions: string }[]
   {
     titre: "Atelier équipe",
     texte:
-      "Deux heures avec les personnes qui valideront les messages du moteur au quotidien. Rien ne part sans validation humaine chez Pegase : encore faut-il que l'équipe sache corriger, suspendre et reprendre la main sans appeler à l'aide.",
+      "Deux heures avec les personnes qui valideront les messages du moteur au quotidien. Rien ne part sans validation humaine chez Omega : encore faut-il que l'équipe sache corriger, suspendre et reprendre la main sans appeler à l'aide.",
     conditions: "Sur devis — souvent éligible au Chèque TIC.",
   },
   {

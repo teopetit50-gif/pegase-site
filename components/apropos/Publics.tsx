@@ -4,7 +4,7 @@
    Calque direct de qonto.com/en/customers § « Explore their experiences » :
    H2 centré, contrôle segmenté centré (piste grise, pastille active blanche
    ombrée), puis une grille de cartes ; chez Qonto ce sont des histoires
-   clients, ici les moteurs de la famille sélectionnée — Pegase n'a pas de
+   clients, ici les moteurs de la famille sélectionnée — Omega n'a pas de
    témoignage client à afficher et refs-qonto/NOTES-DESIGN.md interdit d'en
    inventer un.
 

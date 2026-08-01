@@ -1,7 +1,7 @@
 /* Visuels de /offres/moteurs — 25/07/2026.
 
    Seconde page de référence (la home ocoya.com) : mêmes objets, contenu
-   Pegase. Comme pour /offres, aucune capture produit n'est empruntée — les
+   Omega. Comme pour /offres, aucune capture produit n'est empruntée — les
    maquettes sont dessinées en HTML/CSS. Les marques d'outils viennent de
    `simple-icons` (paths et couleurs officiels), déjà utilisé par
    components/logos.tsx pour les logos moteurs.

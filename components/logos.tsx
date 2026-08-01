@@ -1,4 +1,4 @@
-/* Un logo par moteur Pegase — depuis le 21/07 : LOGOS DE MARQUES IA
+/* Un logo par moteur Omega — depuis le 21/07 : LOGOS DE MARQUES IA
    officiels (demande Teo : « remplace les pictos par des logos de marque
    comme Claude, Mistral AI, NVIDIA etc avec leurs logos »). Chaque moteur
    porte la marque IA qui l'anime, via simple-icons, en tuile app-icon :
