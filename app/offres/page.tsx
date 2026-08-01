@@ -62,9 +62,9 @@ const ARGUMENTS = [
   },
   {
     icone: <IconeCoffre />,
-    titre: "Données en local",
+    titre: "Données lues sur place",
     texte:
-      "Infrastructure auto-hébergée : vos fichiers sont lus sur place, jamais recopiés chez un tiers. RGPD documenté.",
+      "Vos fichiers sont lus dans vos outils, jamais recopiés dans une base tierce. Le strict nécessaire aux modèles, à chaque tâche.",
   },
   {
     icone: <IconeAide />,
@@ -452,7 +452,7 @@ export default function OffresPage() {
               </CarteMise>
               <CarteMise
                 titre="Vos données restent chez vous"
-                texte="Infrastructure auto-hébergée, lecture en place plutôt que copie dans un cloud tiers, et le strict nécessaire transmis aux modèles."
+                texte="Lecture en place dans vos outils plutôt que copie dans une base tierce, et le strict nécessaire transmis aux modèles à chaque tâche."
               >
                 <MediaLocal />
               </CarteMise>

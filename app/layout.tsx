@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import TrackWhatsApp from "@/components/TrackWhatsApp";
 import "./globals.css";
 import { SITE_URL } from "@/lib/site";
 
@@ -14,8 +15,9 @@ const jbmono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jbmono" })
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta" });
 const interTight = Inter_Tight({ subsets: ["latin"], variable: "--font-inter-tight" });
 
+/* 01/08 — ramenée sous ~160 caractères : Google tronquait l'ancienne (278). */
 const DESCRIPTION =
-  "Douze moteurs d'automatisation installés sur vos outils actuels — mail, tableur, WhatsApp — et pilotés sous votre validation : relance d'impayés, réponses clients 24/7, factures fournisseurs classées, prospection. Audit gratuit de trente minutes, financement Chèque TIC vérifié.";
+  "Douze moteurs d'automatisation branchés sur vos outils — mail, tableur, WhatsApp — sous votre validation. Audit gratuit de 30 minutes, Chèque TIC vérifié.";
 
 export const metadata: Metadata = {
   /* 30/07 — `metadataBase` est ce qui transforme les chemins relatifs des
@@ -56,6 +58,7 @@ export default function RootLayout({
       <body>
         {children}
         <Analytics />
+        <TrackWhatsApp />
       </body>
     </html>
   );

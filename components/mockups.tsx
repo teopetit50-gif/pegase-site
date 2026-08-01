@@ -85,7 +85,7 @@ export function DashboardMockup() {
           </span>
           <div className="text-[13px] font-semibold text-white">
             Votre entreprise
-            <span className="ml-2 font-normal text-white/40">Espace client · PAYD</span>
+            <span className="ml-2 font-normal text-white/40">Tableau de bord · PAYD</span>
           </div>
           <span className="ml-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[11px] font-medium text-white/70">
             7 derniers jours
@@ -160,7 +160,7 @@ export function DashboardMockup() {
       </div>
       </BrowserFrame>
       <Caption>
-        L&apos;espace client Pegase — le cash récupéré par PAYD et les relances
+        Le tableau de bord Pegase — le cash récupéré par PAYD et les relances
         de la semaine, en temps réel.
       </Caption>
     </div>

@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
       { source: "/audit", destination: "/reserver-un-audit", permanent: true },
       /* 30/07 : /articles devient /blog (reproduction de la référence
          blog.ocoya.com, liste + articles). Slugs inchangés. */
+      /* 01/08 : /offres/moteurs n'a jamais existé mais circulait — 404 sèche. */
+      { source: "/offres/moteurs", destination: "/offres", permanent: true },
       { source: "/articles", destination: "/blog", permanent: true },
       { source: "/articles/:slug", destination: "/blog/:slug", permanent: true },
     ];

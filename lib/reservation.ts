@@ -512,7 +512,7 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "Mes chiffres restent-ils confidentiels ?",
     r: [
-      "Oui. Les montants et les fichiers partagés pendant l'entretien ne sortent pas de l'audit et ne sont conservés qu'avec votre accord explicite. L'infrastructure Pegase est auto-hébergée : rien ne transite par un service tiers pour être analysé.",
+      "Oui. Les montants et les fichiers partagés pendant l'entretien ne sortent pas de l'audit et ne sont conservés qu'avec votre accord explicite. Rien n'est recopié dans une base tierce pour être analysé : l'audit se fait sur vos fichiers, en lecture.",
     ],
   },
   {

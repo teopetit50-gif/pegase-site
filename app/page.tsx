@@ -61,7 +61,7 @@ const FAITS = [
   "12 moteurs au catalogue",
   "Chèque TIC — jusqu'à 80 % financé",
   "Audit gratuit de 30 minutes",
-  "Données auto-hébergées, en local",
+  "Vos données restent dans vos outils",
   "Facture électronique — 1ᵉʳ septembre 2026",
 ];
 
@@ -173,7 +173,7 @@ const GARANTIES = [
     label: "Données",
     titre: "Vos fichiers ne partent nulle part",
     texte:
-      "Les moteurs tournent auto-hébergés, en local. Vos données restent dans vos outils et le moteur vient les lire là où elles sont, au lieu de les recopier dans un cloud tiers. Le jour où vous arrêtez un moteur, il n'y a rien à rapatrier ni à faire supprimer chez quelqu'un d'autre.",
+      "Vos données restent dans vos outils — messagerie, tableur, agenda — et le moteur vient les lire là où elles sont, au moment de la tâche, au lieu de les recopier dans une base à lui. Le jour où vous arrêtez un moteur, il n'y a rien à rapatrier : vos fichiers n'ont jamais bougé de vos outils.",
     lien: { label: "Pourquoi ce choix", href: "/blog/rgpd-donnees-locales" },
     maquette: <MaqLocal />,
   },
@@ -198,7 +198,7 @@ const FAQ = [
   },
   {
     q: "Où sont hébergées mes données ?",
-    a: "En local, sur une infrastructure auto-hébergée dimensionnée pour l'entreprise. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier.",
+    a: "Vos fichiers restent stockés dans vos outils actuels — c'est là que les moteurs viennent les lire, tâche par tâche, sans les recopier dans une base à eux. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier.",
   },
   {
     q: "Je suis concerné par la facture électronique ?",

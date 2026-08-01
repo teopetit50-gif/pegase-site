@@ -120,7 +120,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   n8n: {
     famille: "Automatisation",
-    role: "Le socle sur lequel tournent les moteurs, auto-hébergé. C'est ce qui permet aux données de rester en local.",
+    role: "Le socle sur lequel tournent les moteurs. C'est lui qui orchestre chaque tâche et va lire vos données dans vos outils, sans les recopier.",
   },
   Zapier: {
     famille: "Automatisation",
@@ -215,6 +215,6 @@ export const RACCORDEMENT = [
     n: "04",
     titre: "Les données restent chez vous",
     texte:
-      "L'infrastructure est auto-hébergée, en local. Le moteur lit vos données là où elles sont au lieu de les recopier dans un cloud tiers.",
+      "Le moteur lit vos données là où elles sont — dans vos outils — au lieu de les recopier dans une base à lui. Rien à rapatrier le jour où vous arrêtez.",
   },
 ];

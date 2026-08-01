@@ -34,12 +34,10 @@
 */
 export type Note = { note: string; sur: string; detail?: string };
 
-/* ⛔ DÉMO — chiffres inventés, à remplacer ou vider avant mise en ligne */
-export const NOTES: Note[] = [
-  { note: "4,9", sur: "Google", detail: "23 avis" },
-  { note: "4,8", sur: "Pages Jaunes", detail: "11 avis" },
-  { note: "4,9", sur: "Facebook", detail: "16 avis" },
-];
+/* 01/08 — tableaux vidés : les avis de démonstration étaient partis en prod.
+   Les sections de preuve sont invisibles tant que c'est vide. Colle ici tes
+   vrais avis uniquement. */
+export const NOTES: Note[] = [];
 
 /* ——— 2 · LE CARROUSEL DE CITATIONS ———
    Équivalent du « Customer story spotlight » de Qonto (1 sur 3).
@@ -71,38 +69,7 @@ export type Citation = {
 };
 
 /* ⛔ DÉMO — personnes et citations inventées, à remplacer ou vider */
-export const SPOTLIGHT: Citation[] = [
-  {
-    cle: "carmo",
-    citation:
-      "On a arrêté de courir après les factures. PAYD relance tout seul, et le matin je vois ce qui est rentré avant même d'ouvrir l'atelier.",
-    nom: "Jean-Marc Sainte-Rose",
-    role: "Gérant",
-    entreprise: "CARMO Toyota",
-    secteur: "Baie-Mahault",
-    moteur: "PAYD",
-  },
-  {
-    cle: "kaz",
-    citation:
-      "Le samedi soir, les demandes de table arrivaient quand on était en plein service. Maintenant elles ont une réponse en une minute, et je récupère la liste au calme.",
-    nom: "Mylène Abraham",
-    role: "Cheffe et propriétaire",
-    entreprise: "Kaz à Manjé",
-    secteur: "Le Gosier",
-    moteur: "ANSWR",
-  },
-  {
-    cle: "fideca",
-    citation:
-      "On passait deux jours par mois à réclamer des pièces. Elles arrivent classées, au bon format, sans qu'on ait à relancer qui que ce soit.",
-    nom: "Patrick Elisabeth",
-    role: "Expert-comptable associé",
-    entreprise: "Cabinet Fidéca",
-    secteur: "Pointe-à-Pitre",
-    moteur: "OFFLOAD",
-  },
-];
+export const SPOTLIGHT: Citation[] = [];
 
 /* ——— 3 · LES CARTES HISTOIRES ———
    Équivalent de la grille « Explore their experiences » de Qonto, avec son
@@ -137,74 +104,7 @@ export type Histoire = {
 };
 
 /* ⛔ DÉMO — entreprises et récits inventés, à remplacer ou vider */
-export const HISTOIRES: Histoire[] = [
-  {
-    cle: "carmo",
-    profil: "artisans",
-    titre: "CARMO ne court plus après ses factures",
-    resume:
-      "Le garage encaissait à quarante-cinq jours en moyenne. PAYD relance à J+3, J+7 et J+21, et rien ne part sans validation du gérant.",
-    taille: "3 salariés",
-    secteur: "Garage automobile",
-    moteur: "PAYD",
-    photo: "/photos/payd.jpg",
-  },
-  {
-    cle: "bois",
-    profil: "artisans",
-    titre: "Une menuiserie qui répond même en atelier",
-    resume:
-      "Les appels manqués partaient à la concurrence. Les demandes reçues sur WhatsApp obtiennent désormais une réponse en moins d'une minute.",
-    taille: "2 salariés",
-    secteur: "Menuiserie",
-    moteur: "ANSWR",
-    photo: "/photos/answr.jpg",
-  },
-  {
-    cle: "kaz",
-    profil: "commerces",
-    titre: "Kaz à Manjé récupère ses samedis soir",
-    resume:
-      "Les demandes de réservation tombaient en plein service. Elles sont maintenant qualifiées et posées dans l'agenda avant le coup de feu.",
-    taille: "6 salariés",
-    secteur: "Restaurant",
-    moteur: "ANSWR",
-    photo: "/photos/answr-conversation.jpg",
-  },
-  {
-    cle: "villa",
-    profil: "commerces",
-    titre: "Trois villas gérées sans messages de minuit",
-    resume:
-      "Réservations centralisées quelle que soit la plateforme, instructions d'arrivée envoyées au bon moment, ménage coordonné entre deux séjours.",
-    taille: "Indépendant",
-    secteur: "Location saisonnière",
-    moteur: "STAYD",
-    photo: "/photos/postd.jpg",
-  },
-  {
-    cle: "fideca",
-    profil: "liberales",
-    titre: "Fidéca a arrêté de réclamer des pièces",
-    resume:
-      "Les factures fournisseurs des clients du cabinet arrivent lues, classées et au format comptable, sans relance manuelle.",
-    taille: "8 salariés",
-    secteur: "Cabinet comptable",
-    moteur: "OFFLOAD",
-    photo: "/photos/offload.jpg",
-  },
-  {
-    cle: "kine",
-    profil: "liberales",
-    titre: "Un cabinet de kiné qui ne rappelle plus personne",
-    resume:
-      "Prises de rendez-vous, annulations et rappels de la veille sont traités sans interrompre les séances en cours.",
-    taille: "Indépendant",
-    secteur: "Kinésithérapie",
-    moteur: "ANSWR",
-    photo: "/photos/brief.jpg",
-  },
-];
+export const HISTOIRES: Histoire[] = [];
 
 /* ——— Les onglets du sélecteur ———
    Adapte les libellés à ta clientèle réelle. Un onglet sans aucune histoire
@@ -229,7 +129,7 @@ export const A_DES_AVIS =
    Quand tu remplis : remplace les entrées des trois tableaux, puis mets
    DEMO à false. Si tu préfères publier sans avis pour l'instant, vide
    simplement les trois tableaux : les sections disparaissent d'elles-mêmes. */
-export const DEMO = true;
+export const DEMO = false;
 
 if (DEMO && A_DES_AVIS && typeof window === "undefined") {
   console.warn(

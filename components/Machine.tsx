@@ -50,24 +50,24 @@ export default function Machine() {
           </Reveal>
           <Reveal delay={90}>
             <h2 className="mt-5 max-w-xl text-[28px] font-bold leading-[1.08] tracking-[-0.025em] text-white sm:text-[44px]">
-              Vos données restent chez vous.
+              Vos données restent dans vos outils.
               <br />
-              Pas dans un cloud étranger.
+              Jamais recopiées ailleurs.
             </h2>
           </Reveal>
           <Reveal delay={180}>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              Les moteurs Pegase tournent sur une infrastructure auto-hébergée,
-              dimensionnée pour votre entreprise. Vos données restent dans vos
-              propres outils — messagerie, tableur — que les moteurs consultent
-              sur place, sans jamais en faire une copie chez un tiers.
+              Les moteurs Pegase ne construisent pas de base de données
+              parallèle. Vos données restent dans vos propres outils —
+              messagerie, tableur — que les moteurs consultent sur place,
+              tâche par tâche, plutôt que de les recopier dans une base à eux.
             </p>
           </Reveal>
           <Reveal delay={270}>
             <ul className="mt-8 space-y-3.5">
               {[
-                "Hébergement local et souverain — vos données ne sont transférées vers aucun opérateur extra-européen.",
-                "Conformité RGPD documentée — registre des traitements tenu à jour et contrat de sous-traitance fourni.",
+                "Validation humaine — aucun message ne part vers un client sans votre accord explicite.",
+                "Aucune exploitation — vos données ne sont ni revendues, ni utilisées pour autre chose que la tâche du moteur.",
                 "Traitement au strict nécessaire — les modèles d'intelligence artificielle n'accèdent qu'aux éléments requis par chaque tâche, jamais à l'intégralité d'un fichier.",
               ].map((pt) => (
                 <li key={pt} className="flex gap-3">

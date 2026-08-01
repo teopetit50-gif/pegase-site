@@ -384,8 +384,8 @@ export default function GabaritHome({
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Vos données restent chez vous</h3>
             <p className="o-body mt-2.5">
-              Infrastructure auto-hébergée, lecture en place plutôt que copie
-              dans un cloud tiers, et le strict nécessaire transmis aux modèles.
+              Lecture en place dans vos outils plutôt que copie dans une base
+              tierce, et le strict nécessaire transmis aux modèles à chaque tâche.
             </p>
           </div>
           <div data-reveal className="o-card-plate p-8 sm:p-10">

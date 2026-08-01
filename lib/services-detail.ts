@@ -151,7 +151,7 @@ const ANSWR: ServiceDetail = {
     },
     {
       q: "Où sont mes données ? Est-ce conforme RGPD ?",
-      a: "Les moteurs tournent sur une infrastructure auto-hébergée, en local, et viennent lire vos données là où elles sont — votre messagerie, votre agenda — au lieu de les copier dans un cloud tiers. Les modèles reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier. Le tout documenté, conforme RGPD.",
+      a: "Vos données restent dans vos outils — votre messagerie, votre agenda — et les moteurs viennent les lire là où elles sont, au lieu de les recopier dans une base tierce. Les modèles reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
     },
     {
       q: "Je garde mon numéro ?",
