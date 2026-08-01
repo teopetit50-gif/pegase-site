@@ -151,7 +151,7 @@ const ANSWR: ServiceDetail = {
     },
     {
       q: "Où sont mes données ? Est-ce conforme RGPD ?",
-      a: "Vos données restent dans vos outils — votre messagerie, votre agenda — et les moteurs viennent les lire là où elles sont, au lieu de les recopier dans une base tierce. Les modèles reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
+      a: "Dans un espace dédié à votre entreprise — chiffré, hébergé dans l'Union européenne, séparé de celui des autres clients. Les modèles reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
     },
     {
       q: "Je garde mon numéro ?",

@@ -243,9 +243,9 @@ export const POSTS: Post[] = [
     date: "2 juin 2026",
     cat: "Données",
     cover: "/photos/offload-chip.jpg",
-    title: "RGPD : pourquoi vos données restent dans vos outils",
+    title: "RGPD : où vivent vos données chez Omega",
     excerpt:
-      "Nos moteurs ne recopient pas vos fichiers dans une base à eux : ils lisent vos données là où elles sont, le strict nécessaire à chaque tâche. Ce que ça change pour une TPE responsable de son fichier clients.",
+      "Un espace dédié par client — chiffré, hébergé dans l'Union européenne, jamais mélangé, jamais revendu, effaçable sur demande. Ce que ça change pour une TPE responsable de son fichier clients.",
     body: [
       {
         p: "Automatiser son entreprise, c'est confier à des machines l'accès à ce qu'elle a de plus sensible : le fichier clients, les factures, les échanges commerciaux. La question de savoir où ces données transitent et qui peut y accéder n'est pas un détail technique — c'est une obligation légale et un choix stratégique.",
@@ -255,16 +255,16 @@ export const POSTS: Post[] = [
         p: "Le règlement s'applique à toutes les entreprises, sans seuil de taille. Une TPE qui utilise un fichier clients doit savoir où il est stocké, qui y accède, et être capable de répondre à une demande d'accès ou de suppression. Chaque outil qui touche à ces données est un sous-traitant au sens du règlement — et le dirigeant reste responsable de la chaîne complète, y compris des outils qu'il a branchés « pour essayer ».",
       },
       {
-        h: "Le problème des outils qui aspirent vos données",
-        p: "La plupart des outils d'automatisation grand public commencent par importer vos données : le fichier clients est recopié dans leur base, enrichi chez eux, et il y reste souvent après la résiliation. Vous voilà avec un double de votre actif le plus sensible chez un tiers — à devoir vérifier qui y accède, et comment le faire supprimer. Pour un fichier de clients guadeloupéens avec noms, téléphones et historiques d'achats, c'est une exposition que rien n'oblige à accepter.",
+        h: "Le problème des outils opaques",
+        p: "La plupart des outils d'automatisation grand public mélangent vos données avec celles de milliers d'autres comptes, dans une base dont vous ne savez ni où elle est, ni qui y accède, ni ce qu'il en reste après résiliation. Pour un fichier de clients guadeloupéens avec noms, téléphones et historiques d'achats, c'est une exposition que rien n'oblige à accepter.",
       },
       {
-        h: "Le choix Omega : lire sur place, ne rien recopier",
-        p: "Nos moteurs travaillent dans l'autre sens : vos données restent dans vos outils — votre tableur, votre messagerie — et le moteur vient les lire là où elles sont, au moment où la tâche l'exige. Aucune base parallèle n'est constituée. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
+        h: "Le choix Omega : un espace dédié par client",
+        p: "Chez Omega, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours — messagerie, tableur, WhatsApp — et c'est là que les moteurs agissent. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
       },
       {
         h: "Ce que ça change concrètement",
-        p: "En cas de contrôle ou de demande d'un client, vous savez répondre : les données sont dans vos outils, traitées par ce moteur, pour cette finalité. Le registre des traitements est documenté à l'installation. Et le jour où vous arrêtez un moteur, il n'y a rien à rapatrier ni à faire supprimer — vos fichiers n'ont jamais quitté vos outils.",
+        p: "En cas de contrôle ou de demande d'un client, vous savez répondre : les données sont dans votre espace dédié, traitées par ce moteur, pour cette finalité. Le registre des traitements est documenté à l'installation. Et le jour où vous arrêtez, l'export complet vous est remis et l'espace est effacé — c'est contractuel, pas une promesse orale.",
       },
     ],
   },

@@ -61,7 +61,7 @@ const FAITS = [
   "12 moteurs au catalogue",
   "Chèque TIC — jusqu'à 10 000 € financés",
   "Audit gratuit de 30 minutes",
-  "Vos données restent dans vos outils",
+  "Données chiffrées, un espace par client",
   "Facture électronique — 1ᵉʳ septembre 2026",
 ];
 
@@ -171,9 +171,9 @@ const GARANTIES = [
   },
   {
     label: "Données",
-    titre: "Vos fichiers ne partent nulle part",
+    titre: "Vos données restent les vôtres",
     texte:
-      "Vos données restent dans vos outils — messagerie, tableur, agenda — et le moteur vient les lire là où elles sont, au moment de la tâche, au lieu de les recopier dans une base à lui. Le jour où vous arrêtez un moteur, il n'y a rien à rapatrier : vos fichiers n'ont jamais bougé de vos outils.",
+      "Vous gardez vos outils de tous les jours — messagerie, tableur, WhatsApp. Vos données de suivi, elles, vivent dans un espace dédié à votre entreprise : chiffré, hébergé dans l'Union européenne, jamais mélangé avec celui d'un autre client. Le jour où vous arrêtez, tout vous est remis et tout est effacé sur simple demande.",
     lien: { label: "Pourquoi ce choix", href: "/blog/rgpd-donnees-locales" },
     maquette: <MaqLocal />,
   },
@@ -198,7 +198,7 @@ const FAQ = [
   },
   {
     q: "Où sont hébergées mes données ?",
-    a: "Vos fichiers restent stockés dans vos outils actuels — c'est là que les moteurs viennent les lire, tâche par tâche, sans les recopier dans une base à eux. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier.",
+    a: "Dans un espace dédié à votre entreprise, chiffré et hébergé dans l'Union européenne, strictement séparé de celui de chaque autre client. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier — et vous pouvez demander l'export complet ou la suppression à tout moment.",
   },
   {
     q: "Je suis concerné par la facture électronique ?",

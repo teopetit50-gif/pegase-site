@@ -120,7 +120,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   n8n: {
     famille: "Automatisation",
-    role: "Le socle sur lequel tournent les moteurs. C'est lui qui orchestre chaque tâche et va lire vos données dans vos outils, sans les recopier.",
+    role: "Le socle sur lequel tournent les moteurs : il orchestre chaque tâche entre vos outils et votre espace de données dédié.",
   },
   Zapier: {
     famille: "Automatisation",
@@ -215,6 +215,6 @@ export const RACCORDEMENT = [
     n: "04",
     titre: "Les données restent chez vous",
     texte:
-      "Le moteur lit vos données là où elles sont — dans vos outils — au lieu de les recopier dans une base à lui. Rien à rapatrier le jour où vous arrêtez.",
+      "Chaque entreprise a son espace de données chiffré, séparé des autres. Le jour où vous arrêtez : export complet remis, espace effacé.",
   },
 ];

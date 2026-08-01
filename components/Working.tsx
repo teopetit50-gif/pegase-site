@@ -33,7 +33,7 @@ const DECLARATIONS: {
     fort: "Rien ne part sans vous.",
     suite: "Aussi longtemps que vous voulez.",
     detail:
-      "Tout message destiné à un client passe par une file de validation : vous approuvez, corrigez ou suspendez d'un clic. Les moteurs lisent par ailleurs vos fichiers là où ils sont — dans vos outils — au lieu de les recopier dans une base à eux.",
+      "Tout message destiné à un client passe par une file de validation : vous approuvez, corrigez ou suspendez d'un clic. Vos données vivent par ailleurs dans un espace dédié à votre entreprise, chiffré et strictement séparé de celui des autres clients.",
   },
   {
     n: "04",

@@ -62,9 +62,9 @@ const ARGUMENTS = [
   },
   {
     icone: <IconeCoffre />,
-    titre: "Données lues sur place",
+    titre: "Données cloisonnées",
     texte:
-      "Vos fichiers sont lus dans vos outils, jamais recopiés dans une base tierce. Le strict nécessaire aux modèles, à chaque tâche.",
+      "Un espace chiffré par client, hébergé dans l'Union européenne — jamais mélangées, jamais revendues. Le strict nécessaire aux modèles.",
   },
   {
     icone: <IconeAide />,
@@ -452,7 +452,7 @@ export default function OffresPage() {
               </CarteMise>
               <CarteMise
                 titre="Vos données restent chez vous"
-                texte="Lecture en place dans vos outils plutôt que copie dans une base tierce, et le strict nécessaire transmis aux modèles à chaque tâche."
+                texte="Un espace de données chiffré et séparé pour chaque client, et le strict nécessaire transmis aux modèles à chaque tâche."
               >
                 <MediaLocal />
               </CarteMise>

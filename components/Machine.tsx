@@ -50,17 +50,18 @@ export default function Machine() {
           </Reveal>
           <Reveal delay={90}>
             <h2 className="mt-5 max-w-xl text-[28px] font-bold leading-[1.08] tracking-[-0.025em] text-white sm:text-[44px]">
-              Vos données restent dans vos outils.
+              Vos données restent les vôtres.
               <br />
-              Jamais recopiées ailleurs.
+              Chiffrées, séparées, effaçables.
             </h2>
           </Reveal>
           <Reveal delay={180}>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              Les moteurs Omega ne construisent pas de base de données
-              parallèle. Vos données restent dans vos propres outils —
-              messagerie, tableur — que les moteurs consultent sur place,
-              tâche par tâche, plutôt que de les recopier dans une base à eux.
+              Chaque client Omega a son espace de données dédié — chiffré,
+              hébergé dans l&apos;Union européenne, jamais mélangé avec celui
+              d&apos;un autre. Vous gardez vos outils de tous les jours ; les
+              moteurs travaillent dans cet espace et n&apos;en sortent que pour
+              agir là où sont vos clients : votre messagerie, votre WhatsApp.
             </p>
           </Reveal>
           <Reveal delay={270}>
