@@ -206,6 +206,45 @@ export const POSTS: Post[] = [
     ],
   },
   {
+    slug: "immobilier-repondre-en-premier",
+    initials: "PM",
+    author: "Pôle métiers",
+    date: "2 août 2026",
+    cat: "Métier",
+    cover: "/photos/answr-phone.jpg",
+    title: "Agence immobilière : le premier qui répond décroche la visite",
+    excerpt:
+      "Les contacts arrivent par les portails, WhatsApp et le téléphone — pendant que les journées se passent en visites et en estimations. Comment une agence indépendante répond à tout sans embaucher, et ce qu'on mesure avant d'installer quoi que ce soit.",
+    body: [
+      {
+        p: "Un acquéreur qui cherche ne contacte jamais une seule agence : il écrit à toutes celles qui ont un bien dans ses critères, souvent le soir même de sa recherche. Un vendeur qui compare des agences pour un mandat juge d'abord une chose : la vitesse et la tenue de la première réponse. Dans les deux cas, l'agence qui répond en premier prend l'avantage — et c'est rarement une question de compétence, presque toujours une question de disponibilité.",
+      },
+      {
+        h: "D'où viennent les contacts, et où ils se perdent",
+        p: "Une agence indépendante reçoit ses demandes par les portails d'annonces, le formulaire du site, WhatsApp et le téléphone — y compris pendant les visites, précisément quand personne ne peut répondre. Chaque canal vit sa vie : rien ne rassemble les demandes au même endroit, rien ne trace celles qui sont restées sans réponse. Les messages du soir et du week-end attendent le lundi ; le prospect, lui, n'attend pas — il a déjà rappelé l'agence suivante de sa liste.",
+      },
+      {
+        h: "Ce qu'une réponse tardive coûte vraiment",
+        p: "Le coût ne se limite pas à la visite manquée. Un contact mal qualifié fait perdre du temps à tout le monde : visites organisées sans vérifier le financement, critères jamais posés, allers-retours pour des informations qui tenaient en trois questions. Et pendant que l'entrant déborde, le stock dort : les acquéreurs dont le projet n'a pas abouti, les vendeurs qui « attendaient de voir », les contacts d'estimation restés sans suite — personne n'a le temps de les rappeler, alors que ce sont les affaires les moins chères à conclure.",
+      },
+      {
+        h: "Ce que fait ANSWR dans une agence",
+        p: "Le moteur ANSWR rassemble les demandes entrantes — mail, WhatsApp — dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
+      },
+      {
+        h: "REVIVE : la base dormante d'une agence vaut de l'or",
+        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti — et qui n'ont jamais été recontactés. Le moteur REVIVE reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait — proprement.",
+      },
+      {
+        h: "Le matin, deux minutes pour tout voir",
+        p: "Chaque matin, le rapport BRIEF pose l'état de la veille : les demandes arrivées, celles qui attendent une décision, les reprises de contact parties. Il se lit en deux minutes avant la première visite. Et la règle de la maison s'applique ici comme partout : les messages types sont validés par vous avant la mise en route, et tout ce qui sort du cadre remonte à un humain au lieu de partir tout seul.",
+      },
+      {
+        p: "L'installation se fait sur les outils déjà en place — la boîte mail, le WhatsApp, le tableur de contacts — sans changer de logiciel ni de méthode de travail. Et elle commence par une mesure, pas par une promesse : l'audit gratuit compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un moteur, la recommandation est de ne rien installer.",
+      },
+    ],
+  },
+  {
     slug: "cheque-tic-financement",
     initials: "PF",
     author: "Pôle financement",
