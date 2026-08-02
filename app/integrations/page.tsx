@@ -43,7 +43,7 @@ import {
 export const metadata: Metadata = {
   title: "Intégrations — Omega",
   description:
-    "Les moteurs Omega se branchent sur les outils que vous avez déjà : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Ni compte à créer, ni migration, et vos données restent en local.",
+    "Les moteurs Omega se branchent sur les outils que vous avez déjà : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Ni compte à créer, ni migration — vos données vivent dans un espace dédié, chiffré, hébergé dans l'UE.",
 };
 
 type Marque = (typeof OUTILS)[number];
@@ -107,7 +107,8 @@ export default function Integrations() {
               Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité :
               les moteurs lisent et écrivent là où vous travaillez. Ni compte à
               créer, ni migration, ni logiciel à apprendre — et vos données
-              restent en local.
+              vivent dans un espace dédié, chiffré, hébergé dans l&apos;Union
+              européenne.
             </p>
             <div data-reveal className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/reserver-un-audit" className="o-btn o-btn--primary">

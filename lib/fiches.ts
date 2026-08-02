@@ -249,7 +249,7 @@ export const FICHES: Record<string, Fiche> = {
     fonctionnement: [
       "Vous transférez vos factures fournisseurs — PDF reçus par mail, scans, photos de tickets prises au comptoir — vers une adresse dédiée. OFFLOAD lit chaque pièce quel qu'en soit le format et en extrait les champs comptables : émetteur, date, montants HT, TVA et TTC, échéance, mode de règlement. La saisie manuelle et la ressaisie du dimanche soir disparaissent.",
       "Chaque extraction passe des contrôles au fil de l'eau : doublon d'une pièce déjà reçue, montant inhabituel pour ce fournisseur, taux de TVA incohérent. Ce qui est certain est classé automatiquement par fournisseur ; ce qui laisse un doute est marqué « à vérifier » et vous est signalé, jamais rangé en silence avec une erreur.",
-      "Tout est stocké dans une arborescence à votre nom, sur le Drive de votre entreprise — rien ne part sur un serveur tiers. À date fixe, le dossier du mois, propre et complet, part vers votre cabinet comptable dans le format qu'il préfère : il gagne du temps sans rien changer à ses méthodes.",
+      "Tout est stocké dans une arborescence à votre nom, sur le Drive de votre entreprise. À date fixe, le dossier du mois, propre et complet, part vers votre cabinet comptable dans le format qu'il préfère : il gagne du temps sans rien changer à ses méthodes.",
     ],
     points: [
       "Lecture de tous les formats : PDF natifs, scans, photos de tickets prises au comptoir",
@@ -286,7 +286,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         q: "Où sont stockées mes factures ?",
-        a: "Sur le Drive de votre entreprise, dans une arborescence à votre nom. Rien ne part sur un serveur tiers — conforme à notre principe d'hébergement local.",
+        a: "Sur le Drive de votre entreprise, dans une arborescence à votre nom. La lecture des pièces passe par votre espace dédié — chiffré, hébergé dans l'Union européenne — et rien n'est réutilisé à d'autres fins.",
       },
     ],
     demo: {

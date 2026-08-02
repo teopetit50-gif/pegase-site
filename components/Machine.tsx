@@ -17,10 +17,10 @@ const STACK: { name: string; className: string }[] = [
   { name: "ElevenLabs", className: "font-bold" },
 ];
 
-/* Section « L'infrastructure » (home, monde sombre) — la machine qui fait
-   tourner les moteurs, en vue éclatée. Incarne l'argument auto-hébergé /
-   local / RGPD du site ; copy repris de l'article rgpd-donnees-locales,
-   rien d'inventé. */
+/* Section « L'infrastructure » (home, monde sombre) — unité de calcul en
+   vue éclatée, en illustration. Porte le discours données v3 : espace dédié
+   par client, chiffré, hébergé dans l'UE, export et suppression sur demande ;
+   copy aligné sur l'article rgpd-donnees-locales, rien d'inventé. */
 export default function Machine() {
   return (
     <section className="border-b border-line-soft">
@@ -93,7 +93,7 @@ export default function Machine() {
           />
           <Image
             src="/machine-pegase.png"
-            alt="L'unité de calcul Omega en vue éclatée — processeur AMD, refroidissement et châssis"
+            alt="Vue éclatée d'une unité de calcul — processeur AMD, refroidissement et châssis"
             width={513}
             height={675}
             className="relative mx-auto w-full max-w-[380px] sm:max-w-[440px]"

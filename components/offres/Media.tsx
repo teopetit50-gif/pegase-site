@@ -557,7 +557,7 @@ export function MediaValidation() {
 export function MediaLocal() {
   return (
     <div className="flex flex-wrap gap-2.5">
-      {["Auto-hébergé", "RGPD", "Chiffré au repos", "Aucun cloud tiers", "Journal d'accès"].map(
+      {["Hébergé UE", "RGPD", "Chiffré au repos", "Export à tout moment", "Journal d'accès"].map(
         (b) => (
           <span
             key={b}

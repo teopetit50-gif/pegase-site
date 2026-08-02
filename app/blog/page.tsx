@@ -7,7 +7,7 @@ import { POSTS } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Blog — Omega",
   description:
-    "Conformité facture électronique, financement Chèque TIC, RGPD et données locales, impayés aux Antilles : les analyses du desk Omega pour les dirigeants de TPE.",
+    "Conformité facture électronique, financement Chèque TIC, RGPD et données clients, impayés aux Antilles : les analyses du desk Omega pour les dirigeants de TPE.",
 };
 
 /* ══════════════════════════════════════════════════════════════════════

@@ -73,7 +73,7 @@ export default function FeatureSection({
                 SOUS LE CAPOT
               </span>
               <div className="mt-4 text-[22px] font-bold leading-snug tracking-[-0.02em] text-[#0f1013] sm:text-[25px]">
-                Des modèles d&apos;IA sur votre propre machine
+                Les modèles d&apos;IA qui font tourner les moteurs
               </div>
               <Link
                 href="/offres"

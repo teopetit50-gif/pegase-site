@@ -451,7 +451,7 @@ export default function OffresPage() {
                 <MediaValidation />
               </CarteMise>
               <CarteMise
-                titre="Vos données restent chez vous"
+                titre="Vos données restent les vôtres"
                 texte="Un espace de données chiffré et séparé pour chaque client, et le strict nécessaire transmis aux modèles à chaque tâche."
               >
                 <MediaLocal />

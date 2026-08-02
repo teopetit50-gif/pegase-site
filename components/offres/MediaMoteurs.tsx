@@ -598,7 +598,7 @@ export function MaqJournal() {
 export function MaqLocal() {
   return (
     <div className="flex flex-wrap gap-2.5">
-      {["Auto-hébergé", "RGPD", "Chiffré au repos", "Aucun cloud tiers", "Journal d'accès", "Export à tout moment"].map(
+      {["Espace dédié par client", "Hébergé UE", "RGPD", "Chiffré au repos", "Export à tout moment", "Journal d'accès"].map(
         (b) => (
           <span
             key={b}
