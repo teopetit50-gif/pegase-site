@@ -206,6 +206,76 @@ export const POSTS: Post[] = [
     ],
   },
   {
+    slug: "garage-fichier-clients",
+    initials: "PM",
+    author: "Pôle métiers",
+    date: "3 août 2026",
+    cat: "Métier",
+    cover: "/photos/payd-comptoir.jpg",
+    title: "Garage : vos anciens clients sont votre meilleure publicité",
+    excerpt:
+      "Chaque véhicule passé à l'atelier reviendra — chez vous ou chez un autre. Comment un garage indépendant fait revenir ses clients à la bonne date, sans embaucher personne à l'accueil.",
+    body: [
+      {
+        p: "Un garage n'a pas un problème de clients : il en voit passer toute l'année. Son problème, c'est ce qui se passe après la restitution. Le véhicule repart, le dossier se ferme, et plus personne n'y pense — jusqu'à ce que le client revienne de lui-même, dans un an, ou n'importe quand, ou jamais. Pourtant la date de son prochain passage est presque écrite d'avance : une révision se refait à l'année, un contrôle technique a une échéance. Ce rendez-vous-là, quelqu'un le prendra. La seule question est de savoir avec qui.",
+      },
+      {
+        h: "Le fichier dort, l'atelier déborde",
+        p: "La plupart des garages ont ce fichier : des années de clients, avec la date du dernier passage et ce qui a été fait. Personne n'a le temps de l'exploiter — les journées se passent sous les ponts, pas au téléphone. Rappeler chaque client à l'approche de l'anniversaire de sa révision serait le travail le plus rentable de la semaine, et c'est précisément celui qui saute toujours.",
+      },
+      {
+        h: "Ce que fait REVIVE dans un garage",
+        p: "Le moteur REVIVE lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel — le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle — jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
+      },
+      {
+        h: "Pendant ce temps, l'accueil répond",
+        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. Le moteur ANSWR les reçoit dans une seule file, pose les bonnes questions — marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule — et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
+      },
+      {
+        h: "Et les factures d'atelier suivent le même chemin",
+        p: "Pour les clients professionnels et les flottes qui règlent à réception, le moteur PAYD relance aux bonnes dates avec des messages que le patron valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le rapport BRIEF pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
+      },
+      {
+        p: "Tout cela s'installe sur les outils déjà en place — le fichier existant, la boîte mail, le WhatsApp — sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un moteur, la recommandation est de ne rien installer.",
+      },
+    ],
+  },
+  {
+    slug: "btp-devis-jamais-relances",
+    initials: "PM",
+    author: "Pôle métiers",
+    date: "3 août 2026",
+    cat: "Métier",
+    cover: "/photos/offload.jpg",
+    title: "Artisan du bâtiment : les devis qu'on ne relance jamais",
+    excerpt:
+      "Des heures à chiffrer, puis plus rien : le devis part et le suivi s'arrête, parce que le chantier en cours passe d'abord. Ce qu'une relance organisée change pour une entreprise de travaux — sans y passer ses soirées.",
+    body: [
+      {
+        p: "Un devis de travaux coûte cher à produire : la visite, le métré, les prix fournisseurs, la mise en page — souvent une heure ou deux par proposition, prises le soir. Et puis il part, et il ne se passe plus rien. Le chantier en cours prend le dessus, la relance se fait « quand on y pense », c'est-à-dire tard, ou jamais. Le particulier, lui, a demandé trois devis : il signe fréquemment avec l'entreprise qui a rappelé la première, pas avec la moins chère.",
+      },
+      {
+        h: "Pourquoi le suivi saute toujours",
+        p: "Ce n'est pas de la négligence, c'est une question de journées : on ne relance pas un prospect à 19 heures en rentrant d'un chantier, et le lundi il y a plus urgent. Le suivi des devis est un travail de bureau régulier dans un métier qui n'a pas de bureau régulier. C'est exactement le genre de tâche qui se confie à un système.",
+      },
+      {
+        h: "Ce que fait PAYD sur les devis",
+        p: "Le moteur PAYD reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part — formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis le moteur s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier — chantier, intervention, acompte, situation — et le patron valide le ton une fois pour toutes.",
+      },
+      {
+        h: "Côté factures, la même discipline",
+        p: "Une fois le chantier livré, les factures suivent le même chemin : rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du patron. Le détail de ce circuit — et de ce qu'il change pour la trésorerie — est dans notre article consacré aux impayés en Guadeloupe.",
+      },
+      {
+        h: "Les demandes entrantes et la paperasse suivent",
+        p: "Le moteur ANSWR accueille les demandes de devis qui arrivent par mail et WhatsApp — nature des travaux, commune du chantier, délai, photos — et escalade immédiatement tout ce qui ressemble à une urgence. Le moteur OFFLOAD lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
+      },
+      {
+        p: "L'installation se fait sur les outils existants, sans changer de méthode de travail. Elle commence par une mesure, pas par une promesse : l'audit gratuit compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien — et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
+      },
+    ],
+  },
+  {
     slug: "immobilier-repondre-en-premier",
     initials: "PM",
     author: "Pôle métiers",
