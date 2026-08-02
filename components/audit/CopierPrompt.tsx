@@ -51,7 +51,7 @@ export default function CopierPrompt({ texte }: { texte: string }) {
     <button
       type="button"
       onClick={copier}
-      className="inline-flex items-center gap-2 rounded-lg border border-[#3f3f46] px-3.5 py-2 text-[13px] font-medium leading-[20px] text-[#e4e4e7] transition-colors hover:border-[#71717a] hover:text-white"
+      className="inline-flex items-center gap-2 rounded-lg border border-[#3f3f46] px-3.5 py-2 text-[13px] font-medium leading-[20px] text-[#e4e4e7] transition-[color,border-color,transform] duration-150 ease-out hover:border-[#71717a] hover:text-white active:scale-[0.97]"
       aria-live="polite"
     >
       {copie ? (

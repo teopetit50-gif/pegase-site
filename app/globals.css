@@ -1743,14 +1743,51 @@ button.rounded-full:active {
   grid-column: span 3 / span 3;
 }
 @media (max-width: 767px) {
-  /* en mobile la grille 6 colonnes devient : libellé pleine largeur, puis
-     les trois valeurs côte à côte, chacune coiffée du nom de sa formule */
+  /* en mobile le comparatif devient un VRAI tableau encadré (demande Teo,
+     02/08) : chaque famille est enveloppée d'un .r-tableau — cadre filet,
+     coins 12px, fond blanc — et chaque ligne se découpe en cellules
+     bordées : rangée de libellé pleine largeur sur fond gris (le gris des
+     têtes de carte), puis les trois valeurs séparées par des filets
+     verticaux. Le gap passe à 0 : dans un tableau, l'espace vit DANS les
+     cellules (padding), pas entre elles, sinon les filets flottent. */
+  .resa .r-tableau {
+    border: 1px solid var(--r-filet);
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+  }
   .resa .r-grille {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    gap: 0;
+    padding: 0;
+    align-items: stretch;
   }
+  /* dernière ligne : le cadre ferme le tableau, pas un filet doublé */
+  .resa .r-grille:last-child {
+    border-bottom: none;
+  }
+  /* la rangée de libellé s'inverse en gris foncé, titre blanc (le TSX
+     passe le texte en blanc sous md) : c'est elle qu'on lit d'abord.
+     Deux essais rejetés par Teo avant d'arriver là — l'or clair
+     (« jaune, années 2000 ») puis le noir #050505 (« trop noir ») :
+     ne pas y revenir. */
   .resa .r-grille-libelle {
     grid-column: span 3 / span 3;
+    background: var(--r-doux);
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--r-filet);
+  }
+  /* cellules de valeurs ; les 2e et 3e portent le filet vertical */
+  .resa .r-grille > div:not(.r-grille-libelle) {
+    padding: 10px 12px;
+  }
+  .resa .r-grille > div + div + div {
+    border-left: 1px solid var(--r-filet);
+  }
+  /* zébrage à peine posé : une rangée de valeurs sur deux en gris très
+     léger, pour guider l'œil d'une ligne à l'autre */
+  .resa .r-grille:nth-child(even) > div:not(.r-grille-libelle) {
+    background: #fafafa;
   }
 }
 
@@ -2132,4 +2169,315 @@ button.rounded-full:active {
 }
 .offres .b-rte > *:first-child {
   margin-top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Pré-audit /audit/[slug] — v2 « composants » (02/08/2026)
+
+   Patterns repérés sur 21st.dev (spotlight card, process timeline, reading
+   progress, sticky table of contents, bottom bar) puis RÉÉCRITS dans la
+   charte .resa — pas collés : toute brillance de surface est en gris satin
+   (règle cartes : jamais de couleur qui déborde), l'or ne vit que sur le
+   fil de la timeline, le liseré hover des cartes nuit et le .cta-shine.
+   Tout est préfixé .pa-*.
+
+   ⚠ .pa-lecture et .pa-cta-bar vivent HORS du wrapper .resa : son
+   clip-path (inset 0 -100vmax) rognerait un descendant position:fixed.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* — barre de lecture : fil noir 2 px au ras du haut, scaleX pilotée en JS — */
+.pa-lecture {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  background: #050505;
+  transform-origin: left;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+/* — barre CTA mobile : apparaît après le hero, disparaît dès md — */
+.pa-cta-bar {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 10px 10px 16px;
+  border-radius: 14px;
+  background: rgba(5, 5, 5, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transform: translateY(calc(100% + 24px));
+  transition: transform 0.34s var(--ease-out-strong);
+}
+.pa-cta-bar[data-visible="true"] {
+  transform: translateY(0);
+}
+.pa-cta-bar-btn {
+  flex: none;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #050505;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  transition: transform 160ms var(--ease-out-strong);
+}
+.pa-cta-bar-btn:active {
+  transform: scale(0.97);
+}
+@media (min-width: 768px) {
+  .pa-cta-bar {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pa-cta-bar {
+    transition: none;
+  }
+}
+
+/* — H1 : mots masqués qui montent, CSS pur (fonctionne sans JS) — */
+.resa .pa-mot {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* le masque suit la boîte de ligne, serrée à 1.14 : sans ce débord
+     compensé, les jambages de « Préparé pour » se font rogner */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.resa .pa-mot > span {
+  display: inline-block;
+  transform: translateY(112%);
+  animation: paMot 0.72s var(--ease-out-strong) forwards;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes paMot {
+  to {
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resa .pa-mot > span {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* — chips méta du hero — */
+.resa .pa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid var(--r-filet);
+  background: #ffffff;
+  font-size: 12.5px;
+  line-height: 1;
+  color: #3d3d3d;
+  white-space: nowrap;
+}
+.resa .pa-chip::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8a6519;
+}
+
+/* — sommaire sticky sous le header (64 px mobile / 72 px sm+) — */
+.resa .pa-som {
+  position: sticky;
+  top: 64px;
+  z-index: 40;
+  background: rgba(245, 245, 245, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--r-filet);
+}
+@media (min-width: 640px) {
+  .resa .pa-som {
+    top: 72px;
+  }
+}
+.resa .pa-som-rangee {
+  display: flex;
+  gap: 26px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.resa .pa-som-rangee::-webkit-scrollbar {
+  display: none;
+}
+.resa .pa-som-rangee a {
+  flex: none;
+  padding: 14px 0 12px;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-jbmono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #616161;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.resa .pa-som-rangee a[data-actif="true"] {
+  color: #050505;
+  border-bottom-color: #8a6519;
+}
+@media (hover: hover) and (pointer: fine) {
+  .resa .pa-som-rangee a:hover {
+    color: #050505;
+  }
+}
+
+/* les ancres s'arrêtent sous header + sommaire */
+.resa .pa-section {
+  scroll-margin-top: 126px;
+}
+
+/* — spotlight satin (Spotlight Card 21st.dev réécrite charte : brillance
+   intérieure gris satin, jamais couleur ; --sx/--sy posées en JS) — */
+.resa .pa-spot {
+  position: relative;
+}
+.resa .pa-spot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(122, 126, 136, 0.16),
+    transparent 65%
+  );
+}
+.resa .pa-spot--nuit::after {
+  background: radial-gradient(
+    300px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(255, 255, 255, 0.07),
+    transparent 65%
+  );
+}
+@media (hover: hover) and (pointer: fine) {
+  .resa .pa-spot:hover::after {
+    opacity: 1;
+  }
+}
+
+/* — carte remède sombre : filet or discret au survol — */
+.resa .pa-carte-nuit {
+  transition: border-color 0.25s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .resa .pa-carte-nuit:hover {
+    border-color: rgba(224, 179, 65, 0.38);
+  }
+}
+
+/* — console de prompt (feux macOS, corps mono) — */
+.resa .pa-console {
+  border-radius: 10px;
+  border: 1px solid #232327;
+  background: #0a0a0c;
+  overflow: hidden;
+}
+.resa .pa-console-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #1c1c20;
+}
+.resa .pa-feu {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* — flèche cerclée (pattern /solutions) : se remplit d'encre au survol — */
+.resa .pa-fleche {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #d9d9d9;
+  color: #050505;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease;
+}
+.resa .pa-fleche svg {
+  transition: transform 0.22s var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .resa a:hover .pa-fleche {
+    background: #050505;
+    border-color: #050505;
+    color: #ffffff;
+  }
+  .resa a:hover .pa-fleche svg {
+    transform: translateX(2px);
+  }
+}
+
+/* — timeline « la suite » : fil or qui se remplit au scroll (scaleY GSAP) — */
+.resa .pa-tl {
+  position: relative;
+  padding-left: 46px;
+}
+.resa .pa-tl-rail {
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--r-filet);
+  overflow: hidden;
+}
+.resa .pa-tl-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: top;
+  transform: scaleY(0);
+  background: linear-gradient(180deg, #e0b341, #8a6519);
+}
+.resa .pa-tl-item {
+  position: relative;
+}
+.resa .pa-tl-dot {
+  position: absolute;
+  left: -46px;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid var(--r-filet);
+}
+.resa .pa-tl-dot > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #050505;
 }
