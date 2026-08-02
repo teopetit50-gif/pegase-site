@@ -115,7 +115,12 @@ export type Formule = {
   suffixe: string;
   /* la sous-ligne grise, à la place du « facturé annuellement » */
   conditions: string;
-  promesse: string;
+  promesse?: string;
+  /* true = la promesse tient sa place — même hauteur de tête, même repli de
+     lignes — mais ne s'affiche pas (Teo, 02/08 : « la phrase disparaît,
+     l'espace reste »). La retirer du JSX changerait la hauteur mobile,
+     où la tête n'a pas de min-height. */
+  promesseFantome?: boolean;
   cta: string;
   souscta: string;
   phare?: boolean;
@@ -143,6 +148,7 @@ export const PROFILS: [Profil, Profil] = [
         conditions: "Gratuit, sans engagement",
         promesse:
           "Identifier la difficulté qui vous coûte le plus cher, et repartir avec un chiffre plutôt qu'une impression.",
+        promesseFantome: true,
         cta: "Réserver ce créneau",
         souscta: "Réponse le jour même sur WhatsApp",
         enteteListe: "L'entretien comprend :",
@@ -167,6 +173,7 @@ export const PROFILS: [Profil, Profil] = [
         conditions: "Gratuit, sans engagement",
         promesse:
           "Passer toute la chaîne en revue et chiffrer les trois postes — pas seulement celui qui se voit.",
+        promesseFantome: true,
         cta: "Réserver ce créneau",
         souscta: "Réponse le jour même sur WhatsApp",
         phare: true,
@@ -198,6 +205,7 @@ export const PROFILS: [Profil, Profil] = [
         conditions: "Sur devis — déduit de l'installation",
         promesse:
           "Observer le travail réel, avec vos fichiers et vos équipes sous les yeux plutôt que de le reconstituer.",
+        promesseFantome: true,
         cta: "Demander un devis",
         souscta: "Guadeloupe — déplacement inclus",
         enteteListe: "Tout l'Audit complet, plus :",
@@ -232,6 +240,7 @@ export const PROFILS: [Profil, Profil] = [
         conditions: "Gratuit, sans engagement",
         promesse:
           "Poser le périmètre : quels services, quels volumes, quelles contraintes de validation avant d'aller plus loin.",
+        promesseFantome: true,
         cta: "Réserver ce créneau",
         souscta: "Réponse le jour même sur WhatsApp",
         enteteListe: "L'entretien comprend :",
@@ -256,6 +265,7 @@ export const PROFILS: [Profil, Profil] = [
         conditions: "Gratuit, sans engagement",
         promesse:
           "Dérouler le processus bout en bout et chiffrer chaque rupture de chaîne, poste par poste.",
+        promesseFantome: true,
         cta: "Réserver ce créneau",
         souscta: "Réponse le jour même sur WhatsApp",
         phare: true,
@@ -288,6 +298,7 @@ export const PROFILS: [Profil, Profil] = [
         conditions: "Sur devis — déduit de l'installation",
         promesse:
           "Auditer le matin, former l'équipe l'après-midi : la validation des messages ne s'improvise pas.",
+        promesseFantome: true,
         cta: "Demander un devis",
         souscta: "Guadeloupe — déplacement inclus",
         enteteListe: "Tout l'Audit process, plus :",
@@ -364,23 +375,21 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
     ],
   },
+  /* Familles resserrées le 02/08 (Teo : « réduis ces deux parties ») : les
+     trois postes mesurés tiennent sur UNE ligne, et la recommandation, le
+     chiffrage et la maquette n'en font plus qu'une — l'ancien découpage
+     ligne par ligne reste lisible dans l'historique git si besoin. */
   {
     titre: "Ce que nous mesurons",
     lignes: [
       {
-        libelle: "Encours d'impayés",
-        aide: "Factures échues, devis restés sans réponse, retards moyens de paiement : la trésorerie immobilisée chez vos clients.",
-        valeurs: ["Estimé à l'oral", "Chiffré et écrit", "Chiffré sur vos fichiers"],
-      },
-      {
-        libelle: "Demandes clients perdues",
-        aide: "Appels manqués, messages sans réponse, sollicitations arrivées hors horaires : le chiffre d'affaires qui part ailleurs.",
-        valeurs: ["—", "Chiffré et écrit", "Chiffré, avec relevé d'appels"],
-      },
-      {
-        libelle: "Heures administratives",
-        aide: "Saisie comptable, classement de factures, relances manuelles : le temps de dirigeant consommé par des tâches automatisables.",
-        valeurs: ["Estimé à l'oral", "Chiffré et écrit", "Relevé sur poste"],
+        libelle: "Les trois postes",
+        aide: "Encours d'impayés, demandes clients perdues, heures administratives : ce que chaque poste vous coûte, en euros ou en heures par mois.",
+        valeurs: [
+          "Le plus coûteux, à l'oral",
+          "Chiffrés et écrits",
+          "Chiffrés sur vos fichiers",
+        ],
       },
       {
         libelle: "Cartographie des outils",
@@ -399,14 +408,13 @@ export const COMPARATIF: FamilleComparatif[] = [
     repliee: true,
     lignes: [
       {
-        libelle: "Recommandation",
-        aide: "Trois colonnes : le moteur à installer d'abord — celui qui a le meilleur retour —, le chantier à planifier ensuite, et ce qu'on déconseille d'automatiser.",
-        valeurs: ["Orale, en fin d'entretien", "Écrite, sous 72 h", "Écrite, avec maquette"],
-      },
-      {
-        libelle: "Chiffrage",
-        aide: "Un montant en euros ou en heures par mois, vérifiable dans vos propres documents.",
-        valeurs: ["—", "PDF de deux pages", "PDF détaillé par poste"],
+        libelle: "Recommandation et chiffrage",
+        aide: "Le moteur à installer d'abord, le chantier à planifier ensuite, ce qu'on déconseille d'automatiser — et le montant de chaque poste, vérifiable dans vos propres documents.",
+        valeurs: [
+          "Oraux, en fin d'entretien",
+          "Écrits, sous 72 h",
+          "PDF détaillé, avec maquette sur vos données",
+        ],
       },
       {
         libelle: "Devis du moteur",
@@ -421,11 +429,6 @@ export const COMPARATIF: FamilleComparatif[] = [
           "Dossier monté",
           "Dossier monté et instruction suivie",
         ],
-      },
-      {
-        libelle: "Maquette sur vos données",
-        aide: "Un moteur qui tourne sur vos vrais fichiers, en lecture seule, avant toute décision.",
-        valeurs: ["—", "—", "Comprise"],
       },
     ],
   },

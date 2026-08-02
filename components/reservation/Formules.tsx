@@ -57,7 +57,18 @@ function Carte({ f }: { f: Formule }) {
         </div>
         <div className="mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">{f.conditions}</div>
 
-        <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">{f.promesse}</p>
+        {/* promesseFantome : le texte occupe sa place — même hauteur de tête,
+            même repli de lignes — mais reste invisible (demande Teo 02/08) */}
+        {f.promesse ? (
+          <p
+            aria-hidden={f.promesseFantome || undefined}
+            className={`mt-4 text-[15px] leading-[22px] text-[#050505] ${
+              f.promesseFantome ? "invisible" : ""
+            }`}
+          >
+            {f.promesse}
+          </p>
+        ) : null}
       </div>
 
       <div className="flex flex-1 flex-col px-3 pt-4">
@@ -94,9 +105,11 @@ function Carte({ f }: { f: Formule }) {
 
 /* ——— une ligne du comparatif ———
    La grille fait six colonnes : le libellé en occupe trois, chaque formule
-   une. En dessous de 768 px la grille retombe à trois colonnes, le libellé
-   passe pleine largeur et chaque valeur est coiffée du nom de sa formule
-   (sinon on ne sait plus quelle colonne on lit). */
+   une. En dessous de 768 px la grille retombe à trois colonnes : le libellé
+   passe pleine largeur et les trois valeurs s'alignent dessous, sous
+   l'en-tête collant qui porte les noms des formules. Le texte d'aide reste
+   sur desktop : répété ligne après ligne avec les trois noms, c'est lui qui
+   transformait le comparatif mobile en mur de texte. */
 function Ligne({
   libelle,
   aide,
@@ -111,14 +124,18 @@ function Ligne({
   return (
     <div className="r-grille">
       <div className="r-grille-libelle">
-        <div className="text-[15px] font-semibold leading-[22px] text-[#050505]">{libelle}</div>
-        <p className="mt-1 max-w-[42ch] text-[13px] leading-[20px] text-[#616161]">{aide}</p>
+        <div className="text-[15px] font-semibold leading-[22px] text-white md:text-[#050505]">
+          {libelle}
+        </div>
+        <p className="mt-1 hidden max-w-[42ch] text-[13px] leading-[20px] text-[#616161] md:block">
+          {aide}
+        </p>
       </div>
       {valeurs.map((v, i) => (
-        <div key={noms[i]} className="text-[14px] leading-[20px] text-[#3d3d3d]">
-          <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161] md:hidden">
-            {noms[i]}
-          </div>
+        <div
+          key={noms[i]}
+          className="text-[13px] leading-[19px] text-[#3d3d3d] md:text-[14px] md:leading-[20px]"
+        >
           {v}
         </div>
       ))}
@@ -258,14 +275,38 @@ export default function Formules() {
             </div>
           </div>
 
+          {/* en-tête collant mobile : les trois noms coiffent les colonnes une
+              seule fois pour tout le tableau — même encadré, mêmes cellules et
+              mêmes gouttières que les tableaux .r-tableau qu'il surplombe,
+              sinon les colonnes ne tombent pas en face */}
+          <div className="sticky top-16 z-10 mt-8 bg-white pb-2 pt-3 sm:top-[72px] md:hidden">
+            <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-[#e3e3e3] bg-[#f5f5f5]">
+              {p.formules.map((f, i) => (
+                <div
+                  key={f.id}
+                  className={`px-3 py-2.5 ${i > 0 ? "border-l border-[#e3e3e3]" : ""}`}
+                >
+                  <div className="font-[family-name:var(--font-jakarta)] text-[14px] font-semibold leading-[19px] tracking-[-0.01em] text-[#050505]">
+                    {f.nom}
+                  </div>
+                  <div className="num mt-0.5 text-[12px] leading-[16px] text-[#616161]">
+                    {f.duree}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* familles toujours visibles */}
-          <div className="mt-8 md:mt-2">
+          <div className="md:mt-2">
             {visibles.map((fam) => (
               <div key={fam.titre}>
                 <h3 className="r-h4 pb-2 pt-10">{fam.titre}</h3>
-                {fam.lignes.map((l) => (
-                  <Ligne key={l.libelle} {...l} noms={noms} />
-                ))}
+                <div className="r-tableau">
+                  {fam.lignes.map((l) => (
+                    <Ligne key={l.libelle} {...l} noms={noms} />
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -283,9 +324,11 @@ export default function Formules() {
               {repliees.map((fam) => (
                 <div key={fam.titre}>
                   <h3 className="r-h4 pb-2 pt-10">{fam.titre}</h3>
-                  {fam.lignes.map((l) => (
-                    <Ligne key={l.libelle} {...l} noms={noms} />
-                  ))}
+                  <div className="r-tableau">
+                    {fam.lignes.map((l) => (
+                      <Ligne key={l.libelle} {...l} noms={noms} />
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
