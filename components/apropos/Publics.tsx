@@ -38,7 +38,7 @@ const ONGLET: Record<string, string> = {
 /* « PAYD — relance devis & factures » → « relance devis & factures » */
 const sansNom = (titre: string, nom: string) =>
   titre.startsWith(nom)
-    ? titre.slice(nom.length).replace(/^\s*[—–-]\s*/, "")
+    ? titre.slice(nom.length).replace(/^\s*[ : –-]\s*/, "")
     : titre;
 
 export default function Publics() {
@@ -73,7 +73,7 @@ export default function Publics() {
         className="mx-auto mt-6 max-w-2xl text-center text-[16px] leading-relaxed text-[#52555c] sm:text-[18px]"
       >
         Douze moteurs, répartis en trois familles. Aucun n&apos;est un logiciel
-        à adopter : chacun se branche sur les outils que vous utilisez déjà —
+        à adopter : chacun se branche sur les outils que vous utilisez déjà
         votre boîte mail, votre tableur, WhatsApp.
       </p>
 
@@ -160,7 +160,7 @@ export default function Publics() {
               <h3 className="mt-3 pr-12 text-[21px] font-semibold tracking-[-0.02em] text-[#0f1013] sm:text-[23px]">
                 {m.system}
                 <span className="font-medium text-[#52555c]">
-                  {" — "}
+                  {" : "}
                   {sansNom(m.title, m.system)}
                 </span>
               </h3>

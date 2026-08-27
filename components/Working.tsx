@@ -19,14 +19,14 @@ const DECLARATIONS: {
     fort: "Un audit de trente minutes.",
     suite: "Un diagnostic chiffré.",
     detail:
-      "Nous mesurons ce que votre difficulté principale vous coûte réellement — encours d'impayés, demandes restées sans réponse, heures de saisie — puis nous désignons le moteur au meilleur retour. Le chiffre est vérifiable dans vos propres documents, et il précède toujours le devis.",
+      "Nous mesurons ce que votre difficulté principale vous coûte réellement (encours d'impayés, demandes restées sans réponse, heures de saisie), puis nous désignons le moteur au meilleur retour. Le chiffre est vérifiable dans vos propres documents, et il précède toujours le devis.",
   },
   {
     n: "02",
     fort: "Un moteur à la fois.",
     suite: "Le plus rentable d'abord.",
     detail:
-      "Le premier moteur se branche sur vos outils existants — messagerie, tableur, WhatsApp — et son retour se lit dès les premières semaines. Le deuxième ne s'installe qu'une fois le premier rentable, jamais dans le même devis.",
+      "Le premier moteur se branche sur vos outils existants (messagerie, tableur, WhatsApp), et son retour se lit dès les premières semaines. Le deuxième ne s'installe qu'une fois le premier rentable, jamais dans le même devis.",
   },
   {
     n: "03",
@@ -40,7 +40,7 @@ const DECLARATIONS: {
     fort: "Le tarif découle du gain.",
     suite: "Jamais l'inverse.",
     detail:
-      "Le montant d'un moteur est posé en regard de ce qu'il récupère ou fait économiser sur un mois. Si le calcul ne tient pas, la recommandation est de ne rien installer — et cette conclusion arrive.",
+      "Le montant d'un moteur est posé en regard de ce qu'il récupère ou fait économiser sur un mois. Si le calcul ne tient pas, la recommandation est de ne rien installer, et cette conclusion arrive.",
   },
 ];
 
@@ -62,7 +62,7 @@ export default function Working() {
             </h2>
             <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[#52555c] sm:text-base">
               La méthode est la même pour un garage, un cabinet ou un
-              restaurant — et elle commence toujours par un chiffrage, jamais
+              restaurant, et elle commence toujours par un chiffrage, jamais
               par un devis.
             </p>
             <Link

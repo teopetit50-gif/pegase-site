@@ -62,7 +62,7 @@ export function lienReservation(formule: string) {
   if (WHATSAPP) {
     return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(corps)}`;
   }
-  const sujet = `Réserver un audit — ${formule}`;
+  const sujet = `Réserver un audit : ${formule}`;
   return `mailto:${COURRIEL}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
 }
 
@@ -138,7 +138,7 @@ export type Profil = {
 export const PROFILS: [Profil, Profil] = [
   {
     id: "tpe",
-    label: "Indépendant & TPE",
+    label: "Indépendant & petite entreprise",
     formules: [
       {
         id: "diagnostic",
@@ -154,8 +154,9 @@ export const PROFILS: [Profil, Profil] = [
         enteteListe: "L'entretien comprend :",
         points: [
           {
-            texte: "Revue du quotidien : facturation, demandes clients, administratif",
-            fort: "facturation, demandes clients, administratif",
+            texte:
+              "Revue du quotidien : facturation, demandes clients, présence en ligne, administratif",
+            fort: "facturation, demandes clients, présence en ligne",
           },
           { texte: "Chiffrage du poste le plus coûteux", fort: "poste le plus coûteux" },
           { texte: "Une recommandation orale, à chaud", fort: "recommandation orale" },
@@ -172,7 +173,7 @@ export const PROFILS: [Profil, Profil] = [
         suffixe: "en visio ou sur place",
         conditions: "Gratuit, sans engagement",
         promesse:
-          "Passer toute la chaîne en revue et chiffrer les trois postes — pas seulement celui qui se voit.",
+          "Passer toute la chaîne en revue et chiffrer les trois postes : pas seulement celui qui se voit.",
         promesseFantome: true,
         cta: "Réserver ce créneau",
         souscta: "Réponse le jour même sur WhatsApp",
@@ -187,10 +188,18 @@ export const PROFILS: [Profil, Profil] = [
             surligne: true,
           },
           {
-            texte: "Cartographie de vos outils actuels — mail, tableur, WhatsApp, caisse",
+            texte: "Cartographie de vos outils actuels, mail, tableur, WhatsApp, caisse",
             fort: "Cartographie de vos outils",
           },
-          { texte: "Devis du moteur recommandé, valable 30 jours", fort: "Devis" },
+          {
+            texte:
+              "État de votre présence en ligne : ce que vous captez, ce qui n'arrive jamais faute de site",
+            fort: "présence en ligne",
+          },
+          {
+            texte: "Devis du moteur recommandé et du modèle de site qui va avec, valables 30 jours",
+            fort: "Devis",
+          },
           {
             texte: "Dossier de financement Chèque TIC monté par nos soins",
             fort: "Chèque TIC",
@@ -199,15 +208,15 @@ export const PROFILS: [Profil, Profil] = [
       },
       {
         id: "site",
-        nom: "Audit sur site",
+        nom: "Audit dans vos locaux",
         duree: "½ journée",
         suffixe: "dans vos locaux",
-        conditions: "Sur devis — déduit de l'installation",
+        conditions: "Sur devis, déduit de l'installation",
         promesse:
           "Observer le travail réel, avec vos fichiers et vos équipes sous les yeux plutôt que de le reconstituer.",
         promesseFantome: true,
         cta: "Demander un devis",
-        souscta: "Guadeloupe — déplacement inclus",
+        souscta: "Dans vos locaux, déplacement inclus en Guadeloupe",
         enteteListe: "Tout l'Audit complet, plus :",
         points: [
           {
@@ -246,7 +255,8 @@ export const PROFILS: [Profil, Profil] = [
         enteteListe: "L'entretien comprend :",
         points: [
           {
-            texte: "Recensement des services concernés et de leurs volumes",
+            texte:
+              "Recensement des services concernés, de leurs volumes et des demandes entrantes",
             fort: "services concernés",
           },
           {
@@ -279,7 +289,7 @@ export const PROFILS: [Profil, Profil] = [
           },
           {
             texte:
-              "Entretiens individuels avec les personnes qui tiennent les outils — jamais en réunion de groupe",
+              "Entretiens individuels avec les personnes qui tiennent les outils : jamais en réunion de groupe",
             fort: "Entretiens individuels",
           },
           {
@@ -295,12 +305,12 @@ export const PROFILS: [Profil, Profil] = [
         nom: "Audit + atelier",
         duree: "1 journée",
         suffixe: "dans vos locaux",
-        conditions: "Sur devis — déduit de l'installation",
+        conditions: "Sur devis, déduit de l'installation",
         promesse:
           "Auditer le matin, former l'équipe l'après-midi : la validation des messages ne s'improvise pas.",
         promesseFantome: true,
         cta: "Demander un devis",
-        souscta: "Guadeloupe — déplacement inclus",
+        souscta: "Dans vos locaux, déplacement inclus en Guadeloupe",
         enteteListe: "Tout l'Audit process, plus :",
         points: [
           {
@@ -352,7 +362,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Qui participe",
-        aide: "Un audit se fait avec les personnes qui tiennent réellement les outils — pas seulement avec celle qui signe. En équipe, les entretiens sont individuels : c'est l'écart entre la vision de la direction et le quotidien réel qu'on mesure.",
+        aide: "Un audit se fait avec les personnes qui tiennent réellement les outils, pas seulement avec celle qui signe. En équipe, les entretiens sont individuels : c'est l'écart entre la vision de la direction et le quotidien réel qu'on mesure.",
         valeurs: [
           "Le dirigeant",
           "Dirigeant, et le comptable si utile",
@@ -375,41 +385,16 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
     ],
   },
-  /* Familles resserrées le 02/08 (Teo : « réduis ces deux parties ») : les
-     trois postes mesurés tiennent sur UNE ligne, et la recommandation, le
-     chiffrage et la maquette n'en font plus qu'une — l'ancien découpage
-     ligne par ligne reste lisible dans l'historique git si besoin. */
-  {
-    titre: "Ce que nous mesurons",
-    lignes: [
-      {
-        libelle: "Les trois postes",
-        aide: "Encours d'impayés, demandes clients perdues, heures administratives : ce que chaque poste vous coûte, en euros ou en heures par mois.",
-        valeurs: [
-          "Le plus coûteux, à l'oral",
-          "Chiffrés et écrits",
-          "Chiffrés sur vos fichiers",
-        ],
-      },
-      {
-        libelle: "Cartographie des outils",
-        aide: "Ce qui tourne déjà chez vous — mail, tableur, WhatsApp, logiciel de caisse — et ce qui se raccorde sans migration.",
-        valeurs: ["—", "Comprise", "Comprise, accès vérifiés"],
-      },
-      {
-        libelle: "Conformité facturation électronique",
-        aide: "L'échéance concerne toutes les entreprises. On regarde où vous en êtes ; Omega n'est pas une plateforme agréée et ne le prétend pas.",
-        valeurs: ["Point de situation", "Point de situation", "Plan de mise en conformité"],
-      },
-    ],
-  },
+  /* La famille « Ce que nous mesurons » a été resserrée puis SUPPRIMÉE le
+     02/08 à la demande de Teo ; « Ce que vous recevez » est resserrée à
+     3 lignes le même jour. Les anciens découpages restent dans git. */
   {
     titre: "Ce que vous recevez",
     repliee: true,
     lignes: [
       {
         libelle: "Recommandation et chiffrage",
-        aide: "Le moteur à installer d'abord, le chantier à planifier ensuite, ce qu'on déconseille d'automatiser — et le montant de chaque poste, vérifiable dans vos propres documents.",
+        aide: "Le moteur à installer d'abord, le chantier à planifier ensuite, ce qu'on déconseille d'automatiser, et le montant de chaque poste, vérifiable dans vos propres documents.",
         valeurs: [
           "Oraux, en fin d'entretien",
           "Écrits, sous 72 h",
@@ -423,7 +408,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Dossier Chèque TIC",
-        aide: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique selon le poste, jusqu'à 10 000 €, pour une TPE éligible.",
+        aide: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique selon le poste, jusqu'à 10 000 €, pour une entreprise éligible.",
         valeurs: [
           "Éligibilité vérifiée",
           "Dossier monté",
@@ -443,7 +428,11 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Point de suivi",
-        aide: "Trente jours après l'audit, on reprend les chiffres — ce qui a bougé, ce qui n'a pas bougé — et la cartographie est remise à jour avec.",
+        aide: "Trente jours après l'audit, on reprend les chiffres (ce qui a bougé, ce qui n'a pas bougé), et la cartographie est remise à jour avec.",
+        /* Le Diagnostic n'a pas de point de suivi : « — », le signe de
+           « non compris » posé en tête du comparatif. La cellule portait
+           « , » — une virgule seule, reste d'une valeur effacée. Elle
+           s'affichait telle quelle en production (repéré le 16/08). */
         valeurs: ["—", "À 30 jours, sur demande", "À 30 jours, compris"],
       },
       {
@@ -470,14 +459,14 @@ export const COMPLEMENTS: { titre: string; texte: string; conditions: string }[]
   {
     titre: "Atelier équipe",
     texte:
-      "Deux heures avec les personnes qui valideront les messages du moteur au quotidien. Rien ne part sans validation humaine chez Omega : encore faut-il que l'équipe sache corriger, suspendre et reprendre la main sans appeler à l'aide.",
-    conditions: "Sur devis — souvent éligible au Chèque TIC.",
+      "Deux heures avec les personnes qui valideront les messages du moteur au quotidien. Rien ne part sans validation humaine chez Omega.AI : encore faut-il que l'équipe sache corriger, suspendre et reprendre la main sans appeler à l'aide.",
+    conditions: "Sur devis, souvent éligible au Chèque TIC.",
   },
   {
     titre: "Cartographie approfondie",
     texte:
       "Un relevé complet de ce qui tourne déjà chez vous, jusqu'aux fichiers partagés et aux boîtes secondaires que personne ne mentionne spontanément. Utile quand plusieurs services se sont équipés chacun de leur côté depuis des années.",
-    conditions: "Comprise dès l'Audit sur site. Sur devis en complément d'un Diagnostic.",
+    conditions: "Comprise dès l'Audit dans vos locaux. Sur devis en complément d'un Diagnostic.",
   },
 ];
 
@@ -502,14 +491,14 @@ export const FAQ: { q: string; r: string[] }[] = [
     q: "Faut-il préparer des documents ?",
     r: [
       "Pour le Diagnostic, rien. On travaille à partir de ce que vous savez de tête, et c'est suffisant pour identifier le poste qui coûte le plus cher.",
-      "Pour l'Audit complet, vos trois derniers mois d'échéances rendent le chiffrage nettement plus précis — un export de logiciel de facturation ou un tableur suffit. Rien n'est à mettre en forme : on prend les fichiers dans l'état où ils sont.",
+      "Pour l'Audit complet, vos trois derniers mois d'échéances rendent le chiffrage nettement plus précis : un export de logiciel de facturation ou un tableur suffit. Rien n'est à mettre en forme : on prend les fichiers dans l'état où ils sont.",
     ],
   },
   {
-    q: "Rien n'est écrit chez moi, tout est dans ma tête — c'est bloquant ?",
+    q: "Rien n'est écrit chez moi, tout est dans ma tête, c'est bloquant ?",
     r: [
-      "Non — c'est le cas de la majorité des entreprises auditées : les décisions se prennent à l'oral, les habitudes vivent dans la mémoire des personnes. Ce n'est pas un obstacle à l'entretien : on vous fait raconter, c'est tout.",
-      "C'est même une partie du travail. La cartographie met votre fonctionnement à plat, noir sur blanc — et un moteur ne s'installe que sur un processus posé. À la fin de l'audit, le vôtre l'est, que vous installiez un moteur ou non.",
+      "Non : c'est le cas de la majorité des entreprises auditées : les décisions se prennent à l'oral, les habitudes vivent dans la mémoire des personnes. Ce n'est pas un obstacle à l'entretien : on vous fait raconter, c'est tout.",
+      "C'est même une partie du travail. La cartographie met votre fonctionnement à plat, noir sur blanc, et un moteur ne s'installe que sur un processus posé. À la fin de l'audit, le vôtre l'est, que vous installiez un moteur ou non.",
     ],
   },
   {
@@ -521,21 +510,36 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "Le Chèque TIC, c'est automatique ?",
     r: [
-      "Non. C'est un dispositif de la Région Guadeloupe qui finance de 40 à 80 % d'un projet numérique selon le poste, dans la limite de 10 000 €, pour une TPE immatriculée depuis au moins un an et à jour de ses obligations sociales et fiscales. Les critères et les enveloppes évoluent.",
+      "Non. C'est un dispositif de la Région Guadeloupe qui finance de 40 à 80 % d'un projet numérique selon le poste, dans la limite de 10 000 €, pour une entreprise immatriculée en Guadeloupe depuis au moins un an et à jour de ses obligations sociales et fiscales. Les critères et les enveloppes évoluent.",
       "Votre éligibilité est vérifiée pendant l'audit, avant tout engagement. Si vous n'êtes pas éligible, on vous le dit à ce moment-là plutôt qu'après signature.",
     ],
   },
   {
-    q: "Je suis hors Guadeloupe, est-ce que ça marche quand même ?",
+    /* 04/08 — ajoutée avec la page /modeles. C'est littéralement la
+       question de quelqu'un qui arrive de la galerie de sites : il vient
+       chercher une vitrine et tombe sur une page qui parle d'impayés. La
+       réponse dit oui, puis explique pourquoi on regarde d'abord ce qui se
+       passe APRÈS le clic — sans quoi on livre une vitrine qui dort. */
+    q: "Je veux surtout un site, vous faites ça ?",
     r: [
-      "Oui pour tous les formats à distance, dans l'ensemble de l'arc antillais. Les formats sur site sont réservés à la Guadeloupe : au-delà, le déplacement coûterait plus cher que ce qu'il apporte.",
+      /* Vingt et un, pas vingt-deux : AssetX est sorti du catalogue le
+         06/08 (voir components/modeles/donnees.ts). /modeles affichait bien
+         « 21 modèles », cette réponse était restée à l'ancien compte. */
+      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, on réécrit tout le contenu en français, à votre métier.",
+      "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps on lui répond, et ce que devient le devis. Un site qui reçoit trois demandes par semaine et n'en transforme aucune coûte plus cher qu'il ne rapporte : c'est cette partie-là qu'on chiffre d'abord, pour que la vitrine ne dorme pas.",
+    ],
+  },
+  {
+    q: "Vous intervenez partout en France ?",
+    r: [
+      "Oui pour tous les formats à distance, où que vous soyez. Les formats dans vos locaux sont réservés à la Guadeloupe, où nous sommes établis : au-delà, le déplacement coûterait plus cher que ce qu'il apporte.",
       "L'installation d'un moteur, elle, ne demande aucune présence permanente : le raccordement se fait sur vos outils existants.",
     ],
   },
   {
     q: "Et si l'audit conclut qu'il n'y a rien à automatiser ?",
     r: [
-      "Cela arrive, et c'est une conclusion valable. Un moteur ne se justifie que si la difficulté qu'il traite coûte plus cher que lui — quand ce n'est pas le cas, la recommandation est de ne rien installer.",
+      "Cela arrive, et c'est une conclusion valable. Un moteur ne se justifie que si la difficulté qu'il traite coûte plus cher que lui : quand ce n'est pas le cas, la recommandation est de ne rien installer.",
       "C'est précisément pour cette raison que l'audit chiffre avant de recommander, et jamais l'inverse.",
     ],
   },

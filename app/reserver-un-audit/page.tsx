@@ -4,10 +4,11 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Formules from "@/components/reservation/Formules";
 import Simulateur from "@/components/reservation/Simulateur";
+import Complements from "@/components/reservation/Complements";
+import Engagements from "@/components/reservation/Engagements";
 import {
   CANAL_LABEL_PHRASE,
   CANAL_VALEUR,
-  COMPLEMENTS,
   FAQ,
   lienContact,
   lienReservation,
@@ -40,26 +41,10 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "Réserver un audit — Omega",
+  title: "Réserver un audit | Omega.AI",
   description:
     "Trois formats d'audit pour mesurer ce que votre difficulté principale vous coûte : impayés, demandes perdues, heures de saisie. Gratuit à partir de 30 minutes, sans engagement, avec vérification de l'éligibilité au Chèque TIC.",
 };
-
-/* Les engagements tenus, à la place des témoignages de la référence. Ce
-   sont des phrases que Omega applique — pas des citations attribuées à
-   des clients qui n'existent pas. */
-const ENGAGEMENTS: { texte: string; sous: string }[] = [
-  {
-    texte:
-      "« Aucun audit ne se termine par une plaquette. Il se termine par un montant en euros ou en heures par mois, vérifiable dans vos propres documents. »",
-    sous: "Protocole d'audit — chiffrage",
-  },
-  {
-    texte:
-      "« Si le calcul ne justifie pas d'installer un moteur, la recommandation est de ne rien installer. C'est une conclusion valable, et elle arrive. »",
-    sous: "Protocole d'audit — recommandation",
-  },
-];
 
 /* Le déroulé en trois temps — même méthode quel que soit le format, seule
    la profondeur change. Écrit ici comme ENGAGEMENTS : du texte tenu, pas
@@ -71,19 +56,19 @@ const DEROULE: { etape: string; titre: string; texte: string }[] = [
     etape: "Étape 1",
     titre: "On écoute",
     texte:
-      "Pas de démo, pas de plaquette. Vous racontez votre journée telle qu'elle se passe : ce qui prend du temps, ce qui se perd, où vivent vos informations. En équipe, les entretiens sont individuels — en groupe, on se censure.",
+      "Pas de démo, pas de plaquette. Vous racontez votre journée telle qu'elle se passe : ce qui prend du temps, ce qui se perd, où vivent vos informations. En équipe, les entretiens sont individuels : en groupe, on se censure.",
   },
   {
     etape: "Étape 2",
     titre: "On met à plat",
     texte:
-      "Chaque flux est cartographié tel qu'il fonctionne vraiment : ce qui entre, ce qui se fait, ce qui sort — et où ça frotte. Ce qui vivait de tête est posé noir sur blanc, sur un document que tout le monde peut regarder et corriger.",
+      "Chaque flux est cartographié tel qu'il fonctionne vraiment : ce qui entre, ce qui se fait, ce qui sort, et où ça frotte. Ce qui vivait de tête est posé noir sur blanc, sur un document que tout le monde peut regarder et corriger.",
   },
   {
     etape: "Étape 3",
     titre: "On chiffre et on classe",
     texte:
-      "Chaque piste est posée sur deux axes : ce qu'elle rapporte, ce qu'elle demande. La recommandation commence par le meilleur retour — avec son indicateur de mesure — et dit aussi ce qu'il ne faut pas automatiser.",
+      "Chaque piste est posée sur deux axes : ce qu'elle rapporte, ce qu'elle demande. La recommandation commence par le meilleur retour, avec son indicateur de mesure, et dit aussi ce qu'il ne faut pas automatiser.",
   },
 ];
 
@@ -100,7 +85,7 @@ export default function ReserverUnAuditPage() {
         {/* ═══ 3bis — le déroulé, trois temps sur fond gris ═══ */}
         <section id="deroule" data-monde="clair" className="r-wrap py-14 sm:py-20">
           <p className="r-note">
-            Le même déroulé quel que soit le format — seule la profondeur change.
+            Le même déroulé quel que soit le format : seule la profondeur change.
           </p>
           <h2 className="r-h2 mt-6 max-w-[18ch]">Comment se passe l&apos;audit</h2>
 
@@ -132,23 +117,7 @@ export default function ReserverUnAuditPage() {
             </p>
             <h2 className="r-h2 mt-6 max-w-[18ch]">Compléter votre audit</h2>
 
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
-              {COMPLEMENTS.map((c) => (
-                <div
-                  key={c.titre}
-                  data-reveal
-                  className="flex h-full flex-col rounded-2xl border border-[#27272a] bg-[#141417] p-7 sm:p-9"
-                >
-                  <h3 className="r-h4">{c.titre}</h3>
-                  <p className="mt-4 flex-1 text-[15px] leading-[24px] text-[#d4d4d8]">
-                    {c.texte}
-                  </p>
-                  <div className="mt-7 text-[14px] leading-[22px] text-[#a1a1aa]">
-                    {c.conditions}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Complements />
           </div>
         </section>
 
@@ -159,22 +128,7 @@ export default function ReserverUnAuditPage() {
         <section id="engagements" data-monde="clair" className="r-blanc">
           <div className="r-wrap py-14 sm:py-20">
             <h2 className="r-h3 max-w-[20ch]">Ce qui est écrit noir sur blanc</h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
-              {ENGAGEMENTS.map((e) => (
-                <blockquote
-                  key={e.sous}
-                  data-reveal
-                  className="flex h-full flex-col rounded-2xl bg-[#f5f5f5] p-7 sm:p-9"
-                >
-                  <p className="font-[family-name:var(--font-jakarta)] text-[21px] font-medium leading-[31px] tracking-[-0.01em] text-[#050505] sm:text-[23px] sm:leading-[34px]">
-                    {e.texte}
-                  </p>
-                  <footer className="mt-6 text-[14px] leading-[22px] text-[#616161]">
-                    {e.sous}
-                  </footer>
-                </blockquote>
-              ))}
-            </div>
+            <Engagements />
           </div>
         </section>
 
@@ -186,7 +140,7 @@ export default function ReserverUnAuditPage() {
               Le bouton ouvre WhatsApp avec le message déjà rédigé : il ne vous
               reste qu&apos;à compléter votre activité, votre commune et la difficulté
               qui vous coûte le plus cher. On répond le jour même avec des
-              créneaux — et rien d&apos;autre.
+              créneaux, et rien d&apos;autre.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <a
@@ -197,7 +151,7 @@ export default function ReserverUnAuditPage() {
               </a>
             </div>
             <p className="r-note mt-5">
-              Ou directement — {CANAL_LABEL_PHRASE} :{" "}
+              Ou directement : {CANAL_LABEL_PHRASE} :{" "}
               <a
                 href={lienContact("Audit gratuit")}
                 className="underline underline-offset-4 hover:text-[#050505]"

@@ -25,7 +25,6 @@ import {
   siHubspot,
   siInstagram,
   siMailchimp,
-  siN8n,
   siNotion,
   siPaypal,
   siQuickbooks,
@@ -48,13 +47,19 @@ type Marque = { path: string; title: string; hex: string };
    Marques d'outils
    —————————————————————————————————————————————————————————— */
 
-/* Les 29 outils sur lesquels un moteur peut se brancher. L'ordre mélange
+/* Les 28 outils sur lesquels un moteur peut se brancher. L'ordre mélange
    volontairement les familles (messagerie, tableur, paiement, e-commerce)
-   pour que le bandeau ne donne pas l'impression d'une seule catégorie. */
+   pour que le bandeau ne donne pas l'impression d'une seule catégorie.
+
+   ⚠ 14/08/2026 — n8n est SORTI de cette liste. Ce bandeau montre les outils
+   du CLIENT, or n8n est notre socle d'automatisation : l'afficher revenait à
+   publier notre stack sur cinq pages (/offres/*, /offres/sur-mesure). Règle
+   posée par Teo : on ne nomme jamais l'outil qu'on utilise, on dit « nos
+   automatisations », « notre base de données ». Ne pas le remettre. */
 export const OUTILS: Marque[] = [
   siGmail, siGooglesheets, siWhatsapp, siGoogledrive, siStripe, siShopify,
   siNotion, siGooglecalendar, siTelegram, siQuickbooks, siWoocommerce, siAirtable,
-  siDropbox, siPaypal, siZapier, siN8n, siTrello, siHubspot,
+  siDropbox, siPaypal, siZapier, siTrello, siHubspot,
   siMailchimp, siCalendly, siTypeform, siAsana, siWordpress, siSage,
   siGoogleforms, siGooglemeet, siZoom, siFacebook, siInstagram,
 ];
@@ -75,8 +80,8 @@ export function Pastille({ marque }: { marque: Marque }) {
 export function GrilleOutils() {
   const rangees = [
     { items: OUTILS.slice(0, 10), inverse: false, lent: false },
-    { items: OUTILS.slice(10, 20), inverse: true, lent: true },
-    { items: OUTILS.slice(19, 29), inverse: false, lent: false },
+    { items: OUTILS.slice(10, 19), inverse: true, lent: true },
+    { items: OUTILS.slice(18, 28), inverse: false, lent: false },
   ];
   return (
     <div className="flex flex-col gap-5">
@@ -262,7 +267,7 @@ export function HeroPile() {
           </div>
           <p className="mt-2 text-[15px] leading-[1.7] text-[#71717a]">
             Défensifs, offensifs, sectoriels. On installe celui qui a le
-            meilleur retour chez vous — jamais les douze.
+            meilleur retour chez vous : jamais les douze.
           </p>
         </div>
       </Carte>
@@ -284,7 +289,7 @@ export function HeroPile() {
           </div>
           <div className="ml-auto max-w-[88%] rounded-[12px] rounded-tr-[4px] bg-[#18181b] px-3 py-2.5 text-[13px] leading-[1.6] text-white">
             Bonsoir ! Oui, de 8 h à 13 h. Il me reste deux créneaux samedi
-            prochain — je vous en réserve un ?
+            prochain : je vous en réserve un ?
           </div>
         </div>
       </Carte>
@@ -348,7 +353,7 @@ export function IllustrationOffload() {
         <div className="space-y-1.5">
           {[
             { f: "EDF_2026-07-04.pdf", m: "312,40 €" },
-            { f: "Sodexo-Antilles.pdf", m: "1 084,00 €" },
+            { f: "Sodexo-Restauration.pdf", m: "1 084,00 €" },
             { f: "Loyer-atelier.pdf", m: "950,00 €" },
           ].map((r) => (
             <div
@@ -464,21 +469,21 @@ const MESSAGES = [
     canal: "E-mail",
     teinte: "#18181b",
     texte:
-      "Bonjour Monsieur Lémard, votre facture FA-2418 est arrivée à échéance vendredi. Je vous remets le lien de paiement — dites-moi si un échelonnement vous arrange.",
+      "Bonjour Monsieur Lémard, votre facture FA-2418 est arrivée à échéance vendredi. Je vous remets le lien de paiement : dites-moi si un échelonnement vous arrange.",
   },
   {
     moteur: "ANSWR",
     canal: "WhatsApp",
     teinte: "#25d366",
     texte:
-      "Bonsoir ! Oui, nous sommes ouverts samedi de 8 h à 13 h. Il me reste deux créneaux — je vous en réserve un à votre nom ?",
+      "Bonsoir ! Oui, nous sommes ouverts samedi de 8 h à 13 h. Il me reste deux créneaux : je vous en réserve un à votre nom ?",
   },
   {
     moteur: "REVIVE",
     canal: "E-mail",
     teinte: "#7c3aed",
     texte:
-      "Bonjour Madame Nadeau, cela fait huit mois depuis votre dernière commande. Nous avons rentré la finition que vous cherchiez — je vous mets de côté un échantillon ?",
+      "Bonjour Madame Nadeau, cela fait huit mois depuis votre dernière commande. Nous avons rentré la finition que vous cherchiez : je vous mets de côté un échantillon ?",
   },
   {
     moteur: "BRIEF",
@@ -492,7 +497,7 @@ const MESSAGES = [
     canal: "E-mail",
     teinte: "#f59e0b",
     texte:
-      "Bonjour, je vois que vous équipez les cuisines professionnelles sur Grande-Terre. Nous fournissons la pièce détachée en 48 h depuis Jarry — cela vous intéresse d'en parler ?",
+      "Bonjour, je vois que vous équipez les cuisines professionnelles sur Grande-Terre. Nous fournissons la pièce détachée en 48 h depuis Jarry : cela vous intéresse d'en parler ?",
   },
 ];
 
@@ -541,7 +546,7 @@ export function MaqValidation() {
   return (
     <Carte className="w-full">
       <div className="border-b border-black/[0.06] bg-[#fbfbfb] px-4 py-2.5 text-[11.5px] font-semibold text-[#52525b]">
-        File de validation — 3 messages en attente
+        File de validation : 3 messages en attente
       </div>
       <div className="space-y-1.5 px-4 py-3.5">
         {[
@@ -569,7 +574,7 @@ export function MaqJournal() {
     <Carte className="w-full">
       <div className="px-4 py-4">
         <div className="mb-3 text-[11.5px] font-semibold text-[#52525b]">
-          Journal — tout ce qui est parti
+          Journal : tout ce qui est parti
         </div>
         <div className="space-y-2">
           {[
@@ -642,7 +647,7 @@ export function MaqEtapes() {
   return (
     <div className="space-y-2.5">
       {[
-        { n: "01", t: "Audit — 30 min", d: "Votre problème n°1, chiffré." },
+        { n: "01", t: "Audit, 30 min", d: "Votre problème n°1, chiffré." },
         { n: "02", t: "Raccordement", d: "Une demi-journée sur vos outils." },
         { n: "03", t: "Cycle supervisé", d: "Vous validez, on cale les réglages." },
       ].map((e) => (
@@ -669,7 +674,7 @@ export function MaqCheque() {
       <div className="px-4 py-4">
         <div className="flex items-baseline justify-between">
           <span className="text-[11.5px] font-semibold text-[#52525b]">Chèque TIC</span>
-          <span className="text-[11.5px] text-[#a1a1aa]">TPE Guadeloupe</span>
+          <span className="text-[11.5px] text-[#a1a1aa]">Petite entreprise</span>
         </div>
         <div
           className="mt-2 text-[30px] font-semibold tracking-[-0.03em] text-[#09090b]"
@@ -687,5 +692,64 @@ export function MaqCheque() {
         </p>
       </div>
     </Carte>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EMBLÈME EUROPÉEN — 05/08/2026, pour la section « hébergement » de la home
+
+   Tracé aux proportions officielles publiées par l'Union : rectangle 3:2
+   bleu #003399, douze étoiles or #FFCC00 posées sur un cercle dont le rayon
+   vaut le tiers de la hauteur, chacune inscrite dans un cercle d'un
+   dix-huitième de la hauteur, toutes pointe en haut — jamais inclinées, et
+   jamais autrement que douze, le nombre ne suit pas celui des États membres.
+
+   Les douze positions sont CALCULÉES — douze pas de trente degrés depuis
+   midi — plutôt que relevées à la main : c'est déterministe, donc le serveur
+   et le navigateur rendent exactement le même balisage et l'hydratation ne
+   proteste pas. Les coordonnées sont arrondies au millième pour éviter qu'un
+   flottant à quinze décimales ne diffère d'un moteur JavaScript à l'autre.
+
+   L'emblème n'est jamais redessiné ni recoloré ici : il sert d'indication
+   géographique et réglementaire à côté d'une mention de lieu, il ne prétend
+   à aucune approbation d'une institution européenne.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* une étoile à cinq branches, pointe en haut, centrée sur l'origine.
+   Rayon extérieur = 40/18 (un dix-huitième de la hauteur du drapeau),
+   rayon intérieur = extérieur × sin(18°)/sin(126°), la seule valeur qui
+   donne des branches droites plutôt que creusées. */
+const ETOILE_UE =
+  "M0 -2.222L0.499 -0.687L2.113 -0.687L0.807 0.262L1.306 1.798" +
+  "L0 0.849L-1.306 1.798L-0.807 0.262L-2.113 -0.687L-0.499 -0.687Z";
+
+export function EmblemeEurope({ taille = 104 }: { taille?: number }) {
+  const rayon = 40 / 3;
+  const etoiles = Array.from({ length: 12 }, (_, k) => {
+    const angle = (k * Math.PI) / 6;
+    return {
+      x: Number((30 + rayon * Math.sin(angle)).toFixed(3)),
+      y: Number((20 - rayon * Math.cos(angle)).toFixed(3)),
+    };
+  });
+  return (
+    <svg
+      viewBox="0 0 60 40"
+      width={taille}
+      height={(taille * 2) / 3}
+      role="img"
+      aria-label="Union européenne"
+    >
+      <rect width="60" height="40" fill="#003399" />
+      <g fill="#FFCC00">
+        {etoiles.map((e) => (
+          <path
+            key={`${e.x}:${e.y}`}
+            d={ETOILE_UE}
+            transform={`translate(${e.x} ${e.y})`}
+          />
+        ))}
+      </g>
+    </svg>
   );
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
@@ -20,6 +19,7 @@ import {
   MediaPayd,
   MediaValidation,
 } from "@/components/offres/Media";
+import { SystemMarque } from "@/components/logos";
 
 /* ══════════════════════════════════════════════════════════════════════
    /offres — « Nos offres » (25/07/2026)
@@ -41,111 +41,112 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "Nos offres — Omega",
+  title: "Nos offres | Omega.AI",
   description:
-    "Un moteur par corvée : relance d'impayés, réponses clients 24/7, factures fournisseurs classées. Installés sur vos outils actuels — mail, tableur, WhatsApp — sous votre validation.",
+    "Un poste par corvée : relance d'impayés, clients dormants, réponses clients 24/7, factures fournisseurs classées. Installés sur vos outils actuels (mail, tableur, WhatsApp), sous votre validation.",
 };
 
 /* ——— rangée des quatre arguments, sous le hero ——— */
+/* 07/08 (Teo) — les quatre arguments sont réécrits, textes fournis tels quels.
+   Deux jeux de titres étaient proposés : les intitulés développés retenus ici
+   et une variante en un mot (INTÉGRATION / CONTRÔLE / SÉCURITÉ / FINANCEMENT).
+   Les développés l'emportent parce qu'ils disent de quoi il s'agit sans
+   dépendre du texte dessous, et qu'ils tiennent tous sur une ou deux lignes
+   dans la colonne centrée. Pour basculer sur la variante courte, il suffit de
+   remplacer les quatre `titre`.
+
+   Le texte fourni pour le bloc financement ne mentionnait plus la Région.
+   L'incise a été remise (arbitrage Teo du 07/08) : le Chèque TIC est un
+   dispositif régional guadeloupéen, et sans elle cette page — qui s'adresse
+   à toute la France — laissait croire à une aide ouverte à tous. */
 const ARGUMENTS = [
   {
     icone: <IconePrise />,
-    titre: "Sur vos outils",
+    titre: "Intégration à votre environnement",
     texte:
-      "Mail, tableur, WhatsApp : le moteur lit et écrit là où vous travaillez déjà. Ni CRM à acheter, ni colonne à renommer.",
+      "Nos systèmes s'intègrent à vos outils existants (messagerie, tableaux de suivi et canaux de communication) sans imposer de changement d'organisation.",
   },
   {
     icone: <IconeValidation />,
-    titre: "Rien ne part sans vous",
+    titre: "Contrôle humain",
     texte:
-      "Chaque message s'approuve, se corrige ou se suspend d'un clic — aussi longtemps que vous le voulez.",
+      "Vous conservez la validation des actions sensibles. Les règles de fonctionnement, les niveaux d'autonomie et les validations sont définis avec vous.",
   },
   {
     icone: <IconeCoffre />,
-    titre: "Données cloisonnées",
+    titre: "Sécurité des données",
     texte:
-      "Un espace chiffré par client, hébergé dans l'Union européenne — jamais mélangées, jamais revendues. Le strict nécessaire aux modèles.",
+      "Les environnements clients sont cloisonnés et les données protégées par des mécanismes de chiffrement et de contrôle d'accès adaptés.",
   },
   {
     icone: <IconeAide />,
-    titre: "Chèque TIC",
+    titre: "Financement éligible",
+    /* « de la Région Guadeloupe » et « qui y sont immatriculées » sont remis
+       (Teo, 07/08) : sans eux, un lecteur hexagonal se croit éligible à une
+       aide qui ne le concerne pas. Seule cette incise est ajoutée au texte
+       fourni, le reste est intact. */
     texte:
-      "Jusqu'à 10 000 € financés par la Région pour les TPE éligibles, selon le poste. Vérifié pendant l'audit.",
+      "Selon votre situation et la nature du projet, une partie de l'investissement peut être prise en charge dans le cadre du Chèque TIC, le dispositif de la Région Guadeloupe ouvert aux entreprises qui y sont immatriculées. L'éligibilité est vérifiée en amont.",
   },
 ];
 
-/* ——— les trois cartes photo de la bande noire ———
-   `pos` : object-position, posé seulement quand le cadrage par défaut (centre)
-   coupe le sujet — une photo portrait dans un cadre 560×450, typiquement. */
+/* ——— les trois cartes de la bande noire ———
+   05/08/2026 (Teo) — les PHOTOS cèdent la place aux LOGOS DE PAQUETS. Chaque
+   carte porte désormais la marque de l'offre vers laquelle elle mène, en grand,
+   au lieu d'une scène d'illustration.
+
+   Pourquoi le logo est posé en BLANC sur fond sombre et non l'inverse : le titre
+   et le lien de ces cartes sont blancs, calés sur le voile `.o-photo::after`.
+   Un fond clair aurait obligé à réencrer titre, lien et pastille — trois
+   régressions de contraste pour un gain nul. Les masques alpha se colorent en
+   CSS, donc le blanc ne coûte aucun fichier supplémentaire.
+
+   Et c'est le `mark` (icône seule) qui est affiché, pas le lockup : le nom du
+   paquet est déjà écrit juste en dessous, dans « Voir CASHD ».
+
+   Les photos (`/photos/payd-comptoir.jpg`, `answr-carte.jpg`, `offload.jpg`)
+   restent au dépôt — ServiceDetail les sert encore. */
 const SCENES: {
-  photo: string;
-  alt: string;
-  pos?: string;
+  system: string;
   etiquette: string;
   titre: string;
   lien: string;
   href: string;
 }[] = [
   {
-    /* 31/07 (Teo) — payd-card.jpg (carte bancaire noire tenue en main sur
-       fond sombre) se confondait avec la bande noire de la section : « image
-       noire avec fond noir ». Remplacée par une scène claire — un client
-       règle au comptoir d'une boulangerie-café, employée face caméra, grande
-       baie vitrée — qui se détache du noir et dit « l'argent rentre ».
-       payd-card.jpg reste servie par ServiceDetail (onglet PAYD), intouchée.
-       Ratio 1600×1200 = 1,333 pour un cadre 1,244 : cover ne rogne que ~7 %
-       en largeur, pas de `pos` nécessaire, le sujet est centré. */
-    photo: "/photos/payd-comptoir.jpg",
-    alt: "Client réglant au comptoir d'une boulangerie-café, l'employée encaisse",
+    system: "CASHD",
     etiquette: "Trésorerie",
     titre: "Vos factures cessent de dormir.",
-    lien: "Voir PAYD",
-    href: "/offres/payd",
+    lien: "Voir CASHD",
+    href: "/offres/relances-impayes",
   },
   {
-    /* 26/07 (Teo) — answr-phone.jpg montrait un iPhone à l'écran VIERGE sur
-       fond gris : la scène disait « un téléphone », pas « ANSWR répond ». La
-       maquette de conversation montre le moteur en train de tenir l'échange,
-       jusqu'à la prise de rendez-vous.
-
-       29/07 (Teo, « la photo est trop grosse ») — answr-conversation.jpg est
-       la seule image PORTRAIT du lot (941×1672, ratio 0,563) dans un cadre
-       .o-photo paysage (560×450, ratio 1,244). En object-fit: cover elle était
-       donc agrandie à 995 px de haut pour 450 visibles : 55 % hors champ, et
-       un téléphone démesuré. Les deux autres scènes, en 1,5, ne perdent que
-       18 % en largeur — d'où l'écart criant entre les trois cartes.
-
-       answr-carte.jpg est la même maquette RECOMPOSÉE au ratio du cadre :
-       l'îlot propre du sujet (téléphone + doigts, isolé sur blanc pur de
-       y=172 à y=1350) est posé à 82 % de la hauteur et ancré en bas — sa
-       coupe tombe pile sur le bord, donc invisible. À 82 %, le haut du
-       téléphone descend à 18 % du cadre : la pastille « 24 h/24 » du coin
-       supérieur droit reste sur le blanc au lieu de mordre sur l'écran.
-       Le ratio étant désormais exact, `cover` ne recadre plus rien et `pos`
-       n'a plus d'objet. Le master portrait reste au dépôt.
-
-       29/07 (Teo, « c'est pas centrée ») — le sujet était volontairement
-       décalé à droite pour dégager le fond sous le titre. Il est désormais
-       au centre exact (394 px de marge à gauche, 393 à droite). Le sujet
-       étant ancré en bas, le titre passe donc sur le bas du téléphone : le
-       contraste a été remesuré voile compris et tient l'AA. */
-    photo: "/photos/answr-carte.jpg",
-    alt: "Conversation ANSWR sur un téléphone tenu à deux mains : demande de devis, créneau proposé, rendez-vous confirmé",
+    system: "FRONTD",
     etiquette: "24 h/24",
     titre: "Vos clients ont une réponse la nuit.",
-    lien: "Voir ANSWR",
-    href: "/offres/answr",
+    lien: "Voir FRONTD",
+    href: "/offres/demandes-clients",
   },
   {
-    /* offload-chip.jpg (gros plan de processeur) illustrait le mot « chip »,
-       pas la comptabilité. offload.jpg — une personne qui dépouille des
-       papiers — dit la corvée que le moteur enlève. */
-    photo: "/photos/offload.jpg",
-    alt: "Personne attablée qui dépouille des papiers",
+    system: "FILED",
     etiquette: "Comptabilité",
     titre: "Votre compta arrête d'avoir un mois de retard.",
-    lien: "Voir OFFLOAD",
-    href: "/offres/offload",
+    lien: "Voir FILED",
+    href: "/offres/factures-fournisseurs",
+  },
+  /* 07/08/2026 (Teo) — quatrième carte. Les trois premières nomment un paquet
+     du catalogue ; celle-ci dit l'inverse — que le catalogue n'est pas une
+     limite. Elle ferme donc la colonne, après les cas concrets, et pas avant :
+     proposer le sur-mesure d'entrée ferait passer les paquets pour un
+     rabais. Sa cible est /offres/sur-mesure, une route statique qui rend le
+     même gabarit que CASHD sans passer par [system] — voir le commentaire en
+     tête de ce fichier-là. */
+  {
+    system: "SUR MESURE",
+    etiquette: "Sur mesure",
+    titre: "Et si votre besoin n'entre dans aucune case.",
+    lien: "Voir le sur-mesure",
+    href: "/offres/sur-mesure",
   },
 ];
 
@@ -268,12 +269,13 @@ export default function OffresPage() {
                 <span className="o-pill o-pill--xs">Nos offres</span>
               </div>
               <h1 data-reveal className="o-h1 mt-4 max-w-[700px]">
-                Un moteur par tâche qui vous coûte cher.
+                Commencez par le processus qui a le plus d&apos;impact.
               </h1>
               <p data-reveal className="o-lead mt-[15px] max-w-[650px]">
-                Douze moteurs au catalogue, un seul installé à la fois : celui
-                dont l&apos;audit démontre qu&apos;il rapporte le plus chez
-                vous. Sur vos outils actuels, sans migration.
+                Nous identifions avec vous le poste où l&apos;automatisation
+                crée le plus de valeur, puis nous le déployons directement dans
+                votre environnement existant. Une approche progressive,
+                mesurable et sans migration inutile.
               </p>
               <div data-reveal className="mt-[25px] flex flex-wrap items-center justify-center gap-3">
                 <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
@@ -314,33 +316,33 @@ export default function OffresPage() {
         {/* ════════ LES MOTEURS — bento 2×2 ════════ */}
         <section id="moteurs" data-monde="clair" className="o-wrap scroll-mt-24 pb-[120px]">
           <EnTete
-            pastille="Moteurs"
+            pastille="Ce qui s'installe"
             titre="Chacun fait un seul travail."
-            chapo="Un moteur ne fait pas tout : il prend une tâche, la traite en continu sur vos outils, et s'arrête sur votre validation. Trois exemples, puis le catalogue."
+            chapo="Aucun ne fait tout : chacun prend une corvée, la traite en continu sur vos outils, et s'arrête sur votre validation. Trois exemples, puis les autres."
           />
 
           <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-2">
             <CarteBento
-              titre="PAYD — impayés"
+              titre="CASHD · impayés"
               texte="Devis sans réponse relancés à J+3 et J+7, factures échues à J+7 et J+21."
             >
               <MediaPayd />
             </CarteBento>
             <CarteBento
-              titre="ANSWR — demandes clients"
+              titre="FRONTD · demandes clients"
               texte="Une demande reçue à 21 h obtient sa réponse à 21 h."
             >
               <MediaAnswr />
             </CarteBento>
             <CarteBento
-              titre="OFFLOAD — comptabilité"
+              titre="FILED · la paperasse"
               texte="Factures fournisseurs lues, classées par fournisseur, transmises au cabinet à date fixe."
             >
               <MediaOffload />
             </CarteBento>
             <CarteBento
-              titre="9 autres moteurs"
-              texte="Du moteur défensif au produit sectoriel. Chaque nom ouvre sa fiche détaillée."
+              titre="Les six d'un coup d'œil"
+              texte="Quatre qui s'installent, deux qui viennent avec : RELOAD ramène du chiffre, PULSE donne le point du matin, VAULT garantit que rien ne part sans vous."
               serre
             >
               <MediaCatalogue />
@@ -361,8 +363,8 @@ export default function OffresPage() {
               </h2>
               <p data-reveal className="o-body mt-5 !text-white/60">
                 Pas de CRM à acheter, pas de migration, pas de compte à créer.
-                Le moteur lit vos données là où elles sont — votre tableur,
-                votre messagerie — et écrit là où vous travaillez déjà. Le
+                Le moteur lit vos données là où elles sont : votre tableur,
+                votre messagerie, et écrit là où vous travaillez déjà. Le
                 raccordement type prend une demi-journée.
               </p>
               <div data-reveal className="mt-5">
@@ -384,27 +386,32 @@ export default function OffresPage() {
                   <div className="o-h2 !text-white">10 000 €</div>
                   <p className="o-body mt-2 !text-white/60">
                     Le plafond de financement Chèque TIC pour les
-                    TPE guadeloupéennes éligibles. Vérifié pendant l&apos;audit.
+                    entreprises guadeloupéennes éligibles. Vérifié pendant l&apos;audit.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* colonne scènes — trois cartes 560×450, 60 px d'écart */}
-            <div className="flex w-full flex-col gap-[60px] lg:w-[560px] lg:shrink-0">
+            {/* colonne scènes — 07/08 (Teo, « elles prennent trop de place ») :
+                les cartes passent de 560×450 à 560×260 et l'écart de 60 à 28 px.
+                Le cadre était aux deux tiers vide — le signe occupait le haut,
+                le titre le bas, et un grand blanc mort entre les deux. En 260
+                de haut les deux se rejoignent sans se toucher, et la colonne
+                gagne près de 900 px sur quatre cartes, ce qui compte d'autant
+                plus qu'une quatrième vient d'être ajoutée. */}
+            <div className="flex w-full flex-col gap-7 lg:w-[560px] lg:shrink-0">
               {SCENES.map((s) => (
-                <Link key={s.href} href={s.href} data-reveal className="o-photo block">
-                  <Image
-                    src={s.photo}
-                    alt={s.alt}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 560px"
-                    style={s.pos ? { objectPosition: s.pos } : undefined}
-                  />
-                  <span className="o-pill o-pill--xs o-pill--verre absolute right-[30px] top-[30px] z-10">
+                <Link
+                  key={s.href}
+                  href={s.href}
+                  data-reveal
+                  className="o-photo o-photo--marque"
+                >
+                  <SystemMarque system={s.system} />
+                  <span className="o-pill o-pill--xs o-pill--verre o-marque-etiquette">
                     {s.etiquette}
                   </span>
-                  <div className="absolute inset-x-[30px] bottom-[30px] z-10">
+                  <div className="o-marque-texte">
                     <div className="o-h4 !text-white">{s.titre}</div>
                     <span className="o-link o-link--light mt-5">
                       {s.lien}
@@ -422,7 +429,7 @@ export default function OffresPage() {
           <EnTete
             pastille="Mise en place"
             titre="Rien ne démarre sans vous."
-            chapo="De l'audit au premier moteur en production, chaque jalon se valide avant le suivant — et vous n'aurez changé aucun outil en chemin."
+            chapo="De l'audit au premier moteur en production, chaque jalon se valide avant le suivant, et vous n'aurez changé aucun outil en chemin."
           />
 
           {/* deux colonnes de hauteurs différentes : c'est ce décalage qui

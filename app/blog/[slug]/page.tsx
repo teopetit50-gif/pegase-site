@@ -44,8 +44,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = POSTS.find((p) => p.slug === slug);
-  if (!post) return { title: "Article — Omega" };
-  return { title: `${post.title} — Omega`, description: post.excerpt };
+  if (!post) return { title: "Article | Omega.AI" };
+  return { title: `${post.title} | Omega.AI`, description: post.excerpt };
 }
 
 /* pictos de partage — traits simples, 16 px dans un cercle 44 */

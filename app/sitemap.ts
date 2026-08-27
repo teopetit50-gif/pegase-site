@@ -20,14 +20,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const fixes: { url: string; priorite: number; frequence: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
     { url: "/", priorite: 1, frequence: "weekly" },
     { url: "/offres", priorite: 0.9, frequence: "weekly" },
+    { url: "/modeles", priorite: 0.9, frequence: "monthly" },
+    { url: "/tarifs", priorite: 0.9, frequence: "monthly" },
     { url: "/reserver-un-audit", priorite: 0.9, frequence: "monthly" },
     { url: "/integrations", priorite: 0.8, frequence: "monthly" },
+    /* 07/08 — « Où vont vos données ». Priorité haute pour une page qui ne
+       vend rien : c'est celle qu'on cherche avant de signer, et elle répond
+       à une question à laquelle aucune autre page du site ne répond. */
+    { url: "/vos-donnees", priorite: 0.8, frequence: "monthly" },
     { url: "/blog", priorite: 0.7, frequence: "weekly" },
     { url: "/mentions-legales", priorite: 0.2, frequence: "yearly" },
   ];
 
   const moteurs = FAMILLES.flatMap((f) => f.moteurs).map((m) => ({
-    url: `/offres/${m.system.toLowerCase()}`,
+    url: `/offres/${m.slug}`,
     priorite: 0.8,
     frequence: "monthly" as const,
   }));

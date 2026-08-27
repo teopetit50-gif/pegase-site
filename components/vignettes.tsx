@@ -120,11 +120,11 @@ export function VFactureAuto({ big = false }: { big?: boolean }) {
 /* ——— ANSWR : LA BULLE WHATSAPP — son canal natif, lui seul ——— */
 export const CHAT_JOUR = [
   { from: "client" as const, text: "Vous êtes ouverts samedi ? C'est pour une vidange sur un Duster.", time: "14:02" },
-  { from: "bot" as const, text: "Oui — samedi 8 h à 13 h. Je peux vous réserver 9 h 30 ?", time: "14:03" },
+  { from: "bot" as const, text: "Oui, samedi 8 h à 13 h. Je peux vous réserver 9 h 30 ?", time: "14:03" },
 ];
 export const CHAT_NUIT = [
   { from: "client" as const, text: "Bonsoir, c'est possible d'avoir un devis pour un carport ?", time: "02:14" },
-  { from: "bot" as const, text: "Bien reçu — votre demande est notée. Réponse détaillée dès l'ouverture, à 8 h.", time: "02:14" },
+  { from: "bot" as const, text: "Bien reçu, votre demande est notée. Réponse détaillée dès l'ouverture, à 8 h.", time: "02:14" },
 ];
 
 export function VChat({
@@ -243,7 +243,7 @@ export function VEmail({
     <div ref={ref} onPointerEnter={replay} className={`${PANEL} min-h-[140px] w-full max-w-md overflow-hidden`}>
       <div className="border-b border-white/[0.07] px-5 py-2.5">
         <div className="text-[12px] text-white/50">
-          De : <span className="text-white/75">Omega</span>
+          De : <span className="text-white/75">Omega.AI</span>
         </div>
         <div className="mt-0.5 text-[13px] font-medium text-white/85">Objet : {objet}</div>
       </div>
@@ -328,7 +328,7 @@ export function VPost({ reduced }: { reduced: boolean }) {
           Conseil : préparer son véhicule à la saison cyclonique
         </p>
         <div className="mt-2 flex items-center justify-between">
-          <span className="font-mono text-[11px] text-white/40">programmé — mar. 18:00</span>
+          <span className="font-mono text-[11px] text-white/40">programmé : mar. 18:00</span>
           <span
             key={gen}
             className="font-mono text-[11px]"

@@ -29,7 +29,7 @@ export const MEMBRES: Membre[] = [
     cle: "teo",
     prenom: "Teo",
     role: "Fondateur",
-    bio: "[À COMPLÉTER — deux lignes : ton parcours, et ce qui t'a fait monter Omega. Les fiches d'hyperstack font 200 à 300 signes, ton ton peut être plus direct.]",
+    bio: "[À COMPLÉTER, deux lignes : ton parcours, et ce qui t'a fait monter Omega.AI. Les fiches d'hyperstack font 200 à 300 signes, ton ton peut être plus direct.]",
     // photo: "/equipe/teo.jpg",
   },
 ];
@@ -38,4 +38,4 @@ export const MEMBRES: Membre[] = [
 export const EQUIPE_SURTITRE = "L'équipe";
 export const EQUIPE_TITRE = "Qui est derrière";
 export const EQUIPE_CHAPO =
-  "Omega est un desk, pas une agence à étages : la personne qui fait l'audit est celle qui installe le moteur et celle que vous avez au téléphone six mois plus tard.";
+  "Omega.AI est un desk, pas une agence à étages : la personne qui fait l'audit est celle qui installe le moteur et celle que vous avez au téléphone six mois plus tard.";

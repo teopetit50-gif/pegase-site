@@ -26,7 +26,7 @@ export default function BarreCTA({
   return (
     <div className="pa-cta-bar" data-visible={visible}>
       <span className="min-w-0 truncate text-[13px] leading-[18px] text-white/70">
-        Pré-audit — {entreprise}
+        Pré-audit : {entreprise}
       </span>
       <a href={lien} className="pa-cta-bar-btn">
         Caler l&apos;entretien

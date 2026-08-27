@@ -41,7 +41,7 @@ function titre(system: string) {
   const m = all.find((x) => x.system === system);
   if (!m) return system;
   const t = m.title.startsWith(m.system)
-    ? m.title.slice(m.system.length).replace(/^\s*—\s*/, "")
+    ? m.title.slice(m.system.length).replace(/^\s* : \s*/, "")
     : m.title;
   return t.charAt(0).toUpperCase() + t.slice(1);
 }

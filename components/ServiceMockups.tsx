@@ -166,7 +166,7 @@ function Telephone({ children }: { children: ReactNode }) {
    « Rendez-vous confirmé » supprimée. */
 const CONVERSATION = [
   { de: "client", t: "Bonsoir, vous faites des devis pour une rénovation de salle de bain ?", h: "23:04" },
-  { de: "bot", t: "Oui — sur place, après une visite de 30 min. Jeudi 14 h ou vendredi 9 h ?", h: "23:04" },
+  { de: "bot", t: "Oui, sur place, après une visite de 30 min. Jeudi 14 h ou vendredi 9 h ?", h: "23:04" },
   { de: "client", t: "Jeudi 14 h, parfait.", h: "23:09" },
   { de: "bot", t: "C'est noté. Rappel envoyé la veille.", h: "23:09" },
 ] as const;

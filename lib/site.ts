@@ -17,6 +17,6 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://pegase-site-beige.vercel.app";
 
-export const SITE_NOM = "Omega";
+export const SITE_NOM = "Omega.AI";
 export const SITE_BASELINE =
-  "Automatisation pour les TPE des Antilles";
+  "Automatisation pour les petites entreprises";

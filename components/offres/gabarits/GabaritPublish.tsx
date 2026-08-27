@@ -8,7 +8,9 @@ import {
   MaqDossierCabinet,
   MaqRegleClassement,
 } from "@/components/offres/MediaPublish";
+import BlocFaq from "./BlocFaq";
 import type { GabaritProps } from "./types";
+import { NOMBRES } from "./types";
 
 /* ══════════════════════════════════════════════════════════════════════
    Gabarit « publish » — d'après ocoya.com/features/publish
@@ -149,7 +151,7 @@ export default function GabaritPublish({
 
             <div data-reveal className="mt-[25px] flex flex-wrap items-center justify-center gap-3">
               <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                Chiffrer mon cas — audit gratuit
+                Chiffrer mon cas : audit gratuit
               </Link>
               <Link href="#reglages" className="o-btn o-btn--ghost">
                 Comment il classe
@@ -211,8 +213,11 @@ export default function GabaritPublish({
         <div className="o-wrap">
           <EnTete
             pastille="Intégrations"
-            titre="Branché sur ce que vous avez."
-            chapo="Messagerie, tableur, stockage, comptabilité : le moteur lit et écrit là où vous travaillez déjà. Ni compte à créer, ni migration."
+            titre={fiche.sections?.integrationsTitre ?? "Branché sur ce que vous avez."}
+            chapo={
+              fiche.sections?.integrationsChapo ??
+              "Messagerie, tableur, stockage, comptabilité : le moteur lit et écrit là où vous travaillez déjà. Ni compte à créer, ni migration."
+            }
           />
         </div>
         <div data-reveal className="mt-16">
@@ -235,7 +240,7 @@ export default function GabaritPublish({
           <CarteMedia
             badge="Cadré avec vous"
             titre="Des règles, pas des devinettes"
-            texte="Le moteur ne classe que selon les règles fixées à l'installation. Hors de ces règles, il met de côté au lieu d'approximer."
+            texte="Le moteur classe selon les règles fixées à l'installation, et selon elles seules. Une pièce qui sort du cadre est mise de côté : jamais rangée au jugé."
             lien={{ label: "Voir le déroulé", href: "/reserver-un-audit" }}
           >
             <MaqRegleClassement fiche={fiche} />
@@ -243,7 +248,7 @@ export default function GabaritPublish({
           <CarteMedia
             badge="Chaque mois"
             titre="Un dossier prêt à ouvrir"
-            texte="Pièces nommées, horodatées, réparties par journal. Le cabinet reçoit un dossier complet, pas un tas de PDF."
+            texte="Pièces nommées, horodatées, réparties par journal. Le cabinet reçoit un dossier constitué, pas une pile de PDF à trier."
             lien={{ label: "Voir les autres moteurs", href: "/offres" }}
           >
             <MaqDossierCabinet />
@@ -256,7 +261,10 @@ export default function GabaritPublish({
         <EnTete
           pastille="Compris"
           titre="Ce qui vient avec le moteur."
-          chapo="Le classement n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
+          chapo={
+            fiche.sections?.comprisChapo ??
+            "Le classement n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
+          }
         />
         <div className="mx-auto mt-20 grid max-w-[1040px] grid-cols-1 gap-8 lg:grid-cols-2">
           <div data-reveal className="o-card-plate flex flex-col p-8 sm:p-10">
@@ -270,10 +278,10 @@ export default function GabaritPublish({
           <div className="flex flex-col gap-8">
             {paragraphes.slice(1).map((para, i) => (
               <div key={i} data-reveal className="o-card-plate flex flex-col p-8 sm:p-10">
-                <span className="o-pill o-pill--xs w-fit">
+                <span aria-hidden className="o-num-fantome">
                   {String(i + 2).padStart(2, "0")}
                 </span>
-                <p className="o-body mt-6">{para}</p>
+                <p className="o-body">{para}</p>
               </div>
             ))}
             <div data-reveal className="o-card-plate flex flex-col p-8 sm:p-10">
@@ -305,7 +313,7 @@ export default function GabaritPublish({
           ))}
           <div data-reveal className="o-formule o-formule--phare">
             <span className="o-pill o-pill--xs w-fit">Avant tout</span>
-            <h3 className="o-h5 mt-6">L&apos;audit — 30 min</h3>
+            <h3 className="o-h5 mt-6">L&apos;audit : 30 min</h3>
             <p className="o-body mt-3 !text-[15px]">
               On chiffre ce que le problème vous coûte, on vérifie que{" "}
               {m.system} est bien le bon moteur, et on regarde votre éligibilité
@@ -324,20 +332,30 @@ export default function GabaritPublish({
           <div data-reveal>
             <span className="o-pill">Catalogue</span>
           </div>
+          {/* 07/08 — même correction que dans GabaritHome : le compte était
+              figé à « Onze », hérité des douze moteurs d'avant le
+              regroupement en paquets. FILED étant la seule fiche sur ce
+              gabarit, elle annonçait onze cartes quand ses voisines en
+              annonçaient cinq. */}
           <h2 data-reveal className="o-h2 mt-2.5 max-w-[600px]">
-            Onze autres moteurs.
+            {NOMBRES[autres.length] ?? autres.length} autre
+            {autres.length > 1 ? "s" : ""} système
+            {autres.length > 1 ? "s" : ""}.
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
-            {m.system}{" "}
-            n&apos;est peut-être pas celui à installer en premier.
-            L&apos;audit désigne le moteur au meilleur retour chez vous — et il
-            arrive que ce soit un autre.
+            {fiche.sections?.catalogueChapo ??
+              `${m.system} n'est peut-être pas celui à installer en premier. L'audit désigne le moteur au meilleur retour chez vous, et il arrive que ce soit un autre.`}
           </p>
         </div>
         <div data-reveal className="mt-16">
           <BandeauAutresMoteurs moteurs={autres} />
         </div>
       </section>
+
+      {/* ════════ 6 bis · FAQ ════════
+          13/08 — comme le gabarit `integration`, celui-ci n'affichait aucune
+          FAQ : les trois questions de FILED n'atteignaient aucune page. */}
+      <BlocFaq faq={fiche.faq} chapo={fiche.sections?.faqChapo} />
 
       {/* ════════ 7 · CTA + navigation ════════ */}
       <section className="o-wrap pb-[120px]">
@@ -353,9 +371,8 @@ export default function GabaritPublish({
             {m.system} est-il le bon pour vous ?
           </h2>
           <p className="o-lead relative mx-auto mt-4 max-w-[610px]">
-            L&apos;audit gratuit chiffre ce que votre difficulté principale vous
-            coûte et désigne le moteur au meilleur retour — celui-ci, ou un
-            autre.
+            {fiche.sections?.clotureChapo ??
+              "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne le moteur au meilleur retour : celui-ci, ou un autre."}
           </p>
           <div className="relative mt-8">
             <Link href="/reserver-un-audit" className="o-btn o-btn--primary">

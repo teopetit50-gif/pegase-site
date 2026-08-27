@@ -106,7 +106,7 @@ export default function ServicesTabs() {
           className="text-[13px] font-medium tracking-tight text-[#52555c] sm:text-[14px]"
         >
           <span aria-hidden className="mr-2 inline-block h-1.5 w-1.5 -translate-y-[2px] rounded-full align-middle" style={{ background: "#8a6519" }} />
-          Chèque TIC — <span className="font-semibold text-[#0f1013]">jusqu&apos;à 10 000 € financés</span> pour les TPE éligibles
+          Chèque TIC : <span className="font-semibold text-[#0f1013]">jusqu&apos;à 10 000 € financés</span> pour les TPE éligibles
         </p>
 
         <h1
@@ -122,8 +122,8 @@ export default function ServicesTabs() {
         >
           Relance des impayés, réponses clients 24/7, factures fournisseurs
           classées, clients dormants réactivés. Chaque moteur s&apos;installe
-          sur <span className="font-semibold text-[#0f1013]">vos outils actuels</span> —
-          mail, tableur, WhatsApp — en{" "}
+          sur <span className="font-semibold text-[#0f1013]">vos outils actuels</span>
+          mail, tableur, WhatsApp : en{" "}
           <span className="font-semibold text-[#0f1013]">quelques jours</span>, et{" "}
           <span className="font-semibold text-[#0f1013]">rien ne part sans votre validation</span>.
         </p>

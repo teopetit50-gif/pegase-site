@@ -42,9 +42,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const audit = auditParSlug(slug);
-  if (!audit) return { title: "Pré-audit — Omega", robots: { index: false, follow: false } };
+  if (!audit) return { title: "Pré-audit | Omega.AI", robots: { index: false, follow: false } };
   return {
-    title: `Pré-audit — ${audit.entreprise} · Omega`,
+    title: `Pré-audit, ${audit.entreprise} · Omega.AI`,
     description: `Document de travail préparé pour ${audit.entreprise} avant l'entretien d'audit.`,
     robots: { index: false, follow: false },
   };
@@ -96,19 +96,19 @@ const ETAPES: EtapeSuite[] = [
     etape: "Étape 1",
     titre: "L'entretien",
     texte:
-      "Trente à quatre-vingt-dix minutes en visio, gratuit, sans engagement. On reprend ce document ligne par ligne : vous corrigez, on écoute — c'est votre quotidien qui fait foi, pas nos hypothèses.",
+      "Trente à quatre-vingt-dix minutes en visio, gratuit, sans engagement. On reprend ce document ligne par ligne : vous corrigez, on écoute, c'est votre quotidien qui fait foi, pas nos hypothèses.",
   },
   {
     etape: "Étape 2",
     titre: "Le chiffrage",
     texte:
-      "Chaque poste confirmé est mesuré sur vos propres fichiers — échéancier, boîte mail, tableur. Le chiffre qui en sort est vérifiable chez vous, pas dans une plaquette.",
+      "Chaque poste confirmé est mesuré sur vos propres fichiers : échéancier, boîte mail, tableur. Le chiffre qui en sort est vérifiable chez vous, pas dans une plaquette.",
   },
   {
     etape: "Étape 3",
     titre: "La décision",
     texte:
-      "La recommandation classe les pistes par retour, dit par quel moteur commencer — et ce qu'il ne faut pas automatiser. Elle vous appartient, que vous installiez un moteur ou non.",
+      "La recommandation classe les pistes par retour, dit par quel moteur commencer, et ce qu'il ne faut pas automatiser. Elle vous appartient, que vous installiez un moteur ou non.",
   },
 ];
 
@@ -144,7 +144,7 @@ export default async function PreAuditPage({
 
           {audit.demo ? (
             <p className="mt-7 inline-block rounded-lg bg-[#e8e8e8] px-4 py-2.5 text-[13px] leading-[20px] text-[#3d3d3d]">
-              Page d&apos;exemple — les contenus sont génériques au métier du
+              Page d&apos;exemple : les contenus sont génériques au métier du
               bâtiment. Aucune entreprise réelle derrière ce document.
             </p>
           ) : null}
@@ -155,7 +155,7 @@ export default async function PreAuditPage({
 
         {/* ═══ 2 — la situation ═══ */}
         <section id="situation" data-monde="clair" className="pa-section r-wrap py-14 sm:py-20">
-          <p className="r-note">À confirmer — ou à démonter — pendant l&apos;entretien.</p>
+          <p className="r-note">À confirmer, ou à démonter, pendant l&apos;entretien.</p>
           <h2 className="r-h3 mt-6 max-w-[22ch]">Ce qu&apos;on pense avoir compris</h2>
 
           <div className="mt-9 max-w-[62ch] border-l-2 border-[#050505] pl-6" data-reveal>
@@ -173,7 +173,7 @@ export default async function PreAuditPage({
         {/* ═══ 3 — les douleurs du métier ═══ */}
         <section id="douleurs" data-monde="clair" className="pa-section r-blanc">
           <div className="r-wrap py-14 sm:py-20">
-            <p className="r-note">Repérées dans le métier — pas encore vérifiées chez vous.</p>
+            <p className="r-note">Repérées dans le métier : pas encore vérifiées chez vous.</p>
             <h2 className="r-h2 mt-6 max-w-[20ch]">Où le temps et l&apos;argent partent</h2>
 
             <div className="mt-10 grid gap-5 md:grid-cols-2">
@@ -205,7 +205,7 @@ export default async function PreAuditPage({
 
             <p className="r-note mt-8 max-w-[66ch]">
               Aucun montant n&apos;est avancé sur cette page. Le chiffrage se
-              fait pendant l&apos;audit, sur vos propres documents — un chiffre
+              fait pendant l&apos;audit, sur vos propres documents : un chiffre
               qu&apos;on ne peut pas vérifier chez vous ne vaut rien.
             </p>
           </div>
@@ -215,14 +215,14 @@ export default async function PreAuditPage({
         <section id="remedes" className="pa-section r-nuit">
           <div className="r-wrap py-14 sm:py-20">
             <p className="r-note">
-              À utiliser dès aujourd&apos;hui, gratuitement, sans nous — avec
+              À utiliser dès aujourd&apos;hui, gratuitement, sans nous : avec
               ChatGPT ou Claude.
             </p>
             <h2 className="r-h2 mt-6 max-w-[20ch]">Trois choses à faire dès cette&nbsp;semaine</h2>
             <p className="r-lead mt-6 max-w-[58ch]">
               L&apos;audit commence par ce qu&apos;on vous donne. Ces trois
-              gestes ne remplacent pas un moteur — ils se font à la main, un
-              par un — mais ils rapportent dès cette semaine, que l&apos;on
+              gestes ne remplacent pas un moteur : ils se font à la main, un
+              par un, mais ils rapportent dès cette semaine, que l&apos;on
               travaille ensemble ou non.
             </p>
 
@@ -267,14 +267,14 @@ export default async function PreAuditPage({
         {/* ═══ 5 — les moteurs qui répondent ═══ */}
         <section id="moteurs" data-monde="clair" className="pa-section r-wrap py-14 sm:py-20">
           <p className="r-note">
-            La version en continu des gestes ci-dessus — installée sur vos
+            La version en continu des gestes ci-dessus : installée sur vos
             outils, sous votre validation.
           </p>
           <h2 className="r-h2 mt-6 max-w-[20ch]">Les moteurs qui répondent à&nbsp;ça</h2>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {audit.moteurs.map((m) => (
-              <Link key={m.system} href={`/offres/${m.system.toLowerCase()}`} className="group">
+              <Link key={m.system} href={`/offres/${m.slug}`} className="group">
                 <CarteSpotlight className="flex h-full flex-col rounded-2xl bg-white p-7 transition-shadow duration-300 group-hover:shadow-[0_2px_28px_rgba(5,5,5,0.09)] sm:p-9">
                   <div data-reveal className="flex h-full flex-col">
                     <div className="flex items-baseline justify-between gap-3">
@@ -329,7 +329,7 @@ export default async function PreAuditPage({
                   </Link>
                 </div>
                 <p className="r-note mt-5">
-                  Ou directement — {CANAL_LABEL_PHRASE} : {CANAL_VALEUR}
+                  Ou directement : {CANAL_LABEL_PHRASE} : {CANAL_VALEUR}
                 </p>
               </div>
 

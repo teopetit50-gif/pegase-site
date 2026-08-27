@@ -697,6 +697,208 @@ button.rounded-full:active {
 }
 
 /* ——— cartes ——— */
+/* ═══════════════════════════════════════════════════════════════════════
+   HERO CLAIR DE LA HOME — clone du template Flux (05/08/2026, demande de Teo
+   « exactement le même fond, tout pareil, juste tu changes les textes »).
+
+   Source : flux-nextjs-template.vercel.app, l'un des 22 modèles achetés par
+   Teo et déjà présentés sur /modeles. Tout ce qui suit est RELEVÉ au style
+   calculé sur viewport 1280, pas approché à l'œil. Les couleurs de la
+   référence sont écrites en lab() ; elles sont converties ici en hexadécimal :
+     fond de section  lab(96.868)  → #f6f6f6
+     titre            lab(2.754)   → #0a0a0a
+     chapô            lab(42)      → #636363
+     fond du bouton   lab(7.782)   → #171717
+     texte du bouton  lab(98.26)   → #fafafa
+     point de veille  lab(57.3, 57.6, 29.7) → #ec5759
+
+   Repères verticaux relevés à 1280 (haut de chaque bloc) : pastille 286,
+   titre 340, chapô 496, bouton 584, maquette 732. Ils tombent d'eux-mêmes
+   avec les marges ci-dessous et le padding-top de 256 px de la section.
+   ═══════════════════════════════════════════════════════════════════════ */
+/* PLEINE LARGEUR (Teo, 05/08 : « le design doit être sur toute la page »).
+   `main` est bridé à 1440 px et posé sur `bg-panel`, qui est NOIR : au-delà de
+   1440 le hero clair laissait donc deux bandes noires sur les côtés, et le
+   header restait noir avec elles. Le hero sort du cadre par la technique des
+   marges négatives ; le reste de la page, lui, garde sa colonne de 1440 —
+   c'est nécessaire, deux sections `o-nuit` vivent plus bas et un fond de
+   conteneur éclairci aurait mis des bandes CLAIRES à côté d'elles.
+
+   Effet de bord bienvenu : le header n'a rien demandé non plus. Sa sonde
+   prélève la couleur du fond à x = 4 px ; jusqu'ici elle tombait dans la bande
+   noire hors cadre, maintenant elle tombe sur le hero. Il bascule seul.
+   `overflow-x: clip` sur le conteneur (et non `hidden`, qui casserait le
+   `position: sticky` du header) absorbe la barre de défilement de `100vw`. */
+.offres .o-flux {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  background: #f6f6f6;
+}
+/* Le fond n'est pas un dégradé CSS mais l'image du template, fondue par un
+   masque radial. Sans ce masque l'image cognerait les bords du cadre : c'est
+   lui qui donne l'impression que la lumière naît au centre. Deux ellipses
+   différentes, l'une pour le mobile, l'autre à partir de lg — relevées
+   telles quelles sur la référence. */
+.offres .o-flux-fond {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 38%, #000 15%, transparent 72%);
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 38%, #000 15%, transparent 72%);
+}
+.offres .o-flux-fond img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: 50% 32%;
+  opacity: 0.9;
+}
+@media (min-width: 1024px) {
+  .offres .o-flux-fond {
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 20%, transparent 75%);
+  }
+  .offres .o-flux-fond img {
+    object-position: center;
+    opacity: 0.8;
+  }
+}
+
+/* 05/08 (Teo, « enlève le point orange ») — la pastille ne porte plus le point
+   de veille rouge qui battait, repris de la référence. Le `gap` disparaît avec
+   lui : il n'y a plus qu'un enfant. */
+.offres .o-flux-pastille {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(235, 235, 235, 0.6);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #0a0a0a;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+/* DM Sans est la famille de la référence, chargée dans layout.tsx pour ce
+   seul usage. L'interlettrage de −3 px est celui du relevé : il paraît
+   énorme écrit comme ça, mais à 60 px c'est −0,05 em. */
+/* Trois paliers relevés sur la référence aux viewports 430 / 834 / 1280 :
+   titre 36/39,6 → 48/52,8 → 60/66 (l'interligne vaut toujours 1,1 × la
+   taille), chapô 16 → 18. La 1ʳᵉ version montait à 38 px dès le mobile : le
+   titre y prenait une ligne de plus et poussait toute la suite vers le bas —
+   c'est l'écart que Teo a vu en comparant les deux sites côte à côte. */
+.offres .o-flux-h1 {
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 36px;
+  line-height: 39.6px;
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  color: #0a0a0a;
+  text-wrap: balance;
+}
+.offres .o-flux-lead {
+  font-size: 16px;
+  line-height: 26px;
+  color: #636363;
+}
+@media (min-width: 768px) {
+  .offres .o-flux-h1 {
+    font-size: 48px;
+    line-height: 52.8px;
+  }
+  .offres .o-flux-lead {
+    font-size: 18px;
+    line-height: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .offres .o-flux-h1 {
+    font-size: 60px;
+    line-height: 66px;
+    letter-spacing: -3px;
+  }
+}
+
+/* Bouton plein noir en pilule : c'est celui de la référence. Il déroge aux
+   deux préférences posées par Teo le 04/08 — contour plutôt que plein, et
+   jamais de pilule — parce que la demande du 05/08 est un 1:1 explicite.
+   Padding asymétrique (22 px à gauche, 10 px à droite) : le rond du chevron
+   apporte sa propre marge visuelle à droite. */
+.offres .o-flux-btn {
+  display: inline-flex;
+  height: 40px;
+  align-items: center;
+  gap: 6px;
+  border-radius: 9999px;
+  background: #171717;
+  padding: 0 10px 0 22px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fafafa;
+  transition: background 0.2s var(--ease-out-strong);
+}
+.offres .o-flux-btn:hover {
+  background: #000000;
+}
+.offres .o-flux-btn-rond {
+  display: grid;
+  height: 22px;
+  width: 22px;
+  place-items: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* La maquette occupe 80,8 % de la largeur (1034 sur 1280) et son bas est
+   coupé net par le bord de la section — d'où `pb-0` côté page. L'ombre est
+   celle du relevé, très basse et très diffuse. */
+/* L'écart bouton → maquette suit lui aussi trois paliers relevés : 32 px à
+   430, 56 px à 834, 108 px à 1280. Il était figé à 108 px, ce qui creusait un
+   trou sur téléphone. Marge latérale de 32 px en dessous de lg, comme la
+   référence (366 px de maquette sur 430 de large). */
+.offres .o-flux-maquette {
+  margin: 32px auto 0;
+  width: 100%;
+  max-width: 1034px;
+  padding: 0 32px;
+}
+@media (min-width: 768px) {
+  .offres .o-flux-maquette {
+    margin-top: 56px;
+  }
+}
+/* Coins arrondis (Teo, 05/08 : « la photo doit avoir les bords un peu
+   arrondis ») et FONDU DU BAS (Teo : « en bas il est censé avoir un dégradé,
+   une sorte de fondu »). La référence, elle, coupe son image net au bord de la
+   section ; ici elle s'efface.
+
+   Le fondu est un masque, pas un voile posé par-dessus : un voile aurait la
+   couleur du fond à un endroit précis et se verrait dès que le fond change
+   sous lui (le hero est une texture, pas un aplat). Le masque, lui, retire
+   vraiment les pixels — l'ondulation reste visible au travers.
+
+   L'ombre est portée par `drop-shadow` sur le parent, jamais `box-shadow` :
+   elle épouse à la fois les coins arrondis ET le fondu, au lieu de dessiner un
+   rectangle derrière une image qui s'efface. */
+.offres .o-flux-maquette img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 98%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 98%);
+}
+@media (min-width: 1024px) {
+  .offres .o-flux-maquette {
+    margin-top: 108px;
+    padding: 0;
+    filter: drop-shadow(0 28px 56px rgba(0, 0, 0, 0.28));
+  }
+}
+
 /* carte bento blanche : l'ombre est un empilement de 4 passes très courtes,
    c'est elle qui donne le relief « produit » sans halo gris */
 .offres .o-card {
@@ -717,6 +919,140 @@ button.rounded-full:active {
   border-radius: 20px;
   border: 1px solid var(--o-line);
   background: var(--o-soft);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Cartes scintillantes (17/08/2026, Teo : « un effet genre scintillant »)
+
+   Deux couches, aucune ne touche au contenu de la carte — donc rien à
+   changer dans le balisage au-delà d'une classe.
+
+   1. Le LISERÉ. Une étincelle fait le tour de la bordure. Même mécanique
+      que `.border-beam` (conic-gradient tournant masqué sur l'anneau),
+      mais la rampe or de la tuile IA ne vaut rien ici : sur une carte
+      #fafafa bordée de #e4e4e7, un éclat clair est invisible. La rampe est
+      donc SPÉCULAIRE — graphite qui monte vers un point blanc — ce qui se
+      lit comme la lumière qui accroche une arête métallique, pas comme une
+      ombre qui se promène.
+
+   2. Le REFLET. Une bande diagonale traverse la face toutes les 7 s, la
+      même que la carte moteur (`MotorCard`) : blanc en flancs, voile
+      graphite à 4 % au centre. Elle passe volontairement AU-DESSUS du
+      texte — c'est un reflet, il se poserait sur le verre, pas dessous —
+      et à cette opacité elle ne coûte rien à la lisibilité.
+
+   Les deux tournent en continu et en décalé d'une carte à l'autre (sinon
+   quatre cartes qui clignent ensemble font enseigne lumineuse). Le survol
+   ne fait qu'appuyer : liseré à pleine opacité, cycle raccourci.
+
+   Coupées net par `prefers-reduced-motion` — la carte redevient la carte
+   plate d'origine, aucun résidu. */
+.offres .o-card-scintille {
+  isolation: isolate;
+}
+
+/* — le liseré — */
+.offres .o-card-scintille::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg 236deg,
+    rgba(161, 161, 170, 0.28) 286deg,
+    rgba(82, 82, 91, 0.7) 322deg,
+    rgba(24, 24, 27, 0.9) 338deg,
+    rgba(255, 255, 255, 0.95) 347deg,
+    rgba(161, 161, 170, 0.3) 353deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  animation: beamSpin 7s linear infinite;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* — le reflet diagonal — */
+.offres .o-card-scintille::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  z-index: 2;
+  width: 46%;
+  background: linear-gradient(
+    100deg,
+    transparent 6%,
+    rgba(255, 255, 255, 0.8) 40%,
+    rgba(9, 9, 11, 0.045) 50%,
+    rgba(255, 255, 255, 0.8) 60%,
+    transparent 94%
+  );
+  opacity: 0;
+  animation: carteReflet 7s cubic-bezier(0.25, 0.6, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes carteReflet {
+  0%,
+  4% {
+    transform: translateX(-260%) rotate(18deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 1;
+  }
+  26%,
+  100% {
+    transform: translateX(330%) rotate(18deg);
+    opacity: 0;
+  }
+}
+
+/* décalage : chaque carte de la grille part avec un temps de retard, la
+   rangée scintille en vague au lieu de clignoter d'un bloc */
+.offres .o-card-scintille:nth-child(2)::before,
+.offres .o-card-scintille:nth-child(2)::after {
+  animation-delay: -1.75s;
+}
+.offres .o-card-scintille:nth-child(3)::before,
+.offres .o-card-scintille:nth-child(3)::after {
+  animation-delay: -3.5s;
+}
+.offres .o-card-scintille:nth-child(4)::before,
+.offres .o-card-scintille:nth-child(4)::after {
+  animation-delay: -5.25s;
+}
+
+/* survol : le liseré passe à fond et accélère, l'ombre se creuse un peu */
+@media (hover: hover) and (pointer: fine) {
+  .offres .o-card-scintille:hover {
+    box-shadow:
+      0 1px 2px rgba(9, 9, 11, 0.04),
+      0 18px 40px -26px rgba(9, 9, 11, 0.35);
+  }
+  .offres .o-card-scintille:hover::before {
+    opacity: 1;
+    animation-duration: 2.6s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offres .o-card-scintille::before,
+  .offres .o-card-scintille::after {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* ——— fond pointillé ———
@@ -757,6 +1093,99 @@ button.rounded-full:active {
 .offres .o-photo:hover img {
   transform: scale(1.04);
 }
+
+/* ——— variante MARQUE : le logo du paquet au lieu d'une photo (05/08/2026,
+   demande de Teo). Le fond reste SOMBRE parce que le titre, le lien et la
+   pastille de ces cartes sont blancs et calés sur le voile `::after` : passer
+   au clair aurait obligé à tout réencrer, trois régressions de contraste pour
+   un gain nul. Le dégradé très fermé donne juste assez de matière pour que la
+   carte se détache du noir de la section. ——— */
+/* 07/08/2026, second passage (Teo : « sur téléphone les deux s'affichent
+   mal ») — LE SIGNE ET LE TITRE NE SONT PLUS SUPERPOSÉS.
+
+   Le cadre avait été ramené de 560×450 à 560×260 le matin même, mais le
+   signe était resté centré en absolu et le titre collé à `bottom: 30`. Sur
+   260 de haut les deux se recouvraient déjà de 6 px en 1440, et de 48 px dès
+   que le titre passait à deux lignes (FILED, Sur mesure). Sur un téléphone
+   le cadre tombait à 159 px : le signe se retrouvait ENTIÈREMENT dans le
+   bloc de texte.
+
+   D'où le passage en flux : colonne flex, signe en haut à gauche, texte
+   arrimé en bas par `space-between`. Et surtout `min-height` À LA PLACE du
+   ratio — un ratio impose la hauteur et laisse le contenu se percuter
+   dedans, un plancher laisse la carte grandir. Elle vaut donc 260 partout
+   où le titre tient (la mesure demandée le matin), et s'allonge d'elle-même
+   le jour où un titre passe à trois lignes au lieu de se chevaucher. */
+.offres .o-photo--marque {
+  aspect-ratio: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* 270 et non 260 : c'est la hauteur que réclament les deux titres de deux
+     lignes (FILED, Sur mesure). En laissant le plancher à 260 les quatre
+     cartes n'avaient plus la même hauteur — deux à 260, deux à 270 — et la
+     colonne perdait son rythme pour 10 px. */
+  min-height: 270px;
+  padding: 30px;
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.07), transparent 62%),
+    linear-gradient(160deg, #17181d 0%, #0e0f12 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.offres .o-marque-etiquette {
+  position: absolute;
+  right: 30px;
+  top: 30px;
+  z-index: 10;
+}
+.offres .o-marque-texte {
+  position: relative;
+  z-index: 10;
+  /* plancher de respiration sous le signe : `space-between` ne garantit rien
+     quand la carte est à sa hauteur minimale de contenu (cas du mobile) */
+  padding-top: 24px;
+}
+.offres .o-marque-fond {
+  display: block;
+}
+.offres .o-marque-signe {
+  display: block;
+  /* mesure FIXE désormais : le signe n'occupe plus toute la carte, un % de
+     largeur le faisait doubler entre le mobile et la colonne de 560 */
+  width: 58px;
+  aspect-ratio: 1;
+  background-color: rgba(255, 255, 255, 0.94);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  transition: transform 0.7s var(--ease-out-strong);
+}
+/* même geste au survol que les photos qu'elles remplacent */
+.offres .o-photo--marque:hover .o-marque-signe {
+  transform: scale(1.04);
+}
+/* sur téléphone la carte se règle sur son contenu : plus de plancher, sinon
+   le titre d'une ligne laisse un grand vide sous lui */
+@media (max-width: 639px) {
+  .offres .o-photo--marque {
+    min-height: 0;
+    padding: 24px;
+  }
+  .offres .o-marque-etiquette {
+    right: 24px;
+    top: 24px;
+  }
+  .offres .o-marque-signe {
+    width: 50px;
+  }
+  .offres .o-marque-texte {
+    padding-top: 20px;
+  }
+}
+
 /* voile bas : sans lui les titres blancs passent sous le seuil AA dès qu'une
    photo est claire en bas de cadre */
 .offres .o-photo::after {
@@ -796,9 +1225,47 @@ button.rounded-full:active {
 .offres .o-card-plate {
   position: relative;
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid #ededed;
   background: #f9f9f9;
+}
+
+/* ——— le numéro en FILIGRANE (proposition D, choisie par Teo le 05/08) ———
+   Remplace la pastille ronde noire et la pilule bordée qui coiffaient les
+   cartes numérotées. Deux défauts réglés d'un coup : la pastille occupait une
+   ligne entière au-dessus du texte, et son contraste maximal captait l'œil sur
+   un chiffre qui n'apporte rien à la lecture.
+
+   Ici le chiffre est posé dans l'angle, presque effacé, en calque du dessous.
+   Il donne le repère de séquence sans coûter une ligne, et le texte remonte
+   d'autant. `aria-hidden` côté balise : un lecteur d'écran n'a rien à faire
+   d'un ornement, l'ordre est déjà porté par le DOM.
+
+   Le rayon des cartes passe de 20 à 16 px dans la foulée : à 20 px le
+   contenant se voyait plus que le contenu. */
+.offres .o-num-fantome {
+  position: absolute;
+  top: -20px;
+  right: 14px;
+  font-size: 108px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  color: #09090b;
+  opacity: 0.055;
+  pointer-events: none;
+  user-select: none;
+}
+/* sur fond nuit c'est l'encre claire qui s'efface, et il en faut un peu plus :
+   un noir à 5,5 % sur #18181b ne se verrait pas du tout */
+.offres--sombre .o-num-fantome {
+  color: #ffffff;
+  opacity: 0.07;
+}
+/* tout ce qui suit le filigrane doit passer AU-DESSUS de lui */
+.offres .o-card-plate > *:not(.o-num-fantome) {
+  position: relative;
 }
 /* posée sur un fond déjà gris, la carte s'éclaircit au lieu de s'assombrir */
 .offres .o-gris .o-card-plate {
@@ -2480,4 +2947,1455 @@ button.rounded-full:active {
   height: 8px;
   border-radius: 50%;
   background: #050505;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   .modeles — monde clair de /modeles (03/08/2026)
+
+   Page de référence : scale.com/generative-ai-data-engine, demandée par
+   Teo. Relevé au computed style sur viewport 1440 — fond #ffffff, titres
+   en 64 px (hero de section) et 48 px (sections) au POIDS 400, gris de
+   corps #525252, sur-titres en petites capitales monospace très espacées,
+   et de grands panneaux gris clair arrondis qui portent des cartes
+   blanches. C'est cette dernière figure qui fait tout le style de la
+   référence : le contenu n'est jamais posé nu sur le blanc, il est
+   toujours dans un panneau.
+
+   La référence compose en aeonik, une grotesque géométrique sous licence.
+   On prend Plus Jakarta Sans, déjà chargée pour /offres et la plus proche
+   du dessin — mêmes terminaisons droites, même largeur d'œil. Surtout, on
+   garde son POIDS 400 : c'est la finesse des titres à cette taille qui
+   fait l'allure, un 600 aurait donné une page bruyante.
+
+   Même technique de débordement que .offres : le contenu vit dans la
+   colonne 1440 de <main>, l'ombre écrêtée peint les gouttières.
+   ══════════════════════════════════════════════════════════════════════ */
+.modeles {
+  --m-fond: #ffffff;
+  --m-encre: #000000;
+  --m-doux: #525252;
+  --m-faible: #737373;
+  --m-panneau: #f2f2f2;
+  --m-carte: #ffffff;
+  --m-filet: rgba(0, 0, 0, 0.08);
+  --m-sombre: #0b0b0c;
+
+  background: var(--m-fond);
+  color: var(--m-encre);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  box-shadow: 0 0 0 50vw var(--m-fond);
+  clip-path: inset(0 -50vw);
+}
+
+/* colonne de contenu — 1200 px, comme la référence */
+.modeles .m-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+@media (min-width: 1248px) {
+  .modeles .m-wrap { padding-inline: 0; }
+}
+
+/* ——— titres : Plus Jakarta Sans 400, la finesse de la référence ——— */
+.modeles h1,
+.modeles h2,
+.modeles h3 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* titre de hero — 64 px relevés, ramenés en clamp pour les petits écrans */
+.modeles .m-h1 {
+  font-size: clamp(2.4rem, 5.4vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+/* titre de section — 48 px relevés */
+.modeles .m-h2 {
+  font-size: clamp(2rem, 3.9vw, 3rem);
+  line-height: 1.08;
+}
+
+/* sur-titre : petites capitales monospace très espacées */
+.modeles .m-sur {
+  font-family: var(--font-jbmono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--m-faible);
+}
+
+/* chapô sous un titre de section — centré, deux lignes, gris */
+.modeles .m-chapo {
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  line-height: 1.55;
+  color: var(--m-doux);
+}
+
+/* LE panneau : la figure qui porte tout le style de la référence */
+.modeles .m-panneau {
+  background: var(--m-panneau);
+  border-radius: 14px;
+}
+
+/* carte blanche posée dans un panneau */
+.modeles .m-carte {
+  background: var(--m-carte);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.10);
+}
+
+/* Boutons. La référence les dessine en pilule (999px) ; on ne la suit PAS
+   sur ce point. Teo a tranché le 23/07 pour tout le site — « ils sont trop
+   arrondis » — et le token --radius-btn existe précisément pour que les
+   ~25 CTA bougent ensemble. Une page qui repasserait en pilule ferait
+   tache à côté de /offres et de /reserver-un-audit. Seule la pastille du
+   chevron reste ronde : c'est une pastille, pas un bouton. */
+.modeles .m-btn {
+  background: #000000;
+  color: #ffffff;
+  border-radius: var(--radius-btn);
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+.modeles .m-btn:hover { opacity: 0.86; }
+
+/* CTA du hero et de la clôture, posé sur le collage sombre.
+   03/08 (Teo) — passé du blanc plein au CONTOUR, comme le CTA du header :
+   trait blanc, fond transparent, texte blanc. Le remplissage ne revient
+   qu'au survol, en très léger, pour que le bouton reste vivant sans
+   redevenir une pastille. Les deux blocs qui le portent sont sombres, donc
+   une seule déclinaison suffit — pas besoin du jeu à deux mondes du
+   header. */
+.modeles .m-btn-clair {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-btn);
+  font-weight: 500;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.modeles .m-btn-clair:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* la pastille du chevron suit : cerclée au lieu d'être un disque noir —
+   un disque noir sur un bouton devenu transparent se serait détaché comme
+   une tache au milieu du collage */
+.modeles .m-btn-clair .m-chevron {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.modeles .m-btn-clair:hover .m-chevron {
+  border-color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   /modeles — mouvements (03/08/2026, demande de Teo : « faire apparaître
+   les trucs, des slides »)
+
+   Trois mouvements, tous en transform/opacity uniquement — jamais de
+   propriété qui déclenche un recalcul de mise en page. Les vingt-deux
+   captures pèsent déjà lourd à l'écran, une animation qui fait relayouter
+   ferait ramer la page sur le téléphone d'un artisan, qui est exactement
+   le terrain de ce site.
+
+   Tous coupés par prefers-reduced-motion, en bas de bloc.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— 1. dérive du collage du hero ———
+   Les colonnes montent et descendent très lentement, en sens alternés. Le
+   mur cesse d'être une image posée : il respire. Amplitude volontairement
+   faible (14 px) — au-delà on voit le truc, et le titre posé devant se met
+   à flotter. */
+@keyframes m-derive-haut {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -14px, 0); }
+}
+@keyframes m-derive-bas {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, 14px, 0); }
+}
+/* La dérive est posée sur un conteneur INTERNE, jamais sur la colonne
+   elle-même : la colonne porte déjà son translateY de pose et sa rotation,
+   et une animation les écraserait. Deux couches, deux responsabilités. */
+.modeles .m-derive {
+  animation: m-derive-haut 11s ease-in-out infinite;
+  will-change: transform;
+}
+.modeles .m-derive-b {
+  animation-name: m-derive-bas;
+  animation-duration: 13s;
+}
+
+/* ——— 2. ruban défilant ———
+   Le contenu est dupliqué à l'identique dans le composant ; on translate de
+   la moitié exacte, donc la boucle est invisible. */
+@keyframes m-ruban {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.modeles .m-ruban-piste {
+  animation: m-ruban var(--m-ruban-duree, 64s) linear infinite;
+  will-change: transform;
+}
+/* au survol le ruban s'arrête : sinon on ne peut pas lire une vignette qui
+   passe, et l'utilisateur poursuit sa cible du regard sans l'attraper */
+.modeles .m-ruban:hover .m-ruban-piste {
+  animation-play-state: paused;
+}
+
+/* ——— 3. apparition des cartes ———
+   Le site anime déjà [data-reveal] au scroll via GSAP (PageMotion). Ici on
+   ajoute seulement la montée des captures intérieures au survol d'une
+   carte : elles glissent d'un cran et se révèlent. */
+.modeles .m-pages {
+  transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modeles .m-derive,
+  .modeles .m-derive-b,
+  .modeles .m-ruban-piste {
+    animation: none !important;
+  }
+  .modeles .m-pages {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /tarifs — système de design isolé (v3, 13/08/2026)
+
+   Sixième page de référence : **scale.com/careers**, demandée par Teo le
+   13/08 en remplacement complet de la v2 (qui reproduisait le template
+   Flux `/about`). Le bloc `.tarifs` / `.t-` de cette v2 a été supprimé, pas
+   complété : plus une seule de ses règles ne servait.
+
+   C'est la MÊME MAISON que /vos-donnees, qui reproduit déjà
+   scale.com/global-public-sector. Les deux pages partagent donc la police
+   et l'échelle typographique — mais pas les valeurs : la page careers a sa
+   propre colonne (1472, pas 1280), ses propres étiquettes mono (12 px en
+   capitales espacées, pas 13 px) et ses propres rayons. D'où un bloc
+   séparé plutôt qu'une extension de `.vd`.
+
+   ── RELEVÉ AU PIXEL (getComputedStyle, viewport 1280) ──────────────────
+     colonne            1472 max, padding-inline 24 (20 en dessous de 768)
+     sections           72 / 120 de padding vertical — 64 / 96 pour la
+                        section repliable, qui est plus longue
+     en-tête de section centré, 768 de large, 80 de marge basse
+     étiquette          mono 12/24, +1 px d'approche, capitales, #525252
+     H1 hero            clamp(2rem, 0.5rem + 5vw, 4rem) / 1,05, −0,01em
+                        ⚠ le 116 px qu'on relève sur la référence est celui
+                        du titre de PIED DE PAGE, pas du hero. Le hero est
+                        à la même échelle que /vos-donnees — c'est le même
+                        site, et les deux pages doivent se répondre.
+     chapô hero         20/30 approche −0,01em, blanc
+     H2 section         48/60 (1,25) approche −0,01em, graisse 400
+     titre de carte     24/36 (1,5)  #212121        petit titre 20/30
+     corps              16/24 approche −0,01em, #575757
+     hero / CTA final   marge 16, rayon 24, min-h 480→720, padding 32→64,
+                        colonne de texte 1152 max, gouttière 24 entre le
+                        titre, le chapô et le bouton ; contenu calé en bas
+     cartes de couleur  rayon 16, padding 32→40, min-h 220, gouttière 16
+     cartes grises      #f2f2f2, rayon 16, padding 32→40, gouttière 24
+     blocs illustrés    image 320 de haut, rayon 8, ombre 0 4 16 noir 20 %
+     replis             filet #eaeaea, en-tête 24/20, lignes 16/24 avec
+                        64 d'alinéa à gauche, fond de groupe #f2f2f2
+     graisse            400 partout, titres compris — signature de la source
+
+   Trois couleurs de marque de la référence, relevées sur ses cartes :
+   `evergreen` #193a29, `atlas-blue` #273252, `gray-10` #212121.
+
+   POLICE : la référence est en Aeonik (CoType Foundry), sous licence — on
+   ne peut ni la servir depuis leurs fichiers ni l'acheter à leur place.
+   Hanken Grotesk la remplace, comme sur /vos-donnees : même squelette de
+   grotesque géométrique, même hauteur d'x, 'g' à un étage, 'y' à queue
+   droite. DM Mono porte les étiquettes, qui sont bien en monospace dans la
+   référence. Les deux familles sont déjà chargées par le layout — cette
+   refonte n'ajoute aucune police.
+
+   Tout est préfixé `--tf-` / `.tf-` sous `.tf` : supprimer ce bloc
+   supprime la page sans effet de bord.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.tf {
+  --tf-ink: #212121;
+  --tf-body: #575757;
+  --tf-mute: #929292;
+  --tf-eyebrow: #525252;
+  --tf-line: #eaeaea;
+  --tf-soft: #f2f2f2;
+  --tf-vert: #193a29;
+  --tf-bleu: #273252;
+  --tf-r-lg: 24px;
+  --tf-r-md: 16px;
+  --tf-r-pill: 12px;
+  --tf-r-sm: 8px;
+  --tf-r-xs: 6px;
+
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ——— colonne et rythme vertical ———
+   `padding-inline` et non `padding`, pour ne pas écraser les `py-*`
+   Tailwind posés sur les mêmes sections (le piège relevé sur .offres le
+   25/07). */
+.tf .tf-wrap {
+  width: 100%;
+  max-width: 1472px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+@media (min-width: 768px) {
+  .tf .tf-wrap {
+    padding-inline: 24px;
+  }
+}
+
+.tf .tf-section {
+  padding-block: 72px;
+}
+@media (min-width: 768px) {
+  .tf .tf-section {
+    padding-block: 120px;
+  }
+}
+/* `.tf-section--liste` (moins d'air que les autres, comme la référence en
+   donne à sa section la plus longue) est parti le 17/08 avec la section
+   repliable, son unique porteuse. */
+
+/* ——— typographie : tout en 400, c'est la signature de la référence ——— */
+.tf .tf-h1,
+.tf .tf-h2,
+.tf .tf-h3,
+.tf .tf-h4 {
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.tf .tf-h1 {
+  font-size: clamp(2rem, 0.5rem + 5vw, 4rem);
+  line-height: 1.05;
+}
+.tf .tf-h2 {
+  font-size: clamp(1.875rem, 1.1rem + 2.4vw, 3rem);
+  line-height: 1.25;
+}
+.tf .tf-h3 {
+  font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.5rem);
+  line-height: 1.5;
+  color: var(--tf-ink);
+}
+.tf .tf-h4 {
+  font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--tf-ink);
+}
+.tf .tf-lead {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: rgba(0, 0, 0, 0.7);
+  text-wrap: pretty;
+}
+.tf .tf-body {
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--tf-body);
+  text-wrap: pretty;
+}
+
+/* étiquette de section — 12 px monospace, capitales espacées d'un pixel.
+   (L'autre page Scale, celle de /vos-donnees, utilise 13 px sans
+   text-transform et en #929292 : ce sont bien deux réglages différents du
+   même site, et chacun reste dans son bloc.) */
+.tf .tf-eyebrow {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  line-height: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--tf-eyebrow);
+}
+/* la petite mono de service : compteurs, étiquettes de ligne, « tout
+   déplier ». 13 px, capitales, gris moyen. */
+.tf .tf-mono {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--tf-mute);
+}
+
+/* ——— en-tête de section : centré, 768 de large ——— */
+.tf .tf-tete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 768px;
+  margin-inline: auto;
+  margin-bottom: 40px;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .tf .tf-tete {
+    margin-top: 48px;
+    margin-bottom: 80px;
+  }
+}
+/* devant une liste, la référence resserre la marge basse */
+.tf .tf-tete--serre {
+  margin-bottom: 40px;
+}
+@media (min-width: 768px) {
+  .tf .tf-tete--serre {
+    margin-bottom: 40px;
+  }
+}
+/* quand la section empile ses blocs dans un flex à gouttière, l'en-tête
+   rend sa marge basse : sinon les deux s'ajoutent (la référence pose un
+   `!mb-0` exactement au même endroit) */
+.tf .tf-tete--colle {
+  margin-bottom: 0;
+}
+@media (min-width: 768px) {
+  .tf .tf-tete--colle {
+    margin-bottom: 0;
+  }
+}
+.tf .tf-tete .tf-eyebrow {
+  margin-bottom: 20px;
+}
+.tf .tf-tete .tf-lead {
+  margin-top: 16px;
+}
+
+/* ——— boutons ——— */
+.tf .tf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: 16px;
+  border-radius: var(--tf-r-xs);
+  background: #ffffff;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+.tf .tf-btn:hover {
+  background: #ebebeb;
+}
+.tf .tf-btn--noir {
+  background: #000000;
+  color: #ffffff;
+}
+.tf .tf-btn--noir:hover {
+  background: #262626;
+}
+/* le bouton au filet des cartes de couleur : plus haut, fond transparent */
+.tf .tf-btn--filet {
+  height: 50px;
+  padding-inline: 20px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  color: #ffffff;
+  font-weight: 400;
+}
+.tf .tf-btn--filet:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ——— hero et bandeau de clôture, plein cadre ———
+   La référence pose ces cartes dans une gouttière de 16 seulement, pas 24 :
+   elles débordent volontairement de la colonne de texte. */
+.tf .tf-bleed-wrap {
+  padding-inline: 16px;
+}
+.tf .tf-bleed {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: var(--tf-r-lg);
+  min-height: 480px;
+  padding: 32px;
+  isolation: isolate;
+  color: #ffffff;
+}
+@media (min-width: 768px) {
+  .tf .tf-bleed {
+    min-height: 720px;
+    padding: 64px;
+  }
+}
+.tf .tf-bleed img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Le voile. La référence assombrit à 45 % sur toute la surface, puis
+   renforce vers le bas : la photo reste lisible en haut, le texte lisible
+   en bas. Les deux dégradés reproduisent ce relevé. */
+.tf .tf-bleed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.18) 46%, rgba(0, 0, 0, 0) 78%),
+    rgba(0, 0, 0, 0.45);
+}
+/* la colonne de texte du hero : 1152 de large, 24 entre chaque élément */
+.tf .tf-bleed-corps {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 72rem;
+}
+.tf .tf-bleed .tf-lead {
+  color: rgba(255, 255, 255, 0.88);
+  /* 20/30 sur la référence, sans le grossissement des chapôs de section */
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+/* ——— les trois cartes de couleur ——— */
+.tf .tf-carte-couleur {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 220px;
+  padding: 32px;
+  border-radius: var(--tf-r-md);
+  color: #ffffff;
+}
+@media (min-width: 768px) {
+  .tf .tf-carte-couleur {
+    padding: 40px;
+  }
+}
+.tf .tf-carte-couleur--vert {
+  background: var(--tf-vert);
+}
+.tf .tf-carte-couleur--bleu {
+  background: var(--tf-bleu);
+}
+.tf .tf-carte-couleur--encre {
+  background: var(--tf-ink);
+}
+.tf .tf-carte-couleur .tf-h3 {
+  color: #ffffff;
+}
+.tf .tf-carte-couleur .tf-mono {
+  color: rgba(255, 255, 255, 0.6);
+}
+.tf .tf-carte-couleur .tf-body {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ——— cartes grises ——— */
+.tf .tf-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px;
+  border-radius: var(--tf-r-md);
+  background: var(--tf-soft);
+}
+@media (min-width: 640px) {
+  .tf .tf-carte {
+    padding: 40px;
+  }
+}
+
+/* ——— blocs illustrés ——— */
+.tf .tf-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.tf .tf-bloc-img {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  border-radius: var(--tf-r-sm);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 768px) {
+  .tf .tf-bloc-img {
+    height: 320px;
+  }
+}
+.tf .tf-bloc-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ——— grilles ——— */
+.tf .tf-grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .tf .tf-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tf .tf-grille--principes {
+  gap: 24px;
+}
+.tf .tf-grille--blocs {
+  gap: 48px;
+}
+@media (min-width: 768px) {
+  .tf .tf-grille--blocs {
+    gap: 64px;
+  }
+}
+/* `.tf-colonnes` — les deux colonnes de texte courant de la section
+   « pourquoi » — est parti avec elle le 17/08 : la section redisait le hero
+   et les compteurs. Le relevé de la référence est dans `lib/tarifs.ts`. */
+
+/* la liste repliable — barre de filtres, groupes, lignes de postes — est
+   partie le 17/08 avec la section « ce que couvre chaque ligne » : elle
+   redisait /offres et /integrations. Son composant client a suivi. */
+
+@media (prefers-reduced-motion: reduce) {
+  .tf .tf-btn {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /INTEGRATIONS — FAMILLES REPLIÉES (07/08/2026, Teo : « un logo par
+   section, un bouton voir plus avec un fondu »)
+
+   Les 29 cartes d'un coup saturaient la page. Chaque famille n'ouvre plus
+   que sur sa première carte ; les suivantes vivent derrière .o-plus, une
+   tuile douce qui occupe les colonnes libres de la rangée (lg:col-span-3)
+   et qui EST le bouton — pas de bouton flottant sous une grille trouée.
+
+   Le fondu est un masque, pas un dégradé peint : posé sur l'aperçu seul,
+   il s'éteint vers la droite quel que soit le fond dessous, et laisse le
+   libellé « Voir plus » net puisque celui-ci est hors du masque.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.offres .o-plus {
+  display: flex;
+  /* et NON étirée à la hauteur de la carte : une tuile de 261 px pour une
+     rangée de pastilles laissait un grand vide gris à côté de la carte */
+  align-self: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--o-line);
+  border-radius: 15px;
+  background: var(--o-soft);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease;
+}
+.offres .o-plus:hover {
+  background: #f4f4f5;
+  border-color: #d4d4d8;
+}
+
+/* l'aperçu s'éteint vers la droite — « il en reste » dit sans le dire.
+   Le fondu est ancré en PIXELS depuis le bord droit, pas en pourcentage :
+   à 55 % il mordait le milieu d'un mot dès que la famille tenait dans la
+   tuile, ce qui se lisait comme un bug d'affichage et non comme un fondu.
+   Ancré à 88 px, il n'éteint que ce qui déborde vraiment. */
+.offres .o-plus-apercu {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 88px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 88px), transparent 100%);
+}
+.offres .o-plus-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px 7px 9px;
+  border: 1px solid var(--o-line);
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--o-muted-strong);
+}
+
+/* sous 640, la tuile s'empile : côte à côte, le bouton ne laissait que
+   179 px à l'aperçu — le fondu de 88 px en mangeait la moitié, et « Agenda »
+   n'affichait plus qu'une pastille et demie */
+@media (max-width: 639px) {
+  .offres .o-plus {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .offres .o-plus-cta {
+    justify-content: center;
+  }
+  .offres .o-plus-apercu {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 52px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 52px), transparent 100%);
+  }
+}
+
+/* même mesure que .o-btn--ghost : le bouton n'invente pas une troisième
+   taille de contrôle sur une page qui en a déjà deux */
+.offres .o-plus-cta {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 15px;
+  border: 1px solid var(--o-line);
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--o-text);
+  transition: border-color 0.2s ease;
+}
+.offres .o-plus:hover .o-plus-cta {
+  border-color: #d4d4d8;
+}
+
+.offres .o-moins {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--o-line);
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--o-muted-strong);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+.offres .o-moins:hover {
+  background: var(--o-soft);
+  border-color: #d4d4d8;
+  color: var(--o-text);
+}
+
+.offres .o-plus-chev {
+  transition: transform 0.25s var(--ease-out-strong);
+}
+.offres .o-plus:hover .o-plus-chev {
+  transform: translateY(2px);
+}
+.offres .o-plus-chev--haut {
+  transform: rotate(180deg);
+}
+.offres .o-moins:hover .o-plus-chev--haut {
+  transform: rotate(180deg) translateY(2px);
+}
+
+/* ——— entrée des cartes dépliées ———
+   animation CSS et non état React : elle se joue à l'insertion du nœud, et
+   si elle ne se joue pas la carte est simplement là. Une opacité pilotée
+   par React, elle, peut rester bloquée à 0 — c'est-à-dire du vide. */
+@keyframes o-outil-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .offres .o-outil-entre {
+    animation: o-outil-in 0.6s var(--ease-out-strong) backwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .offres .o-plus,
+  .offres .o-moins,
+  .offres .o-plus-cta,
+  .offres .o-plus-chev {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /vos-donnees — système de design isolé (08/08/2026)
+
+   Deuxième référence. Le 07/08 la page reproduisait scale.com/public-sector ;
+   Teo a demandé le 08/08 de tout reprendre sur **scale.com/global-public-sector**,
+   qui est une autre page du même site — même échelle typographique, mais une
+   composition beaucoup plus riche : titre en dégradé, grande carte bleu
+   ardoise, tableau, citation, chiffres, onglets. Le bloc a donc été réécrit
+   en entier plutôt que complété.
+
+   Tout est préfixé `--vd-` / `.vd-` et vit sous `.vd` : supprimer ce bloc
+   supprime la page sans effet de bord.
+
+   Relevé au pixel dans le navigateur (viewport 1440, getComputedStyle) :
+     colonne             1280 max, padding-inline 32 → 112 de gouttière
+     hero                marge 16, rayon 24, min-h 720, padding 64
+     H1 hero             64/67.2 (1.05) ls -0.64px, 3 lignes, dégradé
+                         blanc #fff → #d5cedb → #9786a5 clippé sur le texte
+     H2 section          48/60 (1.25) ls -0.48px — centré OU calé à gauche
+                         selon la section, les deux existent dans la référence
+     titre de carte      24/36 (1.5) ls -0.24px, couleur #212121
+     grand chiffre       40/40, graisse 400, #212121
+     étiquette mono      13/15.6 ls -0.13px, couleur #929292 — PAS de
+                         text-transform : le texte est déjà en capitales.
+                         (L'autre page Scale utilisait 12px/#525252/+1px ;
+                         celle-ci non. C'est bien deux réglages différents.)
+     carte citation      fond #839cb2 (leur token `bg-cloud-slate`), rayon 24
+     cartes grises       fond #f2f2f2, rayon 16, gouttière 16
+     graisse             400 partout, titres compris
+
+   POLICE : la référence est en Aeonik (CoType Foundry), sous licence — on ne
+   peut ni la servir depuis leurs fichiers ni l'acheter à leur place. Hanken
+   Grotesk la remplace : même squelette de grotesque géométrique, même hauteur
+   d'x, 'g' à un étage, 'y' à queue droite. DM Mono porte les étiquettes.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.vd {
+  --vd-text: #000000;
+  --vd-ink: #212121;
+  --vd-muted: rgba(0, 0, 0, 0.7);
+  --vd-eyebrow: #929292;
+  --vd-line: #e5e5e5;
+  --vd-soft: #f2f2f2;
+  --vd-slate: #839cb2;
+  --vd-r-lg: 24px;
+  --vd-r-md: 16px;
+  --vd-r-sm: 8px;
+
+  background: #ffffff;
+  color: var(--vd-text);
+  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* colonne de contenu — 1280 max, 32 de padding : à 1440 la gouttière fait
+   80 px et le premier pixel de texte tombe à 112, la mesure de la référence.
+   `padding-inline` et non `padding`, pour ne pas écraser les `py-*` Tailwind
+   posés sur les mêmes sections (le piège relevé sur .offres le 25/07). */
+.vd .vd-wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+@media (min-width: 768px) {
+  .vd .vd-wrap {
+    padding-inline: 32px;
+  }
+}
+
+/* ——— typographie : tout en 400, c'est la signature de la référence ——— */
+.vd .vd-h1,
+.vd .vd-h2,
+.vd .vd-h3,
+.vd .vd-h4 {
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.vd .vd-h1 {
+  font-size: clamp(2.25rem, 0.5rem + 5vw, 4rem);
+  line-height: 1.05;
+}
+.vd .vd-h2 {
+  font-size: clamp(1.875rem, 1rem + 2.2vw, 3rem);
+  line-height: 1.25;
+}
+.vd .vd-h3 {
+  font-size: clamp(1.25rem, 1rem + 0.6vw, 1.5rem);
+  line-height: 1.5;
+  color: var(--vd-ink);
+}
+.vd .vd-h4 {
+  font-size: clamp(1.5rem, 1rem + 1.4vw, 2rem);
+  line-height: 1.25;
+}
+.vd .vd-lead {
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--vd-muted);
+}
+.vd .vd-body {
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--vd-muted);
+}
+.vd .vd-small {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--vd-muted);
+}
+
+/* Le titre du hero : trois lignes, du blanc au mauve. La référence pose une
+   couleur par MOT (relevé : #fff, #d5cedb, #9786a5) pour simuler un dégradé ;
+   un vrai dégradé clippé sur le texte donne le même rendu et se réécrit sans
+   toucher au balisage quand le titre change. */
+.vd .vd-titre-degrade {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f2f6 26%, #d5cedb 62%, #9786a5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* étiquette de section — 13 px monospace, jamais de text-transform */
+.vd .vd-eyebrow {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--vd-eyebrow);
+}
+
+/* grand chiffre — 40/40, même graisse que le reste */
+.vd .vd-chiffre {
+  font-size: clamp(2rem, 1.4rem + 1.6vw, 2.5rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--vd-ink);
+}
+
+/* ——— boutons ——— */
+.vd .vd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: 16px;
+  border-radius: var(--vd-r-sm);
+  background: #000000;
+  color: #ffffff;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+.vd .vd-btn:hover {
+  background: #262626;
+}
+.vd .vd-btn--ghost {
+  background: transparent;
+  color: #525252;
+  border: 1px solid var(--vd-line);
+}
+.vd .vd-btn--ghost:hover {
+  background: var(--vd-soft);
+  color: var(--vd-text);
+}
+/* le bouton clair du hero : la flèche vit dans un carré noir collé au bord */
+.vd .vd-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  height: 44px;
+  padding-left: 20px;
+  padding-right: 6px;
+  border-radius: var(--vd-r-sm);
+  background: #ffffff;
+  color: #000000;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  transition: background-color 0.2s ease;
+}
+.vd .vd-cta:hover {
+  background: #ebebeb;
+}
+.vd .vd-cta span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+}
+
+/* ——— hero et bandeaux plein cadre ——— */
+.vd .vd-bleed {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: var(--vd-r-lg);
+  min-height: 480px;
+  padding: 32px;
+  isolation: isolate;
+}
+@media (min-width: 768px) {
+  .vd .vd-bleed {
+    min-height: 720px;
+    padding: 64px;
+  }
+}
+.vd .vd-bleed img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Le voile. La référence n'assombrit pas uniformément : un dégradé qui part
+   du noir en bas et s'efface aux deux tiers, pour que la photo reste lisible
+   en haut et le texte lisible en bas. */
+.vd .vd-bleed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.55) 34%, rgba(0, 0, 0, 0.12) 70%, rgba(0, 0, 0, 0.05) 100%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 62%);
+}
+/* bandeau large de mi-page : moins haut, dans la colonne */
+.vd .vd-bleed--bande {
+  min-height: 320px;
+  padding: 28px;
+}
+@media (min-width: 768px) {
+  .vd .vd-bleed--bande {
+    min-height: 420px;
+    padding: 56px;
+  }
+}
+.vd .vd-sur-image {
+  color: #ffffff;
+}
+.vd .vd-sur-image .vd-lead,
+.vd .vd-sur-image .vd-body {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ——— la grande carte bleu ardoise (citation, schéma) ——— */
+.vd .vd-ardoise {
+  background: var(--vd-slate);
+  border-radius: var(--vd-r-lg);
+  color: #ffffff;
+  padding: 32px;
+}
+@media (min-width: 768px) {
+  .vd .vd-ardoise {
+    padding: 64px;
+  }
+}
+
+/* ——— cartes grises ——— */
+.vd .vd-carte {
+  background: var(--vd-soft);
+  border-radius: var(--vd-r-md);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 768px) {
+  .vd .vd-carte {
+    padding: 32px;
+  }
+}
+/* pastille d'icône — 40 px, rayon 10, un ton plus sombre que la carte */
+.vd .vd-chip {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #e6e6e6;
+  color: var(--vd-ink);
+}
+
+/* ——— le tableau « qui reçoit quoi » ——— */
+.vd .vd-tbl {
+  width: 100%;
+  border-collapse: collapse;
+}
+.vd .vd-tbl th {
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: #6b6b6b;
+  text-align: left;
+  padding: 0 20px 12px;
+}
+.vd .vd-tbl td {
+  padding: 16px 20px;
+  vertical-align: middle;
+  border-top: 1px solid var(--vd-line);
+}
+/* une ligne sur deux en gris, comme la référence */
+.vd .vd-tbl tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+.vd .vd-tbl tbody tr:nth-child(even) td:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.vd .vd-tbl tbody tr:nth-child(even) td:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+.vd .vd-tbl-nom {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(1rem, 0.9rem + 0.3vw, 1.25rem);
+  letter-spacing: -0.01em;
+  color: var(--vd-ink);
+}
+.vd .vd-point {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: none;
+}
+/* les pastilles de la colonne de droite */
+.vd .vd-jeton {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding-inline: 12px;
+  border: 1px solid var(--vd-line);
+  border-radius: var(--vd-r-sm);
+  background: #ffffff;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--vd-ink);
+  white-space: nowrap;
+}
+
+/* ——— le sélecteur d'onglets ——— */
+.vd .vd-onglets {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--vd-line);
+  border-radius: 999px;
+  background: #ffffff;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.vd .vd-onglets::-webkit-scrollbar {
+  display: none;
+}
+.vd .vd-onglet {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: #8a8a8a;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.vd .vd-onglet:hover {
+  color: var(--vd-ink);
+}
+.vd .vd-onglet[aria-selected="true"] {
+  background: #ffffff;
+  color: var(--vd-ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* la bande de chiffres du cas d'usage : cellules blanches, filets verticaux */
+.vd .vd-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--vd-line);
+  border-radius: var(--vd-r-sm);
+  overflow: hidden;
+  background: #ffffff;
+}
+.vd .vd-stats > div {
+  padding: 14px 18px;
+  border-left: 1px solid var(--vd-line);
+}
+.vd .vd-stats > div:first-child {
+  border-left: 0;
+}
+
+/* puce de liste — cercle 20 px à filet, coche grise */
+.vd .vd-check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid #d4d4d4;
+  display: grid;
+  place-items: center;
+  color: #8a8a8a;
+}
+
+/* la bande de sous-traitants : marques en toutes lettres, jamais les logos
+   des tiers. Le 05/08 les logos de marques IA ont été retirés du site parce
+   qu'affichés comme signes d'une offre Omega ils se lisaient comme des
+   partenariats — la même règle vaut ici, où il ne s'agit que de nommer des
+   sous-traitants. */
+.vd .vd-marque {
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: #9a9a9a;
+  white-space: nowrap;
+}
+
+/* pied de page noir */
+.vd .vd-pied {
+  background: #000000;
+  color: #ffffff;
+}
+.vd .vd-pied-label {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+/* Une classe portée par les liens de colonne, et non `.vd-pied a` : la ligne
+   de copyright contient elle aussi un lien, qui doit rester en 12 monospace
+   gris et non passer en 14 gras blanc. */
+.vd .vd-pied-lien {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  transition: color 0.2s ease;
+}
+.vd .vd-pied-lien:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+.vd .vd-signature {
+  font-size: clamp(2rem, 6.2vw, 5.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /vos-donnees — le hero qui se replie (08/08/2026)
+
+   Teo : « en haut de la page l'image est pleine, et quand tu glisses elle se
+   réduit dans la position dans laquelle elle est actuellement ».
+
+   Toute la géométrie tient ici ; components/donnees/HeroPlein.tsx ne fait
+   qu'écrire `--vd-p` (0 en haut de page, 1 une fois repliée) et
+   `--vd-hero-plein` (la hauteur mesurée de l'état plein).
+
+   La règle qui rend l'effet sûr : `.vd-hero-scene` — la boîte DANS LE FLUX —
+   ne change jamais de taille. C'est le hero, en absolu à l'intérieur, qui
+   déborde puis rentre. Aucune hauteur animée, donc aucun recalcul de mise en
+   page et aucun saut de la page pendant qu'on défile.
+
+   Sans `data-plein` (pas de JS, ou avant hydratation) rien de tout ça ne
+   s'applique : la scène garde la mise en page statique d'origine.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.vd .vd-hero-scene {
+  position: relative;
+  z-index: 10;
+  padding-inline: 16px;
+  --vd-p: 1;
+  --vd-hero-fin: 480px;
+}
+@media (min-width: 768px) {
+  .vd .vd-hero-scene {
+    --vd-hero-fin: 720px;
+  }
+}
+
+.vd .vd-hero-scene[data-plein] {
+  padding-inline: 0;
+  height: var(--vd-hero-fin);
+}
+
+.vd .vd-hero-scene[data-plein] > .vd-bleed {
+  position: absolute;
+  top: 0;
+  min-height: 0;
+  /* `50% - 50vw` : le pourcentage se résout sur la scène, le vw sur la
+     fenêtre — la différence est exactement la gouttière à franchir pour
+     atteindre le bord de l'écran, y compris au-delà de la colonne de 1440. */
+  left: calc((50% - 50vw) * (1 - var(--vd-p)) + 16px * var(--vd-p));
+  right: calc((50% - 50vw) * (1 - var(--vd-p)) + 16px * var(--vd-p));
+  height: calc(
+    var(--vd-hero-plein, 100svh) +
+      (var(--vd-hero-fin) - var(--vd-hero-plein, 100svh)) * var(--vd-p)
+  );
+  border-radius: calc(24px * var(--vd-p));
+  /* le padding suit le rayon : collé au bord quand l'image est pleine, il
+     reprend ses 64 une fois le cadre formé */
+  padding: calc(24px + 8px * var(--vd-p));
+}
+@media (min-width: 768px) {
+  .vd .vd-hero-scene[data-plein] > .vd-bleed {
+    padding: calc(40px + 24px * var(--vd-p));
+  }
+}
+
+/* `50vw` compte la barre de défilement chez certains navigateurs : un ou deux
+   pixels de trop suffiraient à faire apparaître une barre horizontale. */
+.vd {
+  overflow-x: clip;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* ceinture et bretelles — le composant fige déjà `--vd-p` à 1 */
+  .vd .vd-hero-scene[data-plein] {
+    --vd-p: 1 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /vos-donnees — apparitions au défilement (08/08/2026)
+
+   Teo : « pour les graphs, tu fais un effet qui les fait apparaître ».
+
+   Trois niveaux, du plus gros au plus fin :
+     .vd-monte   la colonne entière monte et se révèle
+     .vd-ap      un élément répété à l'intérieur (ligne de mail, nœud du
+                 moteur, ligne de la base) — décalé par `--i`
+     .vd-trace   un tracé SVG qui se dessine (le cercle du trajet)
+
+   L'ORDRE DES SÉLECTEURS EST LE POINT IMPORTANT. L'état invisible n'est
+   appliqué que sous `[data-anime]`, posé par le composant au montage. Sans
+   JavaScript, ou avant hydratation, rien ne se cache : la page montre tout
+   d'emblée plutôt que de garder un bloc vide pour toujours. `[data-vu]`,
+   posé à l'entrée dans l'écran, rend ensuite les éléments.
+
+   Les durées : 620 ms pour une colonne, 380 ms pour un élément interne,
+   décalage de 70 ms entre éléments. Assez pour qu'on voie la séquence, assez
+   court pour que la lecture ne soit jamais en attente d'une animation.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Les trois jeux ont un `to` EXPLICITE, et ce n'est pas une coquetterie :
+   sans lui, l'image d'arrivée reprend la valeur calculée de l'élément — or
+   c'est justement `opacity: 0` (resp. `stroke-dashoffset: 1`) qui est posé
+   plus bas comme état de départ. L'animation irait de 0 à 0 et rien ne
+   s'afficherait jamais. Bug constaté au premier essai. */
+@keyframes vd-monte-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vd-ap-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vd-trace-in {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* Les pointes de flèche n'animent QUE l'opacité, sans `transform`. En SVG,
+   une propriété CSS `transform` écrase l'attribut `transform` de placement :
+   les cinq pointes, positionnées par `translate(...) rotate(...)`, se
+   retrouvaient empilées en haut à gauche du dessin dès que l'animation
+   démarrait. Constaté à l'écran, corrigé ici. */
+@keyframes vd-pointe-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ——— état de départ : seulement quand le JS a pris la main ——— */
+  .vd [data-anime] .vd-monte,
+  .vd [data-anime] .vd-ap {
+    opacity: 0;
+  }
+  .vd [data-anime] .vd-trace {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  /* ——— arrivée ——— */
+  .vd [data-vu] .vd-monte {
+    animation: vd-monte-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 110ms);
+  }
+  .vd [data-vu] .vd-ap {
+    animation: vd-ap-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    /* `--d` : le retard de la colonne qui contient l'élément, pour que les
+       lignes d'une maquette ne partent qu'une fois sa colonne posée */
+    animation-delay: calc(var(--d, 0ms) + 260ms + var(--i, 0) * 70ms);
+  }
+  .vd [data-vu] .vd-trace {
+    animation: vd-trace-in 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 190ms);
+  }
+
+  /* la pointe de flèche n'apparaît qu'une fois son arc tracé */
+  .vd [data-anime] .vd-pointe {
+    opacity: 0;
+  }
+  .vd [data-vu] .vd-pointe {
+    animation: vd-pointe-in 0.3s ease-out forwards;
+    /* 0,95 s : la pointe se pose juste avant que son arc n'arrive au bout
+       (arc i terminé à i×190 + 1100 ms) — la flèche a l'air d'être poussée
+       par le trait plutôt que de l'attendre. */
+    animation-delay: calc(var(--i, 0) * 190ms + 0.95s);
+  }
 }

@@ -160,7 +160,7 @@ export function DashboardMockup() {
       </div>
       </BrowserFrame>
       <Caption>
-        Le tableau de bord Omega — le cash récupéré par PAYD et les relances
+        Le tableau de bord Omega.AI : le cash récupéré par PAYD et les relances
         de la semaine, en temps réel.
       </Caption>
     </div>
@@ -265,7 +265,7 @@ export function ChatMockup() {
       </div>
 
       <Caption>
-        REVIVE en situation — un client sans commande depuis 14 mois, un
+        REVIVE en situation : un client sans commande depuis 14 mois, un
         rendez-vous pris en deux messages, sur WhatsApp.
       </Caption>
     </div>
@@ -279,10 +279,10 @@ const CODE_LINES: [string, React.ReactNode][] = [
   ["2", <span key="2"><span className="text-[#7ee787]">&lt;rsm:CrossIndustryInvoice&gt;</span>  <span className="text-white/30">&lt;!-- Factur-X · EN 16931 --&gt;</span></span>],
   ["3", <span key="3">  <span className="text-[#7ee787]">&lt;ram:ID&gt;</span><span className="text-white/85">FA-2026-0912</span><span className="text-[#7ee787]">&lt;/ram:ID&gt;</span></span>],
   ["4", <span key="4">  <span className="text-[#7ee787]">&lt;ram:IssueDateTime&gt;</span><span className="text-white/85">2026-09-01</span><span className="text-[#7ee787]">&lt;/ram:IssueDateTime&gt;</span></span>],
-  ["5", <span key="5">  <span className="text-[#7ee787]">&lt;ram:SellerTradeParty&gt;</span><span className="text-white/85">CARMO Toyota Guadeloupe</span><span className="text-[#7ee787]">&lt;/…&gt;</span></span>],
+  ["5", <span key="5">  <span className="text-[#7ee787]">&lt;ram:SellerTradeParty&gt;</span><span className="text-white/85">CARMO Automobiles</span><span className="text-[#7ee787]">&lt;/…&gt;</span></span>],
   ["6", <span key="6">  <span className="text-[#7ee787]">&lt;ram:GrandTotalAmount&gt;</span><span className="text-[#f78320]">12 480,00</span><span className="text-[#7ee787]">&lt;/ram:GrandTotalAmount&gt;</span></span>],
   ["7", <span key="7"><span className="text-[#7ee787]">&lt;/rsm:CrossIndustryInvoice&gt;</span></span>],
-  ["8", <span key="8"><span className="text-white/30">✓ conforme — prête pour le portail public de facturation</span></span>],
+  ["8", <span key="8"><span className="text-white/30">✓ conforme : prête pour le portail public de facturation</span></span>],
 ];
 
 export function CodeMockup() {
@@ -321,7 +321,7 @@ export function CodeMockup() {
         </div>
       </BrowserFrame>
       <Caption>
-        BILLD au travail — une facture convertie au format Factur-X exigé au
+        BILLD au travail : une facture convertie au format Factur-X exigé au
         1ᵉʳ septembre 2026, contrôlée avant émission.
       </Caption>
     </div>

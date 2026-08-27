@@ -58,7 +58,7 @@ const PHOTO: Record<
   },
   REVIVE: {
     src: "/photos/revive-chip.jpg",
-    alt: "Processeur AMD Ryzen sur une carte mère",
+    alt: "Processeur sur une carte mère, gros plan",
     voile: 0.6,
   },
 };
@@ -354,7 +354,7 @@ export default function ServiceDetail({ service }: { service: string }) {
               </div>
             )}
             <p className="mt-4 max-w-md text-[14px] leading-relaxed text-[#52555c]">
-              Le montant exact dépend du moteur et de votre situation — c&apos;est ce
+              Le montant exact dépend du moteur et de votre situation : c&apos;est ce
               que l&apos;audit gratuit chiffre en trente minutes.
             </p>
           </div>

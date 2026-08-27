@@ -133,7 +133,7 @@ export default function Hero() {
           >
             Relance d&apos;impayés, demandes clients, factures fournisseurs :
             douze moteurs qui prennent chacun une tâche précise et la tiennent
-            en continu — sur vos outils actuels, sous votre validation.
+            en continu : sur vos outils actuels, sous votre validation.
           </p>
 
           <a

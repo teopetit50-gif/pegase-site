@@ -25,12 +25,12 @@ const VOLETS: { titre: string; texte: string }[] = [
   {
     titre: "Qui peut en bénéficier",
     texte:
-      "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe, à jour de leurs obligations sociales et fiscales. Les critères précis — effectif, chiffre d'affaires, secteurs prioritaires, plafonds — sont fixés par la Région et évoluent selon les enveloppes votées. Votre éligibilité est vérifiée dès l'audit, avant tout engagement de votre part, jamais après.",
+      "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe, à jour de leurs obligations sociales et fiscales. Les critères précis (effectif, chiffre d'affaires, secteurs prioritaires, plafonds), sont fixés par la Région et évoluent selon les enveloppes votées. Votre éligibilité est vérifiée dès l'audit, avant tout engagement de votre part, jamais après.",
   },
   {
     titre: "Ce que la subvention couvre",
     texte:
-      "La subvention porte sur les dépenses du projet numérique lui-même : l'installation du moteur, son raccordement à vos outils existants, l'accompagnement à la prise en main. Sur une installation devisée, la part restant à votre charge est ramenée à une fraction du montant total — ce qui modifie entièrement le calcul de retour sur investissement d'un moteur de relance ou d'un réceptionniste automatique.",
+      "La subvention porte sur les dépenses du projet numérique lui-même : l'installation du moteur, son raccordement à vos outils existants, l'accompagnement à la prise en main. Sur une installation devisée, la part restant à votre charge est ramenée à une fraction du montant total : ce qui modifie entièrement le calcul de retour sur investissement d'un moteur de relance ou d'un réceptionniste automatique.",
   },
   {
     titre: "Comment le dossier se monte",
@@ -61,8 +61,8 @@ export default function FinancementSection() {
             soutient la transformation numérique des petites entreprises. Il
             finance de 40 à 80 % du coût d&apos;un projet numérique selon le
             poste, dans la limite de 10 000 € par an. Un projet
-            d&apos;automatisation Omega — installation d&apos;un moteur,
-            raccordement à vos outils, formation — entre précisément dans le
+            d&apos;automatisation Omega.AI : installation d&apos;un moteur,
+            raccordement à vos outils, formation : entre précisément dans le
             champ de ce dispositif.
           </p>
         </Reveal>
@@ -92,7 +92,7 @@ export default function FinancementSection() {
                 votées puis consommées, et les dossiers déposés tôt dans
                 l&apos;exercice sont instruits plus vite. Si votre entreprise
                 est éligible, chaque mois d&apos;attente est un mois de
-                subvention potentiellement perdue — et un mois de problème non
+                subvention potentiellement perdue, et un mois de problème non
                 traité.
               </p>
             </div>

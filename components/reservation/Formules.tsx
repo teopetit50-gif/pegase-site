@@ -195,7 +195,7 @@ export default function Formules() {
               </div>
               <p className="mt-1.5 text-[13px] leading-[20px] text-[#616161]">
                 Jusqu&apos;à 10 000 € d&apos;une installation financés par la Région Guadeloupe
-                pour les TPE éligibles. Votre éligibilité est vérifiée pendant
+                pour les entreprises éligibles. Votre éligibilité est vérifiée pendant
                 l&apos;audit, avant tout engagement.
               </p>
             </div>
@@ -221,7 +221,7 @@ export default function Formules() {
             <span className="font-semibold text-[#050505]">
               Vous ne savez pas quel format choisir ?
             </span>{" "}
-            Décrivez votre situation en deux lignes — votre activité, votre commune, ce
+            Décrivez votre situation en deux lignes : votre activité, votre commune, ce
             qui vous coûte le plus cher. On vous propose le format adapté et trois
             créneaux.
           </p>

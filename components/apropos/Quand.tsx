@@ -30,7 +30,7 @@ const ETAPES: Etape[] = [
     onglet: "Audit & chiffrage",
     titre: "Savoir ce que ça coûte avant de décider",
     chapo:
-      "Vous sentez que quelque chose fuit — des devis sans réponse, des factures en retard, des appels manqués — mais personne n'a jamais posé le chiffre. On l'établit avec vous en trente minutes.",
+      "Vous sentez que quelque chose fuit (des devis sans réponse, des factures en retard, des appels manqués), mais personne n'a jamais posé le chiffre. On l'établit avec vous en trente minutes.",
     points: [
       "Passage en revue de vos outils et de vos circuits actuels",
       "Identification du point qui coûte le plus cher, pas du plus visible",

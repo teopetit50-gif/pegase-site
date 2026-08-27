@@ -14,29 +14,32 @@ import {
 } from "@/components/offres/gabarits/types";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /offres/[system] — la fiche d'un moteur
+   /offres/[system] — la page d'un paquet
 
-   25/07/2026 — Teo veut UN design par moteur. Cette route ne fait donc plus
-   que trois choses : résoudre le moteur, normaliser sa fiche, et aiguiller
-   vers le gabarit qui lui est affecté. Tout le rendu vit dans
+   25/07/2026 — Teo veut UN design par page. Cette route ne fait donc que
+   trois choses : résoudre le paquet, normaliser sa fiche, et aiguiller vers
+   le gabarit qui lui est affecté. Tout le rendu vit dans
    components/offres/gabarits/, tous les gabarits partagent le même contrat
    (voir types.ts) : en ajouter un se résume à écrire le composant et à
    poser une ligne dans GABARITS ci-dessous.
 
-   Gabarits en place :
-     home        d'après ocoya.com                       → PAYD
-     integration d'après ocoya.com/integrations/[marque]  → ANSWR, REVIVE
-     publish     d'après ocoya.com/features/publish       → OFFLOAD
+   05/08/2026 — les douze fiches moteur deviennent six pages de paquet, et
+   le segment d'URL passe du nom de code au slug descriptif (`payd` →
+   `relances-impayes`). Chaque paquet hérite du gabarit de son moteur
+   principal, donc aucun design ne bouge. Le nom du dossier reste [system]
+   pour ne pas remuer la route ; c'est bien le slug qui circule dedans.
 
-   Les huit moteurs restants tombent sur `home` par défaut, en attendant que
-   Teo fournisse leur page de référence.
+   Gabarits en place :
+     home        d'après ocoya.com                       → CASHD, PULSE, VAULT
+     integration d'après ocoya.com/integrations/[marque]  → FRONTD, RELOAD
+     publish     d'après ocoya.com/features/publish       → FILED
    ══════════════════════════════════════════════════════════════════════ */
 
 const GABARITS: Record<string, "home" | "integration" | "publish"> = {
-  PAYD: "home",
-  ANSWR: "integration",
-  OFFLOAD: "publish",
-  REVIVE: "integration",
+  CASHD: "home",
+  FRONTD: "integration",
+  FILED: "publish",
+  RELOAD: "integration",
 };
 
 const ALL: MoteurAvecFamille[] = FAMILLES.flatMap((f) =>
@@ -44,7 +47,7 @@ const ALL: MoteurAvecFamille[] = FAMILLES.flatMap((f) =>
 );
 
 export function generateStaticParams() {
-  return ALL.map((m) => ({ system: m.system.toLowerCase() }));
+  return ALL.map((m) => ({ system: m.slug }));
 }
 
 export async function generateMetadata({
@@ -53,10 +56,14 @@ export async function generateMetadata({
   params: Promise<{ system: string }>;
 }): Promise<Metadata> {
   const { system } = await params;
-  const m = ALL.find((x) => x.system.toLowerCase() === system);
-  if (!m) return { title: "Moteur — Omega" };
+  const m = ALL.find((x) => x.slug === system);
+  if (!m) return { title: "Offre | Omega.AI" };
   const fiche = FICHES[m.system];
-  return { title: `${m.title} — Omega`, description: fiche?.pitch };
+  /* 13/08 — la description reprenait le pitch, qui est une accroche : elle
+     travaille au-dessus du pli, le contexte déjà posé. Une meta description
+     travaille sans contexte, dans une liste de résultats. `fiche.meta` porte
+     la version écrite pour cet usage ; sans elle, on retombe sur le pitch. */
+  return { title: `${m.title} | Omega.AI`, description: fiche?.meta ?? fiche?.pitch };
 }
 
 export default async function FicheMoteurPage({
@@ -65,7 +72,7 @@ export default async function FicheMoteurPage({
   params: Promise<{ system: string }>;
 }) {
   const { system } = await params;
-  const idx = ALL.findIndex((x) => x.system.toLowerCase() === system);
+  const idx = ALL.findIndex((x) => x.slug === system);
   if (idx === -1) notFound();
   const m = ALL[idx];
   const fiche = FICHES[m.system];
@@ -76,9 +83,9 @@ export default async function FicheMoteurPage({
     ? fiche.fonctionnement
     : [fiche.fonctionnement];
 
-  /* le rôle du moteur = son titre amputé de son nom (« PAYD — relance… ») */
+  /* le rôle du paquet = son titre amputé de son nom (« CASHD — relance… ») */
   const sansNom = (titre: string, nom: string) =>
-    titre.startsWith(nom) ? titre.slice(nom.length).replace(/^\s*[—–-]\s*/, "") : titre;
+    titre.startsWith(nom) ? titre.slice(nom.length).replace(/^\s*[ : –-]\s*/, "") : titre;
 
   const props = {
     m,
@@ -91,7 +98,7 @@ export default async function FicheMoteurPage({
       system: x.system,
       role: sansNom(x.title, x.system),
       pitch: FICHES[x.system]?.pitch ?? x.benefit,
-      href: `/offres/${x.system.toLowerCase()}`,
+      href: `/offres/${x.slug}`,
     })),
   };
 

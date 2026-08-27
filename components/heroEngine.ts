@@ -185,7 +185,7 @@ void main(){
   vec3 col; float amp;
   if      (cs < 0.070) { col = vec3(0.969, 0.514, 0.125); amp = 1.35; } // braise #f78320
   else if (cs < 0.115) { col = vec3(0.878, 0.702, 0.255); amp = 1.25; } // or #e0b341
-  else if (cs < 0.130) { col = vec3(1.0);                 amp = 0.90; } // blanc — pics seulement
+  else if (cs < 0.130) { col = vec3(1.0);                 amp = 0.90; } // blanc : pics seulement
   else                 { col = vec3(0.843, 0.863, 0.910); amp = 0.11; } // poussière #d7dce8, alpha bas
   // les particules rapides chauffent — modérément, pour ne pas blanchir la poussière
   col *= 0.62 + min(speed * 0.45, 0.95);
@@ -395,9 +395,9 @@ export async function createHeroScene(
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(
     new THREE.Vector2(mobile ? 240 : 512, mobile ? 240 : 512),
-    mobile ? 0.45 : 0.5, // strength — le bloom ne s'allume que sur le cœur du ruban
+    mobile ? 0.45 : 0.5, // strength, le bloom ne s'allume que sur le cœur du ruban
     0.8, // radius
-    0.55 // threshold — la poussière ne bloome jamais
+    0.55 // threshold : la poussière ne bloome jamais
   );
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
@@ -481,7 +481,7 @@ export async function createHeroScene(
       if (fpsOverlay) fpsOverlay.textContent = `${Math.round(fpsAvg)} fps · ${COUNT.toLocaleString()} pts`;
       if (simTime - lastFpsLog > 3 && simTime < 16) {
         lastFpsLog = simTime;
-        console.info(`[pegase-hero] ${Math.round(fpsAvg)} fps — ${COUNT} particules, palier ${degraded}`);
+        console.info(`[pegase-hero] ${Math.round(fpsAvg)} fps : ${COUNT} particules, palier ${degraded}`);
       }
       // paliers auto : on ignore les 3 premières secondes (compilation des
       // shaders) et on exige deux mesures basses consécutives avant de dégrader

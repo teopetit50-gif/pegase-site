@@ -11,7 +11,9 @@ import {
   DemoFiche,
   PastillesOutils,
 } from "@/components/offres/MediaFiche";
+import BlocFaq from "./BlocFaq";
 import type { GabaritProps } from "./types";
+import { NOMBRES } from "./types";
 
 /* ══════════════════════════════════════════════════════════════════════
    Gabarit « home » — d'après ocoya.com (page d'accueil)
@@ -114,7 +116,7 @@ export default function GabaritHome({
 
               <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
                 <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                  Chiffrer mon cas — audit gratuit
+                  Chiffrer mon cas : audit gratuit
                 </Link>
                 <Link href="#fonctionnement" className="o-btn o-btn--ghost">
                   Comment il tourne
@@ -218,10 +220,13 @@ export default function GabaritHome({
                 data-reveal
                 className="o-card-plate flex w-[300px] shrink-0 flex-col px-7 py-9 sm:w-[343px] sm:px-8 sm:py-10"
               >
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-[#18181b] text-[13px] font-bold text-white">
+                {/* 05/08 — la pastille ronde noire cède la place au numéro en
+                    filigrane (design D). Le texte remonte de la ligne qu'elle
+                    occupait, d'où la marge supérieure qui disparaît. */}
+                <span aria-hidden className="o-num-fantome">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <p className="o-body mt-6">{pt}</p>
+                <p className="o-body">{pt}</p>
               </div>
             ))}
           </div>
@@ -231,10 +236,18 @@ export default function GabaritHome({
       {/* ════════ 4 · INTÉGRATIONS ════════ */}
       <section className="pb-[110px]">
         <div className="o-wrap">
+          {/* 13/08 — ce bloc était identique mot pour mot sur les six paquets.
+              Il dit maintenant, moteur par moteur, QUELS outils sont lus et
+              écrits : un facturier pour CASHD, aucune écriture pour PULSE, un
+              socle placé sous les autres pour VAULT. Repli sur l'ancienne
+              formule si la fiche ne porte pas encore sa copie. */}
           <EnTete
             pastille="Intégrations"
-            titre="Branché sur ce que vous avez."
-            chapo="Messagerie, tableur, paiement, e-commerce, agenda : le moteur lit et écrit là où vous travaillez déjà. Ni compte à créer, ni migration."
+            titre={fiche.sections?.integrationsTitre ?? "Branché sur ce que vous avez."}
+            chapo={
+              fiche.sections?.integrationsChapo ??
+              "Messagerie, tableur, paiement, e-commerce, agenda : le moteur lit et écrit là où vous travaillez déjà. Ni compte à créer, ni migration."
+            }
           />
         </div>
         <div data-reveal className="mt-16">
@@ -246,14 +259,20 @@ export default function GabaritHome({
       <section className="o-wrap pb-[110px]">
         <EnTete
           pastille="En marche"
-          titre="Un déclencheur, une chaîne, votre validation."
-          chapo="Un événement de votre activité déclenche la chaîne — une facture qui dépasse son échéance, un message qui arrive. Chaque étape est lisible, et la dernière vous attend."
+          titre={
+            fiche.sections?.marcheTitre ?? "Un déclencheur, une chaîne, votre validation."
+          }
+          chapo={
+            fiche.sections?.marcheChapo ??
+            "Un événement de votre activité déclenche la chaîne : une facture qui dépasse son échéance, un message qui arrive. Chaque étape est lisible, et la dernière vous attend."
+          }
         />
         <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-3">
           <div data-reveal className="o-card-plate px-8 pb-10 pt-10">
             <h3 className="o-h4">Le moteur en situation</h3>
             <p className="o-body mt-3">
-              Ce que {m.system} produit concrètement, sur un cas type.
+              {fiche.sections?.situationChapo ??
+                `Ce que ${m.system} produit concrètement, sur un cas type.`}
             </p>
             <div className="mt-8">
               <DemoFiche demo={fiche.demo} />
@@ -268,9 +287,12 @@ export default function GabaritHome({
           </div>
           <div data-reveal className="o-card-plate px-8 pb-10 pt-10">
             <h3 className="o-h4">Sur vos outils</h3>
+            {/* PULSE ne fait que lire, VAULT ne fait que contrôler : la
+                formule « lit et écrit » était fausse sur deux des trois pages
+                servies par ce gabarit. */}
             <p className="o-body mt-3">
-              Le moteur lit et écrit dans vos outils actuels. Aucun n&apos;est
-              remplacé, aucun n&apos;est à réapprendre.
+              {fiche.sections?.outilsChapo ??
+                "Le moteur lit et écrit dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre."}
             </p>
             <div className="mt-8">
               <ChaineOutils outils={fiche.outils} />
@@ -292,10 +314,10 @@ export default function GabaritHome({
         <div className="mx-auto mt-20 grid max-w-[1040px] grid-cols-1 gap-8 lg:grid-cols-2">
           {paragraphes.map((para, i) => (
             <div key={i} data-reveal className="o-card-plate flex flex-col p-8 sm:p-10">
-              <span className="o-pill o-pill--xs w-fit">
+              <span aria-hidden className="o-num-fantome">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <p className="o-body mt-6">{para}</p>
+              <p className="o-body">{para}</p>
             </div>
           ))}
           <div data-reveal className="o-card-plate flex flex-col p-8 sm:p-10">
@@ -338,14 +360,19 @@ export default function GabaritHome({
           <div data-reveal>
             <span className="o-pill">Catalogue</span>
           </div>
+          {/* 07/08 — « Onze autres moteurs. » était figé dans le balisage et
+              datait des douze moteurs d'avant le regroupement en paquets : la
+              page annonçait onze cartes au-dessus d'un bandeau qui en montrait
+              trois ou quatre. Le compte est désormais tiré de `autres`, donc
+              il suit le catalogue sans qu'on y repense. */}
           <h2 data-reveal className="o-h2 mt-2.5 max-w-[600px]">
-            Onze autres moteurs.
+            {NOMBRES[autres.length] ?? autres.length} autre
+            {autres.length > 1 ? "s" : ""} système
+            {autres.length > 1 ? "s" : ""}.
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
-            {m.system}{" "}
-            n&apos;est peut-être pas celui à installer en premier.
-            L&apos;audit désigne le moteur au meilleur retour chez vous — et il
-            arrive que ce soit un autre.
+            {fiche.sections?.catalogueChapo ??
+              `${m.system} n'est peut-être pas celui à installer en premier. L'audit désigne le moteur au meilleur retour chez vous, et il arrive que ce soit un autre.`}
           </p>
           <div data-reveal className="mt-5">
             <Link href="/offres" className="o-link">
@@ -364,36 +391,40 @@ export default function GabaritHome({
         <EnTete
           pastille="Compris"
           titre="Ce qui vient avec le moteur."
-          chapo="Le moteur n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
+          chapo={
+            fiche.sections?.comprisChapo ??
+            "Le moteur n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
+          }
         />
         <div className="mx-auto mt-20 grid max-w-[1040px] grid-cols-1 gap-8 lg:grid-cols-2">
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Une file de validation</h3>
             <p className="o-body mt-2.5">
-              Tout ce qui doit partir passe par là. Vous approuvez, corrigez ou
-              suspendez — aussi longtemps que vous le voulez.
+              Tout ce qui doit partir y passe. Vous approuvez, corrigez ou
+              suspendez, aussi longtemps que vous le jugez utile.
             </p>
           </div>
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Un journal de tout ce qui est parti</h3>
             <p className="o-body mt-2.5">
-              Chaque envoi est daté et consultable. Rien ne se passe dont vous ne
-              puissiez retrouver la trace.
+              Chaque envoi est daté, archivé, consultable. Le jour où un client
+              conteste avoir été relancé, la preuve est là.
             </p>
           </div>
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Vos données restent chez vous</h3>
             <p className="o-body mt-2.5">
-              Un espace de données chiffré et séparé pour chaque client, et le
-              strict nécessaire transmis aux modèles à chaque tâche.
+              Un espace chiffré et distinct pour chaque client, hébergé dans
+              l&apos;Union européenne. Seul le strict nécessaire est transmis aux
+              modèles, tâche par tâche.
             </p>
           </div>
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Le Chèque TIC vérifié</h3>
             <p className="o-body mt-2.5">
-              Pour les TPE guadeloupéennes éligibles, une partie de
-              l&apos;installation est financée. L&apos;éligibilité se vérifie
-              pendant l&apos;audit, avant tout engagement.
+              Pour les entreprises guadeloupéennes éligibles, une partie de
+              l&apos;installation est financée. L&apos;éligibilité est vérifiée
+              pendant l&apos;audit, avant tout engagement de votre part.
             </p>
           </div>
         </div>
@@ -404,36 +435,11 @@ export default function GabaritHome({
           26/07 (Teo) — la section « Installé en quelques jours » (les jalons)
           est retirée : le parcours est déjà raconté plus haut, la reprendre en
           grille juste avant la FAQ faisait doublon. `fiche.etapes` continue
-          d'alimenter les autres gabarits. */}
-      <section className="o-wrap pb-[110px]">
-        <div
-          data-reveal
-          className="o-card-plate mx-auto max-w-[800px] px-6 py-14 sm:px-[100px] sm:py-[76px]"
-        >
-          <h3 className="o-h4 text-center" style={{ fontSize: "36px", lineHeight: "1.4" }}>
-            Questions directes
-          </h3>
-          <p className="o-body mt-2.5 text-center">
-            {fiche.sections?.faqChapo ??
-              `Ce qu'on nous demande sur ${m.system} — répondu ici.`}
-          </p>
-          <div className="mt-9">
-            {fiche.faq.map((f) => (
-              <details key={f.q} className="o-faq-item">
-                <summary>
-                  {f.q}
-                  <span className="o-faq-croix" aria-hidden>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
-                  </span>
-                </summary>
-                <p className="o-body pb-6 pr-10">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
+          d'alimenter les autres gabarits.
+
+          13/08 — le balisage part dans BlocFaq, désormais partagé avec les
+          gabarits `integration` et `publish`, qui n'affichaient aucune FAQ. */}
+      <BlocFaq faq={fiche.faq} chapo={fiche.sections?.faqChapo} />
 
       {/* 26/07 (Teo) — la carte de clôture « [MOTEUR] est-il le bon pour vous ? »
           est retirée de ce gabarit. La page se termine sur la FAQ ; l'appel à

@@ -46,7 +46,7 @@ export default function Spotlight() {
                     key={x.cle}
                     type="button"
                     onClick={() => setI(j)}
-                    aria-label={`Témoignage ${j + 1} — ${x.entreprise}`}
+                    aria-label={`Témoignage ${j + 1} : ${x.entreprise}`}
                     aria-current={j === i}
                     className={`h-2 rounded-full transition-all duration-300 ${
                       j === i
@@ -83,7 +83,7 @@ export default function Spotlight() {
                 {c.nom}
               </div>
               <div className="text-[13px] text-black/50">
-                {c.role} — {c.entreprise}
+                {c.role} : {c.entreprise}
                 {c.secteur ? ` · ${c.secteur}` : ""}
               </div>
             </div>

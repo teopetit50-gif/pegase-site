@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Marque « Sur mesure » — redessinée d'après le rendu fourni par Teo le
+       07/08/2026. Les six autres paquets ont des PNG alpha découpés par
+       PEGASE/decouper-logos-paquets.py ; ici le motif est purement
+       géométrique (anneau ouvert + trois curseurs), donc il est tracé
+       directement en SVG : net à toutes les tailles, ~1 ko, et modifiable
+       sans repasser par le script.
+
+       Sert de MASQUE comme les autres : c'est le canal alpha qui porte le
+       signe, la couleur vient du `background` de .o-marque-signe.
+
+       Géométrie relevée sur le rendu source et ramenée à un cercle de
+       centre (100,100) et de rayon 72. Les rails sont INTERROMPUS de part et
+       d'autre de chaque molette : en masque on ne peut pas percer un trou
+       par-dessus un trait déjà posé, donc le vide de l'anneau doit rester
+       vierge dès le tracé.
+
+       07/08/2026, second passage (Teo : « le sur-mesure est bugé ») —
+       l'anneau était tracé en DEUX arcs : un grand de 290°, puis un second
+       en bas à gauche qui recouvrait une portion déjà tracée sans partir du
+       même point du cercle. Le raccord faisait un coude anguleux, et le
+       signe se lisait comme un tracé raté plutôt que comme un anneau
+       volontairement ouvert. Un seul arc de 305° désormais, une seule
+       ouverture, en haut à gauche comme sur le rendu source. -->
+
+  <g stroke="#000" stroke-width="9" stroke-linecap="round">
+    <!-- l'anneau, ouvert en haut à gauche — un seul arc, aucun raccord -->
+    <path d="M 78.4 31.3 A 72 72 0 1 1 31.3 78.4" />
+
+    <!-- rails, coupés autour des molettes -->
+    <path d="M 62 73 H 104" />
+    <path d="M 128 73 H 136" />
+    <path d="M 53 102 H 68" />
+    <path d="M 92 102 H 144" />
+    <path d="M 66 132 H 100" />
+    <path d="M 124 132 H 135" />
+  </g>
+
+  <!-- molettes : anneaux, centre évidé -->
+  <g stroke="#000" stroke-width="7" fill="none">
+    <circle cx="116" cy="73" r="8.5" />
+    <circle cx="80" cy="102" r="8.5" />
+    <circle cx="112" cy="132" r="8.5" />
+  </g>
+</svg>

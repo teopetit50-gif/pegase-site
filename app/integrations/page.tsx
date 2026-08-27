@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import { SystemLogo } from "@/components/logos";
+import FamilleOutils, { type Outil } from "@/components/integrations/FamilleOutils";
 import { Chevron, OUTILS } from "@/components/offres/MediaMoteurs";
 import {
   FAMILLES_OUTILS,
@@ -36,49 +37,43 @@ import {
    C'est très maigre pour une page qui doit lever une objection, donc les
    familles structurent la grille, et deux sections suivent (le déroulé du
    raccordement, puis ce que consomment les quatre moteurs les plus
-   installés). Rien d'inventé : les 29 outils sont ceux déjà déclarés dans
-   MediaMoteurs, et chaque phrase décrit un usage réel.
+   installés). Rien d'inventé : les 28 outils sont ceux déjà déclarés dans
+   MediaMoteurs, et chaque phrase décrit un usage réel. Ce sont les outils
+   DU CLIENT : aucun outil de notre propre stack n'a sa place ici (n8n en a
+   été retiré le 14/08 — voir le garde-fou en tête d'OUTILS).
+
+   07/08/2026 — 29 cartes ouvertes d'un coup, c'était trop (Teo). Chaque
+   famille n'ouvre plus que sur sa première carte, le reste passe derrière
+   un « Voir plus » : voir components/integrations/FamilleOutils.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "Intégrations — Omega",
+  title: "Intégrations | Omega.AI",
   description:
-    "Les moteurs Omega se branchent sur les outils que vous avez déjà : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Ni compte à créer, ni migration — vos données vivent dans un espace dédié, chiffré, hébergé dans l'UE.",
+    "Les moteurs Omega.AI se branchent sur les outils que vous avez déjà : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Ni compte à créer, ni migration : vos données vivent dans un espace dédié, chiffré, hébergé dans l'UE.",
 };
 
-type Marque = (typeof OUTILS)[number];
-
 /* Regroupement par famille, dans l'ordre déclaré. Un outil sans fiche
-   n'apparaît pas : on ne comble pas un manque par une phrase inventée. */
-const PAR_FAMILLE: { famille: Famille; outils: Marque[] }[] = FAMILLES_OUTILS.map(
+   n'apparaît pas : on ne comble pas un manque par une phrase inventée.
+   Le logo est aplati ici (title/hex/path) : FamilleOutils est un composant
+   client, il ne doit recevoir que du sérialisable — surtout pas le module
+   simple-icons entier, qui partirait alors dans le bundle. */
+const PAR_FAMILLE: { famille: Famille; outils: Outil[] }[] = FAMILLES_OUTILS.map(
   (famille) => ({
     famille,
-    outils: OUTILS.filter((o) => OUTIL_INFOS[o.title]?.famille === famille),
+    outils: OUTILS.filter((o) => OUTIL_INFOS[o.title]?.famille === famille).map(
+      (o) => ({
+        title: o.title,
+        hex: o.hex,
+        path: o.path,
+        famille: OUTIL_INFOS[o.title].famille,
+        role: OUTIL_INFOS[o.title].role,
+      })
+    ),
   })
 ).filter((g) => g.outils.length > 0);
 
 const TOTAL = PAR_FAMILLE.reduce((n, g) => n + g.outils.length, 0);
-
-function CarteOutil({ marque }: { marque: Marque }) {
-  const info = OUTIL_INFOS[marque.title];
-  return (
-    <div data-reveal className="o-card flex flex-col p-[30px]">
-      <span
-        className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full border border-[#f4f4f5] bg-white"
-        aria-hidden
-      >
-        <svg viewBox="0 0 24 24" width="26" height="26" fill={`#${marque.hex}`}>
-          <path d={marque.path} />
-        </svg>
-      </span>
-      <p className="mt-6 text-[16px] font-medium leading-[28.8px] text-[#09090b]">
-        {marque.title}
-      </p>
-      <p className="o-small !leading-[25.2px]">{info.famille}</p>
-      <p className="o-body mt-3 flex-1">{info.role}</p>
-    </div>
-  );
-}
 
 export default function Integrations() {
   return (
@@ -106,7 +101,7 @@ export default function Integrations() {
             <p data-reveal className="o-lead mt-5 max-w-[640px]">
               Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité :
               les moteurs lisent et écrivent là où vous travaillez. Ni compte à
-              créer, ni migration, ni logiciel à apprendre — et vos données
+              créer, ni migration, ni logiciel à apprendre, et vos données
               vivent dans un espace dédié, chiffré, hébergé dans l&apos;Union
               européenne.
             </p>
@@ -129,21 +124,12 @@ export default function Integrations() {
         <section data-monde="clair" className="py-[100px]">
           <div className="o-wrap">
             {PAR_FAMILLE.map((g, i) => (
-              <div key={g.famille} className={i > 0 ? "mt-16" : undefined}>
-                <div className="flex items-baseline gap-3">
-                  <h2 data-reveal className="o-h5">
-                    {g.famille}
-                  </h2>
-                  <span className="o-small !text-[13px]">
-                    {g.outils.length}
-                  </span>
-                </div>
-                <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                  {g.outils.map((o) => (
-                    <CarteOutil key={o.title} marque={o} />
-                  ))}
-                </div>
-              </div>
+              <FamilleOutils
+                key={g.famille}
+                famille={g.famille}
+                outils={g.outils}
+                className={i > 0 ? "mt-16" : undefined}
+              />
             ))}
           </div>
         </section>
@@ -199,14 +185,14 @@ export default function Integrations() {
               <p data-reveal className="o-lead mt-4 max-w-[650px]">
                 Les quatre moteurs les plus installés et les outils qu&apos;ils
                 consomment réellement. Un moteur n&apos;a pas besoin de toute
-                votre pile — seulement de ce qui porte l&apos;information.
+                votre pile : seulement de ce qui porte l&apos;information.
               </p>
             </div>
             <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {MOTEUR_OUTILS.map((m) => (
                 <Link
                   key={m.system}
-                  href={`/offres/${m.system.toLowerCase()}`}
+                  href={`/offres/${m.slug}`}
                   data-reveal
                   className="o-card-soft flex flex-col p-7 transition-colors duration-200 hover:bg-white"
                 >
@@ -263,7 +249,7 @@ export default function Integrations() {
               <p data-reveal className="o-lead mt-5 max-w-[620px]">
                 Cette liste n&apos;est pas une limite, c&apos;est ce qui est
                 déjà raccordé. Dès qu&apos;un outil expose ses données, un
-                moteur peut s&apos;y brancher — et si ce n&apos;est pas le cas,
+                moteur peut s&apos;y brancher, et si ce n&apos;est pas le cas,
                 on vous le dit pendant l&apos;audit plutôt qu&apos;après.
               </p>
               <div data-reveal className="mt-8">

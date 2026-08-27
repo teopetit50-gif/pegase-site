@@ -15,7 +15,7 @@ import { SITE_BASELINE, SITE_NOM } from "@/lib/site";
    et l'image est mise en cache.
    ══════════════════════════════════════════════════════════════════════ */
 
-export const alt = `${SITE_NOM} — ${SITE_BASELINE}`;
+export const alt = `${SITE_NOM} : ${SITE_BASELINE}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -72,7 +72,7 @@ export default async function Image() {
               letterSpacing: "0.04em",
             }}
           >
-            GUADELOUPE
+            AUTOMATISATION
           </div>
         </div>
 
@@ -99,7 +99,7 @@ export default async function Image() {
             }}
           >
             Douze moteurs d&apos;automatisation installés sur les outils que
-            vous avez déjà — relance d&apos;impayés, réponses clients, factures
+            vous avez déjà : relance d&apos;impayés, réponses clients, factures
             fournisseurs.
           </div>
         </div>

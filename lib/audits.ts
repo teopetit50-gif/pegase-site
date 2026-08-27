@@ -39,8 +39,10 @@ export type Remede = {
 };
 
 export type MoteurReco = {
-  /* id système tel que dans lib/content.ts — sert au lien /offres/[system] */
+  /* code du paquet tel que dans lib/content.ts (CASHD, FRONTD…) */
   system: string;
+  /* slug de sa page — /offres/relances-impayes, etc. */
+  slug: string;
   raison: string;
   douleurs: string; /* « douleurs 1 et 2 » — le renvoi lisible */
 };
@@ -68,23 +70,23 @@ export const AUDITS: Audit[] = [
     slug: "demo-btp",
     entreprise: "Constructions Alizés",
     activite: "Entreprise générale du bâtiment",
-    commune: "Baie-Mahault, Guadeloupe",
+    commune: "Zone d'activité",
     date: "2 août 2026",
     demo: true,
     intro:
-      "Une équipe en chantier la journée, la gestion le soir : les devis, les relances et la saisie passent après le métier, parce qu'il faut bien que le métier passe d'abord. Rien de cassé — mais du chiffre part chaque mois par les mêmes trous, et personne n'a le temps de les mesurer. Cette page prépare l'entretien : elle dit ce qu'on pense avoir compris, et vous nous corrigez à l'oral.",
+      "Une équipe en chantier la journée, la gestion le soir : les devis, les relances et la saisie passent après le métier, parce qu'il faut bien que le métier passe d'abord. Rien de cassé, mais du chiffre part chaque mois par les mêmes trous, et personne n'a le temps de les mesurer. Cette page prépare l'entretien : elle dit ce qu'on pense avoir compris, et vous nous corrigez à l'oral.",
     douleurs: [
       {
         titre: "Les devis partent, le suivi s'arrête",
         texte:
-          "Un devis envoyé vit rarement une relance organisée : le chantier en cours prend le dessus, la relance se fait quand on y pense — souvent tard, parfois jamais. Le client, lui, a reçu d'autres devis entre-temps, et c'est fréquemment le premier qui rappelle qui signe.",
+          "Un devis envoyé vit rarement une relance organisée : le chantier en cours prend le dessus, la relance se fait quand on y pense, souvent tard, parfois jamais. Le client, lui, a reçu d'autres devis entre-temps, et c'est fréquemment le premier qui rappelle qui signe.",
         mesure:
           "Le nombre de devis restés sans réponse sur les trois derniers mois, leur montant cumulé, et le délai moyen entre l'envoi et la première relance.",
       },
       {
         titre: "Les factures attendent la fin du chantier",
         texte:
-          "La relance d'impayé se déclenche à la reprise administrative — le soir, le week-end — pas à la date d'échéance. Chaque semaine de décalage s'ajoute au retard de paiement, et une relance écrite sous pression sort plus sèche qu'il ne faudrait avec un client qu'on veut garder.",
+          "La relance d'impayé se déclenche à la reprise administrative (le soir, le week-end), pas à la date d'échéance. Chaque semaine de décalage s'ajoute au retard de paiement, et une relance écrite sous pression sort plus sèche qu'il ne faudrait avec un client qu'on veut garder.",
         mesure:
           "L'encours échu au jour de l'audit, le retard de paiement moyen constaté sur six mois, et la trésorerie que ça immobilise.",
       },
@@ -98,53 +100,56 @@ export const AUDITS: Audit[] = [
       {
         titre: "La saisie fournisseurs se paie en week-ends",
         texte:
-          "Les factures fournisseurs s'accumulent en pochette ou en pièces jointes, puis se saisissent d'un bloc — un travail d'écran pris sur le temps personnel, où l'erreur de saisie coûte cher et où la pièce égarée se découvre au bilan.",
+          "Les factures fournisseurs s'accumulent en pochette ou en pièces jointes, puis se saisissent d'un bloc : un travail d'écran pris sur le temps personnel, où l'erreur de saisie coûte cher et où la pièce égarée se découvre au bilan.",
         mesure:
           "Les heures par mois passées à saisir et classer, et le nombre de pièces manquantes à la dernière clôture.",
       },
     ],
     remedes: [
       {
-        titre: "Relancer les devis en attente — dix minutes",
+        titre: "Relancer les devis en attente, dix minutes",
         texte:
           "Listez vos devis sans réponse depuis plus de huit jours. Collez le prompt ci-dessous dans ChatGPT ou Claude, remplacez les crochets, envoyez le résultat par WhatsApp ou par mail. Le message relance sans mettre la pression.",
         prompt:
-          "Tu écris pour une entreprise du bâtiment en Guadeloupe. Rédige un court message de suivi (quatre phrases maximum, vouvoiement, ton cordial et direct, sans jargon commercial) pour un devis resté sans réponse : client [NOM], devis [OBJET] envoyé le [DATE], montant [MONTANT] €. Termine par une question simple qui appelle une réponse, par exemple : souhaitez-vous qu'on cale la date d'intervention ? Pas d'objet de mail, pas de formule pompeuse, pas de « j'espère que vous allez bien ».",
+          "Tu écris pour une entreprise du bâtiment. Rédige un court message de suivi (quatre phrases maximum, vouvoiement, ton cordial et direct, sans jargon commercial) pour un devis resté sans réponse : client [NOM], devis [OBJET] envoyé le [DATE], montant [MONTANT] €. Termine par une question simple qui appelle une réponse, par exemple : souhaitez-vous qu'on cale la date d'intervention ? Pas d'objet de mail, pas de formule pompeuse, pas de « j'espère que vous allez bien ».",
         moteur: "PAYD",
       },
       {
         titre: "Le compte rendu de chantier, dicté",
         texte:
-          "Après une visite, dictez ce que vous avez vu dans votre téléphone — clavier vocal ou mémo transcrit — puis collez le texte brut avec ce prompt. Vous obtenez un compte rendu propre, à envoyer au client ou à garder au dossier.",
+          "Après une visite, dictez ce que vous avez vu dans votre téléphone, clavier vocal ou mémo transcrit, puis collez le texte brut avec ce prompt. Vous obtenez un compte rendu propre, à envoyer au client ou à garder au dossier.",
         prompt:
           "Voici mes notes dictées après une visite de chantier, en vrac : [COLLER LES NOTES]. Transforme-les en compte rendu structuré : chantier, date, constat, décisions prises, prochaines étapes avec qui fait quoi, points de vigilance. Garde mes mots, n'ajoute rien que je n'ai pas dit, et signale entre crochets ce qui manque.",
       },
       {
         titre: "Le point trésorerie du lundi",
         texte:
-          "Copiez trois colonnes de votre tableur — client, montant, échéance — et collez-les avec ce prompt. Vous obtenez l'ordre de relance de la semaine. C'est exactement ce qu'un moteur fera ensuite chaque matin, tout seul.",
+          "Copiez trois colonnes de votre tableur (client, montant, échéance), et collez-les avec ce prompt. Vous obtenez l'ordre de relance de la semaine. C'est exactement ce qu'un moteur fera ensuite chaque matin, tout seul.",
         prompt:
-          "Voici mes factures en attente (client, montant, date d'échéance) : [COLLER LES LIGNES]. Classe-les en trois groupes : en retard (de la plus ancienne à la plus récente), à échéance cette semaine, à venir. Pour chaque facture en retard, indique le nombre de jours de retard et propose une phrase de relance adaptée à l'ancienneté — cordiale sous quinze jours, ferme au-delà de trente.",
+          "Voici mes factures en attente (client, montant, date d'échéance) : [COLLER LES LIGNES]. Classe-les en trois groupes : en retard (de la plus ancienne à la plus récente), à échéance cette semaine, à venir. Pour chaque facture en retard, indique le nombre de jours de retard et propose une phrase de relance adaptée à l'ancienneté : cordiale sous quinze jours, ferme au-delà de trente.",
         moteur: "PAYD",
       },
     ],
     moteurs: [
       {
-        system: "PAYD",
+        system: "CASHD",
+        slug: "relances-impayes",
         raison:
-          "Relance vos devis puis vos factures aux intervalles que vous choisissez, avec des messages que vous validez. La relance part à la date d'échéance — pas quand la journée le permet enfin.",
+          "Relance vos devis puis vos factures aux intervalles que vous choisissez, avec des messages que vous validez. La relance part à la date d'échéance : pas quand la journée le permet enfin.",
         douleurs: "douleurs 1 et 2",
       },
       {
-        system: "ANSWR",
+        system: "FRONTD",
+        slug: "demandes-clients",
         raison:
-          "Reçoit les demandes — mail, WhatsApp — dans une seule file, répond aux questions simples sans jamais donner de prix ni de délai, et vous transmet le reste. Plus rien n'attend quarante-huit heures.",
+          "Reçoit les demandes (mail, WhatsApp), dans une seule file, répond aux questions simples sans jamais donner de prix ni de délai, et vous transmet le reste. Plus rien n'attend quarante-huit heures.",
         douleurs: "douleur 3",
       },
       {
-        system: "OFFLOAD",
+        system: "FILED",
+        slug: "factures-fournisseurs",
         raison:
-          "Lit les factures fournisseurs reçues par mail, en extrait les montants et les range au journal d'achats — prêtes pour le cabinet, sans écran le dimanche.",
+          "Lit les factures fournisseurs reçues par mail, en extrait les montants et les range au journal d'achats : prêtes pour le cabinet, sans écran le dimanche.",
         douleurs: "douleur 4",
       },
     ],

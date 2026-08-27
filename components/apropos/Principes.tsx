@@ -24,13 +24,13 @@ const PRINCIPES: Principe[] = [
     citation:
       "Vous fixez la frontière : ce que le moteur traite seul, ce qui vous est transmis. Toutes les conversations sont archivées et consultables à tout moment.",
     glose:
-      "Cette règle ne se négocie pas à l'installation — elle est la condition de fonctionnement du moteur. Les premières semaines, tout vous est soumis avant envoi ; ensuite vous choisissez ce qui part seul et ce qui attend votre accord.",
+      "Cette règle ne se négocie pas à l'installation : elle est la condition de fonctionnement du moteur. Les premières semaines, tout vous est soumis avant envoi ; ensuite vous choisissez ce qui part seul et ce qui attend votre accord.",
   },
   {
     cle: "chiffre",
     titre: "On chiffre avant de vendre",
     citation:
-      "L'audit dure trente minutes et se termine par un chiffre : ce que votre difficulté principale vous coûte réellement, et la marche à suivre — avec ou sans nous.",
+      "L'audit dure trente minutes et se termine par un chiffre : ce que votre difficulté principale vous coûte réellement, et la marche à suivre, avec ou sans nous.",
     glose:
       "Un moteur qui ne rembourse pas son installation n'a pas à être installé. C'est pour cela que l'audit précède toujours le devis, qu'il est gratuit, et qu'il peut parfaitement conclure qu'aucun moteur n'est justifié.",
   },
@@ -40,7 +40,7 @@ const PRINCIPES: Principe[] = [
     citation:
       "Aucun logiciel à adopter, aucune migration : le raccordement se fait sur votre boîte mail, votre tableur et WhatsApp. Vos numéros et vos adresses ne changent pas.",
     glose:
-      "Vos clients ne voient aucune différence, sinon qu'on leur répond plus vite. Et si vous arrêtez un moteur, vous récupérez vos outils exactement dans l'état où ils étaient — il n'y a rien à désinstaller.",
+      "Vos clients ne voient aucune différence, sinon qu'on leur répond plus vite. Et si vous arrêtez un moteur, vous récupérez vos outils exactement dans l'état où ils étaient : il n'y a rien à désinstaller.",
   },
 ];
 
@@ -113,7 +113,7 @@ export default function Principes() {
                 {p.titre}
               </div>
               <div className="text-[13px] text-black/50">
-                Règle du desk Omega — Guadeloupe
+                Règle du desk Omega.AI
               </div>
             </div>
           </div>

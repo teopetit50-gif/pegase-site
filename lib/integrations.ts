@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════════
    /integrations — métadonnées des outils (30/07/2026)
 
-   Page de référence : ocoya.com/integrations. Les 29 marques et leurs logos
+   Page de référence : ocoya.com/integrations. Les 28 marques et leurs logos
    vivent déjà dans components/offres/MediaMoteurs (tableau OUTILS, tiré de
    simple-icons) ; ce fichier n'ajoute que ce que la fiche affiche en plus du
    logo — la famille et la phrase de raccordement.
@@ -48,7 +48,7 @@ type Fiche = { famille: Famille; role: string };
 export const OUTIL_INFOS: Record<string, Fiche> = {
   Gmail: {
     famille: "Messagerie",
-    role: "Le moteur lit les fils entrants, rédige les relances et les dépose en brouillon dans votre boîte — l'envoi reste votre geste.",
+    role: "Le moteur lit les fils entrants, rédige les relances et les dépose en brouillon dans votre boîte, l'envoi reste votre geste.",
   },
   WhatsApp: {
     famille: "Messagerie",
@@ -60,15 +60,15 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   "Google Sheets": {
     famille: "Tableur & base",
-    role: "La plupart des TPE pilotent leur activité dans un tableur. Le moteur y lit l'encours et y réécrit l'état de chaque relance.",
+    role: "La plupart des petites entreprises pilotent leur activité dans un tableur. Le moteur y lit l'encours et y réécrit l'état de chaque relance.",
   },
   Airtable: {
     famille: "Tableur & base",
-    role: "Même rôle qu'un tableur, avec des vues par statut — utile quand plusieurs personnes suivent le même encours.",
+    role: "Même rôle qu'un tableur, avec des vues par statut, utile quand plusieurs personnes suivent le même encours.",
   },
   Notion: {
     famille: "Tableur & base",
-    role: "Base de connaissances du réceptionniste : horaires, tarifs, conditions. ANSWR y puise ses réponses au lieu de les inventer.",
+    role: "Base de connaissances du réceptionniste : horaires, tarifs, conditions. FRONTD y puise ses réponses au lieu de les inventer.",
   },
   "Google Drive": {
     famille: "Fichiers",
@@ -80,7 +80,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Stripe: {
     famille: "Paiement",
-    role: "Le moteur sait ce qui est encaissé et arrête de relancer une facture réglée — c'est ce qui évite la relance de trop.",
+    role: "Le moteur sait ce qui est encaissé et arrête de relancer une facture réglée, c'est ce qui évite la relance de trop.",
   },
   PayPal: {
     famille: "Paiement",
@@ -88,7 +88,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Shopify: {
     famille: "E-commerce",
-    role: "Historique de commandes lu par REVIVE pour identifier les clients dormants et les classer par valeur et par récence.",
+    role: "Historique de commandes lu par RELOAD pour identifier les clients dormants et les classer par valeur et par récence.",
   },
   WooCommerce: {
     famille: "E-commerce",
@@ -112,16 +112,16 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   QuickBooks: {
     famille: "Comptabilité",
-    role: "Les pièces classées partent en dossier complet, avec leurs champs comptables extraits — ni ressaisie, ni pièce manquante.",
+    role: "Les pièces classées partent en dossier complet, avec leurs champs comptables extraits, ni ressaisie, ni pièce manquante.",
   },
   Sage: {
     famille: "Comptabilité",
     role: "Même transmission structurée vers le cabinet, au format attendu par l'outil.",
   },
-  n8n: {
-    famille: "Automatisation",
-    role: "Le socle sur lequel tournent les moteurs : il orchestre chaque tâche entre vos outils et votre espace de données dédié.",
-  },
+  /* ⚠ 14/08/2026 — la fiche n8n a été RETIRÉE. Elle disait « le socle sur
+     lequel tournent les moteurs » : c'était nommer notre outil interne sur
+     une page publique. Nos automatisations ne se nomment pas ; seuls les
+     outils du client figurent ici. Ne pas la remettre. */
   Zapier: {
     famille: "Automatisation",
     role: "Passerelle vers les outils métier que le desk ne raccorde pas en direct.",
@@ -166,27 +166,33 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
 };
 
-/* Ce que les quatre moteurs les plus installés consomment réellement. */
+/* Ce que les quatre paquets qui s'installent consomment réellement. */
 export const MOTEUR_OUTILS = [
   {
-    system: "PAYD",
+    system: "CASHD",
+    slug: "relances-impayes",
     role: "Relance devis & factures",
     outils: ["Gmail", "Google Sheets", "Stripe", "WhatsApp"],
   },
   {
-    system: "ANSWR",
-    role: "Réceptionniste 24/7",
+    system: "FRONTD",
+    slug: "demandes-clients",
+    role: "Demandes entrantes & avis",
     outils: ["WhatsApp", "Gmail", "Google Calendar", "Notion"],
   },
   {
-    system: "OFFLOAD",
+    system: "FILED",
+    slug: "factures-fournisseurs",
     role: "Factures fournisseurs",
     outils: ["Gmail", "Google Drive", "QuickBooks", "Sage"],
   },
   {
-    system: "REVIVE",
-    role: "Clients dormants",
-    outils: ["Shopify", "Google Sheets", "Mailchimp", "Gmail"],
+    system: "RELOAD",
+    slug: "nouvelles-affaires",
+    role: "Clients dormants & marchés publics",
+    /* « MailChimp » : même casse que le `title` de simple-icons et que la
+       clé d'OUTIL_INFOS plus haut, sans quoi le logo saute au rendu. */
+    outils: ["Shopify", "Google Sheets", "MailChimp", "Gmail"],
   },
 ];
 
@@ -197,7 +203,7 @@ export const RACCORDEMENT = [
     n: "01",
     titre: "On liste ce que vous avez",
     texte:
-      "Pendant l'audit, on relève les outils réellement utilisés — pas ceux de la plaquette. Un tableur et une boîte mail suffisent à faire tourner un moteur.",
+      "Pendant l'audit, on relève les outils réellement utilisés : pas ceux de la plaquette. Un tableur et une boîte mail suffisent à faire tourner un moteur.",
   },
   {
     n: "02",

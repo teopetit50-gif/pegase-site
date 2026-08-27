@@ -236,3 +236,135 @@ payd-comptoir.jpg  (1600x1200, 247 Ko)
     Photo   : https://unsplash.com/photos/1778790508237-3c6cb00f152a
     Licence : Unsplash License — https://unsplash.com/license
     Sujet   : A man pays a smiling woman at a cafe counter.
+
+==============================================================
+
+Mise à jour du 08/08/2026 — 5 fichiers pour /vos-donnees, page refaite
+sur la référence scale.com/global-public-sector. Largeur 1600 px,
+qualité 78, comme le reste de la bibliothèque. Aucune photo Unsplash+
+(bibliothèque payante) : les cinq viennent de la bibliothèque gratuite.
+Les visuels précédents de la page (offload-chip, revive-chip,
+regle-execution, regle-proximite, brief, payd, answr, billd,
+histoire-constat) ne servent plus /vos-donnees mais restent utilisés
+ailleurs sur le site — ne pas les supprimer.
+
+==============================================================
+
+donnees-couloir.jpg  (1600x1067)  — hero
+    Auteur  : Paul Hanaoka
+    Profil  : https://unsplash.com/@plhnk
+    Photo   : https://unsplash.com/photos/a-long-hallway-with-glass-doors-leading-to-another-room-s0XabTAKvak
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : long couloir sombre à portes vitrées, bleu nuit
+
+donnees-baie.jpg  (1600x2400)  — bande large « le trajet d'une donnée »
+    Auteur  : Matthieu Beaumont
+    Profil  : https://unsplash.com/@matthieubeaumont
+    Photo   : https://unsplash.com/photos/a-very-large-array-of-electronic-equipment-in-a-room-iYnpYeyu57k
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : mur d'équipements électroniques, vert sombre
+
+donnees-francfort-datacenter.jpg  (1600x920)  — onglet « Hébergement Francfort »
+    Auteur  : İsmail Enes Ayhan
+    Profil  : https://unsplash.com/@ismailenesayhan
+    Photo   : https://unsplash.com/photos/server-room-aisle-with-metal-equipment-racks-lVZjvw-u9V8
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : allée de salle serveurs, baies métalliques
+
+donnees-rack-local.jpg  (1600x1067)  — onglet « Installation locale »
+    Auteur  : Kevin Ache
+    Profil  : https://unsplash.com/@kevinache
+    Photo   : https://unsplash.com/photos/a-rack-of-servers-in-a-server-room-2JJ3wBHu4_0
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : baie de brassage, câble orange, gros plan
+
+donnees-francfort-skyline.jpg  (1600x1067)  — CTA final
+    Auteur  : Nick Andreas
+    Profil  : https://unsplash.com/@nick_jpeg
+    Photo   : https://unsplash.com/photos/a-city-skyline-at-night-lopPmvD3Ucs
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : skyline de Francfort de nuit, depuis le Main
+
+==============================================================
+
+Mise à jour du 14/08/2026 — 6 fichiers pour /tarifs, refaite sur la
+référence scale.com/careers. Largeur 1600 px, hauteur 900 (16/9),
+qualité 78, bibliothèque GRATUITE uniquement (vérifié page par page :
+« Free to use under the Unsplash License », aucun Unsplash+).
+
+POURQUOI CE REMPLACEMENT (demande Teo, 14/08 : « les photos font pas
+pro »). Le jeu précédent avait trois défauts, dont deux qui ne
+relèvent pas du goût :
+
+  1. DEUX MARQUES TIERCES EN GROS PLAN. paiement-terminal.jpg montrait
+     un terminal SumUp, payd-comptoir.jpg une caisse SpotOn. Sur une
+     page TARIF, un logo de société tierce se lit comme un partenariat
+     ou un moyen de paiement accepté — nous n'avons ni l'un ni l'autre
+     avec ces sociétés.
+  2. UN SUJET HORS PROPOS. hired.jpg (un entretien d'embauche) venait
+     de la référence, qui est une page CARRIÈRES. Sur une page tarif
+     l'image racontait un recrutement.
+  3. Le reste (bureau mal éclairé, piles de dossiers jaunis) tirait la
+     page vers le bas.
+
+CE QUI GUIDE LE NOUVEAU JEU : la référence ne met aucun visage en fond
+de son hero, mais une architecture large et calme — c'est ce qui laisse
+la place au titre et ce qui fait « pro ». D'où un jeu à dominante
+architecturale, froid, sans visage, SANS AUCUNE MARQUE NI TEXTE LISIBLE
+(critère éliminatoire du sourcing : plusieurs candidats propres ont été
+écartés pour un logo de stylo ou un formulaire en anglais).
+
+Les six anciennes photos restent en place : elles servent encore les
+fiches moteurs, /offres et /apropos. Ne pas les supprimer.
+
+==============================================================
+
+tarifs-hero-atrium.jpg  (1600x900, 333 Ko)  — hero plein cadre
+    Auteur  : Willian Justen de Vasconcellos
+    Profil  : https://unsplash.com/@willianjusten
+    Photo   : https://unsplash.com/photos/modern-atrium-interior-with-geometric-ceiling-design-avT9dYK-9rE
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : atrium moderne, plafond à caissons, tons froids
+
+tarifs-installation-bureau.jpg  (1600x900, 162 Ko)  — bloc « L'installation »
+    Auteur  : Bernd Dittrich
+    Profil  : https://unsplash.com/@hdbernd
+    Photo   : https://unsplash.com/photos/an-office-with-a-lot-of-desks-and-chairs-pYlBAu3de0w
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : plateau de bureaux moderne et vide, lumière naturelle
+
+tarifs-abonnement-facade.jpg  (1600x900, 228 Ko)  — bloc « L'abonnement »
+    Auteur  : Fabian Kleiser
+    Profil  : https://unsplash.com/@fabiankleiser
+    Photo   : https://unsplash.com/photos/glass-facade-of-a-modern-office-building-V5vF94h52r0
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : façade de verre, trame régulière bleue — la répétition
+              de la trame dit le rythme mensuel
+
+tarifs-cheque-tic-signature.jpg  (1600x900, 99 Ko)  — bloc « Chèque TIC »
+    Auteur  : Jakub Zerdzicki
+    Profil  : https://unsplash.com/@jakubzerdzicki
+    Photo   : https://unsplash.com/photos/man-signing-a-document-with-a-pen-QI6NLgN5XnM
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : mains signant un document sur un bureau. Recadré à 42 %
+              de hauteur pour garder les mains et la feuille ; le texte
+              du document est illisible à cette taille.
+
+tarifs-devis-spirale.jpg  (1600x900, 120 Ko)  — bloc « Le devis »
+    Auteur  : Luciana Ribeiro
+    Profil  : https://unsplash.com/@arqlu
+    Photo   : https://unsplash.com/photos/vgoPSHAR5Yc
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : atrium en spirale vu d'en bas, verrière centrale, blanc.
+              Choisie APRÈS avoir écarté une feuille blanche épinglée
+              (oCdG2sTjDDQ) : une feuille A4 est portrait et ne tient
+              pas dans un cadre 16/9 sans être coupée ou noyée dans la
+              marge — vérifié, même en pleine résolution 4500x6763.
+
+tarifs-cloture-facade.jpg  (1600x900, 234 Ko)  — CTA final plein cadre
+    Auteur  : Maxim Tolchinskiy
+    Profil  : https://unsplash.com/@shaikhulud
+    Photo   : https://unsplash.com/photos/modern-building-facade-with-sunset-reflections-on-glass-syzghFb3eRU
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : façade au soleil couchant, reflets chauds — contrepoint
+              chaud au hero froid, pour fermer la page

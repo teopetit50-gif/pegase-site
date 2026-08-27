@@ -25,8 +25,23 @@ export type GabaritProps = {
   accent: string;
   /* le même accent remonté pour tenir sur un fond noir (gabarit sombre) */
   accentSombre: string;
-  /* les onze autres moteurs, prêts à afficher */
+  /* les autres paquets, prêts à afficher */
   autres: { system: string; role: string; pitch: string; href: string }[];
+};
+
+/* Le catalogue s'écrit en lettres partout ailleurs sur le site (« Quatre
+   choses en moins », « Douze verrous »), donc le compte du bandeau « les
+   autres » aussi. Partagé par les gabarits `home` et `publish`, qui
+   annonçaient tous deux « Onze autres moteurs. » en dur — un reste des douze
+   moteurs d'avant le regroupement en paquets. Au-delà de six on retombe sur
+   le chiffre : aucune page n'y arrive, et allonger la table serait du zèle. */
+export const NOMBRES: Record<number, string> = {
+  1: "Un",
+  2: "Deux",
+  3: "Trois",
+  4: "Quatre",
+  5: "Cinq",
+  6: "Six",
 };
 
 /* Accents de famille — repris des valeurs déjà vérifiées AA sur clair par
@@ -35,9 +50,8 @@ export type GabaritProps = {
    couleur de la marque intégrée (Facebook rgb(45,103,237), LinkedIn
    rgb(35,87,184)). */
 export const ACCENT_FAMILLE: Record<string, string> = {
-  defensifs: "#b45309",
-  offensifs: "#047857",
-  pepites: "#0369a1",
+  installes: "#b45309",
+  compris: "#0369a1",
 };
 
 /* Sur le fond #09090b du gabarit sombre, les accents ci-dessus tombent sous
@@ -46,7 +60,6 @@ export const ACCENT_FAMILLE: Record<string, string> = {
    exactement ça : son bleu de marque s'éclaircit quand la page passe en
    sombre. */
 export const ACCENT_FAMILLE_SOMBRE: Record<string, string> = {
-  defensifs: "#f59e0b",
-  offensifs: "#34d399",
-  pepites: "#38bdf8",
+  installes: "#f59e0b",
+  compris: "#38bdf8",
 };

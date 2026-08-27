@@ -95,11 +95,11 @@ function EtapesBilld({ active, reduced }: { active: boolean; reduced: boolean })
 
 /* ——— visuel PUBLIQ : le flux d'appels d'offres (mini-terminal) ——— */
 const AOS = [
-  "AO-114 · Rénovation groupe scolaire — Basse-Terre",
-  "AO-097 · Voirie communale — Le Moule",
-  "AO-121 · Réseau EP — Sainte-Anne",
-  "AO-132 · Extension cantine — Petit-Bourg",
-  "AO-108 · Éclairage public — Baie-Mahault",
+  "AO-114 · Rénovation groupe scolaire : Basse-Terre",
+  "AO-097 · Voirie communale : Le Moule",
+  "AO-121 · Réseau EP : Sainte-Anne",
+  "AO-132 · Extension cantine : Petit-Bourg",
+  "AO-108 · Éclairage public : Baie-Mahault",
 ];
 const LINE_H = 34;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -245,7 +245,7 @@ function Calques({ active, reduced }: { active: boolean; reduced: boolean }) {
         style={{ transform: slid ? "translate(12px, 8px)" : "none" }}
       >
         <span className="absolute bottom-2 right-3.5 text-[11px] font-medium tracking-wide text-sky/80">
-          OMEGA
+          OMEGA.AI
         </span>
       </div>
       <div

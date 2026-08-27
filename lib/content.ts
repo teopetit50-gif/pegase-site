@@ -1,10 +1,15 @@
-/* Source unique du contenu : familles de moteurs + articles.
-   Consommé par l'accueil, /moteurs, /blog et /blog/[slug]. */
+/* Source unique du contenu : les paquets vendus + les articles.
+   Consommé par l'accueil, /offres, /offres/[slug], le sitemap et /blog. */
 
+/* Un paquet = ce que le client achète. Le `system` est son code (CASHD,
+   RELOAD…), le `slug` son URL — volontairement descriptive, parce que
+   personne ne tape « cashd » dans un moteur de recherche alors que
+   « relance facture impayée » se tape. */
 export type Moteur = {
   system: string;
+  slug: string;
   title: string;
-  /* Ce que le moteur fait, en une ligne concrète. */
+  /* Ce que le paquet fait, en une ligne concrète. */
   job: string;
   /* Le bénéfice tangible, en une ligne. */
   benefit: string;
@@ -32,15 +37,41 @@ export type Famille = {
   moteurs: Moteur[];
 };
 
+/* ══════════════════════════════════════════════════════════════════════
+   LES PAQUETS (05/08/2026)
+
+   Ce fichier exposait douze « moteurs » regroupés en trois familles
+   (défensifs, offensifs, pépites). Six d'entre eux — POSTD, REACH, HIRED,
+   BILLD, STAYD, COLLECT — n'existaient dans aucun système : ils promettaient
+   du contenu éditorial, de la prospection sortante et du tri de CV, c'est-à-
+   dire les trois domaines qu'Omega a explicitement décidé de ne pas couvrir.
+   Deux moteurs réels, à l'inverse, n'étaient nulle part : la sollicitation
+   d'avis et la mémoire d'entreprise.
+
+   Le catalogue interne compte 29 moteurs, dont 12 en service. Le client, lui,
+   n'achète pas des moteurs : il achète un assistant qui fait quatre choses,
+   plus deux qui viennent avec. D'où ces six paquets, nommés par leur
+   RÉSULTAT — ce qui les rend insensibles au moteur qu'on ajoute dedans.
+
+   La grammaire des codes : un nom qui finit par D est un paquet qui
+   s'installe et se facture ; PULSE et VAULT ne finissent pas par D, ils sont
+   compris. Deux noms sont réservés pour la suite et ne s'affichent pas tant
+   qu'ils sont vides : AHEAD (tenir le client informé) et COVERD (délais et
+   obligations).
+
+   Rien de ce qui n'existe pas ne figure ici. C'est la règle qui a été
+   enfreinte, et c'est elle qui prime.
+   ══════════════════════════════════════════════════════════════════════ */
+
 export const FAMILLES: Famille[] = [
   {
-    id: "defensifs",
-    tag: "Moteurs défensifs",
+    id: "installes",
+    tag: "Ce qui s'installe",
     accent: "text-gold",
-    title1: "L'argent rentre plus vite.",
-    title2: "La charge descend.",
-    desc: "Impayés relancés, demandes clients traitées, factures fournisseurs classées, clients dormants réveillés : les quatre moteurs les plus installés, branchés sur vos outils actuels.",
-    cta: "Voir les moteurs défensifs",
+    title1: "Quatre choses en moins",
+    title2: "sur vos épaules.",
+    desc: "Encaisser ce qu'on vous doit, retrouver le chiffre qui dort déjà chez vous, répondre à toute heure, classer la paperasse. Quatre postes, branchés sur les outils que vous tenez déjà.",
+    cta: "Voir ce qui s'installe",
     proof: {
       type: "quote",
       text: "Une entreprise ne perd pas son chiffre d'un coup. Elle le perd par un devis sans réponse, un appel manqué, une facture jamais relancée.",
@@ -48,108 +79,62 @@ export const FAMILLES: Famille[] = [
     },
     moteurs: [
       {
-        system: "PAYD",
-        title: "PAYD — relance devis & factures",
-        job: "Vos devis en attente de réponse et vos factures échues font l'objet d'une relance automatique, personnalisée pour chaque client et échelonnée dans le temps. Le recouvrement de votre trésorerie cesse de reposer sur votre vigilance.",
-        benefit: "Relance à J+3, J+7, J+21 — aucun envoi sans votre validation.",
+        system: "CASHD",
+        slug: "relances-impayes",
+        title: "CASHD · relance devis & factures",
+        job: "Vos devis restés sans réponse et vos factures échues font l'objet d'une relance graduée, écrite au cas par cas selon le montant en jeu, l'ancienneté du retard et l'historique du client. Le recouvrement de votre trésorerie cesse de dépendre de votre vigilance et de votre disponibilité du vendredi soir.",
+        benefit: "Relance à J+3, J+7, J+21, aucun envoi sans votre validation.",
       },
       {
-        system: "ANSWR",
-        title: "ANSWR — réceptionniste 24/7",
-        job: "Les demandes reçues par WhatsApp et par mail — horaires, tarifs, disponibilités, prises de rendez-vous — trouvent une réponse à toute heure. Vous n'intervenez que sur les situations qui requièrent réellement votre jugement.",
+        system: "RELOAD",
+        slug: "nouvelles-affaires",
+        title: "RELOAD · clients dormants & marchés publics",
+        job: "Vos clients silencieux sont retrouvés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. En parallèle, les consultations publiques de votre zone et de votre métier sont relevées chaque jour et filtrées sur vos capacités réelles.",
+        benefit: "Vos clients silencieux triés par montant, les marchés de votre zone filtrés chaque jour.",
+      },
+      {
+        system: "FRONTD",
+        slug: "demandes-clients",
+        title: "FRONTD · demandes entrantes & avis",
+        job: "Les demandes reçues par mail et par WhatsApp (horaires, tarifs, disponibilités, prise de rendez-vous), trouvent une réponse à toute heure, tirée de ce que votre entreprise sait vraiment et jamais inventée. Et chaque client satisfait se voit demander un avis au moment où il est le plus enclin à le laisser.",
         benefit: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
       },
       {
-        system: "OFFLOAD",
-        title: "OFFLOAD — factures fournisseurs",
-        job: "Chaque facture fournisseur est lue, quel qu'en soit le format, ses champs comptables extraits, la pièce classée par fournisseur puis transmise à votre cabinet dans un dossier complet. Ni ressaisie, ni pièce cherchée en catastrophe en fin de mois.",
-        benefit: "Une comptabilité tenue à jour, sans ressaisie ni pièce manquante.",
+        system: "FILED",
+        slug: "factures-fournisseurs",
+        title: "FILED · la paperasse traitée",
+        job: "Chaque facture fournisseur est lue quel qu'en soit le format, ses montants extraits puis contrôlés entre eux, la pièce classée par fournisseur et transmise à votre cabinet dans un dossier complet. Ni ressaisie du dimanche soir, ni pièce cherchée en catastrophe en fin de trimestre.",
+        benefit: "La facture lue, ses montants recoupés, la pièce classée et transmise au cabinet.",
       },
+    ],
+  },
+  {
+    id: "compris",
+    tag: "Ce qui vient avec",
+    accent: "text-sky",
+    title1: "Deux choses",
+    title2: "qui ne se facturent pas.",
+    desc: "Savoir où vous en êtes chaque matin, et la certitude que rien ne part sans vous. Ce ne sont pas des options : elles tournent chez tout le monde, dès le premier jour.",
+    cta: "Voir ce qui vient avec",
+    proof: {
+      type: "quote",
+      text: "Un système qui écrit à vos clients doit d'abord prouver ce qu'il refuse d'envoyer.",
+      sub: "Un client qui a réglé, un client qui a dit stop, un dimanche soir à 23 h : trois envois qu'aucun réglage ne peut autoriser.",
+    },
+    moteurs: [
       {
-        system: "BRIEF",
-        title: "BRIEF — la matinale du dirigeant",
-        job: "Chaque matin à 7 h, les encaissements de la veille, les relances en cours, les retards critiques et les clients à rappeler sont réunis dans un message unique, classé par ordre d'urgence.",
+        system: "PULSE",
+        slug: "point-du-matin",
+        title: "PULSE · le point du matin",
+        job: "Chaque matin, un message unique : ce qui est parti la veille, ce qui attend votre validation, ce qui a coincé, où en est votre encours. Et chaque semaine, le système vous propose ce qu'il a compris de vos corrections : vous validez ou vous refusez, il ne retient que ce que vous avez accepté.",
         benefit: "L'état réel de la boîte en un message, lu en deux minutes.",
       },
-    ],
-  },
-  {
-    id: "offensifs",
-    tag: "Moteurs offensifs",
-    accent: "text-gold",
-    title1: "Le chiffre le moins cher",
-    title2: "est déjà dans votre fichier.",
-    desc: "Reconvaincre un client qui a déjà signé coûte une fraction de ce que coûte un inconnu à convaincre. Ces moteurs travaillent le fichier, l'actualité et la réputation que l'entreprise possède déjà.",
-    cta: "Voir les moteurs offensifs",
-    proof: {
-      type: "quote",
-      text: "Aller chercher un nouveau client coûte cher. Réveiller celui qui a déjà acheté chez vous coûte un message.",
-      sub: "Clients sans commande depuis des mois, prospects jamais relancés, réseaux à l'abandon : ces moteurs exploitent ce que l'entreprise possède déjà.",
-    },
-    moteurs: [
       {
-        system: "REVIVE",
-        title: "REVIVE — clients dormants",
-        job: "Vos clients silencieux sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans leur historique réel : dernier achat, dernier passage, prestation habituelle.",
-        benefit: "Une vague de réactivation par trimestre, jamais davantage.",
-      },
-      {
-        system: "POSTD",
-        title: "POSTD — studio de contenu",
-        job: "Le calendrier éditorial du mois est bâti sur votre actualité réelle, les publications rédigées dans le ton défini avec vous, déclinées réseau par réseau et programmées aux heures d'audience.",
-        benefit: "Une présence régulière validée en une seule relecture par mois.",
-      },
-      {
-        system: "REACH",
-        title: "REACH — prospection B2B",
-        job: "Un fichier d'entreprises cibles est constitué puis validé avec vous. Les séquences partent de votre adresse et sous votre signature, les silences sont relancés, et chaque réponse est classée par niveau d'intérêt.",
-        benefit: "Vous n'ouvrez que les conversations déjà intéressées.",
-      },
-      {
-        system: "HIRED",
-        title: "HIRED — tri de CV",
-        job: "Chaque candidature reçoit un accusé de réception, passe les critères éliminatoires que vous avez fixés, puis est évaluée sur son adéquation réelle au poste. Vous recevez une shortlist argumentée, jamais un score opaque.",
-        benefit: "Trois candidats sérieux au lieu de quatre-vingts CV à lire.",
-      },
-    ],
-  },
-  {
-    id: "pepites",
-    tag: "Pépites",
-    accent: "text-sky",
-    title1: "Certains problèmes",
-    title2: "demandent un produit.",
-    desc: "Conformité facture électronique, marchés publics, locations saisonnières, recouvrement en marque blanche : quatre chantiers construits pour un métier ou une échéance précise, déployés en semaines et jalonnés.",
-    cta: "Découvrir les pépites",
-    proof: {
-      type: "quote",
-      text: "Une obligation légale datée ou une procédure de marché public ne se traite pas avec un moteur générique.",
-      sub: "Conformité, marchés publics, saisonnier, recouvrement — et quatre autres en préparation : PRICEBOOK, CARGO, BOOKD, ENTRY.",
-    },
-    moteurs: [
-      {
-        system: "BILLD",
-        title: "BILLD — conformité facture élec.",
-        job: "Le fichier client est d'abord audité — SIREN, adresses, mentions obligatoires — puis la facturation convertie au format Factur-X et l'entreprise raccordée au portail public. Chaque pièce émise passe ensuite un contrôle de conformité.",
-        benefit: "En règle avant le 1ᵉʳ septembre 2026, sans changer d'outil.",
-      },
-      {
-        system: "PUBLIQ",
-        title: "PUBLIQ — marchés publics",
-        job: "Les consultations publiées dans votre secteur et votre zone sont relevées chaque jour, filtrées sur vos capacités réelles — montants, délais, qualifications exigées — et les pièces administratives récurrentes du dossier sont tenues à jour.",
-        benefit: "Vous décidez d'y aller — le dossier est déjà prêt.",
-      },
-      {
-        system: "STAYD",
-        title: "STAYD — locations saisonnières",
-        job: "Les réservations sont centralisées quelle que soit la plateforme d'origine, les instructions d'arrivée envoyées au bon moment, le ménage coordonné entre deux séjours et l'avis du voyageur sollicité quand il est le plus enclin à le laisser.",
-        benefit: "Vos locations tournent sans messages de minuit.",
-      },
-      {
-        system: "COLLECT",
-        title: "COLLECT — recouvrement",
-        job: "Le recouvrement est opéré en marque blanche pour les cabinets comptables : le cabinet le propose sous sa propre marque, Omega exécute relances, suivi et reporting selon le protocole que le cabinet a validé.",
-        benefit: "Le cabinet signe, Omega relance — sous sa marque à lui.",
+        system: "VAULT",
+        slug: "securite",
+        title: "VAULT · validation et verrous",
+        job: "Rien ne part sans vous. Un « stop » d'un client arrête tout, définitivement et sur tous les canaux. Douze verrous inscrits dans la base de données elle-même refusent en silence ce qui ne doit pas partir : relancer quelqu'un qui a réglé, écrire un dimanche soir, envoyer deux messages coup sur coup à la même personne.",
+        benefit: "Douze verrous, et un journal de tout ce qui est parti.",
       },
     ],
   },
@@ -186,22 +171,22 @@ export const POSTS: Post[] = [
       },
       {
         h: "Ce que la loi impose concrètement",
-        p: "Une facture électronique au sens de la réforme n'est pas un PDF envoyé par mail. C'est un fichier structuré — Factur-X, UBL ou CII — qui transite par une plateforme agréée et dont les données sont transmises à l'administration fiscale. Chaque entreprise devra être raccordée au portail public de facturation ou à une plateforme partenaire immatriculée, et ses factures devront comporter des mentions supplémentaires : numéro SIREN du client, adresse de livraison si elle diffère, nature de l'opération.",
+        p: "Une facture électronique au sens de la réforme n'est pas un PDF envoyé par mail. C'est un fichier structuré (Factur-X, UBL ou CII) qui transite par une plateforme agréée et dont les données sont transmises à l'administration fiscale. Chaque entreprise devra être raccordée au portail public de facturation ou à une plateforme partenaire immatriculée, et ses factures devront comporter des mentions supplémentaires : numéro SIREN du client, adresse de livraison si elle diffère, nature de l'opération.",
       },
       {
-        h: "Ce que ça change pour une TPE antillaise",
-        p: "Dès septembre 2026, vos fournisseurs peuvent basculer leurs envois vers le circuit électronique. Une entreprise qui n'est pas raccordée ne recevra plus certaines factures par les canaux habituels — avec les retards de traitement et les pénalités que cela implique. Côté émission, attendre l'échéance de 2027 pour s'équiper, c'est concentrer la migration, la formation et les corrections de données sur les mêmes semaines que des milliers d'autres entreprises.",
+        h: "Ce que ça change pour une petite entreprise",
+        p: "Dès septembre 2026, vos fournisseurs peuvent basculer leurs envois vers le circuit électronique. Une entreprise qui n'est pas raccordée ne recevra plus certaines factures par les canaux habituels : avec les retards de traitement et les pénalités que cela implique. Côté émission, attendre l'échéance de 2027 pour s'équiper, c'est concentrer la migration, la formation et les corrections de données sur les mêmes semaines que des milliers d'autres entreprises.",
       },
       {
         h: "Le vrai risque : les données, pas l'outil",
-        p: "L'expérience des pays déjà passés à la facture électronique le montre : le blocage vient rarement du logiciel, presque toujours de la qualité des données. Fichiers clients sans SIREN, adresses incomplètes, taux de TVA approximatifs — chaque anomalie devient une facture rejetée par la plateforme. Nettoyer sa base en amont, à froid, coûte quelques heures. Le faire en urgence, facture par facture rejetée, coûte des semaines.",
+        p: "L'expérience des pays déjà passés à la facture électronique le montre : le blocage vient rarement du logiciel, presque toujours de la qualité des données. Fichiers clients sans SIREN, adresses incomplètes, taux de TVA approximatifs : chaque anomalie devient une facture rejetée par la plateforme. Nettoyer sa base en amont, à froid, coûte quelques heures. Le faire en urgence, facture par facture rejetée, coûte des semaines.",
       },
       {
-        h: "Comment BILLD traite le sujet",
-        p: "Le moteur BILLD prend le chantier dans l'ordre : audit du fichier client et des mentions obligatoires, conversion de la facturation au format Factur-X, raccordement au portail public, puis contrôle de conformité automatique sur chaque pièce émise. L'objectif est simple : que l'échéance passe sans qu'aucune facture ne soit bloquée, et sans que vous ayez changé vos habitudes de travail.",
+        h: "Ce qu'Omega.AI fait, et ce qu'il ne fait pas",
+        p: "Nous ne vendons pas de mise en conformité : le raccordement à une plateforme immatriculée et la conversion au format Factur-X relèvent de votre outil de facturation et de votre comptable, et c'est très bien ainsi. Ce que l'audit apporte, c'est le point de départ que personne ne fait : l'état réel de votre fichier client, SIREN par SIREN, adresse par adresse. C'est là que se logent les factures rejetées, et c'est un travail qui coûte quelques heures à froid contre des semaines dans l'urgence.",
       },
       {
-        p: "Le calendrier est connu, les textes sont publiés, les plateformes sont immatriculées. Ce qui reste ouvert, c'est l'ordre dans lequel les entreprises s'y mettront — et les dernières paieront leur retard en heures de correction. Un audit de trente minutes suffit à mesurer où vous en êtes.",
+        p: "Le calendrier est connu, les textes sont publiés, les plateformes sont immatriculées. Ce qui reste ouvert, c'est l'ordre dans lequel les entreprises s'y mettront, et les dernières paieront leur retard en heures de correction. Un audit de trente minutes suffit à mesurer où vous en êtes.",
       },
     ],
   },
@@ -214,29 +199,29 @@ export const POSTS: Post[] = [
     cover: "/photos/payd-comptoir.jpg",
     title: "Garage : vos anciens clients sont votre meilleure publicité",
     excerpt:
-      "Chaque véhicule passé à l'atelier reviendra — chez vous ou chez un autre. Comment un garage indépendant fait revenir ses clients à la bonne date, sans embaucher personne à l'accueil.",
+      "Chaque véhicule passé à l'atelier reviendra : chez vous ou chez un autre. Comment un garage indépendant fait revenir ses clients à la bonne date, sans embaucher personne à l'accueil.",
     body: [
       {
-        p: "Un garage n'a pas un problème de clients : il en voit passer toute l'année. Son problème, c'est ce qui se passe après la restitution. Le véhicule repart, le dossier se ferme, et plus personne n'y pense — jusqu'à ce que le client revienne de lui-même, dans un an, ou n'importe quand, ou jamais. Pourtant la date de son prochain passage est presque écrite d'avance : une révision se refait à l'année, un contrôle technique a une échéance. Ce rendez-vous-là, quelqu'un le prendra. La seule question est de savoir avec qui.",
+        p: "Un garage n'a pas un problème de clients : il en voit passer toute l'année. Son problème, c'est ce qui se passe après la restitution. Le véhicule repart, le dossier se ferme, et plus personne n'y pense : jusqu'à ce que le client revienne de lui-même, dans un an, ou n'importe quand, ou jamais. Pourtant la date de son prochain passage est presque écrite d'avance : une révision se refait à l'année, un contrôle technique a une échéance. Ce rendez-vous-là, quelqu'un le prendra. La seule question est de savoir avec qui.",
       },
       {
         h: "Le fichier dort, l'atelier déborde",
-        p: "La plupart des garages ont ce fichier : des années de clients, avec la date du dernier passage et ce qui a été fait. Personne n'a le temps de l'exploiter — les journées se passent sous les ponts, pas au téléphone. Rappeler chaque client à l'approche de l'anniversaire de sa révision serait le travail le plus rentable de la semaine, et c'est précisément celui qui saute toujours.",
+        p: "La plupart des garages ont ce fichier : des années de clients, avec la date du dernier passage et ce qui a été fait. Personne n'a le temps de l'exploiter : les journées se passent sous les ponts, pas au téléphone. Rappeler chaque client à l'approche de l'anniversaire de sa révision serait le travail le plus rentable de la semaine, et c'est précisément celui qui saute toujours.",
       },
       {
         h: "Ce que fait REVIVE dans un garage",
-        p: "Le moteur REVIVE lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel — le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle — jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
+        p: "Le moteur REVIVE lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
       },
       {
         h: "Pendant ce temps, l'accueil répond",
-        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. Le moteur ANSWR les reçoit dans une seule file, pose les bonnes questions — marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule — et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
+        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. Le moteur ANSWR les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
       },
       {
         h: "Et les factures d'atelier suivent le même chemin",
         p: "Pour les clients professionnels et les flottes qui règlent à réception, le moteur PAYD relance aux bonnes dates avec des messages que le patron valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le rapport BRIEF pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
       },
       {
-        p: "Tout cela s'installe sur les outils déjà en place — le fichier existant, la boîte mail, le WhatsApp — sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un moteur, la recommandation est de ne rien installer.",
+        p: "Tout cela s'installe sur les outils déjà en place (le fichier existant, la boîte mail, le WhatsApp), sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un moteur, la recommandation est de ne rien installer.",
       },
     ],
   },
@@ -249,10 +234,10 @@ export const POSTS: Post[] = [
     cover: "/photos/offload.jpg",
     title: "Artisan du bâtiment : les devis qu'on ne relance jamais",
     excerpt:
-      "Des heures à chiffrer, puis plus rien : le devis part et le suivi s'arrête, parce que le chantier en cours passe d'abord. Ce qu'une relance organisée change pour une entreprise de travaux — sans y passer ses soirées.",
+      "Des heures à chiffrer, puis plus rien : le devis part et le suivi s'arrête, parce que le chantier en cours passe d'abord. Ce qu'une relance organisée change pour une entreprise de travaux : sans y passer ses soirées.",
     body: [
       {
-        p: "Un devis de travaux coûte cher à produire : la visite, le métré, les prix fournisseurs, la mise en page — souvent une heure ou deux par proposition, prises le soir. Et puis il part, et il ne se passe plus rien. Le chantier en cours prend le dessus, la relance se fait « quand on y pense », c'est-à-dire tard, ou jamais. Le particulier, lui, a demandé trois devis : il signe fréquemment avec l'entreprise qui a rappelé la première, pas avec la moins chère.",
+        p: "Un devis de travaux coûte cher à produire : la visite, le métré, les prix fournisseurs, la mise en page, souvent une heure ou deux par proposition, prises le soir. Et puis il part, et il ne se passe plus rien. Le chantier en cours prend le dessus, la relance se fait « quand on y pense », c'est-à-dire tard, ou jamais. Le particulier, lui, a demandé trois devis : il signe fréquemment avec l'entreprise qui a rappelé la première, pas avec la moins chère.",
       },
       {
         h: "Pourquoi le suivi saute toujours",
@@ -260,18 +245,18 @@ export const POSTS: Post[] = [
       },
       {
         h: "Ce que fait PAYD sur les devis",
-        p: "Le moteur PAYD reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part — formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis le moteur s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier — chantier, intervention, acompte, situation — et le patron valide le ton une fois pour toutes.",
+        p: "Le moteur PAYD reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis le moteur s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier (chantier, intervention, acompte, situation), et le patron valide le ton une fois pour toutes.",
       },
       {
         h: "Côté factures, la même discipline",
-        p: "Une fois le chantier livré, les factures suivent le même chemin : rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du patron. Le détail de ce circuit — et de ce qu'il change pour la trésorerie — est dans notre article consacré aux impayés en Guadeloupe.",
+        p: "Une fois le chantier livré, les factures suivent le même chemin : rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du patron. Le détail de ce circuit, et de ce qu'il change pour la trésorerie, est dans notre article consacré aux impayés en Guadeloupe.",
       },
       {
         h: "Les demandes entrantes et la paperasse suivent",
-        p: "Le moteur ANSWR accueille les demandes de devis qui arrivent par mail et WhatsApp — nature des travaux, commune du chantier, délai, photos — et escalade immédiatement tout ce qui ressemble à une urgence. Le moteur OFFLOAD lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
+        p: "Le moteur ANSWR accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. Le moteur OFFLOAD lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
       },
       {
-        p: "L'installation se fait sur les outils existants, sans changer de méthode de travail. Elle commence par une mesure, pas par une promesse : l'audit gratuit compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien — et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
+        p: "L'installation se fait sur les outils existants, sans changer de méthode de travail. Elle commence par une mesure, pas par une promesse : l'audit gratuit compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien, et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
       },
     ],
   },
@@ -284,33 +269,33 @@ export const POSTS: Post[] = [
     cover: "/photos/answr-phone.jpg",
     title: "Agence immobilière : le premier qui répond décroche la visite",
     excerpt:
-      "Les contacts arrivent par les portails, WhatsApp et le téléphone — pendant que les journées se passent en visites et en estimations. Comment une agence indépendante répond à tout sans embaucher, et ce qu'on mesure avant d'installer quoi que ce soit.",
+      "Les contacts arrivent par les portails, WhatsApp et le téléphone : pendant que les journées se passent en visites et en estimations. Comment une agence indépendante répond à tout sans embaucher, et ce qu'on mesure avant d'installer quoi que ce soit.",
     body: [
       {
-        p: "Un acquéreur qui cherche ne contacte jamais une seule agence : il écrit à toutes celles qui ont un bien dans ses critères, souvent le soir même de sa recherche. Un vendeur qui compare des agences pour un mandat juge d'abord une chose : la vitesse et la tenue de la première réponse. Dans les deux cas, l'agence qui répond en premier prend l'avantage — et c'est rarement une question de compétence, presque toujours une question de disponibilité.",
+        p: "Un acquéreur qui cherche ne contacte jamais une seule agence : il écrit à toutes celles qui ont un bien dans ses critères, souvent le soir même de sa recherche. Un vendeur qui compare des agences pour un mandat juge d'abord une chose : la vitesse et la tenue de la première réponse. Dans les deux cas, l'agence qui répond en premier prend l'avantage, et c'est rarement une question de compétence, presque toujours une question de disponibilité.",
       },
       {
         h: "D'où viennent les contacts, et où ils se perdent",
-        p: "Une agence indépendante reçoit ses demandes par les portails d'annonces, le formulaire du site, WhatsApp et le téléphone — y compris pendant les visites, précisément quand personne ne peut répondre. Chaque canal vit sa vie : rien ne rassemble les demandes au même endroit, rien ne trace celles qui sont restées sans réponse. Les messages du soir et du week-end attendent le lundi ; le prospect, lui, n'attend pas — il a déjà rappelé l'agence suivante de sa liste.",
+        p: "Une agence indépendante reçoit ses demandes par les portails d'annonces, le formulaire du site, WhatsApp et le téléphone, y compris pendant les visites, précisément quand personne ne peut répondre. Chaque canal vit sa vie : rien ne rassemble les demandes au même endroit, rien ne trace celles qui sont restées sans réponse. Les messages du soir et du week-end attendent le lundi ; le prospect, lui, n'attend pas : il a déjà rappelé l'agence suivante de sa liste.",
       },
       {
         h: "Ce qu'une réponse tardive coûte vraiment",
-        p: "Le coût ne se limite pas à la visite manquée. Un contact mal qualifié fait perdre du temps à tout le monde : visites organisées sans vérifier le financement, critères jamais posés, allers-retours pour des informations qui tenaient en trois questions. Et pendant que l'entrant déborde, le stock dort : les acquéreurs dont le projet n'a pas abouti, les vendeurs qui « attendaient de voir », les contacts d'estimation restés sans suite — personne n'a le temps de les rappeler, alors que ce sont les affaires les moins chères à conclure.",
+        p: "Le coût ne se limite pas à la visite manquée. Un contact mal qualifié fait perdre du temps à tout le monde : visites organisées sans vérifier le financement, critères jamais posés, allers-retours pour des informations qui tenaient en trois questions. Et pendant que l'entrant déborde, le stock dort : les acquéreurs dont le projet n'a pas abouti, les vendeurs qui « attendaient de voir », les contacts d'estimation restés sans suite, personne n'a le temps de les rappeler, alors que ce sont les affaires les moins chères à conclure.",
       },
       {
         h: "Ce que fait ANSWR dans une agence",
-        p: "Le moteur ANSWR rassemble les demandes entrantes — mail, WhatsApp — dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
+        p: "Le moteur ANSWR rassemble les demandes entrantes (mail, WhatsApp), dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
       },
       {
         h: "REVIVE : la base dormante d'une agence vaut de l'or",
-        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti — et qui n'ont jamais été recontactés. Le moteur REVIVE reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait — proprement.",
+        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le moteur REVIVE reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
       },
       {
         h: "Le matin, deux minutes pour tout voir",
         p: "Chaque matin, le rapport BRIEF pose l'état de la veille : les demandes arrivées, celles qui attendent une décision, les reprises de contact parties. Il se lit en deux minutes avant la première visite. Et la règle de la maison s'applique ici comme partout : les messages types sont validés par vous avant la mise en route, et tout ce qui sort du cadre remonte à un humain au lieu de partir tout seul.",
       },
       {
-        p: "L'installation se fait sur les outils déjà en place — la boîte mail, le WhatsApp, le tableur de contacts — sans changer de logiciel ni de méthode de travail. Et elle commence par une mesure, pas par une promesse : l'audit gratuit compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un moteur, la recommandation est de ne rien installer.",
+        p: "L'installation se fait sur les outils déjà en place (la boîte mail, le WhatsApp, le tableur de contacts), sans changer de logiciel ni de méthode de travail. Et elle commence par une mesure, pas par une promesse : l'audit gratuit compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un moteur, la recommandation est de ne rien installer.",
       },
     ],
   },
@@ -323,25 +308,25 @@ export const POSTS: Post[] = [
     cover: "/photos/paiement-terminal.jpg",
     title: "Chèque TIC : jusqu'à 10 000 € pour votre installation",
     excerpt:
-      "Le dispositif régional couvre l'essentiel du coût d'une automatisation pour les TPE de Guadeloupe. Qui est éligible, quels montants, et comment on monte le dossier avec vous.",
+      "Le dispositif régional couvre l'essentiel du coût d'une automatisation pour les entreprises de Guadeloupe. Qui est éligible, quels montants, et comment on monte le dossier avec vous.",
     body: [
       {
-        p: "La Région Guadeloupe soutient la transformation numérique des petites entreprises à travers le dispositif Chèque TIC : une subvention plafonnée à 10 000 €, qui couvre de 40 à 80 % du coût d'un projet numérique selon la nature des dépenses — 80 % sur la présence web et la sécurité, 40 % sur les logiciels de gestion et le matériel. Un projet d'automatisation Omega — installation d'un moteur, raccordement aux outils, formation — entre précisément dans le champ de ce dispositif.",
+        p: "La Région Guadeloupe soutient la transformation numérique des petites entreprises à travers le dispositif Chèque TIC : une subvention plafonnée à 10 000 €, qui couvre de 40 à 80 % du coût d'un projet numérique selon la nature des dépenses, 80 % sur la présence web et la sécurité, 40 % sur les logiciels de gestion et le matériel. Un projet d'automatisation Omega.AI (installation d'un moteur, raccordement aux outils, formation), entre précisément dans le champ de ce dispositif.",
       },
       {
         h: "Qui est éligible",
-        p: "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe depuis au moins un an, à jour de leurs obligations sociales et fiscales. Les critères précis — effectif, chiffre d'affaires, secteurs prioritaires, plafonds — sont fixés par la Région et évoluent selon les enveloppes votées. C'est la première chose que nous vérifions lors de l'audit : votre éligibilité est confirmée avant tout engagement, pas après.",
+        p: "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe depuis au moins un an, à jour de leurs obligations sociales et fiscales. Les critères précis (effectif, chiffre d'affaires, secteurs prioritaires, plafonds), sont fixés par la Région et évoluent selon les enveloppes votées. C'est la première chose que nous vérifions lors de l'audit : votre éligibilité est confirmée avant tout engagement, pas après.",
       },
       {
         h: "Ce que le dispositif couvre",
-        p: "La subvention porte sur les dépenses du projet numérique : la prestation d'installation, le paramétrage des outils, l'accompagnement à la prise en main. Concrètement, sur une installation devisée, la part restant à la charge de l'entreprise peut être ramenée à une fraction du montant total — ce qui change complètement le calcul de retour sur investissement d'un moteur de relance ou d'un réceptionniste automatique.",
+        p: "La subvention porte sur les dépenses du projet numérique : la prestation d'installation, le paramétrage des outils, l'accompagnement à la prise en main. Concrètement, sur une installation devisée, la part restant à la charge de l'entreprise peut être ramenée à une fraction du montant total : ce qui change complètement le calcul de retour sur investissement d'un moteur de relance ou d'un réceptionniste automatique.",
       },
       {
         h: "Comment le dossier se monte",
-        p: "Un dossier de subvention demande des pièces administratives, un devis détaillé, une description du projet et de son impact. C'est un travail que la plupart des dirigeants repoussent — et c'est exactement pour cela que nous le prenons en charge. Omega constitue le dossier avec vous : nous rédigeons la description technique, préparons le devis au format attendu, et suivons l'instruction jusqu'à la décision.",
+        p: "Un dossier de subvention demande des pièces administratives, un devis détaillé, une description du projet et de son impact. C'est un travail que la plupart des dirigeants repoussent, et c'est exactement pour cela que nous le prenons en charge. Omega.AI constitue le dossier avec vous : nous rédigeons la description technique, préparons le devis au format attendu, et suivons l'instruction jusqu'à la décision.",
       },
       {
-        p: "Le calendrier joue un rôle : les enveloppes régionales sont votées puis consommées, et les dossiers déposés tôt dans l'exercice sont instruits plus vite. Si votre entreprise est éligible, chaque mois d'attente est un mois de subvention potentiellement perdue et de problème non traité. L'audit gratuit inclut la vérification d'éligibilité — c'est le point de départ.",
+        p: "Le calendrier joue un rôle : les enveloppes régionales sont votées puis consommées, et les dossiers déposés tôt dans l'exercice sont instruits plus vite. Si votre entreprise est éligible, chaque mois d'attente est un mois de subvention potentiellement perdue et de problème non traité. L'audit gratuit inclut la vérification d'éligibilité : c'est le point de départ.",
       },
     ],
   },
@@ -352,28 +337,28 @@ export const POSTS: Post[] = [
     date: "2 juin 2026",
     cat: "Données",
     cover: "/photos/offload-chip.jpg",
-    title: "RGPD : où vivent vos données chez Omega",
+    title: "RGPD : où vivent vos données chez Omega.AI",
     excerpt:
-      "Un espace dédié par client — chiffré, hébergé dans l'Union européenne, jamais mélangé, jamais revendu, effaçable sur demande. Ce que ça change pour une TPE responsable de son fichier clients.",
+      "Un espace dédié par client : chiffré, hébergé dans l'Union européenne, jamais mélangé, jamais revendu, effaçable sur demande. Ce que ça change pour une petite entreprise responsable de son fichier clients.",
     body: [
       {
-        p: "Automatiser son entreprise, c'est confier à des machines l'accès à ce qu'elle a de plus sensible : le fichier clients, les factures, les échanges commerciaux. La question de savoir où ces données transitent et qui peut y accéder n'est pas un détail technique — c'est une obligation légale et un choix stratégique.",
+        p: "Automatiser son entreprise, c'est confier à des machines l'accès à ce qu'elle a de plus sensible : le fichier clients, les factures, les échanges commerciaux. La question de savoir où ces données transitent et qui peut y accéder n'est pas un détail technique : c'est une obligation légale et un choix stratégique.",
       },
       {
-        h: "Ce que le RGPD exige d'une TPE",
-        p: "Le règlement s'applique à toutes les entreprises, sans seuil de taille. Une TPE qui utilise un fichier clients doit savoir où il est stocké, qui y accède, et être capable de répondre à une demande d'accès ou de suppression. Chaque outil qui touche à ces données est un sous-traitant au sens du règlement — et le dirigeant reste responsable de la chaîne complète, y compris des outils qu'il a branchés « pour essayer ».",
+        h: "Ce que le RGPD exige d'une petite entreprise",
+        p: "Le règlement s'applique à toutes les entreprises, sans seuil de taille. Une petite entreprise qui utilise un fichier clients doit savoir où il est stocké, qui y accède, et être capable de répondre à une demande d'accès ou de suppression. Chaque outil qui touche à ces données est un sous-traitant au sens du règlement, et le dirigeant reste responsable de la chaîne complète, y compris des outils qu'il a branchés « pour essayer ».",
       },
       {
         h: "Le problème des outils opaques",
         p: "La plupart des outils d'automatisation grand public mélangent vos données avec celles de milliers d'autres comptes, dans une base dont vous ne savez ni où elle est, ni qui y accède, ni ce qu'il en reste après résiliation. Pour un fichier de clients guadeloupéens avec noms, téléphones et historiques d'achats, c'est une exposition que rien n'oblige à accepter.",
       },
       {
-        h: "Le choix Omega : un espace dédié par client",
-        p: "Chez Omega, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours — messagerie, tableur, WhatsApp — et c'est là que les moteurs agissent. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
+        h: "Le choix Omega.AI : un espace dédié par client",
+        p: "Chez Omega.AI, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours (messagerie, tableur, WhatsApp), et c'est là que les moteurs agissent. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
       },
       {
         h: "Ce que ça change concrètement",
-        p: "En cas de contrôle ou de demande d'un client, vous savez répondre : les données sont dans votre espace dédié, traitées par ce moteur, pour cette finalité. Le registre des traitements est documenté à l'installation. Et le jour où vous arrêtez, l'export complet vous est remis et l'espace est effacé — c'est contractuel, pas une promesse orale.",
+        p: "En cas de contrôle ou de demande d'un client, vous savez répondre : les données sont dans votre espace dédié, traitées par ce moteur, pour cette finalité. Le registre des traitements est documenté à l'installation. Et le jour où vous arrêtez, l'export complet vous est remis et l'espace est effacé : c'est contractuel, pas une promesse orale.",
       },
     ],
   },
@@ -393,18 +378,18 @@ export const POSTS: Post[] = [
       },
       {
         h: "Ce qu'un impayé coûte vraiment",
-        p: "Le montant de la facture n'est que la partie visible. Un encours qui gonfle, c'est de la trésorerie qu'il faut compenser — par un découvert facturé par la banque, un fournisseur qu'on fait attendre à son tour, un investissement repoussé. C'est aussi du temps de dirigeant : chaque relance manuelle demande de retrouver le dossier, vérifier ce qui a été dit, choisir le ton. À dix relances par semaine, c'est une demi-journée perdue.",
+        p: "Le montant de la facture n'est que la partie visible. Un encours qui gonfle, c'est de la trésorerie qu'il faut compenser : par un découvert facturé par la banque, un fournisseur qu'on fait attendre à son tour, un investissement repoussé. C'est aussi du temps de dirigeant : chaque relance manuelle demande de retrouver le dossier, vérifier ce qui a été dit, choisir le ton. À dix relances par semaine, c'est une demi-journée perdue.",
       },
       {
         h: "Pourquoi la relance manuelle échoue",
-        p: "Personne n'aime relancer. Résultat : on relance tard, on relance les gros montants en oubliant les petits, on saute une semaine parce que l'atelier déborde. Le client, lui, apprend vite qui relance systématiquement et qui laisse filer — et paie en priorité les fournisseurs organisés. L'irrégularité de la relance est exactement ce qui la rend inefficace.",
+        p: "Personne n'aime relancer. Résultat : on relance tard, on relance les gros montants en oubliant les petits, on saute une semaine parce que l'atelier déborde. Le client, lui, apprend vite qui relance systématiquement et qui laisse filer, et paie en priorité les fournisseurs organisés. L'irrégularité de la relance est exactement ce qui la rend inefficace.",
       },
       {
         h: "Ce qu'une relance systématique change",
-        p: "Un moteur comme PAYD ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà — chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. Les entreprises qui passent à la relance systématique constatent le même phénomène : ce ne sont pas les clients qui manquent de trésorerie qui paient plus vite, ce sont les clients qui payaient en dernier ceux qui ne relançaient pas.",
+        p: "Un moteur comme PAYD ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà, chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. Les entreprises qui passent à la relance systématique constatent le même phénomène : ce ne sont pas les clients qui manquent de trésorerie qui paient plus vite, ce sont les clients qui payaient en dernier ceux qui ne relançaient pas.",
       },
       {
-        p: "Le calcul à faire est simple : additionnez vos factures échues de plus de trente jours, ajoutez les devis restés sans réponse le mois dernier, et comparez au coût d'un moteur de relance — financé en partie par le Chèque TIC, jusqu'à 10 000 €, pour les TPE éligibles. C'est précisément le chiffre que l'audit gratuit établit en trente minutes.",
+        p: "Le calcul à faire est simple : additionnez vos factures échues de plus de trente jours, ajoutez les devis restés sans réponse le mois dernier, et comparez au coût d'un moteur de relance, financé en partie par le Chèque TIC, jusqu'à 10 000 €, pour les entreprises éligibles. C'est précisément le chiffre que l'audit gratuit établit en trente minutes.",
       },
     ],
   },

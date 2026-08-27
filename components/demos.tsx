@@ -130,7 +130,7 @@ function CalendarDemo({ demo }: { demo: Extract<Demo, { type: "calendar" }> }) {
       </div>
       <div className="mt-4 flex items-center gap-2 text-[12px] text-white/40">
         <span className="h-1.5 w-1.5 rounded-full bg-mint" />
-        Lot validé en une relecture — publication automatique
+        Lot validé en une relecture : publication automatique
       </div>
     </div>
   );

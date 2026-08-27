@@ -1,5 +1,10 @@
 import Reveal from "./Reveal";
 
+/* Les outils DU CLIENT, jamais les nôtres — 14/08/2026 : « n8n » et
+   « Claude » sont sortis de ce bandeau. Il s'intitule « les outils que vous
+   avez déjà » : y glisser notre socle d'automatisation et notre fournisseur
+   de modèles publiait notre stack, en plus d'être faux. Règle Teo : on dit
+   « nos automatisations », « notre base de données », jamais la marque. */
 const TOOLS: { name: string; className: string }[] = [
   { name: "Gmail", className: "font-semibold tracking-tight" },
   { name: "Google Sheets", className: "font-medium" },
@@ -7,8 +12,8 @@ const TOOLS: { name: string; className: string }[] = [
   { name: "Outlook", className: "font-semibold" },
   { name: "Excel", className: "font-bold" },
   { name: "Stripe", className: "font-semibold italic" },
-  { name: "n8n", className: "font-mono font-semibold" },
-  { name: "Claude", className: "font-medium tracking-wide" },
+  { name: "Google Drive", className: "font-medium tracking-tight" },
+  { name: "Shopify", className: "font-semibold" },
 ];
 
 export default function Tools() {

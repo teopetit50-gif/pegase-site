@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SystemLogo } from "@/components/logos";
 import { Chevron } from "@/components/offres/MediaMoteurs";
 import { DemoFiche, PastillesOutils } from "@/components/offres/MediaFiche";
+import BlocFaq from "./BlocFaq";
 import type { GabaritProps } from "./types";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -172,10 +173,17 @@ export default function GabaritIntegration({
               </div>
 
               {/* H1 bicolore : le nom du moteur prend l'accent de sa famille,
-                  exactement comme la référence teinte le nom de la marque. */}
+                  exactement comme la référence teinte le nom de la marque.
+
+                  13/08 — le deux-points est retiré. `role` commence déjà par
+                  un tiret cadratin (« — clients dormants & marchés publics »),
+                  si bien que RELOAD et FRONTD affichaient « NOM : — rôle »,
+                  deux ponctuations cumulées. Les quatre autres pages
+                  séparaient déjà proprement le nom du rôle ; c'est cette forme
+                  qui est reprise ici. */}
               <h1 data-reveal className="o-h2 mt-6">
                 <span style={{ color: accentSombre }}>{m.system}</span>
-                <span className="text-[#fafafa]"> — {role}</span>
+                <span className="text-[#fafafa]"> {role}</span>
               </h1>
 
               <p data-reveal className="o-lead mt-5 max-w-[560px]">
@@ -195,14 +203,14 @@ export default function GabaritIntegration({
                     className="text-[15px] font-bold tracking-[-0.02em] text-[#09090b]"
                     style={{ fontFamily: "var(--font-jakarta)" }}
                   >
-                    Omega
+                    Omega.AI
                   </span>
                 </span>
               </div>
 
               <div data-reveal className="mt-9">
                 <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                  Chiffrer mon cas — audit gratuit
+                  Chiffrer mon cas : audit gratuit
                   <Chevron taille={13} />
                 </Link>
               </div>
@@ -252,8 +260,12 @@ export default function GabaritIntegration({
             {fiche.sections?.apportTitre ??
               `${role.charAt(0).toUpperCase() + role.slice(1)}, sans angle mort.`}
           </h2>
+          {/* 13/08 — `m.benefit` est écrit pour les cartes de l'accueil : une
+              ligne, trop courte pour tenir un chapô de section. Les fiches qui
+              portent leur propre `apportChapo` l'emportent ; les autres
+              retombent dessus. */}
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
-            {m.benefit}
+            {fiche.sections?.apportChapo ?? m.benefit}
           </p>
           <div data-reveal className="mt-6">
             <Link href="#a-propos" className="o-link">
@@ -341,10 +353,10 @@ export default function GabaritIntegration({
             « {fiche.controle} »
           </blockquote>
           <p className="o-lead mt-8 max-w-[760px]">
-            Cet engagement ne se négocie pas à l&apos;installation : il est la
-            condition de fonctionnement du moteur. Les premières semaines, tout
-            vous est soumis avant envoi ; ensuite vous choisissez ce qui part
-            seul et ce qui attend votre accord.
+            Cet engagement ne se négocie pas à l&apos;installation : il
+            conditionne le fonctionnement du moteur. Les premières semaines,
+            tout vous est soumis avant envoi. Ensuite, vous décidez poste par
+            poste ce qui part seul et ce qui attend votre accord.
           </p>
           <div className="mt-9 flex items-center gap-4">
             <span
@@ -355,9 +367,9 @@ export default function GabaritIntegration({
             </span>
             <div>
               <div className="text-[16px] font-semibold text-[#fafafa]">
-                Le desk Omega
+                Le desk Omega.AI
               </div>
-              <div className="o-small">Guadeloupe — installation et supervision</div>
+              <div className="o-small">Installation et supervision</div>
             </div>
           </div>
         </div>
@@ -407,6 +419,12 @@ export default function GabaritIntegration({
         </div>
       </section>
 
+      {/* ════════ 6 bis · FAQ ════════
+          13/08 — ce gabarit n'affichait aucune FAQ : les quatre questions
+          écrites pour RELOAD et les quatre de FRONTD dormaient dans
+          lib/fiches.ts sans jamais atteindre une page. */}
+      <BlocFaq faq={fiche.faq} chapo={fiche.sections?.faqChapo} />
+
       {/* ════════ 7 · CTA ════════ */}
       <section className="o-wrap pb-[120px]">
         <div
@@ -422,9 +440,8 @@ export default function GabaritIntegration({
             {m.system} est-il le bon pour vous ?
           </h2>
           <p className="o-lead relative mx-auto mt-4 max-w-[610px]">
-            L&apos;audit gratuit chiffre ce que votre difficulté principale vous
-            coûte et désigne le moteur au meilleur retour — celui-ci, ou un
-            autre.
+            {fiche.sections?.clotureChapo ??
+              "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne le moteur au meilleur retour : celui-ci, ou un autre."}
           </p>
           <div className="relative mt-8">
             <Link href="/reserver-un-audit" className="o-btn o-btn--primary">

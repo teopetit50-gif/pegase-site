@@ -200,7 +200,7 @@ export function HeroCollage() {
     <div className="relative mx-auto w-full max-w-[900px] lg:h-[590px]">
       {/* panneau principal — le tableau de bord */}
       <Fenetre className="!relative z-10 mx-auto w-full max-w-[660px] lg:!absolute lg:left-1/2 lg:top-0 lg:w-[640px] lg:-translate-x-1/2">
-        <BarreFenetre titre="Omega — tableau de bord" />
+        <BarreFenetre titre="Omega.AI : tableau de bord" />
         <div className="px-5 pb-6 pt-5">
           {/* en-tête : une seule ligne dès 480 px, empilée en dessous — à
               375 px la ligne unique cassait « 12 480 € » et « Tout valider »
@@ -258,7 +258,7 @@ export function HeroCollage() {
       {/* panneau gauche — le brouillon de relance en attente de validation */}
       <Fenetre className="!absolute -left-[14px] top-[348px] z-20 hidden w-[292px] lg:block">
         <div className="border-b border-black/[0.06] px-3.5 py-2.5 text-[11px] font-semibold tracking-[0.02em] text-[#52525b]">
-          Relance — à valider
+          Relance : à valider
         </div>
         <div className="px-3.5 py-3">
           <p className="text-[11.5px] leading-[1.7] text-[#52525b]">
@@ -307,7 +307,7 @@ export function HeroCollage() {
 export function MediaPayd() {
   return (
     <Fenetre className="w-full">
-      <BarreFenetre titre="PAYD — file de relance" />
+      <BarreFenetre titre="PAYD · file de relance" />
       <div className="space-y-1.5 px-4 py-4">
         {[
           { t: "Devis DV-0891 · Ti Punch Traiteur", s: "Relance J+3 programmée", p: "gris" as const, l: "Demain" },
@@ -349,7 +349,7 @@ export function MediaAnswr() {
         </div>
         <div className="o-demo-envoi ml-auto max-w-[86%] rounded-[12px] rounded-tr-[4px] px-3 py-2.5 text-[12px] leading-[1.65]">
           Bonsoir ! Oui, de 8 h à 13 h. Il me reste deux créneaux samedi
-          prochain — je vous en réserve un ?
+          prochain : je vous en réserve un ?
         </div>
         <div className="o-demo-faible text-right text-[10.5px]">
           Envoyé 40 s après la question
@@ -362,7 +362,7 @@ export function MediaAnswr() {
 export function MediaOffload() {
   return (
     <Fenetre className="w-full">
-      <BarreFenetre titre="OFFLOAD — dossier de juillet" />
+      <BarreFenetre titre="OFFLOAD · dossier de juillet" />
       <div className="px-4 py-4">
         <div className="mb-2.5 flex items-center justify-between">
           <span className="o-demo-doux text-[11px] font-semibold tracking-[0.02em]">
@@ -373,7 +373,7 @@ export function MediaOffload() {
         <div className="space-y-1.5">
           {[
             { f: "EDF_2026-07-04.pdf", m: "312,40 €", t: "TVA 8,5 %" },
-            { f: "Sodexo-Antilles_0712.pdf", m: "1 084,00 €", t: "TVA 8,5 %" },
+            { f: "Sodexo-Restauration_0712.pdf", m: "1 084,00 €", t: "TVA 8,5 %" },
             { f: "Loyer-atelier_juillet.pdf", m: "950,00 €", t: "Exonéré" },
           ].map((r) => (
             <div
@@ -402,17 +402,18 @@ export function MediaOffload() {
 }
 
 /* Grille de pastilles du catalogue — deux colonnes décalées, comme la
-   référence : la colonne de droite est descendue d'une demi-ligne. */
-const CATALOGUE: { nom: string; icone: ReactNode }[] = [
-  { nom: "BRIEF", icone: <IconeGlyphe d="M4 5h16M4 12h16M4 19h10" /> },
-  { nom: "REVIVE", icone: <IconeGlyphe d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" /> },
-  { nom: "POSTD", icone: <IconeGlyphe d="M4 4h16v12H7l-3 4V4Z" /> },
-  { nom: "REACH", icone: <IconeGlyphe d="m3 11 18-7-7 18-2.5-8L3 11Z" /> },
-  { nom: "HIRED", icone: <IconeGlyphe d="M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /> },
-  { nom: "BILLD", icone: <IconeGlyphe d="M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 8h6M9 12h6" /> },
-  { nom: "PUBLIQ", icone: <IconeGlyphe d="M3 21h18M5 21V9l7-5 7 5v12M10 21v-6h4v6" /> },
-  { nom: "STAYD", icone: <IconeGlyphe d="M3 10h18M7 3v3M17 3v3M4 6h16v15H4V6Z" /> },
-  { nom: "COLLECT", icone: <IconeGlyphe d="M3 6h18M3 12h18M3 18h18M7 3v18" /> },
+   référence : la colonne de droite est descendue d'une demi-ligne.
+
+   05/08/2026 — le slug est porté explicitement plutôt que déduit du nom en
+   minuscules : depuis que les pages sont celles des PAQUETS, l'URL est
+   descriptive (`/offres/relances-impayes`) et `cashd` mène à un 404. */
+const CATALOGUE: { nom: string; slug: string; icone: ReactNode }[] = [
+  { nom: "CASHD", slug: "relances-impayes", icone: <IconeGlyphe d="M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 8h6M9 12h6" /> },
+  { nom: "RELOAD", slug: "nouvelles-affaires", icone: <IconeGlyphe d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" /> },
+  { nom: "FRONTD", slug: "demandes-clients", icone: <IconeGlyphe d="M4 4h16v12H7l-3 4V4Z" /> },
+  { nom: "FILED", slug: "factures-fournisseurs", icone: <IconeGlyphe d="M3 7h6l2 2h10v10H3V7Z" /> },
+  { nom: "PULSE", slug: "point-du-matin", icone: <IconeGlyphe d="M4 5h16M4 12h16M4 19h10" /> },
+  { nom: "VAULT", slug: "securite", icone: <IconeGlyphe d="M6 11h12v9H6v-9ZM9 11V7a3 3 0 0 1 6 0v4" /> },
 ];
 
 function IconeGlyphe({ d }: { d: string }) {
@@ -452,10 +453,18 @@ export function MediaCatalogue() {
   );
 }
 
-function PastilleMoteur({ nom, icone }: { nom: string; icone: ReactNode }) {
+function PastilleMoteur({
+  nom,
+  slug,
+  icone,
+}: {
+  nom: string;
+  slug: string;
+  icone: ReactNode;
+}) {
   return (
     <Link
-      href={`/offres/${nom.toLowerCase()}`}
+      href={`/offres/${slug}`}
       className="flex items-center gap-2 rounded-full bg-white px-3.5 py-2.5 text-[13px] font-semibold tracking-[0.01em] text-[#09090b] transition-transform duration-300 hover:-translate-y-0.5"
       style={{
         boxShadow:
@@ -509,7 +518,7 @@ export function MediaValidation() {
   return (
     <Fenetre className="w-full">
       <div className="border-b border-black/[0.06] bg-[#fbfbfb] px-4 py-2.5 text-[11px] font-semibold tracking-[0.02em] text-[#52525b]">
-        File de validation — 3 messages en attente
+        File de validation : 3 messages en attente
       </div>
       <div className="space-y-1.5 px-4 py-3.5">
         {[
@@ -576,7 +585,7 @@ export function MediaLocal() {
 
 export function MediaEtapes() {
   const etapes = [
-    { n: "01", t: "Audit — 30 min", d: "Votre problème n°1, chiffré." },
+    { n: "01", t: "Audit, 30 min", d: "Votre problème n°1, chiffré." },
     { n: "02", t: "Raccordement", d: "Une demi-journée sur vos outils." },
     { n: "03", t: "Cycle supervisé", d: "Vous validez, on cale les réglages." },
   ];

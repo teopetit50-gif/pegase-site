@@ -1,21 +1,14 @@
 import Image from "next/image";
 import Reveal from "./Reveal";
 
-/* Marquee de la stack IA — même langage que le bandeau outils du haut
-   (défilement continu, typographies variées, points or), mais avec les
-   marques IA. Technologies embarquées, jamais présentées comme clients. */
-const STACK: { name: string; className: string }[] = [
-  { name: "Claude", className: "font-medium tracking-wide" },
-  { name: "Mistral AI", className: "font-semibold italic" },
-  { name: "NVIDIA", className: "font-bold tracking-tight" },
-  { name: "AMD", className: "font-black tracking-widest" },
-  { name: "Ollama", className: "font-mono font-semibold" },
-  { name: "Hugging Face", className: "font-medium" },
-  { name: "Anthropic", className: "font-semibold tracking-tight" },
-  { name: "Gemini", className: "font-light tracking-[0.2em]" },
-  { name: "Cursor", className: "font-mono font-medium" },
-  { name: "ElevenLabs", className: "font-bold" },
-];
+/* ⚠ 14/08/2026 — LE MARQUEE « STACK IA EMBARQUÉE » A ÉTÉ SUPPRIMÉ.
+   Il faisait défiler Claude, Mistral AI, NVIDIA, AMD, Ollama, Hugging Face,
+   Anthropic, Gemini, Cursor, ElevenLabs : c'était afficher notre stack en
+   grand sur la home. Règle posée par Teo : le site ne dit jamais quels
+   outils nous utilisons — on écrit « nos automatisations », « notre base de
+   données », « nos modèles ». Ne pas le remettre.
+   (Ce composant n'est plus importé nulle part depuis la refonte, mais il
+   est corrigé pour qu'un futur réemploi ne réintroduise pas la fuite.) */
 
 /* Section « L'infrastructure » (home, monde sombre) — unité de calcul en
    vue éclatée, en illustration. Porte le discours données v3 : espace dédié
@@ -24,21 +17,6 @@ const STACK: { name: string; className: string }[] = [
 export default function Machine() {
   return (
     <section className="border-b border-line-soft">
-      {/* défilement des marques IA — miroir du bandeau outils du haut */}
-      <div className="overflow-hidden py-10 sm:py-14" aria-label="Stack IA embarquée">
-        <div className="marquee-track flex w-max items-center">
-          {[...STACK, ...STACK].map((t, idx) => (
-            <span key={idx} className="flex items-center">
-              <span
-                className={`whitespace-nowrap px-6 text-xl text-white/80 sm:px-12 sm:text-4xl ${t.className}`}
-              >
-                {t.name}
-              </span>
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold/50" />
-            </span>
-          ))}
-        </div>
-      </div>
       <div className="grid items-center gap-12 px-6 py-16 sm:px-10 sm:py-24 lg:grid-cols-2 lg:gap-16">
         {/* copy */}
         <div>
@@ -57,7 +35,7 @@ export default function Machine() {
           </Reveal>
           <Reveal delay={180}>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              Chaque client Omega a son espace de données dédié — chiffré,
+              Chaque client Omega.AI a son espace de données dédié : chiffré,
               hébergé dans l&apos;Union européenne, jamais mélangé avec celui
               d&apos;un autre. Vous gardez vos outils de tous les jours ; les
               moteurs travaillent dans cet espace et n&apos;en sortent que pour
@@ -67,9 +45,9 @@ export default function Machine() {
           <Reveal delay={270}>
             <ul className="mt-8 space-y-3.5">
               {[
-                "Validation humaine — aucun message ne part vers un client sans votre accord explicite.",
-                "Aucune exploitation — vos données ne sont ni revendues, ni utilisées pour autre chose que la tâche du moteur.",
-                "Traitement au strict nécessaire — les modèles d'intelligence artificielle n'accèdent qu'aux éléments requis par chaque tâche, jamais à l'intégralité d'un fichier.",
+                "Validation humaine : aucun message ne part vers un client sans votre accord explicite.",
+                "Aucune exploitation : vos données ne sont ni revendues, ni utilisées pour autre chose que la tâche du moteur.",
+                "Traitement au strict nécessaire : les modèles d'intelligence artificielle n'accèdent qu'aux éléments requis par chaque tâche, jamais à l'intégralité d'un fichier.",
               ].map((pt) => (
                 <li key={pt} className="flex gap-3">
                   <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
@@ -93,7 +71,7 @@ export default function Machine() {
           />
           <Image
             src="/machine-pegase.png"
-            alt="Vue éclatée d'une unité de calcul — processeur AMD, refroidissement et châssis"
+            alt="Vue éclatée d'une unité de calcul : processeur, refroidissement et châssis"
             width={513}
             height={675}
             className="relative mx-auto w-full max-w-[380px] sm:max-w-[440px]"

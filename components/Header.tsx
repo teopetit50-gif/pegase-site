@@ -17,11 +17,25 @@ import { useEffect, useRef, useState } from "react";
    next.config.ts, donc aucun lien externe ne casse. */
 const NAV = [
   { href: "/offres", label: "Nos offres" },
+  /* 03/08 — la galerie de vitrines sectorielles. Placée juste après les
+     offres : c'est l'entrée que comprend un patron de petite entreprise qui ne sait pas
+     encore ce qu'est un « moteur », et elle ramène vers l'audit. */
+  { href: "/modeles", label: "Modèles de sites" },
   { href: "/integrations", label: "Intégrations" },
+  /* 05/08 — la grille tarifaire. Placée après les intégrations : un patron
+     qui a compris ce qu'est un paquet cherche le prix juste après, et
+     jusqu'ici la seule réponse du site était « sur devis ». */
+  { href: "/tarifs", label: "Tarifs" },
   /* 30/07 — « Articles » devient « Blog » : la page est refaite sur la
      référence blog.ocoya.com et vit désormais sous /blog (redirection 308
      depuis /articles dans next.config.ts). */
   { href: "/blog", label: "Blog" },
+  /* 07/08 — « Où vont vos données ». En dernier, après le blog : ce n'est
+     pas une étape du parcours commercial, c'est la page qu'on ouvre quand on
+     est déjà convaincu et qu'il reste l'objection « et mes données ? ». Elle
+     n'était qu'au pied de page — donc invisible au moment précis où cette
+     objection se pose (Teo, 07/08 : « bah nan elle est pas dans la liste »). */
+  { href: "/vos-donnees", label: "Où vont vos données" },
   /* 30/07 — l'entrée « À propos » saute : Teo ne voulait pas de la page
      (reproduction qonto.com/en/about jugée non conforme). La route /contact
      est supprimée et redirigée par next.config.ts. */
@@ -56,6 +70,14 @@ export default function Header() {
   const barre = useRef<HTMLElement | null>(null);
   const pathname = usePathname();
   const clair = fond ? estClair(fond) : false;
+  /* 06/08 (Teo) — le panneau passe du NOIR au BLANC, sur la référence
+     « Flux » qu'il a collée. Conséquence directe : la barre du header doit
+     basculer en clair avec lui, sinon on retrouve exactement le défaut de
+     25/07 dans l'autre sens — une bande sombre posée sur un panneau clair.
+     `clairEff` est donc la couleur EFFECTIVE de la barre : celle prélevée
+     sous elle en temps normal, forcée en clair dès que le panneau est
+     ouvert. Logo, marque, CTA et burger s'y accrochent tous. */
+  const clairEff = open || clair;
 
   useEffect(() => {
     const check = () => {
@@ -147,13 +169,16 @@ export default function Header() {
            à salir le clair, dessinant une barre séparée au-dessus du hero
            /solutions là où la surface doit être continue. */
         /* 25/07 — panneau ouvert : la barre suit le panneau et passe au noir.
-           Sinon on avait une barre claire au-dessus d'un panneau sombre. */
+           Sinon on avait une barre claire au-dessus d'un panneau sombre.
+           06/08 — le panneau est blanc : la barre le suit en BLANC, même
+           raison, sens inverse. La surface header + panneau doit se lire
+           d'un seul tenant, sans démarcation. */
         /* 30/07 — la couleur vient désormais du fond prélevé (style ci-
            dessous). `bg-panel` ne sert plus que de repli pour la toute
            première image, avant que la sonde ait tourné. */
         open || fond ? "" : "bg-panel"
       }`}
-      style={{ backgroundColor: open ? "#09090b" : fond || undefined }}
+      style={{ backgroundColor: open ? "#ffffff" : fond || undefined }}
     >
       <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-10">
         <Link href="/" className="flex shrink-0 items-center gap-2.5 py-3">
@@ -163,7 +188,7 @@ export default function Header() {
               donnait un damier symétrique qui n'était pas le bon dessin.
               La variante suit le caméléon du header. */}
           <Image
-            src={clair && !open ? "/logo-pegase.png" : "/logo-pegase-blanc.png"}
+            src={clairEff ? "/logo-pegase.png" : "/logo-pegase-blanc.png"}
             alt=""
             width={96}
             height={96}
@@ -172,10 +197,10 @@ export default function Header() {
           />
           <span
             className={`text-[17px] font-semibold tracking-tight transition-colors duration-300 sm:text-[19px] ${
-              clair && !open ? "text-[#0f1013]" : "text-white"
+              clairEff ? "text-[#0f1013]" : "text-white"
             }`}
           >
-            Omega
+            Omega.AI
           </span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-4">
@@ -185,12 +210,18 @@ export default function Header() {
               surplombe, d'où l'effet pastille. On garde 36 px de haut — deux
               pixels de plus que .o-btn — pour que la barre respire, et le
               rayon 10 fait la jonction entre les deux mondes. */}
+          {/* 03/08 (Teo) — le CTA passe du plein au CONTOUR. Il prend la
+              couleur du monde qu'il survole : trait noir et texte noir
+              au-dessus d'une section claire, trait blanc et texte blanc
+              au-dessus d'une section sombre — fond transparent dans les deux
+              cas. Le remplissage ne revient qu'au survol, en très léger, pour
+              que le bouton reste vivant sans redevenir une pastille. */}
           <Link
             href="/reserver-un-audit"
-            className={`hidden h-9 items-center rounded-[10px] px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,transform] duration-200 active:scale-[0.97] md:inline-flex ${
-              clair
-                ? "bg-[#09090b] text-white hover:bg-[#27272a]"
-                : "bg-white text-[#09090b] hover:bg-[#e4e4e7]"
+            className={`hidden h-9 items-center rounded-[10px] border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform] duration-200 active:scale-[0.97] md:inline-flex ${
+              clairEff
+                ? "border-[#09090b]/25 text-[#09090b] hover:border-[#09090b]/60 hover:bg-black/[0.05]"
+                : "border-white/35 text-white hover:border-white/70 hover:bg-white/10"
             }`}
           >
             Audit gratuit
@@ -202,9 +233,12 @@ export default function Header() {
             aria-expanded={open}
             aria-controls="menu-principal"
             aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+            /* 06/08 — panneau ouvert, la croix vit dans un carré arrondi à
+               filet clair, comme dans la référence. Le filet était blanc sur
+               noir ; il devient noir très dilué sur blanc. */
             className={`group -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-200 md:h-9 md:w-9 ${
               open
-                ? "border border-white/25"
+                ? "border border-black/15 hover:bg-black/[0.04]"
                 : clair
                   ? "hover:bg-black/[0.06]"
                   : "hover:bg-white/10"
@@ -226,7 +260,7 @@ export default function Header() {
                   key={i}
                   aria-hidden
                   className={`absolute left-0 block h-[2px] rounded-full transition-all duration-300 ${
-                    clair && !open ? "bg-[#0f1013]" : "bg-white"
+                    clairEff ? "bg-[#0f1013]" : "bg-white"
                   } ${
                     open
                       ? "w-full"
@@ -259,79 +293,101 @@ export default function Header() {
       <div
         id="menu-principal"
         aria-hidden={!open}
-        /* Toujours SOMBRE, quelle que soit la page derrière (25/07, Teo :
-           « fais la même que le screen noir »). Le panneau n'est plus
-           caméléon — seule la barre du header l'est encore, et elle bascule
-           avec lui à l'ouverture. */
-        className={`fixed inset-x-0 bottom-0 top-16 z-40 bg-[#09090b] sm:top-[72px] ${
+        /* 25/07 — panneau toujours SOMBRE, quelle que soit la page derrière.
+           06/08 (Teo) — il passe au BLANC sur la référence « Flux » : fond
+           blanc pur, texte noir, et la barre du header bascule avec lui
+           (voir `clairEff`). Le panneau n'est toujours pas caméléon : il ne
+           dépend pas de la page qu'il recouvre, il impose sa surface. */
+        className={`fixed inset-x-0 bottom-0 top-16 z-40 bg-white sm:top-[72px] ${
           open ? "visible" : "invisible"
         }`}
       >
-        {/* 26/07 — panneau recalibré sur la référence, relevée au pixel sur
-            ocoya.com à 414 px de large : rangées de 46 px de pas, texte de
-            corps (pas de titre), boutons de 35 px à rayon 8, 10 px entre les
-            deux. Omega gardait un panneau nettement plus gros et plus gras
-            (Teo, « regarde la taille des écritures, regarde la grosseur »).
-            Seul écart assumé : 44 px de hauteur utile au lieu de 35/36 — la
-            référence passe sous la cible tactile, pas nous. */}
-        <nav className="mx-auto flex h-full max-w-[1440px] flex-col justify-start px-3 pt-4 sm:px-10 sm:pt-6">
-          {NAV.map((l, i) => (
+        {/* 26/07 — panneau calé sur ocoya.com : rangées serrées, texte de
+            corps, boutons rectangulaires à rayon 8 empilés sous les liens.
+            06/08 — nouvelle référence, autre grammaire, trois écarts nets :
+            les liens montent d'un cran (18/19 px au lieu de 16/17, pas de
+            rangée à 48 px), les deux boutons quittent la pile des liens pour
+            un PIED de panneau ancré en bas derrière un filet pleine largeur,
+            et ils passent en pilule pleine (rayon = hauteur/2) au lieu du
+            rayon 8. Le pied est en `mt-auto` : quel que soit le nombre
+            d'entrées de NAV, les CTA restent collés au bas de l'écran, ce
+            que la pile précédente ne savait pas faire. */}
+        <nav className="mx-auto flex h-full max-w-[1440px] flex-col px-3 sm:px-10">
+          <div className="min-h-0 flex-1 overflow-y-auto pt-7 sm:pt-9">
+            {NAV.map((l, i) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                tabIndex={open ? undefined : -1}
+                /* L'opacité n'est JAMAIS animée à l'ouverture : si la
+                   transition ne s'exécute pas (onglet en arrière-plan, rAF
+                   throttlé), un lien resté à 0 serait un menu vide sur fond
+                   opaque. Seule la montée est animée — figée, elle laisse un
+                   décalage de 14 px, jamais du texte invisible. */
+                style={{
+                  transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
+                  transitionDelay: open ? `${60 + i * 55}ms` : "0ms",
+                  opacity: open ? 1 : 0,
+                  transform: open ? "none" : "translateY(14px)",
+                }}
+                /* Texte courant, jamais un titre : la référence garde une
+                   graisse normale et fait respirer par le PAS des rangées
+                   (48 px pour 18 px de corps), pas par le gras. */
+                className="flex h-12 items-center text-[18px] font-normal leading-[1.3] tracking-[-0.015em] text-[#0f1013] transition-colors hover:text-[#0f1013]/55 sm:text-[19px]"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+          {/* Pied ancré. Le filet part d'un bord à l'autre — d'où les marges
+              négatives qui annulent la gouttière de <nav> — tandis que les
+              boutons, eux, restent dans la gouttière. C'est ce décalage qui
+              fait la séparation nette de la référence. Le padding bas suit
+              la barre d'accueil iOS (`env(safe-area-inset-bottom)`) sans
+              jamais descendre sous 16 px. */}
+          {/* Le filet reste pleine largeur, mais la colonne de boutons est
+              bridée à 420 px au-delà du mobile. La référence est un panneau
+              étroit : à 1440 px, deux pilules pleine largeur ne sont plus des
+              boutons, ce sont des bandeaux. Sur téléphone la contrainte ne
+              s'applique pas et les boutons occupent bien toute la gouttière,
+              exactement comme le screen. */}
+          <div className="-mx-3 mt-auto border-t border-black/[0.08] px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:-mx-10 sm:px-10 [&>a]:sm:max-w-[420px]">
+            {/* La référence empile secondaire PUIS primaire : le bouton noir
+                est le dernier de la colonne, au plus près du pouce. Omega
+                n'a pas de compte utilisateur, donc la paire Sign in / Get
+                started devient « Nous contacter » puis « Audit gratuit ». */}
             <Link
-              key={l.href}
-              href={l.href}
+              href="/reserver-un-audit"
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
-              /* L'opacité n'est JAMAIS animée à l'ouverture : si la
-                 transition ne s'exécute pas (onglet en arrière-plan, rAF
-                 throttlé), un lien resté à 0 serait un menu vide sur fond
-                 opaque. Seule la montée est animée — figée, elle laisse un
-                 décalage de 14 px, jamais du texte invisible. */
               style={{
                 transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-                transitionDelay: open ? `${60 + i * 55}ms` : "0ms",
+                transitionDelay: open ? `${60 + NAV.length * 55}ms` : "0ms",
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",
               }}
-              /* 16/17 px en graisse normale, et non 19/20 en medium : dans la
-                 référence les entrées sont du texte courant, pas des titres.
-                 La respiration vient du pas des rangées, jamais du corps. */
-              className="flex h-11 items-center text-[16px] font-normal leading-[1.35] tracking-[-0.01em] text-white transition-colors hover:text-white/60 sm:text-[17px]"
+              className="flex h-[52px] w-full items-center justify-center rounded-full border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
             >
-              {l.label}
+              Nous contacter
             </Link>
-          ))}
-          <Link
-            href="/reserver-un-audit"
-            onClick={() => setOpen(false)}
-            tabIndex={open ? undefined : -1}
-            style={{
-              transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-              transitionDelay: open ? `${60 + NAV.length * 55}ms` : "0ms",
-              opacity: open ? 1 : 0,
-              transform: open ? "none" : "translateY(14px)",
-            }}
-            className="mt-2.5 flex h-11 w-full items-center justify-center rounded-[8px] bg-white text-[15px] font-medium text-[#09090b] transition-colors hover:bg-neutral-200"
-          >
-            Audit gratuit
-          </Link>
-          {/* Second bouton, gris — la référence en a deux (Login / Try free).
-              Omega n'a pas de compte utilisateur : la paire devient
-              « Audit gratuit » (l'action principale) et « Nous contacter ».
-              #27272a est le gris exact du « Try free » de la référence. */}
-          <Link
-            href="/reserver-un-audit"
-            onClick={() => setOpen(false)}
-            tabIndex={open ? undefined : -1}
-            style={{
-              transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-              transitionDelay: open ? `${60 + (NAV.length + 1) * 55}ms` : "0ms",
-              opacity: open ? 1 : 0,
-              transform: open ? "none" : "translateY(14px)",
-            }}
-            className="mt-2.5 flex h-11 w-full items-center justify-center rounded-[8px] bg-[#27272a] text-[15px] font-medium text-white transition-colors hover:bg-[#3f3f46]"
-          >
-            Nous contacter
-          </Link>
+            <Link
+              href="/reserver-un-audit"
+              onClick={() => setOpen(false)}
+              tabIndex={open ? undefined : -1}
+              style={{
+                transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
+                transitionDelay: open
+                  ? `${60 + (NAV.length + 1) * 55}ms`
+                  : "0ms",
+                opacity: open ? 1 : 0,
+                transform: open ? "none" : "translateY(14px)",
+              }}
+              className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-full bg-[#0f1013] text-[15px] font-medium tracking-[-0.01em] text-white transition-colors hover:bg-[#26272b]"
+            >
+              Audit gratuit
+            </Link>
+          </div>
         </nav>
       </div>
     </header>

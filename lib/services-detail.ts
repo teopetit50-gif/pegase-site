@@ -71,7 +71,7 @@ export type ServiceDetail = {
 /* ——— ANSWR : contenu fourni par Teo, utilisé tel quel ——— */
 const ANSWR: ServiceDetail = {
   accroche:
-    "ANSWR ne s'invente jamais une réponse — il s'appuie exclusivement sur VOTRE base de connaissances. Hors de son périmètre, il transfère au lieu d'approximer.",
+    "ANSWR ne s'invente jamais une réponse : il s'appuie exclusivement sur VOTRE base de connaissances. Hors de son périmètre, il transfère au lieu d'approximer.",
   probleme:
     "Chaque appel manqué le soir, le weekend ou en pleine intervention, c'est un client qui appelle le concurrent. Un standard saturé fait fuir. Un RDV oublié coûte une place vide.",
   etapes: [
@@ -92,7 +92,7 @@ const ANSWR: ServiceDetail = {
       d: "Sur une situation sensible ou un mot d'urgence défini avec vous, votre téléphone sonne et la conversation vous arrive avec tout son historique. Le reste tourne seul, chaque échange reste archivé et consultable.",
     },
   ],
-  demoContexte: "23 h 04 — l'entreprise est fermée depuis longtemps",
+  demoContexte: "23 h 04, l'entreprise est fermée depuis longtemps",
   demo: {
     type: "chat",
     title: "Demande de devis, un mardi à 23 h",
@@ -105,7 +105,7 @@ const ANSWR: ServiceDetail = {
       },
       {
         from: "bot",
-        text: "Bonsoir ! Oui, la rénovation de salle de bain fait partie de nos prestations. Le devis se fait sur place, après une visite d'une trentaine de minutes. Je peux vous proposer jeudi 14 h ou vendredi 9 h — le premier créneau libre de l'agenda.",
+        text: "Bonsoir ! Oui, la rénovation de salle de bain fait partie de nos prestations. Le devis se fait sur place, après une visite d'une trentaine de minutes. Je peux vous proposer jeudi 14 h ou vendredi 9 h : le premier créneau libre de l'agenda.",
         time: "23:04",
       },
       { from: "client", text: "Jeudi 14h ça m'arrange", time: "23:09" },
@@ -121,7 +121,7 @@ const ANSWR: ServiceDetail = {
     "Réponse en moins d'une minute, 24 h/24, weekends et jours fériés compris",
     "Prise de rendez-vous directement dans votre agenda, avec confirmation au client et rappel la veille",
     "Qualification des demandes : devis, urgence, réclamation, renseignement",
-    "Ne s'invente jamais de réponse — transfère dès que c'est hors périmètre",
+    "Ne s'invente jamais de réponse : transfère dès que c'est hors périmètre",
     "Historique de chaque échange archivé et consultable",
   ],
   pourQui: [
@@ -140,10 +140,10 @@ const ANSWR: ServiceDetail = {
   /* Pas de témoignage : aucun avis client réel n'existe encore. On affiche à
      la place une phrase de réassurance à la voix de l'entreprise (23/07). */
   reassurance:
-    "Vos échanges et votre numéro restent les vôtres — chaque conversation est archivée et consultable.",
+    "Vos échanges et votre numéro restent les vôtres : chaque conversation est archivée et consultable.",
   tarifTexte: "Sur devis, établi après l'audit gratuit.",
   installation:
-    "Opérationnel en quelques jours. On paramètre tout avec vous — rien à coder de votre côté.",
+    "Opérationnel en quelques jours. On paramètre tout avec vous : rien à coder de votre côté.",
   faq: [
     {
       q: "Et si l'IA ne sait pas répondre ?",
@@ -151,7 +151,7 @@ const ANSWR: ServiceDetail = {
     },
     {
       q: "Où sont mes données ? Est-ce conforme RGPD ?",
-      a: "Dans un espace dédié à votre entreprise — chiffré, hébergé dans l'Union européenne, séparé de celui des autres clients. Les modèles reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
+      a: "Dans un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne, séparé de celui des autres clients. Les modèles reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
     },
     {
       q: "Je garde mon numéro ?",
@@ -159,7 +159,7 @@ const ANSWR: ServiceDetail = {
     },
     {
       q: "Ça gère plusieurs langues ?",
-      a: "[ANSWR — réponse multilingue à confirmer]",
+      a: "[ANSWR : réponse multilingue à confirmer]",
     },
   ],
   ctaTitre: "Voir ANSWR répondre sur vos propres demandes",
@@ -192,7 +192,7 @@ function depuisFiche(
     pourQui: f.cible,
     integrations: f.outils,
     stats: manquants.stats,
-    temoignage: `[${system} — témoignage client à fournir]`,
+    temoignage: `[${system}, témoignage client à fournir]`,
     tarif: "[montant à compléter]",
     tarifDetail: "par mois, + installation",
     installation: manquants.installation,
@@ -203,16 +203,16 @@ function depuisFiche(
 }
 
 export const SERVICES_DETAIL: Record<string, ServiceDetail> = {
-  ANSWR,
-  PAYD: depuisFiche("PAYD", {
-    probleme: "[PAYD — problème à remplir : la douleur avant la solution]",
+  FRONTD: ANSWR,
+  CASHD: depuisFiche("CASHD", {
+    probleme: "[PAYD : problème à remplir : la douleur avant la solution]",
     demoContexte: "Le protocole appliqué à une facture échue",
     stats: [
-      { valeur: "[chiffre]", label: "[PAYD — indicateur à fournir]" },
-      { valeur: "[chiffre]", label: "[PAYD — indicateur à fournir]" },
-      { valeur: "[chiffre]", label: "[PAYD — indicateur à fournir]" },
+      { valeur: "[chiffre]", label: "[PAYD : indicateur à fournir]" },
+      { valeur: "[chiffre]", label: "[PAYD : indicateur à fournir]" },
+      { valeur: "[chiffre]", label: "[PAYD : indicateur à fournir]" },
     ],
-    installation: "[PAYD — ce que ça demande au client et le délai de mise en route]",
+    installation: "[PAYD : ce que ça demande au client et le délai de mise en route]",
     ctaTitre: "Chiffrer ce que vos impayés vous coûtent",
     ctaTexte:
       "L'audit part de votre facturier réel : montants en attente, ancienneté des retards, retour attendu.",
@@ -220,10 +220,10 @@ export const SERVICES_DETAIL: Record<string, ServiceDetail> = {
   /* OFFLOAD : contenu fourni par Teo le 23/07 pour le problème, les trois
      indicateurs, le tarif et l'installation. La réassurance remplace
      l'emplacement témoignage — aucun avis client réel à afficher. */
-  OFFLOAD: {
-    ...depuisFiche("OFFLOAD", {
+  FILED: {
+    ...depuisFiche("FILED", {
       probleme:
-        "Chaque facture fournisseur, c'est une pièce à retrouver, renommer, classer, puis ressaisir. Les PDF s'empilent, on court après les justificatifs en fin de mois, et le comptable facture le temps qu'il passe à démêler un dossier en vrac. Au bout : des heures perdues, de la TVA oubliée, des pénalités de retard — et une compta qui a toujours un mois de retard sur la réalité.",
+        "Chaque facture fournisseur, c'est une pièce à retrouver, renommer, classer, puis ressaisir. Les PDF s'empilent, on court après les justificatifs en fin de mois, et le comptable facture le temps qu'il passe à démêler un dossier en vrac. Au bout : des heures perdues, de la TVA oubliée, des pénalités de retard, et une compta qui a toujours un mois de retard sur la réalité.",
       demoContexte: "Une photo de facture reçue en pleine journée",
       stats: [
         { valeur: "0", label: "ligne de saisie de votre côté" },
@@ -238,20 +238,20 @@ export const SERVICES_DETAIL: Record<string, ServiceDetail> = {
     }),
     temoignage: undefined,
     reassurance:
-      "Vos factures restent sur votre propre Drive — on ne fait que les collecter, les classer et les préparer.",
+      "Vos factures restent sur votre propre Drive : on ne fait que les collecter, les classer et les préparer.",
     tarifTexte: "Sur devis, établi après l'audit gratuit.",
     tarif: undefined,
     tarifDetail: undefined,
   },
-  REVIVE: depuisFiche("REVIVE", {
-    probleme: "[REVIVE — problème à remplir : la douleur avant la solution]",
+  RELOAD: depuisFiche("RELOAD", {
+    probleme: "[REVIVE : problème à remplir : la douleur avant la solution]",
     demoContexte: "Une cliente silencieuse depuis huit mois",
     stats: [
-      { valeur: "[chiffre]", label: "[REVIVE — indicateur à fournir]" },
-      { valeur: "[chiffre]", label: "[REVIVE — indicateur à fournir]" },
-      { valeur: "[chiffre]", label: "[REVIVE — indicateur à fournir]" },
+      { valeur: "[chiffre]", label: "[REVIVE : indicateur à fournir]" },
+      { valeur: "[chiffre]", label: "[REVIVE : indicateur à fournir]" },
+      { valeur: "[chiffre]", label: "[REVIVE : indicateur à fournir]" },
     ],
-    installation: "[REVIVE — ce que ça demande au client et le délai de mise en route]",
+    installation: "[REVIVE : ce que ça demande au client et le délai de mise en route]",
     ctaTitre: "Savoir ce que dort dans votre fichier client",
     ctaTexte:
       "L'audit mesure combien de clients sont silencieux, depuis quand, et pour quelle valeur historique.",

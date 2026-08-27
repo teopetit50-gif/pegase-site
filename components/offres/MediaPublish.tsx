@@ -34,8 +34,8 @@ function Panneau({
 function Console() {
   const colonnes = ["Reçu", "Contrôlé", "Classé"];
   const lignes = [
-    ["EDF — juillet", "312,40 €", 2],
-    ["Sodexo Antilles", "1 084,00 €", 2],
+    ["EDF · juillet", "312,40 €", 2],
+    ["Sodexo Restauration", "1 084,00 €", 2],
     ["Caraïbe Pièces Auto", "1 345,40 €", 1],
     ["Loyer atelier", "950,00 €", 2],
     ["Total Énergies", "218,90 €", 0],
@@ -160,7 +160,7 @@ function Saisie({ fiche }: { fiche: Fiche }) {
       <div className="space-y-2.5 px-4 py-3.5">
         {[
           ["Journal", "Achats"],
-          ["Compte", "606 — Fournitures"],
+          ["Compte", "606 · Fournitures"],
           ["Période", "Juillet 2026"],
         ].map(([k, v]) => (
           <div key={k} className="flex items-baseline justify-between gap-3">
@@ -239,7 +239,7 @@ export function MaqRegleClassement({ fiche }: { fiche: Fiche }) {
       </div>
       <div className="space-y-1.5 px-4 py-4">
         {[
-          ["Fournisseur reconnu", "Journal + compte pré-remplis"],
+          ["Fournisseur reconnu", "Journal et compte pré-remplis"],
           ["Doublon détecté", "Écarté, vous êtes prévenu"],
           ["Pièce illisible", "Mise de côté pour relecture"],
         ].map(([k, v]) => (
@@ -249,7 +249,7 @@ export function MaqRegleClassement({ fiche }: { fiche: Fiche }) {
           </div>
         ))}
         <div className="o-demo-faible pt-1 text-[11px]">
-          Règles fixées avec vous à l&apos;installation — {fiche.outils.join(" · ")}
+          Règles fixées avec vous à l&apos;installation · {fiche.outils.join(" · ")}
         </div>
       </div>
     </CarteBlanche>

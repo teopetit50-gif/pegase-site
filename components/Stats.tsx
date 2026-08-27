@@ -15,7 +15,7 @@ const STATS = [
   {
     n: "01.09.2026",
     label: "facturation électronique obligatoire",
-    sub: "L'obligation entre en vigueur pour toutes les entreprises — BILLD met votre facturation en conformité avant la date.",
+    sub: "L'obligation entre en vigueur pour toutes les entreprises, BILLD met votre facturation en conformité avant la date.",
   },
   {
     n: "10 000 €",

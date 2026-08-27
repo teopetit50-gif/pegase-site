@@ -25,6 +25,27 @@ const nextConfig: NextConfig = {
       { source: "/offres/moteurs", destination: "/offres", permanent: true },
       { source: "/articles", destination: "/blog", permanent: true },
       { source: "/articles/:slug", destination: "/blog/:slug", permanent: true },
+      /* 05/08 : les douze fiches moteur deviennent six pages de paquet, et
+         l'URL passe du nom de code au slug descriptif. Les six moteurs réels
+         pointent vers le paquet qui les contient ; les six qui n'ont jamais
+         existé — POSTD, REACH, HIRED, BILLD, STAYD, COLLECT — retombent sur
+         la liste des offres plutôt que sur un 404 : ils étaient servis en
+         statique depuis fin juillet, donc potentiellement indexés.
+         Les vieilles URL /moteurs/payd et /solutions/payd restent servies :
+         elles tombent d'abord sur /offres/payd, qui rebondit ici. Deux sauts,
+         mais aucune adresse morte depuis juillet. */
+      { source: "/offres/payd", destination: "/offres/relances-impayes", permanent: true },
+      { source: "/offres/answr", destination: "/offres/demandes-clients", permanent: true },
+      { source: "/offres/offload", destination: "/offres/factures-fournisseurs", permanent: true },
+      { source: "/offres/brief", destination: "/offres/point-du-matin", permanent: true },
+      { source: "/offres/revive", destination: "/offres/nouvelles-affaires", permanent: true },
+      { source: "/offres/publiq", destination: "/offres/nouvelles-affaires", permanent: true },
+      { source: "/offres/postd", destination: "/offres", permanent: true },
+      { source: "/offres/reach", destination: "/offres", permanent: true },
+      { source: "/offres/hired", destination: "/offres", permanent: true },
+      { source: "/offres/billd", destination: "/offres", permanent: true },
+      { source: "/offres/stayd", destination: "/offres", permanent: true },
+      { source: "/offres/collect", destination: "/offres", permanent: true },
     ];
   },
 };

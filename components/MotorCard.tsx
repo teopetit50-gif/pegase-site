@@ -147,7 +147,7 @@ export default function MotorCard({
       <Link
         href={`/offres/${moteur.system.toLowerCase()}`}
         className="group block h-full [perspective:1100px]"
-        aria-label={`${moteur.title} — découvrir`}
+        aria-label={`${moteur.title} : découvrir`}
       >
         <div
           ref={cardRef}

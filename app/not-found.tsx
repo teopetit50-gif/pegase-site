@@ -12,7 +12,7 @@ export default function NotFound() {
           Cette page n&apos;existe pas.
         </h1>
         <p className="mx-auto mt-4 max-w-[460px] text-base leading-relaxed opacity-70">
-          L&apos;adresse a peut-être changé — le site a été réorganisé cet été.
+          L&apos;adresse a peut-être changé : le site a été réorganisé cet été.
           Tout ce qui existe se retrouve depuis l&apos;accueil.
         </p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">

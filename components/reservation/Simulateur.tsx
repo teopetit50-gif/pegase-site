@@ -217,7 +217,7 @@ export default function Simulateur() {
           >
             Faire chiffrer mes vrais chiffres
           </a>
-          <p className="r-note mt-2 text-center">Gratuit — réponse le jour même</p>
+          <p className="r-note mt-2 text-center">Gratuit : réponse le jour même</p>
         </div>
       </div>
 

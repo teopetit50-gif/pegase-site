@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { siClaude, siNvidia, siAmd } from "simple-icons";
 import Reveal from "./Reveal";
 import MotorCard from "./MotorCard";
 import type { Famille } from "@/lib/content";
@@ -84,24 +83,24 @@ export default function FeatureSection({
                   <path d="M7 17L17 7M9 7h8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
-              {/* le panneau gris seul, étincelle or en continu sur sa bordure */}
-              <div className="border-beam mt-6 rounded-[12px] bg-black px-7 py-4 shadow-[0_0_110px_-8px_rgba(15,16,19,0.55),0_0_44px_-6px_rgba(15,16,19,0.35),0_22px_56px_-16px_rgba(15,16,19,0.4)] ring-1 ring-white/[0.06]">
-                <div className="flex items-center justify-between gap-4 sm:gap-6">
-                  <span className="grid h-[46px] w-[46px] place-items-center rounded-[8px]" style={{ background: "#D97757" }}>
-                    <svg width="25" height="25" viewBox="0 0 24 24" aria-label="Claude">
-                      <path d={siClaude.path} fill="#ffffff" />
-                    </svg>
-                  </span>
-                  <span className="grid h-[46px] w-[46px] place-items-center rounded-[8px] bg-white">
-                    <svg width="27" height="27" viewBox="0 0 24 24" aria-label="NVIDIA">
-                      <path d={siNvidia.path} fill="#76B900" />
-                    </svg>
-                  </span>
-                  <span className="grid h-[46px] w-[46px] place-items-center rounded-[8px] bg-white">
-                    <svg width="25" height="25" viewBox="0 0 24 24" aria-label="AMD">
-                      <path d={siAmd.path} fill="#0f1013" />
-                    </svg>
-                  </span>
+              {/* le panneau gris seul, étincelle or en continu sur sa bordure
+
+                  ⚠ 14/08/2026 — les trois logos d'éditeurs (Claude, NVIDIA,
+                  AMD) qui remplissaient ce panneau ont été remplacés par ce
+                  qu'ils étaient censés prouver. Règle Teo : le site ne dit
+                  jamais quels outils nous utilisons. Ne pas les remettre. */}
+              <div className="border-beam mt-6 rounded-[12px] bg-black px-7 py-5 shadow-[0_0_110px_-8px_rgba(15,16,19,0.55),0_0_44px_-6px_rgba(15,16,19,0.35),0_22px_56px_-16px_rgba(15,16,19,0.4)] ring-1 ring-white/[0.06]">
+                <div className="flex flex-col gap-2.5">
+                  {[
+                    "Modèles de dernière génération",
+                    "Vos données hébergées dans l'Union européenne",
+                    "Aucun entraînement sur ce que vous nous confiez",
+                  ].map((l) => (
+                    <span key={l} className="flex items-center gap-2.5">
+                      <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
+                      <span className="text-[14px] leading-snug text-white/85">{l}</span>
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
