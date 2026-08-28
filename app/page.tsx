@@ -226,9 +226,12 @@ const GARANTIES: {
        il mène donc à la prise de rendez-vous, seul endroit où l'éligibilité
        se vérifie réellement, ce que le texte de la carte dit déjà. Pour
        revenir en arrière : href "/blog/cheque-tic-financement". */
+    /* 28/08 — repointé vers la section Chèque TIC de /tarifs : c'est elle
+       qui dit où et quand l'éligibilité se vérifie (à l'installation), là
+       où /commencer ne mentionnait ni TIC ni éligibilité. */
     lien: {
       label: "Vérifier mon éligibilité",
-      href: "/commencer",
+      href: "/tarifs#cheque-tic",
     },
     maquette: <MaqCheque />,
   },
@@ -289,11 +292,14 @@ const FAQ = [
   },
   {
     q: "On commence par combien de choses à la fois ?",
-    a: "Une. L'assistant en fait quatre, mais on met en route celle que l'audit a chiffrée comme la plus rentable chez vous, et on la mène jusqu'au bout. Les autres suivent, une par semaine, si les chiffres du premier moteur le justifient.",
+    a: "Une, le plus souvent. L'assistant tient quatre postes, mais on met en route celui qui vous coûte le plus cher — celui que vous choisissez dans la grille, ou que l'audit chiffre chez les structures à plusieurs services — et on le mène jusqu'au bout. Les autres suivent si les chiffres du premier le justifient.",
   },
   {
+    /* 28/08 — la réponse v3 (« un prix affiché ici ne voudrait pas dire
+       grand-chose ») niait la grille publique vers laquelle le CTA de
+       cette même page envoie désormais. Réécrite pour les deux mondes. */
     q: "Combien ça coûte ?",
-    a: "Le chiffrage sort de l'audit, parce qu'il dépend de vos outils, de votre volume et du moteur retenu. Un prix affiché ici ne voudrait pas dire grand-chose. Ce qui est certain, c'est que le Chèque TIC peut en financer une partie (de 40 à 80 % selon le poste, jusqu'à 10 000 €), si vous êtes éligible.",
+    a: "Pour les indépendants, TPE et PME, les prix sont publics : un poste 59 € par mois, trois postes 85 €, tout Omega 105 € — sans engagement, installation comprise. Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit. Dans les deux cas, le Chèque TIC peut financer une partie de l'installation (de 40 à 80 %, jusqu'à 10 000 €), si vous êtes éligible.",
   },
   {
     q: "Où sont hébergées mes données ?",
@@ -867,13 +873,13 @@ export default function Home() {
           </div>
           <div className="o-wrap relative flex flex-col items-center text-center">
             <h2 data-reveal className="o-h2 max-w-[620px]">
-              On commence par regarder.
+              On commence simplement.
             </h2>
             <p data-reveal className="o-lead mt-5 max-w-[600px]">
-              Trente minutes pour identifier ce qui vous coûte le plus, vérifier
-              votre éligibilité au Chèque TIC, et dire franchement s&apos;il y a
-              quelque chose à automatiser chez vous. Si la réponse est non, on le
-              dit.
+              Deux minutes pour choisir votre porte&nbsp;: les prix publics si vous
+              tenez vos outils, un audit chiffré si plusieurs services se partagent
+              le travail. Et si rien ne se justifie chez vous, on le dit
+              franchement.
             </p>
             <div data-reveal className="mt-9 flex flex-wrap justify-center gap-3">
               <Link href="/commencer" className="o-btn o-btn--primary">

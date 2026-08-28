@@ -105,7 +105,7 @@ function BlocAlterne({
           <p className="o-body mt-5 max-w-[450px]">{texte}</p>
           <div className="mt-8 flex flex-wrap items-center gap-5">
             <Link href="/commencer" className="o-btn o-btn--primary">
-              Audit gratuit
+              Commencer
               <Chevron taille={13} />
             </Link>
             {lien ? (

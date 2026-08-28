@@ -74,16 +74,17 @@ export default function Cloture() {
         }}
       />
 
-      {/* 17ch : à 20 le titre laissait « audit » seul sur la seconde ligne,
-          ce qui est le pire endroit possible pour un mot orphelin — c'est
-          le mot que la phrase vise. */}
+      {/* 28/08 — le titre promettait un audit à un public (les chercheurs
+          de vitrine = des TPE) que le funnel n'y envoie plus : la voie TPE
+          de /commencer mène aux prix publics. Reformulé sans promesse
+          d'entretien — la phrase vise maintenant le démarrage. */}
       <h2 data-intertitre className="m-h2 mx-auto max-w-[17ch] text-white">
-        Votre vitrine commence par un audit
+        Votre vitrine démarre en deux minutes
       </h2>
 
       <p className="mx-auto mt-5 max-w-[52ch] text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/70">
-        Une demi-heure pour regarder ce qui se perd entre un visiteur et un client
-        payé, et quel modèle tient debout pour votre métier.
+        Choisissez le modèle qui tient debout pour votre métier, et le poste qui
+        récupère ce qui se perd entre un visiteur et un client payé.
       </p>
 
       {/* Les trois faits, séparés par des filets verticaux à partir de sm.

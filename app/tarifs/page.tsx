@@ -132,7 +132,7 @@ export default function TarifsPage() {
         </section>
 
         {/* ═══ 4 — Chèque TIC, sur bande sombre ═══ */}
-        <section className="r-nuit">
+        <section id="cheque-tic" className="r-nuit">
           <div className="r-wrap py-14 sm:py-16">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-[60ch]">

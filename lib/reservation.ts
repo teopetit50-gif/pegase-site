@@ -170,7 +170,7 @@ export const PROFILS: [Profil, Profil] = [
         cta: "Réserver ce créneau",
         souscta: "Créneau bloqué immédiatement, confirmé le jour même",
         phare: true,
-        badge: "Populaire",
+        badge: "Recommandé",
         enteteListe: "Tout le Diagnostic, plus :",
         points: [
           {
@@ -271,7 +271,7 @@ export const PROFILS: [Profil, Profil] = [
         cta: "Réserver ce créneau",
         souscta: "Créneau bloqué immédiatement, confirmé le jour même",
         phare: true,
-        badge: "Populaire",
+        badge: "Recommandé",
         enteteListe: "Tout le Cadrage, plus :",
         points: [
           {
@@ -372,7 +372,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Délai pour obtenir un créneau",
-        aide: "Délais constatés, hors périodes de fermeture. Trois créneaux vous sont proposés à chaque fois.",
+        aide: "Délais constatés, hors périodes de fermeture. L'agenda en ligne n'affiche que les créneaux réellement libres : vous bloquez le vôtre vous-même.",
         valeurs: ["Sous 72 h", "Sous 5 jours ouvrés", "Sous 10 jours ouvrés"],
       },
     ],

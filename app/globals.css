@@ -3433,6 +3433,13 @@ button.rounded-full:active {
   padding-right: 38px;
 }
 
+/* les labels-radios reprennent le focus de leur input sr-only */
+.resa .rv-fmt:has(input:focus-visible),
+.resa .rv-pil:has(input:focus-visible) {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+
 /* ——— bandeau d'erreur ——— */
 .resa .rv-erreur {
   border: 1px solid #e4b7b0;
@@ -3475,13 +3482,13 @@ button.rounded-full:active {
   color: transparent;
 }
 .resa .rv-prix--un {
-  background-image: linear-gradient(115deg, #f97316, #ea580c);
+  background-image: linear-gradient(115deg, #ea580c, #c2410c); /* AA : >=3:1 sur toutes les bandes de la tête (revue 28/08) */
 }
 .resa .rv-prix--trois {
-  background-image: linear-gradient(115deg, #f43f5e, #c026d3);
+  background-image: linear-gradient(115deg, #e11d48, #a21caf);
 }
 .resa .rv-prix--complet {
-  background-image: linear-gradient(115deg, #8b5cf6, #6d28d9);
+  background-image: linear-gradient(115deg, #7c3aed, #5b21b6);
 }
 /* le trait de sélection d'une case suit la teinte du palier */
 .resa .rv-palier--un .rv-case--actif {
@@ -3541,7 +3548,7 @@ button.rounded-full:active {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #ea580c;
+  color: #c2410c;
   background: #fff1e2;
 }
 .resa .cm-kicker--sombre {

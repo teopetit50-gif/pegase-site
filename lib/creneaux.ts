@@ -29,6 +29,11 @@ const SUPABASE_KEY = "sb_publishable_9TSwcnUkHIOol1FIxEVWPw_F4HRnhqS";
    SQL revérifie de toute façon en zone America/Guadeloupe. */
 const DECALAGE_GP = 4;
 
+/* L'agenda est ouvert sur dix semaines — la MÊME borne que la fonction
+   SQL (creneau_trop_loin au-delà de now + 70 j) et que chargerAgenda :
+   un créneau affiché doit toujours être un créneau acceptable. */
+export const HORIZON_JOURS = 70;
+
 /* ——— formules réservables : durée en minutes, imposée aussi côté SQL.
    `null` = format sur devis : pas de créneau, la demande part « à
    traiter » et Teo répond avec un devis. */
@@ -110,8 +115,12 @@ export function creneauxDuJour(
   if (!regles.length) return [];
 
   /* plancher : maintenant + 3 h — la fonction SQL exige 2 h, la marge
-     laisse le temps de remplir le formulaire sans se faire refuser */
+     laisse le temps de remplir le formulaire sans se faire refuser.
+     Plafond : l'horizon de dix semaines — au-delà, chargerAgenda n'a pas
+     chargé les occupations et la fonction SQL refuserait de toute façon
+     (creneau_trop_loin) : ces jours ne doivent JAMAIS s'afficher libres. */
   const plancher = Date.now() + 3 * 3_600_000;
+  const plafond = Date.now() + HORIZON_JOURS * 86_400_000;
   const creneaux: number[] = [];
 
   for (const r of regles) {
@@ -124,6 +133,7 @@ export function creneauxDuJour(
       if (fin > finRegle) break;
       const libre =
         debut >= plancher &&
+        debut <= plafond &&
         !agenda.indisponibles.some((x) => debut < x.fin && fin > x.debut);
       if (libre) creneaux.push(debut);
       m += 30;
@@ -170,6 +180,15 @@ export function heureVisiteur(instant: number): string | null {
 export function aujourdhuiGp(): { annee: number; mois: number; jour: number } {
   const d = new Date(Date.now() - DECALAGE_GP * 3_600_000);
   return { annee: d.getUTCFullYear(), mois: d.getUTCMonth() + 1, jour: d.getUTCDate() };
+}
+
+/** Le dernier jour réservable (J+70), en date calendaire de Guadeloupe —
+    borne de navigation du calendrier. Même conversion que aujourdhuiGp :
+    on RETRANCHE le décalage (la revue du 28/08 a attrapé un signe inversé
+    qui ouvrait jusqu'à un mois de trop). */
+export function horizonGp(): { annee: number; mois: number } {
+  const d = new Date(Date.now() + HORIZON_JOURS * 86_400_000 - DECALAGE_GP * 3_600_000);
+  return { annee: d.getUTCFullYear(), mois: d.getUTCMonth() + 1 };
 }
 
 /* ——— réservation ——— */

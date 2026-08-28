@@ -105,7 +105,7 @@ export const PALIERS: Palier[] = [
     sousPrix: "par mois, sans engagement",
     aChoisir: 3,
     phare: true,
-    badge: "Le plus choisi",
+    badge: "Recommandé",
     promesse: "La relance, l'accueil et un troisième poste : le trio qui change les journées.",
     points: [
       "Trois postes au choix parmi les quatre",

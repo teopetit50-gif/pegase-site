@@ -279,7 +279,7 @@ export default function OffresPage() {
               </p>
               <div data-reveal className="mt-[25px] flex flex-wrap items-center justify-center gap-3">
                 <Link href="/commencer" className="o-btn o-btn--primary">
-                  Audit gratuit
+                  Commencer
                 </Link>
               </div>
             </div>
@@ -446,7 +446,7 @@ export default function OffresPage() {
                 titre="Sur vos outils"
                 texte="Le moteur se branche sur ce que vous utilisez déjà. Ni compte à créer, ni colonne à renommer, ni habitude à changer."
                 avant={<MediaOutils />}
-                lien={{ label: "Vérifier la compatibilité", href: "/commencer" }}
+                lien={{ label: "Vérifier la compatibilité", href: "/integrations" }}
               />
             </div>
 
@@ -487,7 +487,7 @@ export default function OffresPage() {
             </p>
             <div className="relative mt-8">
               <Link href="/commencer" className="o-btn o-btn--primary">
-                Audit gratuit
+                Commencer
                 <IconeFlecheDroite taille={14} />
               </Link>
             </div>

@@ -188,7 +188,11 @@ export default function Formules() {
         <div className="mt-10 grid gap-4 sm:mt-12 lg:grid-cols-4">
           {/* colonne de gauche — la référence y loge sa preuve sociale ;
               Omega n'en a pas d'authentique, on y met donc les deux faits
-              qui décident réellement : c'est gratuit, et c'est financé. */}
+              qui décident réellement : c'est gratuit, et c'est financé.
+              28/08 : masquée sur l'onglet TPE — « Toute collaboration
+              commence ici » côte à côte avec « Pas besoin d'un audit pour
+              commencer » se contredisait à l'écran. */}
+          {!tpe && (
           <div className="flex flex-col justify-start gap-8 pr-2 lg:pt-2">
             <p className="text-[19px] font-medium leading-[27px] text-[#050505] sm:text-[21px] sm:leading-[29px]">
               Gratuit, sans engagement.
@@ -206,11 +210,12 @@ export default function Formules() {
               </p>
             </div>
           </div>
+          )}
 
           {tpe ? (
             /* l'aiguillage : pas de formules ici, la grille publique est
                leur porte — le Diagnostic gratuit reste en voie douce */
-            <div className="flex flex-col justify-between rounded-2xl bg-white p-7 sm:p-9 lg:col-span-3">
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-7 sm:p-9 lg:col-span-4">
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
                   Indépendants, TPE &amp; PME
@@ -258,8 +263,8 @@ export default function Formules() {
               Vous ne savez pas quel format choisir ?
             </span>{" "}
             Décrivez votre situation en deux lignes : votre activité, votre commune, ce
-            qui vous coûte le plus cher. On vous propose le format adapté et trois
-            créneaux.
+            qui vous coûte le plus cher. On vous répond le jour même avec le format
+            adapté — et l&apos;agenda en ligne fait le reste.
           </p>
           <a
             href={lienContact("Quel format d'audit pour moi ?")}

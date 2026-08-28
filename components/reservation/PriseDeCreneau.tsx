@@ -36,6 +36,7 @@ import {
   creneauxDuJour,
   heureGp,
   heureVisiteur,
+  horizonGp,
   jourGpLabel,
   moisLabel,
   reserver,
@@ -120,13 +121,13 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
     return m;
   }, [agenda, vue, dureeMin]);
 
-  /* bornes de navigation : du mois courant au mois d'aujourd'hui + 10 sem. */
+  /* bornes de navigation : du mois courant au mois du dernier jour
+     réservable (J+70, en date calendaire GUADELOUPE — horizonGp fait la
+     conversion dans le bon sens, voir lib/creneaux.ts). */
   const auj = aujourdhuiGp();
-  const borneFin = new Date(Date.now() + 70 * 86_400_000 + 4 * 3_600_000);
-  const finAnnee = borneFin.getUTCFullYear();
-  const finMois = borneFin.getUTCMonth() + 1;
+  const fin = horizonGp();
   const peutReculer = vue.annee * 12 + vue.mois > auj.annee * 12 + auj.mois;
-  const peutAvancer = vue.annee * 12 + vue.mois < finAnnee * 12 + finMois;
+  const peutAvancer = vue.annee * 12 + vue.mois < fin.annee * 12 + fin.mois;
   const bougerMois = (sens: 1 | -1) =>
     setVue((v) => {
       let m = v.mois + sens;
@@ -202,8 +203,15 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
       return;
     }
     setErreur(rep.erreur);
-    /* créneau soufflé entre-temps : retour au calendrier, grille rafraîchie */
-    if (rep.erreur === "creneau_pris" || rep.erreur === "creneau_passe") {
+    /* créneau invalide côté serveur — soufflé entre-temps, devenu trop
+       proche/lointain, ou hors horaires après un changement de règles :
+       retour au calendrier, grille rechargée, sélection effacée. Rester à
+       l'étape coordonnées avec un créneau refusé serait une impasse. */
+    if (
+      ["creneau_pris", "creneau_passe", "creneau_trop_loin", "hors_horaires", "creneau_non_aligne"].includes(
+        rep.erreur,
+      )
+    ) {
       setCreneau(null);
       setJour(null);
       rechargerAgenda();
@@ -278,25 +286,30 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
               {PROFILS.map((p) => (
                 <div key={p.id}>
                   <div className="rv-fmt-groupe">{p.label}</div>
-                  <div className="mt-2 space-y-1.5" role="radiogroup" aria-label={p.label}>
+                  {/* de VRAIS <input type="radio"> masqués en sr-only (le
+                      motif de Grille.tsx) : flèches, tab stop unique et
+                      annonce lecteur d'écran viennent du navigateur — la
+                      revue du 28/08 a retoqué la version <button
+                      role="radio"> sans clavier. */}
+                  <div className="mt-2 space-y-1.5">
                     {p.formules.map((f) => {
                       const actif = formule === f.id;
                       const devis = DUREES_RDV[f.id] === null;
                       return (
-                        <button
-                          key={f.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={actif}
-                          onClick={() => {
-                            setFormule(f.id);
-                            setJour(null);
-                            setCreneau(null);
-                            setErreur(null);
-                            setEtape(devis ? "coordonnees" : "creneau");
-                          }}
-                          className={`rv-fmt ${actif ? "rv-fmt--actif" : ""}`}
-                        >
+                        <label key={f.id} className={`rv-fmt ${actif ? "rv-fmt--actif" : ""}`}>
+                          <input
+                            type="radio"
+                            name="rv-format"
+                            className="sr-only"
+                            checked={actif}
+                            onChange={() => {
+                              setFormule(f.id);
+                              setJour(null);
+                              setCreneau(null);
+                              setErreur(null);
+                              setEtape(devis ? "coordonnees" : "creneau");
+                            }}
+                          />
                           <span className="rv-fmt-rond" aria-hidden />
                           <span className="flex-1">
                             <span className="block text-[13.5px] font-medium leading-[18px] text-[#050505]">
@@ -306,7 +319,7 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                               {f.duree} · {devis ? "sur devis" : "gratuit"}
                             </span>
                           </span>
-                        </button>
+                        </label>
                       );
                     })}
                   </div>
@@ -527,26 +540,27 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                 </label>
                 <input id="rv-commune" className="rv-champ" autoComplete="address-level2" value={c.commune} onChange={maj("commune")} />
               </div>
-              <div className="sm:col-span-2">
-                <div className="rv-libelle">Secteur d&apos;activité</div>
-                <div className="rv-pils mt-2" role="radiogroup" aria-label="Secteur d'activité">
+              <fieldset className="sm:col-span-2">
+                <legend className="rv-libelle">Secteur d&apos;activité</legend>
+                {/* mêmes vrais radios sr-only que le choix de format */}
+                <div className="rv-pils mt-2">
                   {SECTEURS.map((s) => {
                     const actif = c.secteur === s.valeur;
                     return (
-                      <button
-                        key={s.valeur}
-                        type="button"
-                        role="radio"
-                        aria-checked={actif}
-                        onClick={() => setC((prev) => ({ ...prev, secteur: s.valeur }))}
-                        className={`rv-pil ${actif ? "rv-pil--actif" : ""}`}
-                      >
+                      <label key={s.valeur} className={`rv-pil ${actif ? "rv-pil--actif" : ""}`}>
+                        <input
+                          type="radio"
+                          name="rv-secteur"
+                          className="sr-only"
+                          checked={actif}
+                          onChange={() => setC((prev) => ({ ...prev, secteur: s.valeur }))}
+                        />
                         {s.libelle}
-                      </button>
+                      </label>
                     );
                   })}
                 </div>
-              </div>
+              </fieldset>
               <div className="sm:col-span-2">
                 <label className="rv-libelle" htmlFor="rv-message">
                   {surDevis
@@ -557,10 +571,17 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                 <textarea id="rv-message" rows={3} className="rv-champ resize-y" value={c.message} onChange={maj("message")} />
               </div>
 
-              {/* pot de miel — jamais visible, jamais rempli par un humain */}
+              {/* pot de miel — jamais visible, jamais rempli par un humain.
+                  28/08 (revue) : le libellé « Votre site web » + id « rv-site »
+                  étaient exactement les signaux qu'un gestionnaire de mots de
+                  passe utilise pour auto-remplir — un VRAI visiteur pouvait
+                  déclencher le court-circuit et croire à une réservation qui
+                  n'existait pas. Libellé neutre, nom sans signification, et
+                  autocomplete="one-time-code" (le seul que les navigateurs
+                  respectent vraiment) : plus rien à reconnaître. */}
               <div className="rv-miel" aria-hidden="true">
-                <label htmlFor="rv-site">Votre site web</label>
-                <input id="rv-site" tabIndex={-1} autoComplete="off" value={c.site_web} onChange={maj("site_web")} />
+                <label htmlFor="rv-x7">Ne pas remplir</label>
+                <input id="rv-x7" name="rv-x7" tabIndex={-1} autoComplete="one-time-code" value={c.site_web} onChange={maj("site_web")} />
               </div>
             </div>
 

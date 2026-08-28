@@ -241,7 +241,7 @@ export default function GabaritPublish({
             badge="Cadré avec vous"
             titre="Des règles, pas des devinettes"
             texte="Le moteur classe selon les règles fixées à l'installation, et selon elles seules. Une pièce qui sort du cadre est mise de côté : jamais rangée au jugé."
-            lien={{ label: "Voir le déroulé", href: "/reserver-un-audit" }}
+            lien={{ label: "Comment se passe l'installation", href: "/tarifs#grille" }}
           >
             <MaqRegleClassement fiche={fiche} />
           </CarteMedia>
