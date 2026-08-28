@@ -12,7 +12,6 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useState } from "react";
 import {
   COMPARATIF,
   COURRIEL,
@@ -144,14 +143,13 @@ function Ligne({
 }
 
 export default function Formules() {
-  /* 28/08 — l'audit devient la porte des structures où plusieurs services
-     valident : « Entreprise & équipes » s'affiche en premier. L'onglet
-     indépendant/TPE ne montre plus de formules : il aiguille vers la
-     grille publique de /tarifs (décision Teo, modèle des deux portes) —
-     avec le Diagnostic gratuit en voie douce pour qui veut parler avant. */
-  const [profil, setProfil] = useState(1);
-  const p = PROFILS[profil];
-  const tpe = PROFILS[profil].id === "tpe";
+  /* 28/08, deuxième passe — le sélecteur Indépendant/Équipes DISPARAÎT :
+     depuis que /commencer aiguille et que /tarifs porte la grille
+     publique, cette page ne parle plus qu'aux organisations. Deux mondes
+     sur une page la rendaient illisible (Teo : « surchargé et pas
+     clair »). Le panneau d'aiguillage TPE meurt avec l'onglet — la voie
+     TPE ne vit plus qu'en mention discrète au pied de la page. */
+  const p = PROFILS[1];
   const noms = p.formules.map((f) => f.nom) as [string, string, string];
 
   const visibles = COMPARATIF.filter((f) => !f.repliee);
@@ -159,40 +157,19 @@ export default function Formules() {
 
   return (
     <>
-      {/* ═══ 1. titre + sélecteur + trois formules ═══ */}
+      {/* ═══ 1. titre + trois formules ═══ */}
       <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-14">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
-          <h1 className="r-h1 max-w-[16ch]">Un audit pour chaque situation</h1>
-
-          <div
-            role="tablist"
-            aria-label="Profil d'entreprise"
-            className="r-seg shrink-0 self-start"
-          >
-            {PROFILS.map((x, i) => (
-              <button
-                key={x.id}
-                type="button"
-                role="tab"
-                aria-selected={profil === i}
-                data-actif={profil === i}
-                onClick={() => setProfil(i)}
-                className="r-seg-btn"
-              >
-                {x.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <h1 className="r-h1 max-w-[18ch]">Un audit à la mesure de votre organisation</h1>
+        <p className="r-lead mt-5 max-w-[58ch]">
+          Plusieurs services, plusieurs validateurs&nbsp;: on mesure d&apos;abord, et le devis
+          sort de vos volumes. Trois formats, du cadrage de 45 minutes à la journée dans
+          vos locaux.
+        </p>
 
         <div className="mt-10 grid gap-4 sm:mt-12 lg:grid-cols-4">
           {/* colonne de gauche — la référence y loge sa preuve sociale ;
               Omega n'en a pas d'authentique, on y met donc les deux faits
-              qui décident réellement : c'est gratuit, et c'est financé.
-              28/08 : masquée sur l'onglet TPE — « Toute collaboration
-              commence ici » côte à côte avec « Pas besoin d'un audit pour
-              commencer » se contredisait à l'écran. */}
-          {!tpe && (
+              qui décident réellement : c'est gratuit, et c'est financé. */}
           <div className="flex flex-col justify-start gap-8 pr-2 lg:pt-2">
             <p className="text-[19px] font-medium leading-[27px] text-[#050505] sm:text-[21px] sm:leading-[29px]">
               Gratuit, sans engagement.
@@ -210,49 +187,18 @@ export default function Formules() {
               </p>
             </div>
           </div>
-          )}
 
-          {tpe ? (
-            /* l'aiguillage : pas de formules ici, la grille publique est
-               leur porte — le Diagnostic gratuit reste en voie douce */
-            <div className="flex flex-col justify-between rounded-2xl bg-white p-7 sm:p-9 lg:col-span-4">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                  Indépendants, TPE &amp; PME
-                </div>
-                <h2 className="r-h3 mt-3 max-w-[22ch]">
-                  Pas besoin d&apos;un audit pour commencer : vos prix sont publics.
-                </h2>
-                <p className="mt-4 max-w-[58ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-                  Quand une personne tient les outils, le prix n&apos;a pas à sortir d&apos;un
-                  entretien : un poste 59 €, trois postes 85 €, tout Omega 105 € par mois — sans
-                  engagement, réunion d&apos;installation comprise, satisfait ou remboursé 30
-                  jours. Vous choisissez vos postes, vous réservez l&apos;installation, c&apos;est
-                  en route.
-                </p>
-              </div>
-              <div className="mt-7 flex flex-wrap items-center gap-4">
-                <Link href="/tarifs#grille" className="r-btn r-btn--noir">
-                  Voir la grille des postes
-                </Link>
-                <Link href={lienReservation("diagnostic")} className="r-lien">
-                  Un doute ? Diagnostic gratuit de 30 min
-                </Link>
-              </div>
-            </div>
-          ) : (
-            p.formules.map((f) => <Carte key={f.id} f={f} />)
-          )}
+          {p.formules.map((f) => (
+            <Carte key={f.id} f={f} />
+          ))}
         </div>
 
-        {!tpe ? (
-          <p className="r-note mt-6 max-w-3xl">
-            *Créneaux du lundi au vendredi, 9 h – 17 h (heure Guadeloupe). Les durées
-            annoncées sont tenues : l&apos;entretien se termine à l&apos;heure. Les deux
-            formats sur site sont facturés sur devis et déduits de l&apos;installation si
-            vous décidez d&apos;aller plus loin.
-          </p>
-        ) : null}
+        <p className="r-note mt-6 max-w-3xl">
+          *Créneaux du lundi au vendredi, 9 h – 17 h (heure Guadeloupe). Les durées
+          annoncées sont tenues : l&apos;entretien se termine à l&apos;heure. Le format dans
+          vos locaux est facturé sur devis et déduit de l&apos;installation si vous décidez
+          d&apos;aller plus loin.
+        </p>
       </section>
 
       {/* ═══ 2. bandeau d'orientation ═══ */}
@@ -275,9 +221,7 @@ export default function Formules() {
         </div>
       </section>
 
-      {/* ═══ 3. comparatif — formats d'équipe uniquement : l'onglet TPE
-             n'affiche pas de formules, il n'a rien à comparer ═══ */}
-      {tpe ? null : (
+      {/* ═══ 3. comparatif ═══ */}
       <section id="comparatif" data-monde="clair" className="r-blanc">
         <div className="r-wrap py-14 sm:py-20">
           <h2 className="r-h2">Comparer les formats</h2>
@@ -378,7 +322,6 @@ export default function Formules() {
           </details>
         </div>
       </section>
-      )}
     </>
   );
 }

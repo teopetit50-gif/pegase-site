@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
-import { COMPRIS } from "@/lib/paliers";
+import { COMPRIS, PALIERS } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs — v4 « La grille publique » (28/08/2026)
@@ -42,6 +42,67 @@ export const metadata: Metadata = {
    tenait de /commercial/facturer-omega.md. Quatre survivent : les deux
    retirées (« pas de surcoût si le mois s'emballe », « devis en une
    page ») redisaient le sans-engagement et la réunion d'installation. */
+/* ——— le comparatif des paliers (28/08, 2ᵉ passe — « la page est un peu
+   vide ») : les lignes ne disent QUE ce qui est réellement tenu — pas de
+   ligne d'option inventée pour gonfler le tableau. ——— */
+const LIGNES_PALIERS: { libelle: string; valeurs: [string, string, string] }[] = [
+  { libelle: "Postes en service", valeurs: ["1, au choix", "3, au choix", "Les 4"] },
+  { libelle: "PULSE — le point du matin", valeurs: ["Compris", "Compris", "Compris"] },
+  { libelle: "VAULT — validation & verrous", valeurs: ["Compris", "Compris", "Compris"] },
+  {
+    libelle: "Réunion d'installation (45 min, visio)",
+    valeurs: ["Comprise", "Comprise", "Comprise"],
+  },
+  { libelle: "Engagement de durée", valeurs: ["Aucun", "Aucun", "Aucun"] },
+  { libelle: "Satisfait ou remboursé", valeurs: ["30 jours", "30 jours", "30 jours"] },
+  {
+    libelle: "Changer de palier ensuite",
+    valeurs: ["À tout moment", "À tout moment", "—"],
+  },
+];
+
+/* ——— la FAQ tarifs — les questions qu'une page de prix doit prendre de
+   front, mêmes règles éditoriales que la FAQ de la page audit. ——— */
+const FAQ_TARIFS: { q: string; r: string[] }[] = [
+  {
+    q: "Puis-je changer de palier ensuite ?",
+    r: [
+      "Oui, à tout moment et sans frais de changement : le prix suit simplement le nombre de postes en service. On ajoute un poste quand les chiffres du premier le justifient — c'est même le chemin qu'on recommande.",
+    ],
+  },
+  {
+    q: "Comment se passe le paiement ?",
+    r: [
+      "Rien ne se paie en ligne. Tout se règle à la réunion d'installation, et l'abonnement ne démarre qu'une fois le système en route chez vous. L'abonnement est mensuel, sans engagement : vous prévenez, le mois en cours va à son terme, les envois s'arrêtent.",
+    ],
+  },
+  {
+    q: "Qu'est-ce que le prix comprend, exactement ?",
+    r: [
+      "Le fonctionnement des postes choisis, le point du matin, les verrous de validation, vos corrections et le suivi. La réunion d'installation est comprise : on branche vos outils ensemble, en visio, écran partagé.",
+      "Un raccordement particulier — un logiciel rare, un historique à reprendre — est chiffré avant tout engagement, jamais découvert en cours de route.",
+    ],
+  },
+  {
+    q: "Et si ça ne me convient pas ?",
+    r: [
+      "Trente jours pour être remboursé, sans justification à fournir. Au-delà, l'abonnement reste mensuel et résiliable à tout moment — et vos données repartent avec vous, export complet compris.",
+    ],
+  },
+  {
+    q: "Le Chèque TIC s'applique-t-il ici ?",
+    r: [
+      "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible. Il porte sur l'installation, pas sur l'abonnement. Votre éligibilité est vérifiée à la réunion d'installation, et si un dossier se justifie, nous le montons avec vous.",
+    ],
+  },
+  {
+    q: "Plusieurs services se partagent le travail chez nous — cette grille nous concerne ?",
+    r: [
+      "Probablement pas : quand plusieurs personnes valident, chacune sur son poste, un prix affiché serait un mensonge. Votre porte est l'audit — on mesure vos volumes, et le devis en sort. Il est gratuit dans ses deux premiers formats.",
+    ],
+  },
+];
+
 const JAMAIS: { titre: string; texte: string }[] = [
   {
     titre: "Pas de prix par personne",
@@ -116,6 +177,45 @@ export default function TarifsPage() {
           </div>
         </section>
 
+        {/* ═══ 2bis — les paliers côte à côte (28/08, 2ᵉ passe) ═══ */}
+        <section data-monde="clair" className="r-wrap py-14 sm:py-16">
+          <h2 className="r-h3 max-w-[22ch]">Les trois paliers, côte à côte</h2>
+          <div className="mt-8 overflow-x-auto rounded-2xl bg-white p-2 sm:p-4">
+            <table className="w-full min-w-[560px] border-collapse text-left">
+              <thead>
+                <tr>
+                  <th className="w-[38%] border-b border-[#e3e3e3] px-4 pb-4 pt-3" />
+                  {PALIERS.map((p) => (
+                    <th key={p.id} className="border-b border-[#e3e3e3] px-4 pb-4 pt-3">
+                      <div className="font-[family-name:var(--font-jakarta)] text-[16px] font-semibold leading-[22px] tracking-[-0.01em] text-[#050505]">
+                        {p.nom}
+                      </div>
+                      <div className={`num rv-prix rv-prix--${p.id} mt-0.5 text-[20px] font-semibold leading-[26px]`}>
+                        {p.prix} €
+                        <span className="text-[12px] font-normal text-[#616161]"> /mois</span>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {LIGNES_PALIERS.map((l) => (
+                  <tr key={l.libelle} className="border-b border-[#efefef] last:border-b-0">
+                    <td className="px-4 py-3.5 text-[14px] font-medium text-[#050505]">
+                      {l.libelle}
+                    </td>
+                    {l.valeurs.map((v, i) => (
+                      <td key={i} className="num px-4 py-3.5 text-[14px] text-[#3d3d3d]">
+                        {v}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         {/* ═══ 3 — ce qu'on ne facture jamais ═══ */}
         <section data-monde="clair" className="r-wrap py-14 sm:py-16">
           <h2 className="r-h3 max-w-[22ch]">Ce que nous ne facturons jamais</h2>
@@ -148,6 +248,52 @@ export default function TarifsPage() {
               <a href="#grille" className="r-btn r-btn--blanc shrink-0">
                 Choisir mes postes
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ 4bis — la FAQ tarifs (28/08, 2ᵉ passe) — mêmes replis .r-faq
+               que la page audit ═══ */}
+        <section data-monde="clair" className="r-blanc">
+          <div className="r-wrap py-14 sm:py-16">
+            <div className="grid gap-8 lg:grid-cols-[379px_1fr] lg:gap-16">
+              <h2 className="r-h3 lg:sticky lg:top-28 lg:self-start">
+                Questions sur les prix
+              </h2>
+              <div>
+                {FAQ_TARIFS.map((f) => (
+                  <details key={f.q} className="r-faq">
+                    <summary>
+                      {f.q}
+                      <svg
+                        aria-hidden
+                        className="r-faq-croix"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 18 18"
+                        fill="none"
+                      >
+                        <path
+                          d="M9 1v16M1 9h16"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </summary>
+                    <div className="pb-7 pr-8">
+                      {f.r.map((par, i) => (
+                        <p
+                          key={i}
+                          className={`text-[15px] leading-[26px] text-[#3d3d3d] ${i > 0 ? "mt-4" : ""}`}
+                        >
+                          {par}
+                        </p>
+                      ))}
+                    </div>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
         </section>

@@ -471,6 +471,36 @@ button.rounded-full:active {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   Arrivée de page (28/08/2026, Teo : « trop brutal d'arriver sur les
+   pages de pricing ou d'audit »)
+
+   <main> porte .page-arrivee dans PageShell : chaque navigation le
+   remonte, l'entrée rejoue donc à chaque page — fondu + 12 px de montée,
+   la même courbe --ease-out-strong que les reveals GSAP du site. Le
+   header vit HORS de <main> et reste immobile : c'est lui qui fait la
+   continuité. `both` ramène transform à none en fin de course, donc
+   aucun conteneur transformé ne subsiste sous les sticky.
+   ═══════════════════════════════════════════════════════════════════════ */
+@keyframes page-arrivee {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+main.page-arrivee {
+  animation: page-arrivee 0.45s var(--ease-out-strong, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  main.page-arrivee {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    /offres — système de design isolé (25/07/2026)
 
    Teo a demandé la reproduction à l'identique d'une page de référence

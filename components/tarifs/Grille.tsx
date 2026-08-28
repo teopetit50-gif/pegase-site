@@ -21,17 +21,16 @@ import { useState } from "react";
 import { SystemLogo } from "@/components/logos";
 import { PALIERS, POSTES, type Palier } from "@/lib/paliers";
 
-function CartePalier({ p }: { p: Palier }) {
-  const [choisis, setChoisis] = useState<string[]>([]);
-
-  const bascule = (id: string) => {
-    setChoisis((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (p.aChoisir === 1) return [id]; // comportement radio
-      if (p.aChoisir !== null && prev.length >= p.aChoisir) return prev;
-      return [...prev, id];
-    });
-  };
+function CartePalier({
+  p,
+  choisis,
+  bascule,
+}: {
+  p: Palier;
+  /* la sélection vit dans Grille : vide dès qu'un AUTRE palier est actif */
+  choisis: string[];
+  bascule: (id: string) => void;
+}) {
 
   const postes = p.aChoisir === null ? POSTES.map((x) => x.id) : choisis;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
@@ -141,10 +140,35 @@ function CartePalier({ p }: { p: Palier }) {
 }
 
 export default function Grille() {
+  /* 28/08 (Teo) — la sélection est EXCLUSIVE entre paliers : cocher un
+     poste dans une carte efface la sélection de l'autre. Chaque carte
+     gardait son propre état, on pouvait donc cocher « Un poste » ET
+     « Trois postes » en même temps — deux paniers à l'écran, aucun sens. */
+  const [choix, setChoix] = useState<{ palier: string; postes: string[] }>({
+    palier: "",
+    postes: [],
+  });
+
+  const basculePour = (p: Palier) => (id: string) =>
+    setChoix((prev) => {
+      /* premier clic dans une autre carte : on repart de zéro chez elle */
+      if (prev.palier !== p.id) return { palier: p.id, postes: [id] };
+      if (prev.postes.includes(id))
+        return { palier: p.id, postes: prev.postes.filter((x) => x !== id) };
+      if (p.aChoisir === 1) return { palier: p.id, postes: [id] }; // radio
+      if (p.aChoisir !== null && prev.postes.length >= p.aChoisir) return prev;
+      return { palier: p.id, postes: [...prev.postes, id] };
+    });
+
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       {PALIERS.map((p) => (
-        <CartePalier key={p.id} p={p} />
+        <CartePalier
+          key={p.id}
+          p={p}
+          choisis={choix.palier === p.id ? choix.postes : []}
+          bascule={basculePour(p)}
+        />
       ))}
     </div>
   );

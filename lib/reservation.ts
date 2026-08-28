@@ -468,8 +468,8 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "L'audit est-il vraiment gratuit ?",
     r: [
-      "Le Diagnostic et l'Audit complet le sont, et le demeurent : aucune facture n'arrive après coup, aucune contrepartie n'est demandée. Vous repartez avec le chiffrage et la recommandation, que vous installiez un moteur ou non.",
-      "Les deux formats sur site sont facturés parce qu'ils mobilisent une demi-journée à une journée de déplacement et de relevé. Leur montant est déduit de l'installation si vous décidez d'aller plus loin.",
+      "Le Cadrage et l'Audit process le sont, et le demeurent : aucune facture n'arrive après coup, aucune contrepartie n'est demandée. Vous repartez avec le chiffrage et la recommandation, que vous installiez un moteur ou non.",
+      "Le format dans vos locaux est facturé parce qu'il mobilise une journée de déplacement et de relevé. Son montant est déduit de l'installation si vous décidez d'aller plus loin.",
     ],
   },
   {
