@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
-import { COMPRIS, PORTES } from "@/lib/paliers";
+import { COMPRIS } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs — v4 « La grille publique » (28/08/2026)
@@ -71,46 +71,17 @@ export default function TarifsPage() {
       <PageMotion />
 
       <div className="resa">
-        {/* ═══ 1 — titre + les deux portes ═══ */}
-        <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-12 sm:pt-14">
+        {/* ═══ 1 — titre court : l'aiguillage vit sur /commencer (28/08),
+               cette page ne parle plus qu'aux indépendants et TPE-PME.
+               La porte « organisations » n'existe plus qu'en mention
+               discrète, tout en bas. ═══ */}
+        <section data-monde="clair" className="r-wrap pb-2 pt-12 sm:pt-14">
           <h1 className="r-h1 max-w-[17ch]">Des prix publics, une installation comprise</h1>
           <p className="r-lead mt-6 max-w-[58ch]">
-            {PORTES.critere} Une personne qui tient ses outils choisit ses postes ci-dessous et
-            réserve son installation en ligne. Une structure où plusieurs services valident passe
-            d&apos;abord par l&apos;audit — son prix sort de ses volumes, pas d&apos;une grille.
+            Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
+            réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement,
+            satisfait ou remboursé trente jours.
           </p>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2">
-            <a
-              href="#grille"
-              className="group flex h-full flex-col rounded-2xl bg-white p-7 transition-shadow hover:shadow-[0_2px_16px_rgba(5,5,5,0.08)] sm:p-8"
-            >
-              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                Porte 1 · la grille
-              </div>
-              <h2 className="r-h4 mt-3">{PORTES.solo.titre}</h2>
-              <p className="mt-3 flex-1 text-[15px] leading-[23px] text-[#3d3d3d]">
-                {PORTES.solo.texte}
-              </p>
-              <span className="r-lien mt-5 self-start">Voir la grille ↓</span>
-            </a>
-
-            <Link
-              href="/reserver-un-audit"
-              className="group flex h-full flex-col rounded-2xl bg-[#050505] p-7 transition-opacity hover:opacity-[0.94] sm:p-8"
-            >
-              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#a1a1aa]">
-                Porte 2 · l&apos;audit
-              </div>
-              <h2 className="r-h4 mt-3 !text-white">{PORTES.equipe.titre}</h2>
-              <p className="mt-3 flex-1 text-[15px] leading-[23px] text-[#d4d4d8]">
-                {PORTES.equipe.texte}
-              </p>
-              <span className="mt-5 self-start text-[16px] font-medium leading-[24px] text-white underline decoration-[rgba(255,255,255,0.35)] underline-offset-4 group-hover:decoration-white">
-                Réserver un audit →
-              </span>
-            </Link>
-          </div>
         </section>
 
         {/* ═══ 2 — la grille ═══ */}
@@ -174,11 +145,23 @@ export default function TarifsPage() {
                   se justifie, nous le montons avec vous.
                 </p>
               </div>
-              <Link href="/installation" className="r-btn r-btn--blanc shrink-0">
-                Réserver l&apos;installation
-              </Link>
+              <a href="#grille" className="r-btn r-btn--blanc shrink-0">
+                Choisir mes postes
+              </a>
             </div>
           </div>
+        </section>
+
+        {/* ═══ 5 — la mention discrète de l'autre porte (28/08) : pour qui
+               s'est trompé d'aiguillage, sans re-poser deux portes ici. ═══ */}
+        <section data-monde="clair" className="r-wrap py-9">
+          <p className="r-note mx-auto max-w-xl text-center !text-[13px]">
+            Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille n&apos;est pas
+            votre porte&nbsp;: votre prix sort d&apos;un audit.{" "}
+            <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-[#050505]">
+              Réserver un échange
+            </Link>
+          </p>
         </section>
       </div>
     </PageShell>

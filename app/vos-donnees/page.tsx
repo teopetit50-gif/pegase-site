@@ -313,7 +313,7 @@ const PIED = [
     label: "L'entreprise",
     liens: [
       { label: "Blog", href: "/blog" },
-      { label: "Commencer", href: "/tarifs" },
+      { label: "Commencer", href: "/commencer" },
       { label: "Mentions légales", href: "/mentions-legales" },
     ],
   },
@@ -368,7 +368,7 @@ export default function VosDonnees() {
                   dans l&apos;Union européenne, ou une machine installée chez vous dont rien ne
                   sort.
                 </p>
-                <Link href="/tarifs" className="vd-cta w-fit">
+                <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
                   <span>
                     <Chevron className="h-3.5 w-3.5" />
@@ -636,7 +636,7 @@ export default function VosDonnees() {
                   Trente minutes suffisent pour savoir laquelle des deux installations vous
                   convient, et ce qu&apos;elle coûte.
                 </p>
-                <Link href="/tarifs" className="vd-cta w-fit">
+                <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
                   <span>
                     <Chevron className="h-3.5 w-3.5" />

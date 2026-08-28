@@ -23,7 +23,7 @@ export default function NotFound() {
             Retour à l&apos;accueil
           </Link>
           <Link
-            href="/tarifs"
+            href="/commencer"
             className="rounded-[10px] border border-black/15 px-[25px] py-[14px] text-[15px] leading-none transition-colors hover:bg-black/5"
           >
             Commencer

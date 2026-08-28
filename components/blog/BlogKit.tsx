@@ -128,7 +128,7 @@ export function BlogCta() {
         principale vous coûte réellement.
       </p>
       <Link
-        href="/tarifs"
+        href="/commencer"
         className="mt-7 inline-flex items-center gap-2 rounded-[10px] bg-[#2e2e2e] px-[25px] py-[14px] text-[16px] leading-none text-white transition-[background-color,transform] duration-200 hover:bg-[#3f3f46] active:scale-[0.97]"
       >
         Commencer

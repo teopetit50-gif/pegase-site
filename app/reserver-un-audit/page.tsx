@@ -159,6 +159,15 @@ export default function ReserverUnAuditPage() {
                 {CANAL_VALEUR}
               </a>
             </p>
+            {/* la mention discrète de l'autre porte (28/08) — symétrique de
+                celle qui clôt /tarifs */}
+            <p className="r-note mx-auto mt-8 max-w-xl !text-[13px]">
+              Vous tenez vos outils seul&nbsp;? Pas besoin d&apos;un audit pour commencer&nbsp;:
+              les prix sont publics.{" "}
+              <Link href="/tarifs" className="underline underline-offset-4 hover:text-[#050505]">
+                Voir la grille
+              </Link>
+            </p>
           </div>
         </section>
 

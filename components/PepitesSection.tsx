@@ -510,7 +510,7 @@ export default function PepitesSection({
         </Reveal>
         <Reveal delay={270}>
           <Link
-            href="/tarifs"
+            href="/commencer"
             className="mt-8 inline-block rounded-[var(--radius-btn)] bg-white px-7 py-3.5 text-[16px] font-semibold text-black transition hover:bg-neutral-200 active:scale-[0.98]"
           >
             Commencer

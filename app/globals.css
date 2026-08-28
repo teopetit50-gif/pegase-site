@@ -826,30 +826,58 @@ button.rounded-full:active {
    jamais de pilule — parce que la demande du 05/08 est un 1:1 explicite.
    Padding asymétrique (22 px à gauche, 10 px à droite) : le rond du chevron
    apporte sa propre marge visuelle à droite. */
+/* 28/08 (Teo : « le bouton commencer est bizarre ») — le CTA du hero
+   passe de la pilule discrète de la référence Flux à un vrai bouton de
+   page d'accueil : plus haut, plus lisible, halo doux, et la pastille
+   flèche glisse au survol. La sous-ligne .o-flux-sous porte la promesse
+   de durée sous le bouton. */
 .offres .o-flux-btn {
   display: inline-flex;
-  height: 40px;
+  height: 52px;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   border-radius: 9999px;
   background: #171717;
-  padding: 0 10px 0 22px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 0 12px 0 28px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: #fafafa;
-  transition: background 0.2s var(--ease-out-strong);
+  box-shadow:
+    0 14px 34px -12px rgba(15, 16, 19, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    background 0.2s var(--ease-out-strong),
+    transform 0.2s var(--ease-out-strong),
+    box-shadow 0.2s ease;
 }
 .offres .o-flux-btn:hover {
   background: #000000;
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 40px -12px rgba(15, 16, 19, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.offres .o-flux-btn:active {
+  transform: scale(0.98);
 }
 .offres .o-flux-btn-rond {
   display: grid;
-  height: 22px;
-  width: 22px;
+  height: 30px;
+  width: 30px;
   place-items: center;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.15);
+  transition: transform 0.2s var(--ease-out-strong);
+}
+.offres .o-flux-btn:hover .o-flux-btn-rond {
+  transform: translateX(3px);
+}
+.offres .o-flux-sous {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #7a756c;
 }
 
 /* La maquette occupe 80,8 % de la largeur (1034 sur 1280) et son bas est
@@ -3425,12 +3453,304 @@ button.rounded-full:active {
   overflow: hidden;
 }
 
+/* ——— les trois paliers en dégradé (28/08, demande Teo) ———
+   Une progression orange → violet porte la montée en gamme : « Un poste »
+   part chaud, « Tout Omega » arrive profond. La tête de carte prend un
+   voile très clair de sa teinte (le texte reste NOIR, comme la règle du
+   monde .resa), le PRIX prend le dégradé plein en background-clip.
+   Ces règles battent le doré de .r-carte--phare : même spécificité,
+   déclarées après lui dans le fichier. */
+.resa .rv-palier--un .r-carte-tete {
+  background: linear-gradient(140deg, #fff6ec 0%, #ffe8cf 60%, #ffddb8 100%);
+}
+.resa .rv-palier--trois .r-carte-tete {
+  background: linear-gradient(140deg, #fff0f0 0%, #ffdbe4 55%, #f7c7e3 100%);
+}
+.resa .rv-palier--complet .r-carte-tete {
+  background: linear-gradient(140deg, #f4efff 0%, #e6dbfb 55%, #d9c8f7 100%);
+}
+.resa .rv-prix {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.resa .rv-prix--un {
+  background-image: linear-gradient(115deg, #f97316, #ea580c);
+}
+.resa .rv-prix--trois {
+  background-image: linear-gradient(115deg, #f43f5e, #c026d3);
+}
+.resa .rv-prix--complet {
+  background-image: linear-gradient(115deg, #8b5cf6, #6d28d9);
+}
+/* le trait de sélection d'une case suit la teinte du palier */
+.resa .rv-palier--un .rv-case--actif {
+  border-color: #ea580c;
+  background: #fff6ec;
+}
+.resa .rv-palier--un .rv-case--actif .rv-coche {
+  border-color: #ea580c;
+  background: #ea580c;
+}
+.resa .rv-palier--trois .rv-case--actif {
+  border-color: #d0369b;
+  background: #fff0f5;
+}
+.resa .rv-palier--trois .rv-case--actif .rv-coche {
+  border-color: #d0369b;
+  background: #d0369b;
+}
+
+/* ——— /commencer : l'aiguillage à deux cartes (28/08) ———
+   La carte claire porte le DÉPART du dégradé de la grille (orange), la
+   carte sombre son ARRIVÉE (violet) : la page annonce la suite. */
+.resa .cm-carte {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 34px 32px 30px;
+  border: 1px solid #e3e3e3;
+  transition:
+    transform 0.24s var(--ease-out-strong),
+    box-shadow 0.24s ease,
+    border-color 0.24s ease;
+}
+.resa .cm-carte:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px -18px rgba(5, 5, 5, 0.22);
+  border-color: #050505;
+}
+.resa .cm-carte--sombre {
+  background: #0b0b0e;
+  border-color: #0b0b0e;
+  color: #ffffff;
+}
+.resa .cm-carte--sombre .r-h3 {
+  color: #ffffff;
+}
+.resa .cm-carte--sombre:hover {
+  border-color: #8b5cf6;
+  box-shadow: 0 18px 44px -18px rgba(109, 40, 217, 0.45);
+}
+.resa .cm-kicker {
+  align-self: flex-start;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ea580c;
+  background: #fff1e2;
+}
+.resa .cm-kicker--sombre {
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.16);
+}
+.resa .cm-critere {
+  font-size: 15.5px;
+  line-height: 24px;
+  color: #3d3d3d;
+}
+.resa .cm-carte--sombre .cm-critere {
+  color: #d4d4d8;
+}
+.resa .cm-cvs {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #616161;
+}
+.resa .cm-carte--sombre .cm-cvs {
+  color: #a1a1aa;
+}
+.resa .cm-point {
+  display: flex;
+  gap: 9px;
+  font-size: 14.5px;
+  line-height: 22px;
+  color: #3d3d3d;
+}
+.resa .cm-point svg {
+  color: #ea580c;
+}
+.resa .cm-carte--sombre .cm-point {
+  color: #d4d4d8;
+}
+.resa .cm-carte--sombre .cm-point svg {
+  color: #a78bfa;
+}
+.resa .cm-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 10px;
+  padding: 13px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  background: #050505;
+  color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+.resa .cm-carte:hover .cm-cta {
+  background: #262626;
+}
+.resa .cm-cta--sombre {
+  background: #ffffff;
+  color: #050505;
+}
+.resa .cm-carte--sombre:hover .cm-cta--sombre {
+  background: #ede9fe;
+}
+
+/* ——— réservation : le fil d'étapes (28/08) ——— */
+.resa .rv-etapes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.resa .rv-etape {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9a9a9a;
+}
+.resa .rv-etape i {
+  display: grid;
+  place-items: center;
+  height: 22px;
+  width: 22px;
+  border-radius: 9999px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ececec;
+  color: #757575;
+}
+.resa .rv-etape--active {
+  color: #050505;
+}
+.resa .rv-etape--active i {
+  background: #050505;
+  color: #ffffff;
+}
+.resa .rv-etape--faite {
+  color: #3d3d3d;
+}
+.resa .rv-etape--faite i {
+  background: #dcfce7;
+  color: #15803d;
+}
+.resa .rv-etape-lien {
+  height: 1px;
+  width: 26px;
+  background: #dcdcdc;
+}
+
+/* ——— réservation : le choix de format, en cartes radio (28/08) ———
+   Remplace le <select> natif de la colonne récapitulatif : chaque format
+   est une ligne cliquable — nom, durée, condition — cochée d'un point. */
+.resa .rv-fmt-groupe {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #616161;
+}
+.resa .rv-fmt {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e3e3e3;
+  border-radius: 9px;
+  background: #ffffff;
+  padding: 9px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.resa .rv-fmt:hover {
+  border-color: #050505;
+}
+.resa .rv-fmt--actif {
+  border-color: #050505;
+  background: #f7f7f7;
+}
+.resa .rv-fmt-rond {
+  display: grid;
+  place-items: center;
+  height: 15px;
+  width: 15px;
+  flex: none;
+  border-radius: 9999px;
+  border: 1.5px solid #b5b5b5;
+  background: #ffffff;
+}
+.resa .rv-fmt--actif .rv-fmt-rond {
+  border-color: #050505;
+}
+.resa .rv-fmt--actif .rv-fmt-rond::after {
+  content: "";
+  height: 7px;
+  width: 7px;
+  border-radius: 9999px;
+  background: #050505;
+}
+
+/* ——— réservation : les secteurs en pilules (28/08) ———
+   Remplace le <select> « Secteur d'activité » : neuf pilules visibles,
+   un geste, pas de menu déroulant. */
+.resa .rv-pils {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.resa .rv-pil {
+  border: 1px solid #e3e3e3;
+  border-radius: 9999px;
+  background: #ffffff;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3d3d3d;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.resa .rv-pil:hover {
+  border-color: #050505;
+  color: #050505;
+}
+.resa .rv-pil--actif {
+  background: #050505;
+  border-color: #050505;
+  color: #ffffff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .resa .rv-case,
   .resa .rv-cal-case,
   .resa .rv-heure,
-  .resa .rv-champ {
+  .resa .rv-champ,
+  .resa .rv-fmt,
+  .resa .rv-pil,
+  .resa .cm-carte,
+  .resa .cm-cta {
     transition: none;
+  }
+  .resa .cm-carte:hover {
+    transform: none;
   }
 }
 /* ═══════════════════════════════════════════════════════════════════════

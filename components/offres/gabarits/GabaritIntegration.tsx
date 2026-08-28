@@ -104,7 +104,7 @@ function BlocAlterne({
           <h2 className="o-h2 mt-5 max-w-[520px]">{titre}</h2>
           <p className="o-body mt-5 max-w-[450px]">{texte}</p>
           <div className="mt-8 flex flex-wrap items-center gap-5">
-            <Link href="/tarifs" className="o-btn o-btn--primary">
+            <Link href="/commencer" className="o-btn o-btn--primary">
               Audit gratuit
               <Chevron taille={13} />
             </Link>
@@ -209,7 +209,7 @@ export default function GabaritIntegration({
               </div>
 
               <div data-reveal className="mt-9">
-                <Link href="/tarifs" className="o-btn o-btn--primary">
+                <Link href="/commencer" className="o-btn o-btn--primary">
                   Chiffrer mon cas
                   <Chevron taille={13} />
                 </Link>
@@ -444,7 +444,7 @@ export default function GabaritIntegration({
               "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne le moteur au meilleur retour : celui-ci, ou un autre."}
           </p>
           <div className="relative mt-8">
-            <Link href="/tarifs" className="o-btn o-btn--primary">
+            <Link href="/commencer" className="o-btn o-btn--primary">
               Commencer
               <Chevron taille={14} />
             </Link>

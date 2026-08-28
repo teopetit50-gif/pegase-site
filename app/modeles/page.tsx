@@ -92,7 +92,7 @@ export default function ModelesPage() {
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
-                  href="/tarifs"
+                  href="/commencer"
                   className="m-btn-clair inline-flex items-center gap-2.5 py-3 pl-6 pr-2.5 text-[15px]"
                 >
                   Commencer

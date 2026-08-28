@@ -150,7 +150,7 @@ export default function GabaritPublish({
             </p>
 
             <div data-reveal className="mt-[25px] flex flex-wrap items-center justify-center gap-3">
-              <Link href="/tarifs" className="o-btn o-btn--primary">
+              <Link href="/commencer" className="o-btn o-btn--primary">
                 Chiffrer mon cas
               </Link>
               <Link href="#reglages" className="o-btn o-btn--ghost">
@@ -319,7 +319,7 @@ export default function GabaritPublish({
               {m.system} est bien le bon moteur, et on regarde votre éligibilité
               au Chèque TIC.
             </p>
-            <Link href="/tarifs" className="o-btn o-btn--primary !mt-8 mt-auto w-full">
+            <Link href="/commencer" className="o-btn o-btn--primary !mt-8 mt-auto w-full">
               Commencer
             </Link>
           </div>
@@ -375,7 +375,7 @@ export default function GabaritPublish({
               "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne le moteur au meilleur retour : celui-ci, ou un autre."}
           </p>
           <div className="relative mt-8">
-            <Link href="/tarifs" className="o-btn o-btn--primary">
+            <Link href="/commencer" className="o-btn o-btn--primary">
               Commencer
               <Chevron taille={14} />
             </Link>

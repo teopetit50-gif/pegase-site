@@ -136,13 +136,40 @@ export default function Hero() {
             en continu : sur vos outils actuels, sous votre validation.
           </p>
 
-          <a
-            href="/tarifs"
-            className="relative z-10 mt-10 rounded-[var(--radius-btn)] bg-white px-7 py-3.5 text-[16px] font-semibold text-black transition hover:bg-neutral-200"
+          {/* 28/08 — le CTA n'est plus un mot nu : halo blanc (le geste des
+              boutons noirs glowés du site, inversé pour le monde nuit),
+              flèche qui suit le survol, et la promesse de durée dessous.
+              Destination : /commencer, l'aiguillage à deux cartes. */}
+          <div
+            className="relative z-10 mt-10 flex flex-col items-center gap-3"
             style={enter(650)}
           >
-            Commencer
-          </a>
+            <a
+              href="/commencer"
+              className="group inline-flex items-center gap-2.5 rounded-[var(--radius-btn)] bg-white px-9 py-4 text-[17px] font-semibold text-black shadow-[0_0_46px_-6px_rgba(255,255,255,0.38),0_16px_38px_-12px_rgba(0,0,0,0.55)] transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-neutral-100 hover:shadow-[0_0_62px_-4px_rgba(255,255,255,0.5),0_20px_42px_-12px_rgba(0,0,0,0.55)] active:scale-[0.98]"
+            >
+              Commencer
+              <svg
+                aria-hidden
+                width="16"
+                height="13"
+                viewBox="0 0 16 13"
+                fill="none"
+                className="transition-transform duration-200 group-hover:translate-x-1"
+              >
+                <path
+                  d="M1 6.5h13M10 1.5l4.5 5L10 11.5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </a>
+            <span className="text-[13px] text-white/45">
+              Deux minutes pour choisir — sans engagement
+            </span>
+          </div>
         </div>
       </div>
     </section>

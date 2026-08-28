@@ -228,7 +228,7 @@ const GARANTIES: {
        revenir en arrière : href "/blog/cheque-tic-financement". */
     lien: {
       label: "Vérifier mon éligibilité",
-      href: "/tarifs",
+      href: "/commencer",
     },
     maquette: <MaqCheque />,
   },
@@ -423,13 +423,16 @@ export default function Home() {
             <p data-reveal className="o-flux-lead my-2 max-w-[760px] md:my-4 lg:my-6">
               {HERO.chapo}
             </p>
-            <div data-reveal className="mt-4 md:mt-6 lg:mt-8">
-              <Link href="/tarifs" className="o-flux-btn">
+            <div data-reveal className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
+              <Link href="/commencer" className="o-flux-btn">
                 Commencer
                 <span aria-hidden className="o-flux-btn-rond">
-                  <Chevron taille={13} />
+                  <Chevron taille={14} />
                 </span>
               </Link>
+              <span className="o-flux-sous">
+                Deux minutes pour choisir — sans engagement
+              </span>
             </div>
           </div>
 
@@ -758,7 +761,7 @@ export default function Home() {
                   plateforme agréée.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/tarifs" className="o-btn o-btn--primary">
+                  <Link href="/commencer" className="o-btn o-btn--primary">
                     Faire le point avant l&apos;échéance
                   </Link>
                   <Link
@@ -873,7 +876,7 @@ export default function Home() {
               dit.
             </p>
             <div data-reveal className="mt-9 flex flex-wrap justify-center gap-3">
-              <Link href="/tarifs" className="o-btn o-btn--primary">
+              <Link href="/commencer" className="o-btn o-btn--primary">
                 Commencer
               </Link>
               <a href={lienContact("Bonjour Omega — je vous écris depuis le site.")} className="o-btn o-btn--ghost">

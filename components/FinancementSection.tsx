@@ -109,7 +109,7 @@ export default function FinancementSection() {
               finançable.
             </p>
             <Link
-              href="/tarifs"
+              href="/commencer"
               className="shrink-0 self-start rounded-[var(--radius-btn)] bg-black px-7 py-3.5 text-[16px] font-semibold text-[#f4f1ec] transition hover:bg-black/85 active:scale-[0.97] shadow-[0_0_46px_-2px_rgba(15,16,19,0.55),0_14px_30px_-8px_rgba(15,16,19,0.42)] sm:self-auto"
             >
               Commencer

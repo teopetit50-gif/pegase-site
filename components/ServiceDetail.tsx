@@ -257,7 +257,7 @@ export default function ServiceDetail({ service }: { service: string }) {
         {/* rappel d'action, à mi-parcours */}
         <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
           <Link
-            href="/tarifs"
+            href="/commencer"
             className="rounded-[var(--radius-btn)] bg-black px-6 py-3 text-[15px] font-semibold text-white transition hover:bg-black/85"
           >
             Commencer

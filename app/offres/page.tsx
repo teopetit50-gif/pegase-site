@@ -278,7 +278,7 @@ export default function OffresPage() {
                 mesurable et sans migration inutile.
               </p>
               <div data-reveal className="mt-[25px] flex flex-wrap items-center justify-center gap-3">
-                <Link href="/tarifs" className="o-btn o-btn--primary">
+                <Link href="/commencer" className="o-btn o-btn--primary">
                   Audit gratuit
                 </Link>
               </div>
@@ -368,7 +368,7 @@ export default function OffresPage() {
                 raccordement type prend une demi-journée.
               </p>
               <div data-reveal className="mt-5">
-                <Link href="/tarifs" className="o-link o-link--light">
+                <Link href="/commencer" className="o-link o-link--light">
                   Commencer
                   <IconeFleche />
                 </Link>
@@ -446,7 +446,7 @@ export default function OffresPage() {
                 titre="Sur vos outils"
                 texte="Le moteur se branche sur ce que vous utilisez déjà. Ni compte à créer, ni colonne à renommer, ni habitude à changer."
                 avant={<MediaOutils />}
-                lien={{ label: "Vérifier la compatibilité", href: "/tarifs" }}
+                lien={{ label: "Vérifier la compatibilité", href: "/commencer" }}
               />
             </div>
 
@@ -486,7 +486,7 @@ export default function OffresPage() {
               sans engagement.
             </p>
             <div className="relative mt-8">
-              <Link href="/tarifs" className="o-btn o-btn--primary">
+              <Link href="/commencer" className="o-btn o-btn--primary">
                 Audit gratuit
                 <IconeFlecheDroite taille={14} />
               </Link>

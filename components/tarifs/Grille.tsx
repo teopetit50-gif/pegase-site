@@ -18,6 +18,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { SystemLogo } from "@/components/logos";
 import { PALIERS, POSTES, type Palier } from "@/lib/paliers";
 
 function CartePalier({ p }: { p: Palier }) {
@@ -38,7 +39,7 @@ function CartePalier({ p }: { p: Palier }) {
   const href = `/installation?postes=${postes.join(",")}`;
 
   return (
-    <div className={`r-carte ${p.phare ? "r-carte--phare" : ""}`}>
+    <div className={`r-carte rv-palier--${p.id} ${p.phare ? "r-carte--phare" : ""}`}>
       <div className="r-carte-tete !min-h-0">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
@@ -48,7 +49,7 @@ function CartePalier({ p }: { p: Palier }) {
         </div>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="num text-[36px] font-semibold leading-[44px] text-[#050505] sm:text-[40px] sm:leading-[48px]">
+          <span className={`num rv-prix rv-prix--${p.id} text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]`}>
             {p.prix} €
           </span>
           <span className="text-[12px] leading-[18px] text-[#050505]">{p.sousPrix}</span>
@@ -81,6 +82,7 @@ function CartePalier({ p }: { p: Palier }) {
                       className="sr-only"
                     />
                     <span className="rv-coche" aria-hidden />
+                    <SystemLogo system={x.system} />
                     <span>
                       <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
                         {x.nom}
@@ -99,10 +101,10 @@ function CartePalier({ p }: { p: Palier }) {
             <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
               Les quatre postes, en service :
             </div>
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-3 space-y-2.5">
               {POSTES.map((x) => (
-                <li key={x.id} className="flex gap-2 text-[14px] leading-[22px] text-[#3d3d3d]">
-                  <span aria-hidden className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />
+                <li key={x.id} className="flex items-center gap-2.5 text-[14px] leading-[22px] text-[#3d3d3d]">
+                  <SystemLogo system={x.system} />
                   {x.nom}
                 </li>
               ))}

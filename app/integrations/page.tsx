@@ -254,7 +254,7 @@ export default function Integrations() {
               </p>
               <div data-reveal className="mt-8">
                 <Link
-                  href="/tarifs"
+                  href="/commencer"
                   className="o-btn o-btn--primary"
                 >
                   En parler au premier rendez-vous

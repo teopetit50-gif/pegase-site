@@ -115,7 +115,7 @@ export default function GabaritHome({
               </p>
 
               <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
-                <Link href="/tarifs" className="o-btn o-btn--primary">
+                <Link href="/commencer" className="o-btn o-btn--primary">
                   Chiffrer mon cas
                 </Link>
                 <Link href="#fonctionnement" className="o-btn o-btn--ghost">

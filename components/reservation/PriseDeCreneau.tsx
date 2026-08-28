@@ -41,6 +41,7 @@ import {
   reserver,
   type Agenda,
 } from "@/lib/creneaux";
+import { SystemLogo } from "@/components/logos";
 import { POSTES, prixPour } from "@/lib/paliers";
 import { PROFILS, lienContact } from "@/lib/reservation";
 
@@ -222,6 +223,13 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
 
   const dateJour = (j: number) => jourGpLabel(vue.annee, vue.mois, j);
 
+  /* le fil d'étapes : deux pas pour une demande de devis, trois sinon */
+  const etapes = surDevis
+    ? ["Votre demande", "Confirmation"]
+    : ["Le créneau", "Vos coordonnées", "Confirmation"];
+  const idxEtape =
+    etape === "fait" ? etapes.length - 1 : etape === "coordonnees" ? etapes.length - 2 : 0;
+
   return (
     <div className="rv-cadre">
       {/* ═══ colonne récapitulatif ═══ */}
@@ -239,10 +247,10 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                 ? "Tout Omega — les quatre postes :"
                 : `Vos postes (${postesValides.length}) :`}
             </div>
-            <ul className="mt-2.5 space-y-2">
+            <ul className="mt-2.5 space-y-2.5">
               {postesValides.map((p) => (
-                <li key={p.id} className="flex gap-2 text-[14px] leading-[21px] text-[#3d3d3d]">
-                  <span aria-hidden className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />
+                <li key={p.id} className="flex items-center gap-2.5 text-[14px] leading-[21px] text-[#3d3d3d]">
+                  <SystemLogo system={p.system} />
                   <span>
                     <span className="font-medium text-[#050505]">{p.system}</span> · {p.nom}
                   </span>
@@ -265,31 +273,46 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
           </>
         ) : (
           <div className="mt-5 border-t border-[#e3e3e3] pt-4">
-            <label className="rv-libelle" htmlFor="rv-format">
-              Changer de format
-            </label>
-            <select
-              id="rv-format"
-              className="rv-champ num"
-              value={formule}
-              onChange={(e) => {
-                setFormule(e.target.value);
-                setJour(null);
-                setCreneau(null);
-                const devis = DUREES_RDV[e.target.value] === null;
-                setEtape(devis ? "coordonnees" : "creneau");
-              }}
-            >
+            <div className="rv-libelle">Le format</div>
+            <div className="mt-3 space-y-4">
               {PROFILS.map((p) => (
-                <optgroup key={p.id} label={p.label}>
-                  {p.formules.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.nom} — {f.duree}
-                    </option>
-                  ))}
-                </optgroup>
+                <div key={p.id}>
+                  <div className="rv-fmt-groupe">{p.label}</div>
+                  <div className="mt-2 space-y-1.5" role="radiogroup" aria-label={p.label}>
+                    {p.formules.map((f) => {
+                      const actif = formule === f.id;
+                      const devis = DUREES_RDV[f.id] === null;
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={actif}
+                          onClick={() => {
+                            setFormule(f.id);
+                            setJour(null);
+                            setCreneau(null);
+                            setErreur(null);
+                            setEtape(devis ? "coordonnees" : "creneau");
+                          }}
+                          className={`rv-fmt ${actif ? "rv-fmt--actif" : ""}`}
+                        >
+                          <span className="rv-fmt-rond" aria-hidden />
+                          <span className="flex-1">
+                            <span className="block text-[13.5px] font-medium leading-[18px] text-[#050505]">
+                              {f.nom}
+                            </span>
+                            <span className="num mt-0.5 block text-[12px] leading-[16px] text-[#616161]">
+                              {f.duree} · {devis ? "sur devis" : "gratuit"}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               ))}
-            </select>
+            </div>
           </div>
         )}
 
@@ -315,6 +338,23 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
 
       {/* ═══ colonne principale ═══ */}
       <div className="r-carte !p-7 sm:!p-9">
+        <div className="rv-etapes mb-7">
+          {etapes.map((nom, i) => (
+            <span key={nom} className="contents">
+              {i > 0 && <span aria-hidden className="rv-etape-lien" />}
+              <span
+                className={`rv-etape ${
+                  i === idxEtape ? "rv-etape--active" : i < idxEtape ? "rv-etape--faite" : ""
+                }`}
+                aria-current={i === idxEtape ? "step" : undefined}
+              >
+                <i>{i < idxEtape ? "✓" : i + 1}</i>
+                {nom}
+              </span>
+            </span>
+          ))}
+        </div>
+
         {/* ——— étape 1 : le créneau ——— */}
         {etape === "creneau" ? (
           <div>
@@ -482,19 +522,30 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                 <input id="rv-entreprise" className="rv-champ" autoComplete="organization" value={c.entreprise} onChange={maj("entreprise")} required />
               </div>
               <div>
-                <label className="rv-libelle" htmlFor="rv-secteur">Secteur d&apos;activité</label>
-                <select id="rv-secteur" className="rv-champ" value={c.secteur} onChange={maj("secteur")} required>
-                  <option value="" disabled>Choisir…</option>
-                  {SECTEURS.map((s) => (
-                    <option key={s.valeur} value={s.valeur}>{s.libelle}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="sm:col-span-2">
                 <label className="rv-libelle" htmlFor="rv-commune">
                   Commune <small>— facultatif</small>
                 </label>
                 <input id="rv-commune" className="rv-champ" autoComplete="address-level2" value={c.commune} onChange={maj("commune")} />
+              </div>
+              <div className="sm:col-span-2">
+                <div className="rv-libelle">Secteur d&apos;activité</div>
+                <div className="rv-pils mt-2" role="radiogroup" aria-label="Secteur d'activité">
+                  {SECTEURS.map((s) => {
+                    const actif = c.secteur === s.valeur;
+                    return (
+                      <button
+                        key={s.valeur}
+                        type="button"
+                        role="radio"
+                        aria-checked={actif}
+                        onClick={() => setC((prev) => ({ ...prev, secteur: s.valeur }))}
+                        className={`rv-pil ${actif ? "rv-pil--actif" : ""}`}
+                      >
+                        {s.libelle}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div className="sm:col-span-2">
                 <label className="rv-libelle" htmlFor="rv-message">

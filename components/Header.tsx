@@ -218,7 +218,7 @@ export default function Header() {
               cas. Le remplissage ne revient qu'au survol, en très léger, pour
               que le bouton reste vivant sans redevenir une pastille. */}
           <Link
-            href="/tarifs"
+            href="/commencer"
             className={`hidden h-9 items-center rounded-[10px] border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform] duration-200 active:scale-[0.97] md:inline-flex ${
               clairEff
                 ? "border-[#09090b]/25 text-[#09090b] hover:border-[#09090b]/60 hover:bg-black/[0.05]"
@@ -373,7 +373,7 @@ export default function Header() {
               Nous contacter
             </a>
             <Link
-              href="/tarifs"
+              href="/commencer"
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
               style={{

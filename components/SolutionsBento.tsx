@@ -226,7 +226,7 @@ export default function SolutionsBento() {
                   30 minutes. Un chiffre précis.
                 </p>
                 <Link
-                  href="/tarifs"
+                  href="/commencer"
                   className="cta-shine mt-8 inline-block rounded-[var(--radius-btn)] bg-white px-7 py-3.5 text-[15px] font-semibold text-black transition-transform duration-150 hover:bg-neutral-200 active:scale-[0.97]"
                 >
                   Commencer

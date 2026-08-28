@@ -131,7 +131,7 @@ export default function ServicesTabs() {
         {/* le doublet de CTA de Qonto : plein noir + contour */}
         <div data-reveal className="mt-9 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4">
           <Link
-            href="/tarifs"
+            href="/commencer"
             className="rounded-[var(--radius-btn)] bg-black px-7 py-3.5 text-[16px] font-semibold text-white transition hover:bg-black/85"
           >
             Commencer
