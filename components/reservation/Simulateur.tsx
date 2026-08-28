@@ -212,12 +212,12 @@ export default function Simulateur() {
           </div>
 
           <a
-            href={lienReservation("Audit complet (90 min)")}
+            href={lienReservation("process")}
             className="r-btn r-btn--noir mt-7 w-full"
           >
             Faire chiffrer mes vrais chiffres
           </a>
-          <p className="r-note mt-2 text-center">Gratuit : réponse le jour même</p>
+          <p className="r-note mt-2 text-center">Gratuit : créneau bloqué immédiatement</p>
         </div>
       </div>
 

@@ -72,12 +72,12 @@ function Carte({ f }: { f: Formule }) {
       </div>
 
       <div className="flex flex-1 flex-col px-3 pt-4">
-        <a
-          href={lienReservation(`${f.nom} (${f.duree})`)}
+        <Link
+          href={lienReservation(f.id)}
           className={`r-btn w-full ${f.phare ? "r-btn--noir" : "r-btn--fil"}`}
         >
           {f.cta}
-        </a>
+        </Link>
         <p className="r-note mt-2 text-center">{f.souscta}</p>
 
         <div className="mt-6 text-[14px] font-semibold leading-[20px] text-[#050505]">
@@ -144,8 +144,14 @@ function Ligne({
 }
 
 export default function Formules() {
-  const [profil, setProfil] = useState(0);
+  /* 28/08 — l'audit devient la porte des structures où plusieurs services
+     valident : « Entreprise & équipes » s'affiche en premier. L'onglet
+     indépendant/TPE ne montre plus de formules : il aiguille vers la
+     grille publique de /tarifs (décision Teo, modèle des deux portes) —
+     avec le Diagnostic gratuit en voie douce pour qui veut parler avant. */
+  const [profil, setProfil] = useState(1);
   const p = PROFILS[profil];
+  const tpe = PROFILS[profil].id === "tpe";
   const noms = p.formules.map((f) => f.nom) as [string, string, string];
 
   const visibles = COMPARATIF.filter((f) => !f.repliee);
@@ -201,17 +207,47 @@ export default function Formules() {
             </div>
           </div>
 
-          {p.formules.map((f) => (
-            <Carte key={f.id} f={f} />
-          ))}
+          {tpe ? (
+            /* l'aiguillage : pas de formules ici, la grille publique est
+               leur porte — le Diagnostic gratuit reste en voie douce */
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-7 sm:p-9 lg:col-span-3">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                  Indépendants, TPE &amp; PME
+                </div>
+                <h2 className="r-h3 mt-3 max-w-[22ch]">
+                  Pas besoin d&apos;un audit pour commencer : vos prix sont publics.
+                </h2>
+                <p className="mt-4 max-w-[58ch] text-[15px] leading-[24px] text-[#3d3d3d]">
+                  Quand une personne tient les outils, le prix n&apos;a pas à sortir d&apos;un
+                  entretien : un poste 59 €, trois postes 85 €, tout Omega 105 € par mois — sans
+                  engagement, réunion d&apos;installation comprise, satisfait ou remboursé 30
+                  jours. Vous choisissez vos postes, vous réservez l&apos;installation, c&apos;est
+                  en route.
+                </p>
+              </div>
+              <div className="mt-7 flex flex-wrap items-center gap-4">
+                <Link href="/tarifs#grille" className="r-btn r-btn--noir">
+                  Voir la grille des postes
+                </Link>
+                <Link href={lienReservation("diagnostic")} className="r-lien">
+                  Un doute ? Diagnostic gratuit de 30 min
+                </Link>
+              </div>
+            </div>
+          ) : (
+            p.formules.map((f) => <Carte key={f.id} f={f} />)
+          )}
         </div>
 
-        <p className="r-note mt-6 max-w-3xl">
-          *Créneaux du lundi au vendredi, 8 h – 18 h (heure Guadeloupe). Les durées
-          annoncées sont tenues : l&apos;entretien se termine à l&apos;heure. Les deux
-          formats sur site sont facturés sur devis et déduits de l&apos;installation si
-          vous décidez d&apos;aller plus loin.
-        </p>
+        {!tpe ? (
+          <p className="r-note mt-6 max-w-3xl">
+            *Créneaux du lundi au vendredi, 9 h – 17 h (heure Guadeloupe). Les durées
+            annoncées sont tenues : l&apos;entretien se termine à l&apos;heure. Les deux
+            formats sur site sont facturés sur devis et déduits de l&apos;installation si
+            vous décidez d&apos;aller plus loin.
+          </p>
+        ) : null}
       </section>
 
       {/* ═══ 2. bandeau d'orientation ═══ */}
@@ -234,7 +270,9 @@ export default function Formules() {
         </div>
       </section>
 
-      {/* ═══ 3. comparatif ═══ */}
+      {/* ═══ 3. comparatif — formats d'équipe uniquement : l'onglet TPE
+             n'affiche pas de formules, il n'a rien à comparer ═══ */}
+      {tpe ? null : (
       <section id="comparatif" data-monde="clair" className="r-blanc">
         <div className="r-wrap py-14 sm:py-20">
           <h2 className="r-h2">Comparer les formats</h2>
@@ -262,14 +300,14 @@ export default function Formules() {
                   <div className="num mt-0.5 text-[14px] leading-[22px] text-[#3d3d3d]">
                     {f.duree} · {f.conditions}
                   </div>
-                  <a
-                    href={lienReservation(`${f.nom} (${f.duree})`)}
+                  <Link
+                    href={lienReservation(f.id)}
                     className={`r-btn mt-3 w-full !py-2 !text-[14px] ${
                       f.phare ? "r-btn--noir" : "r-btn--fil"
                     }`}
                   >
                     {f.cta}
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -335,6 +373,7 @@ export default function Formules() {
           </details>
         </div>
       </section>
+      )}
     </>
   );
 }

@@ -137,18 +137,18 @@ export default function ReserverUnAuditPage() {
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="r-h2">Réservez votre créneau en deux minutes</h2>
             <p className="r-lead mx-auto mt-6 max-w-[54ch]">
-              Le bouton ouvre WhatsApp avec le message déjà rédigé : il ne vous
-              reste qu&apos;à compléter votre activité, votre commune et la difficulté
-              qui vous coûte le plus cher. On répond le jour même avec des
-              créneaux, et rien d&apos;autre.
+              L&apos;agenda montre les créneaux réellement libres, en heure de
+              Guadeloupe. Vous en choisissez un, il est bloqué à l&apos;instant même —
+              et vous recevez la confirmation le jour même, avec le lien de la
+              visio.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <a
-                href={lienReservation("Audit complet (90 min)")}
+              <Link
+                href={lienReservation("process")}
                 className="r-btn r-btn--noir"
               >
                 Réserver l&apos;audit gratuit
-              </a>
+              </Link>
             </div>
             <p className="r-note mt-5">
               Ou directement : {CANAL_LABEL_PHRASE} :{" "}

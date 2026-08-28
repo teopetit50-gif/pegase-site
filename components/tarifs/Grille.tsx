@@ -1,0 +1,149 @@
+"use client";
+
+/* ══════════════════════════════════════════════════════════════════════
+   /tarifs v4 — la grille : trois paliers, choix des postes DANS la carte
+   (28/08/2026)
+
+   Chaque carte est autonome : « Un poste » se choisit comme une radio,
+   « Trois postes » coche jusqu'à trois cases, « Tout Omega » n'a rien à
+   choisir. Le bouton reste éteint tant que le compte n'y est pas — il
+   affiche ce qui manque plutôt qu'un « continuer » grisé muet.
+
+   Le CTA n'ouvre PAS WhatsApp et ne demande aucun paiement : il emmène
+   vers /installation, la page de réservation de la réunion d'installation,
+   avec les postes choisis dans l'URL. Le paiement (IBAN, prélèvement) se
+   branchera plus tard À CETTE COUTURE — quand le compte pro existera, une
+   étape s'insérera entre le choix et la réunion, sans toucher aux cartes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+import Link from "next/link";
+import { useState } from "react";
+import { PALIERS, POSTES, type Palier } from "@/lib/paliers";
+
+function CartePalier({ p }: { p: Palier }) {
+  const [choisis, setChoisis] = useState<string[]>([]);
+
+  const bascule = (id: string) => {
+    setChoisis((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (p.aChoisir === 1) return [id]; // comportement radio
+      if (p.aChoisir !== null && prev.length >= p.aChoisir) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const postes = p.aChoisir === null ? POSTES.map((x) => x.id) : choisis;
+  const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
+  const pret = manque <= 0;
+  const href = `/installation?postes=${postes.join(",")}`;
+
+  return (
+    <div className={`r-carte ${p.phare ? "r-carte--phare" : ""}`}>
+      <div className="r-carte-tete !min-h-0">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
+            {p.nom}
+          </h3>
+          {p.badge ? <span className="r-badge mt-1.5">{p.badge}</span> : null}
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="num text-[36px] font-semibold leading-[44px] text-[#050505] sm:text-[40px] sm:leading-[48px]">
+            {p.prix} €
+          </span>
+          <span className="text-[12px] leading-[18px] text-[#050505]">{p.sousPrix}</span>
+        </div>
+
+        <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">{p.promesse}</p>
+      </div>
+
+      <div className="flex flex-1 flex-col px-3 pt-4">
+        {/* le choix des postes, quand il y en a un à faire */}
+        {p.aChoisir !== null ? (
+          <fieldset>
+            <legend className="text-[14px] font-semibold leading-[20px] text-[#050505]">
+              {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
+            </legend>
+            <div className="mt-3 space-y-2">
+              {POSTES.map((x) => {
+                const actif = choisis.includes(x.id);
+                const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
+                return (
+                  <label
+                    key={x.id}
+                    className={`rv-case ${actif ? "rv-case--actif" : ""} ${plein ? "rv-case--plein" : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={actif}
+                      disabled={plein}
+                      onChange={() => bascule(x.id)}
+                      className="sr-only"
+                    />
+                    <span className="rv-coche" aria-hidden />
+                    <span>
+                      <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
+                        {x.nom}
+                      </span>
+                      <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
+                        {x.resume}
+                      </span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : (
+          <div>
+            <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
+              Les quatre postes, en service :
+            </div>
+            <ul className="mt-3 space-y-2">
+              {POSTES.map((x) => (
+                <li key={x.id} className="flex gap-2 text-[14px] leading-[22px] text-[#3d3d3d]">
+                  <span aria-hidden className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />
+                  {x.nom}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-5 flex flex-1 flex-col justify-end">
+          {pret ? (
+            <Link href={href} className={`r-btn w-full ${p.phare ? "r-btn--noir" : "r-btn--fil"}`}>
+              Réserver l&apos;installation
+            </Link>
+          ) : (
+            <span aria-disabled className="r-btn rv-btn--attente w-full">
+              {manque === 1 ? "Choisissez 1 poste" : `Choisissez encore ${manque} postes`}
+            </span>
+          )}
+          <p className="r-note mt-2 text-center">
+            Sans paiement en ligne — tout se règle à l&apos;installation.
+          </p>
+        </div>
+
+        <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5">
+          {p.points.map((t) => (
+            <li key={t} className="flex gap-2 text-[13px] leading-[19px] text-[#3d3d3d]">
+              <span aria-hidden className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />
+              {t}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+export default function Grille() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      {PALIERS.map((p) => (
+        <CartePalier key={p.id} p={p} />
+      ))}
+    </div>
+  );
+}

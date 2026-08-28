@@ -41,29 +41,21 @@ export const WHATSAPP: string = "33768163443";
    changer le jour où un outil de prise de rendez-vous arrive. */
 export const CANAL: "whatsapp" | "courriel" = WHATSAPP ? "whatsapp" : "courriel";
 
-/* Message pré-rempli, identique dans les deux canaux : la demande arrive
-   déjà qualifiée (activité, commune, difficulté principale). */
-function messageAudit(formule: string) {
-  return [
-    "Bonjour,",
-    "",
-    `Je souhaite réserver un créneau : ${formule}.`,
-    "",
-    "Mon activité : ",
-    "Ma commune : ",
-    "La difficulté qui me coûte le plus cher aujourd'hui : ",
-    "",
-    "Merci,",
-  ].join("\n");
-}
+/* ══════════════════════════════════════════════════════════════════════
+   28/08/2026 — LE JOUR PRÉVU PAR LE COMMENTAIRE D'EN-TÊTE EST ARRIVÉ :
+   l'outil de prise de rendez-vous existe (/reserver, calendrier branché
+   sur l'armoire OMEGA-Core). lienReservation n'ouvre plus WhatsApp : il
+   mène au calendrier, avec le format pré-choisi. Le paramètre passe du
+   LIBELLÉ (« Audit complet (90 min) ») à l'ID de formule (« complet ») —
+   tous les appelants sont passés à l'ID le même jour.
 
-export function lienReservation(formule: string) {
-  const corps = messageAudit(formule);
-  if (WHATSAPP) {
-    return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(corps)}`;
-  }
-  const sujet = `Réserver un audit : ${formule}`;
-  return `mailto:${COURRIEL}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+   WhatsApp ne disparaît pas : lienContact (questions libres, pied de
+   page, voie de secours si l'agenda ne répond pas) passe toujours par le
+   desk. L'interrupteur de repli WHATSAPP → COURRIEL ne vaut plus que
+   pour lui. */
+
+export function lienReservation(formuleId: string) {
+  return `/reserver?formule=${encodeURIComponent(formuleId)}`;
 }
 
 /* Contact libre, hors réservation (pied de page, « une autre question »). */
@@ -150,7 +142,7 @@ export const PROFILS: [Profil, Profil] = [
           "Identifier la difficulté qui vous coûte le plus cher, et repartir avec un chiffre plutôt qu'une impression.",
         promesseFantome: true,
         cta: "Réserver ce créneau",
-        souscta: "Réponse le jour même sur WhatsApp",
+        souscta: "Créneau bloqué immédiatement, confirmé le jour même",
         enteteListe: "L'entretien comprend :",
         points: [
           {
@@ -176,7 +168,7 @@ export const PROFILS: [Profil, Profil] = [
           "Passer toute la chaîne en revue et chiffrer les trois postes : pas seulement celui qui se voit.",
         promesseFantome: true,
         cta: "Réserver ce créneau",
-        souscta: "Réponse le jour même sur WhatsApp",
+        souscta: "Créneau bloqué immédiatement, confirmé le jour même",
         phare: true,
         badge: "Populaire",
         enteteListe: "Tout le Diagnostic, plus :",
@@ -251,7 +243,7 @@ export const PROFILS: [Profil, Profil] = [
           "Poser le périmètre : quels services, quels volumes, quelles contraintes de validation avant d'aller plus loin.",
         promesseFantome: true,
         cta: "Réserver ce créneau",
-        souscta: "Réponse le jour même sur WhatsApp",
+        souscta: "Créneau bloqué immédiatement, confirmé le jour même",
         enteteListe: "L'entretien comprend :",
         points: [
           {
@@ -277,7 +269,7 @@ export const PROFILS: [Profil, Profil] = [
           "Dérouler le processus bout en bout et chiffrer chaque rupture de chaîne, poste par poste.",
         promesseFantome: true,
         cta: "Réserver ce créneau",
-        souscta: "Réponse le jour même sur WhatsApp",
+        souscta: "Créneau bloqué immédiatement, confirmé le jour même",
         phare: true,
         badge: "Populaire",
         enteteListe: "Tout le Cadrage, plus :",
@@ -483,7 +475,7 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "Que se passe-t-il concrètement après ma demande ?",
     r: [
-      "La conversation s'ouvre sur WhatsApp avec votre demande déjà rédigée. On vous répond le jour même, en général dans l'heure, avec des créneaux. Si votre demande relève d'un autre format que celui que vous avez coché, on vous le dit à ce moment-là, avant de bloquer quoi que ce soit.",
+      "Votre créneau est bloqué à l'instant où vous le choisissez : l'agenda n'affiche que les disponibilités réelles, personne ne peut prendre le même. Vous recevez un mot de confirmation le jour même — WhatsApp ou e-mail — avec le lien de la visio. Si votre demande relève d'un autre format que celui que vous avez coché, on vous le dit à ce moment-là.",
       "À l'issue de l'entretien, le chiffrage écrit part sous 72 heures pour les formats qui le comprennent. Il n'y a pas de relance commerciale ensuite : si vous ne donnez pas suite, le dossier se ferme.",
     ],
   },
