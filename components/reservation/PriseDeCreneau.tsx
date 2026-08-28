@@ -46,7 +46,12 @@ import { SystemLogo } from "@/components/logos";
 import { POSTES, prixPour } from "@/lib/paliers";
 import { PROFILS, lienContact } from "@/lib/reservation";
 
-/* ——— catalogue des formats réservables sur /reserver ——— */
+/* ——— catalogue des formats réservables sur /reserver ———
+   28/08, 3ᵉ passe (Teo) : UNIQUEMENT les formats d'organisation — depuis
+   que l'audit est la porte des équipes, proposer ici le Diagnostic ou
+   l'Audit complet des indépendants n'avait plus de sens. Les anciens ids
+   restent acceptés par la fonction SQL ; un lien qui en porte un retombe
+   sur le format par défaut. */
 type Format = {
   id: string;
   nom: string;
@@ -55,16 +60,14 @@ type Format = {
   conditions: string;
   surDevis: boolean;
 };
-const FORMATS: Format[] = PROFILS.flatMap((p) =>
-  p.formules.map((f) => ({
-    id: f.id,
-    nom: f.nom,
-    duree: f.duree,
-    profil: p.id as "tpe" | "equipe",
-    conditions: f.conditions,
-    surDevis: DUREES_RDV[f.id] === null,
-  })),
-);
+const FORMATS: Format[] = PROFILS[1].formules.map((f) => ({
+  id: f.id,
+  nom: f.nom,
+  duree: f.duree,
+  profil: "equipe" as const,
+  conditions: f.conditions,
+  surDevis: DUREES_RDV[f.id] === null,
+}));
 
 type Etape = "creneau" | "coordonnees" | "fait";
 
@@ -78,7 +81,7 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
   /* ——— quoi ——— */
   const [formule, setFormule] = useState(() => {
     if (parcours === "installation") return "reglage";
-    return FORMATS.some((f) => f.id === formuleInitiale) ? (formuleInitiale as string) : "complet";
+    return FORMATS.some((f) => f.id === formuleInitiale) ? (formuleInitiale as string) : "process";
   });
   const format = FORMATS.find((f) => f.id === formule);
   const surDevis = parcours === "audit" && (format?.surDevis ?? false);
@@ -281,51 +284,32 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
           </>
         ) : (
           <div className="mt-5 border-t border-[#e3e3e3] pt-4">
-            <div className="rv-libelle">Le format</div>
-            <div className="mt-3 space-y-4">
-              {PROFILS.map((p) => (
-                <div key={p.id}>
-                  <div className="rv-fmt-groupe">{p.label}</div>
-                  {/* de VRAIS <input type="radio"> masqués en sr-only (le
-                      motif de Grille.tsx) : flèches, tab stop unique et
-                      annonce lecteur d'écran viennent du navigateur — la
-                      revue du 28/08 a retoqué la version <button
-                      role="radio"> sans clavier. */}
-                  <div className="mt-2 space-y-1.5">
-                    {p.formules.map((f) => {
-                      const actif = formule === f.id;
-                      const devis = DUREES_RDV[f.id] === null;
-                      return (
-                        <label key={f.id} className={`rv-fmt ${actif ? "rv-fmt--actif" : ""}`}>
-                          <input
-                            type="radio"
-                            name="rv-format"
-                            className="sr-only"
-                            checked={actif}
-                            onChange={() => {
-                              setFormule(f.id);
-                              setJour(null);
-                              setCreneau(null);
-                              setErreur(null);
-                              setEtape(devis ? "coordonnees" : "creneau");
-                            }}
-                          />
-                          <span className="rv-fmt-rond" aria-hidden />
-                          <span className="flex-1">
-                            <span className="block text-[13.5px] font-medium leading-[18px] text-[#050505]">
-                              {f.nom}
-                            </span>
-                            <span className="num mt-0.5 block text-[12px] leading-[16px] text-[#616161]">
-                              {f.duree} · {devis ? "sur devis" : "gratuit"}
-                            </span>
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
+            {/* 28/08, 3ᵉ passe — retour au menu déroulant (Teo : « le menu
+                déroulant était très bien ») : trois formats seulement, le
+                select stylé .rv-champ (chevron custom, focus net) suffit
+                et allège la colonne. */}
+            <label className="rv-libelle" htmlFor="rv-format">
+              Changer de format
+            </label>
+            <select
+              id="rv-format"
+              className="rv-champ"
+              value={formule}
+              onChange={(e) => {
+                const id = e.target.value;
+                setFormule(id);
+                setJour(null);
+                setCreneau(null);
+                setErreur(null);
+                setEtape(DUREES_RDV[id] === null ? "coordonnees" : "creneau");
+              }}
+            >
+              {FORMATS.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.nom} — {f.duree} · {f.surDevis ? "sur devis" : "gratuit"}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
         )}
 
@@ -534,33 +518,24 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                 <label className="rv-libelle" htmlFor="rv-entreprise">Nom de l&apos;entreprise</label>
                 <input id="rv-entreprise" className="rv-champ" autoComplete="organization" value={c.entreprise} onChange={maj("entreprise")} required />
               </div>
+              {/* 28/08, 3ᵉ passe — le secteur revient en menu déroulant
+                  stylé (.rv-champ) : neuf pilules mangeaient la moitié du
+                  formulaire, et le <select> natif est déjà accessible. */}
               <div>
+                <label className="rv-libelle" htmlFor="rv-secteur">Secteur d&apos;activité</label>
+                <select id="rv-secteur" className="rv-champ" value={c.secteur} onChange={maj("secteur")} required>
+                  <option value="" disabled>Choisir…</option>
+                  {SECTEURS.map((s) => (
+                    <option key={s.valeur} value={s.valeur}>{s.libelle}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="sm:col-span-2">
                 <label className="rv-libelle" htmlFor="rv-commune">
                   Commune <small>— facultatif</small>
                 </label>
                 <input id="rv-commune" className="rv-champ" autoComplete="address-level2" value={c.commune} onChange={maj("commune")} />
               </div>
-              <fieldset className="sm:col-span-2">
-                <legend className="rv-libelle">Secteur d&apos;activité</legend>
-                {/* mêmes vrais radios sr-only que le choix de format */}
-                <div className="rv-pils mt-2">
-                  {SECTEURS.map((s) => {
-                    const actif = c.secteur === s.valeur;
-                    return (
-                      <label key={s.valeur} className={`rv-pil ${actif ? "rv-pil--actif" : ""}`}>
-                        <input
-                          type="radio"
-                          name="rv-secteur"
-                          className="sr-only"
-                          checked={actif}
-                          onChange={() => setC((prev) => ({ ...prev, secteur: s.valeur }))}
-                        />
-                        {s.libelle}
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
               <div className="sm:col-span-2">
                 <label className="rv-libelle" htmlFor="rv-message">
                   {surDevis

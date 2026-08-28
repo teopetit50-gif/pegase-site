@@ -3463,13 +3463,6 @@ main.page-arrivee {
   padding-right: 38px;
 }
 
-/* les labels-radios reprennent le focus de leur input sr-only */
-.resa .rv-fmt:has(input:focus-visible),
-.resa .rv-pil:has(input:focus-visible) {
-  outline: 2px solid #050505;
-  outline-offset: 2px;
-}
-
 /* ——— bandeau d'erreur ——— */
 .resa .rv-erreur {
   border: 1px solid #e4b7b0;
@@ -3690,98 +3683,11 @@ main.page-arrivee {
   background: #dcdcdc;
 }
 
-/* ——— réservation : le choix de format, en cartes radio (28/08) ———
-   Remplace le <select> natif de la colonne récapitulatif : chaque format
-   est une ligne cliquable — nom, durée, condition — cochée d'un point. */
-.resa .rv-fmt-groupe {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #616161;
-}
-.resa .rv-fmt {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #e3e3e3;
-  border-radius: 9px;
-  background: #ffffff;
-  padding: 9px 12px;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease;
-}
-.resa .rv-fmt:hover {
-  border-color: #050505;
-}
-.resa .rv-fmt--actif {
-  border-color: #050505;
-  background: #f7f7f7;
-}
-.resa .rv-fmt-rond {
-  display: grid;
-  place-items: center;
-  height: 15px;
-  width: 15px;
-  flex: none;
-  border-radius: 9999px;
-  border: 1.5px solid #b5b5b5;
-  background: #ffffff;
-}
-.resa .rv-fmt--actif .rv-fmt-rond {
-  border-color: #050505;
-}
-.resa .rv-fmt--actif .rv-fmt-rond::after {
-  content: "";
-  height: 7px;
-  width: 7px;
-  border-radius: 9999px;
-  background: #050505;
-}
-
-/* ——— réservation : les secteurs en pilules (28/08) ———
-   Remplace le <select> « Secteur d'activité » : neuf pilules visibles,
-   un geste, pas de menu déroulant. */
-.resa .rv-pils {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.resa .rv-pil {
-  border: 1px solid #e3e3e3;
-  border-radius: 9999px;
-  background: #ffffff;
-  padding: 8px 14px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #3d3d3d;
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-.resa .rv-pil:hover {
-  border-color: #050505;
-  color: #050505;
-}
-.resa .rv-pil--actif {
-  background: #050505;
-  border-color: #050505;
-  color: #ffffff;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .resa .rv-case,
   .resa .rv-cal-case,
   .resa .rv-heure,
   .resa .rv-champ,
-  .resa .rv-fmt,
-  .resa .rv-pil,
   .resa .cm-carte,
   .resa .cm-cta {
     transition: none;

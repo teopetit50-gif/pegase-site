@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
-import { COMPRIS, PALIERS } from "@/lib/paliers";
+import { COMPRIS } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs — v4 « La grille publique » (28/08/2026)
@@ -42,25 +42,6 @@ export const metadata: Metadata = {
    tenait de /commercial/facturer-omega.md. Quatre survivent : les deux
    retirées (« pas de surcoût si le mois s'emballe », « devis en une
    page ») redisaient le sans-engagement et la réunion d'installation. */
-/* ——— le comparatif des paliers (28/08, 2ᵉ passe — « la page est un peu
-   vide ») : les lignes ne disent QUE ce qui est réellement tenu — pas de
-   ligne d'option inventée pour gonfler le tableau. ——— */
-const LIGNES_PALIERS: { libelle: string; valeurs: [string, string, string] }[] = [
-  { libelle: "Postes en service", valeurs: ["1, au choix", "3, au choix", "Les 4"] },
-  { libelle: "PULSE — le point du matin", valeurs: ["Compris", "Compris", "Compris"] },
-  { libelle: "VAULT — validation & verrous", valeurs: ["Compris", "Compris", "Compris"] },
-  {
-    libelle: "Réunion d'installation (45 min, visio)",
-    valeurs: ["Comprise", "Comprise", "Comprise"],
-  },
-  { libelle: "Engagement de durée", valeurs: ["Aucun", "Aucun", "Aucun"] },
-  { libelle: "Satisfait ou remboursé", valeurs: ["30 jours", "30 jours", "30 jours"] },
-  {
-    libelle: "Changer de palier ensuite",
-    valeurs: ["À tout moment", "À tout moment", "—"],
-  },
-];
-
 /* ——— la FAQ tarifs — les questions qu'une page de prix doit prendre de
    front, mêmes règles éditoriales que la FAQ de la page audit. ——— */
 const FAQ_TARIFS: { q: string; r: string[] }[] = [
@@ -174,45 +155,6 @@ export default function TarifsPage() {
               pour les quatre postes standard&nbsp;; un raccordement particulier est chiffré avant
               tout engagement.
             </p>
-          </div>
-        </section>
-
-        {/* ═══ 2bis — les paliers côte à côte (28/08, 2ᵉ passe) ═══ */}
-        <section data-monde="clair" className="r-wrap py-14 sm:py-16">
-          <h2 className="r-h3 max-w-[22ch]">Les trois paliers, côte à côte</h2>
-          <div className="mt-8 overflow-x-auto rounded-2xl bg-white p-2 sm:p-4">
-            <table className="w-full min-w-[560px] border-collapse text-left">
-              <thead>
-                <tr>
-                  <th className="w-[38%] border-b border-[#e3e3e3] px-4 pb-4 pt-3" />
-                  {PALIERS.map((p) => (
-                    <th key={p.id} className="border-b border-[#e3e3e3] px-4 pb-4 pt-3">
-                      <div className="font-[family-name:var(--font-jakarta)] text-[16px] font-semibold leading-[22px] tracking-[-0.01em] text-[#050505]">
-                        {p.nom}
-                      </div>
-                      <div className={`num rv-prix rv-prix--${p.id} mt-0.5 text-[20px] font-semibold leading-[26px]`}>
-                        {p.prix} €
-                        <span className="text-[12px] font-normal text-[#616161]"> /mois</span>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {LIGNES_PALIERS.map((l) => (
-                  <tr key={l.libelle} className="border-b border-[#efefef] last:border-b-0">
-                    <td className="px-4 py-3.5 text-[14px] font-medium text-[#050505]">
-                      {l.libelle}
-                    </td>
-                    {l.valeurs.map((v, i) => (
-                      <td key={i} className="num px-4 py-3.5 text-[14px] text-[#3d3d3d]">
-                        {v}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </section>
 

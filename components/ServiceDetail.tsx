@@ -400,7 +400,7 @@ export default function ServiceDetail({ service }: { service: string }) {
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
           <Link
-            href="/reserver?formule=diagnostic"
+            href="/reserver?formule=cadrage"
             className="rounded-[var(--radius-btn)] bg-black px-7 py-3.5 text-[16px] font-semibold text-white transition hover:bg-black/85"
           >
             Réserver une démo
