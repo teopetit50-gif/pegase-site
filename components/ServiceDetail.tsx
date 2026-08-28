@@ -257,10 +257,10 @@ export default function ServiceDetail({ service }: { service: string }) {
         {/* rappel d'action, à mi-parcours */}
         <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
           <Link
-            href="/reserver-un-audit"
+            href="/tarifs"
             className="rounded-[var(--radius-btn)] bg-black px-6 py-3 text-[15px] font-semibold text-white transition hover:bg-black/85"
           >
-            Réserver l&apos;audit gratuit
+            Commencer
           </Link>
           <span className="text-[14px] text-[#52555c]">30 minutes, sans engagement.</span>
         </div>
@@ -400,13 +400,13 @@ export default function ServiceDetail({ service }: { service: string }) {
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
           <Link
-            href="/reserver-un-audit"
+            href="/reserver?formule=diagnostic"
             className="rounded-[var(--radius-btn)] bg-black px-7 py-3.5 text-[16px] font-semibold text-white transition hover:bg-black/85"
           >
             Réserver une démo
           </Link>
           <Link
-            href="/reserver-un-audit"
+            href="/reserver-un-audit#faq"
             className="rounded-[var(--radius-btn)] border border-black/15 px-7 py-3.5 text-[16px] font-medium text-[#0f1013] transition hover:border-black/40"
           >
             Poser une question

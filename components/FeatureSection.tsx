@@ -55,10 +55,10 @@ export default function FeatureSection({
           <Reveal delay={270}>
             {/* CTA unique du site — pilule noire sur monde clair */}
             <Link
-              href="/reserver-un-audit"
+              href="/tarifs"
               className="mt-8 inline-block rounded-[var(--radius-btn)] bg-black px-7 py-3.5 text-[16px] font-semibold text-[#f4f1ec] transition hover:bg-black/85 active:scale-[0.97] shadow-[0_0_46px_-2px_rgba(15,16,19,0.55),0_14px_30px_-8px_rgba(15,16,19,0.42)]"
             >
-              Réserver l&apos;audit gratuit
+              Commencer
             </Link>
           </Reveal>
         </div>

@@ -115,8 +115,8 @@ export default function GabaritHome({
               </p>
 
               <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
-                <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                  Chiffrer mon cas : audit gratuit
+                <Link href="/tarifs" className="o-btn o-btn--primary">
+                  Chiffrer mon cas
                 </Link>
                 <Link href="#fonctionnement" className="o-btn o-btn--ghost">
                   Comment il tourne

@@ -23,6 +23,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/modeles", priorite: 0.9, frequence: "monthly" },
     { url: "/tarifs", priorite: 0.9, frequence: "monthly" },
     { url: "/reserver-un-audit", priorite: 0.9, frequence: "monthly" },
+    /* 28/08 — les deux pages de réservation en ligne. Priorité modérée :
+       ce sont des étapes de parcours, pas des portes d'entrée SEO. */
+    { url: "/reserver", priorite: 0.5, frequence: "monthly" },
+    { url: "/installation", priorite: 0.4, frequence: "monthly" },
     { url: "/integrations", priorite: 0.8, frequence: "monthly" },
     /* 07/08 — « Où vont vos données ». Priorité haute pour une page qui ne
        vend rien : c'est celle qu'on cherche avant de signer, et elle répond

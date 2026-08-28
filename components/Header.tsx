@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { lienContact } from "@/lib/reservation";
 
 /* 22/07 — le pégase (SVG d'après l'icône « pegasus » de Skoll, game-icons.net,
    CC BY 3.0) est retiré du header ET du footer à la demande de Teo. Le crédit
@@ -217,14 +218,14 @@ export default function Header() {
               cas. Le remplissage ne revient qu'au survol, en très léger, pour
               que le bouton reste vivant sans redevenir une pastille. */}
           <Link
-            href="/reserver-un-audit"
+            href="/tarifs"
             className={`hidden h-9 items-center rounded-[10px] border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform] duration-200 active:scale-[0.97] md:inline-flex ${
               clairEff
                 ? "border-[#09090b]/25 text-[#09090b] hover:border-[#09090b]/60 hover:bg-black/[0.05]"
                 : "border-white/35 text-white hover:border-white/70 hover:bg-white/10"
             }`}
           >
-            Audit gratuit
+            Commencer
           </Link>
           {/* burger 2 barres — se croise en X à l'ouverture */}
           <button
@@ -356,9 +357,9 @@ export default function Header() {
             {/* La référence empile secondaire PUIS primaire : le bouton noir
                 est le dernier de la colonne, au plus près du pouce. Omega
                 n'a pas de compte utilisateur, donc la paire Sign in / Get
-                started devient « Nous contacter » puis « Audit gratuit ». */}
-            <Link
-              href="/reserver-un-audit"
+                started devient « Nous contacter » (WhatsApp) puis « Commencer » (/tarifs, 28/08). */}
+            <a
+              href={lienContact("Bonjour Omega — je vous écris depuis le site.")}
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
               style={{
@@ -370,9 +371,9 @@ export default function Header() {
               className="flex h-[52px] w-full items-center justify-center rounded-full border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
             >
               Nous contacter
-            </Link>
+            </a>
             <Link
-              href="/reserver-un-audit"
+              href="/tarifs"
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
               style={{
@@ -385,7 +386,7 @@ export default function Header() {
               }}
               className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-full bg-[#0f1013] text-[15px] font-medium tracking-[-0.01em] text-white transition-colors hover:bg-[#26272b]"
             >
-              Audit gratuit
+              Commencer
             </Link>
           </div>
         </nav>

@@ -104,7 +104,7 @@ function BlocAlterne({
           <h2 className="o-h2 mt-5 max-w-[520px]">{titre}</h2>
           <p className="o-body mt-5 max-w-[450px]">{texte}</p>
           <div className="mt-8 flex flex-wrap items-center gap-5">
-            <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+            <Link href="/tarifs" className="o-btn o-btn--primary">
               Audit gratuit
               <Chevron taille={13} />
             </Link>
@@ -209,8 +209,8 @@ export default function GabaritIntegration({
               </div>
 
               <div data-reveal className="mt-9">
-                <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                  Chiffrer mon cas : audit gratuit
+                <Link href="/tarifs" className="o-btn o-btn--primary">
+                  Chiffrer mon cas
                   <Chevron taille={13} />
                 </Link>
               </div>
@@ -300,7 +300,7 @@ export default function GabaritIntegration({
             eyebrow={blocs[1].eyebrow}
             titre={blocs[1].titre}
             texte={blocs[1].texte}
-            lien={{ label: "Comment se passe l'installation", href: "/reserver-un-audit" }}
+            lien={{ label: "Comment se passe l'installation", href: "/tarifs#grille" }}
             media={
               <div className="space-y-2.5">
                 {fiche.etapes.map((e, i) => (
@@ -444,8 +444,8 @@ export default function GabaritIntegration({
               "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne le moteur au meilleur retour : celui-ci, ou un autre."}
           </p>
           <div className="relative mt-8">
-            <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-              Réserver l&apos;audit gratuit
+            <Link href="/tarifs" className="o-btn o-btn--primary">
+              Commencer
               <Chevron taille={14} />
             </Link>
           </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { lienContact } from "@/lib/reservation";
 import Header from "@/components/Header";
 import Apparition from "@/components/donnees/Apparition";
 import HeroPlein from "@/components/donnees/HeroPlein";
@@ -312,7 +313,7 @@ const PIED = [
     label: "L'entreprise",
     liens: [
       { label: "Blog", href: "/blog" },
-      { label: "Audit gratuit", href: "/reserver-un-audit" },
+      { label: "Commencer", href: "/tarifs" },
       { label: "Mentions légales", href: "/mentions-legales" },
     ],
   },
@@ -321,7 +322,7 @@ const PIED = [
     liens: [
       { label: "RGPD : où vivent vos données", href: "/blog/rgpd-donnees-locales" },
       { label: "Nos intégrations", href: "/integrations" },
-      { label: "Nous écrire", href: "/reserver-un-audit" },
+      { label: "Nous écrire", href: lienContact("Bonjour Omega — question sur vos garanties de données.") },
     ],
   },
 ];
@@ -367,8 +368,8 @@ export default function VosDonnees() {
                   dans l&apos;Union européenne, ou une machine installée chez vous dont rien ne
                   sort.
                 </p>
-                <Link href="/reserver-un-audit" className="vd-cta w-fit">
-                  Réserver un audit
+                <Link href="/tarifs" className="vd-cta w-fit">
+                  Commencer
                   <span>
                     <Chevron className="h-3.5 w-3.5" />
                   </span>
@@ -635,8 +636,8 @@ export default function VosDonnees() {
                   Trente minutes suffisent pour savoir laquelle des deux installations vous
                   convient, et ce qu&apos;elle coûte.
                 </p>
-                <Link href="/reserver-un-audit" className="vd-cta w-fit">
-                  Réserver un audit
+                <Link href="/tarifs" className="vd-cta w-fit">
+                  Commencer
                   <span>
                     <Chevron className="h-3.5 w-3.5" />
                   </span>

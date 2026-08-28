@@ -106,10 +106,10 @@ export default function Cloture() {
 
       <div className="mt-11">
         <Link
-          href="/reserver-un-audit"
+          href="/tarifs"
           className="m-btn-clair inline-flex items-center gap-2.5 py-3 pl-6 pr-2.5 text-[15px]"
         >
-          Réserver l&apos;audit gratuit
+          Commencer
           <span className="m-chevron flex h-7 w-7 items-center justify-center rounded-full">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
               <path

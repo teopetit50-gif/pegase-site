@@ -510,10 +510,10 @@ export default function PepitesSection({
         </Reveal>
         <Reveal delay={270}>
           <Link
-            href="/reserver-un-audit"
+            href="/tarifs"
             className="mt-8 inline-block rounded-[var(--radius-btn)] bg-white px-7 py-3.5 text-[16px] font-semibold text-black transition hover:bg-neutral-200 active:scale-[0.98]"
           >
-            Réserver l&apos;audit gratuit
+            Commencer
           </Link>
         </Reveal>
       </div>

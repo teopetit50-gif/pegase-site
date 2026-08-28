@@ -46,7 +46,7 @@ import { lienContact } from "@/lib/reservation";
 
    Ce que cette page ne fait pas : vendre. Aucun prix, aucun bouton
    « commander ». Le parcours est « audit d'abord » depuis le 31/07 ;
-   les CTA mènent tous à /reserver-un-audit.
+   les CTA mènent tous à /tarifs (28/08 : entrée neutre « Commencer », les deux portes).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -92,10 +92,10 @@ export default function ModelesPage() {
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
-                  href="/reserver-un-audit"
+                  href="/tarifs"
                   className="m-btn-clair inline-flex items-center gap-2.5 py-3 pl-6 pr-2.5 text-[15px]"
                 >
-                  Réserver l&apos;audit gratuit
+                  Commencer
                   <span className="m-chevron flex h-7 w-7 items-center justify-center rounded-full">
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
                       <path

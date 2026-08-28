@@ -106,7 +106,7 @@ export default function Integrations() {
               européenne.
             </p>
             <div data-reveal className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+              <Link href="/offres" className="o-btn o-btn--primary">
                 Vérifier avec vos outils
               </Link>
               <Link href="/offres" className="o-btn o-btn--ghost">
@@ -254,10 +254,10 @@ export default function Integrations() {
               </p>
               <div data-reveal className="mt-8">
                 <Link
-                  href="/reserver-un-audit"
+                  href="/tarifs"
                   className="o-btn o-btn--primary"
                 >
-                  En parler pendant l&apos;audit
+                  En parler au premier rendez-vous
                 </Link>
               </div>
             </div>

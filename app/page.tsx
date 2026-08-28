@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import { lienContact } from "@/lib/reservation";
 import { SystemLogo } from "@/components/logos";
 import {
   BandeauOutils,
@@ -41,7 +42,7 @@ import { FAMILLES, POSTS } from "@/lib/content";
 
    30/07 — les deux boutons « Audit gratuit » pointaient sur /audit, hérité
    du code restauré. Or /audit est le DÉROULÉ du protocole, pas la page de
-   réservation : le header, lui, envoie sur /reserver-un-audit. Deux boutons
+   réservation : le header, lui, envoie sur /tarifs (entrée neutre « Commencer », 28/08). Deux boutons
    du même nom menaient donc à deux endroits différents (Teo). Repointés.
 
    Aucun chiffre inventé : la rangée du hero ne porte que des faits
@@ -227,7 +228,7 @@ const GARANTIES: {
        revenir en arrière : href "/blog/cheque-tic-financement". */
     lien: {
       label: "Vérifier mon éligibilité",
-      href: "/reserver-un-audit",
+      href: "/tarifs",
     },
     maquette: <MaqCheque />,
   },
@@ -423,8 +424,8 @@ export default function Home() {
               {HERO.chapo}
             </p>
             <div data-reveal className="mt-4 md:mt-6 lg:mt-8">
-              <Link href="/reserver-un-audit" className="o-flux-btn">
-                Audit gratuit
+              <Link href="/tarifs" className="o-flux-btn">
+                Commencer
                 <span aria-hidden className="o-flux-btn-rond">
                   <Chevron taille={13} />
                 </span>
@@ -757,7 +758,7 @@ export default function Home() {
                   plateforme agréée.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+                  <Link href="/tarifs" className="o-btn o-btn--primary">
                     Faire le point avant l&apos;échéance
                   </Link>
                   <Link
@@ -872,12 +873,12 @@ export default function Home() {
               dit.
             </p>
             <div data-reveal className="mt-9 flex flex-wrap justify-center gap-3">
-              <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                Réserver l&apos;audit gratuit
+              <Link href="/tarifs" className="o-btn o-btn--primary">
+                Commencer
               </Link>
-              <Link href="/reserver-un-audit" className="o-btn o-btn--ghost">
+              <a href={lienContact("Bonjour Omega — je vous écris depuis le site.")} className="o-btn o-btn--ghost">
                 Nous joindre
-              </Link>
+              </a>
             </div>
           </div>
         </section>

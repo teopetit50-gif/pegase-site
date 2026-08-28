@@ -200,11 +200,11 @@ export default function Quand() {
             ))}
           </ul>
           <Link
-            href="/reserver-un-audit"
+            href="/tarifs"
             className="mt-9 inline-flex items-center gap-2 rounded-[var(--radius-btn)] px-6 py-3.5 text-[15px] font-semibold text-white transition hover:brightness-110 active:scale-[0.97]"
             style={{ background: "#f78320" }}
           >
-            Réserver l&apos;audit gratuit
+            Commencer
             <span aria-hidden>→</span>
           </Link>
         </div>

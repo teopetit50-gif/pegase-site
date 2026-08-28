@@ -137,11 +137,11 @@ export default function Hero() {
           </p>
 
           <a
-            href="/reserver-un-audit"
+            href="/tarifs"
             className="relative z-10 mt-10 rounded-[var(--radius-btn)] bg-white px-7 py-3.5 text-[16px] font-semibold text-black transition hover:bg-neutral-200"
             style={enter(650)}
           >
-            Réserver l&apos;audit gratuit
+            Commencer
           </a>
         </div>
       </div>
