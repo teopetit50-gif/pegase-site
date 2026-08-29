@@ -111,14 +111,24 @@ function CartePalier({
             <div className="text-[14px] leading-[20px] text-white">
               Les quatre postes, en service :
             </div>
-            <ul className="mt-3 space-y-2.5">
+            {/* mêmes encadrés que les cases des deux autres cartes, coche
+                remplie d'avance : rien à choisir, tout est compris */}
+            <div className="mt-3 space-y-2">
               {POSTES.map((x) => (
-                <li key={x.id} className="flex items-baseline gap-2.5 text-[14px] leading-[22px] text-white/85">
-                  <span className="tf-mono !text-[11px]">{x.system}</span>
-                  {x.nom}
-                </li>
+                <div key={x.id} className="tf-case tf-case--fixe">
+                  <span className="tf-coche" aria-hidden />
+                  <span>
+                    <span className="tf-mono block !text-[11px]">{x.system}</span>
+                    <span className="mt-0.5 block text-[14px] leading-[20px] text-white">
+                      {x.nom}
+                    </span>
+                    <span className="mt-0.5 block text-[12.5px] leading-[18px] text-white/60">
+                      {x.resume}
+                    </span>
+                  </span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
