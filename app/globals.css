@@ -3229,16 +3229,622 @@ main.page-arrivee {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   /tarifs — système de design isolé (v3, 13/08/2026)
+
+   Sixième page de référence : **scale.com/careers**, demandée par Teo le
+   13/08 en remplacement complet de la v2 (qui reproduisait le template
+   Flux `/about`). Le bloc `.tarifs` / `.t-` de cette v2 a été supprimé, pas
+   complété : plus une seule de ses règles ne servait.
+
+   C'est la MÊME MAISON que /vos-donnees, qui reproduit déjà
+   scale.com/global-public-sector. Les deux pages partagent donc la police
+   et l'échelle typographique — mais pas les valeurs : la page careers a sa
+   propre colonne (1472, pas 1280), ses propres étiquettes mono (12 px en
+   capitales espacées, pas 13 px) et ses propres rayons. D'où un bloc
+   séparé plutôt qu'une extension de `.vd`.
+
+   ── RELEVÉ AU PIXEL (getComputedStyle, viewport 1280) ──────────────────
+     colonne            1472 max, padding-inline 24 (20 en dessous de 768)
+     sections           72 / 120 de padding vertical — 64 / 96 pour la
+                        section repliable, qui est plus longue
+     en-tête de section centré, 768 de large, 80 de marge basse
+     étiquette          mono 12/24, +1 px d'approche, capitales, #525252
+     H1 hero            clamp(2rem, 0.5rem + 5vw, 4rem) / 1,05, −0,01em
+                        ⚠ le 116 px qu'on relève sur la référence est celui
+                        du titre de PIED DE PAGE, pas du hero. Le hero est
+                        à la même échelle que /vos-donnees — c'est le même
+                        site, et les deux pages doivent se répondre.
+     chapô hero         20/30 approche −0,01em, blanc
+     H2 section         48/60 (1,25) approche −0,01em, graisse 400
+     titre de carte     24/36 (1,5)  #212121        petit titre 20/30
+     corps              16/24 approche −0,01em, #575757
+     hero / CTA final   marge 16, rayon 24, min-h 480→720, padding 32→64,
+                        colonne de texte 1152 max, gouttière 24 entre le
+                        titre, le chapô et le bouton ; contenu calé en bas
+     cartes de couleur  rayon 16, padding 32→40, min-h 220, gouttière 16
+     cartes grises      #f2f2f2, rayon 16, padding 32→40, gouttière 24
+     blocs illustrés    image 320 de haut, rayon 8, ombre 0 4 16 noir 20 %
+     replis             filet #eaeaea, en-tête 24/20, lignes 16/24 avec
+                        64 d'alinéa à gauche, fond de groupe #f2f2f2
+     graisse            400 partout, titres compris — signature de la source
+
+   Trois couleurs de marque de la référence, relevées sur ses cartes :
+   `evergreen` #193a29, `atlas-blue` #273252, `gray-10` #212121.
+
+   POLICE : la référence est en Aeonik (CoType Foundry), sous licence — on
+   ne peut ni la servir depuis leurs fichiers ni l'acheter à leur place.
+   Hanken Grotesk la remplace, comme sur /vos-donnees : même squelette de
+   grotesque géométrique, même hauteur d'x, 'g' à un étage, 'y' à queue
+   droite. DM Mono porte les étiquettes, qui sont bien en monospace dans la
+   référence. Les deux familles sont déjà chargées par le layout — cette
+   refonte n'ajoute aucune police.
+
+   Tout est préfixé `--tf-` / `.tf-` sous `.tf` : supprimer ce bloc
+   supprime la page sans effet de bord.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.tf {
+  --tf-ink: #212121;
+  --tf-body: #575757;
+  --tf-mute: #929292;
+  --tf-eyebrow: #525252;
+  --tf-line: #eaeaea;
+  --tf-soft: #f2f2f2;
+  --tf-vert: #193a29;
+  --tf-bleu: #273252;
+  --tf-r-lg: 24px;
+  --tf-r-md: 16px;
+  --tf-r-pill: 12px;
+  --tf-r-sm: 8px;
+  --tf-r-xs: 6px;
+
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ——— colonne et rythme vertical ———
+   `padding-inline` et non `padding`, pour ne pas écraser les `py-*`
+   Tailwind posés sur les mêmes sections (le piège relevé sur .offres le
+   25/07). */
+.tf .tf-wrap {
+  width: 100%;
+  max-width: 1472px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+@media (min-width: 768px) {
+  .tf .tf-wrap {
+    padding-inline: 24px;
+  }
+}
+
+.tf .tf-section {
+  padding-block: 72px;
+}
+@media (min-width: 768px) {
+  .tf .tf-section {
+    padding-block: 120px;
+  }
+}
+/* `.tf-section--liste` (moins d'air que les autres, comme la référence en
+   donne à sa section la plus longue) est parti le 17/08 avec la section
+   repliable, son unique porteuse. */
+
+/* ——— typographie : tout en 400, c'est la signature de la référence ——— */
+.tf .tf-h1,
+.tf .tf-h2,
+.tf .tf-h3,
+.tf .tf-h4 {
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.tf .tf-h1 {
+  font-size: clamp(2rem, 0.5rem + 5vw, 4rem);
+  line-height: 1.05;
+}
+.tf .tf-h2 {
+  font-size: clamp(1.875rem, 1.1rem + 2.4vw, 3rem);
+  line-height: 1.25;
+}
+.tf .tf-h3 {
+  font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.5rem);
+  line-height: 1.5;
+  color: var(--tf-ink);
+}
+.tf .tf-h4 {
+  font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--tf-ink);
+}
+.tf .tf-lead {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: rgba(0, 0, 0, 0.7);
+  text-wrap: pretty;
+}
+.tf .tf-body {
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--tf-body);
+  text-wrap: pretty;
+}
+
+/* étiquette de section — 12 px monospace, capitales espacées d'un pixel.
+   (L'autre page Scale, celle de /vos-donnees, utilise 13 px sans
+   text-transform et en #929292 : ce sont bien deux réglages différents du
+   même site, et chacun reste dans son bloc.) */
+.tf .tf-eyebrow {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  line-height: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--tf-eyebrow);
+}
+/* la petite mono de service : compteurs, étiquettes de ligne, « tout
+   déplier ». 13 px, capitales, gris moyen. */
+.tf .tf-mono {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--tf-mute);
+}
+
+/* ——— en-tête de section : centré, 768 de large ——— */
+.tf .tf-tete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 768px;
+  margin-inline: auto;
+  margin-bottom: 40px;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .tf .tf-tete {
+    margin-top: 48px;
+    margin-bottom: 80px;
+  }
+}
+/* devant une liste, la référence resserre la marge basse */
+.tf .tf-tete--serre {
+  margin-bottom: 40px;
+}
+@media (min-width: 768px) {
+  .tf .tf-tete--serre {
+    margin-bottom: 40px;
+  }
+}
+/* quand la section empile ses blocs dans un flex à gouttière, l'en-tête
+   rend sa marge basse : sinon les deux s'ajoutent (la référence pose un
+   `!mb-0` exactement au même endroit) */
+.tf .tf-tete--colle {
+  margin-bottom: 0;
+}
+@media (min-width: 768px) {
+  .tf .tf-tete--colle {
+    margin-bottom: 0;
+  }
+}
+.tf .tf-tete .tf-eyebrow {
+  margin-bottom: 20px;
+}
+.tf .tf-tete .tf-lead {
+  margin-top: 16px;
+}
+
+/* ——— boutons ——— */
+.tf .tf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: 16px;
+  border-radius: var(--tf-r-xs);
+  background: #ffffff;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+.tf .tf-btn:hover {
+  background: #ebebeb;
+}
+.tf .tf-btn--noir {
+  background: #000000;
+  color: #ffffff;
+}
+.tf .tf-btn--noir:hover {
+  background: #262626;
+}
+/* le bouton au filet des cartes de couleur : plus haut, fond transparent */
+.tf .tf-btn--filet {
+  height: 50px;
+  padding-inline: 20px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  color: #ffffff;
+  font-weight: 400;
+}
+.tf .tf-btn--filet:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ——— hero et bandeau de clôture, plein cadre ———
+   La référence pose ces cartes dans une gouttière de 16 seulement, pas 24 :
+   elles débordent volontairement de la colonne de texte. */
+.tf .tf-bleed-wrap {
+  padding-inline: 16px;
+}
+.tf .tf-bleed {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: var(--tf-r-lg);
+  min-height: 480px;
+  padding: 32px;
+  isolation: isolate;
+  color: #ffffff;
+}
+@media (min-width: 768px) {
+  .tf .tf-bleed {
+    min-height: 720px;
+    padding: 64px;
+  }
+}
+.tf .tf-bleed img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Le voile. La référence assombrit à 45 % sur toute la surface, puis
+   renforce vers le bas : la photo reste lisible en haut, le texte lisible
+   en bas. Les deux dégradés reproduisent ce relevé. */
+.tf .tf-bleed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.18) 46%, rgba(0, 0, 0, 0) 78%),
+    rgba(0, 0, 0, 0.45);
+}
+/* la colonne de texte du hero : 1152 de large, 24 entre chaque élément */
+.tf .tf-bleed-corps {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 72rem;
+}
+.tf .tf-bleed .tf-lead {
+  color: rgba(255, 255, 255, 0.88);
+  /* 20/30 sur la référence, sans le grossissement des chapôs de section */
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+/* ——— les trois cartes de couleur ——— */
+.tf .tf-carte-couleur {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 220px;
+  padding: 32px;
+  border-radius: var(--tf-r-md);
+  color: #ffffff;
+}
+@media (min-width: 768px) {
+  .tf .tf-carte-couleur {
+    padding: 40px;
+  }
+}
+.tf .tf-carte-couleur--vert {
+  background: var(--tf-vert);
+}
+.tf .tf-carte-couleur--bleu {
+  background: var(--tf-bleu);
+}
+.tf .tf-carte-couleur--encre {
+  background: var(--tf-ink);
+}
+.tf .tf-carte-couleur .tf-h3 {
+  color: #ffffff;
+}
+.tf .tf-carte-couleur .tf-mono {
+  color: rgba(255, 255, 255, 0.6);
+}
+.tf .tf-carte-couleur .tf-body {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ——— cartes grises ——— */
+.tf .tf-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px;
+  border-radius: var(--tf-r-md);
+  background: var(--tf-soft);
+}
+@media (min-width: 640px) {
+  .tf .tf-carte {
+    padding: 40px;
+  }
+}
+
+/* ——— blocs illustrés ——— */
+.tf .tf-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.tf .tf-bloc-img {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  border-radius: var(--tf-r-sm);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 768px) {
+  .tf .tf-bloc-img {
+    height: 320px;
+  }
+}
+.tf .tf-bloc-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ——— grilles ——— */
+.tf .tf-grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .tf .tf-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tf .tf-grille--principes {
+  gap: 24px;
+}
+.tf .tf-grille--blocs {
+  gap: 48px;
+}
+@media (min-width: 768px) {
+  .tf .tf-grille--blocs {
+    gap: 64px;
+  }
+}
+/* `.tf-colonnes` — les deux colonnes de texte courant de la section
+   « pourquoi » — est parti avec elle le 17/08 : la section redisait le hero
+   et les compteurs. Le relevé de la référence est dans `lib/tarifs.ts`. */
+
+/* la liste repliable — barre de filtres, groupes, lignes de postes — est
+   partie le 17/08 avec la section « ce que couvre chaque ligne » : elle
+   redisait /offres et /integrations. Son composant client a suivi. */
+
+@media (prefers-reduced-motion: reduce) {
+  .tf .tf-btn {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /tarifs — extension du bloc .tf : la grille publique (v5, 29/08/2026)
+
+   Le 28/08 la page était passée au monde .resa (v4 « grille publique »,
+   clone Qonto pricing). Le 29/08, décision Teo : le CONTENU v4 reste —
+   prix publics, choix des postes dans les cartes, FAQ — mais il revient
+   dans CE design, le relevé scale.com/careers ci-dessus. Les trois
+   cartes de couleur portent donc les trois paliers, et les meubles que
+   la référence n'a pas (cases à cocher, badge, gros prix, replis de FAQ)
+   sont dessinés ici dans son échelle, ses gris et sa graisse 400. Même
+   préfixe, même règle d'isolement : tout vit sous `.tf`.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* les trois cartes-paliers tiennent sur une rangée dès lg */
+@media (min-width: 1024px) {
+  .tf .tf-grille--paliers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* pastille « Recommandé » du palier phare — mono, filet blanc */
+.tf .tf-badge {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffffff;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* le prix — même famille que les titres, graisse 400, blanc */
+.tf .tf-prix {
+  font-size: clamp(2.25rem, 1.8rem + 1.5vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+/* ——— case à cocher d'un poste, sur fond de couleur ——— */
+.tf .tf-case {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--tf-r-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.tf .tf-case:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+.tf .tf-case--actif {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+.tf .tf-case--plein {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.tf .tf-case--plein:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.tf .tf-coche {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 4px;
+}
+.tf .tf-case--actif .tf-coche {
+  background: #ffffff;
+  border-color: #ffffff;
+}
+.tf .tf-case--actif .tf-coche::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 6px;
+  height: 11px;
+  border: solid #000000;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+.tf .tf-case input:focus-visible ~ .tf-coche {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* l'état « éteint » du bouton filet : il nomme ce qui manque */
+.tf .tf-btn--attente {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* la petite note légale sous la grille */
+.tf .tf-note {
+  font-size: 13px;
+  line-height: 20px;
+  letter-spacing: -0.01em;
+  color: var(--tf-mute);
+  text-wrap: pretty;
+}
+
+/* ——— les replis de la FAQ — le relevé de la section repliable de la
+   référence tient toujours : filet #eaeaea, lignes 16/24, alinéa 64 ——— */
+.tf .tf-faq {
+  border-top: 1px solid var(--tf-line);
+}
+.tf .tf-faq:last-child {
+  border-bottom: 1px solid var(--tf-line);
+}
+.tf .tf-faq summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 24px;
+  cursor: pointer;
+  list-style: none;
+  font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--tf-ink);
+  text-wrap: balance;
+}
+.tf .tf-faq summary::-webkit-details-marker {
+  display: none;
+}
+.tf .tf-faq summary::after {
+  content: "+";
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--tf-mute);
+  flex: none;
+}
+.tf .tf-faq[open] summary::after {
+  content: "−";
+}
+.tf .tf-faq-corps {
+  padding-bottom: 28px;
+}
+@media (min-width: 768px) {
+  .tf .tf-faq-corps {
+    padding-left: 64px;
+  }
+}
+.tf .tf-faq-corps p {
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--tf-body);
+  text-wrap: pretty;
+}
+.tf .tf-faq-corps p + p {
+  margin-top: 16px;
+}
+
+/* le bandeau TIC : le gabarit plein cadre, à hauteur de section */
+.tf .tf-bleed--bandeau {
+  min-height: 360px;
+}
+@media (min-width: 768px) {
+  .tf .tf-bleed--bandeau {
+    min-height: 440px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf .tf-case {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    Réservation en ligne — extension du monde .resa (28/08/2026)
 
-   Sert deux endroits : le choix des postes dans la grille /tarifs v4
-   (cases à cocher des cartes) et le module de réservation de créneau
-   (/installation et /reserver — calendrier, pastilles d'heure, champs).
-
-   Le bloc .tf de la v3 « Comment nous chiffrons » (clone scale.com) est
-   parti ici même le 28/08 avec la page qu'il servait — décision Teo :
-   prix publics pour ceux qui tiennent leurs outils, la grille vit
-   désormais dans le monde .resa (clone Qonto pricing), conçu pour ça.
+   Sert le module de réservation de créneau (/installation et /reserver —
+   calendrier, pastilles d'heure, champs). Il a aussi servi UN JOUR (le
+   28/08) le choix des postes de la grille /tarifs v4 (cases `.rv-case`,
+   accents `.rv-palier--`/`.rv-prix--`) : le 29/08 la page tarifs est
+   revenue au design .tf ci-dessus — mêmes prix, même mécanique, autre
+   habillage, voir l'extension v5 du bloc .tf. Ces règles-là sont donc
+   orphelines ; elles restent car `.rv-btn--attente` sert toujours
+   PriseDeCreneau et l'ensemble reste cohérent si un choix de postes
+   revient un jour dans le parcours de réservation.
 
    Tout est préfixé `.rv-` sous `.resa` : rien ne fuit ailleurs.
    ═══════════════════════════════════════════════════════════════════════ */

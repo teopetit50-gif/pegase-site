@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
@@ -6,30 +7,41 @@ import Grille from "@/components/tarifs/Grille";
 import { COMPRIS } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /tarifs — v4 « La grille publique » (28/08/2026)
+   /tarifs — v5 « La grille publique, dans la maison v3 » (29/08/2026)
 
-   REMPLACE ENTIÈREMENT la v3 « Comment nous chiffrons » (clone
-   scale.com/careers, aucun montant affiché). Décision Teo des 27-28/08,
-   modèle commercial arrêté : pour ceux qui tiennent leurs outils —
-   indépendants, TPE, PME — les prix sont PUBLICS, l'achat est direct, et
-   la conversion est la réservation de la réunion d'installation
-   (/installation). L'ancienne règle « aucun montant » ne survit que pour
-   les structures où plusieurs services valident : leur porte est l'audit
-   (/reserver-un-audit), sans prix affiché — le devis sort des volumes.
+   Décision Teo du 29/08 : garder le CONTENU de la v4 du 28/08 — prix
+   publics 59/85/105, choix des postes dans les cartes, FAQ, Chèque TIC,
+   porte audit pour les structures où plusieurs services valident — mais
+   le remettre dans le DESIGN v3, le relevé de **scale.com/careers**
+   (bloc .tf de globals.css, restauré ce jour avec une extension v5 pour
+   les meubles que la référence n'a pas : cases, badge, prix, replis).
+   Le monde .resa (clone Qonto pricing) ne rend plus cette page ; il
+   continue de servir /reserver-un-audit, /installation et /reserver.
 
-   La séparation ne se fait PAS par la taille (« grande entreprise ») mais
-   par QUI VALIDE — le vrai déterminant du coût d'installation. Les deux
-   portes sont posées en haut de page, avant la grille.
+   Correspondance section par section avec la référence :
+     hero plein cadre, titre + chapô + bouton  → « Des prix publics… »
+     « IN THE NEWS » — 3 cartes de couleur     → les trois paliers
+     « OUR CREDOS » — cartes grises            → ce que nous ne facturons jamais
+     bandeau plein cadre                       → le Chèque TIC
+     replis (le gabarit de « OPEN POSITIONS ») → la FAQ tarifs
+     CTA final plein cadre                     → la porte audit
 
-   Le design quitte le monde .tf (scale.com) pour le monde .resa de
-   /reserver-un-audit — le clone de la page pricing de Qonto, construit
-   précisément pour vendre des paliers. Une page de prix dans le langage
-   d'une page de prix. La v3 (lib/tarifs.ts, bloc .tf) part avec ce
-   commit ; ses photos restent dans public/photos pour un autre usage.
+   Les photos sont le jeu v3 (public/photos/tarifs-*, sourcing dans
+   CREDITS.txt) : architecture froide, sans visage, sans marque. La seule
+   icône de la page reste la flèche — règle v3 — mais elle n'apparaît
+   plus : les CTA des cartes sont des boutons au filet pleine largeur.
 
-   PAIEMENT : rien en ligne aujourd'hui (pas encore de compte pro). La
-   couture est prévue dans components/tarifs/Grille.tsx — une étape
-   s'insérera entre le choix des postes et la réunion, sans refonte.
+   CE QUI A CHANGÉ DE RÈGLE : la v3 interdisait tout montant (« le prix
+   sort de vos volumes ») ; le modèle commercial arrêté les 27-28/08
+   affiche les prix pour ceux qui tiennent leurs outils. L'ancienne règle
+   ne survit que pour les structures où plusieurs services valident :
+   leur porte est l'audit, sans prix — c'est la clôture de la page. La
+   mention « Région » du Chèque TIC reste obligatoire (aide régionale
+   citée sur un site national).
+
+   PAIEMENT : rien en ligne aujourd'hui. La couture vit dans
+   components/tarifs/Grille.tsx — une étape s'insérera entre le choix
+   des postes et la réunion, sans refonte.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -38,10 +50,32 @@ export const metadata: Metadata = {
     "Un poste 59 €, trois postes 85 €, tout Omega 105 € par mois — sans engagement, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.",
 };
 
-/* Ce qu'on ne facture jamais — resserré depuis la v3 (six cartes), qui le
-   tenait de /commercial/facturer-omega.md. Quatre survivent : les deux
-   retirées (« pas de surcoût si le mois s'emballe », « devis en une
+/* Ce qu'on ne facture jamais — resserré depuis la v3 (six cartes) : les
+   deux retirées (« pas de surcoût si le mois s'emballe », « devis en une
    page ») redisaient le sans-engagement et la réunion d'installation. */
+const JAMAIS: { titre: string; texte: string }[] = [
+  {
+    titre: "Pas de prix par personne",
+    texte:
+      "Le prix ne dépend pas du nombre de gens qui s'en servent chez vous. Embaucher ne coûte rien de plus.",
+  },
+  {
+    titre: "Aucune commission au résultat",
+    texte:
+      "Pas de pourcentage sur les sommes encaissées. Nous avons intérêt à relancer juste, pas à relancer fort.",
+  },
+  {
+    titre: "Aucun engagement de durée",
+    texte:
+      "L'abonnement est mensuel. Vous prévenez, le mois va à son terme, les envois s'arrêtent. Rien n'est payé d'avance.",
+  },
+  {
+    titre: "Vos données repartent avec vous",
+    texte:
+      "L'export complet vous est remis à la sortie, sans condition et sans frais. Ce qui est à vous reste à vous.",
+  },
+];
+
 /* ——— la FAQ tarifs — les questions qu'une page de prix doit prendre de
    front, mêmes règles éditoriales que la FAQ de la page audit. ——— */
 const FAQ_TARIFS: { q: string; r: string[] }[] = [
@@ -84,71 +118,69 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   },
 ];
 
-const JAMAIS: { titre: string; texte: string }[] = [
-  {
-    titre: "Pas de prix par personne",
-    texte:
-      "Le prix ne dépend pas du nombre de gens qui s'en servent chez vous. Embaucher ne coûte rien de plus.",
-  },
-  {
-    titre: "Aucune commission au résultat",
-    texte:
-      "Pas de pourcentage sur les sommes encaissées. Nous avons intérêt à relancer juste, pas à relancer fort.",
-  },
-  {
-    titre: "Aucun engagement de durée",
-    texte:
-      "L'abonnement est mensuel. Vous prévenez, le mois va à son terme, les envois s'arrêtent. Rien n'est payé d'avance.",
-  },
-  {
-    titre: "Vos données repartent avec vous",
-    texte:
-      "L'export complet vous est remis à la sortie, sans condition et sans frais. Ce qui est à vous reste à vous.",
-  },
-];
-
 export default function TarifsPage() {
   return (
     <PageShell>
       <PageMotion />
 
-      <div className="resa">
-        {/* ═══ 1 — titre court : l'aiguillage vit sur /commencer (28/08),
-               cette page ne parle plus qu'aux indépendants et TPE-PME.
-               La porte « organisations » n'existe plus qu'en mention
-               discrète, tout en bas. ═══ */}
-        <section data-monde="clair" className="r-wrap pb-2 pt-12 sm:pt-14">
-          <h1 className="r-h1 max-w-[17ch]">Des prix publics, une installation comprise</h1>
-          <p className="r-lead mt-6 max-w-[58ch]">
-            Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
-            réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement,
-            satisfait ou remboursé trente jours.
-          </p>
-        </section>
+      <div className="tf" data-monde="clair">
+        {/* ─────────────── 1. hero plein cadre ─────────────── */}
+        <div className="pt-24">
+          <div className="tf-bleed-wrap">
+            <section className="tf-bleed">
+              <Image
+                src="/photos/tarifs-hero-atrium.jpg"
+                alt="L'atrium d'un immeuble de bureaux moderne, vu d'en bas"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
+              />
+              <div className="tf-bleed-corps">
+                <h1 className="tf-h1">Des prix publics, une installation comprise</h1>
+                <p className="tf-lead max-w-[46rem]">
+                  Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez
+                  la réunion d&apos;installation, et le système démarre sous votre œil. Sans
+                  engagement, satisfait ou remboursé trente jours.
+                </p>
+                <a href="#grille" className="tf-btn w-fit">
+                  Choisir mes postes
+                </a>
+              </div>
+            </section>
+          </div>
+        </div>
 
-        {/* ═══ 2 — la grille ═══ */}
-        <section id="grille" data-monde="clair" className="r-blanc">
-          <div className="r-wrap py-14 sm:py-16">
-            <h2 className="r-h2 max-w-[18ch]">Choisissez vos postes</h2>
-            <p className="r-body mt-4 max-w-[58ch]">
-              Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
-              WhatsApp. Quel que soit le palier,{" "}
-              <Link href={`/offres/${COMPRIS[0].slug}`} className="r-lien !text-[15px]">
-                {COMPRIS[0].system} · {COMPRIS[0].nom.toLowerCase()}
-              </Link>{" "}
-              et{" "}
-              <Link href={`/offres/${COMPRIS[1].slug}`} className="r-lien !text-[15px]">
-                {COMPRIS[1].system} · {COMPRIS[1].nom.toLowerCase()}
-              </Link>{" "}
-              tournent d&apos;office : savoir où vous en êtes et la certitude que rien ne part sans
-              vous ne sont pas des options.
-            </p>
-
-            <div className="mt-10">
-              <Grille />
+        {/* ─────────────── 2. la grille — les trois paliers ─────────────── */}
+        <section className="tf-section" id="grille">
+          <div className="tf-wrap">
+            <div className="tf-tete tf-tete--serre" data-reveal>
+              <p className="tf-eyebrow">La grille</p>
+              <h2 className="tf-h2">Choisissez vos postes</h2>
+              <p className="tf-lead">
+                Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
+                WhatsApp. Quel que soit le palier,{" "}
+                <Link
+                  href={`/offres/${COMPRIS[0].slug}`}
+                  className="underline underline-offset-4 hover:text-black"
+                >
+                  {COMPRIS[0].system} · {COMPRIS[0].nom.toLowerCase()}
+                </Link>{" "}
+                et{" "}
+                <Link
+                  href={`/offres/${COMPRIS[1].slug}`}
+                  className="underline underline-offset-4 hover:text-black"
+                >
+                  {COMPRIS[1].system} · {COMPRIS[1].nom.toLowerCase()}
+                </Link>{" "}
+                tournent d&apos;office&nbsp;: savoir où vous en êtes et la certitude que rien ne part
+                sans vous ne sont pas des options.
+              </p>
             </div>
 
-            <p className="r-note mt-6 max-w-3xl">
+            <Grille />
+
+            <p className="tf-note mx-auto mt-8 max-w-3xl text-center" data-reveal>
               Prix TTC, grille en vigueur au 28/08/2026 — le prix affiché au moment de votre demande
               est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
               (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion
@@ -158,99 +190,104 @@ export default function TarifsPage() {
           </div>
         </section>
 
-        {/* ═══ 3 — ce qu'on ne facture jamais ═══ */}
-        <section data-monde="clair" className="r-wrap py-14 sm:py-16">
-          <h2 className="r-h3 max-w-[22ch]">Ce que nous ne facturons jamais</h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {JAMAIS.map((j) => (
-              <div key={j.titre} data-reveal className="rounded-2xl bg-white p-6">
-                <h3 className="text-[15px] font-semibold leading-[21px] text-[#050505]">
-                  {j.titre}
-                </h3>
-                <p className="mt-2.5 text-[13.5px] leading-[20px] text-[#3d3d3d]">{j.texte}</p>
+        {/* ─────────────── 3. ce que nous ne facturons jamais ─────────────── */}
+        <section className="tf-section">
+          <div className="tf-wrap">
+            <div className="flex flex-col items-center">
+              <div className="tf-tete tf-tete--colle" data-reveal>
+                <p className="tf-eyebrow">Nos principes</p>
+                <h2 className="tf-h2">Ce que nous ne facturons jamais</h2>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* ═══ 4 — Chèque TIC, sur bande sombre ═══ */}
-        <section id="cheque-tic" className="r-nuit">
-          <div className="r-wrap py-14 sm:py-16">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-[60ch]">
-                <p className="r-note !text-[#a1a1aa]">Chèque TIC — Région Guadeloupe</p>
-                <h2 className="r-h3 mt-4">De 40 à 80 % d&apos;un projet numérique financés</h2>
-                <p className="mt-5 text-[15px] leading-[24px] text-[#d4d4d8]">
-                  La Région Guadeloupe finance de 40 à 80&nbsp;% d&apos;un projet de transformation
-                  numérique, dans la limite de 10&nbsp;000&nbsp;€, pour une entreprise éligible.
-                  Votre éligibilité est vérifiée à la réunion d&apos;installation — et si un dossier
-                  se justifie, nous le montons avec vous.
-                </p>
-              </div>
-              <a href="#grille" className="r-btn r-btn--blanc shrink-0">
-                Choisir mes postes
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ 4bis — la FAQ tarifs (28/08, 2ᵉ passe) — mêmes replis .r-faq
-               que la page audit ═══ */}
-        <section data-monde="clair" className="r-blanc">
-          <div className="r-wrap py-14 sm:py-16">
-            <div className="grid gap-8 lg:grid-cols-[379px_1fr] lg:gap-16">
-              <h2 className="r-h3 lg:sticky lg:top-28 lg:self-start">
-                Questions sur les prix
-              </h2>
-              <div>
-                {FAQ_TARIFS.map((f) => (
-                  <details key={f.q} className="r-faq">
-                    <summary>
-                      {f.q}
-                      <svg
-                        aria-hidden
-                        className="r-faq-croix"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 18 18"
-                        fill="none"
-                      >
-                        <path
-                          d="M9 1v16M1 9h16"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </summary>
-                    <div className="pb-7 pr-8">
-                      {f.r.map((par, i) => (
-                        <p
-                          key={i}
-                          className={`text-[15px] leading-[26px] text-[#3d3d3d] ${i > 0 ? "mt-4" : ""}`}
-                        >
-                          {par}
-                        </p>
-                      ))}
+              <div className="tf-grille tf-grille--principes mt-16 w-full" data-reveal>
+                {JAMAIS.map((j) => (
+                  <article className="tf-carte" key={j.titre}>
+                    <div className="flex flex-col gap-4">
+                      <h3 className="tf-h4">{j.titre}</h3>
+                      <p className="tf-body">{j.texte}</p>
                     </div>
-                  </details>
+                  </article>
                 ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* ═══ 5 — la mention discrète de l'autre porte (28/08) : pour qui
-               s'est trompé d'aiguillage, sans re-poser deux portes ici. ═══ */}
-        <section data-monde="clair" className="r-wrap py-9">
-          <p className="r-note mx-auto max-w-xl text-center !text-[13px]">
-            Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille n&apos;est pas
-            votre porte&nbsp;: votre prix sort d&apos;un audit.{" "}
-            <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-[#050505]">
-              Réserver un échange
-            </Link>
-          </p>
+        {/* ─────────────── 4. le Chèque TIC, plein cadre ─────────────── */}
+        <div className="tf-bleed-wrap" id="cheque-tic">
+          <section className="tf-bleed tf-bleed--bandeau">
+            <Image
+              src="/photos/tarifs-cheque-tic-signature.jpg"
+              alt="Deux mains signant un document posé sur un bureau"
+              fill
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div className="tf-bleed-corps">
+              <p className="tf-mono !text-white/70">Chèque TIC — Région Guadeloupe</p>
+              <h2 className="tf-h2">De 40 à 80&nbsp;% d&apos;un projet numérique financés</h2>
+              <p className="tf-lead max-w-[46rem]">
+                La Région Guadeloupe finance de 40 à 80&nbsp;% d&apos;un projet de transformation
+                numérique, dans la limite de 10&nbsp;000&nbsp;€, pour une entreprise éligible. Votre
+                éligibilité est vérifiée à la réunion d&apos;installation — et si un dossier se
+                justifie, nous le montons avec vous.
+              </p>
+              <a href="#grille" className="tf-btn w-fit">
+                Choisir mes postes
+              </a>
+            </div>
+          </section>
+        </div>
+
+        {/* ─────────────── 5. la FAQ tarifs ─────────────── */}
+        <section className="tf-section">
+          <div className="tf-wrap">
+            <div className="tf-tete tf-tete--serre" data-reveal>
+              <p className="tf-eyebrow">Questions</p>
+              <h2 className="tf-h2">Questions sur les prix</h2>
+            </div>
+
+            <div className="mx-auto max-w-3xl" data-reveal>
+              {FAQ_TARIFS.map((f) => (
+                <details key={f.q} className="tf-faq">
+                  <summary>{f.q}</summary>
+                  <div className="tf-faq-corps">
+                    {f.r.map((par, i) => (
+                      <p key={i}>{par}</p>
+                    ))}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
         </section>
+
+        {/* ─────────────── 6. clôture plein cadre : la porte audit ─────────────── */}
+        <div className="pb-8">
+          <div className="tf-bleed-wrap">
+            <section className="tf-bleed">
+              <Image
+                src="/photos/tarifs-cloture-facade.jpg"
+                alt="La façade d'un immeuble au soleil couchant, reflets dans le verre"
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
+              <div className="tf-bleed-corps">
+                <h2 className="tf-h1">
+                  Plusieurs services se partagent le travail chez vous&nbsp;?
+                </h2>
+                <p className="tf-lead max-w-[46rem]">
+                  Cette grille n&apos;est pas votre porte&nbsp;: quand plusieurs personnes valident,
+                  chacune sur son poste, votre prix sort d&apos;un audit.
+                </p>
+                <Link href="/reserver-un-audit" className="tf-btn w-fit">
+                  Réserver un échange
+                </Link>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
     </PageShell>
   );
