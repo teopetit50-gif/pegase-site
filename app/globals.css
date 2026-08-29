@@ -3747,27 +3747,14 @@ main.page-arrivee {
 }
 
 /* la tuile « comprise d'office » de la carte Tout Omega : le même encadré
-   que les cases, coche remplie d'avance, aucune interaction */
+   que les cases des deux autres cartes, au même état de repos — coche vide
+   (retouche Teo du 29/08 : pré-cochées, elles juraient avec les colonnes
+   voisines), aucune interaction */
 .tf .tf-case--fixe {
   cursor: default;
 }
 .tf .tf-case--fixe:hover {
   border-color: rgba(255, 255, 255, 0.28);
-}
-.tf .tf-case--fixe .tf-coche {
-  background: #ffffff;
-  border-color: #ffffff;
-}
-.tf .tf-case--fixe .tf-coche::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 6px;
-  height: 11px;
-  border: solid #000000;
-  border-width: 0 1.5px 1.5px 0;
-  transform: rotate(45deg);
 }
 
 /* l'état « éteint » du bouton filet : il nomme ce qui manque */

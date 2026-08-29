@@ -111,8 +111,9 @@ function CartePalier({
             <div className="text-[14px] leading-[20px] text-white">
               Les quatre postes, en service :
             </div>
-            {/* mêmes encadrés que les cases des deux autres cartes, coche
-                remplie d'avance : rien à choisir, tout est compris */}
+            {/* mêmes encadrés que les cases des deux autres cartes, au même
+                état de repos — coche vide, aucune interaction : rien à
+                choisir, tout est compris */}
             <div className="mt-3 space-y-2">
               {POSTES.map((x) => (
                 <div key={x.id} className="tf-case tf-case--fixe">
