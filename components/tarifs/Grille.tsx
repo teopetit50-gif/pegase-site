@@ -39,21 +39,13 @@ function CartePalier({
 
   return (
     <div className={`r-carte rv-palier--${p.id} ${p.phare ? "r-carte--phare" : ""}`}>
-      {/* 01/09 — plancher commun dès lg : à quatre cartes de front (la
-          carte site rejoint la grille), les promesses replient
-          différemment et les têtes dessinaient un escalier. Le badge vit
-          AU-DESSUS du titre : à côté, son nowrap repliait « Trois
-          postes » sur deux lignes dans les cartes resserrées. La ligne
-          du badge est RÉSERVÉE sur toutes les cartes (h-5, vide sans
-          badge) : sinon titres et prix des cartes sans badge remontaient
-          d'une rangée et plus rien ne s'alignait d'une carte à l'autre. */}
-      <div className="r-carte-tete !min-h-0 lg:!min-h-[268px]">
-        <div className={`h-5 ${p.badge ? "mb-2 flex" : "hidden lg:mb-2 lg:flex"}`}>
-          {p.badge ? <span className="r-badge">{p.badge}</span> : null}
+      <div className="r-carte-tete !min-h-0">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
+            {p.nom}
+          </h3>
+          {p.badge ? <span className="r-badge mt-1.5">{p.badge}</span> : null}
         </div>
-        <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
-          {p.nom}
-        </h3>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <span className={`num rv-prix rv-prix--${p.id} text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]`}>
@@ -134,10 +126,7 @@ function CartePalier({
           </p>
         </div>
 
-        {/* 01/09 — plancher commun : les puces replient différemment d'une
-            carte à l'autre (171 à 190px mesurés) et décalaient les CTA,
-            ancrés juste au-dessus. Même valeur sur la carte site. */}
-        <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5 lg:min-h-[190px]">
+        <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5">
           {p.points.map((t) => (
             <li key={t} className="flex gap-2 text-[13px] leading-[19px] text-[#3d3d3d]">
               <span aria-hidden className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />

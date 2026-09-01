@@ -4148,22 +4148,6 @@ main.page-arrivee {
   background: #d0369b;
 }
 
-/* ——— la carte site dans la grille (01/09, demande Teo, v4 : « une carte
-   comme pour les prix, même taille, même format, couleur dégradée
-   différente, légèrement excentrée sur la droite ») ———
-   Quatrième carte au format exact des paliers, teinte à part : là où
-   chaque palier porte UNE couleur du dégradé, la carte site les porte
-   TOUTES — c'est la vitrine qui va avec l'ensemble, et le multicolore
-   suffit à dire « offre en plus ». L'excentrage (translate) vit dans
-   app/tarifs/page.tsx. Les v1-v3 (colonne « + ») sont parties avec ce
-   commit. */
-.resa .rv-palier--site .r-carte-tete {
-  background: linear-gradient(140deg, #fff6ec 0%, #ffe4ea 46%, #e9ddfb 100%);
-}
-.resa .rv-prix--site {
-  background-image: linear-gradient(115deg, #ea580c 0%, #d0369b 55%, #7c3aed 100%);
-}
-
 /* ——— /commencer : l'aiguillage à deux cartes (28/08) ———
    La carte claire porte le DÉPART du dégradé de la grille (orange), la
    carte sombre son ARRIVÉE (violet) : la page annonce la suite. */

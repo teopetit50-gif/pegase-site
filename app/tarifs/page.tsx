@@ -144,100 +144,13 @@ export default function TarifsPage() {
               vous ne sont pas des options.
             </p>
 
-            {/* 01/09 (Teo, v4 après trois essais de colonne « + ») — la
-                carte site est une QUATRIÈME CARTE au format exact des
-                paliers : même taille (les tracks de la grille externe
-                s'alignent sur les colonnes internes de <Grille />), même
-                structure, mais la tête porte le dégradé complet de la
-                page site et la carte est légèrement décalée à droite
-                (translate) : une offre EN PLUS, pas un quatrième palier.
-                Sous xl elle passe seule sous la grille, calée à droite au
-                gabarit d'un palier ; en mobile, pleine largeur. */}
-            <div className="mt-10 grid gap-4 xl:grid-cols-4">
-              <div className="xl:col-span-3">
-                <Grille />
-              </div>
-              <div className="r-carte rv-palier--site lg:ml-auto lg:max-w-[calc((100%-2rem)/3)] xl:ml-0 xl:max-w-none xl:translate-x-3">
-                <div className="r-carte-tete !min-h-0 lg:!min-h-[268px]">
-                  {/* même gabarit de ligne badge que CartePalier : les
-                      quatre têtes gardent leurs rangées alignées */}
-                  <div className="mb-2 flex h-5">
-                    <span className="r-badge">Offre en plus</span>
-                  </div>
-                  <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
-                    Le site
-                  </h3>
-                  {/* 01/09 (Teo, v5) — pas de 990 € en grand ici : le
-                      chiffre qui invite, c'est « 21 modèles » ; le prix
-                      vit sur /tarifs/site, la carte donne envie d'aller
-                      voir. Le CTA emmène à la galerie (/modeles) : c'est
-                      littéralement « découvrir nos sites ». */}
-                  <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                    <span className="num rv-prix rv-prix--site text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]">
-                      21 modèles
-                    </span>
-                    <span className="text-[12px] leading-[18px] text-[#050505]">
-                      tous en ligne, tous visitables
-                    </span>
-                  </div>
-                  <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">
-                    La vitrine qui va avec vos postes — vous choisissez l&apos;allure, on réécrit
-                    tout à votre métier.
-                  </p>
-                </div>
-
-                <div className="flex flex-1 flex-col px-3 pt-4">
-                  <div>
-                    <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
-                      Ce qui est compris&nbsp;:
-                    </div>
-                    <ul className="mt-3 space-y-2.5">
-                      {[
-                        "Un modèle au choix dans le catalogue",
-                        "Contenu réécrit en français, à votre métier",
-                        "Nom de domaine la première année, mise en ligne",
-                        "Formulaire prêt à brancher sur vos postes",
-                      ].map((t) => (
-                        <li
-                          key={t}
-                          className="flex gap-2.5 text-[14px] leading-[22px] text-[#3d3d3d]"
-                        >
-                          <span
-                            aria-hidden
-                            className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-[#050505]"
-                          />
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-5 flex flex-1 flex-col justify-end">
-                    <Link href="/modeles" className="r-btn r-btn--fil w-full">
-                      Découvrir nos sites
-                    </Link>
-                    <p className="r-note mt-2 text-center">
-                      Prix public sur la page de l&apos;offre — rien ne se paie en ligne.
-                    </p>
-                  </div>
-
-                  <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5 lg:min-h-[190px]">
-                    {[
-                      "Jusqu'à 80 % financés par le Chèque TIC",
-                      "Maintenance offerte avec un abonnement actif",
-                      "Le site vous appartient, quoi qu'il arrive",
-                    ].map((t) => (
-                      <li key={t} className="flex gap-2 text-[13px] leading-[19px] text-[#3d3d3d]">
-                        <span
-                          aria-hidden
-                          className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]"
-                        />
-                        {t}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+            {/* 01/09 (Teo, en fin de journée) — la grille ne parle QUE des
+                postes. Une carte / colonne « site » y a vécu quelques
+                heures en cinq versions : elle portait à confusion. L'offre
+                site garde sa page (/tarifs/site — 990 €, Chèque TIC,
+                maintenance) ; elle sera intégrée ailleurs. */}
+            <div className="mt-10">
+              <Grille />
             </div>
 
             <p className="r-note mt-6 max-w-3xl">
