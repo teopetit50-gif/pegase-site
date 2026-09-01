@@ -4200,7 +4200,14 @@ main.page-arrivee {
   font-weight: 400;
   color: #616161;
 }
-@media (min-width: 1024px) {
+.resa .rv-plus:focus-visible {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+  border-color: #050505;
+}
+/* colonne verticale à partir de xl seulement : entre 1024 et 1279 les
+   cartes de la grille sont déjà à l'étroit, le « + » reste en bandeau. */
+@media (min-width: 1280px) {
   .resa .rv-plus {
     flex-direction: column;
     width: 118px;
@@ -4367,10 +4374,12 @@ main.page-arrivee {
   .resa .rv-heure,
   .resa .rv-champ,
   .resa .cm-carte,
+  .resa .rv-plus,
   .resa .cm-cta {
     transition: none;
   }
-  .resa .cm-carte:hover {
+  .resa .cm-carte:hover,
+  .resa .rv-plus:hover {
     transform: none;
   }
 }

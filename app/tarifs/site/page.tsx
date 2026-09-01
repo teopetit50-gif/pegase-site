@@ -29,11 +29,15 @@ import PageMotion from "@/components/PageMotion";
 export const metadata: Metadata = {
   title: "Votre site, à prix public | Omega.AI",
   description:
-    "Le site catalogue : 990 € une fois, pas d'abonnement — souvent 198 € restant à charge avec le Chèque TIC. Maintenance offerte tant qu'un poste Omega tourne chez vous. Vingt et un modèles, tous en ligne, contenu réécrit à votre métier.",
+    "Le site catalogue : 990 € une fois, pas d'abonnement — 198 € restant à charge si le Chèque TIC finance 80 %. Maintenance offerte tant qu'un poste Omega tourne chez vous. Vingt et un modèles, tous en ligne, contenu réécrit à votre métier.",
 };
 
 type CarteSite = {
   id: "un" | "trois" | "complet";
+  /* la clé de lecture du h2 « Un prix, une aide, une suite », reprise en
+     surtitre : sans elle, les trois cartes se lisent comme trois formules
+     concurrentes — et « 198 € » comme une version moins chère du site. */
+  cle: string;
   nom: string;
   prix: string;
   sousPrix: string;
@@ -47,6 +51,7 @@ type CarteSite = {
 const CARTES: CarteSite[] = [
   {
     id: "un",
+    cle: "Le prix",
     nom: "Le site catalogue",
     prix: "990 €",
     sousPrix: "une fois — pas d'abonnement",
@@ -55,30 +60,38 @@ const CARTES: CarteSite[] = [
       "Un modèle au choix — les vingt et un sont en ligne, tous visitables",
       "Contenu intégralement réécrit en français, à votre métier",
       "Nom de domaine la première année, mise en ligne comprise",
-      "Formulaire branché aux moteurs — devis, relance, avis",
+      "Formulaire prêt à brancher sur vos postes — devis, relance, avis",
     ],
     cta: { href: "/modeles", label: "Choisir votre modèle" },
   },
   {
     id: "trois",
-    nom: "Avec le Chèque TIC",
+    cle: "L'aide",
+    /* « Le Chèque TIC », pas « Avec le Chèque TIC » : entre 1024 et
+       1280 le titre long repliait sous le badge et la tête dépassait
+       ses voisines de 50 px. */
+    nom: "Le Chèque TIC",
     prix: "198 €",
     sousPrix: "restant à charge, si 80 % financés",
     phare: true,
     badge: "Si vous êtes éligible",
-    promesse: "La Région Guadeloupe finance de 40 à 80 % du projet — on monte le dossier avec vous.",
+    promesse: "La Région finance de 40 à 80 % du projet — dossier monté avec vous.",
     points: [
       "De 40 à 80 % du projet financés, jusqu'à 10 000 €",
       "Éligibilité vérifiée pendant l'audit, avant tout engagement",
       "Dossier monté avec vous, devis fournis",
       "Le même site, les mêmes livrables — seul le reste à charge change",
     ],
-    cta: { href: "/commencer", label: "Vérifier mon éligibilité", noir: true },
+    /* 01/09 (revue) — le CTA pointe là où la vérification est un livrable :
+       le Diagnostic gratuit de /reserver-un-audit la comprend noir sur
+       blanc ; /commencer n'y menait jamais. */
+    cta: { href: "/reserver-un-audit", label: "Vérifier mon éligibilité", noir: true },
   },
   {
     id: "complet",
+    cle: "La suite",
     nom: "La maintenance",
-    prix: "0 €",
+    prix: "Offerte",
     sousPrix: "avec un abonnement Omega actif",
     promesse: "Tant qu'un poste tourne chez vous, la vitrine est entretenue — modifications comprises.",
     points: [
@@ -98,12 +111,13 @@ const FAQ_SITE: { q: string; r: string[] }[] = [
     q: "À qui appartient le site ?",
     r: [
       "À vous, dès le premier jour. Le nom de domaine est au vôtre, les accès vous sont remis, et si nous nous quittons, le site part avec vous — fichiers compris. Rien n'est loué, rien n'est retenu.",
+      "Sans maintenance, rien ne s'éteint sans prévenir : les fichiers et les accès vous sont remis, l'hébergement et le domaine passent à votre nom, et on vous accompagne pour la bascule.",
     ],
   },
   {
     q: "Que comprennent les 990 €, exactement ?",
     r: [
-      "Le modèle choisi dans le catalogue, la réécriture intégrale du contenu en français et à votre métier, vos photos et coordonnées en place, le nom de domaine la première année, la mise en ligne, et le branchement du formulaire aux moteurs — chaque demande reçue entre dans le circuit devis, relance, avis.",
+      "Le modèle choisi dans le catalogue, la réécriture intégrale du contenu en français et à votre métier, vos photos et coordonnées en place, le nom de domaine la première année, la mise en ligne — et le formulaire prêt à brancher : dès qu'un poste Omega tourne chez vous, chaque demande reçue entre dans le circuit devis, relance, avis.",
       "Un besoin hors catalogue — boutique en ligne, espace membre, logiciel particulier — se chiffre sur devis, à l'audit.",
     ],
   },
@@ -139,8 +153,8 @@ export default function TarifsSitePage() {
           <h1 className="r-h1 max-w-[19ch]">Votre site, au même prix pour tout le monde</h1>
           <p className="r-lead mt-6 max-w-[58ch]">
             Vingt et un modèles, tous en ligne, tous visitables. Vous choisissez l&apos;allure, on
-            réécrit tout le contenu à votre métier — et le formulaire alimente vos postes dès le
-            premier jour. Le prix est public, comme celui de la grille.
+            réécrit tout le contenu à votre métier — et dès qu&apos;un poste tourne chez vous, le
+            formulaire l&apos;alimente. Le prix est public, comme celui de la grille.
           </p>
         </section>
 
@@ -160,13 +174,22 @@ export default function TarifsSitePage() {
                   key={c.id}
                   className={`r-carte rv-palier--${c.id} ${c.phare ? "r-carte--phare" : ""}`}
                 >
-                  <div className="r-carte-tete !min-h-0">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
-                        {c.nom}
-                      </h3>
-                      {c.badge ? <span className="r-badge mt-1.5">{c.badge}</span> : null}
+                  {/* plancher commun aux têtes à lg : sans lui, la carte
+                      Chèque TIC (titre + promesse les plus longs) dessine
+                      un escalier avec ses voisines. */}
+                  <div className="r-carte-tete !min-h-0 lg:!min-h-[260px]">
+                    {/* le badge vit sur la ligne du surtitre, pas à côté du
+                        h3 : en colonne étroite (1024-1280) son nowrap
+                        repliait le titre sur trois lignes. */}
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                        {c.cle}
+                      </p>
+                      {c.badge ? <span className="r-badge">{c.badge}</span> : null}
                     </div>
+                    <h3 className="mt-1.5 font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
+                      {c.nom}
+                    </h3>
 
                     <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
                       <span
@@ -227,9 +250,9 @@ export default function TarifsSitePage() {
                 <p className="mt-5 text-[15px] leading-[24px] text-[#d4d4d8]">
                   Un site qui reçoit trois demandes par semaine et n&apos;en transforme aucune coûte
                   plus cher qu&apos;il ne rapporte. Ici, chaque demande entre dans le circuit&nbsp;:
-                  rappel dans les deux minutes, devis relancé à J+3 et J+7, facture suivie, avis
-                  demandé. La vitrine nourrit les postes — c&apos;est pour ça qu&apos;elle est
-                  entretenue avec eux.
+                  accusé de réception en deux minutes, sous votre signature, devis relancé à J+3 et
+                  J+7, facture suivie, avis demandé. La vitrine nourrit les postes — c&apos;est pour
+                  ça qu&apos;elle est entretenue avec eux.
                 </p>
               </div>
               <Link href="/modeles" className="r-btn r-btn--blanc shrink-0">

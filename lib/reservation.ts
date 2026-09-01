@@ -10,8 +10,11 @@
    ⚠ À VALIDER PAR TEO avant mise en avant commerciale : les durées, le
    contenu exact de chaque formule et le périmètre des compléments sont
    une proposition construite à partir de l'existant (page /audit, section
-   Chèque TIC, articles). Aucun prix n'est affiché — les deux formules
-   payantes sont « sur devis », précisément pour ne rien figer ici.
+   Chèque TIC, articles). Les formules d'audit restent sans prix — les
+   deux payantes sont « sur devis », précisément pour ne rien figer ici.
+   EXCEPTION depuis le 01/09/2026 : le site catalogue a un prix public
+   (990 €, décision Teo — voir /tarifs/site), mentionné dans le livrable
+   « Devis » de l'audit complet et la FAQ « Je veux surtout un site ».
    Aucun chiffre de preuve sociale, aucun avis client : la règle posée
    dans refs-qonto/NOTES-DESIGN.md tient toujours.
    ══════════════════════════════════════════════════════════════════════ */
@@ -520,7 +523,7 @@ export const FAQ: { q: string; r: string[] }[] = [
          « 21 modèles », cette réponse était restée à l'ancien compte. */
       /* 01/09 — le prix devient public (voir /tarifs/site) : la réponse
          le donne plutôt que de le garder pour l'audit. */
-      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, on réécrit tout le contenu en français, à votre métier. Le prix est public : 990 € le site catalogue — souvent 198 € restant à charge avec le Chèque TIC.",
+      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, on réécrit tout le contenu en français, à votre métier. Le prix est public : 990 € le site catalogue — de 198 à 594 € restant à charge selon le taux du Chèque TIC.",
       "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps on lui répond, et ce que devient le devis. Un site qui reçoit trois demandes par semaine et n'en transforme aucune coûte plus cher qu'il ne rapporte : c'est cette partie-là qu'on chiffre d'abord, pour que la vitrine ne dorme pas.",
     ],
   },

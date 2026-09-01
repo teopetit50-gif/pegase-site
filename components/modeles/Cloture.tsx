@@ -135,7 +135,7 @@ export default function Cloture() {
           >
             990&nbsp;€ le site catalogue
           </Link>{" "}
-          — souvent 198&nbsp;€ restant à charge avec le Chèque TIC.
+          — 198&nbsp;€ restant à charge si le Chèque TIC finance 80&nbsp;%.
         </p>
       </div>
     </div>

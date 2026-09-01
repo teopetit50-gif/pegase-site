@@ -146,17 +146,17 @@ export default function TarifsPage() {
 
             {/* 01/09 (Teo) — le « + » à droite de la grille : la vitrine
                 qui va avec les postes, à prix public elle aussi, vit sur
-                /tarifs/site. Colonne mince sur grand écran, bandeau plein
-                en dessous sur mobile. */}
-            <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-stretch">
+                /tarifs/site. Colonne mince à partir de xl SEULEMENT :
+                entre 1024 et 1279 les cartes sont déjà à l'étroit (le
+                titre de la carte phare repliait sur deux lignes) — le
+                « + » y reste le bandeau plein dessiné pour mobile. Pas
+                d'aria-label : le nom accessible est le texte visible,
+                sous-ligne comprise (WCAG 2.5.3). */}
+            <div className="mt-10 flex flex-col gap-4 xl:flex-row xl:items-stretch">
               <div className="min-w-0 flex-1">
                 <Grille />
               </div>
-              <Link
-                href="/tarifs/site"
-                className="rv-plus"
-                aria-label="Voir l'offre site — la vitrine qui va avec vos postes"
-              >
+              <Link href="/tarifs/site" className="rv-plus">
                 <span className="rv-plus-signe" aria-hidden>
                   +
                 </span>
