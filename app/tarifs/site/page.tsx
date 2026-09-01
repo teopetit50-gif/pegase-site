@@ -14,10 +14,17 @@ import PageMotion from "@/components/PageMotion";
    porte d'entrée de la grille — d'où le « + » posé à droite des paliers
    sur /tarifs, qui mène ici.
 
-   Même monde .resa que /tarifs, mêmes cartes, même dégradé orange →
-   violet : une page de prix dans le langage des pages de prix. Les têtes
-   de carte reprennent les teintes rv-palier--un/trois/complet ; ici pas
-   de sélection, les cartes sont statiques (Server Component, aucun état).
+   DESIGN v2 (01/09, Teo : « même ton, pas une copie conforme ») : la
+   première version reprenait les trois cartes de palier de /tarifs — la
+   revue avait d'ailleurs noté qu'on lisait « 198 € » comme une formule
+   moins chère. Ici le monde .resa reste (typo, boutons, teintes du
+   dégradé orange → violet), mais la structure raconte UN produit sous
+   trois angles : la carte produit (blanche, filet, l'accent en dégradé),
+   le décompte Chèque TIC façon devis (fond rose, les lignes qui se
+   soustraient — le format le plus honnête pour une aide), et la bande
+   maintenance (fond violet clair, horizontale : c'est une suite, pas une
+   formule). Les trois chiffres clés gardent la progression de la grille :
+   990 orange, 198 rose, « Offerte » violet.
 
    /modeles reste la galerie et continue de ne PAS vendre : ses CTA ne
    changent pas. Cette page-ci assume le prix ; l'achat, lui, passe
@@ -32,76 +39,13 @@ export const metadata: Metadata = {
     "Le site catalogue : 990 € une fois, pas d'abonnement — 198 € restant à charge si le Chèque TIC finance 80 %. Maintenance offerte tant qu'un poste Omega tourne chez vous. Vingt et un modèles, tous en ligne, contenu réécrit à votre métier.",
 };
 
-type CarteSite = {
-  id: "un" | "trois" | "complet";
-  /* la clé de lecture du h2 « Un prix, une aide, une suite », reprise en
-     surtitre : sans elle, les trois cartes se lisent comme trois formules
-     concurrentes — et « 198 € » comme une version moins chère du site. */
-  cle: string;
-  nom: string;
-  prix: string;
-  sousPrix: string;
-  phare?: boolean;
-  badge?: string;
-  promesse: string;
-  points: string[];
-  cta: { href: string; label: string; noir?: boolean };
-};
-
-const CARTES: CarteSite[] = [
-  {
-    id: "un",
-    cle: "Le prix",
-    nom: "Le site catalogue",
-    prix: "990 €",
-    sousPrix: "une fois — pas d'abonnement",
-    promesse: "Un des vingt et un modèles du catalogue, réécrit à votre métier, en ligne.",
-    points: [
-      "Un modèle au choix — les vingt et un sont en ligne, tous visitables",
-      "Contenu intégralement réécrit en français, à votre métier",
-      "Nom de domaine la première année, mise en ligne comprise",
-      "Formulaire prêt à brancher sur vos postes — devis, relance, avis",
-    ],
-    cta: { href: "/modeles", label: "Choisir votre modèle" },
-  },
-  {
-    id: "trois",
-    cle: "L'aide",
-    /* « Le Chèque TIC », pas « Avec le Chèque TIC » : entre 1024 et
-       1280 le titre long repliait sous le badge et la tête dépassait
-       ses voisines de 50 px. */
-    nom: "Le Chèque TIC",
-    prix: "198 €",
-    sousPrix: "restant à charge, si 80 % financés",
-    phare: true,
-    badge: "Si vous êtes éligible",
-    promesse: "La Région finance de 40 à 80 % du projet — dossier monté avec vous.",
-    points: [
-      "De 40 à 80 % du projet financés, jusqu'à 10 000 €",
-      "Éligibilité vérifiée pendant l'audit, avant tout engagement",
-      "Dossier monté avec vous, devis fournis",
-      "Le même site, les mêmes livrables — seul le reste à charge change",
-    ],
-    /* 01/09 (revue) — le CTA pointe là où la vérification est un livrable :
-       le Diagnostic gratuit de /reserver-un-audit la comprend noir sur
-       blanc ; /commencer n'y menait jamais. */
-    cta: { href: "/reserver-un-audit", label: "Vérifier mon éligibilité", noir: true },
-  },
-  {
-    id: "complet",
-    cle: "La suite",
-    nom: "La maintenance",
-    prix: "Offerte",
-    sousPrix: "avec un abonnement Omega actif",
-    promesse: "Tant qu'un poste tourne chez vous, la vitrine est entretenue — modifications comprises.",
-    points: [
-      "Modifications courantes comprises — textes, photos, horaires",
-      "Hébergement, domaine renouvelé, sauvegardes",
-      "Sans abonnement : 19 €/mois, sans engagement",
-      "Le site vous appartient — il part avec vous, quoi qu'il arrive",
-    ],
-    cta: { href: "/tarifs", label: "Voir les postes" },
-  },
+/* ——— ce que les 990 € comprennent — la liste de la carte produit ——— */
+const COMPRIS_SITE: string[] = [
+  "Un modèle au choix — les vingt et un sont en ligne, tous visitables",
+  "Contenu intégralement réécrit en français, à votre métier",
+  "Vos photos, vos coordonnées, vos horaires en place",
+  "Nom de domaine la première année, mise en ligne comprise",
+  "Formulaire prêt à brancher sur vos postes — devis, relance, avis",
 ];
 
 /* ——— la FAQ site — les questions qu'un prix affiché doit prendre de
@@ -158,7 +102,9 @@ export default function TarifsSitePage() {
           </p>
         </section>
 
-        {/* ═══ 2 — les trois cartes : création, Chèque TIC, maintenance ═══ */}
+        {/* ═══ 2 — l'offre : la carte produit, le décompte TIC, la bande
+               maintenance. Un produit sous trois angles — pas trois
+               formules. ═══ */}
         <section id="offre" data-monde="clair" className="r-blanc">
           <div className="r-wrap py-14 sm:py-16">
             <h2 className="r-h2 max-w-[18ch]">Un prix, une aide, une suite</h2>
@@ -168,68 +114,131 @@ export default function TarifsSitePage() {
               chez vous, la vitrine est entretenue.
             </p>
 
-            <div className="mt-10 grid gap-4 lg:grid-cols-3">
-              {CARTES.map((c) => (
+            <div className="mt-10 grid gap-4 lg:grid-cols-[1fr_379px] lg:gap-6">
+              {/* ——— la carte produit ——— */}
+              <div
+                data-reveal
+                className="flex flex-col rounded-[20px] border border-[#e3e3e3] bg-white p-7 sm:p-9"
+              >
                 <div
-                  key={c.id}
-                  className={`r-carte rv-palier--${c.id} ${c.phare ? "r-carte--phare" : ""}`}
-                >
-                  {/* plancher commun aux têtes à lg : sans lui, la carte
-                      Chèque TIC (titre + promesse les plus longs) dessine
-                      un escalier avec ses voisines. */}
-                  <div className="r-carte-tete !min-h-0 lg:!min-h-[260px]">
-                    {/* le badge vit sur la ligne du surtitre, pas à côté du
-                        h3 : en colonne étroite (1024-1280) son nowrap
-                        repliait le titre sur trois lignes. */}
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                        {c.cle}
-                      </p>
-                      {c.badge ? <span className="r-badge">{c.badge}</span> : null}
-                    </div>
-                    <h3 className="mt-1.5 font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
-                      {c.nom}
-                    </h3>
-
-                    <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                      <span
-                        className={`num rv-prix rv-prix--${c.id} text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]`}
-                      >
-                        {c.prix}
-                      </span>
-                      <span className="text-[12px] leading-[18px] text-[#050505]">{c.sousPrix}</span>
-                    </div>
-
-                    <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">{c.promesse}</p>
-                  </div>
-
-                  <div className="flex flex-1 flex-col px-3 pt-4">
-                    <ul className="space-y-3">
-                      {c.points.map((t) => (
-                        <li
-                          key={t}
-                          className="flex gap-2 text-[13.5px] leading-[20px] text-[#3d3d3d]"
-                        >
-                          <span
-                            aria-hidden
-                            className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]"
-                          />
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-6 flex flex-1 flex-col justify-end">
-                      <Link
-                        href={c.cta.href}
-                        className={`r-btn w-full ${c.cta.noir ? "r-btn--noir" : "r-btn--fil"}`}
-                      >
-                        {c.cta.label}
-                      </Link>
-                    </div>
-                  </div>
+                  aria-hidden
+                  className="h-1 w-16 rounded-full bg-[linear-gradient(90deg,#ea580c,#7c3aed)]"
+                />
+                <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                  Le prix
+                </p>
+                <h3 className="mt-1.5 font-[family-name:var(--font-jakarta)] text-[28px] font-semibold leading-[36px] tracking-[-0.02em] text-[#050505] sm:text-[32px] sm:leading-[40px]">
+                  Le site catalogue
+                </h3>
+                <div className="mt-4 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                  <span className="num rv-prix rv-prix--un text-[44px] font-semibold leading-[52px] sm:text-[48px] sm:leading-[56px]">
+                    990&nbsp;€
+                  </span>
+                  <span className="text-[13px] leading-[18px] text-[#3d3d3d]">
+                    une fois — pas d&apos;abonnement
+                  </span>
                 </div>
-              ))}
+                <p className="mt-4 max-w-[48ch] text-[15px] leading-[23px] text-[#050505]">
+                  Un des vingt et un modèles du catalogue, réécrit à votre métier, en ligne sous
+                  votre nom. Hors catalogue&nbsp;: sur devis, à l&apos;audit.
+                </p>
+
+                <ul className="mt-7 space-y-3 border-t border-[#ececec] pt-6">
+                  {COMPRIS_SITE.map((t) => (
+                    <li
+                      key={t}
+                      className="flex gap-2.5 text-[14px] leading-[21px] text-[#3d3d3d]"
+                    >
+                      <span
+                        aria-hidden
+                        className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-[#050505]"
+                      />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-8 flex flex-1 flex-col justify-end sm:flex-row sm:items-end sm:justify-start">
+                  <Link href="/modeles" className="r-btn r-btn--noir sm:min-w-[240px]">
+                    Choisir votre modèle
+                  </Link>
+                </div>
+              </div>
+
+              {/* ——— le décompte Chèque TIC, façon devis ——— */}
+              <aside
+                data-reveal
+                className="flex flex-col rounded-[20px] bg-[linear-gradient(150deg,#fff0f0_0%,#ffdbe4_55%,#f7c7e3_100%)] p-7"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                    L&apos;aide
+                  </p>
+                  <span className="r-badge">Si vous êtes éligible</span>
+                </div>
+                <h3 className="mt-1.5 font-[family-name:var(--font-jakarta)] text-[22px] font-semibold leading-[29px] tracking-[-0.02em] text-[#050505]">
+                  Le Chèque TIC
+                </h3>
+                <p className="mt-3 text-[14px] leading-[21px] text-[#050505]">
+                  La Région Guadeloupe finance de 40 à 80&nbsp;% d&apos;un projet numérique, jusqu&apos;à
+                  10&nbsp;000&nbsp;€. Sur un site catalogue, le compte est vite fait&nbsp;:
+                </p>
+
+                <dl className="mt-5 rounded-[12px] bg-white/75 px-5 py-2">
+                  <div className="flex items-baseline justify-between gap-4 py-2.5 text-[14px] leading-[20px] text-[#050505]">
+                    <dt>Site catalogue</dt>
+                    <dd className="num shrink-0">990&nbsp;€</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-4 border-t border-[#05050514] py-2.5 text-[14px] leading-[20px] text-[#050505]">
+                    <dt>Chèque TIC à 80&nbsp;%</dt>
+                    <dd className="num shrink-0">−&nbsp;792&nbsp;€</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-4 border-t border-[#050505] py-3">
+                    <dt className="text-[14px] font-semibold leading-[20px] text-[#050505]">
+                      Restant à votre charge
+                    </dt>
+                    <dd className="num rv-prix rv-prix--trois shrink-0 text-[24px] font-semibold leading-[30px]">
+                      198&nbsp;€
+                    </dd>
+                  </div>
+                </dl>
+
+                <p className="mt-3 text-[12.5px] leading-[18px] text-[#3d3d3d]">
+                  À 40&nbsp;%, il reste 594&nbsp;€. Éligibilité vérifiée pendant l&apos;audit, avant
+                  tout engagement — et si un dossier se justifie, on le monte avec vous.
+                </p>
+
+                <div className="mt-6 flex flex-1 flex-col justify-end">
+                  <Link href="/reserver-un-audit" className="r-btn r-btn--fil w-full">
+                    Vérifier mon éligibilité
+                  </Link>
+                </div>
+              </aside>
+            </div>
+
+            {/* ——— la bande maintenance : une suite, pas une formule ——— */}
+            <div
+              data-reveal
+              className="mt-4 flex flex-col gap-6 rounded-[20px] bg-[linear-gradient(135deg,#f4efff_0%,#e6dbfb_60%,#d9c8f7_100%)] p-7 lg:mt-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10"
+            >
+              <div className="max-w-[62ch]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                  La suite
+                </p>
+                <h3 className="mt-1.5 font-[family-name:var(--font-jakarta)] text-[22px] font-semibold leading-[29px] tracking-[-0.02em] text-[#050505]">
+                  La maintenance&nbsp;?{" "}
+                  <span className="num rv-prix rv-prix--complet">Offerte</span> avec un abonnement
+                  actif
+                </h3>
+                <p className="mt-2.5 text-[14px] leading-[21px] text-[#050505]">
+                  Modifications courantes, hébergement, domaine renouvelé, sauvegardes — tant
+                  qu&apos;un poste tourne chez vous. Sans abonnement&nbsp;: 19&nbsp;€/mois, sans
+                  engagement. Et le site vous appartient, quoi qu&apos;il arrive.
+                </p>
+              </div>
+              <Link href="/tarifs" className="r-btn r-btn--noir shrink-0">
+                Voir les postes
+              </Link>
             </div>
 
             <p className="r-note mt-6 max-w-3xl">

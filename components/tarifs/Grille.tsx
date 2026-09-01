@@ -39,7 +39,10 @@ function CartePalier({
 
   return (
     <div className={`r-carte rv-palier--${p.id} ${p.phare ? "r-carte--phare" : ""}`}>
-      <div className="r-carte-tete !min-h-0">
+      {/* 01/09 — plancher commun quand la colonne site (rv-plus) resserre
+          les cartes : la promesse de « Tout Omega » passe à trois lignes
+          et sa tête dépassait les deux autres de 44px. */}
+      <div className="r-carte-tete !min-h-0 min-[1360px]:!min-h-[236px]">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
             {p.nom}

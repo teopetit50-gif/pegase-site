@@ -4148,29 +4148,40 @@ main.page-arrivee {
   background: #d0369b;
 }
 
-/* ——— le « + » vers l'offre site (01/09, demande Teo) ———
-   Colonne mince posée à droite de la grille : la vitrine qui va avec les
-   postes. Le trait pointillé dit « ceci n'est pas un palier », le signe +
-   reprend le dégradé complet de la grille (départ orange, arrivée
-   violette) — même langage que les deux cartes de /commencer. */
+/* ——— le « + » vers l'offre site (01/09, demande Teo ; v2 le même jour,
+   croquis : « une colonne légèrement séparée du reste dans un dégradé
+   de couleur avec les infos résumé ») ———
+   Une carte pleine à droite de la grille, tout entière UN lien vers
+   /tarifs/site : le fond reprend le dégradé de la grille en pastel
+   (départ orange, arrivée violette — le texte reste NOIR, règle du
+   monde .resa), le signe + garde le dégradé plein, et le résumé de
+   l'offre se répartit sur la hauteur de la colonne. En dessous de xl :
+   bandeau compact sous les cartes, cœur + bouton, sans le résumé. */
 .resa .rv-plus {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 12px;
   border-radius: 16px;
-  border: 1.5px dashed #d4d4d8;
-  background: #ffffff;
-  padding: 18px;
+  background: linear-gradient(120deg, #fff6ec 0%, #ffdbe4 52%, #e6dbfb 100%);
+  padding: 16px 18px;
   transition:
     transform 0.24s var(--ease-out-strong),
-    box-shadow 0.24s ease,
-    border-color 0.24s ease;
+    box-shadow 0.24s ease;
 }
 .resa .rv-plus:hover {
-  border-color: #050505;
   transform: translateY(-3px);
-  box-shadow: 0 18px 44px -18px rgba(5, 5, 5, 0.18);
+  box-shadow: 0 18px 44px -18px rgba(109, 40, 217, 0.3);
+}
+.resa .rv-plus:focus-visible {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+/* le cœur : le signe + et le titre */
+.resa .rv-plus-coeur {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .resa .rv-plus-signe {
   display: flex;
@@ -4198,21 +4209,60 @@ main.page-arrivee {
   font-size: 12.5px;
   line-height: 17px;
   font-weight: 400;
-  color: #616161;
+  color: #3d3d3d;
 }
-.resa .rv-plus:focus-visible {
-  outline: 2px solid #050505;
-  outline-offset: 2px;
-  border-color: #050505;
+/* le résumé : réservé à la colonne xl */
+.resa .rv-plus-infos {
+  display: none;
 }
-/* colonne verticale à partir de xl seulement : entre 1024 et 1279 les
-   cartes de la grille sont déjà à l'étroit, le « + » reste en bandeau. */
-@media (min-width: 1280px) {
+.resa .rv-plus-infos b {
+  font-weight: 600;
+  color: #050505;
+}
+/* la pastille d'action — un faux bouton, le lien est le bloc entier */
+.resa .rv-plus-cta {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #ffffff;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  line-height: 17px;
+  font-weight: 600;
+  color: #050505;
+}
+/* colonne verticale à partir de 1360px seulement : en dessous, les
+   cartes de la grille n'ont pas la place (à 224px de large la colonne
+   repliait le titre « Trois postes » — mesuré, d'où 176px et 1360). */
+@media (min-width: 1360px) {
   .resa .rv-plus {
     flex-direction: column;
-    width: 118px;
-    padding: 20px 14px;
+    justify-content: flex-start;
+    width: 176px;
+    padding: 24px 16px;
     text-align: center;
+  }
+  .resa .rv-plus-coeur {
+    flex-direction: column;
+  }
+  .resa .rv-plus-infos {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-evenly;
+    gap: 12px;
+    margin-top: 18px;
+    border-top: 1px solid rgba(5, 5, 5, 0.14);
+    padding-top: 14px;
+    font-size: 12.5px;
+    line-height: 18px;
+    color: #3d3d3d;
+  }
+  .resa .rv-plus-cta {
+    margin-top: 18px;
+    width: 100%;
   }
 }
 
