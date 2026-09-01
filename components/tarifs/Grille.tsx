@@ -134,7 +134,10 @@ function CartePalier({
           </p>
         </div>
 
-        <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5">
+        {/* 01/09 — plancher commun : les puces replient différemment d'une
+            carte à l'autre (171 à 190px mesurés) et décalaient les CTA,
+            ancrés juste au-dessus. Même valeur sur la carte site. */}
+        <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5 lg:min-h-[190px]">
           {p.points.map((t) => (
             <li key={t} className="flex gap-2 text-[13px] leading-[19px] text-[#3d3d3d]">
               <span aria-hidden className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />

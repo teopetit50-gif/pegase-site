@@ -167,28 +167,33 @@ export default function TarifsPage() {
                   <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
                     Le site
                   </h3>
+                  {/* 01/09 (Teo, v5) — pas de 990 € en grand ici : le
+                      chiffre qui invite, c'est « 21 modèles » ; le prix
+                      vit sur /tarifs/site, la carte donne envie d'aller
+                      voir. Le CTA emmène à la galerie (/modeles) : c'est
+                      littéralement « découvrir nos sites ». */}
                   <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
                     <span className="num rv-prix rv-prix--site text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]">
-                      990&nbsp;€
+                      21 modèles
                     </span>
                     <span className="text-[12px] leading-[18px] text-[#050505]">
-                      une fois — pas d&apos;abonnement
+                      tous en ligne, tous visitables
                     </span>
                   </div>
                   <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">
-                    La vitrine qui va avec vos postes — un modèle du catalogue, réécrit à votre
-                    métier.
+                    La vitrine qui va avec vos postes — vous choisissez l&apos;allure, on réécrit
+                    tout à votre métier.
                   </p>
                 </div>
 
                 <div className="flex flex-1 flex-col px-3 pt-4">
                   <div>
                     <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
-                      Compris dans le prix&nbsp;:
+                      Ce qui est compris&nbsp;:
                     </div>
                     <ul className="mt-3 space-y-2.5">
                       {[
-                        "Un des 21 modèles, tous visitables en ligne",
+                        "Un modèle au choix dans le catalogue",
                         "Contenu réécrit en français, à votre métier",
                         "Nom de domaine la première année, mise en ligne",
                         "Formulaire prêt à brancher sur vos postes",
@@ -208,17 +213,17 @@ export default function TarifsPage() {
                   </div>
 
                   <div className="mt-5 flex flex-1 flex-col justify-end">
-                    <Link href="/tarifs/site" className="r-btn r-btn--fil w-full">
-                      Voir l&apos;offre site
+                    <Link href="/modeles" className="r-btn r-btn--fil w-full">
+                      Découvrir nos sites
                     </Link>
                     <p className="r-note mt-2 text-center">
-                      Sans paiement en ligne — le devis sort de l&apos;audit gratuit.
+                      Prix public sur la page de l&apos;offre — rien ne se paie en ligne.
                     </p>
                   </div>
 
-                  <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5">
+                  <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5 lg:min-h-[190px]">
                     {[
-                      "198 € restant si le Chèque TIC finance 80 %",
+                      "Jusqu'à 80 % financés par le Chèque TIC",
                       "Maintenance offerte avec un abonnement actif",
                       "Le site vous appartient, quoi qu'il arrive",
                     ].map((t) => (
