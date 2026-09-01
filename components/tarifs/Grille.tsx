@@ -43,9 +43,14 @@ function CartePalier({
           carte site rejoint la grille), les promesses replient
           différemment et les têtes dessinaient un escalier. Le badge vit
           AU-DESSUS du titre : à côté, son nowrap repliait « Trois
-          postes » sur deux lignes dans les cartes resserrées. */}
+          postes » sur deux lignes dans les cartes resserrées. La ligne
+          du badge est RÉSERVÉE sur toutes les cartes (h-5, vide sans
+          badge) : sinon titres et prix des cartes sans badge remontaient
+          d'une rangée et plus rien ne s'alignait d'une carte à l'autre. */}
       <div className="r-carte-tete !min-h-0 lg:!min-h-[268px]">
-        {p.badge ? <span className="r-badge mb-2">{p.badge}</span> : null}
+        <div className={`h-5 ${p.badge ? "mb-2 flex" : "hidden lg:mb-2 lg:flex"}`}>
+          {p.badge ? <span className="r-badge">{p.badge}</span> : null}
+        </div>
         <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
           {p.nom}
         </h3>

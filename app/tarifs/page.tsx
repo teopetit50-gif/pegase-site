@@ -159,7 +159,11 @@ export default function TarifsPage() {
               </div>
               <div className="r-carte rv-palier--site lg:ml-auto lg:max-w-[calc((100%-2rem)/3)] xl:ml-0 xl:max-w-none xl:translate-x-3">
                 <div className="r-carte-tete !min-h-0 lg:!min-h-[268px]">
-                  <span className="r-badge mb-2">Offre en plus</span>
+                  {/* même gabarit de ligne badge que CartePalier : les
+                      quatre têtes gardent leurs rangées alignées */}
+                  <div className="mb-2 flex h-5">
+                    <span className="r-badge">Offre en plus</span>
+                  </div>
                   <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
                     Le site
                   </h3>
