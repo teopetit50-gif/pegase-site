@@ -39,16 +39,16 @@ function CartePalier({
 
   return (
     <div className={`r-carte rv-palier--${p.id} ${p.phare ? "r-carte--phare" : ""}`}>
-      {/* 01/09 — plancher commun quand la colonne site (rv-plus) resserre
-          les cartes : la promesse de « Tout Omega » passe à trois lignes
-          et sa tête dépassait les deux autres de 44px. */}
-      <div className="r-carte-tete !min-h-0 min-[1360px]:!min-h-[236px]">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
-            {p.nom}
-          </h3>
-          {p.badge ? <span className="r-badge mt-1.5">{p.badge}</span> : null}
-        </div>
+      {/* 01/09 — plancher commun dès lg : à quatre cartes de front (la
+          carte site rejoint la grille), les promesses replient
+          différemment et les têtes dessinaient un escalier. Le badge vit
+          AU-DESSUS du titre : à côté, son nowrap repliait « Trois
+          postes » sur deux lignes dans les cartes resserrées. */}
+      <div className="r-carte-tete !min-h-0 lg:!min-h-[268px]">
+        {p.badge ? <span className="r-badge mb-2">{p.badge}</span> : null}
+        <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
+          {p.nom}
+        </h3>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <span className={`num rv-prix rv-prix--${p.id} text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]`}>

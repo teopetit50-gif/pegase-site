@@ -4148,86 +4148,20 @@ main.page-arrivee {
   background: #d0369b;
 }
 
-/* ——— le « + » vers l'offre site (01/09, demande Teo ; v3 le même jour,
-   second croquis : « la colonne ne rend pas bien ») ———
-   L'épure : une carte haute à droite de la grille, tout entière UN lien
-   vers /tarifs/site. Un lavis du dégradé de la page site en fond (orange
-   → violet, très pâle — le texte reste NOIR, règle du monde .resa), un
-   grand + au dégradé plein centré dans la hauteur, deux lignes posées en
-   bas. Rien d'autre — la v2 chargée d'infos résumées encombrait. En
-   dessous de 1360px : bandeau compact sous les cartes (à 224px la
-   colonne repliait « Trois postes », à 176px elle passe — mesuré). */
-.resa .rv-plus {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(5, 5, 5, 0.08);
-  background: linear-gradient(160deg, #fff6ec 0%, #fdf0f4 48%, #f0eaff 100%);
-  padding: 16px 18px;
-  transition:
-    transform 0.24s var(--ease-out-strong),
-    box-shadow 0.24s ease;
+/* ——— la carte site dans la grille (01/09, demande Teo, v4 : « une carte
+   comme pour les prix, même taille, même format, couleur dégradée
+   différente, légèrement excentrée sur la droite ») ———
+   Quatrième carte au format exact des paliers, teinte à part : là où
+   chaque palier porte UNE couleur du dégradé, la carte site les porte
+   TOUTES — c'est la vitrine qui va avec l'ensemble, et le multicolore
+   suffit à dire « offre en plus ». L'excentrage (translate) vit dans
+   app/tarifs/page.tsx. Les v1-v3 (colonne « + ») sont parties avec ce
+   commit. */
+.resa .rv-palier--site .r-carte-tete {
+  background: linear-gradient(140deg, #fff6ec 0%, #ffe4ea 46%, #e9ddfb 100%);
 }
-.resa .rv-plus:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 44px -18px rgba(109, 40, 217, 0.3);
-}
-.resa .rv-plus:focus-visible {
-  outline: 2px solid #050505;
-  outline-offset: 2px;
-}
-/* le signe : un grand + nu, en dégradé plein — pas de pastille */
-.resa .rv-plus-signe {
-  flex: none;
-  background-image: linear-gradient(135deg, #ea580c, #7c3aed);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-size: 34px;
-  font-weight: 300;
-  line-height: 1;
-  transition: transform 0.24s var(--ease-out-strong);
-}
-.resa .rv-plus:hover .rv-plus-signe {
-  transform: scale(1.08);
-}
-.resa .rv-plus-texte {
-  font-size: 13.5px;
-  line-height: 19px;
-  font-weight: 600;
-  color: #050505;
-}
-.resa .rv-plus-sous {
-  display: block;
-  margin-top: 2px;
-  font-size: 12.5px;
-  line-height: 17px;
-  font-weight: 400;
-  color: #3d3d3d;
-}
-@media (min-width: 1360px) {
-  .resa .rv-plus {
-    flex-direction: column;
-    gap: 0;
-    width: 176px;
-    padding: 28px 18px 22px;
-    text-align: center;
-  }
-  /* le + occupe l'espace au-dessus du texte : centré dans la hauteur,
-     comme sur le croquis */
-  .resa .rv-plus-signe {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    font-size: 76px;
-    font-weight: 200;
-  }
-  .resa .rv-plus-texte {
-    padding-bottom: 6px;
-  }
+.resa .rv-prix--site {
+  background-image: linear-gradient(115deg, #ea580c 0%, #d0369b 55%, #7c3aed 100%);
 }
 
 /* ——— /commencer : l'aiguillage à deux cartes (28/08) ———
@@ -4388,14 +4322,10 @@ main.page-arrivee {
   .resa .rv-heure,
   .resa .rv-champ,
   .resa .cm-carte,
-  .resa .rv-plus,
-  .resa .rv-plus-signe,
   .resa .cm-cta {
     transition: none;
   }
-  .resa .cm-carte:hover,
-  .resa .rv-plus:hover,
-  .resa .rv-plus:hover .rv-plus-signe {
+  .resa .cm-carte:hover {
     transform: none;
   }
 }
