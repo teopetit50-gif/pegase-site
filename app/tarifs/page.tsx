@@ -146,43 +146,25 @@ export default function TarifsPage() {
 
             {/* 01/09 (Teo) — le « + » à droite de la grille : la vitrine
                 qui va avec les postes, à prix public elle aussi, vit sur
-                /tarifs/site. v2 le même jour (croquis Teo) : plus une
-                colonne vide avec un signe perdu, mais une carte pleine —
-                fond au dégradé de la grille, le résumé de l'offre réparti
-                sur la hauteur, légèrement écartée des cartes (xl:gap-8),
-                tout le bloc est UN lien. Colonne à partir de xl seulement :
-                entre 1024 et 1279 les cartes sont déjà à l'étroit, le
-                « + » y reste le bandeau compact. Pas d'aria-label : le nom
+                /tarifs/site. v3 le même jour (second croquis Teo, « la
+                colonne ne rend pas bien ») : l'épure — une carte haute au
+                lavis du dégradé de la page site, un grand + centré, deux
+                lignes en bas. Rien d'autre : le résumé encombrait. Tout
+                le bloc est UN lien ; en dessous de 1360px il redevient le
+                bandeau compact sous la grille. Pas d'aria-label : le nom
                 accessible est le texte visible (WCAG 2.5.3). */}
             <div className="mt-10 flex flex-col gap-4 min-[1360px]:flex-row min-[1360px]:items-stretch min-[1360px]:gap-6">
               <div className="min-w-0 flex-1">
                 <Grille />
               </div>
               <Link href="/tarifs/site" className="rv-plus">
-                <span className="rv-plus-coeur">
-                  <span className="rv-plus-signe" aria-hidden>
-                    +
-                  </span>
-                  <span className="rv-plus-texte">
-                    Le site qui va avec
-                    <span className="rv-plus-sous">Vitrine à prix public</span>
-                  </span>
+                <span className="rv-plus-signe" aria-hidden>
+                  +
                 </span>
-                <span className="rv-plus-infos">
-                  <span>
-                    <b>990&nbsp;€</b>{" "}le site catalogue, une fois — pas d&apos;abonnement
-                  </span>
-                  <span>
-                    <b>198&nbsp;€</b>{" "}restant si le Chèque TIC finance 80&nbsp;%
-                  </span>
-                  <span>
-                    Maintenance <b>offerte</b>{" "}avec un abonnement actif
-                  </span>
-                  <span>
-                    <b>21 modèles</b>{" "}en ligne, tous visitables
-                  </span>
+                <span className="rv-plus-texte">
+                  Le site qui va avec
+                  <span className="rv-plus-sous">Vitrine à prix public</span>
                 </span>
-                <span className="rv-plus-cta">Voir l&apos;offre</span>
               </Link>
             </div>
 

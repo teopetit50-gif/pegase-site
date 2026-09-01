@@ -4148,22 +4148,23 @@ main.page-arrivee {
   background: #d0369b;
 }
 
-/* ——— le « + » vers l'offre site (01/09, demande Teo ; v2 le même jour,
-   croquis : « une colonne légèrement séparée du reste dans un dégradé
-   de couleur avec les infos résumé ») ———
-   Une carte pleine à droite de la grille, tout entière UN lien vers
-   /tarifs/site : le fond reprend le dégradé de la grille en pastel
-   (départ orange, arrivée violette — le texte reste NOIR, règle du
-   monde .resa), le signe + garde le dégradé plein, et le résumé de
-   l'offre se répartit sur la hauteur de la colonne. En dessous de xl :
-   bandeau compact sous les cartes, cœur + bouton, sans le résumé. */
+/* ——— le « + » vers l'offre site (01/09, demande Teo ; v3 le même jour,
+   second croquis : « la colonne ne rend pas bien ») ———
+   L'épure : une carte haute à droite de la grille, tout entière UN lien
+   vers /tarifs/site. Un lavis du dégradé de la page site en fond (orange
+   → violet, très pâle — le texte reste NOIR, règle du monde .resa), un
+   grand + au dégradé plein centré dans la hauteur, deux lignes posées en
+   bas. Rien d'autre — la v2 chargée d'infos résumées encombrait. En
+   dessous de 1360px : bandeau compact sous les cartes (à 224px la
+   colonne repliait « Trois postes », à 176px elle passe — mesuré). */
 .resa .rv-plus {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-radius: 16px;
-  background: linear-gradient(120deg, #fff6ec 0%, #ffdbe4 52%, #e6dbfb 100%);
+  justify-content: center;
+  gap: 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(5, 5, 5, 0.08);
+  background: linear-gradient(160deg, #fff6ec 0%, #fdf0f4 48%, #f0eaff 100%);
   padding: 16px 18px;
   transition:
     transform 0.24s var(--ease-out-strong),
@@ -4177,25 +4178,20 @@ main.page-arrivee {
   outline: 2px solid #050505;
   outline-offset: 2px;
 }
-/* le cœur : le signe + et le titre */
-.resa .rv-plus-coeur {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+/* le signe : un grand + nu, en dégradé plein — pas de pastille */
 .resa .rv-plus-signe {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
   flex: none;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #ea580c, #7c3aed);
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: 500;
+  background-image: linear-gradient(135deg, #ea580c, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 34px;
+  font-weight: 300;
   line-height: 1;
+  transition: transform 0.24s var(--ease-out-strong);
+}
+.resa .rv-plus:hover .rv-plus-signe {
+  transform: scale(1.08);
 }
 .resa .rv-plus-texte {
   font-size: 13.5px;
@@ -4211,58 +4207,26 @@ main.page-arrivee {
   font-weight: 400;
   color: #3d3d3d;
 }
-/* le résumé : réservé à la colonne xl */
-.resa .rv-plus-infos {
-  display: none;
-}
-.resa .rv-plus-infos b {
-  font-weight: 600;
-  color: #050505;
-}
-/* la pastille d'action — un faux bouton, le lien est le bloc entier */
-.resa .rv-plus-cta {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  background: #ffffff;
-  padding: 8px 14px;
-  font-size: 12.5px;
-  line-height: 17px;
-  font-weight: 600;
-  color: #050505;
-}
-/* colonne verticale à partir de 1360px seulement : en dessous, les
-   cartes de la grille n'ont pas la place (à 224px de large la colonne
-   repliait le titre « Trois postes » — mesuré, d'où 176px et 1360). */
 @media (min-width: 1360px) {
   .resa .rv-plus {
     flex-direction: column;
-    justify-content: flex-start;
+    gap: 0;
     width: 176px;
-    padding: 24px 16px;
+    padding: 28px 18px 22px;
     text-align: center;
   }
-  .resa .rv-plus-coeur {
-    flex-direction: column;
-  }
-  .resa .rv-plus-infos {
+  /* le + occupe l'espace au-dessus du texte : centré dans la hauteur,
+     comme sur le croquis */
+  .resa .rv-plus-signe {
     display: flex;
     flex: 1;
-    flex-direction: column;
-    justify-content: space-evenly;
-    gap: 12px;
-    margin-top: 18px;
-    border-top: 1px solid rgba(5, 5, 5, 0.14);
-    padding-top: 14px;
-    font-size: 12.5px;
-    line-height: 18px;
-    color: #3d3d3d;
+    align-items: center;
+    justify-content: center;
+    font-size: 76px;
+    font-weight: 200;
   }
-  .resa .rv-plus-cta {
-    margin-top: 18px;
-    width: 100%;
+  .resa .rv-plus-texte {
+    padding-bottom: 6px;
   }
 }
 
@@ -4425,11 +4389,13 @@ main.page-arrivee {
   .resa .rv-champ,
   .resa .cm-carte,
   .resa .rv-plus,
+  .resa .rv-plus-signe,
   .resa .cm-cta {
     transition: none;
   }
   .resa .cm-carte:hover,
-  .resa .rv-plus:hover {
+  .resa .rv-plus:hover,
+  .resa .rv-plus:hover .rv-plus-signe {
     transform: none;
   }
 }
