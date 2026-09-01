@@ -1,42 +1,25 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /tarifs v5 — la grille : trois paliers, choix des postes DANS la carte
-   (né 28/08/2026 en .resa, rhabillé .tf le 29/08/2026)
+   /tarifs v4 — la grille : trois paliers, choix des postes DANS la carte
+   (28/08/2026)
 
-   La MÉCANIQUE est celle du 28/08, inchangée : chaque carte est autonome
-   (« Un poste » se choisit comme une radio, « Trois postes » coche
-   jusqu'à trois cases, « Tout Omega » n'a rien à choisir), la sélection
-   est EXCLUSIVE entre paliers, et le bouton reste éteint tant que le
-   compte n'y est pas — il affiche ce qui manque plutôt qu'un
-   « continuer » grisé muet.
-
-   L'HABILLAGE, lui, a changé le 29/08 : décision Teo, la page tarifs
-   reprend le design v3 (relevé scale.com/careers, bloc .tf de
-   globals.css) en gardant le contenu v4. Les trois paliers occupent les
-   trois cartes de couleur de la référence — vert, bleu, encre — et les
-   cases à cocher sont dessinées dans son langage (extension v5 du bloc
-   .tf). Les logos de postes sont partis avec le monde .resa : ici la
-   seule icône de la page reste la flèche, règle v3.
+   Chaque carte est autonome : « Un poste » se choisit comme une radio,
+   « Trois postes » coche jusqu'à trois cases, « Tout Omega » n'a rien à
+   choisir. Le bouton reste éteint tant que le compte n'y est pas — il
+   affiche ce qui manque plutôt qu'un « continuer » grisé muet.
 
    Le CTA n'ouvre PAS WhatsApp et ne demande aucun paiement : il emmène
-   vers /installation, la page de réservation de la réunion
-   d'installation, avec les postes choisis dans l'URL. Le paiement se
-   branchera plus tard À CETTE COUTURE — quand le compte pro existera,
-   une étape s'insérera entre le choix et la réunion, sans toucher aux
-   cartes.
+   vers /installation, la page de réservation de la réunion d'installation,
+   avec les postes choisis dans l'URL. Le paiement (IBAN, prélèvement) se
+   branchera plus tard À CETTE COUTURE — quand le compte pro existera, une
+   étape s'insérera entre le choix et la réunion, sans toucher aux cartes.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useState } from "react";
+import { SystemLogo } from "@/components/logos";
 import { PALIERS, POSTES, type Palier } from "@/lib/paliers";
-
-/* les trois fonds de la référence, dans son ordre */
-const TONS: Record<Palier["id"], string> = {
-  un: "tf-carte-couleur--vert",
-  trois: "tf-carte-couleur--bleu",
-  complet: "tf-carte-couleur--encre",
-};
 
 function CartePalier({
   p,
@@ -48,31 +31,37 @@ function CartePalier({
   choisis: string[];
   bascule: (id: string) => void;
 }) {
+
   const postes = p.aChoisir === null ? POSTES.map((x) => x.id) : choisis;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
   const pret = manque <= 0;
   const href = `/installation?postes=${postes.join(",")}`;
 
   return (
-    <article className={`tf-carte-couleur ${TONS[p.id]} !justify-start`}>
-      {/* ——— tête : nom, prix, promesse ——— */}
-      <div className="flex flex-col gap-4">
+    <div className={`r-carte rv-palier--${p.id} ${p.phare ? "r-carte--phare" : ""}`}>
+      <div className="r-carte-tete !min-h-0">
         <div className="flex items-start justify-between gap-3">
-          <p className="tf-mono">{p.nom}</p>
-          {p.badge ? <span className="tf-badge">{p.badge}</span> : null}
+          <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
+            {p.nom}
+          </h3>
+          {p.badge ? <span className="r-badge mt-1.5">{p.badge}</span> : null}
         </div>
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="tf-prix">{p.prix}&nbsp;€</span>
-          <span className="text-[13px] leading-[18px] text-white/70">{p.sousPrix}</span>
+
+        <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className={`num rv-prix rv-prix--${p.id} text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]`}>
+            {p.prix} €
+          </span>
+          <span className="text-[12px] leading-[18px] text-[#050505]">{p.sousPrix}</span>
         </div>
-        <p className="tf-body">{p.promesse}</p>
+
+        <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">{p.promesse}</p>
       </div>
 
-      {/* ——— le choix des postes, quand il y en a un à faire ——— */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col px-3 pt-4">
+        {/* le choix des postes, quand il y en a un à faire */}
         {p.aChoisir !== null ? (
           <fieldset>
-            <legend className="text-[14px] leading-[20px] text-white">
+            <legend className="text-[14px] font-semibold leading-[20px] text-[#050505]">
               {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
             </legend>
             <div className="mt-3 space-y-2">
@@ -82,7 +71,7 @@ function CartePalier({
                 return (
                   <label
                     key={x.id}
-                    className={`tf-case ${actif ? "tf-case--actif" : ""} ${plein ? "tf-case--plein" : ""}`}
+                    className={`rv-case ${actif ? "rv-case--actif" : ""} ${plein ? "rv-case--plein" : ""}`}
                   >
                     <input
                       type="checkbox"
@@ -91,13 +80,13 @@ function CartePalier({
                       onChange={() => bascule(x.id)}
                       className="sr-only"
                     />
-                    <span className="tf-coche" aria-hidden />
+                    <span className="rv-coche" aria-hidden />
+                    <SystemLogo system={x.system} />
                     <span>
-                      <span className="tf-mono block !text-[11px]">{x.system}</span>
-                      <span className="mt-0.5 block text-[14px] leading-[20px] text-white">
+                      <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
                         {x.nom}
                       </span>
-                      <span className="mt-0.5 block text-[12.5px] leading-[18px] text-white/60">
+                      <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
                         {x.resume}
                       </span>
                     </span>
@@ -108,57 +97,45 @@ function CartePalier({
           </fieldset>
         ) : (
           <div>
-            <div className="text-[14px] leading-[20px] text-white">
+            <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
               Les quatre postes, en service :
             </div>
-            {/* mêmes encadrés que les cases des deux autres cartes, au même
-                état de repos — coche vide, aucune interaction : rien à
-                choisir, tout est compris */}
-            <div className="mt-3 space-y-2">
+            <ul className="mt-3 space-y-2.5">
               {POSTES.map((x) => (
-                <div key={x.id} className="tf-case tf-case--fixe">
-                  <span className="tf-coche" aria-hidden />
-                  <span>
-                    <span className="tf-mono block !text-[11px]">{x.system}</span>
-                    <span className="mt-0.5 block text-[14px] leading-[20px] text-white">
-                      {x.nom}
-                    </span>
-                    <span className="mt-0.5 block text-[12.5px] leading-[18px] text-white/60">
-                      {x.resume}
-                    </span>
-                  </span>
-                </div>
+                <li key={x.id} className="flex items-center gap-2.5 text-[14px] leading-[22px] text-[#3d3d3d]">
+                  <SystemLogo system={x.system} />
+                  {x.nom}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         )}
 
-        {/* ——— le bouton, calé en bas comme ceux des cartes v3 ——— */}
-        <div className="mt-6 flex flex-1 flex-col justify-end">
+        <div className="mt-5 flex flex-1 flex-col justify-end">
           {pret ? (
-            <Link href={href} className="tf-btn tf-btn--filet w-full !justify-center">
+            <Link href={href} className={`r-btn w-full ${p.phare ? "r-btn--noir" : "r-btn--fil"}`}>
               Réserver l&apos;installation
             </Link>
           ) : (
-            <span aria-disabled className="tf-btn tf-btn--filet tf-btn--attente w-full !justify-center">
+            <span aria-disabled className="r-btn rv-btn--attente w-full">
               {manque === 1 ? "Choisissez 1 poste" : `Choisissez encore ${manque} postes`}
             </span>
           )}
-          <p className="mt-2.5 text-center text-[12px] leading-[18px] text-white/60">
+          <p className="r-note mt-2 text-center">
             Sans paiement en ligne — tout se règle à l&apos;installation.
           </p>
         </div>
 
-        <ul className="mt-6 space-y-3 border-t border-white/20 pt-5">
+        <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5">
           {p.points.map((t) => (
-            <li key={t} className="flex gap-2.5 text-[13px] leading-[19px] text-white/70">
-              <span aria-hidden className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-white/70" />
+            <li key={t} className="flex gap-2 text-[13px] leading-[19px] text-[#3d3d3d]">
+              <span aria-hidden className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />
               {t}
             </li>
           ))}
         </ul>
       </div>
-    </article>
+    </div>
   );
 }
 
@@ -184,7 +161,7 @@ export default function Grille() {
     });
 
   return (
-    <div className="tf-grille tf-grille--paliers" data-reveal>
+    <div className="grid gap-4 lg:grid-cols-3">
       {PALIERS.map((p) => (
         <CartePalier
           key={p.id}
