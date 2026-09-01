@@ -35,7 +35,7 @@ import { COMPRIS } from "@/lib/paliers";
 export const metadata: Metadata = {
   title: "Tarifs | Omega.AI",
   description:
-    "Un poste 59 €, trois postes 85 €, tout Omega 105 € par mois — sans engagement, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.",
+    "Un poste 59 €, trois postes 89 €, tout Omega 119 € par mois — sans engagement, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.",
 };
 
 /* Ce qu'on ne facture jamais — resserré depuis la v3 (six cartes), qui le
@@ -144,12 +144,31 @@ export default function TarifsPage() {
               vous ne sont pas des options.
             </p>
 
-            <div className="mt-10">
-              <Grille />
+            {/* 01/09 (Teo) — le « + » à droite de la grille : la vitrine
+                qui va avec les postes, à prix public elle aussi, vit sur
+                /tarifs/site. Colonne mince sur grand écran, bandeau plein
+                en dessous sur mobile. */}
+            <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-stretch">
+              <div className="min-w-0 flex-1">
+                <Grille />
+              </div>
+              <Link
+                href="/tarifs/site"
+                className="rv-plus"
+                aria-label="Voir l'offre site — la vitrine qui va avec vos postes"
+              >
+                <span className="rv-plus-signe" aria-hidden>
+                  +
+                </span>
+                <span className="rv-plus-texte">
+                  Le site qui va avec
+                  <span className="rv-plus-sous">Vitrine à prix public</span>
+                </span>
+              </Link>
             </div>
 
             <p className="r-note mt-6 max-w-3xl">
-              Prix TTC, grille en vigueur au 28/08/2026 — le prix affiché au moment de votre demande
+              Prix TTC, grille en vigueur au 01/09/2026 — le prix affiché au moment de votre demande
               est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
               (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion
               pour les quatre postes standard&nbsp;; un raccordement particulier est chiffré avant

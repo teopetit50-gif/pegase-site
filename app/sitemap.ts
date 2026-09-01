@@ -22,6 +22,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/offres", priorite: 0.9, frequence: "weekly" },
     { url: "/modeles", priorite: 0.9, frequence: "monthly" },
     { url: "/tarifs", priorite: 0.9, frequence: "monthly" },
+    /* 01/09 — l'offre site à prix public, sœur de /tarifs. */
+    { url: "/tarifs/site", priorite: 0.8, frequence: "monthly" },
     { url: "/reserver-un-audit", priorite: 0.9, frequence: "monthly" },
     /* 28/08 — les deux pages de réservation en ligne. Priorité modérée :
        ce sont des étapes de parcours, pas des portes d'entrée SEO. */

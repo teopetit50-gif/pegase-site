@@ -299,7 +299,7 @@ const FAQ = [
        grand-chose ») niait la grille publique vers laquelle le CTA de
        cette même page envoie désormais. Réécrite pour les deux mondes. */
     q: "Combien ça coûte ?",
-    a: "Pour les indépendants, TPE et PME, les prix sont publics : un poste 59 € par mois, trois postes 85 €, tout Omega 105 € — sans engagement, installation comprise. Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit. Dans les deux cas, le Chèque TIC peut financer une partie de l'installation (de 40 à 80 %, jusqu'à 10 000 €), si vous êtes éligible.",
+    a: "Pour les indépendants, TPE et PME, les prix sont publics : un poste 59 € par mois, trois postes 89 €, tout Omega 119 € — sans engagement, installation comprise. Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit. Dans les deux cas, le Chèque TIC peut financer une partie de l'installation (de 40 à 80 %, jusqu'à 10 000 €), si vous êtes éligible.",
   },
   {
     q: "Où sont hébergées mes données ?",

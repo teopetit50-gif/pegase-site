@@ -4148,6 +4148,67 @@ main.page-arrivee {
   background: #d0369b;
 }
 
+/* ——— le « + » vers l'offre site (01/09, demande Teo) ———
+   Colonne mince posée à droite de la grille : la vitrine qui va avec les
+   postes. Le trait pointillé dit « ceci n'est pas un palier », le signe +
+   reprend le dégradé complet de la grille (départ orange, arrivée
+   violette) — même langage que les deux cartes de /commencer. */
+.resa .rv-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 16px;
+  border: 1.5px dashed #d4d4d8;
+  background: #ffffff;
+  padding: 18px;
+  transition:
+    transform 0.24s var(--ease-out-strong),
+    box-shadow 0.24s ease,
+    border-color 0.24s ease;
+}
+.resa .rv-plus:hover {
+  border-color: #050505;
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px -18px rgba(5, 5, 5, 0.18);
+}
+.resa .rv-plus-signe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #ea580c, #7c3aed);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+}
+.resa .rv-plus-texte {
+  font-size: 13.5px;
+  line-height: 19px;
+  font-weight: 600;
+  color: #050505;
+}
+.resa .rv-plus-sous {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 17px;
+  font-weight: 400;
+  color: #616161;
+}
+@media (min-width: 1024px) {
+  .resa .rv-plus {
+    flex-direction: column;
+    width: 118px;
+    padding: 20px 14px;
+    text-align: center;
+  }
+}
+
 /* ——— /commencer : l'aiguillage à deux cartes (28/08) ———
    La carte claire porte le DÉPART du dégradé de la grille (orange), la
    carte sombre son ARRIVÉE (violet) : la page annonce la suite. */

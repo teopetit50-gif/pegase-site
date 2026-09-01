@@ -123,6 +123,20 @@ export default function Cloture() {
             </svg>
           </span>
         </Link>
+
+        {/* 01/09 — le prix du site devient public (/tarifs/site) : la
+            clôture le mentionne sans vendre — la règle de la page tient,
+            le lien porte la transaction ailleurs. */}
+        <p className="mt-6 text-[13px] text-white/55">
+          Le prix est public&nbsp;:{" "}
+          <Link
+            href="/tarifs/site"
+            className="text-white/80 underline underline-offset-4 hover:text-white"
+          >
+            990&nbsp;€ le site catalogue
+          </Link>{" "}
+          — souvent 198&nbsp;€ restant à charge avec le Chèque TIC.
+        </p>
       </div>
     </div>
   );

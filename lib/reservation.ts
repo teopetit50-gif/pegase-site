@@ -189,7 +189,8 @@ export const PROFILS: [Profil, Profil] = [
             fort: "présence en ligne",
           },
           {
-            texte: "Devis du moteur recommandé et du modèle de site qui va avec, valables 30 jours",
+            texte:
+              "Devis du moteur recommandé et du modèle de site qui va avec (site catalogue : 990 €, prix public), valables 30 jours",
             fort: "Devis",
           },
           {
@@ -517,7 +518,9 @@ export const FAQ: { q: string; r: string[] }[] = [
       /* Vingt et un, pas vingt-deux : AssetX est sorti du catalogue le
          06/08 (voir components/modeles/donnees.ts). /modeles affichait bien
          « 21 modèles », cette réponse était restée à l'ancien compte. */
-      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, on réécrit tout le contenu en français, à votre métier.",
+      /* 01/09 — le prix devient public (voir /tarifs/site) : la réponse
+         le donne plutôt que de le garder pour l'audit. */
+      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, on réécrit tout le contenu en français, à votre métier. Le prix est public : 990 € le site catalogue — souvent 198 € restant à charge avec le Chèque TIC.",
       "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps on lui répond, et ce que devient le devis. Un site qui reçoit trois demandes par semaine et n'en transforme aucune coûte plus cher qu'il ne rapporte : c'est cette partie-là qu'on chiffre d'abord, pour que la vitrine ne dorme pas.",
     ],
   },

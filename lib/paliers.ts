@@ -8,10 +8,13 @@
    d'un côté : POUR LES STRUCTURES OÙ PLUSIEURS PERSONNES VALIDENT, aucun
    montant ne s'affiche — leur prix sort de l'audit, comme avant.
 
-   ⚠ GRILLE PROVISOIRE — prix posés par Teo le 28/08/2026, « amenés à
-   changer ». Ils ne vivent QU'ICI ; la fonction SQL reserver_audit en
-   garde sa propre copie (source de vérité de l'instantané stocké) : toute
-   modification se fait AUX DEUX ENDROITS.
+   GRILLE EN VIGUEUR — 59/89/119 arrêtés le 01/09/2026 (Teo), en
+   remplacement du provisoire 59/85/105 du 28/08 : 89 et 119 sont des
+   points de prix standards là où 85 et 105 n'en étaient pas, et si l'on
+   franchit la barre des 100 €, autant qu'elle rapporte. Les prix ne
+   vivent QU'ICI ; la fonction SQL reserver_audit en garde sa propre copie
+   (source de vérité de l'instantané stocké) : toute modification se fait
+   AUX DEUX ENDROITS.
 
    Le critère qui sépare les deux mondes n'est pas la taille mais QUI
    VALIDE : une personne qui tient les outils → grille ; plusieurs
@@ -73,7 +76,7 @@ export const COMPRIS = [
 export type Palier = {
   id: "un" | "trois" | "complet";
   nom: string;
-  prix: number; // €/mois TTC — PROVISOIRE (voir l'avertissement d'en-tête)
+  prix: number; // €/mois TTC — grille du 01/09/2026 (voir l'en-tête)
   sousPrix: string;
   /* combien de postes le visiteur coche — null : tous, rien à choisir */
   aChoisir: number | null;
@@ -101,7 +104,7 @@ export const PALIERS: Palier[] = [
   {
     id: "trois",
     nom: "Trois postes",
-    prix: 85,
+    prix: 89,
     sousPrix: "par mois, sans engagement",
     aChoisir: 3,
     phare: true,
@@ -117,7 +120,7 @@ export const PALIERS: Palier[] = [
   {
     id: "complet",
     nom: "Tout Omega",
-    prix: 105,
+    prix: 119,
     sousPrix: "par mois, sans engagement",
     aChoisir: null,
     promesse: "Les quatre postes en service — six systèmes au total avec le point du matin et les verrous.",
@@ -133,8 +136,8 @@ export const PALIERS: Palier[] = [
 /** Prix d'un choix de postes — même barème que la fonction SQL. */
 export function prixPour(nb: number): number {
   if (nb <= 1) return 59;
-  if (nb <= 3) return 85;
-  return 105;
+  if (nb <= 3) return 89;
+  return 119;
 }
 
 /* ——— les deux portes : qui valide ? ———
