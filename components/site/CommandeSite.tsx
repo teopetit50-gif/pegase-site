@@ -255,7 +255,18 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
          valide dans les cookies — on ne contredit pas le rendu initial sur
          un événement qui ne prouve rien. Tout autre événement fait foi. */
       if (evt === "INITIAL_SESSION" && !session) return;
-      connecter(session?.user ? utilisateurDepuis(session.user) : null);
+      const u = session?.user ? utilisateurDepuis(session.user) : null;
+      /* 02/09 (bug vu par Teo : « la création de compte ne demande pas de
+         mot de passe ») — le code à six chiffres ouvre la session AVANT
+         que le mot de passe soit choisi : SIGNED_IN arrivait ici, on tenait
+         la personne pour connectée et l'étape passait au brief, en
+         démontant le module avant son écran « Votre mot de passe ». Une
+         session SANS mot de passe défini n'est donc pas prise ici : le
+         module la termine lui-même et prévient par onConnecte ; le
+         USER_UPDATED qui suit l'enregistrement du mot de passe repasse par
+         ici avec le drapeau posé. */
+      if (u && !u.mdpDefini) return;
+      connecter(u);
     });
     return () => data.subscription.unsubscribe();
   }, []);
