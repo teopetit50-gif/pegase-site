@@ -78,7 +78,10 @@ export default function CommencerPage() {
             </p>
           </div>
 
-          <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2">
+          {/* 01/09 — trois colonnes dès lg (la carte sites rejoint la
+              rangée), le conteneur s'élargit d'autant pour que les deux
+              portes gardent leur respiration. */}
+          <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2 lg:max-w-6xl lg:grid-cols-3">
             {PORTES.map((p) => (
               <Link
                 key={p.id}
@@ -115,24 +118,41 @@ export default function CommencerPage() {
 
             {/* 01/09 (Teo) — la troisième carte : les sites. Transversale
                 aux deux portes (un indépendant comme une organisation
-                peut en avoir besoin), elle ne répond pas à « qui valide ? »
-                — donc en bande sous les deux, pas en troisième porte.
-                Bordeaux et or : une teinte à part, premium. Elle mène à
-                la galerie (/modeles) ; la page de l'offre (/tarifs/site,
-                prix et Chèque TIC) sera retravaillée plus tard. */}
+                peut en avoir besoin). D'abord en bande dessous, puis
+                déplacée À DROITE des portes à la demande de Teo (croquis) :
+                troisième colonne dès lg, même squelette que les deux
+                autres. Bordeaux et or : une teinte à part, premium. Elle
+                mène à la galerie (/modeles) ; la page de l'offre
+                (/tarifs/site, prix et Chèque TIC) sera retravaillée plus
+                tard. Entre md et lg elle occupe la rangée du dessous. */}
             <Link
               href="/modeles"
               data-reveal
-              className="cm-carte cm-carte--or group md:col-span-2"
+              className="cm-carte cm-carte--or group md:col-span-2 lg:col-span-1"
             >
-              <div>
-                <span className="cm-kicker cm-kicker--or">En plus</span>
-                <h2 className="r-h3 mt-4">Découvrir nos sites</h2>
-                <p className="cm-critere mt-3 max-w-[52ch]">
-                  Vingt et un modèles en ligne, tous visitables — vous choisissez l&apos;allure,
-                  on réécrit tout le contenu à votre métier.
-                </p>
-              </div>
+              <span className="cm-kicker cm-kicker--or">En plus</span>
+              <h2 className="r-h3 mt-4">Découvrir nos sites</h2>
+              <p className="cm-critere mt-3">
+                Vingt et un modèles en ligne, tous visitables — vous choisissez l&apos;allure, on
+                réécrit tout à votre métier.
+              </p>
+
+              <div className="cm-cvs mt-6">C&apos;est pour vous si&nbsp;:</div>
+              <ul className="mt-3 flex-1 space-y-2.5">
+                {[
+                  "Vous n'avez pas de site, ou le vôtre ne ramène rien",
+                  "Vous voulez juger l'allure en vrai, pas sur une maquette",
+                  "Le formulaire doit alimenter vos postes dès le premier jour",
+                ].map((pt) => (
+                  <li key={pt} className="cm-point">
+                    <svg aria-hidden width="14" height="11" viewBox="0 0 14 11" fill="none" className="mt-[5px] shrink-0">
+                      <path d="M1 5.5 5 9.5 13 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+
               <span className="cm-cta cm-cta--or mt-8">
                 Voir les 21 modèles
                 <svg aria-hidden width="15" height="12" viewBox="0 0 15 12" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">

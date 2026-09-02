@@ -4254,12 +4254,12 @@ main.page-arrivee {
 }
 
 /* ——— /commencer : la troisième carte, les sites (01/09, Teo) ———
-   Sous les deux portes, à leur largeur cumulée : le site concerne les
-   deux mondes, il ne répond pas à « qui valide ? » — donc ni dans une
-   porte ni comme troisième porte, mais en bande dessous. Bordeaux et or,
-   « très premium » (Teo) : une teinte qui n'appartient à aucune des deux
-   cartes. L'or reprend les tokens --r-or-* du monde .resa. Horizontale
-   dès md (texte à gauche, bouton à droite), empilée en dessous. */
+   À DROITE des deux portes, troisième colonne au même gabarit (Teo,
+   croquis : « bouger le rectangle de là à là ») — le site concerne les
+   deux mondes. Bordeaux et or, « très premium » : une teinte qui
+   n'appartient à aucune des deux autres cartes. L'or reprend les tokens
+   --r-or-* du monde .resa. Même squelette vertical que les portes :
+   kicker, titre, critère, « c'est pour vous si », bouton en bas. */
 .resa .cm-carte--or {
   background:
     radial-gradient(70% 90% at 100% 0%, rgba(233, 205, 145, 0.3), transparent 62%),
@@ -4281,25 +4281,21 @@ main.page-arrivee {
 .resa .cm-carte--or .cm-critere {
   color: #f1e2d6;
 }
+.resa .cm-carte--or .cm-cvs {
+  color: rgba(244, 224, 174, 0.72);
+}
+.resa .cm-carte--or .cm-point {
+  color: #f1e2d6;
+}
+.resa .cm-carte--or .cm-point svg {
+  color: var(--r-or-fonce);
+}
 .resa .cm-cta--or {
   background: var(--r-or-fonce);
   color: #2a0a10;
 }
 .resa .cm-carte--or:hover .cm-cta--or {
   background: var(--r-or-mid);
-}
-@media (min-width: 768px) {
-  .resa .cm-carte--or {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    padding-bottom: 34px;
-  }
-  .resa .cm-carte--or .cm-cta {
-    flex: none;
-    margin-top: 0;
-  }
 }
 
 /* ——— réservation : le fil d'étapes (28/08) ——— */
