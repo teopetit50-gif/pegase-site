@@ -4,6 +4,7 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
 import { POSTES } from "@/lib/paliers";
+import { utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
    /installation — réserver la réunion d'installation (28/08/2026)
@@ -20,6 +21,15 @@ import { POSTES } from "@/lib/paliers";
 
    Sans postes valides dans l'URL, retour à la grille : le prix dépend du
    choix, on ne devine pas à la place du visiteur.
+
+   02/09 — le compte client. La réservation d'une installation exige
+   d'être connecté (décision Teo : le compte donne l'identité, la demande
+   lui est rattachée). La page lit la session côté serveur (cookies,
+   jeton vérifié) et la passe au module : connecté, le formulaire s'ouvre
+   directement ; sinon, le module propose la connexion par code à
+   l'étape des coordonnées, sans quitter la page ni perdre le créneau.
+   La page était déjà dynamique (searchParams) — lire les cookies ne
+   change rien à son coût.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -38,6 +48,8 @@ export default async function InstallationPage({
   const postes = POSTES.filter((p) => demandes.includes(p.id)).map((p) => p.id);
   if (!postes.length) redirect("/tarifs");
 
+  const utilisateur = await utilisateurCourant();
+
   return (
     <PageShell>
       <PageMotion />
@@ -50,7 +62,7 @@ export default async function InstallationPage({
             rien à payer aujourd&apos;hui.
           </p>
           <div className="mt-10">
-            <PriseDeCreneau parcours="installation" postes={postes} />
+            <PriseDeCreneau parcours="installation" postes={postes} utilisateur={utilisateur} />
           </div>
         </section>
       </div>

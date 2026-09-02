@@ -23,10 +23,31 @@
    La validation de fond (chevauchement, horaires, anti-abus) vit dans la
    fonction SQL reserver_audit — voir lib/creneaux.ts. Ici : présentation,
    et un pot de miel (champ invisible) qui écarte les robots sans CAPTCHA.
+
+   02/09 — LE COMPTE CLIENT, pour le parcours « installation » SEULEMENT
+   (décision Teo : l'audit et les devis restent libres, sans compte).
+   À l'étape des coordonnées, sans session, le module de connexion
+   (ConnexionInline — e-mail + mot de passe, avec le lien vers la création
+   de compte ; décision révisée du 02/09) se pose AU-DESSUS du formulaire,
+   qui reste désactivé tant qu'on n'est pas connecté ; le jour et l'heure
+   choisis restent en état React — aucune navigation, rien à re-choisir.
+   Le module rend ses propres <form> : il est posé AVANT le formulaire
+   des coordonnées, jamais dedans (revue 02/09, n° 3 — un submit du module
+   remontait jusqu'à envoyer()). Connecté : l'e-mail est celui du compte
+   (pré-rempli, non modifiable — « Ce n'est pas vous ? Changer de compte »
+   pour en sortir, revue n° 7), prénom/nom/entreprise/téléphone viennent du
+   profil s'ils y sont, et la réservation part avec le jeton de session
+   pour que la fonction SQL rattache la demande au compte. La session
+   initiale vient du serveur (prop `utilisateur`, lue dans les cookies par
+   app/installation/page.tsx) ; onAuthStateChange prend le relais pour la
+   connexion faite en ligne. Parcours « audit » : zéro changement.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ConnexionInline from "@/components/compte/ConnexionInline";
+import { signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
+import { createClient } from "@/lib/supabase/client";
 import {
   DUREES_RDV,
   ERREURS,
@@ -75,9 +96,16 @@ type Props = {
   parcours: "installation" | "audit";
   formuleInitiale?: string;
   postes?: string[];
+  /* 02/09 — la session lue côté serveur (parcours installation). Absent
+     ou null : personne de connecté. Le parcours audit ne le passe pas. */
+  utilisateur?: Utilisateur | null;
 };
 
-export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] }: Props) {
+export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [], utilisateur }: Props) {
+  /* ——— le verrou compte (02/09) : installation seulement ——— */
+  const verrou = parcours === "installation";
+  const [util, setUtil] = useState<Utilisateur | null>(verrou ? (utilisateur ?? null) : null);
+
   /* ——— quoi ——— */
   const [formule, setFormule] = useState(() => {
     if (parcours === "installation") return "reglage";
@@ -155,12 +183,15 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
   const [erreur, setErreur] = useState<string | null>(null);
   const [refId, setRefId] = useState<string | null>(null);
   const [c, setC] = useState({
-    prenom: "",
-    nom: "",
-    email: "",
-    entreprise: "",
+    /* 02/09 — déjà connecté à l'arrivée (installation) : l'e-mail du
+       compte, et ce qui a été rangé sur le profil (à la création du
+       compte sur /connexion, ou après une précédente réservation) */
+    prenom: util?.prenom ?? "",
+    nom: util?.nom ?? "",
+    email: util?.email ?? "",
+    entreprise: util?.entreprise ?? "",
     secteur: "",
-    telephone: "",
+    telephone: util?.telephone ?? "",
     commune: "",
     message: "",
     site_web: "", // pot de miel — un humain ne le voit jamais
@@ -168,44 +199,162 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
   const maj = (cle: keyof typeof c) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setC((prev) => ({ ...prev, [cle]: e.target.value }));
 
+  /* 02/09 — la connexion (inline, ou dans un autre onglet) : on retient
+     l'utilisateur ET on remplit le formulaire — l'e-mail est celui du
+     compte (verrouillé), le reste vient des user_metadata s'il y est,
+     sans jamais écraser ce que le visiteur a déjà tapé. Une seule
+     fonction, appelée depuis les rappels (pas depuis un effet). */
+  const connecter = (u: Utilisateur | null) => {
+    setUtil(u);
+    if (!u) return;
+    setC((prev) => ({
+      ...prev,
+      email: u.email,
+      prenom: prev.prenom || u.prenom || "",
+      nom: prev.nom || u.nom || "",
+      entreprise: prev.entreprise || u.entreprise || "",
+      telephone: prev.telephone || u.telephone || "",
+    }));
+  };
+
+  /* 02/09 (revue n° 7) — « Ce n'est pas vous ? » : quelqu'un connecté
+     avec la mauvaise adresse (perso au lieu de pro, session d'un autre
+     onglet) sort d'ici sans quitter la page — signOut côté client (le
+     formulaire POST /auth/signout naviguerait, et perdrait le créneau),
+     puis retour au module de connexion ; le créneau et les champs
+     restent, l'e-mail redevient libre. */
+  const [changement, setChangement] = useState(false);
+  const changerDeCompte = async () => {
+    if (changement) return;
+    setChangement(true);
+    try {
+      await createClient().auth.signOut();
+    } catch {
+      /* déjà déconnecté, ou réseau absent : on se déconnecte quand même
+         localement — la prochaine réservation exigera un vrai jeton */
+    }
+    setChangement(false);
+    setErreur(null);
+    setC((prev) => ({ ...prev, email: "" }));
+    connecter(null);
+    signalerSession();
+  };
+  useEffect(() => {
+    if (!verrou) return;
+    const { data } = createClient().auth.onAuthStateChange((evt, session) => {
+      /* INITIAL_SESSION sans session : le serveur, lui, a peut-être vu un
+         jeton valide (cookies) — on ne contredit pas le rendu initial sur
+         un événement qui ne prouve rien. Tout autre événement fait foi. */
+      if (evt === "INITIAL_SESSION" && !session) return;
+      connecter(session?.user ? utilisateurDepuis(session.user) : null);
+    });
+    return () => data.subscription.unsubscribe();
+  }, [verrou]);
+
+  /* le formulaire attend la connexion (installation sans session) */
+  const bloque = verrou && !util;
+
   const champsOk =
     c.prenom.trim() && c.nom.trim() && /\S+@\S+\.\S+/.test(c.email) && c.entreprise.trim() && c.secteur;
 
+  /* 02/09 (revue n° 2) — garde SYNCHRONE contre le double envoi. Un état
+     React (`envoi`) ne l'est pas : entre le premier await (getSession,
+     qui peut attendre un rafraîchissement de jeton pendant des centaines
+     de ms) et setEnvoi(true), un double clic relançait envoyer() et deux
+     RPC partaient — la seconde recevait « créneau pris » et remettait le
+     calendrier à zéro alors que la première avait réussi. Le ref est
+     posé avant tout await et relâché dans tous les chemins de sortie. */
+  const enCours = useRef(false);
+
   const envoyer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!champsOk || envoi) return;
+    if (!champsOk || envoi || enCours.current) return;
+    enCours.current = true;
+    setEnvoi(true);
     setErreur(null);
+    try {
+      await envoyerVraiment();
+    } finally {
+      enCours.current = false;
+      setEnvoi(false);
+    }
+  };
 
+  const envoyerVraiment = async () => {
     /* robot pris au pot de miel : on fait comme si tout allait bien */
     if (c.site_web) {
       setEtape("fait");
       return;
     }
 
-    setEnvoi(true);
-    const rep = await reserver({
-      parcours: parcours === "installation" ? "reglage" : surDevis ? "devis" : "audit",
-      formule,
-      profil: parcours === "installation" ? "" : (format?.profil ?? ""),
-      nom: c.nom,
-      prenom: c.prenom,
-      email: c.email,
-      entreprise: c.entreprise,
-      secteur: c.secteur,
-      telephone: c.telephone || undefined,
-      commune: c.commune || undefined,
-      message: c.message || undefined,
-      creneau: surDevis ? undefined : (creneau ?? undefined),
-      modules: parcours === "installation" ? postesValides.map((p) => p.id) : undefined,
-    });
-    setEnvoi(false);
+    /* 02/09 — le verrou, AVANT tout envoi : pas de session, pas de
+       réservation d'installation. Le jeton est relu au moment de l'envoi
+       (getSession rafraîchit s'il a expiré pendant la saisie). */
+    let jeton: string | undefined;
+    if (verrou) {
+      if (!util) {
+        setErreur("connexion_requise");
+        return;
+      }
+      const { data } = await createClient().auth.getSession();
+      jeton = data.session?.access_token;
+      if (!jeton) {
+        setUtil(null);
+        setErreur("connexion_requise");
+        return;
+      }
+    }
+
+    const rep = await reserver(
+      {
+        parcours: parcours === "installation" ? "reglage" : surDevis ? "devis" : "audit",
+        formule,
+        profil: parcours === "installation" ? "" : (format?.profil ?? ""),
+        nom: c.nom,
+        prenom: c.prenom,
+        email: c.email,
+        entreprise: c.entreprise,
+        secteur: c.secteur,
+        telephone: c.telephone || undefined,
+        commune: c.commune || undefined,
+        message: c.message || undefined,
+        creneau: surDevis ? undefined : (creneau ?? undefined),
+        modules: parcours === "installation" ? postesValides.map((p) => p.id) : undefined,
+      },
+      jeton,
+    );
 
     if (rep.ok) {
       setRefId(rep.id);
       setEtape("fait");
+      /* prénom, nom, entreprise et téléphone rangés sur le compte pour la
+         prochaine fois — au mieux, sans attendre ni bloquer : la
+         réservation est déjà faite. updateUser fusionne les user_metadata
+         (mdp_defini reste). */
+      if (verrou && util) {
+        const profil = {
+          prenom: c.prenom.trim(),
+          nom: c.nom.trim(),
+          entreprise: c.entreprise.trim(),
+          telephone: c.telephone.trim() || undefined,
+        };
+        const change =
+          profil.prenom !== (util.prenom ?? "") ||
+          profil.nom !== (util.nom ?? "") ||
+          profil.entreprise !== (util.entreprise ?? "") ||
+          (profil.telephone ?? "") !== (util.telephone ?? "");
+        if (change) {
+          void createClient()
+            .auth.updateUser({ data: profil })
+            .catch(() => {});
+        }
+      }
       return;
     }
     setErreur(rep.erreur);
+    /* la session a sauté entre-temps (jeton refusé) : retour au module de
+       connexion, le créneau et les champs restent */
+    if (rep.erreur === "connexion_requise") setUtil(null);
     /* créneau invalide côté serveur — soufflé entre-temps, devenu trop
        proche/lointain, ou hors horaires après un changement de règles :
        retour au calendrier, grille rechargée, sélection effacée. Rester à
@@ -234,12 +383,23 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
 
   const dateJour = (j: number) => jourGpLabel(vue.annee, vue.mois, j);
 
-  /* le fil d'étapes : deux pas pour une demande de devis, trois sinon */
+  /* le fil d'étapes : deux pas pour une demande de devis, trois sinon —
+     quatre pour une installation sans session (02/09) : « Votre compte »
+     s'intercale entre le créneau et les coordonnées, et disparaît dès
+     que la connexion est faite. */
   const etapes = surDevis
     ? ["Votre demande", "Confirmation"]
-    : ["Le créneau", "Vos coordonnées", "Confirmation"];
+    : bloque
+      ? ["Le créneau", "Votre compte", "Vos coordonnées", "Confirmation"]
+      : ["Le créneau", "Vos coordonnées", "Confirmation"];
   const idxEtape =
-    etape === "fait" ? etapes.length - 1 : etape === "coordonnees" ? etapes.length - 2 : 0;
+    etape === "fait"
+      ? etapes.length - 1
+      : etape === "coordonnees"
+        ? bloque
+          ? 1
+          : etapes.length - 2
+        : 0;
 
   return (
     <div className="rv-cadre">
@@ -488,13 +648,53 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
 
         {/* ——— étape 2 : les coordonnées ——— */}
         {etape === "coordonnees" ? (
+          <>
+            {/* 02/09 — installation sans session : la connexion d'abord
+                (e-mail + mot de passe, ou « Créer mon compte » : le code
+                prouve l'adresse, puis le mot de passe seul — les
+                coordonnées suivent ici, avecProfil={false}), le formulaire
+                (désactivé) juste dessous. Le créneau choisi reste affiché
+                dans la colonne de gauche. HORS du <form> des coordonnées :
+                le module a ses propres formulaires (revue n° 3). */}
+            {bloque ? (
+              <div className="mb-8">
+                <ConnexionInline
+                  modeInitial="connexion"
+                  avecProfil={false}
+                  onConnecte={connecter}
+                  intro={
+                    "Votre installation est rattachée à un compte — c'est lui qui vous ouvrira votre cockpit. Connectez-vous, ou créez votre compte en une minute : votre adresse, un code reçu par e-mail, un mot de passe."
+                  }
+                  emailInitial={c.email}
+                />
+              </div>
+            ) : null}
+
           <form onSubmit={envoyer} noValidate>
             <h3 className="r-h4">{surDevis ? "Votre demande de devis" : "Vos coordonnées"}</h3>
             {!surDevis && creneau === null ? (
               <p className="rv-erreur mt-4">{ERREURS.creneau_requis}</p>
             ) : null}
             {erreur ? <p className="rv-erreur mt-4">{ERREURS[erreur] ?? ERREURS.reseau}</p> : null}
+            {verrou && util ? (
+              <p className="r-note mt-2">
+                Connecté avec {util.email}. Ce n&apos;est pas vous&nbsp;?{" "}
+                <button
+                  type="button"
+                  className="underline underline-offset-2"
+                  onClick={changerDeCompte}
+                  disabled={changement || envoi}
+                >
+                  {changement ? "Un instant…" : "Changer de compte"}
+                </button>
+              </p>
+            ) : null}
 
+            {/* <fieldset disabled> : tout le formulaire s'éteint d'un coup
+                tant que la connexion n'est pas faite — champs, menu, bouton.
+                min-w-0 : un fieldset a une largeur minimale intrinsèque qui
+                casserait la grille. */}
+            <fieldset disabled={bloque} className={`m-0 min-w-0 border-0 p-0 ${bloque ? "opacity-50" : ""}`}>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="rv-libelle" htmlFor="rv-prenom">Prénom</label>
@@ -505,8 +705,19 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                 <input id="rv-nom" className="rv-champ" autoComplete="family-name" value={c.nom} onChange={maj("nom")} required />
               </div>
               <div>
-                <label className="rv-libelle" htmlFor="rv-email">Adresse e-mail</label>
-                <input id="rv-email" type="email" className="rv-champ" autoComplete="email" value={c.email} onChange={maj("email")} required />
+                <label className="rv-libelle" htmlFor="rv-email">
+                  Adresse e-mail{verrou && util ? <small> — celle de votre compte</small> : null}
+                </label>
+                <input
+                  id="rv-email"
+                  type="email"
+                  className={`rv-champ ${verrou && util ? "bg-[#f5f5f5] text-[#3d3d3d]" : ""}`}
+                  autoComplete="email"
+                  value={c.email}
+                  onChange={maj("email")}
+                  readOnly={Boolean(verrou && util)}
+                  required
+                />
               </div>
               <div>
                 <label className="rv-libelle" htmlFor="rv-tel">
@@ -586,15 +797,31 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
                 </button>
               ) : null}
             </div>
+            </fieldset>
+            {/* 02/09 (revue n° 11) — pour l'installation, la phrase « rien
+                n'est conservé sans votre accord » était devenue fausse : la
+                demande est rattachée au compte et le profil y est gardé.
+                On le dit. */}
             <p className="r-note mt-4 max-w-[60ch]">
-              Vos coordonnées ne servent qu&apos;à organiser ce rendez-vous. Rien n&apos;est
-              conservé sans votre accord, rien n&apos;est revendu — voir{" "}
+              {verrou ? (
+                <>
+                  Vos coordonnées servent à organiser ce rendez-vous&nbsp;; prénom, nom, entreprise et
+                  téléphone sont gardés sur votre compte pour vos prochaines demandes. Rien
+                  n&apos;est revendu — voir{" "}
+                </>
+              ) : (
+                <>
+                  Vos coordonnées ne servent qu&apos;à organiser ce rendez-vous. Rien n&apos;est
+                  conservé sans votre accord, rien n&apos;est revendu — voir{" "}
+                </>
+              )}
               <Link href="/vos-donnees" className="underline underline-offset-2">
                 où vont vos données
               </Link>
               .
             </p>
           </form>
+          </>
         ) : null}
 
         {/* ——— étape 3 : c'est fait ——— */}
@@ -626,13 +853,27 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [] 
               )}
             </p>
             {parcours === "installation" ? (
-              <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-                À la réunion : on branche vos postes sur vos outils, on vérifie votre éligibilité au
-                Chèque TIC, et l&apos;abonnement ({prix} €/mois) ne démarre qu&apos;une fois le
-                système en route.
-              </p>
+              <>
+                <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
+                  À la réunion&nbsp;: on branche vos postes sur vos outils, on vérifie votre
+                  éligibilité au Chèque TIC, et l&apos;abonnement ({prix} €/mois) ne démarre
+                  qu&apos;une fois le système en route.
+                </p>
+                {/* 02/09 (revue n° 10) — le client vient de créer un compte
+                    pour que sa demande lui soit rattachée : on lui dit où
+                    la retrouver, sinon la raison d'être du compte reste
+                    invisible. */}
+                <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
+                  Votre demande est rangée dans « Mon compte », avec votre créneau.
+                </p>
+              </>
             ) : null}
             <div className="mt-7 flex flex-wrap gap-3">
+              {parcours === "installation" ? (
+                <Link href="/compte" className="r-btn r-btn--noir">
+                  Suivre ma demande
+                </Link>
+              ) : null}
               <Link href="/offres" className="r-btn r-btn--fil">
                 Découvrir les postes
               </Link>

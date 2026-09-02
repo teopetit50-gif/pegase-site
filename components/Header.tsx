@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { EVENEMENT_SESSION } from "@/lib/compte";
 import { lienContact } from "@/lib/reservation";
+import { sessionCookiePresente } from "@/lib/supabase/config";
 
 /* 22/07 — le pégase (SVG d'après l'icône « pegasus » de Skoll, game-icons.net,
    CC BY 3.0) est retiré du header ET du footer à la demande de Teo. Le crédit
@@ -81,6 +83,40 @@ export default function Header() {
      sous elle en temps normal, forcée en clair dès que le panneau est
      ouvert. Logo, marque, CTA et burger s'y accrochent tous. */
   const clairEff = open || clair;
+
+  /* 02/09 — le compte client. L'icône « personne » mène à /compte si une
+     session est ouverte, à /connexion sinon.
+
+     Revue 02/09 (n° 4) : la première version importait supabase-js ici —
+     dans le layout racine, donc sur TOUTES les pages statiques (+252 ko,
+     66 ko gzip, pour la home et le blog). Le header n'a pas besoin d'un
+     jeton vérifié pour choisir un lien : il lit la PRÉSENCE du cookie de
+     session (sb-<ref>-auth-token) dans document.cookie, sans bibliothèque.
+     /connexion renvoie de toute façon vers /compte si la session est
+     valide, et /compte vers /connexion si elle ne l'est pas — jamais
+     d'impasse. Relecture : au changement de route, quand l'onglet revient
+     au premier plan (une autre fenêtre a pu se connecter) et sur
+     l'événement EVENEMENT_SESSION envoyé par le module de connexion
+     inline (parcours installation) — la seule connexion sans navigation.
+     Avant la première lecture on suppose « pas connecté ». */
+  const [connecte, setConnecte] = useState(false);
+  useEffect(() => {
+    const relire = () => setConnecte(sessionCookiePresente());
+    relire();
+    window.addEventListener(EVENEMENT_SESSION, relire);
+    window.addEventListener("focus", relire);
+    document.addEventListener("visibilitychange", relire);
+    return () => {
+      window.removeEventListener(EVENEMENT_SESSION, relire);
+      window.removeEventListener("focus", relire);
+      document.removeEventListener("visibilitychange", relire);
+    };
+  }, [pathname]);
+  const hrefCompte = connecte ? "/compte" : "/connexion";
+  /* 02/09 (Teo) — « se connecter » seul laissait croire qu'il fallait déjà
+     un compte : on nomme les deux. Connecté : « Mon compte », le nom de la
+     page ouverte (revue n° 8 : un seul nom pour le même objet). */
+  const libelleCompte = connecte ? "Mon compte" : "Se connecter ou créer un compte";
 
   useEffect(() => {
     const check = () => {
@@ -245,6 +281,34 @@ export default function Header() {
           >
             Commencer
           </Link>
+          {/* 02/09 — l'icône compte : une personne dans un cercle, trait en
+              currentColor, 20 px. Même gabarit de tap que le burger (44 px
+              mobile, 36 desktop) et même caméléon : noir au-dessus d'une
+              section claire ou du panneau ouvert, blanc sinon. */}
+          <Link
+            href={hrefCompte}
+            aria-label={libelleCompte}
+            title={libelleCompte}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-200 md:h-9 md:w-9 ${
+              clairEff ? "text-[#0f1013] hover:bg-black/[0.06]" : "text-white hover:bg-white/10"
+            }`}
+          >
+            <svg
+              aria-hidden
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="10" r="3.2" />
+              <path d="M5.8 19.2c1.3-2.6 3.6-4 6.2-4s4.9 1.4 6.2 4" />
+            </svg>
+          </Link>
           {/* burger 2 barres — se croise en X à l'ouverture */}
           <button
             type="button"
@@ -374,10 +438,14 @@ export default function Header() {
           <div className="-mx-3 mt-auto border-t border-black/[0.08] px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:-mx-10 sm:px-10 [&>a]:sm:max-w-[420px]">
             {/* La référence empile secondaire PUIS primaire : le bouton noir
                 est le dernier de la colonne, au plus près du pouce. Omega
-                n'a pas de compte utilisateur, donc la paire Sign in / Get
-                started devient « Nous contacter » (WhatsApp) puis « Commencer » (/tarifs, 28/08). */}
-            <a
-              href={lienContact("Bonjour Omega — je vous écris depuis le site.")}
+                n'avait pas de compte utilisateur, donc la paire Sign in / Get
+                started était devenue « Nous contacter » (WhatsApp) puis
+                « Commencer » (/tarifs, 28/08).
+                02/09 — le compte existe : « Se connecter ou créer un
+                compte » / « Mon compte » revient en tête de pile, en pilule
+                grise comme le contact. */}
+            <Link
+              href={hrefCompte}
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
               style={{
@@ -388,6 +456,20 @@ export default function Header() {
               }}
               className="flex h-[52px] w-full items-center justify-center rounded-full border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
             >
+              {libelleCompte}
+            </Link>
+            <a
+              href={lienContact("Bonjour Omega — je vous écris depuis le site.")}
+              onClick={() => setOpen(false)}
+              tabIndex={open ? undefined : -1}
+              style={{
+                transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
+                transitionDelay: open ? `${60 + (NAV.length + 1) * 55}ms` : "0ms",
+                opacity: open ? 1 : 0,
+                transform: open ? "none" : "translateY(14px)",
+              }}
+              className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-full border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
+            >
               Nous contacter
             </a>
             <Link
@@ -397,7 +479,7 @@ export default function Header() {
               style={{
                 transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
                 transitionDelay: open
-                  ? `${60 + (NAV.length + 1) * 55}ms`
+                  ? `${60 + (NAV.length + 2) * 55}ms`
                   : "0ms",
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",

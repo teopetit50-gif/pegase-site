@@ -11,18 +11,23 @@
        horaires, chevauchement, anti-abus) vit DANS la fonction SQL — ce
        fichier ne fait que présenter ; le serveur ne croit pas le client.
 
-   Pas de @supabase/supabase-js : deux appels fetch sur l'API REST
-   suffisent, et le site reste sans dépendance nouvelle.
+   Deux appels fetch sur l'API REST suffisent — pas besoin du client
+   supabase-js ici, même depuis le 02/09 où il est installé pour le compte
+   client : l'agenda et la réservation restent des appels nus.
+
+   02/09 — compte client. reserver() accepte un jeton de session optionnel,
+   envoyé en Authorization: Bearer à la place de la clé publishable : la
+   fonction SQL voit alors auth.uid() et rattache la demande au compte
+   (colonne utilisateur_id). Sans jeton, rien ne change — l'audit reste
+   libre. L'URL et la clé viennent désormais de lib/supabase/config.ts
+   (source unique, avec repli sur les constantes publiques).
 
    Le double de la logique horaire (fuseau, alignement 30 min) existe côté
    SQL : en cas de divergence, c'est TOUJOURS la fonction SQL qui gagne —
    ici on filtre juste ce qu'on affiche.
    ══════════════════════════════════════════════════════════════════════ */
 
-const SUPABASE_URL = "https://noepmkkplxshjbmqqxft.supabase.co";
-/* Clé « publishable » : publique par conception (elle passe par RLS et ne
-   peut appeler que ce qui est accordé à `anon`). Rien de secret ici. */
-const SUPABASE_KEY = "sb_publishable_9TSwcnUkHIOol1FIxEVWPw_F4HRnhqS";
+import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 /* La Guadeloupe vit en UTC−4 toute l'année — pas d'heure d'été depuis
    1911, le décalage est une constante, pas une approximation. La fonction
@@ -54,13 +59,18 @@ export type Agenda = {
   indisponibles: Fenetre[]; // blocages + créneaux déjà pris, confondus
 };
 
-async function rpc<T>(fonction: string, corps: Record<string, unknown>): Promise<T> {
+/* `jeton` : l'access token d'une session Supabase Auth. Présent, il prend
+   la place de la clé dans Authorization — PostgREST exécute alors la
+   fonction en rôle `authenticated`, avec auth.uid() renseigné. L'en-tête
+   apikey garde la clé publishable dans les deux cas : c'est elle qui
+   identifie le projet. */
+async function rpc<T>(fonction: string, corps: Record<string, unknown>, jeton?: string): Promise<T> {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fonction}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
+      Authorization: `Bearer ${jeton || SUPABASE_KEY}`,
     },
     body: JSON.stringify(corps),
   });
@@ -213,24 +223,35 @@ export type Demande = {
 
 export type Reponse = { ok: true; id: string } | { ok: false; erreur: string };
 
-export async function reserver(d: Demande): Promise<Reponse> {
+/** Envoie la demande. `jeton` (02/09) : la session du compte client, pour
+    le parcours installation — voir rpc(). Un 401 (jeton expiré entre le
+    chargement et l'envoi) se lit comme « connexion requise », pas comme
+    une panne réseau. */
+export async function reserver(d: Demande, jeton?: string): Promise<Reponse> {
   try {
-    return await rpc<Reponse>("reserver_audit", {
-      p_parcours: d.parcours,
-      p_formule: d.formule,
-      p_profil: d.profil || null,
-      p_nom: d.nom,
-      p_prenom: d.prenom,
-      p_email: d.email,
-      p_entreprise: d.entreprise,
-      p_secteur: d.secteur,
-      p_telephone: d.telephone || null,
-      p_commune: d.commune || null,
-      p_message: d.message || null,
-      p_creneau_debut: d.creneau ? new Date(d.creneau).toISOString() : null,
-      p_modules: d.modules?.length ? d.modules : null,
-    });
-  } catch {
+    return await rpc<Reponse>(
+      "reserver_audit",
+      {
+        p_parcours: d.parcours,
+        p_formule: d.formule,
+        p_profil: d.profil || null,
+        p_nom: d.nom,
+        p_prenom: d.prenom,
+        p_email: d.email,
+        p_entreprise: d.entreprise,
+        p_secteur: d.secteur,
+        p_telephone: d.telephone || null,
+        p_commune: d.commune || null,
+        p_message: d.message || null,
+        p_creneau_debut: d.creneau ? new Date(d.creneau).toISOString() : null,
+        p_modules: d.modules?.length ? d.modules : null,
+      },
+      jeton,
+    );
+  } catch (e) {
+    if (jeton && e instanceof Error && /: 401$/.test(e.message)) {
+      return { ok: false, erreur: "connexion_requise" };
+    }
     return { ok: false, erreur: "reseau" };
   }
 }
@@ -251,6 +272,11 @@ export const ERREURS: Record<string, string> = {
   formule_inconnue: "Ce format n'existe plus. Rechargez la page.",
   modules_requis: "Choisissez au moins un poste avant de réserver l'installation.",
   parcours_inconnu: "Ce parcours n'existe plus. Rechargez la page.",
+  /* 02/09 — le verrou du parcours installation. Renvoyé par le module
+     lui-même (pas de session) et, une fois la partie B du schéma
+     appliquée, par la fonction SQL pour le parcours 'reglage' sans
+     session : le code doit déjà savoir l'afficher. */
+  connexion_requise: "Connectez-vous pour réserver votre installation.",
   reseau: "La réservation n'est pas partie — vérifiez votre connexion et réessayez.",
 };
 
