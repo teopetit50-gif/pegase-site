@@ -47,7 +47,9 @@ import { lienContact } from "@/lib/reservation";
    Ce que cette page ne fait pas : vendre. Aucun prix, aucun bouton
    « commander ». Le parcours est « audit d'abord » depuis le 31/07 ;
    les CTA mènent tous à /tarifs (28/08 : entrée neutre « Commencer », les deux portes).
-   02/09 — l'achat existe (/tarifs/site → /site/commande) ; la galerie
+   02/09 — l'achat existe (/tarifs/site → /site/commande) ; les deux
+   « Commencer » de la page (hero, clôture) mènent DIRECTEMENT à /tarifs/site
+   (Teo : « pas vers les 3 cartes ») ; la galerie
    reste un lieu de découverte, avec sous chaque carte un petit lien
    « Commander avec ce modèle » qui pré-sélectionne le modèle dans le
    tunnel — discret : ce n'est pas une page de vente.
@@ -106,8 +108,11 @@ export default function ModelesPage() {
                 branchés sur vos moteurs.
               </p>
               <div data-arrivee="hero-bloc" className="mt-8 flex flex-wrap items-center gap-3">
+                {/* 02/09 (Teo) : depuis la galerie, « Commencer » mène DIRECTEMENT
+                    à l'offre site (/tarifs/site), pas à l'aiguillage à trois
+                    cartes — celui qui regarde les modèles a déjà choisi. */}
                 <Link
-                  href="/commencer"
+                  href="/tarifs/site"
                   className="m-btn-clair inline-flex items-center gap-2.5 py-3 pl-6 pr-2.5 text-[15px]"
                 >
                   Commencer

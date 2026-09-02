@@ -106,8 +106,10 @@ export default function Cloture() {
       </div>
 
       <div className="mt-11">
+        {/* 02/09 (Teo) : comme le « Commencer » du hero, direct vers l'offre
+            site — pas l'aiguillage à trois cartes */}
         <Link
-          href="/commencer"
+          href="/tarifs/site"
           className="m-btn-clair inline-flex items-center gap-2.5 py-3 pl-6 pr-2.5 text-[15px]"
         >
           Commencer
