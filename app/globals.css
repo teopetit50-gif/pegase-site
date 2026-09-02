@@ -4297,6 +4297,24 @@ main.page-arrivee {
 .resa .cm-carte--or:hover .cm-cta--or {
   background: var(--r-or-mid);
 }
+/* le « + » entre les portes et la carte sites — pastille or, centrée
+   dans sa colonne. Le display vit dans les utilitaires (flex/hidden par
+   palier), pas ici, pour que le masquage en md l'emporte. */
+.resa .cm-plus {
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  align-self: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: var(--r-or-clair);
+  border: 1px solid rgba(233, 205, 145, 0.75);
+  color: #5e1220;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+}
 
 /* ——— réservation : le fil d'étapes (28/08) ——— */
 .resa .rv-etapes {

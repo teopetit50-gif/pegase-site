@@ -81,7 +81,7 @@ export default function CommencerPage() {
           {/* 01/09 — trois colonnes dès lg (la carte sites rejoint la
               rangée), le conteneur s'élargit d'autant pour que les deux
               portes gardent leur respiration. */}
-          <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2 lg:max-w-6xl lg:grid-cols-3">
+          <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2 lg:max-w-6xl lg:grid-cols-[1fr_1fr_auto_1fr]">
             {PORTES.map((p) => (
               <Link
                 key={p.id}
@@ -125,6 +125,13 @@ export default function CommencerPage() {
                 mène à la galerie (/modeles) ; la page de l'offre
                 (/tarifs/site, prix et Chèque TIC) sera retravaillée plus
                 tard. Entre md et lg elle occupe la rangée du dessous. */}
+            {/* 01/09 (Teo) — un « + » entre les portes et la carte sites :
+                deux portes + une offre en plus. Sa propre colonne (auto)
+                dès lg, entre les cartes empilées en mobile, masqué en md
+                où la grille est à deux colonnes. */}
+            <span className="cm-plus flex md:hidden lg:flex" aria-hidden>
+              +
+            </span>
             <Link
               href="/modeles"
               data-reveal
