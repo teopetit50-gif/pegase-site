@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /* 01/09 — transitions de page : <ViewTransition> React dans PageShell.
+     Le flag est celui que documente cette version (guides/view-transitions) ;
+     le React canary embarqué par Next exporte déjà le composant. */
+  experimental: { viewTransition: true },
   async redirects() {
     // Historique des routes : /moteurs (jusqu'au 20/07) → /solutions
     // (jusqu'au 25/07) → /offres. La liste comme les fiches vivent désormais

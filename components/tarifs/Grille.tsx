@@ -38,7 +38,10 @@ function CartePalier({
   const href = `/installation?postes=${postes.join(",")}`;
 
   return (
-    <div className={`r-carte rv-palier--${p.id} ${p.phare ? "r-carte--phare" : ""}`}>
+    <div
+      data-arrivee="colonne"
+      className={`r-carte rv-palier--${p.id} ${p.phare ? "r-carte--phare" : ""}`}
+    >
       <div className="r-carte-tete !min-h-0">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">

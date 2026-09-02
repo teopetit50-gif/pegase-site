@@ -471,33 +471,141 @@ button.rounded-full:active {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   Arrivée de page (28/08/2026, Teo : « trop brutal d'arriver sur les
-   pages de pricing ou d'audit »)
+   Transitions de page (01/09/2026, Teo : « plus smooth et pro »)
 
-   <main> porte .page-arrivee dans PageShell : chaque navigation le
-   remonte, l'entrée rejoue donc à chaque page — fondu + 12 px de montée,
-   la même courbe --ease-out-strong que les reveals GSAP du site. Le
-   header vit HORS de <main> et reste immobile : c'est lui qui fait la
-   continuité. `both` ramène transform à none en fin de course, donc
-   aucun conteneur transformé ne subsiste sous les sticky.
+   Remplace le fondu global `page-arrivee` du 28/08. Trois couches :
+     · la SORTIE : <main> de l'ancienne page, capturé en un groupe par le
+       <ViewTransition exit="page-out"> de PageShell — 160 ms, s'efface et
+       s'enfonce de 8 px ;
+     · les OBJETS PARTAGÉS (components/Partage.tsx) : la pastille de la
+       carte cliquée voyage jusqu'au titre de la page d'arrivée (380 ms),
+       le cadre bordeaux devient le hero de /modeles (420 ms) — par-dessus
+       la page qui sort ;
+     · l'ARRIVÉE : du DOM vivant, en cascade GSAP (components/Arrivee.tsx),
+       pas une capture fondue.
+   Le header est épinglé : capturé sous son nom, au-dessus de tout, jamais
+   animé. Courbe unique : la bezier charte.
    ═══════════════════════════════════════════════════════════════════════ */
-@keyframes page-arrivee {
+:root {
+  --ease-transition: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* la page qui sort : un seul groupe, bref, vers le bas */
+::view-transition-old(.page-out) {
+  animation: 160ms var(--ease-transition) both vt-sortie;
+}
+::view-transition-group(.page-out) {
+  z-index: 5;
+}
+@keyframes vt-sortie {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes vt-fade-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
-main.page-arrivee {
-  animation: page-arrivee 0.45s var(--ease-out-strong, cubic-bezier(0.16, 1, 0.3, 1)) both;
+@keyframes vt-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
+
+/* la pastille « Prix publics » : UN objet, même dessin des deux côtés —
+   aucun fondu croisé, seule la géométrie voyage */
+::view-transition-group(.voyage-tarifs) {
+  animation-duration: 380ms;
+  animation-delay: 60ms;
+  animation-timing-function: var(--ease-transition);
+  z-index: 20;
+}
+::view-transition-old(.voyage-tarifs) {
+  display: none;
+}
+::view-transition-new(.voyage-tarifs) {
+  animation: none;
+}
+
+/* la pastille « Sur mesure » : sombre sur la carte, claire sur la page —
+   elle change de teinte entre 40 et 80 % du trajet */
+::view-transition-group(.voyage-audit) {
+  animation-duration: 380ms;
+  animation-delay: 60ms;
+  animation-timing-function: var(--ease-transition);
+  z-index: 20;
+}
+::view-transition-old(.voyage-audit) {
+  animation: 152ms linear 212ms both vt-fade-out;
+}
+::view-transition-new(.voyage-audit) {
+  animation: 152ms linear 212ms both vt-fade-in;
+}
+
+/* le cadre bordeaux → le hero sombre de /modeles : la géométrie en 420 ms,
+   le bordeaux s'efface pendant que le noir du hero se pose */
+::view-transition-group(.voyage-modeles) {
+  animation-duration: 420ms;
+  animation-delay: 60ms;
+  animation-timing-function: var(--ease-transition);
+  z-index: 20;
+}
+::view-transition-old(.voyage-modeles) {
+  animation: 200ms var(--ease-transition) 60ms both vt-fade-out;
+}
+::view-transition-new(.voyage-modeles) {
+  animation: 140ms var(--ease-transition) 60ms both vt-fade-in;
+}
+
+/* le header : immobile, au-dessus de tout (recette de la doc Next) */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+/* la page reste cliquable sous la couche de transition */
+::view-transition {
+  pointer-events: none;
+}
+
+/* reduced-motion : la règle globale ne couvre pas les pseudo-éléments de
+   transition — durées à zéro, la page change d'un coup */
 @media (prefers-reduced-motion: reduce) {
-  main.page-arrivee {
-    animation: none;
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
+}
+
+/* la pastille posée en tête de page (destination du voyage) */
+.resa .cm-kicker--page {
+  display: inline-flex;
+  margin-bottom: 18px;
+}
+.resa .cm-kicker--violet {
+  color: #6d28d9;
+  background: #ede9fe;
+}
+/* réponse au clic sur une carte de /commencer, avant même la navigation */
+.resa .cm-carte:active {
+  transform: scale(0.985);
+  transition-duration: 80ms;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

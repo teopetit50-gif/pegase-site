@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
+import Partage from "@/components/Partage";
 import { COMPRIS } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -118,8 +119,16 @@ export default function TarifsPage() {
                La porte « organisations » n'existe plus qu'en mention
                discrète, tout en bas. ═══ */}
         <section data-monde="clair" className="r-wrap pb-2 pt-12 sm:pt-14">
-          <h1 className="r-h1 max-w-[17ch]">Des prix publics, une installation comprise</h1>
-          <p className="r-lead mt-6 max-w-[58ch]">
+          {/* 01/09 — transitions : la pastille « Prix publics » ARRIVE de la
+              carte de /commencer (objet partagé) et se pose au-dessus du
+              titre ; titre puis chapô entrent en cascade (Arrivee). */}
+          <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
+            Prix publics
+          </Partage>
+          <h1 data-arrivee="titre" className="r-h1 max-w-[17ch]">
+            Des prix publics, une installation comprise
+          </h1>
+          <p data-arrivee="chapo" className="r-lead mt-6 max-w-[58ch]">
             Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
             réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement,
             satisfait ou remboursé trente jours.
@@ -129,8 +138,8 @@ export default function TarifsPage() {
         {/* ═══ 2 — la grille ═══ */}
         <section id="grille" data-monde="clair" className="r-blanc">
           <div className="r-wrap py-14 sm:py-16">
-            <h2 className="r-h2 max-w-[18ch]">Choisissez vos postes</h2>
-            <p className="r-body mt-4 max-w-[58ch]">
+            <h2 data-arrivee="bloc" className="r-h2 max-w-[18ch]">Choisissez vos postes</h2>
+            <p data-arrivee="bloc" className="r-body mt-4 max-w-[58ch]">
               Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
               WhatsApp. Quel que soit le palier,{" "}
               <Link href={`/offres/${COMPRIS[0].slug}`} className="r-lien !text-[15px]">

@@ -10,6 +10,8 @@ import {
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import TrackWhatsApp from "@/components/TrackWhatsApp";
+import Header from "@/components/Header";
+import LenisRoot from "@/components/LenisRoot";
 import "./globals.css";
 import { SITE_URL } from "@/lib/site";
 
@@ -92,6 +94,11 @@ export default function RootLayout({
           Le script ne collecte qu'une fois « Web Analytics » activé sur le
           projet Vercel (dashboard → pegase-site → Analytics → Enable). */}
       <body>
+        {/* 01/09 — transitions de page : le Header et Lenis vivent ICI, hors
+            du sous-arbre de page, et survivent aux navigations. Avant, chaque
+            page les remontait (barre noire d'une image, inertie perdue). */}
+        <LenisRoot />
+        <Header />
         {children}
         <Analytics />
         <TrackWhatsApp />

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import Partage from "@/components/Partage";
 import { lienContact } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -70,7 +71,11 @@ export default function CommencerPage() {
       <PageMotion />
       <div className="resa">
         <section data-monde="clair" className="r-wrap pb-20 pt-14 sm:pb-28 sm:pt-20">
-          <div className="mx-auto max-w-3xl text-center">
+          {/* 01/09 — transitions : [data-arrivee] = rôles de la cascade
+              d'arrivée (components/Arrivee.tsx) ; les pastilles et le cadre
+              bordeaux sont des objets PARTAGÉS (components/Partage.tsx) qui
+              voyagent jusqu'à la page d'arrivée, et reviennent au retour. */}
+          <div data-arrivee="titre" className="mx-auto max-w-3xl text-center">
             <h1 className="r-h1">Par où commencer&nbsp;?</h1>
             <p className="r-lead mx-auto mt-5 max-w-[46ch]">
               Une seule question décide de la suite&nbsp;: chez vous,{" "}
@@ -86,12 +91,17 @@ export default function CommencerPage() {
               <Link
                 key={p.id}
                 href={p.href}
-                data-reveal
+                data-arrivee="colonne"
+                data-porte={p.id === "tpe" ? "tarifs" : "audit"}
                 className={`cm-carte group ${p.sombre ? "cm-carte--sombre" : ""}`}
               >
-                <span className={`cm-kicker ${p.sombre ? "cm-kicker--sombre" : ""}`}>
+                <Partage
+                  nom={p.id === "tpe" ? "kicker-tarifs" : "kicker-audit"}
+                  share={p.id === "tpe" ? "voyage-tarifs" : "voyage-audit"}
+                  className={`cm-kicker ${p.sombre ? "cm-kicker--sombre" : ""}`}
+                >
                   {p.kicker}
-                </span>
+                </Partage>
                 <h2 className="r-h3 mt-4">{p.titre}</h2>
                 <p className="cm-critere mt-3">{p.critere}</p>
 
@@ -129,12 +139,15 @@ export default function CommencerPage() {
                 deux portes + une offre en plus. Sa propre colonne (auto)
                 dès lg, entre les cartes empilées en mobile, masqué en md
                 où la grille est à deux colonnes. */}
-            <span className="cm-plus flex md:hidden lg:flex" aria-hidden>
+            <span data-arrivee="colonne" className="cm-plus flex md:hidden lg:flex" aria-hidden>
               +
             </span>
-            <Link
+            <Partage
+              nom="cadre-modeles"
+              share="voyage-modeles"
               href="/modeles"
-              data-reveal
+              data-arrivee="colonne"
+              data-porte="modeles"
               className="cm-carte cm-carte--or group md:col-span-2 lg:col-span-1"
             >
               <span className="cm-kicker cm-kicker--or">En plus</span>
@@ -166,10 +179,10 @@ export default function CommencerPage() {
                   <path d="M1 6h12M9 1.5 13.5 6 9 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-            </Link>
+            </Partage>
           </div>
 
-          <p className="r-note mx-auto mt-10 max-w-md text-center">
+          <p data-arrivee="colonne" className="r-note mx-auto mt-10 max-w-md text-center">
             Vous hésitez entre les deux&nbsp;? Décrivez votre situation en deux lignes{" "}
             <a
               href={lienContact("Bonjour Omega — je ne sais pas par où commencer. Mon activité : ")}

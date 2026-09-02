@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { lienContact } from "@/lib/reservation";
 
 /* 22/07 — le pégase (SVG d'après l'icône « pegasus » de Skoll, game-icons.net,
@@ -69,6 +69,8 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const raf = useRef(0);
   const barre = useRef<HTMLElement | null>(null);
+  /* la sonde, rendue appelable hors de son effet (re-sondage par route) */
+  const checkRef = useRef<() => void>(() => {});
   const pathname = usePathname();
   const clair = fond ? estClair(fond) : false;
   /* 06/08 (Teo) — le panneau passe du NOIR au BLANC, sur la référence
@@ -119,6 +121,7 @@ export default function Header() {
       }
       if (trouve) setFond(trouve);
     };
+    checkRef.current = check;
     const onScroll = () => {
       if (!raf.current) raf.current = requestAnimationFrame(check);
     };
@@ -131,6 +134,18 @@ export default function Header() {
       if (raf.current) cancelAnimationFrame(raf.current);
     };
   }, []);
+
+  /* 01/09 — le header vit dans le layout racine et ne remonte plus à chaque
+     page : il re-sonde la couleur sous lui au changement de route, en phase
+     layout (dans le même cycle que la transition, avant la première image
+     de la nouvelle page), puis une fois la transition finie. */
+  useLayoutEffect(() => {
+    checkRef.current();
+  }, [pathname]);
+  useEffect(() => {
+    const t = window.setTimeout(() => checkRef.current(), 600);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
 
   /* Panneau ouvert : plus de scroll derrière, et Échap referme.
      `overflow: hidden` seul ne suffit pas ici — lenis pilote un scroll
@@ -179,7 +194,10 @@ export default function Header() {
            première image, avant que la sonde ait tourné. */
         open || fond ? "" : "bg-panel"
       }`}
-      style={{ backgroundColor: open ? "#ffffff" : fond || undefined }}
+      /* viewTransitionName : pendant une transition de page, le header est
+         ÉPINGLÉ — capturé sous son propre nom, posé au-dessus de la page
+         qui sort, jamais animé (règles ::view-transition-*(site-header)). */
+      style={{ backgroundColor: open ? "#ffffff" : fond || undefined, viewTransitionName: "site-header" }}
     >
       <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-10">
         <Link href="/" className="flex shrink-0 items-center gap-2.5 py-3">

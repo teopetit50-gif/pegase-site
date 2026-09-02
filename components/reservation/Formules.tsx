@@ -1,5 +1,7 @@
 "use client";
 
+import Partage from "@/components/Partage";
+
 /* ══════════════════════════════════════════════════════════════════════
    /reserver-un-audit — bloc haut : sélecteur de profil, trois formules,
    bandeau d'orientation, comparatif. (26/07/2026)
@@ -39,7 +41,7 @@ function Libelle({ point }: { point: Point }) {
 
 function Carte({ f }: { f: Formule }) {
   return (
-    <div className={`r-carte ${f.phare ? "r-carte--phare" : ""}`}>
+    <div data-arrivee="colonne" className={`r-carte ${f.phare ? "r-carte--phare" : ""}`}>
       <div className="r-carte-tete">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
@@ -159,8 +161,20 @@ export default function Formules() {
     <>
       {/* ═══ 1. titre + trois formules ═══ */}
       <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-14">
-        <h1 className="r-h1 max-w-[18ch]">Un audit à la mesure de votre organisation</h1>
-        <p className="r-lead mt-5 max-w-[58ch]">
+        {/* 01/09 — transitions : la pastille « Sur mesure » ARRIVE de la carte
+            « Organisations & équipes » de /commencer (objet partagé), titre
+            puis chapô puis colonnes entrent en cascade (Arrivee). */}
+        <Partage
+          nom="kicker-audit"
+          share="voyage-audit"
+          className="cm-kicker cm-kicker--violet cm-kicker--page"
+        >
+          Sur mesure
+        </Partage>
+        <h1 data-arrivee="titre" className="r-h1 max-w-[18ch]">
+          Un audit à la mesure de votre organisation
+        </h1>
+        <p data-arrivee="chapo" className="r-lead mt-5 max-w-[58ch]">
           Plusieurs services, plusieurs validateurs&nbsp;: on mesure d&apos;abord, et le devis
           sort de vos volumes. Trois formats, du cadrage de 45 minutes à la journée dans
           vos locaux.
@@ -170,7 +184,7 @@ export default function Formules() {
           {/* colonne de gauche — la référence y loge sa preuve sociale ;
               Omega n'en a pas d'authentique, on y met donc les deux faits
               qui décident réellement : c'est gratuit, et c'est financé. */}
-          <div className="flex flex-col justify-start gap-8 pr-2 lg:pt-2">
+          <div data-arrivee="colonne" className="flex flex-col justify-start gap-8 pr-2 lg:pt-2">
             <p className="text-[19px] font-medium leading-[27px] text-[#050505] sm:text-[21px] sm:leading-[29px]">
               Gratuit, sans engagement.
               <br />
@@ -193,7 +207,7 @@ export default function Formules() {
           ))}
         </div>
 
-        <p className="r-note mt-6 max-w-3xl">
+        <p data-arrivee="colonne" className="r-note mt-6 max-w-3xl">
           *Créneaux du lundi au vendredi, 9 h – 17 h (heure Guadeloupe). Les durées
           annoncées sont tenues : l&apos;entretien se termine à l&apos;heure. Le format dans
           vos locaux est facturé sur devis et déduit de l&apos;installation si vous décidez

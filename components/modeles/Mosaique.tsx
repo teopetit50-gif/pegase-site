@@ -42,7 +42,7 @@ const POSE = [
 
 export default function Mosaique() {
   return (
-    <div aria-hidden className="absolute inset-0 overflow-hidden">
+    <div data-arrivee="collage" aria-hidden className="absolute inset-0 overflow-hidden">
       <div
         className="grid h-full grid-cols-3 items-start sm:grid-cols-4 lg:grid-cols-6"
         style={{

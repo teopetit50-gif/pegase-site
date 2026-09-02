@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import Partage from "@/components/Partage";
 import Mosaique from "@/components/modeles/Mosaique";
 import Ruban from "@/components/modeles/Ruban";
 import Boucle from "@/components/modeles/Boucle";
@@ -73,7 +74,14 @@ export default function ModelesPage() {
       <div className="modeles">
         {/* ═══════════ 1 · hero — le collage, comme la référence ═══════════ */}
         <section data-monde="clair" className="m-wrap pt-6 sm:pt-8">
-          <div
+          {/* 01/09 — transitions : le cadre est un objet PARTAGÉ avec la carte
+              bordeaux « Découvrir nos sites » de /commencer — elle grandit
+              jusqu'à devenir ce hero (components/Partage.tsx). Le collage,
+              le titre, le chapô et les boutons entrent ensuite en cascade. */}
+          <Partage
+            nom="cadre-modeles"
+            share="voyage-modeles"
+            as="div"
             className="relative isolate overflow-hidden rounded-[16px] bg-[#0b0b0c]"
             style={{ height: "clamp(30rem, 64vh, 42rem)" }}
           >
@@ -83,14 +91,17 @@ export default function ModelesPage() {
               {/* 15ch : le titre tombe en deux lignes équilibrées
                   (« Un site qui vous / ramène des clients ») au lieu de
                   laisser « clients » orphelin sur la seconde. */}
-              <h1 className="m-h1 max-w-[15ch] text-white">
+              <h1 data-arrivee="hero-titre" className="m-h1 max-w-[15ch] text-white">
                 Un site qui vous ramène des clients
               </h1>
-              <p className="mt-5 max-w-xl text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/75">
+              <p
+                data-arrivee="hero-chapo"
+                className="mt-5 max-w-xl text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/75"
+              >
                 Vingt et un modèles en ligne, que vous pouvez visiter tout de suite
                 branchés sur vos moteurs.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div data-arrivee="hero-bloc" className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
                   href="/commencer"
                   className="m-btn-clair inline-flex items-center gap-2.5 py-3 pl-6 pr-2.5 text-[15px]"
@@ -116,7 +127,7 @@ export default function ModelesPage() {
                 </a>
               </div>
             </div>
-          </div>
+          </Partage>
         </section>
 
         {/* ═══════════ 2 · bandeau de faits ═══════════ */}
