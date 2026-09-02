@@ -125,6 +125,29 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
   );
   const modele: Modele | null = MODELES.find((m) => m.slug === slug) ?? null;
 
+  /* 02/09 (Teo : « quand on choisit un modèle, les autres doivent se
+     replier — devoir défiler jusqu'à Continuer, c'est pas pro ») — dès
+     qu'un modèle est choisi, la grille des vingt et un se REPLIE sur le
+     modèle retenu, avec « Continuer » juste à côté ; « Choisir un autre
+     modèle » rouvre la grille. Pré-sélectionné depuis la galerie
+     (?modele=) : on arrive directement replié. */
+  const [grilleOuverte, setGrilleOuverte] = useState<boolean>(
+    () => !MODELES.some((m) => m.slug === modeleInitial),
+  );
+  const refEtapeModele = useRef<HTMLDivElement | null>(null);
+  const choisirModele = (s: string) => {
+    setSlug(s);
+    setErreur(null);
+    setGrilleOuverte(false);
+    /* la grille vient de se replier : on ramène le haut de l'étape à
+       l'écran, sous le header collant (scroll-mt), sans animation si
+       l'utilisateur demande moins de mouvement */
+    const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.requestAnimationFrame(() =>
+      refEtapeModele.current?.scrollIntoView({ block: "start", behavior: reduit ? "auto" : "smooth" }),
+    );
+  };
+
   /* ——— c) le brief ——— */
   const [b, setB] = useState({
     entreprise: util?.entreprise ?? "",
@@ -492,15 +515,78 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
         {/* ——— a) le modèle ——— */}
         {etape === "modele" ? (
-          <div>
-            <h3 className="r-h4">Choisissez votre modèle</h3>
+          <div ref={refEtapeModele} className="scroll-mt-24">
+            <h3 className="r-h4">{modele && !grilleOuverte ? "Votre modèle" : "Choisissez votre modèle"}</h3>
             <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
-              Un parti pris visuel, pas un métier imposé&nbsp;: vous choisissez l&apos;allure, on
-              réécrit tout le contenu au vôtre. Chaque démo se visite en vrai.
+              {modele && !grilleOuverte
+                ? "C'est celui-ci qui sera réécrit à votre métier. Vous pouvez encore en changer."
+                : "Un parti pris visuel, pas un métier imposé : vous choisissez l'allure, on réécrit tout le contenu au vôtre. Chaque démo se visite en vrai."}
             </p>
             {messageErreur ? <p className="rv-erreur mt-4">{messageErreur}</p> : null}
 
-            <fieldset className="m-0 min-w-0 border-0 p-0">
+            {/* ——— replié : le modèle retenu, et Continuer sans défiler ——— */}
+            {modele && !grilleOuverte ? (
+              <div className="mt-6 grid gap-5 sm:grid-cols-[minmax(0,320px)_1fr] sm:items-start">
+                <div className="rounded-[12px] border border-[#050505] bg-[#fdf3dd] p-3">
+                  <MiniSite
+                    m={modele}
+                    ton="clair"
+                    cadre={false}
+                    sizes="(max-width: 640px) 90vw, 320px"
+                  />
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <span className="text-[15px] font-medium text-[#050505]">{modele.nom}</span>
+                    <span
+                      aria-hidden
+                      className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border-[1.5px] border-[#050505] bg-[#050505]"
+                    >
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4 3.8 6.8 9 1.2" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-[13px] leading-[19px] text-[#3d3d3d]">{modele.pour}</p>
+                  {modele.reserve ? (
+                    <p className="mt-2 rounded-[6px] bg-black/[0.045] px-2.5 py-1.5 text-[12px] leading-snug text-[#3d3d3d]">
+                      {modele.reserve}
+                    </p>
+                  ) : null}
+                  <a
+                    href={modele.demo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#050505] underline-offset-4 hover:underline"
+                    aria-label={`Visiter la démo du modèle ${modele.nom} dans un nouvel onglet`}
+                  >
+                    Visiter la démo
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
+                      <path d="M5.5 10.5 10.5 5.5M6.5 5.5h4v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                </div>
+                <div className="flex flex-col gap-4 sm:pt-2">
+                  <p className="text-[14px] leading-[21px] text-[#3d3d3d]">
+                    Étape suivante&nbsp;: {util ? "votre brief — ce que vous faites, vos pages, votre logo." : "votre compte, puis votre brief."}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={continuerDepuisModele}
+                    className="r-btn r-btn--noir w-full sm:w-auto sm:min-w-[220px]"
+                  >
+                    Continuer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGrilleOuverte(true)}
+                    className="self-start text-[14px] font-medium text-[#050505] underline underline-offset-4"
+                  >
+                    Choisir un autre modèle
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            <fieldset className={`m-0 min-w-0 border-0 p-0 ${modele && !grilleOuverte ? "hidden" : ""}`}>
               <legend className="sr-only">Le modèle de votre site</legend>
               {CATEGORIES.map((cat) => (
                 <div key={cat.cle} className="mt-8 first:mt-6">
@@ -512,10 +598,10 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       return (
                         <div
                           key={m.slug}
-                          className={`flex flex-col rounded-[12px] border p-3 transition-colors ${
+                          className={`flex flex-col rounded-[12px] border p-3 transition-[border-color,opacity] ${
                             choisi
                               ? "border-[#050505] bg-[#fdf3dd]"
-                              : "border-[#e3e3e3] bg-white hover:border-[#050505]"
+                              : `border-[#e3e3e3] bg-white hover:border-[#050505] ${slug ? "opacity-70 hover:opacity-100" : ""}`
                           } has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#050505]`}
                         >
                           <label className="flex flex-1 cursor-pointer flex-col">
@@ -524,10 +610,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                               name="modele"
                               value={m.slug}
                               checked={choisi}
-                              onChange={() => {
-                                setSlug(m.slug);
-                                setErreur(null);
-                              }}
+                              onChange={() => choisirModele(m.slug)}
                               className="sr-only"
                             />
                             <MiniSite
@@ -580,7 +663,10 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
               ))}
             </fieldset>
 
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            {/* grille ouverte : le bouton du bas ne sert qu'à qui rouvre la
+                grille pour comparer et garde son choix ; replié, Continuer
+                est déjà à côté du modèle */}
+            <div className={`mt-8 flex flex-wrap items-center gap-4 ${modele && !grilleOuverte ? "hidden" : ""}`}>
               <button
                 type="button"
                 disabled={!modele}
