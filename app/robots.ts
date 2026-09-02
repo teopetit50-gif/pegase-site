@@ -9,11 +9,13 @@ import { SITE_URL } from "@/lib/site";
    02/09 — l'espace client existe désormais : /compte (« Mon dossier »)
    et les routes /auth sont fermées aux robots. /connexion n'est pas
    interdite mais reste hors sitemap et en noindex : une page d'entrée
-   qu'un moteur peut rencontrer sans qu'elle ait rien à indexer. */
+   qu'un moteur peut rencontrer sans qu'elle ait rien à indexer.
+   /site/commande (02/09, même jour) : le tunnel de commande de site —
+   une étape de parcours rattachée à un compte, hors sitemap et fermée. */
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/compte", "/auth/"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/compte", "/auth/", "/site/commande"] },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

@@ -10,6 +10,9 @@
    /installation est dans la liste parce que c'est le parcours verrouillé
    (« connectez-vous pour réserver votre installation ») ; /reserver n'y
    est PAS : l'audit reste libre, décision Teo du 02/09.
+   /site/* (02/09, même jour) : le tunnel de commande de site — un achat,
+   donc un compte ; la page lit la session côté serveur et le jeton doit
+   être à jour quand le brief part.
    ══════════════════════════════════════════════════════════════════════ */
 
 import type { NextRequest } from "next/server";
@@ -20,5 +23,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/compte/:path*", "/connexion", "/installation", "/auth/:path*"],
+  matcher: ["/compte/:path*", "/connexion", "/installation", "/auth/:path*", "/site/:path*"],
 };

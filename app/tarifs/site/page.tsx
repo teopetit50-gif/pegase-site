@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import Partage from "@/components/Partage";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs/site — l'offre site à prix public (01/09/2026)
@@ -31,6 +32,20 @@ import PageMotion from "@/components/PageMotion";
    toujours par l'audit gratuit (le devis site sort de là, Chèque TIC
    vérifié séance tenante) — règle « qui valide » inchangée : les
    organisations restent sur devis sans montant.
+
+   02/09 (Teo) — l'ACHAT EN LIGNE. Cette page devient la destination de
+   la carte « Découvrir nos sites » de /commencer, et son CTA principal
+   n'envoie plus vers la galerie : « Commander mon site » → /site/commande
+   (modèle → compte → brief → paiement, Stripe plus tard). La bande sombre
+   garde « Parcourir les 21 modèles » → /modeles : la galerie reste le
+   lieu de découverte. Le Chèque TIC continue de se vérifier à l'audit.
+
+   Transitions (02/09) : le cadre bordeaux de /commencer est un objet
+   PARTAGÉ (« cadre-modeles ») — il voyageait jusqu'au hero de /modeles,
+   il se pose désormais sur la carte produit ci-dessous (Partage as="div",
+   sans data-reveal : l'objet doit être visible à l'arrivée). Titre, chapô
+   et l'intertitre de l'offre entrent en cascade ([data-arrivee], voir
+   components/Arrivee.tsx), comme sur /tarifs.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -94,8 +109,10 @@ export default function TarifsSitePage() {
       <div className="resa">
         {/* ═══ 1 — titre ═══ */}
         <section data-monde="clair" className="r-wrap pb-2 pt-12 sm:pt-14">
-          <h1 className="r-h1 max-w-[19ch]">Votre site, au même prix pour tout le monde</h1>
-          <p className="r-lead mt-6 max-w-[58ch]">
+          <h1 data-arrivee="titre" className="r-h1 max-w-[19ch]">
+            Votre site, au même prix pour tout le monde
+          </h1>
+          <p data-arrivee="chapo" className="r-lead mt-6 max-w-[58ch]">
             Vingt et un modèles, tous en ligne, tous visitables. Vous choisissez l&apos;allure, on
             réécrit tout le contenu à votre métier — et dès qu&apos;un poste tourne chez vous, le
             formulaire l&apos;alimente. Le prix est public, comme celui de la grille.
@@ -107,17 +124,20 @@ export default function TarifsSitePage() {
                formules. ═══ */}
         <section id="offre" data-monde="clair" className="r-blanc">
           <div className="r-wrap py-14 sm:py-16">
-            <h2 className="r-h2 max-w-[18ch]">Un prix, une aide, une suite</h2>
-            <p className="r-body mt-4 max-w-[58ch]">
+            <h2 data-arrivee="bloc" className="r-h2 max-w-[18ch]">Un prix, une aide, une suite</h2>
+            <p data-arrivee="bloc" className="r-body mt-4 max-w-[58ch]">
               La création se paie une fois — c&apos;est un investissement, celui que le Chèque TIC
               sait financer. La suite, elle, est comprise&nbsp;: tant qu&apos;un poste Omega tourne
               chez vous, la vitrine est entretenue.
             </p>
 
             <div className="mt-10 grid gap-4 lg:grid-cols-[1fr_379px] lg:gap-6">
-              {/* ——— la carte produit ——— */}
-              <div
-                data-reveal
+              {/* ——— la carte produit — l'objet partagé qui arrive de
+                     /commencer (02/09) ——— */}
+              <Partage
+                nom="cadre-modeles"
+                share="voyage-modeles"
+                as="div"
                 className="flex flex-col rounded-[20px] border border-[#e3e3e3] bg-white p-7 sm:p-9"
               >
                 <div
@@ -158,12 +178,15 @@ export default function TarifsSitePage() {
                   ))}
                 </ul>
 
-                <div className="mt-8 flex flex-1 flex-col justify-end sm:flex-row sm:items-end sm:justify-start">
-                  <Link href="/modeles" className="r-btn r-btn--noir sm:min-w-[240px]">
-                    Choisir votre modèle
+                <div className="mt-8 flex flex-1 flex-col justify-end gap-3 sm:flex-row sm:items-center sm:justify-start sm:gap-6">
+                  <Link href="/site/commande" className="r-btn r-btn--noir sm:min-w-[240px]">
+                    Commander mon site
+                  </Link>
+                  <Link href="/modeles" className="r-lien !text-[15px] text-center sm:text-left">
+                    Voir les modèles d&apos;abord
                   </Link>
                 </div>
-              </div>
+              </Partage>
 
               {/* ——— le décompte Chèque TIC, façon devis ——— */}
               <aside

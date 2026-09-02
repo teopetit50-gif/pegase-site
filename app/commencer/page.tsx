@@ -15,6 +15,8 @@ import { lienContact } from "@/lib/reservation";
 
      · « Indépendants & TPE-PME »        → /tarifs   (prix publics)
      · « Organisations & équipes »       → /reserver-un-audit (sur devis)
+     · « Découvrir nos sites » (01/09)   → /tarifs/site (l'offre site ;
+                                            depuis le 02/09, plus /modeles)
 
    Le mot retenu pour l'autre monde est « organisation » — jamais
    « grosse entreprise » : ce qui sépare les deux n'est pas la taille mais
@@ -131,10 +133,15 @@ export default function CommencerPage() {
                 peut en avoir besoin). D'abord en bande dessous, puis
                 déplacée À DROITE des portes à la demande de Teo (croquis) :
                 troisième colonne dès lg, même squelette que les deux
-                autres. Bordeaux et or : une teinte à part, premium. Elle
-                mène à la galerie (/modeles) ; la page de l'offre
-                (/tarifs/site, prix et Chèque TIC) sera retravaillée plus
-                tard. Entre md et lg elle occupe la rangée du dessous. */}
+                autres. Bordeaux et or : une teinte à part, premium. Entre
+                md et lg elle occupe la rangée du dessous.
+                02/09 (Teo) — elle mène désormais à l'OFFRE (/tarifs/site :
+                prix, Chèque TIC, « Commander mon site »), plus à la
+                galerie : « Découvrir les modèles » doit conduire à ce qui
+                s'achète. La galerie (/modeles) reste un lieu de découverte,
+                liée depuis l'offre. Le cadre bordeaux (objet partagé
+                « cadre-modeles ») voyage donc jusqu'à la carte produit de
+                /tarifs/site, plus jusqu'au hero de /modeles. */}
             {/* 01/09 (Teo) — un « + » entre les portes et la carte sites :
                 deux portes + une offre en plus. Sa propre colonne (auto)
                 dès lg, entre les cartes empilées en mobile, masqué en md
@@ -145,7 +152,7 @@ export default function CommencerPage() {
             <Partage
               nom="cadre-modeles"
               share="voyage-modeles"
-              href="/modeles"
+              href="/tarifs/site"
               data-arrivee="colonne"
               data-porte="modeles"
               className="cm-carte cm-carte--or group md:col-span-2 lg:col-span-1"
@@ -174,7 +181,7 @@ export default function CommencerPage() {
               </ul>
 
               <span className="cm-cta cm-cta--or mt-8">
-                Voir les 21 modèles
+                Voir les offres
                 <svg aria-hidden width="15" height="12" viewBox="0 0 15 12" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">
                   <path d="M1 6h12M9 1.5 13.5 6 9 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>

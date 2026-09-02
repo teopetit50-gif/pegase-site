@@ -22,10 +22,12 @@ export const EASE_CHARTE = "0.16,1,0.3,1";
 /* route précédente — écrite par Arrivee au moment où il la lit */
 export const memoire = { route: null as string | null };
 
+/* 02/09 — la carte « Découvrir nos sites » mène à /tarifs/site (l'offre)
+   et plus à /modeles : c'est de là que le cadre bordeaux revient. */
 export const PORTES: Record<string, "tarifs" | "audit" | "modeles"> = {
   "/tarifs": "tarifs",
   "/reserver-un-audit": "audit",
-  "/modeles": "modeles",
+  "/tarifs/site": "modeles",
 };
 
 export type Temps = [delai: number, duree: number, y: number];

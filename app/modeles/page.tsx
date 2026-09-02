@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import Partage from "@/components/Partage";
 import Mosaique from "@/components/modeles/Mosaique";
 import Ruban from "@/components/modeles/Ruban";
 import Boucle from "@/components/modeles/Boucle";
@@ -48,6 +47,10 @@ import { lienContact } from "@/lib/reservation";
    Ce que cette page ne fait pas : vendre. Aucun prix, aucun bouton
    « commander ». Le parcours est « audit d'abord » depuis le 31/07 ;
    les CTA mènent tous à /tarifs (28/08 : entrée neutre « Commencer », les deux portes).
+   02/09 — l'achat existe (/tarifs/site → /site/commande) ; la galerie
+   reste un lieu de découverte, avec sous chaque carte un petit lien
+   « Commander avec ce modèle » qui pré-sélectionne le modèle dans le
+   tunnel — discret : ce n'est pas une page de vente.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -74,14 +77,15 @@ export default function ModelesPage() {
       <div className="modeles">
         {/* ═══════════ 1 · hero — le collage, comme la référence ═══════════ */}
         <section data-monde="clair" className="m-wrap pt-6 sm:pt-8">
-          {/* 01/09 — transitions : le cadre est un objet PARTAGÉ avec la carte
-              bordeaux « Découvrir nos sites » de /commencer — elle grandit
-              jusqu'à devenir ce hero (components/Partage.tsx). Le collage,
-              le titre, le chapô et les boutons entrent ensuite en cascade. */}
-          <Partage
-            nom="cadre-modeles"
-            share="voyage-modeles"
-            as="div"
+          {/* 01/09 — transitions : le cadre était un objet PARTAGÉ avec la
+              carte bordeaux « Découvrir nos sites » de /commencer, qui
+              grandissait jusqu'à devenir ce hero. 02/09 : cette carte mène
+              désormais à /tarifs/site, et l'objet partagé « cadre-modeles »
+              y a suivi (la carte produit) — un seul élément monté par nom
+              dans toute l'application, il ne pouvait pas rester ici. Le
+              hero redevient un div ordinaire ; le collage, le titre, le
+              chapô et les boutons entrent toujours en cascade. */}
+          <div
             className="relative isolate overflow-hidden rounded-[16px] bg-[#0b0b0c]"
             style={{ height: "clamp(30rem, 64vh, 42rem)" }}
           >
@@ -127,7 +131,7 @@ export default function ModelesPage() {
                 </a>
               </div>
             </div>
-          </Partage>
+          </div>
         </section>
 
         {/* ═══════════ 2 · bandeau de faits ═══════════ */}

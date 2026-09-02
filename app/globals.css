@@ -550,8 +550,9 @@ button.rounded-full:active {
   animation: 152ms linear 212ms both vt-fade-in;
 }
 
-/* le cadre bordeaux → le hero sombre de /modeles : la géométrie en 420 ms,
-   le bordeaux s'efface pendant que le noir du hero se pose */
+/* le cadre bordeaux → la carte produit (blanche) de /tarifs/site — 02/09,
+   jusque-là le hero sombre de /modeles : la géométrie en 420 ms, le
+   bordeaux s'efface pendant que la carte se pose */
 ::view-transition-group(.voyage-modeles) {
   animation-duration: 420ms;
   animation-delay: 60ms;

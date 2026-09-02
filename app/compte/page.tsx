@@ -12,6 +12,13 @@ import {
   libelleFormule,
 } from "@/lib/compte";
 import { POSTES } from "@/lib/paliers";
+import { MODELES } from "@/components/modeles/donnees";
+import {
+  LIBELLES_STATUT_SITE,
+  dateGp,
+  prixLisible,
+  type LigneCommandeSite,
+} from "@/lib/site-commande";
 import { COCKPIT_URL } from "@/lib/supabase/config";
 import { createClient, utilisateurCourant } from "@/lib/supabase/server";
 
@@ -48,13 +55,23 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
    jamais être mise en cache. Sans session : /connexion?suite=/compte (le
    proxy fait déjà ce renvoi ; on le refait ici — le proxy n'est pas une
    garantie, voir proxy.md).
+
+   02/09 (même jour) — « Mes commandes de site » : les commandes passées
+   par le tunnel /site/commande (rpc mes_commandes_site, celles où
+   utilisateur_id = auth.uid()). Modèle (nom du catalogue — un slug qui
+   n'y serait plus s'affiche tel quel plutôt que de planter la page),
+   entreprise, prix, date, et le statut du point de vue du client :
+   « a_payer » se lit « Enregistrée — règlement à venir », pas « payez »
+   (pas de paiement en ligne encore, Teo appelle). Même règle de panne :
+   une lecture qui échoue se dit.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Mon compte | Omega.AI",
-  description: "Vos demandes d'installation, vos créneaux, votre mot de passe et l'accès à votre cockpit.",
+  description:
+    "Vos demandes d'installation, vos commandes de site, votre mot de passe et l'accès à votre cockpit.",
   robots: { index: false, follow: false },
 };
 
@@ -78,17 +95,21 @@ export default async function ComptePage() {
   if (!utilisateur) redirect("/connexion?suite=%2Fcompte");
 
   const supabase = await createClient();
-  const [demandesRes, comptesRes] = await Promise.all([
+  const [demandesRes, comptesRes, commandesRes] = await Promise.all([
     supabase.rpc("mes_demandes"),
     supabase.from("comptes").select("client_id"),
+    supabase.rpc("mes_commandes_site"),
   ]);
   const demandes = ((demandesRes.data ?? []) as Demande[]).slice();
   const panneDemandes = Boolean(demandesRes.error);
   const panneComptes = Boolean(comptesRes.error);
   const rattache = !panneComptes && (comptesRes.data?.length ?? 0) > 0;
   const aInstallation = demandes.some((d) => d.parcours === "reglage" && d.statut !== "annule");
+  const commandes = ((commandesRes.data ?? []) as LigneCommandeSite[]).slice();
+  const panneCommandes = Boolean(commandesRes.error);
 
   const nomPoste = (id: string) => POSTES.find((p) => p.id === id)?.nom ?? id;
+  const nomModele = (slug: string) => MODELES.find((m) => m.slug === slug)?.nom ?? slug;
 
   return (
     <PageShell>
@@ -181,6 +202,59 @@ export default async function ComptePage() {
                       </li>
                     );
                   })}
+                </ul>
+              )}
+
+              {/* ——— les commandes de site (02/09) ——— */}
+              <h2 className="r-h4 mt-10">Mes commandes de site</h2>
+              {panneCommandes ? (
+                <p className="rv-erreur mt-4">
+                  Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
+                </p>
+              ) : commandes.length === 0 ? (
+                <div className="r-carte mt-4 !p-7">
+                  <p className="text-[15px] leading-[24px] text-[#3d3d3d]">
+                    Aucune commande de site pour l&apos;instant. Le site catalogue est à
+                    990&nbsp;€ TTC, une fois — vingt et un modèles, contenu réécrit à votre métier.
+                  </p>
+                  <div className="mt-5">
+                    <Link href="/tarifs/site" className="r-btn r-btn--fil">
+                      Voir l&apos;offre site
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <ul className="mt-4 space-y-4">
+                  {commandes.map((c) => (
+                    <li key={c.id} className="r-carte !p-7">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                        Site catalogue
+                      </div>
+                      <h3 className="r-h4 mt-2">Modèle {nomModele(c.modele)}</h3>
+                      <p className="num mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">
+                        Commandée le {dateGp(c.cree_le)}
+                      </p>
+                      <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#fdf3dd] px-3 py-1.5 text-[13px] font-medium text-[#050505]">
+                        {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
+                      </p>
+                      <p className="mt-3 text-[14px] leading-[22px] text-[#3d3d3d]">
+                        Entreprise&nbsp;: <span className="font-medium text-[#050505]">{c.entreprise}</span>
+                      </p>
+                      <div className="mt-4 flex items-baseline justify-between border-t border-[#e3e3e3] pt-4">
+                        <span className="text-[14px] text-[#3d3d3d]">Prix</span>
+                        <span className="num text-[20px] font-semibold text-[#050505]">
+                          {prixLisible(c.prix_eur)}
+                          <span className="text-[13px] font-normal text-[#616161]"> TTC</span>
+                        </span>
+                      </div>
+                      {c.statut === "a_payer" ? (
+                        <p className="r-note mt-3">
+                          Le paiement en ligne arrive&nbsp;: on vous appelle pour régler et lancer la
+                          production.
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
                 </ul>
               )}
 

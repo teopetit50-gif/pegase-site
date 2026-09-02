@@ -1,3 +1,4 @@
+import Link from "next/link";
 import MiniSite from "./MiniSite";
 import type { Modele } from "./donnees";
 import { lienContact } from "@/lib/reservation";
@@ -17,6 +18,11 @@ import { lienContact } from "@/lib/reservation";
    Deux liens à l'intérieur, jamais un lien englobant : visiter la démo et
    demander le modèle. Un <a> dans un <a> est invalide, et le navigateur
    défait le balisage à sa façon si on essaie quand même.
+
+   02/09 — un troisième lien, discret, sous les deux autres : « Commander
+   avec ce modèle » → /site/commande?modele=<slug>, le tunnel de commande
+   avec le modèle pré-sélectionné. Petit et en retrait : /modeles reste
+   une galerie, pas une page de vente — le prix se lit sur /tarifs/site.
    ══════════════════════════════════════════════════════════════════════ */
 
 export default function CarteModele({ m }: { m: Modele }) {
@@ -128,6 +134,14 @@ export default function CarteModele({ m }: { m: Modele }) {
             </svg>
           </a>
         </div>
+        <p className="mt-2.5 text-[12.5px] text-[color:var(--m-faible)]">
+          <Link
+            href={`/site/commande?modele=${m.slug}`}
+            className="underline-offset-4 hover:text-[color:var(--m-encre)] hover:underline"
+          >
+            Commander avec ce modèle
+          </Link>
+        </p>
       </div>
     </div>
   );
