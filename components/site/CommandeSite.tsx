@@ -515,7 +515,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
         {/* ——— a) le modèle ——— */}
         {etape === "modele" ? (
-          <div ref={refEtapeModele} className="scroll-mt-24">
+          <div ref={refEtapeModele} className="rv-apparait scroll-mt-24">
             <h3 className="r-h4">{modele && !grilleOuverte ? "Votre modèle" : "Choisissez votre modèle"}</h3>
             <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
               {modele && !grilleOuverte
@@ -526,7 +526,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
             {/* ——— replié : le modèle retenu, et Continuer sans défiler ——— */}
             {modele && !grilleOuverte ? (
-              <div className="mt-6 grid gap-5 sm:grid-cols-[minmax(0,320px)_1fr] sm:items-start">
+              <div className="rv-apparait mt-6 grid gap-5 sm:grid-cols-[minmax(0,320px)_1fr] sm:items-start">
                 <div className="rounded-[12px] border border-[#050505] bg-[#fdf3dd] p-3">
                   <MiniSite
                     m={modele}
@@ -586,7 +586,12 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
               </div>
             ) : null}
 
-            <fieldset className={`m-0 min-w-0 border-0 p-0 ${modele && !grilleOuverte ? "hidden" : ""}`}>
+            {/* keyé sur l'état replié/ouvert : la grille remonte et rejoue
+                son apparition quand on la rouvre */}
+            <fieldset
+              key={grilleOuverte ? "ouverte" : "repliee"}
+              className={`rv-apparait m-0 min-w-0 border-0 p-0 ${modele && !grilleOuverte ? "hidden" : ""}`}
+            >
               <legend className="sr-only">Le modèle de votre site</legend>
               {CATEGORIES.map((cat) => (
                 <div key={cat.cle} className="mt-8 first:mt-6">
@@ -684,7 +689,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
         {/* ——— b) le compte ——— */}
         {etape === "compte" ? (
-          <div>
+          <div className="rv-apparait">
             <h3 className="r-h4">Votre compte</h3>
             {messageErreur ? <p className="rv-erreur mt-4">{messageErreur}</p> : null}
             <div className="mt-5">
@@ -714,7 +719,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
         {/* ——— c) le brief ——— */}
         {etape === "brief" ? (
-          <>
+          <div className="rv-apparait">
             {/* la session a sauté pendant la saisie : la connexion d'abord,
                 le formulaire (désactivé) dessous — HORS du <form>, le
                 module a ses propres formulaires */}
@@ -993,12 +998,12 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                 .
               </p>
             </form>
-          </>
+          </div>
         ) : null}
 
         {/* ——— d) le paiement : l'écran d'attente ——— */}
         {etape === "paiement" ? (
-          <div>
+          <div className="rv-apparait">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#050505]">
               <svg aria-hidden width="18" height="14" viewBox="0 0 18 14" fill="none">
                 <path d="M1.5 7.5 6.5 12.5 16.5 1.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />

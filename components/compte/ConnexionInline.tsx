@@ -353,7 +353,9 @@ export default function ConnexionInline({
   const boutonClasse = (actif: boolean) => `r-btn shrink-0 ${!actif || envoi ? "rv-btn--attente" : "r-btn--noir"}`;
 
   return (
-    <div className="rounded-xl border border-[#e3e3e3] bg-[#fafafa] p-5 sm:p-6">
+    /* keyé sur le mode : chaque écran (connexion, création, code, nouveau
+       mot de passe) apparaît en fondu au lieu de sauter (02/09) */
+    <div key={mode} className="rv-apparait rounded-xl border border-[#e3e3e3] bg-[#fafafa] p-5 sm:p-6">
       {portes ? (
         /* les deux portes — un sélecteur segmenté (.r-seg), comme le
            choix de profil sur /reserver-un-audit. « Mot de passe oublié »

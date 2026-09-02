@@ -520,6 +520,31 @@ button.rounded-full:active {
   }
 }
 
+/* ——— apparition d'un écran DANS une page (02/09, Teo : « plus smooth,
+   plus pro ») — les étapes des tunnels (réservation, commande de site),
+   le repli/réouverture de la grille des modèles, les écrans du module de
+   connexion : ce qui se monte apparaît en fondu + 10 px de montée, sur la
+   courbe charte, au lieu de sauter à l'écran. Un élément keyé remonte,
+   donc rejoue l'entrée à chaque changement. ——— */
+@keyframes rv-apparait {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rv-apparait {
+  animation: rv-apparait 0.36s var(--ease-transition) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv-apparait {
+    animation: none;
+  }
+}
+
 /* la pastille « Prix publics » : UN objet, même dessin des deux côtés —
    aucun fondu croisé, seule la géométrie voyage */
 ::view-transition-group(.voyage-tarifs) {

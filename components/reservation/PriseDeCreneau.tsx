@@ -514,7 +514,7 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
 
         {/* ——— étape 1 : le créneau ——— */}
         {etape === "creneau" ? (
-          <div>
+          <div className="rv-apparait">
             <h3 className="r-h4">Choisissez votre créneau</h3>
             {erreur ? <p className="rv-erreur mt-4">{ERREURS[erreur] ?? ERREURS.reseau}</p> : null}
 
@@ -648,7 +648,7 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
 
         {/* ——— étape 2 : les coordonnées ——— */}
         {etape === "coordonnees" ? (
-          <>
+          <div className="rv-apparait">
             {/* 02/09 — installation sans session : la connexion d'abord
                 (e-mail + mot de passe, ou « Créer mon compte » : le code
                 prouve l'adresse, puis le mot de passe seul — les
@@ -821,12 +821,12 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
               .
             </p>
           </form>
-          </>
+          </div>
         ) : null}
 
         {/* ——— étape 3 : c'est fait ——— */}
         {etape === "fait" ? (
-          <div>
+          <div className="rv-apparait">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#050505]">
               <svg aria-hidden width="18" height="14" viewBox="0 0 18 14" fill="none">
                 <path d="M1.5 7.5 6.5 12.5 16.5 1.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
