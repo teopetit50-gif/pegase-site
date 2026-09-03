@@ -220,14 +220,15 @@ function SelecteurPeriodicite({
   const remise = Math.round(REMISE_ANNUELLE * 100);
   const annuel = valeur === "annuel";
   /* 03/09 (Teo : « vers la droite, en bouton stylisé, plus pro ») — le
-     sélecteur quitte le centre pour la droite de la grille, au-dessus de
-     la troisième carte, et devient une pilule noire à curseur blanc qui
+     sélecteur quitte le centre pour le bord GAUCHE de la grille (03/09,
+     second choix de Teo : « aligné avec le reste »), au-dessus de la
+     première carte, et devient une pilule noire à curseur blanc qui
      GLISSE d'un côté à l'autre (rv-periode, globals.css) — le geste des
      pages de prix de référence. Le mot « Facturation » à gauche dit ce
      que le bouton règle ; la pastille « −15 % » reste dans le bouton
      Annuel, verte sur les deux fonds. */
   return (
-    <div data-arrivee="bloc" className="flex items-center justify-center gap-3 sm:justify-end">
+    <div data-arrivee="bloc" className="flex items-center justify-center gap-3 sm:justify-start">
       <span className="hidden text-[13px] font-medium leading-[18px] text-[#616161] sm:inline">
         Facturation
       </span>
