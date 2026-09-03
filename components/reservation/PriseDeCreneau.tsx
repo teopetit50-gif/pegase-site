@@ -41,6 +41,15 @@
    initiale vient du serveur (prop `utilisateur`, lue dans les cookies par
    app/installation/page.tsx) ; onAuthStateChange prend le relais pour la
    connexion faite en ligne. Parcours « audit » : zéro changement.
+
+   02/09 (soir) — LA FORMULE ANNUELLE, parcours installation seulement.
+   La périodicité arrive de /tarifs (prop `periodicite`, lue dans l'URL
+   par app/installation/page.tsx) et vit ensuite en état LOCAL : Teo veut
+   que le choix reste modifiable jusqu'au bout, d'où le lien « Passer en
+   annuel / en mensuel » sous le prix du récapitulatif, qui bascule sur
+   place sans quitter la page ni perdre le créneau. Les montants sont
+   dérivés de lib/paliers.ts (prixAnnuel & co) ; l'envoi ne transmet que
+   la périodicité, la fonction SQL recalcule et fige l'instantané.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -64,7 +73,15 @@ import {
   type Agenda,
 } from "@/lib/creneaux";
 import { SystemLogo } from "@/components/logos";
-import { POSTES, prixPour } from "@/lib/paliers";
+import {
+  POSTES,
+  REMISE_ANNUELLE,
+  economieAnnuelle,
+  equivalentMensuel,
+  prixAnnuel,
+  prixPour,
+  type Periodicite,
+} from "@/lib/paliers";
 import { PROFILS, lienContact } from "@/lib/reservation";
 
 /* ——— catalogue des formats réservables sur /reserver ———
@@ -96,12 +113,21 @@ type Props = {
   parcours: "installation" | "audit";
   formuleInitiale?: string;
   postes?: string[];
+  /* 02/09 — mensuel (défaut) ou annuel, venu de la grille ; valeur
+     initiale seulement, le récapitulatif la laisse changer */
+  periodicite?: Periodicite;
   /* 02/09 — la session lue côté serveur (parcours installation). Absent
      ou null : personne de connecté. Le parcours audit ne le passe pas. */
   utilisateur?: Utilisateur | null;
 };
 
-export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [], utilisateur }: Props) {
+export default function PriseDeCreneau({
+  parcours,
+  formuleInitiale,
+  postes = [],
+  periodicite: periodiciteInitiale = "mensuel",
+  utilisateur,
+}: Props) {
   /* ——— le verrou compte (02/09) : installation seulement ——— */
   const verrou = parcours === "installation";
   const [util, setUtil] = useState<Utilisateur | null>(verrou ? (utilisateur ?? null) : null);
@@ -120,6 +146,12 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
     [postes],
   );
   const prix = parcours === "installation" ? prixPour(postesValides.length || 1) : null;
+  /* la périodicité (02/09) — état local, initialisé par la prop */
+  const [periodicite, setPeriodicite] = useState<Periodicite>(periodiciteInitiale);
+  const annuel = parcours === "installation" && periodicite === "annuel";
+  /* ce que le récapitulatif et l'écran final disent de l'abonnement */
+  const libellePrix =
+    prix === null ? "" : annuel ? `${prixAnnuel(prix)} € par an` : `${prix} €/mois`;
 
   /* ——— quand ——— */
   const [agenda, setAgenda] = useState<Agenda | null>(null);
@@ -131,14 +163,22 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
   const [jour, setJour] = useState<number | null>(null);
   const [creneau, setCreneau] = useState<number | null>(null);
 
-  const rechargerAgenda = () => {
-    setChargement(true);
+  /* 03/09 — le premier chargement n'a pas à remettre `chargement` à true
+     (il y est déjà) : l'effet appelle directement la lecture, et le
+     rechargement manuel (bouton, créneau refusé) passe par rechargerAgenda.
+     Séparés, pour ne pas poser d'état de façon synchrone dans un effet. */
+  const lireAgenda = () =>
     chargerAgenda()
       .then(setAgenda)
       .catch(() => setAgenda(null))
       .finally(() => setChargement(false));
+  const rechargerAgenda = () => {
+    setChargement(true);
+    void lireAgenda();
   };
-  useEffect(rechargerAgenda, []);
+  useEffect(() => {
+    void lireAgenda(); // au montage seulement
+  }, []);
 
   /* disponibilité de chaque jour du mois affiché */
   const joursDuMois = useMemo(() => {
@@ -181,7 +221,6 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
   const [etape, setEtape] = useState<Etape>(surDevis ? "coordonnees" : "creneau");
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [refId, setRefId] = useState<string | null>(null);
   const [c, setC] = useState({
     /* 02/09 — déjà connecté à l'arrivée (installation) : l'e-mail du
        compte, et ce qui a été rangé sur le profil (à la création du
@@ -331,12 +370,14 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
         message: c.message || undefined,
         creneau: surDevis ? undefined : (creneau ?? undefined),
         modules: parcours === "installation" ? postesValides.map((p) => p.id) : undefined,
+        periodicite: parcours === "installation" ? periodicite : undefined,
       },
       jeton,
     );
 
     if (rep.ok) {
-      setRefId(rep.id);
+      /* l'identifiant renvoyé (rep.id) n'est pas affiché : la confirmation
+         parle en créneau et en postes, pas en numéro de dossier */
       setEtape("fait");
       /* prénom, nom, entreprise et téléphone rangés sur le compte pour la
          prochaine fois — au mieux, sans attendre ni bloquer : la
@@ -439,16 +480,48 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
                 </li>
               ))}
             </ul>
-            <div className="mt-4 flex items-baseline justify-between border-t border-[#e3e3e3] pt-4">
-              <span className="text-[14px] text-[#3d3d3d]">Abonnement</span>
-              <span className="num text-[22px] font-semibold text-[#050505]">
-                {prix} €<span className="text-[13px] font-normal text-[#616161]"> /mois</span>
-              </span>
+            {/* le prix — keyé sur la périodicité pour le fondu (02/09) */}
+            <div key={periodicite} className="rv-fondu mt-4 border-t border-[#e3e3e3] pt-4">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[14px] text-[#3d3d3d]">Abonnement</span>
+                <span className="num text-right text-[22px] font-semibold text-[#050505]">
+                  {annuel && prix !== null ? equivalentMensuel(prix) : prix} €
+                  <span className="text-[13px] font-normal text-[#616161]"> /mois</span>
+                  <span className="block text-[13px] font-normal leading-[18px] text-[#616161]">
+                    {annuel && prix !== null
+                      ? `facturé ${prixAnnuel(prix)} € par an`
+                      : "sans engagement"}
+                  </span>
+                </span>
+              </div>
+              {annuel && prix !== null ? (
+                <p className="rv-economie mt-2.5">
+                  Vous économisez {economieAnnuelle(prix)}&nbsp;€ par an
+                </p>
+              ) : null}
             </div>
+            <p className="mt-2">
+              <button
+                type="button"
+                className="rv-bascule"
+                onClick={() => setPeriodicite(annuel ? "mensuel" : "annuel")}
+              >
+                {annuel
+                  ? "Passer en mensuel"
+                  : `Passer en annuel (−${Math.round(REMISE_ANNUELLE * 100)} %)`}
+              </button>
+            </p>
             <p className="r-note mt-2">
-              Sans engagement · satisfait ou remboursé 30 jours. Aucun paiement en ligne : tout se
-              règle à l&apos;installation.{" "}
-              <Link href="/tarifs" className="underline underline-offset-2">
+              {annuel
+                ? "Facturé en une fois pour douze mois · satisfait ou remboursé 30 jours. Aucun paiement en ligne : tout se règle à l'installation."
+                : "Sans engagement · satisfait ou remboursé 30 jours. Aucun paiement en ligne : tout se règle à l'installation."}{" "}
+              {/* 03/09 — la périodicité repart avec le visiteur : la grille
+                  la relit dans l'URL, sinon un client parti en annuel
+                  retombait en mensuel sans s'en apercevoir */}
+              <Link
+                href={annuel ? "/tarifs?periodicite=annuel" : "/tarifs"}
+                className="underline underline-offset-2"
+              >
                 Modifier mes postes
               </Link>
             </p>
@@ -867,7 +940,7 @@ export default function PriseDeCreneau({ parcours, formuleInitiale, postes = [],
               <>
                 <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
                   À la réunion&nbsp;: on branche vos postes sur vos outils, on vérifie votre
-                  éligibilité au Chèque TIC, et l&apos;abonnement ({prix} €/mois) ne démarre
+                  éligibilité au Chèque TIC, et l&apos;abonnement ({libellePrix}) ne démarre
                   qu&apos;une fois le système en route.
                 </p>
                 {/* 02/09 (revue n° 10) — le client vient de créer un compte

@@ -27,6 +27,7 @@
    ici on filtre juste ce qu'on affiche.
    ══════════════════════════════════════════════════════════════════════ */
 
+import type { Periodicite } from "@/lib/paliers";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 /* La Guadeloupe vit en UTC−4 toute l'année — pas d'heure d'été depuis
@@ -74,7 +75,18 @@ async function rpc<T>(fonction: string, corps: Record<string, unknown>, jeton?: 
     },
     body: JSON.stringify(corps),
   });
-  if (!r.ok) throw new Error(`rpc ${fonction} : ${r.status}`);
+  if (!r.ok) {
+    /* 03/09 — le code PostgREST (PGRST202 : fonction introuvable, PGRST301 :
+       jeton refusé…) est ajouté au message, pour que reserver() puisse
+       distinguer une base pas encore migrée d'une vraie panne. */
+    let code = "";
+    try {
+      code = String(((await r.json()) as { code?: unknown }).code ?? "");
+    } catch {
+      /* corps absent ou non JSON : le statut suffit */
+    }
+    throw new Error(`rpc ${fonction} : ${r.status}${code ? ` ${code}` : ""}`);
+  }
   return (await r.json()) as T;
 }
 
@@ -219,6 +231,11 @@ export type Demande = {
   /* parcours installation : les postes choisis sur /tarifs. Le prix n'est
      PAS envoyé — la fonction SQL le recalcule de sa propre grille. */
   modules?: string[];
+  /* 02/09 — parcours installation : mensuel (défaut) ou annuel. Le prix
+     annuel non plus n'est pas envoyé : la SQL applique sa propre remise
+     (0,90, équivalent mensuel arrondi à l'euro inférieur puis × 12 — la
+     règle de lib/paliers.ts) sur sa propre grille et stocke l'instantané. */
+  periodicite?: Periodicite;
 };
 
 export type Reponse = { ok: true; id: string } | { ok: false; erreur: string };
@@ -228,28 +245,46 @@ export type Reponse = { ok: true; id: string } | { ok: false; erreur: string };
     chargement et l'envoi) se lit comme « connexion requise », pas comme
     une panne réseau. */
 export async function reserver(d: Demande, jeton?: string): Promise<Reponse> {
+  const corps: Record<string, unknown> = {
+    p_parcours: d.parcours,
+    p_formule: d.formule,
+    p_profil: d.profil || null,
+    p_nom: d.nom,
+    p_prenom: d.prenom,
+    p_email: d.email,
+    p_entreprise: d.entreprise,
+    p_secteur: d.secteur,
+    p_telephone: d.telephone || null,
+    p_commune: d.commune || null,
+    p_message: d.message || null,
+    p_creneau_debut: d.creneau ? new Date(d.creneau).toISOString() : null,
+    p_modules: d.modules?.length ? d.modules : null,
+    /* envoyé SEULEMENT quand le parcours le renseigne (installation) :
+       PostgREST choisit la fonction d'après les noms d'arguments, un
+       paramètre inconnu ferait échouer l'appel — l'audit et le devis
+       n'en dépendent donc pas, la SQL a son défaut 'mensuel'. */
+    ...(d.periodicite ? { p_periodicite: d.periodicite } : {}),
+  };
   try {
-    return await rpc<Reponse>(
-      "reserver_audit",
-      {
-        p_parcours: d.parcours,
-        p_formule: d.formule,
-        p_profil: d.profil || null,
-        p_nom: d.nom,
-        p_prenom: d.prenom,
-        p_email: d.email,
-        p_entreprise: d.entreprise,
-        p_secteur: d.secteur,
-        p_telephone: d.telephone || null,
-        p_commune: d.commune || null,
-        p_message: d.message || null,
-        p_creneau_debut: d.creneau ? new Date(d.creneau).toISOString() : null,
-        p_modules: d.modules?.length ? d.modules : null,
-      },
-      jeton,
-    );
+    try {
+      return await rpc<Reponse>("reserver_audit", corps, jeton);
+    } catch (e) {
+      /* 03/09 — CEINTURE : site déployé avant la migration
+         periodicite-annuelle.sql. PostgREST ne connaît alors aucune
+         reserver_audit acceptant p_periodicite (PGRST202) et TOUTE
+         installation échouerait, mensuelle comprise. Une demande mensuelle
+         est rejouée sans le paramètre (le défaut SQL vaut 'mensuel' : même
+         résultat). Une demande ANNUELLE, elle, doit échouer plutôt que
+         d'être stockée mensuelle à l'insu du client. L'ordre normal reste :
+         migration d'abord, site ensuite — voir l'en-tête du fichier SQL. */
+      if (!(e instanceof Error && /PGRST202/.test(e.message) && d.periodicite)) throw e;
+      if (d.periodicite !== "mensuel") return { ok: false, erreur: "annuel_indisponible" };
+      const sansPeriodicite = { ...corps };
+      delete sansPeriodicite.p_periodicite;
+      return await rpc<Reponse>("reserver_audit", sansPeriodicite, jeton);
+    }
   } catch (e) {
-    if (jeton && e instanceof Error && /: 401$/.test(e.message)) {
+    if (jeton && e instanceof Error && /: 401\b/.test(e.message)) {
       return { ok: false, erreur: "connexion_requise" };
     }
     return { ok: false, erreur: "reseau" };
@@ -277,6 +312,10 @@ export const ERREURS: Record<string, string> = {
      appliquée, par la fonction SQL pour le parcours 'reglage' sans
      session : le code doit déjà savoir l'afficher. */
   connexion_requise: "Connectez-vous pour réserver votre installation.",
+  /* 03/09 — la base n'accepte pas encore la formule annuelle (voir la
+     ceinture dans reserver()) : on le dit plutôt que de stocker du mensuel */
+  annuel_indisponible:
+    "La formule annuelle n'est pas encore ouverte à la réservation en ligne. Passez en mensuel pour réserver dès maintenant, ou écrivez-nous.",
   reseau: "La réservation n'est pas partie — vérifiez votre connexion et réessayez.",
 };
 

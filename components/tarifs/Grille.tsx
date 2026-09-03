@@ -14,28 +14,74 @@
    avec les postes choisis dans l'URL. Le paiement (IBAN, prélèvement) se
    branchera plus tard À CETTE COUTURE — quand le compte pro existera, une
    étape s'insérera entre le choix et la réunion, sans toucher aux cartes.
+
+   02/09 — MENSUEL | ANNUEL (Teo : « un bouton en haut des cards pour
+   switch, un pourcentage en moins pour l'annuel, met en évidence le prix
+   économisé »). Le sélecteur segmenté vit AU-DESSUS des trois cartes et
+   l'état est UN pour la grille — pas un par carte : on ne compare pas un
+   palier mensuel à un palier annuel. En annuel, chaque carte montre le
+   mensuel barré, le mensuel équivalent en grand, « facturé N € par an »
+   et la ligne verte « Vous économisez … » ; le chiffre change en fondu
+   (bloc keyé sur la périodicité, .rv-fondu). Le CTA porte
+   `&periodicite=annuel` : /installation le lit et le récap le reprend,
+   modifiable jusqu'au bout. Les montants sont DÉRIVÉS de lib/paliers.ts
+   (prixAnnuel & co), jamais écrits ici.
+
+   03/09 (relecture) — la périodicité fait aussi le chemin RETOUR :
+   « Modifier mes postes » sur /installation renvoie `?periodicite=annuel`
+   et la grille le relit dans l'URL. Lecture par useSyncExternalStore
+   plutôt que useSearchParams : la page /tarifs reste STATIQUE (prix dans
+   le HTML servi, pas de bascule client jusqu'au Suspense) et il n'y a ni
+   effet qui pose un état, ni divergence d'hydratation — React rend
+   d'abord l'instantané serveur (mensuel), puis celui du navigateur.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { SystemLogo } from "@/components/logos";
-import { PALIERS, POSTES, type Palier } from "@/lib/paliers";
+import {
+  PALIERS,
+  POSTES,
+  REMISE_ANNUELLE,
+  economieAnnuelle,
+  equivalentMensuel,
+  lirePeriodicite,
+  prixAnnuel,
+  type Palier,
+  type Periodicite,
+} from "@/lib/paliers";
+
+/* ——— la périodicité venue de l'URL (`?periodicite=annuel`), côté
+   navigateur seulement ; le serveur répond toujours « mensuel » ——— */
+function souscrireUrl(rappel: () => void) {
+  window.addEventListener("popstate", rappel);
+  return () => window.removeEventListener("popstate", rappel);
+}
+function periodiciteDeLUrl(): Periodicite {
+  return lirePeriodicite(new URLSearchParams(window.location.search).get("periodicite"));
+}
+function periodiciteServeur(): Periodicite {
+  return "mensuel";
+}
 
 function CartePalier({
   p,
   choisis,
   bascule,
+  periodicite,
 }: {
   p: Palier;
   /* la sélection vit dans Grille : vide dès qu'un AUTRE palier est actif */
   choisis: string[];
   bascule: (id: string) => void;
+  periodicite: Periodicite;
 }) {
 
   const postes = p.aChoisir === null ? POSTES.map((x) => x.id) : choisis;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
   const pret = manque <= 0;
-  const href = `/installation?postes=${postes.join(",")}`;
+  const annuel = periodicite === "annuel";
+  const href = `/installation?postes=${postes.join(",")}${annuel ? "&periodicite=annuel" : ""}`;
 
   return (
     <div
@@ -50,11 +96,28 @@ function CartePalier({
           {p.badge ? <span className="r-badge mt-1.5">{p.badge}</span> : null}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className={`num rv-prix rv-prix--${p.id} text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]`}>
-            {p.prix} €
-          </span>
-          <span className="text-[12px] leading-[18px] text-[#050505]">{p.sousPrix}</span>
+        {/* keyé sur la périodicité : le bloc prix remonte et rejoue son
+            fondu à chaque bascule — pas de saut de chiffre */}
+        <div key={periodicite} className="rv-fondu mt-3">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            {annuel ? (
+              <span className="num rv-prix-barre">
+                <span className="sr-only">Au lieu de </span>
+                {p.prix} €
+              </span>
+            ) : null}
+            <span className={`num rv-prix rv-prix--${p.id} text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]`}>
+              {annuel ? equivalentMensuel(p.prix) : p.prix} €
+            </span>
+            <span className="text-[12px] leading-[18px] text-[#050505]">
+              {annuel ? `par mois, facturé ${prixAnnuel(p.prix)} € par an` : p.sousPrix}
+            </span>
+          </div>
+          {annuel ? (
+            <p className="rv-economie mt-2.5">
+              Vous économisez {economieAnnuelle(p.prix)}&nbsp;€ par an
+            </p>
+          ) : null}
         </div>
 
         <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">{p.promesse}</p>
@@ -142,6 +205,48 @@ function CartePalier({
   );
 }
 
+/* le sélecteur Mensuel | Annuel — même .r-seg que les deux portes du
+   module de connexion. 03/09 : deux boutons `aria-pressed` dans un groupe
+   nommé, plutôt qu'un radiogroup — un radiogroup promet la navigation aux
+   flèches et un seul arrêt Tab, qu'on n'implémentait pas ; deux boutons
+   à bascule disent exactement ce qu'ils font (Tab, Entrée/Espace). */
+function SelecteurPeriodicite({
+  valeur,
+  changer,
+}: {
+  valeur: Periodicite;
+  changer: (p: Periodicite) => void;
+}) {
+  const remise = Math.round(REMISE_ANNUELLE * 100);
+  return (
+    <div data-arrivee="bloc" className="flex justify-center">
+      <div className="r-seg" role="group" aria-label="Périodicité de l'abonnement">
+        <button
+          type="button"
+          aria-pressed={valeur === "mensuel"}
+          className="r-seg-btn"
+          data-actif={valeur === "mensuel"}
+          onClick={() => changer("mensuel")}
+        >
+          Mensuel
+        </button>
+        <button
+          type="button"
+          aria-pressed={valeur === "annuel"}
+          className="r-seg-btn inline-flex items-center gap-2"
+          data-actif={valeur === "annuel"}
+          onClick={() => changer("annuel")}
+        >
+          Annuel
+          <span className="rv-remise">
+            −{remise}&nbsp;%<span className="sr-only"> de remise</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Grille() {
   /* 28/08 (Teo) — la sélection est EXCLUSIVE entre paliers : cocher un
      poste dans une carte efface la sélection de l'autre. Chaque carte
@@ -151,6 +256,12 @@ export default function Grille() {
     palier: "",
     postes: [],
   });
+  /* 02/09 — la périodicité, UNE pour toute la grille (voir l'en-tête).
+     03/09 : l'URL donne la valeur de départ (retour depuis /installation),
+     le clic du visiteur prend ensuite le dessus. */
+  const depuisUrl = useSyncExternalStore(souscrireUrl, periodiciteDeLUrl, periodiciteServeur);
+  const [choixPeriodicite, setPeriodicite] = useState<Periodicite | null>(null);
+  const periodicite = choixPeriodicite ?? depuisUrl;
 
   const basculePour = (p: Palier) => (id: string) =>
     setChoix((prev) => {
@@ -164,15 +275,19 @@ export default function Grille() {
     });
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      {PALIERS.map((p) => (
-        <CartePalier
-          key={p.id}
-          p={p}
-          choisis={choix.palier === p.id ? choix.postes : []}
-          bascule={basculePour(p)}
-        />
-      ))}
+    <div>
+      <SelecteurPeriodicite valeur={periodicite} changer={setPeriodicite} />
+      <div className="mt-8 grid gap-4 lg:grid-cols-3">
+        {PALIERS.map((p) => (
+          <CartePalier
+            key={p.id}
+            p={p}
+            choisis={choix.palier === p.id ? choix.postes : []}
+            bascule={basculePour(p)}
+            periodicite={periodicite}
+          />
+        ))}
+      </div>
     </div>
   );
 }

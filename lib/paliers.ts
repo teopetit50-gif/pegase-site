@@ -14,7 +14,22 @@
    franchit la barre des 100 €, autant qu'elle rapporte. Les prix ne
    vivent QU'ICI ; la fonction SQL reserver_audit en garde sa propre copie
    (source de vérité de l'instantané stocké) : toute modification se fait
-   AUX DEUX ENDROITS.
+   AUX DEUX ENDROITS — la REMISE ANNUELLE aussi (0,90 dans la SQL).
+
+   FORMULE ANNUELLE — 02/09/2026 (Teo) : un sélecteur Mensuel | Annuel
+   au-dessus des cartes, 10 % de remise sur l'annuel, l'économie mise en
+   évidence « comme ça se fait ». L'annuel est facturé en une fois pour
+   douze mois ; le satisfait ou remboursé 30 jours s'applique pareil. Le
+   mensuel reste sans engagement, inchangé. PALIERS.prix reste le prix
+   MENSUEL de référence — l'annuel se DÉRIVE (prixAnnuel & co), il ne se
+   stocke pas ici. RÈGLE D'ARRONDI (02/09, relecture — la même que la
+   SQL, qui est la source de vérité de l'instantané stocké) : l'équivalent
+   mensuel remisé est arrondi à l'euro INFÉRIEUR, puis multiplié par 12.
+   Un round(mensuel × 12 × 0,9) donnerait 637 / 961 / 1285, non
+   divisibles par 12 : le client lisait « 80 €/mois — facturé 961 € par
+   an » (80 × 12 ≠ 961) et la base figeait 960. Chiffres actés :
+   636 / 960 / 1284 €/an, soit 53 / 80 / 107 €/mois, économie 72 / 108 /
+   144 € par an.
 
    Le critère qui sépare les deux mondes n'est pas la taille mais QUI
    VALIDE : une personne qui tient les outils → grille ; plusieurs
@@ -138,6 +153,39 @@ export function prixPour(nb: number): number {
   if (nb <= 1) return 59;
   if (nb <= 3) return 89;
   return 119;
+}
+
+/* ——— la formule annuelle (02/09/2026) ———
+   UNE seule constante à changer pour bouger la remise — et sa jumelle
+   dans la fonction SQL reserver_audit (voir l'en-tête). */
+
+export const REMISE_ANNUELLE = 0.1;
+
+export type Periodicite = "mensuel" | "annuel";
+
+/** Ce qu'on facture en une fois pour douze mois : l'équivalent mensuel
+    remisé arrondi à l'euro inférieur, × 12 — MÊME règle que la fonction
+    SQL reserver_audit (floor(v_prix * 0.90) * 12), voir l'en-tête. */
+export function prixAnnuel(mensuel: number): number {
+  return Math.floor(mensuel * (1 - REMISE_ANNUELLE)) * 12;
+}
+
+/** Ce que l'annuel fait gagner sur l'année — le chiffre qu'on met en avant. */
+export function economieAnnuelle(mensuel: number): number {
+  return mensuel * 12 - prixAnnuel(mensuel);
+}
+
+/** Le mensuel équivalent de l'annuel — le grand chiffre de la carte. Un
+    entier par construction (prixAnnuel est un multiple de 12) ; le round
+    ne coûte rien et protège d'une virgule flottante capricieuse. */
+export function equivalentMensuel(mensuel: number): number {
+  return Math.round(prixAnnuel(mensuel) / 12);
+}
+
+/** Lit une périodicité venue de l'extérieur (paramètre d'URL, colonne) :
+    tout ce qui n'est pas « annuel » retombe sur le mensuel, le défaut. */
+export function lirePeriodicite(v: unknown): Periodicite {
+  return v === "annuel" ? "annuel" : "mensuel";
 }
 
 /* ——— les deux portes : qui valide ? ———

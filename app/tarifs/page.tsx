@@ -4,7 +4,11 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
 import Partage from "@/components/Partage";
-import { COMPRIS } from "@/lib/paliers";
+import { COMPRIS, REMISE_ANNUELLE } from "@/lib/paliers";
+
+/* 03/09 — le taux de la remise annuelle écrit en toutes lettres dans les
+   textes de la page : dérivé de la constante, jamais recopié à la main. */
+const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs — v4 « La grille publique » (28/08/2026)
@@ -36,8 +40,15 @@ import { COMPRIS } from "@/lib/paliers";
 export const metadata: Metadata = {
   title: "Tarifs | Omega.AI",
   description:
-    "Un poste 59 €, trois postes 89 €, tout Omega 119 € par mois — sans engagement, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.",
+    `Un poste 59 €, trois postes 89 €, tout Omega 119 € par mois — sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.`,
 };
+
+/* 03/09 (relecture de la formule annuelle) — la page disait encore
+   « mensuel, rien n'est payé d'avance » à cinq endroits alors que l'annuel
+   est justement facturé d'avance pour douze mois : un client qui lit
+   « rien n'est payé d'avance » puis reçoit une facture de 960 € a un motif
+   de contestation. Chaque phrase distingue désormais les deux formules.
+   Textes à valider par Teo. */
 
 /* Ce qu'on ne facture jamais — resserré depuis la v3 (six cartes), qui le
    tenait de /commercial/facturer-omega.md. Quatre survivent : les deux
@@ -55,7 +66,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Comment se passe le paiement ?",
     r: [
-      "Rien ne se paie en ligne. Tout se règle à la réunion d'installation, et l'abonnement ne démarre qu'une fois le système en route chez vous. L'abonnement est mensuel, sans engagement : vous prévenez, le mois en cours va à son terme, les envois s'arrêtent.",
+      `Rien ne se paie en ligne. Tout se règle à la réunion d'installation, et l'abonnement ne démarre qu'une fois le système en route chez vous. L'abonnement est mensuel sans engagement, ou annuel (−${REMISE_PCT} %, facturé en une fois pour douze mois). En mensuel, vous prévenez, le mois en cours va à son terme, les envois s'arrêtent.`,
     ],
   },
   {
@@ -68,7 +79,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Et si ça ne me convient pas ?",
     r: [
-      "Trente jours pour être remboursé, sans justification à fournir. Au-delà, l'abonnement reste mensuel et résiliable à tout moment — et vos données repartent avec vous, export complet compris.",
+      "Trente jours pour être remboursé, sans justification à fournir, en mensuel comme en annuel. Au-delà, le mensuel reste résiliable à tout moment ; l'annuel court jusqu'à son terme — et dans les deux cas vos données repartent avec vous, export complet compris.",
     ],
   },
   {
@@ -97,9 +108,9 @@ const JAMAIS: { titre: string; texte: string }[] = [
       "Pas de pourcentage sur les sommes encaissées. Nous avons intérêt à relancer juste, pas à relancer fort.",
   },
   {
-    titre: "Aucun engagement de durée",
+    titre: "Aucun engagement caché",
     texte:
-      "L'abonnement est mensuel. Vous prévenez, le mois va à son terme, les envois s'arrêtent. Rien n'est payé d'avance.",
+      "En mensuel, rien n'est payé d'avance : vous prévenez, le mois va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, avec les mêmes trente jours satisfait ou remboursé.",
   },
   {
     titre: "Vos données repartent avec vous",
@@ -130,8 +141,8 @@ export default function TarifsPage() {
           </h1>
           <p data-arrivee="chapo" className="r-lead mt-6 max-w-[58ch]">
             Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
-            réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement,
-            satisfait ou remboursé trente jours.
+            réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement en
+            mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
           </p>
         </section>
 
@@ -167,7 +178,9 @@ export default function TarifsPage() {
               est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
               (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion
               pour les quatre postes standard&nbsp;; un raccordement particulier est chiffré avant
-              tout engagement.
+              tout engagement. Formule annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une
+              fois pour douze mois&nbsp;; le satisfait ou remboursé 30 jours s&apos;applique de la
+              même façon.
             </p>
           </div>
         </section>

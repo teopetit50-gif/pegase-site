@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
-import { POSTES } from "@/lib/paliers";
+import { POSTES, lirePeriodicite } from "@/lib/paliers";
 import { utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -30,6 +30,11 @@ import { utilisateurCourant } from "@/lib/supabase/server";
    l'étape des coordonnées, sans quitter la page ni perdre le créneau.
    La page était déjà dynamique (searchParams) — lire les cookies ne
    change rien à son coût.
+
+   02/09 (soir) — la formule annuelle : `?periodicite=annuel` arrive de la
+   grille à côté de `postes=` ; tout autre valeur (absente, inconnue) vaut
+   mensuel. La page ne fait que la lire et la passer au module, qui la
+   garde MODIFIABLE dans son récapitulatif (décision Teo).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -41,12 +46,13 @@ export const metadata: Metadata = {
 export default async function InstallationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ postes?: string }>;
+  searchParams: Promise<{ postes?: string; periodicite?: string }>;
 }) {
   const sp = await searchParams;
   const demandes = (sp.postes ?? "").split(",").map((x) => x.trim());
   const postes = POSTES.filter((p) => demandes.includes(p.id)).map((p) => p.id);
   if (!postes.length) redirect("/tarifs");
+  const periodicite = lirePeriodicite(sp.periodicite);
 
   const utilisateur = await utilisateurCourant();
 
@@ -62,7 +68,12 @@ export default async function InstallationPage({
             rien à payer aujourd&apos;hui.
           </p>
           <div className="mt-10">
-            <PriseDeCreneau parcours="installation" postes={postes} utilisateur={utilisateur} />
+            <PriseDeCreneau
+              parcours="installation"
+              postes={postes}
+              periodicite={periodicite}
+              utilisateur={utilisateur}
+            />
           </div>
         </section>
       </div>

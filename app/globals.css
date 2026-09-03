@@ -4264,6 +4264,67 @@ button.rounded-full:active {
 .resa .rv-prix--complet {
   background-image: linear-gradient(115deg, #7c3aed, #5b21b6);
 }
+
+/* ——— la formule annuelle (02/09) : ce que la bascule Mensuel | Annuel
+   ajoute aux cartes et au récapitulatif de /installation ———
+   · .rv-remise : la petite pastille « −10 % » dans le bouton Annuel ;
+   · .rv-prix-barre : l'ancien mensuel, barré, à côté du grand chiffre ;
+   · .rv-economie : la ligne verte « Vous économisez N € par an » — vert
+     doux sur fond vert clair, contraste AA sur les têtes teintées ;
+   · .rv-fondu : le bloc prix rejoue un fondu court (même courbe que
+     rv-apparait, plus bref : un chiffre qui change, pas un écran). */
+.resa .rv-remise {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 9999px;
+  background: #e8f6ed;
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #15753a;
+  white-space: nowrap;
+}
+.resa .rv-prix-barre {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--r-faible);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+.resa .rv-economie {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #e8f6ed;
+  font-size: 13.5px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #15753a;
+}
+.resa .rv-fondu {
+  animation: rv-apparait 0.26s var(--ease-transition) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .resa .rv-fondu {
+    animation: none;
+  }
+}
+/* le lien discret « Passer en annuel / en mensuel » du récapitulatif */
+.resa .rv-bascule {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--r-faible);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.18s ease;
+}
+.resa .rv-bascule:hover {
+  color: var(--r-texte);
+}
+
 /* le trait de sélection d'une case suit la teinte du palier */
 .resa .rv-palier--un .rv-case--actif {
   border-color: #ea580c;

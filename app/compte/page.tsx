@@ -87,6 +87,11 @@ type Demande = {
   statut: string;
   modules: string[] | null;
   prix_mensuel_eur: number | null;
+  /* 02/09 — formule annuelle : `periodicite` vaut 'mensuel' ou 'annuel',
+     `prix_annuel_eur` n'est renseigné que pour l'annuel (instantané SQL).
+     Optionnels : une base pas encore migrée ne casse pas la page. */
+  periodicite?: string | null;
+  prix_annuel_eur?: number | null;
   cree_le: string;
 };
 
@@ -188,7 +193,20 @@ export default async function ComptePage() {
                                 </li>
                               ))}
                             </ul>
-                            {d.prix_mensuel_eur != null ? (
+                            {d.periodicite === "annuel" && d.prix_annuel_eur != null ? (
+                              /* 02/09 — l'annuel : le montant facturé en
+                                 une fois, et son équivalent mensuel */
+                              <div className="mt-3 flex items-baseline justify-between gap-3">
+                                <span className="text-[14px] text-[#3d3d3d]">Abonnement</span>
+                                <span className="num text-right text-[20px] font-semibold text-[#050505]">
+                                  {Math.round(d.prix_annuel_eur)} €
+                                  <span className="text-[13px] font-normal text-[#616161]"> /an</span>
+                                  <span className="block text-[13px] font-normal text-[#616161]">
+                                    soit {Math.round(d.prix_annuel_eur / 12)} €/mois
+                                  </span>
+                                </span>
+                              </div>
+                            ) : d.prix_mensuel_eur != null ? (
                               <div className="mt-3 flex items-baseline justify-between">
                                 <span className="text-[14px] text-[#3d3d3d]">Abonnement</span>
                                 <span className="num text-[20px] font-semibold text-[#050505]">
