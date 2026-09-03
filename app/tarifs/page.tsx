@@ -46,7 +46,7 @@ export const metadata: Metadata = {
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
    « mensuel, rien n'est payé d'avance » à cinq endroits alors que l'annuel
    est justement facturé d'avance pour douze mois : un client qui lit
-   « rien n'est payé d'avance » puis reçoit une facture de 960 € a un motif
+   « rien n'est payé d'avance » puis reçoit une facture de 900 € a un motif
    de contestation. Chaque phrase distingue désormais les deux formules.
    Textes à valider par Teo. */
 

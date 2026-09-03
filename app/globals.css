@@ -4267,7 +4267,7 @@ button.rounded-full:active {
 
 /* ——— la formule annuelle (02/09) : ce que la bascule Mensuel | Annuel
    ajoute aux cartes et au récapitulatif de /installation ———
-   · .rv-remise : la petite pastille « −10 % » dans le bouton Annuel ;
+   · .rv-remise : la petite pastille « −15 % » (le taux vient de REMISE_ANNUELLE) dans le bouton Annuel ;
    · .rv-prix-barre : l'ancien mensuel, barré, à côté du grand chiffre ;
    · .rv-economie : la ligne verte « Vous économisez N € par an » — vert
      doux sur fond vert clair, contraste AA sur les têtes teintées ;

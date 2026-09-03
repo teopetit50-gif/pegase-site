@@ -233,7 +233,7 @@ export type Demande = {
   modules?: string[];
   /* 02/09 — parcours installation : mensuel (défaut) ou annuel. Le prix
      annuel non plus n'est pas envoyé : la SQL applique sa propre remise
-     (0,90, équivalent mensuel arrondi à l'euro inférieur puis × 12 — la
+     (0,85 depuis le 03/09, équivalent mensuel arrondi à l'euro inférieur puis × 12 — la
      règle de lib/paliers.ts) sur sa propre grille et stocke l'instantané. */
   periodicite?: Periodicite;
 };

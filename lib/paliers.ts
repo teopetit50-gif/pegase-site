@@ -14,10 +14,10 @@
    franchit la barre des 100 €, autant qu'elle rapporte. Les prix ne
    vivent QU'ICI ; la fonction SQL reserver_audit en garde sa propre copie
    (source de vérité de l'instantané stocké) : toute modification se fait
-   AUX DEUX ENDROITS — la REMISE ANNUELLE aussi (0,90 dans la SQL).
+   AUX DEUX ENDROITS — la REMISE ANNUELLE aussi (0,85 dans la SQL).
 
    FORMULE ANNUELLE — 02/09/2026 (Teo) : un sélecteur Mensuel | Annuel
-   au-dessus des cartes, 10 % de remise sur l'annuel, l'économie mise en
+   au-dessus des cartes, 15 % de remise sur l'annuel (10 % le 02/09, relevé le 03/09 : sous la norme du marché), l'économie mise en
    évidence « comme ça se fait ». L'annuel est facturé en une fois pour
    douze mois ; le satisfait ou remboursé 30 jours s'applique pareil. Le
    mensuel reste sans engagement, inchangé. PALIERS.prix reste le prix
@@ -28,7 +28,7 @@
    Un round(mensuel × 12 × 0,9) donnerait 637 / 961 / 1285, non
    divisibles par 12 : le client lisait « 80 €/mois — facturé 961 € par
    an » (80 × 12 ≠ 961) et la base figeait 960. Chiffres actés :
-   636 / 960 / 1284 €/an, soit 53 / 80 / 107 €/mois, économie 72 / 108 /
+   600 / 900 / 1212 €/an, soit 50 / 75 / 101 €/mois, économie 108 / 168 /
    144 € par an.
 
    Le critère qui sépare les deux mondes n'est pas la taille mais QUI
@@ -159,13 +159,13 @@ export function prixPour(nb: number): number {
    UNE seule constante à changer pour bouger la remise — et sa jumelle
    dans la fonction SQL reserver_audit (voir l'en-tête). */
 
-export const REMISE_ANNUELLE = 0.1;
+export const REMISE_ANNUELLE = 0.15; // 03/09 (Teo) : 10 % → 15 %, dans la norme du marché (15-20 %)
 
 export type Periodicite = "mensuel" | "annuel";
 
 /** Ce qu'on facture en une fois pour douze mois : l'équivalent mensuel
     remisé arrondi à l'euro inférieur, × 12 — MÊME règle que la fonction
-    SQL reserver_audit (floor(v_prix * 0.90) * 12), voir l'en-tête. */
+    SQL reserver_audit (floor(v_prix * 0.85) * 12), voir l'en-tête. */
 export function prixAnnuel(mensuel: number): number {
   return Math.floor(mensuel * (1 - REMISE_ANNUELLE)) * 12;
 }
