@@ -5445,3 +5445,338 @@ button.rounded-full:active {
     transition: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /compte — « Mon compte » repensée (03/09/2026)
+
+   Demande Teo : « rend plus pro, ajoute de la couleur, sépare les
+   segments un par un ». Chaque segment est une carte blanche
+   (.cp-section) à en-tête teinté : une tuile d'icône, un kicker en
+   capitales, le titre. Une teinte par segment, portée par deux variables
+   (--cp-fond doux, --cp-texte foncé) que les enfants reprennent. Tous
+   les couples tiennent le contraste 4,5:1 texte-sur-fond :
+     orange   #c2410c sur #fff1e6  (4,7)   abonnement — la couleur charte
+     bleu     #2f62c4 sur #eaf1fd  (5,0)   rendez-vous
+     bordeaux #8a2a2a sur #fbeeea  (7,6)   site — la carte de /commencer
+     violet   #6a4ac2 sur #f2effc  (5,4)   profil
+     neutre   #3d3d3d sur #f4f4f2  (9,6)   sécurité
+   Les pastilles de statut (.cp-pastille) suivent la même règle avec une
+   quatrième famille : vert #1e6b3a sur #e6f4ea (5,7), ambre #8a5a00 sur
+   #fdf3dd (5,4).
+
+   Lisibilité (règle posée le 03/09) : corps 15 px, secondaire 13,5 px,
+   kickers de ligne 12,5 px en capitales (.cp-kicker-ligne) — rien en
+   dessous, pas de 12 px ni de 11 px dans ces cartes (la carte
+   d'abonnement comprise). Préfixe .cp-, sous .resa comme le reste du
+   monde clair.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la section : carte blanche + en-tête teinté ——— */
+.resa .cp-section {
+  --cp-fond: #f4f4f2;
+  --cp-texte: #3d3d3d;
+  --cp-filet: #e3e3e3;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(5, 5, 5, 0.04),
+    0 0 0 1px rgba(5, 5, 5, 0.05);
+}
+.resa .cp-section[data-teinte="orange"] {
+  --cp-fond: #fff1e6;
+  --cp-texte: #c2410c;
+  --cp-filet: #f6d8c1;
+}
+.resa .cp-section[data-teinte="bleu"] {
+  --cp-fond: #eaf1fd;
+  --cp-texte: #2f62c4;
+  --cp-filet: #cddcf6;
+}
+.resa .cp-section[data-teinte="bordeaux"] {
+  --cp-fond: #fbeeea;
+  --cp-texte: #8a2a2a;
+  --cp-filet: #efd2cb;
+}
+.resa .cp-section[data-teinte="violet"] {
+  --cp-fond: #f2effc;
+  --cp-texte: #6a4ac2;
+  --cp-filet: #dcd3f5;
+}
+.resa .cp-section[data-teinte="neutre"] {
+  --cp-fond: #f4f4f2;
+  --cp-texte: #3d3d3d;
+  --cp-filet: #e3e3e3;
+}
+.resa .cp-tete {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 22px;
+  background: var(--cp-fond);
+  border-bottom: 1px solid var(--cp-filet);
+}
+@media (min-width: 640px) {
+  .resa .cp-tete {
+    padding: 20px 28px;
+  }
+}
+.resa .cp-tuile {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--cp-texte);
+  box-shadow:
+    0 1px 2px rgba(5, 5, 5, 0.08),
+    inset 0 0 0 1px var(--cp-filet);
+}
+.resa .cp-kicker {
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cp-texte);
+}
+.resa .cp-titre {
+  margin-top: 2px;
+}
+.resa .cp-corps {
+  padding: 22px 22px 26px;
+}
+@media (min-width: 640px) {
+  .resa .cp-corps {
+    padding: 24px 28px 28px;
+  }
+}
+/* MotDePasseCarte (inchangée) rend sa propre .r-carte : dans une section
+   elle devient un panneau gris encastré, pas une carte blanche sur blanc */
+.resa .cp-corps .r-carte {
+  background: var(--r-fond);
+}
+
+/* ——— le compteur à droite de l'en-tête ——— */
+.resa .cp-compteur {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--cp-filet);
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--cp-texte);
+}
+
+/* ——— texte des cartes ——— */
+.resa .cp-texte {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--r-doux);
+}
+.resa .cp-secondaire {
+  font-size: 13.5px;
+  line-height: 20px;
+  color: var(--r-faible);
+}
+.resa .cp-fort {
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .cp-kicker-ligne {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12.5px;
+}
+.resa .cp-prix {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .cp-prix-unite {
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--r-faible);
+}
+.resa .cp-aide {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 18px;
+  color: var(--r-faible);
+}
+.resa .cp-champ--lecture {
+  background: var(--r-fond);
+  color: var(--r-faible);
+  cursor: default;
+}
+.resa .cp-champ--lecture:focus {
+  border-color: var(--r-filet);
+}
+/* le bandeau de confirmation — jumeau vert du .rv-erreur */
+.resa .cp-ok {
+  border: 1px solid #bfe3cb;
+  background: #e6f4ea;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 21px;
+  color: #1e6b3a;
+}
+
+/* ——— lignes séparées par un filet (rendez-vous, commandes) ——— */
+.resa .cp-ligne {
+  padding: 18px 0;
+  border-top: 1px solid var(--r-filet);
+}
+.resa .cp-ligne:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.resa .cp-ligne:last-child {
+  padding-bottom: 0;
+}
+
+/* ——— la pastille de statut ——— */
+.resa .cp-pastille {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #ececec;
+  color: #3d3d3d;
+}
+.resa .cp-pastille[data-teinte="bleu"] {
+  background: #eaf1fd;
+  color: #2f62c4;
+}
+.resa .cp-pastille[data-teinte="vert"] {
+  background: #e6f4ea;
+  color: #1e6b3a;
+}
+.resa .cp-pastille[data-teinte="ambre"] {
+  background: #fdf3dd;
+  color: #8a5a00;
+}
+.resa .cp-pastille[data-teinte="gris"] {
+  background: #ececec;
+  color: #3d3d3d;
+}
+
+/* ——— une carte condensée de rendez-vous : bloc-date | texte | statut ——— */
+.resa .cp-rdv {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+.resa .cp-date {
+  width: 56px;
+  padding: 8px 0 7px;
+  border-radius: 12px;
+  background: var(--r-fond);
+  text-align: center;
+}
+.resa .cp-date-jour {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 22px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--r-texte);
+  font-variant-numeric: tabular-nums;
+}
+.resa .cp-date-mois {
+  font-size: 12.5px;
+  line-height: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--r-faible);
+}
+.resa .cp-date--vide .cp-date-jour {
+  color: #b5b5b5;
+}
+@media (max-width: 639px) {
+  .resa .cp-rdv {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+  .resa .cp-date {
+    width: 52px;
+  }
+  .resa .cp-rdv-statut {
+    grid-column: 2;
+  }
+}
+
+/* ——— la ligne d'identité sous le titre ——— */
+.resa .cp-identite {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+.resa .cp-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: linear-gradient(140deg, var(--r-or-clair) 0%, var(--r-or-mid) 50%, var(--r-or-fonce) 100%);
+  box-shadow: inset 0 0 0 1px rgba(5, 5, 5, 0.06);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--r-texte);
+}
+.resa .cp-identite-nom {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .cp-identite-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--r-doux);
+}
+.resa .cp-identite-sep {
+  color: #b5b5b5;
+}
+
+/* ——— « Votre cockpit » : la carte sombre de droite ——— */
+.resa .cp-cockpit {
+  --r-texte: #ffffff;
+  --r-doux: #d4d4d8;
+  --r-faible: #a1a1aa;
+  border-radius: 16px;
+  padding: 24px 26px 26px;
+  background: #0f1013;
+  color: #d4d4d8;
+  box-shadow: 0 10px 30px -18px rgba(5, 5, 5, 0.6);
+}
+.resa .cp-cockpit .cp-kicker {
+  color: #e9cd91;
+}
+.resa .cp-cockpit .r-h4 {
+  color: #ffffff;
+}

@@ -18,13 +18,26 @@
    là où elle n'est pas nécessaire.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { DUREES_RDV } from "@/lib/creneaux";
+import { DUREES_RDV, SECTEURS } from "@/lib/creneaux";
 import { PROFILS } from "@/lib/reservation";
+
+/** La clé d'un secteur (SECTEURS) → son libellé ; une clé inconnue
+    s'affiche telle quelle plutôt que de disparaître (03/09). */
+export function libelleSecteur(valeur: string | undefined): string | undefined {
+  if (!valeur) return undefined;
+  return SECTEURS.find((s) => s.valeur === valeur)?.libelle ?? valeur;
+}
 
 /* Ce que le site sait d'une personne connectée. prenom/nom/entreprise/
    telephone viennent des user_metadata : rangés à la création du compte
    sur /connexion, ou par le module de réservation après une installation
-   réservée — sinon absents. mdpDefini : voir l'en-tête. */
+   réservée — sinon absents. mdpDefini : voir l'en-tête.
+
+   03/09 — « Profil professionnel » (/compte) : secteur (une clé de
+   SECTEURS, lib/creneaux), commune et SIRET (14 chiffres, facultatif)
+   rejoignent les métadonnées. Mêmes clés que le brief de commande de
+   site (secteur, commune) pour qu'un profil rempli ici pré-remplisse
+   là-bas le jour où le tunnel le lira. */
 export type Utilisateur = {
   id: string;
   email: string;
@@ -32,6 +45,9 @@ export type Utilisateur = {
   nom?: string;
   entreprise?: string;
   telephone?: string;
+  secteur?: string;
+  commune?: string;
+  siret?: string;
   mdpDefini: boolean;
 };
 
@@ -52,8 +68,47 @@ export function utilisateurDepuis(u: {
     nom: texte(meta.nom),
     entreprise: texte(meta.entreprise),
     telephone: texte(meta.telephone),
+    secteur: texte(meta.secteur),
+    commune: texte(meta.commune),
+    siret: texte(meta.siret),
     mdpDefini: meta.mdp_defini === true,
   };
+}
+
+/* ——— identité affichée (03/09, ligne d'identité de /compte) ——— */
+
+/** « Marie Dupont », ou l'e-mail si le profil n'a pas encore de nom. */
+export function nomAffiche(u: Pick<Utilisateur, "prenom" | "nom" | "email">): string {
+  const n = [u.prenom, u.nom].filter(Boolean).join(" ").trim();
+  return n || u.email;
+}
+
+/** Les initiales de la pastille : « MD » — ou la première lettre de
+    l'e-mail quand le profil est vide. Toujours une ou deux lettres. */
+export function initiales(u: Pick<Utilisateur, "prenom" | "nom" | "email">): string {
+  const p = (u.prenom ?? "").trim();
+  const n = (u.nom ?? "").trim();
+  const lettres = `${p.slice(0, 1)}${n.slice(0, 1)}`.toUpperCase();
+  if (lettres) return lettres;
+  return u.email.slice(0, 1).toUpperCase() || "?";
+}
+
+/* ——— SIRET (03/09) ———
+   14 chiffres, espaces tolérés à la saisie (l'INSEE l'imprime « 123 456
+   789 00012 »). On ne vérifie pas la clé de Luhn : le SIRET n'ouvre aucun
+   droit ici, il sert à la facture — une faute de frappe se corrige dans
+   le profil, elle ne doit pas bloquer l'enregistrement du reste. */
+export function siretNormalise(s: string): string {
+  return s.replace(/\s+/g, "");
+}
+export function siretValide(s: string): boolean {
+  return /^\d{14}$/.test(siretNormalise(s));
+}
+/** « 123 456 789 00012 » — la forme lisible, pour l'affichage. */
+export function siretLisible(s: string): string {
+  const n = siretNormalise(s);
+  if (!/^\d{14}$/.test(n)) return s;
+  return `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6, 9)} ${n.slice(9)}`;
 }
 
 /* Longueur minimale d'un mot de passe — la même que celle réglée par Teo
@@ -137,6 +192,41 @@ export const LIBELLES_STATUT: Record<string, string> = {
   no_show: "Réunion manquée — écrivez-nous pour un nouveau créneau",
 };
 
+/* 03/09 — les pastilles de « Mes rendez-vous » : un mot, une teinte. Le
+   libellé long (LIBELLES_STATUT) reste en ligne de détail quand il dit
+   quelque chose de plus que le mot (a_traiter, no_show). Les teintes sont
+   les classes .cp-pastille de globals.css : confirmé bleu, réunion faite
+   vert, annulée gris, reçue ou manquée ambre (quelque chose attend). */
+export const LIBELLES_STATUT_COURT: Record<string, string> = {
+  a_traiter: "Demande reçue",
+  confirme: "Confirmé",
+  honore: "Réunion faite",
+  annule: "Annulée",
+  no_show: "Réunion manquée",
+};
+
+export type TeintePastille = "bleu" | "vert" | "gris" | "ambre";
+
+export const TEINTE_STATUT: Record<string, TeintePastille> = {
+  a_traiter: "ambre",
+  confirme: "bleu",
+  honore: "vert",
+  annule: "gris",
+  no_show: "ambre",
+};
+
+/* Les statuts d'une commande de site (LIBELLES_STATUT_SITE, lib/site-
+   commande) — même palette : payée/livrée vert, en production bleu,
+   règlement à venir ambre, brouillon/annulée gris. */
+export const TEINTE_STATUT_SITE: Record<string, TeintePastille> = {
+  brouillon: "gris",
+  a_payer: "ambre",
+  paye: "vert",
+  en_production: "bleu",
+  livre: "vert",
+  annule: "gris",
+};
+
 export function libelleFormule(id: string): string {
   if (id === "reglage") return "Réunion d'installation";
   for (const p of PROFILS) {
@@ -172,4 +262,19 @@ export function dateHeureGp(iso: string): string {
     .format(d)
     .replace(":", " h ");
   return `${date} à ${heure}`;
+}
+
+/* 03/09 — le bloc-date des cartes condensées de « Mes rendez-vous » :
+   { jour: "12", mois: "sept.", heure: "10 h 30" }, en heure de Guadeloupe.
+   Null si l'instant ne se lit pas (la carte affiche alors « sans créneau »). */
+export function blocDateGp(iso: string): { jour: string; mois: string; heure: string } | null {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const partie = (opts: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat("fr-FR", { timeZone: "America/Guadeloupe", ...opts }).format(d);
+  return {
+    jour: partie({ day: "numeric" }),
+    mois: partie({ month: "short" }),
+    heure: partie({ hour: "2-digit", minute: "2-digit", hour12: false }).replace(":", " h "),
+  };
 }

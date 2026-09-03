@@ -1,17 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { CalendarDays, CreditCard, Globe, LayoutDashboard, ShieldCheck, UserRound } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import AbonnementCarte from "@/components/compte/AbonnementCarte";
+import IdentiteCompte from "@/components/compte/IdentiteCompte";
 import MotDePasseCarte from "@/components/compte/MotDePasseCarte";
+import ProfilCarte from "@/components/compte/ProfilCarte";
+import SectionCompte from "@/components/compte/SectionCompte";
+import { abonnementCourant, reunionPassee, type DemandeAbonnement, type DemandeCompte } from "@/lib/abonnement";
 import {
   LIBELLES_PARCOURS,
   LIBELLES_STATUT,
+  LIBELLES_STATUT_COURT,
+  TEINTE_STATUT,
+  TEINTE_STATUT_SITE,
+  blocDateGp,
   dateHeureGp,
   dureeFormule,
   libelleFormule,
 } from "@/lib/compte";
-import { POSTES } from "@/lib/paliers";
 import { MODELES } from "@/components/modeles/donnees";
 import {
   LIBELLES_STATUT_SITE,
@@ -23,13 +32,31 @@ import { COCKPIT_URL } from "@/lib/supabase/config";
 import { createClient, utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /compte — « Mon compte » (02/09/2026)
+   /compte — « Mon compte » (02/09/2026, repensée le 03/09)
 
-   Ce qu'un client connecté voit sur le SITE : ses demandes d'installation
-   (aujourd'hui seules celles-là sont rattachées au compte — l'audit et le
-   devis partent sans jeton, décision Teo du 02/09), le créneau de chacune
-   en heure de Guadeloupe, son statut ; et son mot de passe (carte « Mon
-   mot de passe », changement par updateUser).
+   Ce qu'un client connecté voit sur le SITE : son abonnement, ses
+   rendez-vous, ses commandes de site, son profil professionnel, son mot
+   de passe — et l'accès à son cockpit.
+
+   03/09 — REFONTE, demande Teo (« rend plus pro, ajoute de la couleur,
+   sépare les segments un par un, permet de gérer l'abonnement, modif de
+   profil pro ») : la page est découpée en SECTIONS SÉPARÉES, chacune une
+   carte blanche à en-tête coloré (SectionCompte — une teinte par
+   segment), dans cet ordre :
+     1. Mon abonnement (orange, la couleur charte) — AbonnementCarte :
+        l'abonnement, c'est la demande d'installation la plus pertinente
+        (abonnementCourant, lib/abonnement) ; le client la modifie ou
+        l'annule lui-même tant qu'elle n'est pas finalisée, et DEMANDE un
+        changement ou une résiliation ensuite (Teo traite dans le cockpit,
+        le paiement n'est pas encore automatisé) ;
+     2. Mes rendez-vous (bleu) — les réunions d'installation, en cartes
+        condensées (bloc-date en heure de Guadeloupe, durée, pastille de
+        statut), puis les audits/devis s'il y en a un jour ;
+     3. Mes commandes de site (bordeaux-or, comme la carte de /commencer) ;
+     4. Profil professionnel (violet) — ProfilCarte, le formulaire ;
+     5. Sécurité et accès (gris) — MotDePasseCarte, inchangée.
+   En tête : « Mon compte », la ligne d'identité (IdentiteCompte) et
+   « Se déconnecter ». À droite, collée en desktop : « Votre cockpit ».
 
    Ce n'est PAS le cockpit — le cockpit vit sur pegase-dashboard, et il ne
    s'ouvre que lorsque Teo a cliqué « Installation finalisée » (RPC
@@ -42,11 +69,16 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
    « votre cockpit est ouvert » (sans affirmer que des postes tournent :
    un gérant invité par Teo peut être rattaché sans moteur en service).
 
-   Sources : rpc mes_demandes() (demandes où utilisateur_id = auth.uid())
-   et la table comptes (RLS : ses propres rattachements). Tout est lu avec
-   la session du visiteur — rien n'est lisible d'un autre compte. Une
-   lecture qui échoue (grant, RLS, base indisponible) se DIT — on ne
-   raconte pas « en préparation » sur une panne (revue n° 5).
+   Sources : rpc mes_demandes() (demandes où utilisateur_id = auth.uid()),
+   la table comptes (RLS : ses propres rattachements), rpc
+   mes_commandes_site(), et depuis le 03/09 rpc mes_demandes_abonnement()
+   (table demandes_abonnement, 2026-09-03-compte-abonnement.sql). Tout
+   est lu avec la session du visiteur — rien n'est lisible d'un autre
+   compte. Une lecture qui échoue (grant, RLS, base indisponible) se DIT —
+   on ne raconte pas « en préparation » sur une panne (revue n° 5). Seule
+   tolérance : mes_demandes_abonnement absente (site déployé avant la
+   migration) donne une liste vide ET le drapeau de panne à la carte, qui
+   choisit quoi en dire.
 
    Libellés (revue n° 8) : la page s'appelle « Mon compte », comme
    l'icône du header qui y mène ; « Se déconnecter » partout.
@@ -54,16 +86,19 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
    Server Component, force-dynamic : la page dépend des cookies et ne doit
    jamais être mise en cache. Sans session : /connexion?suite=/compte (le
    proxy fait déjà ce renvoi ; on le refait ici — le proxy n'est pas une
-   garantie, voir proxy.md).
+   garantie, voir proxy.md). Aucune date n'est calculée « maintenant » dans
+   un rendu partagé serveur/navigateur : tout se formate depuis les
+   instants ISO de la base. La seule comparaison à l'horloge
+   (reunionPassee, ci-dessous) se fait ICI, côté serveur, et passe en prop
+   à la carte d'abonnement — le serveur et le navigateur rendent la même
+   chose.
 
-   02/09 (même jour) — « Mes commandes de site » : les commandes passées
-   par le tunnel /site/commande (rpc mes_commandes_site, celles où
-   utilisateur_id = auth.uid()). Modèle (nom du catalogue — un slug qui
-   n'y serait plus s'affiche tel quel plutôt que de planter la page),
+   « Mes commandes de site » (02/09) : les commandes passées par le
+   tunnel /site/commande. Modèle (nom du catalogue — un slug qui n'y
+   serait plus s'affiche tel quel plutôt que de planter la page),
    entreprise, prix, date, et le statut du point de vue du client :
    « a_payer » se lit « Enregistrée — règlement à venir », pas « payez »
-   (pas de paiement en ligne encore, Teo appelle). Même règle de panne :
-   une lecture qui échoue se dit.
+   (pas de paiement en ligne encore, Teo appelle).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const dynamic = "force-dynamic";
@@ -71,49 +106,67 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Mon compte | Omega.AI",
   description:
-    "Vos demandes d'installation, vos commandes de site, votre mot de passe et l'accès à votre cockpit.",
+    "Votre abonnement, vos rendez-vous, vos commandes de site, votre profil professionnel et l'accès à votre cockpit.",
   robots: { index: false, follow: false },
 };
 
-/* les colonnes de demandes_audit que la page lit — la fonction renvoie la
-   ligne entière, on ne type que ce qu'on affiche */
-type Demande = {
-  id: string;
-  parcours: string;
-  formule: string;
-  entreprise: string | null;
-  creneau_debut: string | null;
-  duree_min: number | null;
-  statut: string;
-  modules: string[] | null;
-  prix_mensuel_eur: number | null;
-  /* 02/09 — formule annuelle : `periodicite` vaut 'mensuel' ou 'annuel',
-     `prix_annuel_eur` n'est renseigné que pour l'annuel (instantané SQL).
-     Optionnels : une base pas encore migrée ne casse pas la page. */
-  periodicite?: string | null;
-  prix_annuel_eur?: number | null;
-  cree_le: string;
-};
+/* la pastille de statut des rendez-vous et des commandes — texte foncé
+   sur fond doux, .cp-pastille[data-teinte] dans globals.css */
+function Pastille({ teinte, children }: { teinte: string; children: React.ReactNode }) {
+  return (
+    <span className="cp-pastille" data-teinte={teinte}>
+      {children}
+    </span>
+  );
+}
+
+/* le petit compteur à droite d'un en-tête de section */
+function Compteur({ n }: { n: number }) {
+  return n > 0 ? <span className="cp-compteur">{n}</span> : null;
+}
 
 export default async function ComptePage() {
   const utilisateur = await utilisateurCourant();
   if (!utilisateur) redirect("/connexion?suite=%2Fcompte");
 
   const supabase = await createClient();
-  const [demandesRes, comptesRes, commandesRes] = await Promise.all([
+  const [demandesRes, comptesRes, commandesRes, abonnementRes] = await Promise.all([
     supabase.rpc("mes_demandes"),
     supabase.from("comptes").select("client_id"),
     supabase.rpc("mes_commandes_site"),
+    supabase.rpc("mes_demandes_abonnement"),
   ]);
-  const demandes = ((demandesRes.data ?? []) as Demande[]).slice();
+  const demandes = ((demandesRes.data ?? []) as DemandeCompte[]).slice();
   const panneDemandes = Boolean(demandesRes.error);
   const panneComptes = Boolean(comptesRes.error);
   const rattache = !panneComptes && (comptesRes.data?.length ?? 0) > 0;
   const aInstallation = demandes.some((d) => d.parcours === "reglage" && d.statut !== "annule");
   const commandes = ((commandesRes.data ?? []) as LigneCommandeSite[]).slice();
   const panneCommandes = Boolean(commandesRes.error);
+  /* tolérance : voir l'en-tête — liste vide + drapeau, la carte décide */
+  const demandesAbonnement = ((abonnementRes.data ?? []) as DemandeAbonnement[]).slice();
+  /* PGRST202 = la fonction n'existe pas encore (site déployé avant la
+     migration du 03/09) : liste vide et silence, pas un bandeau rouge
+     pour tout le monde ; toute autre erreur est une vraie panne, dite */
+  const panneDemandesAbonnement = Boolean(abonnementRes.error) && abonnementRes.error?.code !== "PGRST202";
 
-  const nomPoste = (id: string) => POSTES.find((p) => p.id === id)?.nom ?? id;
+  const abonnement = abonnementCourant(demandes);
+  /* la seule comparaison à l'horloge de la page, ICI côté serveur (dans
+     lib, comme lib/creneaux) : la carte (composant client) la reçoit en
+     prop et ne consulte jamais l'heure au rendu — même garde que
+     annuler_demande / modifier_installation : une réunion passée ne se
+     modifie plus en ligne */
+  const reunionDejaPassee = reunionPassee(abonnement);
+
+  /* Mes rendez-vous : les réunions d'installation, la plus proche du
+     présent d'abord (ISO se trie en texte ; sans créneau → à la fin),
+     puis les audits et devis dans l'ordre de la base */
+  const reunions = demandes
+    .filter((d) => d.parcours === "reglage")
+    .sort((a, b) => (b.creneau_debut ?? "").localeCompare(a.creneau_debut ?? ""));
+  const autres = demandes.filter((d) => d.parcours !== "reglage");
+  const rendezVous = [...reunions, ...autres];
+
   const nomModele = (slug: string) => MODELES.find((m) => m.slug === slug)?.nom ?? slug;
 
   return (
@@ -121,12 +174,11 @@ export default async function ComptePage() {
       <PageMotion />
       <div className="resa">
         <section data-monde="clair" className="r-wrap pb-16 pt-12 sm:pb-24 sm:pt-14">
+          {/* ——— en tête : le titre, l'identité, la sortie ——— */}
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0">
               <h1 className="r-h2 max-w-[20ch]">Mon compte</h1>
-              <p className="r-lead mt-3">
-                Connecté avec <span className="font-medium text-[#050505]">{utilisateur.email}</span>
-              </p>
+              <IdentiteCompte utilisateur={utilisateur} />
             </div>
             <form action="/auth/signout" method="post" className="shrink-0">
               <button type="submit" className="r-btn r-btn--fil">
@@ -135,191 +187,222 @@ export default async function ComptePage() {
             </form>
           </div>
 
-          {/* ——— l'accès au cockpit, ou son attente ——— */}
-          <div className="mt-10 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-            <div className="order-2 lg:order-1">
-              <h2 className="r-h4">Vos demandes d&apos;installation</h2>
-              {panneDemandes ? (
-                <p className="rv-erreur mt-4">
-                  Vos demandes ne répondent pas pour le moment. Rechargez la page dans un instant.
-                </p>
-              ) : demandes.length === 0 ? (
-                <div className="r-carte mt-4 !p-7">
-                  <p className="text-[15px] leading-[24px] text-[#3d3d3d]">
-                    Aucune demande n&apos;est encore rattachée à cette adresse. Pour réserver votre
-                    installation, choisissez vos postes sur la grille.
+          <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+            <div className="order-2 space-y-5 lg:order-1">
+              {/* ——— 1. Mon abonnement ——— */}
+              <SectionCompte id="abonnement" teinte="orange" icone={CreditCard} kicker="Abonnement" titre="Mon abonnement">
+                {panneDemandes ? (
+                  <p className="rv-erreur">
+                    Votre abonnement ne répond pas pour le moment. Rechargez la page dans un instant.
                   </p>
-                  <div className="mt-5">
-                    <Link href="/tarifs" className="r-btn r-btn--noir">
-                      Voir les tarifs
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <ul className="mt-4 space-y-4">
-                  {demandes.map((d) => {
-                    const duree = dureeFormule(d.formule, d.duree_min);
-                    const postes = d.modules ?? [];
-                    return (
-                      <li key={d.id} className="r-carte !p-7">
-                        <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                          {LIBELLES_PARCOURS[d.parcours] ?? d.parcours}
+                ) : (
+                  <AbonnementCarte
+                    demande={abonnement}
+                    rattache={rattache}
+                    demandesAbonnement={demandesAbonnement}
+                    panneDemandesAbonnement={panneDemandesAbonnement}
+                    reunionPassee={reunionDejaPassee}
+                  />
+                )}
+              </SectionCompte>
+
+              {/* ——— 2. Mes rendez-vous ——— */}
+              <SectionCompte
+                id="rendez-vous"
+                teinte="bleu"
+                icone={CalendarDays}
+                kicker="Rendez-vous"
+                titre="Mes rendez-vous"
+                droite={<Compteur n={rendezVous.length} />}
+              >
+                {panneDemandes ? (
+                  <p className="rv-erreur">
+                    Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un instant.
+                  </p>
+                ) : rendezVous.length === 0 ? (
+                  <>
+                    <p className="cp-texte">
+                      Aucun rendez-vous n&apos;est rattaché à cette adresse. La réunion d&apos;installation se
+                      réserve depuis la grille des tarifs&nbsp;: elle met vos postes en route et vous ouvre le
+                      cockpit.
+                    </p>
+                    <div className="mt-5">
+                      <Link href="/tarifs" className="r-btn r-btn--noir">
+                        Réserver mon installation
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <ul>
+                    {rendezVous.map((d) => {
+                      const bloc = d.creneau_debut ? blocDateGp(d.creneau_debut) : null;
+                      const duree = dureeFormule(d.formule, d.duree_min);
+                      const court = LIBELLES_STATUT_COURT[d.statut] ?? d.statut;
+                      const long = LIBELLES_STATUT[d.statut];
+                      /* la phrase longue ne s'ajoute que si elle dit plus que le mot */
+                      const detail = long && long !== court ? long : null;
+                      return (
+                        <li key={d.id} className="cp-ligne cp-rdv">
+                          <div className={`cp-date${bloc ? "" : " cp-date--vide"}`} aria-hidden="true">
+                            <div className="cp-date-jour">{bloc ? bloc.jour : "—"}</div>
+                            <div className="cp-date-mois">{bloc ? bloc.mois : ""}</div>
+                          </div>
+                          <div className="min-w-0">
+                            <div className="cp-secondaire cp-kicker-ligne">
+                              {LIBELLES_PARCOURS[d.parcours] ?? d.parcours}
+                            </div>
+                            <div className="cp-texte cp-fort">{libelleFormule(d.formule)}</div>
+                            <p className="num cp-secondaire mt-0.5">
+                              {d.creneau_debut
+                                ? `${dateHeureGp(d.creneau_debut)}${duree ? ` · ${duree}` : ""} · heure de Guadeloupe`
+                                : "Sans créneau — traitée par e-mail"}
+                            </p>
+                            {d.entreprise ? (
+                              <p className="cp-secondaire mt-0.5">
+                                Entreprise&nbsp;: <span className="cp-fort">{d.entreprise}</span>
+                              </p>
+                            ) : null}
+                            {detail ? <p className="cp-secondaire mt-1.5">{detail}</p> : null}
+                          </div>
+                          <div className="cp-rdv-statut">
+                            <Pastille teinte={TEINTE_STATUT[d.statut] ?? "gris"}>{court}</Pastille>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </SectionCompte>
+
+              {/* ——— 3. Mes commandes de site ——— */}
+              <SectionCompte
+                id="site"
+                teinte="bordeaux"
+                icone={Globe}
+                kicker="Site catalogue"
+                titre="Mes commandes de site"
+                droite={<Compteur n={commandes.length} />}
+              >
+                {panneCommandes ? (
+                  <p className="rv-erreur">
+                    Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
+                  </p>
+                ) : commandes.length === 0 ? (
+                  <>
+                    <p className="cp-texte">
+                      Aucune commande de site pour l&apos;instant. Le site catalogue est à 990&nbsp;€ TTC, une
+                      fois — vingt et un modèles, contenu réécrit à votre métier.
+                    </p>
+                    <div className="mt-5">
+                      <Link href="/tarifs/site" className="r-btn r-btn--fil">
+                        Voir l&apos;offre site
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <ul>
+                    {commandes.map((c) => (
+                      <li key={c.id} className="cp-ligne">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="cp-texte cp-fort">Modèle {nomModele(c.modele)}</div>
+                            <p className="num cp-secondaire mt-0.5">Commandée le {dateGp(c.cree_le)}</p>
+                            <p className="cp-secondaire mt-0.5">
+                              Entreprise&nbsp;: <span className="cp-fort">{c.entreprise}</span>
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 flex-col items-end gap-2">
+                            <span className="num cp-prix">
+                              {prixLisible(c.prix_eur)}
+                              <span className="cp-prix-unite"> TTC</span>
+                            </span>
+                            <Pastille teinte={TEINTE_STATUT_SITE[c.statut] ?? "gris"}>
+                              {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
+                            </Pastille>
+                          </div>
                         </div>
-                        <h3 className="r-h4 mt-2">{libelleFormule(d.formule)}</h3>
-                        <p className="num mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">
-                          {d.creneau_debut
-                            ? `${dateHeureGp(d.creneau_debut)} (heure de Guadeloupe)${duree ? ` · ${duree}` : ""}`
-                            : "Sans créneau — traitée par e-mail"}
-                        </p>
-                        <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#fdf3dd] px-3 py-1.5 text-[13px] font-medium text-[#050505]">
-                          {LIBELLES_STATUT[d.statut] ?? d.statut}
-                        </p>
-                        {d.entreprise ? (
-                          <p className="mt-3 text-[14px] leading-[22px] text-[#3d3d3d]">
-                            Entreprise&nbsp;: <span className="font-medium text-[#050505]">{d.entreprise}</span>
+                        {c.statut === "a_payer" ? (
+                          /* le paiement en ligne n'existe pas encore : on le
+                             dit, on n'invente pas de bouton */
+                          <p className="cp-secondaire mt-3">
+                            Le paiement en ligne arrive&nbsp;: on vous appelle pour régler et lancer la
+                            production.
                           </p>
                         ) : null}
-                        {postes.length ? (
-                          <div className="mt-4 border-t border-[#e3e3e3] pt-4">
-                            <div className="text-[14px] font-semibold text-[#050505]">
-                              {postes.length === POSTES.length
-                                ? "Tout Omega — les quatre postes"
-                                : `Vos postes (${postes.length})`}
-                            </div>
-                            <ul className="mt-2 space-y-1.5">
-                              {postes.map((m) => (
-                                <li key={m} className="text-[14px] leading-[21px] text-[#3d3d3d]">
-                                  {nomPoste(m)}
-                                </li>
-                              ))}
-                            </ul>
-                            {d.periodicite === "annuel" && d.prix_annuel_eur != null ? (
-                              /* 02/09 — l'annuel : le montant facturé en
-                                 une fois, et son équivalent mensuel */
-                              <div className="mt-3 flex items-baseline justify-between gap-3">
-                                <span className="text-[14px] text-[#3d3d3d]">Abonnement</span>
-                                <span className="num text-right text-[20px] font-semibold text-[#050505]">
-                                  {Math.round(d.prix_annuel_eur)} €
-                                  <span className="text-[13px] font-normal text-[#616161]"> /an</span>
-                                  <span className="block text-[13px] font-normal text-[#616161]">
-                                    soit {Math.round(d.prix_annuel_eur / 12)} €/mois
-                                  </span>
-                                </span>
-                              </div>
-                            ) : d.prix_mensuel_eur != null ? (
-                              <div className="mt-3 flex items-baseline justify-between">
-                                <span className="text-[14px] text-[#3d3d3d]">Abonnement</span>
-                                <span className="num text-[20px] font-semibold text-[#050505]">
-                                  {d.prix_mensuel_eur} €
-                                  <span className="text-[13px] font-normal text-[#616161]"> /mois</span>
-                                </span>
-                              </div>
-                            ) : null}
-                          </div>
-                        ) : null}
                       </li>
-                    );
-                  })}
-                </ul>
-              )}
+                    ))}
+                  </ul>
+                )}
+              </SectionCompte>
 
-              {/* ——— les commandes de site (02/09) ——— */}
-              <h2 className="r-h4 mt-10">Mes commandes de site</h2>
-              {panneCommandes ? (
-                <p className="rv-erreur mt-4">
-                  Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
+              {/* ——— 4. Profil professionnel ——— */}
+              <SectionCompte id="profil" teinte="violet" icone={UserRound} kicker="Profil" titre="Profil professionnel">
+                <p className="cp-texte mb-5">
+                  Ce que nous savons de votre entreprise&nbsp;: ces informations servent à vos factures et
+                  pré-remplissent vos prochaines demandes.
                 </p>
-              ) : commandes.length === 0 ? (
-                <div className="r-carte mt-4 !p-7">
-                  <p className="text-[15px] leading-[24px] text-[#3d3d3d]">
-                    Aucune commande de site pour l&apos;instant. Le site catalogue est à
-                    990&nbsp;€ TTC, une fois — vingt et un modèles, contenu réécrit à votre métier.
-                  </p>
-                  <div className="mt-5">
-                    <Link href="/tarifs/site" className="r-btn r-btn--fil">
-                      Voir l&apos;offre site
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <ul className="mt-4 space-y-4">
-                  {commandes.map((c) => (
-                    <li key={c.id} className="r-carte !p-7">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                        Site catalogue
-                      </div>
-                      <h3 className="r-h4 mt-2">Modèle {nomModele(c.modele)}</h3>
-                      <p className="num mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">
-                        Commandée le {dateGp(c.cree_le)}
-                      </p>
-                      <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#fdf3dd] px-3 py-1.5 text-[13px] font-medium text-[#050505]">
-                        {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
-                      </p>
-                      <p className="mt-3 text-[14px] leading-[22px] text-[#3d3d3d]">
-                        Entreprise&nbsp;: <span className="font-medium text-[#050505]">{c.entreprise}</span>
-                      </p>
-                      <div className="mt-4 flex items-baseline justify-between border-t border-[#e3e3e3] pt-4">
-                        <span className="text-[14px] text-[#3d3d3d]">Prix</span>
-                        <span className="num text-[20px] font-semibold text-[#050505]">
-                          {prixLisible(c.prix_eur)}
-                          <span className="text-[13px] font-normal text-[#616161]"> TTC</span>
-                        </span>
-                      </div>
-                      {c.statut === "a_payer" ? (
-                        <p className="r-note mt-3">
-                          Le paiement en ligne arrive&nbsp;: on vous appelle pour régler et lancer la
-                          production.
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                <ProfilCarte utilisateur={utilisateur} />
+              </SectionCompte>
 
-              <h2 className="r-h4 mt-10">Votre accès</h2>
-              <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
+              {/* ——— 5. Sécurité et accès ——— */}
+              <SectionCompte id="securite" teinte="neutre" icone={ShieldCheck} kicker="Sécurité" titre="Sécurité et accès">
+                <p className="cp-texte">
+                  Connecté avec <span className="cp-fort break-all">{utilisateur.email}</span>. Cette adresse
+                  et ce mot de passe ouvrent votre compte sur le site comme sur le cockpit.
+                </p>
+                <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
+                <p className="cp-secondaire mt-4">
+                  Ce que nous faisons de vos données, et comment les récupérer&nbsp;:{" "}
+                  <Link href="/vos-donnees" className="underline underline-offset-2">
+                    vos données
+                  </Link>
+                  .
+                </p>
+              </SectionCompte>
             </div>
 
-            <aside className="order-1 r-carte !p-7 lg:order-2">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+            {/* ——— l'accès au cockpit, ou son attente ——— */}
+            <aside className="cp-cockpit order-1 lg:sticky lg:top-[88px] lg:order-2">
+              <div className="cp-kicker flex items-center gap-2">
+                <LayoutDashboard size={16} strokeWidth={2} aria-hidden="true" />
                 Votre cockpit
               </div>
               {panneComptes ? (
                 <>
-                  <h2 className="r-h4 mt-2">Votre accès cockpit ne répond pas.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px] text-[#3d3d3d]">
-                    Impossible de vérifier votre rattachement pour le moment. Rechargez la page dans
-                    un instant.
+                  <h2 className="r-h4 mt-3">Votre accès cockpit ne répond pas.</h2>
+                  <p className="mt-2 text-[15px] leading-[23px]">
+                    Impossible de vérifier votre rattachement pour le moment. Rechargez la page dans un
+                    instant.
                   </p>
                 </>
               ) : rattache ? (
                 <>
-                  <h2 className="r-h4 mt-2">Votre cockpit est ouvert.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px] text-[#3d3d3d]">
-                    Relances, demandes, factures&nbsp;: vos postes y apparaissent au fur et à mesure
-                    de leur mise en route, avec ce qui attend votre validation. Même adresse, même
-                    mot de passe.
+                  <h2 className="r-h4 mt-3">Votre cockpit est ouvert.</h2>
+                  <p className="mt-2 text-[15px] leading-[23px]">
+                    Relances, demandes, factures&nbsp;: vos postes y apparaissent au fur et à mesure de
+                    leur mise en route, avec ce qui attend votre validation. Même adresse, même mot de
+                    passe.
                   </p>
-                  <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--noir mt-5 w-full sm:w-auto">
+                  <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
                     Ouvrir mon cockpit
                   </a>
                 </>
               ) : aInstallation ? (
                 <>
-                  <h2 className="r-h4 mt-2">Votre installation est en préparation.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px] text-[#3d3d3d]">
-                    On vous ouvre le cockpit dès la réunion faite&nbsp;: vos postes y apparaissent au
-                    fur et à mesure de leur mise en route.
+                  <h2 className="r-h4 mt-3">Votre installation est en préparation.</h2>
+                  <p className="mt-2 text-[15px] leading-[23px]">
+                    On vous ouvre le cockpit dès la réunion faite&nbsp;: vos postes y apparaissent au fur
+                    et à mesure de leur mise en route.
                   </p>
                 </>
               ) : (
                 <>
-                  <h2 className="r-h4 mt-2">Votre cockpit s&apos;ouvre après la réunion d&apos;installation.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px] text-[#3d3d3d]">
-                    Choisissez vos postes, réservez la réunion&nbsp;: c&apos;est elle qui met vos
-                    postes en route et vous ouvre le cockpit.
+                  <h2 className="r-h4 mt-3">Votre cockpit s&apos;ouvre après la réunion d&apos;installation.</h2>
+                  <p className="mt-2 text-[15px] leading-[23px]">
+                    Choisissez vos postes, réservez la réunion&nbsp;: c&apos;est elle qui met vos postes en
+                    route et vous ouvre le cockpit.
                   </p>
-                  <Link href="/tarifs" className="r-btn r-btn--fil mt-5 w-full sm:w-auto">
+                  <Link href="/tarifs" className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
                     Choisir mes postes
                   </Link>
                 </>
