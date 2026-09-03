@@ -5378,3 +5378,70 @@ button.rounded-full:active {
     animation-delay: calc(var(--i, 0) * 190ms + 0.95s);
   }
 }
+
+/* ——— 03/09 — le sélecteur Mensuel | Annuel de /tarifs (Teo : « vers la
+   droite, en bouton stylisé, plus pro ») : une pilule noire, deux moitiés
+   égales, un curseur blanc qui glisse sous le libellé actif. Le curseur est
+   un élément à part (rv-periode-curseur) déplacé par transform : le texte,
+   lui, ne bouge pas, seule sa couleur change. La pastille « −15 % » garde
+   son vert sur les deux fonds. ——— */
+.resa .rv-periode {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  height: 44px;
+  padding: 4px;
+  border-radius: 9999px;
+  background: #0f1013;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 6px 16px -10px rgba(5, 5, 5, 0.5);
+}
+.resa .rv-periode-curseur {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.18);
+  transition: transform 0.28s var(--ease-transition);
+}
+.resa .rv-periode[data-actif="annuel"] .rv-periode-curseur {
+  transform: translateX(100%);
+}
+.resa .rv-periode-btn {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 9999px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  transition: color 0.22s ease;
+}
+.resa .rv-periode-btn:hover:not([data-actif="true"]) {
+  color: #ffffff;
+}
+.resa .rv-periode-btn[data-actif="true"] {
+  color: #0f1013;
+}
+.resa .rv-periode-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .resa .rv-periode-curseur {
+    transition: none;
+  }
+}

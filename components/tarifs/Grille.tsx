@@ -218,23 +218,40 @@ function SelecteurPeriodicite({
   changer: (p: Periodicite) => void;
 }) {
   const remise = Math.round(REMISE_ANNUELLE * 100);
+  const annuel = valeur === "annuel";
+  /* 03/09 (Teo : « vers la droite, en bouton stylisé, plus pro ») — le
+     sélecteur quitte le centre pour la droite de la grille, au-dessus de
+     la troisième carte, et devient une pilule noire à curseur blanc qui
+     GLISSE d'un côté à l'autre (rv-periode, globals.css) — le geste des
+     pages de prix de référence. Le mot « Facturation » à gauche dit ce
+     que le bouton règle ; la pastille « −15 % » reste dans le bouton
+     Annuel, verte sur les deux fonds. */
   return (
-    <div data-arrivee="bloc" className="flex justify-center">
-      <div className="r-seg" role="group" aria-label="Périodicité de l'abonnement">
+    <div data-arrivee="bloc" className="flex items-center justify-center gap-3 sm:justify-end">
+      <span className="hidden text-[13px] font-medium leading-[18px] text-[#616161] sm:inline">
+        Facturation
+      </span>
+      <div
+        className="rv-periode"
+        role="group"
+        aria-label="Périodicité de l'abonnement"
+        data-actif={annuel ? "annuel" : "mensuel"}
+      >
+        <span aria-hidden className="rv-periode-curseur" />
         <button
           type="button"
-          aria-pressed={valeur === "mensuel"}
-          className="r-seg-btn"
-          data-actif={valeur === "mensuel"}
+          aria-pressed={!annuel}
+          className="rv-periode-btn"
+          data-actif={!annuel}
           onClick={() => changer("mensuel")}
         >
           Mensuel
         </button>
         <button
           type="button"
-          aria-pressed={valeur === "annuel"}
-          className="r-seg-btn inline-flex items-center gap-2"
-          data-actif={valeur === "annuel"}
+          aria-pressed={annuel}
+          className="rv-periode-btn"
+          data-actif={annuel}
           onClick={() => changer("annuel")}
         >
           Annuel
