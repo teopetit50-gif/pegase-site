@@ -28,7 +28,6 @@ import {
   prixLisible,
   type LigneCommandeSite,
 } from "@/lib/site-commande";
-import { COCKPIT_URL } from "@/lib/supabase/config";
 import { createClient, utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -380,10 +379,10 @@ export default async function ComptePage() {
                   <h2 className="r-h4 mt-3">Votre cockpit est ouvert.</h2>
                   <p className="mt-2 text-[15px] leading-[23px]">
                     Relances, demandes, factures&nbsp;: vos postes y apparaissent au fur et à mesure de
-                    leur mise en route, avec ce qui attend votre validation. Même adresse, même mot de
-                    passe.
+                    leur mise en route, avec ce qui attend votre validation. Un clic, et vous y êtes : votre
+                    compte suffit.
                   </p>
-                  <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
+                  <a href="/compte/cockpit" className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
                     Ouvrir mon cockpit
                   </a>
                 </>
