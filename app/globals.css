@@ -4367,7 +4367,13 @@ button.rounded-full:active {
                    (scaleY 0→1, 500 ms ease-out) sous le contenu
    Police : Hanken Grotesk, le remplaçant d'Aeonik retenu pour /tarifs
    (voir .tf) — la carte annonce la page où elle mène. Les nappes sont
-   les trois teintes d'icône posées à 20 % sur le gris de la carte. */
+   les trois teintes d'icône posées à 20 % sur le gris de la carte.
+   05/09 — Teo : « trop similaire au fond ». La référence pose #f2f2f2
+   sur une page BLANCHE (13 niveaux d'écart) ; notre monde .resa est
+   #f5f5f5, d'où un écart de 3 à peine. On reporte l'écart de la
+   référence, pas sa valeur : carte #e8e8e8 (245 − 13), bouton 8
+   niveaux sous la carte comme là-bas (#e0e0e0), nappes recalculées sur
+   ce nouveau gris. La tuile reste blanche. */
 .resa .cm-carte {
   position: relative;
   overflow: clip;
@@ -4375,7 +4381,7 @@ button.rounded-full:active {
   flex-direction: column;
   gap: 64px;
   border-radius: 16px;
-  background: #f2f2f2;
+  background: #e8e8e8;
   padding: 40px;
   color: #000000;
   font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
@@ -4398,13 +4404,13 @@ button.rounded-full:active {
   transform: scaleY(1);
 }
 .resa .cm-carte[data-teinte="chaud"] .cm-nappe {
-  background: #e3dfda;
+  background: #dbd7d2;
 }
 .resa .cm-carte[data-teinte="violet"] .cm-nappe {
-  background: #dad6de;
+  background: #d2ced6;
 }
 .resa .cm-carte[data-teinte="bleu"] .cm-nappe {
-  background: #dce1e5;
+  background: #d4d9dd;
 }
 .resa .cm-tuile {
   position: relative;
@@ -4455,7 +4461,7 @@ button.rounded-full:active {
   margin-top: 16px;
   border-radius: 6px;
   padding: 8px 16px;
-  background: #eaeaea;
+  background: #e0e0e0;
   color: #000000;
   font-size: 14px;
   line-height: 21px;
