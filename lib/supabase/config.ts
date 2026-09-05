@@ -19,7 +19,7 @@
 
 const URL_PAR_DEFAUT = "https://noepmkkplxshjbmqqxft.supabase.co";
 const CLE_PAR_DEFAUT = "sb_publishable_9TSwcnUkHIOol1FIxEVWPw_F4HRnhqS";
-const COCKPIT_PAR_DEFAUT = "https://pegase-dashboard.vercel.app";
+const COCKPIT_PAR_DEFAUT = "https://app.omegaai.fr"; // 05/09 — le cockpit a son domaine
 
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || URL_PAR_DEFAUT;
 export const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || CLE_PAR_DEFAUT;
