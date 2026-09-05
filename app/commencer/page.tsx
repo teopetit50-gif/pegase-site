@@ -26,8 +26,20 @@ import { lienContact } from "@/lib/reservation";
    (bas de page) pour qui s'est trompé — c'est ici que la clarté se joue,
    pas en doublant les portes partout.
 
-   La carte claire porte le départ du dégradé de la grille (orange), la
-   carte sombre son arrivée (violet) : l'aiguillage annonce la suite.
+   05/09/2026 — les trois cartes reprennent les « LinkCard » de la page
+   d'accueil de scale.com (demande Teo, capture à l'appui) : carte grise,
+   tuile blanche avec pictogramme, titre fin, texte calé en bas, bouton
+   gris qui passe au noir au survol. Trois colonnes égales, plus de « + »
+   ni de badge — la référence n'en a pas, et le bouton dit déjà où l'on
+   va. Les points « c'est vous si » sont fondus dans le paragraphe. Le
+   relevé au style calculé est en tête du bloc `.cm-*` de globals.css.
+   Les teintes des pictogrammes sont celles de la référence, et elles
+   gardent l'histoire du dégradé : brun chaud pour le départ (prix
+   publics), violet pour l'arrivée (sur mesure), bleu ardoise pour les
+   sites. Les pastilles « prix publics / sur mesure » ne partent donc
+   plus d'ici : sur /tarifs et /reserver-un-audit elles arrivent avec
+   leur page (Partage sans appariement), le cadre de la carte sites
+   voyage toujours jusqu'à /tarifs/site.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -36,36 +48,68 @@ export const metadata: Metadata = {
     "Deux façons de démarrer avec Omega : les prix publics pour les indépendants et TPE-PME, un audit sur mesure pour les organisations où plusieurs services valident.",
 };
 
+/* Les pictogrammes sont dessinés au trait (2 px, grille de 24) : une
+   personne seule pour la porte « prix publics », plusieurs pour « sur
+   mesure » — c'est le nombre de personnes qui valident qui sépare les
+   deux mondes, pas la taille de l'entreprise — et une fenêtre de
+   navigateur pour les sites. */
+const ICONES = {
+  seul: (
+    <svg aria-hidden width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+    </svg>
+  ),
+  plusieurs: (
+    <svg aria-hidden width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1" />
+      <path d="M16 4.5a3.5 3.5 0 0 1 0 7" />
+      <path d="M18.5 14.5a5 5 0 0 1 3.5 4.5v1" />
+    </svg>
+  ),
+  site: (
+    <svg aria-hidden width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18" />
+      <circle cx="6.5" cy="6.5" r="0.5" fill="currentColor" />
+      <circle cx="9.5" cy="6.5" r="0.5" fill="currentColor" />
+    </svg>
+  ),
+};
+
 const PORTES = [
   {
     id: "tpe",
-    kicker: "Prix publics",
+    teinte: "chaud",
+    icone: ICONES.seul,
     titre: "Indépendants & TPE-PME",
-    critere: "Une personne — deux, parfois — tient les demandes, les devis, les factures.",
-    points: [
-      "Vous voyez passer vous-même ce qui entre et ce qui sort",
-      "Vous validez seul ce qui part vers vos clients",
-      "Vos outils : mail, tableur, WhatsApp, caisse",
-    ],
+    texte:
+      "Une personne — deux, parfois — tient les demandes, les devis et les factures, voit passer tout ce qui entre et sort, et valide seule ce qui part vers les clients. Ses outils : le mail, un tableur, WhatsApp, la caisse.",
     cta: "Voir les prix et démarrer",
     href: "/tarifs",
-    sombre: false,
   },
   {
     id: "orga",
-    kicker: "Sur mesure",
+    teinte: "violet",
+    icone: ICONES.plusieurs,
     titre: "Organisations & équipes",
-    critere: "Plusieurs services se partagent le travail, chacun avec ses règles de validation.",
-    points: [
-      "La demande passe par l'accueil, la compta, l'atelier…",
-      "Plusieurs personnes valident, chacune sur son poste",
-      "Le prix sort des volumes mesurés, pas d'une grille",
-    ],
+    texte:
+      "Plusieurs services se partagent le travail — l'accueil, la compta, l'atelier — et plusieurs personnes valident, chacune sur son poste. Le prix sort des volumes mesurés, pas d'une grille.",
     cta: "Réserver un échange",
     href: "/reserver-un-audit",
-    sombre: true,
   },
 ];
+
+const SITE = {
+  teinte: "bleu",
+  icone: ICONES.site,
+  titre: "Découvrir nos sites",
+  texte:
+    "Pour qui n'a pas de site, ou dont le site ne ramène rien : vingt et un modèles en ligne, tous visitables en vrai — vous choisissez l'allure, on réécrit tout à votre métier, et le formulaire alimente vos postes dès le premier jour.",
+  cta: "Voir les offres",
+  href: "/tarifs/site",
+};
 
 export default function CommencerPage() {
   return (
@@ -85,107 +129,48 @@ export default function CommencerPage() {
             </p>
           </div>
 
-          {/* 01/09 — trois colonnes dès lg (la carte sites rejoint la
-              rangée), le conteneur s'élargit d'autant pour que les deux
-              portes gardent leur respiration. */}
-          <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2 lg:max-w-6xl lg:grid-cols-[1fr_1fr_auto_1fr]">
+          {/* 05/09 — trois colonnes égales dès lg (la référence), deux en md
+              où la carte sites prend la rangée du dessous. Le conteneur de
+              1152 donne des cartes de 368 : la largeur relevée. */}
+          <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2 lg:max-w-6xl lg:grid-cols-3">
             {PORTES.map((p) => (
               <Link
                 key={p.id}
                 href={p.href}
                 data-arrivee="colonne"
                 data-porte={p.id === "tpe" ? "tarifs" : "audit"}
-                className={`cm-carte group ${p.sombre ? "cm-carte--sombre" : ""}`}
+                data-teinte={p.teinte}
+                className="cm-carte"
               >
-                <Partage
-                  nom={p.id === "tpe" ? "kicker-tarifs" : "kicker-audit"}
-                  share={p.id === "tpe" ? "voyage-tarifs" : "voyage-audit"}
-                  className={`cm-kicker ${p.sombre ? "cm-kicker--sombre" : ""}`}
-                >
-                  {p.kicker}
-                </Partage>
-                <h2 className="r-h3 mt-4">{p.titre}</h2>
-                <p className="cm-critere mt-3">{p.critere}</p>
-
-                <div className="cm-cvs mt-6">C&apos;est vous si&nbsp;:</div>
-                <ul className="mt-3 flex-1 space-y-2.5">
-                  {p.points.map((pt) => (
-                    <li key={pt} className="cm-point">
-                      <svg aria-hidden width="14" height="11" viewBox="0 0 14 11" fill="none" className="mt-[5px] shrink-0">
-                        <path d="M1 5.5 5 9.5 13 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      {pt}
-                    </li>
-                  ))}
-                </ul>
-
-                <span className={`cm-cta mt-8 ${p.sombre ? "cm-cta--sombre" : ""}`}>
-                  {p.cta}
-                  <svg aria-hidden width="15" height="12" viewBox="0 0 15 12" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">
-                    <path d="M1 6h12M9 1.5 13.5 6 9 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
+                <span aria-hidden className="cm-nappe" />
+                <span className="cm-tuile">{p.icone}</span>
+                <h2 className="cm-titre">{p.titre}</h2>
+                <div className="cm-bas">
+                  <p className="cm-texte">{p.texte}</p>
+                  <span className="cm-btn">{p.cta}</span>
+                </div>
               </Link>
             ))}
 
-            {/* 01/09 (Teo) — la troisième carte : les sites. Transversale
-                aux deux portes (un indépendant comme une organisation
-                peut en avoir besoin). D'abord en bande dessous, puis
-                déplacée À DROITE des portes à la demande de Teo (croquis) :
-                troisième colonne dès lg, même squelette que les deux
-                autres. Bordeaux et or : une teinte à part, premium. Entre
-                md et lg elle occupe la rangée du dessous.
-                02/09 (Teo) — elle mène désormais à l'OFFRE (/tarifs/site :
-                prix, Chèque TIC, « Commander mon site »), plus à la
-                galerie : « Découvrir les modèles » doit conduire à ce qui
-                s'achète. La galerie (/modeles) reste un lieu de découverte,
-                liée depuis l'offre. Le cadre bordeaux (objet partagé
-                « cadre-modeles ») voyage donc jusqu'à la carte produit de
-                /tarifs/site, plus jusqu'au hero de /modeles. */}
-            {/* 01/09 (Teo) — un « + » entre les portes et la carte sites :
-                deux portes + une offre en plus. Sa propre colonne (auto)
-                dès lg, entre les cartes empilées en mobile, masqué en md
-                où la grille est à deux colonnes. */}
-            <span data-arrivee="colonne" className="cm-plus flex md:hidden lg:flex" aria-hidden>
-              +
-            </span>
+            {/* La carte sites reste l'objet partagé « cadre-modeles » : son
+                cadre voyage jusqu'à la carte produit de /tarifs/site et en
+                revient (components/Partage.tsx, lib/transitions.ts). */}
             <Partage
               nom="cadre-modeles"
               share="voyage-modeles"
-              href="/tarifs/site"
+              href={SITE.href}
               data-arrivee="colonne"
               data-porte="modeles"
-              className="cm-carte cm-carte--or group md:col-span-2 lg:col-span-1"
+              data-teinte={SITE.teinte}
+              className="cm-carte md:col-span-2 lg:col-span-1"
             >
-              <span className="cm-kicker cm-kicker--or">En plus</span>
-              <h2 className="r-h3 mt-4">Découvrir nos sites</h2>
-              <p className="cm-critere mt-3">
-                Vingt et un modèles en ligne, tous visitables — vous choisissez l&apos;allure, on
-                réécrit tout à votre métier.
-              </p>
-
-              <div className="cm-cvs mt-6">C&apos;est pour vous si&nbsp;:</div>
-              <ul className="mt-3 flex-1 space-y-2.5">
-                {[
-                  "Vous n'avez pas de site, ou le vôtre ne ramène rien",
-                  "Vous voulez juger l'allure en vrai, pas sur une maquette",
-                  "Le formulaire doit alimenter vos postes dès le premier jour",
-                ].map((pt) => (
-                  <li key={pt} className="cm-point">
-                    <svg aria-hidden width="14" height="11" viewBox="0 0 14 11" fill="none" className="mt-[5px] shrink-0">
-                      <path d="M1 5.5 5 9.5 13 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {pt}
-                  </li>
-                ))}
-              </ul>
-
-              <span className="cm-cta cm-cta--or mt-8">
-                Voir les offres
-                <svg aria-hidden width="15" height="12" viewBox="0 0 15 12" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">
-                  <path d="M1 6h12M9 1.5 13.5 6 9 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
+              <span aria-hidden className="cm-nappe" />
+              <span className="cm-tuile">{SITE.icone}</span>
+              <h2 className="cm-titre">{SITE.titre}</h2>
+              <div className="cm-bas">
+                <p className="cm-texte">{SITE.texte}</p>
+                <span className="cm-btn">{SITE.cta}</span>
+              </div>
             </Partage>
           </div>
 

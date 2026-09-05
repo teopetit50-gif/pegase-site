@@ -4343,38 +4343,146 @@ button.rounded-full:active {
   background: #d0369b;
 }
 
-/* ——— /commencer : l'aiguillage à deux cartes (28/08) ———
-   La carte claire porte le DÉPART du dégradé de la grille (orange), la
-   carte sombre son ARRIVÉE (violet) : la page annonce la suite. */
+/* ——— /commencer : l'aiguillage à trois cartes (28/08, refait le 05/09/2026)
+   Référence : les trois « LinkCard » de la page d'accueil de scale.com,
+   relevées au style calculé à 1440 (émulation de largeur, volet gelé) :
+     carte         #f2f2f2, rayon 16, sans filet, padding 40, colonne
+                   flex, gouttière interne 64, texte calé en bas, 366 de
+                   large ; sous 768 : rayon 8, padding 24, gouttière 24
+                   (la référence bascule sous xl, où sa grille passe à
+                   trois colonnes ; nos cartes ne rétrécissent qu'en
+                   passant sur une colonne, donc sous 768 aussi pour
+                   les tailles de texte)
+     entre cartes  24 (colonnes de 381 à gouttière 8, carte de 366 centrée)
+     tuile icône   64×64 blanc rayon 12, pictogramme 32 ; teintes relevées
+                   #a8927c (brun), #79648c (violet gris), #839cb2 (bleu
+                   ardoise)
+     titre         24/36 graisse 400, approche −0,01em, noir (18/1,35 sous xl)
+     corps         16/24 graisse 400, approche −0,01em, #212121
+                   (14/1,45 sous xl)
+     bouton        #eaeaea, rayon 6, padding 8 16, 14/21 graisse 500,
+                   32 sous le corps (gouttière 16 + 16 de retrait) ;
+                   au survol de la carte : noir / blanc, 500 ms
+     survol        une nappe colorée monte du bas de la carte
+                   (scaleY 0→1, 500 ms ease-out) sous le contenu
+   Police : Hanken Grotesk, le remplaçant d'Aeonik retenu pour /tarifs
+   (voir .tf) — la carte annonce la page où elle mène. Les nappes sont
+   les trois teintes d'icône posées à 20 % sur le gris de la carte. */
 .resa .cm-carte {
+  position: relative;
+  overflow: clip;
   display: flex;
   flex-direction: column;
-  border-radius: 20px;
+  gap: 64px;
+  border-radius: 16px;
+  background: #f2f2f2;
+  padding: 40px;
+  color: #000000;
+  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+}
+@media (max-width: 767px) {
+  .resa .cm-carte {
+    gap: 24px;
+    border-radius: 8px;
+    padding: 24px;
+  }
+}
+.resa .cm-nappe {
+  position: absolute;
+  inset: 0;
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform 0.5s cubic-bezier(0, 0, 0.2, 1);
+}
+.resa .cm-carte:hover .cm-nappe {
+  transform: scaleY(1);
+}
+.resa .cm-carte[data-teinte="chaud"] .cm-nappe {
+  background: #e3dfda;
+}
+.resa .cm-carte[data-teinte="violet"] .cm-nappe {
+  background: #dad6de;
+}
+.resa .cm-carte[data-teinte="bleu"] .cm-nappe {
+  background: #dce1e5;
+}
+.resa .cm-tuile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
   background: #ffffff;
-  padding: 34px 32px 30px;
-  border: 1px solid #e3e3e3;
+}
+.resa .cm-carte[data-teinte="chaud"] .cm-tuile {
+  color: #a8927c;
+}
+.resa .cm-carte[data-teinte="violet"] .cm-tuile {
+  color: #79648c;
+}
+.resa .cm-carte[data-teinte="bleu"] .cm-tuile {
+  color: #839cb2;
+}
+.resa .cm-titre {
+  position: relative;
+  font-family: inherit;
+  font-size: 24px;
+  line-height: 36px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: #000000;
+}
+.resa .cm-bas {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 16px;
+}
+.resa .cm-texte {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  color: #212121;
+}
+.resa .cm-btn {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  margin-top: 16px;
+  border-radius: 6px;
+  padding: 8px 16px;
+  background: #eaeaea;
+  color: #000000;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 500;
+  white-space: nowrap;
   transition:
-    transform 0.24s var(--ease-out-strong),
-    box-shadow 0.24s ease,
-    border-color 0.24s ease;
+    background-color 0.5s cubic-bezier(0, 0, 0.2, 1),
+    color 0.5s cubic-bezier(0, 0, 0.2, 1);
 }
-.resa .cm-carte:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 44px -18px rgba(5, 5, 5, 0.22);
-  border-color: #050505;
-}
-.resa .cm-carte--sombre {
-  background: #0b0b0e;
-  border-color: #0b0b0e;
+.resa .cm-carte:hover .cm-btn {
+  background: #000000;
   color: #ffffff;
 }
-.resa .cm-carte--sombre .r-h3 {
-  color: #ffffff;
+@media (max-width: 767px) {
+  .resa .cm-titre {
+    font-size: 18px;
+    line-height: 1.35;
+  }
+  .resa .cm-texte {
+    font-size: 14px;
+    line-height: 1.45;
+  }
 }
-.resa .cm-carte--sombre:hover {
-  border-color: #8b5cf6;
-  box-shadow: 0 18px 44px -18px rgba(109, 40, 217, 0.45);
-}
+/* La pastille ne part plus des cartes de /commencer (05/09) mais elle
+   reste posée en tête de /tarifs et de /reserver-un-audit (objets
+   partagés « kicker-tarifs » / « kicker-audit », voir .cm-kicker--page
+   plus haut) : sa règle de base vit donc toujours ici. */
 .resa .cm-kicker {
   align-self: flex-start;
   border-radius: 9999px;
@@ -4385,130 +4493,6 @@ button.rounded-full:active {
   text-transform: uppercase;
   color: #c2410c;
   background: #fff1e2;
-}
-.resa .cm-kicker--sombre {
-  color: #c4b5fd;
-  background: rgba(139, 92, 246, 0.16);
-}
-.resa .cm-critere {
-  font-size: 15.5px;
-  line-height: 24px;
-  color: #3d3d3d;
-}
-.resa .cm-carte--sombre .cm-critere {
-  color: #d4d4d8;
-}
-.resa .cm-cvs {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #616161;
-}
-.resa .cm-carte--sombre .cm-cvs {
-  color: #a1a1aa;
-}
-.resa .cm-point {
-  display: flex;
-  gap: 9px;
-  font-size: 14.5px;
-  line-height: 22px;
-  color: #3d3d3d;
-}
-.resa .cm-point svg {
-  color: #ea580c;
-}
-.resa .cm-carte--sombre .cm-point {
-  color: #d4d4d8;
-}
-.resa .cm-carte--sombre .cm-point svg {
-  color: #a78bfa;
-}
-.resa .cm-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  border-radius: 10px;
-  padding: 13px 18px;
-  font-size: 16px;
-  font-weight: 600;
-  background: #050505;
-  color: #ffffff;
-  transition: background-color 0.2s ease;
-}
-.resa .cm-carte:hover .cm-cta {
-  background: #262626;
-}
-.resa .cm-cta--sombre {
-  background: #ffffff;
-  color: #050505;
-}
-.resa .cm-carte--sombre:hover .cm-cta--sombre {
-  background: #ede9fe;
-}
-
-/* ——— /commencer : la troisième carte, les sites (01/09, Teo) ———
-   À DROITE des deux portes, troisième colonne au même gabarit (Teo,
-   croquis : « bouger le rectangle de là à là ») — le site concerne les
-   deux mondes. Bordeaux et or, « très premium » : une teinte qui
-   n'appartient à aucune des deux autres cartes. L'or reprend les tokens
-   --r-or-* du monde .resa. Même squelette vertical que les portes :
-   kicker, titre, critère, « c'est pour vous si », bouton en bas. */
-.resa .cm-carte--or {
-  background:
-    radial-gradient(70% 90% at 100% 0%, rgba(233, 205, 145, 0.3), transparent 62%),
-    linear-gradient(135deg, #3b0b14 0%, #5e1220 48%, #7a1e1c 100%);
-  border-color: rgba(233, 205, 145, 0.4);
-  color: #ffffff;
-}
-.resa .cm-carte--or .r-h3 {
-  color: #ffffff;
-}
-.resa .cm-carte--or:hover {
-  border-color: var(--r-or-fonce);
-  box-shadow: 0 18px 44px -18px rgba(122, 30, 28, 0.6);
-}
-.resa .cm-kicker--or {
-  color: var(--r-or-mid);
-  background: rgba(233, 205, 145, 0.16);
-}
-.resa .cm-carte--or .cm-critere {
-  color: #f1e2d6;
-}
-.resa .cm-carte--or .cm-cvs {
-  color: rgba(244, 224, 174, 0.72);
-}
-.resa .cm-carte--or .cm-point {
-  color: #f1e2d6;
-}
-.resa .cm-carte--or .cm-point svg {
-  color: var(--r-or-fonce);
-}
-.resa .cm-cta--or {
-  background: var(--r-or-fonce);
-  color: #2a0a10;
-}
-.resa .cm-carte--or:hover .cm-cta--or {
-  background: var(--r-or-mid);
-}
-/* le « + » entre les portes et la carte sites — pastille or, centrée
-   dans sa colonne. Le display vit dans les utilitaires (flex/hidden par
-   palier), pas ici, pour que le masquage en md l'emporte. */
-.resa .cm-plus {
-  align-items: center;
-  justify-content: center;
-  justify-self: center;
-  align-self: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 9999px;
-  background: var(--r-or-clair);
-  border: 1px solid rgba(233, 205, 145, 0.75);
-  color: #5e1220;
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1;
 }
 
 /* ——— réservation : le fil d'étapes (28/08) ——— */
@@ -4563,12 +4547,9 @@ button.rounded-full:active {
   .resa .rv-cal-case,
   .resa .rv-heure,
   .resa .rv-champ,
-  .resa .cm-carte,
-  .resa .cm-cta {
+  .resa .cm-nappe,
+  .resa .cm-btn {
     transition: none;
-  }
-  .resa .cm-carte:hover {
-    transform: none;
   }
 }
 /* ═══════════════════════════════════════════════════════════════════════
