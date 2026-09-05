@@ -206,3 +206,130 @@ export const PORTES = {
       "La demande passe par l'accueil, la compta, l'atelier ; chaque service a ses outils et ses règles de validation. Là, un prix affiché serait un mensonge : on audite d'abord, le devis sort des volumes mesurés.",
   },
 };
+
+/* ——— le comparatif des paliers (05/09/2026) ———
+   /tarifs reprend le DESIGN de /reserver-un-audit (demande Teo, 05/09 :
+   « le même design, les infos de tarifs restent »). La page audit compare
+   ses formats dans un tableau ; celui-ci compare les paliers avec les
+   mêmes lignes de six colonnes. Aucune règle nouvelle : chaque cellule
+   redit un fait déjà posé ailleurs sur la page (points des cartes, note
+   TTC, « ce que nous ne facturons jamais », FAQ). Les montants sont
+   DÉRIVÉS de PALIERS — jamais recopiés. */
+
+export type LignePaliers = {
+  libelle: string;
+  aide: string;
+  valeurs: [string, string, string];
+};
+
+export type FamillePaliers = {
+  titre: string;
+  /* les deux premières familles sont visibles, la suivante est derrière
+     le bouton « Voir tous les points » — comme sur la page audit */
+  repliee?: boolean;
+  lignes: LignePaliers[];
+};
+
+const NBSP = " ";
+const REMISE_PCT_TXT = Math.round(REMISE_ANNUELLE * 100);
+const meme = (v: string): [string, string, string] => [v, v, v];
+const parPalier = (f: (p: Palier) => string): [string, string, string] =>
+  PALIERS.map(f) as [string, string, string];
+
+export const COMPARATIF_PALIERS: FamillePaliers[] = [
+  {
+    titre: "Ce qui tourne chez vous",
+    lignes: [
+      {
+        libelle: "Postes en service",
+        aide: "Parmi les quatre : relances, demandes entrantes, clients dormants, paperasse.",
+        valeurs: parPalier((p) =>
+          p.aChoisir === null ? "Les quatre, sans choisir" : `${p.aChoisir}, au choix`,
+        ),
+      },
+      {
+        libelle: "PULSE · le point du matin",
+        aide: "Savoir où vous en êtes, chaque matin — compris quel que soit le palier.",
+        valeurs: meme("Compris"),
+      },
+      {
+        libelle: "VAULT · validation & verrous",
+        aide: "La certitude que rien ne part sans vous — compris quel que soit le palier.",
+        valeurs: meme("Compris"),
+      },
+    ],
+  },
+  {
+    titre: "Prix et engagement",
+    lignes: [
+      {
+        libelle: "Mensuel, sans engagement",
+        aide: "Vous prévenez, le mois en cours va à son terme, les envois s'arrêtent.",
+        valeurs: parPalier((p) => `${p.prix}${NBSP}€ par mois`),
+      },
+      {
+        libelle: `Annuel, −${REMISE_PCT_TXT}${NBSP}%`,
+        aide: "Facturé en une fois pour douze mois ; le satisfait ou remboursé s'applique de la même façon.",
+        valeurs: parPalier(
+          (p) => `${prixAnnuel(p.prix)}${NBSP}€ par an, soit ${equivalentMensuel(p.prix)}${NBSP}€ par mois`,
+        ),
+      },
+      {
+        libelle: "Vous économisez en annuel",
+        aide: "L'écart entre douze mensualités et la facture annuelle.",
+        valeurs: parPalier((p) => `${economieAnnuelle(p.prix)}${NBSP}€ par an`),
+      },
+      {
+        libelle: "Prix par personne",
+        aide: "Le prix ne dépend pas du nombre de gens qui s'en servent chez vous.",
+        valeurs: meme("Aucun"),
+      },
+      {
+        libelle: "Commission au résultat",
+        aide: "Pas de pourcentage sur les sommes encaissées.",
+        valeurs: meme("Aucune"),
+      },
+    ],
+  },
+  {
+    titre: "Installation et sortie",
+    repliee: true,
+    lignes: [
+      {
+        libelle: "Réunion d'installation",
+        aide: "En visio, écran partagé : on branche vos outils ensemble, le système démarre sous votre œil.",
+        valeurs: meme("Comprise, 45 min"),
+      },
+      {
+        libelle: "Raccordement particulier",
+        aide: "Un logiciel rare, un historique à reprendre.",
+        valeurs: meme("Chiffré avant tout engagement"),
+      },
+      {
+        libelle: "Paiement",
+        aide: "Rien ne se paie en ligne : tout se règle à la réunion d'installation.",
+        valeurs: meme("À l'installation"),
+      },
+      {
+        libelle: "Satisfait ou remboursé",
+        aide: "Sans justification à fournir, en mensuel comme en annuel.",
+        valeurs: meme("30 jours"),
+      },
+      {
+        libelle: "Changement de palier",
+        aide: "Le prix suit simplement le nombre de postes en service.",
+        valeurs: meme("À tout moment, sans frais"),
+      },
+      {
+        libelle: "Vos données à la sortie",
+        aide: "Ce qui est à vous reste à vous.",
+        valeurs: meme("Export complet, sans frais"),
+      },
+      {
+        libelle: "Chèque TIC",
+        aide: "Région Guadeloupe — porte sur l'installation, pas sur l'abonnement.",
+        valeurs: meme("Éligibilité vérifiée à l'installation"),
+      },
+    ],
+  },
+];

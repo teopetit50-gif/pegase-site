@@ -3,8 +3,8 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
-import Partage from "@/components/Partage";
-import { COMPRIS, REMISE_ANNUELLE } from "@/lib/paliers";
+import { REMISE_ANNUELLE } from "@/lib/paliers";
+import { CANAL_LABEL_PHRASE, CANAL_VALEUR, lienContact } from "@/lib/reservation";
 
 /* 03/09 — le taux de la remise annuelle écrit en toutes lettres dans les
    textes de la page : dérivé de la constante, jamais recopié à la main. */
@@ -35,6 +35,25 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
    PAIEMENT : rien en ligne aujourd'hui (pas encore de compte pro). La
    couture est prévue dans components/tarifs/Grille.tsx — une étape
    s'insérera entre le choix des postes et la réunion, sans refonte.
+
+   05/09 — LE DESIGN DE /reserver-un-audit, COLLÉ (Teo : « quand on clique
+   sur Indépendants & TPE, le design doit être le même que celui
+   d'Organisations & équipes ; les infos de tarifs restent »). La page
+   suit désormais l'ordre exact de la page audit, section pour section :
+     1-3. titre, quatre colonnes (colonne de gauche + trois cartes à tête
+          grise / dorée), bandeau d'orientation, comparatif — tout dans
+          components/tarifs/Grille.tsx, comme reservation/Formules.tsx ;
+     3bis. « Ce que nous ne facturons jamais » dans les cartes blanches
+          du « Comment se passe l'audit » (note, H2, étiquette, titre) ;
+     4.   Chèque TIC sur bande sombre (H2 au lieu de H3) ;
+     7.   CTA final centré, avec la voie WhatsApp et la mention discrète
+          de l'autre porte — la page audit finit pareil ;
+     8.   la FAQ, en dernier.
+   Le simulateur et les engagements (5, 6) n'ont pas d'équivalent tarifs
+   et ne sont pas meublés. Les textes de la page sont inchangés ; les
+   seuls ajouts sont ceux que les emplacements du design imposaient
+   (bandeau d'orientation, CTA final, cellules du comparatif) et ils
+   redisent des faits déjà posés ici.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -125,76 +144,30 @@ export default function TarifsPage() {
       <PageMotion />
 
       <div className="resa">
-        {/* ═══ 1 — titre court : l'aiguillage vit sur /commencer (28/08),
-               cette page ne parle plus qu'aux indépendants et TPE-PME.
-               La porte « organisations » n'existe plus qu'en mention
-               discrète, tout en bas. ═══ */}
-        <section data-monde="clair" className="r-wrap pb-2 pt-12 sm:pt-14">
-          {/* 01/09 — transitions : la pastille « Prix publics » ARRIVE de la
-              carte de /commencer (objet partagé) et se pose au-dessus du
-              titre ; titre puis chapô entrent en cascade (Arrivee). */}
-          <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
-            Prix publics
-          </Partage>
-          <h1 data-arrivee="titre" className="r-h1 max-w-[17ch]">
-            Des prix publics, une installation comprise
-          </h1>
-          <p data-arrivee="chapo" className="r-lead mt-6 max-w-[58ch]">
-            Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
-            réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement en
-            mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
+        {/* ═══ 1 à 3 — titre, paliers, orientation, comparatif ═══ */}
+        <Grille />
+
+        {/* ═══ 3bis — ce qu'on ne facture jamais, quatre cartes blanches
+               sur fond gris (l'emplacement du « déroulé » de la page
+               audit) ═══ */}
+        <section id="jamais" data-monde="clair" className="r-wrap py-14 sm:py-20">
+          <p className="r-note">
+            Quatre règles, valables quel que soit le palier.
           </p>
-        </section>
+          <h2 className="r-h2 mt-6 max-w-[18ch]">Ce que nous ne facturons jamais</h2>
 
-        {/* ═══ 2 — la grille ═══ */}
-        <section id="grille" data-monde="clair" className="r-blanc">
-          <div className="r-wrap py-14 sm:py-16">
-            <h2 data-arrivee="bloc" className="r-h2 max-w-[18ch]">Choisissez vos postes</h2>
-            <p data-arrivee="bloc" className="r-body mt-4 max-w-[58ch]">
-              Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
-              WhatsApp. Quel que soit le palier,{" "}
-              <Link href={`/offres/${COMPRIS[0].slug}`} className="r-lien !text-[15px]">
-                {COMPRIS[0].system} · {COMPRIS[0].nom.toLowerCase()}
-              </Link>{" "}
-              et{" "}
-              <Link href={`/offres/${COMPRIS[1].slug}`} className="r-lien !text-[15px]">
-                {COMPRIS[1].system} · {COMPRIS[1].nom.toLowerCase()}
-              </Link>{" "}
-              tournent d&apos;office : savoir où vous en êtes et la certitude que rien ne part sans
-              vous ne sont pas des options.
-            </p>
-
-            {/* 01/09 (Teo, en fin de journée) — la grille ne parle QUE des
-                postes. Une carte / colonne « site » y a vécu quelques
-                heures en cinq versions : elle portait à confusion. L'offre
-                site garde sa page (/tarifs/site — 990 €, Chèque TIC,
-                maintenance) ; elle sera intégrée ailleurs. */}
-            <div className="mt-10">
-              <Grille />
-            </div>
-
-            <p className="r-note mt-6 max-w-3xl">
-              Prix TTC, grille en vigueur au 01/09/2026 — le prix affiché au moment de votre demande
-              est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
-              (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion
-              pour les quatre postes standard&nbsp;; un raccordement particulier est chiffré avant
-              tout engagement. Formule annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une
-              fois pour douze mois&nbsp;; le satisfait ou remboursé 30 jours s&apos;applique de la
-              même façon.
-            </p>
-          </div>
-        </section>
-
-        {/* ═══ 3 — ce qu'on ne facture jamais ═══ */}
-        <section data-monde="clair" className="r-wrap py-14 sm:py-16">
-          <h2 className="r-h3 max-w-[22ch]">Ce que nous ne facturons jamais</h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {JAMAIS.map((j) => (
-              <div key={j.titre} data-reveal className="rounded-2xl bg-white p-6">
-                <h3 className="text-[15px] font-semibold leading-[21px] text-[#050505]">
-                  {j.titre}
-                </h3>
-                <p className="mt-2.5 text-[13.5px] leading-[20px] text-[#3d3d3d]">{j.texte}</p>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {JAMAIS.map((j, i) => (
+              <div
+                key={j.titre}
+                data-reveal
+                className="flex h-full flex-col rounded-2xl bg-white p-7 sm:p-9"
+              >
+                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                  Règle {i + 1}
+                </div>
+                <h3 className="r-h4 mt-3">{j.titre}</h3>
+                <p className="mt-4 text-[15px] leading-[23px] text-[#3d3d3d]">{j.texte}</p>
               </div>
             ))}
           </div>
@@ -202,11 +175,13 @@ export default function TarifsPage() {
 
         {/* ═══ 4 — Chèque TIC, sur bande sombre ═══ */}
         <section id="cheque-tic" className="r-nuit">
-          <div className="r-wrap py-14 sm:py-16">
+          <div className="r-wrap py-14 sm:py-20">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-[60ch]">
-                <p className="r-note !text-[#a1a1aa]">Chèque TIC — Région Guadeloupe</p>
-                <h2 className="r-h3 mt-4">De 40 à 80 % d&apos;un projet numérique financés</h2>
+                <p className="r-note">Chèque TIC — Région Guadeloupe</p>
+                <h2 className="r-h2 mt-6 max-w-[18ch]">
+                  De 40 à 80 % d&apos;un projet numérique financés
+                </h2>
                 <p className="mt-5 text-[15px] leading-[24px] text-[#d4d4d8]">
                   La Région Guadeloupe finance de 40 à 80&nbsp;% d&apos;un projet de transformation
                   numérique, dans la limite de 10&nbsp;000&nbsp;€, pour une entreprise éligible.
@@ -221,10 +196,47 @@ export default function TarifsPage() {
           </div>
         </section>
 
-        {/* ═══ 4bis — la FAQ tarifs (28/08, 2ᵉ passe) — mêmes replis .r-faq
+        {/* ═══ 7 — CTA final ═══ */}
+        <section id="reserver" data-monde="clair" className="r-wrap py-16 sm:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="r-h2">Réservez l&apos;installation en deux minutes</h2>
+            <p className="r-lead mx-auto mt-6 max-w-[54ch]">
+              Vous choisissez vos postes, vous réservez la réunion d&apos;installation en
+              ligne — et le système démarre sous votre œil. Rien ne se paie en ligne&nbsp;:
+              tout se règle à l&apos;installation, et l&apos;abonnement ne démarre qu&apos;une
+              fois le système en route chez vous.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+              <a href="#grille" className="r-btn r-btn--noir">
+                Choisir mes postes
+              </a>
+            </div>
+            <p className="r-note mt-5">
+              Ou directement : {CANAL_LABEL_PHRASE} :{" "}
+              <a
+                href={lienContact("Tarifs Omega")}
+                className="underline underline-offset-4 hover:text-[#050505]"
+              >
+                {CANAL_VALEUR}
+              </a>
+            </p>
+            {/* la mention discrète de l'autre porte (28/08) : pour qui
+                s'est trompé d'aiguillage, sans re-poser deux portes ici —
+                symétrique de celle qui clôt /reserver-un-audit */}
+            <p className="r-note mx-auto mt-8 max-w-xl !text-[13px]">
+              Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille n&apos;est pas
+              votre porte&nbsp;: votre prix sort d&apos;un audit.{" "}
+              <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-[#050505]">
+                Réserver un échange
+              </Link>
+            </p>
+          </div>
+        </section>
+
+        {/* ═══ 8 — la FAQ tarifs (28/08, 2ᵉ passe) — mêmes replis .r-faq
                que la page audit ═══ */}
-        <section data-monde="clair" className="r-blanc">
-          <div className="r-wrap py-14 sm:py-16">
+        <section id="faq" data-monde="clair" className="r-blanc">
+          <div className="r-wrap py-14 sm:py-20">
             <div className="grid gap-8 lg:grid-cols-[379px_1fr] lg:gap-16">
               <h2 className="r-h3 lg:sticky lg:top-28 lg:self-start">
                 Questions sur les prix
@@ -265,18 +277,6 @@ export default function TarifsPage() {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* ═══ 5 — la mention discrète de l'autre porte (28/08) : pour qui
-               s'est trompé d'aiguillage, sans re-poser deux portes ici. ═══ */}
-        <section data-monde="clair" className="r-wrap py-9">
-          <p className="r-note mx-auto max-w-xl text-center !text-[13px]">
-            Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille n&apos;est pas
-            votre porte&nbsp;: votre prix sort d&apos;un audit.{" "}
-            <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-[#050505]">
-              Réserver un échange
-            </Link>
-          </p>
         </section>
       </div>
     </PageShell>
