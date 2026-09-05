@@ -5767,3 +5767,50 @@ button.rounded-full:active {
 .resa .cp-cockpit .r-h4 {
   color: #ffffff;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE MOYEN DE PAIEMENT (05/09/2026) — demande des associés : le client
+   enregistre sa carte ou son mandat SEPA à la réservation, rien n'est
+   débité avant la fin de l'installation. Deux emplacements :
+     · l'écran « Créneau réservé » de /installation (.rv-paiement) ;
+     · la ligne « Moyen de paiement » de la carte d'abonnement de /compte
+       (les pastilles .cp-pastille existantes + la teinte rouge, ci-dessous,
+       pour « Paiement refusé »), et le bandeau neutre .cp-info au retour
+       de Stripe (?paiement=plus-tard).
+   Mêmes règles que le reste du monde .resa : corps ≥ 13,5 px, contraste
+   ≥ 4,5:1 — rouge #7c2d24 sur #fdf1ef (8,9), le couple de .rv-erreur.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ——— l'encart « Votre moyen de paiement » de l'écran final ——— */
+.resa .rv-paiement {
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  background: var(--r-fond);
+  padding: 18px 20px;
+}
+/* « l'enregistrement en ligne n'est pas encore ouvert » — neutre, pas rouge */
+.resa .rv-paiement-note {
+  border: 1px solid var(--r-filet);
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--r-doux);
+}
+
+/* ——— /compte : la pastille rouge (paiement refusé) et le bandeau neutre ——— */
+.resa .cp-pastille[data-teinte="rouge"] {
+  background: #fdf1ef;
+  color: #7c2d24;
+}
+/* jumeau gris de .cp-ok : un retour de Stripe sans enregistrement */
+.resa .cp-info {
+  border: 1px solid var(--r-filet);
+  background: var(--r-fond);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--r-doux);
+}

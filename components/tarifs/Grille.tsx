@@ -14,6 +14,12 @@
    avec les postes choisis dans l'URL. Le paiement (IBAN, prélèvement) se
    branchera plus tard À CETTE COUTURE — quand le compte pro existera, une
    étape s'insérera entre le choix et la réunion, sans toucher aux cartes.
+   → 05/09 : c'est fait, mais APRÈS la réservation, pas entre le choix et
+   la réunion — le client enregistre carte ou mandat SEPA sur l'écran
+   « Créneau réservé » de /installation (Stripe, rien de débité), et le
+   premier prélèvement part quand l'agence finalise l'installation. La
+   grille ne change pas ; seule la note sous le CTA a cessé de dire « tout
+   se règle à l'installation ».
 
    02/09 — MENSUEL | ANNUEL (Teo : « un bouton en haut des cards pour
    switch, un pourcentage en moins pour l'annuel, met en évidence le prix
@@ -214,8 +220,11 @@ function CartePalier({
               {manque === 1 ? "Choisissez 1 poste" : `Choisissez encore ${manque} postes`}
             </span>
           )}
+          {/* 05/09 — plus de « tout se règle à l'installation » : le moyen de
+              paiement s'enregistre à la réservation, rien n'est débité avant
+              la fin de l'installation */}
           <p className="r-note mt-2 text-center">
-            Sans paiement en ligne — tout se règle à l&apos;installation.
+            Rien n&apos;est débité avant la fin de l&apos;installation.
           </p>
         </div>
 
@@ -429,9 +438,12 @@ export default function Grille() {
           est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
           (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion
           pour les quatre postes standard&nbsp;; un raccordement particulier est chiffré avant
-          tout engagement. Formule annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une
-          fois pour douze mois&nbsp;; le satisfait ou remboursé 30 jours s&apos;applique de la
-          même façon.
+          tout engagement. Le moyen de paiement — carte ou prélèvement SEPA — est enregistré à
+          la réservation&nbsp;; rien n&apos;est débité avant la fin de l&apos;installation, le
+          premier prélèvement part le jour de la mise en service. Formule mensuelle&nbsp;: sans
+          engagement, résiliable à tout moment, le mois en cours va à son terme. Formule
+          annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une fois le jour de la mise
+          en service&nbsp;; le satisfait ou remboursé 30 jours s&apos;applique de la même façon.
         </p>
       </section>
 

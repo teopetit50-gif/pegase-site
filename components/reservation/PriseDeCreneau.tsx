@@ -50,11 +50,26 @@
    place sans quitter la page ni perdre le créneau. Les montants sont
    dérivés de lib/paliers.ts (prixAnnuel & co) ; l'envoi ne transmet que
    la périodicité, la fonction SQL recalcule et fige l'instantané.
+
+   05/09 — LE MOYEN DE PAIEMENT, parcours installation seulement (demande
+   des associés : « enlève la mention paiement à l'installation ; le
+   client entre son moyen de paiement et est débité une fois
+   l'installation terminée »). Après « Créneau réservé », l'écran final
+   propose « Enregistrer mon moyen de paiement » : POST /api/paiement/setup
+   avec l'id de la demande (rep.id, gardé en état depuis l'envoi), puis
+   redirection vers la page Stripe (carte ou prélèvement SEPA) — rien
+   n'est débité, le premier prélèvement part quand l'agence finalise
+   l'installation. « Plus tard, depuis Mon compte » reste possible : la
+   carte d'abonnement de /compte porte le même bouton. Sans clé Stripe
+   (503), l'écran dit que l'enregistrement en ligne n'est pas encore
+   ouvert — jamais une erreur brute. Les libellés « aucun paiement en
+   ligne : tout se règle à l'installation » sont partis avec ce modèle.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ConnexionInline from "@/components/compte/ConnexionInline";
+import { messageErreur, ouvrirEnregistrementPaiement } from "@/lib/abonnement";
 import { signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -316,6 +331,36 @@ export default function PriseDeCreneau({
      posé avant tout await et relâché dans tous les chemins de sortie. */
   const enCours = useRef(false);
 
+  /* 05/09 — la demande créée (rep.id), pour ouvrir l'enregistrement du
+     moyen de paiement depuis l'écran final ; et l'état de cette ouverture */
+  const [demandeId, setDemandeId] = useState<string | null>(null);
+  const [paiement, setPaiement] = useState<"repos" | "envoi" | "indisponible">("repos");
+  const [erreurPaiement, setErreurPaiement] = useState<string | null>(null);
+  const paiementEnCours = useRef(false);
+
+  const enregistrerPaiement = async () => {
+    if (!demandeId || paiementEnCours.current) return;
+    paiementEnCours.current = true;
+    setPaiement("envoi");
+    setErreurPaiement(null);
+    try {
+      const rep = await ouvrirEnregistrementPaiement(demandeId);
+      if (rep.ok) {
+        /* on quitte la page pour Stripe ; le bouton reste éteint jusque-là */
+        window.location.assign(rep.url);
+        return;
+      }
+      if (rep.erreur === "paiement_indisponible") {
+        setPaiement("indisponible");
+        return;
+      }
+      setErreurPaiement(messageErreur(rep.erreur));
+      setPaiement("repos");
+    } finally {
+      paiementEnCours.current = false;
+    }
+  };
+
   const envoyer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!champsOk || envoi || enCours.current) return;
@@ -377,7 +422,9 @@ export default function PriseDeCreneau({
 
     if (rep.ok) {
       /* l'identifiant renvoyé (rep.id) n'est pas affiché : la confirmation
-         parle en créneau et en postes, pas en numéro de dossier */
+         parle en créneau et en postes, pas en numéro de dossier — mais il
+         est gardé (05/09) pour ouvrir l'enregistrement du moyen de paiement */
+      setDemandeId(rep.id);
       setEtape("fait");
       /* prénom, nom, entreprise et téléphone rangés sur le compte pour la
          prochaine fois — au mieux, sans attendre ni bloquer : la
@@ -512,9 +559,12 @@ export default function PriseDeCreneau({
               </button>
             </p>
             <p className="r-note mt-2">
+              {/* 05/09 — plus de « tout se règle à l'installation » : le moyen
+                  de paiement s'enregistre à la réservation, le premier
+                  prélèvement part le jour de la mise en service */}
               {annuel
-                ? "Facturé en une fois pour douze mois · satisfait ou remboursé 30 jours. Aucun paiement en ligne : tout se règle à l'installation."
-                : "Sans engagement · satisfait ou remboursé 30 jours. Aucun paiement en ligne : tout se règle à l'installation."}{" "}
+                ? "Facturé en une fois, le jour de la mise en service · satisfait ou remboursé 30 jours. Rien n'est débité avant la fin de l'installation."
+                : "Sans engagement, résiliable à tout moment · satisfait ou remboursé 30 jours. Rien n'est débité avant la fin de l'installation."}{" "}
               {/* 03/09 — la périodicité repart avec le visiteur : la grille
                   la relit dans l'URL, sinon un client parti en annuel
                   retombait en mensuel sans s'en apercevoir */}
@@ -941,7 +991,8 @@ export default function PriseDeCreneau({
                 <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
                   À la réunion&nbsp;: on branche vos postes sur vos outils, on vérifie votre
                   éligibilité au Chèque TIC, et l&apos;abonnement ({libellePrix}) ne démarre
-                  qu&apos;une fois le système en route.
+                  qu&apos;une fois le système en route&nbsp;: le premier prélèvement part le jour où
+                  vos modules sont en service.
                 </p>
                 {/* 02/09 (revue n° 10) — le client vient de créer un compte
                     pour que sa demande lui soit rattachée : on lui dit où
@@ -950,11 +1001,52 @@ export default function PriseDeCreneau({
                 <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
                   Votre demande est rangée dans « Mon compte », avec votre créneau.
                 </p>
+
+                {/* 05/09 — le moyen de paiement : enregistré maintenant (Stripe,
+                    carte ou SEPA, rien de débité) ou plus tard depuis /compte.
+                    Sans demandeId (robot pris au pot de miel), rien à proposer. */}
+                {demandeId ? (
+                  <div className="rv-paiement mt-6">
+                    <div className="text-[15px] font-semibold text-[#050505]">Votre moyen de paiement</div>
+                    <p className="mt-1.5 max-w-[54ch] text-[14px] leading-[22px] text-[#3d3d3d]">
+                      Carte ou prélèvement SEPA, enregistré sur une page sécurisée. Rien n&apos;est
+                      débité avant la fin de l&apos;installation&nbsp;: le premier prélèvement part le
+                      jour où vos modules sont en service.
+                    </p>
+                    {paiement === "indisponible" ? (
+                      <p className="rv-paiement-note mt-3" role="status">
+                        L&apos;enregistrement en ligne n&apos;est pas encore ouvert&nbsp;: on vous le
+                        proposera par e-mail.
+                      </p>
+                    ) : (
+                      <>
+                        {erreurPaiement ? (
+                          <p className="rv-erreur mt-3" role="alert">
+                            {erreurPaiement}
+                          </p>
+                        ) : null}
+                        <div className="mt-3 flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            className="r-btn r-btn--noir"
+                            onClick={enregistrerPaiement}
+                            disabled={paiement === "envoi"}
+                          >
+                            {paiement === "envoi" ? "Ouverture…" : "Enregistrer mon moyen de paiement"}
+                          </button>
+                          <Link href="/compte" className="r-lien">
+                            Plus tard, depuis Mon compte
+                          </Link>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ) : null}
               </>
             ) : null}
             <div className="mt-7 flex flex-wrap gap-3">
               {parcours === "installation" ? (
-                <Link href="/compte" className="r-btn r-btn--noir">
+                <Link href="/compte" className={`r-btn ${demandeId && paiement !== "indisponible" ? "r-btn--fil" : "r-btn--noir"}`}>
                   Suivre ma demande
                 </Link>
               ) : null}

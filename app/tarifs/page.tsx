@@ -35,6 +35,14 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
    PAIEMENT : rien en ligne aujourd'hui (pas encore de compte pro). La
    couture est prévue dans components/tarifs/Grille.tsx — une étape
    s'insérera entre le choix des postes et la réunion, sans refonte.
+   → 05/09 (demande des associés : « enlève la mention paiement à
+   l'installation, ça va porter à confusion ») : le client enregistre son
+   moyen de paiement — carte ou prélèvement SEPA — à la réservation, sur
+   /installation ; rien n'est débité avant la fin de l'installation, le
+   premier prélèvement part le jour de la mise en service. La FAQ
+   « Comment se passe le paiement ? », la règle « Aucun engagement
+   caché », le chapô du CTA final et la mention légale de la grille
+   disent désormais cela — plus « tout se règle à l'installation ».
 
    05/09 — LE DESIGN DE /reserver-un-audit, COLLÉ (Teo : « quand on clique
    sur Indépendants & TPE, le design doit être le même que celui
@@ -85,7 +93,8 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Comment se passe le paiement ?",
     r: [
-      `Rien ne se paie en ligne. Tout se règle à la réunion d'installation, et l'abonnement ne démarre qu'une fois le système en route chez vous. L'abonnement est mensuel sans engagement, ou annuel (−${REMISE_PCT} %, facturé en une fois pour douze mois). En mensuel, vous prévenez, le mois en cours va à son terme, les envois s'arrêtent.`,
+      "Vous enregistrez votre moyen de paiement — carte ou prélèvement SEPA — au moment de réserver la réunion d'installation, sur une page sécurisée. Rien n'est débité avant la fin de l'installation : le premier prélèvement part le jour où vos modules sont en service.",
+      `En mensuel, sans engagement : vous résiliez à tout moment, le mois en cours va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, le jour de la mise en service, à −${REMISE_PCT} %.`,
     ],
   },
   {
@@ -98,7 +107,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Et si ça ne me convient pas ?",
     r: [
-      "Trente jours pour être remboursé, sans justification à fournir, en mensuel comme en annuel. Au-delà, le mensuel reste résiliable à tout moment ; l'annuel court jusqu'à son terme — et dans les deux cas vos données repartent avec vous, export complet compris.",
+      "Trente jours à partir de la mise en service pour être remboursé, sans justification à fournir, en mensuel comme en annuel : ce qui a été prélevé vous est rendu. Au-delà, le mensuel reste résiliable à tout moment ; l'annuel court jusqu'à son terme — et dans les deux cas vos données repartent avec vous, export complet compris.",
     ],
   },
   {
@@ -129,7 +138,7 @@ const JAMAIS: { titre: string; texte: string }[] = [
   {
     titre: "Aucun engagement caché",
     texte:
-      "En mensuel, rien n'est payé d'avance : vous prévenez, le mois va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, avec les mêmes trente jours satisfait ou remboursé.",
+      "Rien n'est débité avant la fin de l'installation. En mensuel, sans engagement : vous prévenez, le mois va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, le jour de la mise en service, avec les mêmes trente jours satisfait ou remboursé.",
   },
   {
     titre: "Vos données repartent avec vous",
@@ -202,9 +211,9 @@ export default function TarifsPage() {
             <h2 className="r-h2">Réservez l&apos;installation en deux minutes</h2>
             <p className="r-lead mx-auto mt-6 max-w-[54ch]">
               Vous choisissez vos postes, vous réservez la réunion d&apos;installation en
-              ligne — et le système démarre sous votre œil. Rien ne se paie en ligne&nbsp;:
-              tout se règle à l&apos;installation, et l&apos;abonnement ne démarre qu&apos;une
-              fois le système en route chez vous.
+              ligne, vous enregistrez votre moyen de paiement — et le système démarre sous
+              votre œil. Rien n&apos;est débité avant la fin de l&apos;installation&nbsp;: le
+              premier prélèvement part le jour où vos modules sont en service.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <a href="#grille" className="r-btn r-btn--noir">

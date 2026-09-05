@@ -14,6 +14,12 @@ import { utilisateurCourant } from "@/lib/supabase/server";
    de réglage — 45 min en visio, OAuth et branchements faits ensemble.
    C'est la conversion du modèle arrêté les 27-28/08 : pas de paiement en
    ligne (pas encore de compte pro), la réunion EST l'engagement.
+   → 05/09 (demande des associés) : le client ENREGISTRE son moyen de
+   paiement — carte ou prélèvement SEPA, via Stripe — juste après la
+   réservation, sur l'écran final du module ; rien n'est débité avant la
+   fin de l'installation, le premier prélèvement part le jour de la mise
+   en service. Le chapô et la description ne disent plus « rien à payer
+   aujourd'hui » ni « sans paiement en ligne ».
 
    Page volontairement distincte de /reserver (les audits) : autre
    parcours, autre récapitulatif, autre suite — on n'audite pas, on met
@@ -40,7 +46,7 @@ import { utilisateurCourant } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "Réserver l'installation | Omega.AI",
   description:
-    "Choisissez votre créneau : 45 minutes en visio pour brancher vos postes sur vos outils — mail, tableur, WhatsApp. Sans paiement en ligne, sans engagement de durée.",
+    "Choisissez votre créneau : 45 minutes en visio pour brancher vos postes sur vos outils — mail, tableur, WhatsApp. Vous enregistrez votre moyen de paiement à la réservation ; rien n'est débité avant la fin de l'installation.",
 };
 
 export default async function InstallationPage({
@@ -64,8 +70,9 @@ export default async function InstallationPage({
           <h1 className="r-h2 max-w-[20ch]">Réservez votre installation</h1>
           <p className="r-lead mt-5 max-w-[58ch]">
             45 minutes en visio, écran partagé : on branche vos postes sur vos outils, on règle le
-            ton et les délais avec vous, et le système démarre sous votre œil. Rien à préparer,
-            rien à payer aujourd&apos;hui.
+            ton et les délais avec vous, et le système démarre sous votre œil. Rien à préparer.
+            Vous enregistrez votre moyen de paiement — carte ou prélèvement SEPA — à la
+            réservation&nbsp;; rien n&apos;est débité avant la fin de l&apos;installation.
           </p>
           <div className="mt-10">
             <PriseDeCreneau

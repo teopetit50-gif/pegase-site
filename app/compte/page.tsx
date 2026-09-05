@@ -9,7 +9,13 @@ import IdentiteCompte from "@/components/compte/IdentiteCompte";
 import MotDePasseCarte from "@/components/compte/MotDePasseCarte";
 import ProfilCarte from "@/components/compte/ProfilCarte";
 import SectionCompte from "@/components/compte/SectionCompte";
-import { abonnementCourant, reunionPassee, type DemandeAbonnement, type DemandeCompte } from "@/lib/abonnement";
+import {
+  abonnementCourant,
+  reunionPassee,
+  statutPaiement,
+  type DemandeAbonnement,
+  type DemandeCompte,
+} from "@/lib/abonnement";
 import {
   LIBELLES_PARCOURS,
   LIBELLES_STATUT,
@@ -99,6 +105,18 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
    entreprise, prix, date, et le statut du point de vue du client :
    « a_payer » se lit « Enregistrée — règlement à venir », pas « payez »
    (pas de paiement en ligne encore, Teo appelle).
+
+   05/09 — LE MOYEN DE PAIEMENT DE L'ABONNEMENT (demande des associés).
+   La carte d'abonnement porte une ligne « Moyen de paiement » (voir
+   AbonnementCarte) ; Stripe ramène ici après l'enregistrement, avec
+   ?paiement=ok (bandeau vert : « enregistré — rien ne sera débité avant
+   la fin de l'installation ») ou ?paiement=plus-tard (bandeau neutre :
+   « vous pourrez l'enregistrer plus tard ici »). Honnêteté : c'est le
+   webhook du COCKPIT qui écrit paiement_statut, quelques secondes après
+   le retour — si ?paiement=ok arrive avant lui, la page dit
+   « enregistrement en cours » et la carte reçoit `enregistrementEnCours`
+   plutôt que d'afficher « À enregistrer » à quelqu'un qui vient de le
+   faire. Le paramètre est lu par searchParams (la page est déjà dynamique).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const dynamic = "force-dynamic";
@@ -125,9 +143,17 @@ function Compteur({ n }: { n: number }) {
   return n > 0 ? <span className="cp-compteur">{n}</span> : null;
 }
 
-export default async function ComptePage() {
+export default async function ComptePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ paiement?: string }>;
+}) {
   const utilisateur = await utilisateurCourant();
   if (!utilisateur) redirect("/connexion?suite=%2Fcompte");
+
+  /* 05/09 — le retour de Stripe : ok | plus-tard, tout autre valeur ignorée */
+  const { paiement: retourPaiement } = await searchParams;
+  const retour = retourPaiement === "ok" ? "ok" : retourPaiement === "plus-tard" ? "plus-tard" : null;
 
   const supabase = await createClient();
   const [demandesRes, comptesRes, commandesRes, abonnementRes] = await Promise.all([
@@ -157,6 +183,10 @@ export default async function ComptePage() {
      annuler_demande / modifier_installation : une réunion passée ne se
      modifie plus en ligne */
   const reunionDejaPassee = reunionPassee(abonnement);
+  /* 05/09 — ?paiement=ok mais la base dit encore « à enregistrer » : le
+     webhook du cockpit n'a pas fini d'écrire (quelques secondes) */
+  const enregistrementEnCours =
+    retour === "ok" && abonnement != null && statutPaiement(abonnement) === "a_enregistrer";
 
   /* Mes rendez-vous : les réunions d'installation, la plus proche du
      présent d'abord (ISO se trie en texte ; sans créneau → à la fin),
@@ -191,6 +221,19 @@ export default async function ComptePage() {
             <div className="order-2 space-y-5 lg:order-1">
               {/* ——— 1. Mon abonnement ——— */}
               <SectionCompte id="abonnement" teinte="orange" icone={CreditCard} kicker="Abonnement" titre="Mon abonnement">
+                {/* 05/09 — le retour de Stripe, au-dessus de la carte */}
+                {retour === "ok" ? (
+                  <p className="cp-ok mb-5" role="status">
+                    {enregistrementEnCours
+                      ? "Merci — l'enregistrement de votre moyen de paiement est en cours de confirmation, quelques secondes. Rien ne sera débité avant la fin de l'installation."
+                      : "Moyen de paiement enregistré — rien ne sera débité avant la fin de l'installation."}
+                  </p>
+                ) : retour === "plus-tard" ? (
+                  <p className="cp-info mb-5" role="status">
+                    Vous pourrez enregistrer votre moyen de paiement plus tard, ici, depuis votre
+                    abonnement.
+                  </p>
+                ) : null}
                 {panneDemandes ? (
                   <p className="rv-erreur">
                     Votre abonnement ne répond pas pour le moment. Rechargez la page dans un instant.
@@ -202,6 +245,7 @@ export default async function ComptePage() {
                     demandesAbonnement={demandesAbonnement}
                     panneDemandesAbonnement={panneDemandesAbonnement}
                     reunionPassee={reunionDejaPassee}
+                    enregistrementEnCours={enregistrementEnCours}
                   />
                 )}
               </SectionCompte>

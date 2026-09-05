@@ -32,6 +32,25 @@
    s'ouvrent jouent .rv-apparait ; les cases de postes réutilisent
    .rv-case / .rv-coche (globals.css, sous .resa) et le sélecteur
    mensuel | annuel le .r-seg de /tarifs.
+
+   05/09 — LA LIGNE « MOYEN DE PAIEMENT » (demande des associés : le
+   client enregistre son moyen de paiement, débité une fois l'installation
+   terminée). Entre le prix et les actions, l'état de paiement de la
+   demande (lib/abonnement : statutPaiement, libelleMoyenPaiement) :
+     · a_enregistrer → pastille ambre « À enregistrer » + bouton
+       « Enregistrer mon moyen de paiement » (POST /api/paiement/setup,
+       puis la page Stripe — carte ou prélèvement SEPA, rien de débité) ;
+     · enregistre → « Carte Visa •••• 4242 » / « Prélèvement SEPA •••• 3000 »
+       + pastille verte ;
+     · preleve → « Premier prélèvement effectué » ;
+     · echec → pastille rouge « Paiement refusé » + le même bouton, pour
+       mettre à jour le moyen de paiement (l'agence décide du reste — pas
+       de suspension automatique).
+   Au retour de Stripe (?paiement=ok), le webhook du cockpit peut mettre
+   quelques secondes à écrire : la page passe `enregistrementEnCours` et
+   la ligne dit « Enregistrement en cours » plutôt que « À enregistrer ».
+   Sans clé Stripe (503), la ligne dit que l'enregistrement en ligne n'est
+   pas encore ouvert — jamais une erreur brute.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -47,14 +66,18 @@ import {
   estEnService,
   estModifiable,
   etatAbonnement,
+  libelleMoyenPaiement,
   libellePrix,
   lignesDetail,
   messageErreur,
   modifierInstallation,
   nomPoste,
+  ouvrirEnregistrementPaiement,
+  paiementPertinent,
   postesTries,
   prixChoix,
   prixNombre,
+  statutPaiement,
   type DemandeAbonnement,
   type DemandeCompte,
 } from "@/lib/abonnement";
@@ -76,6 +99,9 @@ type Props = {
      finalisée dont la réunion a eu lieu ne se modifie plus en ligne,
      même garde que annuler_demande / modifier_installation */
   reunionPassee?: boolean;
+  /* 05/09 — retour de Stripe (?paiement=ok) alors que le webhook n'a pas
+     encore écrit : « enregistrement en cours » plutôt qu'« à enregistrer » */
+  enregistrementEnCours?: boolean;
 };
 
 /* quel panneau est déplié — un seul à la fois */
@@ -92,6 +118,12 @@ const TEINTES: Record<string, string> = {
   a_traiter: "ambre",
   traitee: "vert",
   refusee: "gris",
+  /* 05/09 — la ligne « Moyen de paiement » (rouge : globals.css, même jour) */
+  paiement_a_enregistrer: "ambre",
+  paiement_en_cours: "ambre",
+  paiement_enregistre: "vert",
+  paiement_preleve: "vert",
+  paiement_echec: "rouge",
 };
 
 function Pastille({ code, children }: { code: string; children: React.ReactNode }) {
@@ -110,6 +142,7 @@ export default function AbonnementCarte({
   demandesAbonnement,
   panneDemandesAbonnement,
   reunionPassee = false,
+  enregistrementEnCours = false,
 }: Props) {
   const router = useRouter();
 
@@ -118,6 +151,12 @@ export default function AbonnementCarte({
   const [erreur, setErreur] = useState<string | null>(null);
   /* le message de confirmation après une action réussie */
   const [fait, setFait] = useState<string | null>(null);
+
+  /* ——— 05/09 : l'ouverture de la page Stripe (moyen de paiement) ——— */
+  const [paiementEnvoi, setPaiementEnvoi] = useState(false);
+  const [paiementFerme, setPaiementFerme] = useState(false);
+  const [erreurPaiement, setErreurPaiement] = useState<string | null>(null);
+  const paiementEnCours = useRef(false);
 
   /* ——— le panneau « formule » (modifier ou demander un changement) ——— */
   const modulesActuels = postesTries(demande?.modules);
@@ -249,6 +288,72 @@ export default function AbonnementCarte({
       "Demande de résiliation envoyée. Nous vous confirmons par e-mail sous 48 h ; votre abonnement s'arrête à la fin de la période en cours, rien n'est prélevé au-delà.",
     );
 
+  /* ——— 05/09 : la ligne « Moyen de paiement » ——— */
+  const paiement = statutPaiement(demande);
+  const montrerPaiement = paiementPertinent(demande) && etat.code !== "annule";
+  /* ?paiement=ok mais rien d'écrit encore : le webhook arrive */
+  const paiementAttendu = paiement === "a_enregistrer" && enregistrementEnCours;
+
+  const enregistrerPaiement = async () => {
+    if (paiementEnvoi || paiementEnCours.current) return;
+    paiementEnCours.current = true;
+    setPaiementEnvoi(true);
+    setErreurPaiement(null);
+    try {
+      const rep = await ouvrirEnregistrementPaiement(demande.id);
+      if (rep.ok) {
+        /* on quitte la page pour Stripe ; le bouton reste éteint jusque-là */
+        window.location.assign(rep.url);
+        return;
+      }
+      if (rep.erreur === "paiement_indisponible") {
+        setPaiementFerme(true);
+        return;
+      }
+      setErreurPaiement(messageErreur(rep.erreur));
+    } finally {
+      paiementEnCours.current = false;
+      setPaiementEnvoi(false);
+    }
+  };
+
+  /* pastille + libellé + faut-il le bouton, selon l'état */
+  const lignePaiement: { code: string; pastille: string; texte: string; bouton: boolean } = paiementAttendu
+    ? {
+        code: "paiement_en_cours",
+        pastille: "Enregistrement en cours",
+        texte: "Stripe nous confirme votre moyen de paiement dans quelques secondes. Rechargez la page dans un instant.",
+        bouton: false,
+      }
+    : paiement === "enregistre"
+      ? {
+          code: "paiement_enregistre",
+          pastille: "Enregistré",
+          texte: `${libelleMoyenPaiement(demande.moyen_paiement)} — rien n'est débité avant la fin de l'installation.`,
+          bouton: false,
+        }
+      : paiement === "preleve"
+        ? {
+            code: "paiement_preleve",
+            pastille: "Premier prélèvement effectué",
+            texte: libelleMoyenPaiement(demande.moyen_paiement),
+            bouton: false,
+          }
+        : paiement === "echec"
+          ? {
+              code: "paiement_echec",
+              pastille: "Paiement refusé",
+              texte: `${libelleMoyenPaiement(demande.moyen_paiement)} — le prélèvement a été refusé. Mettez à jour votre moyen de paiement ; nous vous écrivons pour la suite.`,
+              bouton: true,
+            }
+          : {
+              code: "paiement_a_enregistrer",
+              pastille: "À enregistrer",
+              texte:
+                "Carte ou prélèvement SEPA, sur une page sécurisée. Rien n'est débité avant la fin de l'installation : le premier prélèvement part le jour où vos modules sont en service.",
+              bouton: true,
+            };
+
   return (
     <div>
       {/* ——— 1. ce que le client a ——— */}
@@ -318,6 +423,45 @@ export default function AbonnementCarte({
               )}
             </span>
           </span>
+        </div>
+      ) : null}
+
+      {/* ——— 05/09 : le moyen de paiement ——— */}
+      {montrerPaiement ? (
+        <div className="mt-4 border-t border-[#e3e3e3] pt-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="cp-secondaire cp-kicker-ligne">Moyen de paiement</div>
+              <p className="mt-1.5 max-w-[54ch] text-[14px] leading-[21px] text-[#3d3d3d]">{lignePaiement.texte}</p>
+            </div>
+            <Pastille code={lignePaiement.code}>{lignePaiement.pastille}</Pastille>
+          </div>
+          {lignePaiement.bouton ? (
+            paiementFerme ? (
+              <p className="cp-info mt-3" role="status">
+                L&apos;enregistrement en ligne n&apos;est pas encore ouvert&nbsp;: on vous le proposera
+                par e-mail.
+              </p>
+            ) : (
+              <>
+                {erreurPaiement ? (
+                  <p className="rv-erreur mt-3" role="alert">
+                    {erreurPaiement}
+                  </p>
+                ) : null}
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="r-btn r-btn--noir"
+                    onClick={enregistrerPaiement}
+                    disabled={paiementEnvoi || envoi}
+                  >
+                    {paiementEnvoi ? "Ouverture…" : "Enregistrer mon moyen de paiement"}
+                  </button>
+                </div>
+              </>
+            )
+          ) : null}
         </div>
       ) : null}
 

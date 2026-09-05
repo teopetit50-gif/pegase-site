@@ -1,6 +1,11 @@
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs v4 — grille publique et catalogue des postes (28/08/2026)
 
+   05/09/2026 (demande des associés) : la ligne « Paiement » du comparatif
+   ne dit plus « tout se règle à l'installation » — moyen de paiement
+   enregistré à la réservation, premier prélèvement à la mise en service
+   (même promesse que la FAQ de /tarifs et la note de la grille).
+
    REVIREMENT ASSUMÉ, décision Teo du 27-28/08 : la v3 interdisait tout
    montant (« le prix sort de vos volumes ») ; le modèle commercial arrêté
    fait l'inverse pour les indépendants et TPE-PME — prix publics, achat
@@ -306,9 +311,12 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
         valeurs: meme("Chiffré avant tout engagement"),
       },
       {
+        /* 05/09 (relecture) — la ligne disait encore « tout se règle à la
+           réunion d'installation » sous une FAQ qui dit le contraire :
+           même promesse que la FAQ et la note de la grille, mot pour mot */
         libelle: "Paiement",
-        aide: "Rien ne se paie en ligne : tout se règle à la réunion d'installation.",
-        valeurs: meme("À l'installation"),
+        aide: "Carte ou prélèvement SEPA enregistré à la réservation. Rien n'est débité avant la fin de l'installation : le premier prélèvement part le jour où vos modules sont en service.",
+        valeurs: meme("À la mise en service"),
       },
       {
         libelle: "Satisfait ou remboursé",

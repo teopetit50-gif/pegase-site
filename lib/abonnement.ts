@@ -29,6 +29,19 @@
    en apikey, jeton de session en Authorization, code PostgREST dans le
    message d'erreur pour distinguer une base pas encore migrée (PGRST202)
    d'une vraie panne.
+
+   05/09 — LE MOYEN DE PAIEMENT (demande des associés : « le client entre
+   son moyen de paiement et est débité une fois l'installation
+   terminée »). La demande d'installation porte désormais l'état du
+   paiement (2026-09-05-paiement-stripe.sql) : paiement_statut
+   (a_enregistrer → enregistre → preleve, ou echec), moyen_paiement (ce
+   qu'il faut pour dire « Carte Visa •••• 4242 » sans rien stocker de
+   sensible), stripe_subscription_id. Le client enregistre sa carte ou son
+   mandat SEPA sur une page Stripe ouverte par POST /api/paiement/setup
+   (ouvrirEnregistrementPaiement, ci-dessous) ; le webhook du COCKPIT
+   remplit ensuite ces colonnes — d'où « enregistrement en cours » quelques
+   secondes après le retour de Stripe. Le premier prélèvement part au
+   clic « Finaliser l'installation » de l'agence, jamais avant.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { LIBELLES_STATUT, dateHeureGp } from "@/lib/compte";
@@ -56,7 +69,25 @@ export type DemandeCompte = {
   /* non null = installation FINALISÉE par Teo (le compte est rattaché) */
   client_id: string | null;
   cree_le: string;
+  /* 05/09 — le paiement (2026-09-05-paiement-stripe.sql). Facultatifs :
+     absents tant que la migration n'est pas passée — lus comme
+     « a_enregistrer » sans moyen de paiement */
+  paiement_statut?: string | null;
+  moyen_paiement?: MoyenPaiement | null;
+  stripe_subscription_id?: string | null;
+  stripe_customer_id?: string | null;
 };
+
+/* Ce que le webhook du cockpit range dans demandes_audit.moyen_paiement :
+   le type, la marque de la carte s'il y en a une, les quatre derniers
+   chiffres (carte) ou caractères (IBAN). Jamais plus. */
+export type MoyenPaiement = {
+  type: "card" | "sepa_debit" | string;
+  marque?: string | null;
+  fin?: string | null;
+};
+
+export type PaiementStatut = "a_enregistrer" | "enregistre" | "preleve" | "echec";
 
 /* Une ligne de public.demandes_abonnement (rpc mes_demandes_abonnement) */
 export type DemandeAbonnement = {
@@ -230,6 +261,81 @@ export function lignesDetail(d: DemandeAbonnement): string[] {
   return lignes;
 }
 
+/* ——— le moyen de paiement (05/09) ——— */
+
+const STATUTS_PAIEMENT: PaiementStatut[] = ["a_enregistrer", "enregistre", "preleve", "echec"];
+
+/** L'état du paiement d'une demande. Colonne absente (migration pas
+    passée) ou valeur inconnue : « à enregistrer » — on ne dit jamais
+    « enregistré » sans l'avoir lu. */
+export function statutPaiement(d: DemandeCompte): PaiementStatut {
+  const s = d.paiement_statut;
+  return STATUTS_PAIEMENT.includes(s as PaiementStatut) ? (s as PaiementStatut) : "a_enregistrer";
+}
+
+/** La ligne « Moyen de paiement » a-t-elle sa place sur cette demande ?
+    Une installation, pas annulée ni manquée — les mêmes gardes que la
+    route /api/paiement/setup, pour ne pas montrer un bouton qui répondra
+    « statut incompatible ». */
+export function paiementPertinent(d: DemandeCompte): boolean {
+  return d.parcours === "reglage" && (["confirme", "a_traiter", "honore"].includes(d.statut) || d.client_id != null);
+}
+
+const MARQUES: Record<string, string> = {
+  visa: "Visa",
+  mastercard: "Mastercard",
+  amex: "American Express",
+  cartes_bancaires: "CB",
+  discover: "Discover",
+  jcb: "JCB",
+  unionpay: "UnionPay",
+};
+
+/** « Carte Visa •••• 4242 », « Prélèvement SEPA •••• 3000 » — ou
+    « Moyen de paiement enregistré » si le détail manque. */
+export function libelleMoyenPaiement(m: MoyenPaiement | null | undefined): string {
+  if (!m) return "Moyen de paiement enregistré";
+  const fin = m.fin ? ` •••• ${m.fin}` : "";
+  if (m.type === "sepa_debit") return `Prélèvement SEPA${fin}`;
+  if (m.type === "card") {
+    const marque = m.marque ? (MARQUES[m.marque] ?? m.marque.charAt(0).toUpperCase() + m.marque.slice(1)) : "";
+    return `Carte${marque ? ` ${marque}` : ""}${fin}`;
+  }
+  return `Moyen de paiement enregistré${fin}`;
+}
+
+export type ReponseEnregistrement = { ok: true; url: string } | { ok: false; erreur: string };
+
+/** Demande au site d'ouvrir la page Stripe où le client enregistre son
+    moyen de paiement (POST /api/paiement/setup, session lue dans les
+    cookies — pas de jeton à passer). Succès : l'URL où aller, par
+    window.location.assign. Échec : un code, à traduire par messageErreur.
+    « paiement_indisponible » (503) n'est pas une panne : la clé Stripe
+    n'est pas encore posée, et l'écran le dit tel quel. */
+export async function ouvrirEnregistrementPaiement(demandeId: string): Promise<ReponseEnregistrement> {
+  try {
+    const r = await fetch("/api/paiement/setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ demande: demandeId }),
+    });
+    let corps: { url?: unknown; erreur?: unknown } = {};
+    try {
+      corps = (await r.json()) as typeof corps;
+    } catch {
+      /* corps absent : le statut décide */
+    }
+    if (r.ok && typeof corps.url === "string" && corps.url) return { ok: true, url: corps.url };
+    if (typeof corps.erreur === "string" && corps.erreur) return { ok: false, erreur: corps.erreur };
+    if (r.status === 401) return { ok: false, erreur: "connexion_requise" };
+    if (r.status === 503) return { ok: false, erreur: "paiement_indisponible" };
+    return { ok: false, erreur: "reseau" };
+  } catch {
+    return { ok: false, erreur: "reseau" };
+  }
+}
+
 /* ——— appels ——— */
 
 async function rpc<T>(fonction: string, corps: Record<string, unknown>, jeton?: string): Promise<T> {
@@ -332,6 +438,14 @@ export const ERREURS_ABONNEMENT: Record<string, string> = {
   aucun_abonnement: "Aucun abonnement n'est rattaché à ce compte. Rechargez la page.",
   connexion_requise: "Votre session a expiré : reconnectez-vous puis réessayez.",
   indisponible: "Cette action n'est pas encore ouverte en ligne. Écrivez-nous, on s'en occupe.",
+  /* 05/09 — les codes de POST /api/paiement/setup */
+  paiement_indisponible:
+    "L'enregistrement en ligne du moyen de paiement n'est pas encore ouvert : on vous le proposera par e-mail.",
+  demande_invalide: "Cette demande n'est pas valide. Rechargez la page.",
+  deja_preleve:
+    "Votre premier prélèvement est déjà passé : pour changer de moyen de paiement, écrivez-nous, on s'en occupe.",
+  base_indisponible: "Votre abonnement ne répond pas pour le moment. Réessayez dans un instant.",
+  stripe_erreur: "La page de paiement n'a pas pu s'ouvrir. Réessayez dans un instant, ou écrivez-nous.",
   reseau: "Ça n'est pas parti — vérifiez votre connexion et réessayez.",
   defaut: "Ça n'a pas fonctionné. Réessayez dans un instant, ou écrivez-nous.",
 };
