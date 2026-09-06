@@ -163,10 +163,20 @@ export async function creerSessionEnregistrement(p: ParametresEnregistrement): P
   const s = stripe();
   const customer = await trouverOuCreerClient(s, p);
 
-  const session = await s.checkout.sessions.create(
-    {
-      mode: "setup",
-      customer: customer.id,
+  /* « Managed Payments » (Stripe vendeur officiel, pour les produits
+     numériques) est ACTIVÉ PAR DÉFAUT sur les comptes Stripe récents et
+     refuse mode=setup — constaté en production le 05/09 au premier essai
+     (« Invalid mode: setup. Managed Payments … only supports mode:
+     subscription or mode: payment »). Il ne convient pas à Omega de toute
+     façon : il interdit de créer un abonnement hors Checkout, ce que fait
+     le cockpit à la finalisation. On le désactive donc pour cette session
+     (et l'agence le désactive aussi par défaut dans le Dashboard, guide
+     phase E). Le paramètre est plus récent que les types du SDK 22.6.1,
+     d'où l'assertion de type sur l'objet entier. */
+  const parametres = {
+    managed_payments: { enabled: false },
+    mode: "setup",
+    customer: customer.id,
       payment_method_types: ["card", "sepa_debit"],
       currency: "eur",
       locale: "fr",
@@ -179,9 +189,11 @@ export async function creerSessionEnregistrement(p: ParametresEnregistrement): P
       setup_intent_data: {
         metadata: { demande_id: p.demandeId, utilisateur_id: p.utilisateurId },
       },
-    },
-    { idempotencyKey: `setup:${p.demandeId}:${minuteCourante()}` },
-  );
+  } as Stripe.Checkout.SessionCreateParams;
+
+  const session = await s.checkout.sessions.create(parametres, {
+    idempotencyKey: `setup:${p.demandeId}:${minuteCourante()}`,
+  });
 
   if (!session.url) throw new Error("session_sans_url");
   return session.url;
