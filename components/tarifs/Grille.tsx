@@ -79,6 +79,7 @@ import {
   PALIERS,
   POSTES,
   REMISE_ANNUELLE,
+  SUR_MESURE,
   economieAnnuelle,
   equivalentMensuel,
   lirePeriodicite,
@@ -109,6 +110,27 @@ function lienPalier(p: Palier, periodicite: Periodicite) {
   if (p.aChoisir !== null) return "#grille";
   const postes = POSTES.map((x) => x.id).join(",");
   return `/installation?postes=${postes}${periodicite === "annuel" ? "&periodicite=annuel" : ""}`;
+}
+
+/* la cinquième ligne : même gabarit qu'un poste, un « + » à la place de
+   la case, et toute la ligne est un lien vers la page sur-mesure */
+function LigneSurMesure() {
+  return (
+    <Link href={SUR_MESURE.href} className="rv-case rv-case--sobre rv-case--lien">
+      <span className="rv-coche rv-coche--plus" aria-hidden />
+      <span>
+        <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
+          {SUR_MESURE.nom}
+        </span>
+        <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
+          {SUR_MESURE.resume}
+        </span>
+        <span className="rv-case-cta mt-1.5 block text-[12.5px] font-medium leading-[18px] text-[#050505]">
+          {SUR_MESURE.cta}
+        </span>
+      </span>
+    </Link>
+  );
 }
 
 function CartePalier({
@@ -201,6 +223,7 @@ function CartePalier({
                   </label>
                 );
               })}
+              <LigneSurMesure />
             </div>
           </fieldset>
         ) : (
@@ -222,6 +245,9 @@ function CartePalier({
                   </span>
                 </li>
               ))}
+              <li>
+                <LigneSurMesure />
+              </li>
             </ul>
           </div>
         )}

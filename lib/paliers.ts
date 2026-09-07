@@ -36,6 +36,19 @@
    600 / 900 / 1212 €/an, soit 50 / 75 / 101 €/mois, économie 108 / 168 /
    144 € par an.
 
+   07/09/2026 — LE TEXTE DE LA GRILLE RÉÉCRIT (Teo : « pas très pro,
+   pas assez détaillé ; le principe d'Omega c'est une machine qui construit
+   des systèmes puissants »). Les noms des postes décrivaient des corvées
+   (« la paperasse traitée »), les résumés étaient des slogans d'une
+   ligne, les promesses des paliers du remplissage et les quatre points
+   identiques d'une carte à l'autre. Désormais : un nom en nom commun,
+   même grammaire pour les quatre ; un résumé qui donne le PÉRIMÈTRE —
+   ce que le système lit, décide, écrit, et ce qui reste sous validation ;
+   une promesse par palier qui dit ce que la machine fait à ce niveau ;
+   des points propres à chaque carte, sans code interne (PULSE, VAULT
+   sont dits par leur résultat). Règle intacte : chaque phrase redit un
+   fait posé dans lib/content.ts — rien qui n'existe pas.
+
    Le critère qui sépare les deux mondes n'est pas la taille mais QUI
    VALIDE : une personne qui tient les outils → grille ; plusieurs
    services qui se partagent la validation → audit d'abord. C'est le
@@ -57,32 +70,50 @@ export const POSTES: Poste[] = [
   {
     id: "cashd",
     system: "CASHD",
-    nom: "Relance devis & factures",
+    nom: "Relance des devis et factures",
     slug: "relances-impayes",
-    resume: "Vos devis sans réponse et vos factures échues, relancés à J+3, J+7, J+21.",
+    resume:
+      "Chaque devis sans réponse et chaque facture échue sont relancés à J+3, J+7 et J+21, avec un message rédigé selon le montant, le retard et l'historique du client. Aucun envoi sans votre validation.",
   },
   {
     id: "frontd",
     system: "FRONTD",
-    nom: "Demandes entrantes & avis",
+    nom: "Réponse aux demandes clients",
     slug: "demandes-clients",
-    resume: "Une demande reçue à 21 h obtient sa réponse à 21 h, mail et WhatsApp.",
+    resume:
+      "Les demandes reçues par mail et WhatsApp — horaires, tarifs, disponibilités, rendez-vous — obtiennent une réponse à toute heure, tirée de ce que votre entreprise sait vraiment. Chaque client satisfait est invité à laisser un avis.",
   },
   {
     id: "reload",
     system: "RELOAD",
-    nom: "Clients dormants & marchés",
+    nom: "Clients dormants et marchés publics",
     slug: "nouvelles-affaires",
-    resume: "Vos clients silencieux recontactés, les marchés publics de votre zone filtrés.",
+    resume:
+      "Vos clients silencieux sont retrouvés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les consultations publiques de votre zone sont relevées chaque jour et filtrées sur vos capacités réelles.",
   },
   {
     id: "filed",
     system: "FILED",
-    nom: "La paperasse traitée",
+    nom: "Factures fournisseurs et pièces comptables",
     slug: "factures-fournisseurs",
-    resume: "Chaque facture fournisseur lue, contrôlée, classée, transmise au cabinet.",
+    resume:
+      "Chaque facture fournisseur est lue quel que soit son format, ses montants extraits et contrôlés entre eux, la pièce classée par fournisseur et transmise à votre cabinet dans un dossier complet.",
   },
 ];
+
+/* ——— la cinquième ligne des cartes (07/09/2026, Teo : « une option pour
+   faire comprendre qu'Omega peut tout faire ») ———
+   Pas un poste de plus : une ligne sous les quatre, dans chaque carte, qui
+   dit que ce qui n'est pas dans la liste se construit aussi. Elle ne se
+   coche pas — elle mène à /offres/sur-mesure, où la promesse est cadrée
+   (devis avant tout engagement). Le texte redit celui de cette page. */
+export const SUR_MESURE = {
+  nom: "Un poste propre à votre métier",
+  resume:
+    "La tâche qui vous coûte le plus cher n'est pas dans la liste ? Elle se construit sur les mêmes fondations — vos outils, vos règles, votre validation. Le périmètre et le devis sont écrits avant tout engagement.",
+  cta: "Décrire votre cas",
+  href: "/offres/sur-mesure",
+};
 
 /* PULSE et VAULT ne se choisissent pas : ils tournent chez tout le monde,
    quel que soit le palier — c'est la règle posée sur /offres. */
@@ -113,11 +144,13 @@ export const PALIERS: Palier[] = [
     prix: 59,
     sousPrix: "par mois, sans engagement",
     aChoisir: 1,
-    promesse: "Le poste qui vous coûte le plus cher aujourd'hui, traité en premier.",
+    promesse:
+      "Un système complet sur le poste qui vous coûte le plus cher : il lit, rédige, attend votre validation et rend compte chaque matin.",
     points: [
       "Un poste au choix parmi les quatre",
-      "PULSE et VAULT compris, dès le premier jour",
-      "Réunion d'installation incluse (visio, 45 min)",
+      "Branché sur vos outils : mail, WhatsApp, tableur",
+      "Le point du matin et les verrous, compris dès le premier jour",
+      "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
     ],
   },
@@ -129,11 +162,13 @@ export const PALIERS: Palier[] = [
     aChoisir: 3,
     phare: true,
     badge: "Recommandé",
-    promesse: "La relance, l'accueil et un troisième poste : le trio qui change les journées.",
+    promesse:
+      "Trois postes tenus par le même système : une seule file de validation, un seul point du matin, un seul journal de ce qui est parti.",
     points: [
       "Trois postes au choix parmi les quatre",
-      "PULSE et VAULT compris, dès le premier jour",
-      "Réunion d'installation incluse (visio, 45 min)",
+      "Une seule validation, un seul journal pour les trois",
+      "Le point du matin et les verrous, compris dès le premier jour",
+      "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
     ],
   },
@@ -143,11 +178,13 @@ export const PALIERS: Palier[] = [
     prix: 119,
     sousPrix: "par mois, sans engagement",
     aChoisir: null,
-    promesse: "Les quatre postes en service — six systèmes au total avec le point du matin et les verrous.",
+    promesse:
+      "Les quatre postes en service, avec le point du matin et les verrous : six systèmes qui tiennent l'administratif et le commercial, sous votre validation.",
     points: [
-      "Les quatre postes, sans choisir",
-      "PULSE et VAULT compris, dès le premier jour",
-      "Réunion d'installation incluse (visio, 45 min)",
+      "Les quatre postes, en service dès l'installation",
+      "Six systèmes, une seule installation",
+      "Le point du matin et les verrous, compris dès le premier jour",
+      "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
     ],
   },
@@ -247,9 +284,9 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
     lignes: [
       {
         libelle: "Postes en service",
-        aide: "Parmi les quatre : relances, demandes entrantes, clients dormants, paperasse.",
+        aide: "Parmi les quatre : relances, demandes clients, clients dormants et marchés publics, factures fournisseurs.",
         valeurs: parPalier((p) =>
-          p.aChoisir === null ? "Les quatre, sans choisir" : `${p.aChoisir}, au choix`,
+          p.aChoisir === null ? "Les quatre, en service" : `${p.aChoisir}, au choix`,
         ),
       },
       {

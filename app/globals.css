@@ -4105,6 +4105,47 @@ button.rounded-full:active {
   transform: rotate(45deg);
 }
 
+/* la ligne « un poste propre à votre métier » (07/09) : un lien qui a le
+   gabarit d'un poste, avec un « + » tracé dans la place de la case */
+.resa .rv-case--lien {
+  color: inherit;
+  text-decoration: none;
+}
+.resa .rv-case--lien .rv-case-cta {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(5, 5, 5, 0.28);
+  transition: text-decoration-color 0.2s ease;
+}
+.resa .rv-case--lien:hover .rv-case-cta {
+  text-decoration-color: currentColor;
+}
+.resa .rv-coche--plus {
+  position: relative;
+  border-color: transparent;
+  background: transparent;
+}
+.resa .rv-case--lien:hover .rv-coche--plus {
+  border-color: transparent;
+}
+.resa .rv-coche--plus::before,
+.resa .rv-coche--plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #050505;
+}
+.resa .rv-coche--plus::before {
+  height: 2px;
+  width: 12px;
+}
+.resa .rv-coche--plus::after {
+  height: 12px;
+  width: 2px;
+}
+
 /* bouton en attente de choix — même gabarit que .r-btn, éteint mais lisible */
 .resa .rv-btn--attente {
   background: #ececec;
