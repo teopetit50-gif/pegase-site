@@ -36,6 +36,27 @@
         enregistrée, on vous appelle. C'est lancerPaiement() qui y mène —
         le point d'accroche de Stripe Checkout.
 
+   07/09 — REFONTE DE L'INTERFACE (Teo : « toute cette partie-là, tu
+   coches le truc, tu te connectes à ton compte… il faut que tu changes le
+   design »). La logique ne bouge pas d'une ligne ; le rendu, si :
+     · UN panneau blanc, coiffé d'un vrai rail d'étapes (.cs-etapes :
+       pastilles reliées, le trait se remplit à mesure) à la place de la
+       rangée de chips ;
+     · le modèle : plus deux colonnes ni vingt et une cartes encadrées
+       sous quatre intertitres — une grille de vignettes à CADRE DE
+       NAVIGATEUR (le geste du mur de /tarifs/site), filtrée par famille
+       avec le sélecteur segmenté .r-seg ; la sélection = liseré noir +
+       coche sur le cadre ; replié, le modèle retenu s'affiche en grand à
+       côté de « Continuer » ;
+     · le compte : deux colonnes, l'explication et le modèle à gauche, le
+       module de connexion avec ses deux portes à droite ;
+     · le brief : récapitulatif collant à gauche, formulaire en CINQ blocs
+       numérotés 01-05 sous filet (l'entreprise, l'objectif, les pages,
+       l'allure, les fichiers) ; les cases deviennent des puces à bascule
+       (.cs-puce), les champs fichier des zones de dépôt (.cs-zone) ;
+     · la confirmation : centrée, la vignette du modèle dans le récap.
+   Le monde reste .resa : ConnexionInline est écrit dans ses classes.
+
    Une commande est un ACHAT : le jeton de session est relu au moment de
    l'envoi (getSession rafraîchit s'il a expiré pendant la saisie), et la
    fonction SQL refuse tout appel anonyme. Garde synchrone (useRef) contre
@@ -46,8 +67,17 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ConnexionInline from "@/components/compte/ConnexionInline";
 import MiniSite from "@/components/modeles/MiniSite";
-import { CATEGORIES, MODELES, parCategorie, type Modele } from "@/components/modeles/donnees";
-import { signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
+import {
+  CATEGORIES,
+  MODELES,
+  parCategorie,
+  type Modele,
+} from "@/components/modeles/donnees";
+import {
+  signalerSession,
+  utilisateurDepuis,
+  type Utilisateur,
+} from "@/lib/compte";
 import { SECTEURS } from "@/lib/creneaux";
 import {
   BUCKET_BRIEFS,
@@ -65,6 +95,15 @@ import {
 import { createClient } from "@/lib/supabase/client";
 
 type Etape = "modele" | "compte" | "brief" | "paiement";
+
+/* 07/09 — le filtre de la grille : les quatre familles du catalogue, en
+   un mot chacune (les titres de CATEGORIES font une phrase) */
+const FAMILLES_COURTES: Record<Modele["cat"], string> = {
+  chantier: "Réalisations",
+  rendezvous: "Réservation",
+  cabinet: "Expertise",
+  produit: "Service en ligne",
+};
 
 const LIBELLES_ETAPES: Record<Etape, string> = {
   modele: "Votre modèle",
@@ -93,7 +132,8 @@ type Props = {
    sécurisé (https, localhost) ; ailleurs, un repli suffisant pour nommer
    un dossier */
 function nouveauDossier(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function")
+    return crypto.randomUUID();
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
@@ -108,7 +148,8 @@ function verifierFichier(f: File): string | null {
 }
 
 function tailleLisible(octets: number): string {
-  if (octets < 1024 * 1024) return `${Math.max(1, Math.round(octets / 1024))} Ko`;
+  if (octets < 1024 * 1024)
+    return `${Math.max(1, Math.round(octets / 1024))} Ko`;
   return `${(octets / (1024 * 1024)).toFixed(1).replace(".", ",")} Mo`;
 }
 
@@ -121,7 +162,9 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
   /* ——— a) le modèle ——— */
   const [slug, setSlug] = useState<string | null>(() =>
-    MODELES.some((m) => m.slug === modeleInitial) ? (modeleInitial as string) : null,
+    MODELES.some((m) => m.slug === modeleInitial)
+      ? (modeleInitial as string)
+      : null,
   );
   const modele: Modele | null = MODELES.find((m) => m.slug === slug) ?? null;
 
@@ -135,6 +178,8 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
     () => !MODELES.some((m) => m.slug === modeleInitial),
   );
   const refEtapeModele = useRef<HTMLDivElement | null>(null);
+  /* 07/09 — la famille affichée dans la grille (« tous » = les vingt et un) */
+  const [famille, setFamille] = useState<"tous" | Modele["cat"]>("tous");
   const choisirModele = (s: string) => {
     setSlug(s);
     setErreur(null);
@@ -142,9 +187,14 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
     /* la grille vient de se replier : on ramène le haut de l'étape à
        l'écran, sous le header collant (scroll-mt), sans animation si
        l'utilisateur demande moins de mouvement */
-    const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduit = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     window.requestAnimationFrame(() =>
-      refEtapeModele.current?.scrollIntoView({ block: "start", behavior: reduit ? "auto" : "smooth" }),
+      refEtapeModele.current?.scrollIntoView({
+        block: "start",
+        behavior: reduit ? "auto" : "smooth",
+      }),
     );
   };
 
@@ -162,16 +212,32 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
     site_web: "", // pot de miel — un humain ne le voit jamais
   });
   const [objectifs, setObjectifs] = useState<string[]>([]);
-  const [pages, setPages] = useState<string[]>(["accueil", "prestations", "contact"]);
+  const [pages, setPages] = useState<string[]>([
+    "accueil",
+    "prestations",
+    "contact",
+  ]);
   const [logo, setLogo] = useState<Piece | null>(null);
   const [images, setImages] = useState<Piece[]>([]);
   const [erreurFichier, setErreurFichier] = useState<string | null>(null);
   const maj =
     (cle: keyof typeof b) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >,
+    ) =>
       setB((prev) => ({ ...prev, [cle]: e.target.value }));
-  const cocher = (liste: string[], poser: (l: string[]) => void, valeur: string) =>
-    poser(liste.includes(valeur) ? liste.filter((x) => x !== valeur) : [...liste, valeur]);
+  const cocher = (
+    liste: string[],
+    poser: (l: string[]) => void,
+    valeur: string,
+  ) =>
+    poser(
+      liste.includes(valeur)
+        ? liste.filter((x) => x !== valeur)
+        : [...liste, valeur],
+    );
 
   /* le dossier temporaire du brief dans le bucket — un par ouverture du
      brief, jamais régénéré : un fichier déjà déposé garde son chemin */
@@ -189,7 +255,11 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
   const nouvellePiece = (f: File): Piece => {
     const apercu = f.type === "application/pdf" ? null : URL.createObjectURL(f);
     if (apercu) urls.current.push(apercu);
-    return { id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`, fichier: f, apercu };
+    return {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      fichier: f,
+      apercu,
+    };
   };
 
   const choisirLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,13 +290,17 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
         continue;
       }
       if (gardes.length < place) gardes.push(nouvellePiece(f));
-      else pb = pb ?? `${MAX_IMAGES} images au plus : les dernières n'ont pas été ajoutées.`;
+      else
+        pb =
+          pb ??
+          `${MAX_IMAGES} images au plus : les dernières n'ont pas été ajoutées.`;
     }
     setErreurFichier(pb);
     if (gardes.length) setImages((prev) => [...prev, ...gardes]);
   };
 
-  const retirerImage = (id: string) => setImages((prev) => prev.filter((p) => p.id !== id));
+  const retirerImage = (id: string) =>
+    setImages((prev) => prev.filter((p) => p.id !== id));
 
   /* ——— la session ——— */
 
@@ -321,7 +395,9 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
   };
 
   /* ——— l'envoi ——— */
-  const briefOk = Boolean(modele && b.entreprise.trim() && b.entreprise.trim().length <= 120);
+  const briefOk = Boolean(
+    modele && b.entreprise.trim() && b.entreprise.trim().length <= 120,
+  );
   /* garde SYNCHRONE contre le double envoi : un état React ne l'est pas
      (voir PriseDeCreneau, revue du 02/09 n° 2) */
   const enCours = useRef(false);
@@ -364,7 +440,10 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
        SQL les refuserait de toute façon (fichier_invalide) */
     const dossierId = (dossier.current ??= nouveauDossier());
     const stockage = createClient().storage.from(BUCKET_BRIEFS);
-    const deposer = async (p: Piece, prefixe: string): Promise<string | null> => {
+    const deposer = async (
+      p: Piece,
+      prefixe: string,
+    ): Promise<string | null> => {
       const deja = deposes.current.get(p.id);
       if (deja) return deja;
       const chemin = cheminBrief(util.id, dossierId, prefixe, p.fichier.name);
@@ -422,8 +501,14 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
     if (rep.ok) {
       /* entreprise et téléphone rangés sur le compte pour la prochaine
          fois — au mieux, sans bloquer : la commande est déjà enregistrée */
-      const profil = { entreprise: b.entreprise.trim(), telephone: b.telephone.trim() || undefined };
-      if (profil.entreprise !== (util.entreprise ?? "") || (profil.telephone ?? "") !== (util.telephone ?? "")) {
+      const profil = {
+        entreprise: b.entreprise.trim(),
+        telephone: b.telephone.trim() || undefined,
+      };
+      if (
+        profil.entreprise !== (util.entreprise ?? "") ||
+        (profil.telephone ?? "") !== (util.telephone ?? "")
+      ) {
         void createClient()
           .auth.updateUser({ data: profil })
           .catch(() => {});
@@ -442,285 +527,401 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
   };
 
   /* ——— le fil d'étapes : « Votre compte » n'y est que sans session ——— */
-  const cles: Etape[] = util ? ["modele", "brief", "paiement"] : ["modele", "compte", "brief", "paiement"];
+  const cles: Etape[] = util
+    ? ["modele", "brief", "paiement"]
+    : ["modele", "compte", "brief", "paiement"];
   const idxEtape = Math.max(0, cles.indexOf(etape));
 
-  const messageErreur = erreur ? (ERREURS_SITE[erreur] ?? ERREURS_SITE.reseau) : null;
+  const messageErreur = erreur
+    ? (ERREURS_SITE[erreur] ?? ERREURS_SITE.reseau)
+    : null;
 
-  return (
-    <div className="rv-cadre">
-      {/* ═══ colonne récapitulatif ═══ */}
-      <aside className="r-carte !p-7">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-          Votre commande
-        </div>
-        <h2 className="r-h4 mt-2">Le site catalogue</h2>
-        <p className="num mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">
-          {PRIX_SITE_EUR}&nbsp;€ TTC, une fois — pas d&apos;abonnement
-        </p>
+  /* 07/09 — la grille se filtre par famille (les quatre du catalogue),
+     au lieu d'empiler vingt et une cartes sous quatre intertitres */
+  const visibles = famille === "tous" ? MODELES : parCategorie(famille);
+  const familleCourante = CATEGORIES.find((c) => c.cle === famille) ?? null;
 
-        <div className="mt-5 border-t border-[#e3e3e3] pt-4">
-          <div className="text-[14px] font-semibold text-[#050505]">Modèle choisi</div>
-          {modele ? (
-            <div className="mt-3">
-              <MiniSite m={modele} ton="clair" sizes="(max-width: 1024px) 90vw, 320px" />
-              <div className="mt-3 flex items-baseline justify-between gap-3">
-                <span className="text-[15px] font-medium text-[#050505]">{modele.nom}</span>
-                {etape !== "paiement" && etape !== "modele" ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setErreur(null);
-                      setEtape("modele");
-                    }}
-                    className="text-[13px] font-medium text-[#050505] underline underline-offset-2"
-                  >
-                    Modifier
-                  </button>
-                ) : null}
-              </div>
-              <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">{modele.style}</p>
-            </div>
-          ) : (
-            <p className="mt-2 text-[14px] leading-[21px] text-[#616161]">
-              Aucun pour l&apos;instant — choisissez-le dans la liste.
-            </p>
-          )}
-        </div>
+  const revenirAuModele = () => {
+    setErreur(null);
+    setEtape("modele");
+  };
 
-        <div className="mt-5 border-t border-[#e3e3e3] pt-4">
-          <div className="text-[14px] font-semibold text-[#050505]">Chèque TIC</div>
-          <p className="mt-1.5 text-[13px] leading-[19px] text-[#3d3d3d]">
-            Si vous êtes éligible, il reste de 198 à 594&nbsp;€ à votre charge selon le taux financé.
-            On vérifie votre éligibilité avec vous, avant tout règlement.
+  /* ——— le récapitulatif de la colonne de gauche (compte, brief) ——— */
+  const recap = (
+    <aside className="lg:sticky lg:top-28">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+        Votre commande
+      </div>
+      {modele ? (
+        <div className="mt-4">
+          <MiniSite
+            m={modele}
+            ton="clair"
+            sizes="(max-width: 1024px) 90vw, 300px"
+          />
+          <div className="mt-3 flex items-baseline justify-between gap-3">
+            <span className="text-[15px] font-medium text-[#050505]">
+              {modele.nom}
+            </span>
+            {etape !== "paiement" ? (
+              <button
+                type="button"
+                onClick={revenirAuModele}
+                className="r-lien !text-[13px]"
+              >
+                Modifier
+              </button>
+            ) : null}
+          </div>
+          <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
+            {modele.style}
           </p>
         </div>
-
-        <p className="r-note mt-4">
-          Le contenu est intégralement réécrit à votre métier, le nom de domaine est compris la
-          première année.{" "}
-          <Link href="/tarifs/site" className="underline underline-offset-2">
-            Le détail de l&apos;offre
-          </Link>
+      ) : null}
+      <dl className="mt-5 border-t border-[#e3e3e3] pt-4">
+        <div className="flex items-baseline justify-between gap-4 text-[14px] leading-[20px]">
+          <dt className="text-[#3d3d3d]">Site catalogue</dt>
+          <dd className="num font-semibold text-[#050505]">
+            {PRIX_SITE_EUR}&nbsp;€
+          </dd>
+        </div>
+        <p className="r-note mt-1">TTC, une fois — pas d&apos;abonnement</p>
+      </dl>
+      <div className="mt-4 border-t border-[#e3e3e3] pt-4">
+        <div className="text-[13px] font-semibold text-[#050505]">
+          Chèque TIC
+        </div>
+        <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
+          Si vous êtes éligible, il reste de 198 à 594&nbsp;€ à votre charge
+          selon le taux financé. On le vérifie avec vous, avant tout règlement.
         </p>
-      </aside>
+      </div>
+      <p className="r-note mt-4">
+        Contenu réécrit à votre métier, nom de domaine compris la première
+        année.{" "}
+        <Link href="/tarifs/site" className="underline underline-offset-2">
+          Le détail de l&apos;offre
+        </Link>
+      </p>
+    </aside>
+  );
 
-      {/* ═══ colonne principale ═══ */}
-      <div className="r-carte !p-7 sm:!p-9">
-        <ol className="rv-etapes mb-7 list-none p-0" aria-label="Étapes de la commande">
-          {cles.map((c, i) => (
-            <li key={c} className="contents">
-              {i > 0 && <span aria-hidden className="rv-etape-lien" />}
+  return (
+    <div className="rounded-[20px] bg-white">
+      {/* ═══ le rail d'étapes — en tête du panneau ═══ */}
+      <ol
+        className="cs-etapes border-b border-[#ececec] px-6 py-5 sm:px-9"
+        aria-label="Étapes de la commande"
+      >
+        {cles.map((c, i) => (
+          <li key={c} className="contents">
+            {i > 0 ? (
               <span
-                className={`rv-etape ${
-                  i === idxEtape ? "rv-etape--active" : i < idxEtape ? "rv-etape--faite" : ""
-                }`}
-                aria-current={i === idxEtape ? "step" : undefined}
-              >
-                <i>{i < idxEtape ? "✓" : i + 1}</i>
-                {LIBELLES_ETAPES[c]}
-              </span>
-            </li>
-          ))}
-        </ol>
+                aria-hidden
+                className="cs-etape-lien"
+                data-fait={i <= idxEtape}
+              />
+            ) : null}
+            <span
+              className="cs-etape"
+              data-etat={
+                i === idxEtape ? "active" : i < idxEtape ? "faite" : "avenir"
+              }
+              aria-current={i === idxEtape ? "step" : undefined}
+            >
+              <i>
+                {i < idxEtape ? (
+                  <svg
+                    width="10"
+                    height="8"
+                    viewBox="0 0 10 8"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <path
+                      d="M1 4 3.8 6.8 9 1.2"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : (
+                  i + 1
+                )}
+              </i>
+              <span className="cs-etape-nom">{LIBELLES_ETAPES[c]}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
 
+      <div className="px-6 py-8 sm:px-9 sm:py-10">
         {/* ——— a) le modèle ——— */}
         {etape === "modele" ? (
           <div ref={refEtapeModele} className="rv-apparait scroll-mt-24">
-            <h3 className="r-h4">{modele && !grilleOuverte ? "Votre modèle" : "Choisissez votre modèle"}</h3>
-            <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
-              {modele && !grilleOuverte
-                ? "C'est celui-ci qui sera réécrit à votre métier. Vous pouvez encore en changer."
-                : "Un parti pris visuel, pas un métier imposé : vous choisissez l'allure, on réécrit tout le contenu au vôtre. Chaque démo se visite en vrai."}
-            </p>
-            {messageErreur ? <p className="rv-erreur mt-4">{messageErreur}</p> : null}
-
             {/* ——— replié : le modèle retenu, et Continuer sans défiler ——— */}
             {modele && !grilleOuverte ? (
-              <div className="rv-apparait mt-6 grid gap-5 sm:grid-cols-[minmax(0,320px)_1fr] sm:items-start">
-                <div className="rounded-[12px] border border-[#050505] bg-[#fdf3dd] p-3">
-                  <MiniSite
-                    m={modele}
-                    ton="clair"
-                    cadre={false}
-                    sizes="(max-width: 640px) 90vw, 320px"
-                  />
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    <span className="text-[15px] font-medium text-[#050505]">{modele.nom}</span>
-                    <span
-                      aria-hidden
-                      className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border-[1.5px] border-[#050505] bg-[#050505]"
-                    >
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                        <path d="M1 4 3.8 6.8 9 1.2" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
+              <div className="rv-apparait grid gap-8 lg:grid-cols-[minmax(0,420px)_1fr] lg:items-center lg:gap-12">
+                <MiniSite
+                  m={modele}
+                  ton="clair"
+                  priority
+                  sizes="(max-width: 1024px) 90vw, 420px"
+                />
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                    Votre modèle
                   </div>
-                  <p className="mt-1.5 text-[13px] leading-[19px] text-[#3d3d3d]">{modele.pour}</p>
+                  <h3 className="r-h4 mt-2">{modele.nom}</h3>
+                  <p className="mt-1 text-[14px] leading-[21px] text-[#616161]">
+                    {modele.style}
+                  </p>
+                  <p className="mt-4 max-w-[52ch] text-[15px] leading-[23px] text-[#3d3d3d]">
+                    {modele.pour}. C&apos;est celui-ci qui sera réécrit à votre
+                    métier — vous pouvez encore en changer.
+                  </p>
                   {modele.reserve ? (
-                    <p className="mt-2 rounded-[6px] bg-black/[0.045] px-2.5 py-1.5 text-[12px] leading-snug text-[#3d3d3d]">
+                    <p className="mt-3 inline-block rounded-[6px] bg-black/[0.045] px-2.5 py-1.5 text-[12px] leading-snug text-[#3d3d3d]">
                       {modele.reserve}
                     </p>
                   ) : null}
-                  <a
-                    href={modele.demo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#050505] underline-offset-4 hover:underline"
-                    aria-label={`Visiter la démo du modèle ${modele.nom} dans un nouvel onglet`}
-                  >
-                    Visiter la démo
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
-                      <path d="M5.5 10.5 10.5 5.5M6.5 5.5h4v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                </div>
-                <div className="flex flex-col gap-4 sm:pt-2">
-                  <p className="text-[14px] leading-[21px] text-[#3d3d3d]">
-                    Étape suivante&nbsp;: {util ? "votre brief — ce que vous faites, vos pages, votre logo." : "votre compte, puis votre brief."}
+                  {messageErreur ? (
+                    <p className="rv-erreur mt-4">{messageErreur}</p>
+                  ) : null}
+                  <p className="r-note mt-5">
+                    Étape suivante&nbsp;:{" "}
+                    {util
+                      ? "votre brief — ce que vous faites, vos pages, votre logo."
+                      : "votre compte, puis votre brief."}
                   </p>
-                  <button
-                    type="button"
-                    onClick={continuerDepuisModele}
-                    className="r-btn r-btn--noir w-full sm:w-auto sm:min-w-[220px]"
-                  >
-                    Continuer
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGrilleOuverte(true)}
-                    className="self-start text-[14px] font-medium text-[#050505] underline underline-offset-4"
-                  >
-                    Choisir un autre modèle
-                  </button>
+                  <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <button
+                      type="button"
+                      onClick={continuerDepuisModele}
+                      className="r-btn r-btn--noir w-full sm:w-auto sm:min-w-[220px]"
+                    >
+                      Continuer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGrilleOuverte(true)}
+                      className="r-lien !text-[15px]"
+                    >
+                      Choisir un autre modèle
+                    </button>
+                    <a
+                      href={modele.demo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="r-lien !text-[15px]"
+                      aria-label={`Visiter la démo du modèle ${modele.nom} dans un nouvel onglet`}
+                    >
+                      Visiter la démo&nbsp;↗
+                    </a>
+                  </div>
                 </div>
               </div>
             ) : null}
 
-            {/* keyé sur l'état replié/ouvert : la grille remonte et rejoue
-                son apparition quand on la rouvre */}
-            <fieldset
-              key={grilleOuverte ? "ouverte" : "repliee"}
-              className={`rv-apparait m-0 min-w-0 border-0 p-0 ${modele && !grilleOuverte ? "hidden" : ""}`}
-            >
-              <legend className="sr-only">Le modèle de votre site</legend>
-              {CATEGORIES.map((cat) => (
-                <div key={cat.cle} className="mt-8 first:mt-6">
-                  <h4 className="text-[15px] font-semibold text-[#050505]">{cat.titre}</h4>
-                  <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">{cat.pour}</p>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {parCategorie(cat.cle).map((m) => {
-                      const choisi = slug === m.slug;
-                      return (
-                        <div
-                          key={m.slug}
-                          className={`flex flex-col rounded-[12px] border p-3 transition-[border-color,opacity] ${
-                            choisi
-                              ? "border-[#050505] bg-[#fdf3dd]"
-                              : `border-[#e3e3e3] bg-white hover:border-[#050505] ${slug ? "opacity-70 hover:opacity-100" : ""}`
-                          } has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#050505]`}
+            {/* ——— ouvert : la grille, filtrée par famille ——— */}
+            <div className={modele && !grilleOuverte ? "hidden" : ""}>
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <h3 className="r-h4">Choisissez votre modèle</h3>
+                  <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
+                    Un parti pris visuel, pas un métier imposé&nbsp;: vous
+                    choisissez l&apos;allure, on réécrit tout le contenu au
+                    vôtre. Chaque démo se visite en vrai.
+                  </p>
+                </div>
+                <div
+                  className="r-seg flex w-full flex-wrap sm:inline-flex sm:w-auto"
+                  role="group"
+                  aria-label="Filtrer par famille"
+                >
+                  <button
+                    type="button"
+                    className="r-seg-btn flex-1 text-center sm:flex-none"
+                    data-actif={famille === "tous"}
+                    aria-pressed={famille === "tous"}
+                    onClick={() => setFamille("tous")}
+                  >
+                    Tous
+                  </button>
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c.cle}
+                      type="button"
+                      className="r-seg-btn flex-1 text-center sm:flex-none"
+                      data-actif={famille === c.cle}
+                      aria-pressed={famille === c.cle}
+                      onClick={() => setFamille(c.cle)}
+                    >
+                      {FAMILLES_COURTES[c.cle]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {familleCourante ? (
+                <p className="mt-4 text-[13px] leading-[19px] text-[#616161]">
+                  <span className="font-semibold text-[#050505]">
+                    {familleCourante.titre}.
+                  </span>{" "}
+                  {familleCourante.pour}
+                </p>
+              ) : null}
+              {messageErreur ? (
+                <p className="rv-erreur mt-4">{messageErreur}</p>
+              ) : null}
+
+              {/* keyé sur la famille : la grille rejoue son apparition à
+                  chaque filtre, comme à la réouverture */}
+              <fieldset
+                key={`${famille}-${grilleOuverte ? "ouverte" : "repliee"}`}
+                className="rv-apparait m-0 mt-7 min-w-0 border-0 p-0"
+              >
+                <legend className="sr-only">Le modèle de votre site</legend>
+                <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {visibles.map((m) => {
+                    const choisi = slug === m.slug;
+                    return (
+                      <div key={m.slug} className="flex min-w-0 flex-col">
+                        <label
+                          className={`cs-modele ${choisi ? "cs-modele--choisi" : ""}`}
                         >
-                          <label className="flex flex-1 cursor-pointer flex-col">
-                            <input
-                              type="radio"
-                              name="modele"
-                              value={m.slug}
-                              checked={choisi}
-                              onChange={() => choisirModele(m.slug)}
-                              className="sr-only"
-                            />
+                          <input
+                            type="radio"
+                            name="modele"
+                            value={m.slug}
+                            checked={choisi}
+                            onChange={() => choisirModele(m.slug)}
+                            className="sr-only"
+                          />
+                          <span className="cs-modele-cadre">
                             <MiniSite
                               m={m}
                               ton="clair"
-                              cadre={false}
-                              sizes="(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 240px"
+                              sizes="(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 260px"
                             />
-                            <span className="mt-3 flex items-center justify-between gap-2">
-                              <span className="text-[15px] font-medium text-[#050505]">{m.nom}</span>
-                              {/* la coche : à part de .rv-coche, dont les règles
-                                  .resa battraient les utilitaires */}
-                              <span
-                                aria-hidden
-                                className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border-[1.5px] ${
-                                  choisi ? "border-[#050505] bg-[#050505]" : "border-[#b5b5b5] bg-white"
-                                }`}
+                            <span className="cs-modele-coche" aria-hidden>
+                              <svg
+                                width="10"
+                                height="8"
+                                viewBox="0 0 10 8"
+                                fill="none"
                               >
-                                {choisi ? (
-                                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                    <path d="M1 4 3.8 6.8 9 1.2" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                ) : null}
-                              </span>
+                                <path
+                                  d="M1 4 3.8 6.8 9 1.2"
+                                  stroke="currentColor"
+                                  strokeWidth="1.8"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
                             </span>
-                            <span className="mt-1.5 text-[13px] leading-[19px] text-[#3d3d3d]">{m.pour}</span>
-                            {m.reserve ? (
-                              <span className="mt-2 rounded-[6px] bg-black/[0.045] px-2.5 py-1.5 text-[12px] leading-snug text-[#3d3d3d]">
-                                {m.reserve}
-                              </span>
-                            ) : null}
-                          </label>
-                          <a
-                            href={m.demo}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-3 inline-flex items-center gap-1.5 self-start text-[13px] font-medium text-[#050505] underline-offset-4 hover:underline"
-                            aria-label={`Visiter la démo du modèle ${m.nom} dans un nouvel onglet`}
-                          >
-                            Visiter la démo
-                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
-                              <path d="M5.5 10.5 10.5 5.5M6.5 5.5h4v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </a>
-                        </div>
-                      );
-                    })}
-                  </div>
+                          </span>
+                          <span className="mt-3 flex items-baseline justify-between gap-3">
+                            <span className="text-[15px] font-medium text-[#050505]">
+                              {m.nom}
+                            </span>
+                            <span className="min-w-0 truncate text-[12.5px] text-[#616161]">
+                              {m.style}
+                            </span>
+                          </span>
+                          <span className="mt-1 text-[13px] leading-[19px] text-[#3d3d3d]">
+                            {m.pour}
+                          </span>
+                          {m.reserve ? (
+                            <span className="mt-2 self-start rounded-[6px] bg-black/[0.045] px-2.5 py-1.5 text-[12px] leading-snug text-[#3d3d3d]">
+                              {m.reserve}
+                            </span>
+                          ) : null}
+                        </label>
+                        <a
+                          href={m.demo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 self-start text-[13px] font-medium text-[#050505] underline-offset-4 hover:underline"
+                          aria-label={`Visiter la démo du modèle ${m.nom} dans un nouvel onglet`}
+                        >
+                          Visiter la démo&nbsp;↗
+                        </a>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </fieldset>
+              </fieldset>
 
-            {/* grille ouverte : le bouton du bas ne sert qu'à qui rouvre la
-                grille pour comparer et garde son choix ; replié, Continuer
-                est déjà à côté du modèle */}
-            <div className={`mt-8 flex flex-wrap items-center gap-4 ${modele && !grilleOuverte ? "hidden" : ""}`}>
-              <button
-                type="button"
-                disabled={!modele}
-                onClick={continuerDepuisModele}
-                className={`r-btn w-full sm:w-auto ${modele ? "r-btn--noir" : "rv-btn--attente"}`}
-              >
-                Continuer
-              </button>
-              <Link href="/modeles" className="r-lien">
-                Parcourir la galerie
-              </Link>
+              <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#ececec] pt-6">
+                <button
+                  type="button"
+                  disabled={!modele}
+                  onClick={continuerDepuisModele}
+                  className={`r-btn w-full sm:w-auto sm:min-w-[220px] ${modele ? "r-btn--noir" : "rv-btn--attente"}`}
+                >
+                  {modele ? "Continuer" : "Choisissez un modèle"}
+                </button>
+                <Link href="/modeles" className="r-lien !text-[15px]">
+                  Parcourir la galerie
+                </Link>
+              </div>
             </div>
           </div>
         ) : null}
 
         {/* ——— b) le compte ——— */}
         {etape === "compte" ? (
-          <div className="rv-apparait">
-            <h3 className="r-h4">Votre compte</h3>
-            {messageErreur ? <p className="rv-erreur mt-4">{messageErreur}</p> : null}
-            <div className="mt-5">
+          <div className="rv-apparait grid gap-10 lg:grid-cols-[300px_1fr] lg:gap-14">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                Étape {idxEtape + 1} sur {cles.length}
+              </div>
+              <h3 className="r-h4 mt-2">Votre compte</h3>
+              <p className="mt-3 text-[15px] leading-[23px] text-[#3d3d3d]">
+                Votre site est rattaché à un compte&nbsp;: c&apos;est là que
+                vous suivrez votre commande, puis que vous retrouverez vos
+                accès. Une adresse, un code reçu par e-mail, un mot de passe —
+                une minute.
+              </p>
+              {modele ? (
+                <div className="mt-6 border-t border-[#e3e3e3] pt-5">
+                  <div className="text-[13px] font-semibold text-[#050505]">
+                    Votre modèle
+                  </div>
+                  <div className="mt-3 max-w-[260px]">
+                    <MiniSite m={modele} ton="clair" sizes="260px" />
+                  </div>
+                  <div className="mt-2 flex items-baseline justify-between gap-3">
+                    <span className="text-[14px] font-medium text-[#050505]">
+                      {modele.nom}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={revenirAuModele}
+                      className="r-lien !text-[13px]"
+                    >
+                      Modifier
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div>
+              {messageErreur ? (
+                <p className="rv-erreur mb-4">{messageErreur}</p>
+              ) : null}
               <ConnexionInline
                 modeInitial="connexion"
+                portes
                 avecProfil={false}
                 onConnecte={connecter}
-                intro={
-                  "Votre site est rattaché à un compte : c'est là que vous suivrez votre commande, puis que vous retrouverez vos accès. Connectez-vous, ou créez votre compte en une minute — votre adresse, un code reçu par e-mail, un mot de passe."
-                }
+                intro="Connectez-vous pour rattacher la commande à votre compte."
               />
-            </div>
-            <div className="mt-6">
               <button
                 type="button"
-                onClick={() => {
-                  setErreur(null);
-                  setEtape("modele");
-                }}
-                className="r-lien"
+                onClick={revenirAuModele}
+                className="r-lien mt-6 !text-[15px]"
               >
                 ← Revenir au modèle
               </button>
@@ -730,182 +931,319 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
         {/* ——— c) le brief ——— */}
         {etape === "brief" ? (
-          <div className="rv-apparait">
-            {/* la session a sauté pendant la saisie : la connexion d'abord,
-                le formulaire (désactivé) dessous — HORS du <form>, le
-                module a ses propres formulaires */}
-            {!util ? (
-              <div className="mb-8">
-                <ConnexionInline
-                  modeInitial="connexion"
-                  avecProfil={false}
-                  onConnecte={connecter}
-                  intro="Votre session s'est fermée. Reconnectez-vous pour envoyer votre brief — tout ce que vous avez saisi est conservé."
-                />
-              </div>
-            ) : null}
+          <div className="rv-apparait grid gap-10 lg:grid-cols-[300px_1fr] lg:gap-14">
+            {recap}
 
-            <form onSubmit={envoyer} noValidate>
-              <h3 className="r-h4">Votre brief</h3>
-              <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
-                Ce qu&apos;il nous faut pour écrire votre site. Seul le nom de l&apos;entreprise est
-                obligatoire&nbsp;: le reste se complète au téléphone si besoin.
-              </p>
-              {messageErreur ? <p className="rv-erreur mt-4">{messageErreur}</p> : null}
-              {util ? (
-                <p className="r-note mt-2">
-                  Connecté avec {util.email}. Ce n&apos;est pas vous&nbsp;?{" "}
-                  <button
-                    type="button"
-                    className="underline underline-offset-2"
-                    onClick={changerDeCompte}
-                    disabled={changement || envoi}
-                  >
-                    {changement ? "Un instant…" : "Changer de compte"}
-                  </button>
-                </p>
+            <div>
+              {/* la session a sauté pendant la saisie : la connexion d'abord,
+                  le formulaire (désactivé) dessous — HORS du <form>, le
+                  module a ses propres formulaires */}
+              {!util ? (
+                <div className="mb-8">
+                  <ConnexionInline
+                    modeInitial="connexion"
+                    avecProfil={false}
+                    onConnecte={connecter}
+                    intro="Votre session s'est fermée. Reconnectez-vous pour envoyer votre brief — tout ce que vous avez saisi est conservé."
+                  />
+                </div>
               ) : null}
 
-              <fieldset disabled={!util || envoi} className={`m-0 min-w-0 border-0 p-0 ${!util ? "opacity-50" : ""}`}>
-                {/* ——— l'entreprise ——— */}
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="rv-libelle" htmlFor="cs-entreprise">Nom de l&apos;entreprise</label>
-                    <input id="cs-entreprise" className="rv-champ" autoComplete="organization" maxLength={120} value={b.entreprise} onChange={maj("entreprise")} required />
-                  </div>
-                  <div>
-                    <label className="rv-libelle" htmlFor="cs-secteur">
-                      Secteur d&apos;activité <small>— conseillé</small>
-                    </label>
-                    <select id="cs-secteur" className="rv-champ" value={b.secteur} onChange={maj("secteur")}>
-                      <option value="">Choisir…</option>
-                      {SECTEURS.map((s) => (
-                        <option key={s.valeur} value={s.valeur}>{s.libelle}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="rv-libelle" htmlFor="cs-tel">
-                      Téléphone / WhatsApp <small>— conseillé, on vous appelle</small>
-                    </label>
-                    <input id="cs-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="0690 …" value={b.telephone} onChange={maj("telephone")} />
-                  </div>
-                  <div>
-                    <label className="rv-libelle" htmlFor="cs-commune">
-                      Commune <small>— facultatif</small>
-                    </label>
-                    <input id="cs-commune" className="rv-champ" autoComplete="address-level2" value={b.commune} onChange={maj("commune")} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="rv-libelle" htmlFor="cs-activite">
-                      Ce que vous faites, en deux phrases <small>— facultatif</small>
-                    </label>
-                    <textarea id="cs-activite" rows={3} className="rv-champ resize-y" maxLength={600} value={b.activite} onChange={maj("activite")} />
-                  </div>
+              <form onSubmit={envoyer} noValidate>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                  Étape {idxEtape + 1} sur {cles.length}
                 </div>
-
-                {/* ——— ce que le site doit obtenir ——— */}
-                <fieldset className="m-0 mt-6 min-w-0 border-0 p-0">
-                  <legend className="rv-libelle">
-                    Ce que le site doit obtenir <small>— plusieurs réponses possibles</small>
-                  </legend>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                    {OBJECTIFS.map((o) => {
-                      const actif = objectifs.includes(o.valeur);
-                      return (
-                        <label key={o.valeur} className={`rv-case ${actif ? "rv-case--actif" : ""}`}>
-                          <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={actif}
-                            onChange={() => cocher(objectifs, setObjectifs, o.valeur)}
-                          />
-                          <span className="rv-coche" aria-hidden />
-                          <span className="text-[14px] leading-[20px] text-[#050505]">{o.libelle}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-
-                {/* ——— les pages ——— */}
-                <fieldset className="m-0 mt-6 min-w-0 border-0 p-0">
-                  <legend className="rv-libelle">
-                    Les pages que vous voulez <small>— on ajuste ensemble</small>
-                  </legend>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {PAGES_SITE.map((p) => {
-                      const actif = pages.includes(p.valeur);
-                      return (
-                        <label key={p.valeur} className={`rv-case ${actif ? "rv-case--actif" : ""}`}>
-                          <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={actif}
-                            onChange={() => cocher(pages, setPages, p.valeur)}
-                          />
-                          <span className="rv-coche" aria-hidden />
-                          <span className="text-[14px] leading-[20px] text-[#050505]">{p.libelle}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-
-                {/* ——— l'allure, le domaine, les réseaux ——— */}
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="rv-libelle" htmlFor="cs-ambiance">
-                      Couleurs, ambiance <small>— facultatif : « sobre et clair », « comme mon logo »…</small>
-                    </label>
-                    <input id="cs-ambiance" className="rv-champ" maxLength={300} value={b.ambiance} onChange={maj("ambiance")} />
-                  </div>
-                  <div>
-                    <label className="rv-libelle" htmlFor="cs-domaine">
-                      Nom de domaine souhaité <small>— facultatif</small>
-                    </label>
-                    <input id="cs-domaine" className="rv-champ" inputMode="url" placeholder="mon-entreprise.gp" maxLength={120} value={b.domaine} onChange={maj("domaine")} />
-                  </div>
-                  <div>
-                    <label className="rv-libelle" htmlFor="cs-reseaux">
-                      Vos réseaux sociaux <small>— facultatif</small>
-                    </label>
-                    <input id="cs-reseaux" className="rv-champ" placeholder="Instagram, Facebook…" maxLength={300} value={b.reseaux} onChange={maj("reseaux")} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="rv-libelle" htmlFor="cs-infos">
-                      Informations importantes{" "}
-                      <small>— horaires, zone d&apos;intervention, ce qu&apos;il ne faut surtout pas oublier</small>
-                    </label>
-                    <textarea id="cs-infos" rows={5} className="rv-champ resize-y" maxLength={4000} value={b.informations} onChange={maj("informations")} />
-                  </div>
-                </div>
-
-                {/* ——— les fichiers ——— */}
-                <div className="mt-6 border-t border-[#e3e3e3] pt-6">
-                  <div className="text-[14px] font-semibold text-[#050505]">Votre logo et vos images</div>
-                  <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
-                    PNG, JPEG, WebP, SVG ou PDF — 10&nbsp;Mo par fichier. Vos fichiers ne sont
-                    visibles que de vous et de nous.
+                <h3 className="r-h4 mt-2">Votre brief</h3>
+                <p className="mt-3 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
+                  Ce qu&apos;il nous faut pour écrire votre site. Seul le nom de
+                  l&apos;entreprise est obligatoire&nbsp;: le reste se complète
+                  au téléphone si besoin.
+                </p>
+                {messageErreur ? (
+                  <p className="rv-erreur mt-4">{messageErreur}</p>
+                ) : null}
+                {util ? (
+                  <p className="r-note mt-3">
+                    Connecté avec {util.email}. Ce n&apos;est pas vous&nbsp;?{" "}
+                    <button
+                      type="button"
+                      className="underline underline-offset-2"
+                      onClick={changerDeCompte}
+                      disabled={changement || envoi}
+                    >
+                      {changement ? "Un instant…" : "Changer de compte"}
+                    </button>
                   </p>
-                  {erreurFichier ? (
-                    <p className="rv-erreur mt-3" role="alert">
-                      {erreurFichier}
-                    </p>
-                  ) : null}
+                ) : null}
 
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    {/* le logo — un seul fichier */}
-                    <div>
-                      <label className="rv-libelle" htmlFor="cs-logo">
-                        Logo <small>— un fichier</small>
-                      </label>
+                <fieldset
+                  disabled={!util || envoi}
+                  className={`m-0 min-w-0 border-0 p-0 ${!util ? "opacity-50" : ""}`}
+                >
+                  {/* ——— 1 · l'entreprise ——— */}
+                  <div className="cs-bloc">
+                    <div className="cs-bloc-tete">
+                      <span className="cs-bloc-num">01</span>
+                      <h4 className="cs-bloc-titre">Votre entreprise</h4>
+                    </div>
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="rv-libelle" htmlFor="cs-entreprise">
+                          Nom de l&apos;entreprise
+                        </label>
+                        <input
+                          id="cs-entreprise"
+                          className="rv-champ"
+                          autoComplete="organization"
+                          maxLength={120}
+                          value={b.entreprise}
+                          onChange={maj("entreprise")}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="rv-libelle" htmlFor="cs-secteur">
+                          Secteur d&apos;activité <small>— conseillé</small>
+                        </label>
+                        <select
+                          id="cs-secteur"
+                          className="rv-champ"
+                          value={b.secteur}
+                          onChange={maj("secteur")}
+                        >
+                          <option value="">Choisir…</option>
+                          {SECTEURS.map((s) => (
+                            <option key={s.valeur} value={s.valeur}>
+                              {s.libelle}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="rv-libelle" htmlFor="cs-tel">
+                          Téléphone / WhatsApp{" "}
+                          <small>— conseillé, on vous appelle</small>
+                        </label>
+                        <input
+                          id="cs-tel"
+                          type="tel"
+                          className="rv-champ"
+                          autoComplete="tel"
+                          placeholder="0690 …"
+                          value={b.telephone}
+                          onChange={maj("telephone")}
+                        />
+                      </div>
+                      <div>
+                        <label className="rv-libelle" htmlFor="cs-commune">
+                          Commune <small>— facultatif</small>
+                        </label>
+                        <input
+                          id="cs-commune"
+                          className="rv-champ"
+                          autoComplete="address-level2"
+                          value={b.commune}
+                          onChange={maj("commune")}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="rv-libelle" htmlFor="cs-activite">
+                          Ce que vous faites, en deux phrases{" "}
+                          <small>— facultatif</small>
+                        </label>
+                        <textarea
+                          id="cs-activite"
+                          rows={3}
+                          className="rv-champ resize-y"
+                          maxLength={600}
+                          value={b.activite}
+                          onChange={maj("activite")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ——— 2 · ce que le site doit obtenir ——— */}
+                  {/* le filet du bloc vit sur le <div>, pas sur le <fieldset> :
+                      une bordure de fieldset se dessine au milieu de sa legend */}
+                  <div className="cs-bloc">
+                    <fieldset className="m-0 min-w-0 border-0 p-0">
+                      <legend className="cs-bloc-tete">
+                        <span className="cs-bloc-num">02</span>
+                        <span className="cs-bloc-titre">
+                          Ce que le site doit obtenir
+                        </span>
+                      </legend>
+                      <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
+                        Plusieurs réponses possibles.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {OBJECTIFS.map((o) => {
+                          const actif = objectifs.includes(o.valeur);
+                          return (
+                            <label
+                              key={o.valeur}
+                              className={`cs-puce ${actif ? "cs-puce--active" : ""}`}
+                            >
+                              <input
+                                type="checkbox"
+                                className="sr-only"
+                                checked={actif}
+                                onChange={() =>
+                                  cocher(objectifs, setObjectifs, o.valeur)
+                                }
+                              />
+                              {o.libelle}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  </div>
+
+                  {/* ——— 3 · les pages ——— */}
+                  {/* le filet du bloc vit sur le <div>, pas sur le <fieldset> :
+                      une bordure de fieldset se dessine au milieu de sa legend */}
+                  <div className="cs-bloc">
+                    <fieldset className="m-0 min-w-0 border-0 p-0">
+                      <legend className="cs-bloc-tete">
+                        <span className="cs-bloc-num">03</span>
+                        <span className="cs-bloc-titre">
+                          Les pages que vous voulez
+                        </span>
+                      </legend>
+                      <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
+                        On ajuste ensemble.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {PAGES_SITE.map((p) => {
+                          const actif = pages.includes(p.valeur);
+                          return (
+                            <label
+                              key={p.valeur}
+                              className={`cs-puce ${actif ? "cs-puce--active" : ""}`}
+                            >
+                              <input
+                                type="checkbox"
+                                className="sr-only"
+                                checked={actif}
+                                onChange={() =>
+                                  cocher(pages, setPages, p.valeur)
+                                }
+                              />
+                              {p.libelle}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  </div>
+
+                  {/* ——— 4 · l'allure, le domaine, les réseaux ——— */}
+                  <div className="cs-bloc">
+                    <div className="cs-bloc-tete">
+                      <span className="cs-bloc-num">04</span>
+                      <h4 className="cs-bloc-titre">
+                        L&apos;allure et les détails
+                      </h4>
+                    </div>
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
+                        <label className="rv-libelle" htmlFor="cs-ambiance">
+                          Couleurs, ambiance{" "}
+                          <small>
+                            — facultatif : « sobre et clair », « comme mon logo
+                            »…
+                          </small>
+                        </label>
+                        <input
+                          id="cs-ambiance"
+                          className="rv-champ"
+                          maxLength={300}
+                          value={b.ambiance}
+                          onChange={maj("ambiance")}
+                        />
+                      </div>
+                      <div>
+                        <label className="rv-libelle" htmlFor="cs-domaine">
+                          Nom de domaine souhaité <small>— facultatif</small>
+                        </label>
+                        <input
+                          id="cs-domaine"
+                          className="rv-champ"
+                          inputMode="url"
+                          placeholder="mon-entreprise.gp"
+                          maxLength={120}
+                          value={b.domaine}
+                          onChange={maj("domaine")}
+                        />
+                      </div>
+                      <div>
+                        <label className="rv-libelle" htmlFor="cs-reseaux">
+                          Vos réseaux sociaux <small>— facultatif</small>
+                        </label>
+                        <input
+                          id="cs-reseaux"
+                          className="rv-champ"
+                          placeholder="Instagram, Facebook…"
+                          maxLength={300}
+                          value={b.reseaux}
+                          onChange={maj("reseaux")}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="rv-libelle" htmlFor="cs-infos">
+                          Informations importantes{" "}
+                          <small>
+                            — horaires, zone d&apos;intervention, ce qu&apos;il
+                            ne faut surtout pas oublier
+                          </small>
+                        </label>
+                        <textarea
+                          id="cs-infos"
+                          rows={5}
+                          className="rv-champ resize-y"
+                          maxLength={4000}
+                          value={b.informations}
+                          onChange={maj("informations")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ——— 5 · les fichiers ——— */}
+                  <div className="cs-bloc">
+                    <div className="cs-bloc-tete">
+                      <span className="cs-bloc-num">05</span>
+                      <h4 className="cs-bloc-titre">
+                        Votre logo et vos images
+                      </h4>
+                    </div>
+                    <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
+                      PNG, JPEG, WebP, SVG ou PDF — 10&nbsp;Mo par fichier. Vos
+                      fichiers ne sont visibles que de vous et de nous.
+                    </p>
+                    {erreurFichier ? (
+                      <p className="rv-erreur mt-3" role="alert">
+                        {erreurFichier}
+                      </p>
+                    ) : null}
+
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      {/* le logo — un seul fichier */}
                       {logo ? (
-                        <div className="mt-2 flex items-center gap-3 rounded-lg border border-[#e3e3e3] p-2.5">
+                        <div className="flex items-center gap-3 rounded-[12px] border border-[#e3e3e3] p-3">
                           <Apercu piece={logo} />
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-[13px] font-medium text-[#050505]">{logo.fichier.name}</div>
-                            <div className="text-[12px] text-[#616161]">{tailleLisible(logo.fichier.size)}</div>
+                            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                              Logo
+                            </div>
+                            <div className="truncate text-[13px] font-medium text-[#050505]">
+                              {logo.fichier.name}
+                            </div>
+                            <div className="text-[12px] text-[#616161]">
+                              {tailleLisible(logo.fichier.size)}
+                            </div>
                           </div>
                           <button
                             type="button"
@@ -917,146 +1255,242 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                           </button>
                         </div>
                       ) : (
-                        <input
-                          id="cs-logo"
-                          type="file"
-                          accept={TYPES_ACCEPTES.join(",")}
-                          onChange={choisirLogo}
-                          className="rv-champ file:mr-3 file:rounded-md file:border-0 file:bg-[#050505] file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-white"
-                        />
+                        <label className="cs-zone" htmlFor="cs-logo">
+                          <input
+                            id="cs-logo"
+                            type="file"
+                            accept={TYPES_ACCEPTES.join(",")}
+                            onChange={choisirLogo}
+                            className="sr-only"
+                          />
+                          <span className="cs-zone-icone" aria-hidden>
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 16V4M6 10l6-6 6 6M4 20h16" />
+                            </svg>
+                          </span>
+                          <span className="cs-zone-titre">Votre logo</span>
+                          <span className="cs-zone-aide">
+                            un fichier — cliquer pour choisir
+                          </span>
+                        </label>
                       )}
+
+                      {/* les images — jusqu'à huit */}
+                      <label
+                        className={`cs-zone ${images.length >= MAX_IMAGES ? "cs-zone--pleine" : ""}`}
+                        htmlFor="cs-images"
+                      >
+                        <input
+                          id="cs-images"
+                          type="file"
+                          multiple
+                          accept={TYPES_ACCEPTES.join(",")}
+                          onChange={ajouterImages}
+                          disabled={images.length >= MAX_IMAGES}
+                          className="sr-only"
+                        />
+                        <span className="cs-zone-icone" aria-hidden>
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="m3 16 5-5 4 4 3-3 6 6" />
+                            <circle cx="16" cy="9" r="1.5" />
+                          </svg>
+                        </span>
+                        <span className="cs-zone-titre">Vos images</span>
+                        <span className="cs-zone-aide">
+                          {images.length} / {MAX_IMAGES} — vos réalisations,
+                          votre équipe, vos locaux
+                        </span>
+                      </label>
                     </div>
 
-                    {/* les images — jusqu'à huit */}
-                    <div>
-                      <label className="rv-libelle" htmlFor="cs-images">
-                        Images <small>— jusqu&apos;à {MAX_IMAGES} : vos réalisations, votre équipe, vos locaux</small>
-                      </label>
-                      <input
-                        id="cs-images"
-                        type="file"
-                        multiple
-                        accept={TYPES_ACCEPTES.join(",")}
-                        onChange={ajouterImages}
-                        disabled={images.length >= MAX_IMAGES}
-                        className="rv-champ file:mr-3 file:rounded-md file:border-0 file:bg-[#050505] file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-white disabled:opacity-50"
-                      />
-                      <p className="mt-1.5 text-[12px] text-[#616161]">
-                        {images.length} / {MAX_IMAGES}
-                      </p>
-                    </div>
+                    {images.length ? (
+                      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        {images.map((p) => (
+                          <li
+                            key={p.id}
+                            className="rounded-[12px] border border-[#e3e3e3] p-2"
+                          >
+                            <Apercu piece={p} large />
+                            <div
+                              className="mt-2 truncate text-[12px] text-[#3d3d3d]"
+                              title={p.fichier.name}
+                            >
+                              {p.fichier.name}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => retirerImage(p.id)}
+                              className="mt-1 text-[12px] underline underline-offset-2"
+                              aria-label={`Retirer l'image ${p.fichier.name}`}
+                            >
+                              Retirer
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </div>
 
-                  {images.length ? (
-                    <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                      {images.map((p) => (
-                        <li key={p.id} className="rounded-lg border border-[#e3e3e3] p-2">
-                          <Apercu piece={p} large />
-                          <div className="mt-2 truncate text-[12px] text-[#3d3d3d]" title={p.fichier.name}>
-                            {p.fichier.name}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => retirerImage(p.id)}
-                            className="mt-1 text-[12px] underline underline-offset-2"
-                            aria-label={`Retirer l'image ${p.fichier.name}`}
-                          >
-                            Retirer
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
+                  {/* pot de miel — jamais visible, jamais rempli par un humain.
+                      Libellé neutre, nom sans signification, autocomplete
+                      « one-time-code » : rien qu'un gestionnaire de mots de
+                      passe puisse reconnaître (voir PriseDeCreneau). */}
+                  <div className="rv-miel" aria-hidden="true">
+                    <label htmlFor="cs-x7">Ne pas remplir</label>
+                    <input
+                      id="cs-x7"
+                      name="cs-x7"
+                      tabIndex={-1}
+                      autoComplete="one-time-code"
+                      value={b.site_web}
+                      onChange={maj("site_web")}
+                    />
+                  </div>
 
-                {/* pot de miel — jamais visible, jamais rempli par un humain.
-                    Libellé neutre, nom sans signification, autocomplete
-                    « one-time-code » : rien qu'un gestionnaire de mots de
-                    passe puisse reconnaître (voir PriseDeCreneau). */}
-                <div className="rv-miel" aria-hidden="true">
-                  <label htmlFor="cs-x7">Ne pas remplir</label>
-                  <input id="cs-x7" name="cs-x7" tabIndex={-1} autoComplete="one-time-code" value={b.site_web} onChange={maj("site_web")} />
-                </div>
+                  <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#ececec] pt-6">
+                    <button
+                      type="submit"
+                      disabled={!briefOk || envoi}
+                      className={`r-btn w-full sm:w-auto sm:min-w-[240px] ${!briefOk || envoi ? "rv-btn--attente" : "r-btn--noir"}`}
+                    >
+                      {envoi ? "Envoi…" : "Enregistrer ma commande"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={revenirAuModele}
+                      className="r-lien !text-[15px]"
+                    >
+                      ← Revenir au modèle
+                    </button>
+                  </div>
+                </fieldset>
 
-                <div className="mt-7 flex flex-wrap items-center gap-4">
-                  <button
-                    type="submit"
-                    disabled={!briefOk || envoi}
-                    className={`r-btn w-full sm:w-auto ${!briefOk || envoi ? "rv-btn--attente" : "r-btn--noir"}`}
+                <p className="r-note mt-4 max-w-[60ch]">
+                  Votre brief et vos fichiers sont rattachés à votre compte et
+                  ne servent qu&apos;à écrire votre site&nbsp;; entreprise et
+                  téléphone y sont gardés pour vos prochaines demandes. Rien
+                  n&apos;est revendu — voir{" "}
+                  <Link
+                    href="/vos-donnees"
+                    className="underline underline-offset-2"
                   >
-                    {envoi ? "Envoi…" : "Enregistrer ma commande"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setErreur(null);
-                      setEtape("modele");
-                    }}
-                    className="r-lien"
-                  >
-                    ← Revenir au modèle
-                  </button>
-                </div>
-              </fieldset>
-
-              <p className="r-note mt-4 max-w-[60ch]">
-                Votre brief et vos fichiers sont rattachés à votre compte et ne servent qu&apos;à
-                écrire votre site&nbsp;; entreprise et téléphone y sont gardés pour vos prochaines
-                demandes. Rien n&apos;est revendu — voir{" "}
-                <Link href="/vos-donnees" className="underline underline-offset-2">
-                  où vont vos données
-                </Link>
-                .
-              </p>
-            </form>
+                    où vont vos données
+                  </Link>
+                  .
+                </p>
+              </form>
+            </div>
           </div>
         ) : null}
 
         {/* ——— d) le paiement : l'écran d'attente ——— */}
         {etape === "paiement" ? (
-          <div className="rv-apparait">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#050505]">
-              <svg aria-hidden width="18" height="14" viewBox="0 0 18 14" fill="none">
-                <path d="M1.5 7.5 6.5 12.5 16.5 1.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          <div className="rv-apparait mx-auto flex max-w-[560px] flex-col items-center py-4 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#050505]">
+              <svg
+                aria-hidden
+                width="18"
+                height="14"
+                viewBox="0 0 18 14"
+                fill="none"
+              >
+                <path
+                  d="M1.5 7.5 6.5 12.5 16.5 1.5"
+                  stroke="#fff"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
-            <h3 className="r-h4 mt-5">Commande enregistrée.</h3>
-            <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-              Le paiement en ligne arrive. Votre commande est enregistrée&nbsp;: on vous appelle
-              pour la régler et lancer la production.
+            <h3 className="r-h3 mt-6">Commande enregistrée.</h3>
+            <p className="mt-4 max-w-[46ch] text-[15px] leading-[24px] text-[#3d3d3d]">
+              Le paiement en ligne arrive. Votre commande est enregistrée&nbsp;:
+              on vous appelle pour la régler et lancer la production.
             </p>
 
-            <dl className="mt-6 max-w-md rounded-[12px] border border-[#e3e3e3] px-5 py-2">
-              <div className="flex items-baseline justify-between gap-4 py-2.5 text-[14px] leading-[20px] text-[#050505]">
-                <dt className="text-[#616161]">Modèle</dt>
-                <dd className="text-right font-medium">{modele?.nom ?? "—"}</dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4 border-t border-[#ececec] py-2.5 text-[14px] leading-[20px] text-[#050505]">
-                <dt className="text-[#616161]">Entreprise</dt>
-                <dd className="text-right font-medium">{b.entreprise.trim() || "—"}</dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4 border-t border-[#050505] py-3">
-                <dt className="text-[14px] font-semibold leading-[20px] text-[#050505]">Site catalogue</dt>
-                <dd className="num shrink-0 text-[22px] font-semibold leading-[28px] text-[#050505]">
-                  {PRIX_SITE_EUR}&nbsp;€ <span className="text-[13px] font-normal text-[#616161]">TTC</span>
-                </dd>
-              </div>
-            </dl>
+            <div className="mt-8 w-full rounded-[16px] border border-[#e3e3e3] p-5 text-left">
+              {modele ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-[120px] shrink-0">
+                    <MiniSite
+                      m={modele}
+                      ton="clair"
+                      cadre={false}
+                      sizes="120px"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
+                      Modèle
+                    </div>
+                    <div className="text-[15px] font-medium text-[#050505]">
+                      {modele.nom}
+                    </div>
+                    <div className="text-[13px] text-[#616161]">
+                      {modele.style}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              <dl className="mt-4 border-t border-[#ececec]">
+                <div className="flex items-baseline justify-between gap-4 py-2.5 text-[14px] leading-[20px] text-[#050505]">
+                  <dt className="text-[#616161]">Entreprise</dt>
+                  <dd className="text-right font-medium">
+                    {b.entreprise.trim() || "—"}
+                  </dd>
+                </div>
+                {commandeId ? (
+                  <div className="flex items-baseline justify-between gap-4 border-t border-[#ececec] py-2.5 text-[14px] leading-[20px] text-[#050505]">
+                    <dt className="text-[#616161]">Référence</dt>
+                    <dd className="num text-right font-medium">
+                      {commandeId.slice(0, 8)}
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex items-baseline justify-between gap-4 border-t border-[#050505] py-3">
+                  <dt className="text-[14px] font-semibold leading-[20px] text-[#050505]">
+                    Site catalogue
+                  </dt>
+                  <dd className="num shrink-0 text-[22px] font-semibold leading-[28px] text-[#050505]">
+                    {PRIX_SITE_EUR}&nbsp;€{" "}
+                    <span className="text-[13px] font-normal text-[#616161]">
+                      TTC
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+            </div>
             <p className="r-note mt-3 max-w-md">
-              Chèque TIC&nbsp;: si vous êtes éligible, il reste de 198 à 594&nbsp;€ à votre charge
-              selon le taux financé — on le vérifie avec vous avant tout règlement.
+              Chèque TIC&nbsp;: si vous êtes éligible, il reste de 198 à
+              594&nbsp;€ à votre charge selon le taux financé — on le vérifie
+              avec vous avant tout règlement.
             </p>
-            {commandeId ? (
-              <p className="r-note mt-2">
-                Référence&nbsp;: <span className="num">{commandeId.slice(0, 8)}</span>
-              </p>
-            ) : null}
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3">
               <Link href="/compte" className="r-btn r-btn--noir">
                 Suivre ma commande
               </Link>
-              <Link href="/" className="r-lien self-center">
+              <Link href="/" className="r-lien self-center !text-[15px]">
                 Retour à l&apos;accueil
               </Link>
             </div>
@@ -1073,7 +1507,9 @@ function Apercu({ piece, large = false }: { piece: Piece; large?: boolean }) {
   const taille = large ? "aspect-[4/3] w-full" : "h-12 w-12 shrink-0";
   if (!piece.apercu) {
     return (
-      <div className={`${taille} flex items-center justify-center rounded-md bg-[#f1f1f1] font-mono text-[11px] uppercase tracking-[0.1em] text-[#616161]`}>
+      <div
+        className={`${taille} flex items-center justify-center rounded-md bg-[#f1f1f1] font-mono text-[11px] uppercase tracking-[0.1em] text-[#616161]`}
+      >
         PDF
       </div>
     );

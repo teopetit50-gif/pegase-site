@@ -51,14 +51,19 @@ export default async function CommandeSitePage({
     <PageShell>
       <PageMotion />
       <div className="resa">
+        {/* 07/09 — en-tête centré, comme /commencer : pastille, titre,
+            chapô ; le tunnel (un seul panneau blanc) suit dessous */}
         <section data-monde="clair" className="r-wrap pb-16 pt-12 sm:pb-24 sm:pt-14">
-          <h1 className="r-h2 max-w-[20ch]">Commandez votre site</h1>
-          <p className="r-lead mt-5 max-w-[58ch]">
-            Un modèle, votre brief, et on écrit tout à votre métier. Le prix est celui de la
-            page&nbsp;: 990&nbsp;€ TTC, une fois — rien à payer en ligne aujourd&apos;hui, on vous
-            appelle pour régler et lancer la production.
-          </p>
-          <div className="mt-10">
+          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <span className="cm-kicker cm-kicker--page">Commander</span>
+            <h1 className="r-h2">Commandez votre site</h1>
+            <p className="r-lead mt-5 max-w-[54ch]">
+              Un modèle, votre brief, et on écrit tout à votre métier. Le prix est celui de la
+              page&nbsp;: 990&nbsp;€ TTC, une fois — rien à payer en ligne aujourd&apos;hui, on vous
+              appelle pour régler et lancer la production.
+            </p>
+          </div>
+          <div className="mt-10 sm:mt-12">
             <CommandeSite utilisateur={utilisateur} modeleInitial={modeleInitial} />
           </div>
         </section>

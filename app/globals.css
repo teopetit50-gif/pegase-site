@@ -4736,6 +4736,254 @@ button.rounded-full:active {
     transition: none;
   }
 }
+
+/* ═══ /site/commande — le tunnel refait (07/09) ═══
+   · .cs-etapes : le rail d'étapes en tête du panneau — pastilles reliées
+     par un trait qui se remplit à mesure (data-fait) ; sous 640 px les
+     noms des étapes à venir s'effacent, seule l'active garde le sien ;
+   · .cs-modele : une vignette de la grille — le liseré noir et la coche
+     sur le cadre marquent le choix, le cadre monte au survol ;
+   · .cs-bloc : un bloc numéroté du brief, sous filet ;
+   · .cs-puce : une case à cocher en pilule (objectifs, pages) ;
+   · .cs-zone : une zone de dépôt de fichier, pointillée. */
+.resa .cs-etapes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+}
+.resa .cs-etape {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #9a9a9a;
+  white-space: nowrap;
+}
+.resa .cs-etape i {
+  display: grid;
+  place-items: center;
+  height: 26px;
+  width: 26px;
+  border-radius: 9999px;
+  border: 1.5px solid #dcdcdc;
+  font-style: normal;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #9a9a9a;
+  background: #ffffff;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+.resa .cs-etape[data-etat="active"] {
+  color: #050505;
+}
+.resa .cs-etape[data-etat="active"] i {
+  border-color: #050505;
+  background: #050505;
+  color: #ffffff;
+}
+.resa .cs-etape[data-etat="faite"] {
+  color: #3d3d3d;
+}
+.resa .cs-etape[data-etat="faite"] i {
+  border-color: #050505;
+  color: #050505;
+}
+.resa .cs-etape-lien {
+  flex: 1 1 24px;
+  height: 1.5px;
+  min-width: 16px;
+  background: #e3e3e3;
+  transition: background-color 0.3s ease;
+}
+.resa .cs-etape-lien[data-fait="true"] {
+  background: #050505;
+}
+@media (max-width: 639px) {
+  .resa .cs-etape:not([data-etat="active"]) .cs-etape-nom {
+    display: none;
+  }
+}
+
+.resa .cs-modele {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  cursor: pointer;
+}
+.resa .cs-modele-cadre {
+  position: relative;
+  display: block;
+  border-radius: 12px;
+  transition:
+    transform 0.3s var(--ease-out-strong),
+    box-shadow 0.2s ease;
+}
+.resa .cs-modele:hover .cs-modele-cadre {
+  transform: translateY(-3px);
+}
+.resa .cs-modele--choisi .cs-modele-cadre,
+.resa .cs-modele input:focus-visible ~ .cs-modele-cadre {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px #050505;
+}
+.resa .cs-modele-coche {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  height: 22px;
+  width: 22px;
+  border-radius: 9999px;
+  background: #050505;
+  color: #ffffff;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s var(--ease-out-strong);
+}
+.resa .cs-modele--choisi .cs-modele-coche {
+  opacity: 1;
+  transform: none;
+}
+
+.resa .cs-bloc {
+  margin-top: 28px;
+  border-top: 1px solid #ececec;
+  padding-top: 24px;
+}
+.resa .cs-bloc-tete {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.resa .cs-bloc-num {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #9a9a9a;
+  font-variant-numeric: tabular-nums;
+}
+.resa .cs-bloc-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  color: #050505;
+}
+
+.resa .cs-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid #e3e3e3;
+  border-radius: 9999px;
+  background: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  color: #050505;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+.resa .cs-puce::before {
+  content: "";
+  height: 14px;
+  width: 14px;
+  border-radius: 9999px;
+  border: 1.5px solid #b5b5b5;
+  background: #ffffff;
+  transition: inherit;
+}
+.resa .cs-puce:hover {
+  border-color: #050505;
+}
+.resa .cs-puce--active {
+  border-color: #050505;
+  background: #050505;
+  color: #ffffff;
+}
+.resa .cs-puce--active::before {
+  border-color: #ffffff;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 3px #050505;
+}
+.resa .cs-puce:has(input:focus-visible) {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+
+.resa .cs-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 132px;
+  padding: 20px;
+  border: 1px dashed #c9c9c9;
+  border-radius: 12px;
+  background: #fafafa;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease;
+}
+.resa .cs-zone:hover {
+  border-color: #050505;
+  background: #f5f5f5;
+}
+.resa .cs-zone:has(input:focus-visible) {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+.resa .cs-zone--pleine {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.resa .cs-zone-icone {
+  display: grid;
+  place-items: center;
+  height: 36px;
+  width: 36px;
+  margin-bottom: 4px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
+  color: #050505;
+}
+.resa .cs-zone-titre {
+  font-size: 14px;
+  font-weight: 600;
+  color: #050505;
+}
+.resa .cs-zone-aide {
+  font-size: 12.5px;
+  line-height: 18px;
+  color: #616161;
+}
+@media (prefers-reduced-motion: reduce) {
+  .resa .cs-modele-cadre,
+  .resa .cs-modele-coche,
+  .resa .cs-puce,
+  .resa .cs-zone,
+  .resa .cs-etape-lien {
+    transition: none;
+  }
+}
 /* ═══════════════════════════════════════════════════════════════════════
    /INTEGRATIONS — FAMILLES REPLIÉES (07/08/2026, Teo : « un logo par
    section, un bouton voir plus avec un fondu »)
