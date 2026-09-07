@@ -56,12 +56,21 @@
         repli « Voir tous les points » (données : COMPARATIF_PALIERS).
    Le H2 « Choisissez vos postes » et le bandeau .r-blanc qui coiffaient la
    grille disparaissent : la page audit n'en a pas.
+
+   07/09 — LE CHOIX DES POSTES, SOBRE (Teo : « j'aime pas le design de
+   genre cocher les logos, c'est mal présenté »). Les quatre postes ne
+   sont plus des cartes encadrées portant chacune une tuile de logo à
+   ombre : ce sont des LIGNES sous filet — case à cocher, nom, résumé —
+   comme les blocs de la colonne de gauche. La sélection ne colore plus
+   la ligne en crème, seule la case se remplit. « Tout Omega » reprend
+   les mêmes lignes avec une coche fixe à la place de la case (variante
+   .rv-case--sobre / --fixe / .rv-coche--ok, globals.css) ; les tuiles
+   de logo restent aux pages d'offres, où elles ont la place de vivre.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import Partage from "@/components/Partage";
-import { SystemLogo } from "@/components/logos";
 import { lienContact } from "@/lib/reservation";
 import {
   COMPARATIF_PALIERS,
@@ -163,14 +172,14 @@ function CartePalier({
             <legend className="text-[14px] font-semibold leading-[20px] text-[#050505]">
               {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
             </legend>
-            <div className="mt-3 space-y-2">
+            <div className="mt-2 border-b border-[#e3e3e3]">
               {POSTES.map((x) => {
                 const actif = choisis.includes(x.id);
                 const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
                 return (
                   <label
                     key={x.id}
-                    className={`rv-case ${actif ? "rv-case--actif" : ""} ${plein ? "rv-case--plein" : ""}`}
+                    className={`rv-case rv-case--sobre ${actif ? "rv-case--actif" : ""} ${plein ? "rv-case--plein" : ""}`}
                   >
                     <input
                       type="checkbox"
@@ -180,7 +189,6 @@ function CartePalier({
                       className="sr-only"
                     />
                     <span className="rv-coche" aria-hidden />
-                    <SystemLogo system={x.system} />
                     <span>
                       <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
                         {x.nom}
@@ -199,11 +207,18 @@ function CartePalier({
             <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
               Les quatre postes, en service :
             </div>
-            <ul className="mt-3 space-y-2.5">
+            <ul className="mt-2 border-b border-[#e3e3e3]">
               {POSTES.map((x) => (
-                <li key={x.id} className="flex items-center gap-2.5 text-[14px] leading-[22px] text-[#3d3d3d]">
-                  <SystemLogo system={x.system} />
-                  {x.nom}
+                <li key={x.id} className="rv-case rv-case--sobre rv-case--fixe">
+                  <span className="rv-coche rv-coche--ok" aria-hidden />
+                  <span>
+                    <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
+                      {x.nom}
+                    </span>
+                    <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
+                      {x.resume}
+                    </span>
+                  </span>
                 </li>
               ))}
             </ul>

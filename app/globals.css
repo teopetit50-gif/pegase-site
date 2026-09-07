@@ -4052,6 +4052,56 @@ button.rounded-full:active {
   outline-offset: 2px;
 }
 
+/* ——— variante SOBRE (07/09, grille /tarifs) : des lignes sous filet, pas
+   des cartes. Ni encadré, ni fond crème à la sélection, ni tuile de logo —
+   la case, le nom, le résumé. `--fixe` est la ligne non cliquable de
+   « Tout Omega », où `.rv-coche--ok` est une coche posée, pas une case. ——— */
+.resa .rv-case--sobre {
+  gap: 12px;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid #e3e3e3;
+  border-radius: 0;
+  background: transparent;
+}
+.resa .rv-case--sobre:hover {
+  border-color: #e3e3e3;
+}
+.resa .rv-case--sobre:hover .rv-coche {
+  border-color: #050505;
+}
+.resa .rv-case--sobre.rv-case--actif {
+  border-color: #e3e3e3;
+  background: transparent;
+}
+.resa .rv-case--sobre.rv-case--plein {
+  opacity: 0.4;
+}
+.resa .rv-case--sobre.rv-case--plein:hover .rv-coche {
+  border-color: #b5b5b5;
+}
+.resa .rv-case--sobre .rv-coche {
+  height: 18px;
+  width: 18px;
+  margin-top: 1px;
+}
+.resa .rv-case--fixe {
+  cursor: default;
+}
+.resa .rv-coche--ok {
+  border-color: #050505;
+  background: #050505;
+}
+.resa .rv-coche--ok::after {
+  content: "";
+  height: 8px;
+  width: 5px;
+  margin-top: -2px;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(45deg);
+}
+
 /* bouton en attente de choix — même gabarit que .r-btn, éteint mais lisible */
 .resa .rv-btn--attente {
   background: #ececec;
