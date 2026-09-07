@@ -624,10 +624,9 @@ button.rounded-full:active {
   display: inline-flex;
   margin-bottom: 18px;
 }
-.resa .cm-kicker--violet {
-  color: #6d28d9;
-  background: #ede9fe;
-}
+/* la teinte violette (.cm-kicker--violet) vit SOUS la règle de base de
+   la pastille, plus bas dans ce fichier : même spécificité, c'est l'ordre
+   qui tranche — posée ici, la base l'écrasait (07/09) */
 /* réponse au clic sur une carte de /commencer, avant même la navigation */
 .resa .cm-carte:active {
   transform: scale(0.985);
@@ -4553,6 +4552,14 @@ button.rounded-full:active {
   text-transform: uppercase;
   color: #c2410c;
   background: #fff1e2;
+}
+/* sa teinte violette — APRÈS la base, à spécificité égale l'ordre décide.
+   Jusqu'au 07/09 « --violet » était déclaré 4 000 lignes plus haut et la
+   base le repeignait en orange : la pastille « Sur mesure » de
+   /reserver-un-audit n'a jamais été violette avant ce jour. */
+.resa .cm-kicker--violet {
+  color: #6d28d9;
+  background: #ede9fe;
 }
 
 /* ——— réservation : le fil d'étapes (28/08) ——— */
