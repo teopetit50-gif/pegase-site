@@ -4088,17 +4088,21 @@ button.rounded-full:active {
 .resa .rv-case--fixe {
   cursor: default;
 }
+/* 07/09 (Teo : « les cases sont déjà cochées, donc il y a un bug ») —
+   une case pleine sur une carte où rien ne se choisit se lit comme une
+   case cochée d'avance. La coche posée n'a donc NI cadre NI fond : un
+   simple trait noir, comme les « inclus » d'une page de prix. */
 .resa .rv-coche--ok {
-  border-color: #050505;
-  background: #050505;
+  border-color: transparent;
+  background: transparent;
 }
 .resa .rv-coche--ok::after {
   content: "";
-  height: 8px;
-  width: 5px;
-  margin-top: -2px;
-  border-right: 2px solid #ffffff;
-  border-bottom: 2px solid #ffffff;
+  height: 11px;
+  width: 6px;
+  margin-top: -3px;
+  border-right: 2px solid #050505;
+  border-bottom: 2px solid #050505;
   transform: rotate(45deg);
 }
 

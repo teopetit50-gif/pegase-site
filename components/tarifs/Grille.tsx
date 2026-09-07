@@ -63,7 +63,8 @@
    ombre : ce sont des LIGNES sous filet — case à cocher, nom, résumé —
    comme les blocs de la colonne de gauche. La sélection ne colore plus
    la ligne en crème, seule la case se remplit. « Tout Omega » reprend
-   les mêmes lignes avec une coche fixe à la place de la case (variante
+   les mêmes lignes avec une coche nue, sans cadre, à la place de la case
+   — une case pleine y passait pour cochée d'avance (variante
    .rv-case--sobre / --fixe / .rv-coche--ok, globals.css) ; les tuiles
    de logo restent aux pages d'offres, où elles ont la place de vivre.
    ══════════════════════════════════════════════════════════════════════ */
