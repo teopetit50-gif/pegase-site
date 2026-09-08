@@ -19,7 +19,19 @@
    dans refs-qonto/NOTES-DESIGN.md tient toujours.
    ══════════════════════════════════════════════════════════════════════ */
 
-export const COURRIEL = "contact@pegase.gp";
+/* 08/09/2026 — le courriel du SERVICE CLIENT : contact@omegaai.fr existe
+   (redirection OVH vers les boîtes des associés) et remplace le vieux
+   contact@pegase.gp, repli sur un domaine jamais enregistré. Il est
+   affiché sur /contact, dans les mentions légales et sous le bandeau de
+   /tarifs ; WhatsApp reste la porte des boutons (lienContact). */
+export const COURRIEL = "contact@omegaai.fr";
+
+/* Le lien « écrire un e-mail » du service client — mailto avec objet,
+   encodé sans « + » (URLSearchParams en met à la place des espaces, et
+   certains clients mail les affichent tels quels). */
+export function lienCourriel(sujet: string) {
+  return `mailto:${COURRIEL}?subject=${encodeURIComponent(sujet)}`;
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    Numéro WhatsApp du desk — fourni par Teo le 30/07 (+33 7 68 16 34 43).

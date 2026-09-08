@@ -10,7 +10,8 @@ import { SITE_URL } from "@/lib/site";
    dérivées des mêmes sources que les pages (FAMILLES, POSTS), donc un
    moteur ou un article ajouté demain y entre tout seul.
 
-   Les URL redirigées — /audit, /contact, /articles, /moteurs, /solutions —
+   Les URL redirigées — /audit, /articles, /moteurs, /solutions — (et plus
+   /contact depuis le 08/09 : c'est la page du service client)
    n'y figurent PAS : un sitemap ne déclare que des destinations finales.
    ══════════════════════════════════════════════════════════════════════ */
 
@@ -34,6 +35,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
        client cherche quand il change de téléphone. Même rang que
        /reserver : une étape, pas une porte d'entrée. */
     { url: "/application", priorite: 0.5, frequence: "monthly" },
+    /* 08/09 — le service client : WhatsApp et contact@omegaai.fr. */
+    { url: "/contact", priorite: 0.6, frequence: "monthly" },
     { url: "/integrations", priorite: 0.8, frequence: "monthly" },
     /* 07/08 — « Où vont vos données ». Priorité haute pour une page qui ne
        vend rien : c'est celle qu'on cherche avant de signer, et elle répond

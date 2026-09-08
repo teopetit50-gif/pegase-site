@@ -17,6 +17,9 @@ const LIENS: { label: string; href: string }[] = [
      du cockpit ; le pied est là où un client la recherche quand il a
      changé de téléphone. */
   { label: "L'application", href: "/application" },
+  /* 08/09 — « Service client » : la page /contact, WhatsApp + contact@omegaai.fr.
+     Le lien WhatsApp du pied reste, c'est le geste le plus court. */
+  { label: "Service client", href: "/contact" },
   /* 07/08 — quatrième entrée, malgré la règle « à l'os » du 22/07. La page
      /vos-donnees n'est appelée par rien d'autre : elle n'est pas dans le
      header (qui ne porte que des entrées commerciales) et aucune page ne la

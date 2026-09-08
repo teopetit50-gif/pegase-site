@@ -101,7 +101,7 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import Partage from "@/components/Partage";
 import { SystemLogo } from "@/components/logos";
-import { lienContact } from "@/lib/reservation";
+import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
 import {
   COMPARATIF_PALIERS,
   COMPRIS,
@@ -597,7 +597,11 @@ export default function Grille() {
             </span>{" "}
             Décrivez votre situation en deux lignes : votre activité, ce qui vous prend le
             plus de temps, ce qui se perd. On vous répond le jour même avec le palier adapté
-            — et la réunion d&apos;installation se réserve en ligne.
+            — et la réunion d&apos;installation se réserve en ligne. Ou par e-mail&nbsp;:{" "}
+            <a href={lienCourriel("Quel palier pour moi ?")} className="r-lien !text-[15px]">
+              {COURRIEL}
+            </a>
+            .
           </p>
           <a
             href={lienContact("Quel palier pour moi ?")}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import { CANAL_VALEUR } from "@/lib/reservation";
+import { CANAL_VALEUR, COURRIEL } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /mentions-legales
@@ -20,6 +20,8 @@ import { CANAL_VALEUR } from "@/lib/reservation";
    tierces — vingt-deux jusqu'au 06/08, AssetX retiré depuis), crédits photo,
    responsabilité, droit applicable.
 
+   08/09 — l'adresse contact@omegaai.fr est ajoutée (éditeur, données
+   personnelles) : elle existe désormais (redirection OVH) et reçoit.
    ⚠ DEUX TROUS RESTENT, ET ILS NE PEUVENT PAS ÊTRE COMBLÉS SANS TEO :
    l'identité légale de l'éditeur (forme juridique, SIRET, adresse du
    siège, capital s'il y a société, TVA intracommunautaire si assujetti) et
@@ -41,7 +43,7 @@ const MANQUE = "[à compléter]";
 const SECTIONS: { h: string; p: string }[] = [
   {
     h: "Éditeur du site",
-    p: `Le site est édité par Omega.AI, entreprise établie en Guadeloupe, dont l'activité est la conception et l'installation d'automatisations pour les très petites entreprises. Forme juridique, numéro SIRET, adresse du siège et, le cas échéant, capital social et numéro de TVA intracommunautaire : ${MANQUE}. Téléphone : ${CANAL_VALEUR}.`,
+    p: `Le site est édité par Omega.AI, entreprise établie en Guadeloupe, dont l'activité est la conception et l'installation d'automatisations pour les très petites entreprises. Forme juridique, numéro SIRET, adresse du siège et, le cas échéant, capital social et numéro de TVA intracommunautaire : ${MANQUE}. Téléphone : ${CANAL_VALEUR}. E-mail : ${COURRIEL}.`,
   },
   {
     h: "Directeur de la publication",
@@ -66,7 +68,7 @@ const SECTIONS: { h: string; p: string }[] = [
   },
   {
     h: "Données personnelles",
-    p: `Les informations que vous transmettez lors d'une demande d'audit ou d'une prise de contact (nom, entreprise, coordonnées, contexte de votre demande), servent uniquement à traiter cette demande. Elles ne sont ni cédées ni vendues. Conformément au Règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition : il s'exerce en nous écrivant au ${CANAL_VALEUR}. Vous pouvez également introduire une réclamation auprès de la CNIL (cnil.fr).`,
+    p: `Les informations que vous transmettez lors d'une demande d'audit ou d'une prise de contact (nom, entreprise, coordonnées, contexte de votre demande), servent uniquement à traiter cette demande. Elles ne sont ni cédées ni vendues. Conformément au Règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition : il s'exerce en nous écrivant à ${COURRIEL} ou au ${CANAL_VALEUR}. Vous pouvez également introduire une réclamation auprès de la CNIL (cnil.fr).`,
   },
   {
     h: "Propriété intellectuelle",
@@ -98,7 +100,7 @@ export default function MentionsLegalesPage() {
           <h1 className="text-[27px] font-medium tracking-[-0.02em] text-white sm:text-[44px]">
             Mentions légales
           </h1>
-          <p className="mt-5 text-[14px] text-muted">Dernière mise à jour : 4 août 2026.</p>
+          <p className="mt-5 text-[14px] text-muted">Dernière mise à jour : 8 septembre 2026.</p>
           <div className="mt-10 space-y-10">
             {SECTIONS.map((s) => (
               <div key={s.h}>

@@ -21,7 +21,10 @@ const nextConfig: NextConfig = {
       /* 30/07 : c'est /audit qui disparaît — l'ancienne page, en charte v2.
          La page travaillée (monde .r-*, formules, simulateur, comparatif,
          FAQ) est /reserver-un-audit : les deux autres URL y convergent. */
-      { source: "/contact", destination: "/reserver-un-audit", permanent: true },
+      /* 08/09 : /contact redevient une vraie page (le service client, WhatsApp +
+         contact@omegaai.fr) — la redirection vers /reserver-un-audit est
+         retirée. Les navigateurs qui ont mémorisé le 308 le gardent un
+         temps ; une visite en navigation privée le confirme. */
       { source: "/audit", destination: "/reserver-un-audit", permanent: true },
       /* 30/07 : /articles devient /blog (reproduction de la référence
          blog.ocoya.com, liste + articles). Slugs inchangés. */
