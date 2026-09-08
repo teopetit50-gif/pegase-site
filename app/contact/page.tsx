@@ -27,6 +27,11 @@ import { CANAL_VALEUR, COURRIEL, lienContact, lienCourriel } from "@/lib/reserva
    le traitement des demandes d'abonnement depuis Mon compte est celui
    du 03/09.
 
+   08/09 (troisième passe, demande de l'associé) : plus de « le jour même »
+   sur cette page — « on ne pourra sans doute pas répondre tout le temps
+   sous 24 h ». La promesse devient « dans les deux jours ouvrés, souvent
+   le jour même » ; le titre ne promet plus de délai.
+
    08/09 (seconde passe, demande de l'associé) : un FORMULAIRE en tête,
    comme celui de l'audit — coordonnées, sujet, et un grand champ pour
    écrire (components/contact/FormulaireContact.tsx → POST /api/contact,
@@ -41,15 +46,15 @@ import { CANAL_VALEUR, COURRIEL, lienContact, lienCourriel } from "@/lib/reserva
 export const metadata: Metadata = {
   title: "Service client | Omega.AI",
   description:
-    "Une question sur votre installation, votre abonnement ou un poste en service : WhatsApp pour le court et l'urgent, contact@omegaai.fr pour le reste. Réponse le jour même.",
+    "Une question sur votre installation, votre abonnement ou un poste en service : WhatsApp pour le court et l'urgent, contact@omegaai.fr pour le reste. Réponse dans les deux jours ouvrés.",
 };
 
 const ATTENDRE = [
   {
     n: "01",
-    titre: "Le jour même",
+    titre: "Sous deux jours ouvrés",
     texte:
-      "Vous recevez une réponse le jour même, en heure de Guadeloupe. Si votre question demande une vérification, on vous dit quand vous aurez la suite.",
+      "Vous recevez une réponse dans les deux jours ouvrés, souvent le jour même, en heure de Guadeloupe. Si votre question demande une vérification, on vous dit quand vous aurez la suite.",
   },
   {
     n: "02",
@@ -85,7 +90,7 @@ export default function ContactPage() {
         <section data-monde="clair" className="r-wrap pb-14 pt-14 sm:pb-20 sm:pt-20">
           <div data-arrivee="titre">
             <p className="ap-kicker">Service client</p>
-            <h1 className="r-h1 mt-4 max-w-[16ch]">On vous répond, le jour même.</h1>
+            <h1 className="r-h1 mt-4 max-w-[16ch]">Écrivez-nous, on vous répond.</h1>
           </div>
           <p data-arrivee="chapo" className="r-lead mt-5 max-w-[52ch]">
             Une question sur votre installation, votre abonnement, un poste qui ne fait pas ce
@@ -180,8 +185,9 @@ export default function ContactPage() {
             <h2 className="r-h4">Pas encore client&nbsp;?</h2>
             <p className="mt-3 max-w-[60ch] text-[15px] leading-[24px] text-[#3d3d3d]">
               Décrivez votre situation en deux lignes, sur WhatsApp ou par e-mail&nbsp;: votre
-              activité, ce qui vous prend le plus de temps, ce qui se perd. On vous répond le jour
-              même avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
+              activité, ce qui vous prend le plus de temps, ce qui se perd. On vous répond dans les
+              deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en
+              ligne.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Link href="/tarifs" className="r-btn r-btn--fil">

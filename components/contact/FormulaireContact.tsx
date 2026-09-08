@@ -102,7 +102,7 @@ export default function FormulaireContact() {
         </div>
         <h2 className="r-h4 mt-5">Message envoyé.</h2>
         <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-          On vous répond le jour même, à l&apos;adresse{" "}
+          On vous répond dans les deux jours ouvrés, souvent plus vite, à l&apos;adresse{" "}
           <span className="font-semibold text-[#050505]">{c.email.trim()}</span>
           {c.telephone.trim() ? " — ou sur WhatsApp si c'est plus simple" : ""}.
         </p>
@@ -116,7 +116,7 @@ export default function FormulaireContact() {
   return (
     <form onSubmit={envoyer} noValidate className="ap-carte">
       <h2 className="r-h4">Écrivez-nous</h2>
-      <p className="ap-sous">Réponse le jour même, en heure de Guadeloupe</p>
+      <p className="ap-sous">Réponse dans les deux jours ouvrés, souvent le jour même</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div>
