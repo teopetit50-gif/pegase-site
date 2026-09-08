@@ -331,12 +331,22 @@ export default function ConnexionInline({
       donnees.entreprise = profil.entreprise.trim();
       if (profil.telephone.trim()) donnees.telephone = profil.telephone.trim();
     }
-    const { data, error } = await createClient().auth.updateUser({ password: mdp, data: donnees });
-    relacher();
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.updateUser({ password: mdp, data: donnees });
     if (error || !data.user) {
+      relacher();
       setErreur(error ? lireErreur(error, "definir") : lireErreur({ message: "" }, "definir"));
       return;
     }
+    /* 08/09 — vu au test de bout en bout : updateUser ne réémet pas le
+       jeton, et /compte (composant serveur) lit les métadonnées dans les
+       CLAIMS du jeton. Sans jeton neuf, la page d'arrivée affichait
+       « Profil à compléter », les champs vides et « votre compte n'a pas
+       encore de mot de passe » pendant jusqu'à une heure, juste après
+       que la personne a tout rempli. Même parade que ProfilCarte :
+       refreshSession() avant de passer la main. */
+    await supabase.auth.refreshSession().catch(() => null);
+    relacher();
     const u = utilisateurDepuis(data.user) ?? (prouve ? { ...prouve, mdpDefini: true } : null);
     if (!u) {
       setErreur("La session n'a pas pu s'ouvrir. Réessayez.");
