@@ -1003,11 +1003,12 @@ export default function PriseDeCreneau({
                 </p>
                 {/* 08/09 — l'application (demande des associés : « dans
                     l'espace client et après l'achat ») : dès la mise en
-                    service, l'espace s'installe sur le téléphone ; on le dit
-                    ici, au moment où le client vient de s'engager. */}
+                    service, l'espace s'installe sur le téléphone — et sur
+                    l'ordinateur (seconde passe du 08/09) ; on le dit ici, au
+                    moment où le client vient de s'engager. */}
                 <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
                   Le jour de la mise en service, votre espace s&apos;installera aussi sur votre
-                  téléphone, comme une application&nbsp;:{" "}
+                  téléphone ou votre ordinateur, comme une application&nbsp;:{" "}
                   <Link href="/application" className="underline underline-offset-2">
                     voir comment
                   </Link>

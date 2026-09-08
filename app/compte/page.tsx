@@ -63,17 +63,21 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
         l'annule lui-même tant qu'elle n'est pas finalisée, et DEMANDE un
         changement ou une résiliation ensuite (Teo traite dans le cockpit,
         le paiement n'est pas encore automatisé) ;
-     2. Omega sur votre téléphone (vert) — 08/09, demande des associés
+     2. L'application Omega (vert) — 08/09, demande des associés
         (« une page pour télécharger l'application, dans l'espace client
         et après l'achat ») : l'espace client s'installe sur l'écran
-        d'accueil du téléphone depuis le 07/09 (manifeste du cockpit).
-        L'installation ne se fait QUE depuis app.omegaai.fr ; ici on
-        l'annonce et on renvoie vers /application (le mode d'emploi,
-        Android et iPhone) et vers l'espace. Rattaché : « voir comment
-        l'installer » + « ouvrir mon espace » ; sinon on dit que ça
-        viendra avec l'installation, et on montre déjà comment ; sur une
-        panne de `comptes`, on le dit (revue n° 5) et on garde le lien
-        vers le mode d'emploi ;
+        d'accueil du téléphone depuis le 07/09 (manifeste du cockpit), et
+        sur l'ordinateur (Chrome, Edge). L'installation ne se fait QUE
+        depuis app.omegaai.fr — et depuis le 08/09 (seconde passe,
+        décision des associés : « télécharger le cockpit sur son bureau
+        ou son téléphone »), le cockpit a une page publique /installer
+        avec UN bouton « Installer Omega » quand le navigateur le permet,
+        les gestes Safari sinon. Rattaché : le bouton « Installer sur cet
+        appareil » (→ /installer) + le lien « voir comment ça marche »
+        (/application, le mode d'emploi : Android, iPhone, ordinateur) ;
+        sinon on dit que ça viendra avec l'installation, et on montre déjà
+        comment ; sur une panne de `comptes`, on le dit (revue n° 5) et on
+        garde le lien vers le mode d'emploi ;
      3. Mes rendez-vous (bleu) — les réunions d'installation, en cartes
         condensées (bloc-date en heure de Guadeloupe, durée, pastille de
         statut), puis les audits/devis s'il y en a un jour ;
@@ -83,7 +87,9 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
    En tête : « Mon compte », la ligne d'identité (IdentiteCompte) et
    « Se déconnecter ». À droite, collée en desktop : « Votre cockpit » —
    qui porte aussi, depuis le 08/09 et pour un compte rattaché, le lien
-   « Installer sur mon téléphone » sous « Ouvrir mon cockpit ».
+   « Installer l'application » sous « Ouvrir mon cockpit » — droit sur
+   app.omegaai.fr/installer, la page d'installation du cockpit (seconde
+   passe du 08/09 ; un temps vers /application).
 
    Ce n'est PAS le cockpit — le cockpit vit sur pegase-dashboard, et il ne
    s'ouvre que lorsque Teo a cliqué « Installation finalisée » (RPC
@@ -271,13 +277,15 @@ export default async function ComptePage({
                 )}
               </SectionCompte>
 
-              {/* ——— 2. Omega sur votre téléphone (08/09) ——— */}
+              {/* ——— 2. L'application Omega (08/09, seconde passe le même
+                  jour : le bouton vers la page d'installation du cockpit,
+                  et l'ordinateur) ——— */}
               <SectionCompte
                 id="application"
                 teinte="vert"
                 icone={Smartphone}
                 kicker="Application"
-                titre="Omega sur votre téléphone"
+                titre="L'application Omega"
               >
                 {panneComptes ? (
                   /* revue 08/09 — sur une panne de `comptes`, rattache vaut
@@ -296,25 +304,27 @@ export default async function ComptePage({
                 ) : rattache ? (
                   <>
                     <p className="cp-texte">
-                      Votre espace s&apos;installe sur l&apos;écran d&apos;accueil de votre téléphone,
-                      comme une application&nbsp;: un toucher pour l&apos;ouvrir, en plein écran, sans
-                      rien télécharger sur une boutique.
+                      Votre espace s&apos;installe sur votre téléphone et sur votre ordinateur, comme
+                      une application&nbsp;: un toucher pour l&apos;ouvrir, en plein écran, sans rien
+                      télécharger sur une boutique.
                     </p>
+                    {/* le bouton mène à la page d'installation du cockpit, sur
+                        l'appareil où l'on est : c'est là que le bouton du
+                        navigateur existe ; le mode d'emploi passe en lien */}
                     <div className="mt-5 flex flex-wrap items-center gap-3">
-                      <Link href="/application" className="r-btn r-btn--noir">
-                        Voir comment l&apos;installer
-                      </Link>
-                      <a href={`${COCKPIT_URL}/espace`} className="r-lien">
-                        Ouvrir mon espace
+                      <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--noir">
+                        Installer sur cet appareil
                       </a>
+                      <Link href="/application" className="r-lien">
+                        Voir comment ça marche
+                      </Link>
                     </div>
                   </>
                 ) : (
                   <>
                     <p className="cp-texte">
                       Dès votre installation faite, votre espace s&apos;installera sur votre téléphone
-                      comme une application&nbsp;: un toucher, plein écran. Vous pouvez déjà voir
-                      comment, en deux gestes.
+                      et votre ordinateur, comme une application. Vous pouvez déjà voir comment.
                     </p>
                     <div className="mt-5">
                       <Link href="/application" className="r-btn r-btn--fil">
@@ -505,13 +515,15 @@ export default async function ComptePage({
                   <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
                     Ouvrir mon cockpit
                   </a>
-                  {/* 08/09 — l'application : le mode d'emploi, sous le bouton
-                      (dans son propre bloc, pour ne pas s'aligner à côté du
-                      bouton dès qu'il reprend sa largeur naturelle) */}
+                  {/* 08/09 — l'application : sous le bouton, le lien vers la
+                      page d'installation du cockpit (seconde passe : droit sur
+                      /installer et son bouton, plus le mode d'emploi du site).
+                      Dans son propre bloc, pour ne pas s'aligner à côté du
+                      bouton dès qu'il reprend sa largeur naturelle. */}
                   <div>
-                    <Link href="/application" className="cp-cockpit-lien">
-                      Installer sur mon téléphone
-                    </Link>
+                    <a href={`${COCKPIT_URL}/installer`} className="cp-cockpit-lien">
+                      Installer l&apos;application
+                    </a>
                   </div>
                 </>
               ) : aInstallation ? (

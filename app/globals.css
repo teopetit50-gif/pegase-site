@@ -5944,15 +5944,23 @@ button.rounded-full:active {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   /application — « Omega sur votre téléphone » (08/09/2026)
+   /application — « Omega dans votre poche » (08/09/2026, seconde passe
+   le même jour)
 
    Demande des associés : « une page pour télécharger l'application, dans
    l'espace client et après l'achat ». Le 07/09, Teo a rendu l'espace
    client installable sur l'écran d'accueil (manifeste et service worker
    du cockpit) ; l'installation ne peut se faire QUE depuis
    app.omegaai.fr — le site guide, puis renvoie. Cette page est ce guide :
-   un QR pour qui lit sur un ordinateur, les gestes Android et iPhone,
-   ce que ça change, et les questions qu'on nous pose.
+   un QR pour qui lit sur un ordinateur, les gestes Android, iPhone et
+   ordinateur, ce que ça change, et les questions qu'on nous pose.
+
+   Seconde passe (08/09) : le cockpit a une page publique /installer avec
+   un seul bouton ; le site y envoie, et couvre l'ordinateur. Côté styles,
+   rien de neuf — la troisième carte reprend .ap-carte, la grille des
+   trois cartes est en Tailwind dans la page (une colonne, deux + une dès
+   640 px, trois dès 1024 px), et les deux notes .ap-note s'empilent sous
+   la grille.
 
    Tout est préfixé .ap-, sous .resa comme le reste du monde clair. Les
    cartes reprennent la carte blanche de « Mon compte » (rayon 16, ombre
@@ -5972,7 +5980,7 @@ button.rounded-full:active {
   color: var(--r-faible);
 }
 
-/* ——— la carte blanche (le QR, les deux gestes) ——— */
+/* ——— la carte blanche (le QR, les trois gestes) ——— */
 .resa .ap-carte {
   background: #ffffff;
   border-radius: 16px;
@@ -6066,10 +6074,10 @@ button.rounded-full:active {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-/* la note sous les deux cartes (« le plus simple est Safari ») : 13,5 px,
-   le plancher du monde clair — .r-note (12 px, graisse 300) est en
-   dessous, et c'est la ligne qui porte le conseil clé pour iPhone
-   (revue 08/09) */
+/* les notes sous les trois cartes (« le plus simple est Safari », puis la
+   première ouverture et Firefox — 08/09, seconde passe) : 13,5 px, le
+   plancher du monde clair — .r-note (12 px, graisse 300) est en dessous,
+   et c'est la ligne qui porte le conseil clé pour iPhone (revue 08/09) */
 .resa .ap-note {
   max-width: 60ch;
   font-size: 13.5px;
