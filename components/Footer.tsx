@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CANAL_LABEL, lienContact } from "@/lib/reservation";
 
 /* Footer v4 (22/07, Teo : « pro c'est genre rien, y a trop de trucs ») —
    réduction à l'os. Une seule rangée : le copyright à gauche, trois liens à
@@ -44,16 +43,8 @@ export default function Footer() {
               {l.label}
             </Link>
           ))}
-          {/* 30/07 — une seule entrée ajoutée, pas un bloc : le pied de page
-              reste « à l'os » (règle Teo du 22/07). Mais le canal de contact
-              n'était écrit nulle part ailleurs que sur /audit, qui ne reçoit
-              que quatre liens entrants — il était donc introuvable. */}
-          <a
-            href={lienContact("Omega.AI : une question")}
-            className="text-white/40 transition hover:text-white/75"
-          >
-            {CANAL_LABEL}
-          </a>
+          {/* 08/09 — le lien WhatsApp du pied part : « Service client »
+              (/contact) le remplace, avec les deux canaux. */}
         </nav>
       </div>
     </footer>

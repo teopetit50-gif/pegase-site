@@ -6,7 +6,7 @@ import Partage from "@/components/Partage";
 import MiniSite from "@/components/modeles/MiniSite";
 import { CATEGORIES, parCategorie } from "@/components/modeles/donnees";
 import { Chevron } from "@/components/offres/MediaMoteurs";
-import { CANAL_LABEL_PHRASE, CANAL_VALEUR, lienContact } from "@/lib/reservation";
+import { CANAL_VALEUR } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs/site — l'offre site à prix public (01/09/2026)
@@ -581,8 +581,8 @@ export default function TarifsSitePage() {
               <Link href="/site/commande" className="o-btn o-btn--primary">
                 Commander mon site
               </Link>
-              <a href={lienContact("Mon site Omega")} className="o-btn o-btn--ghost">
-                Nous joindre {CANAL_LABEL_PHRASE}
+              <a href="/contact" className="o-btn o-btn--ghost">
+                Nous joindre
               </a>
             </div>
             <p data-reveal className="o-small mt-5 !text-[13px]">

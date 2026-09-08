@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import { lienContact } from "@/lib/reservation";
 import { SystemLogo } from "@/components/logos";
 import {
   BandeauOutils,
@@ -885,7 +884,7 @@ export default function Home() {
               <Link href="/commencer" className="o-btn o-btn--primary">
                 Commencer
               </Link>
-              <a href={lienContact("Bonjour Omega — je vous écris depuis le site.")} className="o-btn o-btn--ghost">
+              <a href="/contact" className="o-btn o-btn--ghost">
                 Nous joindre
               </a>
             </div>

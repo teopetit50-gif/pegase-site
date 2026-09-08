@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { lienContact } from "@/lib/reservation";
 import Header from "@/components/Header";
 import Apparition from "@/components/donnees/Apparition";
 import HeroPlein from "@/components/donnees/HeroPlein";
@@ -322,7 +321,7 @@ const PIED = [
     liens: [
       { label: "RGPD : où vivent vos données", href: "/blog/rgpd-donnees-locales" },
       { label: "Nos intégrations", href: "/integrations" },
-      { label: "Nous écrire", href: lienContact("Bonjour Omega — question sur vos garanties de données.") },
+      { label: "Nous écrire", href: "/contact" },
     ],
   },
 ];

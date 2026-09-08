@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { EVENEMENT_SESSION } from "@/lib/compte";
-import { lienContact } from "@/lib/reservation";
 import { sessionCookiePresente } from "@/lib/supabase/config";
 
 /* 22/07 — le pégase (SVG d'après l'icône « pegasus » de Skoll, game-icons.net,
@@ -459,7 +458,7 @@ export default function Header() {
               {libelleCompte}
             </Link>
             <a
-              href={lienContact("Bonjour Omega — je vous écris depuis le site.")}
+              href="/contact"
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
               style={{

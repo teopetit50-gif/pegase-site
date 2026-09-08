@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import FormulaireContact from "@/components/contact/FormulaireContact";
 import { CANAL_VALEUR, COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -25,6 +26,12 @@ import { CANAL_VALEUR, COURRIEL, lienContact, lienCourriel } from "@/lib/reserva
    nouvelle : « le jour même » est celle de /tarifs et de la réservation,
    le traitement des demandes d'abonnement depuis Mon compte est celui
    du 03/09.
+
+   08/09 (seconde passe, demande de l'associé) : un FORMULAIRE en tête,
+   comme celui de l'audit — coordonnées, sujet, et un grand champ pour
+   écrire (components/contact/FormulaireContact.tsx → POST /api/contact,
+   qui envoie le message à contact@omegaai.fr). WhatsApp et l'adresse
+   restent en dessous, « ou directement ».
 
    Monde clair .resa, mêmes classes que /application (.ap-*, globals.css).
    Qui mène ici : le pied de page (« Service client »), les mentions
@@ -82,23 +89,26 @@ export default function ContactPage() {
           </div>
           <p data-arrivee="chapo" className="r-lead mt-5 max-w-[52ch]">
             Une question sur votre installation, votre abonnement, un poste qui ne fait pas ce
-            qu&apos;il devrait&nbsp;? Deux façons de nous joindre, une seule équipe derrière.
+            qu&apos;il devrait&nbsp;? Écrivez-nous ci-dessous, ou passez par WhatsApp&nbsp;: une
+            seule équipe derrière.
           </p>
-          <div data-arrivee="bloc" className="mt-8 flex flex-wrap items-center gap-3">
-            <a href={whatsapp} className="r-btn r-btn--noir">
-              Écrire sur WhatsApp
-            </a>
-            <a href={courriel} className="r-btn r-btn--fil">
-              Écrire un e-mail
-            </a>
+        </section>
+
+        {/* ═══ 1 bis — le formulaire ═══ */}
+        <section id="ecrire" data-monde="clair" className="r-wrap scroll-mt-24 pb-16 sm:pb-24">
+          <div data-arrivee="bloc" className="max-w-[760px]">
+            <FormulaireContact />
           </div>
         </section>
 
-        {/* ═══ 2 — les deux canaux ═══ */}
+        {/* ═══ 2 — les deux canaux, ou directement ═══ */}
         <section data-monde="clair" className="r-wrap pb-16 sm:pb-24">
-          <div className="grid gap-5 sm:grid-cols-2">
+          <h2 data-reveal className="r-h3 max-w-[18ch]">
+            Ou directement
+          </h2>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
             <article data-reveal className="ap-carte">
-              <h2 className="r-h4">WhatsApp</h2>
+              <h3 className="r-h4">WhatsApp</h3>
               <p className="ap-sous">Le plus rapide, depuis votre téléphone</p>
               <p className="mt-3 text-[15px] leading-[24px] text-[#3d3d3d]">
                 Pour une question courte ou une urgence sur un poste en service&nbsp;: un envoi à
@@ -112,7 +122,7 @@ export default function ContactPage() {
               </div>
             </article>
             <article data-reveal className="ap-carte">
-              <h2 className="r-h4">E-mail</h2>
+              <h3 className="r-h4">E-mail</h3>
               <p className="ap-sous">Pour ce qui mérite d&apos;être écrit</p>
               <p className="mt-3 text-[15px] leading-[24px] text-[#3d3d3d]">
                 Une demande détaillée, une pièce à joindre, une question sur une facture ou sur
