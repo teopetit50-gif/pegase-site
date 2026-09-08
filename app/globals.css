@@ -5549,6 +5549,8 @@ button.rounded-full:active {
      bordeaux #8a2a2a sur #fbeeea  (7,6)   site — la carte de /commencer
      violet   #6a4ac2 sur #f2effc  (5,4)   profil
      neutre   #3d3d3d sur #f4f4f2  (9,6)   sécurité
+     vert     #1e6b3a sur #e6f4ea  (5,7)   application — 08/09, la section
+                                            « Omega sur votre téléphone »
    Les pastilles de statut (.cp-pastille) suivent la même règle avec une
    quatrième famille : vert #1e6b3a sur #e6f4ea (5,7), ambre #8a5a00 sur
    #fdf3dd (5,4).
@@ -5596,6 +5598,13 @@ button.rounded-full:active {
   --cp-fond: #f4f4f2;
   --cp-texte: #3d3d3d;
   --cp-filet: #e3e3e3;
+}
+/* 08/09 — la section « Omega sur votre téléphone » : le vert des
+   pastilles « ok », l'application étant ce qui marche déjà */
+.resa .cp-section[data-teinte="vert"] {
+  --cp-fond: #e6f4ea;
+  --cp-texte: #1e6b3a;
+  --cp-filet: #bfe3cb;
 }
 .resa .cp-tete {
   display: flex;
@@ -5869,6 +5878,23 @@ button.rounded-full:active {
 .resa .cp-cockpit .r-h4 {
   color: #ffffff;
 }
+/* 08/09 — sous « Ouvrir mon cockpit » : le lien vers /application, en
+   blanc souligné sur la carte sombre (le .r-lien y serait noir sur noir) */
+.resa .cp-cockpit-lien {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 500;
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  transition: text-decoration-color 0.2s ease;
+}
+.resa .cp-cockpit-lien:hover {
+  text-decoration-color: currentColor;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    LE MOYEN DE PAIEMENT (05/09/2026) — demande des associés : le client
@@ -5914,5 +5940,213 @@ button.rounded-full:active {
   padding: 12px 14px;
   font-size: 14px;
   line-height: 21px;
+  color: var(--r-doux);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /application — « Omega sur votre téléphone » (08/09/2026)
+
+   Demande des associés : « une page pour télécharger l'application, dans
+   l'espace client et après l'achat ». Le 07/09, Teo a rendu l'espace
+   client installable sur l'écran d'accueil (manifeste et service worker
+   du cockpit) ; l'installation ne peut se faire QUE depuis
+   app.omegaai.fr — le site guide, puis renvoie. Cette page est ce guide :
+   un QR pour qui lit sur un ordinateur, les gestes Android et iPhone,
+   ce que ça change, et les questions qu'on nous pose.
+
+   Tout est préfixé .ap-, sous .resa comme le reste du monde clair. Les
+   cartes reprennent la carte blanche de « Mon compte » (rayon 16, ombre
+   de .cp-section), la frise reprend celle de /tarifs/site (filet, numéro
+   tabulaire, titre), l'encart gris est le jumeau de .rv-paiement. Mêmes
+   règles : corps ≥ 13,5 px, contraste ≥ 4,5:1 — gris #616161 sur blanc
+   (6,2) et sur #f5f5f5 (5,7), #3d3d3d sur blanc (10,9).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ——— le kicker en capitales au-dessus du titre ——— */
+.resa .ap-kicker {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--r-faible);
+}
+
+/* ——— la carte blanche (le QR, les deux gestes) ——— */
+.resa .ap-carte {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 22px 26px;
+  box-shadow:
+    0 1px 2px rgba(5, 5, 5, 0.04),
+    0 0 0 1px rgba(5, 5, 5, 0.05);
+}
+@media (min-width: 640px) {
+  .resa .ap-carte {
+    padding: 28px 28px 30px;
+  }
+}
+/* le sous-titre d'une carte de geste : les navigateurs concernés */
+.resa .ap-sous {
+  margin-top: 4px;
+  font-size: 13.5px;
+  line-height: 20px;
+  color: var(--r-faible);
+}
+
+/* ——— la carte QR : tout centré, le code dans son cadre blanc ———
+   Le SVG porte déjà ses 4 modules de zone de repos (≈ 19 px à 176 px) ;
+   le cadre de 16 px l'élargit (≈ 35 px en tout) et pose le code dans la
+   carte, filet compris. */
+.resa .ap-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.resa .ap-qr-cadre {
+  display: block;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  line-height: 0;
+}
+.resa .ap-qr-cadre img {
+  display: block;
+  width: 176px;
+  height: 176px;
+}
+.resa .ap-qr-texte {
+  margin-top: 18px;
+  max-width: 34ch;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--r-doux);
+}
+.resa .ap-qr-adresse {
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--r-texte);
+}
+
+/* ——— les étapes numérotées d'un geste ——— */
+.resa .ap-etapes {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.resa .ap-etape {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--r-doux);
+}
+.resa .ap-etape strong {
+  font-weight: 600;
+  color: var(--r-texte);
+}
+/* la pastille : 24 px, noire, le chiffre en blanc */
+.resa .ap-num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: #050505;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+/* la note sous les deux cartes (« le plus simple est Safari ») : 13,5 px,
+   le plancher du monde clair — .r-note (12 px, graisse 300) est en
+   dessous, et c'est la ligne qui porte le conseil clé pour iPhone
+   (revue 08/09) */
+.resa .ap-note {
+  max-width: 60ch;
+  font-size: 13.5px;
+  line-height: 20px;
+  color: var(--r-faible);
+}
+
+/* ——— la frise « ce que ça change » : filet, numéro, titre, texte ——— */
+.resa .ap-frise {
+  display: flex;
+  flex-direction: column;
+}
+.resa .ap-frise-filet {
+  height: 1px;
+  width: 100%;
+  background: var(--r-filet);
+}
+.resa .ap-frise-num {
+  margin-top: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--r-faible);
+}
+.resa .ap-frise-titre {
+  margin-top: 12px;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--r-texte);
+}
+.resa .ap-frise-texte {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--r-doux);
+}
+
+/* ——— l'encart gris « avant d'installer » (jumeau de .rv-paiement) ——— */
+.resa .ap-encart {
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  background: var(--r-fond);
+  padding: 22px 22px 24px;
+}
+@media (min-width: 640px) {
+  .resa .ap-encart {
+    padding: 26px 28px 28px;
+  }
+}
+
+/* ——— les questions : une liste, un filet entre chaque ——— */
+.resa .ap-question {
+  padding: 20px 0;
+  border-top: 1px solid var(--r-filet);
+}
+.resa .ap-question:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.resa .ap-question:last-child {
+  padding-bottom: 0;
+}
+.resa .ap-question dt {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .ap-question dd {
+  margin-top: 6px;
+  max-width: 60ch;
+  font-size: 15px;
+  line-height: 24px;
   color: var(--r-doux);
 }

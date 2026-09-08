@@ -8,9 +8,10 @@
    un kicker en capitales dans la même teinte, le titre en r-h4. Une
    teinte par segment — orange (abonnement, la couleur charte), bleu
    (rendez-vous), bordeaux (site — la carte bordeaux-or de /commencer),
-   violet (profil), gris (sécurité). Les couples fond/texte sont dans
-   globals.css (.cp-section[data-teinte]) ; ils tiennent tous le
-   contraste 4,5:1 sur leur fond doux.
+   violet (profil), gris (sécurité), et depuis le 08/09 vert (l'application
+   sur le téléphone — la teinte des pastilles « ok »). Les couples
+   fond/texte sont dans globals.css (.cp-section[data-teinte]) ; ils
+   tiennent tous le contraste 4,5:1 sur leur fond doux.
 
    Pas de « use client » : le composant n'a ni état ni gestionnaire, il se
    rend côté serveur dans la page ET peut être importé par un composant
@@ -25,7 +26,7 @@
 import { isValidElement, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
-export type TeinteSection = "orange" | "bleu" | "bordeaux" | "violet" | "neutre";
+export type TeinteSection = "orange" | "bleu" | "bordeaux" | "violet" | "neutre" | "vert";
 
 export type SectionCompteProps = {
   teinte: TeinteSection;

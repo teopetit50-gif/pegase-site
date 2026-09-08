@@ -1001,6 +1001,18 @@ export default function PriseDeCreneau({
                 <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
                   Votre demande est rangée dans « Mon compte », avec votre créneau.
                 </p>
+                {/* 08/09 — l'application (demande des associés : « dans
+                    l'espace client et après l'achat ») : dès la mise en
+                    service, l'espace s'installe sur le téléphone ; on le dit
+                    ici, au moment où le client vient de s'engager. */}
+                <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
+                  Le jour de la mise en service, votre espace s&apos;installera aussi sur votre
+                  téléphone, comme une application&nbsp;:{" "}
+                  <Link href="/application" className="underline underline-offset-2">
+                    voir comment
+                  </Link>
+                  .
+                </p>
 
                 {/* 05/09 — le moyen de paiement : enregistré maintenant (Stripe,
                     carte ou SEPA, rien de débité) ou plus tard depuis /compte.

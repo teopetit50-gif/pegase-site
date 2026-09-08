@@ -29,6 +29,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
        ce sont des étapes de parcours, pas des portes d'entrée SEO. */
     { url: "/reserver", priorite: 0.5, frequence: "monthly" },
     { url: "/installation", priorite: 0.4, frequence: "monthly" },
+    /* 08/09 — le mode d'emploi de l'application (Android, iPhone) : une
+       page publique, liée depuis le pied de page, qu'un client cherche
+       quand il change de téléphone. Même rang que /reserver : une étape,
+       pas une porte d'entrée. */
+    { url: "/application", priorite: 0.5, frequence: "monthly" },
     { url: "/integrations", priorite: 0.8, frequence: "monthly" },
     /* 07/08 — « Où vont vos données ». Priorité haute pour une page qui ne
        vend rien : c'est celle qu'on cherche avant de signer, et elle répond

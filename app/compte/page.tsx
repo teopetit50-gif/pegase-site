@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CalendarDays, CreditCard, Globe, LayoutDashboard, ShieldCheck, UserRound } from "lucide-react";
+import {
+  CalendarDays,
+  CreditCard,
+  Globe,
+  LayoutDashboard,
+  ShieldCheck,
+  Smartphone,
+  UserRound,
+} from "lucide-react";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import AbonnementCarte from "@/components/compte/AbonnementCarte";
@@ -55,14 +63,27 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
         l'annule lui-même tant qu'elle n'est pas finalisée, et DEMANDE un
         changement ou une résiliation ensuite (Teo traite dans le cockpit,
         le paiement n'est pas encore automatisé) ;
-     2. Mes rendez-vous (bleu) — les réunions d'installation, en cartes
+     2. Omega sur votre téléphone (vert) — 08/09, demande des associés
+        (« une page pour télécharger l'application, dans l'espace client
+        et après l'achat ») : l'espace client s'installe sur l'écran
+        d'accueil du téléphone depuis le 07/09 (manifeste du cockpit).
+        L'installation ne se fait QUE depuis app.omegaai.fr ; ici on
+        l'annonce et on renvoie vers /application (le mode d'emploi,
+        Android et iPhone) et vers l'espace. Rattaché : « voir comment
+        l'installer » + « ouvrir mon espace » ; sinon on dit que ça
+        viendra avec l'installation, et on montre déjà comment ; sur une
+        panne de `comptes`, on le dit (revue n° 5) et on garde le lien
+        vers le mode d'emploi ;
+     3. Mes rendez-vous (bleu) — les réunions d'installation, en cartes
         condensées (bloc-date en heure de Guadeloupe, durée, pastille de
         statut), puis les audits/devis s'il y en a un jour ;
-     3. Mes commandes de site (bordeaux-or, comme la carte de /commencer) ;
-     4. Profil professionnel (violet) — ProfilCarte, le formulaire ;
-     5. Sécurité et accès (gris) — MotDePasseCarte, inchangée.
+     4. Mes commandes de site (bordeaux-or, comme la carte de /commencer) ;
+     5. Profil professionnel (violet) — ProfilCarte, le formulaire ;
+     6. Sécurité et accès (gris) — MotDePasseCarte, inchangée.
    En tête : « Mon compte », la ligne d'identité (IdentiteCompte) et
-   « Se déconnecter ». À droite, collée en desktop : « Votre cockpit ».
+   « Se déconnecter ». À droite, collée en desktop : « Votre cockpit » —
+   qui porte aussi, depuis le 08/09 et pour un compte rattaché, le lien
+   « Installer sur mon téléphone » sous « Ouvrir mon cockpit ».
 
    Ce n'est PAS le cockpit — le cockpit vit sur pegase-dashboard, et il ne
    s'ouvre que lorsque Teo a cliqué « Installation finalisée » (RPC
@@ -250,7 +271,61 @@ export default async function ComptePage({
                 )}
               </SectionCompte>
 
-              {/* ——— 2. Mes rendez-vous ——— */}
+              {/* ——— 2. Omega sur votre téléphone (08/09) ——— */}
+              <SectionCompte
+                id="application"
+                teinte="vert"
+                icone={Smartphone}
+                kicker="Application"
+                titre="Omega sur votre téléphone"
+              >
+                {panneComptes ? (
+                  /* revue 08/09 — sur une panne de `comptes`, rattache vaut
+                     false : sans cette branche on raconterait « dès votre
+                     installation faite » à un client peut-être déjà
+                     rattaché, pendant que la carte cockpit dit que l'accès
+                     ne répond pas. Une panne se dit (revue n° 5). */
+                  <p className="cp-texte">
+                    Impossible de vérifier votre accès pour le moment. Rechargez la page dans un
+                    instant. Le mode d&apos;emploi, lui, reste lisible&nbsp;:{" "}
+                    <Link href="/application" className="r-lien">
+                      voir comment installer l&apos;application
+                    </Link>
+                    .
+                  </p>
+                ) : rattache ? (
+                  <>
+                    <p className="cp-texte">
+                      Votre espace s&apos;installe sur l&apos;écran d&apos;accueil de votre téléphone,
+                      comme une application&nbsp;: un toucher pour l&apos;ouvrir, en plein écran, sans
+                      rien télécharger sur une boutique.
+                    </p>
+                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                      <Link href="/application" className="r-btn r-btn--noir">
+                        Voir comment l&apos;installer
+                      </Link>
+                      <a href={`${COCKPIT_URL}/espace`} className="r-lien">
+                        Ouvrir mon espace
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="cp-texte">
+                      Dès votre installation faite, votre espace s&apos;installera sur votre téléphone
+                      comme une application&nbsp;: un toucher, plein écran. Vous pouvez déjà voir
+                      comment, en deux gestes.
+                    </p>
+                    <div className="mt-5">
+                      <Link href="/application" className="r-btn r-btn--fil">
+                        Voir comment ça marche
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </SectionCompte>
+
+              {/* ——— 3. Mes rendez-vous ——— */}
               <SectionCompte
                 id="rendez-vous"
                 teinte="bleu"
@@ -318,7 +393,7 @@ export default async function ComptePage({
                 )}
               </SectionCompte>
 
-              {/* ——— 3. Mes commandes de site ——— */}
+              {/* ——— 4. Mes commandes de site ——— */}
               <SectionCompte
                 id="site"
                 teinte="bordeaux"
@@ -379,7 +454,7 @@ export default async function ComptePage({
                 )}
               </SectionCompte>
 
-              {/* ——— 4. Profil professionnel ——— */}
+              {/* ——— 5. Profil professionnel ——— */}
               <SectionCompte id="profil" teinte="violet" icone={UserRound} kicker="Profil" titre="Profil professionnel">
                 <p className="cp-texte mb-5">
                   Ce que nous savons de votre entreprise&nbsp;: ces informations servent à vos factures et
@@ -388,7 +463,7 @@ export default async function ComptePage({
                 <ProfilCarte utilisateur={utilisateur} />
               </SectionCompte>
 
-              {/* ——— 5. Sécurité et accès ——— */}
+              {/* ——— 6. Sécurité et accès ——— */}
               <SectionCompte id="securite" teinte="neutre" icone={ShieldCheck} kicker="Sécurité" titre="Sécurité et accès">
                 <p className="cp-texte">
                   Connecté avec <span className="cp-fort break-all">{utilisateur.email}</span>. Cette adresse
@@ -430,6 +505,14 @@ export default async function ComptePage({
                   <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
                     Ouvrir mon cockpit
                   </a>
+                  {/* 08/09 — l'application : le mode d'emploi, sous le bouton
+                      (dans son propre bloc, pour ne pas s'aligner à côté du
+                      bouton dès qu'il reprend sa largeur naturelle) */}
+                  <div>
+                    <Link href="/application" className="cp-cockpit-lien">
+                      Installer sur mon téléphone
+                    </Link>
+                  </div>
                 </>
               ) : aInstallation ? (
                 <>

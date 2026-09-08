@@ -12,6 +12,11 @@ import { CANAL_LABEL, lienContact } from "@/lib/reservation";
 const LIENS: { label: string; href: string }[] = [
   { label: "Nos offres", href: "/offres" },
   { label: "Intégrations", href: "/integrations" },
+  /* 08/09 — « L'application » : la page /application n'est appelée que
+     par Mon compte, l'écran « Créneau réservé » et l'e-mail de bienvenue
+     du cockpit ; le pied est là où un client la recherche quand il a
+     changé de téléphone. */
+  { label: "L'application", href: "/application" },
   /* 07/08 — quatrième entrée, malgré la règle « à l'os » du 22/07. La page
      /vos-donnees n'est appelée par rien d'autre : elle n'est pas dans le
      header (qui ne porte que des entrées commerciales) et aucune page ne la
