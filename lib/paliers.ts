@@ -54,6 +54,18 @@
    services qui se partagent la validation → audit d'abord. C'est le
    déterminant réel du coût d'installation (entretiens individuels,
    points de validation — voir les formats « Entreprise & équipes »).
+
+   08/09/2026 — TROIS CHAMPS DE PLUS, décision de l'associé :
+   · Palier.teinte (« bleu » | « or » | « nuit ») : les trois têtes de
+     carte de /tarifs avaient le même gris (seule « Trois postes » était
+     dorée) — « on dirait que c'est la même chose ». Un poste part bleu
+     calme, Trois postes garde l'or, Tout Omega arrive en nuit ;
+   · Palier.badge sur « Tout Omega » (« Le plus complet ») : la dernière
+     carte doit attirer, pas seulement coûter plus cher ;
+   · Poste.court et SUR_MESURE.court : une ligne factuelle tirée du
+     résumé long, pour les tuiles de la grille où le texte du 07/09
+     prenait toute la carte. Le résumé long RESTE : la page Mon compte
+     (AbonnementCarte) s'en sert, et il y a la place de le lire.
    ══════════════════════════════════════════════════════════════════════ */
 
 /* ——— les quatre postes facturables (mêmes slugs que /offres) ——— */
@@ -64,8 +76,16 @@ export type Poste = {
   nom: string;
   slug: string; // page /offres/<slug>
   resume: string;
+  /* 08/09 — la ligne courte des tuiles de la grille (≤ 75 caractères) */
+  court: string;
 };
 
+/* 08/09/2026 — DEUX LONGUEURS DE TEXTE PAR POSTE. Le résumé long du
+   07/09 (Teo) donne le périmètre complet — il sert la page Mon compte,
+   où chaque poste a une carte pour lui. Dans la grille de /tarifs, ces
+   quatre paragraphes empilés dans une carte de 280 px noyaient le choix
+   (l'associé : « trop de texte ») : `court` en garde UNE ligne factuelle,
+   tirée du résumé, sans code interne — le nom du poste fait le reste. */
 export const POSTES: Poste[] = [
   {
     id: "cashd",
@@ -74,6 +94,7 @@ export const POSTES: Poste[] = [
     slug: "relances-impayes",
     resume:
       "Chaque devis sans réponse et chaque facture échue sont relancés à J+3, J+7 et J+21, avec un message rédigé selon le montant, le retard et l'historique du client. Aucun envoi sans votre validation.",
+    court: "Devis sans réponse et factures échues relancés à J+3, J+7 et J+21.",
   },
   {
     id: "frontd",
@@ -82,6 +103,7 @@ export const POSTES: Poste[] = [
     slug: "demandes-clients",
     resume:
       "Les demandes reçues par mail et WhatsApp — horaires, tarifs, disponibilités, rendez-vous — obtiennent une réponse à toute heure, tirée de ce que votre entreprise sait vraiment. Chaque client satisfait est invité à laisser un avis.",
+    court: "Réponse à toute heure aux demandes reçues par mail et WhatsApp.",
   },
   {
     id: "reload",
@@ -90,6 +112,7 @@ export const POSTES: Poste[] = [
     slug: "nouvelles-affaires",
     resume:
       "Vos clients silencieux sont retrouvés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les consultations publiques de votre zone sont relevées chaque jour et filtrées sur vos capacités réelles.",
+    court: "Clients silencieux recontactés, marchés publics de votre zone filtrés.",
   },
   {
     id: "filed",
@@ -98,6 +121,7 @@ export const POSTES: Poste[] = [
     slug: "factures-fournisseurs",
     resume:
       "Chaque facture fournisseur est lue quel que soit son format, ses montants extraits et contrôlés entre eux, la pièce classée par fournisseur et transmise à votre cabinet dans un dossier complet.",
+    court: "Factures fournisseurs lues, contrôlées, classées, transmises au cabinet.",
   },
 ];
 
@@ -111,6 +135,8 @@ export const SUR_MESURE = {
   nom: "Un poste propre à votre métier",
   resume:
     "La tâche qui vous coûte le plus cher n'est pas dans la liste ? Elle se construit sur les mêmes fondations — vos outils, vos règles, votre validation. Le périmètre et le devis sont écrits avant tout engagement.",
+  /* 08/09 — la ligne courte de la tuile (même règle que Poste.court) */
+  court: "Une tâche hors liste ? Elle se construit sur les mêmes fondations.",
   cta: "Décrire votre cas",
   href: "/offres/sur-mesure",
 };
@@ -131,6 +157,9 @@ export type Palier = {
   sousPrix: string;
   /* combien de postes le visiteur coche — null : tous, rien à choisir */
   aChoisir: number | null;
+  /* 08/09 — la couleur de la tête de carte (voir l'en-tête) : trois têtes
+     distinctes, la dernière en nuit pour que « Tout Omega » se voie */
+  teinte: "bleu" | "or" | "nuit";
   phare?: boolean;
   badge?: string;
   promesse: string;
@@ -144,6 +173,7 @@ export const PALIERS: Palier[] = [
     prix: 59,
     sousPrix: "par mois, sans engagement",
     aChoisir: 1,
+    teinte: "bleu",
     promesse:
       "Un système complet sur le poste qui vous coûte le plus cher : il lit, rédige, attend votre validation et rend compte chaque matin.",
     points: [
@@ -160,6 +190,7 @@ export const PALIERS: Palier[] = [
     prix: 89,
     sousPrix: "par mois, sans engagement",
     aChoisir: 3,
+    teinte: "or",
     phare: true,
     badge: "Recommandé",
     promesse:
@@ -178,6 +209,8 @@ export const PALIERS: Palier[] = [
     prix: 119,
     sousPrix: "par mois, sans engagement",
     aChoisir: null,
+    teinte: "nuit",
+    badge: "Le plus complet", // 08/09 (associé) : la dernière carte doit attirer
     promesse:
       "Les quatre postes en service, avec le point du matin et les verrous : six systèmes qui tiennent l'administratif et le commercial, sous votre validation.",
     points: [

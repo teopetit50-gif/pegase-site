@@ -57,21 +57,50 @@
    Le H2 « Choisissez vos postes » et le bandeau .r-blanc qui coiffaient la
    grille disparaissent : la page audit n'en a pas.
 
-   07/09 — LE CHOIX DES POSTES, SOBRE (Teo : « j'aime pas le design de
-   genre cocher les logos, c'est mal présenté »). Les quatre postes ne
-   sont plus des cartes encadrées portant chacune une tuile de logo à
-   ombre : ce sont des LIGNES sous filet — case à cocher, nom, résumé —
-   comme les blocs de la colonne de gauche. La sélection ne colore plus
-   la ligne en crème, seule la case se remplit. « Tout Omega » reprend
-   les mêmes lignes avec une coche nue, sans cadre, à la place de la case
-   — une case pleine y passait pour cochée d'avance (variante
-   .rv-case--sobre / --fixe / .rv-coche--ok, globals.css) ; les tuiles
-   de logo restent aux pages d'offres, où elles ont la place de vivre.
+   08/09 — DEUX DEMANDES DE L'ASSOCIÉ, qui reviennent sur deux choix de
+   Teo de la veille (décision de l'associé, appliquée telle quelle) :
+     1. TROIS TÊTES DE COULEURS DIFFÉRENTES — « on dirait que c'est la
+        même chose ». Les têtes de « Un poste » et « Tout Omega » avaient
+        le même gris, seule « Trois postes » était dorée. Chaque palier
+        porte désormais sa teinte (Palier.teinte → data-teinte sur la
+        tête, globals.css à côté de .r-carte--phare) : bleu calme pour un
+        seul poste, l'or de la charte pour le palier phare, NUIT pour Tout
+        Omega — titre blanc, prix en or, badge « Le plus complet », et une
+        ligne en or qui dit l'argument : « Le quatrième poste pour N € de
+        plus », N CALCULÉ depuis PALIERS (écart Tout Omega − Trois postes,
+        sur les équivalents mensuels en annuel). Les couleurs de la tête
+        ne sont plus écrites en dur dans le JSX : .r-carte-titre / -prix /
+        -sous / -promesse, que la teinte nuit surcharge. Le CTA de Tout
+        Omega passe en noir comme celui de Trois postes ; « Un poste »
+        garde le bouton filet.
+     2. LES TUILES À LOGO, TEXTE COURT — « trop de texte ». Le 07/09
+        (commit 248168a) Teo avait remplacé les tuiles par des lignes
+        sobres sans logo, puis (7deb356) réécrit les résumés en textes
+        longs ; quatre paragraphes empilés dans une carte de 280 px, le
+        choix ne se lisait plus. Retour au balisage d'avant 248168a : une
+        tuile .rv-case par poste (case, <SystemLogo>, nom + ligne courte
+        Poste.court), crème à la sélection. « Tout Omega » montre les
+        mêmes tuiles, non cliquables, avec la coche posée (.rv-case--fixe
+        / .rv-coche--ok du 07/09, conservés) ; la cinquième tuile « Un
+        poste propre à votre métier » porte le signe SUR MESURE à la place
+        du « + » et reste un lien vers /offres/sur-mesure.
+     3. Et pour que les trois boutons restent sur une ligne malgré la tête
+        nuit plus haute : dès 1024 px chaque carte est une SOUS-GRILLE de
+        trois rangs (tête / choix / bouton et points, .r-carte--alignee)
+        partagés par la rangée — le plancher min-height de la tête ne
+        suffisait plus, et le bouton, poussé en bas d'un bloc flex-1,
+        dépendait de la hauteur des points, différente d'une carte à
+        l'autre. Mesuré à 1024 / 1280 / 1440 : trois têtes de même
+        hauteur, trois boutons au même y, en mensuel comme en annuel.
+   Ce qui n'est PAS contesté reste : les noms de postes de Teo, ses
+   résumés longs (la page Mon compte les lit), ses promesses et points
+   par palier, la légende au-dessus des tuiles.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import Partage from "@/components/Partage";
+import { SystemLogo } from "@/components/logos";
 import { lienContact } from "@/lib/reservation";
 import {
   COMPARATIF_PALIERS,
@@ -112,18 +141,38 @@ function lienPalier(p: Palier, periodicite: Periodicite) {
   return `/installation?postes=${postes}${periodicite === "annuel" ? "&periodicite=annuel" : ""}`;
 }
 
-/* la cinquième ligne : même gabarit qu'un poste, un « + » à la place de
-   la case, et toute la ligne est un lien vers la page sur-mesure */
-function LigneSurMesure() {
+/* 08/09 — le bouton d'un palier : noir pour Trois postes ET Tout Omega
+   (la dernière carte doit attirer autant que la phare), filet pour Un
+   poste. Sert la carte et l'en-tête collant du comparatif. */
+function boutonPalier(p: Palier) {
+  return p.id === "un" ? "r-btn--fil" : "r-btn--noir";
+}
+
+/* 08/09 — l'argument de la tête nuit : ce que coûte le quatrième poste
+   par rapport à Trois postes. CALCULÉ depuis PALIERS, jamais écrit en
+   dur ; en annuel on compare les équivalents mensuels, pour que la
+   phrase reste vraie sous les chiffres affichés. */
+function ecartQuatriemePoste(periodicite: Periodicite) {
+  const trois = PALIERS.find((x) => x.id === "trois");
+  const complet = PALIERS.find((x) => x.id === "complet");
+  if (!trois || !complet) return null;
+  const valeur = (p: Palier) => (periodicite === "annuel" ? equivalentMensuel(p.prix) : p.prix);
+  return valeur(complet) - valeur(trois);
+}
+
+/* la cinquième tuile : même gabarit qu'un poste, le signe SUR MESURE à
+   la place de la case (08/09 — il portait un « + » depuis le 07/09), et
+   toute la tuile est un lien vers la page sur-mesure */
+function TuileSurMesure() {
   return (
-    <Link href={SUR_MESURE.href} className="rv-case rv-case--sobre rv-case--lien">
-      <span className="rv-coche rv-coche--plus" aria-hidden />
-      <span>
+    <Link href={SUR_MESURE.href} className="rv-case rv-case--lien">
+      <SystemLogo system="SUR MESURE" />
+      <span className="rv-case-texte">
         <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
           {SUR_MESURE.nom}
         </span>
         <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
-          {SUR_MESURE.resume}
+          {SUR_MESURE.court}
         </span>
         <span className="rv-case-cta mt-1.5 block text-[12.5px] font-medium leading-[18px] text-[#050505]">
           {SUR_MESURE.cta}
@@ -150,12 +199,26 @@ function CartePalier({
   const pret = manque <= 0;
   const annuel = periodicite === "annuel";
   const href = `/installation?postes=${postes.join(",")}${annuel ? "&periodicite=annuel" : ""}`;
+  /* 08/09 — la tête nuit porte l'écart avec Trois postes (voir l'en-tête) */
+  const ecart = p.teinte === "nuit" ? ecartQuatriemePoste(periodicite) : null;
 
   return (
-    <div data-arrivee="colonne" className={`r-carte ${p.phare ? "r-carte--phare" : ""}`}>
-      <div className="r-carte-tete">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
+    /* 08/09 — r-carte--alignee : dès 1024 px la carte est une SOUS-GRILLE
+       de trois rangs partagés par la rangée (tête / choix / bouton et
+       points), voir globals.css — trois têtes de même hauteur, trois
+       boutons sur la même ligne, sans plancher en pixels à entretenir */
+    <div
+      data-arrivee="colonne"
+      className={`r-carte r-carte--alignee ${p.phare ? "r-carte--phare" : ""}`}
+    >
+      {/* 08/09 — data-teinte : bleu / or / nuit, une par palier ; les
+          couleurs du texte suivent (.r-carte-titre & co, globals.css) */}
+      <div className="r-carte-tete" data-teinte={p.teinte}>
+        {/* 08/09 — flex-wrap : entre 1024 et 1280 px la tête fait 176 px
+            de large, « Le plus complet » ne tient pas à côté du titre ; le
+            badge descend sous lui plutôt que de sortir de la tête */}
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
+          <h3 className="r-carte-titre font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] sm:text-[28px] sm:leading-[36px]">
             {p.nom}
           </h3>
           {p.badge ? <span className="r-badge mt-1.5">{p.badge}</span> : null}
@@ -171,10 +234,10 @@ function CartePalier({
                 {p.prix} €
               </span>
             ) : null}
-            <span className="num text-[36px] font-semibold leading-[44px] text-[#050505] sm:text-[40px] sm:leading-[48px]">
+            <span className="r-carte-prix num text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]">
               {annuel ? equivalentMensuel(p.prix) : p.prix} €
             </span>
-            <span className="text-[12px] leading-[18px] text-[#050505]">
+            <span className="r-carte-sous text-[12px] leading-[18px]">
               {annuel ? `par mois, facturé ${prixAnnuel(p.prix)} € par an` : p.sousPrix}
             </span>
           </div>
@@ -185,24 +248,41 @@ function CartePalier({
           ) : null}
         </div>
 
-        <p className="mt-4 text-[15px] leading-[22px] text-[#050505]">{p.promesse}</p>
+        <p className="r-carte-promesse mt-4 text-[15px] leading-[22px]">{p.promesse}</p>
+
+        {/* 08/09 — sur la tête nuit seulement : l'argument du quatrième
+            poste, en or, avec son point ; keyé lui aussi sur la
+            périodicité pour changer en fondu avec le prix */}
+        {ecart !== null ? (
+          <p key={`ecart-${periodicite}`} className="r-carte-ecart rv-fondu mt-3">
+            Le quatrième poste pour {ecart}&nbsp;€ de plus.
+          </p>
+        ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col px-3 pt-4">
+      {/* deuxième rang de la sous-grille : le choix des postes — les cinq
+          mêmes tuiles dans les trois cartes, donc la même hauteur */}
+      <div className="px-3 pt-4">
         {/* le choix des postes, quand il y en a un à faire */}
         {p.aChoisir !== null ? (
-          <fieldset>
+          /* 08/09 — min-w-0 : un fieldset a min-inline-size: min-content
+             par défaut ; entre 1024 et 1280 px il dépassait de 14 px son
+             bloc et ses tuiles ne tombaient plus au droit de celles de
+             « Tout Omega », qui n'a pas de fieldset */
+          <fieldset className="min-w-0">
             <legend className="text-[14px] font-semibold leading-[20px] text-[#050505]">
               {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
             </legend>
-            <div className="mt-2 border-b border-[#e3e3e3]">
+            {/* 08/09 — les tuiles à logo (balisage d'avant 248168a) : case,
+                tuile du module, nom et ligne courte — pas le résumé long */}
+            <div className="mt-3 space-y-2">
               {POSTES.map((x) => {
                 const actif = choisis.includes(x.id);
                 const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
                 return (
                   <label
                     key={x.id}
-                    className={`rv-case rv-case--sobre ${actif ? "rv-case--actif" : ""} ${plein ? "rv-case--plein" : ""}`}
+                    className={`rv-case ${actif ? "rv-case--actif" : ""} ${plein ? "rv-case--plein" : ""}`}
                   >
                     <input
                       type="checkbox"
@@ -212,18 +292,19 @@ function CartePalier({
                       className="sr-only"
                     />
                     <span className="rv-coche" aria-hidden />
-                    <span>
+                    <SystemLogo system={x.system} />
+                    <span className="rv-case-texte">
                       <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
                         {x.nom}
                       </span>
                       <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
-                        {x.resume}
+                        {x.court}
                       </span>
                     </span>
                   </label>
                 );
               })}
-              <LigneSurMesure />
+              <TuileSurMesure />
             </div>
           </fieldset>
         ) : (
@@ -231,30 +312,39 @@ function CartePalier({
             <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
               Les quatre postes, en service :
             </div>
-            <ul className="mt-2 border-b border-[#e3e3e3]">
+            {/* 08/09 — les MÊMES tuiles que dans les deux autres cartes,
+                non cliquables, la coche posée à la place de la case */}
+            <ul className="mt-3 space-y-2">
               {POSTES.map((x) => (
-                <li key={x.id} className="rv-case rv-case--sobre rv-case--fixe">
+                <li key={x.id} className="rv-case rv-case--fixe">
                   <span className="rv-coche rv-coche--ok" aria-hidden />
-                  <span>
+                  <SystemLogo system={x.system} />
+                  <span className="rv-case-texte">
                     <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
                       {x.nom}
                     </span>
                     <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
-                      {x.resume}
+                      {x.court}
                     </span>
                   </span>
                 </li>
               ))}
               <li>
-                <LigneSurMesure />
+                <TuileSurMesure />
               </li>
             </ul>
           </div>
         )}
+      </div>
 
-        <div className="mt-5 flex flex-1 flex-col justify-end">
+      {/* troisième rang : le bouton, sa note, puis les points. 08/09 — le
+          bouton n'est plus poussé en bas d'un bloc flex-1 : il dépendait
+          alors de la hauteur des points, différente d'une carte à l'autre,
+          et les trois boutons ne tombaient pas sur la même ligne */}
+      <div className="px-3">
+        <div className="mt-5">
           {pret ? (
-            <Link href={href} className={`r-btn w-full ${p.phare ? "r-btn--noir" : "r-btn--fil"}`}>
+            <Link href={href} className={`r-btn w-full ${boutonPalier(p)}`}>
               Réserver l&apos;installation
             </Link>
           ) : (
@@ -419,12 +509,21 @@ export default function Grille() {
           mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
         </p>
 
-        <div id="grille" className="mt-10 grid scroll-mt-24 gap-4 sm:mt-12 lg:grid-cols-4">
+        {/* 08/09 — dès 1024 px la rangée a TROIS rangs (sous-grille des
+            cartes, voir CartePalier) et plus d'interligne vertical : la
+            colonne de gauche les enjambe (lg:row-span-3) */}
+        <div
+          id="grille"
+          className="mt-10 grid scroll-mt-24 gap-4 sm:mt-12 lg:grid-cols-4 lg:gap-y-0"
+        >
           {/* colonne de gauche — la page audit y loge le fait qui décide,
               puis des blocs sous filet. Ici : l'installation comprise, la
               facturation (le sélecteur Mensuel | Annuel) et ce qui tourne
               chez tout le monde (PULSE, VAULT). */}
-          <div data-arrivee="colonne" className="flex flex-col justify-start gap-8 pr-2 lg:pt-2">
+          <div
+            data-arrivee="colonne"
+            className="flex flex-col justify-start gap-8 pr-2 lg:row-span-3 lg:pt-2"
+          >
             <p className="text-[19px] font-medium leading-[27px] text-[#050505] sm:text-[21px] sm:leading-[29px]">
               Choisissez vos postes.
               <br />
@@ -539,9 +638,7 @@ export default function Grille() {
                   </div>
                   <Link
                     href={lienPalier(p, periodicite)}
-                    className={`r-btn mt-3 w-full !py-2 !text-[14px] ${
-                      p.phare ? "r-btn--noir" : "r-btn--fil"
-                    }`}
+                    className={`r-btn mt-3 w-full !py-2 !text-[14px] ${boutonPalier(p)}`}
                   >
                     {p.aChoisir === null ? "Réserver l'installation" : "Choisir mes postes"}
                   </Link>

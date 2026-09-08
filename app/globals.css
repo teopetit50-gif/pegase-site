@@ -2295,15 +2295,116 @@ button.rounded-full:active {
     min-height: 304px;
   }
 }
+/* 08/09 — la carte de /tarifs (Grille.tsx) s'aligne sur ses voisines par
+   SOUS-GRILLE dès que les trois sont côte à côte : tête / choix des
+   postes / bouton et points sont trois rangs partagés par la rangée
+   (#grille passe en gap-y-0 à cette largeur, la colonne de gauche
+   enjambe les trois rangs). Trois têtes de même hauteur — la nuit, plus
+   haute (badge plus long, ligne d'argument), donne la sienne aux deux
+   autres — et trois boutons sur la même ligne, quelle que soit la
+   longueur des textes : le plancher min-height ci-dessus ne suffisait
+   plus, et le bouton dépendait de la hauteur des points, différente d'une
+   carte à l'autre. Sous 1024 px les cartes s'empilent : colonne flex,
+   rien à aligner. La marge intérieure de la carte reste celle de .r-carte
+   — une sous-grille la traite comme une gouttière de bord.
+   La colonne unique est minmax(0, 1fr) et les trois rangs ont min-width 0 :
+   sans cela, une colonne `auto` prend la largeur min-content du contenu
+   (le badge « Le plus complet » à côté du titre, un mot long dans une
+   tuile) et les rangs sortent de la carte entre 1024 et 1280 px. */
+@media (min-width: 1024px) {
+  .resa .r-carte--alignee {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+  }
+  .resa .r-carte--alignee > * {
+    min-width: 0;
+  }
+}
 /* carte phare : la tête prend le dégradé or. Les cartes elles-mêmes restent
-   blanches — sur la référence aussi, seule la tête est colorée. */
-.resa .r-carte--phare .r-carte-tete {
+   blanches — sur la référence aussi, seule la tête est colorée.
+   08/09 : la même règle sert la teinte « or » de la grille /tarifs. */
+.resa .r-carte--phare .r-carte-tete,
+.resa .r-carte-tete[data-teinte="or"] {
   background: linear-gradient(
     140deg,
     var(--r-or-clair) 0%,
     var(--r-or-mid) 46%,
     var(--r-or-fonce) 100%
   );
+}
+
+/* ═══ 08/09/2026 — TROIS TÊTES DISTINCTES sur la grille /tarifs
+   (décision de l'associé : « on dirait que c'est la même chose »).
+   Jusqu'ici seule la carte phare était dorée, les deux autres têtes
+   gardaient le gris du fond. Chaque palier pose désormais sa teinte sur
+   la tête (data-teinte, valeur Palier.teinte de lib/paliers.ts) :
+   · bleu — « Un poste » : un bleu calme, encre inchangée ;
+   · or   — « Trois postes » : le dégradé de la carte phare, ci-dessus ;
+   · nuit — « Tout Omega » : le noir de la carte sombre de /compte
+     (.cp-cockpit) — titre blanc, grand prix en or, badge or, et la ligne
+     d'argument .r-carte-ecart (« Le quatrième poste pour N € de plus »).
+   Les couleurs de texte de la tête ne vivent plus en dur dans le JSX :
+   quatre classes (.r-carte-titre / -prix / -sous / -promesse) portent
+   l'encre par défaut, la teinte nuit les surcharge à la spécificité —
+   pas de !important. Même poids que .r-carte--phare .r-carte-tete,
+   déclaré après lui. ═══ */
+.resa .r-carte-tete[data-teinte="bleu"] {
+  background: linear-gradient(140deg, #eef3fd 0%, #dbe6fb 100%);
+}
+.resa .r-carte-tete[data-teinte="nuit"] {
+  background: linear-gradient(140deg, #0f1013 0%, #1d1e24 100%);
+}
+/* le texte de la tête : l'encre du monde clair par défaut (bleu, or)… */
+.resa .r-carte-titre,
+.resa .r-carte-prix,
+.resa .r-carte-sous,
+.resa .r-carte-promesse {
+  color: var(--r-texte);
+}
+/* …et sur la nuit : titre blanc, prix en or, le reste dans les gris
+   clairs de la carte sombre de /compte (#d4d4d8, #a1a1aa) — tous ≥ 6,5:1 */
+.resa .r-carte-tete[data-teinte="nuit"] .r-carte-titre {
+  color: #ffffff;
+}
+.resa .r-carte-tete[data-teinte="nuit"] .r-carte-prix {
+  color: #e9cd91;
+}
+.resa .r-carte-tete[data-teinte="nuit"] .r-carte-sous,
+.resa .r-carte-tete[data-teinte="nuit"] .r-carte-promesse {
+  color: #d4d4d8;
+}
+.resa .r-carte-tete[data-teinte="nuit"] .rv-prix-barre {
+  color: #a1a1aa;
+}
+/* la ligne verte de l'annuel : vert clair sur un voile vert (7,4:1) */
+.resa .r-carte-tete[data-teinte="nuit"] .rv-economie {
+  background: rgba(159, 216, 178, 0.14);
+  color: #9fd8b2;
+}
+.resa .r-carte-tete[data-teinte="nuit"] .r-badge {
+  background: #e9cd91;
+  color: #141415;
+}
+/* l'argument de la tête nuit, en or, précédé d'un point or ; l'écart est
+   calculé dans Grille.tsx depuis PALIERS */
+.resa .r-carte-ecart {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #e9cd91;
+}
+.resa .r-carte-ecart::before {
+  content: "";
+  flex: none;
+  height: 6px;
+  width: 6px;
+  border-radius: 9999px;
+  background: #e9cd91;
 }
 /* bandeau de rappel dans la liste (les lignes surlignées de la référence) */
 .resa .r-carte--phare .r-surligne,
@@ -3989,6 +4090,9 @@ button.rounded-full:active {
    orphelines ; elles restent car `.rv-btn--attente` sert toujours
    PriseDeCreneau et l'ensemble reste cohérent si un choix de postes
    revient un jour dans le parcours de réservation.
+   → 08/09 : `.rv-case` n'est plus orpheline — la grille /tarifs a repris
+   ses tuiles à logo (décision de l'associé, voir plus bas), et la carte
+   d'abonnement de Mon compte comme la commande de site s'en servent.
 
    Tout est préfixé `.rv-` sous `.resa` : rien ne fuit ailleurs.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -4051,53 +4155,48 @@ button.rounded-full:active {
   outline-offset: 2px;
 }
 
-/* ——— variante SOBRE (07/09, grille /tarifs) : des lignes sous filet, pas
-   des cartes. Ni encadré, ni fond crème à la sélection, ni tuile de logo —
-   la case, le nom, le résumé. `--fixe` est la ligne non cliquable de
-   « Tout Omega », où `.rv-coche--ok` est une coche posée, pas une case. ——— */
-.resa .rv-case--sobre {
-  gap: 12px;
-  padding: 12px 0;
-  border: 0;
-  border-top: 1px solid #e3e3e3;
-  border-radius: 0;
-  background: transparent;
-}
-.resa .rv-case--sobre:hover {
-  border-color: #e3e3e3;
-}
-.resa .rv-case--sobre:hover .rv-coche {
-  border-color: #050505;
-}
-.resa .rv-case--sobre.rv-case--actif {
-  border-color: #e3e3e3;
-  background: transparent;
-}
-.resa .rv-case--sobre.rv-case--plein {
-  opacity: 0.4;
-}
-.resa .rv-case--sobre.rv-case--plein:hover .rv-coche {
-  border-color: #b5b5b5;
-}
-.resa .rv-case--sobre .rv-coche {
-  height: 18px;
-  width: 18px;
-  margin-top: 1px;
-}
+/* ——— les tuiles de la grille /tarifs, suite (07/09 → 08/09) ———
+   Le 07/09 Teo avait remplacé les tuiles à logo par des LIGNES sobres
+   sous filet (.rv-case--sobre : ni cadre, ni crème, ni logo — la case,
+   le nom, le résumé long). Le 08/09 l'associé les a trouvées noyées de
+   texte et a demandé le retour des tuiles à logo, avec une ligne courte
+   par poste : décision appliquée. Les lignes sobres n'ont vécu qu'un
+   jour et leurs règles sont parties avec elles (--sobre et dérivés, le
+   « + » .rv-coche--plus que le signe SUR MESURE remplace). Restent ce
+   qui sert encore : `--fixe`, la tuile non cliquable de « Tout Omega »
+   où `.rv-coche--ok` est une coche posée, pas une case ; `--lien` et
+   `.rv-case-cta`, la tuile « un poste propre à votre métier ». ——— */
 .resa .rv-case--fixe {
   cursor: default;
+}
+.resa .rv-case--fixe:hover {
+  border-color: #e3e3e3;
+}
+/* 08/09 — le texte de la tuile (nom + ligne courte), à droite de la case
+   et du logo. Entre 1024 et 1280 px la carte fait 216 px et il lui reste
+   70 px : sans `min-width: 0` le bloc garde la largeur de son mot le plus
+   long et déborde de la carte ; avec, le mot trop long (« fournisseurs »)
+   se coupe au tiret (hyphens, la page est en lang="fr") et, si le
+   navigateur n'a pas le dictionnaire, se casse plutôt que de sortir du
+   cadre (overflow-wrap: anywhere ne joue qu'à défaut d'autre coupure). */
+.resa .rv-case-texte {
+  min-width: 0;
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 /* 07/09 (Teo : « les cases sont déjà cochées, donc il y a un bug ») —
    une case pleine sur une carte où rien ne se choisit se lit comme une
    case cochée d'avance. La coche posée n'a donc NI cadre NI fond : un
-   simple trait noir, comme les « inclus » d'une page de prix. */
+   simple trait noir, comme les « inclus » d'une page de prix.
+   08/09 : trait ramené à la case de 16 px de la tuile (la ligne sobre
+   en avait une de 18). */
 .resa .rv-coche--ok {
   border-color: transparent;
   background: transparent;
 }
 .resa .rv-coche--ok::after {
   content: "";
-  height: 11px;
+  height: 10px;
   width: 6px;
   margin-top: -3px;
   border-right: 2px solid #050505;
@@ -4105,8 +4204,10 @@ button.rounded-full:active {
   transform: rotate(45deg);
 }
 
-/* la ligne « un poste propre à votre métier » (07/09) : un lien qui a le
-   gabarit d'un poste, avec un « + » tracé dans la place de la case */
+/* la tuile « un poste propre à votre métier » (07/09 ; tuile à logo
+   depuis le 08/09) : un lien qui a le gabarit d'un poste, le signe SUR
+   MESURE à la place de la case, et dont le survol souligne « Décrire
+   votre cas » — le cadre, lui, réagit comme celui des autres tuiles */
 .resa .rv-case--lien {
   color: inherit;
   text-decoration: none;
@@ -4119,31 +4220,6 @@ button.rounded-full:active {
 }
 .resa .rv-case--lien:hover .rv-case-cta {
   text-decoration-color: currentColor;
-}
-.resa .rv-coche--plus {
-  position: relative;
-  border-color: transparent;
-  background: transparent;
-}
-.resa .rv-case--lien:hover .rv-coche--plus {
-  border-color: transparent;
-}
-.resa .rv-coche--plus::before,
-.resa .rv-coche--plus::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: #050505;
-}
-.resa .rv-coche--plus::before {
-  height: 2px;
-  width: 12px;
-}
-.resa .rv-coche--plus::after {
-  height: 12px;
-  width: 2px;
 }
 
 /* bouton en attente de choix — même gabarit que .r-btn, éteint mais lisible */
@@ -6157,4 +6233,22 @@ button.rounded-full:active {
   font-size: 15px;
   line-height: 24px;
   color: var(--r-doux);
+}
+
+/* ——— 08/09 (relecture après la seconde passe) : entre 1024 et 1279 px les
+   cartes de la grille font ~216 px ; avec la case (16), la tuile de logo
+   (44) et deux gouttières, le texte n'avait que ~70 px et les noms de
+   postes passaient sur trois ou quatre lignes. À cette seule largeur la
+   tuile passe à 36 px (le signe de 26 px y tient) et la gouttière à 8 px :
+   ~90 px pour le texte. Dès 1280 px, la tuile de 44 px reprend. ——— */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .resa .rv-case {
+    gap: 8px;
+    padding: 10px;
+  }
+  .resa .rv-case > span[aria-label] {
+    height: 36px;
+    width: 36px;
+    border-radius: 11px;
+  }
 }
