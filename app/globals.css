@@ -6709,10 +6709,107 @@ button.rounded-full:active {
   }
 }
 
-/* ——— 2e rang : le choix des postes, sous filet (tuiles .rv-case) ——— */
+/* ——— 2e rang : le choix des postes, sous filet ———
+   09/09, SECONDE PASSE (Teo : « tu as gardé les logos des moteurs, c'est
+   censé être simple comme sur le prompt, et de la même taille »). Les
+   tuiles `.rv-case` — cadre, tuile de logo 44 px, nom + ligne courte —
+   faisaient 66 px chacune : cinq par carte, la carte montait à 1 500 px
+   et le choix pesait plus lourd que le prix. Le choix se fait désormais
+   sur des LIGNES NUES, exactement le gabarit des points en dessous : une
+   case (ou une coche), un nom, rien d'autre. La carte tombe sous 800 px
+   et les trois se lisent d'un coup.
+   `.rv-case` n'est pas touchée — components/compte/AbonnementCarte.tsx
+   s'en sert toujours ; /tarifs a simplement cessé de l'utiliser. */
 .resa .tp-choix {
   border-bottom: 1px solid #e3e3e3;
-  padding: 16px 14px 18px;
+  padding: 16px 18px 18px;
+}
+.resa .tp-legende {
+  font-size: 13px;
+  line-height: 19px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+/* une ligne de poste : même gabarit que .tp-point, à la case près */
+.resa .tp-poste {
+  display: flex;
+  /* haut, pas centre : sur un nom qui passe sur deux lignes (« Factures
+     fournisseurs et pièces comptables ») une case centrée tombe entre les
+     deux — les points en dessous s'alignent en haut, ces lignes aussi */
+  align-items: flex-start;
+  gap: 9px;
+  padding: 5px 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--r-doux);
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+.resa .tp-poste:hover {
+  color: var(--r-texte);
+}
+.resa .tp-poste--actif {
+  font-weight: 500;
+  color: var(--r-texte);
+}
+/* le palier est complet : les postes non retenus s'effacent sans partir */
+.resa .tp-poste--plein {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.resa .tp-poste--plein:hover {
+  color: var(--r-doux);
+}
+.resa .tp-poste--fixe {
+  cursor: default;
+}
+/* la case à cocher, dessinée : le vrai <input> est en sr-only */
+.resa .tp-case {
+  position: relative;
+  flex: none;
+  margin-top: 2px;
+  height: 16px;
+  width: 16px;
+  border: 1px solid #c7c7c7;
+  border-radius: 5px;
+  background: #ffffff;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease;
+}
+.resa .tp-poste--actif .tp-case {
+  border-color: #050505;
+  background: #050505;
+}
+.resa .tp-poste--actif .tp-case::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  height: 7px;
+  width: 3px;
+  border: solid #ffffff;
+  border-width: 0 1.6px 1.6px 0;
+  transform: rotate(45deg);
+}
+.resa .tp-poste input:focus-visible ~ .tp-case {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+/* le « + » de la ligne sur-mesure et la coche de « Tout Omega » */
+.resa .tp-signe {
+  flex: none;
+  margin-top: 2px;
+  height: 16px;
+  width: 16px;
+  color: var(--r-faible);
+}
+.resa .tp-signe--ok {
+  color: var(--r-texte);
+}
+.resa .tp-poste--lien:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* ——— 3e rang : les points du palier, en coches comme la référence ———

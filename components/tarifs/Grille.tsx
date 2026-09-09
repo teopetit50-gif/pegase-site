@@ -63,18 +63,31 @@
    postes. L'installation est comprise. » disparaît — le titre et le
    chapô la disent déjà mot pour mot.
    Ce qui NE change pas : les trois teintes de tête décidées par l'associé
-   le 08/09 (bleu, or, nuit — « on dirait que c'est la même chose »), les
-   tuiles à logo du choix des postes (.rv-case), la ligne d'argument « Le
-   quatrième poste pour N € de plus », tous les textes de Teo, et la
-   mécanique de sélection, d'URL et de périodicité.
+   le 08/09 (bleu, or, nuit — « on dirait que c'est la même chose »), la
+   ligne d'argument « Le quatrième poste pour N € de plus », tous les
+   textes de Teo, et la mécanique de sélection, d'URL et de périodicité.
+
+   09/09, SECONDE PASSE — LE CHOIX DES POSTES MIS À NU (Teo, capture du
+   composant de référence à l'appui : « c'est censé être de la même
+   taille, et là tu as gardé les logos des moteurs ; c'est censé être
+   simple comme sur le prompt »). Les tuiles `.rv-case` du 08/09 —
+   cadre, tuile de logo de 44 px, nom PUIS ligne courte — pesaient 66 px
+   pièce : cinq par carte, la carte montait à 1 500 px et le choix se
+   lisait plus fort que le prix. Chaque poste est désormais UNE LIGNE :
+   une case dessinée (ou une coche pour Tout Omega), le nom, rien
+   d'autre — exactement le gabarit des points en dessous. La ligne
+   « Un poste propre à votre métier » suit, un « + » à la place de la
+   case. `Poste.court` et `SUR_MESURE.court` ne sont plus lus ici ; le
+   champ reste dans lib/paliers.ts, il ne coûte rien.
+   `.rv-case` n'est PAS retirée de globals.css :
+   components/compte/AbonnementCarte.tsx s'en sert toujours.
    ═══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import NumberFlow, { type Format } from "@number-flow/react";
-import { CheckCircle, Star } from "lucide-react";
+import { CheckCircle, Plus, Star } from "lucide-react";
 import Partage from "@/components/Partage";
-import { SystemLogo } from "@/components/logos";
 import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
 import {
   COMPARATIF_PALIERS,
@@ -141,24 +154,13 @@ function ecartQuatriemePoste(periodicite: Periodicite) {
   return valeur(complet) - valeur(trois);
 }
 
-/* la cinquième tuile : même gabarit qu'un poste, le signe SUR MESURE à
-   la place de la case, et toute la tuile est un lien vers la page
-   sur-mesure */
-function TuileSurMesure() {
+/* la cinquième ligne : même gabarit qu'un poste, un « + » à la place de
+   la case, et toute la ligne est un lien vers la page sur-mesure */
+function LigneSurMesure() {
   return (
-    <Link href={SUR_MESURE.href} className="rv-case rv-case--lien">
-      <SystemLogo system="SUR MESURE" />
-      <span className="rv-case-texte">
-        <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
-          {SUR_MESURE.nom}
-        </span>
-        <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
-          {SUR_MESURE.court}
-        </span>
-        <span className="rv-case-cta mt-1.5 block text-[12.5px] font-medium leading-[18px] text-[#050505]">
-          {SUR_MESURE.cta}
-        </span>
-      </span>
+    <Link href={SUR_MESURE.href} className="tp-poste tp-poste--lien">
+      <Plus aria-hidden className="tp-signe" />
+      <span>{SUR_MESURE.nom}</span>
     </Link>
   );
 }
@@ -270,25 +272,26 @@ function CartePalier({
         </div>
       </div>
 
-      {/* 2e rang — le choix des postes : les cinq mêmes tuiles dans les
-          trois cartes, donc la même hauteur */}
+      {/* 2e rang — le choix des postes : cinq lignes nues, le même
+          gabarit que les points en dessous (09/09, seconde passe — voir
+          l'en-tête : ni tuile de logo, ni résumé, comme la référence) */}
       <div className="tp-choix">
         {p.aChoisir !== null ? (
           /* min-w-0 : un fieldset a min-inline-size: min-content par
              défaut ; sans lui il dépasse de son bloc dans les cartes
-             étroites et ses tuiles ne tombent plus au droit des autres */
+             étroites et ses lignes ne tombent plus au droit des autres */
           <fieldset className="min-w-0">
-            <legend className="text-[13px] font-semibold leading-[19px] text-[#050505]">
+            <legend className="tp-legende">
               {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
             </legend>
-            <div className="mt-3 space-y-2">
+            <div className="mt-2.5">
               {POSTES.map((x) => {
                 const actif = choisis.includes(x.id);
                 const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
                 return (
                   <label
                     key={x.id}
-                    className={`rv-case ${actif ? "rv-case--actif" : ""} ${plein ? "rv-case--plein" : ""}`}
+                    className={`tp-poste ${actif ? "tp-poste--actif" : ""} ${plein ? "tp-poste--plein" : ""}`}
                   >
                     <input
                       type="checkbox"
@@ -297,46 +300,28 @@ function CartePalier({
                       onChange={() => bascule(x.id)}
                       className="sr-only"
                     />
-                    <span className="rv-coche" aria-hidden />
-                    <SystemLogo system={x.system} />
-                    <span className="rv-case-texte">
-                      <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
-                        {x.nom}
-                      </span>
-                      <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
-                        {x.court}
-                      </span>
-                    </span>
+                    <span className="tp-case" aria-hidden />
+                    <span>{x.nom}</span>
                   </label>
                 );
               })}
-              <TuileSurMesure />
+              <LigneSurMesure />
             </div>
           </fieldset>
         ) : (
           <div>
-            <div className="text-[13px] font-semibold leading-[19px] text-[#050505]">
-              Les quatre postes, en service :
-            </div>
-            {/* les MÊMES tuiles que dans les deux autres cartes, non
+            <div className="tp-legende">Les quatre postes, en service :</div>
+            {/* les MÊMES lignes que dans les deux autres cartes, non
                 cliquables, la coche posée à la place de la case */}
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-2.5">
               {POSTES.map((x) => (
-                <li key={x.id} className="rv-case rv-case--fixe">
-                  <span className="rv-coche rv-coche--ok" aria-hidden />
-                  <SystemLogo system={x.system} />
-                  <span className="rv-case-texte">
-                    <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">
-                      {x.nom}
-                    </span>
-                    <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[#616161]">
-                      {x.court}
-                    </span>
-                  </span>
+                <li key={x.id} className="tp-poste tp-poste--fixe tp-poste--actif">
+                  <CheckCircle aria-hidden className="tp-signe tp-signe--ok" />
+                  <span>{x.nom}</span>
                 </li>
               ))}
               <li>
-                <TuileSurMesure />
+                <LigneSurMesure />
               </li>
             </ul>
           </div>
