@@ -11,23 +11,17 @@
 
    Le CTA n'ouvre PAS WhatsApp et ne demande aucun paiement : il emmène
    vers /installation, la page de réservation de la réunion d'installation,
-   avec les postes choisis dans l'URL. Le paiement (IBAN, prélèvement) se
-   branchera plus tard À CETTE COUTURE — quand le compte pro existera, une
-   étape s'insérera entre le choix et la réunion, sans toucher aux cartes.
-   → 05/09 : c'est fait, mais APRÈS la réservation, pas entre le choix et
-   la réunion — le client enregistre carte ou mandat SEPA sur l'écran
-   « Créneau réservé » de /installation (Stripe, rien de débité), et le
-   premier prélèvement part quand l'agence finalise l'installation. La
-   grille ne change pas ; seule la note sous le CTA a cessé de dire « tout
-   se règle à l'installation ».
+   avec les postes choisis dans l'URL. Le client enregistre carte ou mandat
+   SEPA sur l'écran « Créneau réservé » de /installation (Stripe, rien de
+   débité), et le premier prélèvement part quand l'agence finalise
+   l'installation.
 
    02/09 — MENSUEL | ANNUEL (Teo : « un bouton en haut des cards pour
    switch, un pourcentage en moins pour l'annuel, met en évidence le prix
    économisé »). L'état est UN pour la grille — pas un par carte : on ne
    compare pas un palier mensuel à un palier annuel. En annuel, chaque
    carte montre le mensuel barré, le mensuel équivalent en grand, « facturé
-   N € par an » et la ligne verte « Vous économisez … » ; le chiffre change
-   en fondu (bloc keyé sur la périodicité, .rv-fondu). Le CTA porte
+   N € par an » et la ligne verte « Vous économisez … ». Le CTA porte
    `&periodicite=annuel` : /installation le lit et le récap le reprend,
    modifiable jusqu'au bout. Les montants sont DÉRIVÉS de lib/paliers.ts
    (prixAnnuel & co), jamais écrits ici.
@@ -40,65 +34,45 @@
    effet qui pose un état, ni divergence d'hydratation — React rend
    d'abord l'instantané serveur (mensuel), puis celui du navigateur.
 
-   05/09 — LE DESIGN DE /reserver-un-audit, COLLÉ (Teo : « quand on clique
-   sur Indépendants & TPE, le design qui s'affiche doit être le même que
-   celui d'Organisations & équipes ; les infos de tarifs restent »). Ce
-   composant reprend donc la structure EXACTE de reservation/Formules.tsx :
-     1. titre + grille de QUATRE colonnes — la colonne de gauche porte ce
-        que la page audit y met (le fait qui décide, puis des blocs sous
-        filet) : ici l'installation comprise, le sélecteur Mensuel |
-        Annuel (qui vivait au-dessus des cartes) et PULSE/VAULT compris
-        (qui vivaient dans le chapô du H2 « Choisissez vos postes ») ;
-        les cartes perdent leurs têtes colorées (.rv-palier--, .rv-prix--)
-        pour la tête grise / dorée de la page audit ;
-     2. le bandeau d'orientation, blanc arrondi, avec sa porte WhatsApp ;
-     3. le comparatif sur bande blanche — en-tête collant, familles,
-        repli « Voir tous les points » (données : COMPARATIF_PALIERS).
-   Le H2 « Choisissez vos postes » et le bandeau .r-blanc qui coiffaient la
-   grille disparaissent : la page audit n'en a pas.
-
-   08/09 — DEUX DEMANDES DE L'ASSOCIÉ, qui reviennent sur deux choix de
-   Teo de la veille (décision de l'associé, appliquée telle quelle) :
-     1. TROIS TÊTES DE COULEURS DIFFÉRENTES — « on dirait que c'est la
-        même chose ». Les têtes de « Un poste » et « Tout Omega » avaient
-        le même gris, seule « Trois postes » était dorée. Chaque palier
-        porte désormais sa teinte (Palier.teinte → data-teinte sur la
-        tête, globals.css à côté de .r-carte--phare) : bleu calme pour un
-        seul poste, l'or de la charte pour le palier phare, NUIT pour Tout
-        Omega — titre blanc, prix en or, badge « Le plus complet », et une
-        ligne en or qui dit l'argument : « Le quatrième poste pour N € de
-        plus », N CALCULÉ depuis PALIERS (écart Tout Omega − Trois postes,
-        sur les équivalents mensuels en annuel). Les couleurs de la tête
-        ne sont plus écrites en dur dans le JSX : .r-carte-titre / -prix /
-        -sous / -promesse, que la teinte nuit surcharge. Le CTA de Tout
-        Omega passe en noir comme celui de Trois postes ; « Un poste »
-        garde le bouton filet.
-     2. LES TUILES À LOGO, TEXTE COURT — « trop de texte ». Le 07/09
-        (commit 248168a) Teo avait remplacé les tuiles par des lignes
-        sobres sans logo, puis (7deb356) réécrit les résumés en textes
-        longs ; quatre paragraphes empilés dans une carte de 280 px, le
-        choix ne se lisait plus. Retour au balisage d'avant 248168a : une
-        tuile .rv-case par poste (case, <SystemLogo>, nom + ligne courte
-        Poste.court), crème à la sélection. « Tout Omega » montre les
-        mêmes tuiles, non cliquables, avec la coche posée (.rv-case--fixe
-        / .rv-coche--ok du 07/09, conservés) ; la cinquième tuile « Un
-        poste propre à votre métier » porte le signe SUR MESURE à la place
-        du « + » et reste un lien vers /offres/sur-mesure.
-     3. Et pour que les trois boutons restent sur une ligne malgré la tête
-        nuit plus haute : dès 1024 px chaque carte est une SOUS-GRILLE de
-        trois rangs (tête / choix / bouton et points, .r-carte--alignee)
-        partagés par la rangée — le plancher min-height de la tête ne
-        suffisait plus, et le bouton, poussé en bas d'un bloc flex-1,
-        dépendait de la hauteur des points, différente d'une carte à
-        l'autre. Mesuré à 1024 / 1280 / 1440 : trois têtes de même
-        hauteur, trois boutons au même y, en mensuel comme en annuel.
-   Ce qui n'est PAS contesté reste : les noms de postes de Teo, ses
-   résumés longs (la page Mon compte les lit), ses promesses et points
-   par palier, la légende au-dessus des tuiles.
-   ══════════════════════════════════════════════════════════════════════ */
+   ═══ 09/09/2026 — LE DESIGN DE LA GRILLE REFAIT (demande de Teo, qui a
+   fourni le composant de référence « pricing-4 » de 21st.dev). La page
+   quitte la composition héritée de /reserver-un-audit — colonne de gauche
+   + trois cartes à grosse tête colorée — pour celle d'une page de prix
+   moderne :
+     · en-tête CENTRÉ (pastille, titre, chapô) puis le sélecteur
+       Mensuel | Annuel centré juste dessous, au lieu de la colonne ;
+     · trois cartes CERNÉES d'un filet, coins arrondis, ombre d'un pixel,
+       chacune en quatre blocs séparés par des filets — tête (nom,
+       promesse, prix), choix des postes, points, pied avec le bouton ;
+     · le prix s'ANIME chiffre par chiffre à la bascule mensuel / annuel
+       (@number-flow/react, la signature du composant de référence) ;
+     · les pastilles passent en HAUT À DROITE de la carte, hors du flux :
+       « Recommandé » avec l'étoile sur le palier phare, « Le plus
+       complet » sur Tout Omega, et la remise annuelle en pastille noire
+       qui n'apparaît qu'en annuel ;
+     · la carte phare se détache par son filet doré, sa tête dorée, son
+       corps voilé et sa pastille à l'étoile — le `scale-105` de la
+       référence a été essayé puis retiré : sur des cartes de 1 500 px il
+       décale la carte de 22 px et casse l'alignement des trois prix et
+       des trois boutons (voir le bloc .tp- de globals.css) ;
+     · les points du palier passent en liste à COCHES (CheckCircle), comme
+       la référence, au lieu des puces rondes.
+   Ce qui vivait dans la colonne de gauche n'est pas perdu : le sélecteur
+   monte sous le chapô, « Compris à tous les paliers » (PULSE, VAULT et
+   leurs liens) descend sous les cartes, et la ligne « Choisissez vos
+   postes. L'installation est comprise. » disparaît — le titre et le
+   chapô la disent déjà mot pour mot.
+   Ce qui NE change pas : les trois teintes de tête décidées par l'associé
+   le 08/09 (bleu, or, nuit — « on dirait que c'est la même chose »), les
+   tuiles à logo du choix des postes (.rv-case), la ligne d'argument « Le
+   quatrième poste pour N € de plus », tous les textes de Teo, et la
+   mécanique de sélection, d'URL et de périodicité.
+   ═══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
+import NumberFlow, { type Format } from "@number-flow/react";
+import { CheckCircle, Star } from "lucide-react";
 import Partage from "@/components/Partage";
 import { SystemLogo } from "@/components/logos";
 import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
@@ -118,6 +92,13 @@ import {
 } from "@/lib/paliers";
 
 const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
+
+/* le prix en euros, sans centimes — le format que NumberFlow anime */
+const FORMAT_EURO: Format = {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+};
 
 /* ——— la périodicité venue de l'URL (`?periodicite=annuel`), côté
    navigateur seulement ; le serveur répond toujours « mensuel » ——— */
@@ -161,8 +142,8 @@ function ecartQuatriemePoste(periodicite: Periodicite) {
 }
 
 /* la cinquième tuile : même gabarit qu'un poste, le signe SUR MESURE à
-   la place de la case (08/09 — il portait un « + » depuis le 07/09), et
-   toute la tuile est un lien vers la page sur-mesure */
+   la place de la case, et toute la tuile est un lien vers la page
+   sur-mesure */
 function TuileSurMesure() {
   return (
     <Link href={SUR_MESURE.href} className="rv-case rv-case--lien">
@@ -203,78 +184,103 @@ function CartePalier({
   const ecart = p.teinte === "nuit" ? ecartQuatriemePoste(periodicite) : null;
 
   return (
-    /* 08/09 — r-carte--alignee : dès 1024 px la carte est une SOUS-GRILLE
-       de trois rangs partagés par la rangée (tête / choix / bouton et
-       points), voir globals.css — trois têtes de même hauteur, trois
-       boutons sur la même ligne, sans plancher en pixels à entretenir */
+    /* 09/09 — la carte de la référence : un filet, quatre blocs séparés
+       par des filets, le pied qui tombe en bas. Dès 1024 px elle devient
+       une SOUS-GRILLE de quatre rangs partagés par la rangée (tête /
+       choix / points / pied) : quatre têtes de même hauteur, trois
+       boutons sur la même ligne, quelle que soit la longueur des textes */
     <div
       data-arrivee="colonne"
-      className={`r-carte r-carte--alignee ${p.phare ? "r-carte--phare" : ""}`}
+      className={`tp-carte ${p.phare ? "tp-carte--phare" : ""}`}
     >
-      {/* 08/09 — data-teinte : bleu / or / nuit, une par palier ; les
-          couleurs du texte suivent (.r-carte-titre & co, globals.css) */}
-      <div className="r-carte-tete" data-teinte={p.teinte}>
-        {/* 08/09 — flex-wrap : entre 1024 et 1280 px la tête fait 176 px
-            de large, « Le plus complet » ne tient pas à côté du titre ; le
-            badge descend sous lui plutôt que de sortir de la tête */}
-        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
-          <h3 className="r-carte-titre font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] sm:text-[28px] sm:leading-[36px]">
-            {p.nom}
-          </h3>
-          {p.badge ? <span className="r-badge mt-1.5">{p.badge}</span> : null}
-        </div>
-
-        {/* keyé sur la périodicité : le bloc prix remonte et rejoue son
-            fondu à chaque bascule — pas de saut de chiffre */}
-        <div key={periodicite} className="rv-fondu mt-3">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            {annuel ? (
-              <span className="num rv-prix-barre">
-                <span className="sr-only">Au lieu de </span>
-                {p.prix} €
-              </span>
-            ) : null}
-            <span className="r-carte-prix num text-[36px] font-semibold leading-[44px] sm:text-[40px] sm:leading-[48px]">
-              {annuel ? equivalentMensuel(p.prix) : p.prix} €
-            </span>
-            <span className="r-carte-sous text-[12px] leading-[18px]">
-              {annuel ? `par mois, facturé ${prixAnnuel(p.prix)} € par an` : p.sousPrix}
-            </span>
-          </div>
-          {annuel ? (
-            <p className="rv-economie mt-2.5">
-              Vous économisez {economieAnnuelle(p.prix)}&nbsp;€ par an
-            </p>
-          ) : null}
-        </div>
-
-        <p className="r-carte-promesse mt-4 text-[15px] leading-[22px]">{p.promesse}</p>
-
-        {/* 08/09 — sur la tête nuit seulement : l'argument du quatrième
-            poste, en or, avec son point ; keyé lui aussi sur la
-            périodicité pour changer en fondu avec le prix */}
-        {ecart !== null ? (
-          <p key={`ecart-${periodicite}`} className="r-carte-ecart rv-fondu mt-3">
-            Le quatrième poste pour {ecart}&nbsp;€ de plus.
-          </p>
+      {/* les pastilles, hors du flux en haut à droite — « Recommandé »
+          avec l'étoile sur le palier phare, la remise seulement en annuel */}
+      <div className="tp-badges">
+        {p.badge ? (
+          <span className="tp-badge">
+            {p.phare ? <Star aria-hidden className="size-3 fill-current" /> : null}
+            {p.badge}
+          </span>
+        ) : null}
+        {annuel ? (
+          <span className="tp-badge tp-badge--remise rv-fondu">
+            −{REMISE_PCT}&nbsp;%<span className="sr-only"> de remise</span>
+          </span>
         ) : null}
       </div>
 
-      {/* deuxième rang de la sous-grille : le choix des postes — les cinq
-          mêmes tuiles dans les trois cartes, donc la même hauteur */}
-      <div className="px-3 pt-4">
-        {/* le choix des postes, quand il y en a un à faire */}
+      {/* 1er rang — la tête : nom, promesse, prix. data-teinte : bleu / or
+          / nuit, une par palier (décision de l'associé du 08/09) */}
+      <div className="tp-tete" data-teinte={p.teinte}>
+        <h3 className="tp-nom font-[family-name:var(--font-jakarta)] text-[20px] font-semibold leading-[27px] tracking-[-0.02em]">
+          {p.nom}
+        </h3>
+        <p className="tp-info mt-1.5 text-[13px] leading-[19px]">{p.promesse}</p>
+
+        {/* le prix — poussé EN BAS de la tête (mt-auto) : les trois têtes
+            ayant la même hauteur par sous-grille, les trois prix tombent
+            ainsi sur la même ligne, comme sur le composant de référence.
+            NumberFlow anime les chiffres à la bascule, il ne faut donc
+            SURTOUT PAS le remonter par une clé ; seules les lignes qui
+            l'entourent rejouent leur fondu */}
+        <div className="tp-bloc-prix">
+        <div className="flex flex-wrap items-end gap-x-2.5 gap-y-1">
+          <NumberFlow
+            aria-label={`${annuel ? equivalentMensuel(p.prix) : p.prix} euros par mois`}
+            className="tp-prix"
+            format={FORMAT_EURO}
+            locales="fr-FR"
+            suffix=" par mois"
+            value={annuel ? equivalentMensuel(p.prix) : p.prix}
+          />
+          {annuel ? (
+            <span key="barre" className="num rv-prix-barre rv-fondu mb-[3px]">
+              <span className="sr-only">Au lieu de </span>
+              {p.prix} €
+            </span>
+          ) : null}
+        </div>
+
+        <div key={periodicite} className="rv-fondu">
+          <p className="tp-facture mt-1.5 text-[12px] leading-[18px]">
+            {annuel
+              ? `Facturé ${prixAnnuel(p.prix)} € par an, en une fois.`
+              : "Facturé chaque mois, sans engagement."}
+          </p>
+          {annuel ? (
+            <p className="rv-economie mt-3">
+              Vous économisez {economieAnnuelle(p.prix)}&nbsp;€ par an
+            </p>
+          ) : null}
+          {/* 08/09 — sur la tête nuit seulement : l'argument du quatrième
+              poste, calculé depuis PALIERS. 09/09 — la ligne est RÉSERVÉE
+              (vide et invisible) dans les deux autres cartes : les trois
+              blocs de prix ont ainsi la même hauteur et, poussés en bas de
+              têtes de même hauteur, les trois prix tombent sur la même
+              ligne. Sous 1024 px les cartes s'empilent, la ligne réservée
+              n'a plus de raison d'être et disparaît. */}
+          <p className="tp-ecart mt-3" data-vide={ecart === null} aria-hidden={ecart === null}>
+            {ecart !== null ? (
+              <>Le quatrième poste pour {ecart}&nbsp;€ de plus.</>
+            ) : (
+              "\u00A0"
+            )}
+          </p>
+        </div>
+        </div>
+      </div>
+
+      {/* 2e rang — le choix des postes : les cinq mêmes tuiles dans les
+          trois cartes, donc la même hauteur */}
+      <div className="tp-choix">
         {p.aChoisir !== null ? (
-          /* 08/09 — min-w-0 : un fieldset a min-inline-size: min-content
-             par défaut ; entre 1024 et 1280 px il dépassait de 14 px son
-             bloc et ses tuiles ne tombaient plus au droit de celles de
-             « Tout Omega », qui n'a pas de fieldset */
+          /* min-w-0 : un fieldset a min-inline-size: min-content par
+             défaut ; sans lui il dépasse de son bloc dans les cartes
+             étroites et ses tuiles ne tombent plus au droit des autres */
           <fieldset className="min-w-0">
-            <legend className="text-[14px] font-semibold leading-[20px] text-[#050505]">
+            <legend className="text-[13px] font-semibold leading-[19px] text-[#050505]">
               {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
             </legend>
-            {/* 08/09 — les tuiles à logo (balisage d'avant 248168a) : case,
-                tuile du module, nom et ligne courte — pas le résumé long */}
             <div className="mt-3 space-y-2">
               {POSTES.map((x) => {
                 const actif = choisis.includes(x.id);
@@ -309,11 +315,11 @@ function CartePalier({
           </fieldset>
         ) : (
           <div>
-            <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
+            <div className="text-[13px] font-semibold leading-[19px] text-[#050505]">
               Les quatre postes, en service :
             </div>
-            {/* 08/09 — les MÊMES tuiles que dans les deux autres cartes,
-                non cliquables, la coche posée à la place de la case */}
+            {/* les MÊMES tuiles que dans les deux autres cartes, non
+                cliquables, la coche posée à la place de la case */}
             <ul className="mt-3 space-y-2">
               {POSTES.map((x) => (
                 <li key={x.id} className="rv-case rv-case--fixe">
@@ -337,37 +343,33 @@ function CartePalier({
         )}
       </div>
 
-      {/* troisième rang : le bouton, sa note, puis les points. 08/09 — le
-          bouton n'est plus poussé en bas d'un bloc flex-1 : il dépendait
-          alors de la hauteur des points, différente d'une carte à l'autre,
-          et les trois boutons ne tombaient pas sur la même ligne */}
-      <div className="px-3">
-        <div className="mt-5">
-          {pret ? (
-            <Link href={href} className={`r-btn w-full ${boutonPalier(p)}`}>
-              Réserver l&apos;installation
-            </Link>
-          ) : (
-            <span aria-disabled className="r-btn rv-btn--attente w-full">
-              {manque === 1 ? "Choisissez 1 poste" : `Choisissez encore ${manque} postes`}
-            </span>
-          )}
-          {/* 05/09 — plus de « tout se règle à l'installation » : le moyen de
-              paiement s'enregistre à la réservation, rien n'est débité avant
-              la fin de l'installation */}
-          <p className="r-note mt-2 text-center">
-            Rien n&apos;est débité avant la fin de l&apos;installation.
-          </p>
-        </div>
+      {/* 3e rang — les points du palier, en coches comme la référence */}
+      <ul className="tp-points">
+        {p.points.map((t) => (
+          <li key={t} className="tp-point">
+            <CheckCircle aria-hidden className="tp-coche" />
+            <span>{t}</span>
+          </li>
+        ))}
+      </ul>
 
-        <ul className="mt-6 space-y-3 border-t border-[#e3e3e3] pt-5">
-          {p.points.map((t) => (
-            <li key={t} className="flex gap-2 text-[13px] leading-[19px] text-[#3d3d3d]">
-              <span aria-hidden className="mt-[8px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />
-              {t}
-            </li>
-          ))}
-        </ul>
+      {/* 4e rang — le pied : le bouton pleine largeur et sa note */}
+      <div className="tp-pied">
+        {pret ? (
+          <Link href={href} className={`r-btn w-full ${boutonPalier(p)}`}>
+            Réserver l&apos;installation
+          </Link>
+        ) : (
+          <span aria-disabled className="r-btn rv-btn--attente w-full">
+            {manque === 1 ? "Choisissez 1 poste" : `Choisissez encore ${manque} postes`}
+          </span>
+        )}
+        {/* 05/09 — plus de « tout se règle à l'installation » : le moyen de
+            paiement s'enregistre à la réservation, rien n'est débité avant
+            la fin de l'installation */}
+        <p className="r-note mt-2 text-center">
+          Rien n&apos;est débité avant la fin de l&apos;installation.
+        </p>
       </div>
     </div>
   );
@@ -377,9 +379,8 @@ function CartePalier({
    (rv-periode, globals.css). 03/09 : deux boutons `aria-pressed` dans un
    groupe nommé, plutôt qu'un radiogroup — un radiogroup promet la
    navigation aux flèches et un seul arrêt Tab, qu'on n'implémentait pas.
-   05/09 : il quitte le dessus des cartes pour la colonne de gauche, sous
-   son propre intitulé « Facturation » — le mot vit donc dans la colonne,
-   plus dans le composant. */
+   09/09 : il quitte la colonne de gauche pour reprendre sa place de la
+   référence — centré, juste sous le chapô et au-dessus des cartes. */
 function SelecteurPeriodicite({
   valeur,
   changer,
@@ -492,77 +493,38 @@ export default function Grille() {
 
   return (
     <>
-      {/* ═══ 1. titre + trois paliers ═══ */}
-      <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-14">
-        {/* 01/09 — transitions : la pastille « Prix publics » ARRIVE de la
-            carte de /commencer (objet partagé) et se pose au-dessus du
-            titre ; titre puis chapô entrent en cascade (Arrivee). */}
-        <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
-          Prix publics
-        </Partage>
-        <h1 data-arrivee="titre" className="r-h1 max-w-[17ch]">
-          Des prix publics, une installation comprise
-        </h1>
-        <p data-arrivee="chapo" className="r-lead mt-5 max-w-[58ch]">
-          Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
-          réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement en
-          mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
-        </p>
+      {/* ═══ 1. en-tête centré, sélecteur, trois paliers ═══ */}
+      <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-16">
+        {/* 09/09 — l'en-tête de la référence : tout est centré, sur une
+            colonne étroite. 01/09 — transitions : la pastille « Prix
+            publics » ARRIVE de la carte de /commencer (objet partagé) et
+            se pose au-dessus du titre ; titre puis chapô entrent en
+            cascade (Arrivee). */}
+        <div className="mx-auto max-w-3xl text-center">
+          <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
+            Prix publics
+          </Partage>
+          <h1 data-arrivee="titre" className="r-h1 mx-auto max-w-[19ch]">
+            Des prix publics, une installation comprise
+          </h1>
+          <p data-arrivee="chapo" className="r-lead mx-auto mt-5 max-w-[58ch]">
+            Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
+            réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement en
+            mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
+          </p>
+        </div>
 
-        {/* 08/09 — dès 1024 px la rangée a TROIS rangs (sous-grille des
-            cartes, voir CartePalier) et plus d'interligne vertical : la
-            colonne de gauche les enjambe (lg:row-span-3) */}
+        {/* le sélecteur Mensuel | Annuel, centré sous le chapô */}
+        <div data-arrivee="chapo" className="mt-9 flex justify-center">
+          <SelecteurPeriodicite valeur={periodicite} changer={setPeriodicite} />
+        </div>
+
+        {/* 09/09 — dès 1024 px la rangée a QUATRE rangs (sous-grille des
+            cartes, voir CartePalier) et plus d'interligne vertical */}
         <div
           id="grille"
-          className="mt-10 grid scroll-mt-24 gap-4 sm:mt-12 lg:grid-cols-4 lg:gap-y-0"
+          className="mx-auto mt-10 grid max-w-md scroll-mt-24 gap-6 sm:mt-12 lg:max-w-5xl lg:grid-cols-3 lg:gap-y-0"
         >
-          {/* colonne de gauche — la page audit y loge le fait qui décide,
-              puis des blocs sous filet. Ici : l'installation comprise, la
-              facturation (le sélecteur Mensuel | Annuel) et ce qui tourne
-              chez tout le monde (PULSE, VAULT). */}
-          <div
-            data-arrivee="colonne"
-            className="flex flex-col justify-start gap-8 pr-2 lg:row-span-3 lg:pt-2"
-          >
-            <p className="text-[19px] font-medium leading-[27px] text-[#050505] sm:text-[21px] sm:leading-[29px]">
-              Choisissez vos postes.
-              <br />
-              L&apos;installation est comprise.
-            </p>
-
-            <div className="border-t border-[#e3e3e3] pt-6">
-              <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
-                Facturation
-              </div>
-              <div className="mt-3">
-                <SelecteurPeriodicite valeur={periodicite} changer={setPeriodicite} />
-              </div>
-              <p className="mt-3 text-[13px] leading-[20px] text-[#616161]">
-                Mensuel sans engagement, ou annuel à −{REMISE_PCT}&nbsp;%, facturé en une fois
-                pour douze mois. Satisfait ou remboursé trente jours dans les deux cas.
-              </p>
-            </div>
-
-            <div className="border-t border-[#e3e3e3] pt-6">
-              <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
-                Compris à tous les paliers
-              </div>
-              <p className="mt-1.5 text-[13px] leading-[20px] text-[#616161]">
-                Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
-                WhatsApp. Quel que soit le palier,{" "}
-                <Link href={`/offres/${COMPRIS[0].slug}`} className="r-lien !text-[13px]">
-                  {COMPRIS[0].system} · {COMPRIS[0].nom.toLowerCase()}
-                </Link>{" "}
-                et{" "}
-                <Link href={`/offres/${COMPRIS[1].slug}`} className="r-lien !text-[13px]">
-                  {COMPRIS[1].system} · {COMPRIS[1].nom.toLowerCase()}
-                </Link>{" "}
-                tournent d&apos;office&nbsp;: savoir où vous en êtes et la certitude que rien ne
-                part sans vous ne sont pas des options.
-              </p>
-            </div>
-          </div>
-
           {PALIERS.map((p) => (
             <CartePalier
               key={p.id}
@@ -574,7 +536,27 @@ export default function Grille() {
           ))}
         </div>
 
-        <p data-arrivee="colonne" className="r-note mt-6 max-w-3xl">
+        {/* ce qui tourne chez tout le monde — vivait dans la colonne de
+            gauche jusqu'au 09/09, descendu sous les cartes avec elle */}
+        <p
+          data-arrivee="colonne"
+          className="mx-auto mt-10 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161]"
+        >
+          <span className="font-semibold text-[#050505]">Compris à tous les paliers.</span>{" "}
+          Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
+          WhatsApp. Quel que soit le palier,{" "}
+          <Link href={`/offres/${COMPRIS[0].slug}`} className="r-lien !text-[13px]">
+            {COMPRIS[0].system} · {COMPRIS[0].nom.toLowerCase()}
+          </Link>{" "}
+          et{" "}
+          <Link href={`/offres/${COMPRIS[1].slug}`} className="r-lien !text-[13px]">
+            {COMPRIS[1].system} · {COMPRIS[1].nom.toLowerCase()}
+          </Link>{" "}
+          tournent d&apos;office&nbsp;: savoir où vous en êtes et la certitude que rien ne part
+          sans vous ne sont pas des options.
+        </p>
+
+        <p data-arrivee="colonne" className="r-note mx-auto mt-8 max-w-3xl text-center">
           Prix TTC, grille en vigueur au 01/09/2026 — le prix affiché au moment de votre demande
           est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
           (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion

@@ -6500,3 +6500,258 @@ button.rounded-full:active {
     border-radius: 11px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   /tarifs — LES CARTES DE PRIX, MODÈLE « PRICING » (09/09/2026)
+
+   Demande de Teo, composant de référence fourni (« pricing-4 », 21st.dev).
+   La grille quitte la composition héritée de /reserver-un-audit — colonne
+   de gauche + trois cartes à grosse tête colorée, sans filet — pour celle
+   d'une page de prix : une carte CERNÉE d'un filet, coins arrondis, ombre
+   d'un pixel, découpée en quatre blocs que des filets séparent (tête,
+   choix des postes, points, pied), les pastilles hors du flux en haut à
+   droite, et la carte phare légèrement mise à l'échelle.
+
+   Trois écarts assumés avec la référence :
+   · `scale-105` ramené à 3 % — nos cartes portent le choix des postes et
+     font le double de haut ; à 5 % la carte phare débordait de sa rangée ;
+   · les trois teintes de tête (bleu, or, nuit) sont CONSERVÉES : la
+     référence ne colore que la carte phare, mais l'associé a tranché le
+     08/09 (« on dirait que c'est la même chose ») et la décision tient ;
+   · le corps garde deux listes au lieu d'une — le choix des postes est la
+     mécanique de vente de la page, il ne se fond pas dans les points.
+
+   Tout est préfixé `.tp-` sous `.resa` : rien ne fuit ailleurs, et les
+   règles `.r-carte` de /reserver-un-audit ne sont pas touchées.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.resa .tp-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e3e3e3;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.05);
+}
+/* la carte phare : filet doré, et elle se détache de ses voisines */
+.resa .tp-carte--phare {
+  border-color: #dcc79a;
+}
+/* Dès 1024 px la carte est une SOUS-GRILLE de quatre rangs partagés par la
+   rangée (tête / choix / points / pied) : trois têtes de même hauteur et
+   trois boutons sur la même ligne, quelle que soit la longueur des textes.
+   La colonne unique est minmax(0, 1fr) et les rangs ont min-width 0 : sans
+   cela une colonne `auto` prend la largeur min-content du contenu (un mot
+   long dans une tuile) et les rangs sortent de la carte. */
+@media (min-width: 1024px) {
+  .resa .tp-carte {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: subgrid;
+    grid-row: span 4;
+  }
+  .resa .tp-carte > * {
+    min-width: 0;
+  }
+}
+/* LE `scale-105` DE LA RÉFÉRENCE N'EST PAS REPRIS (essayé, mesuré, retiré).
+   Sur des cartes de 200 px de haut il soulève la carte phare de 5 px ; sur
+   les nôtres, qui portent le choix des postes et font 1 500 px, il la
+   décale de 22 px en haut ET en bas — les trois prix ne tombent plus sur
+   la même ligne et surtout les trois boutons non plus, ce qui était
+   justement l'exigence du 08/09. La carte phare se distingue autrement, et
+   la référence s'en sert déjà : filet doré, tête dorée, corps voilé,
+   pastille « Recommandé » à l'étoile — plus une ombre un peu plus portée. */
+.resa .tp-carte--phare {
+  box-shadow: 0 10px 30px -18px rgba(5, 5, 5, 0.28);
+}
+/* ——— les pastilles, hors du flux en haut à droite (la référence les pose
+   là, au-dessus de la tête, badge « Popular » puis remise) ——— */
+.resa .tp-badges {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.resa .tp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid #e3e3e3;
+  border-radius: 7px;
+  background: #ffffff;
+  font-size: 11.5px;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--r-texte);
+  white-space: nowrap;
+}
+/* la remise annuelle : la pastille pleine de la référence (bg-primary) */
+.resa .tp-badge--remise {
+  border-color: #050505;
+  background: #050505;
+  color: #ffffff;
+}
+
+/* ——— 1er rang : la tête (nom, promesse, prix), sous filet ———
+   data-teinte : bleu / or / nuit, une par palier (décision de l'associé
+   du 08/09, voir le bloc .r-carte-tete plus haut — mêmes couleurs). */
+.resa .tp-tete {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #e3e3e3;
+  padding: 20px 20px 22px;
+}
+/* le prix tombe EN BAS de la tête : les trois têtes ont la même hauteur
+   (sous-grille), les trois prix se retrouvent donc sur la même ligne — et
+   la promesse, plus courte sur un palier que sur l'autre, ne laisse plus
+   de trou sous elle. Marge haute minimale pour ne pas coller au texte. */
+.resa .tp-bloc-prix {
+  margin-top: auto;
+  padding-top: 24px;
+}
+.resa .tp-tete[data-teinte="bleu"] {
+  background: linear-gradient(140deg, #f5f8fd 0%, #e8effb 100%);
+}
+.resa .tp-tete[data-teinte="or"] {
+  background: linear-gradient(140deg, var(--r-or-clair) 0%, var(--r-or-mid) 100%);
+  border-bottom-color: #e6d5ac;
+}
+.resa .tp-tete[data-teinte="nuit"] {
+  background: linear-gradient(140deg, #0f1013 0%, #1d1e24 100%);
+  border-bottom-color: #1d1e24;
+}
+/* l'encre du monde clair par défaut (bleu, or)… */
+.resa .tp-nom,
+.resa .tp-prix {
+  color: var(--r-texte);
+}
+.resa .tp-info,
+.resa .tp-facture {
+  color: var(--r-faible);
+}
+/* …et sur la nuit : titre blanc, prix en or, le reste dans les gris clairs
+   de la carte sombre de /compte (#d4d4d8, #a1a1aa) — tous ≥ 6,5:1 */
+.resa .tp-tete[data-teinte="nuit"] .tp-nom {
+  color: #ffffff;
+}
+.resa .tp-tete[data-teinte="nuit"] .tp-prix {
+  color: #e9cd91;
+}
+.resa .tp-tete[data-teinte="nuit"] .tp-info {
+  color: #d4d4d8;
+}
+.resa .tp-tete[data-teinte="nuit"] .tp-facture,
+.resa .tp-tete[data-teinte="nuit"] .rv-prix-barre {
+  color: #a1a1aa;
+}
+.resa .tp-tete[data-teinte="nuit"] .rv-economie {
+  background: rgba(159, 216, 178, 0.14);
+  color: #9fd8b2;
+}
+
+/* le grand prix — @number-flow/react rend un élément personnalisé : le
+   suffixe (« par mois ») vit dans son shadow DOM et ne se peint que par
+   ::part(suffix), comme dans le composant de référence */
+.resa .tp-prix {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 34px;
+  line-height: 42px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.resa .tp-prix::part(suffix) {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--r-faible);
+}
+.resa .tp-tete[data-teinte="nuit"] .tp-prix::part(suffix) {
+  color: #a1a1aa;
+}
+
+/* l'argument de la tête nuit (« Le quatrième poste pour N € de plus »),
+   en or, précédé d'un point or — l'écart est calculé dans Grille.tsx */
+.resa .tp-ecart {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 600;
+  color: #e9cd91;
+}
+.resa .tp-ecart::before {
+  content: "";
+  flex: none;
+  height: 6px;
+  width: 6px;
+  border-radius: 9999px;
+  background: #e9cd91;
+}
+/* la ligne réservée des deux autres cartes : elle tient sa place pour que
+   les trois prix tombent sur la même ligne, mais ne se voit pas — et sous
+   1024 px, où les cartes s'empilent, elle n'a plus de raison d'être */
+.resa .tp-ecart[data-vide="true"] {
+  visibility: hidden;
+}
+@media (max-width: 1023px) {
+  .resa .tp-ecart[data-vide="true"] {
+    display: none;
+  }
+}
+
+/* ——— 2e rang : le choix des postes, sous filet (tuiles .rv-case) ——— */
+.resa .tp-choix {
+  border-bottom: 1px solid #e3e3e3;
+  padding: 16px 14px 18px;
+}
+
+/* ——— 3e rang : les points du palier, en coches comme la référence ———
+   La carte phare prend le voile discret que la référence pose sur le
+   corps de sa carte « Popular » (bg-muted/10). */
+.resa .tp-points {
+  padding: 18px 18px 20px;
+}
+.resa .tp-carte--phare .tp-points {
+  background: rgba(233, 205, 145, 0.1);
+}
+.resa .tp-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--r-doux);
+}
+.resa .tp-point + .tp-point {
+  margin-top: 10px;
+}
+.resa .tp-coche {
+  flex: none;
+  margin-top: 2px;
+  height: 15px;
+  width: 15px;
+  color: var(--r-texte);
+}
+
+/* ——— 4e rang : le pied — bouton pleine largeur et sa note ———
+   `margin-top: auto` sert la pile mobile (sous 1024 px la carte est un
+   flex) ; en sous-grille le rang est déjà le dernier. */
+.resa .tp-pied {
+  margin-top: auto;
+  border-top: 1px solid #e3e3e3;
+  padding: 12px;
+}
+.resa .tp-pied .r-btn {
+  padding: 10px 14px;
+  font-size: 15px;
+}
