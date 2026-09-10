@@ -39,9 +39,11 @@ const EN_TETES_SECURITE = [
 
 const nextConfig: NextConfig = {
   /* 01/09 — transitions de page : <ViewTransition> React dans PageShell.
-     Le flag est celui que documente cette version (guides/view-transitions) ;
-     le React canary embarqué par Next exporte déjà le composant. */
-  experimental: { viewTransition: true },
+     10/09 — le drapeau `experimental.viewTransition` a DISPARU de Next 16.3 :
+     il n'existe plus dans le paquet, et `tsc` refuse la clé. On l'enlève ; le
+     composant continue d'être résolu par l'alias React de Next. Si un jour
+     `<ViewTransition>` devient introuvable à l'exécution, c'est ici qu'il
+     faut regarder — et non dans PageShell. */
   async headers() {
     return [{ source: "/:chemin*", headers: EN_TETES_SECURITE }];
   },
