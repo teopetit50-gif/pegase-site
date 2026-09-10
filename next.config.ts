@@ -1,10 +1,50 @@
 import type { NextConfig } from "next";
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   10/09/2026 — en-têtes de sécurité. Audit : le site était à 0/6 ; Vercel ne
+   pose que HSTS. Le manque qui comptait est `X-Frame-Options` — sans lui,
+   n'importe quel site pouvait encadrer omegaai.fr dans une iframe et
+   l'habiller à sa façon.
+
+   Même parti que sur l'espace client : les quatre en-têtes sont APPLIQUÉS
+   (aucun ne dépend des ressources de la page), la politique de contenu part
+   en MODE RAPPORT. Le site a quatre routes API et des formulaires ; une CSP
+   appliquée d'emblée peut couper un envoi sans que rien ne le signale. On la
+   durcit au second passage, une fois les violations relevées dans la console.
+   ═══════════════════════════════════════════════════════════════════════ */
+const POLITIQUE_RAPPORT = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
+
+const EN_TETES_SECURITE = [
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  },
+  { key: "Content-Security-Policy-Report-Only", value: POLITIQUE_RAPPORT },
+];
+
 const nextConfig: NextConfig = {
   /* 01/09 — transitions de page : <ViewTransition> React dans PageShell.
      Le flag est celui que documente cette version (guides/view-transitions) ;
      le React canary embarqué par Next exporte déjà le composant. */
   experimental: { viewTransition: true },
+  async headers() {
+    return [{ source: "/:chemin*", headers: EN_TETES_SECURITE }];
+  },
   async redirects() {
     // Historique des routes : /moteurs (jusqu'au 20/07) → /solutions
     // (jusqu'au 25/07) → /offres. La liste comme les fiches vivent désormais
