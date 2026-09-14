@@ -1,0 +1,250 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Mosaïque d'équipe — feuille co-localisée (12/09/2026)
+
+   POURQUOI PAS globals.css : plusieurs sessions écrivent dans ce fichier le
+   même jour, et rien ici ne sert à une autre page. Même choix que
+   TuilesCatalogue.css et menu-principal.css. Supprimer la section, c'est
+   supprimer ces deux fichiers.
+
+   POURQUOI PAS DES UTILITAIRES TAILWIND : la règle qui décide de tout est
+   `@media (hover: none)`, et une media query ne s'écrit ni dans un attribut
+   `style` ni dans une classe utilitaire. Sans elle, un téléphone reste
+   devant trois portraits gris et éteints pour toujours — personne n'y
+   survole rien (écart nº 4, en tête du composant).
+
+   Les couleurs viennent des `--o-*` du monde `.offres`. Aucune n'est
+   réécrite ici : le jour où la charte bouge, la mosaïque suit.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la mosaïque : trois colonnes pondérées, décalées ——— */
+.eq-mosaique {
+  display: flex;
+  gap: 8px;
+}
+.eq-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* sans ça, une colonne flex refuse de passer sous la largeur de son
+     contenu et les trois tuiles débordent de la colonne de texte */
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .eq-mosaique,
+  .eq-col {
+    gap: 10px;
+  }
+}
+@media (min-width: 1024px) {
+  .eq-mosaique,
+  .eq-col {
+    gap: 12px;
+  }
+}
+
+/* ——— une tuile ———
+   Rapport de forme 31/33 : celui des vignettes de l'original (155 × 165),
+   conservé en relatif pour que les tuiles se règlent sur la colonne. */
+.eq-tuile {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 31 / 33;
+  border-radius: 14px;
+  border: 1px solid var(--o-line);
+  background: var(--o-soft);
+  transition: opacity 0.4s var(--ease-out-strong);
+}
+.eq-tuile[data-etat="attenue"] {
+  opacity: 0.55;
+}
+.eq-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  /* 14/09/2026 (Teo) : « les photos sont noires alors qu'elles ont de la
+     couleur de base ». Le noir et blanc de l'original de 21st.dev est
+     retiré — les portraits sont en couleur pleine, au repos comme au
+     survol. Ce qui relie les deux moitiés reste entier : c'est
+     l'ATTÉNUATION des autres vignettes (`opacity`), pas la couleur. */
+  transition: transform 0.6s var(--ease-out-strong);
+}
+.eq-tuile[data-etat="actif"] .eq-photo {
+  transform: scale(1.04);
+}
+
+/* le monogramme, quand la photo n'est pas encore déposée */
+.eq-mono {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(20px, 3.2vw, 30px);
+  letter-spacing: 0.02em;
+  color: rgba(9, 9, 11, 0.2);
+  transition: color 0.4s var(--ease-out-strong);
+}
+.eq-tuile[data-etat="actif"] .eq-mono {
+  color: rgba(9, 9, 11, 0.45);
+}
+
+/* ——— la liste des noms ——— */
+.eq-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 1024px) {
+  .eq-liste {
+    gap: 24px;
+  }
+}
+.eq-rang {
+  transition: opacity 0.3s var(--ease-out-strong);
+}
+.eq-rang[data-etat="attenue"] {
+  opacity: 0.45;
+}
+.eq-ligne {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eq-tiret {
+  flex: none;
+  display: block;
+  width: 16px;
+  height: 12px;
+  border-radius: 5px;
+  background: rgba(9, 9, 11, 0.18);
+  transition:
+    width 0.3s var(--ease-out-strong),
+    background-color 0.3s var(--ease-out-strong);
+}
+.eq-rang[data-etat="actif"] .eq-tiret {
+  width: 22px;
+  background: var(--o-text);
+}
+.eq-nom {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--o-muted-strong);
+  transition: color 0.3s var(--ease-out-strong);
+}
+@media (min-width: 640px) {
+  .eq-nom {
+    font-size: 19px;
+  }
+}
+.eq-rang[data-etat="actif"] .eq-nom {
+  color: var(--o-text);
+}
+.eq-role {
+  margin: 7px 0 0;
+  padding-left: 26px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--o-muted);
+}
+
+/* Le lien optionnel : révélé au survol de la rangée, ET au focus clavier —
+   sans la seconde règle, la tabulation se poserait sur un lien invisible et
+   inerte (`pointer-events: none`). L'original de 21st.dev n'a que la
+   première : c'est l'écart d'accessibilité nº 7. */
+.eq-lien {
+  margin-left: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--o-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition:
+    opacity 0.2s var(--ease-out-strong),
+    transform 0.2s var(--ease-out-strong),
+    color 0.2s var(--ease-out-strong);
+}
+.eq-rang[data-etat="actif"] .eq-lien,
+.eq-rang:focus-within .eq-lien {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.eq-lien:hover {
+  color: var(--o-text);
+}
+
+/* le descriptif, sous le rôle — 14/09/2026 (Teo : « fais un descriptif
+   aussi de qui on est, genre ce qu'on a fait »). Aligné sur le rôle, pas
+   sur le nom : les trois blocs forment une colonne de texte régulière. */
+.eq-bio {
+  margin: 8px 0 0;
+  padding-left: 26px;
+  max-width: 46ch;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  color: var(--o-muted);
+}
+@media (min-width: 640px) {
+  .eq-bio {
+    font-size: 14px;
+  }
+}
+
+.eq-pied {
+  margin: 26px 0 0;
+  padding-left: 26px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--o-muted);
+}
+
+/* ——— TACTILE ———
+   Aucun survol ne viendra : rien n'est atténué, et le lien optionnel est
+   visible en permanence. (La règle qui rendait la couleur au doigt n'a
+   plus lieu d'être depuis le 14/09 : les photos sont en couleur partout.) */
+@media (hover: none) {
+  .eq-tuile[data-etat="attenue"],
+  .eq-rang[data-etat="attenue"] {
+    opacity: 1;
+  }
+  .eq-lien {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+/* ——— MOUVEMENT RÉDUIT ——— */
+@media (prefers-reduced-motion: reduce) {
+  .eq-tuile,
+  .eq-photo,
+  .eq-rang,
+  .eq-tiret,
+  .eq-nom,
+  .eq-lien {
+    transition: none;
+  }
+  .eq-tuile[data-etat="actif"] .eq-photo {
+    transform: none;
+  }
+}

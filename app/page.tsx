@@ -13,6 +13,15 @@ import {
   MaqValidation,
 } from "@/components/offres/MediaMoteurs";
 import { FAMILLES } from "@/lib/content";
+import TeamShowcase from "@/components/ui/team-showcase";
+import { Drapeau } from "@/components/ui/drapeau";
+import {
+  MEMBRES,
+  EQUIPE_SURTITRE,
+  EQUIPE_TITRE,
+  EQUIPE_CHAPO,
+  EQUIPE_PIED,
+} from "@/lib/equipe";
 
 /* ══════════════════════════════════════════════════════════════════════
    / — la page d'accueil (30/07/2026)
@@ -364,7 +373,10 @@ function EnTete({
   titre,
   chapo,
 }: {
-  pastille: string;
+  /* 14/09/2026 — un noeud et plus une chaine : le sourcil de la section
+     equipe porte le drapeau avant son intitule. Les autres appels passent
+     une chaine, qui reste un noeud valide. */
+  pastille: ReactNode;
   titre: string;
   chapo: string;
 }) {
@@ -497,6 +509,43 @@ export default function Home() {
                   <p className="o-body mt-4">{b.texte}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ 3 bis · L'ÉQUIPE — la mosaïque de portraits ════════
+            14/09/2026 (Teo : « mets-la sur omegaai.fr »). Mise au point sur
+            le banc omega-site-v3 les 12 et 13/09, reportée ici telle quelle.
+
+            LA PLACE est celle du banc : juste après « ce que ça change » et
+            avant le déroulé. On dit qui pose le système aussitôt après avoir
+            dit ce qu'il fait, et la section est assez haut pour être vue de
+            quelqu'un qui ne descend pas la page entière.
+
+            LE DRAPEAU est dans le sourcil (components/ui/drapeau.tsx), aux
+            teintes officielles #000091 / #E1000F. Il dit ce que la famille
+            des sites produits s'autorise — conception française, assistance
+            en français, droit français — et surtout PAS « hébergé en
+            France » : les données vivent à Francfort.
+
+            LE CONTENU est dans lib/equipe.ts, avec ce qui y reste à
+            confirmer : les descriptifs (brouillons du 14/09), le rôle exact
+            de Teo, la quatrième fiche, et son portrait — tant qu'il manque,
+            sa vignette rend ses initiales et rien ne se troue. */}
+        <section data-monde="clair" className="pb-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille={
+                <>
+                  <Drapeau className="h-[10px] w-[15px] shrink-0 rounded-[2px]" />
+                  {EQUIPE_SURTITRE}
+                </>
+              }
+              titre={EQUIPE_TITRE}
+              chapo={EQUIPE_CHAPO}
+            />
+            <div data-reveal className="mt-14 sm:mt-16">
+              <TeamShowcase membres={MEMBRES} pied={EQUIPE_PIED} />
             </div>
           </div>
         </section>
