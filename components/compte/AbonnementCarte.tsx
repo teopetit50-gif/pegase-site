@@ -357,23 +357,24 @@ export default function AbonnementCarte({
   return (
     <div>
       {/* ——— 1. ce que le client a ——— */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="text-[14px] font-semibold text-[#050505]">
-            {modulesActuels.length === POSTES.length
-              ? "Tout Omega — les quatre postes"
-              : modulesActuels.length
-                ? `${modulesActuels.length} poste${modulesActuels.length > 1 ? "s" : ""} en formule`
-                : "Réunion d'installation"}
-          </div>
-          {demande.entreprise ? (
-            <div className="mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">
-              pour <span className="font-medium text-[#050505]">{demande.entreprise}</span>
-            </div>
-          ) : null}
+      {/* 14/09 — la pastille sur la ligne du titre, « pour … » dessous :
+          dans la carte de verre (CompteVue) le panneau fait 500 px, une
+          pastille en frère du bloc de texte passait à la ligne */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="text-[14px] font-semibold text-[#050505]">
+          {modulesActuels.length === POSTES.length
+            ? "Tout Omega — les quatre postes"
+            : modulesActuels.length
+              ? `${modulesActuels.length} poste${modulesActuels.length > 1 ? "s" : ""} en formule`
+              : "Réunion d'installation"}
         </div>
         <Pastille code={etat.code}>{etat.libelle}</Pastille>
       </div>
+      {demande.entreprise ? (
+        <div className="mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">
+          pour <span className="font-medium text-[#050505]">{demande.entreprise}</span>
+        </div>
+      ) : null}
 
       {modulesActuels.length ? (
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -429,13 +430,11 @@ export default function AbonnementCarte({
       {/* ——— 05/09 : le moyen de paiement ——— */}
       {montrerPaiement ? (
         <div className="mt-4 border-t border-[#e3e3e3] pt-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="cp-secondaire cp-kicker-ligne">Moyen de paiement</div>
-              <p className="mt-1.5 max-w-[54ch] text-[14px] leading-[21px] text-[#3d3d3d]">{lignePaiement.texte}</p>
-            </div>
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+            <div className="cp-secondaire cp-kicker-ligne">Moyen de paiement</div>
             <Pastille code={lignePaiement.code}>{lignePaiement.pastille}</Pastille>
           </div>
+          <p className="mt-1.5 max-w-[60ch] text-[14px] leading-[21px] text-[#3d3d3d]">{lignePaiement.texte}</p>
           {lignePaiement.bouton ? (
             paiementFerme ? (
               <p className="cp-info mt-3" role="status">

@@ -5884,78 +5884,327 @@ button.rounded-full:active {
    dessous, pas de 12 px ni de 11 px dans ces cartes (la carte
    d'abonnement comprise). Préfixe .cp-, sous .resa comme le reste du
    monde clair.
+
+   14/09 — TOUT SUR UN ÉCRAN (demande Teo : « elle n'est utilisable que
+   quand on défile ; je veux que tout soit sur une page, donc en
+   largeur »). Les six cartes empilées deviennent UNE carte de verre
+   (.cp-verre — fond blanc à 82 %, flou d'arrière-plan, rayon 24, d'après
+   la « Glass Account Settings Card » shadcn collée par Teo) qui contient
+   une grille de panneaux (.cp-panneau, rayon 16, verre plus léger) posés
+   par AIRES : le profil en BANDEAU sur toute la largeur (.cp-panneau--bande,
+   résumé sur une ligne), puis trois colonnes dès 1280 px (1,7 · 1 · 1 —
+   abonnement sur deux rangs | cockpit, sécurité | rendez-vous,
+   commandes) : mesurées le 14/09, les trois colonnes font ~720 px
+   chacune, rien ne tire la carte vers le bas. Deux colonnes entre 640
+   et 1279, une seule en dessous — dans l'ordre du DOM, le cockpit
+   d'abord, le profil en dernier. La colonne de contenu s'élargit à
+   1440 (.cp-wrap), la largeur de <main>. Les teintes de section
+   survivent sur la tuile d'icône (.cp-tuile), et l'en-tête de la carte
+   tient sur une ligne : identité à gauche, badge d'état (.cp-pilule) et
+   sortie à droite. Les anciennes .cp-section / .cp-tete / .cp-corps sont
+   parties avec SectionCompte.tsx.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ——— la section : carte blanche + en-tête teinté ——— */
-.resa .cp-section {
+/* ——— la colonne : 1440 (la largeur de <main>), 48 de marge dès 1024 ——— */
+.resa .cp-wrap {
+  max-width: 1440px;
+}
+
+/* ——— la carte de verre ——— */
+.resa .cp-verre {
+  position: relative;
+  border-radius: 24px;
+  border: 1px solid rgba(5, 5, 5, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  padding: 18px;
+  box-shadow:
+    0 1px 2px rgba(5, 5, 5, 0.04),
+    0 30px 70px -50px rgba(5, 5, 5, 0.35);
+}
+@media (min-width: 640px) {
+  .resa .cp-verre {
+    padding: 22px;
+  }
+}
+@media (min-width: 1280px) {
+  .resa .cp-verre {
+    padding: 24px 28px 28px;
+  }
+}
+
+/* ——— l'en-tête de la carte : identité | badge + sortie ——— */
+.resa .cp-verre-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .cp-verre-droite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+.resa .cp-titre-page {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 26px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--r-texte);
+}
+@media (min-width: 640px) {
+  .resa .cp-titre-page {
+    font-size: 28px;
+    line-height: 32px;
+  }
+}
+/* le badge d'état du cockpit, en capitales espacées comme la pilule de
+   la référence ; mêmes couples que les pastilles (≥ 4,5:1) */
+.resa .cp-pilule {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  border: 1px solid var(--r-filet);
+  background: #ffffff;
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--r-faible);
+}
+.resa .cp-pilule[data-teinte="vert"] {
+  border-color: #bfe3cb;
+  background: #e6f4ea;
+  color: #1e6b3a;
+}
+.resa .cp-pilule[data-teinte="ambre"] {
+  border-color: #f1dfb3;
+  background: #fdf3dd;
+  color: #8a5a00;
+}
+.resa .cp-pilule[data-teinte="rouge"] {
+  border-color: #e4b7b0;
+  background: #fdf1ef;
+  color: #7c2d24;
+}
+
+/* ——— la grille des panneaux, par aires ———
+   L'ordre du DOM est l'ordre d'une colonne (téléphone) : cockpit,
+   abonnement, rendez-vous, commandes, sécurité, profil. Au-dessus, les
+   aires placent chaque panneau ; le bandeau du profil passe en tête,
+   l'abonnement — le plus haut — occupe deux rangs dès 1024. */
+.resa .cp-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin-top: 16px;
+}
+@media (min-width: 640px) {
+  .resa .cp-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "profil profil"
+      "cockpit cockpit"
+      "abo abo"
+      "rdv cmd"
+      "secu secu";
+  }
+}
+@media (min-width: 1024px) {
+  .resa .cp-grille {
+    grid-template-areas:
+      "profil profil"
+      "abo cockpit"
+      "abo secu"
+      "rdv cmd";
+  }
+}
+@media (min-width: 1280px) {
+  .resa .cp-grille {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "profil profil profil"
+      "abo cockpit rdv"
+      "abo secu cmd";
+  }
+}
+@media (min-width: 640px) {
+  .resa .cp-grille > [data-zone="cockpit"] {
+    grid-area: cockpit;
+  }
+  .resa .cp-grille > [data-zone="abo"] {
+    grid-area: abo;
+  }
+  .resa .cp-grille > [data-zone="rdv"] {
+    grid-area: rdv;
+  }
+  .resa .cp-grille > [data-zone="cmd"] {
+    grid-area: cmd;
+  }
+  .resa .cp-grille > [data-zone="profil"] {
+    grid-area: profil;
+  }
+  .resa .cp-grille > [data-zone="secu"] {
+    grid-area: secu;
+  }
+}
+
+/* ——— le panneau : verre léger, tuile teintée ——— */
+.resa .cp-panneau {
   --cp-fond: #f4f4f2;
   --cp-texte: #3d3d3d;
   --cp-filet: #e3e3e3;
-  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   border-radius: 16px;
-  overflow: hidden;
-  box-shadow:
-    0 1px 2px rgba(5, 5, 5, 0.04),
-    0 0 0 1px rgba(5, 5, 5, 0.05);
+  border: 1px solid var(--r-filet);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 16px 16px 18px;
 }
-.resa .cp-section[data-teinte="orange"] {
+@media (min-width: 640px) {
+  .resa .cp-panneau {
+    padding: 18px 20px 20px;
+  }
+}
+.resa .cp-panneau[data-teinte="orange"] {
   --cp-fond: #fff1e6;
   --cp-texte: #c2410c;
   --cp-filet: #f6d8c1;
 }
-.resa .cp-section[data-teinte="bleu"] {
+.resa .cp-panneau[data-teinte="bleu"] {
   --cp-fond: #eaf1fd;
   --cp-texte: #2f62c4;
   --cp-filet: #cddcf6;
 }
-.resa .cp-section[data-teinte="bordeaux"] {
+.resa .cp-panneau[data-teinte="bordeaux"] {
   --cp-fond: #fbeeea;
   --cp-texte: #8a2a2a;
   --cp-filet: #efd2cb;
 }
-.resa .cp-section[data-teinte="violet"] {
+.resa .cp-panneau[data-teinte="violet"] {
   --cp-fond: #f2effc;
   --cp-texte: #6a4ac2;
   --cp-filet: #dcd3f5;
 }
-.resa .cp-section[data-teinte="neutre"] {
+.resa .cp-panneau[data-teinte="neutre"] {
   --cp-fond: #f4f4f2;
   --cp-texte: #3d3d3d;
   --cp-filet: #e3e3e3;
 }
-/* 08/09 — la section « Omega sur votre téléphone » : le vert des
-   pastilles « ok », l'application étant ce qui marche déjà */
-.resa .cp-section[data-teinte="vert"] {
+.resa .cp-panneau[data-teinte="vert"] {
   --cp-fond: #e6f4ea;
   --cp-texte: #1e6b3a;
   --cp-filet: #bfe3cb;
 }
-.resa .cp-tete {
+.resa .cp-panneau-tete {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 18px 22px;
-  background: var(--cp-fond);
-  border-bottom: 1px solid var(--cp-filet);
-}
-@media (min-width: 640px) {
-  .resa .cp-tete {
-    padding: 20px 28px;
-  }
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 .resa .cp-tuile {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: #ffffff;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--cp-fond);
   color: var(--cp-texte);
-  box-shadow:
-    0 1px 2px rgba(5, 5, 5, 0.08),
-    inset 0 0 0 1px var(--cp-filet);
+  box-shadow: inset 0 0 0 1px var(--cp-filet);
 }
+.resa .cp-panneau-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--r-texte);
+}
+.resa .cp-panneau-sous {
+  margin-top: 1px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--r-faible);
+}
+.resa .cp-panneau-corps {
+  min-width: 0;
+  flex: 1;
+  /* le corps est un conteneur de requête : ses enfants (le résumé du
+     profil, le formulaire) se règlent sur SA largeur */
+  container-type: inline-size;
+}
+/* ——— le bandeau : en-tête et corps sur la même ligne dès 640 px ——— */
+@media (min-width: 640px) {
+  .resa .cp-panneau--bande {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    padding: 12px 18px 12px 16px;
+  }
+  .resa .cp-panneau--bande > .cp-panneau-tete {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .resa .cp-panneau--bande > .cp-panneau-corps {
+    flex: 1 1 520px;
+  }
+}
+
+/* ——— le résumé du profil (ProfilCarte replié) : paires étiquette/valeur
+   en ligne, le bouton à droite ; tout se replie en rangs si la place
+   manque ——— */
+.resa .cp-resume {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+}
+.resa .cp-resume-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  min-width: 0;
+  flex: 1 1 360px;
+}
+.resa .cp-resume-item {
+  min-width: 0;
+}
+.resa .cp-resume-etiquette {
+  font-size: 12.5px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--r-faible);
+}
+.resa .cp-resume-valeur {
+  margin-top: 2px;
+  font-size: 14.5px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--r-texte);
+  overflow-wrap: anywhere;
+}
+.resa .cp-resume-valeur--vide {
+  font-weight: 400;
+  color: var(--r-faible);
+}
+
+/* le kicker sert encore à la carte cockpit */
 .resa .cp-kicker {
   font-size: 11.5px;
   line-height: 16px;
@@ -5963,22 +6212,6 @@ button.rounded-full:active {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--cp-texte);
-}
-.resa .cp-titre {
-  margin-top: 2px;
-}
-.resa .cp-corps {
-  padding: 22px 22px 26px;
-}
-@media (min-width: 640px) {
-  .resa .cp-corps {
-    padding: 24px 28px 28px;
-  }
-}
-/* MotDePasseCarte (inchangée) rend sa propre .r-carte : dans une section
-   elle devient un panneau gris encastré, pas une carte blanche sur blanc */
-.resa .cp-corps .r-carte {
-  background: var(--r-fond);
 }
 
 /* ——— le compteur à droite de l'en-tête ——— */
@@ -5990,7 +6223,7 @@ button.rounded-full:active {
   height: 28px;
   padding: 0 10px;
   border-radius: 9999px;
-  background: #ffffff;
+  background: var(--cp-fond);
   box-shadow: inset 0 0 0 1px var(--cp-filet);
   font-size: 13.5px;
   font-weight: 700;
@@ -6057,7 +6290,7 @@ button.rounded-full:active {
 
 /* ——— lignes séparées par un filet (rendez-vous, commandes) ——— */
 .resa .cp-ligne {
-  padding: 18px 0;
+  padding: 14px 0;
   border-top: 1px solid var(--r-filet);
 }
 .resa .cp-ligne:first-child {
@@ -6099,15 +6332,17 @@ button.rounded-full:active {
   color: #3d3d3d;
 }
 
-/* ——— une carte condensée de rendez-vous : bloc-date | texte | statut ——— */
+/* ——— une carte condensée de rendez-vous : bloc-date | texte (la
+   pastille de statut vit dans le texte depuis le 14/09 : le panneau est
+   étroit dès trois colonnes, une troisième colonne la ferait déborder) ——— */
 .resa .cp-rdv {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
-  gap: 16px;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 14px;
   align-items: start;
 }
 .resa .cp-date {
-  width: 56px;
+  width: 52px;
   padding: 8px 0 7px;
   border-radius: 12px;
   background: var(--r-fond);
@@ -6150,7 +6385,7 @@ button.rounded-full:active {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 16px;
+  min-width: 0;
 }
 .resa .cp-avatar {
   display: grid;
@@ -6190,11 +6425,45 @@ button.rounded-full:active {
   --r-texte: #ffffff;
   --r-doux: #d4d4d8;
   --r-faible: #a1a1aa;
+  --cp-texte: #e9cd91;
+  min-width: 0;
   border-radius: 16px;
-  padding: 24px 26px 26px;
+  padding: 18px 20px 20px;
   background: #0f1013;
   color: #d4d4d8;
   box-shadow: 0 10px 30px -18px rgba(5, 5, 5, 0.6);
+}
+@media (min-width: 640px) {
+  .resa .cp-cockpit {
+    padding: 20px 22px 22px;
+  }
+}
+.resa .cp-cockpit-texte {
+  margin-top: 8px;
+  font-size: 14.5px;
+  line-height: 22px;
+}
+/* le bouton filet, sur fond nuit : trait et texte blancs */
+.resa .cp-cockpit .r-btn--fil {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+/* les boutons des panneaux : 42 px de haut, 15 px — la page tient sur un
+   écran à quelques pixels près, et il y en a huit */
+.resa .cp-panneau .r-btn,
+.resa .cp-cockpit .r-btn {
+  padding: 9px 14px;
+  font-size: 15px;
+  line-height: 22px;
+}
+.resa .cp-cockpit .r-btn--fil:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+}
+.resa .cp-cockpit-lien--inline {
+  display: inline;
+  margin-top: 0;
 }
 .resa .cp-cockpit .cp-kicker {
   color: #e9cd91;

@@ -1,22 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  CalendarDays,
-  CreditCard,
-  Globe,
-  LayoutDashboard,
-  ShieldCheck,
-  Smartphone,
-  UserRound,
-} from "lucide-react";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import AbonnementCarte from "@/components/compte/AbonnementCarte";
-import IdentiteCompte from "@/components/compte/IdentiteCompte";
-import MotDePasseCarte from "@/components/compte/MotDePasseCarte";
-import ProfilCarte from "@/components/compte/ProfilCarte";
-import SectionCompte from "@/components/compte/SectionCompte";
+import CompteVue from "@/components/compte/CompteVue";
 import {
   abonnementCourant,
   reunionPassee,
@@ -24,25 +10,7 @@ import {
   type DemandeAbonnement,
   type DemandeCompte,
 } from "@/lib/abonnement";
-import {
-  LIBELLES_PARCOURS,
-  LIBELLES_STATUT,
-  LIBELLES_STATUT_COURT,
-  TEINTE_STATUT,
-  TEINTE_STATUT_SITE,
-  blocDateGp,
-  dateHeureGp,
-  dureeFormule,
-  libelleFormule,
-} from "@/lib/compte";
-import { MODELES } from "@/components/modeles/donnees";
-import {
-  LIBELLES_STATUT_SITE,
-  dateGp,
-  prixLisible,
-  type LigneCommandeSite,
-} from "@/lib/site-commande";
-import { COCKPIT_URL } from "@/lib/supabase/config";
+import type { LigneCommandeSite } from "@/lib/site-commande";
 import { createClient, utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -51,6 +19,20 @@ import { createClient, utilisateurCourant } from "@/lib/supabase/server";
    Ce qu'un client connecté voit sur le SITE : son abonnement, ses
    rendez-vous, ses commandes de site, son profil professionnel, son mot
    de passe — et l'accès à son cockpit.
+
+   14/09 — TOUT SUR UN ÉCRAN (demande Teo : « elle n'est utilisable que
+   quand on défile, je veux que tout soit sur une page, en largeur »).
+   Cette page ne fait plus que LIRE : la session, les quatre lectures,
+   la comparaison à l'horloge, le retour de Stripe — et passe tout en
+   props à components/compte/CompteVue.tsx, qui porte la mise en page :
+   une carte de verre (components/ui/glass-account-card.tsx) organisée
+   en colonnes, trois dès 1280 px. La description des sections ci-dessous
+   (03/09) reste vraie pour le CONTENU ; l'ordre et la disposition sont
+   dans CompteVue. La section « L'application Omega » (08/09) n'est plus
+   un panneau : ses deux liens vivent dans la carte cockpit. Séparer la
+   lecture de la vue permet aussi /compte/apercu (mode développement
+   seulement) : la même vue sur un jeu fictif, pour la recette sans
+   session.
 
    03/09 — REFONTE, demande Teo (« rend plus pro, ajoute de la couleur,
    sépare les segments un par un, permet de gérer l'abonnement, modif de
@@ -155,21 +137,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/* la pastille de statut des rendez-vous et des commandes — texte foncé
-   sur fond doux, .cp-pastille[data-teinte] dans globals.css */
-function Pastille({ teinte, children }: { teinte: string; children: React.ReactNode }) {
-  return (
-    <span className="cp-pastille" data-teinte={teinte}>
-      {children}
-    </span>
-  );
-}
-
-/* le petit compteur à droite d'un en-tête de section */
-function Compteur({ n }: { n: number }) {
-  return n > 0 ? <span className="cp-compteur">{n}</span> : null;
-}
-
 export default async function ComptePage({
   searchParams,
 }: {
@@ -193,7 +160,6 @@ export default async function ComptePage({
   const panneDemandes = Boolean(demandesRes.error);
   const panneComptes = Boolean(comptesRes.error);
   const rattache = !panneComptes && (comptesRes.data?.length ?? 0) > 0;
-  const aInstallation = demandes.some((d) => d.parcours === "reglage" && d.statut !== "annule");
   const commandes = ((commandesRes.data ?? []) as LigneCommandeSite[]).slice();
   const panneCommandes = Boolean(commandesRes.error);
   /* tolérance : voir l'en-tête — liste vide + drapeau, la carte décide */
@@ -215,341 +181,24 @@ export default async function ComptePage({
   const enregistrementEnCours =
     retour === "ok" && abonnement != null && statutPaiement(abonnement) === "a_enregistrer";
 
-  /* Mes rendez-vous : les réunions d'installation, la plus proche du
-     présent d'abord (ISO se trie en texte ; sans créneau → à la fin),
-     puis les audits et devis dans l'ordre de la base */
-  const reunions = demandes
-    .filter((d) => d.parcours === "reglage")
-    .sort((a, b) => (b.creneau_debut ?? "").localeCompare(a.creneau_debut ?? ""));
-  const autres = demandes.filter((d) => d.parcours !== "reglage");
-  const rendezVous = [...reunions, ...autres];
-
-  const nomModele = (slug: string) => MODELES.find((m) => m.slug === slug)?.nom ?? slug;
-
   return (
     <PageShell>
       <PageMotion />
-      <div className="resa">
-        <section data-monde="clair" className="r-wrap pb-16 pt-12 sm:pb-24 sm:pt-14">
-          {/* ——— en tête : le titre, l'identité, la sortie ——— */}
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h1 className="r-h2 max-w-[20ch]">Mon compte</h1>
-              <IdentiteCompte utilisateur={utilisateur} />
-            </div>
-            <form action="/auth/signout" method="post" className="shrink-0">
-              <button type="submit" className="r-btn r-btn--fil">
-                Se déconnecter
-              </button>
-            </form>
-          </div>
-
-          <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-            <div className="order-2 space-y-5 lg:order-1">
-              {/* ——— 1. Mon abonnement ——— */}
-              <SectionCompte id="abonnement" teinte="orange" icone={CreditCard} kicker="Abonnement" titre="Mon abonnement">
-                {/* 05/09 — le retour de Stripe, au-dessus de la carte */}
-                {retour === "ok" ? (
-                  <p className="cp-ok mb-5" role="status">
-                    {enregistrementEnCours
-                      ? "Merci — l'enregistrement de votre moyen de paiement est en cours de confirmation, quelques secondes. Rien ne sera débité avant la fin de l'installation."
-                      : "Moyen de paiement enregistré — rien ne sera débité avant la fin de l'installation."}
-                  </p>
-                ) : retour === "plus-tard" ? (
-                  <p className="cp-info mb-5" role="status">
-                    Vous pourrez enregistrer votre moyen de paiement plus tard, ici, depuis votre
-                    abonnement.
-                  </p>
-                ) : null}
-                {panneDemandes ? (
-                  <p className="rv-erreur">
-                    Votre abonnement ne répond pas pour le moment. Rechargez la page dans un instant.
-                  </p>
-                ) : (
-                  <AbonnementCarte
-                    demande={abonnement}
-                    rattache={rattache}
-                    demandesAbonnement={demandesAbonnement}
-                    panneDemandesAbonnement={panneDemandesAbonnement}
-                    reunionPassee={reunionDejaPassee}
-                    enregistrementEnCours={enregistrementEnCours}
-                  />
-                )}
-              </SectionCompte>
-
-              {/* ——— 2. L'application Omega (08/09, seconde passe le même
-                  jour : le bouton vers la page d'installation du cockpit,
-                  et l'ordinateur) ——— */}
-              <SectionCompte
-                id="application"
-                teinte="vert"
-                icone={Smartphone}
-                kicker="Application"
-                titre="L'application Omega"
-              >
-                {panneComptes ? (
-                  /* revue 08/09 — sur une panne de `comptes`, rattache vaut
-                     false : sans cette branche on raconterait « dès votre
-                     installation faite » à un client peut-être déjà
-                     rattaché, pendant que la carte cockpit dit que l'accès
-                     ne répond pas. Une panne se dit (revue n° 5). */
-                  <p className="cp-texte">
-                    Impossible de vérifier votre accès pour le moment. Rechargez la page dans un
-                    instant. Le mode d&apos;emploi, lui, reste lisible&nbsp;:{" "}
-                    <Link href="/application" className="r-lien">
-                      voir comment installer l&apos;application
-                    </Link>
-                    .
-                  </p>
-                ) : rattache ? (
-                  <>
-                    <p className="cp-texte">
-                      Votre espace s&apos;installe sur votre téléphone et sur votre ordinateur, comme
-                      une application&nbsp;: un toucher pour l&apos;ouvrir, en plein écran, sans rien
-                      télécharger sur une boutique.
-                    </p>
-                    {/* le bouton mène à la page d'installation du cockpit, sur
-                        l'appareil où l'on est : c'est là que le bouton du
-                        navigateur existe ; le mode d'emploi passe en lien */}
-                    <div className="mt-5 flex flex-wrap items-center gap-3">
-                      <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--noir">
-                        Installer sur cet appareil
-                      </a>
-                      <Link href="/application" className="r-lien">
-                        Voir comment ça marche
-                      </Link>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="cp-texte">
-                      Dès votre installation faite, votre espace s&apos;installera sur votre téléphone
-                      et votre ordinateur, comme une application. Vous pouvez déjà voir comment.
-                    </p>
-                    <div className="mt-5">
-                      <Link href="/application" className="r-btn r-btn--fil">
-                        Voir comment ça marche
-                      </Link>
-                    </div>
-                  </>
-                )}
-              </SectionCompte>
-
-              {/* ——— 3. Mes rendez-vous ——— */}
-              <SectionCompte
-                id="rendez-vous"
-                teinte="bleu"
-                icone={CalendarDays}
-                kicker="Rendez-vous"
-                titre="Mes rendez-vous"
-                droite={<Compteur n={rendezVous.length} />}
-              >
-                {panneDemandes ? (
-                  <p className="rv-erreur">
-                    Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un instant.
-                  </p>
-                ) : rendezVous.length === 0 ? (
-                  <>
-                    <p className="cp-texte">
-                      Aucun rendez-vous n&apos;est rattaché à cette adresse. La réunion d&apos;installation se
-                      réserve depuis la grille des tarifs&nbsp;: elle met vos postes en route et vous ouvre le
-                      cockpit.
-                    </p>
-                    <div className="mt-5">
-                      <Link href="/tarifs" className="r-btn r-btn--noir">
-                        Réserver mon installation
-                      </Link>
-                    </div>
-                  </>
-                ) : (
-                  <ul>
-                    {rendezVous.map((d) => {
-                      const bloc = d.creneau_debut ? blocDateGp(d.creneau_debut) : null;
-                      const duree = dureeFormule(d.formule, d.duree_min);
-                      const court = LIBELLES_STATUT_COURT[d.statut] ?? d.statut;
-                      const long = LIBELLES_STATUT[d.statut];
-                      /* la phrase longue ne s'ajoute que si elle dit plus que le mot */
-                      const detail = long && long !== court ? long : null;
-                      return (
-                        <li key={d.id} className="cp-ligne cp-rdv">
-                          <div className={`cp-date${bloc ? "" : " cp-date--vide"}`} aria-hidden="true">
-                            <div className="cp-date-jour">{bloc ? bloc.jour : "—"}</div>
-                            <div className="cp-date-mois">{bloc ? bloc.mois : ""}</div>
-                          </div>
-                          <div className="min-w-0">
-                            <div className="cp-secondaire cp-kicker-ligne">
-                              {LIBELLES_PARCOURS[d.parcours] ?? d.parcours}
-                            </div>
-                            <div className="cp-texte cp-fort">{libelleFormule(d.formule)}</div>
-                            <p className="num cp-secondaire mt-0.5">
-                              {d.creneau_debut
-                                ? `${dateHeureGp(d.creneau_debut)}${duree ? ` · ${duree}` : ""} · heure de Guadeloupe`
-                                : "Sans créneau — traitée par e-mail"}
-                            </p>
-                            {d.entreprise ? (
-                              <p className="cp-secondaire mt-0.5">
-                                Entreprise&nbsp;: <span className="cp-fort">{d.entreprise}</span>
-                              </p>
-                            ) : null}
-                            {detail ? <p className="cp-secondaire mt-1.5">{detail}</p> : null}
-                          </div>
-                          <div className="cp-rdv-statut">
-                            <Pastille teinte={TEINTE_STATUT[d.statut] ?? "gris"}>{court}</Pastille>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </SectionCompte>
-
-              {/* ——— 4. Mes commandes de site ——— */}
-              <SectionCompte
-                id="site"
-                teinte="bordeaux"
-                icone={Globe}
-                kicker="Site catalogue"
-                titre="Mes commandes de site"
-                droite={<Compteur n={commandes.length} />}
-              >
-                {panneCommandes ? (
-                  <p className="rv-erreur">
-                    Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
-                  </p>
-                ) : commandes.length === 0 ? (
-                  <>
-                    <p className="cp-texte">
-                      Aucune commande de site pour l&apos;instant. Le site catalogue est à 990&nbsp;€ TTC, une
-                      fois — vingt et un modèles, contenu réécrit à votre métier.
-                    </p>
-                    <div className="mt-5">
-                      <Link href="/tarifs/site" className="r-btn r-btn--fil">
-                        Voir l&apos;offre site
-                      </Link>
-                    </div>
-                  </>
-                ) : (
-                  <ul>
-                    {commandes.map((c) => (
-                      <li key={c.id} className="cp-ligne">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="cp-texte cp-fort">Modèle {nomModele(c.modele)}</div>
-                            <p className="num cp-secondaire mt-0.5">Commandée le {dateGp(c.cree_le)}</p>
-                            <p className="cp-secondaire mt-0.5">
-                              Entreprise&nbsp;: <span className="cp-fort">{c.entreprise}</span>
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 flex-col items-end gap-2">
-                            <span className="num cp-prix">
-                              {prixLisible(c.prix_eur)}
-                              <span className="cp-prix-unite"> TTC</span>
-                            </span>
-                            <Pastille teinte={TEINTE_STATUT_SITE[c.statut] ?? "gris"}>
-                              {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
-                            </Pastille>
-                          </div>
-                        </div>
-                        {c.statut === "a_payer" ? (
-                          /* le paiement en ligne n'existe pas encore : on le
-                             dit, on n'invente pas de bouton */
-                          <p className="cp-secondaire mt-3">
-                            Le paiement en ligne arrive&nbsp;: on vous appelle pour régler et lancer la
-                            production.
-                          </p>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </SectionCompte>
-
-              {/* ——— 5. Profil professionnel ——— */}
-              <SectionCompte id="profil" teinte="violet" icone={UserRound} kicker="Profil" titre="Profil professionnel">
-                <p className="cp-texte mb-5">
-                  Ce que nous savons de votre entreprise&nbsp;: ces informations servent à vos factures et
-                  pré-remplissent vos prochaines demandes.
-                </p>
-                <ProfilCarte utilisateur={utilisateur} />
-              </SectionCompte>
-
-              {/* ——— 6. Sécurité et accès ——— */}
-              <SectionCompte id="securite" teinte="neutre" icone={ShieldCheck} kicker="Sécurité" titre="Sécurité et accès">
-                <p className="cp-texte">
-                  Connecté avec <span className="cp-fort break-all">{utilisateur.email}</span>. Cette adresse
-                  et ce mot de passe ouvrent votre compte sur le site comme sur le cockpit.
-                </p>
-                <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
-                <p className="cp-secondaire mt-4">
-                  Ce que nous faisons de vos données, et comment les récupérer&nbsp;:{" "}
-                  <Link href="/vos-donnees" className="underline underline-offset-2">
-                    vos données
-                  </Link>
-                  .
-                </p>
-              </SectionCompte>
-            </div>
-
-            {/* ——— l'accès au cockpit, ou son attente ——— */}
-            <aside className="cp-cockpit order-1 lg:sticky lg:top-[88px] lg:order-2">
-              <div className="cp-kicker flex items-center gap-2">
-                <LayoutDashboard size={16} strokeWidth={2} aria-hidden="true" />
-                Votre cockpit
-              </div>
-              {panneComptes ? (
-                <>
-                  <h2 className="r-h4 mt-3">Votre accès cockpit ne répond pas.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px]">
-                    Impossible de vérifier votre rattachement pour le moment. Rechargez la page dans un
-                    instant.
-                  </p>
-                </>
-              ) : rattache ? (
-                <>
-                  <h2 className="r-h4 mt-3">Votre cockpit est ouvert.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px]">
-                    Relances, demandes, factures&nbsp;: vos postes y apparaissent au fur et à mesure de
-                    leur mise en route, avec ce qui attend votre validation. Même adresse, même mot de
-                    passe.
-                  </p>
-                  <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
-                    Ouvrir mon cockpit
-                  </a>
-                  {/* 08/09 — l'application : sous le bouton, le lien vers la
-                      page d'installation du cockpit (seconde passe : droit sur
-                      /installer et son bouton, plus le mode d'emploi du site).
-                      Dans son propre bloc, pour ne pas s'aligner à côté du
-                      bouton dès qu'il reprend sa largeur naturelle. */}
-                  <div>
-                    <a href={`${COCKPIT_URL}/installer`} className="cp-cockpit-lien">
-                      Installer l&apos;application
-                    </a>
-                  </div>
-                </>
-              ) : aInstallation ? (
-                <>
-                  <h2 className="r-h4 mt-3">Votre installation est en préparation.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px]">
-                    On vous ouvre le cockpit dès la réunion faite&nbsp;: vos postes y apparaissent au fur
-                    et à mesure de leur mise en route.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h2 className="r-h4 mt-3">Votre cockpit s&apos;ouvre après la réunion d&apos;installation.</h2>
-                  <p className="mt-2 text-[15px] leading-[23px]">
-                    Choisissez vos postes, réservez la réunion&nbsp;: c&apos;est elle qui met vos postes en
-                    route et vous ouvre le cockpit.
-                  </p>
-                  <Link href="/tarifs" className="r-btn r-btn--blanc mt-5 w-full sm:w-auto">
-                    Choisir mes postes
-                  </Link>
-                </>
-              )}
-            </aside>
-          </div>
-        </section>
-      </div>
+      <CompteVue
+        utilisateur={utilisateur}
+        demandes={demandes}
+        panneDemandes={panneDemandes}
+        panneComptes={panneComptes}
+        rattache={rattache}
+        commandes={commandes}
+        panneCommandes={panneCommandes}
+        abonnement={abonnement}
+        demandesAbonnement={demandesAbonnement}
+        panneDemandesAbonnement={panneDemandesAbonnement}
+        reunionDejaPassee={reunionDejaPassee}
+        retour={retour}
+        enregistrementEnCours={enregistrementEnCours}
+      />
     </PageShell>
   );
 }

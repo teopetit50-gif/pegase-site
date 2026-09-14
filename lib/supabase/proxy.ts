@@ -44,7 +44,12 @@ export async function updateSession(request: NextRequest) {
   const connecte = Boolean(data?.claims?.sub);
   const { pathname, search } = request.nextUrl;
 
-  if (!connecte && pathname.startsWith("/compte")) {
+  /* 14/09 — /compte/apercu : la vue « Mon compte » sur un jeu fictif, en
+     mode développement seulement (la route elle-même répond 404 en
+     production, app/compte/apercu/page.tsx) — elle ne demande pas de
+     session, c'est tout son intérêt */
+  const apercuDev = process.env.NODE_ENV !== "production" && pathname === "/compte/apercu";
+  if (!connecte && !apercuDev && pathname.startsWith("/compte")) {
     const url = request.nextUrl.clone();
     url.pathname = "/connexion";
     url.search = "";

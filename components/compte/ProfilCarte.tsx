@@ -2,7 +2,7 @@
 
 /* ══════════════════════════════════════════════════════════════════════
    ProfilCarte — « Profil professionnel », le formulaire de /compte
-   (03/09/2026)
+   (03/09/2026, replié en résumé depuis le 14/09)
 
    Demande Teo du 03/09 : « modif de profil pro ». Jusqu'ici le profil
    (prénom, nom, entreprise, téléphone) n'était écrit qu'en passant — à
@@ -10,6 +10,24 @@
    installation. Ici la personne le relit et le corrige elle-même, et
    ajoute ce qui sert à la facture et au brief : secteur (la liste
    SECTEURS du module de réservation), commune, SIRET.
+
+   14/09 — DEUX ÉTATS. La page tient désormais sur un écran (CompteVue,
+   la carte de verre) et huit champs ouverts en permanence coûtaient un
+   rang de 360 px pour une chose qu'on corrige deux fois par an. Au
+   repos, le panneau montre un RÉSUMÉ (six valeurs sur une grille, les
+   absentes en « — ») et un bouton « Modifier mon profil » ; le formulaire
+   se déplie à la demande, dans le même panneau, et se replie après
+   l'enregistrement (le résumé relit alors les champs enregistrés). Un
+   profil INCOMPLET (sans prénom, nom ou entreprise — le cas d'un compte
+   créé par code de secours) s'ouvre directement sur le formulaire, avec
+   un mot qui dit pourquoi : le résumé n'aurait rien à montrer.
+
+   Le panneau est un BANDEAU en pleine largeur (GlassPanel bande) : le
+   résumé est une ligne de paires étiquette/valeur qui se replie en
+   plusieurs rangs quand la place manque, le bouton à droite. La grille
+   du formulaire se règle sur la largeur du bandeau (container query,
+   @container / @md: @2xl: @4xl:) — quatre colonnes dès 896 px de large,
+   deux rangs de champs.
 
    Où ça s'enregistre : dans les user_metadata du compte, par
    updateUser({ data }) — la même porte que ConnexionInline et
@@ -68,9 +86,21 @@ function depuisUtilisateur(u: Utilisateur): Champs {
   };
 }
 
+const complet = (c: Champs) => Boolean(c.prenom.trim() && c.nom.trim() && c.entreprise.trim());
+
+/* « 123 456 789 00012 » — le SIRET s'affiche comme l'INSEE l'imprime */
+const siretLisible = (s: string) => {
+  const n = siretNormalise(s);
+  return n.length === 14 ? `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6, 9)} ${n.slice(9)}` : s;
+};
+
 export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur }) {
   const router = useRouter();
   const [c, setC] = useState<Champs>(() => depuisUtilisateur(utilisateur));
+  /* ce que le résumé montre : les champs tels qu'ENREGISTRÉS, pas la
+     saisie en cours — on annule sans toucher au résumé */
+  const [enregistre, setEnregistre] = useState<Champs>(() => depuisUtilisateur(utilisateur));
+  const [ouvert, setOuvert] = useState(() => !complet(depuisUtilisateur(utilisateur)));
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState(false);
@@ -81,6 +111,20 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
   const maj = (k: keyof Champs) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setC((prev) => ({ ...prev, [k]: e.target.value }));
     setFait(false);
+  };
+
+  const ouvrir = () => {
+    setC(enregistre);
+    setErreur(null);
+    setFait(false);
+    setOuvert(true);
+  };
+  const annuler = () => {
+    setC(enregistre);
+    setErreur(null);
+    setFait(false);
+    /* un profil incomplet reste ouvert : il n'y a rien à résumer */
+    if (complet(enregistre)) setOuvert(false);
   };
 
   const enregistrer = async (e: React.FormEvent) => {
@@ -121,8 +165,19 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
         );
         return;
       }
-      setC((prev) => ({ ...prev, siret: donnees.siret ?? "" }));
+      const propre: Champs = {
+        prenom: donnees.prenom,
+        nom: donnees.nom,
+        entreprise: donnees.entreprise,
+        telephone: donnees.telephone ?? "",
+        secteur: donnees.secteur ?? "",
+        commune: donnees.commune ?? "",
+        siret: donnees.siret ?? "",
+      };
+      setC(propre);
+      setEnregistre(propre);
       setFait(true);
+      setOuvert(false);
       /* un jeton neuf (métadonnées à jour dans les claims), puis l'en-tête
          — composant serveur — se relit : voir l'en-tête du fichier */
       await supabase.auth.refreshSession().catch(() => null);
@@ -135,10 +190,55 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
     }
   };
 
+  /* ——— le résumé ——— */
+  if (!ouvert) {
+    const secteur = SECTEURS.find((s) => s.valeur === enregistre.secteur)?.libelle;
+    /* le nom n'y est pas : il est déjà dans l'en-tête de la carte, juste
+       au-dessus — et sans lui les six paires tiennent sur UNE ligne à 1440 */
+    const lignes: { etiquette: string; valeur: string; num?: boolean }[] = [
+      { etiquette: "Entreprise", valeur: enregistre.entreprise },
+      { etiquette: "Téléphone / WhatsApp", valeur: enregistre.telephone, num: true },
+      { etiquette: "Secteur", valeur: secteur ?? enregistre.secteur },
+      { etiquette: "Commune", valeur: enregistre.commune },
+      { etiquette: "SIRET", valeur: enregistre.siret ? siretLisible(enregistre.siret) : "", num: true },
+    ];
+    return (
+      <div className="cp-resume-bloc">
+        {fait ? (
+          <p className="cp-ok mb-3" role="status">
+            Profil enregistré. Il sert à vos factures et pré-remplit vos prochaines demandes.
+          </p>
+        ) : null}
+        <div className="cp-resume">
+          <dl className="cp-resume-liste">
+            {lignes.map((l) => (
+              <div key={l.etiquette} className="cp-resume-item">
+                <dt className="cp-resume-etiquette">{l.etiquette}</dt>
+                <dd className={`cp-resume-valeur${l.num ? " num" : ""}${l.valeur ? "" : " cp-resume-valeur--vide"}`}>
+                  {l.valeur || "—"}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <button type="button" className="r-btn r-btn--fil shrink-0" onClick={ouvrir}>
+            Modifier mon profil
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ——— le formulaire ——— */
   return (
-    <form onSubmit={enregistrer} noValidate>
+    <form onSubmit={enregistrer} noValidate className="@container">
       <fieldset disabled={envoi} className="m-0 min-w-0 border-0 p-0">
-        <div className="grid gap-4 sm:grid-cols-2">
+        {!complet(enregistre) ? (
+          <p className="cp-texte mb-4">
+            Votre profil n&apos;est pas complet&nbsp;: prénom, nom et entreprise servent à vos factures
+            et à vos prochaines demandes.
+          </p>
+        ) : null}
+        <div className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4">
           <div>
             <label className="rv-libelle" htmlFor="cp-prenom">
               Prénom
@@ -247,31 +347,17 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
         </div>
 
         {erreur ? (
-          <p className="rv-erreur mt-5" role="alert">
+          <p className="rv-erreur mt-4" role="alert">
             {erreur}
           </p>
         ) : null}
-        {fait && !erreur ? (
-          <p className="cp-ok mt-5" role="status">
-            Profil enregistré. Il sert à vos factures et pré-remplit vos prochaines demandes.
-          </p>
-        ) : null}
 
-        <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
           <button type="submit" className={`r-btn ${envoi ? "rv-btn--attente" : "r-btn--noir"}`} disabled={envoi}>
             {envoi ? "Enregistrement…" : "Enregistrer mon profil"}
           </button>
-          <button
-            type="button"
-            className="r-btn r-btn--fil"
-            onClick={() => {
-              setC(depuisUtilisateur(utilisateur));
-              setErreur(null);
-              setFait(false);
-            }}
-            disabled={envoi}
-          >
-            Annuler les modifications
+          <button type="button" className="r-btn r-btn--fil" onClick={annuler} disabled={envoi}>
+            {complet(enregistre) ? "Annuler" : "Annuler les modifications"}
           </button>
         </div>
       </fieldset>
