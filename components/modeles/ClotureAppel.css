@@ -1,0 +1,121 @@
+/* ══════════════════════════════════════════════════════════════════════
+   ClotureAppel — la carte sombre qui ferme /modeles (14/09/2026)
+
+   Tout est scopé sous `.modeles` avec le préfixe `ca-`. Le composant
+   l'importe lui-même (motif faq-06). Les seules règles ici sont celles
+   que Tailwind ne sait pas poser proprement : le voile de lecture sur la
+   photo, la lueur (pseudo-calque animé) et la hauteur commune des deux
+   boutons. Les boutons eux-mêmes sont ceux du site (`.m-btn-clair` +
+   `.m-chevron` dans globals.css, contour choisi par Teo le 03/08) — rien
+   n'est redessiné ici.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* padding en clamp — 28 px sur téléphone, 56 px sur grand écran */
+.modeles .ca-carte {
+  padding: clamp(28px, 4.5vw, 56px);
+}
+
+/* ——— le voile de lecture, sur la photo ———
+   Repris de la Cloture (03/08 : dense là où on lit, léger là où on ne lit
+   pas), axe tourné : on lit à GAUCHE. Source à gauche au milieu, 0,88 sur
+   le titre, 0,80 jusqu'au milieu, plancher 0,50 au bord droit où vivent
+   les boutons (à partir de lg) et le troisième fait. Même encre que la
+   Cloture (8, 9, 11). */
+.modeles .ca-voile {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    80% 130% at 0% 50%,
+    rgba(8, 9, 11, 0.88) 0%,
+    rgba(8, 9, 11, 0.8) 45%,
+    rgba(8, 9, 11, 0.62) 78%,
+    rgba(8, 9, 11, 0.5) 100%
+  );
+}
+
+/* ——— la lueur ———
+   Une seule source, en haut à droite, très faible : elle donne de la
+   profondeur sans rien raconter. `z-index: -1` sous le contenu — la carte
+   est `isolate`, donc le calque reste AU-DESSUS du fond de la carte et ne
+   passe pas derrière la section ; il vient après le voile dans le DOM,
+   donc au-dessus de lui. Elle respire en opacité sur 10 s : c'est un
+   décor, pas un panneau, animer son opacité ne cache rien. Pas de
+   `will-change` : une couche de composition tenue en permanence pour une
+   respiration décorative n'en vaut pas le coût. */
+.modeles .ca-lueur {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    58% 72% at 100% 0%,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.05) 42%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  animation: ca-respire 10s ease-in-out infinite;
+}
+@keyframes ca-respire {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+/* ——— boutons ———
+   Même hauteur pour les deux (52 px = pastille de 28 + 2 × 12 de marge),
+   sinon le bouton sans pastille est plus bas de 5 px et la pile bâille.
+   Pas de `justify-content` ici : chaque bouton pose le sien (between pour
+   celui à pastille, center pour l'autre), sinon la règle scopée battrait
+   l'utilitaire. Le rayon vient de `.m-btn-clair` ou de l'utilitaire du
+   second bouton. */
+.modeles .ca-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+  border-radius: var(--radius-btn);
+}
+.modeles .ca-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+/* ——— mouvement réduit : la lueur reste, immobile ; les boutons ne
+   transitionnent plus (celles de `.m-btn-clair` et `.m-chevron` sont
+   posées dans globals.css sans garde). `.ca-carte` dans le sélecteur :
+   une classe de plus que `.modeles .m-btn-clair`, la coupure gagne quel
+   que soit l'ordre de chargement des deux feuilles. ——— */
+@media (prefers-reduced-motion: reduce) {
+  .modeles .ca-lueur {
+    animation: none;
+    opacity: 0.85;
+  }
+  .modeles .ca-carte .ca-btn,
+  .modeles .ca-carte .ca-btn .m-chevron {
+    transition: none;
+  }
+}
+
+/* ——— 14/09, recette : les deux boutons rendaient le même contour
+   translucide, aucune hiérarchie. Le principal passe en blanc plein, encre
+   noire, pastille noire — l'inverse exact du « Commencer » noir du hero,
+   sur fond sombre. Trois classes dans le sélecteur : il doit gagner contre
+   `.modeles .m-btn-clair` de globals.css. ——— */
+.modeles .ca-carte .ca-btn--principal {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+.modeles .ca-carte .ca-btn--principal:hover {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(255, 255, 255, 0.88);
+}
+.modeles .ca-carte .ca-btn--principal .m-chevron,
+.modeles .ca-carte .ca-btn--principal:hover .m-chevron {
+  background: #000000;
+  border-color: #000000;
+}

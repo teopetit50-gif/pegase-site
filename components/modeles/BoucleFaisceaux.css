@@ -1,0 +1,24 @@
+/* BoucleFaisceaux — le SVG des faisceaux et la règle que les utilitaires
+   ne peuvent pas poser. Tout est scopé sous .modeles. Les titres de jalon
+   gardent le poids 400 de `.modeles h3` : pas de règle ici. */
+
+/* Le SVG épouse le conteneur (la grille des jalons) et déborde sans le
+   déformer : l'arc de retour, en ligne, descend dans la marge basse du
+   panneau ; le rail de retour, en colonne, passe dans sa marge gauche. */
+.modeles .bf-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Mouvement réduit : le chemin de base reste, la lueur disparaît. Le
+   composant ne la monte déjà plus ; cette règle couvre l'instant entre
+   l'hydratation et la lecture de la préférence. */
+@media (prefers-reduced-motion: reduce) {
+  .modeles .bf-lueur {
+    display: none;
+  }
+}

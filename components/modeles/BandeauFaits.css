@@ -1,0 +1,90 @@
+/* BandeauFaits — la carte à quatre cellules sous le hero de /modeles.
+   Tout est scopé sous `.modeles` et préfixé `bf-` ; les jetons viennent du
+   bloc `.modeles` de globals.css (--m-carte, --m-filet, --m-encre, --m-faible).
+
+   Les filets entre cellules ne sont pas des bordures : la grille a un fond
+   couleur filet et un `gap` de 1 px, chaque cellule repeint son fond carte.
+   Un seul mécanisme donne les trois dispositions — 1 × 4 empilé sous 30 rem
+   (trois filets horizontaux), 2 × 2 jusqu'à `md` (un horizontal, un
+   vertical central) et 4 en ligne au-dessus (trois verticaux) — là où
+   `divide-x` / `divide-y` aurait posé un filet de trop sur la deuxième
+   cellule de la première rangée. */
+
+.modeles .bf-carte {
+  background: var(--m-carte);
+  border: 1px solid var(--m-filet);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 1 colonne à 390 : en 2 × 2 une cellule ne laisserait que ~150 px de texte
+   à une valeur de 28 px, et « Branché aux moteurs » y tiendrait sur deux
+   lignes serrées. */
+.modeles .bf-grille {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--m-filet);
+}
+/* 14/09, recette : à 768 les quatre cellules en ligne serraient « Contenu
+   réécrit » et « Branché aux moteurs » sur deux lignes chacune, et sous
+   30 rem la colonne unique empilait quatre cellules de 100 px. Deux
+   colonnes de 0 à lg, quatre au-delà. */
+@media (min-width: 64rem) {
+  .modeles .bf-grille {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.modeles .bf-cellule {
+  background: var(--m-carte);
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+@media (min-width: 30rem) {
+  .modeles .bf-cellule {
+    padding: 1.6rem 0.5rem;
+  }
+}
+@media (min-width: 64rem) {
+  .modeles .bf-cellule {
+    padding: 2.25rem 0.75rem;
+  }
+}
+
+/* 28 px jusqu'à ~1380 (la partie fluide 0.44rem + 1.52vw ne dépasse le
+   plancher qu'à cette largeur), ~29 px à 1440, ~33 px à 1700, 36 px à
+   partir de ~1900 : la pente est choisie pour que « Branché aux moteurs »
+   tienne sur une ligne dans une colonne de ~275 px à 1440.
+   Poids 400 : la doctrine de la page (bloc `.modeles`), la carte et la
+   taille suffisent à distinguer le fait du chapô. Famille héritée de
+   `.modeles` (Inter Tight), plus étroite que la Jakarta des titres. */
+.modeles .bf-valeur {
+  margin: 0;
+  font-size: clamp(1.75rem, 0.44rem + 1.52vw, 2.25rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--m-encre);
+  text-wrap: balance;
+}
+
+/* la précision garde le gris et le corps de l'ancienne rangée */
+.modeles .bf-precision {
+  margin: 0.4rem 0 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--m-faible);
+  text-wrap: balance;
+}
+
+/* sous 30 rem la colonne fait ~154 px : la valeur descend à 24 px pour que
+   le fait le plus long tienne sur deux lignes régulières */
+@media (max-width: 29.999rem) {
+  .modeles .bf-valeur {
+    font-size: 1.5rem;
+  }
+}

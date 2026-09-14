@@ -2,13 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import Mosaique from "@/components/modeles/Mosaique";
-import Ruban from "@/components/modeles/Ruban";
-import Boucle from "@/components/modeles/Boucle";
-import Cloture from "@/components/modeles/Cloture";
-import Categorie from "@/components/modeles/Categorie";
-import CarteModele from "@/components/modeles/CarteModele";
-import { CATEGORIES, parCategorie } from "@/components/modeles/donnees";
+import HeroDefile from "@/components/modeles/HeroDefile";
+import BandeauFaits from "@/components/modeles/BandeauFaits";
+import Galerie from "@/components/modeles/Galerie";
+import BoucleFaisceaux from "@/components/modeles/BoucleFaisceaux";
+import ClotureAppel from "@/components/modeles/ClotureAppel";
 
 /* ══════════════════════════════════════════════════════════════════════
    /modeles — la galerie de modèles de sites (03/08/2026)
@@ -52,6 +50,28 @@ import { CATEGORIES, parCategorie } from "@/components/modeles/donnees";
    reste un lieu de découverte, avec sous chaque carte un petit lien
    « Commander avec ce modèle » qui pré-sélectionne le modèle dans le
    tunnel — discret : ce n'est pas une page de vente.
+
+   14/09/2026 — REFONTE par composants repris (Teo : « fais comme tu le
+   sens, je veux des beaux trucs bien développés et pro »). Même ordre de
+   sections, mêmes textes, mêmes liens ; ce qui change est la matière :
+     1. hero      → <HeroDefile>      (Aceternity « Hero Parallax » : trois
+                                       rangées de captures qui glissent)
+     2. faits     → <BandeauFaits>    (Tailark « stats » : carte à filets)
+     2 bis ruban  → SUPPRIMÉ : le hero montre déjà les modèles en
+                    mouvement ; deux défilés à la suite se cannibalisaient.
+                    <Ruban> reste au dépôt, plus appelé.
+     3. modèles   → <Galerie>         (puces de filtre par usage + grille
+                                       animée + effet « focus » d'Aceternity)
+     4. boucle    → <BoucleFaisceaux> (Magic UI « Animated Beam » : la
+                                       lueur parcourt les cinq jalons et
+                                       revient au premier)
+     5. clôture   → <ClotureAppel>    (shadcnblocks cta10 : carte sombre)
+   Chaque composant porte son en-tête ORIGINE / POURQUOI ICI / CE QUI EST
+   JETÉ / ÉCARTS ASSUMÉS et sa propre feuille CSS scopée sous `.modeles`.
+   Mosaique, Ruban, Categorie, CarteModele, Boucle et Cloture ne sont plus
+   importés ici (orphelins, gardés le temps de la recette).
+   « Je veux ce modèle » mène à /reserver-un-audit?modele=<slug> (14/09,
+   Teo) et non plus à WhatsApp.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -63,7 +83,7 @@ export const metadata: Metadata = {
 /* ——— les quatre faits sous le hero ———
    À la place des logos clients de la référence : on n'a pas de clients à
    afficher, et on n'en invente pas. Ces quatre-là se vérifient. */
-const FAITS = [
+const FAITS: [string, string][] = [
   ["21 modèles", "tous en ligne, tous visitables"],
   ["Contenu réécrit", "en français, à votre métier"],
   ["Branché aux moteurs", "devis, relance, avis"],
@@ -76,67 +96,8 @@ export default function ModelesPage() {
       <PageMotion />
 
       <div className="modeles">
-        {/* ═══════════ 1 · hero — le collage, comme la référence ═══════════ */}
-        <section data-monde="clair" className="m-wrap pt-6 sm:pt-8">
-          {/* 01/09 — transitions : le cadre était un objet PARTAGÉ avec la
-              carte bordeaux « Découvrir nos sites » de /commencer, qui
-              grandissait jusqu'à devenir ce hero. 02/09 : cette carte mène
-              désormais à /tarifs/site, et l'objet partagé « cadre-modeles »
-              y a suivi (la carte produit) — un seul élément monté par nom
-              dans toute l'application, il ne pouvait pas rester ici. Le
-              hero redevient un div ordinaire ; le collage, le titre, le
-              chapô et les boutons entrent toujours en cascade. */}
-          <div
-            className="relative isolate overflow-hidden rounded-[16px] bg-[#0b0b0c]"
-            style={{ height: "clamp(30rem, 64vh, 42rem)" }}
-          >
-            <Mosaique />
-
-            <div className="absolute inset-x-0 bottom-0 p-7 sm:p-12">
-              {/* 15ch : le titre tombe en deux lignes équilibrées
-                  (« Un site qui vous / ramène des clients ») au lieu de
-                  laisser « clients » orphelin sur la seconde. */}
-              <h1 data-arrivee="hero-titre" className="m-h1 max-w-[15ch] text-white">
-                Un site qui vous ramène des clients
-              </h1>
-              <p
-                data-arrivee="hero-chapo"
-                className="mt-5 max-w-xl text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/75"
-              >
-                Vingt et un modèles en ligne, que vous pouvez visiter tout de suite
-                branchés sur vos moteurs.
-              </p>
-              <div data-arrivee="hero-bloc" className="mt-8 flex flex-wrap items-center gap-3">
-                {/* 02/09 (Teo) : depuis la galerie, « Commencer » mène DIRECTEMENT
-                    à l'offre site (/tarifs/site), pas à l'aiguillage à trois
-                    cartes — celui qui regarde les modèles a déjà choisi. */}
-                <Link
-                  href="/tarifs/site"
-                  className="m-btn-clair inline-flex items-center gap-2.5 py-3 pl-6 pr-2.5 text-[15px]"
-                >
-                  Commencer
-                  <span className="m-chevron flex h-7 w-7 items-center justify-center rounded-full">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
-                      <path
-                        d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"
-                        stroke="#fff"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </Link>
-                <a
-                  href="#modeles"
-                  className="rounded-[var(--radius-btn)] border border-white/25 px-6 py-3 text-[15px] font-medium text-white/90 transition-colors hover:border-white/45 hover:text-white"
-                >
-                  Voir les 21 modèles
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* ═══════════ 1 · hero — trois rangées de captures qui glissent ═══════════ */}
+        <HeroDefile ancreCatalogue="#modeles" />
 
         {/* ═══════════ 2 · bandeau de faits ═══════════ */}
         <section data-monde="clair" className="m-wrap py-[clamp(3.5rem,7vw,5.5rem)]">
@@ -147,22 +108,7 @@ export default function ModelesPage() {
             </a>
           </p>
 
-          <div className="mt-11 grid grid-cols-2 gap-x-6 gap-y-9 lg:grid-cols-4">
-            {FAITS.map(([fort, doux]) => (
-              <div key={fort} data-reveal className="text-center">
-                <p className="text-[clamp(1.05rem,1.5vw,1.3rem)]">{fort}</p>
-                <p className="mt-1.5 text-[13.5px] text-[color:var(--m-faible)]">{doux}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ═══════════ 2 bis · le défilé ═══════════
-            Hors de .m-wrap : le ruban traverse toute la largeur de l'écran,
-            c'est ce qui lui donne son effet de flux continu. Dans la colonne
-            de 1200 px il aurait l'air d'un carrousel coincé dans une boîte. */}
-        <section data-monde="clair" className="pb-[clamp(3.5rem,7vw,5.5rem)]">
-          <Ruban />
+          <BandeauFaits faits={FAITS} className="mt-11" />
         </section>
 
         {/* ═══════════ 3 · les modèles ═══════════ */}
@@ -192,15 +138,7 @@ export default function ModelesPage() {
               reste. Vingt-deux cartes d'affilée, on les faisait défiler
               sans jamais choisir ; par usage, on ne déplie que la famille
               qui nous concerne. */}
-          <div className="m-panneau mt-12 p-5 sm:p-8 lg:p-10">
-            {CATEGORIES.map((c) => (
-              <Categorie key={c.cle} titre={c.titre} pour={c.pour}>
-                {parCategorie(c.cle).map((m) => (
-                  <CarteModele key={m.slug} m={m} />
-                ))}
-              </Categorie>
-            ))}
-          </div>
+          <Galerie />
 
           {/* Sortie du catalogue — hors du panneau, pleine largeur : ce
               n'est pas un modèle de plus, c'est ce qu'on répond quand aucun
@@ -252,12 +190,12 @@ export default function ModelesPage() {
             </p>
           </div>
 
-          <Boucle />
+          <BoucleFaisceaux />
         </section>
 
         {/* ═══════════ 5 · clôture ═══════════ */}
         <section data-monde="clair" className="m-wrap pb-[clamp(4.5rem,9vw,7.5rem)]">
-          <Cloture />
+          <ClotureAppel />
         </section>
       </div>
     </PageShell>

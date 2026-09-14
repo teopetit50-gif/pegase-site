@@ -1,0 +1,199 @@
+/* HeroDefile — le hero de /modeles en trois rangées qui glissent.
+   Toutes les règles sont scopées sous .modeles avec le préfixe hd-.
+   Les tailles de carte et les écarts sont des variables posées par palier
+   sur la section : le composant n'a aucune largeur en dur. */
+
+/* ——— la section : un peu plus haute que deux écrans au bureau, pour
+   laisser au défilement la course qui redresse et fait glisser les
+   rangées. min-height, jamais height : si le contenu est plus grand
+   (petit écran en paysage), il n'est pas coupé. ——— */
+.modeles .hd {
+  --hd-w: 400px;
+  --hd-gap: 40px;
+  display: flex;
+  flex-direction: column;
+  min-height: 175vh;
+}
+@media (max-width: 1023px) {
+  .modeles .hd {
+    --hd-w: 320px;
+    --hd-gap: 28px;
+    min-height: 140vh;
+  }
+}
+@media (max-width: 767px) {
+  .modeles .hd {
+    --hd-w: 200px;
+    --hd-gap: 16px;
+    min-height: 125vh;
+  }
+}
+
+/* ——— l'en-tête : dans la colonne .m-wrap, au-dessus de la scène ——— */
+.modeles .hd-tete {
+  padding-top: clamp(2.5rem, 6vw, 5rem);
+  padding-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+
+/* la pastille du chevron sur le bouton noir plein (.m-btn) : cerclée en
+   blanc léger, comme celle de .m-btn-clair l'est sur les blocs sombres */
+.modeles .hd-btn .hd-chevron {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.modeles .hd-btn:hover .hd-chevron {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.14);
+}
+.modeles .hd-btn:focus-visible,
+.modeles .hd-btn-contour:focus-visible {
+  outline: 2px solid var(--m-encre);
+  outline-offset: 3px;
+}
+
+/* ——— la scène : prend le reste de la hauteur, clipe tout ce que les
+   rangées débordent (à gauche, à droite, et en haut quand elles montent
+   vers l'en-tête), porte la perspective. Le padding est DANS la zone
+   visible : les rangées peuvent y monter avant d'être coupées au bord.
+   Le bloc est centré dans la hauteur restante : le blanc que laisse le
+   min-height en vh se répartit au-dessus et au-dessous des rangées au
+   lieu de s'empiler sous la dernière (≈ 200 px à 1440×900, plus sur un
+   27"). Le fondu des bords cache la coupe nette des cartes au bord de la
+   colonne de 1440 px, qui se verrait à 1700. ——— */
+.modeles .hd-scene {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 auto;
+  overflow: hidden;
+  perspective: 1000px;
+  padding-top: clamp(5rem, 11vh, 9rem);
+  padding-bottom: clamp(5rem, 10vh, 8rem);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
+}
+/* téléphone : 11vh ne fait que ~93 px à 844 de haut, moins que la pose de
+   départ du bloc (DEPART_Y dans HeroDefile.tsx, -80 avec JavaScript, -140
+   avant hydratation ou sans JavaScript) plus les ~40 px de coin levé par
+   rotateZ(12°). 18vh, plancher 9,5rem (152 px) : la première rangée reste
+   entière au chargement. */
+@media (max-width: 1023px) {
+  .modeles .hd-scene {
+    padding-top: clamp(4.5rem, 8vh, 6rem);
+  }
+}
+@media (max-width: 767px) {
+  .modeles .hd-scene {
+    padding-top: clamp(6.5rem, 12vh, 8rem);
+  }
+}
+/* 14/09, recette — les min-height de départ (200 / 175 / 145 vh) et le
+   padding-top de 18vh laissaient 200 à 400 px de blanc au-dessus et
+   au-dessous des rangées à 768×1024 et à 390×844 (captures defile.mjs).
+   Ramenés à 175 / 140 / 125 vh et à un padding-top qui suit la hauteur
+   réelle du bloc incliné : la première rangée n'est plus coupée, et le
+   blanc résiduel tient dans la marge de la section suivante. */
+
+/* ——— les rangées : flex à cartes de largeur fixe, sans min-width, dans
+   la scène à 100 % ; ce qui dépasse est clipé par la scène, jamais par la
+   page. Les rangées impaires sont inversées : elles débordent à gauche et
+   glissent vers la droite, les autres débordent à droite et glissent vers
+   la gauche. ——— */
+.modeles .hd-rangee {
+  display: flex;
+  gap: var(--hd-gap);
+  margin: 0 0 var(--hd-gap);
+  padding: 0;
+  list-style: none;
+}
+.modeles .hd-rangee:last-child {
+  margin-bottom: 0;
+}
+.modeles .hd-rangee--inverse {
+  flex-direction: row-reverse;
+}
+.modeles .hd-carte {
+  flex: 0 0 var(--hd-w);
+  width: var(--hd-w);
+}
+
+/* ——— la carte : capture 4/3 dans un cadre à filet, coin 10 px, sans
+   chrome de navigateur (à cette taille la barre mangerait l'image). Le
+   lien se lève au survol ; c'est LUI qui porte le transform de survol,
+   pas le <li>, dont le transform appartient à motion. ——— */
+.modeles .hd-lien {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--m-filet);
+  isolation: isolate;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modeles .hd-lien:hover,
+.modeles .hd-lien:focus-visible {
+  transform: translateY(-10px);
+}
+.modeles .hd-lien:focus-visible {
+  outline: 2px solid var(--m-encre);
+  outline-offset: 3px;
+}
+
+/* voile noir léger + nom en blanc, révélés au survol et au focus */
+.modeles .hd-voile {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.modeles .hd-nom {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.modeles .hd-lien:hover .hd-voile,
+.modeles .hd-lien:focus-visible .hd-voile,
+.modeles .hd-lien:hover .hd-nom,
+.modeles .hd-lien:focus-visible .hd-nom {
+  opacity: 1;
+}
+
+/* écran tactile : pas de survol, le nom reste lisible sur une bande en
+   pied de carte au lieu d'un voile plein */
+@media (hover: none) {
+  .modeles .hd-voile {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0) 45%);
+  }
+  .modeles .hd-nom {
+    opacity: 1;
+    font-size: 13px;
+    left: 10px;
+    bottom: 8px;
+  }
+}
+
+/* mouvement réduit : le composant n'applique plus aucun MotionValue
+   (rendu statique) ; ici on éteint aussi les transitions de survol */
+@media (prefers-reduced-motion: reduce) {
+  .modeles .hd-lien,
+  .modeles .hd-voile,
+  .modeles .hd-nom,
+  .modeles .hd-btn .hd-chevron {
+    transition: none;
+  }
+  .modeles .hd-lien:hover,
+  .modeles .hd-lien:focus-visible {
+    transform: none;
+  }
+}

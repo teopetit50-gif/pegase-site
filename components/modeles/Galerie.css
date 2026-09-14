@@ -1,0 +1,133 @@
+/* Galerie — états du catalogue filtré de /modeles (14/09/2026).
+   Tout est scopé sous .modeles avec le préfixe mg- ; aucune règle ne sort
+   de la section. Le mouvement des tuiles (entrée, réordonnancement) est
+   porté par `motion` dans Galerie.tsx, et le filtre par l'attribut
+   `hidden` ; ici ne vivent que les états que le CSS fait mieux : le
+   survol, le focus clavier, et l'orpheline de la grille à deux colonnes. */
+
+/* ——— la rangée de puces (groupe radio) ———
+   Filet au repos et au survol : les mêmes gris que le « voir plus » que
+   la rangée remplace (border-black/15 → hover:border-black/35, page et
+   Categorie.tsx) ; --m-filet (0.08) est trop pâle pour un bouton posé sur
+   le panneau gris. La puce cochée reprend .m-btn (fond encre, texte
+   carte) et son rayon commun, --radius-btn, pour bouger avec les CTA. */
+.modeles .mg-puce {
+  background: var(--m-carte);
+  color: var(--m-doux);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.modeles .mg-puce:hover {
+  color: var(--m-encre);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+.modeles .mg-puce[aria-checked="true"] {
+  background: var(--m-encre);
+  color: var(--m-carte);
+  border-color: var(--m-encre);
+}
+.modeles .mg-puce:focus-visible,
+.modeles .mg-lien:focus-visible {
+  outline: 2px solid var(--m-encre);
+  outline-offset: 2px;
+}
+
+/* ——— la carte : le « focus » d'Aceternity ———
+   La carte survolée se lève de 2 px ; les autres se voilent (opacité
+   seule — pas de flou : il re-rastérise vingt cartes et quatre-vingts
+   images à chaque changement de cible). Uniquement là où un pointeur
+   peut survoler : sur tactile, rien ne bouge. Le focus clavier dans une
+   carte (un de ses liens) la lève, mais ne voile PAS les autres : tabuler
+   dans la grille ne doit pas griser tout ce qu'on n'a pas encore atteint.
+   Le transform vit sur .mg-carte, JAMAIS sur le <li> : le <li> porte les
+   transforms de `motion` (layout, scale d'entrée), les deux se seraient
+   écrasés. */
+.modeles .mg-carte {
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.35s ease;
+}
+@media (hover: hover) {
+  .modeles .mg-grille:has(.mg-carte:hover) .mg-carte:not(:hover) {
+    opacity: 0.55;
+  }
+  .modeles .mg-carte:hover,
+  .modeles .mg-carte:focus-within {
+    transform: translateY(-2px);
+  }
+}
+
+/* ——— l'orpheline de la grille à deux colonnes ———
+   Entre sm (40rem) et lg (64rem) la grille a deux colonnes ; une famille
+   de 5 ou 7 modèles laisserait un trou en bas à droite. La dernière tuile
+   d'un compte impair prend la ligne entière et se couche : capture à
+   gauche, texte à droite. Au-delà de lg (trois colonnes) on laisse la
+   grille finir en escalier, comme toute grille.
+   Ciblée par `data-orphelin`, posé en JS sur la dernière tuile VISIBLE :
+   les tuiles cachées (`hidden`) restent des frères dans le DOM, un
+   `:nth-child` compterait aussi celles-là. */
+@media (width >= 40rem) and (width < 64rem) {
+  .modeles .mg-item[data-orphelin] {
+    grid-column: 1 / -1;
+  }
+  .modeles .mg-item[data-orphelin] .mg-carte {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .modeles .mg-item[data-orphelin] .mg-visuel {
+    flex: 0 0 46%;
+    min-width: 0;
+  }
+  .modeles .mg-item[data-orphelin] .mg-texte {
+    min-width: 0;
+    padding-top: 4px;
+  }
+}
+
+/* le voile de survol reste (un état, pas un mouvement) ; seules les
+   transitions et la levée sautent */
+@media (prefers-reduced-motion: reduce) {
+  .modeles .mg-puce,
+  .modeles .mg-carte {
+    transition: none;
+  }
+  .modeles .mg-carte:hover,
+  .modeles .mg-carte:focus-within {
+    transform: none;
+  }
+}
+
+/* ——— 14/09, recette : sous sm les cinq puces faisaient CINQ lignes (aucune
+   ne tient à deux sur 342 px), soit 250 px de liste avant la première carte.
+   Elles deviennent un rail horizontal qui déborde jusqu'aux bords du
+   panneau (marges négatives = padding p-5 du panneau), à défilement
+   naturel, barre masquée, une puce coupée au bord droit pour dire qu'il y en
+   a d'autres. Le rail est un conteneur de défilement à part : ce qui y
+   déborde ne touche jamais la largeur de la page. ——— */
+@media (max-width: 39.999rem) {
+  .modeles .mg-puces {
+    flex: 0 0 calc(100% + 2.5rem);
+    min-width: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    padding-bottom: 2px;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 1.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .modeles .mg-puces::-webkit-scrollbar {
+    display: none;
+  }
+  .modeles .mg-puces .mg-puce {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
+}
