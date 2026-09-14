@@ -163,7 +163,7 @@ const FICHE: Fiche = {
     "Immobilier & gestion",
     "Cabinets & conseil",
     "Commerce & distribution",
-    "BTP & artisanat",
+    "BTP & travaux publics",
     "Associations & secteur public",
   ],
 
