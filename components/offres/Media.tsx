@@ -182,10 +182,10 @@ export function IconeLecture({ taille = 15 }: { taille?: number }) {
    —————————————————————————————————————————————————————————— */
 
 const RELANCES = [
-  { client: "Garage Lémard", piece: "FA-2418", montant: "1 240 €", jour: "J+7", etat: "vert" as const, libelle: "Payée" },
-  { client: "SARL Bertine", piece: "FA-2402", montant: "3 780 €", jour: "J+21", etat: "ambre" as const, libelle: "Relancée" },
-  { client: "Ti Punch Traiteur", piece: "DV-0891", montant: "860 €", jour: "J+3", etat: "gris" as const, libelle: "En attente" },
-  { client: "Ébénisterie Nadeau", piece: "FA-2431", montant: "2 150 €", jour: "J+3", etat: "gris" as const, libelle: "En attente" },
+  { client: "Sogexal", piece: "FA-2418", montant: "18 400 €", jour: "J+7", etat: "vert" as const, libelle: "Payée" },
+  { client: "Novasud", piece: "FA-2402", montant: "42 700 €", jour: "J+21", etat: "ambre" as const, libelle: "Relancée" },
+  { client: "Métalco", piece: "DV-0891", montant: "9 850 €", jour: "J+3", etat: "gris" as const, libelle: "En attente" },
+  { client: "Vallier", piece: "FA-2431", montant: "6 300 €", jour: "J+3", etat: "gris" as const, libelle: "En attente" },
 ];
 
 /* Collage du hero — scène de 900 × 560 sur grand écran, comme la capture de
@@ -203,7 +203,7 @@ export function HeroCollage() {
         <BarreFenetre titre="Omega.AI : tableau de bord" />
         <div className="px-5 pb-6 pt-5">
           {/* en-tête : une seule ligne dès 480 px, empilée en dessous — à
-              375 px la ligne unique cassait « 12 480 € » et « Tout valider »
+              375 px la ligne unique cassait « 58 850 € » et « Tout valider »
               en deux morceaux */}
           <div className="flex flex-col gap-3 min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
             <div className="flex items-end gap-4 min-[560px]:gap-6">
@@ -215,7 +215,7 @@ export function HeroCollage() {
                   className="mt-1 whitespace-nowrap text-[26px] font-semibold tracking-[-0.03em] text-[#09090b]"
                   style={{ fontVariantNumeric: "tabular-nums" }}
                 >
-                  12 480 €
+                  58 850 €
                 </div>
               </div>
               <div className="hidden pb-1 min-[560px]:block">
@@ -262,7 +262,7 @@ export function HeroCollage() {
         </div>
         <div className="px-3.5 py-3">
           <p className="text-[11.5px] leading-[1.7] text-[#52525b]">
-            Bonjour Madame Bertine, votre facture FA-2402 arrive à échéance.
+            Bonjour, la facture FA-2402 arrive à échéance vendredi.
             Souhaitez-vous que je vous renvoie le lien de paiement ?
           </p>
           <div className="mt-3 flex gap-2">
@@ -286,10 +286,10 @@ export function HeroCollage() {
         </div>
         <div className="space-y-2 px-3.5 py-3">
           <div className="max-w-[86%] rounded-[10px] rounded-tl-[3px] bg-[#f4f4f5] px-2.5 py-2 text-[11px] leading-[1.6] text-[#3f3f46]">
-            Vous ouvrez demain matin ?
+            Vous pouvez chiffrer 40 unités ?
           </div>
           <div className="ml-auto max-w-[90%] rounded-[10px] rounded-tr-[3px] bg-[#18181b] px-2.5 py-2 text-[11px] leading-[1.6] text-white">
-            Oui, dès 7 h 30. Je vous réserve un créneau ?
+            Oui. Je vous envoie le devis demain matin.
           </div>
           <div className="pt-0.5 text-right text-[10px] text-[#a1a1aa]">
             Répondu en 40 s
@@ -310,9 +310,9 @@ export function MediaPayd() {
       <BarreFenetre titre="PAYD · file de relance" />
       <div className="space-y-1.5 px-4 py-4">
         {[
-          { t: "Devis DV-0891 · Ti Punch Traiteur", s: "Relance J+3 programmée", p: "gris" as const, l: "Demain" },
-          { t: "Facture FA-2402 · SARL Bertine", s: "2ᵉ relance envoyée", p: "ambre" as const, l: "J+21" },
-          { t: "Facture FA-2418 · Garage Lémard", s: "Réglée après relance", p: "vert" as const, l: "Soldée" },
+          { t: "Devis DV-0891 · Métalco", s: "Relance J+3 programmée", p: "gris" as const, l: "Demain" },
+          { t: "Facture FA-2402 · Novasud", s: "2ᵉ relance envoyée", p: "ambre" as const, l: "J+21" },
+          { t: "Facture FA-2418 · Sogexal", s: "Réglée après relance", p: "vert" as const, l: "Soldée" },
         ].map((r) => (
           <div
             key={r.t}
@@ -345,11 +345,11 @@ export function MediaAnswr() {
       </div>
       <div className="space-y-2.5 px-4 py-4">
         <div className="o-demo-recu max-w-[78%] rounded-[12px] rounded-tl-[4px] px-3 py-2.5 text-[12px] leading-[1.65]">
-          Bonsoir, vous faites les vidanges le samedi ?
+          Bonsoir, vous livrez sur la zone de Jarry ?
         </div>
         <div className="o-demo-envoi ml-auto max-w-[86%] rounded-[12px] rounded-tr-[4px] px-3 py-2.5 text-[12px] leading-[1.65]">
-          Bonsoir ! Oui, de 8 h à 13 h. Il me reste deux créneaux samedi
-          prochain : je vous en réserve un ?
+          Bonsoir ! Oui, deux tournées par semaine. Je vous fais chiffrer
+          votre volume dès demain matin ?
         </div>
         <div className="o-demo-faible text-right text-[10.5px]">
           Envoyé 40 s après la question
@@ -372,9 +372,9 @@ export function MediaOffload() {
         </div>
         <div className="space-y-1.5">
           {[
-            { f: "EDF_2026-07-04.pdf", m: "312,40 €", t: "TVA 8,5 %" },
-            { f: "Sodexo-Restauration_0712.pdf", m: "1 084,00 €", t: "TVA 8,5 %" },
-            { f: "Loyer-atelier_juillet.pdf", m: "950,00 €", t: "Exonéré" },
+            { f: "EDF_2026-07-04.pdf", m: "4 180,60 €", t: "TVA 8,5 %" },
+            { f: "Maintenance-flotte_0712.pdf", m: "3 240,00 €", t: "TVA 8,5 %" },
+            { f: "Loyer-entrepot_juillet.pdf", m: "7 900,00 €", t: "Exonéré" },
           ].map((r) => (
             <div
               key={r.f}
@@ -522,9 +522,9 @@ export function MediaValidation() {
       </div>
       <div className="space-y-1.5 px-4 py-3.5">
         {[
-          { t: "Relance FA-2402 · SARL Bertine", e: "attente" as const },
-          { t: "Réponse WhatsApp · devis toiture", e: "valide" as const },
-          { t: "Relance DV-0891 · Ti Punch", e: "suspendu" as const },
+          { t: "Relance FA-2402 · Novasud", e: "attente" as const },
+          { t: "Réponse · demande reçue à 21 h 04", e: "valide" as const },
+          { t: "Relance DV-0891 · service achats", e: "suspendu" as const },
         ].map((r) => (
           <div
             key={r.t}

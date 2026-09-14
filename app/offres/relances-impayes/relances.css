@@ -1,0 +1,382 @@
+/* ══════════════════════════════════════════════════════════════════════
+   OMEGA RELANCES — le monde de la page /offres/relances-impayes
+
+   RAPATRIÉ le 11/09/2026 de `OMEGA/cashd-site/app/globals.css` (248 lignes).
+   Voir RAPATRIEMENT.md : les jetons vivent sous `.p-relances`, JAMAIS sur
+   `:root` — les poser sur `:root` repeindrait les 23 autres pages du site.
+   Tout ce fichier est donc descendant de `.p-relances`.
+
+   ══════════════════════════════════════════════════════════════════════
+   RELEVÉ — folio-topaz-delta.vercel.app (« Folio », gabarit Ruixen UI)
+   Relevé du 09/09/2026, au getComputedStyle sur la référence en ligne,
+   contrôlé à six largeurs (390, 768, 1024, 1280, 1440, 1700) en
+   rechargeant à chaque palier. Aucune valeur estimée.
+
+   COULEURS — lues sur `document.documentElement` dans les deux thèmes.
+   La référence passe par des alias `--color-fd-*` (Fumadocs) ; on écrit
+   ici les valeurs finales, en hexadécimal, sans l'indirection.
+
+   TYPOGRAPHIE
+     h1  36/40 → 48/48 (sm) → 60/60 (lg), 600, interlettre normale
+     h2  30/36 ou 36/40 → 48/48 (sm), 700, -0.025em
+     pied h2  → 72/72 à lg
+     p héros  18/28 → 20/28 (lg), #737373
+     corps    16/26, #737373
+     sourcil  Geist Mono 11px, +0.2em, capitales, #737373
+     h3       16/24 (cartes) ou 18/22.5 (bento), 600, Geist
+
+   ÉCART ASSUMÉ — la police d'affichage. La référence déclare
+   `"Tiempos Headline", Georgia, serif` mais n'embarque aucune fonte
+   serif : Tiempos est sous licence Klim Type Foundry, donc la référence
+   elle-même retombe sur Georgia. On charge **Gelasio**, libre et
+   métriquement compatible avec Georgia : le rendu est identique là où
+   Georgia existe, et cohérent là où elle manque (Android, Linux).
+
+   CADRE — `.rel-conteneur` reprend le conteneur de la référence :
+   100 % puis 768 / 1024 / 1280 / 1400 px aux paliers. Les sections
+   courantes utilisent `max-w-7xl` + `px-6 lg:px-8` (1216 px de contenu
+   à 1440). Le héros ajoute deux filets verticaux tiretés à partir de sm.
+   ══════════════════════════════════════════════════════════════════════
+
+   ── CE QUE LE RAPATRIEMENT CHANGE ───────────────────────────────────
+
+   1. LE MONDE SOMBRE NE VIENT PAS (règle 4). Le site source avait une
+      bascule clair/sombre (`components/BasculeTheme.tsx` + une amorce
+      `localStorage` sur la clé `cashd-theme`). Ni le bouton, ni l'amorce,
+      ni le bloc `.dark` ne sont portés : la page est figée dans son monde
+      CLAIR. Les utilitaires `dark:` restés dans le balisage sont inertes
+      — `globals.css` a rebranché la variante sur une classe que ce site
+      ne pose jamais.
+
+   2. PAS DE `@theme` ICI (règle 3) : il ne vaut que dans `globals.css`.
+      Les utilitaires que le site source tirait de SON `@theme`
+      (`bg-background`, `text-muted-foreground`, `border-border`,
+      `bg-card`, `bg-primary`, `bg-muted`, `ring-ring`…) N'EXISTENT PAS
+      sur ce site. Ils ne produisent aucune erreur : ils ne peignent rien,
+      en silence. Ils sont donc tous convertis en valeur arbitraire dans
+      le balisage — `text-[#737373]`, `border-[#e6e6e6]`, etc.
+
+      Pourquoi la valeur littérale et non `text-[var(--rel-muted-fg)]` :
+      `text-[…]`, `border-[…]` et `ring-[…]` sont ambigus (couleur ou
+      taille ?), et avec un `var()` Tailwind ne peut pas trancher — il
+      faut l'indice de type. Un hexadécimal, lui, est reconnu sans
+      ambiguïté. Le monde étant figé en clair, l'hexadécimal EST le jeton.
+      Les jetons ci-dessous restent la référence écrite de ces valeurs,
+      et servent aux règles CSS de ce fichier.
+
+   3. LE CADRE 1440 (règle 1). `<main>` est plafonné à `max-w-[1440px]`
+      par PageShell. Au-delà, le fond blanc est prolongé jusqu'aux bords
+      de l'écran par l'ombre géante écrêtée ci-dessous — même technique
+      que `.monde-clair` et `.offres` dans globals.css. Sans elle, la
+      page blanche flotterait entre deux bandes noires (`bg-panel`).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-relances {
+  /* ── jetons, relevés dans le thème CLAIR de la référence ────────── */
+  --rel-bg: #ffffff; /* --background */
+  --rel-fg: #171717; /* --foreground */
+  --rel-card: #ffffff; /* --card */
+  --rel-card-fg: #171717; /* --card-foreground */
+  --rel-primary: #171717; /* --primary */
+  --rel-primary-fg: #ffffff; /* --primary-foreground */
+  --rel-muted: #f5f5f5; /* --muted, --secondary, --accent */
+  --rel-muted-fg: #737373; /* --muted-foreground */
+  --rel-accent-fg: #171717; /* --accent-foreground */
+  --rel-border: #e6e6e6; /* --border, --input */
+  --rel-ring: #171717; /* --ring */
+
+  background: var(--rel-bg);
+  color: var(--rel-fg);
+  -webkit-font-smoothing: antialiased;
+
+  /* Règle 5 — la règle de police du site est posée plus haut, sur <html>,
+     avec Inter. Elle doit donc être réécrite explicitement ici, sinon la
+     page rapatriée se compose en Inter et tout le relevé typographique
+     tombe. Les variables viennent du `next/font/google` de la page. */
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+
+  /* ── La page occupe toute la largeur, pas la colonne de 1440 ──────────
+     11/09, demande de Teo : « je veux que ce soit plein, que ça prenne
+     toute la page, pas dans des sortes de grandes sections ».
+
+     Le premier remède était une ombre démesurée écrêtée horizontalement
+     (`box-shadow: 0 0 0 50vw` + `clip-path: inset(0 -50vw)`) : le blanc
+     débordait sans toucher à la mise en page. Mesuré à 1920 sur le
+     déploiement du 11/09, il en restait deux gouttières de 240 px d'une
+     autre teinte de chaque côté — la page se lisait toujours comme un
+     bloc posé au milieu.
+
+     On sort donc franchement la peau du cadre de <main> : elle prend la
+     largeur de la fenêtre, et le contenu reste centré tout seul par les
+     conteneurs internes des sections (`max-w-7xl`, `.conteneur`). Le div
+     de PageShell porte `overflow-x-clip`, donc ce débordement ne crée
+     aucune barre de défilement horizontale — c'est précisément le cas
+     pour lequel `clip` avait été choisi plutôt que `hidden`.
+
+     `100vw` compte la barre de défilement là où elle prend de la place ;
+     le débord est absorbé par ce même `overflow-x-clip`. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* La référence n'habille en serif que h1 et h2 : les h3 restent en Geist. */
+.p-relances h1,
+.p-relances h2 {
+  font-family: var(--font-gelasio), Georgia, "Times New Roman", serif;
+}
+
+/* `font-mono` existe sur ce site, mais il vaut JetBrains Mono — la police
+   mono du site, posée par un `@theme inline` de globals.css, donc valeur
+   INLINÉE dans l'utilitaire : impossible de la détourner en redéfinissant
+   une variable. On écrase la règle ici. Une règle hors couche l'emporte
+   sur n'importe quel utilitaire Tailwind, qui vit dans `@layer utilities`.
+   Concerne les sourcils, les jalons du protocole et les numéros d'étape :
+   le relevé les donne en Geist Mono. */
+.p-relances .font-mono {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Conteneur du héros — relevé : 100 % / 768 / 1024 / 1280 / 1400.
+   (`.conteneur` sur le site source ; renommé `.rel-conteneur` pour ne
+   pas occuper un nom aussi général dans un site qui en a 23 autres.)
+
+   ÉCART DÛ AU CADRE 1440 : le palier 1400 s'ouvrait à 1536 px de fenêtre
+   sur le site source, où il restait 68 px de gouttière de chaque côté. Ici
+   <main> est plafonné à 1440 : la gouttière tombe à 20 px, et le filet
+   tireté du héros vient presque au contact du filet latéral de <main>.
+   C'est le seul palier du relevé que le cadre déplace. */
+.p-relances .rel-conteneur {
+  width: 100%;
+  margin-inline: auto;
+}
+@media (min-width: 768px) {
+  .p-relances .rel-conteneur {
+    max-width: 768px;
+  }
+}
+@media (min-width: 1024px) {
+  .p-relances .rel-conteneur {
+    max-width: 1024px;
+  }
+}
+@media (min-width: 1280px) {
+  .p-relances .rel-conteneur {
+    max-width: 1280px;
+  }
+}
+@media (min-width: 1536px) {
+  .p-relances .rel-conteneur {
+    max-width: 1400px;
+  }
+}
+
+/* ── Animations relevées sur la référence ─────────────────────────────
+   Les deux seules que l'arbre rapatrié utilise encore. Les quatre autres
+   du site source (`apparait`, `monte`, `grandit`, `glisse`) servaient aux
+   vignettes dessinées à la main, remplacées par les composants 21st.dev —
+   elles ne sont pas reprises. Noms préfixés `rel-` : les `@keyframes` sont
+   globaux quoi qu'on fasse, ils ne se scopent pas. */
+
+@keyframes rel-ruban {
+  from {
+    transform: translate(0);
+  }
+  to {
+    transform: translate(-33.3333%);
+  }
+}
+.p-relances .rel-animate-ruban {
+  animation: rel-ruban 35s linear infinite;
+}
+
+/* Relevé : `spin-slow 3s linear infinite` sur la référence. */
+@keyframes rel-tour-lent {
+  to {
+    transform: rotate(1turn);
+  }
+}
+.p-relances .rel-animate-tour-lent {
+  animation: rel-tour-lent 3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p-relances .rel-animate-ruban,
+  .p-relances .rel-animate-tour-lent {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PASSE MOBILE — 11/09/2026, demande de Teo : « ça fait encore trop
+   chargé » sur les pages de module.
+
+   MESURÉ AVANT (outils/lignes-sections.mjs + paliers.mjs, 390 px) :
+   page 10 727 px de haut, 220 lignes de texte vues, h2 36/40 et chapô
+   18/28 — c'est-à-dire L'ÉCHELLE DE BUREAU APPLIQUÉE TELLE QUELLE au
+   téléphone. Le relevé de Folio est respecté au pixel ; c'est justement
+   le piège : la référence est en anglais, et le même gabarit rempli de
+   français donne 20 à 30 % de lignes en plus. Être identique à la
+   référence ne suffit pas.
+
+   CE QU'ON NE FAIT PAS : raccourcir le texte français. C'est la promesse
+   qui rétrécirait. On ne touche qu'à la GÉOMÉTRIE, et seulement SOUS le
+   point d'arrêt `sm` — au-dessus de 640 px, pas un pixel ne bouge, le
+   relevé de la référence reste vérifiable tel qu'il a été contrôlé.
+
+   POURQUOI DES UTILITAIRES RÉÉCRITS ET NON DES CLASSES DANS LE BALISAGE :
+   les neuf composants de la page sont réécrits par d'autres sessions
+   dans le même arbre ; un bloc isolé dans CE fichier survit à ça, se
+   grep en une commande et se supprime d'un bloc. Une règle hors couche
+   l'emporte sur `@layer utilities`, même mécanique que `.font-mono`
+   ci-dessus. Aucun risque de collision avec les variantes `sm:`/`md:` :
+   elles s'ouvrent à 640 et 768, ce bloc se ferme à 639.
+
+   L'ÉCHELLE VISÉE est celle d'un site qui se lit à 390 — texte
+   d'accompagnement autour de 15/23, titres secondaires à 28 — et non
+   celle d'un gabarit anglais étiré.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 639px) {
+  /* ── Titres ───────────────────────────────────────────────────────
+     `text-4xl` porte à la fois le h1 du héros, les huit h2 de section et
+     les quatre chiffres de la bande. 36 px pour tous : plus aucune
+     hiérarchie, tout se vaut, donc tout paraît énorme. On rend l'écart
+     — le héros garde son impact, les sections descendent d'un cran. */
+  .p-relances .text-4xl {
+    font-size: 1.75rem; /* 28 */
+    line-height: 1.16;
+  }
+  .p-relances h1.text-4xl {
+    font-size: 2rem; /* 32 — le héros reste le plus gros élément */
+    line-height: 1.12;
+  }
+
+  /* Les mots du ruban défilant (Bandeau) : 24 → 22. */
+  .p-relances .text-2xl {
+    font-size: 1.375rem;
+  }
+
+  /* Intitulés de carte (`how-it-works`) : 20/28 → 17/24,5. */
+  .p-relances .text-xl {
+    font-size: 1.0625rem;
+    line-height: 1.45;
+  }
+
+  /* ── Corps ────────────────────────────────────────────────────────
+     `text-lg` = chapô du héros et des sections (18/28), `text-base` =
+     texte courant (16/26). Les deux descendent, l'écart entre eux
+     reste : on lit « titre puis paragraphe », pas un mur uniforme.
+     `text-sm` (14/22,75) n'est PAS touché — c'est déjà la bonne taille
+     mobile, et c'est le plancher de lisibilité. */
+  .p-relances .text-lg {
+    font-size: 1rem; /* 16 */
+    line-height: 1.55;
+  }
+  .p-relances .text-base {
+    font-size: 0.9375rem; /* 15 */
+    line-height: 1.55;
+  }
+
+  /* ── Rythme vertical ──────────────────────────────────────────────
+     Sept sections à 80 px de respiration en haut ET en bas, plus le
+     héros à 96/80 : près de 1 200 px de vide avant d'avoir écrit une
+     ligne. On garde de l'air — assez pour que les sections restent
+     distinctes — sans le calibre du bureau. */
+  .p-relances .py-20,
+  .p-relances .pb-20 {
+    padding-block: 2.75rem; /* 44, au lieu de 80 */
+  }
+  .p-relances .pb-20 {
+    padding-top: 0;
+  }
+  .p-relances .py-16,
+  .p-relances .pt-16,
+  .p-relances .pb-16 {
+    padding-block: 2.5rem; /* 40, au lieu de 64 */
+  }
+  .p-relances .pt-16 {
+    padding-bottom: 0;
+  }
+  .p-relances .pb-16 {
+    padding-top: 0;
+  }
+  .p-relances .pt-24 {
+    padding-top: 2.5rem; /* héros : 96 → 40 */
+  }
+  .p-relances .pt-12 {
+    padding-top: 1.75rem;
+  }
+
+  /* Écarts internes. `mt-10` est le plus coûteux : il sépare l'icône du
+     titre dans les quatre cases du bento, 40 px de vide chacune. */
+  .p-relances .mt-28 {
+    margin-top: 2.5rem;
+  }
+  .p-relances .mt-20 {
+    margin-top: 2.25rem;
+  }
+  .p-relances .mt-16 {
+    margin-top: 2rem;
+  }
+  .p-relances .mt-12 {
+    margin-top: 1.75rem;
+  }
+  .p-relances .mt-10 {
+    margin-top: 1.5rem;
+  }
+  .p-relances .mb-16 {
+    margin-bottom: 2rem;
+  }
+  .p-relances .mb-12 {
+    margin-bottom: 1.75rem;
+  }
+  .p-relances .mb-8 {
+    margin-bottom: 1.25rem;
+  }
+  .p-relances .mb-6 {
+    margin-bottom: 1.25rem;
+  }
+
+  /* Gouttières. À 390 px la grille est à une colonne : `gap-12` n'est
+     plus une gouttière entre deux colonnes, c'est un trou entre un
+     titre et son chapô. */
+  .p-relances .gap-14 {
+    gap: 2rem;
+  }
+  .p-relances .gap-12 {
+    gap: 1.75rem;
+  }
+  .p-relances .gap-10 {
+    gap: 1.5rem;
+  }
+  .p-relances .gap-8 {
+    gap: 1.25rem;
+  }
+  .p-relances .gap-6 {
+    gap: 1.25rem;
+  }
+
+  /* `space-y-*` de Tailwind v4 pose un `margin-block-end` sur tous les
+     enfants sauf le dernier, à travers un `:where()` de spécificité
+     nulle : la surcharge passe sans `!important`. */
+  .p-relances .space-y-12 > :not(:last-child) {
+    margin-block-end: 2rem;
+  }
+
+  /* ── Rembourrage des cartes ───────────────────────────────────────
+     À 390 px, le rembourrage se paie deux fois : il mange la largeur du
+     texte, donc il rallonge la page. La section « Un produit français »
+     empilait trois cadres — px-6 de la page, p-8 de la carte, p-5 de la
+     ligne — plus la pastille et sa gouttière : 184 px de chrome pour
+     206 px de texte, d'où des blocs de quatre lignes sur des phrases qui
+     en font deux. On récupère 32 px de colonne. */
+  .p-relances .p-8,
+  .p-relances .p-6 {
+    padding: 1.25rem;
+  }
+  .p-relances .p-5 {
+    padding: 1rem;
+  }
+}

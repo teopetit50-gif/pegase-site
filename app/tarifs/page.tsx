@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
+import ChequeTic from "@/components/tarifs/ChequeTic";
+import AppelFinal from "@/components/tarifs/AppelFinal";
+import FaqTarifs from "@/components/tarifs/FaqTarifs";
 import { REMISE_ANNUELLE } from "@/lib/paliers";
-import { CANAL_LABEL_PHRASE, CANAL_VALEUR, lienContact } from "@/lib/reservation";
 
 /* 03/09 — le taux de la remise annuelle écrit en toutes lettres dans les
    textes de la page : dérivé de la constante, jamais recopié à la main. */
@@ -57,6 +58,12 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
      7.   CTA final centré, avec la voie WhatsApp et la mention discrète
           de l'autre porte — la page audit finit pareil ;
      8.   la FAQ, en dernier.
+   → 14/09 (Teo : « ces sections sont mal faites, récupère des composants
+   sur 21st.dev ») : les sections 4, 7 et 8 sont des reprises 21st.dev,
+   chacune dans components/tarifs/ avec ses écarts en tête — ChequeTic
+   (stats-2), AppelFinal (call-to-action), FaqTarifs (faqs-02). Les textes
+   n'ont pas bougé ; seuls les trois chiffres du Chèque TIC sont sortis du
+   paragraphe pour devenir des tuiles.
    Le simulateur et les engagements (5, 6) n'ont pas d'équivalent tarifs
    et ne sont pas meublés. Les textes de la page sont inchangés ; les
    seuls ajouts sont ceux que les emplacements du design imposaient
@@ -182,110 +189,22 @@ export default function TarifsPage() {
           </div>
         </section>
 
-        {/* ═══ 4 — Chèque TIC, sur bande sombre ═══ */}
+        {/* ═══ 4 — Chèque TIC, sur bande sombre — trois tuiles à grands
+               chiffres (14/09, reprise stats-2) ═══ */}
         <section id="cheque-tic" className="r-nuit">
-          <div className="r-wrap py-14 sm:py-20">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-[60ch]">
-                <p className="r-note">Chèque TIC — Région Guadeloupe</p>
-                <h2 className="r-h2 mt-6 max-w-[18ch]">
-                  De 40 à 80 % d&apos;un projet numérique financés
-                </h2>
-                <p className="mt-5 text-[15px] leading-[24px] text-[#d4d4d8]">
-                  La Région Guadeloupe finance de 40 à 80&nbsp;% d&apos;un projet de transformation
-                  numérique, dans la limite de 10&nbsp;000&nbsp;€, pour une entreprise éligible.
-                  Votre éligibilité est vérifiée à la réunion d&apos;installation — et si un dossier
-                  se justifie, nous le montons avec vous.
-                </p>
-              </div>
-              <a href="#grille" className="r-btn r-btn--blanc shrink-0">
-                Choisir mes postes
-              </a>
-            </div>
-          </div>
+          <ChequeTic />
         </section>
 
-        {/* ═══ 7 — CTA final ═══ */}
-        <section id="reserver" data-monde="clair" className="r-wrap py-16 sm:py-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="r-h2">Réservez l&apos;installation en deux minutes</h2>
-            <p className="r-lead mx-auto mt-6 max-w-[54ch]">
-              Vous choisissez vos postes, vous réservez la réunion d&apos;installation en
-              ligne, vous enregistrez votre moyen de paiement — et le système démarre sous
-              votre œil. Rien n&apos;est débité avant la fin de l&apos;installation&nbsp;: le
-              premier prélèvement part le jour où vos modules sont en service.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <a href="#grille" className="r-btn r-btn--noir">
-                Choisir mes postes
-              </a>
-            </div>
-            <p className="r-note mt-5">
-              Ou directement : {CANAL_LABEL_PHRASE} :{" "}
-              <a
-                href={lienContact("Tarifs Omega")}
-                className="underline underline-offset-4 hover:text-[#050505]"
-              >
-                {CANAL_VALEUR}
-              </a>
-            </p>
-            {/* la mention discrète de l'autre porte (28/08) : pour qui
-                s'est trompé d'aiguillage, sans re-poser deux portes ici —
-                symétrique de celle qui clôt /reserver-un-audit */}
-            <p className="r-note mx-auto mt-8 max-w-xl !text-[13px]">
-              Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille n&apos;est pas
-              votre porte&nbsp;: votre prix sort d&apos;un audit.{" "}
-              <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-[#050505]">
-                Réserver un échange
-              </Link>
-            </p>
-          </div>
+        {/* ═══ 7 — CTA final — la carte sombre encadrée (14/09, reprise
+               call-to-action de @mokshithgujjeti) ═══ */}
+        <section id="reserver" data-monde="clair">
+          <AppelFinal />
         </section>
 
-        {/* ═══ 8 — la FAQ tarifs (28/08, 2ᵉ passe) — mêmes replis .r-faq
-               que la page audit ═══ */}
-        <section id="faq" data-monde="clair" className="r-blanc">
-          <div className="r-wrap py-14 sm:py-20">
-            <div className="grid gap-8 lg:grid-cols-[379px_1fr] lg:gap-16">
-              <h2 className="r-h3 lg:sticky lg:top-28 lg:self-start">
-                Questions sur les prix
-              </h2>
-              <div>
-                {FAQ_TARIFS.map((f) => (
-                  <details key={f.q} className="r-faq">
-                    <summary>
-                      {f.q}
-                      <svg
-                        aria-hidden
-                        className="r-faq-croix"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 18 18"
-                        fill="none"
-                      >
-                        <path
-                          d="M9 1v16M1 9h16"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </summary>
-                    <div className="pb-7 pr-8">
-                      {f.r.map((par, i) => (
-                        <p
-                          key={i}
-                          className={`text-[15px] leading-[26px] text-[#3d3d3d] ${i > 0 ? "mt-4" : ""}`}
-                        >
-                          {par}
-                        </p>
-                      ))}
-                    </div>
-                  </details>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* ═══ 8 — la FAQ tarifs, en dernier — deux colonnes, accordéon
+               Radix (14/09, reprise faqs-02 de @ln-dev7) ═══ */}
+        <section id="faq" data-monde="clair">
+          <FaqTarifs items={FAQ_TARIFS} />
         </section>
       </div>
     </PageShell>

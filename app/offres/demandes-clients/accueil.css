@@ -1,0 +1,311 @@
+/* ══════════════════════════════════════════════════════════════════════
+   RELEVÉ — synthai.demos.tailgrids.com, 09/09/2026
+
+   Valeurs lues au getComputedStyle sur la référence, jamais estimées, et
+   contrôlées aux cinq largeurs en rechargeant à chaque palier.
+
+   Jetons déclarés par la référence (custom properties de sa feuille
+   compilée) :
+     --font-sans           "Figtree", sans-serif      (SIL OFL)
+     --font-mono           "Space Mono", monospace    (SIL OFL)
+     --color-soft-green    #edf4ea
+     --color-soft-purple   #ebebfc
+     --color-soft-pink     #f7eff7
+     .shadow-integration   -6px -5px 5px #00000003, -10.5px 14.5px 11.15px #0000000a
+     @keyframes marquee    translate(0) → translate(-33.33%), 30s linear
+
+   Le reste de la palette est la neutre par défaut de Tailwind v4 : fond de
+   page neutral-100 (oklch(.97 0 0)), texte neutral-900, sourdine
+   neutral-500, cartes neutral-50/100.
+
+   Géométrie mesurée (référence · même valeur chez nous) :
+     ┌────────────┬───────┬───────┬────────┬────────┬────────┐
+     │            │  390  │  768  │  1024  │  1440  │  1700  │
+     ├────────────┼───────┼───────┼────────┼────────┼────────┤
+     │ héros pt   │  120  │  120  │   160  │   160  │   160  │
+     │ héros pb   │   64  │   80  │   300  │   300  │   300  │
+     │ titre héros│ 36/40 │ 36/40 │  48/48 │  60/60 │  60/60 │
+     │ section py │   48  │   48  │   100  │   100  │   100  │
+     │ titre sect.│ 30/36 │ 36/40 │  48/56 │  48/56 │  48/56 │  ls −2px
+     │ colonne    │  366  │  744  │  1000  │  1280  │  1280  │
+     │ carte px   │   24  │   48  │    48  │    48  │    48  │
+     │ coquille p │   12  │   12  │    12  │    12  │    12  │
+     │ rayon sect.│   12  │   12  │    12  │    12  │    12  │  pied 22
+     └────────────┴───────┴───────┴────────┴────────┴────────┘
+
+   Les deux fonds en image de la référence (hero-bg.png 2832×1935 et
+   cta-bg.png 2784×720) ne sont pas repris : ce sont ses fichiers. Ils ont
+   été échantillonnés (grille 9×9 lue au canvas) — ce sont des lavis des
+   trois teintes ci-dessus sur blanc — puis refaits en dégradés CSS, plus
+   bas dans ce fichier.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════
+   RAPATRIEMENT 11/09/2026 — ce fichier est l'ex-`app/globals.css` du site
+   autonome OMEGA/frontd-site, ramené sous la classe de portée `.p-accueil`.
+
+   La colonne 1700 du tableau ci-dessus ne se rejoue PLUS ici : `PageShell`
+   plafonne `<main>` à 1440 px. Sans conséquence sur la ligne « colonne »
+   (max-w-7xl la fige à 1280 dès 1440), mais la page n'occupe plus toute la
+   fenêtre au-delà — elle devient une colonne de 1440 centrée sur le fond
+   du site. Le seul relevé réellement perdu est celui des tuiles flottantes
+   de « Canaux », dont le palier `2xl:` est retiré : voir le commentaire de
+   components/produits/accueil/Canaux.tsx.
+
+   Ce que ce fichier NE contient pas, et pourquoi (règle 3 du contrat) :
+
+     · pas de `@import "tailwindcss"`, pas de `@theme`, pas de
+       `@custom-variant` — ils ne valent que dans app/globals.css. Les
+       quatre utilitaires que le `@theme` du site source faisait naître
+       n'existent donc pas ici, et une utilitaire inexistante ne peint
+       rien EN SILENCE. Elles sont converties une par une :
+
+         bg-soft-green      → bg-[#edf4ea]     (valeur arbitraire)
+         bg-soft-purple     → bg-[#ebebfc]     (valeur arbitraire)
+         bg-soft-pink       → bg-[#f7eff7]     (valeur arbitraire)
+         shadow-integration → .a-ombre-integration   (règle, plus bas)
+         animate-marquee    → .a-marquee             (règle, plus bas)
+
+     · pas de règle sur `html` : la page est une page parmi 23 autres. Le
+       `scroll-behavior: smooth` du site source part avec — le site a Lenis,
+       qui fait le même travail et le ferait deux fois.
+
+     · pas de bascule clair/sombre : il n'y en avait pas. La page est d'un
+       seul monde, clair, et ses sections portent `data-monde="clair"`.
+
+   Un renommage, un seul, et il est obligatoire : la keyframe `marquee`.
+   app/globals.css en déclare DÉJÀ une, de même nom et de valeur
+   différente (translateX 0 → −50 %, pour `.marquee-track`). Les keyframes
+   sont globales quoi qu'on fasse : redéclarer `marquee` ici casserait le
+   ruban d'outils du reste du site, sans un bruit. D'où `a-marquee-accueil`.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-accueil {
+  /* Les trois teintes du thème, portées ici pour les deux lavis. Sous la
+     classe de portée et JAMAIS sur :root : sur :root elles repeindraient
+     les 23 autres pages. */
+  --a-soft-green: #edf4ea;
+  --a-soft-purple: #ebebfc;
+  --a-soft-pink: #f7eff7;
+
+  /* Règle 5 — la police s'écrit explicitement. La règle de police du site
+     est posée plus haut, sur `body`, avec Inter ; et l'utilitaire
+     `font-sans` de ce site est compilé en dur sur `var(--font-inter)`
+     (`@theme inline`), donc redéfinir `--font-sans` ici ne changerait
+     rien. Les deux variables `--police-*` viennent de next/font, posées
+     par la page sur ce même conteneur. */
+  font-family: var(--police-texte), "Figtree", ui-sans-serif, system-ui, sans-serif;
+
+  /* Même piège que la police, et plus vicieux : `body` de ce site porte
+     `color: var(--text)`, un blanc cassé — c'est un site de thème sombre.
+     Le décalque, lui, vivait sur un body sans règle de couleur et comptait
+     donc sur le noir par défaut du navigateur. Tout texte qui n'aurait pas
+     sa couleur écrite serait ici BLANC SUR BLANC. Vérifié : il n'y en a
+     aucun aujourd'hui ; cette ligne est ce qui fait que ça reste vrai. */
+  color: var(--color-neutral-900, #171717);
+
+  /* 11/09 — les bandes noires sur les côtés. <main> est plafonné à 1440 px
+     et centré sur le `bg-panel` noir du site : au-delà, la page claire
+     s'arrêtait net et le noir réapparaissait de chaque côté. Les trois
+     autres pages produit avaient repris la technique maison de
+     `.monde-clair` et `.resa` ; celle-ci ne l'avait pas.
+
+     11/09, demande de Teo, capture à l'appui : « je veux que ce soit
+     plein, que ça prenne toute la page, pas dans des sortes de grandes
+     sections ». L'ombre écrêtée (`box-shadow: 0 0 0 50vw` +
+     `clip-path: inset(0 -50vw)`) laissait encore, mesuré à 1920 sur le
+     déploiement du matin, deux gouttières de 240 px d'une autre teinte :
+     la page se lisait comme un bloc posé au milieu de l'écran.
+
+     On sort donc franchement la peau du cadre de <main> : elle prend la
+     largeur de la fenêtre, et le contenu reste centré tout seul par les
+     conteneurs internes des sections. Le div de PageShell porte
+     `overflow-x-clip`, donc ce débordement ne crée aucune barre de
+     défilement horizontale — c'est le cas pour lequel `clip` avait été
+     préféré à `hidden`.
+
+     Même correction posée le même jour sur relances-impayes/relances.css ;
+     factures-fournisseurs/factures.css porte encore l'ancienne technique. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Même raison : `font-mono` vaut JetBrains Mono sur ce site, et le décalque
+   s'en sert partout (étiquettes, boutons, heures, mentions). Deux classes
+   de sélecteur battent l'utilitaire quel que soit l'ordre d'émission. */
+.p-accueil .font-mono {
+  font-family: var(--police-mono), "Space Mono", ui-monospace, SFMono-Regular, monospace;
+}
+.p-accueil .font-sans {
+  font-family: var(--police-texte), "Figtree", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Les deux lavis, refaits en dégradés — mêmes teintes que les jetons.
+   Héros : violet en haut à droite, rose sur le flanc gauche, vert en bas
+   au centre, bande blanche en diagonale. */
+.p-accueil .a-fond-heros {
+  background-color: #fff;
+  background-image:
+    radial-gradient(120% 90% at 100% 0%, var(--a-soft-purple) 0%, #ffffff00 55%),
+    radial-gradient(90% 80% at 0% 72%, var(--a-soft-pink) 0%, #ffffff00 58%),
+    radial-gradient(70% 60% at 38% 108%, var(--a-soft-green) 0%, #ffffff00 62%),
+    radial-gradient(60% 45% at 34% -8%, var(--a-soft-green) 0%, #ffffff00 60%);
+}
+
+/* Clôture : lavis horizontal violet → rose → vert, accentué vers le bas. */
+.p-accueil .a-fond-cloture {
+  background-color: #fff;
+  background-image:
+    radial-gradient(80% 130% at 8% 100%, var(--a-soft-purple) 0%, #ffffff00 60%),
+    radial-gradient(70% 120% at 45% 105%, var(--a-soft-pink) 0%, #ffffff00 60%),
+    radial-gradient(80% 130% at 92% 100%, var(--a-soft-green) 0%, #ffffff00 60%);
+}
+
+/* ─── `shadow-integration` du site source, au relevé près. En règle et non
+   en valeur arbitraire : elle sert cinq fois (tuiles de canaux, cartes de
+   métiers, les quatre panneaux produit, le schéma du tri), et la valeur
+   arbitraire correspondante ferait 78 signes à chaque emploi. */
+.p-accueil .a-ombre-integration {
+  box-shadow:
+    -6px -5px 5px 0px #00000003,
+    -10.5px 14.5px 11.15px 0px #0000000a;
+}
+
+/* ─── Le ruban des demandes. Trois copies identiques, la piste glissant de
+   −33,33 % : la boucle est invisible. 30 s linéaire, relevé sur la keyframe
+   de la référence.
+
+   En quatre longhands et surtout PAS en raccourci `animation:` — le
+   raccourci réinitialise `animation-play-state` à `running`, et écraserait
+   donc le `hover:[animation-play-state:paused]` posé sur le même élément
+   par le balisage (les deux pèsent 0,2,0 : c'est l'ordre d'émission des
+   feuilles qui trancherait, et il n'est pas garanti). */
+.p-accueil .a-marquee {
+  animation-name: a-marquee-accueil;
+  animation-duration: 30s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes a-marquee-accueil {
+  0% {
+    transform: translate(0);
+  }
+  100% {
+    transform: translate(-33.33%);
+  }
+}
+
+/* ─── Le signe du produit, dans le héros. `/logos/frontd-mark.png` est un
+   MASQUE ALPHA : l'encre est dans le canal alpha, les pixels sont blancs.
+   Posé en `<img>` il n'afficherait rien de lisible — c'est `background` qui
+   donne la couleur à travers le masque, ici `currentColor` pour qu'il suive
+   la teinte du texte à côté duquel il est posé. */
+.p-accueil .a-marque {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-image: url("/logos/frontd-mark.png");
+  mask-image: url("/logos/frontd-mark.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* ─── L'apparition au défilement est ADDITIVE : le bloc est visible par
+   défaut et ne se cache que si le script tourne (data-anim="on" posé au
+   montage). Sans JavaScript, la page reste entièrement lisible. */
+.p-accueil [data-anim="on"][data-vu="non"] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.p-accueil [data-anim="on"] {
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Mouvement réduit : le ruban s'arrête, les apparitions ne glissent plus.
+   Portée à la page — le site a ses propres garde-fous ailleurs. */
+@media (prefers-reduced-motion: reduce) {
+  .p-accueil,
+  .p-accueil *,
+  .p-accueil *::before,
+  .p-accueil *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PASSE MOBILE — 11/09/2026, demande de Teo : « ça fait encore trop
+   chargé » sur les pages de module.
+
+   CE QUI ÉTAIT DÉJÀ FAIT, et qu'il ne faut surtout pas refaire : la
+   TYPOGRAPHIE. Cette page est la mieux traitée des quatre — onze
+   `max-sm:text-[15px]`, dix `max-sm:text-[26px]`, les interlignes et les
+   interlettres qui vont avec. Relevé à 390 : h1 30/34, h2 26/30, corps
+   15/1,55. C'est l'échelle visée. Y toucher la casserait.
+
+   CE QUI RESTAIT : le RYTHME VERTICAL. Le palier mobile existe déjà
+   (`max-sm:py-14`, onze fois) mais il vaut encore 56 px en haut ET en
+   bas — soit 1 008 px cumulés sur neuf sections, plus les 168 px du
+   héros. Sur une page de 9 955 px, c'est plus d'un écran et demi de
+   téléphone qui ne porte aucun mot.
+
+   POURQUOI DES SÉLECTEURS ÉCHAPPÉS (`.max-sm\:py-14`) : la valeur à
+   corriger est déjà portée par une variante `max-sm:`, donc le nom de
+   classe CONTIENT les deux-points. `.p-accueil .py-14` ne l'atteindrait
+   pas — ce serait une autre classe, et la règle serait silencieusement
+   sans effet. C'est le seul endroit du parc où ce détour est nécessaire,
+   parce que c'est la seule des quatre pages dont le palier mobile
+   existait déjà.
+
+   Rien ne bouge au-dessus de 639 px.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 639px) {
+  /* Les neuf sections courantes. */
+  .p-accueil .max-sm\:py-14 {
+    padding-block: 2.25rem; /* 36, au lieu de 56 */
+  }
+
+  /* Le héros — `pt-30 max-sm:pt-26 lg:pt-40 … pb-16 sm:pb-20`. */
+  .p-accueil .max-sm\:pt-26 {
+    padding-top: 2.5rem; /* 40, au lieu de 104 */
+  }
+  .p-accueil .pb-16 {
+    padding-bottom: 2.25rem; /* 36, au lieu de 64 */
+  }
+  .p-accueil .py-16 {
+    padding-block: 2.25rem;
+  }
+
+  /* Rembourrage des cartes : il se paie deux fois, en hauteur et en
+     largeur de colonne. */
+  .p-accueil .p-8,
+  .p-accueil .p-6 {
+    padding: 1.25rem;
+  }
+  .p-accueil .p-5 {
+    padding: 1rem;
+  }
+
+  /* Gouttières d'une grille retombée à une colonne : `gap-14` n'est plus
+     l'écart entre deux colonnes, c'est un trou vertical de 56 px. */
+  .p-accueil .gap-14 {
+    gap: 2rem;
+  }
+  .p-accueil .gap-12 {
+    gap: 1.75rem;
+  }
+  .p-accueil .gap-10 {
+    gap: 1.5rem;
+  }
+  .p-accueil .gap-8 {
+    gap: 1.25rem;
+  }
+}

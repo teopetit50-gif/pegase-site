@@ -1,0 +1,36 @@
+/* marquee — les deux règles de `marquee` (Magic UI, @dillionverma) que le
+   composant attendait de la config Tailwind (`--animate-marquee`). Le site
+   n'a pas ce greffon : elles sont écrites ici. Le pas de la boucle est
+   `-100% - gap` : chaque piste recule exactement de sa largeur plus une
+   gouttière, et la suivante prend sa place sans saut. */
+@keyframes mq-defile {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+.mq {
+  --duration: 40s;
+  --gap: 12px;
+  display: flex;
+  overflow: hidden;
+  gap: var(--gap);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+}
+.mq-piste {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-around;
+  gap: var(--gap);
+  animation: mq-defile var(--duration) linear infinite;
+}
+.mq-piste--inverse {
+  animation-direction: reverse;
+}
+.mq--pause:hover .mq-piste {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-piste {
+    animation: none;
+  }
+}

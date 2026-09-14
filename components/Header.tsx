@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { EVENEMENT_SESSION } from "@/lib/compte";
 import { sessionCookiePresente } from "@/lib/supabase/config";
+import MenuPrincipal from "./MenuPrincipal";
+import { GROUPES, NB_RANGEES } from "@/lib/menu";
 
 /* 22/07 — le pégase (SVG d'après l'icône « pegasus » de Skoll, game-icons.net,
    CC BY 3.0) est retiré du header ET du footer à la demande de Teo. Le crédit
@@ -13,48 +15,78 @@ import { sessionCookiePresente } from "@/lib/supabase/config";
    part : à vérifier avant de la réintroduire. La marque ne vit plus que par
    le mot « Omega ». */
 
-/* 25/07 — « Solutions » retiré : la page liste ET les fiches moteurs vivent
-   désormais sous /offres (/offres, /offres/payd…). Les anciennes URL
-   /solutions et /solutions/[moteur] sont redirigées en 308 par
-   next.config.ts, donc aucun lien externe ne casse. */
-const NAV = [
-  { href: "/offres", label: "Nos offres" },
-  /* 03/08 — la galerie de vitrines sectorielles. Placée juste après les
-     offres : c'est l'entrée que comprend un patron de petite entreprise qui ne sait pas
-     encore ce qu'est un « moteur », et elle ramène vers l'audit. */
-  { href: "/modeles", label: "Modèles de sites" },
-  { href: "/integrations", label: "Intégrations" },
-  /* 05/08 — la grille tarifaire. Placée après les intégrations : un patron
-     qui a compris ce qu'est un paquet cherche le prix juste après, et
-     jusqu'ici la seule réponse du site était « sur devis ». */
-  { href: "/tarifs", label: "Tarifs" },
-  /* 30/07 — « Articles » devient « Blog » : la page est refaite sur la
-     référence blog.ocoya.com et vit désormais sous /blog (redirection 308
-     depuis /articles dans next.config.ts). */
-  { href: "/blog", label: "Blog" },
-  /* 07/08 — « Où vont vos données ». En dernier, après le blog : ce n'est
-     pas une étape du parcours commercial, c'est la page qu'on ouvre quand on
-     est déjà convaincu et qu'il reste l'objection « et mes données ? ». Elle
-     n'était qu'au pied de page — donc invisible au moment précis où cette
-     objection se pose (Teo, 07/08 : « bah nan elle est pas dans la liste »). */
-  { href: "/vos-donnees", label: "Où vont vos données" },
-  /* 30/07 — l'entrée « À propos » saute : Teo ne voulait pas de la page
-     (reproduction qonto.com/en/about jugée non conforme). La route /contact
-     est supprimée et redirigée par next.config.ts. */
-];
+/* 11/09/2026 — la liste plate `NAV` (sept liens, sept blocs de commentaire
+   datés) a déménagé dans lib/menu.ts et s'y est structurée en cinq
+   rubriques. Les arbitrages de juillet et août l'ont suivie mot pour mot :
+   ils expliquent POURQUOI chaque entrée est là, et ils valent autant pour
+   le bandeau que pour ce panneau. Les deux surfaces lisent désormais la
+   même source, elles ne peuvent plus diverger. */
 
 /* Header caméléon (charte v2) : il survole les deux mondes. Au-dessus d'une
    section claire ([data-monde="clair"]), il passe en verre clair — fond
    #f4f1ec/85 + blur, texte noir — via un check rAF léger de la section sous
    le header ; transition douce dans les deux sens. Navigation 22/07 : plus de
    liens inline — un burger 3 barres à tous les breakpoints (façon Qonto) qui
-   ouvre un panneau plein écran ; tap ≥ 44px. */
+   ouvre un panneau plein écran ; tap ≥ 44px.
+
+   11/09/2026 — « à tous les breakpoints » n'est plus vrai : à partir de `lg`
+   la barre porte un bandeau de cinq rubriques (MenuPrincipal) et le burger
+   disparaît. Le panneau plein écran, lui, n'a pas bougé d'un pixel — il reste
+   la navigation du téléphone et de la tablette. Le caméléon vaut pour les
+   deux : les intitulés du bandeau prennent l'encre du monde survolé, mais
+   leurs panneaux déroulants imposent leur blanc, comme le panneau plein écran
+   depuis le 06/08. */
+/* 11/09 — getComputedStyle ne rend pas toujours du `rgb()`. Dès que la
+   couleur est déclarée dans un espace moderne (oklch, lab…), le navigateur
+   la sérialise TELLE QUELLE : `lab(96.52 -0.00003 0.00001)`, qui est un
+   blanc. L'ancienne version cherchait trois nombres et les divisait par
+   255 — elle lisait donc 96.52/255 = 0,38 et déclarait ce blanc « sombre ».
+   L'entête de FRONTD sortait en texte clair sur fond clair, illisible,
+   alors que la sonde avait parfaitement trouvé le bon élément.
+
+   Plutôt que d'énumérer les espaces de couleur (il en arrivera d'autres),
+   on fait PEINDRE la couleur au navigateur et on relit le pixel : quel que
+   soit l'espace d'origine, on récupère du sRGB en 0–255. Mesuré sur ce
+   moteur : `lab(96.52 …)` et `oklch(.97 0 0)` rendent bien 245,245,245.
+
+   ⚠ Ne pas remplacer par la lecture de `fillStyle` après affectation, qui
+   semble plus simple : ce navigateur relit la chaîne TELLE QUELLE
+   (`lab(…)` reste `lab(…)`), donc la conversion n'a pas lieu. Essayé le
+   11/09, ça ne convertit rien. Il faut le `fillRect` + `getImageData`.
+
+   Mémorisé : une seule peinture par couleur distincte, quel que soit le
+   nombre d'images de défilement. */
+const enRgb = new Map<string, number[] | null>();
+let toile: CanvasRenderingContext2D | null = null;
+
+function versRgb(couleur: string): number[] | null {
+  if (enRgb.has(couleur)) return enRgb.get(couleur) ?? null;
+  if (typeof document === "undefined") return null;
+  if (!toile) {
+    const cv = document.createElement("canvas");
+    cv.width = cv.height = 1;
+    toile = cv.getContext("2d", { willReadFrequently: true });
+  }
+  let rgb: number[] | null = null;
+  if (toile) {
+    /* Deux affectations : si la seconde est invalide, `fillStyle` garde
+       silencieusement la précédente — on veut alors un repli connu. */
+    toile.fillStyle = "#000000";
+    toile.fillStyle = couleur;
+    toile.fillRect(0, 0, 1, 1);
+    const d = toile.getImageData(0, 0, 1, 1).data;
+    rgb = [d[0], d[1], d[2]];
+  }
+  enRgb.set(couleur, rgb);
+  return rgb;
+}
+
 /* Luminance relative, pour décider de la couleur du texte à partir du fond
    échantillonné. Seuil à 0,5 : au-dessus le fond est clair, texte noir. */
-function estClair(rgb: string) {
-  const m = rgb.match(/\d+(\.\d+)?/g);
-  if (!m || m.length < 3) return false;
-  const [r, v, b] = m.slice(0, 3).map((n) => parseFloat(n) / 255);
+function estClair(couleur: string) {
+  const canaux = versRgb(couleur);
+  if (!canaux) return false;
+  const [r, v, b] = canaux.map((n) => n / 255);
   return 0.2126 * r + 0.7152 * v + 0.0722 * b > 0.5;
 }
 
@@ -139,7 +171,25 @@ export default function Header() {
          [data-monde="clair"] avec un getBoundingClientRect chacune, qui
          lisait le layout N fois par image de défilement. */
       const y = (barre.current?.getBoundingClientRect().bottom ?? 72) + 1;
-      const pile = document.elementsFromPoint(4, y) as HTMLElement[];
+      /* 11/09 — on prélevait à x = 4, c'est-à-dire à 4 px du bord de la
+         FENÊTRE. Or <main> est plafonné à 1440 px et centré : au-delà, ce
+         point tombe dans la gouttière, sur le bg-panel noir du site, et la
+         barre repassait en verre sombre au-dessus d'une page claire. Le
+         défaut existait depuis juillet sur .monde-clair et .resa ; les
+         quatre pages produit rapatriées, entièrement claires, le rendaient
+         criant.
+
+         On prélève donc à 4 px du bord de <main>, pas de la fenêtre.
+         L'intention d'origine est intacte — rester sur le bord de la
+         colonne, là où il n'y a que des fonds de section, jamais une carte
+         dont on prélèverait la couleur par erreur — et en dessous de 1440
+         la valeur est la même qu'avant, à un pixel près.
+
+         Une seule lecture de layout de plus par image, à côté de celle de
+         la barre qui était déjà là. */
+      const colonne = document.querySelector("main")?.getBoundingClientRect();
+      const x = colonne ? colonne.left + 4 : 4;
+      const pile = document.elementsFromPoint(x, y) as HTMLElement[];
       let trouve = "";
       for (const el of pile) {
         if (el === barre.current || barre.current?.contains(el)) continue;
@@ -210,6 +260,25 @@ export default function Header() {
     setOpen(false);
   }, [pathname]);
 
+  /* 11/09/2026 — quelle rubrique est dépliée dans le panneau du téléphone.
+     Pas d'effet pour la remettre à zéro quand le panneau se ferme : on la
+     DÉRIVE. Le panneau se referme par quatre chemins (burger, Échap,
+     changement de route, clic sur un lien) et un effet de remise à zéro
+     aurait été un `setState` de plus dans un effet — ce que la règle
+     react-hooks de ce dépôt refuse, à raison. */
+  const [deplie, setDeplie] = useState<string | null>(null);
+  const deplieEff = open ? deplie : null;
+
+  /* La cascade d'entrée des rangées, posée une fois. L'opacité n'y est
+     JAMAIS transitionnée (voir le commentaire du panneau) : elle bascule
+     d'un coup, seule la montée est animée. */
+  const cascade = (rang: number) => ({
+    transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
+    transitionDelay: open ? `${60 + rang * 55}ms` : "0ms",
+    opacity: open ? 1 : 0,
+    transform: open ? "none" : "translateY(14px)",
+  });
+
   return (
     <header
       ref={barre}
@@ -257,6 +326,15 @@ export default function Header() {
             Omega.AI
           </span>
         </Link>
+
+        {/* 11/09/2026 — le bandeau de navigation. Il vit à partir de `lg`
+            seulement ; sous ce seuil la barre reste ce qu'elle était depuis
+            le 22/07, un burger et rien d'autre. `clairEff` et non `clair` :
+            panneau ouvert, la barre est forcée en clair et les intitulés
+            doivent basculer avec elle — même si, le burger étant caché à
+            partir de `lg`, les deux valeurs s'y confondent en pratique. */}
+        <MenuPrincipal clair={clairEff} pathname={pathname} />
+
         <div className="flex items-center gap-2 sm:gap-4">
           {/* 30/07 — recalibré sur les boutons de la page (.o-btn : rayon 8,
               14 px medium, 34 px de haut). Le header portait du rayon 12 en
@@ -318,7 +396,7 @@ export default function Header() {
             /* 06/08 — panneau ouvert, la croix vit dans un carré arrondi à
                filet clair, comme dans la référence. Le filet était blanc sur
                noir ; il devient noir très dilué sur blanc. */
-            className={`group -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-200 md:h-9 md:w-9 ${
+            className={`group -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-200 md:h-9 md:w-9 lg:hidden ${
               open
                 ? "border border-black/15 hover:bg-black/[0.04]"
                 : clair
@@ -380,7 +458,11 @@ export default function Header() {
            blanc pur, texte noir, et la barre du header bascule avec lui
            (voir `clairEff`). Le panneau n'est toujours pas caméléon : il ne
            dépend pas de la page qu'il recouvre, il impose sa surface. */
-        className={`fixed inset-x-0 bottom-0 top-16 z-40 bg-white sm:top-[72px] ${
+        /* `lg:hidden` : au-delà du seuil c'est le bandeau qui navigue, et
+           le burger est caché. Sans cette classe, un panneau resté ouvert
+           pendant qu'on élargit la fenêtre recouvrirait la page entière
+           sans qu'aucun bouton ne permette de le refermer. */
+        className={`fixed inset-x-0 bottom-0 top-16 z-40 bg-white sm:top-[72px] lg:hidden ${
           open ? "visible" : "invisible"
         }`}
       >
@@ -392,35 +474,109 @@ export default function Header() {
             un PIED de panneau ancré en bas derrière un filet pleine largeur,
             et ils passent en pilule pleine (rayon = hauteur/2) au lieu du
             rayon 8. Le pied est en `mt-auto` : quel que soit le nombre
-            d'entrées de NAV, les CTA restent collés au bas de l'écran, ce
+            de rangées, les CTA restent collés au bas de l'écran, ce
             que la pile précédente ne savait pas faire. */}
         <nav className="mx-auto flex h-full max-w-[1440px] flex-col px-3 sm:px-10">
           <div className="min-h-0 flex-1 overflow-y-auto pt-7 sm:pt-9">
-            {NAV.map((l, i) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                tabIndex={open ? undefined : -1}
-                /* L'opacité n'est JAMAIS animée à l'ouverture : si la
-                   transition ne s'exécute pas (onglet en arrière-plan, rAF
-                   throttlé), un lien resté à 0 serait un menu vide sur fond
-                   opaque. Seule la montée est animée — figée, elle laisse un
-                   décalage de 14 px, jamais du texte invisible. */
-                style={{
-                  transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-                  transitionDelay: open ? `${60 + i * 55}ms` : "0ms",
-                  opacity: open ? 1 : 0,
-                  transform: open ? "none" : "translateY(14px)",
-                }}
-                /* Texte courant, jamais un titre : la référence garde une
-                   graisse normale et fait respirer par le PAS des rangées
-                   (48 px pour 18 px de corps), pas par le gras. */
-                className="flex h-12 items-center text-[18px] font-normal leading-[1.3] tracking-[-0.015em] text-[#0f1013] transition-colors hover:text-[#0f1013]/55 sm:text-[19px]"
-              >
-                {l.label}
-              </Link>
-            ))}
+            {/* 11/09/2026 — le panneau rend les CINQ rubriques, pas les
+                onze destinations : les groupes se déplient au doigt.
+
+                Première version : la liste à plat, onze rangées sous trois
+                intitulés de groupe. Teo, en la voyant : « sur la version
+                mobile c'est pas des trucs déroulants […] du coup c'est
+                gênant, trop chargé ». Le panneau était passé de sept
+                rangées à quatorze et débordait de l'écran — on avait payé
+                l'accès aux pages produit par un mur de liens. Replié, il
+                fait cinq rangées et tient sans défilement, exactement comme
+                avant ce chantier.
+
+                ⚠ LE DÉPLI N'EST PAS ANIMÉ, et c'est délibéré. Une hauteur
+                ou une opacité qui part de zéro laisse le contenu INVISIBLE
+                dès que le navigateur cesse de produire des images — le
+                défaut qu'on vient de retirer du panneau déroulant du
+                bandeau (voir menu-principal.css), et celui que le bloc de
+                style ci-dessous évite depuis juillet. Le contenu apparaît
+                donc d'un coup ; seul le chevron pivote, et un chevron figé
+                ne cache rien.
+
+                Une seule rubrique ouverte à la fois : c'est ce qui garantit
+                que le panneau ne redevienne jamais le mur qu'il était. */}
+            {GROUPES.map((g) => {
+              const ouvert = deplieEff === g.titre;
+
+              /* rubrique simple : la rangée-lien d'avant, au pixel près */
+              if (g.seul)
+                return (
+                  <Link
+                    key={g.titre}
+                    href={g.href!}
+                    onClick={() => setOpen(false)}
+                    tabIndex={open ? undefined : -1}
+                    style={cascade(g.rang)}
+                    className="flex h-12 items-center text-[18px] font-normal leading-[1.3] tracking-[-0.015em] text-[#0f1013] transition-colors hover:text-[#0f1013]/55 sm:text-[19px]"
+                  >
+                    {g.titre}
+                  </Link>
+                );
+
+              return (
+                <div key={g.titre}>
+                  <button
+                    type="button"
+                    onClick={() => setDeplie((d) => (d === g.titre ? null : g.titre))}
+                    aria-expanded={ouvert}
+                    aria-controls={`menu-groupe-${g.rang}`}
+                    tabIndex={open ? undefined : -1}
+                    style={cascade(g.rang)}
+                    /* Même rangée que les liens — 48 px, 18/19 px, graisse
+                       normale : à l'œil rien ne distingue une rubrique qui
+                       s'ouvre d'une qui navigue, sauf le chevron. */
+                    className="flex h-12 w-full items-center justify-between text-[18px] font-normal leading-[1.3] tracking-[-0.015em] text-[#0f1013] transition-colors hover:text-[#0f1013]/55 sm:text-[19px]"
+                  >
+                    {g.titre}
+                    <svg
+                      aria-hidden
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={`shrink-0 text-[#0f1013]/40 transition-transform duration-300 ${
+                        ouvert ? "rotate-180" : ""
+                      }`}
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+
+                  {/* ⚠ Ce conteneur ne porte AUCUNE classe d'affichage. Un
+                      `block` ou un `flex` ici rendrait l'attribut `hidden`
+                      sans effet — l'utilitaire bat la feuille du navigateur
+                      — et le sous-menu resterait déplié en permanence, sans
+                      un bruit. La marge basse seule. */}
+                  <div id={`menu-groupe-${g.rang}`} hidden={!ouvert} className="pb-2">
+                    {g.entrees.map((e) => (
+                      <Link
+                        key={e.href}
+                        href={e.href}
+                        onClick={() => setOpen(false)}
+                        tabIndex={ouvert && open ? undefined : -1}
+                        /* Un cran en dessous de la rubrique : retrait, corps
+                           plus petit, encre diluée. C'est ce qui fait lire la
+                           pile comme un dépli et non comme dix liens de même
+                           poids. Hauteur 44 px — le minimum tactile. */
+                        className="flex h-11 items-center pl-3.5 text-[16px] font-normal leading-[1.3] tracking-[-0.012em] text-[#0f1013]/65 transition-colors hover:text-[#0f1013] sm:text-[17px]"
+                      >
+                        {e.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
           {/* Pied ancré. Le filet part d'un bord à l'autre — d'où les marges
               négatives qui annulent la gouttière de <nav> — tandis que les
@@ -449,7 +605,7 @@ export default function Header() {
               tabIndex={open ? undefined : -1}
               style={{
                 transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-                transitionDelay: open ? `${60 + NAV.length * 55}ms` : "0ms",
+                transitionDelay: open ? `${60 + NB_RANGEES * 55}ms` : "0ms",
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",
               }}
@@ -463,7 +619,7 @@ export default function Header() {
               tabIndex={open ? undefined : -1}
               style={{
                 transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-                transitionDelay: open ? `${60 + (NAV.length + 1) * 55}ms` : "0ms",
+                transitionDelay: open ? `${60 + (NB_RANGEES + 1) * 55}ms` : "0ms",
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",
               }}
@@ -478,7 +634,7 @@ export default function Header() {
               style={{
                 transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
                 transitionDelay: open
-                  ? `${60 + (NAV.length + 2) * 55}ms`
+                  ? `${60 + (NB_RANGEES + 2) * 55}ms`
                   : "0ms",
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",

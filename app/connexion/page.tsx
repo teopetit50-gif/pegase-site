@@ -51,33 +51,52 @@ export default async function ConnexionPage({
       <PageMotion />
       <div className="resa">
         <section data-monde="clair" className="r-wrap pb-16 pt-12 sm:pb-24 sm:pt-14">
-          {/* 02/09 (Teo : « je vois se connecter mais pas créer un compte »)
-              — le titre nomme les deux, et le module ouvre sur deux portes. */}
-          <h1 className="r-h2 max-w-[20ch]">Se connecter ou créer un compte</h1>
-          <p className="r-lead mt-5 max-w-[58ch]">
-            Votre compte, c&apos;est votre adresse e-mail et un mot de passe. Vous y retrouvez votre
-            demande, votre créneau et, une fois l&apos;installation faite, l&apos;accès à votre
-            cockpit. Première visite&nbsp;? Choisissez « Je crée mon compte »&nbsp;: un code reçu par
-            e-mail prouve votre adresse, puis vous choisissez votre mot de passe.
-          </p>
-          <div className="mt-10 max-w-[640px]">
-            {sp.erreur === "lien" ? (
-              <p className="rv-erreur mb-4">
-                Ce lien de connexion n&apos;est plus valable. Connectez-vous ci-dessous, ou demandez
-                un code.
-              </p>
-            ) : null}
-            <div className="r-carte !p-7 sm:!p-9">
-              <ConnexionPleinePage suite={suite} mode={mode} />
-            </div>
-            <p className="r-note mt-4 max-w-[60ch]">
-              Votre adresse ne sert qu&apos;à vous reconnaître et à vous joindre pour votre
-              installation — voir{" "}
-              <Link href="/vos-donnees" className="underline underline-offset-2">
-                où vont vos données
-              </Link>
-              .
+          {/* 11/09 — la page était alignée à gauche sur toute la largeur :
+              un titre de 56 px, un chapô de quatre lignes, et la moitié
+              droite de l'écran vide. Une porte de connexion n'a pas de
+              contenu à étaler, elle a un formulaire à présenter. On reprend
+              la disposition de la porte de FRONTD — colonne centrée,
+              entête court, une seule carte — mais avec le vocabulaire du
+              monde clair du site, sans rien décalquer. */}
+          <div className="mx-auto w-full max-w-[600px]">
+            <p className="text-center font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--r-faible)]">
+              Un système Omega
             </p>
+            {/* 02/09 (Teo : « je vois se connecter mais pas créer un compte »)
+                — le titre nomme les deux, et le module ouvre sur deux portes. */}
+            <h1 className="r-h3 mt-3 text-center">Se connecter ou créer un compte</h1>
+            <p className="r-lead mx-auto mt-4 max-w-[46ch] text-center">
+              Un seul compte pour tout Omega. Vous y retrouvez votre demande, votre créneau et,
+              une fois l&apos;installation faite, l&apos;accès à votre cockpit.
+            </p>
+
+            <div className="mt-8">
+              {sp.erreur === "lien" ? (
+                <p className="rv-erreur mb-4">
+                  Ce lien de connexion n&apos;est plus valable. Connectez-vous ci-dessous, ou
+                  demandez un code.
+                </p>
+              ) : null}
+              <div className="r-carte !p-6 sm:!p-8">
+                <ConnexionPleinePage suite={suite} mode={mode} />
+              </div>
+              {/* Le détail du code ne sert qu'à la première visite : il se lit
+                  mieux sous le formulaire, quand la question se pose, qu'en
+                  quatrième ligne d'un chapô qu'on traverse pour arriver aux
+                  champs. */}
+              <p className="r-note mt-5 text-center">
+                Première visite&nbsp;? Choisissez « Je crée mon compte »&nbsp;: un code reçu par
+                e-mail prouve votre adresse, puis vous choisissez votre mot de passe.
+              </p>
+              <p className="r-note mt-2 text-center">
+                Votre adresse ne sert qu&apos;à vous reconnaître et à vous joindre pour votre
+                installation — voir{" "}
+                <Link href="/vos-donnees" className="underline underline-offset-2">
+                  où vont vos données
+                </Link>
+                .
+              </p>
+            </div>
           </div>
         </section>
       </div>

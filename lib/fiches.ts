@@ -439,7 +439,7 @@ export const FICHES: Record<string, Fiche> = {
     controle:
       "Le contenu et l'ordre de lecture sont fixés avec vous à l'installation, selon ce qui compte dans votre activité. Un message par jour, jamais deux.",
     outils: ["WhatsApp", "Google Sheets / Excel", "Google Agenda"],
-    cible: ["Dirigeants multi-casquettes", "Gérants d'atelier", "Professions libérales"],
+    cible: ["Directions générales", "Directeurs de site", "Directions financières"],
     etapes: [
       {
         t: "Choix des indicateurs",
@@ -478,15 +478,15 @@ export const FICHES: Record<string, Fiche> = {
       lines: [
         {
           label: "Cash",
-          text: "Encaissé hier : 3 240 € (Villa Kariba, Resto La Datcha). Encours : 18 750 €, en baisse de 9 % sur la semaine.",
+          text: "Encaissé hier : 34 200 € (Sogexal, Vallier). Encours : 187 500 €, en baisse de 9 % sur la semaine.",
         },
         {
           label: "Relances",
-          text: "2 parties hier, 1 réponse : Garage Petit-Bourg annonce un règlement vendredi.",
+          text: "2 parties hier, 1 réponse : Métalco annonce un règlement vendredi.",
         },
         {
           label: "À décider",
-          text: "1. Valider la mise en demeure SCI Lauricisque · 2. Rappeler M. Sainte-Rose (devis 4 800 €) · 3. Signer le dossier Chèque TIC.",
+          text: "1. Valider la mise en demeure Sodimat · 2. Rappeler Novasud (devis 48 000 €) · 3. Signer le dossier Chèque TIC.",
         },
         { label: "Agenda", text: "9 h fournisseur · 14 h chantier Baie-Mahault." },
       ],
@@ -657,17 +657,17 @@ export const FICHES: Record<string, Fiche> = {
       title: "Envois arrêtés, journée du 20 juillet",
       items: [
         {
-          text: "SARL Bel-Air · facture réglée hier soir, relance annulée",
+          text: "Sogexal · facture réglée hier soir, relance annulée",
           badge: "Refusé",
           tone: "off",
         },
         {
-          text: "M. Sainte-Rose · a répondu avant-hier, dossier en pause 14 jours",
+          text: "Novasud · a répondu avant-hier, dossier en pause 14 jours",
           badge: "En pause",
           tone: "warn",
         },
         {
-          text: "Villa Kariba · relance de niveau 2 préparée, en attente de vous",
+          text: "Métalco · relance de niveau 2 préparée, en attente de vous",
           badge: "À valider",
           tone: "ok",
         },

@@ -20,6 +20,9 @@ export default function ConnexionPleinePage({ suite, mode }: { suite: string; mo
     <ConnexionInline
       modeInitial={mode}
       portes
+      /* La carte est posée par la page elle-même : le module n'a pas à en
+         poser une seconde à l'intérieur. */
+      cadre={false}
       onConnecte={() => {
         window.location.assign(suite);
       }}

@@ -74,6 +74,12 @@ type Props = {
   avecProfil?: boolean;
   /* mode « definir » : un bouton « Annuler », rendu par le parent sinon */
   onAnnuler?: () => void;
+  /* le module porte son propre cadre — filet et fond gris. C'est ce qu'il
+     faut quand il s'insère au milieu d'un autre écran (PriseDeCreneau,
+     « Mon compte ») : le cadre le détache de ce qui l'entoure. Sur
+     /connexion il EST l'écran, la page pose la carte autour de lui, et
+     les deux cadres emboîtés faisaient une carte dans une carte (11/09). */
+  cadre?: boolean;
 };
 
 const TITRES: Record<ModeConnexion, string> = {
@@ -155,6 +161,7 @@ export default function ConnexionInline({
   portes = false,
   avecProfil = true,
   onAnnuler,
+  cadre = true,
 }: Props) {
   const [mode, setMode] = useState<ModeConnexion>(modeInitial);
   /* pour les modes par code : l'adresse, puis le code, puis le mot de
@@ -365,7 +372,14 @@ export default function ConnexionInline({
   return (
     /* keyé sur le mode : chaque écran (connexion, création, code, nouveau
        mot de passe) apparaît en fondu au lieu de sauter (02/09) */
-    <div key={mode} className="rv-apparait rounded-xl border border-[#e3e3e3] bg-[#fafafa] p-5 sm:p-6">
+    <div
+      key={mode}
+      className={
+        cadre
+          ? "rv-apparait rounded-xl border border-[#e3e3e3] bg-[#fafafa] p-5 sm:p-6"
+          : "rv-apparait"
+      }
+    >
       {portes ? (
         /* les deux portes — un sélecteur segmenté (.r-seg), comme le
            choix de profil sur /reserver-un-audit. « Mot de passe oublié »

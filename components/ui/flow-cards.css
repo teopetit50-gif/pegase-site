@@ -1,0 +1,142 @@
+/* ══════════════════════════════════════════════════════════════════════
+   flow-cards — feuille relevée dans `bento-monochrome-1` de @larsen66
+   (21st.dev), qui l'injectait dans <head> par un useEffect. Ici elle est
+   un fichier : émise au build, présente au premier rendu, et aucun style
+   n'apparaît après coup.
+
+   Préfixe `fc-` (l'original disait `bento3-`). Seules les règles du
+   pictogramme animé et de la lueur sont reprises ; l'entrée des cartes
+   (`bento3-card-in`, flou + montée) est laissée à `data-reveal`, qui fait
+   déjà ce travail sur tout le site — deux systèmes d'apparition sur le
+   même élément se battent.
+
+   Quatre variantes de pictogramme, une par étape. L'original en avait cinq
+   (`loop` en plus) ; le sur-mesure a quatre étapes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@keyframes fc-flare {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes fc-dash {
+  0% { transform: translateX(-25%); opacity: 0; }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateX(25%); opacity: 0; }
+}
+@keyframes fc-wave {
+  from { transform: translateX(-45%); }
+  to { transform: translateX(45%); }
+}
+@keyframes fc-pulse {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  70% { opacity: 0.05; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.fc-card {
+  --fc-stroke: #fafafa;
+  --fc-trail: rgba(255, 255, 255, 0.32);
+  --fc-glow: rgba(255, 255, 255, 0.12);
+}
+
+.fc-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 40px;
+  border-radius: 9999px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.fc-icon::before,
+.fc-icon::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  border: 1px solid var(--fc-trail);
+  opacity: 0.45;
+}
+.fc-icon::after {
+  inset: 10px;
+  opacity: 0.2;
+}
+
+/* orbit — une aiguille de lumière qui tourne */
+.fc-icon[data-variant="orbit"] span {
+  position: absolute;
+  height: 140%;
+  width: 3px;
+  background: linear-gradient(180deg, transparent, var(--fc-stroke) 55%, transparent);
+  transform-origin: center;
+  animation: fc-flare 8s linear infinite;
+}
+
+/* relay — deux traits qui se passent le relais */
+.fc-icon[data-variant="relay"] span {
+  position: absolute;
+  inset: 12px;
+  border-top: 1px solid var(--fc-stroke);
+  border-bottom: 1px solid var(--fc-stroke);
+  transform: skewX(-15deg);
+}
+.fc-icon[data-variant="relay"] span::before,
+.fc-icon[data-variant="relay"] span::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  width: 120%;
+  left: -10%;
+  background: linear-gradient(90deg, transparent, var(--fc-stroke), transparent);
+  animation: fc-dash 2.6s ease-in-out infinite;
+}
+.fc-icon[data-variant="relay"] span::after {
+  top: 70%;
+  animation-delay: 0.9s;
+}
+
+/* wave — une onde qui balaie le disque */
+.fc-icon[data-variant="wave"] span {
+  position: absolute;
+  inset: 9px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.fc-icon[data-variant="wave"] span::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 5%, var(--fc-stroke) 50%, transparent 95%);
+  transform: translateX(-45%);
+  animation: fc-wave 2.8s ease-in-out infinite alternate;
+}
+
+/* spark — deux anneaux qui s'élargissent et s'éteignent */
+.fc-icon[data-variant="spark"] span {
+  position: absolute;
+  inset: 0;
+}
+.fc-icon[data-variant="spark"] span::before,
+.fc-icon[data-variant="spark"] span::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 9999px;
+  border: 1px solid var(--fc-stroke);
+  opacity: 0.28;
+  animation: fc-pulse 2.8s ease-out infinite;
+}
+.fc-icon[data-variant="spark"] span::after {
+  animation-delay: 0.9s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-icon span,
+  .fc-icon span::before,
+  .fc-icon span::after {
+    animation: none;
+  }
+}

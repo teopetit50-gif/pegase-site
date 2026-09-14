@@ -1,0 +1,37 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Filets des tuiles du catalogue — feuille co-localisée (11/09/2026)
+
+   POURQUOI UNE FEUILLE, ET PAS `animate` DE MOTION. L'accent doré des
+   tuiles est `rgba(var(--or), 0.9)` : la variable est déclarée par
+   `.offres .o-card-or` dans globals.css, et c'est la SEULE définition de
+   l'or du site. Or `motion` ne sait pas interpoler une couleur qui contient
+   un `var()` — il n'en fait rien, silencieusement. Relevé deux fois au CDP
+   le 11/09 : la marque dorée n'apparaissait jamais, et la sonde qui ne
+   vérifiait que l'immobilité répondait « conforme ».
+
+   Trois façons de s'en sortir, et pourquoi celle-ci :
+   • réécrire l'or en rgba littéral dans le composant → une deuxième source
+     de vérité pour une couleur que Teo a déjà fait corriger une fois ;
+   • le lire au `getComputedStyle` au montage → une mesure pour une couleur ;
+   • le laisser au CSS, qui résout `var()` sans difficulté, et ne garder
+     dans `motion` que ce qu'il interpole bien (transformées, opacités,
+     couleurs littérales). C'est celle-ci.
+
+   Pas dans globals.css à dessein : une deuxième session travaille dans le
+   même arbre ce soir, et un fichier partagé se réécrit sans prévenir.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.tc-filet {
+  border-color: rgba(24, 24, 27, 0.12);
+  transition: border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tc-filet[data-on="oui"] {
+  border-color: rgba(var(--or), 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-filet {
+    transition: none;
+  }
+}

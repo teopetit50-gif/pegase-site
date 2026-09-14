@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════════════════════
+   11/09/2026 — les quatre pages produit rapatriées des sites SaaS
+   (FILED, CASHD, RELOAD, FRONTD) portent des utilitaires
+   `dark:`. Tailwind v4 les émet par défaut sous `prefers-color-scheme`,
+   donc sur un Mac réglé en sombre elles s'allumeraient toutes seules —
+   du blanc sur blanc, sans qu'aucune classe `.dark` existe ici.
+
+   Cette ligne rebranche `dark:` sur une classe que ce site ne pose
+   JAMAIS : les utilitaires deviennent inertes et chaque page produit
+   reste figée dans son monde clair. Le site n'utilisait aucun `dark:`
+   avant ce jour (vérifié : 0 occurrence), donc rien d'existant ne bouge.
+   ══════════════════════════════════════════════════════════════════════ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --bg: #08090c;
   --panel: #000000;
@@ -804,38 +818,141 @@ button.rounded-full:active {
 }
 
 /* ——— boutons ——— */
+/* ═══════════════════════════════════════════════════════════════════════
+   LES BOUTONS (refaits le 11/09/2026, demande de Teo : « j'aime pas le
+   design des boutons, va récupérer un composant sur 21st.dev, et applique
+   le à tous les boutons similaires du site »)
+
+   ORIGINE. `flow-button` de @xubohuah (21st.dev) —
+   https://21st.dev/@xubohuah/components/flow-button. Une pastille
+   contournée ; au survol un petit cercle d'encre ÉCLÔT depuis le centre
+   jusqu'à recouvrir tout le bouton, le libellé bascule en négatif, et le
+   rayon passe de 100 px à 12 px — la pastille devient un carré adouci.
+   Les deux courbes de la source sont reprises telles quelles :
+   `cubic-bezier(.19,1,.22,1)` pour le cercle, `cubic-bezier(.23,1,.32,1)`
+   pour le reste.
+
+   POURQUOI C'EST PORTÉ ICI ET PAS EN COMPOSANT. `.o-btn` est déjà posé sur
+   31 boutons dans 9 fichiers (l'accueil, /offres, /tarifs/site,
+   /integrations, l'en-tête, les trois gabarits d'offre). Réécrire la règle
+   les change TOUS d'un coup, sans toucher à une seule ligne de balisage —
+   ce que demandait Teo. Un composant React aurait obligé à reprendre les
+   31 appels, et aurait laissé les prochains repartir sur l'ancien style.
+
+   CE QUI EST JETÉ. Le ballet des DEUX flèches de la source (celle de
+   droite sort, celle de gauche entre) : il lui faut deux `<ArrowRight>`
+   dans le balisage, or la moitié de nos boutons n'ont pas d'icône du tout
+   et l'autre moitié en a une seule (`Chevron`). Le geste est donc réduit à
+   ce qu'on a : le chevron existant glisse de 4 px, avec le même ressort
+   `cubic-bezier(.34,1.56,.64,1)` que la source. Ses couleurs en dur
+   (#111111, blanc) sont remplacées par deux variables, ci-dessous.
+
+   COMMENT ÇA SE PARAMÈTRE. Chaque monde (clair, `.o-nuit`,
+   `.offres--sombre`) et chaque variante ne posent que leur état de REPOS
+   plus deux variables :
+     --btn-encre  : la couleur du cercle qui éclôt
+     --btn-contre : la couleur que prend le libellé une fois recouvert
+   Toute la mécanique est ici, une seule fois.
+
+   DEUX POINTS À NE PAS DÉFAIRE :
+   · `isolation: isolate` — le cercle est en `z-index: -1` pour passer sous
+     le libellé (un nœud de texte ne peut pas prendre de z-index, donc on
+     ne peut pas le faire monter). Sans l'isolation, ce -1 passerait
+     derrière le FOND DE LA SECTION et le cercle deviendrait invisible.
+   · `overflow: hidden` — le cercle fait 320 px de diamètre, il déborderait
+     largement du bouton. C'est aussi lui qui fait suivre l'arrondi pendant
+     que le rayon se morphe.
+   ═══════════════════════════════════════════════════════════════════════ */
 .offres .o-btn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 9px 15px;
-  border-radius: 8px;
+  padding: 10px 22px;
+  border: 1.5px solid transparent;
+  border-radius: 100px;
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
   transition:
-    background-color 0.2s ease,
+    color 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+    border-radius 0.6s cubic-bezier(0.23, 1, 0.32, 1),
     transform 0.16s var(--ease-out-strong);
 }
-.offres .o-btn:active {
-  transform: scale(0.97);
+/* le cercle d'encre */
+.offres .o-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: var(--btn-encre, #09090b);
+  opacity: 0;
+  transition:
+    width 0.8s cubic-bezier(0.19, 1, 0.22, 1),
+    height 0.8s cubic-bezier(0.19, 1, 0.22, 1),
+    margin 0.8s cubic-bezier(0.19, 1, 0.22, 1),
+    opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1);
 }
+.offres .o-btn:hover::before {
+  width: 320px;
+  height: 320px;
+  margin: -160px 0 0 -160px;
+  opacity: 1;
+}
+.offres .o-btn:hover {
+  color: var(--btn-contre, #ffffff);
+  border-color: transparent;
+  border-radius: 12px;
+}
+/* le chevron, quand il y en a un : le reste du ballet de flèches de la
+   source, réduit à ce que notre balisage porte déjà. */
+.offres .o-btn svg {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.offres .o-btn:hover svg {
+  transform: translateX(4px);
+}
+.offres .o-btn:active {
+  transform: scale(0.95);
+}
+
+/* — monde clair — */
 .offres .o-btn--primary {
+  --btn-encre: #09090b;
+  --btn-contre: #ffffff;
   background: var(--o-btn);
   color: #ffffff;
 }
-.offres .o-btn--primary:hover {
-  background: #3f3f46;
-}
 .offres .o-btn--ghost {
+  --btn-encre: #09090b;
+  --btn-contre: #ffffff;
   background: #ffffff;
   color: var(--o-text);
-  border: 1px solid var(--o-line);
+  border-color: var(--o-line);
 }
-.offres .o-btn--ghost:hover {
-  background: #fafafa;
+
+/* Mouvement réduit : le cercle n'éclôt plus et le rayon ne se morphe plus.
+   Le bouton reste PARFAITEMENT lisible — il prend son état recouvert d'un
+   coup, ce n'est pas un état dégradé, c'est le même état sans le trajet. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .o-btn,
+  .offres .o-btn::before,
+  .offres .o-btn svg {
+    transition: none;
+  }
+  .offres .o-btn:hover {
+    border-radius: 100px;
+  }
 }
 
 /* ——— lien fléché (« Voir PAYD › ») ——— */
@@ -898,11 +1015,15 @@ button.rounded-full:active {
   margin-right: calc(50% - 50vw);
   background: #f6f6f6;
 }
-/* Le fond n'est pas un dégradé CSS mais l'image du template, fondue par un
-   masque radial. Sans ce masque l'image cognerait les bords du cadre : c'est
-   lui qui donne l'impression que la lumière naît au centre. Deux ellipses
-   différentes, l'une pour le mobile, l'autre à partir de lg — relevées
-   telles quelles sur la référence. */
+/* Le fond n'est pas un dégradé CSS : c'est une source pleine boîte, fondue
+   par un masque radial. Sans ce masque elle cognerait les bords du cadre :
+   c'est lui qui donne l'impression que la lumière naît au centre. Deux
+   ellipses différentes, l'une pour le mobile, l'autre à partir de lg —
+   relevées telles quelles sur la référence Flux.
+
+   11/09/2026 — la source passe de l'image `/fonds/plis-blancs.webp` au
+   nuancier « Silk » peint en WebGL (`components/accueil/FondSilk.tsx`). Le
+   masque, lui, ne bouge pas d'un pixel : il est relevé, pas inventé. */
 .offres .o-flux-fond {
   position: absolute;
   inset: 0;
@@ -910,21 +1031,102 @@ button.rounded-full:active {
   -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 38%, #000 15%, transparent 72%);
   mask-image: radial-gradient(ellipse 100% 80% at 50% 38%, #000 15%, transparent 72%);
 }
-.offres .o-flux-fond img {
+/* Le canevas se dimensionne LUI-MÊME sur ce cadre (ResizeObserver côté
+   composant) ; ces deux lignes ne font que lui donner la boîte à remplir.
+   `display: block` supprime l'interligne des éléments en ligne, qui
+   décalerait le nuancier de quelques pixels vers le haut. */
+.offres .o-flux-toile {
+  display: block;
   height: 100%;
   width: 100%;
-  object-fit: cover;
-  object-position: 50% 32%;
   opacity: 0.9;
+}
+
+/* ÉCART ASSUMÉ — le plancher clair sous le texte. À ne pas retirer en
+   croyant « libérer » le nuancier.
+
+   L'image qu'il remplace (`plis-blancs.webp`) était des plis BLANCS : elle
+   ne descendait jamais sous un gris clair, et le texte noir du hero passait
+   partout. La recette Silk, elle, traverse toute l'échelle — sa première
+   couleur est #101010. Relevé le 11/09 sur le fond seul, à cinq instants
+   étalés sur une minute (390 px, `outils/silk-recette.mjs`) :
+
+     bloc     pire fond   contraste   exigé
+     h1        #2b2b2b     1,40 : 1    3 : 1
+     chapô     #636363     1,00 : 1    4,5 : 1   ← le fond ÉGALE le texte
+     sous      #a9a9a9     1,95 : 1    4,5 : 1
+
+   Et comme le nuancier dérive, la bande sombre finit toujours par passer
+   sous le texte : ce n'est pas un cadrage malheureux qu'on corrigerait en
+   décalant le motif, c'est structurel.
+
+   PREMIÈRE TENTATIVE, à ne pas refaire : un voile blanc à 93 % sur la zone
+   de texte. Le contraste repassait, mais il lavait AUSSI les plis clairs —
+   à 1024 le hero redevenait un aplat, on avait remplacé une image par
+   rien.
+
+   Ce qui est posé à la place ne touche QUE les noirs : un plancher de
+   luminosité en `mix-blend-mode: lighten`. Tout pixel plus sombre que
+   #e6e6e6 est relevé à #e6e6e6 ; tout pixel plus clair — c'est-à-dire
+   toute la structure des plis, qui monte jusqu'au #F5F5F5 de la recette —
+   passe INTACT. Le nuancier garde donc son dessin sous le texte, et son
+   échelle entière partout ailleurs, puisque le plancher s'éteint avec le
+   dégradé.
+
+   #e6e6e6 n'est pas choisi à l'œil : c'est la valeur qui rend au chapô
+   (#636363) ses 4,74 : 1, soit le seuil AA franchi et le 5,38 : 1 du
+   dessin d'origine approché à un dixième.
+
+   (Le sous-titre « Deux minutes pour choisir » plafonne à 3,5 : 1 — il
+   était déjà à 4,2 : 1 sur le fond blanc d'origine, donc sous le seuil
+   avant ce fond. Ça se corrige en assombrissant #7a756c, pas ici.) */
+.offres .o-flux-voile {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: lighten;
+  background: radial-gradient(
+    ellipse 92% 52% at 50% 42%,
+    rgba(230, 230, 230, 1) 0%,
+    rgba(230, 230, 230, 1) 46%,
+    rgba(230, 230, 230, 0.55) 74%,
+    rgba(230, 230, 230, 0) 100%
+  );
 }
 @media (min-width: 1024px) {
   .offres .o-flux-fond {
     -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 20%, transparent 75%);
     mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 20%, transparent 75%);
   }
-  .offres .o-flux-fond img {
-    object-position: center;
+  .offres .o-flux-toile {
     opacity: 0.8;
+  }
+  /* À partir de lg, PLUS DE PLANCHER DU TOUT : le nuancier est rendu tel
+     que la recette le donne, sur toute la hauteur.
+
+     Ce n'est pas un oubli, c'est la géométrie. Le hero fait 1 500 px de
+     haut à partir de lg et le texte n'en occupe que le tiers supérieur
+     (relevé : pastille à 21 %, sous-titre à 53 %) : le motif y est vu de
+     plus loin, la grande plage claire couvre la colonne de texte, et le
+     contraste passe sans rien corriger. Sous lg au contraire, le hero
+     tombe à 730 px et le texte le remplit d'un bord à l'autre — il n'y a
+     plus un pixel de fond qui ne soit sous une lettre, d'où le plancher.
+
+     Reste le chapô, qui est GRIS (#636363) là où le titre est noir : lui
+     seul retombe sous le seuil quand une bande sombre passe. Le plancher
+     survit donc à lg, mais réduit à l'ellipse de ses deux lignes — 46 % de
+     large sur 13 % de haut, contre 92 × 52 sous lg. Le reste du hero, soit
+     l'écrasante majorité, reçoit la recette sans aucune retouche.
+
+     Si un jour le hero raccourcit sur grand écran, il faudra le rouvrir :
+     reprendre `outils/silk-recette.mjs` avant de trancher. */
+  .offres .o-flux-voile {
+    background: radial-gradient(
+      ellipse 46% 13% at 50% 33%,
+      rgba(230, 230, 230, 1) 0%,
+      rgba(230, 230, 230, 1) 55%,
+      rgba(230, 230, 230, 0) 100%
+    );
   }
 }
 
@@ -1112,6 +1314,37 @@ button.rounded-full:active {
   background: var(--o-soft);
 }
 
+/* ——— la carte douce qui est une PORTE (11/09/2026) ———
+   Les quatre cartes du catalogue de l'accueil (components/ui/integrations-three)
+   sont des liens : elles réagissent au survol. Le survol vit ICI et non en
+   utilitaire Tailwind — `background` et `border-color` de `.o-card-soft` sont
+   posés hors couche, donc ils gagnent contre un `hover:bg-white` quelle que
+   soit la spécificité. La carte s'éclaircit d'un cran (gris → blanc), son
+   filet se marque, et l'ombre courte des `.o-card` vient la décoller.
+   Sous `(hover: none)` — tactile — rien de tout ça ne se déclenche. */
+.offres .o-card-porte {
+  transition:
+    background-color 0.2s var(--ease-out-strong),
+    border-color 0.2s var(--ease-out-strong),
+    box-shadow 0.2s var(--ease-out-strong);
+}
+@media (hover: hover) {
+  .offres .o-card-porte:hover {
+    background: #ffffff;
+    border-color: #d4d4d8;
+    box-shadow:
+      0 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.11),
+      0 2.29px 2.29px -2.5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -3.75px rgba(0, 0, 0, 0.06);
+  }
+  /* le chevron du lien avance quand la CARTE est survolée, pas seulement
+     quand le pointeur tombe sur le lien lui-même (`.o-link:hover svg`, plus
+     haut) : même valeur de part et d'autre, donc jamais de double décalage */
+  .offres .o-card-porte:hover .o-link svg {
+    transform: translateX(3px);
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    Cartes scintillantes (17/08/2026, Teo : « un effet genre scintillant »)
 
@@ -1241,6 +1474,187 @@ button.rounded-full:active {
 @media (prefers-reduced-motion: reduce) {
   .offres .o-card-scintille::before,
   .offres .o-card-scintille::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTES DORÉES — la variante « or » des quatre systèmes (11/09/2026)
+
+   Teo : « les cartes sont encore trop blanc basique, mets-les genre dorées
+   ou plus visibles ». Trois griefs dans cette phrase, et un seul relève de
+   l'animation :
+
+   1. AU REPOS la carte est un #fafafa posé sur du #ffffff, séparé par un
+      filet #e4e4e7 : trois valeurs qui tiennent dans 3 % de luminance. De
+      loin il n'y a pas de carte, il y a un rectangle de texte. C'est le
+      grief PRINCIPAL, et il se règle sans une seule image animée — un
+      filet or, un halo chaud dans l'angle haut-gauche, une ombre courte
+      et chaude. Ces trois-là survivent à `prefers-reduced-motion`.
+   2. RIEN NE BOUGE tant qu'on ne survole pas. D'où le liseré tournant,
+      repris de `.o-card-scintille` (17/08) — lequel n'était plus appelé
+      nulle part depuis que la section a été refaite le 11/09 au matin.
+   3. LA RAMPE. `.o-card-scintille` peint son étincelle en graphite
+      spéculaire ; la rampe OR, elle, est celle de `.border-beam` (tuile IA
+      de la référence Qonto) : rgba(224,179,65) qui monte vers un point
+      rgba(255,240,200). Aucune des deux n'est inventée ici, cette classe
+      ne fait que les recoudre.
+
+   POSÉE EN PLUS de `o-card-soft o-card-porte`, jamais à la place : la
+   porte garde son survol, l'or ne fait que le repeindre par-dessus (ce
+   bloc vient APRÈS `.o-card-porte` dans le fichier, c'est l'ordre qui
+   tranche — les deux sélecteurs ont la même spécificité). Retirer la
+   classe rend les cartes blanches d'avant, il n'y a rien d'autre à
+   défaire.
+
+   TROIS CRANS D'INTENSITÉ, si c'est trop ou pas assez : `--or-filet`
+   (le trait au repos), `--or-halo` (le fond chaud) et `--or-ombre`.
+   ══════════════════════════════════════════════════════════════════════ */
+.offres .o-card-or {
+  /* 11/09, Teo : « je trouve que c'est trop jaune pisse ». C'était le
+     rgba(224,179,65) de `.border-beam` — un or FRANC (H 43°, S 72 %), qui
+     tient sur la tuile IA parce qu'il y est un trait fin sur fond sombre.
+     Étalé en lavis sur une carte blanche, ce même jaune vire au moutarde :
+     à 10 % d'alpha, une grande surface ne garde que la teinte, et une
+     teinte jaune très saturée délavée, c'est de l'urine.
+
+     Deux corrections, pas une. (a) La TEINTE descend vers le vieil or
+     rgba(176,141,87) — H 37°, S 34 % : le rouge remonte, le vert baisse,
+     on sort du jaune-vert pour entrer dans le bronze. (b) Le LAVIS est
+     divisé par deux : ce qui doit dorer la carte, c'est le FILET, un trait
+     de 1 px qu'on lit comme du métal ; le fond, lui, doit rester du
+     papier. Le filet gagne en alpha ce que la teinte a perdu en
+     saturation, sinon un or désaturé à 0,42 se lit comme un gris beige. */
+  --or: 176, 141, 87;
+  --or-filet: 0.62;
+  --or-halo: 0.05;
+  --or-ombre: 0.45;
+
+  isolation: isolate;
+  border-color: rgba(var(--or), var(--or-filet));
+  /* le fond reste une COULEUR unie (que `.o-card-porte` sait animer vers le
+     blanc au survol) et le halo est une IMAGE par-dessus : mettre le halo
+     dans le `background` raccourci aurait tué la transition, deux dégradés
+     ne s'interpolant pas. */
+  background-color: #ffffff;
+  background-image: radial-gradient(
+    120% 100% at 0% 0%,
+    rgba(var(--or), var(--or-halo)) 0%,
+    rgba(var(--or), 0) 58%
+  );
+  box-shadow:
+    0 1px 2px rgba(96, 76, 46, 0.05),
+    0 14px 30px -24px rgba(96, 76, 46, var(--or-ombre));
+}
+
+/* — le liseré : une étincelle or fait le tour de la bordure — */
+.offres .o-card-or::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg 268deg,
+    rgba(var(--or), 0.18) 300deg,
+    rgba(var(--or), 0.95) 334deg,
+    rgba(248, 236, 214, 1) 346deg,
+    rgba(var(--or), 0.3) 353deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.85;
+  animation: beamSpin 7s linear infinite;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* — le reflet : une bande diagonale traverse la face toutes les 7 s —
+   même `carteReflet` que les cartes scintillantes, voile or au centre au
+   lieu du voile graphite.
+
+   DEUX ÉCARTS AU MODÈLE, tous deux pour la même raison — il balayait une
+   carte à maquette, celle-ci balaie un paragraphe de quatre lignes :
+
+   1. `z-index: -1`, donc DERRIÈRE le contenu. Le modèle assume de passer
+      au-dessus du texte (« un reflet se pose sur le verre, pas dessous »).
+      Au-dessus d'un corps en #71717a, une bande blanche le délave le temps
+      du passage : le contraste tombe sous 3:1 pendant une seconde toutes
+      les sept. Le pseudo-élément est peint après le fond de la carte mais
+      avant le flux — d'où le reflet visible sur la carte, invisible sur le
+      texte. C'est `isolation: isolate`, plus haut, qui rend l'ordre sûr :
+      sans lui, un z-index négatif passerait derrière le fond de la carte
+      et ne se verrait plus du tout.
+   2. Une bande DORÉE, là où le modèle balayait du blanc à flancs opaques.
+      Le blanc n'était visible que parce qu'il délavait le texte : passé
+      dessous, sur un fond de carte blanc, il ne se voyait tout simplement
+      plus — blanc sur blanc. C'est l'or qui porte le balayage maintenant,
+      et c'est aussi ce qui le raccorde au halo du coin. */
+.offres .o-card-or::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  z-index: -1;
+  width: 46%;
+  background: linear-gradient(
+    100deg,
+    transparent 6%,
+    rgba(var(--or), 0.07) 38%,
+    rgba(var(--or), 0.16) 50%,
+    rgba(var(--or), 0.07) 62%,
+    transparent 94%
+  );
+  opacity: 0;
+  animation: carteReflet 7s cubic-bezier(0.25, 0.6, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+/* décalage : la rangée scintille en vague au lieu de clignoter d'un bloc */
+.offres .o-card-or:nth-child(2)::before,
+.offres .o-card-or:nth-child(2)::after {
+  animation-delay: -1.75s;
+}
+.offres .o-card-or:nth-child(3)::before,
+.offres .o-card-or:nth-child(3)::after {
+  animation-delay: -3.5s;
+}
+.offres .o-card-or:nth-child(4)::before,
+.offres .o-card-or:nth-child(4)::after {
+  animation-delay: -5.25s;
+}
+
+/* survol : le filet se charge, l'ombre se creuse, le liseré passe à fond et
+   accélère. Le `background-color` reste blanc — il l'était déjà au repos,
+   donc aucun saut ne vient doubler le mouvement. */
+@media (hover: hover) and (pointer: fine) {
+  .offres .o-card-or:hover {
+    background-color: #ffffff;
+    border-color: rgba(var(--or), 0.95);
+    box-shadow:
+      0 1px 2px rgba(96, 76, 46, 0.06),
+      0 22px 44px -26px rgba(96, 76, 46, 0.52);
+  }
+  .offres .o-card-or:hover::before {
+    opacity: 1;
+    animation-duration: 2.6s;
+  }
+}
+
+/* mouvement coupé : restent le filet, le halo et l'ombre — c'est-à-dire
+   l'essentiel de ce qui rendait la carte visible. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .o-card-or::before {
+    animation: none;
+    opacity: 0.5;
+  }
+  .offres .o-card-or::after {
     animation: none;
     opacity: 0;
   }
@@ -1678,19 +2092,20 @@ button.rounded-full:active {
 }
 /* de nuit, le bouton plein s'inverse en blanc et le fantôme se fait verre */
 .offres .o-nuit .o-btn--primary {
+  --btn-encre: #d4d4d8;
+  --btn-contre: #09090b;
   background: #ffffff;
   color: #09090b;
 }
-.offres .o-nuit .o-btn--primary:hover {
-  background: #e4e4e7;
-}
+/* de nuit, le fantôme est celui qui bascule le plus franchement : verre
+   sur noir au repos, pastille blanche à texte noir une fois recouvert.
+   C'est l'inversion exacte que faisait la source. */
 .offres .o-nuit .o-btn--ghost {
+  --btn-encre: #ffffff;
+  --btn-contre: #09090b;
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-}
-.offres .o-nuit .o-btn--ghost:hover {
-  background: rgba(255, 255, 255, 0.15);
 }
 .offres .o-nuit .o-pill {
   background: rgba(255, 255, 255, 0.08);
@@ -1903,19 +2318,17 @@ button.rounded-full:active {
 
 /* boutons */
 .offres--sombre .o-btn--primary {
+  --btn-encre: #18181b;
+  --btn-contre: #ffffff;
   background: #424242;
   color: #ffffff;
 }
-.offres--sombre .o-btn--primary:hover {
-  background: #52525b;
-}
 .offres--sombre .o-btn--ghost {
+  --btn-encre: #fafafa;
+  --btn-contre: #18181b;
   background: transparent;
   border-color: #3f3f46;
   color: #fafafa;
-}
-.offres--sombre .o-btn--ghost:hover {
-  background: #18181b;
 }
 
 /* liens fléchés */
@@ -5792,72 +6205,9 @@ button.rounded-full:active {
   }
 }
 
-/* ——— 03/09 — le sélecteur Mensuel | Annuel de /tarifs (Teo : « vers la
-   droite, en bouton stylisé, plus pro ») : une pilule noire, deux moitiés
-   égales, un curseur blanc qui glisse sous le libellé actif. Le curseur est
-   un élément à part (rv-periode-curseur) déplacé par transform : le texte,
-   lui, ne bouge pas, seule sa couleur change. La pastille « −15 % » garde
-   son vert sur les deux fonds. ——— */
-.resa .rv-periode {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  height: 44px;
-  padding: 4px;
-  border-radius: 9999px;
-  background: #0f1013;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 6px 16px -10px rgba(5, 5, 5, 0.5);
-}
-.resa .rv-periode-curseur {
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  width: calc(50% - 4px);
-  border-radius: 9999px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.18);
-  transition: transform 0.28s var(--ease-transition);
-}
-.resa .rv-periode[data-actif="annuel"] .rv-periode-curseur {
-  transform: translateX(100%);
-}
-.resa .rv-periode-btn {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 18px;
-  border-radius: 9999px;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: rgba(255, 255, 255, 0.72);
-  white-space: nowrap;
-  transition: color 0.22s ease;
-}
-.resa .rv-periode-btn:hover:not([data-actif="true"]) {
-  color: #ffffff;
-}
-.resa .rv-periode-btn[data-actif="true"] {
-  color: #0f1013;
-}
-.resa .rv-periode-btn:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: -4px;
-}
-@media (prefers-reduced-motion: reduce) {
-  .resa .rv-periode-curseur {
-    transition: none;
-  }
-}
+/* (14/09/2026 — le sélecteur .rv-periode de /tarifs est parti avec le
+   modèle « pricing-section-3 » : la grille porte désormais ses styles en
+   utilitaires, voir components/tarifs/Grille.tsx) */
 
 /* ═══════════════════════════════════════════════════════════════════════
    /compte — « Mon compte » repensée (03/09/2026)
@@ -6770,354 +7120,7 @@ button.rounded-full:active {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   /tarifs — LES CARTES DE PRIX, MODÈLE « PRICING » (09/09/2026)
-
-   Demande de Teo, composant de référence fourni (« pricing-4 », 21st.dev).
-   La grille quitte la composition héritée de /reserver-un-audit — colonne
-   de gauche + trois cartes à grosse tête colorée, sans filet — pour celle
-   d'une page de prix : une carte CERNÉE d'un filet, coins arrondis, ombre
-   d'un pixel, découpée en quatre blocs que des filets séparent (tête,
-   choix des postes, points, pied), les pastilles hors du flux en haut à
-   droite, et la carte phare légèrement mise à l'échelle.
-
-   Trois écarts assumés avec la référence :
-   · `scale-105` ramené à 3 % — nos cartes portent le choix des postes et
-     font le double de haut ; à 5 % la carte phare débordait de sa rangée ;
-   · les trois teintes de tête (bleu, or, nuit) sont CONSERVÉES : la
-     référence ne colore que la carte phare, mais l'associé a tranché le
-     08/09 (« on dirait que c'est la même chose ») et la décision tient ;
-   · le corps garde deux listes au lieu d'une — le choix des postes est la
-     mécanique de vente de la page, il ne se fond pas dans les points.
-
-   Tout est préfixé `.tp-` sous `.resa` : rien ne fuit ailleurs, et les
-   règles `.r-carte` de /reserver-un-audit ne sont pas touchées.
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.resa .tp-carte {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid #e3e3e3;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.05);
-}
-/* la carte phare : filet doré, et elle se détache de ses voisines */
-.resa .tp-carte--phare {
-  border-color: #dcc79a;
-}
-/* Dès 1024 px la carte est une SOUS-GRILLE de quatre rangs partagés par la
-   rangée (tête / choix / points / pied) : trois têtes de même hauteur et
-   trois boutons sur la même ligne, quelle que soit la longueur des textes.
-   La colonne unique est minmax(0, 1fr) et les rangs ont min-width 0 : sans
-   cela une colonne `auto` prend la largeur min-content du contenu (un mot
-   long dans une tuile) et les rangs sortent de la carte. */
-@media (min-width: 1024px) {
-  .resa .tp-carte {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: subgrid;
-    grid-row: span 4;
-  }
-  .resa .tp-carte > * {
-    min-width: 0;
-  }
-}
-/* LE `scale-105` DE LA RÉFÉRENCE N'EST PAS REPRIS (essayé, mesuré, retiré).
-   Sur des cartes de 200 px de haut il soulève la carte phare de 5 px ; sur
-   les nôtres, qui portent le choix des postes et font 1 500 px, il la
-   décale de 22 px en haut ET en bas — les trois prix ne tombent plus sur
-   la même ligne et surtout les trois boutons non plus, ce qui était
-   justement l'exigence du 08/09. La carte phare se distingue autrement, et
-   la référence s'en sert déjà : filet doré, tête dorée, corps voilé,
-   pastille « Recommandé » à l'étoile — plus une ombre un peu plus portée. */
-.resa .tp-carte--phare {
-  box-shadow: 0 10px 30px -18px rgba(5, 5, 5, 0.28);
-}
-/* ——— les pastilles, hors du flux en haut à droite (la référence les pose
-   là, au-dessus de la tête, badge « Popular » puis remise) ——— */
-.resa .tp-badges {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.resa .tp-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 22px;
-  padding: 0 8px;
-  border: 1px solid #e3e3e3;
-  border-radius: 7px;
-  background: #ffffff;
-  font-size: 11.5px;
-  line-height: 1;
-  font-weight: 600;
-  color: var(--r-texte);
-  white-space: nowrap;
-}
-/* la remise annuelle : la pastille pleine de la référence (bg-primary) */
-.resa .tp-badge--remise {
-  border-color: #050505;
-  background: #050505;
-  color: #ffffff;
-}
-
-/* ——— 1er rang : la tête (nom, promesse, prix), sous filet ———
-   data-teinte : bleu / or / nuit, une par palier (décision de l'associé
-   du 08/09, voir le bloc .r-carte-tete plus haut — mêmes couleurs). */
-.resa .tp-tete {
-  display: flex;
-  flex-direction: column;
-  border-bottom: 1px solid #e3e3e3;
-  padding: 20px 20px 22px;
-}
-/* le prix tombe EN BAS de la tête : les trois têtes ont la même hauteur
-   (sous-grille), les trois prix se retrouvent donc sur la même ligne — et
-   la promesse, plus courte sur un palier que sur l'autre, ne laisse plus
-   de trou sous elle. Marge haute minimale pour ne pas coller au texte. */
-.resa .tp-bloc-prix {
-  margin-top: auto;
-  padding-top: 24px;
-}
-.resa .tp-tete[data-teinte="bleu"] {
-  background: linear-gradient(140deg, #f5f8fd 0%, #e8effb 100%);
-}
-.resa .tp-tete[data-teinte="or"] {
-  background: linear-gradient(140deg, var(--r-or-clair) 0%, var(--r-or-mid) 100%);
-  border-bottom-color: #e6d5ac;
-}
-.resa .tp-tete[data-teinte="nuit"] {
-  background: linear-gradient(140deg, #0f1013 0%, #1d1e24 100%);
-  border-bottom-color: #1d1e24;
-}
-/* l'encre du monde clair par défaut (bleu, or)… */
-.resa .tp-nom,
-.resa .tp-prix {
-  color: var(--r-texte);
-}
-.resa .tp-info,
-.resa .tp-facture {
-  color: var(--r-faible);
-}
-/* …et sur la nuit : titre blanc, prix en or, le reste dans les gris clairs
-   de la carte sombre de /compte (#d4d4d8, #a1a1aa) — tous ≥ 6,5:1 */
-.resa .tp-tete[data-teinte="nuit"] .tp-nom {
-  color: #ffffff;
-}
-.resa .tp-tete[data-teinte="nuit"] .tp-prix {
-  color: #e9cd91;
-}
-.resa .tp-tete[data-teinte="nuit"] .tp-info {
-  color: #d4d4d8;
-}
-.resa .tp-tete[data-teinte="nuit"] .tp-facture,
-.resa .tp-tete[data-teinte="nuit"] .rv-prix-barre {
-  color: #a1a1aa;
-}
-.resa .tp-tete[data-teinte="nuit"] .rv-economie {
-  background: rgba(159, 216, 178, 0.14);
-  color: #9fd8b2;
-}
-
-/* le grand prix — @number-flow/react rend un élément personnalisé : le
-   suffixe (« par mois ») vit dans son shadow DOM et ne se peint que par
-   ::part(suffix), comme dans le composant de référence */
-.resa .tp-prix {
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  font-variant-numeric: tabular-nums;
-  font-size: 34px;
-  line-height: 42px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-.resa .tp-prix::part(suffix) {
-  font-size: 13px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: var(--r-faible);
-}
-.resa .tp-tete[data-teinte="nuit"] .tp-prix::part(suffix) {
-  color: #a1a1aa;
-}
-
-/* l'argument de la tête nuit (« Le quatrième poste pour N € de plus »),
-   en or, précédé d'un point or — l'écart est calculé dans Grille.tsx */
-.resa .tp-ecart {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  line-height: 18px;
-  font-weight: 600;
-  color: #e9cd91;
-}
-.resa .tp-ecart::before {
-  content: "";
-  flex: none;
-  height: 6px;
-  width: 6px;
-  border-radius: 9999px;
-  background: #e9cd91;
-}
-/* la ligne réservée des deux autres cartes : elle tient sa place pour que
-   les trois prix tombent sur la même ligne, mais ne se voit pas — et sous
-   1024 px, où les cartes s'empilent, elle n'a plus de raison d'être */
-.resa .tp-ecart[data-vide="true"] {
-  visibility: hidden;
-}
-@media (max-width: 1023px) {
-  .resa .tp-ecart[data-vide="true"] {
-    display: none;
-  }
-}
-
-/* ——— 2e rang : le choix des postes, sous filet ———
-   09/09, SECONDE PASSE (Teo : « tu as gardé les logos des moteurs, c'est
-   censé être simple comme sur le prompt, et de la même taille »). Les
-   tuiles `.rv-case` — cadre, tuile de logo 44 px, nom + ligne courte —
-   faisaient 66 px chacune : cinq par carte, la carte montait à 1 500 px
-   et le choix pesait plus lourd que le prix. Le choix se fait désormais
-   sur des LIGNES NUES, exactement le gabarit des points en dessous : une
-   case (ou une coche), un nom, rien d'autre. La carte tombe sous 800 px
-   et les trois se lisent d'un coup.
-   `.rv-case` n'est pas touchée — components/compte/AbonnementCarte.tsx
-   s'en sert toujours ; /tarifs a simplement cessé de l'utiliser. */
-.resa .tp-choix {
-  border-bottom: 1px solid #e3e3e3;
-  padding: 16px 18px 18px;
-}
-.resa .tp-legende {
-  font-size: 13px;
-  line-height: 19px;
-  font-weight: 600;
-  color: var(--r-texte);
-}
-/* une ligne de poste : même gabarit que .tp-point, à la case près */
-.resa .tp-poste {
-  display: flex;
-  /* haut, pas centre : sur un nom qui passe sur deux lignes (« Factures
-     fournisseurs et pièces comptables ») une case centrée tombe entre les
-     deux — les points en dessous s'alignent en haut, ces lignes aussi */
-  align-items: flex-start;
-  gap: 9px;
-  padding: 5px 0;
-  font-size: 13px;
-  line-height: 20px;
-  color: var(--r-doux);
-  cursor: pointer;
-  transition: color 0.18s ease;
-}
-.resa .tp-poste:hover {
-  color: var(--r-texte);
-}
-.resa .tp-poste--actif {
-  font-weight: 500;
-  color: var(--r-texte);
-}
-/* le palier est complet : les postes non retenus s'effacent sans partir */
-.resa .tp-poste--plein {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.resa .tp-poste--plein:hover {
-  color: var(--r-doux);
-}
-.resa .tp-poste--fixe {
-  cursor: default;
-}
-/* la case à cocher, dessinée : le vrai <input> est en sr-only */
-.resa .tp-case {
-  position: relative;
-  flex: none;
-  margin-top: 2px;
-  height: 16px;
-  width: 16px;
-  border: 1px solid #c7c7c7;
-  border-radius: 5px;
-  background: #ffffff;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease;
-}
-.resa .tp-poste--actif .tp-case {
-  border-color: #050505;
-  background: #050505;
-}
-.resa .tp-poste--actif .tp-case::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  height: 7px;
-  width: 3px;
-  border: solid #ffffff;
-  border-width: 0 1.6px 1.6px 0;
-  transform: rotate(45deg);
-}
-.resa .tp-poste input:focus-visible ~ .tp-case {
-  outline: 2px solid #050505;
-  outline-offset: 2px;
-}
-/* le « + » de la ligne sur-mesure et la coche de « Tout Omega » */
-.resa .tp-signe {
-  flex: none;
-  margin-top: 2px;
-  height: 16px;
-  width: 16px;
-  color: var(--r-faible);
-}
-.resa .tp-signe--ok {
-  color: var(--r-texte);
-}
-.resa .tp-poste--lien:hover span {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* ——— 3e rang : les points du palier, en coches comme la référence ———
-   La carte phare prend le voile discret que la référence pose sur le
-   corps de sa carte « Popular » (bg-muted/10). */
-.resa .tp-points {
-  padding: 18px 18px 20px;
-}
-.resa .tp-carte--phare .tp-points {
-  background: rgba(233, 205, 145, 0.1);
-}
-.resa .tp-point {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 13px;
-  line-height: 19px;
-  color: var(--r-doux);
-}
-.resa .tp-point + .tp-point {
-  margin-top: 10px;
-}
-.resa .tp-coche {
-  flex: none;
-  margin-top: 2px;
-  height: 15px;
-  width: 15px;
-  color: var(--r-texte);
-}
-
-/* ——— 4e rang : le pied — bouton pleine largeur et sa note ———
-   `margin-top: auto` sert la pile mobile (sous 1024 px la carte est un
-   flex) ; en sous-grille le rang est déjà le dernier. */
-.resa .tp-pied {
-  margin-top: auto;
-  border-top: 1px solid #e3e3e3;
-  padding: 12px;
-}
-.resa .tp-pied .r-btn {
-  padding: 10px 14px;
-  font-size: 15px;
-}
+/* (14/09/2026 — le bloc .tp- des cartes de /tarifs, modèle « pricing » du
+   09/09, est parti avec le modèle « pricing-section-3 » : la grille porte
+   ses styles en utilitaires Tailwind, comme la référence — voir
+   components/tarifs/Grille.tsx et components/ui/card.tsx) */

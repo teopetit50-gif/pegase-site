@@ -63,6 +63,33 @@ export type Famille = {
    enfreinte, et c'est elle qui prime.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════════
+   LE NOM AFFICHÉ D'UN PAQUET (12/09/2026 — retour aux codes)
+
+   Le 10/09, les quatre paquets qui s'installent avaient pris un nom de
+   marque maison (« Omega Relances », « Omega Reprise »…). Teo est revenu
+   dessus le 12/09 : les paquets s'affichent de nouveau sous leur code,
+   celui qu'ils portaient depuis l'origine.
+
+   La table reste, mais rend le code tel quel. C'est elle qui a rendu le
+   retour sûr : le champ `system` n'avait jamais été renommé — il indexe
+   FICHES, GABARITS, les logos, les paliers, les intégrations et les
+   audits — donc seul l'affichage a bougé, dans un sens comme dans l'autre.
+   Le jour où un nom commercial revient, c'est ici qu'il se pose, et nulle
+   part ailleurs.
+
+   PULSE et VAULT n'y ont jamais figuré : ils sont compris, ils n'ont pas
+   de site, et le repli `?? code` les rend déjà tels quels.
+   ══════════════════════════════════════════════════════════════════════ */
+export const NOM_PAQUET: Record<string, string> = {
+  CASHD: "CASHD",
+  RELOAD: "RELOAD",
+  FRONTD: "FRONTD",
+  FILED: "FILED",
+};
+
+export const nomPaquet = (code: string) => NOM_PAQUET[code] ?? code;
+
 export const FAMILLES: Famille[] = [
   {
     id: "installes",
@@ -75,7 +102,7 @@ export const FAMILLES: Famille[] = [
     proof: {
       type: "quote",
       text: "Une entreprise ne perd pas son chiffre d'un coup. Elle le perd par un devis sans réponse, un appel manqué, une facture jamais relancée.",
-      sub: "Un garage qui rate des appels, un artisan dont les devis dorment, un restaurant qui classe sa compta le dimanche soir.",
+      sub: "Un service qui attend la validation d'un autre, des demandes qui arrivent plus vite qu'on ne les traite, des relances suspendues à la disponibilité d'une personne.",
     },
     moteurs: [
       {

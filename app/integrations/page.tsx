@@ -5,6 +5,7 @@ import PageMotion from "@/components/PageMotion";
 import { SystemLogo } from "@/components/logos";
 import FamilleOutils, { type Outil } from "@/components/integrations/FamilleOutils";
 import { Chevron, OUTILS } from "@/components/offres/MediaMoteurs";
+import { nomPaquet } from "@/lib/content";
 import {
   FAMILLES_OUTILS,
   MOTEUR_OUTILS,
@@ -199,7 +200,7 @@ export default function Integrations() {
                   <div className="flex items-center gap-3">
                     <SystemLogo system={m.system} />
                     <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#09090b]">
-                      {m.system}
+                      {nomPaquet(m.system)}
                     </span>
                   </div>
                   <p className="o-small mt-3 !text-[15px] !text-[#52525b]">

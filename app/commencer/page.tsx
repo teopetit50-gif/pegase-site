@@ -45,7 +45,7 @@ import { lienContact } from "@/lib/reservation";
 export const metadata: Metadata = {
   title: "Par où commencer | Omega.AI",
   description:
-    "Deux façons de démarrer avec Omega : les prix publics pour les indépendants et TPE-PME, un audit sur mesure pour les organisations où plusieurs services valident.",
+    "Deux façons de démarrer avec Omega : un audit sur mesure pour les organisations où plusieurs services valident, des prix publics pour les indépendants et TPE-PME.",
 };
 
 /* Les pictogrammes sont dessinés au trait (2 px, grille de 24) : une
@@ -80,6 +80,16 @@ const ICONES = {
 
 const PORTES = [
   {
+    id: "orga",
+    teinte: "violet",
+    icone: ICONES.plusieurs,
+    titre: "Organisations & équipes",
+    texte:
+      "Plusieurs services se partagent le travail — l'accueil, la comptabilité, les opérations — et plusieurs personnes valident, chacune sur son poste. Le prix sort des volumes mesurés, pas d'une grille.",
+    cta: "Réserver un échange",
+    href: "/reserver-un-audit",
+  },
+  {
     id: "tpe",
     teinte: "chaud",
     icone: ICONES.seul,
@@ -88,16 +98,6 @@ const PORTES = [
       "Une personne — deux, parfois — tient les demandes, les devis et les factures, voit passer tout ce qui entre et sort, et valide seule ce qui part vers les clients. Ses outils : le mail, un tableur, WhatsApp, la caisse.",
     cta: "Voir les prix et démarrer",
     href: "/tarifs",
-  },
-  {
-    id: "orga",
-    teinte: "violet",
-    icone: ICONES.plusieurs,
-    titre: "Organisations & équipes",
-    texte:
-      "Plusieurs services se partagent le travail — l'accueil, la compta, l'atelier — et plusieurs personnes valident, chacune sur son poste. Le prix sort des volumes mesurés, pas d'une grille.",
-    cta: "Réserver un échange",
-    href: "/reserver-un-audit",
   },
 ];
 

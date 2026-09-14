@@ -1,0 +1,296 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   RELOAD — décalque de intellune-ruixen-com.vercel.app
+   ---------------------------------------------------------------------------
+   Relevé au style calculé le 09/09/2026 (CDP, 5 largeurs), pas estimé.
+   Ce que la référence expose et qui est repris tel quel :
+
+   Jetons clair   fond #f5f5f5 · texte #0a0a0a · atténué #737373 · carte #f1f1f1
+                  bord #d9d9d9 · primaire #171717 · accent #e6e6e6 · pop #fafafa
+   Jetons sombre  fond #121212 · texte #ebebeb · atténué #9b9b9b · carte #191919
+                  bord #242424 · primaire #fafafa · accent #2b2b2b
+   Rayon          --radius: .5rem
+   Colonne        .rp-colonne = 100 % puis 40/48/64/80rem, plafond 1400px à 2xl,
+                  padding-inline: 0 (les marges internes sont posées par section)
+   Typo relevée   h1 60px/60px, interlettre -3px, graisse 400, centré, max 672px
+                  h2 36px/40px, graisse 500, max 896px (max-w-4xl)
+   Fond hachuré   .rp-dashed : dégradé 45°, trame .25rem
+   Trames         bento : repeating-linear-gradient(315deg, …) pas 10px
+
+   Écart de police : « Geist » est libre (SIL OFL) et servie par next/font.
+   ---------------------------------------------------------------------------
+   11/09/2026 — RAPATRIEMENT depuis OMEGA/reload-site (voir RAPATRIEMENT.md).
+
+   · Les jetons SOMBRES sont relevés ci-dessus pour mémoire, et RIEN de plus :
+     la bascule clair/sombre du site source ne vient pas (règle 4). Pas de
+     bouton, pas d'amorce localStorage, pas de classe `.dark`. La page est
+     figée dans son monde clair, et les neuf utilitaires `dark:` du balisage
+     d'origine ont été retirés — leur moitié claire suffit et reste lisible.
+
+   · Les jetons vivent sous `.p-reprise`, JAMAIS sur `:root` (règle 2) : le
+     site est sombre, poser ces couleurs à la racine repeindrait les 23 autres
+     pages.
+
+   · Pas de `@theme` ici (règle 3) : les utilitaires du site source qui en
+     naissaient (`bg-background`, `text-foreground`, `border-border`,
+     `text-muted-foreground`, `bg-card`, `bg-popover`, `bg-primary`,
+     `bg-accent`, `ring-ring`…) N'EXISTENT PAS sur ce site et ne peignent rien
+     en silence. Ils sont convertis en valeur arbitraire dans le balisage
+     (`bg-[#f5f5f5]`, `text-[#737373]`…). Le tableau de correspondance est en
+     tête de components/produits/reprise/Cadre.tsx.
+     ⚠ PIÈGE : `bg-muted` existe ici mais vaut #9b9ba3 (le gris de TEXTE du
+     site) là où la source lui donnait #f5f5f5. Ne jamais le réintroduire.
+
+   · La colonne du site source était `@utility container`, qui ne peut pas
+     vivre hors de globals.css : elle devient `.rp-colonne`, au relevé près.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.p-reprise {
+  /* ——— jetons du monde CLAIR, et lui seul ——— */
+  --rp-fond: #f5f5f5;
+  --rp-texte: #0a0a0a;
+  --rp-attenue: #f5f5f5; /* `muted` : EXACTEMENT le fond, chez la référence */
+  --rp-attenue-texte: #737373;
+  --rp-pop: #fafafa;
+  --rp-pop-texte: #272727;
+  --rp-carte: #f1f1f1;
+  --rp-carte-texte: #0a0a0a;
+  --rp-bord: #d9d9d9;
+  --rp-champ: #d9d9d9;
+  --rp-primaire: #171717;
+  --rp-primaire-texte: #fafafa;
+  --rp-secondaire: #ededed;
+  --rp-secondaire-texte: #171717;
+  --rp-accent: #e6e6e6;
+  --rp-accent-texte: #171717;
+  --rp-anneau: #a3a3a3;
+
+  background: var(--rp-fond);
+  color: var(--rp-texte);
+  accent-color: var(--rp-primaire);
+
+  /* Règle 5 — la police s'écrit EXPLICITEMENT. La règle font-family du site
+     est posée plus haut, sur `body`, avec Inter : une variable posée sur ce
+     conteneur ne suffirait pas, rien ne la consommerait. */
+  font-family: var(--police-geist), ui-sans-serif, system-ui, sans-serif;
+
+  /* Même technique que `.monde-clair` : le contenu vit dans la colonne 1440
+     de <main> (PageShell) ; au-delà, le noir de `bg-panel` réapparaissait sur
+     les côtés et coupait la page en deux bandes. Une ombre géante de la MÊME
+     couleur, écrêtée horizontalement, peint jusqu'aux bords de l'écran sans
+     toucher à la mise en page — ni marge négative, ni 100vw, ni barre de
+     défilement parasite. */
+  box-shadow: 0 0 0 100vmax var(--rp-fond);
+  clip-path: inset(0 -100vmax);
+}
+
+/* Contrepartie du `clip-path` ci-dessus : il écrête AUSSI en haut et en bas,
+   au ras de la page. Or les croix d'angle du dernier cadre (components/
+   produits/reprise/Cadre.tsx) descendent 12 px sous la dernière section —
+   elles arrivaient coupées en deux. Sur le site source elles débordaient sur
+   un pied de page CLAIR ; ici le pied est sombre, cette réserve de 12 px leur
+   rend le même fond. Sous 640 les croix sont masquées : pas de réserve. */
+@media (width >= 40rem) {
+  .p-reprise { padding-bottom: 12px; }
+}
+
+.p-reprise ::selection {
+  background-color: var(--rp-accent);
+  color: var(--rp-texte);
+}
+
+@layer base {
+  /* Le site source posait `* { border-color: var(--color-border) }` dans son
+     globals.css. Sans cet équivalent, les `border-b`, `border-x`, `divide-y`
+     et `divide-x` NUS du balisage retombent sur `currentColor` (Tailwind v4)
+     et dessinent des filets noirs au lieu du gris #d9d9d9.
+     Dans `base` et pas hors couche : une utilitaire de couleur de bord posée
+     dans le balisage doit continuer de gagner. */
+  .p-reprise *,
+  .p-reprise *::before,
+  .p-reprise *::after {
+    border-color: var(--rp-bord);
+  }
+}
+
+@layer components {
+  /* ——— la colonne centrale (ex-`@utility container` du site source) ———
+     La référence plafonne la colonne à 1400px au-delà de 96rem. Ce plafond
+     tient toujours ici : <main> est capé à 1440, donc 1400 reste atteignable
+     et le relevé est intact. */
+  .p-reprise .rp-colonne {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 0;
+  }
+  @media (width >= 40rem) {
+    .p-reprise .rp-colonne { max-width: 40rem; }
+  }
+  @media (width >= 48rem) {
+    .p-reprise .rp-colonne { max-width: 48rem; }
+  }
+  @media (width >= 64rem) {
+    .p-reprise .rp-colonne { max-width: 64rem; }
+  }
+  @media (width >= 80rem) {
+    .p-reprise .rp-colonne { max-width: 80rem; }
+  }
+  @media (width >= 96rem) {
+    .p-reprise .rp-colonne { max-width: 1400px; }
+  }
+
+  /* Trame diagonale des bandes de séparation — relevée telle quelle.
+     (ex-`.bg-dashed`, renommée pour ne rien croiser sur ce site.) */
+  .p-reprise .rp-dashed {
+    background-image: linear-gradient(
+      45deg,
+      var(--rp-bord) 12.5%, transparent 12.5%,
+      transparent 50%, var(--rp-bord) 50%,
+      var(--rp-bord) 62.5%, transparent 62.5%, transparent 100%
+    );
+    background-size: 0.25rem 0.25rem;
+  }
+
+  /* ——— entrées du héros ———
+     Renommées : `animate-fade-in` n'existe pas sur ce site (elle naissait
+     d'un `@theme`), et `delay-200`/`delay-400` y existent bel et bien mais
+     comme DÉLAIS DE TRANSITION — elles ne décaleraient aucune animation. */
+  .p-reprise .rp-fondu { animation: rp-fondu .6s ease-out both; }
+  .p-reprise .rp-fondu-haut { animation: rp-fondu-haut .3s ease-out both; }
+  .p-reprise .rp-delai-200 { animation-delay: .2s; }
+  .p-reprise .rp-delai-400 { animation-delay: .4s; }
+
+  /* Carrousel de cartes du héros : décalage, échelle, opacité et rotation
+     dérivés d'une seule variable --card-position (-1, 0, 1). */
+  .p-reprise .rp-carte-carrousel {
+    --card-offset-mobile: calc(var(--card-position) * 80px);
+    --card-offset-tablet: calc(var(--card-position) * 140px);
+    --card-offset-desktop: calc(var(--card-position) * 260px);
+    --card-scale: calc(1 - abs(var(--card-position)) * 0.08);
+    --card-opacity: calc(1 - abs(var(--card-position)) * 0.2);
+    --card-rotate: calc(var(--card-position) * -5deg);
+    transform: translateX(calc(-50% + var(--card-offset-mobile)))
+               scale(var(--card-scale)) rotateY(var(--card-rotate));
+    opacity: var(--card-opacity);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    will-change: transform, opacity;
+    transition: transform .5s cubic-bezier(.4, 0, .2, 1), opacity .5s ease-out;
+  }
+  @media (width >= 640px) {
+    .p-reprise .rp-carte-carrousel {
+      transform: translateX(calc(-50% + var(--card-offset-tablet)))
+                 scale(var(--card-scale)) rotateY(var(--card-rotate));
+    }
+  }
+  @media (width >= 1024px) {
+    .p-reprise .rp-carte-carrousel {
+      transform: translateX(calc(-50% + var(--card-offset-desktop)))
+                 scale(var(--card-scale)) rotateY(var(--card-rotate));
+    }
+  }
+
+  /* Surlignage de la ligne active dans la palette de segments. */
+  .p-reprise .rp-ligne-active {
+    transition: box-shadow .15s ease-out;
+    box-shadow: 0 0 0 1.5px #138dff, 0 0 6px 1px #138dff40;
+  }
+}
+
+@keyframes rp-fondu {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rp-fondu-haut {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Le site source coupait toute animation sous prefers-reduced-motion.
+   Repris à l'identique, mais borné à la page. */
+@media (prefers-reduced-motion: reduce) {
+  .p-reprise *,
+  .p-reprise *::before,
+  .p-reprise *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PASSE MOBILE — 11/09/2026, demande de Teo : « ça fait encore trop
+   chargé » sur les pages de module.
+
+   CE QUI ÉTAIT DÉJÀ FAIT, et qu'il ne faut pas refaire : la HIÉRARCHIE.
+   `TitreSection` (Cadre.tsx) et `Intitule` (Fonctionnalites.tsx) font
+   déjà descendre la suite grise d'un titre en taille de texte courant
+   sous 640 px, et les étiquettes dispersées en pourcentage sont déjà
+   empilées. Le relevé du 11/09 le confirme : à 390 cette page compose
+   déjà en 20/28 pour les titres et 14/22,75 pour le corps, c'est-à-dire
+   l'échelle mobile visée. LA TYPOGRAPHIE N'EST DONC PAS TOUCHÉE ICI —
+   la descendre encore la rendrait illisible.
+
+   CE QUI RESTE, et qui est tout le problème : la page compose 207 lignes
+   dans 8 224 px, soit la même quantité de texte que sa voisine Relances
+   dans 800 px de moins. Elle n'est pas trop longue, elle est trop DENSE.
+   Deux causes, toutes deux de la géométrie de bureau laissée telle
+   quelle sous 640 :
+
+   1. Les en-têtes de section respirent sur 48 à 64 px en haut ET en bas
+      — le calibre d'une colonne de 1 400 px, appliqué à 342.
+   2. Le rembourrage des cartes vaut 24 px de chaque côté. Il se paie
+      deux fois : il prend la largeur du texte, donc il rallonge la page.
+
+   Comme pour Relances : rien ne bouge au-dessus de 639 px, le relevé
+   d'intellune reste vérifiable tel qu'il a été contrôlé à cinq largeurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 639px) {
+  /* ── Respiration des en-têtes de section ──────────────────────────
+     Six `py-12` et cinq `py-16` non préfixés, un par section : 48 ou
+     64 px au-dessus du titre et autant en dessous, avant la première
+     carte. Les variantes `md:` gardent leurs valeurs (classes échappées
+     distinctes, ce bloc ne les atteint pas). */
+  .p-reprise .py-16 {
+    padding-block: 2.25rem; /* 36, au lieu de 64 */
+  }
+  .p-reprise .py-12 {
+    padding-block: 2rem; /* 32, au lieu de 48 */
+  }
+  .p-reprise .py-10 {
+    padding-block: 1.75rem;
+  }
+  .p-reprise .pt-24 {
+    padding-top: 2.5rem;
+  }
+  .p-reprise .pt-16 {
+    padding-top: 2.25rem;
+  }
+  .p-reprise .pt-12 {
+    padding-top: 2rem;
+  }
+
+  /* ── Rembourrage des cartes ───────────────────────────────────────
+     24 → 20 px. Quatre pixels de chaque côté ne se voient pas ; sur une
+     colonne de 342 ils rendent 8 px de texte, et c'est ce qui fait
+     repasser un bloc de cinq lignes à quatre. */
+  .p-reprise .p-6 {
+    padding: 1.25rem;
+  }
+  .p-reprise .p-5 {
+    padding: 1rem;
+  }
+
+  /* ── Gouttières ───────────────────────────────────────────────────
+     À 390 px la grille est à une colonne : `gap-8` n'est plus l'écart
+     entre deux cartes côte à côte, c'est un trou vertical. */
+  .p-reprise .gap-12 {
+    gap: 1.75rem;
+  }
+  .p-reprise .gap-8 {
+    gap: 1.25rem;
+  }
+  .p-reprise .gap-6 {
+    gap: 1.25rem;
+  }
+}

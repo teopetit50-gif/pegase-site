@@ -1,8 +1,16 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
+import {
+  AlertTriangle,
+  CalendarCheck,
+  Cpu,
+  FileDown,
+  Layers,
+  Lock,
+  MapPin,
+  Send,
+} from "lucide-react";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import { SystemLogo } from "@/components/logos";
 import {
   BandeauOutils,
   Chevron,
@@ -12,7 +20,22 @@ import {
   MaqLocal,
   MaqValidation,
 } from "@/components/offres/MediaMoteurs";
-import { FAMILLES } from "@/lib/content";
+import PortesHover from "@/components/offres/PortesHover";
+import FondSilk from "@/components/accueil/FondSilk";
+import FriseDeroule from "@/components/accueil/FriseDeroule";
+import TableauEntrees from "@/components/accueil/TableauEntrees";
+import TexteRevele from "@/components/accueil/TexteRevele";
+import BentoChange, { type CarteBento } from "@/components/accueil/BentoChange";
+import CartesEcheance, {
+  type CarteEcheance,
+} from "@/components/accueil/CartesEcheance";
+import CartesPreuve, {
+  type CartePreuve,
+} from "@/components/accueil/CartesPreuve";
+import CartesLueur, {
+  type CarteLueur,
+} from "@/components/accueil/CartesLueur";
+import { TuilesCatalogue } from "@/components/accueil/TuilesCatalogue";
 import TeamShowcase from "@/components/ui/team-showcase";
 import { Drapeau } from "@/components/ui/drapeau";
 import {
@@ -22,6 +45,7 @@ import {
   EQUIPE_CHAPO,
   EQUIPE_PIED,
 } from "@/lib/equipe";
+import { FAMILLES, nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    / — la page d'accueil (30/07/2026)
@@ -84,11 +108,37 @@ import {
    en place ; elle reste là pour la raison qui l'avait motivée — ne pas
    réduire l'offre à un seul paquet — qui vaut toujours si le hero réénumère
    un jour. La pastille, elle, cite encore les trois familles. */
+/* 10/09/2026 — la pastille et le chapô changent de registre, le TITRE reste
+   celui de Teo (07/08).
+
+   Pourquoi. Chacun des quatre paquets a désormais sa propre vitrine, qui
+   argumente mieux que cette page ne le fera jamais : elle est entière sur un
+   seul métier. Répéter ici « relances, réponses et classement » mettait deux
+   pages en concurrence sur la même requête — et laissait sans réponse la
+   question que pose vraiment un visiteur arrivé du pied de page d'une
+   vitrine : « qui est derrière, et que faites-vous d'autre ? »
+
+   L'ancien chapô ne répondait ni à l'une ni à l'autre : « systèmes
+   intelligents », « rigueur, continuité et contrôle », « libérer du temps à
+   forte valeur ajoutée » auraient tenu sur le site de n'importe quelle
+   agence. Le nouveau nomme l'objet fabriqué et sur quoi il se branche —
+   193 signes ramenés à 145, sous le budget d'un texte d'appel.
+
+   Ce qui n'y figure PAS, volontairement : l'argument « les quatre systèmes
+   se parlent ». Personne n'achète un écosystème ; il se joue dans l'espace
+   client, une fois le premier module installé. */
+/* 14/09 (Teo) — nouvelles phrases choisies pour le hero. Le titre tient sur
+   deux lignes voulues (une par phrase), d'où le tableau. */
 const HERO = {
-  pastille: "Relances, réponses et classement automatisés",
-  titre: "Votre entreprise continue d'avancer, même quand vous n'y pensez pas.",
+  pastille: "Systèmes métiers, automatisation & intégration",
+  titre: [
+    "Vos équipes ont les outils.",
+    "Nous construisons ce qui les fait travailler ensemble.",
+  ],
   chapo:
-    "Nous concevons des systèmes intelligents qui exécutent vos processus récurrents avec rigueur, continuité et contrôle, afin de fluidifier vos opérations et libérer du temps à forte valeur ajoutée.",
+    "Nous concevons des systèmes sur mesure qui connectent vos directions, vos équipes, vos outils et vos données afin de fluidifier les opérations, automatiser les processus critiques et améliorer le pilotage de votre organisation — sans bouleverser votre environnement existant.",
+  bouton: "Découvrir notre approche",
+  sous: "Identifions les leviers à plus fort impact pour votre organisation.",
 };
 
 /* 05/08 — la liste FAITS est partie avec la rangée défilante du hero, retirée
@@ -118,21 +168,149 @@ const HERO = {
    moteur correspondante, ce qui préserve la règle maison : toute affirmation
    de cette page est vérifiable ailleurs sur le site. La note du 05/08 sur le
    chiffre d'encours guadeloupéen tombe d'elle-même, le texte n'avançant plus
-   aucun chiffre. */
+   aucun chiffre.
+   11/09/2026 (Teo, sur une capture de son téléphone) — « réduis la longueur
+   des textes sur cette section, c'est trop long à lire spécialement sur
+   mobile ». Il avait le chiffre contre lui : mesurée à 390 px, la section
+   pesait 64 lignes vues, dont CINQ blocs de 5 à 7 lignes là où la méthode
+   vise trois. Les textes fournis le 07/08 sont donc raccourcis — de 213 et
+   218 signes à 110 et 120.
+
+   Ce qui a été coupé est l'ILLUSTRATION, jamais l'affirmation : la liste
+   d'exemples des verrous (facture déjà réglée, client qui a demandé
+   l'arrêt, horaire, plafond du jour) et les deux phrases de conclusion qui
+   reformulaient le bénéfice déjà énoncé par le titre de la carte. Les
+   douze verrous, eux, restent nommés ici ET détaillés dans la FAQ plus bas.
+   Une redondance est tombée au passage : le texte de la carte « Rien ne part
+   sans que vous l'ayez vu » rappelait la file de validation que son TITRE
+   énonce déjà — une ligne entière pour redire l'intitulé.
+   La règle maison tient toujours : toute affirmation de cette page est
+   vérifiable ailleurs sur le site. */
 const BENEFICES = [
   {
     label: "Trésorerie",
     titre: "Votre chiffre d'affaires ne reste plus en attente.",
     texte:
-      "Les échéances sont suivies automatiquement, les relances sont déclenchées au bon moment et s'arrêtent dès qu'un règlement est identifié. Votre trésorerie gagne en régularité, sans ajouter de charge à vos équipes.",
+      "Les échéances sont suivies, les relances partent au bon moment et s'arrêtent au règlement.",
     maquette: <MaqValidation />,
   },
   {
     label: "Temps",
     titre: "Vos journées retrouvent de l'espace.",
     texte:
-      "Les tâches répétitives sont prises en charge en arrière-plan : suivi, préparation, classement, réponses et contrôles. Vos équipes interviennent uniquement lorsque leur expertise ou leur décision est réellement nécessaire.",
+      "Suivi, préparation, classement, réponses se font en arrière-plan. Vos équipes n'ont qu'à décider.",
     maquette: <MaqJournal />,
+  },
+];
+
+/* 11/09/2026 (Teo) — la section passe au bento à cartes pointillées, qui
+   demande CINQ cartes là où `BENEFICES` n'en portait que deux. Les trois
+   ajoutées ne sont pas des arguments neufs : ce sont les résumés de trois
+   réponses de la FAQ, plus bas sur cette même page (le contrôle avant
+   envoi, les outils qu'on ne change pas, le poste unique mené jusqu'au
+   bout). Le détail reste dans la FAQ ; ici c'est l'annonce.
+
+   Les deux premières gardent leur texte d'origine ET leur maquette : ce
+   sont les deux seules cartes assez hautes pour la porter, et sans elles
+   la zone devenait cinq blocs de texte d'affilée.
+
+   L'ordre des `span` suit la grille de la source : 3+2 (la 6ᵉ colonne
+   reste libre pour le titre qui remonte), puis 4, puis 2+2. */
+const CARTES_CHANGE: CarteBento[] = [
+  {
+    titre: BENEFICES[0].titre,
+    texte: BENEFICES[0].texte,
+    maquette: BENEFICES[0].maquette,
+    span: "lg:col-span-3 lg:row-span-2",
+  },
+  {
+    titre: BENEFICES[1].titre,
+    texte: BENEFICES[1].texte,
+    maquette: BENEFICES[1].maquette,
+    span: "lg:col-span-2 lg:row-span-2",
+  },
+  {
+    titre: "Rien ne part sans que vous l'ayez vu.",
+    texte:
+      "Douze verrous sont vérifiés juste avant l'envoi. Un seul qui saute, rien ne part.",
+    span: "lg:col-span-4",
+  },
+  {
+    titre: "Vous ne changez pas de logiciel.",
+    texte:
+      "Ils lisent et écrivent dans ce que vous utilisez déjà : messagerie, tableur, agenda. Rien à migrer.",
+    span: "lg:col-span-2",
+  },
+  {
+    titre: "Un poste à la fois, mené jusqu'au bout.",
+    texte:
+      "On met en route celui qui vous coûte le plus cher. Les autres suivent si les chiffres du premier le justifient.",
+    span: "lg:col-span-2",
+  },
+];
+
+/* ══════════════════════════════════════════════════════════════════════
+   À L'ÉCHELLE D'UN GROUPE (12/09/2026)
+
+   Teo : le lien va être envoyé à des directions de grands groupes du
+   département. La page, elle, était écrite pour l'autre bout du marché —
+   « un garage qui rate des appels », les prix publics à 59 € en clair,
+   « pour les dirigeants de TPE » dans le pied du blog. Rien n'y est faux ;
+   c'est le registre qui disqualifie avant qu'on ait lu l'offre.
+
+   POURQUOI UNE SECTION, PAS UNE REFONTE. Les deux publics doivent tenir sur
+   la même page : le prix public est ce qui fait vendre sans rendez-vous, et
+   il ne bouge pas d'ici. Ce qui manquait, c'est la réponse aux quatre
+   questions qu'une direction pose AVANT de parler du produit — comment on
+   démarre sans risquer la production, ce qui empêche une automatisation
+   d'écrire une bêtise à un client, où vivent les données et comment on en
+   sort, et ce que ça impose au système d'information. Une par carte.
+
+   AUCUN ARGUMENT NEUF. Les quatre existaient déjà, dispersés : le rodage à
+   blanc et la bascule hebdomadaire dans la fiche VAULT, les douze verrous
+   dans la FAQ, le cloisonnement et l'export dans la section hébergement,
+   les outils inchangés dans le bento juste au-dessus. Ils sont ici REMONTÉS
+   et dits dans la langue d'un comité de direction — un périmètre, un
+   journal opposable, une sortie prévue dès le départ.
+
+   CHAQUE CARTE MÈNE À SA PREUVE, et les quatre destinations sont
+   distinctes : c'est la seule façon de tenir le registre. Une direction qui
+   lit « journal que personne ne modifie » clique pour vérifier ; si le lien
+   la ramène là d'où elle vient, l'argument tombe.
+
+   CE QUI N'Y EST PAS, faute d'être vrai aujourd'hui : l'entité qui signe, le
+   contrat de sous-traitance RGPD, l'engagement de niveau de service. Ce sont
+   les trois premières questions d'un juriste de groupe et aucune n'a de
+   réponse écrite. Elles ne s'inventent pas ici.
+   ══════════════════════════════════════════════════════════════════════ */
+const GROUPES: CarteLueur[] = [
+  {
+    label: "Déploiement",
+    titre: "On commence par un périmètre, jamais par le groupe.",
+    texte:
+      "Une filiale, un service, une famille de comptes. Deux semaines où rien ne part, puis un poste par semaine.",
+    lien: { label: "Demander un audit", href: "/reserver" },
+  },
+  {
+    label: "Contrôle",
+    titre: "Les interdits ne sont pas des consignes.",
+    texte:
+      "Douze contrôles vivent dans notre base, sous les automatisations : l'envoi interdit n'est pas reporté, il n'est jamais écrit.",
+    lien: { label: "Ce que le système refuse", href: "/offres/securite" },
+  },
+  {
+    label: "Données",
+    titre: "Cloisonnées, européennes, restituables.",
+    texte:
+      "Un espace par entreprise, hébergé dans l'Union. Tout ce qui part reste au journal. À la sortie : export, puis effacement.",
+    lien: { label: "Où vont vos données", href: "/vos-donnees" },
+  },
+  {
+    label: "Intégration",
+    titre: "Votre système d'information ne bouge pas.",
+    texte:
+      "On lit et on écrit dans les outils en place. Aucune migration, aucun compte à créer pour vos équipes.",
+    lien: { label: "Ce sur quoi ça se branche", href: "/integrations" },
   },
 ];
 
@@ -206,14 +384,13 @@ const ETAPES = [
    reste vrai, et le détail vit dans l'article du dispositif.
 
    Le lien change aussi de destination — voir le commentaire sur `lien`. */
-const GARANTIES: {
-  label: string;
-  titre: string;
-  texte: string;
-  encadre?: { titre: string; texte: string };
-  lien: { label: string; href: string };
-  maquette: ReactNode;
-}[] = [
+/* 11/09/2026 — les deux corps de 5 et 6 lignes sont ramenés à 3, et
+   l'encadré « accompagnement » disparaît : le type est désormais celui de
+   `CartesLueur`, qui n'a pas de fente pour lui. Ce qui a été retiré de la
+   carte « Données » (chiffrement, hébergement dans l'Union, cloisonnement en
+   base) est dit juste au-dessus, dans les six cartes de `PREUVES` — c'était
+   le même fait écrit deux fois à 300 px d'intervalle. */
+const GARANTIES: CarteLueur[] = [
   {
     label: "Financement",
     titre: "Jusqu'à 10 000 € de prise en charge selon votre éligibilité",
@@ -221,13 +398,12 @@ const GARANTIES: {
        (Teo, 07/08) : le Chèque TIC est régional, et la vitrine ne s'adresse
        plus au seul département. Seule cette incise est ajoutée au texte
        fourni, le reste est intact. */
+    /* L'incise « portée par la Région Guadeloupe » et « qui y sont
+       immatriculées » survivent à la coupe, et ce n'est pas négociable : le
+       Chèque TIC est un dispositif RÉGIONAL sur un site national. Sans
+       elles, un visiteur hexagonal lit une aide qui le concerne. */
     texte:
-      "Le dispositif Chèque TIC, porté par la Région Guadeloupe et ouvert aux entreprises qui y sont immatriculées, peut financer une partie de votre projet de transformation numérique. Nous vérifions votre éligibilité en amont et vous accompagnons dans la constitution du dossier.",
-    encadre: {
-      titre: "Un accompagnement de bout en bout",
-      texte:
-        "Nous préparons avec vous les éléments nécessaires au dossier : périmètre du projet, description technique, devis et pièces justificatives.",
-    },
+      "Le Chèque TIC, porté par la Région Guadeloupe, finance une partie de l'installation pour les entreprises qui y sont immatriculées. On vérifie l'éligibilité, puis on monte le dossier avec vous.",
     /* Le libellé passe de « Lire le détail du dispositif » à « Vérifier mon
        éligibilité » : il annonce un acte, plus une lecture. Le garder pointé
        sur l'article aurait promis une vérification pour livrer un texte —
@@ -247,7 +423,7 @@ const GARANTIES: {
     label: "Données",
     titre: "Vos données restent les vôtres",
     texte:
-      "Vous gardez vos outils de tous les jours : messagerie, tableur, WhatsApp. Vos données de suivi, elles, vivent dans un espace dédié à votre entreprise, chiffré et hébergé dans l'Union européenne. Le cloisonnement n'est pas un filtre posé dans le code : c'est la base elle-même qui refuse une ligne rattachée à deux entreprises. Le jour où vous arrêtez, tout vous est remis et effacé sur demande.",
+      "Vous gardez vos outils de tous les jours : messagerie, tableur, WhatsApp. Le suivi vit dans un espace réservé à votre entreprise. Le jour où vous arrêtez, tout vous est remis et effacé sur demande.",
     lien: { label: "Pourquoi ce choix", href: "/blog/rgpd-donnees-locales" },
     maquette: <MaqLocal />,
   },
@@ -271,21 +447,46 @@ const GARANTIES: {
    détail technique n'est pas perdu : il reste dans les mentions légales et
    dans l'article « Pourquoi ce choix ». C'est le registre de cette section
    qui change, pas les faits. */
-const HEBERGEMENT = [
+/* 11/09/2026 (Teo, « il y a un peu trop de texte sur la page d'accueil ») —
+   les trois paragraphes deviennent SIX faits d'une ligne, portés par
+   `CartesPreuve`. Rien n'est retiré : le lieu, la juridiction, le
+   chiffrement, le cloisonnement et la réversibilité disaient déjà ça, en
+   quatre à cinq lignes chacun. La sixième carte est nouvelle à l'écran mais
+   pas au fond — c'est la réserve sur l'IA, qui était en petit sous la carte.
+   Le détail contractuel (« selon les conditions prévues ») reste dans les
+   mentions légales ; une carte de fait n'est pas un contrat. */
+const PREUVES: CartePreuve[] = [
   {
-    titre: "Hébergement européen",
-    texte:
-      "Vos données sont hébergées dans une infrastructure située à Francfort, en Allemagne, au sein de l'Union européenne.",
+    icone: <MapPin size={19} strokeWidth={1.6} />,
+    intitule: "Hébergement",
+    fait: "Francfort, Allemagne",
   },
   {
-    titre: "Sécurité et cloisonnement",
-    texte:
-      "Chaque entreprise dispose d'un environnement logique distinct. Les données sont chiffrées au repos comme lors de leur transmission.",
+    /* l'emblème de la section précédente : il vivait à 104 px en tête de
+       colonne, il tient le rôle d'icône à 22. */
+    icone: <EmblemeEurope taille={22} />,
+    intitule: "Juridiction",
+    fait: "Union européenne",
   },
   {
-    titre: "Maîtrise et réversibilité",
-    texte:
-      "Vous restez propriétaire de vos données. Elles peuvent être exportées ou supprimées à votre demande, selon les conditions prévues contractuellement.",
+    icone: <Lock size={19} strokeWidth={1.6} />,
+    intitule: "Chiffrement",
+    fait: "Au repos et en transit",
+  },
+  {
+    icone: <Layers size={19} strokeWidth={1.6} />,
+    intitule: "Cloisonnement",
+    fait: "Un espace par entreprise",
+  },
+  {
+    icone: <FileDown size={19} strokeWidth={1.6} />,
+    intitule: "Réversibilité",
+    fait: "Export ou effacement",
+  },
+  {
+    icone: <Cpu size={19} strokeWidth={1.6} />,
+    intitule: "Modèles d'IA",
+    fait: "Interrogés hors d'Europe",
   },
 ];
 
@@ -307,7 +508,7 @@ const FAQ = [
        grand-chose ») niait la grille publique vers laquelle le CTA de
        cette même page envoie désormais. Réécrite pour les deux mondes. */
     q: "Combien ça coûte ?",
-    a: "Pour les indépendants, TPE et PME, les prix sont publics : un poste 59 € par mois, trois postes 89 €, tout Omega 119 € — sans engagement, installation comprise. Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit. Dans les deux cas, le Chèque TIC peut financer une partie de l'installation (de 40 à 80 %, jusqu'à 10 000 €), si vous êtes éligible.",
+    a: "Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit : sociétés, sites et postes concernés. Pour les indépendants, TPE et PME, il est public : un poste 59 € par mois, trois postes 89 €, tout Omega 119 € — sans engagement, installation comprise. Dans les deux cas, le Chèque TIC peut financer une partie de l'installation (de 40 à 80 %, jusqu'à 10 000 €), si vous êtes éligible.",
   },
   {
     q: "Où sont hébergées mes données ?",
@@ -368,15 +569,114 @@ const ACCROCHES_VITRINE: Record<string, { objectif: string; texte: string }> = {
 };
 
 /* ——— en-tête de section, commun à toutes les sections claires ——— */
+/* ══════════════════════════════════════════════════════════════════════
+   LES TROIS PORTES (10/09/2026)
+
+   La section qui manquait. La vitrine présentait quatre paquets et rien
+   d'autre — or Omega vend aussi le sur-mesure et les sites, qui sont
+   aujourd'hui ce qui paie. `/offres/sur-mesure` n'était atteignable que par
+   un lien en bas de /offres (et n'est même pas dans le sitemap) ; les vingt
+   et un modèles de sites vivaient derrière un onglet « Tarifs ». Un visiteur
+   pouvait donc parcourir l'accueil entière sans apprendre que ces deux
+   choses existent.
+
+   Elles ne sont pas un lot de consolation : ce sont les deux offres qui
+   EXIGENT l'audit et l'écriture des règles. Les paquets, eux, ont désormais
+   leur propre vitrine et n'ont plus besoin qu'on plaide pour eux ici.
+
+   Aucun chiffre inventé : « vingt et un » est le compte réel de
+   components/modeles, et « nom de domaine compris » est ce qu'annonce déjà
+   /tarifs/site. */
+/* 11/09/2026 (Teo) — les trois cartes penchées de la section « échéance ».
+
+   Elles remplacent le pavé de deux paragraphes qui occupait la colonne
+   droite. Le calendrier légal y gagne : il était énoncé en prose dans la
+   FAQ et nulle part ailleurs, alors que ce sont DEUX dates, pas une — la
+   section n'en affichait qu'une, en gros, dans son titre.
+
+   Les deux dates sortent de la réponse « Je suis concerné par la facture
+   électronique ? » de la FAQ, plus bas sur cette même page. La troisième
+   carte est le premier paragraphe du pavé retiré, resserré. Le second
+   paragraphe (« nettoyer à froid / en urgence ») n'entre pas dans une
+   carte : il passe en ligne sous l'escalier, rien n'est perdu.
+
+   L'ordre d'empilement suit celui de la source : la première carte est
+   AU-DESSUS, les suivantes descendent en escalier vers la droite. */
+const ECHEANCES: CarteEcheance[] = [
+  {
+    icone: <CalendarCheck className="h-3.5 w-3.5" />,
+    titre: "Recevoir",
+    texte: "Toutes les entreprises établies en France.",
+    bas: "1ᵉʳ septembre 2026",
+    place: "[grid-area:stack] hover:-translate-y-8",
+  },
+  {
+    icone: <Send className="h-3.5 w-3.5" />,
+    titre: "Émettre",
+    texte: "Les TPE et les PME.",
+    bas: "1ᵉʳ septembre 2027",
+    place:
+      "[grid-area:stack] translate-x-8 translate-y-8 hover:-translate-y-1 sm:translate-x-12 sm:translate-y-10",
+  },
+  {
+    icone: <AlertTriangle className="h-3.5 w-3.5" />,
+    titre: "Le vrai blocage",
+    texte: "SIREN manquants, adresses incomplètes, TVA approximative.",
+    bas: "Votre fichier client",
+    place:
+      "[grid-area:stack] translate-x-16 translate-y-16 hover:translate-y-8 sm:translate-x-24 sm:translate-y-20 sm:hover:translate-y-10",
+  },
+];
+
+/* ══════════════════════════════════════════════════════════════════════
+   LA CITATION DU TEMPS D'ARRÊT (11/09/2026)
+
+   Elle n'est pas écrite pour l'accueil : c'est `FAMILLES.installes.proof`,
+   déjà publiée sur /offres. Lue ici plutôt que recopiée, pour qu'une
+   réécriture côté `lib/content.ts` ne laisse pas deux versions de la même
+   phrase en ligne. Le `type === "quote"` n'est pas décoratif : `Proof` est
+   une union, une famille peut porter des chiffres à la place.
+
+   Si la famille venait à passer aux chiffres, la section disparaît d'elle
+   même plutôt que d'afficher un trou — c'est voulu : la règle maison
+   interdit d'inventer une phrase pour meubler l'emplacement. */
+const PREUVE_INSTALLES = FAMILLES.find((f) => f.id === "installes")?.proof;
+const CITATION =
+  PREUVE_INSTALLES?.type === "quote" ? PREUVE_INSTALLES : null;
+
+const PORTES = [
+  {
+    nom: "Les systèmes prêts",
+    objectif: "Quatre postes déjà outillés",
+    texte:
+      "Relances, demandes entrantes, paperasse fournisseurs, affaires à reprendre. Installés en l'état, réglés sur vos règles.",
+    lien: { label: "Voir les quatre", href: "/offres" },
+  },
+  {
+    nom: "Le sur-mesure",
+    objectif: "Ce qui n'existe pas encore",
+    texte:
+      "Un logiciel métier, un pont entre deux outils, un contrôle qui se répète. Le besoin est cadré et chiffré avant d'écrire une ligne.",
+    lien: { label: "Comment ça se cadre", href: "/offres/sur-mesure" },
+  },
+  {
+    nom: "Votre site",
+    objectif: "Une vitrine qui tient debout",
+    texte:
+      "Vingt et un modèles en ligne, tous visitables. Contenu réécrit à votre métier, nom de domaine et mise en ligne compris.",
+    lien: { label: "Voir les modèles", href: "/modeles" },
+  },
+];
+
 function EnTete({
   pastille,
   titre,
   chapo,
 }: {
-  /* 14/09/2026 — un noeud et plus une chaine : le sourcil de la section
-     equipe porte le drapeau avant son intitule. Les autres appels passent
-     une chaine, qui reste un noeud valide. */
-  pastille: ReactNode;
+  /* 12/09/2026 — un noeud et plus une chaine : le sourcil de la section
+     equipe porte le drapeau avant son intitule. Les onze autres appels
+     passent une chaine, qui reste un noeud valide. */
+  pastille: React.ReactNode;
   titre: string;
   chapo: string;
 }) {
@@ -423,9 +723,19 @@ export default function Home() {
             · la bande de faits est conservée sous la maquette, réencrée en
               clair — Flux y met des logos de partenaires, qu'Omega n'a pas. */}
         <section className="o-flux relative overflow-hidden pb-0 pt-[48px] md:pt-[64px] lg:pt-[256px]">
+          {/* 11/09/2026 (Teo) — le fond n'est plus la photo de plis du
+              template Flux (`/fonds/plis-blancs.webp`) mais un nuancier
+              « Silk » peint en WebGL, recette fournie telle quelle (voir
+              `components/accueil/FondSilk.tsx`). Le CADRE ne bouge pas :
+              même `.o-flux-fond`, donc même masque radial à deux ellipses
+              — c'est lui qui fait naître la lumière au centre, et il est
+              relevé sur la référence, pas inventé. Seule la source change. */}
           <div aria-hidden className="o-flux-fond">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/fonds/plis-blancs.webp" alt="" />
+            <FondSilk className="o-flux-toile" />
+            {/* le plancher de luminosité sous le texte — voir le bloc
+                `.o-flux-voile` de globals.css, qui porte le relevé de
+                contraste et dit pourquoi il ne se retire pas */}
+            <div className="o-flux-voile" />
           </div>
 
           <div className="o-wrap relative z-10 flex flex-col items-center text-center">
@@ -435,21 +745,23 @@ export default function Home() {
               <span className="o-flux-pastille">{HERO.pastille}</span>
             </div>
             <h1 data-reveal className="o-flux-h1 mt-5 max-w-[900px] md:mt-6">
-              {HERO.titre}
+              {HERO.titre.map((ligne, i) => (
+                <span key={ligne} className={i > 0 ? "block" : undefined}>
+                  {ligne}
+                </span>
+              ))}
             </h1>
             <p data-reveal className="o-flux-lead my-2 max-w-[760px] md:my-4 lg:my-6">
               {HERO.chapo}
             </p>
             <div data-reveal className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
               <Link href="/commencer" className="o-flux-btn">
-                Commencer
+                {HERO.bouton}
                 <span aria-hidden className="o-flux-btn-rond">
                   <Chevron taille={14} />
                 </span>
               </Link>
-              <span className="o-flux-sous">
-                Deux minutes pour choisir — sans engagement
-              </span>
+              <span className="o-flux-sous">{HERO.sous}</span>
             </div>
           </div>
 
@@ -490,37 +802,131 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 3 · CE QUE ÇA CHANGE — deux colonnes symétriques ════════ */}
-        <section data-monde="clair" className="py-[110px]">
+        {/* ════════ 3 · LE CATALOGUE — quatre cartes douces en 2 × 2 ════════
+            11/09/2026 (Teo) — le catalogue et les trois portes échangent
+            leur place. Il arrive donc juste après le bandeau d'outils, là
+            où se tenaient les trois façons de commencer (section 6
+            désormais). Ce qui change de lecture : le visiteur voit ce qui
+            s'installe avant qu'on lui demande par quelle porte entrer — le
+            choix de l'entrée ne se pose qu'une fois qu'on sait ce qu'il y a
+            à installer. */}
+        {/* Pas de `pb` : sur cette page chaque section porte SON écart, et
+            celle qui suit ouvre déjà sur `py-[110px]`. Le `pb-[110px]` que
+            cette section portait à sa place précédente cumulerait ici 220 px
+            de blanc sous les cartes — défaut relevé à la recette du 10/09,
+            très visible à 390 où il faisait une page vide entre les deux
+            sections. D'où le `pt-[40px]` seul, repris tel quel de la place
+            qu'occupaient les trois portes. */}
+        <section
+          id="catalogue"
+          data-monde="clair"
+          className="scroll-mt-24 pt-[40px]"
+        >
           <div className="o-wrap">
             <EnTete
-              pastille="CE QUE ÇA CHANGE"
-              titre="Moins de tâches. Plus de temps. Plus de marge."
-              chapo="Nous concevons des systèmes qui prennent en charge les tâches répétitives de votre entreprise. Ils exécutent, suivent et organisent ce qui devait jusque-là être fait manuellement, pendant que vos équipes gardent le contrôle et se concentrent sur ce qui crée réellement de la valeur."
+              pastille="CE QUI S'INSTALLE"
+              titre="Quatre systèmes. Quatre leviers de performance."
+              chapo="Encaissement, réactivation, demandes entrantes, documents : chaque système tient un poste précis, sur vos règles, avec un contrôle humain avant tout envoi."
             />
-            <div className="mt-16 grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-20">
-              {BENEFICES.map((b) => (
-                <div key={b.label} data-reveal className="flex flex-col">
-                  <div className="o-card overflow-hidden">{b.maquette}</div>
-                  <p className="o-small mt-8 !text-[14px] uppercase tracking-[0.08em]">
-                    {b.label}
-                  </p>
-                  <h3 className="o-h4 mt-2">{b.titre}</h3>
-                  <p className="o-body mt-4">{b.texte}</p>
-                </div>
-              ))}
+            {/* 11/09/2026 — les quatre systèmes prennent la grille de
+                cartes douces du bloc `integrations-three` (cnblocks, via
+                21st.dev) : tuile du paquet et nom sur une ligne, l'objectif
+                en intitulé, l'accroche dessous, le lien calé en bas de carte.
+
+                Elle remplace la pile de cartes collantes posée le matin même
+                (`CarteCollante` / `ContainerScroll` — le fichier
+                components/accueil/PileCartes reste, il n'est simplement plus
+                appelé ici). Les deux corrigeaient le même défaut : la grille
+                de QUATRE colonnes ne laissait à chaque carte que 285 px, de
+                quoi tenir un intitulé et deux lignes. Mais la pile prenait
+                quatre écrans de haut pour quatre produits, or le catalogue
+                est un carrefour, pas un argumentaire — chacun a désormais sa
+                propre vitrine pour ça. En 2 × 2, les quatre se voient d'un
+                seul regard, avec ~490 px chacune.
+
+                SECONDE PASSE DU 11/09, LE SOIR (Teo) : « c'est le même
+                design, juste les cartes sont faites avec ce composant ». Les
+                quatre cartes passent aux TUILES de `bento-grid-01`
+                (@avanishverma4, 21st.dev) — chacune porte désormais une
+                animation en boucle au-dessus de son intitulé, ce qui manquait
+                à la grille de cartes douces : elle était juste, mais immobile,
+                et la section se lisait comme un sommaire.
+
+                Ce qui n'a PAS bougé : la grille 2 × 2 (le chapô annonce quatre
+                leviers — deux tuiles hautes contre deux petites, comme sur
+                /offres, diraient que deux produits comptent plus), le filet
+                doré, les textes de `ACCROCHES_VITRINE`, et les quatre portes.
+                `components/ui/integrations-three.tsx` reste au dépôt, plus
+                personne ne l'appelle.
+
+                Les écarts au composant d'origine — dont le passage du blanc
+                sur noir à l'encre sur papier — sont documentés en tête de
+                components/accueil/TuilesCatalogue.tsx. */}
+            <TuilesCatalogue
+              className="mt-16"
+              tuiles={MOTEURS.map((m) => ({
+                system: m.system,
+                nom: nomPaquet(m.system),
+                /* Le sigle seul ne dit rien à un visiteur qui arrive :
+                   l'intitulé nomme l'objectif avant le détail. Repli sur
+                   `title` / `benefit` si un système entrait dans VEDETTES
+                   sans avoir d'accroche vitrine. */
+                objectif: ACCROCHES_VITRINE[m.system]?.objectif ?? m.title,
+                texte: ACCROCHES_VITRINE[m.system]?.texte ?? m.benefit,
+                href: `/offres/${m.slug}`,
+              }))}
+            />
+            {/* PULSE et VAULT, compris chez tout le monde, vivent sur /offres */}
+            {/* 07/08 (Teo) — deux libellés étaient proposés : « Découvrir les
+                autres systèmes » et « Voir l'ensemble de nos solutions ». Le
+                premier est retenu parce qu'il dit vrai sur la destination —
+                /offres montre les DEUX paquets restants, pas un catalogue
+                complet — là où « l'ensemble de nos solutions » promettrait une
+                page qui récapitule les six. */}
+            <div data-reveal className="mt-10 flex justify-center">
+              <Link href="/offres" className="o-btn o-btn--ghost">
+                Découvrir les autres systèmes
+                <Chevron taille={13} />
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* ════════ 3 bis · L'ÉQUIPE — la mosaïque de portraits ════════
-            14/09/2026 (Teo : « mets-la sur omegaai.fr »). Mise au point sur
-            le banc omega-site-v3 les 12 et 13/09, reportée ici telle quelle.
+        {/* ════════ 4 · CE QUE ÇA CHANGE — le bento à cartes ════════
+            11/09/2026 (Teo) : « la section sur le screen doit être
+            remplacée par ce composant ». Les deux colonnes symétriques
+            (maquette au-dessus, label, titre, texte — deux fois) laissent
+            la place au bento pointillé repris de 21st.dev. L'origine, ce
+            qui en a été retiré (dont cinq liens sortants publicitaires) et
+            les écarts sont dans l'en-tête de `BentoChange`.
 
-            LA PLACE est celle du banc : juste après « ce que ça change » et
-            avant le déroulé. On dit qui pose le système aussitôt après avoir
-            dit ce qu'il fait, et la section est assez haut pour être vue de
-            quelqu'un qui ne descend pas la page entière.
+            Pas d'`EnTete` ici : ce composant porte son titre LUI-MÊME, et
+            en bas à droite. C'est le seul endroit de la page où l'ordre
+            s'inverse, et c'est précisément ce qu'on est venu chercher. */}
+        <section data-monde="clair" className="py-[110px]">
+          <BentoChange
+            cartes={CARTES_CHANGE}
+            pastille="CE QUE ÇA CHANGE"
+            titre="Moins de tâches. Plus de temps. Plus de marge."
+            chapo="Ce que les systèmes prennent en charge, et ce qui reste entre vos mains."
+          />
+        </section>
+
+        {/* ════════ 4 bis · L'ÉQUIPE — la mosaïque de portraits ════════
+            12/09/2026 (Teo) : « il faut qu'on crée une partie pour décrire
+            l'équipe derrière Omega, et mets un drapeau bien français à
+            côté. »
+
+            LA PLACE — déplacée le 13/09/2026 à la demande de Teo, qui l'a
+            échangée avec « À l'échelle d'un groupe » (descendue en 8 ter).
+            Elle est donc ici, après le bento « ce que ça change » et avant
+            la frise du déroulé. Ce qu'on gagne : elle est assez haut pour
+            être vue de quelqu'un qui ne descend pas la page entière, et le
+            produit vient d'être montré — on dit qui le pose juste après
+            avoir dit ce qu'il fait. Ce qu'on perd, et qu'il faut savoir :
+            elle ne ferme plus le bloc de confiance (données, financement,
+            garanties), où elle répondait à la dernière objection, celle
+            qu'on ne pose pas à voix haute — à qui je parle quand ça coince.
 
             LE DRAPEAU est dans le sourcil (components/ui/drapeau.tsx), aux
             teintes officielles #000091 / #E1000F. Il dit ce que la famille
@@ -528,10 +934,10 @@ export default function Home() {
             en français, droit français — et surtout PAS « hébergé en
             France » : les données vivent à Francfort.
 
-            LE CONTENU est dans lib/equipe.ts, avec ce qui y reste à
-            confirmer : les descriptifs (brouillons du 14/09), le rôle exact
-            de Teo, la quatrième fiche, et son portrait — tant qu'il manque,
-            sa vignette rend ses initiales et rien ne se troue. */}
+            LE CONTENU est dans lib/equipe.ts, avec les deux points qui y
+            restent à confirmer (le rôle de Teo, la quatrième fiche) et les
+            trois portraits à déposer dans /public/equipe/. Sans eux la
+            mosaïque rend les initiales : la page ne se troue pas. */}
         <section data-monde="clair" className="pb-[110px]">
           <div className="o-wrap">
             <EnTete
@@ -550,7 +956,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 4 · COMMENT ÇA MARCHE — frise de quatre étapes ════════ */}
+        {/* ════════ 5 · COMMENT ÇA MARCHE — frise de quatre étapes ════════ */}
         <section data-monde="clair" className="pb-[110px]">
           <div className="o-wrap">
             <EnTete
@@ -558,107 +964,95 @@ export default function Home() {
               titre="De l'analyse au déploiement."
               chapo="Une méthode structurée pour intégrer des systèmes intelligents à vos opérations, sans perturber votre organisation existante."
             />
-            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-              {/* 05/08 (Teo, « le design des numéros est trop amateur ») — la
-                  pastille ronde noire pleine est partie. Deux raisons : c'est
-                  la marque de fabrique des thèmes gratuits, et son contraste
-                  maximal captait l'œil sur le numéro alors que l'information
-                  est dans le titre.
+            {/* 11/09/2026 — les quatre étapes passent de la grille plate à une
+                frise dont le rail se remplit au défilement (`FriseDeroule`,
+                repris de 21st.dev — l'origine et les écarts sont dans
+                l'en-tête du composant).
 
-                  À la place, une frise éditoriale : un filet fin qui coiffe
-                  chaque colonne et forme une ligne continue d'un bout à
-                  l'autre sur grand écran, le numéro en petit et en gris sous
-                  ce filet. La hiérarchie s'inverse — le titre reprend le
-                  premier rôle — et la progression se lit dans la frise elle
-                  même plutôt que dans une puce. Chiffres en `tabular-nums`
-                  pour que les cinq numéros aient exactement la même chasse. */}
-              {ETAPES.map((e) => (
-                <div key={e.n} data-reveal className="flex flex-col">
-                  <span aria-hidden className="h-px w-full bg-[#e4e4e7]" />
-                  <span
-                    className="mt-4 text-[12px] font-semibold tracking-[0.12em] text-[#a1a1aa]"
-                    style={{ fontVariantNumeric: "tabular-nums" }}
-                  >
-                    {e.n}
-                  </span>
-                  <h3 className="o-h5 mt-3">{e.titre}</h3>
-                  {/* 07/08 — le sous-titre porte ce que l'étape produit. Il est
-                      en gras et en noir pour se détacher du corps de texte
-                      juste dessous, sans rivaliser avec le h3 : même taille que
-                      le corps, pas de niveau de titre supplémentaire (le h3
-                      reste le seul point d'entrée du plan de la page). */}
-                  <p className="mt-2 text-[15px] font-semibold leading-[24px] text-[#18181b]">
-                    {e.sousTitre}
-                  </p>
-                  <p className="o-small mt-2 !text-[15px] !leading-[24px]">
-                    {e.texte}
-                  </p>
-                </div>
-              ))}
-            </div>
+                Ce que la grille ratait : à 1440 ses quatre colonnes se
+                lisaient d'un coup, donc comme quatre options simultanées,
+                alors que le déroulé est une SUITE — on ne déploie pas avant
+                d'avoir conçu. La frise remet l'ordre dans la lecture.
+
+                Le filet qui coiffait chaque colonne (05/08, en remplacement
+                des pastilles rondes jugées « trop amateur ») n'est pas
+                perdu : c'est devenu le rail lui-même, qui court d'un bout à
+                l'autre au lieu d'être coupé en quatre. Le numéro reste en
+                petit et en gris, en `tabular-nums`, comme avant. */}
+            <FriseDeroule etapes={ETAPES} />
           </div>
         </section>
 
-        {/* ════════ 5 · LE CATALOGUE — douze cartes compactes ════════ */}
-        <section
-          id="catalogue"
-          data-monde="clair"
-          className="scroll-mt-24 pb-[110px]"
-        >
+        {/* ════════ 6 · CE QU'ON FAIT — les trois portes ════════
+            10/09/2026. Posée d'abord juste après le bandeau d'outils, avant
+            tout argumentaire : c'est la première question d'un visiteur qui
+            arrive du pied de page d'une vitrine produit, et elle n'avait
+            aucune réponse sur cette page.
+
+            11/09/2026 (Teo) — échangée avec le catalogue, qui prend la 3e
+            place. Elle ferme désormais l'argumentaire : ce qui s'installe,
+            ce que ça change, comment ça se déroule, PUIS par où commencer.
+            La question reste posée avant les réserves (hébergement,
+            garanties), donc toujours dans le mouvement de la décision.
+
+            Le rendu est dans `PortesHover` — cartes `.o-card-soft` du
+            catalogue, plus une surbrillance qui GLISSE d'une porte à l'autre
+            au survol (reprise de la bibliothèque, voir l'en-tête du
+            composant). C'est ce glissement qui distingue cette rangée de
+            celle du catalogue plus haut : trois cartes qui s'allument chacune
+            dans leur coin se lisent comme trois produits, un pavé qui se
+            déplace se lit comme trois portes d'une même maison.
+
+            Aucun logo système : deux des trois portes n'en ont pas, et une
+            rangée où seule la première serait ornée se lit comme un défaut
+            d'alignement. */}
+        {/* À cette place le rythme s'inverse : la frise qui précède porte
+            déjà son `pb-[110px]`, et l'hébergement qui suit n'ouvre que sur
+            un `pb`. C'est donc à cette section de porter l'écart du bas —
+            `pb-[110px]`, comme le catalogue le faisait ici avant l'échange,
+            et pas de `pt` sous peine de cumuler 220 px sous la frise. */}
+        <section data-monde="clair" className="pb-[110px]">
           <div className="o-wrap">
             <EnTete
-              pastille="CE QUI S'INSTALLE"
-              titre="Quatre systèmes. Quatre leviers de performance."
-              chapo="Encaissement, réactivation client, traitement des demandes, gestion documentaire : chaque système prend en charge un processus précis de votre activité, avec des règles définies et un contrôle humain à chaque étape."
+              pastille="CE QU'ON FAIT"
+              /* Le titre a d'abord été « Un système prêt, un système à écrire,
+                 ou votre site. » : à 1440 il tombait sur trois lignes dont la
+                 dernière ne portait que « site. ». Les autres titres de la
+                 page tiennent en deux lignes ; celui-ci dit moins et laisse
+                 les trois cartes énumérer. */
+              titre="Trois façons de commencer."
+              chapo="Trois entrées différentes, la même exigence derrière : vos règles écrites noir sur blanc, vos données en Europe, un seul interlocuteur."
             />
-            <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {MOTEURS.map((m) => (
-                <Link
-                  key={m.system}
-                  href={`/offres/${m.slug}`}
-                  data-reveal
-                  className="o-card-soft o-card-scintille flex flex-col p-7 transition-[background-color,box-shadow] duration-200 hover:bg-white"
-                >
-                  <div className="flex items-center gap-3">
-                    <SystemLogo system={m.system} />
-                    <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#09090b]">
-                      {m.system}
-                    </span>
-                  </div>
-                  {/* Le sigle seul ne dit rien à un visiteur qui arrive : le
-                      sous-titre nomme l'objectif juste sous lui, avant le
-                      détail. Repli sur `benefit` si un système entrait dans
-                      VEDETTES sans avoir d'accroche vitrine. */}
-                  <p className="mt-4 text-[15px] font-semibold leading-[23px] text-[#18181b]">
-                    {ACCROCHES_VITRINE[m.system]?.objectif ?? m.title}
-                  </p>
-                  <p className="o-small mt-2 !text-[15px] !leading-[23px] !text-[#52525b]">
-                    {ACCROCHES_VITRINE[m.system]?.texte ?? m.benefit}
-                  </p>
-                  <span className="o-link mt-6 !text-[14px]">
-                    Voir le détail
-                    <Chevron taille={12} />
-                  </span>
-                </Link>
-              ))}
+            {/* 11/09/2026 (Teo) — la rangée de portes ne paraît qu'à partir
+                de `lg`. Sous ce seuil, elle et le tableau se rendaient tous
+                les deux en cartes empilées : six cartes pour trois offres,
+                mêmes noms, mêmes liens, 2 808 px de section à 390 px. Le
+                tableau, lui, devient ces cartes-là — c'est donc la rangée
+                qui s'efface, et sa phrase descend dans les cartes par
+                `textes`. Le détail est en tête de `TableauEntrees`.
+
+                Masqué ICI et pas dans `PortesHover` : le composant n'a pas à
+                connaître la page qui l'emploie, et il ne sert qu'ici. */}
+            <div className="hidden lg:block">
+              <PortesHover portes={PORTES} />
             </div>
-            {/* PULSE et VAULT, compris chez tout le monde, vivent sur /offres */}
-            {/* 07/08 (Teo) — deux libellés étaient proposés : « Découvrir les
-                autres systèmes » et « Voir l'ensemble de nos solutions ». Le
-                premier est retenu parce qu'il dit vrai sur la destination —
-                /offres montre les DEUX paquets restants, pas un catalogue
-                complet — là où « l'ensemble de nos solutions » promettrait une
-                page qui récapitule les six. */}
-            <div data-reveal className="mt-10 flex justify-center">
-              <Link href="/offres" className="o-btn o-btn--ghost">
-                Découvrir les autres systèmes
-                <Chevron taille={13} />
-              </Link>
-            </div>
+
+            {/* 11/09/2026 — le tableau « laquelle pour moi ? ». Les trois
+                portes se posaient côte à côte et s'arrêtaient là ; un
+                visiteur venu du pied de page d'une vitrine produit a une
+                question de plus, et une seule. Le détail de la reprise et
+                l'origine de chaque valeur sont dans l'en-tête du composant.
+                Pas de nouvel `EnTete` : le titre de la section (« Trois
+                façons de commencer. ») coiffe déjà le tableau, et un
+                deuxième intertitre à trois lignes d'intervalle aurait coûté
+                plus de hauteur qu'il n'en aurait éclairci. */}
+            <TableauEntrees
+                textes={Object.fromEntries(PORTES.map((p) => [p.nom, p.texte]))}
+              />
           </div>
         </section>
 
-        {/* ════════ 6 · L'HÉBERGEMENT — où vivent physiquement les données ═══
+        {/* ════════ 7 · L'HÉBERGEMENT — où vivent physiquement les données ═══
             05/08/2026 (Teo). Demandée d'abord « en bas », puis déplacée le
             même jour au-dessus du catalogue. 16/08/2026 (Teo) — repassée
             en dessous : « met la partie des systèmes avant la partie vos
@@ -688,113 +1082,115 @@ export default function Home() {
             que pose tout client sérieux : « et l'IA, elle tourne où ? » */}
         <section data-monde="clair" className="pb-[110px]">
           <div className="o-wrap">
+            {/* 11/09/2026 — le chapô ne répète plus les cartes. Il disait
+                « hébergées en Allemagne, au sein de l'Union européenne, dans
+                un environnement conforme au RGPD » : trois des six faits qui
+                suivent, annoncés avant d'être énoncés. */}
             <EnTete
               pastille="HÉBERGEMENT"
               titre="Vos données restent sous juridiction européenne."
-              chapo="Hébergées en Allemagne, au sein de l'Union européenne, vos données sont traitées dans un environnement conforme aux exigences du RGPD et protégées tout au long de leur cycle de vie."
+              chapo="Six faits vérifiables sur l'endroit où vivent vos données, et sur ce qu'on peut en faire."
             />
 
-            <div
-              data-reveal
-              className="o-card mt-14 grid grid-cols-1 gap-10 p-8 sm:p-12 lg:grid-cols-[minmax(0,300px)_1fr] lg:gap-16"
-            >
-              {/* l'emblème et le lieu — la colonne qu'on regarde en premier */}
-              <div className="flex flex-col items-start">
-                <span className="inline-flex overflow-hidden rounded-[6px] shadow-[0_0_0_1px_rgba(9,9,11,0.08)]">
-                  <EmblemeEurope taille={104} />
-                </span>
-                {/* 07/08 (Teo, « quelque chose de plus institutionnel ») — le
-                    gros titre ne nomme plus la ville. Francfort n'est pas perdu
-                    pour autant : il est énoncé juste à droite, dans le bloc
-                    « Hébergement européen », et dans les mentions légales. */}
-                <p className="o-h5 mt-7">Infrastructure hébergée en Europe</p>
-                <p className="o-small mt-2.5 !text-[15px] !leading-[24px]">
-                  Une base de données unique, sur le sol de l&apos;Union
-                  européenne. C&apos;est là que vivent vos factures, vos
-                  relances et vos échanges clients, et nulle part ailleurs.
-                </p>
-              </div>
-
-              {/* les trois faits — même frise éditoriale que le déroulé */}
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-7">
-                {HEBERGEMENT.map((h) => (
-                  <div key={h.titre} className="flex flex-col">
-                    <span aria-hidden className="h-px w-full bg-[#e4e4e7]" />
-                    <h3 className="o-h5 mt-4 !text-[17px] !leading-[25px]">
-                      {h.titre}
-                    </h3>
-                    <p className="o-small mt-2.5 !text-[15px] !leading-[24px]">
-                      {h.texte}
-                    </p>
-                  </div>
-                ))}
-              </div>
+            <div className="mt-14">
+              <CartesPreuve cartes={PREUVES} />
             </div>
 
+            {/* La réserve reste, et elle reste en petit — mais la SIXIÈME
+                carte l'annonce désormais à la même hauteur de caractères que
+                les cinq autres. Ce paragraphe n'est plus l'endroit où on
+                apprend que l'IA sort d'Europe : c'est celui où on lit à
+                quelles conditions. */}
             <p
               data-reveal
-              className="o-small mx-auto mt-8 max-w-[760px] text-center !text-[15px] !leading-[24px]"
+              className="o-small mx-auto mt-7 max-w-[720px] text-center !text-[15px] !leading-[24px]"
             >
-              Une réserve, parce qu&apos;elle compte : les modèles
-              d&apos;intelligence artificielle qui rédigent les messages sont
-              interrogés hors d&apos;Europe. Ils reçoivent le strict nécessaire
-              à chaque tâche (un montant, une date, un nom), jamais votre
-              fichier client ni votre historique, et rien de ce qui leur est
-              envoyé ne sert à entraîner un modèle.
+              Ils reçoivent le strict nécessaire à chaque tâche — un montant,
+              une date, un nom. Jamais votre fichier client ni votre
+              historique, et rien de ce qui leur est envoyé ne sert à
+              entraîner un modèle.
             </p>
           </div>
         </section>
 
-        {/* ════════ 7 · CE QUI RESTE CHEZ VOUS — deux cartes larges ════════ */}
+        {/* ════════ 8 · CE QUI RESTE CHEZ VOUS — deux cartes larges ════════ */}
         <section data-monde="clair" className="pb-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="LES GARANTIES"
               titre="Un investissement maîtrisé. Des données protégées."
-              chapo="Nous vous accompagnons sur deux points essentiels : le financement de votre projet et la maîtrise de vos données. Des conditions claires, dès le départ."
+              chapo="Le financement de l'installation, et ce qu'il advient de vos données. Deux réponses, dès le départ."
             />
-            <div className="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-2">
-              {GARANTIES.map((g) => (
-                <div
-                  key={g.label}
-                  data-reveal
-                  className="o-card flex flex-col overflow-hidden"
-                >
-                  <div className="border-b border-[#f4f4f5]">{g.maquette}</div>
-                  <div className="flex flex-1 flex-col p-8 sm:p-10">
-                    <p className="o-small !text-[14px] uppercase tracking-[0.08em]">
-                      {g.label}
-                    </p>
-                    <h3 className="o-h5 mt-2">{g.titre}</h3>
-                    <p className="o-body mt-4">{g.texte}</p>
-                    {/* Encadré facultatif : seule la carte « Financement » en a
-                        un. `flex-1` migre du paragraphe vers lui quand il est
-                        là, pour que les deux cartes gardent la même hauteur et
-                        que les deux liens restent alignés en pied. */}
-                    {g.encadre ? (
-                      <div className="mt-6 flex-1 rounded-[10px] bg-[#fafafa] p-5">
-                        <p className="text-[15px] font-semibold leading-[23px] text-[#18181b]">
-                          {g.encadre.titre}
-                        </p>
-                        <p className="o-small mt-2 !text-[15px] !leading-[23px]">
-                          {g.encadre.texte}
-                        </p>
-                      </div>
-                    ) : (
-                      <span aria-hidden className="flex-1" />
-                    )}
-                    <Link href={g.lien.href} className="o-link mt-6 !text-[15px]">
-                      {g.lien.label}
-                      <Chevron taille={12} />
-                    </Link>
-                  </div>
-                </div>
-              ))}
+            {/* 11/09/2026 — les deux cartes larges passent à `CartesLueur` :
+                même maquette, même destination, mais le liseré s'encre sous
+                le pointeur et la carte entière est cliquable. L'origine, le
+                dégradé remis en graphite et les quatre écarts à la source
+                sont en tête de `components/accueil/CartesLueur.tsx`. */}
+            <div className="mt-16">
+              <CartesLueur cartes={GARANTIES} />
             </div>
           </div>
         </section>
 
-        {/* ════════ 8 · L'ÉCHÉANCE — retour au noir ════════ */}
+        {/* ════════ 8 ter · À L'ÉCHELLE D'UN GROUPE — quatre cartes ════════
+            12/09/2026. Le détail du pourquoi est sur la constante `GROUPES`.
+
+            LA PLACE — changée le 13/09/2026 à la demande de Teo (« inverse
+            la place des sections ») : elle a échangé son rang avec l'équipe,
+            qui occupe désormais le sien. Elle vient donc après les garanties
+            et avant le temps d'arrêt, à la fin du bloc de confiance — ce qui
+            se tient : périmètre d'essai, interdits, données, système
+            d'information sont du même ordre que l'hébergement et les
+            garanties qui la précèdent.
+
+            ⚠ CE QU'IL FAUT SURVEILLER À CETTE PLACE : elle suit
+            immédiatement « Un investissement maîtrisé », qui emploie le MÊME
+            composant (`CartesLueur`). Deux rangées de cartes à lueur se
+            suivent, deux puis quatre. L'argument d'origine — « la lueur au
+            survol suffit à les distinguer du bento juste au-dessus » — ne
+            vaut plus, puisque le voisin n'est plus un bento.
+
+            LE COMPOSANT est celui des garanties (`CartesLueur`), pris à
+            quatre cartes au lieu de deux : sa grille est en deux colonnes,
+            elle se referme donc en 2 × 2 sans un réglage. Aucune maquette
+            n'est passée — ces cartes-là portent des faits contractuels, pas
+            des captures d'interface, et la lueur au survol suffit à les
+            distinguer du bento juste au-dessus. */}
+        <section data-monde="clair" className="pb-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille="ORGANISATIONS"
+              titre="Quand plusieurs services valident, rien ne s'improvise."
+              chapo="Le cadre ne change pas avec la taille : un périmètre d'essai, des règles écrites, une sortie prévue dès le départ."
+            />
+            <div className="mt-16">
+              <CartesLueur cartes={GROUPES} />
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ 8 bis · LE TEMPS D'ARRÊT — la phrase qui se peint ═══
+            11/09/2026. La page enchaînait douze sections bâties à
+            l'identique — pastille, titre, chapô, contenu — sans un seul
+            temps de respiration. Les gabarits de vitrine mettent à cet
+            endroit une citation client en grand format ; la règle maison
+            l'interdit (aucune preuve sociale inventée) et propose l'échange
+            exact : même forme typographique, mais le PROBLÈME que le
+            produit règle. C'est ce qui est posé ici.
+
+            Le rendu est dans `TexteRevele` (repris de 21st.dev) : la phrase
+            reste collée au centre de l'écran et se peint mot à mot pendant
+            qu'on descend. Volontairement HORS de `.o-wrap` — le bloc est
+            collant, il lui faut la hauteur de la fenêtre, pas la colonne de
+            1 200. Et volontairement sans `data-reveal` : deux animations
+            d'apparition sur le même bloc se contrarient. */}
+        {CITATION ? (
+          <section data-monde="clair" className="pb-[110px]">
+            <TexteRevele texte={CITATION.text} signature={CITATION.sub} />
+          </section>
+        ) : null}
+
+        {/* ════════ 9 · L'ÉCHÉANCE — retour au noir ════════ */}
         <section className="o-nuit relative py-[110px]">
           <div aria-hidden className="o-deco">
             <div className="o-halo" />
@@ -827,14 +1223,19 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div data-reveal className="o-carte-nuit p-8 sm:p-10">
-                <p className="o-body">
-                  Le blocage ne vient presque jamais du logiciel. Il vient de la
-                  qualité des données : fichiers clients sans SIREN, adresses
-                  incomplètes, taux de TVA approximatifs. Chaque anomalie devient
-                  une facture rejetée par la plateforme.
-                </p>
-                <p className="o-body mt-5">
+              {/* 11/09/2026 (Teo) — le pavé de deux paragraphes laisse la
+                  place aux trois cartes penchées reprises de 21st.dev.
+                  L'origine, ce qui en a été retiré et le piège de largeur
+                  fixe qu'il fallait désamorcer sont dans l'en-tête de
+                  `CartesEcheance`.
+
+                  Pas de `data-reveal` sur l'escalier lui-même : les cartes
+                  portent déjà une transition de 700 ms, et deux animations
+                  sur le même bloc se contrarient. Il reste sur la ligne
+                  qui suit. */}
+              <div>
+                <CartesEcheance cartes={ECHEANCES} />
+                <p data-reveal className="o-small mt-2 max-w-[440px]">
                   Nettoyer sa base à froid coûte quelques heures. Le faire en
                   urgence, facture rejetée par facture rejetée, coûte des
                   semaines.
@@ -844,7 +1245,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 9 · FAQ ════════ */}
+        {/* ════════ 10 · FAQ ════════ */}
         <section data-monde="clair" className="py-[110px]">
           <div className="o-wrap">
             <EnTete
@@ -878,7 +1279,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 11 · CTA — clôture au noir ════════ */}
+        {/* ════════ 12 · CTA — clôture au noir ════════ */}
         <section className="o-nuit relative py-[120px]">
           <div aria-hidden className="o-deco">
             <div className="o-halo" />

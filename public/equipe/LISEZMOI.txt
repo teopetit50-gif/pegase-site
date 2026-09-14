@@ -1,0 +1,16 @@
+Les portraits de la section « équipe » de l'accueil.
+
+Fichiers attendus (les chemins sont déclarés dans lib/equipe.ts) :
+
+  henri.jpg    Henri Guichané
+  vincent.jpg  Vincent Karmalecki
+  teo.jpg      Teo Karczewski
+
+Cadrage : portrait serré, visage dans le tiers haut — les vignettes sont
+rognées en 31/33 et calées sur `object-position: center 22%`.
+Taille : 800 × 850 px environ suffit (elles sont rendues autour de 150 px).
+Format : JPEG de préférence ; un PNG marche aussi, en changeant l'extension
+dans lib/equipe.ts.
+
+Tant qu'un fichier manque, la vignette affiche les initiales de la personne
+au lieu d'une image cassée. Rien à désactiver, rien à commenter.

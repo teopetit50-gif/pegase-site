@@ -1,0 +1,489 @@
+/* ══════════════════════════════════════════════════════════════════════
+   .p-factures — FILED, page produit
+   Rapatriée le 11/09/2026 depuis OMEGA/filed-site/app/globals.css.
+   PASSÉE EN CLAIR le 11/09/2026 — voir « LE PASSAGE EN CLAIR » plus bas.
+
+   ── LE RELEVÉ D'ORIGINE (recopié tel quel, il explique les valeurs) ──
+
+   RELEVÉ — qronos-ai-agent-scheduler-template-v1.21st.app (09/09/2026)
+
+   Valeurs lues au getComputedStyle sur la référence, pas estimées, et
+   contrôlées à cinq largeurs (390, 768, 1024, 1280, 1440) en rechargeant
+   à chaque palier.
+
+   Jetons de couleur : lus dans les custom properties déclarées de la
+   référence (:root), en hexadécimal d'origine.
+
+   ÉCART ASSUMÉ — la police d'affichage. La référence déclare
+   `--font-display: "Google Sans", sans-serif` mais ne l'embarque pas :
+   Google Sans est sous licence Google et n'est servie par aucun CDN
+   public, donc la référence elle-même retombe sur le sans-serif de
+   l'OS. On charge Figtree (Google Fonts, libre), la plus proche en
+   dessin — géométrique, faible contraste, même largeur d'œil. Les deux
+   autres familles sont recopiées telles quelles : ce sont des piles
+   système, aucune police à charger.
+
+   Type : h1 clamp(2rem, 9vw, 2.5rem) / leading .96, puis à partir de sm
+   clamp(2rem, 4.6vw, 4.5rem) / leading .92 ; h2 37px puis 48px à lg ;
+   tracking -0.025em partout sur les titres.
+   Rythme vertical : py-24, puis py-32 à partir de lg.
+   Cadre : max-w-[1344px], pleine largeur sous lg, puis
+   calc(100% - 3.5rem) — soit 28px de marge de chaque côté.
+
+   ── CE QUE LE RAPATRIEMENT A CHANGÉ ─────────────────────────────────
+
+   1. LE CADRE. PageShell plafonne <main> à max-w-[1440px] avec un filet
+      latéral (sm:border-x). Le relevé, lui, laissait la page occuper
+      toute la fenêtre et ne plafonnait qu'à 1400 (sections, rails) et
+      1344 (fond du héros, bandeau, filets). Aux cinq largeurs de recette
+      — 390, 768, 1024, 1280, 1440 — le plafond de PageShell ne mord
+      jamais : à 1440 il donne 1438px utiles, le contenu s'arrête de
+      lui-même à 1400. L'écart n'existe qu'AU-DESSUS de 1440 ; depuis le
+      passage en clair, il est réglé par l'ombre écrêtée (point C).
+
+   2. LES JETONS SONT SOUS `.p-factures`, JAMAIS SUR `:root` (règle 2) —
+      les poser sur :root repeindrait les 23 autres pages. Ils sont
+      préfixés `--pf-` : le site a déjà un `--muted`, et le site source
+      aussi, avec des valeurs opposées.
+
+   3. PAS DE `@import "tailwindcss"`, PAS DE `@theme` ici : ils ne valent
+      que dans app/globals.css. Conséquence, et c'est le piège n°1 de
+      l'opération : LES UTILITAIRES NÉS DU `@theme` DU SITE SOURCE
+      N'EXISTENT PAS ICI. `text-foreground`, `bg-card`, `bg-mockup`…
+      n'étaient pas émises et ne peignaient rien, sans une seule erreur.
+      Elles ont toutes été converties en valeur arbitraire dans le
+      balisage ; la seule exception est `font-display`, recréée en règle
+      CSS plus bas (11 emplois, aucune déclaration concurrente possible).
+
+   4. LES RAYONS. Les quatre `--radius-*` du site source valaient
+      2/4/6/10px ; ceux de Tailwind par défaut valent 4/6/8/12. Comme
+      Tailwind v4 émet `border-radius: var(--radius-xl)`, il suffit de
+      redéclarer les quatre variables sous la classe de portée pour que
+      `rounded-sm|md|lg|xl` retrouvent EXACTEMENT les valeurs du relevé.
+      C'est fait plus bas. (`rounded-full` et `rounded-[Npx]` ne sont pas
+      concernés.) LE PASSAGE EN CLAIR N'Y TOUCHE PAS : ce n'est pas une
+      affaire de couleur.
+
+   5. LES ANIMATIONS SONT PRÉFIXÉES `pf-`. Les @keyframes sont globales
+      en CSS : `marquee` existe déjà dans app/globals.css (le ruban des
+      outils). Redéclarer ce nom ici l'écraserait pour tout le site.
+
+   6. `dark:` reste dans le balisage sans danger — le @custom-variant posé
+      le 11/09 dans globals.css le rebranche sur une classe que ce site ne
+      pose jamais.
+
+   ══════════════════════════════════════════════════════════════════════
+   ── LE PASSAGE EN CLAIR (11/09/2026) ────────────────────────────────
+
+   Demande de Teo : cette page était la SEULE des quatre pages produit à
+   être sombre. Elle passe en clair.
+
+   A. D'OÙ VIENT LA PALETTE — ET D'OÙ ELLE NE VIENT PAS.
+
+      La référence N'A PAS de thème clair : relevée à nouveau le 11/09
+      (outils/relever.sh), sa feuille compilée ne porte qu'un seul
+      `:root`, sombre, et ni `.light`, ni `prefers-color-scheme`, ni
+      `[data-theme]`, ni bascule (le seul « Toggle » de son balisage est
+      son menu mobile). Il n'y avait donc RIEN à relever : la meilleure
+      réponse — décalquer la variante claire de la référence — n'existe
+      pas.
+
+      La palette est donc construite dans le VOCABULAIRE DES TROIS PAGES
+      SŒURS, pour que la page appartienne au même site plutôt que de
+      fonder un quatrième monde. Les trois tiennent dans l'échelle
+      neutre : #ffffff, #fafafa, #f5f5f5, #f1f1f1, #e6e6e6, #d9d9d9,
+      #737373, #171717, #0a0a0a. On y reste.
+
+        rôle                 sombre (relevé)  clair (ici)   sœur
+        page                 #000101          #ffffff       --rel-bg
+        texte                #ecebe7          #171717       --rel-fg
+        texte atténué        #918d84          #737373       --rel-muted-fg
+        carte                #020204          #fafafa       --rp-pop
+        second plan          #040608          #f5f5f5       --rel-muted
+        bord                 #101215          #e6e6e6       --rel-border
+        plein (bouton)       #ecebe7          #171717       --rel-primary
+
+   B. CE QUI A ÉTÉ REPENSÉ, PAS INVERSÉ.
+
+      Une luminosité inversée donne une page plate et sale. Les gestes
+      qui ne se transposent pas :
+
+      · LE TISSAGE DU HÉROS. Le <canvas> three.js peignait en
+        `AdditiveBlending` : il AJOUTE de la lumière, donc sur du blanc
+        il ne peut rien peindre — blanc + quoi que ce soit reste blanc.
+        Il passe en `SubtractiveBlending` sur un fond effacé à la
+        couleur du papier : la structure n'est plus de la lumière tissée
+        dans le noir, c'est un dessin à l'encre sur une feuille. Détail
+        qui compte : sous ce mélange, `material.opacity` n'a plus aucun
+        effet (le facteur source vaut ZERO) — la densité se règle par la
+        CLARTÉ DE L'ENCRE. Voir woven-light-hero.tsx.
+      · LES VOILES du héros éteignaient l'image en NOIR ; ils l'effacent
+        maintenant en BLANC. Même rôle, couleur opposée.
+      · LES BISEAUX (`inset 0 1px 0 blanc` en haut, `inset 0 -1px 0 noir`
+        en bas) simulaient un creux éclairé par le haut. Sur papier un
+        creux se lit dans l'autre sens : ombre en HAUT, lumière en BAS.
+        Les deux liserés sont échangés, pas recolorés.
+      · LES DÉGRADÉS DE JAUGE du bento allaient du saturé vers le pâle
+        (le pâle EST la lumière). Sur papier ils vont du pâle vers le
+        saturé : `from-cyan-600 via-cyan-400 to-cyan-200` devient
+        `from-cyan-200 via-cyan-400 to-cyan-600`. Le sens de lecture est
+        conservé, le sens du dégradé s'inverse.
+      · LE BOUTON PRINCIPAL garde sa lumière tournante — mais il porte
+        désormais SON PROPRE NOIR (`bg-[#0a0a0a]`) au lieu de l'emprunter
+        à la page. Sur fond blanc, un anneau transparent ne pouvait plus
+        rien laisser voir passer.
+      · LES DEUX ROUGES ET L'AMBRE des états de pièce. Le `--destructive`
+        du relevé (#e40014) tombe à 4,4:1 sur blanc, sous le seuil des
+        petits textes ; il est assombri à #c9000f (6,0:1). L'ambre
+        #e0a458 tombait à 2,1:1 : il vaut #8f5e12 en texte (5,9:1) et
+        garde un ton vif (#c07d1d) en remplissage de jauge, où le
+        contraste de texte ne s'applique pas.
+      · LES ALPHAS DE BORD sont remontés d'environ 40 % (0,12 → 0,14…) :
+        à écart absolu égal, un filet se voit moins dans les hautes
+        lumières que dans les basses.
+      · LE TEXTE ne se transpose PAS alpha pour alpha. Un `white/85` sur
+        noir n'a pas pour équivalent un `black/85` sur blanc. Six niveaux
+        d'encre remplacent les onze alphas du balisage, choisis pour
+        RETROUVER LE RAPPORT DE CONTRASTE que chaque alpha donnait sur
+        noir — pas sa valeur :
+          white/85 → #2b2b2b   (14,9:1 sur noir → 14,1:1 sur blanc)
+          white/65 → #4d4d4d   ( 8,8:1          →  8,5:1)
+          white/58 → #5f5f5f   ( 6,7:1          →  6,4:1)
+          white/50 → #737373   ( 5,3:1          →  4,7:1)
+          white/40 → #8f8f8f   — DÉCOR SEUL (3,2:1) : le « + » d'un
+          accordéon, jamais un libellé. Les `white/48` et `white/50` qui
+          portaient du texte sont remontés à #737373 plutôt que suivis à
+          la lettre : à 3,2:1 ils seraient sortis du seuil AA.
+      · LES DEUX RAILS décoratifs et les filets de section étaient des
+        blancs à 6–7 % ; ils deviennent des encres à 8–9 %.
+
+   C. LE CADRE 1440. <main> est plafonné à 1440 px et centré sur le
+      `bg-panel` noir du site : au-delà, une page claire s'arrêterait net
+      entre deux bandes noires. L'ombre géante écrêtée horizontalement —
+      technique maison de `.monde-clair`, `.resa` et des trois pages
+      sœurs — peint la gouttière sans toucher à la mise en page. La
+      gouttière vaut (100vw − 1440)/2 = 50vw − 720 : 50vw suffit toujours.
+      ⚠ `inset(0 -50vw)` n'ouvre l'écrêtage QU'horizontalement : ce qui
+      déborderait en haut ou en bas serait coupé. Vérifié — toutes les
+      sections portent `overflow-hidden`, rien ne sort de la boîte.
+
+      ⚠ ET ON NE VÉRIFIE PAS CETTE GOUTTIÈRE AU `getComputedStyle`. Une
+      `box-shadow` n'est ni un `backgroundColor` ni un élément :
+      `elementsFromPoint(8, y)` rend le `div.min-h-screen` de PageShell et
+      sa couleur déclarée, donc « rgb(0,0,0) » — sur une gouttière
+      parfaitement blanche. La sonde écrite comme ça a menti avant d'être
+      corrigée. Le seul contrôle valable est le PIXEL PEINT : capture, puis
+      lecture du pixel. Relevé à 1760 px, aux cinq hauteurs de la fenêtre,
+      les deux bords rendent (255,255,255).
+
+   D. L'ENTÊTE CAMÉLÉON. Elle prélève la couleur peinte à 4 px du bord de
+      <main>, juste sous la barre, et bascule en verre clair au-dessus
+      d'un fond clair. Les sections portent désormais `data-monde="clair"`
+      comme chez les sœurs — la sonde lit la couleur, pas l'attribut,
+      mais l'attribut reste la déclaration d'intention du fichier.
+      Contrôlé à 1760 px et aux cinq largeurs : la sonde rend bien
+      rgb(255,255,255), l'entête passe en verre clair.
+
+   E. COMMENT ON RECETTE UN PASSAGE EN CLAIR. Une capture ne montre pas
+      un texte resté blanc : il n'y a rien à voir. `outils/contraste.mjs`
+      mesure, à une largeur donnée, l'encre effective de chaque texte
+      contre le premier fond opaque au-dessus de lui, et signale tout ce
+      qui passe sous 3:1 — plus les surfaces qui ne se détachent de rien
+      et n'ont ni bord ni ombre. Passé aux cinq largeurs le 11/09 :
+      0 texte sous 3:1, et les deux seules « surfaces indiscernables »
+      relevées sont le héros et le cadre du canvas, qui SONT le papier.
+
+   ── CE QUI NE PEUT PAS ÊTRE PORTÉ SOUS LA CLASSE DE PORTÉE ──────────
+
+   Le site source posait `html { scroll-behavior: smooth }` : les sept
+   ancres de la page (#principe, #garde-fous…) y glissaient. Ici la
+   propriété s'applique à la boîte de défilement du document, donc à
+   <html> — hors de portée de ce fichier, et le site confie déjà son
+   défilement à Lenis. Les ancres sautent au lieu de glisser. Écart
+   assumé, à trancher par l'orchestrateur s'il le veut autrement.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-factures {
+  /* ── Les jetons, en clair. Le balisage porte les mêmes valeurs en
+     hexadécimal (les utilitaires `bg-[var(--pf-…)]` sont ambigus pour
+     Tailwind — couleur ou taille ? — un hexadécimal ne l'est pas). Ce
+     bloc est donc la table de correspondance ET la source des règles
+     écrites à la main plus bas. ─────────────────────────────────────── */
+  --pf-background: #ffffff; /* la page          (sombre : #000101) */
+  --pf-foreground: #171717; /* texte plein      (sombre : #ecebe7) */
+  --pf-fg-fort: #2b2b2b; /* ex-white/85      — 14,1:1 */
+  --pf-fg-courant: #4d4d4d; /* ex-white/65..75  —  8,5:1 */
+  --pf-fg-doux: #5f5f5f; /* ex-white/55..62  —  6,4:1 */
+  --pf-muted-foreground: #737373; /* atténué (sombre : #918d84) — 4,7:1 */
+  --pf-fg-faible: #8f8f8f; /* DÉCOR SEUL (3,2:1) : jamais un contenu */
+  --pf-card: #fafafa; /* carte            (sombre : #020204) */
+  --pf-secondary: #f5f5f5; /* second plan      (sombre : #040608) */
+  --pf-border: #e6e6e6; /* bord             (sombre : #101215) */
+  --pf-border-fort: #d4d4d4;
+  --pf-primary: #171717; /* plein            (sombre : #ecebe7) */
+  --pf-primary-foreground: #ffffff;
+  --pf-destructive: #c9000f; /* #e40014 assombri — voir B */
+  --pf-attente: #8f5e12; /* #e0a458 assombri — voir B */
+  --pf-ring: #171717;
+
+  /* Le CADRE des vitrines d'application (sombre : #09090c) et l'ÉCRAN
+     qu'il porte (sombre : #141518).
+
+     Ici l'inversion mécanique ne marche pas. En sombre, la luminosité
+     montait à chaque niveau : page 1 → cadre 9 → écran 20. Transposée
+     telle quelle, elle descendrait : page 255 → cadre 246 → écran 237,
+     et l'écran d'une application serait gris. Sur papier, un objet se
+     détache de son décor en étant PLUS BLANC que lui, pas plus gris :
+     le cadre devient le gris du bureau, l'écran reste blanc. C'est un
+     choix, pas une transposition — il est noté ici pour ça.
+
+     Le cadre garde le soupçon de mauve relevé sur la référence
+     (rgba(94,73,86,.24) en radial) : il y survit en teinte de gris. */
+  --pf-cadre: #f1f0f2;
+  --pf-mockup: #ffffff;
+
+  /* Les rayons du relevé (`--radius: 0.25rem` et ses trois dérivés).
+     Tailwind v4 résout `rounded-xl` en `var(--radius-xl)` : redéclarer
+     les variables ici suffit à retrouver le relevé, sans toucher au
+     balisage ni aux 23 autres pages. AFFAIRE DE GÉOMÉTRIE, PAS DE
+     COULEUR — le passage en clair n'y touche pas. */
+  --pf-radius: 0.25rem;
+  --radius-sm: calc(var(--pf-radius) - 2px); /* 2px  — défaut Tailwind : 4 */
+  --radius-md: var(--pf-radius); /* 4px  — défaut Tailwind : 6 */
+  --radius-lg: calc(var(--pf-radius) + 2px); /* 6px  — défaut Tailwind : 8 */
+  --radius-xl: calc(var(--pf-radius) + 6px); /* 10px — défaut Tailwind : 12 */
+
+  /* RÈGLE 5 — la police s'écrit EXPLICITEMENT. La règle de police du site
+     est posée plus haut, sur <html>, avec Inter ; elle n'est pas fausse
+     ici (le site source composait aussi son texte courant en Inter) mais
+     elle n'est pas non plus une garantie. `--font-figtree` est posée sur
+     ce même conteneur par next/font/google, depuis la page. */
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  background: var(--pf-background);
+  color: var(--pf-foreground);
+  -webkit-font-smoothing: antialiased;
+
+  /* Point C de l'en-tête — le blanc jusqu'aux bords de l'écran au-delà
+     du cadre 1440 de PageShell. Même technique que `.monde-clair` et que
+     les trois pages sœurs. */
+  box-shadow: 0 0 0 50vw var(--pf-background);
+  clip-path: inset(0 -50vw);
+}
+
+/* Le site source posait `* { border-color: var(--border) }` dans son
+   globals.css — un quasi-noir (#101215) qui ne se voyait pas. Ici le
+   défaut de Tailwind v4 est `currentColor`, c'est-à-dire #171717 : une
+   bordure NUE dessinerait un trait noir franc au lieu du gris du site.
+   Aucune n'est nue aujourd'hui (vérifié une par une au passage en
+   clair) ; cette règle est ce qui fait que ça le reste.
+
+   Dans `base` et pas hors couche : une utilitaire de couleur de bord
+   posée dans le balisage doit continuer de gagner. */
+@layer base {
+  .p-factures *,
+  .p-factures *::before,
+  .p-factures *::after {
+    border-color: var(--pf-border);
+  }
+}
+
+.p-factures ::selection {
+  background-color: var(--pf-secondary);
+  color: var(--pf-foreground);
+}
+
+/* La police d'affichage — la seule utilitaire du @theme source recréée
+   en règle plutôt que convertie dans le balisage : 11 emplois, et rien
+   d'autre ne pose `font-family` sur ces éléments, donc aucun arbitrage
+   possible avec une utilitaire Tailwind (`font-display` n'existe pas
+   dans ce site). Figtree remplace la « Google Sans » que la référence
+   déclare sans l'embarquer — voir l'en-tête. */
+.p-factures .font-display {
+  font-family: var(--font-figtree), "Google Sans", ui-sans-serif, sans-serif;
+}
+
+/* L'entête du site est collante : sans marge de défilement, cliquer une
+   ancre dépose le titre de la section juste dessous, caché. 4,5rem =
+   72px, la hauteur de la barre à partir de sm. */
+.p-factures section[id] {
+  scroll-margin-top: 4.5rem;
+}
+
+/* ── Apparition au défilement ─────────────────────────────────────────
+   L'apparition est ADDITIVE, jamais soustractive : par défaut le bloc est
+   visible, et c'est le JavaScript qui, au montage, pose `data-anim="on"`
+   pour l'effacer avant de le faire apparaître.
+
+   Écrit dans l'autre sens — masquer en CSS, révéler en JS — un
+   navigateur sans JavaScript, un observateur qui ne se déclenche pas ou
+   un rendu interrompu laissent une page entièrement blanche. Sur un site
+   qui vend, ce n'est pas un risque acceptable. */
+.p-factures .reveal {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+.p-factures .reveal[data-anim="on"][data-shown="false"] {
+  opacity: 0;
+  transform: translateY(1.25rem);
+}
+
+/* ── Le bandeau qui défile au bas du héros ────────────────────────────
+   La piste est doublée dans le balisage, on la translate de -50 % — la
+   boucle est invisible. Relevé sur la référence : 30 s, linéaire,
+   infini. Nom préfixé : `marquee` est déjà pris par le ruban des outils
+   du site, et les @keyframes sont globales. */
+@keyframes pf-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.p-factures .marquee {
+  animation: pf-marquee 30s linear infinite;
+}
+
+/* ── La lumière qui fait le tour du bouton principal ──────────────────
+   Elle suit le contour grâce à `offset-path: border-box` ; un panneau
+   noir posé en inset-[2px] masque l'intérieur, si bien que seule la
+   bordure s'éclaire.
+
+   PASSAGE EN CLAIR : le mécanisme est intact, mais le bouton porte
+   désormais son propre noir (voir star-button.tsx). Sur une page
+   blanche, un anneau transparent n'aurait rien laissé voir passer. */
+@keyframes pf-star-btn {
+  0% {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+.p-factures .animate-star-btn {
+  display: none;
+}
+@supports (offset-path: border-box) {
+  .p-factures .animate-star-btn {
+    display: block;
+    offset-path: border-box;
+    animation: pf-star-btn calc(var(--duration, 3) * 1s) linear infinite;
+  }
+}
+
+/* ── La lueur qui balaie une barre de jauge ───────────────────────────
+   Relevée telle quelle sur la référence (`budget-meter-scan`).
+   En clair elle reste CLAIRE : elle ne se voit que sur la part remplie
+   de la jauge, qui est de l'encre — une brillance qui court sur un
+   objet sombre. Une lueur sombre aurait disparu là, et sali la piste. */
+@keyframes pf-meter-scan {
+  0% {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+  25% {
+    opacity: 0.8;
+  }
+  75% {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(800%);
+  }
+}
+.p-factures .meter-scan {
+  animation: pf-meter-scan 3.2s ease-in-out infinite;
+}
+
+/* ── Mouvement réduit ─────────────────────────────────────────────────
+   Tout ce qui bouge s'arrête pour qui l'a demandé. */
+@media (prefers-reduced-motion: reduce) {
+  .p-factures .reveal,
+  .p-factures .reveal[data-anim="on"][data-shown="false"] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .p-factures .marquee,
+  .p-factures .animate-star-btn {
+    animation: none;
+  }
+  .p-factures .meter-scan {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PASSE MOBILE — 11/09/2026, demande de Teo : « ça fait encore trop
+   chargé » sur les pages de module.
+
+   CE QUI ÉTAIT DÉJÀ FAIT : la TYPOGRAPHIE mobile. Le h1 est en
+   `clamp(2rem, 9vw, 2.5rem)` — 35 px à 390 — et les h2 ont leur propre
+   palier sous `sm` (`text-[28px] leading-[0.98]` avant les 37 px de la
+   référence). Le corps est à 14/22,75, l'échelle visée. On n'y touche
+   pas.
+
+   CE QUI RESTAIT : le RYTHME VERTICAL, resté au calibre du bureau.
+   Relevé à 390 px avant la passe — page de 10 155 px :
+     · le héros ouvre sur `py-28`, soit 224 px de vide avant le premier
+       mot et autant après le dernier bouton ;
+     · les sept sections courantes portent `pt-16 pb-12` sans palier
+       mobile — 112 px de respiration chacune, 784 px cumulés, presque
+       un écran de téléphone entier qui ne dit rien.
+   Ces valeurs ne sont pas des erreurs : ce sont celles du gabarit qronos
+   pour une colonne de 1 400 px. Elles n'ont simplement jamais été
+   redescendues pour 342.
+
+   Rien ne bouge au-dessus de 639 px : les paliers `sm:` et `lg:` du
+   relevé gardent leurs valeurs, ce bloc se ferme avant eux.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 639px) {
+  /* Héros — `px-4 py-28 sm:py-32 lg:py-40`. */
+  .p-factures .py-28 {
+    padding-block: 2.75rem; /* 44, au lieu de 112 */
+  }
+
+  /* Sections courantes — `pt-16 pb-12 lg:pt-32 lg:pb-20`, sept fois,
+     et `py-16 lg:py-32` deux fois. */
+  .p-factures .pt-16 {
+    padding-top: 2.5rem; /* 40, au lieu de 64 */
+  }
+  .p-factures .pb-12 {
+    padding-bottom: 2rem; /* 32, au lieu de 48 */
+  }
+  .p-factures .py-16 {
+    padding-block: 2.25rem; /* 36, au lieu de 64 */
+  }
+
+  /* Rembourrage des cartes : il se paie deux fois, en hauteur et en
+     largeur de colonne. */
+  .p-factures .p-8,
+  .p-factures .p-6 {
+    padding: 1.25rem;
+  }
+  .p-factures .p-5 {
+    padding: 1rem;
+  }
+
+  /* Gouttières d'une grille retombée à une colonne. */
+  .p-factures .gap-12 {
+    gap: 1.75rem;
+  }
+  .p-factures .gap-10 {
+    gap: 1.5rem;
+  }
+  .p-factures .gap-8 {
+    gap: 1.25rem;
+  }
+  .p-factures .gap-6 {
+    gap: 1.25rem;
+  }
+}

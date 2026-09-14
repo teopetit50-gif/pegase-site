@@ -22,6 +22,8 @@
    Ajouter un paquet : déposer les deux fichiers, ajouter la ligne dans
    LOGOS. Rien d'autre. */
 
+import { nomPaquet } from "@/lib/content";
+
 type Logo = { mark: string; lockup: string };
 
 /* Les six logos livrés le 05/08. AHEAD et COVERD sont présents et prêts,
@@ -64,7 +66,7 @@ export function SystemLogo({ system }: { system: string }) {
   if (!logo) {
     /* Repli monogramme — voir le commentaire PULSE/VAULT ci-dessus. */
     return (
-      <span className={TUILE} style={{ boxShadow: OMBRE }} aria-label={system}>
+      <span className={TUILE} style={{ boxShadow: OMBRE }} aria-label={nomPaquet(system)}>
         <span
           className="text-[15px] font-semibold tracking-[-0.03em]"
           style={{ color: ENCRE }}
@@ -76,7 +78,7 @@ export function SystemLogo({ system }: { system: string }) {
   }
 
   return (
-    <span className={TUILE} style={{ boxShadow: OMBRE }} aria-label={`Logo ${system}`}>
+    <span className={TUILE} style={{ boxShadow: OMBRE }} aria-label={`Logo ${nomPaquet(system)}`}>
       <span
         className="block h-[26px] w-[26px]"
         style={{
@@ -136,7 +138,7 @@ export function SystemLockup({
   return (
     <span
       role="img"
-      aria-label={`Logo ${system}`}
+      aria-label={`Logo ${nomPaquet(system)}`}
       className="inline-block"
       style={{
         height: hauteur,

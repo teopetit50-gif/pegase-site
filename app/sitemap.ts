@@ -21,6 +21,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const fixes: { url: string; priorite: number; frequence: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
     { url: "/", priorite: 1, frequence: "weekly" },
     { url: "/offres", priorite: 0.9, frequence: "weekly" },
+    /* 10/09 — /offres/sur-mesure manquait depuis toujours (relevé à l'audit
+       du 16/08 et resté tel quel). Ce n'est pas une étape de parcours mais
+       une porte d'entrée : « logiciel métier », « pont entre deux outils »
+       se cherchent, et la page n'était indexable par aucun chemin. Même rang
+       que /offres, dont elle est le complément. */
+    { url: "/offres/sur-mesure", priorite: 0.9, frequence: "monthly" },
     { url: "/modeles", priorite: 0.9, frequence: "monthly" },
     { url: "/tarifs", priorite: 0.9, frequence: "monthly" },
     /* 01/09 — l'offre site à prix public, sœur de /tarifs. */

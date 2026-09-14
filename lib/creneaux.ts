@@ -325,13 +325,13 @@ export const ERREURS: Record<string, string> = {
    dédié (commerce, tourisme) + la sortie de secours. La valeur stockée est
    la clé, pas le libellé. */
 export const SECTEURS: { valeur: string; libelle: string }[] = [
-  { valeur: "btp", libelle: "Bâtiment & travaux" },
-  { valeur: "garage", libelle: "Garage & atelier automobile" },
-  { valeur: "commerce", libelle: "Commerce & boutique" },
-  { valeur: "resto", libelle: "Restauration & traiteur" },
-  { valeur: "tourisme", libelle: "Tourisme & hébergement" },
-  { valeur: "immo", libelle: "Agence immobilière" },
-  { valeur: "pharmacie", libelle: "Pharmacie d'officine" },
+  { valeur: "btp", libelle: "Bâtiment & travaux publics" },
+  { valeur: "garage", libelle: "Automobile & après-vente" },
+  { valeur: "commerce", libelle: "Distribution & négoce" },
+  { valeur: "resto", libelle: "Restauration & agroalimentaire" },
+  { valeur: "tourisme", libelle: "Tourisme & hôtellerie" },
+  { valeur: "immo", libelle: "Immobilier & gestion" },
+  { valeur: "pharmacie", libelle: "Santé & pharmacie" },
   { valeur: "services", libelle: "Services & prestataires" },
   { valeur: "autre", libelle: "Autre activité" },
 ];

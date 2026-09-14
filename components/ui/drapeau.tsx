@@ -21,7 +21,7 @@
    côtiers ; Teo l'a écartée en une phrase (« juste le drapeau suffisait »).
    Ne pas la remettre.
 
-   ⚠️  Un jumeau existe dans components/produits/factures/ui/drapeau.tsx (sur le banc),
+   ⚠️  Un jumeau existe dans components/produits/factures/ui/drapeau.tsx,
    posé avec la peau de la page Factures. Les deux ne sont pas fusionnés à
    dessein : ce fichier-ci sert l'accueil, celui-là une peau de produit qui
    peut diverger. Les couleurs, elles, doivent rester identiques.

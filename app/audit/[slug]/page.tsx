@@ -11,6 +11,7 @@ import Sommaire from "@/components/audit/Sommaire";
 import TimelineSuite, { type EtapeSuite } from "@/components/audit/TimelineSuite";
 import { AUDITS, auditParSlug } from "@/lib/audits";
 import { CANAL_LABEL_PHRASE, CANAL_VALEUR, lienContact } from "@/lib/reservation";
+import { nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    /audit/[slug] — pré-audit personnalisé, v2 « composants » (02/08/2026)
@@ -279,7 +280,7 @@ export default async function PreAuditPage({
                   <div data-reveal className="flex h-full flex-col">
                     <div className="flex items-baseline justify-between gap-3">
                       <span className="font-mono text-[15px] font-semibold tracking-[0.04em] text-[#050505]">
-                        {m.system}
+                        {nomPaquet(m.system)}
                       </span>
                       <span className="text-[12px] text-[#616161]">{m.douleurs}</span>
                     </div>

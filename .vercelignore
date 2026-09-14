@@ -1,0 +1,6 @@
+.claude
+.agents
+*.bak
+.DS_Store
+scripts-capture-modeles.mjs
+.env*

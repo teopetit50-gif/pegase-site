@@ -278,7 +278,7 @@ export const PORTES = {
   equipe: {
     titre: "Plusieurs services se partagent le travail",
     texte:
-      "La demande passe par l'accueil, la compta, l'atelier ; chaque service a ses outils et ses règles de validation. Là, un prix affiché serait un mensonge : on audite d'abord, le devis sort des volumes mesurés.",
+      "La demande passe par l'accueil, la comptabilité, les opérations ; chaque service a ses outils et ses règles de validation. Là, un prix affiché serait un mensonge : on audite d'abord, le devis sort des volumes mesurés.",
   },
 };
 

@@ -200,10 +200,10 @@ export function MaquetteOutil() {
     ["Archivés", ""],
   ];
   const messages = [
-    ["Cabinet Léger", "Facture 2026-0412 : toujours pas réglée", "09:14"],
-    ["Marie Sylvestre", "Demande de devis, chantier Baie-Mahault", "08:52"],
-    ["SARL Bois du Nord", "Relance n° 2 : échéance dépassée", "hier"],
-    ["Atelier Cadet", "Confirmation du rendez-vous de jeudi", "hier"],
+    ["Sogexal", "Facture 2026-0412 : toujours pas réglée", "09:14"],
+    ["Novasud", "Demande de devis, chantier Baie-Mahault", "08:52"],
+    ["Métalco", "Relance n° 2 : échéance dépassée", "hier"],
+    ["Vallier", "Confirmation du rendez-vous de jeudi", "hier"],
   ];
   return (
     <Fenetre titre="boîte mail" cle="outil">
@@ -321,11 +321,11 @@ export function MaquetteBase() {
     { t: "état", x: 256 },
   ];
   const lignes = [
-    ["Cabinet Léger", "1 240 €", "12/08", "relancé"],
-    ["Marie Sylvestre", "480 €", "18/08", "en attente"],
-    ["SARL Bois du Nord", "3 900 €", "02/08", "relancé"],
-    ["Atelier Cadet", "760 €", "25/08", "payé"],
-    ["Ets Rémy & Fils", "2 150 €", "29/08", "en attente"],
+    ["Sogexal", "18 400 €", "12/08", "relancé"],
+    ["Novasud", "42 700 €", "18/08", "en attente"],
+    ["Métalco", "9 850 €", "02/08", "relancé"],
+    ["Vallier", "6 300 €", "25/08", "payé"],
+    ["Sodimat", "12 100 €", "29/08", "en attente"],
   ];
   const teinte: Record<string, string> = {
     relancé: "#b98a3e",

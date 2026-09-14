@@ -83,11 +83,55 @@
    components/compte/AbonnementCarte.tsx s'en sert toujours.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════════
+   14/09/2026 — LE MODÈLE « PRICING-SECTION-3 » (Teo, composant de
+   référence fourni : ui-layouts, 21st.dev). Le design change, la
+   mécanique de vente non (sélection exclusive, URL, périodicité).
+     · l'en-tête passe À GAUCHE — titre révélé mot à mot en rideau
+       (VerticalCutReveal), chapô — et le sélecteur Mensuel | Annuel se
+       pose À DROITE sur la même ligne : pilule claire, curseur au dégradé
+       gris qui glisse en ressort (layoutId) ;
+     · les trois cartes vivent dans UN CADRE au dégradé gris ; deux sont
+       transparentes et sans filet, la carte phare (« Trois postes ») est
+       NOIRE, cerclée, grossie de 10 % dès 1024 px — en dessous les cartes
+       s'empilent et l'échelle sauterait sur ses voisines ;
+     · l'ordre de lecture est celui de la référence : pastille, le PRIX en
+       premier, puis le nom en 30 px, la promesse, et les listes à
+       pastilles rondes (CheckCheck) ;
+     · le choix des postes garde son mécanisme : la pastille ronde est la
+       case, vide puis cochée ; les points du palier suivent sous un
+       second filet, même gabarit ;
+     · le bouton est le grand bouton dégradé de la référence (20 px,
+       coins 12) : clair sur la carte noire, sombre sur les claires ; tant
+       que le compte n'y est pas il reste éteint et dit ce qui manque ;
+     · les entrées : le titre en rideau, le reste en cascade floutée
+       (TimelineContent, 0,4 s par cran, comme la référence).
+   Ce qui part : les trois teintes de tête (bleu / or / nuit, décision de
+   l'associé du 08/09) — ce design n'a qu'une carte qui se détache, la
+   phare, et c'est le noir ; les pastilles de remise par carte (le
+   sélecteur porte déjà −15 %, le prix barré et l'économie font le reste).
+   Ce qui reste : « Le quatrième poste pour N € de plus » sur Tout Omega,
+   tous les textes, l'ancre #grille et le scroll-mt.
+   Les blocs .tp- et .rv-periode de globals.css partent avec ce commit :
+   les styles sont des utilitaires Tailwind, comme la référence, et les
+   pièces vivent dans components/ui (card, timeline-animation,
+   vertical-cut-reveal). Les deux paragraphes sous les cartes passent de
+   data-arrivee à data-reveal : la cascade d'Arrivee et celle de
+   TimelineContent posent toutes deux l'opacité, elles se seraient
+   battues sur les mêmes blocs.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import NumberFlow, { type Format } from "@number-flow/react";
-import { CheckCircle, Plus, Star } from "lucide-react";
+import { CheckCheck, Plus, Star } from "lucide-react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import Partage from "@/components/Partage";
+import { CallToAction4 } from "@/components/ui/call-to-action-4";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Comparator } from "@/components/ui/comparator-1";
+import { TimelineContent } from "@/components/ui/timeline-animation";
+import { VerticalCutReveal } from "@/components/ui/vertical-cut-reveal";
 import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
 import {
   COMPARATIF_PALIERS,
@@ -113,6 +157,18 @@ const FORMAT_EURO: Format = {
   maximumFractionDigits: 0,
 };
 
+/* la cascade floutée de la référence : chaque bloc arrive 0,4 s après le
+   précédent, d'en haut, en se dé-floutant */
+const VARIANTES_ENTREE: Variants = {
+  visible: (i: number) => ({
+    y: 0,
+    opacity: 1,
+    filter: "blur(0px)",
+    transition: { delay: i * 0.4, duration: 0.5 },
+  }),
+  hidden: { filter: "blur(10px)", y: -20, opacity: 0 },
+};
+
 /* ——— la périodicité venue de l'URL (`?periodicite=annuel`), côté
    navigateur seulement ; le serveur répond toujours « mensuel » ——— */
 function souscrireUrl(rappel: () => void) {
@@ -135,17 +191,16 @@ function lienPalier(p: Palier, periodicite: Periodicite) {
   return `/installation?postes=${postes}${periodicite === "annuel" ? "&periodicite=annuel" : ""}`;
 }
 
-/* 08/09 — le bouton d'un palier : noir pour Trois postes ET Tout Omega
-   (la dernière carte doit attirer autant que la phare), filet pour Un
-   poste. Sert la carte et l'en-tête collant du comparatif. */
+/* 08/09 — le bouton d'un palier dans le comparatif :
+   noir pour Trois postes ET Tout Omega, filet pour Un poste. */
 function boutonPalier(p: Palier) {
   return p.id === "un" ? "r-btn--fil" : "r-btn--noir";
 }
 
-/* 08/09 — l'argument de la tête nuit : ce que coûte le quatrième poste
-   par rapport à Trois postes. CALCULÉ depuis PALIERS, jamais écrit en
-   dur ; en annuel on compare les équivalents mensuels, pour que la
-   phrase reste vraie sous les chiffres affichés. */
+/* 08/09 — l'argument de Tout Omega : ce que coûte le quatrième poste par
+   rapport à Trois postes. CALCULÉ depuis PALIERS, jamais écrit en dur ;
+   en annuel on compare les équivalents mensuels, pour que la phrase reste
+   vraie sous les chiffres affichés. */
 function ecartQuatriemePoste(periodicite: Periodicite) {
   const trois = PALIERS.find((x) => x.id === "trois");
   const complet = PALIERS.find((x) => x.id === "complet");
@@ -154,14 +209,43 @@ function ecartQuatriemePoste(periodicite: Periodicite) {
   return valeur(complet) - valeur(trois);
 }
 
-/* la cinquième ligne : même gabarit qu'un poste, un « + » à la place de
-   la case, et toute la ligne est un lien vers la page sur-mesure */
-function LigneSurMesure() {
+/* ——— la pastille ronde de la référence (h-6 w-6, CheckCheck) ———
+   Elle sert trois fois : la case d'un poste à choisir (vide → cochée), la
+   coche d'un point compris, le « + » de la ligne sur-mesure. Sur la carte
+   noire elle prend les gris de la référence (neutral-600 / 500), sur les
+   claires le blanc cerné de noir. `peer-focus-visible` : le vrai <input>
+   est en sr-only juste avant elle, le focus clavier se voit ici. */
+function Pastille({ sombre, etat }: { sombre: boolean; etat: "vide" | "coche" | "plus" }) {
+  const teinte = sombre
+    ? etat === "vide"
+      ? "border-neutral-500 bg-transparent"
+      : "border-neutral-500 bg-neutral-600 text-white"
+    : "border-black bg-white text-black";
   return (
-    <Link href={SUR_MESURE.href} className="tp-poste tp-poste--lien">
-      <Plus aria-hidden className="tp-signe" />
-      <span>{SUR_MESURE.nom}</span>
-    </Link>
+    <span
+      aria-hidden
+      className={`mr-3 mt-0.5 grid h-6 w-6 flex-none place-content-center rounded-full border transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-current ${teinte}`}
+    >
+      {etat === "coche" ? <CheckCheck className="h-4 w-4" /> : null}
+      {etat === "plus" ? <Plus className="h-4 w-4" /> : null}
+    </span>
+  );
+}
+
+/* la cinquième ligne : même gabarit qu'un poste, un « + » dans la
+   pastille, et toute la ligne est un lien vers la page sur-mesure */
+function LigneSurMesure({ sombre }: { sombre: boolean }) {
+  return (
+    <li>
+      <Link href={SUR_MESURE.href} className="group flex items-start">
+        <Pastille sombre={sombre} etat="plus" />
+        <span
+          className={`text-sm underline-offset-4 group-hover:underline ${sombre ? "text-neutral-100" : "text-gray-600"}`}
+        >
+          {SUR_MESURE.nom}
+        </span>
+      </Link>
+    </li>
   );
 }
 
@@ -181,191 +265,197 @@ function CartePalier({
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
   const pret = manque <= 0;
   const annuel = periodicite === "annuel";
+  const sombre = Boolean(p.phare);
   const href = `/installation?postes=${postes.join(",")}${annuel ? "&periodicite=annuel" : ""}`;
-  /* 08/09 — la tête nuit porte l'écart avec Trois postes (voir l'en-tête) */
-  const ecart = p.teinte === "nuit" ? ecartQuatriemePoste(periodicite) : null;
+  const ecart = p.id === "complet" ? ecartQuatriemePoste(periodicite) : null;
+  const texteDoux = sombre ? "text-neutral-200" : "text-gray-600";
+  const texteListe = sombre ? "text-neutral-100" : "text-gray-600";
+  const filet = sombre ? "border-neutral-700" : "border-neutral-200";
 
   return (
-    /* 09/09 — la carte de la référence : un filet, quatre blocs séparés
-       par des filets, le pied qui tombe en bas. Dès 1024 px elle devient
-       une SOUS-GRILLE de quatre rangs partagés par la rangée (tête /
-       choix / points / pied) : quatre têtes de même hauteur, trois
-       boutons sur la même ligne, quelle que soit la longueur des textes */
-    <div
-      data-arrivee="colonne"
-      className={`tp-carte ${p.phare ? "tp-carte--phare" : ""}`}
+    <Card
+      className={`relative flex h-full flex-col justify-between ${
+        sombre
+          ? "border-transparent bg-gradient-to-t from-black to-neutral-900 text-white ring-2 ring-neutral-900 lg:scale-110"
+          : "border-none bg-transparent pt-4 text-gray-900 shadow-none"
+      }`}
     >
-      {/* les pastilles, hors du flux en haut à droite — « Recommandé »
-          avec l'étoile sur le palier phare, la remise seulement en annuel */}
-      <div className="tp-badges">
-        {p.badge ? (
-          <span className="tp-badge">
-            {p.phare ? <Star aria-hidden className="size-3 fill-current" /> : null}
-            {p.badge}
-          </span>
-        ) : null}
-        {annuel ? (
-          <span className="tp-badge tp-badge--remise rv-fondu">
-            −{REMISE_PCT}&nbsp;%<span className="sr-only"> de remise</span>
-          </span>
-        ) : null}
-      </div>
+      <CardContent className="pt-0">
+        <div className="space-y-2 pb-3">
+          {/* la pastille : « Recommandé » à l'étoile sur la phare, « Le
+              plus complet » sur Tout Omega — Un poste n'en a pas, son
+              prix monte d'autant, comme Starter sur la référence */}
+          {/* la ligne est RÉSERVÉE sur Un poste (pastille invisible) : les
+              deux cartes claires qui encadrent la noire tombent ainsi sur
+              la même ligne de prix — la référence laisse Starter monter,
+              mais elle n'a qu'une carte claire de chaque côté à aligner */}
+          <div className={`pt-4 ${p.badge ? "" : "invisible"}`} aria-hidden={!p.badge}>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                sombre ? "bg-neutral-600 text-white" : "border border-neutral-300 bg-white text-black"
+              }`}
+            >
+              {p.phare ? <Star aria-hidden className="size-3 fill-current" /> : null}
+              {p.badge ?? "\u00A0"}
+            </span>
+          </div>
 
-      {/* 1er rang — la tête : nom, promesse, prix. data-teinte : bleu / or
-          / nuit, une par palier (décision de l'associé du 08/09) */}
-      <div className="tp-tete" data-teinte={p.teinte}>
-        <h3 className="tp-nom font-[family-name:var(--font-jakarta)] text-[20px] font-semibold leading-[27px] tracking-[-0.02em]">
+          {/* le prix EN PREMIER. NumberFlow anime les chiffres à la
+              bascule : il ne faut SURTOUT PAS le remonter par une clé ;
+              seules les lignes qui l'entourent rejouent leur fondu */}
+          <div className="flex flex-wrap items-baseline gap-x-2">
+            <NumberFlow
+              aria-label={`${annuel ? equivalentMensuel(p.prix) : p.prix} euros par mois`}
+              className="text-4xl font-semibold tabular-nums"
+              format={FORMAT_EURO}
+              locales="fr-FR"
+              value={annuel ? equivalentMensuel(p.prix) : p.prix}
+            />
+            <span className={texteDoux}>par mois</span>
+            {annuel ? (
+              <span
+                key="barre"
+                className={`rv-fondu text-sm font-medium line-through ${sombre ? "text-neutral-400" : "text-gray-500"}`}
+              >
+                <span className="sr-only">Au lieu de </span>
+                {p.prix}&nbsp;€
+              </span>
+            ) : null}
+          </div>
+
+          <div key={periodicite} className="rv-fondu">
+            <p className={`text-xs ${sombre ? "text-neutral-300" : "text-gray-500"}`}>
+              {annuel
+                ? `Facturé ${prixAnnuel(p.prix)} € par an, en une fois.`
+                : "Facturé chaque mois, sans engagement."}
+            </p>
+            {annuel ? (
+              <p
+                className={`mt-2 inline-block rounded-lg px-2.5 py-1 text-[13px] font-semibold ${
+                  sombre ? "bg-[rgba(159,216,178,0.14)] text-[#9fd8b2]" : "bg-[#e8f6ed] text-[#15753a]"
+                }`}
+              >
+                Vous économisez {economieAnnuelle(p.prix)}&nbsp;€ par an
+              </p>
+            ) : null}
+            {ecart !== null ? (
+              <p className="mt-2 flex items-center gap-2 text-xs font-semibold text-gray-900">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-black" />
+                Le quatrième poste pour {ecart}&nbsp;€ de plus.
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <h3 className="mb-2 font-[family-name:var(--font-jakarta)] text-3xl font-semibold tracking-[-0.02em]">
           {p.nom}
         </h3>
-        <p className="tp-info mt-1.5 text-[13px] leading-[19px]">{p.promesse}</p>
+        <p className={`mb-4 text-sm ${texteDoux}`}>{p.promesse}</p>
 
-        {/* le prix — poussé EN BAS de la tête (mt-auto) : les trois têtes
-            ayant la même hauteur par sous-grille, les trois prix tombent
-            ainsi sur la même ligne, comme sur le composant de référence.
-            NumberFlow anime les chiffres à la bascule, il ne faut donc
-            SURTOUT PAS le remonter par une clé ; seules les lignes qui
-            l'entourent rejouent leur fondu */}
-        <div className="tp-bloc-prix">
-        <div className="flex flex-wrap items-end gap-x-2.5 gap-y-1">
-          <NumberFlow
-            aria-label={`${annuel ? equivalentMensuel(p.prix) : p.prix} euros par mois`}
-            className="tp-prix"
-            format={FORMAT_EURO}
-            locales="fr-FR"
-            suffix=" par mois"
-            value={annuel ? equivalentMensuel(p.prix) : p.prix}
-          />
-          {annuel ? (
-            <span key="barre" className="num rv-prix-barre rv-fondu mb-[3px]">
-              <span className="sr-only">Au lieu de </span>
-              {p.prix} €
-            </span>
-          ) : null}
-        </div>
-
-        <div key={periodicite} className="rv-fondu">
-          <p className="tp-facture mt-1.5 text-[12px] leading-[18px]">
-            {annuel
-              ? `Facturé ${prixAnnuel(p.prix)} € par an, en une fois.`
-              : "Facturé chaque mois, sans engagement."}
-          </p>
-          {annuel ? (
-            <p className="rv-economie mt-3">
-              Vous économisez {economieAnnuelle(p.prix)}&nbsp;€ par an
-            </p>
-          ) : null}
-          {/* 08/09 — sur la tête nuit seulement : l'argument du quatrième
-              poste, calculé depuis PALIERS. 09/09 — la ligne est RÉSERVÉE
-              (vide et invisible) dans les deux autres cartes : les trois
-              blocs de prix ont ainsi la même hauteur et, poussés en bas de
-              têtes de même hauteur, les trois prix tombent sur la même
-              ligne. Sous 1024 px les cartes s'empilent, la ligne réservée
-              n'a plus de raison d'être et disparaît. */}
-          <p className="tp-ecart mt-3" data-vide={ecart === null} aria-hidden={ecart === null}>
-            {ecart !== null ? (
-              <>Le quatrième poste pour {ecart}&nbsp;€ de plus.</>
-            ) : (
-              "\u00A0"
-            )}
-          </p>
-        </div>
-        </div>
-      </div>
-
-      {/* 2e rang — le choix des postes : cinq lignes nues, le même
-          gabarit que les points en dessous (09/09, seconde passe — voir
-          l'en-tête : ni tuile de logo, ni résumé, comme la référence) */}
-      <div className="tp-choix">
-        {p.aChoisir !== null ? (
-          /* min-w-0 : un fieldset a min-inline-size: min-content par
-             défaut ; sans lui il dépasse de son bloc dans les cartes
-             étroites et ses lignes ne tombent plus au droit des autres */
-          <fieldset className="min-w-0">
-            <legend className="tp-legende">
-              {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
-            </legend>
-            <div className="mt-2.5">
-              {POSTES.map((x) => {
-                const actif = choisis.includes(x.id);
-                const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
-                return (
-                  <label
-                    key={x.id}
-                    className={`tp-poste ${actif ? "tp-poste--actif" : ""} ${plein ? "tp-poste--plein" : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={actif}
-                      disabled={plein}
-                      onChange={() => bascule(x.id)}
-                      className="sr-only"
-                    />
-                    <span className="tp-case" aria-hidden />
-                    <span>{x.nom}</span>
-                  </label>
-                );
-              })}
-              <LigneSurMesure />
+        {/* le choix des postes — la pastille ronde est la case */}
+        <div className={`space-y-3 border-t pt-4 ${filet}`}>
+          {p.aChoisir !== null ? (
+            /* min-w-0 : un fieldset a min-inline-size: min-content par
+               défaut ; sans lui il dépasse de son bloc dans les cartes
+               étroites */
+            <fieldset className="min-w-0">
+              <legend className="mb-3 text-base font-medium">
+                {p.aChoisir === 1 ? "Choisissez votre poste :" : `Choisissez ${p.aChoisir} postes :`}
+              </legend>
+              <ul className="space-y-2 font-semibold">
+                {POSTES.map((x) => {
+                  const actif = choisis.includes(x.id);
+                  const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
+                  return (
+                    <li key={x.id}>
+                      <label
+                        className={`flex items-start ${plein ? "cursor-not-allowed opacity-45" : "cursor-pointer"}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={actif}
+                          disabled={plein}
+                          onChange={() => bascule(x.id)}
+                          className="peer sr-only"
+                        />
+                        <Pastille sombre={sombre} etat={actif ? "coche" : "vide"} />
+                        <span className={`text-sm ${texteListe}`}>{x.nom}</span>
+                      </label>
+                    </li>
+                  );
+                })}
+                <LigneSurMesure sombre={sombre} />
+              </ul>
+            </fieldset>
+          ) : (
+            <div>
+              <h4 className="mb-3 text-base font-medium">Les quatre postes, en service :</h4>
+              <ul className="space-y-2 font-semibold">
+                {POSTES.map((x) => (
+                  <li key={x.id} className="flex items-start">
+                    <Pastille sombre={sombre} etat="coche" />
+                    <span className={`text-sm ${texteListe}`}>{x.nom}</span>
+                  </li>
+                ))}
+                <LigneSurMesure sombre={sombre} />
+              </ul>
             </div>
-          </fieldset>
-        ) : (
-          <div>
-            <div className="tp-legende">Les quatre postes, en service :</div>
-            {/* les MÊMES lignes que dans les deux autres cartes, non
-                cliquables, la coche posée à la place de la case */}
-            <ul className="mt-2.5">
-              {POSTES.map((x) => (
-                <li key={x.id} className="tp-poste tp-poste--fixe tp-poste--actif">
-                  <CheckCircle aria-hidden className="tp-signe tp-signe--ok" />
-                  <span>{x.nom}</span>
-                </li>
-              ))}
-              <li>
-                <LigneSurMesure />
+          )}
+        </div>
+
+        {/* les points du palier, même gabarit */}
+        <div className={`mt-4 space-y-3 border-t pt-4 ${filet}`}>
+          <h4 className="mb-3 text-base font-medium">Compris dans le palier :</h4>
+          <ul className="space-y-2 font-semibold">
+            {p.points.map((t) => (
+              <li key={t} className="flex items-start">
+                <Pastille sombre={sombre} etat="coche" />
+                <span className={`text-sm ${texteListe}`}>{t}</span>
               </li>
-            </ul>
-          </div>
-        )}
-      </div>
+            ))}
+          </ul>
+        </div>
+      </CardContent>
 
-      {/* 3e rang — les points du palier, en coches comme la référence */}
-      <ul className="tp-points">
-        {p.points.map((t) => (
-          <li key={t} className="tp-point">
-            <CheckCircle aria-hidden className="tp-coche" />
-            <span>{t}</span>
-          </li>
-        ))}
-      </ul>
-
-      {/* 4e rang — le pied : le bouton pleine largeur et sa note */}
-      <div className="tp-pied">
+      <CardFooter className="flex-col items-stretch">
         {pret ? (
-          <Link href={href} className={`r-btn w-full ${boutonPalier(p)}`}>
+          <Link
+            href={href}
+            className={`mb-3 w-full rounded-xl border p-4 text-center text-xl lg:text-lg xl:text-xl transition-[filter] hover:brightness-105 ${
+              sombre
+                ? "border-neutral-400 bg-gradient-to-t from-neutral-100 to-neutral-300 font-semibold text-black shadow-lg shadow-neutral-500"
+                : "border-neutral-700 bg-gradient-to-t from-neutral-900 to-neutral-600 text-white shadow-lg shadow-neutral-900"
+            }`}
+          >
             Réserver l&apos;installation
           </Link>
         ) : (
-          <span aria-disabled className="r-btn rv-btn--attente w-full">
+          <span
+            aria-disabled
+            className={`mb-3 w-full rounded-xl border p-4 text-center text-xl lg:text-lg xl:text-xl ${
+              sombre
+                ? "border-neutral-700 bg-neutral-800 text-neutral-400"
+                : "border-neutral-300 bg-neutral-200 text-neutral-500"
+            }`}
+          >
             {manque === 1 ? "Choisissez 1 poste" : `Choisissez encore ${manque} postes`}
           </span>
         )}
-        {/* 05/09 — plus de « tout se règle à l'installation » : le moyen de
-            paiement s'enregistre à la réservation, rien n'est débité avant
-            la fin de l'installation */}
-        <p className="r-note mt-2 text-center">
+        {/* 05/09 — le moyen de paiement s'enregistre à la réservation,
+            rien n'est débité avant la fin de l'installation */}
+        <p className={`mb-2 text-center text-xs ${sombre ? "text-neutral-400" : "text-gray-500"}`}>
           Rien n&apos;est débité avant la fin de l&apos;installation.
         </p>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
 
-/* le sélecteur Mensuel | Annuel — pilule noire à curseur blanc qui glisse
-   (rv-periode, globals.css). 03/09 : deux boutons `aria-pressed` dans un
-   groupe nommé, plutôt qu'un radiogroup — un radiogroup promet la
-   navigation aux flèches et un seul arrêt Tab, qu'on n'implémentait pas.
-   09/09 : il quitte la colonne de gauche pour reprendre sa place de la
-   référence — centré, juste sous le chapô et au-dessus des cartes. */
+/* le sélecteur Mensuel | Annuel — le PricingSwitch de la référence :
+   pilule claire cernée, et sous le libellé actif un curseur au dégradé
+   gris, bordé, qui GLISSE d'un bouton à l'autre (layoutId, ressort).
+   Deux boutons `aria-pressed` dans un groupe nommé (03/09), plutôt qu'un
+   radiogroup qui promettrait la navigation aux flèches. */
 function SelecteurPeriodicite({
   valeur,
   changer,
@@ -373,82 +463,58 @@ function SelecteurPeriodicite({
   valeur: Periodicite;
   changer: (p: Periodicite) => void;
 }) {
-  const annuel = valeur === "annuel";
-  return (
-    <div
-      className="rv-periode"
-      role="group"
-      aria-label="Périodicité de l'abonnement"
-      data-actif={annuel ? "annuel" : "mensuel"}
-    >
-      <span aria-hidden className="rv-periode-curseur" />
+  const reduit = useReducedMotion();
+  const transition = reduit
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 500, damping: 30 };
+  const bouton = (p: Periodicite, contenu: ReactNode) => {
+    const actif = valeur === p;
+    return (
       <button
         type="button"
-        aria-pressed={!annuel}
-        className="rv-periode-btn"
-        data-actif={!annuel}
-        onClick={() => changer("mensuel")}
+        aria-pressed={actif}
+        onClick={() => changer(p)}
+        className={`relative z-10 h-10 w-fit shrink-0 cursor-pointer rounded-full px-3 py-1 font-medium transition-colors sm:h-12 sm:px-6 sm:py-2 ${
+          actif ? "text-black" : "text-neutral-500 hover:text-black"
+        }`}
       >
-        Mensuel
+        {actif ? (
+          <motion.span
+            layoutId="tq-curseur"
+            className="absolute left-0 top-0 h-10 w-full rounded-full border-4 border-neutral-300 bg-gradient-to-t from-neutral-100 via-neutral-200 to-neutral-300 shadow-sm shadow-neutral-300 sm:h-12"
+            transition={transition}
+          />
+        ) : null}
+        <span className="relative flex items-center gap-2">{contenu}</span>
       </button>
-      <button
-        type="button"
-        aria-pressed={annuel}
-        className="rv-periode-btn"
-        data-actif={annuel}
-        onClick={() => changer("annuel")}
-      >
-        Annuel
-        <span className="rv-remise">
-          −{REMISE_PCT}&nbsp;%<span className="sr-only"> de remise</span>
-        </span>
-      </button>
-    </div>
-  );
-}
+    );
+  };
 
-/* ——— une ligne du comparatif — la même que celle de Formules.tsx ———
-   Six colonnes : le libellé en occupe trois, chaque palier une. Sous
-   768 px la grille retombe à trois colonnes, le libellé passe pleine
-   largeur et le texte d'aide s'efface (voir .r-grille / .r-tableau). */
-function Ligne({
-  libelle,
-  aide,
-  valeurs,
-  noms,
-}: {
-  libelle: string;
-  aide: string;
-  valeurs: [string, string, string];
-  noms: [string, string, string];
-}) {
   return (
-    <div className="r-grille">
-      <div className="r-grille-libelle">
-        <div className="text-[15px] font-semibold leading-[22px] text-white md:text-[#050505]">
-          {libelle}
-        </div>
-        <p className="mt-1 hidden max-w-[42ch] text-[13px] leading-[20px] text-[#616161] md:block">
-          {aide}
-        </p>
+    <div className="flex justify-center">
+      <div
+        role="group"
+        aria-label="Périodicité de l'abonnement"
+        className="relative z-10 mx-auto flex w-fit rounded-full border border-gray-200 bg-neutral-50 p-1"
+      >
+        {bouton("mensuel", "Mensuel")}
+        {bouton(
+          "annuel",
+          <>
+            Annuel
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-black">
+              −{REMISE_PCT}&nbsp;%<span className="sr-only"> de remise</span>
+            </span>
+          </>,
+        )}
       </div>
-      {valeurs.map((v, i) => (
-        <div
-          key={noms[i]}
-          className="text-[13px] leading-[19px] text-[#3d3d3d] md:text-[14px] md:leading-[20px]"
-        >
-          {v}
-        </div>
-      ))}
     </div>
   );
 }
 
 export default function Grille() {
   /* 28/08 (Teo) — la sélection est EXCLUSIVE entre paliers : cocher un
-     poste dans une carte efface la sélection de l'autre. Chaque carte
-     gardait son propre état, on pouvait donc cocher « Un poste » ET
-     « Trois postes » en même temps — deux paniers à l'écran, aucun sens. */
+     poste dans une carte efface la sélection de l'autre. */
   const [choix, setChoix] = useState<{ palier: string; postes: string[] }>({
     palier: "",
     postes: [],
@@ -460,6 +526,8 @@ export default function Grille() {
   const [choixPeriodicite, setPeriodicite] = useState<Periodicite | null>(null);
   const periodicite = choixPeriodicite ?? depuisUrl;
   const annuel = periodicite === "annuel";
+  /* le repère de la cascade d'entrée : la section entière */
+  const sectionRef = useRef<HTMLElement>(null);
 
   const basculePour = (p: Palier) => (id: string) =>
     setChoix((prev) => {
@@ -472,60 +540,92 @@ export default function Grille() {
       return { palier: p.id, postes: [...prev.postes, id] };
     });
 
-  const noms = PALIERS.map((p) => p.nom) as [string, string, string];
-  const visibles = COMPARATIF_PALIERS.filter((f) => !f.repliee);
-  const repliees = COMPARATIF_PALIERS.filter((f) => f.repliee);
-
   return (
     <>
-      {/* ═══ 1. en-tête centré, sélecteur, trois paliers ═══ */}
-      <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-16">
-        {/* 09/09 — l'en-tête de la référence : tout est centré, sur une
-            colonne étroite. 01/09 — transitions : la pastille « Prix
-            publics » ARRIVE de la carte de /commencer (objet partagé) et
-            se pose au-dessus du titre ; titre puis chapô entrent en
-            cascade (Arrivee). */}
-        <div className="mx-auto max-w-3xl text-center">
-          <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
-            Prix publics
-          </Partage>
-          <h1 data-arrivee="titre" className="r-h1 mx-auto max-w-[19ch]">
-            Des prix publics, une installation comprise
-          </h1>
-          <p data-arrivee="chapo" className="r-lead mx-auto mt-5 max-w-[58ch]">
-            Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
-            réunion d&apos;installation, et le système démarre sous votre œil. Sans engagement en
-            mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
-          </p>
-        </div>
+      {/* ═══ 1. en-tête à gauche, sélecteur à droite, trois paliers ═══ */}
+      <section
+        ref={sectionRef}
+        data-monde="clair"
+        className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-16"
+      >
+        <article className="flex flex-col items-start justify-between gap-6 pb-4 sm:flex-row sm:items-center sm:pb-0">
+          <div className="max-w-2xl text-left sm:mb-6">
+            {/* 01/09 — la pastille « Prix publics » ARRIVE de la carte de
+                /commencer (objet partagé) */}
+            <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
+              Prix publics
+            </Partage>
+            <h1 className="mb-4 font-[family-name:var(--font-jakarta)] text-4xl font-medium leading-[130%] tracking-[-0.02em] text-gray-900">
+              <VerticalCutReveal
+                splitBy="words"
+                staggerDuration={0.15}
+                staggerFrom="first"
+                reverse
+                containerClassName="justify-start"
+                transition={{ type: "spring", stiffness: 250, damping: 40, delay: 0 }}
+              >
+                Des prix publics, une installation comprise
+              </VerticalCutReveal>
+            </h1>
+            <TimelineContent
+              as="p"
+              animationNum={0}
+              timelineRef={sectionRef}
+              customVariants={VARIANTES_ENTREE}
+              className="text-gray-600 sm:w-[80%]"
+            >
+              Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez
+              la réunion d&apos;installation, et le système démarre sous votre œil. Sans
+              engagement en mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé
+              trente jours.
+            </TimelineContent>
+          </div>
 
-        {/* le sélecteur Mensuel | Annuel, centré sous le chapô */}
-        <div data-arrivee="chapo" className="mt-9 flex justify-center">
-          <SelecteurPeriodicite valeur={periodicite} changer={setPeriodicite} />
-        </div>
+          <TimelineContent
+            as="div"
+            animationNum={1}
+            timelineRef={sectionRef}
+            customVariants={VARIANTES_ENTREE}
+            className="shrink-0"
+          >
+            <SelecteurPeriodicite valeur={periodicite} changer={setPeriodicite} />
+          </TimelineContent>
+        </article>
 
-        {/* 09/09 — dès 1024 px la rangée a QUATRE rangs (sous-grille des
-            cartes, voir CartePalier) et plus d'interligne vertical */}
-        <div
+        {/* le cadre gris des trois cartes. Dès 1024 px la phare est
+            grossie de 10 % : le cadre lui laisse de l'air en haut et en
+            bas (mt / mb plus grands qu'en pile) */}
+        <TimelineContent
+          as="div"
           id="grille"
-          className="mx-auto mt-10 grid max-w-md scroll-mt-24 gap-6 sm:mt-12 lg:max-w-5xl lg:grid-cols-3 lg:gap-y-0"
+          animationNum={2}
+          timelineRef={sectionRef}
+          customVariants={VARIANTES_ENTREE}
+          className="mx-auto mt-6 grid max-w-md scroll-mt-32 gap-4 rounded-lg bg-gradient-to-b from-neutral-100 to-neutral-200 sm:p-3 lg:mt-14 lg:max-w-none lg:grid-cols-3"
         >
-          {PALIERS.map((p) => (
-            <CartePalier
+          {PALIERS.map((p, i) => (
+            <TimelineContent
+              as="div"
               key={p.id}
-              p={p}
-              choisis={choix.palier === p.id ? choix.postes : []}
-              bascule={basculePour(p)}
-              periodicite={periodicite}
-            />
+              animationNum={i + 3}
+              timelineRef={sectionRef}
+              customVariants={VARIANTES_ENTREE}
+              className={p.phare ? "relative lg:z-10" : undefined}
+            >
+              <CartePalier
+                p={p}
+                choisis={choix.palier === p.id ? choix.postes : []}
+                bascule={basculePour(p)}
+                periodicite={periodicite}
+              />
+            </TimelineContent>
           ))}
-        </div>
+        </TimelineContent>
 
-        {/* ce qui tourne chez tout le monde — vivait dans la colonne de
-            gauche jusqu'au 09/09, descendu sous les cartes avec elle */}
+        {/* ce qui tourne chez tout le monde */}
         <p
-          data-arrivee="colonne"
-          className="mx-auto mt-10 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161]"
+          data-reveal
+          className="mx-auto mt-10 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161] lg:mt-20"
         >
           <span className="font-semibold text-[#050505]">Compris à tous les paliers.</span>{" "}
           Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
@@ -541,7 +641,7 @@ export default function Grille() {
           sans vous ne sont pas des options.
         </p>
 
-        <p data-arrivee="colonne" className="r-note mx-auto mt-8 max-w-3xl text-center">
+        <p data-reveal className="r-note mx-auto mt-8 max-w-3xl text-center">
           Prix TTC, grille en vigueur au 01/09/2026 — le prix affiché au moment de votre demande
           est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
           (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion
@@ -555,126 +655,67 @@ export default function Grille() {
         </p>
       </section>
 
-      {/* ═══ 2. bandeau d'orientation ═══ */}
+      {/* ═══ 2. bandeau d'orientation — 14/09 : la carte à deux volets de
+             Tailark (call-to-action-4). Les mots sont ceux du bandeau du
+             28/08, réorganisés : la question en titre, les trois choses à
+             décrire en liste à coches, « le jour même » en grande mention
+             dans l'encart, l'e-mail dessous, le bouton inchangé. ═══ */}
       <section data-monde="clair" className="r-wrap pb-14 sm:pb-16">
-        <div className="flex flex-col gap-4 rounded-2xl bg-white px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:px-8">
-          <p className="max-w-[62ch] text-[15px] leading-[23px] text-[#3d3d3d]">
-            <span className="font-semibold text-[#050505]">
-              Vous ne savez pas quel palier choisir ?
-            </span>{" "}
-            Décrivez votre situation en deux lignes : votre activité, ce qui vous prend le
-            plus de temps, ce qui se perd. On vous répond le jour même avec le palier adapté
-            — et la réunion d&apos;installation se réserve en ligne. Ou par e-mail&nbsp;:{" "}
-            <a href={lienCourriel("Quel palier pour moi ?")} className="r-lien !text-[15px]">
-              {COURRIEL}
-            </a>
-            .
-          </p>
-          <a
-            href={lienContact("Quel palier pour moi ?")}
-            className="r-btn r-btn--fil shrink-0"
-          >
-            Décrire ma situation
-          </a>
-        </div>
+        <CallToAction4
+          className="mx-auto max-w-4xl"
+          titre="Vous ne savez pas quel palier choisir ?"
+          texte="Décrivez votre situation en deux lignes. On vous répond avec le palier adapté — et la réunion d'installation se réserve en ligne."
+          points={["Votre activité", "Ce qui vous prend le plus de temps", "Ce qui se perd"]}
+          encart={{
+            sur: "Une réponse",
+            grand: "le jour même",
+            sous: (
+              <>
+                Ou par e-mail&nbsp;:{" "}
+                <a href={lienCourriel("Quel palier pour moi ?")} className="r-lien !text-sm">
+                  {COURRIEL}
+                </a>
+              </>
+            ),
+            bouton: { label: "Décrire ma situation", href: lienContact("Quel palier pour moi ?") },
+          }}
+        />
       </section>
 
-      {/* ═══ 3. comparatif ═══ */}
+      {/* ═══ 3. comparatif — 14/09 : le « Comparator one » de Tailark, en
+             carte à quatre colonnes (voir components/ui/comparator-1).
+             Les deux en-têtes collants du 05/09 et le repli « Voir tous
+             les points » partent avec lui : quinze lignes en trois
+             familles se lisent d'un coup, et la tête de la carte porte
+             déjà les prix — qui suivent la périodicité choisie plus haut. */}
       <section id="comparatif" data-monde="clair" className="r-blanc">
         <div className="r-wrap py-14 sm:py-20">
-          <h2 className="r-h2">Comparer les paliers</h2>
-          <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
-            <a href={lienContact("Aidez-moi à choisir un palier")} className="r-lien">
-              Aidez-moi à choisir
-            </a>
+          <div className="text-center">
+            <h2 className="r-h2 text-balance">Comparer les paliers</h2>
+            <p className="mx-auto mt-4 max-w-md text-balance text-[#616161]">
+              Chaque ligne redit ce que les cartes disent déjà, côte à côte.{" "}
+              <a href={lienContact("Aidez-moi à choisir un palier")} className="r-lien">
+                Aidez-moi à choisir
+              </a>
+            </p>
           </div>
-
-          {/* en-tête collant : les trois paliers restent lisibles pendant
-              qu'on descend dans les lignes — le prix suit la périodicité
-              choisie plus haut */}
-          <div className="sticky top-16 z-10 mt-10 hidden bg-white pb-4 pt-4 sm:top-[72px] md:block">
-            <div className="grid grid-cols-6 gap-x-6 border-b border-[#e3e3e3] pb-5">
-              <div className="col-span-3 self-end text-[13px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                Indépendants &amp; TPE-PME
-              </div>
-              {PALIERS.map((p) => (
-                <div key={p.id}>
-                  <div className="font-[family-name:var(--font-jakarta)] text-[19px] font-semibold leading-[26px] tracking-[-0.01em] text-[#050505]">
-                    {p.nom}
-                  </div>
-                  <div className="num mt-0.5 text-[14px] leading-[22px] text-[#3d3d3d]">
-                    {annuel
-                      ? `${equivalentMensuel(p.prix)} € par mois · ${prixAnnuel(p.prix)} € par an`
-                      : `${p.prix} € · ${p.sousPrix}`}
-                  </div>
-                  <Link
-                    href={lienPalier(p, periodicite)}
-                    className={`r-btn mt-3 w-full !py-2 !text-[14px] ${boutonPalier(p)}`}
-                  >
-                    {p.aChoisir === null ? "Réserver l'installation" : "Choisir mes postes"}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* en-tête collant mobile : les trois noms coiffent les colonnes
-              une seule fois pour tout le tableau — même encadré, mêmes
-              cellules et mêmes gouttières que les tableaux .r-tableau */}
-          <div className="sticky top-16 z-10 mt-8 bg-white pb-2 pt-3 sm:top-[72px] md:hidden">
-            <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-[#e3e3e3] bg-[#f5f5f5]">
-              {PALIERS.map((p, i) => (
-                <div
-                  key={p.id}
-                  className={`px-3 py-2.5 ${i > 0 ? "border-l border-[#e3e3e3]" : ""}`}
-                >
-                  <div className="font-[family-name:var(--font-jakarta)] text-[14px] font-semibold leading-[19px] tracking-[-0.01em] text-[#050505]">
-                    {p.nom}
-                  </div>
-                  <div className="num mt-0.5 text-[12px] leading-[16px] text-[#616161]">
-                    {annuel ? equivalentMensuel(p.prix) : p.prix} € / mois
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* familles toujours visibles */}
-          <div className="md:mt-2">
-            {visibles.map((fam) => (
-              <div key={fam.titre}>
-                <h3 className="r-h4 pb-2 pt-10">{fam.titre}</h3>
-                <div className="r-tableau">
-                  {fam.lignes.map((l) => (
-                    <Ligne key={l.libelle} {...l} noms={noms} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* familles repliées — le bouton porte lui-même le voile de
-              dégradé (::before), qui disparaît à l'ouverture */}
-          <details className="r-plus">
-            <summary>
-              <span className="r-btn r-btn--fil mx-auto mt-8 w-full max-w-sm">
-                <span className="r-plus-ouvrir">Voir tous les points</span>
-                <span className="r-plus-fermer">Masquer le détail</span>
-              </span>
-            </summary>
-            <div>
-              {repliees.map((fam) => (
-                <div key={fam.titre}>
-                  <h3 className="r-h4 pb-2 pt-10">{fam.titre}</h3>
-                  <div className="r-tableau">
-                    {fam.lignes.map((l) => (
-                      <Ligne key={l.libelle} {...l} noms={noms} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </details>
+          <Comparator
+            className="mx-auto mt-12 max-w-4xl"
+            plans={PALIERS.map((p) => ({
+              id: p.id,
+              nom: p.nom,
+              prix: `${annuel ? equivalentMensuel(p.prix) : p.prix}\u00A0€`,
+              periode: annuel ? `par mois · ${prixAnnuel(p.prix)}\u00A0€ par an` : "par mois",
+              href: lienPalier(p, periodicite),
+              cta: p.aChoisir === null ? "Réserver l'installation" : "Choisir mes postes",
+              bouton: boutonPalier(p),
+              phare: p.phare,
+            }))}
+            familles={COMPARATIF_PALIERS.map((f) => ({
+              titre: f.titre,
+              lignes: f.lignes.map((l) => ({ libelle: l.libelle, aide: l.aide, valeurs: l.valeurs })),
+            }))}
+          />
         </div>
       </section>
     </>

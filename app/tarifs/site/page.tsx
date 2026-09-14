@@ -231,10 +231,10 @@ function MaqCommande() {
    le même geste que le journal de l'accueil ——— */
 function MaqDemandes() {
   const lignes = [
-    ["09:14", "Demande de devis · toiture", "accusé de réception envoyé"],
-    ["09:16", "Réponse WhatsApp · horaires samedi", "sous votre signature"],
-    ["J+3", "Devis DV-0891 · Ti Punch", "relancé"],
-    ["J+7", "Facture FA-2418 · Garage Lémard", "réglée, avis demandé"],
+    ["09:14", "Demande de devis · chantier", "accusé de réception envoyé"],
+    ["09:16", "Réponse · demande du samedi", "sous votre signature"],
+    ["J+3", "Devis DV-0891 · Métalco", "relancé"],
+    ["J+7", "Facture FA-2418 · Sogexal", "réglée, avis demandé"],
   ];
   return (
     <>

@@ -83,11 +83,11 @@ import {
   heureVisiteur,
   horizonGp,
   jourGpLabel,
-  moisLabel,
   reserver,
   type Agenda,
 } from "@/lib/creneaux";
 import { SystemLogo } from "@/components/logos";
+import { CalendarScheduler } from "@/components/ui/calendar-scheduler";
 import {
   POSTES,
   REMISE_ANNUELLE,
@@ -212,25 +212,19 @@ export default function PriseDeCreneau({
      conversion dans le bon sens, voir lib/creneaux.ts). */
   const auj = aujourdhuiGp();
   const fin = horizonGp();
-  const peutReculer = vue.annee * 12 + vue.mois > auj.annee * 12 + auj.mois;
-  const peutAvancer = vue.annee * 12 + vue.mois < fin.annee * 12 + fin.mois;
-  const bougerMois = (sens: 1 | -1) =>
-    setVue((v) => {
-      let m = v.mois + sens;
-      let a = v.annee;
-      if (m === 0) { m = 12; a -= 1; }
-      if (m === 13) { m = 1; a += 1; }
-      setJour(null);
-      setCreneau(null);
-      return { annee: a, mois: m };
-    });
-
-  /* décalage du 1ᵉʳ du mois (lundi en tête) */
-  const cale = (() => {
-    const d = new Date(Date.UTC(vue.annee, vue.mois - 1, 1, 12)).getUTCDay();
-    return d === 0 ? 6 : d - 1;
-  })();
-  const nbJours = new Date(Date.UTC(vue.annee, vue.mois, 0)).getUTCDate();
+  /* 14/09 — le calendrier est celui de react-day-picker (calendar-scheduler) :
+     il navigue lui-même entre startMonth et endMonth et rend le mois choisi
+     par onMonthChange. Les dates qu'on lui passe sont des Date LOCALES
+     construites sur (année, mois, jour) de Guadeloupe — on ne lit jamais
+     leur instant, seulement getFullYear/getMonth/getDate : le fuseau du
+     visiteur n'entre pas en jeu. */
+  const changerMois = (m: Date) => {
+    setVue({ annee: m.getFullYear(), mois: m.getMonth() + 1 });
+    setJour(null);
+    setCreneau(null);
+  };
+  const jourLibre = (d: Date) =>
+    d.getFullYear() === vue.annee && d.getMonth() === vue.mois - 1 && joursDuMois.has(d.getDate());
 
   /* ——— qui ——— */
   const [etape, setEtape] = useState<Etape>(surDevis ? "coordonnees" : "creneau");
@@ -668,113 +662,44 @@ export default function PriseDeCreneau({
                 </button>
               </div>
             ) : (
-              <div className="mt-6 grid gap-8 md:grid-cols-[minmax(0,340px)_1fr]">
-                {/* calendrier */}
-                <div>
-                  <div className="rv-cal-tete">
-                    <button
-                      type="button"
-                      className="rv-cal-nav"
-                      onClick={() => bougerMois(-1)}
-                      disabled={!peutReculer}
-                      aria-label="Mois précédent"
-                    >
-                      ←
-                    </button>
-                    <div className="text-[15px] font-semibold text-[#050505]">
-                      {moisLabel(vue.mois, vue.annee)}
-                    </div>
-                    <button
-                      type="button"
-                      className="rv-cal-nav"
-                      onClick={() => bougerMois(1)}
-                      disabled={!peutAvancer}
-                      aria-label="Mois suivant"
-                    >
-                      →
-                    </button>
-                  </div>
-
-                  <div className="rv-cal-grille mt-4">
-                    {["L", "M", "M", "J", "V", "S", "D"].map((l, i) => (
-                      <div key={i} className="rv-cal-jour">
-                        {l}
-                      </div>
-                    ))}
-                    {Array.from({ length: cale }).map((_, i) => (
-                      <div key={`v${i}`} />
-                    ))}
-                    {Array.from({ length: nbJours }, (_, i) => i + 1).map((j) => {
-                      const libre = joursDuMois.has(j);
-                      return (
-                        <button
-                          key={j}
-                          type="button"
-                          disabled={!libre}
-                          aria-pressed={jour === j}
-                          onClick={() => {
-                            setJour(j);
-                            setCreneau(null);
-                          }}
-                          className={`rv-cal-case num ${
-                            jour === j
-                              ? "rv-cal-case--choisi"
-                              : libre
-                                ? "rv-cal-case--libre"
-                                : "rv-cal-case--vide"
-                          }`}
-                        >
-                          {j}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="r-note mt-3">
-                    Créneaux en heure de Guadeloupe. Agenda ouvert sur dix semaines.
-                  </p>
-                </div>
-
-                {/* heures du jour choisi */}
-                <div>
-                  {jour === null ? (
-                    <p className="text-[15px] leading-[23px] text-[#616161]">
-                      Choisissez un jour dans le calendrier — les jours grisés sont complets ou
-                      fermés.
-                    </p>
-                  ) : (
-                    <>
-                      <div className="text-[15px] font-semibold text-[#050505] first-letter:uppercase">
-                        {dateJour(jour)}
-                      </div>
-                      <div className="rv-heures mt-4">
-                        {(joursDuMois.get(jour) ?? []).map((cr) => (
-                          <button
-                            key={cr}
-                            type="button"
-                            aria-pressed={creneau === cr}
-                            onClick={() => setCreneau(cr)}
-                            className={`rv-heure num ${creneau === cr ? "rv-heure--choisi" : ""}`}
-                          >
-                            {heureGp(cr)}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        disabled={creneau === null}
-                        onClick={() => {
-                          setErreur(null);
-                          setEtape("coordonnees");
-                        }}
-                        className={`mt-6 w-full sm:w-auto ${
-                          creneau === null ? "r-btn rv-btn--attente" : "r-btn r-btn--noir"
-                        }`}
-                      >
-                        Continuer
-                      </button>
-                    </>
-                  )}
-                </div>
+              <div className="mt-6">
+                {/* 14/09 — le calendrier ruixen/originui remplace la grille
+                    maison (rv-cal-*, rv-heure*) : deux panneaux bordés,
+                    le mois à gauche, les heures en deux colonnes à droite,
+                    Réinitialiser / Continuer en pied. Le composant est
+                    contrôlé : tout l'état reste ici. */}
+                <CalendarScheduler
+                  month={new Date(vue.annee, vue.mois - 1, 1)}
+                  onMonthChange={changerMois}
+                  startMonth={new Date(auj.annee, auj.mois - 1, 1)}
+                  endMonth={new Date(fin.annee, fin.mois - 1, 1)}
+                  today={new Date(auj.annee, auj.mois - 1, auj.jour)}
+                  date={jour === null ? undefined : new Date(vue.annee, vue.mois - 1, jour)}
+                  onDateChange={(d) => {
+                    setJour(d ? d.getDate() : null);
+                    setCreneau(null);
+                  }}
+                  jourLibre={jourLibre}
+                  jourLabel={jour === null ? undefined : dateJour(jour)}
+                  creneaux={
+                    jour === null
+                      ? []
+                      : (joursDuMois.get(jour) ?? []).map((cr) => ({ valeur: cr, libelle: heureGp(cr) }))
+                  }
+                  creneau={creneau}
+                  onCreneauChange={setCreneau}
+                  onReset={() => {
+                    setJour(null);
+                    setCreneau(null);
+                  }}
+                  onConfirm={() => {
+                    setErreur(null);
+                    setEtape("coordonnees");
+                  }}
+                />
+                <p className="r-note mt-3">
+                  Créneaux en heure de Guadeloupe. Agenda ouvert sur dix semaines.
+                </p>
               </div>
             )}
           </div>

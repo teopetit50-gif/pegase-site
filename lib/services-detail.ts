@@ -125,9 +125,9 @@ const ANSWR: ServiceDetail = {
     "Historique de chaque échange archivé et consultable",
   ],
   pourQui: [
-    "Artisans",
+    "Réseaux et concessions",
     "Cabinets (avocats, médecins, kinés)",
-    "Cliniques et salons",
+    "Cliniques et laboratoires",
     "Agences",
     "PME de services",
   ],

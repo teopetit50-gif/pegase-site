@@ -46,8 +46,24 @@ const ALL: MoteurAvecFamille[] = FAMILLES.flatMap((f) =>
   f.moteurs.map((m) => ({ ...m, famille: f }))
 );
 
+/* 11/09/2026 — les quatre paquets qui s'installent ont désormais chacun leur
+   route STATIQUE (app/offres/relances-impayes/, nouvelles-affaires/,
+   demandes-clients/, factures-fournisseurs/) : ce sont les pages rapatriées
+   des sites SaaS, qui remplacent les gabarits d'ici. Un segment statique
+   prime sur [system] au routage, mais prérendre le même chemin des deux
+   côtés fait échouer le build — d'où ce filtre.
+
+   Cette route ne sert donc plus que PULSE et VAULT, les deux paquets
+   compris, qui n'ont pas de site à eux. Voir RAPATRIEMENT.md. */
+const RAPATRIES = new Set([
+  "relances-impayes",
+  "nouvelles-affaires",
+  "demandes-clients",
+  "factures-fournisseurs",
+]);
+
 export function generateStaticParams() {
-  return ALL.map((m) => ({ system: m.slug }));
+  return ALL.filter((m) => !RAPATRIES.has(m.slug)).map((m) => ({ system: m.slug }));
 }
 
 export async function generateMetadata({

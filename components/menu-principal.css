@@ -1,0 +1,103 @@
+/* ══════════════════════════════════════════════════════════════════════
+   .omenu — la peau du menu de navigation (11/09/2026)
+
+   Bloc isolé, préfixé, scopé sous `.omenu` : supprimer ce fichier et son
+   import dans MenuPrincipal.tsx supprime le menu, sans effet de bord
+   ailleurs. Rien ici ne sort de `.omenu` — aucune règle d'élément nu,
+   aucune classe utilitaire redéfinie.
+
+   Il porte DEUX choses, et rien d'autre :
+
+   1. Les variables de couleur, parce que le bandeau est caméléon. Le
+      header prélève le fond réel de la section qu'il survole et décide
+      s'il est clair ; il pose alors `.omenu--clair`. Un seul endroit à
+      régler pour les deux mondes, au lieu d'un ternaire par élément comme
+      dans le reste de Header.tsx.
+
+      ⚠ Ce fichier n'est PAS dans un `@layer` : les variables et les
+      animations posées ici battent donc les utilitaires Tailwind, qui
+      vivent en couche. C'est voulu et sans danger tant qu'on ne définit
+      ici QUE des variables et des `@keyframes` — mettre une propriété
+      d'apparence dans ce fichier la rendrait impossible à écraser depuis
+      le TSX, et le prochain lecteur chercherait longtemps.
+
+   2. Les deux animations d'ouverture, que Tailwind seul ne sait pas
+      écrire : le composant d'origine s'appuyait sur `tailwindcss-animate`,
+      absent de ce dépôt.
+
+   LE PANNEAU EST TOUJOURS BLANC. Il ne suit pas le caméléon — même
+   doctrine que le panneau plein écran depuis le 06/08 : il ne dépend pas
+   de la page qu'il recouvre, il impose sa surface. Les variables
+   `--omenu-panneau-*` sont donc posées une seule fois, hors des deux
+   mondes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.omenu {
+  /* monde SOMBRE — le bandeau survole une section noire */
+  --omenu-encre: #ffffff;
+  --omenu-survol: rgba(255, 255, 255, 0.1);
+
+  /* le panneau, invariant */
+  --omenu-panneau: #ffffff;
+  --omenu-panneau-encre: #0f1013;
+  --omenu-panneau-douce: #71717a;
+  --omenu-panneau-filet: rgba(0, 0, 0, 0.08);
+  --omenu-panneau-survol: #f5f5f4;
+}
+
+/* monde CLAIR — posé par le header quand la section sous lui est claire,
+   ou quand le panneau plein écran est ouvert (`clairEff`). */
+.omenu--clair {
+  --omenu-encre: #0f1013;
+  --omenu-survol: rgba(0, 0, 0, 0.055);
+}
+
+/* ─── ouverture du panneau ────────────────────────────────────────────
+   L'OPACITÉ N'EST JAMAIS ANIMÉE, et le panneau n'a AUCUNE animation de
+   sortie. Les deux décisions viennent du même constat, mesuré le 11/09 sur
+   ce menu et déjà écrit en toutes lettres dans Header.tsx pour le panneau
+   plein écran :
+
+   > « si la transition ne s'exécute pas (onglet en arrière-plan, rAF
+   >   throttlé), un lien resté à 0 serait un menu vide sur fond opaque. »
+
+   Ce n'est pas une précaution théorique. La première version fondait de 0 à
+   1 en 180 ms ; la sonde a lu `playState: running`, `currentTime: 0 ms` et
+   `opacity: 0` pendant QUATRE SECONDES — l'horloge d'animation ne tourne pas
+   quand le navigateur ne produit pas d'image (navigateur piloté sans
+   screencast, volet replié, onglet en arrière-plan). Un menu déroulant
+   totalement invisible, sans une erreur, et qui intercepte quand même les
+   clics.
+
+   Ne restent donc que la translation et l'échelle. Figées, elles laissent
+   le panneau 5 px trop haut et 1,5 % trop petit — visible, lisible,
+   cliquable. Jamais rien à 0.
+
+   Pas d'animation de SORTIE non plus, et pour la même raison retournée :
+   Radix garde l'élément monté tant que l'animation de sortie n'a pas émis
+   son `animationend`. Horloge gelée = pas d'`animationend` = un panneau
+   resté au-dessus de la page, pour toujours. Sans animation de sortie, la
+   primitive démonte tout de suite. */
+@keyframes omenu-entre {
+  from {
+    transform: translateY(-5px) scale(0.985);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.omenu [data-slot="navigation-menu-content"][data-state="open"] {
+  transform-origin: top center;
+  animation: omenu-entre 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Le chevron pivote en `transition`, pas en animation : il n'a rien à
+   faire ici et reste dans le TSX. Lui peut se permettre d'être gelé — un
+   chevron qui ne tourne pas ne cache rien. */
+
+@media (prefers-reduced-motion: reduce) {
+  .omenu [data-slot="navigation-menu-content"][data-state="open"] {
+    animation: none;
+  }
+}

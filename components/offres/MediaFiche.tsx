@@ -14,6 +14,7 @@
 
 import type { ReactNode } from "react";
 import type { Demo } from "@/lib/fiches";
+import { nomPaquet } from "@/lib/content";
 import {
   siAirtable,
   siCalendly,
@@ -459,7 +460,7 @@ export function BandeauAutresMoteurs({
                   className="o-demo-fort text-[22px] font-semibold tracking-[-0.02em]"
                   style={{ fontFamily: "var(--font-jakarta)" }}
                 >
-                  {m.system}
+                  {nomPaquet(m.system)}
                 </div>
                 <div className="o-demo-doux mt-0.5 text-[13px] font-medium">{m.role}</div>
                 <p className="o-demo-faible mt-3 text-[14px] leading-[1.7]">{m.pitch}</p>

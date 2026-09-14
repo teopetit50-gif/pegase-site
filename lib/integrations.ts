@@ -92,7 +92,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   WooCommerce: {
     famille: "E-commerce",
-    role: "Même exploitation de l'historique de commandes, pour les boutiques sous WordPress.",
+    role: "Même exploitation de l'historique de commandes, pour les sites marchands sous WordPress.",
   },
   "Google Calendar": {
     famille: "Agenda",

@@ -34,9 +34,9 @@ type Profil = {
 };
 
 const PROFILS: Profil[] = [
-  { id: "artisan", label: "Artisan / BTP", echues: 12000, devis: 8000, heures: 6, taux: 45 },
-  { id: "commerce", label: "Commerce / restauration", echues: 3000, devis: 1500, heures: 8, taux: 38 },
-  { id: "services", label: "Services / libéral", echues: 6000, devis: 4000, heures: 5, taux: 60 },
+  { id: "artisan", label: "BTP & travaux publics", echues: 120000, devis: 80000, heures: 6, taux: 45 },
+  { id: "commerce", label: "Distribution & négoce", echues: 60000, devis: 25000, heures: 8, taux: 38 },
+  { id: "services", label: "Services & conseil", echues: 45000, devis: 30000, heures: 5, taux: 60 },
 ];
 
 const euros = (n: number) =>

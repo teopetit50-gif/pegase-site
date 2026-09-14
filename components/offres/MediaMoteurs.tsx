@@ -550,9 +550,9 @@ export function MaqValidation() {
       </div>
       <div className="space-y-1.5 px-4 py-3.5">
         {[
-          { t: "Relance FA-2402 · SARL Bertine", e: "À valider" },
-          { t: "Réponse WhatsApp · devis toiture", e: "Envoyé" },
-          { t: "Relance DV-0891 · Ti Punch", e: "Suspendu" },
+          { t: "Relance FA-2402 · 14 300 €", e: "À valider" },
+          { t: "Réponse · demande reçue à 21 h 04", e: "Envoyé" },
+          { t: "Relance DV-0891 · service achats", e: "Suspendu" },
         ].map((r) => (
           <div
             key={r.t}
@@ -579,8 +579,8 @@ export function MaqJournal() {
         <div className="space-y-2">
           {[
             { h: "07:02", t: "Brief du matin envoyé" },
-            { h: "09:14", t: "Relance FA-2418 · Garage Lémard" },
-            { h: "11:38", t: "Réponse WhatsApp · horaires samedi" },
+            { h: "09:14", t: "Relance FA-2418 · 8 940 €" },
+            { h: "11:38", t: "Réponse · demande du samedi" },
             { h: "16:20", t: "3 pièces classées → cabinet" },
           ].map((r) => (
             <div key={r.h} className="flex items-center gap-3 text-[12.5px]">
@@ -674,7 +674,7 @@ export function MaqCheque() {
       <div className="px-4 py-4">
         <div className="flex items-baseline justify-between">
           <span className="text-[11.5px] font-semibold text-[#52525b]">Chèque TIC</span>
-          <span className="text-[11.5px] text-[#a1a1aa]">Petite entreprise</span>
+          <span className="text-[11.5px] text-[#a1a1aa]">Selon votre taille</span>
         </div>
         <div
           className="mt-2 text-[30px] font-semibold tracking-[-0.03em] text-[#09090b]"
