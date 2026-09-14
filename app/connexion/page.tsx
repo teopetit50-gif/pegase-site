@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import AuthSectionOne from "@/components/ui/auth-section-1";
 import ConnexionPleinePage from "@/components/compte/ConnexionPleinePage";
 import { suiteSure } from "@/lib/compte";
 import { utilisateurCourant } from "@/lib/supabase/server";
@@ -16,6 +17,19 @@ import { utilisateurCourant } from "@/lib/supabase/server";
    secours). Deux portes claires en tête du module : « J'ai déjà un
    compte » et « Je crée mon compte » — ?mode=creation ouvre directement
    la seconde. Même monde visuel que la réservation (.resa).
+
+   14/09 — nouvelle peau, collée par Teo : « auth-section-1 » (solaceui).
+   Deux panneaux : la carte du formulaire à gauche, un panneau noir au
+   nuancier animé à droite. La coque est components/ui/auth-section-1 ;
+   le module de connexion est LE MÊME qu'avant (ConnexionInline, partagé
+   avec le parcours installation et « Mon compte »), passé en `empile`
+   pour que ses boutons prennent toute la largeur comme le Submit de la
+   référence. Le chapô d'avant (« Un seul compte pour tout Omega… ») se
+   partage entre les deux panneaux : le grand titre du panneau noir dit
+   « un seul compte pour tout Omega », le sous-titre de la carte dit ce
+   qu'on y retrouve. Les deux notes (première visite, où vont vos
+   données) restent sous le formulaire, à la place des conditions de la
+   référence.
 
    ?suite= : où revenir ensuite — filtré par suiteSure (un chemin du site,
    jamais une URL externe). Déjà connecté : on n'affiche rien, on renvoie
@@ -50,55 +64,40 @@ export default async function ConnexionPage({
     <PageShell>
       <PageMotion />
       <div className="resa">
-        <section data-monde="clair" className="r-wrap pb-16 pt-12 sm:pb-24 sm:pt-14">
-          {/* 11/09 — la page était alignée à gauche sur toute la largeur :
-              un titre de 56 px, un chapô de quatre lignes, et la moitié
-              droite de l'écran vide. Une porte de connexion n'a pas de
-              contenu à étaler, elle a un formulaire à présenter. On reprend
-              la disposition de la porte de FRONTD — colonne centrée,
-              entête court, une seule carte — mais avec le vocabulaire du
-              monde clair du site, sans rien décalquer. */}
-          <div className="mx-auto w-full max-w-[600px]">
-            <p className="text-center font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--r-faible)]">
-              Un système Omega
+        <AuthSectionOne
+          titre="Se connecter ou créer un compte"
+          sousTitre="Votre demande, votre créneau, votre cockpit."
+          panneauTitre={
+            <>
+              Un seul compte
+              <br />
+              pour tout Omega.
+            </>
+          }
+          lien={{ href: "/vos-donnees", libelle: "Où vont vos données" }}
+        >
+          {sp.erreur === "lien" ? (
+            <p className="rv-erreur mt-8" role="alert">
+              Ce lien de connexion n&apos;est plus valable. Connectez-vous ci-dessous, ou
+              demandez un code.
             </p>
-            {/* 02/09 (Teo : « je vois se connecter mais pas créer un compte »)
-                — le titre nomme les deux, et le module ouvre sur deux portes. */}
-            <h1 className="r-h3 mt-3 text-center">Se connecter ou créer un compte</h1>
-            <p className="r-lead mx-auto mt-4 max-w-[46ch] text-center">
-              Un seul compte pour tout Omega. Vous y retrouvez votre demande, votre créneau et,
-              une fois l&apos;installation faite, l&apos;accès à votre cockpit.
-            </p>
-
-            <div className="mt-8">
-              {sp.erreur === "lien" ? (
-                <p className="rv-erreur mb-4">
-                  Ce lien de connexion n&apos;est plus valable. Connectez-vous ci-dessous, ou
-                  demandez un code.
-                </p>
-              ) : null}
-              <div className="r-carte !p-6 sm:!p-8">
-                <ConnexionPleinePage suite={suite} mode={mode} />
-              </div>
-              {/* Le détail du code ne sert qu'à la première visite : il se lit
-                  mieux sous le formulaire, quand la question se pose, qu'en
-                  quatrième ligne d'un chapô qu'on traverse pour arriver aux
-                  champs. */}
-              <p className="r-note mt-5 text-center">
-                Première visite&nbsp;? Choisissez « Je crée mon compte »&nbsp;: un code reçu par
-                e-mail prouve votre adresse, puis vous choisissez votre mot de passe.
-              </p>
-              <p className="r-note mt-2 text-center">
-                Votre adresse ne sert qu&apos;à vous reconnaître et à vous joindre pour votre
-                installation — voir{" "}
-                <Link href="/vos-donnees" className="underline underline-offset-2">
-                  où vont vos données
-                </Link>
-                .
-              </p>
-            </div>
-          </div>
-        </section>
+          ) : null}
+          <ConnexionPleinePage suite={suite} mode={mode} />
+          {/* Le détail du code ne sert qu'à la première visite : il se lit
+              mieux sous le formulaire, quand la question se pose. */}
+          <p className="r-note mt-6">
+            Première visite&nbsp;? Choisissez « Je crée mon compte »&nbsp;: un code reçu par
+            e-mail prouve votre adresse, puis vous choisissez votre mot de passe.
+          </p>
+          <p className="r-note mt-3">
+            Votre adresse ne sert qu&apos;à vous reconnaître et à vous joindre pour votre
+            installation — voir{" "}
+            <Link href="/vos-donnees" className="underline underline-offset-2">
+              où vont vos données
+            </Link>
+            .
+          </p>
+        </AuthSectionOne>
       </div>
     </PageShell>
   );

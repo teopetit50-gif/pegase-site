@@ -80,6 +80,12 @@ type Props = {
      /connexion il EST l'écran, la page pose la carte autour de lui, et
      les deux cadres emboîtés faisaient une carte dans une carte (11/09). */
   cadre?: boolean;
+  /* 14/09 — la porte /connexion (peau auth-section-1) : les boutons
+     prennent toute la largeur et les rangées « champ + bouton » (adresse
+     → code, code → continuer) s'empilent à toutes les largeurs, comme le
+     Submit unique de la référence. false ailleurs : rien ne change pour
+     le parcours installation ni pour « Mon compte ». */
+  empile?: boolean;
 };
 
 const TITRES: Record<ModeConnexion, string> = {
@@ -162,6 +168,7 @@ export default function ConnexionInline({
   avecProfil = true,
   onAnnuler,
   cadre = true,
+  empile = false,
 }: Props) {
   const [mode, setMode] = useState<ModeConnexion>(modeInitial);
   /* pour les modes par code : l'adresse, puis le code, puis le mot de
@@ -367,7 +374,8 @@ export default function ConnexionInline({
 
   const parCode = mode === "creation" || mode === "code" || mode === "reinit";
   const lien = "underline underline-offset-2";
-  const boutonClasse = (actif: boolean) => `r-btn shrink-0 ${!actif || envoi ? "rv-btn--attente" : "r-btn--noir"}`;
+  const boutonClasse = (actif: boolean) =>
+    `r-btn shrink-0 ${empile ? "w-full " : ""}${!actif || envoi ? "rv-btn--attente" : "r-btn--noir"}`;
 
   return (
     /* keyé sur le mode : chaque écran (connexion, création, code, nouveau
@@ -491,11 +499,11 @@ export default function ConnexionInline({
             <label className="rv-libelle" htmlFor="cx-email">
               Adresse e-mail
             </label>
-            <div className="mt-0 flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className={empile ? "mt-0 flex flex-col gap-3" : "mt-0 flex flex-col gap-3 sm:flex-row sm:items-end"}>
               <input
                 id="cx-email"
                 type="email"
-                className="rv-champ sm:flex-1"
+                className={empile ? "rv-champ" : "rv-champ sm:flex-1"}
                 autoComplete="email"
                 inputMode="email"
                 placeholder="vous@entreprise.gp"
@@ -552,12 +560,12 @@ export default function ConnexionInline({
           <label className="rv-libelle mt-4" htmlFor="cx-code">
             Le code à six chiffres
           </label>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className={empile ? "flex flex-col gap-3" : "flex flex-col gap-3 sm:flex-row sm:items-end"}>
             <input
               ref={champCode}
               id="cx-code"
               type="text"
-              className="rv-champ num tracking-[0.3em] sm:max-w-[220px]"
+              className={empile ? "rv-champ num tracking-[0.3em]" : "rv-champ num tracking-[0.3em] sm:max-w-[220px]"}
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={6}

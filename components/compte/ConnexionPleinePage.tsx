@@ -23,6 +23,9 @@ export default function ConnexionPleinePage({ suite, mode }: { suite: string; mo
       /* La carte est posée par la page elle-même : le module n'a pas à en
          poser une seconde à l'intérieur. */
       cadre={false}
+      /* 14/09 — peau auth-section-1 : boutons pleine largeur, rangées
+         empilées (voir la prop). */
+      empile
       onConnecte={() => {
         window.location.assign(suite);
       }}
