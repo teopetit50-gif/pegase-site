@@ -755,7 +755,10 @@ export default function Home() {
               {HERO.chapo}
             </p>
             <div data-reveal className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
-              <Link href="/commencer" className="o-flux-btn">
+              {/* 14/09 : « Découvrir notre approche » menait à /commencer
+                  (l'aiguillage). Il mène à la section « le déroulé » de cette
+                  page, qui est littéralement l'approche. */}
+              <Link href="#approche" className="o-flux-btn">
                 {HERO.bouton}
                 <span aria-hidden className="o-flux-btn-rond">
                   <Chevron taille={14} />
@@ -957,7 +960,7 @@ export default function Home() {
         </section>
 
         {/* ════════ 5 · COMMENT ÇA MARCHE — frise de quatre étapes ════════ */}
-        <section data-monde="clair" className="pb-[110px]">
+        <section id="approche" data-monde="clair" className="scroll-mt-24 pb-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="LE DÉROULÉ"
@@ -1132,7 +1135,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 8 ter · À L'ÉCHELLE D'UN GROUPE — quatre cartes ════════
+        {/* ════════ 8 bis · À L'ÉCHELLE D'UN GROUPE — quatre cartes ════════
             12/09/2026. Le détail du pourquoi est sur la constante `GROUPES`.
 
             LA PLACE — changée le 13/09/2026 à la demande de Teo (« inverse
@@ -1169,7 +1172,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 8 bis · LE TEMPS D'ARRÊT — la phrase qui se peint ═══
+        {/* ════════ 8 ter · LE TEMPS D'ARRÊT — la phrase qui se peint ═══
             11/09/2026. La page enchaînait douze sections bâties à
             l'identique — pastille, titre, chapô, contenu — sans un seul
             temps de respiration. Les gabarits de vitrine mettent à cet
@@ -1279,7 +1282,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 12 · CTA — clôture au noir ════════ */}
+        {/* ════════ 11 · CTA — clôture au noir ════════ */}
         <section className="o-nuit relative py-[120px]">
           <div aria-hidden className="o-deco">
             <div className="o-halo" />

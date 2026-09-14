@@ -1,7 +1,6 @@
 import Link from "next/link";
 import MiniSite from "./MiniSite";
 import type { Modele } from "./donnees";
-import { lienContact } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    <CarteModele> — une entrée du catalogue.
@@ -115,11 +114,12 @@ export default function CarteModele({ m }: { m: Modele }) {
               />
             </svg>
           </a>
-          <a
-            href={lienContact(
-              `Modèle ${m.nom}`,
-              `Bonjour, je viens de voir le modèle « ${m.nom} » sur votre site et j'aimerais quelque chose comme ça pour mon entreprise.`
-            )}
+          {/* 14/09 : ce lien ouvrait WhatsApp (lienContact). Teo : « c'est
+              censé renvoyer vers la prise d'audit ». Le parcours unique de
+              conversion est /reserver-un-audit ; le modèle voyage en
+              paramètre pour le jour où le formulaire le lira. */}
+          <Link
+            href={`/reserver-un-audit?modele=${m.slug}`}
             className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-[color:var(--m-doux)] underline-offset-4 hover:text-[color:var(--m-encre)] hover:underline"
           >
             Je veux ce modèle
@@ -132,7 +132,7 @@ export default function CarteModele({ m }: { m: Modele }) {
                 strokeLinejoin="round"
               />
             </svg>
-          </a>
+          </Link>
         </div>
         <p className="mt-2.5 text-[12.5px] text-[color:var(--m-faible)]">
           <Link

@@ -31,8 +31,8 @@ encore, après la phrase qui se peint : la citation sépare alors les deux.
 
 1. **Le portrait de Teo.** Ceux d'Henri et de Vincent sont en place depuis
    le 13/09 (déposés par Teo, liseré saumon rogné, originaux conservés dans
-   `captures/originaux-equipe/`). Il manque `teo.jpg` : sa vignette affiche
-   « TK » en attendant, et rien ne casse.
+   `captures/originaux-equipe/`). `teo.jpg` est en place depuis le 14/09
+   à 12:00 (recadré 845 × 900) : plus aucun monogramme dans la mosaïque.
 2. **Confirmer ton rôle.** « Co-fondateur » est posé par cohérence avec
    « CEO & Fondateur » et « CTO & Co-fondateur », pas parce que tu l'as dit.
 3. **La quatrième fiche**, quand tu l'auras (« on verra pour le dernier

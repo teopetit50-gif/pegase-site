@@ -55,7 +55,7 @@ import {
    /offres, sitemap) et cassé les copies qui comptent en toutes lettres
    (« quatre postes », grilles en quatre colonnes). Next donne priorité au
    segment statique : /offres/sur-mesure atterrit ici, jamais dans
-   [system]. Elle n'est pas dans le sitemap tant qu'on ne l'y ajoute pas.
+   [system]. Elle est au sitemap depuis le 10/09 (rang 0.9, comme /offres).
 
    ——— Passe du 14/09/2026 : la page quitte le gabarit ————————————————
    Teo, capture à l'appui : « des sections encore à l'ancienne ; récupère

@@ -382,7 +382,7 @@ export const FICHES: Record<string, Fiche> = {
       type: "doc",
       title: "Photo de facture reçue à 11 h 42",
       fields: [
-        ["Émetteur", "SARL Caraïbe Pièces Auto"],
+        ["Émetteur", "Métalco"],
         ["Date", "12/07/2026"],
         ["Montant HT", "1 240,00 €"],
         ["TVA 8,5 %", "105,40 €"],

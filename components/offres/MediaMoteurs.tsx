@@ -226,10 +226,10 @@ export function HeroPile() {
         </div>
         <div className="px-5 py-4">
           <div className="text-[15px] font-semibold tracking-[-0.01em] text-[#09090b]">
-            Facture FA-2402 · SARL Bertine
+            Facture FA-2402 · Sogexal
           </div>
           <p className="mt-2 text-[14px] leading-[1.7] text-[#71717a]">
-            Bonjour Madame Bertine, votre facture FA-2402 arrive à échéance.
+            Bonjour, votre facture FA-2402 arrive à échéance.
             Souhaitez-vous que je vous renvoie le lien de paiement ?
           </p>
           <div className="mt-4 flex items-center gap-2">
@@ -353,7 +353,7 @@ export function IllustrationOffload() {
         <div className="space-y-1.5">
           {[
             { f: "EDF_2026-07-04.pdf", m: "312,40 €" },
-            { f: "Sodexo-Restauration.pdf", m: "1 084,00 €" },
+            { f: "Novasud-Restauration.pdf", m: "1 084,00 €" },
             { f: "Loyer-atelier.pdf", m: "950,00 €" },
           ].map((r) => (
             <div
@@ -490,7 +490,7 @@ const MESSAGES = [
     canal: "Message du matin",
     teinte: "#0ea5e9",
     texte:
-      "7 h. Encaissé hier : 2 140 €. Trois relances parties. Un retard critique : SARL Bertine, 3 780 €, J+21. Deux clients à rappeler.",
+      "7 h. Encaissé hier : 2 140 €. Trois relances parties. Un retard critique : Sogexal, 3 780 €, J+21. Deux clients à rappeler.",
   },
   {
     moteur: "REACH",

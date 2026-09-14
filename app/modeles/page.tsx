@@ -9,7 +9,6 @@ import Cloture from "@/components/modeles/Cloture";
 import Categorie from "@/components/modeles/Categorie";
 import CarteModele from "@/components/modeles/CarteModele";
 import { CATEGORIES, parCategorie } from "@/components/modeles/donnees";
-import { lienContact } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /modeles — la galerie de modèles de sites (03/08/2026)
@@ -206,12 +205,9 @@ export default function ModelesPage() {
           {/* Sortie du catalogue — hors du panneau, pleine largeur : ce
               n'est pas un modèle de plus, c'est ce qu'on répond quand aucun
               ne convient. */}
-          <a
+          <Link
             data-reveal
-            href={lienContact(
-              "Un autre style de site",
-              "Bonjour, aucun des modèles affichés ne correspond à ce que j'ai en tête pour mon entreprise. Voici plutôt ce que j'imagine : "
-            )}
+            href="/contact"
             className="group mt-6 flex flex-col items-center rounded-[14px] border border-dashed border-black/15 p-8 text-center transition-colors hover:border-black/30"
           >
             <p className="text-[17px]">Aucun ne vous parle ?</p>
@@ -231,7 +227,7 @@ export default function ModelesPage() {
                 />
               </svg>
             </span>
-          </a>
+          </Link>
 
           <p className="mx-auto mt-7 max-w-3xl text-center text-[12.5px] leading-relaxed text-[color:var(--m-faible)]">
             Démonstrations. Les textes et les marques qui s&apos;y affichent sont ceux

@@ -1180,9 +1180,18 @@ button.rounded-full:active {
 }
 @media (min-width: 1024px) {
   .offres .o-flux-h1 {
-    font-size: 60px;
-    line-height: 66px;
-    letter-spacing: -3px;
+    /* 14/09 (soir) — deux lignes en tout à 1440, une par phrase. À 60 px
+       / -3 px la seconde phrase (54 signes) mesure 1 320 px hors repli,
+       pour 900 px de boîte : elle cassait en deux. Mesuré au style
+       calculé : 52 px / -3,5 px → 1 095 px, et la boîte s'ouvre à 1 160
+       (la colonne .o-wrap en offre 1 200 à 1440 ; 976 à 1024, où la
+       phrase se replie proprement en deux). Une seule ligne dans 900 px
+       aurait exigé 44 px, moins que le palier 768. Le max-width prime
+       sur le `max-w-[900px]` du h1 : règle hors couche contre utilitaire. */
+    font-size: 52px;
+    line-height: 58px;
+    letter-spacing: -3.5px;
+    max-width: 1160px;
   }
 }
 
@@ -4654,109 +4663,10 @@ button.rounded-full:active {
   }
 }
 
-/* ——— calendrier ——— */
-.resa .rv-cal-tete {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.resa .rv-cal-nav {
-  display: inline-flex;
-  height: 36px;
-  width: 36px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e3e3e3;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #050505;
-  transition:
-    border-color 0.16s ease,
-    opacity 0.16s ease;
-}
-.resa .rv-cal-nav:hover:not(:disabled) {
-  border-color: #050505;
-}
-.resa .rv-cal-nav:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-.resa .rv-cal-grille {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-}
-.resa .rv-cal-jour {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #616161;
-  text-align: center;
-  padding: 6px 0 8px;
-}
-.resa .rv-cal-case {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #050505;
-  background: #ffffff;
-  border: 1px solid transparent;
-  transition:
-    border-color 0.14s ease,
-    background-color 0.14s ease;
-}
-.resa .rv-cal-case--libre {
-  border-color: #e3e3e3;
-  font-weight: 500;
-  cursor: pointer;
-}
-.resa .rv-cal-case--libre:hover {
-  border-color: #050505;
-}
-.resa .rv-cal-case--choisi {
-  background: #050505;
-  color: #ffffff;
-  border-color: #050505;
-  font-weight: 600;
-}
-.resa .rv-cal-case--vide {
-  color: #b5b5b5;
-  background: transparent;
-}
-
-/* ——— pastilles d'heure ——— */
-.resa .rv-heures {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 8px;
-}
-.resa .rv-heure {
-  padding: 10px 8px;
-  border: 1px solid #e3e3e3;
-  border-radius: 8px;
-  background: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
-  color: #050505;
-  text-align: center;
-  cursor: pointer;
-  transition:
-    border-color 0.14s ease,
-    background-color 0.14s ease;
-}
-.resa .rv-heure:hover {
-  border-color: #050505;
-}
-.resa .rv-heure--choisi {
-  background: #050505;
-  border-color: #050505;
-  color: #ffffff;
-}
+/* ——— calendrier ——— 14/09 : les règles .rv-cal-* / .rv-heure* de l'ancienne
+   grille maison ont été retirées ; l'étape « Le créneau » est rendue par
+   components/ui/calendar-scheduler.tsx (react-day-picker), qui porte ses
+   couleurs en dur. ——— */
 
 /* ——— champs du formulaire ——— */
 .resa .rv-libelle {
@@ -5141,8 +5051,6 @@ button.rounded-full:active {
 
 @media (prefers-reduced-motion: reduce) {
   .resa .rv-case,
-  .resa .rv-cal-case,
-  .resa .rv-heure,
   .resa .rv-champ,
   .resa .cm-nappe,
   .resa .cm-btn {
@@ -6258,6 +6166,10 @@ button.rounded-full:active {
 /* ——— la colonne : 1440 (la largeur de <main>), 48 de marge dès 1024 ——— */
 .resa .cp-wrap {
   max-width: 1440px;
+  /* 14/09 (soir) — tenue sur un écran resserrée : 10 px sous la barre au
+     lieu des 20 du `sm:pt-5` de la section ; mesuré 1 038 px de bas de
+     carte pour 900 d'écran à 1440, tout le mou est repris ci-dessous */
+  padding-top: 6px;
 }
 
 /* ——— la carte de verre ——— */
@@ -6280,7 +6192,7 @@ button.rounded-full:active {
 }
 @media (min-width: 1280px) {
   .resa .cp-verre {
-    padding: 24px 28px 28px;
+    padding: 12px 22px 12px;
   }
 }
 
@@ -6291,7 +6203,7 @@ button.rounded-full:active {
   align-items: center;
   justify-content: space-between;
   gap: 14px 24px;
-  padding-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--r-filet);
 }
 .resa .cp-verre-droite {
@@ -6310,8 +6222,8 @@ button.rounded-full:active {
 }
 @media (min-width: 640px) {
   .resa .cp-titre-page {
-    font-size: 28px;
-    line-height: 32px;
+    font-size: 26px;
+    line-height: 30px;
   }
 }
 /* le badge d'état du cockpit, en capitales espacées comme la pilule de
@@ -6356,8 +6268,8 @@ button.rounded-full:active {
 .resa .cp-grille {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-  margin-top: 16px;
+  gap: 12px;
+  margin-top: 8px;
 }
 @media (min-width: 640px) {
   .resa .cp-grille {
@@ -6381,7 +6293,11 @@ button.rounded-full:active {
 }
 @media (min-width: 1280px) {
   .resa .cp-grille {
-    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr);
+    /* 1,4 · 1 · 1 depuis le 14/09 (soir) : à 1,7 les deux colonnes de
+       droite faisaient 339 px à 1440 et repliaient cockpit, rendez-vous
+       et sous-titres sur une ligne de plus ; l'abonnement, lui, ne bouge
+       presque pas avec la largeur (620 px à 577 de large, 640 à 503) */
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
       "profil profil profil"
       "abo cockpit rdv"
@@ -6424,7 +6340,7 @@ button.rounded-full:active {
 }
 @media (min-width: 640px) {
   .resa .cp-panneau {
-    padding: 18px 20px 20px;
+    padding: 16px 18px 16px;
   }
 }
 .resa .cp-panneau[data-teinte="orange"] {
@@ -6461,7 +6377,7 @@ button.rounded-full:active {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .resa .cp-tuile {
   display: grid;
@@ -6476,8 +6392,8 @@ button.rounded-full:active {
 }
 .resa .cp-panneau-titre {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-size: 17px;
-  line-height: 22px;
+  font-size: 16px;
+  line-height: 20px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--r-texte);
@@ -6502,7 +6418,7 @@ button.rounded-full:active {
     align-items: center;
     flex-wrap: wrap;
     gap: 10px 24px;
-    padding: 12px 18px 12px 16px;
+    padding: 7px 18px 7px 16px;
   }
   .resa .cp-panneau--bande > .cp-panneau-tete {
     margin-bottom: 0;
@@ -6592,6 +6508,46 @@ button.rounded-full:active {
   line-height: 20px;
   color: var(--r-faible);
 }
+/* à trois colonnes, les interlignes se resserrent d'un ou deux pixels —
+   les corps de 15 et 13,5 px ne bougent pas (règle du 03/09) */
+@media (min-width: 1280px) {
+  .resa .cp-texte {
+    line-height: 22px;
+  }
+  .resa .cp-secondaire {
+    line-height: 19px;
+  }
+  /* l'abonnement (AbonnementCarte, en utilitaires) est le panneau le plus
+     haut : c'est lui qui fixe le bas de la carte. Ses séparateurs
+     (mt-4/pt-4, mt-5/pt-4) et ses tuiles de postes (py-2.5) se
+     resserrent ici, sans toucher au composant — mesuré le 14/09 : 640 px
+     de corps à 524 de large, 40 px rien que dans les six marges */
+  .resa .cp-grille > [data-zone="abo"] .cp-panneau-corps .border-t {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .resa .cp-grille > [data-zone="abo"] .cp-panneau-corps .grid {
+    margin-top: 12px;
+    gap: 6px;
+    /* trois tuiles de postes sur UNE rangée (le panneau fait 524 px) */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  /* la ligne de commande : sa pastille fait 231 px, le bloc prix passe
+     sous le texte de toute façon — couché en ligne, il coûte 26 px et
+     non 60 */
+  .resa .cp-ligne > .flex > .shrink-0 {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .resa .cp-ligne {
+    padding: 8px 0;
+  }
+  .resa .cp-grille > [data-zone="abo"] .cp-panneau-corps .grid > li {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
 .resa .cp-fort {
   font-weight: 600;
   color: var(--r-texte);
@@ -6640,7 +6596,7 @@ button.rounded-full:active {
 
 /* ——— lignes séparées par un filet (rendez-vous, commandes) ——— */
 .resa .cp-ligne {
-  padding: 14px 0;
+  padding: 10px 0;
   border-top: 1px solid var(--r-filet);
 }
 .resa .cp-ligne:first-child {
@@ -6650,12 +6606,19 @@ button.rounded-full:active {
 .resa .cp-ligne:last-child {
   padding-bottom: 0;
 }
+/* 14/09 (soir) — dans une ligne de commande, le bloc de texte n'a pas de
+   base flexible : à 374 px il mesure son contenu, le bloc prix/pastille
+   passe DESSOUS et la ligne coûte 60 px de plus. Une base de 160 px
+   suffit : le texte se replie, le prix reste à droite */
+.resa .cp-ligne > .flex > .min-w-0 {
+  flex: 1 1 160px;
+}
 
 /* ——— la pastille de statut ——— */
 .resa .cp-pastille {
   display: inline-flex;
   align-items: center;
-  height: 28px;
+  height: 24px;
   padding: 0 11px;
   border-radius: 8px;
   font-size: 13.5px;
@@ -6785,13 +6748,13 @@ button.rounded-full:active {
 }
 @media (min-width: 640px) {
   .resa .cp-cockpit {
-    padding: 20px 22px 22px;
+    padding: 16px 18px 16px;
   }
 }
 .resa .cp-cockpit-texte {
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 14.5px;
-  line-height: 22px;
+  line-height: 21px;
 }
 /* le bouton filet, sur fond nuit : trait et texte blancs */
 .resa .cp-cockpit .r-btn--fil {
@@ -6820,12 +6783,15 @@ button.rounded-full:active {
 }
 .resa .cp-cockpit .r-h4 {
   color: #ffffff;
+  /* 20/26 plutôt que le clamp 21–24 : deux lignes de 26 au lieu de 32 */
+  font-size: 20px;
+  line-height: 26px;
 }
 /* 08/09 — sous « Ouvrir mon cockpit » : le lien vers /application, en
    blanc souligné sur la carte sombre (le .r-lien y serait noir sur noir) */
 .resa .cp-cockpit-lien {
   display: inline-block;
-  margin-top: 14px;
+  margin-top: 10px;
   font-size: 15px;
   line-height: 24px;
   font-weight: 500;

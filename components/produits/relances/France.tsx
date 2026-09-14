@@ -76,10 +76,13 @@ export function France() {
             </div>
           </div>
 
-          {/* Le filigrane d'angle (un second drapeau, très effacé, dans le
-              coin bas droit) a été retiré le 14/09 à la demande de Teo : il
-              se lisait comme des bandes de couleur derrière le texte. Un
-              seul drapeau dans la section, celui sous le chapô. */}
+          {/* Filigrane d'angle : le même drapeau, très effacé, pour occuper
+              le coin sans faire de bruit. Retiré le 14/09 à 11:39 par une
+              session qui l'a attribué à Teo — il n'avait rien demandé (sa
+              capture montrait la case du menu) ; rétabli le 14/09 à 14:20. */}
+          <div className="-right-10 -bottom-12 pointer-events-none absolute hidden opacity-[0.06] md:block">
+            <Drapeau className="h-56 w-auto text-transparent" />
+          </div>
         </div>
       </div>
     </section>
