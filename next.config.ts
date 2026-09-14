@@ -53,6 +53,19 @@ const nextConfig: NextConfig = {
     // sous /offres ; les deux anciennes familles d'URL y sont redirigées en
     // 308 pour ne casser ni les liens externes ni les favoris.
     return [
+      /* 14/09 : `www.omegaai.fr` renvoie vers l'apex. Le sous-domaine a servi
+         le banc d'essai (projet omega-site-v3, robots fermé) pendant que la
+         vitrine vivait sur l'apex ; depuis le portage du 14/09 ce dédoublement
+         n'a plus de raison d'être. La règle ne vise que l'hôte www : l'apex
+         et les URL *.vercel.app ne sont pas touchés. Elle prend effet le jour
+         où www est rattaché au projet qui sert cet arbre (pegase-site2), ou
+         au prochain déploiement du banc si www y reste. */
+      {
+        source: "/:chemin*",
+        has: [{ type: "host", value: "www.omegaai.fr" }],
+        destination: "https://omegaai.fr/:chemin*",
+        permanent: true,
+      },
       { source: "/moteurs", destination: "/offres", permanent: true },
       { source: "/solutions", destination: "/offres", permanent: true },
       { source: "/moteurs/:system", destination: "/offres/:system", permanent: true },
