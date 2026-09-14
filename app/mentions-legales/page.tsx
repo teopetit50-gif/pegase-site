@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import { CANAL_VALEUR, COURRIEL } from "@/lib/reservation";
+import { COURRIEL, TELEPHONE_AFFICHE } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /mentions-legales
@@ -43,7 +43,7 @@ const MANQUE = "[à compléter]";
 const SECTIONS: { h: string; p: string }[] = [
   {
     h: "Éditeur du site",
-    p: `Le site est édité par Omega.AI, entreprise établie en Guadeloupe, dont l'activité est la conception et l'installation d'automatisations pour les très petites entreprises. Forme juridique, numéro SIRET, adresse du siège et, le cas échéant, capital social et numéro de TVA intracommunautaire : ${MANQUE}. Téléphone : ${CANAL_VALEUR}. E-mail : ${COURRIEL}.`,
+    p: `Le site est édité par Omega.AI, entreprise établie en Guadeloupe, dont l'activité est la conception et l'installation d'automatisations pour les très petites entreprises. Forme juridique, numéro SIRET, adresse du siège et, le cas échéant, capital social et numéro de TVA intracommunautaire : ${MANQUE}. Téléphone : ${TELEPHONE_AFFICHE}. E-mail : ${COURRIEL}.`,
   },
   {
     h: "Directeur de la publication",
@@ -68,7 +68,7 @@ const SECTIONS: { h: string; p: string }[] = [
   },
   {
     h: "Données personnelles",
-    p: `Les informations que vous transmettez lors d'une demande d'audit ou d'une prise de contact (nom, entreprise, coordonnées, contexte de votre demande), servent uniquement à traiter cette demande. Elles ne sont ni cédées ni vendues. Conformément au Règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition : il s'exerce en nous écrivant à ${COURRIEL} ou au ${CANAL_VALEUR}. Vous pouvez également introduire une réclamation auprès de la CNIL (cnil.fr).`,
+    p: `Les informations que vous transmettez lors d'une demande d'audit ou d'une prise de contact (nom, entreprise, coordonnées, contexte de votre demande), servent uniquement à traiter cette demande. Elles ne sont ni cédées ni vendues. Conformément au Règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition : il s'exerce en nous écrivant à ${COURRIEL} ou au ${TELEPHONE_AFFICHE}. Vous pouvez également introduire une réclamation auprès de la CNIL (cnil.fr).`,
   },
   {
     h: "Propriété intellectuelle",

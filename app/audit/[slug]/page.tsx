@@ -10,7 +10,7 @@ import CopierPrompt from "@/components/audit/CopierPrompt";
 import Sommaire from "@/components/audit/Sommaire";
 import TimelineSuite, { type EtapeSuite } from "@/components/audit/TimelineSuite";
 import { AUDITS, auditParSlug } from "@/lib/audits";
-import { CANAL_LABEL_PHRASE, CANAL_VALEUR, lienContact } from "@/lib/reservation";
+import { COURRIEL, lienCourriel, lienReservation } from "@/lib/reservation";
 import { nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -51,19 +51,16 @@ export async function generateMetadata({
   };
 }
 
-/* message WhatsApp pré-rempli, propre à la page */
-function lienSuite(entreprise: string) {
-  return lienContact(
-    `Pré-audit ${entreprise}`,
-    [
-      "Bonjour,",
-      "",
-      `J'ai lu le pré-audit préparé pour ${entreprise}.`,
-      "Je souhaite caler l'entretien.",
-      "",
-      "Mes disponibilités : ",
-    ].join("\n")
-  );
+/* 14/09 — « Caler l'entretien » ouvre l'agenda, format Audit process (le
+   gratuit des organisations, modifiable sur place) : WhatsApp n'est plus
+   une porte du site — voir lib/reservation.ts. Avant, un message WhatsApp
+   pré-rempli au nom de l'entreprise. La voie écrite reste l'e-mail, objet
+   pré-rempli (lienEcrit). */
+function lienSuite() {
+  return lienReservation("process");
+}
+function lienEcrit(entreprise: string) {
+  return lienCourriel(`Pré-audit ${entreprise}`);
 }
 
 /* H1 en mots masqués — chaque mot monte depuis son propre cadre (CSS pur,
@@ -122,7 +119,8 @@ export default async function PreAuditPage({
   const audit = auditParSlug(slug);
   if (!audit) notFound();
 
-  const lien = lienSuite(audit.entreprise);
+  const lien = lienSuite();
+  const ecrit = lienEcrit(audit.entreprise);
 
   return (
     <PageShell>
@@ -330,7 +328,10 @@ export default async function PreAuditPage({
                   </Link>
                 </div>
                 <p className="r-note mt-5">
-                  Ou directement : {CANAL_LABEL_PHRASE} : {CANAL_VALEUR}
+                  Ou par e-mail :{" "}
+                  <a href={ecrit} className="underline underline-offset-4 hover:text-[#050505]">
+                    {COURRIEL}
+                  </a>
                 </p>
               </div>
 

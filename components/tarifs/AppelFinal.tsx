@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { CANAL_LABEL, CANAL_VALEUR, lienContact } from "@/lib/reservation";
+import { lienContact } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    AppelFinal — la carte sombre qui ferme /tarifs (14/09/2026)
@@ -30,9 +30,9 @@ import { CANAL_LABEL, CANAL_VALEUR, lienContact } from "@/lib/reservation";
       pas et est écrit en utilitaires ici — pas dans globals.css, que
       d'autres sessions éditent.
    4. `cn()` de `@/lib/utils` n'existe pas ici et n'était pas utilisé.
-   5. Le numéro WhatsApp n'est affiché qu'à partir de `sm` : à 390 le
-      libellé complet passait sur deux lignes dans un bouton de 290 px.
-      Le lien ouvre WhatsApp directement, le numéro n'y est pas nécessaire.
+   5. (14/09) Le second bouton ouvrait WhatsApp, numéro affiché dès `sm`.
+      WhatsApp n'est plus une porte du site (lib/reservation.ts) : il mène
+      au formulaire du service client, sans numéro.
 
    Les textes sont ceux de la page (28/08, 05/09) — rien de réécrit.
    ══════════════════════════════════════════════════════════════════════ */
@@ -64,11 +64,10 @@ export default function AppelFinal() {
             <ArrowRight aria-hidden className="size-4" />
           </a>
           <a
-            href={lienContact("Tarifs Omega")}
+            href={lienContact("avant")}
             className="r-btn w-full border border-white/[0.12] bg-transparent text-white transition-colors hover:bg-white/[0.06] sm:w-auto"
           >
-            {CANAL_LABEL}
-            <span className="hidden sm:inline">&nbsp;: {CANAL_VALEUR}</span>
+            Nous écrire
           </a>
         </div>
 

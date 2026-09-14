@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import Header from "@/components/Header";
 import Apparition from "@/components/donnees/Apparition";
 import HeroPlein from "@/components/donnees/HeroPlein";
 import Options, { type Option } from "@/components/donnees/Options";
@@ -108,6 +107,15 @@ import {
 
    Le PIED de page, lui, reste propre à la page (`.vd-pied`) : Teo n'a parlé
    que du haut.
+
+   ── LE HEADER N'EST PLUS MONTÉ ICI (14/09/2026) ─────────────────────
+   Depuis le 01/09, app/layout.tsx rend <Header /> pour tout le site, hors
+   du sous-arbre de page. Cette page était la dernière à en monter un
+   second ; tant que la barre était `fixed` les deux se superposaient sans
+   que rien ne se voie, et depuis qu'elle est `sticky` (menu du 11/09) ils
+   s'empilaient : deux barres l'une sous l'autre — Teo : « ça met deux
+   trucs comme ça, c'est un bug ». La condition « hors de `.vd` » tient
+   toujours, le layout le pose avant {children}.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -331,12 +339,6 @@ const PIED = [
 export default function VosDonnees() {
   return (
     <>
-      {/* Hors de `.vd` — voir la note en tête de fichier. Le header prélève
-          le fond sous lui : à 4 px du bord gauche il traverse le hero (dont
-          le cadre est transparent) et tombe sur le blanc de `.vd`, donc la
-          barre s'affiche en clair, comme aujourd'hui. */}
-      <Header />
-
       <div className="vd min-h-screen">
         <main className="mx-auto max-w-[1440px]">
           {/* ─── HERO ─────────────────────────────────────────────────────

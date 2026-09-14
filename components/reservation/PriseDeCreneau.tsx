@@ -97,7 +97,7 @@ import {
   prixPour,
   type Periodicite,
 } from "@/lib/paliers";
-import { PROFILS, lienContact } from "@/lib/reservation";
+import { COURRIEL, PROFILS, lienCourriel } from "@/lib/reservation";
 
 /* ——— catalogue des formats réservables sur /reserver ———
    28/08, 3ᵉ passe (Teo) : UNIQUEMENT les formats d'organisation — depuis
@@ -651,9 +651,9 @@ export default function PriseDeCreneau({
             ) : !agenda ? (
               <div className="mt-6">
                 <p className="rv-erreur">
-                  L&apos;agenda ne répond pas. Réessayez dans un instant — ou réservez directement{" "}
-                  <a className="underline" href={lienContact("Réserver un créneau")}>
-                    par WhatsApp
+                  L&apos;agenda ne répond pas. Réessayez dans un instant — ou écrivez-nous à{" "}
+                  <a className="underline" href={lienCourriel("Réserver un créneau")}>
+                    {COURRIEL}
                   </a>
                   .
                 </p>

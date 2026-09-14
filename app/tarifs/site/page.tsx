@@ -6,7 +6,7 @@ import Partage from "@/components/Partage";
 import MiniSite from "@/components/modeles/MiniSite";
 import { CATEGORIES, parCategorie } from "@/components/modeles/donnees";
 import { Chevron } from "@/components/offres/MediaMoteurs";
-import { CANAL_VALEUR } from "@/lib/reservation";
+import { COURRIEL } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs/site — l'offre site à prix public (01/09/2026)
@@ -586,7 +586,7 @@ export default function TarifsSitePage() {
               </a>
             </div>
             <p data-reveal className="o-small mt-5 !text-[13px]">
-              {CANAL_VALEUR} — on vous répond le jour même.
+              {COURRIEL} — on vous répond le jour même.
             </p>
             {/* la mention discrète de l'autre porte : pour qui s'est trompé
                 d'aiguillage, sans re-poser deux portes ici */}

@@ -227,7 +227,7 @@ export default function Formules() {
             adapté — et l&apos;agenda en ligne fait le reste.
           </p>
           <a
-            href={lienContact("Quel format d'audit pour moi ?")}
+            href={lienContact("avant")}
             className="r-btn r-btn--fil shrink-0"
           >
             Décrire ma situation
@@ -241,7 +241,7 @@ export default function Formules() {
           <h2 className="r-h2">Comparer les formats</h2>
           <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
             <a
-              href={lienContact("Aidez-moi à choisir un format d'audit")}
+              href={lienContact("avant")}
               className="r-lien"
             >
               Aidez-moi à choisir

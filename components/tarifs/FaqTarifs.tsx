@@ -2,7 +2,7 @@
 
 import * as Accordion from "@radix-ui/react-accordion";
 import { ArrowRight, Mail, MessageCircle, Plus } from "lucide-react";
-import { COURRIEL, CANAL_LABEL, lienContact, lienCourriel } from "@/lib/reservation";
+import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
 import "./faq-tarifs.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -67,10 +67,10 @@ export default function FaqTarifs({ items }: { items: { q: string; r: string[] }
               </div>
             </div>
             <a
-              href={lienContact("Tarifs Omega")}
+              href={lienContact("avant")}
               className="r-btn r-btn--noir mt-2 w-full !text-[15px]"
             >
-              {CANAL_LABEL}
+              Nous écrire
               <ArrowRight aria-hidden className="size-4" />
             </a>
             <p className="text-center text-[11px] leading-4 text-[#616161]">

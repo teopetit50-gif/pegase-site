@@ -3,10 +3,14 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import FormulaireContact from "@/components/contact/FormulaireContact";
-import { CANAL_VALEUR, COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
+import { COURRIEL, lienCourriel } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /contact — le service client (08/09/2026)
+
+   14/09/2026 — WhatsApp n'est plus une porte du site (lib/reservation.ts) :
+   la carte « Ouvrir la conversation » est partie, la page donne le
+   formulaire et l'adresse e-mail. Le texte ci-dessous date du 08/09.
 
    Demande de l'associé : « change les mentions nous contacter sur le site
    et mets en place un vrai service client avec le bon e-mail ». Jusqu'ici
@@ -79,7 +83,6 @@ const BESOINS = [
 ];
 
 export default function ContactPage() {
-  const whatsapp = lienContact("Service client Omega");
   const courriel = lienCourriel("Service client Omega");
 
   return (
@@ -94,7 +97,7 @@ export default function ContactPage() {
           </div>
           <p data-arrivee="chapo" className="r-lead mt-5 max-w-[52ch]">
             Une question sur votre installation, votre abonnement, un poste qui ne fait pas ce
-            qu&apos;il devrait&nbsp;? Écrivez-nous ci-dessous, ou passez par WhatsApp&nbsp;: une
+            qu&apos;il devrait&nbsp;? Écrivez-nous ci-dessous, ou par e-mail&nbsp;: une
             seule équipe derrière.
           </p>
         </section>
@@ -112,20 +115,6 @@ export default function ContactPage() {
             Ou directement
           </h2>
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
-            <article data-reveal className="ap-carte">
-              <h3 className="r-h4">WhatsApp</h3>
-              <p className="ap-sous">Le plus rapide, depuis votre téléphone</p>
-              <p className="mt-3 text-[15px] leading-[24px] text-[#3d3d3d]">
-                Pour une question courte ou une urgence sur un poste en service&nbsp;: un envoi à
-                bloquer, une relance à arrêter, un rendez-vous à déplacer.
-              </p>
-              <p className="num mt-4 text-[17px] font-semibold text-[#050505]">{CANAL_VALEUR}</p>
-              <div className="mt-4">
-                <a href={whatsapp} className="r-btn r-btn--noir w-full sm:w-auto">
-                  Ouvrir la conversation
-                </a>
-              </div>
-            </article>
             <article data-reveal className="ap-carte">
               <h3 className="r-h4">E-mail</h3>
               <p className="ap-sous">Pour ce qui mérite d&apos;être écrit</p>

@@ -23,7 +23,8 @@
    (redirection OVH vers les boîtes des associés) et remplace le vieux
    contact@pegase.gp, repli sur un domaine jamais enregistré. Il est
    affiché sur /contact, dans les mentions légales et sous le bandeau de
-   /tarifs ; WhatsApp reste la porte des boutons (lienContact). */
+   /tarifs ; WhatsApp reste la porte des boutons (lienContact) — jusqu'au 14/09,
+   voir le bloc « WhatsApp n'est plus une porte ». */
 export const COURRIEL = "contact@omegaai.fr";
 
 /* Le lien « écrire un e-mail » du service client — mailto avec objet,
@@ -34,27 +35,39 @@ export function lienCourriel(sujet: string) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   Numéro WhatsApp du desk — fourni par Teo le 30/07 (+33 7 68 16 34 43).
+   14/09/2026 — WHATSAPP N'EST PLUS UNE PORTE DU SITE.
 
-   Format international, SANS le +, SANS espaces : indicatif pays collé au
-   numéro. Ici 33 (France) + 768163443.
+   Du 30/07 au 14/09, tout bouton de contact libre ouvrait une conversation
+   WhatsApp sur le numéro du desk (+33 7 68 16 34 43, fourni par Teo le
+   30/07 : « un artisan sur téléphone passe de la page à une conversation
+   en un geste »). Teo, 14/09 : « des trucs renvoient encore vers le
+   message WhatsApp, il faut régler ça ». Le site a depuis ses propres
+   portes : le formulaire du service client (/contact, 08/09) pour tout ce
+   qui s'écrit, l'agenda (/reserver) pour tout ce qui se réserve.
 
-   Vider cette chaîne fait retomber TOUS les boutons du site sur le
-   courriel, sans rien casser : c'est l'interrupteur de repli.
-
-   Pourquoi WhatsApp (arbitrage Teo, 30/07) : un artisan sur téléphone
-   passe de la page à une conversation en un geste, là où un `mailto:` lui
-   ouvre une application qu'il n'utilise pas. Et ça ne dépend ni du
-   domaine — qui n'existe toujours pas — ni d'un serveur, ni d'un compte.
+   lienContact mène donc au formulaire, sujet pré-choisi dans la liste
+   « Votre demande concerne » (FormulaireContact lit ?sujet= au montage).
+   Le numéro ne reste affiché qu'en mentions légales, où la loi le demande
+   (TELEPHONE_AFFICHE), jamais en lien de conversation. Les anciennes
+   constantes WHATSAPP, CANAL, CANAL_LABEL, CANAL_LABEL_PHRASE et
+   CANAL_VALEUR n'existent plus : chaque appelant écrit son libellé.
    ══════════════════════════════════════════════════════════════════════ */
-/* `: string` explicite et non inféré : sans lui TypeScript fige le type sur
-   le littéral et réduit l'autre branche à `never`. */
-export const WHATSAPP: string = "33768163443";
+const TELEPHONE = "33768163443";
 
-/* Le canal effectif : WhatsApp dès que le numéro est posé, courriel sinon.
-   Tout le site passe par cette fonction — il n'y a donc qu'un endroit à
-   changer le jour où un outil de prise de rendez-vous arrive. */
-export const CANAL: "whatsapp" | "courriel" = WHATSAPP ? "whatsapp" : "courriel";
+/* Les sujets du formulaire du service client — la valeur est celle du
+   <select> de components/contact/FormulaireContact.tsx, qui type sa liste
+   avec ce même type : impossible de pré-choisir un sujet qui n'existe pas.
+   « avant » est l'entrée des prospects (« une question avant de
+   commencer »), celle que /tarifs, /commencer et la réservation d'audit
+   pré-choisissent. */
+export type SujetContact =
+  | "avant"
+  | "installation"
+  | "abonnement"
+  | "poste"
+  | "application"
+  | "site"
+  | "autre";
 
 /* ══════════════════════════════════════════════════════════════════════
    28/08/2026 — LE JOUR PRÉVU PAR LE COMMENTAIRE D'EN-TÊTE EST ARRIVÉ :
@@ -67,29 +80,18 @@ export const CANAL: "whatsapp" | "courriel" = WHATSAPP ? "whatsapp" : "courriel"
    WhatsApp ne disparaît pas : lienContact (questions libres, pied de
    page, voie de secours si l'agenda ne répond pas) passe toujours par le
    desk. L'interrupteur de repli WHATSAPP → COURRIEL ne vaut plus que
-   pour lui. */
+   pour lui. — Dépassé le 14/09 : WhatsApp n'est plus une porte du tout,
+   voir le bloc suivant. */
 
 export function lienReservation(formuleId: string) {
   return `/reserver?formule=${encodeURIComponent(formuleId)}`;
 }
 
-/* Contact libre, hors réservation (pied de page, « une autre question »). */
-export function lienContact(sujet: string, corps?: string) {
-  if (WHATSAPP) {
-    return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(corps ?? sujet)}`;
-  }
-  const q = new URLSearchParams({ subject: sujet });
-  if (corps) q.set("body", corps);
-  return `mailto:${COURRIEL}?${q.toString()}`;
+/* Contact libre, hors réservation : le formulaire du service client, sujet
+   pré-choisi. L'ancre #ecrire pose le formulaire en haut d'écran. */
+export function lienContact(sujet: SujetContact = "autre") {
+  return `/contact?sujet=${sujet}#ecrire`;
 }
-
-/* Libellé et valeur affichée, pour ne pas écrire « par courriel » sous un
-   bouton qui ouvre WhatsApp. */
-export const CANAL_LABEL = WHATSAPP ? "Par WhatsApp" : "Par courriel";
-
-/* Variante pour l'intérieur d'une phrase. Surtout PAS un `.toLowerCase()`
-   sur CANAL_LABEL : ça donnait « par whatsapp », la marque décapitalisée. */
-export const CANAL_LABEL_PHRASE = WHATSAPP ? "par WhatsApp" : "par courriel";
 
 /* Mise en forme lisible du numéro. Le découpage dépend de l'indicatif — un
    numéro français fait 11 chiffres (33 + 9), un guadeloupéen 12 (590 + 9) —
@@ -108,7 +110,7 @@ function formateNumero(n: string) {
   return `+${n}`;
 }
 
-export const CANAL_VALEUR = WHATSAPP ? formateNumero(WHATSAPP) : COURRIEL;
+export const TELEPHONE_AFFICHE = formateNumero(TELEPHONE);
 
 /* ——— les deux profils du sélecteur ——— */
 

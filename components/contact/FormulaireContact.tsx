@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CANAL_VALEUR, COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
+import { useEffect, useState } from "react";
+import { COURRIEL, lienCourriel, type SujetContact } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    Le formulaire du service client (08/09/2026)
@@ -17,19 +17,26 @@ import { CANAL_VALEUR, COURRIEL, lienContact, lienCourriel } from "@/lib/reserva
    à » : depuis leur boîte, les associés répondent d'un clic. Rien n'est
    stocké ici. Tant que la clé d'envoi n'est pas posée sur le projet du
    site (RESEND_API_KEY, voir app/api/contact/route.ts), l'API répond
-   « indisponible » et le formulaire montre les deux autres portes,
-   WhatsApp et l'adresse — jamais un échec muet.
+   « indisponible » et le formulaire montre l'autre porte, l'adresse
+   e-mail — jamais un échec muet.
+
+   14/09/2026 — WhatsApp n'est plus une porte du site (lib/reservation.ts) :
+   le repli WhatsApp de l'écran « indisponible » est parti. Et le sujet
+   peut arriver dans l'URL (?sujet=avant depuis /tarifs, /commencer, la
+   réservation d'audit) : la liste gagne l'entrée des prospects, « Une
+   question avant de commencer », pré-choisie au montage.
 
    Un robot pris au pot de miel reçoit l'écran « Message envoyé » : même
    règle que la réservation, on ne lui apprend rien.
    ══════════════════════════════════════════════════════════════════════ */
 
-const SUJETS = [
+const SUJETS: { valeur: SujetContact; libelle: string }[] = [
   { valeur: "installation", libelle: "Mon installation ou ma réunion" },
   { valeur: "abonnement", libelle: "Mon abonnement ou une facture" },
   { valeur: "poste", libelle: "Un poste en service" },
   { valeur: "application", libelle: "L'application sur mon téléphone ou mon ordinateur" },
   { valeur: "site", libelle: "Mon site" },
+  { valeur: "avant", libelle: "Une question avant de commencer" },
   { valeur: "autre", libelle: "Autre chose" },
 ];
 
@@ -60,6 +67,21 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export default function FormulaireContact() {
   const [c, setC] = useState<Champs>(VIDE);
   const [etat, setEtat] = useState<"saisie" | "envoi" | "fait" | "indisponible" | "erreur">("saisie");
+
+  /* 14/09 — sujet pré-choisi par l'URL (?sujet=avant…), jamais écrasé si la
+     personne a déjà choisi. Lu sur window et non par useSearchParams : la
+     page reste statique, sans Suspense. */
+  useEffect(() => {
+    try {
+      const s = new URLSearchParams(window.location.search).get("sujet");
+      if (s && SUJETS.some((x) => x.valeur === s)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- une seule fois au montage, depuis l'URL (système externe) : pas de cascade
+        setC((prev) => (prev.sujet ? prev : { ...prev, sujet: s }));
+      }
+    } catch {
+      /* pas de window (rendu serveur) : rien à pré-choisir */
+    }
+  }, []);
 
   const maj =
     (k: keyof Champs) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -158,7 +180,7 @@ export default function FormulaireContact() {
             id="ct-message"
             rows={6}
             className="rv-champ resize-y"
-            placeholder="Dites-nous ce qui se passe, avec le plus de détails possible : ce que vous attendiez, ce que vous avez vu, depuis quand."
+            placeholder={c.sujet === "avant" ? "Votre activité, ce qui vous prend le plus de temps, ce qui se perd." : "Dites-nous ce qui se passe, avec le plus de détails possible : ce que vous attendiez, ce que vous avez vu, depuis quand."}
             value={c.message}
             onChange={maj("message")}
             required
@@ -175,9 +197,7 @@ export default function FormulaireContact() {
       {etat === "indisponible" ? (
         <p className="rv-erreur mt-4" role="alert">
           L&apos;envoi depuis le site n&apos;est pas encore ouvert. Écrivez-nous directement à{" "}
-          <a href={lienCourriel(secours)} className="underline underline-offset-2">{COURRIEL}</a>, ou sur
-          WhatsApp au{" "}
-          <a href={lienContact(secours)} className="underline underline-offset-2">{CANAL_VALEUR}</a>.
+          <a href={lienCourriel(secours)} className="underline underline-offset-2">{COURRIEL}</a>.
         </p>
       ) : null}
       {etat === "erreur" ? (

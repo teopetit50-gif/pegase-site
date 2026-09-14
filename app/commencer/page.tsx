@@ -177,10 +177,10 @@ export default function CommencerPage() {
           <p data-arrivee="colonne" className="r-note mx-auto mt-10 max-w-md text-center">
             Vous hésitez entre les deux&nbsp;? Décrivez votre situation en deux lignes{" "}
             <a
-              href={lienContact("Bonjour Omega — je ne sais pas par où commencer. Mon activité : ")}
+              href={lienContact("avant")}
               className="underline underline-offset-4 hover:text-[#050505]"
             >
-              sur WhatsApp
+              dans le formulaire de contact
             </a>{" "}
             — on vous répond le jour même.
           </p>

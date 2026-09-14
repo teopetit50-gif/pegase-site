@@ -7,10 +7,9 @@ import Simulateur from "@/components/reservation/Simulateur";
 import Complements from "@/components/reservation/Complements";
 import Engagements from "@/components/reservation/Engagements";
 import {
-  CANAL_LABEL_PHRASE,
-  CANAL_VALEUR,
+  COURRIEL,
   FAQ,
-  lienContact,
+  lienCourriel,
   lienReservation,
 } from "@/lib/reservation";
 
@@ -151,12 +150,12 @@ export default function ReserverUnAuditPage() {
               </Link>
             </div>
             <p className="r-note mt-5">
-              Ou directement : {CANAL_LABEL_PHRASE} :{" "}
+              Ou par e-mail :{" "}
               <a
-                href={lienContact("Audit gratuit")}
+                href={lienCourriel("Audit gratuit")}
                 className="underline underline-offset-4 hover:text-[#050505]"
               >
-                {CANAL_VALEUR}
+                {COURRIEL}
               </a>
             </p>
             {/* la mention discrète de l'autre porte (28/08) — symétrique de

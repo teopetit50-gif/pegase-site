@@ -677,7 +677,7 @@ export default function Grille() {
                 </a>
               </>
             ),
-            bouton: { label: "Décrire ma situation", href: lienContact("Quel palier pour moi ?") },
+            bouton: { label: "Décrire ma situation", href: lienContact("avant") },
           }}
         />
       </section>
@@ -694,7 +694,7 @@ export default function Grille() {
             <h2 className="r-h2 text-balance">Comparer les paliers</h2>
             <p className="mx-auto mt-4 max-w-md text-balance text-[#616161]">
               Chaque ligne redit ce que les cartes disent déjà, côte à côte.{" "}
-              <a href={lienContact("Aidez-moi à choisir un palier")} className="r-lien">
+              <a href={lienContact("avant")} className="r-lien">
                 Aidez-moi à choisir
               </a>
             </p>
