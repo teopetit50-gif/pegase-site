@@ -310,7 +310,7 @@ const GROUPES: CarteLueur[] = [
     titre: "Votre système d'information ne bouge pas.",
     texte:
       "On lit et on écrit dans les outils en place. Aucune migration, aucun compte à créer pour vos équipes.",
-    lien: { label: "Ce sur quoi ça se branche", href: "/integrations" },
+    lien: { label: "Les outils compatibles", href: "/integrations" },
   },
 ];
 
@@ -493,7 +493,7 @@ const PREUVES: CartePreuve[] = [
 const FAQ = [
   {
     q: "Il faut changer de logiciel ?",
-    a: "Non. Les moteurs lisent et écrivent dans ce que vous utilisez déjà : messagerie, tableur, WhatsApp, agenda, outil de facturation. Aucun compte à créer, aucune donnée à migrer, aucune colonne à renommer : vos fichiers gardent la forme qu'ils ont aujourd'hui.",
+    a: "Non. Les systèmes lisent et écrivent dans ce que vous utilisez déjà : messagerie, tableur, WhatsApp, agenda, outil de facturation. Aucun compte à créer, aucune donnée à migrer, aucune colonne à renommer : vos fichiers gardent la forme qu'ils ont aujourd'hui.",
   },
   {
     q: "Qu'est-ce qui part sans que je le voie ?",
@@ -501,13 +501,13 @@ const FAQ = [
   },
   {
     q: "On commence par combien de choses à la fois ?",
-    a: "Une, le plus souvent. L'assistant tient quatre postes, mais on met en route celui qui vous coûte le plus cher — celui que vous choisissez dans la grille, ou que l'audit chiffre chez les structures à plusieurs services — et on le mène jusqu'au bout. Les autres suivent si les chiffres du premier le justifient.",
+    a: "Une, le plus souvent. L'assistant tient quatre postes, mais on met en route celui qui vous coûte le plus cher, celui que vous choisissez dans la grille ou que l'audit chiffre chez les structures à plusieurs services, et nous le menons jusqu'au bout. Les autres suivent si les chiffres du premier le justifient.",
   },
   {
     /* 28/08 — la réponse v3 (« un prix affiché ici ne voudrait pas dire
        grand-chose ») niait la grille publique vers laquelle le CTA de
        cette même page envoie désormais. Réécrite pour les deux mondes. */
-    q: "Combien ça coûte ?",
+    q: "Combien cela coûte-t-il ?",
     a: "Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit : sociétés, sites et postes concernés. Pour les indépendants, TPE et PME, il est public : un poste 59 € par mois, trois postes 89 €, tout Omega 119 € — sans engagement, installation comprise. Dans les deux cas, le Chèque TIC peut financer une partie de l'installation (de 40 à 80 %, jusqu'à 10 000 €), si vous êtes éligible.",
   },
   {
@@ -649,7 +649,7 @@ const PORTES = [
     nom: "Les systèmes prêts",
     objectif: "Quatre postes déjà outillés",
     texte:
-      "Relances, demandes entrantes, paperasse fournisseurs, affaires à reprendre. Installés en l'état, réglés sur vos règles.",
+      "Relances, demandes entrantes, pièces fournisseurs, affaires à reprendre. Installés en l'état, réglés sur vos règles.",
     lien: { label: "Voir les quatre", href: "/offres" },
   },
   {
@@ -657,7 +657,7 @@ const PORTES = [
     objectif: "Ce qui n'existe pas encore",
     texte:
       "Un logiciel métier, un pont entre deux outils, un contrôle qui se répète. Le besoin est cadré et chiffré avant d'écrire une ligne.",
-    lien: { label: "Comment ça se cadre", href: "/offres/sur-mesure" },
+    lien: { label: "Comment se fait le cadrage", href: "/offres/sur-mesure" },
   },
   {
     nom: "Votre site",

@@ -52,8 +52,7 @@ export default function AppelFinal() {
         </h2>
 
         <p className="mx-auto mt-6 max-w-xl text-balance text-[15px] leading-relaxed text-[#a1a1aa] sm:text-[17px]">
-          Vous choisissez vos postes, vous réservez la réunion d&apos;installation en ligne,
-          vous enregistrez votre moyen de paiement — et le système démarre sous votre œil.
+          Vous choisissez vos postes, vous réservez la réunion d&apos;installation en ligne, vous enregistrez votre moyen de paiement, et le système démarre sous votre contrôle.
           Rien n&apos;est débité avant la fin de l&apos;installation&nbsp;: le premier
           prélèvement part le jour où vos modules sont en service.
         </p>
@@ -76,14 +75,13 @@ export default function AppelFinal() {
             de celle qui clôt /reserver-un-audit */}
         <div className="mt-12 flex w-full max-w-xl flex-col items-center gap-3 rounded-lg border border-white/[0.08] bg-black px-4 py-3 text-left transition-colors hover:border-white/[0.15] sm:flex-row sm:justify-between">
           <p className="text-[13px] leading-5 text-[#a1a1aa]">
-            Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille
-            n&apos;est pas votre porte&nbsp;: votre prix sort d&apos;un audit.
+            Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille ne vous concerne pas&nbsp;: votre tarif est établi à l&apos;issue d&apos;un diagnostic.
           </p>
           <Link
             href="/reserver-un-audit"
             className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-white underline-offset-4 hover:underline"
           >
-            Réserver un échange
+            Demander un diagnostic
             <ArrowRight aria-hidden className="size-3.5" />
           </Link>
         </div>

@@ -692,7 +692,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                   <p className="r-note mt-5">
                     Étape suivante&nbsp;:{" "}
                     {util
-                      ? "votre brief — ce que vous faites, vos pages, votre logo."
+                      ? "votre brief : ce que vous faites, vos pages, votre logo."
                       : "votre compte, puis votre brief."}
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -717,7 +717,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       className="r-lien !text-[15px]"
                       aria-label={`Visiter la démo du modèle ${modele.nom} dans un nouvel onglet`}
                     >
-                      Visiter la démo&nbsp;↗
+                      Voir la démonstration&nbsp;↗
                     </a>
                   </div>
                 </div>
@@ -845,7 +845,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                           className="mt-2 self-start text-[13px] font-medium text-[#050505] underline-offset-4 hover:underline"
                           aria-label={`Visiter la démo du modèle ${m.nom} dans un nouvel onglet`}
                         >
-                          Visiter la démo&nbsp;↗
+                          Voir la démonstration&nbsp;↗
                         </a>
                       </div>
                     );
@@ -944,7 +944,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                     modeInitial="connexion"
                     avecProfil={false}
                     onConnecte={connecter}
-                    intro="Votre session s'est fermée. Reconnectez-vous pour envoyer votre brief — tout ce que vous avez saisi est conservé."
+                    intro="Votre session s'est fermée. Reconnectez-vous pour envoyer votre brief, tout ce que vous avez saisi est conservé."
                   />
                 </div>
               ) : null}
@@ -1003,7 +1003,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       </div>
                       <div>
                         <label className="rv-libelle" htmlFor="cs-secteur">
-                          Secteur d&apos;activité <small>— conseillé</small>
+                          Secteur d&apos;activité <small>(recommandé)</small>
                         </label>
                         <select
                           id="cs-secteur"
@@ -1022,7 +1022,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       <div>
                         <label className="rv-libelle" htmlFor="cs-tel">
                           Téléphone / WhatsApp{" "}
-                          <small>— conseillé, on vous appelle</small>
+                          <small>(recommandé, nous vous appelons)</small>
                         </label>
                         <input
                           id="cs-tel"
@@ -1036,7 +1036,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       </div>
                       <div>
                         <label className="rv-libelle" htmlFor="cs-commune">
-                          Commune <small>— facultatif</small>
+                          Commune <small>(facultatif)</small>
                         </label>
                         <input
                           id="cs-commune"
@@ -1049,7 +1049,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       <div className="sm:col-span-2">
                         <label className="rv-libelle" htmlFor="cs-activite">
                           Ce que vous faites, en deux phrases{" "}
-                          <small>— facultatif</small>
+                          <small>(facultatif)</small>
                         </label>
                         <textarea
                           id="cs-activite"
@@ -1113,7 +1113,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                         </span>
                       </legend>
                       <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
-                        On ajuste ensemble.
+                        Nous ajustons ensemble.
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         {PAGES_SITE.map((p) => {
@@ -1166,7 +1166,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       </div>
                       <div>
                         <label className="rv-libelle" htmlFor="cs-domaine">
-                          Nom de domaine souhaité <small>— facultatif</small>
+                          Nom de domaine souhaité <small>(facultatif)</small>
                         </label>
                         <input
                           id="cs-domaine"
@@ -1180,7 +1180,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       </div>
                       <div>
                         <label className="rv-libelle" htmlFor="cs-reseaux">
-                          Vos réseaux sociaux <small>— facultatif</small>
+                          Vos réseaux sociaux <small>(facultatif)</small>
                         </label>
                         <input
                           id="cs-reseaux"
@@ -1220,7 +1220,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       </h4>
                     </div>
                     <p className="mt-1 text-[13px] leading-[19px] text-[#616161]">
-                      PNG, JPEG, WebP, SVG ou PDF — 10&nbsp;Mo par fichier. Vos
+                      PNG, JPEG, WebP, SVG ou PDF, 10&nbsp;Mo par fichier. Vos
                       fichiers ne sont visibles que de vous et de nous.
                     </p>
                     {erreurFichier ? (
@@ -1388,7 +1388,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                   Votre brief et vos fichiers sont rattachés à votre compte et
                   ne servent qu&apos;à écrire votre site&nbsp;; entreprise et
                   téléphone y sont gardés pour vos prochaines demandes. Rien
-                  n&apos;est revendu — voir{" "}
+                  n&apos;est revendu. Voir{" "}
                   <Link
                     href="/vos-donnees"
                     className="underline underline-offset-2"

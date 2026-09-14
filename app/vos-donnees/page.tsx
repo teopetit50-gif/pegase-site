@@ -121,7 +121,7 @@ import {
 export const metadata: Metadata = {
   title: "Où vont vos données | Omega.AI",
   description:
-    "Votre base à Francfort, dans l'Union européenne, ou une machine installée chez vous dont rien ne sort. Qui reçoit quoi, ce qui n'entraîne aucun modèle, et ce que vous pouvez récupérer à tout moment.",
+    "Votre base hébergée à Francfort, dans l'Union européenne, ou une machine installée dans vos locaux dont rien ne sort. Qui reçoit quoi, ce qui n'entraîne aucun modèle, et ce que vous récupérez à tout moment.",
 };
 
 /* ——— les trois lieux de passage ——— */
@@ -133,8 +133,8 @@ const LIEUX = [
   },
   {
     maquette: MaquetteMoteur,
-    titre: "Le moteur",
-    soustitre: "Il lit, il décide, il n'archive pas",
+    titre: "Le système",
+    soustitre: "Il lit, décide et n'archive rien",
   },
   {
     maquette: MaquetteBase,
@@ -167,19 +167,19 @@ const GARANTIES = [
     icone: IconeOeil,
     titre: "Rien ne part sans vous",
     texte:
-      "Un moteur propose, vous validez. Tant qu'un envoi n'est pas approuvé, il n'existe que sous forme de brouillon dans votre outil.",
+      "Le système propose, vos équipes valident. Tant qu'un envoi n'est pas approuvé, il n'existe que sous forme de brouillon dans votre outil.",
   },
   {
     icone: IconeJournal,
     titre: "Tout est journalisé",
     texte:
-      "Chaque exécution laisse une ligne : date, moteur, décision, destinataire. Le journal est consultable et exportable à tout moment.",
+      "Chaque exécution laisse une ligne : date, système, décision, destinataire. Le journal est consultable et exportable à tout moment.",
   },
   {
     icone: IconeEmporter,
     titre: "Réversibilité",
     texte:
-      "Vos moteurs s'exportent en fichiers lisibles, vos données dans un format de base standard. Vous les emportez tels quels : aucun format propriétaire ne vous retient.",
+      "Vos automatisations s'exportent en fichiers lisibles et vos données dans un format de base standard. Vous les emportez tels quels, puisqu'aucun format propriétaire ne vous retient.",
   },
 ];
 
@@ -219,8 +219,8 @@ const RECOIT: { point: string; nom: string; role: string; jetons: string[] }[] =
   {
     point: "#5b8def",
     nom: "Nos automatisations",
-    role: "orchestration des moteurs",
-    jetons: ["Les moteurs", "Les identifiants de connexion", "Aucune archive de contenu"],
+    role: "orchestration des systèmes",
+    jetons: ["Les systèmes", "Les identifiants de connexion", "Aucune archive de contenu"],
   },
   {
     point: "#d97757",
@@ -255,7 +255,7 @@ const OPTIONS: Option[] = [
     onglet: "Hébergement Omega.AI · Francfort",
     titre: "Votre base chez nous, à Francfort",
     resume:
-      "Vous ne gérez aucune machine. Notre base de données tourne en région eu-central-1, nos automatisations font tourner les moteurs, et vous n'avez qu'à valider ce qui vous est proposé.",
+      "Vous ne gérez aucune machine. Notre base de données est opérée en région eu-central-1, nos automatisations font tourner les systèmes, et vos équipes n'ont qu'à valider ce qui leur est proposé.",
     image: "/photos/donnees-francfort-datacenter.jpg",
     alt: "Allée d'une salle de serveurs, baies métalliques alignées",
     chiffres: [
@@ -264,7 +264,7 @@ const OPTIONS: Option[] = [
       { valeur: "UE", libelle: "Lieu de la base" },
     ],
     principe:
-      "Vos outils actuels restent vos outils. Le moteur s'y branche, lit le champ dont il a besoin, écrit son résultat dans la base, et vous le soumet.",
+      "Vos outils actuels restent vos outils. Le système s'y connecte, lit le champ dont il a besoin, écrit son résultat dans la base et vous le soumet.",
     obtenez: [
       "Une base de données à Francfort, chiffrée au repos",
       "Les sauvegardes et la supervision comprises",
@@ -277,7 +277,7 @@ const OPTIONS: Option[] = [
     onglet: "Installation locale · chez vous",
     titre: "Une machine dans vos murs",
     resume:
-      "Pour qui ne veut rien laisser sortir. Nous installons les moteurs sur une machine que vous possédez : conteneurs isolés, disque chiffré, votre réseau, votre électricité.",
+      "Pour les organisations qui ne veulent rien laisser sortir. Nous installons les systèmes sur une machine que vous possédez : conteneurs isolés, disque chiffré, votre réseau, votre alimentation.",
     image: "/photos/donnees-rack-local.jpg",
     alt: "Baie de brassage vue de près, câble orange lové",
     chiffres: [
@@ -288,7 +288,7 @@ const OPTIONS: Option[] = [
     principe:
       "Aucun appel sortant que vous n'ayez autorisé. Un modèle ouvert peut tourner sur la machine si vous refusez tout appel externe, au prix d'une qualité de rédaction inférieure.",
     obtenez: [
-      "Les moteurs installés sur votre machine, en conteneurs",
+      "Les systèmes installés sur votre machine, en conteneurs",
       "Les sauvegardes chez vous, sur le support de votre choix",
       "Une machine qui continue de tourner si le contrat s'arrête",
       "La documentation d'exploitation, pour reprendre la main",
@@ -365,9 +365,7 @@ export default function VosDonnees() {
                   vos données
                 </h1>
                 <p className="vd-lead max-w-[42rem]">
-                  Deux hébergements, un seul choix à faire : votre base chez nous à Francfort,
-                  dans l&apos;Union européenne, ou une machine installée chez vous dont rien ne
-                  sort.
+                  Deux hébergements, un seul choix à faire : votre base chez nous à Francfort, dans l&apos;Union européenne, ou une machine installée dans vos locaux dont rien ne sort.
                 </p>
                 <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
@@ -386,12 +384,10 @@ export default function VosDonnees() {
                   référence pour cette section-là. Les autres sont centrées. */}
               <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-20">
                 <h2 className="vd-h2">
-                  Vos données dorment à Francfort, et elles n&apos;en sortent pas
+                  Vos données sont hébergées à Francfort, et elles n&apos;en sortent pas
                 </h2>
                 <p className="vd-body lg:pt-3">
-                  Un moteur ne recopie pas votre boîte mail. Il lit le champ dont il a besoin pour
-                  la tâche du jour, écrit son résultat, et laisse le reste où il est. Voici le
-                  chemin complet, sans étape cachée.
+                  Un système ne recopie pas votre messagerie. Il lit le champ dont il a besoin pour la tâche du jour, écrit son résultat, et laisse le reste où il est. Voici le chemin complet, sans étape cachée.
                 </p>
               </div>
 
@@ -404,8 +400,7 @@ export default function VosDonnees() {
                     Cinq étapes, et une seule qui stocke
                   </h3>
                   <p className="mt-4 text-[15px] leading-[1.6] tracking-[-0.01em] text-white/85">
-                    Le moteur lit, le modèle rédige, vous validez. Seule la dernière étape écrit
-                    quelque chose de durable, et cette étape est en Allemagne.
+                    Le système lit, le modèle rédige, vos équipes valident. Seule la dernière étape écrit quelque chose de durable, et cette étape se trouve en Allemagne.
                   </p>
                 </div>
                 <SchemaTrajet className="h-auto w-full text-white/85" />
@@ -419,8 +414,7 @@ export default function VosDonnees() {
               <div className="mx-auto max-w-[46rem] text-center">
                 <h2 className="vd-h2">Les trois seuls endroits où passent vos données</h2>
                 <p className="vd-lead mt-5">
-                  Votre outil, le moteur, la base. Il n&apos;y a pas de quatrième lieu, pas de
-                  copie de travail ailleurs, pas d&apos;entrepôt intermédiaire.
+                  Votre outil, le système, la base. Il n&apos;y a pas de quatrième lieu, pas de copie de travail ailleurs, pas d&apos;entrepôt intermédiaire.
                 </p>
               </div>
 
@@ -489,9 +483,7 @@ export default function VosDonnees() {
                   <div>
                     <Guillemet className="h-4 w-auto text-white/60" />
                     <blockquote className="mt-5 text-[clamp(1.5rem,1rem+1.6vw,2.25rem)] leading-[1.25] tracking-[-0.01em] text-white">
-                      Aucune de vos données, ni ce que vous nous confiez ni ce que les
-                      moteurs produisent, ne sert à entraîner un modèle
-                      d&apos;intelligence artificielle.
+                      Aucune de vos données, ni ce que vous nous confiez ni ce que les systèmes produisent, ne sert à entraîner un modèle d&apos;intelligence artificielle.
                     </blockquote>
                     <p className="mt-8 text-[15px] leading-[1.5] tracking-[-0.01em] text-white/85">
                       Omega.AI
@@ -602,11 +594,10 @@ export default function VosDonnees() {
                 />
                 <div className="relative z-10 max-w-[38rem]">
                   <h2 className="vd-h4">
-                    Une adresse, pas un nuage.
+                    Une adresse précise, pas un nuage.
                   </h2>
                   <p className="vd-body mt-4">
-                    « Le cloud », c&apos;est le nom commercial d&apos;une baie dans un bâtiment.
-                    La vôtre est à Francfort, et son adresse tient en une ligne :
+                    Le terme « cloud » désigne une baie dans un bâtiment identifié. La vôtre est à Francfort, et son adresse tient en une ligne :
                     <span className="whitespace-nowrap"> eu-central-1</span>.
                   </p>
                 </div>
@@ -634,8 +625,7 @@ export default function VosDonnees() {
               <div className="relative z-10 flex w-full max-w-[72rem] flex-col gap-6">
                 <h2 className="vd-h1 vd-titre-degrade">Vos données, votre choix.</h2>
                 <p className="vd-lead max-w-[38rem]">
-                  Trente minutes suffisent pour savoir laquelle des deux installations vous
-                  convient, et ce qu&apos;elle coûte.
+                  Trente minutes suffisent pour déterminer laquelle des deux installations convient à votre organisation, et ce qu&apos;elle coûte.
                 </p>
                 <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
@@ -694,7 +684,7 @@ export default function VosDonnees() {
 
             {/* la signature géante de la référence — même rôle, même place */}
             <p className="vd-signature mt-24 max-w-[22ch]">
-              Vos données restent les vôtres, où qu&apos;elles dorment
+              Vos données restent les vôtres, où qu&apos;elles soient hébergées
             </p>
 
             <div className="mt-16 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">

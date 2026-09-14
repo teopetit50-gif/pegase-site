@@ -207,7 +207,7 @@ export const PROFILS: [Profil, Profil] = [
           },
           {
             texte:
-              "Devis du moteur recommandé et du modèle de site qui va avec (site catalogue : 990 €, prix public), valables 30 jours",
+              "Devis du système recommandé et du modèle de site associé (site catalogue : 990 €, prix public), valables 30 jours",
             fort: "Devis",
           },
           {
@@ -230,7 +230,7 @@ export const PROFILS: [Profil, Profil] = [
         enteteListe: "Tout l'Audit complet, plus :",
         points: [
           {
-            texte: "Observation sur poste : on regarde comment ça se passe vraiment",
+            texte: "Observation sur poste : le travail tel qu'il se fait réellement",
             fort: "Observation sur poste",
             surligne: true,
           },
@@ -239,8 +239,8 @@ export const PROFILS: [Profil, Profil] = [
             fort: "fichiers réels",
           },
           {
-            texte: "Maquette du moteur construite sur vos propres données",
-            fort: "Maquette du moteur",
+            texte: "Maquette du système construite sur vos propres données",
+            fort: "Maquette du système",
           },
           { texte: "Point de suivi à 30 jours, inclus", fort: "Point de suivi à 30 jours" },
         ],
@@ -306,7 +306,7 @@ export const PROFILS: [Profil, Profil] = [
             texte: "Cartographie des outils et des accès en place",
             fort: "Cartographie des outils",
           },
-          { texte: "Devis du moteur recommandé, valable 30 jours", fort: "Devis" },
+          { texte: "Devis du système recommandé, valable 30 jours", fort: "Devis" },
           { texte: "Dossier Chèque TIC monté par nos soins", fort: "Chèque TIC" },
         ],
       },
@@ -329,7 +329,7 @@ export const PROFILS: [Profil, Profil] = [
             surligne: true,
           },
           { texte: "Relevé sur vos fichiers et vos boîtes réelles", fort: "fichiers" },
-          { texte: "Maquette du moteur sur vos propres données", fort: "Maquette" },
+          { texte: "Maquette du système sur vos propres données", fort: "Maquette" },
           { texte: "Point de suivi à 30 jours, inclus", fort: "Point de suivi à 30 jours" },
         ],
       },
@@ -367,12 +367,12 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Format",
-        aide: "La visio suffit dans la très grande majorité des cas : ce qu'on regarde, ce sont vos fichiers et vos boîtes, pas vos murs.",
+        aide: "La visioconférence suffit dans la très grande majorité des cas : ce que nous examinons, ce sont vos fichiers et vos messageries, pas vos locaux.",
         valeurs: ["Visio", "Visio ou sur place", "Sur place, dans vos locaux"],
       },
       {
         libelle: "Qui participe",
-        aide: "Un audit se fait avec les personnes qui tiennent réellement les outils, pas seulement avec celle qui signe. En équipe, les entretiens sont individuels : c'est l'écart entre la vision de la direction et le quotidien réel qu'on mesure.",
+        aide: "Un audit se fait avec les personnes qui tiennent réellement les outils, pas seulement avec celle qui signe. En équipe, les entretiens sont individuels : c'est l'écart entre la vision de la direction et le quotidien réel que nous mesurons.",
         valeurs: [
           "Le dirigeant",
           "Dirigeant, et le comptable si utile",
@@ -381,7 +381,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Ce que vous préparez",
-        aide: "Rien d'administratif à produire : on travaille sur ce qui existe déjà chez vous, dans l'état où il est.",
+        aide: "Rien d'administratif à produire : nous travaillons sur ce qui existe déjà chez vous, dans l'état où il est.",
         valeurs: [
           "Rien",
           "Vos trois derniers mois d'échéances",
@@ -404,7 +404,7 @@ export const COMPARATIF: FamilleComparatif[] = [
     lignes: [
       {
         libelle: "Recommandation et chiffrage",
-        aide: "Le moteur à installer d'abord, le chantier à planifier ensuite, ce qu'on déconseille d'automatiser, et le montant de chaque poste, vérifiable dans vos propres documents.",
+        aide: "Le système à déployer d'abord, le chantier à planifier ensuite, ce que nous déconseillons d'automatiser, et le montant de chaque poste, vérifiable dans vos propres documents.",
         valeurs: [
           "Oraux, en fin d'entretien",
           "Écrits, sous 72 h",
@@ -412,7 +412,7 @@ export const COMPARATIF: FamilleComparatif[] = [
         ],
       },
       {
-        libelle: "Devis du moteur",
+        libelle: "Devis du système",
         aide: "Le devis est indépendant de l'audit : vous pouvez le prendre et ne rien installer.",
         valeurs: ["Sur demande", "Compris, valable 30 jours", "Compris, valable 30 jours"],
       },
@@ -438,7 +438,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Point de suivi",
-        aide: "Trente jours après l'audit, on reprend les chiffres (ce qui a bougé, ce qui n'a pas bougé), et la cartographie est remise à jour avec.",
+        aide: "Trente jours après l'audit, nous reprenons les chiffres, ce qui a évolué et ce qui n'a pas bougé, et la cartographie est mise à jour en conséquence.",
         /* Le Diagnostic n'a pas de point de suivi : « — », le signe de
            « non compris » posé en tête du comparatif. La cellule portait
            « , » — une virgule seule, reste d'une valeur effacée. Elle
@@ -447,7 +447,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Engagement",
-        aide: "La recommandation vous appartient, que vous installiez un moteur ou non.",
+        aide: "La recommandation vous appartient, que vous installiez un système ou non.",
         valeurs: ["Aucun", "Aucun", "Aucun"],
       },
       {
@@ -469,13 +469,13 @@ export const COMPLEMENTS: { titre: string; texte: string; conditions: string }[]
   {
     titre: "Atelier équipe",
     texte:
-      "Deux heures avec les personnes qui valideront les messages du moteur au quotidien. Rien ne part sans validation humaine chez Omega.AI : encore faut-il que l'équipe sache corriger, suspendre et reprendre la main sans appeler à l'aide.",
+      "Deux heures avec les personnes qui valideront les messages du système au quotidien. Rien ne part sans validation humaine chez Omega.AI : encore faut-il que l'équipe sache corriger, suspendre et reprendre la main sans assistance extérieure.",
     conditions: "Sur devis, souvent éligible au Chèque TIC.",
   },
   {
     titre: "Cartographie approfondie",
     texte:
-      "Un relevé complet de ce qui tourne déjà chez vous, jusqu'aux fichiers partagés et aux boîtes secondaires que personne ne mentionne spontanément. Utile quand plusieurs services se sont équipés chacun de leur côté depuis des années.",
+      "Un relevé complet de ce qui fonctionne déjà chez vous, jusqu'aux fichiers partagés et aux boîtes secondaires que personne ne mentionne spontanément. Utile quand plusieurs services se sont équipés chacun de leur côté depuis des années.",
     conditions: "Comprise dès l'Audit dans vos locaux. Sur devis en complément d'un Diagnostic.",
   },
 ];
@@ -486,29 +486,29 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "L'audit est-il vraiment gratuit ?",
     r: [
-      "Le Cadrage et l'Audit process le sont, et le demeurent : aucune facture n'arrive après coup, aucune contrepartie n'est demandée. Vous repartez avec le chiffrage et la recommandation, que vous installiez un moteur ou non.",
+      "Le Cadrage et l'Audit process le sont, et le demeurent : aucune facture n'arrive après coup, aucune contrepartie n'est demandée. Vous repartez avec le chiffrage et la recommandation, que vous installiez un système ou non.",
       "Le format dans vos locaux est facturé parce qu'il mobilise une journée de déplacement et de relevé. Son montant est déduit de l'installation si vous décidez d'aller plus loin.",
     ],
   },
   {
     q: "Que se passe-t-il concrètement après ma demande ?",
     r: [
-      "Votre créneau est bloqué à l'instant où vous le choisissez : l'agenda n'affiche que les disponibilités réelles, personne ne peut prendre le même. Vous recevez un mot de confirmation le jour même — WhatsApp ou e-mail — avec le lien de la visio. Si votre demande relève d'un autre format que celui que vous avez coché, on vous le dit à ce moment-là.",
+      "Votre créneau est bloqué à l'instant où vous le choisissez : l'agenda n'affiche que les disponibilités réelles, personne ne peut prendre le même. Vous recevez une confirmation le jour même, par WhatsApp ou par e-mail, avec le lien de la visioconférence. Si votre demande relève d'un autre format que celui que vous avez coché, nous vous le disons à ce moment-là.",
       "À l'issue de l'entretien, le chiffrage écrit part sous 72 heures pour les formats qui le comprennent. Il n'y a pas de relance commerciale ensuite : si vous ne donnez pas suite, le dossier se ferme.",
     ],
   },
   {
     q: "Faut-il préparer des documents ?",
     r: [
-      "Pour le Diagnostic, rien. On travaille à partir de ce que vous savez de tête, et c'est suffisant pour identifier le poste qui coûte le plus cher.",
-      "Pour l'Audit complet, vos trois derniers mois d'échéances rendent le chiffrage nettement plus précis : un export de logiciel de facturation ou un tableur suffit. Rien n'est à mettre en forme : on prend les fichiers dans l'état où ils sont.",
+      "Pour le Diagnostic, rien. Nous travaillons à partir de ce que vous savez déjà, et c'est suffisant pour identifier le poste qui coûte le plus cher.",
+      "Pour l'Audit complet, vos trois derniers mois d'échéances rendent le chiffrage nettement plus précis : un export de logiciel de facturation ou un tableur suffit. Rien n'est à mettre en forme : nous prenons les fichiers dans l'état où ils sont.",
     ],
   },
   {
-    q: "Rien n'est écrit chez moi, tout est dans ma tête, c'est bloquant ?",
+    q: "Rien n'est formalisé chez nous, est-ce bloquant ?",
     r: [
-      "Non : c'est le cas de la majorité des entreprises auditées : les décisions se prennent à l'oral, les habitudes vivent dans la mémoire des personnes. Ce n'est pas un obstacle à l'entretien : on vous fait raconter, c'est tout.",
-      "C'est même une partie du travail. La cartographie met votre fonctionnement à plat, noir sur blanc, et un moteur ne s'installe que sur un processus posé. À la fin de l'audit, le vôtre l'est, que vous installiez un moteur ou non.",
+      "Non, c'est le cas de la majorité des entreprises auditées : les décisions se prennent à l'oral et les habitudes vivent dans la mémoire des personnes. Ce n'est pas un obstacle à l'entretien, qui consiste précisément à vous faire décrire ce fonctionnement.",
+      "C'est même une partie du travail. La cartographie met votre fonctionnement à plat, noir sur blanc, et un système ne se déploie que sur un processus formalisé. À la fin de l'audit, le vôtre l'est, que vous installiez un système ou non.",
     ],
   },
   {
@@ -521,7 +521,7 @@ export const FAQ: { q: string; r: string[] }[] = [
     q: "Le Chèque TIC, c'est automatique ?",
     r: [
       "Non. C'est un dispositif de la Région Guadeloupe qui finance de 40 à 80 % d'un projet numérique selon le poste, dans la limite de 10 000 €, pour une entreprise immatriculée en Guadeloupe depuis au moins un an et à jour de ses obligations sociales et fiscales. Les critères et les enveloppes évoluent.",
-      "Votre éligibilité est vérifiée pendant l'audit, avant tout engagement. Si vous n'êtes pas éligible, on vous le dit à ce moment-là plutôt qu'après signature.",
+      "Votre éligibilité est vérifiée pendant l'audit, avant tout engagement. Si vous n'êtes pas éligible, nous vous le disons à ce moment-là plutôt qu'après signature.",
     ],
   },
   {
@@ -530,28 +530,28 @@ export const FAQ: { q: string; r: string[] }[] = [
        chercher une vitrine et tombe sur une page qui parle d'impayés. La
        réponse dit oui, puis explique pourquoi on regarde d'abord ce qui se
        passe APRÈS le clic — sans quoi on livre une vitrine qui dort. */
-    q: "Je veux surtout un site, vous faites ça ?",
+    q: "Je cherche avant tout un site, le proposez-vous ?",
     r: [
       /* Vingt et un, pas vingt-deux : AssetX est sorti du catalogue le
          06/08 (voir components/modeles/donnees.ts). /modeles affichait bien
          « 21 modèles », cette réponse était restée à l'ancien compte. */
       /* 01/09 — le prix devient public (voir /tarifs/site) : la réponse
          le donne plutôt que de le garder pour l'audit. */
-      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, on réécrit tout le contenu en français, à votre métier. Le prix est public : 990 € le site catalogue — de 198 à 594 € restant à charge selon le taux du Chèque TIC.",
-      "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps on lui répond, et ce que devient le devis. Un site qui reçoit trois demandes par semaine et n'en transforme aucune coûte plus cher qu'il ne rapporte : c'est cette partie-là qu'on chiffre d'abord, pour que la vitrine ne dorme pas.",
+      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, nous réécrivons tout le contenu en français, pour votre métier. Le prix est public : 990 € le site catalogue, soit de 198 à 594 € restant à charge selon le taux du Chèque TIC.",
+      "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps il obtient une réponse, et ce que devient le devis. Un site qui reçoit trois demandes par semaine et n'en transforme aucune coûte plus cher qu'il ne rapporte : c'est cette partie que nous chiffrons d'abord, pour que la vitrine ne dorme pas.",
     ],
   },
   {
     q: "Vous intervenez partout en France ?",
     r: [
       "Oui pour tous les formats à distance, où que vous soyez. Les formats dans vos locaux sont réservés à la Guadeloupe, où nous sommes établis : au-delà, le déplacement coûterait plus cher que ce qu'il apporte.",
-      "L'installation d'un moteur, elle, ne demande aucune présence permanente : le raccordement se fait sur vos outils existants.",
+      "Le déploiement d'un système ne demande aucune présence permanente : l'intégration se fait sur vos outils existants.",
     ],
   },
   {
     q: "Et si l'audit conclut qu'il n'y a rien à automatiser ?",
     r: [
-      "Cela arrive, et c'est une conclusion valable. Un moteur ne se justifie que si la difficulté qu'il traite coûte plus cher que lui : quand ce n'est pas le cas, la recommandation est de ne rien installer.",
+      "Cela arrive, et c'est une conclusion valable. Un système ne se justifie que si la difficulté qu'il traite coûte plus cher que lui : quand ce n'est pas le cas, la recommandation est de ne rien installer.",
       "C'est précisément pour cette raison que l'audit chiffre avant de recommander, et jamais l'inverse.",
     ],
   },

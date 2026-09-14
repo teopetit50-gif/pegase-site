@@ -101,9 +101,9 @@ import { COCKPIT_URL } from "@/lib/supabase/config";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "L'application Omega sur votre téléphone et votre ordinateur | Omega.AI",
+  title: "L'application Omega.AI sur vos appareils | Omega.AI",
   description:
-    "Votre espace Omega s'installe comme une application sur téléphone, PC ou Mac, sans boutique : un bouton sur Android et sur ordinateur, trois gestes sur iPhone.",
+    "Votre espace client s'installe comme une application sur téléphone, PC ou Mac, sans boutique d'applications : un bouton sur Android et sur ordinateur, trois gestes sur iPhone.",
 };
 
 /* les trois gestes, dans l'ordre où on nous les demande : le téléphone
@@ -147,7 +147,7 @@ const GESTES = [
   {
     id: "ordinateur",
     titre: "Ordinateur",
-    sousTitre: "Windows et Mac — Chrome ou Edge",
+    sousTitre: "Windows et Mac, Chrome ou Edge",
     etapes: [
       <>Ouvrez app.omegaai.fr/installer dans Chrome ou Edge.</>,
       <>
@@ -167,7 +167,7 @@ const GESTES = [
 const CHANGE = [
   {
     n: "01",
-    titre: "Un toucher",
+    titre: "Un seul geste",
     texte: "L'icône ouvre directement votre espace, sans navigateur ni adresse à retaper.",
   },
   {
@@ -178,30 +178,30 @@ const CHANGE = [
   {
     n: "03",
     titre: "Toujours à jour",
-    texte: "Rien à mettre à jour, jamais : vous ouvrez, vous avez la dernière version.",
+    texte: "Aucune mise à jour à effectuer : à chaque ouverture, vous disposez de la dernière version.",
   },
   {
     n: "04",
     titre: "Compris dans l'abonnement",
-    texte: "Rien de plus à payer, et presque rien à stocker sur votre téléphone ou votre ordinateur.",
+    texte: "Aucun coût supplémentaire, et presque rien à stocker sur votre appareil.",
   },
 ];
 
 const QUESTIONS = [
   {
-    q: "Ça marche sans réseau ?",
-    r: "Non : vos chiffres sont vivants, l'application va les chercher à chaque ouverture. Elle n'en garde aucun sur l'appareil, y compris pour votre sécurité.",
+    q: "L'application fonctionne-t-elle sans réseau ?",
+    r: "Non : vos données sont actualisées à chaque ouverture, et l'application n'en conserve aucune sur l'appareil, notamment par sécurité.",
   },
   {
-    q: "Je change de téléphone ou d'ordinateur ?",
-    r: "Recommencez depuis cette page, ou depuis « Mon profil » dans votre espace. Vos données ne sont pas sur l'appareil, rien n'est perdu.",
+    q: "Que faire si je change d'appareil ?",
+    r: "Reprenez l'installation depuis cette page, ou depuis « Mon profil » dans votre espace. Vos données ne sont pas stockées sur l'appareil, rien n'est perdu.",
   },
   {
-    q: "Et sur un ordinateur ?",
-    r: "Oui, avec Chrome ou Edge : Omega s'ouvre dans sa propre fenêtre, comme un logiciel, avec une icône dans le menu Démarrer (ou le Dock). Firefox ne le propose pas, et sur Mac le plus simple reste Chrome ou Edge : sinon, le site fait très bien l'affaire.",
+    q: "Fonctionne-t-elle sur un ordinateur ?",
+    r: "Oui, avec Chrome ou Edge : Omega s'ouvre dans sa propre fenêtre, comme un logiciel, avec une icône dans le menu Démarrer (ou le Dock). Firefox ne le propose pas, et sur Mac le plus simple reste Chrome ou Edge : sinon, le site reste pleinement utilisable.",
   },
   {
-    q: "Comment la retirer ?",
+    q: "Comment la désinstaller ?",
     r: "Comme n'importe quelle application : un appui long sur l'icône du téléphone, un clic droit sur celle de l'ordinateur. Votre espace reste ouvert sur le site.",
   },
 ];
@@ -220,12 +220,10 @@ export default function ApplicationPage() {
             <div>
               <div data-arrivee="titre">
                 <p className="ap-kicker">Votre espace client</p>
-                <h1 className="r-h1 mt-4 max-w-[14ch]">Omega dans votre poche.</h1>
+                <h1 className="r-h1 mt-4 max-w-[14ch]">Votre espace client, sur tous vos appareils.</h1>
               </div>
               <p data-arrivee="chapo" className="r-lead mt-5 max-w-[46ch]">
-                Votre espace client s&apos;installe sur l&apos;écran d&apos;accueil de votre
-                téléphone, et sur votre ordinateur, comme une application&nbsp;: une icône, un
-                toucher, votre entreprise. Rien à télécharger sur une boutique.
+                Votre espace client s&apos;installe sur l&apos;écran d&apos;accueil de votre téléphone et sur votre ordinateur, comme une application&nbsp;: une icône, et votre espace s&apos;ouvre en un geste. Rien à télécharger depuis une boutique d&apos;applications.
               </p>
               {/* 08/09, seconde passe — le bouton mène à la page d'installation
                   du cockpit, publique : « Installer Omega » quand le navigateur
@@ -314,7 +312,7 @@ export default function ApplicationPage() {
         <div className="r-blanc">
           <section data-monde="clair" className="r-wrap pt-14 sm:pt-20">
             <h2 data-reveal className="r-h3 max-w-[16ch]">
-              Ce que ça change
+              Ce que l&apos;application apporte
             </h2>
             <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
               {CHANGE.map((c) => (
@@ -332,9 +330,7 @@ export default function ApplicationPage() {
             <div data-reveal className="ap-encart">
               <h2 className="r-h4">Avant d&apos;installer</h2>
               <p className="mt-3 max-w-[60ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-                L&apos;application ouvre votre espace client&nbsp;: il faut un compte Omega et une
-                installation faite. Si vous n&apos;avez pas encore réservé votre réunion
-                d&apos;installation, tout commence par la grille des tarifs.
+                L&apos;application ouvre votre espace client&nbsp;: elle nécessite un compte Omega.AI et une installation réalisée. Si vous n&apos;avez pas encore réservé votre réunion d&apos;installation, tout commence par la grille des tarifs.
               </p>
               <div className="mt-5">
                 <Link href="/tarifs" className="r-btn r-btn--fil">

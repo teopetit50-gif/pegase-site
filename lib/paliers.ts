@@ -102,17 +102,17 @@ export const POSTES: Poste[] = [
     nom: "Réponse aux demandes clients",
     slug: "demandes-clients",
     resume:
-      "Les demandes reçues par mail et WhatsApp — horaires, tarifs, disponibilités, rendez-vous — obtiennent une réponse à toute heure, tirée de ce que votre entreprise sait vraiment. Chaque client satisfait est invité à laisser un avis.",
+      "Les demandes reçues par e-mail et WhatsApp (horaires, tarifs, disponibilités, rendez-vous) obtiennent une réponse à toute heure, tirée de la base de connaissances que vous avez validée. Chaque client satisfait est invité à laisser un avis.",
     court: "Réponse à toute heure aux demandes reçues par mail et WhatsApp.",
   },
   {
     id: "reload",
     system: "RELOAD",
-    nom: "Clients dormants et marchés publics",
+    nom: "Clients inactifs et marchés publics",
     slug: "nouvelles-affaires",
     resume:
-      "Vos clients silencieux sont retrouvés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les consultations publiques de votre zone sont relevées chaque jour et filtrées sur vos capacités réelles.",
-    court: "Clients silencieux recontactés, marchés publics de votre zone filtrés.",
+      "Vos clients inactifs sont identifiés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les consultations publiques de votre zone sont relevées chaque jour et filtrées sur vos capacités réelles.",
+    court: "Clients inactifs recontactés, marchés publics de votre zone filtrés.",
   },
   {
     id: "filed",
@@ -120,8 +120,8 @@ export const POSTES: Poste[] = [
     nom: "Factures fournisseurs et pièces comptables",
     slug: "factures-fournisseurs",
     resume:
-      "Chaque facture fournisseur est lue quel que soit son format, ses montants extraits et contrôlés entre eux, la pièce classée par fournisseur et transmise à votre cabinet dans un dossier complet.",
-    court: "Factures fournisseurs lues, contrôlées, classées, transmises au cabinet.",
+      "Chaque facture fournisseur est lue quel que soit son format, ses montants extraits et contrôlés entre eux, la pièce classée par fournisseur et transmise à la comptabilité dans un dossier complet.",
+    court: "Factures fournisseurs lues, contrôlées, classées, transmises à la comptabilité.",
   },
 ];
 
@@ -134,7 +134,7 @@ export const POSTES: Poste[] = [
 export const SUR_MESURE = {
   nom: "Un poste propre à votre métier",
   resume:
-    "La tâche qui vous coûte le plus cher n'est pas dans la liste ? Elle se construit sur les mêmes fondations — vos outils, vos règles, votre validation. Le périmètre et le devis sont écrits avant tout engagement.",
+    "La tâche qui vous coûte le plus cher n'est pas dans la liste ? Elle se construit sur les mêmes fondations : vos outils, vos règles, votre validation. Le périmètre et le devis sont écrits avant tout engagement.",
   /* 08/09 — la ligne courte de la tuile (même règle que Poste.court) */
   court: "Une tâche hors liste ? Elle se construit sur les mêmes fondations.",
   cta: "Décrire votre cas",
@@ -178,7 +178,7 @@ export const PALIERS: Palier[] = [
       "Un système complet sur le poste qui vous coûte le plus cher : il lit, rédige, attend votre validation et rend compte chaque matin.",
     points: [
       "Un poste au choix parmi les quatre",
-      "Branché sur vos outils : mail, WhatsApp, tableur",
+      "Intégré à vos outils : messagerie, WhatsApp, tableur",
       "Le point du matin et les verrous, compris dès le premier jour",
       "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
@@ -269,16 +269,16 @@ export function lirePeriodicite(v: unknown): Periodicite {
    ce qui change le prix, c'est la structure de validation. */
 
 export const PORTES = {
-  critere: "Le prix dépend de qui valide — pas de votre chiffre d'affaires.",
+  critere: "Le prix dépend de qui valide, pas de votre chiffre d'affaires.",
   solo: {
     titre: "Vous tenez les outils",
     texte:
-      "Indépendant, TPE, PME : une personne — deux, parfois — voit passer les demandes, les devis, les factures, et valide ce qui part. Le prix est public, l'installation se réserve en ligne.",
+      "Indépendant, TPE, PME : une personne, parfois deux, voit passer les demandes, les devis et les factures, et valide ce qui part. Le prix est public et l'installation se réserve en ligne.",
   },
   equipe: {
     titre: "Plusieurs services se partagent le travail",
     texte:
-      "La demande passe par l'accueil, la comptabilité, les opérations ; chaque service a ses outils et ses règles de validation. Là, un prix affiché serait un mensonge : on audite d'abord, le devis sort des volumes mesurés.",
+      "La demande passe par l'accueil, la comptabilité et les opérations, et chaque service a ses outils et ses règles de validation. Un prix affiché n'aurait pas de sens : le diagnostic mesure d'abord les volumes, et le devis en découle.",
   },
 };
 
@@ -317,19 +317,19 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
     lignes: [
       {
         libelle: "Postes en service",
-        aide: "Parmi les quatre : relances, demandes clients, clients dormants et marchés publics, factures fournisseurs.",
+        aide: "Parmi les quatre : relances, demandes clients, clients inactifs et marchés publics, factures fournisseurs.",
         valeurs: parPalier((p) =>
           p.aChoisir === null ? "Les quatre, en service" : `${p.aChoisir}, au choix`,
         ),
       },
       {
         libelle: "PULSE · le point du matin",
-        aide: "Savoir où vous en êtes, chaque matin — compris quel que soit le palier.",
+        aide: "L'état de l'activité chaque matin, compris quel que soit le palier.",
         valeurs: meme("Compris"),
       },
       {
         libelle: "VAULT · validation & verrous",
-        aide: "La certitude que rien ne part sans vous — compris quel que soit le palier.",
+        aide: "La garantie que rien ne part sans validation, comprise quel que soit le palier.",
         valeurs: meme("Compris"),
       },
     ],
@@ -356,7 +356,7 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
       },
       {
         libelle: "Prix par personne",
-        aide: "Le prix ne dépend pas du nombre de gens qui s'en servent chez vous.",
+        aide: "Le prix ne dépend pas du nombre d'utilisateurs.",
         valeurs: meme("Aucun"),
       },
       {
@@ -372,7 +372,7 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
     lignes: [
       {
         libelle: "Réunion d'installation",
-        aide: "En visio, écran partagé : on branche vos outils ensemble, le système démarre sous votre œil.",
+        aide: "En visioconférence, écran partagé : nous connectons vos outils ensemble, et le système démarre sous votre contrôle.",
         valeurs: meme("Comprise, 45 min"),
       },
       {
@@ -405,7 +405,7 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
       },
       {
         libelle: "Chèque TIC",
-        aide: "Région Guadeloupe — porte sur l'installation, pas sur l'abonnement.",
+        aide: "Région Guadeloupe : porte sur l'installation, pas sur l'abonnement.",
         valeurs: meme("Éligibilité vérifiée à l'installation"),
       },
     ],

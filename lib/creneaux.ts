@@ -302,8 +302,8 @@ export const ERREURS: Record<string, string> = {
   creneau_non_aligne: "Ce créneau n'est pas valide. Rechargez la page et réessayez.",
   creneau_requis: "Choisissez un créneau avant d'envoyer votre demande.",
   trop_de_demandes:
-    "Trois demandes sont déjà enregistrées avec cette adresse cette semaine. Écrivez-nous directement si c'est urgent.",
-  champs_invalides: "Un des champs n'est pas valide — vérifiez l'adresse e-mail notamment.",
+    "Trois demandes sont déjà enregistrées avec cette adresse cette semaine. Écrivez-nous directement en cas d'urgence.",
+  champs_invalides: "Un des champs n'est pas valide. Vérifiez l'adresse e-mail notamment.",
   formule_inconnue: "Ce format n'existe plus. Rechargez la page.",
   modules_requis: "Choisissez au moins un poste avant de réserver l'installation.",
   parcours_inconnu: "Ce parcours n'existe plus. Rechargez la page.",
@@ -316,7 +316,7 @@ export const ERREURS: Record<string, string> = {
      ceinture dans reserver()) : on le dit plutôt que de stocker du mensuel */
   annuel_indisponible:
     "La formule annuelle n'est pas encore ouverte à la réservation en ligne. Passez en mensuel pour réserver dès maintenant, ou écrivez-nous.",
-  reseau: "La réservation n'est pas partie — vérifiez votre connexion et réessayez.",
+  reseau: "La réservation n'a pas pu être envoyée. Vérifiez votre connexion et réessayez.",
 };
 
 /* ——— secteurs proposés dans le formulaire ———

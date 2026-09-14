@@ -80,7 +80,7 @@
 
 export const MARQUE = {
   nom: "RELOAD",
-  bailleur: "un système Omega",
+  bailleur: "un système Omega.AI",
   /* Sur le site source, la signature d'éditeur était réduite au seul logo,
      lien vers omegaai.fr — le nom du produit contient déjà la maison, et
      l'écrire une deuxième fois disait « Omega » trois fois dans la même
@@ -121,7 +121,7 @@ export const HEROS = {
      ou dans la section du problème, jamais en chute de bloc. Les deux scènes
      étaient des phrases sans verbe principal ; elles sont conjuguées. */
   chapo:
-    "Un marché de voirie paraît dans la commune d'à côté, et vous l'apprenez le jour où il est clos. Un client de dix ans fait sa révision ailleurs. RELOAD lit ces deux listes chaque matin et ne vous laisse que la décision.",
+    "Un marché de voirie paraît dans la commune voisine, et vos équipes l'apprennent le jour où il est clos. Un client de dix ans fait sa révision ailleurs. RELOAD lit ces deux listes chaque matin et ne vous laisse que la décision.",
   /* Les deux boutons mènent à /contact, qui propose de montrer ce que le
      moteur aurait remonté la semaine passée : le libellé promet ça, pas une
      démo qui n'existe pas — et l'icône du secondaire est une enveloppe. */
@@ -141,7 +141,7 @@ export const OUTILS = {
      ATTENTION AU GABARIT : ce texte tient dans une colonne de 20 rem à partir
      de lg (lg:max-w-xs dans BandeauOutils.tsx). Au-delà de ~150 signes il
      passe à cinq lignes et fait grandir le bandeau. */
-  phrase: "Votre fichier client tient dans un tableur et vos clients vous écrivent dans votre boîte mail. RELOAD lit les deux, donc vous n'installez rien.",
+  phrase: "Votre fichier client vit dans un tableur ou un CRM, et vos clients écrivent à votre messagerie. RELOAD lit les deux, donc vous n'installez rien.",
   /* Un seul mot par case : les cases font 5 à 7 rem, « Google Sheets » y
      passe à la ligne et chevauche ses voisines. */
   noms: ["Gmail", "Outlook", "Sheets", "Excel", "CSV"],
@@ -196,7 +196,7 @@ export const FONCTIONNALITES = {
        Titre et suite coulent dans le MÊME paragraphe (Intitule). */
     titre: "À 7 h 30, votre liste du jour est prête.",
     suite:
-      "RELOAD lit le bulletin pendant la nuit, puis il ne retient que les marchés parus dans vos départements et dans votre métier.",
+      "RELOAD lit le bulletin pendant la nuit, puis il ne retient que les marchés parus dans vos départements et dans votre secteur.",
     epingles: [
       { gauche: "18%", haut: "38%", delai: 0, drapeau: "971", texte: "Voirie · 84 k€ · clôture 12/10" },
       { gauche: "44%", haut: "24%", delai: 200, drapeau: "972", texte: "Second œuvre · 220 k€" },
@@ -234,16 +234,16 @@ export const FONCTIONNALITES = {
      ne part jamais sans vous » : ce serait faux au bout de trois semaines. */
   citation: {
     texte:
-      "« Vous relisez la première vague nom par nom. Ensuite, c'est vous qui décidez ce qui part seul et ce qui attend votre accord. »",
+      "« Vos équipes relisent la première vague nom par nom. Ensuite, vous décidez ce qui part seul et ce qui attend votre accord. »",
     signataire: "La règle qui ne se négocie pas",
-    role: "Sur RELOAD comme sur tout le système Omega",
+    role: "Sur RELOAD comme sur tout le système Omega.AI",
   },
 
   /* ── Moitié « clients dormants » ────────────────────────────────────── */
   carteLangue: {
     titre: "Vous dictez les règles en français.",
     suite:
-      "Vous n'avez aucune case à cocher : une phrase suffit, et le moteur l'applique ensuite à chaque message.",
+      "Vous n'avez aucune case à cocher : une phrase suffit, et le système l'applique ensuite à chaque message.",
     echanges: [
       { role: "vous" as const, texte: "Écarte tout ce qui dépasse 300 k€." },
       { role: "moteur" as const, texte: "Compris — filtre posé sur le montant." },
@@ -260,7 +260,7 @@ export const FONCTIONNALITES = {
   carteTrace: {
     titre: "Chaque client reçoit son propre message.",
     suite:
-      "Le moteur y reprend la date, la référence et le montant de sa dernière commande, ce qui donne l'inverse exact d'une lettre envoyée à tout le fichier.",
+      "Le système y reprend la date, la référence et le montant de sa dernière commande, ce qui donne l'inverse exact d'une lettre envoyée à tout le fichier.",
     phrase:
       "Bonjour Martin, je retrouve votre",
     phraseCitee: "commande du 14 mars 2025, réf. 4821, 615 €",
@@ -279,7 +279,7 @@ export const CHIFFRES = {
      ce que le moteur fait de ces règles. Les quatre libellés de tuiles ont
      chacun sujet et verbe, à longueur constante — ce sont les chaînes les
      plus contraintes du fichier (text-sm sous un chiffre en text-4xl). */
-  titre: "Le moteur applique quatre règles qu'il ne sait pas contourner.",
+  titre: "Le système applique quatre règles qu'il ne peut pas contourner.",
   suite: "Elles valent le 15 août comme un mardi ordinaire.",
   cellules: [
     { valeur: "7 h 30", libelle: "Le relevé part chaque matin" },
@@ -288,8 +288,8 @@ export const CHIFFRES = {
     { valeur: "Arrêt", libelle: "Au premier doute, rien ne part" },
   ],
   graphique: {
-    intitule: "Ce que devient un fichier client qu'on ne rappelle jamais",
-    mention: "Exemple de lecture — pas les données d'un client",
+    intitule: "Ce que devient un fichier client que personne ne rappelle",
+    mention: "Exemple de lecture, pas les données d'un client",
     series: [
       { tranche: "0–30 j", actifs: 186, dormants: 0 },
       { tranche: "1–3 mois", actifs: 142, dormants: 24 },
@@ -314,7 +314,7 @@ export const METIERS = {
      sur un fragment sans verbe principal. La défense du lecteur tient
      maintenant en une phrase. */
   titre: "Personne ne laisse filer une affaire par négligence.",
-  suite: "Deux de ces métiers passent à côté de marchés publics et trois laissent partir des clients ; ouvrez celui qui vous concerne.",
+  suite: "Deux de ces secteurs passent à côté de marchés publics et trois laissent partir des clients. Ouvrez celui qui vous concerne.",
   /* Les quatre cartes du carrousel d'origine deviennent des onglets, plus une
      cinquième entrée. Chaque métier porte trois blocs, et le troisième — « ce
      qui reste chez vous » — n'est pas une précaution juridique : c'est ce qui
@@ -324,7 +324,7 @@ export const METIERS = {
      (planning, stock, atelier, caisse) reste au logiciel métier. */
   blocs: {
     echappe: "Ce qui vous échappe",
-    cherche: "Ce qu'on va chercher",
+    cherche: "Ce que RELOAD va chercher",
     reste: "Ce qui reste chez vous",
   },
   secteurs: [
@@ -334,11 +334,11 @@ export const METIERS = {
       secteur: "Travaux publics · VRD",
       icone: "chantier" as const,
       echappe:
-        "Vous entendez parler d'un marché trois semaines après sa publication, par quelqu'un qui l'a vu passer, et le délai de réponse ne tient déjà plus.",
+        "Vos équipes entendent parler d'un marché trois semaines après sa publication, par quelqu'un qui l'a vu passer, et le délai de réponse ne tient déjà plus.",
       cherche:
         "RELOAD relève chaque matin les marchés de vos départements, puis il écarte tout ce qui sort de vos qualifications.",
       reste:
-        "Vous décidez d'y aller et vous montez le dossier : le moteur vous met l'annonce sous les yeux, mais il ne répond jamais à votre place.",
+        "Vous décidez d'y répondre et vous montez le dossier : le système vous présente l'annonce, mais il ne répond jamais à votre place.",
     },
     {
       cle: "batiment",
@@ -348,7 +348,7 @@ export const METIERS = {
       echappe:
         "Un lot paraît sous un intitulé que vous ne surveillez pas, et comme le mot n'est pas le vôtre, l'annonce ne remonte jamais jusqu'à vous.",
       cherche:
-        "Le moteur élargit la recherche aux intitulés voisins des vôtres, parce que l'acheteur public n'emploie pas toujours vos mots.",
+        "Le système élargit la recherche aux intitulés voisins des vôtres, parce que l'acheteur public n'emploie pas toujours vos mots.",
       reste: "Vous fixez vos prix, vous choisissez vos co-traitants et vous décidez de répondre ou non.",
     },
     {
@@ -357,9 +357,9 @@ export const METIERS = {
       secteur: "Concession & après-vente",
       icone: "atelier" as const,
       echappe:
-        "Un client qui venait tous les deux ans cesse de venir, sans rien dire à personne. Vous vous en apercevez en fin d'année, quand sa ligne a disparu du chiffre.",
+        "Un client qui venait tous les deux ans cesse de venir, sans rien dire à personne. Le service s'en aperçoit en fin d'année, quand sa ligne a disparu du chiffre.",
       cherche:
-        "Le moteur suit les révisions et les contrôles qui arrivent à échéance, et il repère les clients qui ne sont pas revenus depuis le délai que vous fixez.",
+        "Le système suit les révisions et les contrôles qui arrivent à échéance, et il repère les clients qui ne sont pas revenus depuis le délai que vous fixez.",
       reste:
         "Votre planning d'atelier et votre stock de pièces restent où ils sont, parce que RELOAD ne remplace pas votre logiciel métier.",
     },
@@ -371,7 +371,7 @@ export const METIERS = {
       echappe:
         "L'entretien annuel saute une année, puis il saute la suivante, et le contrat s'éteint sans que personne l'ait jamais résilié.",
       cherche:
-        "Le moteur tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû.",
+        "Le système tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû.",
       reste: "Vous gardez l'intervention, le déplacement et le prix que vous facturez.",
     },
     {
@@ -382,8 +382,8 @@ export const METIERS = {
       echappe:
         "La facture est soldée et le dossier se referme. Six mois plus tard, le client rappelle un concurrent qui, lui, avait écrit.",
       cherche:
-        "Le moteur repère les missions closes depuis assez longtemps pour qu'un mot se justifie, sans que vous deveniez insistant.",
-      reste: "Vous choisissez ce que vous avez envie de leur proposer, et à quel prix.",
+        "Le système repère les missions closes depuis assez longtemps pour qu'une prise de contact se justifie, sans insistance.",
+      reste: "Vous choisissez ce que vous souhaitez leur proposer, et à quel prix.",
     },
   ],
 };
@@ -393,7 +393,7 @@ export const METIERS = {
    produit. Le titre le dit — ça vaut mieux qu'un « questions fréquentes »
    qu'aucun lecteur ne croit. */
 export const QUESTIONS = {
-  titre: "On nous pose ces questions à chaque rendez-vous.",
+  titre: "Les questions posées à chaque rendez-vous.",
   /* « Il en manque une ? » est la SEULE figure courte qui reste sur la page,
      et c'est aussi l'unique question rhétorique que la doctrine autorise :
      elle amorce le lien « Écrivez-nous », elle ne cherche pas un effet. Ne
@@ -404,7 +404,7 @@ export const QUESTIONS = {
   items: [
     {
       q: "Qu'est-ce que RELOAD, concrètement ?",
-      r: "RELOAD lit deux listes à votre place, tous les matins. La première rassemble les marchés publics parus dans vos départements, et vous ne recevez que ceux qui passent vos filtres. La seconde est votre propre fichier client : le moteur y repère les clients qui ne sont pas revenus depuis le délai que vous fixez, puis il rédige la reprise de contact, qui part de votre adresse. Vous ne changez pas d'outil, puisque tout vous arrive dans votre boîte mail.",
+      r: "RELOAD lit deux listes à votre place, tous les matins. La première rassemble les marchés publics parus dans vos départements, et vous ne recevez que ceux qui passent vos filtres. La seconde est votre propre fichier client : le système y repère les clients qui ne sont pas revenus depuis le délai que vous fixez, puis il rédige la reprise de contact, qui part de votre adresse. Vous ne changez pas d'outil, puisque tout vous arrive dans votre messagerie.",
     },
     {
       q: "D'où viennent les annonces de marchés publics ?",
@@ -414,20 +414,20 @@ export const QUESTIONS = {
       /* Question reprise de la fiche produit (textes-pages-paquets-REECRIT.md,
          slug « nouvelles-affaires »). C'est elle qui décide un artisan qui n'a
          jamais répondu à un marché — et elle porte la limite du produit. */
-      q: "Je n'ai jamais répondu à un marché public. C'est jouable ?",
-      r: "Le moteur ne dépose aucun dossier à votre place, puisque son travail s'arrête à vous éviter de passer à côté. Les marchés hors de vos qualifications ou de vos plafonds sont écartés avant de vous parvenir, et ce qui reste vous arrive avec le lien vers l'avis officiel. Le montage du dossier, le prix et la décision d'y aller restent chez vous — c'est un travail que personne ne peut faire à votre place.",
+      q: "Nous n'avons jamais répondu à un marché public. Est-ce réaliste ?",
+      r: "Le système ne dépose aucun dossier à votre place, puisque son travail s'arrête à vous éviter de passer à côté. Les marchés hors de vos qualifications ou de vos plafonds sont écartés avant de vous parvenir, et ce qui reste vous arrive avec le lien vers l'avis officiel. Le montage du dossier, le prix et la décision d'y aller restent chez vous — c'est un travail que personne ne peut faire à votre place.",
     },
     {
       q: "Comment savoir qu'une annonce me concerne vraiment ?",
-      r: "Chaque annonce retenue est notée de 0 à 100 sur votre métier, vos capacités et le délai de réponse. En dessous de votre seuil — 60 par défaut — elle n'apparaît pas. Au-dessus, elle vous arrive avec le motif de la note et le lien vers l'avis officiel, pour que vous puissiez juger vous-même.",
+      r: "Chaque annonce retenue est notée de 0 à 100 sur votre métier, vos capacités et le délai de réponse. En dessous de votre seuil, fixé à 60 par défaut, elle n'apparaît pas. Au-dessus, elle vous arrive avec le motif de la note et le lien vers l'avis officiel, pour que vous puissiez juger vous-même.",
     },
     {
-      q: "Est-ce que RELOAD peut écrire n'importe quoi à mes clients ?",
-      r: "Non, et c'est la première chose qu'on nous demande. Vous posez les règles en français — le ton, les sujets interdits, les remises, la longueur — et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vous relisez la première vague nom par nom ; ensuite, vous décidez ce qui part seul et ce qui attend votre accord, et vous pouvez tout couper en un mot.",
+      q: "RELOAD peut-il écrire n'importe quoi à mes clients ?",
+      r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vous relisez la première vague nom par nom ; ensuite, vous décidez ce qui part seul et ce qui attend votre accord, et vous pouvez tout couper en un mot.",
     },
     {
       q: "Que se passe-t-il si quelque chose déraille ?",
-      r: "Les moteurs s'arrêtent tout seuls. Une annonce déjà vue n'est jamais représentée, un client ne reçoit jamais deux reprises, chaque incident est horodaté dans un journal, et au premier doute la coupure est automatique. Nous préférons un matin sans relevé à un matin où le même client reçoit deux messages.",
+      r: "Les systèmes s'arrêtent d'eux-mêmes. Une annonce déjà vue n'est jamais représentée, un client ne reçoit jamais deux reprises, chaque incident est horodaté dans un journal, et au premier doute la coupure est automatique. Nous préférons un matin sans relevé à un matin où le même client reçoit deux messages.",
     },
   ],
 };
@@ -448,12 +448,12 @@ export const FRANCAIS = {
      Le titre, lui, était une antithèse nominale (« écrit ici, pas traduit
      d'ailleurs ») : c'est le tic n° 3 de la doctrine. */
   titre: "Ce produit est écrit en France.",
-  suite: "Omega l'édite depuis la Guadeloupe, et les annonces viennent du bulletin officiel français. Le contrat dit où vont vos données.",
+  suite: "Omega.AI l'édite depuis la Guadeloupe, et les annonces viennent du bulletin officiel français. Le contrat précise où vont vos données.",
   cellules: [
     {
       icone: "editeur" as const,
       titre: "Édité en France",
-      texte: "Omega conçoit et maintient ce produit en Guadeloupe, donc quand vous écrivez, c'est quelqu'un d'ici qui vous répond.",
+      texte: "Omega.AI conçoit et maintient ce produit en Guadeloupe, donc quand vous écrivez, une personne de l'équipe vous répond.",
     },
     {
       icone: "source" as const,
@@ -468,7 +468,7 @@ export const FRANCAIS = {
          non-revente, la liste des prestataires au contrat, et la sortie. */
       icone: "donnees" as const,
       titre: "Vos clients restent les vôtres",
-      texte: "Vos données sont hébergées en Europe et ne sont jamais revendues. La liste des prestataires est annexée au contrat, et si vous arrêtez, on vous rend tout puis on efface.",
+      texte: "Vos données sont hébergées dans l'Union européenne et ne sont jamais revendues. La liste des prestataires est annexée au contrat, et si vous arrêtez, tout vous est restitué puis effacé.",
     },
   ],
 };

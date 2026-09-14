@@ -77,7 +77,7 @@ const mono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FRONTD — demandes entrantes & avis | Omega.AI",
+  title: "FRONTD · demandes entrantes & avis | Omega.AI",
   /* 11/09 — la description reprenait le titre principal, qui est une
      accroche : il travaille au-dessus du pli, le contexte déjà posé par
      la page. Une description de référencement travaille sans contexte,

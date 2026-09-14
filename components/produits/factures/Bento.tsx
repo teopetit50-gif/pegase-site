@@ -141,7 +141,7 @@ const ETAPES: [string, string][] = [
   ["Lue", "HT, TVA, TTC, date, numéro, fournisseur"],
   ["Recoupée", "les trois montants tombent juste"],
   ["Classée", "sous Sogedis Matériel, septembre"],
-  ["Transmise", "dans le dossier du cabinet"],
+  ["Transmise", "dans le dossier comptable"],
 ];
 
 function CartePercours() {
@@ -344,7 +344,7 @@ function CarteGardeFous() {
 const FILE: [string, string, string][] = [
   ["Une validation vous attend", "Loc'Outils 971 — fournisseur jamais vu", "8 min"],
   ["Montant à vérifier", "Papeterie du Port — TVA incohérente", "1 h"],
-  ["Dossier prêt", "Août transmis au cabinet, 214 pièces", "3 h"],
+  ["Dossier prêt", "Août transmis à la comptabilité, 214 pièces", "3 h"],
   ["Doublon écarté", "Sogedis — facture déjà reçue le 02/09", "1 j"],
 ];
 
@@ -399,8 +399,8 @@ export default function Bento() {
 
       <Article
         titre="Votre semaine, sans y toucher"
-        court="Ce qui est arrivé, et où ça en est."
-        texte="Ce qui est arrivé, par quel canal, et où ça en est. Le format n'est pas votre problème."
+        court="Ce qui est arrivé, et où chaque pièce en est."
+        texte="Ce qui est arrivé, par quel canal, et où chaque pièce en est. Le format ne vous concerne plus."
         className="border-b border-[#171717]/[0.16]"
       >
         <CarteSemaine />

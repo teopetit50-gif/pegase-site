@@ -44,7 +44,7 @@
 export const MARQUE = {
   nom: "CASHD",
   role: "relance devis & factures",
-  signature: "un système Omega",
+  signature: "un système Omega.AI",
   /* 11/09 — l'adresse passe de `bonjour@` à `contact@` : c'est la seule
      adresse de ce site (dix occurrences), et deux adresses de contact sur
      un même site est un défaut, pas une nuance. Reroutage au sens de la
@@ -76,14 +76,14 @@ export const HEROS = {
      §10. La pastille dit maintenant la même situation avec un sujet et un
      verbe, pour deux signes de plus. */
   pastille: "Vos factures attendent d'être payées",
-  titre: "Vous avez combien dehors ?",
+  titre: "Quel montant attend d'être encaissé ?",
   /* L'espace avant le « ? » est une FINE insécable (U+202F), la même que
      celle des questions de la FAQ : sur un titre de 26 signes en
      `text-balance`, une espace ordinaire laissait le point
      d'interrogation partir seul à la ligne, et une insécable large
      (U+00A0) l'éloignait visiblement plus que partout ailleurs. */
   chapo:
-    "Des devis attendent une réponse et des factures ont dépassé leur date. Chaque matin, une relance est déjà écrite pour chaque client, et vous décidez si elle part.",
+    "Des devis attendent une réponse et des factures ont dépassé leur échéance. Chaque matin, une relance est déjà rédigée pour chaque compte, et vos équipes décident si elle part.",
   /* Libellé changé, et c'est la règle 6 qui l'impose : il disait « Créer mon
      compte » et menait à /creer-un-compte, qui n'existe plus. Un bouton qui
      promet un compte et ouvre une prise de rendez-vous serait faux. */
@@ -129,7 +129,7 @@ export const PRINCIPE = {
   sourcil: "Vous livrez d'abord et vous facturez ensuite",
   titre: "À 7 h, vos relances sont déjà écrites.",
   chapo:
-    "Une facture en retard attend que vous ayez le temps de la relancer, et ce temps ne vient jamais. Elle vieillit dans le tableur, si bien que la relance, six mois plus tard, tourne au conflit.",
+    "Une facture en retard attend que quelqu'un ait le temps de la relancer, et ce temps ne vient jamais. Elle vieillit dans le tableur, si bien que la relance, six mois plus tard, tourne au litige.",
   cartes: [
     {
       cle: "relit",
@@ -150,8 +150,8 @@ export const PRINCIPE = {
     },
     {
       cle: "ecrit",
-      titre: "Vous n'avez plus à réclamer",
-      texte: "La phrase désagréable est déjà écrite quand vous ouvrez votre espace, et il ne vous reste qu'à la relire.",
+      titre: "Vos équipes n'ont plus à réclamer",
+      texte: "Le message est déjà rédigé quand vous ouvrez votre espace, et il ne reste qu'à le relire.",
       /* PASSE CORRECTRICE — « Le ton suit le montant en jeu » / « Et
          l'ancienneté du retard » était UNE phrase coupée en deux chaînes,
          la seconde ouvrant sur « Et » : la scansion pure que la doctrine
@@ -268,7 +268,7 @@ export const BENTO = {
     {
       id: "journal",
       titre: "Chaque envoi laisse une trace",
-      texte: "Le moteur date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, vous ressortez la ligne.",
+      texte: "Le système date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible.",
     },
   ],
 } as const;
@@ -357,25 +357,25 @@ export const FRANCE = {
      tic 3, en trois mots et sans verbe, juste au-dessus d'un titre qui
      dit déjà la même chose. Le sourcil redevient une étiquette de
      section : il annonce la question, le titre y répond. */
-  sourcil: "D'où vient ce moteur",
+  sourcil: "D'où vient ce système",
   titre: "Un produit français",
   chapo:
-    "L'origine d'un logiciel n'a l'air de rien tant que tout va bien. Le jour où ça coince, elle décide qui vous répond, en quelle langue, et sous quel droit vous êtes.",
+    "L'origine d'un logiciel semble secondaire tant que tout va bien. Le jour où un problème survient, elle décide qui vous répond, en quelle langue, et sous quel droit vous êtes.",
   points: [
     {
       titre: "Conçu et développé en France",
       texte:
-        "Le moteur est écrit en Guadeloupe, une région française et européenne, et rien n'est sous-traité ailleurs.",
+        "Le système est développé en Guadeloupe, région française et européenne, et rien n'est sous-traité ailleurs.",
     },
     {
       titre: "Vos données sont hébergées dans l'Union européenne",
       texte:
-        "Votre entreprise dispose d'un espace chiffré et distinct. Pour écrire un message, le moteur n'en sort que le nécessaire, jamais votre facturier entier.",
+        "Votre entreprise dispose d'un espace chiffré et distinct. Pour rédiger un message, le système n'en extrait que le nécessaire, jamais votre facturier entier.",
     },
     {
       titre: "L'assistance se fait en français",
       texte:
-        "Quand vous avez une question, elle est traitée par les gens qui ont installé le moteur chez vous.",
+        "Quand vous avez une question, elle est traitée par les personnes qui ont installé le système chez vous.",
     },
     {
       titre: "Facturation en euros, droit français",
@@ -392,10 +392,10 @@ export const FRANCE = {
    ça / c'est ma femme qui gère ». Elles ajoutent deux lignes repliées au
    mobile, pour les deux arguments les plus décisifs de la page. */
 export const QUESTIONS = {
-  titre: "Ce qu'on nous demande à chaque installation",
+  titre: "Les questions posées à chaque installation",
   chapoAvant: "Les mêmes questions reviennent à chaque fois. Si la vôtre n'y est pas, ",
   chapoLien: "écrivez-nous",
-  chapoApres: " — la réponse rejoindra la liste.",
+  chapoApres: ", et la réponse rejoindra la liste.",
   categories: [
     {
       id: "fonctionnement",
@@ -407,10 +407,10 @@ export const QUESTIONS = {
         },
         {
           q: "Qui écrit les messages ?",
-          r: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par le moteur à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
+          r: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par le système à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
         },
         {
-          q: "Mes clients vont mal le prendre ?",
+          q: "Mes clients risquent-ils de mal le prendre ?",
           r: "Un rappel à sept jours ne froisse personne. C'est le silence de six mois, puis l'appel excédé, qui abîme une relation commerciale. Le ton reste le vôtre, le vouvoiement est constant, et vous lisez chaque message avant qu'il parte.",
         },
       ],
@@ -425,11 +425,11 @@ export const QUESTIONS = {
         },
         {
           q: "Faut-il changer de logiciel de facturation ?",
-          r: "Non. Le moteur lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes et vos habitudes. Vous n'avez aucun compte à ouvrir ni aucune donnée à migrer.",
+          r: "Non. Le système lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes et vos habitudes. Vous n'avez aucun compte à ouvrir ni aucune donnée à migrer.",
         },
         {
-          q: "Quelqu'un s'en occupe déjà chez nous.",
-          r: "Le moteur ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part, si bien qu'elle arrête seulement de tenir le compte de qui doit quoi et de courir après les retards.",
+          q: "Une personne s'en occupe déjà chez nous.",
+          r: "Le système ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. Elle cesse seulement de tenir le compte de qui doit quoi et de courir après les retards.",
         },
       ],
     },
@@ -439,15 +439,15 @@ export const QUESTIONS = {
       items: [
         {
           q: "Où vont mes données ?",
-          r: "Elles vont dans un espace chiffré et distinct, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, le moteur transmet à un modèle le strict nécessaire — un client, une facture, un historique — et jamais votre facturier entier.",
+          r: "Elles vont dans un espace chiffré et distinct, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, le système transmet à un modèle le strict nécessaire, un client, une facture, un historique, et jamais votre facturier entier.",
         },
         {
           q: "Un message peut-il partir sans moi ?",
           r: "Non. Tout ce qui doit partir passe par une file de validation : vous approuvez, vous corrigez ou vous suspendez. La mise en demeure exige en plus une validation explicite, à chaque fois.",
         },
         {
-          q: "Combien ça coûte ?",
-          r: "Le tarif n'est pas arrêté. Il dépend de votre encours et du nombre de clients à suivre, et l'annoncer avant de les avoir vus ne rimerait à rien. Écrivez-nous : on chiffre votre cas sur vos volumes réels, et vous décidez après.",
+          q: "Quel est le tarif ?",
+          r: "Le tarif dépend de votre encours et du nombre de comptes à suivre, et l'annoncer avant de les avoir mesurés n'aurait pas de sens. Écrivez-nous : nous chiffrons votre cas sur vos volumes réels, et vous décidez après.",
         },
       ],
     },
@@ -463,9 +463,9 @@ export const QUESTIONS = {
    en plus un encours qui « se relance tout seul », ce que la page passe
    dix sections à démentir. */
 export const CLOTURE = {
-  titre: "Ce qui dort dehors ne rentrera pas tout seul.",
+  titre: "Ce qui attend dehors ne rentrera pas seul.",
   chapo:
-    "Vous branchez le tableur que vous tenez déjà, puis vous relisez chaque relance avant qu'elle parte : le système ne vous demande rien d'autre.",
+    "Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : le système ne demande rien d'autre.",
   /* Même reroutage que le bouton du héros. */
   bouton: "Réserver un audit",
 } as const;

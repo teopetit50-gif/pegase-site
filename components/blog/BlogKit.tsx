@@ -123,9 +123,7 @@ export function BlogCta() {
         Et pour votre entreprise ?
       </h2>
       <p className="o-lead mx-auto mt-3 max-w-[560px]">
-        Les analyses valent pour un secteur ; l&apos;audit vaut pour votre
-        situation. Trente minutes suffisent à chiffrer ce que votre difficulté
-        principale vous coûte réellement.
+        Les analyses valent pour un secteur. L&apos;audit vaut pour votre situation, et trente minutes suffisent à chiffrer ce que votre processus le plus coûteux représente réellement.
       </p>
       <Link
         href="/commencer"

@@ -348,7 +348,7 @@ export function IllustrationOffload() {
       <div className="px-4 py-4">
         <div className="mb-2.5 flex items-center justify-between">
           <span className="text-[11.5px] font-semibold text-[#52525b]">18 pièces classées</span>
-          <Etiquette ton="vert">Prêt cabinet</Etiquette>
+          <Etiquette ton="vert">Prêt compta</Etiquette>
         </div>
         <div className="space-y-1.5">
           {[
@@ -455,7 +455,7 @@ export const CHAINES: Record<string, Noeud[]> = {
     { label: "Pièce reçue par mail", ton: "#f4f4f5", icone: I.mail, source: true },
     { label: "Extraire et contrôler", ton: "#18181b", icone: I.doc },
     { label: "Classer et horodater", ton: "#dc2626", icone: I.flux, decale: true },
-    { label: "Transmettre au cabinet", ton: "#2563eb", icone: I.check },
+    { label: "Transmettre à la comptabilité", ton: "#2563eb", icone: I.check },
   ],
 };
 
@@ -578,10 +578,10 @@ export function MaqJournal() {
         </div>
         <div className="space-y-2">
           {[
-            { h: "07:02", t: "Brief du matin envoyé" },
+            { h: "07:02", t: "Point du matin envoyé" },
             { h: "09:14", t: "Relance FA-2418 · 8 940 €" },
             { h: "11:38", t: "Réponse · demande du samedi" },
-            { h: "16:20", t: "3 pièces classées → cabinet" },
+            { h: "16:20", t: "3 pièces classées → comptabilité" },
           ].map((r) => (
             <div key={r.h} className="flex items-center gap-3 text-[12.5px]">
               <span

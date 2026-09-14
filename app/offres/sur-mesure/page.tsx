@@ -106,7 +106,7 @@ import {
 export const metadata: Metadata = {
   title: "Sur mesure | Omega.AI",
   description:
-    "Quand aucun des quatre systèmes ne correspond : on construit celui qui manque, sur vos règles et dans votre secteur.",
+    "Quand aucun des quatre systèmes ne couvre le besoin, Omega.AI conçoit celui qui manque : cadré, chiffré, puis construit sur vos règles et intégré à votre environnement.",
 };
 
 const TAG = "Sur mesure";
@@ -117,34 +117,34 @@ const ROLE = "le système qui n'existe pas encore";
    c'est ce qui permet de la reporter dans FICHES le jour où le sur-mesure
    deviendrait un paquet, et de comparer ses textes à ceux des autres. */
 const FICHE: Fiche = {
-  pitch: "Ce qui n'existe pas encore, on le construit.",
+  pitch: "Ce que le catalogue ne couvre pas, nous le concevons avec vous.",
 
   sections: {
     pointsTitre: "Ce que couvre le sur-mesure.",
     pointsChapo:
-      "Un processus interne, un logiciel métier, un pont entre deux outils, un contrôle répétitif : le périmètre se définit avec vous, pas dans un catalogue.",
+      "Un processus interne, un logiciel métier, un pont entre deux outils ou un contrôle répétitif : le périmètre se définit avec vos équipes, puis s'écrit avant tout chiffrage.",
     detailChapo:
-      "Ce qu'on cadre avant d'écrire une ligne, ce qu'on construit, et ce qui reste sous votre décision.",
+      "Ce que nous cadrons avant d'écrire une ligne, ce que nous construisons, et ce qui reste sous votre décision.",
     cibleChapo:
-      "Aucun secteur n'est exclu. Ce qui compte n'est pas votre métier, c'est qu'une tâche s'y répète avec des règles qu'on peut écrire.",
-    faqChapo: "Les questions posées avant de lancer un projet sur mesure.",
+      "Aucun secteur n'est exclu : un système sur mesure se justifie dès qu'une tâche se répète selon des règles qui peuvent s'écrire, quel que soit le métier.",
+    faqChapo: "Les questions qu'une direction pose avant de lancer un projet sur mesure.",
   },
 
   fonctionnement: [
-    "Le catalogue Omega.AI couvre quatre postes qui reviennent dans presque toutes les entreprises : les impayés, les clients dormants, les demandes entrantes, la paperasse. Ils sont conçus pour être installés vite parce que le problème est le même partout. Le sur-mesure commence exactement là où cette hypothèse tombe : quand la tâche qui vous coûte le plus cher est propre à votre métier, à votre organisation ou à vos outils, et qu'aucun produit sur étagère ne la traite sans la déformer.",
+    "Le catalogue Omega.AI couvre quatre processus présents dans presque toutes les organisations : les encaissements, la réactivation commerciale, les demandes entrantes et les flux documentaires. Ils se déploient vite parce que le besoin est le même partout. Le sur-mesure commence là où cette hypothèse s'arrête : quand le processus qui coûte le plus cher est propre à votre métier, à votre organisation ou à votre système d'information, et qu'aucun produit sur étagère ne le traite sans le déformer.",
     "Le périmètre n'est pas limité à l'automatisation de messages. Un système sur mesure peut être un logiciel métier complet avec son interface et sa base de données, un pont entre deux outils qui ne communiquent pas, un calcul ou un contrôle répété que personne n'a le temps de faire, une extraction de données depuis des documents, un tableau de bord alimenté en continu, ou un assistant interne qui répond sur vos propres procédures. Si la tâche s'exécute aujourd'hui à la main et suit des règles qu'on peut écrire, elle peut être reprise.",
     "La méthode ne change pas de celle des quatre systèmes : on part de votre processus réel, pas d'un modèle. On écrit les règles avec vous, on définit ce qui s'exécute seul et ce qui attend votre validation, et on branche le résultat sur les outils que vous utilisez déjà plutôt que d'en imposer de nouveaux. La mise en production est progressive : un périmètre restreint d'abord, mesuré, puis élargi une fois qu'il tient.",
   ],
 
   points: [
-    "Logiciels métier : une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit votre façon de travailler",
-    "Ponts entre outils : deux logiciels qui ne se parlent pas, une double saisie quotidienne, un export repris à la main chaque semaine",
+    "Logiciels métier : une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services",
+    "Ponts entre outils : deux logiciels qui ne communiquent pas, une double saisie quotidienne ou un export repris à la main chaque semaine",
     "Traitement de documents : lecture, contrôle, extraction et classement de pièces reçues dans n'importe quel format",
-    "Contrôles et calculs répétitifs : vérifications de cohérence, alertes sur seuils, états produits à date fixe sans que personne n'ait à y penser",
+    "Contrôles et calculs répétitifs : vérifications de cohérence, alertes sur seuils, états produits à date fixe sans intervention de vos équipes",
   ],
 
   controle:
-    "Le niveau d'autonomie se décide règle par règle, avec vous : ce qui s'exécute seul, ce qui attend une validation, et ce qui ne doit jamais partir sans un accord explicite. Rien n'est figé : un réglage se change en cours de route.",
+    "Le niveau d'autonomie se décide règle par règle, avec vous : ce qui s'exécute seul, ce qui attend une validation, et ce qui ne part jamais sans un accord explicite. Rien n'est figé, puisqu'un réglage se modifie en cours d'exploitation.",
 
   /* Le sur-mesure ne se branche pas sur une liste fermée : ces quatre
      entrées sont les FAMILLES d'outils les plus fréquentes, pas une
@@ -170,38 +170,38 @@ const FICHE: Fiche = {
   etapes: [
     {
       t: "Cadrage du besoin",
-      d: "On décrit le processus tel qu'il se déroule aujourd'hui, à qui il coûte du temps et où il casse. Rien n'est chiffré avant que ce soit clair pour vous comme pour nous.",
+      d: "Nous décrivons le processus tel qu'il se déroule aujourd'hui, à quels services il coûte du temps et où il se rompt. Rien n'est chiffré avant que ce soit clair pour vous comme pour nous.",
     },
     {
       t: "Conception et devis",
-      d: "Périmètre, règles de gestion, points de validation et coût : tout est écrit avant de commencer. Vous savez ce que vous achetez, et ce qui est hors périmètre.",
+      d: "Périmètre, règles de gestion, points de validation et coût sont écrits avant de commencer, ce qui vous permet de savoir exactement ce que vous achetez et ce qui reste hors périmètre.",
     },
     {
       t: "Construction",
-      d: "Le système est bâti sur vos règles et branché sur vos outils. Vous voyez des versions intermédiaires plutôt qu'un résultat final surprise.",
+      d: "Le système est construit sur vos règles et intégré à vos outils. Vos équipes voient des versions intermédiaires, jamais un résultat final découvert à la livraison.",
     },
     {
       t: "Mise en service et suivi",
-      d: "Démarrage sur un périmètre restreint, mesure de ce que ça change, puis élargissement. Les règles s'ajustent sur vos usages réels.",
+      d: "Le démarrage se fait sur un périmètre restreint, puis s'élargit une fois l'effet mesuré. Les règles s'ajustent sur les usages réels de vos équipes.",
     },
   ],
 
   faq: [
     {
       q: "Y a-t-il des besoins que vous refusez ?",
-      a: "Oui, deux cas. Ceux dont les règles ne peuvent pas s'écrire : s'il faut un jugement humain à chaque cas, l'automatisation n'apporte rien de fiable. Et ceux dont le gain ne couvre pas le coût de construction : si une tâche vous prend dix minutes par mois, on vous le dira plutôt que de vous vendre un projet.",
+      a: "Oui, deux cas. Ceux dont les règles ne peuvent pas s'écrire : si chaque situation demande un jugement humain, l'automatisation n'apporte rien de fiable. Et ceux dont le gain ne couvre pas le coût de construction : nous le disons au cadrage, avant tout devis.",
     },
     {
-      q: "Est-ce que vous travaillez dans mon secteur ?",
-      a: "La question n'est pas le secteur mais le processus. Une extraction de données depuis des documents fonctionne pareil chez un transporteur et dans un cabinet médical : ce sont les règles métier et le vocabulaire qui changent, et ils se recueillent au cadrage. Aucun secteur n'est écarté par principe.",
+      q: "Travaillez-vous dans mon secteur ?",
+      a: "La question porte moins sur le secteur que sur le processus. Une extraction de données depuis des documents fonctionne de la même façon chez un transporteur et dans un groupe de distribution : seuls les règles métier et le vocabulaire changent, et c'est précisément ce que le cadrage écrit avec vos équipes.",
     },
     {
-      q: "Combien de temps et combien ça coûte ?",
-      a: "Cela dépend entièrement du périmètre, et c'est pour cette raison que le cadrage précède le devis. Un pont entre deux outils se compte en jours ; un logiciel métier complet en semaines. Vous recevez un montant ferme et un périmètre écrit avant tout engagement.",
+      q: "Quels sont les délais et le coût ?",
+      a: "Ils dépendent entièrement du périmètre, et c'est la raison pour laquelle le cadrage précède le devis. Un pont entre deux outils se compte en jours, un logiciel métier complet en semaines. Vous recevez un montant ferme et un périmètre écrit avant de vous engager.",
     },
     {
       q: "À qui appartient ce qui est construit ?",
-      a: "Les données restent les vôtres dans tous les cas, comme pour les systèmes du catalogue : hébergement dans l'Union européenne, export et suppression sur demande. Les conditions de propriété et de reprise du système lui-même sont écrites dans le devis, avant signature.",
+      a: "Les données restent les vôtres dans tous les cas, comme pour les systèmes du catalogue : hébergement dans l'Union européenne, export et suppression sur demande. Les conditions de propriété et de reprise du système lui-même sont fixées au devis, avant la construction.",
     },
   ],
 
@@ -215,7 +215,7 @@ const FICHE: Fiche = {
       { text: "Tâche qui demande un jugement au cas par cas", badge: "Écarté", tone: "off" },
     ],
     footer:
-      "Les trois premiers suivent des règles qu'on peut écrire. Le quatrième non : il reste chez vous, et on vous le dit au cadrage.",
+      "Les trois premiers suivent des règles qui s'écrivent. Le quatrième demande un jugement au cas par cas : il reste chez vous, et nous le disons au cadrage.",
   },
 };
 
@@ -261,25 +261,25 @@ const COMPRIS: CaseArpentee[] = [
     icone: <ListChecks strokeWidth={1.5} />,
     titre: "Une file de validation",
     texte:
-      "Tout ce qui doit partir y passe. Vous approuvez, corrigez ou suspendez, aussi longtemps que vous le jugez utile.",
+      "Tout ce qui doit partir y passe. Vos équipes approuvent, corrigent ou suspendent, aussi longtemps que vous le jugez utile.",
   },
   {
     icone: <ScrollText strokeWidth={1.5} />,
     titre: "Un journal de tout ce qui est parti",
     texte:
-      "Chaque envoi est daté, archivé, consultable. Le jour où un client conteste avoir été relancé, la preuve est là.",
+      "Chaque envoi est daté, archivé et consultable, ce qui vous donne la preuve le jour où un client conteste avoir été relancé.",
   },
   {
     icone: <ShieldCheck strokeWidth={1.5} />,
     titre: "Vos données restent chez vous",
     texte:
-      "Un espace chiffré et distinct pour chaque client, hébergé dans l'Union européenne. Seul le strict nécessaire est transmis aux modèles, tâche par tâche.",
+      "Chaque entreprise dispose d'un espace chiffré et distinct, hébergé dans l'Union européenne. Seul le strict nécessaire est transmis aux modèles, tâche par tâche.",
   },
   {
     icone: <Ticket strokeWidth={1.5} />,
     titre: "Le Chèque TIC vérifié",
     texte:
-      "Pour les entreprises guadeloupéennes éligibles, une partie de l'installation est financée. L'éligibilité est vérifiée pendant l'audit, avant tout engagement de votre part.",
+      "Pour les entreprises immatriculées en Guadeloupe et éligibles, la Région finance une partie de l'installation. L'éligibilité est vérifiée pendant le diagnostic, avant tout engagement de votre part.",
   },
 ];
 
@@ -360,10 +360,10 @@ export default function SurMesurePage() {
 
                 <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
                   <Link href="/commencer" className="o-btn o-btn--primary">
-                    Chiffrer mon cas
+                    Cadrer votre besoin
                   </Link>
                   <Link href="#methode" className="o-btn o-btn--ghost">
-                    Comment il tourne
+                    Voir la méthode
                     <Chevron taille={13} />
                   </Link>
                 </div>
@@ -419,7 +419,7 @@ export default function SurMesurePage() {
         {/* ════════ 2 · CE QUE COUVRE LE SUR-MESURE ════════ */}
         <section id="fonctionnement" className="o-wrap scroll-mt-24 pb-[72px] pt-[72px] sm:pb-[110px] sm:pt-[110px]">
           <EnTete
-            pastille="Ce qu'il fait"
+            pastille="Périmètre"
             titre={FICHE.sections!.pointsTitre!}
             chapo={FICHE.sections!.pointsChapo!}
           />
@@ -448,11 +448,10 @@ export default function SurMesurePage() {
                 <span className="o-pill">Intégrations</span>
               </div>
               <h2 data-reveal className="o-h2 mt-2.5">
-                Branché sur ce que vous avez.
+                Intégré à votre environnement.
               </h2>
               <p data-reveal className="o-lead mt-4">
-                Messagerie, tableur, paiement, e-commerce, agenda : le système lit et écrit là
-                où vous travaillez déjà. Ni compte à créer, ni migration.
+                Messagerie, tableur, paiement, e-commerce, agenda : le système lit et écrit dans les outils où vos équipes travaillent déjà, sans compte à créer ni migration.
               </p>
               <div data-reveal className="mt-7 flex flex-wrap gap-2.5">
                 {FICHE.outils.map((o) => (
@@ -506,9 +505,9 @@ export default function SurMesurePage() {
         {/* ════════ 6 · CE QUI VIENT AVEC ════════ */}
         <section className="o-wrap pb-[72px] sm:pb-[110px]">
           <EnTete
-            pastille="Compris"
+            pastille="Inclus"
             titre="Ce qui vient avec le système."
-            chapo="Le système n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
+            chapo="Le système n'est que la partie visible. Ce qui suit est livré avec lui, sans supplément."
           />
           <div className="mt-10 sm:mt-16">
             <Feature08 cases={COMPRIS} />
@@ -526,9 +525,7 @@ export default function SurMesurePage() {
               {autres.length > 1 ? "s" : ""}.
             </h2>
             <p data-reveal className="o-lead mt-4 max-w-[650px]">
-              Le sur-mesure n&apos;est peut-être pas ce qu&apos;il faut installer en premier.
-              L&apos;audit désigne le système au meilleur retour chez vous, et il arrive que ce
-              soit un autre.
+              Le sur-mesure n&apos;est pas toujours ce qu&apos;il faut déployer en premier. Le diagnostic désigne le système au meilleur retour pour votre organisation, et il arrive que ce soit un autre.
             </p>
             <div data-reveal className="mt-5">
               <Link href="/offres" className="o-link">
@@ -548,7 +545,7 @@ export default function SurMesurePage() {
             <div data-reveal>
               <span className="o-pill">FAQ</span>
             </div>
-            <TitreDeuxEncres>Questions directes, réponses directes.</TitreDeuxEncres>
+            <TitreDeuxEncres>Les questions posées avant de s&apos;engager.</TitreDeuxEncres>
             <p data-reveal className="o-lead mt-4 max-w-[650px]">
               {FICHE.sections!.faqChapo!}
             </p>
@@ -562,9 +559,9 @@ export default function SurMesurePage() {
         <div className="o-wrap pb-[60px]">
           <CtaRectangle
             pastille={TAG}
-            titre="Parler de votre cas."
+            titre="Échanger sur votre cas."
             texte="Rien n'est chiffré avant que ce soit clair pour vous comme pour nous."
-            action={{ label: "Chiffrer mon cas", href: "/commencer" }}
+            action={{ label: "Cadrer votre besoin", href: "/commencer" }}
           />
         </div>
       </div>

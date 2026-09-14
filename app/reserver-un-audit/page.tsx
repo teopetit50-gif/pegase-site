@@ -42,7 +42,7 @@ import {
 export const metadata: Metadata = {
   title: "Réserver un audit | Omega.AI",
   description:
-    "Trois formats d'audit pour mesurer ce que votre difficulté principale vous coûte : impayés, demandes perdues, heures de saisie. Gratuit à partir de 30 minutes, sans engagement, avec vérification de l'éligibilité au Chèque TIC.",
+    "Trois formats d'audit pour mesurer ce que votre processus le plus coûteux représente : impayés, demandes perdues, heures de saisie. Gratuit à partir de 30 minutes, sans engagement, avec vérification de l'éligibilité au Chèque TIC.",
 };
 
 /* Le déroulé en trois temps — même méthode quel que soit le format, seule
@@ -53,19 +53,19 @@ export const metadata: Metadata = {
 const DEROULE: { etape: string; titre: string; texte: string }[] = [
   {
     etape: "Étape 1",
-    titre: "On écoute",
+    titre: "Nous écoutons",
     texte:
-      "Pas de démo, pas de plaquette. Vous racontez votre journée telle qu'elle se passe : ce qui prend du temps, ce qui se perd, où vivent vos informations. En équipe, les entretiens sont individuels : en groupe, on se censure.",
+      "Ni démonstration ni plaquette. Vous décrivez votre journée telle qu'elle se déroule : ce qui prend du temps, ce qui se perd, où vivent vos informations. En équipe, les entretiens sont individuels, parce qu'en groupe chacun se censure.",
   },
   {
     etape: "Étape 2",
-    titre: "On met à plat",
+    titre: "Nous cartographions",
     texte:
-      "Chaque flux est cartographié tel qu'il fonctionne vraiment : ce qui entre, ce qui se fait, ce qui sort, et où ça frotte. Ce qui vivait de tête est posé noir sur blanc, sur un document que tout le monde peut regarder et corriger.",
+      "Chaque flux est cartographié tel qu'il fonctionne réellement : ce qui entre, ce qui se fait, ce qui sort, et où il se bloque. Ce qui n'existait que dans les têtes est posé noir sur blanc, sur un document que chacun peut consulter et corriger.",
   },
   {
     etape: "Étape 3",
-    titre: "On chiffre et on classe",
+    titre: "Nous chiffrons et classons",
     texte:
       "Chaque piste est posée sur deux axes : ce qu'elle rapporte, ce qu'elle demande. La recommandation commence par le meilleur retour, avec son indicateur de mesure, et dit aussi ce qu'il ne faut pas automatiser.",
   },
@@ -137,9 +137,7 @@ export default function ReserverUnAuditPage() {
             <h2 className="r-h2">Réservez votre créneau en deux minutes</h2>
             <p className="r-lead mx-auto mt-6 max-w-[54ch]">
               L&apos;agenda montre les créneaux réellement libres, en heure de
-              Guadeloupe. Vous en choisissez un, il est bloqué à l&apos;instant même —
-              et vous recevez la confirmation le jour même, avec le lien de la
-              visio.
+              Guadeloupe. Vous en choisissez un, il est bloqué à l&apos;instant même, et vous recevez la confirmation le jour même, avec le lien de la visioconférence.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <Link
@@ -161,8 +159,7 @@ export default function ReserverUnAuditPage() {
             {/* la mention discrète de l'autre porte (28/08) — symétrique de
                 celle qui clôt /tarifs */}
             <p className="r-note mx-auto mt-8 max-w-xl !text-[13px]">
-              Vous tenez vos outils seul&nbsp;? Pas besoin d&apos;un audit pour commencer&nbsp;:
-              les prix sont publics.{" "}
+              Vous tenez vos outils seul&nbsp;? Un audit n&apos;est pas nécessaire pour commencer&nbsp;: les prix sont publics.{" "}
               <Link href="/tarifs" className="underline underline-offset-4 hover:text-[#050505]">
                 Voir la grille
               </Link>

@@ -175,9 +175,7 @@ export default function Formules() {
           Un audit à la mesure de votre organisation
         </h1>
         <p data-arrivee="chapo" className="r-lead mt-5 max-w-[58ch]">
-          Plusieurs services, plusieurs validateurs&nbsp;: on mesure d&apos;abord, et le devis
-          sort de vos volumes. Trois formats, du cadrage de 45 minutes à la journée dans
-          vos locaux.
+          Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons d&apos;abord, et le devis est établi à partir de vos volumes. Trois formats, du cadrage de 45 minutes à la journée dans vos locaux.
         </p>
 
         <div className="mt-10 grid gap-4 sm:mt-12 lg:grid-cols-4">
@@ -222,9 +220,7 @@ export default function Formules() {
             <span className="font-semibold text-[#050505]">
               Vous ne savez pas quel format choisir ?
             </span>{" "}
-            Décrivez votre situation en deux lignes : votre activité, votre commune, ce
-            qui vous coûte le plus cher. On vous répond le jour même avec le format
-            adapté — et l&apos;agenda en ligne fait le reste.
+            Décrivez votre situation en deux lignes&nbsp;: votre activité, votre commune, ce qui vous coûte le plus cher. Nous vous répondons le jour même avec le format adapté, et l&apos;agenda en ligne fait le reste.
           </p>
           <a
             href={lienContact("avant")}
@@ -244,7 +240,7 @@ export default function Formules() {
               href={lienContact("avant")}
               className="r-lien"
             >
-              Aidez-moi à choisir
+              Demander conseil
             </a>
           </div>
 

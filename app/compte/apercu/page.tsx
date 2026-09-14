@@ -27,7 +27,7 @@ import type { LigneCommandeSite } from "@/lib/site-commande";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Aperçu — Mon compte | Omega.AI",
+  title: "Aperçu du compte | Omega.AI",
   robots: { index: false, follow: false },
 };
 

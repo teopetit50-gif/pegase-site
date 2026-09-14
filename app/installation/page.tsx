@@ -46,7 +46,7 @@ import { utilisateurCourant } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "Réserver l'installation | Omega.AI",
   description:
-    "Choisissez votre créneau : 45 minutes en visio pour brancher vos postes sur vos outils — mail, tableur, WhatsApp. Vous enregistrez votre moyen de paiement à la réservation ; rien n'est débité avant la fin de l'installation.",
+    "Choisissez votre créneau : 45 minutes en visioconférence pour connecter vos postes à vos outils (messagerie, tableur, WhatsApp). Vous enregistrez votre moyen de paiement à la réservation, et rien n'est débité avant la fin de l'installation.",
 };
 
 export default async function InstallationPage({

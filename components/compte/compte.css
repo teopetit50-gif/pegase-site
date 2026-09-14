@@ -1,0 +1,609 @@
+/* ══════════════════════════════════════════════════════════════════════
+   compte.css — la feuille de « Mon compte » en réglages (14/09/2026, soir)
+
+   Demande Teo, capture à l'appui : « une fois connecté c'est ultra moche,
+   ça fait un gros truc au milieu ; va chercher des composants sur 21st.dev
+   et change complètement ». Il a tranché pour la forme MENU LATÉRAL
+   (réglages Stripe/Vercel) : en-tête d'identité avec l'accès à l'espace
+   client en bouton principal, quatre tuiles de synthèse, puis un menu à
+   gauche et UNE section affichée à droite. Plus de bloc noir.
+
+   Reprises de registres (voir CompteTableau.tsx pour ce qui est jeté) :
+   · les tuiles : « KPI Card » (@nayan_radadiya6) et « Statistics Card 1 »
+     (@sean0205) — une carte filetée divisée en cellules, kicker, grande
+     valeur, pastille d'état ; leur code étant fermé (403), c'est le dessin
+     de l'aperçu qui est repris, aux mesures de notre BandeauFaits
+     (/modeles, Tailark stats) pour la carte à filets ;
+   · le menu : « Animated Sidebar » sidebar-001 (@unlumen) — surbrillance
+     qui glisse d'un item à l'autre au ressort, barre d'état active. Ici
+     la surbrillance est une carte blanche filetée + une barre d'encre de
+     2 px, et non un lavis `bg-accent/50` + une barre rouge « accent-pro » :
+     le monde .resa ne porte pas de rouge, et un état actif se marque au
+     trait plein, jamais au fond seul (palettes-saas-surfaces-invisibles).
+
+   Tout est scopé sous `.resa .cpt-` (compte-tableau) et vit ICI, pas dans
+   globals.css : plusieurs sessions y écrivent le même jour. Les primitives
+   du monde clair (.r-btn, .cp-pastille, .cp-ok, .cp-info, .cp-ligne,
+   .cp-rdv, .cp-date, .cp-texte, .cp-secondaire, .cp-fort, .cp-kicker-
+   ligne, .cp-prix, .cp-resume-*) restent celles de globals.css : les
+   cartes d'abonnement, de profil et de mot de passe les portent encore.
+   Les anciennes règles de mise en page (.cp-verre, .cp-grille,
+   .cp-panneau, .cp-cockpit, .cp-pilule, .cp-tuile, .cp-compteur,
+   .cp-identite, .cp-avatar) ne sont plus appelées — à retirer de
+   globals.css dans une passe de nettoyage, pas dans ce chantier.
+
+   Lisibilité (règle du 03/09) : corps 15 / 14,5, secondaire 13,5, kickers
+   12,5 en capitales — rien en dessous. Contrastes ≥ 4,5:1 : les couples
+   des pastilles sont ceux de globals.css.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la colonne : 1440 (la largeur de <main>), 48 de marge dès 1024 ——— */
+.resa .cpt-wrap {
+  max-width: 1440px;
+  padding-top: 18px;
+  padding-bottom: 40px;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-wrap {
+    padding-top: 22px;
+    padding-bottom: 48px;
+  }
+}
+
+/* ═══ 1. L'EN-TÊTE : identité | état + actions ═══ */
+.resa .cpt-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding-bottom: 18px;
+}
+.resa .cpt-identite {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+/* la pastille d'initiales : or de la charte, encre noire (le blanc sur or
+   clair tombe sous AA — règle du monde .resa) */
+.resa .cpt-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  background: linear-gradient(140deg, var(--r-or-clair) 0%, var(--r-or-mid) 50%, var(--r-or-fonce) 100%);
+  box-shadow: inset 0 0 0 1px rgba(5, 5, 5, 0.06);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--r-texte);
+}
+.resa .cpt-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 26px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--r-texte);
+}
+@media (min-width: 640px) {
+  .resa .cpt-titre {
+    font-size: 28px;
+    line-height: 32px;
+  }
+}
+.resa .cpt-identite-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  margin-top: 2px;
+  font-size: 14.5px;
+  line-height: 21px;
+  color: var(--r-doux);
+}
+.resa .cpt-identite-nom {
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .cpt-identite-sep {
+  color: #b5b5b5;
+}
+
+/* à droite : badge d'état, bouton principal, bouton filet, sortie */
+.resa .cpt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.resa .cpt-actions .r-btn {
+  padding: 10px 16px;
+  font-size: 15px;
+  line-height: 22px;
+}
+/* le badge : capitales espacées, mêmes couples que les pastilles */
+.resa .cpt-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--r-filet);
+  background: #ffffff;
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--r-faible);
+}
+.resa .cpt-pilule::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: currentColor;
+}
+.resa .cpt-pilule[data-teinte="vert"] {
+  border-color: #bfe3cb;
+  background: #e6f4ea;
+  color: #1e6b3a;
+}
+.resa .cpt-pilule[data-teinte="ambre"] {
+  border-color: #f1dfb3;
+  background: #fdf3dd;
+  color: #8a5a00;
+}
+.resa .cpt-pilule[data-teinte="rouge"] {
+  border-color: #e4b7b0;
+  background: #fdf1ef;
+  color: #7c2d24;
+}
+/* « Se déconnecter » : un lien, pas un troisième bouton */
+.resa .cpt-sortie {
+  padding: 10px 4px;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--r-faible);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(5, 5, 5, 0.22);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+}
+.resa .cpt-sortie:hover {
+  color: var(--r-texte);
+  text-decoration-color: currentColor;
+}
+
+/* ═══ 2. LA NOTE D'ÉTAT — seulement quand l'espace n'est pas ouvert ═══ */
+.resa .cpt-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  background: #ffffff;
+  font-size: 14.5px;
+  line-height: 21px;
+  color: var(--r-doux);
+}
+.resa .cpt-note[data-teinte="ambre"] {
+  border-color: #f1dfb3;
+  background: #fdf3dd;
+  color: #8a5a00;
+}
+.resa .cpt-note[data-teinte="rouge"] {
+  border-color: #e4b7b0;
+  background: #fdf1ef;
+  color: #7c2d24;
+}
+.resa .cpt-note a {
+  font-weight: 500;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(5, 5, 5, 0.25);
+}
+.resa .cpt-note a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ═══ 3. LES TUILES : une carte filetée, quatre cellules ═══
+   Même construction que BandeauFaits (/modeles) : une grille à gap 1 px
+   sur fond filet, qui donne les trois dispositions avec la même règle —
+   1 colonne, 2 × 2, puis 1 × 4 dès 1024. */
+.resa .cpt-tuiles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+  margin-bottom: 18px;
+  border: 1px solid var(--r-filet);
+  border-radius: 16px;
+  background: var(--r-filet);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.03);
+}
+@media (min-width: 480px) {
+  .resa .cpt-tuiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .resa .cpt-tuiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 22px;
+  }
+}
+/* chaque tuile est un bouton : elle ouvre sa section */
+.resa .cpt-tuile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+  padding: 15px 44px 14px 20px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.resa .cpt-tuile:hover {
+  background: #fafafa;
+}
+.resa .cpt-tuile:focus-visible {
+  outline: 2px solid #050505;
+  outline-offset: -3px;
+}
+.resa .cpt-tuile-kicker {
+  font-size: 12.5px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--r-faible);
+}
+.resa .cpt-tuile-valeur {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 21px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--r-texte);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.resa .cpt-tuile-valeur--vide {
+  font-weight: 500;
+  color: var(--r-faible);
+}
+.resa .cpt-tuile-sous {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 13.5px;
+  line-height: 19px;
+  color: var(--r-faible);
+}
+/* la flèche d'angle : dit « ça s'ouvre », se lève au survol */
+.resa .cpt-tuile-fleche {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: var(--r-faible);
+  opacity: 0.55;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.resa .cpt-tuile:hover .cpt-tuile-fleche {
+  opacity: 1;
+  transform: translate(2px, -2px);
+  color: var(--r-texte);
+}
+
+/* ═══ 4. LE CORPS : menu | panneau ═══ */
+.resa .cpt-corps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-corps {
+    grid-template-columns: 238px minmax(0, 1fr);
+    gap: 28px;
+  }
+}
+
+/* ——— le menu (Tabs.List) : rangée défilante sous 1024, colonne au-dessus ——— */
+.resa .cpt-menu {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  margin: 0 -24px;
+  padding: 2px 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.resa .cpt-menu::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-menu {
+    position: sticky;
+    top: 88px;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+}
+/* un item : icône en tuile, libellé, sous-ligne (dès 1024), compteur */
+.resa .cpt-item {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  text-align: left;
+  color: var(--r-doux);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-item {
+    width: 100%;
+    padding: 9px 12px 9px 14px;
+  }
+}
+.resa .cpt-item:hover,
+.resa .cpt-item[data-state="active"] {
+  color: var(--r-texte);
+}
+.resa .cpt-item:focus-visible {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+.resa .cpt-item > * {
+  position: relative;
+  z-index: 1;
+}
+/* la surbrillance qui glisse (motion layoutId) : carte blanche filetée,
+   et la barre d'encre à gauche — l'état actif au trait plein */
+.resa .cpt-item > .cpt-surbrillance {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 10px;
+  border: 1px solid var(--r-filet);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.04);
+}
+.resa .cpt-barre {
+  position: absolute;
+  left: -1px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #050505;
+}
+@media (max-width: 1023px) {
+  /* sur la rangée, la barre passe SOUS l'item */
+  .resa .cpt-barre {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: -1px;
+    width: auto;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+  }
+}
+.resa .cpt-item-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--r-filet);
+  background: #ffffff;
+  color: var(--r-faible);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.resa .cpt-item[data-state="active"] .cpt-item-icone {
+  color: var(--r-texte);
+  border-color: #050505;
+}
+.resa .cpt-item-texte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.resa .cpt-item-libelle {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+}
+.resa .cpt-item-sous {
+  display: none;
+  font-size: 13px;
+  line-height: 17px;
+  font-weight: 400;
+  color: var(--r-faible);
+  white-space: normal;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-item-sous {
+    display: block;
+  }
+}
+.resa .cpt-item-compteur {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: #ececec;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #3d3d3d;
+}
+@media (max-width: 1023px) {
+  .resa .cpt-item-compteur {
+    margin-left: 2px;
+  }
+}
+
+/* ——— le panneau (Tabs.Content) ——— */
+.resa .cpt-panneau {
+  min-width: 0;
+  border: 1px solid var(--r-filet);
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 20px 20px 22px;
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.03);
+}
+@media (min-width: 640px) {
+  .resa .cpt-panneau {
+    padding: 22px 26px 26px;
+  }
+}
+/* les panneaux restent MONTÉS (forceMount : une saisie en cours survit
+   au changement de section) ; seul l'actif se voit, et il entre par un
+   court glissé — jamais de sortie animée (adapter-un-composant-shadcn) */
+.resa .cpt-panneau[data-state="inactive"] {
+  display: none;
+}
+.resa .cpt-panneau[data-state="active"] {
+  animation: cpt-entre 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes cpt-entre {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resa .cpt-panneau[data-state="active"] {
+    animation: none;
+  }
+}
+.resa .cpt-panneau-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .cpt-panneau-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 19px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--r-texte);
+}
+.resa .cpt-panneau-sous {
+  margin-top: 3px;
+  font-size: 13.5px;
+  line-height: 19px;
+  color: var(--r-faible);
+}
+.resa .cpt-panneau-corps {
+  min-width: 0;
+  /* les enfants (résumé du profil, formulaire) se règlent sur SA largeur */
+  container-type: inline-size;
+}
+/* l'abonnement : ses tuiles de postes tiennent sur UNE rangée dès 1024
+   (la liste `ul.grid` d'AbonnementCarte, sans toucher au composant) */
+@media (min-width: 1024px) {
+  .resa .cpt-panneau[data-section="abonnement"] ul.grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ——— « Votre accès » : le bloc en tête de la section Sécurité ——— */
+.resa .cpt-acces {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  background: var(--r-fond);
+}
+.resa .cpt-acces-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.resa .cpt-acces-titre {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .cpt-acces-texte {
+  margin-top: 6px;
+  max-width: 64ch;
+  font-size: 14.5px;
+  line-height: 21px;
+  color: var(--r-doux);
+}
+.resa .cpt-acces-liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 10px;
+}
+.resa .cpt-acces-liens a {
+  font-size: 14.5px;
+  line-height: 21px;
+  font-weight: 500;
+  color: var(--r-texte);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(5, 5, 5, 0.28);
+  transition: text-decoration-color 0.2s ease;
+}
+.resa .cpt-acces-liens a:hover {
+  text-decoration-color: currentColor;
+}

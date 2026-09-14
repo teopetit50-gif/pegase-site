@@ -28,8 +28,7 @@ export default function MotDePasseCarte({ email, mdpDefini }: { email: string; m
     <div className="cp-mdp">
       {fait ? (
         <p className="cp-ok" role="status">
-          Mot de passe enregistré. C&apos;est celui-ci qui ouvre votre compte, sur le site comme sur
-          le cockpit.
+          Mot de passe enregistré. C&apos;est celui-ci qui ouvre votre compte, sur le site comme dans l&apos;espace client.
         </p>
       ) : ouvert ? (
         <div>
@@ -49,11 +48,11 @@ export default function MotDePasseCarte({ email, mdpDefini }: { email: string; m
       ) : (
         <>
           <p className="cp-texte">
-            Le même mot de passe ouvre votre compte sur le site et sur le cockpit.
+            Le même mot de passe ouvre votre compte sur le site et dans l&apos;espace client.
           </p>
           <div className="mt-3">
             <button type="button" className="r-btn r-btn--fil" onClick={() => setOuvert(true)}>
-              Changer mon mot de passe
+              Changer le mot de passe
             </button>
           </div>
         </>

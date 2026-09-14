@@ -1,0 +1,109 @@
+/* JournalDemandes — le journal des demandes reçues par le site (14/09/2026)
+   Contenu de la carte « La suite » de /tarifs/site : la barre de fenêtre,
+   puis quatre lignes. Tout est scopé sous `.offres` et préfixé `jd-`. Les
+   valeurs sont celles de l'ancienne MaqDemandes et de BarreFenetre
+   (app/tarifs/site/page.tsx), relevées telles quelles : la carte du prix,
+   juste à côté, garde la même barre et les deux doivent rester jumelles.
+   Les jetons `--demo-*` et `--o-*` viennent du bloc `.offres` de
+   globals.css ; chaque `var()` porte sa valeur en secours. */
+
+/* ——— la barre de fenêtre : trois pastilles et un titre ——— */
+.offres .jd-barre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--demo-tete, #fbfbfb);
+}
+.offres .jd-pastilles {
+  display: flex;
+  gap: 6px;
+}
+.offres .jd-pastille {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.12);
+}
+.offres .jd-titre-barre {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--o-muted-strong, #52525b);
+}
+
+/* ——— la liste : quatre lignes espacées de 6 px, sans puce ——— */
+.offres .jd-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 14px 16px;
+  list-style: none;
+}
+
+/* ——— une ligne : heure · trait · titre · état ———
+   Filet et fond explicites : en Tailwind v4 un `border` nu peindrait en
+   currentColor, ici tout est écrit. Le titre est le seul à pouvoir rétrécir
+   (`min-width: 0`), donc le seul à se tronquer : c'est lui qui compte. */
+.offres .jd-ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 9px;
+  background: var(--demo-ligne, #fcfcfc);
+}
+.offres .jd-heure {
+  flex: 0 0 36px;
+  width: 36px;
+  font-size: 11.5px;
+  color: var(--demo-faible, #a1a1aa);
+  white-space: nowrap;
+}
+.offres .jd-icone {
+  flex: 0 0 auto;
+  color: var(--demo-faible, #a1a1aa);
+}
+.offres .jd-titre {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--o-text, #09090b);
+}
+/* l'état se cache sous 640 px (le `sm` de Tailwind, 40 rem) : à trois
+   colonnes sur ~286 px de large, c'est le titre qui se tronquait */
+.offres .jd-etat {
+  display: none;
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  color: var(--demo-faible, #a1a1aa);
+  white-space: nowrap;
+}
+@media (min-width: 40rem) {
+  .offres .jd-etat {
+    display: inline;
+  }
+}
+
+/* ——— l'entrée rejouée ———
+   Quand la carte arrive dans la fenêtre, le composant pose `data-rejoue`
+   sur la racine. Cette règle cache les quatre lignes DANS LE MÊME RENDU
+   (pas une image de retard, donc pas de clignotement), puis Motion les
+   fait entrer une à une et laisse ses styles en ligne (opacité 1,
+   transform none), qui l'emportent sur elle.
+   Sans JavaScript, l'attribut n'existe pas : rien n'est jamais caché.
+   Mouvement réduit : l'attribut n'est jamais posé ET la règle est hors de
+   portée — double sécurité, une ligne ne peut pas rester invisible. */
+@media (prefers-reduced-motion: no-preference) {
+  .offres .jd[data-rejoue] .jd-ligne {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}

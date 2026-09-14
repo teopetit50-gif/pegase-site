@@ -112,7 +112,7 @@ export const AUDITS: Audit[] = [
           "Listez vos devis sans réponse depuis plus de huit jours. Collez le prompt ci-dessous dans ChatGPT ou Claude, remplacez les crochets, envoyez le résultat par WhatsApp ou par mail. Le message relance sans mettre la pression.",
         prompt:
           "Tu écris pour une entreprise du bâtiment. Rédige un court message de suivi (quatre phrases maximum, vouvoiement, ton cordial et direct, sans jargon commercial) pour un devis resté sans réponse : client [NOM], devis [OBJET] envoyé le [DATE], montant [MONTANT] €. Termine par une question simple qui appelle une réponse, par exemple : souhaitez-vous qu'on cale la date d'intervention ? Pas d'objet de mail, pas de formule pompeuse, pas de « j'espère que vous allez bien ».",
-        moteur: "PAYD",
+        moteur: "CASHD",
       },
       {
         titre: "Le compte rendu de chantier, dicté",
@@ -124,10 +124,10 @@ export const AUDITS: Audit[] = [
       {
         titre: "Le point trésorerie du lundi",
         texte:
-          "Copiez trois colonnes de votre tableur (client, montant, échéance), et collez-les avec ce prompt. Vous obtenez l'ordre de relance de la semaine. C'est exactement ce qu'un moteur fera ensuite chaque matin, tout seul.",
+          "Copiez trois colonnes de votre tableur (client, montant, échéance), et collez-les avec ce prompt. Vous obtenez l'ordre de relance de la semaine. C'est exactement ce qu'un système fera ensuite chaque matin, sans intervention.",
         prompt:
           "Voici mes factures en attente (client, montant, date d'échéance) : [COLLER LES LIGNES]. Classe-les en trois groupes : en retard (de la plus ancienne à la plus récente), à échéance cette semaine, à venir. Pour chaque facture en retard, indique le nombre de jours de retard et propose une phrase de relance adaptée à l'ancienneté : cordiale sous quinze jours, ferme au-delà de trente.",
-        moteur: "PAYD",
+        moteur: "CASHD",
       },
     ],
     moteurs: [
@@ -149,7 +149,7 @@ export const AUDITS: Audit[] = [
         system: "FILED",
         slug: "factures-fournisseurs",
         raison:
-          "Lit les factures fournisseurs reçues par mail, en extrait les montants et les range au journal d'achats : prêtes pour le cabinet, sans écran le dimanche.",
+          "Lit les factures fournisseurs reçues par mail, en extrait les montants et les range au journal d'achats : prêtes pour la comptabilité, sans saisie le week-end.",
         douleurs: "douleur 4",
       },
     ],

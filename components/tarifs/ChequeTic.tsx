@@ -61,8 +61,7 @@ export default function ChequeTic() {
             De 40 à 80&nbsp;% d&apos;un projet numérique financés
           </h2>
           <p className="mt-5 text-[15px] leading-[24px] text-[#d4d4d8]">
-            Votre éligibilité est vérifiée à la réunion d&apos;installation — et si un dossier
-            se justifie, nous le montons avec vous.
+            Votre éligibilité est vérifiée à la réunion d&apos;installation, et si un dossier se justifie, nous le montons avec vous.
           </p>
         </div>
         <a href="#grille" className="r-btn r-btn--blanc shrink-0">

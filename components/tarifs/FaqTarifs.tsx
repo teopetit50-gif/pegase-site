@@ -52,8 +52,7 @@ export default function FaqTarifs({ items }: { items: { q: string; r: string[] }
           </span>
           <h2 className="r-h3">Questions sur les prix</h2>
           <p className="text-[15px] leading-[23px] text-[#616161]">
-            Les questions qu&apos;une page de prix doit prendre de front. Il en manque
-            une&nbsp;? Décrivez votre situation, une vraie personne répond.
+            Les questions qu&apos;une page de prix doit traiter clairement. S&apos;il en manque une, décrivez votre situation et une personne de l&apos;équipe vous répond.
           </p>
 
           <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-[#e3e3e3] bg-white p-4">
@@ -62,7 +61,7 @@ export default function FaqTarifs({ items }: { items: { q: string; r: string[] }
                 <MessageCircle aria-hidden className="size-4" />
               </span>
               <div className="flex flex-col leading-tight">
-                <p className="text-sm font-medium text-[#050505]">Parler à quelqu&apos;un</p>
+                <p className="text-sm font-medium text-[#050505]">Parler à un conseiller</p>
                 <p className="text-xs text-[#616161]">Réponse le jour même</p>
               </div>
             </div>

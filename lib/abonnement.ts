@@ -178,14 +178,14 @@ export function etatAbonnement(d: DemandeCompte, rattache: boolean): EtatAbonnem
     return {
       code: "reserve",
       libelle: d.creneau_debut
-        ? `Réservé — réunion le ${dateHeureGp(d.creneau_debut)}`
-        : "Réservé — créneau confirmé",
+        ? `Réservé, réunion le ${dateHeureGp(d.creneau_debut)}`
+        : "Réservé, créneau confirmé",
     };
   }
   if (d.statut === "a_traiter") return { code: "recu", libelle: "Demande reçue" };
   /* rattaché sans que CETTE demande soit finalisée (no_show puis gérant
      invité, par exemple) : un libellé neutre, pas une date inventée */
-  if (rattache) return { code: "en_service", libelle: "Compte rattaché — cockpit ouvert" };
+  if (rattache) return { code: "en_service", libelle: "Compte rattaché, espace ouvert" };
   /* no_show et tout statut inconnu : le libellé de /compte, tel quel */
   return { code: "recu", libelle: LIBELLES_STATUT[d.statut] ?? d.statut };
 }
@@ -220,7 +220,7 @@ export function prixChoix(modules: string[], periodicite: Periodicite): { mensue
 }
 
 export const LIBELLES_STATUT_ABONNEMENT: Record<DemandeAbonnement["statut"], string> = {
-  a_traiter: "En cours — réponse sous 48 h",
+  a_traiter: "En cours, réponse sous 48 h",
   traitee: "Traitée",
   refusee: "Refusée",
 };
@@ -426,7 +426,7 @@ export const ERREURS_ABONNEMENT: Record<string, string> = {
   demande_inconnue: "Cette demande n'est pas rattachée à votre compte. Rechargez la page.",
   deja_finalisee:
     "Votre installation est déjà finalisée : ce changement passe par une demande, que nous traitons sous 48 h. Rechargez la page.",
-  statut_incompatible: "Cette réservation ne peut plus être modifiée en ligne. Écrivez-nous, on s'en occupe.",
+  statut_incompatible: "Cette réservation ne peut plus être modifiée en ligne. Écrivez-nous, nous nous en occupons.",
   modules_requis: "Choisissez au moins un poste.",
   /* mêmes noms que dans la SQL (et que reserver_audit) : champs_invalides,
      periodicite_inconnue, type_inconnu — à renommer ENSEMBLE */
@@ -437,17 +437,17 @@ export const ERREURS_ABONNEMENT: Record<string, string> = {
     "Trois demandes sont déjà en cours sur votre compte. Attendez notre réponse, ou écrivez-nous directement.",
   aucun_abonnement: "Aucun abonnement n'est rattaché à ce compte. Rechargez la page.",
   connexion_requise: "Votre session a expiré : reconnectez-vous puis réessayez.",
-  indisponible: "Cette action n'est pas encore ouverte en ligne. Écrivez-nous, on s'en occupe.",
+  indisponible: "Cette action n'est pas encore ouverte en ligne. Écrivez-nous, nous nous en occupons.",
   /* 05/09 — les codes de POST /api/paiement/setup */
   paiement_indisponible:
-    "L'enregistrement en ligne du moyen de paiement n'est pas encore ouvert : on vous le proposera par e-mail.",
+    "L'enregistrement en ligne du moyen de paiement n'est pas encore ouvert : nous vous le proposerons par e-mail.",
   demande_invalide: "Cette demande n'est pas valide. Rechargez la page.",
   deja_preleve:
-    "Votre premier prélèvement est déjà passé : pour changer de moyen de paiement, écrivez-nous, on s'en occupe.",
+    "Votre premier prélèvement est déjà passé : pour changer de moyen de paiement, écrivez-nous, nous nous en occupons.",
   base_indisponible: "Votre abonnement ne répond pas pour le moment. Réessayez dans un instant.",
   stripe_erreur: "La page de paiement n'a pas pu s'ouvrir. Réessayez dans un instant, ou écrivez-nous.",
-  reseau: "Ça n'est pas parti — vérifiez votre connexion et réessayez.",
-  defaut: "Ça n'a pas fonctionné. Réessayez dans un instant, ou écrivez-nous.",
+  reseau: "L'envoi n'a pas abouti. Vérifiez votre connexion et réessayez.",
+  defaut: "L'opération n'a pas abouti. Réessayez dans un instant, ou écrivez-nous.",
 };
 
 export function messageErreur(code: string): string {

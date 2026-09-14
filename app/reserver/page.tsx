@@ -23,7 +23,7 @@ import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
 export const metadata: Metadata = {
   title: "Réserver un créneau | Omega.AI",
   description:
-    "Choisissez votre format d'audit et votre créneau dans les disponibilités réelles — en visio, en heure de Guadeloupe. Confirmation le jour même.",
+    "Choisissez votre format d'audit et votre créneau dans les disponibilités réelles, en visioconférence, en heure de Guadeloupe. Confirmation le jour même.",
 };
 
 export default async function ReserverPage({

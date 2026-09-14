@@ -140,7 +140,7 @@ export default function CompteVue({
   const badge: { teinte: string; texte: string } = panneComptes
     ? { teinte: "rouge", texte: "Accès indisponible" }
     : rattache
-      ? { teinte: "vert", texte: "Cockpit ouvert" }
+      ? { teinte: "vert", texte: "Espace ouvert" }
       : aInstallation
         ? { teinte: "ambre", texte: "Installation en préparation" }
         : { teinte: "gris", texte: "Sans installation" };
@@ -168,12 +168,12 @@ export default function CompteVue({
             <section className="cp-cockpit" data-zone="cockpit" aria-labelledby="cp-cockpit-titre">
               <div className="cp-kicker flex items-center gap-2">
                 <LayoutDashboard size={16} strokeWidth={2} aria-hidden="true" />
-                Votre cockpit
+                Votre espace client
               </div>
               {panneComptes ? (
                 <>
                   <h2 id="cp-cockpit-titre" className="r-h4 mt-3">
-                    Votre accès cockpit ne répond pas.
+                    Votre accès à l&apos;espace client ne répond pas.
                   </h2>
                   <p className="cp-cockpit-texte">
                     Impossible de vérifier votre rattachement pour le moment. Rechargez la page dans un
@@ -187,7 +187,7 @@ export default function CompteVue({
               ) : rattache ? (
                 <>
                   <h2 id="cp-cockpit-titre" className="r-h4 mt-3">
-                    Votre cockpit est ouvert.
+                    Votre espace client est ouvert.
                   </h2>
                   <p className="cp-cockpit-texte">
                     Relances, demandes, factures&nbsp;: vos postes y apparaissent au fur et à mesure de
@@ -196,7 +196,7 @@ export default function CompteVue({
                   </p>
                   <div className="mt-5 flex flex-wrap items-center gap-2.5">
                     <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--blanc">
-                      Ouvrir mon cockpit
+                      Ouvrir mon espace
                     </a>
                     {/* 08/09 — droit sur la page d'installation du cockpit, sur
                         l'appareil où l'on est : c'est là que le bouton du
@@ -217,20 +217,20 @@ export default function CompteVue({
                     Votre installation est en préparation.
                   </h2>
                   <p className="cp-cockpit-texte">
-                    On vous ouvre le cockpit dès la réunion faite&nbsp;: vos postes y apparaissent au fur
+                    L&apos;espace client s&apos;ouvre dès la réunion faite&nbsp;: vos postes y apparaissent au fur
                     et à mesure de leur mise en route. Il s&apos;installera sur votre téléphone et votre
                     ordinateur, comme une application.
                   </p>
                   <div>
                     <Link href="/application" className="cp-cockpit-lien">
-                      Voir comment ça marche
+                      Voir le fonctionnement
                     </Link>
                   </div>
                 </>
               ) : (
                 <>
                   <h2 id="cp-cockpit-titre" className="r-h4 mt-3">
-                    Votre cockpit s&apos;ouvre après la réunion d&apos;installation.
+                    Votre espace client s&apos;ouvre après la réunion d&apos;installation.
                   </h2>
                   <p className="cp-cockpit-texte">
                     Choisissez vos postes, réservez la réunion&nbsp;: c&apos;est elle qui met vos postes en
@@ -262,8 +262,8 @@ export default function CompteVue({
               {retour === "ok" ? (
                 <p className="cp-ok mb-4" role="status">
                   {enregistrementEnCours
-                    ? "Merci — l'enregistrement de votre moyen de paiement est en cours de confirmation, quelques secondes. Rien ne sera débité avant la fin de l'installation."
-                    : "Moyen de paiement enregistré — rien ne sera débité avant la fin de l'installation."}
+                    ? "Merci. L'enregistrement de votre moyen de paiement est en cours de confirmation. Rien ne sera débité avant la fin de l'installation."
+                    : "Moyen de paiement enregistré. Rien ne sera débité avant la fin de l'installation."}
                 </p>
               ) : retour === "plus-tard" ? (
                 <p className="cp-info mb-4" role="status">
@@ -309,7 +309,7 @@ export default function CompteVue({
                   </p>
                   <div className="mt-4">
                     <Link href="/tarifs" className="r-btn r-btn--noir">
-                      Réserver mon installation
+                      Réserver l&apos;installation
                     </Link>
                   </div>
                 </>
@@ -342,7 +342,7 @@ export default function CompteVue({
                           <p className="num cp-secondaire mt-0.5">
                             {d.creneau_debut
                               ? `${dateHeureGp(d.creneau_debut)}${duree ? ` · ${duree}` : ""}`
-                              : "Sans créneau — traitée par e-mail"}
+                              : "Sans créneau, traitée par e-mail"}
                           </p>
                           {d.entreprise ? (
                             <p className="cp-secondaire mt-0.5">
@@ -364,7 +364,7 @@ export default function CompteVue({
               teinte="bordeaux"
               icone={Globe}
               titre="Mes commandes de site"
-              sous="Le site catalogue, commandé depuis /site."
+              sous="Le site catalogue, commandé depuis la page Votre site."
               droite={<Compteur n={commandes.length} />}
             >
               {panneCommandes ? (
@@ -409,7 +409,7 @@ export default function CompteVue({
                         /* le paiement en ligne n'existe pas encore : on le
                            dit, on n'invente pas de bouton */
                         <p className="cp-secondaire mt-2">
-                          Le paiement en ligne arrive&nbsp;: on vous appelle pour régler et lancer la
+                          Le paiement en ligne arrive&nbsp;: nous vous appelons pour régler et lancer la
                           production.
                         </p>
                       ) : null}

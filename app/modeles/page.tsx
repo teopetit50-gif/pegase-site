@@ -77,7 +77,7 @@ import ClotureAppel from "@/components/modeles/ClotureAppel";
 export const metadata: Metadata = {
   title: "Modèles de sites | Omega.AI",
   description:
-    "Vingt et un modèles de sites en ligne, à visiter tout de suite, branchés sur vos moteurs : la demande de devis arrive sur votre tableau de bord et se relance toute seule jusqu'au paiement.",
+    "Vingt et un modèles de sites en ligne, consultables immédiatement, connectés à vos systèmes : la demande de devis arrive dans votre espace et se relance jusqu'au paiement, sous votre validation.",
 };
 
 /* ——— les quatre faits sous le hero ———
@@ -86,7 +86,7 @@ export const metadata: Metadata = {
 const FAITS: [string, string][] = [
   ["21 modèles", "tous en ligne, tous visitables"],
   ["Contenu réécrit", "en français, à votre métier"],
-  ["Branché aux moteurs", "devis, relance, avis"],
+  ["Connecté aux systèmes", "devis, relance, avis"],
   ["Chèque TIC", "vérifié pendant l'audit"],
 ];
 
@@ -102,7 +102,7 @@ export default function ModelesPage() {
         {/* ═══════════ 2 · bandeau de faits ═══════════ */}
         <section data-monde="clair" className="m-wrap py-[clamp(3.5rem,7vw,5.5rem)]">
           <p className="text-center text-[15px] text-[color:var(--m-doux)]">
-            Chaque modèle est déjà en ligne et se visite.{" "}
+            Chaque modèle est déjà en ligne et se consulte.{" "}
             <a href="#modeles" className="text-[color:var(--m-encre)] underline underline-offset-4">
               Voir les démonstrations →
             </a>
@@ -123,9 +123,7 @@ export default function ModelesPage() {
               Vingt et un modèles, un même socle
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              Chaque modèle est un parti pris visuel, pas un métier imposé : vous
-              choisissez l&apos;allure, on réécrit tout le contenu au vôtre. Le design
-              change, la mécanique derrière ne change pas.
+              Chaque modèle est un parti pris visuel, pas un métier imposé&nbsp;: vous choisissez l&apos;allure, nous réécrivons tout le contenu pour le vôtre. Le design change, la mécanique derrière ne change pas.
             </p>
           </div>
 
@@ -148,13 +146,12 @@ export default function ModelesPage() {
             href="/contact"
             className="group mt-6 flex flex-col items-center rounded-[14px] border border-dashed border-black/15 p-8 text-center transition-colors hover:border-black/30"
           >
-            <p className="text-[17px]">Aucun ne vous parle ?</p>
+            <p className="text-[17px]">Aucun ne vous convient ?</p>
             <p className="mx-auto mt-3 max-w-[46ch] text-[13.5px] leading-relaxed text-[color:var(--m-doux)]">
-              Le catalogue s&apos;étend. Dites-nous l&apos;allure que vous avez en tête,
-              on cherche le modèle qui s&apos;en approche.
+              Le catalogue s&apos;étend. Décrivez-nous l&apos;allure que vous avez en tête, et nous cherchons le modèle qui s&apos;en approche.
             </p>
             <span className="mt-5 inline-flex items-center justify-center gap-1.5 text-[13.5px] font-medium underline-offset-4 group-hover:underline">
-              Décrire ce que je veux
+              Décrire le site souhaité
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
                 <path
                   d="M3 8h10M9 4l4 4-4 4"
@@ -184,9 +181,7 @@ export default function ModelesPage() {
               Du premier clic jusqu&apos;au paiement
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              N&apos;importe qui peut vous vendre un site. Ce qui suit le clic, c&apos;est
-              autre chose, et c&apos;est là que se joue la différence entre une vitrine
-              qui dort et une vitrine qui vous ramène du chiffre.
+              N&apos;importe qui peut vous vendre un site. Ce qui suit le clic est une autre affaire, et c&apos;est là que se joue la différence entre une vitrine inerte et une vitrine qui vous apporte du chiffre.
             </p>
           </div>
 

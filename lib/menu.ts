@@ -78,33 +78,33 @@ export const MENU: Rubrique[] = [
       href: "/offres",
       label: "Toutes les offres",
       texte:
-        "Quatre postes qui s'installent, deux qui viennent avec. Sur les outils que vous avez déjà, sous votre validation.",
+        "Quatre systèmes prêts à déployer, deux inclus. Sur vos outils en place, sous votre validation.",
     },
     entrees: [
       {
         href: "/offres/relances-impayes",
         label: "CASHD",
-        texte: "Devis sans réponse et factures échues relancés tout seuls.",
+        texte: "Les échéances suivies, les relances préparées selon vos règles.",
       },
       {
         href: "/offres/nouvelles-affaires",
         label: "RELOAD",
-        texte: "Vos clients silencieux, les marchés de votre zone.",
+        texte: "Les clients inactifs et les marchés de votre zone, remis dans le circuit.",
       },
       {
         href: "/offres/demandes-clients",
         label: "FRONTD",
-        texte: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
+        texte: "Chaque demande entrante qualifiée et traitée, à toute heure.",
       },
       {
         href: "/offres/factures-fournisseurs",
         label: "FILED",
-        texte: "La facture lue, recoupée, transmise au cabinet.",
+        texte: "Les pièces fournisseurs lues, contrôlées, transmises à la comptabilité.",
       },
       {
         href: "/offres/sur-mesure",
         label: "Sur mesure",
-        texte: "Quand rien du catalogue ne correspond.",
+        texte: "Le système propre à votre organisation, cadré puis construit.",
       },
     ],
   },
@@ -114,12 +114,12 @@ export const MENU: Rubrique[] = [
       {
         href: "/modeles",
         label: "Modèles de sites",
-        texte: "Vingt et un modèles en ligne, à visiter tout de suite.",
+        texte: "Vingt et un modèles en ligne, consultables immédiatement.",
       },
       {
         href: "/tarifs/site",
         label: "Votre site, à prix public",
-        texte: "Le site catalogue, payé une fois, sans abonnement.",
+        texte: "Un site livré clé en main, réglé une fois, sans abonnement.",
       },
     ],
   },
@@ -131,17 +131,17 @@ export const MENU: Rubrique[] = [
       {
         href: "/vos-donnees",
         label: "Où vont vos données",
-        texte: "Votre base dans l'Union européenne, ou chez vous.",
+        texte: "Hébergement, cloisonnement et réversibilité, en détail.",
       },
       {
         href: "/reserver-un-audit",
         label: "Réserver un audit",
-        texte: "Mesurer ce que votre difficulté principale vous coûte.",
+        texte: "Chiffrer le processus qui pèse le plus sur votre organisation.",
       },
       {
         href: "/blog",
         label: "Blog",
-        texte: "Les analyses du desk, pour les dirigeants.",
+        texte: "Nos analyses, à l'attention des dirigeants.",
       },
     ],
   },

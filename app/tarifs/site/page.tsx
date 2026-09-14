@@ -63,7 +63,7 @@ import { COURRIEL } from "@/lib/reservation";
 export const metadata: Metadata = {
   title: "Votre site, à prix public | Omega.AI",
   description:
-    "Le site catalogue : 990 € une fois, pas d'abonnement — 198 € restant à charge si le Chèque TIC finance 80 %. Maintenance offerte tant qu'un poste Omega tourne chez vous. Vingt et un modèles, tous en ligne, contenu réécrit à votre métier.",
+    "Le site catalogue : 990 € une fois, pas d'abonnement, 198 € restant à charge si le Chèque TIC finance 80 %. Maintenance offerte tant qu'un poste Omega.AI est en service chez vous. Vingt et un modèles, tous en ligne, contenu réécrit à votre métier.",
 };
 
 /* ——— les quatre modèles du mur : le premier de chaque famille du
@@ -80,11 +80,11 @@ const FAITS: [string, string][] = [
 
 /* ——— ce que les 990 € comprennent ——— */
 const COMPRIS_SITE: string[] = [
-  "Un modèle au choix — les vingt et un sont en ligne, tous visitables",
+  "Un modèle au choix : les vingt et un sont en ligne, tous consultables",
   "Contenu intégralement réécrit en français, à votre métier",
   "Vos photos, vos coordonnées, vos horaires en place",
   "Nom de domaine la première année, mise en ligne comprise",
-  "Formulaire prêt à brancher sur vos postes — devis, relance, avis",
+  "Formulaire prêt à connecter à vos postes : devis, relance, avis",
 ];
 
 /* ——— le déroulé, tel que /site/commande l'annonce lui-même ——— */
@@ -94,14 +94,14 @@ const ETAPES = [
     titre: "Le modèle",
     sousTitre: "Choisir l'allure, pas le métier",
     texte:
-      "Les vingt et un modèles sont en ligne, en vrai : vous les visitez, vous retenez celui qui vous ressemble. Le design change, la mécanique derrière ne change pas.",
+      "Les vingt et un modèles sont en ligne : vous les consultez et retenez celui qui vous correspond. Le design change, la mécanique derrière ne change pas.",
   },
   {
     n: "02",
     titre: "Le brief",
     sousTitre: "Votre métier, vos photos, vos horaires",
     texte:
-      "Depuis votre compte, sans quitter la page. Rien à payer en ligne aujourd'hui : on vous appelle pour régler et lancer la production.",
+      "Depuis votre compte, sans quitter la page. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production.",
   },
   {
     n: "03",
@@ -115,7 +115,7 @@ const ETAPES = [
     titre: "La mise en ligne",
     sousTitre: "Sous votre nom, domaine compris",
     texte:
-      "Le site vous appartient dès le premier jour. Dès qu'un poste tourne chez vous, chaque demande reçue entre dans le circuit.",
+      "Le site vous appartient dès le premier jour. Dès qu'un poste est en service chez vous, chaque demande reçue entre dans le circuit.",
   },
 ];
 
@@ -123,30 +123,30 @@ const ETAPES = [
 const CIRCUIT = [
   ["01", "Accusé de réception en deux minutes, sous votre signature."],
   ["02", "Devis relancé à J+3 et J+7, facture suivie jusqu'au règlement."],
-  ["03", "Avis demandé une fois le travail fait — jamais avant."],
+  ["03", "Avis demandé une fois le travail fait, jamais avant."],
 ];
 
 /* ——— la FAQ site — les questions qu'un prix affiché doit prendre de front ——— */
 const FAQ_SITE: { q: string; a: string }[] = [
   {
     q: "À qui appartient le site ?",
-    a: "À vous, dès le premier jour. Le nom de domaine est au vôtre, les accès vous sont remis, et si nous nous quittons, le site part avec vous — fichiers compris. Rien n'est loué, rien n'est retenu. Sans maintenance, rien ne s'éteint sans prévenir : l'hébergement et le domaine passent à votre nom, et on vous accompagne pour la bascule.",
+    a: "À vous, dès le premier jour. Le nom de domaine est au vôtre, les accès vous sont remis, et si nous nous quittons, le site part avec vous, fichiers compris. Rien n'est loué, rien n'est retenu. Sans maintenance, rien ne s'éteint sans prévenir : l'hébergement et le domaine passent à votre nom, et nous vous accompagnons pour la bascule.",
   },
   {
     q: "Que comprennent les 990 €, exactement ?",
-    a: "Le modèle choisi dans le catalogue, la réécriture intégrale du contenu en français et à votre métier, vos photos et coordonnées en place, le nom de domaine la première année, la mise en ligne — et le formulaire prêt à brancher : dès qu'un poste Omega tourne chez vous, chaque demande reçue entre dans le circuit devis, relance, avis. Un besoin hors catalogue — boutique en ligne, espace membre, logiciel particulier — se chiffre sur devis, à l'audit.",
+    a: "Le modèle choisi dans le catalogue, la réécriture intégrale du contenu en français et à votre métier, vos photos et coordonnées en place, le nom de domaine la première année, la mise en ligne, et le formulaire prêt à connecter : dès qu'un poste Omega.AI est en service chez vous, chaque demande reçue entre dans le circuit devis, relance, avis. Un besoin hors catalogue, comme une boutique en ligne, un espace membre ou un logiciel particulier, se chiffre sur devis, à l'audit.",
   },
   {
     q: "Le Chèque TIC, concrètement ?",
-    a: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible. Il porte sur la création du site — un investissement sur facture — pas sur une mensualité. À 80 %, il reste 198 € à votre charge ; à 40 %, 594 €. Votre éligibilité est vérifiée pendant l'audit, avant tout engagement, et si un dossier se justifie, nous le montons avec vous.",
+    a: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible. Il porte sur la création du site, un investissement sur facture, pas sur une mensualité. À 80 %, il reste 198 € à votre charge ; à 40 %, 594 €. Votre éligibilité est vérifiée pendant l'audit, avant tout engagement, et si un dossier se justifie, nous le montons avec vous.",
   },
   {
     q: "Pourquoi la maintenance est-elle offerte avec l'abonnement ?",
-    a: "Parce qu'un site branché aux moteurs vit avec eux : les demandes qu'il reçoit alimentent la relance, les avis, le point du matin. Entretenir la vitrine fait partie du travail — la facturer à part n'aurait pas de sens. Sans abonnement, elle reste disponible à 19 € par mois, sans engagement.",
+    a: "Parce qu'un site connecté aux systèmes vit avec eux : les demandes qu'il reçoit alimentent la relance, les avis, le point du matin. Entretenir la vitrine fait partie du travail, et la facturer à part n'aurait pas de sens. Sans abonnement, elle reste disponible à 19 € par mois, sans engagement.",
   },
   {
     q: "Et si aucun modèle ne me plaît ?",
-    a: "Le catalogue est fait pour être parcouru : chaque modèle est en ligne, en vrai, pas en capture. Si rien n'accroche, décrivez ce que vous voulez — un site sur mesure se chiffre sur devis, à l'audit, comme tout besoin hors catalogue.",
+    a: "Le catalogue est fait pour être parcouru : chaque modèle est en ligne, pas en capture. Si aucun ne convient, décrivez ce que vous souhaitez : un site sur mesure se chiffre sur devis, à l'audit, comme tout besoin hors catalogue.",
   },
 ];
 
@@ -219,8 +219,7 @@ function MaqCommande() {
           </span>
         </div>
         <p className="mt-4 text-[12.5px] leading-[1.6] text-[#71717a]">
-          Le prix est le même pour tout le monde. Sans l&apos;aide, ou à 40&nbsp;%, il reste
-          990&nbsp;€ ou 594&nbsp;€ — jamais plus.
+          Le prix est le même pour tout le monde. Sans l&apos;aide, ou à 40&nbsp;%, il reste 990&nbsp;€ ou 594&nbsp;€, jamais plus.
         </p>
       </div>
     </>
@@ -279,15 +278,12 @@ export default function TarifsSitePage() {
                 Votre site, au même prix pour tout le monde.
               </h1>
               <p data-arrivee="chapo" className="o-lead mt-[15px] max-w-[650px]">
-                Vingt et un modèles, tous en ligne, tous visitables. Vous choisissez
-                l&apos;allure, on réécrit tout le contenu à votre métier — et dès qu&apos;un poste
-                tourne chez vous, le formulaire l&apos;alimente. Le prix est public, comme celui
-                de la grille.
+                Vingt et un modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu pour votre métier, et dès qu&apos;un poste est en service chez vous, le formulaire l&apos;alimente. Le prix est public, comme celui de la grille.
               </p>
               <div data-arrivee="bloc" className="mt-[25px] flex flex-col items-center">
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <Link href="/site/commande" className="o-btn o-btn--primary">
-                    Commander mon site
+                    Commander le site
                   </Link>
                   <Link href="/modeles" className="o-btn o-btn--ghost">
                     Voir les 21 modèles
@@ -362,7 +358,7 @@ export default function TarifsSitePage() {
             <EnTete
               pastille="LE PRIX"
               titre="Un prix, une aide, une suite."
-              chapo="La création se paie une fois — c'est un investissement, celui que le Chèque TIC sait financer. La suite, elle, est comprise : tant qu'un poste Omega tourne chez vous, la vitrine est entretenue."
+              chapo="La création se paie une fois, comme un investissement, celui que le Chèque TIC peut financer. La suite est comprise : tant qu'un poste Omega.AI est en service chez vous, la vitrine est entretenue."
             />
 
             <div className="mt-16 grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-20">
@@ -384,9 +380,7 @@ export default function TarifsSitePage() {
                   990&nbsp;€, une fois. Pas d&apos;abonnement.
                 </h3>
                 <p data-reveal className="o-body mt-4">
-                  Un des vingt et un modèles du catalogue, réécrit à votre métier, en ligne sous
-                  votre nom. Hors catalogue — boutique en ligne, espace membre, logiciel
-                  particulier — c&apos;est sur devis, à l&apos;audit.
+                  Un des vingt et un modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Hors catalogue, comme une boutique en ligne, un espace membre ou un logiciel particulier, le site se chiffre sur devis, à l&apos;audit.
                 </p>
                 <ul data-reveal className="mt-6 space-y-2.5">
                   {COMPRIS_SITE.map((t) => (
@@ -398,7 +392,7 @@ export default function TarifsSitePage() {
                 </ul>
                 <div data-reveal className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                   <Link href="/site/commande" className="o-btn o-btn--primary">
-                    Commander mon site
+                    Commander le site
                   </Link>
                   <Link href="/modeles" className="o-link !text-[15px]">
                     Voir les modèles d&apos;abord
@@ -420,14 +414,10 @@ export default function TarifsSitePage() {
                   La maintenance&nbsp;? Offerte avec un abonnement actif.
                 </h3>
                 <p data-reveal className="o-body mt-4">
-                  Modifications courantes, hébergement, domaine renouvelé, sauvegardes — tant
-                  qu&apos;un poste tourne chez vous. Un site branché aux moteurs vit avec eux&nbsp;:
-                  les demandes qu&apos;il reçoit alimentent la relance, les avis, le point du matin.
-                  Entretenir la vitrine fait partie du travail.
+                  Modifications courantes, hébergement, domaine renouvelé, sauvegardes, tant qu&apos;un poste est en service chez vous. Un site connecté aux systèmes vit avec eux&nbsp;: les demandes qu&apos;il reçoit alimentent la relance, les avis et le point du matin. Entretenir la vitrine fait partie du travail.
                 </p>
                 <p data-reveal className="o-body mt-4">
-                  Sans abonnement&nbsp;: 19&nbsp;€ par mois, sans engagement. Et le site vous
-                  appartient, quoi qu&apos;il arrive — domaine, accès et fichiers à votre nom.
+                  Sans abonnement&nbsp;: 19&nbsp;€ par mois, sans engagement. Et le site vous appartient quoi qu&apos;il arrive, domaine, accès et fichiers à votre nom.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                   <Link href="/tarifs" className="o-btn o-btn--ghost">
@@ -435,7 +425,7 @@ export default function TarifsSitePage() {
                     <Chevron taille={13} />
                   </Link>
                   <Link href="/reserver-un-audit" className="o-link !text-[15px]">
-                    Vérifier mon éligibilité au Chèque TIC
+                    Vérifier l&apos;éligibilité au Chèque TIC
                     <Chevron taille={13} />
                   </Link>
                 </div>
@@ -458,7 +448,7 @@ export default function TarifsSitePage() {
             <EnTete
               pastille="LE DÉROULÉ"
               titre="Du modèle à la mise en ligne."
-              chapo="Vous choisissez un modèle, vous déposez votre brief, on écrit et on met en ligne. Rien à payer en ligne aujourd'hui : on vous appelle pour régler et lancer la production."
+              chapo="Vous choisissez un modèle, vous déposez votre brief, nous écrivons et mettons en ligne. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production."
             />
             <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
               {ETAPES.map((e) => (
@@ -492,20 +482,17 @@ export default function TarifsSitePage() {
                   </span>
                 </div>
                 <h2 data-reveal className="o-h2 mt-4">
-                  Un site branché, pas une vitrine qui dort.
+                  Un site connecté, pas une vitrine inerte.
                 </h2>
                 <p data-reveal className="o-lead mt-5">
-                  Un site qui reçoit trois demandes par semaine et n&apos;en transforme aucune coûte
-                  plus cher qu&apos;il ne rapporte. Ici, chaque demande entre dans le circuit. La
-                  vitrine nourrit les postes — c&apos;est pour ça qu&apos;elle est entretenue avec
-                  eux.
+                  Un site qui reçoit trois demandes par semaine et n&apos;en transforme aucune coûte plus cher qu&apos;il ne rapporte. Ici, chaque demande entre dans le circuit. La vitrine alimente les postes, et c&apos;est pour cette raison qu&apos;elle est entretenue avec eux.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap gap-3">
                   <Link href="/modeles" className="o-btn o-btn--primary">
                     Parcourir les 21 modèles
                   </Link>
                   <Link href="/offres" className="o-btn o-btn--ghost">
-                    Ce qui s&apos;installe
+                    Ce qui se déploie
                     <Chevron taille={13} />
                   </Link>
                 </div>
@@ -538,7 +525,7 @@ export default function TarifsSitePage() {
             <EnTete
               pastille="QUESTIONS"
               titre="Questions sur le site."
-              chapo="Les cinq qu'un prix affiché doit prendre de front, avec les réponses qu'on donne en vrai."
+              chapo="Les cinq questions qu'un prix affiché doit traiter clairement, avec les réponses que nous donnons."
             />
             <div className="mx-auto mt-12 max-w-[800px]">
               {FAQ_SITE.map((f) => (
@@ -573,28 +560,25 @@ export default function TarifsSitePage() {
               Commandez votre site en deux minutes.
             </h2>
             <p data-reveal className="o-lead mt-5 max-w-[600px]">
-              Un modèle, votre brief, et on écrit tout à votre métier. Rien à payer en ligne
-              aujourd&apos;hui&nbsp;: on vous appelle pour régler, et le Chèque TIC se vérifie
-              avant tout engagement.
+              Un modèle, votre brief, et nous écrivons tout pour votre métier. Rien à payer en ligne aujourd&apos;hui&nbsp;: nous vous appelons pour régler, et le Chèque TIC se vérifie avant tout engagement.
             </p>
             <div data-reveal className="mt-9 flex flex-wrap justify-center gap-3">
               <Link href="/site/commande" className="o-btn o-btn--primary">
-                Commander mon site
+                Commander le site
               </Link>
               <a href="/contact" className="o-btn o-btn--ghost">
                 Nous joindre
               </a>
             </div>
             <p data-reveal className="o-small mt-5 !text-[13px]">
-              {COURRIEL} — on vous répond le jour même.
+              {COURRIEL}, nous vous répondons le jour même.
             </p>
             {/* la mention discrète de l'autre porte : pour qui s'est trompé
                 d'aiguillage, sans re-poser deux portes ici */}
             <p data-reveal className="o-small mt-8 max-w-[520px] !text-[13px] !leading-[20px]">
-              Plusieurs services se partagent le travail chez vous&nbsp;? Votre site s&apos;inscrit
-              dans un ensemble qui se mesure d&apos;abord&nbsp;: votre prix sort d&apos;un audit.{" "}
+              Plusieurs services se partagent le travail chez vous&nbsp;? Votre site s&apos;inscrit dans un ensemble qui se mesure d&apos;abord&nbsp;: votre prix est établi à l&apos;issue d&apos;un diagnostic.{" "}
               <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-white">
-                Réserver un échange
+                Demander un diagnostic
               </Link>
             </p>
           </div>

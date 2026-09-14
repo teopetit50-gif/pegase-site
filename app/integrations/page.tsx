@@ -51,7 +51,7 @@ import {
 export const metadata: Metadata = {
   title: "Intégrations | Omega.AI",
   description:
-    "Les moteurs Omega.AI se branchent sur les outils que vous avez déjà : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Ni compte à créer, ni migration : vos données vivent dans un espace dédié, chiffré, hébergé dans l'UE.",
+    "Les systèmes Omega.AI s'intègrent aux outils déjà en place : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Aucun compte à créer, aucune migration : vos données vivent dans un espace dédié, chiffré, hébergé dans l'Union européenne.",
 };
 
 /* Regroupement par famille, dans l'ordre déclaré. Un outil sans fiche
@@ -97,21 +97,17 @@ export default function Integrations() {
             </div>
             {/* .o-h2 sur un h1 : c'est l'échelle de la référence (48/67,2) */}
             <h1 data-reveal className="o-h2 mt-4 max-w-[720px]">
-              Ça se branche sur ce que vous avez déjà.
+              Intégrés à votre environnement, sans le modifier.
             </h1>
             <p data-reveal className="o-lead mt-5 max-w-[640px]">
-              Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité :
-              les moteurs lisent et écrivent là où vous travaillez. Ni compte à
-              créer, ni migration, ni logiciel à apprendre, et vos données
-              vivent dans un espace dédié, chiffré, hébergé dans l&apos;Union
-              européenne.
+              Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité : les systèmes lisent et écrivent dans les outils où vos équipes travaillent déjà. Aucun compte à créer, aucune migration, aucun logiciel à apprendre, et vos données restent dans un espace dédié, chiffré, hébergé dans l&apos;Union européenne.
             </p>
             <div data-reveal className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/offres" className="o-btn o-btn--primary">
-                Vérifier avec vos outils
+                Vérifier la compatibilité
               </Link>
               <Link href="/offres" className="o-btn o-btn--ghost">
-                Voir les moteurs
+                Voir les systèmes
                 <Chevron taille={13} />
               </Link>
             </div>
@@ -143,12 +139,10 @@ export default function Integrations() {
                 <span className="o-pill o-pill--xs">LE RACCORDEMENT</span>
               </div>
               <h2 data-reveal className="o-h2 mt-4 max-w-[600px]">
-                Comment un moteur se branche.
+                Comment un système s&apos;intègre.
               </h2>
               <p data-reveal className="o-lead mt-4 max-w-[650px]">
-                Toujours dans le même ordre, et toujours en lecture avant
-                l&apos;écriture. C&apos;est ce qui garantit qu&apos;aucun
-                message ne part sur des données fausses.
+                Toujours dans le même ordre, et toujours en lecture avant l&apos;écriture, ce qui garantit qu&apos;aucun message ne part sur des données erronées.
               </p>
             </div>
             <div className="mt-16 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
@@ -178,15 +172,13 @@ export default function Integrations() {
           <div className="o-wrap">
             <div className="flex flex-col items-center text-center">
               <div data-reveal>
-                <span className="o-pill o-pill--xs">PAR MOTEUR</span>
+                <span className="o-pill o-pill--xs">PAR SYSTÈME</span>
               </div>
               <h2 data-reveal className="o-h2 mt-4 max-w-[620px]">
-                Qui se branche sur quoi.
+                Ce que chaque système consomme.
               </h2>
               <p data-reveal className="o-lead mt-4 max-w-[650px]">
-                Les quatre moteurs les plus installés et les outils qu&apos;ils
-                consomment réellement. Un moteur n&apos;a pas besoin de toute
-                votre pile : seulement de ce qui porte l&apos;information.
+                Les quatre systèmes les plus déployés et les outils qu&apos;ils consomment réellement. Un système n&apos;a pas besoin de tout votre système d&apos;information, seulement des outils qui portent l&apos;information.
               </p>
             </div>
             <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -248,17 +240,14 @@ export default function Integrations() {
                 Votre outil n&apos;est pas dans la liste ?
               </h2>
               <p data-reveal className="o-lead mt-5 max-w-[620px]">
-                Cette liste n&apos;est pas une limite, c&apos;est ce qui est
-                déjà raccordé. Dès qu&apos;un outil expose ses données, un
-                moteur peut s&apos;y brancher, et si ce n&apos;est pas le cas,
-                on vous le dit pendant l&apos;audit plutôt qu&apos;après.
+                Cette liste recense ce qui est déjà raccordé, pas une limite. Dès qu&apos;un outil expose ses données, un système peut s&apos;y connecter. Dans le cas contraire, nous le disons pendant le diagnostic, pas après.
               </p>
               <div data-reveal className="mt-8">
                 <Link
                   href="/commencer"
                   className="o-btn o-btn--primary"
                 >
-                  En parler au premier rendez-vous
+                  En parler lors du diagnostic
                 </Link>
               </div>
             </div>

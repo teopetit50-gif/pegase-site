@@ -122,7 +122,7 @@ const COLONNES: {
     nom: "Le sur-mesure",
     resume: "Ce qui n'existe pas encore",
     vedette: true,
-    lien: { label: "Comment ça se cadre", href: "/offres/sur-mesure" },
+    lien: { label: "Comment se fait le cadrage", href: "/offres/sur-mesure" },
   },
   {
     nom: "Votre site",

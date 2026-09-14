@@ -27,7 +27,7 @@
    le héros de la page. */
 export const MARQUE = {
   nom: "FILED",
-  endos: "un système Omega",
+  endos: "un système Omega.AI",
 };
 
 /* La barre de navigation d'ancres du site source (NAV) est partie avec
@@ -46,10 +46,10 @@ export const MARQUE = {
    `para1` n'a PAS été touché : c'est déjà la bonne phrase, et c'est elle
    qui distingue vraiment — les concurrents demandent un logiciel. */
 export const HERO = {
-  titre1: "Vous ne ressaisirez",
+  titre1: "Vos équipes ne ressaisiront",
   titre2: "plus une seule facture.",
-  para1: "Vous connectez une boîte mail. C'est la seule chose à faire.",
-  para2: "FILED lit chaque pièce qui arrive, recoupe ses montants et la classe jusqu'au dossier de votre cabinet.",
+  para1: "Vous connectez une messagerie. C'est la seule chose à faire.",
+  para2: "FILED lit chaque pièce qui arrive, recoupe ses montants et la classe jusqu'au dossier de votre comptabilité.",
   cta1: "COMMENCER",
   /* « VOIR UNE DÉMO » promettait une démo qui n'existe pas : le bouton
      descend à #principe, qui est la suite de la page. */
@@ -95,9 +95,9 @@ export const PRINCIPE = {
      un mot orphelin. Mesuré le 11/09 — « n'importe quoi, n'importe
      quand. » (32) donnait « quand. » tout seul sur sa ligne. */
   titre1: "Vos fournisseurs envoient",
-  titre2: "n'importe quoi de partout.",
+  titre2: "leurs pièces de partout.",
   para:
-    "Vous branchez une boîte mail une fois, puis tout ce qui tombe dedans en ressort classé au bon fournisseur. Vous récupérez vos dimanches soir.",
+    "Vous connectez une messagerie une fois, puis tout ce qui y arrive en ressort classé au bon fournisseur. Vos équipes cessent de ressaisir.",
 };
 
 /* Les libellés des quatre cartes ne sont plus ici : la grille a été
@@ -123,7 +123,7 @@ export const SUIVI = {
 
 export const FRANCAIS = {
   titre1: "Un produit français,",
-  titre2: "et ça se vérifie.",
+  titre2: "et cela se vérifie.",
   para:
     "Les quatre faits ci-dessous sont écrits noir sur blanc, et vous pouvez nous les opposer à tout moment. Nous ne promettons rien de plus que ce qui y est écrit.",
 };
@@ -134,13 +134,13 @@ export const PALIERS = [
     nom: "Découverte",
     prix: null as string | null,
     periode: "/ mois",
-    pitch: "Pour voir ce que ça donne sur vos vraies factures.",
+    pitch: "Pour évaluer le système sur vos factures réelles.",
     cta: "Commencer",
     lignes: [
       "20 factures par mois",
       "Une boîte mail connectée",
       "Classement par fournisseur",
-      "Export mensuel pour le cabinet",
+      "Export mensuel pour la comptabilité",
       "Historique de trois mois",
     ],
   },
@@ -155,7 +155,7 @@ export const PALIERS = [
       "100 factures par mois",
       "Deux boîtes mail connectées",
       "Recoupement HT / TVA / TTC",
-      "Transmission directe au cabinet",
+      "Transmission directe à la comptabilité",
       "Historique de douze mois",
       "Assistance par mail",
     ],
@@ -232,7 +232,7 @@ export const GARDE_FOUS = {
     {
       titre: "Aucune pièce n'est effacée.",
       texte:
-        "Un doublon est mis de côté au lieu d'être effacé, et un montant douteux attend votre œil avant d'être classé. Vos fichiers d'origine restent tels que vous les avez reçus, donc vous pouvez tout récupérer quand vous voulez.",
+        "Un doublon est mis de côté au lieu d'être effacé, et un montant douteux attend votre validation avant d'être classé. Vos fichiers d'origine restent tels que vous les avez reçus, donc vous pouvez tout récupérer quand vous voulez.",
       court: "Un doublon est mis de côté au lieu d'être effacé, et vos fichiers d'origine sont conservés.",
       faits: [
         "Chaque pièce gardée dans son format d'origine",
@@ -255,28 +255,28 @@ export const CONFORMITE = {
    que FILED NE fait PAS : c'est ce qu'un acheteur cherche
    d'abord, et c'est ce qui évite un client déçu au premier mois. */
 export const FAQ = {
-  titre1: "Ce qu'on nous demande",
+  titre1: "Les questions posées",
   titre2: "avant de signer.",
   para: "Les réponses sont courtes, et si la vôtre n'y est pas, écrivez-nous.",
   questions: [
     {
-      q: "Qu'est-ce qu'il faut installer ?",
-      r: "Rien. Vous connectez une boîte mail, et c'est tout. Aucun logiciel de facturation à brancher, aucun fichier client à importer, aucune extension à poser sur votre ordinateur.",
+      q: "Que faut-il installer ?",
+      r: "Rien. Vous connectez une messagerie, et c'est tout. Aucun logiciel de facturation à connecter, aucun fichier client à importer, aucune extension à installer sur vos postes.",
     },
     {
       q: "Et si mon fournisseur envoie une photo prise de travers ?",
-      r: "Elle est lue quand même. PDF, scan, photo, pièce jointe, ou montant écrit directement dans le corps du mail : le format est le problème de votre fournisseur, pas le vôtre.",
+      r: "Elle est lue quand même. PDF, scan, photo, pièce jointe, ou montant écrit directement dans le corps du mail : le format ne vous concerne plus.",
     },
     {
       /* Ajoutée le 11/09. C'est l'objection la plus fréquente et elle
          n'était nulle part : le comptable est le premier frein cité en
          rendez-vous. La réponse vient de la fiche produit. */
-      q: "Mon comptable doit-il changer ses outils ?",
-      r: "Non. Il reçoit un dossier classé dans le format qu'il utilise déjà, à la date convenue avec lui pendant l'installation. Il gagne du temps sans rien changer à ses méthodes.",
+      q: "Ma comptabilité doit-elle changer ses outils ?",
+      r: "Non. Elle reçoit un dossier classé dans le format qu'elle utilise déjà, à la date convenue pendant l'installation. Elle gagne du temps sans rien changer à ses méthodes.",
     },
     {
-      q: "Est-ce qu'il écrit à mes clients ou à mes fournisseurs ?",
-      r: "Jamais. Il lit, recoupe, classe et transmet à votre cabinet. Il n'envoie aucun message en votre nom et n'a accès à aucun moyen de paiement.",
+      q: "FILED écrit-il à mes clients ou à mes fournisseurs ?",
+      r: "Jamais. Il lit, recoupe, classe et transmet à votre comptabilité. Il n'envoie aucun message en votre nom et n'a accès à aucun moyen de paiement.",
     },
     {
       q: "Que se passe-t-il s'il se trompe sur un montant ?",
@@ -284,15 +284,15 @@ export const FAQ = {
     },
     {
       q: "Où sont mes factures ?",
-      r: "Sur des serveurs situés dans l'Union européenne. Vos fichiers d'origine sont conservés tels quels, vous pouvez les récupérer ou tout effacer quand vous voulez.",
+      r: "Sur des serveurs situés dans l'Union européenne. Vos fichiers d'origine sont conservés tels quels, vous pouvez les récupérer ou tout effacer à tout moment.",
     },
     {
-      q: "Est-ce que ça me met en conformité pour la facturation électronique ?",
-      r: "Non, et personne ne devrait vous le vendre comme ça. Le raccordement à une plateforme immatriculée relève de votre outil de facturation et de votre comptable. FILED lit et classe ce qui vous arrive, quel que soit le canal.",
+      q: "Ce système assure-t-il la conformité à la facturation électronique ?",
+      r: "Non, et personne ne devrait vous le présenter ainsi. Le raccordement à une plateforme immatriculée relève de votre outil de facturation et de votre comptabilité. FILED lit et classe ce qui vous arrive, quel que soit le canal.",
     },
     {
-      q: "Je peux arrêter quand ?",
-      r: "Quand vous voulez, sans préavis. Vous repartez avec vos pièces.",
+      q: "Puis-je arrêter à tout moment ?",
+      r: "Oui, sans préavis. Vous repartez avec vos pièces.",
     },
   ],
 };
@@ -306,10 +306,10 @@ export const FAQ = {
    (commercial/02-pitch-audit.md, §4). Un refus juste avant le bouton
    vaut mieux qu'une relance de plus. */
 export const FINAL = {
-  titre1: "Ne branchez rien",
-  titre2: "si vos pièces sont déjà rangées.",
+  titre1: "Ne connectez rien",
+  titre2: "si vos pièces sont déjà classées.",
   para:
-    "Si elles arrivent de partout et finissent en pile sur un coin de bureau, une boîte mail connectée suffit à remettre l'ensemble en ordre.",
+    "Si elles arrivent de partout et s'accumulent avant d'être traitées, une messagerie connectée suffit à remettre l'ensemble en ordre.",
 };
 
 /* ══════════════════════════════════════════════════════════════════════

@@ -148,7 +148,7 @@ const JALONS = [
     icone: ICONES.facture,
     titre: "La facture aussi",
     texte:
-      "Le devis accepté devient une facture, et l'impayé entre dans la même mécanique. C'est le moteur qui court après l'argent, plus vous.",
+      "Le devis accepté devient une facture, et l'impayé entre dans la même mécanique. C'est le système qui suit les règlements, plus vous.",
   },
   {
     n: "05",

@@ -17,7 +17,7 @@
           Effet immédiat, la page se rafraîchit ;
         · finalisée / en service : « Demander un changement » (même
           panneau + message → demander_abonnement 'changement') et
-          « Résilier mon abonnement » (motif + message → 'resiliation').
+          « Résilier l&apos;abonnement » (motif + message → 'resiliation').
           Ce sont des DEMANDES : Teo les traite dans le cockpit, on le dit
           (« confirmé par e-mail sous 48 h ») ;
      3. la liste des demandes déjà envoyées, avec leur statut et la
@@ -269,23 +269,23 @@ export default function AbonnementCarte({
   const enregistrerFormule = () =>
     agir(
       (jeton) => modifierInstallation(demande.id, postesTries(choix), periodicite, jeton),
-      "Formule enregistrée. Votre réunion d'installation garde son créneau ; le nouveau prix s'applique dès la mise en route.",
+      "Formule enregistrée. Votre réunion d'installation garde son créneau, et le nouveau prix s'applique dès la mise en service.",
     );
   const annulerReservation = () =>
     agir(
       (jeton) => annulerDemande(demande.id, jeton),
-      "Réservation annulée. Rien n'est prélevé. Vous pouvez réserver à nouveau quand vous voulez depuis la grille des tarifs.",
+      "Réservation annulée. Rien n'est prélevé. Vous pouvez réserver à nouveau à tout moment depuis la grille des tarifs.",
     );
   const demanderChangement = () =>
     agir(
       (jeton) =>
         demanderAbonnement("changement", { modules: postesTries(choix), periodicite }, message, jeton),
-      "Demande de changement envoyée. Nous vous confirmons par e-mail sous 48 h ; en attendant, votre formule actuelle continue telle quelle.",
+      "Demande de changement envoyée. Nous vous confirmons par e-mail sous 48 h. En attendant, votre formule actuelle continue telle quelle.",
     );
   const demanderResiliation = () =>
     agir(
       (jeton) => demanderAbonnement("resiliation", { motif: motif || null }, message, jeton),
-      "Demande de résiliation envoyée. Nous vous confirmons par e-mail sous 48 h ; votre abonnement s'arrête à la fin de la période en cours, rien n'est prélevé au-delà.",
+      "Demande de résiliation envoyée. Nous vous confirmons par e-mail sous 48 h. Votre abonnement s'arrête à la fin de la période en cours, et rien n'est prélevé au-delà.",
     );
 
   /* ——— 05/09 : la ligne « Moyen de paiement » ——— */
@@ -322,14 +322,14 @@ export default function AbonnementCarte({
     ? {
         code: "paiement_en_cours",
         pastille: "Enregistrement en cours",
-        texte: "Stripe nous confirme votre moyen de paiement dans quelques secondes. Rechargez la page dans un instant.",
+        texte: "Notre prestataire de paiement confirme votre moyen de paiement dans quelques secondes. Rechargez la page dans un instant.",
         bouton: false,
       }
     : paiement === "enregistre"
       ? {
           code: "paiement_enregistre",
           pastille: "Enregistré",
-          texte: `${libelleMoyenPaiement(demande.moyen_paiement)} — rien n'est débité avant la fin de l'installation.`,
+          texte: `${libelleMoyenPaiement(demande.moyen_paiement)}. Rien n'est débité avant la fin de l'installation.`,
           bouton: false,
         }
       : paiement === "preleve"
@@ -343,7 +343,7 @@ export default function AbonnementCarte({
           ? {
               code: "paiement_echec",
               pastille: "Paiement refusé",
-              texte: `${libelleMoyenPaiement(demande.moyen_paiement)} — le prélèvement a été refusé. Mettez à jour votre moyen de paiement ; nous vous écrivons pour la suite.`,
+              texte: `${libelleMoyenPaiement(demande.moyen_paiement)} : le prélèvement a été refusé. Mettez à jour votre moyen de paiement, et nous vous écrivons pour la suite.`,
               bouton: true,
             }
           : {
@@ -363,7 +363,7 @@ export default function AbonnementCarte({
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="text-[14px] font-semibold text-[#050505]">
           {modulesActuels.length === POSTES.length
-            ? "Tout Omega — les quatre postes"
+            ? "Tout Omega, les quatre postes"
             : modulesActuels.length
               ? `${modulesActuels.length} poste${modulesActuels.length > 1 ? "s" : ""} en formule`
               : "Réunion d'installation"}
@@ -438,7 +438,7 @@ export default function AbonnementCarte({
           {lignePaiement.bouton ? (
             paiementFerme ? (
               <p className="cp-info mt-3" role="status">
-                L&apos;enregistrement en ligne n&apos;est pas encore ouvert&nbsp;: on vous le proposera
+                L&apos;enregistrement en ligne n&apos;est pas encore ouvert&nbsp;: nous vous le proposerons
                 par e-mail.
               </p>
             ) : (
@@ -489,14 +489,14 @@ export default function AbonnementCarte({
       ) : modifiable ? (
         <div className="mt-5 border-t border-[#e3e3e3] pt-4">
           <p className="text-[13px] leading-[20px] text-[#616161]">
-            Tant que l&apos;installation n&apos;est pas faite, vous changez ou annulez ici, tout de suite.
+            Tant que l&apos;installation n&apos;est pas faite, vous pouvez changer ou annuler ici, immédiatement.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" className="r-btn r-btn--noir" onClick={() => ouvrir("formule")} disabled={envoi}>
               Changer de formule
             </button>
             <button type="button" className="r-btn r-btn--fil" onClick={() => ouvrir("annulation")} disabled={envoi}>
-              Annuler ma réservation
+              Annuler la réservation
             </button>
           </div>
         </div>
@@ -512,7 +512,7 @@ export default function AbonnementCarte({
             </button>
             {resiliationEnCours ? null : (
               <button type="button" className="r-btn r-btn--fil" onClick={() => ouvrir("resiliation")} disabled={envoi}>
-                Résilier mon abonnement
+                Résilier l&apos;abonnement
               </button>
             )}
           </div>
@@ -522,7 +522,7 @@ export default function AbonnementCarte({
         </div>
       ) : (
         <p className="mt-5 border-t border-[#e3e3e3] pt-4 text-[13px] leading-[20px] text-[#616161]">
-          Cette demande ne se modifie plus en ligne. Écrivez-nous, on s&apos;en occupe.
+          Cette demande ne se modifie plus en ligne. Écrivez-nous, nous nous en occupons.
         </p>
       )}
 
@@ -602,7 +602,7 @@ export default function AbonnementCarte({
           {!modifiable ? (
             <div className="mt-4">
               <label className="rv-libelle" htmlFor="ab-message-changement">
-                Un mot pour nous <small>— facultatif</small>
+                Un message pour nous <small>(facultatif)</small>
               </label>
               <textarea
                 id="ab-message-changement"
@@ -651,7 +651,7 @@ export default function AbonnementCarte({
               {envoi ? "Annulation…" : "Oui, annuler"}
             </button>
             <button type="button" className="r-btn r-btn--fil" onClick={fermer} disabled={envoi}>
-              Garder ma réservation
+              Conserver la réservation
             </button>
           </div>
         </div>
@@ -661,16 +661,16 @@ export default function AbonnementCarte({
       {panneau === "resiliation" ? (
         <div className="rv-apparait mt-4 rounded-xl border border-[#e3e3e3] bg-[#f5f5f5] p-4 sm:p-5">
           <div className="cp-secondaire cp-kicker-ligne">
-            Résilier mon abonnement
+            Résilier l&apos;abonnement
           </div>
           <p className="mt-1 text-[14px] leading-[21px] text-[#3d3d3d]">
-            Nous vous confirmons par e-mail sous 48&nbsp;h&nbsp;; votre abonnement s&apos;arrête à la fin
+            Nous vous confirmons par e-mail sous 48&nbsp;h. Votre abonnement s&apos;arrête à la fin
             de la période en cours, rien n&apos;est prélevé au-delà.
           </p>
           <div className="mt-4 grid gap-4">
             <div>
               <label className="rv-libelle" htmlFor="ab-motif">
-                Pourquoi&nbsp;? <small>— facultatif, ça nous aide</small>
+                Pourquoi&nbsp;? <small>(facultatif, cela nous aide)</small>
               </label>
               <select
                 id="ab-motif"
@@ -679,7 +679,7 @@ export default function AbonnementCarte({
                 onChange={(e) => setMotif(e.target.value)}
                 disabled={envoi}
               >
-                <option value="">Je préfère ne pas dire</option>
+                <option value="">Je préfère ne pas préciser</option>
                 {MOTIFS_RESILIATION.map((m) => (
                   <option key={m.valeur} value={m.valeur}>
                     {m.libelle}
@@ -689,7 +689,7 @@ export default function AbonnementCarte({
             </div>
             <div>
               <label className="rv-libelle" htmlFor="ab-message-resiliation">
-                Un mot pour nous <small>— facultatif</small>
+                Un message pour nous <small>(facultatif)</small>
               </label>
               <textarea
                 id="ab-message-resiliation"
@@ -699,7 +699,7 @@ export default function AbonnementCarte({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 disabled={envoi}
-                placeholder="Ce qui n'a pas marché, ou ce qui aurait pu vous retenir…"
+                placeholder="Ce qui n'a pas fonctionné, ou ce qui aurait pu vous retenir…"
               />
             </div>
           </div>
@@ -708,7 +708,7 @@ export default function AbonnementCarte({
               {envoi ? "Envoi…" : "Envoyer ma demande de résiliation"}
             </button>
             <button type="button" className="r-btn r-btn--fil" onClick={fermer} disabled={envoi}>
-              Garder mon abonnement
+              Conserver l&apos;abonnement
             </button>
           </div>
         </div>

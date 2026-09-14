@@ -471,7 +471,7 @@ export default function PriseDeCreneau({
       : (format?.nom ?? "Audit");
   const sousRecap =
     parcours === "installation"
-      ? "45 min · en visio"
+      ? "45 min · en visioconférence"
       : `${format?.duree ?? ""} · ${format?.conditions ?? ""}`;
 
   const dateJour = (j: number) => jourGpLabel(vue.annee, vue.mois, j);
@@ -508,7 +508,7 @@ export default function PriseDeCreneau({
           <>
             <div className="mt-5 border-t border-[#e3e3e3] pt-4 text-[14px] font-semibold text-[#050505]">
               {postesValides.length === POSTES.length
-                ? "Tout Omega — les quatre postes :"
+                ? "Tout Omega, les quatre postes :"
                 : `Vos postes (${postesValides.length}) :`}
             </div>
             <ul className="mt-2.5 space-y-2.5">
@@ -566,7 +566,7 @@ export default function PriseDeCreneau({
                 href={annuel ? "/tarifs?periodicite=annuel" : "/tarifs"}
                 className="underline underline-offset-2"
               >
-                Modifier mes postes
+                Modifier les postes
               </Link>
             </p>
           </>
@@ -651,7 +651,7 @@ export default function PriseDeCreneau({
             ) : !agenda ? (
               <div className="mt-6">
                 <p className="rv-erreur">
-                  L&apos;agenda ne répond pas. Réessayez dans un instant — ou écrivez-nous à{" "}
+                  L&apos;agenda ne répond pas. Réessayez dans un instant, ou écrivez-nous à{" "}
                   <a className="underline" href={lienCourriel("Réserver un créneau")}>
                     {COURRIEL}
                   </a>
@@ -722,7 +722,7 @@ export default function PriseDeCreneau({
                   avecProfil={false}
                   onConnecte={connecter}
                   intro={
-                    "Votre installation est rattachée à un compte — c'est lui qui vous ouvrira votre cockpit. Connectez-vous, ou créez votre compte en une minute : votre adresse, un code reçu par e-mail, un mot de passe."
+                    "Votre installation est rattachée à un compte, qui vous ouvrira votre espace client. Connectez-vous, ou créez votre compte en une minute : votre adresse, un code reçu par e-mail, un mot de passe."
                   }
                   emailInitial={c.email}
                 />
@@ -765,7 +765,7 @@ export default function PriseDeCreneau({
               </div>
               <div>
                 <label className="rv-libelle" htmlFor="rv-email">
-                  Adresse e-mail{verrou && util ? <small> — celle de votre compte</small> : null}
+                  Adresse e-mail{verrou && util ? <small> (celle de votre compte)</small> : null}
                 </label>
                 <input
                   id="rv-email"
@@ -780,7 +780,7 @@ export default function PriseDeCreneau({
               </div>
               <div>
                 <label className="rv-libelle" htmlFor="rv-tel">
-                  Téléphone / WhatsApp <small>— conseillé</small>
+                  Téléphone / WhatsApp <small>(recommandé)</small>
                 </label>
                 <input id="rv-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="0690 …" value={c.telephone} onChange={maj("telephone")} />
               </div>
@@ -802,7 +802,7 @@ export default function PriseDeCreneau({
               </div>
               <div className="sm:col-span-2">
                 <label className="rv-libelle" htmlFor="rv-commune">
-                  Commune <small>— facultatif</small>
+                  Commune <small>(facultatif)</small>
                 </label>
                 <input id="rv-commune" className="rv-champ" autoComplete="address-level2" value={c.commune} onChange={maj("commune")} />
               </div>
@@ -810,8 +810,8 @@ export default function PriseDeCreneau({
                 <label className="rv-libelle" htmlFor="rv-message">
                   {surDevis
                     ? "Votre situation en deux lignes"
-                    : "Ce qui vous coûte le plus cher aujourd'hui"}{" "}
-                  <small>— facultatif</small>
+                    : "Le processus qui vous coûte le plus cher aujourd'hui"}{" "}
+                  <small>(facultatif)</small>
                 </label>
                 <textarea id="rv-message" rows={3} className="rv-champ resize-y" value={c.message} onChange={maj("message")} />
               </div>
@@ -864,14 +864,11 @@ export default function PriseDeCreneau({
             <p className="r-note mt-4 max-w-[60ch]">
               {verrou ? (
                 <>
-                  Vos coordonnées servent à organiser ce rendez-vous&nbsp;; prénom, nom, entreprise et
-                  téléphone sont gardés sur votre compte pour vos prochaines demandes. Rien
-                  n&apos;est revendu — voir{" "}
+                  Vos coordonnées servent à organiser ce rendez-vous. Prénom, nom, entreprise et téléphone sont conservés sur votre compte pour vos prochaines demandes, et rien n&apos;est revendu. Voir{" "}
                 </>
               ) : (
                 <>
-                  Vos coordonnées ne servent qu&apos;à organiser ce rendez-vous. Rien n&apos;est
-                  conservé sans votre accord, rien n&apos;est revendu — voir{" "}
+                  Vos coordonnées ne servent qu&apos;à organiser ce rendez-vous. Rien n&apos;est conservé sans votre accord, rien n&apos;est revendu. Voir{" "}
                 </>
               )}
               <Link href="/vos-donnees" className="underline underline-offset-2">
@@ -896,8 +893,7 @@ export default function PriseDeCreneau({
             </h3>
             <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
               {surDevis ? (
-                <>Votre demande est enregistrée. On vous répond le jour même, avec un devis ou les
-                questions qui le précèdent.</>
+                <>Votre demande est enregistrée. Nous vous répondons le jour même, avec un devis ou les questions qui le précèdent.</>
               ) : (
                 <>
                   <span className="font-semibold text-[#050505] first-letter:uppercase">
@@ -905,16 +901,15 @@ export default function PriseDeCreneau({
                     {creneau !== null ? ` · ${heureGp(creneau)} (heure de Guadeloupe)` : ""}
                   </span>
                   <br />
-                  Le créneau est bloqué chez nous. Vous recevez un mot de confirmation le jour même
-                  {c.telephone ? " sur WhatsApp ou par e-mail" : " par e-mail"}, avec le lien de la
-                  visio.
+                  Le créneau est réservé. Vous recevez une confirmation le jour même
+                  {c.telephone ? " sur WhatsApp ou par e-mail" : " par e-mail"}, avec le lien de la visioconférence.
                 </>
               )}
             </p>
             {parcours === "installation" ? (
               <>
                 <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-                  À la réunion&nbsp;: on branche vos postes sur vos outils, on vérifie votre
+                  À la réunion&nbsp;: nous connectons vos postes à vos outils, nous vérifions votre
                   éligibilité au Chèque TIC, et l&apos;abonnement ({libellePrix}) ne démarre
                   qu&apos;une fois le système en route&nbsp;: le premier prélèvement part le jour où
                   vos modules sont en service.
@@ -924,7 +919,7 @@ export default function PriseDeCreneau({
                     la retrouver, sinon la raison d'être du compte reste
                     invisible. */}
                 <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-                  Votre demande est rangée dans « Mon compte », avec votre créneau.
+                  Votre demande est enregistrée dans « Mon compte », avec votre créneau.
                 </p>
                 {/* 08/09 — l'application (demande des associés : « dans
                     l'espace client et après l'achat ») : dès la mise en
@@ -953,8 +948,7 @@ export default function PriseDeCreneau({
                     </p>
                     {paiement === "indisponible" ? (
                       <p className="rv-paiement-note mt-3" role="status">
-                        L&apos;enregistrement en ligne n&apos;est pas encore ouvert&nbsp;: on vous le
-                        proposera par e-mail.
+                        L&apos;enregistrement en ligne n&apos;est pas encore ouvert&nbsp;: nous vous le proposerons par e-mail.
                       </p>
                     ) : (
                       <>

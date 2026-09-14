@@ -55,7 +55,7 @@
 export const MARQUE = {
   nom: "FRONTD",
   role: "demandes entrantes & avis",
-  signature: "un système Omega",
+  signature: "un système Omega.AI",
   espace: "https://app.omegaai.fr",
   audit: "/reserver-un-audit",
   /* Un seul compte pour tous les systèmes Omega. Le site source renvoyait
@@ -85,9 +85,9 @@ export const HERO = {
      phrase complète. Les canaux ont leur section, la minute revient dans
      APPORT. */
   chapo:
-    "Pendant que vous êtes sous un capot ou déjà couché, votre client reçoit sa réponse — et elle ne dit rien que vous n'ayez validé.",
+    "Pendant que vos équipes sont en intervention ou que le service est fermé, votre client reçoit sa réponse, et elle ne dit rien que vous n'ayez validé.",
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
-  secondaire: { libelle: "Voir ce qu'il répond", href: "#apport" },
+  secondaire: { libelle: "Voir ce que FRONTD répond", href: "#apport" },
 };
 
 /* Le ruban de la référence fait défiler des logos de clients. FRONTD n'a
@@ -95,7 +95,7 @@ export const HERO = {
    Le ruban porte donc les demandes elles-mêmes, annoncées comme des
    exemples — c'est ce que le moteur lit toute la journée. */
 export const BANDEAU = {
-  intro: ["Ce qui arrive", "le soir et le week-end", "— exemples"],
+  intro: ["Ce qui arrive", "le soir et le week-end", ", exemples"],
   items: [
     "« Vous livrez sur Jarry ? »",
     "« Votre prix pour 40 palettes ? »",
@@ -136,7 +136,7 @@ export const APPORT = {
     {
       chiffre: "0",
       texte:
-        "Réponse inventée : quand il ne sait pas, il vous passe la main.",
+        "Réponse inventée : quand il ne sait pas, il transfère à vos équipes.",
     },
   ],
 };
@@ -157,7 +157,7 @@ export const APPORT = {
    fait, ce qui vous reste. Tenue à une seule phrase, chaque carte se
    réécrivait en fragment sans verbe. */
 export const CAPACITES = {
-  etiquette: "Ce qu'il fait",
+  etiquette: "Ce que FRONTD fait",
   titreDebut: "Quand un client écrit à 21 h 47, il obtient",
   titreMots: ["sa réponse", "son créneau"],
   titreLiaison: "et",
@@ -166,17 +166,17 @@ export const CAPACITES = {
     {
       teinte: "bg-[#edf4ea]",
       etiquette: "Réception",
-      titre: "La réponse part avant que vous rouvriez",
+      titre: "La réponse part avant la réouverture",
       texte:
-        "FRONTD lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vous relisez l'échange le lendemain.",
+        "FRONTD lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vos équipes relisent l'échange le lendemain.",
       panneau: "conversation",
     },
     {
       teinte: "bg-[#ebebfc]",
       etiquette: "Qualification",
-      titre: "Une urgence ne finit pas dans la pile",
+      titre: "Une urgence ne finit pas dans la file d'attente",
       texte:
-        "Chaque demande est d'abord qualifiée, puis elle suit le circuit que vous avez défini pour son type. Quand elle est urgente, c'est votre téléphone qui sonne.",
+        "Chaque demande est d'abord qualifiée, puis elle suit le circuit que vous avez défini pour son type. Quand elle est urgente, le téléphone de l'astreinte sonne.",
       panneau: "tri",
     },
     {
@@ -206,26 +206,26 @@ export const ETAPES = {
   etiquette: "Installation",
   titre: "Vous ne changez ni vos numéros, ni vos habitudes",
   chapo:
-    "L'installation demande une heure d'entretien, puis le branchement de vos canaux, et une semaine de rodage pendant laquelle vous relisez chaque réponse.",
+    "L'installation demande une heure d'entretien, puis le branchement de vos canaux, et une semaine de rodage pendant laquelle vos équipes relisent chaque réponse.",
   bouton: { libelle: "Réserver un audit", href: MARQUE.audit },
   etapes: [
     {
       numero: "01",
       titre: "Une heure d'entretien",
       texte:
-        "Nous construisons ensemble la base de votre entreprise : tarifs, horaires, durées d'intervention, règles maison. Rien d'autre ne sera dit à un client.",
+        "Nous construisons ensemble la base de votre entreprise : tarifs, horaires, durées d'intervention, règles internes. Rien d'autre ne sera dit à un client.",
     },
     {
       numero: "02",
-      titre: "Le branchement",
+      titre: "L'intégration",
       texte:
-        "Nous raccordons WhatsApp Business, votre boîte mail et votre agenda, si bien que vos clients continuent d'écrire au même numéro qu'hier.",
+        "Nous connectons WhatsApp Business, votre messagerie et votre agenda, si bien que vos clients continuent d'écrire au même numéro qu'hier.",
     },
     {
       numero: "03",
       titre: "Une semaine en double",
       texte:
-        "Vous recevez copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. FRONTD prend ensuite son rythme sur les postes que vous ouvrez.",
+        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. FRONTD prend ensuite son rythme sur les postes que vous ouvrez.",
     },
   ],
 };
@@ -352,9 +352,9 @@ export const JOURNEE = {
      réponse ») : il dit maintenant ce qu'on ne verrait pas sans lui — les
      quatre demandes sont TOUTES hors horaires, ce que le lecteur peut
      vérifier sur les cartes à côté. */
-  titre: "Vos clients écrivent quand vous avez fermé",
+  titre: "Vos clients écrivent quand le service est fermé",
   chapo: "Aucune de ces quatre demandes n'est arrivée pendant vos heures d'ouverture.",
-  mention: "Exemples de demandes — pas le relevé d'un client",
+  mention: "Exemples de demandes, pas le relevé d'un client",
   demandes: [
     {
       heure: "6 h 30",
@@ -376,7 +376,7 @@ export const JOURNEE = {
       heure: "23 h 05",
       canal: "WhatsApp",
       texte: "Mon pare-brise est fissuré, c'est urgent.",
-      issue: "Transféré : votre téléphone sonne",
+      issue: "Transféré : l'astreinte est appelée",
       dehors: true,
       transfert: true,
     },
@@ -405,15 +405,15 @@ export const QUESTIONS = {
      sans verbe qui ouvrait la cinquième. Le reste vient de la fiche et ne
      se retouche pas ; en particulier « aucun tri des mécontents », qui ne
      s'affaiblit sous aucun prétexte. */
-  titre: "Ce qu'on nous oppose, et ce qu'on répond",
+  titre: "Les objections que nous entendons, et nos réponses",
   items: [
     {
       q: "Le client comprend-il qu'il ne parle pas à un humain ?",
-      r: "La mention figure dans la première réponse, dans les termes que vous choisissez à l'installation. Un client s'accommode de parler à une machine ; ce qui l'agace, c'est d'attendre jusqu'à lundi.",
+      r: "La mention figure dans la première réponse, dans les termes que vous choisissez à l'installation. Un client s'accommode de parler à une machine. Ce qui l'agace, c'est d'attendre jusqu'à lundi.",
     },
     {
-      q: "Et s'il invente une réponse ?",
-      r: "FRONTD ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il vous transfère la conversation avec son historique complet.",
+      q: "Et si FRONTD invente une réponse ?",
+      r: "FRONTD ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il transfère la conversation à vos équipes, avec son historique complet.",
     },
     {
       q: "Que se passe-t-il si deux clients demandent le même créneau ?",
@@ -425,14 +425,14 @@ export const QUESTIONS = {
     },
     {
       q: "Et les avis, comment sont-ils demandés ?",
-      r: "La demande part dans les trois jours qui suivent le règlement, avec deux relances au maximum et six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et ça finit toujours par se voir.",
+      r: "La demande part dans les trois jours qui suivent le règlement, avec deux relances au maximum et six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit toujours par se voir.",
     },
   ],
 } as const;
 
 export const CLOTURE = {
   etiquette: MARQUE.signature,
-  titre: `${MARQUE.nom} est-il le bon pour vous ?`,
+  titre: `${MARQUE.nom} est-il adapté à votre organisation ?`,
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
   secondaire: { libelle: "Se connecter", href: "/connexion" },
 } as const;
@@ -447,7 +447,7 @@ export const CIRCUITS_FIGURE = {
     { nom: "Urgence", suite: "transféré", transfere: true },
     { nom: "Réclamation", suite: "transféré", transfere: true },
   ],
-  mention: "Schéma — les quatre circuits définis à l'installation",
+  mention: "Schéma des quatre circuits définis à l'installation",
 } as const;
 
 /* ── La bande « produit français » ───────────────────────────────────

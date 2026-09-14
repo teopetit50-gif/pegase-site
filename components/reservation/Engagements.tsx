@@ -32,7 +32,7 @@ const ARTICLES: { n: string; intitule: string; texte: string }[] = [
     n: "02",
     intitule: "Recommandation",
     texte:
-      "Si le calcul ne justifie pas d'installer un moteur, la recommandation est de ne rien installer. C'est une conclusion valable, et elle arrive.",
+      "Si le calcul ne justifie pas de déployer un système, la recommandation est de ne rien installer. C'est une conclusion valable, et elle arrive.",
   },
   {
     n: "03",

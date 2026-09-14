@@ -19,4 +19,4 @@ export const SITE_URL =
 
 export const SITE_NOM = "Omega.AI";
 export const SITE_BASELINE =
-  "Automatisation pour les petites entreprises";
+  "Systèmes métiers, automatisation et intégration";

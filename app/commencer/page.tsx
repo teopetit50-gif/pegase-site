@@ -45,7 +45,7 @@ import { lienContact } from "@/lib/reservation";
 export const metadata: Metadata = {
   title: "Par où commencer | Omega.AI",
   description:
-    "Deux façons de démarrer avec Omega : un audit sur mesure pour les organisations où plusieurs services valident, des prix publics pour les indépendants et TPE-PME.",
+    "Deux façons de démarrer avec Omega.AI : un diagnostic sur mesure pour les organisations où plusieurs services valident, des prix publics pour les indépendants et TPE-PME.",
 };
 
 /* Les pictogrammes sont dessinés au trait (2 px, grille de 24) : une
@@ -85,8 +85,8 @@ const PORTES = [
     icone: ICONES.plusieurs,
     titre: "Organisations & équipes",
     texte:
-      "Plusieurs services se partagent le travail — l'accueil, la comptabilité, les opérations — et plusieurs personnes valident, chacune sur son poste. Le prix sort des volumes mesurés, pas d'une grille.",
-    cta: "Réserver un échange",
+      "Plusieurs services se partagent le travail, comme l'accueil, la comptabilité et les opérations, et plusieurs personnes valident, chacune sur son poste. Le prix est établi à partir des volumes mesurés, pas d'une grille.",
+    cta: "Demander un diagnostic",
     href: "/reserver-un-audit",
   },
   {
@@ -95,7 +95,7 @@ const PORTES = [
     icone: ICONES.seul,
     titre: "Indépendants & TPE-PME",
     texte:
-      "Une personne — deux, parfois — tient les demandes, les devis et les factures, voit passer tout ce qui entre et sort, et valide seule ce qui part vers les clients. Ses outils : le mail, un tableur, WhatsApp, la caisse.",
+      "Une personne, parfois deux, tient les demandes, les devis et les factures, voit passer tout ce qui entre et sort, et valide seule ce qui part vers les clients. Ses outils sont la messagerie, un tableur, WhatsApp et la caisse.",
     cta: "Voir les prix et démarrer",
     href: "/tarifs",
   },
@@ -106,7 +106,7 @@ const SITE = {
   icone: ICONES.site,
   titre: "Découvrir nos sites",
   texte:
-    "Pour qui n'a pas de site, ou dont le site ne ramène rien : vingt et un modèles en ligne, tous visitables en vrai — vous choisissez l'allure, on réécrit tout à votre métier, et le formulaire alimente vos postes dès le premier jour.",
+    "Pour les entreprises sans site, ou dont le site n'apporte aucune demande : vingt et un modèles en ligne, tous consultables. Vous choisissez l'allure, nous réécrivons tout le contenu pour votre métier, et le formulaire alimente vos postes dès le premier jour.",
   cta: "Voir les offres",
   href: "/tarifs/site",
 };
@@ -182,7 +182,7 @@ export default function CommencerPage() {
             >
               dans le formulaire de contact
             </a>{" "}
-            — on vous répond le jour même.
+            , nous vous répondons le jour même.
           </p>
         </section>
       </div>

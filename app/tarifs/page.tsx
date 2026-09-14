@@ -74,7 +74,7 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 export const metadata: Metadata = {
   title: "Tarifs | Omega.AI",
   description:
-    `Un poste 59 €, trois postes 89 €, tout Omega 119 € par mois — sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.`,
+    `Un poste 59 €, trois postes 89 €, tout Omega 119 € par mois, sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.`,
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -94,25 +94,25 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Puis-je changer de palier ensuite ?",
     r: [
-      "Oui, à tout moment et sans frais de changement : le prix suit simplement le nombre de postes en service. On ajoute un poste quand les chiffres du premier le justifient — c'est même le chemin qu'on recommande.",
+      "Oui, à tout moment et sans frais de changement : le prix suit simplement le nombre de postes en service. Un poste s'ajoute quand les chiffres du premier le justifient, et c'est le chemin que nous recommandons.",
     ],
   },
   {
     q: "Comment se passe le paiement ?",
     r: [
-      "Vous enregistrez votre moyen de paiement — carte ou prélèvement SEPA — au moment de réserver la réunion d'installation, sur une page sécurisée. Rien n'est débité avant la fin de l'installation : le premier prélèvement part le jour où vos modules sont en service.",
+      "Vous enregistrez votre moyen de paiement, carte ou prélèvement SEPA, au moment de réserver la réunion d'installation, sur une page sécurisée. Rien n'est débité avant la fin de l'installation : le premier prélèvement part le jour où vos modules sont en service.",
       `En mensuel, sans engagement : vous résiliez à tout moment, le mois en cours va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, le jour de la mise en service, à −${REMISE_PCT} %.`,
     ],
   },
   {
     q: "Qu'est-ce que le prix comprend, exactement ?",
     r: [
-      "Le fonctionnement des postes choisis, le point du matin, les verrous de validation, vos corrections et le suivi. La réunion d'installation est comprise : on branche vos outils ensemble, en visio, écran partagé.",
-      "Un raccordement particulier — un logiciel rare, un historique à reprendre — est chiffré avant tout engagement, jamais découvert en cours de route.",
+      "Le fonctionnement des postes choisis, le point du matin, les verrous de validation, vos corrections et le suivi. La réunion d'installation est comprise : nous connectons vos outils ensemble, en visioconférence, écran partagé.",
+      "Un raccordement particulier, comme un logiciel rare ou un historique à reprendre, est chiffré avant tout engagement, jamais découvert en cours de route.",
     ],
   },
   {
-    q: "Et si ça ne me convient pas ?",
+    q: "Et si l'offre ne me convient pas ?",
     r: [
       "Trente jours à partir de la mise en service pour être remboursé, sans justification à fournir, en mensuel comme en annuel : ce qui a été prélevé vous est rendu. Au-delà, le mensuel reste résiliable à tout moment ; l'annuel court jusqu'à son terme — et dans les deux cas vos données repartent avec vous, export complet compris.",
     ],
@@ -124,9 +124,9 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
     ],
   },
   {
-    q: "Plusieurs services se partagent le travail chez nous — cette grille nous concerne ?",
+    q: "Plusieurs services se partagent le travail chez nous : cette grille nous concerne-t-elle ?",
     r: [
-      "Probablement pas : quand plusieurs personnes valident, chacune sur son poste, un prix affiché serait un mensonge. Votre porte est l'audit — on mesure vos volumes, et le devis en sort. Il est gratuit dans ses deux premiers formats.",
+      "Probablement pas : quand plusieurs personnes valident, chacune sur son poste, un prix affiché n'aurait pas de sens. Votre point d'entrée est le diagnostic : nous mesurons vos volumes, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
     ],
   },
 ];
@@ -135,7 +135,7 @@ const JAMAIS: { titre: string; texte: string }[] = [
   {
     titre: "Pas de prix par personne",
     texte:
-      "Le prix ne dépend pas du nombre de gens qui s'en servent chez vous. Embaucher ne coûte rien de plus.",
+      "Le prix ne dépend pas du nombre d'utilisateurs. Un collaborateur de plus ne coûte rien de plus.",
   },
   {
     titre: "Aucune commission au résultat",

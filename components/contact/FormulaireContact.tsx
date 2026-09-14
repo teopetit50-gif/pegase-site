@@ -37,7 +37,7 @@ const SUJETS: { valeur: SujetContact; libelle: string }[] = [
   { valeur: "application", libelle: "L'application sur mon téléphone ou mon ordinateur" },
   { valeur: "site", libelle: "Mon site" },
   { valeur: "avant", libelle: "Une question avant de commencer" },
-  { valeur: "autre", libelle: "Autre chose" },
+  { valeur: "autre", libelle: "Autre demande" },
 ];
 
 type Champs = {
@@ -124,9 +124,9 @@ export default function FormulaireContact() {
         </div>
         <h2 className="r-h4 mt-5">Message envoyé.</h2>
         <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-          On vous répond dans les deux jours ouvrés, souvent plus vite, à l&apos;adresse{" "}
+          Nous vous répondons dans les deux jours ouvrés, souvent plus vite, à l&apos;adresse{" "}
           <span className="font-semibold text-[#050505]">{c.email.trim()}</span>
-          {c.telephone.trim() ? " — ou sur WhatsApp si c'est plus simple" : ""}.
+          {c.telephone.trim() ? ", ou sur WhatsApp si vous préférez" : ""}.
         </p>
       </div>
     );
@@ -180,7 +180,7 @@ export default function FormulaireContact() {
             id="ct-message"
             rows={6}
             className="rv-champ resize-y"
-            placeholder={c.sujet === "avant" ? "Votre activité, ce qui vous prend le plus de temps, ce qui se perd." : "Dites-nous ce qui se passe, avec le plus de détails possible : ce que vous attendiez, ce que vous avez vu, depuis quand."}
+            placeholder={c.sujet === "avant" ? "Votre activité, ce qui vous prend le plus de temps, ce qui se perd." : "Décrivez la situation avec le plus de détails possible : ce que vous attendiez, ce que vous avez constaté, depuis quand."}
             value={c.message}
             onChange={maj("message")}
             required
@@ -209,7 +209,7 @@ export default function FormulaireContact() {
 
       <div className="mt-7 flex flex-wrap items-center gap-4">
         <button type="submit" disabled={!champsOk || etat === "envoi"} className={`r-btn w-full sm:w-auto ${champsOk && etat !== "envoi" ? "r-btn--noir" : "rv-btn--attente"}`}>
-          {etat === "envoi" ? "Envoi…" : "Envoyer mon message"}
+          {etat === "envoi" ? "Envoi…" : "Envoyer le message"}
         </button>
         <p className="r-note max-w-[40ch]">
           Vos coordonnées ne servent qu&apos;à vous répondre. Rien n&apos;est cédé, rien n&apos;est

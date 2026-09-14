@@ -113,7 +113,7 @@ function CalendarScheduler({
             <p className="text-sm leading-[21px] text-[#616161]">
               {date
                 ? "Plus aucun créneau ce jour-là."
-                : "Choisissez un jour dans le calendrier — les jours grisés sont complets ou fermés."}
+                : "Choisissez un jour dans le calendrier : les jours grisés sont complets ou fermés."}
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-2">

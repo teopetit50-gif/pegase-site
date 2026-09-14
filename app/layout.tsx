@@ -55,7 +55,7 @@ const dmMono = DM_Mono({
 
 /* 01/08 — ramenée sous ~160 caractères : Google tronquait l'ancienne (278). */
 const DESCRIPTION =
-  "Douze moteurs d'automatisation branchés sur vos outils (mail, tableur, WhatsApp), sous votre validation. Audit gratuit de 30 minutes, Chèque TIC vérifié.";
+  "Des systèmes qui connectent vos directions, vos outils et vos données, sous validation humaine, sans changer votre environnement. Diagnostic de 30 minutes offert.";
 
 export const metadata: Metadata = {
   /* 30/07 — `metadataBase` est ce qui transforme les chemins relatifs des
@@ -63,19 +63,19 @@ export const metadata: Metadata = {
      app/opengraph-image.tsx n'est pas résolue et les aperçus de partage
      restent vides — précisément sur WhatsApp, devenu le canal principal. */
   metadataBase: new URL(SITE_URL),
-  title: "Omega.AI, Automatisation pour les petites entreprises",
+  title: "Omega.AI | Systèmes métiers, automatisation et intégration",
   description: DESCRIPTION,
   openGraph: {
     type: "website",
     locale: "fr_FR",
     siteName: "Omega.AI",
-    title: "Omega.AI, Automatisation pour les petites entreprises",
+    title: "Omega.AI | Systèmes métiers, automatisation et intégration",
     description: DESCRIPTION,
     url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Omega.AI, Automatisation pour les petites entreprises",
+    title: "Omega.AI | Systèmes métiers, automatisation et intégration",
     description: DESCRIPTION,
   },
 };

@@ -48,39 +48,39 @@ type Fiche = { famille: Famille; role: string };
 export const OUTIL_INFOS: Record<string, Fiche> = {
   Gmail: {
     famille: "Messagerie",
-    role: "Le moteur lit les fils entrants, rédige les relances et les dépose en brouillon dans votre boîte, l'envoi reste votre geste.",
+    role: "Le système lit les fils entrants, rédige les relances et les dépose en brouillon dans la messagerie. L'envoi reste le geste de vos équipes.",
   },
   WhatsApp: {
     famille: "Messagerie",
-    role: "Les demandes reçues hors horaires trouvent une réponse, et tout ce qui sort du périmètre vous est transféré au lieu d'être approximé.",
+    role: "Les demandes reçues hors horaires trouvent une réponse, et tout ce qui sort du périmètre validé est transféré à vos équipes au lieu d'être approximé.",
   },
   Telegram: {
     famille: "Messagerie",
-    role: "Canal de notification du desk : le brief du matin et les alertes de retard critique arrivent là où vous regardez déjà.",
+    role: "Canal de notification : le point du matin et les alertes de retard critique arrivent là où vos équipes regardent déjà.",
   },
   "Google Sheets": {
     famille: "Tableur & base",
-    role: "La plupart des petites entreprises pilotent leur activité dans un tableur. Le moteur y lit l'encours et y réécrit l'état de chaque relance.",
+    role: "Beaucoup de services pilotent encore leur encours dans un tableur. Le système y lit les échéances et y réécrit l'état de chaque relance.",
   },
   Airtable: {
     famille: "Tableur & base",
-    role: "Même rôle qu'un tableur, avec des vues par statut, utile quand plusieurs personnes suivent le même encours.",
+    role: "Même rôle qu'un tableur, avec des vues par statut, utile quand plusieurs services suivent le même encours.",
   },
   Notion: {
     famille: "Tableur & base",
-    role: "Base de connaissances du réceptionniste : horaires, tarifs, conditions. FRONTD y puise ses réponses au lieu de les inventer.",
+    role: "Base de connaissances de FRONTD : horaires, tarifs, conditions. Le système y puise ses réponses au lieu de les inventer.",
   },
   "Google Drive": {
     famille: "Fichiers",
-    role: "Dépôt des pièces classées : chaque facture fournisseur extraite est rangée par émetteur et par mois, prête pour le cabinet.",
+    role: "Dépôt des pièces classées : chaque facture fournisseur extraite est rangée par émetteur et par mois, prête pour la comptabilité.",
   },
   Dropbox: {
     famille: "Fichiers",
-    role: "Alternative au Drive pour le classement des pièces, quand c'est déjà là que vivent vos dossiers.",
+    role: "Même classement des pièces, quand vos dossiers vivent déjà là.",
   },
   Stripe: {
     famille: "Paiement",
-    role: "Le moteur sait ce qui est encaissé et arrête de relancer une facture réglée, c'est ce qui évite la relance de trop.",
+    role: "Le système lit les encaissements et cesse de relancer une facture réglée, ce qui évite la relance de trop.",
   },
   PayPal: {
     famille: "Paiement",
@@ -88,7 +88,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Shopify: {
     famille: "E-commerce",
-    role: "Historique de commandes lu par RELOAD pour identifier les clients dormants et les classer par valeur et par récence.",
+    role: "RELOAD lit l'historique de commandes pour identifier les clients inactifs et les classer par valeur et par récence.",
   },
   WooCommerce: {
     famille: "E-commerce",
@@ -96,11 +96,11 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   "Google Calendar": {
     famille: "Agenda",
-    role: "Le réceptionniste propose des créneaux réellement libres et pose le rendez-vous, sans double réservation.",
+    role: "FRONTD propose des créneaux réellement libres et pose le rendez-vous, sans double réservation.",
   },
   Calendly: {
     famille: "Agenda",
-    role: "Quand la prise de rendez-vous passe déjà par là, le moteur s'y branche plutôt que d'ouvrir un second canal.",
+    role: "Quand la prise de rendez-vous passe déjà par là, le système s'y connecte plutôt que d'ouvrir un second canal.",
   },
   "Google Meet": {
     famille: "Agenda",
@@ -112,11 +112,11 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   QuickBooks: {
     famille: "Comptabilité",
-    role: "Les pièces classées partent en dossier complet, avec leurs champs comptables extraits, ni ressaisie, ni pièce manquante.",
+    role: "Les pièces classées partent en dossier complet, avec leurs champs comptables extraits, sans ressaisie ni pièce manquante.",
   },
   Sage: {
     famille: "Comptabilité",
-    role: "Même transmission structurée vers le cabinet, au format attendu par l'outil.",
+    role: "Même transmission structurée vers la comptabilité, au format attendu par l'outil.",
   },
   /* ⚠ 14/08/2026 — la fiche n8n a été RETIRÉE. Elle disait « le socle sur
      lequel tournent les moteurs » : c'était nommer notre outil interne sur
@@ -124,11 +124,11 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
      outils du client figurent ici. Ne pas la remettre. */
   Zapier: {
     famille: "Automatisation",
-    role: "Passerelle vers les outils métier que le desk ne raccorde pas en direct.",
+    role: "Passerelle vers les outils métier qui ne sont pas raccordés en direct.",
   },
   Trello: {
     famille: "Projet & CRM",
-    role: "Chaque relance sans réponse peut ouvrir une carte à traiter, pour que rien ne se perde entre deux chantiers.",
+    role: "Chaque relance sans réponse peut ouvrir une carte à traiter, pour que rien ne se perde entre deux dossiers.",
   },
   Asana: {
     famille: "Projet & CRM",
@@ -189,7 +189,7 @@ export const MOTEUR_OUTILS = [
   {
     system: "RELOAD",
     slug: "nouvelles-affaires",
-    role: "Clients dormants & marchés publics",
+    role: "Clients inactifs & marchés publics",
     /* « MailChimp » : même casse que le `title` de simple-icons et que la
        clé d'OUTIL_INFOS plus haut, sans quoi le logo saute au rendu. */
     outils: ["Shopify", "Google Sheets", "MailChimp", "Gmail"],
@@ -201,26 +201,26 @@ export const MOTEUR_OUTILS = [
 export const RACCORDEMENT = [
   {
     n: "01",
-    titre: "On liste ce que vous avez",
+    titre: "Nous relevons vos outils",
     texte:
-      "Pendant l'audit, on relève les outils réellement utilisés : pas ceux de la plaquette. Un tableur et une boîte mail suffisent à faire tourner un moteur.",
+      "Pendant le diagnostic, nous relevons les outils réellement utilisés par vos services, pas ceux de l'organigramme. Un tableur et une messagerie suffisent à faire tourner un système.",
   },
   {
     n: "02",
-    titre: "On se branche en lecture d'abord",
+    titre: "La lecture précède l'écriture",
     texte:
-      "Le moteur commence par lire : encours, historique, fils de discussion. Rien n'est écrit ni envoyé tant que la lecture n'est pas juste.",
+      "Le système commence par lire : encours, historique, fils de discussion. Rien n'est écrit ni envoyé tant que cette lecture n'est pas validée.",
   },
   {
     n: "03",
-    titre: "L'écriture passe par vous",
+    titre: "L'écriture passe par vos équipes",
     texte:
-      "Puis le moteur prépare, et dépose dans votre file de validation. Vous envoyez, vous corrigez, ou vous laissez tomber.",
+      "Le système prépare ensuite chaque action et la dépose dans la file de validation, où vos équipes l'envoient, la corrigent ou l'abandonnent.",
   },
   {
     n: "04",
     titre: "Les données restent chez vous",
     texte:
-      "Chaque entreprise a son espace de données chiffré, séparé des autres. Le jour où vous arrêtez : export complet remis, espace effacé.",
+      "Chaque entreprise dispose d'un espace de données chiffré, séparé des autres. Le jour où vous arrêtez, l'export complet vous est remis, puis l'espace est effacé.",
   },
 ];

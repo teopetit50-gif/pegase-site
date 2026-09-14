@@ -142,8 +142,8 @@ export const FICHES: Record<string, Fiche> = {
     photo: "/photos/payd.jpg",
     photoAlt: "Un dirigeant travaille seul à son bureau en soirée, écran allumé.",
     photoVoile: 0.79,
-    pitch: "Le facturier qui se défend tout seul.",
-    meta: "Vos impayés relancés chaque jour, sans que vous ayez à y penser.",
+    pitch: "Les encaissements sécurisés, sans mobiliser vos équipes.",
+    meta: "Les échéances suivies et relancées chaque jour, selon vos règles de gestion.",
     sections: {
       pointsTitre: "Ce que CASHD fait de votre matinée.",
       pointsChapo:
@@ -234,8 +234,8 @@ export const FICHES: Record<string, Fiche> = {
     photo: "/photos/answr.jpg",
     photoAlt: "Les mains d'une personne qui répond à un message sur son téléphone.",
     photoVoile: 0.79,
-    pitch: "Une réception qui ne dort jamais, avec votre discours, pas le sien.",
-    meta: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
+    pitch: "Chaque demande entrante traitée à toute heure, avec votre discours.",
+    meta: "Une demande reçue à 21 h reçoit sa réponse à 21 h.",
     sections: {
       apportTitre: "Répondre à toute heure, sans jamais improviser.",
       apportChapo:
@@ -320,8 +320,8 @@ export const FICHES: Record<string, Fiche> = {
     photo: "/photos/offload.jpg",
     photoAlt: "Une personne attablée dépouille un document administratif.",
     photoVoile: 0.81,
-    pitch: "La compta fournisseurs sans une seule ligne de saisie.",
-    meta: "Vos factures fournisseurs lues, contrôlées, classées et transmises au cabinet.",
+    pitch: "Les pièces fournisseurs traitées sans une ligne de saisie.",
+    meta: "Vos factures fournisseurs lues, contrôlées, classées et transmises à la comptabilité.",
     sections: {
       integrationsTitre: "Vos outils actuels suffisent.",
       integrationsChapo:
@@ -396,38 +396,38 @@ export const FICHES: Record<string, Fiche> = {
     photo: "/photos/brief.jpg",
     photoAlt: "Un ordinateur portable et une tasse de café sur une table en bois, au matin.",
     photoVoile: 0.78,
-    pitch: "L'état de l'entreprise en un message, avant le premier café.",
-    meta: "L'état réel de votre entreprise, en un message, à 7 h.",
+    pitch: "L'état de l'organisation en un message, chaque matin.",
+    meta: "L'état réel de votre organisation, en un message, à 7 h.",
     sections: {
-      pointsTitre: "Ce que contient le brief.",
+      pointsTitre: "Ce que contient le point du matin.",
       /* 13/08 — le chapô annonçait « quatre blocs » et la section en aligne
          cinq depuis l'ajout du bilan hebdomadaire. Le compte est retiré
          plutôt que corrigé : il se démentira au prochain point ajouté. */
       pointsChapo:
-        "Toujours le même ordre de lecture : le cash, les relances, les décisions qui vous attendent, les 48 heures qui viennent.",
+        "Toujours le même ordre de lecture : la trésorerie, les relances, les décisions en attente, les 48 heures à venir.",
       detailChapo:
         "D'où viennent les chiffres, comment ils sont hiérarchisés, et pourquoi il n'y a qu'un message par jour.",
       cibleChapo:
-        "Les dirigeants qui portent quatre casquettes avant midi et n'ouvriront jamais un tableau de bord de plus.",
+        "Les directions qui arbitrent entre plusieurs services avant midi et n'ouvriront pas un tableau de bord de plus.",
       faqChapo:
-        "L'heure, le format, la source des chiffres : ce qu'on nous demande à chaque installation.",
+        "L'heure, le format, la source des chiffres : les questions posées à chaque installation.",
       integrationsTitre: "Vos outils actuels suffisent.",
       integrationsChapo:
-        "PULSE ne crée aucune donnée. Il lit ce qui existe déjà (facturier, agenda, messagerie, moteurs installés) et le restitue en un seul endroit. Aucune saisie supplémentaire n'est demandée à personne.",
+        "PULSE ne crée aucune donnée. Il lit ce qui existe déjà (facturation, agenda, messagerie, systèmes installés) et le restitue en un seul endroit, sans demander de saisie supplémentaire à vos équipes.",
       marcheTitre: "Une nuit de collecte, un message, votre lecture.",
       marcheChapo:
         "La chaîne se déclenche à heure fixe, sans événement extérieur : chaque nuit, les sources sont relues, les écarts calculés, les priorités classées. À 7 h, il ne reste qu'un message.",
       situationChapo: "Ce que PULSE produit concrètement, un mardi ordinaire.",
       outilsChapo:
-        "Le moteur lit dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre.",
+        "Le système lit dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre.",
       catalogueChapo:
-        "PULSE rend compte de ce que les autres moteurs font : seul, il a moins à raconter. L'audit détermine l'ordre d'installation le plus rentable, et il commence rarement par celui-ci.",
+        "PULSE rend compte de ce que les autres systèmes font : seul, il a moins à restituer. Le diagnostic détermine l'ordre de déploiement le plus rentable, et il commence rarement par celui-ci.",
       comprisChapo:
-        "Le brief du matin est la partie qu'on voit. Ce qui suit est livré avec, sans supplément et sans négociation.",
+        "Le point du matin est la partie visible. Ce qui suit est livré avec lui, sans supplément.",
     },
     fonctionnement: [
-      "Chaque nuit, PULSE rassemble ce que vos outils et le reste du système savent déjà (encaissements, relances, agenda, retards) et le condense en un message unique, hiérarchisé, livré à 7 h. Pas un tableau de bord de plus à ouvrir : un point qui se lit comme un SMS. La limite d'un message par jour n'est pas une contrainte technique, c'est une règle : au-delà, plus personne ne les lit.",
-      "Une fois par semaine, il relit ce qui s'est réellement passé et vous propose entre zéro et trois enseignements tirés de faits observés : une formulation que vous corrigez systématiquement, un délai qui ne tient jamais, une question de client qui revient sans arrêt. Vous validez ou vous refusez. Seul ce que vous acceptez entre en mémoire et sert les semaines suivantes. Rien n'est retenu dans votre dos, et ce que vous refusez est effacé.",
+      "Chaque nuit, PULSE rassemble ce que vos outils et le reste du système savent déjà (encaissements, relances, agenda, retards) et le condense en un message unique, hiérarchisé, livré à 7 h. Aucun tableau de bord supplémentaire à ouvrir : un point qui se lit comme un SMS. La limite d'un message par jour n'est pas une contrainte technique, c'est une règle : au-delà, plus personne ne les lit.",
+      "Une fois par semaine, PULSE relit ce qui s'est réellement passé et vous propose entre zéro et trois enseignements tirés de faits observés : une formulation que vous corrigez systématiquement, un délai qui ne tient jamais, une question de client qui revient sans arrêt. Vous validez ou vous refusez. Seul ce que vous acceptez entre en mémoire et sert les semaines suivantes. Rien n'est retenu dans votre dos, et ce que vous refusez est effacé.",
     ],
     points: [
       "Encaissements de la veille et évolution des encours, comparés à la semaine précédente",
@@ -443,33 +443,33 @@ export const FICHES: Record<string, Fiche> = {
     etapes: [
       {
         t: "Choix des indicateurs",
-        d: "On liste ce que vous vérifiez chaque matin, et ce que vous aimeriez vérifier sans jamais avoir le temps. Ça devient la trame du brief.",
+        d: "Nous listons ce que vous vérifiez chaque matin, et ce que vous aimeriez vérifier sans en avoir le temps. Cette liste devient la trame du point du matin.",
       },
       {
         t: "Branchement des sources",
-        d: "Tableur, agenda, moteurs déjà actifs : PULSE lit ce qui existe. Aucune saisie supplémentaire ne vous est demandée.",
+        d: "Tableur, agenda, systèmes déjà actifs : PULSE lit ce qui existe. Aucune saisie supplémentaire n'est demandée à vos équipes.",
       },
       {
         t: "Ajustement du format",
-        d: "Après une semaine, on resserre : ce qui est utile reste, ce qui n'est jamais lu saute. Le brief converge vers votre lecture idéale.",
+        d: "Après une semaine, nous resserrons le format : ce qui est utile reste, ce qui n'est jamais lu disparaît. Le message converge vers votre lecture idéale.",
       },
     ],
     faq: [
       {
         q: "Puis-je changer l'heure de réception ?",
-        a: "Librement : 5 h pour les lève-tôt, 7 h par défaut, ou le dimanche soir pour préparer la semaine. C'est un réglage, pas un chantier.",
+        a: "Librement : 5 h, 7 h par défaut, ou le dimanche soir pour préparer la semaine. C'est un simple réglage.",
       },
       {
         q: "Et si je ne le lis pas un matin ?",
-        a: "Rien ne bloque. Le brief est une photographie, pas une file de validations. Les décisions en attente, elles, restent visibles le lendemain, et le surlendemain.",
+        a: "Rien ne bloque. Le point du matin est une photographie, pas une file de validations. Les décisions en attente restent visibles le lendemain, et le surlendemain.",
       },
       {
         q: "D'où viennent les chiffres ?",
-        a: "De vos propres outils : facturier, agenda, messagerie, et les moteurs installés chez vous. PULSE n'invente aucun chiffre et n'en estime aucun : chaque ligne est traçable jusqu'à sa source.",
+        a: "De vos propres outils : facturation, agenda, messagerie, et les systèmes installés chez vous. PULSE n'invente aucun chiffre et n'en estime aucun, puisque chaque ligne est traçable jusqu'à sa source.",
       },
       {
-        q: "Le système apprend tout seul ?",
-        a: "Non. Il propose ce qu'il croit avoir compris, vous tranchez. Ce que vous refusez n'est pas conservé, et rien n'entre en mémoire sans votre accord explicite.",
+        q: "Le système apprend-il seul ?",
+        a: "Non. Il propose ce qu'il croit avoir compris, et vous tranchez. Ce que vous refusez n'est pas conservé, et rien n'entre en mémoire sans votre accord explicite.",
       },
     ],
     demo: {
@@ -477,7 +477,7 @@ export const FICHES: Record<string, Fiche> = {
       title: "PULSE · mardi 21 juillet, 7 h 00",
       lines: [
         {
-          label: "Cash",
+          label: "Trésorerie",
           text: "Encaissé hier : 34 200 € (Sogexal, Vallier). Encours : 187 500 €, en baisse de 9 % sur la semaine.",
         },
         {
@@ -496,8 +496,8 @@ export const FICHES: Record<string, Fiche> = {
     photo: "/photos/revive.jpg",
     photoAlt: "L'intérieur d'une boutique de vêtements, articles présentés en rayon.",
     photoVoile: 0.83,
-    pitch: "Votre fichier client vaut plus que n'importe quelle publicité.",
-    meta: "Vos anciens clients rapportent plus que vos nouvelles publicités.",
+    pitch: "Le chiffre qui dort dans votre historique, remis dans le circuit.",
+    meta: "Les clients inactifs et les marchés de votre zone, remis dans le circuit commercial.",
     sections: {
       apportTitre: "Réveiller le fichier sans harceler les clients.",
       apportChapo:
@@ -588,36 +588,36 @@ export const FICHES: Record<string, Fiche> = {
       detailChapo:
         "Où vivent les garde-fous, pourquoi leur emplacement n'est pas un détail, et ce qui reste tracé une fois qu'un message est parti.",
       cibleChapo:
-        "Toutes les entreprises équipées, sans exception et sans supplément. Le socle ne se choisit pas : il est posé le premier jour, avant le premier moteur.",
-      faqChapo: "Le contrôle, la sortie, les données : les trois questions posées à chaque audit.",
+        "Toutes les entreprises équipées, sans exception et sans supplément. Le socle ne se choisit pas : il est posé le premier jour, avant le premier système.",
+      faqChapo: "Le contrôle, la sortie, les données : les trois questions posées à chaque diagnostic.",
       integrationsTitre: "Le socle, pas une option.",
       integrationsChapo:
-        "VAULT ne se branche pas à côté des autres moteurs : il s'installe en dessous. Tout ce que CASHD, RELOAD, FRONTD ou FILED préparent passe par lui avant de partir. Un moteur mal configuré ne peut pas le contourner : le contrôle est en dessous de lui, pas à côté.",
+        "VAULT ne s'installe pas à côté des autres systèmes : il s'installe en dessous. Tout ce que CASHD, RELOAD, FRONTD ou FILED préparent passe par lui avant de partir. Un système mal configuré ne peut pas le contourner : le contrôle est en dessous de lui, pas à côté.",
       marcheTitre: "Un envoi préparé, douze contrôles, votre décision.",
       marcheChapo:
-        "Entre le moment où un moteur prépare un message et celui où il part, douze vérifications s'exécutent dans la base de données. Un message qui échoue à l'une d'elles n'est pas reporté à plus tard : il n'est jamais écrit.",
+        "Entre le moment où un système prépare un message et celui où il part, douze vérifications s'exécutent dans la base de données. Un message qui échoue à l'une d'elles n'est pas reporté à plus tard : il n'est jamais écrit.",
       situationChapo:
         "Ce que VAULT arrête concrètement, sur une journée ordinaire de relances.",
       outilsChapo:
-        "Le moteur contrôle ce qui sort de vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre.",
+        "Le système contrôle ce qui sort de vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre.",
       catalogueChapo:
-        "VAULT ne s'installe jamais seul : il encadre les moteurs que vous choisissez. L'audit désigne celui par lequel commencer, et le socle vient avec.",
+        "VAULT ne s'installe jamais seul : il encadre les systèmes que vous choisissez. Le diagnostic désigne celui par lequel commencer, et le socle vient avec.",
       comprisChapo:
-        "Les verrous sont la partie qu'on voit. Ce qui suit est livré avec, sans supplément et sans négociation.",
+        "Les contrôles sont la partie visible. Ce qui suit est livré avec eux, sans supplément.",
     },
     fonctionnement: [
-      "Chaque message préparé passe par votre file de validation : vous approuvez, vous corrigez le texte, ou vous laissez tomber. Rien ne part derrière votre dos. Et le réglage qui autoriserait le contraire n'est pas laissé à la main d'un installateur pressé : c'est une décision prise avec vous, poste par poste, après une période de rodage.",
-      "En dessous, douze verrous vivent dans la base de données elle-même, pas dans les automatisations qui l'utilisent. La différence est tout sauf théorique : une automatisation buggée, mal configurée ou mal instruite ne peut pas écrire un envoi interdit : la base le refuse avant qu'il existe. Un client qui a réglé, un client qui a répondu « stop », un dimanche à 23 h, deux messages coup sur coup à la même personne, une relance pour douze euros : ce ne sont pas des consignes, ce sont des impossibilités.",
+      "Chaque message préparé passe par votre file de validation : vos équipes approuvent, corrigent le texte ou abandonnent l'envoi. Rien ne part sans validation. Et le réglage qui autoriserait le contraire n'est pas laissé à la main d'un installateur pressé : c'est une décision prise avec vous, poste par poste, après une période de rodage.",
+      "En dessous, douze verrous vivent dans la base de données elle-même, pas dans les automatisations qui l'utilisent. La différence est tout sauf théorique : une automatisation défaillante, mal configurée ou mal instruite ne peut pas écrire un envoi interdit : la base le refuse avant qu'il existe. Un client qui a réglé, un client qui a répondu « stop », un dimanche à 23 h, deux messages coup sur coup à la même personne, une relance pour douze euros : ce ne sont pas des consignes, ce sont des impossibilités.",
       "Enfin, tout ce qui part s'inscrit dans un journal qui ne peut être ni modifié ni supprimé, y compris par nous. Vous savez à tout moment ce qui a été envoyé, à qui, quel jour, sous quelle formulation, et vous pouvez le prouver. Cela devient très concret le jour où un client affirme n'avoir jamais été relancé.",
     ],
     points: [
       "Validation avant envoi : chaque message vous est soumis, vous approuvez, corrigez ou annulez",
-      "Un « stop » client vaut retrait immédiat et définitif, sur tous les canaux et tous les moteurs à la fois",
+      "Un « stop » client vaut retrait immédiat et définitif, sur tous les canaux et tous les systèmes à la fois",
       "Douze verrous inscrits dans la base : client déjà réglé, hors horaires, montant dérisoire, double envoi, plafond quotidien",
       "Journal immuable de tout ce qui est parti : consultable, exportable, opposable",
     ],
     controle:
-      "Un seul réglage coupe l'ensemble du système, immédiatement, sans passer par nous. C'est le premier bouton qu'on vous montre à l'installation, avant même de parler de ce que ça rapporte.",
+      "Un seul réglage coupe l'ensemble du système, immédiatement, sans passer par nous. C'est le premier bouton que nous vous montrons à l'installation, avant même de parler de résultats.",
     outils: ["Votre espace dédié", "Gmail / Outlook", "WhatsApp"],
     cible: ["Toutes les entreprises équipées", "Sans supplément", "Dès le premier jour"],
     etapes: [
@@ -627,24 +627,24 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Rodage sans rien envoyer",
-        d: "Pendant deux semaines, tout tourne et rien ne sort : les messages sont préparés et relus, jamais expédiés. Vous voyez exactement ce que le système aurait écrit.",
+        d: "Pendant deux semaines, tout fonctionne et rien ne sort : les messages sont préparés et relus, jamais expédiés. Vos équipes voient exactement ce que le système aurait écrit.",
       },
       {
         t: "Bascule un poste à la fois",
-        d: "Les relances d'abord, puis les autres, à raison d'un par semaine. On vérifie la bonne réception sur une vraie boîte avant d'aller plus loin.",
+        d: "Les relances d'abord, puis les autres postes, à raison d'un par semaine. La bonne réception est vérifiée sur une messagerie réelle avant d'aller plus loin.",
       },
     ],
     faq: [
       {
-        q: "Comment j'arrête tout, tout de suite ?",
-        a: "Un seul réglage, dans votre espace, coupe l'ensemble des envois immédiatement, sans nous appeler, sans délai. Ce qui était en attente reste en attente : rien ne se perd, rien ne repart seul.",
+        q: "Comment tout arrêter immédiatement ?",
+        a: "Un seul réglage, dans votre espace, coupe l'ensemble des envois immédiatement, sans nous appeler et sans délai. Ce qui était en attente reste en attente : rien ne se perd, rien ne repart seul.",
       },
       {
         q: "Et si le système se trompe malgré tout ?",
         a: "Sur les douze cas verrouillés, il ne peut pas se tromper : le refus vient de la base, pas d'une consigne. Sur le reste, tout ce qui a été refusé, arrêté ou mal compris est consigné, et vous le retrouvez dans le point du matin.",
       },
       {
-        q: "Le jour où j'arrête, il se passe quoi ?",
+        q: "Que se passe-t-il le jour où j'arrête ?",
         a: "Vos données vous sont remises intégralement, et effacées de nos serveurs sur simple demande. Vous restez propriétaire de vos clients, de vos factures et de votre historique : c'est écrit dans le contrat, pas seulement sur cette page.",
       },
     ],
@@ -667,7 +667,7 @@ export const FICHES: Record<string, Fiche> = {
           tone: "warn",
         },
         {
-          text: "Métalco · relance de niveau 2 préparée, en attente de vous",
+          text: "Métalco · relance de niveau 2 préparée, en attente de validation",
           badge: "À valider",
           tone: "ok",
         },

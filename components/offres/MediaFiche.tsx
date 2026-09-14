@@ -377,7 +377,7 @@ const GLYPHES = {
    plutôt que dans lib/fiches.ts. */
 export function ChaineControle() {
   const noeuds = [
-    { label: "Le moteur prépare", ton: "#18181b", icone: GLYPHES.plume },
+    { label: "Le système prépare", ton: "#18181b", icone: GLYPHES.plume },
     { label: "Vous relisez", ton: "#18181b", icone: GLYPHES.oeil, decale: true },
     { label: "Vous validez, ça part", ton: "#2563eb", icone: GLYPHES.check },
     { label: "Ou vous suspendez", ton: "#a1a1aa", icone: GLYPHES.pause, decale: true },

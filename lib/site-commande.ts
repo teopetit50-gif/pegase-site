@@ -148,11 +148,11 @@ export async function commander(c: CommandeSite, jeton?: string): Promise<Repons
 export const ERREURS_SITE: Record<string, string> = {
   connexion_requise: "Connectez-vous pour commander votre site.",
   modele_invalide: "Ce modèle n'est plus au catalogue. Choisissez-en un autre.",
-  champs_invalides: "Un des champs n'est pas valide — le nom de l'entreprise, notamment.",
+  champs_invalides: "Un des champs n'est pas valide, le nom de l'entreprise notamment.",
   trop_de_demandes: "Vous avez déjà trois commandes en attente.",
   fichier_invalide: "Un des fichiers n'a pas été accepté. Retirez-le et réessayez.",
-  televersement: "Un fichier n'est pas parti — vérifiez votre connexion et réessayez.",
-  reseau: "La commande n'est pas partie — vérifiez votre connexion et réessayez.",
+  televersement: "Un fichier n'a pas pu être envoyé. Vérifiez votre connexion et réessayez.",
+  reseau: "La commande n'a pas pu être envoyée. Vérifiez votre connexion et réessayez.",
 };
 
 /* ——— « Mon compte » : la ligne d'une commande, telle que la renvoie
@@ -171,7 +171,7 @@ export type LigneCommandeSite = {
    statut inconnu s'affiche tel quel plutôt que de planter la page. */
 export const LIBELLES_STATUT_SITE: Record<string, string> = {
   brouillon: "Brouillon",
-  a_payer: "Enregistrée — règlement à venir",
+  a_payer: "Enregistrée, règlement à venir",
   paye: "Payée",
   en_production: "En production",
   livre: "Livrée",

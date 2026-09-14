@@ -58,17 +58,17 @@ const ATTENDRE = [
     n: "01",
     titre: "Sous deux jours ouvrés",
     texte:
-      "Vous recevez une réponse dans les deux jours ouvrés, souvent le jour même, en heure de Guadeloupe. Si votre question demande une vérification, on vous dit quand vous aurez la suite.",
+      "Vous recevez une réponse dans les deux jours ouvrés, souvent le jour même, en heure de Guadeloupe. Si votre question demande une vérification, nous vous indiquons quand vous aurez la réponse.",
   },
   {
     n: "02",
-    titre: "Les gens qui ont installé vos postes",
+    titre: "Les personnes qui ont installé vos postes",
     texte:
-      "Ce sont les personnes qui ont fait votre installation qui vous répondent, pas un centre d'appels. Elles connaissent vos outils et vos réglages.",
+      "Les personnes qui ont réalisé votre installation vous répondent, pas un centre d'appels. Elles connaissent vos outils et vos réglages.",
   },
   {
     n: "03",
-    titre: "Tout se suit",
+    titre: "Un suivi continu",
     texte:
       "Changement de formule, résiliation, moyen de paiement : la demande se fait depuis Mon compte, et vous y suivez son traitement.",
   },
@@ -93,12 +93,10 @@ export default function ContactPage() {
         <section data-monde="clair" className="r-wrap pb-14 pt-14 sm:pb-20 sm:pt-20">
           <div data-arrivee="titre">
             <p className="ap-kicker">Service client</p>
-            <h1 className="r-h1 mt-4 max-w-[16ch]">Écrivez-nous, on vous répond.</h1>
+            <h1 className="r-h1 mt-4 max-w-[16ch]">Écrivez-nous, nous vous répondons.</h1>
           </div>
           <p data-arrivee="chapo" className="r-lead mt-5 max-w-[52ch]">
-            Une question sur votre installation, votre abonnement, un poste qui ne fait pas ce
-            qu&apos;il devrait&nbsp;? Écrivez-nous ci-dessous, ou par e-mail&nbsp;: une
-            seule équipe derrière.
+            Une question sur votre installation, votre abonnement ou un poste qui ne fonctionne pas comme prévu&nbsp;? Écrivez-nous ci-dessous ou par e-mail&nbsp;: une seule équipe vous répond.
           </p>
         </section>
 
@@ -174,9 +172,7 @@ export default function ContactPage() {
             <h2 className="r-h4">Pas encore client&nbsp;?</h2>
             <p className="mt-3 max-w-[60ch] text-[15px] leading-[24px] text-[#3d3d3d]">
               Décrivez votre situation en deux lignes, sur WhatsApp ou par e-mail&nbsp;: votre
-              activité, ce qui vous prend le plus de temps, ce qui se perd. On vous répond dans les
-              deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en
-              ligne.
+              activité, ce qui vous prend le plus de temps, ce qui se perd. Nous vous répondons dans les deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Link href="/tarifs" className="r-btn r-btn--fil">

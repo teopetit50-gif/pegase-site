@@ -11,7 +11,7 @@
    modes :
      · « connexion » — e-mail + mot de passe (signInWithPassword). Erreur :
        « Adresse ou mot de passe incorrect. », avec deux issues, « Mot de
-       passe oublié ? » et « Recevoir un code à la place ».
+       passe oublié ? » et « Recevoir un code de connexion ».
      · « creation »  — e-mail → code (signInWithOtp shouldCreateUser: true,
        puis verifyOtp type "email") → « Choisissez votre mot de passe »
        (+ prénom, nom, entreprise, téléphone quand `avecProfil`).
@@ -90,16 +90,16 @@ type Props = {
 
 const TITRES: Record<ModeConnexion, string> = {
   connexion: "Se connecter",
-  creation: "Créer mon compte",
+  creation: "Créer un compte",
   code: "Recevoir un code",
   reinit: "Mot de passe oublié",
-  definir: "Mon mot de passe",
+  definir: "Définir un mot de passe",
 };
 
 const INTROS: Record<ModeConnexion, string> = {
   connexion: "Votre adresse e-mail et votre mot de passe.",
   creation:
-    `Votre adresse e-mail d'abord${NBSP}: vous recevez un code à six chiffres qui prouve qu'elle est à vous. Vous choisissez ensuite votre mot de passe.`,
+    `Votre adresse e-mail d'abord${NBSP}: vous recevez un code à six chiffres qui confirme qu'elle vous appartient, puis vous choisissez votre mot de passe.`,
   code:
     "Un code à six chiffres envoyé à votre adresse ouvre votre session, sans mot de passe pour cette fois.",
   reinit:
@@ -128,26 +128,26 @@ function lireErreur(e: { code?: string; status?: number; message: string }, phas
     if (e.code === "signup_disabled" || e.code === "email_provider_disabled") {
       return "L'envoi de codes est momentanément indisponible. Réessayez dans un instant.";
     }
-    return "Le code n'est pas parti — vérifiez votre connexion et réessayez.";
+    return "Le code n'a pas pu être envoyé. Vérifiez votre connexion et réessayez.";
   }
   if (phase === "code") {
     if (e.code === "otp_expired" || /expired|invalid/.test(m)) {
       return "Code incorrect ou expiré. Vérifiez les six chiffres, ou demandez un nouveau code.";
     }
-    return "La vérification n'a pas abouti — réessayez, ou demandez un nouveau code.";
+    return "La vérification n'a pas abouti. Réessayez, ou demandez un nouveau code.";
   }
   if (phase === "mdp") {
     if (e.code === "invalid_credentials" || /invalid login credentials/.test(m)) {
       return "Adresse ou mot de passe incorrect.";
     }
     if (e.code === "email_not_confirmed" || /not confirmed/.test(m)) {
-      return "Cette adresse n'a pas encore été confirmée. Recevez un code pour la valider.";
+      return "Cette adresse n'a pas encore été confirmée. Demandez un code pour la valider.";
     }
-    return "La connexion n'a pas abouti — vérifiez votre connexion et réessayez.";
+    return "La connexion n'a pas abouti. Vérifiez votre connexion et réessayez.";
   }
   /* definir : updateUser({ password }) */
   if (e.code === "weak_password" || /at least|too short|weak/.test(m)) {
-    return `${MDP_LONGUEUR_MIN} caractères minimum.`;
+    return `Le mot de passe doit contenir au moins ${MDP_LONGUEUR_MIN} caractères.`;
   }
   if (e.code === "same_password" || /different from the old/.test(m)) {
     return "Choisissez un mot de passe différent de l'ancien.";
@@ -155,7 +155,7 @@ function lireErreur(e: { code?: string; status?: number; message: string }, phas
   if (e.code === "session_expired" || e.code === "session_not_found" || /session missing|not logged in|jwt/.test(m)) {
     return "Votre session a expiré. Reconnectez-vous, puis réessayez.";
   }
-  return "Le mot de passe n'a pas été enregistré — réessayez.";
+  return "Le mot de passe n'a pas été enregistré. Réessayez.";
 }
 
 export default function ConnexionInline({
@@ -326,7 +326,7 @@ export default function ConnexionInline({
   const definirMdp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mdpOk) {
-      setErreur(`${MDP_LONGUEUR_MIN} caractères minimum.`);
+      setErreur(`Le mot de passe doit contenir au moins ${MDP_LONGUEUR_MIN} caractères.`);
       return;
     }
     if (mdp !== mdp2) {
@@ -334,7 +334,7 @@ export default function ConnexionInline({
       return;
     }
     if (!profilOk) {
-      setErreur("Prénom, nom et entreprise sont nécessaires.");
+      setErreur("Le prénom, le nom et l'entreprise sont requis.");
       return;
     }
     if (!verrouiller()) return;
@@ -410,7 +410,7 @@ export default function ConnexionInline({
             aria-pressed={mode === "creation"}
             onClick={() => changerMode("creation")}
           >
-            Je crée mon compte
+            Créer un compte
           </button>
         </div>
       ) : null}
@@ -439,7 +439,7 @@ export default function ConnexionInline({
               className="rv-champ"
               autoComplete="username"
               inputMode="email"
-              placeholder="vous@entreprise.gp"
+              placeholder="vous@entreprise.fr"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -478,14 +478,14 @@ export default function ConnexionInline({
             </button>
             {" · "}
             <button type="button" className={lien} onClick={() => changerMode("code")}>
-              Recevoir un code à la place
+              Recevoir un code de connexion
             </button>
           </p>
           {!portes ? (
             <p className="r-note mt-2">
               Pas encore de compte&nbsp;?{" "}
               <button type="button" className={lien} onClick={() => changerMode("creation")}>
-                Créer mon compte
+                Créer un compte
               </button>
             </p>
           ) : null}
@@ -506,7 +506,7 @@ export default function ConnexionInline({
                 className={empile ? "rv-champ" : "rv-champ sm:flex-1"}
                 autoComplete="email"
                 inputMode="email"
-                placeholder="vous@entreprise.gp"
+                placeholder="vous@entreprise.fr"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -533,7 +533,7 @@ export default function ConnexionInline({
               {" · "}
               Pas encore de compte&nbsp;?{" "}
               <button type="button" className={lien} onClick={() => changerMode("creation")}>
-                Créer mon compte
+                Créer un compte
               </button>
             </p>
           )}
@@ -580,9 +580,9 @@ export default function ConnexionInline({
             </button>
           </div>
           <p className="r-note mt-3">
-            Rien reçu&nbsp;? Regardez les indésirables.{" "}
+            Vous n&apos;avez rien reçu&nbsp;? Vérifiez le dossier des indésirables.{" "}
             {attente > 0 ? (
-              <span>Nouveau code possible dans {attente}&nbsp;s.</span>
+              <span>Nouveau code disponible dans {attente}&nbsp;s.</span>
             ) : (
               <button type="button" className={lien} onClick={() => envoyerCode()} disabled={envoi}>
                 Renvoyer un code
@@ -598,7 +598,7 @@ export default function ConnexionInline({
           {prouve ? (
             <p className="text-[14px] leading-[21px] text-[#3d3d3d]">
               Adresse confirmée&nbsp;: <span className="font-medium text-[#050505]">{prouve.email}</span>.
-              {mode === "reinit" ? null : " Il ne manque plus que votre mot de passe."}
+              {mode === "reinit" ? null : " Il ne reste qu'à définir votre mot de passe."}
             </p>
           ) : null}
           {/* l'adresse, pour que le gestionnaire de mots de passe range le
@@ -623,7 +623,7 @@ export default function ConnexionInline({
               </div>
               <div>
                 <label className="rv-libelle" htmlFor="cx-tel">
-                  Téléphone / WhatsApp <small>— conseillé</small>
+                  Téléphone / WhatsApp <small>(recommandé)</small>
                 </label>
                 <input id="cx-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="0690 …" value={profil.telephone} onChange={(e) => setProfil((p) => ({ ...p, telephone: e.target.value }))} />
               </div>
@@ -656,7 +656,7 @@ export default function ConnexionInline({
             </button>
           </div>
           <label className="rv-libelle mt-4" htmlFor="cx-mdp-bis">
-            Confirmez-le
+            Confirmer le mot de passe
           </label>
           <input
             id="cx-mdp-bis"
@@ -677,7 +677,7 @@ export default function ConnexionInline({
               {envoi
                 ? "Enregistrement…"
                 : mode === "creation"
-                  ? "Créer mon compte"
+                  ? "Créer un compte"
                   : mode === "code"
                     ? "Enregistrer et continuer"
                     : "Enregistrer le mot de passe"}

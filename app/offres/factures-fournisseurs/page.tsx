@@ -90,9 +90,9 @@ const figtree = Figtree({
    phrase « Un système Omega » finale saute : sur omegaai.fr elle ne dit
    plus rien). */
 export const metadata: Metadata = {
-  title: "FILED · la paperasse traitée | Omega.AI",
+  title: "FILED · flux documentaires | Omega.AI",
   description:
-    "Vous connectez une boîte mail. Chaque facture fournisseur est lue quel qu'en soit le format, ses montants recoupés, la pièce classée et transmise à votre cabinet.",
+    "Vous connectez une messagerie. Chaque facture fournisseur est lue quel qu'en soit le format, ses montants recoupés, la pièce classée et transmise à votre comptabilité.",
 };
 
 /* Cadre de section relevé sur la référence : max-w-[1400px] mx-auto
@@ -398,7 +398,7 @@ export default function PageFactures() {
 
             <Apparition>
               <p className="mx-0 mt-6 font-mono text-[11px] uppercase tracking-[0.1em] text-[#737373] lg:mx-5">
-                Montants en cours d&apos;arbitrage — le palier se choisit sur vos volumes réels.
+                Montants en cours d&apos;arbitrage&nbsp;: le palier se choisit sur vos volumes réels.
               </p>
             </Apparition>
           </div>

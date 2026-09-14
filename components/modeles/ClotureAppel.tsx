@@ -98,8 +98,7 @@ export default function ClotureAppel() {
           {/* Cinq lignes à 390 : hérité de la Cloture, où la phrase faisait
               déjà cinq lignes ; le texte est conservé tel quel. */}
           <p className="mt-5 max-w-[52ch] text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/70">
-            Choisissez le modèle qui tient debout pour votre métier, et le poste qui
-            récupère ce qui se perd entre un visiteur et un client payé.
+            Choisissez le modèle adapté à votre métier, et le poste qui récupère ce qui se perd entre un visiteur et un client qui règle.
           </p>
         </div>
 

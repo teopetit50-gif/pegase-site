@@ -116,10 +116,10 @@ export default function GabaritHome({
 
               <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
                 <Link href="/commencer" className="o-btn o-btn--primary">
-                  Chiffrer mon cas
+                  Demander un diagnostic
                 </Link>
                 <Link href="#fonctionnement" className="o-btn o-btn--ghost">
-                  Comment il tourne
+                  Voir le fonctionnement
                   <Chevron taille={13} />
                 </Link>
               </div>
@@ -207,7 +207,7 @@ export default function GabaritHome({
               H1 plus haut. Repli sur l'ancienne formule si la fiche ne porte
               pas encore sa copie. */}
           <EnTete
-            pastille="Ce qu'il fait"
+            pastille="Périmètre"
             titre={fiche.sections?.pointsTitre ?? `${m.system} en quatre points.`}
             chapo={fiche.sections?.pointsChapo ?? fiche.pitch}
           />
@@ -243,10 +243,10 @@ export default function GabaritHome({
               formule si la fiche ne porte pas encore sa copie. */}
           <EnTete
             pastille="Intégrations"
-            titre={fiche.sections?.integrationsTitre ?? "Branché sur ce que vous avez."}
+            titre={fiche.sections?.integrationsTitre ?? "Intégré à votre environnement."}
             chapo={
               fiche.sections?.integrationsChapo ??
-              "Messagerie, tableur, paiement, e-commerce, agenda : le moteur lit et écrit là où vous travaillez déjà. Ni compte à créer, ni migration."
+              "Messagerie, tableur, paiement, e-commerce, agenda : le système lit et écrit dans les outils où vos équipes travaillent déjà, sans compte à créer ni migration."
             }
           />
         </div>
@@ -258,7 +258,7 @@ export default function GabaritHome({
       {/* ════════ 5 · TROIS CHAÎNES ════════ */}
       <section className="o-wrap pb-[110px]">
         <EnTete
-          pastille="En marche"
+          pastille="Fonctionnement"
           titre={
             fiche.sections?.marcheTitre ?? "Un déclencheur, une chaîne, votre validation."
           }
@@ -269,7 +269,7 @@ export default function GabaritHome({
         />
         <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-3">
           <div data-reveal className="o-card-plate px-8 pb-10 pt-10">
-            <h3 className="o-h4">Le moteur en situation</h3>
+            <h3 className="o-h4">Le système en situation</h3>
             <p className="o-body mt-3">
               {fiche.sections?.situationChapo ??
                 `Ce que ${m.system} produit concrètement, sur un cas type.`}
@@ -292,7 +292,7 @@ export default function GabaritHome({
                 servies par ce gabarit. */}
             <p className="o-body mt-3">
               {fiche.sections?.outilsChapo ??
-                "Le moteur lit et écrit dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre."}
+                "Le système lit et écrit dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre."}
             </p>
             <div className="mt-8">
               <ChaineOutils outils={fiche.outils} />
@@ -305,7 +305,7 @@ export default function GabaritHome({
       <section className="o-wrap pb-[110px]">
         <EnTete
           pastille="Le détail"
-          titre="Comment il travaille, précisément."
+          titre="Le fonctionnement dans le détail."
           chapo={
             fiche.sections?.detailChapo ??
             `Le fonctionnement de ${m.system}, sans raccourci : ce qu'il lit, ce qu'il décide, et ce qu'il vous laisse trancher.`
@@ -332,10 +332,10 @@ export default function GabaritHome({
         <div className="o-wrap">
           <EnTete
             pastille="Pensé pour"
-            titre="À qui ce moteur sert."
+            titre="À qui ce système s'adresse."
             chapo={
               fiche.sections?.cibleChapo ??
-              `${m.system} a été construit pour des activités où ce problème coûte le plus cher. Si vous n'y êtes pas, l'audit désignera un autre moteur.`
+              `${m.system} a été conçu pour les organisations où ce problème coûte le plus cher. Si ce n'est pas votre cas, le diagnostic désignera un autre système.`
             }
           />
         </div>
@@ -372,7 +372,7 @@ export default function GabaritHome({
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
             {fiche.sections?.catalogueChapo ??
-              `${m.system} n'est peut-être pas celui à installer en premier. L'audit désigne le moteur au meilleur retour chez vous, et il arrive que ce soit un autre.`}
+              `${m.system} n'est pas toujours celui à déployer en premier. Le diagnostic désigne le système au meilleur retour pour votre organisation, et il arrive que ce soit un autre.`}
           </p>
           <div data-reveal className="mt-5">
             <Link href="/offres" className="o-link">
@@ -389,42 +389,36 @@ export default function GabaritHome({
       {/* ════════ 9 · CE QUI EST COMPRIS ════════ */}
       <section className="o-wrap pb-[110px]">
         <EnTete
-          pastille="Compris"
-          titre="Ce qui vient avec le moteur."
+          pastille="Inclus"
+          titre="Ce qui vient avec le système."
           chapo={
             fiche.sections?.comprisChapo ??
-            "Le moteur n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
+            "Le système n'est que la partie visible. Ce qui suit est livré avec lui, sans supplément."
           }
         />
         <div className="mx-auto mt-20 grid max-w-[1040px] grid-cols-1 gap-8 lg:grid-cols-2">
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Une file de validation</h3>
             <p className="o-body mt-2.5">
-              Tout ce qui doit partir y passe. Vous approuvez, corrigez ou
-              suspendez, aussi longtemps que vous le jugez utile.
+              Tout ce qui doit partir y passe. Vos équipes approuvent, corrigent ou suspendent, aussi longtemps que vous le jugez utile.
             </p>
           </div>
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Un journal de tout ce qui est parti</h3>
             <p className="o-body mt-2.5">
-              Chaque envoi est daté, archivé, consultable. Le jour où un client
-              conteste avoir été relancé, la preuve est là.
+              Chaque envoi est daté, archivé et consultable, ce qui vous donne la preuve le jour où un client conteste avoir été relancé.
             </p>
           </div>
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Vos données restent chez vous</h3>
             <p className="o-body mt-2.5">
-              Un espace chiffré et distinct pour chaque client, hébergé dans
-              l&apos;Union européenne. Seul le strict nécessaire est transmis aux
-              modèles, tâche par tâche.
+              Chaque entreprise dispose d&apos;un espace chiffré et distinct, hébergé dans l&apos;Union européenne. Seul le strict nécessaire est transmis aux modèles, tâche par tâche.
             </p>
           </div>
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Le Chèque TIC vérifié</h3>
             <p className="o-body mt-2.5">
-              Pour les entreprises guadeloupéennes éligibles, une partie de
-              l&apos;installation est financée. L&apos;éligibilité est vérifiée
-              pendant l&apos;audit, avant tout engagement de votre part.
+              Pour les entreprises immatriculées en Guadeloupe et éligibles, la Région finance une partie de l&apos;installation. L&apos;éligibilité est vérifiée pendant le diagnostic, avant tout engagement de votre part.
             </p>
           </div>
         </div>

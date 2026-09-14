@@ -74,7 +74,7 @@ const gelasio = Gelasio({
   display: "swap",
 });
 
-const TITRE = "CASHD — vos impayés relancés chaque matin";
+const TITRE = "CASHD · vos échéances suivies chaque matin";
 const DESCRIPTION =
   "CASHD relit chaque matin le facturier que vous tenez déjà et relance devis et factures en votre nom. Aucun message ne part sans votre accord. Un système Omega.";
 

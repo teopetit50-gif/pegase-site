@@ -85,7 +85,7 @@ const SECTIONS = [
   { id: "situation", label: "Situation" },
   { id: "douleurs", label: "Douleurs" },
   { id: "remedes", label: "Remèdes" },
-  { id: "moteurs", label: "Moteurs" },
+  { id: "moteurs", label: "Systèmes" },
   { id: "suite", label: "La suite" },
 ];
 
@@ -94,7 +94,7 @@ const ETAPES: EtapeSuite[] = [
     etape: "Étape 1",
     titre: "L'entretien",
     texte:
-      "Trente à quatre-vingt-dix minutes en visio, gratuit, sans engagement. On reprend ce document ligne par ligne : vous corrigez, on écoute, c'est votre quotidien qui fait foi, pas nos hypothèses.",
+      "Trente à quatre-vingt-dix minutes en visio, gratuit, sans engagement. Nous reprenons ce document ligne par ligne : vous corrigez, nous écoutons, et c'est votre quotidien qui fait foi, pas nos hypothèses.",
   },
   {
     etape: "Étape 2",
@@ -106,7 +106,7 @@ const ETAPES: EtapeSuite[] = [
     etape: "Étape 3",
     titre: "La décision",
     texte:
-      "La recommandation classe les pistes par retour, dit par quel moteur commencer, et ce qu'il ne faut pas automatiser. Elle vous appartient, que vous installiez un moteur ou non.",
+      "La recommandation classe les pistes par retour, dit par quel système commencer, et ce qu'il ne faut pas automatiser. Elle vous appartient, que vous installiez un système ou non.",
   },
 ];
 
@@ -155,7 +155,7 @@ export default async function PreAuditPage({
         {/* ═══ 2 — la situation ═══ */}
         <section id="situation" data-monde="clair" className="pa-section r-wrap py-14 sm:py-20">
           <p className="r-note">À confirmer, ou à démonter, pendant l&apos;entretien.</p>
-          <h2 className="r-h3 mt-6 max-w-[22ch]">Ce qu&apos;on pense avoir compris</h2>
+          <h2 className="r-h3 mt-6 max-w-[22ch]">Ce que nous pensons avoir compris</h2>
 
           <div className="mt-9 max-w-[62ch] border-l-2 border-[#050505] pl-6" data-reveal>
             <p className="text-[17px] leading-[27px] text-[#050505] sm:text-[18px] sm:leading-[29px]">
@@ -191,7 +191,7 @@ export default async function PreAuditPage({
                     </p>
                     <div className="mt-6 border-t border-[#e3e3e3] pt-5">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8a6519]">
-                        Ce qu&apos;on mesurera ensemble
+                        Ce que nous mesurerons ensemble
                       </div>
                       <p className="mt-2 text-[14px] leading-[22px] text-[#050505]">
                         {d.mesure}
@@ -219,10 +219,7 @@ export default async function PreAuditPage({
             </p>
             <h2 className="r-h2 mt-6 max-w-[20ch]">Trois choses à faire dès cette&nbsp;semaine</h2>
             <p className="r-lead mt-6 max-w-[58ch]">
-              L&apos;audit commence par ce qu&apos;on vous donne. Ces trois
-              gestes ne remplacent pas un moteur : ils se font à la main, un
-              par un, mais ils rapportent dès cette semaine, que l&apos;on
-              travaille ensemble ou non.
+              L&apos;audit commence par ce que nous vous donnons. Ces trois gestes ne remplacent pas un système&nbsp;: ils se font à la main, un par un, mais ils rapportent dès cette semaine, que nous travaillions ensemble ou non.
             </p>
 
             <div className="mt-10 grid gap-5 lg:grid-cols-3">
@@ -269,7 +266,7 @@ export default async function PreAuditPage({
             La version en continu des gestes ci-dessus : installée sur vos
             outils, sous votre validation.
           </p>
-          <h2 className="r-h2 mt-6 max-w-[20ch]">Les moteurs qui répondent à&nbsp;ça</h2>
+          <h2 className="r-h2 mt-6 max-w-[20ch]">Les systèmes qui répondent à&nbsp;cela</h2>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {audit.moteurs.map((m) => (
@@ -315,9 +312,7 @@ export default async function PreAuditPage({
               <div className="lg:sticky lg:top-40 lg:self-start">
                 <h2 className="r-h3 max-w-[16ch]">La suite tient en un&nbsp;entretien</h2>
                 <p className="r-body mt-5 max-w-[44ch]">
-                  On vérifie ce document avec vous, on chiffre sur vos propres
-                  fichiers, et la recommandation dit aussi ce qu&apos;il ne faut
-                  pas automatiser.
+                  Nous vérifions ce document avec vous, nous chiffrons sur vos propres fichiers, et la recommandation dit aussi ce qu&apos;il ne faut pas automatiser.
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <a href={lien} className="r-btn r-btn--noir cta-shine">

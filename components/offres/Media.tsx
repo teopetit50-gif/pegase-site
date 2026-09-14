@@ -307,7 +307,7 @@ export function HeroCollage() {
 export function MediaPayd() {
   return (
     <Fenetre className="w-full">
-      <BarreFenetre titre="PAYD · file de relance" />
+      <BarreFenetre titre="CASHD · file de relance" />
       <div className="space-y-1.5 px-4 py-4">
         {[
           { t: "Devis DV-0891 · Métalco", s: "Relance J+3 programmée", p: "gris" as const, l: "Demain" },
@@ -362,13 +362,13 @@ export function MediaAnswr() {
 export function MediaOffload() {
   return (
     <Fenetre className="w-full">
-      <BarreFenetre titre="OFFLOAD · dossier de juillet" />
+      <BarreFenetre titre="FILED · dossier de juillet" />
       <div className="px-4 py-4">
         <div className="mb-2.5 flex items-center justify-between">
           <span className="o-demo-doux text-[11px] font-semibold tracking-[0.02em]">
             18 pièces classées
           </span>
-          <Puce couleur="vert">Prêt pour le cabinet</Puce>
+          <Puce couleur="vert">Prêt pour la comptabilité</Puce>
         </div>
         <div className="space-y-1.5">
           {[

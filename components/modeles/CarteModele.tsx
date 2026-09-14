@@ -91,7 +91,7 @@ export default function CarteModele({ m }: { m: Modele }) {
         )}
 
         <p className="mt-3.5 text-[13.5px] leading-relaxed">
-          <span className="text-[color:var(--m-faible)]">Va bien à&nbsp;: </span>
+          <span className="text-[color:var(--m-faible)]">Convient à&nbsp;: </span>
           <span className="text-[color:var(--m-doux)]">{m.pour}</span>
         </p>
         <p className="mt-2 text-[13.5px] leading-relaxed text-[color:var(--m-doux)]">{m.capte}</p>
@@ -103,7 +103,7 @@ export default function CarteModele({ m }: { m: Modele }) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-[13.5px] font-medium underline-offset-4 hover:underline"
           >
-            Visiter la démo
+            Voir la démonstration
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
               <path
                 d="M5.5 10.5 10.5 5.5M6.5 5.5h4v4"
@@ -122,7 +122,7 @@ export default function CarteModele({ m }: { m: Modele }) {
             href={`/reserver-un-audit?modele=${m.slug}`}
             className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-[color:var(--m-doux)] underline-offset-4 hover:text-[color:var(--m-encre)] hover:underline"
           >
-            Je veux ce modèle
+            Choisir ce modèle
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
               <path
                 d="M3 8h10M9 4l4 4-4 4"

@@ -89,7 +89,7 @@ import {
 export const metadata: Metadata = {
   title: "Nos offres | Omega.AI",
   description:
-    "Un poste par corvée : relance d'impayés, clients dormants, réponses clients 24/7, factures fournisseurs classées. Installés sur vos outils actuels (mail, tableur, WhatsApp), sous votre validation.",
+    "Quatre systèmes prêts à déployer : encaissements, réactivation commerciale, demandes entrantes, flux documentaires. Intégrés à vos outils en place, sous validation humaine.",
 };
 
 /* ——— rangée des quatre arguments, sous le hero ———
@@ -142,24 +142,24 @@ const ARGUMENTS: [ArgumentBento, ArgumentBento, ArgumentBento, ArgumentBento] = 
 const MOTEURS: TuileBento[] = [
   {
     icone: Bell,
-    titre: "CASHD · impayés",
+    titre: "CASHD · encaissements",
     texte:
-      "Devis sans réponse relancés à J+3 et J+7, factures échues à J+7 et J+21.",
+      "Les devis sans réponse sont relancés à J+3 et J+7, les factures échues à J+7 et J+21, selon vos règles.",
     href: "/offres/relances-impayes",
     media: <MediaPayd />,
   },
   {
     icone: MessageSquare,
-    titre: "FRONTD · demandes clients",
-    texte: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
+    titre: "FRONTD · demandes entrantes",
+    texte: "Une demande reçue à 21 h est qualifiée et reçoit sa réponse à 21 h, sur son canal d'origine.",
     href: "/offres/demandes-clients",
     media: <MediaAnswr />,
   },
   {
     icone: FileText,
-    titre: "FILED · la paperasse",
+    titre: "FILED · flux documentaires",
     texte:
-      "Factures fournisseurs lues, classées par fournisseur, transmises au cabinet à date fixe.",
+      "Les factures fournisseurs sont lues, contrôlées, classées par émetteur et transmises à la comptabilité à date fixe.",
     href: "/offres/factures-fournisseurs",
     media: <MediaOffload />,
   },
@@ -182,38 +182,38 @@ const PAQUETS: CaseFeature[] = [
   {
     icone: Bell,
     titre: "CASHD",
-    texte: "Devis sans réponse et factures échues relancés à J+3, J+7, J+21.",
+    texte: "Les devis sans réponse et les factures échues sont relancés à J+3, J+7 et J+21.",
     href: "/offres/relances-impayes",
   },
   {
     icone: Users,
     titre: "RELOAD",
     texte:
-      "Vos clients silencieux triés par montant, les marchés de votre zone relevés chaque jour.",
+      "Les clients inactifs sont classés par valeur, et les marchés publics de votre zone relevés chaque jour.",
     href: "/offres/nouvelles-affaires",
   },
   {
     icone: MessageSquare,
     titre: "FRONTD",
-    texte: "Une demande reçue à 21 h obtient sa réponse à 21 h, sur son canal.",
+    texte: "Chaque demande entrante est qualifiée et traitée à toute heure, sur son canal d'origine.",
     href: "/offres/demandes-clients",
   },
   {
     icone: FileText,
     titre: "FILED",
-    texte: "La facture lue, ses montants recoupés, la pièce transmise au cabinet.",
+    texte: "Chaque pièce fournisseur est lue, ses montants recoupés, puis transmise à la comptabilité.",
     href: "/offres/factures-fournisseurs",
   },
   {
     icone: Activity,
     titre: "PULSE",
-    texte: "L'état réel de la boîte en un message, lu en deux minutes.",
+    texte: "L'état réel de l'activité en un message chaque matin, lu en deux minutes.",
     href: "/offres/point-du-matin",
   },
   {
     icone: Lock,
     titre: "VAULT",
-    texte: "Douze verrous, et le journal de tout ce qui est parti.",
+    texte: "Douze contrôles avant chaque envoi, et le journal de tout ce qui est parti.",
     href: "/offres/securite",
   },
 ];
@@ -228,20 +228,20 @@ const ETAPES: Etape[] = [
   {
     rang: "01",
     icone: Search,
-    titre: "Audit, 30 min",
-    texte: "Votre problème n°1, chiffré.",
+    titre: "Diagnostic, 30 min",
+    texte: "Le processus le plus coûteux, chiffré.",
   },
   {
     rang: "02",
     icone: Plug,
-    titre: "Raccordement",
-    texte: "Une demi-journée sur vos outils.",
+    titre: "Intégration",
+    texte: "Une demi-journée sur votre environnement.",
   },
   {
     rang: "03",
     icone: CheckCheck,
     titre: "Cycle supervisé",
-    texte: "Vous validez, on cale les réglages : comptez deux semaines de rodage.",
+    texte: "Vos équipes valident chaque action pendant deux semaines, le temps d'ajuster les règles.",
   },
 ];
 
@@ -285,24 +285,24 @@ const JOURNAL: EntreeJournal[] = [
 const GARANTIES: CarteGarantie[] = [
   {
     icone: Blocks,
-    titre: "Sur vos outils",
+    titre: "Sur votre environnement",
     texte:
-      "Le moteur se branche sur ce que vous utilisez déjà. Ni compte à créer, ni colonne à renommer, ni habitude à changer.",
+      "Le système lit et écrit dans les outils déjà en place. Aucun compte à créer pour vos équipes, aucune donnée à migrer, aucune habitude à changer.",
     media: <MediaOutils />,
     lien: { label: "Vérifier la compatibilité", href: "/integrations" },
   },
   {
     icone: ShieldCheck,
-    titre: "Rien ne part sans vous",
+    titre: "Rien ne part sans validation",
     texte:
-      "Les premières semaines, tout vous est soumis avant envoi. Ensuite vous choisissez ce qui part seul et ce qui attend votre accord.",
+      "Les premières semaines, chaque action est soumise à validation avant envoi. Vous décidez ensuite, règle par règle, de ce qui part seul et de ce qui attend un accord.",
     media: <AuditLog entrees={JOURNAL} />,
   },
   {
     icone: Lock,
     titre: "Vos données restent les vôtres",
     texte:
-      "Un espace de données chiffré et séparé pour chaque client, et le strict nécessaire transmis aux modèles à chaque tâche.",
+      "Chaque entreprise dispose d'un espace chiffré et cloisonné, et les modèles ne reçoivent que le strict nécessaire à chaque tâche.",
     media: <MediaLocal />,
   },
 ];
@@ -374,10 +374,10 @@ export default function OffresPage() {
         {/* ════════ LES MOTEURS — bento : tuile large puis trois tuiles ════════ */}
         <section id="moteurs" data-monde="clair" className="scroll-mt-24 pt-[80px] pb-[120px]">
           <Bento02
-            pastille="Ce qui s'installe"
-            titre="Chacun fait un seul travail."
-            chapo="Aucun ne fait tout : chacun prend une corvée, la traite en continu sur vos outils, et s'arrête sur votre validation. Trois exemples, puis les autres."
-            lien={{ label: "Voir les six", href: "#catalogue" }}
+            pastille="Ce qui se déploie"
+            titre="Chaque système tient un poste, et un seul."
+            chapo="Aucun ne fait tout : chacun prend en charge un processus, le traite en continu sur vos outils et s'arrête à votre validation. Trois exemples, puis le catalogue complet."
+            lien={{ label: "Voir les six systèmes", href: "#catalogue" }}
             tuiles={MOTEURS}
           />
         </section>
@@ -409,8 +409,8 @@ export default function OffresPage() {
         >
           <Features
             pastille="Le catalogue"
-            titre="Quatre qui s'installent, deux qui viennent avec."
-            chapo="Chacun prend une corvée, et une seule. Les deux derniers tournent chez tout le monde, sans se facturer."
+            titre="Quatre systèmes à déployer, deux inclus."
+            chapo="Chacun couvre un processus précis. Les deux derniers accompagnent toute installation, sans facturation supplémentaire."
             cases={PAQUETS}
           />
 
@@ -419,9 +419,9 @@ export default function OffresPage() {
               pour un rabais — mais en une ligne au lieu d'une carte. */}
           <div data-reveal className="o-wrap mt-10 text-center">
             <p className="o-small !text-white/60">
-              Et si votre besoin n&apos;entre dans aucune case.{" "}
+              Si votre besoin n&apos;entre dans aucune de ces cases, le sur-mesure prend le relais.{" "}
               <Link href="/offres/sur-mesure" className="o-link o-link--light align-[-3px]">
-                Voir le sur-mesure
+                Découvrir le sur-mesure
                 <IconeFleche />
               </Link>
             </p>
@@ -432,8 +432,8 @@ export default function OffresPage() {
         <section data-monde="clair" className="py-[120px]">
           <HowItWorks01
             pastille="Mise en place"
-            titre="Rien ne démarre sans vous."
-            chapo="De l'audit au premier moteur en production, chaque jalon se valide avant le suivant, et vous n'aurez changé aucun outil en chemin."
+            titre="Une mise en place progressive, validée à chaque étape."
+            chapo="Du diagnostic au premier système en production, chaque jalon est validé avant le suivant, et votre environnement reste inchangé."
             etapes={ETAPES}
             cartes={GARANTIES}
           />
@@ -442,8 +442,8 @@ export default function OffresPage() {
         {/* ════════ APPEL FINAL — le bloc tenu au trait ════════ */}
         <section data-monde="clair" className="o-wrap pb-[120px]">
           <Cta3
-            titre="Un chiffre avant tout devis."
-            chapo="Trente minutes pour mesurer ce que votre difficulté principale vous coûte, et désigner le moteur au meilleur retour. Gratuit, sans engagement."
+            titre="Un chiffrage avant tout engagement."
+            chapo="Trente minutes suffisent pour mesurer ce que le processus le plus coûteux représente pour votre organisation, et désigner le système au meilleur retour. Sans engagement."
             bouton={{ label: "Commencer", href: "/commencer" }}
           />
         </section>

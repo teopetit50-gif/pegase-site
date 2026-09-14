@@ -44,7 +44,7 @@ import { utilisateurCourant } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Se connecter ou créer un compte | Omega.AI",
-  description: "Votre adresse e-mail et votre mot de passe. Retrouvez votre demande, votre créneau et votre cockpit.",
+  description: "Accédez à votre espace client Omega.AI : votre demande, votre créneau d'installation et votre espace de suivi.",
   robots: { index: false, follow: false },
 };
 
@@ -66,7 +66,7 @@ export default async function ConnexionPage({
       <div className="resa">
         <AuthSectionOne
           titre="Se connecter ou créer un compte"
-          sousTitre="Votre demande, votre créneau, votre cockpit."
+          sousTitre="Votre demande, votre créneau d'installation, votre espace de suivi."
           panneauTitre={
             <>
               Un seul compte
@@ -86,12 +86,12 @@ export default async function ConnexionPage({
           {/* Le détail du code ne sert qu'à la première visite : il se lit
               mieux sous le formulaire, quand la question se pose. */}
           <p className="r-note mt-6">
-            Première visite&nbsp;? Choisissez « Je crée mon compte »&nbsp;: un code reçu par
+            Première visite&nbsp;? Choisissez « Créer un compte »&nbsp;: un code reçu par
             e-mail prouve votre adresse, puis vous choisissez votre mot de passe.
           </p>
           <p className="r-note mt-3">
             Votre adresse ne sert qu&apos;à vous reconnaître et à vous joindre pour votre
-            installation — voir{" "}
+            installation, voir{" "}
             <Link href="/vos-donnees" className="underline underline-offset-2">
               où vont vos données
             </Link>

@@ -69,7 +69,7 @@ function Flanc() {
   const groupes = [
     { titre: null, items: ["Boîte", "Fournisseurs", "Historique", "Contrôles"] },
     { titre: "Espace", items: ["Factures", "Périodes", "Catégories"] },
-    { titre: "Favoris", items: ["Ce mois", "À valider", "Pour le cabinet"] },
+    { titre: "Favoris", items: ["Ce mois", "À valider", "Pour la comptabilité"] },
   ];
   return (
     <aside

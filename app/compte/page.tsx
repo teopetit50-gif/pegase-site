@@ -133,7 +133,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Mon compte | Omega.AI",
   description:
-    "Votre abonnement, vos rendez-vous, vos commandes de site, votre profil professionnel et l'accès à votre cockpit.",
+    "Votre abonnement, vos rendez-vous, vos commandes de site, votre profil professionnel et l'accès à votre espace client.",
   robots: { index: false, follow: false },
 };
 

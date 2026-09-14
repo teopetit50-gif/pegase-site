@@ -185,11 +185,11 @@ export const LIBELLES_PARCOURS: Record<string, string> = {
    le cockpit et n'avait pas de libellé ; « reporte » n'est posé nulle
    part et sort de la liste. */
 export const LIBELLES_STATUT: Record<string, string> = {
-  a_traiter: "Demande reçue — on vous répond le jour même",
+  a_traiter: "Demande reçue, réponse le jour même",
   confirme: "Créneau confirmé",
   honore: "Réunion faite",
   annule: "Annulée",
-  no_show: "Réunion manquée — écrivez-nous pour un nouveau créneau",
+  no_show: "Réunion manquée, écrivez-nous pour un nouveau créneau",
 };
 
 /* 03/09 — les pastilles de « Mes rendez-vous » : un mot, une teinte. Le

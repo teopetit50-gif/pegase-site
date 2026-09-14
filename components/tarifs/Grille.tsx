@@ -574,8 +574,7 @@ export default function Grille() {
               customVariants={VARIANTES_ENTREE}
               className="text-gray-600 sm:w-[80%]"
             >
-              Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez
-              la réunion d&apos;installation, et le système démarre sous votre œil. Sans
+              Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la réunion d&apos;installation, et le système démarre sous votre contrôle. Sans
               engagement en mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé
               trente jours.
             </TimelineContent>
@@ -628,8 +627,7 @@ export default function Grille() {
           className="mx-auto mt-10 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161] lg:mt-20"
         >
           <span className="font-semibold text-[#050505]">Compris à tous les paliers.</span>{" "}
-          Quatre postes s&apos;installent sur les outils que vous avez déjà — mail, tableur,
-          WhatsApp. Quel que soit le palier,{" "}
+          Quatre postes s&apos;installent sur les outils que vous avez déjà&nbsp;: messagerie, tableur, WhatsApp. Quel que soit le palier,{" "}
           <Link href={`/offres/${COMPRIS[0].slug}`} className="r-lien !text-[13px]">
             {COMPRIS[0].system} · {COMPRIS[0].nom.toLowerCase()}
           </Link>{" "}
@@ -637,14 +635,13 @@ export default function Grille() {
           <Link href={`/offres/${COMPRIS[1].slug}`} className="r-lien !text-[13px]">
             {COMPRIS[1].system} · {COMPRIS[1].nom.toLowerCase()}
           </Link>{" "}
-          tournent d&apos;office&nbsp;: savoir où vous en êtes et la certitude que rien ne part
-          sans vous ne sont pas des options.
+          sont inclus&nbsp;: l&apos;état de l&apos;activité chaque matin et la garantie que rien ne part sans validation ne sont pas des options.
         </p>
 
         <p data-reveal className="r-note mx-auto mt-8 max-w-3xl text-center">
           Prix TTC, grille en vigueur au 01/09/2026 — le prix affiché au moment de votre demande
           est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
-          (mise en route sur vos outils, rodage sous votre œil) est comprise dans la réunion
+          (mise en route sur vos outils, rodage sous votre contrôle) est comprise dans la réunion
           pour les quatre postes standard&nbsp;; un raccordement particulier est chiffré avant
           tout engagement. Le moyen de paiement — carte ou prélèvement SEPA — est enregistré à
           la réservation&nbsp;; rien n&apos;est débité avant la fin de l&apos;installation, le
@@ -664,7 +661,7 @@ export default function Grille() {
         <CallToAction4
           className="mx-auto max-w-4xl"
           titre="Vous ne savez pas quel palier choisir ?"
-          texte="Décrivez votre situation en deux lignes. On vous répond avec le palier adapté — et la réunion d'installation se réserve en ligne."
+          texte="Décrivez votre situation en deux lignes. Nous vous répondons avec le palier adapté, et la réunion d'installation se réserve en ligne."
           points={["Votre activité", "Ce qui vous prend le plus de temps", "Ce qui se perd"]}
           encart={{
             sur: "Une réponse",
@@ -695,7 +692,7 @@ export default function Grille() {
             <p className="mx-auto mt-4 max-w-md text-balance text-[#616161]">
               Chaque ligne redit ce que les cartes disent déjà, côte à côte.{" "}
               <a href={lienContact("avant")} className="r-lien">
-                Aidez-moi à choisir
+                Demander conseil
               </a>
             </p>
           </div>

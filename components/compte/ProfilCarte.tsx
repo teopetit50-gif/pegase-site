@@ -15,7 +15,7 @@
    la carte de verre) et huit champs ouverts en permanence coûtaient un
    rang de 360 px pour une chose qu'on corrige deux fois par an. Au
    repos, le panneau montre un RÉSUMÉ (six valeurs sur une grille, les
-   absentes en « — ») et un bouton « Modifier mon profil » ; le formulaire
+   absentes en « — ») et un bouton « Modifier le profil » ; le formulaire
    se déplie à la demande, dans le même panneau, et se replie après
    l'enregistrement (le résumé relit alors les champs enregistrés). Un
    profil INCOMPLET (sans prénom, nom ou entreprise — le cas d'un compte
@@ -221,7 +221,7 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
             ))}
           </dl>
           <button type="button" className="r-btn r-btn--fil shrink-0" onClick={ouvrir}>
-            Modifier mon profil
+            Modifier le profil
           </button>
         </div>
       </div>
@@ -283,7 +283,7 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
           </div>
           <div>
             <label className="rv-libelle" htmlFor="cp-tel">
-              Téléphone / WhatsApp <small>— on vous appelle sur ce numéro</small>
+              Téléphone / WhatsApp <small>(nous vous appelons sur ce numéro)</small>
             </label>
             <input
               id="cp-tel"
@@ -324,7 +324,7 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
           </div>
           <div>
             <label className="rv-libelle" htmlFor="cp-siret">
-              SIRET <small>— facultatif, 14 chiffres</small>
+              SIRET <small>(facultatif, 14 chiffres)</small>
             </label>
             <input
               id="cp-siret"
@@ -339,7 +339,7 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
           </div>
           <div>
             <label className="rv-libelle" htmlFor="cp-email">
-              Adresse e-mail <small>— identifiant de connexion</small>
+              Adresse e-mail <small>(identifiant de connexion)</small>
             </label>
             <input id="cp-email" className="rv-champ cp-champ--lecture" value={utilisateur.email} readOnly />
             <p className="cp-aide">Pour changer d&apos;adresse, écrivez-nous.</p>

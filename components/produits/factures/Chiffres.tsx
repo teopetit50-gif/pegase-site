@@ -28,7 +28,7 @@ const CHIFFRES = [
     icone: Send,
     valeur: "0",
     libelle: "Message envoyé en votre nom",
-    detail: "Il lit, recoupe, classe et transmet — il n'écrit à personne.",
+    detail: "Il lit, recoupe, classe et transmet. Il n'écrit à personne.",
   },
   {
     icone: Inbox,

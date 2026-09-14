@@ -104,9 +104,7 @@ export default function Simulateur() {
         <div>
           <h2 className="r-h3 max-w-[18ch]">Estimez ce que votre situation vous coûte</h2>
           <p className="r-lead mt-5 max-w-[52ch]">
-            Trois chiffres que vous connaissez de tête suffisent à poser un ordre de
-            grandeur. C&apos;est le calcul que l&apos;audit refait sur vos documents
-            réels, en trente minutes.
+            Trois chiffres que vous connaissez déjà suffisent à poser un ordre de grandeur. C&apos;est le calcul que l&apos;audit refait sur vos documents réels, en trente minutes.
           </p>
 
           <div className="mt-8">
@@ -215,7 +213,7 @@ export default function Simulateur() {
             href={lienReservation("process")}
             className="r-btn r-btn--noir mt-7 w-full"
           >
-            Faire chiffrer mes vrais chiffres
+            Faire chiffrer ma situation réelle
           </a>
           <p className="r-note mt-2 text-center">Gratuit : créneau bloqué immédiatement</p>
         </div>

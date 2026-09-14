@@ -7,7 +7,7 @@ import { POSTS } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Blog | Omega.AI",
   description:
-    "Conformité facture électronique, financement Chèque TIC, RGPD et données clients, impayés et trésorerie : les analyses du desk Omega.AI pour les dirigeants.",
+    "Conformité facture électronique, financement Chèque TIC, RGPD et données clients, impayés et trésorerie : les analyses d'Omega.AI pour les dirigeants.",
 };
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -49,7 +49,7 @@ export default function BlogPage() {
               Blog
             </h1>
             <p data-reveal className="o-lead mx-auto mt-3 max-w-[560px]">
-              Découvrez nos dernières analyses pour les petites entreprises.
+              Nos analyses, à l&apos;attention des dirigeants.
             </p>
           </div>
 
