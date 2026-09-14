@@ -12,7 +12,7 @@ import {
   MaqLocal,
   MaqValidation,
 } from "@/components/offres/MediaMoteurs";
-import { FAMILLES, POSTS } from "@/lib/content";
+import { FAMILLES } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    / — la page d'accueil (30/07/2026)
@@ -824,42 +824,6 @@ export default function Home() {
                   </summary>
                   <p className="o-body pb-6 pr-10">{f.a}</p>
                 </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ════════ 10 · ARTICLES ════════ */}
-        <section data-monde="clair" className="pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="À LIRE"
-              titre="Le fond, pas la brochure."
-              chapo="Conformité, financement, données, impayés : quatre sujets traités pour ce qu'ils sont, avec le calendrier et les chiffres qui vont avec."
-            />
-            <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {POSTS.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={`/blog/${p.slug}`}
-                  data-reveal
-                  className="o-card-soft flex flex-col p-8 transition-colors duration-200 hover:bg-white"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="o-pill o-pill--xs">{p.cat}</span>
-                    <span className="o-small !text-[13px]">{p.date}</span>
-                  </div>
-                  <h3 className="o-h5 mt-5 !text-[21px] !leading-[29px]">
-                    {p.title}
-                  </h3>
-                  <p className="o-small mt-3 !text-[15px] !leading-[23px] !text-[#52525b]">
-                    {p.excerpt}
-                  </p>
-                  <span className="o-link mt-6 !text-[14px]">
-                    Lire
-                    <Chevron taille={12} />
-                  </span>
-                </Link>
               ))}
             </div>
           </div>
