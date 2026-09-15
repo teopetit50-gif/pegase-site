@@ -88,3 +88,21 @@
     font-size: 1.5rem;
   }
 }
+
+/* ——— échelle mobile (15/09/2026) ———
+   La cellule fait ~154 px à 390 px et le fait le plus long tient en trois
+   lignes de 28 px à 24 px de corps : « Branché sur vos systèmes » y pèse
+   autant qu'un paragraphe. 20 px le ramène à deux lignes régulières, au
+   même rang que les autres cellules. La règle des 30 rem ci-dessus reste
+   pour la bande 480-767, où la colonne est plus large. */
+@media (max-width: 29.999rem) {
+  .modeles .bf-valeur {
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+}
+@media (min-width: 30rem) and (max-width: 47.999rem) {
+  .modeles .bf-valeur {
+    font-size: 1.375rem;
+  }
+}

@@ -760,7 +760,11 @@ export default function Grille() {
           {/* 15/09 — la pastille « Prix publics » RETIRÉE (Teo). Le titre
               porte déjà les deux mots ; l'objet partagé « kicker-tarifs »
               n'avait plus de partenaire monté côté /commencer. */}
-          <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-4xl font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] sm:text-5xl">
+          {/* 15/09 — `text-[28px]` sous 480 : à 390 px, `text-4xl` (36/41)
+              étalait ce titre sur TROIS lignes, soit 123 px avant le
+              premier mot utile. La marche vers `text-4xl` est remise à
+              480 px, où la ligne tient ; au-dessus de `sm`, rien ne bouge. */}
+          <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-[28px] font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] min-[480px]:text-4xl sm:text-5xl">
             {devis ? GRANDE_STRUCTURE.titre : "Des prix publics, gradués sur ce que vous traitez"}
           </h1>
           <p key={monde} className="rv-fondu mx-auto mt-4 max-w-2xl text-balance text-[#616161]">

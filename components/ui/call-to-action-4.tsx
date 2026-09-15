@@ -40,7 +40,11 @@ export function CallToAction4({
       className={`grid gap-8 rounded-xl border border-neutral-200 bg-white p-6 md:grid-cols-2 md:p-8 ${className}`}
     >
       <div>
-        <h2 className="text-balance font-[family-name:var(--font-jakarta)] text-3xl font-medium tracking-[-0.02em] text-neutral-900">
+        {/* 15/09 — 24 px sous 480 : à 390 le `text-3xl` (30/36) posait la
+            question du bandeau sur deux lignes hautes, juste au-dessus
+            d'une liste à coches de 15 px. La taille de bureau revient dès
+            480 px. */}
+        <h2 className="text-balance font-[family-name:var(--font-jakarta)] text-2xl font-medium tracking-[-0.02em] text-neutral-900 min-[480px]:text-3xl">
           {titre}
         </h2>
         <p className="mt-3 text-balance text-neutral-500">{texte}</p>

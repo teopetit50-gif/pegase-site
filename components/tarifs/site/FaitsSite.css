@@ -99,3 +99,18 @@
   content: attr(data-final);
   visibility: hidden;
 }
+
+/* ——— échelle mobile (15/09/2026) ———
+   Sous 64 rem la liste est en DEUX colonnes : la cellule ne fait que
+   ~171 px à 390, et « Branché sur vos systèmes » y tenait sur trois lignes
+   de 32 px — un fait de quatre mots qui pèse autant qu'un paragraphe.
+   Seul le plancher du clamp descend ; le terme fluide et le plafond ne
+   bougent pas, donc la valeur de bureau est intacte dès 1030 px.
+   Écrit ici et non dans globals.css : les deux règles pèsent (0,2,0) et
+   l'ordre de chargement entre les deux feuilles n'est pas garanti. */
+@media (max-width: 767px) {
+  .offres .fs-valeur {
+    font-size: clamp(21px, 0.99rem + 1.18vw, 36px);
+    line-height: 1.2;
+  }
+}

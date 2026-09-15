@@ -1027,7 +1027,14 @@ export default function Home() {
             n'est passée — ces cartes-là portent des faits contractuels, pas
             des captures d'interface. À cette place, elles ne voisinent plus
             avec une autre rangée à lueur : les garanties sont loin en bas. */}
-        <section data-monde="clair" className="pt-[110px]">
+        {/* RYTHME MOBILE (15/09) — les onze sections de cette page portent
+            leur écart en `110px`, une valeur relevée pour la colonne 1200.
+            À 390 px elle fait onze fois 110 px de blanc, soit 1 200 px de
+            page vide sur 19 300 : la page paraît deux fois plus longue
+            qu'elle n'est, et chaque section arrive après un trou. D'où le
+            `62px md:110px` posé sur les onze : l'écart de bureau est
+            conservé au pixel au-dessus de `md`, là où il a été recetté. */}
+        <section data-monde="clair" className="pt-[62px] md:pt-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="ORGANISATIONS"
@@ -1051,7 +1058,7 @@ export default function Home() {
             Pas d'`EnTete` ici : ce composant porte son titre LUI-MÊME, et
             en bas à droite. C'est le seul endroit de la page où l'ordre
             s'inverse, et c'est précisément ce qu'on est venu chercher. */}
-        <section data-monde="clair" className="py-[110px]">
+        <section data-monde="clair" className="py-[62px] md:py-[110px]">
           <BentoChange
             cartes={CARTES_CHANGE}
             pastille="CE QUE ÇA CHANGE"
@@ -1076,7 +1083,7 @@ export default function Home() {
             demande si ça marche vraiment, et avant qu'on lui dise qui on
             est. La section précédente porte son `py-[110px]`, celle-ci n'a
             donc que son écart bas. */}
-        <section data-monde="clair" className="pb-[110px]">
+        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="LES SITUATIONS"
@@ -1121,7 +1128,7 @@ export default function Home() {
             restent à confirmer (le rôle de Teo, la quatrième fiche) et les
             trois portraits à déposer dans /public/equipe/. Sans eux la
             mosaïque rend les initiales : la page ne se troue pas. */}
-        <section data-monde="clair" className="pb-[110px]">
+        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille={
@@ -1140,7 +1147,7 @@ export default function Home() {
         </section>
 
         {/* ════════ 5 · COMMENT ÇA MARCHE — frise de quatre étapes ════════ */}
-        <section id="approche" data-monde="clair" className="scroll-mt-24 pb-[110px]">
+        <section id="approche" data-monde="clair" className="scroll-mt-24 pb-[62px] md:pb-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="LE DÉROULÉ"
@@ -1194,7 +1201,7 @@ export default function Home() {
             un `pb`. C'est donc à cette section de porter l'écart du bas —
             `pb-[110px]`, comme le catalogue le faisait ici avant l'échange,
             et pas de `pt` sous peine de cumuler 220 px sous la frise. */}
-        <section data-monde="clair" className="pb-[110px]">
+        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="CE QU'ON FAIT"
@@ -1263,7 +1270,7 @@ export default function Home() {
             précaution juridique posée à contrecœur — c'est la seule manière
             d'écrire cette section qui survive à la question suivante, celle
             que pose tout client sérieux : « et l'IA, elle tourne où ? » */}
-        <section data-monde="clair" className="pb-[110px]">
+        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
           <div className="o-wrap">
             {/* 11/09/2026 — le chapô ne répète plus les cartes. Il disait
                 « hébergées en Allemagne, au sein de l'Union européenne, dans
@@ -1297,7 +1304,7 @@ export default function Home() {
         </section>
 
         {/* ════════ 8 · CE QUI RESTE CHEZ VOUS — deux cartes larges ════════ */}
-        <section data-monde="clair" className="pb-[110px]">
+        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="LES GARANTIES"
@@ -1331,13 +1338,13 @@ export default function Home() {
             1 200. Et volontairement sans `data-reveal` : deux animations
             d'apparition sur le même bloc se contrarient. */}
         {CITATION ? (
-          <section data-monde="clair" className="pb-[110px]">
+          <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
             <TexteRevele texte={CITATION.text} signature={CITATION.sub} />
           </section>
         ) : null}
 
         {/* ════════ 9 · L'ÉCHÉANCE — retour au noir ════════ */}
-        <section className="o-nuit relative py-[110px]">
+        <section className="o-nuit relative py-[62px] md:py-[110px]">
           <div aria-hidden className="o-deco">
             <div className="o-halo" />
           </div>
@@ -1392,7 +1399,7 @@ export default function Home() {
         </section>
 
         {/* ════════ 10 · FAQ ════════ */}
-        <section data-monde="clair" className="py-[110px]">
+        <section data-monde="clair" className="py-[62px] md:py-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="QUESTIONS"

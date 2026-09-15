@@ -167,7 +167,11 @@ export default function AuthSectionOne({ titre, sousTitre, panneauTitre, lien, c
           ) : null}
 
           <div className="relative z-10 flex h-full w-full flex-col justify-between">
-            <h2 className="max-w-[620px] pt-0 text-4xl font-medium tracking-[-0.05em] text-white sm:text-6xl lg:pt-16 lg:text-[52px] lg:leading-[0.98] xl:text-[64px] 2xl:text-[70px]">
+            {/* 15/09 — 28 px sous 480 : le panneau sombre fait toute la
+                largeur sur téléphone, et `text-4xl` (36/40) y donnait deux
+                lignes de titre pour une phrase de quatre mots. Rien ne
+                change à partir de `sm`. */}
+            <h2 className="max-w-[620px] pt-0 text-[28px] font-medium tracking-[-0.05em] text-white min-[480px]:text-4xl sm:text-6xl lg:pt-16 lg:text-[52px] lg:leading-[0.98] xl:text-[64px] 2xl:text-[70px]">
               {panneauTitre}
             </h2>
 
