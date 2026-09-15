@@ -357,32 +357,6 @@ export default function OffresPage() {
           </div>
         </section>
 
-        {/* ════════ QUATRE ARGUMENTS — bande noire ════════
-            Pas de data-monde="clair" : le header caméléon doit rester sombre
-            au-dessus de cette bande. Le fond déborde jusqu'aux bords de
-            l'écran via .o-nuit, le contenu reste dans la colonne.
-
-            La respiration verticale descend de 90/110 à 64/80 : les cases
-            de `features-hover` portent désormais leur propre `py-9 sm:py-10`,
-            et cumulée l'ancienne valeur creusait 80 px de noir vide en haut
-            comme en bas. */}
-        <section className="o-nuit py-[64px] sm:py-[80px]">
-          <div className="o-wrap">
-            <BentoGrid01 cases={ARGUMENTS} libelleAtterrissage="Chèque TIC" />
-          </div>
-        </section>
-
-        {/* ════════ LES MOTEURS — bento : tuile large puis trois tuiles ════════ */}
-        <section id="moteurs" data-monde="clair" className="scroll-mt-24 pt-[80px] pb-[120px]">
-          <Bento02
-            pastille="Ce qui se déploie"
-            titre="Chaque système tient un poste, et un seul."
-            chapo="Aucun ne fait tout : chacun prend en charge un processus, le traite en continu sur vos outils et s'arrête à votre validation. Trois exemples, puis le catalogue complet."
-            lien={{ label: "Voir les quatre systèmes", href: "#catalogue" }}
-            tuiles={MOTEURS}
-          />
-        </section>
-
         {/* ════════ LES QUATRE — grille à filets sur bande noire ════════
             11/09/2026 (Teo) — l'ancienne section tenait sur 1150 px : une
             colonne de texte à gauche, deux chiffres, et quatre cartes de
@@ -391,18 +365,24 @@ export default function OffresPage() {
             même information en un tiers de la hauteur.
 
             Ce qui a disparu et où ça se dit déjà : « Branché sur vos outils
-            actuels » est repris deux fois — dans les quatre arguments du haut
+            actuels » est repris deux fois — dans les quatre arguments
             (« Intégration à votre environnement ») et dans la mise en place
             (« Sur vos outils ») ; le plafond du Chèque TIC est dans ces mêmes
             arguments ; les trente minutes d'audit sont dans le CTA final.
 
-            Le fond noir est conservé : c'est la seule respiration sombre du
-            milieu de page, et sans lui la page enchaîne quatre sections
-            blanches d'affilée. Le débordement jusqu'aux bords de l'écran
-            reste la technique de .o-nuit (ombre écrêtée horizontalement).
+            Le fond noir est conservé : avec la bande des quatre arguments,
+            c'est l'une des deux respirations sombres de la page, et sans lui
+            elle enchaînerait quatre sections blanches d'affilée. Le débordement
+            jusqu'aux bords de l'écran reste la technique de .o-nuit (ombre écrêtée horizontalement).
 
-            L'ancre `#catalogue` est la destination du bouton de la tuile
-            large du bento : « Voir les quatre » descend ici. */}
+            15/09/2026 (Teo) — la section passe AVANT les moteurs, et la bande
+            des quatre arguments passe après : le catalogue suit donc le hero.
+            Le bouton « Voir les quatre systèmes » de <Bento02> est retiré (il
+            remonterait) ; l'ancre `#catalogue` reste posée, elle sert aux
+            appels venus des autres pages.
+
+            (Avant le 15/09, l'ancre était la destination de ce bouton, qui
+            descendait depuis la tuile large du bento.) */}
         <section
           id="catalogue"
           className="scroll-mt-24 bg-black py-[120px]"
@@ -426,6 +406,34 @@ export default function OffresPage() {
                 <IconeFleche />
               </Link>
             </p>
+          </div>
+        </section>
+
+        {/* ════════ LES MOTEURS — bento : tuile large puis trois tuiles ════════ */}
+        <section id="moteurs" data-monde="clair" className="scroll-mt-24 pt-[80px] pb-[120px]">
+          <Bento02
+            pastille="Ce qui se déploie"
+            titre="Chaque système tient un poste, et un seul."
+            chapo="Aucun ne fait tout : chacun prend en charge un processus, le traite en continu sur vos outils et s'arrête à votre validation. Trois exemples pris dans le catalogue ci-dessus."
+            tuiles={MOTEURS}
+          />
+        </section>
+
+        {/* ════════ QUATRE ARGUMENTS — bande noire ════════
+            Pas de data-monde="clair" : le header caméléon doit rester sombre
+            au-dessus de cette bande. Le fond déborde jusqu'aux bords de
+            l'écran via .o-nuit, le contenu reste dans la colonne.
+
+            15/09/2026 (Teo) — la bande est descendue sous les moteurs, à la
+            place qu'occupait le catalogue.
+
+            La respiration verticale descend de 90/110 à 64/80 : les cases
+            de `features-hover` portent désormais leur propre `py-9 sm:py-10`,
+            et cumulée l'ancienne valeur creusait 80 px de noir vide en haut
+            comme en bas. */}
+        <section className="o-nuit py-[64px] sm:py-[80px]">
+          <div className="o-wrap">
+            <BentoGrid01 cases={ARGUMENTS} libelleAtterrissage="Chèque TIC" />
           </div>
         </section>
 
