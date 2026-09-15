@@ -59,6 +59,10 @@ import {
   type Variants,
 } from "motion/react";
 
+import {
+  GridPatternCard,
+  GridPatternCardBody,
+} from "@/components/ui/card-with-grid-ellipsis-pattern";
 import { lienAudit } from "@/lib/reservation";
 import {
   CALCULATEUR,
@@ -165,17 +169,25 @@ export default function Calculateur({
     onVerdict(rempli ? (JSON.parse(cle) as SaisieVolumes) : null);
   }, [rempli, cle, onVerdict]);
 
+  /* 15/09/2026 — L'APPEL PASSE SUR LA CARTE À TRAME (21st.dev,
+     « card-with-grid-ellipsis-pattern »). Les mots, le bouton et ce qu'il
+     déclenche ne bougent pas : seule la surface change — quadrillage à
+     pastilles sous un voile blanc en diagonale, au lieu du blanc plat.
+     Le fond et le filet sont portés par le composant ; `.calc-motif` ne
+     range plus que le texte et le bouton (voir globals.css). */
   if (!ouvert) {
     return (
-      <div className="calc-appel">
-        <div>
-          <p className="calc-appel-titre">{CALCULATEUR.appel.titre}</p>
-          <p className="calc-appel-texte">{CALCULATEUR.appel.texte}</p>
-        </div>
-        <button type="button" className="calc-bouton" onClick={() => setOuvert(true)}>
-          {CALCULATEUR.appel.cta}
-        </button>
-      </div>
+      <GridPatternCard className="mt-10">
+        <GridPatternCardBody className="calc-motif">
+          <div>
+            <p className="calc-appel-titre">{CALCULATEUR.appel.titre}</p>
+            <p className="calc-appel-texte">{CALCULATEUR.appel.texte}</p>
+          </div>
+          <button type="button" className="calc-bouton" onClick={() => setOuvert(true)}>
+            {CALCULATEUR.appel.cta}
+          </button>
+        </GridPatternCardBody>
+      </GridPatternCard>
     );
   }
 
