@@ -41,7 +41,7 @@ export const CATALOGUE: Catalogue = {
       icone: "megaphone",
       lignes: [
         { t: "Chaque message reprend la dernière prestation du compte et le temps écoulé depuis.", atteste: true },
-        { t: "Les règles de ton, les interdits et les tournures sont écrits avant la première vague.", atteste: true },
+        { t: "Un compte sans réponse reçoit un second message, puis il sort du cycle.", atteste: true },
         { t: "Les règles de ton et de contenu s'écrivent en français, sans case à cocher.", atteste: true },
         { t: "Un compte reçoit deux messages en tout, espacés d'au moins trois jours.", atteste: true },
         { t: "Une réponse, même négative, arrête la séquence et vous rend la conversation.", atteste: true },

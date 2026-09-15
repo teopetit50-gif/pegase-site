@@ -109,51 +109,51 @@ export const CAS_LIMITES: BlocCasLimites = {
   cas: [
     {
       q: "Le fournisseur envoie sa facture depuis une adresse personnelle.",
-      r: "L'expéditeur inconnu est mis en attente et la pièce n'entre pas. Vous rattachez l'adresse au fournisseur en un geste, et elle est reconnue ensuite.",
+      r: "La pièce est traitée comme les autres, et l'adresse d'envoi est reprise telle quelle sur la ligne d'achat. C'est le contenu de la facture qui décide du fournisseur, pas l'expéditeur.",
     },
     {
-      q: "Un même fichier contient la facture et son avoir.",
-      r: "Les deux pièces sont séparées, puis rattachées l'une à l'autre. Le net à payer tient compte de l'avoir sans ressaisie.",
+      q: "Le fournisseur n'a pas mis de numéro sur sa facture.",
+      r: "La pièce part en anomalie pour champ manquant. Sans numéro, aucun contrôle de doublon ne tient, et une facture réglée deux fois se découvre au relevé.",
     },
     {
       q: "Le montant est dans le corps du message, la pièce jointe est vide.",
-      r: "Le corps du message est lu comme une pièce. La facture est signalée comme incomplète tant que le document d'origine n'est pas arrivé.",
+      r: "Le message part en anomalie avec sa mention, et personne ne le classe au jugé. Vous savez qu'une facture est arrivée sans son document, et vous réclamez la pièce.",
     },
     {
-      q: "La photo est prise de travers, à moitié dans l'ombre.",
-      r: "L'image est redressée et lue. Si un montant reste illisible, la pièce part en attente avec la zone en question mise en évidence.",
+      q: "Le fournisseur envoie une photo au lieu d'un PDF.",
+      r: "La pièce part en anomalie plutôt que d'être devinée. Un montant lu de travers entre en comptabilité et ne se découvre qu'au bilan : c'est le risque que ce refus écarte.",
     },
     {
-      q: "Les coordonnées bancaires ont changé depuis la dernière facture.",
-      r: "Le classement s'arrête et une alerte part au service comptable. C'est le scénario de la fraude au virement, et il ne se rattrape pas après paiement.",
+      q: "Les totaux de la facture ne tombent pas juste.",
+      r: "Le classement s'arrête dès que l'écart entre le hors taxes, la TVA et le total dépasse cinq centimes. La pièce attend une vérification humaine plutôt que d'entrer avec un montant faux.",
     },
     {
-      q: "La facture est libellée en dollars.",
-      r: "La devise est conservée et la contre-valeur en euros calculée au taux du jour d'émission. Les deux montants figurent sur la pièce.",
+      q: "La facture est libellée dans une autre devise.",
+      r: "Les montants sont lus tels qu'ils figurent sur la pièce, sans conversion. La contre-valeur en euros reste à la charge de votre comptabilité.",
     },
     {
-      q: "Un acompte a déjà été versé sur cette commande.",
-      r: "L'acompte est rapproché et le solde recalculé. La facture n'est pas classée sur son montant brut.",
+      q: "La facture porte un taux de TVA inhabituel.",
+      r: "Le contrôle porte sur la cohérence entre le hors taxes, la TVA et le total, quel que soit le taux. Un taux exotique passe s'il tombe juste, et s'arrête sinon.",
     },
     {
       q: "La même facture arrive deux fois, par deux canaux différents.",
       r: "Le doublon est reconnu même après un renommage ou un nouveau scan. La seconde copie est écartée et reste consultable.",
     },
     {
-      q: "L'approbateur est en congé et la facture arrive à échéance.",
-      r: "La délégation prend le relais si elle est posée. Sinon la pièce remonte d'un niveau avant l'échéance, elle ne dort pas.",
+      q: "Un même fichier contient plusieurs factures.",
+      r: "La pièce part en anomalie plutôt que d'être classée sur la première facture lue. Le découpage automatique n'existe pas encore, et l'annoncer coûterait plus cher que de le dire.",
     },
     {
-      q: "La facture dépasse la commande de quelques pour cent.",
-      r: "L'écart est signalé avec son montant et sa cause probable. La validation reste demandée à une personne, jamais présumée.",
+      q: "Le total de la facture est à zéro.",
+      r: "La pièce est mise en attente. Un total nul vient presque toujours d'une lecture ratée, et le classer reviendrait à perdre la facture.",
     },
     {
       q: "Le fournisseur n'existe pas encore dans votre comptabilité.",
-      r: "Une fiche est proposée avec ce qui a été lu sur la pièce. Elle n'est créée qu'après votre accord.",
+      r: "La pièce est classée avec le nom lu sur la facture, et c'est votre comptabilité qui crée la fiche. Le système n'écrit rien dans votre plan comptable.",
     },
     {
-      q: "La pièce arrive après la clôture de l'exercice.",
-      r: "Elle est orientée vers l'exercice suivant et portée à la connaissance de la comptabilité, avec la date de réception qui fait foi.",
+      q: "La pièce arrive longtemps après sa date d'émission.",
+      r: "Elle est classée avec ses deux dates, celle de la facture et celle de sa réception. L'écart se voit, et c'est à votre comptabilité de décider de l'exercice.",
     },
   ],
 };
