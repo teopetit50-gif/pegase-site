@@ -83,7 +83,7 @@ export const MEMBRES: Membre[] = [
     prenom: "Teo",
     nom: "Karczewski",
     role: "Co-fondateur",
-    bio: "Il vient de la finance, où rien ne se décide sans avoir vérifié le chiffre. Chez Omega, c'est lui qui fait les audits, installe les systèmes et décroche quand vous appelez.",
+    bio: "Il vient de la finance, où aucune décision ne se prend sans que le chiffre soit vérifié. Chez Omega, il conduit les audits, pilote les mises en production et assure le suivi des systèmes installés.",
     photo: "/equipe/teo.jpg",
   },
 ];
@@ -95,9 +95,9 @@ export const MEMBRES: Membre[] = [
    Et on ne nomme JAMAIS la région : le produit se vend comme français, pas
    comme guadeloupéen (Teo, 15/09). */
 export const EQUIPE_SURTITRE = "ÉQUIPE FRANÇAISE";
-export const EQUIPE_TITRE = "L'équipe qui installe est celle qui répond.";
+export const EQUIPE_TITRE = "Un interlocuteur unique, de l'audit à l'exploitation.";
 export const EQUIPE_CHAPO =
-  "Omega n'est pas une agence à étages. La personne qui fait votre audit est celle qui installe vos systèmes, et celle que vous avez au téléphone six mois plus tard.";
+  "Omega ne fonctionne pas par couches. L'équipe qui conduit votre audit conçoit vos systèmes, les met en production et reste votre interlocuteur une fois l'installation terminée.";
 /* La ligne de pied, sous la liste des noms. Chaque terme est vérifiable. */
 export const EQUIPE_PIED =
   "Conçu et développé en France.";
