@@ -827,19 +827,31 @@ export default function Home() {
           {/* la maquette, posée en bas de cadre et coupée par le bord comme
               chez la référence — d'où `pb-0` sur la section.
 
-              05/08, arbitrage de Teo : c'est la CAPTURE DU TEMPLATE qui est
-              affichée, pas le tableau de bord Omega (`HeroCollage`). Je lui ai
-              signalé qu'elle porte « Hello, Flux » et des données d'hôtel en
-              anglais, donc qu'un prospect la lira comme le produit d'Omega ;
-              il a tranché pour le 1:1. À remplacer par une capture du vrai
-              tableau de bord Omega quand il en existera une. */}
+              15/09/2026 — c'est enfin NOTRE écran. Jusqu'ici la page ouvrait
+              sur `dashboard-hero.webp`, la capture 1:1 du gabarit Flux : un
+              tableau de bord d'hôtel en anglais, en dollars, avec des
+              réservations Booking.com. Teo l'avait assumée le 05/08 (« le
+              1:1 ») ; il a tranché l'inverse le 15/09 — la première image
+              d'un site qui vend du sur-mesure français ne peut pas être le
+              produit de quelqu'un d'autre.
+
+              La photo est prise sur l'espace client réel (pegase-dashboard,
+              écran /espace/debiteurs) alimenté par le jeu de démonstration
+              écrit en dur dans ce dépôt-là : aucune donnée client, que de la
+              fiction. La route de prise de vue est temporaire et n'est pas
+              restée dans le dépôt ; pour la refaire, voir
+              [[capture-reference-contenu-substitue]] et la même méthode que
+              `public/produits/relances/*`.
+
+              Nom de fichier neuf plutôt qu'écrasé : le CDN sert l'ancienne
+              image pendant des heures quand on réécrit un chemin existant. */}
           <div data-reveal className="o-flux-maquette relative z-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/fonds/dashboard-hero.webp"
-              alt="Tableau de bord"
-              width={1682}
-              height={1122}
+              src="/fonds/tableau-de-bord.webp"
+              alt="L'espace client Omega : qui doit de l'argent, où en est la relance, et l'encours échu au total."
+              width={2160}
+              height={1350}
             />
           </div>
 
