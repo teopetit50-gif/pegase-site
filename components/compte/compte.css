@@ -45,8 +45,8 @@
 }
 @media (min-width: 1024px) {
   .resa .cpt-wrap {
-    padding-top: 22px;
-    padding-bottom: 48px;
+    padding-top: 12px;
+    padding-bottom: 40px;
   }
 }
 
@@ -57,10 +57,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px 24px;
-  padding-bottom: 18px;
+  padding-bottom: 12px;
 }
+/* l'identité cède la place aux actions : base de 320 px, elle grandit
+   ensuite — à 1280 la rangée tient sur UNE ligne (mesuré : 128 px de tête
+   quand les actions passaient dessous, 70 quand elles restent à droite) */
 .resa .cpt-identite {
   display: flex;
+  flex: 1 1 320px;
   align-items: center;
   gap: 16px;
   min-width: 0;
@@ -191,8 +195,8 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 4px 10px;
-  margin-bottom: 16px;
-  padding: 12px 16px;
+  margin-bottom: 12px;
+  padding: 9px 16px;
   border: 1px solid var(--r-filet);
   border-radius: 12px;
   background: #ffffff;
@@ -244,7 +248,7 @@
 @media (min-width: 1024px) {
   .resa .cpt-tuiles {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin-bottom: 22px;
+    margin-bottom: 16px;
   }
 }
 /* chaque tuile est un bouton : elle ouvre sa section */
@@ -256,7 +260,7 @@
   gap: 5px;
   width: 100%;
   min-width: 0;
-  padding: 15px 44px 14px 20px;
+  padding: 12px 44px 11px 20px;
   background: #ffffff;
   text-align: left;
   cursor: pointer;
@@ -327,8 +331,8 @@
 }
 @media (min-width: 1024px) {
   .resa .cpt-corps {
-    grid-template-columns: 238px minmax(0, 1fr);
-    gap: 28px;
+    grid-template-columns: 264px minmax(0, 1fr);
+    gap: 24px;
   }
 }
 
@@ -496,7 +500,7 @@
 }
 @media (min-width: 640px) {
   .resa .cpt-panneau {
-    padding: 22px 26px 26px;
+    padding: 18px 24px 20px;
   }
 }
 /* les panneaux restent MONTÉS (forceMount : une saisie en cours survit
@@ -529,8 +533,8 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px 20px;
-  padding-bottom: 16px;
-  margin-bottom: 18px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
   border-bottom: 1px solid var(--r-filet);
 }
 .resa .cpt-panneau-titre {
@@ -557,6 +561,26 @@
 @media (min-width: 1024px) {
   .resa .cpt-panneau[data-section="abonnement"] ul.grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 12px;
+    gap: 8px;
+  }
+  .resa .cpt-panneau[data-section="abonnement"] ul.grid > li {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  /* la carte d'abonnement (AbonnementCarte, en utilitaires) est la
+     section la plus haute : c'est elle qui décide si la page tient sans
+     défiler à 1440 × 900. Ses séparateurs (mt-4/pt-4, mt-5/pt-4) se
+     resserrent ici, sans toucher au composant — comme la carte de verre
+     le faisait dès 1280 */
+  .resa .cpt-panneau[data-section="abonnement"] .border-t {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  /* son texte « carte ou prélèvement SEPA… » est bridé à 60ch par le
+     composant : dans un panneau de 1 000 px il tient sur deux lignes */
+  .resa .cpt-panneau[data-section="abonnement"] .max-w-\[60ch\] {
+    max-width: 92ch;
   }
 }
 

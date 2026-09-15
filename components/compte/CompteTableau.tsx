@@ -43,8 +43,13 @@
      rangée défilante en dessous — le clavier suit.
    · l'ancre : `#rendez-vous` à l'arrivée ouvre la section, et le choix
      s'écrit dans l'URL par replaceState (un lien « voir mes rendez-vous »
-     depuis un e-mail tombera au bon endroit). Le rendu serveur part de
-     `defaut` : pas de décalage d'hydratation, l'ancre ne se lit qu'après.
+     depuis un e-mail tombera au bon endroit).
+   · l'ancre et la largeur sont lues par useSyncExternalStore, pas par un
+     effet qui pose un état (la règle react-hooks/set-state-in-effect du
+     dépôt l'interdit, et elle a raison : un rendu de plus pour rien). Le
+     serveur rend `defaut` en colonne ; le navigateur, une fois hydraté,
+     relit l'ancre et la largeur et corrige d'un rendu synchrone, sans
+     décalage d'hydratation.
    · les tuiles sont des <button> qui ouvrent leur section — la synthèse
      mène au détail.
    · rien n'anime l'opacité d'un élément flottant, et aucune sortie n'est
@@ -56,7 +61,7 @@
    composant d'icône (fonction-serveur-vers-composant-client).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
@@ -88,6 +93,23 @@ export type TuileCompte = {
   sous?: ReactNode;
 };
 
+/* ——— deux sources externes : l'ancre de l'URL et la largeur ——— */
+function abonnerAncre(cb: () => void) {
+  window.addEventListener("hashchange", cb);
+  return () => window.removeEventListener("hashchange", cb);
+}
+const lireAncre = () => window.location.hash.slice(1);
+const lireAncreServeur = () => "";
+
+const REQUETE_COLONNE = "(min-width: 1024px)";
+function abonnerLargeur(cb: () => void) {
+  const mq = window.matchMedia(REQUETE_COLONNE);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+const lireColonne = () => window.matchMedia(REQUETE_COLONNE).matches;
+const lireColonneServeur = () => true;
+
 export default function CompteTableau({
   sections,
   tuiles,
@@ -97,28 +119,18 @@ export default function CompteTableau({
   tuiles: TuileCompte[];
   defaut?: string;
 }) {
-  const [actif, setActif] = useState(defaut ?? sections[0]?.id ?? "");
-  const [vertical, setVertical] = useState(true);
+  /* le choix de la personne (clic, clavier, tuile) ; tant qu'il n'y en a
+     pas, l'ancre de l'URL décide, puis `defaut` */
+  const [choix, setChoix] = useState<string | null>(null);
+  const ancre = useSyncExternalStore(abonnerAncre, lireAncre, lireAncreServeur);
+  const vertical = useSyncExternalStore(abonnerLargeur, lireColonne, lireColonneServeur);
   const reduit = useReducedMotion();
-  const ids = sections.map((s) => s.id).join(",");
 
-  /* l'ancre à l'arrivée : #rendez-vous ouvre la section */
-  useEffect(() => {
-    const h = window.location.hash.slice(1);
-    if (h && ids.split(",").includes(h)) setActif(h);
-  }, [ids]);
-
-  /* colonne dès 1024 (le clavier suit : flèches haut/bas), rangée sinon */
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const lire = () => setVertical(mq.matches);
-    lire();
-    mq.addEventListener("change", lire);
-    return () => mq.removeEventListener("change", lire);
-  }, []);
+  const ids = sections.map((s) => s.id);
+  const actif = choix ?? (ancre && ids.includes(ancre) ? ancre : (defaut ?? ids[0] ?? ""));
 
   const choisir = (id: string) => {
-    setActif(id);
+    setChoix(id);
     try {
       window.history.replaceState(window.history.state, "", `#${id}`);
     } catch {
