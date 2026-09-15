@@ -783,9 +783,14 @@ export default function Grille() {
 
             15/09, seconde passe — `max-w-5xl` et non `4xl` : le calculateur
             est passé à deux panneaux (modèle pricing-12) et sa colonne de
-            résultat en prend 400 px à partir de 1024 px. */}
+            résultat en prend 400 px à partir de 1024 px.
+            15/09, troisième passe — `lg:max-w-none` : le cadre prend toute la
+            colonne de la page (1 184 px dans le `.r-wrap`) au lieu de 1 024.
+            Ce n'est pas de la largeur pour de la largeur — c'est ce qui donne
+            aux questions les 705 px où elles tiennent sur deux colonnes, et
+            le cadre perd d'un coup la moitié de sa hauteur. */}
         {devis ? null : (
-          <div className="mx-auto mt-10 max-w-5xl">
+          <div className="mx-auto mt-10 max-w-5xl lg:max-w-none">
             <Calculateur
               postesChoisis={choix.postes}
               palierChoisi={choix.palier}

@@ -67,12 +67,17 @@ import {
   QUESTIONS_VOLUME,
   piecesParPoste,
   verdictCalculateur,
+  type Palier,
   type Poste,
   type QuestionVolume,
   type SaisieVolumes,
 } from "@/lib/paliers";
 
-const NBSP = " ";
+/* 15/09 — écrite en séquence d'échappement et non au clavier : l'espace
+   fine insécable se reperd d'une passe à l'autre, et elle s'était déjà
+   dégradée ici en espace ordinaire — d'où le « € » seul en bout de ligne
+   dès que la colonne se resserre. */
+const NBSP = "\u202f";
 
 const nombre = (n: number) => n.toLocaleString("fr-FR");
 const euros = (n: number) => `${nombre(Math.round(n))}${NBSP}€`;
@@ -179,6 +184,22 @@ export default function Calculateur({
   const negatif = rempli && v.palier !== null && v.net !== null && v.net < 0;
   const gain = rempli && !horsGrille && !negatif && v.palier !== null;
   const ton = horsGrille ? "audit" : negatif ? "franc" : gain ? "gain" : "attente";
+
+  /* 15/09, correctif — LE BOUTON MENAIT DANS LE VIDE. Il pointait sur
+     `/installation?palier=<id>` ; la page ne lit que `postes=` et renvoyait
+     donc à /tarifs sans un mot. Elle a raison de ne lire que ça : le prix
+     du récapitulatif sort du NOMBRE de postes, lui passer un palier sans
+     ses postes ferait deux façons de dire le même prix.
+     Les postes ne sont connus que dans deux cas : « Tout Omega », qui les
+     prend tous, et un palier dont le visiteur a coché exactement le compte
+     dans les cartes. Sinon — rien de coché, ou palier monté par le calcul —
+     on ne devine pas à sa place : le bouton descend à la grille. */
+  const postesResa: string[] | null = (() => {
+    const p: Palier | null = v.palier;
+    if (!p) return null;
+    if (p.aChoisir === null) return POSTES.map((x) => x.id);
+    return postesChoisis.length === p.aChoisir ? postesChoisis : null;
+  })();
 
   return (
     <section className="calc" aria-label="Calculateur de palier">
@@ -298,9 +319,17 @@ export default function Calculateur({
                 votre métier.
               </p>
 
-              <a className="calc-bouton" href={`/installation?palier=${v.palier.id}`}>
-                Réserver l&apos;installation — {euros(v.palier.installation)}
-              </a>
+              {postesResa ? (
+                <a className="calc-bouton" href={`/installation?postes=${postesResa.join(",")}`}>
+                  Réserver l&apos;installation — {euros(v.palier.installation)}
+                </a>
+              ) : (
+                <a className="calc-bouton" href="#grille">
+                  {v.palier.aChoisir === 1
+                    ? "Choisir mon poste"
+                    : `Choisir mes ${v.palier.aChoisir} postes`}
+                </a>
+              )}
               <p className="calc-souscta">
                 Puis {euros(v.palier.prix)} par mois · satisfait ou remboursé 30 jours
               </p>

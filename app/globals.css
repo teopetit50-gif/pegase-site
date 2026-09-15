@@ -7201,9 +7201,19 @@ button.rounded-full:active {
     padding: 34px 32px;
   }
 }
+/* 15/09, troisième passe — DEUX COLONNES DE QUESTIONS (Teo : « faut que ce
+   soit plus en largeur plutôt qu'en longueur »). Empilées, les quatre
+   curseurs faisaient plus de 1 200 px de haut et le cadre se lisait comme
+   un formulaire sans fin. `auto-fit` et non `2` : quand un seul poste est
+   coché, la piste vide se replie et la question garde toute la largeur.
+   280 px est la largeur en dessous de laquelle la réglette graduée ne peut
+   plus porter ses cinq chiffres — la bascule se fait donc toute seule vers
+   1 280 px, où la colonne de gauche vaut 705 px. */
 .resa .calc-questions {
   display: grid;
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px 32px;
+  align-items: start;
 }
 .resa .calc-trait {
   height: 1px;
@@ -7229,6 +7239,9 @@ button.rounded-full:active {
   font-size: 15px;
   line-height: 1.5;
   font-weight: 500;
+  /* sur deux colonnes l'intitulé tient sur deux lignes : équilibrées, sinon
+     le « ? » tombe seul en dessous */
+  text-wrap: balance;
   color: var(--r-texte);
 }
 .resa .calc-q-valeur {
