@@ -185,7 +185,11 @@ export default function Calculateur({
   /* Les trois verdicts, nommés une fois : le JSX en dépend quatre fois et
      une chaîne de ternaires imbriqués s'y relit mal. */
   const horsGrille = rempli && v.palier === null;
-  const negatif = rempli && v.palier !== null && v.net !== null && v.net < 0;
+  /* 15/09 — LA RÈGLE ABSOLUE (voir lib/paliers.ts) : on ne bascule plus sur
+     le SIGNE du net mais sur `viable`, qui exige en plus une marge réelle.
+     Un net positif mais dérisoire — « 14 € » sous un abonnement à 756 € —
+     tombe sous le même interdit qu'un net négatif. */
+  const negatif = rempli && v.palier !== null && !v.viable;
   const gain = rempli && !horsGrille && !negatif && v.palier !== null;
   const ton = horsGrille ? "audit" : negatif ? "franc" : gain ? "gain" : "attente";
 
@@ -288,9 +292,14 @@ export default function Calculateur({
             <div className="calc-bloc">
               <p className="calc-verdict-titre">{CALCULATEUR.negatif.titre}</p>
               <p className="calc-verdict-texte">
-                Les {journees(Math.round(v.heuresRecuperees))} heures que le système vous rendrait
-                valent {euros(v.valeurRecuperee)} par mois, pour un abonnement à{" "}
-                {euros(v.prix ?? 0)}. {CALCULATEUR.negatif.texte}
+                {/* AUCUN montant d'économie ici : l'ancienne rédaction disait
+                    « vos 3 heures valent 105 € par mois, pour un abonnement à
+                    149 € », exactement la faute que la règle interdit. Les
+                    HEURES restent — elles sont vraies et elles disent ce que
+                    le système fait. */}
+                Le système vous rendrait environ{" "}
+                {journees(Math.round(v.heuresRecuperees))} heures par mois.{" "}
+                {CALCULATEUR.negatif.texte}
               </p>
               <a className="calc-bouton" href="/reserver-un-audit">
                 {CALCULATEUR.negatif.cta}

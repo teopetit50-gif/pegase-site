@@ -318,6 +318,39 @@ export const PLANCHER_MENSUEL = 149;
 /** Au-delà, le prix ne se calcule plus : il sort d'un audit. */
 export const PLAFOND_GRILLE = 1000;
 
+/* ══════════════════════════════════════════════════════════════════════
+   RÈGLE ABSOLUE (15/09/2026, Teo) — LE VISITEUR NE VOIT JAMAIS UN GAIN
+   PLUS PETIT QUE LE PRIX.
+
+   « Faut jamais que le client voie un prix négatif, genre vous économisez
+   100 mais on facture 150 : c'est impossible ça. »
+
+   Ce que ça interdit, exactement : afficher côte à côte un montant récupéré
+   et un abonnement plus cher. Une page qui fait cette soustraction devant le
+   client démontre elle-même que l'offre ne vaut pas son prix.
+
+   ET LA VARIANTE SOURNOISE, interdite au même titre : un net positif mais
+   dérisoire. « = 14 € net par mois » sous un abonnement à 756 € passe tous
+   les tests naïfs (le net est positif) et se lit pourtant comme un aveu.
+   D'où un SEUIL, et non un simple test de signe.
+
+   POURQUOI CE N'EST PAS QU'UN PROBLÈME D'AFFICHAGE. À 30 €/h, la valeur
+   récupérée vaut ≈ 1,99 € la pièce pour un prix de 2 € la pièce : le net est
+   structurellement nul. Le temps seul ne vend pas Omega à quelqu'un dont
+   l'heure coûte peu — c'est un fait du modèle, pas un bug. Dans ce cas on
+   n'affiche AUCUNE soustraction : on dit ce que le système fait en heures,
+   et on renvoie à l'audit, qui chiffre ce que le temps ne capture pas
+   (devis sans réponse, factures échues, clients jamais rappelés).
+
+   L'invariant à tenir, testé dans PEGASE/test-regle-gain.md :
+   si `viable` est faux, AUCUN montant d'économie ne s'affiche.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/** La marge minimale pour qu'une soustraction ait le droit de s'afficher :
+    le net doit valoir au moins ce pourcentage du prix. En dessous, l'offre
+    ne se défend pas sur le temps seul, et on ne fait pas semblant. */
+export const MARGE_MINIMALE = 0.15;
+
 /** Le prix mensuel pour un volume de pièces — null au-delà de la grille.
     C'est LA fonction du prix public depuis le 15/09 ; `prixPour` ne sert
     plus qu'aux repères et aux cas où aucun volume n'a été saisi.
@@ -932,6 +965,10 @@ export function verdictCalculateur(saisie: SaisieVolumes, taux: number) {
     /* null quand le volume sort de la grille : il n'y a pas de prix à
        soustraire, et on n'en invente pas un. */
     net: prix === null ? null : valeur - prix,
+    /* LE DRAPEAU QUI COMMANDE L'AFFICHAGE — voir la règle absolue plus haut.
+       Faux : on n'affiche ni le montant récupéré, ni la soustraction, ni le
+       net. Ni négatif, ni dérisoire : rien de chiffré côté économies. */
+    viable: prix !== null && valeur - prix >= prix * MARGE_MINIMALE,
   };
 }
 
@@ -998,11 +1035,16 @@ export const CALCULATEUR = {
      jamais été écrite là où un visiteur pouvait la lire. Le bouton reste
      « en parler », jamais « souscrire quand même » : transformer un non
      honnête en rattrapage commercial ruinerait tout l'écran. */
+  /* 15/09 — L'ÉCRAN « PAS SUR LE TEMPS SEUL ». Il remplace l'ancien écran
+     négatif, qui commettait exactement la faute interdite : « vos 3 heures
+     valent 105 € par mois, pour un abonnement à 149 € ». AUCUN montant
+     d'économie ici — ni négatif, ni dérisoire. On donne les HEURES, qui
+     sont vraies et utiles, et on renvoie à ce que le temps ne capture pas. */
   negatif: {
-    titre: "À vos volumes, ça ne se rembourse pas encore.",
+    titre: "À vos volumes, ça ne se décide pas sur le temps gagné.",
     texte:
-      "Nous préférons vous le dire ici plutôt qu'en rendez-vous. Deux choses peuvent changer ce calcul : vos volumes, s'ils grossissent — ou ce que vous ne nous avez pas dit. Nous avons compté vos heures à ce qu'elles coûtent ; si les vôtres valent bien davantage passées devant un client, le calcul n'est plus le même, mais c'est à vous de le dire, pas à nous de le supposer.",
-    cta: "En parler quand même, 30 minutes",
+      "Ce que le système vous rendrait en heures ne suffit pas, seul, à justifier un abonnement — et nous préférons vous le dire ici plutôt qu'en rendez-vous. Ce qui fait la différence à ce niveau, c'est ce qui se perd aujourd'hui sans que personne le compte : devis restés sans réponse, factures échues, clients qu'on ne rappelle jamais. C'est précisément ce que l'audit mesure, sur vos propres chiffres.",
+    cta: "En parler, 30 minutes",
     retour: "Revenir à la grille",
   },
   horsGrille: {
