@@ -351,7 +351,7 @@ export default function OffresPage() {
                 valider, la demande traitée la nuit), mais en bento — donc
                 les trois restent lisibles sur téléphone, là où le collage
                 cachait ses deux panneaux latéraux sous 1024 px. */}
-            <div data-reveal className="mt-10 pb-[15px]">
+            <div data-reveal className="mt-10 pb-[15px] lg:pb-[56px]">
               <HeroBento />
             </div>
           </div>

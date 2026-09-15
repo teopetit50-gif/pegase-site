@@ -120,9 +120,9 @@ export function HeroBento() {
   const dg = `hb-aire-${brut.replace(/:/g, "")}`;
 
   return (
-    <div className="mx-auto grid w-full max-w-[900px] grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="mx-auto grid w-full max-w-[900px] grid-cols-1 items-start gap-4 sm:grid-cols-2">
       {/* ═══════════ tuile large — l'encours et sa courbe ═══════════ */}
-      <div className="relative overflow-hidden rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:col-span-2 sm:p-7">
+      <div className="relative z-0 overflow-hidden rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:col-span-2 sm:p-7 lg:pb-[132px]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -243,6 +243,7 @@ export function HeroBento() {
 
       {/* ═══════════ tuile — le brouillon à valider ═══════════ */}
       <Tuile
+        pose="lg:-ml-[18px] lg:-mt-[104px]"
         icone={PenLine}
         titre="Rien ne part sans vous"
         texte="Le texte est préparé, calé sur l’échéance et posé dans votre file. Vous envoyez, vous corrigez, ou vous ne faites rien."
@@ -270,6 +271,7 @@ export function HeroBento() {
 
       {/* ═══════════ tuile — la demande entrée la nuit ═══════════ */}
       <Tuile
+        pose="lg:-mr-[18px] lg:-mt-[152px]"
         icone={MessagesSquare}
         titre="Répondu pendant la nuit"
         texte="Une demande entre à 21 h 46. La réponse part dans la minute, la pièce chiffrée attend votre accord au matin."
@@ -301,21 +303,43 @@ export function HeroBento() {
 }
 
 /* ——— une tuile basse : pastille d'icône, titre, texte, maquette arrimée en
-   bas (`mt-auto` — les deux tuiles prennent la hauteur de la plus haute, et
-   sans lui la maquette de la plus courte flotterait au milieu) ——— */
+   bas (`mt-auto` — sans lui, la maquette de la tuile la plus courte
+   flotterait au milieu de sa hauteur).
+
+   `pose` — LA SUPERPOSITION, à partir de lg seulement (15/09, Teo : « faut
+   qu'il se superpose sur ordi »). C'est ce que faisait le collage
+   d'avant : deux panneaux posés EN AVANT du tableau de bord, décalés,
+   l'un plus haut que l'autre. Ici la remontée se fait à la marge
+   (`-mt`) plutôt qu'en position absolue : les tuiles restent dans le
+   flux, donc elles gardent leur hauteur propre, la section garde la
+   sienne, et rien ne déborde sur la bande noire qui suit — c'était le
+   défaut de la scène en absolu, qui imposait une hauteur en dur.
+   Le débord latéral (`-ml`/`-mr` de 18 px) les fait dépasser des 900 px
+   de la scène, comme les -14 px du collage.
+   Sous lg : tout retombe en grille, aucune de ces classes ne s'applique.
+
+   Trois choses vont ensemble et ne se séparent pas : le `z-10` (sans lui
+   la tuile passe DERRIÈRE la grande, qui est peinte après dans l'ordre du
+   DOM), le fond BLANC (sur le gris de la grande tuile, un fond gris
+   identique ne se verrait pas — la superposition ne se lirait plus), et
+   l'ombre portée, qui est ce qui dit « posé au-dessus ». ——— */
 function Tuile({
   icone: Icone,
   titre,
   texte,
+  pose = "",
   children,
 }: {
   icone: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   titre: string;
   texte: string;
+  pose?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:p-6">
+    <div
+      className={`relative z-10 flex flex-col rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:p-6 lg:bg-white lg:shadow-[0_2px_4px_rgba(9,9,11,0.04),0_22px_44px_-26px_rgba(9,9,11,0.38)] ${pose}`}
+    >
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--o-line)] bg-white">
         <Icone className="h-[18px] w-[18px]" strokeWidth={1.6} />
       </span>
