@@ -74,7 +74,7 @@ export type Systeme = {
 
 /* `layoutId` est GLOBAL à l'application : ce nom ne doit croiser ni
    « porte-surbrillance » (<PortesHover>) ni « cpt-surbrillance »
-   (<CompteTableau>), les deux seuls autres du dépôt. */
+   (<CompteTableau>, supprimé le 15/09). */
 const LAVIS = "csy-lavis-systeme";
 
 export default function CartesSystemes({

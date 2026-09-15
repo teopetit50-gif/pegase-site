@@ -34,13 +34,11 @@
    mensuel | annuel le .r-seg de /tarifs.
 
    15/09 — SES COULEURS SONT DES VARIABLES, plus des valeurs en dur.
-   « Mon compte » a un cadre SOMBRE depuis ce jour (CompteTableau,
-   .cpt-console) et cette carte y vit. Les douze couleurs qu'elle
-   écrivait en clair (#050505, #e3e3e3, bg-white…) sont devenues autant
-   de `--cp-*`, définies deux fois dans compte.css : une valeur pour le
-   monde clair, une pour le cadre sombre. Le composant n'a donc rien à
-   savoir du monde où on le pose — et l'inverse aurait demandé de le
-   dupliquer. Ne pas y réécrire une couleur en dur.
+   Les douze couleurs qu'elle écrivait en clair (#050505, #e3e3e3,
+   bg-white…) sont devenues autant de `--cp-*`, posées par compte.css.
+   C'était né d'un cadre sombre, abandonné le soir même ; la conversion
+   reste, parce qu'elle vaut pour elle-même : le composant n'a rien à
+   savoir du monde où on le pose. Ne pas y réécrire une couleur en dur.
 
    05/09 — LA LIGNE « MOYEN DE PAIEMENT » (demande des associés : le
    client enregistre son moyen de paiement, débité une fois l'installation
@@ -366,9 +364,9 @@ export default function AbonnementCarte({
   return (
     <div>
       {/* ——— 1. ce que le client a ——— */}
-      {/* les trois id ci-dessous sont les ancres des sous-entrées de la
-          barre de « Mon compte » (CompteTableau) : ne pas les renommer
-          sans mettre à jour CompteVue, qui les nomme */}
+      {/* les trois id ci-dessous étaient les ancres des sous-entrées de
+          la barre de « Mon compte », supprimée le 15/09. Gardés : ils ne
+          coûtent rien et servent de repères à un lien externe. */}
       {/* 14/09 — la pastille sur la ligne du titre, « pour … » dessous :
           dans la carte de verre (CompteVue) le panneau fait 500 px, une
           pastille en frère du bloc de texte passait à la ligne */}
