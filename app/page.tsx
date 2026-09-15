@@ -23,6 +23,7 @@ import {
 } from "@/components/offres/MediaMoteurs";
 import PortesHover from "@/components/offres/PortesHover";
 import FondSilk from "@/components/accueil/FondSilk";
+import BarreAction from "@/components/accueil/BarreAction";
 import FriseDeroule from "@/components/accueil/FriseDeroule";
 import TableauEntrees from "@/components/accueil/TableauEntrees";
 import { CasColonnes } from "@/components/ui/cas-colonnes";
@@ -141,9 +142,60 @@ const HERO = {
   ],
   chapo:
     "Nous concevons des systèmes sur mesure qui connectent vos directions, vos équipes, vos outils et vos données afin de fluidifier les opérations, automatiser les processus critiques et améliorer le pilotage de votre organisation — sans bouleverser votre environnement existant.",
+  /* 15/09/2026 (Teo, « sur mobile on comprend direct quoi, combien, pour
+     qui ») — le chapô de bureau fait 40 mots, six lignes à 390 px : le
+     bouton tombait sous la ligne de flottaison et le visiteur arrivait sur
+     une page qui ne répond à aucune des trois questions. La version courte
+     ne dit pas autre chose, elle dit la même promesse sans les moyens :
+     ce sont les trois réponses ci-dessous qui portent le concret. */
+  chapoCourt:
+    "Vos outils connectés, vos processus automatisés, sans rien remplacer chez vous.",
   bouton: "Découvrir notre approche",
   sous: "Identifions les leviers à plus fort impact pour votre organisation.",
 };
+
+/* ═══ LES TROIS RÉPONSES — téléphone seulement ═══════════════════════════
+   15/09/2026 (Teo) : « il faut que sur mobile on comprenne direct quoi,
+   combien, pour qui ». Mesuré avant : le premier écran d'omegaai.fr à
+   375 px ne répondait à aucune des trois — titre de marque, chapô de six
+   lignes, un bouton, et il fallait défiler quatre écrans pour lire le mot
+   « relance ». Sur bureau les trois réponses sont dans la colonne de
+   droite du hero et dans le menu, toujours visibles : le bloc s'éteint
+   donc à `lg`, il ne corrige que ce que le téléphone perd.
+
+   LE « COMBIEN » NE PORTE PAS DE MONTANT, et c'est délibéré : depuis le
+   15/09 le site n'affiche plus de grille, le tarif est arrêté à l'audit
+   sur les volumes réels. Écrire un prix d'appel ici rouvrirait ce que
+   /tarifs vient de fermer. Ce qu'on donne à la place est ce qui se vérifie :
+   la base de calcul, le délai, et l'absence d'engagement. */
+const TROIS_REPONSES: { cle: string; valeur: string }[] = [
+  {
+    cle: "Quoi",
+    valeur:
+      "Relances, demandes entrantes, réactivation, factures fournisseurs — automatisés.",
+  },
+  {
+    cle: "Pour qui",
+    valeur: "PME et groupes multi-sites, sur vos outils actuels, sans migration.",
+  },
+  {
+    cle: "Combien",
+    valeur: "À l'usage, selon vos volumes. Arrêté à l'audit, en 30 minutes.",
+  },
+];
+
+function TroisReponses() {
+  return (
+    <dl className="o-trois lg:hidden">
+      {TROIS_REPONSES.map(({ cle, valeur }) => (
+        <div key={cle} className="o-trois-ligne">
+          <dt className="o-trois-cle">{cle}</dt>
+          <dd className="o-trois-val">{valeur}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 /* 14/09 (Teo, soir) — le hero s'installe désormais mot à mot, mouvement
    repris du composant qu'il a collé (`components/ui/hero-section.tsx`, qui
@@ -384,6 +436,8 @@ const ETAPES = [
     sousTitre: "Identifier les processus à fort impact",
     texte:
       "Nous analysons vos flux de travail, les points de friction et les tâches à faible valeur ajoutée afin de cibler les leviers d'amélioration les plus pertinents.",
+    court:
+      "Nous relevons vos flux et les tâches à faible valeur, pour cibler les leviers.",
   },
   {
     n: "02",
@@ -391,6 +445,8 @@ const ETAPES = [
     sousTitre: "Définir un système adapté à votre organisation",
     texte:
       "Chaque solution est conçue selon vos règles métier, vos priorités et vos méthodes de travail. Aucun modèle générique : le système s'adapte à votre fonctionnement.",
+    court:
+      "Le système suit vos règles métier. Aucun modèle générique.",
   },
   {
     n: "03",
@@ -398,6 +454,8 @@ const ETAPES = [
     sousTitre: "Intégrer sans bouleverser l'existant",
     texte:
       "Nous connectons le système à votre environnement de travail et organisons sa mise en production de manière progressive, sécurisée et maîtrisée.",
+    court:
+      "Nous le branchons sur vos outils, en mise en production progressive.",
   },
   {
     n: "04",
@@ -405,6 +463,8 @@ const ETAPES = [
     sousTitre: "Mesurer, ajuster, faire évoluer",
     texte:
       "Les premières opérations restent sous votre contrôle. Nous affinons les règles, suivons les performances et faisons évoluer le système selon vos usages.",
+    court:
+      "Les premières opérations restent sous votre contrôle ; on affine les règles.",
   },
 ];
 
@@ -439,6 +499,8 @@ const GARANTIES: CarteLueur[] = [
     texte:
       /* 15/09/2026 — la phrase disait « pour les indépendants, TPE et PME, les prix sont publics ». Le site n'affiche plus de barème : il estime sur les volumes saisis, et l'audit fixe le prix. Promettre un prix public sur l'accueil, c'est promettre un montant que plus aucune page ne porte. */
       "L'audit mesure vos volumes avant la première ligne de code : ce qui passe chaque mois, ce qui revient à quelqu'un, ce qui se perd sans être compté. Le prix en découle, il est écrit dans votre devis, et rien ne démarre sur une estimation faite au téléphone.",
+    court:
+      "L'audit mesure vos volumes, le prix en découle, et il est écrit dans votre devis.",
     lien: {
       label: "Comment le prix se calcule",
       href: "/tarifs",
@@ -450,6 +512,8 @@ const GARANTIES: CarteLueur[] = [
     titre: "Vos données restent les vôtres",
     texte:
       "Vous gardez vos outils de tous les jours : messagerie, tableur, WhatsApp. Le suivi vit dans un espace réservé à votre entreprise. Le jour où vous arrêtez, tout vous est remis et effacé sur demande.",
+    court:
+      "Vous gardez vos outils. Le jour où vous arrêtez, tout vous est remis et effacé.",
     lien: { label: "Pourquoi ce choix", href: "/blog/rgpd-donnees-locales" },
     maquette: <MaqLocal />,
   },
@@ -614,26 +678,43 @@ const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
    crédible. Les heures portent une espace fine insécable (U+202F), comme
    partout dans le parc : un « 7 h » avec une espace ordinaire casse en
    fin de ligne. */
-const ACCROCHES_VITRINE: Record<string, { objectif: string; texte: string }> = {
+/* 15/09/2026 — chaque accroche porte DEUX longueurs. `texte` est celle de
+   bureau, inchangée ; `court` est servie sous 640 px, où la grille 2 × 2 se
+   referme en une colonne et où les 150 signes de la première prennent cinq
+   lignes. Ce n'est pas un résumé : on garde le VERBE (relit, écrit, classe)
+   et on laisse tomber la circonstance. La promesse est la même aux deux
+   longueurs — c'est la règle de la doctrine. */
+const ACCROCHES_VITRINE: Record<
+  string,
+  { objectif: string; texte: string; court: string }
+> = {
   CASHD: {
     objectif: "À 7 h, vos relances sont déjà écrites.",
     texte:
       "CASHD relit votre facturier chaque matin et rédige une relance pour chaque compte en retard. Vos équipes n\u2019ont plus qu\u2019à décider laquelle part.",
+    court:
+      "Relit le facturier chaque matin, écrit la relance. Vous décidez laquelle part.",
   },
   RELOAD: {
     objectif: "Un client qui s\u2019éteint, vous le voyez avant la clôture.",
     texte:
       "RELOAD relit votre base et votre historique pendant la nuit, puis ne garde que les comptes dont le silence dépasse le délai que vous avez fixé.",
+    court:
+      "Relit votre base la nuit, remonte les comptes silencieux depuis trop longtemps.",
   },
   FRONTD: {
     objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
     texte:
       "FRONTD lit le message dès qu\u2019il arrive et répond dans la minute, sans jamais sortir de ce que vous avez validé avec nous.",
+    court:
+      "Lit le message dès son arrivée et répond dans la minute, sur vos réponses validées.",
   },
   FILED: {
     objectif: "Vos équipes ne ressaisiront plus un seul document.",
     texte:
       "Vous connectez une messagerie, rien d\u2019autre. FILED lit chaque document reçu, quel qu\u2019en soit le type, le classe au bon dossier et rédige ce qui doit repartir.",
+    court:
+      "Lit chaque document reçu, le classe au bon dossier, rédige ce qui repart.",
   },
 };
 
@@ -741,6 +822,7 @@ function EnTete({
   pastille,
   titre,
   chapo,
+  court,
 }: {
   /* 12/09/2026 — un noeud et plus une chaine : le sourcil de la section
      equipe porte le drapeau avant son intitule. Les onze autres appels
@@ -748,6 +830,11 @@ function EnTete({
   pastille: React.ReactNode;
   titre: string;
   chapo: string;
+  /* 15/09/2026 — le chapô en une phrase, servi sous 768 px.
+     Mesuré à 375 px : les chapôs de bureau font trois à cinq lignes, douze
+     fois dans la page, soit ~1 100 px de sous-titre avant même le contenu.
+     Facultative : une section sans version courte garde `chapo` partout. */
+  court?: string;
 }) {
   return (
     <div className="flex flex-col items-center text-center">
@@ -757,8 +844,18 @@ function EnTete({
       <h2 data-reveal className="o-h2 mt-4 max-w-[600px]">
         {titre}
       </h2>
-      <p data-reveal className="o-lead mt-4 max-w-[650px]">
-        {chapo}
+      <p data-reveal className="o-lead mt-3 max-w-[650px] md:mt-4">
+        {/* les deux longueurs vivent dans le DOM et s'arbitrent en CSS :
+            un rendu conditionnel en JavaScript ferait clignoter la phrase
+            entre le rendu serveur et l'hydratation. */}
+        {court ? (
+          <>
+            <span className="md:hidden">{court}</span>
+            <span className="hidden md:inline">{chapo}</span>
+          </>
+        ) : (
+          chapo
+        )}
       </p>
     </div>
   );
@@ -768,6 +865,9 @@ export default function Home() {
   return (
     <PageShell>
       <PageMotion />
+      {/* 15/09 — l'appel à l'action du téléphone, hors du flux. Le détail
+          est en tête de `BarreAction`. */}
+      <BarreAction />
 
       <div className="offres">
         {/* ════════ 1 · HERO CLAIR — clone du template Flux ════════
@@ -837,7 +937,11 @@ export default function Home() {
               className="o-bloc-apparait o-flux-lead my-2 max-w-[760px] md:my-4 lg:my-6"
               style={{ "--o-mot-d": `${CADENCE.chapo}ms` } as React.CSSProperties}
             >
-              {HERO.chapo}
+              {/* Les deux versions sont dans le DOM : c'est du texte, il
+                  pèse 300 signes, et un rendu conditionnel en JavaScript
+                  ferait clignoter la phrase au premier rendu. */}
+              <span className="lg:hidden">{HERO.chapoCourt}</span>
+              <span className="hidden lg:inline">{HERO.chapo}</span>
             </p>
             <div className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
               {/* 14/09 : « Découvrir notre approche » menait à /commencer
@@ -859,6 +963,12 @@ export default function Home() {
               >
                 {HERO.sous}
               </span>
+            </div>
+            <div
+              className="o-bloc-apparait w-full lg:hidden"
+              style={{ "--o-mot-d": `${CADENCE.sous + 120}ms` } as React.CSSProperties}
+            >
+              <TroisReponses />
             </div>
           </div>
 
@@ -936,6 +1046,7 @@ export default function Home() {
               pastille="CE QUI S'INSTALLE"
               titre="Chaque système agit sur un levier de performance"
               chapo="Encaissement, réactivation, demandes entrantes, documents : chaque système tient un poste précis, sur vos règles, avec un contrôle humain avant tout envoi."
+              court="Quatre postes, vos règles, un contrôle humain avant chaque envoi."
             />
             {/* 11/09/2026 — les quatre systèmes prennent la grille de
                 cartes douces du bloc `integrations-three` (cnblocks, via
@@ -972,7 +1083,7 @@ export default function Home() {
                 sur noir à l'encre sur papier — sont documentés en tête de
                 components/accueil/TuilesCatalogue.tsx. */}
             <TuilesCatalogue
-              className="mt-16"
+              className="mt-8 md:mt-16"
               tuiles={MOTEURS.map((m) => ({
                 system: m.system,
                 nom: nomPaquet(m.system),
@@ -982,6 +1093,7 @@ export default function Home() {
                    sans avoir d'accroche vitrine. */
                 objectif: ACCROCHES_VITRINE[m.system]?.objectif ?? m.title,
                 texte: ACCROCHES_VITRINE[m.system]?.texte ?? m.benefit,
+                court: ACCROCHES_VITRINE[m.system]?.court,
                 href: `/offres/${m.slug}`,
               }))}
             />
@@ -1041,8 +1153,9 @@ export default function Home() {
               pastille="ORGANISATIONS"
               titre="Quand plusieurs services valident, rien ne s'improvise."
               chapo="Le cadre ne change pas avec la taille : un périmètre d'essai, des règles écrites, une sortie prévue dès le départ."
+              court="Périmètre d'essai, règles écrites, sortie prévue dès le départ."
             />
-            <div className="mt-16">
+            <div className="mt-8 md:mt-16">
               <CartesLueur cartes={GROUPES} />
             </div>
           </div>
@@ -1090,8 +1203,9 @@ export default function Home() {
               pastille="LES SITUATIONS"
               titre="Ce que les systèmes tiennent, et chez qui ça arrive."
               chapo="Neuf situations telles qu'elles se présentent avant l'audit. Ce ne sont pas des témoignages : nous n'en publions pas tant que nous n'en avons pas de vrais."
+              court="Neuf situations réelles avant l'audit. Pas des témoignages : nous n'en publions aucun."
             />
-            <div className="mt-16">
+            <div className="mt-8 md:mt-16">
               <CasColonnes cas={CAS_ACCUEIL} />
             </div>
           </div>
@@ -1141,7 +1255,7 @@ export default function Home() {
               titre={EQUIPE_TITRE}
               chapo={EQUIPE_CHAPO}
             />
-            <div data-reveal className="mt-14 sm:mt-16">
+            <div data-reveal className="mt-8 md:mt-14 lg:mt-16">
               <TeamShowcase membres={MEMBRES} pied={EQUIPE_PIED} />
             </div>
           </div>
@@ -1154,6 +1268,7 @@ export default function Home() {
               pastille="LE DÉROULÉ"
               titre="De l'analyse au déploiement."
               chapo="Une méthode structurée pour intégrer des systèmes intelligents à vos opérations, sans perturber votre organisation existante."
+              court="Quatre étapes, sans interrompre vos opérations."
             />
             {/* 11/09/2026 — les quatre étapes passent de la grille plate à une
                 frise dont le rail se remplit au défilement (`FriseDeroule`,
@@ -1213,6 +1328,7 @@ export default function Home() {
                  les trois cartes énumérer. */
               titre="Trois façons de commencer."
               chapo="Le cœur du métier est le sur-mesure : ce qui n'existe pas encore, cadré et chiffré à l'audit. Les deux autres entrées s'installent en l'état. Même exigence derrière les trois : vos règles écrites noir sur blanc, vos données en Europe, un seul interlocuteur."
+              court="Le sur-mesure, les systèmes prêts, ou votre site. Mêmes garanties derrière les trois."
             />
             {/* 11/09/2026 (Teo) — la rangée de portes ne paraît qu'à partir
                 de `lg`. Sous ce seuil, elle et le tableau se rendaient tous
@@ -1281,9 +1397,10 @@ export default function Home() {
               pastille="HÉBERGEMENT"
               titre="Vos données restent sous juridiction européenne."
               chapo="Six faits vérifiables sur l'hébergement de vos données et sur les traitements qui leur sont appliqués."
+              court="Six faits vérifiables sur l'hébergement et les traitements."
             />
 
-            <div className="mt-14">
+            <div className="mt-8 md:mt-14">
               <CartesPreuve cartes={PREUVES} />
             </div>
 
@@ -1311,13 +1428,14 @@ export default function Home() {
               pastille="LES GARANTIES"
               titre="Un investissement maîtrisé. Des données protégées."
               chapo="Ce que ça vous engage, et ce qu'il advient de vos données. Deux réponses, dès le départ."
+              court="Ce que ça vous engage, et ce qu'il advient de vos données."
             />
             {/* 11/09/2026 — les deux cartes larges passent à `CartesLueur` :
                 même maquette, même destination, mais le liseré s'encre sous
                 le pointeur et la carte entière est cliquable. L'origine, le
                 dégradé remis en graphite et les quatre écarts à la source
                 sont en tête de `components/accueil/CartesLueur.tsx`. */}
-            <div className="mt-16">
+            <div className="mt-8 md:mt-16">
               <CartesLueur cartes={GARANTIES} />
             </div>
           </div>
@@ -1406,8 +1524,9 @@ export default function Home() {
               pastille="QUESTIONS"
               titre="Ce qu'on nous demande avant de signer."
               chapo="Les six questions qui reviennent à chaque premier rendez-vous, avec les réponses qu'on donne en vrai."
+              court="Les six questions de chaque premier rendez-vous."
             />
-            <div className="mx-auto mt-12 max-w-[800px]">
+            <div className="mx-auto mt-7 max-w-[800px] md:mt-12">
               {FAQ.map((f) => (
                 <details key={f.q} className="o-faq-item">
                   <summary>

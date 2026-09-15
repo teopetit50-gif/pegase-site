@@ -84,7 +84,11 @@ function CartePlus({ titre, texte, maquette, span }: CarteBento) {
   return (
     <div
       data-reveal
-      className={`relative flex min-h-[200px] flex-col justify-between rounded-[10px] border border-dashed border-[#c4c4c8] bg-white p-6 sm:p-7 ${span}`}
+      /* 15/09/2026 — le plancher de 200 px et le rembourrage de 24 px
+         viennent de la grille à six colonnes, où ils alignent les cinq
+         cartes. À une colonne ils n'alignent rien : mesuré à 375 px, les
+         cinq cartes faisaient 1 450 px à elles seules. */
+      className={`relative flex flex-col justify-between rounded-[10px] border border-dashed border-[#c4c4c8] bg-white p-5 sm:min-h-[200px] sm:p-7 ${span}`}
     >
       {/* les quatre « + » débordent volontairement des angles : c'est le
           motif de l'original, un repère de plan plutôt qu'un cadre. */}
@@ -94,12 +98,12 @@ function CartePlus({ titre, texte, maquette, span }: CarteBento) {
       <Plus position="-bottom-[11px] -right-[11px]" />
 
       <div className="relative z-10">
-        <h3 className="o-h5 !text-[20px] !leading-[1.35]">{titre}</h3>
-        <p className="o-body mt-3 !text-[15px] !leading-[26px]">{texte}</p>
+        <h3 className="o-h5 !text-[17px] !leading-[1.3] sm:!text-[20px] sm:!leading-[1.35]">{titre}</h3>
+        <p className="o-body mt-2 !text-[14px] !leading-[22px] sm:mt-3 sm:!text-[15px] sm:!leading-[26px]">{texte}</p>
       </div>
 
       {maquette ? (
-        <div className="relative z-10 mt-7 overflow-hidden rounded-[8px] border border-[#f4f4f5]">
+        <div className="relative z-10 mt-5 overflow-hidden rounded-[8px] border border-[#f4f4f5] sm:mt-7">
           {maquette}
         </div>
       ) : null}
@@ -120,11 +124,11 @@ export default function BentoChange({
 }) {
   return (
     <div className="o-wrap">
-      <div className="rounded-[14px] border border-[#e4e4e7] px-4 py-12 sm:px-8">
+      <div className="rounded-[14px] border border-[#e4e4e7] px-4 py-7 sm:px-8 sm:py-12">
         {/* la grille de six colonnes de la source : 3+2 sur la première
             rangée (la sixième colonne reste vide, c'est là que remonte le
             titre), puis 4+2, puis 2. */}
-        <div className="grid auto-rows-auto grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid auto-rows-auto grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-6">
           {cartes.map((c) => (
             <CartePlus key={c.titre} {...c} />
           ))}
@@ -134,10 +138,10 @@ export default function BentoChange({
             `lg:-mt-20` le fait remonter dans la colonne laissée libre par
             la dernière rangée ; sous lg il redescend simplement à la
             suite, aligné à gauche comme le reste de la page. */}
-        <div className="mt-10 max-w-[560px] px-1 lg:-mt-16 lg:ml-auto lg:text-right">
+        <div className="mt-7 max-w-[560px] px-1 sm:mt-10 lg:-mt-16 lg:ml-auto lg:text-right">
           <span className="o-pill o-pill--xs">{pastille}</span>
           <h2 className="o-h2 mt-4 !text-[clamp(28px,3.4vw,40px)]">{titre}</h2>
-          <p className="o-lead mt-4">{chapo}</p>
+          <p className="o-lead mt-3 md:mt-4">{chapo}</p>
         </div>
       </div>
     </div>

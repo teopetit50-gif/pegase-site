@@ -47,6 +47,9 @@ export type EtapeFrise = {
   titre: string;
   sousTitre: string;
   texte: string;
+  /* 15/09/2026 — la même étape en une phrase, servie sous 768 px, où les
+     quatre textes faisaient cinq lignes chacun. Facultatif. */
+  court?: string;
 };
 
 export default function FriseDeroule({ etapes }: { etapes: EtapeFrise[] }) {
@@ -77,12 +80,16 @@ export default function FriseDeroule({ etapes }: { etapes: EtapeFrise[] }) {
   const opacite = useTransform(scrollYProgress, [0, 0.08], [0, 1]);
 
   return (
-    <div ref={cadre} className="relative mt-14">
+    <div ref={cadre} className="relative mt-8 md:mt-14">
       <div ref={rails} className="relative">
         {etapes.map((e) => (
           <div
             key={e.n}
-            className="flex justify-start pb-12 pt-8 md:gap-10 md:pb-16 md:pt-16"
+            /* 15/09/2026 — 48 + 32 px d'écart par étape font 320 px de
+               blanc pour quatre étapes à 375 px, sur une frise qui en
+               mesurait 1 478. Le rembourrage de bureau (64 + 64) n'est pas
+               touché : c'est lui qui laisse respirer la colonne collante. */
+            className="flex justify-start pb-7 pt-5 md:gap-10 md:pb-16 md:pt-16"
           >
             {/* colonne collante : la pastille du rail, et l'intitulé à partir
                 de md. Sous md l'intitulé redescend avec le texte pour ne pas
@@ -115,11 +122,20 @@ export default function FriseDeroule({ etapes }: { etapes: EtapeFrise[] }) {
                 </span>
                 <h3 className="o-h5 mt-2">{e.titre}</h3>
               </div>
-              <p className="mt-3 text-[15px] font-semibold leading-[24px] text-[#18181b] md:mt-0">
+              <p className="mt-2 text-[14px] font-semibold leading-[21px] text-[#18181b] md:mt-0 md:text-[15px] md:leading-[24px]">
                 {e.sousTitre}
               </p>
-              <p className="o-small mt-2 max-w-[560px] !text-[15px] !leading-[24px]">
-                {e.texte}
+              <p className="o-small mt-1.5 max-w-[560px] !text-[14px] !leading-[21px] md:mt-2 md:!text-[15px] md:!leading-[24px]">
+                {/* les deux longueurs s'arbitrent en CSS — voir la note de
+                    `EnTete` sur le clignotement à l'hydratation. */}
+                {e.court ? (
+                  <>
+                    <span className="md:hidden">{e.court}</span>
+                    <span className="hidden md:inline">{e.texte}</span>
+                  </>
+                ) : (
+                  e.texte
+                )}
               </p>
             </div>
           </div>

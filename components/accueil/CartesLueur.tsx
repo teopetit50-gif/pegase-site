@@ -67,6 +67,12 @@ export type CarteLueur = {
   label: string;
   titre: string;
   texte: string;
+  /* 15/09/2026 — le même argument en une phrase, servi sous 640 px.
+     Mesuré à 375 px : « Le prix est connu avant qu'on commence » faisait
+     HUIT lignes, et la carte 626 px — les trois quarts d'un écran de
+     téléphone pour un argument qui en demande trois. Facultatif : une
+     carte sans version courte garde `texte` partout. */
+  court?: string;
   /* 15/09/2026 — facultatif. La carte « Les interdits ne sont pas des
      consignes » menait à la fiche VAULT ; les deux paquets compris ne
      s'affichent plus, et aucune autre page ne détaille les douze contrôles.
@@ -80,7 +86,7 @@ export type CarteLueur = {
 const LUEUR =
   "linear-gradient(135deg, #e4e4e7, #09090b, #52525b, #e4e4e7)";
 
-function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
+function Carte({ label, titre, texte, court, lien, maquette }: CarteLueur) {
   const [souris, setSouris] = useState<{ x: number; y: number } | null>(null);
 
   /* le rectangle vient de `currentTarget` et non d'un `ref` : la racine est
@@ -138,12 +144,12 @@ function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
            texte et le lien de la carte la plus courte, au beau milieu de la
            carte. Égaliser le cadre déplace le vide là où il ne se voit pas,
            réparti autour de la maquette. */
-        <span className="relative z-10 flex min-h-[178px] flex-col justify-center overflow-hidden rounded-t-[19px] border-b border-[#f4f4f5]">
+        <span className="relative z-10 flex min-h-[132px] flex-col justify-center overflow-hidden rounded-t-[19px] border-b border-[#f4f4f5] sm:min-h-[178px]">
           {maquette}
         </span>
       ) : null}
 
-      <span className="relative z-10 flex flex-1 flex-col p-8 sm:p-10">
+      <span className="relative z-10 flex flex-1 flex-col p-5 sm:p-8 md:p-10">
         {/* `<a>` a un modèle de contenu transparent : un titre et des
             paragraphes y sont valides tant qu'ils ne sont pas eux-mêmes
             interactifs. Les garder en `<span>` aurait coûté le niveau de
@@ -153,8 +159,19 @@ function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
         <p className="o-small !text-[14px] uppercase tracking-[0.08em]">
           {label}
         </p>
-        <h3 className="o-h5 mt-2">{titre}</h3>
-        <p className="o-body mt-4">{texte}</p>
+        <h3 className="o-h5 mt-1.5 sm:mt-2">{titre}</h3>
+        <p className="o-body mt-2.5 !text-[14px] !leading-[22px] sm:mt-4 sm:!text-[16px] sm:!leading-[1.8]">
+          {/* les deux longueurs s'arbitrent en CSS : un rendu conditionnel
+              en JavaScript ferait clignoter la phrase à l'hydratation. */}
+          {court ? (
+            <>
+              <span className="sm:hidden">{court}</span>
+              <span className="hidden sm:inline">{texte}</span>
+            </>
+          ) : (
+            texte
+          )}
+        </p>
         {/* Le ressort qui pousse le libellé en pied, pour que les deux
             cartes finissent à la même hauteur. Il était porté par le
             paragraphe (`flex-1`) : le bloc de texte s'étirait alors bien
@@ -162,7 +179,7 @@ function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
             étend la zone de sélection dans le vide. */}
         <span aria-hidden className="flex-1" />
         {lien ? (
-          <span className="o-link mt-6 !text-[15px]">
+          <span className="o-link mt-4 !text-[14px] sm:mt-6 sm:!text-[15px]">
             {lien.label}
             <svg
               aria-hidden
@@ -207,7 +224,7 @@ function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
 
 export default function CartesLueur({ cartes }: { cartes: CarteLueur[] }) {
   return (
-    <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 lg:grid-cols-2">
       {cartes.map((c) => (
         <Carte key={c.label} {...c} />
       ))}

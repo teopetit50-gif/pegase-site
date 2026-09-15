@@ -7679,6 +7679,23 @@ button.rounded-full:active {
    les prix) — un grand nombre est un signal, pas un mur de texte. */
 
 @media (max-width: 767px) {
+  /* ——— le hero de l'accueil ———
+     36 px est la valeur relevée sur le template Flux à 430 px, et elle est
+     juste POUR SON TITRE : deux phrases anglaises courtes. Le nôtre fait
+     81 signes en français et sort à CINQ lignes de 39,6 px — 198 px de
+     titre, après quoi le chapô et le bouton tombent sous la ligne de
+     flottaison. À 30/33 il tient en quatre lignes (132 px) et le premier
+     écran retrouve le bouton + les trois réponses. Le palier 768 n'est pas
+     touché : au-dessus, la référence reste relevée au pixel. */
+  .offres .o-flux-h1 {
+    font-size: 30px;
+    line-height: 33px;
+  }
+  .offres .o-flux-lead {
+    font-size: 15px;
+    line-height: 24px;
+  }
+
   /* ——— monde clair « .offres » : accueil, /offres, /tarifs/site,
          /modeles, /integrations, /vos-donnees, /blog, /commencer ——— */
   .offres .o-h1 {
@@ -7782,5 +7799,160 @@ button.rounded-full:active {
   .vd .vd-lead {
     font-size: clamp(1rem, 1rem + 0.3vw, 1.25rem);
     line-height: 1.55;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LES TROIS RÉPONSES DU HERO — téléphone seulement        (15/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo : « il faut que sur mobile on comprenne direct quoi, combien, pour
+   qui ». Trois lignes sous le bouton du hero, en liste de définition —
+   c'est exactement ce que le balisage `<dl>` décrit, et un lecteur d'écran
+   lit alors la paire, pas deux fragments.
+
+   La géométrie : la clé sur une colonne fixe de 74 px, la valeur à côté.
+   Un empilement clé-au-dessus aurait coûté six lignes au lieu de trois,
+   et c'est précisément la hauteur qu'on est venu récupérer. À 375 px il
+   reste 253 px pour la valeur, soit deux lignes de 13 px — les trois
+   lignes tiennent donc en ~150 px, sous le bouton, dans le premier écran.
+
+   Pas d'ombre, filet plein : la charte du site n'en porte nulle part
+   ailleurs sur fond clair, et une ombre sous le nuancier Silk fait une
+   tache grise. Le fond est blanc à 72 % plutôt que plein : le hero peint
+   un dégradé sous lui, un blanc opaque y découpe un rectangle. */
+.offres .o-trois {
+  width: 100%;
+  max-width: 420px;
+  margin: 20px auto 0;
+  border: 1px solid var(--o-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(6px);
+  text-align: left;
+  overflow: hidden;
+}
+.offres .o-trois-ligne {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 11px 14px;
+}
+.offres .o-trois-ligne + .o-trois-ligne {
+  border-top: 1px solid var(--o-line);
+}
+.offres .o-trois-cle {
+  flex: 0 0 74px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--o-text);
+}
+.offres .o-trois-val {
+  margin: 0;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--o-muted);
+}
+
+/* ——— le détail replié des cartes « laquelle pour moi ? » (15/09/2026) ——— */
+.offres .te-detail-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  cursor: pointer;
+  list-style: none;
+  color: var(--o-text);
+  font-weight: 500;
+}
+/* WebKit garde son triangle tant que ce pseudo-élément n'est pas éteint ;
+   `list-style: none` seul ne suffit pas sur Safari iOS. */
+.offres .te-detail-tete::-webkit-details-marker {
+  display: none;
+}
+.offres .te-detail-tete svg {
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+.offres .te-detail[open] .te-detail-tete svg {
+  transform: rotate(90deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LA BARRE D'ACTION DU TÉLÉPHONE                          (15/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Le pourquoi est en tête de `components/accueil/BarreAction.tsx`. Ici,
+   trois points de géométrie :
+
+   · `padding-bottom: env(safe-area-inset-bottom)` — sans lui, la barre
+     passe sous la poignée d'accueil de l'iPhone et le bouton perd un tiers
+     de sa surface tactile.
+   · elle se translate hors cadre au lieu de se rendre `display:none` :
+     l'entrée se voit, la sortie aussi, et `visibility` coupe le focus
+     clavier au bout de la transition ([[visibility-inline-perce-le-parent]]).
+   · le bouton fait 44 px de haut — la cible tactile minimale d'Apple, et
+     ce que les doigts ratent en dessous. */
+.o-barre {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--o-line);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  transform: translateY(110%);
+  visibility: hidden;
+  transition: transform 0.28s ease, visibility 0s linear 0.28s;
+}
+.o-barre[data-ouverte="oui"] {
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform 0.28s ease, visibility 0s;
+}
+.o-barre-dedans {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.o-barre-dit {
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--o-muted);
+}
+.o-barre-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #09090b;
+  color: #ffffff;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.o-barre-btn:hover {
+  background: #27272a;
+}
+@media (prefers-reduced-motion: reduce) {
+  .o-barre {
+    transition: none;
   }
 }

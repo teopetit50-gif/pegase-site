@@ -328,6 +328,9 @@ export type TuileCatalogue = {
   nom: string;
   objectif: string;
   texte: string;
+  /* 15/09/2026 — la même accroche en une phrase, servie sous 640 px.
+     Facultative : une tuile sans version courte garde `texte` partout. */
+  court?: string;
   href: string;
 };
 
@@ -351,7 +354,13 @@ export function TuilesCatalogue({
           key={t.system}
           href={t.href}
           data-reveal
-          className={`tc-carte ${CADRE_VERRE} min-h-[330px] lg:min-h-[420px]`}
+          /* 15/09/2026 — le plancher de 330 px saute sous 640 px. Il vient
+             de la grille 2 × 2, où il aligne les quatre cartes ; à une
+             colonne il n'aligne rien et impose 330 px à une carte qui en
+             demande 200. Mesuré à 375 px : quatre cartes de 376 px, soit
+             1 504 px de catalogue — presque deux écrans de téléphone pour
+             quatre lignes de produit. */
+          className={`tc-carte ${CADRE_VERRE} sm:min-h-[330px] lg:min-h-[420px]`}
         >
           <GlassCard marque={<SystemSigne system={t.system} taille={24} />}>
             {/* la zone haute : sous `lg` elle ne fait que dégager les
@@ -359,14 +368,18 @@ export function TuilesCatalogue({
                 accueille le visuel animé, à gauche d'eux. */}
             <div
               aria-hidden
-              className="h-[100px] shrink-0 px-8 pt-8 lg:h-[196px] lg:pr-[200px]"
+              /* la zone haute ne porte le visuel animé qu'à partir de `lg`
+                 (voir le `hidden lg:block` juste dessous) : sous 640 px ses
+                 100 px sont du VIDE, là seulement pour dégager les disques
+                 de la marque. 56 px suffisent à les dégager. */
+              className="h-[56px] shrink-0 px-5 pt-5 sm:h-[100px] sm:px-8 sm:pt-8 lg:h-[196px] lg:pr-[200px]"
             >
               <div className="hidden h-full lg:block">
                 <Visuel system={t.system} fige={fige} />
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col px-8 pb-8">
+            <div className="flex flex-1 flex-col px-5 pb-5 sm:px-8 sm:pb-8">
               <span
                 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--o-muted)]"
                 style={{ fontFamily: "var(--font-jakarta)" }}
@@ -380,11 +393,21 @@ export function TuilesCatalogue({
               >
                 {t.objectif}
               </h3>
-              <p className="mt-2.5 max-w-[34ch] text-[15px] leading-[26px] text-[var(--o-muted)]">
-                {t.texte}
+              <p className="mt-2 max-w-[34ch] text-[14px] leading-[22px] text-[var(--o-muted)] sm:mt-2.5 sm:text-[15px] sm:leading-[26px]">
+                {/* les deux longueurs sont dans le DOM et s'arbitrent en
+                    CSS : un rendu conditionnel en JavaScript ferait
+                    clignoter la phrase entre le serveur et le client. */}
+                {t.court ? (
+                  <>
+                    <span className="sm:hidden">{t.court}</span>
+                    <span className="hidden sm:inline">{t.texte}</span>
+                  </>
+                ) : (
+                  t.texte
+                )}
               </p>
 
-              <span className="tc-lien mt-auto inline-flex items-center gap-1.5 self-start pt-7 text-[14px] font-semibold text-[var(--o-text)]">
+              <span className="tc-lien mt-auto inline-flex items-center gap-1.5 self-start pt-4 text-[14px] font-semibold text-[var(--o-text)] sm:pt-7">
                 Voir le détail
                 <Chevron taille={12} />
               </span>

@@ -214,7 +214,7 @@ function CartesEntrees({ textes }: { textes?: Record<string, string> }) {
         <div
           key={c.nom}
           className={
-            "rounded-[14px] border bg-white p-6 " +
+            "rounded-[14px] border bg-white p-5 sm:p-6 " +
             (c.vedette ? "border-[#18181b]" : "border-[#e4e4e7]")
           }
         >
@@ -233,21 +233,41 @@ function CartesEntrees({ textes }: { textes?: Record<string, string> }) {
             </p>
           ) : null}
 
-          <dl className="mt-5 border-t border-[#e4e4e7]">
-            {LIGNES.map((l) => (
-              <div
-                key={l.label}
-                className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] gap-4 border-b border-[#f4f4f5] py-3 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
-              >
-                <dt className="o-small !text-[13px] !leading-[20px]">
-                  {l.label}
-                </dt>
-                <dd className="text-[14px] leading-[22px] text-[#18181b]">
-                  <Valeur valeur={l.cellules[col]} mot />
-                </dd>
-              </div>
-            ))}
-          </dl>
+          {/* 15/09/2026 — les quatre lignes de comparaison se replient sous
+              640 px. Mesuré à 375 px : elles pesaient 280 px par carte, soit
+              840 px pour les trois — la moitié de la section — alors que ce
+              qui décide, à ce moment de la page, est le NOM de l'entrée et
+              sa phrase. Le détail reste à un geste, et il n'est pas retiré
+              du document : `<details>` n'enlève rien à la page imprimée ni
+              au référencement, et le contenu reste trouvable par la
+              recherche du navigateur.
+
+              Le repli vaut pour toute la plage où ces cartes existent
+              (elles s'éteignent à `lg`, c'est le vrai tableau qui prend le
+              relais). Pas d'attribut `name` : il grouperait les trois
+              cartes en accordéon exclusif, or on veut pouvoir en ouvrir
+              deux pour les comparer. */}
+          <details className="te-detail mt-5 border-t border-[#e4e4e7]">
+            <summary className="te-detail-tete o-small !text-[13px] !leading-[20px]">
+              Ce qui est écrit, ce qu{"'"}on écrit avec vous
+              <Chevron taille={12} />
+            </summary>
+            <dl>
+              {LIGNES.map((l) => (
+                <div
+                  key={l.label}
+                  className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] gap-4 border-b border-[#f4f4f5] py-3 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)]"
+                >
+                  <dt className="o-small !text-[13px] !leading-[20px]">
+                    {l.label}
+                  </dt>
+                  <dd className="text-[14px] leading-[22px] text-[#18181b]">
+                    <Valeur valeur={l.cellules[col]} mot />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </details>
 
           <Link href={c.lien.href} className="o-link mt-5 !text-[14px]">
             {c.lien.label}
