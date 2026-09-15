@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
+import { utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
    /reserver — bloquer un créneau d'audit (28/08/2026)
@@ -18,6 +19,14 @@ import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
 
    Distinct de /installation (parcours grille /tarifs) : ici on mesure,
    là-bas on met en route.
+
+   15/09 — LE CRÉNEAU SE RÉSERVE AVEC UN COMPTE, comme l'installation.
+   Décision Teo : plus d'inscription libre sur le site, tout mène à
+   l'audit — le compte naît donc ICI, et le rendez-vous lui est rattaché
+   (reserver_audit pose auth.uid()). Sans ça, l'audit n'apparaissait dans
+   aucun « Mon compte » : la demande partait anonyme. La session est lue
+   côté serveur et passée au module, comme /installation, pour que la
+   personne déjà connectée ne voie pas passer un formulaire de connexion.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -32,6 +41,7 @@ export default async function ReserverPage({
   searchParams: Promise<{ formule?: string }>;
 }) {
   const sp = await searchParams;
+  const utilisateur = await utilisateurCourant();
 
   return (
     <PageShell>
@@ -44,7 +54,7 @@ export default async function ReserverPage({
             et l&apos;entretien se termine à l&apos;heure annoncée.
           </p>
           <div className="mt-10">
-            <PriseDeCreneau parcours="audit" formuleInitiale={sp.formule} />
+            <PriseDeCreneau parcours="audit" formuleInitiale={sp.formule} utilisateur={utilisateur} />
           </div>
         </section>
       </div>

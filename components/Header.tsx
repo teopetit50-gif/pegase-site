@@ -145,9 +145,12 @@ export default function Header() {
   }, [pathname]);
   const hrefCompte = connecte ? "/compte" : "/connexion";
   /* 02/09 (Teo) — « se connecter » seul laissait croire qu'il fallait déjà
-     un compte : on nomme les deux. Connecté : « Mon compte », le nom de la
-     page ouverte (revue n° 8 : un seul nom pour le même objet). */
-  const libelleCompte = connecte ? "Mon compte" : "Se connecter ou créer un compte";
+     un compte : on nommait les deux. 15/09 — il FAUT déjà un compte :
+     l'inscription libre est fermée, le compte s'ouvre en réservant (voir
+     app/connexion/page.tsx). Le libellé redevient donc exact.
+     Connecté : « Mon compte », le nom de la page ouverte (revue n° 8 : un
+     seul nom pour le même objet). */
+  const libelleCompte = connecte ? "Mon compte" : "Se connecter";
 
   useEffect(() => {
     const check = () => {

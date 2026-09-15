@@ -86,6 +86,18 @@ type Props = {
      Submit unique de la référence. false ailleurs : rien ne change pour
      le parcours installation ni pour « Mon compte ». */
   empile?: boolean;
+  /* 15/09 — LA CRÉATION DE COMPTE NE S'OUVRE PLUS DEPUIS /connexion.
+     Décision Teo : « je veux plus qu'on puisse s'inscrire, on fait tout
+     pour rediriger vers un audit ». Un compte créé à vide n'ouvre rien —
+     il n'est rattaché à aucun client, et « Mon compte » n'a rien à
+     montrer. Le compte naît donc AU MOMENT de réserver (audit ou
+     installation), là où il y a quelque chose derrière lui.
+     `sansCreation` retire toutes les portes vers le mode « creation » —
+     le segmenté en tête ET les liens sous les formulaires — et met à la
+     place la phrase qui dit où le compte s'ouvre. Les modes de secours
+     (mot de passe oublié, code de connexion) restent : ils servent à
+     quelqu'un qui A un compte. */
+  sansCreation?: boolean;
 };
 
 const TITRES: Record<ModeConnexion, string> = {
@@ -169,8 +181,13 @@ export default function ConnexionInline({
   onAnnuler,
   cadre = true,
   empile = false,
+  sansCreation = false,
 }: Props) {
-  const [mode, setMode] = useState<ModeConnexion>(modeInitial);
+  /* sansCreation : un ?mode=creation resté dans un favori ne doit pas
+     rouvrir la porte fermée — il retombe sur la connexion. */
+  const [mode, setMode] = useState<ModeConnexion>(
+    sansCreation && modeInitial === "creation" ? "connexion" : modeInitial,
+  );
   /* pour les modes par code : l'adresse, puis le code, puis le mot de
      passe. « connexion » n'a qu'un écran, « definir » commence au dernier. */
   const [etape, setEtape] = useState<"email" | "code" | "definir">(
@@ -388,7 +405,7 @@ export default function ConnexionInline({
           : "rv-apparait"
       }
     >
-      {portes ? (
+      {portes && !sansCreation ? (
         /* les deux portes — un sélecteur segmenté (.r-seg), comme le
            choix de profil sur /reserver-un-audit. « Mot de passe oublié »
            et « Recevoir un code » restent sous la première porte : ce
@@ -481,7 +498,18 @@ export default function ConnexionInline({
               Recevoir un code de connexion
             </button>
           </p>
-          {!portes ? (
+          {sansCreation ? (
+            /* 15/09 — la seule réponse à « pas encore de compte » : il
+               s'ouvre en réservant. Un lien, pas un bouton de mode. */
+            <p className="r-note mt-2">
+              Pas encore de compte&nbsp;? Il s&apos;ouvre au moment de réserver votre
+              audit&nbsp;:{" "}
+              <a href="/reserver-un-audit" className={lien}>
+                réserver un audit
+              </a>{" "}
+              — gratuit à partir de trente minutes, sans engagement.
+            </p>
+          ) : !portes ? (
             <p className="r-note mt-2">
               Pas encore de compte&nbsp;?{" "}
               <button type="button" className={lien} onClick={() => changerMode("creation")}>
@@ -530,11 +558,15 @@ export default function ConnexionInline({
               <button type="button" className={lien} onClick={() => changerMode("connexion")}>
                 ← Retour à la connexion
               </button>
-              {" · "}
-              Pas encore de compte&nbsp;?{" "}
-              <button type="button" className={lien} onClick={() => changerMode("creation")}>
-                Créer un compte
-              </button>
+              {sansCreation ? null : (
+                <>
+                  {" · "}
+                  Pas encore de compte&nbsp;?{" "}
+                  <button type="button" className={lien} onClick={() => changerMode("creation")}>
+                    Créer un compte
+                  </button>
+                </>
+              )}
             </p>
           )}
         </>

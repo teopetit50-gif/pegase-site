@@ -98,6 +98,41 @@ function Pastille({ teinte, children }: { teinte: string; children: React.ReactN
   );
 }
 
+/* une ligne de rendez-vous — installation, audit ou devis. Extraite le
+   15/09 : elle sert au bloc « Mes rendez-vous » ET au bloc « Mon audit »
+   (voir plus bas), et la dupliquer aurait fait diverger les deux. */
+function LigneRdv({ d }: { d: DemandeCompte }) {
+  const bloc = d.creneau_debut ? blocDateGp(d.creneau_debut) : null;
+  const duree = dureeFormule(d.formule, d.duree_min);
+  const court = LIBELLES_STATUT_COURT[d.statut] ?? d.statut;
+  const long = LIBELLES_STATUT[d.statut];
+  /* la phrase longue ne s'ajoute que si elle dit plus que le mot */
+  const detail = long && long !== court ? long : null;
+  return (
+    <li className="cp-ligne cp-rdv">
+      <div className={`cp-date${bloc ? "" : " cp-date--vide"}`} aria-hidden="true">
+        <div className="cp-date-jour">{bloc ? bloc.jour : "—"}</div>
+        <div className="cp-date-mois">{bloc ? bloc.mois : ""}</div>
+      </div>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <span className="cp-secondaire cp-kicker-ligne">
+            {LIBELLES_PARCOURS[d.parcours] ?? d.parcours}
+          </span>
+          <Pastille teinte={TEINTE_STATUT[d.statut] ?? "gris"}>{court}</Pastille>
+        </div>
+        <div className="cp-texte cp-fort mt-0.5">{libelleFormule(d.formule)}</div>
+        <p className="num cp-secondaire mt-0.5">
+          {d.creneau_debut
+            ? `${dateHeureGp(d.creneau_debut)}${duree ? ` · ${duree}` : ""}`
+            : "Sans créneau, traitée par e-mail"}
+        </p>
+        {detail ? <p className="cp-secondaire mt-1">{detail}</p> : null}
+      </div>
+    </li>
+  );
+}
+
 /* un bloc de la page : une carte blanche à filet, un titre, un corps */
 function Bloc({
   titre,
@@ -136,13 +171,28 @@ export default function CompteVue({
 }: CompteVueProps) {
   const aInstallation = demandes.some((d) => d.parcours === "reglage" && d.statut !== "annule");
 
-  /* les réunions d'installation d'abord, la plus récente en tête (ISO se
-     trie en texte ; sans créneau → à la fin), puis les audits et devis */
+  /* les réunions d'installation, la plus récente en tête (ISO se trie en
+     texte ; sans créneau → à la fin) */
   const reunions = demandes
     .filter((d) => d.parcours === "reglage")
     .sort((a, b) => (b.creneau_debut ?? "").localeCompare(a.creneau_debut ?? ""));
-  const autres = demandes.filter((d) => d.parcours !== "reglage");
-  const rendezVous = [...reunions, ...autres];
+  /* les audits et les devis, même tri */
+  const audits = demandes
+    .filter((d) => d.parcours !== "reglage")
+    .sort((a, b) => (b.creneau_debut ?? "").localeCompare(a.creneau_debut ?? ""));
+
+  /* ——— 15/09 : SANS ABONNEMENT, LA PAGE PARLE DE L'AUDIT ———
+     Teo : « plus d'inscription libre, tout mène à l'audit — le compte
+     affichera l'audit, ou un récap. » Avant, un compte sans installation
+     ouvrait sur un bloc « Mon abonnement » vide et un « Choisissez vos
+     postes » : le vocabulaire du prix public, servi à une direction qui
+     vient seulement de faire mesurer son processus. Le deuxième bloc de
+     la page devient donc « Mon audit » tant qu'il n'y a pas
+     d'abonnement, et le bloc « Mes rendez-vous » ne reprend pas les
+     audits qui y sont déjà (on ne répète pas — c'est ce qui a coûté les
+     quatre tuiles le 15/09 au matin). */
+  const blocAudit = abonnement == null;
+  const rendezVous = blocAudit ? reunions : [...reunions, ...audits];
 
   const nomModele = (slug: string) => MODELES.find((m) => m.slug === slug)?.nom ?? slug;
 
@@ -150,13 +200,15 @@ export default function CompteVue({
      une installation a-t-elle été demandée, et le compte est-il rattaché ?
      Trois états, plus la panne — dite, jamais racontée « en préparation »
      (revue n° 5). C'est le SEUL endroit de la page où il est dit. */
-  const etatEspace: "panne" | "ouvert" | "preparation" | "sans" = panneComptes
+  const etatEspace: "panne" | "ouvert" | "preparation" | "audit" | "sans" = panneComptes
     ? "panne"
     : rattache
       ? "ouvert"
       : aInstallation
         ? "preparation"
-        : "sans";
+        : audits.length
+          ? "audit"
+          : "sans";
 
   const acces = {
     panne: {
@@ -174,9 +226,19 @@ export default function CompteVue({
       texte:
         "L'espace client s'ouvre dès la réunion faite : vos postes y apparaissent au fur et à mesure de leur mise en route.",
     },
+    /* 15/09 — « sans » se dédouble : avec un audit au dossier, on ne
+       renvoie pas quelqu'un sur la grille des postes comme s'il n'avait
+       rien fait ; sans audit, c'est LUI la première marche, pas les
+       tarifs. */
+    audit: {
+      titre: "Votre espace client s'ouvre après l'installation.",
+      texte:
+        "Votre audit est ci-dessous. C'est lui qui dit ce qu'il y a à mettre en route ; l'installation suit, et c'est elle qui ouvre votre espace.",
+    },
     sans: {
-      titre: "Votre espace client s'ouvre après la réunion d'installation.",
-      texte: "Choisissez vos postes, réservez la réunion : c'est elle qui met vos postes en route.",
+      titre: "Votre compte est ouvert, et il n'y a encore rien dedans.",
+      texte:
+        "L'audit est la première marche : trente minutes pour mesurer ce que votre processus le plus coûteux vous coûte vraiment. Il est gratuit et sans engagement.",
     },
   }[etatEspace];
 
@@ -232,9 +294,19 @@ export default function CompteVue({
                 </a>
               </>
             ) : etatEspace === "sans" ? (
-              <Link href="/tarifs" className="r-btn r-btn--noir">
-                Choisir mes postes
-              </Link>
+              /* 15/09 — c'était « Choisir mes postes » → /tarifs. La grille
+                 reste accessible (elle est dans le bloc « Mon audit » juste
+                 dessous) ; la porte principale, elle, est l'audit. */
+              <>
+                <Link href="/reserver-un-audit" className="r-btn r-btn--noir">
+                  Réserver mon audit
+                </Link>
+                {/* la grille reste à un clic : elle ne disparaît pas du
+                    compte, elle passe seulement après l'audit */}
+                <Link href="/tarifs" className="r-btn r-btn--fil">
+                  Voir les postes et les tarifs
+                </Link>
+              </>
             ) : null}
             <Link href="/application" className="cp-lien">
               {etatEspace === "ouvert"
@@ -244,7 +316,51 @@ export default function CompteVue({
           </div>
         </section>
 
-        {/* ——— 2. mon abonnement ——— */}
+        {/* ——— 2 bis. mon audit — tant qu'il n'y a pas d'abonnement ———
+            15/09 : c'est LE bloc que voit un compte neuf, à la place d'une
+            carte d'abonnement vide (voir `blocAudit` plus haut). Sans
+            aucun rendez-vous il ne s'affiche PAS : le bloc d'accès, trois
+            centimètres au-dessus, porte déjà la même phrase et le même
+            bouton — même règle que « Mes rendez-vous ». */}
+        {blocAudit && audits.length ? (
+          <Bloc
+            titre="Mon audit"
+            sous="Ce qui a été réservé, et ce qui suit. Heure de Guadeloupe."
+          >
+            {panneDemandes ? (
+              <p className="rv-erreur">
+                Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un
+                instant.
+              </p>
+            ) : (
+              <>
+                <ul>
+                  {audits.map((d) => (
+                    <LigneRdv key={d.id} d={d} />
+                  ))}
+                </ul>
+                {/* ce qui vient APRÈS l'audit : la seule question que se
+                    pose quelqu'un qui revient ici entre les deux */}
+                <p className="cp-secondaire mt-4 max-w-[62ch]">
+                  À l&apos;issue de l&apos;audit, vous recevez ce qui a été mesuré et ce
+                  qu&apos;il y a à mettre en route. L&apos;installation se réserve ensuite, et
+                  c&apos;est elle qui ouvre votre espace client.
+                </p>
+                <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+                  <Link href="/tarifs" className="r-btn r-btn--fil">
+                    Voir les postes et les tarifs
+                  </Link>
+                  <Link href="/reserver-un-audit" className="cp-lien">
+                    Réserver un autre format
+                  </Link>
+                </div>
+              </>
+            )}
+          </Bloc>
+        ) : null}
+
+        {/* ——— 2. mon abonnement — dès qu'il y en a un ——— */}
+        {blocAudit ? null : (
         <Bloc titre="Mon abonnement" sous="Vos postes, votre formule et votre moyen de paiement.">
           {/* 05/09 — le retour de Stripe, au-dessus de la carte */}
           {retour === "ok" ? (
@@ -274,45 +390,21 @@ export default function CompteVue({
             />
           )}
         </Bloc>
+        )}
 
         {/* ——— 3. mes rendez-vous, seulement s'il y en a ———
             l'installation n'a lieu qu'une fois : un bloc « aucun rendez-vous »
             n'apprendrait rien, et la porte vers la réservation est déjà dans
-            le bloc d'accès et dans la carte d'abonnement */}
+            le bloc d'accès et dans la carte d'abonnement.
+            15/09 — sans abonnement, les audits sont déjà dans le bloc
+            « Mon audit » : cette liste ne porte alors que les installations
+            (une annulée, par exemple), et disparaît le plus souvent. */}
         {!panneDemandes && rendezVous.length ? (
           <Bloc titre="Mes rendez-vous" sous="Heure de Guadeloupe.">
             <ul>
-              {rendezVous.map((d) => {
-                const bloc = d.creneau_debut ? blocDateGp(d.creneau_debut) : null;
-                const duree = dureeFormule(d.formule, d.duree_min);
-                const court = LIBELLES_STATUT_COURT[d.statut] ?? d.statut;
-                const long = LIBELLES_STATUT[d.statut];
-                /* la phrase longue ne s'ajoute que si elle dit plus que le mot */
-                const detail = long && long !== court ? long : null;
-                return (
-                  <li key={d.id} className="cp-ligne cp-rdv">
-                    <div className={`cp-date${bloc ? "" : " cp-date--vide"}`} aria-hidden="true">
-                      <div className="cp-date-jour">{bloc ? bloc.jour : "—"}</div>
-                      <div className="cp-date-mois">{bloc ? bloc.mois : ""}</div>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                        <span className="cp-secondaire cp-kicker-ligne">
-                          {LIBELLES_PARCOURS[d.parcours] ?? d.parcours}
-                        </span>
-                        <Pastille teinte={TEINTE_STATUT[d.statut] ?? "gris"}>{court}</Pastille>
-                      </div>
-                      <div className="cp-texte cp-fort mt-0.5">{libelleFormule(d.formule)}</div>
-                      <p className="num cp-secondaire mt-0.5">
-                        {d.creneau_debut
-                          ? `${dateHeureGp(d.creneau_debut)}${duree ? ` · ${duree}` : ""}`
-                          : "Sans créneau, traitée par e-mail"}
-                      </p>
-                      {detail ? <p className="cp-secondaire mt-1">{detail}</p> : null}
-                    </div>
-                  </li>
-                );
-              })}
+              {rendezVous.map((d) => (
+                <LigneRdv key={d.id} d={d} />
+              ))}
             </ul>
           </Bloc>
         ) : null}

@@ -131,8 +131,10 @@ type Props = {
   /* 02/09 — mensuel (défaut) ou annuel, venu de la grille ; valeur
      initiale seulement, le récapitulatif la laisse changer */
   periodicite?: Periodicite;
-  /* 02/09 — la session lue côté serveur (parcours installation). Absent
-     ou null : personne de connecté. Le parcours audit ne le passe pas. */
+  /* 02/09 — la session lue côté serveur. Absent ou null : personne de
+     connecté au rendu ; l'INITIAL_SESSION du client rattrape le cas
+     échéant, la prop évite le clignotement. 15/09 : /reserver la passe
+     aussi, depuis que l'audit exige un compte. */
   utilisateur?: Utilisateur | null;
 };
 
@@ -143,8 +145,20 @@ export default function PriseDeCreneau({
   periodicite: periodiciteInitiale = "mensuel",
   utilisateur,
 }: Props) {
-  /* ——— le verrou compte (02/09) : installation seulement ——— */
-  const verrou = parcours === "installation";
+  /* ——— le verrou compte (02/09 ; étendu le 15/09) ———
+     Il ne tenait que le parcours installation : l'audit et le devis
+     partaient sans jeton, donc sans utilisateur_id (reserver_audit pose
+     auth.uid(), null pour un anonyme) — la demande n'apparaissait NULLE
+     PART dans « Mon compte ».
+
+     15/09, décision Teo (« plus d'inscription libre, tout mène à
+     l'audit ») : le compte ne se crée plus sur /connexion, il se crée
+     ICI, au moment où l'on réserve — audit compris. C'est le seul endroit
+     où il naît avec quelque chose derrière lui, et c'est ce qui permet à
+     « Mon compte » de montrer l'audit au lieu d'un abonnement vide.
+     La création reste donc ouverte DANS ce module (`sansCreation` n'y est
+     pas posé), et elle seule. */
+  const verrou = true;
   const [util, setUtil] = useState<Utilisateur | null>(verrou ? (utilisateur ?? null) : null);
 
   /* ——— quoi ——— */
@@ -722,7 +736,12 @@ export default function PriseDeCreneau({
                   avecProfil={false}
                   onConnecte={connecter}
                   intro={
-                    "Votre installation est rattachée à un compte, qui vous ouvrira votre espace client. Connectez-vous, ou créez votre compte en une minute : votre adresse, un code reçu par e-mail, un mot de passe."
+                    parcours === "installation"
+                      ? "Votre installation est rattachée à un compte, qui vous ouvrira votre espace client. Connectez-vous, ou créez votre compte en une minute : votre adresse, un code reçu par e-mail, un mot de passe."
+                      : /* 15/09 — l'audit aussi est rattaché au compte. On
+                           dit ce qu'il APPORTE (retrouver son créneau et la
+                           suite), pas qu'il est exigé. */
+                        "Votre rendez-vous est rattaché à un compte : vous y retrouvez votre créneau, ce qui suit l'audit, et votre espace client le jour où vous installez. Connectez-vous, ou créez votre compte en une minute : votre adresse, un code reçu par e-mail, un mot de passe."
                   }
                   emailInitial={c.email}
                 />
@@ -860,17 +879,13 @@ export default function PriseDeCreneau({
             {/* 02/09 (revue n° 11) — pour l'installation, la phrase « rien
                 n'est conservé sans votre accord » était devenue fausse : la
                 demande est rattachée au compte et le profil y est gardé.
-                On le dit. */}
+                On le dit. 15/09 — l'audit l'est aussi (verrou étendu) :
+                la seconde phrase, qui promettait l'inverse, est retirée
+                plutôt que laissée dans une branche morte. */}
             <p className="r-note mt-4 max-w-[60ch]">
-              {verrou ? (
-                <>
-                  Vos coordonnées servent à organiser ce rendez-vous. Prénom, nom, entreprise et téléphone sont conservés sur votre compte pour vos prochaines demandes, et rien n&apos;est revendu. Voir{" "}
-                </>
-              ) : (
-                <>
-                  Vos coordonnées ne servent qu&apos;à organiser ce rendez-vous. Rien n&apos;est conservé sans votre accord, rien n&apos;est revendu. Voir{" "}
-                </>
-              )}
+              Vos coordonnées servent à organiser ce rendez-vous. Prénom, nom, entreprise et
+              téléphone sont conservés sur votre compte pour vos prochaines demandes, et rien
+              n&apos;est revendu. Voir{" "}
               <Link href="/vos-donnees" className="underline underline-offset-2">
                 où vont vos données
               </Link>

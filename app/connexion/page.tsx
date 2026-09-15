@@ -9,14 +9,25 @@ import { suiteSure } from "@/lib/compte";
 import { utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /connexion — entrer dans son compte, ou le créer (02/09/2026)
+   /connexion — entrer dans son compte (02/09/2026)
 
    La porte du compte client. Décision Teo du 02/09, révisée l'après-midi :
    le quotidien se fait par e-mail + MOT DE PASSE ; le code à six chiffres
-   ne sert qu'à prouver l'adresse (création, mot de passe oublié,
-   secours). Deux portes claires en tête du module : « J'ai déjà un
-   compte » et « Je crée mon compte » — ?mode=creation ouvre directement
-   la seconde. Même monde visuel que la réservation (.resa).
+   ne sert qu'à prouver l'adresse (mot de passe oublié, secours). Même
+   monde visuel que la réservation (.resa).
+
+   15/09 — PLUS D'INSCRIPTION LIBRE. Décision Teo : « je veux plus qu'on
+   puisse s'inscrire, on fait tout pour rediriger vers un audit ». Les deux
+   portes en tête du module sont retirées, et ?mode=creation — qui ouvrait
+   la création — RENVOIE sur /reserver-un-audit : les liens et les favoris
+   qui le portent encore arrivent au bon endroit, pas sur une page morte.
+
+   Pourquoi : un compte créé ici n'était rattaché à aucun client. Il ouvrait
+   « Mon compte » sur un abonnement vide et un « Choisissez vos postes » —
+   le vocabulaire du prix public servi à tout le monde, y compris à une
+   direction qui vient de recevoir le site. Le compte naît désormais au
+   moment de RÉSERVER, audit ou installation : à ce moment-là il y a une
+   demande derrière lui, et « Mon compte » a quelque chose à montrer.
 
    14/09 — nouvelle peau, collée par Teo : « auth-section-1 » (solaceui).
    Deux panneaux : la carte du formulaire à gauche, un panneau noir au
@@ -43,8 +54,8 @@ import { utilisateurCourant } from "@/lib/supabase/server";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
-  title: "Se connecter ou créer un compte | Omega.AI",
-  description: "Accédez à votre espace client Omega.AI : votre demande, votre créneau d'installation et votre espace de suivi.",
+  title: "Se connecter | Omega.AI",
+  description: "Accédez à votre compte Omega.AI : votre audit, votre installation et votre espace client.",
   robots: { index: false, follow: false },
 };
 
@@ -55,7 +66,9 @@ export default async function ConnexionPage({
 }) {
   const sp = await searchParams;
   const suite = suiteSure(sp.suite);
-  const mode = sp.mode === "creation" ? "creation" : "connexion";
+  /* 15/09 — la création ne s'ouvre plus ici : ?mode=creation mène là où le
+     compte s'ouvre vraiment. */
+  if (sp.mode === "creation") redirect("/reserver-un-audit");
 
   const utilisateur = await utilisateurCourant();
   if (utilisateur) redirect(suite);
@@ -65,8 +78,11 @@ export default async function ConnexionPage({
       <PageMotion />
       <div className="resa">
         <AuthSectionOne
-          titre="Se connecter ou créer un compte"
-          sousTitre="Votre demande, votre créneau d'installation, votre espace de suivi."
+          /* 15/09 — la peau ne dit plus « Se connecter » : le module le dit
+             déjà, deux lignes plus bas, et le mode peut changer (code,
+             mot de passe oublié). Elle nomme la destination. */
+          titre="Votre compte"
+          sousTitre="Votre audit, votre installation, votre espace client."
           panneauTitre={
             <>
               Un seul compte
@@ -82,16 +98,15 @@ export default async function ConnexionPage({
               demandez un code.
             </p>
           ) : null}
-          <ConnexionPleinePage suite={suite} mode={mode} />
-          {/* Le détail du code ne sert qu'à la première visite : il se lit
-              mieux sous le formulaire, quand la question se pose. */}
+          <ConnexionPleinePage suite={suite} />
+          {/* 15/09 — la note « Première visite ? Choisissez Créer un
+              compte » est retirée : le module dit déjà, juste sous le
+              bouton, où le compte s'ouvre. Deux fois la même phrase à
+              trois centimètres d'écart, c'est ce qu'on a passé la
+              journée à enlever ailleurs. */}
           <p className="r-note mt-6">
-            Première visite&nbsp;? Choisissez « Créer un compte »&nbsp;: un code reçu par
-            e-mail prouve votre adresse, puis vous choisissez votre mot de passe.
-          </p>
-          <p className="r-note mt-3">
             Votre adresse ne sert qu&apos;à vous reconnaître et à vous joindre pour votre
-            installation, voir{" "}
+            rendez-vous, voir{" "}
             <Link href="/vos-donnees" className="underline underline-offset-2">
               où vont vos données
             </Link>

@@ -19,9 +19,12 @@ import type { LigneCommandeSite } from "@/lib/site-commande";
    elles répondent « connexion requise », en français, et rien ne part.
 
    En production la route n'existe pas : notFound() dès que NODE_ENV vaut
-   « production » — `next start` comme Vercel rendent un 404. Trois états
+   « production » — `next start` comme Vercel rendent un 404. Quatre états
    par ?etat= : rattache (défaut — cockpit ouvert, abonnement en service),
-   attente (réservé, cockpit en préparation), vide (rien de demandé).
+   attente (réservé, cockpit en préparation), audit (15/09 — un audit
+   réservé et rien d'autre : le cas le plus fréquent depuis que le compte
+   naît en réservant, et le seul qui montre le bloc « Mon audit »), vide
+   (un compte sans la moindre demande).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const dynamic = "force-dynamic";
@@ -57,7 +60,9 @@ function installation(etat: "rattache" | "attente"): DemandeCompte {
 const AUDIT: DemandeCompte = {
   id: "apercu-audit",
   parcours: "audit",
-  formule: "audit",
+  /* une formule du catalogue (lib/reservation) : libelleFormule rend son
+     nom ; un identifiant inventé s'afficherait brut, en minuscules */
+  formule: "diagnostic",
   statut: "a_traiter",
   creneau_debut: "2026-09-22T14:30:00.000Z",
   duree_min: 30,
@@ -84,9 +89,17 @@ export default async function ApercuComptePage({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { etat: brut } = await searchParams;
-  const etat = brut === "attente" ? "attente" : brut === "vide" ? "vide" : "rattache";
+  const etat =
+    brut === "attente"
+      ? "attente"
+      : brut === "audit"
+        ? "audit"
+        : brut === "vide"
+          ? "vide"
+          : "rattache";
 
-  const demandes = etat === "vide" ? [] : [installation(etat), AUDIT];
+  const demandes =
+    etat === "vide" ? [] : etat === "audit" ? [AUDIT] : [installation(etat), AUDIT];
   const rattache = etat === "rattache";
 
   return (
@@ -109,7 +122,7 @@ export default async function ApercuComptePage({
         panneDemandes={false}
         panneComptes={false}
         rattache={rattache}
-        commandes={etat === "vide" ? [] : [COMMANDE]}
+        commandes={etat === "vide" || etat === "audit" ? [] : [COMMANDE]}
         panneCommandes={false}
         abonnement={abonnementCourant(demandes)}
         demandesAbonnement={[]}
