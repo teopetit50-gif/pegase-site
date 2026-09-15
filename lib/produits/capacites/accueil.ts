@@ -119,7 +119,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "Deux clients demandent le même créneau à la même minute.",
-      r: "La réservation s'écrit dans l'agenda à l'instant où elle est acceptée. Le second client se voit proposer les créneaux suivants, sans double réservation.",
+      r: "Les deux demandes sont enregistrées avec leur heure d'arrivée, puis transmises au service qui tient le planning. C'est lui qui tranche, et le second client reçoit une proposition de remplacement.",
     },
     {
       q: "Le client a un litige ouvert avec vous.",
