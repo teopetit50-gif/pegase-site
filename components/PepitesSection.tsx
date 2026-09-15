@@ -95,11 +95,11 @@ function EtapesBilld({ active, reduced }: { active: boolean; reduced: boolean })
 
 /* ——— visuel PUBLIQ : le flux d'appels d'offres (mini-terminal) ——— */
 const AOS = [
-  "AO-114 · Rénovation groupe scolaire : Basse-Terre",
-  "AO-097 · Voirie communale : Le Moule",
-  "AO-121 · Réseau EP : Sainte-Anne",
-  "AO-132 · Extension cantine : Petit-Bourg",
-  "AO-108 · Éclairage public : Baie-Mahault",
+  "AO-114 · Rénovation groupe scolaire : Saint-Herblain",
+  "AO-097 · Voirie communale : Cholet",
+  "AO-121 · Réseau EP : Angers",
+  "AO-132 · Extension cantine : Vertou",
+  "AO-108 · Éclairage public : Rezé",
 ];
 const LINE_H = 34;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

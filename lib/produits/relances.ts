@@ -350,7 +350,7 @@ export const CHIFFRES = {
 } as const;
 
 /* Section « produit français ». Chaque ligne est vérifiable : la société
-   est guadeloupéenne donc française, l'hébergement est européen, la
+   est française, l'hébergement est européen, la
    facturation est en euros et l'assistance se fait en français. */
 export const FRANCE = {
   /* PASSE CORRECTRICE — « D'ici, pas d'ailleurs » était l'antithèse du
@@ -365,7 +365,7 @@ export const FRANCE = {
     {
       titre: "Conçu et développé en France",
       texte:
-        "Le système est développé en Guadeloupe, région française et européenne, et rien n'est sous-traité ailleurs.",
+        "Le système est développé en France, et rien n'est sous-traité ailleurs.",
     },
     {
       titre: "Vos données sont hébergées dans l'Union européenne",

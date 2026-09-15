@@ -7,7 +7,7 @@ import { getImageProps } from "next/image";
    ── Ce que montre l'intérieur ────────────────────────────────────────
    De vraies captures du tableau de bord Omega — /espace/debiteurs,
    /espace/relances, /espace/tresorerie — alimentées par le jeu de
-   démonstration écrit en dur dans le dépôt du tableau de bord (Karayib
+   démonstration écrit en dur dans le dépôt du tableau de bord (Rénov
    Transports). Aucune donnée client, et surtout aucun châssis emprunté :
    les captures précédentes étaient des rendus de l'interface du gabarit
    Folio avec notre texte substitué. Refaites par `outils/apercus-omega.mjs`.

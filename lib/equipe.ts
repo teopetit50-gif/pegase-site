@@ -89,15 +89,15 @@ export const MEMBRES: Membre[] = [
 ];
 
 /* ——— les textes de la section ———
-   Le sourcil porte le drapeau (components/ui/drapeau.tsx) : la Guadeloupe
-   est une région française et européenne, la mention est donc exacte au
-   sens où l'entend la famille des sites produits — conception en France,
-   assistance en français, droit français. Ce qu'elle ne dit PAS, et ne doit
-   pas dire : « hébergé en France » (nos données vivent à Francfort). */
+   Le sourcil porte le drapeau (components/ui/drapeau.tsx) : conception en
+   France, assistance en français, droit français. Ce qu'elle ne dit PAS, et
+   ne doit pas dire : « hébergé en France » (nos données vivent à Francfort).
+   Et on ne nomme JAMAIS la région : le produit se vend comme français, pas
+   comme guadeloupéen (Teo, 15/09). */
 export const EQUIPE_SURTITRE = "ÉQUIPE FRANÇAISE";
 export const EQUIPE_TITRE = "L'équipe qui installe est celle qui répond.";
 export const EQUIPE_CHAPO =
   "Omega n'est pas une agence à étages. La personne qui fait votre audit est celle qui installe vos systèmes, et celle que vous avez au téléphone six mois plus tard.";
 /* La ligne de pied, sous la liste des noms. Chaque terme est vérifiable. */
 export const EQUIPE_PIED =
-  "Conçu et développé en Guadeloupe, région française et européenne.";
+  "Conçu et développé en France.";

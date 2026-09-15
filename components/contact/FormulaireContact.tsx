@@ -157,7 +157,7 @@ export default function FormulaireContact() {
           <label className="rv-libelle" htmlFor="ct-tel">
             Téléphone / WhatsApp <small>— facultatif</small>
           </label>
-          <input id="ct-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="0690 …" value={c.telephone} onChange={maj("telephone")} />
+          <input id="ct-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="06 12 34 56 78" value={c.telephone} onChange={maj("telephone")} />
         </div>
         <div>
           <label className="rv-libelle" htmlFor="ct-entreprise">

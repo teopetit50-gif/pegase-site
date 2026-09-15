@@ -295,15 +295,15 @@ function MockOFFLOAD() {
     <SceneSombre>
       <CarteSombre className="w-full max-w-[380px] p-5" ombre={OMBRE_XL}>
         <div className="flex items-center justify-between gap-4">
-          <span className="text-[15px] font-semibold text-white">Caraïbe Pièces Auto</span>
+          <span className="text-[15px] font-semibold text-white">Comptoir Pièces Auto</span>
           <ChipStatut couleur={TURQUOISE} check>
             À jour
           </ChipStatut>
         </div>
         <div className="mt-4 space-y-2.5">
           <Ligne k="Montant HT" v="1 240,00 €" />
-          <Ligne k="TVA 8,5 %" v="105,40 €" />
-          <Ligne k="Montant TTC" v="1 345,40 €" fort />
+          <Ligne k="TVA 20 %" v="248,00 €" />
+          <Ligne k="Montant TTC" v="1 488,00 €" fort />
         </div>
         <div className="mt-4 flex items-center gap-3 border-t border-white/[0.08] pt-4">
           <IconeRecu />

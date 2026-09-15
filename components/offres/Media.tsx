@@ -345,7 +345,7 @@ export function MediaAnswr() {
       </div>
       <div className="space-y-2.5 px-4 py-4">
         <div className="o-demo-recu max-w-[78%] rounded-[12px] rounded-tl-[4px] px-3 py-2.5 text-[12px] leading-[1.65]">
-          Bonsoir, vous livrez sur la zone de Jarry ?
+          Bonsoir, vous livrez sur la zone industrielle ?
         </div>
         <div className="o-demo-envoi ml-auto max-w-[86%] rounded-[12px] rounded-tr-[4px] px-3 py-2.5 text-[12px] leading-[1.65]">
           Bonsoir ! Oui, deux tournées par semaine. Je vous fais chiffrer
@@ -372,8 +372,8 @@ export function MediaOffload() {
         </div>
         <div className="space-y-1.5">
           {[
-            { f: "EDF_2026-07-04.pdf", m: "4 180,60 €", t: "TVA 8,5 %" },
-            { f: "Maintenance-flotte_0712.pdf", m: "3 240,00 €", t: "TVA 8,5 %" },
+            { f: "EDF_2026-07-04.pdf", m: "4 180,60 €", t: "TVA 20 %" },
+            { f: "Maintenance-flotte_0712.pdf", m: "3 240,00 €", t: "TVA 20 %" },
             { f: "Loyer-entrepot_juillet.pdf", m: "7 900,00 €", t: "Exonéré" },
           ].map((r) => (
             <div

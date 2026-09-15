@@ -276,7 +276,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Côté factures, la même discipline",
-        p: "Une fois le chantier livré, les factures suivent le même chemin : rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du dirigeant. Le détail de ce circuit, et de ce qu'il change pour la trésorerie, est dans notre article consacré aux impayés en Guadeloupe.",
+        p: "Une fois le chantier livré, les factures suivent le même chemin : rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du dirigeant. Le détail de ce circuit, et de ce qu'il change pour la trésorerie, est dans notre article consacré au coût des impayés.",
       },
       {
         h: "Les demandes entrantes et les pièces fournisseurs suivent",
@@ -377,7 +377,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Le problème des outils opaques",
-        p: "La plupart des outils d'automatisation grand public mélangent vos données avec celles de milliers d'autres comptes, dans une base dont vous ne savez ni où elle est, ni qui y accède, ni ce qu'il en reste après résiliation. Pour un fichier de clients guadeloupéens avec noms, téléphones et historiques d'achats, c'est une exposition que rien n'oblige à accepter.",
+        p: "La plupart des outils d'automatisation grand public mélangent vos données avec celles de milliers d'autres comptes, dans une base dont vous ne savez ni où elle est, ni qui y accède, ni ce qu'il en reste après résiliation. Pour un fichier de clients avec noms, téléphones et historiques d'achats, c'est une exposition que rien n'oblige à accepter.",
       },
       {
         h: "Le choix Omega.AI : un espace dédié par client",
@@ -390,18 +390,18 @@ export const POSTS: Post[] = [
     ],
   },
   {
-    slug: "impayes-guadeloupe",
+    slug: "impayes-cout-attendre",
     initials: "PC",
     author: "Pôle cash",
     date: "12 mai 2026",
     cat: "Cash",
     cover: "/photos/payd.jpg",
-    title: "187 M€ d'impayés : le vrai coût d'attendre",
+    title: "Le vrai coût d'attendre un paiement",
     excerpt:
-      "En Guadeloupe, les retards de paiement immobilisent l'équivalent du budget annuel de certaines communes. Combien votre entreprise laisse dormir, et comment une relance systématique le récupère.",
+      "Les retards de paiement immobilisent une part de votre trésorerie chez vos clients. Combien votre entreprise laisse dormir, et comment une relance systématique le récupère.",
     body: [
       {
-        p: "Les retards de paiement sont endémiques aux Antilles : les délais y dépassent structurellement les moyennes nationales, et l'encours d'impayés des entreprises guadeloupéennes se chiffre en centaines de millions d'euros. Derrière ce chiffre global, une réalité par entreprise : des dizaines de milliers d'euros de travail déjà livré, déjà facturé, et toujours pas payé.",
+        p: "Le retard de paiement est un mal structurel : un délai contractuel à trente jours qui se règle à soixante, une facture échue que personne ne rappelle, un devis resté sans réponse. Derrière le constat général, une réalité par entreprise : des dizaines de milliers d'euros de travail déjà livré, déjà facturé, et toujours pas payé.",
       },
       {
         h: "Ce qu'un impayé coûte vraiment",

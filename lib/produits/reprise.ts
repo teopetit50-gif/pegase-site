@@ -198,9 +198,9 @@ export const FONCTIONNALITES = {
     suite:
       "RELOAD relève le bulletin chaque matin à 7 h 30, puis il ne retient que les marchés parus dans vos départements et dans votre secteur.",
     epingles: [
-      { gauche: "18%", haut: "38%", delai: 0, drapeau: "971", texte: "Voirie · 84 k€ · clôture 12/10" },
-      { gauche: "44%", haut: "24%", delai: 200, drapeau: "972", texte: "Second œuvre · 220 k€" },
-      { gauche: "68%", haut: "46%", delai: 400, drapeau: "971", texte: "Entretien annuel · 31 k€" },
+      { gauche: "18%", haut: "38%", delai: 0, drapeau: "44", texte: "Voirie · 84 k€ · clôture 12/10" },
+      { gauche: "44%", haut: "24%", delai: 200, drapeau: "49", texte: "Second œuvre · 220 k€" },
+      { gauche: "68%", haut: "46%", delai: 400, drapeau: "85", texte: "Entretien annuel · 31 k€" },
     ],
   },
   cartePalette: {
@@ -213,8 +213,8 @@ export const FONCTIONNALITES = {
     intitule: "Filtres de votre veille",
     espaceReserve: "Filtrer les annonces…",
     lignes: [
-      { code: "971", texte: "Guadeloupe et îles du Nord" },
-      { code: "972", texte: "Martinique" },
+      { code: "44", texte: "Loire-Atlantique" },
+      { code: "49", texte: "Maine-et-Loire" },
       { code: "VRD", texte: "Voirie et réseaux divers" },
       { code: "€€", texte: "Montant entre 30 et 300 k€" },
       { code: "≥60", texte: "Pertinence supérieure à 60 / 100" },
@@ -448,12 +448,12 @@ export const FRANCAIS = {
      Le titre, lui, était une antithèse nominale (« écrit ici, pas traduit
      d'ailleurs ») : c'est le tic n° 3 de la doctrine. */
   titre: "Ce produit est écrit en France.",
-  suite: "Omega.AI l'édite depuis la Guadeloupe, et les annonces viennent du bulletin officiel français. Le contrat précise où vont vos données.",
+  suite: "Omega.AI en est l'éditeur, et les annonces viennent du bulletin officiel français. Le contrat précise où vont vos données.",
   cellules: [
     {
       icone: "editeur" as const,
       titre: "Édité en France",
-      texte: "Omega.AI conçoit et maintient ce produit en Guadeloupe, donc quand vous écrivez, une personne de l'équipe vous répond.",
+      texte: "Omega.AI conçoit et maintient ce produit en France, donc quand vous écrivez, une personne de l'équipe vous répond.",
     },
     {
       icone: "source" as const,

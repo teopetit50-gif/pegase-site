@@ -36,7 +36,7 @@ function Console() {
   const lignes = [
     ["EDF · juillet", "312,40 €", 2],
     ["Sodexo Restauration", "1 084,00 €", 2],
-    ["Caraïbe Pièces Auto", "1 345,40 €", 1],
+    ["Comptoir Pièces Auto", "1 488,00 €", 1],
     ["Loyer atelier", "950,00 €", 2],
     ["Total Énergies", "218,90 €", 0],
   ] as const;

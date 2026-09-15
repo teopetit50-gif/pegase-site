@@ -625,7 +625,7 @@ export default function ConnexionInline({
                 <label className="rv-libelle" htmlFor="cx-tel">
                   Téléphone / WhatsApp <small>(recommandé)</small>
                 </label>
-                <input id="cx-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="0690 …" value={profil.telephone} onChange={(e) => setProfil((p) => ({ ...p, telephone: e.target.value }))} />
+                <input id="cx-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="06 12 34 56 78" value={profil.telephone} onChange={(e) => setProfil((p) => ({ ...p, telephone: e.target.value }))} />
               </div>
             </div>
           ) : null}

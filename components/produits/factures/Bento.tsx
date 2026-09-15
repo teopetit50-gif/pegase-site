@@ -221,7 +221,7 @@ const PIECES = [
     degrade: "from-cyan-200 via-cyan-400 to-cyan-600/80",
   },
   {
-    nom: "Antilles Énergie",
+    nom: "Armor Énergie",
     voie: "MENSUEL · 386,40 €",
     etat: "TRANSMISE",
     gauche: 28,
@@ -229,7 +229,7 @@ const PIECES = [
     degrade: "from-emerald-200 via-emerald-400 to-emerald-600/80",
   },
   {
-    nom: "Loc'Outils 971",
+    nom: "Loc'Outils Ouest",
     voie: "SCAN · 912,00 €",
     etat: "À VALIDER",
     gauche: 54,
@@ -342,7 +342,7 @@ function CarteGardeFous() {
 /* ── 4. Ce qui remonte ────────────────────────────────────────────────── */
 
 const FILE: [string, string, string][] = [
-  ["Une validation vous attend", "Loc'Outils 971 — fournisseur jamais vu", "8 min"],
+  ["Une validation vous attend", "Loc'Outils Ouest — fournisseur jamais vu", "8 min"],
   ["Montant à vérifier", "Papeterie du Port — TVA incohérente", "1 h"],
   ["Dossier prêt", "Août transmis à la comptabilité, 214 pièces", "3 h"],
   ["Doublon écarté", "Sogedis — facture déjà reçue le 02/09", "1 j"],

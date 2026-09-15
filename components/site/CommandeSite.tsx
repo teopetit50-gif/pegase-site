@@ -1029,7 +1029,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                           type="tel"
                           className="rv-champ"
                           autoComplete="tel"
-                          placeholder="0690 …"
+                          placeholder="06 12 34 56 78"
                           value={b.telephone}
                           onChange={maj("telephone")}
                         />

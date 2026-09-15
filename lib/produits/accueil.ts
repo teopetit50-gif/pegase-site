@@ -97,7 +97,7 @@ export const HERO = {
 export const BANDEAU = {
   intro: ["Ce qui arrive", "le soir et le week-end", ", exemples"],
   items: [
-    "« Vous livrez sur Jarry ? »",
+    "« Vous livrez sur la zone industrielle ? »",
     "« Votre prix pour 40 palettes ? »",
     "« Vous avez un créneau cette semaine ? »",
     "« Ce modèle est encore en stock ? »",
@@ -334,7 +334,7 @@ export const METIERS = {
       nom: "Réseaux",
       icone: "boutique",
       heure: "Jeudi 23 h 05",
-      demande: "Vous avez ce modèle en stock à Jarry ?",
+      demande: "Vous avez ce modèle en stock à l'entrepôt ?",
       issue: "Transféré : la réponse n'est pas dans sa base",
       transfert: true,
     },
@@ -452,15 +452,17 @@ export const CIRCUITS_FIGURE = {
 
 /* ── La bande « produit français » ───────────────────────────────────
    Trois faits vérifiables, et rien de plus. Ce qui est écrit ici est
-   aligné sur les mentions légales d'omegaai.fr : entreprise établie en
-   Guadeloupe donc française, droit français, et données hébergées dans
-   l'UNION EUROPÉENNE — pas en France. Ne pas « améliorer » ce dernier
-   point : ce serait faux. */
+   aligné sur les mentions légales d'omegaai.fr : entreprise française,
+   droit français, et données hébergées dans l'UNION EUROPÉENNE — pas en
+   France. Ne pas « améliorer » ce dernier point : ce serait faux.
+   Et on ne nomme jamais la région : le produit se vend comme français,
+   pas comme guadeloupéen (Teo, 15/09). */
 export const FRANCAIS = {
   etiquette: "Produit français",
-  /* « en France » est vrai mais vague, et voisine dangereusement avec
-     l'hébergement — qui est européen, pas français. Nommer la Guadeloupe est
-     plus précis, aussi vrai, et ne laisse aucune place à la confusion.
+  /* « en France » voisine dangereusement avec l'hébergement — qui est
+     européen, pas français : c'est pour ça que les deux faits sont séparés.
+     Nommer la région est INTERDIT depuis le 15/09 (Teo) — le produit se
+     vend comme français.
 
      Le 11/09, le titre a pris un sujet et un verbe (« Conçu, installé et
      suivi… » était une série de participes, pas une phrase), et les trois
@@ -470,18 +472,17 @@ export const FRANCAIS = {
      en sujet aurait porté le titre à +18 %, donc c'est « Tout » qui le
      prend.
 
-     Le contenu, lui, ne bouge pas d'un mot : entreprise établie en
-     Guadeloupe donc française, droit français, hébergement dans l'UNION
-     EUROPÉENNE. Jamais « hébergé en France », jamais « vos données ne
+     Le contenu, lui, ne bouge pas d'un mot : entreprise française,
+     droit français, hébergement dans l'UNION EUROPÉENNE. Jamais « hébergé en France », jamais « vos données ne
      quittent jamais l'Europe » — les deux sont faux, et ce sont des
      interdits du parc. */
-  titre: "Tout est conçu et suivi depuis la Guadeloupe",
+  titre: "Tout est conçu et suivi depuis la France",
   faits: [
     {
       cle: "Éditeur",
       titre: "Une entreprise française",
       texte:
-        "L'entreprise est établie en Guadeloupe, donc elle relève du droit français.",
+        "L'entreprise est établie en France, donc elle relève du droit français.",
     },
     {
       cle: "Données",

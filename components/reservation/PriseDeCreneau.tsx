@@ -782,7 +782,7 @@ export default function PriseDeCreneau({
                 <label className="rv-libelle" htmlFor="rv-tel">
                   Téléphone / WhatsApp <small>(recommandé)</small>
                 </label>
-                <input id="rv-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="0690 …" value={c.telephone} onChange={maj("telephone")} />
+                <input id="rv-tel" type="tel" className="rv-champ" autoComplete="tel" placeholder="06 12 34 56 78" value={c.telephone} onChange={maj("telephone")} />
               </div>
               <div>
                 <label className="rv-libelle" htmlFor="rv-entreprise">Nom de l&apos;entreprise</label>

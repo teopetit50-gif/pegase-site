@@ -59,7 +59,7 @@ const ATTENDRE = [
     n: "01",
     titre: "Sous deux jours ouvrés",
     texte:
-      "Vous recevez une réponse dans les deux jours ouvrés, souvent le jour même, en heure de Guadeloupe. Si votre question demande une vérification, nous vous indiquons quand vous aurez la réponse.",
+      "Vous recevez une réponse dans les deux jours ouvrés, souvent le jour même. Si votre question demande une vérification, nous vous indiquons quand vous aurez la réponse.",
   },
   {
     n: "02",

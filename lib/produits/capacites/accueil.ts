@@ -110,7 +110,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     "Douze situations que vos équipes reconnaîtront, et ce que le système en fait. Aucune ne se règle en répondant quand même.",
   cas: [
     {
-      q: "Le client écrit en créole, ou dans une langue étrangère.",
+      q: "Le client écrit dans une langue étrangère.",
       r: "La langue est identifiée et la réponse part dans la même langue, avec le contenu de votre base. Si la langue n'est pas couverte, l'échange est transféré.",
     },
     {

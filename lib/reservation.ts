@@ -226,7 +226,7 @@ export const PROFILS: [Profil, Profil] = [
           "Observer le travail réel, avec vos fichiers et vos équipes sous les yeux plutôt que de le reconstituer.",
         promesseFantome: true,
         cta: "Demander un devis",
-        souscta: "Dans vos locaux, déplacement inclus en Guadeloupe",
+        souscta: "Dans vos locaux, déplacement à convenir",
         enteteListe: "Tout l'Audit complet, plus :",
         points: [
           {
@@ -320,7 +320,7 @@ export const PROFILS: [Profil, Profil] = [
           "Auditer le matin, former l'équipe l'après-midi : la validation des messages ne s'improvise pas.",
         promesseFantome: true,
         cta: "Demander un devis",
-        souscta: "Dans vos locaux, déplacement inclus en Guadeloupe",
+        souscta: "Dans vos locaux, déplacement à convenir",
         enteteListe: "Tout l'Audit process, plus :",
         points: [
           {
@@ -544,7 +544,7 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "Vous intervenez partout en France ?",
     r: [
-      "Oui pour tous les formats à distance, où que vous soyez. Les formats dans vos locaux sont réservés à la Guadeloupe, où nous sommes établis : au-delà, le déplacement coûterait plus cher que ce qu'il apporte.",
+      "Oui pour tous les formats à distance, où que vous soyez. Pour les formats dans vos locaux, le déplacement se vérifie avec vous avant de confirmer le rendez-vous.",
       "Le déploiement d'un système ne demande aucune présence permanente : l'intégration se fait sur vos outils existants.",
     ],
   },

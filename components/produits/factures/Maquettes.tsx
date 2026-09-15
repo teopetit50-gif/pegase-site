@@ -146,9 +146,9 @@ type Ligne = {
 
 const LIGNES: Ligne[] = [
   { nom: "Sogedis Matériel", voie: "Mail · 1 240,00 €", debut: 3, fin: 46, avance: 1, etat: "fait", mot: "Classée" },
-  { nom: "Antilles Énergie", voie: "Mensuel · 386,40 €", debut: 11, fin: 58, avance: 1, etat: "fait", mot: "Classée" },
-  { nom: "Loc'Outils 971", voie: "Scan · 912,00 €", debut: 21, fin: 62, avance: 0.42, etat: "attente", mot: "À valider" },
-  { nom: "Transports Karukera", voie: "Mail · 148,20 €", debut: 33, fin: 74, avance: 0.66, etat: "fait", mot: "Recoupée" },
+  { nom: "Armor Énergie", voie: "Mensuel · 386,40 €", debut: 11, fin: 58, avance: 1, etat: "fait", mot: "Classée" },
+  { nom: "Loc'Outils Ouest", voie: "Scan · 912,00 €", debut: 21, fin: 62, avance: 0.42, etat: "attente", mot: "À valider" },
+  { nom: "Transports Kervadec", voie: "Mail · 148,20 €", debut: 33, fin: 74, avance: 0.66, etat: "fait", mot: "Recoupée" },
   { nom: "Papeterie du Port", voie: "Photo · 76,90 €", debut: 45, fin: 78, avance: 0.18, etat: "ecarte", mot: "Doublon écarté" },
   { nom: "Cabinet Mercier", voie: "Mensuel · 540,00 €", debut: 54, fin: 97, avance: 1, etat: "fait", mot: "Transmise" },
 ];
@@ -280,9 +280,9 @@ const BARRES = [
 
 const TABLEAU = [
   { f: "Sogedis Matériel", p: 239, r: [81, 76, 82] },
-  { f: "Antilles Énergie", p: 181, r: [25, 151, 5] },
-  { f: "Loc'Outils 971", p: 95, r: [22, 44, 29] },
-  { f: "Transports Karukera", p: 88, r: [0, 12, 76] },
+  { f: "Armor Énergie", p: 181, r: [25, 151, 5] },
+  { f: "Loc'Outils Ouest", p: 95, r: [22, 44, 29] },
+  { f: "Transports Kervadec", p: 88, r: [0, 12, 76] },
   { f: "Papeterie du Port", p: 72, r: [59, 13, 0] },
 ];
 

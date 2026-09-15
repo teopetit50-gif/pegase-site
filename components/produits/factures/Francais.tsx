@@ -14,7 +14,9 @@ import { Drapeau } from "@/components/produits/factures/ui/drapeau";
 
    ⚠️ CE QUI EST ÉCRIT ICI EST EXACT, ET CE QUI N'Y EST PAS L'EST AUSSI.
 
-   · « Conçu en France » — vrai : la Guadeloupe est française, 971.
+   · « Conçu en France » — vrai : la conception et le suivi sont faits
+     en France. NE PAS nommer la région : le produit se vend comme
+     français, pas comme guadeloupéen (Teo, 15/09).
    · « Hébergé dans l'Union européenne » — vrai : la base est à
      Francfort. NE PAS écrire « hébergé en France », c'est faux.
    · Il n'est écrit NULLE PART que les données ne quittent jamais
@@ -24,7 +26,7 @@ import { Drapeau } from "@/components/produits/factures/ui/drapeau";
    ══════════════════════════════════════════════════════════════════════ */
 
 const FAITS = [
-  ["Conception", "France · 971"],
+  ["Conception", "France"],
   ["Hébergement", "Union européenne"],
   ["Droit applicable", "Français"],
   ["Facturation", "Euros, TVA française"],
@@ -100,7 +102,7 @@ export default function Francais() {
           <div className="relative flex flex-col items-center">
             <Drapeau className="h-16 w-auto rounded-[4px] shadow-[0_14px_34px_-18px_rgba(23,23,23,0.45)] ring-1 ring-[#171717]/[0.14] sm:h-20" />
             <div className="mt-7 font-mono text-[10px] uppercase tracking-[0.16em] text-[#5f5f5f]">
-              Conçu en Guadeloupe · 971
+              Conçu et développé en France
             </div>
           </div>
         </div>

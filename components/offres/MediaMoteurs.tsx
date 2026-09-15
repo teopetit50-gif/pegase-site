@@ -497,7 +497,7 @@ const MESSAGES = [
     canal: "E-mail",
     teinte: "#f59e0b",
     texte:
-      "Bonjour, je vois que vous équipez les cuisines professionnelles sur Grande-Terre. Nous fournissons la pièce détachée en 48 h depuis Jarry : cela vous intéresse d'en parler ?",
+      "Bonjour, je vois que vous équipez les cuisines professionnelles de la région. Nous fournissons la pièce détachée en 48 h depuis notre entrepôt : cela vous intéresse d'en parler ?",
   },
 ];
 

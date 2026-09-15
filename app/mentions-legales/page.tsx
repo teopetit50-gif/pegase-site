@@ -43,7 +43,7 @@ const MANQUE = "[à compléter]";
 const SECTIONS: { h: string; p: string }[] = [
   {
     h: "Éditeur du site",
-    p: `Le site est édité par Omega.AI, entreprise établie en Guadeloupe, dont l'activité est la conception et le déploiement de systèmes d'automatisation pour les entreprises et les organisations. Forme juridique, numéro SIRET, adresse du siège et, le cas échéant, capital social et numéro de TVA intracommunautaire : ${MANQUE}. Téléphone : ${TELEPHONE_AFFICHE}. E-mail : ${COURRIEL}.`,
+    p: `Le site est édité par Omega.AI, entreprise établie en France, dont l'activité est la conception et le déploiement de systèmes d'automatisation pour les entreprises et les organisations. Forme juridique, numéro SIRET, adresse du siège et, le cas échéant, capital social et numéro de TVA intracommunautaire : ${MANQUE}. Téléphone : ${TELEPHONE_AFFICHE}. E-mail : ${COURRIEL}.`,
   },
   {
     h: "Directeur de la publication",

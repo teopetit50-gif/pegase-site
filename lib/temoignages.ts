@@ -54,7 +54,7 @@ export const NOTES: Note[] = [];
        nom: "Jean-Marc Sainte-Rose",
        role: "Gérant",
        entreprise: "CARMO Toyota",
-       secteur: "Garage — Baie-Mahault",
+       secteur: "Garage — Rezé",
        moteur: "PAYD",
      },
 */

@@ -290,7 +290,7 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
               type="tel"
               className="rv-champ"
               autoComplete="tel"
-              placeholder="0690 …"
+              placeholder="06 12 34 56 78"
               maxLength={30}
               value={c.telephone}
               onChange={maj("telephone")}

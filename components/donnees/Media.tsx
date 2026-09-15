@@ -201,7 +201,7 @@ export function MaquetteOutil() {
   ];
   const messages = [
     ["Sogexal", "Facture 2026-0412 : toujours pas réglée", "09:14"],
-    ["Novasud", "Demande de devis, chantier Baie-Mahault", "08:52"],
+    ["Novasud", "Demande de devis, chantier Rezé", "08:52"],
     ["Métalco", "Relance n° 2 : échéance dépassée", "hier"],
     ["Vallier", "Confirmation du rendez-vous de jeudi", "hier"],
   ];

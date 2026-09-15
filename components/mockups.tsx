@@ -39,11 +39,11 @@ function BrowserFrame({ children }: { children: React.ReactNode }) {
 /* ————— PAYD dashboard (moteurs défensifs) ————— */
 
 const RELANCES = [
-  { n: 1, client: "Sarl Bâti Caraïbe", d: "+5j", statut: "Payé", montant: "4 820 €", up: true },
-  { n: 2, client: "Garage Petit-Bourg", d: "+2j", statut: "Relancé", montant: "1 260 €", up: true },
-  { n: 3, client: "Villa Kariba", d: "+12j", statut: "Relance 2", montant: "2 400 €", up: false },
-  { n: 4, client: "SCI Lauricisque", d: "+21j", statut: "Mise en demeure", montant: "6 150 €", up: false },
-  { n: 5, client: "Resto La Datcha", d: "+1j", statut: "Payé", montant: "890 €", up: true },
+  { n: 1, client: "Sarl Bâti Concept", d: "+5j", statut: "Payé", montant: "4 820 €", up: true },
+  { n: 2, client: "Garage du Moulin", d: "+2j", statut: "Relancé", montant: "1 260 €", up: true },
+  { n: 3, client: "Villa Montclair", d: "+12j", statut: "Relance 2", montant: "2 400 €", up: false },
+  { n: 4, client: "SCI Beauregard", d: "+21j", statut: "Mise en demeure", montant: "6 150 €", up: false },
+  { n: 5, client: "Resto La Grange", d: "+1j", statut: "Payé", montant: "890 €", up: true },
 ];
 
 export function DashboardMockup() {
@@ -248,7 +248,7 @@ export function ChatMockup() {
           <div data-msg className="flex justify-end">
             <div className="max-w-[85%] rounded-xl rounded-tr-[4px] border border-white/[0.09] bg-white/[0.07] px-4 py-3 text-[13.5px] leading-relaxed text-white/85">
               Parfait, c&apos;est confirmé : jeudi à 9 h, atelier de
-              Baie-Mahault. Un rappel vous sera envoyé la veille. Excellente
+              Rezé. Un rappel vous sera envoyé la veille. Excellente
               journée.
               <div className="num mt-1.5 text-right text-[10.5px] text-white/35">08:47</div>
             </div>

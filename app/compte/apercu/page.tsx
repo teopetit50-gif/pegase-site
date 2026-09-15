@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const ENTREPRISE = "Karayib Rénov (fiction)";
+const ENTREPRISE = "Rénov Atlantique (fiction)";
 
 function installation(etat: "rattache" | "attente"): DemandeCompte {
   const enService = etat === "rattache";
@@ -95,13 +95,13 @@ export default async function ApercuComptePage({
       <CompteVue
         utilisateur={{
           id: "apercu",
-          email: "marcel@karayib-renov.example",
+          email: "marcel@renov-atlantique.example",
           prenom: "Marcel",
           nom: "Bologne",
           entreprise: ENTREPRISE,
-          telephone: "0690 00 00 00",
+          telephone: "06 00 00 00 00",
           secteur: "btp",
-          commune: "Baie-Mahault",
+          commune: "Rezé",
           siret: "12345678900012",
           mdpDefini: true,
         }}

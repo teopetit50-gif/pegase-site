@@ -183,10 +183,10 @@ export function VTableur({ reduced }: { reduced: boolean }) {
   const { ref, gen, playing, replay } = usePlay(reduced);
   const done = usePhase(gen, playing, reduced, 1500);
   const cols = [
-    ["Fournisseur", "Caraïbe Pièces Auto"],
+    ["Fournisseur", "Comptoir Pièces Auto"],
     ["HT", "1 240,00"],
-    ["TVA 8,5", "105,40"],
-    ["TTC", "1 345,40"],
+    ["TVA 20 %", "248,00"],
+    ["TTC", "1 488,00"],
     ["Échéance", "11/08"],
   ];
   return (
@@ -346,7 +346,7 @@ export function VPost({ reduced }: { reduced: boolean }) {
 export function VTerminal({ reduced }: { reduced: boolean }) {
   const { ref, gen, playing, replay } = usePlay(reduced);
   const lines = [
-    "→ trouvé : menuiserie, Baie-Mahault",
+    "→ trouvé : menuiserie, Rezé",
     "→ fiche enrichie ✓",
     "→ séquence 1/3 envoyée",
   ];
