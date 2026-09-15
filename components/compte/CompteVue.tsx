@@ -433,6 +433,7 @@ export default function CompteVue({
       id: "abonnement",
       libelle: "Abonnement",
       icone: <CreditCard size={16} strokeWidth={1.75} />,
+      groupe: "Votre offre",
       enfants: [
         ...(abonnement ? [{ id: "abo-formule", libelle: "Ma formule", ancre: "cp-abo-formule" }] : []),
         ...(paiementVisible
@@ -613,6 +614,11 @@ export default function CompteVue({
       libelle: "Sécurité",
       icone: <ShieldCheck size={16} strokeWidth={1.75} />,
       groupe: "Votre compte",
+      enfants: [
+        { id: "secu-espace", libelle: "Votre espace client", ancre: "cp-secu-espace" },
+        { id: "secu-mdp", libelle: "Mot de passe", ancre: "cp-secu-mdp" },
+        { id: "secu-donnees", libelle: "Vos données", ancre: "cp-secu-donnees" },
+      ],
       titre: "Sécurité et accès",
       description: (
         <>
@@ -621,7 +627,7 @@ export default function CompteVue({
       ),
       contenu: (
         <>
-          <div className="cpt-acces">
+          <div id="cp-secu-espace" className="cpt-acces">
             <div className="cpt-acces-tete">
               <span className="cpt-acces-titre">Votre espace client</span>
               <Pastille teinte={badge.teinte}>{badge.texte}</Pastille>
@@ -641,8 +647,10 @@ export default function CompteVue({
               )}
             </div>
           </div>
-          <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
-          <p className="cp-secondaire mt-4">
+          <div id="cp-secu-mdp">
+            <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
+          </div>
+          <p id="cp-secu-donnees" className="cp-secondaire mt-4">
             Ce que nous faisons de vos données, et comment les récupérer&nbsp;:{" "}
             <Link href="/vos-donnees" className="underline underline-offset-2">
               vos données

@@ -14,18 +14,30 @@
      valeur, pastille d'état ; leur code étant fermé (403), c'est le dessin
      de l'aperçu qui est repris, aux mesures de notre BandeauFaits
      (/modeles, Tailark stats) pour la carte à filets ;
-   · la barre : « Dashboard Sidebar », collée par Teo le 14/09 au soir —
-     carte propre, en-tête à jeton carré et deux lignes, groupes coiffés
-     d'un intitulé en petites capitales, lignes compactes à icône nue,
-     badges ronds, sous-entrées au chevron avec filet vertical, pied
-     séparé d'un trait. Elle remplace « Animated Sidebar » (@unlumen),
-     dont il ne reste que la surbrillance qui GLISSE au ressort d'une
-     ligne à l'autre (layoutId) — le modèle, lui, la fait clignoter.
+   · la barre : « Settings Sidebar Accordion » (@cnippet.dev), troisième
+     et dernier modèle de la journée. Teo avait collé « Dashboard
+     Sidebar » (@arunjdass) le soir ; une fois posé : « prends-en un
+     autre, il rend mal finalement ». Le reproche tient au dessin, pas à
+     la structure : lignes serrées, gris pâle sur blanc, et une carte
+     blanche posée sur un fond presque blanc — la barre ne se voyait pas.
+     Ce modèle-ci est une barre de RÉGLAGES, pas un tableau de bord
+     générique : intitulé en capitales espacées, sections à icône et
+     libellé franc, repères en retrait derrière un filet vertical, et
+     surtout beaucoup d'air. Il tombe juste sur une page de compte.
 
-   Deux écarts de mesure assumés sur ce modèle, tous deux pour le
-   français : le libellé d'une ligne est à 14 px et non 13 (« Rendez-vous »
-   et « Abonnement » sont deux fois plus longs que « Home » et « Inbox »),
-   et la barre fait 264 px et non 260.
+   Ce qui a été gardé du modèle précédent : les sous-entrées dépliables
+   et la surbrillance qui GLISSE au ressort d'une ligne à l'autre
+   (motion layoutId), qu'aucun des deux modèles n'a.
+
+   Trois écarts assumés sur ce modèle :
+   · il repose sur `@base-ui/react/accordion`, que le parc n'a pas. Le
+     dépliage reste celui d'ici, une grille qui passe de 0fr à 1fr — rien
+     à mesurer, rien à installer.
+   · ses sections n'ont pas d'état actif (c'est un accordéon, pas une
+     navigation). L'actif est marqué ici, au trait plein et à l'encre.
+   · la barre n'est plus une carte : posée à même le fond, avec un filet
+     à droite. Une carte blanche sur un fond à 3 % de gris ne se
+     distingue pas, et c'est ce qui faisait « plat ».
 
    Tout est scopé sous `.resa .cpt-` (compte-tableau) et vit ICI, pas dans
    globals.css : plusieurs sessions y écrivent le même jour. Les primitives
@@ -344,8 +356,13 @@
 }
 @media (min-width: 1024px) {
   .resa .cpt-corps {
-    grid-template-columns: 264px minmax(0, 1fr);
-    gap: 24px;
+    grid-template-columns: 252px minmax(0, 1fr);
+    gap: 32px;
+    /* `stretch` et non `start` : sur les sections courtes (Site, Profil)
+       le panneau faisait 200 px à côté d'une barre de 380, et la page
+       paraissait vide en bas à droite. Il prend maintenant la hauteur de
+       la rangée, donc celle de la barre quand elle est plus haute. */
+    align-items: stretch;
   }
 }
 
@@ -363,10 +380,8 @@
     position: sticky;
     top: 88px;
     flex-direction: column;
-    padding: 10px;
-    border: 1px solid var(--r-filet);
-    border-radius: 14px;
-    background: #ffffff;
+    padding: 2px 20px 2px 0;
+    border-right: 1px solid var(--r-filet);
   }
 }
 
@@ -374,9 +389,9 @@
 .resa .cpt-rail-tete {
   display: none;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   min-width: 0;
-  padding: 6px 8px 12px;
+  padding: 0 4px 18px;
 }
 @media (min-width: 1024px) {
   .resa .cpt-rail-tete {
@@ -387,12 +402,12 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   background: #050505;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1;
 }
@@ -404,9 +419,9 @@
 }
 .resa .cpt-rail-enseigne {
   overflow: hidden;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 17px;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 18px;
   color: var(--r-texte);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -435,7 +450,7 @@
 @media (min-width: 1024px) {
   .resa .cpt-menu {
     flex-direction: column;
-    gap: 14px;
+    gap: 22px;
     margin: 0;
     padding: 0;
     overflow: visible;
@@ -458,11 +473,11 @@
 @media (min-width: 1024px) {
   .resa .cpt-groupe-titre {
     display: block;
-    margin-bottom: 4px;
-    padding: 0 10px;
+    margin-bottom: 8px;
+    padding: 0 8px;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
     line-height: 14px;
     color: var(--r-faible);
     text-transform: uppercase;
@@ -515,15 +530,36 @@
   .resa .cpt-item {
     flex: 1 1 auto;
     min-width: 0;
-    padding: 7px 10px;
+    padding: 9px 8px;
+    gap: 11px;
   }
 }
 .resa .cpt-item:hover {
   color: var(--r-texte);
 }
+@media (min-width: 1024px) {
+  /* un survol sur fond gris : un blanc à demi, pour qu'il se distingue
+     de la sélection en blanc plein */
+  .resa .cpt-item:hover::before,
+  .resa .cpt-lien:hover::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.6);
+  }
+  .resa .cpt-item[data-state="active"]:hover::before {
+    content: none;
+  }
+  .resa .cpt-lien {
+    position: relative;
+    isolation: isolate;
+  }
+}
 .resa .cpt-item[data-state="active"] {
   color: var(--r-texte);
-  font-weight: 500;
+  font-weight: 600;
 }
 .resa .cpt-item:focus-visible {
   outline: 2px solid #050505;
@@ -541,12 +577,30 @@
    modèle ; sur la rangée mobile un aplat se lit mal, c'est un trait
    sous l'item qui marque l'actif. Elle est portée par la LIGNE, pas par
    l'onglet — sinon elle s'arrête avant le chevron. */
+/* L'aplat de l'actif doit se détacher du FOND DE PAGE, pas du blanc :
+   la barre n'est plus une carte, elle est posée sur `--r-fond` (#f5f5f5).
+   Un aplat à #f1f1f1 y était presque invisible — c'est exactement
+   palettes-saas-surfaces-invisibles. D'où le blanc plein, qui ressort
+   sur le gris, PLUS un trait d'encre collé à la ligne. */
 .resa .cpt-surbrillance {
   position: absolute;
   inset: 0;
   z-index: 0;
-  border-radius: 7px;
-  background: #f1f1f1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.05);
+}
+@media (min-width: 1024px) {
+  .resa .cpt-surbrillance::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 0;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: #050505;
+  }
 }
 @media (max-width: 1023px) {
   .resa .cpt-surbrillance {
@@ -567,9 +621,9 @@
 }
 .resa .cpt-item-libelle {
   overflow: hidden;
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: 0.005em;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 21px;
   text-overflow: ellipsis;
 }
 .resa .cpt-item-badge {
@@ -653,9 +707,9 @@
   }
   .resa .cpt-sous-filet {
     position: absolute;
-    top: 2px;
+    top: 0;
     bottom: 2px;
-    left: 18px;
+    left: 19px;
     width: 1px;
     background: var(--r-filet);
   }
@@ -663,32 +717,26 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 5px 10px 5px 30px;
+    padding: 6px 8px 6px 32px;
     border-radius: 6px;
-    font-size: 13.5px;
-    line-height: 19px;
+    font-size: 14px;
+    line-height: 20px;
     text-align: left;
     color: var(--r-faible);
     cursor: pointer;
-    transition:
-      color 0.2s ease,
-      background-color 0.2s ease;
+    transition: color 0.2s ease;
   }
   .resa .cpt-sous-item:hover {
-    background: #f7f7f7;
     color: var(--r-texte);
   }
   .resa .cpt-sous-item:focus-visible {
     outline: 2px solid #050505;
     outline-offset: 2px;
   }
+  /* le modèle ne met pas de puce devant un repère : le filet vertical
+     et le retrait disent déjà la subordination */
   .resa .cpt-sous-croisillon {
-    flex-shrink: 0;
-    font-size: 13px;
-    color: var(--r-filet);
-  }
-  .resa .cpt-sous-item:hover .cpt-sous-croisillon {
-    color: var(--r-faible);
+    display: none;
   }
 }
 
@@ -697,8 +745,8 @@
   display: none;
   flex-direction: column;
   gap: 2px;
-  margin-top: 12px;
-  padding-top: 10px;
+  margin-top: 22px;
+  padding-top: 14px;
   border-top: 1px solid var(--r-filet);
 }
 @media (min-width: 1024px) {
@@ -713,10 +761,10 @@
   display: flex;
   flex: 1 1 auto;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   width: 100%;
-  padding: 7px 10px;
-  border-radius: 7px;
+  padding: 9px 8px;
+  border-radius: 8px;
   text-align: left;
   color: var(--r-faible);
   cursor: pointer;
@@ -725,7 +773,6 @@
     background-color 0.2s ease;
 }
 .resa .cpt-lien:hover {
-  background: #f7f7f7;
   color: var(--r-texte);
 }
 .resa .cpt-lien:focus-visible {
@@ -765,11 +812,13 @@
    la page tient sur un écran, donc `scrollIntoView` n'a souvent rien à
    faire défiler (scrollY 0 → 88, le maximum de la page) et le clic
    resterait sans effet visible. */
-.resa .cpt-panneau [id^="cp-abo-"] {
+.resa .cpt-panneau [id^="cp-abo-"],
+.resa .cpt-panneau [id^="cp-secu-"] {
   scroll-margin-top: 96px;
   border-radius: 8px;
 }
-.resa .cpt-panneau [id^="cp-abo-"][data-vise="oui"] {
+.resa .cpt-panneau [id^="cp-abo-"],
+.resa .cpt-panneau [id^="cp-secu-"][data-vise="oui"] {
   animation: cpt-halo 1.1s ease-out;
 }
 @keyframes cpt-halo {
@@ -782,7 +831,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .resa .cpt-panneau [id^="cp-abo-"][data-vise="oui"] {
+  .resa .cpt-panneau [id^="cp-abo-"],
+.resa .cpt-panneau [id^="cp-secu-"][data-vise="oui"] {
     animation: none;
     box-shadow: 0 0 0 6px #f1f1f1;
   }
