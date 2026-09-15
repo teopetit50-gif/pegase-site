@@ -158,7 +158,6 @@ import {
   useCallback, useState, useSyncExternalStore, type ComponentType } from "react";
 import NumberFlow, { type Format } from "@number-flow/react";
 import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
-import Partage from "@/components/Partage";
 import { Button } from "@/components/ui/button";
 import { CallToAction4 } from "@/components/ui/call-to-action-4";
 import {
@@ -444,7 +443,14 @@ function CartePalier({
   /* côté grande structure le bouton ne commande rien : il mène au
      diagnostic, le compte des postes ne le conditionne plus */
   const devis = monde === "structure";
-  const pret = devis || manque <= 0;
+  /* 15/09, correctif (Teo : « je n'avais pas encore mis de donnée dans le
+     calculateur, il a inventé un chiffre ») — LE BOUTON ATTEND LES VOLUMES.
+     La carte retenait son prix sans volumes, mais son bouton menait quand
+     même à /installation, dont le récapitulatif affiche le montant du
+     palier : le chiffre que la grille refusait de montrer sortait par la
+     porte d'à côté, et sans avoir vérifié que le volume tient sous le
+     plafond du palier. Même verrou que `prixVisible`, même raison. */
+  const pret = devis || (manque <= 0 && prixVisible);
   const annuel = periodicite === "annuel" && !devis;
   const phare = Boolean(p.phare);
   const href = `/installation?postes=${postes.join(",")}${annuel ? "&periodicite=annuel" : ""}`;
@@ -653,7 +659,11 @@ function CartePalier({
           </Button>
         ) : (
           <Button disabled variant="outline" className="h-11 w-full text-[15px]">
-            {manque === 1 ? "Choisissez 1 poste" : `Choisissez encore ${manque} postes`}
+            {manque > 0
+              ? manque === 1
+                ? "Choisissez 1 poste"
+                : `Choisissez encore ${manque} postes`
+              : "Indiquez vos volumes"}
           </Button>
         )}
         {/* 05/09 — le moyen de paiement s'enregistre à la réservation,
@@ -713,13 +723,9 @@ export default function Grille() {
              cernées — le modèle « pricing-module » ═══ */}
       <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-16">
         <div className="mx-auto max-w-3xl text-center">
-          {/* 01/09 — la pastille « Prix publics » ARRIVE de la carte de
-              /commencer (objet partagé) */}
-          <div className="flex justify-center">
-            <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
-              {devis ? GRANDE_STRUCTURE.kicker : "Prix publics"}
-            </Partage>
-          </div>
+          {/* 15/09 — la pastille « Prix publics » RETIRÉE (Teo). Le titre
+              porte déjà les deux mots ; l'objet partagé « kicker-tarifs »
+              n'avait plus de partenaire monté côté /commencer. */}
           <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-4xl font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] sm:text-5xl">
             {devis ? GRANDE_STRUCTURE.titre : "Des prix publics, gradués sur ce que vous traitez"}
           </h1>
