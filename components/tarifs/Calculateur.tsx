@@ -39,13 +39,10 @@
      services valident » va à l'audit et ne le voit jamais (Grille.tsx ne le
      monte pas quand `devis`).
 
-   · LE CALCUL RESTE SUR L'APPAREIL. Aucun fetch : rien ne part tant que le
-     visiteur ne clique pas. 15/09 — depuis le prix continu, le bouton de
-     réservation emporte le VOLUME (`?pieces=`), et lui seul : reserver_audit
-     recalcule le montant à partir de ce nombre, exactement comme la page.
-     Il n'y a donc toujours qu'une source de vérité — le barème — et jamais
-     un prix dans l'URL, qui serait falsifiable. Transmettre le volume est ce
-     qui empêche l'écran suivant d'afficher un autre chiffre que celui-ci.
+   · LE CALCUL RESTE SUR L'APPAREIL. Aucun fetch, aucune donnée transmise,
+     y compris à la réservation : reserver_audit fige son propre instantané
+     de prix, lui passer un volume déclaré créerait deux sources de vérité.
+     C'est aussi ce qui autorise la phrase de l'en-tête du panneau.
 
    · QUAND LE CALCUL EST NÉGATIF, ON L'AFFICHE. Le bouton reste « en
      parler », jamais « souscrire quand même ». C'est la règle de la maison
@@ -337,17 +334,7 @@ export default function Calculateur({
               </p>
 
               {postesResa ? (
-                /* 15/09, correctif — LE LIEN PORTE LE VOLUME MESURÉ. Sans
-                   `pieces`, /installation retombait sur l'ancien barème par
-                   postes : le visiteur lisait « puis 800 € par mois » sous ce
-                   bouton et trouvait 1 990 € dans le récapitulatif. C'est le
-                   nombre qui vient d'être affiché, et le serveur le RECALCULE
-                   — on ne transmet jamais un montant, qui serait falsifiable
-                   depuis l'URL. */
-                <a
-                  className="calc-bouton"
-                  href={`/installation?postes=${postesResa.join(",")}&pieces=${v.pieces}`}
-                >
+                <a className="calc-bouton" href={`/installation?postes=${postesResa.join(",")}`}>
                   Réserver l&apos;installation — {euros(v.palier.installation)}
                 </a>
               ) : (
@@ -385,21 +372,28 @@ export default function Calculateur({
                 <span>{CALCULATEUR.detail.total}</span>
                 <strong>{nombre(v.pieces)} pièces par mois</strong>
               </div>
-              <div className="calc-ligne">
-                <span>
-                  Temps rendu, à {taux}
-                  {NBSP}€ de l&apos;heure
-                </span>
-                <strong>{euros(v.valeurRecuperee)}</strong>
-              </div>
-              {v.palier && (
-                <div className="calc-ligne">
-                  <span>Abonnement {v.palier.nom}</span>
-                  <strong>− {euros(v.prix ?? 0)}</strong>
-                </div>
-              )}
+              {/* RÈGLE ABSOLUE (lib/paliers.ts) — CE RÉCAPITULATIF NE S'OUVRE
+                  QU'EN CAS VIABLE. Les trois lignes ci-dessous posent le
+                  temps rendu FACE à l'abonnement : hors cas viable, elles
+                  affichaient « 105 € » puis « − 149 € », c'est-à-dire
+                  exactement le couple que la règle interdit. Le détail des
+                  pièces, lui, reste visible dans tous les cas — il ne porte
+                  aucun euro et c'est lui qui explique le volume. */}
               {gain && (
                 <>
+                  <div className="calc-ligne">
+                    <span>
+                      Temps rendu, à {taux}
+                      {NBSP}€ de l&apos;heure
+                    </span>
+                    <strong>{euros(v.valeurRecuperee)}</strong>
+                  </div>
+                  {v.palier && (
+                    <div className="calc-ligne">
+                      <span>Abonnement {v.palier.nom}</span>
+                      <strong>− {euros(v.prix ?? 0)}</strong>
+                    </div>
+                  )}
                   <div className="calc-trait calc-trait--serre" aria-hidden="true" />
                   <div className="calc-ligne calc-ligne--net">
                     <span>Net par mois</span>
