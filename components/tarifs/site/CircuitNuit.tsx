@@ -65,11 +65,13 @@ import "./CircuitNuit.css";
      (GSAP, PageMotion), il n'y a pas de seconde mécanique d'apparition.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Les trois lignes de la bande nuit — reprises mot pour mot de la page. */
+/* Les quatre lignes de la bande nuit. 15/09 : une quatrième est ajoutée —
+   ce que le site ENREGISTRE, et non plus seulement ce qu'il déclenche. */
 const CIRCUIT: [string, string][] = [
   ["01", "Accusé de réception en deux minutes, sous votre signature."],
   ["02", "Devis relancé à J+3 et J+7, facture suivie jusqu'au règlement."],
-  ["03", "Avis demandé une fois le travail fait, jamais avant."],
+  ["03", "Avis demandé une fois la commande livrée, jamais avant."],
+  ["04", "Chaque semaine, ce qu'on a cherché chez vous sans le trouver."],
 ];
 
 export default function CircuitNuit({ className }: { className?: string }) {
@@ -81,7 +83,7 @@ export default function CircuitNuit({ className }: { className?: string }) {
       </span>
 
       <div className="cn-corps">
-        <p className="cn-intitule">Ce qui suit le clic</p>
+        <p className="cn-intitule">Ce que le site fait après le clic</p>
         <ol className="cn-liste">
           {CIRCUIT.map(([n, t]) => (
             <li key={n} className="cn-etape">

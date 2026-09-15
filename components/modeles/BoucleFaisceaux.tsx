@@ -127,35 +127,35 @@ const JALONS = [
     icone: ICONES.formulaire,
     titre: "La demande arrive",
     texte:
-      "Le formulaire ne part pas dans une boîte mail où il se perdra\u00a0: la demande devient une ligne dans votre espace, horodatée, avec la page d'où elle vient.",
+      "Le formulaire ne part pas dans une boîte mail où il se perdra\u00a0: la demande devient une ligne dans votre espace, horodatée, avec la page d'où elle vient et ce qui y était cherché.",
   },
   {
     n: "02",
     icone: ICONES.reponse,
-    titre: "Le prospect est rappelé",
+    titre: "La réponse part en deux minutes",
     texte:
-      "Un accusé de réception part en deux minutes, sous votre signature. Il ne va pas voir ailleurs pendant que vous êtes sur un chantier.",
+      "Un accusé de réception sous votre signature, avec le délai que vous annoncez. Personne n'attend le lundi matin pour savoir que sa demande est arrivée quelque part.",
   },
   {
     n: "03",
     icone: ICONES.devis,
     titre: "Le devis se relance seul",
     texte:
-      "Relancé à J+3 puis à J+7 sans réponse. Chaque message vous est soumis avant de partir\u00a0: vous validez, corrigez ou suspendez d'un clic.",
+      "Relancé à J+3 puis à J+7 sans réponse, sous votre signature. Chaque message vous est soumis avant de partir\u00a0: vous validez, corrigez ou suspendez d'un clic.",
   },
   {
     n: "04",
     icone: ICONES.facture,
     titre: "La facture aussi",
     texte:
-      "Le devis accepté devient une facture, et l'impayé entre dans la même mécanique. C'est le système qui suit les règlements, plus vous.",
+      "Le devis accepté devient une facture, et l'impayé entre dans la même mécanique. C'est le système qui suit les règlements, poste par poste, plus vos équipes.",
   },
   {
     n: "05",
     icone: ICONES.avis,
     titre: "L'avis est demandé",
     texte:
-      "Prestation terminée, la demande d'avis part quand le client est encore content\u00a0: au moment exact où il dira oui.",
+      "Commande livrée ou prestation terminée, la demande d'avis part au moment où le client est encore content\u00a0: celui où il dira oui.",
   },
 ];
 
@@ -442,10 +442,10 @@ export default function BoucleFaisceaux() {
           <path d="M20.5 3.5V8h-4.5" />
         </svg>
         <p>
-          <span className="text-[color:var(--m-encre)]">Et ça recommence.</span>{" "}
-          Un client content laisse un avis, l&apos;avis fait remonter votre fiche, et la
-          demande suivante arrive sur le même site&nbsp;: sans que vous ayez rien relancé à la
-          main.
+          <span className="text-[color:var(--m-encre)]">Et le site apprend.</span>{" "}
+          Ce qui est demandé le plus souvent, ce qui est cherché sans être trouvé, les pages
+          d&apos;où l&apos;on repart&nbsp;: vous le lisez en clair, pas en courbes d&apos;audience. Un client
+          déjà venu qui revient sur une gamme reçoit une relance, pas une publicité.
         </p>
       </figcaption>
     </figure>

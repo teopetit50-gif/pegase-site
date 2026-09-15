@@ -74,28 +74,28 @@ const ETAPES = [
     titre: "Le modèle",
     sousTitre: "Choisir l'allure, pas le métier",
     texte:
-      "Les vingt et un modèles sont en ligne : vous les consultez et retenez celui qui vous correspond. Le design change, la mécanique derrière ne change pas.",
+      "Les vingt et un modèles sont en ligne : vous les consultez et retenez celui qui vous ressemble. Le design change d'un modèle à l'autre ; ce qu'il y a derrière, jamais.",
   },
   {
     n: "02",
     titre: "Le brief",
-    sousTitre: "Votre métier, vos photos, vos horaires",
+    sousTitre: "Votre activité, votre marque, vos visuels",
     texte:
-      "Depuis votre compte, sans quitter la page. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production.",
+      "Depuis votre compte, sans quitter la page : ce que vous faites, pour qui, vos adresses et vos visuels. Rien à payer en ligne aujourd'hui ; nous vous appelons pour régler et lancer la production.",
   },
   {
     n: "03",
     titre: "L'écriture",
     sousTitre: "Tout le contenu, réécrit en français",
     texte:
-      "Chaque page est réécrite à votre métier, vos coordonnées et vos photos en place. Rien de ce que montre le modèle ne reste tel quel.",
+      "Chaque page est réécrite à votre métier et à votre marque, vos coordonnées et vos visuels en place. Rien de ce que montre le modèle ne reste tel quel.",
   },
   {
     n: "04",
     titre: "La mise en ligne",
     sousTitre: "Sous votre nom, domaine compris",
     texte:
-      "Le site vous appartient dès le premier jour. Dès qu'un poste est en service chez vous, chaque demande reçue entre dans le circuit.",
+      "Le site vous appartient dès le premier jour, domaine compris. Le formulaire est branché : dès qu'un poste est en service chez vous, chaque demande reçue entre dans le circuit, et ce que le site enregistre vous revient en clair.",
   },
 ];
 
@@ -146,15 +146,15 @@ function MaqBrief() {
     <div className="ed-maq ed-maq--brief">
       <p className="ed-maq-tete">Votre brief</p>
       <div className="ed-champ">
-        <span className="ed-etiquette">Métier</span>
-        <span className="ed-valeur">Peinture et ravalement</span>
+        <span className="ed-etiquette">Activité</span>
+        <span className="ed-valeur">Négoce de matériaux</span>
       </div>
       <div className="ed-champ">
-        <span className="ed-etiquette">Horaires</span>
-        <span className="ed-valeur">Du lundi au vendredi, samedi matin</span>
+        <span className="ed-etiquette">Adresses</span>
+        <span className="ed-valeur">Trois points de vente, horaires par site</span>
       </div>
       <div className="ed-champ">
-        <span className="ed-etiquette">Photos</span>
+        <span className="ed-etiquette">Visuels</span>
         <span className="ed-photos">
           {TROIS.map((k) => (
             <span key={k} className="ed-photo">

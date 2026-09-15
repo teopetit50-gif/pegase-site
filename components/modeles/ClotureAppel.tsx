@@ -59,12 +59,14 @@ import "./ClotureAppel.css";
      n'est pas un texte conservé.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Les trois objections d'un patron de petite entreprise à un rendez-vous,
-   tombées avant d'être posées : le temps, le coût, l'engagement. */
+/* Les trois objections à un premier rendez-vous, tombées avant d'être
+   posées : le temps, le coût, l'échelle. 15/09 : le Chèque TIC laisse la
+   place au multi-enseignes — il reste traité en pleine page sur
+   /tarifs/site, mais en tête de clôture il signait « aide aux TPE ». */
 const FAITS = [
   { fort: "30 minutes", doux: "en visio ou sur place" },
   { fort: "Gratuit", doux: "et sans engagement" },
-  { fort: "Jusqu'à 10 000 €", doux: "financés par le Chèque TIC" },
+  { fort: "Plusieurs sites", doux: "un socle commun, un interlocuteur" },
 ];
 
 export default function ClotureAppel() {
@@ -93,12 +95,12 @@ export default function ClotureAppel() {
               24ch : « Votre vitrine démarre en / deux minutes » en deux lignes
               à partir de lg ; trois sur téléphone, où la colonne fait 286 px. */}
           <h2 data-intertitre className="m-h2 max-w-[24ch] text-white">
-            Votre vitrine démarre en deux minutes
+            Mettez votre vitrine en service
           </h2>
           {/* Cinq lignes à 390 : hérité de la Cloture, où la phrase faisait
               déjà cinq lignes ; le texte est conservé tel quel. */}
           <p className="mt-5 max-w-[52ch] text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/70">
-            Choisissez le modèle adapté à votre métier, et le poste qui récupère ce qui se perd entre un visiteur et un client qui règle.
+            Choisissez un modèle, nous écrivons tout le contenu. Le poste qui va avec récupère ce qui se perd aujourd&apos;hui entre un visiteur et un client qui règle.
           </p>
         </div>
 
@@ -142,8 +144,8 @@ export default function ClotureAppel() {
           </Link>
 
           <p className="text-[13px] leading-relaxed text-white/55 sm:basis-full lg:max-w-[30ch] lg:basis-auto">
-            Prix public. Sur 990&nbsp;€, il reste 198&nbsp;€ à votre charge si le
-            Chèque&nbsp;TIC finance 80&nbsp;%.
+            Prix public, le même pour tout le monde. Plusieurs enseignes ou un besoin
+            hors catalogue&nbsp;: sur devis, après diagnostic.
           </p>
         </div>
       </div>

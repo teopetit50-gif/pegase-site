@@ -77,7 +77,7 @@ import ClotureAppel from "@/components/modeles/ClotureAppel";
 export const metadata: Metadata = {
   title: "Modèles de sites | Omega.AI",
   description:
-    "Vingt et un modèles de sites en ligne, consultables immédiatement, connectés à vos systèmes : la demande de devis arrive dans votre espace et se relance jusqu'au paiement, sous votre validation.",
+    "Vingt et un modèles de sites en ligne, consultables immédiatement, branchés sur vos systèmes : chaque demande entre dans votre espace, se relance jusqu'au règlement sous votre validation, et le site vous dit ce que vos visiteurs cherchent. Un site, ou le même socle sur plusieurs enseignes.",
 };
 
 /* ——— les quatre faits sous le hero ———
@@ -85,9 +85,9 @@ export const metadata: Metadata = {
    afficher, et on n'en invente pas. Ces quatre-là se vérifient. */
 const FAITS: [string, string][] = [
   ["21 modèles", "tous en ligne, tous visitables"],
-  ["Contenu réécrit", "en français, à votre métier"],
-  ["Connecté aux systèmes", "devis, relance, avis"],
-  ["Chèque TIC", "vérifié pendant l'audit"],
+  ["Contenu réécrit", "à votre métier, à votre marque"],
+  ["Branché sur vos systèmes", "demandes, relances, avis"],
+  ["Plusieurs enseignes", "un socle commun, une vue unique"],
 ];
 
 export default function ModelesPage() {
@@ -123,7 +123,7 @@ export default function ModelesPage() {
               Vingt et un modèles, un même socle
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              Chaque modèle est un parti pris visuel, pas un métier imposé&nbsp;: vous choisissez l&apos;allure, nous réécrivons tout le contenu pour le vôtre. Le design change, la mécanique derrière ne change pas.
+              Chaque modèle est un parti pris visuel, pas un métier imposé&nbsp;: vous choisissez l&apos;allure, nous réécrivons tout le contenu pour le vôtre. Le design change&nbsp;; la mécanique derrière — ce que le site reçoit, ce qu&apos;il enregistre, ce qu&apos;il déclenche — ne change pas.
             </p>
           </div>
 
@@ -146,12 +146,12 @@ export default function ModelesPage() {
             href="/contact"
             className="group mt-6 flex flex-col items-center rounded-[14px] border border-dashed border-black/15 p-8 text-center transition-colors hover:border-black/30"
           >
-            <p className="text-[17px]">Aucun ne vous convient ?</p>
+            <p className="text-[17px]">Plusieurs enseignes, ou rien qui vous convienne&nbsp;?</p>
             <p className="mx-auto mt-3 max-w-[46ch] text-[13.5px] leading-relaxed text-[color:var(--m-doux)]">
-              Le catalogue s&apos;étend. Décrivez-nous l&apos;allure que vous avez en tête, et nous cherchons le modèle qui s&apos;en approche.
+              Le catalogue s&apos;étend, et il ne couvre pas tout&nbsp;: un site dessiné pour vous, le même socle posé sur plusieurs enseignes, un espace client à part. Décrivez ce que vous avez en tête&nbsp;; le périmètre se chiffre après un diagnostic.
             </p>
             <span className="mt-5 inline-flex items-center justify-center gap-1.5 text-[13.5px] font-medium underline-offset-4 group-hover:underline">
-              Décrire le site souhaité
+              Décrire votre besoin
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
                 <path
                   d="M3 8h10M9 4l4 4-4 4"
@@ -166,7 +166,7 @@ export default function ModelesPage() {
 
           <p className="mx-auto mt-7 max-w-3xl text-center text-[12.5px] leading-relaxed text-[color:var(--m-faible)]">
             Démonstrations. Les textes et les marques qui s&apos;y affichent sont ceux
-            livrés avec le modèle : votre site porte votre nom, vos photos et vos textes.
+            livrés avec le modèle&nbsp;: votre site porte votre nom, votre marque, vos visuels et vos textes.
           </p>
         </section>
 
@@ -178,10 +178,10 @@ export default function ModelesPage() {
               blanc en haut de section qui ne compensait plus rien. */}
           <div className="mx-auto max-w-3xl text-center">
             <h2 data-intertitre className="m-h2">
-              Du premier clic jusqu&apos;au paiement
+              Ce qui se passe après le clic
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              N&apos;importe qui peut vous vendre un site. Ce qui suit le clic est une autre affaire, et c&apos;est là que se joue la différence entre une vitrine inerte et une vitrine qui vous apporte du chiffre.
+              N&apos;importe qui peut vous vendre un site. Ce qui suit le clic est une autre affaire&nbsp;: c&apos;est là que se joue l&apos;écart entre une vitrine qui décore et une surface qui produit du chiffre et de la donnée exploitable.
             </p>
           </div>
 

@@ -153,10 +153,10 @@ export default function HeroDefile({
             vous / ramène des clients ») au lieu de laisser « clients »
             orphelin sur la seconde. */}
         <h1 data-arrivee="hero-titre" className="m-h1 max-w-[15ch]">
-          Un site qui vous apporte des clients
+          Un site qui reçoit, apprend et relance
         </h1>
         <p data-arrivee="hero-chapo" className="m-chapo mt-5 max-w-xl">
-          Vingt et un modèles en ligne, consultables immédiatement et connectés à vos systèmes.
+          Vingt et un modèles en ligne, consultables immédiatement. Le design change d&apos;un modèle à l&apos;autre&nbsp;; ce qu&apos;il y a derrière, jamais.
         </p>
         <div data-arrivee="hero-bloc" className="mt-8 flex flex-wrap items-center gap-3">
           {/* depuis la galerie, « Commencer » mène DIRECTEMENT à l'offre

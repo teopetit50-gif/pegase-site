@@ -93,50 +93,60 @@ import ClotureSite from "@/components/tarifs/site/ClotureSite";
 export const metadata: Metadata = {
   title: "Votre site, à prix public | Omega.AI",
   description:
-    "Le site catalogue : 990 € une fois, pas d'abonnement, 198 € restant à charge si le Chèque TIC finance 80 %. Maintenance offerte tant qu'un poste Omega.AI est en service chez vous. Vingt et un modèles, tous en ligne, contenu réécrit à votre métier.",
+    "Le site catalogue : 990 € une fois, pas d'abonnement, maintenance comprise tant qu'un poste Omega.AI est en service chez vous. Vingt et un modèles en ligne, contenu réécrit à votre métier et à votre marque, et un site branché sur vos systèmes : les demandes entrent dans votre espace, les devis se relancent, le site vous dit ce que vos visiteurs cherchent. Plusieurs enseignes : sur devis, après diagnostic.",
 };
 
 /* ——— les quatre modèles du mur : le premier de chaque famille du
    catalogue, pour montrer quatre partis pris et non quatre variantes ——— */
 const FAITS: [string, string][] = [
   ["21 modèles", "tous en ligne, tous visitables"],
-  ["Contenu réécrit", "en français, à votre métier"],
-  ["Branché aux postes", "devis, relance, avis"],
-  ["Chèque TIC", "vérifié pendant l'audit"],
+  ["Contenu réécrit", "à votre métier, à votre marque"],
+  ["Branché sur vos systèmes", "demandes, relances, avis"],
+  ["Plusieurs enseignes", "un socle commun, une vue unique"],
 ];
 
 /* ——— ce que les 990 € comprennent ——— */
 const COMPRIS_SITE: string[] = [
   "Un modèle au choix : les vingt et un sont en ligne, tous consultables",
-  "Contenu intégralement réécrit en français, à votre métier",
-  "Vos photos, vos coordonnées, vos horaires en place",
+  "Contenu intégralement réécrit en français, à votre métier et à votre marque",
+  "Vos visuels, vos coordonnées, vos horaires, vos points de vente en place",
   "Nom de domaine la première année, mise en ligne comprise",
-  "Formulaire prêt à connecter à vos postes : devis, relance, avis",
+  "Formulaire branché sur vos postes : chaque demande entre dans votre espace, relance et avis compris",
+  "Le relevé de ce que le site reçoit : d'où viennent les demandes, ce qui revient le plus souvent",
 ];
 
 /* ——— la FAQ site — les questions qu'un prix affiché doit prendre de front ——— */
 const FAQ_SITE: { q: string; a: string }[] = [
   {
     q: "À qui appartient le site ?",
-    a: "À vous, dès le premier jour. Le nom de domaine est au vôtre, les accès vous sont remis, et si nous nous quittons, le site part avec vous, fichiers compris. Rien n'est loué, rien n'est retenu. Sans maintenance, rien ne s'éteint sans prévenir : l'hébergement et le domaine passent à votre nom, et nous vous accompagnons pour la bascule.",
+    a: "À vous, dès le premier jour. Le nom de domaine est au vôtre, les accès vous sont remis, et si nous nous quittons, le site part avec vous, fichiers et contenus compris. Rien n'est loué, rien n'est retenu. Sans maintenance, rien ne s'éteint sans prévenir : l'hébergement et le domaine passent à votre nom, et nous vous accompagnons pour la bascule.",
   },
   {
     q: "Que comprennent les 990 €, exactement ?",
-    a: "Le modèle choisi dans le catalogue, la réécriture intégrale du contenu en français et à votre métier, vos photos et coordonnées en place, le nom de domaine la première année, la mise en ligne, et le formulaire prêt à connecter : dès qu'un poste Omega.AI est en service chez vous, chaque demande reçue entre dans le circuit devis, relance, avis. Un besoin hors catalogue, comme une boutique en ligne, un espace membre ou un logiciel particulier, se chiffre sur devis, à l'audit.",
+    a: "Le modèle choisi dans le catalogue, la réécriture intégrale du contenu en français, à votre métier et à votre marque, vos visuels et vos coordonnées en place, le nom de domaine la première année, la mise en ligne, et le formulaire branché : dès qu'un poste Omega.AI est en service chez vous, chaque demande reçue entre dans le circuit devis, relance, avis, et le relevé de ce que le site reçoit vous revient chaque semaine. Un besoin hors catalogue — boutique en ligne, espace membre, logiciel particulier, plusieurs enseignes sur un même socle — se chiffre sur devis, après diagnostic.",
+  },
+  {
+    q: "Que devient ce que le site enregistre ?",
+    a: "Cela vous appartient, et cela reste lisible : les demandes reçues, la page d'où elles viennent, ce qui est cherché sans être trouvé, ce qui n'aboutit pas. Vous le lisez en clair dans votre espace, pas en courbes d'audience. Ça sert à deux choses : corriger ce que le site dit mal, et déclencher ce qui doit l'être — un devis relancé, un client déjà venu qui revient sur une gamme, une demande hors catalogue signalée au responsable. Rien n'est revendu ni cédé ; le détail du traitement est sur la page « Où vont vos données ».",
+  },
+  {
+    q: "Nous avons plusieurs enseignes. Et nous ?",
+    a: "Le socle est le même, posé autant de fois qu'il y a d'enseignes : chacune garde son allure, son domaine et ses textes, et vous lisez l'ensemble au même endroit — demandes reçues, devis en cours, règlements, avis, par enseigne ou consolidés. Les règles de relance s'écrivent une fois et s'appliquent partout, avec les exceptions que vous posez. Ce périmètre-là ne se commande pas en ligne : il commence par une enseigne pilote et se chiffre après un diagnostic.",
   },
   {
     q: "Le Chèque TIC, concrètement ?",
-    a: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible. Il porte sur la création du site, un investissement sur facture, pas sur une mensualité. À 80 %, il reste 198 € à votre charge ; à 40 %, 594 €. Votre éligibilité est vérifiée pendant l'audit, avant tout engagement, et si un dossier se justifie, nous le montons avec vous.",
+    a: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible qui y est immatriculée. Il porte sur la création du site, un investissement sur facture, pas sur une mensualité. À 80 %, il reste 198 € à votre charge ; à 40 %, 594 €. Votre éligibilité est vérifiée pendant l'audit, avant tout engagement, et si un dossier se justifie, nous le montons avec vous.",
   },
   {
-    q: "Pourquoi la maintenance est-elle offerte avec l'abonnement ?",
-    a: "Parce qu'un site connecté aux systèmes vit avec eux : les demandes qu'il reçoit alimentent la relance, les avis, le point du matin. Entretenir la vitrine fait partie du travail, et la facturer à part n'aurait pas de sens. Sans abonnement, elle reste disponible à 19 € par mois, sans engagement.",
+    q: "Pourquoi la maintenance est-elle comprise avec l'abonnement ?",
+    a: "Parce qu'un site branché sur les systèmes vit avec eux : ce qu'il reçoit alimente la relance, les avis et le point du matin, et ce qu'il enregistre dit quoi corriger sur le site lui-même. Entretenir la vitrine fait partie du travail, et la facturer à part n'aurait pas de sens. Sans abonnement, elle reste disponible à 19 € par mois, sans engagement.",
   },
   {
-    q: "Et si aucun modèle ne me plaît ?",
-    a: "Le catalogue est fait pour être parcouru : chaque modèle est en ligne, pas en capture. Si aucun ne convient, décrivez ce que vous souhaitez : un site sur mesure se chiffre sur devis, à l'audit, comme tout besoin hors catalogue.",
+    q: "Et si aucun modèle ne convient ?",
+    a: "Le catalogue est fait pour être parcouru : chaque modèle est en ligne, pas en capture. Si aucun ne convient, décrivez ce que vous attendez — une charte à respecter, une arborescence imposée, un espace client à part. Un site dessiné pour vous se chiffre sur devis, après diagnostic, comme tout besoin hors catalogue.",
   },
 ];
+
 
 /* ——— en-tête de section : pastille, titre, chapô, centrés — le même
    que l'accueil et /offres ——— */
@@ -172,13 +182,13 @@ export default function TarifsSitePage() {
           <div className="o-wrap relative">
             <div className="flex flex-col items-center pt-[60px] text-center">
               <div data-arrivee="titre">
-                <span className="o-pill o-pill--xs">DÉCOUVRIR NOS SITES</span>
+                <span className="o-pill o-pill--xs">VOTRE SITE</span>
               </div>
               <h1 data-arrivee="titre" className="o-h1 mt-4 max-w-[760px]">
-                Votre site, au même prix pour tout le monde.
+                Un site au prix public. Un système derrière.
               </h1>
               <p data-arrivee="chapo" className="o-lead mt-[15px] max-w-[650px]">
-                Vingt et un modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu pour votre métier, et dès qu&apos;un poste est en service chez vous, le formulaire l&apos;alimente. Le prix est public, comme celui de la grille.
+                Vingt et un modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu à votre métier et à votre marque. Ce qui arrive ensuite — demandes, devis, relances, avis — entre dans vos systèmes au lieu de dormir dans une boîte mail.
               </p>
               <div data-arrivee="bloc" className="mt-[25px] flex flex-col items-center">
                 <div className="flex flex-wrap items-center justify-center gap-3">
@@ -191,7 +201,7 @@ export default function TarifsSitePage() {
                   </Link>
                 </div>
                 <span className="o-flux-sous">
-                  990&nbsp;€ une fois, pas d&apos;abonnement — le Chèque TIC vérifié à l&apos;audit
+                  990&nbsp;€ une fois, pas d&apos;abonnement — plusieurs enseignes&nbsp;: sur devis, après diagnostic
                 </span>
               </div>
             </div>
@@ -223,8 +233,8 @@ export default function TarifsSitePage() {
           <div className="o-wrap">
             <EnTete
               pastille="LE PRIX"
-              titre="Un prix, une aide, une suite."
-              chapo="La création se paie une fois, comme un investissement, celui que le Chèque TIC peut financer. La suite est comprise : tant qu'un poste Omega.AI est en service chez vous, la vitrine est entretenue."
+              titre="Un prix, une aide, et ce qui vient après."
+              chapo="La création se paie une fois, comme un investissement — celui que le Chèque TIC peut financer. Ce qui vient après est compris : tant qu'un poste Omega.AI est en service chez vous, la vitrine est entretenue, et ce qu'elle reçoit alimente vos systèmes."
             />
 
             <div className="mt-16 grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-20">
@@ -246,7 +256,7 @@ export default function TarifsSitePage() {
                   990&nbsp;€, une fois. Pas d&apos;abonnement.
                 </h3>
                 <p data-reveal className="o-body mt-4">
-                  Un des vingt et un modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Hors catalogue, comme une boutique en ligne, un espace membre ou un logiciel particulier, le site se chiffre sur devis, à l&apos;audit.
+                  Un des vingt et un modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Le même prix pour une entreprise de trois personnes et pour une direction de groupe. Hors catalogue — boutique en ligne, espace membre, plusieurs enseignes sur un même socle — le périmètre se chiffre sur devis, après diagnostic.
                 </p>
                 <ul data-reveal className="mt-6 space-y-2.5">
                   {COMPRIS_SITE.map((t) => (
@@ -277,10 +287,10 @@ export default function TarifsSitePage() {
                   La suite
                 </p>
                 <h3 data-reveal className="o-h4 mt-2">
-                  La maintenance&nbsp;? Offerte avec un abonnement actif.
+                  La maintenance&nbsp;? Comprise avec un abonnement actif.
                 </h3>
                 <p data-reveal className="o-body mt-4">
-                  Modifications courantes, hébergement, domaine renouvelé, sauvegardes, tant qu&apos;un poste est en service chez vous. Un site connecté aux systèmes vit avec eux&nbsp;: les demandes qu&apos;il reçoit alimentent la relance, les avis et le point du matin. Entretenir la vitrine fait partie du travail.
+                  Modifications courantes, hébergement, domaine renouvelé, sauvegardes, tant qu&apos;un poste est en service chez vous. Un site branché sur vos systèmes vit avec eux&nbsp;: ce qu&apos;il reçoit alimente la relance, les avis et le point du matin, et ce qu&apos;il enregistre vous dit quoi corriger. Entretenir la vitrine fait partie du travail.
                 </p>
                 <p data-reveal className="o-body mt-4">
                   Sans abonnement&nbsp;: 19&nbsp;€ par mois, sans engagement. Et le site vous appartient quoi qu&apos;il arrive, domaine, accès et fichiers à votre nom.
@@ -314,7 +324,7 @@ export default function TarifsSitePage() {
             <EnTete
               pastille="LE DÉROULÉ"
               titre="Du modèle à la mise en ligne."
-              chapo="Vous choisissez un modèle, vous déposez votre brief, nous écrivons et mettons en ligne. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production."
+              chapo="Vous choisissez un modèle, vous déposez votre brief, nous écrivons, nous mettons en ligne et nous branchons le formulaire. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production."
             />
             <EtapesDefilantes />
           </div>
@@ -327,14 +337,14 @@ export default function TarifsSitePage() {
               <div>
                 <div data-reveal>
                   <span className="o-pill o-pill--xs o-pill--dark">
-                    CE QUE LES AUTRES VITRINES N&apos;ONT PAS
+                    CE QU&apos;UNE VITRINE SEULE NE FAIT PAS
                   </span>
                 </div>
                 <h2 data-reveal className="o-h2 mt-4">
-                  Un site connecté, pas une vitrine inerte.
+                  Une surface branchée, pas une plaquette en ligne.
                 </h2>
                 <p data-reveal className="o-lead mt-5">
-                  Un site qui reçoit trois demandes par semaine et n&apos;en transforme aucune coûte plus cher qu&apos;il ne rapporte. Ici, chaque demande entre dans le circuit. La vitrine alimente les postes, et c&apos;est pour cette raison qu&apos;elle est entretenue avec eux.
+                  Un site qui reçoit des demandes et n&apos;en transforme aucune coûte plus cher qu&apos;il ne rapporte, à trois demandes par semaine comme à trois cents. Ici, chacune entre dans le circuit, et ce que le site enregistre au passage revient à vos équipes en clair. C&apos;est pour cette raison que la vitrine est entretenue avec les systèmes, pas à côté.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap gap-3">
                   <Link href="/modeles" className="o-btn o-btn--primary">
@@ -357,7 +367,7 @@ export default function TarifsSitePage() {
             <EnTete
               pastille="QUESTIONS"
               titre="Questions sur le site."
-              chapo="Les cinq questions qu'un prix affiché doit traiter clairement, avec les réponses que nous donnons."
+              chapo="Les questions qu'un prix affiché doit traiter clairement, avec les réponses que nous donnons."
             />
             <FaqSite questions={FAQ_SITE} />
           </div>

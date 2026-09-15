@@ -115,13 +115,13 @@ type Ligne = {
 const LIGNES: readonly Ligne[] = [
   {
     heure: "09:14",
-    titre: "Demande de devis · chantier",
+    titre: "Demande de devis · Vallier",
     etat: "accusé de réception envoyé",
     genre: "devis",
   },
   {
     heure: "09:16",
-    titre: "Réponse · demande du samedi",
+    titre: "Réponse · demande du dimanche",
     etat: "sous votre signature",
     genre: "reponse",
   },

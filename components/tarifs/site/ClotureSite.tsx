@@ -66,10 +66,10 @@ export default function ClotureSite() {
 
       <div className="o-wrap relative flex flex-col items-center text-center">
         <h2 data-reveal className="o-h2 max-w-[620px]">
-          Commandez votre site en deux minutes.
+          Commandez en deux minutes. Nous faisons le reste.
         </h2>
         <p data-reveal className="o-lead mt-5 max-w-[600px]">
-          Un modèle, votre brief, et nous écrivons tout pour votre métier. Rien à payer en ligne aujourd&apos;hui&nbsp;: nous vous appelons pour régler, et le Chèque TIC se vérifie avant tout engagement.
+          Un modèle, votre brief, et nous écrivons tout à votre métier et à votre marque. Rien à payer en ligne aujourd&apos;hui&nbsp;: nous vous appelons pour régler, et votre éligibilité au Chèque TIC se vérifie avant tout engagement.
         </p>
 
         {/* la rangée de cta13 : colonne pleine largeur sous sm, côte à côte
@@ -103,7 +103,7 @@ export default function ClotureSite() {
         {/* la mention discrète de l'autre porte : pour qui s'est trompé
             d'aiguillage, sans re-poser deux portes ici */}
         <p data-reveal className="o-small mt-8 max-w-[520px] !text-[13px] !leading-[20px]">
-          Plusieurs services se partagent le travail chez vous&nbsp;? Votre site s&apos;inscrit dans un ensemble qui se mesure d&apos;abord&nbsp;: votre prix est établi à l&apos;issue d&apos;un diagnostic.{" "}
+          Plusieurs enseignes, plusieurs services, une charte à respecter&nbsp;? Le site n&apos;est alors qu&apos;une surface de plus dans un ensemble qui se mesure d&apos;abord — périmètre, données, intégrations. On commence par une enseigne pilote, et le prix est établi à l&apos;issue d&apos;un diagnostic.{" "}
           <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-white">
             Demander un diagnostic
           </Link>

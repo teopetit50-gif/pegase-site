@@ -269,7 +269,10 @@ function Carte({ m }: { m: Modele }) {
           <span className="text-[color:var(--m-faible)]">Convient à&nbsp;: </span>
           <span className="text-[color:var(--m-doux)]">{m.pour}</span>
         </p>
-        <p className="mt-2 text-[13.5px] leading-relaxed text-[color:var(--m-doux)]">{m.capte}</p>
+        <p className="mt-2 text-[13.5px] leading-relaxed">
+          <span className="text-[color:var(--m-faible)]">Ce qu&apos;il alimente&nbsp;: </span>
+          <span className="text-[color:var(--m-doux)]">{m.capte}</span>
+        </p>
 
         <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-5">
           <a

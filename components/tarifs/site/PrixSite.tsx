@@ -214,7 +214,7 @@ export default function PrixSite({ defaut = "t80" }: { defaut?: CleTaux }) {
         <div className="ps-ligne">
           <div className="ps-ligne-texte">
             <div className="ps-ligne-titre">Site catalogue</div>
-            <div className="ps-ligne-sous">un modèle, réécrit à votre métier</div>
+            <div className="ps-ligne-sous">un modèle, réécrit à votre métier et à votre marque</div>
           </div>
           <span className="num ps-ligne-prix">990&nbsp;€</span>
         </div>
