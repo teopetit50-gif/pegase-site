@@ -89,7 +89,7 @@ import {
   type DemandeCompte,
 } from "@/lib/abonnement";
 import { dateGp } from "@/lib/site-commande";
-import { POSTES, REMISE_ANNUELLE, lirePeriodicite, type Periodicite } from "@/lib/paliers";
+import { PALIERS, POSTES, REMISE_ANNUELLE, lirePeriodicite, type Periodicite } from "@/lib/paliers";
 import { createClient } from "@/lib/supabase/client";
 
 type Props = {
@@ -543,8 +543,14 @@ export default function AbonnementCarte({
             {modifiable ? "Nouvelle formule" : "Formule souhaitée"}
           </div>
           <p className="mt-1 text-[14px] leading-[21px] text-[var(--cp-doux)]">
-            Un poste 59&nbsp;€, deux ou trois 89&nbsp;€, les quatre 119&nbsp;€ par mois. Le point du matin
-            et la validation avant envoi sont compris quel que soit le choix.
+            {/* 15/09/2026 — la phrase portait 59 / 89 / 119 €, la grille du
+                01/09 remplacée le 15 (voir l'en-tête de lib/paliers.ts). Un
+                client connecté lisait donc un prix qui n'existe plus, au
+                cinquième du vrai. Les montants sont désormais LUS dans
+                PALIERS : une grille, une source. */}
+            Un poste {PALIERS[0].prix}&nbsp;€, deux ou trois {PALIERS[1].prix}&nbsp;€, les quatre{" "}
+            {PALIERS[2].prix}&nbsp;€ par mois. Le point du matin et la validation avant envoi sont
+            compris quel que soit le choix.
           </p>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
