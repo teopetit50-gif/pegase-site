@@ -166,20 +166,25 @@ export default function PriseDeCreneau({
   modeleNom,
   estimation,
 }: Props) {
-  /* ——— le verrou compte (02/09 ; étendu le 15/09) ———
-     Il ne tenait que le parcours installation : l'audit et le devis
-     partaient sans jeton, donc sans utilisateur_id (reserver_audit pose
-     auth.uid(), null pour un anonyme) — la demande n'apparaissait NULLE
-     PART dans « Mon compte ».
+  /* ——— le verrou compte (02/09 ; étendu le 15/09 au matin, REPLIÉ le
+     15/09 au soir) ———
+     Il n'a jamais tenu que le parcours installation. Étendu à l'audit le
+     matin pour que la demande soit rattachée à quelqu'un — au prix d'un
+     mot de passe demandé AVANT l'envoi, pour un audit gratuit.
 
-     15/09, décision Teo (« plus d'inscription libre, tout mène à
-     l'audit ») : le compte ne se crée plus sur /connexion, il se crée
-     ICI, au moment où l'on réserve — audit compris. C'est le seul endroit
-     où il naît avec quelque chose derrière lui, et c'est ce qui permet à
-     « Mon compte » de montrer l'audit au lieu d'un abonnement vide.
-     La création reste donc ouverte DANS ce module (`sansCreation` n'y est
-     pas posé), et elle seule. */
-  const verrou = true;
+     Teo, le soir : « le but c'est d'avoir un site qui redirige vers un
+     audit, pas plus — pas de truc de connexion ». Le repli était prévu
+     dès le matin : c'est celui-là. Le verrou redescend sur l'installation
+     seule — là, il est justifié, on y enregistre un moyen de paiement et
+     la demande doit porter un client. Réserver un AUDIT ne demande plus
+     rien d'autre que ses coordonnées : nom, e-mail, situation, créneau.
+
+     Ce qu'on perd, et qui est assumé : un audit part sans
+     `utilisateur_id` (reserver_audit pose auth.uid(), null pour un
+     anonyme). Il reste rattaché à son e-mail en base ; c'est « Mon
+     compte » qui ne le montre pas — et plus rien du site ne mène à « Mon
+     compte ». */
+  const verrou = parcours === "installation";
   const [util, setUtil] = useState<Utilisateur | null>(verrou ? (utilisateur ?? null) : null);
 
   /* ——— quoi ——— */
@@ -936,13 +941,17 @@ export default function PriseDeCreneau({
             {/* 02/09 (revue n° 11) — pour l'installation, la phrase « rien
                 n'est conservé sans votre accord » était devenue fausse : la
                 demande est rattachée au compte et le profil y est gardé.
-                On le dit. 15/09 — l'audit l'est aussi (verrou étendu) :
-                la seconde phrase, qui promettait l'inverse, est retirée
-                plutôt que laissée dans une branche morte. */}
+                On le dit. 15/09 au matin, le verrou s'étend à l'audit et la
+                seconde phrase part ; le soir il redescend, et elle revient :
+                un audit ne crée plus de compte, donc rien n'y est « conservé
+                sur votre compte ». La phrase suit le verrou, elle ne le
+                devance pas — c'est elle qui engage. */}
             <p className="r-note mt-4 max-w-[60ch]">
-              Vos coordonnées servent à organiser ce rendez-vous. Prénom, nom, entreprise et
-              téléphone sont conservés sur votre compte pour vos prochaines demandes, et rien
-              n&apos;est revendu. Voir{" "}
+              Vos coordonnées servent à organiser ce rendez-vous.{" "}
+              {verrou
+                ? "Prénom, nom, entreprise et téléphone sont conservés sur votre compte pour vos prochaines demandes, et rien n'est revendu."
+                : "Elles ne servent qu'à ça, rien n'est revendu, et vous n'avez aucun compte à créer."}{" "}
+              Voir{" "}
               <Link href="/vos-donnees" className="underline underline-offset-2">
                 où vont vos données
               </Link>

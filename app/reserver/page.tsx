@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
-import { utilisateurCourant } from "@/lib/supabase/server";
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES, prixPourVolume } from "@/lib/paliers";
 
@@ -22,13 +21,18 @@ import { POSTES, prixPourVolume } from "@/lib/paliers";
    Distinct de /installation (parcours grille /tarifs) : ici on mesure,
    là-bas on met en route.
 
-   15/09 — LE CRÉNEAU SE RÉSERVE AVEC UN COMPTE, comme l'installation.
-   Décision Teo : plus d'inscription libre sur le site, tout mène à
-   l'audit — le compte naît donc ICI, et le rendez-vous lui est rattaché
-   (reserver_audit pose auth.uid()). Sans ça, l'audit n'apparaissait dans
-   aucun « Mon compte » : la demande partait anonyme. La session est lue
-   côté serveur et passée au module, comme /installation, pour que la
-   personne déjà connectée ne voie pas passer un formulaire de connexion.
+   15/09 (matin, ANNULÉ LE SOIR) — le créneau s'est réservé AVEC UN COMPTE
+   pendant une journée : la page lisait la session côté serveur, passait
+   l'utilisateur au module, et le module exigeait une connexion avant
+   l'envoi. Teo, le soir : « le but c'est d'avoir un site qui redirige vers
+   un audit, pas plus — pas de truc de connexion ». Réserver un audit ne
+   demande donc plus que des coordonnées.
+
+   La lecture de session (`utilisateurCourant()`) part avec le verrou :
+   sans lui, le module ignore l'utilisateur qu'on lui passe. VÉRIFIÉ après
+   coup : la route reste marquée dynamique (ƒ) au build — c'est
+   `searchParams` qui la tient, pas les cookies, et elle l'était donc déjà
+   avant le verrou. On retire un appel inutile, pas une lenteur.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -97,8 +101,6 @@ export default async function ReserverPage({
     return `Estimation faite sur le site — ${bouts.join(" · ")}.`;
   })();
 
-  const utilisateur = await utilisateurCourant();
-
   return (
     <PageShell>
       <PageMotion />
@@ -115,7 +117,6 @@ export default async function ReserverPage({
               formuleInitiale={sp.formule}
               modeleNom={modeleNom}
               estimation={estimation}
-              utilisateur={utilisateur}
             />
           </div>
         </section>

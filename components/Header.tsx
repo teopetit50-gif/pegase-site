@@ -143,14 +143,21 @@ export default function Header() {
       document.removeEventListener("visibilitychange", relire);
     };
   }, [pathname]);
-  const hrefCompte = connecte ? "/compte" : "/connexion";
+  /* 15/09 (soir), Teo : « le but c'est d'avoir un site qui redirige vers
+     un audit, pas plus — pas de truc de connexion ». LA PORTE DU COMPTE NE
+     S'AFFICHE PLUS QU'À QUI EST DÉJÀ CONNECTÉ. Un visiteur ne voit donc
+     aucune icône, aucun « Se connecter » : le seul geste que le header
+     propose est « Commencer ». Un client, lui, garde sa porte là où elle a
+     toujours été — c'est « cacher, pas casser » : /connexion et /compte
+     répondent toujours, et le lien de ses e-mails y mène. */
+  const hrefCompte = "/compte";
   /* 02/09 (Teo) — « se connecter » seul laissait croire qu'il fallait déjà
      un compte : on nommait les deux. 15/09 — il FAUT déjà un compte :
      l'inscription libre est fermée, le compte s'ouvre en réservant (voir
      app/connexion/page.tsx). Le libellé redevient donc exact.
      Connecté : « Mon compte », le nom de la page ouverte (revue n° 8 : un
      seul nom pour le même objet). */
-  const libelleCompte = connecte ? "Mon compte" : "Se connecter";
+  const libelleCompte = "Mon compte";
 
   useEffect(() => {
     const check = () => {
@@ -364,7 +371,9 @@ export default function Header() {
           {/* 02/09 — l'icône compte : une personne dans un cercle, trait en
               currentColor, 20 px. Même gabarit de tap que le burger (44 px
               mobile, 36 desktop) et même caméléon : noir au-dessus d'une
-              section claire ou du panneau ouvert, blanc sinon. */}
+              section claire ou du panneau ouvert, blanc sinon.
+              15/09 — elle n'est rendue que si le cookie de session est là. */}
+          {connecte ? (
           <Link
             href={hrefCompte}
             aria-label={libelleCompte}
@@ -389,6 +398,7 @@ export default function Header() {
               <path d="M5.8 19.2c1.3-2.6 3.6-4 6.2-4s4.9 1.4 6.2 4" />
             </svg>
           </Link>
+          ) : null}
           {/* burger 2 barres — se croise en X à l'ouverture */}
           <button
             type="button"
@@ -601,7 +611,11 @@ export default function Header() {
                 « Commencer » (/tarifs, 28/08).
                 02/09 — le compte existe : « Se connecter ou créer un
                 compte » / « Mon compte » revient en tête de pile, en pilule
-                grise comme le contact. */}
+                grise comme le contact.
+                15/09 — la pilule ne se rend que pour une session ouverte,
+                comme l'icône de la barre : le panneau d'un visiteur ne
+                propose plus que « Nous contacter » et « Commencer ». */}
+            {connecte ? (
             <Link
               href={hrefCompte}
               onClick={() => setOpen(false)}
@@ -616,6 +630,7 @@ export default function Header() {
             >
               {libelleCompte}
             </Link>
+            ) : null}
             {/* 14/09 — était un <a> brut : le seul du menu, donc le seul
                 bouton qui rechargeait tout le site au lieu de changer de
                 page. Il rejoint ses voisins en <Link>. */}
