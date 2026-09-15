@@ -47,8 +47,11 @@ export function lienCourriel(sujet: string) {
 
    lienContact mène donc au formulaire, sujet pré-choisi dans la liste
    « Votre demande concerne » (FormulaireContact lit ?sujet= au montage).
-   Le numéro ne reste affiché qu'en mentions légales, où la loi le demande
-   (TELEPHONE_AFFICHE), jamais en lien de conversation. Les anciennes
+   Le numéro n'est jamais un lien de conversation. 15/09 : les mentions
+   légales, seul endroit où il restait affiché, ont été retirées du site —
+   plus aucun téléphone n'apparaîssait nulle part. Décision de Teo : il
+   revient sur /contact, en carte « Téléphone » à côté de l'e-mail, avec
+   un lien d'appel (LIEN_TELEPHONE) et pas autre chose. Les anciennes
    constantes WHATSAPP, CANAL, CANAL_LABEL, CANAL_LABEL_PHRASE et
    CANAL_VALEUR n'existent plus : chaque appelant écrit son libellé.
    ══════════════════════════════════════════════════════════════════════ */
@@ -111,6 +114,9 @@ function formateNumero(n: string) {
 }
 
 export const TELEPHONE_AFFICHE = formateNumero(TELEPHONE);
+
+/** Lien d'appel — `tel:`, jamais une conversation. */
+export const LIEN_TELEPHONE = `tel:+${TELEPHONE}`;
 
 /* ——— les deux profils du sélecteur ——— */
 

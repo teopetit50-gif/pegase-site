@@ -4,7 +4,7 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import FormulaireContact from "@/components/contact/FormulaireContact";
 import { AttendreContact, BesoinsContact } from "@/components/contact/VoiesContact";
-import { COURRIEL, lienCourriel } from "@/lib/reservation";
+import { COURRIEL, LIEN_TELEPHONE, TELEPHONE_AFFICHE, lienCourriel } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /contact — le service client (08/09/2026)
@@ -125,6 +125,27 @@ export default function ContactPage() {
               <div className="mt-4">
                 <a href={courriel} className="r-btn r-btn--fil w-full sm:w-auto">
                   Écrire à {COURRIEL}
+                </a>
+              </div>
+            </article>
+
+            {/* 15/09/2026 — le téléphone revient. Il n'était plus affiché
+                qu'en mentions légales ; la page retirée, le site n'avait plus
+                aucun numéro. C'est un lien d'APPEL, pas une conversation :
+                WhatsApp n'est plus une porte du site (voir lib/reservation). */}
+            <article data-reveal className="ap-carte">
+              <h3 className="r-h4">Téléphone</h3>
+              <p className="ap-sous">Pour ce qui va plus vite de vive voix</p>
+              <p className="mt-3 text-[15px] leading-[24px] text-[#3d3d3d]">
+                Une question courte, une installation en cours, un point à caler. Aux heures
+                ouvrées ; en dehors, laissez un message et nous rappelons.
+              </p>
+              <p className="num mt-4 select-all text-[17px] font-semibold text-[#050505]">
+                {TELEPHONE_AFFICHE}
+              </p>
+              <div className="mt-4">
+                <a href={LIEN_TELEPHONE} className="r-btn r-btn--fil w-full sm:w-auto">
+                  Appeler {TELEPHONE_AFFICHE}
                 </a>
               </div>
             </article>

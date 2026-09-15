@@ -15,7 +15,7 @@ import {
   BandeauOutils,
   Chevron,
   EmblemeEurope,
-  MaqCheque,
+  MaqPrixConnu,
   MaqJournal,
   MaqLocal,
   MaqValidation,
@@ -400,21 +400,12 @@ const ETAPES = [
   },
 ];
 
-/* 07/08 (Teo) — le bloc financement est réécrit, textes fournis tels quels.
-   Le paragraphe unique se scinde en deux : ce que le dispositif finance, puis
-   un encadré « accompagnement » qui reprend le montage du dossier.
-
-   Le texte fourni ne mentionnait plus la Région : le Chèque TIC étant un
-   dispositif RÉGIONAL et la vitrine ne s'adressant plus au seul département,
-   un visiteur hexagonal aurait lu cette carte comme une aide le concernant.
-   L'incise a donc été remise (arbitrage Teo du 07/08). Le reste du texte est
-   celui qui a été fourni.
-
-   UNE PERTE ASSUMÉE : le barème (40 à 80 % du projet selon le poste) n'est
-   plus affiché. La maquette continue d'annoncer « jusqu'à 10 000 € », ce qui
-   reste vrai, et le détail vit dans l'article du dispositif.
-
-   Le lien change aussi de destination — voir le commentaire sur `lien`. */
+/* 07/08 → 15/09 — l'histoire du bloc financement, qui n'est plus là.
+   Il portait le Chèque TIC, avec l'incise « porté par la Région
+   Guadeloupe » remise par Teo le 07/08 : sans elle, un visiteur hexagonal
+   lisait une aide qui le concernait. Le 15/09, Teo a tranché plus court —
+   le dispositif sort de l'accueil (voir la première carte de GARANTIES).
+   Il reste entier sur /tarifs#cheque-tic et dans son article de blog. */
 /* 11/09/2026 — les deux corps de 5 et 6 lignes sont ramenés à 3, et
    l'encadré « accompagnement » disparaît : le type est désormais celui de
    `CartesLueur`, qui n'a pas de fente pour lui. Ce qui a été retiré de la
@@ -423,32 +414,27 @@ const ETAPES = [
    le même fait écrit deux fois à 300 px d'intervalle. */
 const GARANTIES: CarteLueur[] = [
   {
-    label: "Financement",
-    titre: "Jusqu'à 10 000 € de prise en charge selon votre éligibilité",
-    /* « de la Région Guadeloupe » et « qui y sont immatriculées » sont remis
-       (Teo, 07/08) : le Chèque TIC est régional, et la vitrine ne s'adresse
-       plus au seul département. Seule cette incise est ajoutée au texte
-       fourni, le reste est intact. */
-    /* L'incise « portée par la Région Guadeloupe » et « qui y sont
-       immatriculées » survivent à la coupe, et ce n'est pas négociable : le
-       Chèque TIC est un dispositif RÉGIONAL sur un site national. Sans
-       elles, un visiteur hexagonal lit une aide qui le concerne. */
+    /* 15/09/2026 — cette carte portait le CHÈQUE TIC (« jusqu'à 10 000 € »).
+       Décision de Teo : il sort de l'accueil. C'est une aide de la Région
+       Guadeloupe posée sur un accueil national — pour la quasi-totalité des
+       visiteurs, une promesse qui ne les concerne pas, et qui brouille le
+       « produit français » ([[produit-francais-jamais-guadeloupeen]]).
+       Il n'est pas retiré du site : sa section vit sur /tarifs#cheque-tic et
+       son article de blog, avec l'incise « Région Guadeloupe » qui reste
+       obligatoire là où il est cité. À la place, un argument qui vaut pour
+       tout le monde et tient le même rôle dans le titre de section
+       (« un investissement maîtrisé ») : le prix est connu avant qu'on
+       commence. Pour revenir en arrière, le texte et la maquette MaqCheque
+       sont intacts dans components/offres/MediaMoteurs.tsx. */
+    label: "Engagement",
+    titre: "Le prix est connu avant qu'on commence",
     texte:
-      "Le Chèque TIC, porté par la Région Guadeloupe, finance une partie de l'installation pour les entreprises qui y sont immatriculées. On vérifie l'éligibilité, puis on monte le dossier avec vous.",
-    /* Le libellé passe de « Lire le détail du dispositif » à « Vérifier mon
-       éligibilité » : il annonce un acte, plus une lecture. Le garder pointé
-       sur l'article aurait promis une vérification pour livrer un texte —
-       il mène donc à la prise de rendez-vous, seul endroit où l'éligibilité
-       se vérifie réellement, ce que le texte de la carte dit déjà. Pour
-       revenir en arrière : href "/blog/cheque-tic-financement". */
-    /* 28/08 — repointé vers la section Chèque TIC de /tarifs : c'est elle
-       qui dit où et quand l'éligibilité se vérifie (à l'installation), là
-       où /commencer ne mentionnait ni TIC ni éligibilité. */
+      "Pour les organisations, l'audit mesure vos volumes et chiffre le besoin avant la première ligne de code. Pour les indépendants, TPE et PME, les prix sont publics, installation comprise. Dans les deux cas, rien ne démarre sur une estimation faite au téléphone.",
     lien: {
-      label: "Vérifier mon éligibilité",
-      href: "/tarifs#cheque-tic",
+      label: "Voir ce qui est public",
+      href: "/tarifs",
     },
-    maquette: <MaqCheque />,
+    maquette: <MaqPrixConnu />,
   },
   {
     label: "Données",
@@ -539,7 +525,7 @@ const FAQ = [
        grand-chose ») niait la grille publique vers laquelle le CTA de
        cette même page envoie désormais. Réécrite pour les deux mondes. */
     q: "Combien cela coûte-t-il ?",
-    a: "Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit : sociétés, sites et postes concernés. Pour les indépendants, TPE et PME, il est public : un poste 59 € par mois, trois postes 89 €, tout Omega 119 € — sans engagement, installation comprise. Dans les deux cas, le Chèque TIC peut financer une partie de l'installation (de 40 à 80 %, jusqu'à 10 000 €), si vous êtes éligible.",
+    a: "Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit : sociétés, sites et postes concernés. Pour les indépendants, TPE et PME, il est public : un poste 59 € par mois, trois postes 89 €, tout Omega 119 € — sans engagement, installation comprise. Dans les deux cas, le prix est annoncé avant que quoi que ce soit démarre.",
   },
   {
     q: "Où sont hébergées mes données ?",
@@ -1194,7 +1180,7 @@ export default function Home() {
             <EnTete
               pastille="LES GARANTIES"
               titre="Un investissement maîtrisé. Des données protégées."
-              chapo="Le financement de l'installation, et ce qu'il advient de vos données. Deux réponses, dès le départ."
+              chapo="Ce que ça vous engage, et ce qu'il advient de vos données. Deux réponses, dès le départ."
             />
             {/* 11/09/2026 — les deux cartes larges passent à `CartesLueur` :
                 même maquette, même destination, mais le liseré s'encre sous

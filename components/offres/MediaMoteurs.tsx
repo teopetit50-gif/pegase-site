@@ -668,6 +668,44 @@ export function MaqEtapes() {
   );
 }
 
+/* 15/09/2026 — la carte « investissement maîtrisé » de l'accueil. Elle
+   remplace MaqCheque, qui portait le Chèque TIC : une aide RÉGIONALE
+   (Guadeloupe) mise en avant sur un accueil national, que la quasi-totalité
+   des visiteurs lisaient comme une promesse qui ne les concerne pas. Le
+   Chèque TIC n'est pas retiré du site — il garde sa section sur /tarifs et
+   son article de blog, avec l'incise « Région Guadeloupe » qui reste
+   obligatoire. Même dessin que MaqCheque (label, valeur, jauge, note) pour
+   ne rien changer à la rangée de cartes. */
+export function MaqPrixConnu() {
+  return (
+    <Carte className="w-full">
+      <div className="px-4 py-4">
+        <div className="flex items-baseline justify-between">
+          <span className="text-[11.5px] font-semibold text-[#52525b]">Avant de commencer</span>
+          <span className="text-[11.5px] text-[#a1a1aa]">Audit, puis devis</span>
+        </div>
+        <div
+          className="mt-2 text-[24px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#09090b]"
+          style={{ fontFamily: "var(--font-jakarta)" }}
+        >
+          Le prix avant
+          <br />
+          la première ligne
+        </div>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#f4f4f5]">
+          <div className="h-full w-[100%] rounded-full bg-[#18181b]" />
+        </div>
+        <p className="mt-3 text-[12.5px] leading-[1.6] text-[#71717a]">
+          Le besoin est mesuré et chiffré avant tout engagement. Rien ne se
+          construit sur une estimation faite au téléphone.
+        </p>
+      </div>
+    </Carte>
+  );
+}
+
+/* ⚠ Plus appelée par l'accueil depuis le 15/09 (voir MaqPrixConnu). Gardée
+   pour la section Chèque TIC de /tarifs, où le dispositif est à sa place. */
 export function MaqCheque() {
   return (
     <Carte className="w-full">
