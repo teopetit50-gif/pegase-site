@@ -25,6 +25,8 @@ import PortesHover from "@/components/offres/PortesHover";
 import FondSilk from "@/components/accueil/FondSilk";
 import FriseDeroule from "@/components/accueil/FriseDeroule";
 import TableauEntrees from "@/components/accueil/TableauEntrees";
+import { CasColonnes } from "@/components/ui/cas-colonnes";
+import { CAS_ACCUEIL } from "@/lib/cas-accueil";
 import TexteRevele from "@/components/accueil/TexteRevele";
 import BentoChange, { type CarteBento } from "@/components/accueil/BentoChange";
 import CartesEcheance, {
@@ -328,7 +330,12 @@ const GROUPES: CarteLueur[] = [
     titre: "Les interdits ne sont pas des consignes.",
     texte:
       "Douze contrôles vivent dans notre base, sous les automatisations : l'envoi interdit n'est pas reporté, il n'est jamais écrit.",
-    lien: { label: "Ce que le système refuse", href: "/offres/securite" },
+    /* 15/09/2026 — la carte menait à « Ce que le système refuse »
+       (/offres/securite, la fiche VAULT). Les deux paquets compris ne
+       s'affichent plus nulle part sur le site et aucune autre page ne
+       détaille les douze contrôles : la carte reste SANS lien plutôt que
+       d'envoyer vers une page qu'on ne montre plus, ou de renvoyer le
+       visiteur là d'où il vient. `lien` est facultatif dans CartesLueur. */
   },
   {
     label: "Données",
@@ -541,9 +548,12 @@ const FAQ = [
 /* 05/08/2026 — les cartes de la vitrine sont désormais les PAQUETS, pas les
    moteurs. Les quatre qui s'installent tiennent exactement dans la grille de
    quatre colonnes qui existait déjà (auparavant les quatre moteurs vedettes
-   sur douze) : aucune maille ne bouge. Les deux paquets compris — PULSE et
-   VAULT — ne sont pas des cartes, ils vivent dans la section « garanties »
-   et sur /offres. */
+   sur douze) : aucune maille ne bouge.
+
+   15/09/2026 — les deux paquets compris, PULSE et VAULT, ne sont plus
+   affichés du tout : ni carte, ni lien, ni mention nommée. Ce qu'ils font
+   reste dit (l'état chaque matin, la validation avant envoi), mais comme une
+   garantie comprise, jamais comme un système de plus à découvrir. */
 const VEDETTES = ["CASHD", "RELOAD", "FRONTD", "FILED"];
 
 const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
@@ -934,16 +944,18 @@ export default function Home() {
                 href: `/offres/${m.slug}`,
               }))}
             />
-            {/* PULSE et VAULT, compris chez tout le monde, vivent sur /offres */}
             {/* 07/08 (Teo) — deux libellés étaient proposés : « Découvrir les
                 autres systèmes » et « Voir l'ensemble de nos solutions ». Le
-                premier est retenu parce qu'il dit vrai sur la destination —
-                /offres montre les DEUX paquets restants, pas un catalogue
-                complet — là où « l'ensemble de nos solutions » promettrait une
-                page qui récapitule les six. */}
+                premier disait vrai tant que /offres montrait DEUX paquets de
+                plus que l'accueil.
+
+                15/09/2026 (Teo) — PULSE et VAULT ne s'affichent plus : /offres
+                porte les mêmes quatre systèmes, plus le sur-mesure et la mise
+                en place. « Les autres systèmes » promettrait donc un catalogue
+                qui n'existe pas ; le bouton nomme la destination. */}
             <div data-reveal className="mt-10 flex justify-center">
               <Link href="/offres" className="o-btn o-btn--ghost">
-                Découvrir les autres systèmes
+                Voir toutes les offres
                 <Chevron taille={13} />
               </Link>
             </div>
@@ -1006,6 +1018,35 @@ export default function Home() {
             titre="Moins de tâches. Plus de temps. Plus de marge."
             chapo="Ce que les systèmes prennent en charge, et ce qui reste entre vos mains."
           />
+        </section>
+
+        {/* ════════ 4 ter · LES NEUF CAS — trois colonnes qui remontent ════════
+            15/09/2026. Le gabarit de témoignages de 21st.dev
+            (`CasColonnes`, déjà en bas de /offres/sur-mesure), rempli de
+            SITUATIONS et non d'avis : Omega n'a aucun client à citer, et un
+            faux avis sur un site commercial est une pratique trompeuse.
+            Le détail de ce qui remplace quoi est en tête de `lib/cas-accueil`.
+
+            Teo a d'abord demandé la version à neuf faux clients « juste pour
+            voir » : elle existe, elle est restée sur le banc et s'éteint
+            partout ailleurs (`omega-site-v3/lib/temoignages-essai.ts`).
+            Ne pas la rapatrier ici.
+
+            LA PLACE : juste après « ce que ça change », là où un visiteur se
+            demande si ça marche vraiment, et avant qu'on lui dise qui on
+            est. La section précédente porte son `py-[110px]`, celle-ci n'a
+            donc que son écart bas. */}
+        <section data-monde="clair" className="pb-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille="LES SITUATIONS"
+              titre="Ce que les systèmes tiennent, et chez qui ça arrive."
+              chapo="Neuf situations telles qu'elles se présentent avant l'audit. Ce ne sont pas des témoignages : nous n'en publions pas tant que nous n'en avons pas de vrais."
+            />
+            <div className="mt-16">
+              <CasColonnes cas={CAS_ACCUEIL} />
+            </div>
+          </div>
         </section>
 
         {/* ════════ 4 bis · L'ÉQUIPE — la mosaïque de portraits ════════
