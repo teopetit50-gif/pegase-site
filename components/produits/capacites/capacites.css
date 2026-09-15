@@ -1,0 +1,354 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les trois blocs de capacités des pages produit (14/09/2026)
+
+   Écrits en CSS scopé plutôt qu'en utilitaires, pour deux raisons tenues
+   par le parc : les quatre pages produit portent chacune leur peau et un
+   utilitaire Tailwind y perd contre une règle de peau hors couche ; et en
+   Tailwind v4 un `border` nu se peint en `currentColor`, ce qui dessine
+   des filets de la couleur du texte sur une grille copiée.
+
+   Tout est réglé par quatre variables, pour qu'une page puisse teinter le
+   bloc sans toucher à ce fichier :
+     --cap-encre   le texte                      (défaut : l'encre du parc)
+     --cap-fond    le fond des cartes
+     --cap-filet   les filets
+     --cap-doux    le texte secondaire
+   ══════════════════════════════════════════════════════════════════════ */
+
+.cap {
+  --cap-encre: #111111;
+  --cap-fond: #ffffff;
+  --cap-filet: #e6e6e6;
+  --cap-doux: #5b5b5b;
+  --cap-pastille: #f4f4f4;
+  color: var(--cap-encre);
+}
+
+/* ─────────────────────────── en-tête de bloc ─────────────────────────── */
+
+.cap-etiquette {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cap-doux);
+}
+
+.cap-titre {
+  margin-top: 14px;
+  font-size: clamp(26px, 3.4vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  max-width: 22ch;
+}
+
+.cap-chapo {
+  margin-top: 14px;
+  max-width: 62ch;
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--cap-doux);
+}
+
+.cap-compte {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--cap-filet);
+}
+
+.cap-compte b {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cap-compte span {
+  font-size: 14px;
+  color: var(--cap-doux);
+}
+
+/* ─────────────────────────── grille de familles ──────────────────────── */
+
+.cap-grille {
+  margin-top: 26px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 48rem) {
+  .cap-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .cap-grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cap-famille {
+  border: 1px solid var(--cap-filet);
+  border-radius: 8px;
+  background: var(--cap-fond);
+  padding: 18px 18px 8px;
+}
+
+.cap-famille-tete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--cap-filet);
+}
+
+.cap-famille-icone {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  background: var(--cap-pastille);
+}
+
+.cap-famille-icone svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cap-famille-nom {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  flex: 1 1 auto;
+}
+
+.cap-famille-compte {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--cap-doux);
+}
+
+.cap-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-liste li {
+  display: flex;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--cap-filet);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.cap-liste li:last-child {
+  border-bottom: 0;
+}
+
+/* la coche : un trait, pas une pastille de couleur — la charte du parc est
+   quasi monochrome, et quarante pastilles vertes feraient une guirlande */
+.cap-puce {
+  margin-top: 6px;
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+}
+
+.cap-puce path {
+  stroke: var(--cap-encre);
+  stroke-width: 2.4;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cap-mention {
+  margin-top: 18px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--cap-doux);
+  max-width: 78ch;
+}
+
+/* ─────────────────────────── cas limites ─────────────────────────────── */
+
+.cap-cas {
+  margin-top: 26px;
+  display: grid;
+  gap: 0 34px;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--cap-filet);
+}
+
+@media (min-width: 64rem) {
+  .cap-cas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cap-cas-item {
+  border-bottom: 1px solid var(--cap-filet);
+}
+
+.cap-cas-tete {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.cap-cas-q {
+  flex: 1 1 auto;
+  font-size: 15px;
+  line-height: 23px;
+  font-weight: 500;
+}
+
+.cap-cas-signe {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  width: 15px;
+  height: 15px;
+  color: var(--cap-doux);
+  transition: transform 0.22s ease;
+}
+
+.cap-cas-item[data-state="open"] .cap-cas-signe {
+  transform: rotate(45deg);
+}
+
+/* L'état de repos est écrit, il ne dépend pas de la fin de l'animation.
+   Sans la ligne `height` de l'état ouvert, la hauteur ne vaut la hauteur du
+   contenu qu'une fois l'animation terminée — et une animation n'avance que
+   si des trames sont produites. Sur un navigateur piloté, ou sur un onglet
+   en arrière-plan, le panneau reste alors coincé à quelques pixels : le
+   `data-state` dit « open » et le lecteur ne voit rien. */
+.cap-cas-corps {
+  overflow: hidden;
+}
+
+.cap-cas-corps[data-state="open"] {
+  height: var(--radix-accordion-content-height);
+  animation: cap-ouvre 0.24s ease-out;
+}
+
+.cap-cas-corps[data-state="closed"] {
+  height: 0;
+  animation: cap-ferme 0.2s ease-in;
+}
+
+.cap-cas-corps p {
+  padding: 0 29px 16px 0;
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--cap-doux);
+}
+
+@keyframes cap-ouvre {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes cap-ferme {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cap-cas-corps[data-state="open"],
+  .cap-cas-corps[data-state="closed"] {
+    animation: none;
+  }
+
+  .cap-cas-signe {
+    transition: none;
+  }
+}
+
+/* ─────────────────────────── échelle groupe ──────────────────────────── */
+
+.cap-echelle {
+  margin-top: 26px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 48rem) {
+  .cap-echelle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .cap-echelle {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cap-carte {
+  border: 1px solid var(--cap-filet);
+  border-radius: 8px;
+  background: var(--cap-fond);
+  padding: 20px;
+}
+
+.cap-carte-icone {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--cap-pastille);
+}
+
+.cap-carte-icone svg {
+  width: 17px;
+  height: 17px;
+}
+
+.cap-carte h3 {
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 23px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.cap-carte p {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--cap-doux);
+}

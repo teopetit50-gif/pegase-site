@@ -51,16 +51,17 @@ export function Chiffres() {
         </div>
         <div className={cn("relative", HACHURE)}>
           <div className="mx-6 border-r border-l bg-[#f5f5f5] md:mx-16">
-            <div className="relative z-10 grid grid-cols-2 divide-y divide-[#d9d9d9] md:grid-cols-4 md:divide-x md:divide-y-0">
-              {C.cellules.map((c) => (
-                <div key={c.libelle} className="p-6 text-center sm:p-8 md:p-10 md:text-left">
-                  <p className="font-semibold text-2xl text-[#0a0a0a] sm:text-3xl md:text-4xl">{c.valeur}</p>
-                  <p className="mt-1 text-[#737373] text-sm">{c.libelle}</p>
-                </div>
-              ))}
-            </div>
-
-            <div ref={bloc} className="border-[#d9d9d9] border-t">
+            {/* 14/09/2026 — les quatre tuiles (« 7 h 30 », « 60 / 100 »,
+                « 1 seul », « Arrêt ») ne sont plus rendues : quatre faits
+                de conception qui décrivaient la machine au lieu de son
+                étendue. Ce qu'elles disaient est repris, développé, dans le
+                catalogue de capacités et les garde-fous commerciaux
+                (`components/produits/reprise/Perimetre.tsx`). `C.cellules`
+                reste dans `lib/produits/reprise.ts` : rien ne le lit, et
+                c'est voulu tant que Teo n'a pas tranché.
+                Le graphique, lui, RESTE : c'est le seul endroit de la page
+                où le coût de ne rien faire se voit. */}
+            <div ref={bloc} className="">
               <div
                 data-sonde="graphique"
                 className={cn(

@@ -6,6 +6,7 @@ import { BandeauOutils } from "@/components/produits/reprise/BandeauOutils";
 import { Separateur } from "@/components/produits/reprise/Cadre";
 import { Fonctionnalites } from "@/components/produits/reprise/Fonctionnalites";
 import { Chiffres } from "@/components/produits/reprise/Chiffres";
+import Perimetre from "@/components/produits/reprise/Perimetre";
 import { Metiers } from "@/components/produits/reprise/Metiers";
 import { Questions } from "@/components/produits/reprise/Questions";
 import { Francais } from "@/components/produits/reprise/Francais";
@@ -79,7 +80,16 @@ export default function NouvellesAffairesPage() {
           <Separateur />
           <Fonctionnalites />
           <Separateur />
+          {/* 14/09 — `Chiffres` ne rend plus ses quatre tuiles (« 7 h 30 »,
+              « 60 / 100 », « 1 seul », « Arrêt »), qui décrivaient la
+              machine au lieu de son étendue ; son graphique reste, c'est le
+              seul endroit de la page où le coût de l'inaction se voit. Le
+              périmètre, les cas tordus et l'échelle groupe prennent la
+              place des tuiles. ⚠ Voir la colonne `atteste` de
+              `lib/produits/capacites/reprise.ts`. */}
           <Chiffres />
+          <Separateur />
+          <Perimetre />
           <Separateur />
           <Metiers />
           <Separateur />

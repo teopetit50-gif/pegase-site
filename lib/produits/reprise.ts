@@ -279,8 +279,8 @@ export const CHIFFRES = {
      ce que le moteur fait de ces règles. Les quatre libellés de tuiles ont
      chacun sujet et verbe, à longueur constante — ce sont les chaînes les
      plus contraintes du fichier (text-sm sous un chiffre en text-4xl). */
-  titre: "Le système applique quatre règles qu'il ne peut pas contourner.",
-  suite: "Elles valent le 15 août comme un mardi ordinaire.",
+  titre: "Un fichier client que personne ne rappelle s'éteint par paliers.",
+  suite: "La courbe ci-dessous se lit sur n'importe quel historique de ventes.",
   cellules: [
     { valeur: "7 h 30", libelle: "Le relevé part chaque matin" },
     { valeur: "60 / 100", libelle: "En dessous, l'annonce est écartée" },

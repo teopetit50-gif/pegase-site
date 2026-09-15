@@ -4,7 +4,7 @@ import PageShell from "@/components/PageShell";
 import { Apport } from "@/components/produits/accueil/Apport";
 import { Bandeau } from "@/components/produits/accueil/Bandeau";
 import { Canaux } from "@/components/produits/accueil/Canaux";
-import { Capacites } from "@/components/produits/accueil/Capacites";
+import Perimetre from "@/components/produits/accueil/Perimetre";
 import { Cloture } from "@/components/produits/accueil/Cloture";
 import { Etapes } from "@/components/produits/accueil/Etapes";
 import { Francais } from "@/components/produits/accueil/Francais";
@@ -103,7 +103,13 @@ export default function Page() {
             <Bandeau />
             <Journee />
             <Apport />
-            <Capacites />
+            {/* 14/09 — le périmètre, les cas tordus et l'échelle groupe
+                remplacent les trois cartes de `Capacites` (réception,
+                qualification, avis) : elles disaient la promesse, pas
+                l'étendue. `Capacites.tsx` reste au dépôt, plus appelé.
+                ⚠ Voir la colonne `atteste` de
+                `lib/produits/capacites/accueil.ts`. */}
+            <Perimetre />
             <Etapes />
             <Canaux />
             <Metiers />

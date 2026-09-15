@@ -11,7 +11,16 @@ import {
 import { LogoMarquee } from "@/components/produits/factures/ui/logo-marquee";
 import Bento from "@/components/produits/factures/Bento";
 import Francais from "@/components/produits/factures/Francais";
-import Chiffres from "@/components/produits/factures/Chiffres";
+import {
+  CasLimites,
+  EchelleGroupe,
+  GrilleCapacites,
+} from "@/components/produits/capacites/Capacites";
+import {
+  CAS_LIMITES,
+  CATALOGUE,
+  ECHELLE,
+} from "@/lib/produits/capacites/factures";
 import Faq from "@/components/produits/factures/Faq";
 import Paliers from "@/components/produits/factures/Paliers";
 import { Marque } from "@/components/produits/factures/Marque";
@@ -266,14 +275,6 @@ export default function PageFactures() {
               </Vitrine>
             </Apparition>
 
-            {/* Trois paragraphes remplacés par des chiffres. Chacun est
-                vérifiable sur le produit — aucun n'est une performance
-                commerciale, FILED n'a pas de client. */}
-            <div className="mt-14 lg:mt-20">
-              <Apparition>
-                <Chiffres />
-              </Apparition>
-            </div>
           </div>
         </section>
 
@@ -344,6 +345,46 @@ export default function PageFactures() {
             />
             <Apparition>
               <Bento />
+            </Apparition>
+          </div>
+        </section>
+
+        <Filet />
+
+        {/* ── Le périmètre, les cas tordus, l'échelle ────────────────
+             14/09/2026 — remplacent la bande `Chiffres` (« 0 message
+             envoyé en votre nom », « 1 boîte mail à brancher »), qui
+             tenait sous la maquette du principe. Quatre faits de
+             fabrication justes, mais qui décrivaient la machine au lieu
+             de son étendue : une direction financière ne se décide pas
+             là-dessus. `Chiffres.tsx` reste au dépôt, plus appelé.
+             ⚠ La colonne `atteste` de `lib/produits/capacites/factures.ts`
+             distingue ce qui existe de ce qui est écrit sans être
+             construit. À trancher avant tout partage du site. */}
+        <section data-monde="clair" id="perimetre" className="relative overflow-hidden pt-16 pb-12 lg:pt-32 lg:pb-20">
+          <div className={CADRE}>
+            <Apparition>
+              <GrilleCapacites donnees={CATALOGUE} />
+            </Apparition>
+          </div>
+        </section>
+
+        <Filet />
+
+        <section data-monde="clair" id="cas-limites" className="relative overflow-hidden pt-16 pb-12 lg:pt-32 lg:pb-20">
+          <div className={CADRE}>
+            <Apparition>
+              <CasLimites donnees={CAS_LIMITES} />
+            </Apparition>
+          </div>
+        </section>
+
+        <Filet />
+
+        <section data-monde="clair" id="echelle" className="relative overflow-hidden pt-16 pb-12 lg:pt-32 lg:pb-20">
+          <div className={CADRE}>
+            <Apparition>
+              <EchelleGroupe donnees={ECHELLE} />
             </Apparition>
           </div>
         </section>

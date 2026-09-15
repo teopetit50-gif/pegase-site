@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Gelasio } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import { Heros } from "@/components/produits/relances/Heros";
 import { Bandeau } from "@/components/produits/relances/Bandeau";
-import { Chiffres } from "@/components/produits/relances/Chiffres";
+import Perimetre from "@/components/produits/relances/Perimetre";
 import { Principe } from "@/components/produits/relances/Principe";
 import { France } from "@/components/produits/relances/France";
 import { Bento } from "@/components/produits/relances/Bento";
@@ -104,10 +104,20 @@ export default function RelancesImpayesPage() {
           <Heros />
         </div>
         <Bandeau />
-        <Chiffres />
         <Principe />
         <Bento />
         <Ecrans />
+        {/* 14/09 — le périmètre, les cas tordus et l'échelle groupe
+            remplacent la bande `Chiffres` (« 1 tableur », « 3 canaux »,
+            « 4 paliers », « 0 envoi sans vous ») qui tenait la troisième
+            place de la page. Quatre faits de conception, justes, mais qui
+            décrivaient la machine au lieu de son étendue. Posés ici, après
+            les écrans : le lecteur a vu ce que le système fait, il peut
+            lire ce qu'il couvre. `Chiffres.tsx` reste au dépôt, plus
+            appelé. ⚠ La colonne `atteste` de
+            `lib/produits/capacites/relances.ts` distingue ce qui existe de
+            ce qui est écrit sans être construit. */}
+        <Perimetre />
         {/* RESYNCHRONISATION 11/09 — « Un produit français » était ici entre
             le Principe et le Bento, où elle coupait la démonstration en deux.
             La source l'a déplacée le même jour (cashd-site/app/page.tsx, et
