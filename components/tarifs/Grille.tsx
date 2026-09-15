@@ -99,6 +99,31 @@
    — un en-tête centré n'a pas de rideau mot à mot, et les entrées
    repassent au `data-reveal` du site. Les deux composants restent au
    dépôt, d'autres pages s'en servent.
+   ═══ 15/09/2026 — UNE QUATRIÈME CARTE : SUR MESURE (Teo)
+   La grille affichait trois paliers chiffrés, et le sur-mesure n'existait
+   qu'en cinquième ligne de chaque carte (07/09). Il devient une carte à
+   part entière, en quatrième colonne, avec « Sur devis » là où les autres
+   portent un montant — la règle de la v3 qui interdit d'afficher un prix
+   quand plusieurs services se partagent la validation (PORTES) reprend sa
+   place, visible, au lieu d'être reléguée au bandeau du dessous.
+
+   Trois conséquences, toutes assumées :
+     a. LA LIGNE SUR-MESURE SORT DES TROIS CARTES. Elle disait la même
+        chose que la nouvelle carte, en plus petit et quatre fois ; les
+        cartes étaient déjà jugées denses, et une colonne entière porte
+        désormais le message. `SUR_MESURE` continue de servir /offres et
+        la page Mon compte ; seule la ligne dans la grille part.
+     b. LE PALIER N'ENTRE PAS DANS `PALIERS` (voir lib/paliers.ts) : cette
+        liste est le barème, et le comparatif, `prixPour` et la fonction
+        SQL en dépendent. La carte est rendue à part, ici.
+     c. LA GRILLE PASSE À QUATRE COLONNES, mais seulement à partir de
+        1280 px — à 1024 px quatre colonnes tombaient à 208 px de large.
+        Entre les deux, deux colonnes de deux : la sous-grille qui aligne
+        têtes, prix, listes et boutons s'applique alors sur DEUX bandes de
+        quatre rangées (d'où le gabarit de huit rangées à `md`).
+   Le comparatif du bas reste à trois colonnes : le sur-mesure répondrait
+   « ça dépend » sur chacune de ses quinze lignes.
+
    Ce qui reste : « Le quatrième poste pour N € de plus » sur Tout Omega,
    tous les textes de Teo, l'ancre #grille et le scroll-mt, la sélection
    exclusive entre paliers, et les sections 2 et 3 (bandeau d'orientation,
@@ -108,7 +133,7 @@
 import Link from "next/link";
 import { useState, useSyncExternalStore, type ComponentType } from "react";
 import NumberFlow, { type Format } from "@number-flow/react";
-import { Boxes, Check, Layers, Plus, Star, X, Zap } from "lucide-react";
+import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
 import Partage from "@/components/Partage";
 import { Button } from "@/components/ui/button";
 import { CallToAction4 } from "@/components/ui/call-to-action-4";
@@ -124,12 +149,12 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/cn";
 import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
 import {
+  CARTE_SUR_MESURE,
   COMPARATIF_PALIERS,
   COMPRIS,
   PALIERS,
   POSTES,
   REMISE_ANNUELLE,
-  SUR_MESURE,
   economieAnnuelle,
   equivalentMensuel,
   lirePeriodicite,
@@ -226,18 +251,81 @@ function Marqueur({ etat }: { etat: "coche" | "vide" | "non" | "plus" }) {
   return <span aria-hidden className={cn(commun, "border border-[#c7c7c7] bg-white")} />;
 }
 
-/* la cinquième ligne : même gabarit qu'un poste, un « + » dans le
-   marqueur, et toute la ligne est un lien vers la page sur-mesure */
-function LigneSurMesure() {
+/* ——— la quatrième carte : sur mesure (15/09/2026, voir l'en-tête) ———
+   Même gabarit que les trois autres — mêmes rangées de sous-grille, même
+   pied — pour qu'elle se lise comme un palier et non comme un encart. Ce
+   qui change : « Sur devis » à la place du chiffre (donc pas de
+   NumberFlow, et l'interrupteur mensuel / annuel ne la touche pas), les
+   deux situations qui y mènent au « + » là où les autres cochent des
+   postes, et un bouton qui ouvre le formulaire au lieu de réserver. */
+function CarteSurMesure() {
+  const c = CARTE_SUR_MESURE;
+
   return (
-    <li>
-      <Link href={SUR_MESURE.href} className="group flex items-start">
-        <Marqueur etat="plus" />
-        <span className="text-[#3d3d3d] underline-offset-4 group-hover:underline">
-          {SUR_MESURE.nom}
-        </span>
-      </Link>
-    </li>
+    <Card
+      className={cn(
+        "relative flex h-full flex-col rounded-xl border-[#e3e3e3] shadow-none transition-all duration-300",
+        "hover:border-[#050505]/30 hover:shadow-md",
+        "md:row-span-4 md:grid md:grid-rows-subgrid",
+      )}
+    >
+      <CardHeader className="items-center pt-8 text-center">
+        <div className="mb-4 flex justify-center">
+          <Sparkles className="size-8 text-[#050505]" strokeWidth={1.5} />
+        </div>
+        <CardTitle className="font-[family-name:var(--font-jakarta)] text-2xl">{c.nom}</CardTitle>
+        <CardDescription className="text-[#616161]">{c.promesse}</CardDescription>
+      </CardHeader>
+
+      <div className="px-6">
+        <div className="text-center">
+          {/* même hauteur de bloc que le prix des voisines : le grand mot,
+              puis la ligne qui remplace « par mois », puis la note */}
+          <p className="text-4xl font-bold text-[#050505]">{c.prixTexte}</p>
+          <p className="mt-1 text-sm text-[#616161]">{c.sousPrix}</p>
+          <div className="mt-3">
+            <p className="text-xs text-[#767676]">{c.note}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6">
+        <div className="border-t border-[#e3e3e3] pt-5 text-left text-sm">
+          <h4 className="mb-3 font-semibold text-[#050505]">{c.casTitre}</h4>
+          <ul className="space-y-2.5">
+            {c.cas.map((t) => (
+              <li key={t} className="flex items-start">
+                <Marqueur etat="plus" />
+                <span className="text-[#3d3d3d]">{t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6 text-left text-sm">
+          <h4 className="mb-3 font-semibold text-[#050505]">{c.pointsTitre}</h4>
+          <ul className="space-y-2.5">
+            {c.points.map((t) => (
+              <li key={t} className="flex items-start">
+                <Marqueur etat="coche" />
+                <span className="text-[#3d3d3d]">{t}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <CardFooter className="mt-auto flex-col items-stretch pt-6 md:mt-0">
+        <Button asChild variant="outline" className="h-11 w-full text-[15px]">
+          <a href={lienContact("avant")}>{c.cta}</a>
+        </Button>
+        <p className="mt-3 text-center text-xs text-[#767676]">
+          <Link href={c.href} className="r-lien !text-xs">
+            {c.enSavoirPlus}
+          </Link>
+        </p>
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -267,11 +355,11 @@ function CartePalier({
       className={cn(
         "relative flex h-full flex-col rounded-xl border-[#e3e3e3] shadow-none transition-all duration-300",
         "hover:border-[#050505]/30 hover:shadow-md",
-        /* dès lg, la carte devient une SOUS-GRILLE de quatre rangées : tête,
-           prix, listes, pied. Les trois cartes partagent donc les mêmes
-           lignes — sans elle, la promesse de « Tout Omega » fait quatre
-           lignes contre trois et son prix descend de 20 px */
-        "lg:row-span-4 lg:grid lg:grid-rows-subgrid",
+        /* dès md, la carte devient une SOUS-GRILLE de quatre rangées : tête,
+           prix, listes, pied. Les cartes d'une même bande partagent donc
+           les mêmes lignes — sans elle, la promesse de « Tout Omega » fait
+           quatre lignes contre trois et son prix descend de 20 px */
+        "md:row-span-4 md:grid md:grid-rows-subgrid",
         phare && "border-[#050505] shadow-md ring-1 ring-[#050505]/15",
       )}
     >
@@ -381,7 +469,6 @@ function CartePalier({
                     </li>
                   );
                 })}
-                <LigneSurMesure />
               </ul>
             </fieldset>
           ) : (
@@ -394,7 +481,6 @@ function CartePalier({
                     <span className="text-[#3d3d3d]">{x.nom}</span>
                   </li>
                 ))}
-                <LigneSurMesure />
               </ul>
             </div>
           )}
@@ -414,9 +500,14 @@ function CartePalier({
         </div>
       </div>
 
-      {/* le bouton en pied (écart 1) : les trois CTA tombent sur la même
-          ligne, et la commande reste sous le choix qui l'active */}
-      <CardFooter className="mt-auto flex-col items-stretch pt-6">
+      {/* le bouton en pied (écart 1) : les CTA tombent sur la même ligne,
+          et la commande reste sous le choix qui l'active. `mt-auto`
+          bottom-aligne le pied tant que la carte est une pile (mobile) ;
+          dès la sous-grille il le DÉCALERAIT — 15/09 : la note d'une
+          seule ligne de la carte sur-mesure faisait descendre son bouton
+          de 16 px sous les trois autres — d'où `md:mt-0`, qui accroche
+          tous les pieds au HAUT de la même rangée. */}
+      <CardFooter className="mt-auto flex-col items-stretch pt-6 md:mt-0">
         {pret ? (
           <Button
             asChild
@@ -502,12 +593,19 @@ export default function Grille() {
           </Switch>
         </div>
 
-        {/* la grille. `pt-4` laisse passer les pastilles posées à -12 px ;
-            dès 1024 px la phare prend 3 % d'échelle, la gouttière de 32 px
-            absorbe les 6 px qu'elle déborde de chaque côté */}
+        {/* la grille. `pt-4` laisse passer les pastilles posées à -12 px.
+            15/09 — QUATRE CARTES, DONC DEUX GABARITS (voir l'en-tête) :
+            · de 768 à 1279 px, deux colonnes de deux, et un gabarit de
+              HUIT rangées — chaque carte en occupe quatre, la seconde
+              bande tombe donc sur les rangées 5 à 8 ; `gap-y-8` sépare
+              les deux bandes, que `gap-y-0` annule quand tout revient
+              sur une seule ligne ;
+            · à partir de 1280 px, quatre colonnes et quatre rangées.
+            Pourquoi pas quatre colonnes dès 1024 px : la colonne utile y
+            vaut 928 px, soit 208 px par carte — deux mots par ligne. */}
         <div
           id="grille"
-          className="mx-auto mt-12 grid max-w-md scroll-mt-32 gap-6 pt-4 lg:mt-16 lg:max-w-none lg:grid-cols-3 lg:grid-rows-[auto_auto_1fr_auto] lg:gap-x-8 lg:gap-y-0"
+          className="mx-auto mt-12 grid max-w-md scroll-mt-32 gap-6 pt-4 md:max-w-3xl md:grid-cols-2 md:grid-rows-[auto_auto_1fr_auto_auto_auto_1fr_auto] md:gap-x-6 md:gap-y-10 lg:mt-16 xl:max-w-none xl:grid-cols-4 xl:grid-rows-[auto_auto_1fr_auto] xl:gap-x-6 xl:gap-y-0"
         >
           {PALIERS.map((p) => (
             <CartePalier
@@ -518,6 +616,7 @@ export default function Grille() {
               periodicite={periodicite}
             />
           ))}
+          <CarteSurMesure />
         </div>
 
         {/* ce qui tourne chez tout le monde */}

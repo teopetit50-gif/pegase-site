@@ -411,3 +411,74 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
     ],
   },
 ];
+
+/* ——— LA QUATRIÈME CARTE : SUR MESURE, SANS MONTANT (15/09/2026, Teo) ———
+
+   La grille montrait trois paliers chiffrés et renvoyait le sur-mesure à
+   une ligne discrète au bas de chaque carte (SUR_MESURE, 07/09). Il prend
+   maintenant sa place de palier à part entière, en quatrième colonne,
+   avec « Sur devis » là où les autres portent un prix.
+
+   POURQUOI IL N'EST PAS DANS `PALIERS` : cette liste est le barème, et
+   trois choses en dépendent qu'un quatrième élément casserait en silence —
+   la fonction SQL reserver_audit (qui garde sa copie des trois prix),
+   `prixPour`, et le comparatif, dont chaque ligne tient exactement trois
+   valeurs. Le sur-mesure n'a pas de prix à comparer : toutes ses cellules
+   diraient « ça dépend ». Il vit donc à côté, et la carte est rendue à
+   part dans components/tarifs/Grille.tsx.
+
+   CE QUE LA CARTE A LE DROIT DE DIRE : rien de neuf. Elle reprend le
+   périmètre de /offres/sur-mesure (SUR_MESURE.resume) et le critère des
+   deux portes (PORTES.critere / PORTES.equipe) — un prix ne s'affiche pas
+   quand plusieurs services se partagent la validation, c'est la règle
+   d'origine de la v3, restée en vigueur de ce côté-là.
+
+   PAS DE PÉRIODICITÉ : l'interrupteur mensuel / annuel ne touche pas
+   cette carte — il n'y a pas de montant à remiser. */
+
+export type CarteSurMesure = {
+  id: "sur-mesure";
+  nom: string;
+  promesse: string;
+  /* ce qui s'affiche à la place du prix, et les deux lignes dessous */
+  prixTexte: string;
+  sousPrix: string;
+  note: string;
+  /* les deux cas qui mènent ici — même rangée que le choix des postes */
+  casTitre: string;
+  cas: string[];
+  /* la rangée « Compris dans le palier » des autres cartes */
+  pointsTitre: string;
+  points: string[];
+  cta: string;
+  /* le lien de la ligne sous le bouton, vers la page qui cadre l'offre */
+  enSavoirPlus: string;
+  href: string;
+};
+
+export const CARTE_SUR_MESURE: CarteSurMesure = {
+  id: "sur-mesure",
+  nom: "Sur mesure",
+  promesse:
+    "Le poste qui vous coûte le plus cher n'est pas dans la liste, ou plusieurs services se partagent la validation : le périmètre se décrit, le devis s'écrit avant tout engagement.",
+  prixTexte: "Sur devis",
+  sousPrix: "établi avec vous",
+  note: "Le prix dépend de qui valide, pas de votre chiffre d'affaires.",
+  casTitre: "Deux situations mènent ici",
+  cas: [
+    "Une tâche hors des quatre postes",
+    "Plusieurs services qui valident",
+    "Un logiciel métier à raccorder",
+  ],
+  pointsTitre: "Compris dans le devis",
+  points: [
+    "Les mêmes fondations : vos outils, vos règles, votre validation",
+    "Le point du matin et les verrous, compris comme partout",
+    "Un diagnostic qui mesure vos volumes avant de chiffrer",
+    "Périmètre, installation et prix écrits avant tout engagement",
+    "Satisfait ou remboursé 30 jours, une fois en service",
+  ],
+  cta: "Décrire votre besoin",
+  enSavoirPlus: "Voir la page sur mesure",
+  href: SUR_MESURE.href,
+};
