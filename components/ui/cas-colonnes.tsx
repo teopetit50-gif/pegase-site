@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
+import { motion, useAnimationFrame, useMotionValue, useReducedMotion } from "motion/react";
 
 /* ══════════════════════════════════════════════════════════════════════
    cas-colonnes — trois colonnes qui remontent en continu (15/09/2026)
@@ -61,11 +62,22 @@ export type CasUsage = {
   texte: string;
   nature: string;
   secteur: string;
+  /* 15/09 (Teo, « quand on clique sur un widget ça renvoie vers le paquet
+     en question ») — la page du paquet qui tient ce cas, quand il y en a
+     une. FACULTATIF, et c'est voulu : sur les neuf cas de l'accueil,
+     quatre nomment un poste qui a sa vitrine (relances, demandes
+     entrantes, clients inactifs, documents) ; les cinq autres parlent du
+     point du matin, de la validation, des intégrations et du cas écarté,
+     qui n'ont plus de page où aller depuis que le site ne montre que les
+     quatre paquets. Une carte sans `href` reste un simple <article>. */
+  href?: string;
 };
 
-function Carte({ cas }: { cas: CasUsage }) {
-  return (
-    <article className="w-full max-w-xs rounded-[15px] border border-[var(--o-line)] bg-white p-8 shadow-[0_1px_2px_rgba(9,9,11,0.04),0_10px_30px_-18px_rgba(9,9,11,0.18)]">
+function Carte({ cas, inerte = false }: { cas: CasUsage; inerte?: boolean }) {
+  const CADRE =
+    "block w-full max-w-xs rounded-[15px] border border-[var(--o-line)] bg-white p-8 shadow-[0_1px_2px_rgba(9,9,11,0.04),0_10px_30px_-18px_rgba(9,9,11,0.18)]";
+  const dedans = (
+    <>
       <p className="text-[15px] leading-[1.7] tracking-[0.01em] text-[var(--o-muted-strong)]">
         {cas.texte}
       </p>
@@ -76,7 +88,7 @@ function Carte({ cas }: { cas: CasUsage }) {
         >
           {cas.icone}
         </span>
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <span className="text-[15px] font-medium leading-5 tracking-[-0.01em] text-[var(--o-text)]">
             {cas.nature}
           </span>
@@ -84,11 +96,63 @@ function Carte({ cas }: { cas: CasUsage }) {
             {cas.secteur}
           </span>
         </div>
+        {/* la flèche du site (bento-02, hero de /offres) : elle avance de
+            3 px au survol de la carte, et n'apparaît que sur celles qui
+            mènent quelque part */}
+        {cas.href ? (
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+            className="ml-auto shrink-0 text-[var(--o-muted)] transition-all duration-200 group-hover:translate-x-[3px] group-hover:text-[var(--o-text)]"
+          >
+            <path d="M7 17 17 7" />
+            <path d="M8 7h9v9" />
+          </svg>
+        ) : null}
       </div>
-    </article>
+    </>
+  );
+
+  if (!cas.href) return <article className={CADRE}>{dedans}</article>;
+  return (
+    <Link
+      href={cas.href}
+      /* la COPIE du bandeau est `aria-hidden` : ses liens doivent sortir
+         du parcours clavier, sinon on tabule dans un contenu annoncé
+         absent — un lien focusable sous `aria-hidden` est une faute
+         d'accessibilité, pas un détail. */
+      tabIndex={inerte ? -1 : undefined}
+      className={`group transition-colors duration-200 hover:border-[var(--o-muted)] ${CADRE}`}
+    >
+      {dedans}
+    </Link>
   );
 }
 
+/* CINQUIÈME ÉCART (15/09) — LE DÉFILEMENT SE MET EN PAUSE AU SURVOL.
+   Il le fallait dès lors que les cartes sont des liens : viser une cible
+   qui remonte de deux cartes par seconde est un jeu d'adresse, et un
+   clic raté sur un bandeau en mouvement se lit comme un site cassé.
+
+   La boucle n'est donc plus déclarative (`animate={{ translateY: "-50%" }}`
+   + `repeat: Infinity`) : on avance nous-mêmes une `MotionValue` à chaque
+   image, de la moitié de la hauteur en `duree` secondes, et on la ramène
+   d'une moitié quand elle la dépasse — le même mouvement, exactement, mais
+   qu'on peut arrêter et reprendre SANS SAUT, ce qu'une animation
+   déclarative ne sait pas faire (la stopper la fige, la relancer la
+   ramène à son point de départ).
+
+   `y` est en PIXELS, pas en pourcentage : la moitié est relue sur le DOM
+   à chaque image, donc la boucle reste juste quand les cartes changent de
+   hauteur (une colonne à 390 px n'a pas la géométrie d'une à 1440).
+   À réglage « animations réduites », rien n'avance, comme avant. */
 export function ColonneCas({
   cas,
   duree = 15,
@@ -99,18 +163,43 @@ export function ColonneCas({
   className?: string;
 }) {
   const sansMouvement = useReducedMotion();
+  const y = useMotionValue(0);
+  const piste = React.useRef<HTMLDivElement>(null);
+  const [pause, setPause] = React.useState(false);
+
+  useAnimationFrame((_, delta) => {
+    if (sansMouvement || pause) return;
+    const moitie = (piste.current?.offsetHeight ?? 0) / 2;
+    if (moitie <= 0) return;
+    let suivant = y.get() - (moitie / (duree * 1000)) * delta;
+    if (suivant <= -moitie) suivant += moitie;
+    y.set(suivant);
+  });
+
   return (
     <div className={className}>
       <motion.div
-        animate={sansMouvement ? undefined : { translateY: "-50%" }}
-        transition={{ duration: duree, repeat: Infinity, ease: "linear", repeatType: "loop" }}
+        ref={piste}
+        style={{ y }}
+        /* `onHoverStart`/`onHoverEnd` de motion (pointer events) plutôt que
+           `onMouseEnter`/`onMouseLeave` : la piste bouge SOUS le curseur,
+           et un pointeur immobile au-dessus d'un élément qui se déplace ne
+           produit pas toujours de `mouseenter` — c'est le survol qui
+           « glisse » d'une carte à l'autre. Les pointer events couvrent
+           aussi le stylet et le doigt qui reste posé. */
+        onHoverStart={() => setPause(true)}
+        onHoverEnd={() => setPause(false)}
+        /* au clavier : le focus d'une carte arrête aussi la colonne,
+           sinon la carte visée s'en va pendant qu'on la lit */
+        onFocusCapture={() => setPause(true)}
+        onBlurCapture={() => setPause(false)}
         className="flex flex-col gap-6 pb-6"
       >
         {[0, 1].map((copie) => (
           <React.Fragment key={copie}>
             {cas.map((c, i) => (
               <div key={`${copie}-${i}`} aria-hidden={copie > 0}>
-                <Carte cas={c} />
+                <Carte cas={c} inerte={copie > 0} />
               </div>
             ))}
           </React.Fragment>

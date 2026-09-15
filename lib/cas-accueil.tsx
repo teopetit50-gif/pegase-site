@@ -46,12 +46,25 @@ import type { CasUsage } from "@/components/ui/cas-colonnes";
    moins » — aucun de ces chiffres n'existe.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* 15/09/2026 (Teo) — « quand on clique sur chaque widget, ça renvoie vers
+   le paquet en question ». QUATRE de ces neuf cas nomment un poste qui a sa
+   vitrine : ils portent désormais son `href`, et la carte devient une porte
+   (flèche ↗, pause du défilement au survol — voir `ColonneCas`).
+
+   LES CINQ AUTRES N'EN PORTENT PAS, et ce n'est pas un oubli : le point du
+   matin et la validation avant envoi sont PULSE et VAULT, dont les pages ne
+   sont plus liées depuis que le site ne montre que les quatre paquets qui
+   s'installent ; l'intégration et le pont entre outils sont du sur-mesure,
+   qui se chiffre et ne se visite pas comme un produit ; et le cas écarté ne
+   mène nulle part par construction — c'est celui où l'on n'installe rien.
+   Leur donner une destination approchante serait mentir sur la porte. */
 export const CAS_ACCUEIL: CasUsage[] = [
   {
     icone: <Receipt strokeWidth={1.5} />,
     texte:
       "Des factures échues relancées quand quelqu'un y pense — donc deux clients dans la même situation traités à deux rythmes différents.",
     nature: "Relance des devis et factures",
+    href: "/offres/relances-impayes",
     secteur: "Négoce & distribution",
   },
   {
@@ -59,6 +72,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
     texte:
       "Des demandes qui arrivent le samedi et attendent le lundi soir qu'on ait le temps de les lire, pendant que le client en appelle un autre.",
     nature: "Réponse aux demandes clients",
+    href: "/offres/demandes-clients",
     secteur: "Services aux entreprises",
   },
   {
@@ -66,6 +80,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
     texte:
       "Un fichier de clients qui n'ont plus rien commandé depuis deux ans, que personne n'a le temps de reprendre un par un.",
     nature: "Clients inactifs",
+    href: "/offres/nouvelles-affaires",
     secteur: "Transport & logistique",
   },
   {
@@ -73,6 +88,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
     texte:
       "Des factures fournisseurs reçues en PDF, ressaisies à la main avant d'être transmises au cabinet comptable.",
     nature: "Factures fournisseurs",
+    href: "/offres/factures-fournisseurs",
     secteur: "Bâtiment & travaux",
   },
   {
