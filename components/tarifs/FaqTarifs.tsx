@@ -62,10 +62,11 @@ export default function FaqTarifs({ items }: { items: Item[] }) {
         <p className="mb-2 text-sm font-medium tracking-wide text-[#616161]">
           Questions fréquentes
         </p>
-        <h2 className="r-h3 mb-3">Questions sur les prix</h2>
+        <h2 className="r-h3 mb-3">Questions sur la facturation</h2>
         <p className="mx-auto mb-6 max-w-xl text-[15px] leading-[23px] text-[#616161]">
-          Les questions qu&apos;une page de prix doit traiter clairement. S&apos;il en manque une,
-          décrivez votre situation et une personne de l&apos;équipe vous répond le jour même.
+          Les points qui reviennent le plus souvent sur la tarification et les modalités. Si
+          une question manque, décrivez votre situation&nbsp;: un membre de l&apos;équipe vous
+          répond le jour même.
         </p>
         <Button asChild className="h-11 rounded-full px-6 text-[15px]">
           <a href={lienContact("avant")}>

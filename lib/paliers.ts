@@ -95,6 +95,18 @@
      résumé long, pour les tuiles de la grille où le texte du 07/09
      prenait toute la carte. Le résumé long RESTE : la page Mon compte
      (AbonnementCarte) s'en sert, et il y a la place de le lire.
+
+   15/09/2026 — PASSE DE REGISTRE (Teo : « trop amateur, plus pro, genre
+   Qonto, des termes précis »). Les promesses de palier, les points, le
+   comparatif, la carte sur mesure, le volet grande structure et tous les
+   textes du calculateur passent au vocabulaire de la facturation :
+   tarification à l'usage, volumétrie, échéance, périmètre, résiliation,
+   réversibilité. Aucun montant, aucun plafond, aucune règle de calcul ne
+   bouge — seules les chaînes affichées changent. Deux pièges vus en
+   chemin : PORTES.critere avait une COPIE littérale dans
+   CARTE_SUR_MESURE.note (les deux se corrigent), et l'aide de la ligne
+   « Pièces comprises » disait encore « les moteurs », mot proscrit depuis
+   le 14/09. Charte : OMEGA/DOCTRINE-TEXTES-SAAS.md, partie III.
    ══════════════════════════════════════════════════════════════════════ */
 
 /* ——— les quatre postes facturables (mêmes slugs que /offres) ——— */
@@ -218,11 +230,11 @@ export const PALIERS: Palier[] = [
     aChoisir: 1,
     teinte: "bleu",
     promesse:
-      "Le poste qui vous coûte le plus cher, tenu de bout en bout, sous votre validation.",
+      "Un poste automatisé de bout en bout, avec validation avant chaque envoi.",
     points: [
       "Un poste au choix parmi les quatre",
       "Jusqu'à 150 pièces traitées par mois",
-      "Intégré à vos outils existants",
+      "Raccordé à vos outils existants, sans migration",
     ],
   },
   {
@@ -237,11 +249,11 @@ export const PALIERS: Palier[] = [
     phare: true,
     badge: "Recommandé",
     promesse:
-      "Trois postes tenus par le même système, sous une seule file de validation.",
+      "Trois postes pilotés par le même système, sur une file de validation unique.",
     points: [
       "Trois postes au choix parmi les quatre",
       "Jusqu'à 400 pièces traitées par mois",
-      "Une seule validation, un seul journal",
+      "File de validation et journal d'activité mutualisés",
     ],
   },
   {
@@ -255,11 +267,11 @@ export const PALIERS: Palier[] = [
     teinte: "nuit",
     badge: "Le plus complet", // 08/09 (associé) : la dernière carte doit attirer
     promesse:
-      "Tout l'administratif et le commercial tenus, sous votre validation.",
+      "Les quatre postes en service, sur l'administratif comme sur le commercial.",
     points: [
-      "Les quatre postes, dès l'installation",
+      "Les quatre postes actifs dès la mise en service",
       "Jusqu'à 1 000 pièces traitées par mois",
-      "Une seule validation, un seul journal",
+      "File de validation et journal d'activité mutualisés",
     ],
   },
 ];
@@ -470,16 +482,16 @@ export function lirePeriodicite(v: unknown): Periodicite {
    ce qui change le prix, c'est la structure de validation. */
 
 export const PORTES = {
-  critere: "Le prix dépend de qui valide, pas de votre chiffre d'affaires.",
+  critere: "Le coût dépend de votre structure de validation, pas de votre chiffre d'affaires.",
   solo: {
-    titre: "Vous tenez les outils",
+    titre: "Une validation centralisée",
     texte:
-      "Indépendant, TPE, PME : une personne, parfois deux, voit passer les demandes, les devis et les factures, et valide ce qui part. Le prix est public et l'installation se réserve en ligne.",
+      "Chez un indépendant, une TPE ou une PME, une à deux personnes voient passer les demandes, les devis et les factures, et valident ce qui part. L'estimation de cette page s'applique, et l'audit l'arrête.",
   },
   equipe: {
-    titre: "Plusieurs services se partagent le travail",
+    titre: "Une validation répartie entre services",
     texte:
-      "La demande passe par l'accueil, la comptabilité et les opérations, et chaque service a ses outils et ses règles de validation. Un prix affiché n'aurait pas de sens : le diagnostic mesure d'abord les volumes, et le devis en découle.",
+      "Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, le coût dépend du nombre de jeux de règles à écrire. Le diagnostic mesure d'abord les volumes service par service, puis le devis en découle.",
   },
 };
 
@@ -534,11 +546,11 @@ export function comparatifPaliers(
 ): FamillePaliers[] {
   return [
   {
-    titre: "Ce qui tourne chez vous",
+    titre: "Périmètre et volumétrie",
     lignes: [
       {
         libelle: "Pièces comprises",
-        aide: "Tout ce qui passe dans les moteurs : factures lues, demandes reçues, relances parties, reprises de contact. C'est le volume qui porte le prix, pas le nombre de personnes chez vous.",
+        aide: "Toutes les unités traitées par le système : factures lues, demandes reçues, relances envoyées, reprises de contact. C'est le volume qui détermine le montant, jamais le nombre d'utilisateurs.",
         valeurs: parPalier((_p, i) => `${volumes[i].toLocaleString("fr-FR")} par mois`),
       },
       {
@@ -549,57 +561,57 @@ export function comparatifPaliers(
         ),
       },
       {
-        libelle: "Le point du matin",
-        aide: "L'état de l'activité chaque matin, compris quel que soit le palier.",
+        libelle: "Rapport quotidien",
+        aide: "Le point du matin : l'activité de la veille et les pièces qui attendent votre validation, transmises chaque matin. Compris à tous les paliers.",
         valeurs: meme("Compris"),
       },
       {
         libelle: "Validation avant envoi",
-        aide: "La garantie que rien ne part sans validation, comprise quel que soit le palier.",
+        aide: "Aucune pièce ne part sans validation humaine. Compris à tous les paliers.",
         valeurs: meme("Compris"),
       },
     ],
   },
   {
-    titre: "Prix et engagement",
+    titre: "Facturation et engagement",
     lignes: [
       {
         libelle: "Mensuel, sans engagement",
-        aide: "Vous prévenez, le mois en cours va à son terme, les envois s'arrêtent.",
+        aide: "La résiliation prend effet à la fin du mois en cours, date à laquelle les envois cessent.",
         valeurs: parPalier((_p, i) => `${prix[i].toLocaleString("fr-FR")}${NBSP}€ par mois`),
       },
       {
         libelle: `Annuel, −${REMISE_PCT_TXT}${NBSP}%`,
-        aide: "Facturé en une fois pour douze mois ; le satisfait ou remboursé s'applique de la même façon.",
+        aide: "Facturé en une fois pour douze mois. La garantie de remboursement sous 30 jours s'applique dans les mêmes conditions.",
         valeurs: parPalier(
           (_p, i) =>
             `${prixAnnuel(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par an, soit ${equivalentMensuel(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par mois`,
         ),
       },
       {
-        libelle: "Vous économisez en annuel",
+        libelle: "Économie en formule annuelle",
         aide: "L'écart entre douze mensualités et la facture annuelle.",
         valeurs: parPalier((_p, i) => `${economieAnnuelle(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par an`),
       },
       {
         libelle: "Au-delà des pièces comprises",
-        aide: "Nous vous prévenons avant le dépassement : on passe au palier au-dessus, ou on ajuste le périmètre ensemble.",
+        aide: "Vous êtes prévenu avant le dépassement : le palier supérieur s'applique, ou le périmètre est ajusté avec vous.",
         valeurs: meme("Prévenu d'avance, jamais facturé sans accord"),
       },
       {
-        libelle: "Prix par personne",
-        aide: "Le prix ne dépend pas du nombre d'utilisateurs.",
-        valeurs: meme("Aucun"),
+        libelle: "Facturation par utilisateur",
+        aide: "Le montant est indexé sur le volume traité, jamais sur le nombre de comptes ouverts.",
+        valeurs: meme("Aucune"),
       },
       {
         libelle: "Commission au résultat",
-        aide: "Pas de pourcentage sur les sommes encaissées.",
+        aide: "Aucun pourcentage n'est prélevé sur les sommes encaissées.",
         valeurs: meme("Aucune"),
       },
     ],
   },
   {
-    titre: "Installation et sortie",
+    titre: "Mise en service et réversibilité",
     repliee: true,
     lignes: [
       {
@@ -611,12 +623,12 @@ export function comparatifPaliers(
            qui part à trois mois. La procédure chiffre 5 h 20 au minimum ;
            « 45 min » ne décrivait que la réunion visible. */
         libelle: "Installation",
-        aide: "Nous connectons vos outils, reprenons votre historique et rodons le système avec vous jusqu'au premier envoi réel. Facturée une seule fois, à la mise en service.",
+        aide: "Raccordement de vos outils, reprise de votre historique et rodage du système jusqu'au premier envoi réel. Facturée une seule fois, à la mise en service.",
         valeurs: parPalier((p) => `${p.installation.toLocaleString("fr-FR")}${NBSP}€, une fois`),
       },
       {
         libelle: "Raccordement particulier",
-        aide: "Un logiciel rare, un historique à reprendre.",
+        aide: "Un logiciel métier peu répandu, un historique volumineux à reprendre.",
         valeurs: meme("Chiffré avant tout engagement"),
       },
       {
@@ -624,22 +636,22 @@ export function comparatifPaliers(
            réunion d'installation » sous une FAQ qui dit le contraire :
            même promesse que la FAQ et la note de la grille, mot pour mot */
         libelle: "Paiement",
-        aide: "Carte ou prélèvement SEPA enregistré à la réservation. Rien n'est débité avant la fin de l'installation : le jour où vos modules sont en service, l'installation est facturée et le premier mois d'abonnement part.",
+        aide: "Carte ou prélèvement SEPA enregistré à la réservation. Aucun débit avant la fin de l'installation : le jour de la mise en service, l'installation est facturée et la première échéance d'abonnement part.",
         valeurs: meme("À la mise en service"),
       },
       {
-        libelle: "Satisfait ou remboursé",
-        aide: "Sans justification à fournir, en mensuel comme en annuel.",
+        libelle: "Garantie de remboursement",
+        aide: "Sans justification à fournir, en formule mensuelle comme annuelle.",
         valeurs: meme("30 jours"),
       },
       {
         libelle: "Changement de palier",
-        aide: "Le prix suit simplement le nombre de postes en service.",
+        aide: "Le montant suit le nombre de postes en service et le volume qu'ils traitent.",
         valeurs: meme("À tout moment, sans frais"),
       },
       {
-        libelle: "Vos données à la sortie",
-        aide: "Ce qui est à vous reste à vous.",
+        libelle: "Réversibilité des données",
+        aide: "L'export complet vous est remis à la résiliation, sans condition et sans frais.",
         valeurs: meme("Export complet, sans frais"),
       },
       {
@@ -710,24 +722,24 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
   id: "sur-mesure",
   nom: "Sur mesure",
   promesse:
-    "Un besoin hors des quatre postes, ou plusieurs services qui valident.",
+    "Un périmètre hors catalogue, ou plusieurs services aux règles distinctes.",
   prixTexte: "Sur devis",
-  sousPrix: "établi avec vous",
-  note: "Le prix dépend de qui valide, pas de votre chiffre d'affaires.",
-  casTitre: "Ce qui mène ici",
+  sousPrix: "établi après diagnostic",
+  note: "Le coût dépend de votre structure de validation, pas de votre chiffre d'affaires.",
+  casTitre: "Périmètre concerné",
   cas: [
-    "Une tâche hors des quatre postes",
-    "Plusieurs services qui valident",
+    "Un processus hors des quatre postes",
+    "Plusieurs services aux règles de validation distinctes",
     "Un logiciel métier à raccorder",
   ],
-  pointsTitre: "Compris dans le devis",
+  pointsTitre: "Inclus dans le devis",
   points: [
-    "Un diagnostic qui mesure vos volumes avant de chiffrer",
-    "Les mêmes fondations : vos outils, vos règles, votre validation",
-    "Périmètre, installation et prix écrits avant tout engagement",
+    "Un diagnostic qui mesure vos volumes avant tout chiffrage",
+    "La même base technique : vos outils, vos règles, votre validation",
+    "Périmètre, installation et tarif écrits avant tout engagement",
   ],
-  cta: "Décrire votre besoin",
-  enSavoirPlus: "Voir la page sur mesure",
+  cta: "Décrire le besoin",
+  enSavoirPlus: "Consulter l'offre sur mesure",
   href: SUR_MESURE.href,
 };
 
@@ -764,8 +776,8 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
 export type Monde = "pme" | "structure";
 
 export const MONDES: { id: Monde; label: string }[] = [
-  { id: "pme", label: "Indépendant & PME" },
-  { id: "structure", label: "Grande structure" },
+  { id: "pme", label: "Indépendants et PME" },
+  { id: "structure", label: "Groupes et multi-sites" },
 ];
 
 export function lireMonde(v: unknown): Monde {
@@ -777,28 +789,28 @@ export function lireMonde(v: unknown): Monde {
    le diagnostic, le comparatif pour le point du matin et les verrous, la ligne
    « Raccordement particulier » du comparatif pour le chiffrage. */
 export const GRANDE_STRUCTURE = {
-  titre: "Un prix qui sort du diagnostic",
+  titre: "Un tarif établi après diagnostic",
   kicker: "Sur devis",
   chapo:
-    "La demande passe par l'accueil, la comptabilité et les opérations, et chaque service a ses outils et ses règles de validation : un prix affiché n'aurait pas de sens. Le diagnostic mesure d'abord vos volumes, et le devis en découle. Les postes, eux, sont les mêmes.",
+    "Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, le coût dépend du nombre de jeux de règles à écrire, pas de votre chiffre d'affaires. Le diagnostic mesure vos volumes service par service, puis le devis en découle. Les postes, eux, restent identiques.",
   prixTexte: "Sur devis",
   sousPrix: "après le diagnostic",
   note: PORTES.critere,
-  pointsTitre: "Compris dans le devis",
+  pointsTitre: "Inclus dans le devis",
   points: [
-    "Un diagnostic qui mesure vos volumes avant de chiffrer",
-    "Les règles de validation de chaque service",
-    "Périmètre, installation et prix écrits avant tout engagement",
+    "Un diagnostic qui mesure vos volumes service par service",
+    "Les règles de validation propres à chaque service",
+    "Périmètre, installation et tarif écrits avant tout engagement",
   ],
   cta: "Réserver un diagnostic",
   href: "/reserver-un-audit#reserver",
   /* la note de bas de grille, à la place du pavé TTC de la formule PME */
-  bas: "Aucun montant n'est affiché de ce côté : le diagnostic mesure vos volumes et vos règles de validation, puis le périmètre, l'installation et le prix sont écrits avant tout engagement. Le diagnostic est gratuit à partir de 30 minutes et sans engagement.",
+  bas: "Aucun montant n'est affiché sur ce périmètre : le diagnostic relève vos volumes et vos règles de validation, puis le périmètre, l'installation et le tarif sont écrits au devis avant tout engagement. Le diagnostic dure trente minutes, il est gratuit et sans engagement.",
   /* le bandeau d'orientation reprend la même destination */
   bandeau: {
-    titre: "Vous ne savez pas par où commencer ?",
+    titre: "Nous identifions le format de diagnostic adapté",
     texte:
-      "Décrivez votre situation en deux lignes. Nous vous répondons avec le format de diagnostic adapté, et le créneau se réserve en ligne.",
+      "Décrivez votre organisation en deux lignes. Nous revenons vers vous avec le format correspondant, et le créneau se réserve en ligne.",
   },
 };
 
@@ -929,19 +941,19 @@ export type ProfilHoraire = {
 export const PROFILS_HORAIRES: ProfilHoraire[] = [
   {
     id: "dirigeant",
-    libelle: "C'est moi, souvent le soir",
-    detail: "une heure de dirigeant",
+    libelle: "Le dirigeant, souvent hors horaires",
+    detail: "coût horaire dirigeant",
     taux: 60,
   },
   {
     id: "temps-partiel",
-    libelle: "Quelqu'un au bureau, à temps partiel",
+    libelle: "Un poste administratif à temps partiel",
     detail: "coût chargé",
     taux: 35,
   },
   {
     id: "service",
-    libelle: "Un service administratif",
+    libelle: "Un service administratif dédié",
     detail: "coût chargé",
     taux: 30,
   },
@@ -1028,7 +1040,7 @@ export const CALCULATEUR = {
   avant: {
     grand: "À estimer",
     sous: "sur vos volumes",
-    note: "Répondez aux questions au-dessus et il s'affiche.",
+    note: "Renseignez vos volumes ci-dessus pour afficher le montant.",
   },
   /* 15/09 (Teo) — « ça peut vraiment être n'importe quel prix, c'est en
      fonction des stats précises de l'entreprise ; là ça reste une estimation
@@ -1039,23 +1051,23 @@ export const CALCULATEUR = {
   estimation: {
     etiquette: "Estimation",
     phrase:
-      "Calculé sur les volumes que vous venez de donner. Le prix définitif se fixe à l'audit, sur vos chiffres réels — il peut être plus bas comme plus haut.",
+      "Calculé sur les volumes que vous venez de renseigner. Le montant définitif est arrêté à l'audit, sur vos chiffres réels : il peut être inférieur comme supérieur.",
   },
   appel: {
-    titre: "Combien ça fait dans votre cas ?",
-    texte: "Les prix de cette page sortent de vos volumes, pas d'un barème. Répondez à une question par poste et ils s'affichent.",
-    cta: "Estimer mon prix",
+    titre: "Estimer votre abonnement",
+    texte: "Les montants de cette page se calculent sur vos volumes, jamais sur un barème fixe. Une question par poste suffit à les afficher.",
+    cta: "Lancer l'estimation",
   },
   entete: {
-    titre: "Votre estimation en trois chiffres",
+    titre: "Vos volumes mensuels",
     texte:
-      "Nous ne demandons rien que vous n'ayez sous la main, et aucun de ces chiffres n'est envoyé nulle part : le calcul se fait sur votre appareil.",
+      "Nous ne demandons que des ordres de grandeur dont vous disposez déjà. Le calcul s'exécute sur votre appareil : aucune de ces valeurs n'est transmise.",
   },
   qui: {
-    question: "Qui s'occupe de tout ça aujourd'hui ?",
-    aide: "Nous comptons le coût réel d'une heure, charges comprises. Si votre chiffre est différent, c'est le vôtre qui compte — dites-le-nous.",
+    question: "Qui traite ces pièces aujourd'hui ?",
+    aide: "L'heure est valorisée à son coût employeur, charges comprises. Si votre coût réel diffère, indiquez-le : c'est celui-là qui sera retenu.",
   },
-  detail: { titre: "Ce que ça représente", total: "Total" },
+  detail: { titre: "Détail du calcul", total: "Volume retenu" },
   /* Le bloc de gain. Le montant en euros est un PLANCHER et le dit : une
      heure passée en boutique ne vaut pas ce qu'elle coûte, elle vaut ce
      qu'elle rapporte — et ça, nous ne pouvons pas le chiffrer à la place du
@@ -1064,9 +1076,9 @@ export const CALCULATEUR = {
      supplémentaire ici : invérifiable, impossible à tenir. */
   gain: {
     plancher:
-      "Nous avons compté ces heures à ce qu'elles vous coûtent. C'est un plancher, pas un plafond : une journée passée dans votre boutique, sur un chantier ou devant un client ne vaut pas ce qu'elle coûte — elle vaut ce qu'elle rapporte. Ce calcul-là, nous ne le ferons pas à votre place.",
+      "Ces heures sont valorisées à leur coût, jamais à ce qu'elles produisent. Le montant obtenu est donc un plancher : une journée passée en clientèle, sur un chantier ou en atelier rapporte davantage que son coût horaire, et cette valeur-là dépend de votre activité.",
     encours:
-      "Et ce calcul ne compte que le temps. Vos devis restés sans réponse et vos factures échues repassent devant le client sans que personne n'y pense — c'est souvent là que se joue le reste, et c'est ce que l'audit chiffre sur vos propres encours.",
+      "Le calcul ne porte que sur le temps. Il ne comptabilise ni les devis restés sans réponse ni les factures échues qui ne sont jamais relancées, alors que ces deux postes pèsent souvent davantage. L'audit les chiffre sur vos propres encours.",
   },
   /* Quand le calcul est négatif, on le DIT. Ce n'est pas une faiblesse de la
      page, c'est ce qu'elle a de plus crédible — et c'est déjà la règle de la
@@ -1081,20 +1093,20 @@ export const CALCULATEUR = {
      d'économie ici — ni négatif, ni dérisoire. On donne les HEURES, qui
      sont vraies et utiles, et on renvoie à ce que le temps ne capture pas. */
   negatif: {
-    titre: "À vos volumes, ça ne se décide pas sur le temps gagné.",
+    titre: "À ce volume, le temps gagné ne suffit pas à justifier l'abonnement.",
     texte:
-      "Ce que le système vous rendrait en heures ne suffit pas, seul, à justifier un abonnement — et nous préférons vous le dire ici plutôt qu'en rendez-vous. Ce qui fait la différence à ce niveau, c'est ce qui se perd aujourd'hui sans que personne le compte : devis restés sans réponse, factures échues, clients jamais rappelés. C'est précisément ce que l'audit mesure, sur vos propres chiffres.",
-    cta: "En parler, 30 minutes",
+      "Nous préférons l'écrire ici plutôt qu'en rendez-vous. À ce niveau, la valeur se situe dans ce qui n'est pas comptabilisé aujourd'hui : devis restés sans réponse, factures échues, clients jamais rappelés. L'audit chiffre ces trois postes sur vos propres encours.",
+    cta: "Réserver un échange de 30 minutes",
     retour: "Revenir à la grille",
   },
   horsGrille: {
-    titre: "À ce volume, un prix affiché ne veut plus rien dire.",
+    titre: "Votre volume dépasse la grille publique.",
     texte:
-      "Au-delà, le coût dépend de qui valide, de combien de sociétés et de quels outils — c'est ce que l'audit mesure, et le devis en découle.",
+      "Au-delà de ce seuil, le coût dépend du nombre de services qui valident, du nombre de sociétés et des logiciels à raccorder. L'audit relève ces trois variables, et le devis en découle.",
     cta: "Réserver un audit",
     souscta: "30 minutes, gratuit, sans engagement",
   },
   /* Cette phrase retire au visiteur la peur de se sur-déclarer, qui est la
      première raison pour laquelle on abandonne un calculateur en route. */
-  pied: "Ces chiffres orientent, ils n'engagent pas. Le palier définitif se confirme à la réunion d'installation, sur vos volumes réels — et s'il s'avère plus bas, c'est le plus bas qui s'applique.",
+  pied: "Ces volumes orientent l'estimation, ils n'engagent à rien. Le périmètre définitif est arrêté à l'audit, sur vos volumes réels : s'ils sont inférieurs à ce que vous avez déclaré, c'est le montant inférieur qui s'applique.",
 };

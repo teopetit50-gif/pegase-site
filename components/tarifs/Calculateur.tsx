@@ -211,7 +211,7 @@ export default function Calculateur({
   })();
 
   return (
-    <section className="calc" aria-label="Calculateur de palier">
+    <section className="calc" aria-label="Estimation de l'abonnement">
       <header className="calc-tete">
         <h3 className="calc-titre">{CALCULATEUR.entete.titre}</h3>
         <p className="calc-chapo">{CALCULATEUR.entete.texte}</p>
@@ -279,8 +279,8 @@ export default function Calculateur({
             <div className="calc-bloc">
               <p className="calc-verdict-titre">{CALCULATEUR.horsGrille.titre}</p>
               <p className="calc-verdict-texte">
-                Vos {nombre(v.pieces)} pièces mensuelles dépassent ce que la grille publique
-                couvre. {CALCULATEUR.horsGrille.texte}
+                Vos {nombre(v.pieces)} pièces par mois dépassent le plafond de la grille
+                publique. {CALCULATEUR.horsGrille.texte}
               </p>
               <a className="calc-bouton" href="/reserver-un-audit">
                 {CALCULATEUR.horsGrille.cta}
@@ -298,7 +298,7 @@ export default function Calculateur({
                     149 € », exactement la faute que la règle interdit. Les
                     HEURES restent — elles sont vraies et elles disent ce que
                     le système fait. */}
-                Le système vous rendrait environ{" "}
+                Le système vous restituerait environ{" "}
                 {journees(Math.round(v.heuresRecuperees))} heures par mois.{" "}
                 {CALCULATEUR.negatif.texte}
               </p>
@@ -319,19 +319,19 @@ export default function Calculateur({
               <p className="calc-monte">
                 <span className="calc-etiquette">{CALCULATEUR.estimation.etiquette}</span>
                 {nombre(v.pieces)} pièces par mois, à {TARIF_PIECE}&nbsp;€ la pièce
-                {v.prix === PLANCHER_MENSUEL ? ` — minimum de ${PLANCHER_MENSUEL} € appliqué` : ""}.{" "}
+                {v.prix === PLANCHER_MENSUEL ? `, facturation minimale de ${PLANCHER_MENSUEL} € appliquée` : ""}.{" "}
                 {CALCULATEUR.estimation.phrase}
               </p>
 
               {/* le chiffre en gros, la soustraction est dans le détail dessous */}
-              <p className="calc-resultat-titre">Ce que ces heures valent</p>
+              <p className="calc-resultat-titre">Valeur du temps récupéré</p>
               <ChiffreAnime valeur={v.valeurRecuperee} />
-              <p className="calc-gain-libelle">de temps récupéré chaque mois</p>
+              <p className="calc-gain-libelle">par mois, au coût horaire retenu</p>
               <p className="calc-gain-note">
-                {journees(Math.round(v.heuresRecuperees))} heures rendues sur les{" "}
-                {journees(Math.round(v.heuresActuelles))} que ces {nombre(v.pieces)} pièces vous
-                coûtent aujourd&apos;hui, soit {journees(v.journees)} journées par mois rendues à
-                votre métier.
+                {journees(Math.round(v.heuresRecuperees))} heures récupérées sur les{" "}
+                {journees(Math.round(v.heuresActuelles))} que ce volume de {nombre(v.pieces)} pièces
+                mobilise aujourd&apos;hui, soit {journees(v.journees)} journées par mois rendues à
+                votre activité.
               </p>
 
               {postesResa ? (
@@ -352,12 +352,12 @@ export default function Calculateur({
               ) : (
                 <a className="calc-bouton" href="#grille">
                   {v.palier.aChoisir === 1
-                    ? "Choisir mon poste"
-                    : `Choisir mes ${v.palier.aChoisir} postes`}
+                    ? "Sélectionner le poste"
+                    : `Sélectionner les ${v.palier.aChoisir} postes`}
                 </a>
               )}
               <p className="calc-souscta">
-                Gratuit, sans engagement · votre estimation part avec la demande
+                Gratuit et sans engagement · votre estimation est jointe à la demande
               </p>
             </div>
           )}
@@ -395,7 +395,7 @@ export default function Calculateur({
                 <>
                   <div className="calc-ligne">
                     <span>
-                      Temps rendu, à {taux}
+                      Temps récupéré, à {taux}
                       {NBSP}€ de l&apos;heure
                     </span>
                     <strong>{euros(v.valeurRecuperee)}</strong>
@@ -411,7 +411,7 @@ export default function Calculateur({
                     <span>Net par mois</span>
                     <strong>{euros(net)}</strong>
                   </div>
-                  <p className="calc-annee">soit {euros(net * 12)} sur l&apos;année.</p>
+                  <p className="calc-annee">soit {euros(net * 12)} sur douze mois.</p>
                 </>
               )}
             </div>

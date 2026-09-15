@@ -144,13 +144,14 @@ export default function AppelFinal() {
       <Card data-reveal className="mx-auto w-full max-w-4xl overflow-hidden">
         <CardHeader className="border-b border-neutral-200 p-6 sm:p-8">
           <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-[#050505] sm:text-[32px]">
-            Votre prix se fixe en trente minutes
+            Votre tarif est arrêté en trente minutes
           </h2>
           <CardDescription className="max-w-[62ch] text-[15px] leading-relaxed text-[#616161]">
-            L&apos;audit mesure vos volumes réels sur vos propres exports&nbsp;: ce qui passe
-            chaque mois, ce qui revient à quelqu&apos;un, ce qui se perd sans être compté. Vous en
-            repartez avec le périmètre, le prix et ce qu&apos;il y a à mettre en route — écrits,
-            avant tout engagement. Il est gratuit, et rien ne s&apos;enregistre ici.
+            L&apos;audit relève votre volumétrie réelle à partir de vos propres
+            exports&nbsp;: ce qui est traité chaque mois, la part qui revient à un opérateur, et
+            ce qui n&apos;est pas comptabilisé aujourd&apos;hui. Vous repartez avec le périmètre,
+            le tarif et le plan de mise en service, écrits avant tout engagement. Il est gratuit,
+            et aucune donnée n&apos;est enregistrée sur cette page.
           </CardDescription>
         </CardHeader>
 
@@ -199,8 +200,8 @@ export default function AppelFinal() {
               <p className="mt-4 text-[15px] leading-relaxed text-[#616161] first-letter:uppercase">
                 {jour === undefined ? (
                   <>
-                    Les jours en clair sont ouverts pour un audit&nbsp;; les jours grisés sont
-                    complets ou fermés.
+                    Les jours en clair sont ouverts à la réservation&nbsp;; les jours grisés
+                    sont complets ou fermés.
                   </>
                 ) : creneaux.length === 0 ? (
                   <>Plus aucun créneau ce jour-là.</>
@@ -213,21 +214,21 @@ export default function AppelFinal() {
                     {creneaux.length > 1 ? "s" : ""}, de{" "}
                     <span className="num">{heureGp(creneaux[0])}</span> à{" "}
                     <span className="num">{heureGp(creneaux[creneaux.length - 1])}</span>, heure de
-                    Guadeloupe. Réservez votre audit pour en bloquer un.
+                    Guadeloupe. Réservez l&apos;audit pour bloquer l&apos;un d&apos;eux.
                   </>
                 )}
               </p>
             </>
           ) : (
             <p className="text-[15px] leading-relaxed text-[#616161]">
-              L&apos;agenda ne répond pas pour le moment. Ouvrez la réservation&nbsp;: les
+              L&apos;agenda est momentanément indisponible. Ouvrez la réservation&nbsp;: les
               créneaux s&apos;affichent à l&apos;étape suivante.
             </p>
           )}
 
           <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center">
             <Link href="/reserver-un-audit" className="r-btn r-btn--noir w-full sm:w-auto">
-              Réserver mon audit
+              Réserver un audit
               <ArrowRight aria-hidden className="size-4" />
             </Link>
             <Lien href={lienContact("avant")} className="r-btn r-btn--fil w-full sm:w-auto">
@@ -241,8 +242,8 @@ export default function AppelFinal() {
             déjà fait — l'ordre des deux portes suit celui du parcours */}
         <CardFooter className="flex flex-col items-start gap-3 border-t border-neutral-200 bg-[#fafafa] p-6 pt-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <p className="text-[13px] leading-5 text-[#616161]">
-            Votre audit est déjà fait et votre prix arrêté&nbsp;? La réunion d&apos;installation
-            se réserve directement, postes choisis.
+            Votre audit est réalisé et votre tarif arrêté&nbsp;? La réunion d&apos;installation
+            se réserve directement, postes sélectionnés.
           </p>
           <Link
             href="/installation"

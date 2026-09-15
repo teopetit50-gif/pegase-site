@@ -75,7 +75,7 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 export const metadata: Metadata = {
   title: "Tarifs | Omega.AI",
   description:
-    `Un, trois ou quatre postes tenus par un système sous votre validation. Le prix suit vos volumes : cette page l'estime, l'audit le fixe sur vos chiffres. Sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation chiffrée à part et éligible au Chèque TIC, satisfait ou remboursé 30 jours.`,
+    `Tarification à l'usage pour un, trois ou quatre postes automatisés sous validation humaine. Le montant est indexé sur le volume traité : cette page l'estime, l'audit l'arrête sur vos chiffres. Facturation mensuelle sans engagement, −${REMISE_PCT} % en annuel, installation facturée séparément et éligible au Chèque TIC, remboursement sous 30 jours.`,
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -96,93 +96,98 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
      sont premières. La page n'affiche plus un barème : elle estime. Sans
      ces réponses, l'absence de montant se lit comme une rétention
      d'information — le reproche le plus cher qu'une page de prix puisse
-     encaisser. */
+     encaisser.
+     15/09, passe de registre (Teo : « trop amateur, plus pro, genre
+     Qonto, des termes précis ») : questions et réponses reformulées en
+     vocabulaire de facturation — unité facturable, volumétrie, échéance,
+     résiliation, réversibilité. Aucun fait nouveau, aucune promesse de
+     plus : seul le registre change. */
   {
-    q: "Pourquoi n'affichez-vous pas un prix ?",
+    q: "Pourquoi aucun tarif fixe n'est-il affiché ?",
     r: [
-      "Parce qu'il n'y en a pas un seul. Ce que vous payez suit ce que le système traite pour vous : deux entreprises du même métier et de la même taille n'envoient pas le même nombre de factures, ni ne reçoivent le même nombre de demandes. Un montant unique ferait payer aux uns le volume des autres.",
-      "Ce que nous affichons à la place, c'est la mécanique entière : le prix suit le nombre de pièces traitées, jamais le nombre d'utilisateurs ni un pourcentage sur vos encaissements. Indiquez vos volumes en haut de page et l'estimation s'affiche ; l'audit la confirme sur vos chiffres réels, et le prix est écrit avant tout engagement.",
+      "Parce que l'abonnement est indexé sur un volume, et qu'aucun volume n'est identique d'une entreprise à l'autre. Deux sociétés du même secteur et du même effectif n'émettent pas le même nombre de factures et ne reçoivent pas le même nombre de demandes. Un tarif unique reviendrait à faire financer par les unes la volumétrie des autres.",
+      "Ce que nous publions à la place, c'est la règle de calcul complète : le montant suit le nombre de pièces traitées, jamais le nombre d'utilisateurs ni un pourcentage sur vos encaissements. Renseignez votre volumétrie en haut de page et l'estimation s'affiche ; l'audit la valide sur vos chiffres réels, et le tarif figure au devis avant tout engagement.",
     ],
   },
   {
-    q: "L'estimation de cette page, c'est mon prix ?",
+    q: "L'estimation affichée correspond-elle au tarif final ?",
     r: [
-      "C'est un ordre de grandeur, calculé sur les volumes que vous venez de saisir. Il vaut ce que valent vos chiffres — et personne ne connaît de mémoire le nombre de factures qu'il a relancées le mois dernier.",
-      "L'audit part de vos exports, pas de vos souvenirs : il mesure les volumes réels, la part des pièces qui reviennent à quelqu'un, et ce qui se perd aujourd'hui sans être compté. Le prix qui en sort est celui du devis, et il ne bouge plus.",
+      "C'est un ordre de grandeur, calculé sur les volumes que vous venez de saisir. Sa précision est celle de vos déclarations, et rares sont les dirigeants qui connaissent de mémoire le nombre de factures relancées le mois précédent.",
+      "L'audit travaille sur vos exports, pas sur une estimation : il relève la volumétrie réelle, le taux de pièces qui reviennent à un opérateur, et ce qui n'est pas comptabilisé aujourd'hui. Le montant qui en sort est celui du devis, et il ne varie plus.",
     ],
   },
   {
-    q: "Puis-je changer de palier ensuite ?",
+    q: "Le palier est-il modifiable en cours de contrat ?",
     r: [
-      "Oui, à tout moment et sans frais de changement : le prix suit les postes en service et les volumes qu'ils traitent. Un poste s'ajoute quand les chiffres du premier le justifient, et c'est le chemin que nous recommandons.",
+      "Oui, à tout moment et sans frais de changement : le montant suit les postes en service et le volume qu'ils traitent. L'ajout d'un poste se décide sur les chiffres du premier, et c'est la trajectoire que nous recommandons.",
     ],
   },
   {
-    q: "Comment se passe le paiement ?",
+    q: "Quelles sont les modalités de paiement ?",
     r: [
-      "Rien ne se paie depuis cette page, et les montants qu'elle affiche sont des estimations : le prix se fixe à l'audit, sur vos chiffres réels. Vous n'enregistrez votre moyen de paiement — carte ou prélèvement SEPA, sur une page sécurisée — qu'ensuite, en réservant la réunion d'installation. Rien n'est débité avant la fin de celle-ci : le premier prélèvement part le jour où vos modules sont en service.",
-      `En mensuel, sans engagement : vous résiliez à tout moment, le mois en cours va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, le jour de la mise en service, à −${REMISE_PCT} %.`,
+      "Aucun paiement n'est possible depuis cette page, et les montants affichés restent des estimations : le tarif est arrêté à l'audit, sur vos chiffres réels. Le moyen de paiement, carte ou prélèvement SEPA, est enregistré ensuite sur une page sécurisée, au moment de réserver la réunion d'installation. Aucun débit n'intervient avant la fin de celle-ci : la première échéance part le jour de la mise en service.",
+      `En formule mensuelle, sans engagement : la résiliation prend effet à la fin du mois en cours, date à laquelle les envois cessent. En formule annuelle, les douze mois sont facturés en une fois le jour de la mise en service, à −${REMISE_PCT} %.`,
     ],
   },
   {
-    q: "Qu'est-ce que le prix comprend, exactement ?",
+    q: "Que comprend l'abonnement ?",
     r: [
-      "Le fonctionnement des postes choisis, le point du matin, les verrous de validation, vos corrections et le suivi. La réunion d'installation est comprise : nous connectons vos outils ensemble, en visioconférence, écran partagé.",
-      "Un raccordement particulier, comme un logiciel rare ou un historique à reprendre, est chiffré avant tout engagement, jamais découvert en cours de route.",
+      "L'exploitation des postes retenus, le rapport quotidien, les règles de validation avant envoi, la prise en compte de vos corrections et le suivi. La réunion d'installation est comprise dans le forfait d'installation : nous raccordons vos outils ensemble, en visioconférence, écran partagé.",
+      "Un raccordement spécifique, tel qu'un logiciel métier peu répandu ou une reprise d'historique, est chiffré au devis avant tout engagement, jamais découvert en cours de projet.",
     ],
   },
   {
-    q: "Et si l'offre ne me convient pas ?",
+    q: "Que se passe-t-il si l'offre ne convient pas ?",
     r: [
-      "Trente jours à partir de la mise en service pour être remboursé, sans justification à fournir, en mensuel comme en annuel : ce qui a été prélevé vous est rendu. Au-delà, le mensuel reste résiliable à tout moment ; l'annuel court jusqu'à son terme — et dans les deux cas vos données repartent avec vous, export complet compris.",
+      "Le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir, en formule mensuelle comme annuelle. Au-delà, la formule mensuelle reste résiliable à tout moment et l'annuelle court jusqu'à son terme. Dans les deux cas, l'export complet de vos données vous est remis, sans condition et sans frais.",
     ],
   },
   {
-    q: "Le Chèque TIC s'applique-t-il ici ?",
+    q: "Le Chèque TIC s'applique-t-il ici ?",
     r: [
-      "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible. Il porte sur l'installation, pas sur l'abonnement. Votre éligibilité est vérifiée à la réunion d'installation, et si un dossier se justifie, nous le montons avec vous.",
+      "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet de transformation numérique, dans la limite de 10 000 €, pour une entreprise éligible. Son assiette est l'installation, jamais l'abonnement. Votre éligibilité est vérifiée à l'audit, et si un dossier se justifie, nous le montons avec vous.",
     ],
   },
   {
-    q: "Plusieurs services se partagent le travail chez nous : cette page nous concerne-t-elle ?",
+    q: "Plusieurs services valident chez nous : cette grille s'applique-t-elle ?",
     r: [
-      "En partie seulement. Les quatre postes et la mécanique du prix sont les mêmes ; ce qui change, c'est l'installation : quand l'accueil, la comptabilité et les opérations valident chacun sur son périmètre, il y a autant de jeux de règles à écrire que de services, et cela ne s'estime pas depuis une page.",
-      "Votre point d'entrée est le diagnostic, dans un format plus long : nous mesurons vos volumes service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
+      "En partie seulement. Les quatre postes et la règle de calcul sont identiques ; ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
+      "Votre point d'entrée est le diagnostic, dans un format plus long : nous relevons votre volumétrie service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
     ],
   },
 ];
 
 const JAMAIS: Regle[] = [
   {
-    titre: "Pas de prix par personne",
-    texte: "Le prix ne dépend pas du nombre d'utilisateurs.",
+    titre: "Aucune facturation par utilisateur",
+    texte: "Le montant est indexé sur le volume traité, jamais sur le nombre de comptes ouverts.",
     points: [
-      "Un collaborateur de plus ne coûte rien de plus",
-      "Le prix suit le nombre de postes en service",
+      "Un utilisateur supplémentaire n'entraîne aucun surcoût",
+      "Seuls les postes en service et leur volume entrent dans le calcul",
     ],
   },
   {
     titre: "Aucune commission au résultat",
-    texte: "Pas de pourcentage sur les sommes encaissées.",
+    texte: "Aucun pourcentage n'est prélevé sur les sommes encaissées.",
     points: [
-      "Nous avons intérêt à relancer juste, pas à relancer fort",
-      "Le montant du mois est connu d'avance",
+      "Le montant ne varie pas selon les sommes recouvrées",
+      "L'échéance du mois est connue à l'avance",
     ],
   },
   {
     titre: "Aucun engagement caché",
-    texte: "Rien n'est débité avant la fin de l'installation.",
+    texte: "Aucun débit n'intervient avant la fin de l'installation.",
     points: [
-      "En mensuel\u00a0: résiliable à tout moment, le mois en cours va à son terme",
-      "En annuel\u00a0: douze mois facturés en une fois, le jour de la mise en service",
+      "Formule mensuelle\u00a0: résiliable à tout moment, le mois en cours allant à son terme",
+      "Formule annuelle\u00a0: douze mois facturés en une fois, le jour de la mise en service",
     ],
   },
   {
-    titre: "Vos données repartent avec vous",
-    texte: "L'export complet vous est remis à la sortie, sans condition et sans frais.",
+    titre: "Réversibilité garantie",
+    texte: "L'export complet vous est remis à la résiliation, sans condition et sans frais.",
     points: [
-      "Ce qui est à vous reste à vous",
-      "Les envois s'arrêtent, rien ne continue sans vous",
+      "Vos données restent votre propriété, dans un format réutilisable",
+      "Les envois cessent à la date de résiliation",
     ],
   },
 ];
@@ -203,7 +208,7 @@ export default function TarifsPage() {
         <section id="jamais" data-monde="clair">
           <ReglesFacturation
             titre="Ce que nous ne facturons jamais"
-            chapo="Quatre règles, valables quel que soit le palier — et quelle que soit la formule, mensuelle ou annuelle."
+            chapo="Quatre règles de facturation, applicables à tous les paliers et aux deux formules."
             regles={JAMAIS}
           />
         </section>

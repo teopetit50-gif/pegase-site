@@ -56,17 +56,17 @@ type Icone = ComponentType<{ className?: string; strokeWidth?: number }>;
 const TUILES: { chiffre: string; phrase: string; icone: Icone }[] = [
   {
     chiffre: "40 à 80 %",
-    phrase: "Part financée du projet de transformation numérique.",
+    phrase: "Part de l'installation financée, selon le poste et le dossier.",
     icone: PieChart,
   },
   {
     chiffre: "10 000 €",
-    phrase: "Plafond de l'aide, pour une entreprise éligible.",
+    phrase: "Plafond de l'aide, pour une entreprise éligible au dispositif.",
     icone: Landmark,
   },
   {
     chiffre: "0 €",
-    phrase: "Sur l'abonnement : le dispositif porte sur l'installation, pas sur le mensuel.",
+    phrase: "Part de l'abonnement couverte : l'assiette est l'installation, jamais le mensuel.",
     icone: Receipt,
   },
 ];
@@ -95,14 +95,15 @@ export default function ChequeTic() {
           De 40 à 80&nbsp;% d&apos;un projet numérique financés
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-balance text-[15px] leading-[24px] text-[#d4d4d8]">
-          Votre éligibilité est vérifiée à la réunion d&apos;installation, et si un dossier se
-          justifie, nous le montons avec vous.
+          Le dispositif porte sur l&apos;installation, jamais sur l&apos;abonnement. Votre
+          éligibilité est vérifiée à l&apos;audit, et si un dossier se justifie, nous le montons
+          avec vous.
         </p>
         {/* 15/09 — le bouton disait « Choisir mes postes » et renvoyait à la
             grille : le dispositif porte sur l'installation, qui vient APRÈS
             l'audit. Il mène donc à l'audit, comme tout le reste de la page. */}
         <a href="/reserver-un-audit" className="r-btn r-btn--blanc mt-7">
-          Réserver mon audit
+          Réserver un audit
         </a>
       </div>
 

@@ -151,6 +151,28 @@
    tous les textes de Teo, l'ancre #grille et le scroll-mt, la sélection
    exclusive entre paliers, et les sections 2 et 3 (bandeau d'orientation,
    comparatif) telles quelles.
+   ═══ 15/09/2026, PASSE DE REGISTRE — LE VOCABULAIRE D'UNE PAGE DE PRIX
+   (Teo : « les phrases de la page tarif sont trop amateur ; il faut du
+   plus pro, genre Qonto, des vrais SaaS, des termes précis »). Aucun fait
+   nouveau, aucune promesse de plus, aucun montant touché : seul le
+   registre change, sur toute la page.
+
+   Ce que la passe applique, et qu'il ne faut pas défaire :
+     · LE VOCABULAIRE DE LA FACTURATION remplace celui du récit —
+       tarification à l'usage, volumétrie, pièce traitée, échéance,
+       périmètre, plafond, résiliation, réversibilité, mise en service.
+       « Satisfait ou remboursé » devient « garantie de remboursement
+       sous 30 jours », « le point du matin » garde son nom mais s'annonce
+       comme « rapport quotidien » dans un libellé de tableau.
+     · LES CHUTES APHORISTIQUES SAUTENT. « Ce qui est à vous reste à
+       vous », « nous avons intérêt à relancer juste, pas à relancer
+       fort », « un prix affiché ne veut plus rien dire » disaient un ton,
+       pas un mécanisme (doctrine §12, règles 5 et 6).
+     · LES VERBES D'ACTION REMPLACENT LES VERBES DE CHOIX dans les
+       commandes : « Sélectionnez un poste », « Renseignez vos volumes ».
+     · « ça », « on » et les fragments nominaux sortent de la prose rendue
+       (ils restent dans ces commentaires, qui ne s'affichent pas).
+   La charte est la partie III de OMEGA/DOCTRINE-TEXTES-SAAS.md.
    ═══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -572,25 +594,25 @@ function CartePalier({
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-sm text-[#616161]">par mois, estimé</p>
+          <p className="mt-1 text-sm text-[#616161]">par mois, estimation</p>
           {/* 15/09 — D'OÙ SORT LE CHIFFRE, ET CE QU'IL VAUT. Un montant nu
               redevient un montant qu'on a choisi : la carte dit sur quoi il
               est calculé, et rappelle que l'audit le fixe. */}
           <p className="mt-1 text-xs text-[#767676]">
             {auPlancher
-              ? `Minimum mensuel — ${nombreFr(piecesCarte)} pièce${piecesCarte > 1 ? "s" : ""} seulement`
+              ? `Facturation minimale — ${nombreFr(piecesCarte)} pièce${piecesCarte > 1 ? "s" : ""} au compteur`
               : `${nombreFr(piecesCarte)} pièces × ${TARIF_PIECE} €, arrondi`}
           </p>
 
           <div key={periodicite} className="rv-fondu mt-3">
             <p className="text-xs text-[#767676]">
               {annuel
-                ? `Facturé ${prixAnnuel(prixCarte!).toLocaleString("fr-FR")} € par an, en une fois.`
-                : "Facturé chaque mois, sans engagement."}
+                ? `Facturé ${prixAnnuel(prixCarte!).toLocaleString("fr-FR")} € par an, en une échéance.`
+                : "Facturé mensuellement, sans engagement."}
             </p>
             {annuel ? (
               <p className="mt-2 inline-block rounded-lg bg-[#e8f6ed] px-2.5 py-1 text-[13px] font-semibold text-[#15753a]">
-                Vous économisez {economieAnnuelle(prixCarte!).toLocaleString("fr-FR")}&nbsp;€ par an
+                Économie de {economieAnnuelle(prixCarte!).toLocaleString("fr-FR")}&nbsp;€ par an
               </p>
             ) : null}
           </div>
@@ -601,7 +623,7 @@ function CartePalier({
           {ecart !== null ? (
             <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#050505]">
               <span aria-hidden className="size-1.5 rounded-full bg-[#050505]" />
-              Le quatrième poste pour {ecart.toLocaleString("fr-FR")}&nbsp;€ de plus.
+              Quatrième poste inclus pour {ecart.toLocaleString("fr-FR")}&nbsp;€ de plus.
             </p>
           ) : null}
         </div>
@@ -617,7 +639,7 @@ function CartePalier({
                étroites */
             <fieldset className="min-w-0">
               <legend className="mb-3 font-semibold text-[#050505]">
-                {p.aChoisir === 1 ? "Choisissez votre poste" : `Choisissez ${p.aChoisir} postes`}
+                {p.aChoisir === 1 ? "Sélectionnez un poste" : `Sélectionnez ${p.aChoisir} postes`}
               </legend>
               <ul className="space-y-2.5">
                 {POSTES.map((x) => {
@@ -648,7 +670,7 @@ function CartePalier({
             </fieldset>
           ) : (
             <div>
-              <h4 className="mb-3 font-semibold text-[#050505]">Les quatre postes, en service</h4>
+              <h4 className="mb-3 font-semibold text-[#050505]">Les quatre postes inclus</h4>
               <ul className="space-y-2.5">
                 {POSTES.map((x) => (
                   <li key={x.id} className="flex items-start">
@@ -667,7 +689,7 @@ function CartePalier({
             promis : ce sont ceux du devis qui s'affichent. */}
         <div className="mt-6 text-left text-sm">
           <h4 className="mb-3 font-semibold text-[#050505]">
-            {devis ? GRANDE_STRUCTURE.pointsTitre : "Compris dans le palier"}
+            {devis ? GRANDE_STRUCTURE.pointsTitre : "Inclus dans le palier"}
           </h4>
           <ul className="space-y-2.5">
             {(devis ? GRANDE_STRUCTURE.points : p.points).map((t) => (
@@ -702,9 +724,9 @@ function CartePalier({
           <Button disabled variant="outline" className="h-11 w-full text-[15px]">
             {manque > 0
               ? manque === 1
-                ? "Choisissez 1 poste"
-                : `Choisissez encore ${manque} postes`
-              : "Indiquez vos volumes"}
+                ? "Sélectionnez 1 poste"
+                : `Sélectionnez encore ${manque} postes`
+              : "Renseignez vos volumes"}
           </Button>
         )}
       </CardFooter>
@@ -765,18 +787,19 @@ export default function Grille() {
               premier mot utile. La marche vers `text-4xl` est remise à
               480 px, où la ligne tient ; au-dessus de `sm`, rien ne bouge. */}
           <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-[28px] font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] min-[480px]:text-4xl sm:text-5xl">
-            {devis ? GRANDE_STRUCTURE.titre : "Deux entreprises ne paient pas le même prix"}
+            {devis ? GRANDE_STRUCTURE.titre : "Une tarification à l'usage, calculée sur vos volumes"}
           </h1>
           <p key={monde} className="rv-fondu mx-auto mt-4 max-w-2xl text-balance text-[#616161]">
             {devis ? (
               GRANDE_STRUCTURE.chapo
             ) : (
               <>
-                Ce que vous payez suit ce que le système traite pour vous&nbsp;: les postes que
-                vous mettez en service, et le nombre de pièces qui passent chaque mois. Cette page
-                en donne l&apos;estimation&nbsp;; l&apos;audit la confirme sur vos chiffres, et le
-                prix est écrit avant tout engagement. Sans engagement en mensuel,
-                −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
+                L&apos;abonnement repose sur deux variables&nbsp;: les postes que vous mettez
+                en service, et le volume de pièces traitées chaque mois (factures lues, demandes
+                entrantes, relances envoyées). Cette page en donne une estimation&nbsp;; l&apos;audit
+                la valide sur vos volumes réels, puis le devis arrête le tarif avant tout
+                engagement. Facturation mensuelle sans engagement, −{REMISE_PCT}&nbsp;% en annuel,
+                remboursement sous 30 jours.
               </>
             )}
           </p>
@@ -872,14 +895,14 @@ export default function Grille() {
           data-reveal
           className="mx-auto mt-12 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161] lg:mt-20"
         >
-          <span className="font-semibold text-[#050505]">Compris à tous les paliers.</span>{" "}
-          L&apos;installation se fait sur les outils que vous avez déjà&nbsp;: messagerie, tableur,
-          WhatsApp. L&apos;état de l&apos;activité chaque matin et la garantie que rien ne part sans
-          votre validation viennent avec
-          {devis ? ". " : ", comme le satisfait ou remboursé 30 jours. "}
+          <span className="font-semibold text-[#050505]">Inclus à tous les paliers.</span>{" "}
+          Le système se raccorde à votre environnement existant&nbsp;: messagerie, tableur,
+          WhatsApp. Le rapport quotidien et la validation obligatoire avant tout envoi sont
+          compris dans l&apos;abonnement
+          {devis ? ". " : ", de même que la garantie de remboursement sous 30 jours. "}
           {devis
-            ? "Le diagnostic est gratuit et sans engagement : c'est lui qui fixe le prix."
-            : "Réserver un audit est gratuit et sans engagement : c'est lui qui fixe le prix."}
+            ? "Le diagnostic est gratuit et sans engagement : c'est lui qui arrête le tarif."
+            : "L'audit est gratuit et sans engagement : c'est lui qui arrête le tarif."}
         </p>
 
         {/* 15/09/2026 — la note disait « grille en vigueur au 01/09/2026 »
@@ -894,17 +917,18 @@ export default function Grille() {
           </p>
         ) : (
         <p data-reveal className="r-note mx-auto mt-8 max-w-3xl text-center">
-          Montants TTC, estimés sur les volumes que vous indiquez&nbsp;: ils donnent un ordre de
-          grandeur, pas votre prix. Le prix se fixe à l&apos;audit, sur vos chiffres, et il est
-          écrit dans votre devis avant tout engagement. L&apos;installation est chiffrée à part,
-          une seule fois&nbsp;; un raccordement particulier — logiciel rare, historique à
-          reprendre — l&apos;est aussi, jamais découvert en cours de route. Le moyen de paiement
-          — carte ou prélèvement SEPA — est enregistré à la réservation de l&apos;installation&nbsp;;
-          rien n&apos;est débité avant la fin de celle-ci, le premier prélèvement part le jour de
-          la mise en service. Formule mensuelle&nbsp;: sans engagement, résiliable à tout moment,
-          le mois en cours va à son terme. Formule annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise,
-          facturée en une fois le jour de la mise en service&nbsp;; le satisfait ou remboursé
-          30 jours s&apos;applique de la même façon.
+          Montants TTC, estimés à partir des volumes que vous renseignez&nbsp;: ils donnent un
+          ordre de grandeur, pas un tarif ferme. Le tarif est arrêté à l&apos;audit, sur vos
+          chiffres, et figure au devis avant tout engagement. L&apos;installation est facturée
+          séparément, une seule fois&nbsp;; un raccordement spécifique (logiciel métier peu
+          répandu, reprise d&apos;historique) est chiffré au devis, jamais découvert en cours de
+          projet. Le moyen de paiement, carte ou prélèvement SEPA, est enregistré à la
+          réservation de l&apos;installation&nbsp;; aucun débit n&apos;intervient avant la fin de
+          celle-ci, et la première échéance part le jour de la mise en service. Formule
+          mensuelle&nbsp;: sans engagement, résiliable à tout moment, le mois en cours allant à
+          son terme. Formule annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une
+          échéance le jour de la mise en service&nbsp;; la garantie de remboursement sous
+          30 jours s&apos;applique dans les mêmes conditions.
         </p>
         )}
       </section>
@@ -917,13 +941,13 @@ export default function Grille() {
       <section data-monde="clair" className="r-wrap pb-14 sm:pb-16">
         <CallToAction4
           className="mx-auto max-w-4xl"
-          titre={devis ? GRANDE_STRUCTURE.bandeau.titre : "Vous ne savez pas quel palier choisir ?"}
+          titre={devis ? GRANDE_STRUCTURE.bandeau.titre : "Nous identifions le palier adapté à votre activité"}
           texte={
             devis
               ? GRANDE_STRUCTURE.bandeau.texte
-              : "Décrivez votre situation en deux lignes. Nous vous répondons avec le palier adapté, et la réunion d'installation se réserve en ligne."
+              : "Décrivez votre activité en deux lignes. Nous revenons vers vous avec le palier correspondant et les volumes à vérifier à l'audit."
           }
-          points={["Votre activité", "Ce qui vous prend le plus de temps", "Ce qui se perd"]}
+          points={["Votre activité et vos effectifs", "Les processus les plus chronophages", "Vos volumes mensuels approximatifs"]}
           encart={{
             sur: "Une réponse",
             grand: "le jour même",
@@ -938,7 +962,7 @@ export default function Grille() {
                 Ou par e-mail&nbsp;: <span className="text-[#050505]">{COURRIEL}</span>
               </>
             ),
-            bouton: { label: "Décrire ma situation", href: lienContact("avant") },
+            bouton: { label: "Décrire mon activité", href: lienContact("avant") },
           }}
         />
       </section>
@@ -986,9 +1010,10 @@ export default function Grille() {
           <div className="text-center">
             <h2 className="r-h2 text-balance">Comparer les paliers</h2>
             <p className="mx-auto mt-4 max-w-md text-balance text-[#616161]">
-              Chaque ligne redit ce que les cartes disent déjà, côte à côte.{" "}
+              Le détail ligne à ligne des trois paliers&nbsp;: périmètre, facturation, mise en
+              service.{" "}
               <a href={lienContact("avant")} className="r-lien">
-                Demander conseil
+                Poser une question
               </a>
             </p>
           </div>
@@ -1000,7 +1025,7 @@ export default function Grille() {
               prix: `${annuel ? equivalentMensuel(prixP) : prixP}\u00A0€`,
               periode: annuel ? `par mois · ${prixAnnuel(prixP)}\u00A0€ par an` : "par mois",
               href: lienPalier(p, volumeLien),
-              cta: p.aChoisir === null ? "Réserver un audit" : "Choisir mes postes",
+              cta: p.aChoisir === null ? "Réserver un audit" : "Sélectionner les postes",
               bouton: boutonPalier(p),
               phare: p.phare,
             }))}
