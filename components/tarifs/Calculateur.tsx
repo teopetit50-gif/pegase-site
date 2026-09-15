@@ -61,8 +61,9 @@ import {
 
 import {
   CALCULATEUR,
-  PALIERS,
+  PLANCHER_MENSUEL,
   POSTES,
+  TARIF_PIECE,
   PROFILS_HORAIRES,
   QUESTIONS_VOLUME,
   piecesParPoste,
@@ -120,7 +121,10 @@ export default function Calculateur({
      l'affichage des prix sur les cartes et dans le comparatif : avant, un
      montant serait un montant qu'on a choisi, pas un montant qui sort de
      son cas. Passe `true` dès qu'une question est remplie. */
-  onVerdict: (repondu: boolean) => void;
+  /* 15/09 (prix continu) — remonte LES VOLUMES, plus un booléen : chaque
+     carte calcule son prix sur les pièces de SES postes, d'où trois montants
+     différents à partir des mêmes réponses. `null` = rien de rempli. */
+  onVerdict: (volumes: SaisieVolumes | null) => void;
 }) {
   const [ouvert, setOuvert] = useState(false);
   const [saisie, setSaisie] = useState<SaisieVolumes>({});
@@ -153,16 +157,16 @@ export default function Calculateur({
      forcément un nombre, mais le rétrécissement ne traverse pas la
      chaîne de ternaires du JSX — on le fige ici. */
   const net = v.net ?? 0;
-  const palierCoche = PALIERS.find((p) => p.id === palierChoisi) ?? null;
-  const monte =
-    v.palier && palierCoche && v.palier.plafond > palierCoche.plafond ? v.palier : null;
-
+  /* 15/09 (prix continu) — `monte` et `palierCoche` ont disparu avec la
+     notion de marche : le montant suit le volume sans saut. */
   /* On ne remonte que le FAIT d'avoir répondu, jamais le montant : les
      cartes tirent leur prix de PALIERS comme avant, elles attendent
      seulement le feu vert. Une seule source de vérité pour les prix. */
+  /* les volumes sérialisés : dépendance stable pour l'effet ci-dessous */
+  const cle = JSON.stringify(saisieUtile);
   useEffect(() => {
-    onVerdict(rempli);
-  }, [rempli, onVerdict]);
+    onVerdict(rempli ? (JSON.parse(cle) as SaisieVolumes) : null);
+  }, [rempli, cle, onVerdict]);
 
   if (!ouvert) {
     return (
@@ -286,7 +290,7 @@ export default function Calculateur({
               <p className="calc-verdict-texte">
                 Les {journees(Math.round(v.heuresRecuperees))} heures que le système vous rendrait
                 valent {euros(v.valeurRecuperee)} par mois, pour un abonnement à{" "}
-                {euros(v.palier.prix)}. {CALCULATEUR.negatif.texte}
+                {euros(v.prix ?? 0)}. {CALCULATEUR.negatif.texte}
               </p>
               <a className="calc-bouton" href="/reserver-un-audit">
                 {CALCULATEUR.negatif.cta}
@@ -299,14 +303,15 @@ export default function Calculateur({
 
           {gain && v.palier && (
             <div className="calc-bloc">
-              {monte && (
-                <p className="calc-monte">
-                  Vous aviez coché {palierCoche?.nom}, qui comprend{" "}
-                  {nombre(palierCoche?.plafond ?? 0)} pièces par mois ; vos réponses en donnent{" "}
-                  {nombre(v.pieces)}. <strong>{v.palier.nom}</strong> en comprend{" "}
-                  {nombre(v.palier.plafond)}.
-                </p>
-              )}
+              {/* 15/09 — plus de « palier au-dessus » à proposer : le prix est
+                  continu, il n'y a pas de marche à franchir. On rappelle d'où
+                  sort le montant, et que l'audit le fixe. */}
+              <p className="calc-monte">
+                <span className="calc-etiquette">{CALCULATEUR.estimation.etiquette}</span>
+                {nombre(v.pieces)} pièces par mois, à {TARIF_PIECE}&nbsp;€ la pièce
+                {v.prix === PLANCHER_MENSUEL ? ` — minimum de ${PLANCHER_MENSUEL} € appliqué` : ""}.{" "}
+                {CALCULATEUR.estimation.phrase}
+              </p>
 
               {/* le chiffre en gros, la soustraction est dans le détail dessous */}
               <p className="calc-resultat-titre">Ce que ces heures valent</p>
@@ -331,7 +336,7 @@ export default function Calculateur({
                 </a>
               )}
               <p className="calc-souscta">
-                Puis {euros(v.palier.prix)} par mois · satisfait ou remboursé 30 jours
+                Puis {euros(v.prix ?? 0)} par mois · satisfait ou remboursé 30 jours
               </p>
             </div>
           )}
@@ -368,7 +373,7 @@ export default function Calculateur({
               {v.palier && (
                 <div className="calc-ligne">
                   <span>Abonnement {v.palier.nom}</span>
-                  <strong>− {euros(v.palier.prix)}</strong>
+                  <strong>− {euros(v.prix ?? 0)}</strong>
                 </div>
               )}
               {gain && (

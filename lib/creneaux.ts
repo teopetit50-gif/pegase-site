@@ -231,6 +231,9 @@ export type Demande = {
   /* parcours installation : les postes choisis sur /tarifs. Le prix n'est
      PAS envoyé — la fonction SQL le recalcule de sa propre grille. */
   modules?: string[];
+  /* 15/09 — le volume mensuel de pièces (prix continu). La SQL recalcule le
+     montant dessus ; on n'envoie jamais un prix. */
+  pieces?: number;
   /* 02/09 — parcours installation : mensuel (défaut) ou annuel. Le prix
      annuel non plus n'est pas envoyé : la SQL applique sa propre remise
      (0,85 depuis le 03/09, équivalent mensuel arrondi à l'euro inférieur puis × 12 — la
@@ -259,6 +262,9 @@ export async function reserver(d: Demande, jeton?: string): Promise<Reponse> {
     p_message: d.message || null,
     p_creneau_debut: d.creneau ? new Date(d.creneau).toISOString() : null,
     p_modules: d.modules?.length ? d.modules : null,
+    /* même règle que p_periodicite : envoyé SEULEMENT quand il existe —
+       PostgREST choisit la fonction d'après les noms d'arguments. */
+    ...(d.pieces && d.pieces > 0 ? { p_pieces: d.pieces } : {}),
     /* envoyé SEULEMENT quand le parcours le renseigne (installation) :
        PostgREST choisit la fonction d'après les noms d'arguments, un
        paramètre inconnu ferait échouer l'appel — l'audit et le devis

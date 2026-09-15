@@ -175,6 +175,8 @@ import Calculateur from "@/components/tarifs/Calculateur";
 
 import {
   CALCULATEUR,
+  PLANCHER_MENSUEL,
+  TARIF_PIECE,
   CARTE_SUR_MESURE,
   COMPARATIF_PALIERS,
   GRANDE_STRUCTURE,
@@ -186,8 +188,12 @@ import {
   equivalentMensuel,
   lireMonde,
   lirePeriodicite,
+  piecesPourPostes,
+  postesPourCarte,
   prixAnnuel,
+  prixPourVolume,
   type Monde,
+  type SaisieVolumes,
   type Palier,
   type Periodicite,
 } from "@/lib/paliers";
@@ -252,13 +258,8 @@ function boutonPalier(p: Palier) {
    rapport à Trois postes. CALCULÉ depuis PALIERS, jamais écrit en dur ;
    en annuel on compare les équivalents mensuels, pour que la phrase reste
    vraie sous les chiffres affichés. */
-function ecartQuatriemePoste(periodicite: Periodicite) {
-  const trois = PALIERS.find((x) => x.id === "trois");
-  const complet = PALIERS.find((x) => x.id === "complet");
-  if (!trois || !complet) return null;
-  const valeur = (p: Palier) => (periodicite === "annuel" ? equivalentMensuel(p.prix) : p.prix);
-  return valeur(complet) - valeur(trois);
-}
+/* 15/09 — `ecartQuatriemePoste` a disparu : avec un prix continu, l'écart
+   entre trois postes et quatre dépend des volumes. Calcul dans CartePalier. */
 
 /* ——— le marqueur de ligne, le `Check` / `X` de la référence ———
    Quatre états : coché (encre), à cocher (cercle vide), interdit par le
@@ -420,13 +421,16 @@ function SelecteurMonde({
   );
 }
 
+/* « 1 200 » et non « 1200 » — même règle que le calculateur. */
+const nombreFr = (n: number) => n.toLocaleString("fr-FR");
+
 function CartePalier({
   p,
   choisis,
   bascule,
   periodicite,
   monde,
-  prixVisible,
+  volumes,
 }: {
   p: Palier;
   /* la sélection vit dans Grille : vide dès qu'un AUTRE palier est actif */
@@ -434,11 +438,18 @@ function CartePalier({
   bascule: (id: string) => void;
   periodicite: Periodicite;
   monde: Monde;
-  /* false tant que le calculateur n'a pas de volumes : la carte montre tout
-     sauf son chiffre (voir l'état `volumesConnus` dans Grille) */
-  prixVisible: boolean;
+  /* les volumes saisis au calculateur — null tant qu'il n'a rien reçu. La
+     carte en tire SON prix, sur les pièces de SES propres postes : deux
+     cartes voisines affichent donc deux montants différents. */
+  volumes: SaisieVolumes | null;
 }) {
-  const postes = p.aChoisir === null ? POSTES.map((x) => x.id) : choisis;
+  /* 15/09 — LE PRIX DE CETTE CARTE. Il ne se lit plus dans PALIERS : il se
+     calcule sur les pièces des postes que CETTE carte comprend. */
+  const postesFactures = volumes ? postesPourCarte(volumes, p.aChoisir, choisis) : [];
+  const piecesCarte = volumes ? piecesPourPostes(volumes, postesFactures) : 0;
+  const prixCarte = volumes ? prixPourVolume(piecesCarte) : null;
+  const prixVisible = prixCarte !== null;
+  const auPlancher = prixCarte === PLANCHER_MENSUEL;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
   /* côté grande structure le bouton ne commande rien : il mène au
      diagnostic, le compte des postes ne le conditionne plus */
@@ -453,9 +464,23 @@ function CartePalier({
   const pret = devis || (manque <= 0 && prixVisible);
   const annuel = periodicite === "annuel" && !devis;
   const phare = Boolean(p.phare);
-  const href = `/installation?postes=${postes.join(",")}${annuel ? "&periodicite=annuel" : ""}`;
-  const ecart =
-    p.id === "complet" && !devis && prixVisible ? ecartQuatriemePoste(periodicite) : null;
+  /* 15/09 — LE LIEN PORTE LE VOLUME : sans lui, /installation puis la
+     fonction SQL figeraient un autre prix que celui affiché ici. Le serveur
+     RECALCULE sur ce nombre ; il ne reçoit jamais un montant, qui serait
+     falsifiable depuis l'URL. */
+  const href =
+    `/installation?postes=${postesFactures.join(",")}` +
+    (piecesCarte > 0 ? `&pieces=${piecesCarte}` : "") +
+    (annuel ? "&periodicite=annuel" : "");
+  /* L'écart « quatrième poste » se calcule lui aussi sur les volumes : il
+     n'est plus une constante. Masqué s'il est nul (le plancher l'écrase). */
+  const ecart = (() => {
+    if (p.id !== "complet" || devis || !volumes || prixCarte === null) return null;
+    const trois = prixPourVolume(piecesPourPostes(volumes, postesPourCarte(volumes, 3, [])));
+    if (trois === null) return null;
+    const d = prixCarte - trois;
+    return d > 0 ? d : null;
+  })();
   const Icone = ICONE_PALIER[p.id];
 
   return (
@@ -526,30 +551,39 @@ function CartePalier({
           <>
           <div className="flex flex-wrap items-baseline justify-center gap-x-2">
             <NumberFlow
-              aria-label={`${annuel ? equivalentMensuel(p.prix) : p.prix} euros par mois`}
+              aria-label={`${annuel ? equivalentMensuel(prixCarte!) : prixCarte!} euros par mois`}
               className="text-4xl font-bold tabular-nums text-[#050505]"
               format={FORMAT_EURO}
               locales="fr-FR"
-              value={annuel ? equivalentMensuel(p.prix) : p.prix}
+              value={annuel ? equivalentMensuel(prixCarte!) : prixCarte!}
             />
             {annuel ? (
               <span key="barre" className="rv-fondu text-sm font-medium text-[#8a8a8a] line-through">
                 <span className="sr-only">Au lieu de </span>
-                {p.prix}&nbsp;€
+                {prixCarte!.toLocaleString("fr-FR")}&nbsp;€
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-sm text-[#616161]">par mois</p>
+          <p className="mt-1 text-sm text-[#616161]">par mois, estimé</p>
+          {/* 15/09 — D'OÙ SORT LE CHIFFRE, ET CE QU'IL VAUT. Un montant nu
+              redevient un montant qu'on a choisi : la carte dit sur quoi il
+              est calculé, et rappelle que l'audit le fixe. */}
+          <p className="mt-1 text-xs text-[#767676]">
+            {auPlancher
+              ? `Minimum mensuel — ${nombreFr(piecesCarte)} pièce${piecesCarte > 1 ? "s" : ""} seulement`
+              : `${nombreFr(piecesCarte)} pièces × ${TARIF_PIECE} €`}
+          </p>
+          <p className="mt-2 text-xs text-[#767676]">Chiffré à l&apos;audit, sur vos vrais chiffres.</p>
 
           <div key={periodicite} className="rv-fondu mt-3">
             <p className="text-xs text-[#767676]">
               {annuel
-                ? `Facturé ${prixAnnuel(p.prix)} € par an, en une fois.`
+                ? `Facturé ${prixAnnuel(prixCarte!).toLocaleString("fr-FR")} € par an, en une fois.`
                 : "Facturé chaque mois, sans engagement."}
             </p>
             {annuel ? (
               <p className="mt-2 inline-block rounded-lg bg-[#e8f6ed] px-2.5 py-1 text-[13px] font-semibold text-[#15753a]">
-                Vous économisez {economieAnnuelle(p.prix)}&nbsp;€ par an
+                Vous économisez {economieAnnuelle(prixCarte!).toLocaleString("fr-FR")}&nbsp;€ par an
               </p>
             ) : null}
           </div>
@@ -700,8 +734,8 @@ export default function Grille() {
      rempli le truc, sinon on reste sur un truc inventé ». Tant que le
      calculateur n'a pas reçu un volume, les cartes montrent tout SAUF leur
      chiffre, et le comparatif — qui ne compare que des prix — attend. */
-  const [volumesConnus, setVolumesConnus] = useState(false);
-  const noterVolumes = useCallback((repondu: boolean) => setVolumesConnus(repondu), []);
+  const [volumes, setVolumes] = useState<SaisieVolumes | null>(null);
+  const noterVolumes = useCallback((v: SaisieVolumes | null) => setVolumes(v), []);
   const monde = choixMonde ?? mondeUrl;
   const devis = monde === "structure";
   const annuel = periodicite === "annuel" && !devis;
@@ -817,7 +851,7 @@ export default function Grille() {
               bascule={basculePour(p)}
               periodicite={periodicite}
               monde={monde}
-              prixVisible={volumesConnus}
+              volumes={volumes}
             />
           ))}
           <CarteSurMesure monde={monde} />
@@ -905,7 +939,7 @@ export default function Grille() {
           « Mensuel », « Annuel », « Vous économisez » et « Installation » ne
           sont QUE des prix. L'afficher avant, ce serait donner par la porte
           de derrière les montants que les cartes retiennent. */}
-      {devis || !volumesConnus ? null : (
+      {devis || volumes === null ? null : (
       <section id="comparatif" data-monde="clair" className="r-blanc">
         <div className="r-wrap py-14 sm:py-20">
           <div className="text-center">

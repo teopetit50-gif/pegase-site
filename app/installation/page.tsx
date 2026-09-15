@@ -52,13 +52,19 @@ export const metadata: Metadata = {
 export default async function InstallationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ postes?: string; periodicite?: string }>;
+  searchParams: Promise<{ postes?: string; periodicite?: string; pieces?: string }>;
 }) {
   const sp = await searchParams;
   const demandes = (sp.postes ?? "").split(",").map((x) => x.trim());
   const postes = POSTES.filter((p) => demandes.includes(p.id)).map((p) => p.id);
   if (!postes.length) redirect("/tarifs");
   const periodicite = lirePeriodicite(sp.periodicite);
+  /* 15/09 — le volume de pièces, venu de la carte de /tarifs. Il ne sert PAS
+     à afficher un prix ici : il est transmis à la fonction SQL, qui
+     recalcule. Valeur absente ou aberrante : la SQL retombe sur son barème
+     par nombre de postes. */
+  const pieces = Number.parseInt(sp.pieces ?? "", 10);
+  const piecesValides = Number.isFinite(pieces) && pieces > 0 ? pieces : undefined;
 
   const utilisateur = await utilisateurCourant();
 
@@ -78,6 +84,7 @@ export default async function InstallationPage({
             <PriseDeCreneau
               parcours="installation"
               postes={postes}
+              pieces={piecesValides}
               periodicite={periodicite}
               utilisateur={utilisateur}
             />

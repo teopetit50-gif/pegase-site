@@ -7625,3 +7625,19 @@ button.rounded-full:active {
   padding-top: 16px;
   border-top: 1px solid var(--r-filet);
 }
+
+/* l'étiquette « Estimation » au-dessus du grand chiffre du calculateur —
+   15/09 : le montant est calculé sur des volumes déclarés de mémoire, et
+   c'est l'audit qui le fixe. Le dire avant le chiffre, pas après. */
+.resa .calc-etiquette {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 3px 9px;
+  border: 1px solid var(--r-or-fonce);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--r-texte);
+}

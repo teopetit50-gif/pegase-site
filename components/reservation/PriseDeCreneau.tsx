@@ -128,6 +128,10 @@ type Props = {
   parcours: "installation" | "audit";
   formuleInitiale?: string;
   postes?: string[];
+  /* 15/09 — le volume mensuel de pièces, venu de /tarifs. Depuis le prix
+     continu, c'est LUI qui détermine le montant : la SQL le recalcule. On ne
+     transmet jamais un prix, qui serait falsifiable depuis l'URL. */
+  pieces?: number;
   /* 02/09 — mensuel (défaut) ou annuel, venu de la grille ; valeur
      initiale seulement, le récapitulatif la laisse changer */
   periodicite?: Periodicite;
@@ -149,6 +153,7 @@ export default function PriseDeCreneau({
   parcours,
   formuleInitiale,
   postes = [],
+  pieces,
   periodicite: periodiciteInitiale = "mensuel",
   utilisateur,
   modeleNom,
@@ -434,6 +439,7 @@ export default function PriseDeCreneau({
         message: c.message || undefined,
         creneau: surDevis ? undefined : (creneau ?? undefined),
         modules: parcours === "installation" ? postesValides.map((p) => p.id) : undefined,
+        pieces: parcours === "installation" ? pieces : undefined,
         periodicite: parcours === "installation" ? periodicite : undefined,
       },
       jeton,

@@ -277,6 +277,57 @@ export function prixPour(nb: number): number {
   return 1990;
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   LE PRIX CONTINU (15/09/2026, Teo) — « le pricing doit évoluer et se
+   modifier en fonction des dossiers ; là ça reste les mêmes prix, genre
+   1990 ; c'est censé être des chiffres qui varient, ça peut être 146 €
+   pour le deuxième ».
+
+   CE QUE ÇA REMPLACE. Les trois montants de PALIERS étaient des paliers
+   au sens fort : quel que soit le volume, on retombait sur 299, 790 ou
+   1990. Deux clients aux volumes très différents payaient pareil, et le
+   chiffre redevenait une étiquette — exactement le reproche d'origine.
+
+   POURQUOI ÇA NE CONTREDIT RIEN. La grille arrêtée le matin même EST une
+   droite : 299/150, 790/400 et 1990/1000 valent 1,99 · 1,98 · 1,99 € la
+   pièce. Le prix continu ne change donc pas le barème, il l'expose. Les
+   trois montants de PALIERS restent en place comme REPÈRES (ils servent
+   au comparatif, à /installation et à l'instantané stocké quand aucun
+   volume n'a été saisi), mais ce qui s'affiche au visiteur qui a répondu
+   est désormais calculé.
+
+   LE PLANCHER. Un client coûte du temps même à volume nul : le rituel
+   hebdomadaire et le support ne dépendent pas des pièces (~85 min/mois,
+   voir PEGASE/calcul-prix.py). 149 € couvre ce socle avec une marge fine.
+   En dessous, chaque client ferait perdre de l'argent quel que soit son
+   volume.
+
+   LE PLAFOND. Au-delà de PLAFOND_GRILLE pièces, on sort de la grille :
+   à ce volume le coût dépend de qui valide et de combien de sociétés, pas
+   du nombre de pièces. C'est l'audit qui prend, comme avant.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/** Ce que coûte une pièce traitée, par mois. Relevé sur la grille du
+    15/09 : les trois paliers valaient 1,99 · 1,98 · 1,99 € la pièce. */
+export const TARIF_PIECE = 2;
+
+/** Le socle incompressible : rituel hebdomadaire et support ne dépendent
+    pas du volume. En dessous, un client fait perdre de l'argent. */
+export const PLANCHER_MENSUEL = 149;
+
+/** Au-delà, le prix ne se calcule plus : il sort d'un audit. */
+export const PLAFOND_GRILLE = 1000;
+
+/** Le prix mensuel pour un volume de pièces — null au-delà de la grille.
+    C'est LA fonction du prix public depuis le 15/09 ; `prixPour` ne sert
+    plus qu'aux repères et aux cas où aucun volume n'a été saisi.
+    Jumelle de la fonction SQL reserver_audit : toute modification se fait
+    AUX DEUX ENDROITS. */
+export function prixPourVolume(pieces: number): number | null {
+  if (pieces <= 0) return null;
+  if (pieces > PLAFOND_GRILLE) return null;
+  return Math.max(PLANCHER_MENSUEL, Math.round(pieces * TARIF_PIECE));
+}
 /** L'installation du palier correspondant — facturée à part, une seule fois,
     et non plus « comprise ». Même barème que la fonction SQL. */
 export function installationPour(nb: number): number {
@@ -289,6 +340,44 @@ export function installationPour(nb: number): number {
     grille, c'est-à-dire quand le prix doit sortir d'un audit. */
 export function palierPourVolume(pieces: number): Palier | null {
   return PALIERS.find((p) => pieces <= p.plafond) ?? null;
+}
+
+/** Quels postes une carte compte, quand le visiteur n'a rien coché dedans.
+
+    Le calculateur est rempli une fois, mais les cartes « Un poste » et
+    « Trois postes » ne savent pas LESQUELS. Plutôt que de les laisser
+    muettes — le visiteur aurait rempli le formulaire pour voir deux cartes
+    sur trois rester à « À calculer » —, on retient les postes où il a le
+    plus de volume : c'est ce qu'un acheteur rationnel automatise en premier,
+    et c'est le chiffre le plus haut, donc jamais une bonne surprise qu'on
+    devrait retirer ensuite. Dès qu'il coche lui-même, son choix prime. */
+export function postesPourCarte(
+  saisie: SaisieVolumes,
+  aChoisir: number | null,
+  choisis: readonly string[],
+): string[] {
+  if (aChoisir === null) return POSTES.map((x) => x.id);
+  if (choisis.length === aChoisir) return [...choisis];
+  return QUESTIONS_VOLUME.map((q) => ({
+    id: q.posteId,
+    pieces: (saisie[q.posteId] ?? 0) * q.coefficient,
+  }))
+    .filter((x) => x.pieces > 0)
+    .sort((a, b) => b.pieces - a.pieces)
+    .slice(0, aChoisir)
+    .map((x) => x.id);
+}
+
+/** Les pièces mensuelles d'une SÉLECTION de postes — c'est ce qui permet
+    aux trois cartes d'afficher trois prix différents à partir des mêmes
+    réponses : chacune ne compte que les postes qu'elle comprend. */
+export function piecesPourPostes(saisie: SaisieVolumes, postes: readonly string[]): number {
+  return Math.round(
+    QUESTIONS_VOLUME.filter((q) => postes.includes(q.posteId)).reduce(
+      (t, q) => t + (saisie[q.posteId] ?? 0) * q.coefficient,
+      0,
+    ),
+  );
 }
 
 /* ——— la formule annuelle (02/09/2026) ———
@@ -825,19 +914,24 @@ export function enJournees(heures: number): number {
 export function verdictCalculateur(saisie: SaisieVolumes, taux: number) {
   const pieces = totalPieces(saisie);
   const palier = palierPourVolume(pieces);
+  /* 15/09 — LE PRIX EST CALCULÉ, plus lu dans le palier. `palier` ne sert
+     plus qu'à nommer la zone et à porter l'installation ; c'est
+     prixPourVolume qui donne le montant, et il varie avec chaque réponse. */
+  const prix = prixPourVolume(pieces);
   const actuelles = heuresActuelles(saisie);
   const recuperees = heuresRecuperees(saisie);
   const valeur = Math.round(recuperees * taux);
   return {
     pieces,
     palier,
+    prix,
     heuresActuelles: actuelles,
     heuresRecuperees: recuperees,
     journees: enJournees(recuperees),
     valeurRecuperee: valeur,
     /* null quand le volume sort de la grille : il n'y a pas de prix à
        soustraire, et on n'en invente pas un. */
-    net: palier ? valeur - palier.prix : null,
+    net: prix === null ? null : valeur - prix,
   };
 }
 
@@ -855,17 +949,28 @@ export const CALCULATEUR = {
      leur plafond — tout sauf le chiffre, qui attend ses réponses. Le
      comparatif, qui compare des prix, attend lui aussi. */
   avant: {
-    grand: "À calculer",
+    grand: "À estimer",
     sous: "sur vos volumes",
     note: "Le prix suit le nombre de pièces que le système traite pour vous. Répondez aux questions au-dessus et il s'affiche.",
+  },
+  /* 15/09 (Teo) — « ça peut vraiment être n'importe quel prix, c'est en
+     fonction des stats précises de l'entreprise ; là ça reste une estimation
+     et faut faire un audit pour chiffrer ». D'où le mot ESTIMATION partout
+     où un montant s'affiche, et l'audit nommé comme ce qui le fixe. Ce n'est
+     pas une précaution juridique : le calcul part de volumes DÉCLARÉS de
+     mémoire, et personne ne connaît ses chiffres à la pièce près. */
+  estimation: {
+    etiquette: "Estimation",
+    phrase:
+      "Calculé sur les volumes que vous venez de donner. Le prix définitif se fixe à l'audit, sur vos chiffres réels — il peut être plus bas comme plus haut.",
   },
   appel: {
     titre: "Combien ça fait dans votre cas ?",
     texte: "Les prix de cette page sortent de vos volumes, pas d'un barème. Répondez à une question par poste et ils s'affichent.",
-    cta: "Calculer mon prix",
+    cta: "Estimer mon prix",
   },
   entete: {
-    titre: "Votre palier en trois chiffres",
+    titre: "Votre estimation en trois chiffres",
     texte:
       "Nous ne demandons rien que vous n'ayez sous la main, et aucun de ces chiffres n'est envoyé nulle part : le calcul se fait sur votre appareil.",
   },
