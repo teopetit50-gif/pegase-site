@@ -8,10 +8,30 @@
    Puis : « si il voit 300 euros par mois et qu'il voit pas combien il gagne,
    ça sert à rien — écrit en gros, 1400 euros d'économies moins le prix. »
 
-   TOUT LE CONTENU VIT DANS lib/paliers.ts — questions, coefficients, durées,
-   profils horaires, textes. Ce fichier ne fait que le mettre en page. C'est
-   la règle du dossier : un chiffre qui apparaît ici et nulle part ailleurs
-   est un chiffre inventé.
+   LA FORME vient de `pricing-12` (21st.dev) — le calculateur de retour sur
+   investissement à deux panneaux : à gauche ce que le visiteur règle, à
+   droite ce que ça donne, dans un seul cadre arrondi. Trois écarts au
+   modèle, tous imposés par le parc :
+
+   1. AUCUN JETON shadcn. `bg-card`, `bg-muted`, `text-muted-foreground`,
+      `shadow-elevated-lg` ne sont définis nulle part chez nous : Tailwind
+      n'émet RIEN pour une couleur inconnue, le panneau serait transparent.
+      Tout est peint par le bloc `.calc-*` de globals.css, sous `.resa`, avec
+      les jetons de la page (--r-texte, --r-filet, --r-or-*). Sur cette page
+      un thème scopé bat de toute façon les utilitaires.
+   2. LE CURSEUR EST NATIF. Le modèle appelle le Slider de shadcn, donc
+      `@radix-ui/react-slider`, absent du projet. Un `input[type=range]`
+      habillé rend le même dessin (rail, pastille cerclée de blanc, réglette
+      graduée dessous), se pilote au clavier sans une ligne de JS et n'ajoute
+      pas une dépendance à un arbre que plusieurs sessions se partagent.
+   3. LE GROS CHIFFRE S'ANIME caractère par caractère comme le modèle
+      (`motion/react`, déjà installé), mais `useReducedMotion` le fige pour
+      qui a demandé moins d'animations.
+
+   TOUT LE CONTENU VIT DANS lib/paliers.ts — questions, bornes des curseurs,
+   coefficients, durées, profils horaires, textes. Ce fichier ne fait que le
+   mettre en page. C'est la règle du dossier : un chiffre qui apparaît ici et
+   nulle part ailleurs est un chiffre inventé.
 
    TROIS CHOSES À NE PAS DÉFAIRE :
 
@@ -32,6 +52,12 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useId, useMemo, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type Variants,
+} from "motion/react";
 
 import {
   CALCULATEUR,
@@ -42,10 +68,11 @@ import {
   piecesParPoste,
   verdictCalculateur,
   type Poste,
+  type QuestionVolume,
   type SaisieVolumes,
 } from "@/lib/paliers";
 
-const NBSP = " ";
+const NBSP = " ";
 
 const nombre = (n: number) => n.toLocaleString("fr-FR");
 const euros = (n: number) => `${nombre(Math.round(n))}${NBSP}€`;
@@ -55,6 +82,26 @@ const journees = (n: number) =>
   n.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
 
 const nomPoste = (id: Poste["id"]) => POSTES.find((p) => p.id === id)?.nom ?? id;
+
+/* L'entrée d'un caractère du gros chiffre — reprise telle quelle du modèle :
+   décalage vertical, flou et échelle, décalés de 30 ms par rang. */
+const animChiffre: Variants = {
+  cache: { opacity: 0, y: 10, filter: "blur(4px)", scale: 0.98 },
+  vu: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    scale: 1,
+    transition: { delay: i * 0.03, type: "spring", damping: 22, stiffness: 280 },
+  }),
+  sorti: {
+    opacity: 0,
+    y: -10,
+    filter: "blur(4px)",
+    scale: 0.98,
+    transition: { duration: 0.14 },
+  },
+};
 
 export default function Calculateur({
   postesChoisis,
@@ -126,6 +173,13 @@ export default function Calculateur({
     );
   }
 
+  /* Les trois verdicts, nommés une fois : le JSX en dépend quatre fois et
+     une chaîne de ternaires imbriqués s'y relit mal. */
+  const horsGrille = rempli && v.palier === null;
+  const negatif = rempli && v.palier !== null && v.net !== null && v.net < 0;
+  const gain = rempli && !horsGrille && !negatif && v.palier !== null;
+  const ton = horsGrille ? "audit" : negatif ? "franc" : gain ? "gain" : "attente";
+
   return (
     <section className="calc" aria-label="Calculateur de palier">
       <header className="calc-tete">
@@ -133,91 +187,66 @@ export default function Calculateur({
         <p className="calc-chapo">{CALCULATEUR.entete.texte}</p>
       </header>
 
-      {/* ——— les champs, un par poste coché ——— */}
-      <div className="calc-champs">
-        {questions.map((q) => {
-          const id = `${idBase}-${q.posteId}`;
-          return (
-            <div key={q.posteId} className="calc-champ">
-              <label className="calc-label" htmlFor={id}>
-                <span className="calc-poste">{nomPoste(q.posteId)}</span>
-                {q.question}
-              </label>
-              <div className="calc-saisie">
-                <input
-                  id={id}
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  step={1}
-                  className="calc-input"
-                  value={saisie[q.posteId] ?? ""}
-                  placeholder="0"
-                  onChange={(e) => {
-                    const n = e.target.value === "" ? undefined : Math.max(0, +e.target.value);
-                    setSaisie((s) => ({ ...s, [q.posteId]: n }));
-                  }}
-                />
-                <span className="calc-unite">{q.unite}</span>
-              </div>
-              <p className="calc-aide">{q.aide}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ——— qui fait ce travail : LA question, sans laquelle le gain est faux ——— */}
-      <fieldset className="calc-qui">
-        <legend className="calc-qui-titre">{CALCULATEUR.qui.question}</legend>
-        <div className="calc-qui-choix">
-          {PROFILS_HORAIRES.map((p) => (
-            <label key={p.id} className="calc-radio" data-actif={profil === p.id}>
-              <input
-                type="radio"
-                name={`${idBase}-profil`}
-                checked={profil === p.id}
-                onChange={() => setProfil(p.id)}
+      {/* ══ le cadre à deux panneaux — la géométrie du modèle ══ */}
+      <div className="calc-cadre">
+        {/* ——— à gauche : ce que le visiteur règle ——— */}
+        <div className="calc-reglages">
+          <div className="calc-questions">
+            {questions.map((q) => (
+              <QuestionCurseur
+                key={q.posteId}
+                q={q}
+                idBase={idBase}
+                valeur={saisie[q.posteId] ?? 0}
+                surValeur={(n) => setSaisie((s) => ({ ...s, [q.posteId]: n }))}
               />
-              <span className="calc-radio-libelle">{p.libelle}</span>
-              <span className="calc-radio-taux">
-                {p.detail}, compté {p.taux}
-                {NBSP}€
-              </span>
-            </label>
-          ))}
-        </div>
-        <p className="calc-aide">{CALCULATEUR.qui.aide}</p>
-      </fieldset>
-
-      {rempli && (
-        <>
-          {/* ——— la conversion, montrée et non cachée ——— */}
-          <div className="calc-detail">
-            <p className="calc-detail-titre">{CALCULATEUR.detail.titre}</p>
-            <ul className="calc-detail-liste">
-              {lignes.map((l) => (
-                <li key={l.question.posteId}>
-                  <span>
-                    {nombre(l.saisi)} {l.question.unite}
-                  </span>
-                  <span className="calc-detail-fleche" aria-hidden="true">
-                    →
-                  </span>
-                  <span className="calc-detail-pieces">
-                    {nombre(Math.round(l.pieces))} pièces
-                    <span className="calc-detail-regle"> · {l.question.conversion}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="calc-detail-total">
-              {CALCULATEUR.detail.total} : <strong>{nombre(v.pieces)} pièces par mois</strong>
-            </p>
+            ))}
           </div>
 
-          {/* ——— le verdict ——— */}
-          {v.palier === null ? (
-            <div className="calc-verdict" data-ton="audit">
+          <div className="calc-trait" aria-hidden="true" />
+
+          {/* ——— qui fait ce travail : LA question, sans laquelle le gain est faux ——— */}
+          <fieldset className="calc-qui">
+            <legend className="calc-qui-titre">{CALCULATEUR.qui.question}</legend>
+            <div className="calc-qui-choix">
+              {PROFILS_HORAIRES.map((p) => (
+                <label key={p.id} className="calc-radio" data-actif={profil === p.id}>
+                  <input
+                    type="radio"
+                    name={`${idBase}-profil`}
+                    checked={profil === p.id}
+                    onChange={() => setProfil(p.id)}
+                  />
+                  <span className="calc-radio-libelle">{p.libelle}</span>
+                  <span className="calc-radio-taux">
+                    {p.detail}, compté {p.taux}
+                    {NBSP}€
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p className="calc-aide">{CALCULATEUR.qui.aide}</p>
+          </fieldset>
+        </div>
+
+        {/* ——— à droite : ce que ça donne ———
+            Le panneau garde toute la hauteur du cadre (sinon la carte montre
+            un fond blanc sous lui), mais son CONTENU est collant à partir de
+            1024 px : avec quatre curseurs, la colonne de gauche fait plus de
+            1 200 px et le résultat sortait de l'écran dès le deuxième
+            réglage. On règle en voyant le chiffre bouger. */}
+        <div className="calc-resultat" data-ton={ton}>
+          <div className="calc-resultat-dedans">
+          {!rempli && (
+            <div className="calc-bloc">
+              <p className="calc-resultat-titre">{CALCULATEUR.avant.sous}</p>
+              <p className="calc-gain-chiffre">{CALCULATEUR.avant.grand}</p>
+              <p className="calc-gain-note">{CALCULATEUR.avant.note}</p>
+            </div>
+          )}
+
+          {horsGrille && (
+            <div className="calc-bloc">
               <p className="calc-verdict-titre">{CALCULATEUR.horsGrille.titre}</p>
               <p className="calc-verdict-texte">
                 Vos {nombre(v.pieces)} pièces mensuelles dépassent ce que la grille publique
@@ -228,8 +257,10 @@ export default function Calculateur({
               </a>
               <p className="calc-souscta">{CALCULATEUR.horsGrille.souscta}</p>
             </div>
-          ) : v.net !== null && v.net < 0 ? (
-            <div className="calc-verdict" data-ton="franc">
+          )}
+
+          {negatif && v.palier && (
+            <div className="calc-bloc">
               <p className="calc-verdict-titre">{CALCULATEUR.negatif.titre}</p>
               <p className="calc-verdict-texte">
                 Les {journees(Math.round(v.heuresRecuperees))} heures que le système vous rendrait
@@ -239,16 +270,14 @@ export default function Calculateur({
               <a className="calc-bouton" href="/reserver-un-audit">
                 {CALCULATEUR.negatif.cta}
               </a>
-              <button
-                type="button"
-                className="calc-retour"
-                onClick={() => setOuvert(false)}
-              >
+              <button type="button" className="calc-retour" onClick={() => setOuvert(false)}>
                 {CALCULATEUR.negatif.retour}
               </button>
             </div>
-          ) : (
-            <div className="calc-verdict" data-ton="gain">
+          )}
+
+          {gain && v.palier && (
+            <div className="calc-bloc">
               {monte && (
                 <p className="calc-monte">
                   Vous aviez coché {palierCoche?.nom}, qui comprend{" "}
@@ -258,25 +287,16 @@ export default function Calculateur({
                 </p>
               )}
 
-              {/* le chiffre en gros, puis la soustraction */}
-              <p className="calc-gain-chiffre">{euros(v.valeurRecuperee)}</p>
+              {/* le chiffre en gros, la soustraction est dans le détail dessous */}
+              <p className="calc-resultat-titre">Ce que ces heures valent</p>
+              <ChiffreAnime valeur={v.valeurRecuperee} />
               <p className="calc-gain-libelle">de temps récupéré chaque mois</p>
               <p className="calc-gain-note">
-                {journees(Math.round(v.heuresRecuperees))} heures rendues, sur les{" "}
+                {journees(Math.round(v.heuresRecuperees))} heures rendues sur les{" "}
                 {journees(Math.round(v.heuresActuelles))} que ces {nombre(v.pieces)} pièces vous
-                coûtent aujourd&apos;hui.
+                coûtent aujourd&apos;hui, soit {journees(v.journees)} journées par mois rendues à
+                votre métier.
               </p>
-
-              <div className="calc-soustraction">
-                <span>− {euros(v.palier.prix)} d&apos;abonnement</span>
-                <strong>= {euros(net)} net par mois</strong>
-                <span>soit {euros(net * 12)} sur l&apos;année.</span>
-              </div>
-
-              <p className="calc-journees">
-                Soit {journees(v.journees)} journées par mois, rendues à votre métier.
-              </p>
-              <p className="calc-verdict-texte">{CALCULATEUR.gain.plancher}</p>
 
               <a className="calc-bouton" href={`/installation?palier=${v.palier.id}`}>
                 Réserver l&apos;installation — {euros(v.palier.installation)}
@@ -284,13 +304,160 @@ export default function Calculateur({
               <p className="calc-souscta">
                 Puis {euros(v.palier.prix)} par mois · satisfait ou remboursé 30 jours
               </p>
-              <p className="calc-encours">{CALCULATEUR.gain.encours}</p>
             </div>
           )}
+
+          {/* ——— la conversion, montrée et non cachée ——— */}
+          {rempli && (
+            <div className="calc-detail">
+              <p className="calc-detail-titre">{CALCULATEUR.detail.titre}</p>
+              <ul className="calc-detail-liste">
+                {lignes.map((l) => (
+                  <li key={l.question.posteId}>
+                    <span className="calc-detail-saisi">
+                      {nombre(l.saisi)} {l.question.unite}
+                    </span>
+                    <span className="calc-detail-pieces">
+                      {nombre(Math.round(l.pieces))} pièces
+                    </span>
+                    <span className="calc-detail-regle">{l.question.conversion}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="calc-ligne">
+                <span>{CALCULATEUR.detail.total}</span>
+                <strong>{nombre(v.pieces)} pièces par mois</strong>
+              </div>
+              <div className="calc-ligne">
+                <span>
+                  Temps rendu, à {taux}
+                  {NBSP}€ de l&apos;heure
+                </span>
+                <strong>{euros(v.valeurRecuperee)}</strong>
+              </div>
+              {v.palier && (
+                <div className="calc-ligne">
+                  <span>Abonnement {v.palier.nom}</span>
+                  <strong>− {euros(v.palier.prix)}</strong>
+                </div>
+              )}
+              {gain && (
+                <>
+                  <div className="calc-trait calc-trait--serre" aria-hidden="true" />
+                  <div className="calc-ligne calc-ligne--net">
+                    <span>Net par mois</span>
+                    <strong>{euros(net)}</strong>
+                  </div>
+                  <p className="calc-annee">soit {euros(net * 12)} sur l&apos;année.</p>
+                </>
+              )}
+            </div>
+          )}
+          </div>
+        </div>
+      </div>
+
+      {/* ——— ce que le chiffre ne dit pas : le plancher, les encours, la portée ——— */}
+      {gain && (
+        <>
+          <p className="calc-pied">{CALCULATEUR.gain.plancher}</p>
+          <p className="calc-pied">{CALCULATEUR.gain.encours}</p>
         </>
       )}
-
-      <p className="calc-pied">{CALCULATEUR.pied}</p>
+      <p className="calc-pied calc-pied--regle">{CALCULATEUR.pied}</p>
     </section>
+  );
+}
+
+/* ——— une question : l'intitulé, le chiffre en grand, le curseur, la règle ——— */
+function QuestionCurseur({
+  q,
+  idBase,
+  valeur,
+  surValeur,
+}: {
+  q: QuestionVolume;
+  idBase: string;
+  valeur: number;
+  surValeur: (n: number) => void;
+}) {
+  const id = `${idBase}-${q.posteId}`;
+  /* Vingt intervalles, comme le modèle : une graduation courte partout, une
+     longue et chiffrée tous les cinq. Le dernier chiffre porte un « + » —
+     au-delà, on sort de la grille et c'est l'audit qui répond. */
+  const intervalles = 20;
+  const graduations = Array.from(
+    { length: intervalles + 1 },
+    (_, i) => (q.max / intervalles) * i,
+  );
+
+  return (
+    <div className="calc-q">
+      <label className="calc-q-question" htmlFor={id}>
+        <span className="calc-poste">{nomPoste(q.posteId)}</span>
+        {q.question}
+      </label>
+
+      <p className="calc-q-valeur">
+        <span className="calc-q-nombre">{nombre(valeur)}</span>
+        <span className="calc-q-unite">{q.unite}</span>
+      </p>
+
+      <div className="calc-curseur">
+        <input
+          id={id}
+          type="range"
+          min={0}
+          max={q.max}
+          step={q.pas}
+          value={valeur}
+          onChange={(e) => surValeur(+e.target.value)}
+          /* la part remplie du rail : le dégradé du fond la lit, ce qui
+             évite un second élément posé par-dessus l'input natif */
+          style={{ "--part": `${(valeur / q.max) * 100}%` } as React.CSSProperties}
+        />
+        <span className="calc-regle" aria-hidden="true">
+          {graduations.map((g, i) => (
+            <span key={i} className="calc-graduation" data-longue={i % 5 === 0}>
+              <span className="calc-graduation-trait" />
+              <span className="calc-graduation-nombre">
+                {i % 5 === 0 ? `${nombre(Math.round(g))}${i === intervalles ? "+" : ""}` : ""}
+              </span>
+            </span>
+          ))}
+        </span>
+      </div>
+
+      <p className="calc-aide">{q.aide}</p>
+    </div>
+  );
+}
+
+/* ——— le gros chiffre, caractère par caractère ——— */
+function ChiffreAnime({ valeur }: { valeur: number }) {
+  const fige = useReducedMotion();
+  const texte = euros(valeur);
+
+  if (fige) return <p className="calc-gain-chiffre">{texte}</p>;
+
+  return (
+    <p className="calc-gain-chiffre">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {texte.split("").map((c, i) => (
+          <motion.span
+            key={`${valeur}-${i}`}
+            variants={animChiffre}
+            initial="cache"
+            animate="vu"
+            exit="sorti"
+            custom={i}
+            className="calc-gain-caractere"
+          >
+            {c === " " ? NBSP : c}
+          </motion.span>
+        ))}
+      </AnimatePresence>
+    </p>
   );
 }
