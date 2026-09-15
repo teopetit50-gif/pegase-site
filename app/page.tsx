@@ -572,27 +572,56 @@ const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
 
    Corollaire à connaître : une accroche modifiée ici ne suit pas ailleurs.
    Le jour où le nouveau registre doit valoir partout, c'est `benefit` qu'il
-   faut réécrire, et cette table disparaît. */
+   faut réécrire, et cette table disparaît.
+
+   15/09/2026 (Teo) — « faut qu'on trouve des phrases plus pro et
+   crocheuses ; ils lisent ça, ils se disent : wtf, ils peuvent faire ça ».
+
+   Les huit textes précédents avaient le défaut exact que la doctrine
+   (OMEGA/DOCTRINE-TEXTES-SAAS.md) décrit : voix passive et produit absent
+   — « les échéances sont suivies », « les clients inactifs sont
+   identifiés ». Personne n'agit dans ces phrases, donc rien n'y étonne.
+   Chaque carte porte désormais un FAIT daté en intitulé, puis une phrase
+   qui dit comment, puis ce qui reste au lecteur.
+
+   AUCUN de ces faits n'est inventé pour la carte : les quatre sont repris
+   mot pour mot des pages produit, où ils ont déjà passé la relecture.
+     • CASHD  — lib/produits/relances.ts, PRINCIPE.titre (« À 7 h… ») et la
+       carte `relit` (« relit votre facturier chaque matin »).
+     • RELOAD — lib/produits/reprise.ts, HERO.chapo (le compte qui s'éteint,
+       vu « à la clôture ») et carteCarte.suite (lecture de nuit, silence
+       au-delà du délai).
+     • FRONTD — lib/produits/accueil.ts, HERO.titre (le meilleur titre du
+       parc, gardé intact) et APPORT (« répond dans la minute »).
+     • FILED  — lib/produits/factures.ts, HERO : le titre, « vous connectez
+       une messagerie », et le classement jusqu'au dossier comptable.
+
+   Deux garde-fous tenus : aucune promesse de résultat (on dit ce que la
+   machine FAIT, jamais ce que ça rapporte), et la validation humaine reste
+   écrite dans deux cartes sur quatre — c'est elle qui rend le reste
+   crédible. Les heures portent une espace fine insécable (U+202F), comme
+   partout dans le parc : un « 7 h » avec une espace ordinaire casse en
+   fin de ligne. */
 const ACCROCHES_VITRINE: Record<string, { objectif: string; texte: string }> = {
   CASHD: {
-    objectif: "Sécuriser les encaissements",
+    objectif: "À 7 h, vos relances sont déjà écrites.",
     texte:
-      "Les échéances sont suivies et les relances préparées au bon moment, selon vos règles de gestion.",
+      "CASHD relit votre facturier chaque matin et rédige une relance pour chaque compte en retard. Vos équipes n\u2019ont plus qu\u2019à décider laquelle part.",
   },
   RELOAD: {
-    objectif: "Réactiver les opportunités",
+    objectif: "Un client qui s\u2019éteint, vous le voyez avant la clôture.",
     texte:
-      "Les clients inactifs et les opportunités à potentiel sont identifiés, priorisés et remis dans le bon circuit.",
+      "RELOAD relit votre base et votre historique pendant la nuit, puis ne garde que les comptes dont le silence dépasse le délai que vous avez fixé.",
   },
   FRONTD: {
-    objectif: "Traiter les demandes sans délai",
+    objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
     texte:
-      "Chaque demande entrante est analysée, qualifiée et préparée pour réponse, y compris en dehors des horaires habituels.",
+      "FRONTD lit le message dès qu\u2019il arrive et répond dans la minute, sans jamais sortir de ce que vous avez validé avec nous.",
   },
   FILED: {
-    objectif: "Structurer les flux documentaires",
+    objectif: "Vos équipes ne ressaisiront plus une seule facture.",
     texte:
-      "Les documents entrants sont lus, contrôlés, classés et transmis au bon interlocuteur, sans ressaisie inutile.",
+      "Vous connectez une messagerie, rien d\u2019autre. FILED lit chaque pièce qui arrive, recoupe ses montants et la classe jusqu\u2019au dossier de votre comptabilité.",
   },
 };
 
