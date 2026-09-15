@@ -15,6 +15,19 @@
    Les boutons `type="submit"` et ceux d'un formulaire sont SAUTÉS : on ne
    poste pas de vraies demandes depuis une sonde.
 
+   ⚠ LE MENSONGE DE LA PREMIÈRE VERSION, gardé en mémoire. Elle appelait
+   `e.click()`. Elle a déclaré MUETS les quatre onglets métier de FRONTD
+   et 62 boutons de /tarifs — tous en parfait état. `element.click()` ne
+   produit ni `pointerdown` ni `mousedown` ; or Radix (onglets, segmentés,
+   menus) ACTIVE au pointeur, pas au clic. La sonde envoie donc de vrais
+   événements souris par CDP, aux coordonnées du bouton.
+
+   CE QU'ELLE NE SAIT TOUJOURS PAS FAIRE : elle clique dans l'ordre du
+   DOM sans revenir à l'état initial entre deux boutons. Un segmenté déjà
+   ACTIF ne change rien quand on le reclique — c'est juste, et ça se lit
+   « MUET ». Un MUET est donc une PISTE à vérifier à la main, jamais un
+   verdict : on rejoue le bouton seul, sur une page fraîche.
+
    Usage : node outils/sonde-boutons-morts.mjs <largeur> <url...>
    ══════════════════════════════════════════════════════════════════════ */
 import { ouvrirSession } from './chrome.mjs';
@@ -56,20 +69,33 @@ for (const url of urls) {
   for (const b of liste) {
     if (b.submit || !b.visible) continue;
     const avant = await s.evaluer(etat);
-    await s.evaluer(`(() => { const e = document.querySelector('[data-sonde="${b.id}"]'); if (!e) return; e.scrollIntoView({block:'center'}); e.click(); })()`);
+    const pos = await s.evaluer(`(() => {
+      const e = document.querySelector('[data-sonde="${b.id}"]');
+      if (!e) return '';
+      e.scrollIntoView({ block: 'center' });
+      const r = e.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return '';
+      return JSON.stringify({ x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) });
+    })()`);
+    if (!pos) continue;
+    const { x, y } = JSON.parse(pos);
+    for (const type of ['mousePressed', 'mouseReleased'])
+      await s.envoyer('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 });
     await s.dormir(450);
     const apres = await s.evaluer(etat);
     testes++;
     if (avant === apres) muets.push(b.t);
-    /* on revient à l'état de départ pour ne pas enchaîner les ouvertures */
-    if (avant !== apres && JSON.parse(avant).url === JSON.parse(apres).url) {
-      await s.evaluer(`(() => { const e = document.querySelector('[data-sonde="${b.id}"]'); if (e && e.getAttribute('aria-expanded') === 'true') e.click(); })()`);
+    /* on referme ce qu'on vient d'ouvrir pour ne pas empiler les panneaux */
+    if (avant !== apres && JSON.parse(avant).url === JSON.parse(apres).url
+        && (await s.evaluer(`document.querySelector('[data-sonde="${b.id}"]')?.getAttribute('aria-expanded') === 'true'`))) {
+      for (const type of ['mousePressed', 'mouseReleased'])
+        await s.envoyer('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 });
       await s.dormir(200);
     }
     if (JSON.parse(avant).url !== JSON.parse(apres).url) { await s.aller(url); await s.evaluer(RELEVE); }
   }
-  console.log(`\n${url}  —  ${testes} boutons cliqués, ${muets.length} muets`);
-  for (const m of muets) console.log('   MUET  ' + m);
+  console.log(`\n${url}  —  ${testes} boutons cliqués, ${muets.length} à vérifier`);
+  for (const m of muets) console.log('   RIEN NE BOUGE  ' + m);
   if (s.soucis.length) console.log('   (console) ' + [...new Set(s.soucis)].slice(0, 4).join(' | '));
   s.fermer();
 }
