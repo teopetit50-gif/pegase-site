@@ -78,14 +78,14 @@ export function GlassCard({
 }: GlassCardProps) {
   return (
     <div
-      className={`relative h-full rounded-[50px] bg-gradient-to-br from-zinc-600 to-zinc-800 shadow-2xl transition-all duration-500 ease-in-out [transform-style:preserve-3d] group-hover:[box-shadow:rgba(0,0,0,0.3)_30px_50px_25px_-40px,rgba(0,0,0,0.1)_0px_25px_30px_0px] group-hover:[transform:rotate3d(1,1,0,var(--bascule))] ${className}`}
+      className={`relative h-full rounded-[50px] bg-gradient-to-br from-zinc-100 to-zinc-300 transition-all duration-500 ease-in-out [box-shadow:0_0_0_1px_rgba(9,9,11,0.06),0_0.6px_0.6px_-1.25px_rgba(0,0,0,0.11),0_2.29px_2.29px_-2.5px_rgba(0,0,0,0.1),0_10px_10px_-3.75px_rgba(0,0,0,0.06)] [transform-style:preserve-3d] group-hover:[box-shadow:0_0_0_1px_rgba(9,9,11,0.06),rgba(0,0,0,0.2)_30px_50px_25px_-40px,rgba(0,0,0,0.07)_0px_25px_30px_0px] group-hover:[transform:rotate3d(1,1,0,var(--bascule))] ${className}`}
       style={{ "--bascule": `${angle}deg` } as React.CSSProperties}
     >
       {/* le panneau de verre, en retrait de 8 px : c'est lui qui donne
           l'épaisseur — deux arcs concentriques plutôt qu'un seul bord. */}
       <div
         aria-hidden
-        className="absolute inset-2 rounded-[46px] border-b border-l border-white/20 bg-gradient-to-b from-white/[0.22] to-white/[0.06] backdrop-blur-sm [transform-style:preserve-3d] [transform:translate3d(0,0,25px)]"
+        className="absolute inset-2 rounded-[46px] border-b border-l border-white bg-gradient-to-b from-white/[0.85] to-white/[0.30] backdrop-blur-sm [transform-style:preserve-3d] [transform:translate3d(0,0,25px)]"
       />
 
       {/* les disques, et le signe du produit posé dessus */}
@@ -97,7 +97,7 @@ export function GlassCard({
           <div
             key={d.taille}
             aria-hidden
-            className="absolute aspect-square rounded-full bg-white/10 shadow-[rgba(100,100,111,0.2)_-10px_10px_20px_0px] transition-all duration-500 ease-in-out"
+            className="absolute aspect-square rounded-full bg-[rgba(9,9,11,0.045)] shadow-[rgba(100,100,111,0.13)_-10px_10px_20px_0px] transition-all duration-500 ease-in-out"
             style={{
               width: d.taille,
               top: d.bord,
@@ -109,7 +109,7 @@ export function GlassCard({
         ))}
         {marque ? (
           <div
-            className="absolute grid aspect-square w-[50px] place-content-center rounded-full bg-white shadow-[rgba(100,100,111,0.2)_-10px_10px_20px_0px] transition-all duration-500 ease-in-out [transform:translate3d(0,0,100px)] [transition-delay:1.6s] group-hover:[transform:translate3d(0,0,120px)]"
+            className="absolute grid aspect-square w-[50px] place-content-center rounded-full bg-white shadow-[0_10px_22px_-8px_rgba(15,16,19,0.28),inset_0_0_0_1px_rgba(15,16,19,0.07)] transition-all duration-500 ease-in-out [transform:translate3d(0,0,100px)] [transition-delay:1.6s] group-hover:[transform:translate3d(0,0,120px)]"
             style={{ top: 30, right: 30 }}
           >
             {marque}

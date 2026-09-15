@@ -27,20 +27,19 @@
   --or: 176, 141, 87;
 }
 
-/* Le filet au repos est passé de l'encre diluée au BLANC dilué : la carte
-   est sombre depuis le 15/09, un `rgba(24,24,27,0.12)` y serait invisible
-   (et un `border` Tailwind v4 sans couleur peindrait en `currentColor`,
-   donc en blanc plein — d'où la valeur posée ici, jamais laissée vide). */
+/* Le filet au repos est en ENCRE diluée : la carte a fait l'aller-retour
+   (papier → encre le 15/09 au matin, puis retour au papier le soir, « plus
+   blanc genre »). Ne jamais laisser la valeur vide : un `border` Tailwind v4
+   sans couleur peint en `currentColor`, donc en encre PLEINE. */
 .tc-filet {
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(24, 24, 27, 0.12);
   transition: border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* L'or monte à 1 : sur le papier il fallait le diluer pour ne pas virer au
-   moutarde ; sur near-black c'est l'inverse, un or à 0,9 se lit comme un
-   gris chaud. C'est ici un TRAIT de 1 px, jamais un aplat. */
+/* L'or reste dilué à 0,9 : sur du papier, un or franc étalé vire au
+   moutarde. C'est ici un TRAIT de 1 px, jamais un aplat. */
 .tc-filet[data-on="oui"] {
-  border-color: rgba(var(--or), 1);
+  border-color: rgba(var(--or), 0.9);
 }
 
 /* Le lien de bas de carte prend l'or au survol de la carte entière — le

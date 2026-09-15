@@ -82,9 +82,9 @@ import "./TuilesCatalogue.css";
 /* blanc dilué : les trois crans des formes inertes, tièdes et marquées.
    Le fond ayant changé de camp le 15/09, ce sont les valeurs d'encre du
    11/09 retournées — mêmes alphas relatifs, lues sur near-black. */
-const INERTE = "rgba(255, 255, 255, 0.20)";
-const TIEDE = "rgba(255, 255, 255, 0.36)";
-const MARQUE = "rgba(255, 255, 255, 0.88)";
+const INERTE = "rgba(24, 24, 27, 0.08)";
+const TIEDE = "rgba(24, 24, 27, 0.16)";
+const MARQUE = "rgba(24, 24, 27, 0.30)";
 /* le filet au repos vit dans TuilesCatalogue.css (`.tc-filet`) */
 
 const DOUX = { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const };
@@ -220,7 +220,7 @@ function Qualification({ fige }: { fige: boolean }) {
                 initial={{ opacity: 0.18, color: TIEDE }}
                 animate={{
                   opacity: on ? 1 : 0.18,
-                  color: on ? "rgba(255,255,255,0.92)" : TIEDE,
+                  color: on ? "rgba(24,24,27,0.75)" : TIEDE,
                 }}
                 transition={DOUX}
               >
@@ -263,15 +263,15 @@ function Classement({ fige }: { fige: boolean }) {
                 x: i * 5,
                 y: i * -4,
                 rotate: -7 + i * 3,
-                backgroundColor: "rgba(255,255,255,0.05)",
+                backgroundColor: "rgba(24,24,27,0.04)",
               }}
               animate={{
                 x: rangee ? 134 : i * 5,
                 y: rangee ? casiers[i] : i * -4,
                 rotate: rangee ? 0 : -7 + i * 3,
                 backgroundColor: rangee
-                  ? "rgba(255,255,255,0.88)"
-                  : "rgba(255,255,255,0.05)",
+                  ? "rgba(255,255,255,1)"
+                  : "rgba(24,24,27,0.04)",
               }}
               transition={GLISSE}
             />
@@ -368,23 +368,23 @@ export function TuilesCatalogue({
 
             <div className="flex flex-1 flex-col px-8 pb-8">
               <span
-                className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/55"
+                className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--o-muted)]"
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
                 {t.nom}
               </span>
 
               <h3
-                className="mt-3 text-[19px] font-semibold leading-[1.35] tracking-[-0.02em] text-white"
+                className="mt-3 text-[19px] font-semibold leading-[1.35] tracking-[-0.02em] text-[var(--o-text)]"
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
                 {t.objectif}
               </h3>
-              <p className="mt-2.5 max-w-[34ch] text-[15px] leading-[26px] text-white/70">
+              <p className="mt-2.5 max-w-[34ch] text-[15px] leading-[26px] text-[var(--o-muted)]">
                 {t.texte}
               </p>
 
-              <span className="tc-lien mt-auto inline-flex items-center gap-1.5 self-start pt-7 text-[14px] font-semibold text-white">
+              <span className="tc-lien mt-auto inline-flex items-center gap-1.5 self-start pt-7 text-[14px] font-semibold text-[var(--o-text)]">
                 Voir le détail
                 <Chevron taille={12} />
               </span>
