@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CompteVue from "@/components/compte/CompteVue";
-import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import { abonnementCourant, type DemandeCompte } from "@/lib/abonnement";
 import type { LigneCommandeSite } from "@/lib/site-commande";
@@ -102,8 +101,12 @@ export default async function ApercuComptePage({
     etat === "vide" ? [] : etat === "audit" ? [AUDIT] : [installation(etat), AUDIT];
   const rattache = etat === "rattache";
 
+  /* 15/09 — PAS de PageShell sur cette route : sa colonne de 1440 px, ses
+     filets latéraux et son pied de page empêchaient l'écran d'être pleine
+     page, et le pied garantissait un défilement. Le header du site, lui,
+     vit dans app/layout.tsx et reste au-dessus. */
   return (
-    <PageShell>
+    <main className="overflow-x-clip">
       <PageMotion />
       <CompteVue
         utilisateur={{
@@ -131,6 +134,6 @@ export default async function ApercuComptePage({
         retour={null}
         enregistrementEnCours={false}
       />
-    </PageShell>
+    </main>
   );
 }

@@ -27,7 +27,21 @@
    survit, pour « Paiement refusé ».
    ══════════════════════════════════════════════════════════════════════ */
 
-/* ——— la colonne, puis les deux colonnes ———
+/* ⚠ 15/09, TROISIÈME FORME — `.cp-page` n'est plus rendu : l'écran est
+   maintenant la coque `.cpt` (CompteCoque, gabarit 21st.dev). Les règles
+   de CETTE feuille qui qualifiaient un descendant de `.cp-page` sont donc
+   écrites `:is(.resa .cp-page, .cpt)` — et PAS `.resa :is(.cp-page,
+   .cpt)`, qui exigerait un `.cpt` DESCENDANT d'un `.resa` alors que les
+   deux classes sont sur le MÊME élément (la coque porte `cpt resa`) :
+   écrit ainsi, le sélecteur ne correspond à rien. Sinon elles cessent de peindre EN
+   SILENCE et les valeurs de globals.css reprennent la main. C'est
+   exactement ce qui est arrivé aux pastilles de statut : le monochrome du
+   15/09 est tombé, et le vert et l'ambre que Teo avait fait retirer sont
+   revenus à l'écran. Les règles de mise en page de la colonne (largeur,
+   deux colonnes) restent sur `.cp-page` : elles ne concernent que
+   l'ancienne forme, gardée pour l'historique de git, pas pour le rendu.
+
+   ——— la colonne, puis les deux colonnes ———
    15/09, seconde passe. Teo : « je veux que ce soit une page en large,
    pas long. » Les quatre blocs empilés dans 940 px faisaient défiler
    trois écrans. À partir de 1100 px la page s'élargit à 1240 et les
@@ -292,12 +306,12 @@
    Ces surcharges ne valent QUE sur cette page : les mêmes pastilles
    gardent leurs couleurs sur /installation et dans le module de
    réservation, où elles n'ont pas été mises en cause. */
-.resa .cp-page .cp-pastille {
+:is(.resa .cp-page, .cpt) .cp-pastille {
   gap: 7px;
   background: #f4f4f2;
   color: var(--r-faible);
 }
-.resa .cp-page .cp-pastille::before {
+:is(.resa .cp-page, .cpt) .cp-pastille::before {
   content: "";
   width: 6px;
   height: 6px;
@@ -305,29 +319,29 @@
   background: currentColor;
   opacity: 0.55;
 }
-.resa .cp-page .cp-pastille[data-teinte="vert"] {
+:is(.resa .cp-page, .cpt) .cp-pastille[data-teinte="vert"] {
   background: #ececea;
   color: var(--r-texte);
   font-weight: 600;
 }
-.resa .cp-page .cp-pastille[data-teinte="vert"]::before {
+:is(.resa .cp-page, .cpt) .cp-pastille[data-teinte="vert"]::before {
   opacity: 1;
 }
-.resa .cp-page .cp-pastille[data-teinte="bleu"],
-.resa .cp-page .cp-pastille[data-teinte="ambre"] {
+:is(.resa .cp-page, .cpt) .cp-pastille[data-teinte="bleu"],
+:is(.resa .cp-page, .cpt) .cp-pastille[data-teinte="ambre"] {
   background: #f4f4f2;
   color: var(--r-doux);
 }
-.resa .cp-page .cp-pastille[data-teinte="gris"] {
+:is(.resa .cp-page, .cpt) .cp-pastille[data-teinte="gris"] {
   background: #f4f4f2;
   color: var(--r-faible);
 }
-.resa .cp-page .cp-pastille[data-teinte="rouge"] {
+:is(.resa .cp-page, .cpt) .cp-pastille[data-teinte="rouge"] {
   background: #fdf1ef;
   color: #7c2d24;
 }
 /* le bandeau de confirmation : un filet d'encre à gauche, plus de vert */
-.resa .cp-page .cp-ok {
+:is(.resa .cp-page, .cpt) .cp-ok {
   border-color: var(--r-filet);
   border-left: 2px solid var(--r-texte);
   background: #fafafa;
@@ -359,6 +373,6 @@
 }
 
 /* ——— les repères d'ancre, s'il en reste dans la carte d'abonnement ——— */
-.resa .cp-page [id^="cp-abo-"] {
+:is(.resa .cp-page, .cpt) [id^="cp-abo-"] {
   scroll-margin-top: 96px;
 }

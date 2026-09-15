@@ -1,0 +1,491 @@
+/* ══════════════════════════════════════════════════════════════════════
+   coque.css — « Mon compte » en PLEINE PAGE (15/09/2026)
+
+   Teo, troisième retour de la journée : « c'est toujours aussi long, c'est
+   toujours pas pleine page, et c'est encore amateur — utilise de vrais
+   composants. » Les trois reproches tiennent au même choix : la page était
+   une colonne de texte dans la coque du site (1240 px centrés, filets
+   latéraux, pied de page), et non un ÉCRAN.
+
+   Le gabarit repris est `@uniquesonu/dashboard-with-collapsible-sidebar`
+   (21st.dev, 629 téléchargements), relevé sur son aperçu et sur le code de
+   son registre :
+
+     · barre latérale 256 px, repliée 64, `position: sticky`, hauteur
+       d'écran, fond blanc, filet à droite ;
+     · en tête de la barre, l'identité (pastille + deux lignes) sur un
+       filet bas ;
+     · entrées de 44 px de haut, rayon 6, icône dans une gouttière de
+       48 px, l'entrée active portant un fond très clair et un trait de
+       2 px à gauche ;
+     · un groupe secondaire sous un filet, précédé d'un intitulé en
+       capitales de 12 px ;
+     · le replieur collé en bas, sur un filet ;
+     · zone de contenu `flex: 1`, padding 24, titre 30 px, une phrase
+       grise, puis une grille de quatre tuiles (rayon 12, filet, padding
+       24, gouttière 24) et une grille de contenu en 2/3 + 1/3.
+
+   CE QUI A ÉTÉ CHANGÉ, ET POURQUOI (aucune de ces lignes n'est
+   cosmétique) :
+
+   1. LES COULEURS. La référence est écrite en `gray-*` / `blue-*` de
+      Tailwind avec un thème sombre en double. Ici, les jetons du site
+      (`--r-texte`, `--r-doux`, `--r-faible`, `--r-filet`) et une seule
+      peau, claire — la charte de l'espace client est quasi monochrome, un
+      état se marque au trait et au poids d'encre, jamais au fond coloré.
+   2. LE MODE SOMBRE de la référence (une classe posée sur
+      `documentElement`) est retiré : il retournerait tout le site.
+   3. LES QUATRE TUILES ne portent PAS de chiffres de croissance
+      (« +12 % from last month »). Elles portent quatre faits que la base
+      rend : l'état de l'espace, la formule, le prochain rendez-vous, le
+      règlement. Un chiffre inventé sur un compte client est un mensonge,
+      pas une décoration.
+   4. LA HAUTEUR. La référence vit seule dans la fenêtre ; ici le header du
+      site (64 px, 72 au-dessus de `sm`) reste au-dessus. La coque prend
+      `100dvh` moins cette hauteur, et le pied de page du site ne s'affiche
+      pas sur cette route : sans ça, la page défile toujours — c'était le
+      premier reproche.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.cpt {
+  --cpt-flanc: 268px;
+  --cpt-flanc-replie: 68px;
+  --cpt-entete: 64px;
+  display: flex;
+  width: 100%;
+  min-height: calc(100dvh - var(--cpt-entete));
+  background: #f6f6f5;
+  color: var(--r-texte, #050505);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+@media (min-width: 640px) {
+  .cpt {
+    --cpt-entete: 72px;
+  }
+}
+
+/* ——— la barre latérale ——— */
+.cpt-flanc {
+  position: sticky;
+  top: var(--cpt-entete);
+  display: none; /* sous lg : la navigation passe en onglets horizontaux */
+  height: calc(100dvh - var(--cpt-entete));
+  flex-direction: column;
+  flex-shrink: 0;
+  width: var(--cpt-flanc);
+  border-right: 1px solid #e6e6e4;
+  background: #ffffff;
+  padding: 10px;
+  transition: width 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (min-width: 1024px) {
+  .cpt-flanc {
+    display: flex;
+  }
+}
+.cpt[data-replie="oui"] .cpt-flanc {
+  width: var(--cpt-flanc-replie);
+}
+
+/* l'identité, en tête */
+.cpt-identite {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 8px 6px 14px;
+  border-bottom: 1px solid #ededeb;
+}
+.cpt-pastille {
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e3e3e1;
+  border-radius: 10px;
+  background: #fafafa;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--r-texte, #050505);
+}
+.cpt-identite-texte {
+  min-width: 0;
+}
+.cpt-identite-nom {
+  display: block;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 19px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--r-texte, #050505);
+}
+.cpt-identite-sous {
+  display: block;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 17px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--r-faible, #616161);
+}
+
+/* les entrées */
+.cpt-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cpt-entree {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  border-radius: 8px;
+  color: var(--r-doux, #3d3d3d);
+  text-align: left;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+.cpt-entree:hover {
+  background: #f5f5f4;
+  color: var(--r-texte, #050505);
+}
+.cpt-entree-icone {
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 100%;
+}
+.cpt-entree-titre {
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* l'entrée active : fond très clair et TRAIT à gauche — la référence le
+   fait en bleu, nous à l'encre ([[palettes-saas-surfaces-invisibles]] :
+   un fond de la couleur du fond ne marque rien, c'est le trait qui dit) */
+.cpt-entree[data-actif] {
+  background: #f1f1ef;
+  color: var(--r-texte, #050505);
+  font-weight: 600;
+}
+.cpt-entree[data-actif]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--r-texte, #050505);
+}
+.cpt-entree-marque {
+  position: absolute;
+  right: 12px;
+  display: grid;
+  place-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--r-texte, #050505);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* le groupe secondaire */
+.cpt-groupe {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #ededeb;
+}
+.cpt-groupe-titre {
+  padding: 4px 12px 6px;
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #8c8c8c;
+}
+
+/* le replieur, en bas */
+.cpt-replieur {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #ededeb;
+  color: var(--r-faible, #616161);
+  transition: color 0.16s ease;
+}
+.cpt-replieur:hover {
+  color: var(--r-texte, #050505);
+}
+.cpt-replieur-icone {
+  display: grid;
+  place-content: center;
+  width: 46px;
+  height: 42px;
+  transition: transform 0.24s ease;
+}
+.cpt[data-replie="oui"] .cpt-replieur-icone {
+  transform: rotate(180deg);
+}
+
+/* ——— la zone de contenu ——— */
+.cpt-contenu {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 20px 16px 28px;
+}
+@media (min-width: 640px) {
+  .cpt-contenu {
+    padding: 24px 24px 32px;
+  }
+}
+@media (min-width: 1280px) {
+  .cpt-contenu {
+    padding: 28px 32px 36px;
+  }
+}
+
+/* l'en-tête de la zone : titre, phrase, actions */
+.cpt-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 18px;
+}
+.cpt-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+@media (min-width: 1024px) {
+  .cpt-titre {
+    font-size: 28px;
+    line-height: 34px;
+  }
+}
+.cpt-sous {
+  margin-top: 4px;
+  max-width: 76ch;
+  font-size: 14.5px;
+  line-height: 22px;
+  color: var(--r-faible, #616161);
+}
+.cpt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* les onglets horizontaux, sous lg (la barre latérale est cachée) */
+.cpt-onglets {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.cpt-onglets::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .cpt-onglets {
+    display: none;
+  }
+}
+.cpt-onglet {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #e6e6e4;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--r-doux, #3d3d3d);
+  white-space: nowrap;
+}
+.cpt-onglet[data-actif] {
+  border-color: var(--r-texte, #050505);
+  background: var(--r-texte, #050505);
+  color: #ffffff;
+}
+
+/* ——— les tuiles de faits ——— */
+.cpt-tuiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (min-width: 1024px) {
+  .cpt-tuiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+}
+.cpt-tuile {
+  min-width: 0;
+  border: 1px solid #e6e6e4;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 14px 14px 16px;
+}
+@media (min-width: 1024px) {
+  .cpt-tuile {
+    padding: 16px 18px 18px;
+  }
+}
+.cpt-tuile-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.cpt-tuile-icone {
+  display: grid;
+  place-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ededeb;
+  border-radius: 9px;
+  background: #fafafa;
+  color: var(--r-doux, #3d3d3d);
+}
+.cpt-tuile-etiquette {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8c8c8c;
+}
+.cpt-tuile-valeur {
+  margin-top: 3px;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 19px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--r-texte, #050505);
+}
+.cpt-tuile-detail {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--r-faible, #616161);
+}
+
+/* le pied de la zone de contenu : la sortie, quand la barre latérale
+   n'est pas rendue (sous 1024 px) */
+.cpt-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e6e6e4;
+}
+@media (min-width: 1024px) {
+  .cpt-pied {
+    display: none;
+  }
+}
+
+/* ——— les panneaux ——— */
+/* le panneau d'onglet occupe ce qui reste de l'écran : sans ça, un écran
+   de 900 px affichait 360 px de contenu et 540 px de gris — le reproche
+   « amateur » tenait autant à ce vide qu'au reste */
+.cpt-contenu > [role="tabpanel"] {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+.cpt-panneaux {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+@media (min-width: 1024px) {
+  .cpt-panneaux {
+    gap: 16px;
+  }
+}
+/* deux colonnes quand un panneau en appelle un second à côté ; et, sur
+   ces écrans-là, les deux cartes prennent la hauteur disponible (une
+   rangée de cartes de hauteurs différentes se voit tout de suite) */
+.cpt-panneaux[data-colonnes="deux"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1280px) {
+  .cpt-panneaux[data-colonnes="deux"] {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    flex: 1 1 auto;
+    align-content: stretch;
+  }
+}
+.cpt-panneau {
+  min-width: 0;
+  border: 1px solid #e6e6e4;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px 16px 18px;
+}
+@media (min-width: 1024px) {
+  .cpt-panneau {
+    padding: 20px 22px 22px;
+  }
+}
+.cpt-panneau-tete {
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #ededeb;
+}
+.cpt-panneau-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.cpt-panneau-sous {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--r-faible, #616161);
+}
+.cpt-panneau-corps {
+  min-width: 0;
+  /* les enfants (résumé du profil, carte d'abonnement) se règlent sur la
+     largeur du panneau, pas sur celle de la fenêtre */
+  container-type: inline-size;
+}

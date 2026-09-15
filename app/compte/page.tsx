@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import CompteVue from "@/components/compte/CompteVue";
 import {
@@ -181,8 +180,12 @@ export default async function ComptePage({
   const enregistrementEnCours =
     retour === "ok" && abonnement != null && statutPaiement(abonnement) === "a_enregistrer";
 
+  /* 15/09 — PAS de PageShell sur cette route : sa colonne de 1440 px, ses
+     filets latéraux et son pied de page empêchaient l'écran d'être pleine
+     page, et le pied garantissait un défilement. Le header du site, lui,
+     vit dans app/layout.tsx et reste au-dessus. */
   return (
-    <PageShell>
+    <main className="overflow-x-clip">
       <PageMotion />
       <CompteVue
         utilisateur={utilisateur}
@@ -199,6 +202,6 @@ export default async function ComptePage({
         retour={retour}
         enregistrementEnCours={enregistrementEnCours}
       />
-    </PageShell>
+    </main>
   );
 }

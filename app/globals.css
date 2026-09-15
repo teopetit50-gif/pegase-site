@@ -7115,15 +7115,6 @@ button.rounded-full:active {
    Il emprunte les jetons de `.resa` (--r-texte, --r-filet, --r-or-*) plutôt
    que des utilitaires Tailwind : sur cette page un thème scopé bat les
    utilitaires, un `bg-…` posé sur ces blocs ne peindrait pas.
-
-   15/09, seconde passe — LA GÉOMÉTRIE VIENT DE `pricing-12` (21st.dev) : un
-   cadre arrondi qui contient DEUX panneaux, les réglages à gauche sur le
-   fond de la carte, le résultat à droite sur un fond creusé. Les curseurs
-   et leur réglette graduée remplacent les quatre champs de saisie — on règle
-   un volume qu'on estime, on ne le tape pas. Le modèle appelle le Slider de
-   shadcn ; ici l'`input[type=range]` natif est habillé (rail en dégradé qui
-   lit `--part`, pastille cerclée de blanc), ce qui évite une dépendance et
-   garde le pilotage au clavier sans une ligne de JS.
    ══════════════════════════════════════════════════════════════════════ */
 
 /* ——— l'appel, avant ouverture ——— */
@@ -7150,9 +7141,18 @@ button.rounded-full:active {
   color: var(--r-faible);
 }
 
-/* ——— l'en-tête ——— */
+/* ——— le panneau ——— */
 .resa .calc {
   margin-top: 40px;
+  padding: 28px 24px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  background: #ffffff;
+}
+@media (min-width: 640px) {
+  .resa .calc {
+    padding: 32px;
+  }
 }
 .resa .calc-titre {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -7168,274 +7168,177 @@ button.rounded-full:active {
   color: var(--r-faible);
 }
 
-/* ——— le cadre à deux panneaux ———
-   `p: 5px` : le liseré de carte du modèle, qui fait flotter le panneau de
-   droite DANS la carte au lieu de le poser à côté. */
-.resa .calc-cadre {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 24px;
-  padding: 5px;
-  border: 1px solid var(--r-filet);
-  border-radius: 26px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -18px rgb(0 0 0 / 0.18);
-}
-@media (min-width: 1024px) {
-  .resa .calc-cadre {
-    flex-direction: row;
-    align-items: stretch;
-  }
-}
-.resa .calc-reglages {
-  display: flex;
-  flex: 1 1 auto;
-  min-width: 0;
-  flex-direction: column;
-  gap: 28px;
-  padding: 26px 20px;
-}
-@media (min-width: 640px) {
-  .resa .calc-reglages {
-    padding: 34px 32px;
-  }
-}
-.resa .calc-questions {
+/* ——— les champs ——— */
+.resa .calc-champs {
   display: grid;
-  gap: 30px;
+  gap: 20px;
+  margin-top: 24px;
 }
-.resa .calc-trait {
-  height: 1px;
-  width: 100%;
-  background: var(--r-filet);
+@media (min-width: 768px) {
+  .resa .calc-champs {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
 }
-.resa .calc-trait--serre {
-  margin: 8px 0 4px;
-}
-
-/* ——— une question : intitulé, chiffre, curseur, règle ——— */
 .resa .calc-poste {
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--r-faible);
 }
-.resa .calc-q-question {
+.resa .calc-label {
   display: block;
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 14px;
   font-weight: 500;
   color: var(--r-texte);
 }
-.resa .calc-q-valeur {
+.resa .calc-saisie {
   display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-.resa .calc-q-nombre {
-  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: var(--r-texte);
-  font-variant-numeric: tabular-nums;
-}
-@media (min-width: 640px) {
-  .resa .calc-q-nombre {
-    font-size: 40px;
-  }
-}
-.resa .calc-q-unite {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--r-faible);
-}
-
-/* le curseur natif, habillé */
-.resa .calc-curseur {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-}
-.resa .calc-curseur input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    var(--r-texte) 0 var(--part, 0%),
-    var(--r-seg) var(--part, 0%) 100%
-  );
-  cursor: grab;
-}
-.resa .calc-curseur input[type="range"]:active {
-  cursor: grabbing;
-}
-.resa .calc-curseur input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 24px;
-  width: 24px;
-  border-radius: 999px;
-  border: 4px solid #ffffff;
-  background: var(--r-texte);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.28);
-  cursor: inherit;
-}
-.resa .calc-curseur input[type="range"]::-moz-range-thumb {
-  height: 16px;
-  width: 16px;
-  border-radius: 999px;
-  border: 4px solid #ffffff;
-  background: var(--r-texte);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.28);
-  cursor: inherit;
-}
-.resa .calc-curseur input[type="range"]:focus-visible {
-  outline: 2px solid var(--r-texte);
-  outline-offset: 4px;
-}
-
-/* la réglette : un trait par graduation, un chiffre tous les cinq */
-.resa .calc-regle {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 4px;
-  padding: 0 12px;
-  font-size: 11px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--r-faible);
-}
-.resa .calc-graduation {
-  display: flex;
-  width: 0;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  white-space: nowrap;
+  gap: 10px;
+  margin-top: 8px;
 }
-.resa .calc-graduation-trait {
-  width: 1px;
-  height: 4px;
-  background: color-mix(in srgb, var(--r-faible) 30%, transparent);
+.resa .calc-input {
+  width: 110px;
+  padding: 9px 12px;
+  border: 1px solid var(--r-filet);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--r-texte);
+  font-size: 16px; /* 16 px : en dessous, iOS zoome au focus */
+  font-variant-numeric: tabular-nums;
 }
-.resa .calc-graduation[data-longue="true"] .calc-graduation-trait {
-  height: 8px;
+.resa .calc-input:focus-visible {
+  outline: 2px solid var(--r-or-fonce);
+  outline-offset: 1px;
+  border-color: var(--r-or-fonce);
 }
-.resa .calc-graduation-nombre {
-  color: color-mix(in srgb, var(--r-faible) 80%, transparent);
+.resa .calc-unite {
+  font-size: 13px;
+  color: var(--r-faible);
 }
 .resa .calc-aide {
-  margin-top: 10px;
+  margin-top: 6px;
   font-size: 12.5px;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--r-faible);
 }
 
-/* ——— qui fait ce travail ——— */
+/* ——— qui fait le travail ——— */
+.resa .calc-qui {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--r-filet);
+}
 .resa .calc-qui-titre {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--r-texte);
 }
 .resa .calc-qui-choix {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   margin-top: 12px;
 }
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .resa .calc-qui-choix {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 }
+/* L'état actif se marque au TRAIT, pas au fond : sur cette surface blanche
+   un fond clair vaudrait le fond de la carte et ne se verrait pas. */
 .resa .calc-radio {
-  display: block;
-  padding: 11px 13px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 4px 10px;
+  padding: 12px 14px;
   border: 1px solid var(--r-filet);
   border-radius: 10px;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.resa .calc-radio:hover {
-  background: var(--r-fond);
 }
 .resa .calc-radio[data-actif="true"] {
   border-color: var(--r-texte);
-  background: var(--r-fond);
+  box-shadow: inset 0 0 0 1px var(--r-texte);
 }
 .resa .calc-radio input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+  margin-top: 3px;
+  accent-color: var(--r-texte);
 }
 .resa .calc-radio-libelle {
-  display: block;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--r-texte);
 }
 .resa .calc-radio-taux {
-  display: block;
-  margin-top: 2px;
-  font-size: 12px;
+  grid-column: 2;
+  font-size: 12.5px;
   color: var(--r-faible);
 }
 
-/* ——— le panneau de résultat ——— */
-.resa .calc-resultat {
-  display: flex;
-  flex-direction: column;
-  padding: 26px 20px;
-  border-radius: 22px;
+/* ——— le détail de la conversion ——— */
+.resa .calc-detail {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border-radius: 10px;
   background: var(--r-fond);
 }
-/* le contenu, et non le panneau : le panneau tient la hauteur du cadre,
-   son contenu suit la lecture des curseurs. 92 px = l'en-tête collant du
-   site (72) plus l'air qu'il faut pour ne pas raser le filet. */
-.resa .calc-resultat-dedans {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-@media (min-width: 1024px) {
-  .resa .calc-resultat-dedans {
-    position: sticky;
-    top: 92px;
-  }
-}
-@media (min-width: 640px) {
-  .resa .calc-resultat {
-    padding: 32px;
-  }
-}
-@media (min-width: 1024px) {
-  .resa .calc-resultat {
-    width: 400px;
-    flex: none;
-  }
-}
-/* le seul ton qui change de peau : celui qui annonce un gain */
-.resa .calc-resultat[data-ton="gain"] {
-  background: linear-gradient(180deg, var(--r-or-clair), #ffffff 78%);
-  box-shadow: inset 0 0 0 1px var(--r-or-fonce);
-}
-.resa .calc-resultat-titre {
-  font-size: 13px;
+.resa .calc-detail-titre {
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--r-faible);
+}
+.resa .calc-detail-liste {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--r-doux);
+}
+.resa .calc-detail-liste li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+.resa .calc-detail-fleche {
+  color: var(--r-faible);
+}
+.resa .calc-detail-pieces {
+  color: var(--r-texte);
+  font-variant-numeric: tabular-nums;
+}
+.resa .calc-detail-regle {
+  color: var(--r-faible);
+}
+.resa .calc-detail-total {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--r-filet);
+  font-size: 14px;
+  color: var(--r-texte);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— le verdict ——— */
+.resa .calc-verdict {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+}
+.resa .calc-verdict[data-ton="gain"] {
+  border-color: var(--r-or-fonce);
+  background: linear-gradient(180deg, var(--r-or-clair), #ffffff 62%);
+}
+.resa .calc-verdict[data-ton="audit"],
+.resa .calc-verdict[data-ton="franc"] {
+  background: var(--r-fond);
 }
 .resa .calc-verdict-titre {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -7446,6 +7349,7 @@ button.rounded-full:active {
 }
 .resa .calc-verdict-texte {
   margin-top: 8px;
+  max-width: 68ch;
   font-size: 14px;
   line-height: 1.6;
   color: var(--r-doux);
@@ -7455,21 +7359,14 @@ button.rounded-full:active {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--r-or-mid);
   font-size: 13.5px;
-  line-height: 1.55;
   color: var(--r-doux);
 }
 
 /* le chiffre en gros — c'est lui qu'on vient chercher */
-/* PAS un conteneur flex : chaque caractère est un élément à lui, et une
-   espace insécable seule dans un enfant de flex est ramenée à zéro — le
-   « 1 170 € » se lisait « 1170€ ». En flux normal avec `white-space: pre`,
-   les espaces du format français tiennent leur largeur. */
 .resa .calc-gain-chiffre {
-  display: block;
-  margin-top: 8px;
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 44px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.03em;
   color: var(--r-texte);
@@ -7480,81 +7377,46 @@ button.rounded-full:active {
     font-size: 54px;
   }
 }
-.resa .calc-gain-caractere {
-  display: inline-block;
-  white-space: pre;
-}
 .resa .calc-gain-libelle {
-  margin-top: 4px;
+  margin-top: 2px;
   font-size: 15px;
   font-weight: 500;
   color: var(--r-texte);
 }
 .resa .calc-gain-note {
-  margin-top: 8px;
-  font-size: 13px;
-  line-height: 1.6;
+  margin-top: 6px;
+  font-size: 13.5px;
   color: var(--r-faible);
 }
-
-/* ——— le détail : la conversion, puis la soustraction ——— */
-.resa .calc-detail {
+.resa .calc-soustraction {
   display: grid;
-  gap: 8px;
-  font-size: 13px;
+  gap: 2px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--r-or-mid);
+  font-size: 14px;
+  color: var(--r-doux);
   font-variant-numeric: tabular-nums;
 }
-.resa .calc-detail-titre {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--r-faible);
-}
-.resa .calc-detail-liste {
-  display: grid;
-  gap: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--r-filet);
-}
-.resa .calc-detail-liste li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 12px;
-  color: var(--r-doux);
-}
-.resa .calc-detail-pieces {
-  font-weight: 600;
-  color: var(--r-texte);
-}
-.resa .calc-detail-regle {
-  grid-column: 1 / -1;
-  font-size: 11.5px;
-  color: var(--r-faible);
-}
-.resa .calc-ligne {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--r-faible);
-}
-.resa .calc-ligne strong {
-  font-weight: 600;
-  color: var(--r-texte);
-}
-.resa .calc-ligne--net {
-  font-size: 14px;
-  color: var(--r-texte);
-}
-.resa .calc-ligne--net strong {
+.resa .calc-soustraction strong {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--r-texte);
 }
-.resa .calc-annee {
-  font-size: 12.5px;
+.resa .calc-journees {
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .calc-encours {
+  margin-top: 14px;
+  max-width: 68ch;
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--r-faible);
 }
 
@@ -7563,21 +7425,18 @@ button.rounded-full:active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  margin-top: 20px;
-  padding: 13px 20px;
-  border-radius: 11px;
+  margin-top: 18px;
+  padding: 11px 20px;
+  border-radius: 9px;
   background: var(--r-texte);
   color: #ffffff;
   font-size: 14.5px;
   font-weight: 500;
-  text-align: center;
   text-decoration: none;
   cursor: pointer;
 }
 .resa .calc-appel .calc-bouton {
   margin-top: 0;
-  width: auto;
   flex: none;
 }
 .resa .calc-bouton:hover {
@@ -7586,12 +7445,10 @@ button.rounded-full:active {
 .resa .calc-souscta {
   margin-top: 8px;
   font-size: 12.5px;
-  text-align: center;
   color: var(--r-faible);
 }
 .resa .calc-retour {
   display: block;
-  width: 100%;
   margin-top: 10px;
   font-size: 13px;
   color: var(--r-faible);
@@ -7601,14 +7458,11 @@ button.rounded-full:active {
   cursor: pointer;
 }
 .resa .calc-pied {
-  margin-top: 16px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--r-filet);
   max-width: 76ch;
   font-size: 12.5px;
   line-height: 1.6;
   color: var(--r-faible);
-}
-.resa .calc-pied--regle {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--r-filet);
 }

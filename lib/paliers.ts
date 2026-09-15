@@ -684,16 +684,6 @@ export type QuestionVolume = {
      vérifiables par le lecteur contre sa propre expérience en une seconde —
      c'est ce qui les rend honnêtes, à défaut d'être mesurées. */
   minutes: number;
-  /* 15/09/2026 — LES BORNES DU CURSEUR, posées ici parce qu'elles disent
-     quelque chose du produit et pas du composant : `max` est la valeur qui,
-     SEULE, dépasse tout juste le dernier plafond de la grille (1 000 pièces
-     par mois). Le curseur va donc exactement de « rien » à « au-delà, c'est
-     l'audit » — la dernière graduation porte un « + » et bascule le verdict
-     hors grille, sans qu'on ait besoin d'écrire la règle deux fois.
-     `pas` vaut max / 60 environ : assez fin pour se poser sur un chiffre
-     rond, assez gros pour que le pouce ne cherche pas le pixel. */
-  max: number;
-  pas: number;
 };
 
 export const QUESTIONS_VOLUME: QuestionVolume[] = [
@@ -705,9 +695,6 @@ export const QUESTIONS_VOLUME: QuestionVolume[] = [
     coefficient: 1,
     conversion: "une facture, une pièce",
     minutes: 6,
-    /* 1 200 factures = 1 200 pièces */
-    max: 1200,
-    pas: 20,
   },
   {
     posteId: "frontd",
@@ -717,9 +704,6 @@ export const QUESTIONS_VOLUME: QuestionVolume[] = [
     coefficient: 22,
     conversion: "22 jours ouvrés par mois",
     minutes: 5,
-    /* 60 demandes par jour = 1 320 pièces par mois */
-    max: 60,
-    pas: 1,
   },
   {
     posteId: "cashd",
@@ -729,9 +713,6 @@ export const QUESTIONS_VOLUME: QuestionVolume[] = [
     coefficient: 0.6,
     conversion: "trois sur dix restent sans réponse, deux relances chacun",
     minutes: 6,
-    /* 2 000 documents = 1 200 relances */
-    max: 2000,
-    pas: 25,
   },
   {
     posteId: "reload",
@@ -741,9 +722,6 @@ export const QUESTIONS_VOLUME: QuestionVolume[] = [
     coefficient: 0.02,
     conversion: "la part qui devient inactive chaque mois",
     minutes: 8,
-    /* 60 000 clients au fichier = 1 200 reprises par mois */
-    max: 60000,
-    pas: 1000,
   },
 ];
 

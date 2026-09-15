@@ -779,13 +779,9 @@ export default function Grille() {
 
             Il reçoit ce qui est déjà coché dans les cartes pour ne pas
             reposer la question ; questions, coefficients, durées et textes
-            vivent tous dans lib/paliers.ts.
-
-            15/09, seconde passe — `max-w-5xl` et non `4xl` : le calculateur
-            est passé à deux panneaux (modèle pricing-12) et sa colonne de
-            résultat en prend 400 px à partir de 1024 px. */}
+            vivent tous dans lib/paliers.ts. */}
         {devis ? null : (
-          <div className="mx-auto mt-10 max-w-5xl">
+          <div className="mx-auto mt-10 max-w-4xl">
             <Calculateur
               postesChoisis={choix.postes}
               palierChoisi={choix.palier}

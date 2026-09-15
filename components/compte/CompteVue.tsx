@@ -1,9 +1,10 @@
 import Link from "next/link";
 import "./compte.css";
 import AbonnementCarte from "@/components/compte/AbonnementCarte";
+import CompteCoque, { type OngletCompte } from "@/components/compte/CompteCoque";
 import MotDePasseCarte from "@/components/compte/MotDePasseCarte";
 import ProfilCarte from "@/components/compte/ProfilCarte";
-import type { DemandeAbonnement, DemandeCompte } from "@/lib/abonnement";
+import { statutPaiement, type DemandeAbonnement, type DemandeCompte } from "@/lib/abonnement";
 import {
   LIBELLES_PARCOURS,
   LIBELLES_STATUT,
@@ -23,51 +24,43 @@ import { LIBELLES_STATUT_SITE, dateGp, prixLisible, type LigneCommandeSite } fro
 import { COCKPIT_URL } from "@/lib/supabase/config";
 
 /* ══════════════════════════════════════════════════════════════════════
-   CompteVue — « Mon compte », UNE page (15/09/2026)
+   CompteVue — ce que « Mon compte » affiche (15/09/2026, troisième forme)
 
-   Teo, après cinq formes en deux jours : « j'aime pas, y a 100 fois trop
-   de trucs. Qu'est-ce qu'il faut qu'on affiche et qu'est-ce qu'il faut
-   pas afficher ? car en vrai le vrai truc c'est le dashboard. »
+   L'HISTOIRE, parce qu'elle explique la forme actuelle et évite d'en
+   refaire un tour :
+     · 14/09 — une carte de verre, tout sur un écran, en largeur.
+     · 15/09 matin — Teo : « y a 100 fois trop de trucs, le vrai truc
+       c'est le dashboard » → une page sans menu, quatre blocs empilés.
+       Le tableau de bord, c'est l'ESPACE CLIENT ; cette page ne porte que
+       la relation commerciale. ÇA N'A PAS CHANGÉ.
+     · 15/09 midi — « en large, pas long » → deux colonnes.
+     · 15/09 après-midi — « c'est toujours aussi long, c'est toujours pas
+       pleine page, c'est encore amateur — utilise de vrais composants. »
 
-   LA RÉPONSE, ET C'EST ELLE QUI TIENT CE FICHIER : le tableau de bord,
-   c'est l'ESPACE CLIENT (app.omegaai.fr). Cette page-ci ne doit pas en
-   être un second. Elle ne porte que la relation commerciale — ce qu'on
-   paie, quand on est installé, qui on est — et la porte vers l'espace.
-   Teo a tranché entre trois formes : UNE PAGE, SANS MENU.
+   D'où la forme d'aujourd'hui : un ÉCRAN, pas une page. La coque
+   (CompteCoque) est le gabarit `dashboard-with-collapsible-sidebar` de
+   21st.dev ; ce fichier-ci ne décide plus que du CONTENU, et le distribue
+   en quatre onglets — un seul panneau à l'écran, donc plus rien à
+   défiler :
 
-   Quatre blocs, dans l'ordre de ce qu'un client vient réellement faire :
+     1. APERÇU — quatre tuiles de faits (l'espace, l'abonnement, le
+        prochain rendez-vous, le règlement), puis l'accès à l'espace et
+        les rendez-vous. Neuf visites sur dix s'arrêtent là.
+     2. MON ABONNEMENT — ou MON AUDIT tant qu'il n'y a pas d'abonnement :
+        sans lui, la carte d'abonnement est un cadre vide et un
+        « choisissez vos postes » servi à quelqu'un qui vient de faire
+        mesurer son processus.
+     3. PROFIL — ProfilCarte (résumé + modale).
+     4. SÉCURITÉ ET COMMANDES — mot de passe, commandes de site, données.
 
-     1. L'ACCÈS. Neuf visites sur dix s'arrêtent là : l'état de l'espace
-        en une phrase, et le bouton qui l'ouvre. C'est le SEUL endroit
-        où cet état est dit — il l'était trois fois avant (pastille de
-        l'en-tête, note d'état, bloc « Votre espace client » de la
-        section Sécurité).
-     2. MON ABONNEMENT (AbonnementCarte, inchangée) : postes, prix,
-        moyen de paiement, changer, résilier.
-     3. MES RENDEZ-VOUS, seulement s'il y en a — l'installation n'a lieu
-        qu'une fois, un bloc vide n'apprendrait rien.
-     4. VOTRE COMPTE : profil, mot de passe, commandes de site, données.
-        Quatre choses qu'on corrige deux fois par an, donc en bas.
+   LES QUATRE TUILES NE PORTENT AUCUN CHIFFRE INVENTÉ. Le gabarit affiche
+   des « +12 % ce mois-ci » ; ici chaque valeur vient de la base (postes,
+   prix, créneau, statut de paiement) ou dit « Aucun ». Un chiffre
+   décoratif sur le compte d'un client est un mensonge.
 
-   CE QUI A ÉTÉ RETIRÉ le 15/09, et pourquoi — à ne pas remettre sans
-   une raison qui ait changé :
-   · les QUATRE TUILES de synthèse : elles répétaient mot pour mot la
-     section qui se trouvait trois centimètres dessous ;
-   · le MENU LATÉRAL à cinq entrées : trois de ses sections tenaient en
-     trois lignes, elles n'avaient pas besoin d'une page chacune ;
-   · le FIL D'ARIANE (un seul niveau), le BOUTON DE REPLI (pour une
-     barre de cinq lignes) et les SIX SOUS-ENTRÉES dépliables (pour
-     sauter dans une page qui tient déjà sur un écran) ;
-   · le cadre pleine page et sa peau sombre : ils faisaient de cette
-     page une application, ce qu'elle n'est pas.
-   `CompteTableau.tsx` (le menu, les tuiles, la barre du haut) et
-   `IdentiteCompte.tsx` ont été SUPPRIMÉS : laissés au dépôt, ils
-   auraient importé une feuille dont leurs classes `.cpt-*` ont disparu.
-   L'historique git les garde si l'une de ces formes doit revenir.
-
-   Composant serveur, SANS lecture de base : tout arrive en props depuis
+   Composant SERVEUR, sans lecture de base : tout arrive en props depuis
    app/compte/page.tsx, ce qui permet à app/compte/apercu (mode
-   développement seulement) de rendre la même vue sur un jeu fictif.
+   développement seulement) de rendre le même écran sur un jeu fictif.
    ══════════════════════════════════════════════════════════════════════ */
 
 export type CompteVueProps = {
@@ -98,9 +91,7 @@ function Pastille({ teinte, children }: { teinte: string; children: React.ReactN
   );
 }
 
-/* une ligne de rendez-vous — installation, audit ou devis. Extraite le
-   15/09 : elle sert au bloc « Mes rendez-vous » ET au bloc « Mon audit »
-   (voir plus bas), et la dupliquer aurait fait diverger les deux. */
+/* une ligne de rendez-vous — installation, audit ou devis */
 function LigneRdv({ d }: { d: DemandeCompte }) {
   const bloc = d.creneau_debut ? blocDateGp(d.creneau_debut) : null;
   const duree = dureeFormule(d.formule, d.duree_min);
@@ -133,26 +124,91 @@ function LigneRdv({ d }: { d: DemandeCompte }) {
   );
 }
 
-/* un bloc de la page : une carte blanche à filet, un titre, un corps */
-function Bloc({
+/* un panneau de l'écran : carte blanche à filet, un titre, un corps */
+function Panneau({
   titre,
   sous,
   children,
 }: {
   titre: string;
-  sous?: React.ReactNode;
+  sous?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="cp-bloc" data-arrivee="bloc">
-      <header className="cp-bloc-tete">
-        <h2 className="cp-bloc-titre">{titre}</h2>
-        {sous ? <p className="cp-bloc-sous">{sous}</p> : null}
+    <section className="cpt-panneau">
+      <header className="cpt-panneau-tete">
+        <h2 className="cpt-panneau-titre">{titre}</h2>
+        {sous ? <p className="cpt-panneau-sous">{sous}</p> : null}
       </header>
-      <div className="cp-bloc-corps">{children}</div>
+      <div className="cpt-panneau-corps">{children}</div>
     </section>
   );
 }
+
+/* une tuile de fait : icône, étiquette, valeur, une ligne de détail */
+function Tuile({
+  etiquette,
+  valeur,
+  detail,
+  icone,
+}: {
+  etiquette: string;
+  valeur: string;
+  detail: string;
+  icone: React.ReactNode;
+}) {
+  return (
+    <div className="cpt-tuile">
+      <div className="cpt-tuile-tete">
+        <span className="cpt-tuile-icone" aria-hidden="true">
+          {icone}
+        </span>
+      </div>
+      <p className="cpt-tuile-etiquette">{etiquette}</p>
+      <p className="cpt-tuile-valeur">{valeur}</p>
+      <p className="cpt-tuile-detail">{detail}</p>
+    </div>
+  );
+}
+
+/* Les quatre icônes des tuiles, en SVG écrit ici : ce fichier est un
+   composant SERVEUR, et lucide-react y importerait 400 ko de modules pour
+   quatre traits. La coque, elle, est cliente et les prend de lucide. */
+const IC = {
+  espace: (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="3" width="20" height="14" rx="2" />
+      <path d="M8 21h8M12 17v4" />
+    </svg>
+  ),
+  postes: (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  ),
+  rdv: (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M8 2v4M16 2v4M3 10h18" />
+    </svg>
+  ),
+  reglement: (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M2 10h20" />
+    </svg>
+  ),
+} as const;
+
+const LIBELLES_PAIEMENT: Record<string, string> = {
+  a_enregistrer: "À enregistrer",
+  enregistre: "Enregistré",
+  preleve: "Prélevé",
+  echec: "Refusé",
+};
 
 export default function CompteVue({
   utilisateur,
@@ -180,26 +236,18 @@ export default function CompteVue({
   const audits = demandes
     .filter((d) => d.parcours !== "reglage")
     .sort((a, b) => (b.creneau_debut ?? "").localeCompare(a.creneau_debut ?? ""));
+  const rendezVous = [...reunions, ...audits];
+  /* Le rendez-vous montré en tuile est le plus RÉCENT qui ait un créneau,
+     pas « le prochain » : la page ne consulte l'horloge qu'une seule fois,
+     côté serveur (reunionDejaPassee), et un « prochain » calculé au rendu
+     donnerait deux réponses différentes sur le serveur et dans le
+     navigateur. Le statut de la ligne dit le reste. */
+  const dernierCreneau = rendezVous.find((d) => d.creneau_debut) ?? null;
 
-  /* ——— 15/09 : SANS ABONNEMENT, LA PAGE PARLE DE L'AUDIT ———
-     Teo : « plus d'inscription libre, tout mène à l'audit — le compte
-     affichera l'audit, ou un récap. » Avant, un compte sans installation
-     ouvrait sur un bloc « Mon abonnement » vide et un « Choisissez vos
-     postes » : le vocabulaire du prix public, servi à une direction qui
-     vient seulement de faire mesurer son processus. Le deuxième bloc de
-     la page devient donc « Mon audit » tant qu'il n'y a pas
-     d'abonnement, et le bloc « Mes rendez-vous » ne reprend pas les
-     audits qui y sont déjà (on ne répète pas — c'est ce qui a coûté les
-     quatre tuiles le 15/09 au matin). */
-  const blocAudit = abonnement == null;
-  const rendezVous = blocAudit ? reunions : [...reunions, ...audits];
+  /* sans abonnement, l'écran parle d'audit — décision du 15/09 */
+  const modeAudit = abonnement == null;
 
-  const nomModele = (slug: string) => MODELES.find((m) => m.slug === slug)?.nom ?? slug;
-
-  /* ——— l'état de l'espace : deux faits croisés (revue 02/09, n° 6) ———
-     une installation a-t-elle été demandée, et le compte est-il rattaché ?
-     Trois états, plus la panne — dite, jamais racontée « en préparation »
-     (revue n° 5). C'est le SEUL endroit de la page où il est dit. */
+  /* ——— l'état de l'espace : deux faits croisés (revue 02/09, n° 6) ——— */
   const etatEspace: "panne" | "ouvert" | "preparation" | "audit" | "sans" = panneComptes
     ? "panne"
     : rattache
@@ -215,206 +263,319 @@ export default function CompteVue({
       titre: "Votre accès à l'espace client ne répond pas.",
       texte:
         "Impossible de vérifier votre rattachement pour le moment. Rechargez la page dans un instant.",
+      tuile: "Ne répond pas",
+      tuileDetail: "Rechargez la page",
     },
     ouvert: {
       titre: "Votre espace client est ouvert.",
       texte:
         "Relances, demandes, factures : vos postes y apparaissent au fur et à mesure de leur mise en route, avec ce qui attend votre validation. Même adresse, même mot de passe.",
+      tuile: "Ouvert",
+      tuileDetail: "Même adresse, même mot de passe",
     },
     preparation: {
       titre: "Votre installation est en préparation.",
       texte:
         "L'espace client s'ouvre dès la réunion faite : vos postes y apparaissent au fur et à mesure de leur mise en route.",
+      tuile: "En préparation",
+      tuileDetail: "Ouvert dès la réunion faite",
     },
-    /* 15/09 — « sans » se dédouble : avec un audit au dossier, on ne
-       renvoie pas quelqu'un sur la grille des postes comme s'il n'avait
-       rien fait ; sans audit, c'est LUI la première marche, pas les
-       tarifs. */
     audit: {
       titre: "Votre espace client s'ouvre après l'installation.",
       texte:
-        "Votre audit est ci-dessous. C'est lui qui dit ce qu'il y a à mettre en route ; l'installation suit, et c'est elle qui ouvre votre espace.",
+        "Votre audit est enregistré. C'est lui qui dit ce qu'il y a à mettre en route ; l'installation suit, et c'est elle qui ouvre votre espace.",
+      tuile: "Après l'installation",
+      tuileDetail: "L'audit d'abord, l'installation ensuite",
     },
     sans: {
       titre: "Votre compte est ouvert, et il n'y a encore rien dedans.",
       texte:
         "L'audit est la première marche : trente minutes pour mesurer ce que votre processus le plus coûteux vous coûte vraiment. Il est gratuit et sans engagement.",
+      tuile: "Pas encore",
+      tuileDetail: "Il s'ouvre après l'installation",
     },
   }[etatEspace];
 
   const nom = nomAffiche(utilisateur);
   const aNom = nom !== utilisateur.email;
 
-  /* ——— la carte qui change de colonne (15/09/2026, seconde passe) ———
-     Teo : « je veux que ce soit une page en large, pas long. » Les cartes
-     se répartissent en deux colonnes au-dessus de 1100 px (compte.css), et
-     le PROFIL suit la place libre : à droite quand la colonne de gauche
-     porte un abonnement — elle est alors la plus haute —, à gauche sous
-     l'audit sinon. Mesuré sur les jeux de /compte/apercu : sans cette
-     bascule, le cas devenu le plus fréquent (un audit et rien d'autre)
-     laissait 386 px d'un côté contre 702 de l'autre.
+  /* ——— les quatre tuiles ——— */
+  const nbPostes = abonnement?.modules?.length ?? 0;
+  const prix = abonnement?.prix_mensuel_eur ?? null;
+  const blocDernier = dernierCreneau?.creneau_debut
+    ? blocDateGp(dernierCreneau.creneau_debut)
+    : null;
+  const paiement = abonnement ? statutPaiement(abonnement) : null;
 
-     C'est le profil qui bascule et pas le mot de passe, POUR L'ORDRE :
-     sous le palier, les deux colonnes n'en font plus qu'une et c'est le
-     DOM qui décide de la suite. Profil, puis mot de passe, puis commandes
-     — dans les deux cas.
-
-     Une répartition FIXE plutôt qu'un multi-colonnes CSS : celui-ci
-     rééquilibre à chaque changement de hauteur, et les cartes sauteraient
-     d'une colonne à l'autre dès qu'on ouvre le formulaire du profil. */
-  const carteProfil = (
-    <Bloc titre="Profil professionnel" sous="Ce que nous savons de votre entreprise.">
-      <ProfilCarte utilisateur={utilisateur} />
-    </Bloc>
+  const tuiles = (
+    <div className="cpt-tuiles">
+      <Tuile
+        icone={IC.espace}
+        etiquette="Espace client"
+        valeur={acces.tuile}
+        detail={acces.tuileDetail}
+      />
+      <Tuile
+        icone={IC.postes}
+        etiquette="Abonnement"
+        valeur={
+          panneDemandes
+            ? "—"
+            : abonnement
+              ? `${nbPostes || 1} poste${(nbPostes || 1) > 1 ? "s" : ""}`
+              : "Aucun"
+        }
+        detail={
+          panneDemandes
+            ? "Ne répond pas pour le moment"
+            : abonnement
+              ? prix
+                ? `${prix} € par mois, sans engagement`
+                : "Formule en cours de calcul"
+              : "Les postes se choisissent sur la grille"
+        }
+      />
+      <Tuile
+        icone={IC.rdv}
+        etiquette="Rendez-vous"
+        valeur={blocDernier ? `${blocDernier.jour} ${blocDernier.mois.toLowerCase()}` : "Aucun"}
+        detail={
+          dernierCreneau?.creneau_debut
+            ? `${libelleFormule(dernierCreneau.formule)} · heure de Guadeloupe`
+            : "Aucun créneau réservé"
+        }
+      />
+      <Tuile
+        icone={IC.reglement}
+        etiquette={abonnement ? "Règlement" : "Commandes de site"}
+        valeur={
+          abonnement
+            ? enregistrementEnCours
+              ? "En cours"
+              : (LIBELLES_PAIEMENT[paiement ?? ""] ?? "—")
+            : panneCommandes
+              ? "—"
+              : String(commandes.length)
+        }
+        detail={
+          abonnement
+            ? "Carte ou prélèvement SEPA, rien avant l'installation"
+            : commandes.length
+              ? "Site vitrine, réglé une fois"
+              : "Aucune commande de site"
+        }
+      />
+    </div>
   );
-  /* la colonne de gauche est-elle la plus courte ? */
-  const compteAGauche = blocAudit;
 
-  return (
-    <div className="resa">
-      <section data-monde="clair" className="r-wrap cp-page" aria-labelledby="cp-titre-page">
-        {/* ——— l'en-tête : qui je suis, et la sortie ——— */}
-        <header className="cp-tete" data-arrivee="titre">
-          <span className="cp-avatar" aria-hidden="true">
-            {initiales(utilisateur)}
-          </span>
-          <div className="min-w-0 flex-1">
-            <h1 id="cp-titre-page" className="cp-titre-page">
-              Mon compte
-            </h1>
-            <p className="cp-tete-detail">
-              {aNom ? nom : "Profil à compléter"}
-              {utilisateur.entreprise ? (
-                <>
-                  <span aria-hidden="true"> · </span>
-                  {utilisateur.entreprise}
-                </>
+  /* ——— le panneau des commandes, appelé par l'onglet Sécurité ——— */
+  const panneauCommandes = (
+    <Panneau titre="Commandes de site" sous="Vos commandes de site vitrine, et vos données.">
+      {panneCommandes ? (
+        <p className="rv-erreur">
+          Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
+        </p>
+      ) : commandes.length === 0 ? (
+        <p className="cp-secondaire">
+          Aucune commande. Le site catalogue est à 990&nbsp;€ TTC, une fois&nbsp;:{" "}
+          <Link href="/tarifs/site" className="cp-lien-inline">
+            voir l&apos;offre
+          </Link>
+          .
+        </p>
+      ) : (
+        <ul>
+          {commandes.map((c) => (
+            <li key={c.id} className="cp-ligne">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="cp-texte cp-fort">
+                    Modèle {MODELES.find((m) => m.slug === c.modele)?.nom ?? c.modele}
+                  </div>
+                  <p className="num cp-secondaire mt-0.5">Commandée le {dateGp(c.cree_le)}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className="num cp-prix">
+                    {prixLisible(c.prix_eur)}
+                    <span className="cp-prix-unite"> TTC</span>
+                  </span>
+                  <Pastille teinte={TEINTE_STATUT_SITE[c.statut] ?? "gris"}>
+                    {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
+                  </Pastille>
+                </div>
+              </div>
+              {c.statut === "a_payer" ? (
+                /* le paiement en ligne n'existe pas encore : on le dit, on
+                   n'invente pas de bouton */
+                <p className="cp-secondaire mt-2">
+                  Le paiement en ligne arrive&nbsp;: nous vous appelons pour régler et lancer la
+                  production.
+                </p>
               ) : null}
-              <span aria-hidden="true"> · </span>
-              <span className="break-all">{utilisateur.email}</span>
-            </p>
-          </div>
-          <form action="/auth/signout" method="post" className="shrink-0">
-            <button type="submit" className="cp-sortie">
-              Se déconnecter
-            </button>
-          </form>
-        </header>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="cp-secondaire mt-5 border-t border-[var(--r-filet)] pt-4">
+        Ce que nous faisons de vos données, et comment les récupérer&nbsp;:{" "}
+        <Link href="/vos-donnees" className="cp-lien-inline">
+          vos données
+        </Link>
+        .
+      </p>
+    </Panneau>
+  );
 
-        {/* ——— 1. l'accès : la raison d'être de la page ——— */}
-        <section className="cp-acces" data-arrivee="bloc">
-          <h2 className="cp-acces-titre">{acces.titre}</h2>
-          <p className="cp-acces-texte">{acces.texte}</p>
-          <div className="cp-acces-actions">
-            {etatEspace === "ouvert" ? (
-              <>
-                <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--noir">
-                  Ouvrir mon espace
-                </a>
-                {/* 08/09 — droit sur la page d'installation de l'espace, sur
-                    l'appareil où l'on est : c'est là que le bouton du
-                    navigateur existe */}
-                <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--fil">
-                  Installer l&apos;application
-                </a>
-              </>
-            ) : etatEspace === "sans" ? (
-              /* 15/09 — c'était « Choisir mes postes » → /tarifs. La grille
-                 reste accessible (elle est dans le bloc « Mon audit » juste
-                 dessous) ; la porte principale, elle, est l'audit. */
-              <>
-                <Link href="/reserver-un-audit" className="r-btn r-btn--noir">
-                  Réserver mon audit
-                </Link>
-                {/* la grille reste à un clic : elle ne disparaît pas du
-                    compte, elle passe seulement après l'audit */}
-                <Link href="/tarifs" className="r-btn r-btn--fil">
-                  Voir les postes et les tarifs
-                </Link>
-              </>
-            ) : null}
-            <Link href="/application" className="cp-lien">
-              {etatEspace === "ouvert"
-                ? "L'installer sur téléphone et ordinateur"
-                : "Voir le fonctionnement"}
+  const onglets: OngletCompte[] = [
+    {
+      cle: "apercu",
+      libelle: "Aperçu",
+      titre: utilisateur.prenom ? `Bonjour ${utilisateur.prenom}` : "Mon compte",
+      sous: "Votre accès, votre abonnement et vos rendez-vous — d'un seul coup d'œil.",
+      actions:
+        etatEspace === "ouvert" ? (
+          <>
+            <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--noir">
+              Ouvrir mon espace
+            </a>
+            <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--fil">
+              Installer l&apos;application
+            </a>
+          </>
+        ) : etatEspace === "sans" ? (
+          <>
+            <Link href="/reserver-un-audit" className="r-btn r-btn--noir">
+              Réserver mon audit
             </Link>
-          </div>
-        </section>
+            <Link href="/tarifs" className="r-btn r-btn--fil">
+              Voir les postes et les tarifs
+            </Link>
+          </>
+        ) : null,
+      contenu: (
+        <>
+          {tuiles}
+          <div className="cpt-panneaux" data-colonnes="deux">
+            <Panneau titre="Votre accès" sous="Le seul endroit où cet état est dit.">
+              <p className="cp-texte cp-fort">{acces.titre}</p>
+              <p className="cp-secondaire mt-2 max-w-[68ch]">{acces.texte}</p>
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+                {etatEspace === "ouvert" ? (
+                  <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--noir">
+                    Ouvrir mon espace
+                  </a>
+                ) : null}
+                <Link href="/application" className="cp-lien">
+                  {etatEspace === "ouvert"
+                    ? "L'installer sur téléphone et ordinateur"
+                    : "Voir le fonctionnement"}
+                </Link>
+              </div>
+            </Panneau>
 
-        {/* ——— LES CARTES, EN LARGEUR (15/09/2026, seconde passe) ———
-            Teo : « je veux que ce soit une page en large, pas long. » Les
-            cartes empilées faisaient défiler près de trois écrans pour ce
-            qui se lit d'un coup d'œil. À partir de 1100 px (compte.css) la
-            page s'élargit et se met en DEUX COLONNES : à gauche la
-            relation — l'audit ou l'abonnement, puis les rendez-vous —, à
-            droite le compte lui-même.
-
-            Deux colonnes RÉELLES, deux conteneurs : dans une grille
-            d'items, un bloc plus haut à gauche pousse le suivant sous le
-            bas du bloc de droite et ouvre un trou blanc. Sous le palier,
-            `.cp-large` redevient une simple colonne et l'ordre de lecture
-            ne bouge pas. */}
-        <div className="cp-large">
-          <div className="cp-col">
-            {/* ——— 2 bis. mon audit — tant qu'il n'y a pas d'abonnement ———
-                15/09 : c'est LE bloc que voit un compte neuf, à la place d'une
-                carte d'abonnement vide (voir `blocAudit` plus haut). Sans
-                aucun rendez-vous il ne s'affiche PAS : le bloc d'accès, trois
-                centimètres au-dessus, porte déjà la même phrase et le même
-                bouton — même règle que « Mes rendez-vous ». */}
-            {blocAudit && audits.length ? (
-              <Bloc
-                titre="Mon audit"
-                sous="Ce qui a été réservé, et ce qui suit. Heure de Guadeloupe."
-              >
-                {panneDemandes ? (
-                  <p className="rv-erreur">
-                    Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un
-                    instant.
+            <Panneau
+              titre={rendezVous.length ? "Vos rendez-vous" : "Aucun rendez-vous"}
+              sous={rendezVous.length ? "Heure de Guadeloupe." : "Rien de réservé sur ce compte."}
+            >
+              {panneDemandes ? (
+                <p className="rv-erreur">
+                  Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un
+                  instant.
+                </p>
+              ) : rendezVous.length ? (
+                <ul>
+                  {rendezVous.slice(0, 3).map((d) => (
+                    <LigneRdv key={d.id} d={d} />
+                  ))}
+                </ul>
+              ) : (
+                <>
+                  <p className="cp-secondaire">
+                    L&apos;audit mesure votre processus le plus coûteux — impayés, demandes
+                    perdues, heures de saisie. Gratuit à partir de trente minutes.
                   </p>
-                ) : (
-                  <>
-                    <ul>
-                      {audits.map((d) => (
-                        <LigneRdv key={d.id} d={d} />
-                      ))}
-                    </ul>
-                    {/* ce qui vient APRÈS l'audit : la seule question que se
-                        pose quelqu'un qui revient ici entre les deux */}
-                    <p className="cp-secondaire mt-4 max-w-[62ch]">
-                      À l&apos;issue de l&apos;audit, vous recevez ce qui a été mesuré et ce
-                      qu&apos;il y a à mettre en route. L&apos;installation se réserve ensuite, et
-                      c&apos;est elle qui ouvre votre espace client.
-                    </p>
-                    <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
-                      <Link href="/tarifs" className="r-btn r-btn--fil">
-                        Voir les postes et les tarifs
-                      </Link>
-                      <Link href="/reserver-un-audit" className="cp-lien">
-                        Réserver un autre format
-                      </Link>
-                    </div>
-                  </>
-                )}
-              </Bloc>
-            ) : null}
+                  <div className="mt-4">
+                    <Link href="/reserver-un-audit" className="r-btn r-btn--fil">
+                      Réserver un audit
+                    </Link>
+                  </div>
+                </>
+              )}
+            </Panneau>
+          </div>
+        </>
+      ),
+    },
+    {
+      cle: "abonnement",
+      libelle: modeAudit ? "Mon audit" : "Abonnement",
+      titre: modeAudit ? "Mon audit" : "Mon abonnement",
+      sous: modeAudit
+        ? "Ce qui a été réservé, et ce qui suit."
+        : "Vos postes, votre formule et votre moyen de paiement.",
+      actions: modeAudit ? (
+        <>
+          <Link href="/reserver-un-audit" className="r-btn r-btn--noir">
+            {audits.length ? "Réserver un autre format" : "Réserver mon audit"}
+          </Link>
+          <Link href="/tarifs" className="r-btn r-btn--fil">
+            Voir les postes et les tarifs
+          </Link>
+        </>
+      ) : null,
+      contenu: (
+        <div className="cpt-panneaux">
+          {/* 05/09 — le retour de Stripe, au-dessus du panneau */}
+          {retour === "ok" ? (
+            <p className="cp-ok" role="status">
+              {enregistrementEnCours
+                ? "Merci. L'enregistrement de votre moyen de paiement est en cours de confirmation. Rien ne sera débité avant la fin de l'installation."
+                : "Moyen de paiement enregistré. Rien ne sera débité avant la fin de l'installation."}
+            </p>
+          ) : retour === "plus-tard" ? (
+            <p className="cp-info" role="status">
+              Vous pourrez enregistrer votre moyen de paiement plus tard, ici, depuis votre
+              abonnement.
+            </p>
+          ) : null}
 
-            {/* ——— 2. mon abonnement — dès qu'il y en a un ——— */}
-            {blocAudit ? null : (
-            <Bloc titre="Mon abonnement" sous="Vos postes, votre formule et votre moyen de paiement.">
-              {/* 05/09 — le retour de Stripe, au-dessus de la carte */}
-              {retour === "ok" ? (
-                <p className="cp-ok mb-4" role="status">
-                  {enregistrementEnCours
-                    ? "Merci. L'enregistrement de votre moyen de paiement est en cours de confirmation. Rien ne sera débité avant la fin de l'installation."
-                    : "Moyen de paiement enregistré. Rien ne sera débité avant la fin de l'installation."}
+          {modeAudit ? (
+            <Panneau
+              titre={audits.length ? "Votre audit" : "L'audit, la première marche"}
+              sous={
+                audits.length
+                  ? "Heure de Guadeloupe."
+                  : "Mesurer avant d'installer — gratuit, sans engagement."
+              }
+            >
+              {panneDemandes ? (
+                <p className="rv-erreur">
+                  Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un
+                  instant.
                 </p>
-              ) : retour === "plus-tard" ? (
-                <p className="cp-info mb-4" role="status">
-                  Vous pourrez enregistrer votre moyen de paiement plus tard, ici, depuis votre
-                  abonnement.
+              ) : audits.length ? (
+                <>
+                  <ul>
+                    {audits.map((d) => (
+                      <LigneRdv key={d.id} d={d} />
+                    ))}
+                  </ul>
+                  <p className="cp-secondaire mt-4 max-w-[68ch]">
+                    À l&apos;issue de l&apos;audit, vous recevez ce qui a été mesuré et ce
+                    qu&apos;il y a à mettre en route. L&apos;installation se réserve ensuite, et
+                    c&apos;est elle qui ouvre votre espace client.
+                  </p>
+                </>
+              ) : (
+                <p className="cp-secondaire max-w-[68ch]">
+                  Aucun rendez-vous sur ce compte. L&apos;audit mesure votre processus le plus
+                  coûteux — impayés, demandes perdues, heures de saisie — et dit ce qu&apos;il y a
+                  à mettre en route, s&apos;il y a quelque chose.
                 </p>
-              ) : null}
+              )}
+            </Panneau>
+          ) : (
+            <Panneau titre="Votre formule" sous="Postes, prix et moyen de paiement.">
               {panneDemandes ? (
                 <p className="rv-erreur">
                   Votre abonnement ne répond pas pour le moment. Rechargez la page dans un instant.
@@ -429,102 +590,61 @@ export default function CompteVue({
                   enregistrementEnCours={enregistrementEnCours}
                 />
               )}
-            </Bloc>
-            )}
+            </Panneau>
+          )}
 
-            {/* ——— 3. mes rendez-vous, seulement s'il y en a ———
-                l'installation n'a lieu qu'une fois : un bloc « aucun rendez-vous »
-                n'apprendrait rien, et la porte vers la réservation est déjà dans
-                le bloc d'accès et dans la carte d'abonnement.
-                15/09 — sans abonnement, les audits sont déjà dans le bloc
-                « Mon audit » : cette liste ne porte alors que les installations
-                (une annulée, par exemple), et disparaît le plus souvent. */}
-            {!panneDemandes && rendezVous.length ? (
-              <Bloc titre="Mes rendez-vous" sous="Heure de Guadeloupe.">
-                <ul>
-                  {rendezVous.map((d) => (
-                    <LigneRdv key={d.id} d={d} />
-                  ))}
-                </ul>
-              </Bloc>
-            ) : null}
-
-
-            {compteAGauche ? carteProfil : null}
-          </div>
-
-          <div className="cp-col">
-            {compteAGauche ? null : carteProfil}
-
-            {/* ——— le compte lui-même : ce qu'on corrige deux fois par an ———
-                C'était UN bloc « Votre compte » à quatre sous-blocs, haut de
-                800 px : en deux colonnes il laissait la colonne d'en face à
-                moitié vide. Il est rendu à ses cartes, et ses sous-titres
-                sont devenus des titres — mêmes mots. « Vos données » tenait
-                en une phrase : elle rejoint les commandes plutôt que de
-                porter une carte pour elle seule. */}
-            <Bloc titre="Mot de passe" sous="Le même sur le site et dans votre espace client.">
-              <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
-            </Bloc>
-
-            <Bloc titre="Commandes de site" sous="Vos commandes de site vitrine, et vos données.">
-              {panneCommandes ? (
-                <p className="rv-erreur">
-                  Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
-                </p>
-              ) : commandes.length === 0 ? (
-                <p className="cp-secondaire">
-                  Aucune commande. Le site catalogue est à 990&nbsp;€ TTC, une fois&nbsp;:{" "}
-                  <Link href="/tarifs/site" className="cp-lien-inline">
-                    voir l&apos;offre
-                  </Link>
-                  .
-                </p>
-              ) : (
-                <ul>
-                  {commandes.map((c) => (
-                    <li key={c.id} className="cp-ligne">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="cp-texte cp-fort">Modèle {nomModele(c.modele)}</div>
-                          <p className="num cp-secondaire mt-0.5">Commandée le {dateGp(c.cree_le)}</p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-3">
-                          <span className="num cp-prix">
-                            {prixLisible(c.prix_eur)}
-                            <span className="cp-prix-unite"> TTC</span>
-                          </span>
-                          <Pastille teinte={TEINTE_STATUT_SITE[c.statut] ?? "gris"}>
-                            {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
-                          </Pastille>
-                        </div>
-                      </div>
-                      {c.statut === "a_payer" ? (
-                        /* le paiement en ligne n'existe pas encore : on le dit,
-                           on n'invente pas de bouton */
-                        <p className="cp-secondaire mt-2">
-                          Le paiement en ligne arrive&nbsp;: nous vous appelons pour régler et lancer
-                          la production.
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="mt-5 border-t border-[var(--r-filet)] pt-4">
-                <p className="cp-secondaire">
-                  Ce que nous faisons de vos données, et comment les récupérer&nbsp;:{" "}
-                  <Link href="/vos-donnees" className="cp-lien-inline">
-                    vos données
-                  </Link>
-                  .
-                </p>
-              </div>
-            </Bloc>
-          </div>
+          {/* les installations, quand il y en a mais qu'aucune ne fait
+              abonnement (une annulée, par exemple) : elles n'ouvrent pas
+              un onglet pour elles seules */}
+          {!panneDemandes && modeAudit && reunions.length ? (
+            <Panneau titre="Vos installations" sous="Heure de Guadeloupe.">
+              <ul>
+                {reunions.map((d) => (
+                  <LigneRdv key={d.id} d={d} />
+                ))}
+              </ul>
+            </Panneau>
+          ) : null}
         </div>
-      </section>
-    </div>
+      ),
+    },
+    {
+      cle: "profil",
+      libelle: "Profil",
+      titre: "Profil professionnel",
+      sous: "Ce que nous savons de votre entreprise : ces informations figurent sur vos factures et pré-remplissent vos demandes.",
+      contenu: (
+        <div className="cpt-panneaux">
+          <Panneau titre="Vos informations" sous="Modifiables à tout moment.">
+            <ProfilCarte utilisateur={utilisateur} />
+          </Panneau>
+        </div>
+      ),
+    },
+    {
+      cle: "securite",
+      libelle: "Sécurité",
+      titre: "Sécurité et commandes",
+      sous: "Votre mot de passe, vos commandes de site et vos données.",
+      contenu: (
+        <div className="cpt-panneaux" data-colonnes="deux">
+          <Panneau titre="Mot de passe" sous={`Compte ouvert avec ${utilisateur.email}.`}>
+            <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
+          </Panneau>
+          {panneauCommandes}
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <CompteCoque
+      initiales={initiales(utilisateur)}
+      nom={aNom ? nom : "Profil à compléter"}
+      sous={utilisateur.entreprise ?? utilisateur.email}
+      onglets={onglets}
+      espaceHref={`${COCKPIT_URL}/espace`}
+      espaceLibelle="Mon espace client"
+    />
   );
 }
