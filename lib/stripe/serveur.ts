@@ -44,7 +44,13 @@ import Stripe from "stripe";
    NEXT_PUBLIC_SITE_URL sur Vercel, repli sur le domaine en production.
    (lib/site.ts a son propre repli, l'aperçu Vercel : ici on veut que
    Stripe ramène TOUJOURS sur le vrai domaine si la variable manque.) */
-const URL_SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://omegaai.fr").replace(/\/+$/, "");
+/* 15/09 — URL_SITE a disparu avec les retours vers /compte du site : les
+   deux seules URL que Stripe rappelle mènent maintenant au cockpit. */
+
+/* Où Stripe ramène le client depuis le 15/09 : l'espace client, qui porte
+   désormais le compte (voir app/compte/page.tsx). Même repli que
+   lib/supabase/config.ts. */
+const URL_COCKPIT = (process.env.NEXT_PUBLIC_COCKPIT_URL ?? "https://app.omegaai.fr").replace(/\/+$/, "");
 
 /** La clé secrète est-elle posée ? Sans elle, « paiement indisponible »
     partout — jamais un crash. */
@@ -181,8 +187,12 @@ export async function creerSessionEnregistrement(p: ParametresEnregistrement): P
       currency: "eur",
       locale: "fr",
       client_reference_id: p.demandeId,
-      success_url: `${URL_SITE}/compte?paiement=ok`,
-      cancel_url: `${URL_SITE}/compte?paiement=plus-tard`,
+      /* 15/09/2026 — les retours ramenaient sur /compte du site ; cette
+         page a été retirée et ne fait plus que rediriger vers le cockpit.
+         Stripe ramène donc DIRECTEMENT au bon endroit, sans l'aller-retour
+         (qui aurait de toute façon perdu le `?paiement=`). */
+      success_url: `${URL_COCKPIT}/compte?paiement=ok`,
+      cancel_url: `${URL_COCKPIT}/compte?paiement=plus-tard`,
       /* recopié sur la session ET sur le SetupIntent : le webhook a la
          demande sous la main quel que soit l'objet qu'il regarde */
       metadata: { demande_id: p.demandeId, utilisateur_id: p.utilisateurId },

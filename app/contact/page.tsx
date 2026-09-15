@@ -71,12 +71,14 @@ const ATTENDRE = [
     n: "03",
     titre: "Un suivi continu",
     texte:
-      "Changement de formule, résiliation, moyen de paiement : la demande se fait depuis Mon compte, et vous y suivez son traitement.",
+      "Changement de formule, résiliation, moyen de paiement : la demande se fait depuis votre espace client, et vous y suivez son traitement.",
   },
 ];
 
 const BESOINS = [
-  { q: "Mon abonnement, mes rendez-vous, mon moyen de paiement", href: "/compte", lien: "Mon compte" },
+  /* 15/09 — « Mon compte » a quitté le site : la ligne pointe l'espace
+     client, où l'abonnement et le moyen de paiement vivent désormais. */
+  { q: "Mon abonnement, mes rendez-vous, mon moyen de paiement", href: "/compte", lien: "Mon espace client" },
   { q: "Installer l'application sur mon téléphone ou mon ordinateur", href: "/application", lien: "L'application" },
   { q: "Réserver ma réunion d'installation", href: "/tarifs", lien: "Les tarifs" },
   { q: "Demander un audit pour mon entreprise", href: "/reserver-un-audit", lien: "Réserver un audit" },
