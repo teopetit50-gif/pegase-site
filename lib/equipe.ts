@@ -17,8 +17,11 @@
    ⚠️  LES TROIS DESCRIPTIFS SONT DES BROUILLONS (14/09, Teo : « fais un
    descriptif aussi de qui on est, genre ce qu'on a fait »). Ceux d'Henri et
    de Vincent sont tirés de la capture que Teo a collée le 12/09 — donc de
-   leur propre page, pas d'une source vérifiée ici. Le sien est bâti sur la
-   seule phrase qu'il en a dite : « j'ai travaillé en finance ». Trois
+   leur propre page, pas d'une source vérifiée ici. Le sien tient de lui :
+   « j'ai travaillé en finance » (14/09), précisé le 15/09 en « des sociétés
+   en finance, genre hedge fund ». D'où « en hedge fund », au singulier
+   générique et sans nommer de maison : aucune n'a été donnée, et on
+   n'invente pas un employeur. Trois
    arbitrages à connaître avant de les relire :
    · AUCUN CHIFFRE. La capture annonçait « 80 000+ abonnés » ; un chiffre
      d'audience posé sur omegaai.fr devient une affirmation d'Omega, et la
@@ -83,7 +86,7 @@ export const MEMBRES: Membre[] = [
     prenom: "Teo",
     nom: "Karczewski",
     role: "Co-fondateur",
-    bio: "Il vient de la finance, où aucune décision ne se prend sans que le chiffre soit vérifié. Chez Omega, il conduit les audits, pilote les mises en production et assure le suivi des systèmes installés.",
+    bio: "Il conduit les audits, décide des mises en production et répond de l'exploitation des systèmes installés. Passé par la finance, en hedge fund, où rien ne s'engage sur une hypothèse non vérifiée.",
     photo: "/equipe/teo.jpg",
   },
 ];
