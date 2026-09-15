@@ -1,21 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { CHIFFRES as C } from "@/lib/produits/reprise";
 import { Cadre, TitreSection } from "./Cadre";
 import { cn } from "./cn";
 
-/* Deux teintes relevées dans la config de graphique de la référence. */
-const BLEU = "#2563eb";
-const BLEU_CLAIR = "#60a5fa";
-
-/* Le site source passait `var(--color-border)` / `var(--color-popover)` aux
-   styles en ligne de recharts. Ces variables naissaient de son `@theme` et
-   N'EXISTENT PAS ici : la grille et l'infobulle seraient rendues sans trait
-   ni fond, sans la moindre erreur. Valeurs du monde clair, en clair. */
-const BORD = "#d9d9d9";
-const POP = "#fafafa";
+/* 14/09/2026 — le tracé recharts vit dans ./Graphique.tsx et n'est demandé
+   qu'à l'entrée dans la fenêtre : 380 ko qui ne retardent plus l'affichage
+   de la page. Les teintes et les valeurs de bord sont parties avec lui. Le
+   cadre de hauteur (h-80 / md:h-96) reste ICI, donc la place est réservée
+   avant que le morceau n'arrive — rien ne saute. */
+const Graphique = dynamic(() => import("./Graphique"), { ssr: false });
 
 /* Trame relevée telle quelle, sa jumelle `dark:` retirée (page en clair). */
 const HACHURE =
@@ -74,62 +70,11 @@ export function Chiffres() {
                   <p className="text-[#737373] text-xs">{C.graphique.mention}</p>
                 </div>
                 <div className="h-80 w-full md:h-96">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={C.graphique.series} /* Marges latérales : sans elles, la première et la dernière
-                         graduation sont rognées par le bord du cadre. */
-                      /* La marge doit valoir au moins la moitié du libellé le plus large,
-                         sinon la première et la dernière graduation sont rognées :
-                         « 0–30 j » perdait son « 0 » avec 10 px. */
-                      margin={{ top: 8, right: etroit ? 22 : 28, left: etroit ? 22 : 28, bottom: 8 }}>
-                      <defs>
-                        <linearGradient id="rp-deg-dormants" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={BLEU} stopOpacity={0.5} />
-                          <stop offset="95%" stopColor={BLEU} stopOpacity={0.05} />
-                        </linearGradient>
-                        <linearGradient id="rp-deg-actifs" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={BLEU_CLAIR} stopOpacity={0.5} />
-                          <stop offset="95%" stopColor={BLEU_CLAIR} stopOpacity={0.05} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid vertical={false} stroke={BORD} strokeOpacity={0.5} />
-                      <XAxis
-                        dataKey="tranche"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        interval={etroit ? 1 : 0}
-                        className="[&_text]:fill-[#737373]"
-                        style={{ fontSize: etroit ? 10 : 12 }}
-                      />
-                      <Tooltip
-                        cursor={{ stroke: BORD }}
-                        contentStyle={{
-                          background: POP,
-                          border: `1px solid ${BORD}`,
-                          borderRadius: 8,
-                          fontSize: 12,
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="dormants"
-                        name="Clients éteints"
-                        stackId="1"
-                        stroke={BLEU}
-                        fill="url(#rp-deg-dormants)"
-                        strokeWidth={2}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="actifs"
-                        name="Clients actifs"
-                        stackId="1"
-                        stroke={BLEU_CLAIR}
-                        fill="url(#rp-deg-actifs)"
-                        strokeWidth={2}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {/* `vu` sert déjà de sonde d'entrée à l'écran pour la
+                      montée du bloc ; il commande maintenant AUSSI le
+                      chargement du morceau recharts. Tant qu'il est faux
+                      la case reste vide — mais à sa hauteur définitive. */}
+                  {vu ? <Graphique etroit={etroit} /> : null}
                 </div>
               </div>
             </div>

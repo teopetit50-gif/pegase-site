@@ -1,4 +1,5 @@
 import React from "react";
+import Lien from "@/components/Lien";
 
 /* ══════════════════════════════════════════════════════════════════════
    Bouton principal de la référence — relevé le 09/09/2026.
@@ -69,7 +70,7 @@ export function StarButton({
     taille === "sm" ? "h-8 px-4 text-xs" : "h-10 px-4 py-2 text-sm";
 
   return (
-    <a
+    <Lien
       href={href}
       style={
         {
@@ -97,7 +98,7 @@ export function StarButton({
       <span className="relative z-[5] inline-flex items-center gap-1.5 text-[#ecebe7]">
         {children}
       </span>
-    </a>
+    </Lien>
   );
 }
 
@@ -113,7 +114,7 @@ export function BoutonPlein({
   className?: string;
 }) {
   return (
-    <a
+    <Lien
       href={href}
       className={`relative isolate inline-flex h-10 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border border-[#d4d4d4] bg-white px-5 text-sm font-medium text-[#171717] transition-all hover:bg-[#f5f5f5] hover:text-[#171717] ${className}`}
     >
@@ -127,7 +128,7 @@ export function BoutonPlein({
       <span className="relative z-10 inline-flex items-center gap-2 whitespace-nowrap">
         {children}
       </span>
-    </a>
+    </Lien>
   );
 }
 

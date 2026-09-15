@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { HEROS, MARQUE, ECRANS } from "@/lib/produits/relances";
 import { Panneau } from "./Panneau";
+import Lien from "@/components/Lien";
 
 /* RAPATRIEMENT 11/09 — couleurs converties : `bg-background` →
    `bg-[#ffffff]`, `border-border` → `border-[#e6e6e6]`, `border-border/50`
@@ -56,27 +57,27 @@ export function Heros() {
                   {HEROS.chapo}
                 </p>
                 <div className="flex items-center justify-center gap-3">
-                  <a
+                  <Lien
                     href={HEROS.boutonPrincipal.href}
                     className="inline-flex h-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#171717] px-4 py-2 font-medium text-[#ffffff] text-sm shadow-md transition-all hover:bg-[#171717]/90"
                   >
                     {HEROS.boutonPrincipal.texte}
-                  </a>
-                  <a
+                  </Lien>
+                  <Lien
                     href={HEROS.boutonSecondaire.href}
                     className="inline-flex h-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-[#e6e6e6] bg-[#ffffff] px-4 py-2 font-medium text-sm shadow-sm transition-all hover:bg-[#f5f5f5] hover:text-[#171717]"
                   >
                     {HEROS.boutonSecondaire.texte}
-                  </a>
+                  </Lien>
                 </div>
                 <p className="mt-4 text-[#737373] text-xs">
                   {HEROS.mention}{" "}
-                  <a
+                  <Lien
                     href={MARQUE.site}
                     className="underline underline-offset-4 transition-colors hover:text-[#171717]"
                   >
                     Omega
-                  </a>
+                  </Lien>
                 </p>
               </div>
             </div>

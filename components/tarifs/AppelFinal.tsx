@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { lienContact } from "@/lib/reservation";
+import Lien from "@/components/Lien";
 
 /* ══════════════════════════════════════════════════════════════════════
    AppelFinal — la carte sombre qui ferme /tarifs (14/09/2026)
@@ -62,12 +63,12 @@ export default function AppelFinal() {
             Choisir mes postes
             <ArrowRight aria-hidden className="size-4" />
           </a>
-          <a
+          <Lien
             href={lienContact("avant")}
             className="r-btn w-full border border-white/[0.12] bg-transparent text-white transition-colors hover:bg-white/[0.06] sm:w-auto"
           >
             Nous écrire
-          </a>
+          </Lien>
         </div>
 
         {/* la mention discrète de l'autre porte (28/08) : pour qui s'est

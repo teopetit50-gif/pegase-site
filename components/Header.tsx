@@ -613,7 +613,10 @@ export default function Header() {
             >
               {libelleCompte}
             </Link>
-            <a
+            {/* 14/09 — était un <a> brut : le seul du menu, donc le seul
+                bouton qui rechargeait tout le site au lieu de changer de
+                page. Il rejoint ses voisins en <Link>. */}
+            <Link
               href="/contact"
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
@@ -626,7 +629,7 @@ export default function Header() {
               className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-full border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
             >
               Nous contacter
-            </a>
+            </Link>
             <Link
               href="/commencer"
               onClick={() => setOpen(false)}

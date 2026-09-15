@@ -489,11 +489,11 @@ button.rounded-full:active {
 
    Remplace le fondu global `page-arrivee` du 28/08. Trois couches :
      · la SORTIE : <main> de l'ancienne page, capturé en un groupe par le
-       <ViewTransition exit="page-out"> de PageShell — 160 ms, s'efface et
+       <ViewTransition exit="page-out"> de PageShell — 100 ms, s'efface et
        s'enfonce de 8 px ;
      · les OBJETS PARTAGÉS (components/Partage.tsx) : la pastille de la
-       carte cliquée voyage jusqu'au titre de la page d'arrivée (380 ms),
-       le cadre bordeaux devient le hero de /modeles (420 ms) — par-dessus
+       carte cliquée voyage jusqu'au titre de la page d'arrivée (260 ms),
+       le cadre bordeaux devient le hero de /modeles (290 ms) — par-dessus
        la page qui sort ;
      · l'ARRIVÉE : du DOM vivant, en cascade GSAP (components/Arrivee.tsx),
        pas une capture fondue.
@@ -506,7 +506,7 @@ button.rounded-full:active {
 
 /* la page qui sort : un seul groupe, bref, vers le bas */
 ::view-transition-old(.page-out) {
-  animation: 160ms var(--ease-transition) both vt-sortie;
+  animation: 100ms var(--ease-transition) both vt-sortie;
 }
 ::view-transition-group(.page-out) {
   z-index: 5;
@@ -562,8 +562,8 @@ button.rounded-full:active {
 /* la pastille « Prix publics » : UN objet, même dessin des deux côtés —
    aucun fondu croisé, seule la géométrie voyage */
 ::view-transition-group(.voyage-tarifs) {
-  animation-duration: 380ms;
-  animation-delay: 60ms;
+  animation-duration: 260ms;
+  animation-delay: 30ms;
   animation-timing-function: var(--ease-transition);
   z-index: 20;
 }
@@ -577,32 +577,32 @@ button.rounded-full:active {
 /* la pastille « Sur mesure » : sombre sur la carte, claire sur la page —
    elle change de teinte entre 40 et 80 % du trajet */
 ::view-transition-group(.voyage-audit) {
-  animation-duration: 380ms;
-  animation-delay: 60ms;
+  animation-duration: 260ms;
+  animation-delay: 30ms;
   animation-timing-function: var(--ease-transition);
   z-index: 20;
 }
 ::view-transition-old(.voyage-audit) {
-  animation: 152ms linear 212ms both vt-fade-out;
+  animation: 104ms linear 145ms both vt-fade-out;
 }
 ::view-transition-new(.voyage-audit) {
-  animation: 152ms linear 212ms both vt-fade-in;
+  animation: 104ms linear 145ms both vt-fade-in;
 }
 
 /* le cadre bordeaux → la carte produit (blanche) de /tarifs/site — 02/09,
    jusque-là le hero sombre de /modeles : la géométrie en 420 ms, le
    bordeaux s'efface pendant que la carte se pose */
 ::view-transition-group(.voyage-modeles) {
-  animation-duration: 420ms;
-  animation-delay: 60ms;
+  animation-duration: 290ms;
+  animation-delay: 30ms;
   animation-timing-function: var(--ease-transition);
   z-index: 20;
 }
 ::view-transition-old(.voyage-modeles) {
-  animation: 200ms var(--ease-transition) 60ms both vt-fade-out;
+  animation: 140ms var(--ease-transition) 30ms both vt-fade-out;
 }
 ::view-transition-new(.voyage-modeles) {
-  animation: 140ms var(--ease-transition) 60ms both vt-fade-in;
+  animation: 100ms var(--ease-transition) 30ms both vt-fade-in;
 }
 
 /* le header : immobile, au-dessus de tout (recette de la doc Next) */

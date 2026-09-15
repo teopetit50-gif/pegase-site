@@ -1,4 +1,5 @@
 import { MARQUE, CLOTURE } from "@/lib/produits/relances";
+import Lien from "@/components/Lien";
 
 /* Le bloc d'appel qui ouvrait le pied du site source (components/Pied.tsx).
 
@@ -74,12 +75,12 @@ export function Cloture() {
             la page, relevé sur Folio. La pastille était l'intruse.
             Aucun autre bouton du parc n'a ce réglage — les quatre pages
             ont été balayées. */}
-        <a
+        <Lien
           href={MARQUE.audit}
           className="mt-8 inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#171717] px-6 py-3 font-medium text-[#ffffff] text-sm shadow-md transition-all hover:bg-[#171717]/90"
         >
           {CLOTURE.bouton}
-        </a>
+        </Lien>
       </div>
     </section>
   );

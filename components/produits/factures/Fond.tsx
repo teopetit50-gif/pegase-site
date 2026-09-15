@@ -1,6 +1,23 @@
 "use client";
 
-import { WovenCanvas } from "@/components/produits/factures/ui/woven-light-hero";
+import dynamic from "next/dynamic";
+
+/* 14/09/2026 (chantier rapidité) — le canvas est demandé APRÈS le reste de
+   la page, pas avec. Il s'appuie sur three.js : 548 ko une fois construit,
+   soit à lui seul la moitié du poids de /offres/factures-fournisseurs, pour
+   un DÉCOR — un tissage d'encre que trois voiles blancs éteignent déjà à
+   86 % là où le titre se pose. Mesuré en prod le 14/09 : la navigation vers
+   cette page téléchargeait 1,3 Mo et le titre n'apparaissait qu'à 1,2 s.
+   En chargement différé, le titre et le chapô n'attendent plus le décor ;
+   le tissage se pose derrière eux une fraction de seconde plus tard, sur un
+   fond blanc qui est déjà sa propre couleur de repos — il n'y a donc rien
+   à voir « manquer » entre les deux.
+   `ssr: false` parce que le composant ne rend rien côté serveur de toute
+   façon (il peint dans un <canvas> au montage). */
+const WovenCanvas = dynamic(
+  () => import("@/components/produits/factures/ui/woven-light-hero").then((m) => m.WovenCanvas),
+  { ssr: false },
+);
 
 /* Fond du héros. La référence pose un <canvas> plein cadre, recouvert de
    deux dégradés : un horizontal qui éteint un flanc, un vertical qui

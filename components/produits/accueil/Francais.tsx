@@ -1,6 +1,7 @@
 import { Apparition } from "./Apparition";
 import { Etiquette } from "./Bouton";
 import { FRANCAIS } from "@/lib/produits/accueil";
+import Lien from "@/components/Lien";
 
 /* La bande « produit français ».
  *
@@ -43,12 +44,12 @@ export function Francais() {
               ))}
             </div>
 
-            <a
+            <Lien
               href={FRANCAIS.lien.href}
               className="mt-8 inline-flex font-mono text-xs uppercase text-neutral-500 underline decoration-neutral-300 underline-offset-4 transition-colors hover:text-neutral-900"
             >
               {FRANCAIS.lien.libelle}
-            </a>
+            </Lien>
           </div>
         </div>
       </div>

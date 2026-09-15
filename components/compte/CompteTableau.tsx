@@ -74,6 +74,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import "./compte.css";
+import Lien from "@/components/Lien";
 
 /* une sous-entrée : un repère DANS le panneau de sa section */
 export type SousEntree = {
@@ -339,7 +340,7 @@ export default function CompteTableau({
                   </button>
                 </form>
               ) : (
-                <a
+                <Lien
                   key={l.id}
                   href={l.href}
                   className="cpt-lien"
@@ -352,7 +353,7 @@ export default function CompteTableau({
                   {l.externe ? (
                     <ArrowUpRight size={14} strokeWidth={2} className="cpt-lien-fleche" aria-hidden="true" />
                   ) : null}
-                </a>
+                </Lien>
               ),
             )}
           </div>
