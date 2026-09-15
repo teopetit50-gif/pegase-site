@@ -11,6 +11,13 @@ import "./hero-section.css";
    avec des équerres de coin, des points flottants et une lueur qui suit
    le pointeur.
 
+   14/09, soir (Teo) : « il reste ça sur la section en haut de l'accueil,
+   c'est pas censé apparaître ». Les deux équerres du haut — les seules que
+   cette page posait — sont retirées : sur le clair du nuancier Silk elles
+   ne se lisent plus comme l'angle d'un cadre mais comme deux marques
+   oubliées dans la bande vide entre le header et le titre. La trame, les
+   filets, les points et la lueur restent.
+
    Ce qui est repris : les quatre mouvements et leurs courbes, à
    l'identique (voir `hero-section.css`, qui porte le détail du relevé et
    des écarts). Ce qui ne l'est pas : la mise en page et les couleurs. Teo
@@ -98,7 +105,7 @@ export function MotsReveles({
 }
 
 /* ——————————————————————————————————————————————————————————————
-   Le décor : trame, filets, points, équerres, points flottants, lueur
+   Le décor : trame, filets, points, points flottants, lueur
    —————————————————————————————————————————————————————————————— */
 
 /* Positions figées, jamais tirées au hasard au rendu : un aléatoire ici
@@ -117,13 +124,6 @@ const FLOTTANTS = [
   { top: "40%", left: "10%", retard: "1s" },
   { top: "44%", left: "90%", retard: "1.5s" },
 ];
-
-/* Même raison pour les équerres : la référence en pose quatre parce que son
-   hero est un cadre fermé d'une hauteur d'écran. Ici le bas du hero n'est
-   jamais vu — il est sous la maquette, dans le fondu — et deux équerres
-   posées là auraient été deux nœuds invisibles. Les deux du haut suffisent
-   à donner l'angle. */
-const COINS = ["hg", "hd"] as const;
 
 export function DecorHero() {
   const cadre = useRef<HTMLDivElement>(null);
@@ -184,16 +184,6 @@ export function DecorHero() {
           <circle cx="80%" cy="80%" r="2" className="o-hero-point" style={{ animationDelay: "3.6s" }} />
         </svg>
       </div>
-
-      {COINS.map((c, i) => (
-        <div
-          key={c}
-          className={`o-hero-coin o-hero-coin-${c}`}
-          style={{ animationDelay: `${1.4 + i * 0.12}s` }}
-        >
-          <i />
-        </div>
-      ))}
 
       {FLOTTANTS.map((f) => (
         <div
