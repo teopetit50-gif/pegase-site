@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { Chevron } from "@/components/offres/MediaMoteurs";
+import { MODELES } from "@/components/modeles/donnees";
 
 /* ══════════════════════════════════════════════════════════════════════
    « Laquelle pour moi ? » — le tableau des trois entrées (11/09/2026)
@@ -39,8 +40,16 @@ import { Chevron } from "@/components/offres/MediaMoteurs";
    D'OÙ SORT CHAQUE VALEUR. Aucune n'est écrite pour la circonstance :
    · les trois intitulés et leurs résumés viennent de `PORTES`, la section
      juste au-dessus ;
-   · « 59 à 119 € par mois » : `PALIERS` de `lib/paliers.ts` (59 / 89 / 119) ;
-   · « 990 € » : `PRIX_SITE_EUR` de `lib/site-commande.ts` ;
+   · 15/09/2026 — LA LIGNE « COMBIEN » EST RETIRÉE. Elle affichait
+     « 59 à 119 € par mois » (`PALIERS`) et « 990 € » (`PRIX_SITE_EUR`)
+     en clair sur l'accueil. Arbitrage de Teo : la page parle d'abord aux
+     organisations, où le prix sort des volumes mesurés à l'audit — deux
+     montants d'entrée de gamme affichés là faisaient lire toute l'offre
+     comme un abonnement à 59 €. Les prix ne sont pas cachés pour autant :
+     la ligne « Le prix est public » reste, et chaque colonne mène à la
+     page qui donne ses montants (/tarifs, /tarifs/site). Pour revenir en
+     arrière, remettre une entrée `{ label: "Combien", cellules: [...] }`
+     dans LIGNES ;
    · l'audit nécessaire au sur-mesure : c'est la seule offre du site qui
      exige le cadrage avant d'écrire, comme dit sur /offres/sur-mesure.
    Si l'une d'elles cesse d'être vraie, elle sort d'ici avant de devenir
@@ -137,7 +146,7 @@ const LIGNES: { label: string; cellules: [Cellule, Cellule, Cellule] }[] = [
     cellules: [
       "Les quatre systèmes, installés en l'état",
       "Rien : tout part de vos règles",
-      "Vingt et un modèles, tous visitables",
+      `${MODELES.length} modèles, tous visitables`,
     ],
   },
   {
@@ -155,10 +164,6 @@ const LIGNES: { label: string; cellules: [Cellule, Cellule, Cellule] }[] = [
   {
     label: "Le prix est public",
     cellules: [true, false, true],
-  },
-  {
-    label: "Combien",
-    cellules: ["59 à 119 € par mois", "Chiffré après le cadrage", "990 €"],
   },
 ];
 

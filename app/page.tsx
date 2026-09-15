@@ -10,6 +10,7 @@ import {
   Send,
 } from "lucide-react";
 import PageShell from "@/components/PageShell";
+import { MODELES } from "@/components/modeles/donnees";
 import PageMotion from "@/components/PageMotion";
 import {
   BandeauOutils,
@@ -601,7 +602,7 @@ const ACCROCHES_VITRINE: Record<string, { objectif: string; texte: string }> = {
    EXIGENT l'audit et l'écriture des règles. Les paquets, eux, ont désormais
    leur propre vitrine et n'ont plus besoin qu'on plaide pour eux ici.
 
-   Aucun chiffre inventé : « vingt et un » est le compte réel de
+   Aucun chiffre inventé : le compte vient de MODELES.length, compte réel de
    components/modeles, et « nom de domaine compris » est ce qu'annonce déjà
    /tarifs/site. */
 /* 11/09/2026 (Teo) — les trois cartes penchées de la section « échéance ».
@@ -680,7 +681,7 @@ const PORTES = [
     nom: "Votre site",
     objectif: "Une vitrine qui tient debout",
     texte:
-      "Vingt et un modèles en ligne, tous visitables. Contenu réécrit à votre métier, nom de domaine et mise en ligne compris.",
+      `${MODELES.length} modèles en ligne, tous visitables. Contenu réécrit à votre métier, nom de domaine et mise en ligne compris.`,
     lien: { label: "Voir les modèles", href: "/modeles" },
   },
 ];
@@ -949,6 +950,44 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ════════ 3 bis · À L'ÉCHELLE D'UN GROUPE — quatre cartes ════════
+            12/09/2026. Le détail du pourquoi est sur la constante `GROUPES`.
+
+            LA PLACE — remontée ici le 15/09/2026. Elle a d'abord fermé le
+            bloc de confiance (après les garanties, 13/09) ; elle ouvre
+            désormais l'argumentaire, juste après le catalogue. Arbitrage de
+            Teo : l'accueil parle d'ABORD aux organisations — celles où
+            plusieurs services valident, qui achètent l'audit et le
+            sur-mesure — et les prix publics comme les sites viennent
+            ensuite. Un visiteur voit donc ce qui s'installe, puis
+            immédiatement que ça tient à l'échelle d'un groupe : périmètre
+            d'essai, interdits en base, données cloisonnées, système
+            d'information qui ne bouge pas.
+
+            L'ÉCART : `pt-[110px]` et pas de `pb`. Le catalogue qui précède
+            ne porte aucun écart bas, et la section suivante ouvre déjà sur
+            `py-[110px]` — un `pb` ici cumulerait 220 px de blanc, défaut
+            déjà relevé à cette place à la recette du 10/09.
+
+            LE COMPOSANT est celui des garanties (`CartesLueur`), pris à
+            quatre cartes au lieu de deux : sa grille est en deux colonnes,
+            elle se referme donc en 2 × 2 sans un réglage. Aucune maquette
+            n'est passée — ces cartes-là portent des faits contractuels, pas
+            des captures d'interface. À cette place, elles ne voisinent plus
+            avec une autre rangée à lueur : les garanties sont loin en bas. */}
+        <section data-monde="clair" className="pt-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille="ORGANISATIONS"
+              titre="Quand plusieurs services valident, rien ne s'improvise."
+              chapo="Le cadre ne change pas avec la taille : un périmètre d'essai, des règles écrites, une sortie prévue dès le départ."
+            />
+            <div className="mt-16">
+              <CartesLueur cartes={GROUPES} />
+            </div>
+          </div>
+        </section>
+
         {/* ════════ 4 · CE QUE ÇA CHANGE — le bento à cartes ════════
             11/09/2026 (Teo) : « la section sur le screen doit être
             remplacée par ce composant ». Les deux colonnes symétriques
@@ -1082,7 +1121,7 @@ export default function Home() {
                  page tiennent en deux lignes ; celui-ci dit moins et laisse
                  les trois cartes énumérer. */
               titre="Trois façons de commencer."
-              chapo="Trois entrées différentes, la même exigence derrière : vos règles écrites noir sur blanc, vos données en Europe, un seul interlocuteur."
+              chapo="Le cœur du métier est le sur-mesure : ce qui n'existe pas encore, cadré et chiffré à l'audit. Les deux autres entrées s'installent en l'état. Même exigence derrière les trois : vos règles écrites noir sur blanc, vos données en Europe, un seul interlocuteur."
             />
             {/* 11/09/2026 (Teo) — la rangée de portes ne paraît qu'à partir
                 de `lg`. Sous ce seuil, elle et le tableau se rendaient tous
@@ -1189,43 +1228,6 @@ export default function Home() {
                 sont en tête de `components/accueil/CartesLueur.tsx`. */}
             <div className="mt-16">
               <CartesLueur cartes={GARANTIES} />
-            </div>
-          </div>
-        </section>
-
-        {/* ════════ 8 bis · À L'ÉCHELLE D'UN GROUPE — quatre cartes ════════
-            12/09/2026. Le détail du pourquoi est sur la constante `GROUPES`.
-
-            LA PLACE — changée le 13/09/2026 à la demande de Teo (« inverse
-            la place des sections ») : elle a échangé son rang avec l'équipe,
-            qui occupe désormais le sien. Elle vient donc après les garanties
-            et avant le temps d'arrêt, à la fin du bloc de confiance — ce qui
-            se tient : périmètre d'essai, interdits, données, système
-            d'information sont du même ordre que l'hébergement et les
-            garanties qui la précèdent.
-
-            ⚠ CE QU'IL FAUT SURVEILLER À CETTE PLACE : elle suit
-            immédiatement « Un investissement maîtrisé », qui emploie le MÊME
-            composant (`CartesLueur`). Deux rangées de cartes à lueur se
-            suivent, deux puis quatre. L'argument d'origine — « la lueur au
-            survol suffit à les distinguer du bento juste au-dessus » — ne
-            vaut plus, puisque le voisin n'est plus un bento.
-
-            LE COMPOSANT est celui des garanties (`CartesLueur`), pris à
-            quatre cartes au lieu de deux : sa grille est en deux colonnes,
-            elle se referme donc en 2 × 2 sans un réglage. Aucune maquette
-            n'est passée — ces cartes-là portent des faits contractuels, pas
-            des captures d'interface, et la lueur au survol suffit à les
-            distinguer du bento juste au-dessus. */}
-        <section data-monde="clair" className="pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="ORGANISATIONS"
-              titre="Quand plusieurs services valident, rien ne s'improvise."
-              chapo="Le cadre ne change pas avec la taille : un périmètre d'essai, des règles écrites, une sortie prévue dès le départ."
-            />
-            <div className="mt-16">
-              <CartesLueur cartes={GROUPES} />
             </div>
           </div>
         </section>
