@@ -182,10 +182,15 @@ export default function ReserverUnAuditPage() {
             {/* la mention discrète de l'autre porte (28/08) — symétrique de
                 celle qui clôt /tarifs */}
             <p className="r-note mx-auto mt-8 max-w-xl !text-[13px]">
-              Vous tenez vos outils seul&nbsp;? Un audit n&apos;est pas nécessaire pour commencer&nbsp;: les prix sont publics.{" "}
+              {/* 15/09 — la mention disait « un audit n'est pas nécessaire
+                  pour commencer : les prix sont publics ». Sur la page qui
+                  vend l'audit, c'était l'inviter à ne pas le faire — et
+                  c'est faux depuis que le prix sort des volumes. */}
+              Vous voulez un ordre de grandeur avant de réserver&nbsp;?{" "}
               <Link href="/tarifs" className="underline underline-offset-4 hover:text-[#050505]">
-                Voir la grille
-              </Link>
+                Estimez votre prix
+              </Link>{" "}
+              en répondant à une question par poste.
             </p>
           </div>
         </section>

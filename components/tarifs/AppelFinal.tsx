@@ -36,8 +36,8 @@ import { lienContact } from "@/lib/reservation";
 
    Remplace la carte noire `call-to-action` du 14/09 (titre, chapô, deux
    boutons, mention de l'audit en pied). Le geste change : la section ne
-   dit plus qu'on peut réserver, elle MONTRE l'agenda — les jours où une
-   réunion d'installation tient encore, lus sur l'armoire, pas dessinés.
+   dit plus qu'on peut réserver, elle MONTRE l'agenda — les jours où un
+   audit tient encore, lus sur l'armoire, pas dessinés.
 
    Écarts avec la démo, tous voulus :
 
@@ -54,14 +54,14 @@ import { lienContact } from "@/lib/reservation";
    3. `mode="single"`, pas `range` : on regarde UN jour, pas un séjour.
    4. Les dates ne sont pas en dur (la démo ouvrait sur le 9→17 septembre
       2025). Les jours libres sortent de `agenda_public` via
-      `creneauxDuJour`, durée `reglage` (45 min) — la même règle que
-      /installation. Un jour grisé est complet ou fermé, pour de vrai.
-   5. LE CALENDRIER NE RÉSERVE PAS ICI, et c'est volontaire : /installation
-      exige les postes choisis (sans `?postes=`, la page renvoie à la
-      grille), le prix en dépend. On ne peut donc pas transporter le jour
-      choisi ; la section montre les disponibilités et le bouton reste
-      « Choisir mes postes ». Le jour cliqué affiche ses heures libres —
-      une information vraie — jamais un bouton qui prétend bloquer.
+      `creneauxDuJour`, durée `diagnostic` (30 min) — la même règle que
+      /reserver-un-audit. Un jour grisé est complet ou fermé, pour de vrai.
+   5. LE CALENDRIER NE RÉSERVE PAS ICI, et c'est volontaire : le tunnel
+      d'audit ouvre un compte et recueille la situation avant de bloquer
+      un créneau. On ne transporte donc pas le jour choisi ; la section
+      montre les disponibilités et le bouton emmène au tunnel. Le jour
+      cliqué affiche ses heures libres — une information vraie — jamais un
+      bouton qui prétend bloquer.
    6. L'agenda muet ne casse pas la section : le calendrier disparaît, le
       chapô et les deux boutons restent (c'est l'ancienne carte, en clair).
    7. Deux mois côte à côte comme la démo, un seul sous 640 px — empilés,
@@ -70,8 +70,13 @@ import { lienContact } from "@/lib/reservation";
    Les textes sont ceux de la page (28/08, 05/09) : rien de réécrit.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* la réunion d'installation : 45 min, comme /installation */
-const DUREE = DUREES_RDV.reglage ?? 45;
+/* 15/09/2026 — l'agenda montrait les créneaux d'INSTALLATION (45 min) et
+   son bouton disait « Choisir mes postes » : la page finissait par
+   proposer d'acheter, alors que ses cartes venaient d'annoncer que le
+   prix sort de l'audit. Il montre désormais les créneaux d'AUDIT (30 min,
+   parcours `diagnostic`), la porte que /tarifs ouvre vraiment. Celle de
+   l'installation reste en pied de carte, pour qui a déjà fait l'audit. */
+const DUREE = DUREES_RDV.diagnostic ?? 30;
 
 const clef = (annee: number, mois: number, jour: number) => `${annee}-${mois}-${jour}`;
 
@@ -138,13 +143,13 @@ export default function AppelFinal() {
       <Card data-reveal className="mx-auto w-full max-w-4xl overflow-hidden">
         <CardHeader className="border-b border-neutral-200 p-6 sm:p-8">
           <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-[#050505] sm:text-[32px]">
-            Réservez l&apos;installation en deux minutes
+            Votre prix se fixe en trente minutes
           </h2>
           <CardDescription className="max-w-[62ch] text-[15px] leading-relaxed text-[#616161]">
-            Vous choisissez vos postes, vous réservez la réunion d&apos;installation en ligne, vous
-            enregistrez votre moyen de paiement, et le système démarre sous votre contrôle. Rien
-            n&apos;est débité avant la fin de l&apos;installation&nbsp;: le premier prélèvement part
-            le jour où vos modules sont en service.
+            L&apos;audit mesure vos volumes réels sur vos propres exports&nbsp;: ce qui passe
+            chaque mois, ce qui revient à quelqu&apos;un, ce qui se perd sans être compté. Vous en
+            repartez avec le périmètre, le prix et ce qu&apos;il y a à mettre en route — écrits,
+            avant tout engagement. Il est gratuit, et rien ne s&apos;enregistre ici.
           </CardDescription>
         </CardHeader>
 
@@ -192,8 +197,8 @@ export default function AppelFinal() {
               <p className="mt-4 text-[15px] leading-relaxed text-[#616161] first-letter:uppercase">
                 {jour === undefined ? (
                   <>
-                    Les jours en clair sont ouverts pour une installation&nbsp;; les jours grisés
-                    sont complets ou fermés.
+                    Les jours en clair sont ouverts pour un audit&nbsp;; les jours grisés sont
+                    complets ou fermés.
                   </>
                 ) : creneaux.length === 0 ? (
                   <>Plus aucun créneau ce jour-là.</>
@@ -206,42 +211,42 @@ export default function AppelFinal() {
                     {creneaux.length > 1 ? "s" : ""}, de{" "}
                     <span className="num">{heureGp(creneaux[0])}</span> à{" "}
                     <span className="num">{heureGp(creneaux[creneaux.length - 1])}</span>, heure de
-                    Guadeloupe. Choisissez vos postes pour en bloquer un.
+                    Guadeloupe. Réservez votre audit pour en bloquer un.
                   </>
                 )}
               </p>
             </>
           ) : (
             <p className="text-[15px] leading-relaxed text-[#616161]">
-              L&apos;agenda ne répond pas pour le moment. Choisissez vos postes&nbsp;: les créneaux
-              s&apos;affichent à l&apos;étape suivante.
+              L&apos;agenda ne répond pas pour le moment. Ouvrez la réservation&nbsp;: les
+              créneaux s&apos;affichent à l&apos;étape suivante.
             </p>
           )}
 
           <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <a href="#grille" className="r-btn r-btn--noir w-full sm:w-auto">
-              Choisir mes postes
+            <Link href="/reserver-un-audit" className="r-btn r-btn--noir w-full sm:w-auto">
+              Réserver mon audit
               <ArrowRight aria-hidden className="size-4" />
-            </a>
+            </Link>
             <Lien href={lienContact("avant")} className="r-btn r-btn--fil w-full sm:w-auto">
               Nous écrire
             </Lien>
           </div>
         </CardContent>
 
-        {/* la mention discrète de l'autre porte (28/08) : pour qui s'est
-            trompé d'aiguillage, sans re-poser deux portes ici — symétrique
-            de celle qui clôt /reserver-un-audit */}
+        {/* la mention discrète de l'autre porte (28/08, retournée le 15/09) :
+            la carte ouvre l'audit, le pied garde l'installation pour qui l'a
+            déjà fait — l'ordre des deux portes suit celui du parcours */}
         <CardFooter className="flex flex-col items-start gap-3 border-t border-neutral-200 bg-[#fafafa] p-6 pt-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <p className="text-[13px] leading-5 text-[#616161]">
-            Plusieurs services se partagent le travail chez vous&nbsp;? Cette grille ne vous
-            concerne pas&nbsp;: votre tarif est établi à l&apos;issue d&apos;un diagnostic.
+            Votre audit est déjà fait et votre prix arrêté&nbsp;? La réunion d&apos;installation
+            se réserve directement, postes choisis.
           </p>
           <Link
-            href="/reserver-un-audit"
+            href="/installation"
             className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-[#050505] underline-offset-4 hover:underline"
           >
-            Demander un diagnostic
+            Réserver l&apos;installation
             <ArrowRight aria-hidden className="size-3.5" />
           </Link>
         </CardFooter>

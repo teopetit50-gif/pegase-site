@@ -437,9 +437,10 @@ const GARANTIES: CarteLueur[] = [
     label: "Engagement",
     titre: "Le prix est connu avant qu'on commence",
     texte:
-      "Pour les organisations, l'audit mesure vos volumes et chiffre le besoin avant la première ligne de code. Pour les indépendants, TPE et PME, les prix sont publics, installation comprise. Dans les deux cas, rien ne démarre sur une estimation faite au téléphone.",
+      /* 15/09/2026 — la phrase disait « pour les indépendants, TPE et PME, les prix sont publics ». Le site n'affiche plus de barème : il estime sur les volumes saisis, et l'audit fixe le prix. Promettre un prix public sur l'accueil, c'est promettre un montant que plus aucune page ne porte. */
+      "L'audit mesure vos volumes avant la première ligne de code : ce qui passe chaque mois, ce qui revient à quelqu'un, ce qui se perd sans être compté. Le prix en découle, il est écrit dans votre devis, et rien ne démarre sur une estimation faite au téléphone.",
     lien: {
-      label: "Voir ce qui est public",
+      label: "Comment le prix se calcule",
       href: "/tarifs",
     },
     maquette: <MaqPrixConnu />,
@@ -1279,7 +1280,7 @@ export default function Home() {
             <EnTete
               pastille="HÉBERGEMENT"
               titre="Vos données restent sous juridiction européenne."
-              chapo="Six faits vérifiables sur l'endroit où vivent vos données, et sur ce qu'on peut en faire."
+              chapo="Six faits vérifiables sur l'hébergement de vos données et sur les traitements qui leur sont appliqués."
             />
 
             <div className="mt-14">

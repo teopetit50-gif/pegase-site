@@ -53,6 +53,16 @@ import { COCKPIT_URL } from "@/lib/supabase/config";
      3. PROFIL — ProfilCarte (résumé + modale).
      4. SÉCURITÉ ET COMMANDES — mot de passe, commandes de site, données.
 
+   UN MONTANT NE S'AFFICHE QUE S'IL EST CONTRACTUEL (15/09, seconde
+   passe). Depuis que le site n'affiche plus de barème public — le prix
+   suit les volumes, l'audit le fixe —, le `prix_mensuel_eur` d'une
+   demande n'est plus qu'un instantané pris à la réservation. Il ne
+   s'affiche donc qu'une fois l'espace ouvert, c'est-à-dire le service
+   commencé ; avant, la tuile dit l'étape (« Prix confirmé avant la mise
+   en service »), jamais un chiffre. Même règle dans AbonnementCarte :
+   les trois montants du barème ont quitté le panneau de changement de
+   formule, et l'aperçu s'appelle « Prix indicatif ».
+
    LES QUATRE TUILES NE PORTENT AUCUN CHIFFRE INVENTÉ. Le gabarit affiche
    des « +12 % ce mois-ci » ; ici chaque valeur vient de la base (postes,
    prix, créneau, statut de paiement) ou dit « Aucun ». Un chiffre
@@ -325,14 +335,23 @@ export default function CompteVue({
               ? `${nbPostes || 1} poste${(nbPostes || 1) > 1 ? "s" : ""}`
               : "Aucun"
         }
+        /* 15/09/2026 — LA RÈGLE DE CETTE TUILE : un montant ne s'affiche
+           que lorsqu'il est CONTRACTUEL, c'est-à-dire une fois l'espace
+           ouvert (installation faite, service commencé). Avant, ce qui est
+           en base n'est qu'un instantané pris à la réservation : depuis que
+           le site n'affiche plus de barème et que le prix se fixe à
+           l'audit, l'afficher comme un fait ferait lire « 89 € par mois,
+           sans engagement » à quelqu'un dont le devis n'est pas écrit.
+           L'état vide, lui, disait « les postes se choisissent sur la
+           grille » — une grille qui ne vend plus. */
         detail={
           panneDemandes
             ? "Ne répond pas pour le moment"
             : abonnement
-              ? prix
+              ? rattache && prix
                 ? `${prix} € par mois, sans engagement`
-                : "Formule en cours de calcul"
-              : "Les postes se choisissent sur la grille"
+                : "Prix confirmé avant la mise en service"
+              : "L'audit fixe le périmètre et le prix"
         }
       />
       <Tuile
@@ -448,7 +467,7 @@ export default function CompteVue({
               Réserver mon audit
             </Link>
             <Link href="/tarifs" className="r-btn r-btn--fil">
-              Voir les postes et les tarifs
+              Estimer mon prix
             </Link>
           </>
         ) : null,
@@ -518,8 +537,11 @@ export default function CompteVue({
           <Link href="/reserver-un-audit" className="r-btn r-btn--noir">
             {audits.length ? "Réserver un autre format" : "Réserver mon audit"}
           </Link>
+          {/* 15/09 — « Voir les postes et les tarifs » envoyait sur une
+              grille qui ne vend plus : /tarifs estime, elle ne chiffre
+              pas. Le libellé dit ce que la page fait. */}
           <Link href="/tarifs" className="r-btn r-btn--fil">
-            Voir les postes et les tarifs
+            Estimer mon prix
           </Link>
         </>
       ) : null,

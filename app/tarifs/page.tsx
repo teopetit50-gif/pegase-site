@@ -75,7 +75,7 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 export const metadata: Metadata = {
   title: "Tarifs | Omega.AI",
   description:
-    `Un, trois ou quatre postes tenus par un système sous votre validation. Prix public gradué au volume de pièces traitées, sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation chiffrée à part et éligible au Chèque TIC, satisfait ou remboursé 30 jours. Pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.`,
+    `Un, trois ou quatre postes tenus par un système sous votre validation. Le prix suit vos volumes : cette page l'estime, l'audit le fixe sur vos chiffres. Sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation chiffrée à part et éligible au Chèque TIC, satisfait ou remboursé 30 jours.`,
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -92,10 +92,29 @@ export const metadata: Metadata = {
 /* ——— la FAQ tarifs — les questions qu'une page de prix doit prendre de
    front, mêmes règles éditoriales que la FAQ de la page audit. ——— */
 const FAQ_TARIFS: { q: string; r: string[] }[] = [
+  /* 15/09/2026 — les deux premières questions sont nouvelles, et elles
+     sont premières. La page n'affiche plus un barème : elle estime. Sans
+     ces réponses, l'absence de montant se lit comme une rétention
+     d'information — le reproche le plus cher qu'une page de prix puisse
+     encaisser. */
+  {
+    q: "Pourquoi n'affichez-vous pas un prix ?",
+    r: [
+      "Parce qu'il n'y en a pas un seul. Ce que vous payez suit ce que le système traite pour vous : deux entreprises du même métier et de la même taille n'envoient pas le même nombre de factures, ni ne reçoivent le même nombre de demandes. Un montant unique ferait payer aux uns le volume des autres.",
+      "Ce que nous affichons à la place, c'est la mécanique entière : le prix suit le nombre de pièces traitées, jamais le nombre d'utilisateurs ni un pourcentage sur vos encaissements. Indiquez vos volumes en haut de page et l'estimation s'affiche ; l'audit la confirme sur vos chiffres réels, et le prix est écrit avant tout engagement.",
+    ],
+  },
+  {
+    q: "L'estimation de cette page, c'est mon prix ?",
+    r: [
+      "C'est un ordre de grandeur, calculé sur les volumes que vous venez de saisir. Il vaut ce que valent vos chiffres — et personne ne connaît de mémoire le nombre de factures qu'il a relancées le mois dernier.",
+      "L'audit part de vos exports, pas de vos souvenirs : il mesure les volumes réels, la part des pièces qui reviennent à quelqu'un, et ce qui se perd aujourd'hui sans être compté. Le prix qui en sort est celui du devis, et il ne bouge plus.",
+    ],
+  },
   {
     q: "Puis-je changer de palier ensuite ?",
     r: [
-      "Oui, à tout moment et sans frais de changement : le prix suit simplement le nombre de postes en service. Un poste s'ajoute quand les chiffres du premier le justifient, et c'est le chemin que nous recommandons.",
+      "Oui, à tout moment et sans frais de changement : le prix suit les postes en service et les volumes qu'ils traitent. Un poste s'ajoute quand les chiffres du premier le justifient, et c'est le chemin que nous recommandons.",
     ],
   },
   {
@@ -125,9 +144,10 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
     ],
   },
   {
-    q: "Plusieurs services se partagent le travail chez nous : cette grille nous concerne-t-elle ?",
+    q: "Plusieurs services se partagent le travail chez nous : cette page nous concerne-t-elle ?",
     r: [
-      "Probablement pas : quand plusieurs personnes valident, chacune sur son poste, un prix affiché n'aurait pas de sens. Votre point d'entrée est le diagnostic : nous mesurons vos volumes, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
+      "En partie seulement. Les quatre postes et la mécanique du prix sont les mêmes ; ce qui change, c'est l'installation : quand l'accueil, la comptabilité et les opérations valident chacun sur son périmètre, il y a autant de jeux de règles à écrire que de services, et cela ne s'estime pas depuis une page.",
+      "Votre point d'entrée est le diagnostic, dans un format plus long : nous mesurons vos volumes service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
     ],
   },
 ];

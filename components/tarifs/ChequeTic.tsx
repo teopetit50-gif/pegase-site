@@ -32,7 +32,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
       fichier. Conséquence directe : `[--border:black] dark:[--border:white]`
       du décor ne peut pas servir — en Tailwind v4 `dark:` suit le réglage
       de l'OS, pas une classe. La trame est donc écrite en blanc, une fois.
-   2. LE BOUTON « Choisir mes postes » EST GARDÉ, centré sous le chapô. La
+   2. LE BOUTON D'APPEL EST GARDÉ, centré sous le chapô. La
       référence n'en a pas ; c'est le seul chemin de cette bande vers la
       grille, le perdre coûterait plus que la ressemblance.
    3. Les requêtes de conteneur de la référence (`@container`,
@@ -98,8 +98,11 @@ export default function ChequeTic() {
           Votre éligibilité est vérifiée à la réunion d&apos;installation, et si un dossier se
           justifie, nous le montons avec vous.
         </p>
-        <a href="#grille" className="r-btn r-btn--blanc mt-7">
-          Choisir mes postes
+        {/* 15/09 — le bouton disait « Choisir mes postes » et renvoyait à la
+            grille : le dispositif porte sur l'installation, qui vient APRÈS
+            l'audit. Il mène donc à l'audit, comme tout le reste de la page. */}
+        <a href="/reserver-un-audit" className="r-btn r-btn--blanc mt-7">
+          Réserver mon audit
         </a>
       </div>
 

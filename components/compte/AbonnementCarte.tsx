@@ -276,12 +276,12 @@ export default function AbonnementCarte({
   const enregistrerFormule = () =>
     agir(
       (jeton) => modifierInstallation(demande.id, postesTries(choix), periodicite, jeton),
-      "Formule enregistrée. Votre réunion d'installation garde son créneau, et le nouveau prix s'applique dès la mise en service.",
+      "Formule enregistrée. Votre réunion d'installation garde son créneau ; le prix est confirmé avec vous avant la mise en service.",
     );
   const annulerReservation = () =>
     agir(
       (jeton) => annulerDemande(demande.id, jeton),
-      "Réservation annulée. Rien n'est prélevé. Vous pouvez réserver à nouveau à tout moment depuis la grille des tarifs.",
+      "Réservation annulée. Rien n'est prélevé. Vous pouvez réserver à nouveau à tout moment.",
     );
   const demanderChangement = () =>
     agir(
@@ -543,8 +543,16 @@ export default function AbonnementCarte({
             {modifiable ? "Nouvelle formule" : "Formule souhaitée"}
           </div>
           <p className="mt-1 text-[14px] leading-[21px] text-[var(--cp-doux)]">
-            Un poste 59&nbsp;€, deux ou trois 89&nbsp;€, les quatre 119&nbsp;€ par mois. Le point du matin
-            et la validation avant envoi sont compris quel que soit le choix.
+            {/* 15/09/2026, deux passes. La phrase portait 59 / 89 / 119 €,
+                puis les trois montants de PALIERS. Elle part entièrement :
+                depuis que le site n'affiche plus de barème public — le prix
+                sort des volumes, l'audit le fixe —, servir trois montants
+                dans un compte client, c'est y remettre la grille que la
+                vitrine vient de retirer, et promettre un prix qu'aucun
+                devis ne porte. Ce qui reste est vrai à tous les paliers. */}
+            Le prix suit les postes en service et le volume qu&apos;ils traitent. Un changement est
+            rechiffré sur vos chiffres et confirmé avant qu&apos;il s&apos;applique. Le point du
+            matin et la validation avant envoi sont compris quel que soit le choix.
           </p>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -592,7 +600,9 @@ export default function AbonnementCarte({
               </button>
             </div>
             <div className="text-right">
-              <div className="text-[13px] text-[var(--cp-faible)]">Nouveau prix</div>
+              {/* 15/09 — « Nouveau prix » annonçait un montant que seul le
+                  devis arrête : le mot dit maintenant ce que c'est. */}
+              <div className="text-[13px] text-[var(--cp-faible)]">Prix indicatif</div>
               <div className="num text-[18px] font-semibold leading-[24px] text-[var(--cp-encre)]" aria-live="polite">
                 {choix.length === 0
                   ? "—"

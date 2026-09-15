@@ -46,7 +46,7 @@ import { lienContact } from "@/lib/reservation";
 export const metadata: Metadata = {
   title: "Par où commencer | Omega.AI",
   description:
-    "Deux façons de démarrer avec Omega.AI : un diagnostic sur mesure pour les organisations où plusieurs services valident, des prix publics pour les indépendants et TPE-PME.",
+    "Deux façons de démarrer avec Omega.AI : un diagnostic sur mesure pour les organisations où plusieurs services valident, un audit court pour les indépendants et TPE-PME. Dans les deux cas, le prix sort de vos volumes.",
 };
 
 
@@ -57,7 +57,10 @@ const PORTES = [
     icone: "plusieurs",
     titre: "Organisations & équipes",
     texte:
-      "Plusieurs services se partagent le travail, comme l'accueil, la comptabilité et les opérations, et plusieurs personnes valident, chacune sur son poste. Le prix est établi à partir des volumes mesurés, pas d'une grille.",
+      /* 15/09 — la phrase opposait « volumes mesurés » à « grille » : la
+         grille n'existe plus, les deux portes chiffrent sur les volumes. Ce
+         qui les sépare, c'est la profondeur du diagnostic. */
+      "Plusieurs services se partagent le travail, comme l'accueil, la comptabilité et les opérations, et plusieurs personnes valident, chacune sur son poste. Le diagnostic mesure vos volumes service par service, et le devis en découle.",
     cta: "Demander un diagnostic",
     href: "/reserver-un-audit",
   },
@@ -68,7 +71,7 @@ const PORTES = [
     titre: "Indépendants & TPE-PME",
     texte:
       "Une personne, parfois deux, tient les demandes, les devis et les factures, voit passer tout ce qui entre et sort, et valide seule ce qui part vers les clients. Ses outils sont la messagerie, un tableur, WhatsApp et la caisse.",
-    cta: "Voir les prix et démarrer",
+    cta: "Estimer mon prix",
     href: "/tarifs",
   },
 ];
