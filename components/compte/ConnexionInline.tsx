@@ -46,6 +46,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useRef, useState } from "react";
+import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 import { MDP_LONGUEUR_MIN, signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
 
@@ -551,7 +552,14 @@ export default function ConnexionInline({
                 required
               />
               <button type="submit" disabled={!emailOk || envoi} className={boutonClasse(emailOk)}>
-                {envoi ? "Envoi…" : "Recevoir mon code"}
+                {envoi ? (
+                  <>
+                    <Loader aria-hidden="true" />
+                    Envoi…
+                  </>
+                ) : (
+                  "Recevoir mon code"
+                )}
               </button>
             </div>
           </form>
@@ -717,13 +725,18 @@ export default function ConnexionInline({
               disabled={!mdpOk || !mdp2 || !profilOk || envoi}
               className={boutonClasse(mdpOk && Boolean(mdp2) && profilOk)}
             >
-              {envoi
-                ? "Enregistrement…"
-                : mode === "creation"
-                  ? "Créer un compte"
-                  : mode === "code"
-                    ? "Enregistrer et continuer"
-                    : "Enregistrer le mot de passe"}
+              {envoi ? (
+                <>
+                  <Loader aria-hidden="true" />
+                  Enregistrement…
+                </>
+              ) : mode === "creation" ? (
+                "Créer un compte"
+              ) : mode === "code" ? (
+                "Enregistrer et continuer"
+              ) : (
+                "Enregistrer le mot de passe"
+              )}
             </button>
             {mode === "definir" && onAnnuler ? (
               <button type="button" className="r-lien" onClick={onAnnuler}>

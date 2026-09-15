@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader } from "@/components/ui/loader";
 import { COURRIEL, lienCourriel, type SujetContact } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -209,7 +210,14 @@ export default function FormulaireContact() {
 
       <div className="mt-7 flex flex-wrap items-center gap-4">
         <button type="submit" disabled={!champsOk || etat === "envoi"} className={`r-btn w-full sm:w-auto ${champsOk && etat !== "envoi" ? "r-btn--noir" : "rv-btn--attente"}`}>
-          {etat === "envoi" ? "Envoi…" : "Envoyer le message"}
+          {etat === "envoi" ? (
+            <>
+              <Loader aria-hidden="true" />
+              Envoi…
+            </>
+          ) : (
+            "Envoyer le message"
+          )}
         </button>
         <p className="r-note max-w-[40ch]">
           Vos coordonnées ne servent qu&apos;à vous répondre. Rien n&apos;est cédé, rien n&apos;est

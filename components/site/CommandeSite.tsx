@@ -92,6 +92,7 @@ import {
   commander,
   type InfosBrief,
 } from "@/lib/site-commande";
+import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 
 type Etape = "modele" | "compte" | "brief" | "paiement";
@@ -971,7 +972,14 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       onClick={changerDeCompte}
                       disabled={changement || envoi}
                     >
-                      {changement ? "Un instant…" : "Changer de compte"}
+                      {changement ? (
+                        <span className="inline-flex items-center gap-1.5 align-middle">
+                          <Loader aria-hidden="true" />
+                          Un instant…
+                        </span>
+                      ) : (
+                        "Changer de compte"
+                      )}
                     </button>
                   </p>
                 ) : null}
@@ -1372,7 +1380,14 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
                       disabled={!briefOk || envoi}
                       className={`r-btn w-full sm:w-auto sm:min-w-[240px] ${!briefOk || envoi ? "rv-btn--attente" : "r-btn--noir"}`}
                     >
-                      {envoi ? "Envoi…" : "Enregistrer ma commande"}
+                      {envoi ? (
+                        <>
+                          <Loader aria-hidden="true" />
+                          Envoi…
+                        </>
+                      ) : (
+                        "Enregistrer ma commande"
+                      )}
                     </button>
                     <button
                       type="button"

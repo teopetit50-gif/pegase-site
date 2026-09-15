@@ -8,6 +8,7 @@ import { ArrowRight } from "lucide-react";
 
 import Lien from "@/components/Lien";
 import { Calendar } from "@/components/ui/calendar";
+import { Loader } from "@/components/ui/loader";
 import {
   Card,
   CardContent,
@@ -155,7 +156,8 @@ export default function AppelFinal() {
 
         <CardContent className="p-6 pt-6 sm:p-8">
           {chargement ? (
-            <div className="flex h-[320px] items-center justify-center rounded-md border border-[#e3e3e3] text-[15px] text-[#616161]">
+            <div className="flex h-[320px] flex-col items-center justify-center gap-3 rounded-md border border-[#e3e3e3] text-[15px] text-[#616161]">
+              <Loader size="md" aria-hidden="true" />
               Chargement de l&apos;agenda…
             </div>
           ) : calendrierVisible ? (

@@ -71,6 +71,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ConnexionInline from "@/components/compte/ConnexionInline";
 import { messageErreur, ouvrirEnregistrementPaiement } from "@/lib/abonnement";
 import { signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
+import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 import {
   DUREES_RDV,
@@ -702,7 +703,10 @@ export default function PriseDeCreneau({
             {erreur ? <p className="rv-erreur mt-4">{ERREURS[erreur] ?? ERREURS.reseau}</p> : null}
 
             {chargement ? (
-              <p className="mt-6 text-[15px] text-[#616161]">Chargement de l&apos;agenda…</p>
+              <p className="mt-6 flex items-center gap-2 text-[15px] text-[#616161]">
+                <Loader aria-hidden="true" />
+                Chargement de l&apos;agenda…
+              </p>
             ) : !agenda ? (
               <div className="mt-6">
                 <p className="rv-erreur">
@@ -804,7 +808,14 @@ export default function PriseDeCreneau({
                   onClick={changerDeCompte}
                   disabled={changement || envoi}
                 >
-                  {changement ? "Un instant…" : "Changer de compte"}
+                  {changement ? (
+                    <span className="inline-flex items-center gap-1.5 align-middle">
+                      <Loader aria-hidden="true" />
+                      Un instant…
+                    </span>
+                  ) : (
+                    "Changer de compte"
+                  )}
                 </button>
               </p>
             ) : null}
@@ -900,11 +911,16 @@ export default function PriseDeCreneau({
                     : "r-btn--noir"
                 }`}
               >
-                {envoi
-                  ? "Envoi…"
-                  : surDevis
-                    ? "Envoyer la demande de devis"
-                    : "Confirmer ce créneau"}
+                {envoi ? (
+                  <>
+                    <Loader aria-hidden="true" />
+                    Envoi…
+                  </>
+                ) : surDevis ? (
+                  "Envoyer la demande de devis"
+                ) : (
+                  "Confirmer ce créneau"
+                )}
               </button>
               {!surDevis ? (
                 <button
@@ -1020,7 +1036,14 @@ export default function PriseDeCreneau({
                             onClick={enregistrerPaiement}
                             disabled={paiement === "envoi"}
                           >
-                            {paiement === "envoi" ? "Ouverture…" : "Enregistrer mon moyen de paiement"}
+                            {paiement === "envoi" ? (
+                              <>
+                                <Loader aria-hidden="true" />
+                                Ouverture…
+                              </>
+                            ) : (
+                              "Enregistrer mon moyen de paiement"
+                            )}
                           </button>
                           <Link href="/compte" className="r-lien">
                             Plus tard, depuis Mon compte

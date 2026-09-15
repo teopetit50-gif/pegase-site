@@ -90,6 +90,7 @@ import {
 } from "@/lib/abonnement";
 import { dateGp } from "@/lib/site-commande";
 import { POSTES, REMISE_ANNUELLE, lirePeriodicite, type Periodicite } from "@/lib/paliers";
+import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 
 type Props = {
@@ -465,7 +466,14 @@ export default function AbonnementCarte({
                     onClick={enregistrerPaiement}
                     disabled={paiementEnvoi || envoi}
                   >
-                    {paiementEnvoi ? "Ouverture…" : "Enregistrer mon moyen de paiement"}
+                    {paiementEnvoi ? (
+                      <>
+                        <Loader aria-hidden="true" />
+                        Ouverture…
+                      </>
+                    ) : (
+                      "Enregistrer mon moyen de paiement"
+                    )}
                   </button>
                 </div>
               </>
@@ -644,7 +652,18 @@ export default function AbonnementCarte({
               onClick={modifiable ? enregistrerFormule : demanderChangement}
               disabled={envoi || choix.length === 0 || memeFormule}
             >
-              {envoi ? "Envoi…" : modifiable ? "Enregistrer" : "Envoyer ma demande"}
+              {envoi ? (
+                <>
+                  <Loader aria-hidden="true" />
+                  Envoi…
+                </>
+              ) : (
+                modifiable ? (
+    "Enregistrer"
+  ) : (
+    "Envoyer ma demande"
+  )
+              )}
             </button>
             <button type="button" className="r-btn r-btn--fil" onClick={fermer} disabled={envoi}>
               Annuler
@@ -668,7 +687,14 @@ export default function AbonnementCarte({
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" className="r-btn r-btn--noir" onClick={annulerReservation} disabled={envoi}>
-              {envoi ? "Annulation…" : "Oui, annuler"}
+              {envoi ? (
+                <>
+                  <Loader aria-hidden="true" />
+                  Annulation…
+                </>
+              ) : (
+                "Oui, annuler"
+              )}
             </button>
             <button type="button" className="r-btn r-btn--fil" onClick={fermer} disabled={envoi}>
               Conserver la réservation
@@ -725,7 +751,14 @@ export default function AbonnementCarte({
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" className="r-btn r-btn--noir" onClick={demanderResiliation} disabled={envoi}>
-              {envoi ? "Envoi…" : "Envoyer ma demande de résiliation"}
+              {envoi ? (
+                <>
+                  <Loader aria-hidden="true" />
+                  Envoi…
+                </>
+              ) : (
+                "Envoyer ma demande de résiliation"
+              )}
             </button>
             <button type="button" className="r-btn r-btn--fil" onClick={fermer} disabled={envoi}>
               Conserver l&apos;abonnement

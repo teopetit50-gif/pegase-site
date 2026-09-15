@@ -79,6 +79,7 @@ import {
 } from "@/components/ui/dialog";
 import { SECTEURS } from "@/lib/creneaux";
 import { siretNormalise, siretValide, type Utilisateur } from "@/lib/compte";
+import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 
 type Champs = {
@@ -414,7 +415,14 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
                     className={`r-btn w-full justify-center ${envoi ? "rv-btn--attente" : "r-btn--noir"}`}
                     disabled={envoi}
                   >
-                    {envoi ? "Enregistrement…" : "Enregistrer mon profil"}
+                    {envoi ? (
+                      <>
+                        <Loader aria-hidden="true" />
+                        Enregistrement…
+                      </>
+                    ) : (
+                      "Enregistrer mon profil"
+                    )}
                   </button>
                   <DialogClose asChild>
                     <button type="button" className="dlg-sortie" disabled={envoi}>
