@@ -144,7 +144,7 @@ const MOTEURS: TuileBento[] = [
     icone: Bell,
     titre: "CASHD · encaissements",
     texte:
-      "Les devis sans réponse sont relancés à J+3 et J+7, les factures échues à J+7 et J+21, selon vos règles.",
+      "Les devis sans réponse sont relancés au troisième jour puis une semaine après, les factures échues à J+7 et J+21, selon vos règles.",
     href: "/offres/relances-impayes",
     media: <MediaPayd />,
   },
@@ -182,7 +182,7 @@ const PAQUETS: CaseFeature[] = [
   {
     icone: Bell,
     titre: "CASHD",
-    texte: "Les devis sans réponse et les factures échues sont relancés à J+3, J+7 et J+21.",
+    texte: "Les devis sans réponse sont relancés dès le troisième jour, les factures échues à J+7 et J+21.",
     href: "/offres/relances-impayes",
   },
   {

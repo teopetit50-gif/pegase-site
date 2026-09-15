@@ -413,7 +413,7 @@ export const QUESTIONS = {
     },
     {
       q: "Et si FRONTD invente une réponse ?",
-      r: "FRONTD ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il transfère la conversation à vos équipes, avec son historique complet.",
+      r: "FRONTD ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec la fiche de son escalade.",
     },
     {
       q: "Que se passe-t-il si deux clients demandent le même créneau ?",

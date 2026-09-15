@@ -18,20 +18,20 @@ export const CATALOGUE: Catalogue = {
   chapo:
     "Une demande entrante traverse cinq étapes avant d'être traitée : elle arrive, elle est comprise, elle reçoit une réponse, elle se transforme en rendez-vous ou elle remonte. Voici ce que le système tient à chacune.",
   mention:
-    "Le système ne répond jamais hors de la base de connaissances que vous avez validée. Tout ce qui sort de ce périmètre est transféré à vos équipes avec l'historique complet de l'échange.",
+    "Le système ne répond jamais hors de la base de connaissances que vous avez validée. Tout ce qui sort de ce périmètre est transféré à vos équipes, avec la fiche de son escalade.",
   familles: [
     {
       nom: "Canaux et réception",
       icone: "inbox",
       lignes: [
-        { t: "Les messages arrivent par votre messagerie et par WhatsApp, sur vos numéros actuels.", atteste: true },
+        { t: "Les messages arrivent par votre messagerie et par le formulaire de votre site.", atteste: true },
         { t: "Le formulaire de votre site entre dans le même circuit que les autres canaux.", atteste: true },
         { t: "La messagerie instantanée du site est tenue aux mêmes règles que le reste.", atteste: false },
         { t: "Les messages reçus sur les réseaux sociaux rejoignent la même file.", atteste: false },
         { t: "Un appel non décroché est transcrit, puis traité comme une demande écrite.", atteste: false },
         { t: "Un accusé de réception part dans la minute, sous votre signature.", atteste: true },
         { t: "Les pièces jointes sont conservées et rattachées à la demande.", atteste: false },
-        { t: "Les horaires d'ouverture et les jours fériés règlent ce qui part et ce qui attend.", atteste: true },
+        { t: "Vos horaires d'ouverture sont cités dans les réponses, tels que vous les avez écrits.", atteste: true },
       ],
     },
     {
@@ -41,7 +41,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Le client est reconnu à partir de son numéro ou de son adresse avant toute réponse.", atteste: false },
         { t: "Son contrat, son historique et ses interventions passées sont lus en même temps.", atteste: false },
         { t: "Chaque demande est classée par type avant d'entrer dans un circuit.", atteste: true },
-        { t: "Le circuit suivi par un type de demande se définit avec vos services.", atteste: true },
+        { t: "Chaque demande est aiguillée selon sa catégorie, d'après les règles posées à l'installation.", atteste: true },
         { t: "Une demande qui relève de deux services est orientée vers le premier concerné.", atteste: false },
         { t: "L'urgence est détectée sur le fond du message, pas sur la présence d'un mot.", atteste: true },
         { t: "Une même demande reçue sur deux canaux est reconnue comme un seul dossier.", atteste: false },
@@ -58,7 +58,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Une modification de tarif ou d'horaire s'applique à la réponse suivante.", atteste: false },
         { t: "Le ton, la signature et les formules se règlent entité par entité.", atteste: false },
         { t: "Les réponses se font en plusieurs langues, avec le même périmètre de contenu.", atteste: false },
-        { t: "La mention d'une réponse automatisée figure dans les termes que vous choisissez.", atteste: true },
+        { t: "La mention d'une réponse automatisée figure dans les termes que vous choisissez.", atteste: false },
         { t: "Chaque échange reste archivé, transféré ou non, et reste consultable.", atteste: true },
       ],
     },
@@ -66,13 +66,13 @@ export const CATALOGUE: Catalogue = {
       nom: "Rendez-vous et agenda",
       icone: "calendar",
       lignes: [
-        { t: "Les créneaux proposés sont ceux que votre agenda montre réellement libres.", atteste: true },
-        { t: "La réservation s'écrit dans l'agenda du service au moment où elle est prise.", atteste: true },
-        { t: "Un rappel part avant la date, sur le canal par lequel le client a écrit.", atteste: true },
+        { t: "Les demandes de rendez-vous sont qualifiées, puis transmises au service concerné.", atteste: true },
+        { t: "Chaque demande est enregistrée avec son canal, son type et l'heure de son arrivée.", atteste: true },
+        { t: "Un rappel part avant la date, sur le canal par lequel le client a écrit.", atteste: false },
         { t: "Le client replanifie ou annule par le même canal, sans appeler personne.", atteste: false },
         { t: "La durée proposée dépend du type d'intervention demandé.", atteste: false },
         { t: "Les ressources et les personnes indisponibles sont exclues des créneaux proposés.", atteste: false },
-        { t: "Un créneau pris par un autre client disparaît des propositions à l'instant même.", atteste: true },
+        { t: "Un rendez-vous demandé hors périmètre est transmis à la personne qui peut le poser.", atteste: true },
       ],
     },
     {
@@ -85,7 +85,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Une réclamation est identifiée comme telle et sort du traitement courant.", atteste: false },
         { t: "Un client en litige ouvert ne reçoit aucune réponse automatisée.", atteste: false },
         { t: "La demande de parler à une personne est honorée sans discussion.", atteste: false },
-        { t: "Tout transfert emporte l'historique complet de l'échange, pas un résumé.", atteste: true },
+        { t: "Une demande hors périmètre est transférée avec la fiche de son escalade.", atteste: true },
       ],
     },
     {

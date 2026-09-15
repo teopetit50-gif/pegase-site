@@ -196,7 +196,7 @@ export const FONCTIONNALITES = {
        Titre et suite coulent dans le MÊME paragraphe (Intitule). */
     titre: "À 7 h 30, votre liste du jour est prête.",
     suite:
-      "RELOAD lit le bulletin pendant la nuit, puis il ne retient que les marchés parus dans vos départements et dans votre secteur.",
+      "RELOAD relève le bulletin chaque matin à 7 h 30, puis il ne retient que les marchés parus dans vos départements et dans votre secteur.",
     epingles: [
       { gauche: "18%", haut: "38%", delai: 0, drapeau: "971", texte: "Voirie · 84 k€ · clôture 12/10" },
       { gauche: "44%", haut: "24%", delai: 200, drapeau: "972", texte: "Second œuvre · 220 k€" },
@@ -234,7 +234,7 @@ export const FONCTIONNALITES = {
      ne part jamais sans vous » : ce serait faux au bout de trois semaines. */
   citation: {
     texte:
-      "« Vos équipes relisent la première vague nom par nom. Ensuite, vous décidez ce qui part seul et ce qui attend votre accord. »",
+      "« Vos règles de ton, vos interdits et vos tournures sont écrits avant la première vague. Le système n'en sort pas, et il s'arrête au premier doute. »",
     signataire: "La règle qui ne se négocie pas",
     role: "Sur RELOAD comme sur tout le système Omega.AI",
   },
@@ -423,7 +423,7 @@ export const QUESTIONS = {
     },
     {
       q: "RELOAD peut-il écrire n'importe quoi à mes clients ?",
-      r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vous relisez la première vague nom par nom ; ensuite, vous décidez ce qui part seul et ce qui attend votre accord, et vous pouvez tout couper en un mot.",
+      r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Le système s'arrête de lui-même au premier doute et vous le signale, et vous pouvez tout couper en un mot.",
     },
     {
       q: "Que se passe-t-il si quelque chose déraille ?",

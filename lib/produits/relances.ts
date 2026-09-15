@@ -263,7 +263,7 @@ export const BENTO = {
       id: "ton",
       titre: "Le ton s'adapte à chaque client",
       texte:
-        "Chaque message est écrit à partir du montant, de l'ancienneté du retard et de l'historique du client. Un bon payeur et un récidiviste ne reçoivent donc pas le même texte.",
+        "Chaque message est écrit à partir du montant, de l'ancienneté du retard et du palier atteint. Un premier rappel et une mise en demeure ne se ressemblent donc pas.",
     },
     {
       id: "journal",

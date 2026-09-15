@@ -8,10 +8,10 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 | Module | Page | Capacités | Attestées | À trancher |
 |---|---|---|---|---|
 | FILED | `/offres/factures-fournisseurs` | 41 | 10 | **31** |
-| CASHD | `/offres/relances-impayes` | 50 | 21 | **29** |
-| RELOAD | `/offres/nouvelles-affaires` | 45 | 20 | **25** |
-| FRONTD | `/offres/demandes-clients` | 44 | 16 | **28** |
-| **Total** | | **180** | **67** | **113** |
+| CASHD | `/offres/relances-impayes` | 50 | 19 | **31** |
+| RELOAD | `/offres/nouvelles-affaires` | 45 | 19 | **26** |
+| FRONTD | `/offres/demandes-clients` | 44 | 14 | **30** |
+| **Total** | | **180** | **62** | **118** |
 
 ## FILED — `/offres/factures-fournisseurs`
 
@@ -68,6 +68,7 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 
 **Suivi de l'encours**
 
+- [ ] La balance âgée range l'encours par tranche d'ancienneté, compte par compte.
 - [ ] Un échéancier négocié remplace l'échéance d'origine, et le suivi épouse ses termes.
 
 **Relance et escalade**
@@ -107,6 +108,7 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 
 **Pilotage**
 
+- [ ] Le délai moyen de règlement se mesure compte par compte.
 - [ ] La prévision d'encaissement est établie à trente et à soixante jours.
 - [ ] Le taux de réponse aux relances se suit palier par palier.
 - [ ] Les créances en litige, en pause et en recouvrement sont comptées en continu.
@@ -126,11 +128,12 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 
 **Campagnes et cadence**
 
-- [ ] Un compte qui a refusé entre en quarantaine pour la durée que vous fixez.
+- [ ] Les comptes déjà contactés par un commercial sont écartés de la vague en cours.
 
 **Veille des marchés publics**
 
 - [ ] Le journal de l'Union européenne est relevé au même rythme pour les seuils élevés.
+- [ ] La recherche s'élargit aux intitulés voisins, parce que l'acheteur n'emploie pas vos mots.
 - [ ] Les marchés en cours qui arrivent à renouvellement sont repérés avant leur publication.
 
 **Analyse d'une consultation**
@@ -181,9 +184,11 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 - [ ] Une modification de tarif ou d'horaire s'applique à la réponse suivante.
 - [ ] Le ton, la signature et les formules se règlent entité par entité.
 - [ ] Les réponses se font en plusieurs langues, avec le même périmètre de contenu.
+- [ ] La mention d'une réponse automatisée figure dans les termes que vous choisissez.
 
 **Rendez-vous et agenda**
 
+- [ ] Un rappel part avant la date, sur le canal par lequel le client a écrit.
 - [ ] Le client replanifie ou annule par le même canal, sans appeler personne.
 - [ ] La durée proposée dépend du type d'intervention demandé.
 - [ ] Les ressources et les personnes indisponibles sont exclues des créneaux proposés.
