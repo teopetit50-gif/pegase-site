@@ -5,6 +5,7 @@ import Grille from "@/components/tarifs/Grille";
 import ChequeTic from "@/components/tarifs/ChequeTic";
 import AppelFinal from "@/components/tarifs/AppelFinal";
 import FaqTarifs from "@/components/tarifs/FaqTarifs";
+import ReglesFacturation, { type Regle } from "@/components/tarifs/ReglesFacturation";
 import { REMISE_ANNUELLE } from "@/lib/paliers";
 
 /* 03/09 — le taux de la remise annuelle écrit en toutes lettres dans les
@@ -131,26 +132,38 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   },
 ];
 
-const JAMAIS: { titre: string; texte: string }[] = [
+const JAMAIS: Regle[] = [
   {
     titre: "Pas de prix par personne",
-    texte:
-      "Le prix ne dépend pas du nombre d'utilisateurs. Un collaborateur de plus ne coûte rien de plus.",
+    texte: "Le prix ne dépend pas du nombre d'utilisateurs.",
+    points: [
+      "Un collaborateur de plus ne coûte rien de plus",
+      "Le prix suit le nombre de postes en service",
+    ],
   },
   {
     titre: "Aucune commission au résultat",
-    texte:
-      "Pas de pourcentage sur les sommes encaissées. Nous avons intérêt à relancer juste, pas à relancer fort.",
+    texte: "Pas de pourcentage sur les sommes encaissées.",
+    points: [
+      "Nous avons intérêt à relancer juste, pas à relancer fort",
+      "Le montant du mois est connu d'avance",
+    ],
   },
   {
     titre: "Aucun engagement caché",
-    texte:
-      "Rien n'est débité avant la fin de l'installation. En mensuel, sans engagement : vous prévenez, le mois va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, le jour de la mise en service, avec les mêmes trente jours satisfait ou remboursé.",
+    texte: "Rien n'est débité avant la fin de l'installation.",
+    points: [
+      "En mensuel\u00a0: résiliable à tout moment, le mois en cours va à son terme",
+      "En annuel\u00a0: douze mois facturés en une fois, le jour de la mise en service",
+    ],
   },
   {
     titre: "Vos données repartent avec vous",
-    texte:
-      "L'export complet vous est remis à la sortie, sans condition et sans frais. Ce qui est à vous reste à vous.",
+    texte: "L'export complet vous est remis à la sortie, sans condition et sans frais.",
+    points: [
+      "Ce qui est à vous reste à vous",
+      "Les envois s'arrêtent, rien ne continue sans vous",
+    ],
   },
 ];
 
@@ -163,30 +176,16 @@ export default function TarifsPage() {
         {/* ═══ 1 à 3 — titre, paliers, orientation, comparatif ═══ */}
         <Grille />
 
-        {/* ═══ 3bis — ce qu'on ne facture jamais, quatre cartes blanches
-               sur fond gris (l'emplacement du « déroulé » de la page
-               audit) ═══ */}
-        <section id="jamais" data-monde="clair" className="r-wrap py-14 sm:py-20">
-          <p className="r-note">
-            Quatre règles, valables quel que soit le palier.
-          </p>
-          <h2 className="r-h2 mt-6 max-w-[18ch]">Ce que nous ne facturons jamais</h2>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {JAMAIS.map((j, i) => (
-              <div
-                key={j.titre}
-                data-reveal
-                className="flex h-full flex-col rounded-2xl bg-white p-7 sm:p-9"
-              >
-                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                  Règle {i + 1}
-                </div>
-                <h3 className="r-h4 mt-3">{j.titre}</h3>
-                <p className="mt-4 text-[15px] leading-[23px] text-[#3d3d3d]">{j.texte}</p>
-              </div>
-            ))}
-          </div>
+        {/* ═══ 3bis — ce qu'on ne facture jamais — 14/09, seconde passe :
+               la composition « how-it-works » (en-tête centré, rail de
+               pastilles numérotées, cartes à tuile d'icône et points)
+               ═══ */}
+        <section id="jamais" data-monde="clair">
+          <ReglesFacturation
+            titre="Ce que nous ne facturons jamais"
+            chapo="Quatre règles, valables quel que soit le palier — et quelle que soit la formule, mensuelle ou annuelle."
+            regles={JAMAIS}
+          />
         </section>
 
         {/* ═══ 4 — Chèque TIC, sur bande sombre — trois tuiles à grands

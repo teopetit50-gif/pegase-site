@@ -1,117 +1,130 @@
 "use client";
 
 import * as Accordion from "@radix-ui/react-accordion";
-import { ArrowRight, Mail, MessageCircle, Plus } from "lucide-react";
+import { ArrowRight, ChevronDown, Mail } from "lucide-react";
 import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
+import { Button } from "@/components/ui/button";
 import "./faq-tarifs.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   FaqTarifs — la FAQ des prix en deux colonnes (14/09/2026)
+   FaqTarifs — la FAQ des prix (14/09/2026)
 
-   Reprise de `faqs-02` de @ln-dev7 (21st.dev), le même auteur que
-   `bento-02` et `how-it-works-01` de /offres : une colonne gauche collante
-   (pastille, titre, phrase, carte « parler à quelqu'un »), et l'accordéon
-   à droite, 1 fr / 1,4 fr.
+   SECONDE PASSE DU JOUR — LE MODÈLE « FAQSECTION » (Teo, composant de
+   référence fourni). La FAQ quitte la composition `faqs-02` du matin
+   (colonne gauche collante : pastille, titre, carte « parler à un
+   conseiller » ; accordéon à droite) pour celle de la référence :
 
-   Remplace la grille titre-collant + `<details>` : les questions y étaient
-   posées en Jakarta 24 px semi-gras, aussi lourdes que les titres de
-   section, et la colonne de gauche ne portait qu'un H2 sur un vide de
-   380 px. La carte de contact remplit ce vide avec ce que la page dit
-   déjà plus haut (réponse le jour même, WhatsApp, courriel).
+     · un EN-TÊTE CENTRÉ — surtitre discret, titre, chapô, puis un bouton
+       en pilule qui emmène vers la porte de contact ;
+     · les questions en DEUX COLONNES d'accordéons, moitié / moitié, la
+       moitié impaire allant à gauche.
 
-   Écarts avec l'original :
+   Ce qui reste du matin : la primitive Radix (clavier, ARIA, ouverture
+   unique), les deux `@keyframes` de hauteur de `faq-tarifs.css`, les gris
+   de `.resa`, et le fait que les questions ne sont PAS écrites ici —
+   elles viennent de `FAQ_TARIFS` dans la page.
 
-   1. `Accordion` de shadcn est remplacé par la primitive Radix directement
-      (déjà installée pour la page Factures) — clavier, ARIA et ouverture
-      unique compris. Les `animate-accordion-*` de tailwindcss-animate
-      n'existent pas ici : deux `@keyframes` sur la hauteur dans
+   Écarts avec la référence, assumés :
+
+   1. La référence ouvre DEUX accordéons indépendants (`type="single"` par
+      colonne) : une réponse peut donc rester ouverte de chaque côté. C'est
+      gardé tel quel — deux colonnes, deux lectures.
+   2. Le chevron vient de `@radix-ui/react-icons` chez la référence ; le
+      paquet n'est pas installé et lucide l'est partout — `ChevronDown`,
+      même geste, même rotation à l'ouverture. Le « + » des autres FAQ du
+      site part donc ici, c'est le signe de ce composant.
+   3. `Accordion` de shadcn est remplacé par la primitive Radix
+      directement, et les `animate-accordion-*` de tailwindcss-animate (qui
+      n'est installé nulle part sur le parc) par les deux keyframes de
       `faq-tarifs.css`, scopées sous `.tf-faq`.
-   2. Les jetons shadcn (`border-border`, `bg-card`, `text-muted-foreground`)
-      sont remplacés par les gris de `.resa` (#e3e3e3, blanc, #616161) —
+   4. Les jetons shadcn (`border-border`, `text-muted-foreground`) sont
+      remplacés par les gris de `.resa` (#e3e3e3, #616161, #3d3d3d) —
       Tailwind n'émet rien pour un jeton inconnu.
-   3. Le bouton `rounded-full` de shadcn devient le bouton du site
-      (`r-btn r-btn--noir`) ; « Open a ticket » devient l'écriture WhatsApp
-      et « Replies in < 4h » reprend « le jour même », déjà écrit dans le
-      bandeau d'orientation de la grille.
-   4. Le « + » qui pivote est gardé (c'est le signe des FAQ du site), pas le
-      chevron de shadcn.
-   5. `cn()` n'est pas utilisé — classes écrites à la main, comme les
-      autres reprises du banc.
-
-   Les questions et réponses viennent de `FAQ_TARIFS` dans la page —
-   rien n'est réécrit ici.
+   5. Le bouton de la référence est décoratif (`onButtonClick`) ; ici il
+      mène vraiment quelque part — la porte de contact — donc un `<a>`
+      habillé par `Button asChild`. La ligne e-mail qui vivait dans la
+      carte du matin le suit : c'est une voie de contact réelle, la perdre
+      coûterait plus que la ressemblance.
    ══════════════════════════════════════════════════════════════════════ */
 
-export default function FaqTarifs({ items }: { items: { q: string; r: string[] }[] }) {
+type Item = { q: string; r: string[] };
+
+export default function FaqTarifs({ items }: { items: Item[] }) {
+  /* moitié / moitié — l'impair va à gauche, comme la référence répartit
+     ses cinq et cinq */
+  const coupe = Math.ceil(items.length / 2);
+  const colonnes: Item[][] = [items.slice(0, coupe), items.slice(coupe)];
+
   return (
     <div className="tf-faq r-wrap py-14 sm:py-20">
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-start lg:gap-16">
-        <div className="flex flex-col gap-5 lg:sticky lg:top-28">
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[#e3e3e3] bg-white px-3 py-1 text-xs font-medium text-[#616161]">
-            FAQ
-          </span>
-          <h2 className="r-h3">Questions sur les prix</h2>
-          <p className="text-[15px] leading-[23px] text-[#616161]">
-            Les questions qu&apos;une page de prix doit traiter clairement. S&apos;il en manque une, décrivez votre situation et une personne de l&apos;équipe vous répond.
-          </p>
+      {/* ——— en-tête centré ——— */}
+      <div className="mx-auto mb-12 max-w-2xl text-center">
+        <p className="mb-2 text-sm font-medium tracking-wide text-[#616161]">
+          Questions fréquentes
+        </p>
+        <h2 className="r-h3 mb-3">Questions sur les prix</h2>
+        <p className="mx-auto mb-6 max-w-xl text-[15px] leading-[23px] text-[#616161]">
+          Les questions qu&apos;une page de prix doit traiter clairement. S&apos;il en manque une,
+          décrivez votre situation et une personne de l&apos;équipe vous répond le jour même.
+        </p>
+        <Button asChild className="h-11 rounded-full px-6 text-[15px]">
+          <a href={lienContact("avant")}>
+            Nous écrire
+            <ArrowRight aria-hidden className="ml-2 size-4" />
+          </a>
+        </Button>
+        <p className="mt-4 text-xs leading-4 text-[#616161]">
+          <Mail aria-hidden className="mr-1 inline size-3" />
+          Ou par e-mail&nbsp;:{" "}
+          <a
+            href={lienCourriel("Tarifs Omega")}
+            className="font-medium text-[#050505] underline-offset-4 hover:underline"
+          >
+            {COURRIEL}
+          </a>
+        </p>
+      </div>
 
-          <div className="mt-2 flex flex-col gap-2 rounded-2xl border border-[#e3e3e3] bg-white p-4">
-            <div className="flex items-center gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#050505] text-white">
-                <MessageCircle aria-hidden className="size-4" />
-              </span>
-              <div className="flex flex-col leading-tight">
-                <p className="text-sm font-medium text-[#050505]">Parler à un conseiller</p>
-                <p className="text-xs text-[#616161]">Réponse le jour même</p>
-              </div>
-            </div>
-            <a
-              href={lienContact("avant")}
-              className="r-btn r-btn--noir mt-2 w-full !text-[15px]"
-            >
-              Nous écrire
-              <ArrowRight aria-hidden className="size-4" />
-            </a>
-            <p className="text-center text-[11px] leading-4 text-[#616161]">
-              <Mail aria-hidden className="mr-1 inline size-3" />
-              Ou par e-mail&nbsp;:{" "}
-              <a
-                href={lienCourriel("Tarifs Omega")}
-                className="font-medium text-[#050505] underline-offset-4 hover:underline"
+      {/* ——— les questions, en deux colonnes ——— */}
+      <div className="grid grid-cols-1 gap-x-12 text-left md:grid-cols-2">
+        {colonnes.map((colonne, c) => (
+          <Accordion.Root
+            key={c}
+            type="single"
+            collapsible
+            className="border-t border-[#e3e3e3]"
+          >
+            {colonne.map((f, i) => (
+              <Accordion.Item
+                key={f.q}
+                value={`q-${c}-${i}`}
+                className="border-b border-[#e3e3e3]"
               >
-                {COURRIEL}
-              </a>
-            </p>
-          </div>
-        </div>
-
-        <Accordion.Root type="single" collapsible className="border-t border-[#e3e3e3]">
-          {items.map((f, i) => (
-            <Accordion.Item key={f.q} value={`q-${i}`} className="border-b border-[#e3e3e3]">
-              <Accordion.Header className="flex">
-                <Accordion.Trigger className="group flex flex-1 items-start justify-between gap-6 py-5 text-left text-[16px] font-medium leading-[24px] text-[#050505] transition-colors hover:text-[#3d3d3d] sm:text-[17px]">
-                  {f.q}
-                  <Plus
-                    aria-hidden
-                    className="mt-1 size-4 shrink-0 text-[#616161] transition-transform duration-300 group-data-[state=open]:rotate-45"
-                  />
-                </Accordion.Trigger>
-              </Accordion.Header>
-              <Accordion.Content className="tf-faq-contenu overflow-hidden">
-                <div className="pb-6 pr-8">
-                  {f.r.map((par, j) => (
-                    <p
-                      key={j}
-                      className={`text-[15px] leading-[24px] text-[#3d3d3d] ${j > 0 ? "mt-3" : ""}`}
-                    >
-                      {par}
-                    </p>
-                  ))}
-                </div>
-              </Accordion.Content>
-            </Accordion.Item>
-          ))}
-        </Accordion.Root>
+                <Accordion.Header className="flex">
+                  <Accordion.Trigger className="group flex flex-1 cursor-pointer items-start justify-between gap-6 py-5 text-left text-[16px] font-medium leading-[24px] text-[#050505] transition-colors hover:text-[#3d3d3d]">
+                    {f.q}
+                    <ChevronDown
+                      aria-hidden
+                      className="mt-1 size-4 shrink-0 text-[#616161] transition-transform duration-300 group-data-[state=open]:rotate-180"
+                    />
+                  </Accordion.Trigger>
+                </Accordion.Header>
+                <Accordion.Content className="tf-faq-contenu overflow-hidden">
+                  <div className="pb-6 pr-8">
+                    {f.r.map((par, j) => (
+                      <p
+                        key={j}
+                        className={`text-[15px] leading-[24px] text-[#3d3d3d] ${j > 0 ? "mt-3" : ""}`}
+                      >
+                        {par}
+                      </p>
+                    ))}
+                  </div>
+                </Accordion.Content>
+              </Accordion.Item>
+            ))}
+          </Accordion.Root>
+        ))}
       </div>
     </div>
   );
