@@ -185,7 +185,6 @@ import { useCallback, useState, type ComponentType } from "react";
 import NumberFlow from "@number-flow/react";
 import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CallToAction4 } from "@/components/ui/call-to-action-4";
 import { HeroSection } from "@/components/ui/hero-section-dark";
 import {
   Card,
@@ -196,7 +195,7 @@ import {
 } from "@/components/ui/card";
 import { Comparator } from "@/components/ui/comparator-1";
 import { cn } from "@/lib/cn";
-import { COURRIEL, lienAudit, lienContact } from "@/lib/reservation";
+import { lienAudit, lienContact } from "@/lib/reservation";
 import Calculateur from "@/components/tarifs/Calculateur";
 import { useChoisirMonde, useMonde } from "@/components/tarifs/monde";
 
@@ -208,7 +207,6 @@ import {
   MONDES,
   PALIERS,
   POSTES,
-  REMISE_ANNUELLE,
   heuresRecuperees,
   piecesPourPostes,
   postesPourCarte,
@@ -217,8 +215,6 @@ import {
   type SaisieVolumes,
   type Palier,
 } from "@/lib/paliers";
-
-const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 
 /* le prix en euros, sans centimes — le format que NumberFlow anime */
 
@@ -883,95 +879,17 @@ export default function Grille() {
           ))}
           <CarteSurMesure monde={monde} />
         </div>
-
-        {/* ce qui tourne chez tout le monde — 15/09 : cette ligne porte
-            désormais ce que les quatre cartes répétaient chacune de leur
-            côté (le point du matin, les verrous, le satisfait ou remboursé,
-            la gratuité de l'audit). Dit une fois sous la grille, c'est la
-            même promesse ; dit quatre fois dans les cartes, c'était
-            quatre-vingts mots de plus à lire avant le bouton. */}
-        <p
-          data-reveal
-          className="mx-auto mt-12 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161] lg:mt-20"
-        >
-          <span className="font-semibold text-[#050505]">Inclus à tous les paliers.</span>{" "}
-          Le système se raccorde à votre environnement existant&nbsp;: messagerie, tableur,
-          WhatsApp. Le rapport quotidien et la validation obligatoire avant tout envoi sont
-          compris dans l&apos;abonnement
-          {devis ? ". " : ", de même que la garantie de remboursement sous 30 jours. "}
-          {devis
-            ? "Le diagnostic est gratuit et sans engagement : c'est lui qui arrête le tarif."
-            : "L'audit est gratuit et sans engagement : c'est lui qui arrête le tarif."}
-        </p>
-
-        {/* 15/09/2026 — la note disait « grille en vigueur au 01/09/2026 »
-            et « le prix affiché est celui qui vous est confirmé ». Les deux
-            sont faux depuis que les cartes n'affichent plus un barème mais
-            une estimation lue sur les volumes saisis : la date renvoyait à
-            une grille remplacée le 15, et la promesse engageait un montant
-            que seul l'audit fixe. */}
-        {devis ? (
-          <p key="bas-devis" className="r-note rv-fondu mx-auto mt-8 max-w-3xl text-center">
-            {GRANDE_STRUCTURE.bas}
-          </p>
-        ) : (
-        <p data-reveal className="r-note mx-auto mt-8 max-w-3xl text-center">
-          Montants TTC, estimés à partir des volumes que vous renseignez&nbsp;: ils donnent un
-          ordre de grandeur, pas un tarif ferme. Le tarif est arrêté à l&apos;audit, sur vos
-          chiffres, et figure au devis avant tout engagement. L&apos;installation est facturée
-          séparément, une seule fois&nbsp;; un raccordement spécifique (logiciel métier peu
-          répandu, reprise d&apos;historique) est chiffré au devis, jamais découvert en cours de
-          projet. Le moyen de paiement, carte ou prélèvement SEPA, est enregistré à la
-          réservation de l&apos;installation&nbsp;; aucun débit n&apos;intervient avant la fin de
-          celle-ci, et la première échéance part le jour de la mise en service. Formule
-          mensuelle&nbsp;: sans engagement, résiliable à tout moment, le mois en cours allant à
-          son terme. Formule annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une
-          échéance le jour de la mise en service&nbsp;; la garantie de remboursement sous
-          30 jours s&apos;applique dans les mêmes conditions.
-        </p>
-        )}
       </section>
 
-      {/* ═══ 2. bandeau d'orientation — 14/09 : la carte à deux volets de
-             Tailark (call-to-action-4). Les mots sont ceux du bandeau du
-             28/08, réorganisés : la question en titre, les trois choses à
-             décrire en liste à coches, « le jour même » en grande mention
-             dans l'encart, l'e-mail dessous, le bouton inchangé. ═══ */}
-      <section data-monde="clair" className="r-wrap pb-14 sm:pb-16">
-        <CallToAction4
-          className="mx-auto max-w-4xl"
-          titre={devis ? GRANDE_STRUCTURE.bandeau.titre : "Nous identifions le palier adapté à votre activité"}
-          texte={
-            devis
-              ? GRANDE_STRUCTURE.bandeau.texte
-              : "Décrivez votre activité en deux lignes. Nous revenons vers vous avec le palier correspondant et les volumes à vérifier à l'audit."
-          }
-          points={["Votre activité et vos effectifs", "Les processus les plus chronophages", "Vos volumes mensuels approximatifs"]}
-          encart={{
-            sur: "Une réponse",
-            grand: "le jour même",
-            sous: (
-              <>
-                {/* 15/09/2026 — l'adresse reste affichée, elle n'est plus
-                    un lien `mailto:`. Plus rien sur le site n'ouvre un
-                    client mail ; le bouton juste à côté mène au formulaire,
-                    en faire un second lien vers la même page ne servirait
-                    à rien.
-                    Le `mailto:` ne subsiste que là où il est la bonne réponse : la carte « Écrire » de /contact, que le visiteur a choisie, et les voies de SECOURS (formulaire ou agenda en panne). */}
-                Ou par e-mail&nbsp;: <span className="text-[#050505]">{COURRIEL}</span>
-              </>
-            ),
-            bouton: { label: "Décrire mon activité", href: lienContact("avant") },
-          }}
-        />
-      </section>
-
-      {/* ═══ 3. comparatif — côté grande structure il ne s'affiche PAS
+      {/* ═══ 2. comparatif — côté grande structure il ne s'affiche PAS
              (15/09) : ses quinze lignes comparent des prix mensuels, une
              réunion d'installation de 45 minutes et un satisfait ou
              remboursé qui n'ont pas été promis de ce côté-là ; les
-             réécrire aurait été inventer. La note de bas de grille et le
-             bandeau d'orientation portent la suite.
+             réécrire aurait été inventer. L'appel final porte la suite.
+             15/09, soir — la ligne « Inclus à tous les paliers », la note
+             de bas de grille (montants TTC, facturation, résiliation) et
+             le bandeau d'orientation « Nous identifions le palier » sont
+             retirés : Teo les a supprimés de la page.
 
              14/09 : le « Comparator one » de Tailark, en
              carte à quatre colonnes (voir components/ui/comparator-1).
