@@ -124,6 +124,29 @@
    Le comparatif du bas reste à trois colonnes : le sur-mesure répondrait
    « ça dépend » sur chacune de ses quinze lignes.
 
+   ═══ 15/09/2026, SECONDE PASSE — LES DEUX MONDES (Teo : « un autre bouton
+   pour changer le truc, soit on est PME soit grosse structure, ce qui
+   changerait du coup les prix »). Un sélecteur segmenté Indépendant & PME |
+   Grande structure est posé À CÔTÉ de l'interrupteur de facturation, et il
+   bascule toute la page entre les deux portes de `PORTES` (voir le bloc
+   MONDES / GRANDE_STRUCTURE de lib/paliers.ts pour l'arbitrage).
+
+   Ce qui bascule, ici :
+     · le titre, la pastille et le chapô ;
+     · le prix des quatre cartes → « Sur devis », et la rangée « Compris
+       dans le palier » → les points du devis (aucune promesse de la
+       grille PME n'est reprise sans avoir été posée pour ce monde) ;
+     · le bouton → « Réserver un diagnostic », toujours actif : le choix
+       des postes reste offert mais ne conditionne plus rien, puisqu'il
+       n'y a plus de commande à passer ;
+     · la note de bas de grille, et le bandeau d'orientation.
+   Ce qui DISPARAÎT côté grande structure : l'interrupteur mensuel /
+   annuel, « Le quatrième poste pour N € de plus », et le comparatif du
+   bas — quinze lignes de prix, de réunion de 45 minutes et de satisfait
+   ou remboursé qui n'ont pas été promis de ce côté-là.
+   La périodicité, elle, n'est pas remise à zéro : on revient côté PME
+   avec la formule qu'on y avait laissée.
+
    Ce qui reste : « Le quatrième poste pour N € de plus » sur Tout Omega,
    tous les textes de Teo, l'ancre #grille et le scroll-mt, la sélection
    exclusive entre paliers, et les sections 2 et 3 (bandeau d'orientation,
@@ -152,13 +175,17 @@ import {
   CARTE_SUR_MESURE,
   COMPARATIF_PALIERS,
   COMPRIS,
+  GRANDE_STRUCTURE,
+  MONDES,
   PALIERS,
   POSTES,
   REMISE_ANNUELLE,
   economieAnnuelle,
   equivalentMensuel,
+  lireMonde,
   lirePeriodicite,
   prixAnnuel,
+  type Monde,
   type Palier,
   type Periodicite,
 } from "@/lib/paliers";
@@ -193,6 +220,15 @@ function periodiciteDeLUrl(): Periodicite {
 }
 function periodiciteServeur(): Periodicite {
   return "mensuel";
+}
+/* 15/09 — le monde se lit de la même façon (`?monde=structure`), pour qu'un
+   lien puisse ouvrir la page directement du bon côté. Le serveur répond
+   toujours « pme » : la page reste STATIQUE, prix dans le HTML servi. */
+function mondeDeLUrl(): Monde {
+  return lireMonde(new URLSearchParams(window.location.search).get("monde"));
+}
+function mondeServeur(): Monde {
+  return "pme";
 }
 
 /* le lien de réservation d'un palier — « Tout Omega » n'a rien à choisir,
@@ -258,8 +294,11 @@ function Marqueur({ etat }: { etat: "coche" | "vide" | "non" | "plus" }) {
    NumberFlow, et l'interrupteur mensuel / annuel ne la touche pas), les
    deux situations qui y mènent au « + » là où les autres cochent des
    postes, et un bouton qui ouvre le formulaire au lieu de réserver. */
-function CarteSurMesure() {
+function CarteSurMesure({ monde }: { monde: Monde }) {
   const c = CARTE_SUR_MESURE;
+  /* côté grande structure, le sur-mesure passe lui aussi par le
+     diagnostic : c'est la même porte, et le formulaire ne l'est plus */
+  const devis = monde === "structure";
 
   return (
     <Card
@@ -282,7 +321,11 @@ function CarteSurMesure() {
           {/* même hauteur de bloc que le prix des voisines : le grand mot,
               puis la ligne qui remplace « par mois », puis la note */}
           <p className="text-4xl font-bold text-[#050505]">{c.prixTexte}</p>
-          <p className="mt-1 text-sm text-[#616161]">{c.sousPrix}</p>
+          {/* côté grande structure, le prix sort du même diagnostic que
+              celui des trois autres cartes : la ligne le dit pareil */}
+          <p className="mt-1 text-sm text-[#616161]">
+            {devis ? GRANDE_STRUCTURE.sousPrix : c.sousPrix}
+          </p>
           <div className="mt-3">
             <p className="text-xs text-[#767676]">{c.note}</p>
           </div>
@@ -317,7 +360,11 @@ function CarteSurMesure() {
 
       <CardFooter className="mt-auto flex-col items-stretch pt-6 md:mt-0">
         <Button asChild variant="outline" className="h-11 w-full text-[15px]">
-          <a href={lienContact("avant")}>{c.cta}</a>
+          {devis ? (
+            <Link href={GRANDE_STRUCTURE.href}>{GRANDE_STRUCTURE.cta}</Link>
+          ) : (
+            <a href={lienContact("avant")}>{c.cta}</a>
+          )}
         </Button>
         <p className="mt-3 text-center text-xs text-[#767676]">
           <Link href={c.href} className="r-lien !text-xs">
@@ -329,25 +376,72 @@ function CarteSurMesure() {
   );
 }
 
+/* ——— le sélecteur des deux mondes (15/09) ———
+   Deux boutons dans une piste, à la géométrie de l'interrupteur voisin
+   (h-10, coins pleins) pour qu'ils se lisent comme une même rangée de
+   commandes. `role="radiogroup"` plutôt qu'un second interrupteur : les
+   deux états ont un NOM, et aucun n'est le « défaut allumé » de l'autre.
+   Jetons shadcn inopérants ici, couleurs de `.resa` écrites en clair. */
+function SelecteurMonde({
+  monde,
+  choisir,
+}: {
+  monde: Monde;
+  choisir: (m: Monde) => void;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="À qui s'adresse la grille"
+      className="inline-flex rounded-full border border-[#e3e3e3] bg-white p-1"
+    >
+      {MONDES.map((m) => {
+        const actif = m.id === monde;
+        return (
+          <button
+            key={m.id}
+            type="button"
+            role="radio"
+            aria-checked={actif}
+            onClick={() => choisir(m.id)}
+            className={cn(
+              "cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+              "outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#050505]/70",
+              actif ? "bg-[#050505] text-white" : "text-[#3d3d3d] hover:text-[#050505]",
+            )}
+          >
+            {m.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function CartePalier({
   p,
   choisis,
   bascule,
   periodicite,
+  monde,
 }: {
   p: Palier;
   /* la sélection vit dans Grille : vide dès qu'un AUTRE palier est actif */
   choisis: string[];
   bascule: (id: string) => void;
   periodicite: Periodicite;
+  monde: Monde;
 }) {
   const postes = p.aChoisir === null ? POSTES.map((x) => x.id) : choisis;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
-  const pret = manque <= 0;
-  const annuel = periodicite === "annuel";
+  /* côté grande structure le bouton ne commande rien : il mène au
+     diagnostic, le compte des postes ne le conditionne plus */
+  const devis = monde === "structure";
+  const pret = devis || manque <= 0;
+  const annuel = periodicite === "annuel" && !devis;
   const phare = Boolean(p.phare);
   const href = `/installation?postes=${postes.join(",")}${annuel ? "&periodicite=annuel" : ""}`;
-  const ecart = p.id === "complet" ? ecartQuatriemePoste(periodicite) : null;
+  const ecart = p.id === "complet" && !devis ? ecartQuatriemePoste(periodicite) : null;
   const Icone = ICONE_PALIER[p.id];
 
   return (
@@ -393,6 +487,18 @@ function CartePalier({
             ne faut SURTOUT PAS le remonter par une clé ; seules les lignes
             qui l'entourent rejouent leur fondu */}
         <div className="text-center">
+          {/* côté grande structure, le grand chiffre laisse la place au
+              mot : pas de NumberFlow, rien à animer ni à remiser */}
+          {devis ? (
+            <>
+              <p className="text-4xl font-bold text-[#050505]">{GRANDE_STRUCTURE.prixTexte}</p>
+              <p className="mt-1 text-sm text-[#616161]">{GRANDE_STRUCTURE.sousPrix}</p>
+              <div className="mt-3">
+                <p className="text-xs text-[#767676]">{GRANDE_STRUCTURE.note}</p>
+              </div>
+            </>
+          ) : (
+          <>
           <div className="flex flex-wrap items-baseline justify-center gap-x-2">
             <NumberFlow
               aria-label={`${annuel ? equivalentMensuel(p.prix) : p.prix} euros par mois`}
@@ -422,6 +528,9 @@ function CartePalier({
               </p>
             ) : null}
           </div>
+
+          </>
+          )}
 
           {ecart !== null ? (
             <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#050505]">
@@ -486,11 +595,16 @@ function CartePalier({
           )}
         </div>
 
-        {/* « Points forts » de la référence : ce que le palier comprend */}
+        {/* « Points forts » de la référence : ce que le palier comprend.
+            Côté grande structure, les points du palier PME (réunion de
+            45 min, satisfait ou remboursé, sans engagement) n'ont pas été
+            promis : ce sont ceux du devis qui s'affichent. */}
         <div className="mt-6 text-left text-sm">
-          <h4 className="mb-3 font-semibold text-[#050505]">Compris dans le palier</h4>
+          <h4 className="mb-3 font-semibold text-[#050505]">
+            {devis ? GRANDE_STRUCTURE.pointsTitre : "Compris dans le palier"}
+          </h4>
           <ul className="space-y-2.5">
-            {p.points.map((t) => (
+            {(devis ? GRANDE_STRUCTURE.points : p.points).map((t) => (
               <li key={t} className="flex items-start">
                 <Marqueur etat="coche" />
                 <span className="text-[#3d3d3d]">{t}</span>
@@ -514,7 +628,9 @@ function CartePalier({
             variant={phare ? "default" : "outline"}
             className="h-11 w-full text-[15px]"
           >
-            <Link href={href}>Réserver l&apos;installation</Link>
+            <Link href={devis ? GRANDE_STRUCTURE.href : href}>
+              {devis ? GRANDE_STRUCTURE.cta : "Réserver l'installation"}
+            </Link>
           </Button>
         ) : (
           <Button disabled variant="outline" className="h-11 w-full text-[15px]">
@@ -524,7 +640,9 @@ function CartePalier({
         {/* 05/09 — le moyen de paiement s'enregistre à la réservation,
             rien n'est débité avant la fin de l'installation */}
         <p className="mt-3 text-center text-xs text-[#767676]">
-          Rien n&apos;est débité avant la fin de l&apos;installation.
+          {devis
+            ? "Gratuit à partir de 30 minutes, sans engagement."
+            : "Rien n'est débité avant la fin de l'installation."}
         </p>
       </CardFooter>
     </Card>
@@ -544,7 +662,14 @@ export default function Grille() {
   const depuisUrl = useSyncExternalStore(souscrireUrl, periodiciteDeLUrl, periodiciteServeur);
   const [choixPeriodicite, setPeriodicite] = useState<Periodicite | null>(null);
   const periodicite = choixPeriodicite ?? depuisUrl;
-  const annuel = periodicite === "annuel";
+  /* 15/09 — le monde, même mécanique que la périodicité. Elle n'est PAS
+     remise à zéro quand on passe côté devis : on revient côté PME avec la
+     formule qu'on y avait laissée. */
+  const mondeUrl = useSyncExternalStore(souscrireUrl, mondeDeLUrl, mondeServeur);
+  const [choixMonde, setMonde] = useState<Monde | null>(null);
+  const monde = choixMonde ?? mondeUrl;
+  const devis = monde === "structure";
+  const annuel = periodicite === "annuel" && !devis;
 
   const basculePour = (p: Palier) => (id: string) =>
     setChoix((prev) => {
@@ -567,30 +692,43 @@ export default function Grille() {
               /commencer (objet partagé) */}
           <div className="flex justify-center">
             <Partage nom="kicker-tarifs" share="voyage-tarifs" className="cm-kicker cm-kicker--page">
-              Prix publics
+              {devis ? GRANDE_STRUCTURE.kicker : "Prix publics"}
             </Partage>
           </div>
           <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-4xl font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] sm:text-5xl">
-            Des prix publics, une installation comprise
+            {devis ? GRANDE_STRUCTURE.titre : "Des prix publics, une installation comprise"}
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-balance text-[#616161]">
-            Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez la
-            réunion d&apos;installation, et le système démarre sous votre contrôle. Sans engagement
-            en mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
+          <p key={monde} className="rv-fondu mx-auto mt-4 max-w-2xl text-balance text-[#616161]">
+            {devis ? (
+              GRANDE_STRUCTURE.chapo
+            ) : (
+              <>
+                Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez
+                la réunion d&apos;installation, et le système démarre sous votre contrôle. Sans
+                engagement en mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé
+                trente jours.
+              </>
+            )}
           </p>
         </div>
 
-        {/* l'interrupteur de la référence, centré sous le chapô */}
-        <div className="mt-8 flex justify-center">
-          <Switch
-            checked={annuel}
-            onCheckedChange={(coche) => setPeriodicite(coche ? "annuel" : "mensuel")}
-          >
-            <span className="text-[#3d3d3d]">Facturation annuelle</span>
-            <span className="rounded-full border border-[#e3e3e3] bg-white px-2 py-0.5 text-xs font-medium text-[#050505]">
-              −{REMISE_PCT}&nbsp;%<span className="sr-only"> de remise</span>
-            </span>
-          </Switch>
+        {/* la rangée de commandes : le sélecteur des deux mondes d'abord —
+            il commande le reste, y compris la présence de l'interrupteur —
+            puis la facturation. `flex-wrap` : sous ~560 px les deux
+            passent l'un sous l'autre plutôt que de déborder. */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
+          <SelecteurMonde monde={monde} choisir={setMonde} />
+          {devis ? null : (
+            <Switch
+              checked={annuel}
+              onCheckedChange={(coche) => setPeriodicite(coche ? "annuel" : "mensuel")}
+            >
+              <span className="text-[#3d3d3d]">Facturation annuelle</span>
+              <span className="rounded-full border border-[#e3e3e3] bg-white px-2 py-0.5 text-xs font-medium text-[#050505]">
+                −{REMISE_PCT}&nbsp;%<span className="sr-only"> de remise</span>
+              </span>
+            </Switch>
+          )}
         </div>
 
         {/* la grille. `pt-4` laisse passer les pastilles posées à -12 px.
@@ -614,9 +752,10 @@ export default function Grille() {
               choisis={choix.palier === p.id ? choix.postes : []}
               bascule={basculePour(p)}
               periodicite={periodicite}
+              monde={monde}
             />
           ))}
-          <CarteSurMesure />
+          <CarteSurMesure monde={monde} />
         </div>
 
         {/* ce qui tourne chez tout le monde */}
@@ -636,6 +775,11 @@ export default function Grille() {
           sont inclus&nbsp;: l&apos;état de l&apos;activité chaque matin et la garantie que rien ne part sans validation ne sont pas des options.
         </p>
 
+        {devis ? (
+          <p key="bas-devis" className="r-note rv-fondu mx-auto mt-8 max-w-3xl text-center">
+            {GRANDE_STRUCTURE.bas}
+          </p>
+        ) : (
         <p data-reveal className="r-note mx-auto mt-8 max-w-3xl text-center">
           Prix TTC, grille en vigueur au 01/09/2026 — le prix affiché au moment de votre demande
           est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
@@ -648,6 +792,7 @@ export default function Grille() {
           annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une fois le jour de la mise
           en service&nbsp;; le satisfait ou remboursé 30 jours s&apos;applique de la même façon.
         </p>
+        )}
       </section>
 
       {/* ═══ 2. bandeau d'orientation — 14/09 : la carte à deux volets de
@@ -658,8 +803,12 @@ export default function Grille() {
       <section data-monde="clair" className="r-wrap pb-14 sm:pb-16">
         <CallToAction4
           className="mx-auto max-w-4xl"
-          titre="Vous ne savez pas quel palier choisir ?"
-          texte="Décrivez votre situation en deux lignes. Nous vous répondons avec le palier adapté, et la réunion d'installation se réserve en ligne."
+          titre={devis ? GRANDE_STRUCTURE.bandeau.titre : "Vous ne savez pas quel palier choisir ?"}
+          texte={
+            devis
+              ? GRANDE_STRUCTURE.bandeau.texte
+              : "Décrivez votre situation en deux lignes. Nous vous répondons avec le palier adapté, et la réunion d'installation se réserve en ligne."
+          }
           points={["Votre activité", "Ce qui vous prend le plus de temps", "Ce qui se perd"]}
           encart={{
             sur: "Une réponse",
@@ -677,12 +826,20 @@ export default function Grille() {
         />
       </section>
 
-      {/* ═══ 3. comparatif — 14/09 : le « Comparator one » de Tailark, en
+      {/* ═══ 3. comparatif — côté grande structure il ne s'affiche PAS
+             (15/09) : ses quinze lignes comparent des prix mensuels, une
+             réunion d'installation de 45 minutes et un satisfait ou
+             remboursé qui n'ont pas été promis de ce côté-là ; les
+             réécrire aurait été inventer. La note de bas de grille et le
+             bandeau d'orientation portent la suite.
+
+             14/09 : le « Comparator one » de Tailark, en
              carte à quatre colonnes (voir components/ui/comparator-1).
              Les deux en-têtes collants du 05/09 et le repli « Voir tous
              les points » partent avec lui : quinze lignes en trois
              familles se lisent d'un coup, et la tête de la carte porte
              déjà les prix — qui suivent la périodicité choisie plus haut. */}
+      {devis ? null : (
       <section id="comparatif" data-monde="clair" className="r-blanc">
         <div className="r-wrap py-14 sm:py-20">
           <div className="text-center">
@@ -713,6 +870,7 @@ export default function Grille() {
           />
         </div>
       </section>
+      )}
     </>
   );
 }

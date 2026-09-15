@@ -482,3 +482,76 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
   enSavoirPlus: "Voir la page sur mesure",
   href: SUR_MESURE.href,
 };
+
+/* ——— LES DEUX MONDES, AU-DESSUS DES CARTES (15/09/2026, Teo) ———
+
+   « Un autre bouton pour changer le truc : soit on est PME, soit grosse
+   structure, ce qui changerait du coup les prix. » Le sélecteur est posé
+   à côté de l'interrupteur de facturation, et il bascule la grille entre
+   les DEUX PORTES déjà écrites plus haut (`PORTES`) — qui, jusqu'ici,
+   n'étaient dites nulle part sur la page depuis la refonte du 14/09.
+
+   CE QUI CHANGE, ET CE QUI NE CHANGE PAS. Côté « Grande structure », les
+   quatre cartes gardent leurs postes et leurs paliers — un poste, trois,
+   les quatre, ou le sur-mesure : ce sont des PÉRIMÈTRES, ils ne dépendent
+   pas de la taille. Ce qui change, c'est le prix : il disparaît. C'est la
+   règle d'origine, jamais levée — quand plusieurs services se partagent la
+   validation, aucun montant ne s'affiche, parce que le coût d'installation
+   dépend du nombre d'entretiens et de points de validation, pas du chiffre
+   d'affaires.
+
+   POURQUOI PAS UNE SECONDE GRILLE CHIFFRÉE (arbitrage du 15/09) : il
+   aurait fallu inventer trois montants, et les poser AUSSI dans la
+   fonction SQL reserver_audit, qui garde sa propre copie des prix. Teo a
+   tranché pour la bascule vers l'audit.
+
+   CE QUI DISPARAÎT CÔTÉ « GRANDE STRUCTURE » : l'interrupteur mensuel /
+   annuel (il n'y a pas de montant à remiser), la phrase « Le quatrième
+   poste pour N € de plus », et le comparatif du bas de page — ses quinze
+   lignes comparent des prix, des réunions d'installation de 45 minutes et
+   un satisfait ou remboursé qui n'ont pas été promis de ce côté-là. Les
+   points des paliers changent pour la même raison : aucune promesse n'est
+   reprise telle quelle sans avoir été posée pour ce monde. */
+
+export type Monde = "pme" | "structure";
+
+export const MONDES: { id: Monde; label: string }[] = [
+  { id: "pme", label: "Indépendant & PME" },
+  { id: "structure", label: "Grande structure" },
+];
+
+export function lireMonde(v: unknown): Monde {
+  return v === "structure" ? "structure" : "pme";
+}
+
+/* Tout ce que la grille dit d'autre quand « Grande structure » est actif.
+   Chaque phrase redit un fait déjà posé : PORTES.equipe pour le critère et
+   le diagnostic, COMPRIS pour le point du matin et les verrous, la ligne
+   « Raccordement particulier » du comparatif pour le chiffrage. */
+export const GRANDE_STRUCTURE = {
+  titre: "Un prix qui sort du diagnostic",
+  kicker: "Sur devis",
+  chapo:
+    "La demande passe par l'accueil, la comptabilité et les opérations, et chaque service a ses outils et ses règles de validation : un prix affiché n'aurait pas de sens. Le diagnostic mesure d'abord vos volumes, et le devis en découle. Les postes, eux, sont les mêmes.",
+  prixTexte: "Sur devis",
+  sousPrix: "après le diagnostic",
+  note: PORTES.critere,
+  pointsTitre: "Compris dans le devis",
+  points: [
+    "Un diagnostic qui mesure vos volumes avant de chiffrer",
+    "Les règles de validation de chaque service",
+    "Le point du matin et les verrous, compris comme partout",
+    "Installation et raccordements chiffrés avant tout engagement",
+    "Périmètre et devis écrits avant tout engagement",
+  ],
+  cta: "Réserver un diagnostic",
+  href: "/reserver-un-audit#reserver",
+  /* la note de bas de grille, à la place du pavé TTC de la formule PME */
+  bas: "Aucun montant n'est affiché de ce côté : le diagnostic mesure vos volumes et vos règles de validation, puis le périmètre, l'installation et le prix sont écrits avant tout engagement. Le diagnostic est gratuit à partir de 30 minutes et sans engagement.",
+  /* le bandeau d'orientation reprend la même destination */
+  bandeau: {
+    titre: "Vous ne savez pas par où commencer ?",
+    texte:
+      "Décrivez votre situation en deux lignes. Nous vous répondons avec le format de diagnostic adapté, et le créneau se réserve en ligne.",
+  },
+};
