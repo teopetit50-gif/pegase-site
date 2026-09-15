@@ -19,9 +19,17 @@
    et son avatar. Le titre « Mon compte » survit en `sr-only` : un
    lecteur d'écran a besoin d'un h1, l'œil a le fil d'Ariane.
 
+   PUIS BLANC (5ᵉ passe, 15/09) : « je veux que ce soit blanc, sobre et
+   épuré pour l'instant ». Le tableau de bord est donc clair par défaut,
+   et ce qui le structure sont les FILETS — barre à droite, barre du haut
+   en bas, cartes — sans ombre ni aplat. La peau sombre n'est pas jetée :
+   elle dort sous `data-peau="nuit"` dans compte.css, et une seule ligne
+   la rallume, l'attribut sur le `<div className="cpt-console">` de ce
+   fichier. C'est ce que « pour l'instant » demandait.
+
    Le cadre redéfinit les variables du monde `.resa` pour que les cartes
    d'abonnement, de profil et de mot de passe s'y lisent sans être
-   réécrites.
+   réécrites — dans les deux peaux.
 
    ORIGINE DE LA BARRE. Teo a collé « Dashboard Sidebar » (21st.dev) :
    « remplace complètement ce qu'il y a actuellement par ce dashboard ;
@@ -311,6 +319,8 @@ export default function CompteTableau({
   const sectionActive = sections.find((s) => s.id === actif);
 
   return (
+    /* `data-peau="nuit"` ici rallume la peau sombre (compte.css) ;
+       sans l'attribut, le tableau de bord est blanc */
     <div className="cpt-console cpt-pleine" data-arrivee="bloc">
       {/* ——— la barre | le panneau ——— */}
       <Tabs.Root

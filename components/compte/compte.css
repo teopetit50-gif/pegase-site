@@ -1049,8 +1049,26 @@ main:has(.cpt-pleine) > footer {
   --cp-ambre-fond: #fdf3dd;
 }
 
-/* ——— le cadre ——— */
+/* ——— le cadre, en CLAIR (défaut) ———
+   Teo, 15/09 : « je veux que ce soit blanc, sobre et épuré pour
+   l'instant ». La peau sombre n'est pas jetée pour autant : elle vit
+   sous `data-peau="nuit"`, et une seule ligne de CompteTableau la
+   rallume. C'est ce que « pour l'instant » demandait.
+
+   Le blanc est un vrai blanc, pas le gris du site : le tableau de bord
+   est pleine page, il EST le fond. Ce qui structure, ce sont les filets
+   — barre à droite, barre du haut en bas, cartes — et rien d'autre : ni
+   ombre, ni aplat, ni couleur. C'est la charte de l'espace client. */
 .resa .cpt-console {
+  --cp-carte: #ffffff;
+  --cp-creux: #fafafa;
+
+  background: #ffffff;
+  color: var(--r-doux);
+}
+
+/* ——— la même chose, en nuit ——— */
+.resa .cpt-console[data-peau="nuit"] {
   --cp-encre: #f4f4f5;
   --cp-doux: #d4d4d8;
   --cp-faible: #a1a1aa;
@@ -1072,7 +1090,6 @@ main:has(.cpt-pleine) > footer {
   --r-fond: #141517;
 
   background: #0f1012;
-  color: var(--r-doux);
 }
 
 /* ——— PLEINE PAGE ———
@@ -1130,12 +1147,15 @@ main:has(.cpt-pleine) > footer {
   }
 }
 .resa .cpt-repli:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--cp-creux);
   color: var(--r-texte);
 }
 .resa .cpt-repli:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid currentColor;
   outline-offset: 2px;
+}
+.resa .cpt-console[data-peau="nuit"] .cpt-repli:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 .resa .cpt-fil {
   display: flex;
@@ -1152,7 +1172,7 @@ main:has(.cpt-pleine) > footer {
   white-space: nowrap;
 }
 .resa .cpt-fil-sep {
-  color: rgba(255, 255, 255, 0.22);
+  color: var(--r-filet);
 }
 .resa .cpt-fil-feuille {
   font-weight: 600;
@@ -1186,7 +1206,7 @@ main:has(.cpt-pleine) > footer {
   font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #0f1012;
+  color: #050505;
 }
 @media (min-width: 640px) {
   .resa .cpt-haut-avatar {
@@ -1229,49 +1249,49 @@ main:has(.cpt-pleine) > footer {
 }
 
 /* la pilule d'état, dans la barre du haut : fonds translucides */
-.resa .cpt-console .cpt-pilule {
+.resa .cpt-console[data-peau="nuit"] .cpt-pilule {
   border-color: var(--r-filet);
   background: rgba(255, 255, 255, 0.05);
   color: var(--r-faible);
 }
-.resa .cpt-console .cpt-pilule[data-teinte="vert"] {
+.resa .cpt-console[data-peau="nuit"] .cpt-pilule[data-teinte="vert"] {
   border-color: rgba(34, 197, 94, 0.3);
   background: var(--cp-vert-fond);
   color: var(--cp-vert);
 }
-.resa .cpt-console .cpt-pilule[data-teinte="ambre"] {
+.resa .cpt-console[data-peau="nuit"] .cpt-pilule[data-teinte="ambre"] {
   border-color: rgba(245, 158, 11, 0.32);
   background: var(--cp-ambre-fond);
   color: #fcd34d;
 }
-.resa .cpt-console .cpt-pilule[data-teinte="rouge"] {
+.resa .cpt-console[data-peau="nuit"] .cpt-pilule[data-teinte="rouge"] {
   border-color: var(--cp-rouge-filet);
   background: var(--cp-rouge-fond);
   color: var(--cp-rouge);
 }
 /* la note d'état et la sortie, repeintes */
-.resa .cpt-console .cpt-note {
+.resa .cpt-console[data-peau="nuit"] .cpt-note {
   border-color: var(--r-filet);
   background: rgba(255, 255, 255, 0.04);
   color: var(--r-doux);
 }
-.resa .cpt-console .cpt-note[data-teinte="ambre"] {
+.resa .cpt-console[data-peau="nuit"] .cpt-note[data-teinte="ambre"] {
   border-color: rgba(245, 158, 11, 0.28);
   background: var(--cp-ambre-fond);
   color: #fcd34d;
 }
-.resa .cpt-console .cpt-note[data-teinte="rouge"] {
+.resa .cpt-console[data-peau="nuit"] .cpt-note[data-teinte="rouge"] {
   border-color: var(--cp-rouge-filet);
   background: var(--cp-rouge-fond);
   color: var(--cp-rouge);
 }
-.resa .cpt-console .cpt-note a {
+.resa .cpt-console[data-peau="nuit"] .cpt-note a {
   color: inherit;
 }
-.resa .cpt-console .cpt-sortie {
+.resa .cpt-console[data-peau="nuit"] .cpt-sortie {
   color: var(--r-faible);
 }
-.resa .cpt-console .cpt-sortie:hover {
+.resa .cpt-console[data-peau="nuit"] .cpt-sortie:hover {
   color: var(--r-texte);
 }
 
@@ -1303,42 +1323,43 @@ main:has(.cpt-pleine) > footer {
       opacity 0.2s ease;
   }
 }
-.resa .cpt-rail-jeton {
+.resa .cpt-console[data-peau="nuit"] .cpt-rail-jeton {
   background: #f4f4f5;
   color: #0f1012;
 }
-.resa .cpt-rail-enseigne {
-  color: var(--r-texte);
-}
+
 
 /* la sélection : sur du sombre, un blanc à 8 % et un trait blanc */
-.resa .cpt-console .cpt-surbrillance {
+.resa .cpt-console[data-peau="nuit"] .cpt-surbrillance {
   background: rgba(255, 255, 255, 0.08);
   box-shadow: none;
 }
 @media (min-width: 1024px) {
-  .resa .cpt-console .cpt-surbrillance::after {
+  .resa .cpt-console[data-peau="nuit"] .cpt-surbrillance::after {
     background: #ffffff;
   }
-  .resa .cpt-console .cpt-item:hover::before,
-  .resa .cpt-console .cpt-lien:hover::before {
+  .resa .cpt-console[data-peau="nuit"] .cpt-item:hover::before,
+  .resa .cpt-console[data-peau="nuit"] .cpt-lien:hover::before {
     background: rgba(255, 255, 255, 0.05);
   }
 }
 @media (max-width: 1023px) {
-  .resa .cpt-console .cpt-surbrillance {
+  .resa .cpt-console[data-peau="nuit"] .cpt-surbrillance {
     box-shadow: inset 0 -2px 0 #ffffff;
   }
 }
-.resa .cpt-item-badge {
+.resa .cpt-console[data-peau="nuit"] .cpt-item-badge {
   background: rgba(255, 255, 255, 0.1);
   color: var(--r-doux);
 }
-.resa .cpt-chevron:hover {
+.resa .cpt-console[data-peau="nuit"] .cpt-chevron:hover {
   background: rgba(255, 255, 255, 0.07);
 }
 
 /* ——— les tuiles, dans la scène ——— */
+/* les MARGES valent dans les deux peaux : elles sont structurelles.
+   Seules les couleurs sont sous `data-peau` — les avoir laissées
+   ensemble aurait collé les tuiles au bord en clair. */
 .resa .cpt-console .cpt-tuiles {
   margin: 16px 16px 0;
   border-color: var(--r-filet);
@@ -1352,7 +1373,7 @@ main:has(.cpt-pleine) > footer {
 .resa .cpt-console .cpt-tuile {
   background: transparent;
 }
-.resa .cpt-console .cpt-tuile:hover {
+.resa .cpt-console[data-peau="nuit"] .cpt-tuile:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1374,142 +1395,161 @@ main:has(.cpt-pleine) > footer {
 
 /* ——— ce qui vient de globals.css et doit s'inverser ——— */
 /* les boutons : le plein passe en blanc, le filet en blanc translucide */
-.resa .cpt-console .r-btn--noir {
+.resa .cpt-console[data-peau="nuit"] .r-btn--noir {
   background: #f4f4f5;
   color: #0f1012;
 }
-.resa .cpt-console .r-btn--noir:hover {
+.resa .cpt-console[data-peau="nuit"] .r-btn--noir:hover {
   background: #ffffff;
 }
-.resa .cpt-console .r-btn--fil {
+.resa .cpt-console[data-peau="nuit"] .r-btn--fil {
   border-color: rgba(255, 255, 255, 0.24);
   background: transparent;
   color: #f4f4f5;
 }
-.resa .cpt-console .r-btn--fil:hover {
+.resa .cpt-console[data-peau="nuit"] .r-btn--fil:hover {
   border-color: rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.06);
 }
-.resa .cpt-console .r-btn--blanc {
+.resa .cpt-console[data-peau="nuit"] .r-btn--blanc {
   background: #f4f4f5;
   color: #0f1012;
 }
 
 /* les pastilles : fonds translucides, textes clairs (≥ 4,5:1 sur #1a1b1e) */
-.resa .cpt-console .cp-pastille {
+.resa .cpt-console[data-peau="nuit"] .cp-pastille {
   background: rgba(255, 255, 255, 0.1);
   color: var(--r-doux);
 }
-.resa .cpt-console .cp-pastille[data-teinte="bleu"] {
+.resa .cpt-console[data-peau="nuit"] .cp-pastille[data-teinte="bleu"] {
   background: rgba(96, 165, 250, 0.16);
   color: #93c5fd;
 }
-.resa .cpt-console .cp-pastille[data-teinte="vert"] {
+.resa .cpt-console[data-peau="nuit"] .cp-pastille[data-teinte="vert"] {
   background: var(--cp-vert-fond);
   color: var(--cp-vert);
 }
-.resa .cpt-console .cp-pastille[data-teinte="ambre"] {
+.resa .cpt-console[data-peau="nuit"] .cp-pastille[data-teinte="ambre"] {
   background: var(--cp-ambre-fond);
   color: #fcd34d;
 }
-.resa .cpt-console .cp-pastille[data-teinte="rouge"] {
+.resa .cpt-console[data-peau="nuit"] .cp-pastille[data-teinte="rouge"] {
   background: var(--cp-rouge-fond);
   color: var(--cp-rouge);
 }
-.resa .cpt-console .cp-pastille[data-teinte="gris"] {
+.resa .cpt-console[data-peau="nuit"] .cp-pastille[data-teinte="gris"] {
   background: rgba(255, 255, 255, 0.1);
   color: var(--r-doux);
 }
 
 /* les bandeaux de retour */
-.resa .cpt-console .cp-ok {
+.resa .cpt-console[data-peau="nuit"] .cp-ok {
   border-color: rgba(34, 197, 94, 0.3);
   background: var(--cp-vert-fond);
   color: var(--cp-vert);
 }
-.resa .cpt-console .cp-info,
-.resa .cpt-console .rv-paiement-note {
+.resa .cpt-console[data-peau="nuit"] .cp-info,
+.resa .cpt-console[data-peau="nuit"] .rv-paiement-note {
   border-color: var(--r-filet);
   background: rgba(255, 255, 255, 0.04);
   color: var(--r-doux);
 }
-.resa .cpt-console .rv-erreur {
+.resa .cpt-console[data-peau="nuit"] .rv-erreur {
   color: var(--cp-rouge);
 }
 
 /* les champs de formulaire (profil, mot de passe, connexion) */
-.resa .cpt-console .rv-champ {
+.resa .cpt-console[data-peau="nuit"] .rv-champ {
   border-color: var(--r-filet);
   background: rgba(255, 255, 255, 0.04);
   color: var(--r-texte);
 }
-.resa .cpt-console .rv-champ:focus {
+.resa .cpt-console[data-peau="nuit"] .rv-champ:focus {
   border-color: rgba(255, 255, 255, 0.45);
 }
-.resa .cpt-console .rv-champ::placeholder {
+.resa .cpt-console[data-peau="nuit"] .rv-champ::placeholder {
   color: rgba(255, 255, 255, 0.35);
 }
-.resa .cpt-console .cp-champ--lecture {
+.resa .cpt-console[data-peau="nuit"] .cp-champ--lecture {
   background: rgba(255, 255, 255, 0.02);
   color: var(--r-faible);
 }
-.resa .cpt-console .rv-libelle {
+.resa .cpt-console[data-peau="nuit"] .rv-libelle {
   color: var(--r-doux);
 }
 /* les cases à cocher des postes (panneau « changer de formule ») */
-.resa .cpt-console .rv-case {
+.resa .cpt-console[data-peau="nuit"] .rv-case {
   border-color: var(--r-filet);
   background: rgba(255, 255, 255, 0.03);
 }
-.resa .cpt-console .rv-case--actif {
+.resa .cpt-console[data-peau="nuit"] .rv-case--actif {
   border-color: rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.07);
 }
-.resa .cpt-console .rv-coche {
+.resa .cpt-console[data-peau="nuit"] .rv-coche {
   border-color: rgba(255, 255, 255, 0.3);
 }
-.resa .cpt-console .rv-case--actif .rv-coche {
+.resa .cpt-console[data-peau="nuit"] .rv-case--actif .rv-coche {
   border-color: #ffffff;
   background: #ffffff;
 }
-.resa .cpt-console .rv-case--actif .rv-coche::after {
+.resa .cpt-console[data-peau="nuit"] .rv-case--actif .rv-coche::after {
   border-color: #0f1012;
 }
 /* le sélecteur mensuel | annuel */
-.resa .cpt-console .r-seg {
+.resa .cpt-console[data-peau="nuit"] .r-seg {
   background: rgba(255, 255, 255, 0.07);
 }
-.resa .cpt-console .r-seg-btn {
+.resa .cpt-console[data-peau="nuit"] .r-seg-btn {
   color: var(--r-faible);
 }
-.resa .cpt-console .r-seg-btn[data-actif="true"] {
+.resa .cpt-console[data-peau="nuit"] .r-seg-btn[data-actif="true"] {
   background: #f4f4f5;
   color: #0f1012;
 }
-.resa .cpt-console .r-note {
+.resa .cpt-console[data-peau="nuit"] .r-note {
   color: var(--r-faible);
 }
 /* le bloc « Votre espace client » de la section Sécurité */
-.resa .cpt-console .cpt-acces {
+.resa .cpt-console[data-peau="nuit"] .cpt-acces {
   border-color: var(--r-filet);
   background: rgba(255, 255, 255, 0.03);
 }
 /* le bloc-date des rendez-vous */
-.resa .cpt-console .cp-date {
+.resa .cpt-console[data-peau="nuit"] .cp-date {
   background: rgba(255, 255, 255, 0.06);
 }
-.resa .cpt-console .cp-date--vide .cp-date-jour {
+.resa .cpt-console[data-peau="nuit"] .cp-date--vide .cp-date-jour {
   color: rgba(255, 255, 255, 0.35);
 }
 /* les logos de postes, posés sur des tuiles blanches dans le monde clair */
-.resa .cpt-console .cpt-panneau ul.grid > li {
+.resa .cpt-console[data-peau="nuit"] .cpt-panneau ul.grid > li {
   border-color: var(--r-filet) !important;
   background: rgba(255, 255, 255, 0.04) !important;
 }
 /* le halo d'un repère visé */
-.resa .cpt-console .cpt-panneau [id^="cp-abo-"][data-vise="oui"],
-.resa .cpt-console .cpt-panneau [id^="cp-secu-"][data-vise="oui"] {
+.resa .cpt-console[data-peau="nuit"] .cpt-panneau [id^="cp-abo-"][data-vise="oui"],
+.resa .cpt-console[data-peau="nuit"] .cpt-panneau [id^="cp-secu-"][data-vise="oui"] {
   animation-name: cpt-halo-nuit;
+}
+
+/* ——— en clair, ce qui structure est le FILET, jamais un aplat ——— */
+.resa .cpt-console .cpt-rail {
+  background: transparent;
+}
+.resa .cpt-console .cpt-haut,
+.resa .cpt-console .cpt-rail {
+  border-color: var(--r-filet);
+}
+/* la sélection : carte blanche filetée sur la barre blanche, plus le
+   trait d'encre — un aplat gris sur du blanc se voit à peine */
+.resa .cpt-console:not([data-peau="nuit"]) .cpt-surbrillance {
+  background: #f4f4f2;
+  box-shadow: none;
+}
+.resa .cpt-console:not([data-peau="nuit"]) .cpt-item:hover::before,
+.resa .cpt-console:not([data-peau="nuit"]) .cpt-lien:hover::before {
+  background: #fafafa;
 }
 @keyframes cpt-halo-nuit {
   0%,
