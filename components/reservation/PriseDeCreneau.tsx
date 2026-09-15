@@ -95,6 +95,7 @@ import {
   equivalentMensuel,
   prixAnnuel,
   prixPour,
+  prixPourVolume,
   type Periodicite,
 } from "@/lib/paliers";
 import { COURRIEL, PROFILS, lienCourriel } from "@/lib/reservation";
@@ -187,7 +188,18 @@ export default function PriseDeCreneau({
     () => POSTES.filter((p) => postes.includes(p.id)),
     [postes],
   );
-  const prix = parcours === "installation" ? prixPour(postesValides.length || 1) : null;
+  /* 15/09, correctif — LE PRIX SUIT LE VOLUME, comme partout ailleurs.
+     Le module envoyait déjà `p_pieces` à la fonction SQL, qui fige
+     `pieces × 2` (plancher 149 €) — mais affichait encore
+     `prixPour(nb de postes)`, l'ancien barème. Trois postes à 600 pièces :
+     le client lisait 790 €/mois et la base enregistrait 1 200 €. L'écart ne
+     se voyait nulle part, ni à l'écran ni dans « Mon compte ». Le repli par
+     postes ne sert plus qu'aux liens sans volume (un signet, un retour
+     arrière, un lien partagé). */
+  const prix =
+    parcours !== "installation"
+      ? null
+      : (pieces ? prixPourVolume(pieces) : null) ?? prixPour(postesValides.length || 1);
   /* la périodicité (02/09) — état local, initialisé par la prop */
   const [periodicite, setPeriodicite] = useState<Periodicite>(periodiciteInitiale);
   const annuel = parcours === "installation" && periodicite === "annuel";
