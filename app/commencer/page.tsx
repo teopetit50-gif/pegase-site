@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Lien from "@/components/Lien";
 import PageShell from "@/components/PageShell";
+import { MODELES } from "@/components/modeles/donnees";
 import PageMotion from "@/components/PageMotion";
 import CartesPortes from "@/components/commencer/CartesPortes";
 import { lienContact } from "@/lib/reservation";
@@ -77,7 +78,7 @@ const SITE = {
   icone: "site",
   titre: "Découvrir nos sites",
   texte:
-    "Pour les entreprises sans site, ou dont le site n'apporte aucune demande : vingt et un modèles en ligne, tous consultables. Vous choisissez l'allure, nous réécrivons tout le contenu pour votre métier, et le formulaire alimente vos postes dès le premier jour.",
+    `Pour les entreprises sans site, ou dont le site n'apporte aucune demande : ${MODELES.length} modèles en ligne, tous consultables. Vous choisissez l'allure, nous réécrivons tout le contenu pour votre métier, et le formulaire alimente vos postes dès le premier jour.`,
   cta: "Voir les offres",
   href: "/tarifs/site",
 };

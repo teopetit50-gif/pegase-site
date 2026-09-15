@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, ImageIcon, Lock } from "lucide-react";
 import MiniSite from "@/components/modeles/MiniSite";
-import { CATEGORIES, parCategorie } from "@/components/modeles/donnees";
+import { CATEGORIES, MODELES, parCategorie } from "@/components/modeles/donnees";
 import { cn } from "@/lib/cn";
 import "./EtapesDefilantes.css";
 
@@ -74,7 +74,7 @@ const ETAPES = [
     titre: "Le modèle",
     sousTitre: "Choisir l'allure, pas le métier",
     texte:
-      "Les vingt et un modèles sont en ligne : vous les consultez et retenez celui qui vous ressemble. Le design change d'un modèle à l'autre ; ce qu'il y a derrière, jamais.",
+      `Les ${MODELES.length} modèles sont en ligne : vous les consultez et retenez celui qui vous ressemble. Le design change d'un modèle à l'autre ; ce qu'il y a derrière, jamais.`,
   },
   {
     n: "02",

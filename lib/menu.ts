@@ -1,3 +1,4 @@
+import { MODELES } from "@/components/modeles/donnees";
 /* ══════════════════════════════════════════════════════════════════════
    Le menu principal — une seule source pour les deux surfaces (11/09/2026)
 
@@ -123,7 +124,7 @@ export const MENU: Rubrique[] = [
       {
         href: "/modeles",
         label: "Voir les modèles",
-        texte: "Vingt et un modèles en ligne, consultables immédiatement.",
+        texte: `${MODELES.length} modèles en ligne, consultables immédiatement.`,
       },
       {
         href: "/tarifs/site",

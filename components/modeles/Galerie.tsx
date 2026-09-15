@@ -21,14 +21,14 @@ import "./Galerie.css";
    avant de choisir. La règle de Teo (03/08 : « range les design et site
    par catégorie […] tu mets 3 et un bouton voir plus ») est tenue
    autrement : une seule famille à l'écran, la première par défaut, et une
-   puce par famille pour changer. Le mur de 21 n'apparaît que si on le
+   puce par famille pour changer. Le mur complet n'apparaît que si on le
    demande (« Tous les modèles »).
 
-   LE HTML LIVRÉ CONTIENT LES 21 (relecture du 14/09). Les vingt et une
+   LE HTML LIVRÉ LES CONTIENT TOUS (relecture du 14/09). Les
    tuiles sont toujours dans l'arbre ; celles hors famille portent
    `hidden` + `inert` (display:none, sorties du tab et de l'accessibilité).
    C'est la décision du 03/08 que <Categorie> gardait : Google voit les
-   21 noms, les 21 démos et les 42 liens /reserver-un-audit et
+   tous les noms, toutes les démos et les liens /reserver-un-audit et
    /site/commande, JavaScript ou pas. Le prix : pas de fondu de SORTIE
    (une tuile qui sort disparaît d'un coup ; AnimatePresence l'aurait
    fondu, mais il retire du DOM, donc du HTML) — on garde le fondu
@@ -172,7 +172,7 @@ export default function Galerie() {
         {actif.pour}
       </p>
 
-      {/* les 21 <li> sont toujours rendus (voir l'en-tête) ; `hidden` fait
+      {/* tous les <li> sont toujours rendus (voir l'en-tête) ; `hidden` fait
           le filtre, `layout` fait glisser celles qui restent, `animate`
           fond celles qui arrivent — initial={false} : au montage, pas
           d'entrée, la première famille est déjà là dans le HTML */}

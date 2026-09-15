@@ -15,7 +15,7 @@
    entre les étapes, rien à re-choisir.
 
    Étapes :
-     a) « Votre modèle » — les vingt et un modèles du catalogue en cartes
+     a) « Votre modèle » — tous les modèles du catalogue en cartes
         radio (clavier : flèches entre les cartes, Entrée/Espace) ;
         ?modele=<slug> pré-sélectionne. Les deux entrées « reserve »
         restent sélectionnables mais gardent leur mention — on ne les
@@ -42,7 +42,7 @@
      · UN panneau blanc, coiffé d'un vrai rail d'étapes (.cs-etapes :
        pastilles reliées, le trait se remplit à mesure) à la place de la
        rangée de chips ;
-     · le modèle : plus deux colonnes ni vingt et une cartes encadrées
+     · le modèle : plus deux colonnes ni une carte encadrée par modèle
        sous quatre intertitres — une grille de vignettes à CADRE DE
        NAVIGATEUR (le geste du mur de /tarifs/site), filtrée par famille
        avec le sélecteur segmenté .r-seg ; la sélection = liseré noir +
@@ -170,7 +170,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
 
   /* 02/09 (Teo : « quand on choisit un modèle, les autres doivent se
      replier — devoir défiler jusqu'à Continuer, c'est pas pro ») — dès
-     qu'un modèle est choisi, la grille des vingt et un se REPLIE sur le
+     qu'un modèle est choisi, la grille des modèles se REPLIE sur le
      modèle retenu, avec « Continuer » juste à côté ; « Choisir un autre
      modèle » rouvre la grille. Pré-sélectionné depuis la galerie
      (?modele=) : on arrive directement replié. */
@@ -178,7 +178,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
     () => !MODELES.some((m) => m.slug === modeleInitial),
   );
   const refEtapeModele = useRef<HTMLDivElement | null>(null);
-  /* 07/09 — la famille affichée dans la grille (« tous » = les vingt et un) */
+  /* 07/09 — la famille affichée dans la grille (« tous » = tout le catalogue) */
   const [famille, setFamille] = useState<"tous" | Modele["cat"]>("tous");
   const choisirModele = (s: string) => {
     setSlug(s);
@@ -537,7 +537,7 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
     : null;
 
   /* 07/09 — la grille se filtre par famille (les quatre du catalogue),
-     au lieu d'empiler vingt et une cartes sous quatre intertitres */
+     au lieu d'empiler toutes les cartes sous quatre intertitres */
   const visibles = famille === "tous" ? MODELES : parCategorie(famille);
   const familleCourante = CATEGORIES.find((c) => c.cle === famille) ?? null;
 

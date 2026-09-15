@@ -43,7 +43,7 @@ import "./BandeauFaits.css";
    – La précision garde le gris et le corps de l'ancienne rangée
      (`--m-faible`, 13,5 px) pour ne pas remonter d'un cran dans la
      hiérarchie de la page ; seule la valeur grandit.
-   – Pas de compteur animé sur « 21 » : la valeur est une chaîne de FAITS,
+   – Pas de compteur animé sur le nombre de modèles : la valeur est une chaîne de FAITS,
      et la compter de 0 imposerait soit un rendu serveur à 0 (faux sans
      JavaScript), soit un flash à l'hydratation. Composant serveur pur ;
      l'apparition est celle de la page (`data-reveal`, posé sur le texte

@@ -6,6 +6,7 @@ import HeroDefile from "@/components/modeles/HeroDefile";
 import BandeauFaits from "@/components/modeles/BandeauFaits";
 import Galerie from "@/components/modeles/Galerie";
 import BoucleFaisceaux from "@/components/modeles/BoucleFaisceaux";
+import { MODELES } from "@/components/modeles/donnees";
 import ClotureAppel from "@/components/modeles/ClotureAppel";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -77,14 +78,14 @@ import ClotureAppel from "@/components/modeles/ClotureAppel";
 export const metadata: Metadata = {
   title: "Modèles de sites | Omega.AI",
   description:
-    "Vingt et un modèles de sites en ligne, consultables immédiatement, branchés sur vos systèmes : chaque demande entre dans votre espace, se relance jusqu'au règlement sous votre validation, et le site vous dit ce que vos visiteurs cherchent. Un site, ou le même socle sur plusieurs enseignes.",
+    `${MODELES.length} modèles de sites en ligne, consultables immédiatement, branchés sur vos systèmes : chaque demande entre dans votre espace, se relance jusqu'au règlement sous votre validation, et le site vous dit ce que vos visiteurs cherchent. Un site, ou le même socle sur plusieurs enseignes.`,
 };
 
 /* ——— les quatre faits sous le hero ———
    À la place des logos clients de la référence : on n'a pas de clients à
    afficher, et on n'en invente pas. Ces quatre-là se vérifient. */
 const FAITS: [string, string][] = [
-  ["21 modèles", "tous en ligne, tous visitables"],
+  [`${MODELES.length} modèles`, "tous en ligne, tous visitables"],
   ["Contenu réécrit", "à votre métier, à votre marque"],
   ["Branché sur vos systèmes", "demandes, relances, avis"],
   ["Plusieurs enseignes", "un socle commun, une vue unique"],
@@ -120,7 +121,7 @@ export default function ModelesPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="m-sur">Les modèles</span>
             <h2 data-intertitre className="m-h2 mt-5">
-              Vingt et un modèles, un même socle
+              {MODELES.length} modèles, un même socle
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
               Chaque modèle est un parti pris visuel, pas un métier imposé&nbsp;: vous choisissez l&apos;allure, nous réécrivons tout le contenu pour le vôtre. Le design change&nbsp;; la mécanique derrière — ce que le site reçoit, ce qu&apos;il enregistre, ce qu&apos;il déclenche — ne change pas.

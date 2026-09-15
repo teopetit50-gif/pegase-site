@@ -28,7 +28,7 @@ import "./ClotureAppel.css";
      principal est `.m-btn-clair` + `.m-chevron` — le CONTOUR blanc que
      Teo a choisi le 03/08 pour « le hero et la clôture » à la place du
      blanc plein (globals.css, commentaire au-dessus de `.m-btn-clair`) ;
-     le second reprend le contour léger du « Voir les 21 modèles ». Un
+     le second reprend le contour léger du « Voir les N modèles ». Un
      bouton plein avait été écrit ici, il est retiré : il renversait cette
      décision. `.o-btn` a été vérifié : sa règle vit sous `.offres`, elle
      ne s'applique pas sous `.modeles`.
@@ -134,7 +134,7 @@ export default function ClotureAppel() {
 
           {/* 01/09 — le prix du site est public (/tarifs/site) : la clôture
               le mentionne sans vendre, le lien porte la transaction ailleurs.
-              Contour léger du second bouton du hero (« Voir les 21 modèles »),
+              Contour léger du second bouton du hero (« Voir les N modèles »),
               pour que les deux contours ne pèsent pas le même poids. */}
           <Link
             href="/tarifs/site"

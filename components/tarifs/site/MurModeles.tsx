@@ -21,7 +21,7 @@ import "./MurModeles.css";
    Safari dit « ceci est un autre site » plus nettement que la barre à trois
    pastilles de <MiniSite>, et l'inclinaison donne à chaque tuile la matière
    d'un objet qu'on peut tourner, pas d'une image collée. Le texte du hero et
-   la ligne « Et dix-sept autres… » restent dans page.tsx : ici, le mur seul.
+   la ligne « Et N autres… » restent dans page.tsx : ici, le mur seul.
 
    CE QUI EST JETÉ. Le SVG mis à l'échelle : à 285 px de large (quatre
    colonnes dans 1200) sa barre ferait 12 px et l'adresse 3 px — illisible.

@@ -6,6 +6,7 @@ import Partage from "@/components/Partage";
 import { Chevron } from "@/components/offres/MediaMoteurs";
 import MurModeles from "@/components/tarifs/site/MurModeles";
 import FaitsSite from "@/components/tarifs/site/FaitsSite";
+import { MODELES } from "@/components/modeles/donnees";
 import PrixSite from "@/components/tarifs/site/PrixSite";
 import JournalDemandes from "@/components/tarifs/site/JournalDemandes";
 import EtapesDefilantes from "@/components/tarifs/site/EtapesDefilantes";
@@ -93,13 +94,13 @@ import ClotureSite from "@/components/tarifs/site/ClotureSite";
 export const metadata: Metadata = {
   title: "Votre site, à prix public | Omega.AI",
   description:
-    "Le site catalogue : 990 € une fois, pas d'abonnement, maintenance comprise tant qu'un poste Omega.AI est en service chez vous. Vingt et un modèles en ligne, contenu réécrit à votre métier et à votre marque, et un site branché sur vos systèmes : les demandes entrent dans votre espace, les devis se relancent, le site vous dit ce que vos visiteurs cherchent. Plusieurs enseignes : sur devis, après diagnostic.",
+    `Le site catalogue : 990 € une fois, pas d'abonnement, maintenance comprise tant qu'un poste Omega.AI est en service chez vous. ${MODELES.length} modèles en ligne, contenu réécrit à votre métier et à votre marque, et un site branché sur vos systèmes : les demandes entrent dans votre espace, les devis se relancent, le site vous dit ce que vos visiteurs cherchent. Plusieurs enseignes : sur devis, après diagnostic.`,
 };
 
 /* ——— les quatre modèles du mur : le premier de chaque famille du
    catalogue, pour montrer quatre partis pris et non quatre variantes ——— */
 const FAITS: [string, string][] = [
-  ["21 modèles", "tous en ligne, tous visitables"],
+  [`${MODELES.length} modèles`, "tous en ligne, tous visitables"],
   ["Contenu réécrit", "à votre métier, à votre marque"],
   ["Branché sur vos systèmes", "demandes, relances, avis"],
   ["Plusieurs enseignes", "un socle commun, une vue unique"],
@@ -107,7 +108,7 @@ const FAITS: [string, string][] = [
 
 /* ——— ce que les 990 € comprennent ——— */
 const COMPRIS_SITE: string[] = [
-  "Un modèle au choix : les vingt et un sont en ligne, tous consultables",
+  `Un modèle au choix : les ${MODELES.length} sont en ligne, tous consultables`,
   "Contenu intégralement réécrit en français, à votre métier et à votre marque",
   "Vos visuels, vos coordonnées, vos horaires, vos points de vente en place",
   "Nom de domaine la première année, mise en ligne comprise",
@@ -188,7 +189,7 @@ export default function TarifsSitePage() {
                 Un site au prix public. Un système derrière.
               </h1>
               <p data-arrivee="chapo" className="o-lead mt-[15px] max-w-[650px]">
-                Vingt et un modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu à votre métier et à votre marque. Ce qui arrive ensuite — demandes, devis, relances, avis — entre dans vos systèmes au lieu de dormir dans une boîte mail.
+                {MODELES.length} modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu à votre métier et à votre marque. Ce qui arrive ensuite — demandes, devis, relances, avis — entre dans vos systèmes au lieu de dormir dans une boîte mail.
               </p>
               <div data-arrivee="bloc" className="mt-[25px] flex flex-col items-center">
                 <div className="flex flex-wrap items-center justify-center gap-3">
@@ -196,7 +197,7 @@ export default function TarifsSitePage() {
                     Commander le site
                   </Link>
                   <Link href="/modeles" className="o-btn o-btn--ghost">
-                    Voir les 21 modèles
+                    Voir les {MODELES.length} modèles
                     <Chevron taille={13} />
                   </Link>
                 </div>
@@ -212,9 +213,9 @@ export default function TarifsSitePage() {
             <MurModeles />
 
             <p data-reveal className="o-small mt-8 text-center">
-              Et dix-sept autres, rangés par usage.{" "}
+              Et {MODELES.length - 4} autres, rangés par usage.{" "}
               <Link href="/modeles" className="o-link !text-[14px]">
-                Parcourir les 21 modèles
+                Parcourir les {MODELES.length} modèles
                 <Chevron taille={12} />
               </Link>
             </p>
@@ -256,7 +257,7 @@ export default function TarifsSitePage() {
                   990&nbsp;€, une fois. Pas d&apos;abonnement.
                 </h3>
                 <p data-reveal className="o-body mt-4">
-                  Un des vingt et un modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Le même prix pour une entreprise de trois personnes et pour une direction de groupe. Hors catalogue — boutique en ligne, espace membre, plusieurs enseignes sur un même socle — le périmètre se chiffre sur devis, après diagnostic.
+                  Un des {MODELES.length} modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Le même prix pour une entreprise de trois personnes et pour une direction de groupe. Le catalogue contient aussi des gabarits de boutique et d’espace membre : le dessin est compris, mais leur mécanique — paiement, stock, comptes — et les montages à plusieurs enseignes se chiffrent sur devis, après diagnostic.
                 </p>
                 <ul data-reveal className="mt-6 space-y-2.5">
                   {COMPRIS_SITE.map((t) => (
@@ -348,7 +349,7 @@ export default function TarifsSitePage() {
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap gap-3">
                   <Link href="/modeles" className="o-btn o-btn--primary">
-                    Parcourir les 21 modèles
+                    Parcourir les {MODELES.length} modèles
                   </Link>
                   <Link href="/offres" className="o-btn o-btn--ghost">
                     Ce qui se déploie

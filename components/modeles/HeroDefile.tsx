@@ -4,7 +4,7 @@ import { useCallback, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useSpring, useTransform, type MotionValue } from "motion/react";
-import { capture, parSlug, type Modele } from "./donnees";
+import { MODELES, capture, parSlug, type Modele } from "./donnees";
 import "./HeroDefile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -156,7 +156,7 @@ export default function HeroDefile({
           Un site qui reçoit, apprend et relance
         </h1>
         <p data-arrivee="hero-chapo" className="m-chapo mt-5 max-w-xl">
-          Vingt et un modèles en ligne, consultables immédiatement. Le design change d&apos;un modèle à l&apos;autre&nbsp;; ce qu&apos;il y a derrière, jamais.
+          {MODELES.length} modèles en ligne, consultables immédiatement. Le design change d&apos;un modèle à l&apos;autre&nbsp;; ce qu&apos;il y a derrière, jamais.
         </p>
         <div data-arrivee="hero-bloc" className="mt-8 flex flex-wrap items-center gap-3">
           {/* depuis la galerie, « Commencer » mène DIRECTEMENT à l'offre
@@ -182,7 +182,7 @@ export default function HeroDefile({
             href={ancreCatalogue}
             className="hd-btn-contour rounded-[var(--radius-btn)] border border-black/20 px-6 py-3 text-[15px] font-medium text-[color:var(--m-encre)] transition-colors hover:border-black/45"
           >
-            Voir les 21 modèles
+            Voir les {MODELES.length} modèles
           </a>
         </div>
       </div>

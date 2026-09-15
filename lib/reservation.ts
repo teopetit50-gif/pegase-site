@@ -1,3 +1,4 @@
+import { MODELES } from "@/components/modeles/donnees";
 /* ══════════════════════════════════════════════════════════════════════
    Contenu de /reserver-un-audit — source unique (26/07/2026)
 
@@ -86,8 +87,19 @@ export type SujetContact =
    pour lui. — Dépassé le 14/09 : WhatsApp n'est plus une porte du tout,
    voir le bloc suivant. */
 
-export function lienReservation(formuleId: string) {
-  return `/reserver?formule=${encodeURIComponent(formuleId)}`;
+/* 15/09/2026 — LE MODÈLE DE SITE VOYAGE JUSQU'AU FORMULAIRE.
+   « Choisir ce modèle », sur /modeles et /tarifs/site, menait à
+   /reserver-un-audit?modele=<slug> depuis le 14/09 avec ce commentaire :
+   « le modèle voyage en paramètre pour le jour où le formulaire le
+   lira ». Ce jour-là, personne ne le lisait : les 21 boutons valaient
+   exactement « Réserver un audit », et le choix se perdait entre la
+   galerie et l'agenda. Le paramètre traverse maintenant les deux sauts —
+   /modeles → /reserver-un-audit → /reserver — et arrive dans le message
+   de la demande, où il est visible et modifiable. */
+export function lienReservation(formuleId: string, modele?: string) {
+  const q = new URLSearchParams({ formule: formuleId });
+  if (modele) q.set("modele", modele);
+  return `/reserver?${q}`;
 }
 
 /* Contact libre, hors réservation : le formulaire du service client, sujet
@@ -538,12 +550,13 @@ export const FAQ: { q: string; r: string[] }[] = [
        passe APRÈS le clic — sans quoi on livre une vitrine qui dort. */
     q: "Je cherche avant tout un site, le proposez-vous ?",
     r: [
-      /* Vingt et un, pas vingt-deux : AssetX est sorti du catalogue le
-         06/08 (voir components/modeles/donnees.ts). /modeles affichait bien
-         « 21 modèles », cette réponse était restée à l'ancien compte. */
+      /* Le compte n'est plus écrit à la main : il vient de MODELES.length
+         (components/modeles/donnees.ts). Il avait déjà dérivé deux fois —
+         au retrait d'AssetX le 06/08, puis à l'arrivée des templates 21st
+         le 15/09 — et c'est cette réponse-là qui restait en arrière. */
       /* 01/09 — le prix devient public (voir /tarifs/site) : la réponse
          le donne plutôt que de le garder pour l'audit. */
-      "Oui, et vous pouvez déjà en visiter vingt et un : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, nous réécrivons tout le contenu en français, pour votre métier. Le prix est public : 990 € le site catalogue, soit de 198 à 594 € restant à charge selon le taux du Chèque TIC.",
+      `Oui, et vous pouvez déjà en visiter ${MODELES.length} : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, nous réécrivons tout le contenu en français, pour votre métier. Le prix est public : 990 € le site catalogue, soit de 198 à 594 € restant à charge selon le taux du Chèque TIC.`,
       "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps il obtient une réponse, et ce que devient le devis. Un site qui reçoit trois demandes par semaine et n'en transforme aucune coûte plus cher qu'il ne rapporte : c'est cette partie que nous chiffrons d'abord, pour que la vitrine ne dorme pas.",
     ],
   },
