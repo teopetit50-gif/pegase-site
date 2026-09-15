@@ -790,7 +790,7 @@ export default function TunnelCommande({ utilisateur, modeleInitial }: Props) {
                   {numeroEtape}
                   <h3 className="r-h4 mt-2">Choisissez votre modèle</h3>
                   <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
-                    Un parti pris visuel, pas un métier imposé&nbsp;: vous
+                    Un parti pris visuel, indépendant du secteur&nbsp;: vous
                     choisissez l&apos;allure, on réécrit tout le contenu au
                     vôtre. Chaque démo se visite en vrai.
                   </p>

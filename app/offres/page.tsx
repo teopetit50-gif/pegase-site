@@ -224,7 +224,7 @@ const ETAPES: Etape[] = [
     rang: "01",
     icone: Search,
     titre: "Diagnostic, 30 min",
-    texte: "Le processus le plus coûteux, chiffré.",
+    texte: "Nous chiffrons le processus qui vous coûte le plus.",
   },
   {
     rang: "02",
@@ -410,8 +410,8 @@ export default function OffresPage() {
         >
           <Features
             pastille="Le catalogue"
-            titre="Quatre systèmes à déployer."
-            chapo="Chacun couvre un processus précis, en continu, sur les outils que vos équipes utilisent déjà — et s'arrête à votre validation."
+            titre="Quatre systèmes couvrent les processus les plus répétitifs"
+            chapo="Chacun s'installe sur les outils que vos équipes utilisent déjà, fonctionne en continu et s'arrête à votre validation."
             cases={PAQUETS}
           />
 

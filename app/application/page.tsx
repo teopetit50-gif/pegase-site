@@ -212,9 +212,9 @@ export default function ApplicationPage() {
             Selon votre appareil
           </h2>
           <p data-reveal className="r-body mt-4 max-w-[58ch]">
-            Pas de boutique, pas de téléchargement&nbsp;: c&apos;est votre navigateur qui pose
-            l&apos;icône. Un bouton sur Android et sur ordinateur, trois gestes sur iPhone — une
-            seule fois.
+            L&apos;application ne passe par aucune boutique&nbsp;: c&apos;est votre navigateur qui
+            pose l&apos;icône. Un bouton suffit sur Android et sur ordinateur, trois gestes sur
+            iPhone, une seule fois.
           </p>
 
           {/* les trois suites en onglets : une seule à l'écran, les trois

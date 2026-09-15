@@ -72,7 +72,7 @@ const ETAPES = [
   {
     n: "01",
     titre: "Le modèle",
-    sousTitre: "Choisir l'allure, pas le métier",
+    sousTitre: "Choisir l'allure du site",
     texte:
       `Les ${MODELES.length} modèles sont en ligne : vous les consultez et retenez celui qui vous ressemble. Le design change d'un modèle à l'autre ; ce qu'il y a derrière, jamais.`,
   },

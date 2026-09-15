@@ -178,7 +178,7 @@ export const ECHELLE: BlocEchelle = {
     },
     {
       icone: "scale",
-      titre: "Des seuils, pas des exceptions",
+      titre: "Des seuils de validation par montant",
       texte:
         "Le montant décide du circuit : validation simple, double validation, accord de la direction. Le seuil est un réglage, et son historique reste lisible.",
     },

@@ -587,11 +587,11 @@ export const FICHES: Record<string, Fiche> = {
       pointsChapo:
         "Quatre situations qu'aucun réglage, aucune erreur de configuration et aucune consigne mal formulée ne peuvent autoriser.",
       detailChapo:
-        "Où vivent les garde-fous, pourquoi leur emplacement n'est pas un détail, et ce qui reste tracé une fois qu'un message est parti.",
+        "Où sont posés les garde-fous, pourquoi leur emplacement compte, et ce qui reste tracé une fois qu'un message est parti.",
       cibleChapo:
         "Toutes les entreprises équipées, sans exception et sans supplément. Le socle ne se choisit pas : il est posé le premier jour, avant le premier système.",
       faqChapo: "Le contrôle, la sortie, les données : les trois questions posées à chaque diagnostic.",
-      integrationsTitre: "Le socle, pas une option.",
+      integrationsTitre: "Le socle est posé sous tous les systèmes",
       integrationsChapo:
         "VAULT ne s'installe pas à côté des autres systèmes : il s'installe en dessous. Tout ce que CASHD, RELOAD, FRONTD ou FILED préparent passe par lui avant de partir. Un système mal configuré ne peut pas le contourner : le contrôle est en dessous de lui, pas à côté.",
       marcheTitre: "Un envoi préparé, douze contrôles, votre décision.",

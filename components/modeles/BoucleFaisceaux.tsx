@@ -447,7 +447,7 @@ export default function BoucleFaisceaux() {
           <path d="M20.5 3.5V8h-4.5" />
         </svg>
         <p>
-          <span className="text-[color:var(--m-encre)]">Et le site apprend.</span>{" "}
+          <span className="text-[color:var(--m-encre)]">Le site produit aussi de la donnée d&apos;usage.</span>{" "}
           Ce qui est demandé le plus souvent, ce qui est cherché sans résultat et les pages
           d&apos;où les visiteurs repartent&nbsp;: votre espace le présente en clair. Un client déjà
           venu qui revient sur une gamme reçoit une relance adaptée à son historique.

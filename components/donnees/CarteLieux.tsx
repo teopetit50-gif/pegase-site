@@ -66,12 +66,12 @@ const LIEUX = [
   {
     maquette: MaquetteOutil,
     titre: "Votre outil",
-    soustitre: "La donnée reste là où elle est née",
+    soustitre: "Vos données restent dans l'outil qui les contient",
   },
   {
     maquette: MaquetteMoteur,
     titre: "Le système",
-    soustitre: "Il lit, décide et n'archive rien",
+    soustitre: "Il traite la donnée sans en conserver de copie",
   },
   {
     maquette: MaquetteBase,

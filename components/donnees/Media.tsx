@@ -25,7 +25,7 @@ type P = { className?: string };
 export function SchemaTrajet({ className }: P) {
   const etapes = [
     { a: -90, l: ["Votre boîte", "mail"] },
-    { a: -18, l: ["Le moteur", "lit le champ"] },
+    { a: -18, l: ["Le système", "lit le champ"] },
     { a: 54, l: ["Le modèle", "rédige"] },
     { a: 126, l: ["Vous", "validez"] },
     { a: 198, l: ["La base", "à Francfort"] },
@@ -278,7 +278,7 @@ export function MaquetteMoteur() {
   );
 
   return (
-    <Fenetre titre="moteur" cle="moteur">
+    <Fenetre titre="système" cle="moteur">
       {/* les liaisons, tracées avant les nœuds pour passer dessous */}
       <g stroke="#dadada" strokeWidth="1.2" fill="none" strokeLinecap="round">
         {["M106 75h12", "M198 75h12", "M66 90v27a8 8 0 008 8h44", "M198 147h12"].map((d, i) => (

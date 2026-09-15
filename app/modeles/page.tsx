@@ -124,7 +124,7 @@ export default function ModelesPage() {
               {MODELES.length} modèles, un même socle
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              Chaque modèle est un parti pris visuel, pas un métier imposé&nbsp;: vous choisissez l&apos;allure, nous réécrivons tout le contenu pour le vôtre. Le design change&nbsp;; la mécanique derrière — ce que le site reçoit, ce qu&apos;il enregistre, ce qu&apos;il déclenche — ne change pas.
+              Chaque modèle est un parti pris visuel, indépendant du secteur&nbsp;: vous choisissez l&apos;allure, nous réécrivons tout le contenu pour le vôtre. Le design change&nbsp;; la mécanique derrière — ce que le site reçoit, ce qu&apos;il enregistre, ce qu&apos;il déclenche — ne change pas.
             </p>
           </div>
 

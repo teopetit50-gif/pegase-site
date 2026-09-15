@@ -92,7 +92,7 @@ const SIGNES: Record<string, ComposantSigne | undefined> = {
   "Hébergement européen": IconeLieu,
   "Aucun entraînement": IconeBarriere,
   "Chiffrement de bout en bout": IconeCadenas,
-  "Rien ne part sans vous": IconeOeil,
+  "Validation avant envoi": IconeOeil,
   "Tout est journalisé": IconeJournal,
   "Réversibilité": IconeEmporter,
 };

@@ -185,7 +185,7 @@ export default function FormulesGrille() {
         <p className="fg-socle-fort">
           Gratuit, sans engagement.
           <br />
-          Toute collaboration commence ici.
+          Toute installation commence par cet audit.
         </p>
         <div className="fg-socle-aide">
           <div className="fg-socle-titre">Chèque TIC</div>

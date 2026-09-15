@@ -118,7 +118,7 @@ import {
 export const metadata: Metadata = {
   title: "Où vont vos données | Omega.AI",
   description:
-    "Votre base hébergée à Francfort, dans l'Union européenne, ou une machine installée dans vos locaux dont rien ne sort. Qui reçoit quoi, ce qui n'entraîne aucun modèle, et ce que vous récupérez à tout moment.",
+    "Hébergement dans l'Union européenne, à Francfort, ou installation sur vos propres serveurs. Liste des sous-traitants et du périmètre reçu par chacun, chiffrement, journalisation et conditions de réversibilité.",
 };
 
 
@@ -128,37 +128,37 @@ const GARANTIES = [
     icone: IconeLieu,
     titre: "Hébergement européen",
     texte:
-      "Notre base de données est hébergée en région eu-central-1, à Francfort, en Allemagne. Aucune réplication hors de l'Union européenne.",
+      "Notre base de données est hébergée dans la région eu-central-1, à Francfort, en Allemagne. Aucune réplication n'est effectuée hors de l'Union européenne.",
   },
   {
     icone: IconeBarriere,
     titre: "Aucun entraînement",
     texte:
-      "Nos fournisseurs de modèles n'utilisent ni les entrées ni les sorties de leurs produits commerciaux pour entraîner leurs modèles. C'est le réglage par défaut, pas une option à réclamer.",
+      "Nos fournisseurs de modèles n'utilisent ni les entrées ni les sorties de leurs produits commerciaux pour entraîner leurs modèles. Ce réglage est celui de nos contrats et ne dépend d'aucune démarche de votre part.",
   },
   {
     icone: IconeCadenas,
     titre: "Chiffrement de bout en bout",
     texte:
-      "TLS sur toutes les liaisons, chiffrement au repos côté hébergeur. Les accès passent par des jetons nominatifs, révocables en une minute.",
+      "Les liaisons sont chiffrées en TLS et les données le sont au repos chez notre hébergeur. Les accès reposent sur des jetons nominatifs, que nous révoquons immédiatement à votre demande.",
   },
   {
     icone: IconeOeil,
-    titre: "Rien ne part sans vous",
+    titre: "Validation avant envoi",
     texte:
-      "Le système propose, vos équipes valident. Tant qu'un envoi n'est pas approuvé, il n'existe que sous forme de brouillon dans votre outil.",
+      "Le système prépare chaque envoi, puis le soumet à la personne habilitée dans votre organisation. Tant que la validation n'a pas eu lieu, le message reste un brouillon dans votre outil.",
   },
   {
     icone: IconeJournal,
     titre: "Tout est journalisé",
     texte:
-      "Chaque exécution laisse une ligne : date, système, décision, destinataire. Le journal est consultable et exportable à tout moment.",
+      "Chaque exécution inscrit une ligne au journal : date, système, décision et destinataire. Ce journal reste consultable et exportable à tout moment, y compris pour un contrôle.",
   },
   {
     icone: IconeEmporter,
     titre: "Réversibilité",
     texte:
-      "Vos automatisations s'exportent en fichiers lisibles et vos données dans un format de base standard. Vous les emportez tels quels, puisqu'aucun format propriétaire ne vous retient.",
+      "Vos automatisations s'exportent en fichiers lisibles et vos données dans un format de base standard. Aucun format propriétaire n'intervient, ce qui vous permet de reprendre l'ensemble sans conversion.",
   },
 ];
 
@@ -168,7 +168,7 @@ const CHIFFRES = [
     icone: IconeServeur,
     etiquette: "HÉBERGEMENT",
     valeur: "eu-central-1",
-    texte: "Francfort, Allemagne : la base ne quitte pas l'UE",
+    texte: "Francfort, Allemagne : aucune réplication hors de l'Union européenne",
   },
   {
     icone: IconeZero,
@@ -180,7 +180,7 @@ const CHIFFRES = [
     icone: IconeSablier,
     etiquette: "RÉTENTION MODÈLE",
     valeur: "30 j",
-    texte: "Le maximum côté fournisseur de modèle, puis effacement",
+    texte: "Durée maximale de rétention chez notre fournisseur, puis effacement",
   },
 ];
 
@@ -232,9 +232,9 @@ const OPTIONS: Option[] = [
   {
     cle: "francfort",
     onglet: "Hébergement Omega.AI · Francfort",
-    titre: "Votre base chez nous, à Francfort",
+    titre: "Votre base hébergée à Francfort",
     resume:
-      "Vous ne gérez aucune machine. Notre base de données est opérée en région eu-central-1, nos automatisations font tourner les systèmes, et vos équipes n'ont qu'à valider ce qui leur est proposé.",
+      "Vous n'administrez aucune machine. Notre base est opérée dans la région eu-central-1 et nos automatisations exécutent les systèmes, tandis que vos équipes conservent la validation de ce qui est produit.",
     image: "/photos/donnees-francfort-datacenter.jpg",
     alt: "Allée d'une salle de serveurs, baies métalliques alignées",
     chiffres: [
@@ -243,7 +243,7 @@ const OPTIONS: Option[] = [
       { valeur: "UE", libelle: "Lieu de la base" },
     ],
     principe:
-      "Vos outils actuels restent vos outils. Le système s'y connecte, lit le champ dont il a besoin, écrit son résultat dans la base et vous le soumet.",
+      "Votre environnement existant reste en place. Le système s'y connecte, lit les champs dont il a besoin, écrit son résultat dans la base, puis vous le soumet pour validation.",
     obtenez: [
       "Une base de données à Francfort, chiffrée au repos",
       "Les sauvegardes et la supervision comprises",
@@ -253,10 +253,10 @@ const OPTIONS: Option[] = [
   },
   {
     cle: "local",
-    onglet: "Installation locale · chez vous",
-    titre: "Une machine dans vos murs",
+    onglet: "Installation locale · vos serveurs",
+    titre: "Une installation sur vos propres serveurs",
     resume:
-      "Pour les organisations qui ne veulent rien laisser sortir. Nous installons les systèmes sur une machine que vous possédez : conteneurs isolés, disque chiffré, votre réseau, votre alimentation.",
+      "Ce dispositif s'adresse aux organisations dont la politique interne interdit toute sortie de données. Nous installons les systèmes sur un serveur qui vous appartient, en conteneurs isolés et sur disque chiffré, à l'intérieur de votre réseau.",
     image: "/photos/donnees-rack-local.jpg",
     alt: "Baie de brassage vue de près, câble orange lové",
     chiffres: [
@@ -265,11 +265,11 @@ const OPTIONS: Option[] = [
       { valeur: "∞", libelle: "Durée après contrat" },
     ],
     principe:
-      "Aucun appel sortant que vous n'ayez autorisé. Un modèle ouvert peut tourner sur la machine si vous refusez tout appel externe, au prix d'une qualité de rédaction inférieure.",
+      "Aucun appel sortant n'est émis sans votre autorisation. Si votre politique interdit tout appel externe, un modèle ouvert s'exécute sur la machine, avec une qualité de rédaction inférieure.",
     obtenez: [
       "Les systèmes installés sur votre machine, en conteneurs",
       "Les sauvegardes chez vous, sur le support de votre choix",
-      "Une machine qui continue de tourner si le contrat s'arrête",
+      "Une installation qui continue de fonctionner si le contrat prend fin",
       "La documentation d'exploitation, pour reprendre la main",
     ],
   },
@@ -305,7 +305,7 @@ const PIED = [
   {
     label: "Aller plus loin",
     liens: [
-      { label: "RGPD : où vivent vos données", href: "/blog/rgpd-donnees-locales" },
+      { label: "RGPD : où sont hébergées vos données", href: "/blog/rgpd-donnees-locales" },
       { label: "Nos intégrations", href: "/integrations" },
       { label: "Nous écrire", href: "/contact" },
     ],
@@ -343,7 +343,7 @@ export default function VosDonnees() {
                   vos données
                 </h1>
                 <p className="vd-lead max-w-[42rem]">
-                  Deux hébergements, un seul choix à faire : votre base chez nous à Francfort, dans l&apos;Union européenne, ou une machine installée dans vos locaux dont rien ne sort.
+                  Vos données sont hébergées dans l&apos;Union européenne, à Francfort, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
                 </p>
                 <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
@@ -362,10 +362,10 @@ export default function VosDonnees() {
                   référence pour cette section-là. Les autres sont centrées. */}
               <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-20">
                 <h2 className="vd-h2">
-                  Vos données sont hébergées à Francfort, et elles n&apos;en sortent pas
+                  Vos données sont hébergées à Francfort, sans réplication ailleurs
                 </h2>
                 <p className="vd-body lg:pt-3">
-                  Un système ne recopie pas votre messagerie. Il lit le champ dont il a besoin pour la tâche du jour, écrit son résultat, et laisse le reste où il est. Voici le chemin complet, sans étape cachée.
+                  Un système ne duplique ni votre messagerie ni vos fichiers. Il lit les champs nécessaires à la tâche en cours, écrit son résultat, puis laisse le reste à sa place. Le schéma ci-dessous suit une donnée d&apos;un bout à l&apos;autre du traitement.
                 </p>
               </div>
 
@@ -375,10 +375,10 @@ export default function VosDonnees() {
               <Apparition className="vd-ardoise mt-14 grid grid-cols-1 items-center gap-10 lg:mt-16 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16 lg:px-24 lg:pb-28">
                 <div className="vd-monte">
                   <h3 className="text-[clamp(1.25rem,1rem+0.8vw,1.75rem)] leading-tight tracking-[-0.01em] text-white">
-                    Cinq étapes, et une seule qui stocke
+                    Cinq étapes, dont une seule conserve une donnée
                   </h3>
                   <p className="mt-4 text-[15px] leading-[1.6] tracking-[-0.01em] text-white/85">
-                    Le système lit, le modèle rédige, vos équipes valident. Seule la dernière étape écrit quelque chose de durable, et cette étape se trouve en Allemagne.
+                    Le système lit la donnée, le modèle rédige une proposition, puis vos équipes valident avant tout envoi. Seule la dernière étape écrit durablement, et elle se situe en Allemagne.
                   </p>
                 </div>
                 <SchemaTrajet className="h-auto w-full text-white/85" />
@@ -390,9 +390,9 @@ export default function VosDonnees() {
           <section className="py-16 md:py-24">
             <div className="vd-wrap">
               <div className="mx-auto max-w-[46rem] text-center">
-                <h2 className="vd-h2">Les trois seuls endroits où passent vos données</h2>
+                <h2 className="vd-h2">Les trois environnements par lesquels passent vos données</h2>
                 <p className="vd-lead mt-5">
-                  Votre outil, le système, la base. Il n&apos;y a pas de quatrième lieu, pas de copie de travail ailleurs, pas d&apos;entrepôt intermédiaire.
+                  Vos données transitent par votre outil existant, par le système qui exécute la tâche, puis par notre base à Francfort. Aucun quatrième environnement n&apos;intervient et aucune copie de travail n&apos;est conservée ailleurs.
                 </p>
               </div>
 
@@ -403,7 +403,7 @@ export default function VosDonnees() {
           {/* ─── LES SIX GARANTIES ────────────────────────────────────── */}
           <section id="garanties" className="scroll-mt-24 py-16 md:py-24">
             <div className="vd-wrap">
-              <h2 className="vd-h2 text-center">Ce que ça vous garantit</h2>
+              <h2 className="vd-h2 text-center">Ce que cette architecture garantit</h2>
 
               <CartesGaranties
                 garanties={GARANTIES.map(({ titre, texte }) => ({ titre, texte }))}
@@ -417,9 +417,9 @@ export default function VosDonnees() {
               <div className="vd-ardoise relative lg:px-24 lg:py-20">
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,180px)_minmax(0,1fr)] lg:gap-16">
                   <p className="vd-eyebrow !text-white/70">
-                    ÉCRIT
+                    ENGAGEMENT
                     <br />
-                    AU CONTRAT
+                    CONTRACTUEL
                   </p>
                   <div>
                     <Guillemet className="h-4 w-auto text-white/60" />
@@ -430,7 +430,7 @@ export default function VosDonnees() {
                       Omega.AI
                       <br />
                       <span className="text-white/60">
-                        Engagement repris au contrat, pas une promesse de page d&apos;accueil
+                        Engagement repris dans le contrat de service
                       </span>
                     </p>
                   </div>
@@ -465,8 +465,8 @@ export default function VosDonnees() {
             <div className="vd-wrap">
               <h2 className="vd-h2 text-center">Qui reçoit quoi</h2>
               <p className="vd-lead mx-auto mt-5 max-w-[42rem] text-center">
-                Tout ce qui touche à vos données, et pour chacun la seule chose qu&apos;il
-                voit passer.
+                Chaque sous-traitant qui intervient dans le traitement figure ci-dessous,
+                avec le périmètre exact des données qui lui parviennent.
               </p>
 
               <div className="mt-14 overflow-x-auto">
@@ -503,9 +503,9 @@ export default function VosDonnees() {
               </div>
 
               <p className="vd-small mx-auto mt-8 max-w-[42rem] text-center">
-                Aucun autre tiers ne reçoit quoi que ce soit. La liste nominative de nos
-                prestataires, avec leur pays d&apos;hébergement et leurs garanties, est
-                annexée au contrat et communiquée sur simple demande.
+                Aucun autre tiers n&apos;intervient dans le traitement. La liste nominative
+                de nos prestataires, avec leur pays d&apos;hébergement et leurs garanties, est
+                annexée au contrat et communiquée sur demande.
               </p>
             </div>
           </section>
@@ -523,10 +523,10 @@ export default function VosDonnees() {
                 />
                 <div className="relative z-10 max-w-[38rem]">
                   <h2 className="vd-h4">
-                    Une adresse précise, pas un nuage.
+                    Le cloud désigne ici des centres de données identifiés
                   </h2>
                   <p className="vd-body mt-4">
-                    Le terme « cloud » désigne une baie dans un bâtiment identifié. La vôtre est à Francfort, et son adresse tient en une ligne :
+                    Notre hébergeur les regroupe par région, et la vôtre se situe à Francfort, en Allemagne. Elle figure au contrat sous son identifiant exact&nbsp;:
                     <span className="whitespace-nowrap"> eu-central-1</span>.
                   </p>
                 </div>
@@ -552,9 +552,9 @@ export default function VosDonnees() {
                 className="object-cover"
               />
               <div className="relative z-10 flex w-full max-w-[72rem] flex-col gap-6">
-                <h2 className="vd-h1 vd-titre-degrade">Vos données, votre choix.</h2>
+                <h2 className="vd-h1 vd-titre-degrade">Choisir votre hébergement</h2>
                 <p className="vd-lead max-w-[38rem]">
-                  Trente minutes suffisent pour déterminer laquelle des deux installations convient à votre organisation, et ce qu&apos;elle coûte.
+                  Un entretien de trente minutes suffit pour déterminer lequel des deux dispositifs convient à votre organisation, ce qu&apos;il implique pour votre système d&apos;information et ce qu&apos;il coûte.
                 </p>
                 <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
@@ -613,7 +613,7 @@ export default function VosDonnees() {
 
             {/* la signature géante de la référence — même rôle, même place */}
             <p className="vd-signature mt-24 max-w-[22ch]">
-              Vos données restent les vôtres, où qu&apos;elles soient hébergées
+              Vous restez responsable de traitement, quel que soit l&apos;hébergement retenu
             </p>
 
             <div className="mt-16 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">

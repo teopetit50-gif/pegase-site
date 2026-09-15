@@ -192,7 +192,7 @@ export const ECHELLE: BlocEchelle = {
     },
     {
       icone: "scale",
-      titre: "Des seuils, pas des exceptions",
+      titre: "Des seuils de relance par montant",
       texte:
         "Le montant et le palier décident de qui valide : le chargé de compte, le responsable crédit, la direction financière. La mise en demeure exige toujours une validation explicite.",
     },

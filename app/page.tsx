@@ -934,7 +934,7 @@ export default function Home() {
           <div className="o-wrap">
             <EnTete
               pastille="CE QUI S'INSTALLE"
-              titre="Quatre systèmes. Quatre leviers de performance."
+              titre="Chaque système agit sur un levier de performance"
               chapo="Encaissement, réactivation, demandes entrantes, documents : chaque système tient un poste précis, sur vos règles, avec un contrôle humain avant tout envoi."
             />
             {/* 11/09/2026 — les quatre systèmes prennent la grille de

@@ -376,7 +376,7 @@ export const POSTS: Post[] = [
     date: "2 juin 2026",
     cat: "Données",
     cover: "/photos/offload-chip.jpg",
-    title: "RGPD : où vivent vos données chez Omega.AI",
+    title: "RGPD : où sont hébergées vos données chez Omega.AI",
     excerpt:
       "Un espace dédié par client : chiffré, hébergé dans l'Union européenne, jamais mélangé, jamais revendu, effaçable sur demande. Ce que cela change pour une entreprise responsable de son fichier clients.",
     body: [

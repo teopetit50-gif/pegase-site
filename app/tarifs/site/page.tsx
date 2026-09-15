@@ -186,7 +186,7 @@ export default function TarifsSitePage() {
                 <span className="o-pill o-pill--xs">VOTRE SITE</span>
               </div>
               <h1 data-arrivee="titre" className="o-h1 mt-4 max-w-[760px]">
-                Un site au prix public. Un système derrière.
+                Un site vitrine à prix public, connecté à vos systèmes
               </h1>
               <p data-arrivee="chapo" className="o-lead mt-[15px] max-w-[650px]">
                 {MODELES.length} modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu à votre métier et à votre marque. Ce qui arrive ensuite — demandes, devis, relances, avis — entre directement dans vos systèmes.
@@ -234,7 +234,7 @@ export default function TarifsSitePage() {
           <div className="o-wrap">
             <EnTete
               pastille="LE PRIX"
-              titre="Un prix, une aide, et ce qui vient après."
+              titre="Le prix, l'aide régionale et ce qui est compris ensuite"
               chapo="La création se paie une fois, comme un investissement — celui que le Chèque TIC peut financer. Ce qui vient après est compris : tant qu'un poste Omega.AI est en service chez vous, la vitrine est entretenue, et ce qu'elle reçoit alimente vos systèmes."
             />
 
