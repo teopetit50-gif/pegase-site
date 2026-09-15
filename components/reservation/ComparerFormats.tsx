@@ -12,6 +12,7 @@ import {
   type LigneComparatif,
 } from "@/lib/reservation";
 import { ICONES_FORMAT, ICONE_DEFAUT } from "./icones";
+import { useModeleUrl } from "./ModeleUrl";
 import "./ComparerFormats.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -102,7 +103,9 @@ function Valeurs({ ligne, actif }: { ligne: LigneComparatif; actif: number }) {
   );
 }
 
-export default function ComparerFormats({ modele }: { modele?: string }) {
+export default function ComparerFormats() {
+  /* le modèle choisi sur /modeles, s'il y en a un dans l'URL */
+  const modele = useModeleUrl();
   const p = PROFILS[1];
   /* le format retenu par défaut est le phare — celui que la page
      recommande en haut ; à défaut, le premier */
@@ -168,7 +171,7 @@ export default function ComparerFormats({ modele }: { modele?: string }) {
                 <span className="num">{f.duree}</span> · {f.suffixe}
               </p>
               <p className="cf-panneau-conditions">{f.conditions}</p>
-              <Link href={lienReservation(f.id, modele)} className="r-btn r-btn--blanc cf-panneau-btn">
+              <Link href={lienReservation(f.id, modele || undefined)} className="r-btn r-btn--blanc cf-panneau-btn">
                 {f.cta}
               </Link>
               <p className="cf-panneau-note">{f.souscta}</p>

@@ -16,6 +16,7 @@
 
 import { useState } from "react";
 import { lienReservation } from "@/lib/reservation";
+import { useModeleUrl } from "./ModeleUrl";
 import Lien from "@/components/Lien";
 
 /* 46 semaines travaillées : 52 moins congés et jours fériés — l'hypothèse
@@ -78,7 +79,8 @@ function Champ({
   );
 }
 
-export default function Simulateur({ modele }: { modele?: string }) {
+export default function Simulateur() {
+  const modele = useModeleUrl();
   const [profil, setProfil] = useState(0);
   const [echues, setEchues] = useState(PROFILS[0].echues);
   const [devis, setDevis] = useState(PROFILS[0].devis);
@@ -211,7 +213,7 @@ export default function Simulateur({ modele }: { modele?: string }) {
           </div>
 
           <Lien
-            href={lienReservation("process", modele)}
+            href={lienReservation("process", modele || undefined)}
             className="r-btn r-btn--noir mt-7 w-full"
           >
             Faire chiffrer ma situation réelle

@@ -171,7 +171,7 @@ import {
 import { Comparator } from "@/components/ui/comparator-1";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/cn";
-import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
+import { COURRIEL, lienContact } from "@/lib/reservation";
 import Calculateur from "@/components/tarifs/Calculateur";
 
 import {
@@ -863,10 +863,13 @@ export default function Grille() {
             grand: "le jour même",
             sous: (
               <>
-                Ou par e-mail&nbsp;:{" "}
-                <a href={lienCourriel("Quel palier pour moi ?")} className="r-lien !text-sm">
-                  {COURRIEL}
-                </a>
+                {/* 15/09/2026 — l'adresse reste affichée, elle n'est plus
+                    un lien `mailto:`. Plus rien sur le site n'ouvre un
+                    client mail ; le bouton juste à côté mène au formulaire,
+                    en faire un second lien vers la même page ne servirait
+                    à rien.
+                    Le `mailto:` ne subsiste que là où il est la bonne réponse : la carte « Écrire » de /contact, que le visiteur a choisie, et les voies de SECOURS (formulaire ou agenda en panne). */}
+                Ou par e-mail&nbsp;: <span className="text-[#050505]">{COURRIEL}</span>
               </>
             ),
             bouton: { label: "Décrire ma situation", href: lienContact("avant") },

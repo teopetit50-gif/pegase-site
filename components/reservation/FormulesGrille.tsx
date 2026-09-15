@@ -1,10 +1,9 @@
-import Link from "next/link";
+import { BoutonReservation } from "./ModeleUrl";
 import { Check } from "lucide-react";
 import Partage from "@/components/Partage";
 import { ICONES_FORMAT, ICONE_DEFAUT } from "./icones";
 import {
   PROFILS,
-  lienReservation,
   type Formule,
   type Point,
 } from "@/lib/reservation";
@@ -76,7 +75,7 @@ function Libelle({ point }: { point: Point }) {
   );
 }
 
-function Carte({ f, modele }: { f: Formule; modele?: string }) {
+function Carte({ f }: { f: Formule }) {
   /* trait fin (1,4) : c'est la graisse des pictogrammes dessinés à la
      main du reste de la page (Complements) */
   const Icone = ICONES_FORMAT[f.id] ?? ICONE_DEFAUT;
@@ -117,12 +116,15 @@ function Carte({ f, modele }: { f: Formule; modele?: string }) {
       </div>
 
       <div className="fg-action">
-        <Link
-          href={lienReservation(f.id, modele)}
+        {/* 15/09 — <BoutonReservation> et pas <Link> : il emporte le
+            modèle de site choisi sur /modeles, lu dans l'URL au montage.
+            C'est ce qui permet à cette page de rester statique. */}
+        <BoutonReservation
+          formule={f.id}
           className={`r-btn w-full ${f.phare ? "r-btn--noir" : "r-btn--fil"}`}
         >
           {f.cta}
-        </Link>
+        </BoutonReservation>
         <p className="r-note fg-souscta">{f.souscta}</p>
       </div>
 
@@ -143,7 +145,7 @@ function Carte({ f, modele }: { f: Formule; modele?: string }) {
   );
 }
 
-export default function FormulesGrille({ modele }: { modele?: string }) {
+export default function FormulesGrille() {
   /* 28/08 — le sélecteur Indépendant/Équipes a disparu : cette page ne
      parle plus qu'aux organisations. PROFILS[1] est donc le seul profil
      affiché, et le tableau reste à deux entrées pour /tarifs. */
@@ -172,7 +174,7 @@ export default function FormulesGrille({ modele }: { modele?: string }) {
 
       <div className="fg-grille">
         {p.formules.map((f) => (
-          <Carte key={f.id} f={f} modele={modele} />
+          <Carte key={f.id} f={f} />
         ))}
       </div>
 

@@ -8,11 +8,10 @@ import Complements from "@/components/reservation/Complements";
 import Engagements from "@/components/reservation/Engagements";
 import DerouleAudit from "@/components/reservation/DerouleAudit";
 import { MODELES } from "@/components/modeles/donnees";
+import { ModeleRetenu, BoutonReservation } from "@/components/reservation/ModeleUrl";
 import {
   COURRIEL,
   FAQ,
-  lienCourriel,
-  lienReservation,
 } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -74,58 +73,39 @@ const DEROULE: { etape: string; titre: string; texte: string }[] = [
 ];
 
 /* ══════════════════════════════════════════════════════════════════════
-   15/09/2026 — ?modele=<slug> EST ENFIN LU.
+   15/09/2026 — ?modele=<slug> EST ENFIN LU, ET LA PAGE RESTE STATIQUE.
 
-   « Choisir ce modèle » (les 21 cartes de /modeles et le mur de
+   « Choisir ce modèle » (les cartes de /modeles et le mur de
    /tarifs/site) menait ici depuis le 14/09 avec le modèle en paramètre,
    « pour le jour où le formulaire le lira ». Personne ne le lisait : la
    page l'ignorait, ses boutons repartaient sur /reserver sans lui, et le
-   choix se perdait — les 21 boutons valaient « Réserver un audit ».
+   choix se perdait — ces boutons valaient « Réserver un audit ».
 
    Il est maintenant annoncé en tête de page et repart avec chaque bouton
    de réservation, jusqu'au message de la demande (voir PriseDeCreneau).
-   Le slug est vérifié contre MODELES comme sur /site/commande : un
-   paramètre inventé est ignoré, jamais affiché.
 
-   LE PRIX : la page passe en rendu dynamique (ƒ) — elle lit
-   searchParams. C'est le même prix que /reserver depuis le 15/09, et
-   elle n'a ni données ni session à charger : le rendu reste du HTML.
-   ══════════════════════════════════════════════════════════════════════ */
+   La première version lisait `searchParams` : la page passait en ƒ,
+   rendue à chaque visite pour une ligne de rappel. Elle est revenue en ○
+   le jour même — le paramètre se lit au montage, côté client
+   (components/reservation/ModeleUrl.tsx), et le serveur ne fournit que
+   la table slug → nom pour que rien d'inventé ne s'affiche. C'est cette
+   table, et elle seule, qui vérifie le slug. */
+const NOMS_MODELES: Record<string, string> = Object.fromEntries(
+  MODELES.map((m) => [m.slug, m.nom]),
+);
 
-export default async function ReserverUnAuditPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ modele?: string }>;
-}) {
-  const demande = ((await searchParams).modele ?? "").trim();
-  const modeleChoisi = MODELES.find((m) => m.slug === demande);
-  const modele = modeleChoisi?.slug;
-
+export default function ReserverUnAuditPage() {
   return (
     <PageShell>
       {/* couche motion commune : lenis + reveals GSAP */}
       <PageMotion />
 
       <div className="resa">
-        {/* ═══ 0 — le modèle de site retenu, s'il y en a un ═══
-            Une ligne, pas une carte : c'est un rappel, pas une étape. Elle
-            ne s'affiche que si le slug existe vraiment. */}
-        {modeleChoisi ? (
-          <section data-monde="clair" className="r-wrap pt-10 sm:pt-12">
-            <p className="r-note">
-              Modèle de site retenu&nbsp;:{" "}
-              <strong className="font-medium text-[#050505]">{modeleChoisi.nom}</strong>{" "}
-              — il part avec votre demande, et reste modifiable jusqu&apos;à la
-              livraison.{" "}
-              <Link href="/modeles" className="underline underline-offset-4 hover:text-[#050505]">
-                Changer de modèle
-              </Link>
-            </p>
-          </section>
-        ) : null}
+        {/* ═══ 0 — le modèle de site retenu, s'il y en a un ═══ */}
+        <ModeleRetenu noms={NOMS_MODELES} />
 
         {/* ═══ 1 à 3 — formules, orientation, comparatif ═══ */}
-        <Formules modele={modele} />
+        <Formules />
 
         {/* ═══ 3bis — le déroulé, trois temps sur fond gris ═══ */}
         <section id="deroule" data-monde="clair" className="r-wrap py-14 sm:py-20">
@@ -151,7 +131,7 @@ export default async function ReserverUnAuditPage({
         </section>
 
         {/* ═══ 5 — simulateur ═══ */}
-        <Simulateur modele={modele} />
+        <Simulateur />
 
         {/* ═══ 6 — engagements (emplacement des témoignages) ═══ */}
         <section id="engagements" data-monde="clair" className="r-blanc">
@@ -170,21 +150,18 @@ export default async function ReserverUnAuditPage({
               Guadeloupe. Vous en choisissez un, il est bloqué à l&apos;instant même, et vous recevez la confirmation le jour même, avec le lien de la visioconférence.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href={lienReservation("process", modele)}
-                className="r-btn r-btn--noir"
-              >
+              <BoutonReservation formule="process" className="r-btn r-btn--noir">
                 Réserver l&apos;audit gratuit
-              </Link>
+              </BoutonReservation>
             </div>
+            {/* 15/09/2026 — l'adresse reste affichée, elle n'est plus un
+                lien `mailto:` : plus rien sur le site n'ouvre un client
+                mail. Qui préfère écrire depuis sa boîte copie l'adresse ;
+                qui veut écrire depuis le site a /contact dans l'entête et
+                le pied, et le bandeau d'orientation plus haut.
+                Le `mailto:` ne subsiste que là où il est la bonne réponse : la carte « Écrire » de /contact, que le visiteur a choisie, et les voies de SECOURS (formulaire ou agenda en panne). */}
             <p className="r-note mt-5">
-              Ou par e-mail :{" "}
-              <a
-                href={lienCourriel("Audit gratuit")}
-                className="underline underline-offset-4 hover:text-[#050505]"
-              >
-                {COURRIEL}
-              </a>
+              Ou par e-mail : <span className="text-[#050505]">{COURRIEL}</span>
             </p>
             {/* la mention discrète de l'autre porte (28/08) — symétrique de
                 celle qui clôt /tarifs */}

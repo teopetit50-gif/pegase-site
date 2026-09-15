@@ -2,7 +2,7 @@
 
 import * as Accordion from "@radix-ui/react-accordion";
 import { ArrowRight, ChevronDown, Mail } from "lucide-react";
-import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
+import { COURRIEL, lienContact } from "@/lib/reservation";
 import { Button } from "@/components/ui/button";
 import "./faq-tarifs.css";
 
@@ -76,12 +76,15 @@ export default function FaqTarifs({ items }: { items: Item[] }) {
         <p className="mt-4 text-xs leading-4 text-[#616161]">
           <Mail aria-hidden className="mr-1 inline size-3" />
           Ou par e-mail&nbsp;:{" "}
-          <a
-            href={lienCourriel("Tarifs Omega")}
-            className="font-medium text-[#050505] underline-offset-4 hover:underline"
-          >
-            {COURRIEL}
-          </a>
+          {/* 15/09/2026 — l'adresse reste AFFICHÉE, elle n'est plus un lien.
+                Un `mailto:` sort du site vers un client mail (et ne fait
+                rien du tout sur un téléphone sans compte configuré) : c'est
+                la dernière famille de portes sortantes après WhatsApp. En
+                faire un second lien vers /contact ne servait à rien — le
+                bouton juste au-dessus y mène déjà. Reste donc le texte, à
+                copier par qui préfère écrire depuis sa propre boîte.
+                Le `mailto:` ne subsiste que là où il est la bonne réponse : la carte « Écrire » de /contact, que le visiteur a choisie, et les voies de SECOURS (formulaire ou agenda en panne). */}
+          <span className="font-medium text-[#050505]">{COURRIEL}</span>
         </p>
       </div>
 

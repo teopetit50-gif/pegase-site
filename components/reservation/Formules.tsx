@@ -26,11 +26,11 @@ import { lienContact } from "@/lib/reservation";
    points ». Le détail de l'arbitrage est en tête de ComparerFormats.tsx.
    ══════════════════════════════════════════════════════════════════════ */
 
-export default function Formules({ modele }: { modele?: string }) {
+export default function Formules() {
   return (
     <>
       {/* ═══ 1. titre, trois formats, financement ═══ */}
-      <FormulesGrille modele={modele} />
+      <FormulesGrille />
 
       {/* ═══ 2. bandeau d'orientation ═══ */}
       <section data-monde="clair" className="r-wrap pb-14 sm:pb-16">
@@ -48,7 +48,7 @@ export default function Formules({ modele }: { modele?: string }) {
       </section>
 
       {/* ═══ 3. comparatif ═══ */}
-      <ComparerFormats modele={modele} />
+      <ComparerFormats />
     </>
   );
 }
