@@ -130,8 +130,20 @@ export const FAMILLES: Famille[] = [
         system: "FILED",
         slug: "factures-fournisseurs",
         title: "FILED · flux documentaires",
-        job: "Chaque facture fournisseur est lue quel qu'en soit le format, ses montants extraits puis contrôlés entre eux, la pièce classée par émetteur et transmise à la comptabilité dans un dossier complet. Aucune ressaisie, aucune pièce recherchée en urgence à la clôture.",
-        benefit: "La pièce lue, ses montants recoupés, le dossier transmis à la comptabilité.",
+        /* 15/09/2026 (Teo) — « on parle pas que des factures, c'est tous les
+           documents, peu importe le doc que l'entreprise reçoit ; il sait
+           lire ET rédiger pour tout type de document ». Ces deux champs
+           disaient « facture fournisseur » alors que le `title` juste
+           au-dessus dit déjà « flux documentaires » : le paquet se
+           contredisait lui-même. Ils sont lus à huit endroits (MotorCard,
+           PepitesSection, les trois gabarits d'offre, Publics, /offres et
+           /offres/[system]), donc la correction vaut pour tout le site.
+           La facture reste NOMMÉE, en tête des exemples : c'est le cas le
+           plus démontrable, et celui que tient toute la page
+           /offres/factures-fournisseurs — qui, elle, est encore écrite au
+           périmètre étroit. */
+        job: "Chaque document reçu est lu, quels qu'en soient le type et le format — facture, bon de livraison, contrat, courrier —, ses informations extraites puis contrôlées, la pièce classée au bon dossier et la réponse qu'elle appelle rédigée. Aucune ressaisie, aucune pièce recherchée en urgence.",
+        benefit: "Tout document reçu, lu et contrôlé, classé au bon dossier, la réponse rédigée.",
       },
     ],
   },
