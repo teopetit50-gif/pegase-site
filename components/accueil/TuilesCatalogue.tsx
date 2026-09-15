@@ -3,84 +3,72 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { SystemLogo } from "@/components/logos";
+import { SystemSigne } from "@/components/logos";
+import { CADRE_VERRE, GlassCard } from "@/components/ui/glass-card";
 import "./TuilesCatalogue.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   TUILES DU CATALOGUE — les quatre cartes de l'accueil, animées (11/09/2026)
+   TUILES DU CATALOGUE — les quatre cartes de l'accueil
 
-   ORIGINE. `bento-grid-01` de @avanishverma4 (21st.dev) — des tuiles qui
-   portent CHACUNE une animation en boucle au-dessus de son intitulé. C'est
-   le composant que Teo a désigné ; sa contribution propre n'est pas une
-   géométrie, c'est le MOUVEMENT au-dessus du texte.
+   15/09/2026 — LES CARTES PASSENT AU VERRE. Teo, capture de la section à
+   l'appui : « change le design de ces cartes dans l'accueil avec ce
+   composant, je veux la même chose ». Le composant est `glass-card`
+   (21st.dev) : carte encre profonde à coins très arrondis, panneau de
+   verre en retrait, basculement 3D au survol et quatre disques
+   concentriques qui se détachent du fond en cascade. La coque et ses
+   écarts au composant d'origine vivent dans
+   `components/ui/glass-card.tsx` ; ce fichier-ci n'en garde que le
+   contenu.
 
-   Remplace `GrilleSystemes` (components/ui/integrations-three.tsx, repris
-   de cnblocks le matin même). Le fichier reste au dépôt, plus personne ne
-   l'appelle : ses quatre cartes étaient justes mais immobiles, et la
-   section se lisait comme un sommaire.
+   CE QUI EST CONSERVÉ de la version du 11/09 (grille `bento-grid-01`) :
 
-   ——— trois écarts au composant d'origine ——————————————————————————————
+   • LA GRILLE 2 × 2 ÉGALE. Le chapô annonce « quatre systèmes, quatre
+     leviers » : deux tuiles hautes contre deux petites diraient que deux
+     produits comptent plus.
 
-   1. LA GRILLE RESTE EN 2 × 2 ÉGAL. La source range six tuiles sur six
-      colonnes, dont deux hautes (2×2) et deux standard (2×1) — c'est ce
-      qu'a repris /offres pour ses quatre arguments. Ici NON : le chapô
-      annonce « quatre systèmes, quatre leviers », et deux tuiles hautes
-      contre deux petites diraient que deux produits comptent plus. Teo a
-      demandé « le même design » : les quatre gardent leur largeur
-      (~490 px) et leur hauteur.
+   • LES QUATRE ANIMATIONS EN BOUCLE, une par produit. C'est ce que Teo
+     avait demandé le 11/09 contre une grille « juste, mais immobile, qui
+     se lisait comme un sommaire ». La carte de verre ne bouge qu'au
+     survol : sans elles, la section redevenait immobile au repos. Elles
+     sont RÉENCRÉES en blanc dilué (le fond est passé du papier à
+     l'encre), et ne s'affichent qu'à partir de `lg` — c'est la largeur à
+     partir de laquelle la carte dépasse ~460 px et laisse une place libre
+     à GAUCHE des disques. En dessous, la carte retrouve exactement les
+     proportions de la source (~290 px de large, les disques seuls).
 
-   2. LES TUILES SONT DES PORTES, DONC DES `<Link>`. La source pose des
-      `motion.div` décoratifs. Chaque carte mène à sa page produit, d'où le
-      `group`, `.o-card-porte` et le chevron qui avance — conservés tels
-      quels de la grille précédente.
+   • LES TUILES SONT DES PORTES. Chaque carte mène à sa page produit :
+     c'est le `<Link>` qui porte `CADRE_VERRE`, donc `group` et la
+     perspective. Sans cet ancêtre, tous les `group-hover:` de la coque
+     sont muets, en silence.
 
-   3. ENCRE SUR PAPIER, PAS BLANC SUR NOIR. La source peint ses formes en
-      `bg-white/[0.16]` sur `zinc-950`. Le catalogue de l'accueil est clair
-      à filet doré (Teo, 11/09, choix confirmé : les bandes noires ont été
-      retirées de cette page en août). Les formes passent donc en encre
-      diluée, et l'accent est porté par le FILET doré — jamais par un
-      aplat : un or franc étalé sur une carte blanche vire au moutarde.
-      L'or n'est pas réécrit ici : il est porté par `.tc-filet[data-on]`,
-      dans la feuille co-localisée TuilesCatalogue.css, qui résout le
-      `rgba(var(--or), …)` hérité de la carte. `motion` ne garde que ce
-      qu'il sait interpoler — l'en-tête de cette feuille dit pourquoi, et
-      c'est le piège qui a coûté deux passes de recette.
+   CE QUI DISPARAÎT : `.o-card-soft`, `.o-card-porte` et `.o-card-or`. Le
+   liseré doré tournant, la carte claire et son survol appartenaient à la
+   carte de papier. ⚠ `--or` était déclarée par `.offres .o-card-or` et
+   nulle part ailleurs : elle est reprise sur `.tc-carte` dans la feuille
+   co-localisée, sans quoi les accents dorés des animations passeraient au
+   noir sans prévenir.
 
-   ——— ce qui a été évité, et qui coûte une demi-heure sinon ————————————
+   ——— les pièges déjà payés, qui n'ont pas changé de nature ————————————
 
    • PAS DE `whileInView` SUR LA CARTE. L'entrée des blocs appartient à
      GSAP (`[data-reveal]`, components/PageMotion.tsx, qui pose opacity/y
      puis `overwrite: true`). Deux moteurs sur la même propriété du même
-     nœud, et la carte reste à mi-chemin. Seul l'INTÉRIEUR des tuiles est
-     animé par `motion`, et la carte garde son `data-reveal`.
+     nœud, et la carte reste à mi-chemin. Le basculement de la coque est
+     posé sur un nœud INTÉRIEUR, jamais sur celui qui porte `data-reveal`.
 
-   • PAS D'`AnimatePresence`. La source s'en sert avec un `animate` en
-     `repeat: Infinity` dont la transition s'applique aussi à la SORTIE :
-     sous `mode="wait"` l'élément suivant n'entre jamais. Ici les quatre
-     animations ne font que cycler un index sur un `setInterval` — rien à
-     monter ni démonter, donc le piège ne peut pas se poser.
+   • LES ANIMATIONS NE SONT PAS DES PROPS. Le composant est client, la
+     page qui l'appelle est serveur : une fonction passée en prop rend 500
+     en production sans que `tsc` ni `eslint` ne le voient. Les visuels
+     sont choisis ICI, par le sigle (une chaîne, qui traverse).
 
-   • LES ANIMATIONS NE SONT PAS DES PROPS. Le composant est client, la page
-     qui l'appelle est serveur : une fonction passée en prop rend 500 en
-     production sans que `tsc` ni `eslint` ne le voient. Les visuels sont
-     donc choisis ICI, par le sigle (une chaîne, qui traverse).
-
-   • L'ÉTAT INERTE EST POSÉ EN DUR DANS `style`, pas seulement dans
-     `animate`. Deux raisons qui se cumulent : un `border` Tailwind v4 sans
-     couleur peint en `currentColor` — donc en ENCRE PLEINE — et avant
-     hydratation aucune valeur de `motion` n'est encore appliquée. La tuile
-     se montrait donc une fraction de seconde avec des filets noirs et des
-     barres invisibles (relevé au CDP le 11/09 : `rgb(9, 9, 11)` sur les
-     quatorze nœuds de la première tuile).
-
-     ⚠ ET C'EST `initial`, PAS `style`. Poser la valeur inerte dans `style`
-     règle bien le premier rendu, mais casse l'animation : React réécrit
-     l'attribut `style` à CHAQUE rendu et efface ce que `motion` venait
-     d'interpoler — les accents dorés ne sont alors jamais apparus (même
-     relevé, deux minutes plus tard). `initial` est rendu côté serveur dans
-     l'attribut `style` par `motion` lui-même, puis `motion` garde la main
-     sur la propriété. `style` ne garde donc que la GÉOMÉTRIE, jamais une
-     propriété animée.
+   • L'ÉTAT INERTE EST POSÉ DANS `initial`, PAS DANS `style`. Un `border`
+     Tailwind v4 sans couleur peint en `currentColor`, et avant hydratation
+     aucune valeur de `motion` n'est appliquée : la tuile se montrait une
+     fraction de seconde avec des filets pleins. Mais `style` casse
+     l'animation — React réécrit l'attribut à chaque rendu et efface ce
+     que `motion` venait d'interpoler. `initial` est rendu côté serveur
+     par `motion` lui-même, puis `motion` garde la main. `style` ne porte
+     donc que la GÉOMÉTRIE.
 
    • AUCUN CHIFFRE, AUCUN LIBELLÉ dans les visuels. Ce sont des barres et
      des pastilles : montrer « 3 relances » ou un montant serait inventer
@@ -88,14 +76,16 @@ import "./TuilesCatalogue.css";
 
    `prefers-reduced-motion` : les quatre se figent sur leur état d'arrivée
    (échéance marquée, file priorisée, demandes qualifiées, documents
-   classés) au lieu de boucler. La source ne le faisait pas.
+   classés) au lieu de boucler.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* encre diluée : les trois crans des formes inertes, tièdes et marquées */
-const INERTE = "rgba(24, 24, 27, 0.08)";
-const TIEDE = "rgba(24, 24, 27, 0.16)";
-const MARQUE = "rgba(24, 24, 27, 0.30)";
-/* le filet au repos vit désormais dans TuilesCatalogue.css (`.tc-filet`) */
+/* blanc dilué : les trois crans des formes inertes, tièdes et marquées.
+   Le fond ayant changé de camp le 15/09, ce sont les valeurs d'encre du
+   11/09 retournées — mêmes alphas relatifs, lues sur near-black. */
+const INERTE = "rgba(255, 255, 255, 0.14)";
+const TIEDE = "rgba(255, 255, 255, 0.30)";
+const MARQUE = "rgba(255, 255, 255, 0.80)";
+/* le filet au repos vit dans TuilesCatalogue.css (`.tc-filet`) */
 
 const DOUX = { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const };
 const GLISSE = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
@@ -107,11 +97,10 @@ const GLISSE = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
    `useState(fige ? arrivee : 0)` ne marche pas : `useReducedMotion()` rend
    `null` au premier rendu (il lit la requête média au montage), donc `fige`
    y vaut toujours faux — et la valeur initiale d'un `useState` ne se relit
-   jamais. Les tuiles se figeaient alors sur l'état VIDE : aucune échéance
-   marquée, aucune demande qualifiée, les pièces encore en pile. Immobile,
-   donc « conforme » à une sonde qui ne vérifie que l'immobilité, et pourtant
-   exactement l'inverse de ce qu'on veut montrer à quelqu'un qui a coupé les
-   animations. Relevé à la recette du 11/09. */
+   jamais. Les tuiles se figeaient alors sur l'état VIDE : immobile, donc
+   « conforme » à une sonde qui ne vérifie que l'immobilité, et pourtant
+   exactement l'inverse de ce qu'on veut montrer à quelqu'un qui a coupé
+   les animations. Relevé à la recette du 11/09. */
 function useCycle(modulo: number, ms: number, fige: boolean, arrivee: number) {
   const [tic, setTic] = useState(0);
   useEffect(() => {
@@ -119,9 +108,6 @@ function useCycle(modulo: number, ms: number, fige: boolean, arrivee: number) {
     const t = setInterval(() => setTic((p) => p + 1), ms);
     return () => clearInterval(t);
   }, [fige, ms]);
-  /* l'état est DÉRIVÉ, pas rangé : c'est ce qui permet à `fige` d'imposer
-     l'arrivée sans écrire dans un effet (que `react-hooks/set-state-in-effect`
-     refuse, à raison — un `setEtat` dans un effet fait un rendu de plus). */
   return fige ? arrivee : tic % modulo;
 }
 
@@ -133,43 +119,41 @@ function Echeancier({ fige }: { fige: boolean }) {
   const largeurs = [124, 96, 110];
 
   return (
-    /* le groupe est CENTRÉ dans la tuile, et la piste a une largeur fixe :
-       sans elle, la pastille suit la barre et les trois se décalent en
-       escalier — l'irrégularité se voit avant l'animation. */
-    <div className="flex h-full items-center justify-center">
+    /* la piste a une largeur fixe : sans elle, la pastille suit la barre
+       et les trois se décalent en escalier — l'irrégularité se voit avant
+       l'animation. */
+    <div className="flex h-full items-center">
       <div className="flex flex-col gap-3">
-      {[0, 1, 2].map((i) => {
-        const on = i === actif;
-        return (
-          <div key={i} className="flex items-center gap-3">
-            <span className="block w-[124px]">
+        {[0, 1, 2].map((i) => {
+          const on = i === actif;
+          return (
+            <div key={i} className="flex items-center gap-3">
+              <span className="block w-[124px]">
+                <motion.span
+                  className="block h-[7px] rounded-full"
+                  style={{ width: largeurs[i] }}
+                  initial={{ backgroundColor: INERTE }}
+                  animate={{ backgroundColor: on ? MARQUE : INERTE }}
+                  transition={DOUX}
+                />
+              </span>
               <motion.span
-                className="block h-[7px] rounded-full"
-                style={{ width: largeurs[i] }}
-                initial={{ backgroundColor: INERTE }}
-                animate={{ backgroundColor: on ? MARQUE : INERTE }}
+                className="tc-filet h-[13px] w-[13px] rounded-full border"
+                data-on={on ? "oui" : "non"}
+                initial={{ scale: 1 }}
+                animate={{ scale: on ? 1.15 : 1 }}
                 transition={DOUX}
               />
-            </span>
-            <motion.span
-              className="tc-filet h-[13px] w-[13px] rounded-full border"
-              data-on={on ? "oui" : "non"}
-              initial={{ scale: 1 }}
-              animate={{ scale: on ? 1.15 : 1 }}
-              transition={DOUX}
-            />
-          </div>
-        );
-      })}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 /* ——— 2 · REPRISE — « identifiés, priorisés et remis dans le bon circuit » ———
-   la file se réordonne : c'est le mécanisme `layout` de la source (ses
-   blocs qui se recomposaient), réaffecté à la priorisation. Le premier rang
-   se marque à chaque recomposition. */
+   la file se réordonne ; le premier rang se marque à chaque recomposition. */
 const ORDRES = [
   [0, 1, 2, 3],
   [2, 0, 3, 1],
@@ -180,7 +164,7 @@ function Repriorisation({ fige }: { fige: boolean }) {
   const largeurs = [132, 104, 118, 88];
 
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex h-full items-center">
       <div className="flex flex-col gap-2.5">
         {ORDRES[etape].map((id, rang) => (
           <motion.span
@@ -205,73 +189,68 @@ function Qualification({ fige }: { fige: boolean }) {
   const faites = useCycle(4, 900, fige, 3);
 
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex h-full items-center">
       <div className="flex flex-col gap-2.5">
-      {[0, 1, 2].map((i) => {
-        const on = i < faites;
-        return (
-          <div
-            key={i}
-            className="tc-filet flex items-center justify-between gap-3 rounded-md border px-2.5 py-[7px]"
-            data-on={on ? "oui" : "non"}
-            style={{ width: 156 }}
-          >
-            <motion.span
-              className="h-[6px] rounded-full"
-              style={{ width: [64, 46, 56][i] }}
-              initial={{ backgroundColor: INERTE }}
-              animate={{ backgroundColor: on ? MARQUE : INERTE }}
-              transition={DOUX}
-            />
-            <motion.svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-              initial={{ opacity: 0.18, color: TIEDE }}
-              animate={{ opacity: on ? 1 : 0.18, color: on ? "rgba(24,24,27,0.75)" : TIEDE }}
-              transition={DOUX}
+        {[0, 1, 2].map((i) => {
+          const on = i < faites;
+          return (
+            <div
+              key={i}
+              className="tc-filet flex items-center justify-between gap-3 rounded-md border px-2.5 py-[7px]"
+              data-on={on ? "oui" : "non"}
+              style={{ width: 156 }}
             >
-              <path d="M20 6 9 17l-5-5" />
-            </motion.svg>
-          </div>
-        );
-      })}
+              <motion.span
+                className="h-[6px] rounded-full"
+                style={{ width: [64, 46, 56][i] }}
+                initial={{ backgroundColor: INERTE }}
+                animate={{ backgroundColor: on ? MARQUE : INERTE }}
+                transition={DOUX}
+              />
+              <motion.svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+                initial={{ opacity: 0.18, color: TIEDE }}
+                animate={{
+                  opacity: on ? 1 : 0.18,
+                  color: on ? "rgba(255,255,255,0.92)" : TIEDE,
+                }}
+                transition={DOUX}
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </motion.svg>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 /* ——— 4 · FACTURES — « lus, contrôlés, classés et transmis » ———
-   les pièces quittent la pile et se rangent dans trois casiers. Les casiers
-   sont dessinés au trait pointillé pour se lire comme des emplacements
-   vides, sans rien nommer. */
+   les pièces quittent la pile et se rangent dans trois casiers, dessinés
+   au trait pointillé pour se lire comme des emplacements vides. */
 function Classement({ fige }: { fige: boolean }) {
   const rangees = useCycle(4, 1100, fige, 3);
   const casiers = [-30, 0, 30];
 
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex h-full items-center">
       <div className="relative h-[96px] w-[190px]">
-        {/* les trois casiers */}
         {casiers.map((y, i) => (
           <span
             key={`casier-${i}`}
             className="tc-filet absolute rounded-[5px] border border-dashed"
-            style={{
-              width: 46,
-              height: 26,
-              right: 4,
-              top: 35 + y,
-            }}
+            style={{ width: 46, height: 26, right: 4, top: 35 + y }}
           />
         ))}
-        {/* les trois pièces */}
         {[0, 1, 2].map((i) => {
           const rangee = i < rangees;
           return (
@@ -281,14 +260,18 @@ function Classement({ fige }: { fige: boolean }) {
               data-on={rangee ? "oui" : "non"}
               style={{ width: 44, height: 24, left: 6, top: 36 }}
               initial={{
-                x: i * 5, y: i * -4, rotate: -7 + i * 3,
-                backgroundColor: "rgba(24,24,27,0.04)",
+                x: i * 5,
+                y: i * -4,
+                rotate: -7 + i * 3,
+                backgroundColor: "rgba(255,255,255,0.05)",
               }}
               animate={{
                 x: rangee ? 134 : i * 5,
                 y: rangee ? casiers[i] : i * -4,
                 rotate: rangee ? 0 : -7 + i * 3,
-                backgroundColor: rangee ? "rgba(255,255,255,1)" : "rgba(24,24,27,0.04)",
+                backgroundColor: rangee
+                  ? "rgba(255,255,255,0.88)"
+                  : "rgba(255,255,255,0.05)",
               }}
               transition={GLISSE}
             />
@@ -331,6 +314,7 @@ function Chevron({ taille = 12 }: { taille?: number }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
+      className="transition-transform duration-300 group-hover:translate-x-[3px]"
     >
       <path d="m9 18 6-6-6-6" />
     </svg>
@@ -338,8 +322,8 @@ function Chevron({ taille = 12 }: { taille?: number }) {
 }
 
 export type TuileCatalogue = {
-  /* sigle interne (CASHD, RELOAD…) : porte le logo, le visuel et la clé.
-     Jamais affiché. */
+  /* sigle interne (CASHD, RELOAD…) : porte le signe, le visuel et la clé.
+     Jamais affiché tel quel — c'est `nom` qui s'écrit. */
   system: string;
   nom: string;
   objectif: string;
@@ -357,49 +341,55 @@ export function TuilesCatalogue({
   const fige = useReducedMotion() ?? false;
 
   return (
-    /* EXACTEMENT QUATRE ENFANTS DIRECTS. Le liseré doré est décalé d'un
-       quart de cycle par `.o-card-or:nth-child(2|3|4)` : un enveloppeur
-       autour d'une carte, ou un cinquième nœud dans la grille, et la vague
-       redevient un clignotement d'un bloc. */
+    /* la gouttière passe de 16 à 24 px : les cartes basculent en 3D au
+       survol, et leur coin haut-droit sort du cadre. */
     <div
-      className={`mx-auto grid max-w-[1000px] grid-cols-1 gap-4 sm:grid-cols-2 ${className}`}
+      className={`mx-auto grid max-w-[1000px] grid-cols-1 gap-6 sm:grid-cols-2 ${className}`}
     >
       {tuiles.map((t) => (
         <Link
           key={t.system}
           href={t.href}
           data-reveal
-          className="o-card-soft o-card-porte o-card-or group flex flex-col p-6 lg:p-8"
+          className={`tc-carte ${CADRE_VERRE} min-h-[330px] lg:min-h-[420px]`}
         >
-          <div
-            aria-hidden
-            className="mb-7 h-[104px] shrink-0 sm:h-[116px]"
-          >
-            <Visuel system={t.system} fige={fige} />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <SystemLogo system={t.system} />
-            <span
-              className="text-[15px] font-semibold tracking-[-0.02em] text-[var(--o-text)]"
-              style={{ fontFamily: "var(--font-jakarta)" }}
+          <GlassCard marque={<SystemSigne system={t.system} taille={24} />}>
+            {/* la zone haute : sous `lg` elle ne fait que dégager les
+                disques (100 px, comme la source) ; à partir de `lg` elle
+                accueille le visuel animé, à gauche d'eux. */}
+            <div
+              aria-hidden
+              className="h-[100px] shrink-0 px-8 pt-8 lg:h-[196px] lg:pr-[200px]"
             >
-              {t.nom}
-            </span>
-          </div>
+              <div className="hidden h-full lg:block">
+                <Visuel system={t.system} fige={fige} />
+              </div>
+            </div>
 
-          <h3
-            className="mt-6 text-[18px] font-semibold leading-[1.35] tracking-[-0.02em] text-[var(--o-text)]"
-            style={{ fontFamily: "var(--font-jakarta)" }}
-          >
-            {t.objectif}
-          </h3>
-          <p className="o-body mt-2 !text-[15px] !leading-[26px]">{t.texte}</p>
+            <div className="flex flex-1 flex-col px-8 pb-8">
+              <span
+                className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/45"
+                style={{ fontFamily: "var(--font-jakarta)" }}
+              >
+                {t.nom}
+              </span>
 
-          <span className="o-link mt-auto self-start pt-6 !text-[14px]">
-            Voir le détail
-            <Chevron taille={12} />
-          </span>
+              <h3
+                className="mt-3 text-[19px] font-semibold leading-[1.35] tracking-[-0.02em] text-white"
+                style={{ fontFamily: "var(--font-jakarta)" }}
+              >
+                {t.objectif}
+              </h3>
+              <p className="mt-2.5 max-w-[34ch] text-[15px] leading-[26px] text-white/60">
+                {t.texte}
+              </p>
+
+              <span className="tc-lien mt-auto inline-flex items-center gap-1.5 self-start pt-7 text-[14px] font-semibold text-white">
+                Voir le détail
+                <Chevron taille={12} />
+              </span>
+            </div>
+          </GlassCard>
         </Link>
       ))}
     </div>

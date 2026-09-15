@@ -1,37 +1,63 @@
 /* ══════════════════════════════════════════════════════════════════════
-   Filets des tuiles du catalogue — feuille co-localisée (11/09/2026)
+   Filets des tuiles du catalogue — feuille co-localisée
+   (11/09/2026, réencrée pour le fond sombre le 15/09/2026)
 
    POURQUOI UNE FEUILLE, ET PAS `animate` DE MOTION. L'accent doré des
-   tuiles est `rgba(var(--or), 0.9)` : la variable est déclarée par
-   `.offres .o-card-or` dans globals.css, et c'est la SEULE définition de
-   l'or du site. Or `motion` ne sait pas interpoler une couleur qui contient
-   un `var()` — il n'en fait rien, silencieusement. Relevé deux fois au CDP
-   le 11/09 : la marque dorée n'apparaissait jamais, et la sonde qui ne
-   vérifiait que l'immobilité répondait « conforme ».
+   tuiles est `rgba(var(--or), …)`. Or `motion` ne sait pas interpoler une
+   couleur qui contient un `var()` — il n'en fait rien, silencieusement.
+   Relevé deux fois au CDP le 11/09 : la marque dorée n'apparaissait
+   jamais, et la sonde qui ne vérifiait que l'immobilité répondait
+   « conforme ». Le CSS, lui, résout `var()` sans difficulté ; `motion` ne
+   garde que ce qu'il interpole bien (transformées, opacités, couleurs
+   littérales).
 
-   Trois façons de s'en sortir, et pourquoi celle-ci :
-   • réécrire l'or en rgba littéral dans le composant → une deuxième source
-     de vérité pour une couleur que Teo a déjà fait corriger une fois ;
-   • le lire au `getComputedStyle` au montage → une mesure pour une couleur ;
-   • le laisser au CSS, qui résout `var()` sans difficulté, et ne garder
-     dans `motion` que ce qu'il interpole bien (transformées, opacités,
-     couleurs littérales). C'est celle-ci.
+   ⚠ LA VARIABLE EST REDÉCLARÉE ICI (15/09). Jusqu'au 14, `--or` était
+   posée par `.offres .o-card-or` dans globals.css — la seule définition de
+   l'or du site — et les tuiles en héritaient parce qu'elles portaient
+   cette classe. Les cartes de verre ne la portent plus : sans la ligne
+   ci-dessous, `rgba(var(--or), …)` ne résout rien et les accents dorés
+   passent au noir, sans erreur. Même valeur, au chiffre près, que
+   globals.css ligne ~1552 : si l'or du site change, les deux changent.
 
-   Pas dans globals.css à dessein : une deuxième session travaille dans le
-   même arbre ce soir, et un fichier partagé se réécrit sans prévenir.
+   Pas dans globals.css à dessein : d'autres sessions travaillent dans le
+   même arbre et un fichier partagé se réécrit sans prévenir.
    ══════════════════════════════════════════════════════════════════════ */
 
+.tc-carte {
+  --or: 176, 141, 87;
+}
+
+/* Le filet au repos est passé de l'encre diluée au BLANC dilué : la carte
+   est sombre depuis le 15/09, un `rgba(24,24,27,0.12)` y serait invisible
+   (et un `border` Tailwind v4 sans couleur peindrait en `currentColor`,
+   donc en blanc plein — d'où la valeur posée ici, jamais laissée vide). */
 .tc-filet {
-  border-color: rgba(24, 24, 27, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
   transition: border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* L'or monte à 1 : sur le papier il fallait le diluer pour ne pas virer au
+   moutarde ; sur near-black c'est l'inverse, un or à 0,9 se lit comme un
+   gris chaud. C'est ici un TRAIT de 1 px, jamais un aplat. */
 .tc-filet[data-on="oui"] {
-  border-color: rgba(var(--or), 0.9);
+  border-color: rgba(var(--or), 1);
+}
+
+/* Le lien de bas de carte prend l'or au survol de la carte entière — le
+   `group` est sur le `<Link>` (voir CADRE_VERRE). */
+.tc-lien {
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) {
+  .tc-carte:hover .tc-lien {
+    color: rgba(var(--or), 1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tc-filet {
+  .tc-filet,
+  .tc-lien {
     transition: none;
   }
 }

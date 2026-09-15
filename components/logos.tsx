@@ -156,3 +156,55 @@ export function SystemLockup({
     />
   );
 }
+
+/* Le SIGNE SEUL — l'icône du paquet, sans sa tuile blanche (15/09/2026).
+   `SystemLogo` apporte son propre fond blanc arrondi : il n'a rien à faire
+   dans un emplacement qui EST déjà une pastille (le disque blanc des cartes
+   de verre du catalogue, où la tuile ferait un carré blanc dans un rond
+   blanc). Même masque alpha, même source, seule la tuile disparaît.
+   Repli sur l'initiale, comme `SystemLogo`, pour un paquet sans logo. */
+export function SystemSigne({
+  system,
+  taille = 26,
+  couleur = ENCRE,
+}: {
+  system: string;
+  taille?: number;
+  couleur?: string;
+}) {
+  const logo = LOGOS[system];
+
+  if (!logo) {
+    return (
+      <span
+        role="img"
+        aria-label={nomPaquet(system)}
+        className="font-semibold tracking-[-0.03em]"
+        style={{ color: couleur, fontSize: taille * 0.6 }}
+      >
+        {system.slice(0, 1)}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      role="img"
+      aria-label={`Logo ${nomPaquet(system)}`}
+      className="block"
+      style={{
+        height: taille,
+        width: taille,
+        backgroundColor: couleur,
+        WebkitMaskImage: `url(${logo.mark})`,
+        maskImage: `url(${logo.mark})`,
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskPosition: "center",
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+      }}
+    />
+  );
+}

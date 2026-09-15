@@ -140,7 +140,7 @@ export const POSTES: Poste[] = [
     nom: "Relance des clients inactifs",
     slug: "nouvelles-affaires",
     resume:
-      "Vos clients inactifs sont identifiés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les entretiens qui redeviennent dus et les commandes que personne n’est venu reprendre entrent dans la même liste.",
+      "Vos clients inactifs sont identifiés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre entrent dans la même liste.",
     court: "Clients inactifs recontactés, échéances et commandes en plan reprises.",
   },
   {
