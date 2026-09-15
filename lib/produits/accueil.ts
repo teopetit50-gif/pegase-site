@@ -497,7 +497,7 @@ export const FRANCAIS = {
         "Les réponses emploient le vocabulaire de votre métier, et le suivi se fait au téléphone.",
     },
   ],
-  lien: { libelle: "Mentions légales", href: "/mentions-legales" },
+  lien: { libelle: "Où vont vos données", href: "/vos-donnees" },
 } as const;
 
 /* La conversation de la fiche, jouée telle quelle dans le panneau du haut.

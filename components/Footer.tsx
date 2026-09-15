@@ -25,7 +25,6 @@ const LIENS: { label: string; href: string }[] = [
      cite. Le pied est le seul endroit où on la cherche — c'est là qu'un
      client va lire les mentions légales, et c'est la même question. */
   { label: "Où vont vos données", href: "/vos-donnees" },
-  { label: "Mentions légales", href: "/mentions-legales" },
 ];
 
 export default function Footer() {

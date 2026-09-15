@@ -49,7 +49,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
        à une question à laquelle aucune autre page du site ne répond. */
     { url: "/vos-donnees", priorite: 0.8, frequence: "monthly" },
     { url: "/blog", priorite: 0.7, frequence: "weekly" },
-    { url: "/mentions-legales", priorite: 0.2, frequence: "yearly" },
   ];
 
   const moteurs = FAMILLES.flatMap((f) => f.moteurs).map((m) => ({

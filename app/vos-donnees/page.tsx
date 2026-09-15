@@ -300,7 +300,6 @@ const PIED = [
     liens: [
       { label: "Blog", href: "/blog" },
       { label: "Commencer", href: "/commencer" },
-      { label: "Mentions légales", href: "/mentions-legales" },
     ],
   },
   {
@@ -434,13 +433,6 @@ export default function VosDonnees() {
                         Engagement repris au contrat, pas une promesse de page d&apos;accueil
                       </span>
                     </p>
-                    <Link
-                      href="/mentions-legales"
-                      className="mt-7 inline-flex items-center gap-1.5 border-b border-white/40 pb-0.5 text-[14px] tracking-[-0.01em] text-white transition-colors hover:border-white"
-                    >
-                      Lire les mentions légales
-                      <FlecheCoin className="h-3 w-3" />
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -513,12 +505,7 @@ export default function VosDonnees() {
               <p className="vd-small mx-auto mt-8 max-w-[42rem] text-center">
                 Aucun autre tiers ne reçoit quoi que ce soit. La liste nominative de nos
                 prestataires, avec leur pays d&apos;hébergement et leurs garanties, est
-                annexée au contrat et communiquée sur simple demande. Le détail juridique
-                figure dans les{" "}
-                <Link href="/mentions-legales" className="underline underline-offset-2">
-                  mentions légales
-                </Link>
-                .
+                annexée au contrat et communiquée sur simple demande.
               </p>
             </div>
           </section>
@@ -631,13 +618,7 @@ export default function VosDonnees() {
 
             <div className="mt-16 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
               <p className="vd-pied-label sm:text-right">
-                © 2026 Omega.AI, tous droits réservés ·{" "}
-                <Link
-                  href="/mentions-legales"
-                  className="underline underline-offset-2 transition-colors hover:text-white"
-                >
-                  Mentions légales
-                </Link>
+                © 2026 Omega.AI, tous droits réservés
               </p>
             </div>
           </div>
