@@ -27,6 +27,8 @@ import {
   type Agenda,
 } from "@/lib/creneaux";
 import { lienContact } from "@/lib/reservation";
+import { useMonde } from "@/components/tarifs/monde";
+import { GRANDE_STRUCTURE } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
    AppelFinal — la clôture de /tarifs (15/09/2026)
@@ -69,19 +71,44 @@ import { lienContact } from "@/lib/reservation";
       ils font deux écrans de haut sur téléphone.
 
    Les textes sont ceux de la page (28/08, 05/09) : rien de réécrit.
+
+   ═══ 15/09/2026, SECONDE PASSE — LA SECTION SUIT LE SÉLECTEUR DES DEUX
+   MONDES. Son bouton disait « Réserver un audit » sous une grille qui
+   venait d'annoncer « Réserver un diagnostic » ; l'état du monde vit
+   désormais dans components/tarifs/monde.tsx, et cette carte le lit.
+
+   Ce n'est PAS qu'un changement de mot : trois choses que cette section
+   affirme ne tiennent pas côté groupes, et ce sont elles qui rendaient la
+   bascule nécessaire.
+     1. LA DURÉE DU CALENDRIER. L'agenda montre les jours où un créneau
+        tient encore, et l'écart 4 ci-dessus engage que « un jour montré
+        libre ici doit l'être encore là-bas ». Côté PME le premier format
+        est le Diagnostic (30 min) ; côté groupes c'est le Cadrage
+        (45 min). À 30 minutes, un jour dont il ne reste qu'une demi-heure
+        s'affichait libre alors que /reserver-un-audit le refuse.
+     2. « Votre tarif est arrêté en trente minutes ». Trente minutes
+        n'existe pas de ce côté, et le tarif n'y est pas arrêté par le
+        rendez-vous mais écrit au devis qui le suit.
+     3. « Il est gratuit », sans réserve : côté groupes, gratuit dans les
+        deux premiers formats — l'Audit + atelier est sur devis.
+   Les textes de remplacement sont dans GRANDE_STRUCTURE.appel
+   (lib/paliers.ts), avec les autres phrases de ce monde.
    ══════════════════════════════════════════════════════════════════════ */
 
 /* 15/09/2026 — l'agenda montrait les créneaux d'INSTALLATION (45 min) et
    son bouton disait « Choisir mes postes » : la page finissait par
    proposer d'acheter, alors que ses cartes venaient d'annoncer que le
-   prix sort de l'audit. Il montre désormais les créneaux d'AUDIT (30 min,
-   parcours `diagnostic`), la porte que /tarifs ouvre vraiment. Celle de
+   prix sort de l'audit. Il montre désormais les créneaux du premier
+   format d'audit, la porte que /tarifs ouvre vraiment. Celle de
    l'installation reste en pied de carte, pour qui a déjà fait l'audit. */
-const DUREE = DUREES_RDV.diagnostic ?? 30;
+const DUREE_PME = DUREES_RDV.diagnostic ?? 30;
+const DUREE_STRUCTURE = DUREES_RDV[GRANDE_STRUCTURE.appel.parcours] ?? 45;
 
 const clef = (annee: number, mois: number, jour: number) => `${annee}-${mois}-${jour}`;
 
 export default function AppelFinal() {
+  const devis = useMonde() === "structure";
+  const duree = devis ? DUREE_STRUCTURE : DUREE_PME;
   const [agenda, setAgenda] = React.useState<Agenda | null>(null);
   const [chargement, setChargement] = React.useState(true);
 
@@ -126,16 +153,16 @@ export default function AppelFinal() {
       const m = d.getMonth() + 1;
       const dernier = new Date(annee, m, 0).getDate();
       for (let j = 1; j <= dernier; j++) {
-        if (creneauxDuJour(agenda, annee, m, j, DUREE).length) set.add(clef(annee, m, j));
+        if (creneauxDuJour(agenda, annee, m, j, duree).length) set.add(clef(annee, m, j));
       }
     }
     return set;
-  }, [agenda, mois, nbMois]);
+  }, [agenda, mois, nbMois, duree]);
 
   const creneaux = React.useMemo(() => {
     if (!agenda || !jour) return [];
-    return creneauxDuJour(agenda, jour.getFullYear(), jour.getMonth() + 1, jour.getDate(), DUREE);
-  }, [agenda, jour]);
+    return creneauxDuJour(agenda, jour.getFullYear(), jour.getMonth() + 1, jour.getDate(), duree);
+  }, [agenda, jour, duree]);
 
   const calendrierVisible = !chargement && agenda !== null;
 
@@ -144,14 +171,23 @@ export default function AppelFinal() {
       <Card data-reveal className="mx-auto w-full max-w-4xl overflow-hidden">
         <CardHeader className="border-b border-neutral-200 p-6 sm:p-8">
           <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-[#050505] sm:text-[32px]">
-            Votre tarif est arrêté en trente minutes
+            {devis ? GRANDE_STRUCTURE.appel.titre : "Votre tarif est arrêté en trente minutes"}
           </h2>
-          <CardDescription className="max-w-[62ch] text-[15px] leading-relaxed text-[#616161]">
-            L&apos;audit relève votre volumétrie réelle à partir de vos propres
-            exports&nbsp;: ce qui est traité chaque mois, la part qui revient à un opérateur, et
-            ce qui n&apos;est pas comptabilisé aujourd&apos;hui. Vous repartez avec le périmètre,
-            le tarif et le plan de mise en service, écrits avant tout engagement. Il est gratuit,
-            et aucune donnée n&apos;est enregistrée sur cette page.
+          <CardDescription
+            key={devis ? "structure" : "pme"}
+            className="rv-fondu max-w-[62ch] text-[15px] leading-relaxed text-[#616161]"
+          >
+            {devis ? (
+              GRANDE_STRUCTURE.appel.chapo
+            ) : (
+              <>
+                L&apos;audit relève votre volumétrie réelle à partir de vos propres
+                exports&nbsp;: ce qui est traité chaque mois, la part qui revient à un opérateur,
+                et ce qui n&apos;est pas comptabilisé aujourd&apos;hui. Vous repartez avec le
+                périmètre, le tarif et le plan de mise en service, écrits avant tout engagement.
+                Il est gratuit, et aucune donnée n&apos;est enregistrée sur cette page.
+              </>
+            )}
           </CardDescription>
         </CardHeader>
 
@@ -214,7 +250,10 @@ export default function AppelFinal() {
                     {creneaux.length > 1 ? "s" : ""}, de{" "}
                     <span className="num">{heureGp(creneaux[0])}</span> à{" "}
                     <span className="num">{heureGp(creneaux[creneaux.length - 1])}</span>, heure de
-                    Guadeloupe. Réservez l&apos;audit pour bloquer l&apos;un d&apos;eux.
+                    Guadeloupe.{" "}
+                    {devis
+                      ? GRANDE_STRUCTURE.appel.jour
+                      : "Réservez l'audit pour bloquer l'un d'eux."}
                   </>
                 )}
               </p>
@@ -227,8 +266,11 @@ export default function AppelFinal() {
           )}
 
           <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href="/reserver-un-audit" className="r-btn r-btn--noir w-full sm:w-auto">
-              Réserver un audit
+            <Link
+              href={devis ? GRANDE_STRUCTURE.href : "/reserver-un-audit"}
+              className="r-btn r-btn--noir w-full sm:w-auto"
+            >
+              {devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
               <ArrowRight aria-hidden className="size-4" />
             </Link>
             <Lien href={lienContact("avant")} className="r-btn r-btn--fil w-full sm:w-auto">
@@ -241,9 +283,15 @@ export default function AppelFinal() {
             la carte ouvre l'audit, le pied garde l'installation pour qui l'a
             déjà fait — l'ordre des deux portes suit celui du parcours */}
         <CardFooter className="flex flex-col items-start gap-3 border-t border-neutral-200 bg-[#fafafa] p-6 pt-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-          <p className="text-[13px] leading-5 text-[#616161]">
-            Votre audit est réalisé et votre tarif arrêté&nbsp;? La réunion d&apos;installation
-            se réserve directement, postes sélectionnés.
+          <p key={devis ? "structure" : "pme"} className="rv-fondu text-[13px] leading-5 text-[#616161]">
+            {devis ? (
+              GRANDE_STRUCTURE.appel.pied
+            ) : (
+              <>
+                Votre audit est réalisé et votre tarif arrêté&nbsp;? La réunion
+                d&apos;installation se réserve directement, postes sélectionnés.
+              </>
+            )}
           </p>
           <Link
             href="/installation"

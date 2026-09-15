@@ -1,6 +1,10 @@
+"use client";
+
 import { Landmark, PieChart, Receipt } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useMonde } from "@/components/tarifs/monde";
+import { GRANDE_STRUCTURE } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
    ChequeTic — le Chèque TIC (14/09/2026)
@@ -49,6 +53,15 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
    la bande et FAQ « Le Chèque TIC s'applique-t-il ici ? ») — rien
    d'ajouté. La mention « Région Guadeloupe » reste : aide régionale sur
    un site national, l'incise est obligatoire.
+
+   15/09/2026 — LA BANDE SUIT LE SÉLECTEUR DES DEUX MONDES. Elle disait
+   « Réserver un audit » sous une grille qui venait d'annoncer « Réserver un
+   diagnostic » : rien n'était cassé (même destination), mais c'étaient deux
+   vocabulaires sur un même écran. Ce qui bascule ici est le MINIMUM — le
+   chapô et le bouton ; le dispositif lui-même ne dépend pas de qui valide
+   chez le client, donc le titre, les trois chiffres et leurs phrases sont
+   les mêmes des deux côtés. Le composant passe client pour cela seul : le
+   HTML servi reste celui des indépendants (voir components/tarifs/monde).
    ══════════════════════════════════════════════════════════════════════ */
 
 type Icone = ComponentType<{ className?: string; strokeWidth?: number }>;
@@ -87,6 +100,8 @@ const Decor = ({ children }: { children: ReactNode }) => (
 );
 
 export default function ChequeTic() {
+  const devis = useMonde() === "structure";
+
   return (
     <div className="r-wrap py-16 sm:py-24">
       <div className="mx-auto max-w-3xl text-center">
@@ -94,16 +109,28 @@ export default function ChequeTic() {
         <h2 className="r-h2 mx-auto mt-5 max-w-[20ch] text-balance">
           De 40 à 80&nbsp;% d&apos;un projet numérique financés
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-balance text-[15px] leading-[24px] text-[#d4d4d8]">
-          Le dispositif porte sur l&apos;installation, jamais sur l&apos;abonnement. Votre
-          éligibilité est vérifiée à l&apos;audit, et si un dossier se justifie, nous le montons
-          avec vous.
+        <p
+          key={devis ? "structure" : "pme"}
+          className="rv-fondu mx-auto mt-4 max-w-xl text-balance text-[15px] leading-[24px] text-[#d4d4d8]"
+        >
+          {devis ? (
+            GRANDE_STRUCTURE.chequeTic.chapo
+          ) : (
+            <>
+              Le dispositif porte sur l&apos;installation, jamais sur l&apos;abonnement. Votre
+              éligibilité est vérifiée à l&apos;audit, et si un dossier se justifie, nous le
+              montons avec vous.
+            </>
+          )}
         </p>
         {/* 15/09 — le bouton disait « Choisir mes postes » et renvoyait à la
             grille : le dispositif porte sur l'installation, qui vient APRÈS
             l'audit. Il mène donc à l'audit, comme tout le reste de la page. */}
-        <a href="/reserver-un-audit" className="r-btn r-btn--blanc mt-7">
-          Réserver un audit
+        <a
+          href={devis ? GRANDE_STRUCTURE.href : "/reserver-un-audit"}
+          className="r-btn r-btn--blanc mt-7"
+        >
+          {devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
         </a>
       </div>
 

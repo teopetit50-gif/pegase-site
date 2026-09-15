@@ -805,12 +805,56 @@ export const GRANDE_STRUCTURE = {
   cta: "Réserver un diagnostic",
   href: "/reserver-un-audit#reserver",
   /* la note de bas de grille, à la place du pavé TTC de la formule PME */
-  bas: "Aucun montant n'est affiché sur ce périmètre : le diagnostic relève vos volumes et vos règles de validation, puis le périmètre, l'installation et le tarif sont écrits au devis avant tout engagement. Le diagnostic dure trente minutes, il est gratuit et sans engagement.",
+  bas: "Aucun montant n'est affiché sur ce périmètre : le diagnostic relève vos volumes et vos règles de validation, puis le périmètre, l'installation et le tarif sont écrits au devis avant tout engagement. Il est gratuit dans ses deux premiers formats, et sans engagement.",
   /* le bandeau d'orientation reprend la même destination */
   bandeau: {
     titre: "Nous identifions le format de diagnostic adapté",
     texte:
       "Décrivez votre organisation en deux lignes. Nous revenons vers vous avec le format correspondant, et le créneau se réserve en ligne.",
+  },
+
+  /* ——— LES DEUX SECTIONS QUI SUIVENT LA GRILLE (15/09/2026, seconde passe) ———
+
+     Le sélecteur des mondes est né dans la grille, avec son état : le reste
+     de la page ne le voyait pas, et disait encore « Réserver un audit » sous
+     une grille qui venait d'annoncer « Réserver un diagnostic ». Rien n'était
+     cassé — les deux boutons mènent à /reserver-un-audit — mais c'était deux
+     vocabulaires sur un même écran. L'état vit désormais dans
+     components/tarifs/monde.tsx, et ces textes avec les autres.
+
+     CE N'EST PAS UN CHANGEMENT DE MOT. Trois affirmations de la version PME
+     ne tiennent PAS de ce côté, et c'est ce qui rend ces textes nécessaires :
+       1. « en trente minutes » : côté groupes, le premier format est le
+          Cadrage, 45 min (PROFILS, lib/reservation.ts). Trente minutes
+          n'existe que chez les indépendants ;
+       2. « il est gratuit », sans réserve : gratuit dans les DEUX premiers
+          formats (Cadrage, Audit process) ; l'Audit + atelier est sur devis,
+          déduit de l'installation ;
+       3. « votre tarif arrêté » à l'issue du rendez-vous : ici le diagnostic
+          relève, et c'est le DEVIS qui arrête — même règle que la carte.
+     Chaque phrase ci-dessous redit un fait déjà posé ailleurs (PROFILS pour
+     les formats et leur gratuité, `points` et `bas` pour le devis) ; aucune
+     promesse nouvelle n'est faite de ce côté. */
+  chequeTic: {
+    /* seul « à l'audit » change : l'assiette du dispositif et le plafond ne
+       dépendent pas de qui valide chez le client */
+    chapo:
+      "Le dispositif porte sur l'installation, jamais sur l'abonnement. Votre éligibilité est vérifiée au diagnostic, et si un dossier se justifie, nous le montons avec vous.",
+  },
+  appel: {
+    titre: "Votre devis part d'un cadrage de quarante-cinq minutes",
+    chapo:
+      "Le diagnostic relève votre volumétrie service par service, à partir de vos propres exports\u00a0: ce qui est traité chaque mois, la part qui revient à un opérateur, et les règles de validation propres à chaque service. Le périmètre, l'installation et le tarif sont ensuite écrits au devis, avant tout engagement. Il est gratuit dans ses deux premiers formats.",
+    /* LA DURÉE DU CALENDRIER, et non un texte : l'agenda de cette section
+       montre les jours où un créneau tient encore, et un jour montré libre
+       ici doit l'être encore sur /reserver-un-audit. Côté PME c'est le
+       Diagnostic (30 min) ; ici le premier format est le Cadrage (45 min).
+       La clé est celle de DUREES_RDV (lib/creneaux.ts) et de PROFILS. */
+    parcours: "cadrage",
+    jour: "Réservez le diagnostic pour bloquer l'un d'eux.",
+    /* le pied garde l'installation pour qui a déjà fait le chemin — de ce
+       côté, ce chemin passe par le devis et non par un tarif affiché */
+    pied: "Votre diagnostic est réalisé et votre devis établi\u00a0? La réunion d'installation se réserve directement.",
   },
 };
 

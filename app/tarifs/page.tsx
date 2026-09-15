@@ -6,6 +6,7 @@ import ChequeTic from "@/components/tarifs/ChequeTic";
 import AppelFinal from "@/components/tarifs/AppelFinal";
 import FaqTarifs from "@/components/tarifs/FaqTarifs";
 import ReglesFacturation, { type Regle } from "@/components/tarifs/ReglesFacturation";
+import { MondeProvider } from "@/components/tarifs/monde";
 import { REMISE_ANNUELLE } from "@/lib/paliers";
 
 /* 03/09 — le taux de la remise annuelle écrit en toutes lettres dans les
@@ -197,6 +198,15 @@ export default function TarifsPage() {
     <PageShell>
       <PageMotion />
 
+      {/* 15/09, seconde passe — LE SÉLECTEUR DES DEUX MONDES COMMANDE
+          TOUTE LA PAGE, plus seulement la grille. Il est né le 15/09 dans
+          components/tarifs/Grille avec son état ; le Chèque TIC et l'appel
+          final, sur le même écran, disaient encore « Réserver un audit »
+          sous une grille passée au « diagnostic ». Le provider ne rend rien
+          et ne rend pas cette page cliente : les sections lui sont passées
+          en `children`, et le monde s'y lit par useSyncExternalStore
+          (instantané serveur « pme »), donc /tarifs reste STATIQUE. */}
+      <MondeProvider>
       <div className="resa">
         {/* ═══ 1 à 3 — titre, paliers, orientation, comparatif ═══ */}
         <Grille />
@@ -227,10 +237,16 @@ export default function TarifsPage() {
 
         {/* ═══ 8 — la FAQ tarifs, en dernier — deux colonnes, accordéon
                Radix (14/09, reprise faqs-02 de @ln-dev7) ═══ */}
+        {/* la FAQ ne bascule PAS : sa dernière question s'adresse
+            explicitement aux structures à validation répartie et les nomme
+            depuis le côté PME — c'est une passerelle vers l'autre monde,
+            pas un texte à traduire. Les règles de facturation non plus :
+            leurs quatre règles valent aux deux, et aucune ne nomme l'audit. */}
         <section id="faq" data-monde="clair">
           <FaqTarifs items={FAQ_TARIFS} />
         </section>
       </div>
+      </MondeProvider>
     </PageShell>
   );
 }

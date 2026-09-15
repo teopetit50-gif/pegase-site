@@ -151,6 +151,11 @@
    tous les textes de Teo, l'ancre #grille et le scroll-mt, la sélection
    exclusive entre paliers, et les sections 2 et 3 (bandeau d'orientation,
    comparatif) telles quelles.
+   → 15/09, TROISIÈME PASSE : l'état du monde SORT de ce fichier pour
+   components/tarifs/monde.tsx. Il ne commandait que la grille, alors que le
+   Chèque TIC et l'appel final, plus bas sur le même écran, continuaient de
+   dire « Réserver un audit ». Ici, rien d'autre ne change : même lecture par
+   useSyncExternalStore, même instantané serveur « pme », même page statique.
    ═══ 15/09/2026, PASSE DE REGISTRE — LE VOCABULAIRE D'UNE PAGE DE PRIX
    (Teo : « les phrases de la page tarif sont trop amateur ; il faut du
    plus pro, genre Qonto, des vrais SaaS, des termes précis »). Aucun fait
@@ -194,6 +199,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/cn";
 import { COURRIEL, lienAudit, lienContact } from "@/lib/reservation";
 import Calculateur from "@/components/tarifs/Calculateur";
+import { souscrireUrl, useChoisirMonde, useMonde } from "@/components/tarifs/monde";
 
 import {
   CALCULATEUR,
@@ -208,7 +214,6 @@ import {
   REMISE_ANNUELLE,
   economieAnnuelle,
   equivalentMensuel,
-  lireMonde,
   lirePeriodicite,
   piecesPourPostes,
   postesPourCarte,
@@ -240,27 +245,15 @@ const ICONE_PALIER: Record<Palier["id"], Icone> = {
 };
 
 /* ——— la périodicité venue de l'URL (`?periodicite=annuel`), côté
-   navigateur seulement ; le serveur répond toujours « mensuel » ——— */
-function souscrireUrl(rappel: () => void) {
-  window.addEventListener("popstate", rappel);
-  return () => window.removeEventListener("popstate", rappel);
-}
+   navigateur seulement ; le serveur répond toujours « mensuel » ———
+   `souscrireUrl` est partagée avec le monde (components/tarifs/monde.tsx),
+   qui se lit de la même façon et pour la même raison. */
 function periodiciteDeLUrl(): Periodicite {
   return lirePeriodicite(new URLSearchParams(window.location.search).get("periodicite"));
 }
 function periodiciteServeur(): Periodicite {
   return "mensuel";
 }
-/* 15/09 — le monde se lit de la même façon (`?monde=structure`), pour qu'un
-   lien puisse ouvrir la page directement du bon côté. Le serveur répond
-   toujours « pme » : la page reste STATIQUE, prix dans le HTML servi. */
-function mondeDeLUrl(): Monde {
-  return lireMonde(new URLSearchParams(window.location.search).get("monde"));
-}
-function mondeServeur(): Monde {
-  return "pme";
-}
-
 /* le lien d'un palier — « Tout Omega » n'a rien à choisir, il part droit
    sur l'audit ; les deux autres renvoient aux cartes où le choix se fait.
 
@@ -747,18 +740,22 @@ export default function Grille() {
   const depuisUrl = useSyncExternalStore(souscrireUrl, periodiciteDeLUrl, periodiciteServeur);
   const [choixPeriodicite, setPeriodicite] = useState<Periodicite | null>(null);
   const periodicite = choixPeriodicite ?? depuisUrl;
-  /* 15/09 — le monde, même mécanique que la périodicité. Elle n'est PAS
-     remise à zéro quand on passe côté devis : on revient côté PME avec la
-     formule qu'on y avait laissée. */
-  const mondeUrl = useSyncExternalStore(souscrireUrl, mondeDeLUrl, mondeServeur);
-  const [choixMonde, setMonde] = useState<Monde | null>(null);
+  /* 15/09, seconde passe — LE MONDE NE VIT PLUS ICI. Il est monté d'un
+     cran (components/tarifs/monde.tsx, provider dans app/tarifs/page.tsx)
+     parce que le Chèque TIC et l'appel final en dépendent eux aussi : tant
+     qu'il était l'état privé de ce composant, ils disaient « Réserver un
+     audit » sous une grille passée au « diagnostic ». La mécanique, elle,
+     est inchangée — même useSyncExternalStore, même instantané serveur.
+     La périodicité n'est PAS remise à zéro quand on passe côté devis : on
+     revient côté PME avec la formule qu'on y avait laissée. */
   /* 15/09 (Teo) — « je veux pas que les prix s'affichent avant d'avoir
      rempli le truc, sinon on reste sur un truc inventé ». Tant que le
      calculateur n'a pas reçu un volume, les cartes montrent tout SAUF leur
      chiffre, et le comparatif — qui ne compare que des prix — attend. */
   const [volumes, setVolumes] = useState<SaisieVolumes | null>(null);
   const noterVolumes = useCallback((v: SaisieVolumes | null) => setVolumes(v), []);
-  const monde = choixMonde ?? mondeUrl;
+  const monde = useMonde();
+  const choisirMonde = useChoisirMonde();
   const devis = monde === "structure";
   const annuel = periodicite === "annuel" && !devis;
 
@@ -809,7 +806,7 @@ export default function Grille() {
             puis la facturation. `flex-wrap` : sous ~560 px les deux
             passent l'un sous l'autre plutôt que de déborder. */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
-          <SelecteurMonde monde={monde} choisir={setMonde} />
+          <SelecteurMonde monde={monde} choisir={choisirMonde} />
           {devis ? null : (
             <Switch
               checked={annuel}
