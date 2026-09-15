@@ -201,7 +201,14 @@ const PAQUETS: CaseFeature[] = [
   {
     icone: FileText,
     titre: "FILED",
-    texte: "Chaque pièce fournisseur est lue, ses montants recoupés, puis transmise à la comptabilité.",
+    /* 15/09/2026 (Teo) — « on parle pas que des factures ». La case gardait
+       le périmètre étroit alors que le paquet s'appelle « flux
+       documentaires ». La VOIX ne change pas : les quatre cases de cette
+       grille sont au passif par construction (« Les devis sont relancés »,
+       « Chaque demande est qualifiée ») — n'en retourner qu'une casserait
+       le parallélisme de la rangée. Seul le périmètre s'ouvre, et la
+       rédaction entre, qu'aucune des versions précédentes ne nommait. */
+    texte: "Chaque document reçu est lu, classé au bon dossier, et la réponse qu’il appelle rédigée.",
     href: "/offres/factures-fournisseurs",
   },
 ];

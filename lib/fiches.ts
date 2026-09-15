@@ -321,7 +321,7 @@ export const FICHES: Record<string, Fiche> = {
     photo: "/photos/offload.jpg",
     photoAlt: "Une personne attablée dépouille un document administratif.",
     photoVoile: 0.81,
-    pitch: "Les pièces fournisseurs traitées sans une ligne de saisie.",
+    pitch: "Tout document reçu, traité sans une ligne de saisie.",
     meta: "Vos factures fournisseurs lues, contrôlées, classées et transmises à la comptabilité.",
     sections: {
       integrationsTitre: "Vos outils actuels suffisent.",
