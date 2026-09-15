@@ -1,0 +1,353 @@
+/* ══════════════════════════════════════════════════════════════════════
+   FormulesGrille.css — la feuille du haut de /reserver-un-audit
+   (15/09/2026, écrite avec FormulesGrille.tsx)
+
+   Tout est scopé sous `.resa .fg` et préfixé `fg-` (vérifié par grep :
+   ni `.fg`, ni `fg-`, ni `--fg` n'existaient dans app/globals.css ni dans
+   components/). Supprimer ce fichier et son composant supprime la section
+   sans effet de bord ailleurs.
+
+   Les jetons sont ceux du monde, déjà posés par `.resa` dans globals.css :
+   --r-texte, --r-doux, --r-faible, --r-fond, --r-filet, et les trois ors
+   --r-or-clair / -mid / -fonce. Les classes de charte sont reprises telles
+   quelles par le composant (.r-carte, .r-carte-tete, .r-carte--phare,
+   .r-badge, .r-btn, .r-h1, .r-lead, .r-note) : cette feuille ne fait
+   qu'AJOUTER ce que la composition centrée demande.
+
+   TROIS RÈGLES DE CE FICHIER, dans l'ordre où elles priment.
+
+   1. RIEN ICI NE TOUCHE `opacity`. Elle appartient au reveal GSAP de la
+      page, qui l'écrit en style EN LIGNE sur [data-arrivee] — un style en
+      ligne bat n'importe quelle règle de feuille. `transform` n'est
+      touchée QUE par le survol : la cascade d'arrivée rend sa valeur aux
+      cartes en fin d'animation (clearProps), c'est ce qui « rend aux
+      cartes leur translateY de survol » (Arrivee.tsx).
+
+   2. LA VALEUR DE REPOS EST LA VALEUR FINIE. Sans JavaScript, sans survol,
+      la section est complète et lisible : les trois cartes sont peintes,
+      la pastille est posée, les points sont cochés.
+
+   3. L'ALIGNEMENT DES TROIS CARTES EST UNE SOUS-GRILLE, pas un
+      min-height. `.r-carte--alignee` (globals.css) donne aux cartes trois
+      rangs partagés — tête / bouton / liste — donc trois têtes de même
+      hauteur et trois boutons sur la même ligne quelle que soit la
+      longueur des textes. Le plancher `min-height` que globals.css pose
+      sur `.r-carte-tete` entre 1024 et 1280 est donc ANNULÉ ici : la
+      sous-grille fait mieux, et le plancher laissait 60 à 120 px de vide
+      sous une tête désormais plus haute (pictogramme + texte centré).
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— en-tête de section : centré, comme la source ——— */
+.resa .fg-entete-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.resa .fg-titre {
+  max-width: 20ch;
+}
+.resa .fg-chapo {
+  margin-top: 20px;
+  max-width: 62ch;
+}
+
+/* ——— la rangée de cartes ——— */
+.resa .fg-grille {
+  display: grid;
+  gap: 28px;
+  margin-top: 44px;
+}
+@media (min-width: 640px) {
+  .resa .fg-grille {
+    margin-top: 48px;
+  }
+}
+/* trois colonnes ET trois rangs partagés : les rangs sont la condition de
+   la sous-grille des cartes, la gouttière verticale tombe donc à zéro (ce
+   sont les cartes qui portent l'espace, pas la grille) */
+@media (min-width: 1024px) {
+  .resa .fg-grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    column-gap: 24px;
+    row-gap: 0;
+  }
+}
+
+/* ——— la carte ——— */
+.resa .fg-carte {
+  position: relative;
+  border: 1px solid transparent;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s var(--ease-out-strong, ease);
+}
+.resa .fg-carte:hover {
+  border-color: var(--r-filet);
+  box-shadow: 0 10px 30px rgba(5, 5, 5, 0.07);
+  transform: translateY(-2px);
+}
+/* la carte phare se détache au FILET doré et à l'ombre, jamais à l'échelle
+   (voir l'en-tête du composant) */
+.resa .fg-carte--phare {
+  border-color: var(--r-or-fonce);
+  box-shadow: 0 14px 34px rgba(5, 5, 5, 0.09);
+}
+.resa .fg-carte--phare:hover {
+  border-color: #dcbd7c;
+  box-shadow: 0 18px 42px rgba(5, 5, 5, 0.12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .resa .fg-carte,
+  .resa .fg-carte:hover {
+    transform: none;
+    transition-property: border-color, box-shadow;
+  }
+}
+
+/* ——— la tête : pictogramme, nom, durée, conditions ——— */
+.resa .fg-carte .fg-tete {
+  text-align: center;
+  /* .r-carte-tete pose 16px 12px 20px : même poids, l'ordre des feuilles
+     déciderait. Trois classes ici, la règle gagne quoi qu'il arrive.
+     Le bas est plus généreux sous 1024 : c'est l'air que rendait la
+     promesse fantôme, retirée du flux à cette largeur (voir plus bas). */
+  padding: 26px 16px 34px;
+}
+@media (min-width: 1024px) {
+  .resa .fg-carte .fg-tete {
+    padding-bottom: 22px;
+  }
+}
+/* la sous-grille aligne les trois têtes : le plancher de globals.css n'a
+   plus de rôle, et laissait du vide sous une tête plus haute */
+@media (min-width: 1024px) {
+  .resa .fg-grille .r-carte-tete {
+    min-height: 0;
+  }
+}
+
+/* la pastille « Recommandé », à cheval sur le bord haut de la carte */
+.resa .fg-carte .fg-pastille {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 22px;
+  background: #050505;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(5, 5, 5, 0.18);
+}
+
+.resa .fg-carte .fg-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  width: 48px;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: var(--r-texte);
+  box-shadow: inset 0 0 0 1px rgba(5, 5, 5, 0.08);
+}
+.resa .fg-carte .fg-icone > svg {
+  height: 22px;
+  width: 22px;
+}
+/* sur la tête dorée, le cercle blanc serait un îlot : il prend l'or clair
+   du haut du dégradé, et son cerne passe en or franc */
+.resa .fg-carte--phare .fg-icone {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(151, 118, 46, 0.35);
+}
+
+.resa .fg-nom {
+  margin-top: 14px;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 26px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--r-texte);
+}
+@media (min-width: 640px) {
+  .resa .fg-nom {
+    font-size: 28px;
+    line-height: 36px;
+  }
+}
+
+.resa .fg-chiffre {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px 8px;
+}
+.resa .fg-duree {
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+@media (min-width: 640px) {
+  .resa .fg-duree {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+.resa .fg-suffixe {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--r-texte);
+}
+.resa .fg-conditions {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--r-doux);
+}
+.resa .fg-promesse {
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--r-texte);
+}
+/* la phrase disparaît, l'espace reste (Teo, 02/08) — mais SEULEMENT là où
+   cet espace sert à quelque chose. Côte à côte, il tient les trois têtes à
+   la même hauteur ; empilées (sous 1024), il ne tient plus rien et laisse
+   90 à 130 px de vide dans CHAQUE carte, trois fois de suite. La phrase
+   est donc retirée du flux sous 1024, et l'air rendu par un padding. */
+.resa .fg-promesse--fantome {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .resa .fg-promesse--fantome {
+    display: block;
+    visibility: hidden;
+  }
+}
+
+/* ——— bouton et sa mention ——— */
+.resa .fg-action {
+  padding: 18px 12px 0;
+}
+.resa .fg-souscta {
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ——— la liste cochée ——— */
+.resa .fg-liste {
+  padding: 22px 12px 4px;
+}
+.resa .fg-entete {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .fg-points {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.resa .fg-point {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--r-doux);
+}
+.resa .fg-check {
+  flex: none;
+  margin-top: 3px;
+  height: 16px;
+  width: 16px;
+  color: var(--r-texte);
+}
+.resa .fg-fort {
+  font-weight: 600;
+  color: var(--r-texte);
+}
+/* le point qui porte la différence — le bandeau de rappel de la référence.
+   Sur la carte phare, l'or de la charte ; ailleurs, un gris de surface :
+   un or dilué sur une carte blanche vire au moutarde. */
+.resa .fg-point--fort {
+  background: var(--r-fond);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-inline: -10px;
+}
+.resa .fg-carte--phare .fg-point--fort {
+  background: rgba(233, 205, 145, 0.28);
+}
+
+/* ——— le socle : gratuité et financement ——— */
+.resa .fg-socle {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 26px 24px;
+}
+@media (min-width: 768px) {
+  .resa .fg-socle {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 28px 32px;
+  }
+}
+.resa .fg-socle-fort {
+  font-size: 19px;
+  line-height: 27px;
+  font-weight: 500;
+  color: var(--r-texte);
+}
+@media (min-width: 640px) {
+  .resa .fg-socle-fort {
+    font-size: 21px;
+    line-height: 29px;
+  }
+}
+.resa .fg-socle-aide {
+  border-top: 1px solid var(--r-filet);
+  padding-top: 20px;
+}
+@media (min-width: 768px) {
+  .resa .fg-socle-fort {
+    flex: 0 0 34%;
+  }
+  .resa .fg-socle-aide {
+    flex: 1 1 auto;
+    border-top: 0;
+    border-left: 1px solid var(--r-filet);
+    padding-top: 0;
+    padding-left: 40px;
+  }
+}
+.resa .fg-socle-titre {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .fg-socle-texte {
+  margin-top: 6px;
+  max-width: 68ch;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--r-faible);
+}
+
+.resa .fg-note {
+  margin-top: 20px;
+  max-width: 48rem;
+}

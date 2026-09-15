@@ -1,0 +1,360 @@
+/* ══════════════════════════════════════════════════════════════════════
+   ComparerFormats.css — la feuille du bento sombre de /reserver-un-audit
+   (15/09/2026, écrite avec ComparerFormats.tsx)
+
+   Tout est scopé sous `.resa .cf` et préfixé `cf-` (vérifié par grep : ni
+   `.cf`, ni `cf-`, ni `--cf` n'existaient dans app/globals.css ni dans
+   components/). Supprimer ce fichier et son composant supprime la section
+   sans effet de bord ailleurs.
+
+   LE MONDE SOMBRE EST DÉJÀ ÉCRIT. La section porte `.r-nuit`
+   (globals.css) : fond #050505 peint jusqu'aux bords de l'écran, et les
+   quatre jetons du monde réencrés — --r-texte #ffffff, --r-doux #d4d4d8,
+   --r-faible #a1a1aa, --r-filet #27272a. Les surfaces (#141417 pour une
+   carte, #18181b pour un bouton, #0f0f12 pour le panneau) reprennent
+   celles de « Compléter votre audit » (Complements.tsx), la bande sombre
+   qui suit sur la même page : deux bandes noires de la même page ne
+   peuvent pas avoir deux gammes de gris.
+
+   QUATRE RÈGLES DE CE FICHIER, dans l'ordre où elles priment.
+
+   1. PAS UN ÎLOT CLAIR. Aucune surface blanche dans la bande : une bande
+      sombre parsemée de blocs clairs se lit comme un raté, et c'est ce
+      qui a fait annuler les bandes noires de l'accueil le 11/09. Seuls
+      les BOUTONS sont clairs — c'est leur rôle, et `.r-btn--blanc` existe
+      pour ça.
+
+   2. L'ÉTAT ACTIF SE MARQUE AU TRAIT, PAS AU FOND. Entre #18181b et
+      #27272a il n'y a presque rien à voir ; le format retenu se reconnaît
+      donc à son filet clair (#d4d4d8) et à son encre blanche, pas à sa
+      teinte de fond.
+
+   3. RIEN ICI NE TOUCHE `opacity` NI `transform`. Elles appartiennent au
+      reveal GSAP de la page, qui les écrit en style EN LIGNE sur
+      [data-reveal] — un style en ligne bat n'importe quelle règle de
+      feuille. Le survol ne joue donc que sur `border-color` et
+      `background-color`.
+
+   4. LA VALEUR DE REPOS EST LA VALEUR FINIE. Sans JavaScript, le format
+      par défaut (le phare) est affiché, ses valeurs sont peintes, et les
+      trois boutons restent lisibles : on perd le changement de format,
+      jamais le contenu.
+
+   Contrastes vérifiés sur le fond de carte #141417 : #a1a1aa 7,0:1,
+   #9a9aa3 6,3:1, #d4d4d8 12,4:1, blanc 17,4:1. Le #71717a de Complements
+   n'est PAS repris pour les intitulés (3,9:1, sous AA).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .cf {
+  --cf-carte: #141417;
+  --cf-creux: #0f0f12;
+  --cf-bouton: #18181b;
+  --cf-filet: #27272a;
+  --cf-filet-vif: #3f3f46;
+  --cf-label: #9a9aa3;
+}
+
+/* ——— en-tête ——— */
+.resa .cf-tete {
+  max-width: 62ch;
+}
+.resa .cf-pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--cf-filet-vif);
+  border-radius: 9999px;
+  background: var(--cf-bouton);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--r-doux);
+}
+.resa .cf-pastille > svg {
+  height: 15px;
+  width: 15px;
+}
+.resa .cf-titre {
+  margin-top: 18px;
+}
+.resa .cf-chapo {
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 25px;
+  color: var(--r-doux);
+}
+.resa .cf .cf-conseil {
+  display: inline-block;
+  margin-top: 20px;
+  /* .r-lien souligne en rgba(5,5,5,.28) — invisible sur le noir */
+  text-decoration-color: rgba(255, 255, 255, 0.4);
+}
+.resa .cf .cf-conseil:hover {
+  text-decoration-color: #ffffff;
+}
+
+/* ——— le bento ——— */
+.resa .cf-bento {
+  display: grid;
+  gap: 16px;
+  margin-top: 40px;
+}
+@media (min-width: 1024px) {
+  .resa .cf-bento {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: start;
+  }
+  .resa .cf-carte--2 {
+    grid-column: span 2;
+  }
+  .resa .cf-carte--3 {
+    grid-column: span 3;
+  }
+}
+
+.resa .cf-carte {
+  border: 1px solid var(--cf-filet);
+  border-radius: 16px;
+  background: var(--cf-carte);
+  padding: 24px 22px;
+  transition: border-color 0.22s ease;
+}
+.resa .cf-carte:hover {
+  border-color: var(--cf-filet-vif);
+}
+@media (min-width: 640px) {
+  .resa .cf-carte {
+    padding: 28px 26px;
+  }
+}
+
+/* ——— intitulé en petites capitales ——— */
+.resa .cf-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  line-height: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cf-label);
+}
+
+/* ——— la carte de choix ——— */
+.resa .cf-boutons {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+@media (min-width: 480px) {
+  .resa .cf-boutons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .resa .cf-boutons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.resa .cf-bouton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border: 1px solid var(--cf-filet);
+  border-radius: 12px;
+  background: var(--cf-bouton);
+  padding: 14px 14px 13px;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+.resa .cf-bouton:hover {
+  border-color: var(--cf-filet-vif);
+}
+/* le format retenu : filet clair et encre blanche (règle 2) */
+.resa .cf-bouton[data-actif="true"] {
+  border-color: var(--r-doux);
+  background: #1f1f24;
+}
+.resa .cf-bouton-icone {
+  height: 20px;
+  width: 20px;
+  color: var(--r-faible);
+}
+.resa .cf-bouton[data-actif="true"] .cf-bouton-icone {
+  color: #ffffff;
+}
+.resa .cf-bouton-nom {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--r-doux);
+}
+.resa .cf-bouton[data-actif="true"] .cf-bouton-nom {
+  color: #ffffff;
+}
+.resa .cf-bouton-duree {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--r-faible);
+}
+
+/* le panneau du format retenu */
+.resa .cf-panneau {
+  margin-top: 18px;
+  border: 1px solid var(--cf-filet);
+  border-radius: 12px;
+  background: var(--cf-creux);
+  padding: 18px 18px 20px;
+}
+.resa .cf-panneau-nom {
+  margin-top: 8px;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 22px;
+  line-height: 29px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.resa .cf-panneau-ligne {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--r-doux);
+}
+.resa .cf-panneau-conditions {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--r-faible);
+}
+.resa .cf-panneau-btn {
+  width: 100%;
+  margin-top: 16px;
+}
+.resa .cf-panneau-note {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 300;
+  color: var(--r-faible);
+}
+
+/* ——— une carte de famille ——— */
+.resa .cf-carte-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 20px;
+  line-height: 27px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+@media (min-width: 640px) {
+  .resa .cf-carte-titre {
+    font-size: 22px;
+    line-height: 29px;
+  }
+}
+.resa .cf-lignes {
+  margin-top: 6px;
+}
+.resa .cf-ligne {
+  display: grid;
+  gap: 4px 24px;
+  border-top: 1px solid var(--cf-filet);
+  padding: 16px 0;
+}
+.resa .cf-lignes > .cf-ligne:last-child {
+  padding-bottom: 0;
+}
+@media (min-width: 640px) {
+  .resa .cf-ligne {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+    align-items: start;
+  }
+}
+.resa .cf-libelle {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.resa .cf-valeur-cell {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--r-doux);
+}
+/* seule la valeur du format retenu est peinte ; les deux autres restent
+   dans le document (les robots les lisent) mais ne s'affichent pas */
+.resa .cf-valeur {
+  display: none;
+}
+.resa .cf-valeur[data-actif="true"] {
+  display: inline;
+}
+.resa .cf-aide {
+  display: none;
+}
+@media (min-width: 768px) {
+  .resa .cf-aide {
+    display: block;
+    margin-top: 6px;
+    max-width: 46ch;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 400;
+    color: var(--r-faible);
+  }
+}
+
+/* ——— la rangée du bas : ce qui ne dépend pas du format ——— */
+.resa .cf-label--rangee {
+  margin-top: 40px;
+}
+.resa .cf-tuiles {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (min-width: 640px) {
+  .resa .cf-tuiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.resa .cf-tuile {
+  border: 1px solid var(--cf-filet);
+  border-radius: 12px;
+  background: var(--cf-carte);
+  padding: 20px;
+  transition: border-color 0.22s ease;
+}
+.resa .cf-tuile:hover {
+  border-color: var(--cf-filet-vif);
+}
+.resa .cf-tuile-coche {
+  height: 17px;
+  width: 17px;
+  color: var(--r-faible);
+}
+.resa .cf-tuile-libelle {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--r-faible);
+}
+.resa .cf-tuile-valeur {
+  margin-top: 3px;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.resa .cf-tuile-aide {
+  max-width: none;
+}

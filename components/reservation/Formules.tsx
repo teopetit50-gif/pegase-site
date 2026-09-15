@@ -1,218 +1,36 @@
-"use client";
-
-import Partage from "@/components/Partage";
+import FormulesGrille from "./FormulesGrille";
+import ComparerFormats from "./ComparerFormats";
+import Lien from "@/components/Lien";
+import { lienContact } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /reserver-un-audit — bloc haut : sélecteur de profil, trois formules,
-   bandeau d'orientation, comparatif. (26/07/2026)
+   /reserver-un-audit — bloc haut : les trois formats, le bandeau
+   d'orientation, le comparatif. (26/07/2026, refait le 15/09/2026)
 
-   Ces quatre sections sont contiguës sur la page de référence ET partagent
-   le même état (le profil choisi pilote les cartes comme les colonnes du
-   comparatif). Elles vivent donc dans un seul composant client plutôt que
-   dans un contexte partagé : moins d'indirection, et le reste de la page
-   demeure entièrement statique.
+   15/09 — Teo a apporté deux composants de 21st.dev, un par section :
+     · `pricing-module`  → <FormulesGrille>, la rangée de formats
+     · `features-card`   → <ComparerFormats>, le bento sombre
+   Chacun vit dans SON fichier avec SA feuille (règles scopées sous
+   `.resa`), comme <DerouleAudit> depuis le 14/09. Ce qui reste ici est ce
+   qui n'appartient à aucun des deux : le bandeau d'orientation, entre les
+   deux.
+
+   Ce fichier n'a plus d'état : le sélecteur Indépendant/Équipes est parti
+   le 28/08 (cette page ne parle plus qu'aux organisations), et le
+   sélecteur de format du comparatif vit dans <ComparerFormats>. La
+   directive "use client" a donc disparu : seul le bento est un composant
+   client, le reste est rendu sur le serveur.
+
+   Ce qui a disparu avec le tableau du comparatif : <Ligne>, ses deux
+   en-têtes collants (bureau et mobile) et le repli « Voir tous les
+   points ». Le détail de l'arbitrage est en tête de ComparerFormats.tsx.
    ══════════════════════════════════════════════════════════════════════ */
 
-import Link from "next/link";
-import Lien from "@/components/Lien";
-import {
-  COMPARATIF,
-  COURRIEL,
-  PROFILS,
-  lienContact,
-  lienReservation,
-  type Formule,
-  type Point,
-} from "@/lib/reservation";
-
-/* Le libellé d'un point comporte une portion en gras (`fort`) — la
-   référence met en gras le mot qui porte la différence, jamais la phrase
-   entière. On coupe autour de la première occurrence. */
-function Libelle({ point }: { point: Point }) {
-  if (!point.fort || !point.texte.includes(point.fort)) return <>{point.texte}</>;
-  const [avant, ...reste] = point.texte.split(point.fort);
-  return (
-    <>
-      {avant}
-      <span className="font-semibold text-[#050505]">{point.fort}</span>
-      {reste.join(point.fort)}
-    </>
-  );
-}
-
-function Carte({ f }: { f: Formule }) {
-  return (
-    <div data-arrivee="colonne" className={`r-carte ${f.phare ? "r-carte--phare" : ""}`}>
-      <div className="r-carte-tete">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-[family-name:var(--font-jakarta)] text-[26px] font-semibold leading-[34px] tracking-[-0.02em] text-[#050505] sm:text-[28px] sm:leading-[36px]">
-            {f.nom}
-          </h3>
-          {f.badge ? <span className="r-badge mt-1.5">{f.badge}</span> : null}
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="num text-[36px] font-semibold leading-[44px] text-[#050505] sm:text-[40px] sm:leading-[48px]">
-            {f.duree}
-          </span>
-          <span className="text-[12px] leading-[18px] text-[#050505]">{f.suffixe}</span>
-        </div>
-        <div className="mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">{f.conditions}</div>
-
-        {/* promesseFantome : le texte occupe sa place — même hauteur de tête,
-            même repli de lignes — mais reste invisible (demande Teo 02/08) */}
-        {f.promesse ? (
-          <p
-            aria-hidden={f.promesseFantome || undefined}
-            className={`mt-4 text-[15px] leading-[22px] text-[#050505] ${
-              f.promesseFantome ? "invisible" : ""
-            }`}
-          >
-            {f.promesse}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-1 flex-col px-3 pt-4">
-        <Link
-          href={lienReservation(f.id)}
-          className={`r-btn w-full ${f.phare ? "r-btn--noir" : "r-btn--fil"}`}
-        >
-          {f.cta}
-        </Link>
-        <p className="r-note mt-2 text-center">{f.souscta}</p>
-
-        <div className="mt-6 text-[14px] font-semibold leading-[20px] text-[#050505]">
-          {f.enteteListe}
-        </div>
-        <ul className="mt-3 space-y-3">
-          {f.points.map((p) => (
-            <li
-              key={p.texte}
-              className={`flex gap-2 text-[14px] leading-[22px] text-[#3d3d3d] ${
-                p.surligne ? "r-surligne" : ""
-              }`}
-            >
-              <span aria-hidden className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-[#050505]" />
-              <span>
-                <Libelle point={p} />
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-/* ——— une ligne du comparatif ———
-   La grille fait six colonnes : le libellé en occupe trois, chaque formule
-   une. En dessous de 768 px la grille retombe à trois colonnes : le libellé
-   passe pleine largeur et les trois valeurs s'alignent dessous, sous
-   l'en-tête collant qui porte les noms des formules. Le texte d'aide reste
-   sur desktop : répété ligne après ligne avec les trois noms, c'est lui qui
-   transformait le comparatif mobile en mur de texte. */
-function Ligne({
-  libelle,
-  aide,
-  valeurs,
-  noms,
-}: {
-  libelle: string;
-  aide: string;
-  valeurs: [string, string, string];
-  noms: [string, string, string];
-}) {
-  return (
-    <div className="r-grille">
-      <div className="r-grille-libelle">
-        <div className="text-[15px] font-semibold leading-[22px] text-white md:text-[#050505]">
-          {libelle}
-        </div>
-        <p className="mt-1 hidden max-w-[42ch] text-[13px] leading-[20px] text-[#616161] md:block">
-          {aide}
-        </p>
-      </div>
-      {valeurs.map((v, i) => (
-        <div
-          key={noms[i]}
-          className="text-[13px] leading-[19px] text-[#3d3d3d] md:text-[14px] md:leading-[20px]"
-        >
-          {v}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function Formules() {
-  /* 28/08, deuxième passe — le sélecteur Indépendant/Équipes DISPARAÎT :
-     depuis que /commencer aiguille et que /tarifs porte la grille
-     publique, cette page ne parle plus qu'aux organisations. Deux mondes
-     sur une page la rendaient illisible (Teo : « surchargé et pas
-     clair »). Le panneau d'aiguillage TPE meurt avec l'onglet — la voie
-     TPE ne vit plus qu'en mention discrète au pied de la page. */
-  const p = PROFILS[1];
-  const noms = p.formules.map((f) => f.nom) as [string, string, string];
-
-  const visibles = COMPARATIF.filter((f) => !f.repliee);
-  const repliees = COMPARATIF.filter((f) => f.repliee);
-
   return (
     <>
-      {/* ═══ 1. titre + trois formules ═══ */}
-      <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-14">
-        {/* 01/09 — transitions : la pastille « Sur mesure » ARRIVE de la carte
-            « Organisations & équipes » de /commencer (objet partagé), titre
-            puis chapô puis colonnes entrent en cascade (Arrivee). */}
-        <Partage
-          nom="kicker-audit"
-          share="voyage-audit"
-          className="cm-kicker cm-kicker--violet cm-kicker--page"
-        >
-          Sur mesure
-        </Partage>
-        <h1 data-arrivee="titre" className="r-h1 max-w-[18ch]">
-          Un audit à la mesure de votre organisation
-        </h1>
-        <p data-arrivee="chapo" className="r-lead mt-5 max-w-[58ch]">
-          Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons d&apos;abord, et le devis est établi à partir de vos volumes. Trois formats, du cadrage de 45 minutes à la journée dans vos locaux.
-        </p>
-
-        <div className="mt-10 grid gap-4 sm:mt-12 lg:grid-cols-4">
-          {/* colonne de gauche — la référence y loge sa preuve sociale ;
-              Omega n'en a pas d'authentique, on y met donc les deux faits
-              qui décident réellement : c'est gratuit, et c'est financé. */}
-          <div data-arrivee="colonne" className="flex flex-col justify-start gap-8 pr-2 lg:pt-2">
-            <p className="text-[19px] font-medium leading-[27px] text-[#050505] sm:text-[21px] sm:leading-[29px]">
-              Gratuit, sans engagement.
-              <br />
-              Toute collaboration commence ici.
-            </p>
-            <div className="border-t border-[#e3e3e3] pt-6">
-              <div className="text-[14px] font-semibold leading-[20px] text-[#050505]">
-                Chèque TIC
-              </div>
-              <p className="mt-1.5 text-[13px] leading-[20px] text-[#616161]">
-                Jusqu&apos;à 10 000 € d&apos;une installation financés par la Région Guadeloupe
-                pour les entreprises éligibles. Votre éligibilité est vérifiée pendant
-                l&apos;audit, avant tout engagement.
-              </p>
-            </div>
-          </div>
-
-          {p.formules.map((f) => (
-            <Carte key={f.id} f={f} />
-          ))}
-        </div>
-
-        <p data-arrivee="colonne" className="r-note mt-6 max-w-3xl">
-          *Créneaux du lundi au vendredi, 9 h – 17 h (heure Guadeloupe). Les durées
-          annoncées sont tenues : l&apos;entretien se termine à l&apos;heure. Le format dans
-          vos locaux est facturé sur devis et déduit de l&apos;installation si vous décidez
-          d&apos;aller plus loin.
-        </p>
-      </section>
+      {/* ═══ 1. titre, trois formats, financement ═══ */}
+      <FormulesGrille />
 
       {/* ═══ 2. bandeau d'orientation ═══ */}
       <section data-monde="clair" className="r-wrap pb-14 sm:pb-16">
@@ -223,116 +41,14 @@ export default function Formules() {
             </span>{" "}
             Décrivez votre situation en deux lignes&nbsp;: votre activité, votre commune, ce qui vous coûte le plus cher. Nous vous répondons le jour même avec le format adapté, et l&apos;agenda en ligne fait le reste.
           </p>
-          <Lien
-            href={lienContact("avant")}
-            className="r-btn r-btn--fil shrink-0"
-          >
+          <Lien href={lienContact("avant")} className="r-btn r-btn--fil shrink-0">
             Décrire ma situation
           </Lien>
         </div>
       </section>
 
       {/* ═══ 3. comparatif ═══ */}
-      <section id="comparatif" data-monde="clair" className="r-blanc">
-        <div className="r-wrap py-14 sm:py-20">
-          <h2 className="r-h2">Comparer les formats</h2>
-          <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
-            <Lien
-              href={lienContact("avant")}
-              className="r-lien"
-            >
-              Demander conseil
-            </Lien>
-          </div>
-
-          {/* en-tête collant : les trois formules restent lisibles pendant
-              qu'on descend dans les lignes */}
-          <div className="sticky top-16 z-10 mt-10 hidden bg-white pb-4 pt-4 sm:top-[72px] md:block">
-            <div className="grid grid-cols-6 gap-x-6 border-b border-[#e3e3e3] pb-5">
-              <div className="col-span-3 self-end text-[13px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                {p.label}
-              </div>
-              {p.formules.map((f) => (
-                <div key={f.id}>
-                  <div className="font-[family-name:var(--font-jakarta)] text-[19px] font-semibold leading-[26px] tracking-[-0.01em] text-[#050505]">
-                    {f.nom}
-                  </div>
-                  <div className="num mt-0.5 text-[14px] leading-[22px] text-[#3d3d3d]">
-                    {f.duree} · {f.conditions}
-                  </div>
-                  <Link
-                    href={lienReservation(f.id)}
-                    className={`r-btn mt-3 w-full !py-2 !text-[14px] ${
-                      f.phare ? "r-btn--noir" : "r-btn--fil"
-                    }`}
-                  >
-                    {f.cta}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* en-tête collant mobile : les trois noms coiffent les colonnes une
-              seule fois pour tout le tableau — même encadré, mêmes cellules et
-              mêmes gouttières que les tableaux .r-tableau qu'il surplombe,
-              sinon les colonnes ne tombent pas en face */}
-          <div className="sticky top-16 z-10 mt-8 bg-white pb-2 pt-3 sm:top-[72px] md:hidden">
-            <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-[#e3e3e3] bg-[#f5f5f5]">
-              {p.formules.map((f, i) => (
-                <div
-                  key={f.id}
-                  className={`px-3 py-2.5 ${i > 0 ? "border-l border-[#e3e3e3]" : ""}`}
-                >
-                  <div className="font-[family-name:var(--font-jakarta)] text-[14px] font-semibold leading-[19px] tracking-[-0.01em] text-[#050505]">
-                    {f.nom}
-                  </div>
-                  <div className="num mt-0.5 text-[12px] leading-[16px] text-[#616161]">
-                    {f.duree}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* familles toujours visibles */}
-          <div className="md:mt-2">
-            {visibles.map((fam) => (
-              <div key={fam.titre}>
-                <h3 className="r-h4 pb-2 pt-10">{fam.titre}</h3>
-                <div className="r-tableau">
-                  {fam.lignes.map((l) => (
-                    <Ligne key={l.libelle} {...l} noms={noms} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* familles repliées — le bouton porte lui-même le voile de
-              dégradé (::before), qui disparaît à l'ouverture */}
-          <details className="r-plus">
-            <summary>
-              <span className="r-btn r-btn--fil mx-auto mt-8 w-full max-w-sm">
-                <span className="r-plus-ouvrir">Voir tous les points</span>
-                <span className="r-plus-fermer">Masquer le détail</span>
-              </span>
-            </summary>
-            <div>
-              {repliees.map((fam) => (
-                <div key={fam.titre}>
-                  <h3 className="r-h4 pb-2 pt-10">{fam.titre}</h3>
-                  <div className="r-tableau">
-                    {fam.lignes.map((l) => (
-                      <Ligne key={l.libelle} {...l} noms={noms} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </details>
-        </div>
-      </section>
+      <ComparerFormats />
     </>
   );
 }
