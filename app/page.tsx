@@ -1014,7 +1014,9 @@ export default function Home() {
             côté. »
 
             LA PLACE — déplacée le 13/09/2026 à la demande de Teo, qui l'a
-            échangée avec « À l'échelle d'un groupe » (descendue en 8 ter).
+            échangée avec « À l'échelle d'un groupe ». Cette dernière est
+            depuis remontée en 3 bis (15/09, l'accueil parle d'abord aux
+            organisations) ; l'équipe, elle, n'a pas bougé.
             Elle est donc ici, après le bento « ce que ça change » et avant
             la frise du déroulé. Ce qu'on gagne : elle est assez haut pour
             être vue de quelqu'un qui ne descend pas la page entière, et le
@@ -1232,7 +1234,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 8 ter · LE TEMPS D'ARRÊT — la phrase qui se peint ═══
+        {/* ════════ 8 bis · LE TEMPS D'ARRÊT — la phrase qui se peint ═══
             11/09/2026. La page enchaînait douze sections bâties à
             l'identique — pastille, titre, chapô, contenu — sans un seul
             temps de respiration. Les gabarits de vitrine mettent à cet
