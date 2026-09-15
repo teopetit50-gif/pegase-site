@@ -593,8 +593,19 @@ const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
        au-delà du délai).
      • FRONTD — lib/produits/accueil.ts, HERO.titre (le meilleur titre du
        parc, gardé intact) et APPORT (« répond dans la minute »).
-     • FILED  — lib/produits/factures.ts, HERO : le titre, « vous connectez
-       une messagerie », et le classement jusqu'au dossier comptable.
+     • FILED  — lib/produits/factures.ts, HERO : « vous connectez une
+       messagerie », et le classement au bon dossier.
+
+   ⚠ FILED N'EST PAS LA CARTE DES FACTURES (Teo, 15/09, après une première
+   version qui disait « plus une seule facture ») : « on parle pas que des
+   factures, c'est tous les documents, peu importe le doc que l'entreprise
+   reçoit ; il sait lire et rédiger pour tout type de document ». Le paquet
+   s'appelle d'ailleurs « FILED · flux documentaires » dans lib/content.ts.
+   La facture fournisseur est un CAS, le plus démontrable — c'est celui que
+   tient toute la page /offres/factures-fournisseurs, qui reste, elle,
+   écrite au périmètre étroit (HT/TVA/TTC recoupés, journal d'achats). La
+   carte et la page ne disent donc pas la même largeur : à reprendre le jour
+   où la page s'élargit.
 
    Deux garde-fous tenus : aucune promesse de résultat (on dit ce que la
    machine FAIT, jamais ce que ça rapporte), et la validation humaine reste
@@ -619,9 +630,9 @@ const ACCROCHES_VITRINE: Record<string, { objectif: string; texte: string }> = {
       "FRONTD lit le message dès qu\u2019il arrive et répond dans la minute, sans jamais sortir de ce que vous avez validé avec nous.",
   },
   FILED: {
-    objectif: "Vos équipes ne ressaisiront plus une seule facture.",
+    objectif: "Vos équipes ne ressaisiront plus un seul document.",
     texte:
-      "Vous connectez une messagerie, rien d\u2019autre. FILED lit chaque pièce qui arrive, recoupe ses montants et la classe jusqu\u2019au dossier de votre comptabilité.",
+      "Vous connectez une messagerie, rien d\u2019autre. FILED lit chaque document reçu, quel qu\u2019en soit le type, le classe au bon dossier et rédige ce qui doit repartir.",
   },
 };
 
