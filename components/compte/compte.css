@@ -245,10 +245,17 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* 1 × 4 dès 1280 seulement : à 1024 une cellule fait 232 px et
+   « Enregistrée, règlement à venir » en sortait (mesuré) ; en 2 × 2 elle
+   a 470 px, à 1280 elle en a 296 et tout tient sur une ligne */
 @media (min-width: 1024px) {
   .resa .cpt-tuiles {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
     margin-bottom: 16px;
+  }
+}
+@media (min-width: 1280px) {
+  .resa .cpt-tuiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 /* chaque tuile est un bouton : elle ouvre sa section */
@@ -556,11 +563,18 @@
   /* les enfants (résumé du profil, formulaire) se règlent sur SA largeur */
   container-type: inline-size;
 }
-/* l'abonnement : ses tuiles de postes tiennent sur UNE rangée dès 1024
-   (la liste `ul.grid` d'AbonnementCarte, sans toucher au composant) */
+/* l'abonnement : la liste `ul.grid` d'AbonnementCarte, resserrée ici sans
+   toucher au composant — deux colonnes jusqu'à 1279, trois au-delà */
+/* de 640 à 1279 la liste des postes est en deux colonnes (le composant) :
+   un troisième poste seul sur son rang prend les deux — le demi-rang vide
+   d'une grille impaire, déjà rencontré sur /offres */
+@media (min-width: 640px) and (max-width: 1279px) {
+  .resa .cpt-panneau[data-section="abonnement"] ul.grid > li:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+}
 @media (min-width: 1024px) {
   .resa .cpt-panneau[data-section="abonnement"] ul.grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     margin-top: 12px;
     gap: 8px;
   }
@@ -581,6 +595,13 @@
      composant : dans un panneau de 1 000 px il tient sur deux lignes */
   .resa .cpt-panneau[data-section="abonnement"] .max-w-\[60ch\] {
     max-width: 92ch;
+  }
+}
+/* trois postes sur une rangée dès 1280 (panneau ≥ 880 px : les noms
+   tiennent sur deux lignes au plus) */
+@media (min-width: 1280px) {
+  .resa .cpt-panneau[data-section="abonnement"] ul.grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
