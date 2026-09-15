@@ -1063,8 +1063,85 @@ main:has(.cpt-pleine) > footer {
   --cp-carte: #ffffff;
   --cp-creux: #fafafa;
 
+  /* 15/09 — Teo : « j'aime pas les couleurs verte et jaune, enlève ».
+     Le tableau de bord est donc MONOCHROME : un état ne se dit plus par
+     une teinte mais par le POIDS de son encre et par un point plein.
+     Le rouge reste, et lui seul : « Paiement refusé » est une alerte, la
+     noyer dans le gris serait la cacher. Ces variables ne valent qu'ici
+     — les mêmes pastilles gardent leurs couleurs sur /installation et
+     dans le module de réservation, où elles n'ont pas été mises en
+     cause. */
+  --cp-vert: #050505;
+  --cp-vert-fond: #ececea;
+  --cp-ambre-fond: #f4f4f2;
+
   background: #ffffff;
   color: var(--r-doux);
+}
+
+/* ——— les pastilles d'état, en monochrome ———
+   Trois niveaux, sans une couleur : ACQUIS (encre pleine, point noir),
+   EN COURS (encre douce, point creux), NEUTRE (gris). */
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille {
+  gap: 7px;
+  background: #f4f4f2;
+  color: var(--r-faible);
+}
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.55;
+}
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille[data-teinte="vert"] {
+  background: #ececea;
+  color: var(--r-texte);
+  font-weight: 600;
+}
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille[data-teinte="vert"]::before {
+  opacity: 1;
+}
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille[data-teinte="bleu"],
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille[data-teinte="ambre"] {
+  background: #f4f4f2;
+  color: var(--r-doux);
+}
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille[data-teinte="gris"] {
+  background: #f4f4f2;
+  color: var(--r-faible);
+}
+/* le rouge reste : c'est la seule alerte de la page */
+.resa .cpt-console:not([data-peau="nuit"]) .cp-pastille[data-teinte="rouge"] {
+  background: #fdf1ef;
+  color: #7c2d24;
+}
+
+/* la pilule d'état de la barre du haut suit la même règle */
+.resa .cpt-console:not([data-peau="nuit"]) .cpt-pilule[data-teinte="vert"] {
+  border-color: #d8d8d4;
+  background: #ececea;
+  color: var(--r-texte);
+}
+.resa .cpt-console:not([data-peau="nuit"]) .cpt-pilule[data-teinte="ambre"] {
+  border-color: var(--r-filet);
+  background: #f4f4f2;
+  color: var(--r-doux);
+}
+/* la note d'état : un filet et du gris, plus de bandeau jaune */
+.resa .cpt-console:not([data-peau="nuit"]) .cpt-note[data-teinte="ambre"],
+.resa .cpt-console:not([data-peau="nuit"]) .cpt-note[data-teinte="gris"] {
+  border-color: var(--r-filet);
+  background: #fafafa;
+  color: var(--r-doux);
+}
+/* le bandeau de confirmation : un filet d'encre à gauche, plus de vert */
+.resa .cpt-console:not([data-peau="nuit"]) .cp-ok {
+  border-color: var(--r-filet);
+  border-left: 2px solid var(--r-texte);
+  background: #fafafa;
+  color: var(--r-texte);
 }
 
 /* ——— la même chose, en nuit ——— */
@@ -1201,7 +1278,11 @@ main:has(.cpt-pleine) > footer {
   width: 32px;
   height: 32px;
   border-radius: 9999px;
-  background: linear-gradient(140deg, var(--r-or-clair) 0%, var(--r-or-mid) 50%, var(--r-or-fonce) 100%);
+  /* l'or de la charte est du jaune : il tombe avec le vert et l'ambre
+     (Teo, 15/09). Un gris clair suffit à distinguer la personne du jeton
+     carré NOIR de l'entreprise, juste en face. */
+  background: #ececea;
+  box-shadow: inset 0 0 0 1px #dedeDA;
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 12.5px;
   font-weight: 700;
