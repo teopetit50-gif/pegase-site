@@ -218,13 +218,11 @@ export const PALIERS: Palier[] = [
     aChoisir: 1,
     teinte: "bleu",
     promesse:
-      "Un système complet sur le poste qui vous coûte le plus cher : il lit, rédige, attend votre validation et rend compte chaque matin.",
+      "Le poste qui vous coûte le plus cher, tenu de bout en bout, sous votre validation.",
     points: [
       "Un poste au choix parmi les quatre",
       "Jusqu'à 150 pièces traitées par mois",
-      "Intégré à vos outils : messagerie, WhatsApp, tableur",
-      "Le point du matin et les verrous, compris dès le premier jour",
-      "Satisfait ou remboursé 30 jours",
+      "Intégré à vos outils existants",
     ],
   },
   {
@@ -239,13 +237,11 @@ export const PALIERS: Palier[] = [
     phare: true,
     badge: "Recommandé",
     promesse:
-      "Trois postes tenus par le même système : une seule file de validation, un seul point du matin, un seul journal de ce qui est parti.",
+      "Trois postes tenus par le même système, sous une seule file de validation.",
     points: [
       "Trois postes au choix parmi les quatre",
       "Jusqu'à 400 pièces traitées par mois",
-      "Une seule validation, un seul journal pour les trois",
-      "Le point du matin et les verrous, compris dès le premier jour",
-      "Satisfait ou remboursé 30 jours",
+      "Une seule validation, un seul journal",
     ],
   },
   {
@@ -259,13 +255,11 @@ export const PALIERS: Palier[] = [
     teinte: "nuit",
     badge: "Le plus complet", // 08/09 (associé) : la dernière carte doit attirer
     promesse:
-      "Les quatre postes en service, avec le point du matin et les verrous compris : tout l'administratif et le commercial tenus, sous votre validation.",
+      "Tout l'administratif et le commercial tenus, sous votre validation.",
     points: [
-      "Les quatre postes, en service dès l'installation",
+      "Les quatre postes, dès l'installation",
       "Jusqu'à 1 000 pièces traitées par mois",
-      "Une seule validation, un seul journal pour les quatre",
-      "Le point du matin et les verrous, compris dès le premier jour",
-      "Satisfait ou remboursé 30 jours",
+      "Une seule validation, un seul journal",
     ],
   },
 ];
@@ -716,11 +710,11 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
   id: "sur-mesure",
   nom: "Sur mesure",
   promesse:
-    "Le poste qui vous coûte le plus cher n'est pas dans la liste, ou plusieurs services se partagent la validation : le périmètre se décrit, le devis s'écrit avant tout engagement.",
+    "Un besoin hors des quatre postes, ou plusieurs services qui valident.",
   prixTexte: "Sur devis",
   sousPrix: "établi avec vous",
   note: "Le prix dépend de qui valide, pas de votre chiffre d'affaires.",
-  casTitre: "Deux situations mènent ici",
+  casTitre: "Ce qui mène ici",
   cas: [
     "Une tâche hors des quatre postes",
     "Plusieurs services qui valident",
@@ -728,11 +722,9 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
   ],
   pointsTitre: "Compris dans le devis",
   points: [
-    "Les mêmes fondations : vos outils, vos règles, votre validation",
-    "Le point du matin et les verrous, compris comme partout",
     "Un diagnostic qui mesure vos volumes avant de chiffrer",
+    "Les mêmes fondations : vos outils, vos règles, votre validation",
     "Périmètre, installation et prix écrits avant tout engagement",
-    "Satisfait ou remboursé 30 jours, une fois en service",
   ],
   cta: "Décrire votre besoin",
   enSavoirPlus: "Voir la page sur mesure",
@@ -796,9 +788,7 @@ export const GRANDE_STRUCTURE = {
   points: [
     "Un diagnostic qui mesure vos volumes avant de chiffrer",
     "Les règles de validation de chaque service",
-    "Le point du matin et les verrous, compris comme partout",
-    "Installation et raccordements chiffrés avant tout engagement",
-    "Périmètre et devis écrits avant tout engagement",
+    "Périmètre, installation et prix écrits avant tout engagement",
   ],
   cta: "Réserver un diagnostic",
   href: "/reserver-un-audit#reserver",
@@ -1038,7 +1028,7 @@ export const CALCULATEUR = {
   avant: {
     grand: "À estimer",
     sous: "sur vos volumes",
-    note: "Le prix suit le nombre de pièces que le système traite pour vous. Répondez aux questions au-dessus et il s'affiche.",
+    note: "Répondez aux questions au-dessus et il s'affiche.",
   },
   /* 15/09 (Teo) — « ça peut vraiment être n'importe quel prix, c'est en
      fonction des stats précises de l'entreprise ; là ça reste une estimation

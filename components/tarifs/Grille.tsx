@@ -581,7 +581,6 @@ function CartePalier({
               ? `Minimum mensuel — ${nombreFr(piecesCarte)} pièce${piecesCarte > 1 ? "s" : ""} seulement`
               : `${nombreFr(piecesCarte)} pièces × ${TARIF_PIECE} €, arrondi`}
           </p>
-          <p className="mt-2 text-xs text-[#767676]">Chiffré à l&apos;audit, sur vos vrais chiffres.</p>
 
           <div key={periodicite} className="rv-fondu mt-3">
             <p className="text-xs text-[#767676]">
@@ -708,12 +707,6 @@ function CartePalier({
               : "Indiquez vos volumes"}
           </Button>
         )}
-        {/* 15/09 — plus de promesse de paiement sous ce bouton : il n'y a
-            rien à payer au bout. Les deux mondes disent donc la même chose,
-            parce qu'ils mènent au même endroit. */}
-        <p className="mt-3 text-center text-xs text-[#767676]">
-          Gratuit, sans engagement — l&apos;audit fixe le prix.
-        </p>
       </CardFooter>
     </Card>
   );
@@ -772,17 +765,18 @@ export default function Grille() {
               premier mot utile. La marche vers `text-4xl` est remise à
               480 px, où la ligne tient ; au-dessus de `sm`, rien ne bouge. */}
           <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-[28px] font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] min-[480px]:text-4xl sm:text-5xl">
-            {devis ? GRANDE_STRUCTURE.titre : "Des prix publics, gradués sur ce que vous traitez"}
+            {devis ? GRANDE_STRUCTURE.titre : "Deux entreprises ne paient pas le même prix"}
           </h1>
           <p key={monde} className="rv-fondu mx-auto mt-4 max-w-2xl text-balance text-[#616161]">
             {devis ? (
               GRANDE_STRUCTURE.chapo
             ) : (
               <>
-                Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, le prix suit
-                le volume que le système traite pour vous, et l&apos;installation se chiffre à
-                part, une seule fois. Sans engagement en mensuel, −{REMISE_PCT}&nbsp;% en annuel,
-                satisfait ou remboursé trente jours.
+                Ce que vous payez suit ce que le système traite pour vous&nbsp;: les postes que
+                vous mettez en service, et le nombre de pièces qui passent chaque mois. Cette page
+                en donne l&apos;estimation&nbsp;; l&apos;audit la confirme sur vos chiffres, et le
+                prix est écrit avant tout engagement. Sans engagement en mensuel,
+                −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé trente jours.
               </>
             )}
           </p>
@@ -868,33 +862,49 @@ export default function Grille() {
           <CarteSurMesure monde={monde} />
         </div>
 
-        {/* ce qui tourne chez tout le monde */}
+        {/* ce qui tourne chez tout le monde — 15/09 : cette ligne porte
+            désormais ce que les quatre cartes répétaient chacune de leur
+            côté (le point du matin, les verrous, le satisfait ou remboursé,
+            la gratuité de l'audit). Dit une fois sous la grille, c'est la
+            même promesse ; dit quatre fois dans les cartes, c'était
+            quatre-vingts mots de plus à lire avant le bouton. */}
         <p
           data-reveal
           className="mx-auto mt-12 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161] lg:mt-20"
         >
           <span className="font-semibold text-[#050505]">Compris à tous les paliers.</span>{" "}
-          Quatre postes s&apos;installent sur les outils que vous avez déjà&nbsp;: messagerie, tableur, WhatsApp. Quel que
-          soit le palier, l&apos;état de l&apos;activité chaque matin et la garantie que rien ne part sans votre validation
-          viennent avec&nbsp;: ce ne sont pas des options, et ils ne se facturent pas.
+          L&apos;installation se fait sur les outils que vous avez déjà&nbsp;: messagerie, tableur,
+          WhatsApp. L&apos;état de l&apos;activité chaque matin et la garantie que rien ne part sans
+          votre validation viennent avec
+          {devis ? ". " : ", comme le satisfait ou remboursé 30 jours. "}
+          {devis
+            ? "Le diagnostic est gratuit et sans engagement : c'est lui qui fixe le prix."
+            : "Réserver un audit est gratuit et sans engagement : c'est lui qui fixe le prix."}
         </p>
 
+        {/* 15/09/2026 — la note disait « grille en vigueur au 01/09/2026 »
+            et « le prix affiché est celui qui vous est confirmé ». Les deux
+            sont faux depuis que les cartes n'affichent plus un barème mais
+            une estimation lue sur les volumes saisis : la date renvoyait à
+            une grille remplacée le 15, et la promesse engageait un montant
+            que seul l'audit fixe. */}
         {devis ? (
           <p key="bas-devis" className="r-note rv-fondu mx-auto mt-8 max-w-3xl text-center">
             {GRANDE_STRUCTURE.bas}
           </p>
         ) : (
         <p data-reveal className="r-note mx-auto mt-8 max-w-3xl text-center">
-          Prix TTC, grille en vigueur au 01/09/2026 — le prix affiché au moment de votre demande
-          est celui qui vous est confirmé à l&apos;installation. L&apos;installation elle-même
-          (mise en route sur vos outils, rodage sous votre contrôle) est comprise dans la réunion
-          pour les quatre postes standard&nbsp;; un raccordement particulier est chiffré avant
-          tout engagement. Le moyen de paiement — carte ou prélèvement SEPA — est enregistré à
-          la réservation&nbsp;; rien n&apos;est débité avant la fin de l&apos;installation, le
-          premier prélèvement part le jour de la mise en service. Formule mensuelle&nbsp;: sans
-          engagement, résiliable à tout moment, le mois en cours va à son terme. Formule
-          annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise, facturée en une fois le jour de la mise
-          en service&nbsp;; le satisfait ou remboursé 30 jours s&apos;applique de la même façon.
+          Montants TTC, estimés sur les volumes que vous indiquez&nbsp;: ils donnent un ordre de
+          grandeur, pas votre prix. Le prix se fixe à l&apos;audit, sur vos chiffres, et il est
+          écrit dans votre devis avant tout engagement. L&apos;installation est chiffrée à part,
+          une seule fois&nbsp;; un raccordement particulier — logiciel rare, historique à
+          reprendre — l&apos;est aussi, jamais découvert en cours de route. Le moyen de paiement
+          — carte ou prélèvement SEPA — est enregistré à la réservation de l&apos;installation&nbsp;;
+          rien n&apos;est débité avant la fin de celle-ci, le premier prélèvement part le jour de
+          la mise en service. Formule mensuelle&nbsp;: sans engagement, résiliable à tout moment,
+          le mois en cours va à son terme. Formule annuelle&nbsp;: {REMISE_PCT}&nbsp;% de remise,
+          facturée en une fois le jour de la mise en service&nbsp;; le satisfait ou remboursé
+          30 jours s&apos;applique de la même façon.
         </p>
         )}
       </section>
