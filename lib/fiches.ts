@@ -5,7 +5,8 @@
    mot pour mot celles de leur moteur principal (CASHD ← PAYD, FRONTD ←
    ANSWR, FILED ← OFFLOAD, PULSE ← BRIEF, RELOAD ← REVIVE), enrichies du
    second moteur du paquet quand il y en a un : les avis dans FRONTD, les
-   marchés publics dans RELOAD, les leçons hebdomadaires dans PULSE. VAULT
+   (la moitié « marchés publics » de RELOAD a été retirée le 15/09/2026),
+   les leçons hebdomadaires dans PULSE. VAULT
    est entièrement neuf. Les six fiches qui décrivaient des moteurs
    inexistants — POSTD, REACH, HIRED, BILLD, STAYD, COLLECT — sont
    supprimées, leurs URL redirigées dans next.config.ts. */
@@ -497,14 +498,14 @@ export const FICHES: Record<string, Fiche> = {
     photoAlt: "L'intérieur d'une boutique de vêtements, articles présentés en rayon.",
     photoVoile: 0.83,
     pitch: "Le chiffre qui dort dans votre historique, remis dans le circuit.",
-    meta: "Les clients inactifs et les marchés de votre zone, remis dans le circuit commercial.",
+    meta: "Les comptes qui n'ont plus commandé, remis dans le circuit commercial.",
     sections: {
       apportTitre: "Réveiller le fichier sans harceler les clients.",
       apportChapo:
-        "Vos clients silencieux classés par valeur, les marchés de votre zone filtrés chaque jour sur vos capacités réelles.",
+        "Vos clients silencieux classés par valeur, les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre.",
       blocTitres: ["Un message par client", "Une cadence plafonnée"],
       faqChapo:
-        "La taille du fichier, la pression sur les clients, les marchés publics : les trois questions posées à chaque installation.",
+        "La taille du fichier, la pression sur les clients, l'état des données : les trois questions posées à chaque installation.",
       clotureChapo:
         "L'audit gratuit chiffre ce qui dort dans votre fichier client, et le compare à ce que les autres moteurs vous feraient gagner.",
     },
@@ -512,18 +513,18 @@ export const FICHES: Record<string, Fiche> = {
       "RELOAD croise votre historique de ventes et votre fichier de contacts pour cartographier vos clients silencieux, puis les classe par valeur et par récence. On réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher, avant les occasionnels plus anciens : l'effort va là où le retour est le plus probable.",
       "Chaque client reçoit un message écrit pour lui, ancré dans son historique réel : dernier achat, dernier passage, prestation habituelle. C'est l'inverse exact d'une newsletter envoyée à tous, et c'est ce qui sépare un message qu'on ouvre d'un message qu'on supprime.",
       "Le plafond est volontaire : une sollicitation par trimestre et par client, sur WhatsApp en priorité quand le numéro existe, sinon par mail, jamais les deux. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation vous revient.",
-      "L'autre gisement est dehors. Chaque jour, les consultations publiques de votre secteur et de votre zone sont relevées, puis écartées dès qu'elles sortent de vos capacités réelles : montant, délai, qualifications exigées. Il en reste une poignée par semaine : celles qui valent le temps que vous y passerez. Sur un territoire où la commande publique fait vivre une part importante du bâtiment, c'est un terrain que la plupart des petites entreprises ne regardent jamais, faute d'une heure à y consacrer.",
+      "La deuxième liste est datée d'avance. Les entretiens annuels, les révisions et les contrôles périodiques redeviennent dus à une date connue, et le client est prévenu la semaine qui précède plutôt que le jour où l'échéance tombe. La troisième rassemble les affaires restées en plan : la pièce arrivée que personne n'est venu chercher, l'intervention terminée qui dort sur une étagère, et le stock qu'elles immobilisent.",
     ],
     points: [
       "Segmentation par valeur et par récence : on réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher",
       "Message individuel ancré dans l'historique réel : dernier achat, dernier passage, préférence connue",
       "Cadence plafonnée : une sollicitation par trimestre et par client, jamais davantage",
       "Arrêt immédiat dès qu'une réponse arrive, même négative : la conversation vous revient",
-      "Veille quotidienne des consultations publiques de votre zone, filtrées sur vos qualifications et vos plafonds",
+      "Entretiens et contrôles suivis jusqu'à leur échéance, et commandes jamais reprises signalées avec le montant immobilisé",
     ],
     controle:
-      "La liste des clients à recontacter vous est soumise avant chaque vague. Un nom retiré ne sera jamais recontacté, et aucun dossier de marché ne part sans votre feu vert.",
-    outils: ["Google Sheets / Excel", "WhatsApp", "Gmail / Outlook", "Plateformes de marchés publics"],
+      "La liste des clients à recontacter vous est soumise avant chaque vague. Un nom retiré ne sera jamais recontacté, et rien ne part sans votre feu vert.",
+    outils: ["Google Sheets / Excel", "WhatsApp", "Gmail / Outlook", "Logiciel de gestion commerciale"],
     cible: ["BTP & artisans", "Garages", "Instituts & salons", "Commerces de détail"],
     etapes: [
       {
@@ -549,8 +550,8 @@ export const FICHES: Record<string, Fiche> = {
         a: "C'est précisément ce que le plafond empêche : une sollicitation par trimestre et par client, un seul canal à la fois, arrêt immédiat à la première réponse. Un client qui ne répond jamais sort du cycle au lieu d'y tourner en boucle.",
       },
       {
-        q: "Je n'ai jamais répondu à un marché public. C'est jouable ?",
-        a: "La veille ne dépose pas les dossiers à votre place : elle vous évite de passer à côté. Les consultations hors de vos qualifications ou de vos plafonds sont écartées avant de vous parvenir, et rien ne part sans votre feu vert.",
+        q: "Mon fichier est réparti entre un tableur et des dossiers papier. C'est jouable ?",
+        a: "Un export de votre outil de gestion suffit pour commencer, et un tableur fait aussi l'affaire. Ce qu'il faut sur chaque ligne, c'est un nom, une date et un montant, parce que le reste se déduit. Ce qui dort sur papier n'entre pas tout seul : on regarde ensemble ce qui vaut la peine d'être saisi.",
       },
     ],
     demo: {

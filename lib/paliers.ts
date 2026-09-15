@@ -108,11 +108,11 @@ export const POSTES: Poste[] = [
   {
     id: "reload",
     system: "RELOAD",
-    nom: "Clients inactifs et marchés publics",
+    nom: "Relance des clients inactifs",
     slug: "nouvelles-affaires",
     resume:
-      "Vos clients inactifs sont identifiés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les consultations publiques de votre zone sont relevées chaque jour et filtrées sur vos capacités réelles.",
-    court: "Clients inactifs recontactés, marchés publics de votre zone filtrés.",
+      "Vos clients inactifs sont identifiés dans votre historique de ventes, classés par valeur, puis recontactés un par un. Les entretiens qui redeviennent dus et les commandes que personne n’est venu reprendre entrent dans la même liste.",
+    court: "Clients inactifs recontactés, échéances et commandes en plan reprises.",
   },
   {
     id: "filed",
@@ -317,7 +317,7 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
     lignes: [
       {
         libelle: "Postes en service",
-        aide: "Parmi les quatre : relances, demandes clients, clients inactifs et marchés publics, factures fournisseurs.",
+        aide: "Parmi les quatre : relances, demandes clients, clients inactifs, factures fournisseurs.",
         valeurs: parPalier((p) =>
           p.aChoisir === null ? "Les quatre, en service" : `${p.aChoisir}, au choix`,
         ),

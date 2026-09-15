@@ -189,7 +189,7 @@ export const MOTEUR_OUTILS = [
   {
     system: "RELOAD",
     slug: "nouvelles-affaires",
-    role: "Clients inactifs & marchés publics",
+    role: "Relance des comptes inactifs",
     /* « MailChimp » : même casse que le `title` de simple-icons et que la
        clé d'OUTIL_INFOS plus haut, sans quoi le logo saute au rendu. */
     outils: ["Shopify", "Google Sheets", "MailChimp", "Gmail"],

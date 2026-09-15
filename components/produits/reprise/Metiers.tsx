@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { HardHat, Building2, Wrench, Snowflake, Briefcase } from "lucide-react";
+import { HardHat, PackageCheck, Wrench, Snowflake, Briefcase } from "lucide-react";
 import { METIERS as M } from "@/lib/produits/reprise";
 import { Cadre, TitreSection } from "./Cadre";
 import { cn } from "./cn";
@@ -37,11 +37,18 @@ import { cn } from "./cn";
  *     `cursor-pointer` explicite, une piste d'onglets ne se signale pas au
  *     survol et se lit comme du texte décoratif.
  */
+/* Recentrage du 15/09/2026 : les deux secteurs « marchés publics » ont sauté
+ *  avec la moitié PUBLIQ. Building2 (le Bâtiment vu comme répondant à un
+ *  appel d'offres) laisse la place à PackageCheck, qui porte le Négoce — le
+ *  compte qui espace ses commandes puis s'arrête. Le Bâtiment reste, sous son
+ *  casque, mais il y parle de chantiers réceptionnés.
+ *  À 16 px et strokeWidth 1.75, Smartphone n'aurait été qu'un rectangle
+ *  arrondi : dans une piste de cinq onglets il ne se distingue pas. */
 const ICONES = {
-  chantier: HardHat,
-  batiment: Building2,
   atelier: Wrench,
+  negoce: PackageCheck,
   froid: Snowflake,
+  chantier: HardHat,
   bureau: Briefcase,
 } as const;
 

@@ -1,4 +1,4 @@
-import { FileCheck2, ShieldCheck } from "lucide-react";
+import { PenLine, ShieldCheck } from "lucide-react";
 import { LogoFrance, DrapeauFrance } from "./France";
 import { FRANCAIS as F } from "@/lib/produits/reprise";
 import { Cadre, TitreSection } from "./Cadre";
@@ -10,9 +10,12 @@ import { Cadre, TitreSection } from "./Cadre";
    ressembler à une pièce rapportée, et gagne une icône par cellule : c'est
    aussi une respiration visuelle dans une page devenue très écrite. */
 
+/* `source` (FileCheck2) illustrait « source officielle française », c'est-à-dire
+   le bulletin des marchés publics : la clé est tombée avec lui le 15/09. Ce qui
+   la remplace est `langue` — les relances sont écrites en français. */
 const ICONES = {
   editeur: LogoFrance,
-  source: FileCheck2,
+  langue: PenLine,
   donnees: ShieldCheck,
 } as const;
 

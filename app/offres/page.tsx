@@ -189,7 +189,7 @@ const PAQUETS: CaseFeature[] = [
     icone: Users,
     titre: "RELOAD",
     texte:
-      "Les clients inactifs sont classés par valeur, et les marchés publics de votre zone relevés chaque jour.",
+      "Les comptes qui n’ont plus commandé, les entretiens redevenus dus et les commandes jamais reprises sont relancés un par un.",
     href: "/offres/nouvelles-affaires",
   },
   {

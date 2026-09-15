@@ -50,16 +50,14 @@ import "./reprise.css";
 const geist = Geist({ subsets: ["latin"], variable: "--police-geist" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--police-geist-mono" });
 
-/* La `description` suit la passe de réécriture du 11/09 (OMEGA/reload-site,
-   app/layout.tsx, où vit la phrase de présentation du produit) : l'ancienne
-   disait « RELOAD surveille les deux », c'est-à-dire le vocabulaire de
-   surveillance que la réécriture abandonne — ce qui tient les deux moitiés,
-   c'est LIRE deux listes. Le titre, lui, garde la forme du site
-   (« … | Omega.AI »), pas celle du site source. */
+/* Recentrage du 15/09/2026 : la moitié « marchés publics » a quitté la page.
+   La description nomme les trois relances dans l'ordre de lib/produits/
+   reprise.ts. Le titre garde la forme du site (« … | Omega.AI »), pas celle
+   du site source. */
 export const metadata: Metadata = {
   title: "RELOAD | Omega.AI",
   description:
-    "Les marchés publics de vos départements et les clients qui ne reviennent plus : deux listes lues chaque matin, à votre place. Un système Omega.",
+    "Votre fichier client relu chaque matin : les comptes qui n'ont plus commandé, les entretiens redevenus dus et les affaires restées en plan. La relance est rédigée, vos équipes la valident. Un système Omega.AI.",
 };
 
 export default function NouvellesAffairesPage() {

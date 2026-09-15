@@ -10,6 +10,19 @@
 
    La colonne `atteste` : voir l'en-tête de `types.ts`. Tout ce qui est à
    `false` est écrit et pas construit, à trancher avant tout partage.
+
+   ── Recentrage du 15/09/2026 ────────────────────────────────────────────
+   Les familles « Veille des marchés publics » et « Analyse d'une
+   consultation » ont été retirées avec la moitié PUBLIQ du produit, et
+   remplacées par les deux relances qui manquaient : « Échéances et
+   renouvellements » et « Affaires restées en plan ».
+
+   ⚠ TOUTES les lignes des deux familles neuves sont à `atteste: false`, et
+   ce n'est pas de la prudence : elles relèvent du moteur CYCLE
+   (`plans-et-decisions/galeres-metier-par-secteur.md` §28), qui n'est PAS
+   construit. Seul REVIVE l'est, et c'est lui qui porte « Lecture du fichier
+   client » et « Campagnes et cadence ». Ne pas passer une de ces lignes à
+   `true` sans avoir vu le moteur tourner.
    ══════════════════════════════════════════════════════════════════════ */
 
 import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
@@ -18,15 +31,15 @@ export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
   titre: "Tout ce que RELOAD prend en charge.",
   chapo:
-    "Deux gisements, un seul système : les comptes qui n'achètent plus, et les marchés publics de votre zone. Voici ce qu'il lit, ce qu'il écarte et ce qu'il vous laisse décider.",
+    "Trois relances, un seul système : le compte qui n'a plus commandé, l'échéance qui redevient due et l'affaire restée en plan. Voici ce qu'il lit, ce qu'il écarte et ce qu'il vous laisse décider.",
   mention:
-    "Les annonces de marchés publics proviennent des publications réglementaires françaises et européennes, qui sont ouvertes et gratuites. Le système ne dépose aucun dossier à votre place.",
+    "Le système lit votre CRM, votre historique de facturation et vos fiches d'intervention, et rien d'autre. Il n'écrit dans aucun de ces outils, ne crée aucun rendez-vous et n'engage aucun prix à votre place.",
   familles: [
     {
-      nom: "Lecture du fichier client",
+      nom: "Lecture de la base clients",
       icone: "search",
       lignes: [
-        { t: "Le système croise votre historique de ventes et votre fichier de contacts.", atteste: true },
+        { t: "Le système croise votre historique de facturation et le référentiel clients de votre CRM.", atteste: true },
         { t: "Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez.", atteste: true },
         { t: "La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté.", atteste: false },
         { t: "Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique.", atteste: false },
@@ -51,31 +64,33 @@ export const CATALOGUE: Catalogue = {
       ],
     },
     {
-      nom: "Veille des marchés publics",
-      icone: "landmark",
+      /* Moteur CYCLE (§28) — écrit, pas construit. Aucune ligne à `true`. */
+      nom: "Échéances et renouvellements",
+      icone: "calendar",
       lignes: [
-        { t: "Le bulletin officiel des marchés publics est relevé chaque matin à 7 h 30.", atteste: true },
-        { t: "Le journal de l'Union européenne est relevé au même rythme pour les seuils élevés.", atteste: false },
-        { t: "Les filtres portent sur vos départements, vos montants et vos qualifications.", atteste: true },
-        { t: "La recherche s'élargit aux intitulés voisins, parce que l'acheteur n'emploie pas vos mots.", atteste: false },
-        { t: "Chaque annonce est notée sur le métier, la capacité et le délai de réponse.", atteste: true },
-        { t: "En dessous du seuil de note que vous fixez, l'annonce ne vous parvient pas.", atteste: true },
-        { t: "Les marchés en cours qui arrivent à renouvellement sont repérés avant leur publication.", atteste: false },
-        { t: "Une annonce déjà vue n'est jamais présentée une seconde fois.", atteste: true },
+        { t: "Les entretiens, révisions et contrôles périodiques sont suivis jusqu'à leur échéance.", atteste: false },
+        { t: "Chaque échéance est datée à partir de la dernière intervention enregistrée.", atteste: false },
+        { t: "Le client est prévenu la semaine qui précède, pas le jour où l'échéance tombe.", atteste: false },
+        { t: "Une échéance déjà honorée ailleurs sort du cycle dès que la date est connue.", atteste: false },
+        { t: "Les contrats d'entretien qui s'éteignent faute de reconduction sont signalés.", atteste: false },
+        { t: "Les équipements installés sont rattachés au compte qui les exploite.", atteste: false },
+        { t: "Un parc réparti sur plusieurs sites se lit site par site et en consolidé.", atteste: false },
+        { t: "Les échéances réglementaires sont distinguées des échéances commerciales.", atteste: false },
       ],
     },
     {
-      nom: "Analyse d'une consultation",
-      icone: "scan",
+      /* Moteur CYCLE (§28) — écrit, pas construit. Aucune ligne à `true`. */
+      nom: "Affaires restées en plan",
+      icone: "bell",
       lignes: [
-        { t: "Le dossier de consultation est téléchargé et lu dès la publication.", atteste: false },
-        { t: "Les pièces à produire sont listées, et les manquantes signalées.", atteste: false },
-        { t: "Les critères de jugement et leur pondération sont extraits du règlement.", atteste: false },
-        { t: "L'allotissement est détaillé, lot par lot, avec les montants estimés.", atteste: false },
-        { t: "Les dates limites entrent dans votre agenda, avec une alerte avant échéance.", atteste: false },
-        { t: "L'historique public des attributions donne les titulaires sortants et leurs prix.", atteste: false },
-        { t: "Une co-traitance est suggérée quand un lot dépasse vos capacités seules.", atteste: false },
-        { t: "Les consultations hors de vos qualifications sont écartées avant de vous parvenir.", atteste: true },
+        { t: "Les commandes arrivées qu'aucun client n'est venu reprendre sont listées.", atteste: false },
+        { t: "Les interventions terminées et non retirées sont relancées après le délai que vous fixez.", atteste: false },
+        { t: "Le stock immobilisé par une commande non reprise est chiffré.", atteste: false },
+        { t: "Une pièce commandée pour un compte inactif est rattachée à sa fiche.", atteste: false },
+        { t: "Les affaires closes sans suite sont distinguées de celles qui attendent encore.", atteste: false },
+        { t: "Un compte relancé deux fois sans réponse passe en décision manuelle.", atteste: false },
+        { t: "La relance de retrait ne porte aucune mention de paiement, qui relève de CASHD.", atteste: false },
+        { t: "Le magasin voit en une liste ce qui dort et depuis combien de temps.", atteste: false },
       ],
     },
     {
@@ -98,7 +113,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Le chiffre d'affaires remis en jeu se lit vague par vague.", atteste: false },
         { t: "Les comptes réactivés sont suivis jusqu'à leur première commande.", atteste: false },
         { t: "Le taux de réponse se compare par segment, par canal et par message.", atteste: false },
-        { t: "Les consultations retenues, déposées et gagnées alimentent un tableau de suivi.", atteste: false },
+        { t: "Les échéances honorées et les commandes reprises alimentent un tableau de suivi.", atteste: false },
         { t: "Les résultats se lisent par entité, par site et en consolidé.", atteste: false },
         { t: "Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe.", atteste: false },
       ],
@@ -108,7 +123,7 @@ export const CATALOGUE: Catalogue = {
 
 export const CAS_LIMITES: BlocCasLimites = {
   etiquette: "Les cas tordus",
-  titre: "Ce qui arrive vraiment quand on réveille un fichier client.",
+  titre: "Ce qui arrive vraiment quand on réactive une base clients.",
   chapo:
     "Douze situations que vos commerciaux connaissent, et ce que le système en fait. Aucune ne se règle en envoyant le message quand même.",
   cas: [
@@ -129,23 +144,23 @@ export const CAS_LIMITES: BlocCasLimites = {
       r: "Les trois fiches sont rapprochées sous une entité mère. Le plafond de sollicitation s'applique au groupe, pas à chaque ligne.",
     },
     {
-      q: "L'annonce publiée n'emploie pas le vocabulaire de votre métier.",
-      r: "La recherche couvre les intitulés voisins et les codes d'activité proches. L'annonce remonte avec le motif de son rapprochement.",
+      q: "Le client a fait son entretien ailleurs le mois dernier.",
+      r: "L'échéance est close dès que la date figure dans vos fiches. Tant qu'aucune trace n'existe, le compte reste en attente et n'est pas relancé une seconde fois.",
     },
     {
-      q: "La consultation sort de vos qualifications.",
-      r: "Elle est écartée avant de vous parvenir, sur la base des qualifications que vous avez déclarées. Vous pouvez consulter ce qui a été écarté.",
+      q: "La pièce commandée est arrivée, mais le client ne répond plus.",
+      r: "Le compte reçoit une relance de retrait, puis une seule autre après le délai que vous fixez. Ensuite il passe en décision manuelle, avec le montant immobilisé en regard.",
     },
     {
-      q: "Le délai de réponse est intenable pour vos équipes.",
-      r: "Le délai entre dans la note de l'annonce. En dessous de votre seuil, elle n'apparaît pas, et vous savez pourquoi.",
+      q: "Le compte a une facture en retard chez vous.",
+      r: "Il sort de la vague de relance commerciale, parce qu'une relance d'impayé et une relance commerciale ne se croisent jamais. Le recouvrement relève de CASHD, pas d'ici.",
     },
     {
-      q: "Le marché est réservé à une catégorie d'entreprises dont vous ne relevez pas.",
-      r: "La réservation est lue dans l'avis et l'annonce est écartée. Elle reste consultable si vous voulez vérifier.",
+      q: "Deux entités du même groupe ont chacune leur échéance.",
+      r: "Chaque entité garde ses échéances, parce qu'elles portent sur des équipements distincts. Le plafond de sollicitation, lui, s'applique au groupe.",
     },
     {
-      q: "Votre fichier client est un tableur sans colonne de date.",
+      q: "L'export de votre CRM ne porte aucune colonne de date.",
       r: "Les dates sont reconstituées à partir de l'historique de facturation. Si rien ne permet de dater un compte, il est présenté à part.",
     },
     {
@@ -173,7 +188,7 @@ export const ECHELLE: BlocEchelle = {
       icone: "users",
       titre: "Une entité, un périmètre",
       texte:
-        "Chaque société, agence ou territoire a son fichier, ses comptes et ses commerciaux. Une direction commerciale lit le consolidé, un responsable d'agence ne voit que le sien.",
+        "Chaque société, agence ou territoire a son périmètre, ses comptes et ses commerciaux. Une direction commerciale lit le consolidé, un responsable d'agence ne voit que le sien.",
     },
     {
       icone: "handshake",
@@ -191,19 +206,19 @@ export const ECHELLE: BlocEchelle = {
       icone: "lock",
       titre: "Un journal opposable",
       texte:
-        "Chaque message parti, chaque annonce écartée et chaque retrait s'inscrivent dans un journal qui ne se modifie pas. Vous savez ce qui a été dit, à qui, et quand.",
+        "Chaque message parti, chaque compte écarté et chaque retrait s'inscrivent dans un journal qui ne se modifie pas. Vous savez ce qui a été dit, à qui, et quand.",
     },
     {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "Le système lit votre outil de gestion commerciale ou votre tableur, et y réécrit l'état de chaque compte. Là où un connecteur manque, l'échange passe par dépôt de fichiers.",
+        "Le système lit votre CRM ou votre ERP, et y réécrit l'état de chaque compte. Là où un connecteur manque, l'échange passe par export et dépôt de fichiers.",
     },
     {
       icone: "chart",
       titre: "Des indicateurs par entité",
       texte:
-        "Comptes réactivés, chiffre remis en jeu, consultations retenues et déposées se lisent par entité et en consolidé, avec un export daté.",
+        "Comptes réactivés, chiffre remis en jeu, échéances honorées et commandes reprises se lisent par entité et en consolidé, avec un export daté.",
     },
   ],
 };

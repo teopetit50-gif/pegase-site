@@ -116,8 +116,8 @@ export const FAMILLES: Famille[] = [
         system: "RELOAD",
         slug: "nouvelles-affaires",
         title: "RELOAD · réactivation commerciale",
-        job: "Les clients inactifs sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. En parallèle, les consultations publiques de votre zone et de votre secteur sont relevées chaque jour et filtrées selon vos capacités réelles.",
-        benefit: "Les clients inactifs classés par valeur, les marchés de votre zone relevés chaque jour.",
+        job: "Les clients inactifs sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. Les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre entrent dans la même liste.",
+        benefit: "Les clients inactifs classés par valeur, un message par compte et par trimestre.",
       },
       {
         system: "FRONTD",
@@ -245,7 +245,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Et les factures d'atelier suivent le même chemin",
-        p: "Pour les clients professionnels et les flottes qui règlent à réception, le système CASHD relance aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, PULSE pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
+        p: "Pour les clients professionnels et les flottes qui règlent à réception, le système CASHD relance aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
       },
       {
         p: "Tout cela s'installe sur les outils déjà en place (le fichier existant, la messagerie, WhatsApp), sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un système, la recommandation est de ne rien installer.",
@@ -319,7 +319,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Le matin, deux minutes pour tout voir",
-        p: "Chaque matin, PULSE pose l'état de la veille : les demandes arrivées, celles qui attendent une décision, les reprises de contact parties. Il se lit en deux minutes avant la première visite. Et la règle de la maison s'applique ici comme partout : les messages types sont validés par vous avant la mise en route, et tout ce qui sort du cadre remonte à un humain au lieu de partir sans contrôle.",
+        p: "Chaque matin, le point du jour pose l'état de la veille : les demandes arrivées, celles qui attendent une décision, les reprises de contact parties. Il se lit en deux minutes avant la première visite. Et la règle de la maison s'applique ici comme partout : les messages types sont validés par vous avant la mise en route, et tout ce qui sort du cadre remonte à un humain au lieu de partir sans contrôle.",
       },
       {
         p: "L'installation se fait sur les outils déjà en place (la messagerie, WhatsApp, le tableur de contacts), sans changer de logiciel ni de méthode de travail. Et elle commence par une mesure, pas par une promesse : l'audit gratuit compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un système, la recommandation est de ne rien installer.",
