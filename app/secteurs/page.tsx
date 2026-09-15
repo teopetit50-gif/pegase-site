@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Gelasio } from "next/font/google";
+import { Onest } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import Metiers from "@/components/secteurs/Metiers";
 import {
-  Cadrage,
   Cloture,
   Faits,
-  Hachure,
   Heros,
-  SurMesure,
+  Ligne,
+  Refus,
 } from "@/components/secteurs/Sections";
 import "./secteurs.css";
 
@@ -35,28 +34,29 @@ import "./secteurs.css";
    haute ceux que nous ne prenons pas — l'officine, le cabinet de soins, le
    dépannage d'urgence, dont toute la charge arrive par la voix.
 
-   ── RELEVÉ ET POLICES ──────────────────────────────────────────────────
-   Décalque de `vertex-one-lovat.vercel.app` (modèle « Vertex » du
-   catalogue /modeles) : grille à filets tiretés, croix aux intersections,
-   bandes hachurées. Relevé complet en tête de `secteurs.css`.
+   ── RELEVÉ ─────────────────────────────────────────────────────────────
+   Décalque de `daliagency-anonymized.vercel.app` (modèle « Northstar » du
+   catalogue /modeles) : titre géant en clamp avec une incise à l'accent,
+   étiquettes de section numérotées, grille de tuiles numérotées à filets,
+   rail collant et panneaux, bande sombre pleine largeur, et une section
+   « About » en deux colonnes. Relevé complet en tête de `secteurs.css`.
 
-   Les trois familles sont chargées ICI, jamais sur `<body>` : seule la
-   classe `.p-secteurs` les consomme, le reste du site garde Inter. Geist
-   et Geist Mono sont celles de la référence ; Gelasio remplace la
-   « Tiempos Headline » sous licence sur laquelle la référence retombe
-   elle-même en Georgia — même arbitrage que /offres/relances-impayes.
+   ⚠ CE N'EST PAS LE PREMIER DÉCALQUE. La page était d'abord relevée sur
+   « Vertex ». Teo l'a arbitrée le 15/09 : « je veux que tu changes la page
+   entière avec ce design-là, exactement ». Rien de Vertex ne subsiste — ni
+   jeton, ni police, ni géométrie.
    ══════════════════════════════════════════════════════════════════════ */
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
-const geistMono = Geist_Mono({
+/* La référence compose TOUT en Onest — corps, titres et étiquettes de
+   section (`--font-body` et `--font-technical` y retombent sur la même
+   famille). Onest est sous licence ouverte et servie par Google Fonts : il
+   n'y a donc aucun substitut à choisir, contrairement aux décalques
+   précédents du site. Chargée ICI, jamais sur `<body>` : seule la classe
+   `.p-secteurs` la consomme, le reste du site garde Inter. */
+const onest = Onest({
   subsets: ["latin"],
-  variable: "--font-geist-mono",
-  display: "swap",
-});
-const gelasio = Gelasio({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-gelasio",
+  weight: ["400", "500", "600"],
+  variable: "--font-onest",
   display: "swap",
 });
 
@@ -84,28 +84,14 @@ export default function SecteursPage() {
     <PageShell>
       <div
         data-monde="clair"
-        className={`p-secteurs flex flex-col ${geist.variable} ${geistMono.variable} ${gelasio.variable}`}
+        className={`p-secteurs flex flex-col ${onest.variable}`}
       >
-        {/* LES DOUBLES RAILS de la référence : un premier `border-x` sur le
-            conteneur, un second à l'intérieur décalé de 4 / 6 / 8 px selon
-            le palier. Ils courent sur toute la hauteur et ferment les filets
-            horizontaux des sections, qui sans eux s'arrêteraient dans le
-            vide. Relevé sur `<main><div class="container mx-auto"><div
-            class="border-x"><div class="mx-1 border-x sm:mx-1.5 lg:mx-2">`. */}
-        <div className="sec-wrap">
-          <div className="border-[#e6e6e6] border-x">
-            <div className="mx-1 border-[#e6e6e6] border-x sm:mx-1.5 lg:mx-2">
-              <Heros />
-              <Faits />
-              <Cadrage />
-              <Hachure />
-              <Metiers />
-              <Hachure />
-              <SurMesure />
-              <Cloture />
-            </div>
-          </div>
-        </div>
+        <Heros />
+        <Faits />
+        <Metiers />
+        <Refus />
+        <Ligne />
+        <Cloture />
       </div>
     </PageShell>
   );
