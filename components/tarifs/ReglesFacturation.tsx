@@ -1,4 +1,4 @@
-import { CalendarCheck, Download, Percent, Users } from "lucide-react";
+import { Boxes, FileSignature, Gauge, UserCheck } from "lucide-react";
 import type { ComponentType } from "react";
 import { cn } from "@/lib/cn";
 
@@ -45,8 +45,17 @@ export type Regle = {
 
 type Icone = ComponentType<{ className?: string; strokeWidth?: number }>;
 
-/* une icône par règle, dans l'ordre de la page */
-const ICONES: Icone[] = [Users, Percent, CalendarCheck, Download];
+/* 15/09 — LA SECTION CHANGE DE CONTENU, PAS DE FORME (Teo : « sa section
+   doit être remplacée par comment nous chiffrons, et là tu expliques
+   comment on chiffre »). « Ce que nous ne facturons jamais » énonçait
+   quatre interdits ; depuis que la page n'affiche plus de montant, la
+   question que le visiteur se pose n'est plus « que me facturez-vous en
+   plus ? » mais « sur quoi allez-vous me chiffrer ? ». Les deux règles
+   qui répondaient vraiment à ça (ni par utilisateur, ni au résultat)
+   sont devenues les points de la première étape ; les deux autres
+   (engagement, réversibilité) vivent déjà dans le comparatif et la FAQ.
+   Les numéros disent maintenant un ORDRE, ce que le rail suggérait déjà. */
+const ICONES: Icone[] = [Boxes, Gauge, UserCheck, FileSignature];
 
 export default function ReglesFacturation({
   titre,

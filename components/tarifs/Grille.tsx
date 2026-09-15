@@ -186,6 +186,7 @@ import NumberFlow from "@number-flow/react";
 import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CallToAction4 } from "@/components/ui/call-to-action-4";
+import { HeroSection } from "@/components/ui/hero-section-dark";
 import {
   Card,
   CardDescription,
@@ -208,6 +209,7 @@ import {
   PALIERS,
   POSTES,
   REMISE_ANNUELLE,
+  heuresRecuperees,
   piecesPourPostes,
   postesPourCarte,
   prixPourVolume,
@@ -324,10 +326,12 @@ function CarteSurMesure({ monde }: { monde: Monde }) {
         <div className="text-center">
           {/* même hauteur de bloc que le prix des voisines : le grand mot,
               puis la ligne qui remplace « par mois », puis la note */}
-          <p className="text-4xl font-bold text-[#050505]">{c.prixTexte}</p>
-          {/* côté grande structure, le prix sort du même diagnostic que
-              celui des trois autres cartes : la ligne le dit pareil */}
-          <p className="mt-1 text-sm text-[#616161]">
+          {/* le grand mot ne survit que côté PME, où cette carte est la
+              SEULE à le porter — et c'est justement ce qui la distingue.
+              Côté Groupes, les trois voisines viennent de le perdre : le
+              garder ici en ferait la quatrième répétition du hero. */}
+          {devis ? null : <p className="text-4xl font-bold text-[#050505]">{c.prixTexte}</p>}
+          <p className={cn("text-sm text-[#616161]", devis ? "" : "mt-1")}>
             {devis ? GRANDE_STRUCTURE.sousPrix : c.sousPrix}
           </p>
           <div className="mt-3">
@@ -349,17 +353,12 @@ function CarteSurMesure({ monde }: { monde: Monde }) {
           </ul>
         </div>
 
-        <div className="mt-6 text-left text-sm">
-          <h4 className="mb-3 font-semibold text-[#050505]">{c.pointsTitre}</h4>
-          <ul className="space-y-2.5">
-            {c.points.map((t) => (
-              <li key={t} className="flex items-start">
-                <Marqueur etat="coche" />
-                <span className="text-[#3d3d3d]">{t}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* 15/09, passe de compression — la seconde liste (« Inclus dans le
+            devis ») part comme « Inclus dans le palier » sur les trois
+            autres cartes. Les quatre partagent une sous-grille : la garder
+            ici aurait gardé la rangée haute pour toutes, et le gain de
+            place aurait été nul. Ce que la carte doit dire, elle le dit
+            au-dessus — le périmètre concerné. */}
       </div>
 
       <CardFooter className="mt-auto flex-col items-stretch pt-6 md:mt-0">
@@ -450,6 +449,26 @@ function CartePalier({
      `prixPourVolume` rend null dans les deux cas où il ne faut rien
      montrer — aucune réponse, ou volume au-delà du plafond de la grille. */
   const volumeValide = volumes ? prixPourVolume(piecesCarte) !== null : false;
+  /* 15/09 (Teo : « ça sert à quoi d'afficher les pièces ? ils en font quoi
+     de cette info ») — LA CARTE ANNONCE DES HEURES, PLUS DES PIÈCES. La
+     pièce est NOTRE unité de facturation : le visiteur ne sait pas si 135
+     est beaucoup, et posée au-dessus de « jusqu'à 150 pièces » elle se
+     lisait comme une jauge de quota — la seule question qu'une carte de
+     prix ne doit pas faire naître. Les heures répondent à ce qu'il
+     cherche vraiment à cet endroit : ce que ça lui rend. Même source
+     (ses réponses), même propriété (chaque carte ne compte que SES
+     postes, donc trois chiffres différents). Les pièces restent, en
+     petit : elles expliquent le plafond du palier, c'est leur seul
+     emploi côté visiteur. */
+  const heuresCarte = volumes
+    ? Math.round(
+        heuresRecuperees(
+          Object.fromEntries(
+            Object.entries(volumes).filter(([id]) => postesFactures.includes(id)),
+          ) as SaisieVolumes,
+        ),
+      )
+    : 0;
   /* LE VOLUME PEUT DÉPASSER LE PLAFOND DE SA PROPRE CARTE, et ça se voyait
      dès qu'on a mis le volume à la place du prix : « 620 pièces » en grand,
      au-dessus de « Jusqu'à 150 pièces traitées par mois » trois lignes plus
@@ -487,8 +506,15 @@ function CartePalier({
      dire sans euro, c'est le VOLUME que le quatrième poste ajoute. */
   const ecart = (() => {
     if (p.id !== "complet" || devis || !volumes) return null;
-    const trois = piecesPourPostes(volumes, postesPourCarte(volumes, 3, []));
-    const d = piecesCarte - trois;
+    const troisPostes = postesPourCarte(volumes, 3, []);
+    const trois = Math.round(
+      heuresRecuperees(
+        Object.fromEntries(
+          Object.entries(volumes).filter(([id]) => troisPostes.includes(id)),
+        ) as SaisieVolumes,
+      ),
+    );
+    const d = heuresCarte - trois;
     return d > 0 ? d : null;
   })();
   const Icone = ICONE_PALIER[p.id];
@@ -539,23 +565,28 @@ function CartePalier({
           {/* côté grande structure, le grand chiffre laisse la place au
               mot : pas de NumberFlow, rien à animer ni à remiser */}
           {devis ? (
+            /* 15/09, dernière passe — CÔTÉ « GROUPES », PLUS DE GRAND
+               « SUR DEVIS ». Les quatre cartes portaient le même mot en
+               36 px, sous un hero qui venait de l'écrire : quatre
+               répétitions d'une phrase déjà lue. Il ne reste que la ligne
+               qui, elle, distingue — d'où sort le montant. */
             <>
-              <p className="text-4xl font-bold text-[#050505]">{GRANDE_STRUCTURE.prixTexte}</p>
-              <p className="mt-1 text-sm text-[#616161]">{GRANDE_STRUCTURE.sousPrix}</p>
-              <div className="mt-3">
-                <p className="text-xs text-[#767676]">{GRANDE_STRUCTURE.note}</p>
-              </div>
+              <p className="text-sm text-[#616161]">{GRANDE_STRUCTURE.sousPrix}</p>
+              <p className="mt-2 text-xs text-[#767676]">{GRANDE_STRUCTURE.note}</p>
             </>
           ) : !volumeValide ? (
             /* 15/09 — l'attente du chiffre. Elle occupe la MÊME place que le
                prix pour que la carte ne saute pas quand il arrive, et elle
                dit pourquoi elle est là plutôt que de laisser un tiret muet. */
+            /* 15/09, passe de compression (Teo : « trop de trucs, plus
+               court ») — l'attente tenait trois lignes de 36 px en gras
+               plus une note de trois lignes, répétée à l'identique sur
+               les trois cartes : neuf lignes pour dire « remplissez le
+               formulaire ». Deux lignes discrètes suffisent, et la note
+               est déjà dans le bloc de tête de page. */
             <>
-              <p className="text-4xl font-bold text-[#c2c2c2]">{CALCULATEUR.avant.grand}</p>
+              <p className="text-2xl font-semibold text-[#c2c2c2]">{CALCULATEUR.avant.grand}</p>
               <p className="mt-1 text-sm text-[#616161]">{CALCULATEUR.avant.sous}</p>
-              <div className="mt-3">
-                <p className="text-xs text-[#767676]">{CALCULATEUR.avant.note}</p>
-              </div>
             </>
           ) : (
           <>
@@ -567,39 +598,44 @@ function CartePalier({
               n'est vrai que pour elle. */}
           <div className="flex flex-wrap items-baseline justify-center gap-x-2">
             <NumberFlow
-              aria-label={`${piecesCarte} pièces par mois`}
+              aria-label={`${heuresCarte} heures rendues par mois`}
               className="text-4xl font-bold tabular-nums text-[#050505]"
               locales="fr-FR"
-              value={piecesCarte}
+              value={heuresCarte}
             />
-            <span className="text-lg font-semibold text-[#050505]">pièces</span>
+            <span className="text-lg font-semibold text-[#050505]">
+              {heuresCarte > 1 ? "heures" : "heure"}
+            </span>
           </div>
-          <p className="mt-1 text-sm text-[#616161]">par mois, d&apos;après vos réponses</p>
-          <p className="mt-1 text-xs text-[#767676]">
-            Factures lues, demandes reçues, relances envoyées, reprises de contact.
-          </p>
-
-          <div className="mt-3">
-            {depasse ? (
-              <p className="rounded-lg bg-[#fdf3e7] px-3 py-2 text-xs text-[#8a5a12]">
-                Au-delà des {p.plafond.toLocaleString("fr-FR")} pièces de ce palier. Le palier
-                supérieur couvre ce volume&nbsp;; l&apos;audit tranche.
-              </p>
-            ) : (
-              <p className="text-xs text-[#767676]">
-                Le tarif est indexé sur ce volume. Il est arrêté à l&apos;audit, sur vos chiffres
-                réels.
-              </p>
-            )}
-          </div>
-
+          <p className="mt-1 text-sm text-[#616161]">rendues chaque mois, d&apos;après vos réponses</p>
+          {depasse ? (
+            <p className="mt-3 rounded-lg bg-[#fdf3e7] px-3 py-2 text-xs text-[#8a5a12]">
+              {piecesCarte.toLocaleString("fr-FR")} pièces à traiter, au-delà des{" "}
+              {p.plafond.toLocaleString("fr-FR")} de ce palier.
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-[#767676]">
+              {piecesCarte.toLocaleString("fr-FR")} pièces à traiter, sur{" "}
+              {p.plafond.toLocaleString("fr-FR")} incluses
+            </p>
+          )}
           </>
+          )}
+
+          {/* dans l'ATTENTE seulement : une fois les volumes donnés, la
+              ligne sous le chiffre porte déjà le plafond, et le répéter
+              donnait deux fois le même nombre à deux lignes d'écart. */}
+          {devis || volumeValide ? null : (
+            <p className="mt-2 text-xs text-[#767676]">
+              Jusqu&apos;à {p.plafond.toLocaleString("fr-FR")} pièces traitées par mois
+            </p>
           )}
 
           {ecart !== null ? (
             <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#050505]">
               <span aria-hidden className="size-1.5 rounded-full bg-[#050505]" />
-              Quatrième poste inclus&nbsp;: {ecart.toLocaleString("fr-FR")} pièces de plus.
+              Quatrième poste&nbsp;: {ecart.toLocaleString("fr-FR")} heure{ecart > 1 ? "s" : ""} de
+              plus.
             </p>
           ) : null}
         </div>
@@ -659,23 +695,16 @@ function CartePalier({
           )}
         </div>
 
-        {/* « Points forts » de la référence : ce que le palier comprend.
-            Côté grande structure, les points du palier PME (réunion de
-            45 min, satisfait ou remboursé, sans engagement) n'ont pas été
-            promis : ce sont ceux du devis qui s'affichent. */}
-        <div className="mt-6 text-left text-sm">
-          <h4 className="mb-3 font-semibold text-[#050505]">
-            {devis ? GRANDE_STRUCTURE.pointsTitre : "Inclus dans le palier"}
-          </h4>
-          <ul className="space-y-2.5">
-            {(devis ? GRANDE_STRUCTURE.points : p.points).map((t) => (
-              <li key={t} className="flex items-start">
-                <Marqueur etat="coche" />
-                <span className="text-[#3d3d3d]">{t}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* 15/09, passe de compression — LE BLOC « INCLUS DANS LE PALIER »
+            EST PARTI. Ses trois points par carte disaient, dans l'ordre :
+            le nombre de postes (déjà écrit au-dessus, dans le sélecteur),
+            le plafond (remonté en une ligne sous le volume), et un
+            avantage identique aux trois cartes — donc qui ne distingue
+            rien et appartient à la page, pas à une carte. Le détail
+            ligne à ligne vit dans le comparatif, juste en dessous.
+            Retiré sur les QUATRE cartes, sur-mesure comprise : elles
+            partagent une sous-grille, garder le bloc sur une seule
+            aurait gardé la rangée haute pour toutes. */}
       </div>
 
       {/* le bouton en pied (écart 1) : les CTA tombent sur la même ligne,
@@ -753,62 +782,48 @@ export default function Grille() {
     <>
       {/* ═══ 1. en-tête centré, interrupteur de périodicité, trois cartes
              cernées — le modèle « pricing-module » ═══ */}
-      <section data-monde="clair" className="r-wrap pb-10 pt-12 sm:pb-14 sm:pt-16">
-        <div className="mx-auto max-w-3xl text-center">
-          {/* 15/09 — la pastille « Prix publics » RETIRÉE (Teo). Le titre
-              porte déjà les deux mots ; l'objet partagé « kicker-tarifs »
-              n'avait plus de partenaire monté côté /commencer. */}
-          {/* 15/09 — `text-[28px]` sous 480 : à 390 px, `text-4xl` (36/41)
-              étalait ce titre sur TROIS lignes, soit 123 px avant le
-              premier mot utile. La marche vers `text-4xl` est remise à
-              480 px, où la ligne tient ; au-dessus de `sm`, rien ne bouge. */}
-          <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-[28px] font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] min-[480px]:text-4xl sm:text-5xl">
-            {devis ? GRANDE_STRUCTURE.titre : "Une tarification à l'usage, calculée sur vos volumes"}
-          </h1>
-          <p key={monde} className="rv-fondu mx-auto mt-4 max-w-2xl text-balance text-[#616161]">
-            {devis ? (
-              GRANDE_STRUCTURE.chapo
-            ) : (
-              <>
-                L&apos;abonnement repose sur deux variables&nbsp;: les postes en service, et le
-                volume de pièces traitées chaque mois (factures lues, demandes entrantes, relances
-                envoyées). Cette page établit ce volume&nbsp;; l&apos;audit le relève sur vos
-                exports, avec la part des pièces qui revient à un opérateur, et le devis arrête le
-                tarif. Facturation mensuelle sans engagement, −{REMISE_PCT}&nbsp;% en annuel,
-                remboursement sous 30 jours.
-              </>
-            )}
-          </p>
-        </div>
+      {/* ═══ 1. le hero, puis le sélecteur des deux mondes ═══
 
-        {/* 15/09, dernière passe — L'INTERRUPTEUR MENSUEL / ANNUEL EST PARTI.
-            Il n'existait que pour remiser un montant affiché ; sans montant,
-            il basculait sans que rien ne change à l'écran — une commande
-            morte, le pire défaut qu'une page de prix puisse montrer. La
-            remise annuelle reste un fait, dite dans le chapô, le comparatif
-            et la FAQ. La périodicité continue de voyager par l'URL vers
-            /installation : seule la commande visible disparaît. */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
+             15/09, dernière passe (Teo : « et ça c'est trop compliqué,
+             utilise ce composant pour expliquer qu'on chiffre à l'audit
+             et pourquoi on peut pas mettre de prix directement »).
+
+             CE QUI PART, et c'était le reproche : un titre, un chapô de
+             six lignes, PUIS un encadré qui redisait la même chose en
+             quatre lignes de plus. Trois blocs pour une seule idée, et
+             l'encadré était né dix minutes plus tôt pour éviter de
+             répéter « sur devis » — il avait créé sa propre répétition.
+
+             CE QUI RESTE : une phrase qui dit quand le tarif est arrêté,
+             une qui dit pourquoi il ne peut pas l'être avant, un bouton.
+             Les conditions commerciales (mensuel, annuel, 30 jours) sont
+             descendues d'un cran : elles vivent dans « Comment nous
+             chiffrons », le comparatif et la FAQ, qui sont faits pour ça.
+             ═══ */}
+      <section data-monde="clair" className="pb-10 sm:pb-14">
+        <HeroSection
+          annonce={devis ? "Structures à validation répartie" : "Tarification à l'usage"}
+          titre={
+            devis
+              ? { debut: "Le devis sort du", accent: "diagnostic." }
+              : { debut: "Le tarif est arrêté", accent: "à l'audit." }
+          }
+          description={
+            devis
+              ? GRANDE_STRUCTURE.chapo
+              : "Le montant est indexé sur le nombre de pièces que le système traite pour vous, et sur la part d'entre elles qui revient à un opérateur. Ces deux variables ne se lisent pas depuis une page : elles se relèvent sur vos exports, en trente minutes."
+          }
+          ctaTexte={devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
+          ctaHref={devis ? GRANDE_STRUCTURE.href : "/reserver-un-audit"}
+          souscta="30 minutes, gratuit, sans engagement"
+        />
+
+        <div className="r-wrap mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
           <SelecteurMonde monde={monde} choisir={choisirMonde} />
         </div>
+      </section>
 
-        {/* LE BLOC QUI REMPLACE LES MONTANTS — dit UNE SEULE FOIS. Répété
-            sur chaque carte, il deviendrait du remplissage, et « sur devis »
-            trois fois de suite se lit « c'est cher et ils ne le disent pas ».
-            Une page sans prix ne tient que si elle annonce DE QUOI le prix
-            dépend : c'est tout ce qui la sépare d'une page opaque. */}
-        {devis ? null : (
-          <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-[#e3e3e3] bg-[#fafafa] p-6 text-center sm:p-7">
-            <p className="font-[family-name:var(--font-jakarta)] text-lg font-semibold text-[#050505]">
-              {CALCULATEUR.sansPrix.titre}
-            </p>
-            <p className="mt-3 text-balance text-sm leading-relaxed text-[#616161]">
-              {CALCULATEUR.sansPrix.texte}
-            </p>
-            <p className="mt-3 text-xs text-[#767676]">{CALCULATEUR.sansPrix.note}</p>
-          </div>
-        )}
-
+      <section data-monde="clair" className="r-wrap pb-10 sm:pb-14">
         {/* la grille. `pt-4` laisse passer les pastilles posées à -12 px.
             15/09 — QUATRE CARTES, DONC DEUX GABARITS (voir l'en-tête) :
             · de 768 à 1279 px, deux colonnes de deux, et un gabarit de

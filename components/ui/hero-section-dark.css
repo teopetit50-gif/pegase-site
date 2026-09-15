@@ -1,0 +1,90 @@
+/* ══════════════════════════════════════════════════════════════════════
+   hero-section-dark — la trame en fuite (15/09/2026)
+
+   Le composant d'origine (21st.dev, collé par Teo) porte sa grille dans
+   des classes arbitraires Tailwind et s'appuie sur une animation
+   `animate-grid` qui n'existe que dans SON projet. Les deux sont refaites
+   ici, pour deux raisons :
+
+   1. `animate-grid` n'est déclarée nulle part dans ce dépôt — la classe
+      aurait été émise sans keyframes, donc la trame serait restée figée
+      sans la moindre erreur. C'est le défaut le plus cher du lot : rien
+      ne le signale.
+   2. Les couleurs d'origine sont un dégradé violet/rose sur fond noir,
+      avec des variantes `dark:` partout. Sur ce site, `dark:` suit l'OS
+      et non une classe : la moitié des visiteurs aurait eu le jeu sombre
+      sur le fond clair de la page. Tout est écrit en gris du nuancier.
+
+   Le mouvement, lui, est repris tel quel : une nappe quadrillée inclinée
+   en perspective, qui défile d'une cellule vers le bas — ce qui donne
+   l'illusion d'une fuite infinie puisque le motif se répète.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.hsd {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* ——— la nappe ——— */
+.hsd-trame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  perspective: 200px;
+  opacity: var(--hsd-opacite, 0.45);
+}
+
+.hsd-trame-plan {
+  position: absolute;
+  inset: 0;
+  transform: rotateX(var(--hsd-angle, 65deg));
+}
+
+.hsd-trame-lignes {
+  height: 300vh;
+  width: 600vw;
+  inset: 0;
+  margin-left: -200%;
+  transform-origin: 100% 0 0;
+  background-image:
+    linear-gradient(to right, var(--hsd-ligne, #d8d8d8) 1px, transparent 0),
+    linear-gradient(to bottom, var(--hsd-ligne, #d8d8d8) 1px, transparent 0);
+  background-repeat: repeat;
+  background-size: var(--hsd-cellule, 60px) var(--hsd-cellule, 60px);
+  animation: hsd-defile 22s linear infinite;
+}
+
+@keyframes hsd-defile {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* exactement une cellule : la boucle est invisible */
+    transform: translate3d(0, calc(var(--hsd-cellule, 60px) * -1), 0);
+  }
+}
+
+/* ——— le fondu qui rattache la nappe au fond de la page ———
+   L'original fond vers le blanc ; ici vers le fond réel de /tarifs
+   (#f5f5f5), sinon on voit une bande claire au-dessus de la trame. */
+.hsd-fondu {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, #f5f5f5 0%, rgba(245, 245, 245, 0) 90%);
+}
+
+/* ——— le contenu passe devant ——— */
+.hsd-dedans {
+  position: relative;
+  z-index: 1;
+}
+
+/* Une nappe qui défile en boucle derrière un texte est exactement ce que
+   `prefers-reduced-motion` vise. La trame reste, elle cesse de bouger. */
+@media (prefers-reduced-motion: reduce) {
+  .hsd-trame-lignes {
+    animation: none;
+  }
+}

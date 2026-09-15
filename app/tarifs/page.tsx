@@ -158,37 +158,53 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   },
 ];
 
-const JAMAIS: Regle[] = [
+/* ——— « Comment nous chiffrons » (15/09) ———
+   Quatre étapes, dans l'ordre : l'unité, le volume, la part qui revient à
+   un opérateur, le devis. Aucune affirmation nouvelle — chaque point
+   redit un fait déjà posé ailleurs sur la page (le bloc de tête, la FAQ,
+   le comparatif, la note sous le calculateur). C'est la règle maison, et
+   elle compte double ici : une page qui explique son chiffrage sans
+   donner de chiffre ne tient que si rien n'y est inventé.
+
+   CE QU'ON NE DIT PAS : les repères internes du taux de reprise (9 % au
+   mieux, 14 % en moyenne — PEGASE/benchmark-prix-marche.md). Ce sont nos
+   chiffres de coût, pas ceux du client, et les publier inviterait à
+   négocier sur une moyenne de marché plutôt que sur SA mesure. */
+const CHIFFRAGE: Regle[] = [
   {
-    titre: "Aucune facturation par utilisateur",
-    texte: "Le montant est indexé sur le volume traité, jamais sur le nombre de comptes ouverts.",
+    titre: "Nous comptons des pièces",
+    texte:
+      "L'unité facturée est la pièce : une facture lue, une demande reçue, une relance envoyée, une reprise de contact.",
     points: [
-      "Un utilisateur supplémentaire n'entraîne aucun surcoût",
-      "Seuls les postes en service et leur volume entrent dans le calcul",
+      "Jamais un montant par utilisateur\u00a0: un compte de plus n'entraîne aucun surcoût",
+      "Jamais un pourcentage sur les sommes que vous encaissez",
     ],
   },
   {
-    titre: "Aucune commission au résultat",
-    texte: "Aucun pourcentage n'est prélevé sur les sommes encaissées.",
+    titre: "Nous relevons votre volume réel",
+    texte:
+      "Le calculateur en donne l'ordre de grandeur, sur des chiffres que vous donnez de mémoire. L'audit le relève sur vos exports.",
     points: [
-      "Le montant ne varie pas selon les sommes recouvrées",
-      "L'échéance du mois est connue à l'avance",
+      "Deux entreprises de même taille n'émettent pas le même nombre de pièces",
+      "Si le volume réel est inférieur à votre estimation, c'est lui qui s'applique",
     ],
   },
   {
-    titre: "Aucun engagement caché",
-    texte: "Aucun débit n'intervient avant la fin de l'installation.",
+    titre: "Nous mesurons ce qui revient à un opérateur",
+    texte:
+      "Toutes les pièces ne se traitent pas seules : une adresse manquante, une pièce jointe illisible, un montant au-dessus de votre seuil de validation repassent par un humain.",
     points: [
-      "Formule mensuelle\u00a0: résiliable à tout moment, le mois en cours allant à son terme",
-      "Formule annuelle\u00a0: douze mois facturés en une fois, le jour de la mise en service",
+      "Cette part dépend de l'état de vos données, et varie fortement d'une entreprise à l'autre",
+      "C'est elle qui déplace le montant le plus, bien avant le volume",
     ],
   },
   {
-    titre: "Réversibilité garantie",
-    texte: "L'export complet vous est remis à la résiliation, sans condition et sans frais.",
+    titre: "Le montant figure au devis",
+    texte:
+      "Il découle des deux mesures précédentes, et il est écrit avant tout engagement. Aucun débit n'intervient avant la fin de l'installation.",
     points: [
-      "Vos données restent votre propriété, dans un format réutilisable",
-      "Les envois cessent à la date de résiliation",
+      "L'installation est facturée à part, une seule fois, et peut relever du Chèque TIC",
+      `Mensuel sans engagement, ou annuel à −${REMISE_PCT}\u00a0% de remise`,
     ],
   },
 ];
@@ -215,11 +231,11 @@ export default function TarifsPage() {
                la composition « how-it-works » (en-tête centré, rail de
                pastilles numérotées, cartes à tuile d'icône et points)
                ═══ */}
-        <section id="jamais" data-monde="clair">
+        <section id="chiffrage" data-monde="clair">
           <ReglesFacturation
-            titre="Ce que nous ne facturons jamais"
-            chapo="Quatre règles de facturation, applicables à tous les paliers et aux deux formules."
-            regles={JAMAIS}
+            titre="Comment nous chiffrons"
+            chapo="Quatre étapes, de l'unité que nous comptons au montant qui figure à votre devis."
+            regles={CHIFFRAGE}
           />
         </section>
 
