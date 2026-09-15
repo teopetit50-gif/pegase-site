@@ -135,21 +135,28 @@ function LigneRdv({ d }: { d: DemandeCompte }) {
 }
 
 /* un panneau de l'écran : carte blanche à filet, un titre, un corps */
+/* 15/09, quatrième forme — un `titre` vide ne dessine plus d'en-tête.
+   L'onglet Profil affichait « Profil professionnel / Ce que nous savons de
+   votre entreprise… » en tête d'écran, puis « Vos informations /
+   Modifiables à tout moment » trois centimètres dessous : deux en-têtes
+   pour une liste de cinq lignes. */
 function Panneau({
   titre,
   sous,
   children,
 }: {
-  titre: string;
+  titre?: string;
   sous?: string;
   children: React.ReactNode;
 }) {
   return (
     <section className="cpt-panneau">
-      <header className="cpt-panneau-tete">
-        <h2 className="cpt-panneau-titre">{titre}</h2>
-        {sous ? <p className="cpt-panneau-sous">{sous}</p> : null}
-      </header>
+      {titre ? (
+        <header className="cpt-panneau-tete">
+          <h2 className="cpt-panneau-titre">{titre}</h2>
+          {sous ? <p className="cpt-panneau-sous">{sous}</p> : null}
+        </header>
+      ) : null}
       <div className="cpt-panneau-corps">{children}</div>
     </section>
   );
@@ -167,14 +174,18 @@ function Tuile({
   detail: string;
   icone: React.ReactNode;
 }) {
+  /* 15/09, quatrième forme — l'icône était encadrée AU-DESSUS de
+     l'étiquette : 32 px de gouttière plus 12 de marge, par tuile, pour ne
+     rien dire que l'étiquette ne dise. Elle passe sur la ligne de
+     l'étiquette, à 14 px et sans cadre. */
   return (
     <div className="cpt-tuile">
-      <div className="cpt-tuile-tete">
+      <p className="cpt-tuile-etiquette">
         <span className="cpt-tuile-icone" aria-hidden="true">
           {icone}
         </span>
-      </div>
-      <p className="cpt-tuile-etiquette">{etiquette}</p>
+        {etiquette}
+      </p>
       <p className="cpt-tuile-valeur">{valeur}</p>
       <p className="cpt-tuile-detail">{detail}</p>
     </div>
@@ -637,7 +648,7 @@ export default function CompteVue({
       sous: "Ce que nous savons de votre entreprise : ces informations figurent sur vos factures et pré-remplissent vos demandes.",
       contenu: (
         <div className="cpt-panneaux">
-          <Panneau titre="Vos informations" sous="Modifiables à tout moment.">
+          <Panneau>
             <ProfilCarte utilisateur={utilisateur} />
           </Panneau>
         </div>

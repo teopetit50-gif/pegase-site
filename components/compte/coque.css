@@ -45,6 +45,23 @@
       `100dvh` moins cette hauteur, et le pied de page du site ne s'affiche
       pas sur cette route : sans ça, la page défile toujours — c'était le
       premier reproche.
+
+   ─── 15/09, QUATRIÈME FORME — « regarde à quoi ressemble un vrai
+   dashboard » (Teo, capture du gabarit Mail de shadcn). Le gabarit du
+   21st.dev posait des CARTES blanches sur un fond gris ; avec quatre faits
+   à dire, ça donne des cartes vides qui flottent. La référence de Teo n'a
+   aucune carte : une surface, des filets d'un pixel, des lignes. D'où, ici :
+
+     5. LE FOND EST BLANC, et les cartes ont disparu — les quatre tuiles
+        deviennent un BANDEAU cerné à cellules séparées, les panneaux des
+        SECTIONS posées sous un filet, les deux volets sont séparés par un
+        filet vertical qui descend jusqu'en bas.
+     6. LE PANNEAU NE S'ÉTIRE PLUS, la COLONNE si. C'est le filet qui
+        prend la hauteur d'écran, pas un cadre : un filet vide ne se voit
+        pas, un cadre vide se voit tout de suite.
+     7. UNE COLONNE DE LECTURE bornée à 880 px pour les onglets à une
+        colonne : une ligne de réglage étalée sur 1 100 px sépare
+        l'intitulé de sa valeur au point qu'on ne les relie plus.
    ══════════════════════════════════════════════════════════════════════ */
 
 .cpt {
@@ -54,7 +71,14 @@
   display: flex;
   width: 100%;
   min-height: calc(100dvh - var(--cpt-entete));
-  background: #f6f6f5;
+  /* 15/09, QUATRIÈME FORME — le fond était gris et chaque bloc une carte
+     blanche posée dessus. Sur un écran de 900 px avec quatre faits à dire,
+     ça donne des cartes vides qui flottent : c'est le « encore moche » de
+     Teo, capture du gabarit Mail de shadcn à l'appui. Dans cette
+     référence, il n'y a AUCUNE carte — une seule surface, découpée par des
+     filets d'un pixel. Un filet n'a pas besoin d'être rempli ; une carte,
+     si. Tout le reste de cette feuille en découle. */
+  background: #ffffff;
   color: var(--r-texte, #050505);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
@@ -338,68 +362,78 @@
 }
 
 /* ——— les tuiles de faits ——— */
+/* Un BANDEAU de quatre faits, cerné en haut et en bas, ses cellules
+   séparées par un filet vertical — et non quatre cartes à 32 px d'icône
+   encadrée. Le gabarit de référence ne borde jamais une cellule : il
+   borde le bloc. Les filets internes se posent à gauche de chaque
+   cellule sauf la première de sa rangée, d'où les deux `nth-child` (2 par
+   rangée sous lg, 4 au-dessus). */
 .cpt-tuiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 0;
+  margin-bottom: 0;
+  border-top: 1px solid #e6e6e4;
+}
+.cpt-tuile {
+  min-width: 0;
+  padding: 13px 16px 15px;
+}
+.cpt-tuile:not(:nth-child(2n + 1)) {
+  border-left: 1px solid #ededeb;
+}
+.cpt-tuile:nth-child(n + 3) {
+  border-top: 1px solid #ededeb;
 }
 @media (min-width: 1024px) {
   .cpt-tuiles {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
   }
-}
-.cpt-tuile {
-  min-width: 0;
-  border: 1px solid #e6e6e4;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 14px 14px 16px;
-}
-@media (min-width: 1024px) {
   .cpt-tuile {
-    padding: 16px 18px 18px;
+    padding: 15px 20px 17px;
+  }
+  .cpt-tuile:nth-child(n + 3) {
+    border-top: 0;
+  }
+  .cpt-tuile:not(:nth-child(4n + 1)) {
+    border-left: 1px solid #ededeb;
   }
 }
-.cpt-tuile-tete {
+/* l'icône rejoint l'étiquette sur sa ligne : encadrée au-dessus, elle
+   coûtait 44 px de haut par tuile pour ne rien dire de plus */
+.cpt-tuile-etiquette {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-.cpt-tuile-icone {
-  display: grid;
-  place-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid #ededeb;
-  border-radius: 9px;
-  background: #fafafa;
-  color: var(--r-doux, #3d3d3d);
-}
-.cpt-tuile-etiquette {
-  font-size: 12px;
+  gap: 7px;
+  font-size: 11.5px;
   line-height: 16px;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #8c8c8c;
 }
+.cpt-tuile-icone {
+  display: inline-grid;
+  place-content: center;
+  color: #a3a3a3;
+}
+.cpt-tuile-icone > svg {
+  width: 14px;
+  height: 14px;
+}
 .cpt-tuile-valeur {
-  margin-top: 3px;
+  margin-top: 5px;
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-size: 19px;
-  line-height: 26px;
+  font-size: 18px;
+  line-height: 24px;
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--r-texte, #050505);
 }
 .cpt-tuile-detail {
-  margin-top: 3px;
-  font-size: 13px;
-  line-height: 19px;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 18px;
   color: var(--r-faible, #616161);
 }
 
@@ -421,9 +455,14 @@
 }
 
 /* ——— les panneaux ——— */
-/* le panneau d'onglet occupe ce qui reste de l'écran : sans ça, un écran
-   de 900 px affichait 360 px de contenu et 540 px de gris — le reproche
-   « amateur » tenait autant à ce vide qu'au reste */
+/* 15/09, QUATRIÈME FORME — LE PANNEAU NE S'ÉTIRE PLUS. La règle
+   précédente lui donnait `flex: 1 1 auto` pour éviter « 360 px de contenu
+   et 540 px de gris » ; elle produisait exactement le contraire, une
+   carte de 900 px pour une ligne d'information (l'onglet Profil des
+   captures de Teo). Le vide ne se comble pas en étirant le cadre qui le
+   contient : on retire le cadre. Chaque panneau est une SECTION posée
+   sous un filet, haute de son contenu — la page se termine là où les
+   faits se terminent. */
 .cpt-contenu > [role="tabpanel"] {
   display: flex;
   min-height: 0;
@@ -433,47 +472,59 @@
 .cpt-panneaux {
   display: grid;
   min-width: 0;
-  gap: 12px;
+  gap: 0;
 }
-@media (min-width: 1024px) {
-  .cpt-panneaux {
-    gap: 16px;
-  }
-}
-/* deux colonnes quand un panneau en appelle un second à côté ; et, sur
-   ces écrans-là, les deux cartes prennent la hauteur disponible (une
-   rangée de cartes de hauteurs différentes se voit tout de suite) */
+/* deux colonnes quand un panneau en appelle un second à côté : elles sont
+   séparées par un filet VERTICAL, comme les volets du gabarit de
+   référence, et non par une gouttière entre deux cartes */
 .cpt-panneaux[data-colonnes="deux"] {
   grid-template-columns: minmax(0, 1fr);
 }
 @media (min-width: 1280px) {
+  /* `flex: 1 1 auto` ÉTIRE LA COLONNE, PAS LA CARTE — la nuance est tout
+     l'écart avec la forme précédente. Il n'y a plus de cadre à gonfler :
+     ce qui descend jusqu'en bas est le filet qui sépare les deux volets,
+     exactement comme dans le gabarit de référence. Le contenu, lui, reste
+     en haut de sa colonne. */
   .cpt-panneaux[data-colonnes="deux"] {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     flex: 1 1 auto;
-    align-content: stretch;
+  }
+  .cpt-panneaux[data-colonnes="deux"] > .cpt-panneau:first-child {
+    padding-right: 32px;
+  }
+  .cpt-panneaux[data-colonnes="deux"] > .cpt-panneau:nth-child(2) {
+    padding-left: 32px;
+    border-left: 1px solid #ededeb;
   }
 }
 .cpt-panneau {
   min-width: 0;
-  border: 1px solid #e6e6e4;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 16px 16px 18px;
+  border-top: 1px solid #e6e6e4;
+  padding: 18px 0 20px;
+}
+/* UNE COLONNE DE LECTURE, pas toute la largeur de l'écran. Une liste de
+   réglages étalée sur 1 100 px pose l'intitulé à gauche et sa valeur à
+   l'autre bout : l'œil ne relie plus les deux. Les écrans de réglages des
+   applications que Teo cite bornent tous cette colonne — la barre
+   latérale et l'en-tête gardent la pleine largeur, le contenu non. */
+.cpt-panneaux:not([data-colonnes="deux"]) > .cpt-panneau > .cpt-panneau-corps {
+  max-width: 880px;
 }
 @media (min-width: 1024px) {
   .cpt-panneau {
-    padding: 20px 22px 22px;
+    padding: 20px 0 24px;
   }
 }
+/* le filet de section sépare déjà : un second filet sous le titre, à
+   quatorze pixels du premier, dessinait deux lignes pour une */
 .cpt-panneau-tete {
-  padding-bottom: 12px;
   margin-bottom: 14px;
-  border-bottom: 1px solid #ededeb;
 }
 .cpt-panneau-titre {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 22px;
+  font-size: 15px;
+  line-height: 21px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
