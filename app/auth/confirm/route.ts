@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { suiteSure } from "@/lib/compte";
+import { COCKPIT_URL } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -14,7 +15,11 @@ import { createClient } from "@/lib/supabase/server";
    verifyOtp({ token_hash, type }) ouvre la session et l'écrit dans les
    cookies (un Route Handler peut le faire, contrairement à un Server
    Component), puis on renvoie vers `next` — filtré, jamais externe. En
-   cas d'échec : /connexion?erreur=lien, où le code reste possible.
+   15/09/2026 — EN CAS D'ÉCHEC, ON PART AU COCKPIT. La route renvoyait
+   sur /connexion du site ; cette page n'existe plus (Teo : « plus rien
+   sur le site ne doit renvoyer à une page de connexion »). Le lien mort
+   ou expiré se rejoue donc sur app.omegaai.fr, qui porte la seule porte
+   de connexion du parc.
 
    Pour que Supabase envoie ici, Teo doit ajouter l'URL du site (et
    http://localhost:3000 en local) aux « Redirect URLs » de Auth.
@@ -41,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const retour = new URL("/connexion", request.url);
+  const retour = new URL(`${COCKPIT_URL}/connexion`);
   retour.searchParams.set("erreur", "lien");
   if (suite !== "/compte") retour.searchParams.set("suite", suite);
   return NextResponse.redirect(retour, { status: 303 });

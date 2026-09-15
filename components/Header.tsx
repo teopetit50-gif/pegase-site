@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { EVENEMENT_SESSION } from "@/lib/compte";
-import { sessionCookiePresente } from "@/lib/supabase/config";
 import MenuPrincipal from "./MenuPrincipal";
 import { GROUPES, NB_RANGEES } from "@/lib/menu";
 
@@ -115,49 +113,6 @@ export default function Header() {
      ouvert. Logo, marque, CTA et burger s'y accrochent tous. */
   const clairEff = open || clair;
 
-  /* 02/09 — le compte client. L'icône « personne » mène à /compte si une
-     session est ouverte, à /connexion sinon.
-
-     Revue 02/09 (n° 4) : la première version importait supabase-js ici —
-     dans le layout racine, donc sur TOUTES les pages statiques (+252 ko,
-     66 ko gzip, pour la home et le blog). Le header n'a pas besoin d'un
-     jeton vérifié pour choisir un lien : il lit la PRÉSENCE du cookie de
-     session (sb-<ref>-auth-token) dans document.cookie, sans bibliothèque.
-     /connexion renvoie de toute façon vers /compte si la session est
-     valide, et /compte vers /connexion si elle ne l'est pas — jamais
-     d'impasse. Relecture : au changement de route, quand l'onglet revient
-     au premier plan (une autre fenêtre a pu se connecter) et sur
-     l'événement EVENEMENT_SESSION envoyé par le module de connexion
-     inline (parcours installation) — la seule connexion sans navigation.
-     Avant la première lecture on suppose « pas connecté ». */
-  const [connecte, setConnecte] = useState(false);
-  useEffect(() => {
-    const relire = () => setConnecte(sessionCookiePresente());
-    relire();
-    window.addEventListener(EVENEMENT_SESSION, relire);
-    window.addEventListener("focus", relire);
-    document.addEventListener("visibilitychange", relire);
-    return () => {
-      window.removeEventListener(EVENEMENT_SESSION, relire);
-      window.removeEventListener("focus", relire);
-      document.removeEventListener("visibilitychange", relire);
-    };
-  }, [pathname]);
-  /* 15/09 (soir), Teo : « le but c'est d'avoir un site qui redirige vers
-     un audit, pas plus — pas de truc de connexion ». LA PORTE DU COMPTE NE
-     S'AFFICHE PLUS QU'À QUI EST DÉJÀ CONNECTÉ. Un visiteur ne voit donc
-     aucune icône, aucun « Se connecter » : le seul geste que le header
-     propose est « Commencer ». Un client, lui, garde sa porte là où elle a
-     toujours été — c'est « cacher, pas casser » : /connexion et /compte
-     répondent toujours, et le lien de ses e-mails y mène. */
-  const hrefCompte = "/compte";
-  /* 02/09 (Teo) — « se connecter » seul laissait croire qu'il fallait déjà
-     un compte : on nommait les deux. 15/09 — il FAUT déjà un compte :
-     l'inscription libre est fermée, le compte s'ouvre en réservant (voir
-     app/connexion/page.tsx). Le libellé redevient donc exact.
-     Connecté : « Mon compte », le nom de la page ouverte (revue n° 8 : un
-     seul nom pour le même objet). */
-  const libelleCompte = "Mon compte";
 
   useEffect(() => {
     const check = () => {
@@ -368,37 +323,13 @@ export default function Header() {
           >
             Commencer
           </Link>
-          {/* 02/09 — l'icône compte : une personne dans un cercle, trait en
-              currentColor, 20 px. Même gabarit de tap que le burger (44 px
-              mobile, 36 desktop) et même caméléon : noir au-dessus d'une
-              section claire ou du panneau ouvert, blanc sinon.
-              15/09 — elle n'est rendue que si le cookie de session est là. */}
-          {connecte ? (
-          <Link
-            href={hrefCompte}
-            aria-label={libelleCompte}
-            title={libelleCompte}
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-200 md:h-9 md:w-9 ${
-              clairEff ? "text-[#0f1013] hover:bg-black/[0.06]" : "text-white hover:bg-white/10"
-            }`}
-          >
-            <svg
-              aria-hidden
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <circle cx="12" cy="10" r="3.2" />
-              <path d="M5.8 19.2c1.3-2.6 3.6-4 6.2-4s4.9 1.4 6.2 4" />
-            </svg>
-          </Link>
-          ) : null}
+          {/* 15/09/2026 — L'ICÔNE COMPTE EST RETIRÉE. Teo : « plus rien sur
+              le site ne doit renvoyer à une page de connexion ». Elle était
+              d'abord conditionnée à la présence du cookie de session (même
+              jour, plus tôt) ; ce n'était pas assez — un client connecté la
+              voyait encore. Le site ne propose plus qu'un geste, réserver un
+              audit. Les clients entrent par app.omegaai.fr, ou par le lien
+              de leurs e-mails. */}
           {/* burger 2 barres — se croise en X à l'ouverture */}
           <button
             type="button"
@@ -609,28 +540,9 @@ export default function Header() {
                 n'avait pas de compte utilisateur, donc la paire Sign in / Get
                 started était devenue « Nous contacter » (WhatsApp) puis
                 « Commencer » (/tarifs, 28/08).
-                02/09 — le compte existe : « Se connecter ou créer un
-                compte » / « Mon compte » revient en tête de pile, en pilule
-                grise comme le contact.
-                15/09 — la pilule ne se rend que pour une session ouverte,
-                comme l'icône de la barre : le panneau d'un visiteur ne
-                propose plus que « Nous contacter » et « Commencer ». */}
-            {connecte ? (
-            <Link
-              href={hrefCompte}
-              onClick={() => setOpen(false)}
-              tabIndex={open ? undefined : -1}
-              style={{
-                transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-                transitionDelay: open ? `${60 + NB_RANGEES * 55}ms` : "0ms",
-                opacity: open ? 1 : 0,
-                transform: open ? "none" : "translateY(14px)",
-              }}
-              className="flex h-[52px] w-full items-center justify-center rounded-full border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
-            >
-              {libelleCompte}
-            </Link>
-            ) : null}
+                15/09 — la pilule de compte est RETIRÉE, comme l'icône de la
+                barre : le panneau ne propose plus que « Nous contacter » et
+                « Commencer ». */}
             {/* 14/09 — était un <a> brut : le seul du menu, donc le seul
                 bouton qui rechargeait tout le site au lieu de changer de
                 page. Il rejoint ses voisins en <Link>. */}

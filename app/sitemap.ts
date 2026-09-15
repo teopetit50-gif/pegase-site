@@ -35,7 +35,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     /* 28/08 — les deux pages de réservation en ligne. Priorité modérée :
        ce sont des étapes de parcours, pas des portes d'entrée SEO. */
     { url: "/reserver", priorite: 0.5, frequence: "monthly" },
-    { url: "/installation", priorite: 0.4, frequence: "monthly" },
+    /* 15/09 (soir) — /installation sort du plan du site : le parcours
+       demande une connexion, et plus rien de la vitrine n'y mène. Il se
+       réserve par le lien envoyé après l'audit. */
     /* 08/09 — le mode d'emploi de l'application (Android, iPhone,
        ordinateur) : une page publique, liée depuis le pied de page, qu'un
        client cherche quand il change de téléphone. Même rang que

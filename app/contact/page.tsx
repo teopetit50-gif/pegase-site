@@ -1,3 +1,4 @@
+import { COCKPIT_URL } from "@/lib/supabase/config";
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
@@ -78,7 +79,7 @@ const ATTENDRE = [
 const BESOINS = [
   /* 15/09 — « Mon compte » a quitté le site : la ligne pointe l'espace
      client, où l'abonnement et le moyen de paiement vivent désormais. */
-  { q: "Mon abonnement, mes rendez-vous, mon moyen de paiement", href: "/compte", lien: "Mon espace client" },
+  { q: "Mon abonnement, mes rendez-vous, mon moyen de paiement", href: `${COCKPIT_URL}/compte`, lien: "Mon espace client" },
   { q: "Installer l'application sur mon téléphone ou mon ordinateur", href: "/application", lien: "L'application" },
   { q: "Réserver ma réunion d'installation", href: "/tarifs", lien: "Les tarifs" },
   { q: "Demander un audit pour mon entreprise", href: "/reserver-un-audit", lien: "Réserver un audit" },

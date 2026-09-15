@@ -13,7 +13,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
 } from "@/components/ui/card";
 import {
@@ -100,7 +99,8 @@ import { GRANDE_STRUCTURE } from "@/lib/paliers";
    proposer d'acheter, alors que ses cartes venaient d'annoncer que le
    prix sort de l'audit. Il montre désormais les créneaux du premier
    format d'audit, la porte que /tarifs ouvre vraiment. Celle de
-   l'installation reste en pied de carte, pour qui a déjà fait l'audit. */
+   l'installation ne se réserve plus depuis la vitrine (15/09 au soir) :
+   ce parcours demande une connexion, et il n'y en a plus ici. */
 const DUREE_PME = DUREES_RDV.diagnostic ?? 30;
 const DUREE_STRUCTURE = DUREES_RDV[GRANDE_STRUCTURE.appel.parcours] ?? 45;
 
@@ -232,7 +232,7 @@ export default function AppelFinal() {
               </div>
 
               {/* ce que dit le jour cliqué — une information, pas un bouton :
-                  le créneau se bloque sur /installation, postes choisis */}
+                  le créneau se bloque dans le tunnel d'audit */}
               <p className="mt-4 text-[15px] leading-relaxed text-[#616161] first-letter:uppercase">
                 {jour === undefined ? (
                   <>
@@ -279,28 +279,11 @@ export default function AppelFinal() {
           </div>
         </CardContent>
 
-        {/* la mention discrète de l'autre porte (28/08, retournée le 15/09) :
-            la carte ouvre l'audit, le pied garde l'installation pour qui l'a
-            déjà fait — l'ordre des deux portes suit celui du parcours */}
-        <CardFooter className="flex flex-col items-start gap-3 border-t border-neutral-200 bg-[#fafafa] p-6 pt-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-          <p key={devis ? "structure" : "pme"} className="rv-fondu text-[13px] leading-5 text-[#616161]">
-            {devis ? (
-              GRANDE_STRUCTURE.appel.pied
-            ) : (
-              <>
-                Votre audit est réalisé et votre tarif arrêté&nbsp;? La réunion
-                d&apos;installation se réserve directement, postes sélectionnés.
-              </>
-            )}
-          </p>
-          <Link
-            href="/installation"
-            className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-[#050505] underline-offset-4 hover:underline"
-          >
-            Réserver l&apos;installation
-            <ArrowRight aria-hidden className="size-3.5" />
-          </Link>
-        </CardFooter>
+        {/* 15/09 (soir) — LE PIED EST RETIRÉ. Il renvoyait à /installation
+            « pour qui a déjà fait son audit » ; ce parcours-là demande une
+            connexion, et Teo : « plus rien sur le site ne doit renvoyer à
+            une page de connexion ». L'installation se réserve par le lien
+            que nous envoyons après l'audit, plus depuis la vitrine. */}
       </Card>
     </div>
   );

@@ -71,12 +71,12 @@ export const MARQUE = {
      audit » et non « commencer ». `creation` reste déclaré : c'est la
      porte à rouvrir le jour où une inscription libre-service existe.
 
-     15/09 — cette porte est désormais FERMÉE pour tout le site :
-     /connexion ne crée plus de compte et ?mode=creation redirige sur
-     /reserver-un-audit. La constante ne mène donc nulle part de nouveau,
-     et rien ne l'utilise. */
-  connexion: "/connexion",
-  creation: "/connexion?mode=creation",
+     15/09 (matin) — cette porte est FERMÉE pour tout le site : /connexion
+     ne crée plus de compte et ?mode=creation redirige sur
+     /reserver-un-audit.
+     15/09 (soir) — /connexion N'EXISTE PLUS du tout. Les deux constantes
+     sont retirées plutôt que laissées à pointer sur un 404 : la seule
+     porte de connexion du parc est app.omegaai.fr. */
 } as const;
 
 export const HERO = {
@@ -439,7 +439,12 @@ export const CLOTURE = {
   etiquette: MARQUE.signature,
   titre: `${MARQUE.nom} est-il adapté à votre organisation ?`,
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
-  secondaire: { libelle: "Se connecter", href: "/connexion" },
+  /* 15/09 (soir) — le bouton disait « Se connecter » et menait à
+     /connexion, page supprimée : Teo, « plus rien sur le site ne doit
+     renvoyer à une page de connexion ». Le second geste d'une clôture qui
+     vend un système est d'aller voir ce qu'il coûte, pas d'entrer dans un
+     compte. */
+  secondaire: { libelle: "Estimer mon prix", href: "/tarifs" },
 } as const;
 
 export const CIRCUITS_FIGURE = {

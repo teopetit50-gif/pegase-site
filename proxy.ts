@@ -13,6 +13,12 @@
    /site/* (02/09, même jour) : le tunnel de commande de site — un achat,
    donc un compte ; la page lit la session côté serveur et le jeton doit
    être à jour quand le brief part.
+
+   15/09/2026 — /compte ET /connexion SORTENT DU MATCHER. Teo : « plus
+   rien sur le site ne doit renvoyer à une page de connexion ». /connexion
+   n'existe plus ; /compte n'est qu'une redirection vers app.omegaai.fr, et
+   la garder derrière la session la faisait passer par /connexion — donc
+   exactement ce qui devait disparaître. Le cockpit tient sa propre porte.
    ══════════════════════════════════════════════════════════════════════ */
 
 import type { NextRequest } from "next/server";
@@ -23,5 +29,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/compte/:path*", "/connexion", "/installation", "/auth/:path*", "/site/:path*"],
+  matcher: ["/installation", "/auth/:path*", "/site/:path*"],
 };
