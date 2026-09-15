@@ -33,11 +33,11 @@ export function Heros() {
       <div className="px-6 py-20 sm:px-8 md:py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="sec-sourcil">Secteurs</p>
-          <h1 className="sec-h1 mt-6">Votre logiciel sait. Personne ne prévient.</h1>
+          <h1 className="sec-h1 mt-6">Chaque métier a ses conversations à tenir.</h1>
           <p className="sec-lead mx-auto mt-6 max-w-2xl">
-            Le planning sait qu’il manque quelqu’un ce matin. Le garage sait que
-            la pièce n’est pas arrivée. Reste la conversation que personne n’a
-            le temps d’avoir — et elle ne se ressemble pas d’un métier à l’autre.
+            Le planning sait qu’il manque quelqu’un ce matin, le garage sait que
+            la pièce n’est pas arrivée. Reste la conversation qui va avec, et elle
+            ne se ressemble pas d’un métier à l’autre.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link href="#metiers" className="sec-btn sec-btn--plein">

@@ -61,7 +61,7 @@ const DEROULE: { etape: string; titre: string; texte: string }[] = [
     etape: "Étape 1",
     titre: "Nous écoutons",
     texte:
-      "Ni démonstration ni plaquette. Vous décrivez votre journée telle qu'elle se déroule : ce qui prend du temps, ce qui se perd, où vivent vos informations. En équipe, les entretiens sont individuels, parce qu'en groupe chacun se censure.",
+      "Ni démonstration ni plaquette. Vous décrivez votre journée telle qu'elle se déroule : ce qui prend du temps, ce qui se perd, où vivent vos informations. En équipe, les entretiens sont individuels, parce que le détail du quotidien se dit plus précisément en tête-à-tête.",
   },
   {
     etape: "Étape 2",

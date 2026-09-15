@@ -1093,7 +1093,7 @@ export const CALCULATEUR = {
   negatif: {
     titre: "À vos volumes, ça ne se décide pas sur le temps gagné.",
     texte:
-      "Ce que le système vous rendrait en heures ne suffit pas, seul, à justifier un abonnement — et nous préférons vous le dire ici plutôt qu'en rendez-vous. Ce qui fait la différence à ce niveau, c'est ce qui se perd aujourd'hui sans que personne le compte : devis restés sans réponse, factures échues, clients qu'on ne rappelle jamais. C'est précisément ce que l'audit mesure, sur vos propres chiffres.",
+      "Ce que le système vous rendrait en heures ne suffit pas, seul, à justifier un abonnement — et nous préférons vous le dire ici plutôt qu'en rendez-vous. Ce qui fait la différence à ce niveau, c'est ce qui se perd aujourd'hui sans que personne le compte : devis restés sans réponse, factures échues, clients jamais rappelés. C'est précisément ce que l'audit mesure, sur vos propres chiffres.",
     cta: "En parler, 30 minutes",
     retour: "Revenir à la grille",
   },

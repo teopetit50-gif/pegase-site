@@ -100,7 +100,7 @@ export default function ClotureAppel() {
           {/* Cinq lignes à 390 : hérité de la Cloture, où la phrase faisait
               déjà cinq lignes ; le texte est conservé tel quel. */}
           <p className="mt-5 max-w-[52ch] text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/70">
-            Choisissez un modèle, nous écrivons tout le contenu. Le poste qui va avec récupère ce qui se perd aujourd&apos;hui entre un visiteur et un client qui règle.
+            Choisissez un modèle, nous écrivons tout le contenu. Le poste qui va avec conduit chaque demande reçue, du premier clic jusqu&apos;au règlement.
           </p>
         </div>
 

@@ -182,7 +182,7 @@ export default function ModelesPage() {
               Ce qui se passe après le clic
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              N&apos;importe qui peut vous vendre un site. Ce qui suit le clic est une autre affaire&nbsp;: c&apos;est là que se joue l&apos;écart entre une vitrine qui décore et une surface qui produit du chiffre et de la donnée exploitable.
+              Un site branché sur vos systèmes prend en charge ce qui suit le clic&nbsp;: l&apos;accusé de réception, le devis, la facture et la demande d&apos;avis. Chaque étape part sous votre signature après votre validation, et laisse une trace datée dans votre espace.
             </p>
           </div>
 

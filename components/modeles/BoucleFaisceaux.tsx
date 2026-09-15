@@ -69,8 +69,13 @@ import "./BoucleFaisceaux.css";
      de texte (~238 px à 390).
    · La phrase « Et ça recommence. … » de l'ancienne <Boucle> est gardée
      en légende de la figure : elle dit en mots ce que l'arc dessine.
-   · Les cinq textes sont ceux de <Boucle>, au mot près ; seuls les
-     deux-points y ont reçu leur insécable.
+   · 15/09 (Teo, « on dirait de la critique ») : les cinq textes et la
+     légende sont réécrits au registre grands comptes. Ils décrivaient la
+     boucle par ce qui manque ailleurs (« ne part pas dans une boîte mail
+     où il se perdra », « personne n'attend le lundi matin », « une
+     relance, pas une publicité ») ; ils décrivent maintenant ce que le
+     système fait, puis ce qui reste à faire au lecteur. Plus aucune
+     antithèse « pas X, c'est Y » dans la section.
    ══════════════════════════════════════════════════════════════════════ */
 
 const TRAIT = {
@@ -127,35 +132,35 @@ const JALONS = [
     icone: ICONES.formulaire,
     titre: "La demande arrive",
     texte:
-      "Le formulaire ne part pas dans une boîte mail où il se perdra\u00a0: la demande devient une ligne dans votre espace, horodatée, avec la page d'où elle vient et ce qui y était cherché.",
+      "Chaque formulaire crée une ligne dans votre espace, horodatée, avec la page d'origine et le terme qui y était cherché. Vos équipes voient ce qui est demandé, par qui, et depuis combien de temps.",
   },
   {
     n: "02",
     icone: ICONES.reponse,
     titre: "La réponse part en deux minutes",
     texte:
-      "Un accusé de réception sous votre signature, avec le délai que vous annoncez. Personne n'attend le lundi matin pour savoir que sa demande est arrivée quelque part.",
+      "Le système envoie un accusé de réception sous votre signature, avec le délai de traitement que vous annoncez. Le demandeur sait que sa demande est enregistrée, et vos équipes disposent de ce délai pour répondre.",
   },
   {
     n: "03",
     icone: ICONES.devis,
-    titre: "Le devis se relance seul",
+    titre: "Le devis est relancé",
     texte:
-      "Relancé à J+3 puis à J+7 sans réponse, sous votre signature. Chaque message vous est soumis avant de partir\u00a0: vous validez, corrigez ou suspendez d'un clic.",
+      "Sans réponse, le devis repart à J+3 puis à J+7, sous votre signature. Chaque message vous est soumis avant l'envoi\u00a0: vous le validez, le corrigez ou vous suspendez la séquence.",
   },
   {
     n: "04",
     icone: ICONES.facture,
-    titre: "La facture aussi",
+    titre: "La facture suit le même parcours",
     texte:
-      "Le devis accepté devient une facture, et l'impayé entre dans la même mécanique. C'est le système qui suit les règlements, poste par poste, plus vos équipes.",
+      "Le devis accepté devient une facture, puis l'impayé entre dans la même séquence de relance. Le système suit les règlements poste par poste et signale ce qui reste dû.",
   },
   {
     n: "05",
     icone: ICONES.avis,
     titre: "L'avis est demandé",
     texte:
-      "Commande livrée ou prestation terminée, la demande d'avis part au moment où le client est encore content\u00a0: celui où il dira oui.",
+      "Une fois la commande livrée ou la prestation terminée, la demande d'avis part au moment où la satisfaction est la plus forte. Les retours reviennent dans votre espace, rattachés à la commande.",
   },
 ];
 
@@ -443,9 +448,9 @@ export default function BoucleFaisceaux() {
         </svg>
         <p>
           <span className="text-[color:var(--m-encre)]">Et le site apprend.</span>{" "}
-          Ce qui est demandé le plus souvent, ce qui est cherché sans être trouvé, les pages
-          d&apos;où l&apos;on repart&nbsp;: vous le lisez en clair, pas en courbes d&apos;audience. Un client
-          déjà venu qui revient sur une gamme reçoit une relance, pas une publicité.
+          Ce qui est demandé le plus souvent, ce qui est cherché sans résultat et les pages
+          d&apos;où les visiteurs repartent&nbsp;: votre espace le présente en clair. Un client déjà
+          venu qui revient sur une gamme reçoit une relance adaptée à son historique.
         </p>
       </figcaption>
     </figure>

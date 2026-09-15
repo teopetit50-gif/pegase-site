@@ -446,9 +446,9 @@ export const FRANCAIS = {
 /* En bas de page, répéter l'ouverture ne referme rien : ce titre dit le coût
    de ne rien faire, qui est le seul argument qui reste à cet endroit. */
 export const APPEL = {
-  titre: "Demain, vos anciens clients ne penseront toujours pas à vous",
+  titre: "Reprendre contact avec vos anciens clients",
   texte:
-    "Ils ne vous en voudront pas, parce qu'ils vous auront simplement oublié. La seule chose qui peut changer d'ici là, c'est que quelqu'un relise enfin votre base clients.",
+    "RELOAD relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange.",
   /* Réaiguillé sur le parcours du site : le site source envoyait sur son
      propre /contact, qui n'existe pas ici sous cette forme. */
   bouton: { texte: "Commencer", lien: "/reserver-un-audit" },

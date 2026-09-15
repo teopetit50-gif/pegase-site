@@ -189,7 +189,7 @@ export default function TarifsSitePage() {
                 Un site au prix public. Un système derrière.
               </h1>
               <p data-arrivee="chapo" className="o-lead mt-[15px] max-w-[650px]">
-                {MODELES.length} modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu à votre métier et à votre marque. Ce qui arrive ensuite — demandes, devis, relances, avis — entre dans vos systèmes au lieu de dormir dans une boîte mail.
+                {MODELES.length} modèles, tous en ligne, tous consultables. Vous choisissez l&apos;allure, nous réécrivons tout le contenu à votre métier et à votre marque. Ce qui arrive ensuite — demandes, devis, relances, avis — entre directement dans vos systèmes.
               </p>
               <div data-arrivee="bloc" className="mt-[25px] flex flex-col items-center">
                 <div className="flex flex-wrap items-center justify-center gap-3">
@@ -331,21 +331,25 @@ export default function TarifsSitePage() {
           </div>
         </section>
 
-        {/* ════════ 5 · CE QUE LES AUTRES VITRINES N'ONT PAS — bande nuit ════════ */}
+        {/* ════════ 5 · CE QUI SUIT LA DEMANDE — bande nuit ════════
+            15/09 (Teo) : la section s'intitulait « CE QUE LES AUTRES VITRINES
+            N'ONT PAS » et ouvrait sur le coût d'un site qui ne transforme
+            rien. Elle disait le produit par le défaut des autres ; elle dit
+            maintenant ce que celui-ci fait d'une demande. */}
         <section className="o-nuit relative py-[110px]">
           <div className="o-wrap relative">
             <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
               <div>
                 <div data-reveal>
                   <span className="o-pill o-pill--xs o-pill--dark">
-                    CE QU&apos;UNE VITRINE SEULE NE FAIT PAS
+                    CE QUI SUIT LA DEMANDE
                   </span>
                 </div>
                 <h2 data-reveal className="o-h2 mt-4">
-                  Une surface branchée, pas une plaquette en ligne.
+                  Une surface branchée sur vos systèmes.
                 </h2>
                 <p data-reveal className="o-lead mt-5">
-                  Un site qui reçoit des demandes et n&apos;en transforme aucune coûte plus cher qu&apos;il ne rapporte, à trois demandes par semaine comme à trois cents. Ici, chacune entre dans le circuit, et ce que le site enregistre au passage revient à vos équipes en clair. C&apos;est pour cette raison que la vitrine est entretenue avec les systèmes, pas à côté.
+                  Chaque demande reçue entre dans le circuit, à trois demandes par semaine comme à trois cents&nbsp;: accusé de réception, devis, relance, facture et demande d&apos;avis. Ce que le site enregistre au passage revient à vos équipes en clair, ce qui permet de corriger une page ou une gamme sur des faits. La vitrine est donc entretenue en même temps que les systèmes qu&apos;elle alimente.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap gap-3">
                   <Link href="/modeles" className="o-btn o-btn--primary">

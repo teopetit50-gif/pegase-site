@@ -592,7 +592,7 @@ export const FAQ: { q: string; r: string[] }[] = [
       /* 01/09 — le prix devient public (voir /tarifs/site) : la réponse
          le donne plutôt que de le garder pour l'audit. */
       `Oui, et vous pouvez déjà en visiter ${MODELES.length} : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, nous réécrivons tout le contenu en français, pour votre métier. Le prix est public : 990 € le site catalogue, soit de 198 à 594 € restant à charge selon le taux du Chèque TIC.`,
-      "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps il obtient une réponse, et ce que devient le devis. Un site qui reçoit trois demandes par semaine et n'en transforme aucune coûte plus cher qu'il ne rapporte : c'est cette partie que nous chiffrons d'abord, pour que la vitrine ne dorme pas.",
+      "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps il obtient une réponse, et ce que devient le devis. C'est cette partie que nous chiffrons d'abord, parce qu'elle décide de ce que le site rapporte, à trois demandes par semaine comme à trois cents.",
     ],
   },
   {
