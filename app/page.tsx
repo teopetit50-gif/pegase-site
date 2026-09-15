@@ -932,7 +932,11 @@ export default function Home() {
             qu'on ne pose pas à voix haute — à qui je parle quand ça coince.
 
             LE DRAPEAU est dans le sourcil (components/ui/drapeau.tsx), aux
-            teintes officielles #000091 / #E1000F. Il dit ce que la famille
+            teintes officielles #000091 / #E1000F. Agrandi le 14/09 (Teo :
+            « un drapeau un peu plus gros, qu'on voit qu'on est bien
+            français ») : 24 × 16 px au lieu de 15 × 10, dans un sourcil de
+            28 px — il y est donc plus haut que les capitales du texte, à
+            dessein. Il dit ce que la famille
             des sites produits s'autorise — conception française, assistance
             en français, droit français — et surtout PAS « hébergé en
             France » : les données vivent à Francfort.
@@ -946,7 +950,7 @@ export default function Home() {
             <EnTete
               pastille={
                 <>
-                  <Drapeau className="h-[10px] w-[15px] shrink-0 rounded-[2px]" />
+                  <Drapeau className="h-[16px] w-[24px] shrink-0 rounded-[3px]" />
                   {EQUIPE_SURTITRE}
                 </>
               }

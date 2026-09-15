@@ -77,11 +77,15 @@ const POIDS = [155, 172, 162];
    à trois personnes, la mosaïque n'a qu'une vignette par colonne, donc
    250 px de haut, quand la colonne de droite en fait le double. Le décalage
    plus franc, et l'alignement VERTICALEMENT CENTRÉ de la paire, répartissent
-   le vide au lieu de le laisser tout entier sous les photos. */
+   le vide au lieu de le laisser tout entier sous les photos.
+   14/09 (Teo : « mets ces images en plus gros ») : la mosaïque passe de
+   500 px à 530 sous `lg` et 700 sous `xl`. Les décalages suivent le même
+   facteur (× 1,06 puis × 1,4), sinon la mosaïque s'aplatit à mesure que
+   les tuiles grandissent. */
 const DECALAGE = [
   "",
-  "mt-[34px] sm:mt-[46px] lg:mt-[76px]",
-  "mt-[16px] sm:mt-[22px] lg:mt-[36px]",
+  "mt-[34px] sm:mt-[46px] lg:mt-[80px] xl:mt-[106px]",
+  "mt-[16px] sm:mt-[22px] lg:mt-[38px] xl:mt-[50px]",
 ];
 
 type Etat = "actif" | "attenue" | "repos";
@@ -111,20 +115,31 @@ export default function TeamShowcase({
   const colonnes = [0, 1, 2].map((c) => membres.filter((_, i) => i % 3 === c));
 
   return (
-    /* La paire est BORNÉE ET CENTRÉE, elle ne s'étale pas sur les 1200 px
-       de la colonne. Relevé le 12/09 sur la première capture : la liste
-       prenait tout le reste (668 px pour trois noms courts) et laissait
-       260 px de vide à droite, sous un titre centré — le bloc penchait à
-       gauche sans qu'aucune mesure ne le signale. */
-    <div className="mx-auto flex w-full flex-col items-center gap-10 lg:max-w-[1100px] lg:flex-row lg:items-center lg:justify-center lg:gap-16">
+    /* La paire est BORNÉE ET CENTRÉE. Relevé le 12/09 sur la première
+       capture : la liste prenait tout le reste (668 px pour trois noms
+       courts) et laissait 260 px de vide à droite, sous un titre centré —
+       le bloc penchait à gauche sans qu'aucune mesure ne le signale. Bornée
+       à 1100 jusqu'au 14/09 ; à 1200 depuis que la mosaïque fait 700 px
+       sous `xl` — à 1100, la liste n'avait plus que 336 px pour trois
+       descriptifs de 46ch. */
+    <div className="mx-auto flex w-full flex-col items-center gap-10 lg:max-w-[1200px] lg:flex-row lg:items-center lg:justify-center lg:gap-12 xl:gap-16">
       {/* ── la mosaïque ── */}
       <div
         aria-hidden="true"
-        /* Même largeur que la liste sous `lg` (420) : empilés, les deux blocs
+        /* Même largeur que la liste sous `lg` (480) : empilés, les deux blocs
            partagent alors exactement le même bord gauche. À 336 et 400, la
            mosaïque se centrait 10 px à droite des noms — assez pour se voir,
-           pas assez pour qu'on sache pourquoi. */
-        className="eq-mosaique w-full max-w-[420px] shrink-0 lg:max-w-[500px]"
+           pas assez pour qu'on sache pourquoi. Les largeurs (420 / 500
+           jusqu'au 14/09) ont été relevées d'un cran à chaque palier : les
+           tuiles font 214 / 238 / 224 px sous `xl`, contre 151 / 168 / 158.
+
+           LE PALIER `lg` EST BORNÉ PAR LE TEXTE, PAS PAR LE GOÛT. À 1024 px
+           la colonne n'offre que 976 px : mosaïque + gouttière + liste doit
+           y tenir, et la liste a besoin de 398 px pour que le descriptif
+           atteigne sa mesure de 46ch (372 px + le retrait de 26). D'où
+           530 px et une gouttière ramenée à 48 — à 560, le descriptif
+           tombait à 324 px de large et coupait « avant-vente » en deux. */
+        className="eq-mosaique w-full max-w-[480px] shrink-0 lg:max-w-[530px] xl:max-w-[700px]"
       >
         {colonnes.map((colonne, c) =>
           colonne.length === 0 ? null : (
@@ -147,7 +162,7 @@ export default function TeamShowcase({
       </div>
 
       {/* ── la liste des noms ── */}
-      <div className="w-full max-w-[420px] lg:max-w-none lg:flex-1 lg:pt-2">
+      <div className="w-full max-w-[480px] lg:max-w-none lg:flex-1 lg:pt-2">
         <ul className="eq-liste">
           {membres.map((m) => (
             <Rangee
