@@ -89,7 +89,11 @@ export default function TexteRevele({
   }
 
   return (
-    <div ref={cadre} className="relative z-0 h-[150vh]">
+    /* 15/09 — 112vh sous `md`. À 390 px la phrase, ramenée à 25 px par
+       l'échelle mobile, finit de se peindre dès le premier tiers : les
+       150vh laissaient ensuite une demi-hauteur d'écran VIDE sous elle,
+       un péage de défilement pour rien. Au-dessus de `md`, rien ne bouge. */
+    <div ref={cadre} className="relative z-0 h-[112vh] md:h-[150vh]">
       <div className="sticky top-0 mx-auto flex h-screen max-w-[900px] flex-col items-center justify-center px-6">
         <p
           aria-label={texte}
