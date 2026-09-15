@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import HeroBento from "@/components/offres/HeroBento";
 import {
-  HeroCollage,
   IconeFleche,
   MediaAnswr,
   MediaLocal,
@@ -345,8 +345,14 @@ export default function OffresPage() {
               </div>
             </div>
 
+            {/* 15/09/2026 (Teo) — le collage de trois fenêtres flottantes
+                (<HeroCollage>, toujours dans Media.tsx) laisse la place à
+                <HeroBento> : mêmes trois idées (l'encours, le brouillon à
+                valider, la demande traitée la nuit), mais en bento — donc
+                les trois restent lisibles sur téléphone, là où le collage
+                cachait ses deux panneaux latéraux sous 1024 px. */}
             <div data-reveal className="mt-10 pb-[15px]">
-              <HeroCollage />
+              <HeroBento />
             </div>
           </div>
         </section>

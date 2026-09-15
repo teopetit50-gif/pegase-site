@@ -34,28 +34,33 @@
   outline-offset: 2px;
 }
 
-/* ——— la carte : le « focus » d'Aceternity ———
-   La carte survolée se lève de 2 px ; les autres se voilent (opacité
-   seule — pas de flou : il re-rastérise vingt cartes et quatre-vingts
-   images à chaque changement de cible). Uniquement là où un pointeur
-   peut survoler : sur tactile, rien ne bouge. Le focus clavier dans une
-   carte (un de ses liens) la lève, mais ne voile PAS les autres : tabuler
-   dans la grille ne doit pas griser tout ce qu'on n'a pas encore atteint.
-   Le transform vit sur .mg-carte, JAMAIS sur le <li> : le <li> porte les
-   transforms de `motion` (layout, scale d'entrée), les deux se seraient
-   écrasés. */
+/* ——— la carte au survol ———
+   La carte visée se lève de 2 px et son ombre s'ouvre ; TOUT LE RESTE DE
+   LA GRILLE NE BOUGE PAS.
+
+   15/09 (Teo) — le voile d'Aceternity est retiré. Il portait les autres
+   cartes à opacité .55 : une carte blanche à .55 sur le panneau #f2f2f2
+   ne s'efface pas, elle DEVIENT grise, et on lisait ça comme « un truc
+   gris autour du site sur lequel la souris n'est pas ». Ne rien remettre
+   de ce genre ici : pour marquer la carte visée on se sert de ce qui vit
+   SUR elle (levée, ombre, zoom de la capture), jamais de ce qu'on retire
+   aux vingt autres.
+
+   Uniquement là où un pointeur peut survoler : sur tactile, rien ne
+   bouge. Le focus clavier dans une carte (un de ses liens) la lève de la
+   même façon. Le transform vit sur .mg-carte, JAMAIS sur le <li> : le
+   <li> porte les transforms de `motion` (layout, scale d'entrée), les
+   deux se seraient écrasés. */
 .modeles .mg-carte {
   transition:
     transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.35s ease;
+    box-shadow 0.35s ease;
 }
 @media (hover: hover) {
-  .modeles .mg-grille:has(.mg-carte:hover) .mg-carte:not(:hover) {
-    opacity: 0.55;
-  }
   .modeles .mg-carte:hover,
   .modeles .mg-carte:focus-within {
     transform: translateY(-2px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 14px 32px -14px rgba(0, 0, 0, 0.16);
   }
 }
 
@@ -87,8 +92,8 @@
   }
 }
 
-/* le voile de survol reste (un état, pas un mouvement) ; seules les
-   transitions et la levée sautent */
+/* mouvement réduit : ni transition ni levée — la carte visée ne se
+   distingue plus que par le curseur, et c'est très bien ainsi */
 @media (prefers-reduced-motion: reduce) {
   .modeles .mg-puce,
   .modeles .mg-carte {

@@ -10,11 +10,11 @@ import "./Galerie.css";
 /* ══════════════════════════════════════════════════════════════════════
    <Galerie> — le catalogue filtré de /modeles (14/09/2026)
 
-   ORIGINE. Trois sources tressées : `focus-cards` (Aceternity) pour le
-   survol — la carte visée reste nette, les autres se voilent ; le motif
-   « filter-grid » de ddoemonn (21st.dev) pour la rangée de puces qui
-   filtre une grille dont les tuiles se réordonnent ; `layout-grid`
-   (Aceternity) pour la mécanique `motion` (layout).
+   ORIGINE. Deux sources tressées : le motif « filter-grid » de ddoemonn
+   (21st.dev) pour la rangée de puces qui filtre une grille dont les
+   tuiles se réordonnent ; `layout-grid` (Aceternity) pour la mécanique
+   `motion` (layout). `focus-cards` (Aceternity) a fourni le survol
+   jusqu'au 15/09 — voir plus bas, il est parti.
 
    POURQUOI ICI. Le panneau alignait quatre familles à la suite, trois
    cartes chacune et un « voir plus » : on faisait défiler quatre en-têtes
@@ -35,15 +35,16 @@ import "./Galerie.css";
    d'entrée et le glissement `layout` des tuiles qui restent.
 
    CE QUI EST JETÉ des sources :
-   • l'état `hovered` React de focus-cards : le voile se fait en CSS
-     (`:has`), sous `@media (hover: hover)` — la source voilait aussi au
-     doigt, où « survoler » n'existe pas.
-   • `blur-sm scale-[0.98]` de la source : opacité .55 seule, sans flou
-     (le flou re-rastérise vingt cartes à chaque survol, et n'est pas
-     dans le vocabulaire de la charte), et la carte active se lève de
-     2 px au lieu de rétrécir les autres. Le focus clavier lève la carte
-     mais ne voile pas les autres : tabuler dans la grille ne doit pas
-     griser vingt cartes.
+   • focus-cards EN ENTIER (15/09, Teo). Son principe — voiler tout ce
+     qu'on ne survole pas — ne tient pas sur ce panneau : une carte
+     blanche passée à opacité .55 sur le gris #f2f2f2 ne s'efface pas,
+     elle devient grise. « Ça fait un truc gris autour du site sur lequel
+     la souris n'est pas. » Le survol se marque maintenant sur la carte
+     visée seule (levée de 2 px, ombre qui s'ouvre, zoom de la capture) ;
+     les autres ne changent pas. Ne pas le réintroduire, même en plus
+     doux.
+   • `blur-sm scale-[0.98]` de la source, avec : le flou re-rastérise
+     vingt cartes et n'est pas dans le vocabulaire de la charte.
    • le dégradé de titre `bg-clip-text` et le voile noir `bg-black/50` :
      la charte est monochrome, la carte reste blanche sur panneau gris.
    • `layoutId` et la carte « sélectionnée » plein cadre de layout-grid :
@@ -59,9 +60,8 @@ import "./Galerie.css";
    • `layout="position"`, pas `layout` : toutes les tuiles ont la même
      largeur, animer aussi la taille déformerait la capture en transit.
    • `prefers-reduced-motion` : aucune transition ni fondu, le filtre
-     change d'un coup ; le voile de survol reste (c'est un état, pas un
-     mouvement), sans transition. Sans JavaScript : la première famille,
-     puces inertes.
+     change d'un coup, et le survol ne lève plus la carte. Sans
+     JavaScript : la première famille, puces inertes.
    • `data-reveal` (l'apparition au scroll de la page) est posé sur la
      rangée de puces et sur la grille entière, pas sur chaque carte comme
      dans <CarteModele> : GSAP et `motion` se disputeraient le transform
