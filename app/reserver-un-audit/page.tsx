@@ -7,6 +7,7 @@ import Simulateur from "@/components/reservation/Simulateur";
 import Complements from "@/components/reservation/Complements";
 import Engagements from "@/components/reservation/Engagements";
 import DerouleAudit from "@/components/reservation/DerouleAudit";
+import { MODELES } from "@/components/modeles/donnees";
 import {
   COURRIEL,
   FAQ,
@@ -72,15 +73,59 @@ const DEROULE: { etape: string; titre: string; texte: string }[] = [
   },
 ];
 
-export default function ReserverUnAuditPage() {
+/* ══════════════════════════════════════════════════════════════════════
+   15/09/2026 — ?modele=<slug> EST ENFIN LU.
+
+   « Choisir ce modèle » (les 21 cartes de /modeles et le mur de
+   /tarifs/site) menait ici depuis le 14/09 avec le modèle en paramètre,
+   « pour le jour où le formulaire le lira ». Personne ne le lisait : la
+   page l'ignorait, ses boutons repartaient sur /reserver sans lui, et le
+   choix se perdait — les 21 boutons valaient « Réserver un audit ».
+
+   Il est maintenant annoncé en tête de page et repart avec chaque bouton
+   de réservation, jusqu'au message de la demande (voir PriseDeCreneau).
+   Le slug est vérifié contre MODELES comme sur /site/commande : un
+   paramètre inventé est ignoré, jamais affiché.
+
+   LE PRIX : la page passe en rendu dynamique (ƒ) — elle lit
+   searchParams. C'est le même prix que /reserver depuis le 15/09, et
+   elle n'a ni données ni session à charger : le rendu reste du HTML.
+   ══════════════════════════════════════════════════════════════════════ */
+
+export default async function ReserverUnAuditPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ modele?: string }>;
+}) {
+  const demande = ((await searchParams).modele ?? "").trim();
+  const modeleChoisi = MODELES.find((m) => m.slug === demande);
+  const modele = modeleChoisi?.slug;
+
   return (
     <PageShell>
       {/* couche motion commune : lenis + reveals GSAP */}
       <PageMotion />
 
       <div className="resa">
+        {/* ═══ 0 — le modèle de site retenu, s'il y en a un ═══
+            Une ligne, pas une carte : c'est un rappel, pas une étape. Elle
+            ne s'affiche que si le slug existe vraiment. */}
+        {modeleChoisi ? (
+          <section data-monde="clair" className="r-wrap pt-10 sm:pt-12">
+            <p className="r-note">
+              Modèle de site retenu&nbsp;:{" "}
+              <strong className="font-medium text-[#050505]">{modeleChoisi.nom}</strong>{" "}
+              — il part avec votre demande, et reste modifiable jusqu&apos;à la
+              livraison.{" "}
+              <Link href="/modeles" className="underline underline-offset-4 hover:text-[#050505]">
+                Changer de modèle
+              </Link>
+            </p>
+          </section>
+        ) : null}
+
         {/* ═══ 1 à 3 — formules, orientation, comparatif ═══ */}
-        <Formules />
+        <Formules modele={modele} />
 
         {/* ═══ 3bis — le déroulé, trois temps sur fond gris ═══ */}
         <section id="deroule" data-monde="clair" className="r-wrap py-14 sm:py-20">
@@ -106,7 +151,7 @@ export default function ReserverUnAuditPage() {
         </section>
 
         {/* ═══ 5 — simulateur ═══ */}
-        <Simulateur />
+        <Simulateur modele={modele} />
 
         {/* ═══ 6 — engagements (emplacement des témoignages) ═══ */}
         <section id="engagements" data-monde="clair" className="r-blanc">
@@ -126,7 +171,7 @@ export default function ReserverUnAuditPage() {
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <Link
-                href={lienReservation("process")}
+                href={lienReservation("process", modele)}
                 className="r-btn r-btn--noir"
               >
                 Réserver l&apos;audit gratuit

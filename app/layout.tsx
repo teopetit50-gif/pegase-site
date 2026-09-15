@@ -9,7 +9,6 @@ import {
   Plus_Jakarta_Sans,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import TrackWhatsApp from "@/components/TrackWhatsApp";
 import Header from "@/components/Header";
 import LenisRoot from "@/components/LenisRoot";
 import "./globals.css";
@@ -128,7 +127,12 @@ export default function RootLayout({
         <Header />
         {children}
         <Analytics />
-        <TrackWhatsApp />
+        {/* 15/09/2026 — <TrackWhatsApp /> retiré. Il comptait les clics sur
+            les liens wa.me ; il n'en reste aucun sur le site depuis le
+            14/09, donc il écoutait chaque clic de chaque page pour un
+            sélecteur qui ne peut plus rien attraper. Le fichier
+            components/TrackWhatsApp.tsx est supprimé avec lui — c'était
+            la dernière trace de WhatsApp dans le code servi. */}
       </body>
     </html>
   );

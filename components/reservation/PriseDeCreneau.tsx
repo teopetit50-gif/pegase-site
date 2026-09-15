@@ -136,6 +136,13 @@ type Props = {
      échéant, la prop évite le clignotement. 15/09 : /reserver la passe
      aussi, depuis que l'audit exige un compte. */
   utilisateur?: Utilisateur | null;
+  /* 15/09/2026 — le modèle de site choisi sur /modeles, arrivé jusqu'ici
+     par /reserver-un-audit. La page passe le NOM déjà résolu, pas le
+     slug : sans quoi ce composant client embarquerait tout le catalogue
+     des modèles dans son paquet pour en lire un seul libellé. Il n'entre
+     pas dans la demande comme une colonne (reserver_audit n'en a que
+     sept) : il ouvre le message, visible et modifiable. */
+  modeleNom?: string;
 };
 
 export default function PriseDeCreneau({
@@ -144,6 +151,7 @@ export default function PriseDeCreneau({
   postes = [],
   periodicite: periodiciteInitiale = "mensuel",
   utilisateur,
+  modeleNom,
 }: Props) {
   /* ——— le verrou compte (02/09 ; étendu le 15/09) ———
      Il ne tenait que le parcours installation : l'audit et le devis
@@ -255,7 +263,10 @@ export default function PriseDeCreneau({
     secteur: "",
     telephone: util?.telephone ?? "",
     commune: "",
-    message: "",
+    /* Le modèle retenu ouvre le message. Écrit une seule fois, à
+       l'initialisation : si le visiteur le réécrit ou l'efface, on ne le
+       remet pas — c'est sa demande. */
+    message: modeleNom ? `Modèle de site retenu : ${modeleNom}.\n` : "",
     site_web: "", // pot de miel — un humain ne le voit jamais
   });
   const maj = (cle: keyof typeof c) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>

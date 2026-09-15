@@ -102,7 +102,7 @@ function Valeurs({ ligne, actif }: { ligne: LigneComparatif; actif: number }) {
   );
 }
 
-export default function ComparerFormats() {
+export default function ComparerFormats({ modele }: { modele?: string }) {
   const p = PROFILS[1];
   /* le format retenu par défaut est le phare — celui que la page
      recommande en haut ; à défaut, le premier */
@@ -168,7 +168,7 @@ export default function ComparerFormats() {
                 <span className="num">{f.duree}</span> · {f.suffixe}
               </p>
               <p className="cf-panneau-conditions">{f.conditions}</p>
-              <Link href={lienReservation(f.id)} className="r-btn r-btn--blanc cf-panneau-btn">
+              <Link href={lienReservation(f.id, modele)} className="r-btn r-btn--blanc cf-panneau-btn">
                 {f.cta}
               </Link>
               <p className="cf-panneau-note">{f.souscta}</p>

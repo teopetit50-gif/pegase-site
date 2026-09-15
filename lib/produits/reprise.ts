@@ -103,8 +103,18 @@ export const HEROS = {
      section des fonctionnalités et par la carte du message. */
   chapo:
     "Un compte qui commandait deux fois par an cesse de commander, et le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. RELOAD relit votre base clients chaque matin et vous dit à qui écrire.",
+  /* 15/09/2026 — LES DEUX BOUTONS DU HÉROS MENAIENT AU MÊME ENDROIT.
+     Ils portaient tous les deux « /contact » : le principal et le
+     secondaire d'un héros de page produit ouvraient le même formulaire,
+     et aucune des deux portes n'était celle du parcours (Teo, 14/09 sur
+     /modeles : « c'est censé renvoyer vers la prise d'audit »). CASHD,
+     FRONTD et FILED disent tous « Réserver un audit » en principal ;
+     RELOAD était la seule des quatre à ne jamais le proposer avant sa
+     clôture, tout en bas. Le libellé change avec la destination : un
+     bouton qui promet « vos premières relances » et ouvre un agenda
+     serait faux (règle 6 du rapatriement). */
   secondaire: { texte: "Poser une question", lien: "/contact" },
-  principal: { texte: "Voir vos premières relances", lien: "/contact" },
+  principal: { texte: "Réserver un audit", lien: "/reserver-un-audit" },
 };
 
 /* Bandeau d'outils : les outils du CLIENT, jamais notre pile. */

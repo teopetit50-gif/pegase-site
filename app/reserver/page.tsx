@@ -3,6 +3,7 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
 import { utilisateurCourant } from "@/lib/supabase/server";
+import { MODELES } from "@/components/modeles/donnees";
 
 /* ══════════════════════════════════════════════════════════════════════
    /reserver — bloquer un créneau d'audit (28/08/2026)
@@ -38,9 +39,17 @@ export const metadata: Metadata = {
 export default async function ReserverPage({
   searchParams,
 }: {
-  searchParams: Promise<{ formule?: string }>;
+  searchParams: Promise<{ formule?: string; modele?: string }>;
 }) {
   const sp = await searchParams;
+  /* 15/09/2026 — le modèle de site choisi sur /modeles traverse
+     /reserver-un-audit et arrive ici. Vérifié contre MODELES comme sur
+     /site/commande : un slug inventé est ignoré. Il ne devient PAS une
+     colonne de la demande (reserver_audit n'a que ses sept valeurs) : il
+     s'écrit en tête du message, où le visiteur le voit et peut le
+     corriger. */
+  const demandeModele = (sp.modele ?? "").trim();
+  const modeleNom = MODELES.find((m) => m.slug === demandeModele)?.nom;
   const utilisateur = await utilisateurCourant();
 
   return (
@@ -54,7 +63,12 @@ export default async function ReserverPage({
             et l&apos;entretien se termine à l&apos;heure annoncée.
           </p>
           <div className="mt-10">
-            <PriseDeCreneau parcours="audit" formuleInitiale={sp.formule} utilisateur={utilisateur} />
+            <PriseDeCreneau
+              parcours="audit"
+              formuleInitiale={sp.formule}
+              modeleNom={modeleNom}
+              utilisateur={utilisateur}
+            />
           </div>
         </section>
       </div>

@@ -76,7 +76,7 @@ function Libelle({ point }: { point: Point }) {
   );
 }
 
-function Carte({ f }: { f: Formule }) {
+function Carte({ f, modele }: { f: Formule; modele?: string }) {
   /* trait fin (1,4) : c'est la graisse des pictogrammes dessinés à la
      main du reste de la page (Complements) */
   const Icone = ICONES_FORMAT[f.id] ?? ICONE_DEFAUT;
@@ -118,7 +118,7 @@ function Carte({ f }: { f: Formule }) {
 
       <div className="fg-action">
         <Link
-          href={lienReservation(f.id)}
+          href={lienReservation(f.id, modele)}
           className={`r-btn w-full ${f.phare ? "r-btn--noir" : "r-btn--fil"}`}
         >
           {f.cta}
@@ -143,7 +143,7 @@ function Carte({ f }: { f: Formule }) {
   );
 }
 
-export default function FormulesGrille() {
+export default function FormulesGrille({ modele }: { modele?: string }) {
   /* 28/08 — le sélecteur Indépendant/Équipes a disparu : cette page ne
      parle plus qu'aux organisations. PROFILS[1] est donc le seul profil
      affiché, et le tableau reste à deux entrées pour /tarifs. */
@@ -172,7 +172,7 @@ export default function FormulesGrille() {
 
       <div className="fg-grille">
         {p.formules.map((f) => (
-          <Carte key={f.id} f={f} />
+          <Carte key={f.id} f={f} modele={modele} />
         ))}
       </div>
 

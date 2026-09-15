@@ -78,7 +78,7 @@ function Champ({
   );
 }
 
-export default function Simulateur() {
+export default function Simulateur({ modele }: { modele?: string }) {
   const [profil, setProfil] = useState(0);
   const [echues, setEchues] = useState(PROFILS[0].echues);
   const [devis, setDevis] = useState(PROFILS[0].devis);
@@ -211,7 +211,7 @@ export default function Simulateur() {
           </div>
 
           <Lien
-            href={lienReservation("process")}
+            href={lienReservation("process", modele)}
             className="r-btn r-btn--noir mt-7 w-full"
           >
             Faire chiffrer ma situation réelle

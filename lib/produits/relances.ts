@@ -88,7 +88,14 @@ export const HEROS = {
      compte » et menait à /creer-un-compte, qui n'existe plus. Un bouton qui
      promet un compte et ouvre une prise de rendez-vous serait faux. */
   boutonPrincipal: { texte: "Réserver un audit", href: MARQUE.audit },
-  boutonSecondaire: { texte: "Nous écrire", href: `mailto:${MARQUE.courriel}` },
+  /* 15/09/2026 — le second bouton ouvrait un CLIENT MAIL (mailto:). C'est
+     la même sortie de route que WhatsApp avant le 14/09 : on quitte le
+     site, on ne sait pas si le message part, et rien n'arrive dans le
+     service client. Les trois autres pages produit envoient « Nous
+     écrire » sur /contact ; celle-ci était la dernière à ne pas le
+     faire. L'adresse reste affichée en clair dans la FAQ, pour qui
+     préfère écrire depuis sa propre boîte. */
+  boutonSecondaire: { texte: "Nous écrire", href: "/contact" },
   mention: "Un système",
 } as const;
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { QUESTIONS, MARQUE } from "@/lib/produits/relances";
+import { QUESTIONS } from "@/lib/produits/relances";
 
 /* Relevé : titre à gauche, chapô à droite, puis une grille `md:grid-cols-5`
    — nav de catégories collante sur 2 colonnes, accordéons sur 3.
@@ -64,12 +65,16 @@ export function Questions() {
           <h2 className="font-semibold text-4xl text-[#171717]">{QUESTIONS.titre}</h2>
           <p className="max-w-md text-balance text-lg text-[#737373]">
             {QUESTIONS.chapoAvant}
-            <a
-              href={`mailto:${MARQUE.courriel}`}
+            {/* 15/09/2026 — « écrivez-nous » ouvrait un client mail
+                (mailto:). Comme le second bouton du héros, il sort du site
+                sans qu'on sache si le message part. Il mène au formulaire
+                du service client, qui lui arrive dans la boîte partagée. */}
+            <Link
+              href="/contact"
               className="font-medium text-[#171717] hover:underline"
             >
               {QUESTIONS.chapoLien}
-            </a>
+            </Link>
             {QUESTIONS.chapoApres}
           </p>
         </div>
