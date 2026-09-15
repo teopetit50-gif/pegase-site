@@ -82,9 +82,9 @@ import "./TuilesCatalogue.css";
 /* blanc dilué : les trois crans des formes inertes, tièdes et marquées.
    Le fond ayant changé de camp le 15/09, ce sont les valeurs d'encre du
    11/09 retournées — mêmes alphas relatifs, lues sur near-black. */
-const INERTE = "rgba(255, 255, 255, 0.14)";
-const TIEDE = "rgba(255, 255, 255, 0.30)";
-const MARQUE = "rgba(255, 255, 255, 0.80)";
+const INERTE = "rgba(255, 255, 255, 0.20)";
+const TIEDE = "rgba(255, 255, 255, 0.36)";
+const MARQUE = "rgba(255, 255, 255, 0.88)";
 /* le filet au repos vit dans TuilesCatalogue.css (`.tc-filet`) */
 
 const DOUX = { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const };
@@ -368,7 +368,7 @@ export function TuilesCatalogue({
 
             <div className="flex flex-1 flex-col px-8 pb-8">
               <span
-                className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/45"
+                className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/55"
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
                 {t.nom}
@@ -380,7 +380,7 @@ export function TuilesCatalogue({
               >
                 {t.objectif}
               </h3>
-              <p className="mt-2.5 max-w-[34ch] text-[15px] leading-[26px] text-white/60">
+              <p className="mt-2.5 max-w-[34ch] text-[15px] leading-[26px] text-white/70">
                 {t.texte}
               </p>
 

@@ -78,7 +78,7 @@ export function GlassCard({
 }: GlassCardProps) {
   return (
     <div
-      className={`relative h-full rounded-[50px] bg-gradient-to-br from-zinc-900 to-black shadow-2xl transition-all duration-500 ease-in-out [transform-style:preserve-3d] group-hover:[box-shadow:rgba(0,0,0,0.3)_30px_50px_25px_-40px,rgba(0,0,0,0.1)_0px_25px_30px_0px] group-hover:[transform:rotate3d(1,1,0,var(--bascule))] ${className}`}
+      className={`relative h-full rounded-[50px] bg-gradient-to-br from-zinc-600 to-zinc-800 shadow-2xl transition-all duration-500 ease-in-out [transform-style:preserve-3d] group-hover:[box-shadow:rgba(0,0,0,0.3)_30px_50px_25px_-40px,rgba(0,0,0,0.1)_0px_25px_30px_0px] group-hover:[transform:rotate3d(1,1,0,var(--bascule))] ${className}`}
       style={{ "--bascule": `${angle}deg` } as React.CSSProperties}
     >
       {/* le panneau de verre, en retrait de 8 px : c'est lui qui donne
