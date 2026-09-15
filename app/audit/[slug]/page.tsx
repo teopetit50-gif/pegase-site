@@ -5,13 +5,11 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import BarreCTA from "@/components/audit/BarreCTA";
 import BarreLecture from "@/components/audit/BarreLecture";
-import CarteSpotlight from "@/components/audit/CarteSpotlight";
-import CopierPrompt from "@/components/audit/CopierPrompt";
+import { CarteDouleur, CarteMoteur, CarteRemede, EnteteSection } from "@/components/audit/CartesFiche";
 import Sommaire from "@/components/audit/Sommaire";
 import TimelineSuite, { type EtapeSuite } from "@/components/audit/TimelineSuite";
 import { AUDITS, auditParSlug } from "@/lib/audits";
 import { COURRIEL, lienCourriel, lienReservation } from "@/lib/reservation";
-import { nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    /audit/[slug] — pré-audit personnalisé, v2 « composants » (02/08/2026)
@@ -154,6 +152,7 @@ export default async function PreAuditPage({
 
         {/* ═══ 2 — la situation ═══ */}
         <section id="situation" data-monde="clair" className="pa-section r-wrap py-14 sm:py-20">
+          <EnteteSection rang={1} total={SECTIONS.length} etiquette="Situation" />
           <p className="r-note">À confirmer, ou à démonter, pendant l&apos;entretien.</p>
           <h2 className="r-h3 mt-6 max-w-[22ch]">Ce que nous pensons avoir compris</h2>
 
@@ -172,33 +171,13 @@ export default async function PreAuditPage({
         {/* ═══ 3 — les douleurs du métier ═══ */}
         <section id="douleurs" data-monde="clair" className="pa-section r-blanc">
           <div className="r-wrap py-14 sm:py-20">
+            <EnteteSection rang={2} total={SECTIONS.length} etiquette="Douleurs" />
             <p className="r-note">Repérées dans le métier : pas encore vérifiées chez vous.</p>
             <h2 className="r-h2 mt-6 max-w-[20ch]">Où le temps et l&apos;argent partent</h2>
 
             <div className="mt-10 grid gap-5 md:grid-cols-2">
               {audit.douleurs.map((d, i) => (
-                <CarteSpotlight
-                  key={d.titre}
-                  className="flex h-full flex-col rounded-2xl bg-[#f5f5f5] p-7 sm:p-9"
-                >
-                  <div data-reveal className="flex h-full flex-col">
-                    <div className="num text-[13px] font-semibold text-[#616161]">
-                      {String(i + 1).padStart(2, "0")}
-                    </div>
-                    <h3 className="r-h4 mt-3">{d.titre}</h3>
-                    <p className="mt-4 flex-1 text-[15px] leading-[24px] text-[#3d3d3d]">
-                      {d.texte}
-                    </p>
-                    <div className="mt-6 border-t border-[#e3e3e3] pt-5">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8a6519]">
-                        Ce que nous mesurerons ensemble
-                      </div>
-                      <p className="mt-2 text-[14px] leading-[22px] text-[#050505]">
-                        {d.mesure}
-                      </p>
-                    </div>
-                  </div>
-                </CarteSpotlight>
+                <CarteDouleur key={d.titre} douleur={d} index={i} />
               ))}
             </div>
 
@@ -213,6 +192,7 @@ export default async function PreAuditPage({
         {/* ═══ 4 — les remèdes immédiats, sans Omega ═══ */}
         <section id="remedes" className="pa-section r-nuit">
           <div className="r-wrap py-14 sm:py-20">
+            <EnteteSection rang={3} total={SECTIONS.length} etiquette="Remèdes" />
             <p className="r-note">
               À utiliser dès aujourd&apos;hui, gratuitement, sans nous : avec
               ChatGPT ou Claude.
@@ -224,37 +204,7 @@ export default async function PreAuditPage({
 
             <div className="mt-10 grid gap-5 lg:grid-cols-3">
               {audit.remedes.map((r) => (
-                <CarteSpotlight
-                  key={r.titre}
-                  nuit
-                  className="pa-carte-nuit flex h-full flex-col rounded-2xl border border-[#27272a] bg-[#141417] p-7"
-                >
-                  <div data-reveal className="flex h-full flex-col">
-                    <h3 className="r-h4">{r.titre}</h3>
-                    <p className="mt-4 text-[15px] leading-[24px] text-[#d4d4d8]">{r.texte}</p>
-                    <div className="pa-console mt-6 flex-1">
-                      <div className="pa-console-tete">
-                        <span className="pa-feu bg-[#ff5f57]" />
-                        <span className="pa-feu bg-[#febc2e]" />
-                        <span className="pa-feu bg-[#28c840]" />
-                        <span className="ml-2 font-mono text-[11px] tracking-[0.02em] text-[#71717a]">
-                          prompt · chatgpt ou claude
-                        </span>
-                      </div>
-                      <div className="p-5 font-mono text-[12.5px] leading-[21px] text-[#a1a1aa]">
-                        {r.prompt}
-                      </div>
-                    </div>
-                    <div className="mt-5 flex items-center justify-between gap-3">
-                      <CopierPrompt texte={r.prompt} />
-                      {r.moteur ? (
-                        <span className="text-[12px] leading-[18px] text-[#71717a]">
-                          En continu : <span className="font-mono">{r.moteur}</span>
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </CarteSpotlight>
+                <CarteRemede key={r.titre} remede={r} />
               ))}
             </div>
           </div>
@@ -262,45 +212,16 @@ export default async function PreAuditPage({
 
         {/* ═══ 5 — les moteurs qui répondent ═══ */}
         <section id="moteurs" data-monde="clair" className="pa-section r-wrap py-14 sm:py-20">
+          <EnteteSection rang={4} total={SECTIONS.length} etiquette="Systèmes" />
           <p className="r-note">
             La version en continu des gestes ci-dessus : installée sur vos
             outils, sous votre validation.
           </p>
           <h2 className="r-h2 mt-6 max-w-[20ch]">Les systèmes qui répondent à&nbsp;cela</h2>
 
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
             {audit.moteurs.map((m) => (
-              <Link key={m.system} href={`/offres/${m.slug}`} className="group">
-                <CarteSpotlight className="flex h-full flex-col rounded-2xl bg-white p-7 transition-shadow duration-300 group-hover:shadow-[0_2px_28px_rgba(5,5,5,0.09)] sm:p-9">
-                  <div data-reveal className="flex h-full flex-col">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="font-mono text-[15px] font-semibold tracking-[0.04em] text-[#050505]">
-                        {nomPaquet(m.system)}
-                      </span>
-                      <span className="text-[12px] text-[#616161]">{m.douleurs}</span>
-                    </div>
-                    <p className="mt-4 flex-1 text-[15px] leading-[24px] text-[#3d3d3d]">
-                      {m.raison}
-                    </p>
-                    <div className="mt-7 flex items-center justify-between">
-                      <span className="text-[14px] font-medium text-[#050505]">
-                        Voir la fiche
-                      </span>
-                      <span className="pa-fleche" aria-hidden>
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path
-                            d="M2.5 8h11m0 0-4.2-4.2M13.5 8l-4.2 4.2"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </CarteSpotlight>
-              </Link>
+              <CarteMoteur key={m.system} moteur={m} />
             ))}
           </div>
         </section>
@@ -308,6 +229,7 @@ export default async function PreAuditPage({
         {/* ═══ 6 — la suite : timeline + CTA ═══ */}
         <section id="suite" data-monde="clair" className="pa-section r-blanc">
           <div className="r-wrap py-16 sm:py-24">
+            <EnteteSection rang={5} total={SECTIONS.length} etiquette="La suite" />
             <div className="grid gap-12 lg:grid-cols-[400px_1fr] lg:gap-20">
               <div className="lg:sticky lg:top-40 lg:self-start">
                 <h2 className="r-h3 max-w-[16ch]">La suite tient en un&nbsp;entretien</h2>

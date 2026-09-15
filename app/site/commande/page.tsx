@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import CommandeSite from "@/components/site/CommandeSite";
+import TunnelCommande from "@/components/site/TunnelCommande";
 import { MODELES } from "@/components/modeles/donnees";
 import { utilisateurCourant } from "@/lib/supabase/server";
 
@@ -64,7 +64,7 @@ export default async function CommandeSitePage({
             </p>
           </div>
           <div className="mt-10 sm:mt-12">
-            <CommandeSite utilisateur={utilisateur} modeleInitial={modeleInitial} />
+            <TunnelCommande utilisateur={utilisateur} modeleInitial={modeleInitial} />
           </div>
         </section>
       </div>

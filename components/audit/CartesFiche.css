@@ -1,0 +1,302 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CartesFiche.css — la feuille des cartes du pré-audit /audit/[slug]
+
+   Écrite le 15/09/2026 avec CartesFiche.tsx. Tout est scopé sous `.resa`
+   et préfixé `fic-`.
+
+   ⚠ POURQUOI `fic-` ET PAS `cf-`. Le monde `.resa` n'appartient PAS à cette
+   page : dix pages le portent (/reserver-un-audit, /commencer, /tarifs,
+   /contact, /connexion, /site/commande…). Une règle écrite ici sous `.resa`
+   les atteint toutes. Le préfixe évident — `cf-` pour « cartes de fiche » —
+   est déjà pris par components/reservation/ComparerFormats.tsx, lui aussi
+   sous `.resa` : il aurait repeint ses cartes en silence. Vérifié avant
+   d'écrire : ni `fic-` dans app/globals.css, ni `fic-` dans components/.
+
+   AUCUN @keyframes ICI, ET C'EST VOLONTAIRE. Un @keyframes est global quoi
+   qu'on fasse ; rien ne s'anime tout seul sur ces cartes. La seule entrée
+   est celle de la page ([data-reveal], GSAP dans PageMotion), et la seule
+   transition est la couleur de filet des cartes système au survol — la
+   seule des trois familles qui soit un lien.
+
+   LES GRIS, EN COUCHES, SANS UNE COULEUR NOUVELLE. La section « douleurs »
+   est blanche, la carte est grise (#f5f5f5), et la tuile « ce que nous
+   mesurerons » redevient blanche : trois plans, aucun accent. L'or #8a6519
+   n'est pas ajouté, c'est celui que la page emploie déjà (pastille des
+   chips, soulignement du sommaire actif), et il ne tient ici qu'une ligne
+   de rubrique.
+
+   LISIBILITÉ À DISTANCE. Corps des cartes à 17/27 — la taille que la page
+   réserve déjà au bloc « Ce que nous pensons avoir compris ». Les filets
+   sont explicites partout (#ececec, #e3e3e3, #27272a) : un projecteur lave
+   les contrastes faibles, une carte sans bord se dissout dans son fond.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ l'en-tête de rubrique : où l'on en est dans le document ═══
+   Les jetons du monde font le travail : sous `.r-nuit`, --r-texte,
+   --r-faible et --r-filet sont déjà redéfinis, la rubrique s'inverse
+   toute seule sans une seule règle en plus. */
+.resa .fic-entete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.resa .fic-entete-rang {
+  flex: none;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .fic-entete-total {
+  color: var(--r-faible);
+  font-weight: 400;
+}
+.resa .fic-entete-etiquette {
+  flex: none;
+  font-family: var(--font-jbmono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--r-faible);
+}
+.resa .fic-entete-filet {
+  flex: 1 1 auto;
+  min-width: 24px;
+  height: 1px;
+  background: var(--r-filet);
+}
+@media (min-width: 640px) {
+  .resa .fic-entete {
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+}
+
+/* ═══ le corps commun des trois cartes ═══
+   height:100% pour que la carte système remplisse son <a>, qui est le vrai
+   enfant de grille ; les deux autres sont enfants directs et s'étirent
+   déjà. Le pied de chaque carte descend par `margin-top: auto`, ce qui
+   aligne les rangées quelle que soit la longueur du texte. */
+.resa .fic-carte {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 16px;
+  padding: 22px;
+}
+@media (min-width: 640px) {
+  .resa .fic-carte {
+    padding: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .resa .fic-carte {
+    padding: 32px;
+  }
+}
+
+.resa .fic-carte--douleur {
+  background: #f5f5f5;
+  border: 1px solid #ececec;
+}
+.resa .fic-carte--nuit {
+  background: #141417;
+  border: 1px solid #27272a;
+}
+.resa .fic-carte--moteur {
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
+  transition: border-color 0.22s ease;
+}
+
+.resa .fic-titre {
+  /* .r-h4 porte la police, le poids et la taille (21 → 24 px) */
+  margin: 0;
+}
+.resa .fic-texte {
+  margin-top: 16px;
+  margin-bottom: 22px;
+  font-size: 17px;
+  line-height: 27px;
+  color: #3d3d3d;
+}
+/* La carte nuit n'a pas de pied poussé par `margin-top: auto` : c'est la
+   console qui prend le vide. La marge basse du texte ferait donc double
+   emploi avec la marge haute de la console (les marges ne fusionnent pas
+   dans un conteneur flex) — elle est remise à zéro. */
+.resa .fic-carte--nuit .fic-texte {
+  margin-bottom: 0;
+  color: #d4d4d8;
+}
+
+/* ═══ carte « douleur » ═══ */
+
+/* Le numéro n'est pas un ornement : c'est la clé que la section
+   « systèmes » cite en toutes lettres (« douleurs 1 et 2 »). Il se lit
+   donc de loin, et on peut le désigner du doigt sur l'écran.
+   Chiffres en Inter tabulaire (.num) : le mono sur les nombres a été
+   abandonné le 21/07, il ne revient pas par la bande. */
+.resa .fic-rang {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.resa .fic-rang-chiffre {
+  flex: none;
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #050505;
+}
+.resa .fic-rang-filet {
+  flex: 1 1 auto;
+  min-width: 24px;
+  height: 1px;
+  background: #dcdcdc;
+}
+.resa .fic-rang + .fic-titre {
+  margin-top: 14px;
+}
+@media (min-width: 640px) {
+  .resa .fic-rang-chiffre {
+    font-size: 30px;
+  }
+}
+
+/* La phrase que Teo lit à voix haute en rendez-vous. Elle quitte le bas de
+   carte en 14 px pour une tuile blanche : même figure que la carte sur sa
+   section, un plan plus haut. */
+.resa .fic-mesure {
+  margin-top: auto;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 15px 17px;
+}
+.resa .fic-mesure-rubrique {
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a6519;
+}
+.resa .fic-mesure-texte {
+  margin-top: 7px;
+  font-size: 16px;
+  line-height: 25px;
+  color: #050505;
+}
+
+/* ═══ carte « remède » (nuit) ═══
+   .pa-console, .pa-console-tete et .pa-feu restent ceux de globals.css :
+   la console n'est pas ma section, je ne la redessine pas, je ne fais que
+   poser ses couleurs de feux et son corps ici plutôt qu'en utilitaires. */
+.resa .fic-console {
+  margin-top: 22px;
+  flex: 1 1 auto;
+}
+.resa .fic-feu--rouge {
+  background: #ff5f57;
+}
+.resa .fic-feu--ambre {
+  background: #febc2e;
+}
+.resa .fic-feu--vert {
+  background: #28c840;
+}
+.resa .fic-console-titre {
+  margin-left: 8px;
+  font-family: var(--font-jbmono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: #71717a;
+}
+
+/* Le prompt garde son corps 12,5 px : il se COPIE, il ne se lit pas à
+   l'écran pendant l'entretien. `overflow-wrap` parce qu'un prompt peut
+   porter un jeton long ([COLLER LES LIGNES], une URL) et que la console
+   est en overflow:hidden — sans lui, le mot serait coupé au ciseau. */
+.resa .fic-console-corps {
+  padding: 20px;
+  font-family: var(--font-jbmono), ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 21px;
+  color: #a1a1aa;
+  overflow-wrap: anywhere;
+}
+
+.resa .fic-remede-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+.resa .fic-remede-suite {
+  font-size: 13px;
+  line-height: 18px;
+  color: #71717a;
+}
+.resa .fic-remede-code {
+  font-family: var(--font-jbmono), ui-monospace, monospace;
+}
+
+/* ═══ carte « système » ═══
+   La seule des trois qui soit un lien, donc la seule où un état de survol
+   a un sens : quelqu'un qui clique, pas quelqu'un qui regarde. */
+.resa .fic-moteur-lien {
+  display: block;
+  height: 100%;
+  border-radius: 16px;
+}
+.resa .fic-moteur-lien:focus-visible {
+  outline: 2px solid #050505;
+  outline-offset: 3px;
+}
+.resa .fic-moteur-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.resa .fic-moteur-code {
+  font-family: var(--font-jbmono), ui-monospace, monospace;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #050505;
+}
+.resa .fic-moteur-renvoi {
+  font-size: 13px;
+  line-height: 18px;
+  color: #616161;
+  text-align: right;
+}
+.resa .fic-moteur-pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+.resa .fic-moteur-lire {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #050505;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .resa .fic-moteur-lien:hover .fic-carte--moteur {
+    border-color: #050505;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resa .fic-carte--moteur {
+    transition: none;
+  }
+}

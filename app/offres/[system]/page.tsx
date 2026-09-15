@@ -7,6 +7,7 @@ import { FICHES } from "@/lib/fiches";
 import GabaritHome from "@/components/offres/gabarits/GabaritHome";
 import GabaritIntegration from "@/components/offres/gabarits/GabaritIntegration";
 import GabaritPublish from "@/components/offres/gabarits/GabaritPublish";
+import GabaritFrise from "@/components/offres/gabarits/GabaritFrise";
 import {
   ACCENT_FAMILLE,
   ACCENT_FAMILLE_SOMBRE,
@@ -35,11 +36,17 @@ import {
      publish     d'après ocoya.com/features/publish       → FILED
    ══════════════════════════════════════════════════════════════════════ */
 
-const GABARITS: Record<string, "home" | "integration" | "publish"> = {
+const GABARITS: Record<string, "home" | "integration" | "publish" | "frise"> = {
   CASHD: "home",
   FRONTD: "integration",
   FILED: "publish",
   RELOAD: "integration",
+  /* 15/09 — les DEUX seuls paquets encore servis par cette route : les quatre
+     autres ont leur route statique (voir RAPATRIES plus bas), donc les quatre
+     lignes du dessus ne s'appliquent plus à aucune URL, et GabaritIntegration
+     comme GabaritPublish sont devenus du code mort. */
+  PULSE: "frise",
+  VAULT: "frise",
 };
 
 const ALL: MoteurAvecFamille[] = FAMILLES.flatMap((f) =>
@@ -101,7 +108,12 @@ export default async function FicheMoteurPage({
 
   /* le rôle du paquet = son titre amputé de son nom (« CASHD — relance… ») */
   const sansNom = (titre: string, nom: string) =>
-    titre.startsWith(nom) ? titre.slice(nom.length).replace(/^\s*[ : –-]\s*/, "") : titre;
+    /* 15/09 — le point médian manquait à la classe, alors que c'est LE
+       séparateur des six titres de lib/content.ts : un « · » orphelin
+       s'affichait sous le nom du produit, sur les six fiches, en production. */
+    titre.startsWith(nom)
+      ? titre.slice(nom.length).replace(/^[\s:·•–—-]+/, "")
+      : titre;
 
   const props = {
     m,
@@ -123,7 +135,9 @@ export default async function FicheMoteurPage({
   return (
     <PageShell>
       <PageMotion />
-      {gabarit === "publish" ? (
+      {gabarit === "frise" ? (
+        <GabaritFrise {...props} />
+      ) : gabarit === "publish" ? (
         <GabaritPublish {...props} />
       ) : gabarit === "integration" ? (
         <GabaritIntegration {...props} />
