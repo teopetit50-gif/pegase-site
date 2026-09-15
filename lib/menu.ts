@@ -48,13 +48,12 @@ import { MODELES } from "@/components/modeles/donnees";
      « Votre site, à prix public » reste le <title> de /tarifs/site, il
      travaille pour la recherche, pas pour la navigation.
 
-   · 15/09 — /secteurs entre en TÊTE du groupe des offres, avant les quatre
-     systèmes. C'est l'entrée de celui qui ne sait pas encore lequel le
-     concerne : il arrive par son métier et la page l'aiguille vers le
-     système. Placée après les quatre, elle n'aurait été lue que par ceux
-     qui n'en avaient plus besoin. Le groupe passe ainsi de six à sept
-     destinations — c'est le seul qui en porte autant, et la recette du
-     panneau a été repassée aux cinq largeurs à cette occasion.
+   · 15/09 — /secteurs est entrée en tête du groupe des offres, puis en est
+     RESSORTIE le même jour : Teo a fait supprimer la page (« supprime cette
+     page finalement »). Le groupe revient donc à six destinations, et le
+     panneau tactile retrouve son défilement à zéro. Noté pour que personne
+     ne repropose l'entrée en croyant à un oubli : ce n'est pas le menu qui
+     a été arbitré, c'est la page.
 
    · 10/09 — /offres/sur-mesure : la page n'était atteignable que par un
      lien en bas de /offres. Le seul endroit du site où l'on vend ce qui ne
@@ -99,11 +98,6 @@ export const MENU: Rubrique[] = [
         "Quatre systèmes prêts à déployer. Sur vos outils en place, sous votre validation.",
     },
     entrees: [
-      {
-        href: "/secteurs",
-        label: "Votre métier",
-        texte: "Douze métiers, ce qui leur échappe et ce que nous y prenons.",
-      },
       {
         href: "/offres/relances-impayes",
         label: "CASHD",
