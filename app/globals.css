@@ -1337,8 +1337,21 @@ button.rounded-full:active {
     border-color 0.2s var(--ease-out-strong),
     box-shadow 0.2s var(--ease-out-strong);
 }
+/* ——— sa ZONE DE CLIC, quand elle est plus grande que la carte
+   (14/09/2026) ———
+   Les quatre cartes du catalogue portent `group` et `.o-card-porte` sur le
+   MÊME élément : la carte EST le lien, son `:hover` suffit. Les trois portes
+   de l'accueil (`components/offres/PortesHover`) non — le lien porte un
+   `p-2`, et la carte laisse 8 px de marge tout autour pour que la
+   surbrillance qui glisse se voie en halo. Or cette surbrillance s'allume au
+   `mouseenter` du LIEN : sans la seconde ligne ci-dessous, ces 8 px
+   allumeraient le halo autour d'une carte restée grise.
+   `.o-porte-zone` se pose donc sur l'élément qui reçoit le pointeur, jamais
+   sur la carte — c'est elle qui garde `.o-card-porte`, puisque c'est elle
+   qui se repeint. */
 @media (hover: hover) {
-  .offres .o-card-porte:hover {
+  .offres .o-card-porte:hover,
+  .offres .o-porte-zone:hover .o-card-porte {
     background: #ffffff;
     border-color: #d4d4d8;
     box-shadow:
@@ -1349,7 +1362,8 @@ button.rounded-full:active {
   /* le chevron du lien avance quand la CARTE est survolée, pas seulement
      quand le pointeur tombe sur le lien lui-même (`.o-link:hover svg`, plus
      haut) : même valeur de part et d'autre, donc jamais de double décalage */
-  .offres .o-card-porte:hover .o-link svg {
+  .offres .o-card-porte:hover .o-link svg,
+  .offres .o-porte-zone:hover .o-link svg {
     transform: translateX(3px);
   }
 }

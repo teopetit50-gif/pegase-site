@@ -25,6 +25,17 @@ import { Chevron } from "@/components/offres/MediaMoteurs";
    `.o-card-soft` — le vocabulaire de l'accueil — et le pavé prend le gris
    de la charte plutôt qu'un gris de démo.
 
+   LE BLANC DU SURVOL EST EN CSS, PAS EN UTILITAIRE (14/09/2026). La carte
+   a longtemps porté `group-hover:bg-white` : mort-né, et en silence.
+   `.offres .o-card-soft` pose son `background` HORS de toute `@layer` dans
+   globals.css, une utilitaire Tailwind vit dans `@layer utilities`, et une
+   couche perd toujours contre ce qui n'est dans aucune — la spécificité n'y
+   change rien. C'est exactement ce pour quoi `.o-card-porte` existe depuis
+   le 11/09. Le survol vient donc d'elle (fond, filet, ombre courte ET la
+   transition), et le lien prend `.o-porte-zone` : la carte ne couvre pas
+   les 8 px du `p-2`, alors que la surbrillance s'y allume déjà. Détail de
+   la règle dans globals.css, sous `.o-card-porte`.
+
    ÉCART ASSUMÉ : c'est le PREMIER composant du site qui anime avec
    `motion`, là où tout le reste passe par GSAP et `data-reveal`. La
    dépendance était déjà au package.json (v12), donc rien à installer, et
@@ -59,7 +70,7 @@ export default function PortesHover({ portes }: { portes: Porte[] }) {
         <Link
           key={porte.nom}
           href={porte.lien.href}
-          className="group relative block h-full w-full p-2"
+          className="o-porte-zone relative block h-full w-full p-2"
           onMouseEnter={() => setSurvolee(i)}
           onMouseLeave={() => setSurvolee(null)}
           onFocus={() => setSurvolee(i)}
@@ -78,7 +89,7 @@ export default function PortesHover({ portes }: { portes: Porte[] }) {
             )}
           </AnimatePresence>
 
-          <div className="o-card-soft relative z-10 flex h-full flex-col p-7 transition-[background-color,box-shadow] duration-200 group-hover:bg-white">
+          <div className="o-card-soft o-card-porte relative z-10 flex h-full flex-col p-7">
             <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#09090b]">
               {porte.nom}
             </span>
