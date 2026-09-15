@@ -769,7 +769,7 @@ export default function Home() {
             <div className="o-flux-voile" />
           </div>
 
-          {/* trame, filets, équerres, points flottants et lueur au
+          {/* trame, filets, points flottants et lueur au
               pointeur — la couche vit ENTRE le nuancier et le texte, d'où
               son z-index 1 face au z-10 de la colonne */}
           <DecorHero />
@@ -1338,32 +1338,6 @@ export default function Home() {
                   <p className="o-body pb-6 pr-10">{f.a}</p>
                 </details>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ════════ 11 · CTA — clôture au noir ════════ */}
-        <section className="o-nuit relative py-[120px]">
-          <div aria-hidden className="o-deco">
-            <div className="o-halo" />
-          </div>
-          <div className="o-wrap relative flex flex-col items-center text-center">
-            <h2 data-reveal className="o-h2 max-w-[620px]">
-              On commence simplement.
-            </h2>
-            <p data-reveal className="o-lead mt-5 max-w-[600px]">
-              Deux minutes pour choisir votre porte&nbsp;: les prix publics si vous
-              tenez vos outils, un audit chiffré si plusieurs services se partagent
-              le travail. Et si rien ne se justifie chez vous, on le dit
-              franchement.
-            </p>
-            <div data-reveal className="mt-9 flex flex-wrap justify-center gap-3">
-              <Link href="/commencer" className="o-btn o-btn--primary">
-                Commencer
-              </Link>
-              <a href="/contact" className="o-btn o-btn--ghost">
-                Nous joindre
-              </a>
             </div>
           </div>
         </section>
