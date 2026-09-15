@@ -20,7 +20,7 @@ import { IntegrationsTiles } from "@/components/ui/integrations-tiles";
 import { Marquee } from "@/components/ui/marquee";
 import { Feature08, type CaseArpentee } from "@/components/ui/feature-08";
 import { Faq06, TitreDeuxEncres } from "@/components/ui/faq-06";
-import { CtaRectangle } from "@/components/ui/cta-rectangle";
+import { CasColonnes, type CasUsage } from "@/components/ui/cas-colonnes";
 import {
   AppWindow,
   ArrowLeftRight,
@@ -31,7 +31,9 @@ import {
   FileSearch,
   HardHat,
   Landmark,
+  LayoutDashboard,
   ListChecks,
+  MessagesSquare,
   ScrollText,
   ShieldCheck,
   ShoppingBag,
@@ -121,6 +123,22 @@ import {
    en tête de son fichier. Et dans le hero, deux couleurs écrites en dur
    (`#fafafa` sur le nom du système, `#a1a1aa` sur les deux lignes de
    légende) qui passent en `--o-text` et `--o-muted`.
+
+   ——— Passe du 15/09/2026 : l'appel final passe en colonnes ————————
+   Teo, capture de la section à l'appui : le rectangle éclairé du 14/09
+   (`cta-rectangle`) devient `testimonials-columns-1` de @sanjay-kv —
+   trois colonnes de cartes qui remontent à trois vitesses.
+
+   Deux choses ne se perdent pas au passage. L'APPEL : pastille, titre,
+   phrase et bouton sont repris mot pour mot en tête de la section, les
+   colonnes se lisent dessous — une page de vente ne se termine pas sans
+   porte de sortie. LA RÈGLE : l'original est bâti sur neuf faux clients
+   (citation, avatar, nom, fonction) et nous n'inventons pas de preuve
+   sociale ; les cartes portent donc neuf CAS D'USAGE tirés de la fiche
+   de cette page, sans personne nommée, icône à la place de l'avatar.
+   Le détail des écarts est en tête de `components/ui/cas-colonnes.tsx`.
+   `cta-rectangle` n'est plus appelé nulle part ; le fichier reste, il
+   est la seule reprise de ce gabarit d'appel.
 
    Aucun texte, aucune section, aucun ordre de lecture ne bouge.
    `data-monde` n'est pas nécessaire : depuis le 11/09 l'entête prélève la
@@ -322,6 +340,72 @@ const COMPRIS: CaseArpentee[] = [
 /* Les quatre paquets du catalogue alimentent le bandeau « les autres ».
    Lus dans FAMILLES : si un paquet change de nom ou de slug, la page suit. */
 const CATALOGUE = ["CASHD", "RELOAD", "FRONTD", "FILED"];
+
+/* ——— les neuf cas de l'appel final ———————————————————————————————
+   Rien n'est inventé : chaque situation reformule un fait déjà écrit
+   plus haut dans la page — les quatre périmètres de `FICHE.points`, la
+   liste de `fonctionnement[1]` (tableau de bord, assistant interne), les
+   quatre lignes de la démo, et les familles de secteur de `FICHE.cible`.
+   `secteur` dit POUR QUI le cas est typique, jamais chez qui il a été
+   livré : nous n'affichons aucune référence client.
+   Le neuvième est le cas écarté, celui qui demande un jugement au cas
+   par cas — la même phrase qu'au cadrage, et qu'en bas de la démo. */
+const CAS: CasUsage[] = [
+  {
+    icone: <ArrowLeftRight strokeWidth={1.5} />,
+    texte: "Deux logiciels qui ne se parlent pas, et un devis ressaisi à la main en comptabilité.",
+    nature: "Pont entre outils",
+    secteur: "Commerce & distribution",
+  },
+  {
+    icone: <FileSearch strokeWidth={1.5} />,
+    texte: "Des bons de livraison reçus dans dix formats, lus et contrôlés dès la réception.",
+    nature: "Traitement de documents",
+    secteur: "Transport & logistique",
+  },
+  {
+    icone: <CalendarCheck strokeWidth={1.5} />,
+    texte: "Un parc suivi dans un tableur, avec des échéances que personne n'a le temps de surveiller.",
+    nature: "Contrôles et alertes",
+    secteur: "Industrie & production",
+  },
+  {
+    icone: <ListChecks strokeWidth={1.5} />,
+    texte: "Le même export repris à la main chaque semaine, pour un état attendu à date fixe.",
+    nature: "Calculs répétitifs",
+    secteur: "Cabinets & conseil",
+  },
+  {
+    icone: <AppWindow strokeWidth={1.5} />,
+    texte: "Aucun outil du marché ne suit le fonctionnement des services, il faut une application dédiée.",
+    nature: "Logiciel métier",
+    secteur: "Santé & professions libérales",
+  },
+  {
+    icone: <ScrollText strokeWidth={1.5} />,
+    texte: "Des pièces à vérifier avant paiement, dans un format qui change à chaque fournisseur.",
+    nature: "Traitement de documents",
+    secteur: "BTP & travaux publics",
+  },
+  {
+    icone: <LayoutDashboard strokeWidth={1.5} />,
+    texte: "Un tableau de bord alimenté en continu, à la place d'un fichier consolidé en fin de mois.",
+    nature: "Tableau de bord",
+    secteur: "Immobilier & gestion",
+  },
+  {
+    icone: <MessagesSquare strokeWidth={1.5} />,
+    texte: "Un assistant interne qui répond aux équipes sur vos propres procédures.",
+    nature: "Assistant interne",
+    secteur: "Associations & secteur public",
+  },
+  {
+    icone: <ShieldCheck strokeWidth={1.5} />,
+    texte: "Une tâche qui demande un jugement au cas par cas. Elle reste chez vous, et nous le disons au cadrage.",
+    nature: "Écarté au cadrage",
+    secteur: "Tous secteurs",
+  },
+];
 
 const sansNom = (titre: string, nom: string) =>
   titre.startsWith(nom) ? titre.slice(nom.length).replace(/^\s*[ : –-]\s*/, "") : titre;
@@ -592,14 +676,28 @@ export default function SurMesurePage() {
         </section>
 
         {/* ════════ 9 · L'APPEL FINAL ════════ */}
-        <div className="o-wrap pb-[60px]">
-          <CtaRectangle
-            pastille={TAG}
-            titre="Échanger sur votre cas."
-            texte="Rien n'est chiffré avant que ce soit clair pour vous comme pour nous."
-            action={{ label: "Cadrer votre besoin", href: "/commencer" }}
-          />
-        </div>
+        <section className="o-wrap overflow-hidden pb-[60px]">
+          <div className="flex flex-col items-center gap-6 px-2 pb-10 pt-16 text-center sm:gap-8 md:pt-24">
+            <div data-reveal>
+              <span className="o-pill o-pill--xs">{TAG}</span>
+            </div>
+            <h2 data-reveal className="o-h2 max-w-[640px] !leading-[1.15]">
+              Échanger sur votre cas.
+            </h2>
+            <p data-reveal className="o-lead max-w-[560px]">
+              Rien n&apos;est chiffré avant que ce soit clair pour vous comme pour nous.
+            </p>
+            <div data-reveal>
+              <Link href="/commencer" className="o-btn o-btn--primary">
+                Cadrer votre besoin
+              </Link>
+            </div>
+            <p data-reveal className="o-small max-w-[560px]">
+              Des besoins qui relèvent du sur-mesure, et un qui n&apos;en relève pas.
+            </p>
+          </div>
+          <CasColonnes cas={CAS} />
+        </section>
       </div>
     </PageShell>
   );
