@@ -7630,8 +7630,8 @@ button.rounded-full:active {
    15/09 : le montant est calculé sur des volumes déclarés de mémoire, et
    c'est l'audit qui le fixe. Le dire avant le chiffre, pas après. */
 .resa .calc-etiquette {
-  display: inline-block;
-  margin-bottom: 6px;
+  display: table;
+  margin-bottom: 8px;
   padding: 3px 9px;
   border: 1px solid var(--r-or-fonce);
   border-radius: 999px;
