@@ -359,7 +359,31 @@ export const MARGE_MINIMALE = 0.15;
 export function prixPourVolume(pieces: number): number | null {
   if (pieces <= 0) return null;
   if (pieces > PLAFOND_GRILLE) return null;
-  return Math.max(PLANCHER_MENSUEL, Math.round(pieces * TARIF_PIECE));
+  return arrondiCommercial(
+    Math.max(PLANCHER_MENSUEL, Math.round(pieces * TARIF_PIECE)),
+  );
+}
+
+/** L'ARRONDI COMMERCIAL (15/09/2026, Teo) — « ça donne un chiffre genre un
+    arrondi ; si c'est genre 123, bah on le met à 129 ».
+
+    `pièces × 2` tombe toujours sur un nombre PAIR : 720, 792, 1 200. Ça ne
+    se lit pas comme un prix, ça se lit comme le résultat d'un calcul — et
+    un résultat de calcul, ça se discute. On monte au montant terminé par 9
+    juste au-dessus : 720 → 729, 1 200 → 1 209, 149 → 149.
+
+    TOUJOURS AU-DESSUS, jamais en dessous : le brut est ce que le volume
+    coûte, on ne vend pas sous son propre calcul. L'écart vaut 9 € au plus.
+
+    PAS de paliers d'arrondi (49/99/149/199…) : à 1 500 € la marche suivante
+    aurait été 1 990, soit 490 € pris au client par le seul effet de
+    l'arrondi. Une règle unique, à la dizaine, partout.
+
+    JUMELLE DE LA FONCTION SQL reserver_audit (v3.4, appliquée le 15/09) :
+    les deux ne se séparent jamais, sinon l'écran annonce 1 209 € et la base
+    fige 1 200. La SQL se pose TOUJOURS en premier. */
+export function arrondiCommercial(montant: number): number {
+  return Math.ceil((montant + 1) / 10) * 10 - 1;
 }
 /** L'installation du palier correspondant — facturée à part, une seule fois,
     et non plus « comprise ». Même barème que la fonction SQL. */

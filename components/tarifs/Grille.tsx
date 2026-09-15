@@ -579,7 +579,7 @@ function CartePalier({
           <p className="mt-1 text-xs text-[#767676]">
             {auPlancher
               ? `Minimum mensuel — ${nombreFr(piecesCarte)} pièce${piecesCarte > 1 ? "s" : ""} seulement`
-              : `${nombreFr(piecesCarte)} pièces × ${TARIF_PIECE} €`}
+              : `${nombreFr(piecesCarte)} pièces × ${TARIF_PIECE} €, arrondi`}
           </p>
           <p className="mt-2 text-xs text-[#767676]">Chiffré à l&apos;audit, sur vos vrais chiffres.</p>
 
