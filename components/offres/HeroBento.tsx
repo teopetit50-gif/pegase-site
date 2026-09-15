@@ -243,7 +243,17 @@ export function HeroBento() {
 
       {/* ═══════════ tuile — le brouillon à valider ═══════════ */}
       <Tuile
-        pose="lg:-ml-[18px] lg:-mt-[104px]"
+        /* 15/09 (Teo) — « celle en bas à gauche, mets-la plus à gauche ».
+           Le décalage se fait en TRANSLATION, pas en marge : une marge
+           négative de plus élargirait la tuile (elle est étirée par la
+           grille) et les deux tuiles n'auraient plus la même largeur. La
+           translation la déplace à largeur constante. Et elle n'arrive
+           qu'à xl : à 1024 px, la gouttière entre la scène de 900 et le
+           bord de l'écran ne fait que 62 px — décalée de 56 de plus, la
+           tuile frôlerait le bord de l'écran, ce qui se lit comme un bug
+           et non comme une intention. Entre lg et xl elle garde le débord
+           de 18 px, symétrique de celui de droite. */
+        pose="lg:-ml-[18px] lg:-mt-[104px] xl:-translate-x-[56px]"
         icone={PenLine}
         titre="Rien ne part sans vous"
         texte="Le texte est préparé, calé sur l’échéance et posé dans votre file. Vous envoyez, vous corrigez, ou vous ne faites rien."
