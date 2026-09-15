@@ -532,12 +532,13 @@ const parPalier = (f: (p: Palier, i: number) => string): [string, string, string
    la section n'est pas rendue ; les valeurs par défaut ne servent qu'aux
    repères (et au typage), elles ne s'affichent jamais devant un visiteur
    qui a répondu. */
+/* 15/09, dernière passe — LE COMPARATIF NE COMPARE PLUS DES PRIX.
+   Ses trois lignes de facturation (mensuel, annuel, économie) et la ligne
+   d'installation n'étaient QUE des montants : elles sont sorties avec le
+   reste des prix du site. Ce qui reste se compare sans euro — périmètre,
+   volumétrie, engagement, réversibilité — et le paramètre `prix` a
+   disparu de la signature, faute d'emploi. */
 export function comparatifPaliers(
-  prix: readonly [number, number, number] = PALIERS.map((p) => p.prix) as unknown as [
-    number,
-    number,
-    number,
-  ],
   volumes: readonly [number, number, number] = PALIERS.map((p) => p.plafond) as unknown as [
     number,
     number,
@@ -578,20 +579,17 @@ export function comparatifPaliers(
       {
         libelle: "Mensuel, sans engagement",
         aide: "La résiliation prend effet à la fin du mois en cours, date à laquelle les envois cessent.",
-        valeurs: parPalier((_p, i) => `${prix[i].toLocaleString("fr-FR")}${NBSP}€ par mois`),
+        valeurs: meme("Disponible"),
       },
       {
         libelle: `Annuel, −${REMISE_PCT_TXT}${NBSP}%`,
-        aide: "Facturé en une fois pour douze mois. La garantie de remboursement sous 30 jours s'applique dans les mêmes conditions.",
-        valeurs: parPalier(
-          (_p, i) =>
-            `${prixAnnuel(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par an, soit ${equivalentMensuel(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par mois`,
-        ),
+        aide: "Facturé en une fois pour douze mois, remise déduite. La garantie de remboursement sous 30 jours s'applique dans les mêmes conditions.",
+        valeurs: meme("Disponible"),
       },
       {
-        libelle: "Économie en formule annuelle",
-        aide: "L'écart entre douze mensualités et la facture annuelle.",
-        valeurs: parPalier((_p, i) => `${economieAnnuelle(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par an`),
+        libelle: "Montant de l'abonnement",
+        aide: "Il est indexé sur le nombre de pièces traitées et sur la part d'entre elles qui revient à un opérateur. Ces deux chiffres se relèvent à l'audit, sur vos exports.",
+        valeurs: meme("Arrêté à l'audit"),
       },
       {
         libelle: "Au-delà du volume inclus",
@@ -624,7 +622,7 @@ export function comparatifPaliers(
            « 45 min » ne décrivait que la réunion visible. */
         libelle: "Installation",
         aide: "Raccordement de vos outils, reprise de votre historique et rodage du système jusqu'au premier envoi réel. Facturée une seule fois, à la mise en service.",
-        valeurs: parPalier((p) => `${p.installation.toLocaleString("fr-FR")}${NBSP}€, une fois`),
+        valeurs: meme("Facturée une fois, chiffrée au devis"),
       },
       {
         libelle: "Raccordement particulier",
@@ -660,10 +658,11 @@ export function comparatifPaliers(
            n'avait aucune assiette. Elle en a une de nouveau. */
         libelle: "Chèque TIC",
         aide: "Région Guadeloupe : le dispositif finance de 40 à 80 % de l'installation selon le poste, jamais l'abonnement. L'éligibilité se vérifie avant la réservation.",
-        valeurs: parPalier(
-          (p) =>
-            `reste ${Math.round((p.installation * 0.2) / 10) * 10}${NBSP}à${NBSP}${Math.round((p.installation * 0.6) / 10) * 10}${NBSP}€`,
-        ),
+        /* 15/09, dernière passe — le reste à charge était calculé sur le prix
+           d'installation : c'était le dernier montant du comparatif, et il
+           part avec les autres. Le TAUX, lui, est un fait public du
+           dispositif régional et peut s'écrire. */
+        valeurs: meme("40 à 80 % de l'installation"),
       },
     ],
   },
@@ -1081,10 +1080,38 @@ export const CALCULATEUR = {
      cas. Les cartes gardent donc leur nom, leur promesse, leurs postes et
      leur plafond — tout sauf le chiffre, qui attend ses réponses. Le
      comparatif, qui compare des prix, attend lui aussi. */
+  /* 15/09, DERNIÈRE PASSE (Teo) — LE SITE N'AFFICHE PLUS AUCUN MONTANT.
+     « Au pire on met aucun prix et on chiffrera à l'audit ce que ça
+     coûtera au client. » C'est l'aboutissement de la décision du 15/09 au
+     soir : tant qu'un montant s'affichait, il fallait le défendre — et il
+     varie d'un facteur 6 selon la part des pièces qui revient à un
+     opérateur, chiffre qu'aucune page ne peut connaître avant l'audit
+     (voir PEGASE/benchmark-prix-marche.md, partie II).
+
+     CE QUI RESTE : le VOLUME et les HEURES. Ce sont des faits, tirés des
+     réponses du visiteur, et ils suffisent à arriver calés en rendez-vous
+     — la seule fonction que Teo assigne au calculateur.
+     CE QUI PART : le montant de l'abonnement, la remise annuelle, le prix
+     d'installation, la soustraction et le net.
+     CE QUI RESTE MALGRÉ TOUT EN EUROS : la valeur du temps récupéré.
+     C'est le chiffre DU CLIENT, calculé sur SON coût horaire — pas notre
+     tarif. La retirer viderait la page de son seul argument. */
   avant: {
-    grand: "À estimer",
-    sous: "sur vos volumes",
-    note: "Renseignez vos volumes ci-dessus pour afficher le montant.",
+    grand: "Répondez aux questions",
+    sous: "votre volume mensuel",
+    note: "Une question par poste suffit à établir le volume que le système aurait à traiter chez vous.",
+  },
+  /* Le bloc qui remplace les montants, en tête de page — dit UNE SEULE
+     FOIS. Répétée sur chaque carte, n'importe quelle formule devient du
+     remplissage, et « sur devis » trois fois de suite se lit « c'est cher
+     et ils ne le disent pas ». La règle qui sauve une page sans prix :
+     annoncer DE QUOI le montant dépend. C'est tout ce qui la sépare d'une
+     page opaque. */
+  sansPrix: {
+    titre: "Le tarif est arrêté à l'audit, sur vos volumes réels.",
+    texte:
+      "Nous ne publions pas de grille. Le montant est indexé sur le nombre de pièces que le système traite pour vous, et sur la part d'entre elles qui revient à un opérateur — deux variables qu'aucune page ne peut connaître d'avance. L'audit les relève en trente minutes, et le devis en découle.",
+    note: "Ni facturation par utilisateur, ni commission sur vos encaissements.",
   },
   /* 15/09 (Teo) — « ça peut vraiment être n'importe quel prix, c'est en
      fonction des stats précises de l'entreprise ; là ça reste une estimation
@@ -1093,14 +1120,14 @@ export const CALCULATEUR = {
      pas une précaution juridique : le calcul part de volumes DÉCLARÉS de
      mémoire, et personne ne connaît ses chiffres à la pièce près. */
   estimation: {
-    etiquette: "Estimation",
+    etiquette: "Volume estimé",
     phrase:
-      "Calculé sur les volumes que vous venez de renseigner. Le montant définitif est arrêté à l'audit, sur vos chiffres réels : il peut être inférieur comme supérieur.",
+      "Établi sur les ordres de grandeur que vous venez de renseigner. L'audit le relève ensuite sur vos exports, avec la part des pièces qui revient à un opérateur : c'est de ces deux chiffres que le tarif découle.",
   },
   appel: {
-    titre: "Estimer votre abonnement",
-    texte: "Les montants de cette page se calculent sur vos volumes, jamais sur un barème fixe. Une question par poste suffit à les afficher.",
-    cta: "Lancer l'estimation",
+    titre: "Estimer votre volume",
+    texte: "Le tarif est indexé sur le nombre de pièces traitées. Une question par poste suffit à établir ce volume ; l'audit l'arrête ensuite sur vos chiffres réels.",
+    cta: "Estimer mon volume",
   },
   entete: {
     titre: "Vos volumes mensuels",
@@ -1124,33 +1151,22 @@ export const CALCULATEUR = {
     encours:
       "Le calcul ne porte que sur le temps. Il ne comptabilise ni les devis restés sans réponse ni les factures échues qui ne sont jamais relancées, alors que ces deux postes pèsent souvent davantage. L'audit les chiffre sur vos propres encours.",
   },
-  /* Quand le calcul est négatif, on le DIT. Ce n'est pas une faiblesse de la
-     page, c'est ce qu'elle a de plus crédible — et c'est déjà la règle de la
-     maison (grille-prix-interne.md §4 : « si l'audit ne montre rien, la
-     recommandation reste ne rien installer »), elle n'avait simplement
-     jamais été écrite là où un visiteur pouvait la lire. Le bouton reste
-     « en parler », jamais « souscrire quand même » : transformer un non
-     honnête en rattrapage commercial ruinerait tout l'écran. */
-  /* 15/09 — L'ÉCRAN « PAS SUR LE TEMPS SEUL ». Il remplace l'ancien écran
-     négatif, qui commettait exactement la faute interdite : « vos 3 heures
-     valent 105 € par mois, pour un abonnement à 149 € ». AUCUN montant
-     d'économie ici — ni négatif, ni dérisoire. On donne les HEURES, qui
-     sont vraies et utiles, et on renvoie à ce que le temps ne capture pas. */
-  negatif: {
-    titre: "À ce volume, le temps gagné ne suffit pas à justifier l'abonnement.",
-    texte:
-      "Nous préférons l'écrire ici plutôt qu'en rendez-vous. À ce niveau, la valeur se situe dans ce qui n'est pas comptabilisé aujourd'hui : devis restés sans réponse, factures échues, clients jamais rappelés. L'audit chiffre ces trois postes sur vos propres encours.",
-    cta: "Réserver un échange de 30 minutes",
-    retour: "Revenir à la grille",
-  },
+  /* 15/09, dernière passe — L'ÉCRAN « PAS SUR LE TEMPS SEUL » A DISPARU,
+     et avec lui le drapeau `viable`. Il existait pour empêcher d'afficher
+     une soustraction dérisoire (« 105 € de temps gagné, 149 € d'abonnement »).
+     Sans montant d'abonnement affiché, il n'y a plus de soustraction, donc
+     plus rien à cacher : le résultat est le même pour tout le monde — un
+     volume, des heures, et un bouton vers l'audit. `verdictCalculateur`
+     garde `prix`, `net` et `viable` pour l'usage interne ; l'écran ne les
+     lit plus. */
   horsGrille: {
-    titre: "Votre volume dépasse la grille publique.",
+    titre: "Votre volume sort du cadre standard.",
     texte:
-      "Au-delà de ce seuil, le coût dépend du nombre de services qui valident, du nombre de sociétés et des logiciels à raccorder. L'audit relève ces trois variables, et le devis en découle.",
+      "Au-delà de ce seuil, le montant dépend du nombre de services qui valident, du nombre de sociétés et des logiciels à raccorder. L'audit relève ces trois variables, et le devis en découle.",
     cta: "Réserver un audit",
     souscta: "30 minutes, gratuit, sans engagement",
   },
   /* Cette phrase retire au visiteur la peur de se sur-déclarer, qui est la
      première raison pour laquelle on abandonne un calculateur en route. */
-  pied: "Ces volumes orientent l'estimation, ils n'engagent à rien. Le périmètre définitif est arrêté à l'audit, sur vos volumes réels : s'ils sont inférieurs à ce que vous avez déclaré, c'est le montant inférieur qui s'applique.",
+  pied: "Ces volumes orientent la discussion, ils n'engagent à rien. Le périmètre définitif est arrêté à l'audit, sur vos volumes réels : s'ils sont inférieurs à ce que vous avez déclaré, c'est le périmètre inférieur qui s'applique.",
 };

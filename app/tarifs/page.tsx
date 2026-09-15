@@ -76,7 +76,7 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 export const metadata: Metadata = {
   title: "Tarifs | Omega.AI",
   description:
-    `Tarification à l'usage pour un, trois ou quatre postes automatisés sous validation humaine. Le montant est indexé sur le volume traité : cette page l'estime, l'audit l'arrête sur vos chiffres. Facturation mensuelle sans engagement, −${REMISE_PCT} % en annuel, installation facturée séparément et éligible au Chèque TIC, remboursement sous 30 jours.`,
+    `Tarification à l'usage pour un, trois ou quatre postes automatisés sous validation humaine. Le montant est indexé sur le volume traité : cette page établit votre volume, l'audit arrête le tarif sur vos chiffres réels. Facturation mensuelle sans engagement, −${REMISE_PCT} % en annuel, installation facturée séparément et éligible au Chèque TIC, remboursement sous 30 jours.`,
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -107,14 +107,14 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
     q: "Pourquoi aucun tarif fixe n'est-il affiché ?",
     r: [
       "Parce que l'abonnement est indexé sur un volume, et qu'aucun volume n'est identique d'une entreprise à l'autre. Deux sociétés du même secteur et du même effectif n'émettent pas le même nombre de factures et ne reçoivent pas le même nombre de demandes. Un tarif unique reviendrait à faire financer par les unes la volumétrie des autres.",
-      "Ce que nous publions à la place, c'est la règle de calcul complète : le montant suit le nombre de pièces traitées, jamais le nombre d'utilisateurs ni un pourcentage sur vos encaissements. Renseignez votre volumétrie en haut de page et l'estimation s'affiche ; l'audit la valide sur vos chiffres réels, et le tarif figure au devis avant tout engagement.",
+      "Ce que nous publions à la place, c'est la règle de calcul complète : le montant suit le nombre de pièces traitées et la part d'entre elles qui revient à un opérateur, jamais le nombre d'utilisateurs ni un pourcentage sur vos encaissements. Renseignez votre volumétrie en haut de page : le volume s'affiche, poste par poste. L'audit le relève ensuite sur vos exports, et le tarif figure au devis avant tout engagement.",
     ],
   },
   {
-    q: "L'estimation affichée correspond-elle au tarif final ?",
+    q: "Quand connaîtrai-je le montant ?",
     r: [
-      "C'est un ordre de grandeur, calculé sur les volumes que vous venez de saisir. Sa précision est celle de vos déclarations, et rares sont les dirigeants qui connaissent de mémoire le nombre de factures relancées le mois précédent.",
-      "L'audit travaille sur vos exports, pas sur une estimation : il relève la volumétrie réelle, le taux de pièces qui reviennent à un opérateur, et ce qui n'est pas comptabilisé aujourd'hui. Le montant qui en sort est celui du devis, et il ne varie plus.",
+      "À l'issue de l'audit, et il figure au devis. Nous ne l'affichons pas ici parce qu'il dépend de deux chiffres qu'aucune page ne peut connaître d'avance : votre volumétrie réelle, et la part des pièces qui revient à un opérateur. Cette seconde variable dépend de l'état de vos données, et elle fait varier le coût du simple au sextuple.",
+      "Le volume que cette page calcule est un ordre de grandeur, à la précision de vos déclarations. L'audit travaille sur vos exports : il relève la volumétrie réelle, ce taux de reprise, et ce qui n'est pas comptabilisé aujourd'hui. Le montant qui en sort est celui du devis, et il ne varie plus.",
     ],
   },
   {
@@ -126,7 +126,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Quelles sont les modalités de paiement ?",
     r: [
-      "Aucun paiement n'est possible depuis cette page, et les montants affichés restent des estimations : le tarif est arrêté à l'audit, sur vos chiffres réels. Le moyen de paiement, carte ou prélèvement SEPA, est enregistré ensuite sur une page sécurisée, au moment de réserver la réunion d'installation. Aucun débit n'intervient avant la fin de celle-ci : la première échéance part le jour de la mise en service.",
+      "Aucun paiement n'est possible depuis cette page, et aucun montant n'y est affiché : le tarif est arrêté à l'audit, sur vos chiffres réels. Le moyen de paiement, carte ou prélèvement SEPA, est enregistré ensuite sur une page sécurisée, au moment de réserver la réunion d'installation. Aucun débit n'intervient avant la fin de celle-ci : la première échéance part le jour de la mise en service.",
       `En formule mensuelle, sans engagement : la résiliation prend effet à la fin du mois en cours, date à laquelle les envois cessent. En formule annuelle, les douze mois sont facturés en une fois le jour de la mise en service, à −${REMISE_PCT} %.`,
     ],
   },

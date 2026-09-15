@@ -83,7 +83,13 @@ export default async function ReserverPage({
   );
   const piecesBrut = Number.parseInt(sp.pieces ?? "", 10);
   const piecesEstimees = Number.isFinite(piecesBrut) && piecesBrut > 0 ? piecesBrut : 0;
-  const prixEstime = piecesEstimees ? prixPourVolume(piecesEstimees) : null;
+  /* 15/09, dernière passe — LE MESSAGE NE PORTE PLUS DE MONTANT. Il
+     annonçait « estimation 1 869 € par mois, à confirmer » : c'était le
+     dernier endroit où un tarif sortait du site, et il arrivait sous les
+     yeux du visiteur juste avant le rendez-vous, comme s'il venait de
+     nous. `prixPourVolume` ne sert plus ici qu'à savoir si le volume
+     tient dans le cadre standard. */
+  const dansLeCadre = piecesEstimees ? prixPourVolume(piecesEstimees) !== null : false;
   const estimation = (() => {
     if (!postesEstimes.length && !piecesEstimees) return undefined;
     const bouts: string[] = [];
@@ -93,10 +99,8 @@ export default async function ReserverPage({
     if (piecesEstimees) {
       bouts.push(`${piecesEstimees.toLocaleString("fr-FR")} pièces par mois`);
     }
-    if (prixEstime !== null) {
-      bouts.push(`estimation ${prixEstime.toLocaleString("fr-FR")} € par mois, à confirmer`);
-    } else if (piecesEstimees) {
-      bouts.push("volume au-delà de la grille publique, le prix sort de l'audit");
+    if (piecesEstimees && !dansLeCadre) {
+      bouts.push("volume au-delà du cadre standard, le devis sort de l'audit");
     }
     return `Estimation faite sur le site — ${bouts.join(" · ")}.`;
   })();

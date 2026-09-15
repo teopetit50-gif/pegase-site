@@ -62,9 +62,7 @@ import {
 import { lienAudit } from "@/lib/reservation";
 import {
   CALCULATEUR,
-  PLANCHER_MENSUEL,
   POSTES,
-  TARIF_PIECE,
   PROFILS_HORAIRES,
   QUESTIONS_VOLUME,
   piecesParPoste,
@@ -80,9 +78,11 @@ import {
    dégradée ici en espace ordinaire — d'où le « € » seul en bout de ligne
    dès que la colonne se resserre. */
 const NBSP = "\u202f";
+/* le seul euro qui reste sur la page : la valeur du temps récupéré, qui
+   est le chiffre DU CLIENT — calculé sur SON coût horaire, pas notre tarif */
+const euros = (n: number) => `${nombre(Math.round(n))}${NBSP}€`;
 
 const nombre = (n: number) => n.toLocaleString("fr-FR");
-const euros = (n: number) => `${nombre(Math.round(n))}${NBSP}€`;
 
 /* « 3,5 » et non « 3.5 », et « 4 » et non « 4,0 ». */
 const journees = (n: number) =>
@@ -154,10 +154,6 @@ export default function Calculateur({
   /* Le palier que la grille propose : celui qui couvre le volume, ou celui
      que le visiteur avait coché s'il est plus grand (on ne redescend jamais
      quelqu'un qui a choisi plus large — il a peut-être ses raisons). */
-  /* `v.net` vaut null hors grille ; dans la branche « gain » il est
-     forcément un nombre, mais le rétrécissement ne traverse pas la
-     chaîne de ternaires du JSX — on le fige ici. */
-  const net = v.net ?? 0;
   /* 15/09 (prix continu) — `monte` et `palierCoche` ont disparu avec la
      notion de marche : le montant suit le volume sans saut. */
   /* On ne remonte que le FAIT d'avoir répondu, jamais le montant : les
@@ -183,16 +179,16 @@ export default function Calculateur({
     );
   }
 
-  /* Les trois verdicts, nommés une fois : le JSX en dépend quatre fois et
-     une chaîne de ternaires imbriqués s'y relit mal. */
+  /* 15/09, dernière passe — DEUX VERDICTS, PLUS TROIS. L'écran « pas sur
+     le temps seul » existait pour éviter d'afficher une soustraction
+     dérisoire entre le temps gagné et l'abonnement. Le site n'affiche plus
+     d'abonnement : il n'y a plus de soustraction, donc plus de cas à
+     cacher. Reste le seul partage qui ait encore un sens — le volume
+     tient dans le cadre standard, ou il le dépasse et c'est l'audit qui
+     prend. `v.viable` n'est plus lu ici. */
   const horsGrille = rempli && v.palier === null;
-  /* 15/09 — LA RÈGLE ABSOLUE (voir lib/paliers.ts) : on ne bascule plus sur
-     le SIGNE du net mais sur `viable`, qui exige en plus une marge réelle.
-     Un net positif mais dérisoire — « 14 € » sous un abonnement à 756 € —
-     tombe sous le même interdit qu'un net négatif. */
-  const negatif = rempli && v.palier !== null && !v.viable;
-  const gain = rempli && !horsGrille && !negatif && v.palier !== null;
-  const ton = horsGrille ? "audit" : negatif ? "franc" : gain ? "gain" : "attente";
+  const gain = rempli && !horsGrille && v.palier !== null;
+  const ton = horsGrille ? "audit" : gain ? "gain" : "attente";
 
   /* 15/09, correctif — LE BOUTON MENAIT DANS LE VIDE. Il pointait sur
      `/installation?palier=<id>` ; la page ne lit que `postes=` et renvoyait
@@ -289,28 +285,6 @@ export default function Calculateur({
             </div>
           )}
 
-          {negatif && v.palier && (
-            <div className="calc-bloc">
-              <p className="calc-verdict-titre">{CALCULATEUR.negatif.titre}</p>
-              <p className="calc-verdict-texte">
-                {/* AUCUN montant d'économie ici : l'ancienne rédaction disait
-                    « vos 3 heures valent 105 € par mois, pour un abonnement à
-                    149 € », exactement la faute que la règle interdit. Les
-                    HEURES restent — elles sont vraies et elles disent ce que
-                    le système fait. */}
-                Le système vous restituerait environ{" "}
-                {journees(Math.round(v.heuresRecuperees))} heures par mois.{" "}
-                {CALCULATEUR.negatif.texte}
-              </p>
-              <a className="calc-bouton" href="/reserver-un-audit">
-                {CALCULATEUR.negatif.cta}
-              </a>
-              <button type="button" className="calc-retour" onClick={() => setOuvert(false)}>
-                {CALCULATEUR.negatif.retour}
-              </button>
-            </div>
-          )}
-
           {gain && v.palier && (
             <div className="calc-bloc">
               {/* 15/09 — plus de « palier au-dessus » à proposer : le prix est
@@ -318,8 +292,7 @@ export default function Calculateur({
                   sort le montant, et que l'audit le fixe. */}
               <p className="calc-monte">
                 <span className="calc-etiquette">{CALCULATEUR.estimation.etiquette}</span>
-                {nombre(v.pieces)} pièces par mois, à {TARIF_PIECE}&nbsp;€ la pièce
-                {v.prix === PLANCHER_MENSUEL ? `, facturation minimale de ${PLANCHER_MENSUEL} € appliquée` : ""}.{" "}
+                {nombre(v.pieces)} pièces par mois.{" "}
                 {CALCULATEUR.estimation.phrase}
               </p>
 
@@ -384,35 +357,16 @@ export default function Calculateur({
                 <span>{CALCULATEUR.detail.total}</span>
                 <strong>{nombre(v.pieces)} pièces par mois</strong>
               </div>
-              {/* RÈGLE ABSOLUE (lib/paliers.ts) — CE RÉCAPITULATIF NE S'OUVRE
-                  QU'EN CAS VIABLE. Les trois lignes ci-dessous posent le
-                  temps rendu FACE à l'abonnement : hors cas viable, elles
-                  affichaient « 105 € » puis « − 149 € », c'est-à-dire
-                  exactement le couple que la règle interdit. Le détail des
-                  pièces, lui, reste visible dans tous les cas — il ne porte
-                  aucun euro et c'est lui qui explique le volume. */}
+              {/* 15/09, dernière passe — LA SOUSTRACTION EST PARTIE. Les
+                  trois lignes posaient le temps rendu FACE à l'abonnement
+                  (« 2 074 € », « − 1 869 € », « net 205 € ») : c'est
+                  précisément le couple que le site n'affiche plus. Restent
+                  les heures, qui sont un fait et non un tarif. */}
               {gain && (
-                <>
-                  <div className="calc-ligne">
-                    <span>
-                      Temps récupéré, à {taux}
-                      {NBSP}€ de l&apos;heure
-                    </span>
-                    <strong>{euros(v.valeurRecuperee)}</strong>
-                  </div>
-                  {v.palier && (
-                    <div className="calc-ligne">
-                      <span>Abonnement {v.palier.nom}</span>
-                      <strong>− {euros(v.prix ?? 0)}</strong>
-                    </div>
-                  )}
-                  <div className="calc-trait calc-trait--serre" aria-hidden="true" />
-                  <div className="calc-ligne calc-ligne--net">
-                    <span>Net par mois</span>
-                    <strong>{euros(net)}</strong>
-                  </div>
-                  <p className="calc-annee">soit {euros(net * 12)} sur douze mois.</p>
-                </>
+                <div className="calc-ligne">
+                  <span>Temps rendu chaque mois</span>
+                  <strong>{journees(Math.round(v.heuresRecuperees))} heures</strong>
+                </div>
               )}
             </div>
           )}

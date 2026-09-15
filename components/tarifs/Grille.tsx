@@ -181,9 +181,8 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import {
-  useCallback, useState, useSyncExternalStore, type ComponentType } from "react";
-import NumberFlow, { type Format } from "@number-flow/react";
+import { useCallback, useState, type ComponentType } from "react";
+import NumberFlow from "@number-flow/react";
 import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CallToAction4 } from "@/components/ui/call-to-action-4";
@@ -195,16 +194,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Comparator } from "@/components/ui/comparator-1";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/cn";
 import { COURRIEL, lienAudit, lienContact } from "@/lib/reservation";
 import Calculateur from "@/components/tarifs/Calculateur";
-import { souscrireUrl, useChoisirMonde, useMonde } from "@/components/tarifs/monde";
+import { useChoisirMonde, useMonde } from "@/components/tarifs/monde";
 
 import {
   CALCULATEUR,
-  PLANCHER_MENSUEL,
-  TARIF_PIECE,
   CARTE_SUR_MESURE,
   comparatifPaliers,
   GRANDE_STRUCTURE,
@@ -212,27 +208,17 @@ import {
   PALIERS,
   POSTES,
   REMISE_ANNUELLE,
-  economieAnnuelle,
-  equivalentMensuel,
-  lirePeriodicite,
   piecesPourPostes,
   postesPourCarte,
-  prixAnnuel,
   prixPourVolume,
   type Monde,
   type SaisieVolumes,
   type Palier,
-  type Periodicite,
 } from "@/lib/paliers";
 
 const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 
 /* le prix en euros, sans centimes — le format que NumberFlow anime */
-const FORMAT_EURO: Format = {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-};
 
 /* l'icône de tête de chaque carte — la référence en pose une par palier,
    en 32 px. Trois icônes neutres qui montent : un poste, trois postes,
@@ -244,16 +230,12 @@ const ICONE_PALIER: Record<Palier["id"], Icone> = {
   complet: Boxes,
 };
 
-/* ——— la périodicité venue de l'URL (`?periodicite=annuel`), côté
-   navigateur seulement ; le serveur répond toujours « mensuel » ———
-   `souscrireUrl` est partagée avec le monde (components/tarifs/monde.tsx),
-   qui se lit de la même façon et pour la même raison. */
-function periodiciteDeLUrl(): Periodicite {
-  return lirePeriodicite(new URLSearchParams(window.location.search).get("periodicite"));
-}
-function periodiciteServeur(): Periodicite {
-  return "mensuel";
-}
+/* 15/09, dernière passe — LA PÉRIODICITÉ NE PILOTE PLUS RIEN ICI. Elle
+   ne servait qu'à remiser un montant affiché ; sans montant, sa lecture
+   d'URL et son instantané serveur étaient du code qui ne produisait plus
+   de pixel. Le paramètre `?periodicite=` continue d'exister pour
+   /installation, qui le lit lui-même. */
+
 /* le lien d'un palier — « Tout Omega » n'a rien à choisir, il part droit
    sur l'audit ; les deux autres renvoient aux cartes où le choix se fait.
 
@@ -441,13 +423,11 @@ function SelecteurMonde({
 }
 
 /* « 1 200 » et non « 1200 » — même règle que le calculateur. */
-const nombreFr = (n: number) => n.toLocaleString("fr-FR");
 
 function CartePalier({
   p,
   choisis,
   bascule,
-  periodicite,
   monde,
   volumes,
 }: {
@@ -455,7 +435,6 @@ function CartePalier({
   /* la sélection vit dans Grille : vide dès qu'un AUTRE palier est actif */
   choisis: string[];
   bascule: (id: string) => void;
-  periodicite: Periodicite;
   monde: Monde;
   /* les volumes saisis au calculateur — null tant qu'il n'a rien reçu. La
      carte en tire SON prix, sur les pièces de SES propres postes : deux
@@ -466,9 +445,18 @@ function CartePalier({
      calcule sur les pièces des postes que CETTE carte comprend. */
   const postesFactures = volumes ? postesPourCarte(volumes, p.aChoisir, choisis) : [];
   const piecesCarte = volumes ? piecesPourPostes(volumes, postesFactures) : 0;
-  const prixCarte = volumes ? prixPourVolume(piecesCarte) : null;
-  const prixVisible = prixCarte !== null;
-  const auPlancher = prixCarte === PLANCHER_MENSUEL;
+  /* 15/09, dernière passe — le garde-fou reste, son nom change : ce qu'il
+     autorise n'est plus un prix mais l'affichage du volume et du bouton.
+     `prixPourVolume` rend null dans les deux cas où il ne faut rien
+     montrer — aucune réponse, ou volume au-delà du plafond de la grille. */
+  const volumeValide = volumes ? prixPourVolume(piecesCarte) !== null : false;
+  /* LE VOLUME PEUT DÉPASSER LE PLAFOND DE SA PROPRE CARTE, et ça se voyait
+     dès qu'on a mis le volume à la place du prix : « 620 pièces » en grand,
+     au-dessus de « Jusqu'à 150 pièces traitées par mois » trois lignes plus
+     bas. `postesPourCarte` retient les postes les plus chargés, sans
+     regarder le plafond du palier — c'était invisible tant qu'un montant
+     occupait la place. La carte le dit maintenant, et oriente. */
+  const depasse = volumeValide && piecesCarte > p.plafond;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
   /* côté grande structure le bouton ne commande rien : il mène au
      diagnostic, le compte des postes ne le conditionne plus */
@@ -479,9 +467,8 @@ function CartePalier({
      même à /installation, dont le récapitulatif affiche le montant du
      palier : le chiffre que la grille refusait de montrer sortait par la
      porte d'à côté, et sans avoir vérifié que le volume tient sous le
-     plafond du palier. Même verrou que `prixVisible`, même raison. */
-  const pret = devis || (manque <= 0 && prixVisible);
-  const annuel = periodicite === "annuel" && !devis;
+     plafond du palier. Même verrou que `volumeValide`, même raison. */
+  const pret = devis || (manque <= 0 && volumeValide);
   const phare = Boolean(p.phare);
   /* 15/09, SECONDE PASSE (Teo) — LE BOUTON MÈNE À L'AUDIT, PAS À L'ACHAT.
      « C'est une estimation qui amène au bouton réserver un audit ; ça ne
@@ -495,13 +482,13 @@ function CartePalier({
      que comme une phrase du message, pour que l'entretien parte des
      chiffres du visiteur. */
   const href = lienAudit(postesFactures, piecesCarte);
-  /* L'écart « quatrième poste » se calcule lui aussi sur les volumes : il
-     n'est plus une constante. Masqué s'il est nul (le plancher l'écrase). */
+  /* 15/09, dernière passe — « Quatrième poste inclus pour N € de plus »
+     était un montant, et il part avec les autres. Ce qu'on peut encore
+     dire sans euro, c'est le VOLUME que le quatrième poste ajoute. */
   const ecart = (() => {
-    if (p.id !== "complet" || devis || !volumes || prixCarte === null) return null;
-    const trois = prixPourVolume(piecesPourPostes(volumes, postesPourCarte(volumes, 3, [])));
-    if (trois === null) return null;
-    const d = prixCarte - trois;
+    if (p.id !== "complet" || devis || !volumes) return null;
+    const trois = piecesPourPostes(volumes, postesPourCarte(volumes, 3, []));
+    const d = piecesCarte - trois;
     return d > 0 ? d : null;
   })();
   const Icone = ICONE_PALIER[p.id];
@@ -559,7 +546,7 @@ function CartePalier({
                 <p className="text-xs text-[#767676]">{GRANDE_STRUCTURE.note}</p>
               </div>
             </>
-          ) : !prixVisible ? (
+          ) : !volumeValide ? (
             /* 15/09 — l'attente du chiffre. Elle occupe la MÊME place que le
                prix pour que la carte ne saute pas quand il arrive, et elle
                dit pourquoi elle est là plutôt que de laisser un tiret muet. */
@@ -572,42 +559,38 @@ function CartePalier({
             </>
           ) : (
           <>
+          {/* 15/09, dernière passe — LE VOLUME À LA PLACE DU MONTANT.
+              Chaque carte ne compte que les pièces de SES postes : les
+              trois affichent donc trois chiffres différents, tirés des
+              mêmes réponses. C'est ce qui évite de répéter « sur devis »
+              trois fois de suite — chaque carte dit quelque chose qui
+              n'est vrai que pour elle. */}
           <div className="flex flex-wrap items-baseline justify-center gap-x-2">
             <NumberFlow
-              aria-label={`${annuel ? equivalentMensuel(prixCarte!) : prixCarte!} euros par mois`}
+              aria-label={`${piecesCarte} pièces par mois`}
               className="text-4xl font-bold tabular-nums text-[#050505]"
-              format={FORMAT_EURO}
               locales="fr-FR"
-              value={annuel ? equivalentMensuel(prixCarte!) : prixCarte!}
+              value={piecesCarte}
             />
-            {annuel ? (
-              <span key="barre" className="rv-fondu text-sm font-medium text-[#8a8a8a] line-through">
-                <span className="sr-only">Au lieu de </span>
-                {prixCarte!.toLocaleString("fr-FR")}&nbsp;€
-              </span>
-            ) : null}
+            <span className="text-lg font-semibold text-[#050505]">pièces</span>
           </div>
-          <p className="mt-1 text-sm text-[#616161]">par mois, estimation</p>
-          {/* 15/09 — D'OÙ SORT LE CHIFFRE, ET CE QU'IL VAUT. Un montant nu
-              redevient un montant qu'on a choisi : la carte dit sur quoi il
-              est calculé, et rappelle que l'audit le fixe. */}
+          <p className="mt-1 text-sm text-[#616161]">par mois, d&apos;après vos réponses</p>
           <p className="mt-1 text-xs text-[#767676]">
-            {auPlancher
-              ? `Facturation minimale — ${nombreFr(piecesCarte)} pièce${piecesCarte > 1 ? "s" : ""} au compteur`
-              : `${nombreFr(piecesCarte)} pièces × ${TARIF_PIECE} €, arrondi`}
+            Factures lues, demandes reçues, relances envoyées, reprises de contact.
           </p>
 
-          <div key={periodicite} className="rv-fondu mt-3">
-            <p className="text-xs text-[#767676]">
-              {annuel
-                ? `Facturé ${prixAnnuel(prixCarte!).toLocaleString("fr-FR")} € par an, en une échéance.`
-                : "Facturé mensuellement, sans engagement."}
-            </p>
-            {annuel ? (
-              <p className="mt-2 inline-block rounded-lg bg-[#e8f6ed] px-2.5 py-1 text-[13px] font-semibold text-[#15753a]">
-                Économie de {economieAnnuelle(prixCarte!).toLocaleString("fr-FR")}&nbsp;€ par an
+          <div className="mt-3">
+            {depasse ? (
+              <p className="rounded-lg bg-[#fdf3e7] px-3 py-2 text-xs text-[#8a5a12]">
+                Au-delà des {p.plafond.toLocaleString("fr-FR")} pièces de ce palier. Le palier
+                supérieur couvre ce volume&nbsp;; l&apos;audit tranche.
               </p>
-            ) : null}
+            ) : (
+              <p className="text-xs text-[#767676]">
+                Le tarif est indexé sur ce volume. Il est arrêté à l&apos;audit, sur vos chiffres
+                réels.
+              </p>
+            )}
           </div>
 
           </>
@@ -616,7 +599,7 @@ function CartePalier({
           {ecart !== null ? (
             <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#050505]">
               <span aria-hidden className="size-1.5 rounded-full bg-[#050505]" />
-              Quatrième poste inclus pour {ecart.toLocaleString("fr-FR")}&nbsp;€ de plus.
+              Quatrième poste inclus&nbsp;: {ecart.toLocaleString("fr-FR")} pièces de plus.
             </p>
           ) : null}
         </div>
@@ -737,9 +720,6 @@ export default function Grille() {
   /* 02/09 — la périodicité, UNE pour toute la grille (voir l'en-tête).
      03/09 : l'URL donne la valeur de départ (retour depuis /installation),
      le clic du visiteur prend ensuite le dessus. */
-  const depuisUrl = useSyncExternalStore(souscrireUrl, periodiciteDeLUrl, periodiciteServeur);
-  const [choixPeriodicite, setPeriodicite] = useState<Periodicite | null>(null);
-  const periodicite = choixPeriodicite ?? depuisUrl;
   /* 15/09, seconde passe — LE MONDE NE VIT PLUS ICI. Il est monté d'un
      cran (components/tarifs/monde.tsx, provider dans app/tarifs/page.tsx)
      parce que le Chèque TIC et l'appel final en dépendent eux aussi : tant
@@ -757,7 +737,6 @@ export default function Grille() {
   const monde = useMonde();
   const choisirMonde = useChoisirMonde();
   const devis = monde === "structure";
-  const annuel = periodicite === "annuel" && !devis;
 
   const basculePour = (p: Palier) => (id: string) =>
     setChoix((prev) => {
@@ -793,32 +772,42 @@ export default function Grille() {
               <>
                 L&apos;abonnement repose sur deux variables&nbsp;: les postes en service, et le
                 volume de pièces traitées chaque mois (factures lues, demandes entrantes, relances
-                envoyées). Cette page en donne une estimation&nbsp;; l&apos;audit la valide sur vos
-                chiffres réels et le devis arrête le tarif. Facturation mensuelle sans engagement,
-                −{REMISE_PCT}&nbsp;% en annuel, remboursement sous 30 jours.
+                envoyées). Cette page établit ce volume&nbsp;; l&apos;audit le relève sur vos
+                exports, avec la part des pièces qui revient à un opérateur, et le devis arrête le
+                tarif. Facturation mensuelle sans engagement, −{REMISE_PCT}&nbsp;% en annuel,
+                remboursement sous 30 jours.
               </>
             )}
           </p>
         </div>
 
-        {/* la rangée de commandes : le sélecteur des deux mondes d'abord —
-            il commande le reste, y compris la présence de l'interrupteur —
-            puis la facturation. `flex-wrap` : sous ~560 px les deux
-            passent l'un sous l'autre plutôt que de déborder. */}
+        {/* 15/09, dernière passe — L'INTERRUPTEUR MENSUEL / ANNUEL EST PARTI.
+            Il n'existait que pour remiser un montant affiché ; sans montant,
+            il basculait sans que rien ne change à l'écran — une commande
+            morte, le pire défaut qu'une page de prix puisse montrer. La
+            remise annuelle reste un fait, dite dans le chapô, le comparatif
+            et la FAQ. La périodicité continue de voyager par l'URL vers
+            /installation : seule la commande visible disparaît. */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
           <SelecteurMonde monde={monde} choisir={choisirMonde} />
-          {devis ? null : (
-            <Switch
-              checked={annuel}
-              onCheckedChange={(coche) => setPeriodicite(coche ? "annuel" : "mensuel")}
-            >
-              <span className="text-[#3d3d3d]">Facturation annuelle</span>
-              <span className="rounded-full border border-[#e3e3e3] bg-white px-2 py-0.5 text-xs font-medium text-[#050505]">
-                −{REMISE_PCT}&nbsp;%<span className="sr-only"> de remise</span>
-              </span>
-            </Switch>
-          )}
         </div>
+
+        {/* LE BLOC QUI REMPLACE LES MONTANTS — dit UNE SEULE FOIS. Répété
+            sur chaque carte, il deviendrait du remplissage, et « sur devis »
+            trois fois de suite se lit « c'est cher et ils ne le disent pas ».
+            Une page sans prix ne tient que si elle annonce DE QUOI le prix
+            dépend : c'est tout ce qui la sépare d'une page opaque. */}
+        {devis ? null : (
+          <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-[#e3e3e3] bg-[#fafafa] p-6 text-center sm:p-7">
+            <p className="font-[family-name:var(--font-jakarta)] text-lg font-semibold text-[#050505]">
+              {CALCULATEUR.sansPrix.titre}
+            </p>
+            <p className="mt-3 text-balance text-sm leading-relaxed text-[#616161]">
+              {CALCULATEUR.sansPrix.texte}
+            </p>
+            <p className="mt-3 text-xs text-[#767676]">{CALCULATEUR.sansPrix.note}</p>
+          </div>
+        )}
 
         {/* la grille. `pt-4` laisse passer les pastilles posées à -12 px.
             15/09 — QUATRE CARTES, DONC DEUX GABARITS (voir l'en-tête) :
@@ -873,7 +862,6 @@ export default function Grille() {
               p={p}
               choisis={choix.palier === p.id ? choix.postes : []}
               bascule={basculePour(p)}
-              periodicite={periodicite}
               monde={monde}
               volumes={volumes}
             />
@@ -1015,18 +1003,17 @@ export default function Grille() {
           </div>
           <Comparator
             className="mx-auto mt-12 max-w-4xl"
-            plans={colonnes.map(({ p, prixP, volumeLien }) => ({
+            plans={colonnes.map(({ p, piecesP, volumeLien }) => ({
               id: p.id,
               nom: p.nom,
-              prix: `${annuel ? equivalentMensuel(prixP) : prixP}\u00A0€`,
-              periode: annuel ? `par mois · ${prixAnnuel(prixP)}\u00A0€ par an` : "par mois",
+              prix: `${piecesP.toLocaleString("fr-FR")} pièces`,
+              periode: "par mois, d'après vos réponses",
               href: lienPalier(p, volumeLien),
               cta: p.aChoisir === null ? "Réserver un audit" : "Sélectionner les postes",
               bouton: boutonPalier(p),
               phare: p.phare,
             }))}
             familles={comparatifPaliers(
-              colonnes.map((c) => c.prixP) as [number, number, number],
               colonnes.map((c) => c.piecesP) as [number, number, number],
             ).map((f) => ({
               titre: f.titre,
