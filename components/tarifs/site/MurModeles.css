@@ -1,0 +1,184 @@
+/* ══════════════════════════════════════════════════════════════════════
+   MurModeles.css — la feuille du mur des quatre modèles (/tarifs/site)
+
+   Écrite le 14/09/2026 par l'intégrateur : l'agent qui a posé MurModeles.tsx
+   a été coupé (quota) juste après l'avoir importée, avant de l'écrire. Les
+   valeurs sont celles que son en-tête annonce — inclinaison bornée, retour
+   au repos en 300 ms, suivi à 120 ms, levée de 4 px sur la carte et non sur
+   le lien —, les couleurs viennent du bloc `.offres` de globals.css
+   (--o-line, --o-text, --o-muted, --o-soft) et l'ombre de `.o-card`.
+
+   Tout est scopé sous `.offres` et préfixé `mm-` : la page est le seul
+   endroit où ces règles existent, et rien n'en sort.
+
+   La perspective est sur le LIEN, pas sur la grille : une perspective de
+   grille ferait fuir les cartes des bords vers le centre, chacune vue sous
+   un angle différent. Sur le lien, chaque tuile a son propre point de fuite.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.offres .mm-mur {
+  margin-inline: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.offres .mm-tuile {
+  display: block;
+  perspective: 1000px;
+  border-radius: 14px;
+  outline-offset: 4px;
+}
+.offres .mm-tuile:focus-visible {
+  outline: 2px solid var(--o-text);
+}
+
+/* ——— la carte : le seul élément qui bouge. `transform-style: preserve-3d`
+   pour que les enfants puissent se détacher en translateZ ; la transition
+   de repos dure 300 ms, celle du suivi 120 ms (attribut data-suivi posé par
+   le JavaScript pendant que le pointeur est dessus). ——— */
+.offres .mm-carte {
+  transform-style: preserve-3d;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.offres .mm-carte[data-suivi] {
+  transition-duration: 120ms;
+}
+
+/* Sans JavaScript, sur tactile et sous mouvement réduit, il reste CE
+   survol-ci : une levée de 4 px, sans inclinaison. C'est le repli, et il
+   suffit. */
+@media (hover: hover) {
+  .offres .mm-tuile:hover .mm-carte {
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .offres .mm-carte,
+  .offres .mm-cadre,
+  .offres .mm-legende {
+    transition: none;
+  }
+  .offres .mm-tuile:hover .mm-carte {
+    transform: none;
+  }
+}
+
+/* ——— le cadre de navigateur : barre + écran, dans une carte à filet.
+   Mêmes ombre et filet que `.o-card`, arrondi 14 px (la page tient ses
+   cartes entre 12 et 20). ——— */
+.offres .mm-cadre {
+  overflow: hidden;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.11),
+    0 2.29px 2.29px -2.5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -3.75px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(9, 9, 11, 0.05);
+  transform: translateZ(0);
+  transition: box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  /* le détachement annoncé dans l'en-tête : 18 px pour le cadre, 8 px pour
+     la légende — l'écart entre les deux est ce qui donne l'épaisseur */
+  .offres .mm-tuile:hover .mm-cadre {
+    transform: translateZ(18px);
+    box-shadow:
+      0 1px 1px -1.25px rgba(0, 0, 0, 0.12),
+      0 4px 4px -2.5px rgba(0, 0, 0, 0.1),
+      0 16px 16px -3.75px rgba(0, 0, 0, 0.08),
+      0 0 0 1px rgba(9, 9, 11, 0.07);
+  }
+  .offres .mm-tuile:hover .mm-legende {
+    transform: translateZ(8px);
+  }
+}
+
+/* ——— la barre : hauteur fixe, trois feux, adresse centrée par un miroir
+   invisible. Sous 640 px le miroir disparaît (la place manque) et
+   l'adresse reprend simplement la suite des feux. ——— */
+.offres .mm-barre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding-inline: 10px;
+  border-bottom: 1px solid rgba(9, 9, 11, 0.06);
+  background: #fbfbfb;
+}
+.offres .mm-feux {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+.offres .mm-feux i {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(9, 9, 11, 0.16);
+}
+.offres .mm-feux--miroir {
+  visibility: hidden;
+}
+@media (max-width: 39.999rem) {
+  .offres .mm-feux--miroir {
+    display: none;
+  }
+}
+
+.offres .mm-adresse {
+  display: inline-flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.offres .mm-url {
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  line-height: 1;
+  color: var(--o-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ——— l'écran : 4 / 3, le format réel des captures. Un rapport posé, pas
+   une hauteur fixe : le cadre suivrait mal la colonne sinon. ——— */
+.offres .mm-ecran {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+}
+
+/* ——— la légende : nom à gauche, parti pris à droite dès 640 px ——— */
+.offres .mm-legende {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  padding-inline: 2px;
+  transform: translateZ(0);
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.offres .mm-nom {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--o-text);
+}
+.offres .mm-style {
+  overflow: hidden;
+  font-size: 13px !important;
+  line-height: 20px !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 39.999rem) {
+  .offres .mm-style {
+    display: none;
+  }
+}

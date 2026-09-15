@@ -1,11 +1,22 @@
-/* JournalDemandes — le journal des demandes reçues par le site (14/09/2026)
-   Contenu de la carte « La suite » de /tarifs/site : la barre de fenêtre,
-   puis quatre lignes. Tout est scopé sous `.offres` et préfixé `jd-`. Les
-   valeurs sont celles de l'ancienne MaqDemandes et de BarreFenetre
-   (app/tarifs/site/page.tsx), relevées telles quelles : la carte du prix,
-   juste à côté, garde la même barre et les deux doivent rester jumelles.
+/* ══════════════════════════════════════════════════════════════════════
+   JournalDemandes.css — le contenu de la carte « La suite » de
+   /tarifs/site (14/09/2026)
+
+   Feuille du seul composant <JournalDemandes> : la barre de fenêtre, la
+   liste, la ligne, puis l'entrée rejouée. Tout est scopé sous `.offres` et
+   préfixé `jd-` — hors de ce monde, aucune de ces règles n'existe.
+
+   Les valeurs ne sont pas choisies : elles sont RELEVÉES sur les classes
+   Tailwind que portaient l'ancienne MaqDemandes et BarreFenetre
+   (app/tarifs/site/page.tsx) — gap-2.5 → 10 px, px-4 py-2.5 → 10 px 16 px,
+   space-y-1.5 → 6 px, rounded-[9px], black/[0.05], #fcfcfc, w-9 → 36 px.
+   La carte du prix, juste à côté, garde sa barre en utilitaires : les deux
+   barres sont jumelles à l'écran et doivent le rester au pixel.
+
    Les jetons `--demo-*` et `--o-*` viennent du bloc `.offres` de
-   globals.css ; chaque `var()` porte sa valeur en secours. */
+   globals.css (lignes 668 et suivantes) ; chaque `var()` porte sa valeur
+   en secours, pour qu'une règle reste juste même lue hors de son monde.
+   ══════════════════════════════════════════════════════════════════════ */
 
 /* ——— la barre de fenêtre : trois pastilles et un titre ——— */
 .offres .jd-barre {
@@ -18,6 +29,7 @@
 }
 .offres .jd-pastilles {
   display: flex;
+  flex: 0 0 auto;
   gap: 6px;
 }
 .offres .jd-pastille {
@@ -28,8 +40,10 @@
   background: rgba(0, 0, 0, 0.12);
 }
 .offres .jd-titre-barre {
+  min-width: 0;
   font-size: 11.5px;
   font-weight: 600;
+  line-height: 1.35;
   color: var(--o-muted-strong, #52525b);
 }
 
@@ -44,13 +58,20 @@
 }
 
 /* ——— une ligne : heure · trait · titre · état ———
-   Filet et fond explicites : en Tailwind v4 un `border` nu peindrait en
-   currentColor, ici tout est écrit. Le titre est le seul à pouvoir rétrécir
-   (`min-width: 0`), donc le seul à se tronquer : c'est lui qui compte. */
+   Filet et fond écrits en toutes lettres : en Tailwind v4 un `border` nu
+   peindrait en currentColor, et ici aucune couleur n'est laissée à deviner.
+   Le titre est le seul à pouvoir rétrécir (`min-width: 0`), donc le seul à
+   se tronquer : c'est lui qui porte l'information.
+
+   L'écart passe de 12 px (le `gap-3` d'origine) à 10 px : le trait lucide
+   ajoute une quatrième colonne et un troisième écart, soit ~25 px pris sur
+   la largeur du titre. À 10 px la ligne rend +7 px seulement par rapport à
+   aujourd'hui, ce qui tient à 1024 px — la largeur la plus serrée où les
+   quatre colonnes cohabitent (carte ~448 px, l'état est déjà affiché). */
 .offres .jd-ligne {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 10px 12px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 9px;
@@ -60,10 +81,13 @@
   flex: 0 0 36px;
   width: 36px;
   font-size: 11.5px;
+  line-height: 1.35;
   color: var(--demo-faible, #a1a1aa);
   white-space: nowrap;
 }
-.offres .jd-icone {
+/* le trait : même gris que l'heure et que l'état, jamais une couleur —
+   il classe la ligne, il ne la signale pas */
+.offres .jd-trait {
   flex: 0 0 auto;
   color: var(--demo-faible, #a1a1aa);
 }
@@ -75,35 +99,62 @@
   white-space: nowrap;
   font-size: 12.5px;
   font-weight: 500;
+  line-height: 1.35;
   color: var(--o-text, #09090b);
 }
-/* l'état se cache sous 640 px (le `sm` de Tailwind, 40 rem) : à trois
-   colonnes sur ~286 px de large, c'est le titre qui se tronquait */
+/* l'état se cache sous 640 px (le `sm` de Tailwind, 40 rem), exactement
+   comme aujourd'hui : à quatre colonnes sur une carte de ~342 px, c'est le
+   titre qui se tronquait, et c'est lui qui compte */
 .offres .jd-etat {
   display: none;
   flex: 0 0 auto;
   font-size: 11.5px;
+  line-height: 1.35;
   color: var(--demo-faible, #a1a1aa);
   white-space: nowrap;
 }
 @media (min-width: 40rem) {
   .offres .jd-etat {
-    display: inline;
+    display: block;
   }
 }
 
-/* ——— l'entrée rejouée ———
-   Quand la carte arrive dans la fenêtre, le composant pose `data-rejoue`
-   sur la racine. Cette règle cache les quatre lignes DANS LE MÊME RENDU
-   (pas une image de retard, donc pas de clignotement), puis Motion les
-   fait entrer une à une et laisse ses styles en ligne (opacité 1,
-   transform none), qui l'emportent sur elle.
-   Sans JavaScript, l'attribut n'existe pas : rien n'est jamais caché.
-   Mouvement réduit : l'attribut n'est jamais posé ET la règle est hors de
-   portée — double sécurité, une ligne ne peut pas rester invisible. */
+/* ——— l'entrée rejouée, une ligne après l'autre ———
+   La cadence vient du composant : chaque <li> porte son retard en
+   `--jd-retard` (0, 500, 1000, 1500 ms). Ici on ne décrit que le geste.
+
+   `both` fait tenir la pose de départ pendant le retard : la quatrième
+   ligne reste à opacité 0 jusqu'à 1,5 s puis entre, sans qu'aucun style
+   n'ait eu à être posé sur elle à l'avance. C'est ce qui remplace le
+   montage progressif de la source (voir l'en-tête du .tsx) : les quatre
+   lignes sont dans le document dès le rendu serveur, aucune n'apparaît ni
+   ne disparaît, et rien ne bouge dans le flux — l'entrée est une
+   transformation, elle ne réserve ni ne libère de place.
+
+   Trois verrous pour qu'une ligne ne puisse JAMAIS rester invisible :
+   1. `data-rejoue` n'est posé que par le composant, en JavaScript, à
+      l'entrée dans la fenêtre — sans JS l'attribut n'existe pas et cette
+      règle entière est hors d'atteinte ;
+   2. elle vit dans `prefers-reduced-motion: no-preference`, donc hors de
+      portée en mouvement réduit, où le composant ne la pose pas non plus ;
+   3. l'animation finit sur `opacity: 1` et `transform: none`, jamais sur
+      autre chose. */
 @media (prefers-reduced-motion: no-preference) {
   .offres .jd[data-rejoue] .jd-ligne {
+    animation: jd-entree 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    /* après le raccourci, qui vient de remettre le retard à zéro */
+    animation-delay: var(--jd-retard, 0ms);
+  }
+}
+
+/* les @keyframes sont globales quoi qu'il arrive : le nom est préfixé */
+@keyframes jd-entree {
+  from {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

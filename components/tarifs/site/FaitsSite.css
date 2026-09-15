@@ -1,0 +1,101 @@
+/* FaitsSite — la bande des quatre faits sous le mur de /tarifs/site.
+   Tout est scopé sous `.offres` et préfixé `fs-` ; les jetons viennent du
+   bloc `.offres` de globals.css (--o-text, --o-muted, --o-line). Les
+   polices aussi : Plus Jakarta Sans (var(--font-jakarta)) pour la valeur,
+   Inter Tight héritée de `.offres` pour la précision.
+
+   Deux dispositions, une seule liste :
+   · sous 64 rem, une grille 2 × 2 (colonnes égales, le texte s'y replie) ;
+   · dès 64 rem, une rangée `flex` à `space-between` : chaque cellule prend
+     la largeur de son texte et les trois écarts se partagent le reste.
+     C'est l'écart assumé sur la grille égale de la source (voir l'en-tête
+     de FaitsSite.tsx) : « Branché aux postes » en Jakarta 600 mesure
+     ~9 em, soit plus que le quart d'une colonne de 1200 px dès 32 px,
+     et en grille il passerait sur deux lignes à 1440 comme à 1700. */
+
+.offres .fs-liste {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 20px;
+  row-gap: 28px;
+  margin: 0;
+  padding: 28px 0;
+  list-style: none;
+  border-top: 1px solid var(--o-line);
+  border-bottom: 1px solid var(--o-line);
+}
+@media (min-width: 64rem) {
+  .offres .fs-liste {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    column-gap: 40px;
+    padding: 36px 0;
+  }
+}
+
+/* `min-width: 0` : en grille comme en flex, la cellule accepte de passer
+   sous la largeur de son contenu — le texte se replie au lieu de déborder */
+.offres .fs-fait {
+  min-width: 0;
+  text-align: left;
+}
+
+/* 28 px jusqu'à 64 rem (le terme fluide 0.99rem + 1.18vw ne passe le
+   plancher qu'à ~1030 px), ~32,8 px à 1440, ~36 px à 1700 : la pente est
+   réglée pour atteindre le plafond à la largeur de recette la plus haute.
+   Poids 600 et chasse −0,03 em : ceux des titres du monde `.offres`
+   (o-h4 / o-h5), la source dit 700. */
+.offres .fs-valeur {
+  margin: 0;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(28px, 0.99rem + 1.18vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--o-text);
+  text-wrap: balance;
+}
+
+/* la précision : corps, chasse et gris de `.o-small`, avec un interligne
+   de légende (1.5) au lieu de l'interligne de paragraphe (1.8). Écrit en
+   entier ici plutôt qu'empilé sur `.o-small` : les deux règles pèsent
+   (0,2,0) et l'ordre de chargement entre globals.css et cette feuille
+   n'est pas garanti d'un mode à l'autre. */
+.offres .fs-precision {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--o-muted);
+  text-wrap: pretty;
+}
+
+/* ——— le compteur (CompteurFait) ———
+   Une grille en ligne dont la cellule unique est dimensionnée par un
+   FANTÔME : `::after` rend la valeur finale (attr(data-final)) en
+   invisible, dans la même case que le nombre vivant. La case a donc
+   toujours exactement la largeur de « 21 » dans cette police à cette
+   taille — ni `ch` (qui suppose des chiffres à chasse fixe) ni mesure
+   en JavaScript — et le mot qui suit ne bouge jamais pendant le compte.
+   Le nombre vivant est calé à droite : les unités restent en place, le
+   chiffre des dizaines apparaît à gauche, comme un compteur.
+   `tabular-nums` évite en plus le tremblement du bord gauche si la
+   police a des chiffres tabulaires ; sinon rien ne casse.
+   Le jumeau `sr-only` (lu par les lecteurs d'écran) est en position
+   absolue : il ne prend pas de case. */
+.offres .fs-compteur {
+  display: inline-grid;
+  font-variant-numeric: tabular-nums;
+}
+.offres .fs-compteur > [aria-hidden],
+.offres .fs-compteur::after {
+  grid-area: 1 / 1;
+}
+.offres .fs-compteur > [aria-hidden] {
+  justify-self: end;
+}
+.offres .fs-compteur::after {
+  content: attr(data-final);
+  visibility: hidden;
+}

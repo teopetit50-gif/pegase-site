@@ -3,10 +3,15 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Partage from "@/components/Partage";
-import MiniSite from "@/components/modeles/MiniSite";
-import { CATEGORIES, parCategorie } from "@/components/modeles/donnees";
 import { Chevron } from "@/components/offres/MediaMoteurs";
-import { COURRIEL } from "@/lib/reservation";
+import MurModeles from "@/components/tarifs/site/MurModeles";
+import FaitsSite from "@/components/tarifs/site/FaitsSite";
+import PrixSite from "@/components/tarifs/site/PrixSite";
+import JournalDemandes from "@/components/tarifs/site/JournalDemandes";
+import EtapesDefilantes from "@/components/tarifs/site/EtapesDefilantes";
+import CircuitNuit from "@/components/tarifs/site/CircuitNuit";
+import FaqSite from "@/components/tarifs/site/FaqSite";
+import ClotureSite from "@/components/tarifs/site/ClotureSite";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs/site — l'offre site à prix public (01/09/2026)
@@ -58,6 +63,31 @@ import { COURRIEL } from "@/lib/reservation";
    pose sur la maquette du prix (Partage as="div", sans data-reveal :
    l'objet doit être visible à l'arrivée). Pastille, titre, chapô et
    boutons entrent en cascade ([data-arrivee], components/Arrivee.tsx).
+
+   14/09/2026 — REFONTE par composants repris (chantier « fais comme tu le
+   sens, je veux des beaux trucs bien développés et pro »). Même ordre de
+   sections, mêmes textes, mêmes liens ; ce qui change est la matière :
+     1. mur        → <MurModeles>       (Aceternity « 3D card » + le cadre
+                                         Safari de Magic UI : les quatre
+                                         vitrines s'inclinent sous le pointeur)
+     2. faits      → <FaitsSite>        (Tailark « stats two » ; le « 21 » se
+                                         compte à l'arrivée, <CompteurFait>)
+     3. prix       → <PrixSite>         (Tailark « pricing » : trois taux de
+                                         Chèque TIC, le reste à charge glisse)
+        la suite   → <JournalDemandes>  (Magic UI « animated list » : les
+                                         quatre lignes entrent l'une après
+                                         l'autre)
+     4. déroulé    → <EtapesDefilantes>
+     5. bande nuit → <CircuitNuit>      (Magic UI « border beam » : un
+                                         faisceau fait le tour de la carte)
+     6. FAQ        → <FaqSite>          (Tailark « faqs three », accordéon
+                                         Radix : une seule réponse ouverte)
+     7. clôture    → <ClotureSite>      (shadcnblocks cta13)
+   Chaque composant porte son en-tête ORIGINE / POURQUOI ICI / CE QUI EST
+   JETÉ / ÉCARTS ASSUMÉS et sa feuille CSS scopée sous `.offres`. Les
+   maquettes locales (BarreFenetre, MaqCommande, MaqDemandes) et les
+   constantes ETAPES, CIRCUIT, VITRINE sont parties avec elles : leur
+   contenu vit désormais dans le composant qui le rend.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -68,9 +98,6 @@ export const metadata: Metadata = {
 
 /* ——— les quatre modèles du mur : le premier de chaque famille du
    catalogue, pour montrer quatre partis pris et non quatre variantes ——— */
-const VITRINE = CATEGORIES.map((c) => parCategorie(c.cle)[0]);
-
-/* ——— les quatre faits sous le mur — les mêmes que /modeles ——— */
 const FAITS: [string, string][] = [
   ["21 modèles", "tous en ligne, tous visitables"],
   ["Contenu réécrit", "en français, à votre métier"],
@@ -85,45 +112,6 @@ const COMPRIS_SITE: string[] = [
   "Vos photos, vos coordonnées, vos horaires en place",
   "Nom de domaine la première année, mise en ligne comprise",
   "Formulaire prêt à connecter à vos postes : devis, relance, avis",
-];
-
-/* ——— le déroulé, tel que /site/commande l'annonce lui-même ——— */
-const ETAPES = [
-  {
-    n: "01",
-    titre: "Le modèle",
-    sousTitre: "Choisir l'allure, pas le métier",
-    texte:
-      "Les vingt et un modèles sont en ligne : vous les consultez et retenez celui qui vous correspond. Le design change, la mécanique derrière ne change pas.",
-  },
-  {
-    n: "02",
-    titre: "Le brief",
-    sousTitre: "Votre métier, vos photos, vos horaires",
-    texte:
-      "Depuis votre compte, sans quitter la page. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production.",
-  },
-  {
-    n: "03",
-    titre: "L'écriture",
-    sousTitre: "Tout le contenu, réécrit en français",
-    texte:
-      "Chaque page est réécrite à votre métier, vos coordonnées et vos photos en place. Rien de ce que montre le modèle ne reste tel quel.",
-  },
-  {
-    n: "04",
-    titre: "La mise en ligne",
-    sousTitre: "Sous votre nom, domaine compris",
-    texte:
-      "Le site vous appartient dès le premier jour. Dès qu'un poste est en service chez vous, chaque demande reçue entre dans le circuit.",
-  },
-];
-
-/* ——— ce qui suit le clic — la bande nuit ——— */
-const CIRCUIT = [
-  ["01", "Accusé de réception en deux minutes, sous votre signature."],
-  ["02", "Devis relancé à J+3 et J+7, facture suivie jusqu'au règlement."],
-  ["03", "Avis demandé une fois le travail fait, jamais avant."],
 ];
 
 /* ——— la FAQ site — les questions qu'un prix affiché doit prendre de front ——— */
@@ -168,94 +156,6 @@ function EnTete({ pastille, titre, chapo }: { pastille: string; titre: string; c
   );
 }
 
-/* ——— la barre de fenêtre des maquettes (trois pastilles + titre), celle
-   de la maquette de /offres ——— */
-function BarreFenetre({ titre }: { titre: string }) {
-  return (
-    <div className="flex items-center gap-2.5 border-b border-black/[0.06] bg-[#fbfbfb] px-4 py-2.5">
-      <span className="flex gap-1.5">
-        {[0, 1, 2].map((k) => (
-          <i key={k} className="block h-[7px] w-[7px] rounded-full bg-black/[0.12]" />
-        ))}
-      </span>
-      <span className="text-[11.5px] font-semibold text-[#52525b]">{titre}</span>
-    </div>
-  );
-}
-
-/* ——— maquette du prix : le récapitulatif de commande, où l'aide se
-   soustrait ligne à ligne — le format le plus honnête pour une aide ——— */
-function MaqCommande() {
-  return (
-    <>
-      <BarreFenetre titre="Omega.AI : votre commande" />
-      <div className="px-5 py-4 sm:px-6">
-        <div className="flex items-center justify-between gap-4 py-3">
-          <div className="min-w-0">
-            <div className="text-[13px] font-medium text-[#09090b]">Site catalogue</div>
-            <div className="text-[11.5px] text-[#a1a1aa]">un modèle, réécrit à votre métier</div>
-          </div>
-          <span className="num shrink-0 text-[13px] font-medium text-[#09090b]">990 €</span>
-        </div>
-        <div className="flex items-center justify-between gap-4 border-t border-black/[0.06] py-3">
-          <div className="min-w-0">
-            <div className="text-[13px] font-medium text-[#09090b]">Chèque TIC à 80 %</div>
-            <div className="text-[11.5px] text-[#a1a1aa]">Région Guadeloupe · si vous êtes éligible</div>
-          </div>
-          <span className="num shrink-0 text-[13px] font-medium text-[#09090b]">− 792 €</span>
-        </div>
-        <div className="flex items-end justify-between gap-4 border-t border-black/[0.12] pt-4">
-          <div>
-            <div className="text-[11.5px] font-semibold text-[#52525b]">Restant à votre charge</div>
-            <div
-              className="num mt-1 text-[30px] font-semibold leading-none tracking-[-0.03em] text-[#09090b]"
-              style={{ fontFamily: "var(--font-jakarta)" }}
-            >
-              198 €
-            </div>
-          </div>
-          <span className="rounded-full bg-[#ecfdf3] px-2.5 py-1 text-[11.5px] font-medium text-[#15803d]">
-            Éligibilité vérifiée à l&apos;audit
-          </span>
-        </div>
-        <p className="mt-4 text-[12.5px] leading-[1.6] text-[#71717a]">
-          Le prix est le même pour tout le monde. Sans l&apos;aide, ou à 40&nbsp;%, il reste 990&nbsp;€ ou 594&nbsp;€, jamais plus.
-        </p>
-      </div>
-    </>
-  );
-}
-
-/* ——— maquette de la suite : le journal des demandes reçues par le site,
-   le même geste que le journal de l'accueil ——— */
-function MaqDemandes() {
-  const lignes = [
-    ["09:14", "Demande de devis · chantier", "accusé de réception envoyé"],
-    ["09:16", "Réponse · demande du samedi", "sous votre signature"],
-    ["J+3", "Devis DV-0891 · Métalco", "relancé"],
-    ["J+7", "Facture FA-2418 · Sogexal", "réglée, avis demandé"],
-  ];
-  return (
-    <>
-      <BarreFenetre titre="Omega.AI : demandes reçues par le site" />
-      <div className="space-y-1.5 px-4 py-3.5">
-        {lignes.map(([h, t, e]) => (
-          <div
-            key={t}
-            className="flex items-center gap-3 rounded-[9px] border border-black/[0.05] bg-[#fcfcfc] px-3 py-2.5"
-          >
-            <span className="num w-9 shrink-0 text-[11.5px] text-[#a1a1aa]">{h}</span>
-            <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-[#09090b]">{t}</span>
-            {/* l'état se cache sous 640 px : à trois colonnes sur 327 px de
-                large, c'est le titre qui se tronquait, et c'est lui qui compte */}
-            <span className="hidden shrink-0 text-[11.5px] text-[#a1a1aa] sm:inline">{e}</span>
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
-
 export default function TarifsSitePage() {
   return (
     <PageShell>
@@ -296,38 +196,11 @@ export default function TarifsSitePage() {
               </div>
             </div>
 
-            {/* le mur — quatre modèles réels, dans leur cadre de navigateur,
-                chacun cliquable vers sa démo en ligne. C'est la maquette de
+            {/* le mur — quatre modèles réels, chacun dans un cadre de
+                navigateur qui s'incline sous le pointeur. C'est la maquette de
                 cette page : ce qu'on achète se voit. */}
-            <div
-              data-arrivee="collage"
-              className="mt-12 grid grid-cols-2 gap-4 sm:mt-14 lg:grid-cols-4 lg:gap-5"
-            >
-              {VITRINE.map((m, i) => (
-                <a
-                  key={m.slug}
-                  href={m.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`${m.nom} : ${m.style}`}
-                  className="group block"
-                >
-                  <MiniSite
-                    m={m}
-                    ton="clair"
-                    priority={i < 2}
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 45vw, 22vw"
-                    className="transition-transform duration-300 ease-out group-hover:-translate-y-1"
-                  />
-                  <div className="mt-3 flex items-baseline justify-between gap-3 px-0.5">
-                    <span className="text-[14px] font-medium text-[#09090b]">{m.nom}</span>
-                    <span className="o-small hidden truncate !text-[13px] !leading-[20px] sm:inline">
-                      {m.style}
-                    </span>
-                  </div>
-                </a>
-              ))}
-            </div>
+            <MurModeles />
+
             <p data-reveal className="o-small mt-8 text-center">
               Et dix-sept autres, rangés par usage.{" "}
               <Link href="/modeles" className="o-link !text-[14px]">
@@ -341,14 +214,7 @@ export default function TarifsSitePage() {
         {/* ════════ 2 · LES FAITS — la bande sous le mur ════════ */}
         <section data-monde="clair" className="pb-[40px] pt-[80px]">
           <div className="o-wrap">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
-              {FAITS.map(([fort, doux]) => (
-                <div key={fort} data-reveal className="text-center">
-                  <p className="o-h5 !text-[20px] !leading-[28px]">{fort}</p>
-                  <p className="o-small mt-1 !text-[13.5px] !leading-[20px]">{doux}</p>
-                </div>
-              ))}
-            </div>
+            <FaitsSite faits={FAITS} />
           </div>
         </section>
 
@@ -371,7 +237,7 @@ export default function TarifsSitePage() {
                   as="div"
                   className="o-card overflow-hidden"
                 >
-                  <MaqCommande />
+                  <PrixSite />
                 </Partage>
                 <p data-reveal className="o-small mt-8 !text-[14px] uppercase tracking-[0.08em]">
                   Le prix
@@ -405,7 +271,7 @@ export default function TarifsSitePage() {
                      est comprise avec eux ——— */}
               <div className="flex flex-col">
                 <div data-reveal className="o-card overflow-hidden">
-                  <MaqDemandes />
+                  <JournalDemandes />
                 </div>
                 <p data-reveal className="o-small mt-8 !text-[14px] uppercase tracking-[0.08em]">
                   La suite
@@ -450,24 +316,7 @@ export default function TarifsSitePage() {
               titre="Du modèle à la mise en ligne."
               chapo="Vous choisissez un modèle, vous déposez votre brief, nous écrivons et mettons en ligne. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production."
             />
-            <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-              {ETAPES.map((e) => (
-                <div key={e.n} data-reveal className="flex flex-col">
-                  <span aria-hidden className="h-px w-full bg-[#e4e4e7]" />
-                  <span
-                    className="mt-4 text-[12px] font-semibold tracking-[0.12em] text-[#a1a1aa]"
-                    style={{ fontVariantNumeric: "tabular-nums" }}
-                  >
-                    {e.n}
-                  </span>
-                  <h3 className="o-h5 mt-3">{e.titre}</h3>
-                  <p className="mt-2 text-[15px] font-semibold leading-[24px] text-[#18181b]">
-                    {e.sousTitre}
-                  </p>
-                  <p className="o-small mt-2 !text-[15px] !leading-[24px]">{e.texte}</p>
-                </div>
-              ))}
-            </div>
+            <EtapesDefilantes />
           </div>
         </section>
 
@@ -497,24 +346,7 @@ export default function TarifsSitePage() {
                   </Link>
                 </div>
               </div>
-              <div data-reveal className="rounded-[20px] border border-white/[0.1] bg-[#18181b] p-8 sm:p-10">
-                <p className="text-[11.5px] font-semibold uppercase tracking-[0.1em] text-[#a1a1aa]">
-                  Ce qui suit le clic
-                </p>
-                <ul className="mt-5 divide-y divide-white/[0.08]">
-                  {CIRCUIT.map(([n, t]) => (
-                    <li key={n} className="flex gap-5 py-4 first:pt-0 last:pb-0">
-                      <span
-                        className="mt-[3px] text-[12px] font-semibold tracking-[0.12em] text-[#71717a]"
-                        style={{ fontVariantNumeric: "tabular-nums" }}
-                      >
-                        {n}
-                      </span>
-                      <span className="o-body !text-[#d4d4d8]">{t}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <CircuitNuit />
             </div>
           </div>
         </section>
@@ -527,61 +359,13 @@ export default function TarifsSitePage() {
               titre="Questions sur le site."
               chapo="Les cinq questions qu'un prix affiché doit traiter clairement, avec les réponses que nous donnons."
             />
-            <div className="mx-auto mt-12 max-w-[800px]">
-              {FAQ_SITE.map((f) => (
-                <details key={f.q} className="o-faq-item">
-                  <summary>
-                    {f.q}
-                    <span className="o-faq-croix" aria-hidden>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.8}
-                        strokeLinecap="round"
-                      >
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                    </span>
-                  </summary>
-                  <p className="o-body pb-6 pr-10">{f.a}</p>
-                </details>
-              ))}
-            </div>
+            <FaqSite questions={FAQ_SITE} />
           </div>
         </section>
 
         {/* ════════ 7 · CTA — clôture au noir ════════ */}
         <section className="o-nuit relative py-[120px]">
-          <div className="o-wrap relative flex flex-col items-center text-center">
-            <h2 data-reveal className="o-h2 max-w-[620px]">
-              Commandez votre site en deux minutes.
-            </h2>
-            <p data-reveal className="o-lead mt-5 max-w-[600px]">
-              Un modèle, votre brief, et nous écrivons tout pour votre métier. Rien à payer en ligne aujourd&apos;hui&nbsp;: nous vous appelons pour régler, et le Chèque TIC se vérifie avant tout engagement.
-            </p>
-            <div data-reveal className="mt-9 flex flex-wrap justify-center gap-3">
-              <Link href="/site/commande" className="o-btn o-btn--primary">
-                Commander le site
-              </Link>
-              <a href="/contact" className="o-btn o-btn--ghost">
-                Nous joindre
-              </a>
-            </div>
-            <p data-reveal className="o-small mt-5 !text-[13px]">
-              {COURRIEL}, nous vous répondons le jour même.
-            </p>
-            {/* la mention discrète de l'autre porte : pour qui s'est trompé
-                d'aiguillage, sans re-poser deux portes ici */}
-            <p data-reveal className="o-small mt-8 max-w-[520px] !text-[13px] !leading-[20px]">
-              Plusieurs services se partagent le travail chez vous&nbsp;? Votre site s&apos;inscrit dans un ensemble qui se mesure d&apos;abord&nbsp;: votre prix est établi à l&apos;issue d&apos;un diagnostic.{" "}
-              <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-white">
-                Demander un diagnostic
-              </Link>
-            </p>
-          </div>
+          <ClotureSite />
         </section>
       </div>
     </PageShell>

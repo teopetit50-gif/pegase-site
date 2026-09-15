@@ -1,0 +1,171 @@
+/* FaqSite — la FAQ de /tarifs/site, liste à filets (faqs/three de Tailark).
+   Toutes les règles sont scopées sous `.offres` avec le préfixe `fqs-`, et
+   le composant n'emploie AUCUNE classe Tailwind : la feuille porte tout.
+   Le préfixe et les noms de keyframes sont propres à ce fichier — les
+   `fq-*` de components/ui/faq-06.css (l'autre FAQ Radix du site) ne sont
+   pas scopés, un nom partagé les ferait se marcher dessus. */
+
+/* ——— la liste : 800 px centrés, et le rythme vertical que portait la
+   <div> de la page (mt-12 = 48 px). `--fqs-pad` est la rentrée commune du
+   texte et des filets : c'est elle qui laisse la surface de la question
+   ouverte déborder un peu de son texte. ——— */
+.offres .fqs {
+  --fqs-pad: 16px;
+  width: 100%;
+  max-width: 800px;
+  margin: 48px auto 0;
+}
+@media (min-width: 768px) {
+  .offres .fqs {
+    --fqs-pad: 24px;
+  }
+}
+
+/* ——— une question ——— */
+.offres .fqs-item {
+  position: relative;
+  padding-inline: var(--fqs-pad);
+  border-radius: 12px;
+  background: transparent;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.offres .fqs-item[data-state="open"] {
+  background: var(--o-soft);
+}
+
+/* le filet entre deux questions : rentré à l'aplomb du texte, absent après
+   la dernière, effacé sous celle qui est ouverte (le geste de la source,
+   son <hr> en moins). Position absolue : il ne pèse rien dans la hauteur,
+   donc il ne fausse pas la mesure de l'accordéon. */
+.offres .fqs-item::after {
+  content: "";
+  position: absolute;
+  right: var(--fqs-pad);
+  bottom: 0;
+  left: var(--fqs-pad);
+  height: 1px;
+  background: var(--o-line);
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.offres .fqs-item:last-child::after,
+.offres .fqs-item[data-state="open"]::after {
+  opacity: 0;
+}
+
+/* ——— le déclencheur : Radix rend un <h3> (fqs-tete) qui contient un
+   <button> (fqs-declencheur). Le <button> ne tient sa police de personne :
+   elle est réécrite ici, Inter Tight comme le reste du monde. ——— */
+.offres .fqs-tete {
+  display: flex;
+  margin: 0;
+}
+.offres .fqs-declencheur {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  margin: 0;
+  padding: 20px 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--o-text);
+}
+@media (min-width: 768px) {
+  .offres .fqs-declencheur {
+    font-size: 17px;
+  }
+}
+.offres .fqs-declencheur:focus-visible {
+  outline: 2px solid var(--o-text);
+  outline-offset: 2px;
+}
+.offres .fqs-question {
+  flex: 1 1 auto;
+}
+
+/* le chevron : 18 px (les attributs width/height de lucide valent 24, la
+   feuille l'emporte), gris au repos, encre au survol, retourné à
+   l'ouverture. */
+.offres .fqs-chevron {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  color: var(--o-muted);
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.offres .fqs-declencheur:hover .fqs-chevron {
+  color: var(--o-text);
+}
+.offres .fqs-item[data-state="open"] .fqs-chevron {
+  transform: rotate(180deg);
+}
+
+/* ——— la réponse ——— */
+.offres .fqs-contenu {
+  overflow: hidden;
+}
+.offres .fqs-reponse {
+  margin: 0;
+  padding-right: 8px;
+  padding-bottom: 22px;
+}
+@media (min-width: 768px) {
+  .offres .fqs-reponse {
+    padding-right: 40px;
+  }
+}
+
+/* L'ouverture n'anime QUE la hauteur, jamais l'opacité : une animation
+   gelée laisserait un panneau invisible qui capte les clics.
+   `--radix-accordion-content-height` est posée par la primitive sur le
+   contenu ; c'est elle qui rend la hauteur animable. */
+@keyframes fqs-ouvre {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes fqs-ferme {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+.offres .fqs-contenu[data-state="open"] {
+  animation: fqs-ouvre 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.offres .fqs-contenu[data-state="closed"] {
+  animation: fqs-ferme 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Mouvement réduit : plus un trajet, mais exactement les mêmes états —
+   la réponse s'affiche d'un coup, le chevron est retourné, la surface est
+   posée. Rien n'est dégradé, seul le chemin disparaît. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .fqs-item,
+  .offres .fqs-item::after,
+  .offres .fqs-chevron {
+    transition: none;
+  }
+  .offres .fqs-contenu[data-state="open"],
+  .offres .fqs-contenu[data-state="closed"] {
+    animation: none;
+  }
+}

@@ -1,0 +1,532 @@
+/* ══════════════════════════════════════════════════════════════════════
+   EtapesDefilantes — le déroulé à volet collant de /tarifs/site.
+
+   Toutes les règles sont scopées sous `.offres` et préfixées `ed-`. Les
+   jetons (--o-text, --o-muted, --o-line, --o-soft) et les classes o-h4 /
+   o-small / o-card-soft / num viennent de globals.css : rien n'y est
+   redéfini, seules les tailles propres à la section le sont — et chaque
+   fois qu'une règle doit gagner contre une classe `o-*`, elle est écrite
+   en (0,3,0) (`.offres .ed-etape .ed-corps`) et non en (0,2,0) : à
+   spécificité égale, c'est l'ordre des feuilles qui déciderait, et cet
+   ordre n'est pas garanti entre globals.css et une feuille de composant.
+
+   Trois dispositions, un seul balisage, pilotées par `data-mode` sur .ed :
+     repos  — rendu serveur, et rendu définitif si JavaScript ne s'exécute
+              pas : tout est en encre pleine, le volet montre la première
+              maquette. Aucune étape n'est éteinte tant que le composant
+              n'a pas pris la main ;
+     defile — dès 64 rem, deux colonnes : l'étape courante en encre, les
+              autres à .35, le volet collant à 120 px du haut ;
+     pose   — mouvement réduit : une colonne, chaque étape suivie de sa
+              maquette (dès 48 rem), plus rien ne bouge.
+
+   Sous 64 rem les maquettes ne sont pas affichées du tout : à 390 px une
+   mosaïque de quatre vitrines, ou deux colonnes de fausses lignes, ne se
+   lisent plus — les étapes deviennent des cartes numérotées. Elles sont
+   décoratives (aria-hidden), rien ne se perd.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——————————————————————————————————————————————————————————
+   1 · LA GRILLE
+   —————————————————————————————————————————————————————————— */
+/* La respiration sous l'en-tête de section est portée ICI, et non par un
+   `mt-14` de l'appelant : sous `.offres`, une règle de composant hors
+   couche gagne contre un utilitaire Tailwind, donc un `mt-*` passé en
+   className serait ignoré sans un bruit. 56 px = le mt-14 des autres
+   sections de la page. */
+.offres .ed {
+  --ed-volet: 480px;
+  --ed-carte: 380px;
+  --ed-collant: 120px;
+  margin-top: 56px;
+}
+
+@media (min-width: 64rem) {
+  /* pas d'`align-items: start` : le volet doit rester étiré sur toute la
+     hauteur de la rangée, sinon `position: sticky` n'a aucune course. */
+  .offres .ed {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--ed-volet);
+    column-gap: 56px;
+  }
+  .offres .ed[data-mode="pose"] {
+    display: block;
+    max-width: 760px;
+  }
+}
+
+@media (min-width: 80rem) {
+  .offres .ed {
+    --ed-volet: 560px;
+  }
+}
+
+/* ——————————————————————————————————————————————————————————
+   2 · LA COLONNE DES ÉTAPES
+   —————————————————————————————————————————————————————————— */
+.offres .ed-liste {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* sous 64 rem : des cartes numérotées, toutes lisibles, sans maquette */
+.offres .ed-etape {
+  border: 1px solid var(--o-line);
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 20px;
+}
+
+@media (min-width: 64rem) {
+  .offres .ed-liste {
+    display: block;
+  }
+  /* chaque étape occupe ~64 vh : la bande de détection (les 20 % du milieu
+     de la fenêtre) n'en croise jamais plus de deux à la fois. La première
+     est plus courte et cadrée en haut — sinon son texte naîtrait un tiers
+     d'écran sous le volet, qui est déjà collé. */
+  .offres .ed-etape {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 64vh;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    padding: 0;
+    transition: opacity 0.3s var(--ease-out-strong);
+  }
+  .offres .ed-etape:first-child {
+    justify-content: flex-start;
+    min-height: 52vh;
+  }
+  .offres .ed-etape:last-child {
+    min-height: 58vh;
+  }
+  /* l'extinction n'existe QUE quand le composant pilote vraiment l'étape
+     courante — jamais au premier rendu, jamais sans JavaScript. */
+  .offres .ed[data-mode="defile"] .ed-etape {
+    opacity: 0.35;
+  }
+  .offres .ed[data-mode="defile"] .ed-etape[data-vif="oui"] {
+    opacity: 1;
+  }
+  .offres .ed[data-mode="pose"] .ed-etape {
+    display: block;
+    min-height: 0;
+    opacity: 1;
+    padding: 32px 0;
+    border-top: 1px solid var(--o-line);
+  }
+  .offres .ed[data-mode="pose"] .ed-etape:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* ——— le texte d'une étape ——— */
+.offres .ed-etape .ed-num {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  color: #a1a1aa;
+  transition: color 0.3s var(--ease-out-strong);
+}
+@media (min-width: 64rem) {
+  .offres .ed[data-mode="defile"] .ed-etape[data-vif="oui"] .ed-num {
+    color: var(--o-muted-strong);
+  }
+}
+.offres .ed-etape .ed-titre {
+  margin-top: 12px;
+}
+.offres .ed-etape .ed-sous {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  color: #18181b;
+}
+.offres .ed-etape .ed-corps {
+  margin-top: 8px;
+  max-width: 44ch;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+/* ——————————————————————————————————————————————————————————
+   3 · LE VOLET COLLANT ET SES CALQUES
+   —————————————————————————————————————————————————————————— */
+.offres .ed-volet {
+  display: none;
+}
+@media (min-width: 64rem) {
+  .offres .ed-volet {
+    display: block;
+  }
+}
+
+.offres .ed-collant {
+  position: sticky;
+  top: var(--ed-collant);
+}
+
+/* la maquette inline du mode « pose » : sous 48 rem elle reste masquée,
+   comme sous 64 rem en mode défilé — même raison, même décision. */
+.offres .ed-maquette-posee {
+  display: none;
+}
+@media (min-width: 48rem) {
+  .offres .ed[data-mode="pose"] .ed-maquette-posee {
+    display: block;
+    max-width: 560px;
+    margin-top: 22px;
+  }
+}
+
+/* .o-card-soft porte le filet, le fond #fafafa, le rayon 20 px,
+   `position: relative` et `overflow: hidden` : ici, seule la hauteur. */
+.offres .ed .ed-carte {
+  height: var(--ed-carte);
+}
+
+/* fondu croisé par calques superposés : la hauteur ne bouge jamais, et
+   `visibility` retirée à retardement évite qu'un calque éteint reste
+   atteignable pendant la transition. */
+.offres .ed-calque {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.4s var(--ease-out-strong),
+    visibility 0s linear 0.4s;
+}
+.offres .ed-calque[data-vif="oui"] {
+  z-index: 1;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.4s var(--ease-out-strong),
+    visibility 0s linear 0s;
+}
+
+/* ——————————————————————————————————————————————————————————
+   4 · LE VOCABULAIRE DES MAQUETTES (monochrome, zinc)
+   —————————————————————————————————————————————————————————— */
+.offres .ed-maq {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.offres .ed-maq-tete {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+/* les fausses lignes de texte, communes aux maquettes 03 et 04 */
+.offres .ed-ligne {
+  display: block;
+  height: 9px;
+  border-radius: 4px;
+  background: #e4e4e7;
+}
+.offres .ed-ligne--encre {
+  background: #52525b;
+}
+
+/* ——— 01 · LE MODÈLE ——— */
+.offres .ed-maq--modele {
+  padding: 20px;
+}
+.offres .ed-mosaique {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 348px;
+  margin: auto;
+}
+.offres .ed-vignette {
+  position: relative;
+  padding: 3px;
+  border-radius: 13px;
+}
+/* filet encre en ombre INTERNE : la vignette retenue n'est pas décalée
+   d'un pixel par rapport aux trois autres. */
+.offres .ed-vignette[data-retenu="oui"] {
+  box-shadow: inset 0 0 0 1.5px var(--o-text);
+}
+.offres .ed-retenu {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--o-text);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* ——— 02 · LE BRIEF ——— */
+.offres .ed-maq--brief {
+  gap: 14px;
+  padding: 22px 24px;
+}
+.offres .ed-champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.offres .ed-etiquette {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+.offres .ed-valeur {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--o-line);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--o-text);
+}
+.offres .ed-photos {
+  display: flex;
+  gap: 8px;
+}
+.offres .ed-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 40px;
+  border: 1px solid var(--o-line);
+  border-radius: 8px;
+  background: #f4f4f5;
+  color: #a1a1aa;
+}
+/* bouton INACTIF : gris plein, texte gris — il ne se distingue d'un
+   bouton d'action que par ce contraste, c'est voulu. */
+.offres .ed-envoi {
+  margin-top: auto;
+  display: block;
+  padding: 9px 0;
+  border-radius: 8px;
+  background: #e4e4e7;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #a1a1aa;
+}
+
+/* ——— 03 · L'ÉCRITURE ——— */
+.offres .ed-maq--ecriture {
+  justify-content: center;
+  padding: 22px 24px;
+}
+.offres .ed-colonnes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 26px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 10px;
+}
+.offres .ed-colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+/* la flèche se cale au MILIEU des deux colonnes, pas sur leur première
+   ligne : la grille est en `align-items: start`, d'où l'align-self. */
+.offres .ed-fleche {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a1a1aa;
+}
+.offres .ed-para {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.offres .ed-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--o-text);
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ——— 04 · LA MISE EN LIGNE ——— */
+.offres .ed-maq--ligne {
+  padding: 0;
+}
+.offres .ed-barre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--o-line);
+  background: #f4f4f5;
+}
+.offres .ed-pastilles {
+  display: flex;
+  gap: 5px;
+}
+.offres .ed-pastilles i {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(9, 9, 11, 0.14);
+}
+.offres .ed-url {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--o-line);
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--o-text);
+}
+.offres .ed-url svg {
+  flex: none;
+  color: #a1a1aa;
+}
+.offres .ed-page {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  flex: 1 1 auto;
+  justify-content: center;
+  padding: 20px 24px;
+}
+.offres .ed-page-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+.offres .ed-logo {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: #d4d4d8;
+}
+.offres .ed-nav {
+  display: flex;
+  gap: 10px;
+}
+.offres .ed-nav i {
+  display: block;
+  width: 34px;
+  height: 7px;
+  border-radius: 4px;
+  background: #e4e4e7;
+}
+.offres .ed-faux-titre {
+  display: block;
+  width: 62%;
+  height: 17px;
+  border-radius: 6px;
+  background: #d4d4d8;
+  margin-bottom: 3px;
+}
+.offres .ed-faux-cta {
+  display: block;
+  width: 108px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--o-text);
+  margin-top: 7px;
+}
+.offres .ed-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--o-line);
+  background: #ffffff;
+}
+.offres .ed-etat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--o-text);
+}
+.offres .ed-point {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--o-text);
+  box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.09);
+}
+.offres .ed-note {
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: var(--o-muted);
+}
+
+/* ——————————————————————————————————————————————————————————
+   5 · MOUVEMENT RÉDUIT — ceinture CSS, en plus du mode « pose » posé
+   par le composant : si JavaScript tarde, rien n'a déjà commencé à
+   bouger ni à s'éteindre.
+   —————————————————————————————————————————————————————————— */
+@media (prefers-reduced-motion: reduce) {
+  .offres .ed-etape,
+  .offres .ed-etape .ed-num,
+  .offres .ed-calque {
+    transition: none;
+  }
+  .offres .ed[data-mode="defile"] .ed-etape,
+  .offres .ed[data-mode="repos"] .ed-etape {
+    opacity: 1;
+  }
+}

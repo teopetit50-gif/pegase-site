@@ -1,0 +1,185 @@
+/* CircuitNuit — la carte sombre « Ce qui suit le clic » de /tarifs/site.
+   Toutes les règles sont scopées sous `.offres`, préfixe `cn-`.
+   La carte n'a AUCUNE largeur en dur : elle remplit sa colonne de grille
+   (≈ 560 px à 1440, ≈ 448 px à 1024, ≈ 342 px à 390). */
+
+/* ═══════════════ la carte ═══════════════ */
+.offres .cn-carte {
+  position: relative;
+  /* la carte est sa propre couche : le faisceau et le contenu s'ordonnent
+     entre eux, jamais avec le décor de la bande nuit */
+  isolation: isolate;
+  overflow: hidden; /* le faisceau ne peut jamais sortir du cadre */
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: #18181b;
+}
+@media (min-width: 640px) {
+  .offres .cn-carte {
+    padding: 40px;
+  }
+}
+
+/* ═══════════════ le faisceau ═══════════════
+   `.cn-faisceau` occupe la boîte de remplissage de la carte, c'est-à-dire
+   l'intérieur du liseré : son rayon vaut donc 20 − 1 = 19 px. Son
+   `overflow: hidden` coupe la moitié extérieure du point ; son `::after`,
+   posé à 1 px du bord et peint de la couleur EXACTE du fond de la carte,
+   couvre tout l'intérieur. Il ne reste au point qu'un anneau d'un pixel
+   le long du bord — l'anneau que la source obtenait par masque.
+   Il est masqué par défaut et n'apparaît que si `offset-path: rect()` est
+   reconnu (voir @supports plus bas) : sans la course, un point clair
+   immobile dans un coin ressemble à une avarie. */
+.offres .cn-faisceau {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: 19px;
+  pointer-events: none;
+}
+.offres .cn-faisceau::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 18px;
+  background: #18181b; /* DOIT rester la couleur de fond de .cn-carte */
+}
+
+/* le point lui-même : un carré de 80 px dont seul le pixel qui tombe sur
+   l'anneau se voit. `offset-rotate: auto` l'aligne sur la tangente du
+   chemin, `offset-anchor` le centre dessus : la tête du dégradé (à
+   droite, sens de marche) mène, la traîne s'éteint derrière. */
+.offres .cn-faisceau-point {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  offset-path: rect(0 auto auto 0 round 19px);
+  offset-anchor: 50% 50%;
+  offset-rotate: auto;
+  offset-distance: 0%;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.4) 34%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: cn-faisceau-course 9s linear infinite;
+}
+
+@keyframes cn-faisceau-course {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@supports (offset-path: rect(0 auto auto 0 round 19px)) {
+  .offres .cn-faisceau {
+    display: block;
+  }
+}
+
+/* ═══════════════ le contenu ═══════════════
+   Au-dessus du cache du faisceau, qui peint tout l'intérieur de la carte. */
+.offres .cn-corps {
+  position: relative;
+  z-index: 1;
+}
+
+.offres .cn-intitule {
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+
+.offres .cn-liste {
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* `--cn-haut` = le retrait haut de l'étape. Il sert deux fois : au padding
+   de l'étape ET au départ du rail, qui se déduit ainsi tout seul du
+   premier item (sans filet, sans retrait) comme des suivants. */
+.offres .cn-etape {
+  --cn-haut: 16px;
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-top: var(--cn-haut);
+  padding-bottom: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.offres .cn-etape:first-child {
+  --cn-haut: 0px;
+  border-top: 0;
+}
+.offres .cn-etape:last-child {
+  padding-bottom: 0;
+}
+@media (min-width: 480px) {
+  .offres .cn-etape {
+    gap: 20px;
+  }
+}
+
+/* le rail qui relie les numéros : 1 px à 12 %, au milieu de la colonne
+   des numéros (22 / 2 = 11). Départ = retrait haut + 4 (l'aplomb du
+   numéro sur la première ligne de texte) + 22 (la boîte du numéro) + 6
+   (l'air) ; arrivée 14 px sous l'étape, soit 7 px avant le numéro suivant
+   (1 de filet + 16 de retrait + 4 d'aplomb = 21). Aucune de ces valeurs
+   ne dépend du nombre de lignes du texte. */
+.offres .cn-etape:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--cn-haut) + 32px);
+  bottom: -14px;
+  left: 11px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* boîte FIXE de 22 px : les chiffres tabulaires de `.num` ont tous la
+   même chasse, le rail tombe donc toujours à leur milieu. */
+.offres .cn-num {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #71717a;
+}
+
+/* `.cn-texte.o-body` — deux classes sur le même élément, pour passer
+   devant `.offres .o-body` (qui peindrait en --o-muted, #a1a1aa sous
+   `.o-nuit`) sans recourir à un `!important`. `min-width: 0` autorise la
+   coupure des mots longs dans l'item de flex. */
+.offres .cn-texte.o-body {
+  min-width: 0;
+  color: #d4d4d8;
+}
+
+/* ═══════════════ mouvement réduit ═══════════════
+   En dernier : même spécificité que le @supports, c'est l'ordre qui
+   tranche. Le faisceau disparaît — la carte reste entière et lisible. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .cn-faisceau {
+    display: none;
+  }
+}

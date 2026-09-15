@@ -1,0 +1,208 @@
+/* PrixSite — le récapitulatif de commande de /tarifs/site (14/09/2026)
+
+   Contenu de la carte « Le prix » : barre de fenêtre, sélecteur du taux
+   d'aide, deux lignes, le total, la pastille et la phrase de pied. La
+   CARTE elle-même reste dans page.tsx (`o-card`, posée par `Partage`) :
+   rien ici ne dessine de fond ni d'arrondi de carte.
+
+   Toutes les valeurs sont celles de l'ancienne MaqCommande et de
+   BarreFenetre, relevées telles quelles — la carte du journal, juste à
+   côté, garde la même barre et les deux doivent rester jumelles. Seul le
+   sélecteur est neuf.
+
+   Tout est scopé sous `.offres` et préfixé `ps-`. Chaque filet porte sa
+   couleur en toutes lettres : en Tailwind v4 un `border` nu peindrait en
+   currentColor, et ici on n'écrit pas d'utilitaire du tout. Les jetons
+   `--o-*` et `--demo-*` viennent du bloc `.offres` de globals.css, chaque
+   var() avec sa valeur de secours. */
+
+/* ——— la barre de fenêtre : trois pastilles et un titre ——— */
+.offres .ps-barre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--demo-tete, #fbfbfb);
+}
+.offres .ps-pastilles {
+  display: flex;
+  gap: 6px;
+}
+.offres .ps-pastille {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.12);
+}
+.offres .ps-titre-barre {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--o-muted-strong, #52525b);
+}
+
+/* ——— le corps : 20 px de gouttière, 24 px dès le téléphone couché ——— */
+.offres .ps-corps {
+  padding: 16px 20px;
+}
+@media (width >= 40rem) {
+  .offres .ps-corps {
+    padding-inline: 24px;
+  }
+}
+
+/* ——— le sélecteur du taux ———
+   Trois puces sur une ligne à 390 px (la carte y fait 342 px, le corps
+   302 px : les trois libellés courts tiennent). `flex-wrap` est là pour
+   les tailles de police relevées par l'utilisateur : elles passent alors
+   à la ligne au lieu de déborder. Chaque puce reste insécable. */
+.offres .ps-selecteur {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.offres .ps-puce {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 11px;
+  border: 1px solid var(--o-line, #e4e4e7);
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--o-muted-strong, #52525b);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+@media (hover: hover) {
+  .offres .ps-puce:hover {
+    color: var(--o-text, #09090b);
+    border-color: #d4d4d8;
+  }
+}
+/* l'état coché se marque à l'encre pleine : dans un monde quasi
+   monochrome, un fond gris clair vaudrait le fond de la carte. */
+.offres .ps-puce[aria-checked="true"] {
+  background: var(--o-text, #09090b);
+  border-color: var(--o-text, #09090b);
+  color: #ffffff;
+}
+.offres .ps-puce:focus-visible {
+  outline: 2px solid var(--o-text, #09090b);
+  outline-offset: 2px;
+}
+
+/* ——— les lignes du récapitulatif ———
+   Seul le bloc de texte peut rétrécir (`min-width: 0`) ; le montant ne se
+   comprime jamais. Ni `line-height` ni `letter-spacing` ici : la maquette
+   d'origine laissait ces deux-là hériter, on ne change rien. */
+.offres .ps-ligne {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+.offres .ps-ligne--filet {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.offres .ps-ligne-texte {
+  min-width: 0;
+}
+.offres .ps-ligne-titre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--o-text, #09090b);
+}
+.offres .ps-ligne-sous {
+  font-size: 11.5px;
+  color: var(--demo-faible, #a1a1aa);
+}
+.offres .ps-ligne-prix {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--o-text, #09090b);
+}
+
+/* ——— le total ———
+   La pastille garde le droit de passer à deux lignes : à 390 px, « Restant
+   à votre charge » et « Éligibilité vérifiée à l'audit » ne tiennent pas
+   côte à côte sur une seule ligne, et c'est déjà ainsi que la maquette
+   d'aujourd'hui se plie. D'où l'absence de `white-space: nowrap` et de
+   `flex-shrink: 0` sur .ps-eligible : c'est volontaire. */
+.offres .ps-total {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+.offres .ps-total-bloc {
+  min-width: 0;
+}
+.offres .ps-total-libelle {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--o-muted-strong, #52525b);
+}
+/* le grand nombre : 30 px, Jakarta (posé en style en ligne par le
+   composant, .num imposant sinon var(--font-inter)), chasses de la
+   maquette. `tabular-nums` vient de .num : 198, 594 et 990 occupent
+   exactement la même largeur, le bloc ne bouge pas pendant le glissement. */
+.offres .ps-total-valeur {
+  margin: 4px 0 0;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--o-text, #09090b);
+}
+.offres .ps-eligible {
+  border-radius: 9999px;
+  padding: 4px 10px;
+  background: #ecfdf3;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #15803d;
+}
+
+/* ——— le total LU : présent pour les synthèses vocales, invisible à
+   l'écran. Le nombre visible, lui, est aria-hidden — il change soixante
+   fois par seconde. ——— */
+.offres .ps-lecture {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.offres .ps-pied {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--o-muted, #71717a);
+}
+
+/* ——— mouvement réduit : les puces prennent leur état d'un coup. Le
+   nombre, lui, saute d'une valeur à l'autre côté composant. ——— */
+@media (prefers-reduced-motion: reduce) {
+  .offres .ps-puce {
+    transition: none;
+  }
+}
