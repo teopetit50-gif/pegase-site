@@ -159,32 +159,35 @@ export default function MenuPrincipal({
                     </li>
                   )}
 
-                  {rubrique.entrees?.map((entree, rang) => (
+                  {rubrique.entrees?.map((entree) => (
                     <li
                       key={entree.href}
-                      /* 15/09 (Teo) — « Nos offres » porte SIX entrées pour
-                         cinq rangées : la sixième retombe forcément sous la
-                         case vedette, dans la colonne de gauche. Jusqu'ici
-                         c'était « Sur mesure » qui s'y trouvait, par le seul
-                         effet de l'ordre de la liste — donc séparé des quatre
-                         systèmes alors qu'il se lit comme leur complément.
-                         On pose cette dernière case explicitement et on y met
-                         « Votre métier » : l'entrée qui aiguille, avant même
-                         de savoir quel système on cherche, a sa place à part.
-                         La colonne de droite redevient la liste des systèmes,
-                         « Sur mesure » sous FILED comme sur /offres.
-                         L'ordre des DONNÉES ne bouge pas : c'est lui que lit
-                         le panneau du téléphone, où « Votre métier » doit
-                         rester en tête (arbitrage du 15/09, dans menu.ts).
-                         Les deux coordonnées sont écrites, pas seulement la
-                         colonne : une case au placement à moitié libre
-                         déplacerait le curseur d'auto-placement et les quatre
-                         systèmes partiraient en quinconce. */
-                      className={
-                        large && rang === 0
-                          ? "md:col-start-1 md:row-start-6"
-                          : undefined
-                      }
+                      /* 15/09, dans la journée — cette case a porté un
+                        placement explicite (`md:col-start-1 md:row-start-6`)
+                        sur `rang === 0`, le temps où « Nos offres » comptait
+                        SIX entrées pour cinq rangées : la sixième retombait
+                        sous la case vedette, et on y avait mis « Votre métier »
+                        plutôt que de laisser l'ordre de la liste y envoyer
+                        « Sur mesure ».
+
+                        La page /secteurs ayant été supprimée, « Votre métier »
+                        est partie et le groupe est revenu à CINQ entrées —
+                        exactement le nombre de rangées de la case vedette. Le
+                        placement épinglé, lui, était resté : il visait
+                        toujours la première entrée de la liste, devenue CASHD,
+                        qui se retrouvait donc seule sous la vedette pendant
+                        que les quatre autres tenaient la colonne de droite
+                        (Teo : « CASHD a été déplacé, il doit être dans la
+                        liste à droite »).
+
+                        Il n'y a plus rien à épingler : à cinq entrées pour
+                        cinq rangées, l'auto-placement remplit la colonne de
+                        droite dans l'ordre, et c'est le résultat voulu. Ne pas
+                        réintroduire de `col-start`/`row-start` ici sans
+                        recompter les entrées — et si le groupe repasse à six,
+                        écrire les DEUX coordonnées, pas seulement la colonne :
+                        une case au placement à moitié libre déplace le curseur
+                        d'auto-placement et met les systèmes en quinconce. */
                     >
                       <NavigationMenuLink
                         asChild
