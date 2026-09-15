@@ -58,9 +58,16 @@ import {
    ÉCARTS ASSUMÉS.
    • Composant CLIENT (recharts mesure son conteneur). Le reste du hero
      reste rendu au serveur ; seule cette tuile s'hydrate.
-   • Hauteur de courbe FIXE (180 px, 240 px au-delà de sm) : recharts ne
+   • Hauteur de courbe FIXE (158 px, 205 px au-delà de sm) : recharts ne
      peint rien avant d'avoir mesuré, une hauteur libre ferait sauter la
      page au premier rendu.
+   • ÉCHELLE (15/09, Teo : « la première section est trop zoomée, dézoome-la »).
+     La scène est passée de 900 à 820 px et tout ce qu'elle contient a
+     baissé d'un cran avec elle — le chiffre (34 → 29), la courbe, les
+     paddings, les titres et le corps des deux tuiles. La typographie
+     PARTAGÉE du site (`o-h1`, `o-lead`, `o-h5`) n'est pas touchée : elle
+     est relevée sur la page de référence et sert vingt autres sections ;
+     ce qui paraissait zoomé était la maquette, pas la page.
    • L'identifiant du dégradé passe par `useId()` débarrassé de ses
      deux-points : deux exemplaires du même dégradé sur une page et le
      second peint dans le vide.
@@ -120,9 +127,9 @@ export function HeroBento() {
   const dg = `hb-aire-${brut.replace(/:/g, "")}`;
 
   return (
-    <div className="mx-auto grid w-full max-w-[900px] grid-cols-1 items-start gap-4 sm:grid-cols-2">
+    <div className="mx-auto grid w-full max-w-[820px] grid-cols-1 items-start gap-4 sm:grid-cols-2">
       {/* ═══════════ tuile large — l'encours et sa courbe ═══════════ */}
-      <div className="relative z-0 overflow-hidden rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:col-span-2 sm:p-7 lg:pb-[132px]">
+      <div className="relative z-0 overflow-hidden rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:col-span-2 sm:p-6 lg:pb-[118px]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -142,28 +149,28 @@ export function HeroBento() {
                 En attente de règlement
               </div>
               <div
-                className="mt-1 whitespace-nowrap text-[30px] font-semibold leading-none tracking-[-0.03em] text-[#09090b] sm:text-[34px]"
+                className="mt-1 whitespace-nowrap text-[26px] font-semibold leading-none tracking-[-0.03em] text-[#09090b] sm:text-[29px]"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 58 850 €
               </div>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="o-demo-jeton--ok inline-flex items-center rounded-[6px] px-2 py-[3px] text-[10.5px] font-semibold tracking-[0.02em]">
+                <span className="o-demo-jeton--ok inline-flex items-center rounded-[6px] px-2 py-[3px] text-[10px] font-semibold tracking-[0.02em]">
                   3 relances parties ce matin
                 </span>
-                <span className="o-demo-jeton--warn inline-flex items-center rounded-[6px] px-2 py-[3px] text-[10.5px] font-semibold tracking-[0.02em]">
+                <span className="o-demo-jeton--warn inline-flex items-center rounded-[6px] px-2 py-[3px] text-[10px] font-semibold tracking-[0.02em]">
                   2 en attente de votre accord
                 </span>
               </div>
             </div>
 
-            <span className="w-fit shrink-0 whitespace-nowrap rounded-[8px] bg-[#18181b] px-3.5 py-2 text-[11.5px] font-semibold text-white">
+            <span className="w-fit shrink-0 whitespace-nowrap rounded-[8px] bg-[#18181b] px-3 py-1.5 text-[11px] font-semibold text-white">
               Tout valider
             </span>
           </div>
 
           {/* la courbe */}
-          <div className="mt-6 h-[180px] w-full sm:h-[240px]">
+          <div className="mt-5 h-[158px] w-full sm:h-[205px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={SEMAINES}
@@ -229,12 +236,12 @@ export function HeroBento() {
           </div>
 
           {/* légende + mention : une série, donc une ligne */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 border-t border-[var(--o-line)] pt-3.5">
-            <span className="inline-flex items-center gap-2 text-[11.5px] font-medium text-[#52525b]">
+          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 border-t border-[var(--o-line)] pt-3">
+            <span className="inline-flex items-center gap-2 text-[11px] font-medium text-[#52525b]">
               <span className="h-2 w-2 rounded-[2px] bg-[#09090b]" />
               Encours suivi, semaine par semaine
             </span>
-            <span className="text-[11px] text-[#a1a1aa]">
+            <span className="text-[10.5px] text-[#a1a1aa]">
               Démonstration · 12 dernières semaines
             </span>
           </div>
@@ -253,7 +260,7 @@ export function HeroBento() {
            tuile frôlerait le bord de l'écran, ce qui se lit comme un bug
            et non comme une intention. Entre lg et xl elle garde le débord
            de 18 px, symétrique de celui de droite. */
-        pose="lg:-ml-[18px] lg:-mt-[104px] xl:-translate-x-[56px]"
+        pose="lg:-ml-[18px] lg:-mt-[92px] xl:-translate-x-[56px]"
         icone={PenLine}
         titre="Rien ne part sans vous"
         texte="Le texte est préparé, calé sur l’échéance et posé dans votre file. Vous envoyez, vous corrigez, ou vous ne faites rien."
@@ -281,7 +288,7 @@ export function HeroBento() {
 
       {/* ═══════════ tuile — la demande entrée la nuit ═══════════ */}
       <Tuile
-        pose="lg:-mr-[18px] lg:-mt-[152px]"
+        pose="lg:-mr-[18px] lg:-mt-[136px]"
         icone={MessagesSquare}
         titre="Répondu pendant la nuit"
         texte="Une demande entre à 21 h 46. La réponse part dans la minute, la pièce chiffrée attend votre accord au matin."
@@ -348,14 +355,14 @@ function Tuile({
 }) {
   return (
     <div
-      className={`relative z-10 flex flex-col rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:p-6 lg:bg-white lg:shadow-[0_2px_4px_rgba(9,9,11,0.04),0_22px_44px_-26px_rgba(9,9,11,0.38)] ${pose}`}
+      className={`relative z-10 flex flex-col rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-4.5 sm:p-5 lg:bg-white lg:shadow-[0_2px_4px_rgba(9,9,11,0.04),0_22px_44px_-26px_rgba(9,9,11,0.38)] ${pose}`}
     >
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--o-line)] bg-white">
-        <Icone className="h-[18px] w-[18px]" strokeWidth={1.6} />
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-[var(--o-line)] bg-white">
+        <Icone className="h-4 w-4" strokeWidth={1.6} />
       </span>
-      <h3 className="o-h5 mt-4 !text-[18px]">{titre}</h3>
-      <p className="o-small mt-1.5">{texte}</p>
-      <div className="mt-auto w-full pt-5">{children}</div>
+      <h3 className="o-h5 mt-3.5 !text-[16.5px]">{titre}</h3>
+      <p className="o-small mt-1.5 !text-[13px] !leading-[1.65]">{texte}</p>
+      <div className="mt-auto w-full pt-4">{children}</div>
     </div>
   );
 }
