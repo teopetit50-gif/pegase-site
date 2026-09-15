@@ -148,6 +148,11 @@ type Props = {
      pas dans la demande comme une colonne (reserver_audit n'en a que
      sept) : il ouvre le message, visible et modifiable. */
   modeleNom?: string;
+  /* 15/09/2026 — l'estimation faite sur /tarifs, déjà mise en phrase et
+     RECALCULÉE par la page (jamais lue dans l'URL). Elle ouvre le message
+     de la demande : l'audit démarre sur les chiffres du visiteur. Ce n'est
+     pas un montant dû — la demande d'audit ne fige aucun prix. */
+  estimation?: string;
 };
 
 export default function PriseDeCreneau({
@@ -158,6 +163,7 @@ export default function PriseDeCreneau({
   periodicite: periodiciteInitiale = "mensuel",
   utilisateur,
   modeleNom,
+  estimation,
 }: Props) {
   /* ——— le verrou compte (02/09 ; étendu le 15/09) ———
      Il ne tenait que le parcours installation : l'audit et le devis
@@ -283,7 +289,13 @@ export default function PriseDeCreneau({
     /* Le modèle retenu ouvre le message. Écrit une seule fois, à
        l'initialisation : si le visiteur le réécrit ou l'efface, on ne le
        remet pas — c'est sa demande. */
-    message: modeleNom ? `Modèle de site retenu : ${modeleNom}.\n` : "",
+    message: [
+      modeleNom ? `Modèle de site retenu : ${modeleNom}.` : null,
+      estimation,
+    ]
+      .filter(Boolean)
+      .map((l) => `${l}\n`)
+      .join(""),
     site_web: "", // pot de miel — un humain ne le voit jamais
   });
   const maj = (cle: keyof typeof c) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>

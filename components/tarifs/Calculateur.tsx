@@ -59,6 +59,7 @@ import {
   type Variants,
 } from "motion/react";
 
+import { lienAudit } from "@/lib/reservation";
 import {
   CALCULATEUR,
   PLANCHER_MENSUEL,
@@ -334,8 +335,19 @@ export default function Calculateur({
               </p>
 
               {postesResa ? (
-                <a className="calc-bouton" href={`/installation?postes=${postesResa.join(",")}`}>
-                  Réserver l&apos;installation — {euros(v.palier.installation)}
+                /* 15/09, SECONDE PASSE (Teo) — LE BOUTON MÈNE À L'AUDIT.
+                   « Ce n'est pas un SaaS ; ça ne doit pas amener à un tarif à
+                   faire payer. » Il ouvrait la réservation de l'installation,
+                   le prix de mise en route écrit dessus et l'abonnement
+                   annoncé dessous : le calculateur vendait, sur des volumes
+                   déclarés de mémoire. Il ORIENTE — son chiffre sert à
+                   arriver calés en rendez-vous, et c'est l'audit qui chiffre.
+
+                   Le volume et les postes l'accompagnent, jamais le prix : il
+                   se recalcule à l'arrivée (app/reserver/page.tsx), et il n'y
+                   entre que comme une phrase du message. */
+                <a className="calc-bouton" href={lienAudit(postesResa, v.pieces)}>
+                  Réserver un audit
                 </a>
               ) : (
                 <a className="calc-bouton" href="#grille">
@@ -345,7 +357,7 @@ export default function Calculateur({
                 </a>
               )}
               <p className="calc-souscta">
-                Puis {euros(v.prix ?? 0)} par mois · satisfait ou remboursé 30 jours
+                Gratuit, sans engagement · votre estimation part avec la demande
               </p>
             </div>
           )}

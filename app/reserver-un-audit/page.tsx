@@ -8,7 +8,12 @@ import Complements from "@/components/reservation/Complements";
 import Engagements from "@/components/reservation/Engagements";
 import DerouleAudit from "@/components/reservation/DerouleAudit";
 import { MODELES } from "@/components/modeles/donnees";
-import { ModeleRetenu, BoutonReservation } from "@/components/reservation/ModeleUrl";
+import { POSTES } from "@/lib/paliers";
+import {
+  ModeleRetenu,
+  EstimationRetenue,
+  BoutonReservation,
+} from "@/components/reservation/ModeleUrl";
 import {
   COURRIEL,
   FAQ,
@@ -94,6 +99,15 @@ const NOMS_MODELES: Record<string, string> = Object.fromEntries(
   MODELES.map((m) => [m.slug, m.nom]),
 );
 
+/* 15/09/2026 — les noms des quatre postes, fournis par le SERVEUR au
+   rappel d'estimation. Même raison que pour les modèles : la vérification
+   se fait côté client, mais la table des noms n'a pas à entrer dans le
+   paquet d'une page d'entrée — ici elle est minuscule, et le motif reste
+   le même d'un rappel à l'autre. */
+const NOMS_POSTES: Record<string, string> = Object.fromEntries(
+  POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
+);
+
 export default function ReserverUnAuditPage() {
   return (
     <PageShell>
@@ -101,8 +115,10 @@ export default function ReserverUnAuditPage() {
       <PageMotion />
 
       <div className="resa">
-        {/* ═══ 0 — le modèle de site retenu, s'il y en a un ═══ */}
+        {/* ═══ 0 — ce que le visiteur apporte : le modèle de site retenu,
+               et l'estimation faite sur /tarifs ═══ */}
         <ModeleRetenu noms={NOMS_MODELES} />
+        <EstimationRetenue noms={NOMS_POSTES} />
 
         {/* ═══ 1 à 3 — formules, orientation, comparatif ═══ */}
         <Formules />

@@ -96,10 +96,45 @@ export type SujetContact =
    galerie et l'agenda. Le paramètre traverse maintenant les deux sauts —
    /modeles → /reserver-un-audit → /reserver — et arrive dans le message
    de la demande, où il est visible et modifiable. */
-export function lienReservation(formuleId: string, modele?: string) {
+export function lienReservation(
+  formuleId: string,
+  modele?: string,
+  estimation?: ContexteEstimation,
+) {
   const q = new URLSearchParams({ formule: formuleId });
   if (modele) q.set("modele", modele);
+  if (estimation?.postes) q.set("postes", estimation.postes);
+  if (estimation?.pieces) q.set("pieces", estimation.pieces);
   return `/reserver?${q}`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   15/09/2026 (Teo) — L'ESTIMATION VOYAGE, ELLE NE VEND RIEN.
+
+   « Ce n'est pas un SaaS : c'est une estimation qui amène au bouton
+   réserver un audit. Ça ne doit pas amener à un tarif à faire payer —
+   le calculateur, c'est juste un chiffre qui va nous servir à être déjà
+   calés pendant l'audit. »
+
+   D'où le chemin : /tarifs ne mène plus à /installation (réserver et
+   enregistrer un moyen de paiement) mais à /reserver-un-audit, et ce que
+   le visiteur a déclaré l'accompagne — les postes qu'il vise, le volume
+   qu'il traite. Le prix, lui, NE VOYAGE PAS : il se recalcule à l'arrivée
+   (prixPourVolume) et n'entre dans la demande que comme une phrase du
+   message, modifiable, jamais comme un montant dû.
+
+   Deux sauts à traverser, /tarifs → /reserver-un-audit → /reserver : le
+   second est porté par les boutons de la page d'audit
+   (components/reservation/ModeleUrl.tsx), comme le modèle de site. */
+export type ContexteEstimation = { postes?: string; pieces?: string };
+
+/** Le lien de /tarifs vers l'audit, avec ce que le visiteur a déclaré. */
+export function lienAudit(postes: readonly string[], pieces: number) {
+  const q = new URLSearchParams();
+  if (postes.length) q.set("postes", postes.join(","));
+  if (pieces > 0) q.set("pieces", String(Math.round(pieces)));
+  const s = q.toString();
+  return s ? `/reserver-un-audit?${s}` : "/reserver-un-audit";
 }
 
 /* Contact libre, hors réservation : le formulaire du service client, sujet

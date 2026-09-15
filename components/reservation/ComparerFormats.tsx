@@ -12,7 +12,7 @@ import {
   type LigneComparatif,
 } from "@/lib/reservation";
 import { ICONES_FORMAT, ICONE_DEFAUT } from "./icones";
-import { useModeleUrl } from "./ModeleUrl";
+import { useEstimationUrl, useModeleUrl } from "./ModeleUrl";
 import "./ComparerFormats.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -106,6 +106,13 @@ function Valeurs({ ligne, actif }: { ligne: LigneComparatif; actif: number }) {
 export default function ComparerFormats() {
   /* le modèle choisi sur /modeles, s'il y en a un dans l'URL */
   const modele = useModeleUrl();
+  /* 15/09 — l'estimation de /tarifs suit aussi par ici : ce bouton fabrique
+     son lien lui-même, il ne passe pas par <BoutonReservation>. */
+  const { postes, pieces } = useEstimationUrl();
+  const estimation = {
+    postes: postes.length ? postes.join(",") : undefined,
+    pieces: pieces ? String(pieces) : undefined,
+  };
   const p = PROFILS[1];
   /* le format retenu par défaut est le phare — celui que la page
      recommande en haut ; à défaut, le premier */
@@ -171,7 +178,7 @@ export default function ComparerFormats() {
                 <span className="num">{f.duree}</span> · {f.suffixe}
               </p>
               <p className="cf-panneau-conditions">{f.conditions}</p>
-              <Link href={lienReservation(f.id, modele || undefined)} className="r-btn r-btn--blanc cf-panneau-btn">
+              <Link href={lienReservation(f.id, modele || undefined, estimation)} className="r-btn r-btn--blanc cf-panneau-btn">
                 {f.cta}
               </Link>
               <p className="cf-panneau-note">{f.souscta}</p>

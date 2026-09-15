@@ -101,7 +101,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Comment se passe le paiement ?",
     r: [
-      "Vous enregistrez votre moyen de paiement, carte ou prélèvement SEPA, au moment de réserver la réunion d'installation, sur une page sécurisée. Rien n'est débité avant la fin de l'installation : le premier prélèvement part le jour où vos modules sont en service.",
+      "Rien ne se paie depuis cette page, et les montants qu'elle affiche sont des estimations : le prix se fixe à l'audit, sur vos chiffres réels. Vous n'enregistrez votre moyen de paiement — carte ou prélèvement SEPA, sur une page sécurisée — qu'ensuite, en réservant la réunion d'installation. Rien n'est débité avant la fin de celle-ci : le premier prélèvement part le jour où vos modules sont en service.",
       `En mensuel, sans engagement : vous résiliez à tout moment, le mois en cours va à son terme, les envois s'arrêtent. En annuel, les douze mois sont facturés en une fois, le jour de la mise en service, à −${REMISE_PCT} %.`,
     ],
   },

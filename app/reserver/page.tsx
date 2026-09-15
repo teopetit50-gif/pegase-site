@@ -4,6 +4,7 @@ import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
 import { utilisateurCourant } from "@/lib/supabase/server";
 import { MODELES } from "@/components/modeles/donnees";
+import { POSTES, prixPourVolume } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
    /reserver — bloquer un créneau d'audit (28/08/2026)
@@ -39,7 +40,12 @@ export const metadata: Metadata = {
 export default async function ReserverPage({
   searchParams,
 }: {
-  searchParams: Promise<{ formule?: string; modele?: string }>;
+  searchParams: Promise<{
+    formule?: string;
+    modele?: string;
+    postes?: string;
+    pieces?: string;
+  }>;
 }) {
   const sp = await searchParams;
   /* 15/09/2026 — le modèle de site choisi sur /modeles traverse
@@ -50,6 +56,47 @@ export default async function ReserverPage({
      corriger. */
   const demandeModele = (sp.modele ?? "").trim();
   const modeleNom = MODELES.find((m) => m.slug === demandeModele)?.nom;
+  /* ══════════════════════════════════════════════════════════════════
+     15/09/2026 (Teo) — L'ESTIMATION DE /tarifs ARRIVE ICI, EN PHRASE.
+
+     « Ce n'est pas un SaaS ; le calculateur, c'est juste un chiffre qui va
+     nous servir à être déjà calés pendant l'audit. » Les postes visés et
+     le volume déclaré traversent /reserver-un-audit et atterrissent dans
+     le message de la demande : l'entretien commence sur les chiffres du
+     visiteur au lieu de les redemander.
+
+     LE PRIX NE VIENT PAS DE L'URL — il se RECALCULE ici, sur le volume,
+     avec la même fonction que la grille. Un montant transporté en
+     paramètre se réécrirait dans la barre d'adresse, et on l'aurait
+     ensuite sous les yeux en rendez-vous comme s'il venait de nous.
+
+     Et ce n'est PAS une somme due : la demande d'audit ne fige aucun prix
+     (reserver_audit ne le fait que pour le parcours installation). C'est
+     une estimation écrite noir sur blanc, que le visiteur voit dans le
+     message et peut corriger avant d'envoyer. */
+  const postesEstimes = POSTES.filter((p) =>
+    (sp.postes ?? "").split(",").map((x) => x.trim()).includes(p.id),
+  );
+  const piecesBrut = Number.parseInt(sp.pieces ?? "", 10);
+  const piecesEstimees = Number.isFinite(piecesBrut) && piecesBrut > 0 ? piecesBrut : 0;
+  const prixEstime = piecesEstimees ? prixPourVolume(piecesEstimees) : null;
+  const estimation = (() => {
+    if (!postesEstimes.length && !piecesEstimees) return undefined;
+    const bouts: string[] = [];
+    if (postesEstimes.length) {
+      bouts.push(`postes visés : ${postesEstimes.map((p) => p.system).join(", ")}`);
+    }
+    if (piecesEstimees) {
+      bouts.push(`${piecesEstimees.toLocaleString("fr-FR")} pièces par mois`);
+    }
+    if (prixEstime !== null) {
+      bouts.push(`estimation ${prixEstime.toLocaleString("fr-FR")} € par mois, à confirmer`);
+    } else if (piecesEstimees) {
+      bouts.push("volume au-delà de la grille publique, le prix sort de l'audit");
+    }
+    return `Estimation faite sur le site — ${bouts.join(" · ")}.`;
+  })();
+
   const utilisateur = await utilisateurCourant();
 
   return (
@@ -67,6 +114,7 @@ export default async function ReserverPage({
               parcours="audit"
               formuleInitiale={sp.formule}
               modeleNom={modeleNom}
+              estimation={estimation}
               utilisateur={utilisateur}
             />
           </div>
