@@ -33,6 +33,15 @@
    .rv-case / .rv-coche (globals.css, sous .resa) et le sélecteur
    mensuel | annuel le .r-seg de /tarifs.
 
+   15/09 — SES COULEURS SONT DES VARIABLES, plus des valeurs en dur.
+   « Mon compte » a un cadre SOMBRE depuis ce jour (CompteTableau,
+   .cpt-console) et cette carte y vit. Les douze couleurs qu'elle
+   écrivait en clair (#050505, #e3e3e3, bg-white…) sont devenues autant
+   de `--cp-*`, définies deux fois dans compte.css : une valeur pour le
+   monde clair, une pour le cadre sombre. Le composant n'a donc rien à
+   savoir du monde où on le pose — et l'inverse aurait demandé de le
+   dupliquer. Ne pas y réécrire une couleur en dur.
+
    05/09 — LA LIGNE « MOYEN DE PAIEMENT » (demande des associés : le
    client enregistre son moyen de paiement, débité une fois l'installation
    terminée). Entre le prix et les actions, l'état de paiement de la
@@ -179,11 +188,11 @@ export default function AbonnementCarte({
             annulée n'est plus retenue : la confirmation doit survivre ici,
             sinon elle disparaît en quelques centaines de millisecondes */}
         {fait ? (
-          <p className="rv-apparait mb-4 rounded-lg bg-[#e8f6ed] px-4 py-3 text-[14px] leading-[21px] text-[#15753a]" role="status">
+          <p className="rv-apparait mb-4 rounded-lg bg-[var(--cp-vert-fond)] px-4 py-3 text-[14px] leading-[21px] text-[var(--cp-vert)]" role="status">
             {fait}
           </p>
         ) : null}
-        <p className="text-[15px] leading-[24px] text-[#3d3d3d]">
+        <p className="text-[15px] leading-[24px] text-[var(--cp-doux)]">
           Aucun abonnement n&apos;est en cours sur ce compte. Choisissez vos postes sur la grille&nbsp;:
           la réunion d&apos;installation est incluse, et le mensuel est sans engagement.
         </p>
@@ -364,7 +373,7 @@ export default function AbonnementCarte({
           dans la carte de verre (CompteVue) le panneau fait 500 px, une
           pastille en frère du bloc de texte passait à la ligne */}
       <div id="cp-abo-formule" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div className="text-[14px] font-semibold text-[#050505]">
+        <div className="text-[14px] font-semibold text-[var(--cp-encre)]">
           {modulesActuels.length === POSTES.length
             ? "Tout Omega, les quatre postes"
             : modulesActuels.length
@@ -374,8 +383,8 @@ export default function AbonnementCarte({
         <Pastille code={etat.code}>{etat.libelle}</Pastille>
       </div>
       {demande.entreprise ? (
-        <div className="mt-1 text-[14px] leading-[22px] text-[#3d3d3d]">
-          pour <span className="font-medium text-[#050505]">{demande.entreprise}</span>
+        <div className="mt-1 text-[14px] leading-[22px] text-[var(--cp-doux)]">
+          pour <span className="font-medium text-[var(--cp-encre)]">{demande.entreprise}</span>
         </div>
       ) : null}
 
@@ -386,10 +395,10 @@ export default function AbonnementCarte({
             return (
               <li
                 key={m}
-                className="flex items-center gap-3 rounded-lg border border-[#e3e3e3] bg-white px-3 py-2.5"
+                className="flex items-center gap-3 rounded-lg border border-[var(--cp-filet)] bg-[var(--cp-carte)] px-3 py-2.5"
               >
                 <SystemLogo system={p?.system ?? m.toUpperCase()} />
-                <span className="text-[14px] font-medium leading-[20px] text-[#050505]">{nomPoste(m)}</span>
+                <span className="text-[14px] font-medium leading-[20px] text-[var(--cp-encre)]">{nomPoste(m)}</span>
               </li>
             );
           })}
@@ -397,28 +406,28 @@ export default function AbonnementCarte({
       ) : null}
 
       {prix ? (
-        <div className="mt-4 flex flex-wrap items-baseline justify-between gap-3 border-t border-[#e3e3e3] pt-4">
-          <span className="text-[14px] text-[#3d3d3d]">
+        <div className="mt-4 flex flex-wrap items-baseline justify-between gap-3 border-t border-[var(--cp-filet)] pt-4">
+          <span className="text-[14px] text-[var(--cp-doux)]">
             Formule {periodiciteActuelle === "annuel" ? "annuelle" : "mensuelle"}
-            <span className="block text-[13px] text-[#616161]">PULSE et VAULT compris</span>
+            <span className="block text-[13px] text-[var(--cp-faible)]">PULSE et VAULT compris</span>
           </span>
           <span className="text-right">
-            <span className="num block text-[22px] font-semibold leading-[28px] text-[#050505]">
+            <span className="num block text-[22px] font-semibold leading-[28px] text-[var(--cp-encre)]">
               {periodiciteActuelle === "annuel" && annuel != null ? (
                 <>
-                  {Math.round(annuel)} €<span className="text-[13px] font-normal text-[#616161]"> /an</span>
+                  {Math.round(annuel)} €<span className="text-[13px] font-normal text-[var(--cp-faible)]"> /an</span>
                 </>
               ) : (
                 <>
-                  {Math.round(mensuel ?? 0)} €<span className="text-[13px] font-normal text-[#616161]"> /mois</span>
+                  {Math.round(mensuel ?? 0)} €<span className="text-[13px] font-normal text-[var(--cp-faible)]"> /mois</span>
                 </>
               )}
             </span>
-            <span className="mt-1 flex items-center justify-end gap-2 text-[13px] text-[#616161]">
+            <span className="mt-1 flex items-center justify-end gap-2 text-[13px] text-[var(--cp-faible)]">
               {periodiciteActuelle === "annuel" && annuel != null ? (
                 <>
                   soit {Math.round(annuel / 12)} €/mois
-                  <span className="inline-flex items-center rounded-md bg-[#e8f6ed] px-2 py-0.5 text-[13px] font-semibold text-[#15753a]">
+                  <span className="inline-flex items-center rounded-md bg-[var(--cp-vert-fond)] px-2 py-0.5 text-[13px] font-semibold text-[var(--cp-vert)]">
                     −{REMISE_PCT}&nbsp;%
                   </span>
                 </>
@@ -432,12 +441,12 @@ export default function AbonnementCarte({
 
       {/* ——— 05/09 : le moyen de paiement ——— */}
       {montrerPaiement ? (
-        <div id="cp-abo-paiement" className="mt-4 border-t border-[#e3e3e3] pt-4">
+        <div id="cp-abo-paiement" className="mt-4 border-t border-[var(--cp-filet)] pt-4">
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             <div className="cp-secondaire cp-kicker-ligne">Moyen de paiement</div>
             <Pastille code={lignePaiement.code}>{lignePaiement.pastille}</Pastille>
           </div>
-          <p className="mt-1.5 max-w-[60ch] text-[14px] leading-[21px] text-[#3d3d3d]">{lignePaiement.texte}</p>
+          <p className="mt-1.5 max-w-[60ch] text-[14px] leading-[21px] text-[var(--cp-doux)]">{lignePaiement.texte}</p>
           {lignePaiement.bouton ? (
             paiementFerme ? (
               <p className="cp-info mt-3" role="status">
@@ -469,7 +478,7 @@ export default function AbonnementCarte({
 
       {/* ——— retours ——— */}
       {fait ? (
-        <p className="rv-apparait mt-4 rounded-lg bg-[#e8f6ed] px-4 py-3 text-[14px] leading-[21px] text-[#15753a]" role="status">
+        <p className="rv-apparait mt-4 rounded-lg bg-[var(--cp-vert-fond)] px-4 py-3 text-[14px] leading-[21px] text-[var(--cp-vert)]" role="status">
           {fait}
         </p>
       ) : null}
@@ -481,8 +490,8 @@ export default function AbonnementCarte({
 
       {/* ——— 2. les actions ——— */}
       {etat.code === "annule" ? (
-        <div className="mt-5 border-t border-[#e3e3e3] pt-4">
-          <p className="text-[14px] leading-[22px] text-[#3d3d3d]">
+        <div className="mt-5 border-t border-[var(--cp-filet)] pt-4">
+          <p className="text-[14px] leading-[22px] text-[var(--cp-doux)]">
             Cette réservation a été annulée. Pour repartir, choisissez vos postes sur la grille.
           </p>
           <Link href="/tarifs" className="r-btn r-btn--fil mt-4">
@@ -490,8 +499,8 @@ export default function AbonnementCarte({
           </Link>
         </div>
       ) : modifiable ? (
-        <div className="mt-5 border-t border-[#e3e3e3] pt-4">
-          <p className="text-[13px] leading-[20px] text-[#616161]">
+        <div className="mt-5 border-t border-[var(--cp-filet)] pt-4">
+          <p className="text-[13px] leading-[20px] text-[var(--cp-faible)]">
             Tant que l&apos;installation n&apos;est pas faite, vous pouvez changer ou annuler ici, immédiatement.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -504,8 +513,8 @@ export default function AbonnementCarte({
           </div>
         </div>
       ) : enService ? (
-        <div className="mt-5 border-t border-[#e3e3e3] pt-4">
-          <p className="text-[13px] leading-[20px] text-[#616161]">
+        <div className="mt-5 border-t border-[var(--cp-filet)] pt-4">
+          <p className="text-[13px] leading-[20px] text-[var(--cp-faible)]">
             Votre installation est faite&nbsp;: un changement ou une résiliation passe par une demande,
             confirmée par e-mail sous 48&nbsp;h.
           </p>
@@ -524,18 +533,18 @@ export default function AbonnementCarte({
           ) : null}
         </div>
       ) : (
-        <p className="mt-5 border-t border-[#e3e3e3] pt-4 text-[13px] leading-[20px] text-[#616161]">
+        <p className="mt-5 border-t border-[var(--cp-filet)] pt-4 text-[13px] leading-[20px] text-[var(--cp-faible)]">
           Cette demande ne se modifie plus en ligne. Écrivez-nous, nous nous en occupons.
         </p>
       )}
 
       {/* ——— le panneau formule : modifier (direct) ou demander (finalisée) ——— */}
       {panneau === "formule" ? (
-        <div className="rv-apparait mt-4 rounded-xl border border-[#e3e3e3] bg-[#f5f5f5] p-4 sm:p-5">
+        <div className="rv-apparait mt-4 rounded-xl border border-[var(--cp-filet)] bg-[var(--cp-creux)] p-4 sm:p-5">
           <div className="cp-secondaire cp-kicker-ligne">
             {modifiable ? "Nouvelle formule" : "Formule souhaitée"}
           </div>
-          <p className="mt-1 text-[14px] leading-[21px] text-[#3d3d3d]">
+          <p className="mt-1 text-[14px] leading-[21px] text-[var(--cp-doux)]">
             Un poste 59&nbsp;€, deux ou trois 89&nbsp;€, les quatre 119&nbsp;€ par mois. PULSE et VAULT
             sont compris quel que soit le choix.
           </p>
@@ -555,8 +564,8 @@ export default function AbonnementCarte({
                   <span className="rv-coche" aria-hidden />
                   <SystemLogo system={p.system} />
                   <span>
-                    <span className="block text-[14px] font-medium leading-[20px] text-[#050505]">{p.nom}</span>
-                    <span className="mt-0.5 block text-[13px] leading-[18px] text-[#616161]">{p.resume}</span>
+                    <span className="block text-[14px] font-medium leading-[20px] text-[var(--cp-encre)]">{p.nom}</span>
+                    <span className="mt-0.5 block text-[13px] leading-[18px] text-[var(--cp-faible)]">{p.resume}</span>
                   </span>
                 </label>
               );
@@ -581,12 +590,12 @@ export default function AbonnementCarte({
                 onClick={() => setPeriodicite("annuel")}
                 disabled={envoi}
               >
-                Annuel <span className="text-[#15753a]">−{REMISE_PCT}&nbsp;%</span>
+                Annuel <span className="text-[var(--cp-vert)]">−{REMISE_PCT}&nbsp;%</span>
               </button>
             </div>
             <div className="text-right">
-              <div className="text-[13px] text-[#616161]">Nouveau prix</div>
-              <div className="num text-[18px] font-semibold leading-[24px] text-[#050505]" aria-live="polite">
+              <div className="text-[13px] text-[var(--cp-faible)]">Nouveau prix</div>
+              <div className="num text-[18px] font-semibold leading-[24px] text-[var(--cp-encre)]" aria-live="polite">
                 {choix.length === 0
                   ? "—"
                   : periodicite === "annuel" && apercu.annuel != null
@@ -643,9 +652,9 @@ export default function AbonnementCarte({
 
       {/* ——— l'annulation : confirmation en deux temps ——— */}
       {panneau === "annulation" ? (
-        <div className="rv-apparait mt-4 rounded-xl border border-[#e4b7b0] bg-[#fdf1ef] p-4 sm:p-5">
-          <div className="text-[15px] font-semibold text-[#7c2d24]">Vous êtes sûr&nbsp;?</div>
-          <p className="mt-1 text-[14px] leading-[21px] text-[#7c2d24]">
+        <div className="rv-apparait mt-4 rounded-xl border border-[var(--cp-rouge-filet)] bg-[var(--cp-rouge-fond)] p-4 sm:p-5">
+          <div className="text-[15px] font-semibold text-[var(--cp-rouge)]">Vous êtes sûr&nbsp;?</div>
+          <p className="mt-1 text-[14px] leading-[21px] text-[var(--cp-rouge)]">
             Votre créneau de réunion sera libéré et votre demande d&apos;installation annulée. Rien
             n&apos;a été prélevé, rien ne le sera. Vous pourrez réserver à nouveau quand vous voudrez.
           </p>
@@ -662,11 +671,11 @@ export default function AbonnementCarte({
 
       {/* ——— la résiliation : motif + message → demande ——— */}
       {panneau === "resiliation" ? (
-        <div className="rv-apparait mt-4 rounded-xl border border-[#e3e3e3] bg-[#f5f5f5] p-4 sm:p-5">
+        <div className="rv-apparait mt-4 rounded-xl border border-[var(--cp-filet)] bg-[var(--cp-creux)] p-4 sm:p-5">
           <div className="cp-secondaire cp-kicker-ligne">
             Résilier l&apos;abonnement
           </div>
-          <p className="mt-1 text-[14px] leading-[21px] text-[#3d3d3d]">
+          <p className="mt-1 text-[14px] leading-[21px] text-[var(--cp-doux)]">
             Nous vous confirmons par e-mail sous 48&nbsp;h. Votre abonnement s&apos;arrête à la fin
             de la période en cours, rien n&apos;est prélevé au-delà.
           </p>
@@ -724,35 +733,35 @@ export default function AbonnementCarte({
           instant.
         </p>
       ) : demandesAbonnement.length ? (
-        <div id="cp-abo-demandes" className="mt-5 border-t border-[#e3e3e3] pt-4">
+        <div id="cp-abo-demandes" className="mt-5 border-t border-[var(--cp-filet)] pt-4">
           <div className="cp-secondaire cp-kicker-ligne">
             Vos demandes
           </div>
           <ul className="mt-3 space-y-3">
             {demandesAbonnement.map((d) => (
-              <li key={d.id} className="rounded-lg border border-[#e3e3e3] bg-white px-4 py-3">
+              <li key={d.id} className="rounded-lg border border-[var(--cp-filet)] bg-[var(--cp-carte)] px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[14px] font-semibold text-[#050505]">
+                  <span className="text-[14px] font-semibold text-[var(--cp-encre)]">
                     {LIBELLES_TYPE_ABONNEMENT[d.type] ?? d.type}
-                    <span className="num ml-2 text-[13px] font-normal text-[#616161]">{dateGp(d.cree_le)}</span>
+                    <span className="num ml-2 text-[13px] font-normal text-[var(--cp-faible)]">{dateGp(d.cree_le)}</span>
                   </span>
                   <Pastille code={d.statut}>{LIBELLES_STATUT_ABONNEMENT[d.statut] ?? d.statut}</Pastille>
                 </div>
                 {lignesDetail(d).map((l) => (
-                  <p key={l} className="mt-1.5 text-[13.5px] leading-[20px] text-[#3d3d3d]">
+                  <p key={l} className="mt-1.5 text-[13.5px] leading-[20px] text-[var(--cp-doux)]">
                     {l}
                   </p>
                 ))}
                 {d.message ? (
-                  <p className="mt-1.5 text-[13.5px] leading-[20px] text-[#616161]">
+                  <p className="mt-1.5 text-[13.5px] leading-[20px] text-[var(--cp-faible)]">
                     Votre message&nbsp;: «&nbsp;{d.message}&nbsp;»
                   </p>
                 ) : null}
                 {d.reponse ? (
-                  <p className="mt-2 rounded-md bg-[#fdf3dd] px-3 py-2 text-[13.5px] leading-[20px] text-[#050505]">
+                  <p className="mt-2 rounded-md bg-[var(--cp-ambre-fond)] px-3 py-2 text-[13.5px] leading-[20px] text-[var(--cp-encre)]">
                     <span className="font-semibold">Réponse d&apos;Omega</span>
                     {d.traitee_le ? (
-                      <span className="num text-[13px] text-[#616161]"> · {dateGp(d.traitee_le)}</span>
+                      <span className="num text-[13px] text-[var(--cp-faible)]"> · {dateGp(d.traitee_le)}</span>
                     ) : null}
                     <span className="block">{d.reponse}</span>
                   </p>

@@ -63,8 +63,8 @@
 }
 @media (min-width: 1024px) {
   .resa .cpt-wrap {
-    padding-top: 12px;
-    padding-bottom: 40px;
+    padding-top: 10px;
+    padding-bottom: 20px;
   }
 }
 
@@ -75,7 +75,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px 24px;
-  padding-bottom: 12px;
+  padding-bottom: 10px;
 }
 /* l'identité cède la place aux actions : base de 320 px, elle grandit
    ensuite — à 1280 la rangée tient sur UNE ligne (mesuré : 128 px de tête
@@ -849,7 +849,7 @@
 }
 @media (min-width: 640px) {
   .resa .cpt-panneau {
-    padding: 18px 24px 20px;
+    padding: 14px 22px 16px;
   }
 }
 /* les panneaux restent MONTÉS (forceMount : une saisie en cours survit
@@ -882,8 +882,8 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px 20px;
-  padding-bottom: 14px;
-  margin-bottom: 16px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
   border-bottom: 1px solid var(--r-filet);
 }
 .resa .cpt-panneau-titre {
@@ -993,4 +993,402 @@
 }
 .resa .cpt-acces-liens a:hover {
   text-decoration-color: currentColor;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE CADRE SOMBRE (15/09/2026)
+
+   Teo, capture du modèle à l'appui : « on dirait pas du tout le même
+   dashboard que le composant … c'est pas la même que sur le screen ».
+   L'écart n'était pas la structure — sections, groupes, repères, pied
+   étaient déjà là — mais la LUMIÈRE : « Dashboard Sidebar » est un
+   tableau de bord SOMBRE, et les deux reprises précédentes étaient
+   claires. D'où ce cadre.
+
+   Ce qu'il contient : la barre, la barre du haut (repli + fil d'Ariane),
+   les tuiles et le panneau. Ce qu'il ne contient PAS : l'en-tête de page
+   (identité, état, bouton principal), qui reste clair — on est sur le
+   SITE, pas dans l'application, et la page doit continuer à s'y rattacher.
+
+   COMMENT LES CARTES SUIVENT SANS ÊTRE RÉÉCRITES. Le cadre redéfinit
+   deux familles de variables :
+   · les `--r-*` du monde `.resa` (texte, doux, faible, filet, fond) —
+     c'est ce qui porte .cp-texte, .cp-secondaire, .rv-champ, .rv-libelle,
+     donc ProfilCarte, MotDePasseCarte et ConnexionInline, qui n'écrivent
+     aucune couleur en dur ;
+   · les `--cp-*`, créées le même jour pour AbonnementCarte : ses 55
+     classes de couleur en dur (text-[#050505], bg-white, border-[#e3e3e3]…)
+     sont devenues autant de variables. C'était la seule carte concernée.
+   Le reste — boutons, pastilles, champs — se surcharge ici, parce que
+   ces règles vivent dans globals.css et valent pour tout le site.
+
+   Valeurs du sombre : celles de l'ancienne carte « Votre cockpit »
+   (#0f1013, #d4d4d8, #a1a1aa), pour ne pas inventer une seconde nuit.
+   Contrastes contrôlés ≥ 4,5:1 sur les corps de texte.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ——— les couleurs des cartes, version claire ———
+   Sur `.resa` et RIEN D'AUTRE. Les avoir posées aussi sur .cpt-panneau
+   remettait tout le clair À L'INTÉRIEUR du cadre sombre : le panneau
+   redevenait blanc, et les titres, eux bien passés en #f4f4f5, étaient
+   blancs sur blanc. Une variable se définit à la racine d'un monde,
+   jamais sur un élément que l'autre monde contient. */
+.resa {
+  --cp-encre: #050505;
+  --cp-doux: #3d3d3d;
+  --cp-faible: #616161;
+  --cp-filet: #e3e3e3;
+  --cp-carte: #ffffff;
+  --cp-creux: #f5f5f5;
+  --cp-vert: #15753a;
+  --cp-vert-fond: #e8f6ed;
+  --cp-rouge: #7c2d24;
+  --cp-rouge-fond: #fdf1ef;
+  --cp-rouge-filet: #e4b7b0;
+  --cp-ambre-fond: #fdf3dd;
+}
+
+/* ——— le cadre ——— */
+.resa .cpt-console {
+  --cp-encre: #f4f4f5;
+  --cp-doux: #d4d4d8;
+  --cp-faible: #a1a1aa;
+  --cp-filet: rgba(255, 255, 255, 0.11);
+  --cp-carte: #1a1b1e;
+  --cp-creux: #141517;
+  --cp-vert: #86efac;
+  --cp-vert-fond: rgba(34, 197, 94, 0.14);
+  --cp-rouge: #fca5a5;
+  --cp-rouge-fond: rgba(239, 68, 68, 0.13);
+  --cp-rouge-filet: rgba(239, 68, 68, 0.32);
+  --cp-ambre-fond: rgba(245, 158, 11, 0.16);
+
+  /* le monde .resa, repeint pour ses enfants */
+  --r-texte: #f4f4f5;
+  --r-doux: #d4d4d8;
+  --r-faible: #a1a1aa;
+  --r-filet: rgba(255, 255, 255, 0.11);
+  --r-fond: #141517;
+
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: #0f1012;
+  color: var(--r-doux);
+}
+
+/* ——— la barre du haut : repli et fil d'Ariane ——— */
+.resa .cpt-haut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 5px 16px;
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .cpt-repli {
+  display: none;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  color: var(--r-faible);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-repli {
+    display: grid;
+  }
+}
+.resa .cpt-repli:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--r-texte);
+}
+.resa .cpt-repli:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+.resa .cpt-fil {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+.resa .cpt-fil-racine {
+  overflow: hidden;
+  color: var(--r-faible);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resa .cpt-fil-sep {
+  color: rgba(255, 255, 255, 0.22);
+}
+.resa .cpt-fil-feuille {
+  font-weight: 600;
+  color: var(--r-texte);
+  white-space: nowrap;
+}
+
+/* ——— la scène : tout ce qui n'est pas la barre ——— */
+.resa .cpt-scene {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 0 16px;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-scene {
+    padding-bottom: 12px;
+  }
+}
+
+/* ——— la barre, repeinte ——— */
+@media (min-width: 1024px) {
+  .resa .cpt-rail {
+    position: static;
+    padding: 16px 14px;
+    border-right: 1px solid var(--r-filet);
+    background: rgba(255, 255, 255, 0.015);
+  }
+  /* le repli : la colonne se ferme, la barre s'efface */
+  .resa .cpt-corps[data-replie="true"] {
+    grid-template-columns: 0 minmax(0, 1fr);
+    gap: 0;
+  }
+  .resa .cpt-corps[data-replie="true"] > .cpt-rail {
+    padding-inline: 0;
+    border-right-width: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .resa .cpt-corps,
+  .resa .cpt-rail {
+    transition:
+      grid-template-columns 0.3s ease,
+      padding 0.3s ease,
+      opacity 0.2s ease;
+  }
+}
+.resa .cpt-rail-jeton {
+  background: #f4f4f5;
+  color: #0f1012;
+}
+.resa .cpt-rail-enseigne {
+  color: var(--r-texte);
+}
+
+/* la sélection : sur du sombre, un blanc à 8 % et un trait blanc */
+.resa .cpt-console .cpt-surbrillance {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+@media (min-width: 1024px) {
+  .resa .cpt-console .cpt-surbrillance::after {
+    background: #ffffff;
+  }
+  .resa .cpt-console .cpt-item:hover::before,
+  .resa .cpt-console .cpt-lien:hover::before {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+@media (max-width: 1023px) {
+  .resa .cpt-console .cpt-surbrillance {
+    box-shadow: inset 0 -2px 0 #ffffff;
+  }
+}
+.resa .cpt-item-badge {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--r-doux);
+}
+.resa .cpt-chevron:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ——— les tuiles, dans la scène ——— */
+.resa .cpt-console .cpt-tuiles {
+  margin: 16px 16px 0;
+  border-color: var(--r-filet);
+  background: var(--cp-carte);
+}
+@media (min-width: 1024px) {
+  .resa .cpt-console .cpt-tuiles {
+    margin: 12px 14px 0;
+  }
+}
+.resa .cpt-console .cpt-tuile {
+  background: transparent;
+}
+.resa .cpt-console .cpt-tuile:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ——— le panneau ——— */
+.resa .cpt-console .cpt-panneau {
+  margin: 16px 16px 0;
+  border-color: var(--r-filet);
+  background: var(--cp-carte);
+}
+@media (min-width: 1024px) {
+  .resa .cpt-console .cpt-panneau {
+    margin: 10px 14px 0;
+  }
+}
+.resa .cpt-console .cpt-panneau-titre,
+.resa .cpt-console .cpt-fort {
+  color: var(--r-texte);
+}
+
+/* ——— ce qui vient de globals.css et doit s'inverser ——— */
+/* les boutons : le plein passe en blanc, le filet en blanc translucide */
+.resa .cpt-console .r-btn--noir {
+  background: #f4f4f5;
+  color: #0f1012;
+}
+.resa .cpt-console .r-btn--noir:hover {
+  background: #ffffff;
+}
+.resa .cpt-console .r-btn--fil {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: transparent;
+  color: #f4f4f5;
+}
+.resa .cpt-console .r-btn--fil:hover {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.06);
+}
+.resa .cpt-console .r-btn--blanc {
+  background: #f4f4f5;
+  color: #0f1012;
+}
+
+/* les pastilles : fonds translucides, textes clairs (≥ 4,5:1 sur #1a1b1e) */
+.resa .cpt-console .cp-pastille {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--r-doux);
+}
+.resa .cpt-console .cp-pastille[data-teinte="bleu"] {
+  background: rgba(96, 165, 250, 0.16);
+  color: #93c5fd;
+}
+.resa .cpt-console .cp-pastille[data-teinte="vert"] {
+  background: var(--cp-vert-fond);
+  color: var(--cp-vert);
+}
+.resa .cpt-console .cp-pastille[data-teinte="ambre"] {
+  background: var(--cp-ambre-fond);
+  color: #fcd34d;
+}
+.resa .cpt-console .cp-pastille[data-teinte="rouge"] {
+  background: var(--cp-rouge-fond);
+  color: var(--cp-rouge);
+}
+.resa .cpt-console .cp-pastille[data-teinte="gris"] {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--r-doux);
+}
+
+/* les bandeaux de retour */
+.resa .cpt-console .cp-ok {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: var(--cp-vert-fond);
+  color: var(--cp-vert);
+}
+.resa .cpt-console .cp-info,
+.resa .cpt-console .rv-paiement-note {
+  border-color: var(--r-filet);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--r-doux);
+}
+.resa .cpt-console .rv-erreur {
+  color: var(--cp-rouge);
+}
+
+/* les champs de formulaire (profil, mot de passe, connexion) */
+.resa .cpt-console .rv-champ {
+  border-color: var(--r-filet);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--r-texte);
+}
+.resa .cpt-console .rv-champ:focus {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+.resa .cpt-console .rv-champ::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+.resa .cpt-console .cp-champ--lecture {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--r-faible);
+}
+.resa .cpt-console .rv-libelle {
+  color: var(--r-doux);
+}
+/* les cases à cocher des postes (panneau « changer de formule ») */
+.resa .cpt-console .rv-case {
+  border-color: var(--r-filet);
+  background: rgba(255, 255, 255, 0.03);
+}
+.resa .cpt-console .rv-case--actif {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.07);
+}
+.resa .cpt-console .rv-coche {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.resa .cpt-console .rv-case--actif .rv-coche {
+  border-color: #ffffff;
+  background: #ffffff;
+}
+.resa .cpt-console .rv-case--actif .rv-coche::after {
+  border-color: #0f1012;
+}
+/* le sélecteur mensuel | annuel */
+.resa .cpt-console .r-seg {
+  background: rgba(255, 255, 255, 0.07);
+}
+.resa .cpt-console .r-seg-btn {
+  color: var(--r-faible);
+}
+.resa .cpt-console .r-seg-btn[data-actif="true"] {
+  background: #f4f4f5;
+  color: #0f1012;
+}
+.resa .cpt-console .r-note {
+  color: var(--r-faible);
+}
+/* le bloc « Votre espace client » de la section Sécurité */
+.resa .cpt-console .cpt-acces {
+  border-color: var(--r-filet);
+  background: rgba(255, 255, 255, 0.03);
+}
+/* le bloc-date des rendez-vous */
+.resa .cpt-console .cp-date {
+  background: rgba(255, 255, 255, 0.06);
+}
+.resa .cpt-console .cp-date--vide .cp-date-jour {
+  color: rgba(255, 255, 255, 0.35);
+}
+/* les logos de postes, posés sur des tuiles blanches dans le monde clair */
+.resa .cpt-console .cpt-panneau ul.grid > li {
+  border-color: var(--r-filet) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+/* le halo d'un repère visé */
+.resa .cpt-console .cpt-panneau [id^="cp-abo-"][data-vise="oui"],
+.resa .cpt-console .cpt-panneau [id^="cp-secu-"][data-vise="oui"] {
+  animation-name: cpt-halo-nuit;
+}
+@keyframes cpt-halo-nuit {
+  0%,
+  35% {
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.09);
+  }
+  100% {
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
 }

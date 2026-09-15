@@ -4,6 +4,17 @@
    CompteTableau — les tuiles et la barre de navigation de « Mon compte »
    (14/09/2026 soir, barre refaite le 14/09 nuit)
 
+   LE CADRE EST SOMBRE (15/09, 3ᵉ passe). Teo, capture du modèle à
+   l'appui : « on dirait pas du tout le même dashboard que le composant …
+   c'est pas la même que sur le screen ». L'écart n'était pas la
+   structure mais la LUMIÈRE : le modèle est un tableau de bord sombre,
+   les deux reprises précédentes étaient claires. Tout le bloc — barre,
+   barre du haut, tuiles, panneau — vit donc dans un cadre sombre
+   (`.cpt-console`), qui redéfinit les variables du monde `.resa` pour
+   que les cartes d'abonnement, de profil et de mot de passe s'y lisent
+   sans être réécrites. L'en-tête de page, lui, reste clair : c'est la
+   page du site, pas l'application.
+
    ORIGINE DE LA BARRE. Teo a collé « Dashboard Sidebar » (21st.dev) :
    « remplace complètement ce qu'il y a actuellement par ce dashboard ;
    bien sûr les sections doivent afficher les mêmes trucs qu'on veut
@@ -39,9 +50,12 @@
    · la palette de recherche ⌘K et les raccourcis clavier affichés au
      survol : cinq sections ne se cherchent pas, et nous n'avons aucun
      raccourci réel — un `kbd` qui ne correspond à rien est un mensonge.
-   · le bouton de repli de la barre : sous 1024 px la barre devient une
-     rangée défilante d'une seule ligne, ce qui vaut mieux qu'un panneau
-     à ouvrir sur téléphone (menu-mobile-deplie-pas-a-plat).
+   · la recherche ⌘K et les raccourcis : voir ci-dessus. En revanche le
+     BOUTON DE REPLI et le FIL D'ARIANE du modèle sont repris (3ᵉ passe) —
+     ils font une bonne part de son allure. Le repli ne vaut qu'en
+     colonne : sous 1024 px la barre est une rangée défilante d'une seule
+     ligne, ce qui vaut mieux qu'un panneau à ouvrir sur téléphone
+     (menu-mobile-deplie-pas-a-plat).
    · les groupes « Developers » et les entrées de démonstration.
 
    ÉCART ASSUMÉ, contre la ressemblance : le modèle fait ses lignes en
@@ -72,9 +86,8 @@
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import "./compte.css";
-import Lien from "@/components/Lien";
 
 /* une sous-entrée : un repère DANS le panneau de sa section */
 export type SousEntree = {
@@ -232,6 +245,8 @@ export default function CompteTableau({
   /* le choix de la personne (clic, clavier, tuile) ; tant qu'il n'y en a
      pas, l'ancre de l'URL décide, puis `defaut` */
   const [choix, setChoix] = useState<string | null>(null);
+  /* la barre se replie, comme dans le modèle — seulement en colonne */
+  const [ouverte, setOuverte] = useState(true);
   const ancre = useSyncExternalStore(abonnerAncre, lireAncre, lireAncreServeur);
   const vertical = useSyncExternalStore(abonnerLargeur, lireColonne, lireColonneServeur);
   const reduit = useReducedMotion();
@@ -276,27 +291,17 @@ export default function CompteTableau({
     else groupes.push({ titre: s.groupe, sections: [s] });
   }
 
-  return (
-    <>
-      {/* ——— les tuiles de synthèse ——— */}
-      <div className="cpt-tuiles" data-arrivee="bloc">
-        {tuiles.map((t) => (
-          <button key={t.id} type="button" className="cpt-tuile" onClick={() => choisir(t.cible)}>
-            <span className="cpt-tuile-kicker">{t.kicker}</span>
-            <span className={`cpt-tuile-valeur${t.vide ? " cpt-tuile-valeur--vide" : ""}`}>{t.valeur}</span>
-            {t.sous ? <span className="cpt-tuile-sous">{t.sous}</span> : null}
-            <ArrowUpRight size={16} strokeWidth={2} className="cpt-tuile-fleche" aria-hidden="true" />
-          </button>
-        ))}
-      </div>
+  const sectionActive = sections.find((s) => s.id === actif);
 
+  return (
+    <div className="cpt-console" data-arrivee="bloc">
       {/* ——— la barre | le panneau ——— */}
       <Tabs.Root
         value={actif}
         onValueChange={choisir}
         orientation={vertical ? "vertical" : "horizontal"}
         className="cpt-corps"
-        data-arrivee="colonne"
+        data-replie={vertical ? !ouverte : false}
       >
         <div className="cpt-rail">
           {/* l'en-tête : l'entreprise et sa formule */}
@@ -340,7 +345,7 @@ export default function CompteTableau({
                   </button>
                 </form>
               ) : (
-                <Lien
+                <a
                   key={l.id}
                   href={l.href}
                   className="cpt-lien"
@@ -353,24 +358,63 @@ export default function CompteTableau({
                   {l.externe ? (
                     <ArrowUpRight size={14} strokeWidth={2} className="cpt-lien-fleche" aria-hidden="true" />
                   ) : null}
-                </Lien>
+                </a>
               ),
             )}
           </div>
         </div>
 
-        {sections.map((s) => (
-          <Tabs.Content key={s.id} value={s.id} forceMount className="cpt-panneau" data-section={s.id}>
-            <header className="cpt-panneau-tete">
-              <div className="min-w-0">
-                <h2 className="cpt-panneau-titre">{s.titre}</h2>
-                {s.description ? <p className="cpt-panneau-sous">{s.description}</p> : null}
-              </div>
-            </header>
-            <div className="cpt-panneau-corps">{s.contenu}</div>
-          </Tabs.Content>
-        ))}
+        <div className="cpt-scene">
+          {/* la barre du haut : repli et fil d'Ariane, comme le modèle */}
+          <div className="cpt-haut">
+            <button
+              type="button"
+              className="cpt-repli"
+              onClick={() => setOuverte((v) => !v)}
+              aria-label={ouverte ? "Replier le menu" : "Déplier le menu"}
+            >
+              {ouverte ? (
+                <PanelLeftClose size={18} strokeWidth={1.5} aria-hidden="true" />
+              ) : (
+                <PanelLeftOpen size={18} strokeWidth={1.5} aria-hidden="true" />
+              )}
+            </button>
+            <nav className="cpt-fil" aria-label="Fil d'Ariane">
+              <span className="cpt-fil-racine">{enseigne}</span>
+              <span className="cpt-fil-sep" aria-hidden="true">
+                /
+              </span>
+              <span className="cpt-fil-feuille">{sectionActive?.libelle ?? ""}</span>
+            </nav>
+          </div>
+
+          {/* ——— les tuiles de synthèse ——— */}
+          <div className="cpt-tuiles">
+            {tuiles.map((t) => (
+              <button key={t.id} type="button" className="cpt-tuile" onClick={() => choisir(t.cible)}>
+                <span className="cpt-tuile-kicker">{t.kicker}</span>
+                <span className={`cpt-tuile-valeur${t.vide ? " cpt-tuile-valeur--vide" : ""}`}>
+                  {t.valeur}
+                </span>
+                {t.sous ? <span className="cpt-tuile-sous">{t.sous}</span> : null}
+                <ArrowUpRight size={16} strokeWidth={2} className="cpt-tuile-fleche" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+
+          {sections.map((s) => (
+            <Tabs.Content key={s.id} value={s.id} forceMount className="cpt-panneau" data-section={s.id}>
+              <header className="cpt-panneau-tete">
+                <div className="min-w-0">
+                  <h2 className="cpt-panneau-titre">{s.titre}</h2>
+                  {s.description ? <p className="cpt-panneau-sous">{s.description}</p> : null}
+                </div>
+              </header>
+              <div className="cpt-panneau-corps">{s.contenu}</div>
+            </Tabs.Content>
+          ))}
+        </div>
       </Tabs.Root>
-    </>
+    </div>
   );
 }

@@ -232,13 +232,16 @@ export default function CompteVue({
           id: "abonnement",
           cible: "abonnement",
           kicker: "Abonnement",
-          valeur: prixCourt ? `${nomFormule} · ${prixCourt}` : nomFormule,
+          /* le PRIX en grand, la formule dessous : « 3 postes · 89 €/mois »
+             passait sur deux lignes dans le cadre et coûtait 35 px à toute
+             la rangée de tuiles */
+          valeur: prixCourt ?? nomFormule,
           sous: (
             <>
               <Pastille teinte={ETAT_COURT[etat.code]?.teinte ?? "gris"}>
                 {ETAT_COURT[etat.code]?.texte ?? etat.libelle}
               </Pastille>
-              {prixCourt && periodicite === "mensuel" ? <span>sans engagement</span> : null}
+              {prixCourt ? <span>{nomFormule}</span> : null}
             </>
           ),
         }
