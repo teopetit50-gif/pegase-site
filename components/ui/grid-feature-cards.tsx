@@ -25,12 +25,18 @@ import { useId } from "react";
       d'hydratation et repeint. Les cases sont fixées, une série par carte.
    2. NI `text-foreground` NI `text-muted-foreground` : jetons shadcn sans
       valeur ici. Encre `--o-text`, gris `--o-muted`, filets `--o-line`.
+      15/09 — MONDE CLAIR : les cases passent de `#0d0d10` à `bg-white`,
+      et la trame de blanc translucide à l'encre `#09090b` (dégradé 5 %,
+      cases pleines 5 %, filets 18 %), en `mix-blend-multiply` — sur un
+      fond clair, `overlay` éclaircit au lieu d'assombrir. La carte reste
+      blanche sur une page blanche : ce sont le `gap-px` sur fond
+      `--o-line` et le filet du cadre qui la découpent, pas son fond.
    3. LES FILETS ENTRE CASES VIENNENT D'UN `gap-px` SUR FOND `--o-line`,
       pas de `divide-x/y` : quatre cases en 1, 2 ou 4 colonnes n'ont
       jamais de filet orphelin sur un bord, quelle que soit la largeur.
    4. LE TITRE PASSE EN JAKARTA 17 PX, comme les intitulés de carte du
-      site, et non `text-sm` — à 14 px sur fond noir un intitulé se
-      confond avec son texte.
+      site, et non `text-sm` — à 14 px un intitulé se confond avec son
+      texte.
    5. `cn()` retiré : les classes sont composées à la main, comme dans les
       autres reprises de ce dossier.
    ══════════════════════════════════════════════════════════════════════ */
@@ -55,8 +61,8 @@ function Trame({ cases }: { cases: number[][] }) {
   const w = 20;
   return (
     <div className="pointer-events-none absolute left-1/2 top-0 -ml-20 -mt-2 h-full w-full [mask-image:linear-gradient(white,transparent)]">
-      <div className="absolute inset-0 bg-gradient-to-r from-white/[0.06] to-white/[0.01] [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
-        <svg aria-hidden className="absolute inset-0 h-full w-full fill-white/[0.05] stroke-white/[0.22] mix-blend-overlay">
+      <div className="absolute inset-0 bg-gradient-to-r from-[#09090b]/[0.05] to-[#09090b]/[0.01] [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
+        <svg aria-hidden className="absolute inset-0 h-full w-full fill-[#09090b]/[0.05] stroke-[#09090b]/[0.18] mix-blend-multiply">
           <defs>
             <pattern id={id} width={w} height={w} patternUnits="userSpaceOnUse" x="-12" y="4">
               <path d={`M.5 ${w}V.5H${w}`} fill="none" />
@@ -81,7 +87,7 @@ export function GridFeatureCards({ cases }: { cases: CaseTrame[] }) {
         <div
           key={c.titre}
           data-reveal
-          className="relative overflow-hidden bg-[#0d0d10] p-7 sm:p-8"
+          className="relative overflow-hidden bg-white p-7 sm:p-8"
         >
           <Trame cases={TRAMES[i % TRAMES.length]} />
           <div className="relative z-10 text-[var(--o-text)]/80 [&>svg]:h-6 [&>svg]:w-6">{c.icone}</div>

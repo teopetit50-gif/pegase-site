@@ -61,7 +61,8 @@ import {
    Teo, capture à l'appui : « des sections encore à l'ancienne ; récupère
    les composants sur 21st.dev et change les sections ». Le hero est
    gardé tel quel (c'est sa capture nº 1, il n'était pas en cause) ; tout
-   ce qui suit est repris section par section, dans le monde sombre :
+   ce qui suit est repris section par section (le monde était alors
+   sombre — voir la passe du 15/09 plus bas) :
 
    | section                     | composant repris        | auteur         |
    |-----------------------------|-------------------------|----------------|
@@ -101,6 +102,30 @@ import {
    votre secteur. », « Parler de votre cas. ») — le dernier est l'appel de
    la famille, les deux autres remplacent des titres du gabarit qui
    parlaient d'un « moteur ».
+
+   ——— Passe du 15/09/2026 : la page repasse en BLANC ————————————————
+   Teo : « la page sur mesure n'est toujours pas blanche, elle est encore
+   noire ; elle doit être blanche comme CASHD. » Les quatre pages produit
+   rapatriées le 11/09 sont claires ; celle-ci était la dernière page du
+   catalogue en monde sombre, et la seule à s'ouvrir en noir depuis une
+   carte de /offres.
+
+   Ce qui change : la racine perd `offres--sombre`. Le monde `.offres` de
+   base EST le monde blanc (fond #ffffff, encre #09090b, hero .o-gris
+   #f5f5f5, cartes de démo blanches) — tout ce qui lit `--o-text`,
+   `--o-muted`, `--o-line`, `--o-soft` ou les jetons `--demo-*` suit sans
+   une ligne à écrire : pastilles, boutons, liens, le hero entier, les
+   pastilles d'outils, le bandeau « les autres systèmes ».
+   Restaient à repeindre à la main les sept reprises 21st.dev du 14/09,
+   qui avaient été écrites en valeurs sombres en dur — chacune est notée
+   en tête de son fichier. Et dans le hero, deux couleurs écrites en dur
+   (`#fafafa` sur le nom du système, `#a1a1aa` sur les deux lignes de
+   légende) qui passent en `--o-text` et `--o-muted`.
+
+   Aucun texte, aucune section, aucun ordre de lecture ne bouge.
+   `data-monde` n'est pas nécessaire : depuis le 11/09 l'entête prélève la
+   couleur de fond réelle sous son bord bas, et le blanc de `.offres` la
+   fait basculer en verre clair toute seule.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -222,7 +247,17 @@ const FICHE: Fiche = {
 /* ——— ce que couvre : « Intitulé : développement » → deux champs ———
    La fiche écrit chaque périmètre en une phrase dont le premier
    deux-points sépare l'intitulé du développement. On coupe là, on ne
-   réécrit pas. */
+   réécrit pas.
+
+   15/09 — LA COUPE SE FAISAIT SUR `" : "`, ESPACE ORDINAIRE. Le deuxième
+   périmètre (« Ponts entre outils ») porte l'INSÉCABLE devant son
+   deux-points (U+00A0), comme le veut la typographie française et comme
+   l'impose la règle du parc : la coupe ne trouvait rien, `titre` valait
+   la phrase entière et `texte` était vide. La carte affichait donc ses
+   130 signes en gras, sans développement, à côté de trois cartes bien
+   formées. On ne retire pas l'insécable du texte — c'est le séparateur
+   qui devient tolérant : n'importe quelle espace (`\s` couvre U+00A0 et
+   U+202F en JavaScript) devant le PREMIER deux-points. */
 const ICONES_PERIMETRE = [
   <AppWindow key="a" strokeWidth={1.25} />,
   <ArrowLeftRight key="b" strokeWidth={1.25} />,
@@ -230,8 +265,9 @@ const ICONES_PERIMETRE = [
   <CalendarCheck key="d" strokeWidth={1.25} />,
 ];
 const PERIMETRES: CaseTrame[] = FICHE.points.map((pt, i) => {
-  const [titre, ...reste] = pt.split(" : ");
-  const texte = reste.join(" : ");
+  const coupe = pt.match(/^(.*?)\s*:\s*(.*)$/);
+  const titre = coupe ? coupe[1] : pt;
+  const texte = coupe ? coupe[2] : "";
   /* la suite d'un deux-points est en minuscule dans la fiche ; seule, elle
      redevient une phrase */
   return { icone: ICONES_PERIMETRE[i], titre, texte: texte.charAt(0).toUpperCase() + texte.slice(1) };
@@ -320,7 +356,7 @@ export default function SurMesurePage() {
   return (
     <PageShell>
       <PageMotion />
-      <div className="offres offres--sombre">
+      <div className="offres">
         {/* ════════ 1 · HERO — celui du gabarit « home », inchangé ════════ */}
         <section className="o-gris relative overflow-hidden pb-[90px] pt-[40px] sm:pb-[120px] sm:pt-[81px]">
           <div
@@ -341,12 +377,12 @@ export default function SurMesurePage() {
                   <SystemLogo system={SYSTEM} />
                   <div>
                     <div
-                      className="text-[26px] font-semibold tracking-[-0.03em] text-[#fafafa]"
+                      className="text-[26px] font-semibold tracking-[-0.03em] text-[var(--o-text)]"
                       style={{ fontFamily: "var(--font-jakarta)" }}
                     >
                       {SYSTEM}
                     </div>
-                    <div className="o-small !text-[#a1a1aa]">· {ROLE}</div>
+                    <div className="o-small !text-[var(--o-muted)]">· {ROLE}</div>
                   </div>
                 </div>
 
@@ -377,7 +413,7 @@ export default function SurMesurePage() {
                     <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
                     SUR VOS OUTILS
                   </span>
-                  <span className="o-small !text-[#a1a1aa]">{FICHE.outils.join(" · ")}</span>
+                  <span className="o-small !text-[var(--o-muted)]">{FICHE.outils.join(" · ")}</span>
                 </div>
               </div>
 

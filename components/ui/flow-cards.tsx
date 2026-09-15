@@ -13,6 +13,12 @@ import "./flow-cards.css";
    qui s'élargissent. Une lueur suit le pointeur sur la carte survolée.
    C'est du noir et blanc de bout en bout : c'est pour ça qu'il est pris.
 
+   15/09 — MONDE CLAIR. Cartes `--o-soft` (#fafafa) sur la page blanche,
+   filet au survol `#d4d4d8`, disque du pictogramme blanc. Le trait du
+   pictogramme et la lueur au pointeur passent à l'encre dans
+   `flow-cards.css` (`--fc-stroke`, `--fc-trail`, `--fc-glow`) : le
+   composant n'en connaît que les noms.
+
    Remplace « Le détail » de /offres/sur-mesure : trois paragraphes de
    500 signes dans des cartes numérotées, plus une quatrième carte qui
    répétait le texte « Vous gardez la main » déjà affiché dans le hero.
@@ -23,14 +29,14 @@ import "./flow-cards.css";
 
    Ce qui a été jeté, et pourquoi :
    • Le détecteur de thème (MutationObserver, matchMedia, localStorage) et
-     le bouton jour/nuit : la page est sombre, point.
+     le bouton jour/nuit : la page a un seul monde, point.
    • Le bandeau de métriques (« 19 days », « 99.5% ») et le pied
      (« Copy layout tokens ») : chiffres de démonstration, rien à afficher
      ici sans inventer.
    • La ligne de statistique en bas de chaque carte (« Scope commit ·
      48 hrs ») : même raison — aucun délai ne s'annonce sur ce site.
    • Le fond quadrillé pleine page : la section vit dans la colonne du
-     site, sur le noir de la page.
+     site, sur le fond de la page.
    • La feuille injectée dans <head> devient `flow-cards.css`.
    • L'apparition par IntersectionObserver devient `data-reveal`.
 
@@ -81,7 +87,7 @@ function CarteFlux({ etape }: { etape: EtapeFlux }) {
     <article
       ref={ref}
       data-reveal
-      className="fc-card group relative overflow-hidden rounded-[24px] border border-[var(--o-line)] bg-[rgba(24,24,27,0.55)] p-6 transition-colors duration-500 hover:border-[#3f3f46] sm:p-8"
+      className="fc-card group relative overflow-hidden rounded-[24px] border border-[var(--o-line)] bg-[var(--o-soft)] p-6 transition-colors duration-500 hover:border-[#d4d4d8] sm:p-8"
       onMouseMove={suivre}
       onMouseLeave={quitter}
     >
@@ -94,7 +100,7 @@ function CarteFlux({ etape }: { etape: EtapeFlux }) {
             {etape.meta}
           </span>
         </div>
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--o-line)] bg-[rgba(24,24,27,0.7)] lg:h-14 lg:w-14">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--o-line)] bg-white lg:h-14 lg:w-14">
           <span className="fc-icon" data-variant={etape.variante}>
             <span />
           </span>

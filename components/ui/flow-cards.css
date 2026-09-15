@@ -12,6 +12,12 @@
 
    Quatre variantes de pictogramme, une par étape. L'original en avait cinq
    (`loop` en plus) ; le sur-mesure a quatre étapes.
+
+   15/09 — les trois couleurs du pictogramme sont INVERSÉES avec la page :
+   trait et anneaux à l'encre #09090b, traînée à 26 %, lueur au pointeur à
+   5,5 %. L'original les tenait en blanc translucide ; sur fond clair une
+   lueur blanche ne se voit pas du tout. Ce sont les seules couleurs du
+   fichier : tout le reste est de la géométrie et des `@keyframes`.
    ══════════════════════════════════════════════════════════════════════ */
 
 @keyframes fc-flare {
@@ -35,9 +41,9 @@
 }
 
 .fc-card {
-  --fc-stroke: #fafafa;
-  --fc-trail: rgba(255, 255, 255, 0.32);
-  --fc-glow: rgba(255, 255, 255, 0.12);
+  --fc-stroke: #09090b;
+  --fc-trail: rgba(9, 9, 11, 0.26);
+  --fc-glow: rgba(9, 9, 11, 0.055);
 }
 
 .fc-icon {

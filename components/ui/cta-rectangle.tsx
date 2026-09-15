@@ -18,8 +18,15 @@ import Link from "next/link";
 
    Trois écarts :
    1. `shadow-glow` et `fade-top-lg` sont des utilitaires de la config
-      Launch UI : la lueur est écrite en `box-shadow` inset blanc, le
-      fondu en `mask-image`. Le glow est monochrome, comme tout ici.
+      Launch UI : la lueur est écrite en `box-shadow` inset, le fondu en
+      `mask-image`. Elle est monochrome, comme tout ici.
+      15/09 — monde clair : l'inset passe du blanc à l'encre #09090b.
+      Le dessin ne change pas — elle monte du bas et s'éteint vers le
+      haut — mais sur blanc c'est une OMBRE qui la porte, pas une
+      lumière, et une ombre pèse plus qu'une lueur à opacité égale :
+      reprises du blanc (7 % / 4 %) telles quelles, elles dessinaient un
+      panneau gris au bas d'une page blanche. Ramenées à 4,5 % / 2,2 %,
+      de quoi asseoir le bloc sans le peindre.
    2. `animate-fade-in-up delay-*` (greffon d'animation absent) →
       `data-reveal`, comme partout sur le site.
    3. `Button` et `Badge` shadcn → `o-btn` et `o-pill` du site.
@@ -58,7 +65,7 @@ export function CtaRectangle({
           className="pointer-events-none absolute inset-0 rounded-2xl"
           style={{
             boxShadow:
-              "0 -16px 128px 0 rgba(255,255,255,0.10) inset, 0 -16px 32px 0 rgba(255,255,255,0.05) inset",
+              "0 -16px 128px 0 rgba(9,9,11,0.045) inset, 0 -16px 32px 0 rgba(9,9,11,0.022) inset",
             maskImage: "linear-gradient(to bottom, transparent, black 45%)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent, black 45%)",
           }}

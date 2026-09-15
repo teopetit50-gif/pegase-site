@@ -34,10 +34,12 @@ import {
       recopiés. Même source que `components/offres/MediaMoteurs.tsx`, même
       règle : les outils du CLIENT, jamais les nôtres (n8n est exclu
       depuis le 14/08).
-   3. LES TUILES DE MARQUE RESTENT BLANCHES sur le noir — c'est la règle
-      de `.offres--sombre` pour `.o-tuile` (« c'est leur contraste avec
-      le fond qui les fait exister »). Les cases vides prennent `--o-soft`
-      et un filet `--o-line`.
+   3. LES TUILES DE MARQUE SONT BLANCHES. Sur le noir (jusqu'au 15/09)
+      c'était leur contraste avec le fond qui les faisait exister, et une
+      ombre dure suffisait. Sur la page blanche, blanc sur blanc ne
+      découpe plus rien : elles prennent un filet `--o-line` et l'ombre
+      passe à l'encre (5 % près, 28 % portée). Les cases vides gardent
+      `--o-soft` et le même filet.
    4. `cn()` et `dark:invert` retirés : un seul monde, pas de bascule.
    ══════════════════════════════════════════════════════════════════════ */
 
@@ -78,7 +80,7 @@ export function IntegrationsTiles() {
           <div
             className={
               t.marque
-                ? "flex h-full w-full items-center justify-center rounded-md bg-white shadow-[0_1px_2px_rgba(0,0,0,0.4),0_14px_30px_-16px_rgba(0,0,0,0.6)]"
+                ? "flex h-full w-full items-center justify-center rounded-md border border-[var(--o-line)] bg-white shadow-[0_1px_2px_rgba(9,9,11,0.05),0_14px_30px_-16px_rgba(9,9,11,0.28)]"
                 : "h-full w-full rounded-md border border-[var(--o-line)] bg-[var(--o-soft)]"
             }
             title={t.marque?.title}

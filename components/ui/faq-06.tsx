@@ -23,7 +23,11 @@ import "./faq-06.css";
      battent. Les spans du titre restent, sans animation.
    • `Badge`, `bg-card`, `bg-muted/40`, `border-border`, `font-serif` :
      jetons et police absents. Pastille `o-pill`, surfaces `--o-soft` /
-     `#1c1c20` à l'ouverture, filets `--o-line`, titre en `o-h2`.
+     blanc à l'ouverture, filets `--o-line`, titre en `o-h2`.
+     15/09 — la carte ouverte S'ÉCLAIRCIT, comme dans l'original : elle
+     valait `#1c1c20` sur le noir, elle vaut `bg-white` sur le
+     `--o-soft` (#fafafa) des cartes fermées. Le geste est le même, le
+     sens de l'écart aussi.
    • L'accordéon shadcn attendu (`@/components/ui/accordion`) n'existe pas
      dans ce dossier : la primitive Radix est câblée directement, avec un
      « + » qui pivote en croix — le vocabulaire déjà posé sur le bloc
@@ -38,7 +42,9 @@ import "./faq-06.css";
 
 export type Question = { q: string; a: string };
 
-/* la moitié des mots en gris, la suite en blanc — l'accent de Hirael */
+/* la moitié des mots en gris, la suite à l'encre pleine — l'accent de
+   Hirael. Aucune couleur en dur : `--o-muted` puis la couleur héritée,
+   donc le titre suit le monde de la page. */
 export function TitreDeuxEncres({ children }: { children: string }) {
   const mots = children.split(" ");
   const moitie = Math.floor(mots.length / 2);
@@ -65,7 +71,7 @@ export function Faq06({ questions }: { questions: Question[] }) {
           key={f.q}
           value={`q-${i}`}
           data-reveal
-          className="rounded-xl border border-[var(--o-line)] bg-[var(--o-soft)] px-5 transition-colors data-[state=open]:bg-[#1c1c20] md:px-6"
+          className="rounded-xl border border-[var(--o-line)] bg-[var(--o-soft)] px-5 transition-colors data-[state=open]:bg-white md:px-6"
         >
           <Accordion.Header className="flex">
             <Accordion.Trigger className="group flex flex-1 items-center justify-between gap-6 py-4 text-left text-[16px] font-medium leading-snug text-[var(--o-text)] md:text-[17px]">
