@@ -36,6 +36,7 @@ import CartesLueur, {
   type CarteLueur,
 } from "@/components/accueil/CartesLueur";
 import { TuilesCatalogue } from "@/components/accueil/TuilesCatalogue";
+import { DecorHero, MotsReveles } from "@/components/ui/hero-section";
 import TeamShowcase from "@/components/ui/team-showcase";
 import { Drapeau } from "@/components/ui/drapeau";
 import {
@@ -139,6 +140,36 @@ const HERO = {
     "Nous concevons des systèmes sur mesure qui connectent vos directions, vos équipes, vos outils et vos données afin de fluidifier les opérations, automatiser les processus critiques et améliorer le pilotage de votre organisation — sans bouleverser votre environnement existant.",
   bouton: "Découvrir notre approche",
   sous: "Identifions les leviers à plus fort impact pour votre organisation.",
+};
+
+/* 14/09 (Teo, soir) — le hero s'installe désormais mot à mot, mouvement
+   repris du composant qu'il a collé (`components/ui/hero-section.tsx`, qui
+   porte le relevé et les écarts). Il a tranché la seule question qui
+   changeait le travail : le hero RESTE clair — même nuancier Silk, même
+   maquette, même plancher de lisibilité —, on ne lui prend que
+   l'animation.
+
+   La cadence est calculée, pas posée à l'œil. La référence étale la
+   sienne sur 6 s ; c'est un écran de démonstration. Ici la pastille part
+   à 0, le titre enchaîne mot à mot, et le chapô entame sa montée quand il
+   reste trois mots au titre — les deux se recouvrent, sinon on regarde un
+   blanc. Tout est en place à 2,1 s.
+
+   Le chapô, le bouton et la sous-ligne arrivent d'un BLOC. Les peindre
+   mot à mot aussi (la référence le fait) portait la cascade à 5 s pour un
+   paragraphe de 40 mots que personne ne lit à cette vitesse. */
+const PAS_MOT = 70;
+const CADENCE = {
+  /* La pastille arrive d'un BLOC, là où la référence peint aussi sa
+     sur-ligne mot à mot. La raison est sa forme : c'est une PILULE, avec
+     un contour, un fond et un flou d'arrière-plan. Mot à mot, on regarde
+     pendant une demi-seconde une gélule vide qui se remplit. La
+     référence, elle, n'a qu'un texte nu à cet endroit. */
+  pastille: 0,
+  titre: 220,
+  chapo: 1000,
+  bouton: 1160,
+  sous: 1280,
 };
 
 /* 05/08 — la liste FAITS est partie avec la rangée défilante du hero, retirée
@@ -722,7 +753,7 @@ export default function Home() {
               fait chez vous ») n'a pas d'équivalent chez Flux ;
             · la bande de faits est conservée sous la maquette, réencrée en
               clair — Flux y met des logos de partenaires, qu'Omega n'a pas. */}
-        <section className="o-flux relative overflow-hidden pb-0 pt-[48px] md:pt-[64px] lg:pt-[256px]">
+        <section className="o-flux o-hero-anim relative overflow-hidden pb-0 pt-[48px] md:pt-[64px] lg:pt-[256px]">
           {/* 11/09/2026 (Teo) — le fond n'est plus la photo de plis du
               template Flux (`/fonds/plis-blancs.webp`) mais un nuancier
               « Silk » peint en WebGL, recette fournie telle quelle (voir
@@ -738,33 +769,58 @@ export default function Home() {
             <div className="o-flux-voile" />
           </div>
 
+          {/* trame, filets, équerres, points flottants et lueur au
+              pointeur — la couche vit ENTRE le nuancier et le texte, d'où
+              son z-index 1 face au z-10 de la colonne */}
+          <DecorHero />
+
+          {/* Les `data-reveal` du hero sont retirés : c'est la cadence
+              ci-dessus qui fait l'entrée maintenant.
+
+              Ils ne servaient déjà à rien sur grand écran — PageMotion ne
+              prend QUE ce qui est sous la ligne de flottaison — mais sur
+              un téléphone de 390 × 700 le bouton et sa sous-ligne tombent
+              dessous, et GSAP serait venu les rejouer par-dessus
+              l'animation CSS, chacun avec sa propre opacité. */}
           <div className="o-wrap relative z-10 flex flex-col items-center text-center">
-            <div data-reveal>
+            <div className="o-bloc-apparait" style={{ "--o-mot-d": `${CADENCE.pastille}ms` } as React.CSSProperties}>
               {/* 05/08 (Teo) — le point de veille qui bat, repris de la
                   référence, est retiré : « enlève le point orange ». */}
               <span className="o-flux-pastille">{HERO.pastille}</span>
             </div>
-            <h1 data-reveal className="o-flux-h1 mt-5 max-w-[900px] md:mt-6">
-              {HERO.titre.map((ligne, i) => (
-                <span key={ligne} className={i > 0 ? "block" : undefined}>
-                  {ligne}
-                </span>
-              ))}
+            {/* Chaque ligne du titre reprend la cascade là où la
+                précédente l'a laissée : sans ça les deux phrases
+                partiraient ensemble et on lirait deux vagues parallèles au
+                lieu d'une seule qui traverse. */}
+            <h1 className="o-flux-h1 mt-5 max-w-[900px] md:mt-6">
+              <MotsReveles lignes={HERO.titre} depart={CADENCE.titre} pas={PAS_MOT} />
             </h1>
-            <p data-reveal className="o-flux-lead my-2 max-w-[760px] md:my-4 lg:my-6">
+            <p
+              className="o-bloc-apparait o-flux-lead my-2 max-w-[760px] md:my-4 lg:my-6"
+              style={{ "--o-mot-d": `${CADENCE.chapo}ms` } as React.CSSProperties}
+            >
               {HERO.chapo}
             </p>
-            <div data-reveal className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
+            <div className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
               {/* 14/09 : « Découvrir notre approche » menait à /commencer
                   (l'aiguillage). Il mène à la section « le déroulé » de cette
                   page, qui est littéralement l'approche. */}
-              <Link href="#approche" className="o-flux-btn">
+              <Link
+                href="#approche"
+                className="o-bloc-apparait o-flux-btn"
+                style={{ "--o-mot-d": `${CADENCE.bouton}ms` } as React.CSSProperties}
+              >
                 {HERO.bouton}
                 <span aria-hidden className="o-flux-btn-rond">
                   <Chevron taille={14} />
                 </span>
               </Link>
-              <span className="o-flux-sous">{HERO.sous}</span>
+              <span
+                className="o-bloc-apparait o-flux-sous"
+                style={{ "--o-mot-d": `${CADENCE.sous}ms` } as React.CSSProperties}
+              >
+                {HERO.sous}
+              </span>
             </div>
           </div>
 

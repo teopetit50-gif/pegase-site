@@ -1,0 +1,326 @@
+/* ══════════════════════════════════════════════════════════════════════
+   hero-section — l'apparition mot à mot du hero, et ses détails (14/09/2026)
+
+   ORIGINE. Composant « hero-section » collé par Teo (un hero plein écran
+   noir : trame quadrillée en SVG, équerres aux quatre coins, points
+   flottants, lueur qui suit le pointeur, et un titre qui se peint mot à
+   mot). Ses `@keyframes` — word-appear, grid-draw, pulse-glow, float —
+   sont reprises telles quelles, seuls les noms sont préfixés pour ne pas
+   entrer en collision avec les trente-quatre déjà posées dans globals.css.
+
+   CE QUI CHANGE, ET POURQUOI. Teo a tranché (14/09) : le hero de l'accueil
+   RESTE clair — même nuancier Silk, même maquette, même plancher de
+   lisibilité. On ne lui reprend que le mouvement. Donc :
+
+   · toutes les encres sont retournées. La référence peint en #c8b4a0 sur
+     du noir ; ici c'est du #0a0a0a à très basse opacité sur un fond qui
+     monte à #f6f6f6. Les valeurs ne sont pas converties mécaniquement :
+     une trame à 8 % sur noir se voit à peine, la même sur clair fait une
+     feuille de cahier. Relevé à l'écran, la trame tient à 4 %, les filets
+     à 7 %, les points à 18 %.
+   · les délais passent du JavaScript au CSS. La référence les pose au
+     `setTimeout` après montage, ce qui montre d'abord les mots puis les
+     efface pour les rejouer ; ici chaque mot porte son propre
+     `animation-delay` et part à zéro dès la première image. Aucun timer,
+     rien à nettoyer, et le rendu serveur est déjà juste.
+   · la cascade est raccourcie. La référence s'étale sur 6 s (le dernier
+     mot part à 5 150 ms) : c'est un écran de démonstration, pas une page
+     qui vend. Ici tout est posé à 2,2 s — pastille, titre mot à mot,
+     chapô, bouton.
+
+   `prefers-reduced-motion` : plus une seule animation, et tout est
+   visible. La règle maison vaut ici comme ailleurs — une panne ne doit
+   jamais masquer le contenu.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— le mot qui se peint ——— */
+/* `inline-block` est indispensable (on ne peut pas transformer un span en
+   ligne), mais il casserait la césure des mots trop longs sur 390 px :
+   d'où `white-space: normal` hérité et rien d'autre. Les séparateurs, eux,
+   restent des nœuds de texte ENTRE les spans — c'est ce qui préserve les
+   espaces insécables des titres. */
+.o-mot {
+  display: inline-block;
+  opacity: 0;
+  animation: o-mot-apparait 0.8s ease-out forwards;
+  animation-delay: var(--o-mot-d, 0ms);
+  will-change: transform, opacity, filter;
+}
+/* un bloc entier qui arrive d'un coup, avec exactement la même courbe —
+   le chapô, le bouton, la sous-ligne : les peindre mot à mot allongeait la
+   cascade à 5 s pour rien */
+.o-bloc-apparait {
+  opacity: 0;
+  animation: o-mot-apparait 0.8s ease-out forwards;
+  animation-delay: var(--o-mot-d, 0ms);
+}
+
+@keyframes o-mot-apparait {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(10px) scale(0.95);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* le titre monte de 30 px et grossit : sans ça la boîte du h1 déborde par
+   le bas pendant la cascade et pousse le chapô */
+.o-hero-anim {
+  overflow: hidden;
+}
+
+/* ——— la couche de décor ——— */
+/* Elle vit ENTRE le nuancier et le texte. Le fond porte son propre masque
+   (`.o-flux-fond`), qui crée un contexte d'empilement : le `mix-blend-mode:
+   lighten` du plancher de lisibilité reste donc enfermé dedans et ne touche
+   pas ce qui suit. D'où le z-index 1 ici, et le z-10 du texte.
+
+   Le masque vertical coupe la trame avant la maquette du tableau de bord :
+   sans lui les filets passaient DERRIÈRE la capture et la faisaient flotter
+   sur une feuille à carreaux. */
+.o-hero-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 88%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 88%);
+}
+/* ÉCART ASSUMÉ — la trame ne passe pas sous le texte.
+
+   Posée plein cadre, elle s'imprime PAR-DESSUS le plancher de lisibilité
+   (`.o-flux-voile`, qui vit dans le contexte d'empilement du fond, donc
+   sous cette couche). Un filet noir à 4 % sur le #e6e6e6 du plancher rend
+   #dcdcdc : le chapô, qui est gris #636363, retombe alors à 4,36 : 1 —
+   sous le seuil AA de 4,5 que le plancher avait justement été posé pour
+   franchir. Trois pixels de filet ne font pas un fond, mais le site tient
+   ce seuil ailleurs et ce n'est pas ici qu'on commence à l'arrondir.
+
+   Le trou reprend EXACTEMENT les deux ellipses du plancher — même
+   géométrie sous lg (92 × 52 à 50/42) et à partir de lg (46 × 13 à
+   50/33), où seul le chapô reste à protéger. Là où le texte est protégé,
+   la trame s'efface ; partout ailleurs elle est entière. Effet de bord
+   heureux : elle ENCADRE le titre au lieu de le traverser.
+
+   Le masque est posé sur un cadre intermédiaire plutôt qu'en deuxième
+   couche de `mask-image` : deux masques imbriqués se composent tout
+   seuls, là où `mask-composite: intersect` retombe en `add` sur un
+   navigateur qui ne le connaît pas — c'est-à-dire trame partout, et le
+   défaut revient sans bruit. */
+.o-hero-trame {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(
+    ellipse 92% 52% at 50% 42%,
+    transparent 0%,
+    transparent 52%,
+    #000 92%
+  );
+  mask-image: radial-gradient(
+    ellipse 92% 52% at 50% 42%,
+    transparent 0%,
+    transparent 52%,
+    #000 92%
+  );
+}
+@media (min-width: 1024px) {
+  .o-hero-trame {
+    -webkit-mask-image: radial-gradient(
+      ellipse 46% 13% at 50% 33%,
+      transparent 0%,
+      transparent 60%,
+      #000 100%
+    );
+    mask-image: radial-gradient(
+      ellipse 46% 13% at 50% 33%,
+      transparent 0%,
+      transparent 60%,
+      #000 100%
+    );
+  }
+}
+.o-hero-decor svg {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* les quatre longs filets qui se tracent, repris de la référence */
+.o-hero-filet {
+  stroke: rgba(10, 10, 10, 0.07);
+  stroke-width: 1;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  opacity: 0;
+  animation: o-filet-trace 2s ease-out forwards;
+}
+@keyframes o-filet-trace {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.15;
+  }
+}
+
+/* les points aux intersections — ils battent, très lentement */
+.o-hero-point {
+  fill: rgba(10, 10, 10, 0.18);
+  opacity: 0;
+  animation: o-point-bat 3s ease-in-out infinite;
+}
+@keyframes o-point-bat {
+  0%,
+  100% {
+    opacity: 0.1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.1);
+  }
+}
+
+/* ——— les équerres de coin ——— */
+/* La référence ne livre pas la règle de `.corner-element` (son extrait ne
+   porte que les keyframes) : elle est écrite ici. 24 px, deux filets d'un
+   pixel, l'angle plein — c'est ce que montre sa capture. */
+.o-hero-coin {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  border-color: rgba(10, 10, 10, 0.18);
+  animation: o-mot-apparait 1s ease-out forwards;
+}
+.o-hero-coin i {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: rgba(10, 10, 10, 0.28);
+}
+.o-hero-coin-hg {
+  top: 32px;
+  left: 32px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.o-hero-coin-hg i {
+  top: -1px;
+  left: -1px;
+}
+.o-hero-coin-hd {
+  top: 32px;
+  right: 32px;
+  border-top: 1px solid;
+  border-right: 1px solid;
+}
+.o-hero-coin-hd i {
+  top: -1px;
+  right: -1px;
+}
+/* sous 768 les équerres tombent dans le texte du titre, qui remplit alors
+   tout le hero — elles ne sont pas assez lisibles pour mériter ça */
+@media (max-width: 767px) {
+  .o-hero-coin {
+    display: none;
+  }
+}
+
+/* ——— les points flottants ——— */
+.o-hero-flotte {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: rgba(10, 10, 10, 0.22);
+  opacity: 0.2;
+  animation: o-flotte 12s ease-in-out infinite;
+}
+@keyframes o-flotte {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-5px) translateX(-3px);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateY(-15px) translateX(7px);
+    opacity: 0.8;
+  }
+}
+
+/* ——— la lueur qui suit le pointeur ——— */
+/* Sur le noir de la référence c'est une lueur CLAIRE qui éclaire le fond.
+   La transposition littérale sur clair — une tache sombre — se lit comme
+   une salissure sous le curseur. Ce qui marche est l'inverse : un halo
+   blanc très diffus, qui ne fait que POSER de la lumière sur le nuancier
+   là où passe le pointeur. Il ne touche pas au texte (il est sous lui) et
+   son opacité plafonne à 1 sur un dégradé déjà à 55 %. */
+.o-hero-lueur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 384px;
+  height: 384px;
+  border-radius: 9999px;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(48px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, transparent 70%);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.28s ease-out;
+  will-change: transform, opacity;
+}
+
+/* ——— le contrat de sobriété ——— */
+@media (prefers-reduced-motion: reduce) {
+  .o-mot,
+  .o-bloc-apparait,
+  .o-hero-coin,
+  .o-hero-filet,
+  .o-hero-point,
+  .o-hero-flotte {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .o-hero-filet {
+    stroke-dashoffset: 0;
+    opacity: 0.15;
+  }
+  .o-hero-point {
+    opacity: 0.2;
+  }
+  .o-hero-flotte {
+    opacity: 0.2;
+  }
+  .o-hero-lueur {
+    display: none;
+  }
+}
