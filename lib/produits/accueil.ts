@@ -69,7 +69,12 @@ export const MARQUE = {
      une heure d'entretien) avant de répondre à qui que ce soit en son nom.
      C'était d'ailleurs la consigne d'origine du produit — « réserver un
      audit » et non « commencer ». `creation` reste déclaré : c'est la
-     porte à rouvrir le jour où une inscription libre-service existe. */
+     porte à rouvrir le jour où une inscription libre-service existe.
+
+     15/09 — cette porte est désormais FERMÉE pour tout le site :
+     /connexion ne crée plus de compte et ?mode=creation redirige sur
+     /reserver-un-audit. La constante ne mène donc nulle part de nouveau,
+     et rien ne l'utilise. */
   connexion: "/connexion",
   creation: "/connexion?mode=creation",
 } as const;
