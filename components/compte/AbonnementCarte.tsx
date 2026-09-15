@@ -357,10 +357,13 @@ export default function AbonnementCarte({
   return (
     <div>
       {/* ——— 1. ce que le client a ——— */}
+      {/* les trois id ci-dessous sont les ancres des sous-entrées de la
+          barre de « Mon compte » (CompteTableau) : ne pas les renommer
+          sans mettre à jour CompteVue, qui les nomme */}
       {/* 14/09 — la pastille sur la ligne du titre, « pour … » dessous :
           dans la carte de verre (CompteVue) le panneau fait 500 px, une
           pastille en frère du bloc de texte passait à la ligne */}
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <div id="cp-abo-formule" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="text-[14px] font-semibold text-[#050505]">
           {modulesActuels.length === POSTES.length
             ? "Tout Omega, les quatre postes"
@@ -429,7 +432,7 @@ export default function AbonnementCarte({
 
       {/* ——— 05/09 : le moyen de paiement ——— */}
       {montrerPaiement ? (
-        <div className="mt-4 border-t border-[#e3e3e3] pt-4">
+        <div id="cp-abo-paiement" className="mt-4 border-t border-[#e3e3e3] pt-4">
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             <div className="cp-secondaire cp-kicker-ligne">Moyen de paiement</div>
             <Pastille code={lignePaiement.code}>{lignePaiement.pastille}</Pastille>
@@ -721,7 +724,7 @@ export default function AbonnementCarte({
           instant.
         </p>
       ) : demandesAbonnement.length ? (
-        <div className="mt-5 border-t border-[#e3e3e3] pt-4">
+        <div id="cp-abo-demandes" className="mt-5 border-t border-[#e3e3e3] pt-4">
           <div className="cp-secondaire cp-kicker-ligne">
             Vos demandes
           </div>

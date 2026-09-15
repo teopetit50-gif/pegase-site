@@ -1,6 +1,18 @@
 import Link from "next/link";
-import { CalendarDays, CreditCard, Globe, ShieldCheck, UserRound } from "lucide-react";
-import CompteTableau, { type SectionCompte, type TuileCompte } from "@/components/compte/CompteTableau";
+import {
+  CalendarDays,
+  CreditCard,
+  Globe,
+  LogOut,
+  ShieldCheck,
+  Smartphone,
+  UserRound,
+} from "lucide-react";
+import CompteTableau, {
+  type LienRail,
+  type SectionCompte,
+  type TuileCompte,
+} from "@/components/compte/CompteTableau";
 import AbonnementCarte from "@/components/compte/AbonnementCarte";
 import IdentiteCompte from "@/components/compte/IdentiteCompte";
 import MotDePasseCarte from "@/components/compte/MotDePasseCarte";
@@ -25,6 +37,7 @@ import {
   dateHeureGp,
   dureeFormule,
   libelleFormule,
+  nomAffiche,
   type Utilisateur,
 } from "@/lib/compte";
 import { MODELES } from "@/components/modeles/donnees";
@@ -56,10 +69,23 @@ import { COCKPIT_URL } from "@/lib/supabase/config";
      3. QUATRE TUILES de synthèse : abonnement (postes · prix, état),
         réunion d'installation (date · heure, statut), moyen de paiement,
         site catalogue. Chacune ouvre sa section.
-     4. Le MENU à gauche (Abonnement, Rendez-vous, Site, Profil,
-        Sécurité) et UNE section à droite — CompteTableau, composant
-        client sur Radix Tabs. Rien ne défile à 1440 × 900 : la section
-        la plus haute (l'abonnement) tient sous les tuiles.
+     4. La BARRE à gauche et UNE section à droite — CompteTableau,
+        composant client sur Radix Tabs, refait le 14/09 dans la nuit sur
+        le « Dashboard Sidebar » que Teo a collé. Elle porte son propre
+        en-tête (l'ENTREPRISE du client et sa formule, à la place du
+        sélecteur d'espace de travail du modèle), deux groupes de
+        sections, et un pied qui quitte la page.
+
+        Répartition des actions, pour qu'aucune ne soit dite deux fois :
+        l'en-tête de PAGE porte l'état de l'espace et le bouton principal
+        qui en découle ; le PIED de la barre porte l'installation de
+        l'application et la déconnexion. Le profil, lui, garde son bouton
+        « Modifier le profil » dans sa propre section.
+
+        Les sous-entrées de l'abonnement (Ma formule, Moyen de paiement,
+        Mes demandes) visent trois id posés dans AbonnementCarte — et
+        seulement quand le bloc visé existe : pas de moyen de paiement
+        avant une réservation, pas de demandes tant qu'il n'y en a pas.
 
    Ce qui n'a PAS changé de contenu : l'abonnement (AbonnementCarte,
    inchangée), les rendez-vous, les commandes de site, le profil
@@ -371,13 +397,51 @@ export default function CompteVue({
     },
   }[etatEspace];
 
+  /* ——— le pied de la barre : ce qui quitte la page ———
+     « Ouvrir mon espace » n'y est pas : c'est le bouton principal de
+     l'en-tête, et le dire deux fois ferait une page qui se répète */
+  const liens: LienRail[] = [
+    ...(etatEspace === "ouvert"
+      ? [
+          {
+            id: "installer",
+            libelle: "Installer l'application",
+            icone: <Smartphone size={16} strokeWidth={1.75} />,
+            href: `${COCKPIT_URL}/installer`,
+            externe: true,
+          },
+        ]
+      : []),
+    {
+      id: "sortie",
+      libelle: "Se déconnecter",
+      icone: <LogOut size={16} strokeWidth={1.75} />,
+      deconnexion: true,
+    },
+  ];
+
+  /* l'en-tête de la barre : l'entreprise du client, sa formule.
+     L'entreprise du profil d'abord, celle de la demande ensuite ; sans
+     rien, le nom de la personne — le jeton doit toujours porter une
+     lettre */
+  const enseigne = utilisateur.entreprise || abonnement?.entreprise || nomAffiche(utilisateur);
+  const formuleBarre = abonnement && prixCourt ? `${nomFormule} · ${prixCourt}` : "Sans abonnement";
+
   /* ——— les sections ——— */
   const sections: SectionCompte[] = [
     {
       id: "abonnement",
       libelle: "Abonnement",
-      sous: "Postes, formule, paiement",
-      icone: <CreditCard size={17} strokeWidth={2} />,
+      icone: <CreditCard size={16} strokeWidth={1.75} />,
+      enfants: [
+        ...(abonnement ? [{ id: "abo-formule", libelle: "Ma formule", ancre: "cp-abo-formule" }] : []),
+        ...(paiementVisible
+          ? [{ id: "abo-paiement", libelle: "Moyen de paiement", ancre: "cp-abo-paiement" }]
+          : []),
+        ...(demandesAbonnement.length
+          ? [{ id: "abo-demandes", libelle: "Mes demandes", ancre: "cp-abo-demandes" }]
+          : []),
+      ],
       titre: "Mon abonnement",
       description: "Vos postes, votre formule et votre moyen de paiement.",
       contenu: (
@@ -414,9 +478,8 @@ export default function CompteVue({
     {
       id: "rendez-vous",
       libelle: "Rendez-vous",
-      sous: "Réunions d'installation",
-      icone: <CalendarDays size={17} strokeWidth={2} />,
-      compteur: rendezVous.length,
+      icone: <CalendarDays size={16} strokeWidth={1.75} />,
+      badge: rendezVous.length || undefined,
       titre: "Mes rendez-vous",
       description: "Heure de Guadeloupe.",
       contenu: panneDemandes ? (
@@ -480,9 +543,8 @@ export default function CompteVue({
     {
       id: "site",
       libelle: "Site",
-      sous: "Commandes du site",
-      icone: <Globe size={17} strokeWidth={2} />,
-      compteur: commandes.length,
+      icone: <Globe size={16} strokeWidth={1.75} />,
+      badge: commandes.length || undefined,
       titre: "Mes commandes de site",
       description: "Le site catalogue, commandé depuis la page Votre site.",
       contenu: panneCommandes ? (
@@ -539,8 +601,8 @@ export default function CompteVue({
     {
       id: "profil",
       libelle: "Profil",
-      sous: "Entreprise, téléphone, SIRET",
-      icone: <UserRound size={17} strokeWidth={2} />,
+      icone: <UserRound size={16} strokeWidth={1.75} />,
+      groupe: "Votre compte",
       titre: "Profil professionnel",
       description:
         "Il sert à vos factures et pré-remplit vos prochaines demandes. L'adresse e-mail reste l'identifiant de connexion.",
@@ -549,8 +611,8 @@ export default function CompteVue({
     {
       id: "securite",
       libelle: "Sécurité",
-      sous: "Mot de passe, accès, données",
-      icone: <ShieldCheck size={17} strokeWidth={2} />,
+      icone: <ShieldCheck size={16} strokeWidth={1.75} />,
+      groupe: "Votre compte",
       titre: "Sécurité et accès",
       description: (
         <>
@@ -609,8 +671,9 @@ export default function CompteVue({
                 </a>
                 {/* 08/09 — droit sur la page d'installation de l'espace, sur
                     l'appareil où l'on est : c'est là que le bouton du
-                    navigateur existe */}
-                <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--fil">
+                    navigateur existe. Dès 1024 il vit dans le pied de la
+                    barre ; ici il ne reste que pour la rangée mobile */}
+                <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--fil cpt-installer-mobile">
                   Installer l&apos;application
                 </a>
               </>
@@ -623,7 +686,9 @@ export default function CompteVue({
                 Choisir mes postes
               </Link>
             ) : null}
-            <form action="/auth/signout" method="post" className="shrink-0">
+            {/* sous 1024 la barre n'a pas de pied : la déconnexion reste
+                ici, où elle est la seule sortie de la page */}
+            <form action="/auth/signout" method="post" className="cpt-sortie-forme">
               <button type="submit" className="cpt-sortie">
                 Se déconnecter
               </button>
@@ -659,7 +724,14 @@ export default function CompteVue({
         ) : null}
 
         {/* ——— 3 et 4. les tuiles, puis menu | panneau ——— */}
-        <CompteTableau sections={sections} tuiles={tuiles} defaut="abonnement" />
+        <CompteTableau
+          sections={sections}
+          tuiles={tuiles}
+          liens={liens}
+          enseigne={enseigne}
+          formule={formuleBarre}
+          defaut="abonnement"
+        />
       </section>
     </div>
   );
