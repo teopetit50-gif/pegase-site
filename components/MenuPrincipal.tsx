@@ -159,8 +159,33 @@ export default function MenuPrincipal({
                     </li>
                   )}
 
-                  {rubrique.entrees?.map((entree) => (
-                    <li key={entree.href}>
+                  {rubrique.entrees?.map((entree, rang) => (
+                    <li
+                      key={entree.href}
+                      /* 15/09 (Teo) — « Nos offres » porte SIX entrées pour
+                         cinq rangées : la sixième retombe forcément sous la
+                         case vedette, dans la colonne de gauche. Jusqu'ici
+                         c'était « Sur mesure » qui s'y trouvait, par le seul
+                         effet de l'ordre de la liste — donc séparé des quatre
+                         systèmes alors qu'il se lit comme leur complément.
+                         On pose cette dernière case explicitement et on y met
+                         « Votre métier » : l'entrée qui aiguille, avant même
+                         de savoir quel système on cherche, a sa place à part.
+                         La colonne de droite redevient la liste des systèmes,
+                         « Sur mesure » sous FILED comme sur /offres.
+                         L'ordre des DONNÉES ne bouge pas : c'est lui que lit
+                         le panneau du téléphone, où « Votre métier » doit
+                         rester en tête (arbitrage du 15/09, dans menu.ts).
+                         Les deux coordonnées sont écrites, pas seulement la
+                         colonne : une case au placement à moitié libre
+                         déplacerait le curseur d'auto-placement et les quatre
+                         systèmes partiraient en quinconce. */
+                      className={
+                        large && rang === 0
+                          ? "md:col-start-1 md:row-start-6"
+                          : undefined
+                      }
+                    >
                       <NavigationMenuLink
                         asChild
                         active={
