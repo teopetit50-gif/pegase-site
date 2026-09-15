@@ -1,0 +1,209 @@
+/* ══════════════════════════════════════════════════════════════════════
+   OrbiteOutils.css — la feuille de l'orbite du hero de /integrations
+
+   Écrite le 14/09/2026, en même temps que OrbiteOutils.tsx. Tout est scopé
+   sous `.offres` et préfixé `orb-` (vérifié : ni `.orb-`, ni `orb-tour`
+   n'existaient ailleurs dans app/globals.css ni dans components/).
+
+   ⚠ Ne pas confondre le préfixe `orb-` avec les jetons `--or-filet`,
+   `--or-halo`, `--or-ombre` de globals.css (ligne 1539) : ceux-là sont la
+   dorure du monde Blackfeather, ils n'ont rien à voir avec l'orbite. C'est
+   pour cela que le préfixe est `orb-` et non `or-`.
+
+   GÉOMÉTRIE. Un seul jeu de variables porte tout le dessin, et seules ces
+   variables changent aux trois paliers — aucune règle n'est réécrite. La
+   contrainte tenue partout : carré = 2 × rayon extérieur + diamètre d'une
+   pastille, de sorte que les satellites de l'anneau extérieur affleurent
+   EXACTEMENT le bord du carré déclaré, jamais au-delà.
+
+     < 390 px   300 = 2 × 133 + 34
+     ≥ 390 px   340 = 2 × 151 + 38     (le palier demandé pour 390)
+     ≥ 768 px   420 = 2 × 189 + 42
+     ≥ 1024 px  480 = 2 × 217 + 46
+
+   LE PIÈGE DE CE COMPOSANT, traité ici explicitement. Chez Magic UI la
+   POSITION du satellite n'existe que dans les keyframes : `animation: none`
+   et les douze pastilles retombent empilées au centre. La règle de base
+   porte donc le MÊME `transform` que l'image `from` — l'animation ne fait
+   que le parcourir. Couper l'animation (mouvement réduit) laisse chaque
+   satellite posé à son angle, et rien ne bouge plus.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Un @keyframes est GLOBAL quoi qu'on fasse — on ne peut pas le scoper sous
+   `.offres`, d'où le nom préfixé (même discipline que le reste du dépôt).
+   La contre-rotation finale est ce qui empêche la pastille de tourner sur
+   elle-même : le logo reste droit tout le tour. */
+@keyframes orb-tour {
+  from {
+    transform:
+      rotate(calc(var(--orb-angle) * 1deg))
+      translateY(var(--orb-rayon))
+      rotate(calc(var(--orb-angle) * -1deg));
+  }
+  to {
+    transform:
+      rotate(calc(var(--orb-angle) * 1deg + 360deg))
+      translateY(var(--orb-rayon))
+      rotate(calc(var(--orb-angle) * -1deg - 360deg));
+  }
+}
+
+/* ——— le carré qui contient tout ———
+   `width` explicite : les satellites sont en `position: absolute` depuis le
+   centre, ils ne participent donc PAS à la largeur du bloc — c'est cette
+   déclaration-ci, et elle seule, qui peut pousser la page. `max-width: 100%`
+   la borne à la colonne, dans tous les cas et à toute largeur.
+   `height` explicite et non `aspect-ratio` : les rayons sont en pixels, la
+   place verticale à réserver doit l'être aussi. */
+.offres .orb-bloc {
+  --orb-carre: 340px;
+  --orb-pastille: 38px;
+  --orb-rayon-int: 92px;
+  --orb-rayon-ext: 151px;
+  --orb-noyau: 62px;
+  --orb-marque: 30px;
+  --orb-logo: 17px;
+
+  position: relative;
+  width: var(--orb-carre);
+  max-width: 100%;
+  height: var(--orb-carre);
+  margin-inline: auto;
+}
+
+/* ——— les deux cercles de chemin ———
+   Le `<svg><circle r>` de la source devient un `<span>` à
+   `border-radius: 50%` : le rayon doit changer à quatre paliers, or l'attribut
+   `r` d'un SVG ne se pilote pas par variable CSS de façon fiable (la propriété
+   CSS `r` n'est arrivée dans Firefox qu'en 2024). Le rendu est le même — un
+   filet de 1 px — et il suit les variables sans une ligne de JavaScript.
+   `stroke-black/10` de la source devient --o-line, le filet de la maison. */
+.offres .orb-chemin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--o-line);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.offres .orb-chemin--int {
+  width: calc(var(--orb-rayon-int) * 2);
+  height: calc(var(--orb-rayon-int) * 2);
+}
+.offres .orb-chemin--ext {
+  width: calc(var(--orb-rayon-ext) * 2);
+  height: calc(var(--orb-rayon-ext) * 2);
+}
+
+/* ——— le noyau : la marque, en négatif sur un disque d'encre ——— */
+.offres .orb-noyau {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: var(--orb-noyau);
+  height: var(--orb-noyau);
+  border-radius: 50%;
+  background: var(--o-text);
+}
+.offres .orb-noyau img {
+  display: block;
+  width: var(--orb-marque);
+  height: var(--orb-marque);
+  object-fit: contain;
+}
+
+/* ——— un satellite ———
+   Le centrage se fait aux marges négatives et NON à `translate(-50%, -50%)` :
+   le `transform` est pris par l'orbite, il ne peut pas servir deux fois. */
+.offres .orb-satellite {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: calc(var(--orb-pastille) / -2);
+  margin-left: calc(var(--orb-pastille) / -2);
+  display: grid;
+  place-items: center;
+  width: var(--orb-pastille);
+  height: var(--orb-pastille);
+  border: 1px solid var(--o-line);
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(9, 9, 11, 0.04);
+
+  /* ⚠ LE MÊME transform QUE L'IMAGE `from` DES KEYFRAMES — c'est lui qui
+     tient la pastille à son angle quand l'animation est coupée. Ne jamais
+     le retirer en croyant qu'il fait doublon : voir l'en-tête. */
+  transform:
+    rotate(calc(var(--orb-angle) * 1deg))
+    translateY(var(--orb-rayon))
+    rotate(calc(var(--orb-angle) * -1deg));
+  animation: orb-tour var(--orb-duree) linear infinite;
+}
+.offres .orb-satellite svg {
+  display: block;
+  width: var(--orb-logo);
+  height: var(--orb-logo);
+}
+
+/* Intérieur : le tour le plus court, dans le sens direct.
+   Extérieur : plus loin, plus lent, et à contresens (`reverse`). */
+.offres .orb-satellite--int {
+  --orb-rayon: var(--orb-rayon-int);
+  --orb-duree: 32s;
+}
+.offres .orb-satellite--ext {
+  --orb-rayon: var(--orb-rayon-ext);
+  --orb-duree: 44s;
+  animation-direction: reverse;
+}
+
+/* ——— les paliers : QUE des variables ——— */
+@media (max-width: 389px) {
+  .offres .orb-bloc {
+    --orb-carre: 300px;
+    --orb-pastille: 34px;
+    --orb-rayon-int: 82px;
+    --orb-rayon-ext: 133px;
+    --orb-noyau: 56px;
+    --orb-marque: 27px;
+    --orb-logo: 16px;
+  }
+}
+@media (min-width: 768px) {
+  .offres .orb-bloc {
+    --orb-carre: 420px;
+    --orb-pastille: 42px;
+    --orb-rayon-int: 114px;
+    --orb-rayon-ext: 189px;
+    --orb-noyau: 72px;
+    --orb-marque: 35px;
+    --orb-logo: 18px;
+  }
+}
+@media (min-width: 1024px) {
+  .offres .orb-bloc {
+    --orb-carre: 480px;
+    --orb-pastille: 46px;
+    --orb-rayon-int: 131px;
+    --orb-rayon-ext: 217px;
+    --orb-noyau: 80px;
+    --orb-marque: 39px;
+    --orb-logo: 20px;
+  }
+}
+
+/* ——— mouvement réduit : le dessin, sans le trajet ———
+   `animation: none` et non `animation-play-state: paused` : une animation en
+   pause reste une animation (couche de composition, reprise possible), alors
+   qu'ici on veut qu'il n'y en ait plus du tout. Chaque satellite garde son
+   angle grâce au `transform` de la règle de base — c'est exactement la même
+   image que la première trame, et personne ne retombe au centre. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .orb-satellite {
+    animation: none;
+  }
+}

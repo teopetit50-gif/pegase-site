@@ -1,0 +1,75 @@
+/* ══════════════════════════════════════════════════════════════════════
+   AppelOutil.css — la trame du coin bas-droit de la dernière carte de
+   /integrations (14/09/2026)
+
+   ORIGINE. Rien. Le bloc source (`cta4` de shadcnblocks) n'a pas de feuille
+   propre, il vit en utilitaires ; tout ce qu'il apporte de structurel — la
+   carte plate, la mise en regard, les gouttières — tient ici en classes qui
+   existent déjà (`.o-card-soft`, `.o-dots` de globals.css) et en flux
+   Tailwind, donc n'a rien à faire dans un fichier.
+
+   POURQUOI ICI MALGRÉ TOUT. Une seule chose ne s'écrit pas en utilitaire :
+   le masque du quart de trame. C'est un `radial-gradient` à trois arrêts,
+   qu'il faut doubler pour `-webkit-` et redéclarer sur trois paliers. En
+   valeur arbitraire Tailwind il faudrait échapper chaque virgule et
+   recopier l'expression six fois — illisible, et cassant au premier
+   réglage.
+
+   CE QUI EST JETÉ. Aucun `@keyframes` : cette matière ne bouge pas, par
+   consigne. Donc rien à désactiver sous `prefers-reduced-motion` — ce qui
+   est rendu en mouvement réduit est exactement ce qui est rendu partout.
+
+   ÉCARTS ASSUMÉS. Tout est scopé sous `.offres` et préfixé `am-`, et le
+   fichier ne contient qu'un sélecteur. Il est importé par un composant
+   SERVEUR : c'est autorisé dans l'App Router, et déjà le cas de
+   FaitsSite.css et BandeauFaits.css.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* La trame reprend `.o-dots` de globals.css — le motif et son pas de
+   20,5 px — et ne change que l'encre : 5,5 % au lieu de 12 %, soit moitié
+   moins de poids que les points du hero. De la matière, pas un motif.
+   Le sélecteur pèse (0,2,0), la déclaration de `--o-dot` sur `.offres` pèse
+   (0,1,0) : la substitution est gagnée quel que soit l'ordre d'émission des
+   deux feuilles.
+
+   `inset: 0` et non une boîte de coin dimensionnée en pixels : une largeur
+   fixe déborderait de la carte aux petites largeurs. C'est le MASQUE qui
+   fait le coin, et l'`overflow: hidden` de `.o-card-soft` qui lui fait
+   suivre l'arrondi de 20 px. */
+.offres .am-trame {
+  --o-dot: rgba(9, 9, 11, 0.055);
+
+  /* rayon du quart de cercle : il grandit avec la carte, sinon la trame
+     couvre tout le bloc à 390 px et se perd dans les 1200 px du grand
+     format. Déclaré ici puis surchargé plus bas, même sélecteur, même
+     poids : c'est l'ordre source qui tranche. */
+  --am-rayon: 240px;
+
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    var(--am-rayon) var(--am-rayon) at 100% 100%,
+    #000 0%,
+    rgba(0, 0, 0, 0.45) 42%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    var(--am-rayon) var(--am-rayon) at 100% 100%,
+    #000 0%,
+    rgba(0, 0, 0, 0.45) 42%,
+    transparent 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .offres .am-trame {
+    --am-rayon: 300px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .offres .am-trame {
+    --am-rayon: 380px;
+  }
+}

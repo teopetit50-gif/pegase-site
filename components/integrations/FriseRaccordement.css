@@ -1,0 +1,214 @@
+/* ══════════════════════════════════════════════════════════════════════
+   FriseRaccordement.css — la feuille de la frise du raccordement
+   (/integrations, section 3) — 14/09/2026
+
+   Tout est scopé sous `.offres` et préfixé `frs-` : vérifié par grep, ni
+   `frs-` ni `.fr-` n'existaient ailleurs dans app/globals.css ni dans
+   components/ (les voisines de ce dossier prennent `orb-`, `go-`, `am-`,
+   `mm-`). Aucune @keyframes : rien ne s'anime tout seul ici, le mouvement
+   vient du défilement — donc rien à dédoublonner dans l'espace global.
+
+   Les couleurs viennent du bloc `.offres` de globals.css : --o-text
+   #09090b, --o-muted-strong #52525b, --o-line #e4e4e7. Aucun accent, aucun
+   dégradé, aucune ombre. Tailwind v4 : chaque `border` porte sa couleur
+   explicite, un `border` nu peindrait en currentColor.
+
+   ═══ LA MÉCANIQUE, EN UNE VARIABLE ═══
+   Le TSX écrit une seule chose sur le cadre : --frs-p, la part parcourue,
+   de 0 à 1, sans unité. Chaque étape porte son seuil --frs-seuil (0, ⅓, ⅔,
+   1) et le cadre porte --frs-pas (le nombre de segments). Tout le reste est
+   calculé ici :
+
+     longueur du segment i   clamp(0, (p − seuil) × pas, 1)
+     allumage du jalon i     clamp(0, (p − seuil) × 12 + 1, 1)
+
+   ⚠ LA VALEUR DE REPOS EST « REMPLI ». Partout où --frs-p est lue, elle
+   l'est en `var(--frs-p, 1)`. Si personne ne l'écrit — JavaScript coupé,
+   erreur d'hydratation, mouvement réduit — elle vaut 1 : tous les segments
+   sont pleins, tous les jalons allumés, la frise se lit entière. Le
+   JavaScript ne fait que RETIRER du remplissage. Ne jamais inverser ce sens
+   en croyant simplifier : un rail vide avec quatre jalons éteints est le
+   seul état que ce composant n'a pas le droit de produire.
+
+   ═══ LA GÉOMÉTRIE, SANS UNE MESURE JAVASCRIPT ═══
+   Le rail n'est pas UN trait posé sur la frise, mais TROIS segments, un par
+   étape sauf la dernière, chacun logé dans son étape et débordant jusqu'au
+   centre du jalon suivant (`right` ou `bottom` négatif, de l'écart de
+   grille plus un demi-jalon). C'est ce qui permet au rail d'épouser des
+   rangées de hauteurs inégales sans que personne n'ait à les mesurer : la
+   source, elle, lisait `getBoundingClientRect().height` dans un état.
+   Corollaire à ne pas défaire : l'écart entre deux étapes est --frs-ecart,
+   la MÊME variable que le `gap` de la grille. Changer l'un sans l'autre
+   décroche le rail des jalons.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— le cadre : rangées empilées sous 1024 px, colonnes au-delà ———
+   `grid-auto-flow: column` plutôt qu'un `repeat(4, …)` en dur : le nombre
+   de colonnes suit RACCORDEMENT, et `minmax(0, 1fr)` empêche une colonne de
+   grandir au-delà de sa part (sans le `0`, un mot long pousserait la
+   grille hors de la colonne .o-wrap). */
+.offres .frs-cadre {
+  --frs-jalon: 30px;
+  --frs-demi: 15px;
+  --frs-ecart: 36px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--frs-ecart);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 64rem) {
+  .offres .frs-cadre {
+    --frs-ecart: 24px;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-columns: none;
+  }
+}
+
+/* ——— une étape ———
+   Le jalon est en absolu au coin haut-gauche DANS LES DEUX dispositions :
+   sous 1024 px il tient la gouttière de gauche, au-delà il coiffe la
+   colonne. Seul le creux réservé change — à gauche, puis au-dessus. */
+.offres .frs-etape {
+  position: relative;
+  padding-left: calc(var(--frs-jalon) + 26px);
+}
+@media (min-width: 64rem) {
+  .offres .frs-etape {
+    padding-left: 0;
+    padding-top: calc(var(--frs-jalon) + 20px);
+  }
+}
+
+/* ——— le segment de rail ———
+   Sous 1024 px : vertical, du centre du jalon jusqu'au centre du jalon de
+   la rangée suivante — d'où un `bottom` négatif d'un écart plus un demi-
+   jalon. Au-delà : horizontal, même raisonnement sur `right`.
+   Le trait passe SOUS le jalon (qui est opaque et monte en z-index) : la
+   géométrie est ainsi de centre à centre, honnête, et rien ne dépasse. */
+.offres .frs-fil {
+  position: absolute;
+  top: var(--frs-demi);
+  left: var(--frs-demi);
+  bottom: calc(-1 * (var(--frs-ecart) + var(--frs-demi)));
+  width: 1px;
+  overflow: hidden;
+  background: var(--o-line);
+}
+@media (min-width: 64rem) {
+  .offres .frs-fil {
+    right: calc(-1 * (var(--frs-ecart) + var(--frs-demi)));
+    bottom: auto;
+    width: auto;
+    height: 1px;
+  }
+}
+
+/* ——— la portion parcourue ———
+   `clamp()` dans une propriété personnalisée, puis multipliée par 100 % :
+   le segment est vide tant que la part n'a pas atteint son seuil, plein
+   quand elle a atteint le seuil suivant.
+   La transition de 220 ms n'est pas un ornement : elle lisse le suivi du
+   défilement (chaque image relance la course vers la valeur suivante, ce
+   qui filtre les à-coups) ET elle transforme en glissement le seul saut
+   possible de ce composant — le rappel du rail plein rendu par le serveur
+   vers la position réelle, au montage. */
+.offres .frs-fil-plein {
+  --frs-part: clamp(0, (var(--frs-p, 1) - var(--frs-seuil, 0)) * var(--frs-pas, 1), 1);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(var(--frs-part) * 100%);
+  background: var(--o-text);
+  transition: height 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (min-width: 64rem) {
+  .offres .frs-fil-plein {
+    width: calc(var(--frs-part) * 100%);
+    height: 100%;
+    transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* ——— le jalon : deux disques dans la même cellule ———
+   `grid-area: 1 / 1` plutôt qu'un empilement en absolu : les deux couches
+   font exactement la taille du jalon, sans `inset: 0` ni recalage, et le
+   numéro reste centré par `place-items`. */
+.offres .frs-jalon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  width: var(--frs-jalon);
+  height: var(--frs-jalon);
+}
+.offres .frs-jalon-off,
+.offres .frs-jalon-on {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* éteint : le filet de la maison sur du blanc opaque — c'est lui qui cache
+   le rail qui passe dessous */
+.offres .frs-jalon-off {
+  border: 1px solid var(--o-line);
+  background: #ffffff;
+  color: var(--o-muted-strong);
+}
+/* allumé : le disque d'encre de la page d'avant, numéro en négatif */
+.offres .frs-jalon-on {
+  background: var(--o-text);
+  color: #ffffff;
+  opacity: clamp(0, (var(--frs-p, 1) - var(--frs-seuil, 0)) * 12 + 1, 1);
+  transition: opacity 0.22s ease-out;
+}
+
+/* ——— le corps : le titre et la phrase ———
+   Le sélecteur est à trois classes (0,3,0) et non deux : `.offres .o-small`
+   pose 14 px dans globals.css, à égalité de poids avec `.offres .frs-texte`
+   — l'ordre des feuilles déciderait alors, et l'ordre des feuilles d'un
+   composant n'est pas garanti. À trois classes, la mesure gagne toujours.
+   15/24 : exactement ce que la page posait en `!text-[15px]
+   !leading-[24px]`, sans les `!important`. */
+.offres .frs-corps .frs-texte {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 24px;
+  max-width: 56ch;
+}
+@media (min-width: 64rem) {
+  .offres .frs-corps .frs-texte {
+    max-width: none;
+  }
+}
+
+/* ——— mouvement réduit ———
+   La feuille reprend la main sur le JavaScript : `!important` bat un
+   `style` en ligne sans `!important`, donc même si --frs-p a été écrit
+   avant que le réglage ne change, la frise redevient pleine et le reste.
+   Rien ne disparaît, rien n'est dégradé : c'est la même image, sans le
+   trajet. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .frs-cadre {
+    --frs-p: 1 !important;
+  }
+  .offres .frs-fil-plein,
+  .offres .frs-jalon-on {
+    transition: none;
+  }
+}

@@ -1,0 +1,140 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CartesSystemes.css — la feuille des quatre cartes « par système » de
+   /integrations (14/09/2026)
+
+   ORIGINE. `card-hover-effect` d'Aceternity UI, dont TOUT le style tient en
+   utilitaires dans le TSX. Ne descend ici que ce qui ne s'écrit pas en
+   utilitaire sans devenir illisible ou faux : le lavis (quatre décalages
+   négatifs et un z-index), l'état actif de la carte (voir plus bas : un
+   utilitaire ne peut pas le poser), le disque des pastilles et le contour
+   de focus.
+
+   POURQUOI CE FICHIER EXISTE MALGRÉ TOUT. `.o-card-soft` déclare son
+   `background` et son `border-color` HORS COUCHE dans app/globals.css ;
+   une couche `utilities` perd toujours contre du non-couché, donc
+   `hover:bg-white` sur une `.o-card-soft` ne peint RIEN — c'est le constat
+   qui a fait naître `.o-card-porte`, et c'est pour la même raison que
+   l'état actif se joue ici, en `[data-actif="true"]` (0,3,0) contre
+   `.offres .o-card-soft` (0,2,0) : gagné par spécificité, quel que soit
+   l'ordre d'émission des deux feuilles.
+
+   CE QUI EST JETÉ. `bg-neutral-200` et `dark:bg-slate-800/[0.8]` du lavis,
+   `rounded-3xl`, la carte noire et ses `border-white/[0.2]`. Aucune
+   `@keyframes` : le seul mouvement est porté par `motion` dans le TSX, il
+   n'y a donc rien à nommer ni à désactiver ailleurs qu'aux deux
+   transitions d'état ci-dessous.
+
+   ÉCARTS ASSUMÉS. Tout est scopé sous `.offres` et préfixé `csy-` : aucun
+   nom ne croise ceux de globals.css (`o-*`, et le `cs-*` de `.resa`, qui
+   vit dans un autre monde), ni ceux des trois autres feuilles de
+   components/integrations (`or-`, `go-`, `am-`). Toutes les couleurs
+   viennent du bloc `.offres` — --o-text #09090b, --o-line #e4e4e7,
+   --o-soft #fafafa — sauf deux valeurs de la même rampe zinc, dites à
+   l'endroit où elles servent. Tailwind v4 : chaque `border` porte sa
+   couleur, un `border` nu peindrait en encre.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la porte : le lien qui EST la carte ———
+   `min-width: 0` parce que c'est l'élément de grille : sans lui, à quatre
+   colonnes, un mot insécable élargirait la colonne au lieu de se couper.
+   Le `border-radius` n'est pas visible (le lien n'a ni fond ni filet) : il
+   ne sert qu'à faire suivre l'arrondi au contour de focus. */
+.offres .csy-porte {
+  position: relative;
+  display: block;
+  height: 100%;
+  min-width: 0;
+  border-radius: 20px;
+}
+.offres .csy-porte:focus-visible {
+  outline: 2px solid var(--o-text);
+  /* 4 px : le contour passe DEHORS du lavis (décalé de 8 px), il ne se
+     confond donc jamais avec lui quand les deux sont allumés ensemble */
+  outline-offset: 4px;
+}
+
+/* ——— le lavis ———
+   Le pavé partagé qui glisse d'une carte à l'autre. Il déborde de 8 px de
+   chaque côté : la gouttière de la grille vaut 16 px (`gap-4`), deux lavis
+   voisins se toucheraient donc au plus, sans jamais se recouvrir — et un
+   seul est allumé à la fois.
+
+   #f4f4f5 est le cran zinc immédiatement sous --o-soft (#fafafa), sur la
+   même rampe que --o-line (#e4e4e7) : aucune couleur nouvelle, aucun
+   accent. Et non --o-soft : c'est DÉJÀ le fond de la carte au repos, un
+   lavis de cette valeur ne se verrait ni sous la carte (elle passe au
+   blanc) ni autour d'elle (2 % d'écart avec le blanc de la section).
+
+   Rayon 24 et non 28 (20 de la carte + 8 de débord) : c'est la valeur que
+   <PortesHover> a posée sur le même geste le 10/09, et un halo n'a pas
+   besoin d'être concentrique au pixel pour se lire comme un halo. */
+.offres .csy-lavis {
+  position: absolute;
+  z-index: 0;
+  top: -8px;
+  right: -8px;
+  bottom: -8px;
+  left: -8px;
+  display: block;
+  border-radius: 24px;
+  background: #f4f4f5;
+  pointer-events: none;
+}
+
+/* ——— la carte ———
+   Fond, filet et rayon viennent de `.o-card-soft`. Ici, seulement le rang
+   de peinture (au-dessus du lavis) et le passage au blanc quand la carte
+   est allumée — par le survol à la souris OU par le focus clavier, c'est
+   le même attribut, donc le même rendu.
+   #d4d4d8 : le filet appuyé de `.o-card-porte`, mot pour mot. */
+.offres .csy-carte {
+  z-index: 1;
+  transition:
+    background-color 0.2s var(--ease-out-strong),
+    border-color 0.2s var(--ease-out-strong);
+}
+.offres .csy-carte[data-actif="true"] {
+  background: #ffffff;
+  border-color: #d4d4d8;
+}
+
+/* ——— le rôle du système ———
+   Le seul réglage : à quatre colonnes, « Clients inactifs & marchés
+   publics » tient sur deux lignes quand les trois autres en font une, et
+   la rangée de pastilles de RELOAD tombait 27 px plus bas que les trois
+   autres. Deux lignes réservées (1,8em, l'interligne de `.o-small`) les
+   remettent d'aplomb. En em et non en px : la ligne suit le `!text-[15px]`
+   posé sur l'élément. Sous lg les cartes sont larges ou seules, personne
+   ne compare deux hauteurs côte à côte — rien n'est réservé. */
+@media (min-width: 64rem) {
+  .offres .csy-role {
+    min-height: calc(2 * 1.8em);
+  }
+}
+
+/* ——— une pastille d'outil ———
+   Disque blanc à filet, logo de marque 16 px en couleur officielle (le
+   `fill` est dans le TSX : c'est la seule exception couleur de la charte).
+   `flex: 0 0 auto` : la rangée est en `flex-wrap`, un disque ne doit jamais
+   s'écraser en ovale quand quatre d'entre eux serrent la colonne. */
+.offres .csy-pastille {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--o-line);
+  border-radius: 9999px;
+  background: #ffffff;
+}
+
+/* ——— mouvement réduit ———
+   Les deux transitions d'état sautent ; la carte allumée reste allumée,
+   c'est un état, pas un mouvement. Le lavis est figé côté `motion`
+   (useReducedMotion) : plus de `layoutId`, donc plus de glissement, et des
+   durées à zéro. Ce qui est rendu ici est ce qui est rendu partout. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .csy-carte {
+    transition: none;
+  }
+}

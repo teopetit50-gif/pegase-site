@@ -2,15 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import { SystemLogo } from "@/components/logos";
-import FamilleOutils, { type Outil } from "@/components/integrations/FamilleOutils";
+import { type Outil } from "@/components/integrations/FamilleOutils";
+import OrbiteOutils from "@/components/integrations/OrbiteOutils";
+import GrilleOutils from "@/components/integrations/GrilleOutils";
+import FriseRaccordement from "@/components/integrations/FriseRaccordement";
+import CartesSystemes from "@/components/integrations/CartesSystemes";
+import AppelOutil from "@/components/integrations/AppelOutil";
 import { Chevron, OUTILS } from "@/components/offres/MediaMoteurs";
-import { nomPaquet } from "@/lib/content";
 import {
   FAMILLES_OUTILS,
   MOTEUR_OUTILS,
   OUTIL_INFOS,
-  RACCORDEMENT,
   type Famille,
 } from "@/lib/integrations";
 
@@ -46,6 +48,23 @@ import {
    07/08/2026 — 29 cartes ouvertes d'un coup, c'était trop (Teo). Chaque
    famille n'ouvre plus que sur sa première carte, le reste passe derrière
    un « Voir plus » : voir components/integrations/FamilleOutils.
+
+   14/09/2026 — REFONTE par composants repris. Mêmes sections, mêmes textes,
+   mêmes liens ; ce qui change est la matière :
+     1. hero     + <OrbiteOutils>      (Magic UI « orbiting-circles » : deux
+                                        anneaux d'outils clients autour du
+                                        noyau ; le texte du hero ne bouge pas)
+     2. grille   → <GrilleOutils>      (Tailark « integrations three » + les
+                                        puces de filtre de /modeles : les 28
+                                        outils sont tous dans le HTML)
+     3. déroulé  → <FriseRaccordement> (Aceternity « timeline » couché à
+                                        l'horizontale : le rail se remplit au
+                                        défilement, plein sans JavaScript)
+     4. systèmes → <CartesSystemes>    (Aceternity « card-hover-effect » : le
+                                        lavis glisse d'une carte à l'autre)
+     5. clôture  → <AppelOutil>        (shadcnblocks « cta4 », carte claire)
+   <FamilleOutils> n'est plus appelé (orphelin, gardé le temps de la recette) ;
+   seul son type Outil sert encore ici.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -111,6 +130,9 @@ export default function Integrations() {
                 <Chevron taille={13} />
               </Link>
             </div>
+            {/* 14/09 — l'objet qui manquait : les outils du client gravitent
+                autour du noyau. La ligne ci-dessous devient sa légende. */}
+            <OrbiteOutils className="mt-14" />
             <p data-reveal className="o-small mt-6">
               {TOTAL} outils raccordés à ce jour
             </p>
@@ -120,14 +142,7 @@ export default function Integrations() {
         {/* ════════ 2 · LA GRILLE, PAR FAMILLE ════════ */}
         <section data-monde="clair" className="py-[100px]">
           <div className="o-wrap">
-            {PAR_FAMILLE.map((g, i) => (
-              <FamilleOutils
-                key={g.famille}
-                famille={g.famille}
-                outils={g.outils}
-                className={i > 0 ? "mt-16" : undefined}
-              />
-            ))}
+            <GrilleOutils groupes={PAR_FAMILLE} />
           </div>
         </section>
 
@@ -145,25 +160,7 @@ export default function Integrations() {
                 Toujours dans le même ordre, et toujours en lecture avant l&apos;écriture, ce qui garantit qu&apos;aucun message ne part sur des données erronées.
               </p>
             </div>
-            <div className="mt-16 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-              {RACCORDEMENT.map((e, i) => (
-                <div key={e.n} data-reveal className="relative flex flex-col">
-                  {i < RACCORDEMENT.length - 1 && (
-                    <span
-                      aria-hidden
-                      className="absolute left-9 right-0 top-[15px] hidden h-px bg-[#e4e4e7] lg:block"
-                    />
-                  )}
-                  <span className="relative z-10 inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#09090b] text-[12px] font-semibold text-white">
-                    {e.n}
-                  </span>
-                  <h3 className="o-h5 mt-5">{e.titre}</h3>
-                  <p className="o-small mt-2.5 !text-[15px] !leading-[24px]">
-                    {e.texte}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <FriseRaccordement className="mt-16" />
           </div>
         </section>
 
@@ -181,78 +178,29 @@ export default function Integrations() {
                 Les quatre systèmes les plus déployés et les outils qu&apos;ils consomment réellement. Un système n&apos;a pas besoin de tout votre système d&apos;information, seulement des outils qui portent l&apos;information.
               </p>
             </div>
-            <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {MOTEUR_OUTILS.map((m) => (
-                <Link
-                  key={m.system}
-                  href={`/offres/${m.slug}`}
-                  data-reveal
-                  className="o-card-soft flex flex-col p-7 transition-colors duration-200 hover:bg-white"
-                >
-                  <div className="flex items-center gap-3">
-                    <SystemLogo system={m.system} />
-                    <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#09090b]">
-                      {nomPaquet(m.system)}
-                    </span>
-                  </div>
-                  <p className="o-small mt-3 !text-[15px] !text-[#52525b]">
-                    {m.role}
-                  </p>
-                  <div className="mt-5 flex flex-wrap items-center gap-2">
-                    {m.outils.map((t) => {
-                      const marque = OUTILS.find((o) => o.title === t);
-                      if (!marque) return null;
-                      return (
-                        <span
-                          key={t}
-                          title={t}
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e4e4e7] bg-white"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            width="16"
-                            height="16"
-                            fill={`#${marque.hex}`}
-                            role="img"
-                            aria-label={t}
-                          >
-                            <path d={marque.path} />
-                          </svg>
-                        </span>
-                      );
-                    })}
-                  </div>
-                  <span className="o-link mt-6 !text-[14px]">
-                    Voir la fiche
-                    <Chevron taille={12} />
-                  </span>
-                </Link>
-              ))}
-            </div>
+            <CartesSystemes
+              className="mt-16"
+              systemes={MOTEUR_OUTILS.map((m) => ({
+                system: m.system,
+                slug: m.slug,
+                role: m.role,
+                /* aplati ici comme PAR_FAMILLE : CartesSystemes est un
+                   composant client, il ne reçoit que du sérialisable — jamais
+                   le module simple-icons. Un outil sans logo n'affiche pas de
+                   pastille, il n'est pas remplacé. */
+                outils: m.outils.flatMap((t) => {
+                  const marque = OUTILS.find((o) => o.title === t);
+                  return marque
+                    ? [{ title: marque.title, hex: marque.hex, path: marque.path }]
+                    : [];
+                }),
+              }))}
+            />
           </div>
         </section>
 
         {/* ════════ 5 · L'OUTIL MANQUANT ════════ */}
-        <section data-monde="clair" className="pb-[120px]">
-          <div className="o-wrap">
-            <div className="o-card flex flex-col items-center px-8 py-14 text-center sm:px-16 sm:py-16">
-              <h2 data-reveal className="o-h2 max-w-[620px]">
-                Votre outil n&apos;est pas dans la liste ?
-              </h2>
-              <p data-reveal className="o-lead mt-5 max-w-[620px]">
-                Cette liste recense ce qui est déjà raccordé, pas une limite. Dès qu&apos;un outil expose ses données, un système peut s&apos;y connecter. Dans le cas contraire, nous le disons pendant le diagnostic, pas après.
-              </p>
-              <div data-reveal className="mt-8">
-                <Link
-                  href="/commencer"
-                  className="o-btn o-btn--primary"
-                >
-                  En parler lors du diagnostic
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        <AppelOutil />
       </div>
     </PageShell>
   );

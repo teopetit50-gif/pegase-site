@@ -1,0 +1,183 @@
+/* ══════════════════════════════════════════════════════════════════════
+   GrilleOutils.css — la feuille de la grille d'outils filtrée (/integrations)
+
+   Tout est scopé sous `.offres` et préfixé `go-` : rien ne sort de la
+   section, et aucun nom ne croise ceux déjà posés dans app/globals.css
+   (`o-*`, `mg-*`, `mm-*`…). Aucune `@keyframes` ici — le mouvement du
+   filtre est porté par `motion` dans GrilleOutils.tsx ; ne vivent dans
+   cette feuille que les états que le CSS fait mieux (repos, survol, focus)
+   et le rail de puces des petits écrans.
+
+   Les couleurs viennent toutes du bloc `.offres` de globals.css :
+   --o-text #09090b, --o-muted #71717a, --o-muted-strong #52525b,
+   --o-line #e4e4e7, --o-soft #fafafa. Aucun accent, aucun dégradé ; seuls
+   les logos de marque gardent leur couleur, posée en `fill` dans le TSX.
+
+   Tailwind v4 : chaque `border` porte ici sa couleur explicite — un
+   `border` nu peindrait en `currentColor`, donc en encre.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la rangée de puces (groupe radio) ———
+   Le repos reprend `.o-pill` mot pour mot (blanc, filet --o-line, rayon 10,
+   ombre d'un pixel) : c'est le vocabulaire des pastilles de la page. La
+   puce cochée bascule en encre pleine — sur blanc, un simple filet appuyé
+   ne se verrait pas d'un coup d'œil, et c'est la seule information que la
+   rangée doit donner. */
+.offres .go-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+@media (min-width: 40rem) {
+  .offres .go-puces {
+    gap: 8px;
+  }
+}
+
+.offres .go-puce {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--o-line);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(9, 9, 11, 0.04);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: var(--o-muted-strong);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+@media (min-width: 40rem) {
+  .offres .go-puce {
+    min-height: 36px;
+    font-size: 13.5px;
+  }
+}
+@media (hover: hover) {
+  .offres .go-puce:hover {
+    color: var(--o-text);
+    border-color: #d4d4d8;
+  }
+}
+.offres .go-puce[aria-checked="true"] {
+  background: var(--o-text);
+  border-color: var(--o-text);
+  color: #ffffff;
+  box-shadow: none;
+}
+.offres .go-puce:focus-visible {
+  outline: 2px solid var(--o-text);
+  outline-offset: 2px;
+}
+
+/* ——— le compteur de la famille active ———
+   Calculé dans le TSX, jamais écrit en dur. `aria-live` y est posé : c'est
+   lui qui annonce le changement de famille à la synthèse vocale. */
+.offres .go-compte {
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--o-muted);
+}
+
+/* ——— la carte d'un outil ———
+   Le fond, le filet et le rayon viennent de `.o-card-soft` (globals.css) :
+   c'est exactement le `<Card variant="soft">` de la source. Ici, seulement
+   ce que la source posait en jetons shadcn. Aucun survol : la carte ne mène
+   nulle part, elle ne doit pas se comporter comme une porte. */
+.offres .go-carte {
+  /* `.o-card-soft` pose overflow:hidden ; le contour de focus d'un futur
+     enfant interactif serait rogné — rien d'interactif ici aujourd'hui. */
+  gap: 0;
+}
+
+.offres .go-logo {
+  display: grid;
+  place-items: center;
+  align-self: flex-start;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--o-line);
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.offres .go-nom {
+  margin-top: 20px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--o-text);
+}
+@media (min-width: 40rem) {
+  .offres .go-nom {
+    font-size: 16px;
+  }
+}
+
+/* Pas de `line-clamp` : mesuré sur OUTIL_INFOS, les phrases font 49 à 149
+   signes (médiane 99) quand deux lignes à 390 px en tiennent ~86 — le
+   clamp couperait 19 phrases sur 28. Le rôle prend ses 3 à 4 lignes, et la
+   grille égalise les hauteurs de rangée. */
+.offres .go-role {
+  margin-top: 6px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+  color: var(--o-muted);
+}
+
+/* ——— mouvement réduit ———
+   Les transitions d'état des puces sautent. La puce cochée reste cochée :
+   c'est un état, pas un mouvement. Le filtre lui-même est figé côté
+   `motion` (useReducedMotion) : la famille change d'un coup. */
+@media (prefers-reduced-motion: reduce) {
+  .offres .go-puce {
+    transition: none;
+  }
+}
+
+/* ——— sous sm : la rangée devient un rail ———
+   Treize puces (douze familles + « Tous ») feraient six lignes à 342 px de
+   large, soit ~250 px de liste avant la première carte. Elles passent donc
+   en rail à défilement naturel, d'un bord à l'autre de l'écran : les
+   marges négatives valent exactement le `padding-inline` de `.o-wrap`
+   (24 px), donc le rail s'arrête AU bord — il ne dépasse jamais, et
+   n'élargit pas la fenêtre de mise en page. Ce qui déborde dedans est
+   contenu par son propre `overflow-x`, barre masquée. ——— */
+@media (max-width: 39.999rem) {
+  .offres .go-puces {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    margin-inline: -24px;
+    padding-inline: 24px;
+    padding-bottom: 2px;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 24px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .offres .go-puces::-webkit-scrollbar {
+    display: none;
+  }
+  .offres .go-puces .go-puce {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
+}
