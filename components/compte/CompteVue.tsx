@@ -245,6 +245,31 @@ export default function CompteVue({
   const nom = nomAffiche(utilisateur);
   const aNom = nom !== utilisateur.email;
 
+  /* ——— la carte qui change de colonne (15/09/2026, seconde passe) ———
+     Teo : « je veux que ce soit une page en large, pas long. » Les cartes
+     se répartissent en deux colonnes au-dessus de 1100 px (compte.css), et
+     le PROFIL suit la place libre : à droite quand la colonne de gauche
+     porte un abonnement — elle est alors la plus haute —, à gauche sous
+     l'audit sinon. Mesuré sur les jeux de /compte/apercu : sans cette
+     bascule, le cas devenu le plus fréquent (un audit et rien d'autre)
+     laissait 386 px d'un côté contre 702 de l'autre.
+
+     C'est le profil qui bascule et pas le mot de passe, POUR L'ORDRE :
+     sous le palier, les deux colonnes n'en font plus qu'une et c'est le
+     DOM qui décide de la suite. Profil, puis mot de passe, puis commandes
+     — dans les deux cas.
+
+     Une répartition FIXE plutôt qu'un multi-colonnes CSS : celui-ci
+     rééquilibre à chaque changement de hauteur, et les cartes sauteraient
+     d'une colonne à l'autre dès qu'on ouvre le formulaire du profil. */
+  const carteProfil = (
+    <Bloc titre="Profil professionnel" sous="Ce que nous savons de votre entreprise.">
+      <ProfilCarte utilisateur={utilisateur} />
+    </Bloc>
+  );
+  /* la colonne de gauche est-elle la plus courte ? */
+  const compteAGauche = blocAudit;
+
   return (
     <div className="resa">
       <section data-monde="clair" className="r-wrap cp-page" aria-labelledby="cp-titre-page">
@@ -316,169 +341,189 @@ export default function CompteVue({
           </div>
         </section>
 
-        {/* ——— 2 bis. mon audit — tant qu'il n'y a pas d'abonnement ———
-            15/09 : c'est LE bloc que voit un compte neuf, à la place d'une
-            carte d'abonnement vide (voir `blocAudit` plus haut). Sans
-            aucun rendez-vous il ne s'affiche PAS : le bloc d'accès, trois
-            centimètres au-dessus, porte déjà la même phrase et le même
-            bouton — même règle que « Mes rendez-vous ». */}
-        {blocAudit && audits.length ? (
-          <Bloc
-            titre="Mon audit"
-            sous="Ce qui a été réservé, et ce qui suit. Heure de Guadeloupe."
-          >
-            {panneDemandes ? (
-              <p className="rv-erreur">
-                Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un
-                instant.
-              </p>
-            ) : (
-              <>
+        {/* ——— LES CARTES, EN LARGEUR (15/09/2026, seconde passe) ———
+            Teo : « je veux que ce soit une page en large, pas long. » Les
+            cartes empilées faisaient défiler près de trois écrans pour ce
+            qui se lit d'un coup d'œil. À partir de 1100 px (compte.css) la
+            page s'élargit et se met en DEUX COLONNES : à gauche la
+            relation — l'audit ou l'abonnement, puis les rendez-vous —, à
+            droite le compte lui-même.
+
+            Deux colonnes RÉELLES, deux conteneurs : dans une grille
+            d'items, un bloc plus haut à gauche pousse le suivant sous le
+            bas du bloc de droite et ouvre un trou blanc. Sous le palier,
+            `.cp-large` redevient une simple colonne et l'ordre de lecture
+            ne bouge pas. */}
+        <div className="cp-large">
+          <div className="cp-col">
+            {/* ——— 2 bis. mon audit — tant qu'il n'y a pas d'abonnement ———
+                15/09 : c'est LE bloc que voit un compte neuf, à la place d'une
+                carte d'abonnement vide (voir `blocAudit` plus haut). Sans
+                aucun rendez-vous il ne s'affiche PAS : le bloc d'accès, trois
+                centimètres au-dessus, porte déjà la même phrase et le même
+                bouton — même règle que « Mes rendez-vous ». */}
+            {blocAudit && audits.length ? (
+              <Bloc
+                titre="Mon audit"
+                sous="Ce qui a été réservé, et ce qui suit. Heure de Guadeloupe."
+              >
+                {panneDemandes ? (
+                  <p className="rv-erreur">
+                    Vos rendez-vous ne répondent pas pour le moment. Rechargez la page dans un
+                    instant.
+                  </p>
+                ) : (
+                  <>
+                    <ul>
+                      {audits.map((d) => (
+                        <LigneRdv key={d.id} d={d} />
+                      ))}
+                    </ul>
+                    {/* ce qui vient APRÈS l'audit : la seule question que se
+                        pose quelqu'un qui revient ici entre les deux */}
+                    <p className="cp-secondaire mt-4 max-w-[62ch]">
+                      À l&apos;issue de l&apos;audit, vous recevez ce qui a été mesuré et ce
+                      qu&apos;il y a à mettre en route. L&apos;installation se réserve ensuite, et
+                      c&apos;est elle qui ouvre votre espace client.
+                    </p>
+                    <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+                      <Link href="/tarifs" className="r-btn r-btn--fil">
+                        Voir les postes et les tarifs
+                      </Link>
+                      <Link href="/reserver-un-audit" className="cp-lien">
+                        Réserver un autre format
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </Bloc>
+            ) : null}
+
+            {/* ——— 2. mon abonnement — dès qu'il y en a un ——— */}
+            {blocAudit ? null : (
+            <Bloc titre="Mon abonnement" sous="Vos postes, votre formule et votre moyen de paiement.">
+              {/* 05/09 — le retour de Stripe, au-dessus de la carte */}
+              {retour === "ok" ? (
+                <p className="cp-ok mb-4" role="status">
+                  {enregistrementEnCours
+                    ? "Merci. L'enregistrement de votre moyen de paiement est en cours de confirmation. Rien ne sera débité avant la fin de l'installation."
+                    : "Moyen de paiement enregistré. Rien ne sera débité avant la fin de l'installation."}
+                </p>
+              ) : retour === "plus-tard" ? (
+                <p className="cp-info mb-4" role="status">
+                  Vous pourrez enregistrer votre moyen de paiement plus tard, ici, depuis votre
+                  abonnement.
+                </p>
+              ) : null}
+              {panneDemandes ? (
+                <p className="rv-erreur">
+                  Votre abonnement ne répond pas pour le moment. Rechargez la page dans un instant.
+                </p>
+              ) : (
+                <AbonnementCarte
+                  demande={abonnement}
+                  rattache={rattache}
+                  demandesAbonnement={demandesAbonnement}
+                  panneDemandesAbonnement={panneDemandesAbonnement}
+                  reunionPassee={reunionDejaPassee}
+                  enregistrementEnCours={enregistrementEnCours}
+                />
+              )}
+            </Bloc>
+            )}
+
+            {/* ——— 3. mes rendez-vous, seulement s'il y en a ———
+                l'installation n'a lieu qu'une fois : un bloc « aucun rendez-vous »
+                n'apprendrait rien, et la porte vers la réservation est déjà dans
+                le bloc d'accès et dans la carte d'abonnement.
+                15/09 — sans abonnement, les audits sont déjà dans le bloc
+                « Mon audit » : cette liste ne porte alors que les installations
+                (une annulée, par exemple), et disparaît le plus souvent. */}
+            {!panneDemandes && rendezVous.length ? (
+              <Bloc titre="Mes rendez-vous" sous="Heure de Guadeloupe.">
                 <ul>
-                  {audits.map((d) => (
+                  {rendezVous.map((d) => (
                     <LigneRdv key={d.id} d={d} />
                   ))}
                 </ul>
-                {/* ce qui vient APRÈS l'audit : la seule question que se
-                    pose quelqu'un qui revient ici entre les deux */}
-                <p className="cp-secondaire mt-4 max-w-[62ch]">
-                  À l&apos;issue de l&apos;audit, vous recevez ce qui a été mesuré et ce
-                  qu&apos;il y a à mettre en route. L&apos;installation se réserve ensuite, et
-                  c&apos;est elle qui ouvre votre espace client.
+              </Bloc>
+            ) : null}
+
+
+            {compteAGauche ? carteProfil : null}
+          </div>
+
+          <div className="cp-col">
+            {compteAGauche ? null : carteProfil}
+
+            {/* ——— le compte lui-même : ce qu'on corrige deux fois par an ———
+                C'était UN bloc « Votre compte » à quatre sous-blocs, haut de
+                800 px : en deux colonnes il laissait la colonne d'en face à
+                moitié vide. Il est rendu à ses cartes, et ses sous-titres
+                sont devenus des titres — mêmes mots. « Vos données » tenait
+                en une phrase : elle rejoint les commandes plutôt que de
+                porter une carte pour elle seule. */}
+            <Bloc titre="Mot de passe" sous="Le même sur le site et dans votre espace client.">
+              <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
+            </Bloc>
+
+            <Bloc titre="Commandes de site" sous="Vos commandes de site vitrine, et vos données.">
+              {panneCommandes ? (
+                <p className="rv-erreur">
+                  Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
                 </p>
-                <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
-                  <Link href="/tarifs" className="r-btn r-btn--fil">
-                    Voir les postes et les tarifs
+              ) : commandes.length === 0 ? (
+                <p className="cp-secondaire">
+                  Aucune commande. Le site catalogue est à 990&nbsp;€ TTC, une fois&nbsp;:{" "}
+                  <Link href="/tarifs/site" className="cp-lien-inline">
+                    voir l&apos;offre
                   </Link>
-                  <Link href="/reserver-un-audit" className="cp-lien">
-                    Réserver un autre format
+                  .
+                </p>
+              ) : (
+                <ul>
+                  {commandes.map((c) => (
+                    <li key={c.id} className="cp-ligne">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="cp-texte cp-fort">Modèle {nomModele(c.modele)}</div>
+                          <p className="num cp-secondaire mt-0.5">Commandée le {dateGp(c.cree_le)}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-3">
+                          <span className="num cp-prix">
+                            {prixLisible(c.prix_eur)}
+                            <span className="cp-prix-unite"> TTC</span>
+                          </span>
+                          <Pastille teinte={TEINTE_STATUT_SITE[c.statut] ?? "gris"}>
+                            {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
+                          </Pastille>
+                        </div>
+                      </div>
+                      {c.statut === "a_payer" ? (
+                        /* le paiement en ligne n'existe pas encore : on le dit,
+                           on n'invente pas de bouton */
+                        <p className="cp-secondaire mt-2">
+                          Le paiement en ligne arrive&nbsp;: nous vous appelons pour régler et lancer
+                          la production.
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-5 border-t border-[var(--r-filet)] pt-4">
+                <p className="cp-secondaire">
+                  Ce que nous faisons de vos données, et comment les récupérer&nbsp;:{" "}
+                  <Link href="/vos-donnees" className="cp-lien-inline">
+                    vos données
                   </Link>
-                </div>
-              </>
-            )}
-          </Bloc>
-        ) : null}
-
-        {/* ——— 2. mon abonnement — dès qu'il y en a un ——— */}
-        {blocAudit ? null : (
-        <Bloc titre="Mon abonnement" sous="Vos postes, votre formule et votre moyen de paiement.">
-          {/* 05/09 — le retour de Stripe, au-dessus de la carte */}
-          {retour === "ok" ? (
-            <p className="cp-ok mb-4" role="status">
-              {enregistrementEnCours
-                ? "Merci. L'enregistrement de votre moyen de paiement est en cours de confirmation. Rien ne sera débité avant la fin de l'installation."
-                : "Moyen de paiement enregistré. Rien ne sera débité avant la fin de l'installation."}
-            </p>
-          ) : retour === "plus-tard" ? (
-            <p className="cp-info mb-4" role="status">
-              Vous pourrez enregistrer votre moyen de paiement plus tard, ici, depuis votre
-              abonnement.
-            </p>
-          ) : null}
-          {panneDemandes ? (
-            <p className="rv-erreur">
-              Votre abonnement ne répond pas pour le moment. Rechargez la page dans un instant.
-            </p>
-          ) : (
-            <AbonnementCarte
-              demande={abonnement}
-              rattache={rattache}
-              demandesAbonnement={demandesAbonnement}
-              panneDemandesAbonnement={panneDemandesAbonnement}
-              reunionPassee={reunionDejaPassee}
-              enregistrementEnCours={enregistrementEnCours}
-            />
-          )}
-        </Bloc>
-        )}
-
-        {/* ——— 3. mes rendez-vous, seulement s'il y en a ———
-            l'installation n'a lieu qu'une fois : un bloc « aucun rendez-vous »
-            n'apprendrait rien, et la porte vers la réservation est déjà dans
-            le bloc d'accès et dans la carte d'abonnement.
-            15/09 — sans abonnement, les audits sont déjà dans le bloc
-            « Mon audit » : cette liste ne porte alors que les installations
-            (une annulée, par exemple), et disparaît le plus souvent. */}
-        {!panneDemandes && rendezVous.length ? (
-          <Bloc titre="Mes rendez-vous" sous="Heure de Guadeloupe.">
-            <ul>
-              {rendezVous.map((d) => (
-                <LigneRdv key={d.id} d={d} />
-              ))}
-            </ul>
-          </Bloc>
-        ) : null}
-
-        {/* ——— 4. votre compte : ce qu'on corrige deux fois par an ——— */}
-        <Bloc titre="Votre compte" sous="Vos coordonnées, votre mot de passe et vos commandes.">
-          <div className="cp-sous-bloc">
-            <h3 className="cp-sous-titre">Profil professionnel</h3>
-            <ProfilCarte utilisateur={utilisateur} />
+                  .
+                </p>
+              </div>
+            </Bloc>
           </div>
-
-          <div className="cp-sous-bloc">
-            <h3 className="cp-sous-titre">Mot de passe</h3>
-            <MotDePasseCarte email={utilisateur.email} mdpDefini={utilisateur.mdpDefini} />
-          </div>
-
-          <div className="cp-sous-bloc">
-            <h3 className="cp-sous-titre">Commandes de site</h3>
-            {panneCommandes ? (
-              <p className="rv-erreur">
-                Vos commandes ne répondent pas pour le moment. Rechargez la page dans un instant.
-              </p>
-            ) : commandes.length === 0 ? (
-              <p className="cp-secondaire">
-                Aucune commande. Le site catalogue est à 990&nbsp;€ TTC, une fois&nbsp;:{" "}
-                <Link href="/tarifs/site" className="cp-lien-inline">
-                  voir l&apos;offre
-                </Link>
-                .
-              </p>
-            ) : (
-              <ul>
-                {commandes.map((c) => (
-                  <li key={c.id} className="cp-ligne">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="cp-texte cp-fort">Modèle {nomModele(c.modele)}</div>
-                        <p className="num cp-secondaire mt-0.5">Commandée le {dateGp(c.cree_le)}</p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-3">
-                        <span className="num cp-prix">
-                          {prixLisible(c.prix_eur)}
-                          <span className="cp-prix-unite"> TTC</span>
-                        </span>
-                        <Pastille teinte={TEINTE_STATUT_SITE[c.statut] ?? "gris"}>
-                          {LIBELLES_STATUT_SITE[c.statut] ?? c.statut}
-                        </Pastille>
-                      </div>
-                    </div>
-                    {c.statut === "a_payer" ? (
-                      /* le paiement en ligne n'existe pas encore : on le dit,
-                         on n'invente pas de bouton */
-                      <p className="cp-secondaire mt-2">
-                        Le paiement en ligne arrive&nbsp;: nous vous appelons pour régler et lancer
-                        la production.
-                      </p>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="cp-sous-bloc">
-            <h3 className="cp-sous-titre">Vos données</h3>
-            <p className="cp-secondaire">
-              Ce que nous faisons de vos données, et comment les récupérer&nbsp;:{" "}
-              <Link href="/vos-donnees" className="cp-lien-inline">
-                vos données
-              </Link>
-              .
-            </p>
-          </div>
-        </Bloc>
+        </div>
       </section>
     </div>
   );

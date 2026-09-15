@@ -27,7 +27,13 @@
    survit, pour « Paiement refusé ».
    ══════════════════════════════════════════════════════════════════════ */
 
-/* ——— la colonne ——— */
+/* ——— la colonne, puis les deux colonnes ———
+   15/09, seconde passe. Teo : « je veux que ce soit une page en large,
+   pas long. » Les quatre blocs empilés dans 940 px faisaient défiler
+   trois écrans. À partir de 1100 px la page s'élargit à 1240 et les
+   blocs se répartissent en DEUX colonnes (voir .cp-large) ; l'en-tête
+   et le bloc d'accès, eux, restent en pleine largeur — ce sont les deux
+   seules choses qu'on lit dans l'ordre. */
 .resa .cp-page {
   max-width: 940px;
   padding-top: 20px;
@@ -37,6 +43,39 @@
   .resa .cp-page {
     padding-top: 28px;
     padding-bottom: 72px;
+  }
+}
+@media (min-width: 1100px) {
+  .resa .cp-page {
+    max-width: 1240px;
+  }
+}
+
+/* ——— les deux colonnes ———
+   Deux conteneurs RÉELS, pas une grille d'items : dans une grille, un
+   bloc plus haut à gauche pousse le suivant sous le bas du bloc de
+   droite et ouvre un trou blanc. Sous le palier, c'est une simple
+   colonne : l'ordre de lecture (l'audit, puis les rendez-vous, puis le
+   compte) ne bouge pas.
+
+   Le nom est `cp-large` et PAS `cp-grille` : globals.css garde encore les
+   règles de la mise en page d'avant le 15/09 (`.resa .cp-grille` et ses
+   `[data-zone]`), qui posaient déjà deux puis trois colonnes dès 640 px.
+   Elles ne peignent plus rien — aucun `data-zone` n'existe dans le TSX —
+   mais elles auraient repris la main sur une classe du même nom, sans
+   bruit, à des paliers qui ne sont pas les nôtres. */
+@media (min-width: 1100px) {
+  .resa .cp-large {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 0 24px;
+    align-items: start;
+  }
+  /* min-width: 0 — sans lui, une carte au contenu large (le tableau du
+     profil, une ligne de rendez-vous) impose sa largeur intrinsèque à sa
+     colonne et déséquilibre les deux */
+  .resa .cp-col {
+    min-width: 0;
   }
 }
 
@@ -140,6 +179,33 @@
   align-items: center;
   gap: 10px 14px;
   margin-top: 20px;
+}
+/* 15/09, seconde passe — « en large, pas long » : au-dessus du palier, les
+   actions se rangent À DROITE de la phrase au lieu de s'empiler dessous.
+   Le bloc d'accès passe de quatre rangées à deux, et c'est autant de moins
+   avant d'atteindre les cartes. */
+@media (min-width: 1100px) {
+  .resa .cp-acces {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 32px;
+    padding: 24px 0 28px;
+  }
+  .resa .cp-acces-titre {
+    grid-column: 1;
+  }
+  .resa .cp-acces-texte {
+    grid-column: 1;
+    max-width: 68ch;
+  }
+  .resa .cp-acces-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-top: 0;
+    justify-content: flex-end;
+    max-width: 320px;
+  }
 }
 
 /* ——— les liens ——— */
