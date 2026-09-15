@@ -14,10 +14,22 @@ import { lienContact } from "@/lib/reservation";
    page à décision unique, deux grandes cartes, rien d'autre. Le visiteur
    se qualifie lui-même et part directement au bon endroit :
 
-     · « Indépendants & TPE-PME »        → /tarifs   (prix publics)
-     · « Organisations & équipes »       → /reserver-un-audit (sur devis)
+     · « Indépendants & TPE-PME »        → /tarifs (côté « PME »)
+     · « Organisations & équipes »       → /tarifs?monde=structure
      · « Découvrir nos sites » (01/09)   → /tarifs/site (l'offre site ;
                                             depuis le 02/09, plus /modeles)
+
+   15/09/2026 — LA PORTE « ORGANISATIONS » NE SAUTE PLUS /tarifs. Elle
+   menait droit à /reserver-un-audit, parce qu'il y avait alors DEUX
+   modèles commerciaux : prix publics et achat direct d'un côté, aucun
+   montant et devis de l'autre. Les deux commits du jour ont supprimé cette
+   raison : /tarifs n'affiche plus de barème (elle estime, l'audit fixe) et
+   elle a reçu le sélecteur des deux mondes (MONDES / GRANDE_STRUCTURE de
+   lib/paliers.ts), que `?monde=structure` ouvre directement du bon côté.
+   Une organisation voit donc maintenant les mêmes postes et le même
+   périmètre que tout le monde, en « Sur devis », avant d'aller réserver —
+   /reserver-un-audit reste l'arrivée unique, atteinte depuis la grille.
+   Le CTA le dit : on arrive sur des postes, pas sur un formulaire.
 
    Le mot retenu pour l'autre monde est « organisation » — jamais
    « grosse entreprise » : ce qui sépare les deux n'est pas la taille mais
@@ -61,8 +73,14 @@ const PORTES = [
          grille n'existe plus, les deux portes chiffrent sur les volumes. Ce
          qui les sépare, c'est la profondeur du diagnostic. */
       "Plusieurs services se partagent le travail, comme l'accueil, la comptabilité et les opérations, et plusieurs personnes valident, chacune sur son poste. Le diagnostic mesure vos volumes service par service, et le devis en découle.",
-    cta: "Demander un diagnostic",
-    href: "/reserver-un-audit",
+    cta: "Voir les postes",
+    /* 15/09 — la grille, ouverte côté « Grande structure » (voir l'en-tête).
+       Le href porte une query : il ne figure donc PAS dans la table PORTES
+       de lib/transitions, et `data-porte` reste vide sur cette carte. C'est
+       voulu — au retour, <Arrivee> ne connaît que le pathname (`/tarifs`) et
+       ne peut apparier qu'UNE carte : celle des prix publics garde la pose
+       de l'objet, celle-ci fait sa montée normale. */
+    href: "/tarifs?monde=structure",
   },
   {
     id: "tpe",
