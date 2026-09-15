@@ -72,7 +72,12 @@ export default function MiniSite({
               clair ? "text-black/40" : "text-muted/70"
             }`}
           >
-            {m.nom.toLowerCase()}.fr
+            {/* 15/09/2026 — la barre affichait `<nom du modèle>.fr` :
+                studio.fr, folio.fr, sonic.fr, hive.fr existent et
+                appartiennent à des tiers. Un visiteur qui tape l'adresse
+                lue ici tombait chez quelqu'un d'autre. Le gabarit n'a pas
+                de domaine — celui qui compte est celui du client. */}
+            votre-entreprise.fr
           </span>
         </div>
       )}

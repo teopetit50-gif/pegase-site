@@ -152,7 +152,7 @@ export default function ContactPage() {
           <div data-reveal className="ap-encart mt-12">
             <h2 className="r-h4">Pas encore client&nbsp;?</h2>
             <p className="mt-3 max-w-[60ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-              Décrivez votre situation en deux lignes, sur WhatsApp ou par e-mail&nbsp;: votre
+              Décrivez votre situation en deux lignes, par e-mail ou dans le formulaire ci-dessus&nbsp;: votre
               activité, ce qui vous prend le plus de temps, ce qui se perd. Nous vous répondons dans les deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
