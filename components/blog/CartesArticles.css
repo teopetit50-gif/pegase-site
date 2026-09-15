@@ -1,0 +1,343 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CartesArticles.css — la feuille des cartes d'articles du blog
+
+   Écrite le 15/09/2026, en même temps que CartesArticles.tsx. Tout est
+   scopé sous `.offres` (le monde de /blog et /blog/[slug]) et préfixé
+   `bc-` — vérifié par grep : ni `.bc-` ni aucun nom en `bc-` n'existait
+   ailleurs dans app/globals.css ni dans components/.
+
+   ⚠ NE PAS CONFONDRE avec le préfixe `.b-` du bloc /blog de globals.css
+   (`.b-grid`, `.b-card`, `.b-compo-*`) : celui-là reste en place, intact,
+   et continue de servir la couverture composée en tête d'article
+   (`.b-cover` + <BlogCover>) ainsi que la typo du corps (`.b-rte`).
+
+   AUCUN `@keyframes` ici, et c'est délibéré : un `@keyframes` est global
+   quoi qu'on fasse, et il n'y a rien à animer en boucle. L'apparition des
+   cartes est celle de la page ([data-reveal] + GSAP dans PageMotion) —
+   une seule mécanique, pas deux. Le reste du mouvement est du survol, donc
+   des `transition`, neutralisées en mouvement réduit tout en bas.
+
+   LA CONTRAINTE QUI TIENT LA GRILLE. 7 articles sur /blog, 6 sur une page
+   article : aucun des deux ne se divise proprement par 4. La « une »
+   (`.bc-carte--une`, le premier article de la liste) prend toute la
+   largeur dès 640 px, ce qui ramène le compte à 1 + 6 — deux rangées
+   pleines de 3 à partir de 1024 px, trois rangées pleines de 2 entre 640
+   et 1023, une colonne en dessous. La variante compacte n'a pas de une :
+   ses 6 cartes font exactement 2 × 3 puis 3 × 2. Aucune rangée orpheline
+   à aucun des cinq paliers de recette.
+
+   LA LISIBILITÉ DU TEXTE SUR LA PHOTO est garantie par le voile, pas par
+   la photo : à 0,72 d'encre, le composite au-dessus d'une photo BLANCHE
+   (le pire cas) vaut déjà #4e4e4e, soit 7,4:1 contre du blanc. Le bloc de
+   texte vit dans la moitié basse, où le voile ne descend jamais sous 0,72.
+   C'est pour ça que les paliers du dégradé ne se règlent pas « à l'œil ».
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la grille ——— */
+.offres .bc-grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 640px) {
+  .offres .bc-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .offres .bc-grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
+
+/* ——— la carte : la photo EST la carte ——— */
+.offres .bc-carte {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  overflow: hidden;
+  /* l'encre sous la photo : ce qu'on voit pendant le chargement, et le
+     fond des rares photos qui ne couvrent pas tout à fait */
+  background: #18181b;
+  isolation: isolate;
+  box-shadow: 0 1px 2px rgba(9, 9, 11, 0.06);
+  transition:
+    transform 0.35s var(--ease-out-strong),
+    box-shadow 0.35s ease;
+}
+.offres .bc-carte:focus-visible {
+  outline: 2px solid #09090b;
+  outline-offset: 3px;
+}
+
+/* la une : pleine largeur dès 640, et de plus en plus panoramique */
+@media (min-width: 640px) {
+  .offres .bc-carte--une {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 9;
+  }
+}
+@media (min-width: 1024px) {
+  .offres .bc-carte--une {
+    aspect-ratio: 21 / 9;
+  }
+}
+
+/* variante compacte (le bas d'une page article) : carré, moins haut,
+   moins de texte — la rangée ne doit pas peser autant que l'article */
+.offres .bc-grille--compacte .bc-carte {
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+}
+
+/* ——— la photo ——— */
+.offres .bc-photo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+/* next/image `fill` pose position/inset/taille en style inline ; il ne pose
+   NI object-fit NI transform, les deux seules propriétés qu'on règle ici */
+.offres .bc-img {
+  object-fit: cover;
+  transition: transform 0.6s var(--ease-out-strong);
+}
+
+/* ——— le voile d'encre ———
+   monochrome, jamais teinté : la charte du monde clair interdit une
+   couleur d'accent, et une photo de chantier ou de comptoir n'a pas
+   besoin d'être virée au bleu pour porter du texte blanc. */
+.offres .bc-voile {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(9, 9, 11, 0.94) 0%,
+    rgba(9, 9, 11, 0.9) 30%,
+    rgba(9, 9, 11, 0.84) 55%,
+    rgba(9, 9, 11, 0.42) 72%,
+    rgba(9, 9, 11, 0.12) 86%,
+    rgba(9, 9, 11, 0) 98%
+  );
+  transition: opacity 0.35s ease;
+}
+/* La une NE REMPLACE PAS le voile du bas, elle lui AJOUTE une nappe venue
+   de la gauche — et seulement à partir de 1024 px, là où la carte devient
+   vraiment panoramique (21/9) et où la moitié droite de la photo se met à
+   concurrencer le texte. Le remplacer serait le piège : entre 640 et 1023
+   la une ne fait que 333 px de haut, son bloc de texte en occupe 58 %, et
+   une nappe purement horizontale laisserait le haut du titre sur la photo
+   nue. Le dégradé du bas, lui, vaut encore 0,77 d'encre à cette hauteur.
+   La nappe ajoutée est douce (0,40 au bord gauche) : elle sépare, elle ne
+   noircit pas. */
+@media (min-width: 1024px) {
+  .offres .bc-carte--une .bc-voile {
+    background:
+      linear-gradient(
+        to right,
+        rgba(9, 9, 11, 0.4) 0%,
+        rgba(9, 9, 11, 0.18) 38%,
+        rgba(9, 9, 11, 0) 66%,
+        rgba(9, 9, 11, 0) 100%
+      ),
+      linear-gradient(
+        to top,
+        rgba(9, 9, 11, 0.94) 0%,
+        rgba(9, 9, 11, 0.9) 30%,
+        rgba(9, 9, 11, 0.84) 55%,
+        rgba(9, 9, 11, 0.42) 72%,
+        rgba(9, 9, 11, 0.12) 86%,
+        rgba(9, 9, 11, 0) 98%
+      );
+  }
+}
+
+/* ——— la pastille catégorie, en haut ———
+   même verre blanc que `.b-compo-tag` : c'est le vocabulaire déjà posé
+   par la couverture composée, on ne l'invente pas ici. */
+.offres .bc-haut {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+}
+.offres .bc-cat {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 6px 11px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  color: #0c1d37;
+}
+@media (min-width: 1024px) {
+  .offres .bc-carte--une .bc-haut {
+    top: 24px;
+    left: 32px;
+    right: 32px;
+  }
+}
+
+/* ——— le bloc de texte, en bas ——— */
+.offres .bc-bas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+}
+@media (min-width: 640px) {
+  .offres .bc-carte--une .bc-bas {
+    max-width: 620px;
+    gap: 10px;
+    padding: 28px 32px;
+  }
+}
+
+.offres .bc-titre {
+  margin: 0;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.32;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+@media (min-width: 1024px) {
+  .offres .bc-titre {
+    font-size: 22px;
+  }
+}
+.offres .bc-grille--compacte .bc-titre {
+  font-size: 18px;
+  -webkit-line-clamp: 2;
+}
+@media (min-width: 640px) {
+  .offres .bc-carte--une .bc-titre {
+    font-size: clamp(24px, 3.1vw, 34px);
+    line-height: 1.24;
+    letter-spacing: -0.035em;
+    -webkit-line-clamp: 2;
+  }
+}
+
+.offres .bc-chapo {
+  margin: 0;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.78);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  /* DEUX lignes, à toutes les largeurs et dans les deux variantes. Trois
+     lignes de chapô sur une carte étroite font cinq lignes VUES, et
+     surtout : c'est la hauteur du bloc de texte qui décide des paliers du
+     voile. Un clamp qui change avec la largeur ferait bouger cette hauteur
+     d'un palier de recette à l'autre, donc le contraste avec. */
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .offres .bc-carte--une .bc-chapo {
+    font-size: 15px;
+  }
+}
+
+/* ——— le pied : date · temps de lecture, puis le lien ——— */
+/* Une SEULE ligne, et rien qui se replie : « Lire la suite » n'est rendu
+   que sur la une (cf. le TSX), donc le pied des cartes de grille ne porte
+   que « date · N min de lecture » — environ 170 px à 13 px, quand la plus
+   étroite des colonnes en offre 264. Aucun palier de recette ne peut le
+   faire passer à deux lignes, donc la hauteur du bloc ne varie pas. */
+.offres .bc-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  margin-top: 2px;
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.72);
+}
+.offres .bc-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.offres .bc-ico {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  opacity: 0.8;
+}
+.offres .bc-sep {
+  opacity: 0.5;
+}
+.offres .bc-lire {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  color: #ffffff;
+}
+.offres .bc-lire svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  transition: transform 0.3s var(--ease-out-strong);
+}
+
+/* ——— survol : réservé aux pointeurs fins ———
+   sur un écran tactile `:hover` reste collé après le tap ; tout ce qui est
+   ici est décoratif, rien ne s'y cache (le chapô est lu au repos). */
+@media (hover: hover) and (pointer: fine) {
+  .offres .bc-carte:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(9, 9, 11, 0.12);
+  }
+  .offres .bc-carte:hover .bc-img {
+    transform: scale(1.05);
+  }
+  .offres .bc-carte:hover .bc-titre,
+  .offres .bc-carte:hover .bc-lire {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .offres .bc-carte:hover .bc-lire svg {
+    transform: translateX(3px);
+  }
+}
+
+/* ——— mouvement réduit : la carte ne bouge plus, elle reste entière ——— */
+@media (prefers-reduced-motion: reduce) {
+  .offres .bc-carte,
+  .offres .bc-img,
+  .offres .bc-voile,
+  .offres .bc-lire svg {
+    transition: none;
+  }
+  .offres .bc-carte:hover,
+  .offres .bc-carte:hover .bc-img,
+  .offres .bc-carte:hover .bc-lire svg {
+    transform: none;
+  }
+}

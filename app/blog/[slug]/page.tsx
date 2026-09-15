@@ -4,12 +4,13 @@ import { notFound } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import {
-  BlogCard,
   BlogCover,
   BlogCta,
   IconeCalendrier,
 } from "@/components/blog/BlogKit";
+import CartesArticles from "@/components/blog/CartesArticles";
 import { POSTS } from "@/lib/content";
+import { SITE_URL } from "@/lib/site";
 
 /* ══════════════════════════════════════════════════════════════════════
    /blog/[slug] — page article (30/07/2026)
@@ -28,10 +29,6 @@ import { POSTS } from "@/lib/content";
    utile. Sous 1280 px le rail disparaît, comme chez la référence dont
    la colonne absorbe le gabarit mobile.
    ══════════════════════════════════════════════════════════════════════ */
-
-/* URL publique de l'article, pour les liens de partage (le site est servi
-   sur ce domaine de prod — voir memory projet). */
-const BASE = "https://pegase-site-beige.vercel.app";
 
 export function generateStaticParams() {
   return POSTS.map((p) => ({ slug: p.slug }));
@@ -80,7 +77,7 @@ export default async function ArticlePage({
   const post = POSTS.find((p) => p.slug === slug);
   if (!post) notFound();
 
-  const url = `${BASE}/blog/${post.slug}`;
+  const url = `${SITE_URL}/blog/${post.slug}`;
   const autres = POSTS.filter((p) => p.slug !== post.slug);
 
   return (
@@ -189,11 +186,11 @@ export default async function ArticlePage({
                 </svg>
               </Link>
             </div>
-            <div className="b-grid mt-10 sm:mt-12">
-              {autres.map((p) => (
-                <BlogCard key={p.slug} post={p} />
-              ))}
-            </div>
+            <CartesArticles
+              articles={autres}
+              variante="compacte"
+              className="mt-10 sm:mt-12"
+            />
           </div>
 
           {/* ——— CTA final ——— */}

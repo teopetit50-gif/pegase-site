@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import { BlogCard, BlogCta } from "@/components/blog/BlogKit";
+import { BlogCta } from "@/components/blog/BlogKit";
+import CartesArticles from "@/components/blog/CartesArticles";
 import { POSTS } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -55,11 +56,7 @@ export default function BlogPage() {
 
           {/* ——— la grille de cartes ——— */}
           <div className="o-wrap relative mt-[90px] sm:mt-[150px]">
-            <div className="b-grid">
-              {POSTS.map((p) => (
-                <BlogCard key={p.slug} post={p} />
-              ))}
-            </div>
+            <CartesArticles articles={POSTS} />
           </div>
 
           {/* ——— CTA final ——— */}

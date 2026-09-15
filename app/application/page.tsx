@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import GestesAppareil from "@/components/application/GestesAppareil";
 import { COCKPIT_URL } from "@/lib/supabase/config";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -106,61 +107,6 @@ export const metadata: Metadata = {
     "Votre espace client s'installe comme une application sur téléphone, PC ou Mac, sans boutique d'applications : un bouton sur Android et sur ordinateur, trois gestes sur iPhone.",
 };
 
-/* les trois gestes, dans l'ordre où on nous les demande : le téléphone
-   d'abord (Android, puis iPhone), l'ordinateur ensuite (08/09, seconde
-   passe). Chacun commence sur app.omegaai.fr/installer — la page
-   d'installation du cockpit, publique, qui montre le bouton quand le
-   navigateur le permet. */
-const GESTES = [
-  {
-    id: "android",
-    titre: "Android",
-    sousTitre: "Chrome, Samsung Internet ou Edge",
-    etapes: [
-      <>Ouvrez app.omegaai.fr/installer dans Chrome.</>,
-      <>
-        Touchez <strong>«&nbsp;Installer Omega&nbsp;»</strong>. S&apos;il n&apos;y a pas de
-        bouton&nbsp;: menu <strong>⋮</strong>{" "}en haut à droite, puis{" "}
-        <strong>«&nbsp;Ajouter à l&apos;écran d&apos;accueil&nbsp;»</strong>{" "}
-        (ou <strong>«&nbsp;Installer l&apos;application&nbsp;»</strong>).
-      </>,
-      <>Confirmez. L&apos;icône Omega est sur votre écran d&apos;accueil.</>,
-    ],
-  },
-  {
-    id: "iphone",
-    titre: "iPhone / iPad",
-    sousTitre: "Safari",
-    etapes: [
-      <>Ouvrez app.omegaai.fr/installer dans Safari.</>,
-      <>
-        Touchez le bouton <strong>Partager</strong>{" "}
-        (le carré avec une flèche&nbsp;: en bas au milieu sur iPhone, en haut à droite sur iPad),
-        puis <strong>«&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;»</strong>.
-      </>,
-      <>
-        Touchez <strong>«&nbsp;Ajouter&nbsp;»</strong>, en haut à droite. Omega apparaît parmi vos
-        applications.
-      </>,
-    ],
-  },
-  {
-    id: "ordinateur",
-    titre: "Ordinateur",
-    sousTitre: "Windows et Mac, Chrome ou Edge",
-    etapes: [
-      <>Ouvrez app.omegaai.fr/installer dans Chrome ou Edge.</>,
-      <>
-        Cliquez <strong>«&nbsp;Installer Omega&nbsp;»</strong>{" "}
-        (ou la petite icône d&apos;installation à droite de la barre d&apos;adresse).
-      </>,
-      <>
-        Confirmez. Omega s&apos;ouvre dans sa fenêtre, avec son icône dans le menu Démarrer et la
-        barre des tâches — le Dock sur Mac.
-      </>,
-    ],
-  },
-];
 
 /* les espaces insécables ( ) sont écrites en dur dans les chaînes :
    ces textes ne passent pas par du JSX */
@@ -271,30 +217,11 @@ export default function ApplicationPage() {
             seule fois.
           </p>
 
-          {/* trois cartes jumelles, enfants directs de la grille : elles
-              prennent la même hauteur. Une colonne sur téléphone, deux + une
-              dès 640 px, trois dès 1024 px (08/09, seconde passe : la carte
-              ordinateur). Les notes sont posées SOUS la grille, pleine
-              largeur — un temps sous la seule carte iPhone, la note Safari
-              décalait les bords inférieurs des cartes (revue 08/09). */}
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {GESTES.map((g) => (
-              <article key={g.id} data-reveal className="ap-carte">
-                <h3 className="r-h4">{g.titre}</h3>
-                <p className="ap-sous">{g.sousTitre}</p>
-                <ol className="ap-etapes">
-                  {g.etapes.map((e, i) => (
-                    <li key={i} className="ap-etape">
-                      <span className="ap-num" aria-hidden="true">
-                        {i + 1}
-                      </span>
-                      <span>{e}</span>
-                    </li>
-                  ))}
-                </ol>
-              </article>
-            ))}
-          </div>
+          {/* les trois suites en onglets : une seule à l'écran, les trois
+              dans le HTML, et toutes dépliées sans JavaScript. Le composant
+              porte sa marge haute et son [data-reveal]. */}
+          <GestesAppareil />
+
           <p data-reveal className="ap-note mt-4">
             Sur iPhone et iPad, le plus simple est Safari&nbsp;: c&apos;est lui qui propose
             «&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;». Si vous avez ouvert ce lien depuis WhatsApp

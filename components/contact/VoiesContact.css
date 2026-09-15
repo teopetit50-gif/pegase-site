@@ -1,0 +1,239 @@
+/* ══════════════════════════════════════════════════════════════════════
+   VoiesContact.css — la feuille des deux fins de /contact
+
+   Écrite le 15/09/2026, en même temps que VoiesContact.tsx. Tout est scopé
+   sous `.resa` (le monde clair de la page) et préfixé `vc-` — vérifié :
+   ni `.vc-`, ni `vc-trace-fil`, ni `vc-temps-in` n'existaient ailleurs dans
+   app/globals.css ni dans components/.
+
+   JETONS EMPRUNTÉS au monde `.resa`, jamais redéfinis : --r-texte (#050505),
+   --r-doux (#3d3d3d, 10,9:1 sur blanc), --r-faible (#616161, 6,2:1 sur blanc
+   et 5,7:1 sur #f5f5f5), --r-filet (#e3e3e3), --ease-out-strong. Aucune
+   couleur d'accent, aucun dégradé : les seules valeurs en dur sont #d4d4d8
+   (le fil de la frise, un cran au-dessus du filet parce qu'il porte
+   désormais la structure de la section) et #ffffff (le survol d'une rangée,
+   qui éclaircit le gris de page comme `.o-card-porte` le fait ailleurs).
+
+   LE PIÈGE TRAITÉ ICI. Le fond de survol d'une rangée vit dans CETTE
+   feuille et non en utilitaire `hover:bg-*` : un fond de classe maison est
+   posé hors couche, il gagne contre l'utilitaire quelle que soit la
+   spécificité (même leçon que `.o-card-porte`, globals.css l. 1334).
+
+   ÉTAT DE REPOS = ÉTAT FINI. Le fil est tracé, les temps sont visibles :
+   sans JavaScript, ou avant hydratation, la section est complète. Les deux
+   `@keyframes` ne se déclenchent que sous `[data-cadence="oui"]`, attribut
+   posé par le composant à l'entrée dans la fenêtre — et jamais en mouvement
+   réduit, où la règle vit de toute façon hors de portée.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Un @keyframes est GLOBAL quoi qu'on fasse : les deux noms sont préfixés. */
+@keyframes vc-trace-fil {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes vc-temps-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ═══ 1 — « Ce que vous pouvez attendre » ═══
+   Gouttière NULLE entre les colonnes : c'est ce qui fait que les trois fils
+   se touchent et n'en forment qu'un, en travers de la section. L'écart entre
+   les textes est repris en `padding-right`, qui ne coupe pas le fil (il est
+   posé sur la boîte, bord à bord). */
+.resa .vc-frise {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resa .vc-temps {
+  position: relative;
+  padding-top: 18px;
+  padding-bottom: 24px;
+}
+.resa .vc-temps:last-child {
+  padding-bottom: 0;
+}
+
+/* LE FIL. Il remplace le filet gris de la frise : un seul trait, et c'est
+   lui qui se trace. `scaleX(1)` écrit dans la règle de base — couper
+   l'animation laisse le fil entier, jamais un trait absent. */
+.resa .vc-temps::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #d4d4d8;
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* le numéro SUR la ligne du titre : c'est la compression qui fait que la
+   section se lit en trois secondes — trois titres, puis trois phrases */
+.resa .vc-tete {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+}
+.resa .vc-num {
+  flex: none;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--r-faible);
+}
+.resa .vc-titre {
+  min-width: 0;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--r-texte);
+}
+.resa .vc-texte {
+  margin: 10px 0 0;
+  max-width: 44ch;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--r-doux);
+}
+
+@media (min-width: 768px) {
+  .resa .vc-frise {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .resa .vc-temps {
+    padding-bottom: 0;
+    padding-right: 28px;
+  }
+  .resa .vc-temps:last-child {
+    padding-right: 0;
+  }
+  .resa .vc-titre {
+    font-size: 19px;
+    line-height: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .resa .vc-temps {
+    padding-right: 40px;
+  }
+}
+
+/* la cadence de la source, relue : le fil avance, le temps le suit de
+   160 ms. Valeurs déterministes (`--vc-retard` = indice × 380 ms, posé en
+   style par le composant) : même calcul au serveur et au client. */
+@media (prefers-reduced-motion: no-preference) {
+  .resa .vc-frise[data-cadence="oui"] .vc-temps::before {
+    animation: vc-trace-fil 560ms var(--ease-out-strong) var(--vc-retard) both;
+  }
+  .resa .vc-frise[data-cadence="oui"] .vc-tete,
+  .resa .vc-frise[data-cadence="oui"] .vc-texte {
+    animation: vc-temps-in 520ms var(--ease-out-strong) calc(var(--vc-retard) + 160ms) both;
+  }
+}
+
+/* ═══ 2 — « Selon votre besoin » ═══
+   Un vrai tableau de rangées : un filet au-dessus de chacune, un filet de
+   fermeture sous la liste. */
+.resa .vc-voies {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .vc-voie {
+  border-top: 1px solid var(--r-filet);
+}
+
+/* LA RANGÉE EST LE LIEN. Les 12 px de débord (padding + marge négative)
+   laissent le texte aligné sur la colonne tandis que le survol déborde
+   légèrement du fil : 12 px pris dans la gouttière de `.r-wrap`, qui en
+   compte 24 au plus étroit — aucune largeur ne dépasse la colonne. */
+.resa .vc-rangee {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  padding: 18px 12px;
+  margin-inline: -12px;
+  border-radius: 8px;
+  transition: background-color 0.2s var(--ease-out-strong);
+}
+.resa .vc-rangee:focus-visible {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+
+.resa .vc-question {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .vc-dest {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--r-faible);
+  white-space: nowrap;
+  transition: color 0.2s var(--ease-out-strong);
+}
+.resa .vc-chevron {
+  flex: none;
+  transition: transform 0.2s var(--ease-out-strong);
+}
+
+/* dès 640 px la destination revient à droite, sur la ligne de la question */
+@media (min-width: 640px) {
+  .resa .vc-rangee {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    padding: 20px 12px;
+  }
+  .resa .vc-question {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .resa .vc-dest {
+    justify-self: end;
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
+/* survol : le gris de page s'éclaircit d'un cran, la destination passe à
+   l'encre, le chevron avance. Rien sous (hover: none) — tactile. */
+@media (hover: hover) {
+  .resa .vc-rangee:hover {
+    background: #ffffff;
+  }
+  .resa .vc-rangee:hover .vc-dest {
+    color: var(--r-texte);
+  }
+  .resa .vc-rangee:hover .vc-chevron {
+    transform: translateX(3px);
+  }
+}

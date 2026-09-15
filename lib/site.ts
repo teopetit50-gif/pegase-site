@@ -6,16 +6,15 @@
    chemins relatifs des images Open Graph en URL absolues, sans quoi les
    aperçus de partage ne s'affichent pas.
 
-   ⚠️  À CHANGER LE JOUR OÙ pegase.gp EXISTE. Le domaine n'est aujourd'hui
-   ni enregistré ni délégué (aucun NS, aucun MX), donc l'URL canonique est
-   celle de Vercel. Poser `pegase.gp` maintenant serait pire que le statu
-   quo : Google indexerait des URL qui ne résolvent pas.
-
-   La variable d'environnement permet de basculer sans toucher au code :
-   il suffira de définir NEXT_PUBLIC_SITE_URL sur Vercel.
+   15/09/2026 — le repli n'est plus l'ancienne adresse Vercel mais le vrai
+   domaine, qui existe et sert le site. L'ancien repli ne se voyait qu'en
+   l'absence de NEXT_PUBLIC_SITE_URL : posée en production, absente en
+   local — d'où des liens de partage d'articles qui pointaient vers une
+   adresse que plus personne ne visite. La variable reste prioritaire, pour
+   que le banc d'essai puisse déclarer la sienne.
    ══════════════════════════════════════════════════════════════════════ */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pegase-site-beige.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://omegaai.fr";
 
 export const SITE_NOM = "Omega.AI";
 export const SITE_BASELINE =

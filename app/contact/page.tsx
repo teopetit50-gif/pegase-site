@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import FormulaireContact from "@/components/contact/FormulaireContact";
+import { AttendreContact, BesoinsContact } from "@/components/contact/VoiesContact";
 import { COURRIEL, lienCourriel } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -136,16 +137,7 @@ export default function ContactPage() {
             <h2 data-reveal className="r-h3 max-w-[18ch]">
               Ce que vous pouvez attendre
             </h2>
-            <div className="mt-10 grid gap-8 sm:grid-cols-3 lg:gap-6">
-              {ATTENDRE.map((a) => (
-                <div key={a.n} data-reveal className="ap-frise">
-                  <span aria-hidden className="ap-frise-filet" />
-                  <span className="ap-frise-num">{a.n}</span>
-                  <h3 className="ap-frise-titre">{a.titre}</h3>
-                  <p className="ap-frise-texte">{a.texte}</p>
-                </div>
-              ))}
-            </div>
+            <AttendreContact temps={ATTENDRE} className="mt-10" />
           </section>
         </div>
 
@@ -155,18 +147,7 @@ export default function ContactPage() {
             <h2 data-reveal className="r-h3 lg:sticky lg:top-28 lg:self-start">
               Selon votre besoin
             </h2>
-            <dl>
-              {BESOINS.map((b) => (
-                <div key={b.href} data-reveal className="ap-question">
-                  <dt>{b.q}</dt>
-                  <dd>
-                    <Link href={b.href} className="r-lien">
-                      {b.lien}
-                    </Link>
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <BesoinsContact besoins={BESOINS} />
           </div>
           <div data-reveal className="ap-encart mt-12">
             <h2 className="r-h4">Pas encore client&nbsp;?</h2>
