@@ -29,7 +29,7 @@ entrée là suffit : elle apparaît aux deux endroits.
 ## Les cinq rubriques
 
 1. **Nos offres** — case vedette `/offres`, puis les 4 produits et Sur mesure
-2. **Votre site** — `/modeles`, `/tarifs/site`
+2. **Votre site** — « Voir les modèles » (`/modeles`), « Prix et commande » (`/tarifs/site`)
 3. **Intégrations** — lien direct
 4. **Tarifs** — lien direct
 5. **Ressources** — `/vos-donnees`, `/reserver-un-audit`, `/blog`

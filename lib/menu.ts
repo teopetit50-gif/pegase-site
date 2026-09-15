@@ -38,6 +38,15 @@
      posée en TÊTE de son groupe pour qu'on la voie en premier dès qu'il
      s'ouvre. Si Teo la veut de nouveau au premier plan, la sortir en
      rubrique simple suffit (`{ label, href }`).
+   · 14/09 — les deux entrées de « Votre site » sont renommées (Teo : « les
+     noms c'est pas clair »). « Modèles de sites » redisait sa rubrique sans
+     rien ajouter, et « Votre site, à prix public » ne disait pas ce qu'on
+     trouve sur la page. Les intitulés disent maintenant l'ACTE : « Voir les
+     modèles » (regarder, rien à décider) et « Prix et commande » (le prix,
+     ce qu'il comprend, le tunnel). Les titres des PAGES ne bougent pas —
+     « Votre site, à prix public » reste le <title> de /tarifs/site, il
+     travaille pour la recherche, pas pour la navigation.
+
    · 10/09 — /offres/sur-mesure : la page n'était atteignable que par un
      lien en bas de /offres. Le seul endroit du site où l'on vend ce qui ne
      rentre dans aucun paquet était donc le seul qu'on ne pouvait pas
@@ -113,13 +122,13 @@ export const MENU: Rubrique[] = [
     entrees: [
       {
         href: "/modeles",
-        label: "Modèles de sites",
+        label: "Voir les modèles",
         texte: "Vingt et un modèles en ligne, consultables immédiatement.",
       },
       {
         href: "/tarifs/site",
-        label: "Votre site, à prix public",
-        texte: "Un site livré clé en main, réglé une fois, sans abonnement.",
+        label: "Prix et commande",
+        texte: "Ce que coûte un site, ce qu'il comprend, et la commande.",
       },
     ],
   },
