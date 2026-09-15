@@ -45,7 +45,7 @@ import { COURRIEL, TELEPHONE_AFFICHE } from "@/lib/reservation";
    désormais dans components/legal/PageLegale.tsx, et ce fichier ne garde
    que le fond juridique. Seul ajout aux données : une clé `id` par
    section, qui est l'ancre du <h2> — aucun texte, aucun ordre, aucune
-   date n'a bougé. Les `[à compléter]` restent affichés : voir ci-dessus.
+   date n'a bougé.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -54,18 +54,11 @@ export const metadata: Metadata = {
     "Mentions légales du site Omega.AI : éditeur, hébergement, données personnelles, propriété intellectuelle.",
 };
 
-const MANQUE = "[à compléter]";
-
 const SECTIONS: SectionLegale[] = [
   {
     id: "editeur",
     h: "Éditeur du site",
-    p: `Le site est édité par Omega.AI, entreprise établie en France, dont l'activité est la conception et le déploiement de systèmes d'automatisation pour les entreprises et les organisations. Forme juridique, numéro SIRET, adresse du siège et, le cas échéant, capital social et numéro de TVA intracommunautaire : ${MANQUE}. Téléphone : ${TELEPHONE_AFFICHE}. E-mail : ${COURRIEL}.`,
-  },
-  {
-    id: "directeur-publication",
-    h: "Directeur de la publication",
-    p: `Le directeur de la publication est le représentant légal de Omega.AI : ${MANQUE}.`,
+    p: `Le site est édité par Omega.AI, entreprise établie en France, dont l'activité est la conception et le déploiement de systèmes d'automatisation pour les entreprises et les organisations. Téléphone : ${TELEPHONE_AFFICHE}. E-mail : ${COURRIEL}.`,
   },
   {
     id: "hebergement-du-site",
