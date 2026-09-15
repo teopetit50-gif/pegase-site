@@ -533,7 +533,7 @@ const FAQ = [
        grand-chose ») niait la grille publique vers laquelle le CTA de
        cette même page envoie désormais. Réécrite pour les deux mondes. */
     q: "Combien cela coûte-t-il ?",
-    a: "Pour les organisations où plusieurs services valident, le prix sort des volumes mesurés à l'audit : sociétés, sites et postes concernés. Pour les indépendants, TPE et PME, il est public : un poste 59 € par mois, trois postes 89 €, tout Omega 119 € — sans engagement, installation comprise. Dans les deux cas, le prix est annoncé avant que quoi que ce soit démarre.",
+    a: "Le prix suit ce que le système traite pour vous : le nombre de pièces qui passent chaque mois — factures lues, demandes reçues, relances parties — et le nombre de postes en service. Vos volumes donnent votre palier sur la page Tarifs, et l'installation s'y chiffre à part, une seule fois. Pour les organisations où plusieurs services valident, la grille ne s'applique pas : les volumes se mesurent à l'audit et le devis en découle. Dans les deux cas, le prix est annoncé avant que quoi que ce soit démarre.",
   },
   {
     q: "Où sont hébergées mes données ?",

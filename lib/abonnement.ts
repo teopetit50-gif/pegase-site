@@ -202,7 +202,7 @@ export function postesTries(ids: string[] | null | undefined): string[] {
   return POSTES.filter((p) => set.has(p.id)).map((p) => p.id);
 }
 
-/** « 89 €/mois, sans engagement » ou « 900 € par an, soit 75 €/mois ». */
+/** « 790 €/mois, sans engagement » ou « 8 052 € par an, soit 671 €/mois ». */
 export function libellePrix(mensuel: number, periodicite: Periodicite, annuel?: number | null): string {
   if (periodicite === "annuel") {
     const a = annuel ?? prixAnnuel(mensuel);

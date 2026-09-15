@@ -154,7 +154,8 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useState, useSyncExternalStore, type ComponentType } from "react";
+import {
+  useCallback, useState, useSyncExternalStore, type ComponentType } from "react";
 import NumberFlow, { type Format } from "@number-flow/react";
 import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
 import Partage from "@/components/Partage";
@@ -171,7 +172,10 @@ import { Comparator } from "@/components/ui/comparator-1";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/cn";
 import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
+import Calculateur from "@/components/tarifs/Calculateur";
+
 import {
+  CALCULATEUR,
   CARTE_SUR_MESURE,
   COMPARATIF_PALIERS,
   GRANDE_STRUCTURE,
@@ -423,6 +427,7 @@ function CartePalier({
   bascule,
   periodicite,
   monde,
+  prixVisible,
 }: {
   p: Palier;
   /* la sélection vit dans Grille : vide dès qu'un AUTRE palier est actif */
@@ -430,6 +435,9 @@ function CartePalier({
   bascule: (id: string) => void;
   periodicite: Periodicite;
   monde: Monde;
+  /* false tant que le calculateur n'a pas de volumes : la carte montre tout
+     sauf son chiffre (voir l'état `volumesConnus` dans Grille) */
+  prixVisible: boolean;
 }) {
   const postes = p.aChoisir === null ? POSTES.map((x) => x.id) : choisis;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
@@ -440,7 +448,8 @@ function CartePalier({
   const annuel = periodicite === "annuel" && !devis;
   const phare = Boolean(p.phare);
   const href = `/installation?postes=${postes.join(",")}${annuel ? "&periodicite=annuel" : ""}`;
-  const ecart = p.id === "complet" && !devis ? ecartQuatriemePoste(periodicite) : null;
+  const ecart =
+    p.id === "complet" && !devis && prixVisible ? ecartQuatriemePoste(periodicite) : null;
   const Icone = ICONE_PALIER[p.id];
 
   return (
@@ -496,6 +505,17 @@ function CartePalier({
                 <p className="text-xs text-[#767676]">{GRANDE_STRUCTURE.note}</p>
               </div>
             </>
+          ) : !prixVisible ? (
+            /* 15/09 — l'attente du chiffre. Elle occupe la MÊME place que le
+               prix pour que la carte ne saute pas quand il arrive, et elle
+               dit pourquoi elle est là plutôt que de laisser un tiret muet. */
+            <>
+              <p className="text-4xl font-bold text-[#c2c2c2]">{CALCULATEUR.avant.grand}</p>
+              <p className="mt-1 text-sm text-[#616161]">{CALCULATEUR.avant.sous}</p>
+              <div className="mt-3">
+                <p className="text-xs text-[#767676]">{CALCULATEUR.avant.note}</p>
+              </div>
+            </>
           ) : (
           <>
           <div className="flex flex-wrap items-baseline justify-center gap-x-2">
@@ -534,7 +554,7 @@ function CartePalier({
           {ecart !== null ? (
             <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#050505]">
               <span aria-hidden className="size-1.5 rounded-full bg-[#050505]" />
-              Le quatrième poste pour {ecart}&nbsp;€ de plus.
+              Le quatrième poste pour {ecart.toLocaleString("fr-FR")}&nbsp;€ de plus.
             </p>
           ) : null}
         </div>
@@ -666,6 +686,12 @@ export default function Grille() {
      formule qu'on y avait laissée. */
   const mondeUrl = useSyncExternalStore(souscrireUrl, mondeDeLUrl, mondeServeur);
   const [choixMonde, setMonde] = useState<Monde | null>(null);
+  /* 15/09 (Teo) — « je veux pas que les prix s'affichent avant d'avoir
+     rempli le truc, sinon on reste sur un truc inventé ». Tant que le
+     calculateur n'a pas reçu un volume, les cartes montrent tout SAUF leur
+     chiffre, et le comparatif — qui ne compare que des prix — attend. */
+  const [volumesConnus, setVolumesConnus] = useState(false);
+  const noterVolumes = useCallback((repondu: boolean) => setVolumesConnus(repondu), []);
   const monde = choixMonde ?? mondeUrl;
   const devis = monde === "structure";
   const annuel = periodicite === "annuel" && !devis;
@@ -695,17 +721,17 @@ export default function Grille() {
             </Partage>
           </div>
           <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-4xl font-semibold leading-[1.15] tracking-[-0.025em] text-[#050505] sm:text-5xl">
-            {devis ? GRANDE_STRUCTURE.titre : "Des prix publics, une installation comprise"}
+            {devis ? GRANDE_STRUCTURE.titre : "Des prix publics, gradués sur ce que vous traitez"}
           </h1>
           <p key={monde} className="rv-fondu mx-auto mt-4 max-w-2xl text-balance text-[#616161]">
             {devis ? (
               GRANDE_STRUCTURE.chapo
             ) : (
               <>
-                Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, vous réservez
-                la réunion d&apos;installation, et le système démarre sous votre contrôle. Sans
-                engagement en mensuel, −{REMISE_PCT}&nbsp;% en annuel, satisfait ou remboursé
-                trente jours.
+                Pour les indépendants, TPE et PME&nbsp;: vous choisissez vos postes, le prix suit
+                le volume que le système traite pour vous, et l&apos;installation se chiffre à
+                part, une seule fois. Sans engagement en mensuel, −{REMISE_PCT}&nbsp;% en annuel,
+                satisfait ou remboursé trente jours.
               </>
             )}
           </p>
@@ -740,6 +766,30 @@ export default function Grille() {
             · à partir de 1280 px, quatre colonnes et quatre rangées.
             Pourquoi pas quatre colonnes dès 1024 px : la colonne utile y
             vaut 928 px, soit 208 px par carte — deux mots par ligne. */}
+        {/* ═══ LE CALCULATEUR — AVANT LES CARTES (15/09, Teo) ═══
+            Il est passé DEVANT le 15/09 : « je veux pas que les prix
+            s'affichent avant d'avoir rempli le truc, sinon on reste sur un
+            truc inventé. » Les cartes en dépendent maintenant — tant qu'il
+            n'a pas de volumes, elles montrent tout sauf leur chiffre. Le
+            mettre après les cartes reviendrait à demander au visiteur de
+            redescendre pour débloquer ce qu'il regarde.
+
+            PAS DU CÔTÉ GRANDE STRUCTURE : là-bas il n'y a pas de palier à
+            trouver, le prix sort de l'audit. Même raison que le comparatif.
+
+            Il reçoit ce qui est déjà coché dans les cartes pour ne pas
+            reposer la question ; questions, coefficients, durées et textes
+            vivent tous dans lib/paliers.ts. */}
+        {devis ? null : (
+          <div className="mx-auto mt-10 max-w-4xl">
+            <Calculateur
+              postesChoisis={choix.postes}
+              palierChoisi={choix.palier}
+              onVerdict={noterVolumes}
+            />
+          </div>
+        )}
+
         <div
           id="grille"
           className="mx-auto mt-12 grid max-w-md scroll-mt-32 gap-6 pt-4 md:max-w-3xl md:grid-cols-2 md:grid-rows-[auto_auto_1fr_auto_auto_auto_1fr_auto] md:gap-x-6 md:gap-y-10 lg:mt-16 xl:max-w-none xl:grid-cols-4 xl:grid-rows-[auto_auto_1fr_auto] xl:gap-x-6 xl:gap-y-0"
@@ -752,6 +802,7 @@ export default function Grille() {
               bascule={basculePour(p)}
               periodicite={periodicite}
               monde={monde}
+              prixVisible={volumesConnus}
             />
           ))}
           <CarteSurMesure monde={monde} />
@@ -832,7 +883,11 @@ export default function Grille() {
              les points » partent avec lui : quinze lignes en trois
              familles se lisent d'un coup, et la tête de la carte porte
              déjà les prix — qui suivent la périodicité choisie plus haut. */}
-      {devis ? null : (
+      {/* 15/09 — le comparatif attend lui aussi les volumes : ses lignes
+          « Mensuel », « Annuel », « Vous économisez » et « Installation » ne
+          sont QUE des prix. L'afficher avant, ce serait donner par la porte
+          de derrière les montants que les cartes retiennent. */}
+      {devis || !volumesConnus ? null : (
       <section id="comparatif" data-monde="clair" className="r-blanc">
         <div className="r-wrap py-14 sm:py-20">
           <div className="text-center">

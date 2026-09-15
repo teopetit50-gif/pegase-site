@@ -13,13 +13,42 @@
    d'un côté : POUR LES STRUCTURES OÙ PLUSIEURS PERSONNES VALIDENT, aucun
    montant ne s'affiche — leur prix sort de l'audit, comme avant.
 
-   GRILLE EN VIGUEUR — 59/89/119 arrêtés le 01/09/2026 (Teo), en
-   remplacement du provisoire 59/85/105 du 28/08 : 89 et 119 sont des
-   points de prix standards là où 85 et 105 n'en étaient pas, et si l'on
-   franchit la barre des 100 €, autant qu'elle rapporte. Les prix ne
-   vivent QU'ICI ; la fonction SQL reserver_audit en garde sa propre copie
-   (source de vérité de l'instantané stocké) : toute modification se fait
-   AUX DEUX ENDROITS — la REMISE ANNUELLE aussi (0,85 dans la SQL).
+   ══════════════════════════════════════════════════════════════════════
+   GRILLE EN VIGUEUR — 299/790/1990 €/mois (15/09/2026), plus une
+   installation facturée à part : 590/790/1490 €.
+
+   CE QU'ELLE REMPLACE. La grille du 01/09 (59/89/119) se justifiait ici
+   même par « des points de prix standards » et « si l'on franchit la barre
+   des 100 €, autant qu'elle rapporte ». Teo, le 15/09 : « les prix sont
+   trop bas, on se base sur rien ». Vérifié — et pire : LES TROIS PALIERS
+   VENDAIENT À PERTE. Un artisan coûtait 153 €/mois et se vendait 59 ; une
+   PME coûtait 637 €/mois et se vendait 119.
+
+   D'OÙ SORTENT CES TROIS NOMBRES. De PEGASE/calcul-prix.py, dont
+   PEGASE/modele-cout-client.md porte la démonstration. Le coût d'un client
+   n'est pas l'IA (0,65 centime la pièce, 0,3 % du prix) mais le TEMPS, et
+   le temps est porté par le nombre de pièces qui reviennent à un humain.
+
+   POURQUOI 299 ET NON 399. Le premier jet posait 399, arrondi du coût ×
+   marge. Contrôle de cohérence : rapporté au plafond, ça faisait 2,66 € la
+   pièce contre 1,98 et 1,99 pour les deux autres paliers — l'entrée était
+   34 % plus chère à la pièce, sans raison. L'effet se voyait au
+   calculateur : à 399 €, sur trois postes sur quatre, il devenait
+   IMPOSSIBLE de rentabiliser le palier dès que le travail est fait par
+   quelqu'un à 35 €/h chargés — il aurait fallu plus de pièces que le
+   plafond du palier n'en autorise. Un palier qui ne se justifie pas à
+   l'intérieur de ses propres limites n'est pas un palier. 299 = 150 × 2 €.
+
+   ET L'INSTALLATION SORT DE L'ABONNEMENT : grille-prix-interne.md §4 et
+   omega-onboarding §8 l'écrivaient déjà, le site faisait l'inverse. Effet
+   de bord réparé au passage : le Chèque TIC porte sur l'installation —
+   quand elle valait 0 €, l'argument n'avait aucune assiette.
+
+   Les prix ne vivent QU'ICI ; la fonction SQL reserver_audit en garde sa
+   propre copie (source de vérité de l'instantané stocké) : toute
+   modification se fait AUX DEUX ENDROITS — la REMISE ANNUELLE aussi
+   (0,85 dans la SQL).
+   ══════════════════════════════════════════════════════════════════════
 
    FORMULE ANNUELLE — 02/09/2026 (Teo) : un sélecteur Mensuel | Annuel
    au-dessus des cartes, 15 % de remise sur l'annuel (10 % le 02/09, relevé le 03/09 : sous la norme du marché), l'économie mise en
@@ -153,8 +182,20 @@ export const SUR_MESURE = {
 export type Palier = {
   id: "un" | "trois" | "complet";
   nom: string;
-  prix: number; // €/mois TTC — grille du 01/09/2026 (voir l'en-tête)
+  prix: number; // €/mois TTC — grille du 15/09/2026 (voir l'en-tête)
   sousPrix: string;
+  /* 15/09 — LE PLAFOND DE VOLUME, la variable qui manquait à la grille : le
+     nombre de pièces traitées par mois, tous postes confondus (factures lues,
+     demandes reçues, relances parties, reprises de contact). C'est lui qui
+     porte notre coût — une pièce sur dix revient à un humain — et la valeur
+     rendue au client. Au-delà du dernier plafond, le prix sort d'un devis.
+     ATTENTION : ce plafond ne vient PAS du coût technique. L'IA coûte
+     0,65 centime la pièce, soit 0,3 % du prix à tous les paliers ; elle ne
+     freine rien. Le plafond est celui du TEMPS HUMAIN de rattrapage. Si le
+     taux d'anomalie baisse, il peut monter beaucoup, au même prix. */
+  plafond: number;
+  /* 15/09 — l'installation, facturée à part et une seule fois (en-tête) */
+  installation: number;
   /* combien de postes le visiteur coche — null : tous, rien à choisir */
   aChoisir: number | null;
   /* 08/09 — la couleur de la tête de carte (voir l'en-tête) : trois têtes
@@ -170,25 +211,29 @@ export const PALIERS: Palier[] = [
   {
     id: "un",
     nom: "Un poste",
-    prix: 59,
+    prix: 299,
     sousPrix: "par mois, sans engagement",
+    plafond: 150,
+    installation: 590,
     aChoisir: 1,
     teinte: "bleu",
     promesse:
       "Un système complet sur le poste qui vous coûte le plus cher : il lit, rédige, attend votre validation et rend compte chaque matin.",
     points: [
       "Un poste au choix parmi les quatre",
+      "Jusqu'à 150 pièces traitées par mois",
       "Intégré à vos outils : messagerie, WhatsApp, tableur",
       "Le point du matin et les verrous, compris dès le premier jour",
-      "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
     ],
   },
   {
     id: "trois",
     nom: "Trois postes",
-    prix: 89,
+    prix: 790,
     sousPrix: "par mois, sans engagement",
+    plafond: 400,
+    installation: 790,
     aChoisir: 3,
     teinte: "or",
     phare: true,
@@ -197,17 +242,19 @@ export const PALIERS: Palier[] = [
       "Trois postes tenus par le même système : une seule file de validation, un seul point du matin, un seul journal de ce qui est parti.",
     points: [
       "Trois postes au choix parmi les quatre",
+      "Jusqu'à 400 pièces traitées par mois",
       "Une seule validation, un seul journal pour les trois",
       "Le point du matin et les verrous, compris dès le premier jour",
-      "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
     ],
   },
   {
     id: "complet",
     nom: "Tout Omega",
-    prix: 119,
+    prix: 1990,
     sousPrix: "par mois, sans engagement",
+    plafond: 1000,
+    installation: 1490,
     aChoisir: null,
     teinte: "nuit",
     badge: "Le plus complet", // 08/09 (associé) : la dernière carte doit attirer
@@ -215,9 +262,9 @@ export const PALIERS: Palier[] = [
       "Les quatre postes en service, avec le point du matin et les verrous compris : tout l'administratif et le commercial tenus, sous votre validation.",
     points: [
       "Les quatre postes, en service dès l'installation",
+      "Jusqu'à 1 000 pièces traitées par mois",
       "Une seule validation, un seul journal pour les quatre",
       "Le point du matin et les verrous, compris dès le premier jour",
-      "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
     ],
   },
@@ -225,9 +272,23 @@ export const PALIERS: Palier[] = [
 
 /** Prix d'un choix de postes — même barème que la fonction SQL. */
 export function prixPour(nb: number): number {
-  if (nb <= 1) return 59;
-  if (nb <= 3) return 89;
-  return 119;
+  if (nb <= 1) return 299;
+  if (nb <= 3) return 790;
+  return 1990;
+}
+
+/** L'installation du palier correspondant — facturée à part, une seule fois,
+    et non plus « comprise ». Même barème que la fonction SQL. */
+export function installationPour(nb: number): number {
+  if (nb <= 1) return 590;
+  if (nb <= 3) return 790;
+  return 1490;
+}
+
+/** Le palier qui couvre ce volume mensuel de pièces — null au-delà de la
+    grille, c'est-à-dire quand le prix doit sortir d'un audit. */
+export function palierPourVolume(pieces: number): Palier | null {
+  return PALIERS.find((p) => pieces <= p.plafond) ?? null;
 }
 
 /* ——— la formule annuelle (02/09/2026) ———
@@ -316,6 +377,11 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
     titre: "Ce qui tourne chez vous",
     lignes: [
       {
+        libelle: "Pièces comprises",
+        aide: "Tout ce qui passe dans les moteurs : factures lues, demandes reçues, relances parties, reprises de contact. C'est le volume qui porte le prix, pas le nombre de personnes chez vous.",
+        valeurs: parPalier((p) => `${p.plafond.toLocaleString("fr-FR")} par mois`),
+      },
+      {
         libelle: "Postes en service",
         aide: "Parmi les quatre : relances, demandes clients, clients inactifs, factures fournisseurs.",
         valeurs: parPalier((p) =>
@@ -355,6 +421,11 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
         valeurs: parPalier((p) => `${economieAnnuelle(p.prix)}${NBSP}€ par an`),
       },
       {
+        libelle: "Au-delà des pièces comprises",
+        aide: "Nous vous prévenons avant le dépassement : on passe au palier au-dessus, ou on ajuste le périmètre ensemble.",
+        valeurs: meme("Prévenu d'avance, jamais facturé sans accord"),
+      },
+      {
         libelle: "Prix par personne",
         aide: "Le prix ne dépend pas du nombre d'utilisateurs.",
         valeurs: meme("Aucun"),
@@ -371,9 +442,16 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
     repliee: true,
     lignes: [
       {
-        libelle: "Réunion d'installation",
-        aide: "En visioconférence, écran partagé : nous connectons vos outils ensemble, et le système démarre sous votre contrôle.",
-        valeurs: meme("Comprise, 45 min"),
+        /* 15/09/2026 — L'INSTALLATION SE FACTURE. Elle était « comprise »
+           depuis le 28/08, contre notre propre doctrine : grille-prix-interne
+           §4 et omega-onboarding/00-procedure-onboarding.md §8 écrivent toutes
+           deux que confondre installation et abonnement revient à financer
+           l'installation avec les mois suivants, donc à perdre sur un client
+           qui part à trois mois. La procédure chiffre 5 h 20 au minimum ;
+           « 45 min » ne décrivait que la réunion visible. */
+        libelle: "Installation",
+        aide: "Nous connectons vos outils, reprenons votre historique et rodons le système avec vous jusqu'au premier envoi réel. Facturée une seule fois, à la mise en service.",
+        valeurs: parPalier((p) => `${p.installation.toLocaleString("fr-FR")}${NBSP}€, une fois`),
       },
       {
         libelle: "Raccordement particulier",
@@ -385,7 +463,7 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
            réunion d'installation » sous une FAQ qui dit le contraire :
            même promesse que la FAQ et la note de la grille, mot pour mot */
         libelle: "Paiement",
-        aide: "Carte ou prélèvement SEPA enregistré à la réservation. Rien n'est débité avant la fin de l'installation : le premier prélèvement part le jour où vos modules sont en service.",
+        aide: "Carte ou prélèvement SEPA enregistré à la réservation. Rien n'est débité avant la fin de l'installation : le jour où vos modules sont en service, l'installation est facturée et le premier mois d'abonnement part.",
         valeurs: meme("À la mise en service"),
       },
       {
@@ -404,9 +482,15 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
         valeurs: meme("Export complet, sans frais"),
       },
       {
+        /* 15/09 — la ligne avait cessé d'avoir un sens : le dispositif porte
+           sur l'installation, et l'installation valait 0 €. La subvention
+           n'avait aucune assiette. Elle en a une de nouveau. */
         libelle: "Chèque TIC",
-        aide: "Région Guadeloupe : porte sur l'installation, pas sur l'abonnement.",
-        valeurs: meme("Éligibilité vérifiée à l'installation"),
+        aide: "Région Guadeloupe : le dispositif finance de 40 à 80 % de l'installation selon le poste, jamais l'abonnement. L'éligibilité se vérifie avant la réservation.",
+        valeurs: parPalier(
+          (p) =>
+            `reste ${Math.round((p.installation * 0.2) / 10) * 10}${NBSP}à${NBSP}${Math.round((p.installation * 0.6) / 10) * 10}${NBSP}€`,
+        ),
       },
     ],
   },
@@ -554,4 +638,254 @@ export const GRANDE_STRUCTURE = {
     texte:
       "Décrivez votre situation en deux lignes. Nous vous répondons avec le format de diagnostic adapté, et le créneau se réserve en ligne.",
   },
+};
+
+/* ══════════════════════════════════════════════════════════════════════
+   LE CALCULATEUR DE PALIER (15/09/2026, Teo)
+
+   « Un bouton qui calcule : tu dis combien de factures tu as par mois, boum
+   ça affiche un prix ; et si t'as pris Tout Omega, tu remplis les données. »
+
+   DEUX RÈGLES qui le rendent tenable, et qu'il ne faut pas défaire :
+
+   1. IL ORIENTE, IL NE DEVISE PAS. Il atterrit sur l'un des trois paliers
+      existants, ou il sort de la grille vers l'audit. Jamais un montant
+      intermédiaire : un calculateur qui sort 623 €/mois ouvre une
+      négociation à chaque cas limite et rend la grille publique caduque.
+
+   2. IL MONTRE SA CONVERSION. Personne ne sait combien de « pièces » il
+      traite — tout le monde sait combien de factures il reçoit. On demande
+      ce que le visiteur sait, on affiche le total intermédiaire, puis le
+      palier. En rendez-vous, le chiffre se défend ligne par ligne.
+
+   IL NE VIT QUE DU CÔTÉ « Indépendant & TPE ». Le sélecteur « plusieurs
+   services valident » mène à l'audit et ne le voit jamais — même règle que
+   PORTES, et même raison.
+
+   LE CALCUL RESTE SUR L'APPAREIL. Aucun appel réseau : c'est ce qui autorise
+   la phrase « aucun de ces chiffres n'est envoyé nulle part », et ça évite
+   d'ouvrir une surface serveur sur un site qui n'en a presque pas. Les
+   volumes saisis ne partent PAS dans la réservation : reserver_audit fige
+   son propre instantané de prix, lui passer un volume déclaré créerait deux
+   sources de vérité sur le même prix.
+   ══════════════════════════════════════════════════════════════════════ */
+
+export type QuestionVolume = {
+  posteId: Poste["id"];
+  question: string;
+  aide: string;
+  /* ce qui s'écrit à droite du champ */
+  unite: string;
+  /* ce qu'une unité saisie vaut en pièces mensuelles */
+  coefficient: number;
+  /* la phrase du détail du calcul, sous les champs */
+  conversion: string;
+  /* minutes que cette pièce coûte AUJOURD'HUI, à la main. Ces durées sont
+     vérifiables par le lecteur contre sa propre expérience en une seconde —
+     c'est ce qui les rend honnêtes, à défaut d'être mesurées. */
+  minutes: number;
+};
+
+export const QUESTIONS_VOLUME: QuestionVolume[] = [
+  {
+    posteId: "filed",
+    question: "Combien de factures fournisseurs recevez-vous par mois ?",
+    aide: "Toutes sources confondues — mail, papier scanné, portail fournisseur. Une estimation suffit.",
+    unite: "factures par mois",
+    coefficient: 1,
+    conversion: "une facture, une pièce",
+    minutes: 6,
+  },
+  {
+    posteId: "frontd",
+    question: "Combien de demandes recevez-vous par jour ?",
+    aide: "Les questions qui appellent une réponse : horaires, tarifs, disponibilité, prise de rendez-vous. Mail et WhatsApp confondus.",
+    unite: "demandes par jour",
+    coefficient: 22,
+    conversion: "22 jours ouvrés par mois",
+    minutes: 5,
+  },
+  {
+    posteId: "cashd",
+    question: "Combien de devis et de factures envoyez-vous par mois ?",
+    aide: "Nous comptons les relances, pas les envois : sur dix documents, trois restent sans réponse et se relancent deux fois en moyenne.",
+    unite: "documents par mois",
+    coefficient: 0.6,
+    conversion: "trois sur dix restent sans réponse, deux relances chacun",
+    minutes: 6,
+  },
+  {
+    posteId: "reload",
+    question: "Combien de clients comptez-vous dans votre fichier ?",
+    aide: "Le fichier complet, même les anciens — ce sont eux que le système va chercher. Nous comptons la part qui devient inactive chaque mois.",
+    unite: "clients au total",
+    coefficient: 0.02,
+    conversion: "la part qui devient inactive chaque mois",
+    minutes: 8,
+  },
+];
+
+/* Le système ne rend pas 100 % du temps : le client valide encore, et une
+   pièce sur dix lui revient (taux d'anomalie du modèle de coût). Annoncer
+   la totalité serait faux, et se verrait au premier mois. */
+export const PART_RECUPEREE = 0.75;
+
+/* ——— qui fait ce travail aujourd'hui ———
+   LA question du calculateur. Le gain bascule entre 30 et 41 €/h selon le
+   palier : un taux par défaut choisi au hasard rendrait tout le résultat
+   faux. On demande donc qui tient les outils, et le taux s'affiche à côté
+   de la réponse — le visiteur peut le contester, c'est le but. */
+export type ProfilHoraire = {
+  id: "dirigeant" | "temps-partiel" | "service";
+  libelle: string;
+  detail: string;
+  taux: number; // € de l'heure, charges comprises
+};
+
+export const PROFILS_HORAIRES: ProfilHoraire[] = [
+  {
+    id: "dirigeant",
+    libelle: "C'est moi, souvent le soir",
+    detail: "une heure de dirigeant",
+    taux: 60,
+  },
+  {
+    id: "temps-partiel",
+    libelle: "Quelqu'un au bureau, à temps partiel",
+    detail: "coût chargé",
+    taux: 35,
+  },
+  {
+    id: "service",
+    libelle: "Un service administratif",
+    detail: "coût chargé",
+    taux: 30,
+  },
+];
+
+/** Ce que le visiteur a saisi, par poste — la valeur BRUTE du champ, dans
+    l'unité de la question (factures/mois, demandes/JOUR, etc.). */
+export type SaisieVolumes = Partial<Record<Poste["id"], number>>;
+
+/** Les pièces mensuelles que représente une saisie, poste par poste. */
+export function piecesParPoste(saisie: SaisieVolumes) {
+  return QUESTIONS_VOLUME.filter((q) => (saisie[q.posteId] ?? 0) > 0).map((q) => ({
+    question: q,
+    saisi: saisie[q.posteId] as number,
+    pieces: (saisie[q.posteId] as number) * q.coefficient,
+  }));
+}
+
+/** Le total, arrondi : on ne montre pas « 378,4 pièces ». */
+export function totalPieces(saisie: SaisieVolumes): number {
+  return Math.round(piecesParPoste(saisie).reduce((t, l) => t + l.pieces, 0));
+}
+
+/** Les heures que ces pièces coûtent aujourd'hui, à la main. */
+export function heuresActuelles(saisie: SaisieVolumes): number {
+  return piecesParPoste(saisie).reduce((t, l) => t + (l.pieces * l.question.minutes) / 60, 0);
+}
+
+/** Celles que le système rend — jamais la totalité. */
+export function heuresRecuperees(saisie: SaisieVolumes): number {
+  return heuresActuelles(saisie) * PART_RECUPEREE;
+}
+
+/** Les heures en journées, pour que ça se visualise : « 25,7 heures » se
+    subit, « près de quatre journées » se projette. Journée de 7 heures,
+    arrondie à la demi-journée. */
+export function enJournees(heures: number): number {
+  return Math.round((heures / 7) * 2) / 2;
+}
+
+/** Le verdict complet — tout ce que l'écran de résultat a besoin d'afficher.
+    `palier` à null : le volume sort de la grille, c'est l'audit qui prend. */
+export function verdictCalculateur(saisie: SaisieVolumes, taux: number) {
+  const pieces = totalPieces(saisie);
+  const palier = palierPourVolume(pieces);
+  const actuelles = heuresActuelles(saisie);
+  const recuperees = heuresRecuperees(saisie);
+  const valeur = Math.round(recuperees * taux);
+  return {
+    pieces,
+    palier,
+    heuresActuelles: actuelles,
+    heuresRecuperees: recuperees,
+    journees: enJournees(recuperees),
+    valeurRecuperee: valeur,
+    /* null quand le volume sort de la grille : il n'y a pas de prix à
+       soustraire, et on n'en invente pas un. */
+    net: palier ? valeur - palier.prix : null,
+  };
+}
+
+/* ——— les textes du calculateur ———
+   Ils vivent ici, avec les nombres qu'ils commentent, et non dans le
+   composant : c'est la règle du fichier depuis le début. */
+
+export const CALCULATEUR = {
+  /* 15/09 (Teo, dans la foulée) — LES PRIX NE S'AFFICHENT PAS AVANT.
+     « Je veux pas que les prix s'affichent avant d'avoir rempli le truc,
+     sinon on reste sur un truc inventé. » C'est la conséquence logique de
+     tout le reste : un montant posé avant que le visiteur ait donné ses
+     volumes est un montant qu'on a choisi, pas un montant qui sort de son
+     cas. Les cartes gardent donc leur nom, leur promesse, leurs postes et
+     leur plafond — tout sauf le chiffre, qui attend ses réponses. Le
+     comparatif, qui compare des prix, attend lui aussi. */
+  avant: {
+    grand: "À calculer",
+    sous: "sur vos volumes",
+    note: "Le prix suit le nombre de pièces que le système traite pour vous. Répondez aux questions au-dessus et il s'affiche.",
+  },
+  appel: {
+    titre: "Combien ça fait dans votre cas ?",
+    texte: "Les prix de cette page sortent de vos volumes, pas d'un barème. Répondez à une question par poste et ils s'affichent.",
+    cta: "Calculer mon prix",
+  },
+  entete: {
+    titre: "Votre palier en trois chiffres",
+    texte:
+      "Nous ne demandons rien que vous n'ayez sous la main, et aucun de ces chiffres n'est envoyé nulle part : le calcul se fait sur votre appareil.",
+  },
+  qui: {
+    question: "Qui s'occupe de tout ça aujourd'hui ?",
+    aide: "Nous comptons le coût réel d'une heure, charges comprises. Si votre chiffre est différent, c'est le vôtre qui compte — dites-le-nous.",
+  },
+  detail: { titre: "Ce que ça représente", total: "Total" },
+  /* Le bloc de gain. Le montant en euros est un PLANCHER et le dit : une
+     heure passée en boutique ne vaut pas ce qu'elle coûte, elle vaut ce
+     qu'elle rapporte — et ça, nous ne pouvons pas le chiffrer à la place du
+     client. Une page qui annonce son propre plancher se croit plus qu'une
+     page qui promet un rendement. On ne écrit JAMAIS de chiffre d'affaires
+     supplémentaire ici : invérifiable, impossible à tenir. */
+  gain: {
+    plancher:
+      "Nous avons compté ces heures à ce qu'elles vous coûtent. C'est un plancher, pas un plafond : une journée passée dans votre boutique, sur un chantier ou devant un client ne vaut pas ce qu'elle coûte — elle vaut ce qu'elle rapporte. Ce calcul-là, nous ne le ferons pas à votre place.",
+    encours:
+      "Et ce calcul ne compte que le temps. Vos devis restés sans réponse et vos factures échues repassent devant le client sans que personne n'y pense — c'est souvent là que se joue le reste, et c'est ce que l'audit chiffre sur vos propres encours.",
+  },
+  /* Quand le calcul est négatif, on le DIT. Ce n'est pas une faiblesse de la
+     page, c'est ce qu'elle a de plus crédible — et c'est déjà la règle de la
+     maison (grille-prix-interne.md §4 : « si l'audit ne montre rien, la
+     recommandation reste ne rien installer »), elle n'avait simplement
+     jamais été écrite là où un visiteur pouvait la lire. Le bouton reste
+     « en parler », jamais « souscrire quand même » : transformer un non
+     honnête en rattrapage commercial ruinerait tout l'écran. */
+  negatif: {
+    titre: "À vos volumes, ça ne se rembourse pas encore.",
+    texte:
+      "Nous préférons vous le dire ici plutôt qu'en rendez-vous. Deux choses peuvent changer ce calcul : vos volumes, s'ils grossissent — ou ce que vous ne nous avez pas dit. Nous avons compté vos heures à ce qu'elles coûtent ; si les vôtres valent bien davantage passées devant un client, le calcul n'est plus le même, mais c'est à vous de le dire, pas à nous de le supposer.",
+    cta: "En parler quand même, 30 minutes",
+    retour: "Revenir à la grille",
+  },
+  horsGrille: {
+    titre: "À ce volume, un prix affiché ne veut plus rien dire.",
+    texte:
+      "Au-delà, le coût dépend de qui valide, de combien de sociétés et de quels outils — c'est ce que l'audit mesure, et le devis en découle.",
+    cta: "Réserver un audit",
+    souscta: "30 minutes, gratuit, sans engagement",
+  },
+  /* Cette phrase retire au visiteur la peur de se sur-déclarer, qui est la
+     première raison pour laquelle on abandonne un calculateur en route. */
+  pied: "Ces chiffres orientent, ils n'engagent pas. Le palier définitif se confirme à la réunion d'installation, sur vos volumes réels — et s'il s'avère plus bas, c'est le plus bas qui s'applique.",
 };

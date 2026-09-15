@@ -75,7 +75,7 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 export const metadata: Metadata = {
   title: "Tarifs | Omega.AI",
   description:
-    `Un poste 59 €, trois postes 89 €, tout Omega 119 € par mois, sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation comprise, satisfait ou remboursé 30 jours. Et pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.`,
+    `Un, trois ou quatre postes tenus par un système sous votre validation. Prix public gradué au volume de pièces traitées, sans engagement en mensuel, −${REMISE_PCT} % en annuel, installation chiffrée à part et éligible au Chèque TIC, satisfait ou remboursé 30 jours. Pour les structures où plusieurs services valident : un audit d'abord, un devis ensuite.`,
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
