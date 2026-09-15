@@ -174,7 +174,6 @@ import { COURRIEL, lienContact, lienCourriel } from "@/lib/reservation";
 import {
   CARTE_SUR_MESURE,
   COMPARATIF_PALIERS,
-  COMPRIS,
   GRANDE_STRUCTURE,
   MONDES,
   PALIERS,
@@ -764,15 +763,9 @@ export default function Grille() {
           className="mx-auto mt-12 max-w-[76ch] text-center text-[13px] leading-[21px] text-[#616161] lg:mt-20"
         >
           <span className="font-semibold text-[#050505]">Compris à tous les paliers.</span>{" "}
-          Quatre postes s&apos;installent sur les outils que vous avez déjà&nbsp;: messagerie, tableur, WhatsApp. Quel que soit le palier,{" "}
-          <Link href={`/offres/${COMPRIS[0].slug}`} className="r-lien !text-[13px]">
-            {COMPRIS[0].system} · {COMPRIS[0].nom.toLowerCase()}
-          </Link>{" "}
-          et{" "}
-          <Link href={`/offres/${COMPRIS[1].slug}`} className="r-lien !text-[13px]">
-            {COMPRIS[1].system} · {COMPRIS[1].nom.toLowerCase()}
-          </Link>{" "}
-          sont inclus&nbsp;: l&apos;état de l&apos;activité chaque matin et la garantie que rien ne part sans validation ne sont pas des options.
+          Quatre postes s&apos;installent sur les outils que vous avez déjà&nbsp;: messagerie, tableur, WhatsApp. Quel que
+          soit le palier, l&apos;état de l&apos;activité chaque matin et la garantie que rien ne part sans votre validation
+          viennent avec&nbsp;: ce ne sont pas des options, et ils ne se facturent pas.
         </p>
 
         {devis ? (

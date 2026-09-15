@@ -19,6 +19,10 @@ import { ArrowUpRight } from "lucide-react";
    4. Les cases peuvent porter un `href` : le bloc d'origine est décoratif,
       celui-ci remplace une colonne de cartes qui étaient les portes d'entrée
       des pages produit. Une case sans `href` reste un simple <div>.
+   5. DEUX colonnes au maximum (15/09/2026) : le catalogue est passé de six
+      cases à quatre, et `lg:grid-cols-3` laissait la quatrième seule sur sa
+      rangée, avec un filet en travers d'un tiers du bloc. En 2 × 2 la grille
+      se referme, et les cases gagnent 166 px de large.
 
    Le composant ne définit ni police ni taille de titre : il vit sous une
    classe de monde (`.offres`) et emprunte ses `o-*`. Sous un autre monde,
@@ -78,7 +82,7 @@ export function Features({
           `border`, et les coins rognés par l'overflow du conteneur */}
       <div
         data-reveal
-        className={`mx-auto mt-16 grid max-w-[1000px] grid-cols-1 overflow-hidden rounded-[15px] border divide-y divide-x-0 sm:grid-cols-2 sm:divide-x lg:grid-cols-3 ${filet}`}
+        className={`mx-auto mt-16 grid max-w-[1000px] grid-cols-1 overflow-hidden rounded-[15px] border divide-y divide-x-0 sm:grid-cols-2 sm:divide-x ${filet}`}
       >
         {cases.map((c) => {
           const contenu = (

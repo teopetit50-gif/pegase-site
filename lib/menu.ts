@@ -87,7 +87,7 @@ export const MENU: Rubrique[] = [
       href: "/offres",
       label: "Toutes les offres",
       texte:
-        "Quatre systèmes prêts à déployer, deux inclus. Sur vos outils en place, sous votre validation.",
+        "Quatre systèmes prêts à déployer. Sur vos outils en place, sous votre validation.",
     },
     entrees: [
       {

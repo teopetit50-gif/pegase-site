@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 /* ══════════════════════════════════════════════════════════════════════
    « CARTES À LUEUR » — le trait d'encre qui suit le pointeur (11/09/2026)
@@ -67,7 +67,12 @@ export type CarteLueur = {
   label: string;
   titre: string;
   texte: string;
-  lien: { label: string; href: string };
+  /* 15/09/2026 — facultatif. La carte « Les interdits ne sont pas des
+     consignes » menait à la fiche VAULT ; les deux paquets compris ne
+     s'affichent plus, et aucune autre page ne détaille les douze contrôles.
+     Sans `lien`, la carte est un <div> : ni flèche, ni libellé de pied, ni
+     survol qui promet une destination. */
+  lien?: { label: string; href: string };
   maquette?: ReactNode;
 };
 
@@ -76,23 +81,22 @@ const LUEUR =
   "linear-gradient(135deg, #e4e4e7, #09090b, #52525b, #e4e4e7)";
 
 function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
-  const cadre = useRef<HTMLAnchorElement>(null);
   const [souris, setSouris] = useState<{ x: number; y: number } | null>(null);
 
-  const suivre = useCallback((e: React.MouseEvent) => {
-    const r = cadre.current?.getBoundingClientRect();
-    if (r) setSouris({ x: e.clientX - r.left, y: e.clientY - r.top });
+  /* le rectangle vient de `currentTarget` et non d'un `ref` : la racine est
+     un <Link> ou un <div> selon qu'il y a un lien, et un ref typé pour l'un
+     ne vaut pas pour l'autre. L'élément qui reçoit l'événement est de toute
+     façon le cadre lui-même. */
+  const suivre = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setSouris({ x: e.clientX - r.left, y: e.clientY - r.top });
   }, []);
 
-  return (
-    <Link
-      ref={cadre}
-      href={lien.href}
-      onMouseMove={suivre}
-      onMouseLeave={() => setSouris(null)}
-      data-reveal
-      className="group relative flex transform-gpu flex-col overflow-hidden rounded-[20px] bg-[#f4f4f5] p-[1.5px] transition-transform duration-300 ease-out hover:scale-[1.005]"
-    >
+  const cadreClasses =
+    "group relative flex transform-gpu flex-col overflow-hidden rounded-[20px] bg-[#f4f4f5] p-[1.5px] transition-transform duration-300 ease-out hover:scale-[1.005]";
+
+  const corps = (
+    <>
       {/* le disque de dégradé, masqué en cercle : invisible tant que le
           pointeur n'est pas entré, puis étalé ×3 au survol. */}
       <span
@@ -117,12 +121,14 @@ function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
         className="absolute inset-[1.5px] rounded-[19px] bg-white"
       />
 
-      <ArrowUpRight
-        aria-hidden
-        size={18}
-        strokeWidth={1.6}
-        className="absolute right-4 top-4 z-20 translate-y-2 text-[#71717a] opacity-0 transition-[transform,opacity] duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-      />
+      {lien ? (
+        <ArrowUpRight
+          aria-hidden
+          size={18}
+          strokeWidth={1.6}
+          className="absolute right-4 top-4 z-20 translate-y-2 text-[#71717a] opacity-0 transition-[transform,opacity] duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+        />
+      ) : null}
 
       {maquette ? (
         /* Hauteur commune, contenu centré. Les deux maquettes du site ne
@@ -155,24 +161,47 @@ function Carte({ label, titre, texte, lien, maquette }: CarteLueur) {
             au-delà de ses lignes, ce qui fausse toute mesure de hauteur et
             étend la zone de sélection dans le vide. */}
         <span aria-hidden className="flex-1" />
-        <span className="o-link mt-6 !text-[15px]">
-          {lien.label}
-          <svg
-            aria-hidden
-            width={12}
-            height={12}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m9 18 6-6-6-6" />
-          </svg>
-        </span>
+        {lien ? (
+          <span className="o-link mt-6 !text-[15px]">
+            {lien.label}
+            <svg
+              aria-hidden
+              width={12}
+              height={12}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </span>
+        ) : null}
       </span>
+    </>
+  );
+
+  return lien ? (
+    <Link
+      href={lien.href}
+      onMouseMove={suivre}
+      onMouseLeave={() => setSouris(null)}
+      data-reveal
+      className={cadreClasses}
+    >
+      {corps}
     </Link>
+  ) : (
+    <div
+      onMouseMove={suivre}
+      onMouseLeave={() => setSouris(null)}
+      data-reveal
+      className={cadreClasses}
+    >
+      {corps}
+    </div>
   );
 }
 

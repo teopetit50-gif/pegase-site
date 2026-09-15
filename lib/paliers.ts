@@ -141,12 +141,12 @@ export const SUR_MESURE = {
   href: "/offres/sur-mesure",
 };
 
-/* PULSE et VAULT ne se choisissent pas : ils tournent chez tout le monde,
-   quel que soit le palier — c'est la règle posée sur /offres. */
-export const COMPRIS = [
-  { system: "PULSE", nom: "Le point du matin", slug: "point-du-matin" },
-  { system: "VAULT", nom: "Validation & verrous", slug: "securite" },
-];
+/* 15/09/2026 — la table COMPRIS (PULSE / VAULT et leurs slugs) est retirée :
+   elle n'existait que pour fabriquer les deux liens du bas de la grille, et
+   le site ne montre plus que les quatre paquets qui s'installent. Ce que les
+   deux faisaient est toujours dit — « le point du matin et les verrous,
+   compris dès le premier jour » — mais comme une garantie, sans nom de code
+   et sans page où aller. */
 
 /* ——— la grille ——— */
 
@@ -212,10 +212,10 @@ export const PALIERS: Palier[] = [
     teinte: "nuit",
     badge: "Le plus complet", // 08/09 (associé) : la dernière carte doit attirer
     promesse:
-      "Les quatre postes en service, avec le point du matin et les verrous : six systèmes qui tiennent l'administratif et le commercial, sous votre validation.",
+      "Les quatre postes en service, avec le point du matin et les verrous compris : tout l'administratif et le commercial tenus, sous votre validation.",
     points: [
       "Les quatre postes, en service dès l'installation",
-      "Six systèmes, une seule installation",
+      "Une seule validation, un seul journal pour les quatre",
       "Le point du matin et les verrous, compris dès le premier jour",
       "Réunion d'installation comprise, 45 min en visio",
       "Satisfait ou remboursé 30 jours",
@@ -323,12 +323,12 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
         ),
       },
       {
-        libelle: "PULSE · le point du matin",
+        libelle: "Le point du matin",
         aide: "L'état de l'activité chaque matin, compris quel que soit le palier.",
         valeurs: meme("Compris"),
       },
       {
-        libelle: "VAULT · validation & verrous",
+        libelle: "Validation avant envoi",
         aide: "La garantie que rien ne part sans validation, comprise quel que soit le palier.",
         valeurs: meme("Compris"),
       },
@@ -526,7 +526,7 @@ export function lireMonde(v: unknown): Monde {
 
 /* Tout ce que la grille dit d'autre quand « Grande structure » est actif.
    Chaque phrase redit un fait déjà posé : PORTES.equipe pour le critère et
-   le diagnostic, COMPRIS pour le point du matin et les verrous, la ligne
+   le diagnostic, le comparatif pour le point du matin et les verrous, la ligne
    « Raccordement particulier » du comparatif pour le chiffrage. */
 export const GRANDE_STRUCTURE = {
   titre: "Un prix qui sort du diagnostic",

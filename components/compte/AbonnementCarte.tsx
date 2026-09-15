@@ -407,7 +407,7 @@ export default function AbonnementCarte({
         <div className="mt-4 flex flex-wrap items-baseline justify-between gap-3 border-t border-[var(--cp-filet)] pt-4">
           <span className="text-[14px] text-[var(--cp-doux)]">
             Formule {periodiciteActuelle === "annuel" ? "annuelle" : "mensuelle"}
-            <span className="block text-[13px] text-[var(--cp-faible)]">PULSE et VAULT compris</span>
+            <span className="block text-[13px] text-[var(--cp-faible)]">Point du matin et validation compris</span>
           </span>
           <span className="text-right">
             <span className="num block text-[22px] font-semibold leading-[28px] text-[var(--cp-encre)]">
@@ -543,8 +543,8 @@ export default function AbonnementCarte({
             {modifiable ? "Nouvelle formule" : "Formule souhaitée"}
           </div>
           <p className="mt-1 text-[14px] leading-[21px] text-[var(--cp-doux)]">
-            Un poste 59&nbsp;€, deux ou trois 89&nbsp;€, les quatre 119&nbsp;€ par mois. PULSE et VAULT
-            sont compris quel que soit le choix.
+            Un poste 59&nbsp;€, deux ou trois 89&nbsp;€, les quatre 119&nbsp;€ par mois. Le point du matin
+            et la validation avant envoi sont compris quel que soit le choix.
           </p>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">

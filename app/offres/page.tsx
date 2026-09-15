@@ -18,7 +18,6 @@ import { Bento02, type TuileBento } from "@/components/ui/bento-02";
 import { HowItWorks01, type Etape, type CarteGarantie } from "@/components/ui/how-it-works-01";
 import { Cta3 } from "@/components/ui/cta-3";
 import {
-  Activity,
   Bell,
   Blocks,
   Check,
@@ -165,19 +164,20 @@ const MOTEURS: TuileBento[] = [
   },
 ];
 
-/* ——— les six paquets de la grille à filets ———
+/* ——— les quatre paquets de la grille à filets ———
    11/09/2026 (Teo, « j'aime pas cette section ») — remplace SCENES, les
    quatre cartes de 560×260 de la bande noire. Les intitulés sont ceux de
    NOM_PAQUET (lib/content.ts) et les phrases leurs `benefit`, raccourcis
    pour tenir sur deux lignes dans une case de 333 px.
 
-   PULSE et VAULT entrent dans la liste alors que les cartes ne les
-   montraient pas : ils ont une page (rendue par [system]), et une grille de
-   six cases se remplit exactement avec le catalogue.
+   15/09/2026 (Teo) — PULSE et VAULT SORTENT de la grille. Le site ne montre
+   plus que les quatre paquets qui s'installent et se facturent ; plus aucune
+   page ne mène aux deux fiches comprises. La grille tombe donc à quatre
+   cases, en deux colonnes (voir components/ui/features-4.tsx).
 
    Les icônes viennent de lucide-react et non des marques de paquets : les
-   marques sont des PNG pensés pour le grand format, et PULSE et VAULT n'en
-   ont pas — les six cases n'auraient pas porté le même signe. */
+   marques sont des PNG pensés pour le grand format, qu'une case de 333 px
+   n'aurait pas portés. */
 const PAQUETS: CaseFeature[] = [
   {
     icone: Bell,
@@ -203,18 +203,6 @@ const PAQUETS: CaseFeature[] = [
     titre: "FILED",
     texte: "Chaque pièce fournisseur est lue, ses montants recoupés, puis transmise à la comptabilité.",
     href: "/offres/factures-fournisseurs",
-  },
-  {
-    icone: Activity,
-    titre: "PULSE",
-    texte: "L'état réel de l'activité en un message chaque matin, lu en deux minutes.",
-    href: "/offres/point-du-matin",
-  },
-  {
-    icone: Lock,
-    titre: "VAULT",
-    texte: "Douze contrôles avant chaque envoi, et le journal de tout ce qui est parti.",
-    href: "/offres/securite",
   },
 ];
 
@@ -377,12 +365,12 @@ export default function OffresPage() {
             pastille="Ce qui se déploie"
             titre="Chaque système tient un poste, et un seul."
             chapo="Aucun ne fait tout : chacun prend en charge un processus, le traite en continu sur vos outils et s'arrête à votre validation. Trois exemples, puis le catalogue complet."
-            lien={{ label: "Voir les six systèmes", href: "#catalogue" }}
+            lien={{ label: "Voir les quatre systèmes", href: "#catalogue" }}
             tuiles={MOTEURS}
           />
         </section>
 
-        {/* ════════ LES SIX — grille à filets sur bande noire ════════
+        {/* ════════ LES QUATRE — grille à filets sur bande noire ════════
             11/09/2026 (Teo) — l'ancienne section tenait sur 1150 px : une
             colonne de texte à gauche, deux chiffres, et quatre cartes de
             560×260 à droite. Elle disait une troisième fois ce que le bento
@@ -401,7 +389,7 @@ export default function OffresPage() {
             reste la technique de .o-nuit (ombre écrêtée horizontalement).
 
             L'ancre `#catalogue` est la destination du bouton de la tuile
-            large du bento : « Voir les six » descend ici. */}
+            large du bento : « Voir les quatre » descend ici. */}
         <section
           id="catalogue"
           className="scroll-mt-24 bg-black py-[120px]"
@@ -409,8 +397,8 @@ export default function OffresPage() {
         >
           <Features
             pastille="Le catalogue"
-            titre="Quatre systèmes à déployer, deux inclus."
-            chapo="Chacun couvre un processus précis. Les deux derniers accompagnent toute installation, sans facturation supplémentaire."
+            titre="Quatre systèmes à déployer."
+            chapo="Chacun couvre un processus précis, en continu, sur les outils que vos équipes utilisent déjà — et s'arrête à votre validation."
             cases={PAQUETS}
           />
 

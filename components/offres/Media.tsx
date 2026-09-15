@@ -407,13 +407,15 @@ export function MediaOffload() {
    05/08/2026 — le slug est porté explicitement plutôt que déduit du nom en
    minuscules : depuis que les pages sont celles des PAQUETS, l'URL est
    descriptive (`/offres/relances-impayes`) et `cashd` mène à un 404. */
+
+/* 15/09/2026 — PULSE et VAULT quittent la liste : plus rien sur le site ne
+   mène à leurs fiches. Ce bloc n'est plus appelé nulle part, mais il serait
+   revenu avec ses deux pastilles le jour où on le rebranche. */
 const CATALOGUE: { nom: string; slug: string; icone: ReactNode }[] = [
   { nom: "CASHD", slug: "relances-impayes", icone: <IconeGlyphe d="M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 8h6M9 12h6" /> },
   { nom: "RELOAD", slug: "nouvelles-affaires", icone: <IconeGlyphe d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" /> },
   { nom: "FRONTD", slug: "demandes-clients", icone: <IconeGlyphe d="M4 4h16v12H7l-3 4V4Z" /> },
   { nom: "FILED", slug: "factures-fournisseurs", icone: <IconeGlyphe d="M3 7h6l2 2h10v10H3V7Z" /> },
-  { nom: "PULSE", slug: "point-du-matin", icone: <IconeGlyphe d="M4 5h16M4 12h16M4 19h10" /> },
-  { nom: "VAULT", slug: "securite", icone: <IconeGlyphe d="M6 11h12v9H6v-9ZM9 11V7a3 3 0 0 1 6 0v4" /> },
 ];
 
 function IconeGlyphe({ d }: { d: string }) {

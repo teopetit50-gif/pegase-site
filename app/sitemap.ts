@@ -51,11 +51,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/blog", priorite: 0.7, frequence: "weekly" },
   ];
 
-  const moteurs = FAMILLES.flatMap((f) => f.moteurs).map((m) => ({
-    url: `/offres/${m.slug}`,
-    priorite: 0.8,
-    frequence: "monthly" as const,
-  }));
+  /* 15/09/2026 — seuls les QUATRE paquets qui s'installent entrent au plan du
+     site. Les deux compris (PULSE, VAULT) ne sont plus affichés ni liés nulle
+     part : leurs pages existent encore, mais les déclarer ici reviendrait à
+     les proposer à l'indexation comme des offres de plus. */
+  const AFFICHES = new Set([
+    "relances-impayes",
+    "nouvelles-affaires",
+    "demandes-clients",
+    "factures-fournisseurs",
+  ]);
+
+  const moteurs = FAMILLES.flatMap((f) => f.moteurs)
+    .filter((m) => AFFICHES.has(m.slug))
+    .map((m) => ({
+      url: `/offres/${m.slug}`,
+      priorite: 0.8,
+      frequence: "monthly" as const,
+    }));
 
   const articles = POSTS.map((p) => ({
     url: `/blog/${p.slug}`,
