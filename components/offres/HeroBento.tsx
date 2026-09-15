@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useId } from "react";
 import { PenLine, MessagesSquare } from "lucide-react";
 import {
@@ -122,6 +123,45 @@ function Infobulle({
   );
 }
 
+/* ——— la flèche de lien ———
+   15/09 (Teo) : « quand on clique sur chaque widget, ça renvoie vers le
+   paquet en question ». Les trois tuiles de ce hero montrent le travail
+   d'un paquet précis (l'encours et les relances : CASHD ; le brouillon à
+   valider : CASHD ; la demande de 21 h 46 : FRONTD) et ne menaient nulle
+   part : le visiteur voyait la démonstration, la comprenait, et devait
+   redescendre chercher la porte trois sections plus bas.
+
+   L'AFFORDANCE EST CELLE DE LA PAGE, pas une nouvelle : la flèche ↗ des
+   tuiles produit de `components/ui/bento-02.tsx`, même taille, même
+   avancée de 3 px au survol, même passage du filet à `--o-muted`. Deux
+   façons de dire « ceci est une porte » sur la même page se liraient
+   comme deux choses différentes.
+
+   Rien d'interactif ne descend sous le lien : les « boutons » des
+   maquettes sont des `<span>`, jamais des `<button>` — un contrôle
+   imbriqué dans un lien est invalide et casse la navigation au clavier.
+   Seule exception : l'infobulle de la courbe, qui réagit au SURVOL ; un
+   clic sur la courbe navigue, comme partout ailleurs dans la tuile. ——— */
+function FlecheLien({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={`shrink-0 text-[var(--o-muted)] transition-all duration-200 group-hover:translate-x-[3px] group-hover:text-[var(--o-text)] ${className}`}
+    >
+      <path d="M7 17 17 7" />
+      <path d="M8 7h9v9" />
+    </svg>
+  );
+}
+
 export function HeroBento() {
   const brut = useId();
   const dg = `hb-aire-${brut.replace(/:/g, "")}`;
@@ -129,7 +169,11 @@ export function HeroBento() {
   return (
     <div className="mx-auto grid w-full max-w-[820px] grid-cols-1 items-start gap-4 sm:grid-cols-2">
       {/* ═══════════ tuile large — l'encours et sa courbe ═══════════ */}
-      <div className="relative z-0 overflow-hidden rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:col-span-2 sm:p-6 lg:pb-[118px]">
+      <Link
+        href="/offres/relances-impayes"
+        aria-label="CASHD · encaissements — voir le système des relances"
+        className="group relative z-0 block overflow-hidden rounded-[20px] transition-colors duration-200 hover:border-[var(--o-muted)] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:col-span-2 sm:p-6 lg:pb-[118px]"
+      >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -241,12 +285,13 @@ export function HeroBento() {
               <span className="h-2 w-2 rounded-[2px] bg-[#09090b]" />
               Encours suivi, semaine par semaine
             </span>
-            <span className="text-[10.5px] text-[#a1a1aa]">
+            <span className="inline-flex items-center gap-1.5 text-[10.5px] text-[#a1a1aa]">
               Démonstration · 12 dernières semaines
+              <FlecheLien />
             </span>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* ═══════════ tuile — le brouillon à valider ═══════════ */}
       <Tuile
@@ -262,6 +307,7 @@ export function HeroBento() {
            de 18 px, symétrique de celui de droite. */
         pose="lg:-ml-[18px] lg:-mt-[92px] xl:-translate-x-[56px]"
         icone={PenLine}
+        href="/offres/relances-impayes"
         titre="Rien ne part sans vous"
         texte="Le texte est préparé, calé sur l’échéance et posé dans votre file. Vous envoyez, vous corrigez, ou vous ne faites rien."
       >
@@ -290,6 +336,7 @@ export function HeroBento() {
       <Tuile
         pose="lg:-mr-[18px] lg:-mt-[136px]"
         icone={MessagesSquare}
+        href="/offres/demandes-clients"
         titre="Répondu pendant la nuit"
         texte="Une demande entre à 21 h 46. La réponse part dans la minute, la pièce chiffrée attend votre accord au matin."
       >
@@ -344,26 +391,34 @@ function Tuile({
   icone: Icone,
   titre,
   texte,
+  href,
   pose = "",
   children,
 }: {
   icone: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   titre: string;
   texte: string;
+  /* 15/09 — la page produit que cette tuile montre. Elle est OBLIGATOIRE :
+     une maquette sans porte laisse le visiteur chercher. */
+  href: string;
   pose?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={`relative z-10 flex flex-col rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-4.5 sm:p-5 lg:bg-white lg:shadow-[0_2px_4px_rgba(9,9,11,0.04),0_22px_44px_-26px_rgba(9,9,11,0.38)] ${pose}`}
+    <Link
+      href={href}
+      className={`group relative z-10 flex flex-col transition-colors duration-200 hover:border-[var(--o-muted)] rounded-[20px] border border-[var(--o-line)] bg-[var(--o-soft)] p-4.5 sm:p-5 lg:bg-white lg:shadow-[0_2px_4px_rgba(9,9,11,0.04),0_22px_44px_-26px_rgba(9,9,11,0.38)] ${pose}`}
     >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-[var(--o-line)] bg-white">
-        <Icone className="h-4 w-4" strokeWidth={1.6} />
-      </span>
+      <div className="flex items-start justify-between gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-[var(--o-line)] bg-white">
+          <Icone className="h-4 w-4" strokeWidth={1.6} />
+        </span>
+        <FlecheLien className="mt-1" />
+      </div>
       <h3 className="o-h5 mt-3.5 !text-[16.5px]">{titre}</h3>
       <p className="o-small mt-1.5 !text-[13px] !leading-[1.65]">{texte}</p>
       <div className="mt-auto w-full pt-4">{children}</div>
-    </div>
+    </Link>
   );
 }
 
