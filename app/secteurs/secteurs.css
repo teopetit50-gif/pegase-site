@@ -247,15 +247,11 @@
   color: var(--sec-texte);
   font-weight: 500;
 }
-/* La barre pleine de l'onglet sélectionné : c'est elle qu'on voit. */
-.p-secteurs .sec-tuile[aria-selected="true"]::after {
-  content: "";
-  position: absolute;
-  inset-inline: -1px;
-  bottom: -1px;
-  height: 2px;
-  background: var(--sec-texte);
-}
+/* LA BARRE N'EST PAS ICI. Elle était d'abord un `::after` sur la tuile
+   sélectionnée ; elle est maintenant un élément framer-motion unique, porté
+   par `layoutId` dans Metiers.tsx, pour qu'elle GLISSE d'une tuile à l'autre.
+   Ne pas la remettre en CSS « pour faire simple » : les deux se
+   superposeraient, et la version fixe annulerait visuellement le trajet. */
 .p-secteurs .sec-tuile:focus-visible {
   outline: 2px solid var(--sec-texte);
   outline-offset: -2px;
