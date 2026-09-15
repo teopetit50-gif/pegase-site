@@ -1,0 +1,221 @@
+/* ══════════════════════════════════════════════════════════════════════
+   dialog.css — la feuille du dialogue repris de @originui/dialog
+   (21st.dev, MIT), 15/09/2026
+
+   Relevé sur l'aperçu du registre : panneau blanc de 400 px au plus,
+   rayon 12, filet 1 px très clair, ombre portée large et très douce,
+   pastille ronde de 40 px à icône en tête, titre 17/24 semi-gras, une
+   phrase grise dessous, bouton noir pleine largeur en pied, sortie en
+   texte souligné.
+
+   ⚠ Les deux règles qui ne se défont pas (voir l'en-tête du .tsx) :
+   AUCUNE animation d'opacité, AUCUNE animation de sortie. L'ouverture ne
+   déplace et ne met à l'échelle. Un fondu laisserait, horloge gelée, un
+   panneau invisible qui intercepte les clics ; une sortie animée
+   empêcherait Radix de démonter le panneau.
+
+   Pas de préfixe `.resa` ici : le panneau est rendu dans un PORTAIL,
+   donc enfant de <body> — il ne descend d'aucune de nos racines de
+   monde, et une règle scopée ne l'atteindrait pas.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.dlg-voile {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(5, 5, 5, 0.42);
+  /* le voile peut se permettre un fondu : il n'intercepte rien qu'on ait
+     besoin de voir, et il n'a pas d'animation de sortie non plus */
+  animation: dlg-voile-entre 0.18s ease-out;
+}
+
+/* ⚠ `.dlg-panneau.resa` et non `.dlg-panneau` : le panneau porte la classe
+   `resa` pour hériter des règles de formulaire du site (voir l'adaptation
+   n° 6 dans dialog.tsx), et `.resa` lui imposerait un fond gris, une ombre
+   de 100vmax peinte jusqu'aux bords de l'écran et un `clip-path` qui la
+   découpe. Deux classes valent mieux qu'une : la spécificité gagne, quel
+   que soit l'ordre dans lequel Next assemble les feuilles. */
+.dlg-panneau.resa {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 121;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 32px);
+  max-width: 460px;
+  max-height: calc(100vh - 48px);
+  transform: translate(-50%, -50%);
+  border: 1px solid #ebebeb;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(5, 5, 5, 0.04),
+    0 24px 48px -12px rgba(5, 5, 5, 0.18);
+  /* les trois déclarations de `.resa` qui ne valent que pour une page */
+  clip-path: none;
+  padding: 22px 22px 20px;
+  color: var(--r-texte, #050505);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+@media (min-width: 640px) {
+  .dlg-panneau.resa {
+    padding: 26px 26px 22px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dlg-panneau.resa[data-state="open"] {
+    animation: dlg-panneau-entre 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* ——— la croix ——— */
+.dlg-fermer {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: var(--r-faible, #616161);
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+.dlg-fermer:hover {
+  background: #f4f4f4;
+  color: var(--r-texte, #050505);
+}
+.dlg-fermer:focus-visible {
+  outline: 2px solid var(--r-texte, #050505);
+  outline-offset: 2px;
+}
+
+/* ——— la pastille d'en-tête ——— */
+.dlg-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 14px;
+  border: 1px solid #e3e3e3;
+  border-radius: 999px;
+  background: #fafafa;
+  color: var(--r-doux, #3d3d3d);
+}
+
+/* ——— tête, corps, pied ——— */
+.dlg-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-right: 32px; /* la croix */
+}
+.dlg-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--r-texte, #050505);
+}
+.dlg-intro {
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--r-faible, #616161);
+}
+.dlg-corps {
+  min-width: 0;
+  margin-top: 18px;
+  /* le formulaire défile, le titre et le pied restent : c'est ce qui
+     permet six champs sur un téléphone sans perdre le bouton.
+
+     ⚠ `flex: 1 1 auto` ET `min-height: 0` : sans les deux, un enfant
+     flexible ne rétrécit JAMAIS sous sa hauteur de contenu (la valeur
+     initiale de min-height en colonne est `auto`). Mesuré le 15/09 à
+     375 px : le corps gardait ses 690 px, le panneau était plafonné à
+     764, et le pied — donc le bouton « Enregistrer » — se retrouvait à
+     930 px, DEHORS, invisible et injoignable. Rien dans la console. */
+  /* `0 1 auto` et non `1 1 auto` : le corps ne GRANDIT pas (il prendrait
+     la place restante et ferait défiler un contenu qui tenait déjà —
+     mesuré : 10 px d'écart et une barre de défilement sur la modale du
+     mot de passe), il rétrécit seulement quand la place manque. */
+  flex: 0 1 auto;
+  min-height: 0;
+  /* ⚠ ET une hauteur maximale EN DUR, parce que la chaîne flexible seule
+     ne suffit pas : le formulaire du profil intercale un <fieldset> (il
+     désactive les huit champs d'un coup pendant l'envoi), et un fieldset
+     ne contraint PAS ses enfants comme une boîte flexible ordinaire —
+     mesuré le 15/09 à 375 px : fieldset 548 px, corps 669 px à
+     l'intérieur, et le bouton « Enregistrer » à 930 px, hors du panneau.
+     La valeur laisse la place de la tête (~175 px) et du pied (~105 px)
+     dans les 100vh − 48 du panneau. */
+  max-height: max(140px, calc(100vh - 340px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dlg-pied {
+  display: flex;
+  /* et le pied, lui, ne rétrécit pas */
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--r-filet, #e3e3e3);
+}
+
+/* la chaîne flexible entre le panneau et le corps : un <form> s'intercale
+   (le formulaire de profil) et doit pouvoir rétrécir, sinon le pied sort
+   par le bas comme ci-dessus. Un <fieldset> ne DOIT PAS être un maillon de
+   cette chaîne — voir le commentaire dans ProfilCarte. */
+.dlg-panneau.resa > form {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+}
+
+/* ——— la sortie en texte, sous le bouton plein (dessin de l'aperçu) ——— */
+.dlg-sortie {
+  align-self: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 14.5px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--r-faible, #616161);
+  transition: color 0.18s ease;
+}
+.dlg-sortie:hover:not(:disabled) {
+  color: var(--r-texte, #050505);
+}
+.dlg-sortie:disabled {
+  opacity: 0.55;
+}
+.dlg-sortie:focus-visible {
+  outline: 2px solid var(--r-texte, #050505);
+  outline-offset: 2px;
+}
+
+@keyframes dlg-voile-entre {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* translation + échelle SEULEMENT — voir l'avertissement en tête */
+@keyframes dlg-panneau-entre {
+  from {
+    transform: translate(-50%, calc(-50% + 10px)) scale(0.97);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

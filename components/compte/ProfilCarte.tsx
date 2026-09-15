@@ -11,23 +11,27 @@
    ajoute ce qui sert à la facture et au brief : secteur (la liste
    SECTEURS du module de réservation), commune, SIRET.
 
-   14/09 — DEUX ÉTATS. La page tient désormais sur un écran (CompteVue,
-   la carte de verre) et huit champs ouverts en permanence coûtaient un
-   rang de 360 px pour une chose qu'on corrige deux fois par an. Au
-   repos, le panneau montre un RÉSUMÉ (six valeurs sur une grille, les
-   absentes en « — ») et un bouton « Modifier le profil » ; le formulaire
-   se déplie à la demande, dans le même panneau, et se replie après
-   l'enregistrement (le résumé relit alors les champs enregistrés). Un
-   profil INCOMPLET (sans prénom, nom ou entreprise — le cas d'un compte
-   créé par code de secours) s'ouvre directement sur le formulaire, avec
-   un mot qui dit pourquoi : le résumé n'aurait rien à montrer.
+   14/09 — DEUX ÉTATS. Huit champs ouverts en permanence coûtaient un rang
+   de 360 px pour une chose qu'on corrige deux fois par an. Au repos, la
+   carte montre un RÉSUMÉ (cinq valeurs, les absentes en « — ») ; le
+   formulaire s'ouvre à la demande et se referme après l'enregistrement,
+   le résumé relisant alors les champs enregistrés.
 
-   Le panneau est un BANDEAU en pleine largeur (GlassPanel bande) : le
-   résumé est une ligne de paires étiquette/valeur qui se replie en
-   plusieurs rangs quand la place manque, le bouton à droite. La grille
-   du formulaire se règle sur la largeur du bandeau (container query,
-   @container / @md: @2xl: @4xl:) — quatre colonnes dès 896 px de large,
-   deux rangs de champs.
+   15/09 — LE FORMULAIRE PASSE DANS UNE MODALE. Teo : « il faut de beaux
+   composants — quand on clique sur le profil, ça nous fait un beau
+   truc. » Le dialogue est la reprise de `@originui/dialog` (21st.dev,
+   MIT) posée dans components/ui/dialog.tsx, avec les cinq adaptations
+   qu'exige ce dépôt (jetons, filets, animations) écrites en tête de ce
+   fichier-là. Ce qui change ICI : le formulaire ne se déplie plus dans
+   la carte — il s'ouvre par-dessus la page, en une colonne à partir de
+   laquelle rien ne bouge derrière ; et la grille en `@container` cède la
+   place à `sm:grid-cols-2`, le panneau faisant 460 px au plus (une
+   requête de conteneur n'aurait plus rien à mesurer).
+
+   Un profil INCOMPLET (sans prénom, nom ou entreprise — compte créé par
+   code de secours) n'ouvre PLUS la modale d'office : une modale qui
+   s'ouvre seule au chargement de la page se referme par réflexe, sans
+   être lue. La carte le dit et propose « Compléter mon profil ».
 
    Où ça s'enregistre : dans les user_metadata du compte, par
    updateUser({ data }) — la même porte que ConnexionInline et
@@ -58,8 +62,21 @@
    (espaces tolérés, lib/compte siretValide).
    ══════════════════════════════════════════════════════════════════════ */
 
+import { UserRound } from "lucide-react";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogIcone,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { SECTEURS } from "@/lib/creneaux";
 import { siretNormalise, siretValide, type Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -100,7 +117,9 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
   /* ce que le résumé montre : les champs tels qu'ENREGISTRÉS, pas la
      saisie en cours — on annule sans toucher au résumé */
   const [enregistre, setEnregistre] = useState<Champs>(() => depuisUtilisateur(utilisateur));
-  const [ouvert, setOuvert] = useState(() => !complet(depuisUtilisateur(utilisateur)));
+  /* 15/09 : plus d'ouverture d'office sur un profil incomplet — voir
+     l'en-tête. La carte porte l'alerte, la modale attend un clic. */
+  const [ouvert, setOuvert] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState(false);
@@ -123,8 +142,7 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
     setC(enregistre);
     setErreur(null);
     setFait(false);
-    /* un profil incomplet reste ouvert : il n'y a rien à résumer */
-    if (complet(enregistre)) setOuvert(false);
+    setOuvert(false);
   };
 
   const enregistrer = async (e: React.FormEvent) => {
@@ -190,177 +208,224 @@ export default function ProfilCarte({ utilisateur }: { utilisateur: Utilisateur 
     }
   };
 
-  /* ——— le résumé ——— */
-  if (!ouvert) {
-    const secteur = SECTEURS.find((s) => s.valeur === enregistre.secteur)?.libelle;
-    /* le nom n'y est pas : il est déjà dans l'en-tête de la carte, juste
-       au-dessus — et sans lui les six paires tiennent sur UNE ligne à 1440 */
-    const lignes: { etiquette: string; valeur: string; num?: boolean }[] = [
-      { etiquette: "Entreprise", valeur: enregistre.entreprise },
-      { etiquette: "Téléphone / WhatsApp", valeur: enregistre.telephone, num: true },
-      { etiquette: "Secteur", valeur: secteur ?? enregistre.secteur },
-      { etiquette: "Commune", valeur: enregistre.commune },
-      { etiquette: "SIRET", valeur: enregistre.siret ? siretLisible(enregistre.siret) : "", num: true },
-    ];
-    return (
-      <div className="cp-resume-bloc">
-        {fait ? (
-          <p className="cp-ok mb-3" role="status">
-            Profil enregistré. Il sert à vos factures et pré-remplit vos prochaines demandes.
-          </p>
-        ) : null}
-        <div className="cp-resume">
-          <dl className="cp-resume-liste">
-            {lignes.map((l) => (
-              <div key={l.etiquette} className="cp-resume-item">
-                <dt className="cp-resume-etiquette">{l.etiquette}</dt>
-                <dd className={`cp-resume-valeur${l.num ? " num" : ""}${l.valeur ? "" : " cp-resume-valeur--vide"}`}>
-                  {l.valeur || "—"}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <button type="button" className="r-btn r-btn--fil shrink-0" onClick={ouvrir}>
-            Modifier le profil
-          </button>
-        </div>
-      </div>
-    );
-  }
+  /* ——— la carte au repos : le résumé, et la porte vers la modale ——— */
+  const secteurLisible = SECTEURS.find((s) => s.valeur === enregistre.secteur)?.libelle;
+  /* le nom n'est pas dans la liste : il est déjà dans l'en-tête de page */
+  const lignes: { etiquette: string; valeur: string; num?: boolean }[] = [
+    { etiquette: "Entreprise", valeur: enregistre.entreprise },
+    { etiquette: "Téléphone / WhatsApp", valeur: enregistre.telephone, num: true },
+    { etiquette: "Secteur", valeur: secteurLisible ?? enregistre.secteur },
+    { etiquette: "Commune", valeur: enregistre.commune },
+    {
+      etiquette: "SIRET",
+      valeur: enregistre.siret ? siretLisible(enregistre.siret) : "",
+      num: true,
+    },
+  ];
+  const incomplet = !complet(enregistre);
 
-  /* ——— le formulaire ——— */
   return (
-    <form onSubmit={enregistrer} noValidate className="@container">
-      <fieldset disabled={envoi} className="m-0 min-w-0 border-0 p-0">
-        {!complet(enregistre) ? (
-          <p className="cp-texte mb-4">
-            Votre profil n&apos;est pas complet&nbsp;: prénom, nom et entreprise servent à vos factures
-            et à vos prochaines demandes.
-          </p>
-        ) : null}
-        <div className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4">
-          <div>
-            <label className="rv-libelle" htmlFor="cp-prenom">
-              Prénom
-            </label>
-            <input
-              id="cp-prenom"
-              className="rv-champ"
-              autoComplete="given-name"
-              maxLength={80}
-              value={c.prenom}
-              onChange={maj("prenom")}
-              required
-            />
-          </div>
-          <div>
-            <label className="rv-libelle" htmlFor="cp-nom">
-              Nom
-            </label>
-            <input
-              id="cp-nom"
-              className="rv-champ"
-              autoComplete="family-name"
-              maxLength={80}
-              value={c.nom}
-              onChange={maj("nom")}
-              required
-            />
-          </div>
-          <div>
-            <label className="rv-libelle" htmlFor="cp-entreprise">
-              Entreprise
-            </label>
-            <input
-              id="cp-entreprise"
-              className="rv-champ"
-              autoComplete="organization"
-              maxLength={120}
-              value={c.entreprise}
-              onChange={maj("entreprise")}
-              required
-            />
-          </div>
-          <div>
-            <label className="rv-libelle" htmlFor="cp-tel">
-              Téléphone / WhatsApp <small>(nous vous appelons sur ce numéro)</small>
-            </label>
-            <input
-              id="cp-tel"
-              type="tel"
-              className="rv-champ"
-              autoComplete="tel"
-              placeholder="06 12 34 56 78"
-              maxLength={30}
-              value={c.telephone}
-              onChange={maj("telephone")}
-            />
-          </div>
-          <div>
-            <label className="rv-libelle" htmlFor="cp-secteur">
-              Secteur d&apos;activité
-            </label>
-            <select id="cp-secteur" className="rv-champ" value={c.secteur} onChange={maj("secteur")}>
-              <option value="">Choisir…</option>
-              {SECTEURS.map((s) => (
-                <option key={s.valeur} value={s.valeur}>
-                  {s.libelle}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="rv-libelle" htmlFor="cp-commune">
-              Commune
-            </label>
-            <input
-              id="cp-commune"
-              className="rv-champ"
-              autoComplete="address-level2"
-              maxLength={80}
-              value={c.commune}
-              onChange={maj("commune")}
-            />
-          </div>
-          <div>
-            <label className="rv-libelle" htmlFor="cp-siret">
-              SIRET <small>(facultatif, 14 chiffres)</small>
-            </label>
-            <input
-              id="cp-siret"
-              className="rv-champ num"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="123 456 789 00012"
-              maxLength={20}
-              value={c.siret}
-              onChange={maj("siret")}
-            />
-          </div>
-          <div>
-            <label className="rv-libelle" htmlFor="cp-email">
-              Adresse e-mail <small>(identifiant de connexion)</small>
-            </label>
-            <input id="cp-email" className="rv-champ cp-champ--lecture" value={utilisateur.email} readOnly />
-            <p className="cp-aide">Pour changer d&apos;adresse, écrivez-nous.</p>
-          </div>
-        </div>
+    <div className="cp-resume-bloc">
+      {fait ? (
+        <p className="cp-ok mb-3" role="status">
+          Profil enregistré. Il sert à vos factures et pré-remplit vos prochaines demandes.
+        </p>
+      ) : null}
+      {incomplet ? (
+        <p className="cp-texte mb-3">
+          Votre profil n&apos;est pas complet&nbsp;: prénom, nom et entreprise servent à vos
+          factures et à vos prochaines demandes.
+        </p>
+      ) : null}
+      <div className="cp-resume">
+        <dl className="cp-resume-liste">
+          {lignes.map((l) => (
+            <div key={l.etiquette} className="cp-resume-item">
+              <dt className="cp-resume-etiquette">{l.etiquette}</dt>
+              <dd
+                className={`cp-resume-valeur${l.num ? " num" : ""}${l.valeur ? "" : " cp-resume-valeur--vide"}`}
+              >
+                {l.valeur || "—"}
+              </dd>
+            </div>
+          ))}
+        </dl>
 
-        {erreur ? (
-          <p className="rv-erreur mt-4" role="alert">
-            {erreur}
-          </p>
-        ) : null}
+        {/* ——— la modale ———
+            Le déclencheur EST le bouton (DialogTrigger asChild) : Radix
+            pose alors l'état d'ouverture, `aria-haspopup`, et rend le
+            focus au bouton à la fermeture — ce qu'un onClick à la main ne
+            fait pas. */}
+        <Dialog
+          open={ouvert}
+          onOpenChange={(o) => {
+            if (o) ouvrir();
+            else annuler();
+          }}
+        >
+          <DialogTrigger asChild>
+            <button type="button" className="r-btn r-btn--fil shrink-0">
+              {incomplet ? "Compléter mon profil" : "Modifier le profil"}
+            </button>
+          </DialogTrigger>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3">
-          <button type="submit" className={`r-btn ${envoi ? "rv-btn--attente" : "r-btn--noir"}`} disabled={envoi}>
-            {envoi ? "Enregistrement…" : "Enregistrer mon profil"}
-          </button>
-          <button type="button" className="r-btn r-btn--fil" onClick={annuler} disabled={envoi}>
-            {complet(enregistre) ? "Annuler" : "Annuler les modifications"}
-          </button>
-        </div>
-      </fieldset>
-    </form>
+          <DialogContent>
+            <DialogIcone>
+              <UserRound size={18} strokeWidth={1.75} aria-hidden="true" />
+            </DialogIcone>
+            <DialogHeader>
+              <DialogTitle>Profil professionnel</DialogTitle>
+              <DialogDescription>
+                Ce que nous savons de votre entreprise&nbsp;: ces informations figurent sur vos
+                factures et pré-remplissent vos demandes.
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* ⚠ LE <fieldset> EST À L'INTÉRIEUR DU CORPS, PAS AUTOUR.
+                Il désactive les huit champs d'un coup pendant l'envoi,
+                mais un fieldset ne contraint pas ses enfants comme une
+                boîte flexible : intercalé entre le <form> et le corps
+                défilant, il allouait 540 px et laissait le corps en
+                occuper 596 — le pied, donc le bouton « Enregistrer »,
+                sortait du panneau à 375 px de large (mesuré le 15/09).
+                Les deux boutons du pied portent leur propre `disabled`. */}
+            <form onSubmit={enregistrer} noValidate className="flex min-h-0 flex-1 flex-col">
+                <DialogBody>
+                  <fieldset disabled={envoi} className="m-0 min-w-0 border-0 p-0">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-prenom">
+                        Prénom
+                      </label>
+                      <input
+                        id="cp-prenom"
+                        className="rv-champ"
+                        autoComplete="given-name"
+                        maxLength={80}
+                        value={c.prenom}
+                        onChange={maj("prenom")}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-nom">
+                        Nom
+                      </label>
+                      <input
+                        id="cp-nom"
+                        className="rv-champ"
+                        autoComplete="family-name"
+                        maxLength={80}
+                        value={c.nom}
+                        onChange={maj("nom")}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-entreprise">
+                        Entreprise
+                      </label>
+                      <input
+                        id="cp-entreprise"
+                        className="rv-champ"
+                        autoComplete="organization"
+                        maxLength={120}
+                        value={c.entreprise}
+                        onChange={maj("entreprise")}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-tel">
+                        Téléphone / WhatsApp <small>(nous vous appelons sur ce numéro)</small>
+                      </label>
+                      <input
+                        id="cp-tel"
+                        type="tel"
+                        className="rv-champ"
+                        autoComplete="tel"
+                        placeholder="06 12 34 56 78"
+                        maxLength={30}
+                        value={c.telephone}
+                        onChange={maj("telephone")}
+                      />
+                    </div>
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-secteur">
+                        Secteur d&apos;activité
+                      </label>
+                      <select id="cp-secteur" className="rv-champ" value={c.secteur} onChange={maj("secteur")}>
+                        <option value="">Choisir…</option>
+                        {SECTEURS.map((s) => (
+                          <option key={s.valeur} value={s.valeur}>
+                            {s.libelle}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-commune">
+                        Commune
+                      </label>
+                      <input
+                        id="cp-commune"
+                        className="rv-champ"
+                        autoComplete="address-level2"
+                        maxLength={80}
+                        value={c.commune}
+                        onChange={maj("commune")}
+                      />
+                    </div>
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-siret">
+                        SIRET <small>(facultatif, 14 chiffres)</small>
+                      </label>
+                      <input
+                        id="cp-siret"
+                        className="rv-champ num"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder="123 456 789 00012"
+                        maxLength={20}
+                        value={c.siret}
+                        onChange={maj("siret")}
+                      />
+                    </div>
+                    <div>
+                      <label className="rv-libelle" htmlFor="cp-email">
+                        Adresse e-mail <small>(identifiant de connexion)</small>
+                      </label>
+                      <input id="cp-email" className="rv-champ cp-champ--lecture" value={utilisateur.email} readOnly />
+                      <p className="cp-aide">Pour changer d&apos;adresse, écrivez-nous.</p>
+                    </div>
+                  </div>
+
+                  {erreur ? (
+                    <p className="rv-erreur mt-4" role="alert">
+                      {erreur}
+                    </p>
+                  ) : null}
+                  </fieldset>
+                </DialogBody>
+
+                <DialogFooter>
+                  <button
+                    type="submit"
+                    className={`r-btn w-full justify-center ${envoi ? "rv-btn--attente" : "r-btn--noir"}`}
+                    disabled={envoi}
+                  >
+                    {envoi ? "Enregistrement…" : "Enregistrer mon profil"}
+                  </button>
+                  <DialogClose asChild>
+                    <button type="button" className="dlg-sortie" disabled={envoi}>
+                      Annuler
+                    </button>
+                  </DialogClose>
+                </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
   );
 }

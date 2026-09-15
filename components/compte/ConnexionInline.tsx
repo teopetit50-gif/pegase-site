@@ -98,6 +98,12 @@ type Props = {
      (mot de passe oublié, code de connexion) restent : ils servent à
      quelqu'un qui A un compte. */
   sansCreation?: boolean;
+  /* 15/09 — le module posé DANS un dialogue : le panneau porte déjà son
+     titre et sa phrase (DialogTitle / DialogDescription), et le module
+     affichait les siens juste dessous — deux titres empilés, vus à
+     l'écran sur « Changer mon mot de passe ». `sansTitre` les retire ;
+     le reste du module ne change pas. */
+  sansTitre?: boolean;
 };
 
 const TITRES: Record<ModeConnexion, string> = {
@@ -182,6 +188,7 @@ export default function ConnexionInline({
   cadre = true,
   empile = false,
   sansCreation = false,
+  sansTitre = false,
 }: Props) {
   /* sansCreation : un ?mode=creation resté dans un favori ne doit pas
      rouvrir la porte fermée — il retombe sur la connexion. */
@@ -432,10 +439,14 @@ export default function ConnexionInline({
         </div>
       ) : null}
 
-      <h3 className="r-h4">{titre ?? TITRES[mode]}</h3>
-      <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
-        {intro && mode === modeInitial ? intro : INTROS[mode]}
-      </p>
+      {sansTitre ? null : (
+        <>
+          <h3 className="r-h4">{titre ?? TITRES[mode]}</h3>
+          <p className="mt-2 max-w-[56ch] text-[15px] leading-[23px] text-[#3d3d3d]">
+            {intro && mode === modeInitial ? intro : INTROS[mode]}
+          </p>
+        </>
+      )}
 
       {erreur ? (
         <p className="rv-erreur mt-4" role="alert">
