@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
        se cherchent, et la page n'était indexable par aucun chemin. Même rang
        que /offres, dont elle est le complément. */
     { url: "/offres/sur-mesure", priorite: 0.9, frequence: "monthly" },
+    { url: "/secteurs", priorite: 0.9, frequence: "monthly" },
     { url: "/modeles", priorite: 0.9, frequence: "monthly" },
     { url: "/tarifs", priorite: 0.9, frequence: "monthly" },
     /* 01/09 — l'offre site à prix public, sœur de /tarifs. */

@@ -1,0 +1,307 @@
+/* ══════════════════════════════════════════════════════════════════════
+   OMEGA SECTEURS — le monde de la page /secteurs (15/09/2026)
+
+   Les jetons vivent sous `.p-secteurs`, JAMAIS sur `:root` : les poser sur
+   `:root` repeindrait les vingt-quatre autres pages du site. Tout ce
+   fichier est donc descendant de `.p-secteurs`. Supprimer le bloc supprime
+   la page, sans effet de bord ailleurs.
+
+   ══════════════════════════════════════════════════════════════════════
+   RELEVÉ — vertex-one-lovat.vercel.app (« Vertex », modèle du catalogue
+   /modeles, entrée `vertex`). Relevé du 15/09/2026 sur le HTML rendu et la
+   feuille compilée, mesuré aux cinq largeurs (390, 768, 1024, 1440, 1700)
+   en RECHARGEANT à chaque palier. Aucune valeur estimée.
+
+   POURQUOI CE MODÈLE. La page doit faire tenir douze métiers côte à côte
+   sans qu'aucun n'écrase les autres. Vertex compose entièrement en grille
+   à filets TIRETÉS, avec une croix à chaque intersection : une tuile y est
+   une cellule de grille, pas une carte posée sur un fond. C'est la seule
+   mise en page du catalogue où douze entrées se lisent comme un sommaire
+   plutôt que comme un mur de cartes.
+
+   COULEURS — lues sur `document.documentElement`, thème clair. La
+   référence passe par des alias `--color-fd-*` (Fumadocs) ; on écrit ici
+   les valeurs finales, sans l'indirection.
+     fond #fff · texte #171717 · secondaire #737373 · filet #e6e6e6
+     accent (survol, sélection) #f5f5f5 · anneau #171717 · rayon 0.5rem
+
+   TYPOGRAPHIE — relevé au getComputedStyle, par palier
+     h1     36/40 ls -0.9 · 48/48 ls -1.2 (768) · 60/60 ls -1.5 (1024+), 600
+     h2     36/40, 600, interlettre 0 — constante à toutes les largeurs
+     corps  16/24 · 18/28 (768+), #737373
+     sourcil  Geist Mono 11px, +0.2em, capitales, #737373
+
+   CADRE — la référence : 100 % puis 768 / 1024 / 1280 (à 1440) / 1400 (à
+   1700). Le dernier palier est INATTEIGNABLE ici : `PageShell` borne
+   `<main>` à 1440 px, donc la page plafonne à 1280 + gouttières. Le palier
+   1400 n'est pas porté — il ne servirait jamais.
+
+   ── LES DEUX SIGNATURES DE LA RÉFÉRENCE, reprises telles quelles ────────
+
+   1. LA BANDE HACHURÉE (`.sec-hachure`) — la respiration entre deux
+      sections. Relevée à l'identique depuis `.bg-dashed` de la feuille
+      compilée : dégradé à 45°, pas de 0.25rem. C'est ce qui empêche deux
+      sections blanches successives de se lire comme une seule.
+
+   2. LES CROIX D'INTERSECTION (`.sec-croix`) — un carré de 0.75rem dont le
+      `::before` est un filet horizontal et le `::after` un filet vertical,
+      le tout masqué par un dégradé radial (`#000 15%, transparent 100%`)
+      qui éteint les branches en s'éloignant du centre. Sans ce masque, on
+      obtient une croix pleine, qui se voit comme une faute d'impression.
+      La référence les pose aux quatre coins de ses grandes grilles.
+
+   ── ÉCARTS ASSUMÉS ─────────────────────────────────────────────────────
+
+   · LA POLICE D'AFFICHAGE. La référence déclare `"Tiempos Headline",
+     Georgia, serif` mais n'embarque aucune serif : elle retombe donc sur
+     Georgia. On charge **Gelasio**, libre et métriquement compatible avec
+     Georgia — même choix, même raison, que `/offres/relances-impayes`.
+   · LE MONDE SOMBRE NE VIENT PAS. La référence a une bascule clair/sombre.
+     Ni le bouton, ni le bloc `.dark` ne sont portés : la page est figée
+     dans son monde CLAIR, comme les quatre pages produit.
+   · PAS DE `@theme` ICI : il ne vaut que dans `globals.css`. Les
+     utilitaires que la référence tire de SON `@theme` (`bg-background`,
+     `text-muted-foreground`, `border-border`, `bg-card`…) N'EXISTENT PAS
+     sur ce site. Ils ne produisent aucune erreur : ils ne peignent rien,
+     EN SILENCE. Ils sont donc tous écrits en valeur arbitraire dans le
+     balisage — `text-[#737373]`, `border-[#e6e6e6]`, etc.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-secteurs {
+  --sec-fond: #ffffff;
+  --sec-texte: #171717;
+  --sec-second: #737373;
+  --sec-filet: #e6e6e6;
+  --sec-accent: #f5f5f5;
+  --sec-rayon: 0.5rem;
+
+  background: var(--sec-fond);
+  color: var(--sec-texte);
+  font-family: var(--font-geist), var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LE CADRE ─────────────────────────────────────────────────────────
+   Relevé : 100 % → 768 → 1024 → 1280. Les gouttières restent à l'appelant
+   (`px-6 sm:px-8 lg:px-12`), comme chez la référence.
+
+   LES DOUBLES RAILS. La référence enferme toute la page dans deux paires de
+   filets verticaux : un `border-x` sur le conteneur, puis un second à
+   l'intérieur, décalé de 4 / 6 / 8 px selon le palier. C'est ce qui donne
+   à la page son air de feuille réglée, et c'est ce qui ferme le treillis
+   des sections — sans eux, chaque filet horizontal s'arrête dans le vide.
+   Ils sont posés dans `page.tsx`, autour de toutes les sections. */
+.p-secteurs .sec-wrap {
+  width: 100%;
+  margin-inline: auto;
+}
+@media (min-width: 640px) {
+  .p-secteurs .sec-wrap { max-width: 768px; }
+}
+@media (min-width: 1024px) {
+  .p-secteurs .sec-wrap { max-width: 1024px; }
+}
+@media (min-width: 1280px) {
+  .p-secteurs .sec-wrap { max-width: 1280px; }
+}
+
+/* ── TYPOGRAPHIE ───────────────────────────────────────────────────────
+
+   LA SERIF EST SUR TOUS LES TITRES, pas sur deux d'entre eux. La feuille
+   compilée de la référence porte une règle d'élément, invisible dans le
+   balisage : `h1,h2{font-family:var(--font-tiempos)}`. Premier brouillon
+   ici : une classe `.sec-serif` posée à la main sur deux titres, le reste
+   en Geist. C'était un contresens — chez la référence, TOUT h1 et TOUT h2
+   sont en serif, et h3 comme le corps restent en Geist. La règle est donc
+   reproduite telle quelle, par élément.
+
+   Et le poids reste 600 : `font-semibold`, pas `font-bold`. Une Georgia
+   en 700 sur un titre de 60 px se lit comme un journal, pas comme la
+   référence. */
+.p-secteurs h1,
+.p-secteurs h2 {
+  font-family: var(--font-gelasio), Georgia, "Times New Roman", serif;
+}
+
+/* `text-4xl md:text-5xl lg:text-6xl` + `tracking-tight` chez la référence.
+   L'interlettre est écrite en em (-0.025em) plutôt qu'en pixels par palier :
+   c'est la même valeur — -0.9 / -1.2 / -1.5 px aux trois tailles — et elle
+   suit la taille si elle change. */
+.p-secteurs .sec-h1 {
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+@media (min-width: 768px) {
+  .p-secteurs .sec-h1 { font-size: 48px; line-height: 48px; }
+}
+@media (min-width: 1024px) {
+  .p-secteurs .sec-h1 { font-size: 60px; line-height: 60px; }
+}
+
+/* h2 : 36/40 à TOUTES les largeurs chez la référence, sans interlettre —
+   c'est délibéré, un titre de section y garde le même poids sur téléphone
+   que sur écran. */
+.p-secteurs .sec-h2 {
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.p-secteurs .sec-lead {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--sec-second);
+  text-wrap: pretty;
+}
+@media (min-width: 768px) {
+  .p-secteurs .sec-lead { font-size: 18px; line-height: 28px; }
+}
+
+.p-secteurs .sec-body {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--sec-texte);
+  text-wrap: pretty;
+}
+@media (min-width: 768px) {
+  .p-secteurs .sec-body { font-size: 16px; line-height: 26px; }
+}
+
+/* Le sourcil monospace des sections — relevé à 11px / +0.2em / capitales. */
+.p-secteurs .sec-sourcil {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sec-second);
+}
+
+/* ── SIGNATURE 1 — LA BANDE HACHURÉE ───────────────────────────────────
+   Relevé à l'identique de `.bg-dashed` (feuille compilée de la référence).
+   `--color-border` y vaut #e6e6e6 ; on écrit la variable de la page. */
+.p-secteurs .sec-hachure {
+  background-image: linear-gradient(
+    45deg,
+    var(--sec-filet) 12.5%,
+    transparent 12.5%,
+    transparent 50%,
+    var(--sec-filet) 50%,
+    var(--sec-filet) 62.5%,
+    transparent 62.5%,
+    transparent 100%
+  );
+  background-size: 0.25rem 0.25rem;
+}
+
+/* ── SIGNATURE 2 — LA CROIX D'INTERSECTION ─────────────────────────────
+   Posée en absolu sur un coin de grille ; le décalage de translation est
+   porté par l'appelant, puisqu'il dépend du coin. Le masque radial est ce
+   qui fait la différence entre une croix dessinée et une croix imprimée. */
+.p-secteurs .sec-croix {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle, #000 15%, transparent 100%);
+  mask-image: radial-gradient(circle, #000 15%, transparent 100%);
+}
+.p-secteurs .sec-croix::before,
+.p-secteurs .sec-croix::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  background: rgba(23, 23, 23, 0.25);
+}
+.p-secteurs .sec-croix::before { height: 1px; }
+.p-secteurs .sec-croix::after { width: 1px; }
+
+/* ── LA TUILE DE MÉTIER ────────────────────────────────────────────────
+   Une cellule de grille, pas une carte : aucun fond au repos, aucune ombre,
+   le filet tireté de la grille fait tout le travail. Trois états seulement.
+
+   PIÈGE DE PALETTE, celui qui a déjà coûté une reprise sur la page RELOAD
+   (Metiers.tsx, 10/09) : `--sec-accent` (#f5f5f5) est très proche du fond
+   blanc. Une sélection peinte au fond seul est INVISIBLE. La sélection se
+   marque donc au TRAIT plein en couleur de texte, et le fond n'est qu'un
+   appoint. Ne pas « simplifier » en retirant la barre. */
+.p-secteurs .sec-tuile {
+  position: relative;
+  cursor: pointer;
+  text-align: left;
+  color: var(--sec-second);
+  transition: background-color 0.15s ease-out, color 0.15s ease-out;
+}
+.p-secteurs .sec-tuile:hover {
+  background-color: var(--sec-accent);
+  color: var(--sec-texte);
+}
+.p-secteurs .sec-tuile[aria-selected="true"] {
+  background-color: var(--sec-accent);
+  color: var(--sec-texte);
+  font-weight: 500;
+}
+/* La barre pleine de l'onglet sélectionné : c'est elle qu'on voit. */
+.p-secteurs .sec-tuile[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: -1px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--sec-texte);
+}
+.p-secteurs .sec-tuile:focus-visible {
+  outline: 2px solid var(--sec-texte);
+  outline-offset: -2px;
+}
+
+/* ── LE BOUTON ─────────────────────────────────────────────────────────
+   Relevé sur le CTA de la référence : hauteur 2rem, rayon `--radius - 2px`,
+   texte 12px 500, anneau intérieur à 10 % plutôt qu'une bordure franche. */
+.p-secteurs .sec-btn {
+  display: inline-flex;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  border-radius: calc(var(--sec-rayon) - 2px);
+  padding-inline: 0.875rem;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.p-secteurs .sec-btn--plein {
+  background: var(--sec-texte);
+  color: #fafafa;
+}
+.p-secteurs .sec-btn--plein:hover { background: #2e2e2e; }
+.p-secteurs .sec-btn--creux {
+  background: var(--sec-fond);
+  color: var(--sec-texte);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), inset 0 0 0 1px rgba(23, 23, 23, 0.1);
+}
+.p-secteurs .sec-btn--creux:hover { background: var(--sec-accent); }
+
+/* ── MOUVEMENT ─────────────────────────────────────────────────────────
+   La référence fait entrer ses cellules au défilement (`fade-in-up`, 20 px).
+   Une seule règle ici, sur le panneau : le changement d'onglet doit se voir,
+   sinon on doute d'avoir cliqué. 120 ms, translation seule — pas d'opacité
+   qui parte de zéro : un panneau à `opacity: 0` reste invisible dès que le
+   navigateur cesse de produire des images (constaté sur le menu, 11/09). */
+@keyframes sec-panneau {
+  from { transform: translateY(6px); }
+  to   { transform: translateY(0); }
+}
+.p-secteurs .sec-panneau {
+  animation: sec-panneau 120ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-secteurs .sec-panneau { animation: none; }
+}

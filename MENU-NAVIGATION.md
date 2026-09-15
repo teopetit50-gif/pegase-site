@@ -28,7 +28,8 @@ entrée là suffit : elle apparaît aux deux endroits.
 
 ## Les cinq rubriques
 
-1. **Nos offres** — case vedette `/offres`, puis les 4 produits et Sur mesure
+1. **Nos offres** — case vedette `/offres`, puis `/secteurs`, les 4 produits
+   et Sur mesure
 2. **Votre site** — « Voir les modèles » (`/modeles`), « Prix et commande » (`/tarifs/site`)
 3. **Intégrations** — lien direct
 4. **Tarifs** — lien direct
@@ -75,6 +76,23 @@ tactile. Captures : `node outils/capture-menu.mjs`.
 - Échap referme, la souris qui quitte la barre referme.
 - Zéro débord horizontal aux cinq largeurs. Les treize destinations du menu
   répondent 200.
+## Recette du 15/09 — l'entrée /secteurs
+
+`/secteurs` entre en tête de « Nos offres », qui passe de six à sept
+destinations. Recette repassée : bandeau 504 × 36 à 1024, 1440 et 1700,
+panneau à 7 liens, aucun panneau hors fenêtre, Échap et sortie souris
+referment, débord 0 partout.
+
+**Le seul écart, et il est assumé.** Sur le panneau tactile, déplier « Nos
+offres » demande maintenant **13 px de défilement à 390 et 29 px à 768** — là
+où la recette du 11/09 relevait 0. Le panneau au repos n'a pas bougé : cinq
+rangées, aucun défilement, pied ancré. C'est la septième entrée dépliée qui
+dépasse de treize pixels. Retirer l'entrée ou la déplacer sous « Ressources »
+rendrait le zéro ; on garde les treize pixels, parce que l'entrée par le
+métier est la porte de celui qui ne sait pas encore quel système le concerne.
+À surveiller : une huitième entrée ferait franchir le seuil où le pied de
+panneau sort de l'écran.
+
 - Panneau tactile (390 et 768) : **cinq rangées, défilement 0**, pied ancré
   au bas de l'écran, chaque rubrique déplie toutes ses entrées et replie la
   précédente, aucun élément à opacité < 1.

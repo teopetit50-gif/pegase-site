@@ -48,6 +48,14 @@ import { MODELES } from "@/components/modeles/donnees";
      « Votre site, à prix public » reste le <title> de /tarifs/site, il
      travaille pour la recherche, pas pour la navigation.
 
+   · 15/09 — /secteurs entre en TÊTE du groupe des offres, avant les quatre
+     systèmes. C'est l'entrée de celui qui ne sait pas encore lequel le
+     concerne : il arrive par son métier et la page l'aiguille vers le
+     système. Placée après les quatre, elle n'aurait été lue que par ceux
+     qui n'en avaient plus besoin. Le groupe passe ainsi de six à sept
+     destinations — c'est le seul qui en porte autant, et la recette du
+     panneau a été repassée aux cinq largeurs à cette occasion.
+
    · 10/09 — /offres/sur-mesure : la page n'était atteignable que par un
      lien en bas de /offres. Le seul endroit du site où l'on vend ce qui ne
      rentre dans aucun paquet était donc le seul qu'on ne pouvait pas
@@ -91,6 +99,11 @@ export const MENU: Rubrique[] = [
         "Quatre systèmes prêts à déployer. Sur vos outils en place, sous votre validation.",
     },
     entrees: [
+      {
+        href: "/secteurs",
+        label: "Votre métier",
+        texte: "Douze métiers, ce qui leur échappe et ce que nous y prenons.",
+      },
       {
         href: "/offres/relances-impayes",
         label: "CASHD",
