@@ -14,6 +14,7 @@ import Partage from "@/components/Partage";
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
+import Lien from "@/components/Lien";
 import {
   COMPARATIF,
   COURRIEL,
@@ -222,12 +223,12 @@ export default function Formules() {
             </span>{" "}
             Décrivez votre situation en deux lignes&nbsp;: votre activité, votre commune, ce qui vous coûte le plus cher. Nous vous répondons le jour même avec le format adapté, et l&apos;agenda en ligne fait le reste.
           </p>
-          <a
+          <Lien
             href={lienContact("avant")}
             className="r-btn r-btn--fil shrink-0"
           >
             Décrire ma situation
-          </a>
+          </Lien>
         </div>
       </section>
 
@@ -236,12 +237,12 @@ export default function Formules() {
         <div className="r-wrap py-14 sm:py-20">
           <h2 className="r-h2">Comparer les formats</h2>
           <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
-            <a
+            <Lien
               href={lienContact("avant")}
               className="r-lien"
             >
               Demander conseil
-            </a>
+            </Lien>
           </div>
 
           {/* en-tête collant : les trois formules restent lisibles pendant

@@ -1,0 +1,169 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CarteLieux.css — la feuille de la chaîne des trois lieux de /vos-donnees
+
+   Écrite le 14/09/2026, en même temps que CarteLieux.tsx. Tout est scopé
+   sous `.vd`, la classe racine de la page, et préfixé `chn-` (vérifié par
+   grep : ni `.chn`, ni `chn-` n'existaient ailleurs dans app/globals.css
+   ni dans components/).
+
+   ⚠ AUCUN @keyframes ICI, ET C'EST VOLONTAIRE. Un @keyframes est global
+   quoi qu'on fasse ; celui dont ce composant a besoin existe déjà et
+   s'appelle `vd-monte-in` (bloc « apparitions au défilement » de
+   globals.css, ligne ~6048). Les étapes portent donc `.vd-monte`, la
+   classe de la page, et les lignes internes des maquettes gardent leur
+   `.vd-ap` cadencé par `--d`. Une seule mécanique d'apparition sur ces
+   blocs, exactement comme avant — rien à déclarer, rien à faire collisionner.
+
+   GÉOMÉTRIE. Deux variables portent tout le dessin et seules elles changent
+   aux paliers : `--chn-jalon` (le diamètre de la pastille de numéro) et
+   `--chn-gap` (la gouttière de la grille, qui est AUSSI la longueur du trait
+   de liaison en colonne unique).
+
+     < 768 px    1 colonne,  gouttière 20 — le trait est vertical
+     ≥ 768 px    3 colonnes, gouttière 24 — le trait devient horizontal
+     ≥ 1024 px   3 colonnes, gouttière 28
+
+   LE TRAIT DE LIAISON, qui est tout le propos de cette forme. Il n'est pas
+   dessiné en un seul morceau sur la grille : chaque étape sauf la dernière
+   porte son propre segment, vers l'étape suivante. C'est ce qui le rend
+   indépendant de la largeur des colonnes — aucun calcul de tiers de grille
+   à maintenir, et il reste juste si le nombre de lieux change un jour.
+
+   En 3 colonnes, le segment part du centre de SA pastille et va au centre
+   de la pastille suivante : il déborde donc volontairement de sa `<li>` par
+   la droite (`right` négatif) pour traverser la gouttière. Il reste dans la
+   largeur du `<ol>` — aucun débordement horizontal de la page.
+
+   En colonne unique, il n'occupe QUE la gouttière (`top: 100%`, hauteur
+   `--chn-gap`) : du bas d'une carte au haut de la pastille suivante. Aller
+   le chercher jusqu'au centre de la pastille du dessus n'apporterait rien,
+   la carte, pleine largeur, le masquerait sur tout ce trajet.
+
+   Le demi-pixel (`- 0.5px`) centre le trait d'1 px sur l'axe de la pastille
+   plutôt que de le poser un demi-pixel plus bas : sans lui, le trait touche
+   la pastille en biais aux écrans non Retina.
+
+   COULEURS : `--vd-line` pour le trait et le cerclage, `--vd-soft` pour la
+   carte, `--vd-ink` pour le numéro. Aucune valeur nouvelle, aucun accent,
+   aucun dégradé — les trois jetons sont ceux du bloc `.vd`.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Le créneau de la section. `margin-top` ici plutôt qu'un `mt-14` dans le
+   JSX : l'appelant colle une seule balise et n'a aucune classe à retenir. */
+.vd .chn {
+  margin-top: 56px;
+}
+@media (min-width: 1024px) {
+  .vd .chn {
+    margin-top: 64px;
+  }
+}
+
+/* ——— le rail : la grille des étapes ——— */
+.vd .chn-rail {
+  --chn-jalon: 36px;
+  --chn-gap: 20px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--chn-gap);
+}
+@media (min-width: 768px) {
+  .vd .chn-rail {
+    --chn-gap: 24px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .vd .chn-rail {
+    --chn-gap: 28px;
+  }
+}
+
+/* ——— une étape : la pastille, puis la carte ——— */
+.vd .chn-etape {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* Le segment de liaison vers l'étape suivante.
+   Colonne unique : vertical, exactement la hauteur de la gouttière, calé sur
+   l'axe vertical de la pastille. */
+.vd .chn-etape:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--chn-jalon) / 2 - 0.5px);
+  top: 100%;
+  width: 1px;
+  height: var(--chn-gap);
+  background: var(--vd-line);
+}
+/* Trois colonnes : horizontal, du centre de cette pastille au centre de la
+   suivante. Il passe dans la bande vide à droite du numéro, au-dessus des
+   cartes — il ne croise donc jamais un contenu. */
+@media (min-width: 768px) {
+  .vd .chn-etape:not(:last-child)::before {
+    left: calc(var(--chn-jalon) / 2);
+    right: calc(-1 * (var(--chn-gap) + var(--chn-jalon) / 2));
+    top: calc(var(--chn-jalon) / 2 - 0.5px);
+    width: auto;
+    height: 1px;
+  }
+}
+
+/* ——— le jalon : le rang de l'étape, posé SUR le trait ———
+   Fond opaque et `z-index` au-dessus du segment : le trait s'arrête
+   visuellement au bord de la pastille sans qu'on ait à le raccourcir. */
+.vd .chn-jalon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--chn-jalon);
+  height: var(--chn-jalon);
+  border: 1px solid var(--vd-line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--vd-ink);
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* ——— la carte du lieu ———
+   Même vocabulaire que `.vd-carte` : fond `--vd-soft`, rayon `--vd-r-md`,
+   aucun filet, aucune ombre. `z-index: 1` la tient au-dessus du segment de
+   liaison — ceinture et bretelles, les deux ne se croisent dans aucun des
+   deux paliers, mais l'ordre est écrit plutôt que subi. */
+.vd .chn-carte {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: var(--vd-soft);
+  border-radius: var(--vd-r-md);
+  padding: 20px;
+}
+@media (min-width: 1024px) {
+  .vd .chn-carte {
+    padding: 24px;
+  }
+}
+
+/* Les deux respirations du bloc de texte, reprises telles quelles de la
+   section actuelle (`mt-7` et `mt-1.5`) pour ne pas déplacer la ligne de
+   base des titres. */
+.vd .chn-titre {
+  margin-top: 28px;
+}
+.vd .chn-soustitre {
+  margin-top: 6px;
+}

@@ -4,12 +4,9 @@ import Link from "next/link";
 import Apparition from "@/components/donnees/Apparition";
 import HeroPlein from "@/components/donnees/HeroPlein";
 import Options, { type Option } from "@/components/donnees/Options";
-import {
-  MaquetteBase,
-  MaquetteMoteur,
-  MaquetteOutil,
-  SchemaTrajet,
-} from "@/components/donnees/Media";
+import { SchemaTrajet } from "@/components/donnees/Media";
+import CarteLieux from "@/components/donnees/CarteLieux";
+import CartesGaranties from "@/components/donnees/CartesGaranties";
 import {
   Chevron,
   FlecheCoin,
@@ -124,24 +121,6 @@ export const metadata: Metadata = {
     "Votre base hébergée à Francfort, dans l'Union européenne, ou une machine installée dans vos locaux dont rien ne sort. Qui reçoit quoi, ce qui n'entraîne aucun modèle, et ce que vous récupérez à tout moment.",
 };
 
-/* ——— les trois lieux de passage ——— */
-const LIEUX = [
-  {
-    maquette: MaquetteOutil,
-    titre: "Votre outil",
-    soustitre: "La donnée reste là où elle est née",
-  },
-  {
-    maquette: MaquetteMoteur,
-    titre: "Le système",
-    soustitre: "Il lit, décide et n'archive rien",
-  },
-  {
-    maquette: MaquetteBase,
-    titre: "La base",
-    soustitre: "Francfort, région eu-central-1",
-  },
-];
 
 /* ——— les six garanties ——— */
 const GARANTIES = [
@@ -418,30 +397,7 @@ export default function VosDonnees() {
                 </p>
               </div>
 
-              {/* un seul bloc gris, trois colonnes séparées par un filet —
-                  exactement le motif de la référence.
-                  Les colonnes montent l'une après l'autre (`--i`), et à
-                  l'intérieur de chaque maquette les lignes se posent une par une
-                  avec le retard de leur colonne (`--d`). L'ordre raconte le
-                  trajet : la boîte mail, puis le moteur, puis la base. */}
-              <Apparition className="mt-14 grid grid-cols-1 overflow-hidden rounded-[var(--vd-r-md)] bg-[var(--vd-soft)] md:grid-cols-3">
-                {LIEUX.map((l, i) => {
-                  const Maquette = l.maquette;
-                  return (
-                    <div
-                      key={l.titre}
-                      style={{ "--i": i, "--d": `${i * 110}ms` } as React.CSSProperties}
-                      className={`vd-monte px-6 pt-8 pb-8 md:px-8 ${
-                        i > 0 ? "border-t border-[#e4e4e4] md:border-t-0 md:border-l" : ""
-                      }`}
-                    >
-                      <Maquette />
-                      <h3 className="vd-h3 mt-7">{l.titre}</h3>
-                      <p className="vd-small mt-1.5">{l.soustitre}</p>
-                    </div>
-                  );
-                })}
-              </Apparition>
+              <CarteLieux />
             </div>
           </section>
 
@@ -450,23 +406,9 @@ export default function VosDonnees() {
             <div className="vd-wrap">
               <h2 className="vd-h2 text-center">Ce que ça vous garantit</h2>
 
-              <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {GARANTIES.map((g) => {
-                  const Icone = g.icone;
-                  return (
-                    <div key={g.titre} className="vd-carte">
-                      <span className="vd-chip">
-                        <Icone className="h-5 w-5" />
-                      </span>
-                      <h3 className="vd-h3 mt-10">{g.titre}</h3>
-                      {/* le texte est poussé en bas de carte : c'est ce qui donne
-                          à la grille de la référence son alignement par le bas
-                          malgré des titres de une à trois lignes */}
-                      <p className="vd-small mt-auto pt-10">{g.texte}</p>
-                    </div>
-                  );
-                })}
-              </div>
+              <CartesGaranties
+                garanties={GARANTIES.map(({ titre, texte }) => ({ titre, texte }))}
+              />
             </div>
           </section>
 

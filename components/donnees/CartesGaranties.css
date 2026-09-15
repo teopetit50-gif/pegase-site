@@ -1,0 +1,195 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CartesGaranties.css — la feuille des cartes de « Ce que ça vous
+   garantit » (section #garanties de /vos-donnees), 14/09/2026
+
+   Tout est scopé sous `.vd`, la classe racine de la page, et préfixé
+   `cg-` — vérifié avant d'écrire : ni `.cg-`, ni `--cg-`, ni `cg-`
+   n'existaient dans app/globals.css ni ailleurs dans components/.
+
+   AUCUNE `@keyframes` ici, et c'est délibéré : la nappe ne fait que
+   monter en opacité au survol et le relief est une transition. Rien ne
+   s'anime tout seul, donc rien à préfixer dans l'espace global.
+
+   CE QUI N'EST PAS REDÉCLARÉ. `.vd-carte` (globals.css) garde le fond
+   #f2f2f2, le rayon 16, le padding 28/32 et la colonne flex ; `.vd-chip`
+   garde sa pastille 40×40 ; `.vd-h3` et `.vd-small` gardent leur échelle.
+   Cette feuille n'AJOUTE que le relief, le cadre du masque et les
+   marges. Aucune propriété n'est écrite deux fois, donc l'ordre des
+   feuilles (globals.css d'un côté, cette feuille importée par le
+   composant de l'autre) n'a aucune conséquence — le piège classique du
+   dépôt est contourné par construction, pas par un `!important`.
+
+   La seule exception assumée est le fond de la pastille au survol, où
+   `.vd .cg-carte:hover .vd-chip` (0,3,0) bat `.vd .vd-chip` (0,2,0)
+   quelle que soit la feuille qui arrive la première.
+
+   LE MASQUE. `--cg-x` / `--cg-y` portent le centre du masque radial. Ils
+   valent 50 % au repos : sans JavaScript, sans souris, ou avant
+   hydratation, la carte est ENTIÈRE et rien n'attend un script pour
+   s'afficher. Le JavaScript ne fait que déplacer ce centre.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la grille : 1 / 2 / 3 colonnes ———
+   Les paliers 640 et 1024 sont ceux de `sm:` et `lg:` de Tailwind : la
+   section les portait en utilitaires avant cette reprise, la rangée ne
+   change donc de rythme ni plus tôt ni plus tard qu'avant.
+   `minmax(0, 1fr)` et non `1fr` : une piste `1fr` a une largeur minimale
+   `auto`, qu'un contenu insécable pousse au-delà de la colonne. */
+.vd .cg-grille {
+  list-style: none;
+  margin: 56px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+@media (min-width: 640px) {
+  .vd .cg-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .vd .cg-grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ——— la carte ———
+   Le filet est un `box-shadow: inset`, pas un `border` : un bord ajoute
+   2 px à la boîte et décalerait le padding relevé au pixel (28/32) ;
+   l'ombre interne ne déplace rien et se transitionne proprement.
+   L'ombre externe est une levée, pas une ombre portée : 24 px de flou
+   pour −18 px d'étalement, elle ne dépasse la carte que de quelques
+   pixels. */
+.vd .cg-carte {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 0 0 0 rgba(0, 0, 0, 0);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+
+  /* centre et rayon du masque au repos */
+  --cg-x: 50%;
+  --cg-y: 50%;
+  --cg-rayon: 210px;
+}
+.vd .cg-carte:hover {
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.14),
+    0 10px 24px -18px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+.vd .cg-carte .vd-chip {
+  transition: background-color 0.3s ease;
+}
+.vd .cg-carte:hover .vd-chip {
+  background: #dcdcdc;
+}
+
+/* Tout ce qui se lit passe AU-DESSUS de la nappe. La règle vise les
+   enfants directs et non un conteneur ajouté : `.vd-carte` est une
+   colonne flex, et c'est `margin-top: auto` sur le paragraphe qui aligne
+   la rangée par le bas — un div d'emballage casserait cet alignement. */
+.vd .cg-carte > *:not(.cg-nappe) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Les deux écarts de la section, repris au pixel des utilitaires qu'ils
+   remplacent : `mt-10` (40) sous la pastille, `mt-auto pt-10` sur le
+   texte — c'est ce dernier qui donne à la grille son alignement par le
+   bas malgré des titres de une à trois lignes. */
+.vd .cg-titre {
+  margin-top: 40px;
+}
+.vd .cg-texte {
+  margin-top: auto;
+  padding-top: 40px;
+}
+
+/* ——— la nappe chiffrée ———
+   Elle vit SOUS le contenu (z-index 0 contre 1) et n'écrit qu'en gris
+   clair : le titre à #212121 et le texte à 70 % de noir restent lisibles
+   par-dessus. Deux précautions plutôt qu'une, comme demandé.
+   `user-select: none` + `pointer-events: none` : on ne peut ni la
+   sélectionner, ni l'attraper, ni la copier avec le texte de la carte. */
+.vd .cg-nappe {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  overflow: hidden;
+  padding: 10px 12px;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: rgba(0, 0, 0, 0.45);
+  word-break: break-all;
+  transition: opacity 0.42s ease;
+
+  /* `mask-repeat` et `mask-size` sont déclarés : leurs valeurs par défaut
+     (repeat / auto) suffisent pour un dégradé, mais un raccourci
+     `mask` posé ailleurs les réinitialiserait sans bruit. */
+  -webkit-mask-image: radial-gradient(
+    circle var(--cg-rayon) at var(--cg-x) var(--cg-y),
+    #000 0%,
+    rgba(0, 0, 0, 0.45) 58%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--cg-rayon) at var(--cg-x) var(--cg-y),
+    #000 0%,
+    rgba(0, 0, 0, 0.45) 58%,
+    transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+.vd .cg-carte[data-cg-chiffre]:hover .cg-nappe {
+  opacity: 1;
+}
+
+/* ——— sans souris ———
+   `display: none` et non `opacity: 0` : le navigateur ne met la nappe ni
+   en page ni à l'écran. Le composant, de son côté, n'écrit même pas la
+   chaîne de caractères sur ces appareils — voir CartesGaranties.tsx.
+   Le survol est neutralisé aussi : sur tactile, `:hover` colle après une
+   tape et la carte resterait levée sans raison. */
+@media (hover: none) {
+  .vd .cg-nappe {
+    display: none;
+  }
+  .vd .cg-carte:hover {
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.04),
+      0 0 0 0 rgba(0, 0, 0, 0);
+    transform: none;
+  }
+}
+
+/* ——— mouvement réduit ———
+   Aucune nappe, aucune levée, aucune transition. Le filet se marque
+   encore au survol, mais d'un coup : c'est un changement d'état, pas un
+   mouvement, et il garde l'affordance sans rien faire bouger. */
+@media (prefers-reduced-motion: reduce) {
+  .vd .cg-nappe {
+    display: none;
+  }
+  .vd .cg-carte {
+    transition: none;
+  }
+  .vd .cg-carte:hover {
+    transform: none;
+  }
+}

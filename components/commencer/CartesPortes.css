@@ -1,0 +1,177 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CartesPortes.css — la feuille des trois cartes de /commencer
+
+   Écrite le 14/09/2026, en même temps que CartesPortes.tsx.
+
+   ORIGINE. `card-spotlight` d'Aceternity UI, dont tout le style tient en
+   utilitaires dans le TSX et dont le masque est réécrit à chaque image par
+   `useMotionTemplate`. Ici le masque est écrit UNE FOIS : seules deux
+   propriétés personnalisées bougent (`--cpo-x`, `--cpo-y`), posées sur la
+   carte par le TSX et héritées par le calque.
+
+   POURQUOI CE FICHIER EXISTE. Rien de tout cela ne s'écrit en utilitaire :
+   ni un masque en `radial-gradient` piloté par variables, ni une trame de
+   points, ni une media query `(hover: none)` — et les jetons shadcn
+   (`bg-card`, `bg-muted`…) n'existent pas dans ce dépôt.
+
+   CE QUI EST JETÉ. Le `CanvasRevealEffect` de la source et ses trois
+   dépendances (@react-three/fiber, three, un shader GLSL) : le motif révélé
+   est une trame de points en `radial-gradient` répété. Ses deux couleurs
+   d'accent, son `bg-black`, ses `border-neutral-800` et sa variante `dark:`.
+   AUCUNE `@keyframes` — un `@keyframes` est global quoi qu'on fasse, et il
+   n'y a rien à nommer : le seul mouvement est une transition d'opacité et
+   le déplacement du masque, qui suit le pointeur et non une horloge.
+
+   ÉCARTS ASSUMÉS. Tout est scopé sous `.resa` et préfixé `cpo-` — vérifié
+   par grep : ni `.cpo-`, ni `--cpo-` n'existaient dans app/globals.css ni
+   dans components/. ⚠ Ne pas confondre avec `.cp-` (l'espace client, lui
+   aussi sous `.resa`, globals.css ligne 6139) ni avec `cpt-` (components/
+   compte/) : c'est précisément pour cela que le préfixe est `cpo-`.
+   Les couleurs de la page ne bougent pas d'un cran : les trois teintes de
+   `.cm-nappe` / `.cm-tuile` restent ce qu'elles sont, la lueur n'ajoute
+   qu'un gris très clair (#fafafa, le cran zinc de la maison) et de l'encre
+   à 16 % pour les points. Aucun accent, aucun dégradé coloré.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la carte ———
+   `.cm-carte` (globals.css) garde tout : fond, rayon, padding, nappe,
+   bouton. Ne vient ici que ce qu'elle n'a pas — les variables de la lueur,
+   et le garde-fou de colonne.
+
+   VALEUR DE REPOS FINIE : les deux positions par défaut sont des
+   pourcentages, donc la carte est complète AVANT la première ligne de
+   JavaScript, et le reste si le JavaScript ne s'exécute jamais (le calque
+   est à `opacity: 0` hors survol : la carte rendue est celle du 05/09, au
+   pixel). Le TSX ne fait que déplacer un masque, il n'ajoute rien.
+
+   `min-width: 0` : c'est l'élément de grille. Sans lui, un mot insécable
+   (« Indépendants & TPE-PME », « TPE-PME ») élargit sa colonne au lieu de
+   se couper, et c'est la page entière qui déborde en largeur. */
+.resa .cpo-carte {
+  --cpo-x: 50%;
+  --cpo-y: 0%;
+  --cpo-rayon: 240px;
+
+  min-width: 0;
+}
+
+/* ——— le calque de lueur ———
+   Un seul élément porte les deux couches de la source, dans cet ordre de
+   peinture (la première déclarée est la plus haute) :
+     1. la trame de points — le remplaçant du canvas : encre à 16 %, un
+        point de 1 px tous les 13 px. Pas assez serrée pour faire une
+        texture, assez pour qu'on voie qu'il y a quelque chose dessous ;
+     2. la lueur elle-même — un aplat #fafafa à 62 %, qui éclaircit aussi
+        bien le gris de la carte (#e8e8e8) que la nappe montée au survol.
+   Les deux ne se voient QUE sous le masque, qui est le seul élément mobile :
+   un disque opaque au pointeur, éteint à 76 % de son rayon.
+
+   `inset: 0` et `.cm-carte` est en `overflow: clip` : la lueur ne peut pas
+   sortir de la carte, exactement comme chez la source.
+   `pointer-events: none` : le calque ne doit jamais intercepter le clic —
+   la carte entière EST le lien.
+   Les deux écritures du masque : `mask-image` est non préfixé partout
+   depuis Safari 16.4, `-webkit-mask-image` couvre les Safari antérieurs.
+   Noir vers noir-transparent (et non le mot-clé `transparent`) : les deux
+   moteurs lisent l'alpha, et la rampe reste neutre. */
+.resa .cpo-lueur {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0, 0, 0.2, 1);
+
+  background-image:
+    radial-gradient(circle at center, rgba(9, 9, 11, 0.16) 1px, rgba(9, 9, 11, 0) 1.8px),
+    linear-gradient(rgba(250, 250, 250, 0.62), rgba(250, 250, 250, 0.62));
+  background-size: 13px 13px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+
+  -webkit-mask-image: radial-gradient(
+    var(--cpo-rayon) circle at var(--cpo-x) var(--cpo-y),
+    rgb(0 0 0 / 1) 0%,
+    rgb(0 0 0 / 0) 76%
+  );
+  mask-image: radial-gradient(
+    var(--cpo-rayon) circle at var(--cpo-x) var(--cpo-y),
+    rgb(0 0 0 / 1) 0%,
+    rgb(0 0 0 / 0) 76%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Allumage au survol — et RIEN d'autre : aucun `transform`, aucune marge,
+   aucun `padding` ne change. La zone de clic est immobile au survol, la
+   seule réponse géométrique de la carte reste le `:active` du 01/09
+   (`scale(0.985)`, globals.css), qui répond au clic et non au passage. */
+.resa .cpo-carte:hover .cpo-lueur {
+  opacity: 1;
+}
+
+/* ——— le focus clavier ———
+   Trois déclarations pour un seul état, celui du survol :
+     · le contour, qui est la seule marque lisible sans couleur ;
+     · la nappe, montée comme au survol ;
+     · le bouton, passé au noir comme au survol.
+   Spécificité : `.resa .cpo-carte:focus-visible .cm-nappe` pèse (0,4,0)
+   contre (0,2,0) pour `.resa .cm-nappe` — gagné quel que soit l'ordre
+   d'émission des deux feuilles. Face à `.resa .cm-carte:hover .cm-nappe`,
+   à (0,4,0) lui aussi, il n'y a pas de conflit : les deux règles posent la
+   MÊME valeur, et un clic à la souris (qui focalise aussi le lien) ne
+   déclenche pas `:focus-visible`.
+   Le contour n'est pas rogné par l'`overflow: clip` de la carte : une
+   boîte ne rogne jamais son propre contour, seulement ses descendants.
+   Il suit l'arrondi de 16 px tout seul, et 2 px de retrait le tiennent
+   loin des 24 px de gouttière de la grille. */
+.resa .cpo-carte:focus-visible {
+  outline: 2px solid #050505;
+  outline-offset: 2px;
+}
+.resa .cpo-carte:focus-visible .cm-nappe {
+  transform: scaleY(1);
+}
+.resa .cpo-carte:focus-visible .cm-btn {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* ——— le palier : QUE la variable ———
+   Sous 768 px les cartes passent sur une colonne et deviennent plus hautes
+   que larges ; un disque de 240 px y couvrirait presque toute la largeur et
+   la lueur cesserait de désigner quoi que ce soit. 180 px garde le rapport
+   du relevé. (Ce palier ne sert qu'à une fenêtre étroite sur écran à
+   souris : sur tactile la lueur est éteinte au bloc suivant.) */
+@media (max-width: 767px) {
+  .resa .cpo-carte {
+    --cpo-rayon: 180px;
+  }
+}
+
+/* ——— tactile : aucune lueur ———
+   `display: none` et non `opacity: 0` : sur un appareil sans survol, le
+   calque n'a aucune raison d'exister — ni masque à composer, ni couche à
+   peindre. Le TSX tient la même règle de son côté (`pointerType !== "mouse"`
+   ne pose aucune variable) : la coupure est doublée, jamais contournable.
+   ⚠ Cette coupure ne touche QUE la lueur. L'état de focus clavier vit
+   au-dessus, hors de cette media query : une tablette à clavier garde donc
+   contour, nappe et bouton noir. */
+@media (hover: none) {
+  .resa .cpo-lueur {
+    display: none;
+  }
+}
+
+/* ——— mouvement réduit : aucune lueur non plus ———
+   Un objet clair qui suit le pointeur EST du mouvement, et c'en est du
+   permanent : il ne se contente pas de sauter, il se calme en disparaissant.
+   La carte retombe alors exactement sur son rendu du 05/09 — nappe et
+   bouton compris, dont globals.css coupe déjà les transitions au même
+   endroit. Rien n'est masqué, rien ne manque : la lueur n'a jamais porté
+   d'information. */
+@media (prefers-reduced-motion: reduce) {
+  .resa .cpo-lueur {
+    display: none;
+  }
+}

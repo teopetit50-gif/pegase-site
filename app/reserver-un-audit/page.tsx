@@ -6,6 +6,7 @@ import Formules from "@/components/reservation/Formules";
 import Simulateur from "@/components/reservation/Simulateur";
 import Complements from "@/components/reservation/Complements";
 import Engagements from "@/components/reservation/Engagements";
+import DerouleAudit from "@/components/reservation/DerouleAudit";
 import {
   COURRIEL,
   FAQ,
@@ -88,23 +89,7 @@ export default function ReserverUnAuditPage() {
           </p>
           <h2 className="r-h2 mt-6 max-w-[18ch]">Comment se passe l&apos;audit</h2>
 
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {DEROULE.map((d) => (
-              <div
-                key={d.etape}
-                data-reveal
-                className="flex h-full flex-col rounded-2xl bg-white p-7 sm:p-9"
-              >
-                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161]">
-                  {d.etape}
-                </div>
-                <h3 className="r-h4 mt-3">{d.titre}</h3>
-                <p className="mt-4 text-[15px] leading-[23px] text-[#3d3d3d]">
-                  {d.texte}
-                </p>
-              </div>
-            ))}
-          </div>
+          <DerouleAudit temps={DEROULE} />
         </section>
 
         {/* ═══ 4 — compléments, sur bande sombre ═══ */}

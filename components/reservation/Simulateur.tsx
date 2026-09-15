@@ -16,6 +16,7 @@
 
 import { useState } from "react";
 import { lienReservation } from "@/lib/reservation";
+import Lien from "@/components/Lien";
 
 /* 46 semaines travaillées : 52 moins congés et jours fériés — l'hypothèse
    est basse à dessein, un chiffrage qui gonfle ne sert personne. */
@@ -209,12 +210,12 @@ export default function Simulateur() {
             </p>
           </div>
 
-          <a
+          <Lien
             href={lienReservation("process")}
             className="r-btn r-btn--noir mt-7 w-full"
           >
             Faire chiffrer ma situation réelle
-          </a>
+          </Lien>
           <p className="r-note mt-2 text-center">Gratuit : créneau bloqué immédiatement</p>
         </div>
       </div>
