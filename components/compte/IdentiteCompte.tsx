@@ -12,9 +12,14 @@
    montre la première lettre de l'e-mail et « Profil à compléter » — la
    section « Profil » invite à le remplir.
 
-   Les classes sont celles de components/compte/compte.css (.cpt-*).
-   Composant serveur : rien à cliquer ici, le badge d'état, les boutons
-   et « Se déconnecter » sont posés par CompteVue à droite.
+   ⚠ 15/09 — PLUS APPELÉ. Depuis que « Mon compte » est un tableau de
+   bord pleine page, l'en-tête de page n'existe plus : la pastille
+   d'initiales est dans la barre du haut, l'entreprise dans l'en-tête de
+   la barre latérale, et le nom complet dans la section Profil. Le
+   fichier reste au dépôt comme les autres orphelins de la page
+   (glass-account-card, les .cp-* de mise en page dans globals.css), à
+   nettoyer dans une passe dédiée. Ne pas le rebrancher sans relire
+   CompteTableau : il ferait doublon avec le fil d'Ariane.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { initiales, nomAffiche, type Utilisateur } from "@/lib/compte";

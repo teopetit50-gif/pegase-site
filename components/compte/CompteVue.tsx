@@ -14,7 +14,6 @@ import CompteTableau, {
   type TuileCompte,
 } from "@/components/compte/CompteTableau";
 import AbonnementCarte from "@/components/compte/AbonnementCarte";
-import IdentiteCompte from "@/components/compte/IdentiteCompte";
 import MotDePasseCarte from "@/components/compte/MotDePasseCarte";
 import ProfilCarte from "@/components/compte/ProfilCarte";
 import {
@@ -36,6 +35,7 @@ import {
   blocDateGp,
   dateHeureGp,
   dureeFormule,
+  initiales,
   libelleFormule,
   nomAffiche,
   type Utilisateur,
@@ -56,7 +56,8 @@ import { COCKPIT_URL } from "@/lib/supabase/config";
    tranché entre trois formes : MENU LATÉRAL, comme les réglages
    Stripe/Vercel. La page se lit désormais de haut en bas :
 
-     1. L'EN-TÊTE — identité (IdentiteCompte) à gauche ; à droite le badge
+     1. LA BARRE DU HAUT du tableau de bord (15/09, passe « pleine
+        page ») — repli et fil d'Ariane à gauche ; à droite le badge
         d'état de l'espace client, le bouton PRINCIPAL selon l'état
         (« Ouvrir mon espace » + « Installer l'application » quand le
         compte est rattaché ; « Voir le fonctionnement » en préparation ;
@@ -667,81 +668,79 @@ export default function CompteVue({
 
   return (
     <div className="resa">
-      <section data-monde="clair" className="r-wrap cpt-wrap" aria-labelledby="cpt-titre-page">
-        {/* ——— 1. l'en-tête : identité | état + actions ——— */}
-        <header className="cpt-tete" data-arrivee="titre">
-          <IdentiteCompte utilisateur={utilisateur} />
-          <div className="cpt-actions">
-            <span className="cpt-pilule" data-teinte={badge.teinte}>
-              {badge.texte}
-            </span>
-            {etatEspace === "ouvert" ? (
-              <>
-                <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--noir">
-                  Ouvrir mon espace
-                </a>
-                {/* 08/09 — droit sur la page d'installation de l'espace, sur
-                    l'appareil où l'on est : c'est là que le bouton du
-                    navigateur existe. Dès 1024 il vit dans le pied de la
-                    barre ; ici il ne reste que pour la rangée mobile */}
-                <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--fil cpt-installer-mobile">
-                  Installer l&apos;application
-                </a>
-              </>
-            ) : etatEspace === "preparation" ? (
-              <Link href="/application" className="r-btn r-btn--fil">
-                Voir le fonctionnement
-              </Link>
-            ) : etatEspace === "sans" ? (
-              <Link href="/tarifs" className="r-btn r-btn--noir">
-                Choisir mes postes
-              </Link>
-            ) : null}
-            {/* sous 1024 la barre n'a pas de pied : la déconnexion reste
-                ici, où elle est la seule sortie de la page */}
-            <form action="/auth/signout" method="post" className="cpt-sortie-forme">
-              <button type="submit" className="cpt-sortie">
-                Se déconnecter
-              </button>
-            </form>
-          </div>
-        </header>
-
-        {/* ——— 2. la note d'état, seulement quand l'espace n'est pas ouvert ——— */}
-        {etatEspace === "panne" ? (
-          <p className="cpt-note" data-teinte="rouge" data-arrivee="chapo" role="status">
-            <span>
-              Votre accès à l&apos;espace client ne répond pas&nbsp;: impossible de vérifier votre
-              rattachement pour le moment. Rechargez la page dans un instant.
-            </span>
-            <Link href="/application">Voir comment ça marche</Link>
-          </p>
-        ) : etatEspace === "preparation" ? (
-          <p className="cpt-note" data-teinte="ambre" data-arrivee="chapo">
-            <span>
-              Votre installation est en préparation. L&apos;espace client s&apos;ouvre dès la réunion
-              faite&nbsp;: vos postes y apparaissent au fur et à mesure de leur mise en route.
-            </span>
-            <Link href="/application">Voir le fonctionnement</Link>
-          </p>
-        ) : etatEspace === "sans" ? (
-          <p className="cpt-note" data-teinte="gris" data-arrivee="chapo">
-            <span>
-              Votre espace client s&apos;ouvre après la réunion d&apos;installation&nbsp;: choisissez vos
-              postes, réservez la réunion. C&apos;est elle qui met vos postes en route.
-            </span>
-            <Link href="/application">Voir comment l&apos;application s&apos;installe</Link>
-          </p>
-        ) : null}
-
-        {/* ——— 3 et 4. les tuiles, puis menu | panneau ——— */}
+      <section data-monde="clair" className="cpt-wrap" aria-labelledby="cpt-titre-page">
+        {/* le titre survit pour les lecteurs d'écran : l'œil, lui, a le
+            fil d'Ariane de la barre du haut (« Rénov Atlantique / Abonnement ») */}
+        <h1 id="cpt-titre-page" className="sr-only">
+          Mon compte
+        </h1>
         <CompteTableau
           sections={sections}
           tuiles={tuiles}
           liens={liens}
           enseigne={enseigne}
           formule={formuleBarre}
+          initiales={initiales(utilisateur)}
           defaut="abonnement"
+          actions={
+            <>
+              <span className="cpt-pilule" data-teinte={badge.teinte}>
+                {badge.texte}
+              </span>
+              {etatEspace === "ouvert" ? (
+                <a href={`${COCKPIT_URL}/espace`} className="r-btn r-btn--noir">
+                  Ouvrir mon espace
+                </a>
+              ) : etatEspace === "preparation" ? (
+                <Link href="/application" className="r-btn r-btn--fil">
+                  Voir le fonctionnement
+                </Link>
+              ) : etatEspace === "sans" ? (
+                <Link href="/tarifs" className="r-btn r-btn--noir">
+                  Choisir mes postes
+                </Link>
+              ) : null}
+              {/* sous 1024 la barre n'a pas de pied : l'installation et la
+                  déconnexion restent ici, seules sorties de la page */}
+              {etatEspace === "ouvert" ? (
+                <a href={`${COCKPIT_URL}/installer`} className="r-btn r-btn--fil cpt-installer-mobile">
+                  Installer l&apos;application
+                </a>
+              ) : null}
+              <form action="/auth/signout" method="post" className="cpt-sortie-forme">
+                <button type="submit" className="cpt-sortie">
+                  Se déconnecter
+                </button>
+              </form>
+            </>
+          }
+          note={
+            etatEspace === "panne" ? (
+              <p className="cpt-note" data-teinte="rouge" role="status">
+                <span>
+                  Votre accès à l&apos;espace client ne répond pas&nbsp;: impossible de vérifier votre
+                  rattachement pour le moment. Rechargez la page dans un instant.
+                </span>
+                <Link href="/application">Voir comment ça marche</Link>
+              </p>
+            ) : etatEspace === "preparation" ? (
+              <p className="cpt-note" data-teinte="ambre">
+                <span>
+                  Votre installation est en préparation. L&apos;espace client s&apos;ouvre dès la réunion
+                  faite&nbsp;: vos postes y apparaissent au fur et à mesure de leur mise en route.
+                </span>
+                <Link href="/application">Voir le fonctionnement</Link>
+              </p>
+            ) : etatEspace === "sans" ? (
+              <p className="cpt-note" data-teinte="gris">
+                <span>
+                  Votre espace client s&apos;ouvre après la réunion d&apos;installation&nbsp;: choisissez vos
+                  postes, réservez la réunion. C&apos;est elle qui met vos postes en route.
+                </span>
+                <Link href="/application">Voir comment l&apos;application s&apos;installe</Link>
+              </p>
+            ) : null
+          }
         />
       </section>
     </div>

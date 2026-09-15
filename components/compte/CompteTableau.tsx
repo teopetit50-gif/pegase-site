@@ -4,16 +4,24 @@
    CompteTableau — les tuiles et la barre de navigation de « Mon compte »
    (14/09/2026 soir, barre refaite le 14/09 nuit)
 
-   LE CADRE EST SOMBRE (15/09, 3ᵉ passe). Teo, capture du modèle à
-   l'appui : « on dirait pas du tout le même dashboard que le composant …
-   c'est pas la même que sur le screen ». L'écart n'était pas la
-   structure mais la LUMIÈRE : le modèle est un tableau de bord sombre,
-   les deux reprises précédentes étaient claires. Tout le bloc — barre,
-   barre du haut, tuiles, panneau — vit donc dans un cadre sombre
-   (`.cpt-console`), qui redéfinit les variables du monde `.resa` pour
-   que les cartes d'abonnement, de profil et de mot de passe s'y lisent
-   sans être réécrites. L'en-tête de page, lui, reste clair : c'est la
-   page du site, pas l'application.
+   SOMBRE (3ᵉ passe) ET PLEINE PAGE (4ᵉ). Teo, capture du modèle à
+   l'appui : « on dirait pas du tout le même dashboard que le composant ».
+   L'écart n'était pas la structure mais la LUMIÈRE : le modèle est un
+   tableau de bord sombre. Puis, le cadre posé : « faut que ce soit une
+   pleine page, là c'est pas pleine page ».
+
+   Donc plus de cadre arrondi flottant au milieu d'une page de site : le
+   tableau de bord sort de la colonne de 1440 (`.cpt-pleine`), touche les
+   quatre bords et prend la hauteur de la fenêtre. Le pied de page du
+   site est masqué sur cette route, et l'EN-TÊTE DE PAGE A DISPARU —
+   identité, état et bouton principal sont passés dans la barre du haut,
+   à droite du fil d'Ariane, exactement là où le modèle met sa recherche
+   et son avatar. Le titre « Mon compte » survit en `sr-only` : un
+   lecteur d'écran a besoin d'un h1, l'œil a le fil d'Ariane.
+
+   Le cadre redéfinit les variables du monde `.resa` pour que les cartes
+   d'abonnement, de profil et de mot de passe s'y lisent sans être
+   réécrites.
 
    ORIGINE DE LA BARRE. Teo a collé « Dashboard Sidebar » (21st.dev) :
    « remplace complètement ce qu'il y a actuellement par ce dashboard ;
@@ -232,6 +240,9 @@ export default function CompteTableau({
   liens,
   enseigne,
   formule,
+  initiales,
+  actions,
+  note,
   defaut,
 }: {
   sections: SectionCompte[];
@@ -240,6 +251,12 @@ export default function CompteTableau({
   /* l'en-tête de la barre : l'entreprise du client, et sa formule */
   enseigne: string;
   formule: string;
+  /* les initiales de la personne, dans la pastille en haut à droite */
+  initiales: string;
+  /* à droite du fil d'Ariane : l'état et le bouton principal */
+  actions: ReactNode;
+  /* sous la barre du haut, quand l'espace n'est pas encore ouvert */
+  note?: ReactNode;
   defaut?: string;
 }) {
   /* le choix de la personne (clic, clavier, tuile) ; tant qu'il n'y en a
@@ -294,7 +311,7 @@ export default function CompteTableau({
   const sectionActive = sections.find((s) => s.id === actif);
 
   return (
-    <div className="cpt-console" data-arrivee="bloc">
+    <div className="cpt-console cpt-pleine" data-arrivee="bloc">
       {/* ——— la barre | le panneau ——— */}
       <Tabs.Root
         value={actif}
@@ -386,7 +403,15 @@ export default function CompteTableau({
               </span>
               <span className="cpt-fil-feuille">{sectionActive?.libelle ?? ""}</span>
             </nav>
+            <div className="cpt-haut-actions">
+              {actions}
+              <span className="cpt-haut-avatar" aria-hidden="true">
+                {initiales}
+              </span>
+            </div>
           </div>
+
+          {note ? <div className="cpt-note-place">{note}</div> : null}
 
           {/* ——— les tuiles de synthèse ——— */}
           <div className="cpt-tuiles">
