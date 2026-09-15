@@ -549,7 +549,7 @@ export function comparatifPaliers(
     titre: "Périmètre et volumétrie",
     lignes: [
       {
-        libelle: "Pièces comprises",
+        libelle: "Volume inclus",
         aide: "Toutes les unités traitées par le système : factures lues, demandes reçues, relances envoyées, reprises de contact. C'est le volume qui détermine le montant, jamais le nombre d'utilisateurs.",
         valeurs: parPalier((_p, i) => `${volumes[i].toLocaleString("fr-FR")} par mois`),
       },
@@ -563,12 +563,12 @@ export function comparatifPaliers(
       {
         libelle: "Rapport quotidien",
         aide: "Le point du matin : l'activité de la veille et les pièces qui attendent votre validation, transmises chaque matin. Compris à tous les paliers.",
-        valeurs: meme("Compris"),
+        valeurs: meme("Inclus"),
       },
       {
         libelle: "Validation avant envoi",
         aide: "Aucune pièce ne part sans validation humaine. Compris à tous les paliers.",
-        valeurs: meme("Compris"),
+        valeurs: meme("Inclus"),
       },
     ],
   },
@@ -594,7 +594,7 @@ export function comparatifPaliers(
         valeurs: parPalier((_p, i) => `${economieAnnuelle(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par an`),
       },
       {
-        libelle: "Au-delà des pièces comprises",
+        libelle: "Au-delà du volume inclus",
         aide: "Vous êtes prévenu avant le dépassement : le palier supérieur s'applique, ou le périmètre est ajusté avec vous.",
         valeurs: meme("Prévenu d'avance, jamais facturé sans accord"),
       },

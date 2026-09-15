@@ -794,12 +794,11 @@ export default function Grille() {
               GRANDE_STRUCTURE.chapo
             ) : (
               <>
-                L&apos;abonnement repose sur deux variables&nbsp;: les postes que vous mettez
-                en service, et le volume de pièces traitées chaque mois (factures lues, demandes
-                entrantes, relances envoyées). Cette page en donne une estimation&nbsp;; l&apos;audit
-                la valide sur vos volumes réels, puis le devis arrête le tarif avant tout
-                engagement. Facturation mensuelle sans engagement, −{REMISE_PCT}&nbsp;% en annuel,
-                remboursement sous 30 jours.
+                L&apos;abonnement repose sur deux variables&nbsp;: les postes en service, et le
+                volume de pièces traitées chaque mois (factures lues, demandes entrantes, relances
+                envoyées). Cette page en donne une estimation&nbsp;; l&apos;audit la valide sur vos
+                chiffres réels et le devis arrête le tarif. Facturation mensuelle sans engagement,
+                −{REMISE_PCT}&nbsp;% en annuel, remboursement sous 30 jours.
               </>
             )}
           </p>
