@@ -39,10 +39,13 @@
      services valident » va à l'audit et ne le voit jamais (Grille.tsx ne le
      monte pas quand `devis`).
 
-   · LE CALCUL RESTE SUR L'APPAREIL. Aucun fetch, aucune donnée transmise,
-     y compris à la réservation : reserver_audit fige son propre instantané
-     de prix, lui passer un volume déclaré créerait deux sources de vérité.
-     C'est aussi ce qui autorise la phrase de l'en-tête du panneau.
+   · LE CALCUL RESTE SUR L'APPAREIL. Aucun fetch : rien ne part tant que le
+     visiteur ne clique pas. 15/09 — depuis le prix continu, le bouton de
+     réservation emporte le VOLUME (`?pieces=`), et lui seul : reserver_audit
+     recalcule le montant à partir de ce nombre, exactement comme la page.
+     Il n'y a donc toujours qu'une source de vérité — le barème — et jamais
+     un prix dans l'URL, qui serait falsifiable. Transmettre le volume est ce
+     qui empêche l'écran suivant d'afficher un autre chiffre que celui-ci.
 
    · QUAND LE CALCUL EST NÉGATIF, ON L'AFFICHE. Le bouton reste « en
      parler », jamais « souscrire quand même ». C'est la règle de la maison
@@ -334,7 +337,17 @@ export default function Calculateur({
               </p>
 
               {postesResa ? (
-                <a className="calc-bouton" href={`/installation?postes=${postesResa.join(",")}`}>
+                /* 15/09, correctif — LE LIEN PORTE LE VOLUME MESURÉ. Sans
+                   `pieces`, /installation retombait sur l'ancien barème par
+                   postes : le visiteur lisait « puis 800 € par mois » sous ce
+                   bouton et trouvait 1 990 € dans le récapitulatif. C'est le
+                   nombre qui vient d'être affiché, et le serveur le RECALCULE
+                   — on ne transmet jamais un montant, qui serait falsifiable
+                   depuis l'URL. */
+                <a
+                  className="calc-bouton"
+                  href={`/installation?postes=${postesResa.join(",")}&pieces=${v.pieces}`}
+                >
                   Réserver l&apos;installation — {euros(v.palier.installation)}
                 </a>
               ) : (

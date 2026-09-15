@@ -491,17 +491,37 @@ export type FamillePaliers = {
 const NBSP = " ";
 const REMISE_PCT_TXT = Math.round(REMISE_ANNUELLE * 100);
 const meme = (v: string): [string, string, string] => [v, v, v];
-const parPalier = (f: (p: Palier) => string): [string, string, string] =>
+const parPalier = (f: (p: Palier, i: number) => string): [string, string, string] =>
   PALIERS.map(f) as [string, string, string];
 
-export const COMPARATIF_PALIERS: FamillePaliers[] = [
+/* 15/09, correctif — LE COMPARATIF SUIT LES VOLUMES, COMME LES CARTES.
+   Ses lignes de prix lisaient `p.prix`, les trois repères de PALIERS : sous
+   des cartes qui affichaient 220 / 620 / 800 €, le tableau redisait
+   299 / 790 / 1 990 € et son bouton emmenait sur ce dernier montant. Il
+   prend donc les prix et les volumes du haut de page. Sans volumes saisis
+   la section n'est pas rendue ; les valeurs par défaut ne servent qu'aux
+   repères (et au typage), elles ne s'affichent jamais devant un visiteur
+   qui a répondu. */
+export function comparatifPaliers(
+  prix: readonly [number, number, number] = PALIERS.map((p) => p.prix) as unknown as [
+    number,
+    number,
+    number,
+  ],
+  volumes: readonly [number, number, number] = PALIERS.map((p) => p.plafond) as unknown as [
+    number,
+    number,
+    number,
+  ],
+): FamillePaliers[] {
+  return [
   {
     titre: "Ce qui tourne chez vous",
     lignes: [
       {
         libelle: "Pièces comprises",
         aide: "Tout ce qui passe dans les moteurs : factures lues, demandes reçues, relances parties, reprises de contact. C'est le volume qui porte le prix, pas le nombre de personnes chez vous.",
-        valeurs: parPalier((p) => `${p.plafond.toLocaleString("fr-FR")} par mois`),
+        valeurs: parPalier((_p, i) => `${volumes[i].toLocaleString("fr-FR")} par mois`),
       },
       {
         libelle: "Postes en service",
@@ -528,19 +548,20 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
       {
         libelle: "Mensuel, sans engagement",
         aide: "Vous prévenez, le mois en cours va à son terme, les envois s'arrêtent.",
-        valeurs: parPalier((p) => `${p.prix}${NBSP}€ par mois`),
+        valeurs: parPalier((_p, i) => `${prix[i].toLocaleString("fr-FR")}${NBSP}€ par mois`),
       },
       {
         libelle: `Annuel, −${REMISE_PCT_TXT}${NBSP}%`,
         aide: "Facturé en une fois pour douze mois ; le satisfait ou remboursé s'applique de la même façon.",
         valeurs: parPalier(
-          (p) => `${prixAnnuel(p.prix)}${NBSP}€ par an, soit ${equivalentMensuel(p.prix)}${NBSP}€ par mois`,
+          (_p, i) =>
+            `${prixAnnuel(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par an, soit ${equivalentMensuel(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par mois`,
         ),
       },
       {
         libelle: "Vous économisez en annuel",
         aide: "L'écart entre douze mensualités et la facture annuelle.",
-        valeurs: parPalier((p) => `${economieAnnuelle(p.prix)}${NBSP}€ par an`),
+        valeurs: parPalier((_p, i) => `${economieAnnuelle(prix[i]).toLocaleString("fr-FR")}${NBSP}€ par an`),
       },
       {
         libelle: "Au-delà des pièces comprises",
@@ -616,7 +637,12 @@ export const COMPARATIF_PALIERS: FamillePaliers[] = [
       },
     ],
   },
-];
+  ];
+}
+
+/** Le comparatif sur les repères de PALIERS — ce que voyait la page avant
+    le prix continu. Gardé pour les surfaces qui n'ont pas de volumes. */
+export const COMPARATIF_PALIERS: FamillePaliers[] = comparatifPaliers();
 
 /* ——— LA QUATRIÈME CARTE : SUR MESURE, SANS MONTANT (15/09/2026, Teo) ———
 

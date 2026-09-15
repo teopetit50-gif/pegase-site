@@ -170,7 +170,7 @@ import {
 import { Comparator } from "@/components/ui/comparator-1";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/cn";
-import { COURRIEL, lienContact } from "@/lib/reservation";
+import { COURRIEL, lienAudit, lienContact } from "@/lib/reservation";
 import Calculateur from "@/components/tarifs/Calculateur";
 
 import {
@@ -178,7 +178,7 @@ import {
   PLANCHER_MENSUEL,
   TARIF_PIECE,
   CARTE_SUR_MESURE,
-  COMPARATIF_PALIERS,
+  comparatifPaliers,
   GRANDE_STRUCTURE,
   MONDES,
   PALIERS,
@@ -239,13 +239,17 @@ function mondeServeur(): Monde {
   return "pme";
 }
 
-/* le lien de réservation d'un palier — « Tout Omega » n'a rien à choisir,
-   il part droit sur /installation ; les deux autres renvoient aux cartes
-   où le choix se fait */
-function lienPalier(p: Palier, periodicite: Periodicite) {
+/* le lien d'un palier — « Tout Omega » n'a rien à choisir, il part droit
+   sur l'audit ; les deux autres renvoient aux cartes où le choix se fait.
+
+   15/09, SECONDE PASSE (Teo) : il menait à /installation — réserver la mise
+   en route et enregistrer un moyen de paiement. « Ce n'est pas un SaaS, on
+   ne vend plus de prix direct » : il mène maintenant à l'audit, avec les
+   postes et le volume déclarés. La périodicité ne l'accompagne plus — un
+   audit n'a pas de mensuel ni d'annuel. */
+function lienPalier(p: Palier, pieces: number) {
   if (p.aChoisir !== null) return "#grille";
-  const postes = POSTES.map((x) => x.id).join(",");
-  return `/installation?postes=${postes}${periodicite === "annuel" ? "&periodicite=annuel" : ""}`;
+  return lienAudit(POSTES.map((x) => x.id), pieces);
 }
 
 /* 08/09 — le bouton d'un palier dans le comparatif :
@@ -464,14 +468,18 @@ function CartePalier({
   const pret = devis || (manque <= 0 && prixVisible);
   const annuel = periodicite === "annuel" && !devis;
   const phare = Boolean(p.phare);
-  /* 15/09 — LE LIEN PORTE LE VOLUME : sans lui, /installation puis la
-     fonction SQL figeraient un autre prix que celui affiché ici. Le serveur
-     RECALCULE sur ce nombre ; il ne reçoit jamais un montant, qui serait
-     falsifiable depuis l'URL. */
-  const href =
-    `/installation?postes=${postesFactures.join(",")}` +
-    (piecesCarte > 0 ? `&pieces=${piecesCarte}` : "") +
-    (annuel ? "&periodicite=annuel" : "");
+  /* 15/09, SECONDE PASSE (Teo) — LE BOUTON MÈNE À L'AUDIT, PAS À L'ACHAT.
+     « C'est une estimation qui amène au bouton réserver un audit ; ça ne
+     doit pas amener à un tarif à faire payer. » Il menait à /installation,
+     où l'on bloque un créneau de mise en route et où l'on enregistre un
+     moyen de paiement : le site vendait un abonnement au prix qu'il venait
+     de calculer, sur des volumes déclarés de mémoire.
+
+     Ce qui voyage : les postes et le volume, jamais le prix — il se
+     recalcule à l'arrivée (voir app/reserver/page.tsx), et il n'y arrive
+     que comme une phrase du message, pour que l'entretien parte des
+     chiffres du visiteur. */
+  const href = lienAudit(postesFactures, piecesCarte);
   /* L'écart « quatrième poste » se calcule lui aussi sur les volumes : il
      n'est plus une constante. Masqué s'il est nul (le plancher l'écrase). */
   const ecart = (() => {
@@ -688,7 +696,7 @@ function CartePalier({
             className="h-11 w-full text-[15px]"
           >
             <Link href={devis ? GRANDE_STRUCTURE.href : href}>
-              {devis ? GRANDE_STRUCTURE.cta : "Réserver l'installation"}
+              {devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
             </Link>
           </Button>
         ) : (
@@ -700,12 +708,11 @@ function CartePalier({
               : "Indiquez vos volumes"}
           </Button>
         )}
-        {/* 05/09 — le moyen de paiement s'enregistre à la réservation,
-            rien n'est débité avant la fin de l'installation */}
+        {/* 15/09 — plus de promesse de paiement sous ce bouton : il n'y a
+            rien à payer au bout. Les deux mondes disent donc la même chose,
+            parce qu'ils mènent au même endroit. */}
         <p className="mt-3 text-center text-xs text-[#767676]">
-          {devis
-            ? "Gratuit à partir de 30 minutes, sans engagement."
-            : "Rien n'est débité avant la fin de l'installation."}
+          Gratuit, sans engagement — l&apos;audit fixe le prix.
         </p>
       </CardFooter>
     </Card>
@@ -943,7 +950,27 @@ export default function Grille() {
           « Mensuel », « Annuel », « Vous économisez » et « Installation » ne
           sont QUE des prix. L'afficher avant, ce serait donner par la porte
           de derrière les montants que les cartes retiennent. */}
-      {devis || volumes === null ? null : (
+      {devis || volumes === null ? null : (() => {
+      /* 15/09, correctif — LE COMPARATIF LIT LES MÊMES CHIFFRES QUE LES
+         CARTES. Prix comme lignes sortaient de PALIERS, les trois repères :
+         sous des cartes à 220 / 620 / 800 €, le tableau redisait
+         299 / 790 / 1 990 € et son bouton emmenait sur ce dernier montant.
+         On refait ici le calcul d'une carte — ses postes, leurs pièces, le
+         prix continu — et on le donne au tableau comme aux boutons. Hors
+         grille (le prix sort d'un audit), on retombe sur le repère plutôt
+         que d'inventer un chiffre, et le lien n'emporte aucun volume. */
+      const colonnes = PALIERS.map((p) => {
+        const postesP = postesPourCarte(volumes, p.aChoisir, choix.palier === p.id ? choix.postes : []);
+        const piecesP = piecesPourPostes(volumes, postesP);
+        const calcule = prixPourVolume(piecesP);
+        return {
+          p,
+          piecesP: calcule === null ? p.plafond : piecesP,
+          prixP: calcule ?? p.prix,
+          volumeLien: calcule === null ? 0 : piecesP,
+        };
+      });
+      return (
       <section id="comparatif" data-monde="clair" className="r-blanc">
         <div className="r-wrap py-14 sm:py-20">
           <div className="text-center">
@@ -957,24 +984,28 @@ export default function Grille() {
           </div>
           <Comparator
             className="mx-auto mt-12 max-w-4xl"
-            plans={PALIERS.map((p) => ({
+            plans={colonnes.map(({ p, prixP, volumeLien }) => ({
               id: p.id,
               nom: p.nom,
-              prix: `${annuel ? equivalentMensuel(p.prix) : p.prix}\u00A0€`,
-              periode: annuel ? `par mois · ${prixAnnuel(p.prix)}\u00A0€ par an` : "par mois",
-              href: lienPalier(p, periodicite),
-              cta: p.aChoisir === null ? "Réserver l'installation" : "Choisir mes postes",
+              prix: `${annuel ? equivalentMensuel(prixP) : prixP}\u00A0€`,
+              periode: annuel ? `par mois · ${prixAnnuel(prixP)}\u00A0€ par an` : "par mois",
+              href: lienPalier(p, volumeLien),
+              cta: p.aChoisir === null ? "Réserver un audit" : "Choisir mes postes",
               bouton: boutonPalier(p),
               phare: p.phare,
             }))}
-            familles={COMPARATIF_PALIERS.map((f) => ({
+            familles={comparatifPaliers(
+              colonnes.map((c) => c.prixP) as [number, number, number],
+              colonnes.map((c) => c.piecesP) as [number, number, number],
+            ).map((f) => ({
               titre: f.titre,
               lignes: f.lignes.map((l) => ({ libelle: l.libelle, aide: l.aide, valeurs: l.valeurs })),
             }))}
           />
         </div>
       </section>
-      )}
+      );
+      })()}
     </>
   );
 }
