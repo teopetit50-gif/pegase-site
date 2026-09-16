@@ -968,7 +968,12 @@ export default function OffresPage() {
           <section data-monde="clair" className="ofd-pleine ofd-sec">
             <div className="ofd-hero">
               <Image
-                src="/photos/tarifs-cloture-facade.jpg"
+                /* 16/09 (Teo, « prends une image mieux, plus pro et
+                   nette ») — la façade au coucher de soleil lisait
+                   « photo de banque d'images ». Celle-ci est un
+                   mur-rideau de verre : graphique, net, et elle répond à
+                   l'atrium du hero sans le répéter. */
+                src="/photos/tarifs-abonnement-facade.jpg"
                 alt=""
                 fill
                 sizes="100vw"

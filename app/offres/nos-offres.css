@@ -513,6 +513,57 @@
   }
 }
 
+/* ── L'EFFET D'ENTRÉE DES BLOCS PLEINE IMAGE ───────────────────────────
+   Leur « ClipScrollSection » : la carte ne bouge pas de taille (1408 × 720
+   du début à la fin), c'est son CLIP qui se resserre à zéro à mesure
+   qu'elle monte. Relevé à 1440, fenêtre de 900, sur le pied d'appel, en
+   fonction de la position de son bord haut :
+       haut à 922  →  inset(5%    round 24px)
+       haut à 722  →  inset(3,90% round 24px)
+       haut à 472  →  inset(2,36% round 24px)
+       haut à 222  →  inset(0,81% round 24px)
+       haut à 22   →  inset(0%    round 24px)
+   L'image paraît donc grandir sans jamais être redimensionnée — c'est du
+   découpage, pas une échelle, et c'est pour ça que la photo ne perd pas
+   en netteté pendant l'effet.
+
+   Comme le panneau ardoise : animation liée au défilement, pas de
+   JavaScript par image, et là où `view()` n'est pas reconnu la carte reste
+   simplement à `inset(0%)` — l'état de repos est le bon. */
+@keyframes ofd-pleine-entree {
+  from {
+    clip-path: inset(5% round 24px);
+  }
+  to {
+    clip-path: inset(0% round 24px);
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ofd .ofd-hero {
+      /* `linear` EXPLICITE. Sans lui l'animation prend `ease` par défaut,
+         qui avance vite au début : mesuré 0,96 % à un haut de 450 quand la
+         référence est à 2,36. Le relevé, lui, est linéaire en pixels de
+         défilement — c'est le propre d'une animation liée au scroll. */
+      animation: ofd-pleine-entree both linear;
+      animation-timeline: view();
+      /* La portée demande un calcul, et deux essais l'ont montré :
+         `entry 100%` ET `contain 0%` désignent le MÊME instant — le bord
+         bas atteint le bas de la fenêtre, soit un haut à 180 — alors que
+         la référence ne se ferme qu'à un haut de 22. Il faut donc compter
+         en `cover`, qui court du haut à 900 jusqu'au bas à 0, soit
+         900 + 720 = 1620 px de course. Le point d'arrivée voulu (haut à 0)
+         est à 900 px, donc à 55 %.
+         Vérification, référence puis nous, en linéaire sur cette portée :
+           haut 700  3,90 %  ·  3,88 %
+           haut 450  2,36 %  ·  2,47 %
+           haut 200  0,81 %  ·  1,07 %
+           haut 0    0 %     ·  0 % */
+      animation-range: entry 0% cover 55%;
+    }
+  }
+}
+
 .ofd .ofd-hero__media,
 .ofd .ofd-hero__media img {
   position: absolute;
@@ -794,6 +845,21 @@
   z-index: 0;
   border-radius: inherit;
   background: #e7131a;
+
+  /* ⚠ `pointer-events: none` N'EST PAS DÉCORATIF, c'est ce qui règle le
+     défaut d'entête — et c'est la référence qui donne la réponse : son
+     propre panneau de couleur est écrit `pointer-events-none absolute …
+     bg-cloud-slate`, et on peut se demander pourquoi jusqu'au moment où
+     on comprend que `document.elementsFromPoint` IGNORE les éléments non
+     cliquables. La sonde de couleur de l'entête est bâtie dessus.
+
+     Premier essai le 16/09 : descendre le rouge du cadre vers cet enfant,
+     en croyant que la sonde traverserait. Elle ne traversait pas — l'enfant
+     couvre exactement la même surface, elle le trouvait lui. C'est ce
+     `pointer-events: none` qui le retire du test, et la pile arrive alors
+     sur le blanc de `.ofd`. Le rouge, lui, est toujours peint : la
+     propriété ne change rien au rendu. */
+  pointer-events: none;
 }
 .ofd .ofd-duo__signe {
   position: relative;
@@ -1218,10 +1284,54 @@
   border-radius: var(--ofd-r-lg);
   background: var(--ofd-ardoise);
   padding: 32px;
+  margin-inline: auto;
 }
 @media (min-width: 1024px) {
   .ofd .ofd-ardoise {
     padding: 80px 48px;
+    /* Hauteur relevée sur la référence à 1440, panneau à pleine largeur :
+       563 px. Notre citation fait trois lignes contre quatre chez eux, donc
+       à contenu seul le panneau tombait à 431 — « la nôtre est plus
+       petite » (Teo, 16/09). On pose donc la hauteur, pas le texte : c'est
+       la géométrie qu'on décalque, et rallonger une citation vraie pour
+       remplir un cadre serait l'erreur inverse. */
+    min-height: 563px;
+  }
+}
+
+/* ── L'EFFET D'ENTRÉE, relevé au défilement sur la référence ────────────
+   Leur panneau ne se contente pas d'apparaître : il S'ÉLARGIT à mesure
+   qu'il monte dans l'écran. Mesuré à 1440, fenêtre de 900, en fonction de
+   la position de son bord haut :
+       haut à 900 (bas de fenêtre)  →  1253 px   (90 % de la colonne)
+       haut à 600                   →  1372      (98,6 %)
+       haut à 350                   →  1391      (99,9 %)
+       haut à 100 et au-delà        →  1392      (100 %)
+   Ce n'est pas linéaire : à mi-course il est déjà à 98,6 %. Une sortie en
+   quart (cubic-bezier .16 1 .3 1) recolle aux quatre points.
+
+   Fait en animation LIÉE AU DÉFILEMENT plutôt qu'en JavaScript : aucun
+   travail par image sur le fil principal, et là où `view()` n'est pas
+   encore reconnu (Safari, Firefox) le panneau reste simplement à sa
+   largeur pleine — la page est juste, sans l'effet. C'est pour ça que la
+   largeur de repos est 100 % et que l'animation la RÉDUIT à l'entrée :
+   l'état par défaut doit être le bon. */
+@keyframes ofd-ardoise-entree {
+  from {
+    width: 90%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ofd .ofd-ardoise {
+      animation: ofd-ardoise-entree both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
 }
 .ofd .ofd-ardoise__grille {
