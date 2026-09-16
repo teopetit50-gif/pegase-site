@@ -160,7 +160,13 @@ const HERO = {
      (colonne de droite, menu), et son chapô a 40 mots pour les moyens. */
   chapoCourt:
     "Relances, demandes entrantes, réactivation, factures fournisseurs : automatisés pour les PME et les groupes multi-sites, sur vos outils actuels.",
-  bouton: "Découvrir notre approche",
+  /* 16/09 (associé) — « Découvrir notre approche » devient COMMENCER, et
+     mène à /commencer au lieu de la section plus bas. Deux raisons, la
+     seconde étant la vraie : l'intitulé promettait une lecture quand le
+     visiteur est venu pour agir, et le bouton de la barre dit déjà
+     « Commencer » — deux mots pour un même geste, sur le même écran,
+     faisaient hésiter. Un seul mot, une seule destination. */
+  bouton: "Commencer",
   sous: "Identifions les leviers à plus fort impact pour votre organisation.",
   /* le COMBIEN. Pas de montant : depuis le 15/09 le site n'affiche plus de
      grille, le tarif est arrêté à l'audit sur les volumes réels. Ce qu'on
@@ -879,10 +885,21 @@ export default function Home() {
             </p>
             <div className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
               {/* 14/09 : « Découvrir notre approche » menait à /commencer
-                  (l'aiguillage). Il mène à la section « le déroulé » de cette
-                  page, qui est littéralement l'approche. */}
+                  (l'aiguillage), puis à la section « le déroulé » de cette
+                  page. 16/09 : retour à /commencer, sur demande de
+                  l'associé — le visiteur qui appuie ici veut entrer, pas
+                  descendre d'un écran.
+
+                  `data-cta-hero` n'est pas décoratif : l'entête (components/
+                  Header.tsx) l'observe pour ne montrer SON bouton
+                  « Commencer » qu'une fois celui-ci sorti de l'écran. Deux
+                  boutons identiques visibles en même temps, c'est une
+                  hésitation offerte au visiteur. Retirer cet attribut ne
+                  casse rien — l'entête retombe simplement sur « toujours
+                  visible » — mais on perd l'effet. */}
               <Link
-                href="#approche"
+                href="/commencer"
+                data-cta-hero
                 className="o-bloc-apparait o-flux-btn"
                 style={{ "--o-mot-d": `${CADENCE.bouton}ms` } as React.CSSProperties}
               >

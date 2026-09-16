@@ -219,6 +219,81 @@ export default function Header() {
     };
   }, [open]);
 
+  /* ═══ 16/09/2026 — LE CTA DE LA BARRE NE DOUBLE PLUS CELUI DU HERO ═══
+
+     Demande de l'associé : « fais en sorte que le Commencer en haut à
+     droite n'apparaisse qu'une fois qu'on scrolle assez, et que le bouton
+     du hero ne soit plus visible ». Sur l'accueil, les deux disaient le
+     même mot et menaient au même endroit, à trente centimètres l'un de
+     l'autre : une hésitation offerte au visiteur, et deux fois moins de
+     poids pour chacun.
+
+     L'accueil marque son bouton `data-cta-hero` ; on l'observe, et celui
+     de la barre n'apparaît qu'une fois l'autre sorti de l'écran.
+
+     L'ÉTAT INITIAL SE DÉDUIT DU CHEMIN, il n'est pas deviné. `pathname`
+     est connu au rendu serveur : sur « / » on part caché (le hero est à
+     l'écran), partout ailleurs visible. Sans ça, ou bien le bouton
+     clignote au premier rendu de l'accueil, ou bien il manque une image
+     sur toutes les autres pages — et dans les deux cas l'hydratation
+     diverge.
+
+     La marge haute de −72 px vaut la hauteur de la barre (h-16 / sm:72) :
+     sans elle, le bouton du hero compte comme « à l'écran » alors qu'il
+     est déjà passé DERRIÈRE la barre, et le relais se ferait trop tard.
+
+     Repère absent (toutes les pages sauf l'accueil, ou accueil modifié) :
+     on montre le bouton. Le défaut est le comportement d'avant.
+
+     ⚠ PAS D'IntersectionObserver ICI, ET CE N'EST PAS UN OUBLI. Première
+     version, le 16/09 : un observateur avec `rootMargin: -72px`. Il
+     relayait bien à la descente et NE REPASSAIT PAS à la remontée —
+     recette Playwright, transitions neutralisées : bouton encore visible
+     une fois revenu à scrollY 0. Le défilement du site est piloté par
+     Lenis (components/PageMotion.tsx) et l'observateur ne voyait pas
+     toutes les traversées.
+
+     On mesure donc le rectangle, dans la MÊME mécanique que la sonde de
+     couleur juste au-dessus : mêmes écouteurs `scroll` / `resize`, même
+     rAF, une lecture de layout de plus par image. Un seul dispositif à
+     comprendre, et un seuil qu'on lit en clair — le bouton du hero est
+     passé sous la barre quand son bas franchit sa hauteur. */
+  const [ctaBarre, setCtaBarre] = useState(pathname !== "/");
+  useEffect(() => {
+    const cible = document.querySelector("[data-cta-hero]");
+    /* la hauteur de la barre : h-16 sur téléphone, 72 dès `sm` */
+    const hauteurBarre = () => (window.innerWidth >= 640 ? 72 : 64);
+    let brut = 0;
+    const mesure = () => {
+      brut = 0;
+      setCtaBarre(!cible || cible.getBoundingClientRect().bottom <= hauteurBarre());
+    };
+    const surDefilement = () => {
+      if (!brut) brut = requestAnimationFrame(mesure);
+    };
+    /* La première mesure passe par une image d'animation, jamais par un
+       appel direct : un setState synchrone dans le corps d'un effet
+       déclenche un rendu en cascade, et la règle
+       `react-hooks/set-state-in-effect` du projet le refuse. Le décalage
+       d'une image ne se voit pas — l'état de départ est déjà le bon,
+       déduit du chemin. */
+    surDefilement();
+    /* Pas de repère sur la page : la mesure ci-dessus a déjà posé
+       « visible », il n'y a rien à écouter. */
+    if (!cible) {
+      return () => {
+        if (brut) cancelAnimationFrame(brut);
+      };
+    }
+    window.addEventListener("scroll", surDefilement, { passive: true });
+    window.addEventListener("resize", surDefilement, { passive: true });
+    return () => {
+      if (brut) cancelAnimationFrame(brut);
+      window.removeEventListener("scroll", surDefilement);
+      window.removeEventListener("resize", surDefilement);
+    };
+  }, [pathname]);
+
   /* changement de page depuis le panneau : on referme (le composant n'est pas
      démonté par la navigation client, le panneau resterait ouvert) */
   useEffect(() => {
@@ -315,7 +390,16 @@ export default function Header() {
               que le bouton reste vivant sans redevenir une pastille. */}
           <Link
             href="/commencer"
-            className={`hidden h-9 items-center rounded-[10px] border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform] duration-200 active:scale-[0.97] md:inline-flex ${
+            /* Caché, il reste dans le DOM : le démonter ferait sauter la
+               largeur de la barre à chaque passage, et les intitulés du
+               menu glisseraient à droite. Il perd sa prise au clavier et
+               son annonce aux lecteurs d'écran tant qu'il est invisible —
+               un bouton qu'on ne voit pas ne doit pas se tabuler. */
+            aria-hidden={!ctaBarre}
+            tabIndex={ctaBarre ? undefined : -1}
+            className={`hidden h-9 items-center rounded-[10px] border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform,opacity] duration-200 active:scale-[0.97] md:inline-flex ${
+              ctaBarre ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
+            } ${
               clairEff
                 ? "border-[#09090b]/25 text-[#09090b] hover:border-[#09090b]/60 hover:bg-black/[0.05]"
                 : "border-white/35 text-white hover:border-white/70 hover:bg-white/10"
