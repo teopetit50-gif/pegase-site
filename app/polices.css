@@ -1,0 +1,41 @@
+/* ══ POLICE UNIQUE DU SITE — 16/09/2026 ════════════════════════════════
+   Teo, en comparant notre accueil à scale.ai : « est-ce que ce sont les
+   mêmes polices ? sinon modifie notre police avec la leur, et ça pour
+   tout le site. »
+
+   Non, ce n'étaient pas les mêmes. scale.com est composé en AEONIK PRO
+   (CoType Foundry) — police sous licence commerciale : on ne peut ni
+   servir leurs fichiers .woff2 ni l'acheter à leur place. Le site portait
+   de son côté SIX familles libres empilées page par page au fil des
+   décalques : Inter (corps), Inter Tight + Plus Jakarta Sans (/offres),
+   DM Sans (hero de l'accueil et /tarifs), Hanken Grotesk (/vos-donnees),
+   Figtree (deux pages produit) — plus trois monos.
+
+   GEIST remplace tout. Ce n'est pas un choix à l'œil : les douze familles
+   libres candidates ont été mesurées le 16/09 contre Aeonik sur une même
+   chaîne à 40 px (voir app/layout.tsx), Geist tombe à +1,6 % de la
+   largeur de la référence et c'est, parmi les trois plus proches, celle
+   dont le squelette colle le mieux. Teo l'a validée à l'œil le même jour
+   sur /offres. Geist Mono fait la paire, comme Aeonik Mono chez eux.
+
+   COMMENT ça tient : les ~240 règles `font-family: var(--font-X)` du site
+   ne sont PAS réécrites — on redéfinit les variables elles-mêmes ici.
+   Une seule famille est chargée, les anciens noms y pointent. Revenir en
+   arrière = rendre à app/layout.tsx ses imports et supprimer ce fichier.
+
+   Effet de bord voulu : treize fichiers woff2 en moins à servir.
+   ════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Sans — tout le site */
+  --font-inter: var(--font-geist);
+  --font-inter-tight: var(--font-geist);
+  --font-jakarta: var(--font-geist);
+  --font-dm-sans: var(--font-geist);
+  --font-hanken: var(--font-geist);
+  --font-figtree: var(--font-geist);
+
+  /* Monos — les étiquettes et les chiffres alignés */
+  --font-jbmono: var(--font-geist-mono);
+  --font-dm-mono: var(--font-geist-mono);
+}

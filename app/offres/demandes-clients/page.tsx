@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree, Space_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import { Apport } from "@/components/produits/accueil/Apport";
 import { Bandeau } from "@/components/produits/accueil/Bandeau";
@@ -60,18 +60,20 @@ import "./accueil.css";
       qui est ici.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Les deux polices de la référence sont libres (SIL OFL) : on les charge
-   telles quelles, servies depuis notre domaine par next/font. */
-const texte = Figtree({
+/* 16/09/2026 — la référence composait en Figtree + Space Mono, et on les
+   chargeait telles quelles (libres, SIL OFL). Le site est passé à une
+   police unique ce jour-là (voir app/polices.css) : cette page suit, sinon
+   elle resterait le dernier îlot en Figtree. Les noms de variables ne
+   bougent PAS — la centaine de règles du CSS de portée continue de les
+   lire, elles servent simplement Geist. */
+const texte = Geist({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
   variable: "--police-texte",
   display: "swap",
 });
 
-const mono = Space_Mono({
+const mono = Geist_Mono({
   subsets: ["latin"],
-  weight: ["400", "700"],
   variable: "--police-mono",
   display: "swap",
 });

@@ -1,106 +1,45 @@
 import type { Metadata } from "next";
-import {
-  DM_Mono,
-  DM_Sans,
-  Hanken_Grotesk,
-  Inter,
-  Inter_Tight,
-  Geist,
-  JetBrains_Mono,
-  Plus_Jakarta_Sans,
-} from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import LenisRoot from "@/components/LenisRoot";
 import "./globals.css";
+import "./polices.css";
 import "./echelle-mobile.css";
 import { SITE_URL } from "@/lib/site";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const jbmono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jbmono" });
+/* ══ UNE SEULE FAMILLE — 16/09/2026 ═══════════════════════════════════
+   Le site portait six familles sans + trois monos, empilées page par page
+   au fil des décalques (Inter, Inter Tight, Plus Jakarta Sans, DM Sans,
+   Hanken Grotesk, Figtree — JetBrains Mono, DM Mono, Space Mono). Teo, en
+   comparant l'accueil à scale.ai : « modifie notre police avec la leur, et
+   ça pour tout le site ».
 
-/* ══ PRÉCHARGEMENT — 14/09/2026 ══════════════════════════════════════
-   Les cinq familles ci-dessous portent `preload: false`. Les variables
-   sont toutes posées sur <html>, donc Next les considérait toutes
-   « utilisées » sur TOUTES les routes et en préchargeait treize fichiers
-   par page — mesuré en prod : ~460 ko de woff2, en priorité HAUTE, sur
-   une page qui n'en consomme que deux ou trois. Ces treize <link
-   rel=preload> passaient devant le JS et le CSS de la page dans la file
-   du navigateur : ils retardaient le premier écran au lieu de l'aider.
-   `preload: false` ne retire NI la police NI sa déclaration @font-face —
-   le fichier est simplement demandé quand une règle le réclame, c'est-à-
-   dire sur la seule page qui s'en sert. Inter et JetBrains Mono, elles,
-   servent tout le site et gardent leur préchargement.
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* 25/07 — deux familles ajoutées pour /offres uniquement (Teo : reproduire à
-   l'identique la page de référence). Plus Jakarta Sans porte tous les titres,
-   Inter Tight tout le corps de texte. Elles ne sont PAS posées sur <body> :
-   seule la classe `.offres` les consomme, le reste du site garde Inter. */
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-  preload: false,
-});
-const interTight = Inter_Tight({
-  subsets: ["latin"],
-  variable: "--font-inter-tight",
-  preload: false,
-});
-
-/* 05/08 — DM Sans, uniquement pour le hero de la home (Teo : cloner à
-   l'identique le hero du template Flux, qu'il a acheté). C'est la famille du
-   titre de la référence, et son dessin géométrique se voit au premier coup
-   d'œil sur un H1 de 60 px — reprendre les métriques sans la police aurait
-   donné « presque pareil ». Comme jakarta/interTight, elle n'est PAS posée sur
-   <body> : seul `.o-flux-h1` la consomme. */
-/* 06/08 — DM Sans sert aussi /tarifs, refaite sur le même template Flux :
-   les deux pages se répondent, et il n'y a donc aucune famille à charger
-   en plus pour elle. (Figtree et Space Mono, ajoutées le 05/08 pour la
-   grille de prix clonée de Synth AI, sont reparties avec elle.) */
-const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", preload: false });
-
-/* 07/08 — deux familles pour /vos-donnees uniquement (Teo : reproduire à
-   l'identique scale.com/public-sector). La référence est composée en Aeonik,
-   une police sous licence commerciale : on ne peut ni la servir depuis leurs
-   fichiers ni l'acheter à leur place. Hanken Grotesk est le remplaçant le
-   plus proche parmi les fontes libres — même squelette de grotesque
-   géométrique, même hauteur d'x, 'g' à un étage, 'y' à queue droite. DM Mono
-   porte les étiquettes de section, qui sont bien en monospace dans la
-   référence. Comme les familles de /offres, elles ne sont PAS posées sur
-   <body> : seul le bloc `.vd` de globals.css les consomme. */
-const hanken = Hanken_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-hanken",
-  preload: false,
-});
-/* 16/09/2026 — GEIST, pour /offres uniquement (décalque de
-   scale.com/data-engine). La référence est composée en Aeonik Pro, sous
-   licence : on ne peut ni servir leurs fichiers ni l'acheter à leur place.
-
-   Deux essais avant celui-ci, tous deux recalés par Teo à l'œil sur un
-   titre de 40 px. Le troisième choix a été fait sur une MESURE et non sur
-   une impression : « The Best In The Business » à 40 px / -0.01em fait
-   440 px dans la référence ; douze familles libres ont été mesurées sur
-   la même chaîne.
-     Familjen Grotesk 408 · Inter Tight 422 · Hanken Grotesk 431 (1er essai)
+   scale.com est composé en Aeonik Pro, sous licence commerciale : ni
+   servable depuis leurs fichiers, ni achetable à leur place. GEIST est le
+   substitut libre le plus proche, et ce n'est pas un jugement à l'œil —
+   « The Best In The Business » à 40 px / -0.01em fait 440 px dans la
+   référence ; douze familles libres ont été mesurées sur la même chaîne :
+     Familjen Grotesk 408 · Inter Tight 422 · Hanken Grotesk 431
      Figtree 432 · ARCHIVO 442 · Instrument Sans 446 · GEIST 447
-     Manrope 450 · Public Sans 453 · Onest 456 (2e essai) · Schibsted 461
-   Onest était 3,6 % plus large : c'est exactement le « plus étalé » que
-   Teo a relevé, et le français, déjà plus long, doublait l'effet. Geist
-   tombe à +1,6 % et c'est, parmi les trois plus proches en largeur, celle
-   dont le squelette colle le mieux — grotesque neutre, barre du 'e'
-   horizontale, terminaisons coupées droit.
-   Comme les autres familles de page, elle n'est PAS posée sur <body> :
-   seul le bloc `.ofd` de app/offres/nos-offres.css la consomme. */
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", preload: false });
+     Manrope 450 · Public Sans 453 · Onest 456 · Schibsted 461
+   Geist tombe à +1,6 % et c'est, parmi les trois plus proches en largeur,
+   celle dont le squelette colle le mieux — grotesque neutre, barre du 'e'
+   horizontale, terminaisons coupées droit. Teo l'avait déjà validée à
+   l'œil sur /offres le matin même. Geist Mono fait la paire, comme Aeonik
+   Mono chez eux.
 
-const dmMono = DM_Mono({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-dm-mono",
-  preload: false,
-});
+   Les ~240 règles `font-family: var(--font-X)` du site ne sont PAS
+   réécrites : app/polices.css fait pointer les anciens noms de variables
+   sur ces deux-là. Revenir en arrière = rendre ses imports à ce fichier et
+   supprimer app/polices.css.
+
+   Les deux familles sont préchargées : elles servent TOUTES les pages, ce
+   qui n'était le cas d'aucune des neuf d'avant (d'où le `preload: false`
+   qu'elles portaient toutes sauf Inter et JetBrains Mono).
+   ═══════════════════════════════════════════════════════════════════════ */
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 /* 01/08 — ramenée sous ~160 caractères : Google tronquait l'ancienne (278). */
 const DESCRIPTION =
@@ -137,7 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${inter.variable} ${jbmono.variable} ${jakarta.variable} ${interTight.variable} ${dmSans.variable} ${hanken.variable} ${dmMono.variable} ${geist.variable} antialiased`}
+      className={`${geist.variable} ${geistMono.variable} antialiased`}
     >
       {/* Vercel Web Analytics — sans cookie, donc pas de bandeau consentement.
           Le script ne collecte qu'une fois « Web Analytics » activé sur le

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
+import { Geist } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import Fond from "@/components/produits/factures/Fond";
 import Apparition from "@/components/produits/factures/Apparition";
@@ -84,9 +84,11 @@ import "./factures.css";
    `font-family` qui la consomme est écrite explicitement dans le CSS de
    portée, parce que la règle de police du site est posée plus haut, sur
    <html>, avec Inter. */
-const figtree = Figtree({
+/* 16/09/2026 — Figtree remplacée par Geist, comme partout ailleurs
+   (app/polices.css). Le nom de variable ne bouge pas : le CSS de portée
+   qui la consomme reste inchangé. */
+const figtree = Geist({
   subsets: ["latin"],
-  weight: ["400", "500"],
   variable: "--font-figtree",
   display: "swap",
 });

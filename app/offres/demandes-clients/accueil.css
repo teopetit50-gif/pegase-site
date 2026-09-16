@@ -94,7 +94,7 @@
      (`@theme inline`), donc redéfinir `--font-sans` ici ne changerait
      rien. Les deux variables `--police-*` viennent de next/font, posées
      par la page sur ce même conteneur. */
-  font-family: var(--police-texte), "Figtree", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--police-texte), ui-sans-serif, system-ui, sans-serif;
 
   /* Même piège que la police, et plus vicieux : `body` de ce site porte
      `color: var(--text)`, un blanc cassé — c'est un site de thème sombre.
@@ -134,10 +134,10 @@
    s'en sert partout (étiquettes, boutons, heures, mentions). Deux classes
    de sélecteur battent l'utilitaire quel que soit l'ordre d'émission. */
 .p-accueil .font-mono {
-  font-family: var(--police-mono), "Space Mono", ui-monospace, SFMono-Regular, monospace;
+  font-family: var(--police-mono), ui-monospace, SFMono-Regular, monospace;
 }
 .p-accueil .font-sans {
-  font-family: var(--police-texte), "Figtree", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--police-texte), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ─── Les deux lavis, refaits en dégradés — mêmes teintes que les jetons.
