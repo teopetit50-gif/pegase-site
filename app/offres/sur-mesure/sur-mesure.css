@@ -816,6 +816,246 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+   8 bis · LE DÉROULÉ D'EXÉCUTION — habillage d'AgentTrace
+
+   Le composant vient de 21st.dev et est écrit en jetons shadcn, dont ce
+   site n'a AUCUN : `bg-card`, `text-muted-foreground`, `bg-primary`,
+   `border-border`, `bg-destructive` n'existent pas dans son `@theme`, et
+   en Tailwind v4 une utilitaire sans jeton n'est tout simplement pas
+   émise. Les classes auraient été mortes, sans une erreur — le piège
+   déjà rencontré en adaptant d'autres composants shadcn. Tout
+   l'habillage est donc ici, à la charte de la page.
+
+   Correspondance des jetons d'origine :
+     card / background      → #ffffff
+     foreground             → #000000
+     muted-foreground       → #525252   (l'étiquette de la page)
+     border                 → rgba(0,0,0,.1)
+     muted                  → #f2f2f2   (le fond doux de la page)
+     primary                → #193a29   (l'evergreen de la citation)
+     destructive            → #b42318
+   Le monospace est DM Mono, comme les étiquettes de section ; le reste
+   suit `--font-geist`, hérité de `.smd`.
+
+   ⚠ Ce bloc est scopé sous `.smd` : le composant n'est pas réutilisable
+   tel quel sur une autre page du site. Pour l'y poser, copier ce bloc
+   et le renommer.
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-trace {
+  --tr-ligne: rgba(0, 0, 0, 0.1);
+  --tr-doux: #f2f2f2;
+  --tr-accent: var(--smd-evergreen);
+  --tr-echec: #b42318;
+  --tr-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+
+  background: #ffffff;
+  color: var(--smd-texte);
+  border: 1px solid var(--tr-ligne);
+  border-radius: var(--smd-r-lg);
+}
+
+/* ——— la tête : identifiant, nombre d'étapes, état ——— */
+.smd .smd-trace-tete {
+  border-bottom: 1px solid var(--tr-ligne);
+}
+.smd .smd-trace-point {
+  background: rgba(0, 0, 0, 0.3);
+  transition: background-color 300ms ease;
+}
+.smd .smd-trace[data-run="running"] .smd-trace-point {
+  background: var(--tr-accent);
+}
+.smd .smd-trace-id {
+  font-family: var(--tr-mono);
+  font-size: 0.8125rem;
+  line-height: 1;
+  font-weight: 500;
+  color: var(--smd-texte);
+}
+.smd .smd-trace-sous {
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--smd-etiquette);
+}
+.smd .smd-trace-etat {
+  border: 1px solid var(--tr-ligne);
+  font-family: var(--tr-mono);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--smd-etiquette);
+}
+
+/* ——— une ligne d'étape ——— */
+.smd .smd-trace-ligne {
+  transition: background-color 150ms ease;
+}
+.smd .smd-trace-ligne[data-state="running"] {
+  background: var(--tr-doux);
+}
+.smd .smd-trace-ligne[data-selected="true"] {
+  background: rgba(0, 0, 0, 0.035);
+}
+.smd .smd-trace-rail {
+  background: var(--tr-ligne);
+}
+.smd .smd-trace-nom {
+  transition: background-color 150ms ease;
+}
+.smd .smd-trace-nom:hover {
+  background: var(--tr-doux);
+}
+.smd .smd-trace-nom:focus-visible {
+  box-shadow: 0 0 0 3px rgba(25, 58, 41, 0.35);
+}
+.smd .smd-trace-ico {
+  color: var(--smd-etiquette);
+  transition: color 200ms ease;
+}
+.smd .smd-trace-ligne[data-state="queued"] .smd-trace-ico {
+  color: rgba(0, 0, 0, 0.4);
+}
+.smd .smd-trace-ligne[data-state="done"] .smd-trace-ico--accent,
+.smd .smd-trace-ligne[data-state="running"] .smd-trace-ico--accent {
+  color: var(--tr-accent);
+}
+.smd .smd-trace-lbl {
+  font-family: var(--tr-mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--smd-texte);
+  transition: color 200ms ease;
+}
+/* Une ligne en attente descend en TEINTE, pas en opacité : 40 % de noir
+   sur blanc tomberait à 2,8:1. */
+.smd .smd-trace-ligne[data-state="queued"] .smd-trace-lbl {
+  color: var(--smd-etiquette);
+}
+.smd .smd-trace-essai {
+  border: 1px solid var(--tr-ligne);
+  font-family: var(--tr-mono);
+  font-size: 10px;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--smd-etiquette);
+}
+
+/* ——— la barre : l'étendue en fantôme, remplie jusqu'à la tête ——— */
+.smd .smd-trace-fantome {
+  background: rgba(0, 0, 0, 0.1);
+}
+.smd .smd-trace-jauge {
+  background: rgba(0, 0, 0, 0.5);
+}
+.smd .smd-trace-jauge--accent {
+  background: var(--tr-accent);
+}
+.smd .smd-trace-jauge--echec {
+  background: var(--tr-echec);
+}
+.smd .smd-trace-jauge--cache {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ——— la colonne de résultat ——— */
+.smd .smd-trace-resultat {
+  transition: opacity 200ms ease;
+}
+.smd .smd-trace-ligne[data-state="queued"] .smd-trace-resultat {
+  opacity: 0;
+}
+.smd .smd-trace-ico-echec {
+  color: var(--tr-echec);
+}
+.smd .smd-trace-ico-cache {
+  color: var(--smd-etiquette);
+}
+.smd .smd-trace-meta,
+.smd .smd-trace-duree,
+.smd .smd-trace-horloge,
+.smd .smd-trace-tic {
+  font-family: var(--tr-mono);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.smd .smd-trace-meta,
+.smd .smd-trace-horloge,
+.smd .smd-trace-tic {
+  color: var(--smd-etiquette);
+}
+.smd .smd-trace-duree {
+  color: rgba(0, 0, 0, 0.7);
+}
+.smd .smd-trace-duree--echec {
+  color: var(--tr-echec);
+}
+.smd .smd-trace-tic {
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
+/* ——— la règle de temps, sa trame, et la tête de lecture ——— */
+.smd .smd-trace-regle {
+  border-bottom: 1px solid var(--tr-ligne);
+}
+.smd .smd-trace-grille {
+  background: rgba(0, 0, 0, 0.06);
+}
+.smd .smd-trace-tete-lecture {
+  background: rgba(25, 58, 41, 0.7);
+}
+.smd .smd-trace-pointe {
+  background: var(--tr-accent);
+}
+
+/* ——— le transport ——— */
+.smd .smd-trace-transport {
+  border-top: 1px solid var(--tr-ligne);
+}
+.smd .smd-trace-jouer {
+  background: var(--tr-accent);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.smd .smd-trace-jouer:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+}
+.smd .smd-trace-jouer:active {
+  transform: scale(0.98);
+}
+.smd .smd-trace-jouer:focus-visible {
+  box-shadow: 0 0 0 3px rgba(25, 58, 41, 0.35);
+}
+.smd .smd-trace-piste:focus-visible {
+  box-shadow: 0 0 0 3px rgba(25, 58, 41, 0.35);
+}
+.smd .smd-trace-rail-fond {
+  background: rgba(0, 0, 0, 0.1);
+}
+.smd .smd-trace-progression {
+  background: var(--tr-accent);
+}
+.smd .smd-trace-curseur {
+  background: var(--tr-accent);
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smd .smd-trace-ligne,
+  .smd .smd-trace-nom,
+  .smd .smd-trace-ico,
+  .smd .smd-trace-lbl,
+  .smd .smd-trace-resultat,
+  .smd .smd-trace-jouer,
+  .smd .smd-trace-point {
+    transition: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
    9 · VIGNETTES — leurs « Demos » (16/9) et leurs « Resources » (389/243)
    ───────────────────────────────────────────────────────────────────── */
 

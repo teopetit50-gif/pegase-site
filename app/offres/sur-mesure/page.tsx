@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import { AgentTrace, type TraceSpan } from "@/components/ui/agent-trace";
 import {
   SigneHubspot,
   SigneNotion,
@@ -10,7 +11,6 @@ import {
   CroquisDocument,
   CroquisPont,
   CroquisSuivi,
-  PanneauMethode,
   PanneauReglages,
 } from "@/components/surmesure/Panneaux";
 import { FAMILLES } from "@/lib/content";
@@ -20,14 +20,10 @@ import type { Fiche } from "@/lib/fiches";
 import {
   AppWindow,
   ArrowLeftRight,
-  Blocks,
   CalendarCheck,
   FileSearch,
-  FileSignature,
   LayoutDashboard,
   MessagesSquare,
-  Rocket,
-  Search,
 } from "lucide-react";
 import "./sur-mesure.css";
 
@@ -100,9 +96,16 @@ import "./sur-mesure.css";
    • `FICHE.faq` (4 questions) n'est plus rendue. C'était le seul endroit
      du site qui écrivait les délais, le coût, la propriété du code et
      les besoins qu'on refuse. → à remettre si Teo veut une 12ᵉ section.
-   • `FICHE.cible` (8 secteurs) EST REVENUE le 16/09 : elle occupe la
-     colonne droite du panneau d'aperçu, à la place du planisphère de la
-     référence — même rôle (dire l'étendue), contenu vrai.
+   • `FICHE.etapes` (les 4 étapes : cadrage, devis, construction, mise en
+     service) et `FICHE.cible` (8 secteurs) ne sont PLUS RENDUES depuis
+     que le panneau d'aperçu a cédé la place au déroulé d'exécution
+     (16/09, demande de Teo). C'est la perte la plus sérieuse de la
+     page : la MÉTHODE n'est écrite nulle part ailleurs, or c'est la
+     première question d'une direction devant un projet sur mesure. Les
+     deux champs restent ici, et le composant qui les mettait en page
+     reste dans components/surmesure/Panneaux.tsx (`PanneauMethode`,
+     orphelin depuis le 16/09) : les remettre est un import et six
+     lignes. → à trancher avec Teo.
    • `FICHE.outils` alimente désormais le bandeau nº 2, sous forme de
      logos plutôt que de pastilles.
    • Les quatre garanties du gabarit (file de validation, journal, données
@@ -226,26 +229,49 @@ const FICHE: Fiche = {
   },
 };
 
-/* ——— § 4 · les quatre étapes, rangées et numérotées ——————————————
-   Le texte de la grande pièce doit tenir dans une colonne de 244 px, et
-   les quatre colonnes doivent faire la même hauteur : chaque étape est
-   donc coupée à sa proposition principale, jamais réécrite. La phrase
-   complète reste dans `FICHE.etapes`, d'où sortent ces quatre-là. */
-const COUPES = [
-  "Le processus tel qu'il se déroule, et où il se rompt.",
-  "Périmètre, règles et coût écrits avant de commencer.",
-  "Construit sur vos règles, intégré à vos outils.",
-  "Un périmètre restreint d'abord, élargi une fois mesuré.",
+/* ——— § 4 · le déroulé d'une exécution ————————————————————————————
+   16/09, Teo : « remplace cette section par ce composant », en donnant
+   l'AgentTrace de 21st.dev. Ce qu'il montre chez son auteur est une
+   exécution d'agent de code ; ce qu'il montre ici est le seul déroulé
+   qui intéresse un acheteur de sur-mesure : ce que le système fait tout
+   seul, et l'endroit exact où il s'arrête pour attendre quelqu'un.
+
+   Les dix étapes reprennent un traitement documentaire — la deuxième
+   ligne de `FICHE.demo`, « bons de livraison lus et contrôlés à
+   réception ». Elles racontent, dans l'ordre : on reçoit, on lit, on
+   rapproche, un contrôle ÉCHOUE, la règle de tolérance tranche, le
+   système s'arrête et demande un accord, l'accord arrive, il écrit chez
+   le client, il journalise. Le rouge du contrôle et l'attente de
+   validation sont le SUJET de la page, pas un accident de démonstration.
+
+   ── CE QUE CE BLOC N'AFFICHE PAS, ET POURQUOI ───────────────────────
+   • Pas de `model` dans la tête. Le composant d'origine y écrit le nom
+     du modèle ; le site ne nomme jamais notre fournisseur (règle du
+     parc). La tête ne porte que l'identifiant et le nombre d'étapes.
+   • Pas de jetons. `showTokens` est à false : « 4 820 tk » est du
+     vocabulaire de fournisseur de modèles, et ça ne dit rien à une
+     direction. La colonne de droite affiche le résultat en clair.
+   • Les durées sont un EXEMPLE, et la page le dit sous le bloc. Un
+     graphique qui ne montre pas les données d'un vrai client se signale
+     comme tel — c'est la règle du parc sur les chiffres.
+
+   `autoPlay` est à false et la tête de lecture part à 62 % : au
+   chargement le bloc montre une exécution déjà avancée, contrôle en
+   échec compris, plutôt qu'une grille d'étapes grises. Le bouton
+   lecture la rejoue depuis le début. */
+const TRACE: TraceSpan[] = [
+  { id: "reception", label: "reception.piece", kind: "io", start: 0, end: 420, detail: "1 bon de livraison" },
+  { id: "lecture", label: "lecture.champs", kind: "tool", start: 460, end: 1980, detail: "18 champs" },
+  { id: "rapproche", label: "rapprochement.commande", kind: "tool", start: 2020, end: 2940, detail: "commande trouvée" },
+  { id: "controle", label: "controle.coherence", kind: "tool", start: 2980, end: 3820, status: "error", detail: "2 écarts" },
+  { id: "tolerance", label: "regle.tolerance", kind: "tool", start: 3860, end: 4180, status: "cached", detail: "seuil connu" },
+  { id: "attente", label: "attente.validation", kind: "agent", start: 4220, end: 7600, detail: "accord donné" },
+  { id: "avis", label: "avis.responsable", kind: "io", parentId: "attente", start: 4260, end: 4620, detail: "1 destinataire" },
+  { id: "reponse", label: "reponse.humaine", kind: "io", parentId: "attente", start: 7180, end: 7560, detail: "validé" },
+  { id: "ecriture", label: "ecriture.outil-metier", kind: "io", start: 7640, end: 8720, detail: "3 lignes" },
+  { id: "journal", label: "journal.ecriture", kind: "io", start: 8760, end: 9100, detail: "horodaté" },
 ];
-/* Un pictogramme par étape, dans le sens de l'étape : on regarde, on
-   écrit, on assemble, on met en route. */
-const ICONES_ETAPE = [Search, FileSignature, Blocks, Rocket];
-const ETAPES = FICHE.etapes.map((e, i) => ({
-  rang: String(i + 1).padStart(2, "0"),
-  titre: e.t,
-  texte: COUPES[i],
-  Icone: ICONES_ETAPE[i],
-}));
+const TRACE_TOTAL = 9100;
 
 /* ——— § 8 · les six périmètres ———————————————————————————————————
    Les quatre premiers sont `FICHE.points`, coupés au premier deux-points
@@ -536,13 +562,31 @@ export default function SurMesurePage() {
           </div>
         </section>
 
-        {/* ════════ 4 · DU BESOIN AU SYSTÈME ════════
-            L'emplacement de leur grand schéma. Écart nº 5 du bloc .smd :
-            c'est du balisage qui se recompose, pas une image. */}
+        {/* ════════ 4 · UNE EXÉCUTION, ÉTAPE PAR ÉTAPE ════════
+            L'emplacement de leur grand schéma. Depuis le 16/09 il porte
+            le déroulé d'une exécution, qu'on peut rejouer à la main —
+            voir `TRACE` plus haut pour ce qu'il montre et ce qu'il ne
+            montre pas. Le composant est enveloppé dans le même cadre que
+            les autres pièces, mais SANS `smd-panneau` : il a son propre
+            fond blanc et son propre filet. */}
         <section className="smd-sec">
           <div className="smd-wrap">
-            <div data-reveal className="smd-panneau">
-              <PanneauMethode etapes={ETAPES} secteurs={FICHE.cible ?? []} />
+            <div data-reveal>
+              <AgentTrace
+                spans={TRACE}
+                duration={TRACE_TOTAL}
+                runId="traitement_4821"
+                defaultTime={TRACE_TOTAL * 0.62}
+                autoPlay={false}
+                loop
+                showTokens={false}
+                labelWidth={208}
+              />
+              <p className="smd-body mt-4 !text-[0.8125rem]">
+                Exemple de déroulé, sur des durées réalistes. Les étapes et leur
+                enchaînement sont ceux d’un système en service&nbsp;; les valeurs ne
+                sont pas celles d’un client.
+              </p>
             </div>
           </div>
         </section>
