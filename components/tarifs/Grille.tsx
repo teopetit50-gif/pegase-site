@@ -533,8 +533,12 @@ function CartePalier({
         <div
           className={cn(
             "absolute inset-x-0 -top-3 mx-auto w-fit rounded-full px-3 py-1 text-xs font-medium",
+            /* 15/09 (Teo) — la pastille phare n'est plus PLEINE : fond blanc,
+               filet d'encre, texte et étoile en noir. Le fond reste opaque,
+               pas transparent : la pastille est posée à cheval sur le filet
+               de la carte, qui la traverserait de part en part. */
             phare
-              ? "bg-[#050505] text-white"
+              ? "border border-[#050505] bg-white text-[#050505] shadow-sm"
               : "border border-[#e3e3e3] bg-white text-[#050505] shadow-sm",
           )}
         >
