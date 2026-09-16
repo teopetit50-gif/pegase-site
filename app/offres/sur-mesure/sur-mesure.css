@@ -241,6 +241,25 @@
    perdait 16 px de largeur sur tout le haut de page. */
 .smd .smd-cadre {
   padding-inline: 16px;
+  /* 16/09, seconde passe — LE PLAFOND DES DEUX PLEINES IMAGES.
+     Le relevé ci-dessus s'arrête à 1920 px : c'est la seule largeur où le
+     plafond de la référence et la vue coïncident, la carte y vaut 1888
+     dans les deux cas, et le défaut ne peut pas se voir. Repris plus
+     large sur scale.com/generative-ai-data-engine, leur carte se fige :
+
+       vue      2560   3840
+       carte    1888   1888     (x = 329 puis 969 : centrée)
+
+     Sans ce plafond, notre hero mesurait 3840 à 3840 et l'appel final
+     3808 : la photo s'étalait d'un bord à l'autre et le titre se
+     retrouvait collé au bord gauche dès qu'on dézoomait.
+
+     1920 − 32 de marge = 1888. Le repli du hero n'est pas touché : il
+     reste en absolu dans sa scène et va toujours de 0 à 16 px de marge,
+     simplement dans un cadre qui ne dépasse plus 1920. Sous cette
+     largeur, pas un pixel ne bouge. */
+  max-width: 1920px;
+  margin-inline: auto;
 }
 /* Le cadre du hero ne porte PLUS de `padding-inline` : c'est `.smd-scene`
    qui gère la marge latérale, parce qu'elle doit l'animer de 0 à 16
@@ -248,6 +267,22 @@
 .smd .smd-cadre--hero {
   padding-top: 20px; /* écart nº 2 : notre entête est dans le flux */
   padding-bottom: 40px;
+  /* ⚠ LE MÊME PLAFOND QUE .smd-cadre, RÉPÉTÉ ICI, ET CE N'EST PAS UN
+     DOUBLON : le cadre du hero ne porte PAS la classe de base
+     .smd-cadre dans le balisage — seulement smd-cadre--hero. La règle
+     de base ne l'atteint donc jamais. Constaté le 16/09 : après avoir
+     plafonné .smd-cadre, l'appel final tombait bien à 1888 à 3840
+     pendant que le hero restait à 3840, la photo d'un bord à l'autre.
+
+     Le plafond est posé sur le CADRE et non sur le hero lui-même : le
+     hero est en absolu dans .smd-scene, ses left/right valent
+     16px × --smd-p, donc il suit la largeur de sa scène. La scène
+     plafonne, le hero plafonne avec elle — et le repli au défilement
+     continue d'aller de 0 à 16 px, intact. Poser un max-width sur le
+     hero le sur-contraindrait (left + right + width) et le collerait à
+     gauche au lieu de le centrer. */
+  max-width: 1920px;
+  margin-inline: auto;
 }
 .smd .smd-cadre--appel {
   padding-top: 64px;
