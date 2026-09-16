@@ -1,5 +1,9 @@
+"use client";
+
 import { Archive, CalendarClock, MessageSquare, TrendingUp } from "lucide-react";
 import { BENTO, PROTOCOLE } from "@/lib/produits/relances";
+import { useState } from "react";
+
 import { FeatureCard } from "./ui/grid-feature-cards";
 
 /* Le détail du moteur, sur le composant `grid-feature-cards`.
@@ -58,7 +62,19 @@ function Frise() {
   );
 }
 
+/* Combien de cartes restent sur téléphone. Deux : assez pour montrer de
+   quoi parle le bloc, et la moitié de sa hauteur. */
+const CARTES_MOBILE = 2;
+
 export function Bento() {
+  /* 16/09/2026 (Teo, par l'associé) — « toute la page CASHD est cent fois
+     trop remplie sur mobile ». Arbitrage de l'associé : replier plutôt
+     que couper, rien de perdu. Les quatre cartes s'empilent sous 640 et
+     pèsent la moitié des 1 500 px de la section. Deux restent, deux
+     suivent d'un geste. Dès `sm` elles sont sur deux colonnes, dès `lg`
+     sur quatre : le repli n'y a plus lieu d'être, et le bouton n'est même
+     pas rendu. */
+  const [tout, setTout] = useState(false);
   return (
     <section id="detail" data-monde="clair" className="scroll-mt-24 py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -77,6 +93,7 @@ export function Bento() {
             <FeatureCard
               key={c.id}
               graine={i}
+              className={i < CARTES_MOBILE || tout ? undefined : "hidden sm:block"}
               fonctionnalite={{
                 titre: c.titre,
                 icone: ICONES[c.id],
@@ -85,6 +102,16 @@ export function Bento() {
             />
           ))}
         </div>
+        {BENTO.cartes.length > CARTES_MOBILE ? (
+          <button
+            type="button"
+            aria-expanded={tout}
+            onClick={() => setTout((v) => !v)}
+            className="mt-6 font-medium text-[#737373] text-sm underline underline-offset-4 sm:hidden"
+          >
+            {tout ? "Réduire" : `Lire la suite (${BENTO.cartes.length - CARTES_MOBILE} autres)`}
+          </button>
+        ) : null}
       </div>
     </section>
   );

@@ -2,6 +2,7 @@
 
 import { cn } from "@/components/produits/relances/utils";
 import type React from "react";
+import { useState } from "react";
 
 /* Composant 21st.dev « how-it-works », adapté.
    Trois écarts au code d'origine, tous notés ici :
@@ -33,12 +34,13 @@ export interface Etape {
   points: readonly string[];
 }
 
-function CarteEtape({ icone, titre, texte, points }: Etape) {
+function CarteEtape({ icone, titre, texte, points, className }: Etape & { className?: string }) {
   return (
     <div
       className={cn(
         "relative rounded-2xl border border-[#e6e6e6] bg-[#ffffff] p-6 text-[#171717] transition-shadow duration-300",
         "hover:border-[#171717]/20 hover:shadow-lg",
+        className,
       )}
     >
       <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-[#f5f5f5] text-[#171717]">
@@ -73,6 +75,21 @@ export function HowItWorks({
   chapo: string;
   etapes: readonly Etape[];
 }) {
+  /* 16/09/2026 (Teo, par l'associé) — « toute la page est cent fois trop
+     remplie sur mobile, mettre beaucoup moins de texte ». Arbitrage de
+     l'associé le même jour : replier plutôt que couper — « rien de perdu,
+     tout derrière un geste ».
+
+     Les trois cartes s'empilent sous 768 et pèsent près de 1 500 px à
+     elles seules, titre et chapô compris. La première reste, les autres
+     suivent d'un geste. Sur ordinateur elles sont sur TROIS COLONNES et
+     coûtent la hauteur d'une seule : le repli n'y a aucun sens, et le
+     bouton n'y est même pas rendu (`md:hidden`).
+
+     Les cartes cachées restent dans le DOM (`hidden md:block`) : même
+     balisage partout, rien ne clignote au montage, et la recherche dans
+     la page les trouve. */
+  const [tout, setTout] = useState(false);
   return (
     <section
       data-monde="clair"
@@ -109,10 +126,27 @@ export function HowItWorks({
         </div>
 
         <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
-          {etapes.map((e) => (
-            <CarteEtape key={e.titre} {...e} />
+          {etapes.map((e, i) => (
+            <CarteEtape
+              key={e.titre}
+              {...e}
+              className={i === 0 || tout ? undefined : "hidden md:block"}
+            />
           ))}
         </div>
+        {etapes.length > 1 ? (
+          <div className="mx-auto mt-6 max-w-4xl md:hidden">
+            <button
+              type="button"
+              aria-expanded={tout}
+              onClick={() => setTout((v) => !v)
+              }
+              className="font-medium text-[#737373] text-sm underline underline-offset-4"
+            >
+              {tout ? "Réduire" : `Lire la suite (${etapes.length - 1} autres)`}
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
