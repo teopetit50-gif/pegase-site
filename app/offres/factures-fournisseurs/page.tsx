@@ -440,7 +440,7 @@ export default function PageFactures() {
 
             <Apparition>
               <p className="mx-0 mt-6 font-mono text-[11px] uppercase tracking-[0.1em] text-[#737373] lg:mx-5">
-                Montants en cours d&apos;arbitrage&nbsp;: le palier se choisit sur vos volumes réels.
+                Le palier se choisit sur vos volumes réels, et le montant figure à votre devis.
               </p>
             </Apparition>
           </div>
