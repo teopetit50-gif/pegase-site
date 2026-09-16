@@ -30,6 +30,10 @@ export const runtime = "nodejs";
 
 /* Mercredi 23 septembre 2026, 10 h 30 en Guadeloupe (UTC−4) */
 const CRENEAU_EXEMPLE = "2026-09-23T14:30:00.000Z";
+/* Un identifiant d'exemple, fixe lui aussi : il sert d'UID au fichier
+   d'agenda, et un UID qui change à chaque rechargement ferait créer un
+   nouvel événement à chaque essai au lieu de mettre à jour le même. */
+const ID_EXEMPLE = "00000000-0000-4000-8000-0000000000aa";
 
 export async function GET(req: Request) {
   if (process.env.NODE_ENV === "production") {
@@ -41,9 +45,24 @@ export async function GET(req: Request) {
 
   const mail = composerConfirmation(
     devis
-      ? { prenom: "Claire", formule: "atelier", creneauISO: null, dureeMin: null }
-      : { prenom: "Marc", formule: "diagnostic", creneauISO: CRENEAU_EXEMPLE, dureeMin: 30 },
+      ? { id: ID_EXEMPLE, prenom: "Claire", formule: "atelier", creneauISO: null, dureeMin: null }
+      : {
+          id: ID_EXEMPLE,
+          prenom: "Marc",
+          formule: "diagnostic",
+          creneauISO: CRENEAU_EXEMPLE,
+          dureeMin: 30,
+          maintenant: new Date(CRENEAU_EXEMPLE),
+        },
   );
+
+  /* ?format=ics rend le fichier d'agenda tel qu'il part en pièce
+     jointe : on l'ouvre pour vérifier qu'un agenda le reprend bien. */
+  if (url.searchParams.get("format") === "ics" && mail.agenda) {
+    return new Response(mail.agenda.contenu, {
+      headers: { "Content-Type": "text/calendar; charset=utf-8" },
+    });
+  }
 
   if (url.searchParams.get("format") === "texte") {
     return new Response(`Objet : ${mail.sujet}\n\n${mail.texte}`, {
