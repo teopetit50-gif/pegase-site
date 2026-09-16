@@ -1,0 +1,330 @@
+/* ══════════════════════════════════════════════════════════════════════
+   chat-messages — la fenêtre de validation animée (16/09/2026)
+
+   Relevé au getComputedStyle sur la fenêtre « AI Text Generator » de
+   scale.com/data-engine (section #build-ai, variante claire
+   `.build-ai-chat-window-light`), à 1440 px, cadre de 649 × 402.
+
+   ── CE QUI EST REPRIS AU PIXEL ───────────────────────────────────────
+   cadre            649 × 402, rayon 10, fond #ffffff
+   chrome           grille de 3 colonnes, padding 12, trois pastilles de
+                    12 px espacées de 6, titre 16/26.4 graisse 500 #525252
+   corps            padding 12 / 24, interligne des blocs 8
+   bulle entrante   hauteur 32, padding 4.5 12 4.5 7, rayon 18,
+                    fond rgba(0,0,0,.04), filet 1px rgba(0,0,0,.12),
+                    vignette 18, écart 8, texte 14/21 #525252
+   bulle sortante   hauteur 36, padding 5 5 5 12, disque 24
+   pastille d'attente
+                    anneau de 1 px en dégradé
+                    linear-gradient(97deg,#fff,#9a77ff,#4d7df7,#e151ff,#fff759)
+                    rayon 18, pastille noire, padding 3, écart 8,
+                    points 12/18 padding 3 7 3 12
+   panneau          marge 8, padding 8 8 36, rayon 6, fond transparent,
+                    filet ::before 1px rgba(255,255,255,.05),
+                    voile ::after linear-gradient(180deg,
+                    rgba(243,238,255,0) 0%, rgba(243,238,255,.04) 100%)
+   libellé          13/24, #c88bc4, centré, padding-top 24
+   propositions     rayon plein, padding 4 12, filet rgba(0,0,0,.12),
+                    fond rgba(0,0,0,.25), texte 14/21, écart 7
+
+   ── ÉCARTS ASSUMÉS ───────────────────────────────────────────────────
+   1. LES UNITÉS. La référence pose des px fixes au-dessus de 640 et des
+      valeurs miniatures (7 px) en dessous, ce qui donne deux fenêtres
+      sans rien entre les deux. Ici tout est en `cqw` borné par un
+      `clamp` : le cadre est un conteneur de requête (voir
+      `.ofd-scinde__media`), et chaque valeur vaut EXACTEMENT celle de la
+      référence quand le conteneur fait 649. Sous 649 la fenêtre se réduit
+      sans palier — même rendu à la taille de référence, plus de trou.
+   2. LA VIGNETTE DU MESSAGE ENTRANT. La référence y met la photo d'un
+      visage (Unsplash). Un avatar de client n'est pas un client : c'est
+      une icône qui tient la place, même emprise, même rondeur.
+   3. LE DISQUE DU SYSTÈME. La référence sert un PNG iridescent qui lui
+      appartient (`/static/images/icons/llm-1.png`). Le nôtre est composé
+      en CSS à partir des mêmes teintes que l'anneau — refait, pas copié.
+   4. LE FILET DU PANNEAU. Il est relevé tel quel — `rgba(255,255,255,.05)`
+      sur fond blanc, donc invisible. La référence a laissé là son jeton
+      de variante sombre ; on le garde pour ne pas inventer un filet
+      qu'elle ne dessine pas.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.cmsg {
+  --cmsg-encre: #525252;
+  --cmsg-filet: rgba(0, 0, 0, 0.12);
+  --cmsg-voile: rgba(0, 0, 0, 0.04);
+  --cmsg-pastille: rgba(0, 0, 0, 0.25);
+  --cmsg-mauve: #c88bc4;
+  --cmsg-iris: linear-gradient(97deg, #ffffff, #9a77ff, #4d7df7, #e151ff, #fff759);
+
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  background: #ffffff;
+  color: var(--cmsg-encre);
+  letter-spacing: -0.01em;
+}
+
+/* ─── le chrome à trois pastilles ─── */
+
+/* Hauteur du chrome : 58 dans la référence, et elle ne vient pas d'une
+   hauteur posée mais du `pt-2` de la cellule du titre — 12 + 8 + 26.4 + 12.
+   Les cellules sont étirées (grille sans `align-items`), donc les trois
+   pastilles se calent EN HAUT, à 12 du bord. Centrer la grille les
+   descendait de 7 px et ramenait le chrome à 50 : c'est la seule mesure
+   qui manquait au premier passage de recette. */
+.cmsg__chrome {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: clamp(6px, 1.85cqw, 12px);
+}
+.cmsg__points {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(3px, 0.93cqw, 6px);
+}
+.cmsg__points i {
+  display: block;
+  aspect-ratio: 1;
+  width: clamp(6px, 1.85cqw, 12px);
+  border-radius: 9999px;
+}
+.cmsg__titre {
+  justify-self: center;
+  padding-top: clamp(4px, 1.23cqw, 8px);
+  font-size: clamp(7px, 2.47cqw, 16px);
+  line-height: 1.65;
+  font-weight: 500;
+  color: var(--cmsg-encre);
+  white-space: nowrap;
+}
+/* La troisième cellule de la référence est vide. La nôtre porte la
+   mention « Exemple » : règle du site, une fenêtre qui ne montre les
+   données d'aucun client le dit dans son propre chrome. */
+.cmsg__mention {
+  justify-self: end;
+  align-self: center;
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: clamp(5px, 1.54cqw, 10px);
+  line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+/* ─── le corps ─── */
+
+.cmsg__corps {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: clamp(3px, 1.23cqw, 8px);
+  padding: clamp(6px, 1.85cqw, 12px) clamp(10px, 3.7cqw, 24px);
+}
+
+/* ─── les deux bulles ─── */
+
+.cmsg__bulle {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: clamp(4px, 1.23cqw, 8px);
+  border: 1px solid var(--cmsg-filet);
+  border-radius: clamp(9px, 2.77cqw, 18px);
+  background: var(--cmsg-voile);
+}
+.cmsg__bulle--entrante {
+  padding: clamp(2px, 0.69cqw, 4.5px) clamp(5px, 1.85cqw, 12px)
+    clamp(2px, 0.69cqw, 4.5px) clamp(3px, 1.08cqw, 7px);
+}
+.cmsg__bulle--sortante {
+  padding: clamp(2px, 0.77cqw, 5px) clamp(2px, 0.77cqw, 5px)
+    clamp(2px, 0.77cqw, 5px) clamp(5px, 1.85cqw, 12px);
+}
+.cmsg__texte {
+  font-size: clamp(7px, 2.16cqw, 14px);
+  line-height: 1.5;
+}
+.cmsg__sortie {
+  display: flex;
+  justify-content: flex-end;
+}
+.cmsg__sortie .cmsg__texte {
+  text-align: right;
+}
+
+/* la vignette du message entrant — écart 2 */
+.cmsg__vignette {
+  display: flex;
+  aspect-ratio: 1;
+  width: clamp(8px, 2.77cqw, 18px);
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.5);
+}
+.cmsg__vignette svg {
+  width: 62%;
+  height: 62%;
+}
+
+/* le disque du système — écart 3 : les teintes de l'anneau, refaites */
+.cmsg__disque {
+  aspect-ratio: 1;
+  width: clamp(8px, 2.77cqw, 18px);
+  flex: none;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 42%),
+    conic-gradient(from 210deg, #4d7df7, #9a77ff, #e151ff, #fff759, #4d7df7);
+}
+.cmsg__disque--grand {
+  width: clamp(10px, 3.7cqw, 24px);
+}
+
+/* ─── la pastille d'attente ─── */
+
+.cmsg__attente {
+  display: flex;
+  justify-content: flex-end;
+}
+.cmsg__anneau {
+  padding: 1px;
+  border-radius: clamp(9px, 2.77cqw, 18px);
+  background: var(--cmsg-iris);
+}
+.cmsg__souffle {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 1.23cqw, 8px);
+  border-radius: inherit;
+  background: #000000;
+  padding: clamp(1px, 0.46cqw, 3px);
+}
+.cmsg__points-attente {
+  width: clamp(9px, 2.6cqw, 17px);
+  padding: clamp(1px, 0.46cqw, 3px) clamp(3px, 1.08cqw, 7px) clamp(1px, 0.46cqw, 3px)
+    clamp(5px, 1.85cqw, 12px);
+  font-size: clamp(6px, 1.85cqw, 12px);
+  line-height: 1.5;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* ─── le panneau de validation ─── */
+
+/* `absolute bottom-0 w-full` dans la référence : le panneau monte du bas
+   du cadre et recouvre le corps, il ne pousse rien. */
+.cmsg__hote {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10;
+}
+.cmsg__panneau {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 3.7cqw, 24px);
+  margin: clamp(4px, 1.23cqw, 8px);
+  border-radius: 6px;
+  padding: clamp(4px, 1.23cqw, 8px) clamp(4px, 1.23cqw, 8px) clamp(14px, 5.55cqw, 36px);
+}
+.cmsg__panneau::before,
+.cmsg__panneau::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.cmsg__panneau::before {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.cmsg__panneau::after {
+  background: linear-gradient(180deg, rgba(243, 238, 255, 0) 0%, rgba(243, 238, 255, 0.04) 100%);
+}
+.cmsg__libelle {
+  position: relative;
+  z-index: 1;
+  padding-top: clamp(8px, 3.7cqw, 24px);
+  text-align: center;
+  font-size: clamp(6px, 2cqw, 13px);
+  line-height: 1.85;
+  color: var(--cmsg-mauve);
+}
+.cmsg__propositions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(3px, 1.08cqw, 7px);
+}
+.cmsg__proposition {
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid var(--cmsg-filet);
+  border-radius: 9999px;
+  background: var(--cmsg-pastille);
+  padding: clamp(2px, 0.62cqw, 4px) clamp(5px, 1.85cqw, 12px);
+  font-size: clamp(7px, 2.16cqw, 14px);
+  line-height: 1.5;
+  color: var(--cmsg-encre);
+  text-align: center;
+  transition:
+    transform 300ms ease-out,
+    background-color 300ms ease-out,
+    border-color 300ms ease-out,
+    color 300ms ease-out,
+    opacity 300ms ease-out;
+}
+/* La référence pose `transition-[transform,background-color,border-color,
+   color]` sur la SEULE proposition qui sera retenue : la classe dit le
+   geste que la capture ne montre pas. Ici il est joué — celle qu'on garde
+   se marque, les deux autres s'effacent, puis elle part en message. */
+.cmsg__proposition[data-etat="retenue"] {
+  transform: scale(1.03);
+  border-color: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+}
+.cmsg__proposition[data-etat="ecartee"] {
+  transform: scale(0.97);
+  opacity: 0.35;
+}
+
+/* ─── le curseur de frappe ─── */
+
+.cmsg__curseur {
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  translate: 0 0.12em;
+  background: currentColor;
+  animation: cmsg-curseur 1s steps(2, end) infinite;
+}
+@keyframes cmsg-curseur {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cmsg__curseur {
+    animation: none;
+    opacity: 0;
+  }
+  .cmsg__proposition {
+    transition: none;
+  }
+}
