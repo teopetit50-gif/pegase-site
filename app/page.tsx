@@ -132,12 +132,41 @@ import { FAMILLES, nomPaquet } from "@/lib/content";
    client, une fois le premier module installé. */
 /* 14/09 (Teo) — nouvelles phrases choisies pour le hero. Le titre tient sur
    deux lignes voulues (une par phrase), d'où le tableau. */
+/* ══════════════════════════════════════════════════════════════════════
+   16/09/2026 (l'associé) — « le texte de la page d'accueil ne rend pas
+   bien sur tel, améliore-le ou change-le sur la version tel ».
+
+   Relevé à 390 px avant de toucher : le titre tombait sur CINQ lignes
+   (165 px à lui seul), avec deux coupes malheureuses — « ce qui les
+   fait / travailler ensemble » —, le chapô sur trois lignes de vingt
+   mots, et la sous-ligne laissait « 30 minutes. » orpheline sur la
+   deuxième. Près de mille pixels de texte avant la première image.
+
+   Les trois phrases ont donc une version courte, et LES DEUX VERSIONS
+   SONT DANS LE DOM — c'est la règle déjà posée pour le chapô le 15/09 :
+   du texte pèse trois cents signes, alors qu'un rendu conditionnel en
+   JavaScript ferait clignoter la phrase au premier rendu, sur la
+   première chose que le visiteur lit.
+
+   CE QUI EST GARDÉ MOT POUR MOT : la première phrase du titre, qui est
+   de Teo (07/08). Seule la seconde raccourcit — « nous construisons ce
+   qui les fait travailler ensemble » devient « nous les faisons
+   travailler ensemble » : même promesse, trois mots de moins, une ligne
+   de gagnée. Et les trois réponses que Teo exige sur mobile (quoi, pour
+   qui, combien) restent toutes les trois : « quatre tâches » et « vos
+   outils actuels » pour le quoi, « PME et groupes multi-sites » pour le
+   pour qui, « tarif à l'usage, arrêté à l'audit » pour le combien.
+   ══════════════════════════════════════════════════════════════════════ */
 const HERO = {
   pastille: "Systèmes métiers, automatisation & intégration",
   titre: [
     "Vos équipes ont les outils.",
     "Nous construisons ce qui les fait travailler ensemble.",
   ],
+  titreTel: ["Vos équipes ont les outils.", "Nous les faisons travailler ensemble."],
+  chapoTel:
+    "Quatre tâches automatisées sur vos outils actuels — PME et groupes multi-sites.",
+  sousTel: "Tarif à l'usage. Arrêté à l'audit, en 30 minutes.",
   chapo:
     "Nous concevons des systèmes sur mesure qui connectent vos directions, vos équipes, vos outils et vos données afin de fluidifier les opérations, automatiser les processus critiques et améliorer le pilotage de votre organisation — sans bouleverser votre environnement existant.",
   /* 15/09/2026 (Teo, « sur mobile on comprend direct quoi, combien, pour
@@ -872,7 +901,14 @@ export default function Home() {
                 partiraient ensemble et on lirait deux vagues parallèles au
                 lieu d'une seule qui traverse. */}
             <h1 className="o-flux-h1 mt-5 max-w-[900px] md:mt-6">
-              <MotsReveles lignes={HERO.titre} depart={CADENCE.titre} pas={PAS_MOT} />
+              {/* un seul <h1>, deux jeux de mots : la bascule est en CSS
+                  (`o-seul-tel` / `o-seul-bureau`), pas en JavaScript. */}
+              <span className="o-seul-tel">
+                <MotsReveles lignes={HERO.titreTel} depart={CADENCE.titre} pas={PAS_MOT} />
+              </span>
+              <span className="o-seul-bureau">
+                <MotsReveles lignes={HERO.titre} depart={CADENCE.titre} pas={PAS_MOT} />
+              </span>
             </h1>
             <p
               className="o-bloc-apparait o-flux-lead my-2 max-w-[760px] md:my-4 lg:my-6"
@@ -881,7 +917,8 @@ export default function Home() {
               {/* Les deux versions sont dans le DOM : c'est du texte, il
                   pèse 300 signes, et un rendu conditionnel en JavaScript
                   ferait clignoter la phrase au premier rendu. */}
-              {HERO.chapoCourt}
+              <span className="o-seul-tel">{HERO.chapoTel}</span>
+              <span className="o-seul-bureau">{HERO.chapoCourt}</span>
             </p>
             <div className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
               {/* 14/09 : « Découvrir notre approche » menait à /commencer
@@ -914,7 +951,8 @@ export default function Home() {
               >
                 {/* même procédé que le chapô : les deux versions dans le
                     DOM, la largeur choisit. */}
-                {HERO.sousCourt}
+                <span className="o-seul-tel">{HERO.sousTel}</span>
+                <span className="o-seul-bureau">{HERO.sousCourt}</span>
               </span>
             </div>
           </div>

@@ -1222,6 +1222,27 @@ button.rounded-full:active {
    fois l'interlettre de la référence, d'où les lettres qui se touchaient.
    Les TAILLES et les interlignes du relevé Flux sont conservés tels quels —
    seule la composition change. */
+/* ── LA BASCULE TÉLÉPHONE / BUREAU DU HERO (16/09/2026) ──────────────
+   Deux versions du même texte dans le DOM, la largeur choisit. En
+   `display: contents` et non `inline` : les lignes du titre sont des
+   blocs (MotsReveles pose `block` à partir de la deuxième), et une
+   enveloppe en ligne les remettrait à la queue leu leu.
+   Le point de bascule est 768, celui du reste du hero. */
+.o-seul-tel {
+  display: contents;
+}
+.o-seul-bureau {
+  display: none;
+}
+@media (min-width: 768px) {
+  .o-seul-tel {
+    display: none;
+  }
+  .o-seul-bureau {
+    display: contents;
+  }
+}
+
 .offres .o-flux-h1 {
   font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 36px;
