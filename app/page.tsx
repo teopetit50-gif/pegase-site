@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  AlertTriangle,
-  CalendarCheck,
   Cpu,
   FileDown,
   Layers,
   Lock,
   MapPin,
-  Send,
 } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import { MODELES } from "@/components/modeles/donnees";
@@ -30,9 +27,6 @@ import { CasColonnes } from "@/components/ui/cas-colonnes";
 import { CAS_ACCUEIL } from "@/lib/cas-accueil";
 import TexteRevele from "@/components/accueil/TexteRevele";
 import BentoChange, { type CarteBento } from "@/components/accueil/BentoChange";
-import CartesEcheance, {
-  type CarteEcheance,
-} from "@/components/accueil/CartesEcheance";
 import CartesPreuve, {
   type CartePreuve,
 } from "@/components/accueil/CartesPreuve";
@@ -690,47 +684,6 @@ const ACCROCHES_VITRINE: Record<
    Aucun chiffre inventé : le compte vient de MODELES.length, compte réel de
    components/modeles, et « nom de domaine compris » est ce qu'annonce déjà
    /tarifs/site. */
-/* 11/09/2026 (Teo) — les trois cartes penchées de la section « échéance ».
-
-   Elles remplacent le pavé de deux paragraphes qui occupait la colonne
-   droite. Le calendrier légal y gagne : il était énoncé en prose dans la
-   FAQ et nulle part ailleurs, alors que ce sont DEUX dates, pas une — la
-   section n'en affichait qu'une, en gros, dans son titre.
-
-   Les deux dates sortent de la réponse « Je suis concerné par la facture
-   électronique ? » de la FAQ, plus bas sur cette même page. La troisième
-   carte est le premier paragraphe du pavé retiré, resserré. Le second
-   paragraphe (« nettoyer à froid / en urgence ») n'entre pas dans une
-   carte : il passe en ligne sous l'escalier, rien n'est perdu.
-
-   L'ordre d'empilement suit celui de la source : la première carte est
-   AU-DESSUS, les suivantes descendent en escalier vers la droite. */
-const ECHEANCES: CarteEcheance[] = [
-  {
-    icone: <CalendarCheck className="h-3.5 w-3.5" />,
-    titre: "Recevoir",
-    texte: "Toutes les entreprises établies en France.",
-    bas: "1ᵉʳ septembre 2026",
-    place: "[grid-area:stack] hover:-translate-y-8",
-  },
-  {
-    icone: <Send className="h-3.5 w-3.5" />,
-    titre: "Émettre",
-    texte: "Les TPE et les PME.",
-    bas: "1ᵉʳ septembre 2027",
-    place:
-      "[grid-area:stack] translate-x-8 translate-y-8 hover:-translate-y-1 sm:translate-x-12 sm:translate-y-10",
-  },
-  {
-    icone: <AlertTriangle className="h-3.5 w-3.5" />,
-    titre: "Le vrai blocage",
-    texte: "SIREN manquants, adresses incomplètes, TVA approximative.",
-    bas: "Votre fichier client",
-    place:
-      "[grid-area:stack] translate-x-16 translate-y-16 hover:translate-y-8 sm:translate-x-24 sm:translate-y-20 sm:hover:translate-y-10",
-  },
-];
-
 /* ══════════════════════════════════════════════════════════════════════
    LA CITATION DU TEMPS D'ARRÊT (11/09/2026)
 
@@ -1412,58 +1365,6 @@ export default function Home() {
             <TexteRevele texte={CITATION.text} signature={CITATION.sub} />
           </section>
         ) : null}
-
-        {/* ════════ 9 · L'ÉCHÉANCE — retour au noir ════════ */}
-        <section className="o-nuit relative py-[62px] md:py-[110px]">
-          <div aria-hidden className="o-deco">
-            <div className="o-halo" />
-          </div>
-          <div className="o-wrap relative">
-            <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
-              <div>
-                <div data-reveal>
-                  <span className="o-pill o-pill--xs">ÉCHÉANCE LÉGALE</span>
-                </div>
-                <h2 data-reveal className="o-h2 mt-4">
-                  1ᵉʳ septembre 2026.
-                </h2>
-                <p data-reveal className="o-lead mt-5">
-                  Toutes les entreprises établies en France doivent pouvoir
-                  recevoir une facture au format structuré. Pas un PDF par mail.
-                </p>
-                <div data-reveal className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/commencer" className="o-btn o-btn--primary">
-                    Faire le point avant l&apos;échéance
-                  </Link>
-                  <Link
-                    href="/blog/facturation-electronique-2026"
-                    className="o-btn o-btn--ghost"
-                  >
-                    Ce que la loi impose
-                    <Chevron taille={13} />
-                  </Link>
-                </div>
-              </div>
-              {/* 11/09/2026 (Teo) — le pavé de deux paragraphes laisse la
-                  place aux trois cartes penchées reprises de 21st.dev.
-                  L'origine, ce qui en a été retiré et le piège de largeur
-                  fixe qu'il fallait désamorcer sont dans l'en-tête de
-                  `CartesEcheance`.
-
-                  Pas de `data-reveal` sur l'escalier lui-même : les cartes
-                  portent déjà une transition de 700 ms, et deux animations
-                  sur le même bloc se contrarient. Il reste sur la ligne
-                  qui suit. */}
-              <div>
-                <CartesEcheance cartes={ECHEANCES} />
-                <p data-reveal className="o-small mt-2 max-w-[440px]">
-                  Nettoyer sa base à froid coûte quelques heures. Dans
-                  l&apos;urgence, des semaines.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* ════════ 10 · FAQ ════════ */}
         <section data-monde="clair" className="py-[62px] md:py-[110px]">
