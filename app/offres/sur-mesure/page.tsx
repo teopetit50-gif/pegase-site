@@ -4,13 +4,6 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import {
-  LogoDrive,
-  LogoExcel,
-  LogoGmail,
-  LogoOutlook,
-  LogoSheets,
-} from "@/components/offres/logos-outils";
-import {
   CroquisDocument,
   CroquisPont,
   CroquisSuivi,
@@ -303,14 +296,25 @@ const CATALOGUE = ["CASHD", "RELOAD", "FRONTD", "FILED"];
 const sansNom = (titre: string, nom: string) =>
   titre.startsWith(nom) ? titre.slice(nom.length).replace(/^[\s·:–—-]+/, "") : titre;
 
-/* ——— § 2 · les outils du client ————————————————————————————————— */
-const OUTILS = [
-  { Logo: LogoGmail, nom: "Gmail" },
-  { Logo: LogoOutlook, nom: "Outlook" },
-  { Logo: LogoSheets, nom: "Google Sheets" },
-  { Logo: LogoExcel, nom: "Excel" },
-  { Logo: LogoDrive, nom: "Google Drive" },
-];
+/* ——— § 2 · les outils du client —————————————————————————————————
+   TROIS, en mot-symbole noir, comme la référence (Meta / cohere / NTT en
+   `brightness-0`). Trois décisions, chacune vérifiée en rendant les
+   variantes côte à côte le 16/09 :
+
+   • TROIS et pas cinq : c'est le compte de la référence, et cinq
+     pastilles étirées sur 1280 px faisaient une rangée de vignettes, pas
+     une ligne de confiance.
+   • NOIR : la référence aplatit ses logos. Nos pastilles polychromes
+     tiraient l'œil avant le titre.
+   • MOT-SYMBOLE et pas pictogramme : aplati en noir, le logo Outlook
+     devient un rectangle plein illisible et Drive un triangle. Un
+     mot-symbole typographique tient la composition, se lit à toutes les
+     largeurs, et n'engage rien — c'est aussi la règle du parc sur les
+     marques de tiers.
+
+   Ces trois-là sont les familles d'outils les plus fréquentes chez nos
+   clients, pas une liste fermée : /integrations porte la liste. */
+const OUTILS = ["Gmail", "Outlook", "Google Drive"];
 
 /* ══ les deux pièces de balisage répétées ═════════════════════════════ */
 
@@ -428,10 +432,14 @@ export default function SurMesurePage() {
             L'emplacement de leur bandeau « Trusted by » — écart nº 1. */}
         <section className="smd-sec">
           <div className="smd-wrap">
+            {/* UNE SEULE LIGNE, comme la référence. Leur phrase fait 46
+                signes (« Trusted by the world’s most ambitious AI teams. »)
+                et tient avec son lien dans les 698 px de la colonne. La
+                nôtre en faisait 78 et passait à deux lignes : c'est le
+                budget de texte qui se relève, pas la largeur qui
+                s'élargit. */}
             <p data-reveal className="smd-chapo mx-auto mb-12 max-w-[698px] !text-base !text-black/70">
-              <span className="mr-2">
-                Un système sur mesure se branche sur les outils que vos équipes utilisent déjà.
-              </span>
+              <span className="mr-2">Un système sur mesure se branche sur vos outils.</span>
               <Link href="/integrations" className="smd-lien !text-base">
                 Voir nos intégrations
                 <span aria-hidden>→</span>
@@ -442,12 +450,11 @@ export default function SurMesurePage() {
                 premiers d'elle-même, le plafond de 1280 pose le troisième. */}
             <ul
               data-reveal
-              className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-10 gap-y-6 sm:justify-around"
+              className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-14 gap-y-6 sm:justify-around"
             >
-              {OUTILS.map(({ Logo, nom }) => (
-                <li key={nom} className="flex items-center gap-2.5">
-                  <Logo taille={24} />
-                  <span className="smd-body !text-[0.9375rem]">{nom}</span>
+              {OUTILS.map((nom) => (
+                <li key={nom} className="smd-marque">
+                  {nom}
                 </li>
               ))}
             </ul>

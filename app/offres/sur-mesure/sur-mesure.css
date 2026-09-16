@@ -81,11 +81,35 @@
 
    1. LA POLICE. La référence est composée en Aeonik Pro (CoType Foundry),
       sous licence commerciale : on ne peut ni servir leurs fichiers ni
-      l'acheter à leur place. Hanken Grotesk la remplace — même squelette
-      de grotesque géométrique, même hauteur d'x, 'g' à un étage. DM Mono
-      porte les étiquettes, qui sont bien en monospace dans la référence.
-      C'est le choix déjà fait pour `.vd` et `.ofd` : les trois pages se
-      répondent.
+      l'acheter à leur place. **Onest** la remplace. DM Mono porte les
+      étiquettes, qui sont bien en monospace dans la référence.
+
+      Le choix a été MESURÉ, pas donné à l'œil. Vingt familles libres
+      rendues à 48 px et comparées à Aeonik au canevas — largeur de cinq
+      chaînes, hauteur d'œil, hauteur de capitale (16/09/2026) :
+
+        police              largeur   x-haut   capit
+        Figtree               1,41 %   1,96 %   0,00 %
+        DM Sans               2,56 %   1,18 %   0,00 %
+        Hanken Grotesk        0,91 %   3,35 %   0,42 %
+        Onest                 5,15 %   3,35 %   1,01 %
+
+      Figtree gagne sur les métriques. Ce n'est pas elle qui est retenue,
+      et c'est délibéré : à 48 px ce qui se voit n'est pas l'avance des
+      glyphes mais le SQUELETTE, et sur les trois traits qui signent
+      Aeonik — l'éperon vertical du 'G', la queue du 'a', la barre
+      horizontale du 'e' — Figtree et Hanken sont à côté, Onest tombe
+      juste. Les cinq points d'écart de largeur sont absorbés par
+      `text-wrap: balance`.
+
+      Onest est aussi la police du bloc `.ofd` (/offres), décalque d'une
+      autre page du MÊME site, choisie le même jour après le même
+      reproche de Teo. Deux substituts d'Aeonik différents sur deux pages
+      voisines seraient pires que le défaut d'origine.
+
+      RESTE À FAIRE : `.vd` (/vos-donnees) décalque une troisième page de
+      Scale et porte encore Hanken Grotesk. À aligner sur Onest, avec sa
+      propre recette.
 
    2. LE HAUT DE PAGE. La référence pose `pt-24` (96 px) parce que son
       entête est `fixed` et recouvre le haut du document ; le bord haut du
@@ -152,7 +176,7 @@
 
   background: #ffffff;
   color: var(--smd-texte);
-  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -442,6 +466,23 @@
   .smd .smd-cta__voile,
   .smd .smd-pastille__rail {
     transition: none;
+  }
+}
+
+/* Mot-symbole d'outil — l'équivalent de leurs logos client aplatis en
+   noir. Relevé sur la référence : leurs trois marques font 20 à 28 px de
+   haut et sont réparties par `justify-around` sur la colonne. */
+.smd .smd-marque {
+  font-size: 1.375rem;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #000000;
+  white-space: nowrap;
+}
+@media (min-width: 768px) {
+  .smd .smd-marque {
+    font-size: 1.625rem;
   }
 }
 
