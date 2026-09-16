@@ -24,7 +24,6 @@ import {
 } from "@/components/offres/MediaMoteurs";
 import PortesHover from "@/components/offres/PortesHover";
 import FondSilk from "@/components/accueil/FondSilk";
-import BarreAction from "@/components/accueil/BarreAction";
 import FriseDeroule from "@/components/accueil/FriseDeroule";
 import TableauEntrees from "@/components/accueil/TableauEntrees";
 import { CasColonnes } from "@/components/ui/cas-colonnes";
@@ -853,9 +852,9 @@ export default function Home() {
   return (
     <PageShell>
       <PageMotion />
-      {/* 15/09 — l'appel à l'action du téléphone, hors du flux. Le détail
-          est en tête de `BarreAction`. */}
-      <BarreAction />
+      {/* 16/09 — la barre d'action flottante du téléphone est retirée
+          (Teo). Le composant `accueil/BarreAction.tsx` et ses règles
+          `.o-barre*` dans globals.css ne sont plus appelés par personne. */}
 
       <div className="offres">
         {/* ════════ 1 · HERO CLAIR — clone du template Flux ════════
