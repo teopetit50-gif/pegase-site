@@ -801,6 +801,14 @@
    colonnes, le hero les prend toutes, la citation en laisse une. Sous
    1920 le pourcentage reste sous le plafond — 1671 à 1920 — et rien ne
    bouge : la correction ne mord que sur les écrans larges. */
+/* LA LARGEUR SUIT LE DÉFILEMENT. `--smd-zoom` va de 0 à 1 et est écrite
+   par components/surmesure/Elargi.tsx, à chaque image, sans transition —
+   la référence n'en a pas : sa carte suit la position du doigt, elle ne
+   rejoue pas une animation. Relevé à 1600 × 900 : 87,3 % de la fenêtre
+   au repos, 97,0 % une fois la carte montée dans l'écran.
+
+   ⚠ NE PAS AJOUTER DE `transition` ICI. Elle ajouterait un retard que la
+   référence n'a pas, et le bloc décrocherait du défilement. */
 .smd .smd-citation {
   width: 84.4%;
   max-width: 1699px;
@@ -812,8 +820,13 @@
 }
 @media (min-width: 768px) {
   .smd .smd-citation {
-    width: 87.3%;
+    width: calc(87.3% + 9.7% * var(--smd-zoom, 0));
   }
+}
+
+.smd .smd-elargi {
+  display: block;
+  width: 100%;
 }
 @media (min-width: 1024px) {
   .smd .smd-citation {
@@ -1397,6 +1410,29 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+   8 ter bis · LE CADRE QUI MET À L'ÉCHELLE
+
+   Un dessin rendu à sa largeur naturelle, réduit pour tenir dans la
+   place disponible — au lieu de se réorganiser. C'est ce que fait une
+   image, et c'est ce que fait la référence, dont le schéma EST une
+   image. components/surmesure/Ajuste.tsx écrit `--aj-k` et la hauteur.
+
+   `transform-origin: top left` et non `center` : avec le centre, un
+   contenu réduit se recentre et laisse une marge à gauche qu'aucune
+   hauteur calculée ne rattrape.
+   ───────────────────────────────────────────────────────────────────── */
+.smd .smd-ajuste {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.smd .smd-ajuste__in {
+  width: var(--aj-l);
+  transform-origin: top left;
+  transform: scale(var(--aj-k, 1));
+}
+
+/* ─────────────────────────────────────────────────────────────────────
    8 quater · LE CYCLE — le schéma en boucle du bloc « ce que vous obtenez »
 
    Décalque de la géométrie du schéma de la référence : entrée à gauche,
@@ -1433,18 +1469,11 @@
   --cy-pas: calc(var(--cy-haut) + var(--cy-gouttiere));
 
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
   gap: 0;
-  padding: 28px 20px;
-}
-@media (min-width: 1024px) {
-  .smd .smd-cy {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 32px;
-  }
+  padding: 48px 32px;
 }
 
 /* ——— une carte ——— */
@@ -1452,19 +1481,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 100%;
+  width: var(--cy-carte);
+  min-height: var(--cy-haut);
   border-radius: 12px;
   background: #ffffff;
   padding: 16px 18px;
 }
-@media (min-width: 1024px) {
-  .smd .smd-cy-carte {
-    width: var(--cy-carte);
-    min-height: var(--cy-haut);
-  }
-  .smd .smd-cy-carte--plate {
-    min-height: 0;
-  }
+.smd .smd-cy-carte--plate {
+  min-height: 0;
 }
 .smd .smd-cy-titre {
   font-size: 0.9375rem;
@@ -1481,30 +1505,14 @@
   color: var(--smd-etiquette);
 }
 
-/* ═══ SOUS 1024 : tout s'empile, les liaisons sont verticales ═══════════
-   La référence ne prévoit rien pour le téléphone — son schéma est une
-   image. C'est le seul écart de ce bloc, et il est assumé. */
-.smd .smd-cy-entree,
-.smd .smd-cy-boucle,
-.smd .smd-cy-sortie,
-.smd .smd-cy-sortie-haut,
-.smd .smd-cy-sortie-bas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-.smd .smd-cy-case {
-  width: 100%;
-}
+/* Les liaisons droites d'entrée et de sortie — trait fin et pointe. Le
+   reste (sens, longueur) est posé plus bas, avec la géométrie. */
 .smd .smd-cy-fleche,
 .smd .smd-cy-descente,
 .smd .smd-cy-retour {
   position: relative;
   display: block;
   flex-shrink: 0;
-  width: 1px;
-  height: 22px;
   background: var(--cy-trait);
 }
 .smd .smd-cy-fleche::after,
@@ -1512,247 +1520,213 @@
 .smd .smd-cy-retour::after {
   content: "";
   position: absolute;
-  bottom: 0;
-  left: 50%;
   width: 6px;
   height: 6px;
   border-top: 1px solid var(--cy-pointe);
   border-right: 1px solid var(--cy-pointe);
-  transform: translate(-50%, 0) rotate(135deg);
-}
-/* En pile, les cartes de la boucle se suivent : on ajoute la liaison
-   entre elles par des pseudo-éléments sur les cases. */
-.smd .smd-cy-anneau,
-.smd .smd-cy-axe {
-  display: none;
-}
-.smd .smd-cy-case + .smd-cy-case {
-  margin-top: 22px;
-}
-.smd .smd-cy-case + .smd-cy-case::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -22px;
-  width: 1px;
-  height: 22px;
-  background: var(--cy-trait);
-}
-.smd .smd-cy-case {
-  position: relative;
-}
-.smd .smd-cy-boucle {
-  margin-block: 22px;
-}
-.smd .smd-cy-sortie {
-  margin-top: 22px;
-}
-.smd .smd-cy-sortie-haut,
-.smd .smd-cy-sortie-bas {
-  gap: 0;
-}
-.smd .smd-cy-retour {
-  border-left: 1px dashed var(--cy-trait);
-  background: none;
-  width: 0;
 }
 
-/* ═══ AU-DESSUS DE 1024 : la géométrie de la référence ═════════════════
+/* ═══ LA GÉOMÉTRIE DE LA RÉFÉRENCE, À TOUTES LES LARGEURS ═════════════
+   16/09, Teo : « sur leur version mobile rien ne bouge, le composant
+   rétrécit mais reste le même ». Cette mise en page n'a donc plus de
+   palier : elle vaut à toutes les largeurs, et c'est `Ajuste` qui la
+   réduit pour qu'elle tienne. Le repli en colonne d'avant est supprimé —
+   il faisait exactement ce que Teo ne veut pas : changer de forme.
+
    Trois blocs sur une rangée — entrée, boucle, sortie. La boucle est une
    grille 3 × 3 ; l'anneau est un cadre à coins ronds posé en absolu dont
    les bords tombent au CENTRE des quatre cartes, soit la moitié d'une
    carte de chaque côté. Ne pas remplacer par des pourcentages : les
    rangées sont en hauteur fixe et le compte tomberait faux dès qu'une
    légende gagne une ligne. */
-@media (min-width: 1024px) {
-  .smd .smd-cy-entree {
-    flex-direction: row;
-    align-items: center;
-    width: auto;
-  }
-  .smd .smd-cy-case {
-    width: auto;
-    margin-top: 0;
-  }
-  .smd .smd-cy-case::before {
-    display: none;
-  }
-
-  .smd .smd-cy-boucle {
-    position: relative;
-    display: grid;
-    grid-template-columns: var(--cy-carte) minmax(140px, 300px) var(--cy-carte);
-    grid-template-rows: repeat(3, var(--cy-haut));
-    gap: var(--cy-gouttiere);
-    width: auto;
-    margin-block: 0;
-  }
-  .smd .smd-cy-case--haut {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: center;
-  }
-  .smd .smd-cy-case--gauche {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  .smd .smd-cy-case--droite {
-    grid-column: 3;
-    grid-row: 2;
-  }
-  .smd .smd-cy-case--bas {
-    grid-column: 2;
-    grid-row: 3;
-    justify-self: center;
-  }
-
-  /* ⚠ L'ORDRE DE PEINTURE. Un élément POSITIONNÉ est peint après les
-     blocs statiques, quelle que soit sa place dans le balisage : sans
-     `z-index`, l'anneau passait PAR-DESSUS les cartes et le trait
-     traversait « Validation ». On le renvoie donc sous elles. */
-  .smd .smd-cy-anneau {
-    display: block;
-    position: absolute;
-    inset: calc(var(--cy-haut) / 2) calc(var(--cy-carte) / 2);
-    z-index: 0;
-    border: 1px solid var(--cy-trait);
-    border-radius: 999px;
-    pointer-events: none;
-  }
-  .smd .smd-cy-case {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* L'axe droit entre les deux cartes latérales. */
-  .smd .smd-cy-axe {
-    display: block;
-    position: relative;
-    z-index: 0;
-    grid-column: 2;
-    grid-row: 2;
-    align-self: center;
-    justify-self: stretch;
-    height: 1px;
-    margin-inline: calc(var(--cy-gouttiere) * -1);
-    background: var(--cy-trait);
-  }
-  .smd .smd-cy-axe::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 50%;
-    width: 6px;
-    height: 6px;
-    border-top: 1px solid var(--cy-pointe);
-    border-right: 1px solid var(--cy-pointe);
-    transform: translate(0, -50%) rotate(45deg);
-  }
-
-  /* Les deux pointes qui disent le SENS : vers la droite en haut, vers la
-     gauche en bas — donc dans le sens des aiguilles d'une montre. */
-  .smd .smd-cy-case--haut::after,
-  .smd .smd-cy-case--bas::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    width: 6px;
-    height: 6px;
-    border-top: 1px solid var(--cy-pointe);
-    border-right: 1px solid var(--cy-pointe);
-  }
-  .smd .smd-cy-case--haut::after {
-    left: -20px;
-    transform: translateY(-50%) rotate(45deg);
-  }
-  .smd .smd-cy-case--bas::after {
-    right: -20px;
-    transform: translateY(-50%) rotate(-135deg);
-  }
-
-  /* ——— la colonne de sortie, calée sur les rangées de la boucle ———
-     Positionnement absolu et non empilement : c'est le seul moyen de
-     garantir que « Mise en service » tombe au centre de la rangée 2 et
-     « Retours » au centre de la rangée 3, donc que le retour en
-     pointillés soit à la hauteur du bas du cycle. */
-  .smd .smd-cy-sortie {
-    position: relative;
-    width: calc(var(--cy-carte) + 34px);
-    height: var(--cy-total);
-    margin-top: 0;
-  }
-  .smd .smd-cy-sortie-haut,
-  .smd .smd-cy-sortie-bas {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: var(--cy-haut);
-    flex-direction: row;
-    align-items: center;
-    width: auto;
-  }
-  .smd .smd-cy-sortie-haut {
-    top: var(--cy-pas);
-  }
-  .smd .smd-cy-sortie-bas {
-    top: calc(var(--cy-pas) * 2);
-  }
-  .smd .smd-cy-fleche--droite {
-    width: 34px;
-    height: 1px;
-  }
-  .smd .smd-cy-fleche--droite::after {
-    right: 0;
-    top: 50%;
-    bottom: auto;
-    left: auto;
-    transform: translate(0, -50%) rotate(45deg);
-  }
-
-  /* La descente, en pointillés comme sur la référence : de « Mise en
-     service » vers « Retours ». */
-  .smd .smd-cy-descente {
-    position: absolute;
-    left: calc(34px + var(--cy-carte) / 2);
-    top: calc(var(--cy-pas) + var(--cy-haut) / 2 + 26px);
-    height: calc(var(--cy-pas) - 52px);
-    width: 0;
-    background: none;
-    border-left: 1px dashed var(--cy-trait);
-  }
-  .smd .smd-cy-descente::after {
-    left: 0;
-    transform: translate(-50%, 0) rotate(135deg);
-  }
-
-  /* Le retour : en pointillés, il part de « Retours » vers la gauche et
-     rentre dans la boucle.
-
-     ÉCART ASSUMÉ — sur la référence le trait traverse toute la colonne de
-     droite et vient mourir sur « Model Evaluation ». Ici il s'arrête au
-     bord de la boucle, à la hauteur de « Mesure » : la lecture est la
-     même (ça revient dans le cycle) et le tracé ne passe pas sous une
-     carte, ce qui aurait demandé de sortir la sortie du flux. */
-  .smd .smd-cy-retour {
-    position: absolute;
-    /* Il traverse la rangée 3 de la colonne droite, qui est VIDE —
-       « Validation » n'occupe que la rangée 2 — et vient toucher le bord
-       de la colonne du milieu, là où se trouve « Mesure ». */
-    left: calc((34px + var(--cy-carte) + var(--cy-gouttiere)) * -1);
-    width: calc(34px + var(--cy-carte) + var(--cy-gouttiere));
-    height: 0;
-    top: 50%;
-    border-left: 0;
-    border-top: 1px dashed var(--cy-trait);
-    background: none;
-  }
-  .smd .smd-cy-retour::after {
-    left: 0;
-    bottom: auto;
-    top: 50%;
-    transform: translate(0, -50%) rotate(-135deg);
-  }
+.smd .smd-cy-entree {
+  flex-direction: row;
+  align-items: center;
+  width: auto;
 }
+.smd .smd-cy-case {
+  width: auto;
+  margin-top: 0;
+}
+.smd .smd-cy-case::before {
+  display: none;
+}
+
+.smd .smd-cy-boucle {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--cy-carte) minmax(140px, 300px) var(--cy-carte);
+  grid-template-rows: repeat(3, var(--cy-haut));
+  gap: var(--cy-gouttiere);
+  width: auto;
+  margin-block: 0;
+}
+.smd .smd-cy-case--haut {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+}
+.smd .smd-cy-case--gauche {
+  grid-column: 1;
+  grid-row: 2;
+}
+.smd .smd-cy-case--droite {
+  grid-column: 3;
+  grid-row: 2;
+}
+.smd .smd-cy-case--bas {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: center;
+}
+
+/* ⚠ L'ORDRE DE PEINTURE. Un élément POSITIONNÉ est peint après les
+   blocs statiques, quelle que soit sa place dans le balisage : sans
+   `z-index`, l'anneau passait PAR-DESSUS les cartes et le trait
+   traversait « Validation ». On le renvoie donc sous elles. */
+.smd .smd-cy-anneau {
+  display: block;
+  position: absolute;
+  inset: calc(var(--cy-haut) / 2) calc(var(--cy-carte) / 2);
+  z-index: 0;
+  border: 1px solid var(--cy-trait);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.smd .smd-cy-case {
+  position: relative;
+  z-index: 1;
+}
+
+/* L'axe droit entre les deux cartes latérales. */
+.smd .smd-cy-axe {
+  display: block;
+  position: relative;
+  z-index: 0;
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  justify-self: stretch;
+  height: 1px;
+  margin-inline: calc(var(--cy-gouttiere) * -1);
+  background: var(--cy-trait);
+}
+.smd .smd-cy-axe::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid var(--cy-pointe);
+  border-right: 1px solid var(--cy-pointe);
+  transform: translate(0, -50%) rotate(45deg);
+}
+
+/* Les deux pointes qui disent le SENS : vers la droite en haut, vers la
+   gauche en bas — donc dans le sens des aiguilles d'une montre. */
+.smd .smd-cy-case--haut::after,
+.smd .smd-cy-case--bas::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid var(--cy-pointe);
+  border-right: 1px solid var(--cy-pointe);
+}
+.smd .smd-cy-case--haut::after {
+  left: -20px;
+  transform: translateY(-50%) rotate(45deg);
+}
+.smd .smd-cy-case--bas::after {
+  right: -20px;
+  transform: translateY(-50%) rotate(-135deg);
+}
+
+/* ——— la colonne de sortie, calée sur les rangées de la boucle ———
+   Positionnement absolu et non empilement : c'est le seul moyen de
+   garantir que « Mise en service » tombe au centre de la rangée 2 et
+   « Retours » au centre de la rangée 3, donc que le retour en
+   pointillés soit à la hauteur du bas du cycle. */
+.smd .smd-cy-sortie {
+  position: relative;
+  width: calc(var(--cy-carte) + 34px);
+  height: var(--cy-total);
+  margin-top: 0;
+}
+.smd .smd-cy-sortie-haut,
+.smd .smd-cy-sortie-bas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--cy-haut);
+  flex-direction: row;
+  align-items: center;
+  width: auto;
+}
+.smd .smd-cy-sortie-haut {
+  top: var(--cy-pas);
+}
+.smd .smd-cy-sortie-bas {
+  top: calc(var(--cy-pas) * 2);
+}
+.smd .smd-cy-fleche--droite {
+  width: 34px;
+  height: 1px;
+}
+.smd .smd-cy-fleche--droite::after {
+  right: 0;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translate(0, -50%) rotate(45deg);
+}
+
+/* La descente, en pointillés comme sur la référence : de « Mise en
+   service » vers « Retours ». */
+.smd .smd-cy-descente {
+  position: absolute;
+  left: calc(34px + var(--cy-carte) / 2);
+  top: calc(var(--cy-pas) + var(--cy-haut) / 2 + 26px);
+  height: calc(var(--cy-pas) - 52px);
+  width: 0;
+  background: none;
+  border-left: 1px dashed var(--cy-trait);
+}
+.smd .smd-cy-descente::after {
+  left: 0;
+  transform: translate(-50%, 0) rotate(135deg);
+}
+
+/* Le retour : en pointillés, il part de « Retours » vers la gauche et
+   rentre dans la boucle.
+
+   ÉCART ASSUMÉ — sur la référence le trait traverse toute la colonne de
+   droite et vient mourir sur « Model Evaluation ». Ici il s'arrête au
+   bord de la boucle, à la hauteur de « Mesure » : la lecture est la
+   même (ça revient dans le cycle) et le tracé ne passe pas sous une
+   carte, ce qui aurait demandé de sortir la sortie du flux. */
+.smd .smd-cy-retour {
+  position: absolute;
+  /* Il traverse la rangée 3 de la colonne droite, qui est VIDE —
+     « Validation » n'occupe que la rangée 2 — et vient toucher le bord
+     de la colonne du milieu, là où se trouve « Mesure ». */
+  left: calc((34px + var(--cy-carte) + var(--cy-gouttiere)) * -1);
+  width: calc(34px + var(--cy-carte) + var(--cy-gouttiere));
+  height: 0;
+  top: 50%;
+  border-left: 0;
+  border-top: 1px dashed var(--cy-trait);
+  background: none;
+}
+.smd .smd-cy-retour::after {
+  left: 0;
+  bottom: auto;
+  top: 50%;
+  transform: translate(0, -50%) rotate(-135deg);
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────
    8 quinquies · LA PILE DE CARTES — section « exemples »
@@ -2291,5 +2265,169 @@
 .smd .smd-lien {
   text-decoration: underline;
   text-underline-offset: 3px;
+  color: var(--smd-texte);
+}
+/* ═══════════════════════════════════════════════════════════════════════
+   LES ONGLETS DU CATALOGUE (components/ui/feature-11) — 16/09/2026
+
+   Teo : « remplace-le par ce composant-là, mais bien sûr les polices
+   doivent être adaptées à celles qu'on utilise pour cette page. » C'est la
+   règle de toutes les reprises ici, et elle se joue à deux endroits : le
+   composant arrive en classes `f11-*` NUES — ses utilitaires de thème
+   shadcn ont été retirés à la source, ils ne peignent rien dans ce dépôt
+   — et c'est ce bloc qui les habille, dans le vocabulaire `.smd`. Il hérite
+   donc de Geist et de DM Mono, comme le reste de la page.
+
+   La fiche pose une colonne d'onglets de 20 rem à gauche et le panneau à
+   droite à partir de `lg`. En dessous, les onglets passent à l'horizontale
+   et défilent : une colonne de quatre onglets hauts sur un téléphone
+   repousserait le panneau sous la ligne de flottaison.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.smd .f11 {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+@media (min-width: 1024px) {
+  .smd .f11 {
+    display: grid;
+    grid-template-columns: minmax(0, 20rem) 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+}
+
+.smd .f11-liste {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.smd .f11-liste::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .smd .f11-liste {
+    flex-direction: column;
+    overflow: visible;
+    /* le filet de la variante « line » : il court le long de la colonne,
+       et l'onglet actif y pose un trait plein */
+    border-left: 1px solid var(--smd-ligne);
+  }
+}
+
+.smd .f11-onglet {
+  position: relative;
+  display: flex;
+  min-width: 15rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 12px 16px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--smd-texte);
+  transition: background-color 200ms ease;
+}
+@media (min-width: 1024px) {
+  .smd .f11-onglet {
+    min-width: 0;
+    width: 100%;
+  }
+}
+.smd .f11-onglet:hover {
+  background: var(--smd-fond);
+}
+/* le trait de l'onglet actif : sous lui à l'horizontale, à sa gauche en
+   colonne — là où court le filet de la liste */
+.smd .f11-onglet::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: transparent;
+  transition: background-color 200ms ease;
+}
+@media (min-width: 1024px) {
+  .smd .f11-onglet::after {
+    left: -1px;
+    right: auto;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    height: auto;
+  }
+}
+.smd .f11-onglet[data-state="active"]::after {
+  background: var(--smd-texte);
+}
+
+.smd .f11-onglet__titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--smd-texte);
+}
+.smd .f11-onglet__resume {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--smd-etiquette);
+  white-space: normal;
+}
+
+.smd .f11-panneau {
+  min-height: 15rem;
+  border-radius: var(--smd-r-lg);
+  border: 1px solid var(--smd-ligne);
+  background: var(--smd-fond);
+  padding: 24px;
+}
+@media (min-width: 640px) {
+  .smd .f11-panneau {
+    padding: 32px;
+  }
+}
+.smd .f11-panneau[hidden] {
+  display: none;
+}
+
+.smd .f11-fiche {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+.smd .f11-fiche__role {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--smd-etiquette);
+}
+.smd .f11-fiche__corps {
+  font-size: 1rem;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--smd-doux);
+  text-wrap: pretty;
+}
+.smd .f11-onglet__icone {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--smd-etiquette);
+}
+.smd .f11-onglet[data-state="active"] .f11-onglet__icone {
   color: var(--smd-texte);
 }

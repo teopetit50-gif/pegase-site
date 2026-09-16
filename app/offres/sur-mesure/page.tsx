@@ -8,6 +8,8 @@ import { HalftoneFlow } from "@/components/ui/halftone-flow";
 import HeroReplie from "@/components/surmesure/HeroReplie";
 import Cycle from "@/components/surmesure/Cycle";
 import Revele from "@/components/surmesure/Revele";
+import Elargi from "@/components/surmesure/Elargi";
+import Ajuste from "@/components/surmesure/Ajuste";
 import {
   SigneHubspot,
   SigneNotion,
@@ -24,8 +26,9 @@ import {
 } from "@/components/surmesure/Panneaux";
 import { FAMILLES } from "@/lib/content";
 import { fr } from "@/lib/typo";
-import { CardSlide, type CarteEmpilee } from "@/components/ui/card-slide";
-import { PileSurFond, type Carte } from "@/components/ui/hero-preview-walls";
+import { Bell, FileText, MessageSquare, Users } from "lucide-react";
+import Casestudies, { type Cas } from "@/components/ui/case-studies";
+import Feature11, { type Volet } from "@/components/ui/feature-11";
 import { FICHES } from "@/lib/fiches";
 import type { Fiche } from "@/lib/fiches";
 import "./sur-mesure.css";
@@ -327,56 +330,81 @@ const PERIMETRES = [
   },
 ];
 
-/* ——— § 9 · trois besoins traités, en pile de cartes ——————————————
-   16/09, Teo : « remplace cette section par ce composant », en donnant
-   `hero-preview-walls` de 21st.dev. Ce qui nous intéresse est sa PILE
-   (`CardSlide`) : trois cartes empilées, décalées et réduites vers le
-   fond, celle du dessous qui repasse devant toutes les 3,6 s. Le reste
-   du composant — un hero « We build technology… », deux boutons, du
-   contenu inventé et quatre images sur cdn.21st.dev — est resté chez
-   lui ; le détail est en tête de components/ui/card-slide.tsx.
+/* ——— § 9 · trois besoins traités, en études de cas ———————————————
+   ⚠ CETTE SECTION A CHANGÉ TROIS FOIS LE 16/09. Elle portait d'abord
+   trois vignettes à croquis ; elle est passée au bloc `case-studies` de
+   21st.dev ; une autre session l'a ensuite remplacée par la pile de
+   cartes `card-slide`. Teo, le soir : « remets celui qui était dans la
+   version d'avant » — c'est-à-dire `case-studies`, celui qu'il avait
+   demandé pour cette section précisément.
 
-   ⚠ CETTE SECTION A CHANGÉ DEUX FOIS LE MÊME JOUR. Le 16/09 au matin
-   elle portait trois vignettes à croquis ; une autre session l'a ensuite
-   remplacée par `components/ui/case-studies.tsx`, un autre bloc 21st.dev
-   avec ses chiffres et ses sous-légendes ; Teo a demandé la pile dans la
-   foulée. `case-studies.tsx` reste dans le dépôt, orphelin — rien n'est
-   perdu, et remettre l'un ou l'autre est un import et deux lignes. À
-   trancher avec Teo.
+   `card-slide.tsx` reste au dépôt, orphelin, comme `hero-preview-walls`
+   qui servait la section 10 : rien n'est perdu, et remettre l'un ou
+   l'autre est un import et deux lignes. À trancher avec Teo — il y a
+   maintenant DEUX composants de pile qui font la même chose.
 
-   Les trois cartes sont les trois premières lignes de `FICHE.demo` :
-   celles dont les règles s'écrivent. La quatrième, celle qu'on écarte,
-   ferme la section en une phrase — elle ne mérite pas une carte.
+   Les trois lignes sont les trois premières de `FICHE.demo` : celles
+   dont les règles s'écrivent. La quatrième, celle qu'on écarte, ferme la
+   section en une phrase plutôt que d'occuper une ligne.
 
-   Le croquis prend la place de l'image de l'original, dans le même cadre
-   16/9. Les textes reprennent ceux écrits pour le bloc précédent, coupés
-   au budget d'une carte. */
-const EXEMPLES: CarteEmpilee[] = [
+   Les deux mesures de droite ne sont pas des chiffres de performance —
+   la maison n'en invente pas. Ce sont des faits de conception, et chacun
+   trace à une phrase déjà publiée : « un pont se compte en jours, un
+   logiciel métier complet en semaines » vient de la FAQ de cette fiche. */
+const EXEMPLES: Cas[] = [
   {
     id: "pont",
+    visuel: <CroquisPont />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[0].text : "",
     texte:
-      "La donnée passe d'un outil à l'autre sans que personne la retape, et l'écart est signalé quand les deux ne concordent pas.",
-    visuel: <CroquisPont />,
-    nature: "Pont entre outils",
+      "Deux logiciels qui ne se parlent pas, une double saisie quotidienne ou un export repris à la main chaque semaine : la donnée passe de l'un à l'autre sans que personne la retape.",
+    legende: "Pont entre outils",
+    sousLegende: "Règles écrites avant tout chiffrage",
+    mesures: [
+      { value: "2", label: "Outils reliés", sub: "La donnée n'est saisie qu'une fois" },
+      { value: "Jours", label: "Ordre de grandeur", sub: "Un pont entre deux outils se compte en jours" },
+    ],
   },
   {
     id: "documents",
+    visuel: <CroquisDocument />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[1].text : "",
     texte:
-      "Chaque pièce est lue au moment où elle arrive, rapprochée de sa commande ; ce qui ne colle pas attend une validation.",
-    visuel: <CroquisDocument />,
-    nature: "Traitement de documents",
+      "Lecture, contrôle, extraction et classement de pièces reçues dans n'importe quel format, au moment où elles arrivent plutôt qu'au moment où quelqu'un s'en occupe.",
+    legende: "Traitement de documents",
+    sousLegende: "Contrôle à réception, pas après coup",
+    mesures: [
+      { value: "0", label: "Ressaisie", sub: "Les informations extraites ne sont pas retapées" },
+      { value: "Tous", label: "Formats acceptés", sub: "La pièce est lue telle qu'elle arrive" },
+    ],
   },
   {
     id: "logiciel",
+    visuel: <CroquisSuivi />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "",
     texte:
-      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit vos services sans les déformer.",
-    visuel: <CroquisSuivi />,
-    nature: "Logiciel métier",
+      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services sans le déformer.",
+    legende: "Logiciel métier",
+    sousLegende: "Construit sur vos règles, branché sur vos outils",
+    mesures: [
+      { value: "1", label: "Application", sub: "Interface, base de données et droits" },
+      { value: "Semaines", label: "Ordre de grandeur", sub: "Un logiciel métier complet se compte en semaines" },
+    ],
   },
 ];
+
+/* Les quatre icônes du catalogue — les mêmes que sur /offres, pour qu'un
+   paquet se reconnaisse d'une page à l'autre.
+
+   Ce sont des ÉLÉMENTS déjà rendus, pas des composants : `feature-11` est
+   un composant client, et lui passer la fonction casse le build au
+   prérendu. Voir le commentaire de `Volet.icone`. */
+const PICTOS: Record<string, React.ReactNode> = {
+  CASHD: <Bell size={16} strokeWidth={1.75} />,
+  RELOAD: <Users size={16} strokeWidth={1.75} />,
+  FRONTD: <MessageSquare size={16} strokeWidth={1.75} />,
+  FILED: <FileText size={16} strokeWidth={1.75} />,
+};
 
 /* ——— § 10 · les quatre paquets du catalogue ——————————————————————
    Lus dans FAMILLES : si un paquet change de nom ou de slug, la page
@@ -517,18 +545,36 @@ export default function SurMesurePage() {
       photo: FICHES[x.system]?.photo ?? "",
       photoAlt: FICHES[x.system]?.photoAlt ?? "",
       pitch: FICHES[x.system]?.pitch ?? "",
+      job: x.job,
+      benefit: x.benefit,
     }));
 
-  /* § 10 — les quatre systèmes en pile tournante. Rien d'inventé : nom,
-     rôle, pitch et photo sortent de la fiche de chaque paquet, ceux que
-     porte sa propre page. */
-  const cartes: Carte[] = catalogue.map((p, i) => ({
-    id: i,
-    nom: p.system,
-    mention: p.role,
-    contenu: <p>{fr(p.pitch)}</p>,
-    image: p.photo,
-    imageAlt: p.photoAlt,
+  /* § 10 — les quatre systèmes en onglets (`feature-11`).
+     16/09, Teo : « remplace-le par ce composant-là, mais bien sûr les
+     polices doivent être adaptées à celles qu'on utilise pour cette
+     page. » C'est fait au niveau du composant : il arrive en classes
+     `f11-*` nues, et c'est le bloc `.smd` qui les habille — il prend donc
+     Geist, comme le reste de la page.
+
+     Rien d'inventé : l'intitulé, le rôle, la phrase de résumé et le
+     paragraphe du panneau sortent de la fiche de chaque paquet, ceux que
+     porte sa propre page. Le panneau finit par le lien vers elle — un
+     onglet n'est pas une porte, et quatre systèmes qui se présentent
+     doivent pouvoir se visiter. */
+  const volets: Volet[] = catalogue.map((p) => ({
+    valeur: p.system.toLowerCase(),
+    icone: PICTOS[p.system],
+    titre: p.system,
+    resume: fr(p.benefit),
+    panneau: (
+      <div className="f11-fiche">
+        <p className="f11-fiche__role">{fr(p.role)}</p>
+        <p className="f11-fiche__corps">{fr(p.job)}</p>
+        <Link href={p.href} className="smd-lien">
+          Voir la page de {p.system}
+        </Link>
+      </div>
+    ),
   }));
 
   return (
@@ -681,6 +727,11 @@ export default function SurMesurePage() {
                 lignes et à la carte sa hauteur. Et le texte MONTE dans
                 son cadre à l'entrée dans l'écran (`Revele`), au lieu
                 d'être là d'emblée : le nom suit 180 ms après. */}
+            {/* `Elargi` écrit `--smd-zoom` (0 → 1) selon la position de
+                la carte dans la fenêtre : elle passe de 87,3 % à 97,0 %
+                de la vue en montant, et rétrécit en redescendant. Le
+                relevé qui donne la courbe est en tête du composant. */}
+            <Elargi>
             <div data-reveal className="smd-citation">
               <div className="flex flex-col gap-10 lg:grid lg:grid-cols-12 lg:gap-8">
                 {/* L'étiquette et le corps sont sur la MÊME rangée de
@@ -719,6 +770,7 @@ export default function SurMesurePage() {
                 </div>
               </div>
             </div>
+            </Elargi>
           </div>
         </section>
 
@@ -772,8 +824,17 @@ export default function SurMesurePage() {
                 tournent, sortie, retour en pointillés. Le contenu est le
                 nôtre : la correspondance poste par poste est en tête de
                 components/surmesure/Cycle.tsx. */}
+            {/* `Ajuste` rend le schéma à sa largeur naturelle (1408, celle
+                pour laquelle il est dessiné) puis le RÉDUIT pour tenir.
+                Teo : « sur leur version mobile rien ne bouge, le
+                composant rétrécit mais reste le même ». Leur schéma est
+                une image, donc il se met à l'échelle ; le nôtre est du
+                balisage et se repliait en colonne — ce repli est
+                supprimé, la mise en page n'a plus de palier. */}
             <div data-reveal className="smd-panneau">
-              <Cycle />
+              <Ajuste largeur={1408}>
+                <Cycle />
+              </Ajuste>
             </div>
           </div>
         </section>
@@ -806,7 +867,7 @@ export default function SurMesurePage() {
           <div className="smd-wrap">
             <Entete etiquette="Exemples" titre="Trois besoins traités hors catalogue." />
             <div data-reveal>
-              <CardSlide items={EXEMPLES} />
+              <Casestudies cas={EXEMPLES} />
             </div>
             <p data-reveal className="smd-body mt-10 max-w-[698px]">
               {FICHE.demo.type === "list" ? fr(FICHE.demo.footer ?? "") : ""}
@@ -827,28 +888,7 @@ export default function SurMesurePage() {
                 "Avant de concevoir celui qui manque, vérifiez qu'il n'existe pas : quatre processus sont présents dans presque toutes les organisations, et se déploient sans cadrage."
               )}
             />
-            <PileSurFond
-              /* Un fond CALME, pas une capture d'écran. La fiche pose une
-                 image de produit derrière ses cartes ; avec notre console
-                 des débiteurs, les cartes blanches tombaient au milieu
-                 d'un tableau dense et l'ensemble se lisait en désordre.
-                 Ce pli blanc ne dit rien et ne dispute rien. */
-              fond="/fonds/plis-blancs.webp"
-              cartes={cartes}
-            />
-            {/* La pile n'est pas navigable : les quatre liens du catalogue
-                restent, en ligne, sous elle. Une carte qui tourne toute
-                seule ne peut pas être la seule porte vers une page. */}
-            <p data-reveal className="smd-body smd-pile__liens">
-              {catalogue.map((p, i) => (
-                <span key={p.system}>
-                  {i > 0 ? " · " : ""}
-                  <Link href={p.href} className="smd-lien">
-                    {p.system}
-                  </Link>
-                </span>
-              ))}
-            </p>
+            <Feature11 volets={volets} />
           </div>
         </section>
 
