@@ -31,8 +31,14 @@ encore, après la phrase qui se peint : la citation sépare alors les deux.
 
 1. **Le portrait de Teo.** Ceux d'Henri et de Vincent sont en place depuis
    le 13/09 (déposés par Teo, liseré saumon rogné, originaux conservés dans
-   `captures/originaux-equipe/`). `teo.jpg` est en place depuis le 14/09
-   à 12:00 (recadré 845 × 900) : plus aucun monogramme dans la mosaïque.
+   `captures/originaux-equipe/`). `teo.jpg` a été REMPLACÉ le 16/09 — la
+   version du 14/09 était trop lumineuse. La nouvelle vient d'une capture
+   d'écran, cadre saumon compris : le liseré n'a pas été rogné mais
+   RECONSTRUIT (le fond mauve a été prolongé par diffusion sous les arcs
+   des quatre coins, puis la bande du bas coupée franc), sinon rogner
+   assez pour effacer les arcs mangeait le haut du crâne. Recadré 845 × 900,
+   soit exactement le 31/33 de la tuile : `object-fit: cover` ne rogne
+   plus rien. Les deux originaux sont dans `captures/originaux-equipe/`.
 2. **Confirmer ton rôle.** « Co-fondateur » est posé par cohérence avec
    « CEO & Fondateur » et « CTO & Co-fondateur », pas parce que tu l'as dit.
 3. **La quatrième fiche**, quand tu l'auras (« on verra pour le dernier
