@@ -1,0 +1,717 @@
+/* ══════════════════════════════════════════════════════════════════════
+   .smd — /offres/sur-mesure, décalque de
+   https://scale.com/generative-ai-data-engine  (16/09/2026)
+
+   Demande de Teo : « refais complètement la page sur mesure — supprime
+   l'ancienne version, la nouvelle doit être la même page, mot pour mot. »
+   L'ancienne page (gabarit maison + sept reprises 21st.dev du 14/09) est
+   remplacée en entier ; ses textes, eux, sont conservés dans `FICHE` et
+   redistribués section par section (la correspondance est en tête de
+   page.tsx).
+
+   TOUT vit sous `.smd` et tout est préfixé `--smd-` / `.smd-`. Supprimer
+   ce fichier et son import supprime la page, sans effet de bord ailleurs.
+   Il ne touche NI au bloc `.offres` de globals.css (/, /blog,
+   /integrations, /tarifs/site), NI au bloc `.vd` (/vos-donnees), NI au
+   bloc `.ofd` de app/offres/nos-offres.css (/offres).
+
+   Ces trois derniers décalquent d'autres pages du MÊME site : l'échelle
+   typographique, les rayons et le bouton « FlatCta » se répondent d'un
+   bloc à l'autre. Les valeurs ci-dessous ont malgré tout été relevées sur
+   CETTE page — le rythme vertical et la carte de citation, notamment, n'y
+   sont pas les mêmes que sur /offres.
+
+   ── LE RELEVÉ ────────────────────────────────────────────────────────
+   Lu au getComputedStyle sur la référence (jamais estimé), repassé à cinq
+   largeurs en RECHARGEANT à chaque palier — 390 / 768 / 1024 / 1440 /
+   1700. Au-delà de 1472 la colonne est plafonnée : 1700 ne dit rien de
+   plus que 1440, et c'est la seule raison pour laquelle les deux paliers
+   rendent des chiffres identiques.
+
+   colonne          max 1472, padding-inline 24  → 1392 utiles à 1440
+   rythme vertical  padding-top 32 (40 dès 768), padding-bottom 40
+                    (leur `py-18 lg:py-20` est écrasé par `!pt-8 !pb-10
+                    md:!pt-10` sur TOUTES les sections de la page)
+   rayons           24 (pleine image) · 16 (panneau, carte de citation)
+                    · 8 (bouton, vignette, pastille d'icône) · 6 (pastille
+                    de bouton)
+   couleurs         texte #000 · étiquette et texte de carte #525252
+                    chapô rgba(0,0,0,.7) · fond doux #f2f2f2
+                    citation : fond #193a29 (leur token `evergreen`)
+                    catégorie de vignette #d1aad7 (leur `archive-lilac`)
+                    voile sur image rgba(0,0,0,.45)
+   graisse          400 PARTOUT, titres compris. C'est la signature de la
+                    référence, et la première chose qui se perd si on met
+                    du 600 sur un h2. Seuls le libellé de bouton et la
+                    catégorie de vignette sont en 500.
+   interlettre      -0.01em sur tout le texte courant ; -0.03em puis
+                    -0.05em sur la seule citation ; +1px sur l'étiquette
+                    monospace ; normale sur le libellé de bouton
+
+   échelle typographique, mesurée aux cinq largeurs :
+                        390        768        1024/1440/1700
+     titre du hero    32/33.6    46.4/48.7    64/67.2  (clamp 5vw, plafond 4rem)
+     chapô du hero    16/23.2    20/30        20/30
+     étiquette mono   12/24 ls +1px, capitales, identique partout
+     h2 de section    30/41.25   40/55        48/60
+     chapô de section 16/25.6    16/25.6      20/32    rgba(0,0,0,.7)
+     titre de carte   24/36      24/36        24/36    ls -0.01em
+     texte de carte   16/24      16/24        16/24    #525252
+     citation         24/28      32/28        40/44    ls -0.05em partout
+     nom sous citation 16/20     16/20        18/22.5
+
+   géométrie relevée, bloc par bloc :
+     hero             cadre à 16 du bord (24 dès 768), rayon 24,
+                      hauteur mini 480 puis 720, padding 32 puis 64,
+                      contenu calé EN BAS, colonne de texte 1152 max
+     bouton plein     hauteur 40, rayon 8, libellé 14/21 en 500,
+                      pastille 32×32 rayon 6, padding 4/4/4/16, gap 16
+     en-tête de sect. colonne 768 centrée, marge basse 40, haute 48 ≥768
+     carte de fonction figure 44×44 rayon 8, fond rgba(0,0,0,.09),
+                      bord rgba(0,0,0,.1) ; titre à 24 du pictogramme,
+                      texte à 16 du titre ; base 100 %, 368 max dès 768,
+                      quart de colonne dès 1024 ; gouttières 64, puis
+                      80/24 dès 768, puis 80/56 dès 1280
+     vignette         rapport 389/243, rayon 8, fond noir
+     carte citation   fond #193a29, rayon 16, padding 32 (0 + 80 vertical
+                      dès 1024), texte à droite sur 7 colonnes de 12
+
+   ── ÉCARTS ASSUMÉS ───────────────────────────────────────────────────
+   Chacun est un choix, pas un oubli. Ne pas les « corriger ».
+
+   1. LA POLICE. La référence est composée en Aeonik Pro (CoType Foundry),
+      sous licence commerciale : on ne peut ni servir leurs fichiers ni
+      l'acheter à leur place. Hanken Grotesk la remplace — même squelette
+      de grotesque géométrique, même hauteur d'x, 'g' à un étage. DM Mono
+      porte les étiquettes, qui sont bien en monospace dans la référence.
+      C'est le choix déjà fait pour `.vd` et `.ofd` : les trois pages se
+      répondent.
+
+   2. LE HAUT DE PAGE. La référence pose `pt-24` (96 px) parce que son
+      entête est `fixed` et recouvre le haut du document ; le bord haut du
+      hero tombe donc à 20 px sous l'entête. Le nôtre est `sticky` et
+      occupe sa place dans le flux : `padding-top: 20px` rend exactement
+      le même écart visible.
+
+   3. LE VOILE DU HERO. La référence a un voile uniforme `bg-black/45` sur
+      une photo déjà sombre en bas. La nôtre est un atrium clair : le
+      voile uniforme y laissait le texte blanc sous le seuil de
+      lisibilité. On garde leur densité en haut d'image et on l'appuie
+      vers le bas (`.smd-voile`).
+
+   4. LES DEUX HAUTEURS DU HERO. La référence écrit `min-h-[480]` et
+      `min-h-[720]`, sans unité — une valeur que Tailwind v4 laisse
+      passer telle quelle. Elle est rendue en pixels par le navigateur,
+      mais c'est une faute de frappe de leur côté, pas une intention :
+      on écrit `480px` / `720px`.
+
+   5. LA GRANDE IMAGE. La référence pose trois captures de son produit.
+      On ne recopie pas l'actif d'autrui, et nos écrans ne montrent pas
+      un système sur mesure : deux emplacements portent nos vraies
+      captures (l'espace client et la file de validation), le troisième
+      un schéma composé en SVG — même emprise, même poids visuel.
+
+   Les écarts de CONTENU (preuve sociale, logos clients, prix, la vidéo
+   de démonstration qu'on n'a pas) sont documentés dans page.tsx, section
+   par section.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.smd {
+  --smd-texte: #000000;
+  --smd-doux: rgba(0, 0, 0, 0.7);
+  --smd-etiquette: #525252;
+  --smd-fond: #f2f2f2;
+  --smd-ligne: rgba(0, 0, 0, 0.1);
+  --smd-evergreen: #193a29;
+  --smd-lilas: #d1aad7;
+
+  --smd-r-xl: 24px;
+  --smd-r-lg: 16px;
+  --smd-r-sm: 8px;
+
+  background: #ffffff;
+  color: var(--smd-texte);
+  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* L'interlettre est posée sur CHAQUE classe typographique, jamais sur la
+   racine. Un `letter-spacing: -0.01em` hérité se transmet en PIXELS
+   calculés sur la racine (16 px → -0,16 px) : le titre du hero à 64 px
+   recevait -0,16 au lieu de -0,64, soit quatre fois trop peu. Relevé sur
+   la référence : -0,64 à 64 px, -0,48 à 48 px, -0,2 à 20 px — c'est bien
+   -0,01em recalculé à chaque taille. */
+.smd .smd-h1,
+.smd .smd-h2,
+.smd .smd-h3,
+.smd .smd-h4,
+.smd .smd-lead,
+.smd .smd-chapo,
+.smd .smd-body {
+  letter-spacing: -0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   1 · COLONNE ET RYTHME
+   ───────────────────────────────────────────────────────────────────── */
+
+/* `padding-inline` et jamais `padding` : les sections portent leur propre
+   rythme vertical, un raccourci `padding` l'écraserait en silence. */
+.smd .smd-wrap {
+  width: 100%;
+  max-width: 1472px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+/* Toutes les sections de la référence portent le même rythme, au pixel :
+   32 en haut (40 dès 768), 40 en bas. */
+.smd .smd-sec {
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+@media (min-width: 768px) {
+  .smd .smd-sec {
+    padding-top: 40px;
+  }
+}
+
+/* Le cadre des deux pleines images — hero en haut, appel en bas. Leur
+   `px-4! md:grid-padding` : 16 de marge, 24 dès 768. */
+.smd .smd-cadre {
+  padding-inline: 16px;
+}
+@media (min-width: 768px) {
+  .smd .smd-cadre {
+    padding-inline: 24px;
+  }
+}
+.smd .smd-cadre--hero {
+  padding-top: 20px; /* écart nº 2 : notre entête est dans le flux */
+  padding-bottom: 40px;
+}
+.smd .smd-cadre--appel {
+  padding-top: 64px;
+  padding-bottom: 32px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   2 · TYPOGRAPHIE
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-h1,
+.smd .smd-h2,
+.smd .smd-h3,
+.smd .smd-h4 {
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+/* titre du hero — la référence pose ce clamp au pixel près */
+.smd .smd-h1 {
+  font-size: clamp(2rem, 0.5rem + 5vw, 4rem);
+  line-height: 1.05;
+  color: #ffffff;
+}
+
+/* h2 de section — 30 → 40 (768) → 48 (1024) */
+.smd .smd-h2 {
+  font-size: 1.875rem;
+  line-height: 1.375;
+  color: var(--smd-texte);
+}
+@media (min-width: 768px) {
+  .smd .smd-h2 {
+    font-size: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .smd-h2 {
+    font-size: 3rem;
+    line-height: 1.25;
+  }
+}
+
+/* la phrase seule du bloc à deux colonnes — leur `text-xl font-medium
+   leading-relaxed`, le seul 500 de la page côté texte courant */
+.smd .smd-h3 {
+  font-size: 1.25rem;
+  line-height: 1.625;
+  font-weight: 500;
+  color: var(--smd-texte);
+}
+
+/* titre de carte et de vignette — 24/36 partout */
+.smd .smd-h4 {
+  font-size: 1.5rem;
+  line-height: 1.5;
+  color: var(--smd-texte);
+}
+
+/* chapô du hero (leur body1) */
+.smd .smd-lead {
+  font-size: 1rem;
+  line-height: 1.45;
+  color: #ffffff;
+}
+@media (min-width: 768px) {
+  .smd .smd-lead {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+}
+
+/* chapô de section — 16/1.6 puis 20/1.6 à 1024 */
+.smd .smd-chapo {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--smd-doux);
+  text-wrap: balance;
+}
+@media (min-width: 1024px) {
+  .smd .smd-chapo {
+    font-size: 1.25rem;
+  }
+}
+
+/* texte de carte — 16/24, gris moyen */
+.smd .smd-body {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--smd-etiquette);
+}
+
+/* étiquette de section — 12 px monospace, capitales, +1px d'interlettre */
+.smd .smd-etiquette {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--smd-etiquette);
+  margin-bottom: 20px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   3 · EN-TÊTE DE SECTION — étiquette, titre, chapô, colonne 768 centrée
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-entete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 768px;
+  margin-inline: auto;
+  margin-bottom: 40px;
+  text-align: center;
+}
+/* Sans cette largeur, `align-items: center` réduit chaque enfant à la
+   largeur de son texte : le titre ne pouvait plus se répartir sur la
+   colonne de 768 (relevé : 746 chez nous, 768 sur la référence) et
+   `text-wrap: balance` travaillait sur une mesure fausse. */
+.smd .smd-entete > * {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .smd .smd-entete {
+    margin-top: 48px;
+  }
+}
+.smd .smd-entete .smd-chapo {
+  margin-top: 16px;
+}
+@media (min-width: 1024px) {
+  .smd .smd-entete .smd-chapo {
+    margin-top: 8px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   4 · BOUTON — leur « FlatCta »
+
+   Deux mouvements, relevés tels quels : un voile `currentColor` à 35 %
+   qui TRAVERSE de gauche à droite en 600 ms, et la flèche qui défile
+   dans sa pastille (deux exemplaires, translatés de 50 %). Le voile est
+   un enfant en position absolue, pas un `background` : c'est ce qui
+   permet de le translater sans repeindre le bouton.
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: 40px;
+  overflow: hidden;
+  border-radius: var(--smd-r-sm);
+  background: #ffffff;
+  color: #000000;
+  text-decoration: none;
+  letter-spacing: normal;
+}
+.smd .smd-cta--noir {
+  background: #000000;
+  color: #ffffff;
+}
+.smd .smd-cta__voile {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: currentColor;
+  opacity: 0.35;
+  border-radius: inherit;
+  transform: translateX(-100%);
+  transition: transform 600ms ease-out;
+  pointer-events: none;
+}
+.smd .smd-cta:hover .smd-cta__voile {
+  transform: translateX(0);
+}
+.smd .smd-cta__lbl {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 4px 4px 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.smd .smd-pastille {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 32px;
+  width: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+}
+.smd .smd-cta--noir .smd-pastille {
+  background: #ffffff;
+  color: #000000;
+}
+.smd .smd-pastille__rail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 200%;
+  transform: translateX(-50%);
+  transition: transform 600ms ease-out;
+}
+.smd .smd-cta:hover .smd-pastille__rail {
+  transform: translateX(0);
+}
+.smd .smd-pastille__rail > span {
+  display: flex;
+  height: 100%;
+  width: 50%;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .smd .smd-cta__voile,
+  .smd .smd-pastille__rail {
+    transition: none;
+  }
+}
+
+/* lien fléché du bandeau d'outils — la flèche avance de 4 px au survol */
+.smd .smd-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1263f5;
+  font-weight: 500;
+  transition: color 300ms ease;
+}
+.smd .smd-lien:hover {
+  color: #1d4ed8;
+}
+.smd .smd-lien span {
+  display: inline-block;
+  transition: transform 300ms ease-out;
+}
+.smd .smd-lien:hover span {
+  transform: translateX(4px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   5 · PLEINE IMAGE — hero et appel final
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-plein {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: var(--smd-r-xl);
+  min-height: 480px;
+  padding: 32px;
+  background: var(--smd-evergreen);
+}
+@media (min-width: 768px) {
+  .smd .smd-plein {
+    min-height: 720px;
+    padding: 64px;
+  }
+}
+.smd .smd-plein > img {
+  object-fit: cover;
+}
+/* écart nº 3 : densité de la référence en haut, appuyée vers le bas */
+.smd .smd-voile {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.45) 42%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+}
+.smd .smd-plein__texte {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  width: 100%;
+  max-width: 72rem;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   6 · PANNEAU D'IMAGE — le cadre des trois grandes pièces
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-panneau {
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+  border-radius: var(--smd-r-lg);
+  background: var(--smd-fond);
+}
+/* ENFANT DIRECT, jamais un descendant. Un bloc de page est UNLAYERED :
+   il passe devant toutes les utilitaires de Tailwind, qui vivent dans
+   `@layer utilities`. Écrit `.smd-panneau svg`, ce `display: block`
+   écrasait le `hidden` posé sur les flèches du schéma — les deux
+   variantes (vers le bas sous 768, vers la droite au-dessus) se
+   dessinaient l'une sous l'autre, sans une erreur. */
+.smd .smd-panneau > img,
+.smd .smd-panneau > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   7 · CARTE DE CITATION — leur bloc « ClientTestimonials »
+   ───────────────────────────────────────────────────────────────────── */
+
+/* La carte n'occupe PAS toute la colonne : sur la référence elle est en
+   retrait, et le retrait change de palier. Relevé (carte / colonne) :
+   390 → 329/342 · 768 → 670/720 · 1024 → 878/976 · 1440 → 1253/1392,
+   soit 100 %, 93 %, puis 90 % à partir de 1024. Les quatre largeurs
+   tombent au pixel avec ces trois valeurs. */
+.smd .smd-citation {
+  width: 100%;
+  margin-inline: auto;
+  border-radius: var(--smd-r-lg);
+  background: var(--smd-evergreen);
+  color: #ffffff;
+  padding: 32px;
+}
+@media (min-width: 768px) {
+  .smd .smd-citation {
+    width: 93%;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .smd-citation {
+    width: 90%;
+    padding: 80px 64px;
+  }
+}
+.smd .smd-citation__texte {
+  font-size: 1.5rem;
+  line-height: 28px;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+}
+@media (min-width: 768px) {
+  .smd .smd-citation__texte {
+    font-size: 2rem;
+    line-height: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .smd-citation__texte {
+    font-size: 2.5rem;
+    line-height: 44px;
+  }
+}
+.smd .smd-citation__label {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  line-height: 1.375;
+  font-weight: 500;
+  text-transform: uppercase;
+  white-space: pre-line;
+}
+.smd .smd-citation__nom {
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+}
+@media (min-width: 1024px) {
+  .smd .smd-citation__nom {
+    font-size: 1.125rem;
+  }
+}
+.smd .smd-citation__jeton {
+  display: inline-block;
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--smd-evergreen);
+  padding: 4px 8px;
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 10px;
+  line-height: 1.375;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   8 · CARTES DE FONCTION — leur grille « Key Features »
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-fonctions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 64px;
+}
+@media (min-width: 768px) {
+  .smd .smd-fonctions {
+    row-gap: 80px;
+    column-gap: 24px;
+  }
+}
+@media (min-width: 1280px) {
+  .smd .smd-fonctions {
+    column-gap: 56px;
+  }
+}
+.smd .smd-fonction {
+  flex: 1 0 100%;
+}
+@media (min-width: 768px) {
+  .smd .smd-fonction {
+    max-width: 368px;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .smd-fonction {
+    flex-basis: 25%;
+  }
+}
+.smd .smd-fonction figure {
+  display: flex;
+  height: 44px;
+  width: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--smd-r-sm);
+  border: 1px solid var(--smd-ligne);
+  background: rgba(0, 0, 0, 0.09);
+}
+.smd .smd-fonction figure svg {
+  height: 24px;
+  width: 24px;
+}
+.smd .smd-fonction h4 {
+  margin-top: 24px;
+}
+.smd .smd-fonction p {
+  margin-top: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   9 · VIGNETTES — leurs « Demos » (16/9) et leurs « Resources » (389/243)
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-vignettes {
+  display: grid;
+  gap: 40px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .smd .smd-vignettes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+.smd .smd-vignette__cadre {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--smd-r-lg);
+  background: var(--smd-fond);
+  aspect-ratio: 16 / 9;
+}
+
+.smd .smd-ressources {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .smd .smd-ressources {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .smd .smd-ressources {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+.smd .smd-ressource__cadre {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--smd-r-sm);
+  background: #000000;
+  aspect-ratio: 389 / 243;
+}
+.smd .smd-ressource__cadre img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 600ms ease-out;
+}
+.smd .smd-ressource:hover .smd-ressource__cadre img {
+  transform: scale(1.04);
+}
+.smd .smd-ressource__cat {
+  font-size: 0.875rem;
+  line-height: 1.71;
+  font-weight: 500;
+  color: var(--smd-lilas);
+}
+.smd .smd-ressource h4 {
+  margin-top: 4px;
+  line-height: 1.33;
+}
+@media (prefers-reduced-motion: reduce) {
+  .smd .smd-ressource__cadre img {
+    transition: none;
+  }
+}

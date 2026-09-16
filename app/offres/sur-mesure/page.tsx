@@ -1,188 +1,150 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import { SystemLogo } from "@/components/logos";
-import { Chevron } from "@/components/offres/MediaMoteurs";
 import {
-  BandeauAutresMoteurs,
-  CarteBlanche,
-  DemoFiche,
-  PastillesOutils,
-} from "@/components/offres/MediaFiche";
+  LogoDrive,
+  LogoExcel,
+  LogoGmail,
+  LogoOutlook,
+  LogoSheets,
+} from "@/components/offres/logos-outils";
+import {
+  CroquisDocument,
+  CroquisPont,
+  CroquisSuivi,
+  PanneauMethode,
+  PanneauReglages,
+} from "@/components/surmesure/Panneaux";
 import { FAMILLES } from "@/lib/content";
+import { fr } from "@/lib/typo";
 import { FICHES } from "@/lib/fiches";
 import type { Fiche } from "@/lib/fiches";
-import { NOMBRES } from "@/components/offres/gabarits/types";
-import { GridFeatureCards, type CaseTrame } from "@/components/ui/grid-feature-cards";
-import { FlowCards, type EtapeFlux } from "@/components/ui/flow-cards";
-import { IntegrationsTiles } from "@/components/ui/integrations-tiles";
-import { Marquee } from "@/components/ui/marquee";
-import { Feature08, type CaseArpentee } from "@/components/ui/feature-08";
-import { Faq06, TitreDeuxEncres } from "@/components/ui/faq-06";
-import { CasColonnes, type CasUsage } from "@/components/ui/cas-colonnes";
 import {
   AppWindow,
   ArrowLeftRight,
-  Briefcase,
-  Building2,
   CalendarCheck,
-  Factory,
   FileSearch,
-  HardHat,
-  Landmark,
   LayoutDashboard,
-  ListChecks,
   MessagesSquare,
-  ScrollText,
-  ShieldCheck,
-  ShoppingBag,
-  Stethoscope,
-  Ticket,
-  Truck,
 } from "lucide-react";
+import "./sur-mesure.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /offres/sur-mesure — 07/08/2026 (Teo), refondue le 14/09/2026
+   /offres/sur-mesure — décalque de scale.com/generative-ai-data-engine
+   (16/09/2026)
 
-   ROUTE STATIQUE, PAS UN PAQUET. Elle rendait le gabarit « home » à
-   l'identique (« exactement le même design que quand on clique sur la
-   carte FILED ou CASHD »). Depuis le 11/09 les quatre pages produit ont
-   leur propre design ; cette page était la dernière du catalogue à porter
-   les cartes grises numérotées du gabarit.
+   Demande de Teo, lien à l'appui : « refais complètement la page sur
+   mesure — supprime l'ancienne version et refais la nouvelle, ça doit
+   être mot pour mot la même page. »
 
-   Pourquoi ici et pas dans FAMILLES / FICHES : le sur-mesure n'est pas un
-   paquet catalogue. L'inscrire dans FAMILLES l'aurait propagé partout où
-   la liste des paquets est lue (bandeau « les autres », grilles de
-   /offres, sitemap) et cassé les copies qui comptent en toutes lettres
+   La page précédente (gabarit maison du 07/08, puis sept reprises
+   21st.dev du 14/09, puis passage en blanc le 15/09) est remplacée EN
+   ENTIER. Elle n'est plus là : ni ses composants, ni son ordre de
+   lecture, ni son habillage. Le relevé au pixel, le choix de police et
+   les écarts de forme sont documentés en tête de `./sur-mesure.css`.
+
+   ROUTE STATIQUE, PAS UN PAQUET — inchangé. Le sur-mesure n'est pas dans
+   FAMILLES / FICHES : l'y inscrire le propagerait partout où la liste
+   des paquets est lue (bandeau « les autres », grilles de /offres,
+   sitemap) et casserait les copies qui comptent en toutes lettres
    (« quatre postes », grilles en quatre colonnes). Next donne priorité au
    segment statique : /offres/sur-mesure atterrit ici, jamais dans
-   [system]. Elle est au sitemap depuis le 10/09 (rang 0.9, comme /offres).
+   [system]. Elle reste au sitemap (rang 0.9, comme /offres).
 
-   ——— Passe du 14/09/2026 : la page quitte le gabarit ————————————————
-   Teo, capture à l'appui : « des sections encore à l'ancienne ; récupère
-   les composants sur 21st.dev et change les sections ». Le hero est
-   gardé tel quel (c'est sa capture nº 1, il n'était pas en cause) ; tout
-   ce qui suit est repris section par section (le monde était alors
-   sombre — voir la passe du 15/09 plus bas) :
+   ── LES ONZE SECTIONS, DANS L'ORDRE DE LA RÉFÉRENCE ──────────────────
+    1 hero pleine image + bouton      → « Sur mesure » / le pitch
+    2 bandeau « trusted by » + lien   → les outils du client (voir écart 1)
+    3 étiquette + h2 + chapô          → APERÇU : le système qui manque
+    4 grande pièce                    → du besoin au système (les 4 étapes)
+    5 carte de citation vert sombre   → le pari de la page (voir écart 2)
+    6 phrase à gauche + pièce à droite→ le niveau d'autonomie, règle par règle
+    7 étiquette + h2 + chapô + image  → l'espace client, capture réelle
+    8 six cartes « Key Features »     → les six périmètres
+    9 trois vignettes « Demos »       → trois besoins traités (voir écart 3)
+   10 vignettes « Case Studies »      → les quatre systèmes du catalogue
+   11 appel pleine image              → parler de votre cas
 
-   | section                     | composant repris        | auteur         |
-   |-----------------------------|-------------------------|----------------|
-   | ce que couvre le sur-mesure | grid-feature-cards      | @efferd        |
-   | comment un besoin devient   | bento-monochrome-1      | @larsen66      |
-   |   un système (les étapes)   |   → flow-cards          |                |
-   | sur vos outils              | integrations-4-2        | @efferd        |
-   | pensé pour                  | marquee (Magic UI)      | @dillionverma  |
-   | ce qui vient avec           | feature-08              | @hirael        |
-   | questions directes          | faq-06                  | @hirael        |
-   | l'appel final               | cta-with-rectangle      | @mikolajdobrucki|
+   ── LES ÉCARTS DE CONTENU ────────────────────────────────────────────
+   Chacun est un choix, pas un oubli.
 
-   Chaque reprise vit dans components/ui/, réencrée à la charte, avec ses
-   écarts documentés en tête de fichier.
+   1. LA PREUVE SOCIALE. La référence ouvre sur « Trusted by the world's
+      most ambitious AI teams » et trois logos de clients. Nous n'avons
+      pas de logo client à afficher et nous n'en inventons pas : le
+      bandeau porte les OUTILS DU CLIENT — ceux sur lesquels un système
+      se branche — avec le lien vers /integrations. Même emplacement,
+      même rangée, rien d'inventé.
 
-   CE QUI DISPARAÎT, ET OÙ C'EST PASSÉ — aucun fait perdu :
-   • Le bandeau « SUR MESURE se branche sur ce que vous tenez déjà » et la
-     grille « Intégrations » (28 marques, deux fois) fusionnent dans
-     « Sur vos outils » : huit marques en damier, le texte à gauche.
-   • « Trois chaînes » (démo · garde-fous · outils) : la démo et le texte
-     des garde-fous sont DÉJÀ dans le hero, à 900 px de là ; les outils
-     sont la section d'à côté. C'était le même contenu une deuxième fois.
-   • « Le détail » : `fonctionnement[1]` (la liste de ce qu'un système
-     peut être) est ce que disent les quatre cases de « Ce que couvre » ;
-     `fonctionnement[2]` (la méthode) est ce que racontent les quatre
-     étapes, qui n'étaient affichées NULLE PART depuis le retrait des
-     jalons le 26/07. Les deux paragraphes restent dans FICHE, prêts si on
-     veut les remettre. La carte « Vous gardez la main » répétait mot
-     pour mot celle du hero.
-   • Le `BlocFaq` (grande carte grise, `<details>`) devient des cartes
-     accordéon ; les quatre questions sont inchangées.
-   • Le bandeau « les autres systèmes » est GARDÉ : c'est la navigation
-     vers les quatre pages produit, et il défile déjà.
+   2. LA CITATION. La référence signe la sienne d'un nom connu du
+      secteur. Nous ne citons personne : la grande citation porte le PARI
+      de la page — ce que le catalogue ne couvre pas et pourquoi — et la
+      signature est la nôtre, pas celle d'un client.
 
-   Les textes de Teo n'ont pas bougé. Seuls trois intertitres sont
-   nouveaux (« Comment un besoin devient un système. », « Quel que soit
-   votre secteur. », « Parler de votre cas. ») — le dernier est l'appel de
-   la famille, les deux autres remplacent des titres du gabarit qui
-   parlaient d'un « moteur ».
+   3. LES DÉMONSTRATIONS. La référence pose trois vignettes de vidéo.
+      Nous n'avons pas ces vidéos, et un lecteur vide serait un mensonge
+      d'interface : trois croquis au trait, un par nature de besoin,
+      dans le même cadre et le même rapport, sans bouton de lecture.
 
-   ——— Passe du 15/09/2026 : la page repasse en BLANC ————————————————
-   Teo : « la page sur mesure n'est toujours pas blanche, elle est encore
-   noire ; elle doit être blanche comme CASHD. » Les quatre pages produit
-   rapatriées le 11/09 sont claires ; celle-ci était la dernière page du
-   catalogue en monde sombre, et la seule à s'ouvrir en noir depuis une
-   carte de /offres.
+   4. LES LOGOS SUR MOBILE. La référence masque sa rangée de logos sous
+      768 px (`hidden md:block`) et ne la remplace par rien. La nôtre
+      s'enroule sur deux lignes : une rangée de cinq marques tient à
+      390 px, il n'y a pas de raison de la retirer.
 
-   Ce qui change : la racine perd `offres--sombre`. Le monde `.offres` de
-   base EST le monde blanc (fond #ffffff, encre #09090b, hero .o-gris
-   #f5f5f5, cartes de démo blanches) — tout ce qui lit `--o-text`,
-   `--o-muted`, `--o-line`, `--o-soft` ou les jetons `--demo-*` suit sans
-   une ligne à écrire : pastilles, boutons, liens, le hero entier, les
-   pastilles d'outils, le bandeau « les autres systèmes ».
-   Restaient à repeindre à la main les sept reprises 21st.dev du 14/09,
-   qui avaient été écrites en valeurs sombres en dur — chacune est notée
-   en tête de son fichier. Et dans le hero, deux couleurs écrites en dur
-   (`#fafafa` sur le nom du système, `#a1a1aa` sur les deux lignes de
-   légende) qui passent en `--o-text` et `--o-muted`.
+   ── CE QUI QUITTE LA PAGE, ET OÙ C'EST PASSÉ ─────────────────────────
+   La référence n'a ni FAQ, ni bandeau de secteurs, ni grille
+   d'intégrations, ni liste de garanties. Décalquer la page mot pour mot,
+   c'est donc s'en séparer. Les textes, eux, restent dans `FICHE`
+   ci-dessous — champ pour champ, prêts à être remis :
 
-   ——— Passe du 15/09/2026 : l'appel final passe en colonnes ————————
-   Teo, capture de la section à l'appui : le rectangle éclairé du 14/09
-   (`cta-rectangle`) devient `testimonials-columns-1` de @sanjay-kv —
-   trois colonnes de cartes qui remontent à trois vitesses.
-
-   Deux choses ne se perdent pas au passage. L'APPEL : pastille, titre,
-   phrase et bouton sont repris mot pour mot en tête de la section, les
-   colonnes se lisent dessous — une page de vente ne se termine pas sans
-   porte de sortie. LA RÈGLE : l'original est bâti sur neuf faux clients
-   (citation, avatar, nom, fonction) et nous n'inventons pas de preuve
-   sociale ; les cartes portent donc neuf CAS D'USAGE tirés de la fiche
-   de cette page, sans personne nommée, icône à la place de l'avatar.
-   Le détail des écarts est en tête de `components/ui/cas-colonnes.tsx`.
-   `cta-rectangle` n'est plus appelé nulle part ; le fichier reste, il
-   est la seule reprise de ce gabarit d'appel.
-
-   Aucun texte, aucune section, aucun ordre de lecture ne bouge.
-   `data-monde` n'est pas nécessaire : depuis le 11/09 l'entête prélève la
-   couleur de fond réelle sous son bord bas, et le blanc de `.offres` la
-   fait basculer en verre clair toute seule.
+   • `FICHE.faq` (4 questions) n'est plus rendue. C'était le seul endroit
+     du site qui écrivait les délais, le coût, la propriété du code et
+     les besoins qu'on refuse. → à remettre si Teo veut une 12ᵉ section.
+   • `FICHE.cible` (8 secteurs) n'est plus rendue : la référence n'a pas
+     ce bandeau. Le fait tient en une phrase, reprise dans le chapô de
+     l'aperçu (« aucun secteur n'est exclu »).
+   • `FICHE.outils` alimente désormais le bandeau nº 2, sous forme de
+     logos plutôt que de pastilles.
+   • Les quatre garanties du gabarit (file de validation, journal, données
+     chez vous, Chèque TIC) partaient d'un bloc commun aux pages produit,
+     pas de cette fiche : elles vivent toujours sur les quatre pages du
+     catalogue, vers lesquelles la section 10 renvoie.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
   alternates: { canonical: "/offres/sur-mesure" },
   title: "Sur mesure | Omega.AI",
   description:
-    "Quand aucun des quatre systèmes ne couvre le besoin, Omega.AI conçoit celui qui manque : cadré, chiffré, puis construit sur vos règles et intégré à votre environnement.",
+    "Quand aucun des quatre systèmes ne couvre le besoin, Omega.AI conçoit celui qui manque : cadré, chiffré, puis construit sur vos règles et intégré à votre environnement.",
 };
-
-const TAG = "Sur mesure";
-const SYSTEM = "SUR MESURE";
-const ROLE = "le système qui n'existe pas encore";
 
 /* La fiche garde la structure `Fiche` du catalogue, champ pour champ :
    c'est ce qui permet de la reporter dans FICHES le jour où le sur-mesure
-   deviendrait un paquet, et de comparer ses textes à ceux des autres. */
+   deviendrait un paquet, et de comparer ses textes à ceux des autres.
+   Aucun texte de Teo n'a bougé depuis le 07/08. */
 const FICHE: Fiche = {
   pitch: "Ce que le catalogue ne couvre pas, nous le concevons avec vous.",
 
   sections: {
     pointsTitre: "Ce que couvre le sur-mesure.",
     pointsChapo:
-      "Un processus interne, un logiciel métier, un pont entre deux outils ou un contrôle répétitif : le périmètre se définit avec vos équipes, puis s'écrit avant tout chiffrage.",
+      "Un processus interne, un logiciel métier, un pont entre deux outils ou un contrôle répétitif : le périmètre se définit avec vos équipes, puis s'écrit avant tout chiffrage.",
     detailChapo:
       "Ce que nous cadrons avant d'écrire une ligne, ce que nous construisons, et ce qui reste sous votre décision.",
     cibleChapo:
-      "Aucun secteur n'est exclu : un système sur mesure se justifie dès qu'une tâche se répète selon des règles qui peuvent s'écrire, quel que soit le métier.",
+      "Aucun secteur n'est exclu : un système sur mesure se justifie dès qu'une tâche se répète selon des règles qui peuvent s'écrire, quel que soit le métier.",
     faqChapo: "Les questions qu'une direction pose avant de lancer un projet sur mesure.",
   },
 
   fonctionnement: [
-    "Le catalogue Omega.AI couvre quatre processus présents dans presque toutes les organisations : les encaissements, la réactivation commerciale, les demandes entrantes et les flux documentaires. Ils se déploient vite parce que le besoin est le même partout. Le sur-mesure commence là où cette hypothèse s'arrête : quand le processus qui coûte le plus cher est propre à votre métier, à votre organisation ou à votre système d'information, et qu'aucun produit sur étagère ne le traite sans le déformer.",
+    "Le catalogue Omega.AI couvre quatre processus présents dans presque toutes les organisations : les encaissements, la réactivation commerciale, les demandes entrantes et les flux documentaires. Ils se déploient vite parce que le besoin est le même partout. Le sur-mesure commence là où cette hypothèse s'arrête : quand le processus qui coûte le plus cher est propre à votre métier, à votre organisation ou à votre système d'information, et qu'aucun produit sur étagère ne le traite sans le déformer.",
     "Le périmètre n'est pas limité à l'automatisation de messages. Un système sur mesure peut être un logiciel métier complet avec son interface et sa base de données, un pont entre deux outils qui ne communiquent pas, un calcul ou un contrôle répété que personne n'a le temps de faire, une extraction de données depuis des documents, un tableau de bord alimenté en continu, ou un assistant interne qui répond sur vos propres procédures. Si la tâche s'exécute aujourd'hui à la main et suit des règles qu'on peut écrire, elle peut être reprise.",
     "La méthode ne change pas de celle des quatre systèmes : on part de votre processus réel, pas d'un modèle. On écrit les règles avec vous, on définit ce qui s'exécute seul et ce qui attend votre validation, et on branche le résultat sur les outils que vous utilisez déjà plutôt que d'en imposer de nouveaux. La mise en production est progressive : un périmètre restreint d'abord, mesuré, puis élargi une fois qu'il tient.",
   ],
 
   points: [
     "Logiciels métier : une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services",
-    "Ponts entre outils : deux logiciels qui ne communiquent pas, une double saisie quotidienne ou un export repris à la main chaque semaine",
+    "Ponts entre outils : deux logiciels qui ne communiquent pas, une double saisie quotidienne ou un export repris à la main chaque semaine",
     "Traitement de documents : lecture, contrôle, extraction et classement de pièces reçues dans n'importe quel format",
     "Contrôles et calculs répétitifs : vérifications de cohérence, alertes sur seuils, états produits à date fixe sans intervention de vos équipes",
   ],
@@ -230,22 +192,23 @@ const FICHE: Fiche = {
     },
   ],
 
+  /* Conservée bien que non rendue — voir « ce qui quitte la page ». */
   faq: [
     {
       q: "Y a-t-il des besoins que vous refusez ?",
-      a: "Oui, deux cas. Ceux dont les règles ne peuvent pas s'écrire : si chaque situation demande un jugement humain, l'automatisation n'apporte rien de fiable. Et ceux dont le gain ne couvre pas le coût de construction : nous le disons au cadrage, avant tout devis.",
+      a: "Oui, deux cas. Ceux dont les règles ne peuvent pas s'écrire : si chaque situation demande un jugement humain, l'automatisation n'apporte rien de fiable. Et ceux dont le gain ne couvre pas le coût de construction : nous le disons au cadrage, avant tout devis.",
     },
     {
-      q: "Travaillez-vous dans mon secteur ?",
-      a: "La question porte moins sur le secteur que sur le processus. Une extraction de données depuis des documents fonctionne de la même façon chez un transporteur et dans un groupe de distribution : seuls les règles métier et le vocabulaire changent, et c'est précisément ce que le cadrage écrit avec vos équipes.",
+      q: "Travaillez-vous dans mon secteur ?",
+      a: "La question porte moins sur le secteur que sur le processus. Une extraction de données depuis des documents fonctionne de la même façon chez un transporteur et dans un groupe de distribution : seuls les règles métier et le vocabulaire changent, et c'est précisément ce que le cadrage écrit avec vos équipes.",
     },
     {
-      q: "Quels sont les délais et le coût ?",
+      q: "Quels sont les délais et le coût ?",
       a: "Ils dépendent entièrement du périmètre, et c'est la raison pour laquelle le cadrage précède le devis. Un pont entre deux outils se compte en jours, un logiciel métier complet en semaines. Vous recevez un montant ferme et un périmètre écrit avant de vous engager.",
     },
     {
       q: "À qui appartient ce qui est construit ?",
-      a: "Les données restent les vôtres dans tous les cas, comme pour les systèmes du catalogue : hébergement dans l'Union européenne, export et suppression sur demande. Les conditions de propriété et de reprise du système lui-même sont fixées au devis, avant la construction.",
+      a: "Les données restent les vôtres dans tous les cas, comme pour les systèmes du catalogue : hébergement dans l'Union européenne, export et suppression sur demande. Les conditions de propriété et de reprise du système lui-même sont fixées au devis, avant la construction.",
     },
   ],
 
@@ -259,446 +222,435 @@ const FICHE: Fiche = {
       { text: "Tâche qui demande un jugement au cas par cas", badge: "Écarté", tone: "off" },
     ],
     footer:
-      "Les trois premiers suivent des règles qui s'écrivent. Le quatrième demande un jugement au cas par cas : il reste chez vous, et nous le disons au cadrage.",
+      "Les trois premiers suivent des règles qui s'écrivent. Le quatrième demande un jugement au cas par cas : il reste chez vous, et nous le disons au cadrage.",
   },
 };
 
-/* ——— ce que couvre : « Intitulé : développement » → deux champs ———
-   La fiche écrit chaque périmètre en une phrase dont le premier
-   deux-points sépare l'intitulé du développement. On coupe là, on ne
-   réécrit pas.
-
-   15/09 — LA COUPE SE FAISAIT SUR `" : "`, ESPACE ORDINAIRE. Le deuxième
-   périmètre (« Ponts entre outils ») porte l'INSÉCABLE devant son
-   deux-points (U+00A0), comme le veut la typographie française et comme
-   l'impose la règle du parc : la coupe ne trouvait rien, `titre` valait
-   la phrase entière et `texte` était vide. La carte affichait donc ses
-   130 signes en gras, sans développement, à côté de trois cartes bien
-   formées. On ne retire pas l'insécable du texte — c'est le séparateur
-   qui devient tolérant : n'importe quelle espace (`\s` couvre U+00A0 et
-   U+202F en JavaScript) devant le PREMIER deux-points. */
-const ICONES_PERIMETRE = [
-  <AppWindow key="a" strokeWidth={1.25} />,
-  <ArrowLeftRight key="b" strokeWidth={1.25} />,
-  <FileSearch key="c" strokeWidth={1.25} />,
-  <CalendarCheck key="d" strokeWidth={1.25} />,
+/* ——— § 4 · les quatre étapes, rangées et numérotées ——————————————
+   Le texte de la grande pièce doit tenir dans une colonne de 244 px, et
+   les quatre colonnes doivent faire la même hauteur : chaque étape est
+   donc coupée à sa proposition principale, jamais réécrite. La phrase
+   complète reste dans `FICHE.etapes`, d'où sortent ces quatre-là. */
+const COUPES = [
+  "Nous décrivons le processus tel qu'il se déroule aujourd'hui, et où il se rompt.",
+  "Périmètre, règles de gestion, points de validation et coût sont écrits avant de commencer.",
+  "Le système est construit sur vos règles et intégré à vos outils, sous vos yeux.",
+  "Le démarrage se fait sur un périmètre restreint, puis s'élargit une fois l'effet mesuré.",
 ];
-const PERIMETRES: CaseTrame[] = FICHE.points.map((pt, i) => {
-  const coupe = pt.match(/^(.*?)\s*:\s*(.*)$/);
-  const titre = coupe ? coupe[1] : pt;
-  const texte = coupe ? coupe[2] : "";
-  /* la suite d'un deux-points est en minuscule dans la fiche ; seule, elle
-     redevient une phrase */
-  return { icone: ICONES_PERIMETRE[i], titre, texte: texte.charAt(0).toUpperCase() + texte.slice(1) };
-});
-
-/* ——— les étapes : rang, phase, pictogramme ———
-   Les quatre variantes de pictogramme suivent le sens de chaque étape :
-   l'aiguille qui balaie (on regarde), le relais (on écrit et on passe),
-   l'onde (on construit), les anneaux qui s'élargissent (on démarre petit
-   et on étend). */
-const PHASES = ["Cadrage", "Devis", "Construction", "Mise en service"] as const;
-const VARIANTES = ["orbit", "relay", "wave", "spark"] as const;
-const ETAPES: EtapeFlux[] = FICHE.etapes.map((e, i) => ({
+const ETAPES = FICHE.etapes.map((e, i) => ({
   rang: String(i + 1).padStart(2, "0"),
-  meta: `Étape ${i + 1} · ${PHASES[i]}`,
   titre: e.t,
-  texte: e.d,
-  variante: VARIANTES[i],
+  texte: COUPES[i],
 }));
 
-/* ——— pensé pour : une icône par secteur, dans l'ordre de la fiche ——— */
-const ICONES_SECTEUR = [Factory, Stethoscope, Truck, Building2, Briefcase, ShoppingBag, HardHat, Landmark];
+/* ——— § 8 · les six périmètres ———————————————————————————————————
+   Les quatre premiers sont `FICHE.points`, coupés au premier deux-points
+   (intitulé / développement). Les deux derniers sont les deux périmètres
+   que `fonctionnement[1]` cite sans que la liste les reprenne : le
+   tableau de bord et l'assistant interne. Rien d'inventé.
 
-/* ——— ce qui vient avec : les quatre garanties du gabarit, inchangées ——— */
-const COMPRIS: CaseArpentee[] = [
+   LA COUPE EST TOLÉRANTE À L'ESPACE. Le deuxième périmètre porte
+   l'INSÉCABLE devant son deux-points, comme le veut la typographie
+   française : une coupe sur `" : "` ne trouvait rien et affichait la
+   phrase entière en gras. `\s` couvre U+00A0 et U+202F en JavaScript. */
+const ICONES_PERIMETRE = [AppWindow, ArrowLeftRight, FileSearch, CalendarCheck];
+
+const PERIMETRES = [
+  ...FICHE.points.map((pt, i) => {
+    const coupe = pt.match(/^(.*?)\s*:\s*(.*)$/);
+    const titre = coupe ? coupe[1] : pt;
+    const suite = coupe ? coupe[2] : "";
+    return {
+      Icone: ICONES_PERIMETRE[i],
+      titre,
+      /* la suite d'un deux-points est en minuscule dans la fiche ; seule,
+         elle redevient une phrase */
+      texte: suite ? suite.charAt(0).toUpperCase() + suite.slice(1) + "." : "",
+    };
+  }),
   {
-    icone: <ListChecks strokeWidth={1.5} />,
-    titre: "Une file de validation",
+    Icone: LayoutDashboard,
+    titre: "Tableaux de bord",
     texte:
-      "Tout ce qui doit partir y passe. Vos équipes approuvent, corrigent ou suspendent, aussi longtemps que vous le jugez utile.",
+      "Un état alimenté en continu, à la place d'un fichier consolidé à la main en fin de mois.",
   },
   {
-    icone: <ScrollText strokeWidth={1.5} />,
-    titre: "Un journal de tout ce qui est parti",
-    texte:
-      "Chaque envoi est daté, archivé et consultable, ce qui vous donne la preuve le jour où un client conteste avoir été relancé.",
-  },
-  {
-    icone: <ShieldCheck strokeWidth={1.5} />,
-    titre: "Vos données restent chez vous",
-    texte:
-      "Chaque entreprise dispose d'un espace chiffré et distinct, hébergé dans l'Union européenne. Seul le strict nécessaire est transmis aux modèles, tâche par tâche.",
-  },
-  {
-    icone: <Ticket strokeWidth={1.5} />,
-    titre: "Le Chèque TIC vérifié",
-    texte:
-      "Pour les entreprises immatriculées en Guadeloupe et éligibles, la Région finance une partie de l'installation. L'éligibilité est vérifiée pendant le diagnostic, avant tout engagement de votre part.",
+    Icone: MessagesSquare,
+    titre: "Assistants internes",
+    texte: "Un assistant qui répond à vos équipes sur vos propres procédures, pas sur le web.",
   },
 ];
 
-/* Les quatre paquets du catalogue alimentent le bandeau « les autres ».
-   Lus dans FAMILLES : si un paquet change de nom ou de slug, la page suit. */
+/* ——— § 9 · trois besoins traités, un croquis chacun ——————————————
+   Les trois premières lignes de `FICHE.demo` — celles dont les règles
+   s'écrivent. La quatrième, celle qu'on écarte, ferme la section en une
+   phrase plutôt que d'occuper une vignette. */
+const EXEMPLES = [
+  { nature: "Pont entre outils", titre: FICHE.demo.type === "list" ? FICHE.demo.items[0].text : "", Croquis: CroquisPont },
+  { nature: "Traitement de documents", titre: FICHE.demo.type === "list" ? FICHE.demo.items[1].text : "", Croquis: CroquisDocument },
+  { nature: "Logiciel métier", titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "", Croquis: CroquisSuivi },
+];
+
+/* ——— § 10 · les quatre paquets du catalogue ——————————————————————
+   Lus dans FAMILLES : si un paquet change de nom ou de slug, la page
+   suit. La photo et le pitch viennent de la fiche du paquet — ce sont
+   exactement ceux que porte sa propre page. */
 const CATALOGUE = ["CASHD", "RELOAD", "FRONTD", "FILED"];
 
-/* ——— les neuf cas de l'appel final ———————————————————————————————
-   Rien n'est inventé : chaque situation reformule un fait déjà écrit
-   plus haut dans la page — les quatre périmètres de `FICHE.points`, la
-   liste de `fonctionnement[1]` (tableau de bord, assistant interne), les
-   quatre lignes de la démo, et les familles de secteur de `FICHE.cible`.
-   `secteur` dit POUR QUI le cas est typique, jamais chez qui il a été
-   livré : nous n'affichons aucune référence client.
-   Le neuvième est le cas écarté, celui qui demande un jugement au cas
-   par cas — la même phrase qu'au cadrage, et qu'en bas de la démo. */
-const CAS: CasUsage[] = [
-  {
-    icone: <ArrowLeftRight strokeWidth={1.5} />,
-    texte: "Deux logiciels qui ne se parlent pas, et un devis ressaisi à la main en comptabilité.",
-    nature: "Pont entre outils",
-    secteur: "Commerce & distribution",
-  },
-  {
-    icone: <FileSearch strokeWidth={1.5} />,
-    texte: "Des bons de livraison reçus dans dix formats, lus et contrôlés dès la réception.",
-    nature: "Traitement de documents",
-    secteur: "Transport & logistique",
-  },
-  {
-    icone: <CalendarCheck strokeWidth={1.5} />,
-    texte: "Un parc suivi dans un tableur, avec des échéances que personne n'a le temps de surveiller.",
-    nature: "Contrôles et alertes",
-    secteur: "Industrie & production",
-  },
-  {
-    icone: <ListChecks strokeWidth={1.5} />,
-    texte: "Le même export repris à la main chaque semaine, pour un état attendu à date fixe.",
-    nature: "Calculs répétitifs",
-    secteur: "Cabinets & conseil",
-  },
-  {
-    icone: <AppWindow strokeWidth={1.5} />,
-    texte: "Aucun outil du marché ne suit le fonctionnement des services, il faut une application dédiée.",
-    nature: "Logiciel métier",
-    secteur: "Santé & professions libérales",
-  },
-  {
-    icone: <ScrollText strokeWidth={1.5} />,
-    texte: "Des pièces à vérifier avant paiement, dans un format qui change à chaque fournisseur.",
-    nature: "Traitement de documents",
-    secteur: "BTP & travaux publics",
-  },
-  {
-    icone: <LayoutDashboard strokeWidth={1.5} />,
-    texte: "Un tableau de bord alimenté en continu, à la place d'un fichier consolidé en fin de mois.",
-    nature: "Tableau de bord",
-    secteur: "Immobilier & gestion",
-  },
-  {
-    icone: <MessagesSquare strokeWidth={1.5} />,
-    texte: "Un assistant interne qui répond aux équipes sur vos propres procédures.",
-    nature: "Assistant interne",
-    secteur: "Associations & secteur public",
-  },
-  {
-    icone: <ShieldCheck strokeWidth={1.5} />,
-    texte: "Une tâche qui demande un jugement au cas par cas. Elle reste chez vous, et nous le disons au cadrage.",
-    nature: "Écarté au cadrage",
-    secteur: "Tous secteurs",
-  },
+/* « CASHD · encaissements » → « encaissements ». Le séparateur du
+   catalogue est le point médian ; les autres formes sont acceptées parce
+   que FAMILLES en a porté plusieurs. */
+const sansNom = (titre: string, nom: string) =>
+  titre.startsWith(nom) ? titre.slice(nom.length).replace(/^[\s·:–—-]+/, "") : titre;
+
+/* ——— § 2 · les outils du client ————————————————————————————————— */
+const OUTILS = [
+  { Logo: LogoGmail, nom: "Gmail" },
+  { Logo: LogoOutlook, nom: "Outlook" },
+  { Logo: LogoSheets, nom: "Google Sheets" },
+  { Logo: LogoExcel, nom: "Excel" },
+  { Logo: LogoDrive, nom: "Google Drive" },
 ];
 
-const sansNom = (titre: string, nom: string) =>
-  titre.startsWith(nom) ? titre.slice(nom.length).replace(/^\s*[ : –-]\s*/, "") : titre;
+/* ══ les deux pièces de balisage répétées ═════════════════════════════ */
 
-function EnTete({ pastille, titre, chapo }: { pastille: string; titre: string; chapo: string }) {
+function Fleche() {
   return (
-    <div className="flex flex-col items-center text-center">
-      <div data-reveal>
-        <span className="o-pill">{pastille}</span>
-      </div>
-      <h2 data-reveal className="o-h2 mt-2.5 max-w-[600px]">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M5 12h14m0 0-6-6m6 6-6 6" />
+    </svg>
+  );
+}
+
+/* Le bouton de la référence : un voile `currentColor` traverse le fond,
+   la flèche défile dans sa pastille. Les deux exemplaires de la flèche
+   sont ce qui donne le défilement — ne pas en retirer un. */
+function Bouton({
+  href,
+  children,
+  noir = false,
+}: {
+  href: string;
+  children: React.ReactNode;
+  noir?: boolean;
+}) {
+  return (
+    <Link href={href} className={`smd-cta${noir ? " smd-cta--noir" : ""}`}>
+      <span aria-hidden className="smd-cta__voile" />
+      <span className="smd-cta__lbl">
+        {children}
+        <span aria-hidden className="smd-pastille">
+          <span className="smd-pastille__rail">
+            <span>
+              <Fleche />
+            </span>
+            <span>
+              <Fleche />
+            </span>
+          </span>
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+function Entete({
+  etiquette,
+  titre,
+  chapo,
+}: {
+  etiquette: string;
+  titre: string;
+  chapo?: string;
+}) {
+  return (
+    <div className="smd-entete">
+      <p data-reveal className="smd-etiquette">
+        {etiquette}
+      </p>
+      <h2 data-reveal className="smd-h2">
         {titre}
       </h2>
-      <p data-reveal className="o-lead mt-4 max-w-[650px]">
-        {chapo}
-      </p>
+      {chapo && (
+        <p data-reveal className="smd-chapo">
+          {chapo}
+        </p>
+      )}
     </div>
   );
 }
 
+/* ══ la page ══════════════════════════════════════════════════════════ */
+
 export default function SurMesurePage() {
-  const autres = FAMILLES.flatMap((f) => f.moteurs)
+  const catalogue = FAMILLES.flatMap((f) => f.moteurs)
     .filter((x) => CATALOGUE.includes(x.system))
     .sort((a, b) => CATALOGUE.indexOf(a.system) - CATALOGUE.indexOf(b.system))
     .map((x) => ({
       system: x.system,
       role: sansNom(x.title, x.system),
-      pitch: FICHES[x.system]?.pitch ?? x.benefit,
       href: `/offres/${x.slug}`,
+      photo: FICHES[x.system]?.photo ?? "",
+      photoAlt: FICHES[x.system]?.photoAlt ?? "",
     }));
 
   return (
     <PageShell>
       <PageMotion />
-      <div className="offres">
-        {/* ════════ 1 · HERO — celui du gabarit « home », inchangé ════════ */}
-        <section className="o-gris relative overflow-hidden pb-[90px] pt-[40px] sm:pb-[120px] sm:pt-[81px]">
-          <div
-            aria-hidden
-            className="o-dots o-dots-fade pointer-events-none absolute inset-x-0 top-0 h-[900px]"
-          />
-          <div className="o-wrap relative">
-            <div className="grid grid-cols-1 items-start gap-14 pt-[60px] lg:grid-cols-[700px_minmax(0,1fr)] lg:gap-[76px]">
-              <div>
-                <div data-reveal className="flex flex-wrap items-center gap-3">
-                  <Link href="/offres" className="o-pill o-pill--xs">
-                    ← Nos offres
-                  </Link>
-                  <span className="o-pill o-pill--xs">{TAG}</span>
-                </div>
-
-                <div data-reveal className="mt-7 flex items-center gap-4">
-                  <SystemLogo system={SYSTEM} />
-                  <div>
-                    <div
-                      className="text-[26px] font-semibold tracking-[-0.03em] text-[var(--o-text)]"
-                      style={{ fontFamily: "var(--font-jakarta)" }}
-                    >
-                      {SYSTEM}
-                    </div>
-                    <div className="o-small !text-[var(--o-muted)]">· {ROLE}</div>
-                  </div>
-                </div>
-
-                <h1 data-reveal className="o-h2 mt-6">
-                  {FICHE.pitch}
-                </h1>
-
-                <p data-reveal className="o-lead mt-5 max-w-[608px]">
-                  {FICHE.fonctionnement[0]}
-                </p>
-
-                <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
-                  <Link href="/commencer" className="o-btn o-btn--primary">
-                    Cadrer votre besoin
-                  </Link>
-                  <Link href="#methode" className="o-btn o-btn--ghost">
-                    Voir la méthode
-                    <Chevron taille={13} />
-                  </Link>
-                </div>
-
-                <div data-reveal className="mt-10">
-                  <PastillesOutils outils={FICHE.outils} />
-                </div>
-
-                <div data-reveal className="mt-6 flex flex-wrap items-center gap-3">
-                  <span className="o-pill o-pill--xs">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
-                    SUR VOS OUTILS
-                  </span>
-                  <span className="o-small !text-[var(--o-muted)]">{FICHE.outils.join(" · ")}</span>
-                </div>
-              </div>
-
-              <div data-reveal className="flex w-full flex-col gap-5 lg:max-w-[404px]">
-                <DemoFiche demo={FICHE.demo} />
-
-                <CarteBlanche>
-                  <div className="px-6 py-6">
-                    <span className="o-demo-fort">
-                      <svg
-                        width="34"
-                        height="34"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.7}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden
-                      >
-                        <path d="M20 6 9 17l-5-5" />
-                        <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8" />
-                      </svg>
-                    </span>
-                    <div
-                      className="o-demo-fort mt-5 text-[20px] font-semibold tracking-[-0.02em]"
-                      style={{ fontFamily: "var(--font-jakarta)" }}
-                    >
-                      Vous gardez la main
-                    </div>
-                    <p className="o-demo-faible mt-2 text-[15px] leading-[1.7]">{FICHE.controle}</p>
-                  </div>
-                </CarteBlanche>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ════════ 2 · CE QUE COUVRE LE SUR-MESURE ════════ */}
-        <section id="fonctionnement" className="o-wrap scroll-mt-24 pb-[72px] pt-[72px] sm:pb-[110px] sm:pt-[110px]">
-          <EnTete
-            pastille="Périmètre"
-            titre={FICHE.sections!.pointsTitre!}
-            chapo={FICHE.sections!.pointsChapo!}
-          />
-          <div className="mt-10 sm:mt-16">
-            <GridFeatureCards cases={PERIMETRES} />
-          </div>
-        </section>
-
-        {/* ════════ 3 · LES ÉTAPES ════════ */}
-        <section id="methode" className="o-wrap scroll-mt-24 pb-[72px] sm:pb-[110px]">
-          <EnTete
-            pastille="La méthode"
-            titre="Comment un besoin devient un système."
-            chapo={FICHE.sections!.detailChapo!}
-          />
-          <div className="mt-10 sm:mt-16">
-            <FlowCards etapes={ETAPES} />
-          </div>
-        </section>
-
-        {/* ════════ 4 · SUR VOS OUTILS ════════ */}
-        <section className="o-wrap pb-[72px] sm:pb-[110px]">
-          <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
-            <div className="max-w-[520px]">
-              <div data-reveal>
-                <span className="o-pill">Intégrations</span>
-              </div>
-              <h2 data-reveal className="o-h2 mt-2.5">
-                Intégré à votre environnement.
-              </h2>
-              <p data-reveal className="o-lead mt-4">
-                Messagerie, tableur, paiement, e-commerce, agenda : le système lit et écrit dans les outils où vos équipes travaillent déjà, sans compte à créer ni migration.
+      <div className="smd">
+        {/* ════════ 1 · HERO PLEINE IMAGE ════════ */}
+        <div className="smd-cadre smd-cadre--hero">
+          <section className="smd-plein">
+            <Image
+              src="/photos/tarifs-hero-atrium.jpg"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div aria-hidden className="smd-voile" />
+            <div className="smd-plein__texte">
+              <h1 data-arrivee className="smd-h1">
+                Sur mesure
+              </h1>
+              <p data-arrivee className="smd-lead">
+                {FICHE.pitch}
               </p>
-              <div data-reveal className="mt-7 flex flex-wrap gap-2.5">
-                {FICHE.outils.map((o) => (
-                  <span key={o} className="o-pill o-pill--xs">
-                    {o}
-                  </span>
-                ))}
+              <div data-arrivee>
+                <Bouton href="/reserver-un-audit">Parler de votre cas</Bouton>
               </div>
             </div>
-            <div data-reveal className="flex justify-center md:justify-end">
-              <IntegrationsTiles />
-            </div>
+          </section>
+        </div>
+
+        {/* ════════ 2 · LES OUTILS DU CLIENT ════════
+            L'emplacement de leur bandeau « Trusted by » — écart nº 1. */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <p data-reveal className="smd-chapo mx-auto mb-12 max-w-[698px] !text-base !text-black/70">
+              <span className="mr-2">
+                Un système sur mesure se branche sur les outils que vos équipes utilisent déjà.
+              </span>
+              <Link href="/integrations" className="smd-lien !text-base">
+                Voir nos intégrations
+                <span aria-hidden>→</span>
+              </Link>
+            </p>
+            {/* la rangée de la référence est dans leur `.container` : 720 à
+                768, 976 à 1024, 1280 au-delà. Notre colonne rend les deux
+                premiers d'elle-même, le plafond de 1280 pose le troisième. */}
+            <ul
+              data-reveal
+              className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-10 gap-y-6 sm:justify-around"
+            >
+              {OUTILS.map(({ Logo, nom }) => (
+                <li key={nom} className="flex items-center gap-2.5">
+                  <Logo taille={24} />
+                  <span className="smd-body !text-[0.9375rem]">{nom}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
-        {/* ════════ 5 · PENSÉ POUR ════════ */}
-        <section className="pb-[72px] sm:pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="Pensé pour"
-              titre="Quel que soit votre secteur."
-              chapo={FICHE.sections!.cibleChapo!}
+        {/* ════════ 3 · APERÇU ════════ */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <Entete
+              etiquette="Aperçu"
+              titre="Le système qui n'existe pas encore."
+              chapo={fr(FICHE.sections?.pointsChapo ?? "")}
             />
           </div>
-          <div data-reveal className="mt-10 flex flex-col gap-3 sm:mt-14">
-            <Marquee duree={46} pause>
-              {FICHE.cible.map((c, i) => {
-                const Icone = ICONES_SECTEUR[i];
-                return (
-                  <span key={c} className="o-pill whitespace-nowrap">
-                    <Icone className="h-4 w-4 text-[var(--o-muted)]" strokeWidth={1.5} aria-hidden />
-                    {c}
-                  </span>
-                );
-              })}
-            </Marquee>
-            <Marquee duree={52} pause inverse>
-              {[...FICHE.cible].reverse().map((c, i) => {
-                const Icone = ICONES_SECTEUR[FICHE.cible.length - 1 - i];
-                return (
-                  <span key={c} className="o-pill whitespace-nowrap">
-                    <Icone className="h-4 w-4 text-[var(--o-muted)]" strokeWidth={1.5} aria-hidden />
-                    {c}
-                  </span>
-                );
-              })}
-            </Marquee>
+        </section>
+
+        {/* ════════ 4 · DU BESOIN AU SYSTÈME ════════
+            L'emplacement de leur grand schéma. Écart nº 5 du bloc .smd :
+            c'est du balisage qui se recompose, pas une image. */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <div data-reveal className="smd-panneau">
+              <PanneauMethode etapes={ETAPES} />
+            </div>
           </div>
         </section>
 
-        {/* ════════ 6 · CE QUI VIENT AVEC ════════ */}
-        <section className="o-wrap pb-[72px] sm:pb-[110px]">
-          <EnTete
-            pastille="Inclus"
-            titre="Ce qui vient avec le système."
-            chapo="Le système n'est que la partie visible. Ce qui suit est livré avec lui, sans supplément."
-          />
-          <div className="mt-10 sm:mt-16">
-            <Feature08 cases={COMPRIS} />
+        {/* ════════ 5 · LE PARI ════════
+            L'emplacement de leur citation signée — écart nº 2 : personne
+            n'est cité, la page porte sa propre position. */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <div data-reveal className="smd-citation">
+              <div className="flex flex-col gap-10 lg:grid lg:grid-cols-12 lg:gap-8">
+                <p className="smd-citation__label lg:col-span-3 lg:self-end">
+                  Ce que le catalogue{"\n"}ne couvre pas
+                </p>
+                <div className="flex flex-col justify-between gap-12 lg:col-span-8 lg:col-start-5">
+                  <p className="smd-citation__texte">
+                    «&nbsp;Le sur-mesure commence là où l&apos;hypothèse du catalogue
+                    s&apos;arrête&nbsp;: quand le processus qui coûte le plus cher est propre à
+                    votre métier, et qu&apos;aucun produit sur étagère ne le traite sans le
+                    déformer.&nbsp;»
+                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-4 lg:justify-end lg:gap-6">
+                    <p className="smd-citation__nom">Omega.AI</p>
+                    <span className="smd-citation__jeton">Cadrage avant devis</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ════════ 7 · LES AUTRES SYSTÈMES — bandeau gardé ════════ */}
-        <section className="pb-[72px] sm:pb-[110px]">
-          <div className="o-wrap flex flex-col items-center text-center">
-            <div data-reveal>
-              <span className="o-pill">Catalogue</span>
+        {/* ════════ 6 · RÈGLE PAR RÈGLE ════════ */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
+              <h3 data-reveal className="smd-h3">
+                {fr(FICHE.controle ?? "")}
+              </h3>
+              <div data-reveal className="smd-panneau">
+                <PanneauReglages />
+              </div>
             </div>
-            <h2 data-reveal className="o-h2 mt-2.5 max-w-[600px]">
-              {NOMBRES[autres.length] ?? autres.length} autre{autres.length > 1 ? "s" : ""} système
-              {autres.length > 1 ? "s" : ""}.
-            </h2>
-            <p data-reveal className="o-lead mt-4 max-w-[650px]">
-              Le sur-mesure n&apos;est pas toujours ce qu&apos;il faut déployer en premier. Le diagnostic désigne le système au meilleur retour pour votre organisation, et il arrive que ce soit un autre.
-            </p>
-            <div data-reveal className="mt-5">
-              <Link href="/offres" className="o-link">
-                Voir toutes les offres
-                <Chevron />
-              </Link>
-            </div>
-          </div>
-          <div data-reveal className="mt-10 sm:mt-16">
-            <BandeauAutresMoteurs moteurs={autres} />
           </div>
         </section>
 
-        {/* ════════ 8 · FAQ ════════ */}
-        <section className="o-wrap pb-[60px]">
-          <div className="flex flex-col items-center text-center">
-            <div data-reveal>
-              <span className="o-pill">FAQ</span>
+        {/* ════════ 7 · L'ESPACE CLIENT ════════
+            Leur deuxième grande capture produit. La nôtre est réelle :
+            l'espace client Omega, alimenté par le jeu de démonstration
+            écrit en dur dans le dépôt du cockpit — aucune donnée client.
+            Voir app/page.tsx pour la route de prise de vue. */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <Entete
+              etiquette="Ce que vous obtenez"
+              titre="Un système de plus, dans le même espace."
+              chapo={fr(
+                "Un système sur mesure se livre là où vivent déjà les autres : la même file de validation, le même journal de ce qui est parti, les mêmes droits par service. Vos équipes n'ouvrent pas un outil de plus."
+              )}
+            />
+            <div data-reveal className="smd-panneau">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/fonds/tableau-de-bord.webp"
+                alt="L'espace client Omega : la liste des débiteurs, leur état et l'encours échu au total — ici le module d'encaissements du catalogue."
+                width={2160}
+                height={1350}
+              />
             </div>
-            <TitreDeuxEncres>Les questions posées avant de s&apos;engager.</TitreDeuxEncres>
-            <p data-reveal className="o-lead mt-4 max-w-[650px]">
-              {FICHE.sections!.faqChapo!}
-            </p>
-          </div>
-          <div className="mt-12">
-            <Faq06 questions={FICHE.faq} />
           </div>
         </section>
 
-        {/* ════════ 9 · L'APPEL FINAL ════════ */}
-        <section className="o-wrap overflow-hidden pb-[60px]">
-          <div className="flex flex-col items-center gap-6 px-2 pb-10 pt-16 text-center sm:gap-8 md:pt-24">
-            <div data-reveal>
-              <span className="o-pill o-pill--xs">{TAG}</span>
+        {/* ════════ 8 · LES SIX PÉRIMÈTRES ════════ */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <Entete
+              etiquette="Périmètres"
+              titre="Ce que couvre le sur-mesure."
+              chapo="Si la tâche s'exécute aujourd'hui à la main et suit des règles qu'on peut écrire, elle peut être reprise."
+            />
+            <div className="smd-fonctions">
+              {PERIMETRES.map(({ Icone, titre, texte }) => (
+                <div data-reveal key={titre} className="smd-fonction">
+                  <figure>
+                    <Icone strokeWidth={1.25} />
+                  </figure>
+                  <h4 className="smd-h4">{titre}</h4>
+                  <p className="smd-body">{texte}</p>
+                </div>
+              ))}
             </div>
-            <h2 data-reveal className="o-h2 max-w-[640px] !leading-[1.15]">
-              Échanger sur votre cas.
-            </h2>
-            <p data-reveal className="o-lead max-w-[560px]">
-              Rien n&apos;est chiffré avant que ce soit clair pour vous comme pour nous.
-            </p>
-            <div data-reveal>
-              <Link href="/commencer" className="o-btn o-btn--primary">
-                Cadrer votre besoin
-              </Link>
+          </div>
+        </section>
+
+        {/* ════════ 9 · TROIS BESOINS TRAITÉS ════════
+            L'emplacement de leurs vidéos de démonstration — écart nº 3. */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <Entete etiquette="Exemples" titre="Trois besoins traités hors catalogue." />
+            <div className="smd-vignettes">
+              {EXEMPLES.map(({ nature, titre, Croquis }) => (
+                <div data-reveal key={nature}>
+                  <div className="smd-vignette__cadre">
+                    <Croquis />
+                  </div>
+                  <h4 className="smd-h4 mb-3 mt-2 !leading-[1.33]">{titre}</h4>
+                  <p className="smd-body">{nature}</p>
+                </div>
+              ))}
             </div>
-            <p data-reveal className="o-small max-w-[560px]">
-              Des besoins qui relèvent du sur-mesure, et un qui n&apos;en relève pas.
+            <p data-reveal className="smd-body mt-10 max-w-[698px]">
+              {FICHE.demo.type === "list" ? fr(FICHE.demo.footer ?? "") : ""}
             </p>
           </div>
-          <CasColonnes cas={CAS} />
         </section>
+
+        {/* ════════ 10 · LE CATALOGUE ════════
+            L'emplacement de leurs études de cas. Les nôtres sont les
+            quatre pages produit : de la vraie navigation, pas une
+            référence client. */}
+        <section className="smd-sec">
+          <div className="smd-wrap">
+            <Entete
+              etiquette="Le catalogue"
+              titre="Les quatre systèmes déjà construits."
+              chapo={fr(
+                "Avant de concevoir celui qui manque, vérifiez qu'il n'existe pas : quatre processus sont présents dans presque toutes les organisations, et se déploient sans cadrage."
+              )}
+            />
+            <div className="smd-ressources">
+              {catalogue.map((p) => (
+                <Link data-reveal key={p.system} href={p.href} className="smd-ressource block">
+                  <div className="smd-ressource__cadre">
+                    {p.photo && (
+                      <Image
+                        src={p.photo}
+                        alt={p.photoAlt}
+                        width={640}
+                        height={402}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    )}
+                  </div>
+                  <div className="pt-6">
+                    <p className="smd-ressource__cat">{p.role}</p>
+                    <h4 className="smd-h4">{p.system}</h4>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ 11 · L'APPEL ════════ */}
+        <div className="smd-cadre smd-cadre--appel">
+          <section className="smd-plein">
+            <Image
+              src="/photos/tarifs-cloture-facade.jpg"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div aria-hidden className="smd-voile" />
+            <div className="smd-plein__texte">
+              <h2 data-reveal className="smd-h1">
+                Parler de votre cas.
+              </h2>
+              <p data-reveal className="smd-lead max-w-[42rem]">
+                Trente minutes pour décrire le processus tel qu&apos;il se déroule
+                aujourd&apos;hui. Rien n&apos;est chiffré avant que ce soit clair pour vous
+                comme pour nous.
+              </p>
+              <div data-reveal>
+                <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </PageShell>
   );
