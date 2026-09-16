@@ -9,7 +9,7 @@ import { lienContact } from "@/lib/reservation";
 
    15/09 — Teo a apporté deux composants de 21st.dev, un par section :
      · `pricing-module`  → <FormulesGrille>, la rangée de formats
-     · `features-card`   → <ComparerFormats>, le bento sombre
+     · `features-card`   → <ComparerFormats>, le bento à sélecteur
    Chacun vit dans SON fichier avec SA feuille (règles scopées sous
    `.resa`), comme le reste de la page. Ce qui reste ici est ce qui
    n'appartient à aucun des deux : le bandeau d'orientation, entre les

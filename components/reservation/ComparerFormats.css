@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════════
-   ComparerFormats.css — la feuille du bento sombre de /reserver-un-audit
+   ComparerFormats.css — la feuille du bento de /reserver-un-audit
    (15/09/2026, écrite avec ComparerFormats.tsx)
 
    Tout est scopé sous `.resa .cf` et préfixé `cf-` (vérifié par grep : ni
@@ -7,28 +7,36 @@
    components/). Supprimer ce fichier et son composant supprime la section
    sans effet de bord ailleurs.
 
-   LE MONDE SOMBRE EST DÉJÀ ÉCRIT. La section porte `.r-nuit`
-   (globals.css) : fond #050505 peint jusqu'aux bords de l'écran, et les
-   quatre jetons du monde réencrés — --r-texte #ffffff, --r-doux #d4d4d8,
-   --r-faible #a1a1aa, --r-filet #27272a. Les surfaces (#141417 pour une
-   carte, #18181b pour un bouton, #0f0f12 pour le panneau) reprennent
-   celles qu'avait « Compléter votre audit » (Complements.tsx, section
-   supprimée le 16/09) : c'était la seconde bande noire de la page, et
-   deux bandes noires d'une même page ne peuvent pas avoir deux gammes de
-   gris. Le comparatif est désormais la seule — la gamme reste la
-   référence pour toute bande sombre qu'on rajouterait ici.
+   16/09/2026 — LA BANDE N'EST PLUS NOIRE (Teo : « trop sombre cette
+   section »). Le comparatif était la SEULE bande sombre de la page depuis
+   que « Compléter votre audit » a été supprimé le matin même : un slab
+   #050505 posé au milieu de sept sections claires, ce n'est plus un
+   rythme, c'est un trou. C'est exactement ce qui avait fait annuler les
+   bandes noires de l'accueil le 11/09.
+
+   La section repasse donc dans le monde clair de la page — elle ne porte
+   plus `.r-nuit`, donc plus de fond à elle : elle laisse voir le
+   #f5f5f5 de `.resa`, et ce sont les CARTES BLANCHES qui portent le
+   rythme, comme les cartes de formules en haut de page. La gamme est
+   celle du monde `.resa`, pas une nouvelle : #ffffff pour une carte,
+   #f5f5f5 pour un creux (c'est déjà `.r-carte` / `.r-carte-tete`),
+   #e3e3e3 pour un filet (`--r-filet`).
+
+   Le bento lui-même n'a pas bougé d'un pixel : mêmes tailles de cartes
+   inégales, même sélecteur, même panneau, mêmes tuiles. Seule la gamme
+   est retournée.
 
    QUATRE RÈGLES DE CE FICHIER, dans l'ordre où elles priment.
 
-   1. PAS UN ÎLOT CLAIR. Aucune surface blanche dans la bande : une bande
-      sombre parsemée de blocs clairs se lit comme un raté, et c'est ce
-      qui a fait annuler les bandes noires de l'accueil le 11/09. Seuls
-      les BOUTONS sont clairs — c'est leur rôle, et `.r-btn--blanc` existe
-      pour ça.
+   1. PAS DE SURFACE ÉTRANGÈRE. La règle du 15/09 disait « pas un îlot
+      clair dans la bande noire » ; retournée, elle dit la même chose :
+      aucune surface sombre dans la bande claire. Le seul élément noir de
+      la section est le BOUTON du panneau — c'est son rôle, et
+      `.r-btn--noir` existe pour ça.
 
-   2. L'ÉTAT ACTIF SE MARQUE AU TRAIT, PAS AU FOND. Entre #18181b et
-      #27272a il n'y a presque rien à voir ; le format retenu se reconnaît
-      donc à son filet clair (#d4d4d8) et à son encre blanche, pas à sa
+   2. L'ÉTAT ACTIF SE MARQUE AU TRAIT, PAS AU FOND. Entre #f5f5f5 et
+      #ffffff il n'y a presque rien à voir ; le format retenu se reconnaît
+      donc à son filet noir (#050505) et à son encre noire, pas à sa
       teinte de fond.
 
    3. RIEN ICI NE TOUCHE `opacity` NI `transform`. Elles appartiennent au
@@ -42,18 +50,19 @@
       trois boutons restent lisibles : on perd le changement de format,
       jamais le contenu.
 
-   Contrastes vérifiés sur le fond de carte #141417 : #a1a1aa 7,0:1,
-   #9a9aa3 6,3:1, #d4d4d8 12,4:1, blanc 17,4:1. Le #71717a qu'employait
-   Complements n'est PAS repris pour les intitulés (3,9:1, sous AA).
+   Contrastes vérifiés sur le fond de carte #ffffff : #616161 5,9:1,
+   #3d3d3d 10,4:1, #050505 20,2:1. Sur le creux #f5f5f5 : #616161 5,4:1,
+   #3d3d3d 9,6:1. Le #757575 qu'on aurait pu prendre pour les intitulés
+   n'est PAS repris (4,3:1 sur #f5f5f5, sous AA à cette taille).
    ══════════════════════════════════════════════════════════════════════ */
 
 .resa .cf {
-  --cf-carte: #141417;
-  --cf-creux: #0f0f12;
-  --cf-bouton: #18181b;
-  --cf-filet: #27272a;
-  --cf-filet-vif: #3f3f46;
-  --cf-label: #9a9aa3;
+  --cf-carte: #ffffff;
+  --cf-creux: #f5f5f5;
+  --cf-bouton: #f5f5f5;
+  --cf-filet: #e3e3e3;
+  --cf-filet-vif: #c9c9c9;
+  --cf-label: #616161;
 }
 
 /* ——— en-tête ——— */
@@ -66,9 +75,9 @@
   gap: 8px;
   height: 32px;
   padding: 0 14px;
-  border: 1px solid var(--cf-filet-vif);
+  border: 1px solid var(--cf-filet);
   border-radius: 9999px;
-  background: var(--cf-bouton);
+  background: var(--cf-carte);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -87,14 +96,12 @@
   line-height: 25px;
   color: var(--r-doux);
 }
+/* le soulignement de `.r-lien` (rgba(5,5,5,.28) → currentColor au survol)
+   est déjà celui du monde clair : plus rien à corriger ici depuis le
+   16/09, la section n'est plus sur du noir. */
 .resa .cf .cf-conseil {
   display: inline-block;
   margin-top: 20px;
-  /* .r-lien souligne en rgba(5,5,5,.28) — invisible sur le noir */
-  text-decoration-color: rgba(255, 255, 255, 0.4);
-}
-.resa .cf .cf-conseil:hover {
-  text-decoration-color: #ffffff;
 }
 
 /* ——— le bento ——— */
@@ -175,10 +182,10 @@
 .resa .cf-bouton:hover {
   border-color: var(--cf-filet-vif);
 }
-/* le format retenu : filet clair et encre blanche (règle 2) */
+/* le format retenu : filet noir et encre noire (règle 2) */
 .resa .cf-bouton[data-actif="true"] {
-  border-color: var(--r-doux);
-  background: #1f1f24;
+  border-color: var(--r-texte);
+  background: #ffffff;
 }
 .resa .cf-bouton-icone {
   height: 20px;
@@ -186,7 +193,7 @@
   color: var(--r-faible);
 }
 .resa .cf-bouton[data-actif="true"] .cf-bouton-icone {
-  color: #ffffff;
+  color: var(--r-texte);
 }
 .resa .cf-bouton-nom {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -197,7 +204,7 @@
   color: var(--r-doux);
 }
 .resa .cf-bouton[data-actif="true"] .cf-bouton-nom {
-  color: #ffffff;
+  color: var(--r-texte);
 }
 .resa .cf-bouton-duree {
   font-size: 13px;
@@ -220,7 +227,7 @@
   line-height: 29px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: #ffffff;
+  color: var(--r-texte);
 }
 .resa .cf-panneau-ligne {
   margin-top: 4px;
@@ -254,7 +261,7 @@
   line-height: 27px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: #ffffff;
+  color: var(--r-texte);
 }
 @media (min-width: 640px) {
   .resa .cf-carte-titre {
@@ -284,7 +291,7 @@
   font-size: 15px;
   line-height: 22px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--r-texte);
 }
 .resa .cf-valeur-cell {
   margin: 0;
@@ -355,7 +362,7 @@
   font-size: 17px;
   line-height: 24px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--r-texte);
 }
 .resa .cf-tuile-aide {
   max-width: none;

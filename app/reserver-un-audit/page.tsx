@@ -43,8 +43,18 @@ import {
    sections »). Le déroulé en trois temps (« Comment se passe l'audit »,
    #deroule) et les compléments (« Compléter votre audit », #complements)
    ne sont plus sur la page. Rien ne pointait sur leurs ancres — vérifié
-   par grep avant la coupe. Le rythme clair/sombre tient toujours : le
-   comparatif sombre enchaîne maintenant sur le simulateur clair.
+   par grep avant la coupe.
+
+   Dans la foulée, la page est ENTIÈREMENT CLAIRE. Le comparatif était la
+   dernière bande sombre ; une fois seul de son espèce au milieu de sept
+   sections claires, il ne faisait plus un rythme mais un trou (Teo :
+   « trop sombre cette section »). Il repasse dans le monde clair — le
+   détail du retournement est en tête de ComparerFormats.css. Le rythme
+   est désormais porté par les fonds de bande (#f5f5f5 de `.resa` ↔
+   `.r-blanc`) et par les cartes, comme sur la référence Qonto.
+   `.resa .r-nuit` reste écrit dans globals.css : plus rien ne le porte
+   sur cette page, mais c'est la gamme de référence si on y remet un jour
+   une bande sombre.
    Le texte des compléments est retiré de lib/reservation.ts avec eux ;
    les trois temps se relisent dans l'historique (commit f40e687).
 

@@ -16,8 +16,8 @@ import { useEstimationUrl, useModeleUrl } from "./ModeleUrl";
 import "./ComparerFormats.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   <ComparerFormats> — « Comparer les formats », bento sombre à sélecteur
-   (15/09/2026)
+   <ComparerFormats> — « Comparer les formats », bento clair à sélecteur
+   (15/09/2026, repassé dans le monde clair le 16/09/2026)
 
    ORIGINE. `features-card` (21st.dev), apporté par Teo : une bande NOIRE,
    un en-tête avec pastille + titre + chapô, puis une grille bento de
@@ -25,12 +25,21 @@ import "./ComparerFormats.css";
    boutons qui pilote un panneau « Selected: » ; une rangée de tuiles
    ferme la section.
 
-   CE QUI EST REPRIS : la bande noire et ses cartes #141417 cerclées de
-   #27272a (ce sont déjà celles de « Compléter votre audit », plus bas sur
-   cette page), la pastille d'en-tête, les tailles de cartes inégales, le
-   sélecteur qui pilote un panneau, les intitulés en petites capitales
-   monospace, la rangée de tuiles du bas, le filet qui s'éclaircit au
-   survol.
+   CE QUI EST REPRIS : la pastille d'en-tête, les tailles de cartes
+   inégales, le sélecteur qui pilote un panneau, les intitulés en petites
+   capitales monospace, la rangée de tuiles du bas, le filet qui se
+   renforce au survol.
+
+   CE QUI NE L'EST PLUS — LA BANDE NOIRE. Elle a tenu du 15/09 au 16/09.
+   Le matin du 16, « Compléter votre audit » est supprimé : le comparatif
+   devient la seule section sombre d'une page qui en compte sept, et Teo
+   tranche (« trop sombre cette section »). La section repasse donc dans
+   le monde clair de `.resa` — cartes blanches sur le #f5f5f5 de la page,
+   filets #e3e3e3, encre noire. Le bento n'a pas bougé : mêmes tailles,
+   même sélecteur, même panneau, mêmes tuiles ; seule la gamme est
+   retournée (voir ComparerFormats.css pour le détail et les contrastes).
+   Le précédent est celui de l'accueil, le 11/09 : une bande noire isolée
+   au milieu de sections claires ne se lit pas comme un rythme.
 
    CE QUI EST JETÉ, et pourquoi —
 
@@ -47,10 +56,11 @@ import "./ComparerFormats.css";
    · LES LOGOS D'INTÉGRATION en émojis : même raison, et ce ne sont pas
      nos technologies.
 
-   · L'ÎLOT CLAIR. Pas une surface claire dans la bande : une bande sombre
-     parsemée de blocs blancs se lit comme un raté (leçon du 11/09 sur
-     l'accueil). Les boutons de la section passent donc en `r-btn--blanc`
-     et `r-btn--nuit`, jamais en carte blanche.
+   · L'ÎLOT ÉTRANGER. Pas une surface d'un autre monde dans la bande —
+     règle écrite pour le noir (pas de bloc blanc), elle vaut à l'identique
+     depuis le retournement du 16/09 : pas de bloc sombre dans la bande
+     claire. Le seul élément noir de la section est le BOUTON du panneau,
+     en `r-btn--noir` — c'est son rôle.
 
    CE QUE ÇA REMPLACE. Un tableau de 12 lignes × 3 colonnes, à deux
    en-têtes collants (un pour le bureau, un pour le mobile) et à moitié
@@ -124,7 +134,7 @@ export default function ComparerFormats() {
   const f = p.formules[actif];
 
   return (
-    <section id="comparatif" className="r-nuit cf">
+    <section id="comparatif" data-monde="clair" className="cf">
       <div className="r-wrap py-14 sm:py-20">
         <div className="cf-tete">
           <span className="cf-pastille">
@@ -178,7 +188,7 @@ export default function ComparerFormats() {
                 <span className="num">{f.duree}</span> · {f.suffixe}
               </p>
               <p className="cf-panneau-conditions">{f.conditions}</p>
-              <Link href={lienReservation(f.id, modele || undefined, estimation)} className="r-btn r-btn--blanc cf-panneau-btn">
+              <Link href={lienReservation(f.id, modele || undefined, estimation)} className="r-btn r-btn--noir cf-panneau-btn">
                 {f.cta}
               </Link>
               <p className="cf-panneau-note">{f.souscta}</p>
