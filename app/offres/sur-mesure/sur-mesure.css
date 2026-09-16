@@ -524,6 +524,21 @@
    5 · PLEINE IMAGE — hero et appel final
    ───────────────────────────────────────────────────────────────────── */
 
+/* ⚠ FOND BLANC, ET SURTOUT PAS UNE COULEUR SOMBRE.
+
+   L'entête du site prélève la couleur sous son bord bas et se peint avec
+   (components/Header.tsx) : elle remonte la pile d'éléments au point
+   `main.left + 4` jusqu'au PREMIER fond non transparent. Dans le hero,
+   l'image et le voile sont tous deux transparents pour ce test — l'image
+   n'a pas de `background-color`, le voile est un dégradé — donc la pile
+   arrive ici. Un fond vert de secours posé sur ce cadre, et l'entête
+   devient une barre VERTE dès qu'on défile de quelques pixels et qu'elle
+   recouvre le hero. C'est ce qui s'est produit le 16/09.
+
+   Le blanc est aussi la bonne réponse de fond : la page est blanche, le
+   hero est une carte posée dessus, et l'entête doit lire la page.
+   Si un jour il faut un fond de secours pendant le chargement de la
+   photo, le poser sur un enfant SOUS l'image, jamais sur ce cadre. */
 .smd .smd-plein {
   position: relative;
   display: flex;
@@ -532,7 +547,7 @@
   border-radius: var(--smd-r-xl);
   min-height: 480px;
   padding: 32px;
-  background: var(--smd-evergreen);
+  background: #ffffff;
 }
 @media (min-width: 768px) {
   .smd .smd-plein {
