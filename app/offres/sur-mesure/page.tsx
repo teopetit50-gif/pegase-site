@@ -659,10 +659,23 @@ export default function SurMesurePage() {
             </p>
             {/* la rangée de la référence est dans leur `.container` : 720 à
                 768, 976 à 1024, 1280 au-delà. Notre colonne rend les deux
-                premiers d'elle-même, le plafond de 1280 pose le troisième. */}
+                premiers d'elle-même, le plafond de 1280 pose le troisième.
+
+                16/09 au soir (Teo) — « sur mobile cette bande défile chez
+                eux, pas chez nous ». Vrai, et la cause était le
+                `flex-wrap` : sous 390 px la rangée passait à la ligne au
+                lieu de sortir du cadre. Mesuré sur la référence à 390 : sa
+                liste fait 801 px dans une fenêtre de 390, en
+                `min-width: max-content`, et son parent est en
+                `overflow-x: auto`. Elle ne défile donc pas TOUTE SEULE —
+                `animation-name: none`, `transform: none` — elle se fait
+                glisser au doigt. C'est ce comportement-là qui est repris,
+                pas une marquise : le cadre `.smd-bandeau` défile, la
+                rangée reste d'un seul tenant. */}
+            <div className="smd-bandeau">
             <ul
               data-reveal
-              className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-14 gap-y-6 sm:justify-around"
+              className="smd-bandeau__rangee mx-auto flex max-w-[1280px] items-center justify-center gap-x-14 sm:justify-around"
             >
               {OUTILS.map(({ nom, Signe }) => (
                 <li key={nom} className="smd-marque">
@@ -671,6 +684,7 @@ export default function SurMesurePage() {
                 </li>
               ))}
             </ul>
+            </div>
           </div>
         </section>
 

@@ -2446,3 +2446,82 @@
 .smd .f11-onglet[data-state="active"] .f11-onglet__icone {
   color: var(--smd-texte);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LA BANDE DE MARQUES QUI DÉFILE AU DOIGT — 16/09/2026 au soir
+
+   Teo : « sur mobile cette partie avec les logos défile chez eux, pas
+   chez nous. » Vrai, et la cause était un `flex-wrap` : sous 390 px la
+   rangée passait à la ligne au lieu de sortir du cadre.
+
+   Ce qu'il ne faut PAS en conclure, et c'est pour ça qu'on l'a mesuré
+   avant d'écrire : la référence ne défile pas TOUTE SEULE. À 390 sa liste
+   fait 801 px dans une fenêtre de 390, `min-width: max-content`, parent en
+   `overflow-x: auto`, `animation-name: none` et `transform: none`. C'est
+   une bande qu'on FAIT GLISSER, pas une marquise. Reprendre une marquise
+   aurait ajouté un mouvement que la référence n'a pas.
+
+   Au-delà de 640 la rangée tient dans la colonne : le cadre redevient
+   transparent et la rangée reprend sa répartition.
+   ═══════════════════════════════════════════════════════════════════════ */
+.smd .smd-bandeau {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.smd .smd-bandeau::-webkit-scrollbar {
+  display: none;
+}
+.smd .smd-bandeau__rangee {
+  flex-wrap: nowrap;
+  min-width: max-content;
+}
+@media (min-width: 640px) {
+  .smd .smd-bandeau {
+    overflow-x: visible;
+  }
+  .smd .smd-bandeau__rangee {
+    min-width: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LA CARTE DE CITATION QUI S'ÉLARGIT À L'ENTRÉE — 16/09/2026 au soir
+
+   Teo : « ce composant n'a toujours pas le truc qui fait qu'il s'agrandit
+   quand on zoome ou dézoome ». Relevé sur la référence à 1440, fenêtre de
+   900, selon la position du bord haut de son panneau :
+       haut à 900 (bas de fenêtre)  →  90 % de la colonne
+       haut à 600                   →  98,6 %
+       haut à 350                   →  99,9 %
+       haut à 100 et au-delà        →  100 %
+   Ce n'est pas linéaire : à mi-course il est déjà à 98,6 %. Une sortie en
+   quart (cubic-bezier .16 1 .3 1) recolle aux quatre points.
+
+   Animation LIÉE AU DÉFILEMENT, pas de JavaScript par image. Là où
+   `view()` n'est pas reconnu (Safari, Firefox) la carte reste à sa largeur
+   pleine : c'est pour ça que la largeur de repos est 100 % et que
+   l'animation la RÉDUIT à l'entrée — l'état par défaut doit être le bon.
+   Même réglage que `.ofd-ardoise` sur /offres, qui décalque le même
+   panneau de la même référence.
+   ═══════════════════════════════════════════════════════════════════════ */
+@keyframes smd-citation-entree {
+  from {
+    width: 90%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .smd .smd-citation {
+      margin-inline: auto;
+      animation: smd-citation-entree both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+}
