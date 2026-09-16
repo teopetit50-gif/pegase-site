@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { siAirtable, siAsana, siHubspot, siQuickbooks, siStripe } from "simple-icons";
+import { BandeauOutils } from "@/components/offres/BandeauOutils";
 import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
 import { ChatMessages } from "@/components/ui/chat-messages";
 import PageShell from "@/components/PageShell";
@@ -719,20 +720,19 @@ export default function OffresPage() {
             {/* hors écran : la rangée garde un intitulé pour les lecteurs
                 d'écran, la référence n'en affiche aucun. */}
             <p className="ofd-outils__legende">Se branche sur les outils déjà en place</p>
-            <div className="ofd-outils">
-              <ul>
-                {OUTILS.map(({ marque, nom }) => (
-                  <li key={nom}>
-                    <span className="ofd-outil">
-                      <svg viewBox="0 0 24 24" role="img" aria-label={marque.title}>
-                        <path d={marque.path} />
-                      </svg>
-                      <span>{nom}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* 16/09 (Teo) — « va récupérer le composant sur 21st.dev et
+                fais en sorte que ce soit un truc qui défile ». La rangée
+                défile désormais en continu ; le moteur vient de « Logo
+                Marquee » (ddoemonn, 21st.dev), son habillage non — nos
+                logotypes gardent le leur, réglé le matin même. Voir
+                components/offres/BandeauOutils.tsx pour les écarts. */}
+            <BandeauOutils
+              outils={OUTILS.map(({ marque, nom }) => ({
+                nom,
+                chemin: marque.path,
+                titre: marque.title,
+              }))}
+            />
           </div>
         </section>
 

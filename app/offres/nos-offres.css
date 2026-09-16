@@ -630,41 +630,66 @@
   border: 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   16/09 (Teo) — LA BANDE DÉFILE.
+
+   Avant : une rangée qu'on faisait glisser au doigt, avec un fondu à
+   droite sous 768 pour dire qu'elle continuait. Teo : « fais en sorte que
+   ce soit un truc qui défile ». Le mouvement est piloté par le moteur
+   repris de 21st.dev (components/offres/BandeauOutils.tsx) ; ici on ne
+   pose que le cadre, le rail et les deux fondus.
+
+   Le fondu passe des deux côtés et à TOUTES les largeurs : une bande qui
+   défile entre par la droite ET sort par la gauche — un bord net d'un
+   seul côté se lirait comme une coupure. Il reste en masque, jamais en
+   dégradé posé par-dessus, pour que le fond de la section (doux ici,
+   blanc ailleurs) n'ait pas à être redonné.
+   ═══════════════════════════════════════════════════════════════════════ */
 .ofd .ofd-outils {
   width: 100%;
-  overflow-x: auto;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 40px,
+    #000 calc(100% - 40px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 40px,
+    #000 calc(100% - 40px),
+    transparent
+  );
+}
+.ofd .ofd-outils__cadre {
+  overflow-y: hidden;
   scrollbar-width: none;
 }
-.ofd .ofd-outils::-webkit-scrollbar {
+.ofd .ofd-outils__cadre::-webkit-scrollbar {
   display: none;
 }
-/* Sous 768 la rangée déborde de son cadre et se fait défiler. Sans
-   signe, elle se lit comme une rangée COUPÉE : relevé à 390, le
-   cinquième logotype est tranché en deux au ras du bord. Le fondu de
-   40 px le dit — en masque et non en dégradé posé par-dessus, pour que
-   le fond de la section (doux ici, blanc ailleurs) n'ait pas à être
-   redonné. Rien au-dessus de 768 : la rangée y tient d'elle-même. */
-@media (max-width: 767px) {
-  .ofd .ofd-outils {
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
-  }
+/* le rail porte toutes les copies du groupe, bout à bout */
+.ofd .ofd-outils__rail {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 40px;
+  will-change: transform;
 }
+/* Chaque groupe garde sa largeur naturelle : le rail en aligne
+   plusieurs bout à bout, et une répartition (`space-around`) ferait
+   respirer les copies différemment selon la place restante — le raccord
+   entre deux copies se verrait à chaque tour. */
 .ofd .ofd-outils ul {
   display: flex;
-  min-width: max-content;
+  width: max-content;
   align-items: center;
-  justify-content: space-around;
-  gap: 56px;
+  justify-content: flex-start;
+  gap: 40px;
   margin: 0;
   padding: 0;
   list-style: none;
-}
-@media (min-width: 768px) {
-  .ofd .ofd-outils ul {
-    min-width: 0;
-    gap: 40px;
-  }
 }
 .ofd .ofd-outils li {
   display: flex;
