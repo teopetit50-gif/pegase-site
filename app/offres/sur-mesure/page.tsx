@@ -8,7 +8,6 @@ import { HalftoneFlow } from "@/components/ui/halftone-flow";
 import HeroReplie from "@/components/surmesure/HeroReplie";
 import Cycle from "@/components/surmesure/Cycle";
 import Revele from "@/components/surmesure/Revele";
-import Elargi from "@/components/surmesure/Elargi";
 import Ajuste from "@/components/surmesure/Ajuste";
 import {
   SigneHubspot,
@@ -118,6 +117,30 @@ import "./sur-mesure.css";
      chez vous, Chèque TIC) partaient d'un bloc commun aux pages produit,
      pas de cette fiche : elles vivent toujours sur les quatre pages du
      catalogue, vers lesquelles la section 10 renvoie.
+
+   ── LE REGISTRE, PASSE DU 16/09 AU SOIR ──────────────────────────────
+   Teo : « les textes sont nuls et génériques, inspire-toi de Scale AI »,
+   et « la même densité de texte qu'eux, pas plus développé ». La
+   référence tient tous ses énoncés de section entre 80 et 157 signes,
+   en fragments sans subordonnée. Huit emplacements dépassaient :
+
+     aperçu (pointsChapo)        168 → 127     (le leur : 139)
+     règle par règle (controle)  235 → 146     (le leur : 157)
+     ce que vous obtenez         200 → 132     (le leur :  80)
+     le catalogue                163 → 114
+     les trois exemples      145-176 →  96-108
+     fermeture des exemples      152 → 137
+     l'appel                     142 → 106     (le leur : aucun texte)
+
+   Ce qui est coupé est à chaque fois une REDITE ou une précaution, pas
+   un fait : « avec vous » que la phrase dit déjà deux fois, « Rien n'est
+   figé, puisqu'un réglage se modifie » quand la phrase énumère justement
+   les réglages, « Vos équipes n'ouvrent pas un outil de plus » qui
+   reformule « là où vivent déjà les autres ». Les faits de méthode
+   restent intacts dans FICHE.etapes et FICHE.faq.
+
+   La citation de la § 5 N'A PAS bougé : elle est calée sur les 235
+   signes de la référence, qui est longue à cet endroit-là aussi.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -137,7 +160,7 @@ const FICHE: Fiche = {
   sections: {
     pointsTitre: "Ce que couvre le sur-mesure.",
     pointsChapo:
-      "Un processus interne, un logiciel métier, un pont entre deux outils ou un contrôle répétitif : le périmètre se définit avec vos équipes, puis s'écrit avant tout chiffrage.",
+      "Un processus interne, un logiciel métier, un pont entre deux outils : le périmètre s'écrit avec vos équipes avant tout chiffrage.",
     detailChapo:
       "Ce que nous cadrons avant d'écrire une ligne, ce que nous construisons, et ce qui reste sous votre décision.",
     cibleChapo:
@@ -159,7 +182,7 @@ const FICHE: Fiche = {
   ],
 
   controle:
-    "Le niveau d'autonomie se décide règle par règle, avec vous : ce qui s'exécute seul, ce qui attend une validation, et ce qui ne part jamais sans un accord explicite. Rien n'est figé, puisqu'un réglage se modifie en cours d'exploitation.",
+    "Le niveau d'autonomie se décide règle par règle : ce qui s'exécute seul, ce qui attend une validation, ce qui ne part jamais sans accord explicite.",
 
   /* Le sur-mesure ne se branche pas sur une liste fermée : ces quatre
      entrées sont les FAMILLES d'outils les plus fréquentes, pas une
@@ -231,7 +254,7 @@ const FICHE: Fiche = {
       { text: "Tâche qui demande un jugement au cas par cas", badge: "Écarté", tone: "off" },
     ],
     footer:
-      "Les trois premiers suivent des règles qui s'écrivent. Le quatrième demande un jugement au cas par cas : il reste chez vous, et nous le disons au cadrage.",
+      "Les trois suivent des règles qui s'écrivent. Une tâche qui demande un jugement au cas par cas reste chez vous, et nous le disons au cadrage.",
   },
 };
 
@@ -357,7 +380,7 @@ const EXEMPLES: Cas[] = [
     visuel: <CroquisPont />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[0].text : "",
     texte:
-      "Deux logiciels qui ne se parlent pas, une double saisie quotidienne ou un export repris à la main chaque semaine : la donnée passe de l'un à l'autre sans que personne la retape.",
+      "Deux logiciels qui ne se parlent pas : la donnée passe de l'un à l'autre sans que personne la retape.",
     legende: "Pont entre outils",
     sousLegende: "Règles écrites avant tout chiffrage",
     mesures: [
@@ -370,7 +393,7 @@ const EXEMPLES: Cas[] = [
     visuel: <CroquisDocument />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[1].text : "",
     texte:
-      "Lecture, contrôle, extraction et classement de pièces reçues dans n'importe quel format, au moment où elles arrivent plutôt qu'au moment où quelqu'un s'en occupe.",
+      "Les pièces sont lues, contrôlées et classées à l'arrivée, pas au moment où quelqu'un s'en occupe.",
     legende: "Traitement de documents",
     sousLegende: "Contrôle à réception, pas après coup",
     mesures: [
@@ -383,7 +406,7 @@ const EXEMPLES: Cas[] = [
     visuel: <CroquisSuivi />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "",
     texte:
-      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services sans le déformer.",
+      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit vos services.",
     legende: "Logiciel métier",
     sousLegende: "Construit sur vos règles, branché sur vos outils",
     mesures: [
@@ -741,11 +764,6 @@ export default function SurMesurePage() {
                 lignes et à la carte sa hauteur. Et le texte MONTE dans
                 son cadre à l'entrée dans l'écran (`Revele`), au lieu
                 d'être là d'emblée : le nom suit 180 ms après. */}
-            {/* `Elargi` écrit `--smd-zoom` (0 → 1) selon la position de
-                la carte dans la fenêtre : elle passe de 87,3 % à 97,0 %
-                de la vue en montant, et rétrécit en redescendant. Le
-                relevé qui donne la courbe est en tête du composant. */}
-            <Elargi>
             <div data-reveal className="smd-citation">
               <div className="flex flex-col gap-10 lg:grid lg:grid-cols-12 lg:gap-8">
                 {/* L'étiquette et le corps sont sur la MÊME rangée de
@@ -784,7 +802,6 @@ export default function SurMesurePage() {
                 </div>
               </div>
             </div>
-            </Elargi>
           </div>
         </section>
 
@@ -828,7 +845,7 @@ export default function SurMesurePage() {
               etiquette="Ce que vous obtenez"
               titre="Un système de plus, dans le même espace."
               chapo={fr(
-                "Un système sur mesure se livre là où vivent déjà les autres : la même file de validation, le même journal de ce qui est parti, les mêmes droits par service. Vos équipes n'ouvrent pas un outil de plus."
+                "Un système sur mesure se livre là où vivent déjà les autres : même file de validation, même journal, mêmes droits par service."
               )}
             />
             {/* 16/09, Teo : « cette section n'est pas la même que sur le
@@ -899,7 +916,7 @@ export default function SurMesurePage() {
               etiquette="Le catalogue"
               titre="Les quatre systèmes déjà construits."
               chapo={fr(
-                "Avant de concevoir celui qui manque, vérifiez qu'il n'existe pas : quatre processus sont présents dans presque toutes les organisations, et se déploient sans cadrage."
+                "Avant de concevoir celui qui manque, vérifiez qu'il n'existe pas déjà : quatre processus, quatre systèmes prêts."
               )}
             />
             <Feature11 volets={volets} />
@@ -909,8 +926,20 @@ export default function SurMesurePage() {
         {/* ════════ 11 · L'APPEL ════════ */}
         <div className="smd-cadre smd-cadre--appel">
           <section className="smd-plein">
+            {/* 16/09, Teo : « change la photo de fond en une plus pro et
+                nette ». L'ancienne (tarifs-cloture-facade) est un
+                contre-jour de couchant : voile orange, halo au centre,
+                et au fond une voiture et des vélos qui la font lire
+                comme un parking. Celle-ci est nette d'un bord à l'autre,
+                froide, sans sujet anecdotique, et sa trame régulière
+                tient le cadre sans concurrencer le titre.
+
+                ⚠ Elle sert AUSSI au bloc « L'abonnement » de /tarifs.
+                Les deux pages ne se croisent pas dans un parcours, mais
+                si /tarifs change de photo, vérifier qu'elle ne prend pas
+                celle d'ici. Crédits dans public/photos/CREDITS.txt. */}
             <Image
-              src="/photos/tarifs-cloture-facade.jpg"
+              src="/photos/tarifs-abonnement-facade.jpg"
               alt=""
               fill
               loading="lazy"
@@ -923,9 +952,8 @@ export default function SurMesurePage() {
                 Parler de votre cas.
               </h2>
               <p data-reveal className="smd-lead max-w-[42rem]">
-                Trente minutes pour décrire le processus tel qu&apos;il se déroule
-                aujourd&apos;hui. Rien n&apos;est chiffré avant que ce soit clair pour vous
-                comme pour nous.
+                Trente minutes sur le processus tel qu&apos;il se déroule aujourd&apos;hui.
+                Rien n&apos;est chiffré avant que ce soit clair.
               </p>
               <div data-reveal>
                 <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>

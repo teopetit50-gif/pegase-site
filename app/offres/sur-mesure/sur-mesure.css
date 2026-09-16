@@ -801,14 +801,6 @@
    colonnes, le hero les prend toutes, la citation en laisse une. Sous
    1920 le pourcentage reste sous le plafond — 1671 à 1920 — et rien ne
    bouge : la correction ne mord que sur les écrans larges. */
-/* LA LARGEUR SUIT LE DÉFILEMENT. `--smd-zoom` va de 0 à 1 et est écrite
-   par components/surmesure/Elargi.tsx, à chaque image, sans transition —
-   la référence n'en a pas : sa carte suit la position du doigt, elle ne
-   rejoue pas une animation. Relevé à 1600 × 900 : 87,3 % de la fenêtre
-   au repos, 97,0 % une fois la carte montée dans l'écran.
-
-   ⚠ NE PAS AJOUTER DE `transition` ICI. Elle ajouterait un retard que la
-   référence n'a pas, et le bloc décrocherait du défilement. */
 .smd .smd-citation {
   width: 84.4%;
   max-width: 1699px;
@@ -818,16 +810,18 @@
   color: #ffffff;
   padding: 32px;
 }
+/* Largeur d'ARRIVÉE, celle qu'on voit une fois la carte entrée. C'est
+   volontairement l'état final et non l'état de départ : là où
+   `animation-timeline: view()` n'est pas reconnu (Firefox aujourd'hui),
+   aucune animation ne se joue et c'est cette valeur qui reste — mieux
+   vaut y laisser l'état juste. L'animation, plus bas, RÉDUIT la carte à
+   l'entrée puis la ramène ici. */
 @media (min-width: 768px) {
   .smd .smd-citation {
-    width: calc(87.3% + 9.7% * var(--smd-zoom, 0));
+    width: 97%;
   }
 }
 
-.smd .smd-elargi {
-  display: block;
-  width: 100%;
-}
 @media (min-width: 1024px) {
   .smd .smd-citation {
     padding: 80px 64px;
@@ -2506,12 +2500,60 @@
    Même réglage que `.ofd-ardoise` sur /offres, qui décalque le même
    panneau de la même référence.
    ═══════════════════════════════════════════════════════════════════════ */
-@keyframes smd-citation-entree {
+/* 16/09, seconde mesure — à 1600 × 900, à la molette et
+   `prefers-reduced-motion` forcé à `no-preference`, la référence donne :
+       haut à 1000 (hors écran)  →  1397, soit 87,3 % de la fenêtre
+       haut à  880               →  1413
+       haut à  780               →  1476
+       haut à  615               →  1530
+       haut à  455               →  1548
+       haut à  295 et au-delà    →  1552, soit 97,0 %
+   Les bornes passent donc de 90 → 100 % à 87,3 → 97 %. Le plafond n'est
+   PAS la pleine largeur : la carte garde toujours une marge, et une
+   sortie en quart recolle aux six points. */
+/* ═══════════════════════════════════════════════════════════════════════
+   L'APPEL FINAL S'ÉLARGIT AUSSI — 16/09/2026
+
+   Teo : « l'effet de zoom et dézoom ne marche pas sur celle-là ». Même
+   mécanique que la carte de citation, mêmes bornes (87,3 → 97 % de la
+   fenêtre) et même sortie cubique — c'est la seule autre grande carte de
+   la page, et elle ferme la lecture comme la citation l'ouvre.
+
+   ⚠ SCOPÉ À `.smd-cadre--appel`. `.smd-plein` sert AUSSI au hero, qui a
+   déjà son propre mouvement (le repli, piloté en JavaScript) : les deux
+   s'annuleraient.
+   ═══════════════════════════════════════════════════════════════════════ */
+/* 89,1 et 99, pas 87,3 et 97 : le cadre de l'appel est déjà rentré de 16
+   de chaque côté, là où la citation se mesure sur la fenêtre entière.
+   Ces deux valeurs redonnent EXACTEMENT la même excursion que la
+   citation — 1397 → 1552 à 1600 de large. */
+@keyframes smd-appel-entree {
   from {
-    width: 90%;
+    width: 89.1%;
   }
   to {
-    width: 100%;
+    width: 99%;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+    .smd .smd-cadre--appel > .smd-plein {
+      width: 99%;
+      margin-inline: auto;
+      animation: smd-appel-entree both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+      animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+    }
+  }
+}
+
+@keyframes smd-citation-entree {
+  from {
+    width: 87.3%;
+  }
+  to {
+    width: 97%;
   }
 }
 @supports (animation-timeline: view()) {
@@ -2521,7 +2563,11 @@
       animation: smd-citation-entree both;
       animation-timeline: view();
       animation-range: entry 0% entry 100%;
-      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      /* Ease-out CUBIQUE, et non le quart. La courbe relevée est
+         `1 − (1 − p)³` : l'exposant mesuré sur les six points tombe entre
+         2,9 et 3,3. Avec `cubic-bezier(.16, 1, .3, 1)` le milieu de
+         course partait trop vite — 1526 au lieu de 1476 à mi-chemin. */
+      animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
     }
   }
 }

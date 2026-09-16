@@ -24,40 +24,40 @@
    pas bougé — c'est à l'appelant de tenir ce seuil.
    ══════════════════════════════════════════════════════════════════════ */
 
-export function cadencer(cible: Element, peindre: () => void) {
+export function cadencer(_cible: Element, peindre: () => void) {
   let raf = 0;
-  let visible = true;
 
   const image = () => {
-    raf = 0;
     peindre();
-    if (visible && !document.hidden) raf = requestAnimationFrame(image);
+    raf = requestAnimationFrame(image);
   };
   const lancer = () => {
-    if (!raf && visible && !document.hidden) raf = requestAnimationFrame(image);
+    if (!raf && !document.hidden) raf = requestAnimationFrame(image);
   };
   const arreter = () => {
     if (raf) cancelAnimationFrame(raf);
     raf = 0;
   };
 
-  const io = new IntersectionObserver(
-    ([e]) => {
-      visible = e?.isIntersecting ?? true;
-      if (visible) lancer();
-      else {
-        arreter();
-        /* Une dernière passe hors écran : sinon la valeur reste figée à
-           mi-course quand on quitte la zone d'un coup de molette. */
-        peindre();
-      }
-    },
-    /* Marge généreuse : le calcul doit déjà être juste quand l'élément
-       apparaît, pas commencer à l'instant où il touche le bord. */
-    { rootMargin: "200px 0px" }
-  );
-  io.observe(cible);
+  /* ⚠ PAS DE GARDE PAR OBSERVATEUR D'INTERSECTION.
 
+     La première version n'allumait la boucle que lorsque l'élément
+     entrait à l'écran. En production, l'observateur ne s'est JAMAIS
+     redéclenché : vérifié le 16/09 sur omegaai.fr — le nouveau code était
+     bien déployé, le rectangle de l'élément passait à 500 px du haut de
+     la fenêtre, et la variable restait à la valeur écrite au montage.
+     Sous Lenis, ni l'événement `scroll` ni l'observateur ne sont un
+     signal fiable ; seul le rectangle dit la vérité.
+
+     La boucle tourne donc tant que le composant est monté. Ce n'est pas
+     un gaspillage : `peindre` sort immédiatement quand la valeur n'a pas
+     bougé — un `getBoundingClientRect` par image sur UN élément — et le
+     site fait déjà tourner Lenis et GSAP à la même cadence. La seule
+     mise en veille qui compte est l'onglet caché, où le navigateur
+     suspend de toute façon `requestAnimationFrame`.
+
+     Le paramètre `_cible` est conservé pour ne pas avoir à toucher les
+     appelants le jour où une garde fiable existerait. */
   const surVisibilite = () => (document.hidden ? arreter() : lancer());
   document.addEventListener("visibilitychange", surVisibilite);
   window.addEventListener("resize", peindre);
@@ -67,7 +67,6 @@ export function cadencer(cible: Element, peindre: () => void) {
 
   return () => {
     arreter();
-    io.disconnect();
     document.removeEventListener("visibilitychange", surVisibilite);
     window.removeEventListener("resize", peindre);
   };
