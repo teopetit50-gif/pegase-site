@@ -1167,6 +1167,17 @@ export default function Home() {
             partout ailleurs (`omega-site-v3/lib/temoignages-essai.ts`).
             Ne pas la rapatrier ici.
 
+            15/09, Teo : « il doit être écrit nulle part des choses comme ça
+            qui nous décrédibilisent ». Le chapô disait « ce ne sont pas des
+            témoignages : nous n'en publions pas tant que nous n'en avons pas
+            de vrais » — c'est-à-dire, en clair, « nous n'avons aucun client »,
+            écrit noir sur blanc sur l'accueil. La section reste (elle ne
+            prétend rien), le chapô ne dit plus que ce qu'elle EST : neuf
+            situations, leur poste et leur secteur. La règle « jamais de faux
+            avis » ne change pas — elle se tient en n'en publiant pas, pas en
+            l'annonçant. Vérifié le 15/09 : c'était la seule phrase de ce
+            genre visible sur les 21 routes.
+
             LA PLACE : juste après « ce que ça change », là où un visiteur se
             demande si ça marche vraiment, et avant qu'on lui dise qui on
             est. La section précédente porte son `py-[110px]`, celle-ci n'a
@@ -1176,8 +1187,8 @@ export default function Home() {
             <EnTete
               pastille="LES SITUATIONS"
               titre="Ce que les systèmes tiennent, et chez qui ça arrive."
-              chapo="Neuf situations telles qu'elles se présentent avant l'audit. Ce ne sont pas des témoignages : nous n'en publions pas tant que nous n'en avons pas de vrais."
-              court="Neuf situations réelles avant l'audit. Pas des témoignages : nous n'en publions aucun."
+              chapo="Neuf situations telles qu'elles se présentent avant l'audit, avec le poste qui les prend en charge et le secteur où elles reviennent le plus souvent."
+              court="Neuf situations telles qu'elles se présentent avant l'audit, et le poste qui les tient."
             />
             <div className="mt-8 md:mt-16">
               <CasColonnes cas={CAS_ACCUEIL} />

@@ -409,6 +409,20 @@ export type FamilleComparatif = {
   lignes: LigneComparatif[];
 };
 
+/* 15/09, correctif — LE COMPARATIF LIT LES MÊMES DURÉES QUE LES CARTES.
+   Cette ligne portait « 30 minutes / 90 minutes / Une demi-journée », les
+   durées du profil TPE, alors que <ComparerFormats> affiche PROFILS[1]
+   (groupes) et que ses cartes annoncent 45 min / 2 h / 1 journée. La page
+   se contredisait donc à dix centimètres d'intervalle, sur les trois
+   formats : « Audit process — 2 h » ouvrait un tableau disant « 90
+   minutes ». Le même correctif avait été passé sur lib/paliers.ts le
+   15/09 et oublié ici.
+   Les durées sont désormais DÉRIVÉES des formules : on ne peut plus
+   changer une carte sans que le tableau suive. Si <ComparerFormats>
+   devait un jour rendre le profil TPE, c'est cet index qu'il faudrait
+   rendre variable — pas ces trois chaînes. */
+const DUREES_COMPARATIF = PROFILS[1].formules;
+
 export const COMPARATIF: FamilleComparatif[] = [
   {
     titre: "Le déroulé de l'entretien",
@@ -416,7 +430,11 @@ export const COMPARATIF: FamilleComparatif[] = [
       {
         libelle: "Durée",
         aide: "Le format est cadré et se termine à l'heure annoncée. Si le sujet mérite davantage, c'est vous qui décidez de la suite.",
-        valeurs: ["30 minutes", "90 minutes", "Une demi-journée"],
+        valeurs: [
+          DUREES_COMPARATIF[0].duree,
+          DUREES_COMPARATIF[1].duree,
+          DUREES_COMPARATIF[2].duree,
+        ],
       },
       {
         libelle: "Format",
