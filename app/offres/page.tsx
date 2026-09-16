@@ -23,6 +23,7 @@ import {
   siShopify,
   siStripe,
 } from "simple-icons";
+import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import { POSTS } from "@/lib/content";
@@ -388,36 +389,6 @@ function TeteSection({
   );
 }
 
-/* Le fond à points de la colonne de gauche du bloc 3.
-   La référence y pose un planisphère en points livré en un seul fichier :
-   c'est son actif, on ne le recopie pas. Celui-ci est calculé — une
-   sphère de points, même emprise carrée et même poids visuel. Rendu côté
-   serveur, sans aléatoire : deux visites donnent la même image. */
-function MotifPoints() {
-  const pas = 17;
-  const rayon = 190;
-  const points: { x: number; y: number; o: number }[] = [];
-  for (let i = -rayon; i <= rayon; i += pas) {
-    for (let j = -rayon; j <= rayon; j += pas) {
-      const d = Math.hypot(i, j);
-      if (d > rayon) continue;
-      /* Réglé le 16/09 sur l'image que Teo a fournie : un disque PLEIN et
-         régulier, gris moyen, avec un dégradé radial discret vers le
-         centre-gauche. La première version penchait trop à gauche — le
-         bord droit s'effaçait et le motif se lisait en escalier. */
-      const o = 0.34 + 0.26 * (1 - d / rayon) + 0.1 * Math.max(0, 1 - (i + rayon) / (2 * rayon));
-      points.push({ x: 200 + i, y: 200 + j, o: Math.min(0.7, o) });
-    }
-  }
-  return (
-    <svg viewBox="0 0 400 400" role="img" aria-label="Motif : une sphère composée de points">
-      {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={3.6} fill="#5b5b5b" opacity={p.o} />
-      ))}
-    </svg>
-  );
-}
-
 /* Le coin plein des cartes du bloc 3 — relevé TEL QUEL dans le DOM de la
    référence : un viewBox de 6×6, un triangle à angle droit aux sommets
    arrondis, peint en `currentColor`. La couleur vient de la carte. */
@@ -521,8 +492,14 @@ export default function OffresPage() {
                       créer, aucune donnée à migrer.
                     </p>
                   </div>
-                  <div aria-hidden className="ofd-panneau__motif">
-                    <MotifPoints />
+                  {/* 16/09 (Teo) — le motif à points calculé laisse la
+                      place au globe `cobe` (components/ui/cobe-globe-cdn).
+                      Pastilles de région et compteurs de débit ÉTEINTS :
+                      les valeurs par défaut de la fiche nomment les
+                      régions d'un hébergeur et affichent des débits
+                      inventés. Il ne reste que des points et des arcs. */}
+                  <div className="ofd-panneau__motif">
+                    <GlobeCdn libelles={false} trafic={false} className="ofd-globe" />
                   </div>
                 </div>
 

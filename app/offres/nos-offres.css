@@ -641,10 +641,11 @@
     min-height: 560px;
   }
 }
-.ofd .ofd-panneau__motif svg {
-  height: auto;
+/* Le globe est carré et tient la place qu'occupait le planisphère en
+   points de la référence : même emprise, même poids visuel. */
+.ofd .ofd-panneau__motif .ofd-globe {
   width: 100%;
-  max-width: 760px;
+  max-width: 560px;
 }
 
 .ofd .ofd-quatre {
