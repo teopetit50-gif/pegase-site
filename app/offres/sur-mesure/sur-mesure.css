@@ -1094,6 +1094,116 @@
   color: var(--smd-etiquette);
 }
 
+/* ——— L'ÉCHELLE DES TROIS COLONNES, ET LE PLI MOBILE ———
+   Relevé du 16/09 au dev, DM Mono 12 px : le plus long intitulé
+   (`rapprochement.commande`) mesure 158,4 px, le plus long résultat
+   (`1 bon de livraison`) 118,8 px, la plus longue durée 39,6 px. D'où
+   les deux paliers : 208 px d'intitulé (16 de retrait + 14 d'icône + 6
+   + 158 + 8), 4,5 rem de résultat quand seule la durée s'affiche, 12 rem
+   quand le détail s'affiche avec elle.
+
+   ⚠ CE QUI ÉTAIT CASSÉ. Les paliers d'origine (`@xs` 20 rem, `@md`
+   28 rem) étaient ceux d'un composant anglais aux colonnes plus courtes.
+   À 28 rem de conteneur, 208 px d'intitulé + 12 rem de résultat + 24 de
+   marge laissaient VINGT-HUIT PIXELS à l'axe de temps : les dix barres
+   et les quatre graduations de la règle s'empilaient dans un filet, et
+   c'est ce que Teo a photographié (500 px de fenêtre = 452 de
+   conteneur). Le seuil ne dépend pas du goût : une colonne ne s'ouvre
+   que si l'axe garde au moins 40 % de la largeur.
+
+   Sous 32 rem la ligne SE PLIE au lieu de se serrer : l'intitulé et la
+   durée tiennent la première ligne, la barre prend la seconde sur toute
+   la largeur. Les intitulés cessent d'être coupés, et la barre la plus
+   courte (320 ms sur 9,1 s) passe de 3 px à 10. `--gutter` et `--meta`
+   tombent alors à zéro : ce sont eux qui placent la règle, la trame et
+   la tête de lecture, qui doivent couvrir toute la largeur au pli. */
+.smd .smd-trace-cadre {
+  --gutter: 0px;
+  --meta: 0px;
+}
+@container trace (min-width: 32rem) {
+  .smd .smd-trace-cadre {
+    --gutter: var(--label-w);
+    --meta: 4.5rem;
+  }
+}
+@container trace (min-width: 44rem) {
+  .smd .smd-trace-cadre {
+    --meta: 12rem;
+  }
+}
+
+/* Le détail (« 1 bon de livraison ») n'apparaît qu'avec la colonne qui
+   peut le tenir — sinon il serait coupé au deuxième mot. */
+.smd .smd-trace-meta {
+  display: none;
+}
+@container trace (min-width: 44rem) {
+  .smd .smd-trace-meta {
+    display: inline;
+  }
+}
+
+/* « 10 étapes », dans la tête : la ligne fait 290 px avec lui, il tient
+   donc dès le plus petit téléphone. */
+.smd .smd-trace-sous {
+  display: none;
+}
+@container trace (min-width: 19rem) {
+  .smd .smd-trace-sous {
+    display: inline;
+  }
+}
+
+@container trace (max-width: 31.9375rem) {
+  /* La règle, sa trame et la tête de lecture supposent un axe qui longe
+     une colonne ; au pli il n'y en a plus, et une tête de lecture qui
+     traverse les intitulés se lit comme un défaut d'affichage. */
+  .smd .smd-trace-regle,
+  .smd .smd-trace-trame,
+  .smd .smd-trace-lecture {
+    display: none;
+  }
+  .smd .smd-trace-ligne {
+    height: auto;
+    flex-wrap: wrap;
+    row-gap: 0.375rem;
+    padding-top: 0.4375rem;
+    padding-bottom: 0.5625rem;
+  }
+  .smd .smd-trace-nom {
+    order: 1;
+    width: auto;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .smd .smd-trace-resultat {
+    order: 2;
+    width: auto;
+  }
+  .smd .smd-trace-couloir {
+    order: 3;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 0.5rem;
+  }
+  /* Deux lignes par étape, sans séparation, et la barre d'une étape se lit
+     comme celle de la suivante. Le filet est à 4 % : il sépare sans
+     quadriller, et la ligne en survol garde son fond doux par-dessus. */
+  .smd .smd-trace-ligne {
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+  }
+  .smd .smd-trace li:last-child .smd-trace-ligne {
+    box-shadow: none;
+  }
+  /* L'horloge garde ses 7,5 rem sur grand écran pour ne pas sauter d'un
+     centième à l'autre ; au pli, ces 120 px sont pris à la piste. Les
+     chiffres sont tabulaires, `auto` ne saute donc pas non plus. */
+  .smd .smd-trace-horloge {
+    width: auto;
+  }
+}
+
 /* ——— une ligne d'étape ——— */
 .smd .smd-trace-ligne {
   transition: background-color 150ms ease;
@@ -1645,6 +1755,116 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+   8 quinquies · LA PILE DE CARTES — section « exemples »
+
+   Habillage de CardSlide (components/ui/card-slide.tsx), repris de
+   21st.dev. L'original peint ses cartes en `bg-white dark:bg-neutral-900`
+   avec des bords `neutral-200` : toutes ces classes sont retirées là-bas
+   et remplacées ici, pour deux raisons.
+
+   1. `dark:` suit le SYSTÈME en Tailwind v4, pas une classe de thème.
+      Sur un Mac en thème sombre, les cartes seraient devenues noires au
+      milieu d'une page blanche.
+   2. La page a ses propres encres. Une carte de cette page, c'est du
+      blanc, un filet à 10 %, un rayon de 16 — comme les autres.
+
+   LA PILE MONTE : les cartes du fond sont posées à `top` NÉGATIF, donc
+   au-dessus du bord haut du conteneur. En flux, elles passaient sur le
+   titre de la section. Le conteneur reçoit donc une marge haute égale au
+   débord (nombre de cartes × décalage) : la pile garde son dessin, et le
+   titre reste lisible. La hauteur, elle, est celle d'une carte — il n'y
+   a rien à réserver en bas.
+   ───────────────────────────────────────────────────────────────────── */
+.smd .smd-pile {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 26rem;
+  height: 27rem;
+  margin-inline: auto;
+  margin-top: calc(var(--pile-nb) * var(--pile-decalage));
+}
+@media (min-width: 640px) {
+  .smd .smd-pile {
+    max-width: 28rem;
+    height: 29rem;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .smd-pile {
+    max-width: 32rem;
+    height: 30rem;
+  }
+}
+
+.smd .smd-pile__carte {
+  position: absolute;
+  inset-inline: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  height: 27rem;
+  border: 1px solid var(--smd-ligne);
+  border-radius: var(--smd-r-lg);
+  background: #ffffff;
+  padding: 24px;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+@media (min-width: 640px) {
+  .smd .smd-pile__carte {
+    height: 29rem;
+    padding: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .smd-pile__carte {
+    height: 30rem;
+    padding: 32px;
+  }
+}
+
+.smd .smd-pile__titre {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--smd-texte);
+  text-wrap: balance;
+}
+@media (min-width: 1024px) {
+  .smd .smd-pile__titre {
+    font-size: 1.5rem;
+  }
+}
+.smd .smd-pile__texte {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  color: var(--smd-etiquette);
+}
+.smd .smd-pile__visuel {
+  margin-top: 20px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--smd-fond);
+  aspect-ratio: 16 / 9;
+}
+.smd .smd-pile__nature {
+  border-top: 1px solid var(--smd-ligne);
+  padding-top: 14px;
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--smd-etiquette);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
    9 · VIGNETTES — leurs « Demos » (16/9) et leurs « Resources » (389/243)
    ───────────────────────────────────────────────────────────────────── */
 
@@ -1900,4 +2120,176 @@
   line-height: 1.5;
   letter-spacing: -0.01em;
   color: var(--smd-doux);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LA PILE DE CARTES (components/ui/hero-preview-walls) — 16/09/2026
+
+   Teo a collé la fiche 21st.dev « hero-preview-walls » pour remplacer la
+   grille du catalogue. Le composant arrive en classes `hp-*` nues — ses
+   utilitaires Tailwind de thème ont été retirés à la source, ils ne
+   peignent rien ici — et c'est ce bloc qui l'habille, dans le vocabulaire
+   `.smd`. Il prend donc la police de la page, Geist, comme le reste.
+
+   Ce que la fiche fait et qu'on garde : la pile en perspective, le
+   décalage et l'échelle dégressifs, la rotation toutes les trois
+   secondes, l'ancrage à cheval sur le bas de l'image de fond.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.smd .hp-scene {
+  position: relative;
+  /* la pile déborde sous l'image : on réserve la place en bas plutôt que
+     de laisser le débordement pousser la section suivante */
+  padding-bottom: 300px;
+}
+@media (min-width: 640px) {
+  .smd .hp-scene {
+    padding-bottom: 180px;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .hp-scene {
+    padding-bottom: 120px;
+  }
+}
+
+.smd .hp-fond {
+  overflow: hidden;
+  border-radius: var(--smd-r-xl);
+  border: 8px solid var(--smd-fond);
+  background: var(--smd-fond);
+}
+.smd .hp-fond img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--smd-r-xl) - 8px);
+}
+
+.smd .hp-ancre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 40px;
+  display: flex;
+  justify-content: center;
+}
+@media (min-width: 1024px) {
+  .smd .hp-ancre {
+    bottom: 0;
+  }
+}
+
+/* La hauteur de la pile = celle d'une carte + les marches de l'empilement,
+   passées par le composant en `--hp-marches`. */
+.smd .hp-pile {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 20rem;
+  height: calc(24rem + var(--hp-marches, 0px));
+}
+@media (min-width: 640px) {
+  .smd .hp-pile {
+    width: 26rem;
+    height: calc(27rem + var(--hp-marches, 0px));
+  }
+}
+@media (min-width: 1024px) {
+  .smd .hp-pile {
+    width: 28rem;
+    height: calc(28rem + var(--hp-marches, 0px));
+  }
+}
+
+.smd .hp-carte {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  width: 100%;
+  height: 24rem;
+  border-radius: var(--smd-r-lg);
+  border: 1px solid var(--smd-ligne);
+  background: #ffffff;
+  padding: 20px;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.25);
+}
+@media (min-width: 640px) {
+  .smd .hp-carte {
+    height: 27rem;
+    padding: 24px;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .hp-carte {
+    height: 28rem;
+    padding: 28px;
+  }
+}
+
+.smd .hp-carte__haut {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+.smd .hp-carte__nom {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--smd-texte);
+}
+@media (min-width: 640px) {
+  .smd .hp-carte__nom {
+    font-size: 1.5rem;
+  }
+}
+.smd .hp-carte__corps {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--smd-doux);
+}
+/* La vignette prend ce qui reste de la carte au lieu de laisser un vide
+   entre elle et la mention du bas : à hauteur fixe, un pitch court
+   creusait 90 px de blanc. */
+.smd .hp-carte__vignette {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--smd-r-sm);
+  border: 1px solid var(--smd-ligne);
+}
+.smd .hp-carte__vignette img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.smd .hp-carte__mention {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--smd-ligne);
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--smd-etiquette);
+}
+
+/* Les quatre liens sous la pile : une carte qui tourne toute seule ne
+   peut pas être la seule porte vers une page produit. */
+.smd .smd-pile__liens {
+  margin-top: 32px;
+  text-align: center;
+}
+.smd .smd-lien {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--smd-texte);
 }

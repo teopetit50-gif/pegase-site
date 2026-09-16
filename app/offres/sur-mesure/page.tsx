@@ -24,7 +24,8 @@ import {
 } from "@/components/surmesure/Panneaux";
 import { FAMILLES } from "@/lib/content";
 import { fr } from "@/lib/typo";
-import Casestudies, { type Cas } from "@/components/ui/case-studies";
+import { CardSlide, type CarteEmpilee } from "@/components/ui/card-slide";
+import { PileSurFond, type Carte } from "@/components/ui/hero-preview-walls";
 import { FICHES } from "@/lib/fiches";
 import type { Fiche } from "@/lib/fiches";
 import "./sur-mesure.css";
@@ -326,49 +327,54 @@ const PERIMETRES = [
   },
 ];
 
-/* ——— § 9 · trois besoins traités, un croquis chacun ——————————————
-   Les trois premières lignes de `FICHE.demo` — celles dont les règles
-   s'écrivent. La quatrième, celle qu'on écarte, ferme la section en une
-   phrase plutôt que d'occuper une vignette. */
-const EXEMPLES: Cas[] = [
+/* ——— § 9 · trois besoins traités, en pile de cartes ——————————————
+   16/09, Teo : « remplace cette section par ce composant », en donnant
+   `hero-preview-walls` de 21st.dev. Ce qui nous intéresse est sa PILE
+   (`CardSlide`) : trois cartes empilées, décalées et réduites vers le
+   fond, celle du dessous qui repasse devant toutes les 3,6 s. Le reste
+   du composant — un hero « We build technology… », deux boutons, du
+   contenu inventé et quatre images sur cdn.21st.dev — est resté chez
+   lui ; le détail est en tête de components/ui/card-slide.tsx.
+
+   ⚠ CETTE SECTION A CHANGÉ DEUX FOIS LE MÊME JOUR. Le 16/09 au matin
+   elle portait trois vignettes à croquis ; une autre session l'a ensuite
+   remplacée par `components/ui/case-studies.tsx`, un autre bloc 21st.dev
+   avec ses chiffres et ses sous-légendes ; Teo a demandé la pile dans la
+   foulée. `case-studies.tsx` reste dans le dépôt, orphelin — rien n'est
+   perdu, et remettre l'un ou l'autre est un import et deux lignes. À
+   trancher avec Teo.
+
+   Les trois cartes sont les trois premières lignes de `FICHE.demo` :
+   celles dont les règles s'écrivent. La quatrième, celle qu'on écarte,
+   ferme la section en une phrase — elle ne mérite pas une carte.
+
+   Le croquis prend la place de l'image de l'original, dans le même cadre
+   16/9. Les textes reprennent ceux écrits pour le bloc précédent, coupés
+   au budget d'une carte. */
+const EXEMPLES: CarteEmpilee[] = [
   {
     id: "pont",
-    visuel: <CroquisPont />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[0].text : "",
     texte:
-      "Deux logiciels qui ne se parlent pas, une double saisie quotidienne ou un export repris à la main chaque semaine : la donnée passe de l'un à l'autre sans que personne la retape.",
-    legende: "Pont entre outils",
-    sousLegende: "Règles écrites avant tout chiffrage",
-    mesures: [
-      { value: "2", label: "Outils reliés", sub: "La donnée n'est saisie qu'une fois" },
-      { value: "Jours", label: "Ordre de grandeur", sub: "Un pont entre deux outils se compte en jours" },
-    ],
+      "La donnée passe d'un outil à l'autre sans que personne la retape, et l'écart est signalé quand les deux ne concordent pas.",
+    visuel: <CroquisPont />,
+    nature: "Pont entre outils",
   },
   {
     id: "documents",
-    visuel: <CroquisDocument />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[1].text : "",
     texte:
-      "Lecture, contrôle, extraction et classement de pièces reçues dans n'importe quel format, au moment où elles arrivent plutôt qu'au moment où quelqu'un s'en occupe.",
-    legende: "Traitement de documents",
-    sousLegende: "Contrôle à réception, pas après coup",
-    mesures: [
-      { value: "0", label: "Ressaisie", sub: "Les informations extraites ne sont pas retapées" },
-      { value: "Tous", label: "Formats acceptés", sub: "La pièce est lue telle qu'elle arrive" },
-    ],
+      "Chaque pièce est lue au moment où elle arrive, rapprochée de sa commande ; ce qui ne colle pas attend une validation.",
+    visuel: <CroquisDocument />,
+    nature: "Traitement de documents",
   },
   {
     id: "logiciel",
-    visuel: <CroquisSuivi />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "",
     texte:
-      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services sans le déformer.",
-    legende: "Logiciel métier",
-    sousLegende: "Construit sur vos règles, branché sur vos outils",
-    mesures: [
-      { value: "1", label: "Application", sub: "Interface, base de données et droits" },
-      { value: "Semaines", label: "Ordre de grandeur", sub: "Un logiciel métier complet se compte en semaines" },
-    ],
+      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit vos services sans les déformer.",
+    visuel: <CroquisSuivi />,
+    nature: "Logiciel métier",
   },
 ];
 
@@ -510,7 +516,20 @@ export default function SurMesurePage() {
       href: `/offres/${x.slug}`,
       photo: FICHES[x.system]?.photo ?? "",
       photoAlt: FICHES[x.system]?.photoAlt ?? "",
+      pitch: FICHES[x.system]?.pitch ?? "",
     }));
+
+  /* § 10 — les quatre systèmes en pile tournante. Rien d'inventé : nom,
+     rôle, pitch et photo sortent de la fiche de chaque paquet, ceux que
+     porte sa propre page. */
+  const cartes: Carte[] = catalogue.map((p, i) => ({
+    id: i,
+    nom: p.system,
+    mention: p.role,
+    contenu: <p>{fr(p.pitch)}</p>,
+    image: p.photo,
+    imageAlt: p.photoAlt,
+  }));
 
   return (
     <PageShell>
@@ -786,7 +805,9 @@ export default function SurMesurePage() {
         <section className="smd-sec">
           <div className="smd-wrap">
             <Entete etiquette="Exemples" titre="Trois besoins traités hors catalogue." />
-            <Casestudies cas={EXEMPLES} />
+            <div data-reveal>
+              <CardSlide items={EXEMPLES} />
+            </div>
             <p data-reveal className="smd-body mt-10 max-w-[698px]">
               {FICHE.demo.type === "list" ? fr(FICHE.demo.footer ?? "") : ""}
             </p>
@@ -806,27 +827,28 @@ export default function SurMesurePage() {
                 "Avant de concevoir celui qui manque, vérifiez qu'il n'existe pas : quatre processus sont présents dans presque toutes les organisations, et se déploient sans cadrage."
               )}
             />
-            <div className="smd-ressources">
-              {catalogue.map((p) => (
-                <Link data-reveal key={p.system} href={p.href} className="smd-ressource block">
-                  <div className="smd-ressource__cadre">
-                    {p.photo && (
-                      <Image
-                        src={p.photo}
-                        alt={p.photoAlt}
-                        width={640}
-                        height={402}
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      />
-                    )}
-                  </div>
-                  <div className="pt-6">
-                    <p className="smd-ressource__cat">{p.role}</p>
-                    <h4 className="smd-h4">{p.system}</h4>
-                  </div>
-                </Link>
+            <PileSurFond
+              /* Un fond CALME, pas une capture d'écran. La fiche pose une
+                 image de produit derrière ses cartes ; avec notre console
+                 des débiteurs, les cartes blanches tombaient au milieu
+                 d'un tableau dense et l'ensemble se lisait en désordre.
+                 Ce pli blanc ne dit rien et ne dispute rien. */
+              fond="/fonds/plis-blancs.webp"
+              cartes={cartes}
+            />
+            {/* La pile n'est pas navigable : les quatre liens du catalogue
+                restent, en ligne, sous elle. Une carte qui tourne toute
+                seule ne peut pas être la seule porte vers une page. */}
+            <p data-reveal className="smd-body smd-pile__liens">
+              {catalogue.map((p, i) => (
+                <span key={p.system}>
+                  {i > 0 ? " · " : ""}
+                  <Link href={p.href} className="smd-lien">
+                    {p.system}
+                  </Link>
+                </span>
               ))}
-            </div>
+            </p>
           </div>
         </section>
 
