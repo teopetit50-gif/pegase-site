@@ -127,7 +127,7 @@ export default function ReglesFacturation({
                   Règle {i + 1}
                 </p>
               </div>
-              <h3 className="mb-2 mt-2 font-[family-name:var(--font-jakarta)] text-xl font-semibold tracking-[-0.01em] text-[#050505] xl:mt-0">
+              <h3 className="mb-2 mt-2 font-[family-name:var(--font-jakarta)] text-xl font-medium tracking-[-0.01em] text-[#050505] xl:mt-0">
                 {r.titre}
               </h3>
               <p className="mb-6 text-[15px] leading-[23px] text-[#3d3d3d]">{r.texte}</p>

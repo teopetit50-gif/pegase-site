@@ -35,7 +35,7 @@ export function Questions() {
                 const actif = ouvert === i;
                 return (
                   <div key={item.q}>
-                    <h3 className="flex">
+                    <h3 className="flex tracking-[-0.01em]">
                       <button
                         type="button"
                         onClick={() => setOuvert(actif ? null : i)}

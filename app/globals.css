@@ -773,34 +773,45 @@ button.rounded-full:active {
   }
 }
 
-/* ——— titres : Plus Jakarta Sans 600, interlignes et chasses relevés ——— */
+/* ——— titres — 16/09/2026, la composition de scale.ai ————————————————
+   Teo, capture d'un titre de l'accueil à l'appui : « tous les titres comme
+   ça doivent être comme sur scale.ai ». Relevé sur scale.com (accueil et
+   /data-engine, à 1440) : leur règle est d'une uniformité totale —
+   GRAISSE 400 et INTERLETTRE −0,01 em, de 12 px à 116 px, titres comme
+   texte. Pas un seul gras sur le site ; la hiérarchie se fait à la TAILLE
+   seule. Le 500 n'apparaît que sous 20 px, sur les petites étiquettes.
+   Nos titres étaient à 600 et −0,03/−0,04 em : gras ET resserrés, l'effet
+   « massif » que Teo montrait. Les tailles, elles, ne bougent pas. ——— */
 .offres .o-h1,
 .offres .o-h2,
 .offres .o-h4,
 .offres .o-h5 {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 600;
+  font-weight: 400;
+  letter-spacing: -0.01em;
   color: var(--o-text);
+}
+/* Seule exception, celle de la référence : sous 20 px un titre en 400 ne se
+   détache plus du corps, qui est en 400 lui aussi. scale.ai passe à 500 au
+   même endroit (leur h3 de 20 px), et à rien d'autre. */
+.offres .o-h5 {
+  font-weight: 500;
 }
 .offres .o-h1 {
   font-size: clamp(38px, 5.6vw, 60px);
   line-height: 1.2;
-  letter-spacing: -0.03em;
 }
 .offres .o-h2 {
   font-size: clamp(32px, 4.4vw, 48px);
   line-height: 1.4;
-  letter-spacing: -0.04em;
 }
 .offres .o-h4 {
   font-size: clamp(24px, 2.6vw, 30px);
   line-height: 1.4;
-  letter-spacing: -0.04em;
 }
 .offres .o-h5 {
   font-size: clamp(20px, 1.9vw, 24px);
   line-height: 1.5;
-  letter-spacing: -0.03em;
 }
 
 /* ——— corps : Inter Tight, trois graduations ——— */
@@ -1206,12 +1217,17 @@ button.rounded-full:active {
    taille), chapô 16 → 18. La 1ʳᵉ version montait à 38 px dès le mobile : le
    titre y prenait une ligne de plus et poussait toute la suite vers le bas —
    c'est l'écart que Teo a vu en comparant les deux sites côte à côte. */
+/* 16/09/2026 — la graisse et l'interlettre passent à la règle de scale.ai
+   (400 / −0,01 em). C'était le titre le plus serré du site : −0,05 em, cinq
+   fois l'interlettre de la référence, d'où les lettres qui se touchaient.
+   Les TAILLES et les interlignes du relevé Flux sont conservés tels quels —
+   seule la composition change. */
 .offres .o-flux-h1 {
   font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 36px;
   line-height: 39.6px;
-  font-weight: 500;
-  letter-spacing: -0.05em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
   color: #0a0a0a;
   text-wrap: balance;
 }
@@ -1240,9 +1256,14 @@ button.rounded-full:active {
        phrase se replie proprement en deux). Une seule ligne dans 900 px
        aurait exigé 44 px, moins que le palier 768. Le max-width prime
        sur le `max-w-[900px]` du h1 : règle hors couche contre utilitaire. */
-    font-size: 52px;
-    line-height: 58px;
-    letter-spacing: -3.5px;
+    /* 16/09 — 52 → 49 px. Desserrer l'interlettre de −0,05 à −0,01 em (la
+       valeur de scale.ai) a élargi la seconde phrase de 1 095 à 1 194 px,
+       pour une boîte de 1 160 : elle repassait à TROIS lignes, et la règle
+       posée le 14/09 au soir est « une ligne par phrase à 1440 ». Mesuré au
+       style calculé à la nouvelle interlettre : 49 px → 1 125 px, 35 px de
+       marge. 50 px passait aussi (1 148) mais sans réserve. */
+    font-size: 49px;
+    line-height: 55px;
     max-width: 1160px;
   }
 }
@@ -2684,15 +2705,18 @@ button.rounded-full:active {
   }
 }
 
-/* ——— titres ——— */
+/* ——— titres — même règle que le monde « .offres » : scale.ai compose
+       TOUT en 400 / −0,01 em, la hiérarchie se fait à la taille seule.
+       Le 500 ne revient que sur le plus petit rang (.r-h4), sous 24 px,
+       comme chez eux. ——— */
 .resa .r-h1,
 .resa .r-h2,
 .resa .r-h3,
 .resa .r-h4 {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--r-texte);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 /* 56/64 sur la référence — clampé pour ne pas déborder en dessous de 400 px */
 .resa .r-h1,
@@ -2707,7 +2731,7 @@ button.rounded-full:active {
 .resa .r-h4 {
   font-size: clamp(21px, 1.9vw, 24px);
   line-height: 1.33;
-  letter-spacing: -0.01em;
+  font-weight: 500;
 }
 
 /* ——— corps ——— */
@@ -3791,7 +3815,8 @@ button.rounded-full:active {
 .modeles .m-h1 {
   font-size: clamp(2.4rem, 5.4vw, 4rem);
   line-height: 1.02;
-  letter-spacing: -0.02em;
+  /* 16/09 — −0,02 → −0,01 em, la valeur de scale.ai. */
+  letter-spacing: -0.01em;
 }
 
 /* titre de section — 48 px relevés */

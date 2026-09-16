@@ -104,7 +104,7 @@ export default function FaqTarifs({ items }: { items: Item[] }) {
                 value={`q-${c}-${i}`}
                 className="border-b border-[#e3e3e3]"
               >
-                <Accordion.Header className="flex">
+                <Accordion.Header className="flex tracking-[-0.01em]">
                   <Accordion.Trigger className="group flex flex-1 cursor-pointer items-start justify-between gap-6 py-5 text-left text-[16px] font-medium leading-[24px] text-[#050505] transition-colors hover:text-[#3d3d3d]">
                     {f.q}
                     <ChevronDown

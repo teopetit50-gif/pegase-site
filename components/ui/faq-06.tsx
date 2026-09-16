@@ -73,7 +73,7 @@ export function Faq06({ questions }: { questions: Question[] }) {
           data-reveal
           className="rounded-xl border border-[var(--o-line)] bg-[var(--o-soft)] px-5 transition-colors data-[state=open]:bg-white md:px-6"
         >
-          <Accordion.Header className="flex">
+          <Accordion.Header className="flex tracking-[-0.01em]">
             <Accordion.Trigger className="group flex flex-1 items-center justify-between gap-6 py-4 text-left text-[16px] font-medium leading-snug text-[var(--o-text)] md:text-[17px]">
               {f.q}
               <Plus

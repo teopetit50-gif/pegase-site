@@ -91,6 +91,9 @@
   align-items: baseline;
   gap: 10px;
   margin: 0;
+  /* 16/09 — la seule composition de titre du site qui n'avait aucune
+     interlettre ; alignée sur les autres (scale.ai : −0,01 em partout). */
+  letter-spacing: -0.01em;
 }
 .resa .vc-num {
   flex: none;

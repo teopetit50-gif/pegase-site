@@ -403,7 +403,7 @@ export function TuilesCatalogue({
               </span>
 
               <h3
-                className="mt-3 text-[19px] font-semibold leading-[1.35] tracking-[-0.02em] text-[var(--o-text)]"
+                className="mt-3 text-[19px] font-medium leading-[1.35] tracking-[-0.01em] text-[var(--o-text)]"
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
                 {t.objectif}

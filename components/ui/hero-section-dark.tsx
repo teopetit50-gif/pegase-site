@@ -98,7 +98,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
           {/* le titre en deux tons : l'original vire au violet, ici la
               seconde moitié passe simplement en gris — c'est le même
               effet de relief, dans le nuancier de la maison */}
-          <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-[32px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#050505] min-[480px]:text-[40px] sm:text-5xl">
+          <h1 className="text-balance font-[family-name:var(--font-jakarta)] text-[32px] font-normal leading-[1.12] tracking-[-0.01em] text-[#050505] min-[480px]:text-[40px] sm:text-5xl">
             {titre.debut} <span className="text-[#9a9a9a]">{titre.accent}</span>
           </h1>
 

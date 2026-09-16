@@ -219,7 +219,7 @@ function CartesEntrees({ textes }: { textes?: Record<string, string> }) {
           }
         >
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[18px] font-semibold tracking-[-0.02em] text-[#09090b]">
+            <h3 className="text-[18px] font-medium tracking-[-0.01em] text-[#09090b]">
               {c.nom}
             </h3>
             {c.vedette ? (
