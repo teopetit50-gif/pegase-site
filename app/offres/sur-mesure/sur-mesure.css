@@ -484,6 +484,9 @@
    noir. Relevé sur la référence : leurs trois marques font 20 à 28 px de
    haut et sont réparties par `justify-around` sur la colonne. */
 .smd .smd-marque {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 1.375rem;
   line-height: 1.2;
   font-weight: 500;
@@ -762,6 +765,39 @@
 }
 .smd .smd-fonction p {
   margin-top: 16px;
+}
+
+/* Grand chiffre du panneau d'aperçu, et son étiquette monospace.
+   Relevé sur l'image de la référence : le chiffre fait ~37 px dans un
+   actif de 1216 de large, soit ~42 px une fois rendu dans la colonne ;
+   l'étiquette est en monospace, capitales, +1px, sur deux lignes. */
+.smd .smd-chiffre {
+  font-size: 2.25rem;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--smd-texte);
+}
+@media (min-width: 768px) {
+  .smd .smd-chiffre {
+    font-size: 2.75rem;
+  }
+}
+.smd .smd-chiffre-label {
+  margin-top: 10px;
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--smd-etiquette);
+  white-space: pre-line;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .smd .smd-chiffre-label {
+    font-size: 0.75rem;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────

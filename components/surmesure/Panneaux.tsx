@@ -19,108 +19,175 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
+
+/* ─────────────────────────────────────────────────────────────────────
+   0 · LES SIGNES D'OUTIL — le bandeau du haut
+
+   La référence pose trois logos de clients aplatis en noir. Nous n'avons
+   pas de logo client à afficher et nous ne reprenons pas les logos de
+   tiers : ces trois silhouettes au trait DISENT l'outil sans prétendre
+   être sa marque. Même poids visuel que leurs trois signes, et lisibles
+   en noir — ce qu'un logo polychrome aplati n'est pas.
+   ───────────────────────────────────────────────────────────────────── */
+
+const SIGNE = {
+  width: 26,
+  height: 26,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.6,
+  strokeLinejoin: "round" as const,
+  "aria-hidden": true,
+};
+
+export function SigneMail() {
+  return (
+    <svg {...SIGNE}>
+      <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+      <path d="M2.5 8.5 12 14.5l9.5-6" />
+    </svg>
+  );
+}
+
+export function SigneBoite() {
+  return (
+    <svg {...SIGNE}>
+      <rect x="2.5" y="5.5" width="11" height="13" rx="2" />
+      <ellipse cx="8" cy="12" rx="2.6" ry="3.2" />
+      <path d="M13.5 8.5h8v8.5a1.5 1.5 0 0 1-1.5 1.5h-6.5" />
+      <path d="M13.5 12h8" />
+    </svg>
+  );
+}
+
+export function SigneDrive() {
+  return (
+    <svg {...SIGNE}>
+      <path d="M9 3h6l6 10.5h-6z" />
+      <path d="M9 3 3 13.5 6 19l6-10.5z" />
+      <path d="M6 19h12l3-5.5H9z" />
+    </svg>
+  );
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    1 · DU BESOIN AU SYSTÈME — la grande pièce, sous l'aperçu
 
-   Le bandeau du haut est le point de départ (votre processus), les
-   quatre colonnes sont les étapes de `FICHE.etapes`, le bandeau du bas
-   est ce qui reste sous décision humaine pendant tout le trajet.
+   16/09, Teo, capture contre capture : « cette section n'a rien à voir
+   en design ». Elle est refaite sur la COMPOSITION de la référence, pas
+   sur son contenu.
+
+   Ce que la référence pose là est une IMAGE (1216 × 638, un de leurs
+   actifs) : panneau gris à coins arrondis ; à gauche quatre cartes
+   blanches en 2 × 2, chacune un titre centré, un pictogramme cerclé et
+   une légende grise ; à droite deux grands chiffres surmontant leurs
+   étiquettes monospace, puis un grand graphique de couverture avec sa
+   légende. Proportions relevées sur l'image : colonne gauche 37 %,
+   colonne droite 63 %, gouttière 4 %.
+
+   On ne recopie pas l'actif d'autrui — et on ne pouvait pas : leur
+   graphique est un planisphère en points qui leur appartient, et leurs
+   deux chiffres (« 20+ domaines », « 80+ langues ») sont de la traction
+   commerciale, que nous n'inventons pas.
+
+   CE QU'ON MET À LA PLACE, à la même géométrie :
+   • les quatre cartes portent les quatre ÉTAPES de `FICHE.etapes` ;
+   • les deux chiffres sont des faits de CONCEPTION vérifiables sur cette
+     page même — quatre étapes avant la mise en service, zéro ligne
+     écrite avant que le périmètre le soit ;
+   • le planisphère devient la COUVERTURE, qui dit la même chose que lui
+     (« on est partout ») avec nos huit familles de métiers, reprises de
+     `FICHE.cible`. Elles avaient quitté la page à la refonte du 16/09 :
+     elles y reviennent ici, à leur place.
+
+   TOUT EST DU BALISAGE QUI SE RECOMPOSE, jamais une image : le panneau
+   fait 1392 px de large sur ordinateur et 342 sur téléphone ; un texte
+   posé à 14 px dans une image y tomberait à 3,4 px. Deux colonnes dès
+   1024, empilées en dessous.
    ───────────────────────────────────────────────────────────────────── */
 
-type Etape = { rang: string; titre: string; texte: string };
+type Etape = { rang: string; titre: string; texte: string; Icone: LucideIcon };
 
-export function PanneauMethode({ etapes }: { etapes: Etape[] }) {
+const CHIFFRES = [
+  { valeur: "4", label: "étapes avant\nla mise en service" },
+  { valeur: "0", label: "ligne écrite avant\nle périmètre" },
+];
+
+export function PanneauMethode({
+  etapes,
+  secteurs,
+}: {
+  etapes: Etape[];
+  secteurs: string[];
+}) {
   return (
     <div className="p-6 md:p-10">
-      {/* le point de départ */}
-      <div className="rounded-xl border border-dashed border-black/20 px-5 py-4 text-center">
-        <p className="smd-body !text-black/70">
-          Le processus tel qu&apos;il se déroule aujourd&apos;hui, chez vous
-        </p>
-      </div>
-
-      {/* les quatre étapes */}
-      <div className="mt-6 grid gap-4 md:mt-8 md:grid-cols-4 md:gap-5">
-        {etapes.map((e, i) => (
-          <div
-            key={e.rang}
-            className="relative rounded-xl border border-black/10 bg-white p-5 md:p-6"
-          >
-            {/* la flèche qui mène à l'étape suivante : sous la carte en
-                colonne, entre les cartes en rangée */}
-            {i < etapes.length - 1 && (
+      <div className="grid gap-8 lg:grid-cols-[37fr_63fr] lg:gap-[4%]">
+        {/* ——— à gauche : les quatre étapes, en 2 × 2 ——— */}
+        <ul className="grid grid-cols-2 gap-3 md:gap-5">
+          {etapes.map((e) => (
+            <li
+              key={e.rang}
+              className="flex flex-col items-center rounded-xl bg-white px-3 py-6 text-center md:px-5 md:py-8"
+            >
+              <span
+                className="block"
+                style={{
+                  fontFamily: "var(--font-dm-mono), ui-monospace, monospace",
+                  fontSize: "11px",
+                  letterSpacing: "1px",
+                  color: "var(--smd-etiquette)",
+                }}
+              >
+                {e.rang}
+              </span>
+              <h5 className="smd-h4 mt-2 !text-[0.9375rem] !leading-[1.3] md:!text-[1.0625rem]">
+                {e.titre}
+              </h5>
               <span
                 aria-hidden
-                className="absolute left-1/2 top-full z-10 -translate-x-1/2 text-black/25 md:left-full md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
+                className="mt-5 flex h-12 w-12 items-center justify-center rounded-full border border-black/15 text-black md:mt-6 md:h-14 md:w-14"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  className="md:hidden"
-                >
-                  <path d="M12 5v14m0 0-5-5m5 5 5-5" />
-                </svg>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  className="hidden md:block"
-                >
-                  <path d="M5 12h14m0 0-5-5m5 5-5 5" />
-                </svg>
+                <e.Icone strokeWidth={1.25} className="h-5 w-5 md:h-6 md:w-6" />
               </span>
-            )}
-            <span
-              className="font-medium"
-              style={{
-                fontFamily: "var(--font-dm-mono), ui-monospace, monospace",
-                fontSize: "12px",
-                letterSpacing: "1px",
-                color: "var(--smd-etiquette)",
-              }}
-            >
-              {e.rang}
-            </span>
-            <h5 className="smd-h4 mt-3 !text-[1.125rem] !leading-[1.35]">{e.titre}</h5>
-            <p className="smd-body mt-2 !text-[0.875rem] !leading-[1.5]">{e.texte}</p>
-          </div>
-        ))}
-      </div>
+              <p className="smd-body mt-5 !text-[0.75rem] !leading-[1.45] md:mt-6 md:!text-[0.8125rem]">
+                {e.texte}
+              </p>
+            </li>
+          ))}
+        </ul>
 
-      {/* ce qui reste sous décision, du premier au dernier jour */}
-      <div className="mt-6 rounded-xl px-5 py-5 md:mt-8 md:px-8" style={{ background: "var(--smd-evergreen)" }}>
-        <p
-          className="text-white/70"
-          style={{
-            fontFamily: "var(--font-dm-mono), ui-monospace, monospace",
-            fontSize: "12px",
-            lineHeight: "1.5rem",
-            letterSpacing: "1px",
-            textTransform: "uppercase",
-          }}
-        >
-          Sous votre décision, règle par règle
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {["Ce qui s'exécute seul", "Ce qui attend une validation", "Ce qui ne part jamais sans un accord"].map(
-            (t) => (
-              <span
-                key={t}
-                className="rounded-md bg-white/10 px-3 py-1.5 text-white"
-                style={{ fontSize: "0.875rem", lineHeight: 1.5 }}
-              >
-                {t}
-              </span>
-            )
-          )}
+        {/* ——— à droite : les deux chiffres, puis la couverture ——— */}
+        <div className="flex flex-col">
+          <div className="flex justify-center gap-10 md:gap-20">
+            {CHIFFRES.map((c) => (
+              <div key={c.valeur} className="text-center">
+                <p className="smd-chiffre">{c.valeur}</p>
+                <p className="smd-chiffre-label">{c.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-1 flex-col justify-center md:mt-12">
+            <ul className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+              {secteurs.map((nom) => (
+                <li
+                  key={nom}
+                  className="flex items-center gap-3 border-b border-black/10 py-3 last:border-b-0 sm:[&:nth-last-child(2)]:border-b-0"
+                >
+                  <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-black/45" />
+                  <span className="smd-body !text-[0.8125rem] !text-black md:!text-[0.9375rem]">
+                    {nom}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="smd-chiffre-label mt-6 !text-left md:mt-8">
+              Aucun secteur n&apos;est exclu · le critère est le processus, pas le métier
+            </p>
+          </div>
         </div>
       </div>
     </div>

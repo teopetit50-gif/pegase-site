@@ -4,6 +4,9 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import {
+  SigneBoite,
+  SigneDrive,
+  SigneMail,
   CroquisDocument,
   CroquisPont,
   CroquisSuivi,
@@ -17,10 +20,14 @@ import type { Fiche } from "@/lib/fiches";
 import {
   AppWindow,
   ArrowLeftRight,
+  Blocks,
   CalendarCheck,
   FileSearch,
+  FileSignature,
   LayoutDashboard,
   MessagesSquare,
+  Rocket,
+  Search,
 } from "lucide-react";
 import "./sur-mesure.css";
 
@@ -93,9 +100,9 @@ import "./sur-mesure.css";
    • `FICHE.faq` (4 questions) n'est plus rendue. C'était le seul endroit
      du site qui écrivait les délais, le coût, la propriété du code et
      les besoins qu'on refuse. → à remettre si Teo veut une 12ᵉ section.
-   • `FICHE.cible` (8 secteurs) n'est plus rendue : la référence n'a pas
-     ce bandeau. Le fait tient en une phrase, reprise dans le chapô de
-     l'aperçu (« aucun secteur n'est exclu »).
+   • `FICHE.cible` (8 secteurs) EST REVENUE le 16/09 : elle occupe la
+     colonne droite du panneau d'aperçu, à la place du planisphère de la
+     référence — même rôle (dire l'étendue), contenu vrai.
    • `FICHE.outils` alimente désormais le bandeau nº 2, sous forme de
      logos plutôt que de pastilles.
    • Les quatre garanties du gabarit (file de validation, journal, données
@@ -225,15 +232,19 @@ const FICHE: Fiche = {
    donc coupée à sa proposition principale, jamais réécrite. La phrase
    complète reste dans `FICHE.etapes`, d'où sortent ces quatre-là. */
 const COUPES = [
-  "Nous décrivons le processus tel qu'il se déroule aujourd'hui, et où il se rompt.",
-  "Périmètre, règles de gestion, points de validation et coût sont écrits avant de commencer.",
-  "Le système est construit sur vos règles et intégré à vos outils, sous vos yeux.",
-  "Le démarrage se fait sur un périmètre restreint, puis s'élargit une fois l'effet mesuré.",
+  "Le processus tel qu'il se déroule, et où il se rompt.",
+  "Périmètre, règles et coût écrits avant de commencer.",
+  "Construit sur vos règles, intégré à vos outils.",
+  "Un périmètre restreint d'abord, élargi une fois mesuré.",
 ];
+/* Un pictogramme par étape, dans le sens de l'étape : on regarde, on
+   écrit, on assemble, on met en route. */
+const ICONES_ETAPE = [Search, FileSignature, Blocks, Rocket];
 const ETAPES = FICHE.etapes.map((e, i) => ({
   rang: String(i + 1).padStart(2, "0"),
   titre: e.t,
   texte: COUPES[i],
+  Icone: ICONES_ETAPE[i],
 }));
 
 /* ——— § 8 · les six périmètres ———————————————————————————————————
@@ -312,9 +323,23 @@ const sansNom = (titre: string, nom: string) =>
      largeurs, et n'engage rien — c'est aussi la règle du parc sur les
      marques de tiers.
 
+   16/09, Teo : « eux ils ont à côté des trucs, les logos aussi, que tu
+   n'as pas mis chez nous ». Le signe revient donc devant le mot — mais
+   DESSINÉ AU TRAIT, en noir, pas le logo officiel aplati. Deux raisons,
+   les deux vérifiées en rendant les variantes côte à côte : un logo
+   polychrome passé en `brightness-0` donne un rectangle plein pour
+   Outlook et un triangle pour Drive, illisibles ; et la règle du parc
+   interdit de reprendre le logo d'un tiers. Une silhouette au trait dit
+   l'outil sans prétendre être sa marque — c'est exactement le poids
+   visuel des signes de Meta, cohere et NTT sur la référence.
+
    Ces trois-là sont les familles d'outils les plus fréquentes chez nos
    clients, pas une liste fermée : /integrations porte la liste. */
-const OUTILS = ["Gmail", "Outlook", "Google Drive"];
+const OUTILS = [
+  { nom: "Gmail", Signe: SigneMail },
+  { nom: "Outlook", Signe: SigneBoite },
+  { nom: "Google Drive", Signe: SigneDrive },
+];
 
 /* ══ les deux pièces de balisage répétées ═════════════════════════════ */
 
@@ -464,7 +489,7 @@ export default function SurMesurePage() {
                 nôtre en faisait 78 et passait à deux lignes : c'est le
                 budget de texte qui se relève, pas la largeur qui
                 s'élargit. */}
-            <p data-reveal className="smd-chapo mx-auto mb-12 max-w-[698px] !text-base !text-black/70">
+            <p data-reveal className="smd-chapo mx-auto mb-12 max-w-[698px] !text-base !text-black/70 text-center">
               <span className="mr-2">Un système sur mesure se branche sur vos outils.</span>
               <Link href="/integrations" className="smd-lien !text-base">
                 Voir nos intégrations
@@ -478,8 +503,9 @@ export default function SurMesurePage() {
               data-reveal
               className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-14 gap-y-6 sm:justify-around"
             >
-              {OUTILS.map((nom) => (
+              {OUTILS.map(({ nom, Signe }) => (
                 <li key={nom} className="smd-marque">
+                  <Signe />
                   {nom}
                 </li>
               ))}
@@ -492,7 +518,7 @@ export default function SurMesurePage() {
           <div className="smd-wrap">
             <Entete
               etiquette="Aperçu"
-              titre="Le système qui n'existe pas encore."
+              titre="Un système, pas un produit."
               chapo={fr(FICHE.sections?.pointsChapo ?? "")}
             />
           </div>
@@ -504,7 +530,7 @@ export default function SurMesurePage() {
         <section className="smd-sec">
           <div className="smd-wrap">
             <div data-reveal className="smd-panneau">
-              <PanneauMethode etapes={ETAPES} />
+              <PanneauMethode etapes={ETAPES} secteurs={FICHE.cible ?? []} />
             </div>
           </div>
         </section>
