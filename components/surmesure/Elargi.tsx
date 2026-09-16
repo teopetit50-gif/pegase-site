@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { cadencer } from "./cadence";
 
 /* ══════════════════════════════════════════════════════════════════════
    La carte qui s'élargit au défilement (16/09/2026)
@@ -47,11 +48,9 @@ export default function Elargi({ children }: { children: React.ReactNode }) {
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    let raf = 0;
     let dernier = -1;
 
     const peindre = () => {
-      raf = 0;
       const haut = el.getBoundingClientRect().top;
       const vh = window.innerHeight;
       /* Début : le haut de la carte touche le bas de la fenêtre.
@@ -66,18 +65,10 @@ export default function Elargi({ children }: { children: React.ReactNode }) {
       el.style.setProperty("--smd-zoom", val.toFixed(4));
     };
 
-    const planifier = () => {
-      if (!raf) raf = requestAnimationFrame(peindre);
-    };
-
-    peindre();
-    window.addEventListener("scroll", planifier, { passive: true });
-    window.addEventListener("resize", planifier);
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", planifier);
-      window.removeEventListener("resize", planifier);
-    };
+    /* ⚠ PAS D'ÉCOUTE DE `scroll` : Lenis l'avale en production. Voir
+       components/surmesure/cadence.ts — le défaut est silencieux et ne
+       se voit qu'en ligne. */
+    return cadencer(el, peindre);
   }, []);
 
   return (

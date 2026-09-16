@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { cadencer } from "./cadence";
 
 /* ══════════════════════════════════════════════════════════════════════
    /offres/sur-mesure — le hero qui se replie (16/09/2026)
@@ -48,7 +49,6 @@ export default function HeroReplie({ children }: { children: React.ReactNode }) 
     if (!scene) return;
 
     const moinsDeMouvement = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let rafId = 0;
     let dernier = -1;
     let mesureL = -1;
     let mesureH = -1;
@@ -67,7 +67,6 @@ export default function HeroReplie({ children }: { children: React.ReactNode }) 
     };
 
     const peindre = () => {
-      rafId = 0;
       /* Filet de sécurité : la mesure initiale peut tomber avant que le
          conteneur ait sa taille définitive. La comparaison est gratuite ;
          le `getBoundingClientRect` qui coûte n'a lieu que si les
@@ -84,28 +83,22 @@ export default function HeroReplie({ children }: { children: React.ReactNode }) 
       scene.style.setProperty("--smd-p", p.toFixed(4));
     };
 
-    const planifier = () => {
-      if (!rafId) rafId = requestAnimationFrame(peindre);
-    };
-
+    /* ⚠ PAS D'ÉCOUTE DE `scroll` : Lenis l'avale en production, et le
+       repli ne se jouait jamais en ligne alors qu'il marchait en
+       développement. Voir components/surmesure/cadence.ts. */
     mesurer();
-    peindre();
     scene.setAttribute("data-plein", "");
+    const arret = cadencer(scene, peindre);
 
     const surRedimension = () => {
       mesurer();
-      planifier();
+      peindre();
     };
-
-    window.addEventListener("scroll", planifier, { passive: true });
     window.addEventListener("resize", surRedimension);
-    moinsDeMouvement.addEventListener("change", planifier);
 
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", planifier);
+      arret();
       window.removeEventListener("resize", surRedimension);
-      moinsDeMouvement.removeEventListener("change", planifier);
       scene.removeAttribute("data-plein");
     };
   }, []);
