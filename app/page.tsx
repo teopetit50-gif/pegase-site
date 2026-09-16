@@ -251,14 +251,14 @@ const BENEFICES = [
     label: "Trésorerie",
     titre: "Votre chiffre d'affaires ne reste plus en attente.",
     texte:
-      "Les échéances sont suivies, les relances partent au bon moment et s'arrêtent au règlement.",
+      "Les relances partent au bon moment et s'arrêtent au règlement.",
     maquette: <MaqValidation />,
   },
   {
     label: "Temps",
     titre: "Vos journées retrouvent de l'espace.",
     texte:
-      "Suivi, préparation, classement, réponses se font en arrière-plan. Vos équipes n'ont qu'à décider.",
+      "Suivi, classement, réponses : en arrière-plan. Vos équipes décident.",
     maquette: <MaqJournal />,
   },
 ];
@@ -292,19 +292,19 @@ const CARTES_CHANGE: CarteBento[] = [
   {
     titre: "Rien ne part sans que vous l'ayez vu.",
     texte:
-      "Douze verrous sont vérifiés juste avant l'envoi. Un seul qui saute, rien ne part.",
+      "Douze verrous avant l'envoi. Un seul qui saute, rien ne part.",
     span: "lg:col-span-4",
   },
   {
     titre: "Vous ne changez pas de logiciel.",
     texte:
-      "Ils lisent et écrivent dans ce que vous utilisez déjà : messagerie, tableur, agenda. Rien à migrer.",
+      "Messagerie, tableur, agenda : ils écrivent là où vous travaillez déjà.",
     span: "lg:col-span-2",
   },
   {
     titre: "Un poste à la fois, mené jusqu'au bout.",
     texte:
-      "On met en route celui qui vous coûte le plus cher. Les autres suivent si les chiffres du premier le justifient.",
+      "On met en route celui qui vous coûte le plus cher. Les autres suivent.",
     span: "lg:col-span-2",
   },
 ];
@@ -348,14 +348,14 @@ const GROUPES: CarteLueur[] = [
     label: "Déploiement",
     titre: "On commence par un périmètre, jamais par le groupe.",
     texte:
-      "Une filiale, un service, une famille de comptes. Deux semaines où rien ne part, puis un poste par semaine.",
+      "Une filiale, un service. Deux semaines à blanc, puis un poste par semaine.",
     lien: { label: "Demander un audit", href: "/reserver" },
   },
   {
     label: "Contrôle",
     titre: "Les interdits ne sont pas des consignes.",
     texte:
-      "Douze contrôles vivent dans notre base, sous les automatisations : l'envoi interdit n'est pas reporté, il n'est jamais écrit.",
+      "Douze contrôles en base : l'envoi interdit n'est pas reporté, il n'est jamais écrit.",
     /* 15/09/2026 — la carte menait à « Ce que le système refuse »
        (/offres/securite, la fiche VAULT). Les deux paquets compris ne
        s'affichent plus nulle part sur le site et aucune autre page ne
@@ -367,14 +367,14 @@ const GROUPES: CarteLueur[] = [
     label: "Données",
     titre: "Cloisonnées, européennes, restituables.",
     texte:
-      "Un espace par entreprise, hébergé dans l'Union. Tout ce qui part reste au journal. À la sortie : export, puis effacement.",
+      "Un espace par entreprise, dans l'Union. À la sortie : export, puis effacement.",
     lien: { label: "Où vont vos données", href: "/vos-donnees" },
   },
   {
     label: "Intégration",
     titre: "Votre système d'information ne bouge pas.",
     texte:
-      "On lit et on écrit dans les outils en place. Aucune migration, aucun compte à créer pour vos équipes.",
+      "On lit et on écrit dans les outils en place. Aucune migration.",
     lien: { label: "Les outils compatibles", href: "/integrations" },
   },
 ];
@@ -407,37 +407,25 @@ const ETAPES = [
   {
     n: "01",
     titre: "Diagnostic opérationnel",
-    sousTitre: "Identifier les processus à fort impact",
     texte:
-      "Nous analysons vos flux de travail, les points de friction et les tâches à faible valeur ajoutée afin de cibler les leviers d'amélioration les plus pertinents.",
-    court:
       "Nous relevons vos flux et les tâches à faible valeur, pour cibler les leviers.",
   },
   {
     n: "02",
     titre: "Conception",
-    sousTitre: "Définir un système adapté à votre organisation",
     texte:
-      "Chaque solution est conçue selon vos règles métier, vos priorités et vos méthodes de travail. Aucun modèle générique : le système s'adapte à votre fonctionnement.",
-    court:
       "Le système suit vos règles métier. Aucun modèle générique.",
   },
   {
     n: "03",
     titre: "Déploiement",
-    sousTitre: "Intégrer sans bouleverser l'existant",
     texte:
-      "Nous connectons le système à votre environnement de travail et organisons sa mise en production de manière progressive, sécurisée et maîtrisée.",
-    court:
       "Nous le branchons sur vos outils, en mise en production progressive.",
   },
   {
     n: "04",
     titre: "Pilotage",
-    sousTitre: "Mesurer, ajuster, faire évoluer",
     texte:
-      "Les premières opérations restent sous votre contrôle. Nous affinons les règles, suivons les performances et faisons évoluer le système selon vos usages.",
-    court:
       "Les premières opérations restent sous votre contrôle ; on affine les règles.",
   },
 ];
@@ -475,8 +463,6 @@ const GARANTIES: CarteLueur[] = [
     titre: "Le prix est connu avant qu'on commence",
     texte:
       /* 15/09/2026 — la phrase disait « pour les indépendants, TPE et PME, les prix sont publics ». Le site n'affiche plus de barème : il estime sur les volumes saisis, et l'audit fixe le prix. Promettre un prix public sur l'accueil, c'est promettre un montant que plus aucune page ne porte. */
-      "L'audit mesure vos volumes avant la première ligne de code : ce qui passe chaque mois, ce qui revient à quelqu'un, ce qui se perd sans être compté. Le prix en découle, il est écrit dans votre devis, et rien ne démarre sur une estimation faite au téléphone.",
-    court:
       "L'audit mesure vos volumes, le prix en découle, et il est écrit dans votre devis.",
     lien: {
       label: "Comment le prix se calcule",
@@ -488,8 +474,6 @@ const GARANTIES: CarteLueur[] = [
     label: "Données",
     titre: "Vos données restent les vôtres",
     texte:
-      "Vous gardez vos outils de tous les jours : messagerie, tableur, WhatsApp. Le suivi vit dans un espace réservé à votre entreprise. Le jour où vous arrêtez, tout vous est remis et effacé sur demande.",
-    court:
       "Vous gardez vos outils. Le jour où vous arrêtez, tout vous est remis et effacé.",
     lien: { label: "Pourquoi ce choix", href: "/blog/rgpd-donnees-locales" },
     maquette: <MaqLocal />,
@@ -663,35 +647,27 @@ const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
    longueurs — c'est la règle de la doctrine. */
 const ACCROCHES_VITRINE: Record<
   string,
-  { objectif: string; texte: string; court: string }
+  { objectif: string; texte: string }
 > = {
   CASHD: {
     objectif: "À 7 h, vos relances sont déjà écrites.",
     texte:
-      "CASHD relit votre facturier chaque matin et rédige une relance pour chaque compte en retard. Vos équipes n'ont plus qu'à décider laquelle part.",
-    court:
-      "Relit le facturier chaque matin, écrit la relance. Vous décidez laquelle part.",
+      "Relit le facturier chaque matin. Vous décidez ce qui part.",
   },
   RELOAD: {
     objectif: "Un client qui s'éteint, vous le voyez avant la clôture.",
     texte:
-      "RELOAD relit votre base et votre historique pendant la nuit, puis ne garde que les comptes dont le silence dépasse le délai que vous avez fixé.",
-    court:
-      "Relit votre base la nuit, remonte les comptes silencieux depuis trop longtemps.",
+      "Relit votre base la nuit, remonte les comptes silencieux.",
   },
   FRONTD: {
     objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
     texte:
-      "FRONTD lit le message dès qu'il arrive et répond dans la minute, sans jamais sortir de ce que vous avez validé avec nous.",
-    court:
-      "Lit le message dès son arrivée et répond dans la minute, sur vos réponses validées.",
+      "Lit le message dès son arrivée et répond dans la minute.",
   },
   FILED: {
     objectif: "Vos équipes ne ressaisiront plus un seul document.",
     texte:
-      "Vous connectez une messagerie, rien d'autre. FILED lit chaque document reçu, quel qu'en soit le type, le classe au bon dossier et rédige ce qui doit repartir.",
-    court:
-      "Lit chaque document reçu, le classe au bon dossier, rédige ce qui repart.",
+      "Lit chaque document, le classe, rédige ce qui repart.",
   },
 };
 
@@ -776,21 +752,21 @@ const PORTES = [
     nom: "Les systèmes prêts",
     objectif: "Quatre postes déjà outillés",
     texte:
-      "Relances, demandes entrantes, pièces fournisseurs, affaires à reprendre. Installés en l'état, réglés sur vos règles.",
+      "Relances, demandes, pièces fournisseurs, affaires à reprendre. Réglés sur vos règles.",
     lien: { label: "Voir les quatre", href: "/offres" },
   },
   {
     nom: "Le sur-mesure",
     objectif: "Ce qui n'existe pas encore",
     texte:
-      "Un logiciel métier, un pont entre deux outils, un contrôle qui se répète. Le besoin est cadré et chiffré avant d'écrire une ligne.",
+      "Un logiciel métier, un pont entre deux outils, cadrés avant la première ligne.",
     lien: { label: "Comment se fait le cadrage", href: "/offres/sur-mesure" },
   },
   {
     nom: "Votre site",
     objectif: "Une vitrine qui tient debout",
     texte:
-      `${MODELES.length} modèles en ligne, tous visitables. Contenu réécrit à votre métier, nom de domaine et mise en ligne compris.`,
+      `${MODELES.length} modèles en ligne. Contenu réécrit à votre métier, nom de domaine compris.`,
     lien: { label: "Voir les modèles", href: "/modeles" },
   },
 ];
@@ -799,19 +775,18 @@ function EnTete({
   pastille,
   titre,
   chapo,
-  court,
 }: {
   /* 12/09/2026 — un noeud et plus une chaine : le sourcil de la section
      equipe porte le drapeau avant son intitule. Les onze autres appels
      passent une chaine, qui reste un noeud valide. */
   pastille: React.ReactNode;
   titre: string;
+  /* 16/09/2026 — une seule longueur, servie à toutes les largeurs. La page
+     portait DEUX chapôs par section (bureau + téléphone) : relevée sur
+     scale.com, la référence donnée par Teo, un chapô de section tient en
+     17 à 38 signes, ou en UNE phrase de 145 au maximum. C'est la version
+     courte qui reste, celle qui avait déjà été écrite pour 375 px. */
   chapo: string;
-  /* 15/09/2026 — le chapô en une phrase, servi sous 768 px.
-     Mesuré à 375 px : les chapôs de bureau font trois à cinq lignes, douze
-     fois dans la page, soit ~1 100 px de sous-titre avant même le contenu.
-     Facultative : une section sans version courte garde `chapo` partout. */
-  court?: string;
 }) {
   return (
     <div className="flex flex-col items-center text-center">
@@ -825,14 +800,7 @@ function EnTete({
         {/* les deux longueurs vivent dans le DOM et s'arbitrent en CSS :
             un rendu conditionnel en JavaScript ferait clignoter la phrase
             entre le rendu serveur et l'hydratation. */}
-        {court ? (
-          <>
-            <span className="md:hidden">{court}</span>
-            <span className="hidden md:inline">{chapo}</span>
-          </>
-        ) : (
-          chapo
-        )}
+        {chapo}
       </p>
     </div>
   );
@@ -927,8 +895,7 @@ export default function Home() {
               {/* Les deux versions sont dans le DOM : c'est du texte, il
                   pèse 300 signes, et un rendu conditionnel en JavaScript
                   ferait clignoter la phrase au premier rendu. */}
-              <span className="lg:hidden">{HERO.chapoCourt}</span>
-              <span className="hidden lg:inline">{HERO.chapo}</span>
+              {HERO.chapoCourt}
             </p>
             <div className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
               {/* 14/09 : « Découvrir notre approche » menait à /commencer
@@ -950,8 +917,7 @@ export default function Home() {
               >
                 {/* même procédé que le chapô : les deux versions dans le
                     DOM, la largeur choisit. */}
-                <span className="lg:hidden">{HERO.sousCourt}</span>
-                <span className="hidden lg:inline">{HERO.sous}</span>
+                {HERO.sousCourt}
               </span>
             </div>
           </div>
@@ -1029,8 +995,7 @@ export default function Home() {
             <EnTete
               pastille="CE QUI S'INSTALLE"
               titre="Chaque système agit sur un levier de performance"
-              chapo="Encaissement, réactivation, demandes entrantes, documents : chaque système tient un poste précis, sur vos règles, avec un contrôle humain avant tout envoi."
-              court="Quatre postes, vos règles, un contrôle humain avant chaque envoi."
+              chapo="Quatre postes, vos règles, un contrôle humain avant chaque envoi."
             />
             {/* 11/09/2026 — les quatre systèmes prennent la grille de
                 cartes douces du bloc `integrations-three` (cnblocks, via
@@ -1077,7 +1042,6 @@ export default function Home() {
                    sans avoir d'accroche vitrine. */
                 objectif: ACCROCHES_VITRINE[m.system]?.objectif ?? m.title,
                 texte: ACCROCHES_VITRINE[m.system]?.texte ?? m.benefit,
-                court: ACCROCHES_VITRINE[m.system]?.court,
                 href: `/offres/${m.slug}`,
               }))}
             />
@@ -1136,8 +1100,7 @@ export default function Home() {
             <EnTete
               pastille="ORGANISATIONS"
               titre="Quand plusieurs services valident, rien ne s'improvise."
-              chapo="Le cadre ne change pas avec la taille : un périmètre d'essai, des règles écrites, une sortie prévue dès le départ."
-              court="Périmètre d'essai, règles écrites, sortie prévue dès le départ."
+              chapo="Périmètre d'essai, règles écrites, sortie prévue dès le départ."
             />
             <div className="mt-8 md:mt-16">
               <CartesLueur cartes={GROUPES} />
@@ -1197,8 +1160,7 @@ export default function Home() {
             <EnTete
               pastille="LES SITUATIONS"
               titre="Ce que les systèmes tiennent, et chez qui ça arrive."
-              chapo="Neuf situations telles qu'elles se présentent avant l'audit, avec le poste qui les prend en charge et le secteur où elles reviennent le plus souvent."
-              court="Neuf situations telles qu'elles se présentent avant l'audit, et le poste qui les tient."
+              chapo="Neuf situations telles qu'elles se présentent avant l'audit, et le poste qui les tient."
             />
             <div className="mt-8 md:mt-16">
               <CasColonnes cas={CAS_ACCUEIL} />
@@ -1262,8 +1224,7 @@ export default function Home() {
             <EnTete
               pastille="LE DÉROULÉ"
               titre="De l'analyse au déploiement."
-              chapo="Une méthode structurée pour intégrer des systèmes intelligents à vos opérations, sans perturber votre organisation existante."
-              court="Quatre étapes, sans interrompre vos opérations."
+              chapo="Quatre étapes, sans interrompre vos opérations."
             />
             {/* 11/09/2026 — les quatre étapes passent de la grille plate à une
                 frise dont le rail se remplit au défilement (`FriseDeroule`,
@@ -1322,8 +1283,7 @@ export default function Home() {
                  page tiennent en deux lignes ; celui-ci dit moins et laisse
                  les trois cartes énumérer. */
               titre="Trois façons de commencer."
-              chapo="Le cœur du métier est le sur-mesure : ce qui n'existe pas encore, cadré et chiffré à l'audit. Les deux autres entrées s'installent en l'état. Même exigence derrière les trois : vos règles écrites noir sur blanc, vos données en Europe, un seul interlocuteur."
-              court="Le sur-mesure, les systèmes prêts, ou votre site. Mêmes garanties derrière les trois."
+              chapo="Le sur-mesure, les systèmes prêts, ou votre site. Mêmes garanties derrière les trois."
             />
             {/* 11/09/2026 (Teo) — la rangée de portes ne paraît qu'à partir
                 de `lg`. Sous ce seuil, elle et le tableau se rendaient tous
@@ -1391,8 +1351,7 @@ export default function Home() {
             <EnTete
               pastille="HÉBERGEMENT"
               titre="Vos données restent sous juridiction européenne."
-              chapo="Six faits vérifiables sur l'hébergement de vos données et sur les traitements qui leur sont appliqués."
-              court="Six faits vérifiables sur l'hébergement et les traitements."
+              chapo="Six faits vérifiables sur l'hébergement et les traitements."
             />
 
             <div className="mt-8 md:mt-14">
@@ -1408,10 +1367,8 @@ export default function Home() {
               data-reveal
               className="o-small mx-auto mt-7 max-w-[720px] text-center !text-[15px] !leading-[24px]"
             >
-              Ils reçoivent le strict nécessaire à chaque tâche — un montant,
-              une date, un nom. Jamais votre fichier client ni votre
-              historique, et rien de ce qui leur est envoyé ne sert à
-              entraîner un modèle.
+              Un montant, une date, un nom : le strict nécessaire. Rien de ce
+              qui leur est envoyé ne sert à entraîner un modèle.
             </p>
           </div>
         </section>
@@ -1422,8 +1379,7 @@ export default function Home() {
             <EnTete
               pastille="LES GARANTIES"
               titre="Un investissement maîtrisé. Des données protégées."
-              chapo="Ce que ça vous engage, et ce qu'il advient de vos données. Deux réponses, dès le départ."
-              court="Ce que ça vous engage, et ce qu'il advient de vos données."
+              chapo="Ce que ça vous engage, et ce qu'il advient de vos données."
             />
             {/* 11/09/2026 — les deux cartes larges passent à `CartesLueur` :
                 même maquette, même destination, mais le liseré s'encre sous
@@ -1472,10 +1428,8 @@ export default function Home() {
                   1ᵉʳ septembre 2026.
                 </h2>
                 <p data-reveal className="o-lead mt-5">
-                  À cette date, toutes les entreprises établies en France doivent
-                  être en mesure de recevoir des factures électroniques au format
-                  structuré. Pas un PDF par mail : un fichier qui transite par une
-                  plateforme agréée.
+                  Toutes les entreprises établies en France doivent pouvoir
+                  recevoir une facture au format structuré. Pas un PDF par mail.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap gap-3">
                   <Link href="/commencer" className="o-btn o-btn--primary">
@@ -1503,9 +1457,8 @@ export default function Home() {
               <div>
                 <CartesEcheance cartes={ECHEANCES} />
                 <p data-reveal className="o-small mt-2 max-w-[440px]">
-                  Nettoyer sa base à froid coûte quelques heures. Le faire en
-                  urgence, facture rejetée par facture rejetée, coûte des
-                  semaines.
+                  Nettoyer sa base à froid coûte quelques heures. Dans
+                  l&apos;urgence, des semaines.
                 </p>
               </div>
             </div>
@@ -1518,8 +1471,7 @@ export default function Home() {
             <EnTete
               pastille="QUESTIONS"
               titre="Ce qu'on nous demande avant de signer."
-              chapo="Les six questions qui reviennent à chaque premier rendez-vous, avec les réponses qu'on donne en vrai."
-              court="Les six questions de chaque premier rendez-vous."
+              chapo="Les six questions de chaque premier rendez-vous."
             />
             <div className="mx-auto mt-7 max-w-[800px] md:mt-12">
               {FAQ.map((f) => (

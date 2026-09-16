@@ -144,7 +144,7 @@ const LIGNES: { label: string; cellules: [Cellule, Cellule, Cellule] }[] = [
   {
     label: "Ce qui est déjà écrit",
     cellules: [
-      "Les quatre systèmes, installés en l'état",
+      "Les quatre systèmes",
       "Rien : tout part de vos règles",
       `${MODELES.length} modèles, tous visitables`,
     ],
@@ -152,9 +152,9 @@ const LIGNES: { label: string; cellules: [Cellule, Cellule, Cellule] }[] = [
   {
     label: "Ce qu'on écrit avec vous",
     cellules: [
-      "La cadence, les plafonds, les verrous d'envoi",
-      "Le besoin, cadré et chiffré avant la première ligne",
-      "Le contenu, réécrit à votre métier",
+      "Cadence, plafonds, verrous",
+      "Le besoin, cadré et chiffré",
+      "Le contenu, à votre métier",
     ],
   },
   {

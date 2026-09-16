@@ -695,9 +695,11 @@ export function MaqPrixConnu() {
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#f4f4f5]">
           <div className="h-full w-[100%] rounded-full bg-[#18181b]" />
         </div>
+        {/* 16/09 — la phrase disait ce que la carte qui porte cette
+            maquette dit déjà (« l'audit mesure vos volumes, le prix en
+            découle »). Une ligne suffit sous la jauge. */}
         <p className="mt-3 text-[12.5px] leading-[1.6] text-[#71717a]">
-          Le besoin est mesuré et chiffré avant tout engagement. Rien ne se
-          construit sur une estimation faite au téléphone.
+          Jamais une estimation faite au téléphone.
         </p>
       </div>
     </Carte>

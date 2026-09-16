@@ -248,7 +248,11 @@ function Rangee({
         ) : null}
       </div>
       <p className="eq-role">{membre.role}</p>
-      {membre.bio ? <p className="eq-bio">{membre.bio}</p> : null}
+      {/* 16/09 — la version courte si elle existe : l'accueil est dégraissé
+          au budget de scale.com, /a-propos garde la bio entière. */}
+      {membre.bioCourte ?? membre.bio ? (
+        <p className="eq-bio">{membre.bioCourte ?? membre.bio}</p>
+      ) : null}
     </li>
   );
 }

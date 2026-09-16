@@ -54,9 +54,14 @@ export type Membre = {
   /* le nom de famille, affiché à la suite du prénom dans la mosaïque */
   nom?: string;
   role: string;
-  /* le descriptif, deux à trois lignes. Affiché sous le rôle dans la
-     mosaïque depuis le 14/09, et par la grille de fiches. */
+  /* le descriptif, deux à trois lignes. Affiché par la grille de fiches de
+     /a-propos, où c'est le sujet de la page. */
   bio?: string;
+  /* 16/09/2026 — la même en une ligne, servie par la mosaïque de l'ACCUEIL.
+     Les trois bios y pesaient 550 signes à elles seules, au milieu d'une
+     page dégraissée sur le budget de scale.com. /a-propos garde les
+     longues : là-bas, l'équipe est le sujet. */
+  bioCourte?: string;
   /* chemin dans /public — sans photo, la tuile affiche les initiales */
   photo?: string;
   /* lien optionnel révélé au survol (profil, page perso). Aucun n'est posé
@@ -71,6 +76,8 @@ export const MEMBRES: Membre[] = [
     nom: "Guichané",
     role: "CEO & Fondateur",
     bio: "Passé par Microsoft puis DocuSign, où son métier était de faire adopter des logiciels dans de grandes organisations. Ce qui décide qu'un outil serve vraiment, il l'a vu de près.",
+    bioCourte:
+      "Passé par Microsoft puis DocuSign, où il faisait adopter des logiciels dans de grandes organisations.",
     photo: "/equipe/henri.jpg",
   },
   {
@@ -79,6 +86,8 @@ export const MEMBRES: Membre[] = [
     nom: "Karmalecki",
     role: "CTO & Co-fondateur",
     bio: "Ingénieur en intelligence artificielle, passé par Salesforce puis Databricks comme ingénieur avant-vente. C'est lui qui conçoit les systèmes, et qui les tient quand ils passent en production.",
+    bioCourte:
+      "Ingénieur en intelligence artificielle, passé par Salesforce puis Databricks. Il conçoit les systèmes et les tient en production.",
     photo: "/equipe/vincent.jpg",
   },
   {
@@ -87,6 +96,8 @@ export const MEMBRES: Membre[] = [
     nom: "Karczewski",
     role: "Co-fondateur",
     bio: "Il conduit les audits, décide des mises en production et répond de l'exploitation des systèmes installés. Passé par la finance, en hedge fund, où rien ne s'engage sur une hypothèse non vérifiée.",
+    bioCourte:
+      "Il conduit les audits et répond de l'exploitation. Passé par la finance, en hedge fund.",
     photo: "/equipe/teo.jpg",
   },
 ];
@@ -99,8 +110,11 @@ export const MEMBRES: Membre[] = [
    comme guadeloupéen (Teo, 15/09). */
 export const EQUIPE_SURTITRE = "ÉQUIPE FRANÇAISE";
 export const EQUIPE_TITRE = "Un interlocuteur unique, de l'audit à l'exploitation.";
+/* 16/09/2026 — trois lignes de chapô ramenées à une : sur l'accueil, c'était
+   le seul texte de section qui n'avait pas de version courte. Budget relevé
+   sur scale.com : un chapô de section y tient en 17 à 38 signes. */
 export const EQUIPE_CHAPO =
-  "Omega ne fonctionne pas par couches. L'équipe qui conduit votre audit conçoit vos systèmes, les met en production et reste votre interlocuteur une fois l'installation terminée.";
+  "La même équipe conduit l'audit, conçoit les systèmes et reste votre interlocuteur.";
 /* La ligne de pied, sous la liste des noms. Chaque terme est vérifiable. */
 export const EQUIPE_PIED =
   "Conçu et développé en France.";

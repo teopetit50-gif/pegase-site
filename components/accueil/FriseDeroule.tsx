@@ -45,10 +45,16 @@ import { motion, useReducedMotion, useScroll, useTransform } from "motion/react"
 export type EtapeFrise = {
   n: string;
   titre: string;
-  sousTitre: string;
+  /* 16/09/2026 — facultatif. L'accueil posait TROIS textes par étape : le
+     nom (« Conception »), ce qu'elle produit (« Définir un système adapté à
+     votre organisation ») et la phrase. Les deux premiers disent la même
+     chose ; le sous-titre est retiré côté accueil. */
+  sousTitre?: string;
   texte: string;
   /* 15/09/2026 — la même étape en une phrase, servie sous 768 px, où les
-     quatre textes faisaient cinq lignes chacun. Facultatif. */
+     quatre textes faisaient cinq lignes chacun. Facultatif.
+     16/09 — l'accueil n'en passe plus : sa version courte est devenue la
+     seule, à toutes les largeurs. */
   court?: string;
 };
 
@@ -122,10 +128,12 @@ export default function FriseDeroule({ etapes }: { etapes: EtapeFrise[] }) {
                 </span>
                 <h3 className="o-h5 mt-2">{e.titre}</h3>
               </div>
-              <p className="mt-2 text-[14px] font-semibold leading-[21px] text-[#18181b] md:mt-0 md:text-[15px] md:leading-[24px]">
-                {e.sousTitre}
-              </p>
-              <p className="o-small mt-1.5 max-w-[560px] !text-[14px] !leading-[21px] md:mt-2 md:!text-[15px] md:!leading-[24px]">
+              {e.sousTitre ? (
+                <p className="mt-2 text-[14px] font-semibold leading-[21px] text-[#18181b] md:mt-0 md:text-[15px] md:leading-[24px]">
+                  {e.sousTitre}
+                </p>
+              ) : null}
+              <p className="o-small max-w-[560px] !text-[14px] !leading-[21px] md:!text-[15px] md:!leading-[24px] mt-2">
                 {/* les deux longueurs s'arbitrent en CSS — voir la note de
                     `EnTete` sur le clignotement à l'hydratation. */}
                 {e.court ? (

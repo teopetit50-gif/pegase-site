@@ -62,7 +62,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
   {
     icone: <Receipt strokeWidth={1.5} />,
     texte:
-      "Des factures échues relancées quand quelqu'un y pense — donc deux clients dans la même situation traités à deux rythmes différents.",
+      "Des factures échues relancées quand quelqu'un y pense.",
     nature: "Relance des devis et factures",
     href: "/offres/relances-impayes",
     secteur: "Négoce & distribution",
@@ -70,7 +70,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
   {
     icone: <MessagesSquare strokeWidth={1.5} />,
     texte:
-      "Des demandes qui arrivent le samedi et attendent le lundi soir qu'on ait le temps de les lire, pendant que le client en appelle un autre.",
+      "Une demande arrivée le samedi, lue le lundi soir.",
     nature: "Réponse aux demandes clients",
     href: "/offres/demandes-clients",
     secteur: "Services aux entreprises",
@@ -78,7 +78,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
   {
     icone: <RefreshCw strokeWidth={1.5} />,
     texte:
-      "Un fichier de clients qui n'ont plus rien commandé depuis deux ans, que personne n'a le temps de reprendre un par un.",
+      "Des clients sans commande depuis deux ans, jamais rappelés.",
     nature: "Clients inactifs",
     href: "/offres/nouvelles-affaires",
     secteur: "Transport & logistique",
@@ -86,7 +86,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
   {
     icone: <FileSearch strokeWidth={1.5} />,
     texte:
-      "Des factures fournisseurs reçues en PDF, ressaisies à la main avant d'être transmises au cabinet comptable.",
+      "Des factures fournisseurs en PDF, ressaisies à la main.",
     nature: "Factures fournisseurs",
     href: "/offres/factures-fournisseurs",
     secteur: "Bâtiment & travaux",
@@ -94,28 +94,28 @@ export const CAS_ACCUEIL: CasUsage[] = [
   {
     icone: <Sunrise strokeWidth={1.5} />,
     texte:
-      "Ouvrir la journée sans savoir ce qui est parti la veille, ce qui attend une décision, ni ce qui a été refusé avant d'être envoyé.",
+      "Ouvrir la journée sans savoir ce qui est parti la veille.",
     nature: "Le point du matin",
     secteur: "Toutes tailles",
   },
   {
     icone: <ShieldCheck strokeWidth={1.5} />,
     texte:
-      "Un message parti au mauvais client, une seule fois, et des mois à refaire la confiance. Rien ne part sans passer la file de validation.",
+      "Un message parti au mauvais client, et la confiance à refaire.",
     nature: "Validation avant envoi",
     secteur: "Plusieurs services qui valident",
   },
   {
     icone: <Cable strokeWidth={1.5} />,
     texte:
-      "Un outil de plus à ouvrir chaque matin, quand les équipes travaillent déjà dans la messagerie, le tableur et l'agenda.",
+      "Un outil de plus à ouvrir chaque matin.",
     nature: "Intégration sans migration",
     secteur: "PME déjà équipées",
   },
   {
     icone: <ArrowLeftRight strokeWidth={1.5} />,
     texte:
-      "Deux logiciels qui ne se parlent pas, et la même information ressaisie deux fois par jour par deux personnes différentes.",
+      "La même information saisie deux fois, dans deux logiciels.",
     nature: "Pont entre deux outils",
     secteur: "Industrie & production",
   },
@@ -125,7 +125,7 @@ export const CAS_ACCUEIL: CasUsage[] = [
        même phrase qu'on dit au cadrage. */
     icone: <Scale strokeWidth={1.5} />,
     texte:
-      "Sur de petits volumes, l'audit conclut parfois qu'aucun poste ne se rentabilise. On le dit avant de commencer, pas après.",
+      "Sur de petits volumes, rien ne se rentabilise. On le dit avant.",
     nature: "Ce qu'on n'installe pas",
     secteur: "Le cas écarté",
   },
