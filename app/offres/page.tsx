@@ -1,7 +1,18 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bell, Check, FileText, MessageSquare, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Bell,
+  Check,
+  FileClock,
+  FileText,
+  Hourglass,
+  MessageSquare,
+  ReceiptText,
+  Send,
+  Users,
+} from "lucide-react";
 import { siAirtable, siAsana, siHubspot, siQuickbooks, siStripe } from "simple-icons";
 import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
 import { ChatMessages } from "@/components/ui/chat-messages";
@@ -354,16 +365,39 @@ const PAQUETS = [
   },
 ];
 
-/* BLOC 5d — quatre articles RÉELS du site (lib/content.ts). Aucune
-   vignette inventée : chaque couverture est celle du billet. */
+/* BLOC 5d — LES RESSOURCES.
+
+   16/09 (Teo) — « cette section n'est pas pareille : eux c'est des trucs
+   avec fond blanc, pas nous, nous c'est des images ; et les phrases en
+   noir sont encore trop développées chez nous. »
+
+   Deux corrections :
+
+   1. LA VIGNETTE. La référence ne met PAS de photographie : un fond blanc
+      et un dessin au trait, centré. Nos couvertures d'articles sont des
+      photos sombres — même emprise, poids visuel opposé. La vignette
+      passe donc au blanc avec un pictogramme au trait, comme eux. Les
+      couvertures restent celles des billets, sur /blog, où elles ont leur
+      place.
+
+   2. LE TITRE. Leurs titres de carte font 22 à 33 signes et tiennent sur
+      une ligne ; les nôtres, qui sont les titres COMPLETS des billets, en
+      font 32 à 62 et passaient tous sur deux lignes. La carte porte
+      désormais un `libelle` court — un abrégé fidèle, pas un autre titre.
+      Le titre complet du billet n'est pas perdu : il reste le nom
+      accessible du lien (`aria-label`), donc ce qu'annonce un lecteur
+      d'écran et ce qu'affiche l'infobulle. La page /blog, elle, continue
+      d'afficher les titres entiers.
+
+   Longueurs, référence puis nous : 22-33 · 18-25. */
 const RESSOURCES = [
-  "impayes-cout-attendre",
-  "btp-devis-jamais-relances",
-  "immobilier-repondre-en-premier",
-  "facturation-electronique-2026",
+  { slug: "impayes-cout-attendre", libelle: "Le coût d'attendre", icone: Hourglass },
+  { slug: "btp-devis-jamais-relances", libelle: "Les devis sans réponse", icone: FileClock },
+  { slug: "immobilier-repondre-en-premier", libelle: "Répondre en premier", icone: Send },
+  { slug: "facturation-electronique-2026", libelle: "La facture électronique", icone: ReceiptText },
 ]
-  .map((slug) => POSTS.find((p) => p.slug === slug))
-  .filter((p): p is (typeof POSTS)[number] => Boolean(p));
+  .map((r) => ({ ...r, post: POSTS.find((p) => p.slug === r.slug) }))
+  .filter((r): r is typeof r & { post: (typeof POSTS)[number] } => Boolean(r.post));
 
 /* ─────────────────────────────────────────────────────────────────────
    Briques
@@ -744,6 +778,11 @@ export default function OffresPage() {
           <div className="ofd-wrap ofd-wrap--plein">
             <div className="ofd-duo">
               <div aria-hidden className="ofd-duo__marque">
+                {/* le rouge est porté par cet enfant, pas par le cadre :
+                    la sonde de couleur de l'entête traverse le cadre
+                    transparent et lit le blanc de la page. Voir le
+                    commentaire de `.ofd-duo__marque` dans nos-offres.css. */}
+                <span className="ofd-duo__fond" />
                 {/* Mot-symbole en serif blanc sur le rouge de la référence
                     (#E7131A). UN SEUL MOT — Teo, 16/09 : « c'est un mot
                     qu'il faut mettre ». « Sur mesure » passait sur deux
@@ -879,20 +918,21 @@ export default function OffresPage() {
               <TeteSection etiquette="Ressources" titre="Pour aller plus loin" />
 
               <div className="ofd-ressources">
-                {RESSOURCES.map((p) => (
-                  <Link key={p.slug} href={`/blog/${p.slug}`} data-reveal className="ofd-ressource">
-                    <div className="ofd-ressource__vignette">
-                      <Image
-                        src={p.cover}
-                        alt=""
-                        width={640}
-                        height={402}
-                        sizes="(max-width: 1024px) 100vw, 25vw"
-                      />
+                {RESSOURCES.map(({ slug, libelle, icone: Icone, post }) => (
+                  <Link
+                    key={slug}
+                    href={`/blog/${slug}`}
+                    data-reveal
+                    className="ofd-ressource"
+                    aria-label={post.title}
+                    title={post.title}
+                  >
+                    <div aria-hidden className="ofd-ressource__vignette">
+                      <Icone size={96} strokeWidth={1} />
                     </div>
                     <div className="ofd-ressource__texte">
-                      <p className="ofd-ressource__cat">{p.cat}</p>
-                      <h3 className="ofd-ressource__titre">{p.title}</h3>
+                      <p className="ofd-ressource__cat">{post.cat}</p>
+                      <h3 className="ofd-ressource__titre">{libelle}</h3>
                     </div>
                   </Link>
                 ))}

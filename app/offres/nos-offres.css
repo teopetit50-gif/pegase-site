@@ -492,7 +492,19 @@
   border-radius: var(--ofd-r-xl);
   overflow: hidden;
   isolation: isolate;
-  background: #193a29;
+
+  /* ⚠ BLANC, ET SURTOUT PAS UNE COULEUR SOMBRE.
+     L'entête du site prélève la couleur sous son bord bas et se peint avec
+     (components/Header.tsx) : elle remonte la pile au point `main.left + 4`
+     jusqu'au PREMIER fond non transparent. Dans le hero, l'image et le voile
+     sont transparents pour ce test — l'image n'a pas de `background-color`,
+     le voile est un dégradé — donc la pile arrive ICI. Le vert `evergreen`
+     qui servait de fond de secours peignait donc l'entête en VERT SAPIN dès
+     qu'elle recouvrait le hero (Teo, capture du 16/09 ; même défaut corrigé
+     le même jour sur /offres/sur-mesure).
+     Si un fond de secours redevient nécessaire pendant le chargement de la
+     photo, le poser sur un enfant SOUS l'image, jamais sur ce cadre. */
+  background: #ffffff;
 }
 @media (min-width: 768px) {
   .ofd .ofd-hero {
@@ -765,7 +777,27 @@
   overflow: hidden;
   border-radius: var(--ofd-r-lg);
   padding: 40px;
+
+  /* Même raison que le hero, et c'est plus retors ici : le rouge est le
+     dessin, on ne peut pas le remplacer par du blanc. Il descend donc sur
+     un ENFANT en position absolue, et le cadre reste transparent — la
+     sonde de l'entête le traverse et tombe sur le blanc de `.ofd`.
+     Pourquoi ça ne se voyait qu'en grand écran : la sonde prélève à
+     `main.left + 4`. À 1440, main commence à 0, le point tombe à x = 4,
+     dans la marge de 24 du panneau. À 1920, main commence à 240 : le point
+     tombe à x = 244, DANS le rouge — et l'entête virait au rouge vif. */
+  background: transparent;
+}
+.ofd .ofd-duo__fond {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
   background: #e7131a;
+}
+.ofd .ofd-duo__signe {
+  position: relative;
+  z-index: 1;
 }
 @media (min-width: 768px) {
   .ofd .ofd-duo__marque {
@@ -1124,22 +1156,26 @@
   text-decoration: none;
   color: inherit;
 }
+/* Fond BLANC et dessin au trait, pas une photographie : c'est ce que pose
+   la référence, et nos couvertures d'articles — des photos sombres —
+   donnaient le poids visuel inverse à emprise égale (Teo, 16/09). */
 .ofd .ofd-ressource__vignette {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   border-radius: var(--ofd-r-sm);
-  background: #000000;
+  background: #ffffff;
+  color: var(--ofd-encre);
   aspect-ratio: 389 / 243;
 }
-.ofd .ofd-ressource__vignette img {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
+.ofd .ofd-ressource__vignette svg {
   transition: transform 600ms ease-out;
 }
-.ofd .ofd-ressource:hover .ofd-ressource__vignette img {
-  transform: scale(1.04);
+.ofd .ofd-ressource:hover .ofd-ressource__vignette svg {
+  transform: scale(1.06);
 }
 .ofd .ofd-ressource__texte {
   position: relative;
@@ -1166,10 +1202,10 @@
   overflow: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ofd .ofd-ressource__vignette img {
+  .ofd .ofd-ressource__vignette svg {
     transition: none;
   }
-  .ofd .ofd-ressource:hover .ofd-ressource__vignette img {
+  .ofd .ofd-ressource:hover .ofd-ressource__vignette svg {
     transform: none;
   }
 }
