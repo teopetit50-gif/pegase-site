@@ -447,7 +447,8 @@ const ETAPES = [
    Guadeloupe » remise par Teo le 07/08 : sans elle, un visiteur hexagonal
    lisait une aide qui le concernait. Le 15/09, Teo a tranché plus court —
    le dispositif sort de l'accueil (voir la première carte de GARANTIES).
-   Il reste entier sur /tarifs#cheque-tic et dans son article de blog. */
+   Il reste dans la FAQ de /tarifs et dans son article de blog — la
+   section de /tarifs qui le portait a été supprimée le 15/09 au soir. */
 /* 11/09/2026 — les deux corps de 5 et 6 lignes sont ramenés à 3, et
    l'encadré « accompagnement » disparaît : le type est désormais celui de
    `CartesLueur`, qui n'a pas de fente pour lui. Ce qui a été retiré de la
@@ -461,9 +462,11 @@ const GARANTIES: CarteLueur[] = [
        Guadeloupe posée sur un accueil national — pour la quasi-totalité des
        visiteurs, une promesse qui ne les concerne pas, et qui brouille le
        « produit français » ([[produit-francais-jamais-guadeloupeen]]).
-       Il n'est pas retiré du site : sa section vit sur /tarifs#cheque-tic et
-       son article de blog, avec l'incise « Région Guadeloupe » qui reste
-       obligatoire là où il est cité. À la place, un argument qui vaut pour
+       Il n'est pas retiré du site : il est dit dans la FAQ de /tarifs, sur
+       la ligne d'engagement de l'installation et dans son article de blog,
+       avec l'incise « Région Guadeloupe » qui reste obligatoire là où il
+       est cité. (La bande qui lui était consacrée sur /tarifs a elle aussi
+       été supprimée, le 15/09 au soir.) À la place, un argument qui vaut pour
        tout le monde et tient le même rôle dans le titre de section
        (« un investissement maîtrisé ») : le prix est connu avant qu'on
        commence. Pour revenir en arrière, le texte et la maquette MaqCheque

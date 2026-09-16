@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Grille from "@/components/tarifs/Grille";
-import ChequeTic from "@/components/tarifs/ChequeTic";
 import AppelFinal from "@/components/tarifs/AppelFinal";
 import FaqTarifs from "@/components/tarifs/FaqTarifs";
 import ReglesFacturation, { type Regle } from "@/components/tarifs/ReglesFacturation";
@@ -56,16 +55,28 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
           components/tarifs/Grille.tsx, comme reservation/Formules.tsx ;
      3bis. « Ce que nous ne facturons jamais » dans les cartes blanches
           du « Comment se passe l'audit » (note, H2, étiquette, titre) ;
-     4.   Chèque TIC sur bande sombre (H2 au lieu de H3) ;
+     4.   (supprimée le 15/09 — voir la note en bas de ce bloc) ;
      7.   CTA final centré, avec la voie WhatsApp et la mention discrète
           de l'autre porte — la page audit finit pareil ;
      8.   la FAQ, en dernier.
    → 14/09 (Teo : « ces sections sont mal faites, récupère des composants
    sur 21st.dev ») : les sections 4, 7 et 8 sont des reprises 21st.dev,
    chacune dans components/tarifs/ avec ses écarts en tête — ChequeTic
-   (stats-2), AppelFinal (call-to-action), FaqTarifs (faqs-02). Les textes
-   n'ont pas bougé ; seuls les trois chiffres du Chèque TIC sont sortis du
-   paragraphe pour devenir des tuiles.
+   (stats-2, puis stats-section-with-text le 15/09), AppelFinal
+   (call-to-action), FaqTarifs (faqs-02).
+
+   → 15/09, fin de journée : LA SECTION 4 EST SUPPRIMÉE (Teo, après deux
+   passes sur sa composition et une sur sa couleur : « supprime cette
+   section finalement »). La page perd sa seule bande sombre et enchaîne
+   désormais les engagements sur l'appel final. Le Chèque TIC n'est PAS
+   retiré du site pour autant — il reste dit à trois endroits : la FAQ de
+   cette page (« Le Chèque TIC s'applique-t-il ici ? », qui porte les
+   mêmes faits : 40 à 80 %, 10 000 €, assiette sur l'installation), la
+   ligne d'engagement « l'installation peut relever du Chèque TIC », et
+   l'article de blog cheque-tic-financement. C'est ce qui permet de le
+   supprimer sans perdre l'information ni l'incise « Région Guadeloupe ».
+   Le composant et sa feuille sont supprimés avec elle ; ils se relisent
+   dans l'historique si la section doit revenir.
    Le simulateur et les engagements (5, 6) n'ont pas d'équivalent tarifs
    et ne sont pas meublés. Les textes de la page sont inchangés ; les
    seuls ajouts sont ceux que les emplacements du design imposaient
@@ -237,12 +248,6 @@ export default function TarifsPage() {
             chapo="Quatre étapes, de l'unité que nous comptons au montant qui figure à votre devis."
             regles={CHIFFRAGE}
           />
-        </section>
-
-        {/* ═══ 4 — Chèque TIC, sur bande sombre — trois tuiles à grands
-               chiffres (14/09, reprise stats-2) ═══ */}
-        <section id="cheque-tic" className="r-nuit ct-bande">
-          <ChequeTic />
         </section>
 
         {/* ═══ 7 — CTA final — la carte sombre encadrée (14/09, reprise

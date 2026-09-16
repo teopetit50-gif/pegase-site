@@ -60,7 +60,8 @@ import { useCallback, useState } from "react";
    étaient dits deux fois à 300 px d'intervalle, et c'est ce doublon qui
    faisait le mur. L'encadré « accompagnement de bout en bout » de la carte
    « Financement » disparaît de la même façon : « on monte le dossier avec
-   vous » le porte, et le détail des pièces vit sur /tarifs#cheque-tic.
+   vous » le porte, et le détail des pièces vit dans l'article de blog
+   cheque-tic-financement (la bande de /tarifs a été supprimée le 15/09).
    ══════════════════════════════════════════════════════════════════════ */
 
 export type CarteLueur = {
