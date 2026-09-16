@@ -42,7 +42,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTML
       ref={ref}
       className={/* 16/09 — 400 / −0,01 em, la composition de scale.ai, au lieu du
          `font-semibold tracking-tight` livré par shadcn. */
-      cn("text-2xl font-normal leading-none tracking-[-0.01em]", className)}
+      cn("text-2xl font-medium leading-none tracking-[-0.01em]", className)}
       {...props}
     />
   ),

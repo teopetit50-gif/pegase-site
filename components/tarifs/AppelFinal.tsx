@@ -170,7 +170,7 @@ export default function AppelFinal() {
     <div className="r-wrap py-16 sm:py-20">
       <Card data-reveal className="mx-auto w-full max-w-4xl overflow-hidden">
         <CardHeader className="border-b border-neutral-200 p-6 sm:p-8">
-          <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-normal leading-[1.15] tracking-[-0.01em] text-[#050505] sm:text-[32px]">
+          <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-[#050505] sm:text-[32px]">
             {devis ? GRANDE_STRUCTURE.appel.titre : "Votre tarif est arrêté en trente minutes"}
           </h2>
           <CardDescription

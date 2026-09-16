@@ -787,15 +787,15 @@ button.rounded-full:active {
 .offres .o-h4,
 .offres .o-h5 {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
+  /* 500 et non 400. scale.ai compose ses titres en 400, et c'est ce qui
+     avait été posé d'abord — Teo : « trop fin, mets-les un peu moins
+     fin ». General Sans a des fûts plus étroits qu'Aeonik à graisse
+     égale : le 400 qui tient chez eux se délave chez nous. Le cran
+     au-dessus garde l'esprit de la référence (aucun gras, hiérarchie par
+     la taille) sans la maigreur. */
+  font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--o-text);
-}
-/* Seule exception, celle de la référence : sous 20 px un titre en 400 ne se
-   détache plus du corps, qui est en 400 lui aussi. scale.ai passe à 500 au
-   même endroit (leur h3 de 20 px), et à rien d'autre. */
-.offres .o-h5 {
-  font-weight: 500;
 }
 .offres .o-h1 {
   font-size: clamp(38px, 5.6vw, 60px);
@@ -1226,7 +1226,7 @@ button.rounded-full:active {
   font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 36px;
   line-height: 39.6px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.01em;
   color: #0a0a0a;
   text-wrap: balance;
@@ -1261,9 +1261,12 @@ button.rounded-full:active {
        pour une boîte de 1 160 : elle repassait à TROIS lignes, et la règle
        posée le 14/09 au soir est « une ligne par phrase à 1440 ». Mesuré au
        style calculé à la nouvelle interlettre : 49 px → 1 125 px, 35 px de
-       marge. 50 px passait aussi (1 148) mais sans réserve. */
-    font-size: 49px;
-    line-height: 55px;
+       marge. 50 px passait aussi (1 148) mais sans réserve.
+       16/09 (bis) — la graisse remontée à 500 à la demande de Teo élargit
+       encore : 49 px mesure alors 1 159 px pour 1 160 de boîte, un pixel
+       de marge. 48 px → 1 136, soit 24 px. */
+    font-size: 48px;
+    line-height: 54px;
     max-width: 1160px;
   }
 }
@@ -2714,7 +2717,7 @@ button.rounded-full:active {
 .resa .r-h3,
 .resa .r-h4 {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--r-texte);
   letter-spacing: -0.01em;
 }
@@ -2731,7 +2734,6 @@ button.rounded-full:active {
 .resa .r-h4 {
   font-size: clamp(21px, 1.9vw, 24px);
   line-height: 1.33;
-  font-weight: 500;
 }
 
 /* ——— corps ——— */
