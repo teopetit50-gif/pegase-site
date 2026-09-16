@@ -1,0 +1,109 @@
+/* ══════════════════════════════════════════════════════════════════════
+   L'apparition des sections de l'accueil (16/09/2026)
+
+   POURQUOI. Teo : « pour la page d'accueil fais en sorte que chaque
+   section apparaisse, comme le texte de notre première section. » Le hero
+   se peint mot à mot au chargement (`.o-mot`, hero-section.css) ; passé le
+   premier écran, la page s'arrêtait net — seul `[data-reveal]` de
+   PageMotion posait un fondu de 26 px sur les chapeaux, et la moitié des
+   sections n'en portait même pas. Elles arrivaient donc toutes faites.
+
+   ORIGINE DU MÉCANISME. `blur-reveal` de @badtzx0 et @tom_ui (21st.dev,
+   MIT) : un `useInView` qui fait passer le bloc de
+   `opacity 0 / blur(10px) / y 20%` à net, une fois. On en garde l'idée —
+   l'entrée se déclenche à la vue, une seule fois — et on jette le reste :
+
+   · leur animation vit dans `motion/react`, une par bloc et une par
+     caractère chez @tom_ui. À douze sections, c'est un composant de
+     mouvement monté des centaines de fois pour jouer 800 ms. Ici les
+     images sont posées en CSS et le JavaScript ne fait qu'ajouter un
+     attribut ;
+   · leur courbe n'est pas la nôtre. La cascade du hero passe par un
+     `scale(0.8)` et un palier à 50 % (opacité 0,8, blur 2) : c'est CE
+     dessin qu'on retrouve ici à l'identique, sinon les deux moitiés de la
+     page ne bougeraient pas de la même façon.
+
+   La keyframe est recopiée plutôt qu'importée du hero : ce bloc doit
+   pouvoir vivre seul, et `o-mot-apparait` n'existe que si le hero est
+   dans la page.
+
+   L'ÉTAT EST PORTÉ PAR `data-app`, posé par le JavaScript seulement :
+   · absent (rendu serveur, mouvement réduit, panne de JS) → rien, le
+     texte est là. Une animation d'entrée ne doit jamais pouvoir masquer
+     le contenu ;
+   · `arme` → caché, en attente de l'entrée dans la fenêtre. L'attribut
+     est porté soit par l'élément animé lui-même, soit par le GROUPE qui
+     le contient — d'où les deux formes de chaque sélecteur, descendante
+     et directe ;
+   · `joue` → la cascade part ;
+   · retiré à la fin — aucune règle ne survit à l'animation, donc aucun
+     `filter` résiduel pour créer un contexte d'empilement sous des
+     enfants collants.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@keyframes o-app-monte {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(10px) scale(0.95);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ——— les mots d'un titre ——— */
+/* `inline-block` : un mot qui monte doit pouvoir porter une transformée.
+   Les espaces restent des nœuds de texte ENTRE les spans — même règle que
+   le hero, c'est ce qui garde les insécables insécables. */
+.o-app-mot {
+  display: inline-block;
+}
+[data-app="arme"] .o-app-mot {
+  opacity: 0;
+}
+[data-app="joue"] .o-app-mot {
+  opacity: 0;
+  animation: o-app-monte 0.8s ease-out forwards;
+  animation-delay: var(--o-app-d, 0ms);
+  will-change: transform, opacity, filter;
+}
+
+/* ——— un bloc entier, même courbe ——— */
+/* Le contenu d'une section (une rangée de cartes, un tableau, une frise)
+   ne se peint pas mot à mot : il arrive d'un coup, un cran après son
+   chapeau. Peindre vingt cartes une par une allongerait la cascade à
+   plusieurs secondes et transformerait la page en diaporama. */
+[data-app="arme"] .o-app-bloc,
+.o-app-bloc[data-app="arme"] {
+  opacity: 0;
+}
+[data-app="joue"] .o-app-bloc,
+.o-app-bloc[data-app="joue"] {
+  opacity: 0;
+  animation: o-app-monte 0.8s ease-out forwards;
+  animation-delay: var(--o-app-d, 0ms);
+  will-change: transform, opacity, filter;
+}
+
+/* ——— le contrat de sobriété ——— */
+/* Doublé ici alors que le hook ne pose déjà rien en mouvement réduit : un
+   changement de réglage EN COURS de visite ne remonte pas jusqu'au
+   composant, la feuille, elle, s'applique tout de suite. */
+@media (prefers-reduced-motion: reduce) {
+  [data-app] .o-app-mot,
+  [data-app] .o-app-bloc,
+  .o-app-bloc[data-app] {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

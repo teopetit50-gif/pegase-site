@@ -26,6 +26,10 @@ import TableauEntrees from "@/components/accueil/TableauEntrees";
 import { CasColonnes } from "@/components/ui/cas-colonnes";
 import { CAS_ACCUEIL } from "@/lib/cas-accueil";
 import TexteRevele from "@/components/accueil/TexteRevele";
+import Apparition, {
+  GroupeApparition,
+  MotsApparition,
+} from "@/components/accueil/Apparition";
 import BentoChange, { type CarteBento } from "@/components/accueil/BentoChange";
 import CartesPreuve, {
   type CartePreuve,
@@ -741,21 +745,44 @@ function EnTete({
      courte qui reste, celle qui avait déjà été écrite pour 375 px. */
   chapo: string;
 }) {
+  /* 16/09/2026 — le chapeau de section se peint comme le hero (Teo :
+     « fais en sorte que chaque section apparaisse, comme le texte de
+     notre première section »). Les trois `data-reveal` sont retirés : le
+     fondu GSAP de PageMotion et cette cascade jouaient sur les mêmes
+     nœuds, et deux animations d'entrée sur un même bloc se contrarient —
+     la leçon est déjà écrite en tête du hero et du texte révélé.
+
+     LES DÉLAIS. Le sourcil ouvre à zéro, le titre part 90 ms plus tard et
+     avance de 55 ms par mot — le hero est à 75, mais ses titres font
+     quatre mots quand ceux des sections en font jusqu'à dix : au même pas,
+     le dernier mot arriverait une demi-seconde après que l'œil l'a lu. Le
+     chapô ferme 140 ms après le dernier mot du titre, donc toujours APRÈS
+     lui, quelle que soit sa longueur — un chapô qui double son propre
+     titre se lit comme une erreur de cascade. */
+  const motsTitre = titre.split(/\s+/).filter(Boolean).length;
+  const DEPART_TITRE = 90;
+  const PAS_TITRE = 55;
+  const delaiChapo = DEPART_TITRE + PAS_TITRE * Math.max(motsTitre - 1, 0) + 140;
+
   return (
-    <div className="flex flex-col items-center text-center">
-      <div data-reveal>
+    <GroupeApparition className="flex flex-col items-center text-center">
+      <Apparition>
         <span className="o-pill o-pill--xs">{pastille}</span>
-      </div>
-      <h2 data-reveal className="o-h2 mt-4 max-w-[600px]">
-        {titre}
+      </Apparition>
+      <h2 className="o-h2 mt-4 max-w-[600px]">
+        <MotsApparition texte={titre} depart={DEPART_TITRE} pas={PAS_TITRE} />
       </h2>
-      <p data-reveal className="o-lead mt-3 max-w-[650px] md:mt-4">
+      <Apparition
+        as="p"
+        className="o-lead mt-3 max-w-[650px] md:mt-4"
+        delai={delaiChapo}
+      >
         {/* les deux longueurs vivent dans le DOM et s'arbitrent en CSS :
             un rendu conditionnel en JavaScript ferait clignoter la phrase
             entre le rendu serveur et l'hydratation. */}
         {chapo}
-      </p>
-    </div>
+      </Apparition>
+    </GroupeApparition>
   );
 }
 
@@ -915,13 +942,13 @@ export default function Home() {
         {/* ════════ 2 · LES OUTILS ════════ */}
         <section data-monde="clair" className="pb-[50px] pt-[70px]">
           <div className="o-wrap">
-            <p data-reveal className="o-small text-center">
+            <Apparition as="p" className="o-small text-center">
               Branché sur les outils que vous tenez déjà
-            </p>
+            </Apparition>
           </div>
-          <div data-reveal className="mt-8">
+          <Apparition className="mt-8" delai={120}>
             <BandeauOutils />
-          </div>
+          </Apparition>
         </section>
 
         {/* ════════ 3 · LE CATALOGUE — quatre cartes douces en 2 × 2 ════════
@@ -984,8 +1011,8 @@ export default function Home() {
                 Les écarts au composant d'origine — dont le passage du blanc
                 sur noir à l'encre sur papier — sont documentés en tête de
                 components/accueil/TuilesCatalogue.tsx. */}
+            <Apparition className="mt-8 md:mt-16" delai={120}>
             <TuilesCatalogue
-              className="mt-8 md:mt-16"
               tuiles={MOTEURS.map((m) => ({
                 system: m.system,
                 nom: nomPaquet(m.system),
@@ -998,6 +1025,7 @@ export default function Home() {
                 href: `/offres/${m.slug}`,
               }))}
             />
+            </Apparition>
             {/* 07/08 (Teo) — deux libellés étaient proposés : « Découvrir les
                 autres systèmes » et « Voir l'ensemble de nos solutions ». Le
                 premier disait vrai tant que /offres montrait DEUX paquets de
@@ -1007,12 +1035,12 @@ export default function Home() {
                 porte les mêmes quatre systèmes, plus le sur-mesure et la mise
                 en place. « Les autres systèmes » promettrait donc un catalogue
                 qui n'existe pas ; le bouton nomme la destination. */}
-            <div data-reveal className="mt-10 flex justify-center">
+            <Apparition className="mt-10 flex justify-center" delai={180}>
               <Link href="/offres" className="o-btn o-btn--ghost">
                 Voir toutes les offres
                 <Chevron taille={13} />
               </Link>
-            </div>
+            </Apparition>
           </div>
         </section>
 
@@ -1055,9 +1083,9 @@ export default function Home() {
               titre="Quand plusieurs services valident, rien ne s'improvise."
               chapo="Périmètre d'essai, règles écrites, sortie prévue dès le départ."
             />
-            <div className="mt-8 md:mt-16">
+            <Apparition className="mt-8 md:mt-16" delai={120}>
               <CartesLueur cartes={GROUPES} />
-            </div>
+            </Apparition>
           </div>
         </section>
 
@@ -1073,12 +1101,19 @@ export default function Home() {
             en bas à droite. C'est le seul endroit de la page où l'ordre
             s'inverse, et c'est précisément ce qu'on est venu chercher. */}
         <section data-monde="clair" className="py-[62px] md:py-[110px]">
-          <BentoChange
-            cartes={CARTES_CHANGE}
-            pastille="CE QUE ÇA CHANGE"
-            titre="Moins de tâches. Plus de temps. Plus de marge."
-            chapo="Ce que les systèmes prennent en charge, et ce qui reste entre vos mains."
-          />
+          {/* 16/09 — enveloppé et non repris de l'intérieur : ce bloc porte
+              son titre LUI-MÊME, en bas à droite, et c'est justement ce qui
+              en fait le seul endroit de la page où l'ordre s'inverse. Le
+              peindre mot à mot depuis ce coin-là se lirait comme une
+              cascade à l'envers ; il arrive donc d'un seul mouvement. */}
+          <Apparition>
+            <BentoChange
+              cartes={CARTES_CHANGE}
+              pastille="CE QUE ÇA CHANGE"
+              titre="Moins de tâches. Plus de temps. Plus de marge."
+              chapo="Ce que les systèmes prennent en charge, et ce qui reste entre vos mains."
+            />
+          </Apparition>
         </section>
 
         {/* ════════ 4 ter · LES NEUF CAS — trois colonnes qui remontent ════════
@@ -1115,9 +1150,9 @@ export default function Home() {
               titre="Ce que les systèmes tiennent, et chez qui ça arrive."
               chapo="Neuf situations telles qu'elles se présentent avant l'audit, et le poste qui les tient."
             />
-            <div className="mt-8 md:mt-16">
+            <Apparition className="mt-8 md:mt-16" delai={120}>
               <CasColonnes cas={CAS_ACCUEIL} />
-            </div>
+            </Apparition>
           </div>
         </section>
 
@@ -1165,9 +1200,9 @@ export default function Home() {
               titre={EQUIPE_TITRE}
               chapo={EQUIPE_CHAPO}
             />
-            <div data-reveal className="mt-8 md:mt-14 lg:mt-16">
+            <Apparition className="mt-8 md:mt-14 lg:mt-16" delai={120}>
               <TeamShowcase membres={MEMBRES} pied={EQUIPE_PIED} />
-            </div>
+            </Apparition>
           </div>
         </section>
 
@@ -1248,9 +1283,9 @@ export default function Home() {
 
                 Masqué ICI et pas dans `PortesHover` : le composant n'a pas à
                 connaître la page qui l'emploie, et il ne sert qu'ici. */}
-            <div className="hidden lg:block">
+            <Apparition className="hidden lg:block" delai={120}>
               <PortesHover portes={PORTES} />
-            </div>
+            </Apparition>
 
             {/* 11/09/2026 — le tableau « laquelle pour moi ? ». Les trois
                 portes se posaient côte à côte et s'arrêtaient là ; un
@@ -1307,22 +1342,22 @@ export default function Home() {
               chapo="Six faits vérifiables sur l'hébergement et les traitements."
             />
 
-            <div className="mt-8 md:mt-14">
+            <Apparition className="mt-8 md:mt-14" delai={120}>
               <CartesPreuve cartes={PREUVES} />
-            </div>
+            </Apparition>
 
             {/* La réserve reste, et elle reste en petit — mais la SIXIÈME
                 carte l'annonce désormais à la même hauteur de caractères que
                 les cinq autres. Ce paragraphe n'est plus l'endroit où on
                 apprend que l'IA sort d'Europe : c'est celui où on lit à
                 quelles conditions. */}
-            <p
-              data-reveal
+            <Apparition
+              as="p"
               className="o-small mx-auto mt-7 max-w-[720px] text-center !text-[15px] !leading-[24px]"
             >
               Un montant, une date, un nom : le strict nécessaire. Rien de ce
               qui leur est envoyé ne sert à entraîner un modèle.
-            </p>
+            </Apparition>
           </div>
         </section>
 
@@ -1339,9 +1374,9 @@ export default function Home() {
                 le pointeur et la carte entière est cliquable. L'origine, le
                 dégradé remis en graphite et les quatre écarts à la source
                 sont en tête de `components/accueil/CartesLueur.tsx`. */}
-            <div className="mt-8 md:mt-16">
+            <Apparition className="mt-8 md:mt-16" delai={120}>
               <CartesLueur cartes={GARANTIES} />
-            </div>
+            </Apparition>
           </div>
         </section>
 
@@ -1374,7 +1409,7 @@ export default function Home() {
               titre="Ce qu'on nous demande avant de signer."
               chapo="Les six questions de chaque premier rendez-vous."
             />
-            <div className="mx-auto mt-7 max-w-[800px] md:mt-12">
+            <Apparition className="mx-auto mt-7 max-w-[800px] md:mt-12" delai={120}>
               {FAQ.map((f) => (
                 <details key={f.q} className="o-faq-item">
                   <summary>
@@ -1396,7 +1431,7 @@ export default function Home() {
                   <p className="o-body pb-6 pr-10">{f.a}</p>
                 </details>
               ))}
-            </div>
+            </Apparition>
           </div>
         </section>
       </div>
