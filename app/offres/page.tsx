@@ -251,29 +251,49 @@ const ETAPES = [
   },
 ];
 
-/* BLOC 5b — les quatre colonnes de la console d'exemple. Quatre lignes
-   chacune, pas trois : à trois, la moitié basse du cadre restait noire
-   alors que la grande image de la référence remplit son rapport. Les
-   libellés tiennent sur UNE ligne dans une colonne de 210 px — au-delà
-   ils sont coupés par des points de suspension, ce qui se voit. */
-const CONSOLE = [
-  {
-    code: "CASHD",
-    lignes: ["Devis DV-0891 · J+3", "Facture FA-2402 · J+7", "Facture FA-2318 · J+21", "En attente d'accord"],
+/* BLOC 5b — LE SCHÉMA DU CYCLE.
+
+   16/09 (Teo) — « tu m'as fait deux trucs complètement différents, je veux
+   que le schéma soit le même. » Il avait raison : la référence pose ici un
+   SCHÉMA — des cartes blanches reliées par des flèches courbes sur le fond
+   doux — et nous avions mis une console sombre. Rien à voir.
+
+   Leur schéma est une IMAGE sur leur CDN (2432 × 1274). On ne recopie pas
+   l'actif d'autrui (references/regles-maison.md) : celui-ci est redessiné
+   en SVG, même topologie et même vocabulaire graphique —
+     une entrée et une sortie en pastilles, marquées d'un astérisque et
+     renvoyées à une note de bas de schéma, parce qu'elles ne sont pas de
+     notre ressort (chez eux : « managed by customers ») ;
+     deux cartes hautes sur la ligne centrale, reliées par des flèches
+     droites ;
+     une boucle par le haut et une par le bas, en arcs ;
+     un retour en pointillés depuis la sortie.
+   En SVG plutôt qu'en image : net à toute taille, et le texte reste du
+   texte — sélectionnable, traduisible, lu par un lecteur d'écran. */
+const SCHEMA = {
+  entree: "Réception*",
+  sortie: "Envoi*",
+  gauche: {
+    titre: "Qualification",
+    sous: "(compréhension)",
+    corps: ["La demande est comprise et", "rattachée au bon dossier."],
   },
-  {
-    code: "RELOAD",
-    lignes: ["14 comptes inactifs", "Classés par valeur", "1 message / trimestre", "Ancré sur l'historique"],
+  droite: {
+    titre: "Rédaction",
+    sous: "(au cas par cas)",
+    corps: ["Le message est écrit depuis vos", "règles, pas d'un modèle figé."],
   },
-  {
-    code: "FRONTD",
-    lignes: ["Demande · 21 h 04", "Réponse rédigée", "Rendez-vous proposé", "Avis demandé ensuite"],
+  haut: {
+    titre: "Règles",
+    corps: ["Ce que le système a le droit de", "faire, défini avec vous."],
   },
-  {
-    code: "FILED",
-    lignes: ["Bon de livraison lu", "Montants contrôlés", "Classé au dossier", "Réponse rédigée"],
+  bas: {
+    titre: "Journal",
+    corps: ["Tout ce qui est parti, et qui", "l'a validé."],
   },
-];
+  retour: "Vos corrections",
+  note: "*Réception et envoi se font dans vos outils : aucun compte à créer.",
+};
 
 /* BLOC 5c — les quatre paquets. Les listes sont volontairement inégales
    (4 / 4 / 3 / 2), comme celles de la référence (4 / 3 / 2 / 1) : rien
@@ -412,17 +432,156 @@ function CoinPlein() {
   );
 }
 
-function ChromeFenetre({ titre }: { titre: string }) {
+/* Le schéma du cycle, redessiné d'après la topologie de la référence.
+   Tout est dans un seul viewBox de 1216 × 640 (leur image fait 2432 × 1274,
+   même rapport) : les textes suivent donc l'échelle du cadre et restent
+   nets à toute taille. */
+/* une carte du schéma : cadre blanc, titre, éventuel sous-titre entre
+   parenthèses, puis le corps sur deux lignes. Déclarée AU MODULE et non
+   dans SchemaCycle : un composant créé pendant le rendu perd son état à
+   chaque passe, et eslint le refuse (react/no-unstable-nested-components). */
+function SchemaCarte({
+  x,
+  y,
+  l,
+  h,
+  titre,
+  sous,
+  corps,
+}: {
+  x: number;
+  y: number;
+  l: number;
+  h: number;
+  titre: string;
+  sous?: string;
+  corps: string[];
+}) {
   return (
-    <div className="ofd-fenetre__barre">
-      <span aria-hidden className="ofd-fenetre__points">
-        <i style={{ background: "#ff5f57" }} />
-        <i style={{ background: "#febc2e" }} />
-        <i style={{ background: "#28c840" }} />
-      </span>
-      <span className="ofd-fenetre__titre">{titre}</span>
-      <span className="ofd-fenetre__mention">Exemple</span>
-    </div>
+    <g>
+      <rect x={x} y={y} width={l} height={h} rx={14} fill="#ffffff" filter="url(#ofd-ombre)" />
+      <text x={x + 26} y={y + 42} className="ofd-schema__titre">
+        {titre}
+      </text>
+      {sous ? (
+        <text x={x + 26} y={y + 68} className="ofd-schema__sous">
+          {sous}
+        </text>
+      ) : null}
+      {corps.map((ligne, i) => (
+        <text key={ligne} x={x + 26} y={y + (sous ? 118 : 92) + i * 24} className="ofd-schema__corps">
+          {ligne}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+/* une pastille d'entrée, de sortie ou de retour : ce qui n'est pas de
+   notre ressort, d'où l'astérisque et la note en bas de schéma. */
+function SchemaPastille({
+  x,
+  y,
+  l,
+  h,
+  texte,
+  pointille = false,
+}: {
+  x: number;
+  y: number;
+  l: number;
+  h: number;
+  texte: string;
+  pointille?: boolean;
+}) {
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={l}
+        height={h}
+        rx={14}
+        fill="#ffffff"
+        stroke={pointille ? "#c9c9c9" : "none"}
+        strokeDasharray={pointille ? "5 5" : undefined}
+        filter={pointille ? undefined : "url(#ofd-ombre)"}
+      />
+      <text x={x + l / 2} y={y + h / 2 + 7} textAnchor="middle" className="ofd-schema__titre">
+        {texte}
+      </text>
+    </g>
+  );
+}
+
+/* Le schéma du cycle, redessiné d'après la topologie de la référence.
+   Tout tient dans un viewBox de 1216 × 660 (leur image fait 2432 × 1274,
+   même rapport) : les textes suivent donc l'échelle du cadre et restent
+   nets à toute taille. */
+function SchemaCycle() {
+  const C = SCHEMA;
+  return (
+    <svg
+      viewBox="0 0 1216 660"
+      role="img"
+      aria-label="Le cycle : réception, qualification, rédaction, envoi, avec la boucle des règles et du journal"
+    >
+      <defs>
+        <filter id="ofd-ombre" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#000000" floodOpacity="0.06" />
+        </filter>
+        <marker
+          id="ofd-fleche"
+          viewBox="0 0 10 10"
+          refX="9"
+          refY="5"
+          markerWidth="7"
+          markerHeight="7"
+          orient="auto-start-reverse"
+        >
+          <path d="M0 0 L10 5 L0 10 z" fill="#8a8a8a" />
+        </marker>
+      </defs>
+
+      {/* ── la ligne centrale : entrée → qualification → rédaction → sortie ── */}
+      <SchemaPastille x={0} y={286} l={196} h={76} texte={C.entree} />
+      <SchemaCarte x={276} y={232} l={290} h={184} {...C.gauche} />
+      <SchemaCarte x={650} y={232} l={290} h={184} {...C.droite} />
+      <SchemaPastille x={1020} y={286} l={196} h={76} texte={C.sortie} />
+
+      <g stroke="#8a8a8a" strokeWidth="1.6" fill="none" markerEnd="url(#ofd-fleche)">
+        <path d="M196 324 H262" />
+        <path d="M566 324 H636" />
+        <path d="M940 324 H1006" />
+        {/* boucle haute : qualification → règles → rédaction */}
+        <path d="M352 232 C352 150 366 108 416 108" />
+        <path d="M800 108 C850 108 864 150 864 232" />
+        {/* boucle basse : rédaction → journal → qualification */}
+        <path d="M864 416 C864 498 850 540 800 540" />
+        <path d="M416 540 C366 540 352 498 352 416" />
+      </g>
+
+      {/* ── les deux cartes de la boucle ── */}
+      <SchemaCarte x={416} y={30} l={384} h={156} {...C.haut} />
+      <SchemaCarte x={416} y={462} l={384} h={156} {...C.bas} />
+
+      {/* ── le retour en pointillés, depuis la sortie ── */}
+      <SchemaPastille x={1000} y={508} l={216} h={64} texte={C.retour} pointille />
+      <g
+        stroke="#b4b4b4"
+        strokeWidth="1.6"
+        fill="none"
+        strokeDasharray="5 6"
+        markerEnd="url(#ofd-fleche)"
+      >
+        <path d="M1118 362 V502" />
+        <path d="M1000 540 H806" />
+      </g>
+
+      <text x={608} y={650} textAnchor="middle" className="ofd-schema__note">
+        {C.note}
+      </text>
+    </svg>
   );
 }
 
@@ -645,22 +804,8 @@ export default function OffresPage() {
               />
 
               <div className="ofd-large">
-                <div data-reveal className="ofd-console">
-                  <div className="ofd-fenetre">
-                    <ChromeFenetre titre="Les quatre systèmes" />
-                    <div className="ofd-fenetre__corps ofd-fenetre__corps--colonnes">
-                      {CONSOLE.map((col) => (
-                        <div key={col.code} className="ofd-colonne">
-                          <span className="ofd-ligne__etat">{col.code}</span>
-                          {col.lignes.map((l) => (
-                            <span key={l} className="ofd-ligne ofd-ligne--puce">
-                              <span className="ofd-ligne__titre">{l}</span>
-                            </span>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                <div data-reveal className="ofd-schema">
+                  <SchemaCycle />
                 </div>
 
                 <div className="ofd-rangee">

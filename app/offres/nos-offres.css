@@ -927,227 +927,68 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   10 · FENÊTRE D'EXEMPLE — le chrome à trois pastilles de la référence
+   10 · SCHÉMA DU CYCLE
+
+   Ici vivaient la « fenêtre d'exemple » (chrome à trois pastilles, lignes
+   de journal) et la « console à quatre colonnes ». Les deux sont parties
+   le 16/09 : la fenêtre a été reprise par components/ui/chat-messages, qui
+   porte son propre CSS, et la console a laissé la place au schéma, parce
+   que la référence pose ici un schéma et pas un terminal. Environ 150
+   lignes retirées — aucune n'avait plus d'appelant (`ofd-fenetre`,
+   `ofd-console`, `ofd-colonne`, `ofd-ligne`, vérifiés à zéro dans app/ et
+   components/).
    ───────────────────────────────────────────────────────────────────── */
 
-.ofd .ofd-fenetre {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  background: #101014;
-  color: #e5e5e5;
-}
-.ofd .ofd-fenetre__barre {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: center;
-  padding: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-@media (min-width: 640px) {
-  .ofd .ofd-fenetre__barre {
-    padding: 12px;
-  }
-}
-.ofd .ofd-fenetre__points {
-  display: flex;
-  gap: 3px;
-}
-@media (min-width: 640px) {
-  .ofd .ofd-fenetre__points {
-    gap: 6px;
-  }
-}
-.ofd .ofd-fenetre__points i {
-  display: block;
-  height: 6px;
-  width: 6px;
-  border-radius: 9999px;
-}
-@media (min-width: 640px) {
-  .ofd .ofd-fenetre__points i {
-    height: 12px;
-    width: 12px;
-  }
-}
-.ofd .ofd-fenetre__titre {
-  letter-spacing: -0.01em;
-  justify-self: center;
-  font-size: 7px;
-  font-weight: 500;
-  color: #e5e5e5;
-  white-space: nowrap;
-}
-@media (min-width: 640px) {
-  .ofd .ofd-fenetre__titre {
-    font-size: 1rem;
-  }
-}
-.ofd .ofd-fenetre__mention {
-  justify-self: end;
-  font-family: var(--font-dm-mono), ui-monospace, monospace;
-  font-size: 7px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.45);
-}
-@media (min-width: 640px) {
-  .ofd .ofd-fenetre__mention {
-    font-size: 10px;
-  }
-}
-.ofd .ofd-fenetre__corps {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 1.6cqw;
-  justify-content: center;
-  padding: 3cqw 4cqw;
-}
-
-/* la console large range quatre colonnes au lieu d'empiler des lignes */
-/* Quatre colonnes qui OCCUPENT le cadre : la grande image de la référence
-   remplit son rapport 2432/1274, et des rangées calées en haut laissaient
-   la moitié basse en noir vide — constaté à la première recette. */
-.ofd .ofd-fenetre__corps--colonnes {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.6cqw;
-  align-content: stretch;
-  align-items: stretch;
-}
-.ofd .ofd-colonne {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2cqw;
-  min-width: 0;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.02);
-  padding: 1.8cqw;
-}
-.ofd .ofd-colonne > .ofd-ligne__etat {
-  align-self: flex-start;
-}
-/* Les rangées de la console se PARTAGENT la hauteur du cadre : calées en
-   haut, elles laissaient un quart de noir vide sous la dernière. Et leur
-   libellé peut passer à la ligne — en `nowrap` il finissait en points de
-   suspension dans une colonne de 210 px. */
-.ofd .ofd-ligne--puce {
-  flex: 1;
-  align-items: center;
-  padding: 1.4cqw 1.8cqw;
-}
-.ofd .ofd-ligne--puce .ofd-ligne__titre {
-  white-space: normal;
-}
-
-/* une ligne de journal : le geste proposé, qui l'a fait, et son état */
-.ofd .ofd-ligne {
-  display: flex;
-  align-items: center;
-  gap: 2cqw;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  padding: 2cqw 2.4cqw;
-}
-.ofd .ofd-ligne__icone {
-  display: flex;
-  width: 5.5cqw;
-  min-width: 20px;
-  max-width: 34px;
-  aspect-ratio: 1;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.07);
-  color: #e5e5e5;
-}
-.ofd .ofd-ligne__corps {
-  display: block;
-  min-width: 0;
-  flex: 1;
-}
-.ofd .ofd-ligne__titre {
-  letter-spacing: -0.01em;
-  display: block;
-  font-size: clamp(7px, 1.85cqw, 13px);
-  line-height: 1.35;
-  color: #f5f5f5;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ofd .ofd-ligne__sous {
-  letter-spacing: -0.01em;
-  display: block;
-  font-size: clamp(6px, 1.6cqw, 12px);
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.55);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ofd .ofd-ligne__etat {
-  flex-shrink: 0;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  padding: 2px 8px;
-  font-family: var(--font-dm-mono), ui-monospace, monospace;
-  font-size: clamp(5px, 1.35cqw, 10px);
-  line-height: 1.6;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
-  white-space: nowrap;
-}
-/* la pastille de la ligne en attente bat, comme les médias de la référence */
-.ofd .ofd-ligne--attente .ofd-ligne__etat {
-  color: #ffd9a0;
-  border-color: rgba(255, 217, 160, 0.4);
-  animation: ofd-battement 2.4s ease-in-out infinite;
-}
-@keyframes ofd-battement {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.45;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ofd .ofd-ligne--attente .ofd-ligne__etat {
-    animation: none;
-  }
-}
-
-/* `cqw` ci-dessus a besoin d'un conteneur nommé : c'est la fenêtre. */
-.ofd .ofd-scinde__media,
-.ofd .ofd-console {
-  container-type: inline-size;
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   11 · GRANDE CONSOLE + RANGÉE D'ENTRÉES
-   ───────────────────────────────────────────────────────────────────── */
-
-.ofd .ofd-large {
-  margin-inline: auto;
-  margin-top: 48px;
-  max-width: 1216px;
-}
-.ofd .ofd-console {
-  display: flex;
+/* Le schéma du cycle. La référence loge ici une image de 2432 × 1274 dans
+   une colonne de 980 : même emprise, même rapport, mais en SVG — voir le
+   commentaire de SCHEMA dans page.tsx. Les corps de texte sont exprimés en
+   unités du viewBox (1216 de large), donc ils suivent l'échelle du cadre
+   au lieu de rapetisser d'un coup sous un point d'arrêt. */
+.ofd .ofd-schema {
   margin-inline: auto;
   max-width: 980px;
-  overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #101014;
-  aspect-ratio: 2432 / 1274;
+}
+.ofd .ofd-schema svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.ofd .ofd-schema__titre {
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  fill: var(--ofd-encre);
+}
+.ofd .ofd-schema__sous,
+.ofd .ofd-schema__corps {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  fill: #6f6f6f;
+}
+.ofd .ofd-schema__note {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  fill: #8a8a8a;
+}
+
+/* Sous 768 un schéma de 1216 de large rend un texte de 9 px : il passe en
+   défilement horizontal DANS SON CADRE, comme la rangée de logos, plutôt
+   que d'être illisible. */
+@media (max-width: 767px) {
+  .ofd .ofd-schema {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .ofd .ofd-schema::-webkit-scrollbar {
+    display: none;
+  }
+  .ofd .ofd-schema svg {
+    width: 820px;
+    max-width: none;
+  }
 }
 .ofd .ofd-rangee {
   margin-top: 48px;
