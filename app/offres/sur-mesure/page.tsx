@@ -6,6 +6,7 @@ import PageMotion from "@/components/PageMotion";
 import { AgentTrace, type TraceSpan } from "@/components/ui/agent-trace";
 import { HalftoneFlow } from "@/components/ui/halftone-flow";
 import HeroReplie from "@/components/surmesure/HeroReplie";
+import Cycle from "@/components/surmesure/Cycle";
 import {
   SigneHubspot,
   SigneNotion,
@@ -672,14 +673,15 @@ export default function SurMesurePage() {
                 "Un système sur mesure se livre là où vivent déjà les autres : la même file de validation, le même journal de ce qui est parti, les mêmes droits par service. Vos équipes n'ouvrent pas un outil de plus."
               )}
             />
+            {/* 16/09, Teo : « cette section n'est pas la même que sur le
+                modèle de base, refais exactement la même ». La capture de
+                l'espace client cède la place au SCHÉMA EN BOUCLE de la
+                référence, à la géométrie près — entrée, quatre étapes qui
+                tournent, sortie, retour en pointillés. Le contenu est le
+                nôtre : la correspondance poste par poste est en tête de
+                components/surmesure/Cycle.tsx. */}
             <div data-reveal className="smd-panneau">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/fonds/tableau-de-bord.webp"
-                alt="L'espace client Omega : la liste des débiteurs, leur état et l'encours échu au total — ici le module d'encaissements du catalogue."
-                width={2160}
-                height={1350}
-              />
+              <Cycle />
             </div>
           </div>
         </section>

@@ -1150,6 +1150,364 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+   8 quater · LE CYCLE — le schéma en boucle du bloc « ce que vous obtenez »
+
+   Décalque de la géométrie du schéma de la référence : entrée à gauche,
+   quatre étapes qui tournent, sortie à droite, retour en pointillés qui
+   rentre par le bas. Le contenu est le nôtre — voir
+   components/surmesure/Cycle.tsx pour la correspondance poste par poste.
+
+   LA GÉOMÉTRIE TIENT À UNE SEULE DÉCISION : les quatre cartes de la
+   boucle ont une HAUTEUR FIXE (132) et une LARGEUR FIXE (230) au-dessus
+   de 1024. Sans elles, l'anneau — qui est un simple cadre à coins ronds
+   posé en absolu — ne saurait pas où s'arrêter : ses bords doivent
+   tomber au CENTRE des quatre cartes, soit 115 de chaque côté et 66 en
+   haut et en bas. Ne pas remplacer ces valeurs par des pourcentages :
+   les rangées sont en `auto` et le compte tomberait faux dès qu'une
+   légende gagne une ligne.
+
+   Les cartes portent le fond gris du panneau, pas du blanc transparent :
+   c'est ce qui « coupe » le trait de l'anneau là où elles le croisent.
+
+   Sous 1024 le schéma s'empile et les liaisons deviennent verticales.
+   C'est le seul écart avec la référence, qui ne prévoit rien pour le
+   téléphone — son schéma est une image.
+   ───────────────────────────────────────────────────────────────────── */
+
+.smd .smd-cy {
+  --cy-carte: 230px;
+  --cy-haut: 132px;
+  --cy-gouttiere: 28px;
+  --cy-trait: rgba(0, 0, 0, 0.22);
+  --cy-pointe: rgba(0, 0, 0, 0.45);
+  /* hauteur de la boucle = trois rangées + deux gouttières */
+  --cy-total: calc(var(--cy-haut) * 3 + var(--cy-gouttiere) * 2);
+  /* écart entre le centre de deux rangées voisines */
+  --cy-pas: calc(var(--cy-haut) + var(--cy-gouttiere));
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 28px 20px;
+}
+@media (min-width: 1024px) {
+  .smd .smd-cy {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+  }
+}
+
+/* ——— une carte ——— */
+.smd .smd-cy-carte {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px 18px;
+}
+@media (min-width: 1024px) {
+  .smd .smd-cy-carte {
+    width: var(--cy-carte);
+    min-height: var(--cy-haut);
+  }
+  .smd .smd-cy-carte--plate {
+    min-height: 0;
+  }
+}
+.smd .smd-cy-titre {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--smd-texte);
+}
+.smd .smd-cy-texte {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: var(--smd-etiquette);
+}
+
+/* ═══ SOUS 1024 : tout s'empile, les liaisons sont verticales ═══════════
+   La référence ne prévoit rien pour le téléphone — son schéma est une
+   image. C'est le seul écart de ce bloc, et il est assumé. */
+.smd .smd-cy-entree,
+.smd .smd-cy-boucle,
+.smd .smd-cy-sortie,
+.smd .smd-cy-sortie-haut,
+.smd .smd-cy-sortie-bas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.smd .smd-cy-case {
+  width: 100%;
+}
+.smd .smd-cy-fleche,
+.smd .smd-cy-descente,
+.smd .smd-cy-retour {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  width: 1px;
+  height: 22px;
+  background: var(--cy-trait);
+}
+.smd .smd-cy-fleche::after,
+.smd .smd-cy-descente::after,
+.smd .smd-cy-retour::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid var(--cy-pointe);
+  border-right: 1px solid var(--cy-pointe);
+  transform: translate(-50%, 0) rotate(135deg);
+}
+/* En pile, les cartes de la boucle se suivent : on ajoute la liaison
+   entre elles par des pseudo-éléments sur les cases. */
+.smd .smd-cy-anneau,
+.smd .smd-cy-axe {
+  display: none;
+}
+.smd .smd-cy-case + .smd-cy-case {
+  margin-top: 22px;
+}
+.smd .smd-cy-case + .smd-cy-case::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  width: 1px;
+  height: 22px;
+  background: var(--cy-trait);
+}
+.smd .smd-cy-case {
+  position: relative;
+}
+.smd .smd-cy-boucle {
+  margin-block: 22px;
+}
+.smd .smd-cy-sortie {
+  margin-top: 22px;
+}
+.smd .smd-cy-sortie-haut,
+.smd .smd-cy-sortie-bas {
+  gap: 0;
+}
+.smd .smd-cy-retour {
+  border-left: 1px dashed var(--cy-trait);
+  background: none;
+  width: 0;
+}
+
+/* ═══ AU-DESSUS DE 1024 : la géométrie de la référence ═════════════════
+   Trois blocs sur une rangée — entrée, boucle, sortie. La boucle est une
+   grille 3 × 3 ; l'anneau est un cadre à coins ronds posé en absolu dont
+   les bords tombent au CENTRE des quatre cartes, soit la moitié d'une
+   carte de chaque côté. Ne pas remplacer par des pourcentages : les
+   rangées sont en hauteur fixe et le compte tomberait faux dès qu'une
+   légende gagne une ligne. */
+@media (min-width: 1024px) {
+  .smd .smd-cy-entree {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+  }
+  .smd .smd-cy-case {
+    width: auto;
+    margin-top: 0;
+  }
+  .smd .smd-cy-case::before {
+    display: none;
+  }
+
+  .smd .smd-cy-boucle {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--cy-carte) minmax(140px, 300px) var(--cy-carte);
+    grid-template-rows: repeat(3, var(--cy-haut));
+    gap: var(--cy-gouttiere);
+    width: auto;
+    margin-block: 0;
+  }
+  .smd .smd-cy-case--haut {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+  }
+  .smd .smd-cy-case--gauche {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .smd .smd-cy-case--droite {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  .smd .smd-cy-case--bas {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: center;
+  }
+
+  /* ⚠ L'ORDRE DE PEINTURE. Un élément POSITIONNÉ est peint après les
+     blocs statiques, quelle que soit sa place dans le balisage : sans
+     `z-index`, l'anneau passait PAR-DESSUS les cartes et le trait
+     traversait « Validation ». On le renvoie donc sous elles. */
+  .smd .smd-cy-anneau {
+    display: block;
+    position: absolute;
+    inset: calc(var(--cy-haut) / 2) calc(var(--cy-carte) / 2);
+    z-index: 0;
+    border: 1px solid var(--cy-trait);
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .smd .smd-cy-case {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* L'axe droit entre les deux cartes latérales. */
+  .smd .smd-cy-axe {
+    display: block;
+    position: relative;
+    z-index: 0;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    justify-self: stretch;
+    height: 1px;
+    margin-inline: calc(var(--cy-gouttiere) * -1);
+    background: var(--cy-trait);
+  }
+  .smd .smd-cy-axe::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-top: 1px solid var(--cy-pointe);
+    border-right: 1px solid var(--cy-pointe);
+    transform: translate(0, -50%) rotate(45deg);
+  }
+
+  /* Les deux pointes qui disent le SENS : vers la droite en haut, vers la
+     gauche en bas — donc dans le sens des aiguilles d'une montre. */
+  .smd .smd-cy-case--haut::after,
+  .smd .smd-cy-case--bas::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-top: 1px solid var(--cy-pointe);
+    border-right: 1px solid var(--cy-pointe);
+  }
+  .smd .smd-cy-case--haut::after {
+    left: -20px;
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .smd .smd-cy-case--bas::after {
+    right: -20px;
+    transform: translateY(-50%) rotate(-135deg);
+  }
+
+  /* ——— la colonne de sortie, calée sur les rangées de la boucle ———
+     Positionnement absolu et non empilement : c'est le seul moyen de
+     garantir que « Mise en service » tombe au centre de la rangée 2 et
+     « Retours » au centre de la rangée 3, donc que le retour en
+     pointillés soit à la hauteur du bas du cycle. */
+  .smd .smd-cy-sortie {
+    position: relative;
+    width: calc(var(--cy-carte) + 34px);
+    height: var(--cy-total);
+    margin-top: 0;
+  }
+  .smd .smd-cy-sortie-haut,
+  .smd .smd-cy-sortie-bas {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--cy-haut);
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+  }
+  .smd .smd-cy-sortie-haut {
+    top: var(--cy-pas);
+  }
+  .smd .smd-cy-sortie-bas {
+    top: calc(var(--cy-pas) * 2);
+  }
+  .smd .smd-cy-fleche--droite {
+    width: 34px;
+    height: 1px;
+  }
+  .smd .smd-cy-fleche--droite::after {
+    right: 0;
+    top: 50%;
+    bottom: auto;
+    left: auto;
+    transform: translate(0, -50%) rotate(45deg);
+  }
+
+  /* La descente, en pointillés comme sur la référence : de « Mise en
+     service » vers « Retours ». */
+  .smd .smd-cy-descente {
+    position: absolute;
+    left: calc(34px + var(--cy-carte) / 2);
+    top: calc(var(--cy-pas) + var(--cy-haut) / 2 + 26px);
+    height: calc(var(--cy-pas) - 52px);
+    width: 0;
+    background: none;
+    border-left: 1px dashed var(--cy-trait);
+  }
+  .smd .smd-cy-descente::after {
+    left: 0;
+    transform: translate(-50%, 0) rotate(135deg);
+  }
+
+  /* Le retour : en pointillés, il part de « Retours » vers la gauche et
+     rentre dans la boucle.
+
+     ÉCART ASSUMÉ — sur la référence le trait traverse toute la colonne de
+     droite et vient mourir sur « Model Evaluation ». Ici il s'arrête au
+     bord de la boucle, à la hauteur de « Mesure » : la lecture est la
+     même (ça revient dans le cycle) et le tracé ne passe pas sous une
+     carte, ce qui aurait demandé de sortir la sortie du flux. */
+  .smd .smd-cy-retour {
+    position: absolute;
+    /* Il traverse la rangée 3 de la colonne droite, qui est VIDE —
+       « Validation » n'occupe que la rangée 2 — et vient toucher le bord
+       de la colonne du milieu, là où se trouve « Mesure ». */
+    left: calc((34px + var(--cy-carte) + var(--cy-gouttiere)) * -1);
+    width: calc(34px + var(--cy-carte) + var(--cy-gouttiere));
+    height: 0;
+    top: 50%;
+    border-left: 0;
+    border-top: 1px dashed var(--cy-trait);
+    background: none;
+  }
+  .smd .smd-cy-retour::after {
+    left: 0;
+    bottom: auto;
+    top: 50%;
+    transform: translate(0, -50%) rotate(-135deg);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
    9 · VIGNETTES — leurs « Demos » (16/9) et leurs « Resources » (389/243)
    ───────────────────────────────────────────────────────────────────── */
 
