@@ -126,9 +126,21 @@ export function GrilleCapacites({ donnees }: { donnees: Catalogue }) {
   );
 }
 
+/* Combien de questions et de cartes restent visibles sur téléphone avant
+   le repli. Six : la moitié d'un bloc de douze, un tiers de page au lieu
+   des deux tiers, et assez pour que le visiteur voie de quoi il s'agit. */
+const CAS_MOBILE = 6;
+const CARTES_MOBILE = 3;
+
 export function CasLimites({ donnees }: { donnees: BlocCasLimites }) {
+  /* 16/09/2026 (Teo, par l'associé) — « toute la page CASHD est cent fois
+     trop remplie sur la version mobile ». Douze questions en accordéon
+     font douze cents pixels de rangées fermées : on en montre six, les
+     autres à un geste. Sur ordinateur elles s'affichent sur deux colonnes
+     dès 1024 et ne coûtent qu'un demi-écran — rien n'y change. */
+  const [tout, setTout] = useState(false);
   return (
-    <div className="cap">
+    <div className="cap" data-tout={tout ? "" : undefined}>
       <p className="cap-etiquette">{donnees.etiquette}</p>
       <h2 className="cap-titre">{donnees.titre}</h2>
       <p className="cap-chapo">{donnees.chapo}</p>
@@ -155,13 +167,22 @@ export function CasLimites({ donnees }: { donnees: BlocCasLimites }) {
           </Accordion.Item>
         ))}
       </Accordion.Root>
+      {donnees.cas.length > CAS_MOBILE ? (
+        <button type="button" className="cap-plus cap-plus--bloc" aria-expanded={tout} onClick={() => setTout((v) => !v)}>
+          {tout ? "Réduire" : `Voir les ${donnees.cas.length - CAS_MOBILE} autres questions`}
+        </button>
+      ) : null}
     </div>
   );
 }
 
 export function EchelleGroupe({ donnees }: { donnees: BlocEchelle }) {
+  /* Même raison que ci-dessus : six cartes en pile font seize cents
+     pixels, et cette section-là parle des groupes à plusieurs services —
+     ce n'est pas ce que le visiteur d'un téléphone cherche en premier. */
+  const [tout, setTout] = useState(false);
   return (
-    <div className="cap">
+    <div className="cap" data-tout={tout ? "" : undefined}>
       <p className="cap-etiquette">{donnees.etiquette}</p>
       <h2 className="cap-titre">{donnees.titre}</h2>
       <p className="cap-chapo">{donnees.chapo}</p>
@@ -177,6 +198,11 @@ export function EchelleGroupe({ donnees }: { donnees: BlocEchelle }) {
           </article>
         ))}
       </div>
+      {donnees.cartes.length > CARTES_MOBILE ? (
+        <button type="button" className="cap-plus cap-plus--bloc" aria-expanded={tout} onClick={() => setTout((v) => !v)}>
+          {tout ? "Réduire" : `Voir les ${donnees.cartes.length - CARTES_MOBILE} autres`}
+        </button>
+      ) : null}
     </div>
   );
 }

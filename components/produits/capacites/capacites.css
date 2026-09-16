@@ -417,6 +417,23 @@
     position: absolute;
     inset: -12px -8px;
   }
+
+  /* ── les deux autres blocs de la page produit ──────────────────────
+     Même raison, même geste : douze questions en accordéon fermé font
+     douze cents pixels, six cartes de groupe en font seize cents. On en
+     montre la moitié — le tiers pour les cartes — et le reste suit d'un
+     geste. Dès 768 les deux reprennent leur forme complète, sur deux
+     colonnes (questions) et sur deux ou trois (cartes) : le repli n'y
+     aurait aucun sens, l'écran est large. */
+  .cap:not([data-tout]) .cap-cas-item:nth-child(n + 7) {
+    display: none;
+  }
+  .cap:not([data-tout]) .cap-carte:nth-child(n + 4) {
+    display: none;
+  }
+  .cap-plus--bloc {
+    margin-top: 22px;
+  }
 }
 
 @media (max-width: 767px) {
