@@ -41,15 +41,16 @@ import { COURRIEL } from "@/lib/reservation";
      celle-ci reprend le geste, est centrée.
 
    ÉCARTS ASSUMÉS.
-   · Le filet et la trame pointillée ne viennent pas de cta13, qui n'a que
-     sa carte. Le filet sépare la vente du pied ; la trame `.o-dots` qui
-     ferme la bande par le bas (`o-dots-fade-up`) fait écho à celle qui
+   · La trame pointillée ne vient pas de cta13, qui n'a que sa carte.
+     Elle ferme la bande par le bas (`o-dots-fade-up`) et fait écho à celle qui
      ouvre le hero par le haut : la page s'ouvre et se ferme sur la même
      trame, en version nuit (`--o-dot` est redéfini par `.o-nuit`).
    · Le `gap-3` de la rangée est celui de la maison (accueil, hero de
      cette page), pas le `sm:gap-4` de la source.
-   · Les `data-reveal` sont gardés bloc par bloc, comme avant ; le filet
-     en porte un aussi, pour entrer dans la même cascade.
+   · Les `data-reveal` sont gardés bloc par bloc, comme avant.
+   · 15/09 (Teo) : le filet qui séparait la vente du pied est retiré. Son
+     écart total est conservé au pied (mt-[72px] = les 40 px au-dessus du
+     filet plus les 32 px au-dessous), la séparation tient donc au blanc.
    ══════════════════════════════════════════════════════════════════════ */
 
 export default function ClotureSite() {
@@ -95,14 +96,9 @@ export default function ClotureSite() {
           {COURRIEL}, nous vous répondons le jour même.
         </p>
 
-        {/* le filet : la vente au-dessus, le pied au-dessous. Couleur
-            explicite (Tailwind v4 peindrait un `border` nu en currentColor,
-            ici c'est un fond, même prudence). */}
-        <span aria-hidden data-reveal className="mt-10 h-px w-full max-w-[520px] bg-white/[0.12]" />
-
         {/* la mention discrète de l'autre porte : pour qui s'est trompé
             d'aiguillage, sans re-poser deux portes ici */}
-        <p data-reveal className="o-small mt-8 max-w-[520px] !text-[13px] !leading-[20px]">
+        <p data-reveal className="o-small mt-[72px] max-w-[520px] !text-[13px] !leading-[20px]">
           Plusieurs enseignes, plusieurs services, une charte à respecter&nbsp;? Le site n&apos;est alors qu&apos;une surface de plus dans un ensemble qui se mesure d&apos;abord — périmètre, données, intégrations. On commence par une enseigne pilote, et le prix est établi à l&apos;issue d&apos;un diagnostic.{" "}
           <Link href="/reserver-un-audit" className="underline underline-offset-4 hover:text-white">
             Demander un diagnostic
