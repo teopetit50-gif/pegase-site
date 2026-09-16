@@ -7,6 +7,7 @@ import { AgentTrace, type TraceSpan } from "@/components/ui/agent-trace";
 import { HalftoneFlow } from "@/components/ui/halftone-flow";
 import HeroReplie from "@/components/surmesure/HeroReplie";
 import Cycle from "@/components/surmesure/Cycle";
+import Revele from "@/components/surmesure/Revele";
 import {
   SigneHubspot,
   SigneNotion,
@@ -14,19 +15,18 @@ import {
   CroquisDocument,
   CroquisPont,
   CroquisSuivi,
+  PictoApplication,
+  PictoAssistant,
+  PictoBord,
+  PictoCadran,
+  PictoPiece,
+  PictoPont,
 } from "@/components/surmesure/Panneaux";
 import { FAMILLES } from "@/lib/content";
 import { fr } from "@/lib/typo";
+import Casestudies, { type Cas } from "@/components/ui/case-studies";
 import { FICHES } from "@/lib/fiches";
 import type { Fiche } from "@/lib/fiches";
-import {
-  AppWindow,
-  ArrowLeftRight,
-  CalendarCheck,
-  FileSearch,
-  LayoutDashboard,
-  MessagesSquare,
-} from "lucide-react";
 import "./sur-mesure.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -276,40 +276,53 @@ const TRACE: TraceSpan[] = [
 const TRACE_TOTAL = 9100;
 
 /* ——— § 8 · les six périmètres ———————————————————————————————————
-   Les quatre premiers sont `FICHE.points`, coupés au premier deux-points
-   (intitulé / développement). Les deux derniers sont les deux périmètres
-   que `fonctionnement[1]` cite sans que la liste les reprenne : le
-   tableau de bord et l'assistant interne. Rien d'inventé.
+   Les intitulés et le fond viennent de `FICHE.points` et de la liste de
+   `fonctionnement[1]` (tableau de bord, assistant interne). Rien
+   d'inventé — mais les textes sont RÉÉCRITS COURT, et c'est le sujet.
 
-   LA COUPE EST TOLÉRANTE À L'ESPACE. Le deuxième périmètre porte
-   l'INSÉCABLE devant son deux-points, comme le veut la typographie
-   française : une coupe sur `" : "` ne trouvait rien et affichait la
-   phrase entière en gras. `\s` couvre U+00A0 et U+202F en JavaScript. */
-const ICONES_PERIMETRE = [AppWindow, ArrowLeftRight, FileSearch, CalendarCheck];
+   16/09, Teo : « on a encore trop de texte par rapport à eux ». Relevé
+   sur la référence, les six légendes de cette grille font 52, 105, 89,
+   43, 85 et 51 signes — 71 en moyenne. Les nôtres en faisaient 129, 115,
+   88, 108, 88 et 81, soit 101 : quarante pour cent de trop. Elles sont
+   ramenées autour de 63, ce qui est le bon équivalent une fois compté
+   que le français court 15 à 20 % plus long que l'anglais.
 
+   La phrase complète de chaque périmètre reste dans `FICHE.points` : on
+   coupe l'affichage, on ne perd pas le texte.
+
+   Les pictogrammes sont DESSINÉS (components/surmesure/Panneaux.tsx) et
+   non pris dans une bibliothèque : chacun montre la chose, comme ceux de
+   la référence. Voir le commentaire en tête de la section 4 du fichier. */
 const PERIMETRES = [
-  ...FICHE.points.map((pt, i) => {
-    const coupe = pt.match(/^(.*?)\s*:\s*(.*)$/);
-    const titre = coupe ? coupe[1] : pt;
-    const suite = coupe ? coupe[2] : "";
-    return {
-      Icone: ICONES_PERIMETRE[i],
-      titre,
-      /* la suite d'un deux-points est en minuscule dans la fiche ; seule,
-         elle redevient une phrase */
-      texte: suite ? suite.charAt(0).toUpperCase() + suite.slice(1) + "." : "",
-    };
-  }),
   {
-    Icone: LayoutDashboard,
-    titre: "Tableaux de bord",
-    texte:
-      "Un état alimenté en continu, à la place d'un fichier consolidé à la main en fin de mois.",
+    Icone: PictoApplication,
+    titre: "Logiciels métier",
+    texte: "Une application avec son interface, sa base et ses droits.",
   },
   {
-    Icone: MessagesSquare,
+    Icone: PictoPont,
+    titre: "Ponts entre outils",
+    texte: "Deux logiciels qui ne se parlent pas, une double saisie quotidienne.",
+  },
+  {
+    Icone: PictoPiece,
+    titre: "Traitement de documents",
+    texte: "Lecture, contrôle et classement des pièces, quel que soit le format.",
+  },
+  {
+    Icone: PictoCadran,
+    titre: "Contrôles répétitifs",
+    texte: "Vérifications de cohérence, alertes sur seuils, états à date fixe.",
+  },
+  {
+    Icone: PictoBord,
+    titre: "Tableaux de bord",
+    texte: "Un état alimenté en continu, à la place d'un fichier de fin de mois.",
+  },
+  {
+    Icone: PictoAssistant,
     titre: "Assistants internes",
-    texte: "Un assistant qui répond à vos équipes sur vos propres procédures, pas sur le web.",
+    texte: "Un assistant qui répond sur vos procédures, pas sur le web.",
   },
 ];
 
@@ -317,10 +330,46 @@ const PERIMETRES = [
    Les trois premières lignes de `FICHE.demo` — celles dont les règles
    s'écrivent. La quatrième, celle qu'on écarte, ferme la section en une
    phrase plutôt que d'occuper une vignette. */
-const EXEMPLES = [
-  { nature: "Pont entre outils", titre: FICHE.demo.type === "list" ? FICHE.demo.items[0].text : "", Croquis: CroquisPont },
-  { nature: "Traitement de documents", titre: FICHE.demo.type === "list" ? FICHE.demo.items[1].text : "", Croquis: CroquisDocument },
-  { nature: "Logiciel métier", titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "", Croquis: CroquisSuivi },
+const EXEMPLES: Cas[] = [
+  {
+    id: "pont",
+    visuel: <CroquisPont />,
+    titre: FICHE.demo.type === "list" ? FICHE.demo.items[0].text : "",
+    texte:
+      "Deux logiciels qui ne se parlent pas, une double saisie quotidienne ou un export repris à la main chaque semaine : la donnée passe de l'un à l'autre sans que personne la retape.",
+    legende: "Pont entre outils",
+    sousLegende: "Règles écrites avant tout chiffrage",
+    mesures: [
+      { value: "2", label: "Outils reliés", sub: "La donnée n'est saisie qu'une fois" },
+      { value: "Jours", label: "Ordre de grandeur", sub: "Un pont entre deux outils se compte en jours" },
+    ],
+  },
+  {
+    id: "documents",
+    visuel: <CroquisDocument />,
+    titre: FICHE.demo.type === "list" ? FICHE.demo.items[1].text : "",
+    texte:
+      "Lecture, contrôle, extraction et classement de pièces reçues dans n'importe quel format, au moment où elles arrivent plutôt qu'au moment où quelqu'un s'en occupe.",
+    legende: "Traitement de documents",
+    sousLegende: "Contrôle à réception, pas après coup",
+    mesures: [
+      { value: "0", label: "Ressaisie", sub: "Les informations extraites ne sont pas retapées" },
+      { value: "Tous", label: "Formats acceptés", sub: "La pièce est lue telle qu'elle arrive" },
+    ],
+  },
+  {
+    id: "logiciel",
+    visuel: <CroquisSuivi />,
+    titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "",
+    texte:
+      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services sans le déformer.",
+    legende: "Logiciel métier",
+    sousLegende: "Construit sur vos règles, branché sur vos outils",
+    mesures: [
+      { value: "1", label: "Application", sub: "Interface, base de données et droits" },
+      { value: "Semaines", label: "Ordre de grandeur", sub: "Un logiciel métier complet se compte en semaines" },
+    ],
+  },
 ];
 
 /* ——— § 10 · les quatre paquets du catalogue ——————————————————————
@@ -608,22 +657,46 @@ export default function SurMesurePage() {
               sort de la colonne de 1472 et suit la vue jusqu'à 1888 —
               voir le relevé en tête de sur-mesure.css. */}
           <div className="smd-large">
+            {/* La colonne de texte fait 64,6 % de la carte, comme sur la
+                référence — c'est elle qui donne à la citation ses cinq
+                lignes et à la carte sa hauteur. Et le texte MONTE dans
+                son cadre à l'entrée dans l'écran (`Revele`), au lieu
+                d'être là d'emblée : le nom suit 180 ms après. */}
             <div data-reveal className="smd-citation">
               <div className="flex flex-col gap-10 lg:grid lg:grid-cols-12 lg:gap-8">
-                <p className="smd-citation__label lg:col-span-3 lg:self-end">
+                {/* L'étiquette et le corps sont sur la MÊME rangée de
+                    grille, sinon l'étiquette se place sur une rangée à
+                    elle et remonte en haut de la carte — sur la
+                    référence elle est en bas à gauche, à la hauteur du
+                    nom. Le recouvrement est sans conséquence : le corps
+                    est calé à droite sur 71 % et laisse la gauche libre. */}
+                <p className="smd-citation__label lg:col-span-4 lg:col-start-1 lg:row-start-1 lg:self-end">
                   Ce que le catalogue{"\n"}ne couvre pas
                 </p>
-                <div className="flex flex-col justify-between gap-12 lg:col-span-8 lg:col-start-5">
-                  <p className="smd-citation__texte">
-                    «&nbsp;Le sur-mesure commence là où l&apos;hypothèse du catalogue
-                    s&apos;arrête&nbsp;: quand le processus qui coûte le plus cher est propre à
-                    votre métier, et qu&apos;aucun produit sur étagère ne le traite sans le
-                    déformer.&nbsp;»
-                  </p>
-                  <div className="flex flex-wrap items-center justify-between gap-4 lg:justify-end lg:gap-6">
-                    <p className="smd-citation__nom">Omega.AI</p>
-                    <span className="smd-citation__jeton">Cadrage avant devis</span>
+                <div className="flex flex-col justify-between gap-16 lg:col-span-12 lg:col-start-1 lg:row-start-1">
+                  <div className="smd-citation__corps">
+                    <Revele>
+                      {/* La citation est celle de `FICHE.fonctionnement[0]`,
+                          MOT POUR MOT. Je l'avais raccourcie en la posant :
+                          elle tombait à 197 signes contre 235 chez eux,
+                          donc quatre lignes au lieu de cinq, donc une carte
+                          plus basse. Le texte complet de Teo fait la bonne
+                          longueur — la coupe n'avait rien gagné. */}
+                      <span className="smd-citation__texte">
+                        «&nbsp;Le sur-mesure commence là où l&apos;hypothèse du catalogue
+                        s&apos;arrête&nbsp;: quand le processus qui coûte le plus cher est
+                        propre à votre métier, à votre organisation ou à votre système
+                        d&apos;information, et qu&apos;aucun produit sur étagère ne le
+                        traite sans le déformer.&nbsp;»
+                      </span>
+                    </Revele>
                   </div>
+                  <Revele delai={180}>
+                    <span className="flex flex-wrap items-center justify-between gap-4 lg:justify-end lg:gap-6">
+                      <span className="smd-citation__nom">Omega.AI</span>
+                      <span className="smd-citation__jeton">Cadrage avant devis</span>
+                    </span>
+                  </Revele>
                 </div>
               </div>
             </div>
@@ -692,13 +765,13 @@ export default function SurMesurePage() {
             <Entete
               etiquette="Périmètres"
               titre="Ce que couvre le sur-mesure."
-              chapo="Si la tâche s'exécute aujourd'hui à la main et suit des règles qu'on peut écrire, elle peut être reprise."
+              chapo="Si la tâche suit des règles qu'on peut écrire, elle peut être reprise."
             />
             <div className="smd-fonctions">
               {PERIMETRES.map(({ Icone, titre, texte }) => (
                 <div data-reveal key={titre} className="smd-fonction">
                   <figure>
-                    <Icone strokeWidth={1.25} />
+                    <Icone />
                   </figure>
                   <h4 className="smd-h4">{titre}</h4>
                   <p className="smd-body">{texte}</p>
@@ -713,17 +786,7 @@ export default function SurMesurePage() {
         <section className="smd-sec">
           <div className="smd-wrap">
             <Entete etiquette="Exemples" titre="Trois besoins traités hors catalogue." />
-            <div className="smd-vignettes">
-              {EXEMPLES.map(({ nature, titre, Croquis }) => (
-                <div data-reveal key={nature}>
-                  <div className="smd-vignette__cadre">
-                    <Croquis />
-                  </div>
-                  <h4 className="smd-h4 mb-3 mt-2 !leading-[1.33]">{titre}</h4>
-                  <p className="smd-body">{nature}</p>
-                </div>
-              ))}
-            </div>
+            <Casestudies cas={EXEMPLES} />
             <p data-reveal className="smd-body mt-10 max-w-[698px]">
               {FICHE.demo.type === "list" ? fr(FICHE.demo.footer ?? "") : ""}
             </p>

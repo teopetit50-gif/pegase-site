@@ -821,7 +821,34 @@
   }
 }
 
+/* La colonne de texte de la citation.
+
+   Relevé sur la référence à 1600 : la carte fait 1397 de large et le
+   texte 902, soit 64,6 % — sept colonnes sur douze, gouttières
+   comprises. Notre grille en donnait huit sur douze, soit 835 : 67 px
+   de moins, donc UNE LIGNE DE MOINS, donc une carte plus courte de 85 px
+   que la leur. C'est cette largeur qui règle la hauteur, pas un
+   `min-height`.
+
+   La hauteur relevée sur la référence, pour mémoire : 492 à 1600, avec
+   cinq lignes de citation. */
+.smd .smd-citation__corps {
+  width: 100%;
+}
+@media (min-width: 1024px) {
+  /* 71,1 % et non 64,6 : la référence n'a PAS de padding horizontal sur
+     sa carte (`lg:px-0`), son retrait vient de sa grille — ses 64,6 %
+     se comptent donc sur la carte entière. Les nôtres se comptent sur la
+     boîte de contenu, déjà rentrée de 64 de chaque côté. 71,1 % de
+     (1397 − 128) redonne exactement les 902 relevés. */
+  .smd .smd-citation__corps {
+    width: 71.1%;
+    margin-left: auto;
+  }
+}
+
 .smd .smd-citation__texte {
+  display: block;
   font-size: 1.5rem;
   line-height: 28px;
   font-weight: 400;
@@ -848,6 +875,7 @@
   white-space: pre-line;
 }
 .smd .smd-citation__nom {
+  display: block;
   font-size: 1rem;
   line-height: 1.25;
   font-weight: 500;
@@ -868,6 +896,44 @@
   line-height: 1.375;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   7 bis · LA RÉVÉLATION AU DÉFILEMENT
+
+   Le texte monte dans son cadre quand le bloc entre dans l'écran, comme
+   la citation de la référence (`AnimatedText isnt-visible`).
+
+   ⚠ L'ÉTAT MASQUÉ N'EXISTE QUE SOUS `[data-anime]`, que le composant
+   pose au montage. Sans JavaScript, ou avant l'hydratation, le texte est
+   visible — un bloc vide pour toujours serait pire que pas d'effet.
+   ───────────────────────────────────────────────────────────────────── */
+.smd .smd-masque {
+  display: block;
+}
+.smd .smd-masque__in {
+  display: block;
+}
+.smd .smd-masque[data-anime] {
+  overflow: hidden;
+}
+.smd .smd-masque[data-anime] .smd-masque__in {
+  transform: translateY(105%);
+  opacity: 0;
+  transition:
+    transform 900ms cubic-bezier(0.16, 1, 0.3, 1) var(--smd-delai, 0ms),
+    opacity 700ms ease var(--smd-delai, 0ms);
+}
+.smd .smd-masque[data-anime][data-vu] .smd-masque__in {
+  transform: none;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .smd .smd-masque[data-anime] .smd-masque__in {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -1647,4 +1713,191 @@
   .smd .smd-ressource__cadre img {
     transition: none;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE BLOC D'ÉTUDES DE CAS (components/ui/case-studies) — 16/09/2026
+
+   Teo a collé la fiche 21st.dev « case-studies » pour remplacer les trois
+   vignettes de la section « Exemples », avec une consigne explicite :
+   « adapte-toi à la police d'écriture du site de référence, le composant
+   que je t'ai donné n'a pas la même police. »
+
+   Il a raison sur le principe et c'est la règle de toutes les reprises
+   ici : une fiche 21st.dev n'apporte JAMAIS sa police — elle vient du CSS
+   de page. Ce que la fiche apporte en revanche, et qu'il faut défaire, ce
+   sont ses utilitaires Tailwind de thème (`text-foreground`,
+   `text-muted-foreground`, `bg-background`, `dark:text-white`) et ses
+   tailles en dur (`text-4xl`, `text-2xl`). Sur ce site, un `text-*` de
+   thème shadcn ne peint RIEN et ne dit rien : les jetons n'existent pas
+   ([[theme-scope-bat-les-utilitaires]]). Le composant a donc été réencré
+   en classes `cs-*` nues, et c'est ce bloc qui les habille — dans le
+   vocabulaire `.smd`, donc en Geist comme le reste de la page.
+
+   Correspondances : titre = `.smd-h4`, corps = `.smd-body`, valeur de
+   mesure = `.smd-chiffre`, libellé de mesure = `.smd-chiffre-label`
+   (mais aligné à gauche ici, la fiche cale tout à gauche), filets =
+   `--smd-ligne`.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.smd .cs-lignes {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.smd .cs-ligne {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--smd-ligne);
+}
+.smd .cs-ligne:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+@media (min-width: 1024px) {
+  .smd .cs-ligne {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 48px;
+  }
+}
+
+.smd .cs-ligne__gauche {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+@media (min-width: 640px) {
+  .smd .cs-ligne__gauche {
+    flex-direction: row;
+    gap: 40px;
+  }
+}
+@media (min-width: 1024px) {
+  .smd .cs-ligne__gauche {
+    grid-column: span 2;
+    padding-right: 48px;
+    border-right: 1px solid var(--smd-ligne);
+  }
+  /* une ligne sur deux bascule : le visuel passe à droite, le filet
+     change de côté. C'est l'alternance de la fiche, gardée telle quelle. */
+  .smd .cs-ligne--inverse .cs-ligne__gauche {
+    order: 2;
+    padding-right: 0;
+    padding-left: 48px;
+    border-right: 0;
+    border-left: 1px solid var(--smd-ligne);
+  }
+  .smd .cs-ligne--inverse .cs-mesures {
+    order: 1;
+  }
+}
+
+/* Le cadre du visuel. La fiche y met un portrait en 29/35 ; ici ce sont
+   les croquis au trait de la page, qui sont larges — le cadre garde donc
+   le 16/9 des vignettes qu'il remplace, et sa surface douce. */
+.smd .cs-visuel {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--smd-r-lg);
+  background: var(--smd-fond);
+  aspect-ratio: 16 / 9;
+  width: 100%;
+}
+@media (min-width: 640px) {
+  .smd .cs-visuel {
+    width: 300px;
+  }
+}
+
+.smd .cs-propos {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  margin: 0;
+}
+.smd .cs-titre {
+  font-size: 1.375rem;
+  line-height: 1.33;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--smd-texte);
+  text-wrap: balance;
+}
+@media (min-width: 1024px) {
+  .smd .cs-titre {
+    font-size: 1.5rem;
+  }
+}
+.smd .cs-corps {
+  margin-top: 12px;
+  font-size: 1rem;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--smd-doux);
+}
+
+/* La fiche met ici un nom et un poste. Nous n'avons personne à nommer :
+   c'est la NATURE du besoin qui occupe la place, et la ligne dessous dit
+   comment il est traité. Voir l'en-tête du composant. */
+.smd .cs-legende {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.smd .cs-legende__nom {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--smd-texte);
+}
+.smd .cs-legende__role {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--smd-etiquette);
+}
+
+.smd .cs-mesures {
+  display: grid;
+  gap: 28px;
+  align-self: center;
+}
+.smd .cs-mesure {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.smd .cs-mesure__valeur {
+  font-size: 1.75rem;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--smd-texte);
+}
+@media (min-width: 640px) {
+  .smd .cs-mesure__valeur {
+    font-size: 2.25rem;
+  }
+}
+.smd .cs-mesure__label {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--smd-etiquette);
+}
+.smd .cs-mesure__sous {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--smd-doux);
 }

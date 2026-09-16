@@ -303,3 +303,113 @@ export function CroquisSuivi() {
     </Cadre>
   );
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   4 · LES SIX PICTOGRAMMES DE PÉRIMÈTRE
+
+   16/09, Teo : « les logos ne sont pas aussi bien faits que sur la
+   version de base ». C'est juste : la référence dessine SES icônes —
+   un cadran, un graphe de nœuds, une courbe, un éclair, un microscope,
+   une poignée de main. Chacune dit son sujet. Les nôtres venaient d'une
+   bibliothèque générique : une fenêtre, deux flèches, un fichier, un
+   calendrier — interchangeables et sans rapport précis avec le texte.
+
+   Ces six-là sont dessinées pour leur carte, au même trait (1,2) et dans
+   la même boîte de 24, comme celles de la référence. Chacune montre la
+   CHOSE, pas sa catégorie : une application avec son rail et ses droits,
+   un pont entre deux outils, une pièce lue et validée, un cadran avec
+   son seuil, un état qui monte, un assistant qui répond depuis une base.
+   ───────────────────────────────────────────────────────────────────── */
+
+const PICTO = {
+  width: 24,
+  height: 24,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.2,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  "aria-hidden": true,
+};
+
+/* Logiciel métier : une fenêtre avec son rail de navigation et ses
+   droits (le cadenas d'angle). */
+export function PictoApplication() {
+  return (
+    <svg {...PICTO}>
+      <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+      <path d="M8.5 4v16" />
+      <path d="M4.8 8h1.4M4.8 11h1.4M4.8 14h1.4" />
+      <path d="M11.5 9h7M11.5 12h4.5" />
+      <rect x="15.5" y="14.5" width="4" height="3.2" rx="1" />
+      <path d="M16.6 14.5v-1a.9.9 0 0 1 1.8 0v1" />
+    </svg>
+  );
+}
+
+/* Pont entre outils : deux blocs et un tablier qui les relie. */
+export function PictoPont() {
+  return (
+    <svg {...PICTO}>
+      <rect x="1.8" y="13" width="5.4" height="7" rx="1.2" />
+      <rect x="16.8" y="13" width="5.4" height="7" rx="1.2" />
+      <path d="M4.5 13V9M19.5 13V9" />
+      <path d="M2.5 9.5C6 5 18 5 21.5 9.5" />
+      <path d="M8 11.4v2.1M12 10.6v2.9M16 11.4v2.1" />
+    </svg>
+  );
+}
+
+/* Traitement de documents : une pièce lue, et son contrôle. */
+export function PictoPiece() {
+  return (
+    <svg {...PICTO}>
+      <path d="M5 3.2h8l5 5v6.4" />
+      <path d="M13 3.2V8h5" />
+      <path d="M5 3.2v17.6h5.4" />
+      <path d="M8 9h3M8 12h5M8 15h3.5" />
+      <circle cx="16.6" cy="17.4" r="3.6" />
+      <path d="m14.9 17.5 1.2 1.2 2.3-2.5" />
+    </svg>
+  );
+}
+
+/* Contrôles répétitifs : un cadran, son aiguille et son seuil. */
+export function PictoCadran() {
+  return (
+    <svg {...PICTO}>
+      <path d="M3 17.5a9 9 0 1 1 18 0" />
+      <path d="M12 17.5 16.2 11" />
+      <circle cx="12" cy="17.5" r="1.1" />
+      <path d="M4.6 12.2 5.8 13M19.4 12.2 18.2 13M12 5.2v1.5" />
+      <path d="M2.2 20.6h19.6" />
+    </svg>
+  );
+}
+
+/* Tableau de bord : un cadre, une courbe qui monte, un repère. */
+export function PictoBord() {
+  return (
+    <svg {...PICTO}>
+      <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+      <path d="M2.5 8h19" />
+      <path d="M6 16.2l3.4-3.6 2.6 2.1 4.4-4.6" />
+      <circle cx="16.4" cy="10.1" r="1.2" />
+      <path d="M5 6h1.2M8 6h1.2" />
+    </svg>
+  );
+}
+
+/* Assistant interne : une réponse, et la base de procédures d'où elle
+   sort — c'est ce qui le distingue d'un assistant générique. */
+export function PictoAssistant() {
+  return (
+    <svg {...PICTO}>
+      <path d="M3 5.6A2.1 2.1 0 0 1 5.1 3.5h9.3a2.1 2.1 0 0 1 2.1 2.1v5.2a2.1 2.1 0 0 1-2.1 2.1H8l-3.7 2.7v-2.7H5.1A2.1 2.1 0 0 1 3 10.8z" />
+      <path d="M6.4 6.9h6.7M6.4 9.4h4.2" />
+      <ellipse cx="17.4" cy="16.3" rx="3.9" ry="1.6" />
+      <path d="M13.5 16.3v3.4c0 .9 1.7 1.6 3.9 1.6s3.9-.7 3.9-1.6v-3.4" />
+    </svg>
+  );
+}
