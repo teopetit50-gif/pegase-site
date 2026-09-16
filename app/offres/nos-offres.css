@@ -1094,28 +1094,35 @@
   fill: #8a8a8a;
 }
 
-/* Sous 768 un schéma de 1216 de large rend un texte de 9 px : il passe en
-   défilement horizontal DANS SON CADRE, comme la rangée de logos, plutôt
-   que d'être illisible. */
+/* ═══════════════════════════════════════════════════════════════════════
+   16/09/2026 (Teo, par l'associé) — LE SCHÉMA DISPARAÎT SUR TÉLÉPHONE
+
+   « Sur mobile le schéma complet ne s'affiche pas ; base-toi sur le
+   design de la page sur mesure pour refaire le même. »
+
+   Version précédente : le SVG restait à 820 px de large et défilait
+   horizontalement dans son cadre, avec un fondu au bord droit pour dire
+   qu'on pouvait le faire glisser. Le geste ne se devine pas, et un schéma
+   dont on ne voit qu'un tiers n'est pas un schéma — c'est une image
+   coupée. C'est exactement ce que Teo a vu.
+
+   Ce qui le remplace existait déjà : `.ofd-rangee`, le même cycle « temps
+   par temps » en pile, une colonne sur téléphone — la forme que la page
+   sur-mesure a retenue pour son déroulé. Rien n'est perdu : les quatre
+   temps, leurs intitulés et leurs textes sont les mêmes des deux côtés.
+   Le SVG reste servi tel quel dès 768.
+
+   `display: none` et non `visibility` : il ne doit rien coûter en hauteur
+   ni en défilement, et un SVG masqué mais présent laisserait un blanc de
+   400 px au milieu de la page. */
 @media (max-width: 767px) {
   .ofd .ofd-schema {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .ofd .ofd-schema::-webkit-scrollbar {
     display: none;
   }
-  .ofd .ofd-schema svg {
-    width: 820px;
-    max-width: none;
-  }
-  /* Même remarque que pour la rangée d'outils : sans fondu, la carte
-     « Règles » tranchée au ras du bord se lit comme un défaut, et rien
-     ne dit qu'on peut faire glisser. Le cycle reste par ailleurs lisible
-     en entier juste dessous, en pile (`.ofd-rangee`). */
-  .ofd .ofd-schema {
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+  /* la chronologie prend la place du schéma : elle n'est plus un
+     complément posé dessous, elle EST la section */
+  .ofd .ofd-rangee {
+    margin-top: 0;
   }
 }
 .ofd .ofd-rangee {
@@ -1309,6 +1316,56 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/* ═══════════════════════════════════════════════════════════════════════
+   16/09/2026 (Teo, par l'associé) — « POUR ALLER PLUS LOIN » SE RESSERRE
+
+   « La section est beaucoup trop grosse sur mobile. » Elle l'était : en
+   une colonne, chaque carte empilait une vignette au rapport 389/243 —
+   soit 243 px de haut sur un téléphone de 390 — puis sa catégorie et son
+   titre à 24 px. Quatre ressources faisaient plus de treize cents pixels
+   pour quatre liens d'articles, en fin de page, là où l'on survole.
+
+   Sur téléphone elles deviennent donc une LISTE : vignette de 92 px à
+   gauche, titre à droite, quatre lignes d'à peine plus de trois cents
+   pixels en tout. C'est la forme qu'ont les listes d'articles partout
+   ailleurs sur un téléphone, et elle se parcourt d'un pouce.
+
+   Dès 768, la grille éditoriale d'origine revient sans un pixel d'écart :
+   la grande vignette y a un sens, l'écran est large. */
+@media (max-width: 767px) {
+  .ofd .ofd-ressources {
+    gap: 18px;
+  }
+  .ofd .ofd-ressource {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+  }
+  .ofd .ofd-ressource__vignette {
+    aspect-ratio: 4 / 3;
+  }
+  /* le pictogramme est posé à 96 px dans le balisage (lucide écrit
+     `width`/`height` sur le SVG) : on le ramène à la taille de la
+     vignette ici plutôt que de rendre deux tailles dans le TSX */
+  .ofd .ofd-ressource__vignette svg {
+    width: 34px;
+    height: 34px;
+  }
+  .ofd .ofd-ressource__texte {
+    padding-top: 0;
+  }
+  .ofd .ofd-ressource__cat {
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .ofd .ofd-ressource__titre {
+    margin-top: 2px;
+    font-size: 1.0625rem;
+    line-height: 1.35;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ofd .ofd-ressource__vignette svg {
     transition: none;
