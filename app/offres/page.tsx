@@ -12,7 +12,7 @@ import {
   Search,
   Users,
 } from "lucide-react";
-import { siGmail, siGoogledrive, siNotion, siShopify, siStripe } from "simple-icons";
+import { siAirtable, siAsana, siHubspot, siQuickbooks, siStripe } from "simple-icons";
 import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
 import { ChatMessages } from "@/components/ui/chat-messages";
 import PageShell from "@/components/PageShell";
@@ -105,18 +105,26 @@ import "./nos-offres.css";
    · Les fenêtres et la console sont des EXEMPLES, et le disent dans leur
      propre chrome — elles ne montrent les données d'aucun client.
 
-   ── LE BUDGET DE TEXTE ───────────────────────────────────────────────
-   Teo, 16/09 : « il y a trop de texte sur les sections, regarde comme
-   eux n'en mettent pas trop. » Relevé sur la référence, à 1440 :
-     chapô du hero      70 signes
-     chapô de section   45 à 47
-     texte de carte     93 à 142
-     paragraphe long    182 à 188, et il n'y en a QU'UN dans la page
-     pied d'appel       aucun paragraphe — un titre et deux boutons
-   Les nôtres faisaient 152, 165, 140, 163 et 118. Ils sont ramenés dans
-   ces fourchettes ; le paragraphe du bloc scindé (190) est le seul long
-   de la page, comme chez eux, et le paragraphe du pied d'appel a été
-   SUPPRIMÉ. Aucun fait n'est perdu : ce qui part est de la redite.
+   ── LE BUDGET DE TEXTE, EMPLACEMENT PAR EMPLACEMENT ──────────────────
+   Teo, 16/09, deux fois : « il y a trop de texte sur les sections » puis
+   « fais les textes aussi courts quand c'est court et aussi longs quand
+   c'est long ». La consigne n'est donc PAS « faire court » : c'est de
+   tenir la longueur de la référence À CHAQUE EMPLACEMENT. Relevé à 1440,
+   référence puis nous :
+
+     chapô du hero            70   ·  76
+     chapô de section         45-47·  34 et 39      (une ligne, comme eux)
+     titre du bloc scindé     13   ·  10   « Generative AI » → « Le journal »
+     sous-titre du bloc       45   ·  36
+     paragraphe du bloc      188   · 190   LE SEUL long de la page, chez
+                                            eux comme chez nous
+     texte de carte           93-142· 89-143
+     pied d'appel            aucun paragraphe, un titre et deux boutons
+
+   Les chapôs de section faisaient 94 et 66, donc deux lignes là où la
+   référence en a une : c'est ce qui se voyait. Le paragraphe du bloc
+   scindé, lui, N'A PAS été raccourci — il est long chez eux aussi, et le
+   raccourcir aurait été l'autre moitié de l'erreur.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -140,12 +148,26 @@ export const metadata: Metadata = {
    NOTRE police : c'est un rappel typographique, pas la reproduction d'un
    logotype de marque. Les libellés sont raccourcis (« Sheets », « Drive »)
    pour tenir la largeur de la rangée sans la faire défiler. */
+/* 16/09 (Teo, « mets des logos qui font plus pro ») — la rangée portait
+   Gmail, Drive, Notion, Shopify : des outils de TPE, qui tiraient la page
+   vers le bas alors qu'elle parle à des groupes. Les cinq ci-dessous sont
+   les plus corporate de la liste de /integrations — ERP et comptabilité,
+   CRM, paiement, gestion de projet, base de données.
+
+   CE QU'ON N'Y MET PAS, et ce n'est pas négociable : des logos d'éditeurs
+   d'IA. Aucune page publique ne dit avec quoi le produit est fait
+   (references/regles-maison.md). Et c'est déjà arrivé : jusqu'au
+   05/08/2026 les tuiles de paquets portaient Anthropic, Gemini, Cursor,
+   n8n — retirés ce jour-là parce qu'afficher la marque d'un éditeur comme
+   signe distinctif d'une offre Omega se lit comme une marque empruntée
+   (voir l'en-tête de components/logos.tsx). Cette bande liste les outils
+   DU CLIENT, jamais les nôtres. */
 const OUTILS = [
-  { marque: siGmail, nom: "Gmail" },
+  { marque: siHubspot, nom: "HubSpot" },
   { marque: siStripe, nom: "Stripe" },
-  { marque: siShopify, nom: "Shopify" },
-  { marque: siGoogledrive, nom: "Drive" },
-  { marque: siNotion, nom: "Notion" },
+  { marque: siQuickbooks, nom: "QuickBooks" },
+  { marque: siAsana, nom: "Asana" },
+  { marque: siAirtable, nom: "Airtable" },
 ];
 
 /* BLOC 3 — les quatre arguments. Les quatre pastilles reprennent les
@@ -509,7 +531,20 @@ export default function OffresPage() {
                       régions d'un hébergeur et affichent des débits
                       inventés. Il ne reste que des points et des arcs. */}
                   <div className="ofd-panneau__motif">
-                    <GlobeCdn libelles={false} trafic={false} className="ofd-globe" />
+                    {/* Ni arcs ni marqueurs : à l'écran, les arcs de la
+                        fiche rayaient la sphère comme des griffes et les
+                        marqueurs faisaient des pâtés noirs sur le bord.
+                        La référence, à cette place, pose un planisphère en
+                        points — rien d'autre. Le globe garde sa rotation
+                        et reste manipulable à la souris, ce que le
+                        planisphère ne faisait pas. */}
+                    <GlobeCdn
+                      markers={[]}
+                      arcs={[]}
+                      libelles={false}
+                      trafic={false}
+                      className="ofd-globe"
+                    />
                   </div>
                 </div>
 
@@ -566,14 +601,14 @@ export default function OffresPage() {
               <TeteSection
                 etiquette="Contrôle humain"
                 titre="Rien ne part sans vous."
-                chapo="Chaque action attend votre accord. Vous décidez ensuite, règle par règle, de ce qui part seul."
+                chapo="Chaque action attend votre accord."
                 large
               />
 
               <div className="ofd-scinde">
                 <div data-reveal className="ofd-scinde__texte">
-                  <p className="ofd-h4">Un journal de tout ce qui part</p>
-                  <p className="ofd-scinde__sous">Le système propose, vous tranchez.</p>
+                  <p className="ofd-h4">Le journal</p>
+                  <p className="ofd-scinde__sous">Tout ce qui part, et qui l&apos;a validé.</p>
                   <p className="ofd-scinde__corps">
                     Les règles et les niveaux d&apos;autonomie sont définis avec vous. Chaque entreprise
                     dispose d&apos;un espace chiffré et cloisonné, et les modèles ne reçoivent que le
@@ -606,7 +641,7 @@ export default function OffresPage() {
               <TeteSection
                 etiquette="Ce qu'on installe"
                 titre="Un système par processus, branché sur vos outils."
-                chapo="Un processus chacun, traité en continu, arrêté à votre validation."
+                chapo="Un processus chacun, traité en continu."
               />
 
               <div className="ofd-large">

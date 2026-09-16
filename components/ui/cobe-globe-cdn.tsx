@@ -152,6 +152,24 @@ export function GlobeCdn({
       const width = canvas.offsetWidth;
       if (width === 0 || globe) return;
 
+      /* ── RÉGLAGES REPRIS LE 16/09 (Teo : « le composant est mal fait ») ──
+         Les valeurs de la fiche sont taillées pour un tableau de bord CDN
+         sombre ; posées sur un panneau clair, elles donnaient une boule
+         blanche brillante traversée de fils noirs. Ce qui était en cause,
+         dans l'ordre de ce qui se voyait :
+           arcHeight 0.25  les arcs montaient si haut qu'ils SORTAIENT de
+                           la sphère et se lisaient comme des cheveux ;
+                           0.06 les fait raser la surface.
+           arcWidth 0.5    un trait d'un demi-pixel, donc crénelé ; 1.8.
+           arcColor noir   sur du blanc, c'est un trait de stylo ; gris.
+           mapBrightness 10 délave les points des continents jusqu'à les
+                           effacer ; à 4.2 ils redeviennent la matière du
+                           globe, ce qu'ils sont dans la référence.
+           diffuse 1.5     le reflet satiné qui faisait « boule » ; 1.05.
+           opacity 0.7     la sphère passait sous le fond du panneau.
+           markers 0.012   invisibles à cette taille ; 0.03, sans élévation.
+         Le glow passe du beige (0.94, 0.93, 0.91) à un gris neutre : le
+         panneau est à #f2f2f2, la chaleur d'origine y virait au sable. */
       globe = createGlobe(canvas, {
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
         width,
@@ -159,19 +177,19 @@ export function GlobeCdn({
         phi: 0,
         theta: 0.2,
         dark: 0,
-        diffuse: 1.5,
+        diffuse: 1.05,
         mapSamples: 16000,
-        mapBrightness: 10,
-        baseColor: [1, 1, 1],
-        markerColor: [0, 0, 0],
-        glowColor: [0.94, 0.93, 0.91],
-        markerElevation: 0.02,
-        markers: markers.map((m) => ({ location: m.location, size: 0.012, id: m.id })),
+        mapBrightness: 4.2,
+        baseColor: [0.98, 0.98, 0.98],
+        markerColor: [0.1, 0.1, 0.1],
+        glowColor: [0.95, 0.95, 0.95],
+        markerElevation: 0,
+        markers: markers.map((m) => ({ location: m.location, size: 0.03, id: m.id })),
         arcs: arcs.map((a) => ({ from: a.from, to: a.to, id: a.id })),
-        arcColor: [0, 0, 0],
-        arcWidth: 0.5,
-        arcHeight: 0.25,
-        opacity: 0.7,
+        arcColor: [0.42, 0.42, 0.42],
+        arcWidth: 1.8,
+        arcHeight: 0.06,
+        opacity: 1,
       });
       function animate() {
         if (!isPausedRef.current) phi += speed;
