@@ -638,6 +638,18 @@
 .ofd .ofd-outils::-webkit-scrollbar {
   display: none;
 }
+/* Sous 768 la rangée déborde de son cadre et se fait défiler. Sans
+   signe, elle se lit comme une rangée COUPÉE : relevé à 390, le
+   cinquième logotype est tranché en deux au ras du bord. Le fondu de
+   40 px le dit — en masque et non en dégradé posé par-dessus, pour que
+   le fond de la section (doux ici, blanc ailleurs) n'ait pas à être
+   redonné. Rien au-dessus de 768 : la rangée y tient d'elle-même. */
+@media (max-width: 767px) {
+  .ofd .ofd-outils {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  }
+}
 .ofd .ofd-outils ul {
   display: flex;
   min-width: max-content;
@@ -780,6 +792,16 @@
 @media (min-width: 768px) {
   .ofd .ofd-carte {
     padding: 32px;
+  }
+}
+/* `min-height` égalise des cartes CÔTE À CÔTE ; en colonne il ne reste
+   qu'un vide. Relevé à 390 : « Contrôle humain » gardait 72 px entre son
+   titre et son texte au lieu des 32 de l'écart, et les quatre cartes
+   étaient hautes de 200 pour 160 de contenu. Le plancher tombe donc sous
+   768, où il n'y a plus qu'une colonne. */
+@media (max-width: 767px) {
+  .ofd .ofd-carte {
+    min-height: 0;
   }
 }
 .ofd .ofd-carte__tete {
@@ -1087,6 +1109,14 @@
     width: 820px;
     max-width: none;
   }
+  /* Même remarque que pour la rangée d'outils : sans fondu, la carte
+     « Règles » tranchée au ras du bord se lit comme un défaut, et rien
+     ne dit qu'on peut faire glisser. Le cycle reste par ailleurs lisible
+     en entier juste dessous, en pile (`.ofd-rangee`). */
+  .ofd .ofd-schema {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+  }
 }
 .ofd .ofd-rangee {
   margin-top: 48px;
@@ -1157,6 +1187,18 @@
 @media (min-width: 768px) {
   .ofd .ofd-fiche {
     padding: 32px;
+  }
+}
+/* Même raison, en plus voyant : à 390 une fiche de deux lignes tenait
+   dans 180 px et en occupait 320. Le bandeau de tête garde son écart au
+   titre, mais ce n'est plus un plancher de 136 px : c'est une marge. */
+@media (max-width: 767px) {
+  .ofd .ofd-fiche {
+    min-height: 0;
+  }
+  .ofd .ofd-fiche__tete {
+    min-height: 0;
+    margin-bottom: 32px;
   }
 }
 .ofd a.ofd-fiche:hover {

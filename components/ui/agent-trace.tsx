@@ -36,6 +36,16 @@ import { cn } from "@/lib/cn";
    3. Les textes sont en français, y compris ceux que lit un lecteur
       d'écran (`queued` → « en attente », etc.). Le site est français.
 
+   4. L'ÉCHELLE DES COLONNES A QUITTÉ LE COMPOSANT. Les paliers d'origine
+      étaient calés sur des intitulés anglais courts et laissaient 28 px
+      à l'axe de temps sur un conteneur de 452 — le composant arrivait
+      illisible sur téléphone et sur petite tablette. `--gutter` et
+      `--meta`, le pli de la ligne sous 32 rem, et ce qui s'affiche à
+      chaque palier sont désormais dans la section 8 bis de
+      sur-mesure.css, relevés sur les textes réels. Les classes
+      `smd-trace-cadre`, `smd-trace-couloir`, `smd-trace-trame` et
+      `smd-trace-lecture` n'existent que pour ça : ne pas les retirer.
+
    Les `tokens` de l'original (« 1 240 tk ») ne sont pas utilisés :
    c'est du vocabulaire de fournisseur de modèles, que le site ne nomme
    jamais. Le champ reste dans le type, la colonne affiche `detail`.
@@ -241,7 +251,7 @@ export const TraceSpanRow = React.memo(function TraceSpanRow({
         )}
       </button>
 
-      <div className="relative h-full flex-1">
+      <div className="smd-trace-couloir relative h-full flex-1">
         <div
           className="absolute top-1/2 h-2 min-w-[3px] -translate-y-1/2 overflow-hidden rounded-full"
           style={{ left, width }}
@@ -271,7 +281,7 @@ export const TraceSpanRow = React.memo(function TraceSpanRow({
         {span.status === "cached" && (
           <Zap aria-hidden="true" className="smd-trace-ico-cache size-3 shrink-0" />
         )}
-        <span data-part="meta" className="smd-trace-meta @md/trace:inline hidden truncate">
+        <span data-part="meta" className="smd-trace-meta truncate">
           {metaText(span, 1, showTokens)}
         </span>
         <span
@@ -595,7 +605,7 @@ export function AgentTrace({
       <div data-slot="trace-header" className="smd-trace-tete flex items-center gap-2.5 px-3 py-2.5">
         <span aria-hidden="true" className="smd-trace-point size-1.5 shrink-0 rounded-full" />
         <span className="smd-trace-id">{runId}</span>
-        <span className="smd-trace-sous @sm/trace:inline hidden truncate">
+        <span className="smd-trace-sous truncate">
           {model ? `${model} · ` : ""}
           {rows.length} étapes
         </span>
@@ -604,24 +614,18 @@ export function AgentTrace({
         </span>
       </div>
 
-      <div
-        className={cn(
-          "relative",
-          "[--gutter:96px] [--meta:3.75rem]",
-          "@xs/trace:[--gutter:132px] @xs/trace:[--meta:5rem]",
-          /* 12rem et non 9 : les résultats du site sont en français et
-             plus longs que les « 12 matches » de l'original — à 9rem
-             « 1 bon de livraison » s'affichait « 1 bon de liv… ». */
-          "@md/trace:[--gutter:var(--label-w)] @md/trace:[--meta:12rem]"
-        )}
-      >
+      {/* `--gutter` et `--meta` sont posés dans sur-mesure.css, par
+          requêtes de conteneur : l'échelle des trois colonnes et le pli
+          mobile de la ligne sont deux faces d'un même réglage et ne
+          peuvent pas vivre à deux endroits. Voir la section 8 bis. */}
+      <div className="smd-trace-cadre relative">
         {showRuler && (
           <div
             data-slot="trace-ruler"
             onPointerDown={onScrubDown}
             onPointerMove={onScrubMove}
             onPointerUp={onScrubUp}
-            className="smd-trace-regle @max-sm/trace:hidden relative h-7 cursor-ew-resize touch-none select-none"
+            className="smd-trace-regle relative h-7 cursor-ew-resize touch-none select-none"
           >
             <div className={cn(trackBox, "inset-y-0")}>
               {ticks.map((t) => (
@@ -639,7 +643,7 @@ export function AgentTrace({
 
         <div className="relative py-1">
           {showRuler && (
-            <div aria-hidden="true" className={cn(trackBox, "@max-sm/trace:hidden inset-y-0")}>
+            <div aria-hidden="true" className={cn(trackBox, "smd-trace-trame inset-y-0")}>
               {ticks.map((t) => (
                 <span
                   key={t}
@@ -666,7 +670,7 @@ export function AgentTrace({
             ))}
           </ol>
 
-          <div aria-hidden="true" className={cn(trackBox, "pointer-events-none inset-y-0")}>
+          <div aria-hidden="true" className={cn(trackBox, "smd-trace-lecture pointer-events-none inset-y-0")}>
             <div
               className="relative h-full w-full"
               style={{ transform: "translateX(calc(var(--t,0) * 100%))" }}
