@@ -402,24 +402,50 @@ export default function SurMesurePage() {
     <PageShell>
       <PageMotion />
       <div className="smd">
-        {/* ════════ 1 · HERO PLEINE IMAGE ════════ */}
+        {/* ════════ 1 · HERO PLEINE IMAGE ════════
+            16/09, Teo, capture contre capture : « notre titre n'est pas
+            assez long comme eux, je veux la même longueur, la même police
+            et les mêmes majuscules ; la phrase en dessous est trop longue,
+            la leur est plus courte ; et change l'image de fond. »
+
+            LE TITRE. Leur « Generative AI Data Engine » fait 25 signes et
+            quatre mots, en capitales de titre. « Sur mesure » en faisait
+            dix. « Système Métier Sur Mesure » fait 25 signes, quatre mots.
+            Les capitales sur « Sur » et « Mesure » ne sont PAS la
+            typographie française — c'est voulu, et c'est le seul endroit
+            de la page où on se le permet : chez eux comme ici, ce titre
+            n'est pas une phrase, c'est le NOM du produit, et un nom de
+            produit porte ses capitales. Le reste de la page garde la
+            règle française (« Le système qui n'existe pas encore. »).
+
+            LA PHRASE. Leur « Powering the Next Frontier of AI. » fait 33
+            signes. Le pitch de la fiche en fait 63 et tenait sur deux
+            lignes là où la leur en tient une. Coupé à 32 — c'est la
+            seconde moitié du pitch de Teo, mot pour mot ; la première
+            moitié est déjà le titre de l'aperçu, 900 px plus bas.
+
+            L'IMAGE. L'atrium partait de /tarifs et ne disait rien du
+            sur-mesure. Le plateau de bureaux dit l'endroit où vit le
+            processus qu'on vient reprendre — et la page parle à des
+            directions, pas à un atelier. Crédits dans
+            public/photos/CREDITS.txt. */}
         <div className="smd-cadre smd-cadre--hero">
           <section className="smd-plein">
             <Image
-              src="/photos/tarifs-hero-atrium.jpg"
+              src="/photos/tarifs-installation-bureau.jpg"
               alt=""
               fill
               priority
               sizes="100vw"
               className="object-cover"
             />
-            <div aria-hidden className="smd-voile" />
+            <div aria-hidden className="smd-voile smd-voile--clair" />
             <div className="smd-plein__texte">
               <h1 data-arrivee className="smd-h1">
-                Sur mesure
+                Système Métier Sur Mesure
               </h1>
               <p data-arrivee className="smd-lead">
-                {FICHE.pitch}
+                Nous concevons celui qui manque.
               </p>
               <div data-arrivee>
                 <Bouton href="/reserver-un-audit">Parler de votre cas</Bouton>
@@ -487,7 +513,10 @@ export default function SurMesurePage() {
             L'emplacement de leur citation signée — écart nº 2 : personne
             n'est cité, la page porte sa propre position. */}
         <section className="smd-sec">
-          <div className="smd-wrap">
+          {/* `smd-large` et NON `smd-wrap` : sur la référence cette carte
+              sort de la colonne de 1472 et suit la vue jusqu'à 1888 —
+              voir le relevé en tête de sur-mesure.css. */}
+          <div className="smd-large">
             <div data-reveal className="smd-citation">
               <div className="flex flex-col gap-10 lg:grid lg:grid-cols-12 lg:gap-8">
                 <p className="smd-citation__label lg:col-span-3 lg:self-end">

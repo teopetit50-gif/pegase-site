@@ -61,7 +61,7 @@
      nom sous citation 16/20     16/20        18/22.5
 
    géométrie relevée, bloc par bloc :
-     hero             cadre à 16 du bord (24 dès 768), rayon 24,
+     hero             cadre à 16 du bord à TOUTES les largeurs, rayon 24,
                       hauteur mini 480 puis 720, padding 32 puis 64,
                       contenu calé EN BAS, colonne de texte 1152 max
      bouton plein     hauteur 40, rayon 8, libellé 14/21 en 500,
@@ -73,43 +73,54 @@
                       quart de colonne dès 1024 ; gouttières 64, puis
                       80/24 dès 768, puis 80/56 dès 1280
      vignette         rapport 389/243, rayon 8, fond noir
-     carte citation   fond #193a29, rayon 16, padding 32 (0 + 80 vertical
-                      dès 1024), texte à droite sur 7 colonnes de 12
+     carte citation   fond #193a29, rayon 16, padding 32 (64 + 80 vertical
+                      dès 1024), texte à droite sur 7 colonnes de 12.
+                      Hors colonne : 87 % de la VUE, pas de plafond à 1472
 
    ── ÉCARTS ASSUMÉS ───────────────────────────────────────────────────
    Chacun est un choix, pas un oubli. Ne pas les « corriger ».
 
    1. LA POLICE. La référence est composée en Aeonik Pro (CoType Foundry),
       sous licence commerciale : on ne peut ni servir leurs fichiers ni
-      l'acheter à leur place. **Onest** la remplace. DM Mono porte les
+      l'acheter à leur place. **Geist** la remplace. DM Mono porte les
       étiquettes, qui sont bien en monospace dans la référence.
 
-      Le choix a été MESURÉ, pas donné à l'œil. Vingt familles libres
+      Trois essais, et le troisième est le bon pour une raison qui ne se
+      lit pas dans un tableau. Le 16/09, vingt familles libres ont été
       rendues à 48 px et comparées à Aeonik au canevas — largeur de cinq
-      chaînes, hauteur d'œil, hauteur de capitale (16/09/2026) :
+      chaînes, hauteur d'œil, hauteur de capitale :
 
         police              largeur   x-haut   capit
         Figtree               1,41 %   1,96 %   0,00 %
-        DM Sans               2,56 %   1,18 %   0,00 %
+        Geist                 2,33 %   3,92 %   1,43 %
         Hanken Grotesk        0,91 %   3,35 %   0,42 %
         Onest                 5,15 %   3,35 %   1,01 %
 
-      Figtree gagne sur les métriques. Ce n'est pas elle qui est retenue,
-      et c'est délibéré : à 48 px ce qui se voit n'est pas l'avance des
-      glyphes mais le SQUELETTE, et sur les trois traits qui signent
-      Aeonik — l'éperon vertical du 'G', la queue du 'a', la barre
-      horizontale du 'e' — Figtree et Hanken sont à côté, Onest tombe
-      juste. Les cinq points d'écart de largeur sont absorbés par
-      `text-wrap: balance`.
+      Onest avait d'abord été retenue : à 48 px ce qui se voit n'est pas
+      l'avance des glyphes mais le squelette, et l'éperon du 'G', la queue
+      du 'a' et la barre du 'e' y tombaient juste. Teo l'a recalée le même
+      jour sur /offres — décalque d'une AUTRE page du même site, menée en
+      parallèle — d'un mot qui tranche : « plus étalé ». Il a raison et le
+      tableau le dit : +5,15 % de largeur, doublés par le français qui est
+      déjà plus long que l'anglais. Geist tient +2,33 % avec le même
+      squelette de grotesque neutre.
 
-      Onest est aussi la police du bloc `.ofd` (/offres), décalque d'une
-      autre page du MÊME site, choisie le même jour après le même
-      reproche de Teo. Deux substituts d'Aeonik différents sur deux pages
-      voisines seraient pires que le défaut d'origine.
+      Cette page suit donc `.ofd` (app/offres/nos-offres.css) : même
+      substitut d'Aeonik sur les deux décalques. NE PAS LES DÉSYNCHRONISER
+      — deux substituts différents sur deux pages voisines sont pires que
+      le défaut d'origine, et c'est exactement ce qui s'est produit ici
+      pendant une heure.
 
       RESTE À FAIRE : `.vd` (/vos-donnees) décalque une troisième page de
-      Scale et porte encore Hanken Grotesk. À aligner sur Onest, avec sa
+      Scale et porte encore Hanken Grotesk. À aligner sur Geist, avec sa
       propre recette.
+
+      ⚠ `--font-geist` est déclarée dans app/layout.tsx, fichier PARTAGÉ.
+      Si la variable disparaît, `font-family: var(--font-geist), …`
+      devient invalide en bloc et la page retombe sur l'Inter du site,
+      sans une erreur. C'est arrivé le 16/09 quand l'autre session a
+      remplacé `--font-onest` par `--font-geist` : vérifier la variable
+      avant d'accuser le CSS de la page.
 
    2. LE HAUT DE PAGE. La référence pose `pt-24` (96 px) parce que son
       entête est `fixed` et recouvre le haut du document ; le bord haut du
@@ -176,7 +187,7 @@
 
   background: #ffffff;
   color: var(--smd-texte);
-  font-family: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -221,15 +232,15 @@
   }
 }
 
-/* Le cadre des deux pleines images — hero en haut, appel en bas. Leur
-   `px-4! md:grid-padding` : 16 de marge, 24 dès 768. */
+/* Le cadre des deux pleines images — hero en haut, appel en bas.
+   16 de marge À TOUTES LES LARGEURS. Leur classe est `px-4!
+   md:grid-padding` : le `!important` de `px-4` gagne contre
+   `md:grid-padding` à tous les paliers, la seconde ne s'applique donc
+   jamais. Relevé sur la référence : carte du hero = vue − 32, à 1440
+   (1408), 1600 (1568) et 1920 (1888). Lu comme « 24 dès 768 », on
+   perdait 16 px de largeur sur tout le haut de page. */
 .smd .smd-cadre {
   padding-inline: 16px;
-}
-@media (min-width: 768px) {
-  .smd .smd-cadre {
-    padding-inline: 24px;
-  }
 }
 .smd .smd-cadre--hero {
   padding-top: 20px; /* écart nº 2 : notre entête est dans le flux */
@@ -542,6 +553,33 @@
     rgba(0, 0, 0, 0.62) 100%
   );
 }
+/* Le plateau de bureaux du hero est une photo CLAIRE, à l'inverse de la
+   façade au couchant de l'appel final. Le voile commun l'amène à la même
+   lisibilité : relevé sur la zone de texte, la luminance passe sous le
+   seuil visé. La densité n'est pas choisie, elle est CALCULÉE : la
+   luminance du fond sous la zone du titre est relevée à la capture, et
+   le voile l'amène à 0,133 — la valeur de référence des fiches, qui
+   donne ~6:1 au blanc. Relevé le 16/09 avec ces trois arrêts : pixel le
+   plus clair sous le titre à 0,104, soit 6,8:1. À 0,59 on tombait à 8,7
+   — plus lisible, mais la photo disparaissait.
+
+   ⚠ MESURER LE FOND SANS LE TEXTE. Une capture prise texte visible
+   moyenne les glyphes BLANCS avec le fond : le chiffre sort à 4,9:1,
+   ne bouge presque plus quand on change le voile, et on « corrige » un
+   défaut qui n'existe pas — c'est exactement ce qui s'est passé ici.
+   Poser `visibility: hidden` sur `.smd-plein__texte` avant la capture.
+
+   La règle du parc est celle des fiches — même RENDU, pas même voile
+   (voir `photoVoile` dans lib/fiches.ts). */
+.smd .smd-voile--clair {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.42) 0%,
+    rgba(0, 0, 0, 0.5) 45%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
 .smd .smd-plein__texte {
   position: relative;
   z-index: 20;
@@ -580,13 +618,32 @@
    7 · CARTE DE CITATION — leur bloc « ClientTestimonials »
    ───────────────────────────────────────────────────────────────────── */
 
-/* La carte n'occupe PAS toute la colonne : sur la référence elle est en
-   retrait, et le retrait change de palier. Relevé (carte / colonne) :
-   390 → 329/342 · 768 → 670/720 · 1024 → 878/976 · 1440 → 1253/1392,
-   soit 100 %, 93 %, puis 90 % à partir de 1024. Les quatre largeurs
-   tombent au pixel avec ces trois valeurs. */
-.smd .smd-citation {
+/* La carte de citation ne vit PAS dans la colonne de 1472.
+
+   Relevé sur la référence : son conteneur est une grille
+   `repeat(12, minmax(0,150px))` centrée, plafonnée à 1888 — donc PLEINE
+   LARGEUR jusqu'à 1888, là où toutes les autres sections sont bridées à
+   1472. La carte y occupe une part constante de la VUE :
+
+     vue    grille   carte    part
+     390     390      329     84,4 %
+     768     768      670     87,2 %
+     1440   1440     1253     87,0 %
+     1600   1600     1397     87,3 %
+     1920   1920     1685     87,8 %
+
+   D'où deux règles et pas une : le conteneur `.smd-large` ne plafonne
+   rien, et la carte prend son pourcentage de la vue. Bridée à 1472 comme
+   le reste, elle perdait 130 px à 1600 et 250 px à 1920 — c'est l'écart
+   que Teo a vu en posant les deux captures côte à côte.
+
+   ⚠ NE PAS remplacer `.smd-large` par `.smd-wrap` sur cette section. */
+.smd .smd-large {
   width: 100%;
+}
+
+.smd .smd-citation {
+  width: 84.4%;
   margin-inline: auto;
   border-radius: var(--smd-r-lg);
   background: var(--smd-evergreen);
@@ -595,15 +652,15 @@
 }
 @media (min-width: 768px) {
   .smd .smd-citation {
-    width: 93%;
+    width: 87.3%;
   }
 }
 @media (min-width: 1024px) {
   .smd .smd-citation {
-    width: 90%;
     padding: 80px 64px;
   }
 }
+
 .smd .smd-citation__texte {
   font-size: 1.5rem;
   line-height: 28px;
