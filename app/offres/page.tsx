@@ -116,6 +116,19 @@ import "./nos-offres.css";
 
    · Les fenêtres et la console sont des EXEMPLES, et le disent dans leur
      propre chrome — elles ne montrent les données d'aucun client.
+
+   ── LE BUDGET DE TEXTE ───────────────────────────────────────────────
+   Teo, 16/09 : « il y a trop de texte sur les sections, regarde comme
+   eux n'en mettent pas trop. » Relevé sur la référence, à 1440 :
+     chapô du hero      70 signes
+     chapô de section   45 à 47
+     texte de carte     93 à 142
+     paragraphe long    182 à 188, et il n'y en a QU'UN dans la page
+     pied d'appel       aucun paragraphe — un titre et deux boutons
+   Les nôtres faisaient 152, 165, 140, 163 et 118. Ils sont ramenés dans
+   ces fourchettes ; le paragraphe du bloc scindé (190) est le seul long
+   de la page, comme chez eux, et le paragraphe du pied d'appel a été
+   SUPPRIMÉ. Aucun fait n'est perdu : ce qui part est de la redite.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -173,7 +186,7 @@ const ARGUMENTS = [
     teinte: "#193a29",
     titre: "Financement éligible",
     texte:
-      "Une partie de l'investissement peut être prise en charge par le Chèque TIC, dispositif de la Région Guadeloupe ouvert aux entreprises qui y sont immatriculées.",
+      "Une partie de l'investissement peut relever du Chèque TIC, dispositif de la Région Guadeloupe réservé aux entreprises qui y sont immatriculées.",
   },
 ];
 
@@ -479,8 +492,8 @@ export default function OffresPage() {
                   <div data-reveal className="ofd-panneau__intro">
                     <h2 className="ofd-h3">Ce qui ne change pas chez vous.</h2>
                     <p className="ofd-body">
-                      Les systèmes lisent et écrivent dans les outils déjà en place. Aucun compte à créer
-                      pour vos équipes, aucune donnée à migrer, aucune habitude à changer.
+                      Les systèmes lisent et écrivent dans les outils déjà en place. Aucun compte à
+                      créer, aucune donnée à migrer.
                     </p>
                   </div>
                   <div aria-hidden className="ofd-panneau__motif">
@@ -539,7 +552,7 @@ export default function OffresPage() {
               <TeteSection
                 etiquette="Contrôle humain"
                 titre="Rien ne part sans vous."
-                chapo="Les premières semaines, chaque action est soumise à validation avant envoi. Vous décidez ensuite, règle par règle, de ce qui part seul et de ce qui attend un accord."
+                chapo="Chaque action attend votre accord. Vous décidez ensuite, règle par règle, de ce qui part seul."
                 large
               />
 
@@ -589,7 +602,7 @@ export default function OffresPage() {
               <TeteSection
                 etiquette="Ce qu'on installe"
                 titre="Un système par processus, branché sur vos outils."
-                chapo="Aucun ne fait tout : chacun prend en charge un processus, le traite en continu sur les outils déjà en place, et s'arrête à votre validation."
+                chapo="Un processus chacun, traité en continu, arrêté à votre validation."
               />
 
               <div className="ofd-large">
@@ -702,8 +715,7 @@ export default function OffresPage() {
                     </p>
                     <div data-reveal className="ofd-ardoise__signature">
                       <p>
-                        Un service qui attend la validation d&apos;un autre, des demandes qui arrivent plus
-                        vite qu&apos;on ne les traite, des relances suspendues à la disponibilité d&apos;une
+                        Des demandes plus rapides que leur traitement, des relances suspendues à une
                         personne.
                       </p>
                       <span className="ofd-ardoise__tag">Ce que les quatre systèmes reprennent</span>
@@ -729,10 +741,6 @@ export default function OffresPage() {
                 <h2 data-reveal className="ofd-h1">
                   Un chiffrage avant tout engagement.
                 </h2>
-                <p data-reveal className="ofd-lead">
-                  Trente minutes pour mesurer ce que le processus le plus coûteux représente, et désigner
-                  le système au meilleur retour.
-                </p>
                 <div data-reveal className="ofd-hero__actions">
                   <CtaPastille href="/commencer">Commencer</CtaPastille>
                   <Cta href="/offres/sur-mesure" variante="trait-blanc">
