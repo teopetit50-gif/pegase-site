@@ -25,12 +25,15 @@
      sourcil  Geist Mono 11px, +0.2em, capitales, #737373
      h3       16/24 (cartes) ou 18/22.5 (bento), 600, Geist
 
-   ÉCART ASSUMÉ — la police d'affichage. La référence déclare
-   `"Tiempos Headline", Georgia, serif` mais n'embarque aucune fonte
-   serif : Tiempos est sous licence Klim Type Foundry, donc la référence
-   elle-même retombe sur Georgia. On charge **Gelasio**, libre et
-   métriquement compatible avec Georgia : le rendu est identique là où
-   Georgia existe, et cohérent là où elle manque (Android, Linux).
+   LES FAMILLES CI-DESSUS SONT CELLES DU RELEVÉ, PAS CELLES DE LA PAGE.
+   Depuis le 16/09/2026 la page est composée dans les polices DU SITE —
+   Geist et Geist Mono, la famille unique posée le même jour pour toutes
+   les pages (app/polices.css) ; voir le bloc POLICES sous `.p-relances`. Ce qui est noté ici reste le relevé de la
+   référence : tailles, graisses et interlignes tiennent toujours, seules
+   les familles ont changé. L'écart de serif est donc soldé : la référence
+   déclarait `"Tiempos Headline", Georgia, serif` sans embarquer aucune
+   fonte serif (Tiempos est sous licence Klim), on la remplaçait par
+   Gelasio, et c'était le dernier endroit du site en serif.
 
    CADRE — `.rel-conteneur` reprend le conteneur de la référence :
    100 % puis 768 / 1024 / 1280 / 1400 px aux paliers. Les sections
@@ -89,11 +92,40 @@
   color: var(--rel-fg);
   -webkit-font-smoothing: antialiased;
 
-  /* Règle 5 — la règle de police du site est posée plus haut, sur <html>,
-     avec Inter. Elle doit donc être réécrite explicitement ici, sinon la
-     page rapatriée se compose en Inter et tout le relevé typographique
-     tombe. Les variables viennent du `next/font/google` de la page. */
-  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  /* ── POLICES : CELLES DU SITE — 16/09/2026 ────────────────────────────
+     Demande de Teo : « toutes les polices, les mêmes que sur tout le reste
+     du site, base-toi sur la page d'accueil. »
+
+     LA PAGE N'A PLUS DE POLICE À ELLE. Le site entier est passé le même
+     jour à une famille unique — GEIST, plus Geist Mono pour la mono (voir
+     app/polices.css et l'en-tête d'app/layout.tsx : les ~240 règles
+     `font-family: var(--font-X)` du site ne sont pas réécrites, ce sont
+     les variables qui pointent toutes sur Geist). L'accueil compose donc
+     en Geist, et cette page compose exactement comme lui.
+
+     Trois familles propres au décalque Folio sont parties d'ici, et avec
+     elles les trois `next/font/google` de page.tsx :
+       Geist (corps)      → la police de CORPS du site
+       Gelasio (h1, h2)   → la police de TITRE du site
+       Geist Mono         → la MONO du site (l'override est retiré plus bas)
+
+     POURQUOI DEUX RÈGLES SUBSISTENT AU LIEU DE TOUT LAISSER HÉRITER :
+     elles ne nomment aucune fonte, elles pointent sur les variables de
+     L'ACCUEIL
+     (`--font-inter-tight` pour le corps, `--font-jakarta` pour les
+     titres — les deux familles du bloc `.offres` de globals.css, que
+     l'accueil consomme). Aujourd'hui elles valent Geist toutes les deux
+     par app/polices.css, donc le rendu est bien la famille unique. Mais
+     si le site revenait un jour à plusieurs familles, CETTE PAGE SUIVRAIT
+     L'ACCUEIL TOUTE SEULE, au lieu de retomber sur la police de `body`
+     et de redevenir la page qui ne ressemble à rien. C'est la demande de
+     Teo écrite une fois pour toutes, pas pour l'état du jour.
+
+     C'EST UN ÉCART DE PLUS AU RELEVÉ, assumé et demandé : la référence
+     n'habillait h1 et h2 qu'en serif, et c'était le dernier endroit du
+     site à le faire. Les tailles, graisses et interlignes du relevé ne
+     bougent pas — seules les familles changent. */
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
 
   /* ── La page occupe toute la largeur, pas la colonne de 1440 ──────────
      11/09, demande de Teo : « je veux que ce soit plein, que ça prenne
@@ -119,22 +151,30 @@
   margin-inline: calc(50% - 50vw);
 }
 
-/* La référence n'habille en serif que h1 et h2 : les h3 restent en Geist. */
+/* Titres : la police de titre du site. C'est ici que vivait la serif
+   Gelasio, sur h1 et h2 ; elle descend aussi sur les h3, parce qu'ailleurs
+   sur le site tout ce qui est titre porte la même famille et qu'une
+   exception de plus n'avait pas à survivre à ce nettoyage.
+   L'approche du h1 du héros : c'est le seul titre de la page à ne pas
+   porter `tracking-tight` dans le balisage, et une grotesque à 60 px sans
+   approche négative s'étale là où la serif tenait. On lui donne la valeur
+   de ses huit voisins, pas une valeur de plus. */
 .p-relances h1,
-.p-relances h2 {
-  font-family: var(--font-gelasio), Georgia, "Times New Roman", serif;
+.p-relances h2,
+.p-relances h3 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+.p-relances h1 {
+  letter-spacing: -0.025em;
 }
 
-/* `font-mono` existe sur ce site, mais il vaut JetBrains Mono — la police
-   mono du site, posée par un `@theme inline` de globals.css, donc valeur
-   INLINÉE dans l'utilitaire : impossible de la détourner en redéfinissant
-   une variable. On écrase la règle ici. Une règle hors couche l'emporte
-   sur n'importe quel utilitaire Tailwind, qui vit dans `@layer utilities`.
-   Concerne les sourcils, les jalons du protocole et les numéros d'étape :
-   le relevé les donne en Geist Mono. */
-.p-relances .font-mono {
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
-}
+/* 16/09/2026 — L'OVERRIDE DE `font-mono` EST RETIRÉ (il portait Geist Mono).
+   `font-mono` vaut JetBrains Mono sur ce site — la mono de globals.css,
+   inlinée par un `@theme inline` dans l'utilitaire. En supprimant la règle,
+   les sourcils, les jalons du protocole et les numéros d'étape retombent
+   d'eux-mêmes sur la mono du site, sans une seule classe à changer dans les
+   neuf composants. NE PAS REPOSER de règle `.p-relances .font-mono` ici :
+   ce serait redéclarer une police propre à la page. */
 
 /* Conteneur du héros — relevé : 100 % / 768 / 1024 / 1280 / 1400.
    (`.conteneur` sur le site source ; renommé `.rel-conteneur` pour ne

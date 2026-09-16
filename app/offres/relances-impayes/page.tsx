@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Gelasio } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import { Heros } from "@/components/produits/relances/Heros";
 import { Bandeau } from "@/components/produits/relances/Bandeau";
@@ -44,9 +43,14 @@ import "./relances.css";
       clé `cashd-theme`, ni le bloc `.dark`. La page est figée dans son
       monde clair, et chaque section porte `data-monde="clair"` pour que
       l'entête du site passe en verre clair au-dessus d'elle.
-   5. Les polices s'importent ICI et pas dans le layout, et `.p-relances`
-      réécrit `font-family` explicitement : la règle de police du site est
-      posée plus haut, sur `html`, avec Inter.
+   5. Les polices sont CELLES DU SITE depuis le 16/09/2026 (demande de
+      Teo : « les mêmes polices que sur tout le reste du site, base-toi
+      sur la page d'accueil »). LA PAGE N'IMPORTE PLUS AUCUNE FONTE : ses
+      trois `next/font/google` — Geist, Geist Mono et la serif Gelasio des
+      titres — sont partis. `relances.css` pointe sur les variables de
+      l'accueil, qui valent Geist depuis app/polices.css. La règle 5
+      d'origine disait le contraire : les polices s'importaient ici parce
+      que `html` portait Inter. Détail dans le bloc POLICES du CSS.
    6. Appels à l'action réaiguillés : `/creer-un-compte` →
       `/reserver-un-audit` (héros et clôture), `https://omegaai.fr` → `/`,
       `mailto:bonjour@` → `mailto:contact@`. `/espace` et `/connexion`
@@ -57,22 +61,6 @@ import "./relances.css";
    page n'en pose aucun (elle a ses propres animations, CSS et
    framer-motion). L'inclure aurait chargé GSAP et ScrollTrigger pour rien.
    ══════════════════════════════════════════════════════════════════════ */
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  display: "swap",
-});
-
-/* Substitut libre et métriquement compatible de la Georgia sur laquelle
-   retombe la référence (voir l'en-tête de relances.css). */
-const gelasio = Gelasio({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-gelasio",
-  display: "swap",
-});
 
 const TITRE = "CASHD · vos échéances suivies chaque matin";
 const DESCRIPTION =
@@ -105,7 +93,7 @@ export default function RelancesImpayesPage() {
     <PageShell>
       <div
         data-monde="clair"
-        className={`p-relances flex flex-col ${geist.variable} ${geistMono.variable} ${gelasio.variable}`}
+        className="p-relances flex flex-col"
       >
         <div className="relative z-10 overflow-hidden border-[#e6e6e6] border-b">
           <Heros />
