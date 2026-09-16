@@ -126,6 +126,41 @@ import "./nos-offres.css";
    référence en a une : c'est ce qui se voyait. Le paragraphe du bloc
    scindé, lui, N'A PAS été raccourci — il est long chez eux aussi, et le
    raccourcir aurait été l'autre moitié de l'erreur.
+
+   ── LE REGISTRE, PASSE DU 16/09 AU SOIR ──────────────────────────────
+   Teo : « les textes sont nuls et génériques, inspire-toi de comment
+   Scale AI écrit les siens », puis « la même densité de texte qu'eux :
+   les sections trop remplies, des textes plus pro mais pas plus
+   développés que les leurs ». Ce qui a été relevé sur la référence et
+   appliqué ici, emplacement par emplacement :
+
+   · CADENCE VERBALE dans le chapô du hero. Leur « Collect, Curate, and
+     annotate data. Train models and evaluate. Repeat. » n'est pas une
+     phrase, c'est une suite de verbes qui montre le cycle. Le nôtre
+     énumérait des compléments (« sur vos outils, sous vos règles ») ;
+     il énumère maintenant les temps du traitement.
+
+   · TITRES DE CARTE D'UN SEUL MOT. Leurs quatre cartes s'appellent
+     Quality, Cost Effective, Scalability, Diversity. Les nôtres
+     portaient des intitulés de rubrique (« Intégration à votre
+     environnement ») : le mot seul suffit, le texte dit le reste.
+
+   · FRAGMENTS, PAS DE PHRASES DE PRÉCAUTION. Leurs légendes n'ont ni
+     « nos systèmes », ni « permet de », ni proposition subordonnée :
+     « Real-time visibility into data collection and curation ». Les
+     tournures en « Nos systèmes s'intègrent… sans imposer le moindre… »
+     sont celles que Teo lit comme génériques — elles décrivent une
+     intention au lieu d'énoncer un fait.
+
+   · LE FAIT LE PLUS PROCHE, PAS LE PLUS LARGE. Le paragraphe du bloc
+     scindé répétait les cartes 2 et 3 (règles, chiffrement) sous le
+     titre « Le journal » : il dit maintenant ce que le journal contient.
+     Un texte qui répète la section d'à côté se lit comme du remplissage,
+     quelle que soit sa longueur.
+
+   · AUCUN EMPLACEMENT N'A ÉTÉ RALLONGÉ. Le budget relevé plus haut tient
+     toujours ; les quatre cartes passent de 89-158 à 78-129 signes, et
+     l'énoncé du panneau rouge de 79 à 96 (le leur en fait 122).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -187,27 +222,27 @@ const OUTILS = [
 const ARGUMENTS = [
   {
     teinte: "#79648c",
-    titre: "Intégration à votre environnement",
+    titre: "Intégration",
     texte:
-      "Nos systèmes s'intègrent à vos outils existants sans imposer le moindre changement d'organisation.",
+      "Vos outils restent les vôtres. Les systèmes s'y branchent, sans interface de plus.",
   },
   {
     teinte: "#a8927c",
-    titre: "Contrôle humain",
+    titre: "Contrôle",
     texte:
-      "Vous gardez la validation des actions sensibles. Les règles et les niveaux d'autonomie sont définis avec vous.",
+      "Les règles s'écrivent avec vous. Les actions sensibles attendent votre accord.",
   },
   {
     teinte: "#273252",
-    titre: "Sécurité des données",
+    titre: "Sécurité",
     texte:
-      "Les environnements clients sont cloisonnés, les données chiffrées et les accès contrôlés.",
+      "Un environnement cloisonné par client, des données chiffrées, des accès tracés.",
   },
   {
     teinte: "#193a29",
-    titre: "Financement éligible",
+    titre: "Financement",
     texte:
-      "Une partie de l'investissement peut relever du Chèque TIC, dispositif de la Région Guadeloupe réservé aux entreprises qui y sont immatriculées.",
+      "Une partie de l'investissement peut relever du Chèque TIC, aide de la Région Guadeloupe aux entreprises qui y sont immatriculées.",
   },
 ];
 
@@ -314,8 +349,8 @@ const CYCLE = [
     titre: "Réception",
     texte: "La demande arrive dans vos outils, sur son canal d'origine.",
   },
-  { titre: "Qualification", texte: "Elle est comprise et rattachée au bon dossier." },
-  { titre: "Rédaction", texte: "Le message est écrit depuis vos règles." },
+  { titre: "Qualification", texte: "Comprise et rattachée au bon dossier." },
+  { titre: "Rédaction", texte: "Écrit depuis vos règles, pas d'un modèle figé." },
   { titre: "Validation", texte: "Rien ne part sans votre accord." },
 ];
 
@@ -669,7 +704,7 @@ export default function OffresPage() {
                 Nos offres
               </h1>
               <p data-reveal className="ofd-lead">
-                Un processus à la fois. Sur vos outils, sous vos règles, à votre validation.
+                Recevoir, comprendre, rédiger. Vous validez, le système envoie. Chaque jour.
               </p>
               <div data-reveal className="ofd-hero__actions">
                 <CtaPastille href="/commencer">Commencer</CtaPastille>
@@ -727,8 +762,8 @@ export default function OffresPage() {
                         colonne de droite se décalent. */}
                     <h2 className="ofd-h3">Ce qui ne change pas.</h2>
                     <p className="ofd-body">
-                      Les systèmes lisent et écrivent dans les outils déjà en place. Aucun compte à
-                      créer, aucune donnée à migrer.
+                      Les systèmes travaillent dans vos outils, pas à côté. Aucun compte à créer,
+                      aucune donnée à migrer.
                     </p>
                   </div>
                   {/* 16/09 (Teo) — le motif à points calculé laisse la
@@ -794,7 +829,7 @@ export default function OffresPage() {
                 <div data-reveal>
                   <p className="ofd-mono">Sur mesure</p>
                   <h3 className="ofd-h3">
-                    Si votre besoin n&apos;entre dans aucune de ces cases, le sur-mesure prend le relais.
+                    Quand aucun système du catalogue ne couvre le processus, nous concevons celui qui manque.
                   </h3>
                 </div>
                 <div data-reveal>
@@ -813,7 +848,7 @@ export default function OffresPage() {
               <TeteSection
                 etiquette="Contrôle humain"
                 titre="Rien ne part sans vous."
-                chapo="Chaque action attend votre accord."
+                chapo="Le système propose, vous tranchez."
                 large
               />
 
@@ -822,9 +857,9 @@ export default function OffresPage() {
                   <p className="ofd-h4">Le journal</p>
                   <p className="ofd-scinde__sous">Tout ce qui part, et qui l&apos;a validé.</p>
                   <p className="ofd-scinde__corps">
-                    Les règles et les niveaux d&apos;autonomie sont définis avec vous. Chaque entreprise
-                    dispose d&apos;un espace chiffré et cloisonné, et les modèles ne reçoivent que le
-                    strict nécessaire à chaque tâche.
+                    Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui
+                    l&apos;a validé. Les niveaux d&apos;autonomie se règlent poste par poste, et se
+                    modifient en cours d&apos;exploitation.
                   </p>
                   <div className="ofd-scinde__actions">
                     <Cta href="/commencer">Commencer</Cta>
@@ -852,8 +887,8 @@ export default function OffresPage() {
             <div className="ofd-wrap">
               <TeteSection
                 etiquette="Ce qu'on installe"
-                titre="Un système par processus, branché sur vos outils."
-                chapo="Un processus chacun, traité en continu."
+                titre="Un système par processus, de bout en bout."
+                chapo="De la demande reçue au message parti."
               />
 
               <div className="ofd-large">
@@ -886,7 +921,7 @@ export default function OffresPage() {
             <div className="ofd-wrap">
               <TeteSection
                 etiquette="Le catalogue"
-                titre="Quatre systèmes couvrent les processus les plus répétitifs"
+                titre="Quatre processus, quatre systèmes déjà construits."
               />
 
               <div className="ofd-cartes4">
