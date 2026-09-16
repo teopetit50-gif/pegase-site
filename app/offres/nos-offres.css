@@ -48,13 +48,14 @@
 
    1. LA POLICE. La référence est composée en Aeonik Pro (CoType Foundry),
       sous licence commerciale : on ne peut ni servir leurs fichiers ni
-      l'acheter à leur place. ONEST la remplace. Hanken Grotesk avait
-      d'abord été reprise de /vos-donnees, qui décalque une autre page du
-      même site ; Teo a vu la différence à l'œil sur un titre de 40 px le
-      16/09. Six familles libres ont alors été rendues côte à côte à la
-      même taille (scratchpad, `polices/essai.html`) et comparées à une
-      capture de la référence : Onest est la plus proche — mêmes
-      proportions, barre du 'e' horizontale, terminaisons coupées droit.
+      l'acheter à leur place. GEIST la remplace, et le choix est une
+      MESURE, pas une impression : « The Best In The Business » à 40 px /
+      -0.01em fait 440 px dans la référence. Hanken Grotesk (431) puis
+      Onest (456) ont été recalées par Teo à l'œil ; Onest était 3,6 %
+      plus large, ce qu'il a décrit comme « plus étalé ». Geist tombe à
+      447, soit +1,6 %, et c'est la plus proche de squelette parmi les
+      trois plus proches de largeur. Le tableau des douze familles
+      mesurées est en tête de app/layout.tsx.
       Ne pas « réaligner » cette page sur `.vd` : les deux blocs décalquent
       la même fonderie mais n'ont pas la même exigence de ressemblance.
       DM Mono porte les étiquettes, bien en monospace dans la référence.
@@ -97,7 +98,7 @@
 
   background: #ffffff;
   color: var(--ofd-texte);
-  font-family: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
 }
@@ -731,18 +732,22 @@
     min-height: 420px;
   }
 }
-/* Mot-symbole, à la place du signe alpha. La référence pose ici un
-   logotype en serif blanc sur le rouge ; aucune serif n'est chargée sur
-   le site et il n'y a pas lieu d'en charger une pour deux mots : la pile
-   système (ui-serif → Georgia → Times) rend le même dessin, comme la
-   référence elle-même retombe sur une pile pour ses logotypes. */
+/* Mot-symbole en serif blanc sur le rouge, comme le logotype de la
+   référence. UN SEUL MOT, et c'est ce qui compte : « SUR MESURE » sur
+   deux lignes couvrait presque tout le champ rouge et le faisait lire
+   comme une autre couleur (le rouge, lui, est pixel pour pixel celui de
+   la référence — relevé (231, 19, 26) des deux côtés le 16/09). Un mot
+   de cinq lettres laisse le rouge respirer, exactement comme chez eux.
+   Aucune serif n'est chargée sur le site et il n'y a pas lieu d'en
+   charger une pour un mot : la pile système rend le même dessin, comme
+   la référence retombe elle aussi sur une pile pour ses logotypes. */
 .ofd .ofd-duo__signe {
   display: block;
   font-family: ui-serif, Georgia, "Times New Roman", serif;
-  font-size: clamp(2.75rem, 1rem + 6vw, 5rem);
+  font-size: clamp(2.5rem, 1rem + 4.2vw, 4rem);
   line-height: 1;
   font-weight: 400;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   color: #ffffff;
   text-align: center;
   text-transform: uppercase;

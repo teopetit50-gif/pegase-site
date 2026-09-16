@@ -5,8 +5,8 @@ import {
   Hanken_Grotesk,
   Inter,
   Inter_Tight,
+  Geist,
   JetBrains_Mono,
-  Onest,
   Plus_Jakarta_Sans,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
@@ -74,17 +74,26 @@ const hanken = Hanken_Grotesk({
   variable: "--font-hanken",
   preload: false,
 });
-/* 16/09/2026 — Onest, pour /offres uniquement (décalque de
+/* 16/09/2026 — GEIST, pour /offres uniquement (décalque de
    scale.com/data-engine). La référence est composée en Aeonik Pro, sous
    licence : on ne peut ni servir leurs fichiers ni l'acheter à leur place.
-   Hanken Grotesk avait d'abord été reprise de /vos-donnees ; Teo a vu la
-   différence à l'œil sur un titre de 40 px. Les six candidates libres ont
-   été rendues côte à côte à la même taille et comparées à une capture de
-   la référence : Onest est la plus proche — mêmes proportions, barre du
-   'e' horizontale, mêmes empattements coupés droit. Comme les autres
-   familles de page, elle n'est PAS posée sur <body> : seul le bloc `.ofd`
-   de app/offres/nos-offres.css la consomme. */
-const onest = Onest({ subsets: ["latin"], variable: "--font-onest", preload: false });
+
+   Deux essais avant celui-ci, tous deux recalés par Teo à l'œil sur un
+   titre de 40 px. Le troisième choix a été fait sur une MESURE et non sur
+   une impression : « The Best In The Business » à 40 px / -0.01em fait
+   440 px dans la référence ; douze familles libres ont été mesurées sur
+   la même chaîne.
+     Familjen Grotesk 408 · Inter Tight 422 · Hanken Grotesk 431 (1er essai)
+     Figtree 432 · ARCHIVO 442 · Instrument Sans 446 · GEIST 447
+     Manrope 450 · Public Sans 453 · Onest 456 (2e essai) · Schibsted 461
+   Onest était 3,6 % plus large : c'est exactement le « plus étalé » que
+   Teo a relevé, et le français, déjà plus long, doublait l'effet. Geist
+   tombe à +1,6 % et c'est, parmi les trois plus proches en largeur, celle
+   dont le squelette colle le mieux — grotesque neutre, barre du 'e'
+   horizontale, terminaisons coupées droit.
+   Comme les autres familles de page, elle n'est PAS posée sur <body> :
+   seul le bloc `.ofd` de app/offres/nos-offres.css la consomme. */
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist", preload: false });
 
 const dmMono = DM_Mono({
   subsets: ["latin"],
@@ -128,7 +137,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${inter.variable} ${jbmono.variable} ${jakarta.variable} ${interTight.variable} ${dmSans.variable} ${hanken.variable} ${dmMono.variable} ${onest.variable} antialiased`}
+      className={`${inter.variable} ${jbmono.variable} ${jakarta.variable} ${interTight.variable} ${dmSans.variable} ${hanken.variable} ${dmMono.variable} ${geist.variable} antialiased`}
     >
       {/* Vercel Web Analytics — sans cookie, donc pas de bandeau consentement.
           Le script ne collecte qu'une fois « Web Analytics » activé sur le

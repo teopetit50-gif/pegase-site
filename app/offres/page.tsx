@@ -486,7 +486,24 @@ export default function OffresPage() {
               <div className="ofd-panneau__grille">
                 <div className="ofd-panneau__gauche">
                   <div data-reveal className="ofd-panneau__intro">
-                    <h2 className="ofd-h3">Ce qui ne change pas chez vous.</h2>
+                    {/* 16/09 (Teo, « les tailles de section ne sont pas les
+                        mêmes, les cartes non plus ») — et c'était vrai : le
+                        panneau faisait 860 contre 810, les cartes 362 contre
+                        337. Toute la différence venait d'ICI. La colonne de
+                        gauche est ce qui dicte la hauteur du panneau (le
+                        globe y pose 560 fixes), et ce titre passait sur DEUX
+                        lignes là où « The Best In The Business » tient sur
+                        une : 100 px au lieu de 50, reportés tels quels sur
+                        le panneau puis sur les quatre cartes.
+                        Le titre doit donc tenir en UNE ligne dans les 460 px
+                        de `.ofd-panneau__intro`. Mesuré à 40 px : la version
+                        d'avant faisait 600 px, « Rien ne change chez vous. »
+                        488, « Vos outils ne changent pas. » 502 — le
+                        français passe tout juste au-dessus à chaque fois.
+                        Celle-ci fait 404 et tient. Ne pas la rallonger sans
+                        remesurer : deux mots de plus et les huit blocs de la
+                        colonne de droite se décalent. */}
+                    <h2 className="ofd-h3">Ce qui ne change pas.</h2>
                     <p className="ofd-body">
                       Les systèmes lisent et écrivent dans les outils déjà en place. Aucun compte à
                       créer, aucune donnée à migrer.
@@ -527,9 +544,11 @@ export default function OffresPage() {
             <div className="ofd-duo">
               <div aria-hidden className="ofd-duo__marque">
                 {/* Mot-symbole en serif blanc sur le rouge de la référence
-                    (#E7131A). Remplace le signe alpha « sur mesure », que
-                    Teo a trouvé terne sur fond noir le 16/09. */}
-                <span className="ofd-duo__signe">Sur mesure</span>
+                    (#E7131A). UN SEUL MOT — Teo, 16/09 : « c'est un mot
+                    qu'il faut mettre ». « Sur mesure » passait sur deux
+                    lignes et mangeait le champ rouge ; leur logotype à eux
+                    est un mot de quatre lettres. */}
+                <span className="ofd-duo__signe">Omega</span>
               </div>
               <div className="ofd-duo__texte">
                 <div data-reveal>
