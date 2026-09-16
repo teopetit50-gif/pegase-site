@@ -4,9 +4,7 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import Formules from "@/components/reservation/Formules";
 import Simulateur from "@/components/reservation/Simulateur";
-import Complements from "@/components/reservation/Complements";
 import Engagements from "@/components/reservation/Engagements";
-import EtapesAudit from "@/components/reservation/EtapesAudit";
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES } from "@/lib/paliers";
 import {
@@ -41,6 +39,15 @@ import {
      · le carrousel de témoignages clients → les engagements du protocole
        d'audit, cités tels qu'ils sont tenus.
 
+   16/09/2026 — DEUX SECTIONS SUPPRIMÉES (Teo : « supprime ces deux
+   sections »). Le déroulé en trois temps (« Comment se passe l'audit »,
+   #deroule) et les compléments (« Compléter votre audit », #complements)
+   ne sont plus sur la page. Rien ne pointait sur leurs ancres — vérifié
+   par grep avant la coupe. Le rythme clair/sombre tient toujours : le
+   comparatif sombre enchaîne maintenant sur le simulateur clair.
+   Le texte des compléments est retiré de lib/reservation.ts avec eux ;
+   les trois temps se relisent dans l'historique (commit f40e687).
+
    Le chrome reste celui du site : header caméléon (les sections claires
    portent data-monde="clair") et footer sombre hérités de PageShell.
    ══════════════════════════════════════════════════════════════════════ */
@@ -52,31 +59,6 @@ export const metadata: Metadata = {
     "Trois formats d'audit, gratuits à partir du cadrage de 45 minutes, pour mesurer ce que votre processus le plus coûteux représente. Sans engagement.",
 };
 
-/* Le déroulé en trois temps — même méthode quel que soit le format, seule
-   la profondeur change. Écrit ici comme ENGAGEMENTS : du texte tenu, pas
-   des promesses. (31/07 — ajout suite à la révision éditoriale « audit
-   d'abord » : la page vendait des formats sans jamais dire comment
-   l'entretien se déroule.) */
-const DEROULE: { etape: string; titre: string; texte: string }[] = [
-  {
-    etape: "Étape 1",
-    titre: "Nous écoutons",
-    texte:
-      "Ni démonstration ni plaquette. Vous décrivez votre journée telle qu'elle se déroule : ce qui prend du temps, ce qui se perd, où vivent vos informations. En équipe, les entretiens sont individuels, parce que le détail du quotidien se dit plus précisément en tête-à-tête.",
-  },
-  {
-    etape: "Étape 2",
-    titre: "Nous cartographions",
-    texte:
-      "Chaque flux est cartographié tel qu'il fonctionne réellement : ce qui entre, ce qui se fait, ce qui sort, et où il se bloque. Ce qui n'existait que dans les têtes est posé noir sur blanc, sur un document que chacun peut consulter et corriger.",
-  },
-  {
-    etape: "Étape 3",
-    titre: "Nous chiffrons et classons",
-    texte:
-      "Chaque piste est posée sur deux axes : ce qu'elle rapporte, ce qu'elle demande. La recommandation commence par le meilleur retour, avec son indicateur de mesure, et dit aussi ce qu'il ne faut pas automatiser.",
-  },
-];
 
 /* ══════════════════════════════════════════════════════════════════════
    15/09/2026 — ?modele=<slug> EST ENFIN LU, ET LA PAGE RESTE STATIQUE.
@@ -124,33 +106,10 @@ export default function ReserverUnAuditPage() {
         {/* ═══ 1 à 3 — formules, orientation, comparatif ═══ */}
         <Formules />
 
-        {/* ═══ 3bis — le déroulé, trois temps sur fond gris ═══ */}
-        <section id="deroule" data-monde="clair" className="r-wrap py-14 sm:py-20">
-          <p className="r-note">
-            Le même déroulé quel que soit le format : seule la profondeur change.
-          </p>
-          <h2 className="r-h2 mt-6 max-w-[18ch]">Comment se passe l&apos;audit</h2>
-
-          <EtapesAudit temps={DEROULE} />
-        </section>
-
-        {/* ═══ 4 — compléments, sur bande sombre ═══ */}
-        <section id="complements" className="r-nuit">
-          <div className="r-wrap py-14 sm:py-20">
-            <p className="r-note">
-              Les compléments s&apos;ajoutent à un format existant. Ils ne se
-              réservent pas seuls et sont chiffrés pendant l&apos;audit.
-            </p>
-            <h2 className="r-h2 mt-6 max-w-[18ch]">Compléter votre audit</h2>
-
-            <Complements />
-          </div>
-        </section>
-
-        {/* ═══ 5 — simulateur ═══ */}
+        {/* ═══ 4 — simulateur ═══ */}
         <Simulateur />
 
-        {/* ═══ 6 — engagements (emplacement des témoignages) ═══ */}
+        {/* ═══ 5 — engagements (emplacement des témoignages) ═══ */}
         <section id="engagements" data-monde="clair" className="r-blanc">
           <div className="r-wrap py-14 sm:py-20">
             <h2 className="r-h3 max-w-[20ch]">Ce qui est écrit noir sur blanc</h2>
@@ -158,7 +117,7 @@ export default function ReserverUnAuditPage() {
           </div>
         </section>
 
-        {/* ═══ 7 — CTA final ═══ */}
+        {/* ═══ 6 — CTA final ═══ */}
         <section id="reserver" data-monde="clair" className="r-wrap py-16 sm:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="r-h2">Réservez votre créneau en deux minutes</h2>
@@ -196,7 +155,7 @@ export default function ReserverUnAuditPage() {
           </div>
         </section>
 
-        {/* ═══ 8 — FAQ ═══ */}
+        {/* ═══ 7 — FAQ ═══ */}
         <section id="faq" data-monde="clair" className="r-blanc">
           <div className="r-wrap py-14 sm:py-20">
             <div className="grid gap-8 lg:grid-cols-[379px_1fr] lg:gap-16">

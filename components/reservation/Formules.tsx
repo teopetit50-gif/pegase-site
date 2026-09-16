@@ -11,8 +11,8 @@ import { lienContact } from "@/lib/reservation";
      · `pricing-module`  → <FormulesGrille>, la rangée de formats
      · `features-card`   → <ComparerFormats>, le bento sombre
    Chacun vit dans SON fichier avec SA feuille (règles scopées sous
-   `.resa`), comme <EtapesAudit> depuis le 14/09. Ce qui reste ici est ce
-   qui n'appartient à aucun des deux : le bandeau d'orientation, entre les
+   `.resa`), comme le reste de la page. Ce qui reste ici est ce qui
+   n'appartient à aucun des deux : le bandeau d'orientation, entre les
    deux.
 
    Ce fichier n'a plus d'état : le sélecteur Indépendant/Équipes est parti

@@ -4,14 +4,13 @@ import { MODELES } from "@/components/modeles/donnees";
 
    La page reprend l'architecture de la page tarifs de référence : un
    sélecteur à deux profils, trois formules en cartes, un comparatif à
-   quatre familles de lignes, deux compléments, un simulateur, une FAQ.
+   quatre familles de lignes, un simulateur, une FAQ.
    Ce fichier porte tout le texte pour que la page reste lisible et que la
    révision éditoriale se fasse à un seul endroit.
 
    ⚠ À VALIDER PAR TEO avant mise en avant commerciale : les durées, le
-   contenu exact de chaque formule et le périmètre des compléments sont
-   une proposition construite à partir de l'existant (page /audit, section
-   Chèque TIC, articles). Les formules d'audit restent sans prix — les
+   contenu exact de chaque formule sont une proposition construite à
+   partir de l'existant (page /audit, section Chèque TIC, articles). Les formules d'audit restent sans prix — les
    deux payantes sont « sur devis », précisément pour ne rien figer ici.
    EXCEPTION depuis le 01/09/2026 : le site catalogue a un prix public
    (990 €, décision Teo — voir /tarifs/site), mentionné dans le livrable
@@ -531,23 +530,6 @@ export const COMPARATIF: FamilleComparatif[] = [
         ],
       },
     ],
-  },
-];
-
-/* ——— compléments (les « add-ons » de la référence) ——— */
-
-export const COMPLEMENTS: { titre: string; texte: string; conditions: string }[] = [
-  {
-    titre: "Atelier équipe",
-    texte:
-      "Deux heures avec les personnes qui valideront les messages du système au quotidien. Rien ne part sans validation humaine chez Omega.AI : encore faut-il que l'équipe sache corriger, suspendre et reprendre la main sans assistance extérieure.",
-    conditions: "Sur devis, souvent éligible au Chèque TIC.",
-  },
-  {
-    titre: "Cartographie approfondie",
-    texte:
-      "Un relevé complet de ce qui fonctionne déjà chez vous, jusqu'aux fichiers partagés et aux boîtes secondaires que personne ne mentionne spontanément. Utile quand plusieurs services se sont équipés chacun de leur côté depuis des années.",
-    conditions: "Comprise dès l'Audit dans vos locaux. Sur devis en complément d'un Diagnostic.",
   },
 ];
 

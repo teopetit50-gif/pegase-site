@@ -805,8 +805,8 @@ export const GRANDE_STRUCTURE = {
   /* 15/09 (Teo) — SANS ancre. La destination portait `#reserver`, qui est
      la section « Réservez votre créneau » : le visiteur qui cliquait
      « Réserver un diagnostic » atterrissait en BAS de /reserver-un-audit,
-     sous les formats, le comparatif et les compléments — donc après tout
-     ce qui lui dit quel format demander. La page commence par son <h1>,
+     sous les formats et le comparatif — donc après tout ce qui lui dit
+     quel format demander. La page commence par son <h1>,
      « Un audit à la mesure de votre organisation » : on y arrive en haut. */
   href: "/reserver-un-audit",
   /* la note de bas de grille, à la place du pavé TTC de la formule PME */

@@ -76,8 +76,8 @@ function Libelle({ point }: { point: Point }) {
 }
 
 function Carte({ f }: { f: Formule }) {
-  /* trait fin (1,4) : c'est la graisse des pictogrammes dessinés à la
-     main du reste de la page (Complements) */
+  /* trait fin (1,4) : la graisse des pictogrammes dessinés à la main
+     du reste du site */
   const Icone = ICONES_FORMAT[f.id] ?? ICONE_DEFAUT;
 
   return (

@@ -12,9 +12,11 @@
    quatre jetons du monde réencrés — --r-texte #ffffff, --r-doux #d4d4d8,
    --r-faible #a1a1aa, --r-filet #27272a. Les surfaces (#141417 pour une
    carte, #18181b pour un bouton, #0f0f12 pour le panneau) reprennent
-   celles de « Compléter votre audit » (Complements.tsx), la bande sombre
-   qui suit sur la même page : deux bandes noires de la même page ne
-   peuvent pas avoir deux gammes de gris.
+   celles qu'avait « Compléter votre audit » (Complements.tsx, section
+   supprimée le 16/09) : c'était la seconde bande noire de la page, et
+   deux bandes noires d'une même page ne peuvent pas avoir deux gammes de
+   gris. Le comparatif est désormais la seule — la gamme reste la
+   référence pour toute bande sombre qu'on rajouterait ici.
 
    QUATRE RÈGLES DE CE FICHIER, dans l'ordre où elles priment.
 
@@ -41,8 +43,8 @@
       jamais le contenu.
 
    Contrastes vérifiés sur le fond de carte #141417 : #a1a1aa 7,0:1,
-   #9a9aa3 6,3:1, #d4d4d8 12,4:1, blanc 17,4:1. Le #71717a de Complements
-   n'est PAS repris pour les intitulés (3,9:1, sous AA).
+   #9a9aa3 6,3:1, #d4d4d8 12,4:1, blanc 17,4:1. Le #71717a qu'employait
+   Complements n'est PAS repris pour les intitulés (3,9:1, sous AA).
    ══════════════════════════════════════════════════════════════════════ */
 
 .resa .cf {
