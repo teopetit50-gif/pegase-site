@@ -3,6 +3,7 @@
 import { Landmark, PieChart, Receipt } from "lucide-react";
 import type { ComponentType } from "react";
 import { useMonde } from "@/components/tarifs/monde";
+import "./ChequeTic.css";
 import { GRANDE_STRUCTURE } from "@/lib/paliers";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -31,7 +32,8 @@ import { GRANDE_STRUCTURE } from "@/lib/paliers";
    Écarts assumés :
 
    1. LA BANDE RESTE SOMBRE — `.r-nuit` est posée par la page, c'est le
-      seul contraste de /tarifs. Les couleurs ne sont donc pas écrites en
+      seul contraste de /tarifs (fond et cartes : voir ChequeTic.css,
+      la bande est remontée d'un cran au-dessus du noir). Les couleurs ne sont donc pas écrites en
       dur : les jetons du monde (`--r-texte`, `--r-doux`, `--r-faible`,
       `--r-filet`) basculent déjà avec la bande. La référence, elle, est
       une section claire en jetons shadcn, absents ici.
@@ -142,7 +144,7 @@ export default function ChequeTic() {
             <div
               key={t.chiffre}
               data-reveal
-              className={`flex flex-col justify-between rounded-xl border border-[color:var(--r-filet)] p-6 ${
+              className={`ct-carte flex flex-col justify-between rounded-xl p-6 ${
                 t.large ? "sm:col-span-2 lg:col-span-1 xl:col-span-2" : ""
               }`}
             >

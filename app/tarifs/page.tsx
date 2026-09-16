@@ -241,7 +241,7 @@ export default function TarifsPage() {
 
         {/* ═══ 4 — Chèque TIC, sur bande sombre — trois tuiles à grands
                chiffres (14/09, reprise stats-2) ═══ */}
-        <section id="cheque-tic" className="r-nuit">
+        <section id="cheque-tic" className="r-nuit ct-bande">
           <ChequeTic />
         </section>
 
