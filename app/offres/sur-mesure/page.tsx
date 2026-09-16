@@ -4,6 +4,8 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import { AgentTrace, type TraceSpan } from "@/components/ui/agent-trace";
+import { HalftoneFlow } from "@/components/ui/halftone-flow";
+import HeroReplie from "@/components/surmesure/HeroReplie";
 import {
   SigneHubspot,
   SigneNotion,
@@ -11,7 +13,6 @@ import {
   CroquisDocument,
   CroquisPont,
   CroquisSuivi,
-  PanneauReglages,
 } from "@/components/surmesure/Panneaux";
 import { FAMILLES } from "@/lib/content";
 import { fr } from "@/lib/typo";
@@ -492,7 +493,13 @@ export default function SurMesurePage() {
             processus qu'on vient reprendre — et la page parle à des
             directions, pas à un atelier. Crédits dans
             public/photos/CREDITS.txt. */}
-        <div className="smd-cadre smd-cadre--hero">
+        {/* `HeroReplie` : en haut de page l'image est pleine, au premier
+            défilement elle rentre dans son cadre. La scène garde une
+            hauteur fixe dans le flux — voir le bloc « le hero qui se
+            replie » de sur-mesure.css pour la raison. Le cadre perd son
+            `padding-inline`, c'est la scène qui le porte désormais. */}
+        <div className="smd-cadre--hero">
+          <HeroReplie>
           <section className="smd-plein">
             <Image
               src="/photos/tarifs-installation-bureau.jpg"
@@ -515,6 +522,7 @@ export default function SurMesurePage() {
               </div>
             </div>
           </section>
+          </HeroReplie>
         </div>
 
         {/* ════════ 2 · LES OUTILS DU CLIENT ════════
@@ -628,8 +636,23 @@ export default function SurMesurePage() {
               <h3 data-reveal className="smd-h3">
                 {fr(FICHE.controle ?? "")}
               </h3>
-              <div data-reveal className="smd-panneau">
-                <PanneauReglages />
+              {/* 16/09, Teo : « remplace le truc noir du modèle de base
+                  par ce composant ». La référence pose ici une carte NOIRE
+                  avec un rendu abstrait coloré — un de leurs actifs. À sa
+                  place, la nappe de points animée : même cadre, même noir,
+                  même rapport de forme, et rien d'emprunté.
+
+                  Les couleurs ne sont pas celles du composant d'origine
+                  (rouge et orange) : elles descendent du vert de la
+                  citation, pour que le bloc appartienne à la page. Trois
+                  triplets à changer si Teo veut une autre teinte.
+
+                  Ce panneau remplace la carte « Niveau d'autonomie »
+                  (`PanneauReglages`, désormais orpheline dans
+                  Panneaux.tsx). Rien ne se perd : ses trois niveaux
+                  RÉPÉTAIENT la phrase de gauche, qui les énumère déjà. */}
+              <div data-reveal className="smd-nappe">
+                <HalftoneFlow className="smd-nappe__toile" />
               </div>
             </div>
           </div>

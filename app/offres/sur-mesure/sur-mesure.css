@@ -242,6 +242,9 @@
 .smd .smd-cadre {
   padding-inline: 16px;
 }
+/* Le cadre du hero ne porte PLUS de `padding-inline` : c'est `.smd-scene`
+   qui gère la marge latérale, parce qu'elle doit l'animer de 0 à 16
+   pendant le repli. */
 .smd .smd-cadre--hero {
   padding-top: 20px; /* écart nº 2 : notre entête est dans le flux */
   padding-bottom: 40px;
@@ -606,6 +609,74 @@
   max-width: 72rem;
   flex-direction: column;
   gap: 24px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   5 bis · LE HERO QUI SE REPLIE
+
+   Teo, 16/09 : « elle se réduit quand on défile ». En haut de page
+   l'image est pleine ; au premier défilement elle rentre dans son cadre.
+   Même mécanique que /vos-donnees (bloc `.vd`, 08/08) :
+   components/surmesure/HeroReplie.tsx n'écrit que `--smd-p` (0 en haut,
+   1 une fois repliée) et `--smd-hero-plein` (la hauteur mesurée de
+   l'état plein) ; toute la géométrie est ici.
+
+   LA RÈGLE QUI REND L'EFFET SÛR : `.smd-scene` — la boîte DANS LE FLUX —
+   ne change jamais de taille. C'est le hero, en absolu à l'intérieur,
+   qui déborde puis rentre. Aucune hauteur animée, donc aucun recalcul de
+   mise en page et aucun saut pendant qu'on défile. Ne pas « simplifier »
+   en animant la hauteur de la scène.
+
+   Sans `data-plein` (pas de JS, ou avant hydratation) rien de tout ça ne
+   s'applique : la scène garde la mise en page statique d'origine.
+   ───────────────────────────────────────────────────────────────────── */
+.smd .smd-scene {
+  position: relative;
+  z-index: 10;
+  padding-inline: 16px;
+  --smd-p: 1;
+  --smd-hero-fin: 480px;
+}
+@media (min-width: 768px) {
+  .smd .smd-scene {
+    --smd-hero-fin: 720px;
+  }
+}
+
+.smd .smd-scene[data-plein] {
+  padding-inline: 0;
+  height: var(--smd-hero-fin);
+}
+
+/* La page est déjà en pleine largeur (`width: 100vw` sur `.smd`), donc
+   pas de `50% - 50vw` à franchir comme sur /vos-donnees : la marge va
+   simplement de 0 à 16. */
+.smd .smd-scene[data-plein] > .smd-plein {
+  position: absolute;
+  top: 0;
+  min-height: 0;
+  left: calc(16px * var(--smd-p));
+  right: calc(16px * var(--smd-p));
+  height: calc(
+    var(--smd-hero-plein, 100svh) +
+      (var(--smd-hero-fin) - var(--smd-hero-plein, 100svh)) * var(--smd-p)
+  );
+  border-radius: calc(24px * var(--smd-p));
+  /* Le padding suit le rayon : collé au bord quand l'image est pleine, il
+     reprend ses 32 (64 dès 768) une fois le cadre formé. */
+  padding: calc(20px + 12px * var(--smd-p));
+}
+@media (min-width: 768px) {
+  .smd .smd-scene[data-plein] > .smd-plein {
+    padding: calc(40px + 24px * var(--smd-p));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Ceinture et bretelles — le composant fige déjà `--smd-p` à 1. */
+  .smd .smd-scene[data-plein] {
+    --smd-p: 1 !important;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -1053,6 +1124,29 @@
   .smd .smd-trace-point {
     transition: none;
   }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   8 ter · LA NAPPE DE POINTS — le cadre noir du bloc à deux colonnes
+
+   Relevé sur la référence : carte noire, rayon 16, rapport 1214/636. La
+   nappe WebGL l'occupe entièrement. Le `aspect-ratio` est posé sur le
+   CADRE et non sur le canevas : un canevas n'a pas de dimensions propres
+   tant que WebGL n'a pas tourné, et sans cadre le bloc s'effondrerait à
+   zéro le temps du premier rendu — puis sauterait. Piège déjà payé sur
+   une image responsive à hauteur fixe.
+   ───────────────────────────────────────────────────────────────────── */
+.smd .smd-nappe {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--smd-r-lg);
+  background: #000000;
+  aspect-ratio: 1214 / 636;
+}
+.smd .smd-nappe__toile {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* ─────────────────────────────────────────────────────────────────────
