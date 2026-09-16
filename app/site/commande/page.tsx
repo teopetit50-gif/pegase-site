@@ -60,8 +60,8 @@ export default async function CommandeSitePage({
             <h1 className="r-h2">Commandez votre site</h1>
             <p className="r-lead mt-5 max-w-[54ch]">
               Un modèle, votre brief, et on écrit tout à votre métier. Le prix est celui de la
-              page&nbsp;: 990&nbsp;€ TTC, une fois — rien à payer en ligne aujourd&apos;hui, on vous
-              appelle pour régler et lancer la production.
+              page&nbsp;: 990&nbsp;€ TTC, une fois. Le règlement se fait avec nous, au
+              téléphone, avant le lancement de la production.
             </p>
           </div>
           <div className="mt-10 sm:mt-12">

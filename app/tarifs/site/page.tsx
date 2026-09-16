@@ -326,7 +326,7 @@ export default function TarifsSitePage() {
             <EnTete
               pastille="LE DÉROULÉ"
               titre="Du modèle à la mise en ligne."
-              chapo="Vous choisissez un modèle, vous déposez votre brief, nous écrivons, nous mettons en ligne et nous branchons le formulaire. Rien à payer en ligne aujourd'hui : nous vous appelons pour régler et lancer la production."
+              chapo="Vous choisissez un modèle, vous déposez votre brief, nous écrivons, nous mettons en ligne et nous branchons le formulaire. Le règlement se fait avec nous, au téléphone, avant le lancement de la production."
             />
             <EtapesDefilantes />
           </div>

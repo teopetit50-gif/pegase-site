@@ -70,7 +70,7 @@ export default function ClotureSite() {
           Commandez en deux minutes. Nous faisons le reste.
         </h2>
         <p data-reveal className="o-lead mt-5 max-w-[600px]">
-          Un modèle, votre brief, et nous écrivons tout à votre métier et à votre marque. Rien à payer en ligne aujourd&apos;hui&nbsp;: nous vous appelons pour régler, et votre éligibilité au Chèque TIC se vérifie avant tout engagement.
+          Un modèle, votre brief, et nous écrivons tout à votre métier et à votre marque. Le règlement se fait avec nous, au téléphone, et votre éligibilité au Chèque TIC se vérifie avant tout engagement.
         </p>
 
         {/* la rangée de cta13 : colonne pleine largeur sous sm, côte à côte
