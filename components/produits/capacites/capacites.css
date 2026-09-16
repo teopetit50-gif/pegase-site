@@ -363,6 +363,62 @@
    barème (23) et on ramène le chapô au pas de la référence (15/22,5).
    Voir `app/echelle-mobile.css` pour le relevé complet.
    ═══════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   16/09/2026 (Teo, par l'associé) — LE PÉRIMÈTRE SE REPLIE SUR TÉLÉPHONE
+
+   « Cette section est beaucoup trop longue sur mobile, c'est immense ;
+   que l'essentiel, uniquement sur la vue mobile — ça peut rester comme ça
+   sur la version desktop. »
+
+   Quarante-cinq lignes en une colonne font deux écrans et demi sur un
+   téléphone. Chaque famille s'arrête donc à trois lignes, le reste à un
+   geste. Sur ordinateur, rien ne bouge : la densité EST l'argument de la
+   section, six colonnes se balayent d'un regard.
+
+   La coupe est faite ICI, en CSS, et jamais dans le balisage : le DOM est
+   le même partout, les quarante-cinq lignes restent lisibles par la
+   recherche de la page et par les moteurs, et rien ne clignote au montage.
+   ═══════════════════════════════════════════════════════════════════════ */
+.cap-plus {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .cap-famille:not([data-tout]) .cap-liste > li:nth-child(n + 4) {
+    display: none;
+  }
+  /* la troisième ligne devient la dernière : son filet tomberait sur le
+     bouton, à deux pixels de son propre trait */
+  .cap-famille:not([data-tout]) .cap-liste > li:nth-child(3) {
+    border-bottom: 0;
+  }
+  .cap-plus {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 10px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    color: var(--cap-doux);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    /* la cible tactile fait 44 px de haut sans peser dans la mise en
+       page : on l'étend par un pseudo-élément plutôt que par du padding,
+       qui décalerait le filet de la carte */
+    position: relative;
+  }
+  .cap-plus::after {
+    content: "";
+    position: absolute;
+    inset: -12px -8px;
+  }
+}
+
 @media (max-width: 767px) {
   .cap-titre {
     font-size: clamp(23px, 3.4vw, 40px);

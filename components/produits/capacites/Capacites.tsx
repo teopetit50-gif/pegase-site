@@ -22,6 +22,8 @@
      trou dans la page.
    ══════════════════════════════════════════════════════════════════════ */
 
+import { useState } from "react";
+
 import * as Accordion from "@radix-ui/react-accordion";
 
 import type { BlocCasLimites, BlocEchelle, Catalogue } from "@/lib/produits/capacites/types";
@@ -37,8 +39,29 @@ function Coche() {
   );
 }
 
+/* Combien de lignes une famille montre sur téléphone avant de se replier.
+   Trois : de quoi comprendre ce que la famille couvre, sans dérouler les
+   huit. Sur ordinateur la coupe n'existe pas — voir capacites.css. */
+const LIGNES_MOBILE = 3;
+
 export function GrilleCapacites({ donnees }: { donnees: Catalogue }) {
   const total = compterCapacites(donnees);
+  /* 16/09/2026 (Teo, par l'associé) — « cette section est beaucoup trop
+     longue sur mobile, c'est immense ; que l'essentiel, uniquement sur la
+     vue mobile, ça peut rester comme ça sur desktop ».
+
+     Quarante-cinq lignes en une colonne font un mur de deux écrans et
+     demi sur un téléphone. Sur ordinateur, c'est l'inverse : la densité
+     EST l'argument de la section, six colonnes se balayent d'un regard,
+     et on n'y touche pas.
+
+     Chaque famille s'arrête donc à trois lignes sur téléphone, avec le
+     reste à un geste. RIEN N'EST RETIRÉ DU DOM : la coupe est faite en
+     CSS sous 768 px (`:nth-child(n + 4)`), le même balisage est rendu
+     partout. C'est ce qui permet de garder le référencement et la
+     recherche dans la page — et d'éviter une bascule au montage, qui
+     ferait clignoter la liste entière à l'arrivée sur mobile. */
+  const [deployees, setDeployees] = useState<string[]>([]);
 
   return (
     <div className="cap">
@@ -55,7 +78,11 @@ export function GrilleCapacites({ donnees }: { donnees: Catalogue }) {
 
       <div className="cap-grille">
         {donnees.familles.map((f) => (
-          <section key={f.nom} className="cap-famille">
+          <section
+            key={f.nom}
+            className="cap-famille"
+            data-tout={deployees.includes(f.nom) ? "" : undefined}
+          >
             <header className="cap-famille-tete">
               <span className="cap-famille-icone">
                 <Icone nom={f.icone} />
@@ -71,6 +98,25 @@ export function GrilleCapacites({ donnees }: { donnees: Catalogue }) {
                 </li>
               ))}
             </ul>
+            {/* Caché sur ordinateur par la feuille de style, et pas rendu
+                du tout quand la famille tient déjà en entier : un bouton
+                « voir les 0 autres » est une faute, pas un détail. */}
+            {f.lignes.length > LIGNES_MOBILE ? (
+              <button
+                type="button"
+                className="cap-plus"
+                aria-expanded={deployees.includes(f.nom)}
+                onClick={() =>
+                  setDeployees((d) =>
+                    d.includes(f.nom) ? d.filter((x) => x !== f.nom) : [...d, f.nom],
+                  )
+                }
+              >
+                {deployees.includes(f.nom)
+                  ? "Réduire"
+                  : `Voir les ${f.lignes.length - LIGNES_MOBILE} autres`}
+              </button>
+            ) : null}
           </section>
         ))}
       </div>
