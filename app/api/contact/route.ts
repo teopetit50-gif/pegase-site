@@ -57,6 +57,16 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, motif: "requete" }, { status: 400 });
   }
 
+  /* 15/09 — le corps « null » passait au travers et cassait juste en
+     dessous. `JSON.parse("null")` réussit : ce n'est pas une erreur de
+     syntaxe, donc le catch ne voyait rien, et c'est `corps.x7` qui levait
+     un TypeError — une 500 au lieu d'une 400, pour la seule charge sur
+     les treize essayées en recette. Un tableau ou un nombre tombaient
+     déjà correctement en 400 plus bas, faute de champs requis. */
+  if (!corps || typeof corps !== "object" || Array.isArray(corps)) {
+    return Response.json({ ok: false, motif: "requete" }, { status: 400 });
+  }
+
   /* robot pris au pot de miel : on fait comme si tout allait bien */
   if (texte(corps.x7, 10)) return Response.json({ ok: true });
 
