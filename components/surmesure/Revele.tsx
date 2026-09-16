@@ -54,9 +54,18 @@ export default function Revele({
           io.disconnect();
         }
       },
-      /* 0,25 : le bloc doit être franchement entré, sinon la montée se
-         joue pendant qu'il est encore sous le pli et on ne la voit pas. */
-      { threshold: 0.25 }
+      /* 16/09, seconde passe — DÈS QUE LE BLOC ENTRE, pas quand il est
+         au quart visible. Avec 0,25 la montée partait 135 px après le
+         bord haut de la carte, donc APRÈS la fin de l'élargissement de
+         la plaque : Teo voyait arriver une bande verte vide, puis le
+         texte monter dedans, et le mouvement de la plaque ne portait
+         plus rien. Relevé sur la référence à 1600 × 900 : sa première
+         ligne est en place quand 55 px seulement du bloc sont visibles
+         et que sa plaque n'a fait que la moitié de son chemin (1476 sur
+         1552). Les 48 px de marge négative gardent le principe de la
+         version précédente — ne pas jouer la montée franchement sous le
+         pli — sans attendre le quart de la hauteur. */
+      { threshold: 0, rootMargin: "0px 0px -48px 0px" }
     );
     io.observe(el);
     return () => io.disconnect();

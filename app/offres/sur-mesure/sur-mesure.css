@@ -801,57 +801,140 @@
    colonnes, le hero les prend toutes, la citation en laisse une. Sous
    1920 le pourcentage reste sous le plafond — 1671 à 1920 — et rien ne
    bouge : la correction ne mord que sur les écrans larges. */
+/* ══ 16/09, TROISIÈME PASSE — LA PLAQUE EST UN CALQUE, PAS LA CARTE ══
+   Teo : « le zoom dézoom apparaît trop tard, et l'espace entre la gauche
+   et la droite n'est pas comme sur Scale AI, il n'y a pas assez
+   d'espace ». Les deux reproches ont la même cause, et le relevé la
+   donne sans ambiguïté. Sur la référence à 1600 × 900, en suivant le
+   bord haut de leur panneau :
+
+     haut    plaque (x, w)     colonne de texte (x, w)
+     1000    102, 1397         544, 902
+      880     93, 1413         544, 902
+      800     67, 1467         544, 902
+      660     38, 1520         544, 902
+      440     26, 1549         544, 902
+      300     24, 1552         544, 902
+
+   La colonne de texte NE BOUGE JAMAIS. C'est la plaque verte seule qui
+   s'élargit dessous — chez eux un calque
+   `absolute inset-y-0 left-1/2 -translate-x-1/2 z-0 bg-evergreen`, sans
+   aucune classe de largeur, posé DERRIÈRE le contenu.
+
+   Chez nous la carte portait le fond ET le contenu : la colonne de texte
+   était un pourcentage d'une boîte qui grandissait, donc elle glissait
+   vers la gauche (523 → 489) en s'élargissant (933 → 1047) au lieu des
+   902 relevés. D'où les deux défauts d'un coup :
+   — 68 px d'espace en moins à gauche de la citation ;
+   — un mouvement qu'on ne PERÇOIT pas, parce que le texte se déplace
+     avec son fond : rien ne reste fixe pour servir de repère.
+
+   Donc : `.smd-citation` est désormais la COLONNE FIXE (97 % de la vue,
+   plafonnée à 1699), `.smd-citation__plaque` est le calque qui s'élargit
+   de 90 % à 100 % de cette colonne — soit exactement 1397 → 1552 à 1600.
+   La grille intérieure est la leur, au pixel : douze colonnes de 122,
+   8 de gouttière, l'étiquette en colonne 2, la citation en colonnes
+   5 à 11.
+
+   Le plafond de 1699 reste sur la colonne (voir le relevé ci-dessus) :
+   la plaque, qui s'y mesure en pourcentage, ne peut plus le dépasser. */
 .smd .smd-citation {
+  position: relative;
   width: 84.4%;
   max-width: 1699px;
   margin-inline: auto;
-  border-radius: var(--smd-r-lg);
-  background: var(--smd-evergreen);
   color: #ffffff;
   padding: 32px;
 }
-/* Largeur d'ARRIVÉE, celle qu'on voit une fois la carte entrée. C'est
-   volontairement l'état final et non l'état de départ : là où
-   `animation-timeline: view()` n'est pas reconnu (Firefox aujourd'hui),
-   aucune animation ne se joue et c'est cette valeur qui reste — mieux
-   vaut y laisser l'état juste. L'animation, plus bas, RÉDUIT la carte à
-   l'entrée puis la ramène ici. */
 @media (min-width: 768px) {
   .smd .smd-citation {
     width: 97%;
   }
 }
-
 @media (min-width: 1024px) {
+  /* Plus de padding horizontal : comme sur la référence (`lg:px-0`), le
+     retrait du texte vient de la grille, pas d'un padding. Les 80
+     verticaux, eux, restent — ils font la hauteur de la plaque (332 de
+     contenu + 160 = les 492 relevés). */
   .smd .smd-citation {
-    padding: 80px 64px;
+    padding: 80px 0;
   }
 }
 
-/* La colonne de texte de la citation.
+/* Le calque vert. `inset-block: 0` le cale sur la boîte de PADDING de la
+   colonne : il déborde donc au-dessus et au-dessous du contenu des 80 px
+   de padding, exactement comme leur `inset-y-0`.
 
-   Relevé sur la référence à 1600 : la carte fait 1397 de large et le
-   texte 902, soit 64,6 % — sept colonnes sur douze, gouttières
-   comprises. Notre grille en donnait huit sur douze, soit 835 : 67 px
-   de moins, donc UNE LIGNE DE MOINS, donc une carte plus courte de 85 px
-   que la leur. C'est cette largeur qui règle la hauteur, pas un
-   `min-height`.
+   Largeur au repos = 100 %, et non 90 % : là où
+   `animation-timeline: view()` n'est pas reconnu (Safari, Firefox
+   aujourd'hui) aucune animation ne se joue, et c'est cette valeur qui
+   reste affichée — l'état par défaut doit être l'état d'arrivée.
+   L'animation, en fin de fichier, RÉDUIT la plaque à l'entrée. */
+.smd .smd-citation__plaque {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+  width: 100%;
+  border-radius: var(--smd-r-lg);
+  background: var(--smd-evergreen);
+  pointer-events: none;
+}
 
-   La hauteur relevée sur la référence, pour mémoire : 492 à 1600, avec
-   cinq lignes de citation. */
+/* La grille intérieure, relevée sur la référence à 1600 : le contenu
+   tient dans 1552 (x = 24), en douze colonnes de 122 avec 8 de
+   gouttière — 12 × 122 + 11 × 8 = 1552. L'étiquette commence en
+   colonne 2 (x = 154), la citation en colonne 5 (x = 544, sept colonnes
+   = 902).
+
+   ÉCART ASSUMÉ : leur étiquette tient sur une seule colonne (122), la
+   nôtre en prend deux (252). « Ce que le catalogue » fait 137 px en
+   DM Mono 12 — il ne rentre pas dans 122 et se couperait au milieu d'un
+   mot. Deux colonnes gardent leur départ (x = 154) et leurs deux lignes,
+   et n'entament pas la colonne 5 où commence la citation. */
+.smd .smd-citation__grille {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.smd .smd-citation__colonne {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 64px;
+}
+@media (min-width: 1024px) {
+  .smd .smd-citation__grille {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 8px;
+    row-gap: 0;
+  }
+  /* Même rangée que la citation : sur la référence l'étiquette est en bas
+     à gauche, à la hauteur du nom. Sur une rangée à elle, elle
+     remonterait en haut de la plaque. Aucun recouvrement — elle s'arrête
+     colonne 3, la citation commence colonne 5. */
+  .smd .smd-citation__label {
+    grid-column: 2 / span 2;
+    grid-row: 1;
+    align-self: end;
+  }
+  .smd .smd-citation__colonne {
+    grid-column: 5 / span 7;
+    grid-row: 1;
+  }
+}
+
+/* La colonne de texte ne se mesure plus en pourcentage : c'est la grille
+   qui la pose. Relevé sur la référence, pour mémoire : 902 de large à
+   1600 (sept colonnes sur douze), cinq lignes de citation, 492 de
+   hauteur de plaque. C'est cette largeur qui règle la hauteur, pas un
+   `min-height`. */
 .smd .smd-citation__corps {
   width: 100%;
-}
-@media (min-width: 1024px) {
-  /* 71,1 % et non 64,6 : la référence n'a PAS de padding horizontal sur
-     sa carte (`lg:px-0`), son retrait vient de sa grille — ses 64,6 %
-     se comptent donc sur la carte entière. Les nôtres se comptent sur la
-     boîte de contenu, déjà rentrée de 64 de chaque côté. 71,1 % de
-     (1397 − 128) redonne exactement les 902 relevés. */
-  .smd .smd-citation__corps {
-    width: 71.1%;
-    margin-left: auto;
-  }
 }
 
 .smd .smd-citation__texte {
@@ -2548,18 +2631,22 @@
   }
 }
 
+/* 90 et 100, pas 87,3 et 97 : depuis la troisième passe du 16/09, la
+   plaque se mesure sur `.smd-citation`, la colonne fixe qui vaut déjà
+   97 % de la vue. 90 % de 1552 = 1397 et 100 % = 1552 : la même
+   excursion qu'avant, au pixel, mais sous un texte qui ne bouge plus.
+   C'est `.smd-citation__plaque` qui s'anime, jamais la colonne. */
 @keyframes smd-citation-entree {
   from {
-    width: 87.3%;
+    width: 90%;
   }
   to {
-    width: 97%;
+    width: 100%;
   }
 }
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .smd .smd-citation {
-      margin-inline: auto;
+    .smd .smd-citation__plaque {
       animation: smd-citation-entree both;
       animation-timeline: view();
       animation-range: entry 0% entry 100%;

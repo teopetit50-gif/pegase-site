@@ -759,23 +759,36 @@ export default function SurMesurePage() {
               sort de la colonne de 1472 et suit la vue jusqu'à 1888 —
               voir le relevé en tête de sur-mesure.css. */}
           <div className="smd-large">
-            {/* La colonne de texte fait 64,6 % de la carte, comme sur la
-                référence — c'est elle qui donne à la citation ses cinq
-                lignes et à la carte sa hauteur. Et le texte MONTE dans
-                son cadre à l'entrée dans l'écran (`Revele`), au lieu
-                d'être là d'emblée : le nom suit 180 ms après. */}
-            <div data-reveal className="smd-citation">
-              <div className="flex flex-col gap-10 lg:grid lg:grid-cols-12 lg:gap-8">
+            {/* ⚠ PAS DE `data-reveal` ICI, ET C'EST LE FOND DU REPROCHE
+                « le zoom dézoom apparaît trop tard » (Teo, 16/09 au
+                soir). `[data-reveal]` est repris par PageMotion (GSAP),
+                qui tient le bloc à `opacity: 0` jusqu'à ce que son bord
+                haut passe 88 % de la fenêtre, puis le fait apparaître en
+                750 ms. La plaque, elle, s'élargit dès que ce même bord
+                entre par le bas : les deux tiers de l'excursion se
+                jouaient donc sur une carte INVISIBLE, et ce qu'on voyait
+                arriver était une bande déjà presque à sa largeur finale.
+                Sur la référence rien ne masque le panneau — il entre
+                visible et s'élargit sous nos yeux. Son entrée, c'est la
+                plaque qui s'ouvre et le texte qui monte, pas un fondu.
+
+                La colonne de texte, elle, ne bouge plus : la grille la
+                pose à 902 (colonnes 5 à 11) comme sur la référence, et
+                la plaque s'élargit DERRIÈRE. Le texte monte dans son
+                cadre à l'entrée (`Revele`) ; le nom suit 180 ms après. */}
+            <div className="smd-citation">
+              <div className="smd-citation__plaque" aria-hidden="true" />
+              <div className="smd-citation__grille">
                 {/* L'étiquette et le corps sont sur la MÊME rangée de
                     grille, sinon l'étiquette se place sur une rangée à
                     elle et remonte en haut de la carte — sur la
                     référence elle est en bas à gauche, à la hauteur du
-                    nom. Le recouvrement est sans conséquence : le corps
-                    est calé à droite sur 71 % et laisse la gauche libre. */}
-                <p className="smd-citation__label lg:col-span-4 lg:col-start-1 lg:row-start-1 lg:self-end">
+                    nom. Colonnes 2-3 pour elle, 5 à 11 pour la
+                    citation : elles ne se touchent pas. */}
+                <p className="smd-citation__label">
                   Ce que le catalogue{"\n"}ne couvre pas
                 </p>
-                <div className="flex flex-col justify-between gap-16 lg:col-span-12 lg:col-start-1 lg:row-start-1">
+                <div className="smd-citation__colonne">
                   <div className="smd-citation__corps">
                     <Revele>
                       {/* La citation est celle de `FICHE.fonctionnement[0]`,
