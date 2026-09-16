@@ -6,6 +6,7 @@ import {
   Inter,
   Inter_Tight,
   JetBrains_Mono,
+  Onest,
   Plus_Jakarta_Sans,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
@@ -73,6 +74,18 @@ const hanken = Hanken_Grotesk({
   variable: "--font-hanken",
   preload: false,
 });
+/* 16/09/2026 — Onest, pour /offres uniquement (décalque de
+   scale.com/data-engine). La référence est composée en Aeonik Pro, sous
+   licence : on ne peut ni servir leurs fichiers ni l'acheter à leur place.
+   Hanken Grotesk avait d'abord été reprise de /vos-donnees ; Teo a vu la
+   différence à l'œil sur un titre de 40 px. Les six candidates libres ont
+   été rendues côte à côte à la même taille et comparées à une capture de
+   la référence : Onest est la plus proche — mêmes proportions, barre du
+   'e' horizontale, mêmes empattements coupés droit. Comme les autres
+   familles de page, elle n'est PAS posée sur <body> : seul le bloc `.ofd`
+   de app/offres/nos-offres.css la consomme. */
+const onest = Onest({ subsets: ["latin"], variable: "--font-onest", preload: false });
+
 const dmMono = DM_Mono({
   subsets: ["latin"],
   weight: ["400"],
@@ -115,7 +128,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${inter.variable} ${jbmono.variable} ${jakarta.variable} ${interTight.variable} ${dmSans.variable} ${hanken.variable} ${dmMono.variable} antialiased`}
+      className={`${inter.variable} ${jbmono.variable} ${jakarta.variable} ${interTight.variable} ${dmSans.variable} ${hanken.variable} ${dmMono.variable} ${onest.variable} antialiased`}
     >
       {/* Vercel Web Analytics — sans cookie, donc pas de bandeau consentement.
           Le script ne collecte qu'une fois « Web Analytics » activé sur le

@@ -48,11 +48,16 @@
 
    1. LA POLICE. La référence est composée en Aeonik Pro (CoType Foundry),
       sous licence commerciale : on ne peut ni servir leurs fichiers ni
-      l'acheter à leur place. Hanken Grotesk la remplace — même squelette
-      de grotesque géométrique, même hauteur d'x, 'g' à un étage. DM Mono
-      porte les étiquettes, qui sont bien en monospace dans la référence.
-      C'est le même choix que /vos-donnees (bloc `.vd`), qui décalque une
-      autre page du même site : les deux pages se répondent.
+      l'acheter à leur place. ONEST la remplace. Hanken Grotesk avait
+      d'abord été reprise de /vos-donnees, qui décalque une autre page du
+      même site ; Teo a vu la différence à l'œil sur un titre de 40 px le
+      16/09. Six familles libres ont alors été rendues côte à côte à la
+      même taille (scratchpad, `polices/essai.html`) et comparées à une
+      capture de la référence : Onest est la plus proche — mêmes
+      proportions, barre du 'e' horizontale, terminaisons coupées droit.
+      Ne pas « réaligner » cette page sur `.vd` : les deux blocs décalquent
+      la même fonderie mais n'ont pas la même exigence de ressemblance.
+      DM Mono porte les étiquettes, bien en monospace dans la référence.
 
    2. LE HAUT DE PAGE. La référence pose `pt-24` (96 px) parce que son
       entête est `fixed` et recouvre le haut du document ; le bord haut de
@@ -92,7 +97,7 @@
 
   background: #ffffff;
   color: var(--ofd-texte);
-  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
 }
@@ -556,10 +561,30 @@
   align-items: center;
   justify-content: center;
 }
+/* La référence aligne des LOGOTYPES (signe + nom), pas des signes nus :
+   90 à 111 px de large sur 20 à 24 de haut. Un signe seul — un « M » de
+   messagerie, un « N » — se lit mal à cette taille, et Teo l'a relevé.
+   Le nom est composé dans NOTRE police, pas dans celle de la marque :
+   c'est un rappel typographique, pas la reproduction d'un logotype. */
 .ofd .ofd-outils svg {
-  height: 24px;
-  width: auto;
+  height: 22px;
+  width: 22px;
+  flex-shrink: 0;
   fill: #000000;
+}
+.ofd .ofd-outil {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+}
+.ofd .ofd-outil span {
+  font-size: 1.125rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #000000;
+  white-space: nowrap;
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -658,10 +683,22 @@
   justify-content: space-between;
   gap: 24px;
 }
+/* Le « petit truc en haut à droite » des cartes de la référence n'est PAS
+   un pictogramme : c'est un coin plein de 17×17, un triangle à angle droit
+   aux sommets arrondis, décliné dans les quatre couleurs. Relevé dans son
+   DOM (viewBox 6×6, `fill: currentColor`) et recopié tel quel — la
+   première version posait des icônes lucide à la place, ce qui changeait
+   le dessin de la carte. */
 .ofd .ofd-carte__puce {
   height: 17px;
   width: 17px;
   flex-shrink: 0;
+  display: block;
+}
+.ofd .ofd-carte__puce svg {
+  display: block;
+  height: 100%;
+  width: 100%;
 }
 
 /* ─────────────────────────────────────────────────────────────────────

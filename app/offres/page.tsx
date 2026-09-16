@@ -4,18 +4,14 @@ import Link from "next/link";
 import {
   ArrowRight,
   Bell,
-  Blocks,
   Check,
   CheckCheck,
   Clock,
   FileText,
-  Landmark,
-  Lock,
   MessageSquare,
   Pause,
   Plug,
   Search,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 import {
@@ -143,8 +139,24 @@ export const metadata: Metadata = {
    ───────────────────────────────────────────────────────────────────── */
 
 /* BLOC 2 — sept outils du client, comme la référence aligne sept logos.
-   Les chemins viennent de simple-icons, déjà au dépôt pour /integrations. */
-const OUTILS = [siGmail, siGooglesheets, siStripe, siShopify, siGoogledrive, siNotion, siQuickbooks];
+   Les chemins viennent de simple-icons, déjà au dépôt pour /integrations.
+
+   16/09 (Teo, « les logos sont mal faits ») — ce sont des LOGOTYPES et
+   non des signes nus : la référence aligne « Pinterest », « Meta »,
+   « instacart » écrits en toutes lettres, 90 à 111 px de large. Un « M »
+   ou un « N » seul, à 24 px, ne se lit pas. Le nom est composé dans
+   NOTRE police : c'est un rappel typographique, pas la reproduction d'un
+   logotype de marque. Les libellés sont raccourcis (« Sheets », « Drive »)
+   pour tenir la largeur de la rangée sans la faire défiler. */
+const OUTILS = [
+  { marque: siGmail, nom: "Gmail" },
+  { marque: siGooglesheets, nom: "Sheets" },
+  { marque: siStripe, nom: "Stripe" },
+  { marque: siShopify, nom: "Shopify" },
+  { marque: siGoogledrive, nom: "Drive" },
+  { marque: siNotion, nom: "Notion" },
+  { marque: siQuickbooks, nom: "QuickBooks" },
+];
 
 /* BLOC 3 — les quatre arguments. Les quatre pastilles reprennent les
    quatre couleurs de la référence (archive-purple, foundry-tan,
@@ -161,28 +173,24 @@ const OUTILS = [siGmail, siGooglesheets, siStripe, siShopify, siGoogledrive, siN
    plus longue (158 contre ~110), et c'est le bon arbitrage. */
 const ARGUMENTS = [
   {
-    icone: Blocks,
     teinte: "#79648c",
     titre: "Intégration à votre environnement",
     texte:
       "Nos systèmes s'intègrent à vos outils existants sans imposer le moindre changement d'organisation.",
   },
   {
-    icone: ShieldCheck,
     teinte: "#a8927c",
     titre: "Contrôle humain",
     texte:
       "Vous gardez la validation des actions sensibles. Les règles et les niveaux d'autonomie sont définis avec vous.",
   },
   {
-    icone: Lock,
     teinte: "#273252",
     titre: "Sécurité des données",
     texte:
       "Les environnements clients sont cloisonnés, les données chiffrées et les accès contrôlés.",
   },
   {
-    icone: Landmark,
     teinte: "#193a29",
     titre: "Financement éligible",
     texte:
@@ -410,6 +418,20 @@ function MotifPoints() {
   );
 }
 
+/* Le coin plein des cartes du bloc 3 — relevé TEL QUEL dans le DOM de la
+   référence : un viewBox de 6×6, un triangle à angle droit aux sommets
+   arrondis, peint en `currentColor`. La couleur vient de la carte. */
+function CoinPlein() {
+  return (
+    <svg width="6" height="6" viewBox="0 0 6 6" fill="none" aria-hidden="true">
+      <path
+        d="M5.0957 0H0.376033C0.041944 0 -0.125369 0.403928 0.110868 0.640165L4.83054 5.35983C5.06677 5.59607 5.4707 5.42876 5.4707 5.09467V0.375C5.4707 0.167893 5.30281 0 5.0957 0Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 function ChromeFenetre({ titre }: { titre: string }) {
   return (
     <div className="ofd-fenetre__barre">
@@ -471,11 +493,14 @@ export default function OffresPage() {
             <p className="ofd-mono ofd-outils__legende">Se branche sur les outils déjà en place</p>
             <div className="ofd-outils">
               <ul>
-                {OUTILS.map((m) => (
-                  <li key={m.title}>
-                    <svg viewBox="0 0 24 24" role="img" aria-label={m.title}>
-                      <path d={m.path} />
-                    </svg>
+                {OUTILS.map(({ marque, nom }) => (
+                  <li key={nom}>
+                    <span className="ofd-outil">
+                      <svg viewBox="0 0 24 24" role="img" aria-label={marque.title}>
+                        <path d={marque.path} />
+                      </svg>
+                      <span>{nom}</span>
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -502,12 +527,12 @@ export default function OffresPage() {
                 </div>
 
                 <div className="ofd-quatre">
-                  {ARGUMENTS.map(({ icone: Icone, teinte, titre, texte }) => (
+                  {ARGUMENTS.map(({ teinte, titre, texte }) => (
                     <article key={titre} data-reveal className="ofd-carte">
                       <div className="ofd-carte__tete">
                         <h3 className="ofd-h5">{titre}</h3>
                         <span className="ofd-carte__puce" style={{ color: teinte }}>
-                          <Icone size={17} strokeWidth={1.5} />
+                          <CoinPlein />
                         </span>
                       </div>
                       <p className="ofd-body">{texte}</p>
