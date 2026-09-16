@@ -267,22 +267,12 @@
 .smd .smd-cadre--hero {
   padding-top: 20px; /* écart nº 2 : notre entête est dans le flux */
   padding-bottom: 40px;
-  /* ⚠ LE MÊME PLAFOND QUE .smd-cadre, RÉPÉTÉ ICI, ET CE N'EST PAS UN
-     DOUBLON : le cadre du hero ne porte PAS la classe de base
-     .smd-cadre dans le balisage — seulement smd-cadre--hero. La règle
-     de base ne l'atteint donc jamais. Constaté le 16/09 : après avoir
-     plafonné .smd-cadre, l'appel final tombait bien à 1888 à 3840
-     pendant que le hero restait à 3840, la photo d'un bord à l'autre.
-
-     Le plafond est posé sur le CADRE et non sur le hero lui-même : le
-     hero est en absolu dans .smd-scene, ses left/right valent
-     16px × --smd-p, donc il suit la largeur de sa scène. La scène
-     plafonne, le hero plafonne avec elle — et le repli au défilement
-     continue d'aller de 0 à 16 px, intact. Poser un max-width sur le
-     hero le sur-contraindrait (left + right + width) et le collerait à
-     gauche au lieu de le centrer. */
-  max-width: 1920px;
-  margin-inline: auto;
+  /* PAS DE max-width ICI — essayé le 16/09, retiré le jour même. Le
+     plafonner faisait arriver la photo en bande flottante entre deux
+     marges blanches sur un écran large : l'arrivée pleine page, qui
+     est tout l'effet du repli, était supprimée. Le plafond vit
+     désormais dans le repli lui-même, plus bas (--smd-sur-marge) :
+     pleine largeur à l'arrivée, 1888 une fois replié. */
 }
 .smd .smd-cadre--appel {
   padding-top: 64px;
@@ -690,8 +680,22 @@
   position: absolute;
   top: 0;
   min-height: 0;
-  left: calc(16px * var(--smd-p));
-  right: calc(16px * var(--smd-p));
+  /* 16/09 — LE PLAFOND, PORTÉ PAR LE REPLI PLUTÔT QUE PAR LE CADRE.
+     La référence ne laisse jamais son hero dépasser 1888 (relevé :
+     1888 à 2560 comme à 3840, centré). Nous, la photo arrive pleine
+     page — c'est l'effet — puis se replie. Le repli l'emmène donc
+     jusqu'à ce cadre au lieu de s'arrêter à 16 px du bord :
+
+       --smd-sur-marge = ce qui dépasse 1920, réparti des deux côtés
+       marge du repli = (sur-marge + 16) × --smd-p
+
+     À l'arrivée (p = 0) la marge vaut 0 : plein écran, intact. Une
+     fois replié (p = 1) elle vaut sur-marge + 16, donc 1888 centré —
+     les nombres de la référence. Sous 1920 la sur-marge est nulle et
+     on retrouve exactement les 16 px d'origine, à tous les p. */
+  --smd-sur-marge: max(0px, (100% - 1920px) / 2);
+  left: calc((var(--smd-sur-marge) + 16px) * var(--smd-p));
+  right: calc((var(--smd-sur-marge) + 16px) * var(--smd-p));
   height: calc(
     var(--smd-hero-plein, 100svh) +
       (var(--smd-hero-fin) - var(--smd-hero-plein, 100svh)) * var(--smd-p)
@@ -700,10 +704,23 @@
   /* Le padding suit le rayon : collé au bord quand l'image est pleine, il
      reprend ses 32 (64 dès 768) une fois le cadre formé. */
   padding: calc(20px + 12px * var(--smd-p));
+  /* Le texte, lui, se cale sur le cadre DÈS L'ARRIVÉE : le padding
+     latéral absorbe la sur-marge que la photo n'a pas encore prise
+     (× 1 − p). Sans ça, sur un écran large le titre se retrouvait
+     plaqué contre le bord gauche de l'écran pendant tout le haut de
+     page — le défaut d'origine. Les deux termes se complétant, le
+     titre garde presque la même abscisse pendant que la photo rentre.
+     Sous 1920 la sur-marge est nulle : padding inchangé. */
+  padding-inline: calc(
+    20px + 12px * var(--smd-p) + var(--smd-sur-marge) * (1 - var(--smd-p))
+  );
 }
 @media (min-width: 768px) {
   .smd .smd-scene[data-plein] > .smd-plein {
     padding: calc(40px + 24px * var(--smd-p));
+    padding-inline: calc(
+      40px + 24px * var(--smd-p) + var(--smd-sur-marge) * (1 - var(--smd-p))
+    );
   }
 }
 
