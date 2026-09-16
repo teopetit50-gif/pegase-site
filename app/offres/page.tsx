@@ -1,17 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bell,
-  Check,
-  CheckCheck,
-  FileText,
-  MessageSquare,
-  Plug,
-  Search,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Bell, Check, FileText, MessageSquare, Users } from "lucide-react";
 import { siAirtable, siAsana, siHubspot, siQuickbooks, siStripe } from "simple-icons";
 import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
 import { ChatMessages } from "@/components/ui/chat-messages";
@@ -235,22 +225,6 @@ const VALIDATION = {
   envoi: "Échéance au 3 septembre, le solde est dû depuis 12 jours.",
 };
 
-/* BLOC 5b — la rangée : les trois étapes de la mise en place (voir
-   l'écart documenté en tête de fichier). */
-const ETAPES = [
-  {
-    icone: Search,
-    titre: "Diagnostic, 30 min",
-    texte: "Nous chiffrons le processus qui vous coûte le plus.",
-  },
-  { icone: Plug, titre: "Intégration", texte: "Une demi-journée sur votre environnement." },
-  {
-    icone: CheckCheck,
-    titre: "Cycle supervisé",
-    texte: "Vos équipes valident chaque action pendant deux semaines, le temps d'ajuster les règles.",
-  },
-];
-
 /* BLOC 5b — LE SCHÉMA DU CYCLE.
 
    16/09 (Teo) — « tu m'as fait deux trucs complètement différents, je veux
@@ -295,48 +269,88 @@ const SCHEMA = {
   note: "*Réception et envoi se font dans vos outils : aucun compte à créer.",
 };
 
-/* BLOC 5c — les quatre paquets. Les listes sont volontairement inégales
-   (4 / 4 / 3 / 2), comme celles de la référence (4 / 3 / 2 / 1) : rien
-   n'est ajouté pour égaliser une colonne. Chaque ligne reprend un fait
-   déjà publié sur la page produit correspondante (lib/content.ts). */
+/* BLOC 5b — LA RANGÉE SOUS LE SCHÉMA.
+
+   16/09 (Teo) — « notre section est mal faite, les trucs ne sont pas au
+   même endroit ; eux c'est des trucs validés, nous c'est des logos ; il
+   faut que ce soit un copier-coller, et on n'a que 3 phrases, eux 4. »
+
+   Deux erreurs, et la seconde était la cause de la première :
+
+   1. LA FORME. La référence coche ses quatre entrées — un seul et même
+      chevron, pas un pictogramme différent par ligne. Nous posions une
+      loupe, une prise et un double-chevron : trois dessins pour trois
+      lignes, là où eux en ont un pour quatre.
+
+   2. LE FOND. Leur rangée ne liste pas des ÉTAPES mais les quatre temps
+      du SCHÉMA juste au-dessus (leur diagramme montre SFT, RLHF, Red
+      Teaming, Model Evaluation ; leur rangée les reprend). J'y avais mis
+      les trois étapes de la mise en place — un contenu qui n'a rien à
+      voir avec le schéma, d'où le trou en bas à droite de la grille.
+      La rangée reprend donc les quatre temps de NOTRE schéma, dans son
+      ordre : réception, qualification, rédaction, validation.
+
+   CE QUI DISPARAÎT DE LA PAGE : les trois étapes de la mise en place
+   (diagnostic 30 min, intégration, cycle supervisé). Elles n'ont pas
+   d'emplacement dans la référence — je les avais logées ici faute de
+   mieux. Elles vivent sur /commencer, et le diagnostic de trente minutes
+   reste la promesse du bouton. À remettre si Teo les veut sur cette page,
+   mais alors dans une section à elles, pas dans celle-ci.
+
+   Longueurs, référence puis nous : 41-85 signes · 38-58. */
+const CYCLE = [
+  {
+    titre: "Réception",
+    texte: "La demande arrive dans vos outils, sur son canal d'origine.",
+  },
+  { titre: "Qualification", texte: "Elle est comprise et rattachée au bon dossier." },
+  { titre: "Rédaction", texte: "Le message est écrit depuis vos règles." },
+  { titre: "Validation", texte: "Rien ne part sans votre accord." },
+];
+
+/* BLOC 5c — les quatre paquets.
+
+   16/09 (Teo) — « la taille des cartes n'est pas la même, les nôtres sont
+   plus hautes ; eux il y a moins de trucs, nous il y a trop de texte. »
+   Les deux vont ensemble. Leurs puces sont des ÉTIQUETTES de deux ou
+   trois mots, jamais des phrases : « Document Processing », « Infrared »,
+   « LiDAR » — 5 à 27 signes, une ligne chacune. Les nôtres faisaient 38 à
+   55 signes et passaient toutes sur deux lignes : à `min-height: 320`
+   identique, c'est le nombre de lignes qui creusait l'écart de hauteur.
+
+   Et le compte : la référence descend 4 / 3 / 2 / 1. Nous faisions
+   4 / 4 / 3 / 2. Même dégradé maintenant, sans rien inventer — ce qui
+   part est le détail, il est repris sur la page produit de chaque
+   paquet, où il a la place de s'écrire en phrases. */
 const PAQUETS = [
   {
     icone: Bell,
     titre: "CASHD",
     href: "/offres/relances-impayes",
     lignes: [
-      "Devis sans réponse relancés dès le troisième jour",
-      "Factures échues relancées à J+7 puis J+21",
-      "Relance graduée selon le montant et le retard",
-      "Aucun envoi sans votre validation",
+      "Relance des devis",
+      "Relance des factures échues",
+      "Gradation par montant",
+      "Validation avant envoi",
     ],
   },
   {
     icone: Users,
     titre: "RELOAD",
     href: "/offres/nouvelles-affaires",
-    lignes: [
-      "Clients inactifs repérés dans votre historique",
-      "Classés par valeur et par récence",
-      "Un message par compte et par trimestre",
-      "Entretiens dus et commandes jamais reprises",
-    ],
+    lignes: ["Clients inactifs", "Classement par valeur", "Un message par trimestre"],
   },
   {
     icone: MessageSquare,
     titre: "FRONTD",
     href: "/offres/demandes-clients",
-    lignes: [
-      "Une réponse à toute heure, sur le canal d'origine",
-      "Rien hors de la base que vous avez validée",
-      "Prise de rendez-vous menée jusqu'au bout",
-    ],
+    lignes: ["Réponse à toute heure", "Prise de rendez-vous"],
   },
   {
     icone: FileText,
     titre: "FILED",
     href: "/offres/factures-fournisseurs",
-    lignes: ["Tout document reçu, lu puis contrôlé", "Classé au bon dossier, la réponse rédigée"],
+    lignes: ["Lecture et classement"],
   },
 ];
 
@@ -809,12 +823,12 @@ export default function OffresPage() {
                 </div>
 
                 <div className="ofd-rangee">
-                  <p className="ofd-mono ofd-rangee__legende">La mise en place, en trois étapes</p>
+                  <p className="ofd-mono ofd-rangee__legende">Le cycle, temps par temps</p>
                   <div className="ofd-rangee__grille">
-                    {ETAPES.map(({ icone: Icone, titre, texte }) => (
+                    {CYCLE.map(({ titre, texte }) => (
                       <div key={titre} data-reveal className="ofd-entree">
                         <span aria-hidden className="ofd-entree__icone">
-                          <Icone size={24} strokeWidth={1.5} />
+                          <Check size={22} strokeWidth={2} />
                         </span>
                         <div>
                           <h3 className="ofd-h5">{titre}</h3>

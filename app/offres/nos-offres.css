@@ -1008,9 +1008,10 @@
   }
 }
 @media (min-width: 1280px) {
-  /* TROIS et non quatre : voir l'écart « BLOC 5b » en tête de page.tsx. */
+  /* Retour à QUATRE le 16/09 : la rangée ne porte plus trois étapes mais
+     les quatre temps du schéma, comme la référence sous sa grande image. */
   .ofd .ofd-rangee__grille {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 .ofd .ofd-entree {
