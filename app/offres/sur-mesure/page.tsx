@@ -951,15 +951,29 @@ export default function SurMesurePage() {
                 Les deux pages ne se croisent pas dans un parcours, mais
                 si /tarifs change de photo, vérifier qu'elle ne prend pas
                 celle d'ici. Crédits dans public/photos/CREDITS.txt. */}
-            <Image
-              src="/photos/tarifs-abonnement-facade.jpg"
-              alt=""
-              fill
-              loading="lazy"
-              sizes="100vw"
-              className="object-cover"
-            />
-            <div aria-hidden className="smd-voile" />
+            {/* LA PLAQUE EST UN CALQUE, LE TEXTE NE BOUGE PAS.
+
+                C'est la construction de la référence, relevée le 16/09 :
+                chez elle le fond est un calque posé derrière le contenu,
+                et le contenu vit dans une colonne qui ne bouge jamais —
+                titre à x=80, largeur 1152, identique à toutes les
+                positions de défilement.
+
+                La première version animait `.smd-plein` lui-même, donc
+                le texte, qui est dedans, voyageait avec : x passait de
+                165 à 88 pendant qu'on défilait. Mesuré en prod, c'est ce
+                qui donnait le sentiment d'un bloc qui dérive. */}
+            <div aria-hidden className="smd-appel-plaque">
+              <Image
+                src="/photos/tarifs-abonnement-facade.jpg"
+                alt=""
+                fill
+                loading="lazy"
+                sizes="100vw"
+                className="object-cover"
+              />
+              <div className="smd-voile" />
+            </div>
             <div className="smd-plein__texte">
               <h2 data-reveal className="smd-h1">
                 Parler de votre cas.

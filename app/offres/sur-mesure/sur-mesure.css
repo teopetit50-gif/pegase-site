@@ -2597,19 +2597,64 @@
 /* ═══════════════════════════════════════════════════════════════════════
    L'APPEL FINAL S'ÉLARGIT AUSSI — 16/09/2026
 
-   Teo : « l'effet de zoom et dézoom ne marche pas sur celle-là ». Même
-   mécanique que la carte de citation, mêmes bornes (87,3 → 97 % de la
-   fenêtre) et même sortie cubique — c'est la seule autre grande carte de
-   la page, et elle ferme la lecture comme la citation l'ouvre.
+   Teo : « l'effet de zoom et dézoom ne marche pas sur celle-là ».
+
+   ⚠ ÉCART ASSUMÉ AVEC LA RÉFÉRENCE, ET IL EST DEMANDÉ. Son pré-pied de
+   page NE S'ANIME PAS : relevé le 16/09 à 1600 de large, sa plaque reste
+   à x=16, w=1568, h=720 à toutes les positions de défilement, et seul le
+   titre s'anime (leur classe `AnimatedText`). C'est la CITATION qui
+   s'élargit chez eux, pas celle-ci. Teo a demandé le mouvement ici en
+   croyant qu'il y était ; il est donc construit, mais c'est la seule
+   chose de cette section qui ne vient pas du relevé. Si un jour on
+   revient au décalque strict, il suffit de retirer le bloc `@supports`
+   ci-dessous : tout le reste est déjà à la géométrie de la référence.
 
    ⚠ SCOPÉ À `.smd-cadre--appel`. `.smd-plein` sert AUSSI au hero, qui a
    déjà son propre mouvement (le repli, piloté en JavaScript) : les deux
    s'annuleraient.
    ═══════════════════════════════════════════════════════════════════════ */
-/* 89,1 et 99, pas 87,3 et 97 : le cadre de l'appel est déjà rentré de 16
-   de chaque côté, là où la citation se mesure sur la fenêtre entière.
-   Ces deux valeurs redonnent EXACTEMENT la même excursion que la
-   citation — 1397 → 1552 à 1600 de large. */
+
+/* CE N'EST PAS `.smd-plein` QUI S'ANIME, C'EST LA PLAQUE DERRIÈRE.
+
+   Première version : l'animation portait sur `.smd-plein`, qui CONTIENT
+   le texte. Le texte gardait sa largeur mais voyageait avec la carte —
+   x de 165 à 88 pendant le défilement, mesuré en prod. La référence ne
+   construit pas comme ça : son fond est un calque posé derrière, et le
+   contenu vit dans une colonne fixe (titre x=80, w=1152, invariant).
+
+   Donc `.smd-plein` garde ici sa largeur pleine et son remplissage de
+   64 px — d'où un titre à 16+64 = 80, exactement la référence — et c'est
+   `.smd-appel-plaque`, en absolu derrière, qui s'élargit. */
+.smd .smd-cadre--appel > .smd-plein {
+  /* le rayon et le rognage descendent sur la plaque : ce niveau-ci ne
+     dessine plus rien, il ne fait que tenir la colonne de texte */
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+}
+.smd .smd-appel-plaque {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 0;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--smd-r-xl);
+}
+.smd .smd-appel-plaque > img {
+  object-fit: cover;
+}
+
+/* 89,1 et 99, pas 87,3 et 97 : la plaque se mesure sur `.smd-plein`, qui
+   est déjà rentré de 16 de chaque côté par le cadre, là où la citation
+   se mesure sur la fenêtre entière. Ces deux valeurs redonnent
+   EXACTEMENT la même excursion que la citation — 1397 → 1552 à 1600.
+
+   La largeur d'ARRIVÉE est aussi la largeur au repos : là où
+   `animation-timeline: view()` n'est pas reconnu (Firefox), rien ne
+   s'anime et c'est 99 % qui reste — la géométrie de la référence, pas un
+   état coincé à mi-course. */
 @keyframes smd-appel-entree {
   from {
     width: 89.1%;
@@ -2618,11 +2663,14 @@
     width: 99%;
   }
 }
+@media (min-width: 768px) {
+  .smd .smd-appel-plaque {
+    width: 99%;
+  }
+}
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
-    .smd .smd-cadre--appel > .smd-plein {
-      width: 99%;
-      margin-inline: auto;
+    .smd .smd-appel-plaque {
       animation: smd-appel-entree both;
       animation-timeline: view();
       animation-range: entry 0% entry 100%;
