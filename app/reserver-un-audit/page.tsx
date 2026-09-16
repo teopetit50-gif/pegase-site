@@ -6,7 +6,7 @@ import Formules from "@/components/reservation/Formules";
 import Simulateur from "@/components/reservation/Simulateur";
 import Complements from "@/components/reservation/Complements";
 import Engagements from "@/components/reservation/Engagements";
-import DerouleAudit from "@/components/reservation/DerouleAudit";
+import EtapesAudit from "@/components/reservation/EtapesAudit";
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES } from "@/lib/paliers";
 import {
@@ -131,7 +131,7 @@ export default function ReserverUnAuditPage() {
           </p>
           <h2 className="r-h2 mt-6 max-w-[18ch]">Comment se passe l&apos;audit</h2>
 
-          <DerouleAudit temps={DEROULE} />
+          <EtapesAudit temps={DEROULE} />
         </section>
 
         {/* ═══ 4 — compléments, sur bande sombre ═══ */}

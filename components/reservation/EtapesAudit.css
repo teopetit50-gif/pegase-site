@@ -1,0 +1,182 @@
+/* ══════════════════════════════════════════════════════════════════════
+   EtapesAudit.css — la feuille du rail numéroté de /reserver-un-audit
+
+   Écrite le 15/09/2026 avec EtapesAudit.tsx, en remplacement de
+   DerouleAudit.css (volet collant, refusé). Tout est scopé sous
+   `.resa .eta` et préfixé `eta-` (vérifié par grep avant d'écrire : ni
+   `.eta`, ni `eta-`, ni `--eta` n'existaient dans app/globals.css ni dans
+   components/). Aucun `@keyframes`, aucune transition : cette section ne
+   bouge que par le `[data-reveal]` de la page.
+
+   Les jetons sont ceux du monde, déjà posés par `.resa` dans globals.css :
+   --r-texte #050505, --r-doux #3d3d3d, --r-faible #616161,
+   --r-filet #e3e3e3. Rien n'est écrit en dur.
+
+   LA MESURE, à 1280 (colonne 1184, gouttière 32) : trois colonnes de
+   373 px, soit ~313 px de texte dans une carte à 30 px de marge — 40
+   signes par ligne à 16 px, et nos trois temps (≈ 300 signes) tiennent en
+   huit lignes. À 1024 la colonne tombe à 288 : la marge passe à 26 et le
+   corps à 15/24, on reste à ~29 signes par ligne. Sous 1024 c'est une
+   colonne, et la carte reprend au pixel celle d'avant ce composant —
+   rayon 16, fond blanc, marges 28 puis 36 à partir de 640, corps 15/23.
+
+   DEUX RÈGLES DE CE FICHIER.
+
+   1. LE RAIL SE REJOINT PAR DES MARGES NÉGATIVES. Chaque filet déborde de
+      la moitié de la gouttière (−16 px pour un `column-gap: 32px`) : le
+      filet droit d'une colonne et le filet gauche de la suivante se
+      touchent au milieu du vide. Si la gouttière change, ces deux marges
+      changent avec elle, sinon le rail se coupe entre les cartes.
+
+   2. LES DEUX BOUTS SONT CACHÉS, PAS RETIRÉS. `[data-bout]` passe en
+      `visibility: hidden` : le filet garde sa place dans le `flex`, donc
+      la pastille reste centrée sur sa colonne comme les deux autres. Le
+      mettre en `display: none` décalerait la première et la dernière.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— le bloc : la marge que portait le `mt-10` du bloc remplacé ——— */
+.resa .eta {
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 16px;
+}
+
+.resa .eta .eta-temps {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  row-gap: 14px;
+}
+
+/* ——— le nœud : deux filets et une pastille ——— */
+.resa .eta .eta-noeud {
+  display: flex;
+  align-items: center;
+}
+/* sous 1024 il ne reste que la pastille : les filets ne relient rien */
+.resa .eta .eta-trait {
+  display: none;
+  flex: 1 1 0;
+  height: 1px;
+  background: var(--r-filet);
+}
+.resa .eta .eta-pastille {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--r-texte);
+  color: #ffffff;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* ——— la carte ——— */
+.resa .eta .eta-carte {
+  height: 100%;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 28px;
+}
+@media (min-width: 640px) {
+  .resa .eta .eta-carte {
+    padding: 36px;
+  }
+  /* La bande 640 → 1023 est la seule où la carte est large ET seule dans
+     sa colonne : sans cette borne, la ligne fait ~85 signes à 768 px. */
+  .resa .eta .eta-texte {
+    max-width: 62ch;
+  }
+}
+
+.resa .eta .eta-etape {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--r-faible);
+}
+/* le titre porte aussi `.r-h4` : la police vient de là, cette règle ne
+   décide que de l'encre et de la marge (et gagne par sa spécificité) */
+.resa .eta .eta-titre {
+  margin-top: 10px;
+  color: var(--r-texte);
+}
+.resa .eta .eta-texte {
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--r-doux);
+  overflow-wrap: break-word;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   DÈS 1024 px — trois colonnes, le rail, et la sous-grille
+
+   `.eta` porte DEUX rangées ; chaque `<li>` s'étale sur les deux
+   (`grid-row: span 2`) et reprend leur définition (`grid-template-rows:
+   subgrid`). C'est ce qui aligne les trois pastilles sur une même ligne et
+   donne aux trois cartes la hauteur de la plus haute, quel que soit le
+   nombre de lignes de leur texte.
+   ══════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  .resa .eta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    column-gap: 32px;
+    row-gap: 0;
+  }
+  .resa .eta .eta-temps {
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+    row-gap: 22px;
+  }
+
+  .resa .eta .eta-trait {
+    display: block;
+  }
+  /* la moitié de la gouttière, de chaque côté : c'est ce qui fait se
+     rejoindre les filets d'une colonne à l'autre */
+  .resa .eta .eta-trait:first-child {
+    margin-left: -16px;
+  }
+  .resa .eta .eta-trait:last-child {
+    margin-right: -16px;
+  }
+  /* les deux extrémités du rail : cachées, jamais retirées */
+  .resa .eta .eta-trait[data-bout] {
+    visibility: hidden;
+  }
+  .resa .eta .eta-pastille {
+    margin-inline: 14px;
+  }
+
+  .resa .eta .eta-carte {
+    padding: 26px;
+  }
+  .resa .eta .eta-titre {
+    font-size: clamp(19px, 1.5vw, 22px);
+  }
+  .resa .eta .eta-texte {
+    font-size: 15px;
+    line-height: 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .resa .eta .eta-carte {
+    padding: 30px;
+  }
+  .resa .eta .eta-texte {
+    font-size: 16px;
+    line-height: 26px;
+  }
+}
