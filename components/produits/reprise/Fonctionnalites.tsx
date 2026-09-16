@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { VoirPlus } from "@/components/ui/VoirPlus";
 import { Search } from "lucide-react";
 import { FONCTIONNALITES as F } from "@/lib/produits/reprise";
 import { Cadre, TitreSection } from "./Cadre";
@@ -321,14 +322,12 @@ export function Fonctionnalites() {
               <CarteTrace />
             </div>
             <div className="mx-6 mt-5 md:hidden">
-              <button
-                type="button"
-                aria-expanded={tout}
-                onClick={() => setTout((v) => !v)}
-                className="font-medium text-[#6b6b6b] text-sm underline underline-offset-4"
-              >
-                {tout ? "Réduire" : "Lire la suite (3 autres)"}
-              </button>
+              <VoirPlus
+                pleineLargeur
+                ouvert={tout}
+                onBascule={() => setTout((v) => !v)}
+                libelle="Lire la suite (3 autres)"
+              />
             </div>
           </div>
         </Cadre>

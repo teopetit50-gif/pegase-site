@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { VoirPlus } from "@/components/ui/VoirPlus";
 
 import { Apparition } from "./Apparition";
 import { Etiquette } from "./Bouton";
@@ -56,14 +57,13 @@ export function Francais() {
                 </Apparition>
               ))}
             </div>
-            <button
-              type="button"
-              aria-expanded={tout}
-              onClick={() => setTout((v) => !v)}
-              className="mt-4 font-medium text-neutral-500 text-sm underline underline-offset-4 lg:hidden"
-            >
-              {tout ? "Réduire" : "Lire la suite"}
-            </button>
+            <VoirPlus
+              pleineLargeur
+              className="mt-4 lg:hidden"
+              ouvert={tout}
+              onBascule={() => setTout((v) => !v)}
+              libelle="Lire la suite"
+            />
 
             <Lien
               href={FRANCAIS.lien.href}

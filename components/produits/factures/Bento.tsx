@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { VoirPlus } from "@/components/ui/VoirPlus";
 import { AnimatedPath } from "@/components/produits/factures/ui/animated-path";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -438,14 +439,12 @@ export default function Bento() {
       </Article>
     </div>
     <div className="mt-5 md:hidden">
-      <button
-        type="button"
-        aria-expanded={tout}
-        onClick={() => setTout((v) => !v)}
-        className="font-medium text-[#6b6b6b] text-sm underline underline-offset-4"
-      >
-        {tout ? "Réduire" : "Lire la suite"}
-      </button>
+      <VoirPlus
+        pleineLargeur
+        ouvert={tout}
+        onBascule={() => setTout((v) => !v)}
+        libelle="Lire la suite"
+      />
     </div>
     </>
   );

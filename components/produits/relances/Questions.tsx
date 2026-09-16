@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { VoirPlus } from "@/components/ui/VoirPlus";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { QUESTIONS } from "@/lib/produits/relances";
@@ -173,16 +174,13 @@ export function Questions() {
               </div>
             ))}
             {QUESTIONS.categories.length > 2 ? (
-              <button
-                type="button"
-                aria-expanded={toutesCategories}
-                onClick={() => setToutesCategories((v) => !v)}
-                className="font-medium text-[#737373] text-sm underline underline-offset-4 md:hidden"
-              >
-                {toutesCategories
-                  ? "Réduire"
-                  : `Lire la suite (${QUESTIONS.categories.length - 2} autres rubriques)`}
-              </button>
+              <VoirPlus
+                pleineLargeur
+                className="md:hidden"
+                ouvert={toutesCategories}
+                onBascule={() => setToutesCategories((v) => !v)}
+                libelle={`Lire la suite (${QUESTIONS.categories.length - 2} autres rubriques)`}
+              />
             ) : null}
           </div>
         </div>

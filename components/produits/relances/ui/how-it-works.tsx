@@ -3,6 +3,7 @@
 import { cn } from "@/components/produits/relances/utils";
 import type React from "react";
 import { useState } from "react";
+import { VoirPlus } from "@/components/ui/VoirPlus";
 
 /* Composant 21st.dev « how-it-works », adapté.
    Trois écarts au code d'origine, tous notés ici :
@@ -136,15 +137,12 @@ export function HowItWorks({
         </div>
         {etapes.length > 1 ? (
           <div className="mx-auto mt-6 max-w-4xl md:hidden">
-            <button
-              type="button"
-              aria-expanded={tout}
-              onClick={() => setTout((v) => !v)
-              }
-              className="font-medium text-[#737373] text-sm underline underline-offset-4"
-            >
-              {tout ? "Réduire" : `Lire la suite (${etapes.length - 1} autres)`}
-            </button>
+            <VoirPlus
+              pleineLargeur
+              ouvert={tout}
+              onBascule={() => setTout((v) => !v)}
+              libelle={`Lire la suite (${etapes.length - 1} autres)`}
+            />
           </div>
         ) : null}
       </div>

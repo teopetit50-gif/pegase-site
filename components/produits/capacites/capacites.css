@@ -392,30 +392,68 @@
   .cap-famille:not([data-tout]) .cap-liste > li:nth-child(2) {
     border-bottom: 0;
   }
+  /* ── LE BOUTON ─────────────────────────────────────────────────────
+     16/09, seconde passe (l'associé) : « rends les boutons plus propres
+     et design ». C'était une ligne soulignée — la forme d'un lien, pas
+     d'une commande, et une cible de 20 px de haut sur un téléphone.
+
+     Même dessin que components/ui/VoirPlus.tsx, celui des autres
+     sections : pilule, filet, chevron qui pivote. Il est REFAIT ICI et
+     non importé — ce monde est en CSS scopé par règle (voir l'en-tête du
+     composant) : une peau de page bat un utilitaire, et un bouton stylé
+     en utilitaires se ferait repeindre par la page qui l'accueille.
+
+     40 px de haut : la cible tactile est le bouton lui-même, plus un
+     pseudo-élément qui triche. */
   .cap-plus {
     display: inline-flex;
     align-items: center;
-    margin-top: 10px;
-    padding: 0;
-    border: 0;
-    background: none;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 40px;
+    margin-top: 14px;
+    padding: 0 16px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
     font: inherit;
     font-size: 13px;
     line-height: 20px;
     font-weight: 500;
-    color: var(--cap-doux);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    letter-spacing: -0.01em;
+    color: #3d3d3d;
     cursor: pointer;
-    /* la cible tactile fait 44 px de haut sans peser dans la mise en
-       page : on l'étend par un pseudo-élément plutôt que par du padding,
-       qui décalerait le filet de la carte */
-    position: relative;
+    transition:
+      border-color 200ms,
+      color 200ms,
+      transform 200ms;
   }
-  .cap-plus::after {
-    content: "";
-    position: absolute;
-    inset: -12px -8px;
+  .cap-plus:hover {
+    border-color: rgba(0, 0, 0, 0.25);
+    color: #050505;
+  }
+  .cap-plus:active {
+    transform: scale(0.985);
+  }
+  .cap-plus__chevron {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 200ms;
+  }
+  .cap-plus[aria-expanded="true"] .cap-plus__chevron {
+    transform: rotate(180deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cap-plus,
+    .cap-plus__chevron {
+      transition: none;
+    }
   }
 
   /* ── les deux autres blocs de la page produit ──────────────────────

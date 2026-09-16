@@ -31,6 +31,17 @@ import { compterCapacites } from "@/lib/produits/capacites/types";
 import { Icone } from "./icones";
 import "./capacites.css";
 
+/* Le chevron des boutons de repli. Il pivote de 180° à l'ouverture — un
+   seul glyphe, jamais deux dessins différents : changer de signe au clic
+   fait clignoter la ligne de base. */
+function Chevron() {
+  return (
+    <svg className="cap-plus__chevron" viewBox="0 0 12 12" aria-hidden="true">
+      <path d="M2.6 4.4 6 7.8l3.4-3.4" />
+    </svg>
+  );
+}
+
 function Coche() {
   return (
     <svg className="cap-puce" viewBox="0 0 10 10" aria-hidden="true">
@@ -118,6 +129,7 @@ export function GrilleCapacites({ donnees }: { donnees: Catalogue }) {
                 {deployees.includes(f.nom)
                   ? "Réduire"
                   : `Voir les ${f.lignes.length - LIGNES_MOBILE} autres`}
+                <Chevron />
               </button>
             ) : null}
           </section>
@@ -173,6 +185,7 @@ export function CasLimites({ donnees }: { donnees: BlocCasLimites }) {
       {donnees.cas.length > CAS_MOBILE ? (
         <button type="button" className="cap-plus cap-plus--bloc" aria-expanded={tout} onClick={() => setTout((v) => !v)}>
           {tout ? "Réduire" : `Voir les ${donnees.cas.length - CAS_MOBILE} autres questions`}
+          <Chevron />
         </button>
       ) : null}
     </div>
@@ -204,6 +217,7 @@ export function EchelleGroupe({ donnees }: { donnees: BlocEchelle }) {
       {donnees.cartes.length > CARTES_MOBILE ? (
         <button type="button" className="cap-plus cap-plus--bloc" aria-expanded={tout} onClick={() => setTout((v) => !v)}>
           {tout ? "Réduire" : `Voir les ${donnees.cartes.length - CARTES_MOBILE} autres`}
+          <Chevron />
         </button>
       ) : null}
     </div>

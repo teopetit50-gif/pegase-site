@@ -3,6 +3,7 @@
 import { Archive, CalendarClock, MessageSquare, TrendingUp } from "lucide-react";
 import { BENTO, PROTOCOLE } from "@/lib/produits/relances";
 import { useState } from "react";
+import { VoirPlus } from "@/components/ui/VoirPlus";
 
 import { FeatureCard } from "./ui/grid-feature-cards";
 
@@ -103,14 +104,13 @@ export function Bento() {
           ))}
         </div>
         {BENTO.cartes.length > CARTES_MOBILE ? (
-          <button
-            type="button"
-            aria-expanded={tout}
-            onClick={() => setTout((v) => !v)}
-            className="mt-6 font-medium text-[#737373] text-sm underline underline-offset-4 sm:hidden"
-          >
-            {tout ? "Réduire" : `Lire la suite (${BENTO.cartes.length - CARTES_MOBILE} autres)`}
-          </button>
+          <VoirPlus
+            pleineLargeur
+            className="mt-6 sm:hidden"
+            ouvert={tout}
+            onBascule={() => setTout((v) => !v)}
+            libelle={`Lire la suite (${BENTO.cartes.length - CARTES_MOBILE} autres)`}
+          />
         ) : null}
       </div>
     </section>

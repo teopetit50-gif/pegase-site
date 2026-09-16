@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { VoirPlus } from "@/components/ui/VoirPlus";
 
 import { Check } from "lucide-react";
 import { FRANCE } from "@/lib/produits/relances";
@@ -89,14 +90,13 @@ export function France() {
               ))}
             </div>
             {FRANCE.points.length > 2 ? (
-              <button
-                type="button"
-                aria-expanded={tousPoints}
-                onClick={() => setTousPoints((v) => !v)}
-                className="mt-4 self-start font-medium text-[#737373] text-sm underline underline-offset-4 md:hidden"
-              >
-                {tousPoints ? "Réduire" : `Lire la suite (${FRANCE.points.length - 2} autres)`}
-              </button>
+              <VoirPlus
+                pleineLargeur
+                className="mt-4 md:hidden"
+                ouvert={tousPoints}
+                onBascule={() => setTousPoints((v) => !v)}
+                libelle={`Lire la suite (${FRANCE.points.length - 2} autres)`}
+              />
             ) : null}
           </div>
 
