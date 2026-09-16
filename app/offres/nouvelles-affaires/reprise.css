@@ -294,3 +294,53 @@
     gap: 1.25rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ÉCHELLE MOBILE                                         (16/09/2026)
+
+   Cette page n'avait aucun bloc mobile : à 390 px elle servait l'échelle
+   de bureau du gabarit (h1 30/36 sur trois lignes, `text-2xl` de corps à
+   20, `text-xl` à 20 dans les cartes). Relevé scale.com le même jour à
+   390 px : titres 24-32, intitulés de carte 18-24, corps 14-16 avec un
+   interligne de 1,35 à 1,5. Barème : `app/echelle-mobile.css`.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .p-reprise h1,
+  .p-reprise .text-\[3\.1rem\] {
+    font-size: 1.75rem; /* 28 */
+    line-height: 1.12;
+  }
+  .p-reprise h2,
+  .p-reprise .text-\[2\.5rem\] {
+    font-size: 1.5rem; /* 24 */
+    line-height: 1.18;
+  }
+  .p-reprise .text-\[2rem\] {
+    font-size: 1.375rem; /* 22 */
+    line-height: 1.2;
+  }
+  .p-reprise .text-4xl {
+    font-size: 1.5rem;
+    line-height: 1.18;
+  }
+  .p-reprise .text-3xl {
+    font-size: 1.40625rem; /* 22,5 */
+    line-height: 1.2;
+  }
+  .p-reprise .text-2xl {
+    font-size: 1.25rem; /* 20 */
+    line-height: 1.25;
+  }
+  .p-reprise .text-xl {
+    font-size: 1.03125rem; /* 16,5 */
+    line-height: 1.42;
+  }
+  .p-reprise .text-lg,
+  .p-reprise .text-base {
+    font-size: 0.9375rem; /* 15 */
+    line-height: 1.5;
+  }
+  .p-reprise li {
+    line-height: 1.5;
+  }
+}

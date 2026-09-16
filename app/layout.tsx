@@ -12,6 +12,7 @@ import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import LenisRoot from "@/components/LenisRoot";
 import "./globals.css";
+import "./echelle-mobile.css";
 import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });

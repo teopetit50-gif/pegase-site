@@ -352,3 +352,27 @@
   line-height: 22px;
   color: var(--cap-doux);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ÉCHELLE MOBILE — SECOND CRAN                          (16/09/2026)
+
+   Le bloc « Tout ce que <SYSTÈME> prend en charge » est le même sur les
+   quatre pages produit : son titre sortait à 26 px et son chapô à 16/26
+   sur les quatre, à 390 px. Relevé sur scale.com le même jour : titre de
+   section 28-32 mais corps 14-16 / 1,35-1,5. On garde le titre dans le
+   barème (23) et on ramène le chapô au pas de la référence (15/22,5).
+   Voir `app/echelle-mobile.css` pour le relevé complet.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .cap-titre {
+    font-size: clamp(23px, 3.4vw, 40px);
+    line-height: 1.16;
+  }
+  .cap-chapo {
+    font-size: 15px;
+    line-height: 22.5px;
+  }
+  .cap-compte b {
+    font-size: 26px;
+  }
+}

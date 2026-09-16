@@ -351,3 +351,28 @@
   margin-top: 20px;
   max-width: 48rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ÉCHELLE MOBILE                                         (16/09/2026)
+
+   Mesuré à 390 px : le nom de formule sortait à 26/34, c'est-à-dire la
+   taille exacte du h2 qui surplombe la grille — trois cartes empilées
+   où chaque intitulé pesait autant qu'un titre de section, et la page
+   entière se lisait comme une suite de titres. 21/28 lui rend son rang
+   sans le rendre discret (scale.com pose 18-24 pour un intitulé de
+   carte). Barème complet : `app/echelle-mobile.css`.
+
+   La DURÉE ne descend pas d'autant : « 45 min », « 90 min », c'est le
+   chiffre qui vend le format, et un grand nombre est un signal, pas un
+   mur de texte. 36 → 32, juste de quoi ne plus buter sur la carte.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 639px) {
+  .resa .fg-nom {
+    font-size: 21px;
+    line-height: 28px;
+  }
+  .resa .fg-duree {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}

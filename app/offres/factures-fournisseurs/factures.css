@@ -487,3 +487,45 @@
     gap: 1.25rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECOND CRAN MOBILE — la typographie                    (16/09/2026)
+
+   Le bloc du 15/09 ne touchait que les espacements. Mesuré à 390 px le
+   16/09, cette page rendait encore : h1 35/33,7 (un interligne PLUS
+   COURT que la police — les trois lignes du titre se touchaient), h2 28,
+   corps 16/26. Relevé scale.com le même jour : 24-32 pour les titres,
+   14-16 / 1,35-1,5 pour le corps. Barème : `app/echelle-mobile.css`.
+
+   On vise ici l'ÉLÉMENT (`h1`, `h2`, `h3`) et non la classe utilitaire :
+   les titres de cette page sont écrits tantôt en `text-6xl`, tantôt en
+   `text-[21px] sm:text-2xl lg:text-3xl`, et un sélecteur d'élément sous
+   la racine (0,1,1) bat un utilitaire (0,1,0) sans un `!important`.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .p-factures h1 {
+    font-size: 1.75rem; /* 28 */
+    line-height: 1.12;
+  }
+  .p-factures h2 {
+    font-size: 1.5rem; /* 24 */
+    line-height: 1.18;
+  }
+  .p-factures h3 {
+    font-size: 1.0625rem; /* 17 */
+    line-height: 1.4;
+  }
+  .p-factures .text-3xl,
+  .p-factures .text-2xl {
+    font-size: 1.25rem; /* 20 — les chiffres de la bande gardent leur rang */
+    line-height: 1.25;
+  }
+  .p-factures .text-lg,
+  .p-factures .text-base {
+    font-size: 0.9375rem; /* 15 */
+    line-height: 1.5;
+  }
+  .p-factures li {
+    line-height: 1.5;
+  }
+}

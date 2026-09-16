@@ -1,0 +1,246 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   ÉCHELLE MOBILE — SECOND CRAN                          (16/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo, après la passe du 15/09 : « la version mobile est trop zoomée ;
+   va regarder toutes les pages de Scale AI pour voir comment c'est
+   agencé. Sur desktop c'est beau, sur mobile c'est encore trop gros. »
+
+   ── CE QUI A ÉTÉ RELEVÉ (getComputedStyle, 390 px, huit pages) ─────────
+   scale.com — /, /enterprise, /about, /automotive, /physical-ai,
+   /public-sector, /data-engine, /demo :
+
+     titre de page        24 – 32 / 1,05 – 1,15, graisse 400
+     titre de section     28 – 32 / 1,05 – 1,38
+     intitulé de carte    18 – 24 / 1,25 – 1,5
+     texte courant        14 – 16 / 1,35 – 1,50   ← le point dur
+     mention              10 – 12
+     bouton               h 36 – 40, texte 14, rayon 6 – 8
+     padding de section   48 – 72   (`py-12 md:py-16`)
+     rembourrage de carte 24        (`p-6 md:p-8`)
+     rayon de carte       8         (`max-xl:!rounded-[8px]`)
+     gouttière de page    24
+
+   Le nôtre, mesuré le même jour, à la même largeur, même sonde :
+   titres dans le barème, mais le CORPS est à 16/1,6 – 1,8 (25,6 à 28,8 px
+   de pas) là où la référence pose 14–16 / 1,35–1,5 (20 à 24). Sur une
+   colonne de 342 px, un paragraphe de cinq lignes coûte 144 px chez eux
+   et 130 à 144 chez nous pour deux lignes de moins : c'est l'interligne,
+   pas la police, qui fait le « zoom ». S'y ajoutent les rayons (jusqu'à
+   50 px sur des cartes de 342 de large — la référence descend à 8 sous
+   `xl`) et les pastilles d'icône à 56.
+
+   ── CE QUE CE FICHIER FAIT ────────────────────────────────────────────
+   Un cran de plus SOUS 768 px seulement, et rien d'autre :
+
+     titre de page        27          titre de section   23 – 24
+     intertitre           18,5        petit intertitre   16,5
+     chapô                15 / 1,5    courant            15 / 1,55
+     mention              13,5        rayon de carte     ≤ 18
+     pastille d'icône     ≤ 44        rembourrage        ≤ 20
+
+   Les planchers seuls bougent : le terme en `vw` de chaque `clamp()` est
+   conservé, donc la courbe rejoint la valeur de bureau exactement où les
+   deux se croisent — aucune marche à 768, et la géométrie relevée sur
+   chaque référence reste intacte là où elle a été vérifiée.
+
+   AUCUN TEXTE N'EST TOUCHÉ : c'est la promesse qui rétrécirait.
+   LES CHIFFRES NON PLUS (prix, `.vd-chiffre`, compteurs) : un grand
+   nombre est un signal, pas un mur de texte.
+
+   POURQUOI UN FICHIER SÉPARÉ plutôt qu'une suite de `globals.css` : il
+   est importé après lui dans `app/layout.tsx`, donc il gagne à
+   spécificité égale sans un seul `!important` ; et le supprimer rend
+   exactement l'échelle du 15/09, sans rien décoller d'autre.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ═══ 1. monde « .offres » — accueil, /offres, /modeles, /integrations,
+         /vos-donnees (peau claire), /blog, /commencer ═══════════════ */
+  .offres .o-h1 {
+    font-size: clamp(27px, 5.6vw, 60px);
+    line-height: 1.14;
+  }
+  .offres .o-h2 {
+    font-size: clamp(23px, 4.4vw, 48px);
+    line-height: 1.22;
+  }
+  /* /integrations écrit son titre de PAGE avec la classe `.o-h2` (c'est
+     le seul endroit du site où un h1 emprunte l'échelle des sections) :
+     descendu avec elles, il tombait à 23 px, sous le titre des sections
+     qui le suivent. On lui rend son rang, sans toucher aux vrais h2. */
+  .offres h1.o-h2 {
+    font-size: clamp(26px, 4.4vw, 48px);
+    line-height: 1.18;
+  }
+  .offres .o-h4 {
+    font-size: clamp(18.5px, 2.6vw, 30px);
+    line-height: 1.3;
+  }
+  .offres .o-h5 {
+    font-size: clamp(16.5px, 1.9vw, 24px);
+    line-height: 1.38;
+  }
+  .offres .o-lead {
+    font-size: 15px;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+  }
+  /* 16/1,8 → 15/1,55 : le pas passe de 28,8 à 23,2 px. Un paragraphe de
+     quatre lignes rend 22 px de moins par ligne, et l'approche de 0,03em
+     — pensée pour du 20 px de bureau — retombe à 0,015em, sinon le texte
+     se délave à cette taille. */
+  .offres .o-body {
+    font-size: 15px;
+    line-height: 1.55;
+    letter-spacing: 0.015em;
+  }
+  .offres .o-small {
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .offres .b-h1 {
+    font-size: clamp(26px, 4.4vw, 48px);
+    line-height: 1.18;
+  }
+  .offres .b-article-h1 {
+    font-size: clamp(24px, 4.4vw, 48px);
+    line-height: 1.2;
+  }
+  .offres .b-rte h2 {
+    font-size: clamp(19.5px, 3vw, 38px);
+    line-height: 1.28;
+  }
+  .offres .b-rte p,
+  .offres .b-rte li {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ═══ 2. monde « .resa » — /reserver-un-audit, /tarifs, /installation ═
+     Relevé avant : le h3 des trois formats d'audit sortait à 26 px, soit
+     la taille du h2 qui le surplombe — deux niveaux à la même valeur, il
+     ne reste plus de hiérarchie et la page entière paraît en titres. */
+  /* Le h1 et le h2 partageaient la MÊME valeur depuis le 15/09 : sur
+     /reserver-un-audit, le titre de page et les quatre titres de section
+     sortaient tous à 26 px, et la page se lisait comme une suite de
+     bannières sans rang. On rend l'écart — 27 pour la page, 24 pour ses
+     sections, l'écart que la référence tient elle aussi (32 / 28). */
+  .resa .r-h1 {
+    font-size: clamp(27px, 4.6vw, 56px);
+    line-height: 1.14;
+  }
+  .resa .r-h2 {
+    font-size: clamp(24px, 4.6vw, 56px);
+    line-height: 1.18;
+  }
+  .resa .r-h3 {
+    font-size: clamp(19px, 3.2vw, 40px);
+    line-height: 1.24;
+  }
+  .resa .r-h4 {
+    font-size: clamp(16.5px, 1.9vw, 24px);
+    line-height: 1.36;
+  }
+  .resa .r-lead {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .resa .r-body {
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+  .resa .r-faq summary {
+    font-size: clamp(15px, 1.8vw, 24px);
+  }
+
+  /* ═══ 3. monde « .modeles » — catalogue de sites ═══════════════════ */
+  .modeles .m-h1 {
+    font-size: clamp(1.75rem, 5.4vw, 4rem);
+    line-height: 1.12;
+  }
+  .modeles .m-h2 {
+    font-size: clamp(1.45rem, 3.9vw, 3rem);
+    line-height: 1.18;
+  }
+
+  /* ═══ 4. monde « .tf » — /tarifs/site ══════════════════════════════
+     Déjà décalqué de scale.com : on lui rend l'échelle mobile DE SA
+     PROPRE RÉFÉRENCE, mesurée aujourd'hui — sections à 48, corps à 15. */
+  .tf .tf-h1 {
+    font-size: clamp(1.6875rem, 0.5rem + 5vw, 4rem);
+    line-height: 1.12;
+  }
+  .tf .tf-h2 {
+    font-size: clamp(1.4375rem, 1.1rem + 2.4vw, 3rem);
+    line-height: 1.2;
+  }
+  .tf .tf-h3 {
+    font-size: clamp(1.125rem, 1.05rem + 0.6vw, 1.5rem);
+    line-height: 1.4;
+  }
+  .tf .tf-h4 {
+    font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+    line-height: 1.4;
+  }
+  .tf .tf-lead {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .tf .tf-body {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .tf .tf-section {
+    padding-block: 48px;
+  }
+
+  /* ═══ 5. monde « .vd » — /vos-donnees ══════════════════════════════ */
+  .vd .vd-h1 {
+    font-size: clamp(1.6875rem, 0.5rem + 5vw, 4rem);
+    line-height: 1.12;
+  }
+  .vd .vd-h2 {
+    font-size: clamp(1.4375rem, 1rem + 2.2vw, 3rem);
+    line-height: 1.2;
+  }
+  .vd .vd-h3 {
+    font-size: clamp(1.0625rem, 1rem + 0.6vw, 1.5rem);
+    line-height: 1.4;
+  }
+  .vd .vd-h4 {
+    font-size: clamp(1.1875rem, 1rem + 1.4vw, 2rem);
+    line-height: 1.3;
+  }
+  .vd .vd-lead {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .vd .vd-body {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  /* ═══ 6. le corps écrit en valeur arbitraire ═══════════════════════
+     `text-[17px]` et `text-[19px]` traversent une douzaine de composants
+     partagés (FeatureSection, MotorCard, SolutionsBento, ServiceDetail,
+     les blocs de /tarifs…) : c'est du corps de bureau, posé une fois pour
+     toutes et servi tel quel à 390 px — d'où des paragraphes à 17/27
+     mesurés sur /tarifs. La référence tient son texte courant entre 14
+     et 16 ; on aligne, sans descendre sous 15 (le plancher de lisibilité
+     du site, déjà retenu le 15/09).
+
+     Ces trois règles valent pour le site entier, y compris les pages qui
+     n'ont pas de monde à elles. Elles ne peuvent qu'abaisser : aucune
+     mention en 12 ou 13 px n'est concernée. */
+  .text-\[17px\] {
+    font-size: 15px;
+  }
+  .text-\[19px\] {
+    font-size: 17.5px;
+  }
+  .leading-\[26px\],
+  .leading-\[27px\] {
+    line-height: 1.5;
+  }
+}

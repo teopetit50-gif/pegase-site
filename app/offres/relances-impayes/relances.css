@@ -380,3 +380,53 @@
     padding: 1rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECOND CRAN MOBILE                                    (16/09/2026)
+
+   Teo : « sur mobile c'est encore trop zoomé ». Relevé le même jour sur
+   scale.com à 390 px (huit pages) : titres 24-32, INTITULÉS DE CARTE
+   18-24, et surtout un texte courant à 14-16 avec un interligne de 1,35
+   à 1,50. Le cran du 15/09 avait descendu les titres et laissé le corps
+   à 1,55 ; c'est le pas du corps qui fait le volume sur une colonne de
+   342 px. Barème complet et raisonnement : `app/echelle-mobile.css`.
+
+   Le palier est porté à 767 px (le cran précédent s'arrêtait à 639) :
+   entre les deux, un iPhone en paysage et les petites tablettes lisaient
+   encore l'échelle de bureau.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .p-relances h1.text-4xl {
+    font-size: 1.75rem; /* 28 */
+    line-height: 1.12;
+  }
+  .p-relances .text-4xl {
+    font-size: 1.5rem; /* 24 */
+    line-height: 1.18;
+  }
+  .p-relances .text-3xl {
+    font-size: 1.40625rem; /* 22,5 */
+    line-height: 1.2;
+  }
+  .p-relances .text-2xl {
+    font-size: 1.25rem; /* 20 */
+    line-height: 1.25;
+  }
+  .p-relances .text-xl {
+    font-size: 1.03125rem; /* 16,5 */
+    line-height: 1.42;
+  }
+  .p-relances .text-lg {
+    font-size: 0.9375rem; /* 15 */
+    line-height: 1.5;
+  }
+  .p-relances .text-base {
+    font-size: 0.9375rem; /* 15 */
+    line-height: 1.5;
+  }
+  /* Les listes à puces de la page — même pas que le corps, sinon trois
+     items font la hauteur d'un paragraphe de six lignes. */
+  .p-relances li {
+    line-height: 1.5;
+  }
+}
