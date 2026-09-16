@@ -1,41 +1,58 @@
-/* ══ POLICE UNIQUE DU SITE — 16/09/2026 ════════════════════════════════
-   Teo, en comparant notre accueil à scale.ai : « est-ce que ce sont les
-   mêmes polices ? sinon modifie notre police avec la leur, et ça pour
-   tout le site. »
+/* ══ UNE SEULE POLICE POUR TOUT LE SITE ═══════════════════════════════
+   Teo, 16/09/2026, capture de notre accueil à côté de scale.ai : « est-ce
+   que ce sont les mêmes polices ? » — non. Puis, le même jour : « je veux
+   la même police qu'eux ; la même. S'il n'y a pas, trouve une autre ultra
+   semblable. »
 
-   Non, ce n'étaient pas les mêmes. scale.com est composé en AEONIK PRO
-   (CoType Foundry) — police sous licence commerciale : on ne peut ni
-   servir leurs fichiers .woff2 ni l'acheter à leur place. Le site portait
-   de son côté SIX familles libres empilées page par page au fil des
-   décalques : Inter (corps), Inter Tight + Plus Jakarta Sans (/offres),
-   DM Sans (hero de l'accueil et /tarifs), Hanken Grotesk (/vos-donnees),
-   Figtree (deux pages produit) — plus trois monos.
+   LA MÊME est impossible en l'état. scale.com est composé en AEONIK PRO
+   (CoType Foundry), sous licence commerciale : on ne peut ni servir leurs
+   fichiers, ni l'acheter à leur place. C'est une licence web à acheter,
+   et le jour où Teo l'achète tout se règle dans app/_polices/index.ts :
+   déposer les .woff2, changer une ligne. Rien d'autre dans le site ne
+   nomme de police.
 
-   GEIST remplace tout. Ce n'est pas un choix à l'œil : les douze familles
-   libres candidates ont été mesurées le 16/09 contre Aeonik sur une même
-   chaîne à 40 px (voir app/layout.tsx), Geist tombe à +1,6 % de la
-   largeur de la référence et c'est, parmi les trois plus proches, celle
-   dont le squelette colle le mieux. Teo l'a validée à l'œil le même jour
-   sur /offres. Geist Mono fait la paire, comme Aeonik Mono chez eux.
+   LA PLUS PROCHE est GENERAL SANS (Indian Type Foundry, Fontshare, ITF
+   Free Font License — commerciale et auto-hébergement autorisés). Elle a
+   été choisie contre la VRAIE Aeonik, chargée depuis scale.com et mesurée
+   lettre par lettre à 100 px — pas sur une impression :
+     ascendante / capitale      0,0 %   le 'd' monte exactement à la
+                                        hauteur du 'H', comme Aeonik
+     hauteur d'x / capitale    +0,7 %
+     « The Best In The Business »  −0,1 %
+     « Vos équipes ont les outils » +0,2 %
+   Puis composée ligne à ligne SOUS la vraie : même 'g' à un étage à queue
+   droite, même 'R' à jambe droite, même 'Q', même 'S'.
 
-   COMMENT ça tient : les ~240 règles `font-family: var(--font-X)` du site
-   ne sont PAS réécrites — on redéfinit les variables elles-mêmes ici.
-   Une seule famille est chargée, les anciens noms y pointent. Revenir en
-   arrière = rendre à app/layout.tsx ses imports et supprimer ce fichier.
+   Geist, qui tenait ce rôle depuis le matin, a été écartée : elle avait
+   été retenue sur la largeur d'UNE phrase parmi douze familles Google, et
+   le relevé lettre par lettre ne la place même pas dans les seize
+   premières. À côté d'Aeonik elle lit plus étroite et plus serrée.
 
-   Effet de bord voulu : treize fichiers woff2 en moins à servir.
-   ════════════════════════════════════════════════════════════════════ */
+   COMMENT ça tient : les ~160 règles `font-family: var(--font-X)` du site
+   ne sont PAS réécrites — on redéfinit les variables. Une seule famille
+   est déclarée (app/_polices/index.ts), tous les anciens noms y pointent.
+   Aucune page ne charge plus de police en propre.
+   ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Sans — tout le site */
-  --font-inter: var(--font-geist);
-  --font-inter-tight: var(--font-geist);
-  --font-jakarta: var(--font-geist);
-  --font-dm-sans: var(--font-geist);
-  --font-hanken: var(--font-geist);
-  --font-figtree: var(--font-geist);
+  /* Sans — tout le site. Anciens noms hérités des décalques successifs :
+     Inter (corps), Inter Tight + Plus Jakarta Sans (/offres), DM Sans
+     (accueil et /tarifs), Hanken Grotesk (/vos-donnees), Figtree et Geist
+     (pages produit). */
+  --font-inter: var(--font-omega);
+  --font-inter-tight: var(--font-omega);
+  --font-jakarta: var(--font-omega);
+  --font-dm-sans: var(--font-omega);
+  --font-hanken: var(--font-omega);
+  --font-figtree: var(--font-omega);
+  --font-geist: var(--font-omega);
+  --police-texte: var(--font-omega);
+  --police-geist: var(--font-omega);
 
-  /* Monos — les étiquettes et les chiffres alignés */
-  --font-jbmono: var(--font-geist-mono);
-  --font-dm-mono: var(--font-geist-mono);
+  /* Monos — étiquettes et chiffres alignés. */
+  --font-jbmono: var(--font-omega-mono);
+  --font-dm-mono: var(--font-omega-mono);
+  --font-geist-mono: var(--font-omega-mono);
+  --police-mono: var(--font-omega-mono);
+  --police-geist-mono: var(--font-omega-mono);
 }

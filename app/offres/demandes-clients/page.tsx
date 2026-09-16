@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import { Apport } from "@/components/produits/accueil/Apport";
 import { Bandeau } from "@/components/produits/accueil/Bandeau";
@@ -60,24 +59,6 @@ import "./accueil.css";
       qui est ici.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* 16/09/2026 — la référence composait en Figtree + Space Mono, et on les
-   chargeait telles quelles (libres, SIL OFL). Le site est passé à une
-   police unique ce jour-là (voir app/polices.css) : cette page suit, sinon
-   elle resterait le dernier îlot en Figtree. Les noms de variables ne
-   bougent PAS — la centaine de règles du CSS de portée continue de les
-   lire, elles servent simplement Geist. */
-const texte = Geist({
-  subsets: ["latin"],
-  variable: "--police-texte",
-  display: "swap",
-});
-
-const mono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--police-mono",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   alternates: { canonical: "/offres/demandes-clients" },
   title: "FRONTD · demandes entrantes & avis | Omega.AI",
@@ -95,7 +76,7 @@ export default function Page() {
   return (
     <PageShell>
       <div
-        className={`p-accueil ${texte.variable} ${mono.variable} bg-neutral-100 antialiased overflow-clip`}
+        className="p-accueil bg-neutral-100 antialiased overflow-clip"
       >
         <div className="p-3 mx-auto">
           {/* Gouttière : 12 px, valeur relevée sur la référence — passée à

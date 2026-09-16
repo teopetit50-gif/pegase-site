@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import { Heros } from "@/components/produits/reprise/Heros";
 import { BandeauOutils } from "@/components/produits/reprise/BandeauOutils";
@@ -47,8 +46,6 @@ import "./reprise.css";
    `font-family` explicitement : la règle de police du site est posée plus
    haut, sur `body`, avec Inter.
    Écart de police assumé côté design : « Geist » est libre (SIL OFL). */
-const geist = Geist({ subsets: ["latin"], variable: "--police-geist" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--police-geist-mono" });
 
 /* Recentrage du 15/09/2026 : la moitié « marchés publics » a quitté la page.
    La description nomme les trois relances dans l'ordre de lib/produits/
@@ -64,7 +61,7 @@ export const metadata: Metadata = {
 export default function NouvellesAffairesPage() {
   return (
     <PageShell>
-      <div className={`p-reprise ${geist.variable} ${geistMono.variable}`}>
+      <div className="p-reprise">
         {/* Les filets pointillés horizontaux entre sections viennent du
             divide-y du conteneur, pas d'une bordure posée section par
             section. */}

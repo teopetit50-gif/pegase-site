@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import PageShell from "@/components/PageShell";
 import Fond from "@/components/produits/factures/Fond";
 import Apparition from "@/components/produits/factures/Apparition";
@@ -84,15 +83,6 @@ import "./factures.css";
    `font-family` qui la consomme est écrite explicitement dans le CSS de
    portée, parce que la règle de police du site est posée plus haut, sur
    <html>, avec Inter. */
-/* 16/09/2026 — Figtree remplacée par Geist, comme partout ailleurs
-   (app/polices.css). Le nom de variable ne bouge pas : le CSS de portée
-   qui la consomme reste inchangé. */
-const figtree = Geist({
-  subsets: ["latin"],
-  variable: "--font-figtree",
-  display: "swap",
-});
-
 /* Reprise du <title>/<description> que le site SaaS portait dans son
    layout. Le titre suit la convention du site (« … | Omega.AI ») et
    reprend le libellé déjà publié pour ce slug dans lib/content.ts, pour
@@ -153,14 +143,13 @@ function Filet() {
   );
 }
 
-
 export default function PageFactures() {
   return (
     <PageShell>
       {/* `relative` : c'est ce conteneur qui sert d'origine aux rails
           verticaux ci-dessous. La classe de portée y est posée avec la
           variable de Figtree — les deux vont ensemble (règle 5). */}
-      <div data-monde="clair" className={`p-factures relative ${figtree.variable}`}>
+      <div data-monde="clair" className="p-factures relative">
         {/* Rails verticaux de la référence, purement décoratifs.
             ÉTAIENT `fixed inset-y-0 z-[51]` sur le site source, où la page
             EST le document : ils couraient d'un bord à l'autre de la
@@ -463,7 +452,6 @@ export default function PageFactures() {
         </section>
 
         <Filet />
-
 
         {/* ── Appel final ───────────────────────────────────────────── */}
         <section data-monde="clair" className="relative overflow-hidden py-16 lg:py-32">

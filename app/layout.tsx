@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { omega, omegaMono } from "./_polices";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import LenisRoot from "@/components/LenisRoot";
@@ -7,39 +7,6 @@ import "./globals.css";
 import "./polices.css";
 import "./echelle-mobile.css";
 import { SITE_URL } from "@/lib/site";
-
-/* ══ UNE SEULE FAMILLE — 16/09/2026 ═══════════════════════════════════
-   Le site portait six familles sans + trois monos, empilées page par page
-   au fil des décalques (Inter, Inter Tight, Plus Jakarta Sans, DM Sans,
-   Hanken Grotesk, Figtree — JetBrains Mono, DM Mono, Space Mono). Teo, en
-   comparant l'accueil à scale.ai : « modifie notre police avec la leur, et
-   ça pour tout le site ».
-
-   scale.com est composé en Aeonik Pro, sous licence commerciale : ni
-   servable depuis leurs fichiers, ni achetable à leur place. GEIST est le
-   substitut libre le plus proche, et ce n'est pas un jugement à l'œil —
-   « The Best In The Business » à 40 px / -0.01em fait 440 px dans la
-   référence ; douze familles libres ont été mesurées sur la même chaîne :
-     Familjen Grotesk 408 · Inter Tight 422 · Hanken Grotesk 431
-     Figtree 432 · ARCHIVO 442 · Instrument Sans 446 · GEIST 447
-     Manrope 450 · Public Sans 453 · Onest 456 · Schibsted 461
-   Geist tombe à +1,6 % et c'est, parmi les trois plus proches en largeur,
-   celle dont le squelette colle le mieux — grotesque neutre, barre du 'e'
-   horizontale, terminaisons coupées droit. Teo l'avait déjà validée à
-   l'œil sur /offres le matin même. Geist Mono fait la paire, comme Aeonik
-   Mono chez eux.
-
-   Les ~240 règles `font-family: var(--font-X)` du site ne sont PAS
-   réécrites : app/polices.css fait pointer les anciens noms de variables
-   sur ces deux-là. Revenir en arrière = rendre ses imports à ce fichier et
-   supprimer app/polices.css.
-
-   Les deux familles sont préchargées : elles servent TOUTES les pages, ce
-   qui n'était le cas d'aucune des neuf d'avant (d'où le `preload: false`
-   qu'elles portaient toutes sauf Inter et JetBrains Mono).
-   ═══════════════════════════════════════════════════════════════════════ */
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 /* 01/08 — ramenée sous ~160 caractères : Google tronquait l'ancienne (278). */
 const DESCRIPTION =
@@ -76,7 +43,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${geist.variable} ${geistMono.variable} antialiased`}
+      className={`${omega.variable} ${omegaMono.variable} antialiased`}
     >
       {/* Vercel Web Analytics — sans cookie, donc pas de bandeau consentement.
           Le script ne collecte qu'une fois « Web Analytics » activé sur le
