@@ -40,9 +40,12 @@ function Coche() {
 }
 
 /* Combien de lignes une famille montre sur téléphone avant de se replier.
-   Trois : de quoi comprendre ce que la famille couvre, sans dérouler les
-   huit. Sur ordinateur la coupe n'existe pas — voir capacites.css. */
-const LIGNES_MOBILE = 3;
+   DEUX depuis la seconde passe du 16/09 : à trois, les six familles
+   faisaient encore 2 400 px, la section restait la plus lourde de la
+   page. Deux lignes suffisent à dire de quoi la famille parle — son nom
+   le dit déjà — et le compte à côté du nom annonce ce qui reste.
+   Sur ordinateur la coupe n'existe pas — voir capacites.css. */
+const LIGNES_MOBILE = 2;
 
 export function GrilleCapacites({ donnees }: { donnees: Catalogue }) {
   const total = compterCapacites(donnees);

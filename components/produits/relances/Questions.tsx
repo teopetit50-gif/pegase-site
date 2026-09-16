@@ -36,6 +36,10 @@ export function Questions() {
     `${QUESTIONS.categories[0].id}-0`,
   );
   const [visible, setVisible] = useState<string>(QUESTIONS.categories[0].id);
+  /* 16/09 — sur téléphone on n'ouvre que les deux premières catégories ;
+     le reste attend un geste. Sans état séparé : `ouvert` porte la
+     question dépliée, pas la longueur de la liste. */
+  const [toutesCategories, setToutesCategories] = useState(false);
 
   useEffect(() => {
     const cibles = QUESTIONS.categories
@@ -100,8 +104,19 @@ export function Questions() {
           </nav>
 
           <div className="space-y-12 max-md:mt-6 md:col-span-3">
-            {QUESTIONS.categories.map((c) => (
-              <div key={c.id} id={c.id} className="scroll-mt-28 space-y-4">
+            {/* 16/09 (Teo, par l'associé) — sur téléphone, les catégories
+                au-delà de la deuxième attendent le bouton du bas : la
+                section pesait 1 250 px de rangées fermées. Le sommaire de
+                gauche est déjà masqué sous `md`, donc rien ne pointe vers
+                une catégorie qu'on aurait cachée. Dès `md`, tout est là. */}
+            {QUESTIONS.categories.map((c, iCat) => (
+              <div
+                key={c.id}
+                id={c.id}
+                className={`scroll-mt-28 space-y-4 ${
+                  iCat < 2 || toutesCategories ? "" : "hidden md:block"
+                }`}
+              >
                 <h3 className="pl-6 font-semibold text-[#171717] text-lg">{c.titre}</h3>
                 <div className="-space-y-1">
                   {c.items.map((item, i) => {
@@ -157,6 +172,18 @@ export function Questions() {
                 </div>
               </div>
             ))}
+            {QUESTIONS.categories.length > 2 ? (
+              <button
+                type="button"
+                aria-expanded={toutesCategories}
+                onClick={() => setToutesCategories((v) => !v)}
+                className="font-medium text-[#737373] text-sm underline underline-offset-4 md:hidden"
+              >
+                {toutesCategories
+                  ? "Réduire"
+                  : `Lire la suite (${QUESTIONS.categories.length - 2} autres rubriques)`}
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

@@ -384,12 +384,12 @@
 }
 
 @media (max-width: 767px) {
-  .cap-famille:not([data-tout]) .cap-liste > li:nth-child(n + 4) {
+  .cap-famille:not([data-tout]) .cap-liste > li:nth-child(n + 3) {
     display: none;
   }
-  /* la troisième ligne devient la dernière : son filet tomberait sur le
+  /* la deuxième ligne devient la dernière : son filet tomberait sur le
      bouton, à deux pixels de son propre trait */
-  .cap-famille:not([data-tout]) .cap-liste > li:nth-child(3) {
+  .cap-famille:not([data-tout]) .cap-liste > li:nth-child(2) {
     border-bottom: 0;
   }
   .cap-plus {

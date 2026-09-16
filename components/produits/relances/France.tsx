@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { Check } from "lucide-react";
 import { FRANCE } from "@/lib/produits/relances";
 
@@ -35,6 +39,7 @@ function Drapeau({ className }: { className?: string }) {
 }
 
 export function France() {
+  const [tousPoints, setTousPoints] = useState(false);
   return (
     <section id="france" data-monde="clair" className="scroll-mt-24 py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -61,9 +66,18 @@ export function France() {
               </div>
             </div>
 
+            {/* 16/09 (Teo, par l'associé) — deux points sur téléphone, le
+                reste d'un geste : la liste en pesait près de 700 à elle
+                seule. Dès `md` elle est à côté du drapeau, dans la
+                colonne de droite, et ne coûte rien de plus. */}
             <div className="grid gap-px overflow-hidden rounded-xl bg-[#e6e6e6]">
-              {FRANCE.points.map((p) => (
-                <div key={p.titre} className="flex gap-3 bg-[#ffffff] p-5">
+              {FRANCE.points.map((p, i) => (
+                <div
+                  key={p.titre}
+                  className={`flex gap-3 bg-[#ffffff] p-5 ${
+                    i < 2 || tousPoints ? "" : "hidden md:flex"
+                  }`}
+                >
                   <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[#171717] text-[#ffffff]">
                     <Check className="size-3" />
                   </span>
@@ -74,6 +88,16 @@ export function France() {
                 </div>
               ))}
             </div>
+            {FRANCE.points.length > 2 ? (
+              <button
+                type="button"
+                aria-expanded={tousPoints}
+                onClick={() => setTousPoints((v) => !v)}
+                className="mt-4 self-start font-medium text-[#737373] text-sm underline underline-offset-4 md:hidden"
+              >
+                {tousPoints ? "Réduire" : `Lire la suite (${FRANCE.points.length - 2} autres)`}
+              </button>
+            ) : null}
           </div>
 
           {/* Filigrane d'angle : le même drapeau, très effacé, pour occuper
