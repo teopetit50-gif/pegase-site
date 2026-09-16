@@ -838,7 +838,7 @@ export const GRANDE_STRUCTURE = {
     /* seul « à l'audit » change : l'assiette du dispositif et le plafond ne
        dépendent pas de qui valide chez le client */
     chapo:
-      "Le dispositif porte sur l'installation, jamais sur l'abonnement. Votre éligibilité est vérifiée au diagnostic, et si un dossier se justifie, nous le montons avec vous.",
+      "Le dispositif porte sur l'installation, jamais sur l'abonnement. Éligibilité vérifiée au diagnostic, dossier monté avec vous.",
   },
   appel: {
     titre: "Votre devis part d'un cadrage de quarante-cinq minutes",

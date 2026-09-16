@@ -117,9 +117,8 @@ export default function ChequeTic() {
             GRANDE_STRUCTURE.chequeTic.chapo
           ) : (
             <>
-              Le dispositif porte sur l&apos;installation, jamais sur l&apos;abonnement. Votre
-              éligibilité est vérifiée à l&apos;audit, et si un dossier se justifie, nous le
-              montons avec vous.
+              Le dispositif porte sur l&apos;installation, jamais sur l&apos;abonnement.
+              Éligibilité vérifiée à l&apos;audit, dossier monté avec vous.
             </>
           )}
         </p>
