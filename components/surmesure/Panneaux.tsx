@@ -20,56 +20,60 @@
 
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { siHubspot, siNotion, siStripe } from "simple-icons";
 
 /* ─────────────────────────────────────────────────────────────────────
    0 · LES SIGNES D'OUTIL — le bandeau du haut
 
-   La référence pose trois logos de clients aplatis en noir. Nous n'avons
-   pas de logo client à afficher et nous ne reprenons pas les logos de
-   tiers : ces trois silhouettes au trait DISENT l'outil sans prétendre
-   être sa marque. Même poids visuel que leurs trois signes, et lisibles
-   en noir — ce qu'un logo polychrome aplati n'est pas.
+   16/09, Teo : « change ça avec des sociétés qui font plus pro, genre du
+   monde de la tech ». Gmail, Outlook et Drive sont des outils grand
+   public ; Stripe, HubSpot et Notion parlent à une direction.
+
+   LES TROIS SONT DE VRAIES INTÉGRATIONS, pas un décor : ils figurent dans
+   `OUTIL_INFOS` (lib/integrations.ts) avec la description de ce que le
+   système y fait, comme les vingt-cinq autres. On ne met pas dans ce
+   bandeau un outil sur lequel on ne se branche pas.
+
+   ⚠ CE NE SONT PAS DES CLIENTS. La référence titre son bandeau « Trusted
+   by the world's most ambitious AI teams » et aligne ses clients. Nous
+   n'en avons pas à afficher et nous n'en inventons pas : la phrase
+   au-dessus dit « se branche sur VOS outils », et elle doit le dire —
+   c'est elle qui empêche de lire ces trois marques comme des références.
+   Ne pas la raccourcir en « Stripe, HubSpot, Notion » tout court.
+
+   LE SIGNE VIENT DE `simple-icons`, comme partout ailleurs sur le site
+   (/integrations, l'accueil), et il est peint en `currentColor` donc en
+   NOIR — le traitement exact de la référence, qui passe ses logos en
+   `brightness-0`. Ça marche ici et pas avec les précédents pour une
+   raison simple : ces trois marques sont monochromes par construction,
+   un seul tracé. Un logo polychrome aplati, lui, donne un aplat illisible
+   (constaté sur Outlook, qui devenait un rectangle plein).
    ───────────────────────────────────────────────────────────────────── */
 
-const SIGNE = {
-  width: 26,
-  height: 26,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.6,
-  strokeLinejoin: "round" as const,
-  "aria-hidden": true,
-};
-
-export function SigneMail() {
+function Signe({ path, titre }: { path: string; titre: string }) {
   return (
-    <svg {...SIGNE}>
-      <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
-      <path d="M2.5 8.5 12 14.5l9.5-6" />
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      role="img"
+      aria-label={titre}
+      className="shrink-0"
+    >
+      <path d={path} />
     </svg>
   );
 }
 
-export function SigneBoite() {
-  return (
-    <svg {...SIGNE}>
-      <rect x="2.5" y="5.5" width="11" height="13" rx="2" />
-      <ellipse cx="8" cy="12" rx="2.6" ry="3.2" />
-      <path d="M13.5 8.5h8v8.5a1.5 1.5 0 0 1-1.5 1.5h-6.5" />
-      <path d="M13.5 12h8" />
-    </svg>
-  );
+export function SigneStripe() {
+  return <Signe path={siStripe.path} titre="Stripe" />;
 }
-
-export function SigneDrive() {
-  return (
-    <svg {...SIGNE}>
-      <path d="M9 3h6l6 10.5h-6z" />
-      <path d="M9 3 3 13.5 6 19l6-10.5z" />
-      <path d="M6 19h12l3-5.5H9z" />
-    </svg>
-  );
+export function SigneHubspot() {
+  return <Signe path={siHubspot.path} titre="HubSpot" />;
+}
+export function SigneNotion() {
+  return <Signe path={siNotion.path} titre="Notion" />;
 }
 
 /* ─────────────────────────────────────────────────────────────────────

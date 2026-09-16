@@ -4,9 +4,9 @@ import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import {
-  SigneBoite,
-  SigneDrive,
-  SigneMail,
+  SigneHubspot,
+  SigneNotion,
+  SigneStripe,
   CroquisDocument,
   CroquisPont,
   CroquisSuivi,
@@ -323,22 +323,34 @@ const sansNom = (titre: string, nom: string) =>
      largeurs, et n'engage rien — c'est aussi la règle du parc sur les
      marques de tiers.
 
-   16/09, Teo : « eux ils ont à côté des trucs, les logos aussi, que tu
-   n'as pas mis chez nous ». Le signe revient donc devant le mot — mais
-   DESSINÉ AU TRAIT, en noir, pas le logo officiel aplati. Deux raisons,
-   les deux vérifiées en rendant les variantes côte à côte : un logo
-   polychrome passé en `brightness-0` donne un rectangle plein pour
-   Outlook et un triangle pour Drive, illisibles ; et la règle du parc
-   interdit de reprendre le logo d'un tiers. Une silhouette au trait dit
-   l'outil sans prétendre être sa marque — c'est exactement le poids
-   visuel des signes de Meta, cohere et NTT sur la référence.
+   16/09, Teo, deux fois. D'abord « eux ils ont à côté des trucs, les
+   logos aussi, que tu n'as pas mis chez nous » : le signe est revenu
+   devant le mot. Puis « change ça avec des sociétés qui font plus pro,
+   genre du monde de la tech » : Gmail, Outlook et Drive sont des outils
+   grand public, ces trois-là parlent à une direction.
 
-   Ces trois-là sont les familles d'outils les plus fréquentes chez nos
-   clients, pas une liste fermée : /integrations porte la liste. */
+   LES TROIS SONT DE VRAIES INTÉGRATIONS, déclarées dans `OUTIL_INFOS`
+   (lib/integrations.ts) avec ce que le système y fait — paiement, CRM,
+   base de connaissance, trois mondes différents. On ne met pas dans ce
+   bandeau un outil sur lequel on ne se branche pas, et c'est ce qui
+   sépare cette rangée d'un mur de logos.
+
+   ⚠ CE NE SONT PAS DES CLIENTS, et la phrase au-dessus est ce qui
+   l'empêche de se lire ainsi. La référence titre la sienne « Trusted by
+   the world's most ambitious AI teams » et aligne ses clients ; nous
+   n'en avons pas à afficher et nous n'en inventons pas. La nôtre dit
+   « se branche sur VOS outils ». Ne pas la retirer ni la raccourcir.
+
+   Le signe vient de `simple-icons` et est peint en noir — le traitement
+   de la référence, qui passe ses logos en `brightness-0`. Le détail des
+   écarts est en tête de components/surmesure/Panneaux.tsx.
+
+   Ces trois-là sont un échantillon, pas une liste fermée :
+   /integrations porte les vingt-huit. */
 const OUTILS = [
-  { nom: "Gmail", Signe: SigneMail },
-  { nom: "Outlook", Signe: SigneBoite },
-  { nom: "Google Drive", Signe: SigneDrive },
+  { nom: "Stripe", Signe: SigneStripe },
+  { nom: "HubSpot", Signe: SigneHubspot },
+  { nom: "Notion", Signe: SigneNotion },
 ];
 
 /* ══ les deux pièces de balisage répétées ═════════════════════════════ */
