@@ -4,21 +4,37 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { SystemSigne } from "@/components/logos";
-import { CADRE_VERRE, GlassCard } from "@/components/ui/glass-card";
+import {
+  PatternCard,
+  PatternCardBody,
+} from "@/components/ui/card-with-ellipsis-pattern";
 import "./TuilesCatalogue.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    TUILES DU CATALOGUE — les quatre cartes de l'accueil
 
-   15/09/2026 — LES CARTES PASSENT AU VERRE. Teo, capture de la section à
-   l'appui : « change le design de ces cartes dans l'accueil avec ce
-   composant, je veux la même chose ». Le composant est `glass-card`
-   (21st.dev) : carte encre profonde à coins très arrondis, panneau de
-   verre en retrait, basculement 3D au survol et quatre disques
-   concentriques qui se détachent du fond en cascade. La coque et ses
-   écarts au composant d'origine vivent dans
-   `components/ui/glass-card.tsx` ; ce fichier-ci n'en garde que le
-   contenu.
+   16/09/2026 — LES CARTES PASSENT AU SEMIS DE PASTILLES. Teo : « change
+   le design de ces cartes de la page d'accueil par ce design là », le
+   composant à l'appui — `card-with-ellipsis-pattern` (21st.dev) : une
+   carte de papier, filet fin, coins courts, dont le fond est une trame de
+   pastilles très fines qu'un dégradé blanc en biais efface vers le bas à
+   gauche et laisse affleurer en haut à droite. La coque et ses écarts au
+   modèle vivent dans `components/ui/card-with-ellipsis-pattern.tsx` ; ce
+   fichier-ci n'en garde que le contenu.
+
+   ⚠ C'EST LA TROISIÈME COQUE EN CINQ JOURS sur les mêmes quatre cartes —
+   tuiles `bento-grid-01` le 11/09, cartes de verre le 15/09, semis le
+   16/09. Le CONTENU, lui, n'a jamais bougé : signe du produit, nom,
+   objectif, accroche, « Voir le détail ». C'est la preuve par l'usage que
+   la séparation coque / contenu doit tenir — la prochaine reprise ne
+   devrait toucher qu'au fichier de la coque et à ce `return`.
+
+   CE QUI DISPARAÎT avec le verre : `GlassCard` et `CADRE_VERRE`, donc le
+   basculement 3D au survol, les quatre disques concentriques et le disque
+   blanc qui portait le signe. `components/ui/glass-card.tsx` reste au
+   dépôt, plus personne ne l'appelle. Le signe, lui, revient en haut à
+   gauche de la carte, en encre sur le papier — il n'a plus besoin de sa
+   pastille (voir `SystemSigne`, components/logos.tsx).
 
    CE QUI EST CONSERVÉ de la version du 11/09 (grille `bento-grid-01`) :
 
@@ -28,25 +44,22 @@ import "./TuilesCatalogue.css";
 
    • LES QUATRE ANIMATIONS EN BOUCLE, une par produit. C'est ce que Teo
      avait demandé le 11/09 contre une grille « juste, mais immobile, qui
-     se lisait comme un sommaire ». La carte de verre ne bouge qu'au
-     survol : sans elles, la section redevenait immobile au repos. Elles
-     sont RÉENCRÉES en blanc dilué (le fond est passé du papier à
-     l'encre), et ne s'affichent qu'à partir de `lg` — c'est la largeur à
-     partir de laquelle la carte dépasse ~460 px et laisse une place libre
-     à GAUCHE des disques. En dessous, la carte retrouve exactement les
-     proportions de la source (~290 px de large, les disques seuls).
+     se lisait comme un sommaire ». Le semis est une trame FIXE : sans
+     elles, la section redevient ce sommaire. Elles retrouvent leur encre
+     du 11/09 — le fond est revenu au papier — et ne s'affichent qu'à
+     partir de `lg`, la largeur à partir de laquelle la carte dépasse
+     ~460 px et laisse au visuel ses ~190 px à droite du signe.
 
    • LES TUILES SONT DES PORTES. Chaque carte mène à sa page produit :
-     c'est le `<Link>` qui porte `CADRE_VERRE`, donc `group` et la
-     perspective. Sans cet ancêtre, tous les `group-hover:` de la coque
-     sont muets, en silence.
+     c'est le `<Link>` qui porte `group`, sans quoi le chevron de « Voir
+     le détail » ne bouge plus au survol — et il ne bougerait plus en
+     silence.
 
-   CE QUI DISPARAÎT : `.o-card-soft`, `.o-card-porte` et `.o-card-or`. Le
-   liseré doré tournant, la carte claire et son survol appartenaient à la
-   carte de papier. ⚠ `--or` était déclarée par `.offres .o-card-or` et
-   nulle part ailleurs : elle est reprise sur `.tc-carte` dans la feuille
-   co-localisée, sans quoi les accents dorés des animations passeraient au
-   noir sans prévenir.
+   ⚠ `--or` N'EST DÉCLARÉE QUE DANS LA FEUILLE CO-LOCALISÉE. Elle venait
+   de `.offres .o-card-or` jusqu'au 14/09, une classe que ces cartes ne
+   portent plus depuis le verre : sans la ligne de `TuilesCatalogue.css`,
+   `rgba(var(--or), …)` ne résout rien et les accents dorés des animations
+   passent au noir sans prévenir.
 
    ——— les pièges déjà payés, qui n'ont pas changé de nature ————————————
 
@@ -79,9 +92,9 @@ import "./TuilesCatalogue.css";
    classés) au lieu de boucler.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* blanc dilué : les trois crans des formes inertes, tièdes et marquées.
-   Le fond ayant changé de camp le 15/09, ce sont les valeurs d'encre du
-   11/09 retournées — mêmes alphas relatifs, lues sur near-black. */
+/* encre diluée : les trois crans des formes inertes, tièdes et marquées.
+   Valeurs du 11/09, lues sur papier — le fond a fait l'aller-retour par
+   l'encre le 15/09 et y est revenu le 16. */
 const INERTE = "rgba(24, 24, 27, 0.08)";
 const TIEDE = "rgba(24, 24, 27, 0.16)";
 const MARQUE = "rgba(24, 24, 27, 0.30)";
@@ -344,8 +357,6 @@ export function TuilesCatalogue({
   const fige = useReducedMotion() ?? false;
 
   return (
-    /* la gouttière passe de 16 à 24 px : les cartes basculent en 3D au
-       survol, et leur coin haut-droit sort du cadre. */
     <div
       className={`mx-auto grid max-w-[1000px] grid-cols-1 gap-6 sm:grid-cols-2 ${className}`}
     >
@@ -354,34 +365,38 @@ export function TuilesCatalogue({
           key={t.system}
           href={t.href}
           data-reveal
-          /* 15/09/2026 — le plancher de 330 px saute sous 640 px. Il vient
-             de la grille 2 × 2, où il aligne les quatre cartes ; à une
-             colonne il n'aligne rien et impose 330 px à une carte qui en
-             demande 200. Mesuré à 375 px : quatre cartes de 376 px, soit
-             1 504 px de catalogue — presque deux écrans de téléphone pour
-             quatre lignes de produit. */
-          className={`tc-carte ${CADRE_VERRE} sm:min-h-[330px] lg:min-h-[420px]`}
-        >
-          <GlassCard marque={<SystemSigne system={t.system} taille={24} />}>
-            {/* la zone haute : sous `lg` elle ne fait que dégager les
-                disques (100 px, comme la source) ; à partir de `lg` elle
-                accueille le visuel animé, à gauche d'eux. */}
-            <div
-              aria-hidden
-              /* la zone haute ne porte le visuel animé qu'à partir de `lg`
-                 (voir le `hidden lg:block` juste dessous) : sous 640 px ses
-                 100 px sont du VIDE, là seulement pour dégager les disques
-                 de la marque. 56 px suffisent à les dégager. */
-              className="h-[56px] shrink-0 px-5 pt-5 sm:h-[100px] sm:px-8 sm:pt-8 lg:h-[196px] lg:pr-[200px]"
-            >
-              <div className="hidden h-full lg:block">
-                <Visuel system={t.system} fige={fige} />
-              </div>
-            </div>
+          /* Le lien est en COLONNE FLEX et la carte en `flex-1` : les
+             trois couches de `PatternCard` sont en `size-full`, donc en
+             hauteur relative — sans un parent à hauteur définie, elles se
+             replient sur leur contenu et la trame s'arrête au milieu de
+             la carte.
 
-            <div className="flex flex-1 flex-col px-5 pb-5 sm:px-8 sm:pb-8">
+             Les planchers de hauteur alignent les quatre tuiles deux à
+             deux ; sous 640 px il n'y a plus qu'une colonne, donc plus
+             rien à aligner (voir le relevé du 15/09 : 330 px imposés à
+             une carte qui en demandait 200 faisaient presque deux écrans
+             de téléphone pour quatre lignes de produit). */
+          className="tc-carte group flex flex-col sm:min-h-[300px] lg:min-h-[392px]"
+        >
+          <PatternCard className="tc-cadre flex-1">
+            <PatternCardBody className="flex h-full flex-col p-5 sm:p-6">
+              {/* la ligne haute : le signe du produit à gauche, le visuel
+                  animé à droite — et seulement à partir de `lg`, la
+                  largeur à partir de laquelle la carte dépasse ~460 px et
+                  laisse au visuel ses ~190 px sans serrer le signe. En
+                  dessous, la ligne se réduit au signe seul. */}
+              <div className="flex items-start justify-between gap-6">
+                <SystemSigne system={t.system} taille={26} />
+                <div
+                  aria-hidden
+                  className="hidden h-[104px] items-center lg:flex"
+                >
+                  <Visuel system={t.system} fige={fige} />
+                </div>
+              </div>
+
               <span
-                className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--o-muted)]"
+                className="mt-5 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--o-muted)] sm:mt-6"
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
                 {t.nom}
@@ -407,12 +422,12 @@ export function TuilesCatalogue({
                 )}
               </p>
 
-              <span className="tc-lien mt-auto inline-flex items-center gap-1.5 self-start pt-4 text-[14px] font-semibold text-[var(--o-text)] sm:pt-7">
+              <span className="tc-lien mt-auto inline-flex items-center gap-1.5 self-start pt-4 text-[14px] font-semibold text-[var(--o-text)] sm:pt-6">
                 Voir le détail
                 <Chevron taille={12} />
               </span>
-            </div>
-          </GlassCard>
+            </PatternCardBody>
+          </PatternCard>
         </Link>
       ))}
     </div>

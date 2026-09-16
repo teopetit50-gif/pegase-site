@@ -42,8 +42,33 @@
   border-color: rgba(var(--or), 0.9);
 }
 
+/* ——— le survol de la carte (16/09/2026) ———
+   La carte de verre basculait en 3D ; le semis, lui, ne bouge pas. Il
+   fallait rendre à la porte un signe qu'on la survole : le filet se
+   ferme d'un cran et une ombre courte se pose. Rien de plus — la carte
+   est du papier, pas un bouton.
+
+   ⚠ POURQUOI ICI ET PAS EN UTILITAIRES. Un `hover:border-…` de Tailwind
+   vit dans la couche `utilities` ; tout le vocabulaire `.offres` de
+   globals.css est écrit HORS couche et gagne donc contre lui, en
+   silence. Cette feuille-ci est hors couche elle aussi : elle passe.
+   (Le même piège a déjà coûté un aller-retour sur les portes de
+   l'accueil.) */
+.tc-cadre {
+  transition:
+    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) {
+  .tc-carte:hover .tc-cadre {
+    border-color: rgba(24, 24, 27, 0.2);
+    box-shadow: 0 6px 20px rgba(24, 24, 27, 0.07);
+  }
+}
+
 /* Le lien de bas de carte prend l'or au survol de la carte entière — le
-   `group` est sur le `<Link>` (voir CADRE_VERRE). */
+   `group` est sur le `<Link>`. */
 .tc-lien {
   transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -56,7 +81,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .tc-filet,
-  .tc-lien {
+  .tc-lien,
+  .tc-cadre {
     transition: none;
   }
 }
