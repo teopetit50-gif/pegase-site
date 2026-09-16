@@ -82,7 +82,21 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, motif: "identifiant" }, { status: 400 });
   }
 
-  /* ——— 1. lire la demande, et marquer l'envoi dans le même mouvement ——— */
+  /* ——— 1. la clé D'ABORD, avant de consommer la demande ———
+     `demande_pour_confirmation()` marque l'envoi DANS l'instruction qui
+     lit la ligne : appelée sans pouvoir envoyer derrière, elle brûlerait
+     l'unique tentative de cette réservation — marquée confirmée, jamais
+     partie. Tant que la clé n'est pas posée sur le projet Vercel du site,
+     on ne touche donc pas à la base. Constaté le 16/09, juste après
+     l'application de la migration : la clé n'y était pas encore, et la
+     première vraie réservation aurait perdu sa confirmation en silence. */
+  const cle = process.env.RESEND_API_KEY;
+  if (!cle) {
+    console.error("[confirmation] RESEND_API_KEY absente : confirmation non envoyée");
+    return Response.json({ ok: false, motif: "indisponible", envoye: false }, { status: 503 });
+  }
+
+  /* ——— 2. lire la demande, et marquer l'envoi dans le même mouvement ——— */
   let ligne: Ligne | null = null;
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/demande_pour_confirmation`, {
@@ -116,13 +130,7 @@ export async function POST(req: Request) {
      apprendrait à un curieux quels identifiants existent. */
   if (!ligne) return Response.json({ ok: true, envoye: false });
 
-  /* ——— 2. composer ——— */
-  const cle = process.env.RESEND_API_KEY;
-  if (!cle) {
-    console.error("[confirmation] RESEND_API_KEY absente : confirmation non envoyée");
-    return Response.json({ ok: false, motif: "indisponible", envoye: false }, { status: 503 });
-  }
-
+  /* ——— 3. composer ——— */
   const { sujet, html, texte } = composerConfirmation({
     prenom: ligne.prenom,
     formule: ligne.formule,
@@ -130,7 +138,7 @@ export async function POST(req: Request) {
     dureeMin: ligne.duree_min,
   });
 
-  /* ——— 3. envoyer ——— */
+  /* ——— 4. envoyer ——— */
   try {
     const r = await fetch(API_ENVOI, {
       method: "POST",
