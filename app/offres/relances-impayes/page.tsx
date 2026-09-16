@@ -89,6 +89,13 @@ export const metadata: Metadata = {
     title: TITRE,
     description: DESCRIPTION,
     url: "/offres/relances-impayes",
+    /* 15/09 — SANS CETTE LIGNE, LA PAGE PART SANS VISUEL. Déclarer un bloc
+       openGraph remplace celui que Next déduit, image comprise : cette page
+       était la seule des quatre à en déclarer un, et donc la seule à perdre
+       l'image de app/opengraph-image.tsx. Partagée sur LinkedIn ou WhatsApp,
+       elle sortait en texte nu quand ses trois sœurs sortaient illustrées.
+       À reproduire sur toute page qui ouvrira un bloc openGraph à elle. */
+    images: ["/opengraph-image"],
   },
   twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
 };

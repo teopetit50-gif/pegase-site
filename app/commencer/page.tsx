@@ -56,9 +56,10 @@ import { lienContact } from "@/lib/reservation";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/commencer" },
   title: "Par où commencer | Omega.AI",
   description:
-    "Deux façons de démarrer avec Omega.AI : un diagnostic sur mesure pour les organisations où plusieurs services valident, un audit court pour les indépendants et TPE-PME. Dans les deux cas, le prix sort de vos volumes.",
+    "Deux façons de démarrer avec Omega.AI : un diagnostic sur mesure là où plusieurs services valident, un audit court pour les TPE-PME.",
 };
 
 

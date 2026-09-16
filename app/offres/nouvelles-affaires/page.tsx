@@ -55,6 +55,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--police-geist-mon
    reprise.ts. Le titre garde la forme du site (« … | Omega.AI »), pas celle
    du site source. */
 export const metadata: Metadata = {
+  alternates: { canonical: "/offres/nouvelles-affaires" },
   title: "RELOAD | Omega.AI",
   description:
     "Votre fichier client relu chaque matin : les comptes qui n'ont plus commandé, les entretiens redevenus dus et les affaires restées en plan. La relance est rédigée, vos équipes la valident. Un système Omega.AI.",

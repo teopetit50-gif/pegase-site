@@ -106,7 +106,7 @@ export const MENU: Rubrique[] = [
       {
         href: "/offres/nouvelles-affaires",
         label: "RELOAD",
-        texte: "Les comptes qui n’ont plus commandé, remis dans le circuit.",
+        texte: "Les comptes qui n'ont plus commandé, remis dans le circuit.",
       },
       {
         href: "/offres/demandes-clients",

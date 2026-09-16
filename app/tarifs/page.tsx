@@ -68,7 +68,7 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
    → 15/09, fin de journée : LA SECTION 4 EST SUPPRIMÉE (Teo, après deux
    passes sur sa composition et une sur sa couleur : « supprime cette
    section finalement »). La page perd sa seule bande sombre et enchaîne
-   désormais les engagements sur l'appel final. Le Chèque TIC n'est PAS
+   désormais le chiffrage sur l'appel final. Le Chèque TIC n'est PAS
    retiré du site pour autant — il reste dit à trois endroits : la FAQ de
    cette page (« Le Chèque TIC s'applique-t-il ici ? », qui porte les
    mêmes faits : 40 à 80 %, 10 000 €, assiette sur l'installation), la
@@ -85,9 +85,10 @@ const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/tarifs" },
   title: "Tarifs | Omega.AI",
   description:
-    `Tarification à l'usage pour un, trois ou quatre postes automatisés sous validation humaine. Le montant est indexé sur le volume traité : cette page établit votre volume, l'audit arrête le tarif sur vos chiffres réels. Facturation mensuelle sans engagement, −${REMISE_PCT} % en annuel, installation facturée séparément et éligible au Chèque TIC, remboursement sous 30 jours.`,
+    `Tarification à l'usage pour un, trois ou quatre postes automatisés sous validation humaine. Le montant est indexé sur le volume, arrêté à l'audit.`,
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore

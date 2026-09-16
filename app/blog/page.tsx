@@ -6,9 +6,10 @@ import CartesArticles from "@/components/blog/CartesArticles";
 import { POSTS } from "@/lib/content";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog" },
   title: "Blog | Omega.AI",
   description:
-    "Conformité facture électronique, financement Chèque TIC, RGPD et données clients, impayés et trésorerie : les analyses d'Omega.AI pour les dirigeants.",
+    "Conformité facture électronique, financement Chèque TIC, RGPD et données clients, impayés et trésorerie : les analyses d'Omega.AI pour les dirigeants.",
 };
 
 /* ══════════════════════════════════════════════════════════════════════

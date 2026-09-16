@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -668,12 +669,12 @@ const ACCROCHES_VITRINE: Record<
   CASHD: {
     objectif: "À 7 h, vos relances sont déjà écrites.",
     texte:
-      "CASHD relit votre facturier chaque matin et rédige une relance pour chaque compte en retard. Vos équipes n\u2019ont plus qu\u2019à décider laquelle part.",
+      "CASHD relit votre facturier chaque matin et rédige une relance pour chaque compte en retard. Vos équipes n'ont plus qu'à décider laquelle part.",
     court:
       "Relit le facturier chaque matin, écrit la relance. Vous décidez laquelle part.",
   },
   RELOAD: {
-    objectif: "Un client qui s\u2019éteint, vous le voyez avant la clôture.",
+    objectif: "Un client qui s'éteint, vous le voyez avant la clôture.",
     texte:
       "RELOAD relit votre base et votre historique pendant la nuit, puis ne garde que les comptes dont le silence dépasse le délai que vous avez fixé.",
     court:
@@ -682,14 +683,14 @@ const ACCROCHES_VITRINE: Record<
   FRONTD: {
     objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
     texte:
-      "FRONTD lit le message dès qu\u2019il arrive et répond dans la minute, sans jamais sortir de ce que vous avez validé avec nous.",
+      "FRONTD lit le message dès qu'il arrive et répond dans la minute, sans jamais sortir de ce que vous avez validé avec nous.",
     court:
       "Lit le message dès son arrivée et répond dans la minute, sur vos réponses validées.",
   },
   FILED: {
     objectif: "Vos équipes ne ressaisiront plus un seul document.",
     texte:
-      "Vous connectez une messagerie, rien d\u2019autre. FILED lit chaque document reçu, quel qu\u2019en soit le type, le classe au bon dossier et rédige ce qui doit repartir.",
+      "Vous connectez une messagerie, rien d'autre. FILED lit chaque document reçu, quel qu'en soit le type, le classe au bon dossier et rédige ce qui doit repartir.",
     court:
       "Lit chaque document reçu, le classe au bon dossier, rédige ce qui repart.",
   },
@@ -837,6 +838,16 @@ function EnTete({
     </div>
   );
 }
+
+/* 15/09 — l'accueil prenait tout son metadata du layout, canonique
+   comprise : il n'en avait donc aucune, comme 26 autres pages. Elle est
+   posée ICI et pas dans le layout à dessein — une canonique posée en
+   haut se propagerait telle quelle à toutes les pages qui n'en
+   redéfinissent pas, et le site entier se déclarerait doublon de
+   l'accueil. Le titre et la description, eux, restent hérités. */
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function Home() {
   return (

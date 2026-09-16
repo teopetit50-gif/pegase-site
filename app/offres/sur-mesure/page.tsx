@@ -147,6 +147,7 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/offres/sur-mesure" },
   title: "Sur mesure | Omega.AI",
   description:
     "Quand aucun des quatre systèmes ne couvre le besoin, Omega.AI conçoit celui qui manque : cadré, chiffré, puis construit sur vos règles et intégré à votre environnement.",

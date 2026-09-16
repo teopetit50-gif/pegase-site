@@ -99,6 +99,7 @@ const figtree = Figtree({
    phrase « Un système Omega » finale saute : sur omegaai.fr elle ne dit
    plus rien). */
 export const metadata: Metadata = {
+  alternates: { canonical: "/offres/factures-fournisseurs" },
   title: "FILED · flux documentaires | Omega.AI",
   description:
     "Vous connectez une messagerie. Chaque facture fournisseur est lue quel qu'en soit le format, ses montants recoupés, la pièce classée et transmise à votre comptabilité.",

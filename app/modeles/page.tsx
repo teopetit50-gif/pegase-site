@@ -76,9 +76,10 @@ import ClotureAppel from "@/components/modeles/ClotureAppel";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/modeles" },
   title: "Modèles de sites | Omega.AI",
   description:
-    `${MODELES.length} modèles de sites en ligne, consultables immédiatement, branchés sur vos systèmes : chaque demande entre dans votre espace, se relance jusqu'au règlement sous votre validation, et le site vous dit ce que vos visiteurs cherchent. Un site, ou le même socle sur plusieurs enseignes.`,
+    `${MODELES.length} modèles de sites en ligne, consultables immédiatement, branchés sur vos systèmes : chaque demande entre dans votre espace et s'y relance.`,
 };
 
 /* ——— les quatre faits sous le hero ———

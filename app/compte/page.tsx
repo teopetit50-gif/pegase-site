@@ -38,6 +38,7 @@ import { COCKPIT_URL } from "@/lib/supabase/config";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/compte" },
   title: "Mon compte | Omega.AI",
   robots: { index: false, follow: false },
 };

@@ -42,7 +42,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = POSTS.find((p) => p.slug === slug);
   if (!post) return { title: "Article | Omega.AI" };
-  return { title: `${post.title} | Omega.AI`, description: post.excerpt };
+  return {
+    title: `${post.title} | Omega.AI`,
+    description: post.excerpt,
+    alternates: { canonical: `/blog/${slug}` },
+  };
 }
 
 /* pictos de partage — traits simples, 16 px dans un cercle 44 */

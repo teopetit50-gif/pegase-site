@@ -30,6 +30,7 @@ import { utilisateurCourant } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/site/commande" },
   title: "Commander mon site | Omega.AI",
   description:
     "Choisissez votre modèle, déposez votre brief : votre site catalogue à 990 € TTC, contenu réécrit à votre métier, mis en ligne sous votre nom.",

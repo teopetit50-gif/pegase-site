@@ -68,9 +68,10 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/integrations" },
   title: "Intégrations | Omega.AI",
   description:
-    "Les systèmes Omega.AI s'intègrent aux outils déjà en place : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Aucun compte à créer, aucune migration : vos données vivent dans un espace dédié, chiffré, hébergé dans l'Union européenne.",
+    "Les systèmes Omega.AI s'intègrent aux outils déjà en place : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Aucune migration.",
 };
 
 /* Regroupement par famille, dans l'ordre déclaré. Un outil sans fiche

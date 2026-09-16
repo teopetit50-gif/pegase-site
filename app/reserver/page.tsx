@@ -36,6 +36,7 @@ import { POSTES, prixPourVolume } from "@/lib/paliers";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/reserver" },
   title: "Réserver un créneau | Omega.AI",
   description:
     "Choisissez votre format d'audit et votre créneau dans les disponibilités réelles, en visioconférence, en heure de Guadeloupe. Confirmation le jour même.",

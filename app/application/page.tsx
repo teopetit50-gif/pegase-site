@@ -102,6 +102,7 @@ import { COCKPIT_URL } from "@/lib/supabase/config";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/application" },
   title: "L'application Omega.AI sur vos appareils | Omega.AI",
   description:
     "Votre espace client s'installe comme une application sur téléphone, PC ou Mac, sans boutique d'applications : un bouton sur Android et sur ordinateur, trois gestes sur iPhone.",

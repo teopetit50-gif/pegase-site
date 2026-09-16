@@ -86,6 +86,7 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/offres" },
   title: "Nos offres | Omega.AI",
   description:
     "Quatre systèmes prêts à déployer : encaissements, réactivation commerciale, demandes entrantes, flux documentaires. Intégrés à vos outils en place, sous validation humaine.",
@@ -189,7 +190,7 @@ const PAQUETS: CaseFeature[] = [
     icone: Users,
     titre: "RELOAD",
     texte:
-      "Les comptes qui n’ont plus commandé, les entretiens redevenus dus et les commandes jamais reprises sont relancés un par un.",
+      "Les comptes qui n'ont plus commandé, les entretiens redevenus dus et les commandes jamais reprises sont relancés un par un.",
     href: "/offres/nouvelles-affaires",
   },
   {
@@ -208,7 +209,7 @@ const PAQUETS: CaseFeature[] = [
        « Chaque demande est qualifiée ») — n'en retourner qu'une casserait
        le parallélisme de la rangée. Seul le périmètre s'ouvre, et la
        rédaction entre, qu'aucune des versions précédentes ne nommait. */
-    texte: "Chaque document reçu est lu, classé au bon dossier, et la réponse qu’il appelle rédigée.",
+    texte: "Chaque document reçu est lu, classé au bon dossier, et la réponse qu'il appelle rédigée.",
     href: "/offres/factures-fournisseurs",
   },
 ];
@@ -372,14 +373,15 @@ export default function OffresPage() {
 
             Le fond noir est conservé : avec la bande des quatre arguments,
             c'est l'une des deux respirations sombres de la page, et sans lui
-            elle enchaînerait quatre sections blanches d'affilée. Le débordement
-            jusqu'aux bords de l'écran reste la technique de .o-nuit (ombre écrêtée horizontalement).
+            elle enchaînerait quatre sections blanches d'affilée. Le
+            débordement jusqu'aux bords de l'écran
+            reste la technique de .o-nuit (ombre écrêtée horizontalement).
 
             15/09/2026 (Teo) — la section passe AVANT les moteurs, et la bande
             des quatre arguments passe après : le catalogue suit donc le hero.
             Le bouton « Voir les quatre systèmes » de <Bento02> est retiré (il
-            remonterait) ; l'ancre `#catalogue` reste posée, elle sert aux
-            appels venus des autres pages.
+            remonterait), l'ancre `#catalogue` reste posée pour les appels venus
+            des autres pages.
 
             (Avant le 15/09, l'ancre était la destination de ce bouton, qui
             descendait depuis la tuile large du bento.) */}

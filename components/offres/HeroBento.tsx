@@ -309,7 +309,7 @@ export function HeroBento() {
         icone={PenLine}
         href="/offres/relances-impayes"
         titre="Rien ne part sans vous"
-        texte="Le texte est préparé, calé sur l’échéance et posé dans votre file. Vous envoyez, vous corrigez, ou vous ne faites rien."
+        texte="Le texte est préparé, calé sur l'échéance et posé dans votre file. Vous envoyez, vous corrigez, ou vous ne faites rien."
       >
         <div className="o-demo !rounded-[12px] !shadow-none">
           <div className="o-demo-sep px-3.5 py-2.5 text-[11px] font-semibold tracking-[0.02em] text-[#52525b]">

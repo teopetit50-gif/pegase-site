@@ -50,9 +50,10 @@ import { COURRIEL, LIEN_TELEPHONE, TELEPHONE_AFFICHE, lienCourriel } from "@/lib
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
   title: "Service client | Omega.AI",
   description:
-    "Une question sur votre installation, votre abonnement ou un poste en service : WhatsApp pour le court et l'urgent, contact@omegaai.fr pour le reste. Réponse dans les deux jours ouvrés.",
+    "Une question sur votre installation, votre abonnement ou un poste en service : WhatsApp pour le court et l'urgent, contact@omegaai.fr pour le reste. Réponse dans les deux jours ouvrés.",
 };
 
 const ATTENDRE = [

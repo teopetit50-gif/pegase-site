@@ -46,9 +46,10 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/reserver-un-audit" },
   title: "Réserver un audit | Omega.AI",
   description:
-    "Trois formats d'audit pour mesurer ce que votre processus le plus coûteux représente : impayés, demandes perdues, heures de saisie. Gratuit à partir de 30 minutes, sans engagement, avec vérification de l'éligibilité au Chèque TIC.",
+    "Trois formats d'audit, gratuits à partir du cadrage de 45 minutes, pour mesurer ce que votre processus le plus coûteux représente. Sans engagement.",
 };
 
 /* Le déroulé en trois temps — même méthode quel que soit le format, seule

@@ -116,9 +116,10 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/vos-donnees" },
   title: "Où vont vos données | Omega.AI",
   description:
-    "Hébergement dans l'Union européenne, à Francfort, ou installation sur vos propres serveurs. Liste des sous-traitants et du périmètre reçu par chacun, chiffrement, journalisation et conditions de réversibilité.",
+    "Hébergement dans l'Union européenne, à Francfort, ou sur vos propres serveurs. Sous-traitants, chiffrement, journalisation et réversibilité.",
 };
 
 

@@ -86,7 +86,11 @@ export async function generateMetadata({
      travaille au-dessus du pli, le contexte déjà posé. Une meta description
      travaille sans contexte, dans une liste de résultats. `fiche.meta` porte
      la version écrite pour cet usage ; sans elle, on retombe sur le pitch. */
-  return { title: `${m.title} | Omega.AI`, description: fiche?.meta ?? fiche?.pitch };
+  return {
+    title: `${m.title} | Omega.AI`,
+    description: fiche?.meta ?? fiche?.pitch,
+    alternates: { canonical: `/offres/${system}` },
+  };
 }
 
 export default async function FicheMoteurPage({

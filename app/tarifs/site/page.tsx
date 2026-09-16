@@ -92,9 +92,10 @@ import ClotureSite from "@/components/tarifs/site/ClotureSite";
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/tarifs/site" },
   title: "Votre site, à prix public | Omega.AI",
   description:
-    `Le site catalogue : 990 € une fois, pas d'abonnement, maintenance comprise tant qu'un poste Omega.AI est en service chez vous. ${MODELES.length} modèles en ligne, contenu réécrit à votre métier et à votre marque, et un site branché sur vos systèmes : les demandes entrent dans votre espace, les devis se relancent, le site vous dit ce que vos visiteurs cherchent. Plusieurs enseignes : sur devis, après diagnostic.`,
+    `Le site catalogue : 990 € une fois, pas d'abonnement, maintenance comprise tant qu'un poste Omega.AI est en service. ${MODELES.length} modèles en ligne.`,
 };
 
 /* ——— les quatre modèles du mur : le premier de chaque famille du
@@ -257,7 +258,7 @@ export default function TarifsSitePage() {
                   990&nbsp;€, une fois. Pas d&apos;abonnement.
                 </h3>
                 <p data-reveal className="o-body mt-4">
-                  Un des {MODELES.length} modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Le même prix pour une entreprise de trois personnes et pour une direction de groupe. Le catalogue contient aussi des gabarits de boutique et d’espace membre : le dessin est compris, mais leur mécanique — paiement, stock, comptes — et les montages à plusieurs enseignes se chiffrent sur devis, après diagnostic.
+                  Un des {MODELES.length} modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Le même prix pour une entreprise de trois personnes et pour une direction de groupe. Le catalogue contient aussi des gabarits de boutique et d&apos;espace membre : le dessin est compris, mais leur mécanique — paiement, stock, comptes — et les montages à plusieurs enseignes se chiffrent sur devis, après diagnostic.
                 </p>
                 <ul data-reveal className="mt-6 space-y-2.5">
                   {COMPRIS_SITE.map((t) => (
