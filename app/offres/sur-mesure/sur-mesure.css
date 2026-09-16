@@ -129,6 +129,27 @@
   --smd-r-lg: 16px;
   --smd-r-sm: 8px;
 
+  /* ── PLEINE LARGEUR ────────────────────────────────────────────────
+     La coque du site (components/PageShell.tsx) bride `main` à 1440 px
+     et le pose sur `bg-panel`, qui est NOIR : au-delà de 1440 la page
+     laissait deux bandes noires sur les côtés, alors que la référence
+     est blanche d'un bord à l'autre et ne plafonne que sa COLONNE de
+     texte (1472). On sort donc du cadre par les marges négatives — la
+     même technique que `.offres .o-flux` sur l'accueil (05/08).
+
+     `overflow-x: clip` sur le conteneur de PageShell absorbe la barre de
+     défilement que `100vw` compte en trop. Ne pas remplacer par
+     `overflow: hidden` en amont : ça casserait le `position: sticky` de
+     l'entête.
+
+     Effet de bord voulu : la sonde de l'entête prélève la couleur du
+     fond à x = 4 px. Avant, elle tombait dans la bande noire hors cadre
+     et faisait basculer l'entête en sombre sur une page blanche ;
+     maintenant elle tombe sur le blanc de la page. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+
   background: #ffffff;
   color: var(--smd-texte);
   font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
