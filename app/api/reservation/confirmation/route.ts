@@ -1,3 +1,4 @@
+import { composerConfirmation } from "@/lib/mail/confirmation";
 import { COURRIEL } from "@/lib/reservation";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
@@ -13,14 +14,11 @@ import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
    bloquer — alors que l'écran de fin lui promet, depuis le 28/08, « une
    confirmation le jour même ».
 
-   CE QUE CET E-MAIL EST, ET N'EST PAS
-   C'est un accusé de réception parti dans la seconde : il redit le
-   créneau, le format et la durée, et il dit ce qui suit. Ce n'est PAS la
-   confirmation de l'agence, celle qui porte le lien de visioconférence :
-   ce lien n'existe nulle part dans le système, personne ne peut le
-   fabriquer ici, et l'annoncer serait mentir. Le texte dit donc que le
-   lien parvient avant le rendez-vous — ce que les associés font
-   aujourd'hui à la main.
+   Ce fichier ne fait que DEUX choses : lire la demande, et l'envoyer. Le
+   texte et la mise en forme vivent dans lib/mail/confirmation.ts, avec
+   les raisons de chaque parti pris (tableaux plutôt que flex, marque
+   lisible sans les images, aucun bouton). L'aperçu de développement, en
+   dessous de cette route, importe le même module.
 
    D'OÙ VIENNENT LES DONNÉES
    Pas du navigateur : de la base. Le corps de la requête ne porte que
@@ -61,25 +59,6 @@ const API_ENVOI = "https://api.resend.com/emails";
 const EXPEDITEUR_PAR_DEFAUT = "Omega <bonjour@auth.omegaai.fr>";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/* Les identifiants de format tels qu'ils partent de PriseDeCreneau
-   (lib/reservation.ts, PROFILS[].formules[].id). Le repli rend le code tel
-   quel plutôt qu'une chaîne vide : mieux vaut « process » dans un e-mail
-   qu'un trou, et ça se voit tout de suite en relecture. */
-const FORMATS: Record<string, string> = {
-  diagnostic: "Diagnostic",
-  complet: "Audit complet",
-  site: "Rendez-vous site",
-  cadrage: "Cadrage",
-  process: "Audit de processus",
-  atelier: "Atelier sur place",
-};
-
-/* Le fuseau de l'agence. Le client a choisi son créneau en heure de
-   Guadeloupe sur le site — c'est écrit sur l'écran de réservation :
-   l'e-mail dit la même heure avec la même mention, sinon un client
-   métropolitain lit une heure et en note une autre. */
-const FUSEAU = "America/Guadeloupe";
-
 type Ligne = {
   prenom: string;
   nom: string;
@@ -90,34 +69,6 @@ type Ligne = {
   creneau_debut: string | null;
   duree_min: number | null;
 };
-
-function echapper(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function dateLongue(iso: string): string {
-  const d = new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    timeZone: FUSEAU,
-  }).format(new Date(iso));
-  return d.charAt(0).toUpperCase() + d.slice(1);
-}
-
-function heure(iso: string): string {
-  return new Intl.DateTimeFormat("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: FUSEAU,
-  })
-    .format(new Date(iso))
-    .replace(":", " h ");
-}
 
 export async function POST(req: Request) {
   let corps: Record<string, unknown>;
@@ -165,71 +116,21 @@ export async function POST(req: Request) {
      apprendrait à un curieux quels identifiants existent. */
   if (!ligne) return Response.json({ ok: true, envoye: false });
 
-  /* ——— 2. le texte ——— */
+  /* ——— 2. composer ——— */
   const cle = process.env.RESEND_API_KEY;
   if (!cle) {
     console.error("[confirmation] RESEND_API_KEY absente : confirmation non envoyée");
     return Response.json({ ok: false, motif: "indisponible", envoye: false }, { status: 503 });
   }
 
-  const format = FORMATS[ligne.formule] ?? ligne.formule;
-  const prenom = (ligne.prenom || "").trim();
-  const quand = ligne.creneau_debut;
-  const duree = ligne.duree_min ? `${ligne.duree_min} min` : null;
+  const { sujet, html, texte } = composerConfirmation({
+    prenom: ligne.prenom,
+    formule: ligne.formule,
+    creneauISO: ligne.creneau_debut,
+    dureeMin: ligne.duree_min,
+  });
 
-  const sujet = quand
-    ? `Votre créneau est bloqué — ${dateLongue(quand)} à ${heure(quand)}`
-    : "Votre demande est bien reçue";
-
-  /* Deux cas, et deux seulement : avec créneau (audit, réglage) ou sans
-     (les formats sur devis, qui n'ont pas de calendrier). */
-  const texte = quand
-    ? [
-        `Bonjour ${prenom},`,
-        "",
-        `Votre créneau est bloqué : ${dateLongue(quand)} à ${heure(quand)}, heure de Guadeloupe — ${format}${
-          duree ? `, ${duree}` : ""
-        }, en visioconférence.`,
-        "",
-        "Nous revenons vers vous avec le lien de la visioconférence avant le rendez-vous.",
-        "",
-        "Si cette date ne vous convient plus, répondez simplement à ce message : on en trouve une autre.",
-        "",
-        "À bientôt,",
-        "L'équipe Omega.AI",
-        COURRIEL,
-      ].join("\n")
-    : [
-        `Bonjour ${prenom},`,
-        "",
-        `Votre demande (${format}) est enregistrée. Nous vous répondons le jour même, avec un devis ou les questions qui le précèdent.`,
-        "",
-        "Vous pouvez répondre à ce message pour ajouter quoi que ce soit.",
-        "",
-        "À bientôt,",
-        "L'équipe Omega.AI",
-        COURRIEL,
-      ].join("\n");
-
-  const html =
-    `<div style="font-family:-apple-system,Segoe UI,Inter,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#050505">` +
-    `<p>Bonjour ${echapper(prenom)},</p>` +
-    (quand
-      ? `<p>Votre créneau est bloqué :</p>` +
-        `<p style="font-size:17px;font-weight:600;border-left:3px solid #e9cd91;padding-left:12px;margin:18px 0">` +
-        `${echapper(dateLongue(quand))} à ${echapper(heure(quand))}` +
-        `<span style="font-weight:400;color:#616161"> (heure de Guadeloupe)</span><br>` +
-        `<span style="font-size:14px;font-weight:400;color:#3d3d3d">${echapper(format)}${
-          duree ? ` · ${duree}` : ""
-        } · en visioconférence</span></p>` +
-        `<p>Nous revenons vers vous avec le lien de la visioconférence avant le rendez-vous.</p>` +
-        `<p>Si cette date ne vous convient plus, répondez simplement à ce message : on en trouve une autre.</p>`
-      : `<p>Votre demande (${echapper(format)}) est enregistrée. Nous vous répondons le jour même, avec un devis ou les questions qui le précèdent.</p>` +
-        `<p>Vous pouvez répondre à ce message pour ajouter quoi que ce soit.</p>`) +
-    `<p style="color:#616161;font-size:13px;margin-top:22px">L'équipe Omega.AI · ` +
-    `<a href="mailto:${COURRIEL}" style="color:#616161">${COURRIEL}</a></p></div>`;
-
-  /* ——— 3. l'envoi ——— */
+  /* ——— 3. envoyer ——— */
   try {
     const r = await fetch(API_ENVOI, {
       method: "POST",
