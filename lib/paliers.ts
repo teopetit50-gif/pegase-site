@@ -802,7 +802,13 @@ export const GRANDE_STRUCTURE = {
     "Périmètre, installation et tarif écrits avant tout engagement",
   ],
   cta: "Réserver un diagnostic",
-  href: "/reserver-un-audit#reserver",
+  /* 15/09 (Teo) — SANS ancre. La destination portait `#reserver`, qui est
+     la section « Réservez votre créneau » : le visiteur qui cliquait
+     « Réserver un diagnostic » atterrissait en BAS de /reserver-un-audit,
+     sous les formats, le comparatif et les compléments — donc après tout
+     ce qui lui dit quel format demander. La page commence par son <h1>,
+     « Un audit à la mesure de votre organisation » : on y arrive en haut. */
+  href: "/reserver-un-audit",
   /* la note de bas de grille, à la place du pavé TTC de la formule PME */
   bas: "Aucun montant n'est affiché sur ce périmètre : le diagnostic relève vos volumes et vos règles de validation, puis le périmètre, l'installation et le tarif sont écrits au devis avant tout engagement. Il est gratuit dans ses deux premiers formats, et sans engagement.",
   /* le bandeau d'orientation reprend la même destination */
