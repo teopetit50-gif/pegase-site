@@ -1119,10 +1119,112 @@
   .ofd .ofd-schema {
     display: none;
   }
-  /* la chronologie prend la place du schéma : elle n'est plus un
-     complément posé dessous, elle EST la section */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE MÊME CYCLE, EN COLONNE, POUR LE TÉLÉPHONE (16/09, seconde passe)
+
+   Masquer le SVG ne suffisait pas : Teo voulait le schéma LISIBLE, pas
+   absent — « y a ça qu'a disparu », capture à l'appui. Il est rebâti ici
+   en balisage : une colonne de nœuds reliés par un filet, deux encarts de
+   côté pour les règles et le journal, et les deux bornes en pilule. Le
+   texte garde sa taille de lecture au lieu de tomber à 9 px, et rien ne
+   déborde.
+
+   `aria-hidden` sur le bloc : les mêmes temps sont juste dessous en toutes
+   lettres (`.ofd-rangee`). Faire lire deux fois la même chose à un lecteur
+   d'écran n'apporte rien.
+   ═══════════════════════════════════════════════════════════════════════ */
+.ofd .ofd-cycle-tel {
+  display: none;
+}
+@media (max-width: 767px) {
+  .ofd .ofd-cycle-tel {
+    display: grid;
+    gap: 10px;
+    margin-inline: auto;
+    max-width: 420px;
+  }
+  /* le filet de liaison : un trait tiré dans la gouttière, plutôt qu'un
+     pseudo-élément par nœud */
+  .ofd .ofd-cycle-tel > * + *::before {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 10px;
+    margin: -10px auto 0;
+    background: #e0e0e0;
+  }
+  .ofd .ofd-cycle-tel__borne {
+    margin: 0;
+    padding: 9px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 999px;
+    background: #ffffff;
+    text-align: center;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    color: var(--ofd-encre);
+  }
+  .ofd .ofd-cycle-tel__etape {
+    padding: 14px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+  .ofd .ofd-cycle-tel__etape h3 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ofd-encre);
+  }
+  .ofd .ofd-cycle-tel__etape h3 span {
+    font-weight: 400;
+    color: #8a8a8a;
+  }
+  .ofd .ofd-cycle-tel__etape p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    line-height: 21px;
+    color: #6f6f6f;
+  }
+  /* les deux encarts : rentrés, sans fond — on doit lire qu'ils encadrent
+     l'étape au lieu d'en être une */
+  .ofd .ofd-cycle-tel__cote {
+    margin-left: 22px;
+    padding: 10px 14px;
+    border-left: 2px solid #e0e0e0;
+    font-size: 13px;
+    line-height: 20px;
+    color: #6f6f6f;
+  }
+  .ofd .ofd-cycle-tel__cote b {
+    color: var(--ofd-encre);
+    font-weight: 500;
+  }
+  .ofd .ofd-cycle-tel__retour {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #8a8a8a;
+  }
+  .ofd .ofd-cycle-tel__retour::before {
+    content: "↺ ";
+  }
+  .ofd .ofd-cycle-tel__note {
+    margin: 2px 0 0;
+    font-size: 12px;
+    line-height: 18px;
+    color: #8a8a8a;
+  }
+  .ofd .ofd-cycle-tel__note::before {
+    content: none;
+  }
   .ofd .ofd-rangee {
-    margin-top: 0;
+    margin-top: 34px;
   }
 }
 .ofd .ofd-rangee {
