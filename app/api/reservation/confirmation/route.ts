@@ -131,7 +131,8 @@ export async function POST(req: Request) {
   if (!ligne) return Response.json({ ok: true, envoye: false });
 
   /* ——— 3. composer ——— */
-  const { sujet, html, texte } = composerConfirmation({
+  const { sujet, html, texte, agenda } = composerConfirmation({
+    id,
     prenom: ligne.prenom,
     formule: ligne.formule,
     creneauISO: ligne.creneau_debut,
@@ -150,6 +151,19 @@ export async function POST(req: Request) {
         subject: sujet,
         text: texte,
         html,
+        /* Le fichier d'agenda, encodé en base64 comme l'attend le
+           service d'envoi. Absent quand la demande n'a pas de créneau
+           (formats sur devis) : il n'y aurait rien à mettre dedans. */
+        ...(agenda
+          ? {
+              attachments: [
+                {
+                  filename: agenda.nom,
+                  content: Buffer.from(agenda.contenu, "utf8").toString("base64"),
+                },
+              ],
+            }
+          : {}),
       }),
       signal: AbortSignal.timeout(10_000),
     });
