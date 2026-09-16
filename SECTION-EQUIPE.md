@@ -29,16 +29,24 @@ encore, après la phrase qui se peint : la citation sépare alors les deux.
 
 ## Ce qui reste à faire, et qui ne dépend que de toi
 
-1. **Le portrait de Teo.** Ceux d'Henri et de Vincent sont en place depuis
-   le 13/09 (déposés par Teo, liseré saumon rogné, originaux conservés dans
-   `captures/originaux-equipe/`). `teo.jpg` a été REMPLACÉ le 16/09 — la
-   version du 14/09 était trop lumineuse. La nouvelle vient d'une capture
-   d'écran, cadre saumon compris : le liseré n'a pas été rogné mais
-   RECONSTRUIT (le fond mauve a été prolongé par diffusion sous les arcs
-   des quatre coins, puis la bande du bas coupée franc), sinon rogner
-   assez pour effacer les arcs mangeait le haut du crâne. Recadré 845 × 900,
-   soit exactement le 31/33 de la tuile : `object-fit: cover` ne rogne
-   plus rien. Les deux originaux sont dans `captures/originaux-equipe/`.
+1. **Les trois portraits sont en place.** Henri et Vincent depuis le
+   13/09, Teo depuis le 14/09 à 12:00 (recadré 845 × 900) — plus aucun
+   monogramme dans la mosaïque. Les originaux et les versions remplacées
+   vivent dans `captures/originaux-equipe/`.
+
+   `vincent.jpg` a été REMPLACÉ le 16/09 : la version du 13/09 était trop
+   lumineuse, le visage brûlé. La nouvelle arrive en capture d'écran,
+   cadre saumon compris. Le liseré n'a PAS été rogné mais RECONSTRUIT —
+   le fond mauve a été prolongé par diffusion sous les arcs des quatre
+   coins, et seule la bande du bas, épaisse et posée sur le tee-shirt
+   noir, a été coupée franc. Rogner assez pour effacer les arcs mangeait
+   le haut du crâne. Recadré 845 × 900, soit exactement le 31/33 de la
+   tuile : `object-fit: cover` ne rogne plus rien.
+
+   ⚠ Vincent et Teo se ressemblent en vignette (même fond mauve, même
+   tee-shirt noir, même sourire). Avant de remplacer l'un des deux, lire
+   le `src` dans le DOM — l'ordre de la mosaïque n'est pas celui de la
+   liste de noms : la colonne du milieu est Vincent, celle de droite Teo.
 2. **Confirmer ton rôle.** « Co-fondateur » est posé par cohérence avec
    « CEO & Fondateur » et « CTO & Co-fondateur », pas parce que tu l'as dit.
 3. **La quatrième fiche**, quand tu l'auras (« on verra pour le dernier
