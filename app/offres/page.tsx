@@ -89,7 +89,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/offres" },
   title: "Nos offres | Omega.AI",
   description:
-    "Quatre systèmes prêts à déployer : encaissements, réactivation commerciale, demandes entrantes, flux documentaires. Intégrés à vos outils en place, sous validation humaine.",
+    "Quatre systèmes prêts à déployer : encaissements, réactivation commerciale, demandes entrantes, flux documentaires. Sous validation humaine.",
 };
 
 /* ——— rangée des quatre arguments, sous le hero ———
