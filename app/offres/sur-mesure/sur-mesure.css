@@ -731,8 +731,27 @@
   width: 100%;
 }
 
+/* 16/09, seconde passe — LE PLAFOND MANQUANT. Le tableau ci-dessus
+   s'arrête à 1920 px : c'est la seule largeur où le plafond de la
+   référence et la vue coïncident, donc la carte y mesure la même chose
+   dans les deux cas et le défaut ne peut pas se voir. Repris plus large
+   sur scale.com/generative-ai-data-engine, le pourcentage de la vue
+   cesse de s'appliquer et leur carte se fige :
+
+     vue      2560   3840
+     carte    1699   1699     (x = 423 puis 1063 : centrée)
+
+   Sans ce plafond, la nôtre continuait de grandir : sur un écran large
+   la bande verte traversait l'écran d'un bord à l'autre et la citation
+   tombait sur une seule ligne interminable.
+
+   1699 et non 1888 (le plafond du hero) : sur leur grille de douze
+   colonnes, le hero les prend toutes, la citation en laisse une. Sous
+   1920 le pourcentage reste sous le plafond — 1671 à 1920 — et rien ne
+   bouge : la correction ne mord que sur les écrans larges. */
 .smd .smd-citation {
   width: 84.4%;
+  max-width: 1699px;
   margin-inline: auto;
   border-radius: var(--smd-r-lg);
   background: var(--smd-evergreen);
