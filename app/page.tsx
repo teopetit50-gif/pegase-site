@@ -145,57 +145,31 @@ const HERO = {
   /* 15/09/2026 (Teo, « sur mobile on comprend direct quoi, combien, pour
      qui ») — le chapô de bureau fait 40 mots, six lignes à 390 px : le
      bouton tombait sous la ligne de flottaison et le visiteur arrivait sur
-     une page qui ne répond à aucune des trois questions. La version courte
-     ne dit pas autre chose, elle dit la même promesse sans les moyens :
-     ce sont les trois réponses ci-dessous qui portent le concret. */
+     une page qui ne répond à aucune des trois questions.
+
+     15/09, 2ᵉ passe (Teo : « dans les textes des pages on devrait
+     retrouver ces infos, pas une section spécialement pour ») — la
+     première version posait les trois réponses en TABLEAU sous le bouton,
+     un `<dl>` encadré de trois lignes « Quoi / Pour qui / Combien ». La
+     réponse y était, mais sous une forme que le reste du site n'emploie
+     nulle part : une fiche d'identité collée au hero, qui se lit comme un
+     encadré de notice et non comme la page. Les trois réponses sont donc
+     rentrées dans les DEUX phrases qui étaient déjà là — le chapô prend le
+     quoi et le pour qui, la sous-ligne du bouton prend le combien. Rien
+     n'est perdu, et il n'y a plus de bloc à entretenir.
+
+     Le bureau garde ses phrases : il a les trois réponses ailleurs
+     (colonne de droite, menu), et son chapô a 40 mots pour les moyens. */
   chapoCourt:
-    "Vos outils connectés, vos processus automatisés, sans rien remplacer chez vous.",
+    "Relances, demandes entrantes, réactivation, factures fournisseurs : automatisés pour les PME et les groupes multi-sites, sur vos outils actuels.",
   bouton: "Découvrir notre approche",
   sous: "Identifions les leviers à plus fort impact pour votre organisation.",
+  /* le COMBIEN. Pas de montant : depuis le 15/09 le site n'affiche plus de
+     grille, le tarif est arrêté à l'audit sur les volumes réels. Ce qu'on
+     donne est ce qui se vérifie — la base de calcul et le délai. */
+  sousCourt:
+    "Tarif à l'usage, selon vos volumes. Arrêté à l'audit, en 30 minutes.",
 };
-
-/* ═══ LES TROIS RÉPONSES — téléphone seulement ═══════════════════════════
-   15/09/2026 (Teo) : « il faut que sur mobile on comprenne direct quoi,
-   combien, pour qui ». Mesuré avant : le premier écran d'omegaai.fr à
-   375 px ne répondait à aucune des trois — titre de marque, chapô de six
-   lignes, un bouton, et il fallait défiler quatre écrans pour lire le mot
-   « relance ». Sur bureau les trois réponses sont dans la colonne de
-   droite du hero et dans le menu, toujours visibles : le bloc s'éteint
-   donc à `lg`, il ne corrige que ce que le téléphone perd.
-
-   LE « COMBIEN » NE PORTE PAS DE MONTANT, et c'est délibéré : depuis le
-   15/09 le site n'affiche plus de grille, le tarif est arrêté à l'audit
-   sur les volumes réels. Écrire un prix d'appel ici rouvrirait ce que
-   /tarifs vient de fermer. Ce qu'on donne à la place est ce qui se vérifie :
-   la base de calcul, le délai, et l'absence d'engagement. */
-const TROIS_REPONSES: { cle: string; valeur: string }[] = [
-  {
-    cle: "Quoi",
-    valeur:
-      "Relances, demandes entrantes, réactivation, factures fournisseurs — automatisés.",
-  },
-  {
-    cle: "Pour qui",
-    valeur: "PME et groupes multi-sites, sur vos outils actuels, sans migration.",
-  },
-  {
-    cle: "Combien",
-    valeur: "À l'usage, selon vos volumes. Arrêté à l'audit, en 30 minutes.",
-  },
-];
-
-function TroisReponses() {
-  return (
-    <dl className="o-trois lg:hidden">
-      {TROIS_REPONSES.map(({ cle, valeur }) => (
-        <div key={cle} className="o-trois-ligne">
-          <dt className="o-trois-cle">{cle}</dt>
-          <dd className="o-trois-val">{valeur}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
 
 /* 14/09 (Teo, soir) — le hero s'installe désormais mot à mot, mouvement
    repris du composant qu'il a collé (`components/ui/hero-section.tsx`, qui
@@ -961,14 +935,11 @@ export default function Home() {
                 className="o-bloc-apparait o-flux-sous"
                 style={{ "--o-mot-d": `${CADENCE.sous}ms` } as React.CSSProperties}
               >
-                {HERO.sous}
+                {/* même procédé que le chapô : les deux versions dans le
+                    DOM, la largeur choisit. */}
+                <span className="lg:hidden">{HERO.sousCourt}</span>
+                <span className="hidden lg:inline">{HERO.sous}</span>
               </span>
-            </div>
-            <div
-              className="o-bloc-apparait w-full lg:hidden"
-              style={{ "--o-mot-d": `${CADENCE.sous + 120}ms` } as React.CSSProperties}
-            >
-              <TroisReponses />
             </div>
           </div>
 

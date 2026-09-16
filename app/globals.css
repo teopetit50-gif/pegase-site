@@ -7830,63 +7830,6 @@ button.rounded-full:active {
 }
 
 
-/* ═══════════════════════════════════════════════════════════════════════
-   LES TROIS RÉPONSES DU HERO — téléphone seulement        (15/09/2026)
-   ═══════════════════════════════════════════════════════════════════════
-
-   Teo : « il faut que sur mobile on comprenne direct quoi, combien, pour
-   qui ». Trois lignes sous le bouton du hero, en liste de définition —
-   c'est exactement ce que le balisage `<dl>` décrit, et un lecteur d'écran
-   lit alors la paire, pas deux fragments.
-
-   La géométrie : la clé sur une colonne fixe de 74 px, la valeur à côté.
-   Un empilement clé-au-dessus aurait coûté six lignes au lieu de trois,
-   et c'est précisément la hauteur qu'on est venu récupérer. À 375 px il
-   reste 253 px pour la valeur, soit deux lignes de 13 px — les trois
-   lignes tiennent donc en ~150 px, sous le bouton, dans le premier écran.
-
-   Pas d'ombre, filet plein : la charte du site n'en porte nulle part
-   ailleurs sur fond clair, et une ombre sous le nuancier Silk fait une
-   tache grise. Le fond est blanc à 72 % plutôt que plein : le hero peint
-   un dégradé sous lui, un blanc opaque y découpe un rectangle. */
-.offres .o-trois {
-  width: 100%;
-  max-width: 420px;
-  margin: 20px auto 0;
-  border: 1px solid var(--o-line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(6px);
-  text-align: left;
-  overflow: hidden;
-}
-.offres .o-trois-ligne {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 11px 14px;
-}
-.offres .o-trois-ligne + .o-trois-ligne {
-  border-top: 1px solid var(--o-line);
-}
-.offres .o-trois-cle {
-  flex: 0 0 74px;
-  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--o-text);
-}
-.offres .o-trois-val {
-  margin: 0;
-  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
-  font-size: 13px;
-  line-height: 1.45;
-  letter-spacing: 0.01em;
-  color: var(--o-muted);
-}
-
 /* ——— le détail replié des cartes « laquelle pour moi ? » (15/09/2026) ——— */
 .offres .te-detail-tete {
   display: flex;
