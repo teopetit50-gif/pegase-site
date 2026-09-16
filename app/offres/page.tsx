@@ -1,29 +1,15 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
-import HeroBento from "@/components/offres/HeroBento";
 import {
-  IconeFleche,
-  MediaAnswr,
-  MediaLocal,
-  MediaOffload,
-  MediaOutils,
-  MediaPayd,
-} from "@/components/offres/Media";
-import { Features, type CaseFeature } from "@/components/ui/features-4";
-import { BentoGrid01, type ArgumentBento } from "@/components/ui/bento-grid-01";
-import { AuditLog, type EntreeJournal } from "@/components/ui/audit-log";
-import { Bento02, type TuileBento } from "@/components/ui/bento-02";
-import { HowItWorks01, type Etape, type CarteGarantie } from "@/components/ui/how-it-works-01";
-import { Cta3 } from "@/components/ui/cta-3";
-import {
+  ArrowRight,
   Bell,
   Blocks,
   Check,
   CheckCheck,
   Clock,
   FileText,
+  Landmark,
   Lock,
   MessageSquare,
   Pause,
@@ -32,432 +18,731 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import {
+  siGmail,
+  siGoogledrive,
+  siGooglesheets,
+  siNotion,
+  siQuickbooks,
+  siShopify,
+  siStripe,
+} from "simple-icons";
+import PageShell from "@/components/PageShell";
+import PageMotion from "@/components/PageMotion";
+import { POSTS } from "@/lib/content";
+import "./nos-offres.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /offres — « Nos offres » (25/07/2026, refondue le 11/09/2026)
+   /offres — « Nos offres »
 
-   Reprise d'origine à l'identique de la maquette de référence demandée par
-   Teo (ocoya.com/features/create) : mêmes sections dans le même ordre,
-   mêmes proportions, même typographie, mêmes rayons et mêmes animations
-   d'entrée. Relevé au pixel sur viewport 1440 — voir le bloc `.offres` de
-   globals.css pour les tokens.
+   16/09/2026 — REFONTE COMPLÈTE. Teo : « refais la page nos offres de
+   omegaai.fr, exactement la même chose que https://scale.com/data-engine,
+   dans le détail près : les textes, leurs tailles, le design, tout. »
 
-   ——— Passe du 11/09/2026 : quatre sections sur six passent à des
-   composants 21st.dev ————————————————————————————————————————————————
-   Teo : « aucun composant de 21st.dev sur cette page, remplace section par
-   section. » La page n'en portait qu'un (`features-4`, le catalogue).
+   La page précédente (25/07, refondue le 11/09) décalquait
+   ocoya.com/features/create et assemblait six composants 21st.dev
+   (bento-grid-01, bento-02, features-4, how-it-works-01, audit-log,
+   cta-3). Elle part en entier. Ces six composants restent au dépôt —
+   `features-4`, `how-it-works-01` et `cta-3` servent d'autres pages —
+   mais plus aucun n'est appelé ici, et le bloc `.offres` de globals.css
+   n'habille plus cette route (il habille encore /, /blog, /integrations
+   et /tarifs/site : ne pas le supprimer).
 
-   | section                | composant repris    | auteur        |
-   |------------------------|---------------------|---------------|
-   | les quatre arguments   | bento-grid-01       | 21st.dev      |
-   | les moteurs            | bento-02            | @ln-dev7      |
-   | le catalogue (déjà là) | features-4          | @meschacirung |
-   | la mise en place       | how-it-works-01     | @ln-dev7      |
-   | · son média « validation » | audit-log       | 21st.dev      |
-   | l'appel final          | cta-3               | @efferd       |
+   Le relevé de la référence — colonne, rythme, échelle typographique,
+   rayons, couleurs — est en tête de nos-offres.css, avec les quatre
+   écarts de FORME. Ci-dessous, les écarts de CONTENU.
 
-   Seconde passe du 11/09 (Teo a collé quatre fiches 21st.dev de plus) :
-   la bande noire passe de `feature-section-with-hover-effects` à
-   `bento-grid-01` — le survol ne suffisait pas, il fallait du mouvement
-   sans geste. `components/ui/features-hover.tsx` reste au dépôt, plus
-   personne ne l'appelle. `how-it-works-01` était déjà là depuis la
-   première passe. `tech-solutions-hero-section` n'a PAS été intégré : son
-   CSS (huit classes maison) et son fond `raycast-animated-blue-background`
-   n'étaient pas dans la fiche, et le rebâtir aurait été l'inventer.
+   ── CE QUI EST REPRIS AU PIXEL ───────────────────────────────────────
+   L'enchaînement des blocs de la référence, dans son ordre :
+     1  image pleine, coins à 24, texte calé en bas          (hero)
+     2  bande d'outils en une rangée, logos en noir
+     3  panneau doux + 2×2 cartes blanches
+     4  panneau de couleur + énoncé + bouton noir
+     5  ── à partir d'ici, tout vit sur le fond doux #f2f2f2 ──
+        a  étiquette/titre/chapô centrés, puis bloc scindé texte + fenêtre
+        b  étiquette/titre/chapô, grande console, légende mono, rangée
+        c  étiquette/titre, quatre cartes hautes à liste à puces
+        d  étiquette/titre, quatre vignettes de ressources
+        e  panneau ardoise, citation, signature
+        f  image pleine, titre, deux boutons                  (pied d'appel)
 
-   Chaque reprise est réencrée à la charte dans son propre fichier, avec
-   ses écarts documentés en tête — c'est là qu'il faut lire pourquoi une
-   classe shadcn a disparu.
+   ── LES ÉCARTS DE CONTENU, et pourquoi ───────────────────────────────
+   Un décalque n'autorise pas à recopier ce que la référence se permet.
+   Chaque fois, la géométrie est gardée et le contenu remplacé.
 
-   CE QUI N'A PAS BOUGÉ : le hero et ses textes, les textes des quatre
-   arguments (fournis tels quels par Teo le 07/08, y compris l'incise sur la
-   Région Guadeloupe), les intitulés et phrases des trois moteurs, le
-   catalogue des six, les trois garanties de la mise en place.
+   · BLOC 2 — la référence aligne sept logos de CLIENTS (Meta, Pinterest,
+     TIME…). Nous n'avons aucun client à nommer, et un logo de client
+     inventé est une pratique commerciale trompeuse. Même rangée, mêmes
+     hauteurs : ce sont les outils DU CLIENT sur lesquels les systèmes se
+     branchent, ceux de /integrations. La légende monospace au-dessus est
+     un AJOUT (la référence n'en a pas) : sans elle, une rangée de logos
+     sous un hero se lit comme une liste de références.
 
-   CE QUI A BOUGÉ, et où c'est passé : la carte « Trois étapes, pas trois
-   mois » n'existe plus en tant que carte — les trois étapes qu'elle
-   contenait dans `MediaEtapes` (audit / raccordement / cycle supervisé)
-   SONT devenues la première rangée de la mise en place, et « deux semaines
-   de rodage » a suivi dans la troisième étape. Aucun fait perdu, une carte
-   de moins.
+   · BLOC 3 — la référence y écrit « The Scale Data Engine is trusted by
+     the world's leading ML teams ». Remplacé par ce qui ne change pas
+     chez le client. Les quatre cartes portent les QUATRE ARGUMENTS de
+     l'ancienne page, resserrés au budget de la référence le 16/09 (voir
+     le commentaire d'ARGUMENTS) — l'incise sur la Région Guadeloupe est
+     la seule chose qu'on n'a pas coupée, et elle est obligatoire : le
+     Chèque TIC est un dispositif régional, la retirer sur un site à
+     portée nationale rendrait la mention trompeuse.
 
-   Le chrome (header caméléon, footer) reste celui du site : les sections
-   claires portent data-monde="clair" pour que le header bascule en blanc.
+   · BLOC 4 — le panneau est au ROUGE de la référence (#E7131A, relevé
+     rgb(231,19,26)) et porte un mot-symbole en serif blanc, comme son
+     logotype à elle. Teo, 16/09 : « je veux la même couleur et la même
+     police, là c'est noir et le logo est moche. » Le signe alpha
+     « sur mesure » de public/logos sortait terne sur du noir.
+
+   · BLOC 4 — « Customer Case Study » + une étude de cas nommée. Nous
+     n'en avons pas. Même géométrie, le sur-mesure à la place : c'est le
+     seul énoncé de la page qui appelle un panneau à lui seul, et il
+     fermait déjà l'ancienne page.
+
+   · BLOC 5b — la référence aligne QUATRE colonnes sous sa grande image.
+     Nous en avons trois (les trois étapes de la mise en place) et il n'y
+     a pas de quatrième à inventer : la grille passe à trois colonnes à
+     partir de 1280, même gouttière, pas de colonne vide.
+
+   · BLOC 5e — la référence place ici une citation client signée. Les
+     témoignages du site sont vides par construction (lib/temoignages.ts).
+     À la place, du vrai de même forme typographique : l'énoncé du
+     PROBLÈME que les quatre systèmes règlent, repris de lib/content.ts
+     (FAMILLES[0].proof). La signature n'est donc pas une personne mais
+     la portée de la phrase.
+
+   · PARTOUT — aucun montant. Le site n'affiche plus de prix depuis le
+     15/09 ; les boutons mènent au diagnostic. Et aucun outil À NOUS
+     n'est nommé : ni éditeur, ni fournisseur de modèles.
+
+   · Les fenêtres et la console sont des EXEMPLES, et le disent dans leur
+     propre chrome — elles ne montrent les données d'aucun client.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
   alternates: { canonical: "/offres" },
   title: "Nos offres | Omega.AI",
   description:
-    "Quatre systèmes prêts à déployer : encaissements, réactivation commerciale, demandes entrantes, flux documentaires. Sous validation humaine.",
+    "Quatre systèmes prêts à déployer : encaissements, réactivation commerciale, demandes entrantes, flux documentaires. Branchés sur vos outils, arrêtés à votre validation.",
 };
 
-/* ——— rangée des quatre arguments, sous le hero ———
-   07/08 (Teo) — les quatre arguments sont réécrits, textes fournis tels
-   quels. Deux jeux de titres étaient proposés : les intitulés développés
-   retenus ici et une variante en un mot (INTÉGRATION / CONTRÔLE / SÉCURITÉ
-   / FINANCEMENT). Les développés l'emportent parce qu'ils disent de quoi il
-   s'agit sans dépendre du texte dessous. Pour basculer sur la variante
-   courte, il suffit de remplacer les quatre `titre`.
+/* ─────────────────────────────────────────────────────────────────────
+   Données de page
+   ───────────────────────────────────────────────────────────────────── */
 
-   Le texte fourni pour le bloc financement ne mentionnait plus la Région.
-   L'incise a été remise (arbitrage Teo du 07/08) : le Chèque TIC est un
-   dispositif régional guadeloupéen, et sans elle cette page — qui s'adresse
-   à toute la France — laissait croire à une aide ouverte à tous.
+/* BLOC 2 — sept outils du client, comme la référence aligne sept logos.
+   Les chemins viennent de simple-icons, déjà au dépôt pour /integrations. */
+const OUTILS = [siGmail, siGooglesheets, siStripe, siShopify, siGoogledrive, siNotion, siQuickbooks];
 
-   11/09 — les quatre textes sont INTACTS depuis le début, à travers deux
-   changements de contenant : quatre colonnes centrées à 240 px, puis des
-   cases à filets, et enfin les tuiles animées de `bento-grid-01`. Le défaut
-   d'origine n'était pas la longueur mais l'inégalité (le quatrième faisait
-   neuf lignes contre cinq, et trois colonnes finissaient dans le vide) ;
-   ce qui manquait ensuite était le mouvement. Les icônes ont disparu du
-   tableau : le bento porte une animation par tuile, pas un pictogramme. */
-const ARGUMENTS: [ArgumentBento, ArgumentBento, ArgumentBento, ArgumentBento] = [
+/* BLOC 3 — les quatre arguments. Les quatre pastilles reprennent les
+   quatre couleurs de la référence (archive-purple, foundry-tan,
+   atlas-blue, evergreen).
+
+   16/09/2026 (Teo, « il y a un peu trop de texte dans les cards ») — les
+   quatre textes sont RESSERRÉS. Ils venaient de lui (07/08) et tenaient
+   dans le gabarit précédent ; ici la carte de la référence tourne autour
+   de 110 signes et les nôtres en faisaient 124 à 265. Aucun fait n'est
+   perdu, seules les redites et les incises de précaution partent — sauf
+   dans le quatrième, où l'incise « Région Guadeloupe » RESTE : le Chèque
+   TIC est un dispositif régional et la retirer sur un site à portée
+   nationale rendrait la mention trompeuse. Il reste donc la carte la
+   plus longue (158 contre ~110), et c'est le bon arbitrage. */
+const ARGUMENTS = [
   {
+    icone: Blocks,
+    teinte: "#79648c",
     titre: "Intégration à votre environnement",
     texte:
-      "Nos systèmes s'intègrent à vos outils existants (messagerie, tableaux de suivi et canaux de communication) sans imposer de changement d'organisation.",
+      "Nos systèmes s'intègrent à vos outils existants sans imposer le moindre changement d'organisation.",
   },
   {
+    icone: ShieldCheck,
+    teinte: "#a8927c",
     titre: "Contrôle humain",
     texte:
-      "Vous conservez la validation des actions sensibles. Les règles de fonctionnement, les niveaux d'autonomie et les validations sont définis avec vous.",
+      "Vous gardez la validation des actions sensibles. Les règles et les niveaux d'autonomie sont définis avec vous.",
   },
   {
+    icone: Lock,
+    teinte: "#273252",
     titre: "Sécurité des données",
     texte:
-      "Les environnements clients sont cloisonnés et les données protégées par des mécanismes de chiffrement et de contrôle d'accès adaptés.",
+      "Les environnements clients sont cloisonnés, les données chiffrées et les accès contrôlés.",
   },
   {
+    icone: Landmark,
+    teinte: "#193a29",
     titre: "Financement éligible",
     texte:
-      "Selon votre situation et la nature du projet, une partie de l'investissement peut être prise en charge dans le cadre du Chèque TIC, le dispositif de la Région Guadeloupe ouvert aux entreprises qui y sont immatriculées. L'éligibilité est vérifiée en amont.",
+      "Une partie de l'investissement peut être prise en charge par le Chèque TIC, dispositif de la Région Guadeloupe ouvert aux entreprises qui y sont immatriculées.",
   },
 ];
 
-/* ——— les trois moteurs montrés, en tuiles ———
-   11/09 — ils étaient dans des cartes décoratives ; ce sont maintenant les
-   portes des pages produit. C'est le seul endroit de la page où les trois
-   captures d'interface apparaissent. */
-const MOTEURS: TuileBento[] = [
+/* BLOC 5a — la fenêtre d'exemple. Mêmes trois faits que le journal de
+   l'ancienne page : une relance rédigée qui attend l'accord, une réponse
+   partie APRÈS validation, une relance suspendue par le client. */
+const JOURNAL = [
   {
-    icone: Bell,
-    titre: "CASHD · encaissements",
-    texte:
-      "Les devis sans réponse sont relancés au troisième jour puis une semaine après, les factures échues à J+7 et J+21, selon vos règles.",
-    href: "/offres/relances-impayes",
-    media: <MediaPayd />,
+    icone: Clock,
+    titre: "Relance FA-2402",
+    sous: "Message rédigé, en attente de validation.",
+    etat: "à valider",
+    attente: true,
   },
   {
-    icone: MessageSquare,
-    titre: "FRONTD · demandes entrantes",
-    texte: "Une demande reçue à 21 h est qualifiée et reçoit sa réponse à 21 h, sur son canal d'origine.",
-    href: "/offres/demandes-clients",
-    media: <MediaAnswr />,
+    icone: Check,
+    titre: "Réponse · demande reçue à 21 h 04",
+    sous: "Partie après votre validation.",
+    etat: "envoyé",
+    attente: false,
   },
   {
-    icone: FileText,
-    titre: "FILED · flux documentaires",
-    texte:
-      "Les factures fournisseurs sont lues, contrôlées, classées par émetteur et transmises à la comptabilité à date fixe.",
-    href: "/offres/factures-fournisseurs",
-    media: <MediaOffload />,
+    icone: Pause,
+    titre: "Relance DV-0891 · service achats",
+    sous: "Suspendue : montant à revoir avant envoi.",
+    etat: "suspendu",
+    attente: false,
   },
 ];
 
-/* ——— les quatre paquets de la grille à filets ———
-   11/09/2026 (Teo, « j'aime pas cette section ») — remplace SCENES, les
-   quatre cartes de 560×260 de la bande noire. Les intitulés sont ceux de
-   NOM_PAQUET (lib/content.ts) et les phrases leurs `benefit`, raccourcis
-   pour tenir sur deux lignes dans une case de 333 px.
-
-   15/09/2026 (Teo) — PULSE et VAULT SORTENT de la grille. Le site ne montre
-   plus que les quatre paquets qui s'installent et se facturent ; plus aucune
-   page ne mène aux deux fiches comprises. La grille tombe donc à quatre
-   cases, en deux colonnes (voir components/ui/features-4.tsx).
-
-   Les icônes viennent de lucide-react et non des marques de paquets : les
-   marques sont des PNG pensés pour le grand format, qu'une case de 333 px
-   n'aurait pas portés. */
-const PAQUETS: CaseFeature[] = [
+/* BLOC 5b — la rangée : les trois étapes de la mise en place (voir
+   l'écart documenté en tête de fichier). */
+const ETAPES = [
   {
-    icone: Bell,
-    titre: "CASHD",
-    texte: "Les devis sans réponse sont relancés dès le troisième jour, les factures échues à J+7 et J+21.",
-    href: "/offres/relances-impayes",
-  },
-  {
-    icone: Users,
-    titre: "RELOAD",
-    texte:
-      "Les comptes qui n'ont plus commandé, les entretiens redevenus dus et les commandes jamais reprises sont relancés un par un.",
-    href: "/offres/nouvelles-affaires",
-  },
-  {
-    icone: MessageSquare,
-    titre: "FRONTD",
-    texte: "Chaque demande entrante est qualifiée et traitée à toute heure, sur son canal d'origine.",
-    href: "/offres/demandes-clients",
-  },
-  {
-    icone: FileText,
-    titre: "FILED",
-    /* 15/09/2026 (Teo) — « on parle pas que des factures ». La case gardait
-       le périmètre étroit alors que le paquet s'appelle « flux
-       documentaires ». La VOIX ne change pas : les quatre cases de cette
-       grille sont au passif par construction (« Les devis sont relancés »,
-       « Chaque demande est qualifiée ») — n'en retourner qu'une casserait
-       le parallélisme de la rangée. Seul le périmètre s'ouvre, et la
-       rédaction entre, qu'aucune des versions précédentes ne nommait. */
-    texte: "Chaque document reçu est lu, classé au bon dossier, et la réponse qu'il appelle rédigée.",
-    href: "/offres/factures-fournisseurs",
-  },
-];
-
-/* ——— les trois étapes de mise en place ———
-   Elles ne sont pas nouvelles : c'est mot pour mot ce que `MediaEtapes`
-   listait à l'intérieur de la carte « Trois étapes, pas trois mois ». Elles
-   montent d'un cran et deviennent la section. Seule la troisième est
-   allongée, pour recueillir « deux semaines de rodage » qui vivait dans le
-   texte de la carte disparue. */
-const ETAPES: Etape[] = [
-  {
-    rang: "01",
     icone: Search,
     titre: "Diagnostic, 30 min",
     texte: "Nous chiffrons le processus qui vous coûte le plus.",
   },
+  { icone: Plug, titre: "Intégration", texte: "Une demi-journée sur votre environnement." },
   {
-    rang: "02",
-    icone: Plug,
-    titre: "Intégration",
-    texte: "Une demi-journée sur votre environnement.",
-  },
-  {
-    rang: "03",
     icone: CheckCheck,
     titre: "Cycle supervisé",
     texte: "Vos équipes valident chaque action pendant deux semaines, le temps d'ajuster les règles.",
   },
 ];
 
-/* ——— le journal de la carte « Rien ne part sans vous » ———
-   Mêmes trois faits que la fausse fenêtre qu'il remplace (`MediaValidation`) :
-   une relance rédigée qui attend l'accord, une réponse partie APRÈS
-   validation, une relance suspendue par le client. Ce que le journal ajoute
-   et que la file d'attente ne disait pas : QUI a fait le geste — le moteur
-   propose, vous tranchez, ce qui est exactement la promesse de la carte. */
-const JOURNAL: EntreeJournal[] = [
+/* BLOC 5b — les quatre colonnes de la console d'exemple. Quatre lignes
+   chacune, pas trois : à trois, la moitié basse du cadre restait noire
+   alors que la grande image de la référence remplit son rapport. Les
+   libellés tiennent sur UNE ligne dans une colonne de 210 px — au-delà
+   ils sont coupés par des points de suspension, ce qui se voit. */
+const CONSOLE = [
   {
-    id: "j1",
-    titre: "Relance FA-2402 · 14 300 €",
-    description: "Message rédigé, en attente de validation.",
-    horodatage: "il y a 2 min",
-    auteur: "CASHD",
-    etiquette: "à valider",
-    icone: <Clock className="h-3 w-3" />,
+    code: "CASHD",
+    lignes: ["Devis DV-0891 · J+3", "Facture FA-2402 · J+7", "Facture FA-2318 · J+21", "En attente d'accord"],
   },
   {
-    id: "j2",
-    titre: "Réponse · demande reçue à 21 h 04",
-    description: "Partie après votre validation.",
-    horodatage: "il y a 1 h",
-    auteur: "Vous",
-    etiquette: "envoyé",
-    icone: <Check className="h-3 w-3" />,
+    code: "RELOAD",
+    lignes: ["14 comptes inactifs", "Classés par valeur", "1 message / trimestre", "Ancré sur l'historique"],
   },
   {
-    id: "j3",
-    titre: "Relance DV-0891 · service achats",
-    description: "Suspendue : montant à revoir avant envoi.",
-    horodatage: "hier",
-    auteur: "Vous",
-    etiquette: "suspendu",
-    icone: <Pause className="h-3 w-3" />,
+    code: "FRONTD",
+    lignes: ["Demande · 21 h 04", "Réponse rédigée", "Rendez-vous proposé", "Avis demandé ensuite"],
+  },
+  {
+    code: "FILED",
+    lignes: ["Bon de livraison lu", "Montants contrôlés", "Classé au dossier", "Réponse rédigée"],
   },
 ];
 
-/* ——— les trois garanties, textes et médias inchangés ——— */
-const GARANTIES: CarteGarantie[] = [
+/* BLOC 5c — les quatre paquets. Les listes sont volontairement inégales
+   (4 / 4 / 3 / 2), comme celles de la référence (4 / 3 / 2 / 1) : rien
+   n'est ajouté pour égaliser une colonne. Chaque ligne reprend un fait
+   déjà publié sur la page produit correspondante (lib/content.ts). */
+const PAQUETS = [
   {
-    icone: Blocks,
-    titre: "Sur votre environnement",
-    texte:
-      "Le système lit et écrit dans les outils déjà en place. Aucun compte à créer pour vos équipes, aucune donnée à migrer, aucune habitude à changer.",
-    media: <MediaOutils />,
-    lien: { label: "Vérifier la compatibilité", href: "/integrations" },
+    icone: Bell,
+    titre: "CASHD",
+    href: "/offres/relances-impayes",
+    lignes: [
+      "Devis sans réponse relancés dès le troisième jour",
+      "Factures échues relancées à J+7 puis J+21",
+      "Relance graduée selon le montant et le retard",
+      "Aucun envoi sans votre validation",
+    ],
   },
   {
-    icone: ShieldCheck,
-    titre: "Rien ne part sans validation",
-    texte:
-      "Les premières semaines, chaque action est soumise à validation avant envoi. Vous décidez ensuite, règle par règle, de ce qui part seul et de ce qui attend un accord.",
-    media: <AuditLog entrees={JOURNAL} />,
+    icone: Users,
+    titre: "RELOAD",
+    href: "/offres/nouvelles-affaires",
+    lignes: [
+      "Clients inactifs repérés dans votre historique",
+      "Classés par valeur et par récence",
+      "Un message par compte et par trimestre",
+      "Entretiens dus et commandes jamais reprises",
+    ],
   },
   {
-    icone: Lock,
-    titre: "Vos données restent les vôtres",
-    texte:
-      "Chaque entreprise dispose d'un espace chiffré et cloisonné, et les modèles ne reçoivent que le strict nécessaire à chaque tâche.",
-    media: <MediaLocal />,
+    icone: MessageSquare,
+    titre: "FRONTD",
+    href: "/offres/demandes-clients",
+    lignes: [
+      "Une réponse à toute heure, sur le canal d'origine",
+      "Rien hors de la base que vous avez validée",
+      "Prise de rendez-vous menée jusqu'au bout",
+    ],
+  },
+  {
+    icone: FileText,
+    titre: "FILED",
+    href: "/offres/factures-fournisseurs",
+    lignes: ["Tout document reçu, lu puis contrôlé", "Classé au bon dossier, la réponse rédigée"],
   },
 ];
+
+/* BLOC 5d — quatre articles RÉELS du site (lib/content.ts). Aucune
+   vignette inventée : chaque couverture est celle du billet. */
+const RESSOURCES = [
+  "impayes-cout-attendre",
+  "btp-devis-jamais-relances",
+  "immobilier-repondre-en-premier",
+  "facturation-electronique-2026",
+]
+  .map((slug) => POSTS.find((p) => p.slug === slug))
+  .filter((p): p is (typeof POSTS)[number] => Boolean(p));
+
+/* ─────────────────────────────────────────────────────────────────────
+   Briques
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Le bouton de la référence (« FlatCta ») : un voile `currentColor` qui
+   monte du bas au survol, et le libellé qui rentre à 0.9. Le voile est un
+   enfant absolu, pas un `background` — voir nos-offres.css § 3. */
+function Cta({
+  href,
+  children,
+  variante = "noir",
+}: {
+  href: string;
+  children: React.ReactNode;
+  variante?: "noir" | "blanc" | "trait" | "trait-blanc";
+}) {
+  return (
+    <Link href={href} className={`ofd-cta ofd-cta--${variante}`}>
+      <span aria-hidden className="ofd-cta__voile" />
+      <span className="ofd-cta__lbl">{children}</span>
+    </Link>
+  );
+}
+
+/* La variante à pastille du hero et du pied d'appel : la flèche défile
+   dans sa fenêtre (deux exemplaires translatés de 50 %). */
+function CtaPastille({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="ofd-cta ofd-cta--blanc ofd-cta--pastille">
+      <span aria-hidden className="ofd-cta__voile" />
+      <span className="ofd-cta__lbl">
+        {children}
+        <span aria-hidden className="ofd-pastille">
+          <span className="ofd-pastille__rail">
+            <span>
+              <ArrowRight size={16} strokeWidth={1.75} />
+            </span>
+            <span>
+              <ArrowRight size={16} strokeWidth={1.75} />
+            </span>
+          </span>
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+function TeteSection({
+  etiquette,
+  titre,
+  chapo,
+  large = false,
+}: {
+  etiquette: string;
+  titre: string;
+  chapo?: string;
+  large?: boolean;
+}) {
+  return (
+    <div data-reveal className={`ofd-tete${large ? " ofd-tete--large" : ""}`}>
+      <p className="ofd-etiquette">{etiquette}</p>
+      <h2 className="ofd-h2">{titre}</h2>
+      {chapo ? <p className="ofd-chapo">{chapo}</p> : null}
+    </div>
+  );
+}
+
+/* Le fond à points de la colonne de gauche du bloc 3.
+   La référence y pose un planisphère en points livré en un seul fichier :
+   c'est son actif, on ne le recopie pas. Celui-ci est calculé — une
+   sphère de points, même emprise carrée et même poids visuel. Rendu côté
+   serveur, sans aléatoire : deux visites donnent la même image. */
+function MotifPoints() {
+  const pas = 17;
+  const rayon = 190;
+  const points: { x: number; y: number; o: number }[] = [];
+  for (let i = -rayon; i <= rayon; i += pas) {
+    for (let j = -rayon; j <= rayon; j += pas) {
+      const d = Math.hypot(i, j);
+      if (d > rayon) continue;
+      /* Réglé le 16/09 sur l'image que Teo a fournie : un disque PLEIN et
+         régulier, gris moyen, avec un dégradé radial discret vers le
+         centre-gauche. La première version penchait trop à gauche — le
+         bord droit s'effaçait et le motif se lisait en escalier. */
+      const o = 0.34 + 0.26 * (1 - d / rayon) + 0.1 * Math.max(0, 1 - (i + rayon) / (2 * rayon));
+      points.push({ x: 200 + i, y: 200 + j, o: Math.min(0.7, o) });
+    }
+  }
+  return (
+    <svg viewBox="0 0 400 400" role="img" aria-label="Motif : une sphère composée de points">
+      {points.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={3.6} fill="#5b5b5b" opacity={p.o} />
+      ))}
+    </svg>
+  );
+}
+
+function ChromeFenetre({ titre }: { titre: string }) {
+  return (
+    <div className="ofd-fenetre__barre">
+      <span aria-hidden className="ofd-fenetre__points">
+        <i style={{ background: "#ff5f57" }} />
+        <i style={{ background: "#febc2e" }} />
+        <i style={{ background: "#28c840" }} />
+      </span>
+      <span className="ofd-fenetre__titre">{titre}</span>
+      <span className="ofd-fenetre__mention">Exemple</span>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   La page
+   ───────────────────────────────────────────────────────────────────── */
 
 export default function OffresPage() {
   return (
     <PageShell>
       <PageMotion />
 
-      <div className="offres">
-        {/* ════════ HERO ════════
-            Fond pointillé sur les 600 premiers pixels, éteint en dégradé ;
-            le collage produit chevauche le bas du bloc de texte. */}
-        {/* pt calé sur la référence : la pastille y tombe à 225 px du haut de
-            page. Le header du site occupe 72 px DANS le flux (il est sticky,
-            pas fixed, contrairement à la nav flottante de la référence), d'où
-            81 + 60 au lieu de 160 + 60. */}
-        <section
-          data-monde="clair"
-          className="relative overflow-hidden pt-[40px] sm:pt-[81px]"
-        >
-          <div
-            aria-hidden
-            className="o-dots o-dots-fade pointer-events-none absolute inset-x-0 top-0 h-[600px]"
-          />
-
-          <div className="o-wrap relative">
-            <div className="flex flex-col items-center pt-[60px] text-center">
-              <div data-reveal>
-                <span className="o-pill o-pill--xs">Nos offres</span>
-              </div>
-              <h1 data-reveal className="o-h1 mt-4 max-w-[700px]">
+      <div className="ofd">
+        {/* ═══ 1 · HERO — image pleine, coins à 24, texte calé en bas ═══
+            data-monde="clair" : le header caméléon du site doit passer en
+            verre clair au-dessus de la marge blanche qui borde la carte. */}
+        <section data-monde="clair" className="ofd-pleine ofd-pleine--haut">
+          <div className="ofd-hero">
+            <Image
+              src="/photos/tarifs-hero-atrium.jpg"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="ofd-hero__media"
+            />
+            <div aria-hidden className="ofd-hero-voile" />
+            <div className="ofd-hero__col">
+              {/* budget de signes de la référence : titre 11, chapô 66.
+                  Le nôtre : 50 et 76 — le chapô de l'ancienne page en
+                  faisait 230, il devenait un paragraphe dans ce gabarit. */}
+              <h1 data-reveal className="ofd-h1">
                 Commencez par le processus qui a le plus d&apos;impact.
               </h1>
-              <p data-reveal className="o-lead mt-[15px] max-w-[650px]">
-                Nous identifions avec vous le poste où l&apos;automatisation
-                crée le plus de valeur, puis nous le déployons directement dans
-                votre environnement existant. Une approche progressive,
-                mesurable et sans migration inutile.
+              <p data-reveal className="ofd-lead">
+                Un processus à la fois. Sur vos outils, sous vos règles, à votre validation.
               </p>
-              <div data-reveal className="mt-[25px] flex flex-wrap items-center justify-center gap-3">
-                <Link href="/commencer" className="o-btn o-btn--primary">
-                  Commencer
-                </Link>
+              <div data-reveal className="ofd-hero__actions">
+                <CtaPastille href="/commencer">Commencer</CtaPastille>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* 15/09/2026 (Teo) — le collage de trois fenêtres flottantes
-                (<HeroCollage>, toujours dans Media.tsx) laisse la place à
-                <HeroBento> : mêmes trois idées (l'encours, le brouillon à
-                valider, la demande traitée la nuit), mais en bento — donc
-                les trois restent lisibles sur téléphone, là où le collage
-                cachait ses deux panneaux latéraux sous 1024 px. */}
-            <div data-reveal className="mt-10 pb-[15px] lg:pb-[56px]">
-              <HeroBento />
+        {/* ═══ 2 · BANDE D'OUTILS ═══ */}
+        <section data-monde="clair" className="ofd-sec ofd-sec--haut">
+          <div className="ofd-wrap">
+            <p className="ofd-mono ofd-outils__legende">Se branche sur les outils déjà en place</p>
+            <div className="ofd-outils">
+              <ul>
+                {OUTILS.map((m) => (
+                  <li key={m.title}>
+                    <svg viewBox="0 0 24 24" role="img" aria-label={m.title}>
+                      <path d={m.path} />
+                    </svg>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
 
-        {/* ════════ LES QUATRE — grille à filets sur bande noire ════════
-            11/09/2026 (Teo) — l'ancienne section tenait sur 1150 px : une
-            colonne de texte à gauche, deux chiffres, et quatre cartes de
-            560×260 à droite. Elle disait une troisième fois ce que le bento
-            venait de dire, et le bloc `features-4` demandé par Teo tient la
-            même information en un tiers de la hauteur.
+        {/* ═══ 3 · PANNEAU DOUX + LES QUATRE ARGUMENTS ═══ */}
+        <section data-monde="clair" className="ofd-sec">
+          <div className="ofd-wrap">
+            <div className="ofd-panneau">
+              <div className="ofd-panneau__grille">
+                <div className="ofd-panneau__gauche">
+                  <div data-reveal className="ofd-panneau__intro">
+                    <h2 className="ofd-h3">Ce qui ne change pas chez vous.</h2>
+                    <p className="ofd-body">
+                      Les systèmes lisent et écrivent dans les outils déjà en place. Aucun compte à créer
+                      pour vos équipes, aucune donnée à migrer, aucune habitude à changer.
+                    </p>
+                  </div>
+                  <div aria-hidden className="ofd-panneau__motif">
+                    <MotifPoints />
+                  </div>
+                </div>
 
-            Ce qui a disparu et où ça se dit déjà : « Branché sur vos outils
-            actuels » est repris deux fois — dans les quatre arguments
-            (« Intégration à votre environnement ») et dans la mise en place
-            (« Sur vos outils ») ; le plafond du Chèque TIC est dans ces mêmes
-            arguments ; les trente minutes d'audit sont dans le CTA final.
-
-            Le fond noir est conservé : avec la bande des quatre arguments,
-            c'est l'une des deux respirations sombres de la page, et sans lui
-            elle enchaînerait quatre sections blanches d'affilée. Le
-            débordement jusqu'aux bords de l'écran
-            reste la technique de .o-nuit (ombre écrêtée horizontalement).
-
-            15/09/2026 (Teo) — la section passe AVANT les moteurs, et la bande
-            des quatre arguments passe après : le catalogue suit donc le hero.
-            Le bouton « Voir les quatre systèmes » de <Bento02> est retiré (il
-            remonterait), l'ancre `#catalogue` reste posée pour les appels venus
-            des autres pages.
-
-            (Avant le 15/09, l'ancre était la destination de ce bouton, qui
-            descendait depuis la tuile large du bento.) */}
-        <section
-          id="catalogue"
-          className="scroll-mt-24 bg-black py-[120px]"
-          style={{ boxShadow: "0 0 0 100vmax #000", clipPath: "inset(0 -100vmax)" }}
-        >
-          <Features
-            pastille="Le catalogue"
-            titre="Quatre systèmes couvrent les processus les plus répétitifs"
-            chapo="Chacun s'installe sur les outils que vos équipes utilisent déjà, fonctionne en continu et s'arrête à votre validation."
-            cases={PAQUETS}
-          />
-
-          {/* le sur-mesure fermait la colonne de cartes : il garde sa place
-              APRÈS le catalogue — le proposer avant ferait passer les paquets
-              pour un rabais — mais en une ligne au lieu d'une carte. */}
-          <div data-reveal className="o-wrap mt-10 text-center">
-            <p className="o-small !text-white/60">
-              Si votre besoin n&apos;entre dans aucune de ces cases, le sur-mesure prend le relais.{" "}
-              <Link href="/offres/sur-mesure" className="o-link o-link--light align-[-3px]">
-                Découvrir le sur-mesure
-                <IconeFleche />
-              </Link>
-            </p>
+                <div className="ofd-quatre">
+                  {ARGUMENTS.map(({ icone: Icone, teinte, titre, texte }) => (
+                    <article key={titre} data-reveal className="ofd-carte">
+                      <div className="ofd-carte__tete">
+                        <h3 className="ofd-h5">{titre}</h3>
+                        <span className="ofd-carte__puce" style={{ color: teinte }}>
+                          <Icone size={17} strokeWidth={1.5} />
+                        </span>
+                      </div>
+                      <p className="ofd-body">{texte}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ════════ LES MOTEURS — bento : tuile large puis trois tuiles ════════ */}
-        <section id="moteurs" data-monde="clair" className="scroll-mt-24 pt-[80px] pb-[120px]">
-          <Bento02
-            pastille="Ce qui se déploie"
-            titre="Chaque système tient un poste, et un seul."
-            chapo="Aucun ne fait tout : chacun prend en charge un processus, le traite en continu sur vos outils et s'arrête à votre validation. Trois exemples pris dans le catalogue ci-dessus."
-            tuiles={MOTEURS}
-          />
-        </section>
-
-        {/* ════════ QUATRE ARGUMENTS — bande noire ════════
-            Pas de data-monde="clair" : le header caméléon doit rester sombre
-            au-dessus de cette bande. Le fond déborde jusqu'aux bords de
-            l'écran via .o-nuit, le contenu reste dans la colonne.
-
-            15/09/2026 (Teo) — la bande est descendue sous les moteurs, à la
-            place qu'occupait le catalogue.
-
-            La respiration verticale descend de 90/110 à 64/80 : les cases
-            de `features-hover` portent désormais leur propre `py-9 sm:py-10`,
-            et cumulée l'ancienne valeur creusait 80 px de noir vide en haut
-            comme en bas. */}
-        <section className="o-nuit py-[64px] sm:py-[80px]">
-          <div className="o-wrap">
-            <BentoGrid01 cases={ARGUMENTS} libelleAtterrissage="Chèque TIC" />
+        {/* ═══ 4 · PANNEAU DE COULEUR + ÉNONCÉ ═══ */}
+        <section data-monde="clair" className="ofd-sec">
+          <div className="ofd-wrap">
+            <div className="ofd-duo">
+              <div aria-hidden className="ofd-duo__marque">
+                {/* Mot-symbole en serif blanc sur le rouge de la référence
+                    (#E7131A). Remplace le signe alpha « sur mesure », que
+                    Teo a trouvé terne sur fond noir le 16/09. */}
+                <span className="ofd-duo__signe">Sur mesure</span>
+              </div>
+              <div className="ofd-duo__texte">
+                <div data-reveal>
+                  <p className="ofd-mono">Sur mesure</p>
+                  <h3 className="ofd-h3">
+                    Si votre besoin n&apos;entre dans aucune de ces cases, le sur-mesure prend le relais.
+                  </h3>
+                </div>
+                <div data-reveal>
+                  <Cta href="/offres/sur-mesure">Découvrir le sur-mesure</Cta>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ════════ MISE EN PLACE — trois étapes, puis trois garanties ════════ */}
-        <section data-monde="clair" className="py-[120px]">
-          <HowItWorks01
-            pastille="Mise en place"
-            titre="Une mise en place progressive, validée à chaque étape."
-            chapo="Du diagnostic au premier système en production, chaque jalon est validé avant le suivant, et votre environnement reste inchangé."
-            etapes={ETAPES}
-            cartes={GARANTIES}
-          />
-        </section>
+        {/* ═══ 5 · LA ZONE DOUCE — tout ce qui suit vit sur #f2f2f2 ═══ */}
+        <div className="ofd-zone-douce">
+          {/* ─── 5a · bloc scindé : l'énoncé à droite, la fenêtre à gauche ─── */}
+          <section data-monde="clair" className="ofd-sec ofd-sec--plein">
+            <div className="ofd-wrap">
+              <TeteSection
+                etiquette="Contrôle humain"
+                titre="Rien ne part sans vous."
+                chapo="Les premières semaines, chaque action est soumise à validation avant envoi. Vous décidez ensuite, règle par règle, de ce qui part seul et de ce qui attend un accord."
+                large
+              />
 
-        {/* ════════ APPEL FINAL — le bloc tenu au trait ════════ */}
-        <section data-monde="clair" className="o-wrap pb-[120px]">
-          <Cta3
-            titre="Un chiffrage avant tout engagement."
-            chapo="Trente minutes suffisent pour mesurer ce que le processus le plus coûteux représente pour votre organisation, et désigner le système au meilleur retour. Sans engagement."
-            bouton={{ label: "Commencer", href: "/commencer" }}
-          />
-        </section>
+              <div className="ofd-scinde">
+                <div data-reveal className="ofd-scinde__texte">
+                  <p className="ofd-h4">Un journal de tout ce qui part</p>
+                  <p className="ofd-scinde__sous">Le système propose, vous tranchez.</p>
+                  <p className="ofd-scinde__corps">
+                    Les règles et les niveaux d&apos;autonomie sont définis avec vous. Chaque entreprise
+                    dispose d&apos;un espace chiffré et cloisonné, et les modèles ne reçoivent que le
+                    strict nécessaire à chaque tâche.
+                  </p>
+                  <div className="ofd-scinde__actions">
+                    <Cta href="/commencer">Commencer</Cta>
+                    <Cta href="/integrations" variante="trait">
+                      Vérifier la compatibilité
+                    </Cta>
+                  </div>
+                </div>
+
+                <div data-reveal className="ofd-scinde__media">
+                  <div className="ofd-fenetre">
+                    <ChromeFenetre titre="File de validation" />
+                    <div className="ofd-fenetre__corps">
+                      {JOURNAL.map(({ icone: Icone, titre, sous, etat, attente }) => (
+                        <div key={titre} className={`ofd-ligne${attente ? " ofd-ligne--attente" : ""}`}>
+                          <span aria-hidden className="ofd-ligne__icone">
+                            <Icone size={12} strokeWidth={1.75} />
+                          </span>
+                          <span className="ofd-ligne__corps">
+                            <span className="ofd-ligne__titre">{titre}</span>
+                            <span className="ofd-ligne__sous">{sous}</span>
+                          </span>
+                          <span className="ofd-ligne__etat">{etat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ─── 5b · grande console, légende mono, rangée ─── */}
+          <section data-monde="clair" className="ofd-sec">
+            <div className="ofd-wrap">
+              <TeteSection
+                etiquette="Ce qu'on installe"
+                titre="Un système par processus, branché sur vos outils."
+                chapo="Aucun ne fait tout : chacun prend en charge un processus, le traite en continu sur les outils déjà en place, et s'arrête à votre validation."
+              />
+
+              <div className="ofd-large">
+                <div data-reveal className="ofd-console">
+                  <div className="ofd-fenetre">
+                    <ChromeFenetre titre="Les quatre systèmes" />
+                    <div className="ofd-fenetre__corps ofd-fenetre__corps--colonnes">
+                      {CONSOLE.map((col) => (
+                        <div key={col.code} className="ofd-colonne">
+                          <span className="ofd-ligne__etat">{col.code}</span>
+                          {col.lignes.map((l) => (
+                            <span key={l} className="ofd-ligne ofd-ligne--puce">
+                              <span className="ofd-ligne__titre">{l}</span>
+                            </span>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="ofd-rangee">
+                  <p className="ofd-mono ofd-rangee__legende">La mise en place, en trois étapes</p>
+                  <div className="ofd-rangee__grille">
+                    {ETAPES.map(({ icone: Icone, titre, texte }) => (
+                      <div key={titre} data-reveal className="ofd-entree">
+                        <span aria-hidden className="ofd-entree__icone">
+                          <Icone size={24} strokeWidth={1.5} />
+                        </span>
+                        <div>
+                          <h3 className="ofd-h5">{titre}</h3>
+                          <p className="ofd-body">{texte}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ─── 5c · les quatre cartes à liste ─── */}
+          <section id="catalogue" data-monde="clair" className="ofd-sec ofd-ancre">
+            <div className="ofd-wrap">
+              <TeteSection
+                etiquette="Le catalogue"
+                titre="Quatre systèmes couvrent les processus les plus répétitifs"
+              />
+
+              <div className="ofd-cartes4">
+                {PAQUETS.map(({ icone: Icone, titre, href, lignes }) => (
+                  <Link key={titre} href={href} data-reveal className="ofd-fiche">
+                    <div className="ofd-fiche__tete">
+                      <span aria-hidden className="ofd-fiche__icone">
+                        <Icone size={24} strokeWidth={1.5} />
+                      </span>
+                      <h3 className="ofd-h5">{titre}</h3>
+                    </div>
+                    <ul>
+                      {lignes.map((l) => (
+                        <li key={l} className="ofd-body">
+                          <Check size={16} strokeWidth={2} />
+                          <span>{l}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ─── 5d · les ressources ─── */}
+          <section data-monde="clair" className="ofd-sec">
+            <div className="ofd-wrap">
+              <TeteSection etiquette="Ressources" titre="Pour aller plus loin" />
+
+              <div className="ofd-ressources">
+                {RESSOURCES.map((p) => (
+                  <Link key={p.slug} href={`/blog/${p.slug}`} data-reveal className="ofd-ressource">
+                    <div className="ofd-ressource__vignette">
+                      <Image
+                        src={p.cover}
+                        alt=""
+                        width={640}
+                        height={402}
+                        sizes="(max-width: 1024px) 100vw, 25vw"
+                      />
+                    </div>
+                    <div className="ofd-ressource__texte">
+                      <p className="ofd-ressource__cat">{p.cat}</p>
+                      <h3 className="ofd-ressource__titre">{p.title}</h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ─── 5e · le panneau ardoise ─── */}
+          <section data-monde="clair" className="ofd-sec">
+            <div className="ofd-wrap">
+              <div className="ofd-ardoise">
+                <div className="ofd-ardoise__grille">
+                  <p className="ofd-ardoise__label">{"Le problème\nqu'ils règlent"}</p>
+                  <div className="ofd-ardoise__corps">
+                    <p data-reveal className="ofd-citation">
+                      «&nbsp;Une entreprise ne perd pas son chiffre d&apos;un coup. Elle le perd par un
+                      devis sans réponse, un appel manqué, une facture jamais relancée.&nbsp;»
+                    </p>
+                    <div data-reveal className="ofd-ardoise__signature">
+                      <p>
+                        Un service qui attend la validation d&apos;un autre, des demandes qui arrivent plus
+                        vite qu&apos;on ne les traite, des relances suspendues à la disponibilité d&apos;une
+                        personne.
+                      </p>
+                      <span className="ofd-ardoise__tag">Ce que les quatre systèmes reprennent</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ─── 5f · le pied d'appel ─── */}
+          <section data-monde="clair" className="ofd-pleine ofd-sec">
+            <div className="ofd-hero">
+              <Image
+                src="/photos/tarifs-cloture-facade.jpg"
+                alt=""
+                fill
+                sizes="100vw"
+                className="ofd-hero__media"
+              />
+              <div aria-hidden className="ofd-hero-voile" />
+              <div className="ofd-hero__col">
+                <h2 data-reveal className="ofd-h1">
+                  Un chiffrage avant tout engagement.
+                </h2>
+                <p data-reveal className="ofd-lead">
+                  Trente minutes pour mesurer ce que le processus le plus coûteux représente, et désigner
+                  le système au meilleur retour.
+                </p>
+                <div data-reveal className="ofd-hero__actions">
+                  <CtaPastille href="/commencer">Commencer</CtaPastille>
+                  <Cta href="/offres/sur-mesure" variante="trait-blanc">
+                    Découvrir le sur-mesure
+                  </Cta>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </PageShell>
   );

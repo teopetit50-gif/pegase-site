@@ -1,0 +1,1352 @@
+/* ══════════════════════════════════════════════════════════════════════
+   .ofd — /offres, décalque de scale.com/data-engine (16/09/2026)
+
+   Demande de Teo : « refais la page nos offres, exactement la même chose
+   que https://scale.com/data-engine — le design, les textes, leurs
+   tailles, tout. »
+
+   TOUT vit sous `.ofd` et tout est préfixé `--ofd-` / `.ofd-`. Supprimer ce
+   fichier et son import supprime la page, sans effet de bord ailleurs. En
+   particulier il ne touche PAS au bloc `.offres` de globals.css, qui sert
+   encore /, /blog, /integrations et /tarifs/site.
+
+   ── LE RELEVÉ ────────────────────────────────────────────────────────
+   Lu au getComputedStyle sur la référence, jamais estimé, et repassé à
+   cinq largeurs en RECHARGEANT à chaque palier (390 / 768 / 1024 / 1440 ;
+   au-delà de 1472 la colonne est plafonnée, donc 1700 ne dit rien de plus).
+
+   colonne          max 1472, padding-inline 24  → 1392 utiles à 1440
+   rythme vertical  padding-bottom 56, puis 80 à partir de 768
+   rayons           24 (pleine image) · 16 (panneau) · 12 (carte) · 8 (bouton)
+   couleurs         texte #000 · encre de titre #212121 · fond doux #f2f2f2
+                    étiquette #525252 · ardoise (citation) #839cb2
+                    voile sur image rgba(0,0,0,.45)
+                    les quatre pastilles des cartes : #79648c #a8927c
+                    #273252 #193a29 — leurs tokens archive-purple,
+                    foundry-tan, atlas-blue, evergreen
+   graisse          400 PARTOUT, titres compris. C'est la signature de la
+                    référence et la première chose qui se perd si on met
+                    du 600 sur un h2.
+   interlettre      -0.01em sur tout le texte courant ; -0.05em sur la
+                    seule citation ; +1px sur l'étiquette monospace
+
+   échelle typographique, mesurée aux quatre largeurs :
+                        390        768        1024/1440
+     titre du hero    32/33.6    46.4/48.7    64/67.2   (clamp 5vw, plafond 4rem)
+     chapô du hero    16/23.2    20/30        20/30
+     étiquette mono   12/24 ls+1px, en capitales, identique partout
+     h2 de section    30/41.25   40/55        48/60
+     chapô de section 16/25.6    16/25.6      20/32     couleur rgba(0,0,0,.7)
+     titre de bloc    24/25.2    40/50        40/50     couleur #212121
+     titre de carte   22/23.1    24/36        24/36     couleur #212121
+     texte de carte   14/18.9    16/24        16/24     couleur #000
+     légende mono     10/12      13/15.6      13/15.6
+     citation         24/28      32/28        40/44     ls -0.05em
+
+   ── ÉCARTS ASSUMÉS ───────────────────────────────────────────────────
+   Chacun est un choix, pas un oubli. Ne pas les « corriger ».
+
+   1. LA POLICE. La référence est composée en Aeonik Pro (CoType Foundry),
+      sous licence commerciale : on ne peut ni servir leurs fichiers ni
+      l'acheter à leur place. Hanken Grotesk la remplace — même squelette
+      de grotesque géométrique, même hauteur d'x, 'g' à un étage. DM Mono
+      porte les étiquettes, qui sont bien en monospace dans la référence.
+      C'est le même choix que /vos-donnees (bloc `.vd`), qui décalque une
+      autre page du même site : les deux pages se répondent.
+
+   2. LE HAUT DE PAGE. La référence pose `pt-24` (96 px) parce que son
+      entête est `fixed` et recouvre le haut du document ; le bord haut de
+      la carte du hero tombe donc à 20 px sous l'entête. Le nôtre est
+      `sticky` et occupe sa place dans le flux : `padding-top: 20px` rend
+      exactement le même écart visible.
+
+   3. LE VOILE DU HERO. La référence a un voile uniforme `bg-black/45`.
+      Le nôtre y ajoute un dégradé vers le bas (voir `.ofd-hero-voile`) :
+      leur photo est sombre en bas, la nôtre est un atrium clair, et le
+      texte blanc y passait sous le seuil de lisibilité. La densité en
+      haut d'image est identique.
+
+   4. LE FOND À POIS de la colonne de gauche (§ « ce qui ne change pas »)
+      est un actif de la référence — un planisphère en points livré en un
+      seul fichier. On ne recopie pas l'actif d'autrui : le nôtre est
+      composé en SVG, même emprise et même poids visuel.
+
+   Les écarts de CONTENU (preuve sociale, logos clients, prix) sont
+   documentés dans page.tsx, section par section.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.ofd {
+  --ofd-texte: #000000;
+  --ofd-encre: #212121;
+  --ofd-doux: rgba(0, 0, 0, 0.7);
+  --ofd-fond: #f2f2f2;
+  --ofd-etiquette: #525252;
+  --ofd-ardoise: #839cb2;
+  --ofd-mauve: #d1aad7;
+  --ofd-ligne: rgba(0, 0, 0, 0.08);
+
+  --ofd-r-xl: 24px;
+  --ofd-r-lg: 16px;
+  --ofd-r-md: 12px;
+  --ofd-r-sm: 8px;
+
+  background: #ffffff;
+  color: var(--ofd-texte);
+  font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   1 · COLONNE ET RYTHME
+   ───────────────────────────────────────────────────────────────────── */
+
+/* `padding-inline` et jamais `padding` : les sections portent leur propre
+   rythme vertical, un raccourci `padding` l'écraserait en silence. */
+.ofd .ofd-wrap {
+  width: 100%;
+  max-width: 1472px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.ofd .ofd-sec {
+  padding-bottom: 56px;
+}
+.ofd .ofd-sec--haut {
+  padding-top: 40px;
+}
+.ofd .ofd-sec--plein {
+  padding-top: 56px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-sec {
+    padding-bottom: 80px;
+  }
+  .ofd .ofd-sec--plein {
+    padding-top: 80px;
+  }
+}
+
+/* l'ancre #catalogue est appelée depuis d'autres pages : le header du site
+   est `sticky` et recouvrirait la tête de section sans cette marge. */
+.ofd .ofd-ancre {
+  scroll-margin-top: 96px;
+}
+
+/* la moitié basse de la page vit sur le fond doux, d'un seul tenant */
+.ofd .ofd-zone-douce {
+  width: 100%;
+  background: var(--ofd-fond);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   2 · TYPOGRAPHIE
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-h1,
+.ofd .ofd-h2,
+.ofd .ofd-h3,
+.ofd .ofd-h4,
+.ofd .ofd-h5 {
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+/* titre du hero — la référence pose ce clamp au pixel près */
+.ofd .ofd-h1 {
+  font-size: clamp(2rem, 0.5rem + 5vw, 4rem);
+  line-height: 1.05;
+  color: #ffffff;
+}
+
+/* h2 de section — 30 → 40 (768) → 48 (1024) */
+.ofd .ofd-h2 {
+  font-size: 1.875rem;
+  line-height: 1.375;
+  color: var(--ofd-texte);
+}
+@media (min-width: 768px) {
+  .ofd .ofd-h2 {
+    font-size: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-h2 {
+    font-size: 3rem;
+    line-height: 1.25;
+  }
+}
+
+/* titre de bloc (leur header3-regular) — 24/1.05 puis 40/1.25 */
+.ofd .ofd-h3 {
+  font-size: 1.5rem;
+  line-height: 1.05;
+  color: var(--ofd-encre);
+}
+@media (min-width: 768px) {
+  .ofd .ofd-h3 {
+    font-size: 2.5rem;
+    line-height: 1.25;
+  }
+}
+
+/* titre intermédiaire du bloc scindé — 32 puis 36 à partir de 1280 */
+.ofd .ofd-h4 {
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #010101;
+}
+@media (min-width: 1280px) {
+  .ofd .ofd-h4 {
+    font-size: 2.25rem;
+  }
+}
+
+/* titre de carte (leur header5-regular) — 22/1.05 puis 24/1.5 */
+.ofd .ofd-h5 {
+  font-size: 1.375rem;
+  line-height: 1.05;
+  color: var(--ofd-encre);
+}
+@media (min-width: 768px) {
+  .ofd .ofd-h5 {
+    font-size: 1.5rem;
+    line-height: 1.5;
+  }
+}
+
+/* chapô du hero (leur body1) */
+.ofd .ofd-lead {
+  letter-spacing: -0.01em;
+  font-size: 1rem;
+  line-height: 1.45;
+  font-weight: 400;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-lead {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+}
+
+/* chapô de section — 16/1.6 puis 20/1.6 à 1024 */
+.ofd .ofd-chapo {
+  letter-spacing: -0.01em;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--ofd-doux);
+  text-wrap: balance;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-chapo {
+    font-size: 1.25rem;
+  }
+}
+
+/* texte courant de carte (leur body2-regular) */
+.ofd .ofd-body {
+  letter-spacing: -0.01em;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  font-weight: 400;
+  color: var(--ofd-texte);
+}
+@media (min-width: 768px) {
+  .ofd .ofd-body {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+/* étiquette de section — 12 px monospace, capitales, +1px d'interlettre */
+.ofd .ofd-etiquette {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ofd-etiquette);
+  margin-bottom: 20px;
+}
+
+/* légende monospace (leur detail-mono) — 10 puis 13 */
+.ofd .ofd-mono {
+  letter-spacing: -0.01em;
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--ofd-texte);
+}
+@media (min-width: 768px) {
+  .ofd .ofd-mono {
+    font-size: 0.813rem;
+    line-height: 1.2;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   3 · BOUTONS — leur « FlatCta »
+
+   Deux mouvements, relevés tels quels : un voile `currentColor` à 30–35 %
+   qui MONTE depuis le bas en 300 ms, et le libellé qui rentre à 0.9. Le
+   voile est un enfant en position absolue, pas un `background` : c'est ce
+   qui permet de le translater sans repeindre le bouton.
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-cta {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 300ms ease, background-color 300ms ease;
+}
+.ofd .ofd-cta__voile {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: currentColor;
+  opacity: 0.3;
+  border-radius: inherit;
+  transform: translateY(100%);
+  transition: transform 300ms ease-out;
+  pointer-events: none;
+}
+.ofd .ofd-cta:hover .ofd-cta__voile {
+  transform: translateY(0);
+}
+.ofd .ofd-cta__lbl {
+  position: relative;
+  z-index: 1;
+  display: block;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  line-height: 21px;
+  font-weight: 500;
+  letter-spacing: normal;
+  white-space: nowrap;
+  transform-origin: center;
+  transition: transform 300ms ease-out;
+}
+.ofd .ofd-cta:hover .ofd-cta__lbl {
+  transform: scale(0.9);
+}
+
+.ofd .ofd-cta--noir {
+  background: #000000;
+  color: #ffffff;
+}
+.ofd .ofd-cta--blanc {
+  background: #ffffff;
+  color: #000000;
+}
+/* Seules les variantes au trait portent une bordure : la référence mesure
+   37 px sur le bouton plein (8 + 21 + 8) et 39 sur celui au trait. */
+.ofd .ofd-cta--trait {
+  border: 1px solid #000000;
+  color: #000000;
+}
+.ofd .ofd-cta--trait-blanc {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+}
+
+/* variante à pastille : le libellé ne rentre pas, c'est la flèche qui
+   défile dans sa fenêtre (deux exemplaires, translatés de 50 %). */
+.ofd .ofd-cta--pastille .ofd-cta__lbl {
+  display: flex;
+  line-height: 1.5;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 4px 4px 16px;
+}
+.ofd .ofd-cta--pastille:hover .ofd-cta__lbl {
+  transform: none;
+}
+.ofd .ofd-cta--pastille .ofd-cta__voile {
+  opacity: 0.35;
+  transform: translateX(-100%);
+  transition-duration: 600ms;
+}
+.ofd .ofd-cta--pastille:hover .ofd-cta__voile {
+  transform: translateX(0);
+}
+.ofd .ofd-pastille {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 32px;
+  width: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+}
+.ofd .ofd-pastille__rail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 200%;
+  transform: translateX(-50%);
+  transition: transform 600ms ease-out;
+}
+.ofd .ofd-cta--pastille:hover .ofd-pastille__rail {
+  transform: translateX(0);
+}
+.ofd .ofd-pastille__rail > span {
+  display: flex;
+  height: 100%;
+  width: 50%;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ofd .ofd-cta__voile,
+  .ofd .ofd-cta__lbl,
+  .ofd .ofd-pastille__rail {
+    transition: none;
+  }
+  .ofd .ofd-cta:hover .ofd-cta__voile {
+    transform: translateY(100%);
+  }
+  .ofd .ofd-cta--pastille:hover .ofd-cta__voile {
+    transform: translateX(-100%);
+  }
+  .ofd .ofd-cta:hover .ofd-cta__lbl {
+    transform: none;
+  }
+  .ofd .ofd-cta--pastille:hover .ofd-pastille__rail {
+    transform: translateX(-50%);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   4 · HERO ET PIED D'APPEL — la « FullBleedMediaSection »
+   ───────────────────────────────────────────────────────────────────── */
+
+/* 16 px de marge latérale à TOUTES les largeurs : la référence pose
+   `px-4!` en important, qui gagne contre son `md:grid-padding`. Mesuré :
+   1408 de carte à 1440, 736 à 768, 358 à 390. */
+.ofd .ofd-pleine {
+  padding-inline: 16px;
+}
+.ofd .ofd-pleine--haut {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.ofd .ofd-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 480px;
+  padding: 32px;
+  border-radius: var(--ofd-r-xl);
+  overflow: hidden;
+  isolation: isolate;
+  background: #193a29;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-hero {
+    min-height: 720px;
+    padding: 64px;
+  }
+}
+
+.ofd .ofd-hero__media,
+.ofd .ofd-hero__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* écart n° 3 du relevé : voile uniforme de la référence + dégradé bas */
+.ofd .ofd-hero-voile {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 55%),
+    rgba(0, 0, 0, 0.45);
+}
+
+.ofd .ofd-hero__col {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 72rem;
+}
+.ofd .ofd-hero__col .ofd-lead {
+  color: #ffffff;
+}
+
+.ofd .ofd-hero__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-hero__actions {
+    flex-direction: row;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   5 · BANDE D'OUTILS
+   ───────────────────────────────────────────────────────────────────── */
+
+/* AJOUT assumé : la référence n'a pas de légende au-dessus de sa rangée de
+   logos. Sans elle, une rangée de marques sous un hero se lit comme une
+   liste de clients — voir l'écart « BLOC 2 » en tête de page.tsx. */
+.ofd .ofd-outils__legende {
+  text-align: center;
+  margin-bottom: 32px;
+  color: var(--ofd-etiquette);
+}
+
+.ofd .ofd-outils {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ofd .ofd-outils::-webkit-scrollbar {
+  display: none;
+}
+.ofd .ofd-outils ul {
+  display: flex;
+  min-width: max-content;
+  align-items: center;
+  justify-content: space-around;
+  gap: 48px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-outils ul {
+    min-width: 0;
+    gap: 40px;
+  }
+}
+.ofd .ofd-outils li {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+.ofd .ofd-outils svg {
+  height: 24px;
+  width: auto;
+  fill: #000000;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   6 · PANNEAU DOUX + GRILLE DE QUATRE CARTES
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-panneau {
+  border-radius: var(--ofd-r-lg);
+  background: var(--ofd-fond);
+  padding: 24px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-panneau {
+    padding: 40px;
+  }
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-panneau {
+    padding: 48px;
+  }
+}
+
+.ofd .ofd-panneau__grille {
+  display: grid;
+  gap: 40px;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-panneau__grille {
+    grid-template-columns: minmax(0, 0.95fr) minmax(560px, 1.05fr);
+    align-items: stretch;
+  }
+}
+
+.ofd .ofd-panneau__gauche {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+}
+.ofd .ofd-panneau__intro {
+  max-width: 460px;
+}
+.ofd .ofd-panneau__intro .ofd-body {
+  margin-top: 16px;
+}
+.ofd .ofd-panneau__motif {
+  display: flex;
+  min-height: 360px;
+  align-items: center;
+  justify-content: center;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-panneau__motif {
+    min-height: 560px;
+  }
+}
+.ofd .ofd-panneau__motif svg {
+  height: auto;
+  width: 100%;
+  max-width: 760px;
+}
+
+.ofd .ofd-quatre {
+  display: grid;
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-quatre {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-quatre {
+    gap: 16px;
+  }
+}
+
+.ofd .ofd-carte {
+  display: flex;
+  min-height: 200px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  border-radius: var(--ofd-r-md);
+  background: #ffffff;
+  padding: 24px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-carte {
+    padding: 32px;
+  }
+}
+.ofd .ofd-carte__tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+.ofd .ofd-carte__puce {
+  height: 17px;
+  width: 17px;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   7 · BLOC EN DEUX TEMPS — panneau de couleur + énoncé
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-duo {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-duo {
+    grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
+  }
+}
+.ofd .ofd-duo__marque {
+  position: relative;
+  display: flex;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--ofd-r-lg);
+  padding: 40px;
+  background: #e7131a;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-duo__marque {
+    min-height: 420px;
+  }
+}
+/* Mot-symbole, à la place du signe alpha. La référence pose ici un
+   logotype en serif blanc sur le rouge ; aucune serif n'est chargée sur
+   le site et il n'y a pas lieu d'en charger une pour deux mots : la pile
+   système (ui-serif → Georgia → Times) rend le même dessin, comme la
+   référence elle-même retombe sur une pile pour ses logotypes. */
+.ofd .ofd-duo__signe {
+  display: block;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: clamp(2.75rem, 1rem + 6vw, 5rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ofd .ofd-duo__texte {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 24px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-duo__texte {
+    padding: 40px;
+  }
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-duo__texte {
+    padding: 48px;
+  }
+}
+.ofd .ofd-duo__texte .ofd-h3 {
+  margin-top: 16px;
+}
+.ofd .ofd-duo__texte .ofd-mono {
+  color: var(--ofd-texte);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   8 · TÊTE DE SECTION CENTRÉE
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-tete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-inline: auto;
+  max-width: 48rem;
+  text-align: center;
+  margin-bottom: 40px;
+}
+.ofd .ofd-tete--large {
+  margin-bottom: 64px;
+}
+.ofd .ofd-tete .ofd-chapo {
+  margin-top: 16px;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-tete .ofd-chapo {
+    margin-top: 8px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   9 · BLOC SCINDÉ — énoncé à droite, fenêtre à gauche
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-scinde {
+  display: flex;
+  flex-direction: column-reverse;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-scinde {
+    flex-direction: row-reverse;
+    gap: 64px;
+    justify-content: flex-start;
+  }
+}
+.ofd .ofd-scinde__texte {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-scinde__texte {
+    align-items: flex-start;
+  }
+}
+@media (min-width: 1280px) {
+  .ofd .ofd-scinde__texte {
+    width: auto;
+    min-width: 466px;
+    max-width: 466px;
+  }
+}
+.ofd .ofd-scinde__sous {
+  letter-spacing: -0.01em;
+  margin-top: 8px;
+  color: #010101;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.ofd .ofd-scinde__corps {
+  letter-spacing: -0.01em;
+  margin-block: 32px;
+  color: #010101;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.ofd .ofd-scinde__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+@media (min-width: 480px) {
+  .ofd .ofd-scinde__actions {
+    gap: 24px;
+  }
+}
+.ofd .ofd-scinde__media {
+  display: flex;
+  position: relative;
+  margin-bottom: 36px;
+  min-width: 100%;
+  max-width: calc(100% + 24px);
+  overflow: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+  aspect-ratio: 649 / 402;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-scinde__media {
+    margin-bottom: 0;
+    width: 50%;
+    min-width: 50%;
+  }
+}
+@media (min-width: 1280px) {
+  .ofd .ofd-scinde__media {
+    width: 649px;
+    min-width: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   10 · FENÊTRE D'EXEMPLE — le chrome à trois pastilles de la référence
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-fenetre {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  background: #101014;
+  color: #e5e5e5;
+}
+.ofd .ofd-fenetre__barre {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+@media (min-width: 640px) {
+  .ofd .ofd-fenetre__barre {
+    padding: 12px;
+  }
+}
+.ofd .ofd-fenetre__points {
+  display: flex;
+  gap: 3px;
+}
+@media (min-width: 640px) {
+  .ofd .ofd-fenetre__points {
+    gap: 6px;
+  }
+}
+.ofd .ofd-fenetre__points i {
+  display: block;
+  height: 6px;
+  width: 6px;
+  border-radius: 9999px;
+}
+@media (min-width: 640px) {
+  .ofd .ofd-fenetre__points i {
+    height: 12px;
+    width: 12px;
+  }
+}
+.ofd .ofd-fenetre__titre {
+  letter-spacing: -0.01em;
+  justify-self: center;
+  font-size: 7px;
+  font-weight: 500;
+  color: #e5e5e5;
+  white-space: nowrap;
+}
+@media (min-width: 640px) {
+  .ofd .ofd-fenetre__titre {
+    font-size: 1rem;
+  }
+}
+.ofd .ofd-fenetre__mention {
+  justify-self: end;
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.45);
+}
+@media (min-width: 640px) {
+  .ofd .ofd-fenetre__mention {
+    font-size: 10px;
+  }
+}
+.ofd .ofd-fenetre__corps {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.6cqw;
+  justify-content: center;
+  padding: 3cqw 4cqw;
+}
+
+/* la console large range quatre colonnes au lieu d'empiler des lignes */
+/* Quatre colonnes qui OCCUPENT le cadre : la grande image de la référence
+   remplit son rapport 2432/1274, et des rangées calées en haut laissaient
+   la moitié basse en noir vide — constaté à la première recette. */
+.ofd .ofd-fenetre__corps--colonnes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.6cqw;
+  align-content: stretch;
+  align-items: stretch;
+}
+.ofd .ofd-colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqw;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1.8cqw;
+}
+.ofd .ofd-colonne > .ofd-ligne__etat {
+  align-self: flex-start;
+}
+/* Les rangées de la console se PARTAGENT la hauteur du cadre : calées en
+   haut, elles laissaient un quart de noir vide sous la dernière. Et leur
+   libellé peut passer à la ligne — en `nowrap` il finissait en points de
+   suspension dans une colonne de 210 px. */
+.ofd .ofd-ligne--puce {
+  flex: 1;
+  align-items: center;
+  padding: 1.4cqw 1.8cqw;
+}
+.ofd .ofd-ligne--puce .ofd-ligne__titre {
+  white-space: normal;
+}
+
+/* une ligne de journal : le geste proposé, qui l'a fait, et son état */
+.ofd .ofd-ligne {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2cqw 2.4cqw;
+}
+.ofd .ofd-ligne__icone {
+  display: flex;
+  width: 5.5cqw;
+  min-width: 20px;
+  max-width: 34px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #e5e5e5;
+}
+.ofd .ofd-ligne__corps {
+  display: block;
+  min-width: 0;
+  flex: 1;
+}
+.ofd .ofd-ligne__titre {
+  letter-spacing: -0.01em;
+  display: block;
+  font-size: clamp(7px, 1.85cqw, 13px);
+  line-height: 1.35;
+  color: #f5f5f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ofd .ofd-ligne__sous {
+  letter-spacing: -0.01em;
+  display: block;
+  font-size: clamp(6px, 1.6cqw, 12px);
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ofd .ofd-ligne__etat {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 2px 8px;
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: clamp(5px, 1.35cqw, 10px);
+  line-height: 1.6;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+/* la pastille de la ligne en attente bat, comme les médias de la référence */
+.ofd .ofd-ligne--attente .ofd-ligne__etat {
+  color: #ffd9a0;
+  border-color: rgba(255, 217, 160, 0.4);
+  animation: ofd-battement 2.4s ease-in-out infinite;
+}
+@keyframes ofd-battement {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ofd .ofd-ligne--attente .ofd-ligne__etat {
+    animation: none;
+  }
+}
+
+/* `cqw` ci-dessus a besoin d'un conteneur nommé : c'est la fenêtre. */
+.ofd .ofd-scinde__media,
+.ofd .ofd-console {
+  container-type: inline-size;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   11 · GRANDE CONSOLE + RANGÉE D'ENTRÉES
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-large {
+  margin-inline: auto;
+  margin-top: 48px;
+  max-width: 1216px;
+}
+.ofd .ofd-console {
+  display: flex;
+  margin-inline: auto;
+  max-width: 980px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #101014;
+  aspect-ratio: 2432 / 1274;
+}
+.ofd .ofd-rangee {
+  margin-top: 48px;
+}
+.ofd .ofd-rangee__legende {
+  text-align: center;
+  color: var(--ofd-etiquette);
+}
+.ofd .ofd-rangee__grille {
+  margin-top: 32px;
+  display: grid;
+  gap: 32px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-rangee__grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  /* TROIS et non quatre : voir l'écart « BLOC 5b » en tête de page.tsx. */
+  .ofd .ofd-rangee__grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.ofd .ofd-entree {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.ofd .ofd-entree__icone {
+  flex-shrink: 0;
+  color: var(--ofd-encre);
+}
+.ofd .ofd-entree .ofd-body {
+  margin-top: 12px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   12 · CARTES À LISTE
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-cartes4 {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-cartes4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .ofd .ofd-cartes4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.ofd .ofd-fiche {
+  display: flex;
+  min-height: 320px;
+  flex-direction: column;
+  border-radius: var(--ofd-r-md);
+  background: #ffffff;
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 300ms ease-out, box-shadow 300ms ease-out;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-fiche {
+    padding: 32px;
+  }
+}
+.ofd a.ofd-fiche:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+}
+.ofd .ofd-fiche__tete {
+  min-height: 136px;
+}
+.ofd .ofd-fiche__icone {
+  display: flex;
+  height: 44px;
+  width: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ofd-r-sm);
+  background: var(--ofd-fond);
+  color: var(--ofd-encre);
+}
+.ofd .ofd-fiche__tete .ofd-h5 {
+  margin-top: 32px;
+}
+.ofd .ofd-fiche ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ofd .ofd-fiche li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ofd .ofd-fiche li svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--ofd-encre);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   13 · RESSOURCES
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-ressources {
+  display: grid;
+  gap: 24px;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-ressources {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .ofd .ofd-ressources {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.ofd .ofd-ressource {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+.ofd .ofd-ressource__vignette {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: var(--ofd-r-sm);
+  background: #000000;
+  aspect-ratio: 389 / 243;
+}
+.ofd .ofd-ressource__vignette img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 600ms ease-out;
+}
+.ofd .ofd-ressource:hover .ofd-ressource__vignette img {
+  transform: scale(1.04);
+}
+.ofd .ofd-ressource__texte {
+  position: relative;
+  z-index: 2;
+  padding-top: 24px;
+}
+.ofd .ofd-ressource__cat {
+  letter-spacing: -0.01em;
+  font-size: 0.875rem;
+  line-height: 1.71;
+  font-weight: 500;
+  color: var(--ofd-mauve);
+}
+.ofd .ofd-ressource__titre {
+  letter-spacing: -0.01em;
+  margin-top: 4px;
+  font-size: 1.5rem;
+  line-height: 1.33;
+  font-weight: 400;
+  color: var(--ofd-texte);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ofd .ofd-ressource__vignette img {
+    transition: none;
+  }
+  .ofd .ofd-ressource:hover .ofd-ressource__vignette img {
+    transform: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   14 · PANNEAU ARDOISE — l'énoncé du problème
+   ───────────────────────────────────────────────────────────────────── */
+
+.ofd .ofd-ardoise {
+  border-radius: var(--ofd-r-lg);
+  background: var(--ofd-ardoise);
+  padding: 32px;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-ardoise {
+    padding: 80px 48px;
+  }
+}
+.ofd .ofd-ardoise__grille {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-ardoise__grille {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
+.ofd .ofd-ardoise__label {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.375;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: pre-line;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-ardoise__label {
+    grid-column: 1 / span 3;
+    align-self: flex-end;
+  }
+}
+.ofd .ofd-ardoise__corps {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 64px;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-ardoise__corps {
+    grid-column: 5 / span 8;
+  }
+}
+.ofd .ofd-citation {
+  font-size: 1.5rem;
+  line-height: 28px;
+  letter-spacing: -0.05em;
+  font-weight: 400;
+  color: #ffffff;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-citation {
+    font-size: 2rem;
+  }
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-citation {
+    font-size: 2.5rem;
+    line-height: 44px;
+  }
+}
+.ofd .ofd-ardoise__signature {
+  text-align: left;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-ardoise__signature {
+    text-align: right;
+  }
+}
+.ofd .ofd-ardoise__signature p {
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #ffffff;
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-ardoise__signature p {
+    font-size: 1.125rem;
+  }
+}
+.ofd .ofd-ardoise__tag {
+  display: inline-block;
+  margin-top: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  padding: 4px 8px;
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1.375;
+  text-transform: uppercase;
+  color: #839cb2;
+}
