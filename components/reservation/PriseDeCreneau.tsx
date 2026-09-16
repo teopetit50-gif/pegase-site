@@ -481,6 +481,23 @@ export default function PriseDeCreneau({
          est gardé (05/09) pour ouvrir l'enregistrement du moyen de paiement */
       setDemandeId(rep.id);
       setEtape("fait");
+      /* 16/09 — L'ACCUSÉ DE RÉCEPTION. Jusqu'ici le client fermait
+         l'onglet sans aucune trace de la date qu'il venait de bloquer,
+         alors que l'écran ci-dessous lui promet une confirmation.
+
+         Tiré après coup et sans await : la réservation EST faite, et un
+         e-mail n'a pas à la retarder ni à la faire échouer. `keepalive`
+         pour qu'il parte même si le client ferme l'onglet dans la
+         seconde. Rien n'est lu de la réponse : la route ne casse rien
+         quand la clé d'envoi ou la migration manquent, et le seul
+         identifiant qu'on lui passe ne lui sert qu'à relire la demande
+         en base — l'adresse de destination vient de là, jamais d'ici. */
+      void fetch("/api/reservation/confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: rep.id }),
+        keepalive: true,
+      }).catch(() => {});
       /* prénom, nom, entreprise et téléphone rangés sur le compte pour la
          prochaine fois — au mieux, sans attendre ni bloquer : la
          réservation est déjà faite. updateUser fusionne les user_metadata
