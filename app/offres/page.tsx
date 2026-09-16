@@ -6,24 +6,15 @@ import {
   Bell,
   Check,
   CheckCheck,
-  Clock,
   FileText,
   MessageSquare,
-  Pause,
   Plug,
   Search,
   Users,
 } from "lucide-react";
-import {
-  siGmail,
-  siGoogledrive,
-  siGooglesheets,
-  siNotion,
-  siQuickbooks,
-  siShopify,
-  siStripe,
-} from "simple-icons";
+import { siGmail, siGoogledrive, siNotion, siShopify, siStripe } from "simple-icons";
 import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
+import { ChatMessages } from "@/components/ui/chat-messages";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import { POSTS } from "@/lib/content";
@@ -151,12 +142,10 @@ export const metadata: Metadata = {
    pour tenir la largeur de la rangée sans la faire défiler. */
 const OUTILS = [
   { marque: siGmail, nom: "Gmail" },
-  { marque: siGooglesheets, nom: "Sheets" },
   { marque: siStripe, nom: "Stripe" },
   { marque: siShopify, nom: "Shopify" },
   { marque: siGoogledrive, nom: "Drive" },
   { marque: siNotion, nom: "Notion" },
-  { marque: siQuickbooks, nom: "QuickBooks" },
 ];
 
 /* BLOC 3 — les quatre arguments. Les quatre pastilles reprennent les
@@ -199,32 +188,30 @@ const ARGUMENTS = [
   },
 ];
 
-/* BLOC 5a — la fenêtre d'exemple. Mêmes trois faits que le journal de
-   l'ancienne page : une relance rédigée qui attend l'accord, une réponse
-   partie APRÈS validation, une relance suspendue par le client. */
-const JOURNAL = [
-  {
-    icone: Clock,
-    titre: "Relance FA-2402",
-    sous: "Message rédigé, en attente de validation.",
-    etat: "à valider",
-    attente: true,
-  },
-  {
-    icone: Check,
-    titre: "Réponse · demande reçue à 21 h 04",
-    sous: "Partie après votre validation.",
-    etat: "envoyé",
-    attente: false,
-  },
-  {
-    icone: Pause,
-    titre: "Relance DV-0891 · service achats",
-    sous: "Suspendue : montant à revoir avant envoi.",
-    etat: "suspendu",
-    attente: false,
-  },
-];
+/* BLOC 5a — la fenêtre d'exemple. 16/09, Teo : « prends ce composant et
+   refais exactement cette section » (capture de scale.com/data-engine à
+   l'appui). Le journal de trois lignes figées laisse la place à la
+   fenêtre ANIMÉE de la référence : une demande entre, le système rédige,
+   trois brouillons s'empilent, vous tranchez, le message part.
+
+   La mécanique et son relevé sont dans components/ui/chat-messages.tsx ;
+   ici, seulement ce qui est dit. C'est la scène exacte de l'énoncé posé à
+   côté — « Le système propose, vous tranchez » — et elle ne montre les
+   données d'aucun client : le chrome porte « Exemple ».
+
+   Budget de texte relevé sur la référence : 58 signes pour la question,
+   54 à 58 pour chaque proposition. Les nôtres tiennent dedans ; deux mots
+   de plus et la pastille passe sur deux lignes dans le cadre de 649. */
+const VALIDATION = {
+  question: "Pouvez-vous me confirmer l'échéance de la facture FA-2402 ?",
+  libelle: "Votre validation",
+  propositions: [
+    { texte: "Facture FA-2402 en retard, règlement attendu sous 24 h." },
+    { texte: "Échéance au 3 septembre, le solde est dû depuis 12 jours.", retenue: true },
+    { texte: "Votre demande a été transmise au service concerné." },
+  ],
+  envoi: "Échéance au 3 septembre, le solde est dû depuis 12 jours.",
+};
 
 /* BLOC 5b — la rangée : les trois étapes de la mise en place (voir
    l'écart documenté en tête de fichier). */
@@ -442,11 +429,15 @@ export default function OffresPage() {
             />
             <div aria-hidden className="ofd-hero-voile" />
             <div className="ofd-hero__col">
-              {/* budget de signes de la référence : titre 11, chapô 66.
-                  Le nôtre : 50 et 76 — le chapô de l'ancienne page en
-                  faisait 230, il devenait un paragraphe dans ce gabarit. */}
+              {/* 16/09 (Teo, « on a aussi trop de texte, je veux la même
+                  chose qu'eux ») — leur hero tient en TROIS éléments : le
+                  nom de la page sur UNE ligne (« Data Engine », 11 signes),
+                  une promesse d'une ligne (70), un bouton. Le nôtre portait
+                  un titre de 50 signes qui passait sur deux lignes à 64 px.
+                  « Nos offres » est l'exact pendant de leur « Data Engine » :
+                  le nom de la page, et le chapô porte la promesse. */}
               <h1 data-reveal className="ofd-h1">
-                Commencez par le processus qui a le plus d&apos;impact.
+                Nos offres
               </h1>
               <p data-reveal className="ofd-lead">
                 Un processus à la fois. Sur vos outils, sous vos règles, à votre validation.
@@ -460,8 +451,10 @@ export default function OffresPage() {
 
         {/* ═══ 2 · BANDE D'OUTILS ═══ */}
         <section data-monde="clair" className="ofd-sec ofd-sec--haut">
-          <div className="ofd-wrap">
-            <p className="ofd-mono ofd-outils__legende">Se branche sur les outils déjà en place</p>
+          <div className="ofd-wrap ofd-wrap--plein">
+            {/* hors écran : la rangée garde un intitulé pour les lecteurs
+                d'écran, la référence n'en affiche aucun. */}
+            <p className="ofd-outils__legende">Se branche sur les outils déjà en place</p>
             <div className="ofd-outils">
               <ul>
                 {OUTILS.map(({ marque, nom }) => (
@@ -481,7 +474,7 @@ export default function OffresPage() {
 
         {/* ═══ 3 · PANNEAU DOUX + LES QUATRE ARGUMENTS ═══ */}
         <section data-monde="clair" className="ofd-sec">
-          <div className="ofd-wrap">
+          <div className="ofd-wrap ofd-wrap--plein">
             <div className="ofd-panneau">
               <div className="ofd-panneau__grille">
                 <div className="ofd-panneau__gauche">
@@ -540,7 +533,7 @@ export default function OffresPage() {
 
         {/* ═══ 4 · PANNEAU DE COULEUR + ÉNONCÉ ═══ */}
         <section data-monde="clair" className="ofd-sec">
-          <div className="ofd-wrap">
+          <div className="ofd-wrap ofd-wrap--plein">
             <div className="ofd-duo">
               <div aria-hidden className="ofd-duo__marque">
                 {/* Mot-symbole en serif blanc sur le rouge de la référence
@@ -595,23 +588,13 @@ export default function OffresPage() {
                 </div>
 
                 <div data-reveal className="ofd-scinde__media">
-                  <div className="ofd-fenetre">
-                    <ChromeFenetre titre="File de validation" />
-                    <div className="ofd-fenetre__corps">
-                      {JOURNAL.map(({ icone: Icone, titre, sous, etat, attente }) => (
-                        <div key={titre} className={`ofd-ligne${attente ? " ofd-ligne--attente" : ""}`}>
-                          <span aria-hidden className="ofd-ligne__icone">
-                            <Icone size={12} strokeWidth={1.75} />
-                          </span>
-                          <span className="ofd-ligne__corps">
-                            <span className="ofd-ligne__titre">{titre}</span>
-                            <span className="ofd-ligne__sous">{sous}</span>
-                          </span>
-                          <span className="ofd-ligne__etat">{etat}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ChatMessages
+                    titre="File de validation"
+                    question={VALIDATION.question}
+                    libelleValidation={VALIDATION.libelle}
+                    propositions={VALIDATION.propositions}
+                    envoi={VALIDATION.envoi}
+                  />
                 </div>
               </div>
             </div>
