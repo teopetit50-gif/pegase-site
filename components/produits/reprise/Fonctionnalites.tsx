@@ -290,7 +290,17 @@ function CarteTrace() {
   );
 }
 
+/* 16/09/2026 (Teo, par l'associé) — deux cartes sur téléphone, le reste
+   d'un geste. Ces cartes portent chacune une maquette d'au moins 20 rem :
+   empilées, elles font 1 800 px à elles seules. Dès `md` elles sont sur
+   deux colonnes et la coupe n'a plus lieu d'être.
+
+   La coupe passe par une variante Tailwind sur le CONTENEUR plutôt que
+   par une classe sur chaque carte : les cartes portent leurs propres
+   bordures de grille (`border-r`, `border-b`), et les envelopper aurait
+   décalé ces traits d'un pixel. */
 export function Fonctionnalites() {
+  const [tout, setTout] = useState(false);
   return (
     <section id="fonctionnement" data-monde="clair" className="scroll-mt-20">
       <section>
@@ -299,12 +309,26 @@ export function Fonctionnalites() {
             <TitreSection titre={F.titre} suite={F.suite} />
           </div>
           <div className={cn("relative", HACHURE)}>
-            <div className="mx-6 grid grid-cols-1 border-[#d9d9d9] border-r border-l md:mx-16 md:grid-cols-2">
+            <div
+              className={`mx-6 grid grid-cols-1 border-[#d9d9d9] border-r border-l md:mx-16 md:grid-cols-2 ${
+                tout ? "" : "max-md:[&>*:nth-child(n+3)]:hidden"
+              }`}
+            >
               <CarteChamp />
               <CartePalette />
               <Citation />
               <CarteLangue />
               <CarteTrace />
+            </div>
+            <div className="mx-6 mt-5 md:hidden">
+              <button
+                type="button"
+                aria-expanded={tout}
+                onClick={() => setTout((v) => !v)}
+                className="font-medium text-[#6b6b6b] text-sm underline underline-offset-4"
+              >
+                {tout ? "Réduire" : "Lire la suite (3 autres)"}
+              </button>
             </div>
           </div>
         </Cadre>

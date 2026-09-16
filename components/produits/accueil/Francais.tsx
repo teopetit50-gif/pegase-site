@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { Apparition } from "./Apparition";
 import { Etiquette } from "./Bouton";
 import { FRANCAIS } from "@/lib/produits/accueil";
@@ -10,7 +14,12 @@ import Lien from "@/components/Lien";
  * trois faits. Ce qui est écrit ici est aligné sur les mentions légales
  * d'omegaai.fr — notamment « Union européenne » pour l'hébergement, et
  * pas « France », qui serait faux. */
+/* 16/09/2026 (Teo, par l'associé) — deux faits sur téléphone, le reste
+   d'un geste. Empilés, les trois pavés font près de 900 px pour une
+   section de réassurance placée en fin de page. Dès `lg` ils sont sur
+   trois colonnes et la coupe n'a plus lieu d'être. */
 export function Francais() {
+  const [tout, setTout] = useState(false);
   return (
     <section data-monde="clair" id="francais" className="scroll-mt-24 bg-white rounded-xl px-3 py-12 max-sm:py-14 lg:py-25">
       <div className="max-w-7xl mx-auto">
@@ -32,7 +41,11 @@ export function Francais() {
               </h2>
             </Apparition>
 
-            <div className="mt-10 grid gap-px overflow-hidden rounded-xl bg-neutral-200/80 sm:mt-14 lg:grid-cols-3">
+            <div
+              className={`mt-10 grid gap-px overflow-hidden rounded-xl bg-neutral-200/80 sm:mt-14 lg:grid-cols-3 ${
+                tout ? "" : "max-lg:[&>*:nth-child(n+3)]:hidden"
+              }`}
+            >
               {FRANCAIS.faits.map((f, i) => (
                 <Apparition key={f.cle} delai={80 * i} className="bg-white p-6 sm:p-8">
                   <span className="font-mono text-[11px] uppercase text-neutral-400">{f.cle}</span>
@@ -43,6 +56,14 @@ export function Francais() {
                 </Apparition>
               ))}
             </div>
+            <button
+              type="button"
+              aria-expanded={tout}
+              onClick={() => setTout((v) => !v)}
+              className="mt-4 font-medium text-neutral-500 text-sm underline underline-offset-4 lg:hidden"
+            >
+              {tout ? "Réduire" : "Lire la suite"}
+            </button>
 
             <Lien
               href={FRANCAIS.lien.href}

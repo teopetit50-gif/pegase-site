@@ -385,9 +385,20 @@ function CarteFile() {
 
 /* ── Le bloc ──────────────────────────────────────────────────────────── */
 
+/* 16/09/2026 (Teo, par l'associé) — deux tuiles sur téléphone, le reste
+   d'un geste : empilées, les tuiles de ce bento font 2 187 px avec leur
+   titre. Dès `md` elles sont sur deux colonnes, et la coupe disparaît.
+   Variante Tailwind sur le conteneur : les tuiles portent leurs propres
+   bordures, les envelopper décalerait la grille. */
 export default function Bento() {
+  const [tout, setTout] = useState(false);
   return (
-    <div className="mx-0 mt-8 grid overflow-hidden rounded-xl border border-[#171717]/[0.16] bg-[linear-gradient(#ffffff,#f2f2f3)] md:grid-cols-2 lg:mx-5">
+    <>
+    <div
+      className={`mx-0 mt-8 grid overflow-hidden rounded-xl border border-[#171717]/[0.16] bg-[linear-gradient(#ffffff,#f2f2f3)] md:grid-cols-2 lg:mx-5 ${
+        tout ? "" : "max-md:[&>*:nth-child(n+3)]:hidden"
+      }`}
+    >
       <Article
         titre="Aucune pièce ne se perd"
         court="Cinq étapes, toujours les mêmes."
@@ -426,5 +437,16 @@ export default function Bento() {
         <CarteFile />
       </Article>
     </div>
+    <div className="mt-5 md:hidden">
+      <button
+        type="button"
+        aria-expanded={tout}
+        onClick={() => setTout((v) => !v)}
+        className="font-medium text-[#6b6b6b] text-sm underline underline-offset-4"
+      >
+        {tout ? "Réduire" : "Lire la suite"}
+      </button>
+    </div>
+    </>
   );
 }
