@@ -150,6 +150,13 @@
     font-size: 14.5px;
     line-height: 1.55;
   }
+  /* /tarifs écrit un de ses titres de section en dur (`text-[26px]`) :
+     il sortait deux points au-dessus des `.r-h2` de la même page, et la
+     rangée de titres ne s'alignait plus d'une section à l'autre. */
+  .resa .text-\[26px\] {
+    font-size: 24px;
+    line-height: 1.18;
+  }
   .resa .r-faq summary {
     font-size: clamp(15px, 1.8vw, 24px);
   }
