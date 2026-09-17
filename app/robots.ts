@@ -15,7 +15,7 @@ import { SITE_URL } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/compte", "/auth/", "/site/commande"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/auth/", "/installation"] },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

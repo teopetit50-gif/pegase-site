@@ -194,8 +194,8 @@ export default function TarifsSitePage() {
               </p>
               <div data-arrivee="bloc" className="mt-[25px] flex flex-col items-center">
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  <Link href="/site/commande" className="o-btn o-btn--primary">
-                    Commander le site
+                  <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+                    Réserver un audit
                   </Link>
                   <Link href="/modeles" className="o-btn o-btn--ghost">
                     Voir les {MODELES.length} modèles
@@ -269,8 +269,8 @@ export default function TarifsSitePage() {
                   ))}
                 </ul>
                 <div data-reveal className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-                  <Link href="/site/commande" className="o-btn o-btn--primary">
-                    Commander le site
+                  <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+                    Réserver un audit
                   </Link>
                   <Link href="/modeles" className="o-link !text-[15px]">
                     Voir les modèles d&apos;abord

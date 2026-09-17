@@ -81,7 +81,7 @@ const ETAPES = [
     titre: "Le brief",
     sousTitre: "Votre activité, votre marque, vos visuels",
     texte:
-      "Depuis votre compte, sans quitter la page : ce que vous faites, pour qui, vos adresses et vos visuels. Le règlement se fait ensuite avec nous, au téléphone, avant le lancement de la production.",
+      "Après l'audit, nous relevons votre brief avec vous : ce que vous faites, pour qui, vos adresses et vos visuels. Le règlement se fait au téléphone, avant le lancement de la production.",
   },
   {
     n: "03",

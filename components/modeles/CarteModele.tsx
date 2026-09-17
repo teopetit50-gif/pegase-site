@@ -134,14 +134,9 @@ export default function CarteModele({ m }: { m: Modele }) {
             </svg>
           </Link>
         </div>
-        <p className="mt-2.5 text-[12.5px] text-[color:var(--m-faible)]">
-          <Link
-            href={`/site/commande?modele=${m.slug}`}
-            className="underline-offset-4 hover:text-[color:var(--m-encre)] hover:underline"
-          >
-            Commander avec ce modèle
-          </Link>
-        </p>
+        {/* 17/09 — « Commander avec ce modèle » (/site/commande) retiré :
+            le tunnel de commande n'existe plus, tout passe par l'audit.
+            « Choisir ce modèle » porte déjà le modèle jusqu'à /reserver-un-audit. */}
       </div>
     </div>
   );

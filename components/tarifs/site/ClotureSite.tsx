@@ -67,7 +67,7 @@ export default function ClotureSite() {
 
       <div className="o-wrap relative flex flex-col items-center text-center">
         <h2 data-reveal className="o-h2 max-w-[620px]">
-          Commandez en deux minutes. Nous faisons le reste.
+          Réservez votre audit. Nous faisons le reste.
         </h2>
         <p data-reveal className="o-lead mt-5 max-w-[600px]">
           Un modèle, votre brief, et nous écrivons tout à votre métier et à votre marque. Le règlement se fait avec nous, au téléphone, et votre éligibilité au Chèque TIC se vérifie avant tout engagement.
@@ -85,8 +85,8 @@ export default function ClotureSite() {
           data-reveal
           className="mt-9 flex w-full max-w-[320px] flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:justify-center"
         >
-          <Link href="/site/commande" className="o-btn o-btn--primary w-full sm:w-auto">
-            Commander le site
+          <Link href="/reserver-un-audit" className="o-btn o-btn--primary w-full sm:w-auto">
+            Réserver un audit
           </Link>
           <Link href="/contact" className="o-btn o-btn--ghost w-full sm:w-auto">
             Nous joindre
