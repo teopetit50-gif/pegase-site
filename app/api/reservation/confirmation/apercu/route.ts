@@ -13,6 +13,7 @@ import { composerConfirmation } from "@/lib/mail/confirmation";
    En local : npm run dev, puis
      http://localhost:3000/api/reservation/confirmation/apercu
      http://localhost:3000/api/reservation/confirmation/apercu?cas=devis
+     http://localhost:3000/api/reservation/confirmation/apercu?cas=sans-lien
      http://localhost:3000/api/reservation/confirmation/apercu?format=texte
 
    ⚠ DÉVELOPPEMENT SEULEMENT. En production la route répond 404 : elle
@@ -34,6 +35,11 @@ const CRENEAU_EXEMPLE = "2026-09-23T14:30:00.000Z";
    d'agenda, et un UID qui change à chaque rechargement ferait créer un
    nouvel événement à chaque essai au lieu de mettre à jour le même. */
 const ID_EXEMPLE = "00000000-0000-4000-8000-0000000000aa";
+/* Une adresse de Meet à la bonne forme (trois groupes de lettres), mais
+   qui n'ouvre rien : l'aperçu sert à lire une mise en page, pas à entrer
+   dans une salle. `?cas=sans-lien` rend l'autre version du mail, celle
+   qu'on envoie tant que l'agenda n'est pas branché. */
+const VISIO_EXEMPLE = "https://meet.google.com/abc-defg-hij";
 
 export async function GET(req: Request) {
   if (process.env.NODE_ENV === "production") {
@@ -41,7 +47,8 @@ export async function GET(req: Request) {
   }
 
   const url = new URL(req.url);
-  const devis = url.searchParams.get("cas") === "devis";
+  const cas = url.searchParams.get("cas");
+  const devis = cas === "devis";
 
   const mail = composerConfirmation(
     devis
@@ -53,6 +60,7 @@ export async function GET(req: Request) {
           creneauISO: CRENEAU_EXEMPLE,
           dureeMin: 30,
           maintenant: new Date(CRENEAU_EXEMPLE),
+          lienVisio: cas === "sans-lien" ? null : VISIO_EXEMPLE,
         },
   );
 

@@ -57,9 +57,14 @@ import { COURRIEL } from "@/lib/reservation";
    4. UN DOCUMENT COMPLET, PAS UN FRAGMENT. `<!doctype html>` et
       `color-scheme: light` : sans eux, les clients en thème sombre
       inversent les couleurs et le gris clair vire au gris sale.
-   5. LE LIEN DE VISIOCONFÉRENCE N'EST PAS PROMIS COMME AUTOMATIQUE. Il
-      n'existe nulle part dans le système ; le texte dit qu'il parvient
-      avant le rendez-vous, ce que les associés font à la main.
+   5. LE LIEN DE VISIOCONFÉRENCE EST DANS LE MAIL — quand il existe. Il
+      est fabriqué en amont par lib/visio.ts (salle Google Meet créée
+      dans l'agenda d'Omega) et arrive ici tout fait. Ce module ne va
+      rien chercher : il reçoit une URL ou `null`, et le texte change en
+      conséquence — avec le lien, la phrase « nous revenons vers vous
+      avec le lien » disparaît ; sans lui, elle revient. C'est ce repli
+      qui permet de déployer avant que l'agenda soit branché, sans
+      jamais écrire une adresse morte dans un e-mail.
    ══════════════════════════════════════════════════════════════════════ */
 
 /* Le site, en absolu : dans un e-mail il n'y a pas d'origine relative. */
@@ -171,6 +176,7 @@ function fichierAgenda(p: {
   debutISO: string;
   dureeMin: number;
   maintenant: Date;
+  lienVisio?: string | null;
 }): string {
   const debut = new Date(p.debutISO);
   const fin = new Date(debut.getTime() + p.dureeMin * 60_000);
@@ -187,10 +193,17 @@ function fichierAgenda(p: {
     `DTEND:${horodatageIcs(fin)}`,
     `SUMMARY:${echapperIcs(`${p.format} — Omega.AI`)}`,
     `DESCRIPTION:${echapperIcs(
-      "Rendez-vous en visioconférence. Le lien vous parvient avant le rendez-vous. " +
-        `Une question : ${COURRIEL}`,
+      (p.lienVisio
+        ? `Rendez-vous en visioconférence : ${p.lienVisio}`
+        : "Rendez-vous en visioconférence. Le lien vous parvient avant le rendez-vous.") +
+        ` Une question : ${COURRIEL}`,
     )}`,
-    "LOCATION:Visioconférence",
+    /* LOCATION porte l'adresse elle-même : la plupart des agendas en
+       font un lien cliquable, et sur téléphone c'est la ligne qu'on
+       touche à l'heure dite. X-GOOGLE-CONFERENCE, en plus, donne à
+       Google Agenda son bouton « Rejoindre avec Google Meet ». */
+    `LOCATION:${echapperIcs(p.lienVisio || "Visioconférence")}`,
+    ...(p.lienVisio ? [`X-GOOGLE-CONFERENCE:${p.lienVisio}`] : []),
     `ORGANIZER;CN=Omega.AI:mailto:${COURRIEL}`,
     "STATUS:CONFIRMED",
     "END:VEVENT",
@@ -291,11 +304,23 @@ export function composerConfirmation(p: {
   creneauISO: string | null;
   dureeMin: number | null;
   maintenant?: Date;
+  /** L'adresse de la visioconférence, quand lib/visio.ts a pu en ouvrir
+      une. `null` ou absente : le mail reprend la phrase d'attente. */
+  lienVisio?: string | null;
 }): Confirmation {
   const format = FORMATS[p.formule] ?? p.formule;
   const prenom = (p.prenom || "").trim();
   const quand = p.creneauISO;
   const duree = p.dureeMin && p.dureeMin > 0 ? p.dureeMin : null;
+  /* Une URL, ou rien. On ne fait confiance à rien d'autre : une valeur
+     qui n'est pas une adresse http(s) n'a pas à finir dans un href. */
+  const visio =
+    typeof p.lienVisio === "string" && /^https?:\/\//i.test(p.lienVisio.trim())
+      ? p.lienVisio.trim()
+      : null;
+  /* Affiché sans son « https:// » : c'est du bruit dans une ligne déjà
+     longue, et l'adresse reste parfaitement reconnaissable. */
+  const visioLisible = visio ? visio.replace(/^https?:\/\//i, "").replace(/\/$/, "") : null;
 
   if (!quand) {
     const sujet = "Votre demande est bien reçue";
@@ -344,6 +369,7 @@ export function composerConfirmation(p: {
           debutISO: quand,
           dureeMin: duree,
           maintenant: p.maintenant ?? new Date(),
+          lienVisio: visio,
         }),
       }
     : undefined;
@@ -365,21 +391,46 @@ export function composerConfirmation(p: {
     `<strong style="color:#050505;font-weight:600">${echapper(format)}</strong>` +
     (duree ? ` · ${duree} min` : "") +
     ` · en visioconférence</td></tr>` +
+    /* Le lien, dans la carte et non dans un paragraphe : c'est la seule
+       chose qu'on revient chercher à l'heure dite, et on la trouve au
+       même endroit que l'heure. En gras et souligné, pas en bouton —
+       voir la règle 3 en tête de fichier. `word-break` parce qu'un
+       téléphone en portrait coupe l'adresse sinon n'importe où. */
+    (visio
+      ? `<tr><td style="padding:0 22px"><div style="border-top:1px solid #ededf0"></div></td></tr>` +
+        `<tr><td style="padding:14px 22px 16px;font-family:${POLICE};font-size:14px;line-height:21px;color:#71717a">` +
+        `Lien de la visioconférence<br>` +
+        `<a href="${echapper(visio)}" style="color:#050505;font-weight:600;text-decoration:underline;` +
+        `word-break:break-all">${echapper(visioLisible ?? visio)}</a>` +
+        `</td></tr>`
+      : "") +
     `</table></td></tr>`;
 
   return {
     sujet,
     html: enveloppe(
       sujet,
-      `${jour} à ${h}, heure de Guadeloupe · ${format}${duree ? `, ${duree} min` : ""}, en visioconférence.`,
+      `${jour} à ${h}, heure de Guadeloupe · ${format}${duree ? `, ${duree} min` : ""}` +
+        (visio ? `, en visioconférence — le lien est dans le message.` : ", en visioconférence."),
       ENTETE +
         titre("Votre rendez-vous est confirmé") +
         paragraphe(`Bonjour ${echapper(prenom)}, nous vous attendons à cette date.`, 14) +
         vedette +
-        paragraphe("Nous revenons vers vous avec le lien de la visioconférence avant le rendez-vous.", 22) +
+        (visio
+          ? paragraphe(
+              "Le jour venu, ouvrez ce lien : la visioconférence se lance dans votre navigateur, " +
+                "il n'y a rien à installer.",
+              22,
+            )
+          : paragraphe(
+              "Nous revenons vers vous avec le lien de la visioconférence avant le rendez-vous.",
+              22,
+            )) +
         (agenda
           ? paragraphe(
-              "Le rendez-vous est en pièce jointe : ouvrez-la pour l'ajouter à votre agenda.",
+              visio
+                ? "Le rendez-vous est en pièce jointe, le lien avec lui : ouvrez-la pour l'ajouter à votre agenda."
+                : "Le rendez-vous est en pièce jointe : ouvrez-la pour l'ajouter à votre agenda.",
             )
           : "") +
         paragraphe(
@@ -394,9 +445,19 @@ export function composerConfirmation(p: {
       "",
       `  ${jour} à ${h} (heure de Guadeloupe)`,
       `  ${format}${duree ? ` · ${duree} min` : ""} · en visioconférence`,
+      ...(visio ? ["", "Lien de la visioconférence :", `  ${visio}`] : []),
       "",
-      "Nous revenons vers vous avec le lien de la visioconférence avant le rendez-vous.",
-      ...(agenda ? ["", "Le rendez-vous est en pièce jointe : ouvrez-la pour l'ajouter à votre agenda."] : []),
+      visio
+        ? "Le jour venu, ouvrez ce lien : la visioconférence se lance dans votre navigateur, il n'y a rien à installer."
+        : "Nous revenons vers vous avec le lien de la visioconférence avant le rendez-vous.",
+      ...(agenda
+        ? [
+            "",
+            visio
+              ? "Le rendez-vous est en pièce jointe, le lien avec lui : ouvrez-la pour l'ajouter à votre agenda."
+              : "Le rendez-vous est en pièce jointe : ouvrez-la pour l'ajouter à votre agenda.",
+          ]
+        : []),
       "",
       "Si cette date ne vous convient plus, répondez simplement à ce message : on en trouve une autre.",
       "",

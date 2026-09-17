@@ -1,5 +1,6 @@
-import { composerConfirmation } from "@/lib/mail/confirmation";
+import { composerConfirmation, FORMATS } from "@/lib/mail/confirmation";
 import { COURRIEL } from "@/lib/reservation";
+import { lienVisio } from "@/lib/visio";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -45,12 +46,25 @@ import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
      cette route reste muette tant que la clé n'y est pas posée. La même
      clé sert déjà à /api/contact.
 
+   LE LIEN DE VISIOCONFÉRENCE (16/09, second passage)
+   Le mail annonçait un lien « avant le rendez-vous », à fabriquer à la
+   main. Il porte maintenant une salle Google Meet ouverte au moment de
+   l'envoi par lib/visio.ts, qui pose aussi le rendez-vous dans l'agenda
+   d'Omega. Cet appel est le SEUL du flux qu'on attend vraiment (`await`)
+   avant de composer — mais il ne peut pas faire échouer l'envoi : en
+   panne, sans autorisation ou sans variables, il rend `null` et le mail
+   repart avec sa phrase d'attente. Un rendez-vous confirmé sans lien
+   vaut mieux qu'un client qui ne reçoit rien.
+
    Variables d'environnement, projet Vercel du SITE (pegase-site2) :
    · RESEND_API_KEY — la clé du compte Resend ;
    · MAIL_EXPEDITEUR — facultatif, « Omega <bonjour@auth.omegaai.fr> » par
      défaut (sous-domaine déjà vérifié chez Resend) ;
    · MAIL_REPONDRE_A — facultatif, l'adresse qui reçoit les réponses du
-     client ; à défaut contact@omegaai.fr.
+     client ; à défaut contact@omegaai.fr ;
+   · GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET /
+     GOOGLE_OAUTH_REFRESH_TOKEN, et GOOGLE_CALENDAR_ID ou MEET_LIEN — la
+     visioconférence ; tout est détaillé en tête de lib/visio.ts.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const runtime = "nodejs";
@@ -130,16 +144,40 @@ export async function POST(req: Request) {
      apprendrait à un curieux quels identifiants existent. */
   if (!ligne) return Response.json({ ok: true, envoye: false });
 
-  /* ——— 3. composer ——— */
+  /* ——— 3. ouvrir la salle de visioconférence ———
+     Seulement quand il y a un créneau : les formats sur devis n'ont pas
+     de date, donc rien à poser dans un agenda. Le titre et la
+     description sont ce que LE CLIENT verra dans son invitation s'il
+     ouvre l'événement — d'où le nom de l'entreprise quand on l'a. */
+  const format = FORMATS[ligne.formule] ?? ligne.formule;
+  const nomComplet = `${ligne.prenom} ${ligne.nom}`.trim();
+  const visio =
+    ligne.creneau_debut && ligne.duree_min && ligne.duree_min > 0
+      ? await lienVisio({
+          id,
+          titre: `${format} — ${ligne.entreprise?.trim() || nomComplet || "Omega.AI"}`,
+          description:
+            `${format} réservé sur omegaai.fr.\n` +
+            `${nomComplet}${ligne.entreprise?.trim() ? ` · ${ligne.entreprise.trim()}` : ""}\n` +
+            `${ligne.email}\n` +
+            `Parcours : ${ligne.parcours}`,
+          debutISO: ligne.creneau_debut,
+          dureeMin: ligne.duree_min,
+          invite: nomComplet ? { email: ligne.email, nom: nomComplet } : { email: ligne.email, nom: ligne.email },
+        })
+      : null;
+
+  /* ——— 4. composer ——— */
   const { sujet, html, texte, agenda } = composerConfirmation({
     id,
     prenom: ligne.prenom,
     formule: ligne.formule,
     creneauISO: ligne.creneau_debut,
     dureeMin: ligne.duree_min,
+    lienVisio: visio,
   });
 
-  /* ——— 4. envoyer ——— */
+  /* ——— 5. envoyer ——— */
   try {
     const r = await fetch(API_ENVOI, {
       method: "POST",
@@ -176,5 +214,5 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, motif: "reseau", envoye: false }, { status: 502 });
   }
 
-  return Response.json({ ok: true, envoye: true });
+  return Response.json({ ok: true, envoye: true, visio: Boolean(visio) });
 }
