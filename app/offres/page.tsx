@@ -609,10 +609,28 @@ export default function OffresPage() {
                         Celle-ci fait 404 et tient. Ne pas la rallonger sans
                         remesurer : deux mots de plus et les huit blocs de la
                         colonne de droite se décalent. */}
-                    <h2 className="ofd-h3">Ce qui ne change pas.</h2>
+                    {/* 17/09 (Teo, « on a mis un globe, tu penses pas qu'il
+                        faudrait changer le texte ? — genre en mode on est
+                        partout dans le monde ») — le bloc disait « Ce qui ne
+                        change pas » au-dessus d'une mappemonde : le texte
+                        parlait des outils du client, l'image d'une présence
+                        mondiale. Le titre porte donc désormais ce que le globe
+                        montre, et il le fait SANS revendiquer de bureaux
+                        ailleurs : ce qui est partout, ce sont les systèmes
+                        (ils tournent en ligne), pas nous.
+                        L'argument « vos outils ne bougent pas » n'est pas
+                        perdu pour autant — la carte « Intégration », à droite
+                        dans ce même panneau, le porte déjà mot pour mot.
+                        Mesuré à 40 px dans les 460 px de la colonne :
+                        celle-ci 400, « Partout où vous travaillez. » 448 (trop
+                        serré pour la police de secours), « Où que soit votre
+                        équipe. » 440. Le corps tient les DEUX lignes de
+                        l'ancien : une troisième ajouterait 24 px à la colonne
+                        de gauche et décalerait les quatre cartes. */}
+                    <h2 className="ofd-h3">Où que vous travailliez.</h2>
                     <p className="ofd-body">
-                      Les systèmes travaillent dans vos outils, pas à côté. Aucun compte à créer,
-                      aucune donnée à migrer.
+                      Les systèmes tournent en ligne, pas sur un poste. Vos équipes les
+                      retrouvent où qu'elles soient.
                     </p>
                   </div>
                   {/* 16/09 (Teo) — le motif à points calculé laisse la
