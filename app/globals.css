@@ -5842,6 +5842,128 @@ button.rounded-full:active {
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   LES BANDEAUX PHOTO QUI S'ÉLARGISSENT À L'ENTRÉE — 16/09/2026
+
+   Teo : « je veux l'effet où ça zoome et dézoome, comme sur /offres et
+   /offres/sur-mesure ». Même construction que `.smd-appel-plaque` et
+   `.smd-citation__plaque` : voir le bloc du même nom dans
+   app/offres/sur-mesure/sur-mesure.css, qui porte le relevé chiffré.
+
+   CE QUI S'ANIME EST UN CALQUE, PAS LA CARTE. Si le fond et le texte sont
+   le même élément, le texte voyage avec son fond : il n'y a plus de repère
+   fixe à côté et on ne perçoit pas le mouvement. Ici `.vd-bleed--calque`
+   garde sa largeur pleine et son remplissage — la colonne de texte ne bouge
+   jamais d'un pixel — et c'est `.vd-plaque`, en absolu derrière, qui porte
+   la photo, le voile, le rayon et l'élargissement.
+
+   ⚠ SCOPÉ À `.vd-bleed--calque`. Le hero est un `.vd-bleed` lui aussi, mais
+   il a déjà son propre mouvement (le repli, piloté en JavaScript dans
+   components/donnees/HeroPlein.tsx) : les deux s'annuleraient.
+
+   L'EXCURSION : 90 → 100 %, comme la référence. Relevé le 16/09 sur
+   `.smd-appel-plaque` de /offres/sur-mesure, à 1440 × 900, bord haut de la
+   carte de 900 à 180 : 87,2 → 96,8 % de la colonne, soit 9,6 points et
+   139 px. Ici 10 points font 122 px sur le bandeau et 141 px sur l'appel.
+
+   La largeur d'ARRIVÉE est aussi la largeur au repos : là où
+   `animation-timeline: view()` n'est pas reconnu (Safari, Firefox), rien
+   ne s'anime et c'est 100 % qui reste — la géométrie d'avant l'effet, pas
+   un état coincé à mi-course.
+
+   LA BORNE EST EN `cover`, PAS EN `entry`, ET C'EST LE POINT DUR.
+   `entry` se mesure sur la HAUTEUR DU SUJET : sur le bandeau, haut de
+   420, `entry 0% → 55%` consomme toute l'excursion en 231 px de
+   défilement, pendant que la carte n'est encore qu'un liseré en bas de
+   l'écran — mesuré : déjà à 97,8 % quand 80 px de la carte sont visibles.
+   C'est exactement le « le zoom dézoom apparaît trop tard » du 16/09.
+
+   `cover` court du même départ mais sur la hauteur de la FENÊTRE plus
+   celle du sujet — l'excursion peut donc durer plus longtemps que la
+   carte n'est haute. Les bornes sont calées pour rendre les ~480 px de
+   défilement de la référence, dont le sujet fait 816 :
+     bandeau, 420 de haut  →  cover 8 % → 46 %, 502 px à 1440 × 900
+     appel,   720 de haut  →  cover 8 % → 39 %, 502 px à 1440 × 900
+   Le départ à 8 % et non 0 vient du même relevé : chez eux le calque ne
+   bouge pas des 80 premiers pixels (87,2 puis 87,8 %), il ne part qu'une
+   fois une centaine de pixels de la carte visibles. Parti à 0 %, le nôtre
+   avait fait 42 % du chemin quand la carte n'était encore qu'un liseré —
+   on ne voyait arriver que la fin du mouvement, et c'est très exactement
+   ce que Teo appelle « le zoom dézoom apparaît trop tard ».
+
+   Profil obtenu, bord haut de la carte de 740 à 420, en part d'excursion
+   faite — référence 34, 56, 73, 84, 92 ; bandeau 29, 61, 81, 93, 98.
+
+   Le calque ne rentre jamais sous le texte : à son plus étroit (90 %) il
+   perd 61 px de chaque côté, plus que le remplissage de 56, mais à ce
+   moment-là le bord haut de la carte est au ras du bas de la fenêtre et
+   la première ligne est 220 px plus bas, hors champ. Quand elle entre,
+   le calque est à 98,4 % — 10 px de retrait, contre 56 de remplissage.
+   ═══════════════════════════════════════════════════════════════════════ */
+.vd .vd-bleed--calque {
+  /* ce niveau-ci ne dessine plus rien : il ne fait que tenir la colonne de
+     texte. Le rayon et le rognage sont descendus sur la plaque. */
+  overflow: visible;
+  border-radius: 0;
+}
+.vd .vd-bleed--calque::after {
+  content: none;
+}
+.vd .vd-plaque {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 0;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--vd-r-lg);
+}
+.vd .vd-plaque img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* le voile suit la photo dans le calque, sinon il resterait à la largeur
+   pleine et déborderait du cadre pendant que celui-ci est rétréci */
+.vd .vd-plaque::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.55) 34%, rgba(0, 0, 0, 0.12) 70%, rgba(0, 0, 0, 0.05) 100%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 62%);
+}
+
+@keyframes vd-plaque-entree {
+  from {
+    width: 90%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+    .vd .vd-plaque {
+      animation: vd-plaque-entree both;
+      animation-timeline: view();
+      /* sortie cubique `1 − (1 − p)³`, la courbe relevée sur la référence */
+      animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+    }
+    .vd .vd-bleed--bande .vd-plaque {
+      animation-range: cover 8% cover 46%;
+    }
+    .vd .vd-bleed--calque:not(.vd-bleed--bande) .vd-plaque {
+      animation-range: cover 8% cover 39%;
+    }
+  }
+}
+
 /* ——— la grande carte bleu ardoise (citation, schéma) ——— */
 .vd .vd-ardoise {
   background: var(--vd-slate);

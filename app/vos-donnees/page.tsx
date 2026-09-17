@@ -514,14 +514,19 @@ export default function VosDonnees() {
           {/* ─── BANDEAU PHOTO ────────────────────────────────────────── */}
           <section className="pb-16 md:pb-24">
             <div className="vd-wrap">
-              <div className="vd-bleed vd-bleed--bande vd-sur-image">
-                <Image
-                  src="/photos/donnees-baie.jpg"
-                  alt=""
-                  fill
-                  sizes="(min-width:1280px) 1216px, 100vw"
-                  className="object-cover"
-                />
+              <div className="vd-bleed vd-bleed--bande vd-bleed--calque vd-sur-image">
+                {/* le calque qui s'élargit au défilement — la colonne de texte
+                    ci-dessous, elle, ne bouge pas (bloc « LES BANDEAUX PHOTO
+                    QUI S'ÉLARGISSENT À L'ENTRÉE » de globals.css) */}
+                <div className="vd-plaque">
+                  <Image
+                    src="/photos/donnees-baie.jpg"
+                    alt=""
+                    fill
+                    sizes="(min-width:1280px) 1216px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
                 <div className="relative z-10 max-w-[38rem]">
                   <h2 className="vd-h4">
                     Le cloud désigne ici des centres de données identifiés
@@ -544,14 +549,18 @@ export default function VosDonnees() {
 
           {/* ─── CTA FINAL ────────────────────────────────────────────── */}
           <div className="px-4 pb-12">
-            <section className="vd-bleed vd-sur-image">
-              <Image
-                src="/photos/donnees-francfort-skyline.jpg"
-                alt=""
-                fill
-                sizes="100vw"
-                className="object-cover"
-              />
+            <section className="vd-bleed vd-bleed--calque vd-sur-image">
+              {/* même calque que le bandeau photo : c'est lui qui s'élargit,
+                  le titre et le bouton restent à leur place */}
+              <div className="vd-plaque">
+                <Image
+                  src="/photos/donnees-francfort-skyline.jpg"
+                  alt=""
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </div>
               <div className="relative z-10 flex w-full max-w-[72rem] flex-col gap-6">
                 <h2 className="vd-h1 vd-titre-degrade">Choisir votre hébergement</h2>
                 <p className="vd-lead max-w-[38rem]">
