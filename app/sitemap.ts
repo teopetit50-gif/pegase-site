@@ -35,14 +35,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     /* 28/08 — les deux pages de réservation en ligne. Priorité modérée :
        ce sont des étapes de parcours, pas des portes d'entrée SEO. */
     { url: "/reserver", priorite: 0.5, frequence: "monthly" },
-    /* 15/09 (soir) — /installation sort du plan du site : le parcours
-       demande une connexion, et plus rien de la vitrine n'y mène. Il se
-       réserve par le lien envoyé après l'audit. */
-    /* 08/09 — le mode d'emploi de l'application (Android, iPhone,
-       ordinateur) : une page publique, liée depuis le pied de page, qu'un
-       client cherche quand il change de téléphone. Même rang que
-       /reserver : une étape, pas une porte d'entrée. */
-    { url: "/application", priorite: 0.5, frequence: "monthly" },
+    /* 17/09 — /application est SUPPRIMÉE du site (Teo). Elle sort
+       donc aussi du plan du site. */
     /* 08/09 — le service client : WhatsApp et contact@omegaai.fr. */
     { url: "/contact", priorite: 0.6, frequence: "monthly" },
     { url: "/integrations", priorite: 0.8, frequence: "monthly" },

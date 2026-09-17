@@ -56,7 +56,8 @@ export const MARQUE = {
   nom: "FRONTD",
   role: "demandes entrantes & avis",
   signature: "un système Omega.AI",
-  espace: "https://app.omegaai.fr",
+  /* 17/09 — `espace` (app.omegaai.fr) retirée : plus aucun lien du site
+     ne mène au cockpit. La constante n'était plus lue par aucun rendu. */
   audit: "/reserver-un-audit",
   /* Un seul compte pour tous les systèmes Omega. Le site source renvoyait
      vers `https://omegaai.fr/connexion` parce qu'il était ailleurs ; ici le

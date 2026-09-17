@@ -1,4 +1,3 @@
-import { COCKPIT_URL } from "@/lib/supabase/config";
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
@@ -73,15 +72,15 @@ const ATTENDRE = [
     n: "03",
     titre: "Un suivi continu",
     texte:
-      "Changement de formule, résiliation, moyen de paiement : la demande se fait depuis votre espace client, et vous y suivez son traitement.",
+      "Changement de formule, résiliation, moyen de paiement : écrivez-nous, nous traitons la demande et nous vous confirmons son traitement par e-mail.",
   },
 ];
 
 const BESOINS = [
-  /* 15/09 — « Mon compte » a quitté le site : la ligne pointe l'espace
-     client, où l'abonnement et le moyen de paiement vivent désormais. */
-  { q: "Mon abonnement, mes rendez-vous, mon moyen de paiement", href: `${COCKPIT_URL}/compte`, lien: "Mon espace client" },
-  { q: "Installer l'application sur mon téléphone ou mon ordinateur", href: "/application", lien: "L'application" },
+  /* 17/09 — les deux lignes « Mon espace client » (cockpit) et
+     « Installer l'application » (/application) sont retirées : plus
+     rien du site ne mène à un compte, à une connexion ni à
+     l'installation de l'application. */
   { q: "Réserver ma réunion d'installation", href: "/tarifs", lien: "Les tarifs" },
   { q: "Demander un audit pour mon entreprise", href: "/reserver-un-audit", lien: "Réserver un audit" },
   { q: "Savoir où vont mes données", href: "/vos-donnees", lien: "Vos données" },

@@ -1502,9 +1502,8 @@ export default function CommandeSite({ utilisateur, modeleInitial }: Props) {
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3">
-              <Link href="/compte" className="r-btn r-btn--noir">
-                Suivre ma commande
-              </Link>
+              {/* 17/09 — « Suivre ma commande » menait à /compte, page
+                  retirée du site : le suivi passe par e-mail. */}
               <Link href="/" className="r-lien self-center !text-[15px]">
                 Retour à l&apos;accueil
               </Link>

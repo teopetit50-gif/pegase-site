@@ -1012,26 +1012,11 @@ export default function PriseDeCreneau({
                   qu&apos;une fois le système en route&nbsp;: le premier prélèvement part le jour où
                   vos modules sont en service.
                 </p>
-                {/* 02/09 (revue n° 10) — le client vient de créer un compte
-                    pour que sa demande lui soit rattachée : on lui dit où
-                    la retrouver, sinon la raison d'être du compte reste
-                    invisible. */}
-                <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-                  Votre demande est enregistrée dans « Mon compte », avec votre créneau.
-                </p>
-                {/* 08/09 — l'application (demande des associés : « dans
-                    l'espace client et après l'achat ») : dès la mise en
-                    service, l'espace s'installe sur le téléphone — et sur
-                    l'ordinateur (seconde passe du 08/09) ; on le dit ici, au
-                    moment où le client vient de s'engager. */}
-                <p className="mt-3 max-w-[54ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-                  Le jour de la mise en service, votre espace s&apos;installera aussi sur votre
-                  téléphone ou votre ordinateur, comme une application&nbsp;:{" "}
-                  <Link href="/application" className="underline underline-offset-2">
-                    voir comment
-                  </Link>
-                  .
-                </p>
+                {/* 17/09 — les deux paragraphes « Mon compte » et
+                    « l'application » sont retirés (Teo : plus rien du site
+                    ne mène à un compte, à une connexion ni à l'installation
+                    de l'application). Le client a sa confirmation par
+                    e-mail, dite juste au-dessus. */}
 
                 {/* 05/09 — le moyen de paiement : enregistré maintenant (Stripe,
                     carte ou SEPA, rien de débité) ou plus tard depuis /compte.
@@ -1071,9 +1056,11 @@ export default function PriseDeCreneau({
                               "Enregistrer mon moyen de paiement"
                             )}
                           </button>
-                          <Link href="/compte" className="r-lien">
-                            Plus tard, depuis Mon compte
-                          </Link>
+                          {/* 17/09 — le renvoi vers /compte tombe avec la
+                              page : le report se dit, il ne se clique plus. */}
+                          <span className="r-lien">
+                            Ou plus tard&nbsp;: nous vous le proposerons par e-mail.
+                          </span>
                         </div>
                       </>
                     )}
@@ -1082,11 +1069,8 @@ export default function PriseDeCreneau({
               </>
             ) : null}
             <div className="mt-7 flex flex-wrap gap-3">
-              {parcours === "installation" ? (
-                <Link href="/compte" className={`r-btn ${demandeId && paiement !== "indisponible" ? "r-btn--fil" : "r-btn--noir"}`}>
-                  Suivre ma demande
-                </Link>
-              ) : null}
+              {/* 17/09 — « Suivre ma demande » menait à /compte, page
+                  retirée du site. Le suivi se fait par e-mail. */}
               <Link href="/offres" className="r-btn r-btn--fil">
                 Découvrir les postes
               </Link>

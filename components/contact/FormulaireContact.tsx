@@ -35,7 +35,9 @@ const SUJETS: { valeur: SujetContact; libelle: string }[] = [
   { valeur: "installation", libelle: "Mon installation ou ma réunion" },
   { valeur: "abonnement", libelle: "Mon abonnement ou une facture" },
   { valeur: "poste", libelle: "Un poste en service" },
-  { valeur: "application", libelle: "L'application sur mon téléphone ou mon ordinateur" },
+  /* 17/09 — le sujet « L'application » est retiré : l'application
+     n'est plus proposée nulle part sur le site. La valeur reste acceptée
+     côté API pour un formulaire déjà ouvert dans un onglet. */
   { valeur: "site", libelle: "Mon site" },
   { valeur: "avant", libelle: "Une question avant de commencer" },
   { valeur: "autre", libelle: "Autre demande" },
