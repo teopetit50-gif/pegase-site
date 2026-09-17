@@ -896,54 +896,6 @@ export default function OffresPage() {
                   <SchemaCycle />
                 </div>
 
-                {/* 16/09, seconde passe — LE SCHÉMA SUR TÉLÉPHONE.
-
-                    Première tentative le même jour : le SVG était
-                    simplement masqué sous 768, la chronologie en dessous
-                    devant suffire. Teo, capture à l’appui : « y a ça
-                    qu’a disparu ». Il avait demandé que le schéma
-                    S’AFFICHE EN ENTIER, pas qu’il s’efface —
-                    le retirer répondait à la lettre et contre
-                    l’intention.
-
-                    Le voici redessiné en colonne, en balisage plutôt
-                    qu’en SVG : le texte garde sa taille de lecture,
-                    rien ne déborde, et les six nœuds sont là — réception,
-                    qualification, règles, rédaction, journal avec son
-                    retour, envoi. Le SVG reprend la main dès 768, où il a
-                    la place de se déplier. */}
-                <div data-reveal className="ofd-cycle-tel" aria-hidden>
-                  <p className="ofd-cycle-tel__borne">{SCHEMA.entree}</p>
-
-                  <article className="ofd-cycle-tel__etape">
-                    <h3>
-                      {SCHEMA.gauche.titre}
-                      <span> {SCHEMA.gauche.sous}</span>
-                    </h3>
-                    <p>{SCHEMA.gauche.corps.join(" ")}</p>
-                  </article>
-
-                  <aside className="ofd-cycle-tel__cote">
-                    <b>{SCHEMA.haut.titre}</b> {SCHEMA.haut.corps.join(" ")}
-                  </aside>
-
-                  <article className="ofd-cycle-tel__etape">
-                    <h3>
-                      {SCHEMA.droite.titre}
-                      <span> {SCHEMA.droite.sous}</span>
-                    </h3>
-                    <p>{SCHEMA.droite.corps.join(" ")}</p>
-                  </article>
-
-                  <aside className="ofd-cycle-tel__cote">
-                    <b>{SCHEMA.bas.titre}</b> {SCHEMA.bas.corps.join(" ")}
-                    <span className="ofd-cycle-tel__retour">{SCHEMA.retour}</span>
-                  </aside>
-
-                  <p className="ofd-cycle-tel__borne">{SCHEMA.sortie}</p>
-                  <p className="ofd-cycle-tel__note">{SCHEMA.note}</p>
-                </div>
-
                 <div className="ofd-rangee">
                   <p className="ofd-mono ofd-rangee__legende">Le cycle, temps par temps</p>
                   <div className="ofd-rangee__grille">

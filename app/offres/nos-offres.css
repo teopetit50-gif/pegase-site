@@ -1120,140 +1120,67 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   16/09/2026 (Teo, par l'associé) — LE SCHÉMA DISPARAÎT SUR TÉLÉPHONE
+   LE SCHÉMA SUR TÉLÉPHONE — IL RÉTRÉCIT, IL NE SE REFAIT PAS
+   16/09/2026, troisième passe (Teo, capture à l'appui)
 
-   « Sur mobile le schéma complet ne s'affiche pas ; base-toi sur le
-   design de la page sur mesure pour refaire le même. »
+   « Le design change alors que le schéma doit rester exactement le même
+   sur mobile, juste en plus petit, comme sur la page sur mesure. »
 
-   Version précédente : le SVG restait à 820 px de large et défilait
-   horizontalement dans son cadre, avec un fondu au bord droit pour dire
-   qu'on pouvait le faire glisser. Le geste ne se devine pas, et un schéma
-   dont on ne voit qu'un tiers n'est pas un schéma — c'est une image
-   coupée. C'est exactement ce que Teo a vu.
+   Deux tentatives sont tombées avant celle-ci, et les deux répondaient à
+   côté :
+     1. le SVG forcé à 820 px dans un cadre à défilement horizontal, avec
+        un fondu à droite — on n'en voyait qu'un tiers, le geste ne se
+        devine pas ;
+     2. le SVG masqué sous 768 et remplacé par une colonne de pilules en
+        balisage (`.ofd-cycle-tel`, supprimée avec cette passe) — lisible,
+        mais ce n'était plus le schéma : une liste verticale ne montre ni
+        la boucle des règles, ni le retour du journal, ni le fait que tout
+        revient sur la qualification.
 
-   Ce qui le remplace existait déjà : `.ofd-rangee`, le même cycle « temps
-   par temps » en pile, une colonne sur téléphone — la forme que la page
-   sur-mesure a retenue pour son déroulé. Rien n'est perdu : les quatre
-   temps, leurs intitulés et leurs textes sont les mêmes des deux côtés.
-   Le SVG reste servi tel quel dès 768.
+   Ce que « comme sur la page sur mesure » veut dire : là-bas, le cycle
+   est du BALISAGE, donc il ne peut pas rétrécir tout seul — il est
+   enveloppé dans `components/surmesure/Ajuste.tsx`, qui le rend à sa
+   largeur naturelle (1408) puis lui applique un `transform: scale()` et
+   recalcule la hauteur du cadre. Le dessin est rigoureusement le même à
+   toutes les largeurs, seulement plus petit (0,24 à 375 — encore moins
+   que chez nous, et c'est accepté).
 
-   `display: none` et non `visibility` : il ne doit rien coûter en hauteur
-   ni en défilement, et un SVG masqué mais présent laisserait un blanc de
-   400 px au milieu de la page. */
+   Ici ce composant n'a rien à apporter : notre schéma est UN SVG À
+   VIEWBOX, et un SVG à viewBox fait déjà exactement ça, sans JavaScript
+   ni mesure. Le résultat à l'écran est le même. Il suffisait de le
+   laisser occuper sa largeur — même topologie, mêmes cartes, mêmes
+   flèches, même boucle, entièrement visible, juste plus petit.
+
+   Il déborde les gouttières de 24 du `.ofd-wrap` pour prendre la largeur
+   de fenêtre entière : 14 % de dessin en plus, sans rien changer au
+   dessin. `margin-inline: -24px`, la valeur exacte de la gouttière, et
+   surtout PAS `width: 100vw` ni `calc(50% - 50vw)` : `vw` compte la barre
+   de défilement, et le schéma déborde alors de sa largeur sur toute
+   fenêtre qui en affiche une en permanence (constaté dans le volet de
+   recette — « Envoi » et « Vos corrections » tranchés à droite).
+
+   ⚠ Ce qu'il faut assumer et ne pas « corriger » : à 375 l'échelle tombe
+   à 0,31, donc les phrases DANS les cartes rendent 4,6 px. Elles y sont
+   la silhouette du propos, pas le propos. Ce qu'elles disent est écrit en
+   entier juste dessous, en pile, dans `.ofd-rangee` — c'est là qu'on lit
+   le cycle sur un téléphone. Ne pas réintroduire de colonne de
+   remplacement : la demande est explicite. */
 @media (max-width: 767px) {
   .ofd .ofd-schema {
-    display: none;
+    margin-inline: -24px;
+    max-width: none;
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   LE MÊME CYCLE, EN COLONNE, POUR LE TÉLÉPHONE (16/09, seconde passe)
-
-   Masquer le SVG ne suffisait pas : Teo voulait le schéma LISIBLE, pas
-   absent — « y a ça qu'a disparu », capture à l'appui. Il est rebâti ici
-   en balisage : une colonne de nœuds reliés par un filet, deux encarts de
-   côté pour les règles et le journal, et les deux bornes en pilule. Le
-   texte garde sa taille de lecture au lieu de tomber à 9 px, et rien ne
-   déborde.
-
-   `aria-hidden` sur le bloc : les mêmes temps sont juste dessous en toutes
-   lettres (`.ofd-rangee`). Faire lire deux fois la même chose à un lecteur
-   d'écran n'apporte rien.
-   ═══════════════════════════════════════════════════════════════════════ */
-.ofd .ofd-cycle-tel {
-  display: none;
+.ofd .ofd-rangee {
+  margin-top: 48px;
 }
+/* APRÈS la règle de base, sinon la spécificité est égale et c'est 48 qui
+   gagne — le schéma prend déjà toute la largeur, la rangée se recolle. */
 @media (max-width: 767px) {
-  .ofd .ofd-cycle-tel {
-    display: grid;
-    gap: 10px;
-    margin-inline: auto;
-    max-width: 420px;
-  }
-  /* le filet de liaison : un trait tiré dans la gouttière, plutôt qu'un
-     pseudo-élément par nœud */
-  .ofd .ofd-cycle-tel > * + *::before {
-    content: "";
-    display: block;
-    width: 1px;
-    height: 10px;
-    margin: -10px auto 0;
-    background: #e0e0e0;
-  }
-  .ofd .ofd-cycle-tel__borne {
-    margin: 0;
-    padding: 9px 14px;
-    border: 1px solid #e0e0e0;
-    border-radius: 999px;
-    background: #ffffff;
-    text-align: center;
-    font-size: 13px;
-    line-height: 20px;
-    font-weight: 500;
-    color: var(--ofd-encre);
-  }
-  .ofd .ofd-cycle-tel__etape {
-    padding: 14px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    background: #ffffff;
-  }
-  .ofd .ofd-cycle-tel__etape h3 {
-    margin: 0;
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    color: var(--ofd-encre);
-  }
-  .ofd .ofd-cycle-tel__etape h3 span {
-    font-weight: 400;
-    color: #8a8a8a;
-  }
-  .ofd .ofd-cycle-tel__etape p {
-    margin: 4px 0 0;
-    font-size: 14px;
-    line-height: 21px;
-    color: #6f6f6f;
-  }
-  /* les deux encarts : rentrés, sans fond — on doit lire qu'ils encadrent
-     l'étape au lieu d'en être une */
-  .ofd .ofd-cycle-tel__cote {
-    margin-left: 22px;
-    padding: 10px 14px;
-    border-left: 2px solid #e0e0e0;
-    font-size: 13px;
-    line-height: 20px;
-    color: #6f6f6f;
-  }
-  .ofd .ofd-cycle-tel__cote b {
-    color: var(--ofd-encre);
-    font-weight: 500;
-  }
-  .ofd .ofd-cycle-tel__retour {
-    display: block;
-    margin-top: 4px;
-    font-size: 12px;
-    color: #8a8a8a;
-  }
-  .ofd .ofd-cycle-tel__retour::before {
-    content: "↺ ";
-  }
-  .ofd .ofd-cycle-tel__note {
-    margin: 2px 0 0;
-    font-size: 12px;
-    line-height: 18px;
-    color: #8a8a8a;
-  }
-  .ofd .ofd-cycle-tel__note::before {
-    content: none;
-  }
   .ofd .ofd-rangee {
     margin-top: 34px;
   }
-}
-.ofd .ofd-rangee {
-  margin-top: 48px;
 }
 .ofd .ofd-rangee__legende {
   text-align: center;
