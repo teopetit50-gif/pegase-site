@@ -18,6 +18,8 @@ import { BandeauOutils } from "@/components/offres/BandeauOutils";
 import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
 import { ChatMessages } from "@/components/ui/chat-messages";
 import PageShell from "@/components/PageShell";
+import Ajuste from "@/components/surmesure/Ajuste";
+import Cycle from "@/components/offres/Cycle";
 import PageMotion from "@/components/PageMotion";
 import { POSTS } from "@/lib/content";
 import "./nos-offres.css";
@@ -516,159 +518,6 @@ function CoinPlein() {
   );
 }
 
-/* Le schéma du cycle, redessiné d'après la topologie de la référence.
-   Tout est dans un seul viewBox de 1216 × 640 (leur image fait 2432 × 1274,
-   même rapport) : les textes suivent donc l'échelle du cadre et restent
-   nets à toute taille. */
-/* une carte du schéma : cadre blanc, titre, éventuel sous-titre entre
-   parenthèses, puis le corps sur deux lignes. Déclarée AU MODULE et non
-   dans SchemaCycle : un composant créé pendant le rendu perd son état à
-   chaque passe, et eslint le refuse (react/no-unstable-nested-components). */
-function SchemaCarte({
-  x,
-  y,
-  l,
-  h,
-  titre,
-  sous,
-  corps,
-}: {
-  x: number;
-  y: number;
-  l: number;
-  h: number;
-  titre: string;
-  sous?: string;
-  corps: string[];
-}) {
-  return (
-    <g>
-      <rect x={x} y={y} width={l} height={h} rx={14} fill="#ffffff" filter="url(#ofd-ombre)" />
-      <text x={x + 26} y={y + 42} className="ofd-schema__titre">
-        {titre}
-      </text>
-      {sous ? (
-        <text x={x + 26} y={y + 68} className="ofd-schema__sous">
-          {sous}
-        </text>
-      ) : null}
-      {corps.map((ligne, i) => (
-        <text key={ligne} x={x + 26} y={y + (sous ? 118 : 92) + i * 24} className="ofd-schema__corps">
-          {ligne}
-        </text>
-      ))}
-    </g>
-  );
-}
-
-/* une pastille d'entrée, de sortie ou de retour : ce qui n'est pas de
-   notre ressort, d'où l'astérisque et la note en bas de schéma. */
-function SchemaPastille({
-  x,
-  y,
-  l,
-  h,
-  texte,
-  pointille = false,
-}: {
-  x: number;
-  y: number;
-  l: number;
-  h: number;
-  texte: string;
-  pointille?: boolean;
-}) {
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={l}
-        height={h}
-        rx={14}
-        fill="#ffffff"
-        stroke={pointille ? "#c9c9c9" : "none"}
-        strokeDasharray={pointille ? "5 5" : undefined}
-        filter={pointille ? undefined : "url(#ofd-ombre)"}
-      />
-      <text x={x + l / 2} y={y + h / 2 + 7} textAnchor="middle" className="ofd-schema__titre">
-        {texte}
-      </text>
-    </g>
-  );
-}
-
-/* Le schéma du cycle, redessiné d'après la topologie de la référence.
-   Tout tient dans un viewBox de 1216 × 660 (leur image fait 2432 × 1274,
-   même rapport) : les textes suivent donc l'échelle du cadre et restent
-   nets à toute taille. */
-function SchemaCycle() {
-  const C = SCHEMA;
-  return (
-    <svg
-      viewBox="0 0 1216 660"
-      role="img"
-      aria-label="Le cycle : réception, qualification, rédaction, envoi, avec la boucle des règles et du journal"
-    >
-      <defs>
-        <filter id="ofd-ombre" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#000000" floodOpacity="0.06" />
-        </filter>
-        <marker
-          id="ofd-fleche"
-          viewBox="0 0 10 10"
-          refX="9"
-          refY="5"
-          markerWidth="7"
-          markerHeight="7"
-          orient="auto-start-reverse"
-        >
-          <path d="M0 0 L10 5 L0 10 z" fill="#8a8a8a" />
-        </marker>
-      </defs>
-
-      {/* ── la ligne centrale : entrée → qualification → rédaction → sortie ── */}
-      <SchemaPastille x={0} y={286} l={196} h={76} texte={C.entree} />
-      <SchemaCarte x={276} y={232} l={290} h={184} {...C.gauche} />
-      <SchemaCarte x={650} y={232} l={290} h={184} {...C.droite} />
-      <SchemaPastille x={1020} y={286} l={196} h={76} texte={C.sortie} />
-
-      <g stroke="#8a8a8a" strokeWidth="1.6" fill="none" markerEnd="url(#ofd-fleche)">
-        <path d="M196 324 H262" />
-        <path d="M566 324 H636" />
-        <path d="M940 324 H1006" />
-        {/* boucle haute : qualification → règles → rédaction */}
-        <path d="M352 232 C352 150 366 108 416 108" />
-        <path d="M800 108 C850 108 864 150 864 232" />
-        {/* boucle basse : rédaction → journal → qualification */}
-        <path d="M864 416 C864 498 850 540 800 540" />
-        <path d="M416 540 C366 540 352 498 352 416" />
-      </g>
-
-      {/* ── les deux cartes de la boucle ── */}
-      <SchemaCarte x={416} y={30} l={384} h={156} {...C.haut} />
-      <SchemaCarte x={416} y={462} l={384} h={156} {...C.bas} />
-
-      {/* ── le retour en pointillés, depuis la sortie ── */}
-      <SchemaPastille x={1000} y={508} l={216} h={64} texte={C.retour} pointille />
-      <g
-        stroke="#b4b4b4"
-        strokeWidth="1.6"
-        fill="none"
-        strokeDasharray="5 6"
-        markerEnd="url(#ofd-fleche)"
-      >
-        <path d="M1118 362 V502" />
-        <path d="M1000 540 H806" />
-      </g>
-
-      <text x={608} y={650} textAnchor="middle" className="ofd-schema__note">
-        {C.note}
-      </text>
-    </svg>
-  );
-}
-
 /* ─────────────────────────────────────────────────────────────────────
    La page
    ───────────────────────────────────────────────────────────────────── */
@@ -892,8 +741,18 @@ export default function OffresPage() {
               />
 
               <div className="ofd-large">
+                {/* `Ajuste` rend le cycle à sa largeur naturelle (1408, celle
+                    pour laquelle il est dessiné) puis le RÉDUIT pour tenir
+                    dans la colonne. C'est le composant de
+                    /offres/sur-mesure, réemployé tel quel : le dessin est
+                    rigoureusement le même à toutes les largeurs, il est
+                    seulement plus petit. La note d'astérisque reste HORS
+                    du cadre, sinon elle rétrécirait avec lui. */}
                 <div data-reveal className="ofd-schema">
-                  <SchemaCycle />
+                  <Ajuste largeur={1408}>
+                    <Cycle />
+                  </Ajuste>
+                  <p className="ofd-schema__note">{SCHEMA.note}</p>
                 </div>
 
                 <div className="ofd-rangee">

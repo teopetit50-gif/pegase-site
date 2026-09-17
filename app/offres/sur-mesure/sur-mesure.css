@@ -1631,7 +1631,13 @@
    carte de chaque côté. Ne pas remplacer par des pourcentages : les
    rangées sont en hauteur fixe et le compte tomberait faux dès qu'une
    légende gagne une ligne. */
+/* ⚠ `display: flex` — il manquait. `flex-direction` et `align-items` ne
+   font rien sur un bloc : la flèche de 34 px tombait SOUS « Cadrage » au
+   lieu d'être en ligne avec lui. Même oubli sur les deux rangées de
+   sortie ci-dessous (constaté le 16/09 en comparant cette page à
+   /offres, dont le cycle est le même dessin). */
 .smd .smd-cy-entree {
+  display: flex;
   flex-direction: row;
   align-items: center;
   width: auto;
@@ -1753,6 +1759,7 @@
   left: 0;
   right: 0;
   height: var(--cy-haut);
+  display: flex;
   flex-direction: row;
   align-items: center;
   width: auto;

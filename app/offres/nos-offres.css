@@ -1084,92 +1084,356 @@
    components/).
    ───────────────────────────────────────────────────────────────────── */
 
-/* Le schéma du cycle. La référence loge ici une image de 2432 × 1274 dans
-   une colonne de 980 : même emprise, même rapport, mais en SVG — voir le
-   commentaire de SCHEMA dans page.tsx. Les corps de texte sont exprimés en
-   unités du viewBox (1216 de large), donc ils suivent l'échelle du cadre
-   au lieu de rapetisser d'un coup sous un point d'arrêt. */
-.ofd .ofd-schema {
-  margin-inline: auto;
-  max-width: 980px;
-}
-.ofd .ofd-schema svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-.ofd .ofd-schema__titre {
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  fill: var(--ofd-encre);
-}
-.ofd .ofd-schema__sous,
-.ofd .ofd-schema__corps {
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  fill: #6f6f6f;
-}
-.ofd .ofd-schema__note {
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  fill: #8a8a8a;
-}
-
 /* ═══════════════════════════════════════════════════════════════════════
-   LE SCHÉMA SUR TÉLÉPHONE — IL RÉTRÉCIT, IL NE SE REFAIT PAS
-   16/09/2026, troisième passe (Teo, capture à l'appui)
+   LE SCHÉMA DU CYCLE — LE MÊME DESSIN QUE SUR /offres/sur-mesure
+   16/09/2026, quatrième passe (Teo, les deux captures côte à côte)
 
-   « Le design change alors que le schéma doit rester exactement le même
-   sur mobile, juste en plus petit, comme sur la page sur mesure. »
+   « C'est toujours pas exactement comme sur la page sur mesure, regarde
+   bien la diff, c'est pas la même chose. »
 
-   Deux tentatives sont tombées avant celle-ci, et les deux répondaient à
-   côté :
-     1. le SVG forcé à 820 px dans un cadre à défilement horizontal, avec
-        un fondu à droite — on n'en voyait qu'un tiers, le geste ne se
-        devine pas ;
-     2. le SVG masqué sous 768 et remplacé par une colonne de pilules en
-        balisage (`.ofd-cycle-tel`, supprimée avec cette passe) — lisible,
-        mais ce n'était plus le schéma : une liste verticale ne montre ni
-        la boucle des règles, ni le retour du journal, ni le fait que tout
-        revient sur la qualification.
+   L'historique de ce coin de page, pour qu'on ne refasse pas un tour :
+     1. SVG à viewBox forcé à 820 px et défilement horizontal sous 768 —
+        on n'en voyait qu'un tiers ;
+     2. SVG masqué sous 768, remplacé par une colonne de pilules — lisible
+        mais ce n'était plus le schéma ;
+     3. SVG laissé à l'échelle de son bloc — le rétrécissement était bon,
+        mais l'HABILLAGE restait le nôtre, et c'est ce que Teo a vu.
 
-   Ce que « comme sur la page sur mesure » veut dire : là-bas, le cycle
-   est du BALISAGE, donc il ne peut pas rétrécir tout seul — il est
-   enveloppé dans `components/surmesure/Ajuste.tsx`, qui le rend à sa
-   largeur naturelle (1408) puis lui applique un `transform: scale()` et
-   recalcule la hauteur du cadre. Le dessin est rigoureusement le même à
-   toutes les largeurs, seulement plus petit (0,24 à 375 — encore moins
-   que chez nous, et c'est accepté).
+   Les écarts, relevés au style calculé sur les deux pages :
 
-   Ici ce composant n'a rien à apporter : notre schéma est UN SVG À
-   VIEWBOX, et un SVG à viewBox fait déjà exactement ça, sans JavaScript
-   ni mesure. Le résultat à l'écran est le même. Il suffisait de le
-   laisser occuper sa largeur — même topologie, mêmes cartes, mêmes
-   flèches, même boucle, entièrement visible, juste plus petit.
+       ici (SVG)                    sur-mesure (balisage)
+       ──────────────────────────   ─────────────────────────────────────
+       cartes à ombre portée        cartes plates
+       rayon 14                     rayon 12
+       titres 22, corps 15          titres 15, corps 12
+       traits #8a8a8a à 1,6         filets rgba(0,0,0,.22) à 1
+       pointes pleines (triangles)  pointes fines (deux bords à 45°)
+       quatre crochets de Bézier    UN anneau continu
+       largeur de colonne 980       toute la colonne (1232 à 1280)
 
-   Il déborde les gouttières de 24 du `.ofd-wrap` pour prendre la largeur
-   de fenêtre entière : 14 % de dessin en plus, sans rien changer au
-   dessin. `margin-inline: -24px`, la valeur exacte de la gouttière, et
-   surtout PAS `width: 100vw` ni `calc(50% - 50vw)` : `vw` compte la barre
-   de défilement, et le schéma déborde alors de sa largeur sur toute
-   fenêtre qui en affiche une en permanence (constaté dans le volet de
-   recette — « Envoi » et « Vos corrections » tranchés à droite).
+   Le bloc ci-dessous est donc le décalque de `.smd-cy`, valeur pour
+   valeur, avec deux seuls écarts, tous deux voulus :
+     · l'encre est `--ofd-encre` (#212121, la couleur de tous les titres
+       de cette page) et non le #000 de sur-mesure ;
+     · les deux cartes d'axe portent un sous-titre entre parenthèses,
+       d'où `.ofd-cy-sous` — sur-mesure n'en a pas.
 
-   ⚠ Ce qu'il faut assumer et ne pas « corriger » : à 375 l'échelle tombe
-   à 0,31, donc les phrases DANS les cartes rendent 4,6 px. Elles y sont
-   la silhouette du propos, pas le propos. Ce qu'elles disent est écrit en
-   entier juste dessous, en pile, dans `.ofd-rangee` — c'est là qu'on lit
-   le cycle sur un téléphone. Ne pas réintroduire de colonne de
-   remplacement : la demande est explicite. */
-@media (max-width: 767px) {
-  .ofd .ofd-schema {
-    margin-inline: -24px;
-    max-width: none;
-  }
+   Le SVG et ses trois fonctions de dessin ont quitté page.tsx.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Le cadre. Il occupe TOUTE la colonne, comme `.smd-panneau` : c'est ce
+   qui donne au schéma la même taille apparente que sur sur-mesure à
+   largeur de fenêtre égale (1232 à 1280, soit un facteur 0,875 sur une
+   largeur naturelle de 1408). Pas de fond ni de rayon ici : sur-mesure
+   pose un panneau gris parce que sa page est blanche ; la nôtre est déjà
+   sur `--ofd-fond`, le même gris. */
+.ofd .ofd-schema {
+  width: 100%;
+}
+
+/* L'enveloppe qui met à l'échelle — `components/surmesure/Ajuste.tsx`,
+   réemployé tel quel. Ses deux règles vivent sous `.smd` dans le bloc de
+   sur-mesure, donc elles ne portent pas ici : on les redonne à
+   l'identique sous `.ofd`. Elles ne font que déclarer le cadre ; tout le
+   calcul (`--aj-k`, la hauteur) est posé en ligne par le composant. */
+.ofd .smd-ajuste {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.ofd .smd-ajuste__in {
+  width: var(--aj-l);
+  transform-origin: top left;
+  transform: scale(var(--aj-k, 1));
+}
+
+/* ── LE CYCLE ─────────────────────────────────────────────────────────
+   Décalque de `.smd-cy` (app/offres/sur-mesure/sur-mesure.css).
+
+   LA GÉOMÉTRIE TIENT À UNE SEULE DÉCISION : les quatre cartes de la
+   boucle ont une HAUTEUR FIXE (132) et une LARGEUR FIXE (230). Sans
+   elles, l'anneau — un simple cadre à coins ronds posé en absolu — ne
+   saurait pas où s'arrêter : ses bords doivent tomber au CENTRE des
+   quatre cartes, soit 115 de chaque côté et 66 en haut et en bas. Ne pas
+   remplacer ces valeurs par des pourcentages : les rangées sont en
+   hauteur fixe et le compte tomberait faux dès qu'une légende gagne une
+   ligne. Il n'y a AUCUN point d'arrêt : la mise en page est la même à
+   toutes les largeurs, c'est `Ajuste` qui la réduit. */
+.ofd .ofd-cy {
+  --cy-carte: 230px;
+  --cy-haut: 132px;
+  --cy-gouttiere: 28px;
+  --cy-trait: rgba(0, 0, 0, 0.22);
+  --cy-pointe: rgba(0, 0, 0, 0.45);
+  /* hauteur de la boucle = trois rangées + deux gouttières */
+  --cy-total: calc(var(--cy-haut) * 3 + var(--cy-gouttiere) * 2);
+  /* écart entre le centre de deux rangées voisines */
+  --cy-pas: calc(var(--cy-haut) + var(--cy-gouttiere));
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 48px 32px;
+}
+
+/* ——— une carte ——— */
+.ofd .ofd-cy-carte {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: var(--cy-carte);
+  min-height: var(--cy-haut);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px 18px;
+}
+.ofd .ofd-cy-carte--plate {
+  min-height: 0;
+}
+.ofd .ofd-cy-titre {
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ofd-encre);
+}
+/* le « (compréhension) » et le « (au cas par cas) » : SUR SA PROPRE
+   LIGNE, en gris — c'est ce que faisait le SVG. En ligne dans le titre,
+   « Qualification (compréhension) » passait à la ligne tout seul (28
+   signes pour 194 px) tandis que « Rédaction (au cas par cas) » tenait :
+   les deux cartes d'axe n'avaient plus le même dessin. */
+.ofd .ofd-cy-sous {
+  display: block;
+  font-weight: 400;
+  color: var(--ofd-etiquette);
+}
+.ofd .ofd-cy-texte {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: var(--ofd-etiquette);
+}
+
+/* Les liaisons droites d'entrée et de sortie — trait fin et pointe. */
+.ofd .ofd-cy-fleche,
+.ofd .ofd-cy-descente,
+.ofd .ofd-cy-retour {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  background: var(--cy-trait);
+}
+.ofd .ofd-cy-fleche::after,
+.ofd .ofd-cy-descente::after,
+.ofd .ofd-cy-retour::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid var(--cy-pointe);
+  border-right: 1px solid var(--cy-pointe);
+}
+
+/* ⚠ `display: flex` SUR LES TROIS RANGÉES. Sur-mesure pose bien
+   `flex-direction: row` et `align-items: center` sur `.smd-cy-entree`,
+   `-sortie-haut` et `-sortie-bas`, mais jamais `display: flex` : ces
+   blocs restent donc des blocs, et les trois flèches de 34 px tombent
+   AU-DESSUS ou EN DESSOUS de leur carte au lieu d'être en ligne avec
+   elle. C'est visible sur la page en ligne — le trait sous « Cadrage »,
+   les deux chevrons posés sur « Mise en service » et « Retours ». On ne
+   recopie pas ce défaut. */
+.ofd .ofd-cy-entree {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: auto;
+}
+.ofd .ofd-cy-case {
+  width: auto;
+  margin-top: 0;
+}
+
+.ofd .ofd-cy-boucle {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--cy-carte) minmax(140px, 300px) var(--cy-carte);
+  grid-template-rows: repeat(3, var(--cy-haut));
+  gap: var(--cy-gouttiere);
+  width: auto;
+  margin-block: 0;
+}
+.ofd .ofd-cy-case--haut {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+}
+.ofd .ofd-cy-case--gauche {
+  grid-column: 1;
+  grid-row: 2;
+}
+.ofd .ofd-cy-case--droite {
+  grid-column: 3;
+  grid-row: 2;
+}
+.ofd .ofd-cy-case--bas {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: center;
+}
+
+/* ⚠ L'ORDRE DE PEINTURE. Un élément POSITIONNÉ est peint après les blocs
+   statiques, quelle que soit sa place dans le balisage : sans `z-index`,
+   l'anneau passe PAR-DESSUS les cartes et le trait traverse
+   « Rédaction ». On le renvoie donc sous elles. */
+.ofd .ofd-cy-anneau {
+  display: block;
+  position: absolute;
+  inset: calc(var(--cy-haut) / 2) calc(var(--cy-carte) / 2);
+  z-index: 0;
+  border: 1px solid var(--cy-trait);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.ofd .ofd-cy-case {
+  position: relative;
+  z-index: 1;
+}
+
+/* L'axe droit entre les deux cartes latérales. */
+.ofd .ofd-cy-axe {
+  display: block;
+  position: relative;
+  z-index: 0;
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  justify-self: stretch;
+  height: 1px;
+  margin-inline: calc(var(--cy-gouttiere) * -1);
+  background: var(--cy-trait);
+}
+.ofd .ofd-cy-axe::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid var(--cy-pointe);
+  border-right: 1px solid var(--cy-pointe);
+  transform: translate(0, -50%) rotate(45deg);
+}
+
+/* Les deux pointes qui disent le SENS : vers la droite en haut, vers la
+   gauche en bas — donc dans le sens des aiguilles d'une montre. */
+.ofd .ofd-cy-case--haut::after,
+.ofd .ofd-cy-case--bas::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid var(--cy-pointe);
+  border-right: 1px solid var(--cy-pointe);
+}
+.ofd .ofd-cy-case--haut::after {
+  left: -20px;
+  transform: translateY(-50%) rotate(45deg);
+}
+.ofd .ofd-cy-case--bas::after {
+  right: -20px;
+  transform: translateY(-50%) rotate(-135deg);
+}
+
+/* ——— la colonne de sortie, calée sur les rangées de la boucle ———
+   Positionnement absolu et non empilement : c'est le seul moyen de
+   garantir que « Envoi » tombe au centre de la rangée 2 et « Vos
+   corrections » au centre de la rangée 3, donc que le retour en
+   pointillés soit à la hauteur du bas du cycle. */
+.ofd .ofd-cy-sortie {
+  position: relative;
+  width: calc(var(--cy-carte) + 34px);
+  height: var(--cy-total);
+  margin-top: 0;
+}
+.ofd .ofd-cy-sortie-haut,
+.ofd .ofd-cy-sortie-bas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--cy-haut);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: auto;
+}
+.ofd .ofd-cy-sortie-haut {
+  top: var(--cy-pas);
+}
+.ofd .ofd-cy-sortie-bas {
+  top: calc(var(--cy-pas) * 2);
+}
+.ofd .ofd-cy-fleche--droite {
+  width: 34px;
+  height: 1px;
+}
+.ofd .ofd-cy-fleche--droite::after {
+  right: 0;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translate(0, -50%) rotate(45deg);
+}
+
+/* La descente, en pointillés : de « Envoi » vers « Vos corrections ». */
+.ofd .ofd-cy-descente {
+  position: absolute;
+  left: calc(34px + var(--cy-carte) / 2);
+  top: calc(var(--cy-pas) + var(--cy-haut) / 2 + 26px);
+  height: calc(var(--cy-pas) - 52px);
+  width: 0;
+  background: none;
+  border-left: 1px dashed var(--cy-trait);
+}
+.ofd .ofd-cy-descente::after {
+  left: 0;
+  transform: translate(-50%, 0) rotate(135deg);
+}
+
+/* Le retour : en pointillés, il part de « Vos corrections » vers la
+   gauche et rentre dans la boucle à la hauteur du « Journal ». Il
+   traverse la rangée 3 de la colonne droite, qui est VIDE —
+   « Rédaction » n'occupe que la rangée 2. */
+.ofd .ofd-cy-retour {
+  position: absolute;
+  left: calc((34px + var(--cy-carte) + var(--cy-gouttiere)) * -1);
+  width: calc(34px + var(--cy-carte) + var(--cy-gouttiere));
+  height: 0;
+  top: 50%;
+  border-left: 0;
+  border-top: 1px dashed var(--cy-trait);
+  background: none;
+}
+.ofd .ofd-cy-retour::after {
+  left: 0;
+  bottom: auto;
+  top: 50%;
+  transform: translate(0, -50%) rotate(-135deg);
+}
+
+/* La note d'astérisque, sous le cadre. Elle est HORS du bloc mis à
+   l'échelle : sinon elle rendrait 10 px sur ordinateur et 3 sur
+   téléphone. Sur-mesure n'en a pas. */
+.ofd .ofd-schema__note {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: var(--ofd-etiquette);
 }
 
 .ofd .ofd-rangee {
