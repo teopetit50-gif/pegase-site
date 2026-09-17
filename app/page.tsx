@@ -1171,63 +1171,29 @@ export default function Home() {
           </Apparition>
         </section>
 
-        {/* ════════ 4 ter · LES NEUF CAS — trois colonnes qui remontent ════════
-            15/09/2026. Le gabarit de témoignages de 21st.dev
-            (`CasColonnes`, déjà en bas de /offres/sur-mesure), rempli de
-            SITUATIONS et non d'avis : Omega n'a aucun client à citer, et un
-            faux avis sur un site commercial est une pratique trompeuse.
-            Le détail de ce qui remplace quoi est en tête de `lib/cas-accueil`.
-
-            Teo a d'abord demandé la version à neuf faux clients « juste pour
-            voir » : elle existe, elle est restée sur le banc et s'éteint
-            partout ailleurs (`omega-site-v3/lib/temoignages-essai.ts`).
-            Ne pas la rapatrier ici.
-
-            15/09, Teo : « il doit être écrit nulle part des choses comme ça
-            qui nous décrédibilisent ». Le chapô disait « ce ne sont pas des
-            témoignages : nous n'en publions pas tant que nous n'en avons pas
-            de vrais » — c'est-à-dire, en clair, « nous n'avons aucun client »,
-            écrit noir sur blanc sur l'accueil. La section reste (elle ne
-            prétend rien), le chapô ne dit plus que ce qu'elle EST : neuf
-            situations, leur poste et leur secteur. La règle « jamais de faux
-            avis » ne change pas — elle se tient en n'en publiant pas, pas en
-            l'annonçant. Vérifié le 15/09 : c'était la seule phrase de ce
-            genre visible sur les 21 routes.
-
-            LA PLACE : juste après « ce que ça change », là où un visiteur se
-            demande si ça marche vraiment, et avant qu'on lui dise qui on
-            est. La section précédente porte son `py-[110px]`, celle-ci n'a
-            donc que son écart bas. */}
-        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="LES SITUATIONS"
-              titre="Ce que les systèmes tiennent, et chez qui ça arrive."
-              chapo="Neuf situations telles qu'elles se présentent avant l'audit, et le poste qui les tient."
-            />
-            <Apparition className="mt-8 md:mt-16" delai={120}>
-              <CasColonnes cas={CAS_ACCUEIL} />
-            </Apparition>
-          </div>
-        </section>
-
         {/* ════════ 4 bis · L'ÉQUIPE — la mosaïque de portraits ════════
             12/09/2026 (Teo) : « il faut qu'on crée une partie pour décrire
             l'équipe derrière Omega, et mets un drapeau bien français à
             côté. »
 
-            LA PLACE — déplacée le 13/09/2026 à la demande de Teo, qui l'a
-            échangée avec « À l'échelle d'un groupe ». Cette dernière est
-            depuis remontée en 3 bis (15/09, l'accueil parle d'abord aux
-            organisations) ; l'équipe, elle, n'a pas bougé.
-            Elle est donc ici, après le bento « ce que ça change » et avant
-            la frise du déroulé. Ce qu'on gagne : elle est assez haut pour
-            être vue de quelqu'un qui ne descend pas la page entière, et le
-            produit vient d'être montré — on dit qui le pose juste après
-            avoir dit ce qu'il fait. Ce qu'on perd, et qu'il faut savoir :
-            elle ne ferme plus le bloc de confiance (données, financement,
+            LA PLACE — échangée le 16/09/2026 à la demande de Teo avec
+            « les situations », qui la suivait et qui passe donc dessous.
+            Elle arrive maintenant DIRECTEMENT après le bento « ce que ça
+            change » : le produit vient d'être montré, on dit qui le pose,
+            puis les neuf situations montrent chez qui ça arrive. Avant cet
+            échange, les situations s'intercalaient entre le produit et
+            l'équipe. Rappel de son histoire : posée d'abord en bas du bloc
+            de confiance, remontée le 13/09 en échange d'« À l'échelle d'un
+            groupe » (elle-même remontée en 3 bis le 15/09). Ce qu'on perd
+            depuis ce premier déplacement, et qu'il faut savoir : elle ne
+            ferme plus le bloc de confiance (données, financement,
             garanties), où elle répondait à la dernière objection, celle
             qu'on ne pose pas à voix haute — à qui je parle quand ça coince.
+
+            L'ÉCART DU HAUT : la section qui précède (le bento) porte son
+            `py-[110px]`, celle-ci n'a donc que son écart bas — inchangé,
+            les deux sections échangées portent exactement les mêmes
+            classes, l'échange ne déplace aucun blanc.
 
             LE DRAPEAU est dans le sourcil (components/ui/drapeau.tsx), aux
             teintes officielles #000091 / #E1000F. Agrandi le 14/09 (Teo :
@@ -1257,6 +1223,50 @@ export default function Home() {
             />
             <Apparition className="mt-8 md:mt-14 lg:mt-16" delai={120}>
               <TeamShowcase membres={MEMBRES} pied={EQUIPE_PIED} />
+            </Apparition>
+          </div>
+        </section>
+
+        {/* ════════ 4 ter · LES NEUF CAS — trois colonnes qui remontent ════════
+            15/09/2026. Le gabarit de témoignages de 21st.dev
+            (`CasColonnes`, déjà en bas de /offres/sur-mesure), rempli de
+            SITUATIONS et non d'avis : Omega n'a aucun client à citer, et un
+            faux avis sur un site commercial est une pratique trompeuse.
+            Le détail de ce qui remplace quoi est en tête de `lib/cas-accueil`.
+
+            Teo a d'abord demandé la version à neuf faux clients « juste pour
+            voir » : elle existe, elle est restée sur le banc et s'éteint
+            partout ailleurs (`omega-site-v3/lib/temoignages-essai.ts`).
+            Ne pas la rapatrier ici.
+
+            15/09, Teo : « il doit être écrit nulle part des choses comme ça
+            qui nous décrédibilisent ». Le chapô disait « ce ne sont pas des
+            témoignages : nous n'en publions pas tant que nous n'en avons pas
+            de vrais » — c'est-à-dire, en clair, « nous n'avons aucun client »,
+            écrit noir sur blanc sur l'accueil. La section reste (elle ne
+            prétend rien), le chapô ne dit plus que ce qu'elle EST : neuf
+            situations, leur poste et leur secteur. La règle « jamais de faux
+            avis » ne change pas — elle se tient en n'en publiant pas, pas en
+            l'annonçant. Vérifié le 15/09 : c'était la seule phrase de ce
+            genre visible sur les 21 routes.
+
+            LA PLACE : après l'équipe depuis le 16/09/2026 (Teo l'a
+            échangée avec elle). L'ordre se lit donc : ce que ça change,
+            qui on est, puis chez qui ça arrive — la preuve par les
+            situations arrive une fois qu'on sait à qui on parle, et juste
+            avant le déroulé. Elle n'ouvre plus le bloc, elle le referme.
+            Les deux sections échangées portent les mêmes écarts (`pb`
+            seul, la section 4 du bento gardant son `py-[110px]`), donc
+            l'échange ne change rien au rythme vertical. */}
+        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
+          <div className="o-wrap">
+            <EnTete
+              pastille="LES SITUATIONS"
+              titre="Ce que les systèmes tiennent, et chez qui ça arrive."
+              chapo="Neuf situations telles qu'elles se présentent avant l'audit, et le poste qui les tient."
+            />
+            <Apparition className="mt-8 md:mt-16" delai={120}>
+              <CasColonnes cas={CAS_ACCUEIL} />
             </Apparition>
           </div>
         </section>
