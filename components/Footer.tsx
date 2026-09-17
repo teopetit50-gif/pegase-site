@@ -11,11 +11,10 @@ import Link from "next/link";
 const LIENS: { label: string; href: string }[] = [
   { label: "Nos offres", href: "/offres" },
   { label: "Intégrations", href: "/integrations" },
-  /* 08/09 — « L'application » : la page /application n'est appelée que
-     par Mon compte, l'écran « Créneau réservé » et l'e-mail de bienvenue
-     du cockpit ; le pied est là où un client la recherche quand il a
-     changé de téléphone. */
-  { label: "L'application", href: "/application" },
+  /* 17/09 — « L'application » retirée du pied (demande de Teo). La page
+     /application reste en ligne : elle est appelée par Mon compte, l'écran
+     « Créneau réservé » et l'e-mail de bienvenue du cockpit, ainsi que par
+     la ligne « Installer l'application » de /contact. */
   /* 08/09 — « Service client » : la page /contact, WhatsApp + contact@omegaai.fr.
      Le lien WhatsApp du pied reste, c'est le geste le plus court. */
   { label: "Service client", href: "/contact" },
