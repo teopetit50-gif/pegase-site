@@ -2180,17 +2180,17 @@ button.rounded-full:active {
   --o-muted: #a1a1aa;
   --o-muted-strong: #d4d4d8;
   --o-line: rgba(255, 255, 255, 0.14);
-  --o-soft: #27272a;
+  --o-soft: #212124;
   --o-dot: rgba(255, 255, 255, 0.14);
   position: relative;
-  background: #18181b;
+  background: #121215;
   color: #ffffff;
   /* 30/07 — étalement ramené de 100vmax à 50vw. Le débord n'a besoin de
      couvrir que la gouttière, soit (100vw − 1440)/2 = 50vw − 720 : 50vw est
      donc toujours suffisant, sur n'importe quel écran. 100vmax faisait
      peindre un rectangle quatre fois plus grand à chaque repeinte, pour un
      rendu strictement identique. */
-  box-shadow: 0 0 0 50vw #18181b;
+  box-shadow: 0 0 0 50vw #121215;
   clip-path: inset(0 -50vw);
 }
 
@@ -2632,23 +2632,24 @@ button.rounded-full:active {
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* 18/09 (Teo, « réduis la sombritude de ces deux sections ») — la bande
-   passe du #09090b, qui est un noir plein, au #18181b : un cran plus haut
-   sur la même échelle zinc, assez pour que la bande se lise comme sombre
-   et non comme un trou. Tout ce qui vivait dessus monte du même cran,
-   sinon les surfaces disparaissent dans le fond : `--o-soft` et la carte
-   de CircuitNuit passent en #27272a, le filet `--o-line` en #35353a et la
-   trame `--o-dot` de 0,12 à 0,14 — le contraste relevé est conservé.
+   passe du #09090b, qui est un noir plein, au #121215 : assez pour que la
+   bande se lise comme sombre et non comme un trou. Premier essai à #18181b,
+   ramené d'un demi-cran le jour même (Teo : « un peu moins »). Tout ce qui
+   vivait dessus monte du même écart, sinon les surfaces disparaissent dans
+   le fond : `--o-soft` et la carte de CircuitNuit passent en #212124, le
+   filet `--o-line` en #2f2f34 et la trame `--o-dot` de 0,12 à 0,13 — le
+   contraste relevé est conservé.
    Les deux seules sections concernées sont celles de /tarifs/site. */
 .offres .o-nuit {
   --o-text: #fafafa;
   --o-muted: #a1a1aa;
   --o-muted-strong: #d4d4d8;
-  --o-line: #35353a;
-  --o-dot: rgba(255, 255, 255, 0.14);
+  --o-line: #2f2f34;
+  --o-dot: rgba(255, 255, 255, 0.13);
 
-  background: #18181b;
+  background: #121215;
   color: var(--o-text);
-  box-shadow: 0 0 0 100vmax #18181b;
+  box-shadow: 0 0 0 100vmax #121215;
   clip-path: inset(0 -100vmax);
 }
 
