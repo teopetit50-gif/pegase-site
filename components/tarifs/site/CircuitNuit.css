@@ -13,7 +13,7 @@
   padding: 32px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  background: #18181b;
+  background: #27272a;
 }
 @media (min-width: 640px) {
   .offres .cn-carte {
@@ -45,7 +45,7 @@
   position: absolute;
   inset: 1px;
   border-radius: 18px;
-  background: #18181b; /* DOIT rester la couleur de fond de .cn-carte */
+  background: #27272a; /* DOIT rester la couleur de fond de .cn-carte */
 }
 
 /* le point lui-même : un carré de 80 px dont seul le pixel qui tombe sur

@@ -2180,17 +2180,17 @@ button.rounded-full:active {
   --o-muted: #a1a1aa;
   --o-muted-strong: #d4d4d8;
   --o-line: rgba(255, 255, 255, 0.14);
-  --o-soft: #18181b;
+  --o-soft: #27272a;
   --o-dot: rgba(255, 255, 255, 0.14);
   position: relative;
-  background: #09090b;
+  background: #18181b;
   color: #ffffff;
   /* 30/07 — étalement ramené de 100vmax à 50vw. Le débord n'a besoin de
      couvrir que la gouttière, soit (100vw − 1440)/2 = 50vw − 720 : 50vw est
      donc toujours suffisant, sur n'importe quel écran. 100vmax faisait
      peindre un rectangle quatre fois plus grand à chaque repeinte, pour un
      rendu strictement identique. */
-  box-shadow: 0 0 0 50vw #09090b;
+  box-shadow: 0 0 0 50vw #18181b;
   clip-path: inset(0 -50vw);
 }
 
@@ -2631,16 +2631,24 @@ button.rounded-full:active {
    suit, sans qu'aucune classe utilitaire ne soit à réécrire.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* 18/09 (Teo, « réduis la sombritude de ces deux sections ») — la bande
+   passe du #09090b, qui est un noir plein, au #18181b : un cran plus haut
+   sur la même échelle zinc, assez pour que la bande se lise comme sombre
+   et non comme un trou. Tout ce qui vivait dessus monte du même cran,
+   sinon les surfaces disparaissent dans le fond : `--o-soft` et la carte
+   de CircuitNuit passent en #27272a, le filet `--o-line` en #35353a et la
+   trame `--o-dot` de 0,12 à 0,14 — le contraste relevé est conservé.
+   Les deux seules sections concernées sont celles de /tarifs/site. */
 .offres .o-nuit {
   --o-text: #fafafa;
   --o-muted: #a1a1aa;
   --o-muted-strong: #d4d4d8;
-  --o-line: #27272a;
-  --o-dot: rgba(255, 255, 255, 0.12);
+  --o-line: #35353a;
+  --o-dot: rgba(255, 255, 255, 0.14);
 
-  background: #09090b;
+  background: #18181b;
   color: var(--o-text);
-  box-shadow: 0 0 0 100vmax #09090b;
+  box-shadow: 0 0 0 100vmax #18181b;
   clip-path: inset(0 -100vmax);
 }
 
