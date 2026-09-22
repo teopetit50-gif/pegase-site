@@ -67,6 +67,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
+import { suivrePixel } from "@/lib/pixel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ConnexionInline from "@/components/compte/ConnexionInline";
 import { messageErreur, ouvrirEnregistrementPaiement } from "@/lib/abonnement";
@@ -433,6 +434,9 @@ export default function PriseDeCreneau({
     /* robot pris au pot de miel : on fait comme si tout allait bien */
     if (c.site_web) {
       setEtape("fait");
+      /* 21/09 — l'événement « Schedule » du pixel Meta : c'est le seul
+         chiffre qui juge une campagne (lib/pixel.ts ; no-op sans pixel). */
+      suivrePixel("Schedule", { content_name: formule });
       return;
     }
 

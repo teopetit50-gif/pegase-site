@@ -1,0 +1,63 @@
+/* Bandeau de consentement (components/pub/Consentement.tsx). Bloc isolé,
+   scopé sous .pub-consent ; le supprimer supprime le bandeau. Valeurs
+   reprises du monde clair .resa (globals.css) : filet #e5e5e5, texte
+   #050505 / #3d3d3d, bouton noir plein. */
+.pub-consent {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+@media (min-width: 640px) {
+  .pub-consent {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+}
+.pub-consent-texte {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: #3d3d3d;
+}
+.pub-consent-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.pub-consent-btn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #d4d4d4;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #050505;
+  cursor: pointer;
+}
+.pub-consent-btn:hover {
+  background: #f5f5f5;
+}
+.pub-consent-btn--noir {
+  border-color: #050505;
+  background: #050505;
+  color: #fff;
+}
+.pub-consent-btn--noir:hover {
+  background: #262626;
+}

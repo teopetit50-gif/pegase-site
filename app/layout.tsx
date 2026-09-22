@@ -3,6 +3,8 @@ import { omega, omegaMono } from "./_polices";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import LenisRoot from "@/components/LenisRoot";
+import PixelMeta from "@/components/pub/PixelMeta";
+import Consentement from "@/components/pub/Consentement";
 import "./globals.css";
 import "./polices.css";
 import "./echelle-mobile.css";
@@ -56,6 +58,11 @@ export default function RootLayout({
         <Header />
         {children}
         <Analytics />
+        {/* 21/09/2026 — pixel Meta pour la pub en ligne, derrière le bandeau
+            de consentement. Sans NEXT_PUBLIC_META_PIXEL_ID, les deux rendent
+            null (lib/pixel.ts). */}
+        <PixelMeta />
+        <Consentement />
         {/* 15/09/2026 — <TrackWhatsApp /> retiré. Il comptait les clics sur
             les liens wa.me ; il n'en reste aucun sur le site depuis le
             14/09, donc il écoutait chaque clic de chaque page pour un
