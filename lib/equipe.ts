@@ -14,7 +14,13 @@
    trois fiches ci-dessous ont été données par Teo le 12/09/2026, noms et
    rôles compris ; rien n'a été déduit ni complété.
 
-   ⚠️  LES TROIS DESCRIPTIFS SONT DES BROUILLONS (14/09, Teo : « fais un
+   22/09/2026 — RÉÉCRITURE (Teo : « trop amateur »). Mêmes faits, aucun
+   ajout : registre grands comptes, verbes de responsabilité, plus de
+   « faisait adopter » ni de « en hedge fund » (rendu par « fonds
+   d'investissement », terme générique et exact). Le chapô ne répète plus
+   le titre : il dit d'où viennent les trois associés.
+
+   ⚠️  LES TROIS DESCRIPTIFS ÉTAIENT DES BROUILLONS (14/09, Teo : « fais un
    descriptif aussi de qui on est, genre ce qu'on a fait »). Ceux d'Henri et
    de Vincent sont tirés de la capture que Teo a collée le 12/09 — donc de
    leur propre page, pas d'une source vérifiée ici. Le sien tient de lui :
@@ -75,9 +81,9 @@ export const MEMBRES: Membre[] = [
     prenom: "Henri",
     nom: "Guichané",
     role: "CEO & Fondateur",
-    bio: "Passé par Microsoft puis DocuSign, où son métier était de faire adopter des logiciels dans de grandes organisations. Ce qui décide qu'un outil serve vraiment, il l'a vu de près.",
+    bio: "Ancien de Microsoft et de DocuSign, où il accompagnait le déploiement de logiciels auprès de grandes organisations. Il dirige Omega et porte la relation avec chaque client, de la première réunion au suivi.",
     bioCourte:
-      "Passé par Microsoft puis DocuSign, où il faisait adopter des logiciels dans de grandes organisations.",
+      "Ancien de Microsoft et de DocuSign, où il accompagnait le déploiement de logiciels auprès de grandes organisations. Il dirige Omega et la relation client.",
     photo: "/equipe/henri.jpg",
   },
   {
@@ -85,9 +91,9 @@ export const MEMBRES: Membre[] = [
     prenom: "Vincent",
     nom: "Karmalecki",
     role: "CTO & Co-fondateur",
-    bio: "Ingénieur en intelligence artificielle, passé par Salesforce puis Databricks comme ingénieur avant-vente. C'est lui qui conçoit les systèmes, et qui les tient quand ils passent en production.",
+    bio: "Ingénieur en intelligence artificielle, ancien ingénieur avant-vente chez Salesforce puis Databricks. Il conçoit l'architecture des systèmes, en assure la mise en production et en garantit la tenue dans le temps.",
     bioCourte:
-      "Ingénieur en intelligence artificielle, passé par Salesforce puis Databricks. Il conçoit les systèmes et les tient en production.",
+      "Ingénieur en intelligence artificielle, ancien de Salesforce et de Databricks. Il conçoit l'architecture des systèmes et en assure la mise en production.",
     photo: "/equipe/vincent.jpg",
   },
   {
@@ -95,9 +101,9 @@ export const MEMBRES: Membre[] = [
     prenom: "Teo",
     nom: "Karczewski",
     role: "Co-fondateur",
-    bio: "Il conduit les audits, décide des mises en production et répond de l'exploitation des systèmes installés. Passé par la finance, en hedge fund, où rien ne s'engage sur une hypothèse non vérifiée.",
+    bio: "Issu de la finance, où il a travaillé pour des fonds d'investissement. Il conduit les audits, arbitre les mises en production et supervise l'exploitation des systèmes installés.",
     bioCourte:
-      "Il conduit les audits et répond de l'exploitation. Passé par la finance, en hedge fund.",
+      "Issu de la finance, où il a travaillé pour des fonds d'investissement. Il conduit les audits et supervise l'exploitation des systèmes installés.",
     photo: "/equipe/teo.jpg",
   },
 ];
@@ -114,7 +120,7 @@ export const EQUIPE_TITRE = "Un interlocuteur unique, de l'audit à l'exploitati
    le seul texte de section qui n'avait pas de version courte. Budget relevé
    sur scale.com : un chapô de section y tient en 17 à 38 signes. */
 export const EQUIPE_CHAPO =
-  "La même équipe conduit l'audit, conçoit les systèmes et reste votre interlocuteur.";
+  "Trois associés, issus du logiciel d'entreprise, de l'ingénierie IA et de la finance.";
 /* La ligne de pied, sous la liste des noms. Chaque terme est vérifiable. */
 export const EQUIPE_PIED =
   "Conçu et développé en France.";
