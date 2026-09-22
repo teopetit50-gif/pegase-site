@@ -1104,7 +1104,7 @@ export const CALCULATEUR = {
      tarif. La retirer viderait la page de son seul argument. */
   avant: {
     grand: "Choisissez un cas",
-    sous: "dans le comparateur ci-dessus",
+    sous: "dans le comparateur ci-dessous",
     note: "Une question par poste suffit à établir le volume que le système aurait à traiter chez vous.",
   },
   /* Le bloc qui remplace les montants, en tête de page — dit UNE SEULE

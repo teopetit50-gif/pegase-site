@@ -834,7 +834,10 @@ export default function Grille() {
             · à partir de 1280 px, quatre colonnes et quatre rangées.
             Pourquoi pas quatre colonnes dès 1024 px : la colonne utile y
             vaut 928 px, soit 208 px par carte — deux mots par ligne. */}
-        {/* ═══ LE CALCULATEUR — AVANT LES CARTES (15/09, Teo) ═══
+        {/* ═══ LE CALCULATEUR — AVANT LES CARTES (15/09, Teo), PUIS APRÈS
+            (22/09, Teo) — il vit désormais sous la grille, voir plus bas.
+            L'historique du 15/09 reste ici parce qu'il dit pourquoi les
+            cartes retiennent leur chiffre tant qu'aucun cas n'est choisi. ═══
             Il est passé DEVANT le 15/09 : « je veux pas que les prix
             s'affichent avant d'avoir rempli le truc, sinon on reste sur un
             truc inventé. » Les cartes en dépendent maintenant — tant qu'il
@@ -857,19 +860,9 @@ export default function Grille() {
             Ce n'est pas de la largeur pour de la largeur — c'est ce qui donne
             aux questions les 705 px où elles tiennent sur deux colonnes, et
             le cadre perd d'un coup la moitié de sa hauteur. */}
-        {devis ? null : (
-          <div className="mx-auto mt-10 max-w-5xl lg:max-w-none">
-            <Calculateur
-              postesChoisis={choix.postes}
-              palierChoisi={choix.palier}
-              onVerdict={noterVolumes}
-            />
-          </div>
-        )}
-
         <div
           id="grille"
-          className="mx-auto mt-12 grid max-w-md scroll-mt-32 gap-6 pt-4 md:max-w-3xl md:grid-cols-2 md:grid-rows-[auto_auto_1fr_auto_auto_auto_1fr_auto] md:gap-x-6 md:gap-y-10 lg:mt-16 xl:max-w-none xl:grid-cols-4 xl:grid-rows-[auto_auto_1fr_auto] xl:gap-x-6 xl:gap-y-0"
+          className="mx-auto mt-10 grid max-w-md scroll-mt-32 gap-6 pt-4 md:max-w-3xl md:grid-cols-2 md:grid-rows-[auto_auto_1fr_auto_auto_auto_1fr_auto] md:gap-x-6 md:gap-y-10 xl:max-w-none xl:grid-cols-4 xl:grid-rows-[auto_auto_1fr_auto] xl:gap-x-6 xl:gap-y-0"
         >
           {PALIERS.map((p) => (
             <CartePalier
@@ -883,6 +876,24 @@ export default function Grille() {
           ))}
           <CarteSurMesure monde={monde} />
         </div>
+
+        {/* 22/09 (Teo : « déplace la section comparatif avec la section
+            des postes ») — LE COMPARATEUR DE CAS PASSE SOUS LES CARTES.
+            L'ordre du 15/09 (calculateur devant) tenait à ce que les cartes
+            affichaient un prix qu'il fallait mériter ; depuis qu'elles ne
+            montrent plus que « Choisissez un cas », l'offre se lit d'abord,
+            le cas type s'y choisit ensuite. Le renvoi des cartes dit donc
+            « ci-dessous » (lib/paliers.ts, CALCULATEUR.avant.sous). Même
+            écart que les cartes avaient sous lui : mt-12, lg:mt-16. */}
+        {devis ? null : (
+          <div className="mx-auto mt-12 max-w-5xl lg:mt-16 lg:max-w-none">
+            <Calculateur
+              postesChoisis={choix.postes}
+              palierChoisi={choix.palier}
+              onVerdict={noterVolumes}
+            />
+          </div>
+        )}
       </section>
 
       {/* ═══ 2. comparatif — côté grande structure il ne s'affiche PAS
