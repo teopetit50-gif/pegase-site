@@ -19,12 +19,26 @@ import { useEffect, useRef } from "react";
    · le cadrage sur le CONTENEUR (ResizeObserver), pas sur la fenêtre —
      le fond vit dans `.o-flux-fond`, qui est en `inset: 0` de la
      section, pas dans `100vh` ;
-   · la densité plafonnée à 2 : au-delà on peint quatre fois plus de
-     pixels pour un dégradé que personne ne peut voir plus net ;
-   · la boucle coupée quand l'onglet passe en arrière-plan, et
-     l'horloge qui n'avance QUE pendant le temps visible — sinon le
-     nuancier saute d'un coup au retour d'onglet, après vingt minutes
-     ailleurs ;
+   · la densité bornée par un BUDGET de pixels (`BUDGET_PIXELS`), pas
+     par un plafond fixe. 22/09/2026 — Teo : « c'est pas assez fluide
+     quand on scrolle ». Mesuré dans un Chromium avec GPU (Brave, fenêtre
+     1470 px, densité 2) : la toile faisait 2940 × 2788 px, soit 8,2 M de
+     pixels de bruit fbm à chaque image ; au repos 59 fps, mais au
+     défilement du hero huit images sur 216 dépassaient 25 ms (jusqu'à
+     184 ms), et plus bas dans la page encore un accroc à 246 ms. La même
+     toile à la densité 1 : 60 fps plat, aucune image au-dessus de 19 ms.
+     Un dégradé de soie n'a pas de contour à rendre net — le budget
+     donne la densité 2 aux petits cadres (téléphone) et retombe vers 1
+     dès que le hero est grand ;
+   · la boucle coupée quand l'onglet passe en arrière-plan ET quand le
+     hero est sorti de l'écran (IntersectionObserver) — avant, la toile
+     se repeignait encore au pied de la page, pour personne. L'horloge
+     n'avance QUE pendant le temps où le fond est vu — sinon le nuancier
+     saute d'un coup au retour, après vingt minutes ailleurs ;
+   · aucune lecture de mise en page dans la boucle : le cadrage ne se
+     relit que sur ResizeObserver. `clientWidth` à chaque image forçait
+     un calcul de mise en page synchrone pendant que Lenis et GSAP
+     écrivent des positions — c'est du thrashing, image après image ;
    · `prefers-reduced-motion` : une image peinte une fois, immobile.
      Même parti que `woven-light-hero`.
 
@@ -338,6 +352,10 @@ const COULEURS = new Float32Array([
 
 const NB_COULEURS = 4;
 const VITESSE = 0.18; // u_scene.z = secondes × 0.18
+/* Pixels physiques que la toile peut peindre par image. 2,2 M ≈ un hero
+   de 1470 × 1394 px à la densité 1, ou un cadre de 768 × 700 à la
+   densité 2. Au-dessus on descend la densité, jamais sous 1. */
+const BUDGET_PIXELS = 2_200_000;
 const U_SHAPE = [1.38, 0.43, 0.8, 0.02]; // zoom, intensité, paramA, warp
 const U_SURFACE = [1.57, 0.96, 0.0, 1.0]; // détail, contraste, luminosité, saturation
 const U_FINISH = [0.0, 0.28, 0.002, 0.0]; // teinte, vignette, flou, grain
@@ -439,9 +457,14 @@ export default function FondSilk({ className }: { className?: string }) {
 
     const dimensionner = () => {
       const cadre = toile.parentElement ?? toile;
-      const densite = Math.min(window.devicePixelRatio || 1, 2);
-      const l = Math.max(1, Math.round(cadre.clientWidth * densite));
-      const h = Math.max(1, Math.round(cadre.clientHeight * densite));
+      const cl = Math.max(1, cadre.clientWidth);
+      const ch = Math.max(1, cadre.clientHeight);
+      const densite = Math.max(
+        1,
+        Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(BUDGET_PIXELS / (cl * ch))),
+      );
+      const l = Math.round(cl * densite);
+      const h = Math.round(ch * densite);
       if (l === largeur && h === hauteur) return false;
       largeur = l;
       hauteur = h;
@@ -459,8 +482,9 @@ export default function FondSilk({ className }: { className?: string }) {
     const doux = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let raf = 0;
-    let horloge = 0; // secondes VISIBLES écoulées
+    let horloge = 0; // secondes VUES écoulées
     let dernier = performance.now();
+    let enVue = true; // le hero est-il (au moins en partie) à l'écran ?
 
     const boucle = () => {
       if (gl.isContextLost()) {
@@ -470,41 +494,52 @@ export default function FondSilk({ className }: { className?: string }) {
       const maintenant = performance.now();
       horloge += (maintenant - dernier) / 1000;
       dernier = maintenant;
-      dimensionner();
       peindre(horloge);
       raf = requestAnimationFrame(boucle);
     };
 
-    const visibilite = () => {
-      if (document.hidden) {
+    /* Une seule règle pour l'onglet caché et le hero hors écran : la
+       boucle tourne si, et seulement si, quelqu'un peut voir le fond. */
+    const accorder = () => {
+      const doitTourner = !doux && !document.hidden && enVue;
+      if (!doitTourner && raf) {
         cancelAnimationFrame(raf);
         raf = 0;
-      } else if (!raf && !doux) {
+      } else if (doitTourner && !raf) {
         /* On repart de l'instant présent : l'horloge n'a pas couru pendant
-           que l'onglet était derrière, donc le nuancier reprend là où il
-           s'était arrêté au lieu de sauter. */
+           l'absence, donc le nuancier reprend là où il s'était arrêté au
+           lieu de sauter. */
         dernier = performance.now();
         raf = requestAnimationFrame(boucle);
       }
     };
 
     dimensionner();
-    if (doux) {
-      peindre(0);
-    } else if (!document.hidden) {
-      raf = requestAnimationFrame(boucle);
-    }
+    if (doux) peindre(0);
+    else accorder();
 
     const ro = new ResizeObserver(() => {
-      if (dimensionner() && (doux || !raf)) peindre(horloge);
+      if (dimensionner() && !raf) peindre(horloge);
     });
     ro.observe(toile.parentElement ?? toile);
-    document.addEventListener("visibilitychange", visibilite);
+    /* Le seuil 0 suffit : dès que le dernier pixel du hero est sorti par
+       le haut, la toile ne peint plus. Elle repart avant même que le
+       premier pixel ne revienne — la marge de 10 % l'y prépare. */
+    const io = new IntersectionObserver(
+      ([e]) => {
+        enVue = e.isIntersecting;
+        accorder();
+      },
+      { rootMargin: "10% 0px" },
+    );
+    io.observe(toile);
+    document.addEventListener("visibilitychange", accorder);
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      document.removeEventListener("visibilitychange", visibilite);
+      io.disconnect();
+      document.removeEventListener("visibilitychange", accorder);
       gl.deleteBuffer(tampon);
       gl.deleteProgram(prog);
       /* PAS de `WEBGL_lose_context.loseContext()` ici, même si c'est ce
