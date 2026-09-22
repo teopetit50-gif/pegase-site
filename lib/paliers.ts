@@ -1103,8 +1103,8 @@ export const CALCULATEUR = {
      C'est le chiffre DU CLIENT, calculé sur SON coût horaire — pas notre
      tarif. La retirer viderait la page de son seul argument. */
   avant: {
-    grand: "Répondez aux questions",
-    sous: "votre volume mensuel",
+    grand: "Choisissez un cas",
+    sous: "dans le comparateur ci-dessus",
     note: "Une question par poste suffit à établir le volume que le système aurait à traiter chez vous.",
   },
   /* Le bloc qui remplace les montants, en tête de page — dit UNE SEULE
@@ -1175,4 +1175,175 @@ export const CALCULATEUR = {
   /* Cette phrase retire au visiteur la peur de se sur-déclarer, qui est la
      première raison pour laquelle on abandonne un calculateur en route. */
   pied: "Ces volumes orientent la discussion, ils n'engagent à rien. Le périmètre définitif est arrêté à l'audit, sur vos volumes réels : s'ils sont inférieurs à ce que vous avez déclaré, c'est le périmètre inférieur qui s'applique.",
+};
+
+/* ══════════════════════════════════════════════════════════════════════
+   LE COMPARATEUR DE CAS TYPES (22/09/2026, Teo)
+
+   « Change ce composant par le composant de comparaison, et mets des
+   exemples : x factures et y demandes font perdre en moyenne tant de
+   temps. » Le calculateur à curseurs (pricing-12) laisse la place au
+   tableau de comparaison (comparison-table, 21st.dev) : des lignes
+   d'activités types avec leurs volumes, et ce que ces volumes coûtent en
+   heures chaque mois — le visiteur en compare deux, et se reconnaît.
+
+   LES VOLUMES SONT DES ORDRES DE GRANDEUR, pas des mesures : ils sont
+   posés pour être vraisemblables à qui exerce le métier, et c'est tout
+   ce qu'on leur demande. Les heures et la valeur en sortent par le MÊME
+   calcul que le calculateur (QUESTIONS_VOLUME × minutes × PART_RECUPEREE,
+   au taux de PROFILS_HORAIRES) : rien n'est écrit à la main ici, il n'y a
+   donc pas de chiffre à défendre en plus de ceux qui existaient déjà.
+
+   Chaque cas porte QUI traite ses pièces (le dirigeant dans un garage, un
+   service dans un cabinet) : c'est ce qui fixe le taux horaire, et donc
+   la valeur en euros — la ligne du comparatif le dit à côté du montant.
+
+   La concession dépasse volontairement le plafond de la grille : le
+   tableau montre ainsi, sans le dire deux fois, où commence l'audit.
+   ══════════════════════════════════════════════════════════════════════ */
+
+export type Secteur = "Automobile" | "Commerce" | "BTP & artisans" | "Services" | "Santé";
+
+export type ExempleVolumes = {
+  id: string;
+  /* l'activité, telle qu'on la nomme au comptoir */
+  nom: string;
+  /* la taille, en un mot : « 2 mécaniciens », « 10 salariés » */
+  taille: string;
+  secteur: Secteur;
+  /* qui tient les outils aujourd'hui — fixe le taux horaire */
+  profil: ProfilHoraire["id"];
+  /* les volumes, dans l'unité de chaque question (factures/mois,
+     demandes/JOUR, documents/mois, clients au fichier) */
+  volumes: SaisieVolumes;
+};
+
+export const EXEMPLES_VOLUMES: ExempleVolumes[] = [
+  {
+    id: "garage",
+    nom: "Garage indépendant",
+    taille: "2 mécaniciens",
+    secteur: "Automobile",
+    profil: "dirigeant",
+    volumes: { filed: 120, frontd: 12, cashd: 90, reload: 1800 },
+  },
+  {
+    id: "concession",
+    nom: "Concession automobile",
+    taille: "3 sites",
+    secteur: "Automobile",
+    profil: "service",
+    volumes: { filed: 600, frontd: 40, cashd: 400, reload: 12000 },
+  },
+  {
+    id: "boutique",
+    nom: "Boutique de détail",
+    taille: "1 point de vente",
+    secteur: "Commerce",
+    profil: "dirigeant",
+    volumes: { filed: 60, frontd: 8, cashd: 20, reload: 3000 },
+  },
+  {
+    id: "restaurant",
+    nom: "Restaurant",
+    taille: "60 couverts",
+    secteur: "Commerce",
+    profil: "dirigeant",
+    volumes: { filed: 90, frontd: 25, reload: 2500 },
+  },
+  {
+    id: "grossiste",
+    nom: "Grossiste",
+    taille: "600 comptes clients",
+    secteur: "Commerce",
+    profil: "service",
+    volumes: { filed: 450, frontd: 10, cashd: 500, reload: 600 },
+  },
+  {
+    id: "btp",
+    nom: "Entreprise du bâtiment",
+    taille: "10 salariés",
+    secteur: "BTP & artisans",
+    profil: "dirigeant",
+    volumes: { filed: 200, frontd: 6, cashd: 60, reload: 400 },
+  },
+  {
+    id: "nettoyage",
+    nom: "Société de nettoyage",
+    taille: "25 agents",
+    secteur: "Services",
+    profil: "temps-partiel",
+    volumes: { filed: 80, frontd: 5, cashd: 120, reload: 300 },
+  },
+  {
+    id: "agence-immo",
+    nom: "Agence immobilière",
+    taille: "4 négociateurs",
+    secteur: "Services",
+    profil: "temps-partiel",
+    volumes: { filed: 40, frontd: 15, cashd: 30, reload: 1500 },
+  },
+  {
+    id: "cabinet-comptable",
+    nom: "Cabinet d'expertise comptable",
+    taille: "120 dossiers",
+    secteur: "Services",
+    profil: "service",
+    volumes: { filed: 350, frontd: 20, cashd: 200, reload: 900 },
+  },
+  {
+    id: "cabinet-medical",
+    nom: "Cabinet médical",
+    taille: "3 praticiens",
+    secteur: "Santé",
+    profil: "temps-partiel",
+    volumes: { filed: 30, frontd: 30, reload: 4000 },
+  },
+];
+
+export const SECTEURS: Secteur[] = ["Automobile", "Commerce", "BTP & artisans", "Services", "Santé"];
+
+/** Le cas type, chiffré — même calcul que le calculateur, au taux de son
+    profil. `palier` à null : le volume sort de la grille, c'est l'audit. */
+export function verdictExemple(e: ExempleVolumes) {
+  const taux = PROFILS_HORAIRES.find((p) => p.id === e.profil)?.taux ?? 60;
+  return { ...verdictCalculateur(e.volumes, taux), taux };
+}
+
+export const COMPARATEUR = {
+  entete: {
+    titre: "Ce que ces volumes coûtent en temps",
+    texte:
+      "Dix activités types, avec des volumes vraisemblables pour chacune, et les heures que ces pièces mobilisent chaque mois quand elles sont traitées à la main. Comparez-en deux, et retrouvez la vôtre.",
+  },
+  filtres: {
+    recherche: "Rechercher une activité",
+    tous: "Tous les secteurs",
+    reinitialiser: "Réinitialiser",
+  },
+  colonnes: {
+    activite: "Activité",
+    volumes: "Volumes mensuels",
+    pieces: "Pièces / mois",
+    heures: "Heures perdues / mois",
+    comparer: "Comparer",
+  },
+  boutons: { comparer: "Comparer", retirer: "Retirer" },
+  audit: "Au-delà du cadre standard : audit",
+  /* sous le tableau, tant qu'il n'y a pas deux lignes cochées */
+  consigne: "Cochez deux activités pour les mettre côte à côte.",
+  resultat: {
+    titre: "Côte à côte",
+    lignes: {
+      pieces: "Pièces traitées par mois",
+      actuelles: "Heures perdues aujourd'hui",
+      rendues: "Heures rendues par le système",
+      journees: "Journées rendues par mois",
+      valeur: "Valeur du temps récupéré",
+    },
+    note: "Les heures rendues sont comptées à 75 % du temps actuel : le client valide encore, et une pièce sur dix lui revient. La valeur retient le coût horaire de la personne qui traite ces pièces dans chaque cas.",
+    cta: "Réserver un audit",
+    souscta: "30 minutes, gratuit, sans engagement · l'audit relève vos volumes réels",
+  },
+  pied: "Ces cas sont des ordres de grandeur, posés pour situer le vôtre. Le périmètre définitif est arrêté à l'audit, sur vos volumes réels.",
 };

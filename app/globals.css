@@ -7877,6 +7877,303 @@ button.rounded-full:active {
   color: var(--r-texte);
 }
 
+/* ——— LE COMPARATEUR DE CAS TYPES (22/09/2026) ———
+   La carte, les filtres, le tableau et le comparatif de
+   components/tarifs/Calculateur.tsx — reprise du « comparison-table » de
+   21st.dev, peinte avec les jetons de la page (aucun jeton shadcn ici).
+   Le tableau est en `table-layout: fixed` : sa largeur ne remonte jamais
+   au document, ce qui évite la fenêtre élargie sur téléphone. Sous 640 px,
+   la colonne des pièces disparaît — les volumes restent lisibles sous le
+   nom, et les heures sont ce que le visiteur cherche. */
+.resa .cmp-carte {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--r-filet);
+  border-radius: 26px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -18px rgb(0 0 0 / 0.18);
+}
+@media (min-width: 640px) {
+  .resa .cmp-carte {
+    padding: 28px 32px;
+  }
+}
+.resa .cmp-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.resa .cmp-champ {
+  display: block;
+  flex: 1 1 200px;
+  max-width: 320px;
+}
+.resa .cmp-champ--select {
+  flex: 0 1 200px;
+}
+.resa .cmp-entree {
+  display: block;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 14px;
+  color: var(--r-texte);
+  outline: none;
+}
+.resa .cmp-entree::placeholder {
+  color: var(--r-faible);
+}
+.resa .cmp-entree:focus-visible {
+  border-color: var(--r-texte);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--r-texte) 10%, transparent);
+}
+.resa .cmp-select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23616161' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+}
+.resa .cmp-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--r-texte);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+.resa .cmp-bouton:hover {
+  background: var(--r-fond);
+}
+.resa .cmp-bouton[data-coche="true"] {
+  border-color: var(--r-texte);
+  background: var(--r-texte);
+  color: #ffffff;
+}
+.resa .cmp-bouton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.resa .cmp-filtres .cmp-bouton {
+  height: 40px;
+}
+
+/* le tableau */
+.resa .cmp-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.resa .cmp-table th,
+.resa .cmp-table td {
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .cmp-table th:first-child,
+.resa .cmp-table td:first-child {
+  padding-left: 0;
+}
+.resa .cmp-table th:last-child,
+.resa .cmp-table td:last-child {
+  padding-right: 0;
+}
+.resa .cmp-table thead th {
+  height: 44px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--r-faible);
+}
+.resa .cmp-table tbody tr:last-child th,
+.resa .cmp-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.resa .cmp-table tbody tr {
+  transition: background 0.15s ease;
+}
+.resa .cmp-table tbody tr:hover,
+.resa .cmp-table tbody tr[data-coche="true"] {
+  background: var(--r-fond);
+  /* la teinte déborde du tableau jusqu'aux bords de la carte */
+  box-shadow: -12px 0 0 var(--r-fond), 12px 0 0 var(--r-fond);
+}
+.resa .cmp-table tbody th {
+  font-weight: 400;
+}
+.resa .cmp-col-pieces {
+  width: 120px;
+}
+.resa .cmp-col-heures {
+  width: 150px;
+}
+.resa .cmp-col-action {
+  width: 104px;
+  text-align: right !important;
+}
+@media (max-width: 639px) {
+  .resa .cmp-col-pieces {
+    display: none;
+  }
+  .resa .cmp-col-heures {
+    width: 64px;
+  }
+  .resa .cmp-col-action {
+    width: 92px;
+  }
+  .resa .cmp-table th,
+  .resa .cmp-table td {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}
+.resa .cmp-nom {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--r-texte);
+}
+.resa .cmp-taille {
+  margin-left: 6px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--r-faible);
+}
+.resa .cmp-volumes {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--r-faible);
+}
+.resa .cmp-heures-note {
+  color: var(--r-faible);
+}
+.resa .cmp-audit {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border: 1px solid var(--r-or-fonce);
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--r-texte);
+  vertical-align: 2px;
+}
+.resa .cmp-vide,
+.resa .cmp-consigne {
+  font-size: 13px;
+  color: var(--r-faible);
+}
+.resa .cmp-consigne {
+  margin-top: 14px;
+}
+
+/* le comparatif, sous le tableau */
+.resa .cmp-resultat {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--r-filet);
+}
+.resa .cmp-resultat-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--r-texte);
+}
+.resa .cmp-grille {
+  display: grid;
+  gap: 0;
+  margin-top: 12px;
+  font-size: 14px;
+}
+.resa .cmp-ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .cmp-ligne:last-child {
+  border-bottom: 0;
+}
+.resa .cmp-ligne dt {
+  color: var(--r-faible);
+}
+.resa .cmp-ligne dd {
+  margin: 0;
+  color: var(--r-texte);
+}
+.resa .cmp-ligne--tete dt {
+  display: none;
+}
+.resa .cmp-ligne--tete {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border-bottom: 1px solid var(--r-texte);
+}
+.resa .cmp-ligne--tete .cmp-taille {
+  display: block;
+  margin: 2px 0 0;
+}
+/* « mieux » = le plus à récupérer : porté par le filet d'or de la page,
+   jamais par un fond dilué */
+.resa .cmp-ligne dd[data-mieux="true"] {
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--r-or-fonce);
+  width: max-content;
+  max-width: 100%;
+}
+.resa .cmp-taux {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--r-faible);
+}
+.resa .cmp-note {
+  margin-top: 16px;
+  max-width: 76ch;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--r-faible);
+}
+@media (max-width: 639px) {
+  .resa .cmp-ligne {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px 12px;
+  }
+  .resa .cmp-ligne dt {
+    grid-column: 1 / -1;
+    font-size: 12.5px;
+  }
+  .resa .cmp-ligne--tete {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+
 /* ═══════════════════════════════════════════════════════════════════════
    ÉCHELLE MOBILE — sous 768 px seulement          (15/09/2026)
    ═══════════════════════════════════════════════════════════════════════

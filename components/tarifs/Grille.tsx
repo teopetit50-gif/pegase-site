@@ -607,7 +607,7 @@ function CartePalier({
               {heuresCarte > 1 ? "heures" : "heure"}
             </span>
           </div>
-          <p className="mt-1 text-sm text-[#616161]">rendues chaque mois, d&apos;après vos réponses</p>
+          <p className="mt-1 text-sm text-[#616161]">rendues chaque mois, d&apos;après le cas choisi</p>
           {depasse ? (
             <p className="mt-3 rounded-lg bg-[#fdf3e7] px-3 py-2 text-xs text-[#8a5a12]">
               {piecesCarte.toLocaleString("fr-FR")} pièces à traiter, au-delà des{" "}
@@ -731,7 +731,7 @@ function CartePalier({
               ? manque === 1
                 ? "Sélectionnez 1 poste"
                 : `Sélectionnez encore ${manque} postes`
-              : "Renseignez vos volumes"}
+              : "Choisissez un cas type"}
           </Button>
         )}
       </CardFooter>
@@ -944,7 +944,7 @@ export default function Grille() {
               id: p.id,
               nom: p.nom,
               prix: `${piecesP.toLocaleString("fr-FR")} pièces`,
-              periode: "par mois, d'après vos réponses",
+              periode: "par mois, d'après le cas choisi",
               href: lienPalier(p, volumeLien),
               cta: p.aChoisir === null ? "Réserver un audit" : "Sélectionner les postes",
               bouton: boutonPalier(p),

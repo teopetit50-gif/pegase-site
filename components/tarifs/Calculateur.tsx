@@ -1,491 +1,362 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   LE CALCULATEUR DE PALIER (15/09/2026, Teo)
+   LE COMPARATEUR DE CAS TYPES (22/09/2026, Teo)
 
-   « Un bouton qui calcule : tu dis combien de factures tu as par mois, boum
-   ça affiche un prix ; et si t'as pris Tout Omega, tu remplis les données. »
-   Puis : « si il voit 300 euros par mois et qu'il voit pas combien il gagne,
-   ça sert à rien — écrit en gros, 1400 euros d'économies moins le prix. »
+   « Change ce composant par le composant de comparaison, et mets des
+   exemples : x factures et y demandes font perdre en moyenne tant de
+   temps. » Le calculateur à deux panneaux et quatre curseurs (pricing-12,
+   15/09) est remplacé par le TABLEAU DE COMPARAISON de 21st.dev
+   (comparison-table) : une carte, des filtres en tête (recherche, secteur,
+   remise à zéro), un tableau dont chaque ligne porte un bouton « Comparer »,
+   et — dès que deux lignes sont cochées — un comparatif attribut par
+   attribut sous le tableau, la meilleure valeur mise en couleur.
 
-   LA FORME vient de `pricing-12` (21st.dev) — le calculateur de retour sur
-   investissement à deux panneaux : à gauche ce que le visiteur règle, à
-   droite ce que ça donne, dans un seul cadre arrondi. Trois écarts au
-   modèle, tous imposés par le parc :
+   Ce qui change par rapport au modèle, et pourquoi :
 
-   1. AUCUN JETON shadcn. `bg-card`, `bg-muted`, `text-muted-foreground`,
-      `shadow-elevated-lg` ne sont définis nulle part chez nous : Tailwind
-      n'émet RIEN pour une couleur inconnue, le panneau serait transparent.
-      Tout est peint par le bloc `.calc-*` de globals.css, sous `.resa`, avec
-      les jetons de la page (--r-texte, --r-filet, --r-or-*). Sur cette page
-      un thème scopé bat de toute façon les utilitaires.
-   2. LE CURSEUR EST NATIF. Le modèle appelle le Slider de shadcn, donc
-      `@radix-ui/react-slider`, absent du projet. Un `input[type=range]`
-      habillé rend le même dessin (rail, pastille cerclée de blanc, réglette
-      graduée dessous), se pilote au clavier sans une ligne de JS et n'ajoute
-      pas une dépendance à un arbre que plusieurs sessions se partagent.
-   3. LE GROS CHIFFRE S'ANIME caractère par caractère comme le modèle
-      (`motion/react`, déjà installé), mais `useReducedMotion` le fige pour
-      qui a demandé moins d'animations.
+   1. AUCUN JETON shadcn, AUCUNE DÉPENDANCE NOUVELLE. Le modèle appelle
+      Card, Table, Input, Select (Radix) et Button. `bg-muted`,
+      `text-muted-foreground` ne sont définis nulle part chez nous —
+      Tailwind n'émet rien pour une couleur inconnue — et
+      @radix-ui/react-select n'est pas dans le projet. Un <table> natif,
+      un <input> et un <select> natifs habillés par le bloc `.cmp-*` de
+      globals.css (sous `.resa`, avec les jetons de la page) rendent le
+      même dessin, se pilotent au clavier, et n'ajoutent rien à un arbre
+      que plusieurs sessions se partagent.
+   2. LES LIGNES SONT DES ACTIVITÉS, pas des produits. Les colonnes du
+      modèle (prix, note, stock) deviennent : les volumes, les pièces par
+      mois, les heures perdues par mois. Le comparatif compare cinq
+      attributs (pièces, heures perdues, heures rendues, journées, valeur).
+      « Mieux » = plus à récupérer : c'est la valeur la plus haute qui est
+      marquée, à l'or de la page et non au vert du modèle.
+   3. LE FILTRE DE SECTEUR SORT DES DONNÉES (SECTEURS), le modèle codait
+      ses quatre catégories dans le JSX.
 
-   TOUT LE CONTENU VIT DANS lib/paliers.ts — questions, bornes des curseurs,
-   coefficients, durées, profils horaires, textes. Ce fichier ne fait que le
-   mettre en page. C'est la règle du dossier : un chiffre qui apparaît ici et
-   nulle part ailleurs est un chiffre inventé.
+   TOUT LE CONTENU VIT DANS lib/paliers.ts — cas types, volumes, profils
+   horaires, textes, et le calcul (verdictExemple, qui repasse par
+   verdictCalculateur : mêmes minutes par pièce, même part récupérée).
+   Ce fichier ne fait que le mettre en page. Un chiffre qui apparaît ici
+   et nulle part ailleurs est un chiffre inventé.
 
-   TROIS CHOSES À NE PAS DÉFAIRE :
-
-   · IL N'APPARAÎT QUE CÔTÉ « Indépendant & TPE ». Le monde « plusieurs
-     services valident » va à l'audit et ne le voit jamais (Grille.tsx ne le
-     monte pas quand `devis`).
-
-   · LE CALCUL RESTE SUR L'APPAREIL. Aucun fetch, aucune donnée transmise,
-     y compris à la réservation : reserver_audit fige son propre instantané
-     de prix, lui passer un volume déclaré créerait deux sources de vérité.
-     C'est aussi ce qui autorise la phrase de l'en-tête du panneau.
-
-   · QUAND LE CALCUL EST NÉGATIF, ON L'AFFICHE. Le bouton reste « en
-     parler », jamais « souscrire quand même ». C'est la règle de la maison
-     (« si l'audit ne montre rien, ne rien installer »), écrite pour la
-     première fois là où un visiteur peut la lire — et c'est ce que cet
-     écran a de plus crédible. Ne pas la transformer en rattrapage.
+   CE QUI NE CHANGE PAS pour la grille : le composant garde son nom, ses
+   props et son contrat. `onVerdict` remonte les volumes du DERNIER cas
+   coché (null quand rien ne l'est) : les cartes affichent alors les
+   heures de ce cas, poste par poste, comme elles le faisaient avec les
+   réponses du visiteur. Il n'apparaît que côté « Indépendant & TPE »
+   (Grille.tsx ne le monte pas quand `devis`), et tout reste sur
+   l'appareil : aucun fetch, rien de transmis.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useId, useMemo, useState } from "react";
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-  type Variants,
-} from "motion/react";
 
-import {
-  GridPatternCard,
-  GridPatternCardBody,
-} from "@/components/ui/card-with-grid-ellipsis-pattern";
 import { lienAudit } from "@/lib/reservation";
 import {
-  CALCULATEUR,
-  POSTES,
+  COMPARATEUR,
+  EXEMPLES_VOLUMES,
   PROFILS_HORAIRES,
   QUESTIONS_VOLUME,
-  piecesParPoste,
-  verdictCalculateur,
-  type Palier,
+  SECTEURS,
+  verdictExemple,
+  type ExempleVolumes,
   type Poste,
-  type QuestionVolume,
   type SaisieVolumes,
 } from "@/lib/paliers";
 
-/* 15/09 — écrite en séquence d'échappement et non au clavier : l'espace
-   fine insécable se reperd d'une passe à l'autre, et elle s'était déjà
-   dégradée ici en espace ordinaire — d'où le « € » seul en bout de ligne
-   dès que la colonne se resserre. */
-const NBSP = "\u202f";
-/* le seul euro qui reste sur la page : la valeur du temps récupéré, qui
-   est le chiffre DU CLIENT — calculé sur SON coût horaire, pas notre tarif */
-const euros = (n: number) => `${nombre(Math.round(n))}${NBSP}€`;
-
+/* espace fine insécable, en séquence d'échappement (elle se reperd d'une
+   passe à l'autre quand elle est tapée au clavier) */
+const NBSP = " ";
 const nombre = (n: number) => n.toLocaleString("fr-FR");
+const euros = (n: number) => `${nombre(Math.round(n))}${NBSP}€`;
+/* « 3,5 » et non « 3.5 », et « 4 » et non « 4,0 » */
+const decimale = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
 
-/* « 3,5 » et non « 3.5 », et « 4 » et non « 4,0 ». */
-const journees = (n: number) =>
-  n.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
-
-const nomPoste = (id: Poste["id"]) => POSTES.find((p) => p.id === id)?.nom ?? id;
-
-/* L'entrée d'un caractère du gros chiffre — reprise telle quelle du modèle :
-   décalage vertical, flou et échelle, décalés de 30 ms par rang. */
-const animChiffre: Variants = {
-  cache: { opacity: 0, y: 10, filter: "blur(4px)", scale: 0.98 },
-  vu: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    scale: 1,
-    transition: { delay: i * 0.03, type: "spring", damping: 22, stiffness: 280 },
-  }),
-  sorti: {
-    opacity: 0,
-    y: -10,
-    filter: "blur(4px)",
-    scale: 0.98,
-    transition: { duration: 0.14 },
-  },
+/* l'unité courte d'un volume, pour la ligne du tableau :
+   « 120 factures · 12 demandes/j · 90 devis · 1 800 clients » */
+const UNITE_COURTE: Record<Poste["id"], string> = {
+  filed: "factures",
+  frontd: "demandes/j",
+  cashd: "devis",
+  reload: "clients",
 };
 
+function volumesCourts(v: SaisieVolumes) {
+  return QUESTIONS_VOLUME.filter((q) => (v[q.posteId] ?? 0) > 0).map(
+    (q) => `${nombre(v[q.posteId] as number)} ${UNITE_COURTE[q.posteId]}`,
+  );
+}
+
+type Cas = ExempleVolumes & { v: ReturnType<typeof verdictExemple> };
+
 export default function Calculateur({
-  postesChoisis,
-  palierChoisi,
   onVerdict,
 }: {
-  /* les postes cochés dans la grille — vide tant que rien n'est choisi */
+  /* les postes cochés dans la grille et le palier — le comparateur ne les
+     lit pas (ses lignes sont des cas complets), mais la grille les passe
+     toujours : le contrat ne bouge pas */
   postesChoisis: string[];
   palierChoisi: string;
-  /* 15/09 — remonte à la grille le FAIT d'avoir répondu. C'est ce qui ouvre
-     l'affichage des prix sur les cartes et dans le comparatif : avant, un
-     montant serait un montant qu'on a choisi, pas un montant qui sort de
-     son cas. Passe `true` dès qu'une question est remplie. */
-  /* 15/09 (prix continu) — remonte LES VOLUMES, plus un booléen : chaque
-     carte calcule son prix sur les pièces de SES postes, d'où trois montants
-     différents à partir des mêmes réponses. `null` = rien de rempli. */
+  /* remonte à la grille les volumes du dernier cas coché, null sinon */
   onVerdict: (volumes: SaisieVolumes | null) => void;
 }) {
-  const [ouvert, setOuvert] = useState(false);
-  const [saisie, setSaisie] = useState<SaisieVolumes>({});
-  const [profil, setProfil] = useState(PROFILS_HORAIRES[0].id);
+  const [choisis, setChoisis] = useState<string[]>([]);
+  const [recherche, setRecherche] = useState("");
+  const [secteur, setSecteur] = useState<string>("tous");
   const idBase = useId();
 
-  /* Quelles questions poser. On ne repose pas le choix des postes : il est
-     déjà fait dans les cartes. Tant que rien n'est coché — ou quand « Tout
-     Omega » l'est —, on pose les quatre : c'est le cas où le visiteur veut
-     justement voir ce que l'ensemble donne. */
-  const questions = useMemo(() => {
-    if (palierChoisi === "complet" || postesChoisis.length === 0) return QUESTIONS_VOLUME;
-    return QUESTIONS_VOLUME.filter((q) => postesChoisis.includes(q.posteId));
-  }, [palierChoisi, postesChoisis]);
-
-  const taux = PROFILS_HORAIRES.find((p) => p.id === profil)?.taux ?? 60;
-  const lignes = piecesParPoste(saisie).filter((l) =>
-    questions.some((q) => q.posteId === l.question.posteId),
+  /* chiffrés une fois pour toutes : les cas ne changent pas */
+  const cas = useMemo<Cas[]>(
+    () => EXEMPLES_VOLUMES.map((e) => ({ ...e, v: verdictExemple(e) })),
+    [],
   );
-  const saisieUtile = Object.fromEntries(
-    lignes.map((l) => [l.question.posteId, l.saisi]),
-  ) as SaisieVolumes;
-  const rempli = lignes.length > 0;
-  const v = verdictCalculateur(saisieUtile, taux);
 
-  /* Le palier que la grille propose : celui qui couvre le volume, ou celui
-     que le visiteur avait coché s'il est plus grand (on ne redescend jamais
-     quelqu'un qui a choisi plus large — il a peut-être ses raisons). */
-  /* 15/09 (prix continu) — `monte` et `palierCoche` ont disparu avec la
-     notion de marche : le montant suit le volume sans saut. */
-  /* On ne remonte que le FAIT d'avoir répondu, jamais le montant : les
-     cartes tirent leur prix de PALIERS comme avant, elles attendent
-     seulement le feu vert. Une seule source de vérité pour les prix. */
-  /* les volumes sérialisés : dépendance stable pour l'effet ci-dessous */
-  const cle = JSON.stringify(saisieUtile);
-  useEffect(() => {
-    onVerdict(rempli ? (JSON.parse(cle) as SaisieVolumes) : null);
-  }, [rempli, cle, onVerdict]);
-
-  /* 15/09/2026 — L'APPEL PASSE SUR LA CARTE À TRAME (21st.dev,
-     « card-with-grid-ellipsis-pattern »). Les mots, le bouton et ce qu'il
-     déclenche ne bougent pas : seule la surface change — quadrillage à
-     pastilles sous un voile blanc en diagonale, au lieu du blanc plat.
-     Le fond et le filet sont portés par le composant ; `.calc-motif` ne
-     range plus que le texte et le bouton (voir globals.css). */
-  if (!ouvert) {
-    return (
-      <GridPatternCard className="mt-10">
-        <GridPatternCardBody className="calc-motif">
-          <div>
-            <p className="calc-appel-titre">{CALCULATEUR.appel.titre}</p>
-            <p className="calc-appel-texte">{CALCULATEUR.appel.texte}</p>
-          </div>
-          <button type="button" className="calc-bouton" onClick={() => setOuvert(true)}>
-            {CALCULATEUR.appel.cta}
-          </button>
-        </GridPatternCardBody>
-      </GridPatternCard>
+  const basculer = (id: string) =>
+    setChoisis((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 2 ? [...prev, id] : prev,
     );
-  }
 
-  /* 15/09, dernière passe — DEUX VERDICTS, PLUS TROIS. L'écran « pas sur
-     le temps seul » existait pour éviter d'afficher une soustraction
-     dérisoire entre le temps gagné et l'abonnement. Le site n'affiche plus
-     d'abonnement : il n'y a plus de soustraction, donc plus de cas à
-     cacher. Reste le seul partage qui ait encore un sens — le volume
-     tient dans le cadre standard, ou il le dépasse et c'est l'audit qui
-     prend. `v.viable` n'est plus lu ici. */
-  const horsGrille = rempli && v.palier === null;
-  const gain = rempli && !horsGrille && v.palier !== null;
-  const ton = horsGrille ? "audit" : gain ? "gain" : "attente";
+  const remettre = () => {
+    setChoisis([]);
+    setRecherche("");
+    setSecteur("tous");
+  };
 
-  /* 15/09, correctif — LE BOUTON MENAIT DANS LE VIDE. Il pointait sur
-     `/installation?palier=<id>` ; la page ne lit que `postes=` et renvoyait
-     donc à /tarifs sans un mot. Elle a raison de ne lire que ça : le prix
-     du récapitulatif sort du NOMBRE de postes, lui passer un palier sans
-     ses postes ferait deux façons de dire le même prix.
-     Les postes ne sont connus que dans deux cas : « Tout Omega », qui les
-     prend tous, et un palier dont le visiteur a coché exactement le compte
-     dans les cartes. Sinon — rien de coché, ou palier monté par le calcul —
-     on ne devine pas à sa place : le bouton descend à la grille. */
-  const postesResa: string[] | null = (() => {
-    const p: Palier | null = v.palier;
-    if (!p) return null;
-    if (p.aChoisir === null) return POSTES.map((x) => x.id);
-    return postesChoisis.length === p.aChoisir ? postesChoisis : null;
-  })();
+  const filtres = cas.filter((c) => {
+    const q = recherche.trim().toLowerCase();
+    const parNom = !q || `${c.nom} ${c.taille} ${c.secteur}`.toLowerCase().includes(q);
+    const parSecteur = secteur === "tous" || c.secteur === secteur;
+    return parNom && parSecteur;
+  });
+
+  /* dans l'ordre où ils ont été cochés — la colonne A reste la colonne A */
+  const compares = choisis
+    .map((id) => cas.find((c) => c.id === id))
+    .filter((c): c is Cas => c !== undefined);
+
+  /* la grille reçoit les volumes du dernier cas coché */
+  const dernier = compares[compares.length - 1];
+  const cle = dernier ? JSON.stringify(dernier.volumes) : "";
+  useEffect(() => {
+    onVerdict(cle ? (JSON.parse(cle) as SaisieVolumes) : null);
+  }, [cle, onVerdict]);
+
+  const pleins = compares.length === 2;
 
   return (
-    <section className="calc" aria-label="Estimation de l'abonnement">
+    <section className="calc" aria-label="Comparaison de cas types">
       <header className="calc-tete">
-        <h3 className="calc-titre">{CALCULATEUR.entete.titre}</h3>
-        <p className="calc-chapo">{CALCULATEUR.entete.texte}</p>
+        <h3 className="calc-titre">{COMPARATEUR.entete.titre}</h3>
+        <p className="calc-chapo">{COMPARATEUR.entete.texte}</p>
       </header>
 
-      {/* ══ le cadre à deux panneaux — la géométrie du modèle ══ */}
-      <div className="calc-cadre">
-        {/* ——— à gauche : ce que le visiteur règle ——— */}
-        <div className="calc-reglages">
-          <div className="calc-questions">
-            {questions.map((q) => (
-              <QuestionCurseur
-                key={q.posteId}
-                q={q}
-                idBase={idBase}
-                valeur={saisie[q.posteId] ?? 0}
-                surValeur={(n) => setSaisie((s) => ({ ...s, [q.posteId]: n }))}
-              />
-            ))}
-          </div>
-
-          <div className="calc-trait" aria-hidden="true" />
-
-          {/* ——— qui fait ce travail : LA question, sans laquelle le gain est faux ——— */}
-          <fieldset className="calc-qui">
-            <legend className="calc-qui-titre">{CALCULATEUR.qui.question}</legend>
-            <div className="calc-qui-choix">
-              {PROFILS_HORAIRES.map((p) => (
-                <label key={p.id} className="calc-radio" data-actif={profil === p.id}>
-                  <input
-                    type="radio"
-                    name={`${idBase}-profil`}
-                    checked={profil === p.id}
-                    onChange={() => setProfil(p.id)}
-                  />
-                  <span className="calc-radio-libelle">{p.libelle}</span>
-                  <span className="calc-radio-taux">
-                    {p.detail}, compté {p.taux}
-                    {NBSP}€
-                  </span>
-                </label>
+      <div className="cmp-carte">
+        {/* ——— les filtres : recherche, secteur, remise à zéro ——— */}
+        <div className="cmp-filtres">
+          <label className="cmp-champ">
+            <span className="sr-only">{COMPARATEUR.filtres.recherche}</span>
+            <input
+              type="search"
+              className="cmp-entree"
+              placeholder={`${COMPARATEUR.filtres.recherche}…`}
+              value={recherche}
+              onChange={(e) => setRecherche(e.target.value)}
+            />
+          </label>
+          <label className="cmp-champ cmp-champ--select">
+            <span className="sr-only">Secteur</span>
+            <select
+              className="cmp-entree cmp-select"
+              value={secteur}
+              onChange={(e) => setSecteur(e.target.value)}
+            >
+              <option value="tous">{COMPARATEUR.filtres.tous}</option>
+              {SECTEURS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
-            </div>
-            <p className="calc-aide">{CALCULATEUR.qui.aide}</p>
-          </fieldset>
+            </select>
+          </label>
+          <button type="button" className="cmp-bouton" onClick={remettre}>
+            {COMPARATEUR.filtres.reinitialiser}
+          </button>
         </div>
 
-        {/* ——— à droite : ce que ça donne ———
-            Le panneau garde toute la hauteur du cadre (sinon la carte montre
-            un fond blanc sous lui), mais son CONTENU est collant à partir de
-            1024 px : avec quatre curseurs, la colonne de gauche fait plus de
-            1 200 px et le résultat sortait de l'écran dès le deuxième
-            réglage. On règle en voyant le chiffre bouger. */}
-        <div className="calc-resultat" data-ton={ton}>
-          <div className="calc-resultat-dedans">
-          {!rempli && (
-            <div className="calc-bloc">
-              <p className="calc-resultat-titre">{CALCULATEUR.avant.sous}</p>
-              <p className="calc-gain-chiffre">{CALCULATEUR.avant.grand}</p>
-              <p className="calc-gain-note">{CALCULATEUR.avant.note}</p>
-            </div>
-          )}
-
-          {horsGrille && (
-            <div className="calc-bloc">
-              <p className="calc-verdict-titre">{CALCULATEUR.horsGrille.titre}</p>
-              <p className="calc-verdict-texte">
-                Vos {nombre(v.pieces)} pièces par mois dépassent le plafond de la grille
-                publique. {CALCULATEUR.horsGrille.texte}
-              </p>
-              <a className="calc-bouton" href="/reserver-un-audit">
-                {CALCULATEUR.horsGrille.cta}
-              </a>
-              <p className="calc-souscta">{CALCULATEUR.horsGrille.souscta}</p>
-            </div>
-          )}
-
-          {gain && v.palier && (
-            <div className="calc-bloc">
-              {/* 15/09 — plus de « palier au-dessus » à proposer : le prix est
-                  continu, il n'y a pas de marche à franchir. On rappelle d'où
-                  sort le montant, et que l'audit le fixe. */}
-              <p className="calc-monte">
-                <span className="calc-etiquette">{CALCULATEUR.estimation.etiquette}</span>
-                {nombre(v.pieces)} pièces par mois.{" "}
-                {CALCULATEUR.estimation.phrase}
-              </p>
-
-              {/* le chiffre en gros, la soustraction est dans le détail dessous */}
-              <p className="calc-resultat-titre">Valeur du temps récupéré</p>
-              <ChiffreAnime valeur={v.valeurRecuperee} />
-              <p className="calc-gain-libelle">par mois, au coût horaire retenu</p>
-              <p className="calc-gain-note">
-                {journees(Math.round(v.heuresRecuperees))} heures récupérées sur les{" "}
-                {journees(Math.round(v.heuresActuelles))} que ce volume de {nombre(v.pieces)} pièces
-                mobilise aujourd&apos;hui, soit {journees(v.journees)} journées par mois rendues à
-                votre activité.
-              </p>
-
-              {postesResa ? (
-                /* 15/09, SECONDE PASSE (Teo) — LE BOUTON MÈNE À L'AUDIT.
-                   « Ce n'est pas un SaaS ; ça ne doit pas amener à un tarif à
-                   faire payer. » Il ouvrait la réservation de l'installation,
-                   le prix de mise en route écrit dessus et l'abonnement
-                   annoncé dessous : le calculateur vendait, sur des volumes
-                   déclarés de mémoire. Il ORIENTE — son chiffre sert à
-                   arriver calés en rendez-vous, et c'est l'audit qui chiffre.
-
-                   Le volume et les postes l'accompagnent, jamais le prix : il
-                   se recalcule à l'arrivée (app/reserver/page.tsx), et il n'y
-                   entre que comme une phrase du message. */
-                <a className="calc-bouton" href={lienAudit(postesResa, v.pieces)}>
-                  Réserver un audit
-                </a>
-              ) : (
-                <a className="calc-bouton" href="#grille">
-                  {v.palier.aChoisir === 1
-                    ? "Sélectionner le poste"
-                    : `Sélectionner les ${v.palier.aChoisir} postes`}
-                </a>
-              )}
-              <p className="calc-souscta">
-                Gratuit et sans engagement · votre estimation est jointe à la demande
-              </p>
-            </div>
-          )}
-
-          {/* ——— la conversion, montrée et non cachée ——— */}
-          {rempli && (
-            <div className="calc-detail">
-              <p className="calc-detail-titre">{CALCULATEUR.detail.titre}</p>
-              <ul className="calc-detail-liste">
-                {lignes.map((l) => (
-                  <li key={l.question.posteId}>
-                    <span className="calc-detail-saisi">
-                      {nombre(l.saisi)} {l.question.unite}
+        {/* ——— le tableau ——— */}
+        <table className="cmp-table">
+          <thead>
+            <tr>
+              <th scope="col">{COMPARATEUR.colonnes.activite}</th>
+              <th scope="col" className="cmp-col-pieces">
+                {COMPARATEUR.colonnes.pieces}
+              </th>
+              <th scope="col" className="cmp-col-heures">
+                {COMPARATEUR.colonnes.heures}
+              </th>
+              <th scope="col" className="cmp-col-action">
+                <span className="sr-only">{COMPARATEUR.colonnes.comparer}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtres.map((c) => {
+              const coche = choisis.includes(c.id);
+              const bloque = !coche && choisis.length >= 2;
+              return (
+                <tr key={c.id} data-coche={coche}>
+                  <th scope="row">
+                    <span className="cmp-nom">
+                      {c.nom}
+                      <span className="cmp-taille">{c.taille}</span>
                     </span>
-                    <span className="calc-detail-pieces">
-                      {nombre(Math.round(l.pieces))} pièces
-                    </span>
-                    <span className="calc-detail-regle">{l.question.conversion}</span>
-                  </li>
+                    <span className="cmp-volumes">{volumesCourts(c.volumes).join(" · ")}</span>
+                  </th>
+                  <td className="cmp-col-pieces">
+                    {nombre(c.v.pieces)}
+                    {c.v.palier === null && (
+                      <span className="cmp-audit" title={COMPARATEUR.audit}>
+                        audit
+                      </span>
+                    )}
+                  </td>
+                  <td className="cmp-col-heures">
+                    <strong>{nombre(Math.round(c.v.heuresActuelles))}</strong>
+                    <span className="cmp-heures-note"> h</span>
+                  </td>
+                  <td className="cmp-col-action">
+                    <button
+                      type="button"
+                      className="cmp-bouton"
+                      data-coche={coche}
+                      disabled={bloque}
+                      aria-pressed={coche}
+                      aria-describedby={`${idBase}-consigne`}
+                      onClick={() => basculer(c.id)}
+                    >
+                      {coche ? COMPARATEUR.boutons.retirer : COMPARATEUR.boutons.comparer}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+            {filtres.length === 0 && (
+              <tr>
+                <td colSpan={4} className="cmp-vide">
+                  Aucune activité ne correspond.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {!pleins && (
+          <p id={`${idBase}-consigne`} className="cmp-consigne">
+            {COMPARATEUR.consigne}
+          </p>
+        )}
+
+        {/* ——— le comparatif, dès que deux lignes sont cochées ——— */}
+        {pleins && (
+          <div className="cmp-resultat">
+            <h4 className="cmp-resultat-titre">{COMPARATEUR.resultat.titre}</h4>
+            <dl className="cmp-grille">
+              <div className="cmp-ligne cmp-ligne--tete">
+                <dt>&nbsp;</dt>
+                {compares.map((c) => (
+                  <dd key={c.id}>
+                    <span className="cmp-nom">{c.nom}</span>
+                    <span className="cmp-taille">{c.taille}</span>
+                  </dd>
                 ))}
-              </ul>
-
-              <div className="calc-ligne">
-                <span>{CALCULATEUR.detail.total}</span>
-                <strong>{nombre(v.pieces)} pièces par mois</strong>
               </div>
-              {/* 15/09, dernière passe — LA SOUSTRACTION EST PARTIE. Les
-                  trois lignes posaient le temps rendu FACE à l'abonnement
-                  (« 2 074 € », « − 1 869 € », « net 205 € ») : c'est
-                  précisément le couple que le site n'affiche plus. Restent
-                  les heures, qui sont un fait et non un tarif. */}
-              {gain && (
-                <div className="calc-ligne">
-                  <span>Temps rendu chaque mois</span>
-                  <strong>{journees(Math.round(v.heuresRecuperees))} heures</strong>
-                </div>
-              )}
-            </div>
-          )}
+              <Ligne
+                libelle={COMPARATEUR.resultat.lignes.pieces}
+                valeurs={compares.map((c) => c.v.pieces)}
+                rendu={(n, c) =>
+                  c.v.palier === null ? (
+                    <>
+                      {nombre(n)}
+                      <span className="cmp-audit" title={COMPARATEUR.audit}>
+                        audit
+                      </span>
+                    </>
+                  ) : (
+                    nombre(n)
+                  )
+                }
+                compares={compares}
+              />
+              <Ligne
+                libelle={COMPARATEUR.resultat.lignes.actuelles}
+                valeurs={compares.map((c) => Math.round(c.v.heuresActuelles))}
+                rendu={(n) => `${nombre(n)} h`}
+                compares={compares}
+              />
+              <Ligne
+                libelle={COMPARATEUR.resultat.lignes.rendues}
+                valeurs={compares.map((c) => Math.round(c.v.heuresRecuperees))}
+                rendu={(n) => `${nombre(n)} h`}
+                compares={compares}
+              />
+              <Ligne
+                libelle={COMPARATEUR.resultat.lignes.journees}
+                valeurs={compares.map((c) => c.v.journees)}
+                rendu={(n) => decimale(n)}
+                compares={compares}
+              />
+              <Ligne
+                libelle={COMPARATEUR.resultat.lignes.valeur}
+                valeurs={compares.map((c) => c.v.valeurRecuperee)}
+                rendu={(n, c) => (
+                  <>
+                    {euros(n)}
+                    <span className="cmp-taux">
+                      {PROFILS_HORAIRES.find((p) => p.id === c.profil)?.libelle.toLowerCase()},{" "}
+                      {c.v.taux}
+                      {NBSP}€/h
+                    </span>
+                  </>
+                )}
+                compares={compares}
+              />
+            </dl>
+            <p className="cmp-note">{COMPARATEUR.resultat.note}</p>
+            <a className="calc-bouton" href={lienAudit([], 0)}>
+              {COMPARATEUR.resultat.cta}
+            </a>
+            <p className="calc-souscta">{COMPARATEUR.resultat.souscta}</p>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* ——— ce que le chiffre ne dit pas : le plancher, les encours, la portée ——— */}
-      {gain && (
-        <>
-          <p className="calc-pied">{CALCULATEUR.gain.plancher}</p>
-          <p className="calc-pied">{CALCULATEUR.gain.encours}</p>
-        </>
-      )}
-      <p className="calc-pied calc-pied--regle">{CALCULATEUR.pied}</p>
+      <p className="calc-pied calc-pied--regle">{COMPARATEUR.pied}</p>
     </section>
   );
 }
 
-/* ——— une question : l'intitulé, le chiffre en grand, le curseur, la règle ——— */
-function QuestionCurseur({
-  q,
-  idBase,
-  valeur,
-  surValeur,
+/* ——— une ligne du comparatif : le libellé, puis une valeur par cas.
+   La plus haute est marquée — c'est celle où il y a le plus à récupérer.
+   À égalité, aucune ne l'est. ——— */
+function Ligne({
+  libelle,
+  valeurs,
+  rendu,
+  compares,
 }: {
-  q: QuestionVolume;
-  idBase: string;
-  valeur: number;
-  surValeur: (n: number) => void;
+  libelle: string;
+  valeurs: number[];
+  rendu: (n: number, c: Cas) => React.ReactNode;
+  compares: Cas[];
 }) {
-  const id = `${idBase}-${q.posteId}`;
-  /* Vingt intervalles, comme le modèle : une graduation courte partout, une
-     longue et chiffrée tous les cinq. Le dernier chiffre porte un « + » —
-     au-delà, on sort de la grille et c'est l'audit qui répond. */
-  const intervalles = 20;
-  const graduations = Array.from(
-    { length: intervalles + 1 },
-    (_, i) => (q.max / intervalles) * i,
-  );
-
+  const max = Math.max(...valeurs);
+  const egales = valeurs.every((n) => n === max);
   return (
-    <div className="calc-q">
-      <label className="calc-q-question" htmlFor={id}>
-        <span className="calc-poste">{nomPoste(q.posteId)}</span>
-        {q.question}
-      </label>
-
-      <p className="calc-q-valeur">
-        <span className="calc-q-nombre">{nombre(valeur)}</span>
-        <span className="calc-q-unite">{q.unite}</span>
-      </p>
-
-      <div className="calc-curseur">
-        <input
-          id={id}
-          type="range"
-          min={0}
-          max={q.max}
-          step={q.pas}
-          value={valeur}
-          onChange={(e) => surValeur(+e.target.value)}
-          /* la part remplie du rail : le dégradé du fond la lit, ce qui
-             évite un second élément posé par-dessus l'input natif */
-          style={{ "--part": `${(valeur / q.max) * 100}%` } as React.CSSProperties}
-        />
-        <span className="calc-regle" aria-hidden="true">
-          {graduations.map((g, i) => (
-            <span key={i} className="calc-graduation" data-longue={i % 5 === 0}>
-              <span className="calc-graduation-trait" />
-              <span className="calc-graduation-nombre">
-                {i % 5 === 0 ? `${nombre(Math.round(g))}${i === intervalles ? "+" : ""}` : ""}
-              </span>
-            </span>
-          ))}
-        </span>
-      </div>
-
-      <p className="calc-aide">{q.aide}</p>
+    <div className="cmp-ligne">
+      <dt>{libelle}</dt>
+      {compares.map((c, i) => (
+        <dd key={c.id} data-mieux={!egales && valeurs[i] === max}>
+          {rendu(valeurs[i], c)}
+        </dd>
+      ))}
     </div>
-  );
-}
-
-/* ——— le gros chiffre, caractère par caractère ——— */
-function ChiffreAnime({ valeur }: { valeur: number }) {
-  const fige = useReducedMotion();
-  const texte = euros(valeur);
-
-  if (fige) return <p className="calc-gain-chiffre">{texte}</p>;
-
-  return (
-    <p className="calc-gain-chiffre">
-      <AnimatePresence mode="popLayout" initial={false}>
-        {texte.split("").map((c, i) => (
-          <motion.span
-            key={`${valeur}-${i}`}
-            variants={animChiffre}
-            initial="cache"
-            animate="vu"
-            exit="sorti"
-            custom={i}
-            className="calc-gain-caractere"
-          >
-            {c === " " ? NBSP : c}
-          </motion.span>
-        ))}
-      </AnimatePresence>
-    </p>
   );
 }
