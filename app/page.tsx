@@ -38,6 +38,7 @@ import CartesLueur, {
   type CarteLueur,
 } from "@/components/accueil/CartesLueur";
 import { TuilesCatalogue } from "@/components/accueil/TuilesCatalogue";
+import { FlowButton } from "@/components/ui/flow-button";
 import { DecorHero, MotsReveles } from "@/components/ui/hero-section";
 import TeamShowcase from "@/components/ui/team-showcase";
 import { Drapeau } from "@/components/ui/drapeau";
@@ -934,17 +935,20 @@ export default function Home() {
                   hésitation offerte au visiteur. Retirer cet attribut ne
                   casse rien — l'entête retombe simplement sur « toujours
                   visible » — mais on perd l'effet. */}
-              <Link
+              {/* 22/09 (Teo) : la pastille noire du gabarit Flux cède la
+                  place au « Flow button » collé depuis 21st.dev
+                  (components/ui/flow-button.tsx) — trait fin au repos, le
+                  disque noir gonfle et les flèches se relaient au survol.
+                  Il reste un LIEN vers /commencer, garde `data-cta-hero` et
+                  la cascade d'apparition. Sa taille est calée sur l'ancien
+                  bouton (52 px de haut, 16 px de corps). */}
+              <FlowButton
                 href="/commencer"
                 data-cta-hero
-                className="o-bloc-apparait o-flux-btn"
+                text={HERO.bouton}
+                className="o-bloc-apparait h-[52px] px-9 text-[16px] tracking-[-0.01em]"
                 style={{ "--o-mot-d": `${CADENCE.bouton}ms` } as React.CSSProperties}
-              >
-                {HERO.bouton}
-                <span aria-hidden className="o-flux-btn-rond">
-                  <Chevron taille={14} />
-                </span>
-              </Link>
+              />
               <span
                 className="o-bloc-apparait o-flux-sous"
                 style={{ "--o-mot-d": `${CADENCE.sous}ms` } as React.CSSProperties}
