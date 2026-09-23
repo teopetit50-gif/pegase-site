@@ -350,10 +350,13 @@ export default function Header() {
               entrelacs, pas une forme pleine, et le reconstruire à la main
               donnait un damier symétrique qui n'était pas le bon dessin.
               La variante suit le caméléon du header.
-              23/09 — nouveau dessin (deux anneaux entrelacés, chants
-              argentés) : les mêmes cinq fichiers ont été régénérés depuis
-              l'image livrée par Teo, la variante blanche par inversion de
-              luminance. Icône, apple-icon et favicon suivent. */}
+              23/09 — nouveau dessin (deux anneaux entrelacés), livré en
+              silhouette plate blanc sur noir : la luminance de l'image est
+              directement l'alpha, la marque est unie (#0f1013, la couleur
+              du mot-symbole ; blanc pour la variante). Les cinq fichiers
+              sortent de outils/logo-omega.py ; icône, apple-icon (sur
+              plaque blanche : iOS peint le transparent en noir) et favicon
+              suivent. */}
           <Image
             src={clairEff ? "/logo-pegase.png" : "/logo-pegase-blanc.png"}
             alt=""
