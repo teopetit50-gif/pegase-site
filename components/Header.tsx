@@ -349,7 +349,11 @@ export default function Header() {
               variantes plutôt qu'un SVG recolorable : le tracé est un
               entrelacs, pas une forme pleine, et le reconstruire à la main
               donnait un damier symétrique qui n'était pas le bon dessin.
-              La variante suit le caméléon du header. */}
+              La variante suit le caméléon du header.
+              23/09 — nouveau dessin (deux anneaux entrelacés, chants
+              argentés) : les mêmes cinq fichiers ont été régénérés depuis
+              l'image livrée par Teo, la variante blanche par inversion de
+              luminance. Icône, apple-icon et favicon suivent. */}
           <Image
             src={clairEff ? "/logo-pegase.png" : "/logo-pegase-blanc.png"}
             alt=""
