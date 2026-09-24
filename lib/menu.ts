@@ -1,4 +1,5 @@
 import { MODELES } from "@/components/modeles/donnees";
+import { SECTEURS } from "@/lib/secteurs";
 /* ══════════════════════════════════════════════════════════════════════
    Le menu principal — une seule source pour les deux surfaces (11/09/2026)
 
@@ -54,6 +55,14 @@ import { MODELES } from "@/components/modeles/donnees";
      panneau tactile retrouve son défilement à zéro. Noté pour que personne
      ne repropose l'entrée en croyant à un oubli : ce n'est pas le menu qui
      a été arbitré, c'est la page.
+
+   · 24/09 — /secteurs REVIENT, cette fois en rubrique à part, juste après
+     « Nos offres » : Teo veut une entrée par métier (« pour les avocats on a
+     ça, pour le BTP on a ça »). Les offres classent par PROBLÈME (relances,
+     pièces, demandes), les secteurs par MÉTIER ; mélangés, le menu se
+     contredirait. Les entrées se lisent dans lib/secteurs.ts : ajouter un
+     SaaS là-bas l'ajoute ici. Six rubriques au lieu de cinq : le panneau
+     mobile les rend repliées, il tient toujours sans défilement.
 
    · 10/09 — /offres/sur-mesure : la page n'était atteignable que par un
      lien en bas de /offres. Le seul endroit du site où l'on vend ce qui ne
@@ -124,6 +133,19 @@ export const MENU: Rubrique[] = [
         texte: "Le système propre à votre organisation, cadré puis construit.",
       },
     ],
+  },
+  {
+    label: "Secteurs",
+    vedette: {
+      href: "/secteurs",
+      label: "Tous les secteurs",
+      texte: "Un logiciel par métier, construit sur la décision du matin.",
+    },
+    entrees: SECTEURS.map((s) => ({
+      href: `/secteurs/${s.slug}`,
+      label: s.metier,
+      texte: s.texte,
+    })),
   },
   {
     label: "Votre site",

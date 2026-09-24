@@ -1,0 +1,926 @@
+/* ══════════════════════════════════════════════════════════════════════
+   .sct — /secteurs, décalque de https://scale.com/rlenvironments
+   (24/09/2026)
+
+   Demande de Teo : la page qui présente les SaaS verticaux d'Omega, un
+   par métier, « même structure, même géométrie, même typographie, même
+   rythme vertical, mêmes animations » que la page RL Environments de
+   Scale, avec notre contenu et les VRAIES captures des SaaS.
+
+   TOUT vit sous `.sct` et tout est préfixé `--sct-` / `.sct-`. Supprimer
+   ce fichier et son import supprime la page, sans effet de bord ailleurs.
+   Rien dans globals.css. Les trois autres décalques Scale du dépôt
+   (`.vd` /vos-donnees, `.ofd` /offres, `.smd` /offres/sur-mesure)
+   partagent la même échelle typographique et le même bouton FlatCta ;
+   les valeurs ci-dessous ont malgré tout été relevées sur CETTE page.
+
+   ⚠ Ce fichier n'est dans aucune couche : il passe devant les
+   utilitaires Tailwind. D'où les sélecteurs d'enfant direct (`>`) partout
+   où une règle toucherait un élément générique (svg, img, p).
+
+   ── LE RELEVÉ ────────────────────────────────────────────────────────
+   Lu au getComputedStyle sur la référence, à 390 / 768 / 1024 / 1440 /
+   1700 en RECHARGEANT à chaque largeur (sonde sans screencast : la
+   référence gèle le rendu CDP avec). La colonne plafonne à 1472 : 1700
+   ne rend que des largeurs de colonne différentes.
+
+   colonne        max 1472, padding-inline 24 → 1392 utiles à 1440
+   couleurs       texte #000 · étiquette #525252 · carte #f2f2f2
+                  (scale-gray-95) · filet #eaeaea (scale-gray-90) · texte
+                  de carte #212121 (gray-10) · légende #575757 (gray-30)
+                  · étiquette des piliers #929292 (gray-60) · voile sur
+                  image rgba(0,0,0,.45)
+   pictos         cartes : #273252 · #193a29 · #79648c · #a8927c
+                  piliers : fonds #273252 · #193a29 · #839cb2, trait blanc
+   graisse        400 partout, titres compris ; 500 sur le libellé du
+                  bouton ; 600 nulle part sur ce qu'on garde
+   interlettre    -0.01em sur chaque classe de texte (jamais sur la
+                  racine : elle s'hériterait en pixels calculés) ; +1px
+                  sur l'étiquette mono de section
+
+   échelle typographique :
+                         390         768          1024        1440/1700
+     titre du hero     32/33.6     46.4/48.7    59.2/62.2    64/67.2
+                       (clamp(2rem, .5rem + 5vw, 4rem), interligne 1.05)
+     chapô du hero     16/23.2     20/30        20/30        20/30
+     étiquette mono    12/24 +1px, capitales, partout
+     h2 de section     30/41.25    40/55        48/60        48/60
+     titre de carte    18/24.3     18/24.3      18/24.3      24/36  (xl)
+     texte de carte    16/24 partout, #212121
+     titre d'aperçu    22/23.1     24/36        24/36        24/36
+     légende d'aperçu  14/22.75 partout, #575757
+     titre des piliers 32/33.6     64/67.2      64/67.2      64/67.2
+     chapô des piliers 16/23.2     20/30        20/30        20/30
+     étiq. des piliers 10/12       13/15.6      13/15.6      13/15.6
+     item des piliers  22/23.1 + 14/21 → 24/36 + 16/24 dès 768
+
+   géométrie :
+     hero          cadre à 16 du bord à TOUTES les largeurs, rayon 24,
+                   hauteur mini 480 puis 720 (768), padding 32 puis 64,
+                   contenu calé en bas, colonne de texte 1152, écart 24
+     sous le hero  40, puis l'en-tête de section (marge haute 0 / 48)
+     en-tête       colonne 768 centrée ; marge basse 40 puis 80 (768)
+     grille cartes padding vertical 48 puis 96 (1280) ; empilées sous
+                   1024, quatre colonnes dès 1024, gouttière 8 ;
+                   carte rayon 8 puis 16 (1280), padding 24 puis 40
+                   (1280), écart interne 20 / 24 (768) / 64 (1280) ;
+                   pastille 40 puis 64 (768), rayon 12, pictogramme 32
+     bande aperçu  fond #f2f2f2, padding 64 puis 96 (768) ; cartes
+                   blanches, filet 1px #eaeaea, rayon 16, image 4:3,
+                   texte à 24, titre → légende 12, gouttière 24
+     piliers       padding 96 partout ; grille 12 × 150 max, gouttière 8
+                   (dès 768) ; gauche colonnes 2 à 6, droite 8 à 11 ;
+                   écart 24 à gauche ; items séparés par un filet
+                   #eaeaea à 20 / 40 (768), écart 20 / 40 (768) ;
+                   pastille 40 rayon 8, picto 20 ; titre → texte 24
+     appel         même carte que le hero, sous un padding bas de 32
+
+   ── ÉCARTS ASSUMÉS ───────────────────────────────────────────────────
+   Chacun est un choix, pas un oubli. Ne pas les « corriger ».
+
+   1. LA POLICE. Aeonik (licence commerciale) → General Sans, le sosie
+      mesuré qui sert tout le site : `--font-geist` pointe dessus
+      (app/polices.css). Le mono d'Aeonik → Geist Mono (`--font-dm-mono`).
+
+   2. LE HAUT DE PAGE. L'entête de la référence est `fixed` (88 px) et la
+      page pose 96 px au-dessus du hero : 8 px visibles entre l'entête et
+      la carte. La nôtre est `sticky`, dans le flux : 8 px de padding
+      rendent le même écart.
+
+   3. LE HERO. La référence y passe une vidéo abstraite, des fenêtres de
+      lumière dans le noir. On ne reprend pas l'actif d'autrui : nos
+      quatre fenêtres sont les quatre CAPTURES des SaaS, posées dans le
+      noir, qui flottent doucement (la vidéo, elle aussi, bouge). Même
+      voile noir à 45 %, appuyé vers le bas-gauche, là où est le texte.
+
+   4. LA SECTION « CAPABILITIES » EST SUPPRIMÉE. La référence y montre
+      deux grandes captures de SON produit en quinconce. Nos quatre
+      captures sont déjà dans la bande d'aperçu juste au-dessus : les
+      reposer une deuxième fois ferait répéter la page, et nous n'avons
+      pas de troisième série d'écrans vraie à y mettre.
+
+   5. LA BANDE D'APERÇU EST EN DEUX COLONNES, pas trois. Quatre SaaS
+      dans une grille de trois laissent une carte orpheline ; en quatre
+      colonnes, une capture de 1440 px tombe à 330 px de large et devient
+      une vignette illisible. 2 × 2 dès 768, une colonne dessous.
+
+   6. LES CARTES SONT DES LIENS (vers /secteurs/<slug>) et la référence
+      n'en a pas : un fond qui fonce d'un cran au survol dit qu'on peut
+      cliquer, sans autre ornement.
+
+   7. LA PASTILLE DE CARTE PORTE LE NOM DU SAAS à côté du pictogramme,
+      en mono gris. C'est une variante du MÊME composant de la référence
+      (`Card` : `font-mono text-sm uppercase text-scale-gray-60`), que
+      cette page-là n'utilise pas.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.sct {
+  --sct-texte: #000000;
+  --sct-doux: rgba(0, 0, 0, 0.7);
+  --sct-etiquette: #525252;
+  --sct-fond: #f2f2f2;
+  --sct-filet: #eaeaea;
+  --sct-carte-texte: #212121;
+  --sct-legende: #575757;
+  --sct-gris-60: #929292;
+
+  --sct-r-xl: 24px;
+  --sct-r-lg: 16px;
+  --sct-r-sm: 8px;
+
+  /* PLEINE LARGEUR — même technique que `.smd` : PageShell bride `main`
+     à 1440 sur un fond sombre ; la référence est blanche d'un bord à
+     l'autre et ne plafonne que sa colonne. `overflow-x: clip` sur le
+     conteneur de PageShell absorbe les 100vw, et celui d'ici rogne les
+     cartes qui entrent par les côtés (± 160 px, voir Mouvements.tsx). */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow-x: clip;
+
+  background: #ffffff;
+  color: var(--sct-texte);
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sct .sct-h1,
+.sct .sct-h2,
+.sct .sct-titre-carte,
+.sct .sct-texte-carte,
+.sct .sct-lead,
+.sct .sct-apercu__titre,
+.sct .sct-apercu__legende,
+.sct .sct-piliers__titre,
+.sct .sct-piliers__chapo,
+.sct .sct-piliers__etiquette,
+.sct .sct-pilier__titre,
+.sct .sct-pilier__texte {
+  letter-spacing: -0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   1 · COLONNE
+   ───────────────────────────────────────────────────────────────────── */
+
+.sct .sct-wrap {
+  width: 100%;
+  max-width: 1472px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+/* Masques de ligne de l'apparition du texte (Mouvements.tsx) : la
+   référence compense les jambages de 0,12 em en haut et en bas, sinon le
+   masque rogne les « g » et les « p » pendant la montée. */
+.sct .sct-ligne-masque {
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   2 · EN-TÊTE DE SECTION — étiquette, titre, colonne 768 centrée
+   ───────────────────────────────────────────────────────────────────── */
+
+.sct .sct-entete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 768px;
+  margin-inline: auto;
+  margin-bottom: 40px;
+  text-align: center;
+}
+.sct .sct-entete > * {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .sct .sct-entete {
+    margin-top: 48px;
+    margin-bottom: 80px;
+  }
+}
+
+.sct .sct-etiquette {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--sct-etiquette);
+  margin-bottom: 20px;
+}
+
+.sct .sct-h2 {
+  font-size: 1.875rem;
+  line-height: 1.375;
+  font-weight: 400;
+  text-wrap: balance;
+  color: var(--sct-texte);
+}
+@media (min-width: 768px) {
+  .sct .sct-h2 {
+    font-size: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .sct .sct-h2 {
+    font-size: 3rem;
+    line-height: 1.25;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   3 · BOUTON — leur « FlatCta », repris de `.smd-cta` (sur-mesure.css)
+
+   Un voile `currentColor` à 35 % traverse de gauche à droite en 600 ms,
+   la flèche défile dans sa pastille (deux exemplaires, translatés de
+   50 %). Relevé ici : hauteur 40, rayon 8, libellé 14/21 en 500,
+   pastille 32 × 32 rayon 6, padding 4/4/4/16, écart 16.
+   ───────────────────────────────────────────────────────────────────── */
+
+.sct .sct-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: 40px;
+  overflow: hidden;
+  border-radius: var(--sct-r-sm);
+  background: #ffffff;
+  color: #000000;
+  text-decoration: none;
+  letter-spacing: normal;
+}
+.sct .sct-cta__voile {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: currentColor;
+  opacity: 0.35;
+  border-radius: inherit;
+  transform: translateX(-100%);
+  transition: transform 600ms ease-out;
+  pointer-events: none;
+}
+.sct .sct-cta:hover .sct-cta__voile {
+  transform: translateX(0);
+}
+.sct .sct-cta__lbl {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 4px 4px 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sct .sct-pastille {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 32px;
+  width: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+}
+.sct .sct-pastille__rail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 200%;
+  transform: translateX(-50%);
+  transition: transform 600ms ease-out;
+}
+.sct .sct-cta:hover .sct-pastille__rail {
+  transform: translateX(0);
+}
+.sct .sct-pastille__rail > span {
+  display: flex;
+  height: 100%;
+  width: 50%;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+.sct .sct-cta:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   4 · PLEINE IMAGE — hero et appel final
+   ───────────────────────────────────────────────────────────────────── */
+
+.sct .sct-cadre {
+  padding-inline: 16px;
+  max-width: 1920px;
+  margin-inline: auto;
+}
+.sct .sct-cadre--hero {
+  padding-top: 8px; /* écart nº 2 */
+  padding-bottom: 40px;
+}
+.sct .sct-cadre--appel {
+  padding-bottom: 32px;
+}
+
+/* FOND BLANC, jamais sombre — LA SONDE DE L'ENTÊTE. L'entête du site
+   prélève la couleur sous son bord bas, à 4 px du bord de <main>, et se
+   peint avec (components/Header.tsx) : elle remonte la pile jusqu'au
+   premier `background-color` non transparent. Au-delà de 1440 px ce
+   point tombe DANS la carte du hero. Le noir du hero, le voile et le
+   fond de secours de l'appel sont donc écrits en `background-image`
+   (un dégradé d'une seule couleur), transparent pour la sonde : elle
+   traverse et lit le blanc de cette carte, comme sur /offres/sur-mesure.
+   Écrits en couleur, l'entête virerait au noir dès qu'elle recouvre le
+   hero d'un écran large. */
+.sct .sct-plein {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: var(--sct-r-xl);
+  min-height: 480px;
+  padding: 32px;
+  background: #ffffff;
+}
+@media (min-width: 768px) {
+  .sct .sct-plein {
+    min-height: 720px;
+    padding: 64px;
+  }
+}
+.sct .sct-plein > img {
+  object-fit: cover;
+}
+
+.sct .sct-voile {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  /* en IMAGE, pas en couleur : voir « la sonde de l'entête » plus bas */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45));
+}
+/* écart nº 3 — sur le hero, le voile de la référence (45 % uniforme) est
+   doublé d'un dégradé vers le bas-gauche : deux captures sont claires,
+   et le titre blanc ne doit jamais tomber sur l'une d'elles. */
+.sct .sct-voile--hero {
+  background-image:
+    linear-gradient(to top right, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 55%),
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45));
+}
+
+.sct .sct-plein__texte {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  width: 100%;
+  max-width: 72rem;
+  flex-direction: column;
+  gap: 24px;
+  color: #ffffff;
+}
+.sct .sct-plein__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .sct .sct-plein__actions {
+    flex-direction: row;
+  }
+}
+
+.sct .sct-h1 {
+  font-size: clamp(2rem, 0.5rem + 5vw, 4rem);
+  line-height: 1.05;
+  font-weight: 400;
+  text-wrap: balance;
+  color: #ffffff;
+}
+.sct .sct-lead {
+  font-size: 1rem;
+  line-height: 1.45;
+  text-wrap: balance;
+  color: #ffffff;
+}
+@media (min-width: 768px) {
+  .sct .sct-lead {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+}
+
+/* ── les quatre fenêtres du hero (écart nº 3) ─────────────────────────
+   Positions en pourcentage de la carte. Trois jeux : la carte change de
+   FORME à 768 (358 × 480, portrait, puis paysage), et le chapô change de
+   longueur de ligne à 1280. Toutes les fenêtres restent au-dessus de la
+   zone du titre, ou à sa droite : jamais de texte blanc sur une capture
+   claire. Sur téléphone, trois fenêtres seulement — la quatrième
+   tomberait sous le titre. */
+.sct .sct-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background-image: linear-gradient(#0b0b0c, #0b0b0c);
+}
+.sct .sct-lueur {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(55% 60% at 58% 12%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 70%);
+}
+.sct .sct-fenetre {
+  position: absolute;
+  left: var(--sct-x);
+  top: var(--sct-y);
+  width: var(--sct-l);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 30px 80px rgba(0, 0, 0, 0.6);
+  animation: sct-flotte var(--sct-duree, 9s) ease-in-out var(--sct-delai, 0s) infinite alternate;
+  will-change: transform;
+}
+.sct .sct-fenetre > img {
+  object-fit: cover;
+  object-position: left top;
+}
+@keyframes sct-flotte {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+/* mobile — carte portrait */
+.sct .sct-fenetre--1 {
+  --sct-x: 26%;
+  --sct-y: 3%;
+  --sct-l: 64%;
+  --sct-duree: 10s;
+}
+.sct .sct-fenetre--0 {
+  --sct-x: -12%;
+  --sct-y: 19%;
+  --sct-l: 50%;
+  --sct-duree: 8s;
+  --sct-delai: -3s;
+}
+.sct .sct-fenetre--2 {
+  --sct-x: 64%;
+  --sct-y: 25%;
+  --sct-l: 48%;
+  --sct-duree: 11s;
+  --sct-delai: -6s;
+}
+.sct .sct-fenetre--3 {
+  display: none;
+}
+/* 768 → 1279 — carte paysage, mais le chapô passe sur deux lignes (768)
+   ou s'étire jusqu'aux deux tiers (1024) : la quatrième fenêtre remonte
+   sous la troisième, à droite, au-dessus du titre. Vérifié à 768 et 1024 :
+   aucune fenêtre ne passe sous le texte. */
+@media (min-width: 768px) {
+  .sct .sct-fenetre--2 {
+    --sct-x: 4%;
+    --sct-y: 5%;
+    --sct-l: 25%;
+  }
+  .sct .sct-fenetre--1 {
+    --sct-x: 31%;
+    --sct-y: -8%;
+    --sct-l: 36%;
+  }
+  .sct .sct-fenetre--0 {
+    --sct-x: 70%;
+    --sct-y: 4%;
+    --sct-l: 29%;
+  }
+  .sct .sct-fenetre--3 {
+    display: block;
+    --sct-x: 71%;
+    --sct-y: 37%;
+    --sct-l: 28%;
+    --sct-duree: 12s;
+    --sct-delai: -8s;
+  }
+}
+/* 1280 et plus — le chapô tient sur une ligne à gauche ; la quatrième
+   fenêtre descend en bas à droite, coupée par le bord comme les
+   ouvertures de la vidéo de référence. */
+@media (min-width: 1280px) {
+  .sct .sct-fenetre--2 {
+    --sct-x: 5%;
+    --sct-y: 6%;
+    --sct-l: 23%;
+  }
+  .sct .sct-fenetre--1 {
+    --sct-x: 32%;
+    --sct-y: -9%;
+    --sct-l: 31%;
+  }
+  .sct .sct-fenetre--0 {
+    --sct-x: 67%;
+    --sct-y: 8%;
+    --sct-l: 27%;
+  }
+  .sct .sct-fenetre--3 {
+    --sct-x: 60%;
+    --sct-y: 58%;
+    --sct-l: 33%;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   5 · CARTES — leur « CardGrid »
+   ───────────────────────────────────────────────────────────────────── */
+
+.sct .sct-grille {
+  padding-block: 48px;
+}
+@media (min-width: 1280px) {
+  .sct .sct-grille {
+    padding-block: 96px;
+  }
+}
+.sct .sct-cartes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (min-width: 1024px) {
+  .sct .sct-cartes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+/* Le porteur de l'entrée au défilement (x, échelle, opacité) : la
+   carte elle-même garde son survol libre. */
+.sct .sct-carte-base {
+  height: 100%;
+}
+.sct .sct-carte {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--sct-r-sm);
+  background: var(--sct-fond);
+  color: var(--sct-texte);
+  text-decoration: none;
+  transition: background-color 300ms ease;
+}
+.sct .sct-carte:hover {
+  background: #ebebeb; /* écart nº 6 */
+}
+.sct .sct-carte:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+@media (min-width: 768px) {
+  .sct .sct-carte {
+    gap: 24px;
+  }
+}
+@media (min-width: 1280px) {
+  .sct .sct-carte {
+    gap: 64px;
+    padding: 40px;
+    border-radius: var(--sct-r-lg);
+  }
+}
+.sct .sct-carte__tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sct .sct-carte__picto {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.06);
+}
+@media (min-width: 768px) {
+  .sct .sct-carte__picto {
+    width: 64px;
+    height: 64px;
+  }
+}
+.sct .sct-carte__picto > svg {
+  width: 32px;
+  height: 32px;
+}
+/* écart nº 7 — le nom du SaaS, variante mono du composant de la référence */
+.sct .sct-carte__nom {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-transform: uppercase;
+  color: var(--sct-gris-60);
+}
+.sct .sct-titre-carte {
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 400;
+}
+@media (min-width: 1280px) {
+  .sct .sct-titre-carte {
+    font-size: 1.5rem;
+    line-height: 1.5;
+  }
+}
+.sct .sct-texte-carte {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--sct-carte-texte);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   6 · BANDE D'APERÇU — leur « Overview »
+   ───────────────────────────────────────────────────────────────────── */
+
+.sct .sct-bande {
+  background: var(--sct-fond);
+  padding-block: 64px;
+}
+@media (min-width: 768px) {
+  .sct .sct-bande {
+    padding-block: 96px;
+  }
+}
+.sct .sct-apercus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+@media (min-width: 768px) {
+  .sct .sct-apercus {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* écart nº 5 */
+  }
+}
+.sct .sct-apercu {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--sct-filet);
+  border-radius: var(--sct-r-lg);
+  background: #ffffff;
+  color: var(--sct-texte);
+  text-decoration: none;
+  transition: border-color 300ms ease;
+}
+.sct .sct-apercu:hover {
+  border-color: #d4d4d4; /* écart nº 6 */
+}
+.sct .sct-apercu:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+.sct .sct-apercu__image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--sct-filet);
+}
+.sct .sct-apercu__image > img {
+  object-fit: cover;
+  object-position: left top;
+}
+.sct .sct-apercu__texte {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 24px;
+}
+.sct .sct-apercu__titre {
+  margin-bottom: 12px;
+  font-size: 1.375rem;
+  line-height: 1.05;
+  font-weight: 400;
+}
+@media (min-width: 768px) {
+  .sct .sct-apercu__titre {
+    font-size: 1.5rem;
+    line-height: 1.5;
+  }
+}
+.sct .sct-apercu__legende {
+  font-size: 0.875rem;
+  line-height: 1.625;
+  color: var(--sct-legende);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   7 · PILIERS — leur « EnterprisePillars »
+
+   La grille est celle de la référence, `grid-layout-desktop` : douze
+   colonnes plafonnées à 150 px, centrées, gouttière 8, padding 24.
+   Sous 768 elle passe à huit colonnes égales et tout s'y empile.
+   ───────────────────────────────────────────────────────────────────── */
+
+.sct .sct-piliers {
+  padding-block: 96px;
+  background: #ffffff;
+}
+.sct .sct-piliers__grille {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  padding-inline: 24px;
+}
+@media (min-width: 768px) {
+  .sct .sct-piliers__grille {
+    grid-template-columns: repeat(12, minmax(0, 150px));
+    justify-content: center;
+  }
+}
+.sct .sct-piliers__gauche {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+.sct .sct-piliers__droite {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+@media (min-width: 768px) {
+  .sct .sct-piliers__gauche {
+    grid-column: 2 / span 5;
+    justify-content: center;
+  }
+  .sct .sct-piliers__droite {
+    grid-column: 8 / span 4;
+    gap: 40px;
+  }
+}
+.sct .sct-piliers__etiquette {
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--sct-gris-60);
+}
+.sct .sct-piliers__titre {
+  font-size: 2rem;
+  line-height: 1.05;
+  font-weight: 400;
+  text-wrap: balance;
+  color: var(--sct-texte);
+}
+.sct .sct-piliers__chapo {
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--sct-legende);
+}
+@media (min-width: 768px) {
+  .sct .sct-piliers__etiquette {
+    font-size: 0.813rem;
+  }
+  .sct .sct-piliers__titre {
+    font-size: 4rem;
+  }
+  .sct .sct-piliers__chapo {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+}
+/* Le carré de la référence porte une vidéo au trait sur fond clair.
+   Le nôtre porte une vraie capture (Daliro, « L'essentiel »), posée sur
+   le gris des cartes avec le cadre et l'ombre des captures de la
+   référence (`border p-2 border-black/10 shadow-[0_18px_60px_…]`). */
+.sct .sct-piliers__media {
+  position: relative;
+  display: flex;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--sct-r-lg);
+  background: var(--sct-fond);
+}
+.sct .sct-piliers__capture {
+  width: 86%;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 8px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.08);
+}
+.sct .sct-piliers__capture > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.sct .sct-pilier__picto {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #ffffff;
+}
+.sct .sct-pilier__picto > svg {
+  width: 20px;
+  height: 20px;
+}
+.sct .sct-pilier__tete {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  padding-top: 24px;
+}
+/* `w-full` chez eux sur le titre et le texte : ils occupent la colonne
+   même quand la tête est en `align-items: flex-start`. */
+.sct .sct-pilier__tete > * {
+  width: 100%;
+}
+.sct .sct-pilier__titre {
+  font-size: 1.375rem;
+  line-height: 1.05;
+  font-weight: 400;
+}
+.sct .sct-pilier__texte {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #000000;
+}
+.sct .sct-pilier__filet {
+  width: 100%;
+  height: 1px;
+  margin-top: 20px;
+  background: var(--sct-filet);
+  transform-origin: left center;
+}
+@media (min-width: 768px) {
+  .sct .sct-pilier__titre {
+    font-size: 1.5rem;
+    line-height: 1.5;
+  }
+  .sct .sct-pilier__texte {
+    font-size: 1rem;
+  }
+  .sct .sct-pilier__filet {
+    margin-top: 40px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   8 · APPEL FINAL — leur « ClipScrollSection »
+
+   La carte s'ouvre au défilement : `clip-path: inset(5 %)` → 0 entre
+   « son haut touche le bas de l'écran » et « son centre au centre ».
+   Relevé : 5 % à l'arrêt, 3,5 % au tiers, 0 au centre. La valeur est
+   écrite par Mouvements.tsx ; sans JS, la carte est simplement ouverte.
+   ───────────────────────────────────────────────────────────────────── */
+.sct .sct-clip {
+  overflow: hidden;
+  clip-path: inset(0 round var(--sct-r-xl));
+}
+.sct .sct-plein--appel {
+  /* le fond de secours de la référence, sous la photo — en image */
+  background-image: linear-gradient(#193a29, #193a29);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sct .sct-fenetre {
+    animation: none;
+  }
+  .sct .sct-cta__voile,
+  .sct .sct-pastille__rail,
+  .sct .sct-carte,
+  .sct .sct-apercu {
+    transition: none;
+  }
+}
