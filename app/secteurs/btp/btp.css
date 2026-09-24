@@ -1,0 +1,272 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO (BTP) — le monde de la page /secteurs/btp
+
+   RAPATRIÉ le 24/09/2026 (copie du disque à 12 h 01, heure de la
+   Guadeloupe) de `OMEGA/chantieros-site/src/app/globals.css` (125 lignes).
+   Méthode : app/secteurs/RAPATRIEMENT.md. Les jetons vivent sous `.p-btp`,
+   JAMAIS sur `:root` — sur `:root` ils repeindraient tout le site. Tout ce
+   fichier est donc descendant de `.p-btp`.
+
+   ══════════════════════════════════════════════════════════════════════
+   RELEVÉ — la source, et ce qu'elle relevait elle-même
+   Le site Daliro décalque le gabarit « Vertex » (Ruixen UI, 21st.dev,
+   démo vertex-one-lovat.vercel.app), relevé au style calculé le 24/09 par
+   la session qui l'a construit ; ses jetons, règles de base, utilitaires
+   et keyframes sont recopiés de la feuille compilée de Vertex. On reprend
+   ici SON résultat, mesuré de nouveau sur chantieros-site.vercel.app aux
+   cinq largeurs (390, 768, 1024, 1440, 1700) — tableau de concordance
+   dans app/secteurs/RAPATRIEMENT.md.
+
+   COULEURS — thème CLAIR de la source (`:root`, alias `--color-fd-*`) :
+     fond, carte, popover        #ffffff
+     texte, primaire, anneau     #171717
+     secondaire, muted, accent   #f5f5f5
+     texte atténué               #737373
+     filets, champs              #e6e6e6
+     destructif                  #ef4444
+   Le thème sombre (`.dark`) n'est pas repris (règle 4).
+
+   TYPOGRAPHIE (source) — h1 36/40 → 48 (md) → 60 (lg), 600, -0.025em ;
+   h2 de section 36/40, 600 ; chapô 18/28 ; corps 16/24 ; filets et
+   étiquettes 12-14. Titres h1/h2 en Newsreader coupe display (opsz 72),
+   substitut libre de Tiempos Headline.
+
+   CADRE — `container` de la source : 100 % puis 640 / 768 / 1024 / 1280
+   et 1400 px dès 1536, SANS gouttière ; à l'intérieur, deux paires de
+   filets verticaux (`border-x`, puis `mx-1 sm:mx-1.5 lg:mx-2 border-x`) et
+   des bandes hachurées entre les sections.
+   ══════════════════════════════════════════════════════════════════════
+
+   ── CE QUE LE RAPATRIEMENT CHANGE ───────────────────────────────────
+
+   1. PAS DE BASCULE CLAIR/SOMBRE (règle 4). Ni le bouton de l'entête, ni
+      l'amorce `localStorage` (clé `theme`), ni le bloc `.dark`. Les
+      utilitaires `dark:` du balisage ont été RETIRÉS à la copie (51), pas
+      seulement laissés inertes : la page est figée en clair, ils n'étaient
+      que du bruit dans des lignes de 20 000 signes.
+
+   2. PAS DE `@theme` (règle 3). Tous les utilitaires de couleur de la
+      source sont convertis en hexadécimal dans les composants (table dans
+      RAPATRIEMENT.md, détail en tête de chaque fichier). ⚠ Un piège de
+      plus que sur CASHD : `bg-muted` et `text-muted` EXISTENT sur ce site
+      — `--color-muted` y vaut #9b9ba3. Non convertis, ils ne se seraient
+      pas tus : ils auraient peint en gris moyen ce qui doit être #f5f5f5.
+
+   3. LA COULEUR DES FILETS SANS COULEUR. La source pose
+      `* { border-color: var(--color-border) }` en couche de base : tout
+      `border`, `border-x`, `divide-y` écrit sans couleur y est #e6e6e6.
+      Ici Tailwind v4 laisse ces filets en `currentColor` — du #171717 plein
+      sur toute la grille. La règle est reprise, dans la couche `base`
+      (voir plus bas pourquoi elle DOIT y être).
+
+   4. POLICES DU SITE (règle 5). Aucune `next/font` dans la page. Geist,
+      Geist Mono et Newsreader de la source partent ; `.p-btp` pointe sur
+      les variables de l'accueil (`--font-inter-tight` pour le corps,
+      `--font-jakarta` pour les titres), qui valent General Sans par
+      app/polices.css. `font-mono` reste l'utilitaire du site (sa mono).
+      L'axe optique `opsz 72` de Newsreader n'a plus d'objet : non repris.
+
+   5. LA PEAU SORT DU CADRE 1440 (règle 1), comme `.p-relances` : 100vw,
+      et le contenu reste centré par `.btp-conteneur`. Au-delà de 1440 la
+      page garde donc le cadre de la source (1400 dès 1536), filets compris.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-btp {
+  /* ── jetons, thème CLAIR de la source ─────────────────────────────── */
+  --btp-fond: #ffffff; /* --background, --card, --popover */
+  --btp-texte: #171717; /* --foreground, --primary, --ring */
+  --btp-doux: #f5f5f5; /* --secondary, --muted, --accent */
+  --btp-attenue: #737373; /* --muted-foreground */
+  --btp-filet: #e6e6e6; /* --border, --input */
+  /* `rounded-(--radius)` (maquette « Accueil » des fonctionnalités) lit
+     cette variable, que la source posait sur :root. */
+  --radius: 0.5rem;
+
+  background: var(--btp-fond);
+  color: var(--btp-texte);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Plein écran : la peau sort de <main> (plafonné à 1440 par PageShell).
+     Le div de PageShell porte `overflow-x-clip`, qui absorbe le débord de
+     `100vw` sans barre horizontale ; `clip` (pas `hidden`) laisse vivre
+     les `position: sticky` de la page — onglets du héros, en-tête des
+     formules, sommaire des questions. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Titres : la police de titre du site (règle 5). La source n'habillait en
+   serif que h1 et h2 ; h3 suit, comme sur la page CASHD, pour qu'aucun
+   titre ne retombe sur la police de corps. */
+.p-btp h1,
+.p-btp h2,
+.p-btp h3 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Règle de base de la source, dans la couche `base`.
+   POURQUOI UNE COUCHE : une règle hors couche l'emporte sur TOUTE règle en
+   couche, quelle que soit la spécificité. Écrite nue, elle repeindrait en
+   #e6e6e6 les filets qui ont leur couleur — `border-[#171717]/15` des
+   fiches, `border-blue-500` de la formule conseillée. Dans `base`, elle
+   passe après le préflight de Tailwind (`border-color: currentColor`, même
+   couche, spécificité plus faible) et avant `utilities`. Le nom `base`
+   rejoint la couche que globals.css a déjà déclarée : l'ordre des couches
+   est fixé par la première feuille, celle du site. */
+@layer base {
+  .p-btp * {
+    border-color: var(--btp-filet);
+    outline-color: color-mix(in oklab, var(--btp-texte) 50%, transparent);
+  }
+  .p-btp a {
+    overflow-wrap: anywhere;
+  }
+  .p-btp [role="button"]:not(:disabled),
+  .p-btp button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Le conteneur de la source (`container`, 100 % puis 640 / 768 / 1024 /
+   1280 / 1400, sans gouttière), renommé : `container` existe ici avec
+   d'autres valeurs (celles de Tailwind), et on n'occupe pas un nom aussi
+   général dans un site qui a trente autres pages. */
+.p-btp .btp-conteneur {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 0;
+}
+@media (min-width: 40rem) {
+  .p-btp .btp-conteneur {
+    max-width: 40rem;
+  }
+}
+@media (min-width: 48rem) {
+  .p-btp .btp-conteneur {
+    max-width: 48rem;
+  }
+}
+@media (min-width: 64rem) {
+  .p-btp .btp-conteneur {
+    max-width: 64rem;
+  }
+}
+@media (min-width: 80rem) {
+  .p-btp .btp-conteneur {
+    max-width: 80rem;
+  }
+}
+@media (min-width: 96rem) {
+  .p-btp .btp-conteneur {
+    max-width: 1400px;
+  }
+}
+
+/* ── Animations de la source ──────────────────────────────────────────
+   Utilitaires `animate-*` du `@theme` source, renommés `btp-*` : ni les
+   classes ni les `@keyframes` n'existent sur ce site, et les `@keyframes`
+   sont globaux quoi qu'on fasse — d'où le préfixe. Valeurs recopiées. */
+
+/* Les trois orbites de l'appel (Appel.tsx) : la durée vient de
+   `--duration`, posée en style sur chaque anneau (34 s, 26 s, 18 s). */
+.p-btp .btp-orbite {
+  animation: btp-orbite var(--duration, 30s) linear infinite;
+}
+.p-btp .btp-contre-orbite {
+  animation: btp-contre-orbite var(--duration, 30s) linear infinite;
+}
+@keyframes btp-orbite {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes btp-contre-orbite {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(-1turn);
+  }
+}
+
+/* Les deux rubans de situations (Metiers.tsx). */
+.p-btp .btp-defile-gauche-lent {
+  animation: btp-defile-gauche 30s linear infinite;
+}
+.p-btp .btp-defile-droite-lent {
+  animation: btp-defile-droite 30s linear infinite;
+}
+@keyframes btp-defile-gauche {
+  from {
+    transform: translate(0);
+  }
+  to {
+    transform: translate(-50%);
+  }
+}
+@keyframes btp-defile-droite {
+  from {
+    transform: translate(-50%);
+  }
+  to {
+    transform: translate(0);
+  }
+}
+
+/* L'accordéon des questions (Questions.tsx) : 0,2 s ease-out sur la
+   hauteur que Radix mesure, comme `animate-accordion-down/up`. */
+.p-btp .btp-accordeon[data-state="open"] {
+  animation: btp-accordeon-ouvre 0.2s ease-out;
+}
+.p-btp .btp-accordeon[data-state="closed"] {
+  animation: btp-accordeon-ferme 0.2s ease-out;
+}
+@keyframes btp-accordeon-ouvre {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes btp-accordeon-ferme {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* L'infobulle des formules (Formules.tsx) : l'entrée de la source venait
+   de tw-animate-css (`fade-in-0 zoom-in-95 slide-in-from-bottom-2`), qui
+   n'est pas installé ici. Même geste en une règle. L'échelle passe par la
+   propriété `scale` et non `transform`, que la bulle utilise déjà pour son
+   recalage horizontal. */
+.p-btp .btp-bulle {
+  animation: btp-bulle 0.15s ease-out;
+}
+@keyframes btp-bulle {
+  from {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+/* La source coupait les orbites seules ; les rubans et la bulle suivent
+   (globals.css ramène déjà toute animation à 0,01 ms dans ce cas — ceci
+   rend l'arrêt explicite, et lisible ici). */
+@media (prefers-reduced-motion: reduce) {
+  .p-btp .btp-orbite,
+  .p-btp .btp-contre-orbite,
+  .p-btp .btp-defile-gauche-lent,
+  .p-btp .btp-defile-droite-lent,
+  .p-btp .btp-bulle {
+    animation: none;
+  }
+}

@@ -18,7 +18,9 @@ import { SECTEURS, secteur } from "@/lib/secteurs";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return SECTEURS.map((s) => ({ metier: s.slug }));
+  /* un secteur rapatrié a son dossier statique app/secteurs/<slug>/ : il
+     ne doit plus être généré ici (lib/secteurs.ts, champ `integre`). */
+  return SECTEURS.filter((s) => !s.integre).map((s) => ({ metier: s.slug }));
 }
 
 export async function generateMetadata({

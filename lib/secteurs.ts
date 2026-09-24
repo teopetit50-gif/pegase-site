@@ -32,8 +32,13 @@ export type Secteur = {
   saas: string;
   /* une ligne, 40 à 60 signes : la décision que le SaaS prend chaque matin */
   texte: string;
-  /* le site déployé, affiché par /secteurs/<slug> */
+  /* le site déployé, affiché par /secteurs/<slug> tant que `integre` est faux */
   url: string;
+  /* 24/09 (soir) — Teo : « je veux le même système que CASHD ». La page est
+     RAPATRIÉE dans ce site (app/secteurs/<slug>/, entête et pied d'Omega,
+     monde blanc) ; la route à cadre [metier] ne la sert plus. Méthode :
+     app/secteurs/RAPATRIEMENT.md. */
+  integre?: boolean;
 };
 
 export const SECTEURS: Secteur[] = [
@@ -43,6 +48,7 @@ export const SECTEURS: Secteur[] = [
     saas: "Daliro",
     texte: "Travaux supplémentaires captés, sous-traitants confirmés à J-2.",
     url: "https://chantieros-site.vercel.app",
+    integre: true,
   },
   {
     slug: "avocats",

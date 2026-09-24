@@ -1,0 +1,137 @@
+import type { Metadata } from "next";
+import PageShell from "@/components/PageShell";
+import { Hero } from "@/components/secteurs/btp/Heros";
+import { Logos } from "@/components/secteurs/btp/Lu";
+import { Features } from "@/components/secteurs/btp/Fonctions";
+import { Stats } from "@/components/secteurs/btp/Chiffres";
+import { Testimonials } from "@/components/secteurs/btp/Metiers";
+import { Pricing } from "@/components/secteurs/btp/Formules";
+import { Faq } from "@/components/secteurs/btp/Questions";
+import { Cta } from "@/components/secteurs/btp/Appel";
+import { Bande } from "@/components/secteurs/btp/Bande";
+import "./btp.css";
+
+/* ══════════════════════════════════════════════════════════════════════
+   /secteurs/btp — DALIRO (24/09/2026, soir)
+
+   C'EST LA PAGE D'ACCUEIL DU SITE SaaS `OMEGA/chantieros-site`, RAPATRIÉE
+   (le dossier et le projet Vercel gardent l'ancien nom ChantierOS). Copie
+   de l'état du disque le 24/09/2026 à 12 h 01, heure de la Guadeloupe :
+   une autre session travaillait encore le site source ; rien n'y a été
+   modifié.
+
+   Jusqu'ici /secteurs/btp AFFICHAIT le site déployé du SaaS dans un cadre
+   plein écran (app/secteurs/[metier]/). Teo, le 24/09 : « ça redirige vers
+   un truc à part, alors que quand on clique sur CASHD c'est une page qui
+   tourne dans omegaai.fr, on peut recliquer en haut pour revenir à
+   l'accueil. Je veux le même système pour les pages par secteur. » Même
+   système, donc : celui de /offres/relances-impayes (11/09). La ligne
+   `btp` de lib/secteurs.ts porte `integre: true` ; la route à cadre ne
+   génère plus ce slug, et ce dossier statique prend la place.
+
+   Méthode et pièges, pour les trois suivants (Tamila, Lorani, Tavaro) :
+   app/secteurs/RAPATRIEMENT.md.
+
+   LES SIX RÈGLES, ET CE QU'ELLES DONNENT ICI
+   1. Enveloppée dans `PageShell` : entête, pied et transitions du site.
+      La peau `.p-btp` sort du `<main>` plafonné à 1440 (100vw, btp.css) ;
+      le contenu reste dans le cadre de la source (`.btp-conteneur`, 1280
+      puis 1400 px dès 1536), avec ses deux paires de filets verticaux.
+   2. Les jetons vivent sous `.p-btp`, jamais sur `:root`.
+   3. Aucun `@theme` : les utilitaires de couleur de la source sont
+      convertis en valeurs arbitraires (51 `dark:` retirés, ~550
+      conversions), chacune notée en tête du composant concerné.
+   4. Pas de bascule clair/sombre ; chaque section porte
+      `data-monde="clair"` pour l'entête du site.
+   5. Les polices sont celles du site : aucune `next/font` ici.
+   6. Appels à l'action : tout mène à /reserver-un-audit (héros, bouton
+      des fonctionnalités, trois formules, appel final). `/sign-up` et
+      `/pricing`, routes mortes du gabarit, sont réaiguillés ; « Connexion »
+      et la recherche partent avec l'entête de la source.
+
+   CE QUI NE VIENT PAS : l'entête du site source (menus Produit / Métiers,
+   loupe, bascule de thème, « Connexion ») et son pied noir — ce sont ceux
+   d'Omega qui servent. `<PageMotion />` non plus : la page ne pose aucun
+   `[data-reveal]`.
+
+   MONDE BLANC. Daliro était déjà clair : sa seule bande noire était son
+   pied de page, qui ne vient pas. La dernière surface sombre — la vignette
+   d'application d'une notification, dans les fonctionnalités — est passée
+   au blanc (Fonctions.tsx).
+   ══════════════════════════════════════════════════════════════════════ */
+
+const TITRE = "Daliro · les travaux en plus, signés avant d'être faits";
+const DESCRIPTION =
+  "Daliro lit les photos et les vocaux de vos équipes, repère les travaux hors devis, confirme vos sous-traitants à J-2 et cale les livraisons sur le planning. Conçu par Omega pour le BTP.";
+
+export const metadata: Metadata = {
+  title: `${TITRE} | Omega.AI`,
+  description: DESCRIPTION,
+  alternates: { canonical: "/secteurs/btp" },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "Omega.AI",
+    title: TITRE,
+    description: DESCRIPTION,
+    url: "/secteurs/btp",
+    /* Déclarer un bloc openGraph remplace celui que Next déduit, image
+       comprise : sans cette ligne la page partirait sans visuel (voir
+       l'en-tête de app/offres/relances-impayes/page.tsx, 15/09). */
+    images: ["/opengraph-image"],
+  },
+  twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
+};
+
+/* Le cadre de la source (chantieros-site/src/app/page.tsx), à l'identique
+   moins l'entête et le pied : conteneur, filets doubles, bande hachurée
+   entre chaque section. Le `<main>` imbriqué de la source devient un
+   `<div>` — PageShell porte déjà le <main> de la page. Sa `divide-y` ne
+   séparait que le cadre du pied ; il reste le filet tireté bas (`sm:`). */
+export default function PageBtp() {
+  return (
+    <PageShell>
+      <div data-monde="clair" className="p-btp flex flex-col">
+        <div className="flex flex-1 flex-col border-dashed border-[#e6e6e6] sm:border-b">
+          <div className="btp-conteneur">
+            <div className="border-x border-[#e6e6e6]">
+              <div className="mx-1 border-x border-[#e6e6e6] sm:mx-1.5 lg:mx-2">
+                <div data-monde="clair" className="relative z-20 w-full bg-[#ffffff] pt-24 md:pt-32">
+                  <Hero />
+                </div>
+                <Bande />
+                <div data-monde="clair">
+                  <Logos />
+                </div>
+                <Bande />
+                <div data-monde="clair">
+                  <Features />
+                </div>
+                <Bande />
+                <div data-monde="clair">
+                  <Stats />
+                </div>
+                <Bande />
+                <div data-monde="clair">
+                  <Testimonials />
+                </div>
+                <Bande />
+                <section id="pricing" data-monde="clair" className="scroll-mt-20">
+                  <Pricing />
+                </section>
+                <Bande />
+                <section id="faq" data-monde="clair" className="scroll-mt-20">
+                  <Faq />
+                </section>
+                <Bande />
+                <div data-monde="clair">
+                  <Cta />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </PageShell>
+  );
+}
