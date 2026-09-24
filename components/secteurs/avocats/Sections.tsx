@@ -78,7 +78,7 @@ import { APPEL, CONNEXIONS, CONTACT, FONCTIONNALITES, PIECES, POINT } from "./te
 import { cn } from "@/lib/cn";
 
 /* ─── « Trusted by leading brands » → les familles de pièces lues (aucun logo de client inventé) ─── */
-const iconesPieces = [Gavel, FileStack, Paperclip, FileSearch, Stamp, AtSign, ScanText];
+const iconesPieces = [Gavel, FileStack, Paperclip, FileSearch, FileCheck2, Stamp, AtSign, Inbox, ScanText];
 
 export function Pieces() {
   return (

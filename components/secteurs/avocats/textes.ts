@@ -32,7 +32,7 @@ export const CONTACT = {
 
 export const HERO = {
   badge: "NOUVEAU",
-  annonce: "Contrôle du bordereau, article 768 du CPC",
+  annonce: "Délais d'appel et contrôles de procédure",
   titreAvant: "Chaque fait du dossier,",
   titreMot: "renvoyé",
   titreApres: "à sa pièce",
@@ -45,7 +45,7 @@ export const PIECES = {
   avant: "Chaque pièce est lue, même",
   mot: "manuscrite",
   apres: "",
-  familles: ["Conclusions", "Bordereaux", "Pièces adverses", "Expertises", "Constats", "Courriels", "Scans"],
+  familles: ["Conclusions", "Bordereaux", "Pièces adverses", "Expertises", "Pré-rapports", "Constats", "Courriels", "Avis RPVA", "Scans"],
 };
 
 export const FONCTIONNALITES = {
@@ -65,7 +65,7 @@ export const FONCTIONNALITES = {
 export const POINT = {
   titreL1: "Chaque matin, l'état",
   titreMot: "du cabinet",
-  texte: "Un courriel à 7 h vous signale les forfaits dépassés et les dossiers sans diligence, chacun avec l'action à engager.",
+  texte: "Un courriel à 7 h vous signale les délais de procédure de la semaine, ce que le cabinet attend encore, les forfaits dépassés et les dossiers sans diligence, chacun avec l'action à engager.",
   cartes: [
     {
       titre: "Forfaits dépassés",
@@ -89,6 +89,30 @@ export const POINT = {
         ["Succession", "Courriel", "46 j", "—"],
         ["Copropriété", "Conclusions", "38 j", "14 oct."],
         ["Travail", "RDV", "33 j", "21 oct."],
+      ],
+    },
+    {
+      titre: "Délais de procédure",
+      texte: "Lus dans l'avis RPVA, du plus proche au plus lointain.",
+      valeur: "4 délais",
+      tendance: "1 cette semaine",
+      colonnes: ["Dossier", "Acte attendu", "Échéance", "Reste"],
+      lignes: [
+        ["Construction", "Conclusions d'appel", "2 oct.", "8 j"],
+        ["Bail", "Conclusions d'intimé", "19 oct.", "25 j"],
+        ["Travail", "Appel incident", "6 nov.", "43 j"],
+      ],
+    },
+    {
+      titre: "Ce que le cabinet attend",
+      texte: "Pièces promises, pré-rapports et pièces citées par le confrère.",
+      valeur: "5 attentes",
+      tendance: "2 dires à rendre en octobre",
+      colonnes: ["Dossier", "Attendu de", "Objet", "Date"],
+      lignes: [
+        ["Construction", "Expert", "Dires sur le pré-rapport", "14 oct."],
+        ["Succession", "Client", "Relevés bancaires", "21 j"],
+        ["Copropriété", "Confrère", "Pièce n° 12 citée", "18 j"],
       ],
     },
   ],
@@ -142,8 +166,8 @@ export const FORMULES = {
       bouton: "Soumettre un dossier",
       note: { Contentieux: "Réalisé pendant l'audit, sur un dossier réel", "Dommage corporel": "Réalisé pendant l'audit, sur un dossier réel" },
       inclut: {
-        Contentieux: ["Dossier de faits daté et sourcé", "Contradictions entre pièces", "Bordereau contrôlé (art. 768 et 954)", "Pièces adverses du jour", "Pièces scannées et manuscrites", "Export Word et PDF", "Hébergement en France"],
-        "Dommage corporel": ["Chronologie des soins", "Nomenclature Dintilhac pré-remplie", "Écarts entre rapports d'expertise", "Source de chaque poste de préjudice", "Pièces médicales scannées", "Export Word et PDF", "Effacement à la clôture"],
+        Contentieux: ["Dossier de faits daté et sourcé", "Contradictions entre pièces", "Bordereau contrôlé (art. 768)", "Dispositif contre motifs (art. 954)", "Prétentions nouvelles et concentration en appel", "Pièces citées jamais communiquées, sommation prête", "Dires à l'expert préparés sur le pré-rapport", "Trous de la chronologie et faits contredits", "Index des personnes et faits classés par moyen", "Questions posées au dossier", "Premier jet de l'exposé des faits", "Dossier de plaidoirie et renvois cliquables", "Pièces adverses du jour", "Pièces scannées et manuscrites", "Export Word et PDF", "Hébergement en France"],
+        "Dommage corporel": ["Chronologie des soins", "Interruptions de soins repérées", "Nomenclature Dintilhac pré-remplie", "Écarts entre rapports d'expertise", "Dires à l'expert préparés sur le pré-rapport", "Source de chaque poste de préjudice", "Questions posées au dossier médical", "Premier jet de l'exposé des faits", "Pièces médicales scannées", "Export Word et PDF", "Effacement à la clôture"],
       },
     },
     {
@@ -154,8 +178,8 @@ export const FORMULES = {
       bouton: "Réserver un audit",
       note: { Contentieux: "Tarif par cabinet, fixé à l'audit", "Dommage corporel": "Tarif par cabinet, fixé à l'audit" },
       inclut: {
-        Contentieux: ["L'ensemble de la pré-lecture", "Point du matin à 7 h", "Forfaits dépassés", "Dossiers sans diligence", "Charge par avocat", "Temps passé proposé à la saisie", "Lecture seule de vos outils"],
-        "Dommage corporel": ["L'ensemble de la pré-lecture", "Point du matin à 7 h", "Conventions et forfaits", "Dossiers sans diligence", "Charge par avocat", "Temps passé proposé à la saisie", "Lecture seule de vos outils"],
+        Contentieux: ["L'ensemble de la pré-lecture", "Point du matin à 7 h", "Délais d'appel lus dans l'avis RPVA", "Pièces attendues du client et de l'expert", "Forfaits dépassés", "Marge par dossier", "Contentieux en série comparés", "Dossiers sans diligence", "Charge par avocat", "Temps passé proposé à la saisie", "Lecture seule de vos outils"],
+        "Dommage corporel": ["L'ensemble de la pré-lecture", "Point du matin à 7 h", "Délais d'appel lus dans l'avis RPVA", "Pièces attendues du client et de l'expert", "Conventions et forfaits", "Marge par dossier", "Dossiers en série comparés", "Dossiers sans diligence", "Charge par avocat", "Temps passé proposé à la saisie", "Lecture seule de vos outils"],
       },
     },
   ],
