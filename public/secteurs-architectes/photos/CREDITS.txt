@@ -1,0 +1,71 @@
+Photos de la vitrine Lorani — banque Unsplash (licence Unsplash, usage commercial autorisé sans redevance).
+Crédit dû moralement à chaque auteur ; aucune image générée.
+
+logement.jpg
+    Auteur  : Warren Griffiths
+    Profil  : https://unsplash.com/@photoeightyeight
+    Photo   : https://unsplash.com/photos/UsKq5wqO5N0
+    Sujet   : Modern building facade with repeating windows and balconies
+
+equipements-publics.jpg
+    Auteur  : Anna Stampfli
+    Profil  : https://unsplash.com/@annastampfli
+    Photo   : https://unsplash.com/photos/Q518TADE3Ns
+    Sujet   : grayscale photo of building
+
+rehabilitation.jpg
+    Auteur  : Karen Barrett
+    Profil  : https://unsplash.com/@mylenslife
+    Photo   : https://unsplash.com/photos/6NrnN_L8Pvg
+    Sujet   : a very tall building with lots of scaffolding on it
+
+tertiaire.jpg
+    Auteur  : Robert Anderson
+    Profil  : https://unsplash.com/@robanderson72
+    Photo   : https://unsplash.com/photos/fakYR25jORU
+    Sujet   : gray concrete building under white sky during daytime
+
+plans.jpg
+    Auteur  : Lucas Kepner
+    Profil  : https://unsplash.com/@lucaskphoto
+    Photo   : https://unsplash.com/photos/Yn8D5B8C-eY
+    Sujet   : Architectural blueprints with drafting pencils, a metal ruler, and a storage tube
+
+elevations.jpg
+    Auteur  : Amsterdam City Archives
+    Profil  : https://unsplash.com/@amsterdamcityarchives
+    Photo   : https://unsplash.com/photos/1hSh1aDG6Mg
+    Sujet   : Architectural drawings of a building with elevations and floor plan
+
+Plans en fond de section (public/plans/, traits blancs sur transparence tirés des planches ci-dessous)
+
+cafe-restaurant.webp
+    Auteur  : Amsterdam City Archives
+    Profil  : https://unsplash.com/@amsterdamcityarchives
+    Photo   : https://unsplash.com/photos/a1XrwixH1X8
+    Sujet   : Architectural blueprint for a cafe restaurant
+
+salle-circulaire.webp
+    Auteur  : Amsterdam City Archives
+    Profil  : https://unsplash.com/@amsterdamcityarchives
+    Photo   : https://unsplash.com/photos/IIyMRyOGyag
+    Sujet   : A plan of a building with a circular floor plan
+
+piscine.webp
+    Auteur  : Amsterdam City Archives
+    Profil  : https://unsplash.com/@amsterdamcityarchives
+    Photo   : https://unsplash.com/photos/aKC8kSNVu-U
+    Sujet   : A plan of a building with a swimming pool
+
+facades.webp
+    Auteur  : Amsterdam City Archives
+    Profil  : https://unsplash.com/@amsterdamcityarchives
+    Photo   : https://unsplash.com/photos/-zX5oLU6HBQ
+    Sujet   : A black and white drawing of a four story building
+
+salles-ovales.webp
+    Auteur  : Amsterdam City Archives
+    Profil  : https://unsplash.com/@amsterdamcityarchives
+    Photo   : https://unsplash.com/photos/tL20z1hk-hY
+    Sujet   : Two architectural floor plans of an oval-shaped building
+

@@ -1,0 +1,408 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LORANI (AGENCES D'ARCHITECTURE) — le monde de la page /secteurs/architectes
+
+   RAPATRIÉ le 24/09/2026 (copie du disque à 14 h 57, heure de la
+   Guadeloupe ; seconde copie de cinq composants à 17 h 00, voir page.tsx)
+   de `OMEGA/dossieros-site/src/app/globals.css` (le dossier et
+   le projet Vercel gardent l'ancien nom DossierOS). Méthode :
+   app/secteurs/RAPATRIEMENT.md. Les jetons vivent sous `.p-architectes`,
+   JAMAIS sur `:root` — sur `:root` ils repeindraient tout le site. Tout ce
+   fichier est donc descendant de `.p-architectes`.
+
+   ══════════════════════════════════════════════════════════════════════
+   RELEVÉ — la source, et ce qu'elle relevait elle-même
+   Le site Lorani décalque le gabarit « Parlo — Autonomous Messaging
+   Agent » (Monolyth Dev, 21st.dev), relevé au style calculé le 23/09 par
+   la session qui l'a construit ; ses jetons, keyframes et utilitaires sont
+   recopiés de la feuille compilée de Parlo. On reprend SON résultat,
+   mesuré de nouveau sur dossieros-site.vercel.app aux cinq largeurs.
+
+   COULEURS DE LA SOURCE — la page tournait en SOMBRE (classe `dark` posée
+   sur <html>, variante `dark:` = `&:is(.dark *)`) :
+     fond #0a0a0a · carte #171717 · texte #fafafa · secondaire / muted /
+     accent #262626 · texte atténué #a1a1a1 · filets blanc à 10 %.
+   MAIS la référence a un thème CLAIR complet (`:root` de sa feuille, et des
+   branches `useTheme()` dans son code) : c'est lui qu'on prend, pas des
+   valeurs devinées. Les `dark:` du balisage ont été RETIRÉS à la copie
+   (outils/rapatrier-secteur.py) ; ce qui reste est le dessin clair de
+   l'auteur du gabarit.
+
+   TYPOGRAPHIE (source) — Syne partout (titres et corps), Geist Mono pour
+   les intitulés de cartouche ; h1 du héros 40 → 54 px (768), interligne 1 ;
+   h2 de section `text-4xl` (36/40), 500-600 ; corps 16 → 18.
+
+   CADRE — deux paires de filets verticaux FIXES (22 et 30 px des bords) et
+   un cadre `mx-[30px] border-x` autour de tout le contenu ; chaque section
+   centre le sien dans `max-w-7xl px-6` ; une bande de points de 50 px
+   (filets haut et bas) entre les sections.
+   ══════════════════════════════════════════════════════════════════════
+
+   ── CE QUE LE RAPATRIEMENT CHANGE ───────────────────────────────────
+
+   1. TOUT PASSE AU CLAIR (Teo, 24/09 : « Omega c'est blanc, les SaaS qui
+      sont en noir, change les couleurs et mets tout en blanc »), avec le
+      thème clair de la référence :
+        fond, carte, popover        #ffffff   (était #0a0a0a / #171717)
+        texte                       #0a0a0a   (était #fafafa)
+        primaire                    #171717   (était #e5e5e5)
+        secondaire, muted, accent   #f5f5f5   (était #262626)
+        texte atténué               #737373   (était #a1a1a1)
+        filets, champs              #e5e5e5   (était blanc à 10 / 15 %)
+        anneau                      #a1a1a1   (était #737373)
+        destructif                  #e40014
+      Ces valeurs sont celles de Parlo en clair, un cheveu à côté de celles
+      de Daliro et Tamila (#171717 / #e6e6e6) : c'est le dessin du gabarit,
+      on ne le retouche pas pour un demi-point de gris.
+      Ce que la source avait écrit en sombre EN DUR (maquettes, grilles,
+      lueurs, rayons, tuiles) est repris composant par composant ; chaque
+      choix est écrit en tête du fichier concerné.
+
+   2. PAS DE `@theme` (règle 3). Utilitaires de couleur convertis en
+      hexadécimal dans les composants. ⚠ Comme chez Daliro, `bg-muted`
+      existe ici (`--color-muted` #9b9ba3) : toujours converti. Deux jetons
+      de la source restent lus en variable par le balisage et sont reposés
+      ici : `--radius` (rounded-tl-(--radius)) et les `--hero-10-*`.
+
+   3. PALIERS MAISON. La source déclarait `ipad` (768 px), `desktop-sm`
+      (1280), `wide-lg` (1600), `android-sm` (360) et `ultrawide` (2560).
+      Ici ils n'existent pas : un `ipad:` serait IGNORÉ sans une erreur.
+      Convertis à la copie : `ipad:` → `md:`, `desktop-sm:` → `xl:` (mêmes
+      largeurs), `wide-lg:` → `min-[1600px]:`.
+
+   4. RAYONS. La source dérivait `rounded-sm/md/lg/xl` de
+      `--radius: .625rem` (6 / 8 / 10 / 14 px) ; ce site garde ceux de
+      Tailwind (4 / 6 / 8 / 12). Convertis à la copie en valeurs
+      arbitraires (`rounded-lg` → `rounded-[10px]`…).
+
+   5. LA COULEUR DES FILETS SANS COULEUR. La source pose
+      `* { border-color: var(--border) }` en couche de base. Ici Tailwind v4
+      les laisse en `currentColor`. La règle est reprise, dans la couche
+      `base`, pour la raison écrite dans btp.css : hors couche, elle
+      battrait les `border-[#0a0a0a]/[0.06]` du balisage.
+
+   6. POLICES DU SITE (règle 5). Aucune `next/font` dans la page. Syne et
+      Geist Mono partent : `font-sans` et le corps suivent la police du site
+      (`--font-inter`), les titres `--font-jakarta`, `font-mono` la mono du
+      site. Toutes valent General Sans / sa mono aujourd'hui
+      (app/polices.css).
+
+   7. LA PEAU SORT DU CADRE 1440 (règle 1), comme `.p-btp` et `.p-avocats` :
+      100vw. PAGE PLEINE (Teo, 24/09 au soir : « la page n'est pas pleine,
+      il y a les barres sur les côtés ») : ni rails fixes ni `border-x`. Les
+      30 px du cadre de la source restent en MARGE autour du contenu de
+      chaque section (page.tsx) — c'est là que respirent les blocs à
+      `md:-mx-8` de la source — mais les bandes de points, le héros, la
+      grille des compteurs, les rayons de l'appel et les filets des quatre
+      cellules du produit courent d'un bord à l'autre de la fenêtre.
+
+   8. UN SEUL CONTEXTE D'EMPILEMENT (`isolation: isolate`), comme Tamila :
+      les planches d'architecte en fond d'en-tête sont en `-z-10` dans des
+      sections isolées ; la peau garantit qu'aucune ne passe sous le blanc.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-architectes {
+  /* ── jetons, thème CLAIR de la référence (voir 1) ────────────────── */
+  --architectes-fond: #ffffff; /* --background, --card, --popover */
+  --architectes-texte: #0a0a0a; /* --foreground */
+  --architectes-filet: #e5e5e5; /* --border, --input */
+  --architectes-anneau: #a1a1a1; /* --ring */
+  /* `rounded-tl-(--radius)` (GrilleFonctions.tsx) lit cette variable, que
+     la source posait sur :root. */
+  --radius: 0.625rem;
+  /* Le héros de la référence, thème clair (son `:root`) : fond, voile,
+     éclosion et deux halos. En sombre : #070707, un voile #252525 → #070707
+     et des halos BLANCS ; en clair, un voile gris qui s'éteint dans le fond
+     et des halos neutres à 10-22 %. */
+  --hero-10-background: #fafafa;
+  --hero-10-glow-wash: linear-gradient(to bottom, #e5e5e5 0%, #f0f0f0 48%, #fafafa 100%);
+  --hero-10-glow-bloom: radial-gradient(ellipse 85% 90% at 50% 0%, #52525238 0%, #a3a3a321 48%, transparent 76%);
+  --hero-10-glow-mid: #5252521a;
+  --hero-10-glow-wide: #a3a3a314;
+
+  background: var(--architectes-fond);
+  color: var(--architectes-texte);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  isolation: isolate;
+
+  /* Plein écran : la peau sort de <main> (plafonné à 1440 par PageShell).
+     Le div de PageShell porte `overflow-x-clip`, qui absorbe le débord de
+     `100vw` sans barre horizontale ; `clip` (pas `hidden`) laisse vivre le
+     `position: sticky` de la barre des quatre contrôles. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Titres : la police de titre du site (voir 6). */
+.p-architectes h1,
+.p-architectes h2,
+.p-architectes h3 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Règle de base de la source, dans la couche `base` (voir 5). */
+@layer base {
+  .p-architectes *,
+  .p-architectes ::before,
+  .p-architectes ::after {
+    border-color: var(--architectes-filet);
+    outline-color: color-mix(in oklab, var(--architectes-anneau) 50%, transparent);
+  }
+  .p-architectes [role="button"]:not(:disabled),
+  .p-architectes button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* ── Apparitions (apparition.tsx) ─────────────────────────────────────
+   États initiaux framer-motion de la référence : opacité 0, translation
+   de 8 à 20 px (`--reveal-y`, posé bloc par bloc), puis 0,6 s. */
+.p-architectes [data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 12px));
+  transition:
+    opacity 0.6s cubic-bezier(0.215, 0.61, 0.355, 1),
+    transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.p-architectes [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Animations de la source ──────────────────────────────────────────
+   Keyframes et utilitaires de la source, renommés `architectes-*` : ni
+   les classes ni les `@keyframes` n'existent sur ce site, et les
+   `@keyframes` sont globaux quoi qu'on fasse — d'où le préfixe. Valeurs
+   recopiées. */
+
+/* L'entrée de la bande des compteurs (`animate-hero-reveal`). */
+.p-architectes .architectes-hero-reveal {
+  animation: architectes-hero-reveal 0.3s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}
+@keyframes architectes-hero-reveal {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* La lueur du bouton étoilé (bouton-etoile.tsx) suit `--path` ; la durée
+   vient de `--duration` (3 s). */
+.p-architectes .architectes-star-btn {
+  animation: architectes-star-btn calc(var(--duration) * 1s) linear infinite;
+}
+@keyframes architectes-star-btn {
+  0% {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+/* Les rangées de libellés qui défilent (Produit.tsx, derrière le menu ;
+   Metiers.tsx, les logiciels) — `trusted-marquee` de la référence. */
+@keyframes architectes-trusted-marquee {
+  0% {
+    transform: translate(0);
+  }
+  to {
+    transform: translate(-50%);
+  }
+}
+
+/* L'onglet des offres (Fonctionnement.tsx) : ligne de balayage, 2,8 s de
+   course + 0,5 s d'arrêt ; pastilles qui respirent en 2,6 s. */
+@keyframes architectes-scan-canaux {
+  0% {
+    left: 4%;
+    opacity: 0;
+  }
+  42.42% {
+    opacity: 0.9;
+  }
+  84.85% {
+    left: 96%;
+    opacity: 0;
+  }
+  100% {
+    left: 96%;
+    opacity: 0;
+  }
+}
+@keyframes architectes-pouls-canal {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Le rail des situations (Metiers.tsx) — CSS styled-jsx de la référence :
+   48 s, arrêt au survol. */
+.p-architectes .architectes-rail {
+  animation: architectes-rail 48s linear infinite;
+}
+.p-architectes .architectes-rail:hover {
+  animation-play-state: paused;
+}
+@keyframes architectes-rail {
+  to {
+    transform: translate(-50%);
+  }
+}
+
+/* La bande d'icônes à pas de l'appel (Appel.tsx) — `.cta-model-marquee` :
+   dix arrêts, 36 s, positions relevées sous et au-dessus de 768 px. */
+.p-architectes .architectes-pas {
+  --cta-marquee-position-0: -720px;
+  --cta-marquee-position-1: -662px;
+  --cta-marquee-position-2: -604px;
+  --cta-marquee-position-3: -546px;
+  --cta-marquee-position-4: -488px;
+  --cta-marquee-position-5: -430px;
+  --cta-marquee-position-6: -372px;
+  --cta-marquee-position-7: -314px;
+  --cta-marquee-position-8: -256px;
+  --cta-marquee-position-9: -198px;
+  animation: architectes-pas 36s ease-in-out infinite;
+  will-change: transform;
+}
+@media (min-width: 768px) {
+  .p-architectes .architectes-pas {
+    --cta-marquee-position-0: -844px;
+    --cta-marquee-position-1: -776px;
+    --cta-marquee-position-2: -708px;
+    --cta-marquee-position-3: -640px;
+    --cta-marquee-position-4: -572px;
+    --cta-marquee-position-5: -504px;
+    --cta-marquee-position-6: -436px;
+    --cta-marquee-position-7: -368px;
+    --cta-marquee-position-8: -300px;
+    --cta-marquee-position-9: -232px;
+  }
+}
+@keyframes architectes-pas {
+  0%,
+  6% {
+    transform: translateX(var(--cta-marquee-position-0));
+  }
+  11.111%,
+  17.111% {
+    transform: translateX(var(--cta-marquee-position-1));
+  }
+  22.222%,
+  28.222% {
+    transform: translateX(var(--cta-marquee-position-2));
+  }
+  33.333%,
+  39.333% {
+    transform: translateX(var(--cta-marquee-position-3));
+  }
+  44.444%,
+  50.444% {
+    transform: translateX(var(--cta-marquee-position-4));
+  }
+  55.555%,
+  61.555% {
+    transform: translateX(var(--cta-marquee-position-5));
+  }
+  66.666%,
+  72.666% {
+    transform: translateX(var(--cta-marquee-position-6));
+  }
+  77.777%,
+  83.777% {
+    transform: translateX(var(--cta-marquee-position-7));
+  }
+  88.888%,
+  94.888% {
+    transform: translateX(var(--cta-marquee-position-8));
+  }
+  to {
+    transform: translateX(var(--cta-marquee-position-9));
+  }
+}
+
+/* La tuile centrale de l'appel — `.cta-center-mark` de la source : un
+   fond plein dans un anneau métallique (dégradé en `border-box`), qui
+   respire. Sur le noir : fond #050505, et la respiration passait d'une
+   LUEUR blanche (#ffffff1f, tuile grossie) à une OMBRE noire (#00000047,
+   tuile au repos). Sur le blanc, une lueur blanche ne se voit pas : fond
+   blanc, même anneau, et une ombre d'encre qui s'étoffe quand la tuile
+   grossit — le geste (la tuile se soulève) plutôt que la valeur. */
+.p-architectes .architectes-marque-centre {
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #626262 0%, #f0f0f0 28%, #8b8b8b 50%, #f5f5f5 72%, #5e5e5e 100%) border-box;
+  animation: architectes-respiration 4s ease-in-out infinite;
+}
+@keyframes architectes-respiration {
+  0%,
+  10%,
+  to {
+    transform: scale(1.035);
+    box-shadow: 0 12px 26px rgba(10, 10, 10, 0.12);
+  }
+  25%,
+  54% {
+    transform: scale(1);
+    box-shadow: 0 8px 20px rgba(10, 10, 10, 0.06);
+  }
+}
+
+/* L'accordéon des questions (accordeon.tsx) : `animate-accordion-down/up`
+   de tw-animate-css, absent ici — 0,2 s ease-out sur la hauteur que Radix
+   mesure. */
+.p-architectes .architectes-accordeon[data-state="open"] {
+  animation: architectes-accordeon-ouvre 0.2s ease-out;
+}
+.p-architectes .architectes-accordeon[data-state="closed"] {
+  animation: architectes-accordeon-ferme 0.2s ease-out;
+}
+@keyframes architectes-accordeon-ouvre {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes architectes-accordeon-ferme {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* La source coupait la bande à pas et la tuile ; le reste suit (globals.css
+   ramène déjà toute animation à 0,01 ms dans ce cas — ceci rend l'arrêt
+   explicite, et lisible ici). Les blocs à `[data-reveal]` s'affichent
+   d'emblée. */
+@media (prefers-reduced-motion: reduce) {
+  .p-architectes .architectes-pas,
+  .p-architectes .architectes-marque-centre,
+  .p-architectes .architectes-rail,
+  .p-architectes .architectes-star-btn,
+  .p-architectes .architectes-hero-reveal {
+    animation: none;
+  }
+  .p-architectes [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
