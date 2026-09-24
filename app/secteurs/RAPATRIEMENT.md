@@ -18,7 +18,7 @@ appliquent aux secteurs.
 | Secteur | SaaS | Source (nom d'origine) | Classe | Fichiers |
 |---|---|---|---|---|
 | `btp` | Daliro | `OMEGA/chantieros-site` | `.p-btp` | ✅ fait le 24/09 |
-| `avocats` | Tamila | `OMEGA/cabinetos-site` | `.p-avocats` | source **sombre** |
+| `avocats` | Tamila | `OMEGA/cabinetos-site` | `.p-avocats` | ✅ fait le 24/09 (source **sombre**, § Source sombre) |
 | `architectes` | Lorani | `OMEGA/dossieros-site` | `.p-architectes` | |
 | `location-automobile` | Tavaro | `OMEGA/rentalos-site` | `.p-location` | |
 
@@ -35,6 +35,26 @@ lib/secteurs.ts                     une seule clé : integre: true sur sa ligne
 Ne pas toucher : `lib/menu.ts`, `next.config.ts`, `app/secteurs/page.tsx`,
 `app/secteurs/[metier]/`, `components/logos.tsx`, `globals.css`. Ne pas
 commiter : l'orchestrateur s'en charge.
+
+## La page est pleine : aucun filet qui l'encadre (24/09, soir)
+
+Teo, sur Daliro en ligne : « la page n'est pas pleine, regarde, il y a les
+barres sur les côtés ». Règle, pour les quatre :
+
+- **Aucun filet vertical qui encadre toute la page** : pas de `border-x`
+  sur un conteneur global, pas de rails latéraux, même si la source en pose
+  (Daliro en avait deux paires ; ils sont retirés).
+- **Le contenu reste centré**, section par section : chaque section dans
+  son propre conteneur (fonction `Section` de `app/secteurs/btp/page.tsx`
+  et de `app/secteurs/avocats/page.tsx`).
+- **Un séparateur entre sections prend toute la largeur de la fenêtre** :
+  il se pose HORS du conteneur (bandes hachurées de Daliro,
+  `components/secteurs/btp/Bande.tsx`, sans leurs croix d'angle qui
+  n'avaient de sens qu'au croisement des rails ; filet de Tamila,
+  `.avocats-filet`, posé au bord haut de la section « Chaque pièce est
+  lue »). Un séparateur dessiné DANS une section qui porte
+  `overflow-hidden` (le `::before` de `.companies` chez Tamila) doit en
+  sortir : le `overflow` le rognerait à la largeur du conteneur.
 
 ## Les étapes, dans l'ordre suivi pour Daliro
 
@@ -181,6 +201,77 @@ s'inverse, pas sa valeur.
 partagé par tout le site, CASHD compris) est noir. Il ferme donc cette page
 blanche par une bande noire. Le signaler, ne pas le toucher.
 
+## Source sombre (Tamila, 24/09, après-midi)
+
+Tamila décalque vetra-app : fond noir, halos bleus, écran produit et
+illustrations sombres. Tout est passé au clair, sans îlot noir. Ce qui a
+servi, dans l'ordre :
+
+1. **Jetons clairs par `--jetons`** (la table lue dans la source est celle
+   du noir). Les valeurs de Daliro, pour que les secteurs se ressemblent :
+   ```json
+   {"background":"#ffffff","foreground":"#171717","card":"#ffffff","card-foreground":"#171717",
+    "popover":"#ffffff","popover-foreground":"#171717","primary":"#171717","primary-foreground":"#ffffff",
+    "secondary":"#f5f5f5","secondary-foreground":"#171717","muted":"#f5f5f5","muted-foreground":"#737373",
+    "accent":"#f5f5f5","accent-foreground":"#171717","destructive":"#ef4444","destructive-foreground":"#ffffff",
+    "border":"#e6e6e6","input":"#e6e6e6","ring":"#171717"}
+   ```
+   Conséquence voulue : le bouton `primary` (blanc sur le noir) devient le
+   bouton encre sur le blanc.
+2. **Les lueurs** (`bg-blue-600 blur-[8rem]`, dégradés sky → blue, halo
+   conique) : même place, même flou, même animation, **teinte claire de la
+   même famille** (600 → 300, 500 → 300/400, 400 → 200). Saturées sur le
+   blanc, elles tachent.
+3. **Les maquettes** (écran produit, illustrations SVG) passent en thème
+   clair en entier, par une table écrite en tête de chaque fichier
+   (`ApercuDossier.tsx`, `Illustrations.tsx`) : « blanc à N % » → « noir à
+   N % », `zinc-100/200/300/400/600` → `900/800/700/600/400`, accents
+   « 300 » (clairs sur le noir) → « 600 », voiles colorés un peu réduits.
+   Le sens d'un état s'inverse (l'élément actif fonçait → il fonce).
+4. **Une ombre invisible dans la source se RETIRE**, elle ne se divise pas :
+   `shadow-xl shadow-black/10` sur un disque posé sur le noir ne se voyait
+   pas ; sur le blanc, même à 7 %, six disques empilés faisaient six
+   croissants gris (ondes.tsx). Le ÷ 1,5 vaut pour une ombre qui se voyait.
+5. **Contexte d'empilement.** Les lueurs et orbites de la source sont en
+   `z-index` négatif ; la source les tenait au-dessus du fond par un
+   `<main class="relative z-40">`. Ici la peau porte le fond blanc : sans
+   `isolation: isolate` sur `.p-avocats`, TOUTES les lueurs passent sous le
+   blanc, sans une erreur.
+6. **Deux fois le même SVG = dégradés morts** (memory du même nom) : l'icône
+   d'application était posée deux fois (mobile masqué, bureau) avec les
+   mêmes `id` ; sur le site déployé elle s'affichait sans fond. `useId()`.
+7. **L'italique serif des titres** (Instrument Serif) → la police de titre
+   du site en italique (`.avocats-accent`) : oblique calculée, qui est le
+   dessin de la General Sans Italic.
+
+Pièges de plus, tous signalés désormais par l'outil :
+- une classe dans un gabarit `` `…${x}…` `` n'est pas convertie
+  (`animate-ripple`, `bg-foreground/25` des ondes) ;
+- `before:animate-rotate` devient `before:avocats-rotate`, classe morte :
+  l'animation du pseudo-élément s'écrit dans le CSS ;
+- l'outil réécrivait `/logos/…` en `/secteurs-avocats/logos/…` : corrigé,
+  `logos/` est exclu.
+
+Et hors outil :
+- **Deux sessions dans la même copie.** À 14 h 23, la session des textes de
+  Tamila a reporté ses réécritures à la fois dans la source et dans
+  `components/secteurs/avocats/textes.ts` et `Matieres.tsx`. Avant de
+  conclure à un écart de hauteur, relire les dates (`ls -T`) et diffuser la
+  copie figée contre le fichier.
+- **Le bloc-notes est partagé entre agents** : un dossier `recette-1440`
+  peut contenir les captures d'un autre secteur. Préfixer ses dossiers
+  (`tamila-recette-1440`).
+- **Le flou en SwiftShader fait des bandes.** Un `blur(6rem)` très étendu
+  sur le blanc sort en arcs gris sur les captures de `defile.mjs` (rendu
+  logiciel). Pour juger une lueur, capturer avec le GPU : copier
+  `chrome.mjs` en remplaçant `--use-angle=swiftshader` par
+  `--use-angle=metal --enable-gpu-rasterization --ignore-gpu-blocklist` —
+  la même zone sort lisse.
+- **Tableau en quatre colonnes égales** : General Sans est plus large que
+  Satoshi, « Licenciement » débordait sur la colonne voisine à 390 et 768
+  (la source débordait déjà à 768). Colonnes proportionnelles aux textes
+  mesurés sous `lg` seulement.
+
 ## Écarts assumés (Daliro)
 
 | Écart | Pourquoi |
@@ -221,3 +312,17 @@ Concordance Daliro (source → nous), rechargé à chaque largeur :
 Débordement horizontal : 0 aux cinq largeurs (la source déborde de 1 px à
 390 et de 5 px à 768). Seule différence de hauteur totale : l'entête et le
 pied (ceux de la source contre ceux d'Omega).
+
+Concordance Tamila (source redéployée à 14 h 23 → nous), rechargé à chaque
+largeur ; sections : héros · pièces · fonctionnalités · point du matin ·
+outils · secret · formules · matières · appel :
+
+| Largeur | h1 | h2 | chapô | conteneur | hauteurs de section |
+|---|---|---|---|---|---|
+| 390 | 36/45 700 = | 24/33 = | 16/24 = | 390, gouttière 16 = | toutes ±1, sauf point du matin 1132 → 1152 et secret 2281 → 2303 (police : une ligne de plus) |
+| 768 | 36/45 = | 36/49,5 = | 16/24 = | 768, gouttière 48 = | toutes ±2 |
+| 1024 | 72/90 = | 48/66 = | 18/28 = | 1024 = | toutes ±3, sauf secret 1327 → 1349 (police) |
+| 1440 | 72/90 = | 48/66 = | 18/28 = | 1280 (x = 80) = | toutes ±3 |
+| 1700 | 72/90 = | 48/66 = | 18/28 = | 1280 (x = 210) = | = 1440 |
+
+Débordement horizontal : 0 aux cinq largeurs (la source : 3 px à 1024).

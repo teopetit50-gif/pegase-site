@@ -70,6 +70,7 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Chaque matin à 7 h, l'associé reçoit les pièces communiquées la veille, les honoraires forfaitaires dépassés et les dossiers sans diligence depuis trente jours.",
     url: "https://cabinetos-site-two.vercel.app",
+    integre: true,
   },
   {
     slug: "architectes",

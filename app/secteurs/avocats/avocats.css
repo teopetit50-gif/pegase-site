@@ -1,0 +1,270 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA (CABINETS D'AVOCATS) — le monde de la page /secteurs/avocats
+
+   RAPATRIÉ le 24/09/2026 (copie du disque à 13 h 37, heure de la
+   Guadeloupe) de `OMEGA/cabinetos-site/src/app/globals.css` (le dossier et
+   le projet Vercel gardent l'ancien nom CabinetOS). Méthode :
+   app/secteurs/RAPATRIEMENT.md. Les jetons vivent sous `.p-avocats`,
+   JAMAIS sur `:root` — sur `:root` ils repeindraient tout le site. Tout ce
+   fichier est donc descendant de `.p-avocats`.
+
+   ══════════════════════════════════════════════════════════════════════
+   RELEVÉ — la source, et ce qu'elle relevait elle-même
+   Le site Tamila décalque vetra-app.vercel.app (gabarit Tailwind v3,
+   composants Magic UI), relevé au style calculé le 24/09 par la session
+   qui l'a construit ; ses jetons shadcn, keyframes et utilitaires maison
+   sont recopiés de la feuille compilée de la référence. On reprend SON
+   résultat, mesuré de nouveau sur cabinetos-site-two.vercel.app aux cinq
+   largeurs (390, 768, 1024, 1440, 1700) — concordance dans
+   app/secteurs/RAPATRIEMENT.md.
+
+   COULEURS DE LA SOURCE — un thème UNIQUE, SOMBRE :
+     fond #09090b (240 10% 4%) · carte #0a0a0a · texte #fafafa ·
+     secondaire / muted / accent #262626 · texte atténué #a3a3a3 ·
+     filets #262626 · anneau #d4d4d4 · accent de marque bleu-500 #3b82f6.
+
+   TYPOGRAPHIE (source) — h1 36/45 → 72/90 (lg), 700 ; h2 de section
+   24 → 36 (md) → 48 (lg), 500, interligne `snug` ; mot d'accent en
+   Instrument Serif italique ; corps 16 → 18 (lg). Satoshi partout.
+
+   CADRE — un seul conteneur : 100 % puis 1280 px dès `lg`, gouttières
+   16 px puis 48 px dès `md` ; aucun filet vertical.
+   ══════════════════════════════════════════════════════════════════════
+
+   ── CE QUE LE RAPATRIEMENT CHANGE ───────────────────────────────────
+
+   1. TOUT PASSE AU CLAIR (Teo, 24/09 : « Omega c'est blanc, les SaaS qui
+      sont en noir, change les couleurs et mets tout en blanc »). Les
+      jetons ci-dessous sont les valeurs CLAIRES de la même famille shadcn,
+      alignées sur Daliro ; l'outil de conversion les a reçues par
+      `--jetons` (la table lue dans la source était celle du noir) :
+        fond, carte, popover        #ffffff   (était #09090b / #0a0a0a)
+        texte, primaire, anneau     #171717   (était #fafafa / #d4d4d4)
+        secondaire, muted, accent   #f5f5f5   (était #262626)
+        texte atténué               #737373   (était #a3a3a3)
+        filets, champs              #e6e6e6   (était #262626)
+      Le bleu de la marque (#3b82f6) ne bouge pas. Le reste — lueurs,
+      maquettes, ondes, orbites — est repris composant par composant ;
+      chaque choix est écrit en tête du fichier concerné.
+
+   2. PAS DE `@theme` (règle 3). Utilitaires de couleur convertis en
+      hexadécimal dans les composants. ⚠ Comme chez Daliro, `bg-muted`
+      existe ici (`--color-muted` #9b9ba3) : toujours converti.
+
+   3. LA COULEUR DES FILETS SANS COULEUR. La source pose
+      `*, ::before, ::after { border-color: hsl(var(--border)) }` en couche
+      de base. Ici Tailwind v4 les laisse en `currentColor`. La règle est
+      reprise, dans la couche `base`, pour la raison écrite dans btp.css :
+      hors couche, elle battrait les `border-blue-500` du balisage.
+
+   4. POLICES DU SITE (règle 5). Aucune `next/font` dans la page. Satoshi
+      (titres et corps), Inter (l'écran produit) et Instrument Serif (le mot
+      en italique des titres) partent :
+        `font-heading` → la police de titre du site (`--font-jakarta`),
+          posée sur h1-h3 ici, et par `.avocats-titre` ailleurs ;
+        `font-base`    → la police de corps (`--font-inter-tight`),
+          `.avocats-texte` ;
+        `font-subheading italic` → `.avocats-accent`, la police de titre
+          EN ITALIQUE. General Sans n'est servie qu'en romain : l'italique
+          est donc l'oblique que le navigateur calcule — c'est d'ailleurs
+          le dessin de la General Sans Italic, une oblique. Le mot d'accent
+          garde ainsi son rôle (se détacher du reste du titre) sans serif.
+      Toutes valent General Sans aujourd'hui (app/polices.css).
+
+   5. LA PEAU SORT DU CADRE 1440 (règle 1), comme `.p-relances` et
+      `.p-btp` : 100vw ; le contenu reste centré, section par section.
+
+   6. UN SEUL CONTEXTE D'EMPILEMENT, comme la source. Ses lueurs et ses
+      orbites sont en `z-index` négatif ; la source les tenait au-dessus du
+      fond de page par un `<main class="relative z-40">`. Ici c'est la peau
+      elle-même qui isole (`isolation: isolate`) : sans cela, les calques
+      négatifs passeraient SOUS le fond blanc de `.p-avocats` et toutes les
+      lueurs disparaîtraient, sans une erreur.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-avocats {
+  /* ── jetons, thème CLAIR (voir 1) ─────────────────────────────────── */
+  --avocats-fond: #ffffff; /* --background, --card, --popover */
+  --avocats-texte: #171717; /* --foreground, --primary, --ring */
+  --avocats-doux: #f5f5f5; /* --secondary, --muted, --accent */
+  --avocats-attenue: #737373; /* --muted-foreground */
+  --avocats-filet: #e6e6e6; /* --border, --input */
+
+  background: var(--avocats-fond);
+  color: var(--avocats-texte);
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  isolation: isolate;
+
+  /* Plein écran : la peau sort de <main> (plafonné à 1440 par PageShell).
+     Le div de PageShell porte `overflow-x-clip`, qui absorbe le débord de
+     `100vw` sans barre horizontale — et rogne les orbites du héros (rayon
+     500 px), comme le `overflow-x: hidden` du <body> de la source. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Titres : la police de titre du site (voir 4). */
+.p-avocats h1,
+.p-avocats h2,
+.p-avocats h3,
+.p-avocats .avocats-titre {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+.p-avocats .avocats-texte {
+  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+}
+.p-avocats .avocats-accent {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-style: italic;
+}
+
+/* Règle de base de la source, dans la couche `base` (voir 3). */
+@layer base {
+  .p-avocats *,
+  .p-avocats ::before,
+  .p-avocats ::after {
+    border-color: var(--avocats-filet);
+  }
+  .p-avocats button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* `.link` de la source : un soulignement qui se déroule au survol. Le
+   trait était `hsl(var(--foreground))` : l'encre, ici. */
+.p-avocats .avocats-lien {
+  position: relative;
+  transition: color 0.3s ease-in-out;
+}
+.p-avocats .avocats-lien::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--avocats-texte);
+  transition: width 0.3s ease-in-out;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.p-avocats .avocats-lien:hover::after {
+  width: 100%;
+}
+
+/* ── « Chaque pièce est lue » : `.companies` de la source ─────────────
+   ::after — la lueur bleue sous le filet (70 % de large, 20 px, flou
+   6 rem). #5591f3 sur le noir ; sur le blanc, la même lueur saturée
+   ferait une traînée : #93b5f6, un bleu de la même famille, plus clair.
+   Le ::before (le filet d'un pixel) sort de la section : `.avocats-filet`
+   ci-dessous. */
+.p-avocats .avocats-pieces::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 20px;
+  width: 70%;
+  border-radius: 100%;
+  filter: blur(6rem);
+  background: #93b5f6;
+}
+
+/* Le filet entre le héros et « Chaque pièce est lue » — le SEUL séparateur
+   de la source. 24/09 (soir), règle de Teo : un séparateur entre sections
+   prend toute la largeur de la fenêtre (page.tsx le pose hors du
+   conteneur). Même dessin : plein au centre, fondu vers les bords
+   (dégradé radial de la source, ellipse de 50 % × 56 400 %). La teinte
+   était #222939, un bleu nuit à peine plus clair que le noir ; ici un
+   ardoise à peine plus foncé que le blanc. */
+.p-avocats .avocats-filet {
+  height: 1px;
+  background: radial-gradient(50% 56400% at 50% 100%, #d5dbe6 0, rgba(213, 219, 230, 0) 100%);
+}
+
+/* ── Animations de la source ──────────────────────────────────────────
+   `--animate-*` du `@theme` source, renommés `avocats-*` : ni les classes
+   ni les `@keyframes` n'existent sur ce site, et les `@keyframes` sont
+   globaux quoi qu'on fasse — d'où le préfixe. Valeurs recopiées. */
+
+/* Les orbites du héros (orbites.tsx) : `--angle`, `--radius` et
+   `--duration` sont posées en style sur chaque satellite. */
+.p-avocats .avocats-orbit {
+  animation: avocats-orbit calc(var(--duration) * 1s) linear infinite;
+}
+@keyframes avocats-orbit {
+  0% {
+    transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px)) rotate(calc(var(--angle) * -1deg));
+  }
+  to {
+    transform: rotate(calc(var(--angle) * 1deg + 1turn)) translateY(calc(var(--radius) * 1px))
+      rotate(calc((var(--angle) * -1deg) - 1turn));
+  }
+}
+
+/* Les ondes des outils (ondes.tsx). */
+.p-avocats .avocats-ripple {
+  animation: avocats-ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s) infinite;
+}
+@keyframes avocats-ripple {
+  0%,
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
+/* L'étincelle qui fait le tour du badge du héros (Heros.tsx) : le calque
+   bascule d'un demi-tour en deux temps toutes les 6 s, et son pseudo-
+   élément (le dégradé conique) tourne de 90° en 3 s. La source écrivait le
+   second `before:animate-rotate` ; un nom de classe maison ne passe pas
+   derrière une variante Tailwind, d'où la règle écrite ici. */
+.p-avocats .avocats-flip {
+  animation: avocats-flip 6s steps(2) infinite;
+}
+.p-avocats .avocats-etincelle::before {
+  animation: avocats-rotate 3s linear infinite both;
+}
+@keyframes avocats-flip {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes avocats-rotate {
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+/* Les deux lueurs du cadre de l'écran produit (Heros.tsx). */
+.p-avocats .avocats-image-glow {
+  animation: avocats-image-glow 6s ease-out 0.6s forwards;
+}
+@keyframes avocats-image-glow {
+  0% {
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.74, 0.25, 0.76, 1);
+  }
+  10% {
+    opacity: 0.5;
+    animation-timing-function: cubic-bezier(0.12, 0.01, 0.08, 0.99);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* La source coupait orbites, ondes et étincelle. */
+@media (prefers-reduced-motion: reduce) {
+  .p-avocats .avocats-orbit,
+  .p-avocats .avocats-ripple,
+  .p-avocats .avocats-flip,
+  .p-avocats .avocats-etincelle::before {
+    animation: none !important;
+  }
+}

@@ -30,7 +30,11 @@ les apostrophes du texte JSX (`react/no-unescaped-entities`).
 CE QU'IL NE FAIT PAS (à la main, voir RAPATRIEMENT.md) : les liens morts,
 les imports, les polices, les `sticky top-…` sous l'entête d'Omega, les
 dépendances absentes (tooltip Radix, tw-animate-css), les surfaces sombres
-écrites en dur (`bg-black`, `bg-neutral-900`, `text-white`…), les « J-2 ».
+écrites en dur (`bg-black`, `bg-neutral-900`, `text-white`…), les « J-2 »,
+les classes écrites dans un gabarit `…` (signalées), les animations placées
+derrière une variante, `before:animate-x` (signalées : à écrire dans le CSS).
+Le dossier `public/logos/` de la source n'est jamais réécrit : les logos
+officiels sont lus dans public/logos/ du site (ajout du 24/09, Tamila).
 Il imprime la table des jetons et un rapport par fichier : c'est la matière
 des en-têtes de fichiers et du tableau de conversions.
 """
@@ -126,6 +130,9 @@ def main():
     anims = sorted(set(re.findall(r'@utility\s+animate-([\w-]+)', css)) |
                    set(re.findall(r'--animate-([\w-]+)\s*:', css)), key=len, reverse=True)
     publics = sorted(os.listdir(os.path.join(a.source, 'public'))) if os.path.isdir(os.path.join(a.source, 'public')) else []
+    # 24/09 (Tamila) : `logos/` porte les logos officiels, qui vivent À LEUR PLACE dans public/logos/ du site ;
+    # réécrire `/logos/…` en `/secteurs-<prefixe>/logos/…` pointerait sur un fichier qui n'existe pas.
+    publics = [e for e in publics if e != 'logos']
 
     rx_coul = re.compile(r'(?<![\w\-\[#/.])(' + '|'.join(UTILS) + r')-(' +
                          '|'.join(sorted(map(re.escape, jetons), key=len, reverse=True)) +
@@ -177,6 +184,16 @@ def main():
         print(f'\n{dst} — {sum(rap.values())} conversions, {sombres} dark: retirés, {apos} apostrophes échappées')
         for k, v in sorted(rap.items()):
             print(f'  {v:4}  {k}')
+        # 24/09 (Tamila) : deux angles morts de la conversion, à reprendre à la main.
+        #  · les gabarits `…` ne sont pas convertis (seules les chaînes "…" le sont) ;
+        #  · `before:animate-x` devient `before:<prefixe>-x`, qui n'est PAS un utilitaire : classe morte.
+        gabarits = [g for g in re.findall(r'`([^`]*)`', texte)
+                    if (rx_coul and rx_coul.search(g)) or re.search(r'(?<![\w-])animate-', g)]
+        if gabarits:
+            print('  ⚠ utilitaires de la source dans un gabarit `…`, non convertis :', ' | '.join(g[:60] for g in gabarits))
+        mortes = sorted(set(re.findall(r'\b[\w-]+:' + re.escape(a.prefixe) + r'-[\w-]+', texte)))
+        if mortes:
+            print('  ⚠ animation renommée derrière une variante (classe morte, à écrire dans le CSS) :', ', '.join(mortes))
         reste = sorted(set(re.findall(r'\b(?:bg-black|bg-neutral-[89]\d0|bg-zinc-[89]\d0|bg-gray-[89]\d0|'
                                       r'bg-slate-[89]\d0|text-white)\b', texte)))
         if reste:
