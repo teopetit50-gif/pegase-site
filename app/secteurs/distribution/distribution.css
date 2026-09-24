@@ -37,8 +37,9 @@
               quatre colonnes de 160 de haut, séparées d'un filet ;
               chiffre 52/52, 600, bleu ; libellé 16/24, 500
    modules    marge haute 64 ; onglets 260 × 52 collés ; volet 50 / 90 ;
-              capture 1080 × 703 ; carte 400 × 252 à 41 du bas, bordure
-              6 px à 10 %, ombre dure 20 × 20 à 20 %
+              capture 1080 × 703 ; carte 400 × 252 à 41 du bas (leur
+              bordure 6 px et leur ombre dure 20 × 20 : refusées, voir
+              .nm-module)
    carrousel  fond #e8f5f9 ; 100 / 100 ; colonne 1040 ; étiquette 163 × 100
               + 60 ; citation serif italique 18/36 sur 120 ; chiffres
               52/52 ; flèches 54 × 54
@@ -698,9 +699,13 @@
   z-index: 20;
   width: 400px;
   padding: 30px;
-  border: 6px solid #16283d1a;
+  /* 24/09 — Teo : « j'aime pas l'effet ». La bordure de 6 px et l'ombre
+     dure de 20 × 20 de Toolio sont remplacées par un filet et une ombre
+     douce, comme les autres cartes de la page. */
+  border: 1px solid var(--nm-filet);
+  border-radius: 6px;
   background: #ffffff;
-  box-shadow: 20px 20px #0003;
+  box-shadow: 0 24px 60px -24px rgba(12, 37, 66, 0.28);
 }
 .p-distribution .nm-module__texte {
   margin-top: 12px;
