@@ -92,23 +92,23 @@ const PILIERS: { Icone: LucideIcon; fond: string; titre: string; texte: string }
   {
     Icone: FolderOpen,
     fond: "#273252",
-    titre: "Vos documents, tels qu'ils sont",
+    titre: "Vos pièces, dans leur format d'origine",
     texte:
-      "Photos de chantier, pièces scannées, plans en PDF ou contrats : le logiciel lit ce que vos équipes envoient déjà, sans saisie ni outil à installer.",
+      "Le logiciel lit les photos, les vocaux, les PDF et les scans que vos équipes produisent déjà. Elles continuent d'envoyer ce qu'elles envoient aujourd'hui, sans ressaisie ni application à installer.",
   },
   {
     Icone: ScanSearch,
     fond: "#193a29",
     titre: "Chaque écart, avec sa preuve",
     texte:
-      "Un travail hors devis, deux pièces qui se contredisent ou un dommage au retour : chaque point relevé renvoie à la photo, à la page ou à l'article qui le fonde.",
+      "Qu'il s'agisse d'un travail supplémentaire, de deux pièces qui se contredisent ou d'un dommage constaté à la restitution, chaque point renvoie à la photo, à la page ou à l'article qui le fonde.",
   },
   {
     Icone: CircleCheck,
     fond: "#839cb2",
-    titre: "La décision vous revient",
+    titre: "Une validation avant chaque envoi",
     texte:
-      "Le logiciel prépare l'avenant, la liste de points ou la facture, puis vous la soumet. Rien ne part tant que vous ne l'avez pas validée.",
+      "Le logiciel prépare l'avenant, la note d'anomalies ou la facture, puis la soumet à la personne habilitée. Aucun document ne part sans sa validation, et le journal garde la trace de chaque décision.",
   },
 ];
 
@@ -192,8 +192,8 @@ export default function SecteursPage() {
                 Un logiciel par métier
               </h1>
               <p className="sct-lead" data-sct-texte="hero">
-                Chacun lit les documents que vos équipes produisent déjà, relève ce qui doit être
-                facturé, corrigé ou tranché, puis vous le remet prêt à valider.
+                Chaque logiciel lit les pièces de son métier, des photos de chantier aux conclusions
+                adverses, et vous remet chaque écart avec la page qui le prouve.
               </p>
               <div className="sct-plein__actions" data-sct-cta>
                 <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>
@@ -206,7 +206,7 @@ export default function SecteursPage() {
             Quatre cartes chez eux, quatre SaaS chez nous : la grille est
             reprise au compte près. Chaque carte mène à la page du SaaS. */}
         <div className="sct-wrap">
-          <Entete etiquette="Secteurs" titre="Chacun connaît les pièces de son métier" />
+          <Entete etiquette="Secteurs" titre="Chaque logiciel connaît les règles d'un seul métier" />
           <section className="sct-grille" data-sct-grille>
             <div className="sct-cartes">
               {SECTEURS.map((s, i) => {
@@ -246,7 +246,7 @@ export default function SecteursPage() {
             entière mène à la page du SaaS. */}
         <section className="sct-bande">
           <div className="sct-wrap">
-            <Entete etiquette="Aperçu" titre="Voir chaque logiciel au travail" />
+            <Entete etiquette="Aperçu" titre="Chaque logiciel rend un document à valider" />
             <div className="sct-apercus">
               {SECTEURS.map((s) => (
                 <CarteApercu key={s.slug} href={`/secteurs/${s.slug}`}>
@@ -278,11 +278,10 @@ export default function SecteursPage() {
           <div className="sct-piliers__grille">
             <div className="sct-piliers__gauche">
               <p className="sct-piliers__etiquette">Le principe</p>
-              <h2 className="sct-piliers__titre">Une seule méthode</h2>
+              <h2 className="sct-piliers__titre">Les quatre logiciels suivent la même méthode</h2>
               <p className="sct-piliers__chapo">
-                Les quatre logiciels suivent le même principe&nbsp;: ils partent des documents que
-                vous produisez déjà, relèvent chaque écart avec sa preuve et vous laissent la
-                décision.
+                Ils partent des documents que vous produisez déjà, relèvent chaque écart avec la
+                pièce qui le fonde et laissent la décision à la personne qui signe.
               </p>
               <div className="sct-piliers__media">
                 <div className="sct-piliers__capture">
@@ -339,10 +338,10 @@ export default function SecteursPage() {
               <div aria-hidden className="sct-voile" />
               <div className="sct-plein__texte">
                 <h2 className="sct-h1" data-sct-texte="appel">
-                  Parlons de votre métier
+                  Tester sur un dossier que vous connaissez
                 </h2>
                 <p className="sct-lead" data-sct-texte="appel">
-                  {"En trente minutes, nous regardons vos documents et vos processus, puis nous vous disons lequel de ces logiciels s'applique chez vous, ou ce qu'il faudrait construire."}
+                  {"L'audit dure trente minutes : nous examinons vos pièces et vos processus, puis nous vous indiquons lequel de ces logiciels s'applique à votre organisation, ou ce qu'il faudrait construire."}
                 </p>
                 <div className="sct-plein__actions" data-sct-cta-appel>
                   <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>

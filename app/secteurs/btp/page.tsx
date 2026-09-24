@@ -62,9 +62,9 @@ import "./btp.css";
    au blanc (Fonctions.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Daliro · les travaux en plus, signés avant d'être faits";
+const TITRE = "Daliro · les travaux supplémentaires signés avant exécution";
 const DESCRIPTION =
-  "Daliro lit les photos et les vocaux de vos équipes, repère les travaux hors devis, confirme vos sous-traitants à J-2 et cale les livraisons sur le planning. Conçu par Omega pour le BTP.";
+  "Daliro compare les photos et les vocaux de vos équipes au marché signé, chiffre les travaux supplémentaires sur vos prix unitaires, prépare l'avenant et confirme vos sous-traitants à J-2. Conçu par Omega pour les entreprises du bâtiment.";
 
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,

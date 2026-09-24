@@ -32,10 +32,10 @@ export const CONTACT = {
 };
 
 export const HERO = {
-  pastille: "Le cerveau de chantier",
-  titre: "Les travaux en plus, signés avant d'être faits",
+  pastille: "Entreprises du bâtiment",
+  titre: "Les travaux supplémentaires signés avant exécution",
   texte:
-    "Vos équipes envoient déjà photos et vocaux. Daliro y repère le hors-devis, confirme vos sous-traitants à J-2 et cale les livraisons sur le planning.",
+    "Daliro compare les photos et les vocaux de vos équipes au marché signé, chiffre chaque écart sur vos prix unitaires et prépare l'avenant. Il confirme aussi vos sous-traitants à J-2.",
   audit: "Réserver un audit",
   demo: "Voir la démo",
   signature: "Conçu par",
@@ -65,12 +65,12 @@ export const CHANTIERS: Chantier[] = [
     id: "travaux", accentClass: "bg-orange-500", name: "Maison Lefèvre", role: "Extension 38 m² · Rennes",
     equipe: "Équipe Karim", location: "Rennes (35)", company: "Particulier", companyLocation: "Devis n° 2025-114 · 18 400 € HT",
     lastInteraction: "il y a 3 h", glyphe: "/secteurs-btp/glyphes/truelle.svg", fil: "4 photos · 2 vocaux",
-    summary: "Karim a photographié une reprise de dalle absente du devis. Avenant chiffré à 576 € HT, prêt à signer sur place demain matin.",
+    summary: "Karim a photographié une reprise de dalle absente du devis. L'avenant, chiffré à 576 € HT, est prêt à signer sur place demain matin.",
     upcoming: { title: "Signature de l'avenant", dateLine: "Jeu. 4 déc., 8 h 00", day: "JEU", date: "04" },
     outreach: { step: 3, label: "Avenant chiffré", total: 9 },
     activities: [
       { type: "meeting", actor: "Karim B.", action: "a envoyé", target: "4 photos", time: "il y a 3 h", glyphe: "/secteurs-btp/glyphes/casque.svg" },
-      { type: "event", actor: "Daliro", action: "a repéré", target: "un hors-devis", time: "il y a 3 h", glyphe: "" },
+      { type: "event", actor: "Daliro", action: "a repéré", target: "un travail non prévu", time: "il y a 3 h", glyphe: "" },
       { type: "call", actor: "Julie M.", action: "a validé", target: "le prix unitaire", time: "il y a 1 h", glyphe: "/secteurs-btp/glyphes/cle.svg", success: true },
     ],
   },
@@ -91,7 +91,7 @@ export const CHANTIERS: Chantier[] = [
     id: "appro", accentClass: "bg-blue-500", name: "Résidence Les Tilleuls", role: "18 logements · Nantes",
     equipe: "Équipe Samir", location: "Nantes (44)", company: "Promoteur", companyLocation: "Bâtiment B · 9 logements",
     lastInteraction: "il y a 1 j", glyphe: "/secteurs-btp/glyphes/camion.svg", fil: "3 bons de livraison",
-    summary: "Les menuiseries du bâtiment B arrivent mardi, la pose commence jeudi. Livraison proposée mercredi pour ne pas stocker trois jours sur site.",
+    summary: "Les menuiseries du bâtiment B arrivent mardi, deux jours avant la pose. La livraison est proposée mercredi pour limiter le stockage sur site.",
     upcoming: { title: "Livraison des menuiseries", dateLine: "Mer. 3 déc., 10 h 00", day: "MER", date: "03" },
     outreach: { step: 1, label: "Menuiseries", total: 9 },
     activities: [
@@ -104,7 +104,7 @@ export const CHANTIERS: Chantier[] = [
     id: "avancement", accentClass: "bg-rose-500", name: "Bureaux Vauban", role: "Réhabilitation · Lille",
     equipe: "Équipe Hugo", location: "Lille (59)", company: "Foncière", companyLocation: "R+2 · plateau de 640 m²",
     lastInteraction: "il y a 6 h", glyphe: "/secteurs-btp/glyphes/marteau.svg", fil: "22 photos cette semaine",
-    summary: "Les photos de la semaine montrent le cloisonnement du R+2 fini aux trois quarts. La situation de fin de mois peut partir sur cette base.",
+    summary: "Les photos de la semaine montrent le cloisonnement du R+2 achevé aux trois quarts. La situation de travaux de fin de mois peut être établie sur cette base.",
     upcoming: { title: "Situation n° 4", dateLine: "Ven. 28 nov., 17 h 00", day: "VEN", date: "28" },
     outreach: { step: 2, label: "Cloisonnement", total: 9 },
     activities: [
@@ -116,7 +116,7 @@ export const CHANTIERS: Chantier[] = [
 ];
 
 export const ONGLETS: Record<string, string> = {
-  travaux: "Travaux en plus",
+  travaux: "Avenants",
   "sous-traitants": "Sous-traitants",
   appro: "Approvisionnement",
   avancement: "Avancement",
@@ -142,8 +142,8 @@ export const LU = {
 /* Formules : aucun prix public (le prix s'estime, l'audit le fixe). */
 export type Valeur = boolean | string;
 export const FORMULES = {
-  titre: "Trois formules, un prix fixé à l'audit",
-  sous: "Le prix dépend du nombre de chantiers ouverts. On le fixe ensemble, après avoir vu les vôtres.",
+  titre: "Le prix se fixe sur vos chantiers ouverts",
+  sous: "Les trois formules se distinguent par le nombre de chantiers suivis et les fonctions ouvertes. Le prix est arrêté pendant l'audit, après examen de vos chantiers en cours.",
   comparer: ["Comparer", "les formules"],
   prix: "Prix fixé à l'audit,",
   prixSous: "selon vos chantiers ouverts",
@@ -154,12 +154,12 @@ export const FORMULES = {
     { id: "entreprise", name: "Entreprise", cta: "Réserver un audit" },
   ],
   groupes: [
-    { title: "Travaux en plus", description: "Repérés dans ce que vos équipes envoient", features: [
+    { title: "Travaux supplémentaires", description: "Repérés dans ce que vos équipes envoient", features: [
       { name: "Lecture des photos et vocaux", description: "WhatsApp, SMS ou mail : ce que les équipes envoient déjà.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Avenants chiffrés sur vos prix", description: "Prix unitaires repris de vos devis.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Signature sur place", description: "Le client signe sur le téléphone du chef d'équipe.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Chantiers ouverts", description: "Nombre de chantiers suivis en même temps.", values: { demarrage: "5", chantiers: "20", entreprise: "Sur mesure" } },
-      { name: "Relance des avenants non signés", description: "Un avenant oublié revient dans la liste du matin.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Relance des avenants non signés", description: "Un avenant non signé reste dans la liste du matin jusqu'à sa signature.", values: { demarrage: false, chantiers: true, entreprise: true } },
     ] },
     { title: "Sous-traitants", description: "Confirmés avant de se déplacer", features: [
       { name: "Confirmation à J-2", description: "Chaque intervenant confirme son passage deux jours avant.", values: { demarrage: true, chantiers: true, entreprise: true } },
@@ -170,22 +170,22 @@ export const FORMULES = {
     ] },
     { title: "Approvisionnement", description: "Livré le bon jour", features: [
       { name: "Liste cadencée depuis le devis", description: "Les quantités viennent du devis, les dates du planning.", values: { demarrage: false, chantiers: true, entreprise: true } },
-      { name: "Livraisons calées sur la pose", description: "Ni trois jours de stockage, ni une équipe qui attend.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Livraisons calées sur la pose", description: "La livraison est proposée pour le début de la pose.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Suivi des retours", description: "Ce qui reste sur le chantier et doit repartir.", values: { demarrage: false, chantiers: false, entreprise: true } },
       { name: "Bons de livraison rapprochés", description: "Chaque bon comparé à la commande.", values: { demarrage: false, chantiers: false, entreprise: true } },
       { name: "Avancement lu dans les photos", description: "La base de la situation de fin de mois.", values: { demarrage: false, chantiers: false, entreprise: true } },
     ] },
     { title: "Équipe et accès", description: "Le bureau et le terrain", features: [
-      { name: "Comptes bureau", description: "Conducteurs de travaux, assistantes, gérant.", values: { demarrage: "2", chantiers: "5", entreprise: "Sur mesure" } },
+      { name: "Comptes bureau", description: "Conducteurs de travaux, assistants, direction.", values: { demarrage: "2", chantiers: "5", entreprise: "Sur mesure" } },
       { name: "Chefs d'équipe", description: "Aucune application à installer : ils écrivent comme d'habitude.", values: { demarrage: "Sans limite", chantiers: "Sans limite", entreprise: "Sans limite" } },
       { name: "Rôles et droits", description: "Qui valide un avenant, qui voit les prix.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Journal des validations", description: "Qui a validé quoi, et quand.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Données dans l'Union européenne", description: "Hébergement de vos données dans l'Union européenne.", values: { demarrage: true, chantiers: true, entreprise: true } },
     ] },
-    { title: "Accompagnement", description: "Quand quelque chose coince", features: [
-      { name: "Installation par Omega", description: "Nous branchons vos devis, votre planning et vos équipes.", values: { demarrage: true, chantiers: true, entreprise: true } },
-      { name: "Réponse en français", description: "Par des gens qui connaissent vos chantiers.", values: { demarrage: true, chantiers: true, entreprise: true } },
-      { name: "Point mensuel", description: "Ce qui a été repéré, ce qui a été facturé.", values: { demarrage: false, chantiers: true, entreprise: true } },
+    { title: "Accompagnement", description: "Mise en service et suivi", features: [
+      { name: "Installation par Omega", description: "Nous raccordons vos devis, votre planning et les messages de vos équipes.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Réponse en français", description: "Par une équipe qui connaît le fonctionnement d'un chantier.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Point mensuel", description: "Travaux repérés et travaux facturés, rapprochés chaque mois.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Formation des chefs d'équipe", description: "Sur le chantier, pas en salle.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Interlocuteur dédié", description: "Une seule personne qui suit votre compte.", values: { demarrage: false, chantiers: false, entreprise: true } },
     ] },
@@ -194,26 +194,27 @@ export const FORMULES = {
 
 export const FAQ = {
   titre: "Questions fréquentes.",
-  sous: "Ce que les patrons du bâtiment demandent avant l'audit.",
+  sous: "Les questions que posent les dirigeants d'entreprises du bâtiment avant l'audit.",
   aria: "Catégories de questions",
   categories: [
     { id: "general", label: "Général", items: [
-      { question: "Qu'est-ce que Daliro ?", answer: "Une couche qui lit ce que vos équipes envoient déjà (photos, vocaux, messages), le compare à vos devis et à votre planning, et vous rend chaque matin ce qui est à facturer, à confirmer et à livrer. Ce n'est pas un logiciel de gestion de plus." },
+      { question: "Qu'est-ce que Daliro ?", answer: "Daliro est un logiciel qui lit ce que vos équipes envoient déjà (photos, vocaux, messages) et le compare à vos marchés et à votre planning. Chaque matin, il vous remet ce qui est à facturer, à confirmer et à livrer, sans remplacer votre logiciel de gestion." },
       { question: "Faut-il changer de logiciel de devis ?", answer: "Non. Daliro lit vos devis là où ils sont, depuis votre logiciel ou un export. Il ne remplace ni votre outil de devis, ni votre planning." },
-      { question: "Mes chefs d'équipe doivent-ils installer une application ?", answer: "Non. Ils continuent d'envoyer photos et vocaux comme aujourd'hui. C'est Daliro qui s'adapte à leur façon de travailler." },
-      { question: "Qu'est-ce que Daliro ne fait pas ?", answer: "Il ne signe rien à votre place et n'envoie aucun avenant sans votre accord. Il ne fait ni la paie, ni la comptabilité, ni vos devis." },
+      { question: "Mes chefs d'équipe doivent-ils installer une application ?", answer: "Non. Ils continuent d'envoyer photos et vocaux comme aujourd'hui. Daliro lit les messages qu'ils envoient déjà par WhatsApp, SMS ou courriel." },
+      { question: "Qu'est-ce que Daliro ne fait pas ?", answer: "Daliro ne signe rien à votre place et n'envoie aucun avenant sans votre accord. La paie, la comptabilité et l'établissement des devis restent dans vos outils actuels." },
     ] },
     { id: "chantier", label: "Chantier", items: [
-      { question: "Comment un travail en plus est-il repéré ?", answer: "Ce qui est photographié ou dit est comparé au devis. Ce qui n'y figure pas remonte avec la photo, le lot concerné et un prix tiré de vos prix unitaires. Vous validez avant tout envoi." },
-      { question: "Comment les sous-traitants sont-ils confirmés ?", answer: "Deux jours avant leur passage, chacun reçoit un message qui lui demande de confirmer. Sans réponse, vous êtes prévenu le soir même, avec les remplaçants de votre annuaire." },
-      { question: "Et quand la météo change ?", answer: "Quand la pluie ou le gel est annoncé sur un chantier, l'ordre des interventions de la semaine est reproposé. C'est vous qui choisissez." },
-      { question: "Comment l'approvisionnement est-il cadencé ?", answer: "Les quantités viennent du devis, les dates du planning. Chaque livraison est proposée pour arriver quand la pose commence, pas trois jours avant." },
+      { question: "Comment un travail supplémentaire est-il repéré ?", answer: "Daliro compare chaque photo et chaque vocal au marché signé. Un ouvrage qui n'y figure pas remonte avec la photo, le lot concerné et un prix calculé sur vos prix unitaires, puis vous le validez avant tout envoi." },
+      { question: "Pourquoi faire signer l'avenant avant les travaux ?", answer: "Dans un marché à forfait, l'article 1793 du Code civil exclut toute augmentation de prix si les changements n'ont pas été autorisés par écrit et leur prix convenu avec le maître d'ouvrage. Un travail supplémentaire exécuté sans avenant signé se défend donc mal au moment du décompte." },
+      { question: "Comment les sous-traitants sont-ils confirmés ?", answer: "Deux jours avant son passage, chaque sous-traitant reçoit une demande de confirmation. S'il ne répond pas, vous êtes prévenu le soir même, avec les remplaçants disponibles dans votre annuaire." },
+      { question: "Que se passe-t-il quand la météo change ?", answer: "Quand de la pluie ou du gel est annoncé sur un chantier, Daliro propose un nouvel ordre d'intervention pour la semaine. Le conducteur de travaux le valide ou le modifie." },
+      { question: "Comment l'approvisionnement est-il cadencé ?", answer: "Daliro reprend les quantités du devis et les dates du planning. Chaque livraison est proposée pour le début de la pose, ce qui limite le stockage sur site." },
     ] },
     { id: "formules", label: "Formules", items: [
-      { question: "Combien ça coûte ?", answer: "Le prix dépend du nombre de chantiers ouverts et de ce que vous voulez brancher. Il est fixé pendant l'audit, sur vos chantiers réels, avant tout engagement." },
-      { question: "Comment se passe l'audit ?", answer: "Nous regardons vos devis, votre planning et les échanges d'un ou deux chantiers en cours. Vous repartez avec ce que nous y avons trouvé, que vous alliez plus loin ou non." },
-      { question: "Où sont mes données ?", answer: "Hébergées dans l'Union européenne. Daliro lit vos fichiers ; il n'en modifie aucun." },
-      { question: "Qui est derrière Daliro ?", answer: "Omega, une entreprise française qui installe des automatisations dans les PME. Daliro est un nom provisoire." },
+      { question: "Quel est le prix ?", answer: "Le prix dépend du nombre de chantiers ouverts et des fonctions retenues. Il est fixé pendant l'audit, sur vos chantiers réels, avant tout engagement." },
+      { question: "Comment se passe l'audit ?", answer: "Nous examinons les devis, le planning et les échanges d'un ou deux chantiers en cours. Vous repartez avec ce que nous y avons relevé, que vous poursuiviez ou non." },
+      { question: "Où sont mes données ?", answer: "Vos données sont hébergées dans l'Union européenne. Daliro lit vos fichiers sans jamais les modifier." },
+      { question: "Qui édite Daliro ?", answer: "Daliro est conçu et développé en France par Omega, qui déploie des systèmes d'automatisation dans les entreprises et les groupes." },
     ] },
   ],
 };

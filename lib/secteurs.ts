@@ -52,11 +52,11 @@ export const SECTEURS: Secteur[] = [
     slug: "btp",
     metier: "BTP",
     saas: "Daliro",
-    texte: "Travaux supplémentaires captés, sous-traitants confirmés à J-2.",
+    texte: "Travaux supplémentaires chiffrés et signés avant exécution.",
     detail:
-      "Daliro lit les photos et les vocaux de vos équipes, repère les travaux hors devis et les chiffre sur vos prix. Vous signez l'avenant avant que le mur soit refermé.",
+      "Daliro relève dans les photos et les vocaux de vos équipes les travaux absents du marché, puis les chiffre sur vos prix unitaires. Vous obtenez l'accord écrit du client avant que l'ouvrage soit refermé.",
     apercu:
-      "Chaque matin, trois listes par chantier : ce qu'il faut facturer, les sous-traitants qui doivent confirmer leur passage à J-2 et les livraisons à caler sur le planning.",
+      "Chaque matin à 7 h, le conducteur de travaux reçoit trois listes par chantier : les travaux à facturer, les sous-traitants à confirmer à J-2 et les livraisons à caler sur le planning.",
     url: "https://chantieros-site.vercel.app",
     integre: true,
   },
@@ -64,33 +64,33 @@ export const SECTEURS: Secteur[] = [
     slug: "avocats",
     metier: "Cabinets d'avocats",
     saas: "Tamila",
-    texte: "Le dossier de faits, les pièces du jour, les forfaits qui dérapent.",
+    texte: "Chaque fait rattaché à la pièce et à la page qui le fondent.",
     detail:
-      "Tamila lit toutes les pièces du dossier, même scannées ou manuscrites, et renvoie chaque fait à la page qui le prouve. Vous recevez la chronologie, les contradictions et le bordereau contrôlé.",
+      "Tamila lit chaque pièce du dossier, y compris scannée ou manuscrite, et rattache chaque fait à la page qui le fonde. L'avocat reçoit une chronologie sourcée, les contradictions entre pièces et un bordereau rapproché des conclusions.",
     apercu:
-      "Chaque matin à 7 h, un courriel signale les pièces reçues la veille, les forfaits dépassés et les dossiers restés sans diligence depuis trente jours.",
+      "Chaque matin à 7 h, l'associé reçoit les pièces communiquées la veille, les honoraires forfaitaires dépassés et les dossiers sans diligence depuis trente jours.",
     url: "https://cabinetos-site-two.vercel.app",
   },
   {
     slug: "architectes",
     metier: "Architectes",
     saas: "Lorani",
-    texte: "Les plans contrôlés avant le permis, les offres analysées.",
+    texte: "Plans, CCTP et DPGF croisés avant le permis et le DCE.",
     detail:
-      "Lorani relit chaque planche contre les autres, le CCTP et la DPGF, puis liste les contradictions avec la page et l'article en face. L'architecte tranche sur un dossier vérifié.",
+      "Lorani croise chaque planche avec les autres, le CCTP et la DPGF, puis relève chaque incohérence avec la planche et l'article concernés. L'architecte arbitre avant le dépôt du permis ou la consultation des entreprises.",
     apercu:
-      "Quatre contrôles couvrent la mission, du permis à la réception : le dossier de permis et le DCE, l'analyse des offres, les situations de travaux et le visa des documents.",
+      "Quatre contrôles suivent la mission de maîtrise d'œuvre, du permis à la réception : le permis et le DCE, l'analyse des offres, le visa des documents d'exécution et les situations de travaux.",
     url: "https://dossieros-site.vercel.app",
   },
   {
     slug: "location-automobile",
     metier: "Loueurs automobiles",
     saas: "Tavaro",
-    texte: "Quels véhicules déplacer, lesquels dorment, quel retour facturer.",
+    texte: "Restitutions chiffrées sur votre barème, preuves jointes.",
     detail:
-      "Tavaro compare les photos de retour à celles du départ, puis chiffre le carburant, le retard et les dommages selon votre barème. Vos agences décident de ce qui est facturé.",
+      "Tavaro rapproche les photos de restitution de l'état des lieux de départ, puis chiffre carburant, retard et dommages selon votre barème de remise en état. Chaque facture part avec ses preuves datées, après validation de l'agence.",
     apercu:
-      "Chaque matin à 7 h, une page par agence indique les retours à facturer, les véhicules à préparer et l'entretien placé dans les creux du planning.",
+      "Chaque matin à 7 h, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
     url: "https://rentalos-site.vercel.app",
   },
 ];
