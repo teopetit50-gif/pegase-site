@@ -19,7 +19,8 @@
    cette table ou doivent recevoir l'hôte du nouveau site.
 
    Noms choisis par Teo le 24/09 : Daliro (ex-ChantierOS), Tamila
-   (ex-CabinetOS), Lorani (ex-DossierOS), Tavaro (ex-RentalOS). Les dossiers
+   (ex-CabinetOS), Lorani (ex-DossierOS), Tavaro (ex-RentalOS) ; Tiroma
+   (ex-FauteuilOS, dossier dentaire-site) est un nom provisoire. Les dossiers
    OMEGA/<ancien>-site et les projets Vercel gardent l'ancien nom, d'où les
    URL ci-dessous.
    Aucun prix, aucun chiffre de traction : le prix s'estime, l'audit le fixe.
@@ -94,6 +95,25 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Chaque matin à 7 h, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
     url: "https://rentalos-site.vercel.app",
+    integre: true,
+  },
+  /* 24/09 (soir) — Tiroma, NOM PROVISOIRE (dossier OMEGA/dentaire-site,
+     projet Vercel tiroma-site). Pas encore de logo officiel : les masques
+     public/logos/tiroma-mark.png (512 × 512) et tiroma-lockup.png sont
+     PROVISOIRES, tirés du monogramme « T » que dessine la source (carré
+     arrondi à 28 %, « T » semi-gras à 0,62 em, police du site), au format
+     des logos de Teo (masque alpha, RVB noir). À remplacer dès que le vrai
+     logo existe ; aucun code à toucher, les noms de fichiers suffisent. */
+  {
+    slug: "dentaire",
+    metier: "Cabinets dentaires",
+    saas: "Tiroma",
+    texte: "Créneaux libérés repris, plans signés mis à l'agenda.",
+    detail:
+      "Tiroma lit l'agenda, les plans de traitement et les devis signés de votre logiciel, en lecture seule. Chaque créneau libéré arrive avec les patients qui peuvent le prendre, et l'assistante appelle dans l'ordre.",
+    apercu:
+      "Chaque matin à 7 h, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
+    url: "https://tiroma-site.vercel.app",
     integre: true,
   },
 ];

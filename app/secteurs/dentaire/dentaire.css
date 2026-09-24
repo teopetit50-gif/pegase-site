@@ -1,0 +1,397 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TIROMA (CABINETS DENTAIRES) — le monde de la page /secteurs/dentaire
+
+   RAPATRIÉ le 24/09/2026 de `OMEGA/dentaire-site/src/app/globals.css`,
+   dans sa version finale du jour (17 h 12, heure de la Guadeloupe) :
+   les ajouts de la session « fonctions » et le RHABILLAGE « cabinet
+   dentaire » (photos, schéma FDI, vert d'eau), déployé sur
+   https://tiroma-site.vercel.app. Méthode : app/secteurs/RAPATRIEMENT.md.
+   Tout ce fichier est descendant de `.p-dentaire`, sauf les `@property`
+   et les `@keyframes`, globaux par nature — d'où leur préfixe `dentaire`.
+
+   ══════════════════════════════════════════════════════════════════════
+   RELEVÉ — la source, et ce qu'elle relevait elle-même
+   La source décalque saleshookai-landing-page-2 (Pantokrator, 21st.dev) :
+   son bundle compilé a été repassé en JSX (un seul fichier de 150 Ko),
+   puis habillé pour les cabinets dentaires. Ici il est découpé en
+   composants lisibles, en TypeScript (components/secteurs/dentaire/).
+
+   COULEURS — la source était DÉJÀ claire (blanc et bleu ciel, choix de
+   Teo). Au rhabillage du 24/09, le bleu ciel a cédé la place à une
+   échelle « eau », un VERT D'EAU clinique peu saturé — la couleur des
+   fauteuils et des blouses sur les photos du cabinet :
+     eau-50  #f3f8f7   eau-100 #e3f0ed   eau-200 #c7e1db   eau-300 #a0ccc3
+     eau-400 #72b0a4   eau-500 #4f9587   eau-600 #3b7a6e   eau-700 #30635a
+     eau-800 #29514a   eau-900 #23433e
+   Texte et boutons en eau-600 / eau-700 (contraste 5,0 et 6,9 sur le
+   blanc). Le reste est la palette slate de Tailwind (texte #0f172a).
+
+   TYPOGRAPHIE (source) — h1 clamp(2 rem, 6 vw, 4,5 rem), interligne 1,
+   400 ; h2 de section 30 → 48 px (lg) ; corps 16 → 18 px. Geist partout.
+
+   CADRE — chaque section pleine largeur, contenu dans
+   `max-w-[1400px] px-6 lg:px-12` ; aucun filet vertical, aucun conteneur
+   global : c'était déjà la construction de la source. Les séparateurs
+   (`border-t` de « Au quotidien » et des formules) courent sur toute la
+   largeur de la fenêtre.
+   ══════════════════════════════════════════════════════════════════════
+
+   ── CE QUE LE RAPATRIEMENT CHANGE ───────────────────────────────────
+
+   1. PAS DE `@theme` (règle 3). L'échelle « eau » de la source est écrite
+      en hexadécimal dans les composants (`bg-[#3b7a6e]`…) ; les `slate-*`,
+      `emerald-*`, `rose-*`, `amber-*` restent ceux de Tailwind (le site ne
+      les redéfinit pas).
+   2. PAS DE BASCULE CLAIR / SOMBRE (règle 4). La source gardait 275
+      utilitaires `dark:` hérités du gabarit, jamais actifs (thème figé en
+      clair) : tous retirés, ainsi que les jetons `bg-*` / `text-*` qu'ils
+      étaient seuls à lire.
+   3. POLICES DU SITE (règle 5). Geist et Geist Mono partent ; `font-sans`
+      et `font-mono` sont ceux du site (General Sans et sa mono), et les
+      titres prennent la police de titre du site.
+   4. LA PEAU SORT DU CADRE 1440 (règle 1) : 100vw, comme `.p-btp`.
+   5. Les classes maison de la source sont renommées `dentaire-*` : elles
+      auraient pu croiser un nom du site, et les `@property` de la source
+      (`--color-1`… `--stop-5`) auraient ENREGISTRÉ pour tout le site des
+      propriétés de type <color> ou <percentage> : elles deviennent
+      `--dentaire-couleur-1`, etc.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-dentaire {
+  background: #ffffff;
+  color: #0f172a;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Plein écran : la peau sort de <main> (plafonné à 1440 par PageShell),
+     dont le conteneur porte `overflow-x-clip`. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+.p-dentaire h1,
+.p-dentaire h2,
+.p-dentaire h3 {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Le bouton « dégradé » (`.gradient-button` de la source) ───────────
+   Un dégradé radial à cinq arrêts dont TOUT s'anime au survol (position,
+   étendue, couleurs, arrêts), plus un liseré en `::before` masqué en
+   anneau. Les variables animées doivent être déclarées (`@property`)
+   pour que le navigateur sache les interpoler. Rhabillage du 24/09 : les
+   cinq couleurs sont des verts d'eau proches, le dégradé se lit à peine. */
+@property --dentaire-pos-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 11.14%;
+}
+@property --dentaire-pos-y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 140%;
+}
+@property --dentaire-etendue-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 150%;
+}
+@property --dentaire-etendue-y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 180.06%;
+}
+@property --dentaire-couleur-1 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #30635a;
+}
+@property --dentaire-couleur-2 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #3b7a6e;
+}
+@property --dentaire-couleur-3 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #3b7a6e;
+}
+@property --dentaire-couleur-4 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #467f73;
+}
+@property --dentaire-couleur-5 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #4f9587;
+}
+@property --dentaire-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 20deg;
+}
+@property --dentaire-lisere-1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #72b0a433;
+}
+@property --dentaire-lisere-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #3b7a6ebf;
+}
+@property --dentaire-arret-1 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 37.35%;
+}
+@property --dentaire-arret-2 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 61.36%;
+}
+@property --dentaire-arret-3 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 78.42%;
+}
+@property --dentaire-arret-4 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 89.52%;
+}
+@property --dentaire-arret-5 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+.p-dentaire .dentaire-bouton-degrade {
+  appearance: none;
+  cursor: pointer;
+  position: relative;
+  background: radial-gradient(
+    var(--dentaire-etendue-x) var(--dentaire-etendue-y) at var(--dentaire-pos-x) var(--dentaire-pos-y),
+    var(--dentaire-couleur-1) var(--dentaire-arret-1),
+    var(--dentaire-couleur-2) var(--dentaire-arret-2),
+    var(--dentaire-couleur-3) var(--dentaire-arret-3),
+    var(--dentaire-couleur-4) var(--dentaire-arret-4),
+    var(--dentaire-couleur-5) var(--dentaire-arret-5)
+  );
+  transition:
+    --dentaire-pos-x 0.5s,
+    --dentaire-pos-y 0.5s,
+    --dentaire-etendue-x 0.5s,
+    --dentaire-etendue-y 0.5s,
+    --dentaire-couleur-1 0.5s,
+    --dentaire-couleur-2 0.5s,
+    --dentaire-couleur-3 0.5s,
+    --dentaire-couleur-4 0.5s,
+    --dentaire-couleur-5 0.5s,
+    --dentaire-angle 0.5s,
+    --dentaire-lisere-1 0.5s,
+    --dentaire-lisere-2 0.5s,
+    --dentaire-arret-1 0.5s,
+    --dentaire-arret-2 0.5s,
+    --dentaire-arret-3 0.5s,
+    --dentaire-arret-4 0.5s,
+    --dentaire-arret-5 0.5s;
+}
+.p-dentaire .dentaire-bouton-degrade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(var(--dentaire-angle), var(--dentaire-lisere-1), var(--dentaire-lisere-2));
+  /* l'anneau d'un pixel : la boîte de contenu retranchée de la boîte de
+     bordure (longhands recopiés de la source, préfixe WebKit compris) */
+  -webkit-mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  -webkit-mask-clip: content-box, border-box;
+  mask-clip: content-box, border-box;
+  -webkit-mask-origin: content-box, border-box;
+  mask-origin: content-box, border-box;
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.p-dentaire .dentaire-bouton-degrade:hover {
+  --dentaire-pos-x: 0%;
+  --dentaire-pos-y: 91.51%;
+  --dentaire-etendue-x: 120.24%;
+  --dentaire-etendue-y: 103.18%;
+  --dentaire-couleur-1: #29514a;
+  --dentaire-couleur-2: #30635a;
+  --dentaire-couleur-3: #3b7a6e;
+  --dentaire-couleur-4: #467f73;
+  --dentaire-couleur-5: #30635a;
+  --dentaire-angle: 190deg;
+  --dentaire-lisere-1: #e3f0ed1a;
+  --dentaire-lisere-2: #a0ccc399;
+  --dentaire-arret-1: 0%;
+  --dentaire-arret-2: 8.8%;
+  --dentaire-arret-3: 21.44%;
+  --dentaire-arret-4: 71.34%;
+  --dentaire-arret-5: 85.76%;
+}
+
+/* ── La pastille « perle » (`.pearl-badge`) ────────────────────────────
+   Surtitres centrés, badges des écrans, nœuds du schéma. Rhabillage du
+   24/09 : plus de perle bleue brillante au texte blanc, une pastille vert
+   d'eau MATE, texte foncé, filet intérieur. */
+.p-dentaire .dentaire-perle {
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  color: #29514a;
+  background-color: #e3f0ed;
+  box-shadow:
+    inset 0 0 0 1px #c7e1db,
+    0 0.35rem 0.8rem #3b7a6e14;
+}
+
+/* ── Les curseurs du calculateur (`.roi-range`, injecté en <style> par la
+   source) : pouce blanc cerclé de vert d'eau. ─────────────────────── */
+.p-dentaire .dentaire-curseur::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid #3b7a6e;
+  box-shadow: 0 2px 6px rgba(59, 122, 110, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.p-dentaire .dentaire-curseur::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+.p-dentaire .dentaire-curseur::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid #3b7a6e;
+  box-shadow: 0 2px 6px rgba(59, 122, 110, 0.35);
+  cursor: pointer;
+}
+
+/* ── Animations de la source, renommées ───────────────────────────────
+   `animate-marquee-slow` / `-testimonials`, `animate-char-in`, et les
+   boucles `lp3-*` que la page de référence injectait au montage. */
+
+/* Les deux rubans : données lues (héros, 50 s, sens inverse posé en style)
+   et situations types (60 s). */
+@keyframes dentaire-defile {
+  0% {
+    transform: translate(0);
+  }
+  to {
+    transform: translate(-50%);
+  }
+}
+.p-dentaire .dentaire-defile-lent {
+  animation: 50s linear infinite dentaire-defile;
+}
+.p-dentaire .dentaire-defile-situations {
+  animation: 60s linear infinite dentaire-defile;
+}
+
+/* La ligne tournante du titre : lettres floues qui montent. */
+@keyframes dentaire-lettres {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(30%);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+.p-dentaire .dentaire-lettres {
+  opacity: 0;
+  animation: 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards dentaire-lettres;
+}
+
+/* Les pointillés qui défilent dans les courbes du schéma. */
+@keyframes dentaire-trait {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+.p-dentaire .dentaire-trait {
+  stroke-dasharray: 4 4;
+  animation: dentaire-trait 0.8s linear infinite;
+}
+
+/* L'onde verte autour du créneau repris. */
+@keyframes dentaire-onde {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.p-dentaire .dentaire-onde {
+  animation: dentaire-onde 2s ease-out infinite;
+}
+
+/* Les lueurs vert d'eau des maquettes (cases de la semaine, pastille
+   Tiroma, ligne des décisions) et les flèches qui battent. */
+@keyframes dentaire-lueur-case {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(79, 149, 135, 0);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(79, 149, 135, 0.55);
+  }
+}
+.p-dentaire .dentaire-lueur-case {
+  animation: dentaire-lueur-case 3s ease-in-out infinite;
+}
+@keyframes dentaire-pouls {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.p-dentaire .dentaire-pouls {
+  animation: dentaire-pouls 1.6s ease-in-out infinite;
+}
+@keyframes dentaire-lueur-pastille {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(79, 149, 135, 0);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(79, 149, 135, 0.6);
+  }
+}
+.p-dentaire .dentaire-lueur-pastille {
+  animation: dentaire-lueur-pastille 1.6s ease-in-out infinite;
+}
+@keyframes dentaire-lueur-ligne {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 rgba(79, 149, 135, 0);
+  }
+  50% {
+    box-shadow: inset 0 0 18px rgba(79, 149, 135, 0.3);
+  }
+}
+.p-dentaire .dentaire-lueur-ligne {
+  animation: dentaire-lueur-ligne 2.4s ease-in-out infinite;
+}
