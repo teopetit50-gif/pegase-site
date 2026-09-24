@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type React from "react";
 import PageShell from "@/components/PageShell";
 import { Hero } from "@/components/secteurs/btp/Heros";
 import { Logos } from "@/components/secteurs/btp/Lu";
@@ -35,8 +36,9 @@ import "./btp.css";
    LES SIX RÈGLES, ET CE QU'ELLES DONNENT ICI
    1. Enveloppée dans `PageShell` : entête, pied et transitions du site.
       La peau `.p-btp` sort du `<main>` plafonné à 1440 (100vw, btp.css) ;
-      le contenu reste dans le cadre de la source (`.btp-conteneur`, 1280
-      puis 1400 px dès 1536), avec ses deux paires de filets verticaux.
+      le contenu reste centré par `.btp-conteneur` (1280 puis 1400 px dès
+      1536), SANS les filets verticaux de la source (retirés le 24/09 au soir,
+      voir plus bas).
    2. Les jetons vivent sous `.p-btp`, jamais sur `:root`.
    3. Aucun `@theme` : les utilitaires de couleur de la source sont
       convertis en valeurs arbitraires (51 `dark:` retirés, ~550
@@ -83,54 +85,63 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
 };
 
-/* Le cadre de la source (chantieros-site/src/app/page.tsx), à l'identique
-   moins l'entête et le pied : conteneur, filets doubles, bande hachurée
-   entre chaque section. Le `<main>` imbriqué de la source devient un
-   `<div>` — PageShell porte déjà le <main> de la page. Sa `divide-y` ne
-   séparait que le cadre du pied ; il reste le filet tireté bas (`sm:`). */
+/* 24/09/2026 (soir) — LE CADRE DE LA SOURCE EST RETIRÉ. Teo, en voyant la
+   page en ligne : « la page n'est pas pleine, regarde, il y a les barres sur
+   les côtés ». Les deux paires de filets verticaux (`border-x`, puis
+   `mx-1 sm:mx-1.5 lg:mx-2 border-x`) encadraient tout le contenu ; ils ne
+   sont plus posés. Le contenu reste centré, section par section, par
+   `.btp-conteneur` ; les bandes hachurées passent HORS conteneur et
+   prennent toute la largeur de la fenêtre, sans les croix d'angle (elles
+   marquaient la jonction avec les filets : sans filets, elles flottaient).
+   Le `<main>` imbriqué de la source devient une suite de blocs : PageShell
+   porte déjà le <main> de la page. */
+function Section({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div data-monde="clair" className={className}>
+      <div className="btp-conteneur">{children}</div>
+    </div>
+  );
+}
+
 export default function PageBtp() {
   return (
     <PageShell>
       <div data-monde="clair" className="p-btp flex flex-col">
-        <div className="flex flex-1 flex-col border-dashed border-[#e6e6e6] sm:border-b">
+        <Section className="relative z-20 w-full bg-[#ffffff] pt-24 md:pt-32">
+          <Hero />
+        </Section>
+        <Bande />
+        <Section>
+          <Logos />
+        </Section>
+        <Bande />
+        <Section>
+          <Features />
+        </Section>
+        <Bande />
+        <Section>
+          <Stats />
+        </Section>
+        <Bande />
+        <Section>
+          <Testimonials />
+        </Section>
+        <Bande />
+        <section id="pricing" data-monde="clair" className="scroll-mt-20">
           <div className="btp-conteneur">
-            <div className="border-x border-[#e6e6e6]">
-              <div className="mx-1 border-x border-[#e6e6e6] sm:mx-1.5 lg:mx-2">
-                <div data-monde="clair" className="relative z-20 w-full bg-[#ffffff] pt-24 md:pt-32">
-                  <Hero />
-                </div>
-                <Bande />
-                <div data-monde="clair">
-                  <Logos />
-                </div>
-                <Bande />
-                <div data-monde="clair">
-                  <Features />
-                </div>
-                <Bande />
-                <div data-monde="clair">
-                  <Stats />
-                </div>
-                <Bande />
-                <div data-monde="clair">
-                  <Testimonials />
-                </div>
-                <Bande />
-                <section id="pricing" data-monde="clair" className="scroll-mt-20">
-                  <Pricing />
-                </section>
-                <Bande />
-                <section id="faq" data-monde="clair" className="scroll-mt-20">
-                  <Faq />
-                </section>
-                <Bande />
-                <div data-monde="clair">
-                  <Cta />
-                </div>
-              </div>
-            </div>
+            <Pricing />
           </div>
-        </div>
+        </section>
+        <Bande />
+        <section id="faq" data-monde="clair" className="scroll-mt-20">
+          <div className="btp-conteneur">
+            <Faq />
+          </div>
+        </section>
+        <Bande />
+        <Section>
+          <Cta />
+        </Section>
       </div>
     </PageShell>
   );

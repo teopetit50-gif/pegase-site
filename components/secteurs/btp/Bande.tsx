@@ -16,7 +16,9 @@ import React from "react";
 export function Bande() {
   return (
     <>
-<div aria-hidden="true" className="relative h-10 border-[#e6e6e6] border-y border-dashed bg-[size:10px_10px] [background-image:repeating-linear-gradient(315deg,rgba(0,0,0,0.05)_0_1px,transparent_0_50%)] md:h-12"><div aria-hidden="true" className="mask-radial-from-15% absolute size-3 before:absolute before:inset-0 before:m-auto before:h-px before:bg-[#171717]/25 after:absolute after:inset-0 after:m-auto after:w-px after:bg-[#171717]/25 -translate-[calc(50%+0.5px)]"></div><div aria-hidden="true" className="mask-radial-from-15% absolute size-3 before:absolute before:inset-0 before:m-auto before:h-px before:bg-[#171717]/25 after:absolute after:inset-0 after:m-auto after:w-px after:bg-[#171717]/25 right-0 -translate-y-[calc(50%+0.5px)] translate-x-[calc(50%+0.5px)]"></div><div aria-hidden="true" className="mask-radial-from-15% absolute size-3 before:absolute before:inset-0 before:m-auto before:h-px before:bg-[#171717]/25 after:absolute after:inset-0 after:m-auto after:w-px after:bg-[#171717]/25 bottom-0 -translate-x-[calc(50%+0.5px)] translate-y-[calc(50%+0.5px)]"></div><div aria-hidden="true" className="mask-radial-from-15% absolute size-3 before:absolute before:inset-0 before:m-auto before:h-px before:bg-[#171717]/25 after:absolute after:inset-0 after:m-auto after:w-px after:bg-[#171717]/25 bottom-0 right-0 translate-x-[calc(50%+0.5px)] translate-y-[calc(50%+0.5px)]"></div></div>
+{/* 24/09 (soir) : pleine largeur, sans les quatre croix d'angle — elles marquaient la jonction avec les filets
+    verticaux du cadre, retirés (voir app/secteurs/btp/page.tsx). */}
+<div aria-hidden="true" className="relative h-10 border-[#e6e6e6] border-y border-dashed bg-[size:10px_10px] [background-image:repeating-linear-gradient(315deg,rgba(0,0,0,0.05)_0_1px,transparent_0_50%)] md:h-12" />
     </>
   );
 }
