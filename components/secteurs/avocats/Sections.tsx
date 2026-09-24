@@ -52,7 +52,17 @@
    la géométrie de la source (`grid-cols-4`, 14 px).
    ANCRES : `scroll-mt-16` (la barre de 64 px de la source) →
    `scroll-mt-16 sm:scroll-mt-[72px]`, la hauteur de l'entête d'Omega.
+
+   24/09 (SOIR) — REGISTRE D'UN CABINET (avocats.css) : les taches bleues
+   floues du point du matin et des outils sont retirées ; les h2 passent en
+   serif, interligne 1,15 (1,375 pour la sans d'origine) ; l'icône
+   d'application et les ondes passent au vert de Tamila. L'APPEL FINAL
+   perd ses particules et son halo conique : c'est une carte blanche en
+   deux colonnes, le texte à gauche, et à droite la cour du Mai du Palais
+   de justice de Paris un jour de pluie (Robin Benzrihem, Unsplash) —
+   une photo documentaire plutôt qu'un effet.
    ══════════════════════════════════════════════════════════════════════ */
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight, AtSign, Briefcase, CalendarDays, Download, FileCheck2, FileSearch, FileSpreadsheet, FileStack, Filter,
@@ -61,13 +71,11 @@ import {
 import AnimationContainer from "./apparition";
 import { MagicCard } from "./carte-magique";
 import { Ripple } from "./ondes";
-import { Particles } from "./particules";
 import { Button } from "./bouton";
 import { IconeApp } from "./marque";
 import { IllusBordereau, IllusChronologie, IllusContradictions, IllusPieces, IllusSecret } from "./Illustrations";
 import { APPEL, CONNEXIONS, CONTACT, FONCTIONNALITES, PIECES, POINT } from "./textes";
 import { cn } from "@/lib/cn";
-import { HaloConique } from "./halo";
 
 /* ─── « Trusted by leading brands » → les familles de pièces lues (aucun logo de client inventé) ─── */
 const iconesPieces = [Gavel, FileStack, Paperclip, FileSearch, Stamp, AtSign, ScanText];
@@ -83,7 +91,7 @@ export function Pieces() {
         </div>
       </AnimationContainer>
       <AnimationContainer delay={0.45}>
-        <ul className="flex flex-row flex-wrap items-center justify-center gap-8 max-w-xl mx-auto pt-16 text-[#737373] transition-all">
+        <ul className="flex flex-row flex-wrap items-center justify-center gap-8 max-w-xl mx-auto pt-16 text-[#6f6a62] transition-all">
           {PIECES.familles.map((f, i) => {
             const I = iconesPieces[i];
             return (
@@ -113,7 +121,7 @@ export function Fonctionnalites() {
     <div id="fonctionnalites" className="relative flex flex-col items-center justify-center w-full py-20 scroll-mt-16 sm:scroll-mt-[72px]">
       <AnimationContainer delay={0.1}>
         <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-snug! mt-6">
+          <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-[1.15]! mt-6">
             {FONCTIONNALITES.titreL1}
             <br />
             {FONCTIONNALITES.titreL2} <span className="avocats-accent italic">{FONCTIONNALITES.titreMot}</span>
@@ -128,7 +136,7 @@ export function Fonctionnalites() {
             <AnimationContainer
               key={c.titre}
               delay={0.2 + 0.1 * i}
-              className={cn("relative flex flex-col rounded-2xl lg:rounded-3xl bg-[#ffffff] border border-[#e6e6e6]/50 hover:border-[#e6e6e6]/100 transition-colors", span)}
+              className={cn("relative flex flex-col rounded-2xl lg:rounded-3xl bg-[#ffffff] border border-[#e5e1d8]/50 hover:border-[#e5e1d8]/100 transition-colors", span)}
             >
               <MagicCard className="p-4 lg:p-6 lg:rounded-3xl">
                 <div className="flex items-center space-x-4 mb-4">
@@ -137,7 +145,7 @@ export function Fonctionnalites() {
                     {c.titre}
                   </h3>
                 </div>
-                <p className="text-sm text-[#737373]">{c.texte}</p>
+                <p className="text-sm text-[#6f6a62]">{c.texte}</p>
                 <div className="mt-6 w-full bg-[#ffffff]/50 overflow-hidden">
                   <Illus />
                 </div>
@@ -156,7 +164,7 @@ export function PointDuMatin() {
     <div id="point-du-matin" className="relative flex flex-col items-center justify-center w-full py-20 scroll-mt-16 sm:scroll-mt-[72px]">
       <AnimationContainer delay={0.1}>
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-snug!">
+          <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-[1.15]!">
             {POINT.titreL1}
             <br />
             <span className="avocats-accent italic">{POINT.titreMot}</span>
@@ -167,15 +175,14 @@ export function PointDuMatin() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative w-full">
         {POINT.cartes.map((c, i) => (
           <AnimationContainer key={c.titre} delay={0.2 + 0.1 * i}>
-            <div className="rounded-2xl bg-[#ffffff]/40 relative border border-[#e6e6e6]/50">
+            <div className="rounded-2xl bg-[#ffffff]/40 relative border border-[#e5e1d8]/50">
               <MagicCard className="p-4 lg:p-8 w-full overflow-hidden">
-                <div className={cn("absolute bottom-0 right-0 w-1/4 h-1/4 blur-[8rem] z-20", i ? "bg-sky-300" : "bg-blue-300")} />
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold flex items-center justify-between gap-2">
                     {c.titre}
-                    <span className="rounded-[calc(0.6rem-2px)] border border-[#e6e6e6] px-2 py-0.5 text-[11px] font-normal uppercase tracking-wider text-[#737373]">{POINT.exemple}</span>
+                    <span className="rounded-[calc(0.6rem-2px)] border border-[#e5e1d8] px-2 py-0.5 text-[11px] font-normal uppercase tracking-wider text-[#6f6a62]">{POINT.exemple}</span>
                   </h3>
-                  <p className="text-sm text-[#737373]">{c.texte}</p>
+                  <p className="text-sm text-[#6f6a62]">{c.texte}</p>
                   <div className="space-y-4">
                     <div className="flex justify-between items-baseline">
                       <div>
@@ -195,11 +202,11 @@ export function PointDuMatin() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <div className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 text-[#737373] py-2">
+                      <div className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 text-[#6f6a62] py-2">
                         {c.colonnes.map((col) => <div key={col}>{col}</div>)}
                       </div>
                       {c.lignes.map((l) => (
-                        <div key={l[0]} className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 py-2 border-t border-[#e6e6e6]/50">
+                        <div key={l[0]} className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 py-2 border-t border-[#e5e1d8]/50">
                           <div>{l[0]}</div>
                           <div>{l[1]}</div>
                           <div>{l[2]}</div>
@@ -231,9 +238,11 @@ const outils = [
 export function Connexions() {
   return (
     <div id="outils" className="relative flex flex-col items-center justify-center w-full py-20 scroll-mt-16 sm:scroll-mt-[72px]">
-      <AnimationContainer delay={0.1} className="relative">
+      {/* 24/09 au soir : ce conteneur prend toute la section dès `lg` (`lg:absolute lg:inset-0`). Sans hauteur,
+          le titre (`lg:top-1/4`) et le bouton (`lg:bottom-1/4`) se calaient tous deux sur son bord à 0 px, et
+          « Voir les garanties » s'affichait AU-DESSUS du titre ; ils encadrent maintenant les ondes. */}
+      <AnimationContainer delay={0.1} className="relative lg:absolute lg:inset-0 lg:z-20 lg:pointer-events-none [&_a]:pointer-events-auto">
         <div className="relative flex flex-col lg:hidden items-center justify-center overflow-visible">
-          <div className="absolute top-1/2 -translate-y-1/2 right-1/4 w-3/5 h-14 lg:h-20 bg-linear-to-r from-blue-200 to-indigo-300 rounded-full -rotate-12 blur-[6.5rem] -z-10" />
           {/* la référence pose ici une image (integration.svg, une rangée d'icônes) : même rangée, dessinée */}
           <div className="max-w-sm w-full h-auto mx-auto mt-8 flex items-center justify-center gap-3" role="img" aria-label={CONNEXIONS.outils.join(", ")}>
             {outils.slice(1, 3).map(({ I, t }) => (
@@ -246,7 +255,7 @@ export function Connexions() {
           </div>
         </div>
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto lg:absolute lg:top-1/4 inset-x-0 mt-12 lg:mt-0">
-          <h2 className="text-2xl md:text-4xl lg:text-6xl font-semibold leading-snug!">{CONNEXIONS.titre}</h2>
+          <h2 className="text-2xl md:text-4xl lg:text-6xl font-semibold leading-[1.15]!">{CONNEXIONS.titre}</h2>
         </div>
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto lg:absolute lg:bottom-1/4 inset-x-0 z-20 mt-8 lg:mt-0">
           <Button asChild size="lg">
@@ -259,7 +268,6 @@ export function Connexions() {
       </AnimationContainer>
       <AnimationContainer delay={0.2}>
         <div className="relative hidden lg:flex items-center justify-center overflow-visible">
-          <div className="absolute top-1/2 -translate-y-1/2 right-1/4 w-3/5 h-14 lg:h-20 bg-linear-to-r from-blue-200 to-indigo-300 rounded-full -rotate-12 blur-[6.5rem] -z-10" />
           <div className="relative flex h-dvh w-full flex-col items-center justify-center overflow-visible">
             <Ripple />
           </div>
@@ -281,27 +289,37 @@ export function Connexions() {
   );
 }
 
-/* ─── « Ready to boost your marketing? » → l'appel final, particules Magic UI et halo conique ─── */
+/* ─── « Ready to boost your marketing? » → l'appel final : texte à gauche, la cour du Mai à droite ─── */
 export function Appel() {
   return (
     <div className="relative flex flex-col items-center justify-center w-full py-20">
       <AnimationContainer className="py-20 max-w-6xl mx-auto">
-        <div className="relative flex flex-col items-center justify-center py-12 lg:py-20 px-0 rounded-2xl lg:rounded-3xl bg-[#ffffff]/20 text-center border border-[#171717]/20 overflow-hidden">
-          <Particles refresh ease={80} quantity={80} color="#64748b" className="hidden lg:block absolute inset-0 z-0" />
-          <Particles refresh ease={80} quantity={35} color="#64748b" className="block lg:hidden absolute inset-0 z-0" />
-          <HaloConique />
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-medium leading-snug! px-4">
-            {APPEL.titreAvant} <br /> <span className="avocats-accent italic">{APPEL.titreMot}</span>
-          </h2>
-          <p className="text-sm md:text-lg text-center text-[#171717]/80 max-w-2xl mx-auto mt-4 px-4">
-            {APPEL.texte} <span className="hidden lg:inline">{APPEL.texteSuite}</span>
-          </p>
-          <Button asChild size="lg" className="mt-8 relative z-10">
-            <Link href={CONTACT.audit}>{APPEL.bouton}</Link>
-          </Button>
+        <div className="grid overflow-hidden rounded-2xl lg:rounded-3xl border border-[#171717]/10 bg-[#ffffff] lg:grid-cols-2">
+          <div className="flex flex-col items-start justify-center px-6 py-10 md:p-12 lg:p-14">
+            <h2 className="text-3xl md:text-5xl lg:text-[2.75rem] leading-[1.12]!">
+              {APPEL.titreAvant} <br /> <span className="avocats-accent">{APPEL.titreMot}</span>
+            </h2>
+            <p className="text-sm md:text-lg text-[#171717]/80 max-w-xl mt-5">
+              {APPEL.texte} {APPEL.texteSuite}
+            </p>
+            <Button asChild size="lg" className="mt-8">
+              <Link href={CONTACT.audit}>{APPEL.bouton}</Link>
+            </Button>
+          </div>
+          <figure className="relative -order-1 min-h-[240px] sm:min-h-[320px] lg:order-none lg:min-h-[520px]">
+            <Image
+              src="/photos/avocats-cour-du-mai.jpg"
+              alt="La cour du Mai du Palais de justice de Paris, un jour de pluie"
+              fill
+              sizes="(min-width: 1280px) 576px, (min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+            <figcaption className="absolute bottom-3 left-4 rounded-full bg-black/35 px-2.5 py-1 text-[11px] text-white backdrop-blur-sm">
+              {APPEL.legende}
+            </figcaption>
+          </figure>
         </div>
       </AnimationContainer>
     </div>
   );
 }
-

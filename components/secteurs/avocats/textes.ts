@@ -38,6 +38,7 @@ export const HERO = {
   titreApres: "à sa pièce",
   texte: "Tamila lit chaque pièce du dossier et vous remet une chronologie sourcée, les contradictions entre pièces et un bordereau rapproché de vos conclusions.",
   bouton: "Soumettre un dossier",
+  legende: "Palais de justice de Paris, boulevard du Palais. À l'écran, des conclusions et leur dossier de faits (exemple).",
 };
 
 export const PIECES = {
@@ -179,4 +180,5 @@ export const APPEL = {
   texte: "Lors de l'audit, vous nous confiez les pièces d'un dossier clos et comparez le dossier de faits obtenu à celui que vous aviez constitué,",
   texteSuite: "sans rien installer.",
   bouton: "Réserver un audit",
+  legende: "Palais de justice de Paris, cour du Mai",
 };

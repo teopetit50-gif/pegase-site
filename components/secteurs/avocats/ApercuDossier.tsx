@@ -34,104 +34,84 @@
    de la source) ; identifiants SVG `hachure`, `aire` préfixés `avocats-`
    (un identifiant est global au document, et cette page vit désormais
    dans un site de trente pages).
+
+   24/09 (SOIR) — L'ÉCRAN MONTRE UN ACTE, PLUS UN TABLEAU DE BORD
+   Teo : « on ne voit pas assez que ça fait avocat ». La courbe violette
+   « pièces lues » et le tableau de pièces étaient l'écran de n'importe
+   quel SaaS. L'écran montre maintenant ce que l'avocat reçoit, dans les
+   mots du Palais (relevé de douze sites du métier, avocats.css) :
+   · à gauche, le DOSSIER DE FAITS d'une affaire de bail commercial —
+     chaque fait daté renvoie à sa pièce et à sa page ; un fait contredit
+     par une autre pièce est signalé ;
+   · à droite, les CONCLUSIONS RÉCAPITULATIVES elles-mêmes, en serif,
+     paragraphes numérotés, un passage surligné, un passage souligné de
+     rouge, et en marge, comme les commentaires d'un traitement de texte,
+     la pièce qui fonde chaque passage ;
+   · en tête, la juridiction et la chambre, le n° RG, l'avocat en charge
+     et la date de l'audience de plaidoirie.
+   Composé à 1611 × 1000 (la largeur de l'ancien écran, pour garder la
+   même échelle dans le cadre) ; la feuille est coupée par le bas, comme
+   une page qu'on fait défiler. Les parties, le n° RG et Me Aubert sont
+   inventés : l'écran est étiqueté « Exemple ». Faits cohérents entre les
+   deux colonnes (dates, numéros de pièces).
+   Teintes : le vert de Tamila #193a29 (fait sélectionné, renvois
+   conformes), le rose pour la contradiction (celui de l'ancien écran), le
+   jaune du surligneur #fbe9a3.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useRef, useState } from "react";
 import {
-  AlertTriangle, BookOpen, CalendarDays, Clock, FileCheck2, FileText, Files, Filter, GitCompare,
-  History, Inbox, LayoutDashboard, LifeBuoy, MoreVertical, Scale, Search, Settings, Users, ArrowDown, ArrowLeft, ArrowRight,
+  AlertTriangle, BookOpen, CalendarDays, Check, Download, FileCheck2, FileText, Files, FolderOpen, Gavel, GitCompare,
+  History, Inbox, LayoutDashboard, LifeBuoy, MoreVertical, Scale, Search, Settings, UserRound,
 } from "lucide-react";
 import { Glyphe } from "./marque";
 
-/* L'écran produit du héros. La référence y pose une capture PNG d'un tableau de bord tiers (3222 × 2596) ;
-   on ne recopie pas cet actif : l'écran est dessiné ici, à la même géométrie, avec le vrai produit.
-   Il est composé à 1611 px de large (la moitié de la capture, sa densité 2) puis mis à l'échelle du cadre,
-   comme une image : la composition ne se réarrange jamais, elle rétrécit. Données : un exemple. */
-
 const L = 1611;
-const H = 1298;
+const H = 1000;
 
 const menu = [
   { titre: "Cabinet", items: [
-    { i: LayoutDashboard, t: "Point du matin", actif: true },
+    { i: LayoutDashboard, t: "Point du matin" },
     { i: Files, t: "Dossiers", n: "42" },
     { i: Inbox, t: "Pièces du jour", n: "4" },
-    { i: History, t: "Chronologies" },
-    { i: GitCompare, t: "Contradictions", n: "2" },
-    { i: FileCheck2, t: "Bordereaux" },
-    { i: CalendarDays, t: "Audiences" },
+    { i: CalendarDays, t: "Audiences", n: "3" },
   ] },
-  { titre: "Gestion", items: [
-    { i: Scale, t: "Forfaits" },
-    { i: Clock, t: "Temps à saisir" },
-    { i: Users, t: "Charge" },
+  { titre: "Ce dossier", items: [
+    { i: History, t: "Dossier de faits", actif: true },
+    { i: FileText, t: "Conclusions" },
+    { i: FileCheck2, t: "Bordereau" },
+    { i: GitCompare, t: "Contradictions", n: "1" },
+    { i: FolderOpen, t: "Pièces", n: "31" },
   ] },
 ];
 
-const pieces = [
-  { p: "Rapport d'expertise", ref: "Pièce adverse n° 23", dossier: "Construction — lot 4", tags: ["Contradiction", "Nouvelle date"], recue: "23 sept. 2026", page: "p. 12" },
-  { p: "Conclusions n° 3", ref: "Partie adverse", dossier: "Bail commercial", tags: ["Contradiction", "Sans pièce"], recue: "23 sept. 2026", page: "p. 7" },
-  { p: "Procès-verbal de constat", ref: "Pièce n° 14", dossier: "Copropriété", tags: ["Nouvelle date"], recue: "23 sept. 2026", page: "p. 2" },
-  { p: "Courriel du confrère", ref: "Messagerie", dossier: "Prud'hommes", tags: ["Délai cité"], recue: "22 sept. 2026", page: "—" },
-  { p: "Contrat de bail", ref: "Pièce n° 7", dossier: "Bail commercial", tags: ["Citée 3 fois"], recue: "19 sept. 2026", page: "p. 4" },
-  { p: "Attestation", ref: "Pièce n° 31", dossier: "Succession", tags: ["Jamais citée"], recue: "18 sept. 2026", page: "p. 1" },
+type Fait = { d: string; t: string; s: string; actif?: boolean; contredit?: string };
+const faits: Fait[] = [
+  { d: "03/03/2021", t: "Bail commercial conclu, loyer annuel de 36 000 € HT", s: "Pièce n° 7, p. 1" },
+  { d: "01/04/2021", t: "Prise d'effet du bail", s: "Pièce n° 7, p. 4", actif: true },
+  { d: "30/09/2023", t: "Départ des lieux allégué par les preneurs", s: "Pièce adverse n° 23, p. 1", contredit: "Contredit par la pièce n° 14, p. 2" },
+  { d: "12/10/2023", t: "Constat : le mobilier des preneurs est encore dans les lieux", s: "Pièce n° 14, p. 2" },
+  { d: "05/01/2024", t: "Premier loyer impayé", s: "Pièces n° 12 et 13" },
+  { d: "18/03/2024", t: "Commandement de payer visant la clause résolutoire", s: "Pièce n° 15, p. 1 à 3" },
 ];
 
-const couleurTag: Record<string, string> = {
-  Contradiction: "text-rose-600 border-rose-500/25 bg-rose-50",
-  "Sans pièce": "text-amber-700 border-amber-500/30 bg-amber-50",
-  "Jamais citée": "text-amber-700 border-amber-500/30 bg-amber-50",
-};
-
-/* la courbe « pièces lues », douze mois, même dessin que la référence (violet, aire hachurée) */
-const valeurs = [118, 132, 126, 164, 150, 205, 238, 222, 268, 301, 286, 344];
-const mois = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
-
-function Courbe() {
-  const w = 1180, h = 250, max = 380;
-  const pts = valeurs.map((v, i) => [(i / (valeurs.length - 1)) * w, h - (v / max) * h] as const);
-  const d = pts.reduce((acc, [x, y], i) => {
-    if (i === 0) return `M${x},${y}`;
-    const [px, py] = pts[i - 1];
-    const cx = (px + x) / 2;
-    return `${acc} C${cx},${py} ${cx},${y} ${x},${y}`;
-  }, "");
-  const [tx, ty] = pts[6];
+/* Un commentaire de marge, aligné sur son paragraphe (grille de la feuille). */
+function Note({ ton, titre, children }: { ton: "vert" | "rose"; titre: string; children: React.ReactNode }) {
+  const vert = ton === "vert";
   return (
-    <svg viewBox={`0 0 ${w} ${h + 40}`} className="w-full" style={{ height: 290 }} aria-hidden="true">
-      <defs>
-        <pattern id="avocats-hachure" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <line x1="0" y1="0" x2="0" y2="6" stroke="#9e77ed" strokeOpacity=".22" strokeWidth="1" />
-        </pattern>
-        <linearGradient id="avocats-aire" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#9e77ed" stopOpacity=".28" />
-          <stop offset="1" stopColor="#9e77ed" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {[0, 1, 2, 3, 4].map((k) => (
-        <line key={k} x1="0" x2={w} y1={(k / 4) * h} y2={(k / 4) * h} stroke="#18181b" strokeOpacity=".07" />
-      ))}
-      <path d={`${d} L${w},${h} L0,${h} Z`} fill="url(#avocats-aire)" />
-      <path d={`${d} L${w},${h} L0,${h} Z`} fill="url(#avocats-hachure)" />
-      <path d={d} fill="none" stroke="#9e77ed" strokeWidth="2.5" />
-      <line x1={tx} x2={tx} y1={ty} y2={h} stroke="#9e77ed" strokeOpacity=".4" strokeDasharray="3 3" />
-      <circle cx={tx} cy={ty} r="7" fill="#9e77ed" fillOpacity=".25" />
-      <circle cx={tx} cy={ty} r="4" fill="#ffffff" stroke="#9e77ed" strokeWidth="2" />
-      <g transform={`translate(${tx - 46} ${ty - 62})`}>
-        <rect width="92" height="46" rx="8" fill="#ffffff" stroke="#18181b" strokeOpacity=".12" />
-        <text x="12" y="20" fill="#18181b" fontSize="13" fontWeight="600">238 pièces</text>
-        <text x="12" y="36" fill="#71717a" fontSize="11">juillet 2026</text>
-      </g>
-      {mois.map((m, i) => (
-        <text key={m} x={(i / (mois.length - 1)) * (w - 30) + 4} y={h + 30} fill="#71717a" fontSize="12">{m}</text>
-      ))}
-    </svg>
+    <div className={`rounded-lg border px-3.5 py-3 text-[12.5px] leading-[1.45] ${vert ? "border-[#193a29]/20 bg-[#eef3ef]" : "border-rose-200 bg-rose-50"}`}>
+      <p className={`flex items-center gap-1.5 font-semibold ${vert ? "text-[#193a29]" : "text-rose-700"}`}>
+        {vert ? <Check className="size-3.5" strokeWidth={2.6} /> : <AlertTriangle className="size-3.5" />}
+        {titre}
+      </p>
+      <div className="mt-1 text-zinc-600">{children}</div>
+    </div>
   );
 }
 
 export default function ApercuDossier() {
   const boite = useRef<HTMLDivElement>(null);
-  const [echelle, setEchelle] = useState(1132 / L);
+  const [echelle, setEchelle] = useState(1024 / L);
 
   useEffect(() => {
     const el = boite.current;
@@ -144,17 +124,17 @@ export default function ApercuDossier() {
   return (
     <div
       ref={boite}
-      className="relative w-full overflow-hidden rounded-[0.6rem] lg:rounded-[20px]"
+      className="relative w-full overflow-hidden"
       style={{ aspectRatio: `${L} / ${H}` }}
       role="img"
-      aria-label="Écran du point du matin de Tamila : pièces lues sur douze mois et pièces du jour avec leurs constats (données d'exemple)"
+      aria-label="Écran de Tamila sur un dossier de bail commercial (exemple) : le dossier de faits, chaque fait daté renvoyé à sa pièce et à sa page, et les conclusions récapitulatives annotées en marge, un passage conforme au bail, un passage contredit par un constat"
     >
       <div
         className="absolute left-0 top-0 origin-top-left flex bg-[#ffffff] text-zinc-700 avocats-texte"
         style={{ width: L, height: H, transform: `scale(${echelle})` }}
       >
         {/* barre latérale */}
-        <aside className="w-[300px] shrink-0 border-r border-black/[0.08] flex flex-col px-5 pt-5">
+        <aside className="w-[268px] shrink-0 border-r border-black/[0.08] flex flex-col px-5 pt-5 bg-[#fcfbf9]">
           <div className="flex gap-2 pb-6">
             <span className="size-3 rounded-full bg-[#ff5f57]" />
             <span className="size-3 rounded-full bg-[#febc2e]" />
@@ -162,7 +142,7 @@ export default function ApercuDossier() {
           </div>
           <div className="flex items-center justify-between px-2 pb-7">
             <span className="flex items-center gap-2.5 text-[17px] font-semibold text-zinc-900 avocats-titre">
-              <span className="grid size-8 place-items-center rounded-[0.6rem] bg-black/[0.04] ring-1 ring-black/10"><Glyphe className="size-5" /></span>
+              <span className="grid size-8 place-items-center rounded-[0.6rem] bg-[#193a29] text-white"><Glyphe className="size-5" /></span>
               Tamila
             </span>
             <Search className="size-[18px] text-zinc-500" />
@@ -174,10 +154,10 @@ export default function ApercuDossier() {
                 <MoreVertical className="size-3.5" />
               </div>
               {g.items.map(({ i: I, t, actif, n }: { i: typeof Files; t: string; actif?: boolean; n?: string }) => (
-                <div key={t} className={`flex items-center gap-3 rounded-[0.6rem] px-3 h-10 text-[14px] ${actif ? "bg-black/[0.05] text-zinc-900 font-medium" : "text-zinc-600"}`}>
+                <div key={t} className={`flex items-center gap-3 rounded-[0.6rem] px-3 h-10 text-[14px] ${actif ? "bg-[#193a29]/[0.07] text-[#193a29] font-medium" : "text-zinc-600"}`}>
                   <I className="size-[18px]" />
                   <span className="flex-1">{t}</span>
-                  {n && <span className="rounded-full bg-black/[0.05] px-2 text-[11px] leading-5 text-zinc-600">{n}</span>}
+                  {n && <span className={`rounded-full px-2 text-[11px] leading-5 ${t === "Contradictions" ? "bg-rose-50 text-rose-700" : "bg-black/[0.05] text-zinc-600"}`}>{n}</span>}
                 </div>
               ))}
             </div>
@@ -190,78 +170,116 @@ export default function ApercuDossier() {
         </aside>
 
         {/* contenu */}
-        <div className="flex-1 min-w-0 px-10 pt-8">
+        <div className="flex-1 min-w-0 flex flex-col px-10 pt-7">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-[13px] text-zinc-500">
-              <span className="grid size-6 place-items-center rounded-[calc(0.6rem-2px)] bg-black/[0.05]"><Glyphe className="size-3.5 text-zinc-700" /></span>
-              <span>Cabinet</span>
+              <Files className="size-4" />
+              <span>Dossiers</span>
               <span className="text-zinc-400">/</span>
-              <span className="rounded-[calc(0.6rem-2px)] bg-black/[0.05] px-2 py-0.5 text-zinc-800">Point du matin</span>
+              <span className="rounded-[calc(0.6rem-2px)] bg-black/[0.05] px-2 py-0.5 text-zinc-800">SCI Les Tilleuls c/ Roche</span>
             </div>
             <span className="rounded-[calc(0.6rem-2px)] border border-black/10 px-2.5 py-1 text-[11px] uppercase tracking-wider text-zinc-500">Exemple</span>
           </div>
 
-          <h3 className="mt-7 text-[26px] font-semibold text-zinc-900 avocats-titre">Point du matin, mardi 24 septembre</h3>
-          <p className="mt-1.5 text-[14px] text-zinc-600">4 pièces reçues hier, 2 contradictions à vérifier, 1 bordereau à reprendre avant l&apos;audience du 14 octobre.</p>
+          <p className="mt-6 text-[27px] font-semibold text-zinc-900 avocats-titre">SCI Les Tilleuls c/ M. et Mme Roche</p>
+          <div className="mt-3 flex items-center gap-5 text-[13.5px] text-zinc-600">
+            <span className="flex items-center gap-1.5"><Scale className="size-4 text-zinc-500" />Tribunal judiciaire de Paris, 18e chambre</span>
+            <span className="text-zinc-300">|</span>
+            <span>RG n° 24/03817</span>
+            <span className="text-zinc-300">|</span>
+            <span className="flex items-center gap-1.5"><UserRound className="size-4 text-zinc-500" />Me Claire Aubert</span>
+            <span className="ml-auto flex items-center gap-1.5 rounded-full border border-[#193a29]/20 bg-[#eef3ef] px-3 py-1 text-[13px] font-medium text-[#193a29]">
+              <Gavel className="size-3.5" />Plaidoirie le 14 octobre 2026
+            </span>
+          </div>
 
-          <div className="mt-8 flex items-center justify-between">
-            <p className="text-[17px] font-semibold text-zinc-900">
-              Pièces lues <span className="ml-1 text-[#7f56d9]">+38 cette semaine</span>
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="flex rounded-[0.6rem] border border-black/10 text-[13px]">
-                {["12 mois", "30 jours", "7 jours", "24 heures"].map((t, i) => (
-                  <span key={t} className={`px-3.5 h-9 grid place-items-center ${i ? "border-l border-black/10 text-zinc-500" : "bg-black/[0.05] text-zinc-900"}`}>{t}</span>
+          <div className="mt-7 flex min-h-0 flex-1 gap-8">
+            {/* dossier de faits */}
+            <div className="w-[500px] shrink-0">
+              <div className="flex items-baseline justify-between">
+                <p className="text-[17px] font-semibold text-zinc-900">Dossier de faits</p>
+                <p className="text-[12.5px] text-zinc-500">6 faits, 31 pièces lues</p>
+              </div>
+              <div className="mt-3 flex gap-2 text-[12px]">
+                <span className="rounded-full bg-zinc-900 px-3 py-1 text-white">Tous</span>
+                <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-rose-700">Contredits (1)</span>
+                <span className="rounded-full border border-black/10 px-3 py-1 text-zinc-500">Sans pièce (0)</span>
+              </div>
+              <div className="mt-4 overflow-hidden rounded-xl border border-black/[0.08]">
+                {faits.map((f, k) => (
+                  <div
+                    key={f.d}
+                    className={`grid grid-cols-[96px_1fr] gap-3 px-4 py-3.5 ${k ? "border-t border-black/[0.07]" : ""} ${f.actif ? "bg-[#193a29]/[0.05] shadow-[inset_3px_0_0_#193a29]" : ""}`}
+                  >
+                    <span className="pt-px font-mono text-[12.5px] text-zinc-500">{f.d}</span>
+                    <span className="min-w-0">
+                      <span className="block text-[14px] leading-snug text-zinc-900">{f.t}</span>
+                      <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11.5px] ${f.actif ? "border-[#193a29]/25 bg-white text-[#193a29]" : "border-black/10 text-zinc-600"}`}>
+                          <FileText className="size-3" />{f.s}
+                        </span>
+                        {f.contredit && (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11.5px] text-rose-700">
+                            <AlertTriangle className="size-3" />{f.contredit}
+                          </span>
+                        )}
+                      </span>
+                    </span>
+                  </div>
                 ))}
               </div>
-              <span className="flex items-center gap-2 rounded-[0.6rem] border border-black/10 px-3.5 h-9 text-[13px] text-zinc-700"><Filter className="size-4" />Filtres</span>
             </div>
-          </div>
-          <div className="mt-5"><Courbe /></div>
 
-          <div className="mt-8 flex items-center justify-between">
-            <p className="text-[17px] font-semibold text-zinc-900">Pièces du jour</p>
-            <MoreVertical className="size-4 text-zinc-500" />
-          </div>
-          <div className="mt-4 overflow-hidden rounded-xl border border-black/[0.08]">
-            <div className="grid grid-cols-[1.6fr_1.1fr_1.5fr_0.8fr_0.45fr_40px] items-center gap-4 bg-black/[0.02] px-5 h-11 text-[12px] font-medium text-zinc-500">
-              <span className="flex items-center gap-3"><span className="size-4 rounded border border-black/15" />Pièce</span>
-              <span>Dossier</span>
-              <span>Constats</span>
-              <span className="flex items-center gap-1">Reçue <ArrowDown className="size-3" /></span>
-              <span>Page</span>
-              <span />
-            </div>
-            {pieces.map((r, k) => (
-              <div key={k} className={`grid grid-cols-[1.6fr_1.1fr_1.5fr_0.8fr_0.45fr_40px] items-center gap-4 border-t border-black/[0.07] px-5 h-[68px] text-[13px] ${k > 3 ? "opacity-50" : ""}`}>
-                <span className="flex items-center gap-3 min-w-0">
-                  <span className="size-4 shrink-0 rounded border border-black/15" />
-                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-black/[0.04] ring-1 ring-black/10">
-                    {r.tags.includes("Contradiction") ? <AlertTriangle className="size-[18px] text-rose-500" /> : <FileText className="size-[18px] text-zinc-600" />}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium text-zinc-900">{r.p}</span>
-                    <span className="block truncate text-zinc-500">{r.ref}</span>
-                  </span>
-                </span>
-                <span className="truncate text-zinc-600">{r.dossier}</span>
-                <span className="flex flex-wrap gap-1.5">
-                  {r.tags.map((t) => (
-                    <span key={t} className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] ${couleurTag[t] ?? "text-zinc-600 border-black/10 bg-black/[0.03]"}`}>
-                      <span className="size-1.5 rounded-full bg-current" />{t}
-                    </span>
-                  ))}
-                </span>
-                <span className="text-zinc-600">{r.recue}</span>
-                <span className="text-zinc-600">{r.page}</span>
-                <MoreVertical className="size-4 text-zinc-400" />
+            {/* les conclusions, annotées en marge */}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-2 text-[14px] font-medium text-zinc-900">
+                  <FileText className="size-4 text-zinc-500" />Conclusions récapitulatives n° 3
+                  <span className="font-normal text-zinc-500">· p. 4 sur 18</span>
+                </p>
+                <div className="flex gap-2 text-[12.5px]">
+                  <span className="flex items-center gap-1.5 rounded-[0.6rem] border border-black/10 px-3 h-8 text-zinc-700"><FileCheck2 className="size-3.5" />Bordereau</span>
+                  <span className="flex items-center gap-1.5 rounded-[0.6rem] border border-black/10 px-3 h-8 text-zinc-700"><Download className="size-3.5" />Word</span>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="mt-5 flex items-center justify-between text-[13px] text-zinc-500 opacity-40">
-            <span className="flex items-center gap-2"><ArrowLeft className="size-4" />Précédent</span>
-            <span className="flex gap-4">{[1, 2, 3, "…", 8, 9].map((n, i) => <span key={i}>{n}</span>)}</span>
-            <span className="flex items-center gap-2">Suivant<ArrowRight className="size-4" /></span>
+              <div className="relative mt-4 min-h-0 flex-1 overflow-hidden rounded-t-xl bg-[#f3f1ec] px-6 pt-6">
+                <div className="grid grid-cols-[1fr_214px] gap-x-6 rounded-t-[4px] bg-white px-9 pt-8 pb-10 shadow-[0_1px_3px_rgba(30,22,10,0.10),0_8px_24px_-8px_rgba(30,22,10,0.12)] avocats-serif text-[15px] leading-[1.6] text-zinc-800">
+                  <div className="col-start-1 pb-5">
+                    <p className="text-right text-[12px] tracking-wide text-zinc-500">RG n° 24/03817</p>
+                    <p className="mt-2 whitespace-nowrap text-center text-[15px] font-semibold tracking-[0.07em] text-zinc-900">CONCLUSIONS RÉCAPITULATIVES N° 3</p>
+                    <p className="mt-3 text-[13px] leading-[1.5]"><span className="font-semibold">POUR :</span> la SCI Les Tilleuls, demanderesse, ayant pour avocat Me Claire Aubert</p>
+                    <p className="text-[13px] leading-[1.5]"><span className="font-semibold">CONTRE :</span> M. et Mme Roche, défendeurs</p>
+                    <p className="mt-4 text-center text-[13px] tracking-[0.2em] text-zinc-900">PLAISE AU TRIBUNAL</p>
+                    <p className="mt-4 text-[13px] font-semibold tracking-[0.06em] text-zinc-900">I. — FAITS ET PROCÉDURE</p>
+                  </div>
+                  <div />
+
+                  <p className="col-start-1 pb-4">
+                    <span className="font-semibold">12.</span> Par acte sous seing privé du 3 mars 2021, la SCI Les Tilleuls a donné à bail commercial à
+                    M. et Mme Roche des locaux situés à Paris 11e, <span className="rounded-[2px] bg-[#fbe9a3] px-0.5">à effet du 1er avril 2021</span> (pièce n° 7).
+                  </p>
+                  <div className="pb-4">
+                    <Note ton="vert" titre="Pièce n° 7, p. 4">Article 3 du bail : prise d&apos;effet au 1er avril 2021. Conforme.</Note>
+                  </div>
+
+                  <p className="col-start-1 pb-4">
+                    <span className="font-semibold">13.</span> Les défendeurs soutiennent avoir quitté les lieux le 30 septembre 2023 (pièce adverse n° 23).{" "}
+                    <span className="underline decoration-rose-500 decoration-wavy decoration-[1.5px] underline-offset-[5px]">Le procès-verbal de constat du 12 octobre 2023 relève pourtant la présence de leur mobilier</span> (pièce n° 14).
+                  </p>
+                  <div className="pb-4">
+                    <Note ton="rose" titre="Contradiction">Pièce adverse n° 23, p. 1 : départ le 30 sept. 2023. Pièce n° 14, p. 2 : mobilier présent le 12 oct. 2023.</Note>
+                  </div>
+
+                  <p className="col-start-1 pb-4">
+                    <span className="font-semibold">14.</span> Les loyers ne sont plus réglés depuis le 5 janvier 2024 (pièces n° 12 et 13). Par acte du
+                    18 mars 2024, un commandement de payer visant la clause résolutoire leur a été délivré (pièce n° 15).
+                  </p>
+                  <div className="pb-4">
+                    <Note ton="vert" titre="Pièces n° 12, 13 et 15">Relevé de compte et commandement de payer : dates concordantes.</Note>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -20,7 +20,8 @@ import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { cn } from "@/lib/cn";
 
 /* MagicCard — Magic UI (@dillionverma sur 21st.dev), version exacte du bundle de la référence (module 8728).
-   Réglages de la référence : gradientColor rgba(59,130,246,0.1), de #38bdf8 à #3b82f6. */
+   Réglages de la référence : gradientColor rgba(59,130,246,0.1), de #38bdf8 à #3b82f6. Depuis le 24/09 au soir
+   (registre d'un cabinet, avocats.css) : le vert de Tamila, lueur à 6 %, liseré de #4f7a62 à #193a29. */
 interface MagicCardProps {
   children?: React.ReactNode;
   className?: string;
@@ -35,10 +36,10 @@ export function MagicCard({
   children,
   className,
   gradientSize = 200,
-  gradientColor = "rgba(59,130,246,0.1)",
+  gradientColor = "rgba(25,58,41,0.06)",
   gradientOpacity = 0.8,
-  gradientFrom = "#38bdf8",
-  gradientTo = "#3b82f6",
+  gradientFrom = "#4f7a62",
+  gradientTo = "#193a29",
 }: MagicCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(-gradientSize);
@@ -95,7 +96,7 @@ export function MagicCard({
             radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px,
               ${gradientFrom}, 
               ${gradientTo}, 
-              #e6e6e6 100%
+              #e5e1d8 100%
             )
           `;
 
@@ -108,7 +109,7 @@ export function MagicCard({
         style={{ background: lueur, opacity: gradientOpacity }}
       />
       <motion.div
-        className="pointer-events-none absolute inset-0 rounded-xl bg-[#e6e6e6] duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 rounded-xl bg-[#e5e1d8] duration-300 group-hover:opacity-100"
         style={{ background: liseré }}
       />
     </div>

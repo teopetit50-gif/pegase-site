@@ -41,76 +41,61 @@
    classes mortes, retirées. `before:animate-rotate` ne pouvait pas passer
    en `before:avocats-rotate` (ce n'est pas un utilitaire) : l'animation du
    pseudo-élément est écrite dans avocats.css (`.avocats-etincelle`).
+
+   24/09 (SOIR) — LE HÉROS D'UN CABINET (avocats.css, « registre d'un
+   cabinet ») :
+   · Orbites, étincelle du badge, taches bleues et fondu blanc du bas :
+     RETIRÉS. Le badge devient une étiquette filetée sur fond blanc, sa
+     pastille « NOUVEAU » passe au vert de Tamila (#193a29).
+   · Le h1 passe en serif 400 (avocats.css), interligne 1,08 au lieu de
+     1,25 : une serif de titrage se compose serrée.
+   · L'écran produit n'est plus posé sur des lueurs mais sur une photo de
+     la façade du Palais de justice de Paris (Slavan, Unsplash, crédits
+     dans public/photos/CREDITS.txt). Première version : l'écran DANS la
+     photo, collé au bas, comme chez Harvey — mais le dôme et la grille
+     sont au centre de la photo et l'écran les cachait tous deux : on ne
+     voyait qu'un ciel. D'où ce montage : un bandeau photo 11/5 cadré par
+     35 % du haut, et l'écran qui le chevauche à partir de 16 % de la
+     largeur (une marge en % se calcule sur la LARGEUR : le chevauchement
+     suit le bandeau à toutes les tailles). Le dôme, de 8 à 23 % de la
+     largeur depuis le haut du bandeau, reste entier au-dessus de l'écran
+     (qui commence à 29 %) ; à 10 %, on ne voyait que le ciel et la
+     lanterne.
    ══════════════════════════════════════════════════════════════════════ */
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import AnimationContainer from "./apparition";
-import { OrbitingCircles } from "./orbites";
 import { Button } from "./bouton";
-import { Glyphe } from "./marque";
 import ApercuDossier from "./ApercuDossier";
 import { CONTACT, HERO } from "./textes";
 
-const Point = ({ c }: { c: string }) => (
-  <svg className={`size-1 ${c}`} width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    <circle cx="10" cy="10" r="10" fill="currentColor" />
-  </svg>
-);
-
-/* Héros de la référence : trois orbites derrière le titre, badge à étincelle, h1 72/90 gras, bouton, puis le
-   cadre de l'écran produit (rounded-[32px], deux lueurs bleues). */
+/* Héros : badge, h1 serif, texte, bouton, puis l'écran produit dans la photo du Palais. */
 export default function Hero() {
   return (
     <div className="relative flex flex-col items-center justify-center w-full py-20">
-      <div className="absolute flex lg:hidden size-40 rounded-full bg-blue-300 blur-[10rem] top-0 left-1/2 -translate-x-1/2 -z-10" />
-      {/* w-full sur ces deux colonnes : dans la référence, c'est l'<img> 1920 px de l'écran produit qui les élargit
-          jusqu'au cadre max-w-6xl ; notre écran est dessiné, sans largeur propre, d'où la largeur posée ici. */}
       <div className="flex flex-col items-center justify-center gap-y-8 relative w-full">
-        <AnimationContainer className="hidden lg:flex absolute inset-0 top-0 mb-auto flex-col items-center justify-center w-full min-h-screen -z-10">
-          <OrbitingCircles duration={40} radius={300}>
-            <Glyphe className="size-4 text-[#171717]/70" />
-            <Point c="text-[#171717]/80" />
-          </OrbitingCircles>
-          <OrbitingCircles duration={80} radius={400}>
-            <Point c="text-[#171717]/50" />
-            <Glyphe className="size-4 text-[#171717]/60" />
-            <Point c="text-[#171717]/90" />
-          </OrbitingCircles>
-          <OrbitingCircles duration={200} radius={500}>
-            <Point c="text-[#171717]/50" />
-            <Point c="text-[#171717]/90" />
-            <Glyphe className="size-4 text-[#171717]/60" />
-            <Point c="text-[#171717]/90" />
-          </OrbitingCircles>
-        </AnimationContainer>
-
         <div className="flex flex-col items-center justify-center text-center gap-y-4 w-full">
-          <AnimationContainer className="relative hidden lg:block overflow-hidden" delay={0.1}>
+          <AnimationContainer className="relative hidden lg:block" delay={0.1}>
             <Link
               href="#fonctionnalites"
-              className="group relative grid overflow-hidden rounded-full px-2 py-1 shadow-[0_1000px_0_0_#e6e6e6_inset] transition-colors duration-200 mx-auto w-fit"
+              className="group mx-auto flex w-fit items-center rounded-full border border-[#e5e1d8] bg-[#ffffff] px-2 py-1 text-sm text-[#171717] transition-colors duration-200 hover:border-[#193a29]/30"
             >
-              <span>
-                <span className="avocats-etincelle absolute inset-0 h-[100%] w-[100%] avocats-flip overflow-hidden rounded-full [mask:linear-gradient(white,_transparent_50%)] before:absolute before:aspect-square before:w-[200%] before:rotate-[-90deg] before:bg-[conic-gradient(from_0deg,transparent_0_340deg,#3b82f6_360deg)] before:content-[''] before:[inset:0_auto_auto_50%] before:[translate:-50%_-15%]" />
+              <span className="mr-2 flex h-[18px] items-center justify-center rounded-full bg-[#193a29] px-2 text-[9px] font-medium tracking-wide text-white">
+                {HERO.badge}
               </span>
-              <span className="absolute inset-[1px] rounded-full bg-[#ffffff] transition-colors duration-200 group-hover:bg-[#f5f5f5]" />
-              <span className="z-10 py-0.5 text-sm text-[#171717] flex items-center">
-                <span className="px-2 py-[0.5px] h-[18px] tracking-wide flex items-center justify-center rounded-full bg-linear-to-r from-sky-400 to-blue-600 text-[9px] font-medium mr-2 text-white">
-                  {HERO.badge}
-                </span>
-                {HERO.annonce}
-              </span>
+              {HERO.annonce}
             </Link>
           </AnimationContainer>
 
           <AnimationContainer delay={0.15}>
-            <h1 className="text-4xl md:text-4xl lg:text-7xl font-bold text-center leading-tight! max-w-4xl mx-auto">
-              {HERO.titreAvant} <span>{HERO.titreMot}</span> {HERO.titreApres}
+            <h1 className="text-[2.5rem] md:text-5xl lg:text-7xl text-center leading-[1.08]! max-w-4xl mx-auto">
+              {HERO.titreAvant} <span className="avocats-accent">{HERO.titreMot}</span> {HERO.titreApres}
             </h1>
           </AnimationContainer>
 
           <AnimationContainer delay={0.2}>
-            <p className="max-w-xl mx-auto mt-2 text-base lg:text-lg text-center text-[#737373]">{HERO.texte}</p>
+            <p className="max-w-xl mx-auto mt-2 text-base lg:text-lg text-center text-[#6f6a62]">{HERO.texte}</p>
           </AnimationContainer>
 
           <AnimationContainer delay={0.25} className="z-20">
@@ -124,15 +109,25 @@ export default function Hero() {
             </div>
           </AnimationContainer>
 
-          <AnimationContainer delay={0.3} className="relative">
-            <div className="relative rounded-xl lg:rounded-[32px] border border-[#e6e6e6] p-2 backdrop-blur-lg mt-10 max-w-6xl mx-auto">
-              <div className="absolute top-1/8 left-1/2 -z-10 bg-linear-to-r from-sky-300 to-blue-400 w-1/2 lg:w-3/4 -translate-x-1/2 h-1/4 -translate-y-1/2 inset-0 blur-[4rem] lg:blur-[10rem] avocats-image-glow" />
-              <div className="hidden lg:block absolute -top-1/8 left-1/2 -z-20 bg-blue-400 w-1/4 -translate-x-1/2 h-1/4 -translate-y-1/2 inset-0 blur-[10rem] avocats-image-glow" />
-              <div className="rounded-[0.6rem] lg:rounded-[22px] border border-[#e6e6e6] bg-[#ffffff]">
+          <AnimationContainer delay={0.3} className="relative mt-10 max-w-6xl mx-auto">
+            <figure>
+              <div className="relative aspect-[11/5] overflow-hidden rounded-xl lg:rounded-[28px] bg-[#d8cfc0]">
+                <Image
+                  src="/photos/avocats-palais-facade.jpg"
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1280px) 1152px, 100vw"
+                  className="object-cover object-[50%_35%]"
+                />
+              </div>
+              <div className="relative -mt-[16%] mx-3 sm:mx-8 lg:mx-16 overflow-hidden rounded-[0.6rem] lg:rounded-[18px] border border-black/10 bg-[#ffffff] shadow-[0_24px_60px_-20px_rgba(30,22,10,0.35)]">
                 <ApercuDossier />
               </div>
-            </div>
-            <div className="bg-linear-to-t from-[#ffffff] to-transparent absolute bottom-0 inset-x-0 w-full h-1/2" />
+              <figcaption className="mt-3 text-left text-xs text-[#6f6a62]">
+                {HERO.legende}
+              </figcaption>
+            </figure>
           </AnimationContainer>
         </div>
       </div>

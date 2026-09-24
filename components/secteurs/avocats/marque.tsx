@@ -52,7 +52,8 @@ export function Glyphe({ className }: { className?: string }) {
   return <span aria-hidden="true" className={cn("inline-block size-6 shrink-0 bg-current", className)} style={SIGNE} />;
 }
 
-/* Icône d'application (le carré bleu au centre des ondes, size-24 dans la référence). */
+/* Icône d'application (le carré bleu au centre des ondes, size-24 dans la référence). Vert de Tamila depuis le
+   24/09 au soir (registre d'un cabinet, avocats.css) : la teinte de sa carte sur /secteurs. */
 export function IconeApp({ className }: { className?: string }) {
   const id = useId();
   const fond = `${id}-fond`;
@@ -61,16 +62,16 @@ export function IconeApp({ className }: { className?: string }) {
     <svg viewBox="0 0 96 96" className={cn("size-24", className)} aria-hidden="true">
       <defs>
         <linearGradient id={fond} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#3b82f6" />
-          <stop offset="1" stopColor="#1d4ed8" />
+          <stop offset="0" stopColor="#24503a" />
+          <stop offset="1" stopColor="#12291d" />
         </linearGradient>
         <linearGradient id={dalle} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#60a5fa" />
-          <stop offset="1" stopColor="#2563eb" />
+          <stop offset="0" stopColor="#2f6049" />
+          <stop offset="1" stopColor="#193a29" />
         </linearGradient>
       </defs>
       <rect x="4" y="4" width="88" height="88" rx="20" fill={`url(#${fond})`} />
-      <rect x="4.5" y="4.5" width="87" height="87" rx="19.5" fill="none" stroke="#93c5fd" strokeOpacity=".5" />
+      <rect x="4.5" y="4.5" width="87" height="87" rx="19.5" fill="none" stroke="#8fb09d" strokeOpacity=".5" />
       <rect x="18" y="18" width="60" height="60" rx="14" fill={`url(#${dalle})`} />
       <image href="/logos/tamila-mark.png" x="24" y="24" width="48" height="48" style={{ filter: "invert(1)" }} />
     </svg>

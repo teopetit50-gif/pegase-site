@@ -5,6 +5,7 @@ import { Appel, Connexions, Fonctionnalites, Pieces, PointDuMatin } from "@/comp
 import Secret from "@/components/secteurs/avocats/Secret";
 import Formules from "@/components/secteurs/avocats/Formules";
 import Matieres from "@/components/secteurs/avocats/Matieres";
+import { serifAvocats } from "@/app/_polices/serif";
 import "./avocats.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -58,6 +59,16 @@ import "./avocats.css";
    ⚠ Le pied d'Omega (components/Footer.tsx, partagé par tout le site) est
    noir : il ferme cette page blanche par une bande noire. Connu, hors de
    notre périmètre.
+
+   24/09 (SOIR) — « ON NE VOIT PAS ASSEZ QUE ÇA FAIT AVOCAT » (Teo). La
+   page quitte les codes du gabarit vetra pour ceux des sites du métier :
+   titres en serif (Newsreader, app/_polices/serif.ts, posée ici par
+   `serifAvocats.variable`), fond papier, vert de Tamila au lieu du bleu,
+   plus d'orbites, de halos ni de particules (orbites.tsx, particules.tsx
+   et halo.tsx supprimés), photos du Palais de justice de Paris, et un
+   écran produit qui montre des conclusions annotées. Le détail et le
+   relevé : en tête de avocats.css. Le site source OMEGA/cabinetos-site
+   n'a pas suivi : la page d'Omega est désormais la version de référence.
    ══════════════════════════════════════════════════════════════════════ */
 
 const TITRE = "Tamila · chaque fait du dossier, renvoyé à sa pièce";
@@ -103,7 +114,7 @@ function Section({ children, className }: { children: React.ReactNode; className
 export default function PageAvocats() {
   return (
     <PageShell>
-      <div data-monde="clair" className="p-avocats flex flex-col">
+      <div data-monde="clair" className={`p-avocats ${serifAvocats.variable} flex flex-col`}>
         <Section className="pt-20">
           <Hero />
         </Section>

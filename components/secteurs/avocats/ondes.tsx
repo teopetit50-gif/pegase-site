@@ -49,7 +49,7 @@ export function Ripple({
         return (
           <div
             key={i}
-            className="absolute avocats-ripple rounded-full bg-[#1e293b]/16 border"
+            className="absolute avocats-ripple rounded-full bg-[#193a29]/12 border border-[#193a29]/40"
             style={{
               "--i": i,
               width: `${size}px`,

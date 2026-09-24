@@ -80,15 +80,47 @@
       elle-même qui isole (`isolation: isolate`) : sans cela, les calques
       négatifs passeraient SOUS le fond blanc de `.p-avocats` et toutes les
       lueurs disparaîtraient, sans une erreur.
+   ══════════════════════════════════════════════════════════════════════
+
+   ── 24/09 (SOIR) : LE REGISTRE D'UN CABINET, PAS CELUI D'UNE STARTUP ──
+   Teo : « on ne voit pas assez que ça fait avocat ». Les textes parlaient
+   déjà comme un cabinet (art. 768, 66-5, bordereau) ; c'est l'habillage
+   qui restait celui du gabarit vetra (halos bleus, orbites, particules,
+   titres gras sans serif). Relevé de douze sites du métier le même soir
+   (Harvey, Legora, Doctrine, Spellbook, EvenUp, Eve, Legalfly, Gide,
+   Bredin Prat, August Debouzy, Darrois, Cravath) ; Teo a retenu six
+   points, appliqués ici et dans les composants :
+     1. TITRES EN SERIF, fins, le mot d'accent en italique vraie —
+        Newsreader (app/_polices/serif.ts), 400 comme Harvey et EvenUp.
+        Les h3 et l'écran produit restent dans la police du site.
+     2. FOND PAPIER #faf9f6 au lieu du blanc pur (Harvey, Legora : un
+        blanc cassé chaud). Les cartes restent blanches : elles se
+        détachent du papier comme une feuille posée dessus. Filets et
+        gris passent à leur version chaude (#e5e1d8, #f3f1ec, #6f6a62).
+     3. PLUS AUCUN EFFET DE SaaS TECH : orbites, étincelle, halos flous,
+        particules et halo conique sont retirés (aucun site du métier
+        n'en porte). Le bleu électrique devient le VERT de Tamila,
+        #193a29 — la teinte de sa carte sur /secteurs.
+     5. PHOTOS DU PALAIS DE JUSTICE DE PARIS (Unsplash, crédits dans
+        public/photos/CREDITS.txt) : façade derrière l'écran produit,
+        grille « Liberté · Fraternité » dans le secret professionnel,
+        cour du Mai dans l'appel final.
+     8. L'ÉCRAN PRODUIT MONTRE UN VRAI ACTE : des conclusions
+        récapitulatives, paragraphes numérotés, un passage surligné et
+        son renvoi à la pièce en marge (ApercuDossier.tsx).
+    12. LE VOCABULAIRE DU PALAIS dans l'écran : juridiction et chambre,
+        n° RG, Me, audience de plaidoirie, commandement de payer.
+   (Les points 4, 6, 7, 9 à 11, 13 à 15 du relevé n'ont pas été retenus.)
    ══════════════════════════════════════════════════════════════════════ */
 
 .p-avocats {
   /* ── jetons, thème CLAIR (voir 1) ─────────────────────────────────── */
-  --avocats-fond: #ffffff; /* --background, --card, --popover */
+  --avocats-fond: #faf9f6; /* le papier (24/09 soir, voir 2) ; cartes #ffffff */
   --avocats-texte: #171717; /* --foreground, --primary, --ring */
-  --avocats-doux: #f5f5f5; /* --secondary, --muted, --accent */
-  --avocats-attenue: #737373; /* --muted-foreground */
-  --avocats-filet: #e6e6e6; /* --border, --input */
+  --avocats-doux: #f3f1ec; /* --secondary, --muted, --accent */
+  --avocats-attenue: #6f6a62; /* --muted-foreground */
+  --avocats-filet: #e5e1d8; /* --border, --input */
+  --avocats-marque: #193a29; /* le vert de Tamila (carte de /secteurs) */
 
   background: var(--avocats-fond);
   color: var(--avocats-texte);
@@ -105,9 +137,18 @@
   margin-inline: calc(50% - 50vw);
 }
 
-/* Titres : la police de titre du site (voir 4). */
+/* Titres de page et de section : la serif (24/09 soir, voir 1). Graisse
+   posée ici, pas en utilitaire : ces règles sont hors couche et battent
+   les `font-bold` / `font-medium` du balisage d'origine. */
 .p-avocats h1,
 .p-avocats h2,
+.p-avocats .avocats-serif {
+  font-family: var(--font-avocats-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+  font-optical-sizing: auto;
+}
+/* Intitulés de carte et écran produit : la police du site. */
 .p-avocats h3,
 .p-avocats .avocats-titre {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -115,9 +156,12 @@
 .p-avocats .avocats-texte {
   font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
 }
+/* Le mot d'accent : l'italique VRAIE de la serif (il était l'oblique
+   calculée de General Sans). */
 .p-avocats .avocats-accent {
-  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-avocats-serif), Georgia, "Times New Roman", serif;
   font-style: italic;
+  font-weight: 400;
 }
 
 /* Règle de base de la source, dans la couche `base` (voir 3). */
@@ -155,55 +199,25 @@
 }
 
 /* ── « Chaque pièce est lue » : `.companies` de la source ─────────────
-   ::after — la lueur bleue sous le filet (70 % de large, 20 px, flou
-   6 rem). #5591f3 sur le noir ; sur le blanc, la même lueur saturée
-   ferait une traînée : #93b5f6, un bleu de la même famille, plus clair.
-   Le ::before (le filet d'un pixel) sort de la section : `.avocats-filet`
-   ci-dessous. */
-.p-avocats .avocats-pieces::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 20px;
-  width: 70%;
-  border-radius: 100%;
-  filter: blur(6rem);
-  background: #93b5f6;
-}
+   Sa lueur bleue sous le filet (::after, flou 6 rem) est retirée le 24/09
+   au soir avec les autres halos (voir 3). Le filet reste : `.avocats-filet`. */
 
 /* Le filet entre le héros et « Chaque pièce est lue » — le SEUL séparateur
    de la source. 24/09 (soir), règle de Teo : un séparateur entre sections
    prend toute la largeur de la fenêtre (page.tsx le pose hors du
    conteneur). Même dessin : plein au centre, fondu vers les bords
    (dégradé radial de la source, ellipse de 50 % × 56 400 %). La teinte
-   était #222939, un bleu nuit à peine plus clair que le noir ; ici un
-   ardoise à peine plus foncé que le blanc. */
+   était #222939, un bleu nuit à peine plus clair que le noir ; ici le
+   filet chaud du papier, un cran plus foncé (#d9d3c7). */
 .p-avocats .avocats-filet {
   height: 1px;
-  background: radial-gradient(50% 56400% at 50% 100%, #d5dbe6 0, rgba(213, 219, 230, 0) 100%);
+  background: radial-gradient(50% 56400% at 50% 100%, #d9d3c7 0, rgba(217, 211, 199, 0) 100%);
 }
 
 /* ── Animations de la source ──────────────────────────────────────────
    `--animate-*` du `@theme` source, renommés `avocats-*` : ni les classes
    ni les `@keyframes` n'existent sur ce site, et les `@keyframes` sont
    globaux quoi qu'on fasse — d'où le préfixe. Valeurs recopiées. */
-
-/* Les orbites du héros (orbites.tsx) : `--angle`, `--radius` et
-   `--duration` sont posées en style sur chaque satellite. */
-.p-avocats .avocats-orbit {
-  animation: avocats-orbit calc(var(--duration) * 1s) linear infinite;
-}
-@keyframes avocats-orbit {
-  0% {
-    transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px)) rotate(calc(var(--angle) * -1deg));
-  }
-  to {
-    transform: rotate(calc(var(--angle) * 1deg + 1turn)) translateY(calc(var(--radius) * 1px))
-      rotate(calc((var(--angle) * -1deg) - 1turn));
-  }
-}
 
 /* Les ondes des outils (ondes.tsx). */
 .p-avocats .avocats-ripple {
@@ -219,52 +233,12 @@
   }
 }
 
-/* L'étincelle qui fait le tour du badge du héros (Heros.tsx) : le calque
-   bascule d'un demi-tour en deux temps toutes les 6 s, et son pseudo-
-   élément (le dégradé conique) tourne de 90° en 3 s. La source écrivait le
-   second `before:animate-rotate` ; un nom de classe maison ne passe pas
-   derrière une variante Tailwind, d'où la règle écrite ici. */
-.p-avocats .avocats-flip {
-  animation: avocats-flip 6s steps(2) infinite;
-}
-.p-avocats .avocats-etincelle::before {
-  animation: avocats-rotate 3s linear infinite both;
-}
-@keyframes avocats-flip {
-  to {
-    transform: rotate(1turn);
-  }
-}
-@keyframes avocats-rotate {
-  to {
-    transform: rotate(90deg);
-  }
-}
+/* Orbites, étincelle du badge et lueurs de l'écran produit : retirées le
+   24/09 au soir (voir 3), avec leurs @keyframes. Restent les ondes. */
 
-/* Les deux lueurs du cadre de l'écran produit (Heros.tsx). */
-.p-avocats .avocats-image-glow {
-  animation: avocats-image-glow 6s ease-out 0.6s forwards;
-}
-@keyframes avocats-image-glow {
-  0% {
-    opacity: 0;
-    animation-timing-function: cubic-bezier(0.74, 0.25, 0.76, 1);
-  }
-  10% {
-    opacity: 0.5;
-    animation-timing-function: cubic-bezier(0.12, 0.01, 0.08, 0.99);
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* La source coupait orbites, ondes et étincelle. */
+/* La source coupait les ondes. */
 @media (prefers-reduced-motion: reduce) {
-  .p-avocats .avocats-orbit,
-  .p-avocats .avocats-ripple,
-  .p-avocats .avocats-flip,
-  .p-avocats .avocats-etincelle::before {
+  .p-avocats .avocats-ripple {
     animation: none !important;
   }
 }

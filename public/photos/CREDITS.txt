@@ -368,3 +368,29 @@ tarifs-cloture-facade.jpg  (1600x900, 234 Ko)  — CTA final plein cadre
     Licence : Unsplash License — https://unsplash.com/license
     Sujet   : façade au soleil couchant, reflets chauds — contrepoint
               chaud au hero froid, pour fermer la page
+
+── /secteurs/avocats (Tamila), 24/09/2026 au soir ─────────────────────
+
+avocats-palais-facade.jpg  (2400x1600)  — héros, derrière l'écran produit
+    Auteur  : Slavan
+    Profil  : https://unsplash.com/@slavan_art
+    Photo   : https://unsplash.com/photos/ornate-golden-gate-in-front-of-historic-building-WQkcpj0-4j8
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : Palais de justice de Paris, façade du boulevard du Palais,
+              dôme, horloge et grille dorée ; cadrée par le haut
+
+avocats-palais-grille.jpg  (1600x1067)  — section « Le secret professionnel »
+    Auteur  : Nathan Cima
+    Profil  : https://unsplash.com/@nathan_cima
+    Photo   : https://unsplash.com/photos/ornate-golden-gate-with-french-flags-on-building-9_sNWCPc7Sc
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : grille du Palais de justice de Paris, « Liberté »,
+              « Fraternité » gravés, écussons RF
+
+avocats-cour-du-mai.jpg  (2000x1366)  — appel final
+    Auteur  : Robin Benzrihem
+    Profil  : https://unsplash.com/@robinoode
+    Photo   : https://unsplash.com/photos/brown-concrete-building-A5hD0BMzsbo
+    Licence : Unsplash License — https://unsplash.com/license
+    Sujet   : la cour du Mai du Palais de justice de Paris, jour de
+              pluie, passants — documentaire

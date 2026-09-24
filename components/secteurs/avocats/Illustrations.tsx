@@ -37,9 +37,11 @@
    fixe la hauteur des cartes (une fois ses images chargées, la référence les affiche à leur ratio naturel :
    1381×817, 918×533, 604×398, 1126×422, 560×474 ; rangées de 355 et 416 px à 1440). */
 
-const bleu = "#3b82f6";
+/* 24/09 au soir (registre d'un cabinet, avocats.css) : le bleu #3b82f6 devient le vert de Tamila. Le nom
+   `bleu` reste pour ne pas réécrire chaque dessin. */
+const bleu = "#193a29";
 const trait = "#e5e5e5";
-const texte = "#737373";
+const texte = "#6f6a62";
 
 const Cadre = ({ w, h, label, children }: { w: number; h: number; label: string; children: React.ReactNode }) => (
   <svg
@@ -81,7 +83,7 @@ export function IllusPieces() {
       <circle cx="198" cy="107" r="6.5" fill={bleu} />
       <text x="211" y="113" fill={bleu} fontSize="16" letterSpacing="1">NOUVELLE</text>
       <text x="190" y="148" fill="#171717" fontSize="25" fontWeight="500">Pièce adverse n° 23</text>
-      <text x="190" y="174" fill="#737373" fontSize="16">Aujourd&apos;hui, 10 h 25</text>
+      <text x="190" y="174" fill="#6f6a62" fontSize="16">Aujourd&apos;hui, 10 h 25</text>
       {[232, 256, 280].map((y, i) => (
         <line key={y} x1={110 + i * 18} x2="444" y1={y} y2={y} stroke="#d4d4d4" strokeWidth="2" strokeDasharray="8 7" />
       ))}
@@ -89,32 +91,48 @@ export function IllusPieces() {
   );
 }
 
-/* 2 — Chronologie : courbe sur un axe de dates, un fait mis en avant (format de feature-one, 918 × 533 → 500 × 290) */
+/* 2 — Chronologie (format de feature-one, 918 × 533 → 500 × 290). 24/09 au soir : la courbe sur un axe de mois
+   faisait graphique de ventes ; c'est maintenant une frise de faits datés, comme celle d'un dossier de plaidoirie,
+   le constat du 12 mai mis en avant avec sa pièce et sa page. */
+const evenements = [
+  { x: 40, d: "12 janv." },
+  { x: 118, d: "3 févr." },
+  { x: 196, d: "28 févr." },
+  { x: 274, d: "14 mars" },
+  { x: 368, d: "12 mai", actif: true },
+  { x: 452, d: "2 juin" },
+];
+
 export function IllusChronologie() {
-  const xs = [40, 120, 200, 280, 360, 440];
-  const dates = ["janv.", "févr.", "mars", "avr.", "mai", "juin"];
   return (
-    <Cadre w={918} h={533} label="Chronologie : les faits datés d'un dossier, le 12 mai mis en avant (pièce 9, page 4)">
-      <defs>
-        <linearGradient id="avocats-courbe-chrono" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#dbeafe" />
-          <stop offset=".6" stopColor={bleu} />
-          <stop offset="1" stopColor="#1e3a8a" />
-        </linearGradient>
-      </defs>
-      {xs.map((x, i) => (
-        <g key={x}>
-          <line x1={x} x2={x} y1="0" y2="290" stroke="#d4d4d4" strokeDasharray="6 6" />
-          <text x={x + 8} y="112" fill={texte} fontSize="19">{dates[i]}</text>
+    <Cadre w={918} h={533} label="Chronologie : les faits datés d'un dossier, le constat du 12 mai mis en avant (pièce n° 9, page 4)">
+      <line x1="16" x2="484" y1="168" y2="168" stroke="#d4d4d4" strokeWidth="2" />
+      {evenements.map((e) => (
+        <g key={e.x}>
+          {e.actif ? (
+            <>
+              <line x1={e.x} x2={e.x} y1="118" y2="168" stroke={bleu} strokeWidth="1.5" strokeDasharray="4 4" />
+              <circle cx={e.x} cy="168" r="17" fill={bleu} fillOpacity=".12" />
+              <circle cx={e.x} cy="168" r="8" fill={bleu} />
+            </>
+          ) : (
+            <circle cx={e.x} cy="168" r="6" fill="#ffffff" stroke="#a3a3a3" strokeWidth="2" />
+          )}
+          <text x={e.x} y="206" textAnchor="middle" fill={e.actif ? "#171717" : texte} fontSize="15" fontWeight={e.actif ? 500 : 400}>{e.d}</text>
+          <rect x={e.x - 26} y="220" width="52" height="7" rx="3.5" fill={e.actif ? "#d4d4d4" : "#ececec"} />
+          <rect x={e.x - 18} y="234" width="36" height="7" rx="3.5" fill="#ececec" />
         </g>
       ))}
-      <path d="M0 282 C 70 246, 110 232, 170 230 S 240 226, 272 206 S 322 176, 352 186 S 380 196, 388 170 S 408 88, 440 72 S 480 58, 500 58" fill="none" stroke="url(#avocats-courbe-chrono)" strokeWidth="6" strokeLinecap="round" />
-      <circle cx="394" cy="144" r="22" fill={bleu} fillOpacity=".25" />
-      <circle cx="394" cy="144" r="9.5" fill={bleu} />
-      <g transform="translate(222 134)">
-        <rect width="140" height="56" rx="12" fill="#ffffff" stroke={trait} />
-        <text x="14" y="24" fill="#171717" fontSize="16" fontWeight="500">12 mai</text>
-        <text x="14" y="43" fill="#737373" fontSize="13">Pièce 9, page 4</text>
+      <g transform="translate(236 28)">
+        <rect width="248" height="90" rx="14" fill="#ffffff" stroke={trait} />
+        <text x="18" y="32" fill="#171717" fontSize="17" fontWeight="500">Constat du 12 mai 2026</text>
+        <text x="18" y="54" fill={texte} fontSize="13.5">Commissaire de justice</text>
+        <text x="18" y="75" fill={bleu} fontSize="13.5" fontWeight="500">Pièce n° 9, page 4</text>
+      </g>
+      <g opacity=".5">
+        <rect x="16" y="52" width="170" height="54" rx="12" fill="#fafafa" stroke={trait} />
+        <rect x="32" y="68" width="96" height="8" rx="4" fill="#e5e5e5" />
+        <rect x="32" y="84" width="130" height="8" rx="4" fill="#ececec" />
       </g>
     </Cadre>
   );
@@ -157,11 +175,11 @@ const Panneau = ({ x, source, page, date, actif }: { x: number; source: string; 
   <g transform={`translate(${x} 12)`}>
     <rect width="206" height="163" rx="14" fill="#ffffff" stroke={actif ? "url(#avocats-liseré-contra)" : trait} strokeWidth={actif ? 1.5 : 1} />
     <text x="16" y="28" fill="#171717" fontSize="13" fontWeight="500">{source}</text>
-    <text x="16" y="45" fill="#737373" fontSize="10.5">{page}</text>
+    <text x="16" y="45" fill="#6f6a62" fontSize="10.5">{page}</text>
     {[60, 74].map((y, i) => <rect key={y} x="16" y={y} width={i ? 120 : 172} height="6" rx="3" fill="#ececec" />)}
-    <rect x="10" y="88" width="186" height="38" rx="8" fill={actif ? "rgba(59,130,246,.10)" : "rgba(244,63,94,.09)"} />
-    <text x="20" y="104" fill="#737373" fontSize="10">remise des clés</text>
-    <text x="20" y="119" fill={actif ? "#2563eb" : "#e11d48"} fontSize="13" fontWeight="500">{date}</text>
+    <rect x="10" y="88" width="186" height="38" rx="8" fill={actif ? "rgba(25,58,41,.08)" : "rgba(244,63,94,.09)"} />
+    <text x="20" y="104" fill="#6f6a62" fontSize="10">remise des clés</text>
+    <text x="20" y="119" fill={actif ? "#193a29" : "#e11d48"} fontSize="13" fontWeight="500">{date}</text>
     {[138, 150].map((y, i) => <rect key={y} x="16" y={y} width={i ? 140 : 172} height="6" rx="3" fill="#ececec" />)}
   </g>
 );
@@ -171,7 +189,7 @@ export function IllusContradictions() {
     <Cadre w={1126} h={422} label="Contradiction : la pièce 7 date la remise des clés au 12 mars, la pièce 15 au 21 mars">
       <defs>
         <linearGradient id="avocats-liseré-contra" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#38bdf8" />
+          <stop offset="0" stopColor="#4f7a62" />
           <stop offset="1" stopColor={bleu} />
         </linearGradient>
       </defs>
@@ -205,9 +223,9 @@ export function IllusSecret() {
         <rect x="30" width="30" height="60" fill="#fff" />
         <rect x="60" width="30" height="60" rx="4" fill="#E1000F" />
         <rect x="60" width="8" height="60" fill="#E1000F" />
-        <text x="0" y="92" fill="#737373" fontSize="13">Éditeur français</text>
+        <text x="0" y="92" fill="#6f6a62" fontSize="13">Éditeur français</text>
       </g>
-      <circle cx="335" cy="175" r="25" fill="#f5f5f5" />
+      <circle cx="335" cy="175" r="25" fill="#f3f1ec" />
       <g transform="translate(323 162)" fill="none" stroke="#171717" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="11" width="18" height="12" rx="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />

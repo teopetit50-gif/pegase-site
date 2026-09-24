@@ -26,6 +26,10 @@
    · La lueur oblique `bg-blue-600` derrière la formule conseillée →
      `bg-blue-300`.
    · La bascule reste bleue, son curseur blanc.
+   24/09 AU SOIR (registre d'un cabinet, avocats.css) : le bleu devient le
+   vert de Tamila (#193a29) — bascule, liseré et bouton de la formule
+   conseillée (variante `marque`, bouton.tsx) ; la lueur oblique est
+   retirée ; le h2 et le prix « Sur audit » passent en serif.
 
    LIENS (règle 6) : « Soumettre un dossier » et « Réserver un audit » →
    /reserver-un-audit (textes.ts), en <Link> dans `Button asChild`, comme
@@ -55,7 +59,7 @@ export default function Formules() {
       <div className="flex flex-col items-center justify-center max-w-2xl mx-auto">
         <AnimationContainer>
           <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-snug! mt-6">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-[1.15]! mt-6">
               {FORMULES.titreAvant} <br className="hidden lg:block" /> <span className="avocats-accent italic">{FORMULES.titreMot}</span>
             </h2>
             <p className="text-base md:text-lg text-center text-[#171717]/80 mt-6">{FORMULES.texte}</p>
@@ -72,7 +76,7 @@ export default function Formules() {
               onClick={() => setMode((m) => (m === a ? b : a))}
               className="relative rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171717]"
             >
-              <div className="w-12 h-6 transition rounded-full shadow-md outline-none bg-blue-500" />
+              <div className="w-12 h-6 transition rounded-full shadow-md outline-none bg-[#193a29]" />
               <div className={cn("absolute inline-flex items-center justify-center w-4 h-4 transition-all duration-500 ease-in-out top-1 left-1 rounded-full bg-white", mode === b ? "translate-x-6" : "translate-x-0")} />
             </button>
             <span className="text-base font-medium">{b}</span>
@@ -84,16 +88,15 @@ export default function Formules() {
           const vedette = plan.id === "cabinet";
           return (
             <AnimationContainer key={plan.id} delay={0.1 * r + 0.2}>
-              <div className={cn("flex flex-col relative rounded-2xl lg:rounded-3xl transition-all items-start w-full border border-[#171717]/10 overflow-hidden", vedette && "border-blue-500")}>
-                {vedette && <div className="absolute top-1/2 inset-x-0 mx-auto h-12 -rotate-45 w-full bg-blue-300 rounded-2xl lg:rounded-3xl blur-[8rem] -z-10" />}
+              <div className={cn("flex flex-col relative rounded-2xl lg:rounded-3xl transition-all items-start w-full border border-[#171717]/10 overflow-hidden", vedette && "border-[#193a29] bg-[#ffffff]")}>
                 <div className="p-4 md:p-8 flex rounded-t-2xl lg:rounded-t-3xl flex-col items-start w-full relative">
                   <h3 className="font-medium text-xl text-[#171717] pt-5">{plan.titre}</h3>
                   {/* py 0,25em : la hauteur du compteur NumberFlow de la référence (48 → 72 px, 30 → 45 px) */}
-                  <p className="mt-3 text-3xl font-medium md:text-5xl leading-none py-[0.25em]">{plan.prix}</p>
-                  <p className="text-sm md:text-base text-[#737373] mt-2">{plan.desc}</p>
+                  <p className="mt-3 text-3xl md:text-5xl leading-none py-[0.25em] avocats-serif">{plan.prix}</p>
+                  <p className="text-sm md:text-base text-[#6f6a62] mt-2">{plan.desc}</p>
                 </div>
                 <div className="flex flex-col items-start w-full px-4 py-2 md:px-8">
-                  <Button asChild size="lg" variant={vedette ? "blue" : "white"} className="w-full">
+                  <Button asChild size="lg" variant={vedette ? "marque" : "white"} className="w-full">
                     <Link href={CONTACT.audit}>{plan.bouton}</Link>
                   </Button>
                   <div className="h-8 overflow-hidden w-full mx-auto">
@@ -104,7 +107,7 @@ export default function Formules() {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: -20, opacity: 0 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="text-sm text-center text-[#737373] mt-3 mx-auto block"
+                        className="text-sm text-center text-[#6f6a62] mt-3 mx-auto block"
                       >
                         {plan.note[mode]}
                       </motion.span>
