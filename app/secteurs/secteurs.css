@@ -498,7 +498,8 @@
   --sct-delai: -6s;
 }
 .sct .sct-fenetre--3,
-.sct .sct-fenetre--4 {
+.sct .sct-fenetre--4,
+.sct .sct-fenetre--5 {
   display: none;
 }
 /* 768 → 1279 — carte paysage, mais le chapô passe sur deux lignes (768)
@@ -604,12 +605,13 @@
   .sct .sct-cartes > :last-child:nth-child(odd) {
     grid-column: auto;
   }
-  /* CINQ SaaS (24/09 au soir) : six colonnes, trois cartes puis deux.
-     Cinq de front laisseraient 190 px de texte par carte. */
-  .sct .sct-cartes:has(> :nth-child(5):last-child) {
+  /* CINQ SaaS ou plus (24/09 au soir) : six colonnes, trois cartes par
+     rangée — trois puis deux à cinq, trois puis trois à six. Cinq de front
+     laisseraient 190 px de texte par carte. */
+  .sct .sct-cartes:has(> :nth-child(5)) {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
-  .sct .sct-cartes:has(> :nth-child(5):last-child) > * {
+  .sct .sct-cartes:has(> :nth-child(5)) > * {
     grid-column: span 2;
   }
   .sct .sct-cartes:has(> :nth-child(5):last-child) > :nth-child(n + 4) {
@@ -756,10 +758,10 @@
 }
 /* dès 1280, cinq SaaS se rangent trois puis deux, comme les cartes */
 @media (min-width: 1280px) {
-  .sct .sct-apercus:has(> :nth-child(5):last-child) {
+  .sct .sct-apercus:has(> :nth-child(5)) {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
-  .sct .sct-apercus:has(> :nth-child(5):last-child) > * {
+  .sct .sct-apercus:has(> :nth-child(5)) > * {
     grid-column: span 2;
   }
   .sct .sct-apercus:has(> :nth-child(5):last-child) > :nth-child(n + 4) {

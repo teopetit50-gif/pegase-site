@@ -92,6 +92,22 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Chaque matin à 7 h, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
   },
+  /* 24/09 (soir) — Namolu, NOM DE TRAVAIL (rapports
+     plans-et-decisions/secteurs/groupes-*-2026-09.md : un produit, trois
+     modules, pour les groupes de distribution d'outre-mer). Décalque de
+     toolio.com. Signe PROVISOIRE (public/logos/namolu-{mark,lockup}.png,
+     monogramme « N » au format des logos de Teo) : à remplacer par le vrai,
+     sans toucher au code. */
+  {
+    slug: "distribution",
+    metier: "Groupes de distribution",
+    saas: "Namolu",
+    texte: "Conteneurs, transferts entre îles et démarque, chaque matin.",
+    detail:
+      "Namolu lit les ventes, les stocks et les conteneurs en mer de votre groupe, magasin par magasin et île par île. La direction des achats reçoit ce qu'il faut commander, faire venir par avion, transférer ou démarquer, et décide.",
+    apercu:
+      "Chaque matin à 7 h, la direction des achats reçoit trois listes : le prochain conteneur à compléter, les articles à faire venir par avion et le stock à transférer ou à démarquer.",
+  },
 ];
 
 export const secteur = (slug: string) => SECTEURS.find((s) => s.slug === slug);

@@ -94,7 +94,7 @@ export const metadata: Metadata = {
    (RAPATRIEMENT.md). Couleurs : celles des quatre cartes de la référence,
    dans leur ordre. */
 const signe = (saas: string) => `url(/logos/${saas.toLowerCase()}-mark.png)`;
-const TEINTES = ["#273252", "#193a29", "#79648c", "#a8927c", "#839cb2"];
+const TEINTES = ["#273252", "#193a29", "#79648c", "#a8927c", "#839cb2", "#0c2542"];
 const signeStyle = (i: number, saas: string) =>
   ({ backgroundColor: TEINTES[i % TEINTES.length], "--sct-signe": signe(saas) }) as React.CSSProperties;
 
