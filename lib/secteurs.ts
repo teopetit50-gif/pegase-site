@@ -82,6 +82,7 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Quatre contrôles suivent la mission de maîtrise d'œuvre, du permis à la réception : le permis et le DCE, l'analyse des offres, le visa des documents d'exécution et les situations de travaux.",
     url: "https://dossieros-site.vercel.app",
+    integre: true,
   },
   {
     slug: "location-automobile",
