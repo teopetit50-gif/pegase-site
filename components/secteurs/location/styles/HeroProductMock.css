@@ -1,0 +1,266 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Tavaro — styles/HeroProductMock.css
+
+   COPIÉ le 24/09/2026 à 14 h 58 de `OMEGA/rentalos-site/src/styles/HeroProductMock.css`
+   (module CSS de la référence daliagency, noms de classes débarrassés de
+   leur hachage par la session qui l'a relevé). Recopié tel quel puis SCOPÉ
+   par script : chaque sélecteur est préfixé de `.p-location ` (la feuille
+   n'agit que sur la page /secteurs/location-automobile), les conditions
+   `@media` / `@container` sont gardées, et les `@keyframes` — globales
+   quoi qu'on fasse — sont renommées `location-*` sans leur hachage, avec
+   chaque `animation` qui les appelle. Importée par page.tsx après
+   location.css, dans l'ordre du layout de la source.
+
+   La maquette du héros était claire : aucune couleur ne change.
+   ══════════════════════════════════════════════════════════════════════ */
+.p-location .HeroProductMock_root{--ink:#111312;--muted:#687170;--faint:#9aa3a1;--line:rgba(17,19,18,0.1);--line-2:rgba(17,19,18,0.14);--canvas:#f4f5f7;--surface:#ffffff;--soft:#f0f2f5;--hover:#f7f8fa;--accent:#1e3a8a;--accent-soft:#e9edff;--accent-text:#172a66;--green:#0b9f6e;--green-soft:#e6f8f1;--green-text:#087f58;--amber:#b7791f;--amber-soft:#fff6e0;--amber-text:#8a5a10;--r:8px;--r-sm:6px;--r-xs:4px;position:relative;width:100%;height:100%;overflow:hidden;color:var(--ink);font-family:var(--font-body),system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--surface);-webkit-user-select:none;-moz-user-select:none;user-select:none;pointer-events:none}
+.p-location .HeroProductMock_root[data-in-view=false] *,.p-location .HeroProductMock_root[data-in-view=false] :after,.p-location .HeroProductMock_root[data-in-view=false] :before{animation-play-state:paused!important}
+.p-location .HeroProductMock_chrome{display:flex;height:1.45rem;align-items:center;gap:.4rem;border-bottom:1px solid var(--line);padding:0 .6rem;background:linear-gradient(180deg,#fbfbfc,#f5f5f7)}
+.p-location .HeroProductMock_dots{display:flex;gap:.26rem}
+.p-location .HeroProductMock_dots i{display:block;width:.42rem;height:.42rem;border-radius:999px;background:#d8d8dc}
+.p-location .HeroProductMock_dots i:first-child{background:#ff5f57}
+.p-location .HeroProductMock_dots i:nth-child(2){background:#febc2e}
+.p-location .HeroProductMock_dots i:nth-child(3){background:#28c840}
+.p-location .HeroProductMock_chromeTitle{display:inline-flex;flex:1;align-items:center;justify-content:center;gap:.28rem;overflow:hidden;color:var(--faint);font-family:var(--font-technical),ui-monospace,system-ui,sans-serif;font-size:.55rem;font-weight:500;letter-spacing:.01em;text-align:center;text-overflow:ellipsis;white-space:nowrap}
+.p-location .HeroProductMock_chromeFavicon{flex-shrink:0;width:.7rem;height:.7rem;border-radius:.12rem;-o-object-fit:contain;object-fit:contain}
+.p-location .HeroProductMock_liveBadge{display:inline-flex;align-items:center;gap:.28rem;border:1px solid var(--line);border-radius:999px;padding:.12rem .45rem;background:var(--surface);color:var(--green-text);font-family:var(--font-technical),ui-monospace,monospace;font-size:.58rem;font-weight:500;letter-spacing:.02em;text-transform:uppercase}
+.p-location .HeroProductMock_liveDot{width:.35rem;height:.35rem;border-radius:999px;background:var(--green);box-shadow:0 0 0 0 rgba(11,159,110,.45);animation:location-HeroProductMock_pulseDot 1.6s ease-out infinite}
+@keyframes location-HeroProductMock_pulseDot{0%{box-shadow:0 0 0 0 rgba(11,159,110,.45)}70%{box-shadow:0 0 0 6px rgba(11,159,110,0)}to{box-shadow:0 0 0 0 rgba(11,159,110,0)}}
+.p-location .HeroProductMock_app{display:grid;grid-template-columns:12.75rem 1fr;height:calc(100% - 1.45rem);min-height:0}
+.p-location .HeroProductMock_sidebar{display:flex;min-height:0;flex-direction:column;gap:.2rem;border-right:1px solid var(--line);padding:.4rem .35rem .45rem;background:#fafafb;overflow:hidden}
+.p-location .HeroProductMock_workspace{display:flex;flex-shrink:0;align-items:center;gap:.35rem;padding:.15rem .3rem .35rem}
+.p-location .HeroProductMock_workspaceMark{display:grid;width:1.2rem;height:1.2rem;flex-shrink:0;place-items:center;border-radius:var(--r-xs);overflow:hidden;background:#fff;border:1px solid var(--line);box-shadow:0 0 0 .5px rgba(15,23,42,.04)}
+.p-location .HeroProductMock_workspaceMark img{width:100%;height:100%;-o-object-fit:contain;object-fit:contain;display:block}
+.p-location .HeroProductMock_workspaceName{overflow:hidden;flex:1;font-size:.68rem;font-weight:650;letter-spacing:-.02em;text-overflow:ellipsis;white-space:nowrap}
+.p-location .HeroProductMock_workspaceChevron{color:var(--faint);font-size:.55rem}
+.p-location .HeroProductMock_nav{display:flex;min-height:0;flex:1;flex-direction:column;gap:.05rem;overflow-x:hidden;overflow-y:auto;padding-bottom:.2rem;scrollbar-width:none}
+.p-location .HeroProductMock_nav::-webkit-scrollbar{display:none}
+.p-location .HeroProductMock_quickActions{display:flex;min-height:1.55rem;align-items:center;gap:.32rem;margin-bottom:.15rem;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 .38rem;background:var(--surface);color:var(--muted);font-size:.62rem;font-weight:500}
+.p-location .HeroProductMock_quickActions kbd{margin-left:auto;border:1px solid var(--line);border-radius:3px;padding:.05rem .22rem;color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;font-weight:500}
+.p-location .HeroProductMock_agentNavItem,.p-location .HeroProductMock_navItem,.p-location .HeroProductMock_navSubItem{display:flex;min-height:1.45rem;align-items:center;gap:.32rem;border-radius:var(--r-sm);padding:0 .35rem;color:var(--muted);font-size:.64rem;font-weight:500;letter-spacing:-.01em;transition:background .22s ease,color .22s ease}
+.p-location .HeroProductMock_navSubItem{min-height:1.35rem;padding-left:.55rem;font-size:.6rem;color:color-mix(in srgb,var(--muted) 92%,transparent)}
+.p-location .HeroProductMock_agentNavItem{min-height:1.35rem;padding-left:.45rem;font-size:.6rem}
+.p-location .HeroProductMock_navItemActive{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+.p-location .HeroProductMock_navLabel{overflow:hidden;min-width:0;text-overflow:ellipsis;white-space:nowrap}
+.p-location .HeroProductMock_navIcon{display:grid;width:.88rem;height:.88rem;flex-shrink:0;place-items:center;color:currentColor;opacity:.85}
+.p-location .HeroProductMock_navIcon svg{width:.8rem;height:.8rem}
+.p-location .HeroProductMock_navLive{margin-left:auto;width:.32rem;height:.32rem;flex-shrink:0;border-radius:999px;background:var(--green)}
+.p-location .HeroProductMock_navBadge{margin-left:auto;border-radius:999px;padding:.05rem .28rem;background:var(--soft);color:var(--muted);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;font-weight:600;line-height:1.2}
+.p-location .HeroProductMock_navItemActive .HeroProductMock_navBadge{background:rgba(30,58,138,.12);color:var(--accent-text)}
+.p-location .HeroProductMock_agentNavDot{width:.38rem;height:.38rem;flex-shrink:0;border-radius:999px}
+.p-location .HeroProductMock_sectionLabel{margin:.38rem .3rem .12rem;color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
+.p-location .HeroProductMock_main{position:relative;display:flex;min-width:0;min-height:0;flex-direction:column;background:var(--surface);overflow:hidden}
+.p-location .HeroProductMock_toolbar{display:flex;min-height:1.65rem;flex-shrink:0;align-items:center;justify-content:space-between;gap:.4rem;border-bottom:1px solid var(--line);padding:0 .65rem}
+.p-location .HeroProductMock_toolbarLeft{display:flex;min-width:0;align-items:center;gap:.4rem}
+.p-location .HeroProductMock_pageTitle{overflow:hidden;font-size:.68rem;font-weight:600;letter-spacing:-.02em;text-overflow:ellipsis;white-space:nowrap}
+.p-location .HeroProductMock_star{color:var(--faint);font-size:.58rem}
+.p-location .HeroProductMock_toolbarRight{display:flex;align-items:center;gap:.25rem;color:var(--faint);font-size:.58rem}
+.p-location .HeroProductMock_agentsFlowFallback{width:100%;height:100%;min-height:220px;background:linear-gradient(180deg,var(--soft) 0,var(--surface) 100%)}
+.p-location .HeroProductMock_viewBody{position:relative;flex:1;min-height:0;overflow:hidden}
+.p-location .HeroProductMock_view{position:absolute;inset:0;display:flex;min-height:0;flex-direction:column}
+.p-location .HeroProductMock_orgCanvas{position:relative;display:flex;flex:1;min-height:0;flex-direction:column;background:radial-gradient(circle at 42% 28%,rgba(233,237,255,.7),transparent 42%),var(--canvas);overflow:hidden}
+.p-location .HeroProductMock_orgStats{display:grid;flex-shrink:0;grid-template-columns:repeat(4,minmax(0,1fr));gap:.35rem;border-bottom:1px solid var(--line);padding:.4rem .55rem .35rem;background:rgba(255,255,255,.72)}
+.p-location .HeroProductMock_orgStat{display:flex;flex-direction:column;gap:.05rem;border:1px solid var(--line);border-radius:var(--r-sm);padding:.28rem .4rem;background:var(--surface);transition:border-color .55s cubic-bezier(.33,.08,.18,1),box-shadow .55s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_orgStatHot{border-color:rgba(30,58,138,.28);box-shadow:0 0 0 2px rgba(233,237,255,.85)}
+.p-location .HeroProductMock_orgStat strong{font-size:.78rem;font-weight:700;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums;transition:color .25s ease}
+.p-location .HeroProductMock_orgStatHot strong{color:var(--accent-text)}
+.p-location .HeroProductMock_orgStat span{color:var(--faint);font-size:.52rem;font-weight:500;letter-spacing:.02em;text-transform:uppercase}
+.p-location .HeroProductMock_orgBanner{display:flex;flex-shrink:0;align-items:center;gap:.4rem;min-height:1.85rem;border-bottom:1px solid var(--line);padding:.32rem .65rem;background:linear-gradient(90deg,rgba(233,237,255,.95),rgba(255,255,255,.7));color:var(--accent-text);font-size:.62rem;font-weight:600;letter-spacing:-.01em}
+.p-location .HeroProductMock_orgBannerText{display:inline-block}
+.p-location .HeroProductMock_orgBannerDot{width:.38rem;height:.38rem;flex-shrink:0;border-radius:999px;background:var(--green-text);box-shadow:0 0 0 3px rgba(11,159,110,.16);transition:background .5s cubic-bezier(.33,.08,.18,1),box-shadow .5s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_orgBody{display:grid;flex:1;min-height:0;grid-template-columns:1fr minmax(12.5rem,13.5rem)}
+.p-location .HeroProductMock_orgTree{position:relative;display:flex;min-width:0;min-height:0;flex:1;flex-direction:column;padding:0;gap:0;overflow:hidden}
+.p-location .HeroProductMock_rfCanvas{width:100%!important;height:100%!important;min-height:0;background:transparent!important}
+.p-location .HeroProductMock_rfCanvas .react-flow__attribution{display:none}
+.p-location .HeroProductMock_rfCanvas .react-flow__node{cursor:default;pointer-events:none}
+.p-location .HeroProductMock_rfCanvas .react-flow__edge-path{transition:stroke .45s cubic-bezier(.33,.08,.18,1),stroke-width .45s cubic-bezier(.33,.08,.18,1),opacity .45s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_rfCanvas .react-flow__edge.animated path{stroke-dasharray:5 4;animation:location-HeroProductMock_rfEdgeDash .9s linear infinite}
+@keyframes location-HeroProductMock_rfEdgeDash{to{stroke-dashoffset:-18}}
+.p-location .HeroProductMock_rfHandle{width:6px!important;height:6px!important;border:1.5px solid rgba(17,19,18,.12)!important;background:#fff!important;opacity:.55;pointer-events:none!important}
+.p-location .HeroProductMock_rfNode{display:flex;width:8.4rem;min-height:4.6rem;flex-direction:column;gap:.06rem;border:1px solid var(--line-2);border-radius:var(--r);padding:.36rem .42rem .38rem;background:var(--surface);box-shadow:0 1px 0 rgba(17,24,39,.03),0 8px 18px rgba(17,24,39,.04);transition:border-color .5s cubic-bezier(.33,.08,.18,1),box-shadow .55s cubic-bezier(.33,.08,.18,1),background .5s cubic-bezier(.33,.08,.18,1),transform .5s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_rfNode_receive{border-color:rgba(30,58,138,.42);background:rgba(243,246,255,.98);box-shadow:0 0 0 3px rgba(30,58,138,.1),0 12px 28px rgba(30,58,138,.1);transform:translateY(-1px) scale(1.02)}
+.p-location .HeroProductMock_rfNode_work{border-color:rgba(30,58,138,.38);background:rgba(246,247,255,1);box-shadow:0 0 0 2px rgba(30,58,138,.08),0 10px 24px rgba(30,58,138,.09);transform:translateY(-1px) scale(1.014)}
+.p-location .HeroProductMock_rfNode_pass{border-color:rgba(30,58,138,.28);background:rgba(250,250,255,1);box-shadow:0 0 0 2px rgba(30,58,138,.06),0 0 18px rgba(30,58,138,.08)}
+.p-location .HeroProductMock_rfNode_done{border-color:rgba(11,159,110,.2);box-shadow:0 0 0 1px rgba(11,159,110,.06),0 6px 16px rgba(17,24,39,.03)}
+.p-location .HeroProductMock_rfNodeTop{display:flex;align-items:center;gap:.35rem}
+.p-location .HeroProductMock_rfNodeAvatar{display:grid;width:1.15rem;height:1.15rem;place-items:center;overflow:hidden;border-radius:999px;background:var(--soft);flex-shrink:0;transition:box-shadow .55s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_rfNodeAvatar img{display:block;width:100%;height:100%;-o-object-fit:cover;object-fit:cover}
+.p-location .HeroProductMock_rfNodeAvatarCrown{box-shadow:0 0 0 1.5px var(--accent)}
+.p-location .HeroProductMock_rfNodeAvatarActive{box-shadow:0 0 0 2px rgba(30,58,138,.45)}
+.p-location .HeroProductMock_rfNodeName{font-size:.66rem;font-weight:650;letter-spacing:-.02em;color:var(--ink)}
+.p-location .HeroProductMock_rfNodeRole{color:var(--muted);font-size:.55rem;font-weight:500;letter-spacing:-.01em}
+.p-location .HeroProductMock_rfNodeTask{display:-webkit-box;min-height:1.3rem;margin-top:.1rem;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:var(--accent-text);font-size:.52rem;font-weight:600;letter-spacing:-.01em;line-height:1.25;transition:opacity .35s ease}
+.p-location .HeroProductMock_rfNodeTask[data-empty=true]{opacity:0}
+.p-location .HeroProductMock_rfNodeStatus{display:inline-flex;align-items:center;gap:.22rem;margin-top:.14rem;color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;letter-spacing:.04em;text-transform:uppercase}
+.p-location .HeroProductMock_rfNodeStatusLive{color:var(--green-text)}
+.p-location .HeroProductMock_rfNodeStatusActive{color:var(--accent-text)}
+.p-location .HeroProductMock_rfNode[data-phase=done] .HeroProductMock_rfNodeStatus{color:var(--green-text)}
+.p-location .HeroProductMock_rfNode[data-phase=receive] .HeroProductMock_rfNodeStatus{color:var(--accent-text)}
+.p-location .HeroProductMock_rfNodeDot{display:inline-block;width:.3rem;height:.3rem;border-radius:999px;background:currentColor;flex-shrink:0}
+.p-location .HeroProductMock_rfNode[data-phase=pass] .HeroProductMock_rfNodeDot,.p-location .HeroProductMock_rfNode[data-phase=receive] .HeroProductMock_rfNodeDot,.p-location .HeroProductMock_rfNode[data-phase=work] .HeroProductMock_rfNodeDot{animation:location-HeroProductMock_rfDotPulse 1.6s ease-in-out infinite}
+@keyframes location-HeroProductMock_rfDotPulse{0%,to{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.88)}}
+.p-location .HeroProductMock_orgFeed{display:flex;min-height:0;flex-direction:column;gap:.28rem;border-left:1px solid var(--line);padding:.45rem .45rem .5rem;background:rgba(255,255,255,.55);overflow:hidden}
+.p-location .HeroProductMock_orgFeedTitle{color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.p-location .HeroProductMock_orgFeedList{display:flex;min-height:0;flex:1;flex-direction:column;gap:.28rem;overflow:hidden}
+.p-location .HeroProductMock_orgFeedRow{display:grid;grid-template-columns:1.7rem minmax(0,1fr);gap:.28rem;align-items:start;border:1px solid var(--line);border-radius:var(--r-xs);padding:.28rem .34rem;background:var(--surface);font-size:.54rem;line-height:1.3;min-width:0;transition:opacity .45s cubic-bezier(.33,.08,.18,1),border-color .5s cubic-bezier(.33,.08,.18,1),background .5s cubic-bezier(.33,.08,.18,1),box-shadow .5s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_orgFeedRowHot{border-color:rgba(30,58,138,.32);background:rgba(233,237,255,.75);box-shadow:0 0 0 1px rgba(30,58,138,.08)}
+.p-location .HeroProductMock_orgFeedTime{color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.48rem;padding-top:.04rem}
+.p-location .HeroProductMock_orgFeedBody{display:flex;flex-wrap:wrap;align-items:baseline;gap:.06rem .3rem;min-width:0}
+.p-location .HeroProductMock_orgFeedAgent{flex:0 0 auto;color:var(--accent-text);font-weight:650;white-space:nowrap}
+.p-location .HeroProductMock_orgFeedText{flex:1 1 3.5rem;min-width:0;color:var(--muted);font-weight:500;overflow-wrap:anywhere;word-break:break-word}
+.p-location .HeroProductMock_orgRow{position:relative;z-index:1;display:flex;width:100%;max-width:28rem;align-items:stretch;justify-content:center;gap:.4rem}
+.p-location .HeroProductMock_orgRowTop{max-width:11.5rem}
+.p-location .HeroProductMock_orgRowMid{max-width:28rem}
+.p-location .HeroProductMock_orgRowBottom{max-width:18rem}
+.p-location .HeroProductMock_orgConnector{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:28rem;height:1.15rem;flex-shrink:0}
+.p-location .HeroProductMock_orgConnectorShort{height:1rem;max-width:18rem}
+.p-location .HeroProductMock_orgConnectorRail{width:2px;height:100%;border-radius:999px;background:rgba(17,19,18,.1);transition:background .65s cubic-bezier(.33,.08,.18,1),box-shadow .65s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_orgConnector[data-active=true] .HeroProductMock_orgConnectorRail{background:rgba(30,58,138,.4)}
+.p-location .HeroProductMock_orgConnectorHot .HeroProductMock_orgConnectorRail{background:rgba(30,58,138,.75);box-shadow:0 0 8px rgba(30,58,138,.24)}
+.p-location .HeroProductMock_orgConnectorBar{position:absolute;top:50%;left:12%;right:12%;height:2px;border-radius:999px;background:rgba(17,19,18,.08);transform:translateY(-50%);transition:background .65s cubic-bezier(.33,.08,.18,1),opacity .65s cubic-bezier(.33,.08,.18,1);opacity:.65}
+.p-location .HeroProductMock_orgConnectorBarNarrow{left:22%;right:22%}
+.p-location .HeroProductMock_orgConnectorBarOn{background:rgba(30,58,138,.35);opacity:1}
+.p-location .HeroProductMock_orgConnectorHot .HeroProductMock_orgConnectorBar{background:rgba(30,58,138,.55)}
+.p-location .HeroProductMock_orgPacket{position:absolute;top:0;left:50%;width:7px;height:7px;border-radius:999px;background:var(--accent-text,#1e3a8a);box-shadow:0 0 0 2px #fff,0 0 12px rgba(30,58,138,.4);z-index:2;pointer-events:none;will-change:transform,opacity,top}
+.p-location .HeroProductMock_agentCard{position:relative;display:flex;min-width:6.2rem;max-width:8.2rem;min-height:4.55rem;flex:1 1 0;flex-direction:column;gap:.06rem;border:1px solid var(--line-2);border-radius:var(--r);padding:.36rem .42rem .38rem;background:var(--surface);box-shadow:0 1px 0 rgba(17,24,39,.03),0 8px 18px rgba(17,24,39,.04);overflow:hidden;will-change:transform,box-shadow,border-color;transform:translateZ(0);backface-visibility:hidden}
+.p-location .HeroProductMock_agentAcceptFlash{pointer-events:none;position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 50% 40%,rgba(30,58,138,.18),transparent 70%)}
+.p-location .HeroProductMock_agentCard[data-phase=receive] .HeroProductMock_agentStatus{color:var(--accent-text)}
+.p-location .HeroProductMock_agentCard[data-phase=done] .HeroProductMock_agentStatus{color:var(--green-text)}
+.p-location .HeroProductMock_agentCard[data-phase=idle] .HeroProductMock_agentStatus{color:var(--faint)}
+.p-location .HeroProductMock_agentTop{display:flex;align-items:center;gap:.35rem}
+.p-location .HeroProductMock_agentAvatar{display:grid;width:1.15rem;height:1.15rem;place-items:center;overflow:hidden;border-radius:999px;background:var(--soft);color:var(--accent-text);font-size:.55rem;font-weight:700;transition:box-shadow .55s cubic-bezier(.33,.08,.18,1)}
+.p-location .HeroProductMock_agentAvatar img{display:block;width:100%;height:100%;-o-object-fit:cover;object-fit:cover}
+.p-location .HeroProductMock_agentAvatarCrown{box-shadow:0 0 0 1.5px var(--accent)}
+.p-location .HeroProductMock_agentAvatarActive{box-shadow:0 0 0 2px rgba(30,58,138,.45)}
+.p-location .HeroProductMock_agentName{font-size:.66rem;font-weight:650;letter-spacing:-.02em}
+.p-location .HeroProductMock_agentRole{color:var(--muted);font-size:.55rem;font-weight:500;letter-spacing:-.01em}
+.p-location .HeroProductMock_agentTask{display:block;min-height:1.3rem;margin-top:.1rem;overflow:hidden;color:var(--accent-text);font-size:.52rem;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.p-location .HeroProductMock_agentTaskInner{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.p-location .HeroProductMock_agentTask[data-empty=true]{opacity:0}
+.p-location .HeroProductMock_agentStatus{display:inline-flex;align-items:center;gap:.22rem;margin-top:.14rem;color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;letter-spacing:.04em;text-transform:uppercase}
+.p-location .HeroProductMock_agentStatusLive{color:var(--green-text)}
+.p-location .HeroProductMock_agentStatusActive{color:var(--accent-text)}
+.p-location .HeroProductMock_agentCardReceive .HeroProductMock_agentStatus{color:#047857}
+.p-location .HeroProductMock_agentCardDone .HeroProductMock_agentStatus{color:var(--green-text)}
+.p-location .HeroProductMock_agentStatusDot{display:inline-block;width:.3rem;height:.3rem;border-radius:999px;background:currentColor;flex-shrink:0}
+.p-location .HeroProductMock_orgBannerDot[data-phase=receive]{background:#047857;box-shadow:0 0 0 3px rgba(11,159,110,.2)}
+.p-location .HeroProductMock_orgBannerDot[data-phase=pass]{background:var(--accent-text,#1e3a8a);box-shadow:0 0 0 3px rgba(30,58,138,.16)}
+.p-location .HeroProductMock_chat{position:relative;display:flex;flex:1;min-height:0;flex-direction:column;justify-content:space-between;padding:.65rem .9rem;background:radial-gradient(circle at 70% 18%,rgba(233,237,255,.45),transparent 42%),var(--surface)}
+.p-location .HeroProductMock_chatThread{display:flex;min-height:0;flex:1;flex-direction:column;justify-content:center;gap:.55rem;overflow:hidden;padding:.2rem .25rem .5rem}
+.p-location .HeroProductMock_chatThreadActive{justify-content:flex-start;padding-top:.35rem}
+.p-location .HeroProductMock_userBubble{align-self:flex-end;max-width:78%;border-radius:999px;padding:.42rem .75rem;background:var(--soft);color:var(--ink);font-size:.72rem;font-weight:500;letter-spacing:-.01em;line-height:1.35}
+.p-location .HeroProductMock_thinkingRow{display:flex;align-items:center;gap:.4rem;align-self:flex-start}
+.p-location .HeroProductMock_thinkingAvatar{display:grid;width:1.25rem;height:1.25rem;flex-shrink:0;place-items:center;overflow:hidden;border-radius:999px;background:var(--soft)}
+.p-location .HeroProductMock_thinkingAvatar img{display:block;width:100%;height:100%;-o-object-fit:contain;object-fit:contain}
+.p-location .HeroProductMock_thinkingCard{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--line);border-radius:999px;padding:.28rem .55rem;background:var(--surface);box-shadow:0 2px 8px rgba(17,24,39,.03)}
+.p-location .HeroProductMock_thinkingLabel{color:var(--muted);font-size:.68rem;font-weight:500}
+.p-location .HeroProductMock_thinkingDots{display:inline-flex;gap:.18rem;align-items:center}
+.p-location .HeroProductMock_thinkingDots i{width:.28rem;height:.28rem;border-radius:999px;background:var(--faint);animation:location-HeroProductMock_thinkPulse 1s ease-in-out infinite}
+.p-location .HeroProductMock_thinkingDots i:nth-child(2){animation-delay:.15s}
+.p-location .HeroProductMock_thinkingDots i:nth-child(3){animation-delay:.3s}
+@keyframes location-HeroProductMock_thinkPulse{0%,80%,to{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-1px)}}
+.p-location .HeroProductMock_toolStack{display:flex;flex-direction:column;align-self:flex-start;gap:.28rem;max-width:92%}
+.p-location .HeroProductMock_toolStackInline{display:flex;flex-wrap:wrap;gap:.28rem}
+.p-location .HeroProductMock_toolChipSm,.p-location .HeroProductMock_toolChip{display:inline-flex;align-items:center;gap:.3rem;border:1px solid var(--line);border-radius:999px;padding:.22rem .48rem;background:var(--soft);color:var(--muted);font-size:.58rem;font-weight:550;letter-spacing:-.01em;white-space:nowrap}
+.p-location .HeroProductMock_toolChipSm{padding:.14rem .4rem;font-size:.54rem}
+.p-location .HeroProductMock_toolDotActive,.p-location .HeroProductMock_toolDotDone{width:.32rem;height:.32rem;flex-shrink:0;border-radius:999px;background:var(--green)}
+.p-location .HeroProductMock_toolDotActive{background:var(--accent);box-shadow:0 0 0 0 rgba(30,58,138,.35);animation:location-HeroProductMock_pulseDot 1.4s ease-out infinite}
+.p-location .HeroProductMock_agentReply{align-self:flex-start;max-width:92%;display:flex;flex-direction:column;gap:.42rem;border:1px solid var(--line);border-radius:12px;padding:.6rem .7rem .65rem;background:var(--surface);box-shadow:0 8px 20px rgba(17,24,39,.04)}
+.p-location .HeroProductMock_agentReplyHead{display:flex;align-items:center;gap:.4rem}
+.p-location .HeroProductMock_agentReplyHead strong{display:block;font-size:.68rem;font-weight:650;letter-spacing:-.02em}
+.p-location .HeroProductMock_agentReplyHead small{display:block;color:var(--faint);font-size:.54rem;font-weight:500}
+.p-location .HeroProductMock_agentReplyAvatar{display:grid;width:1.25rem;height:1.25rem;overflow:hidden;border-radius:999px;background:var(--soft)}
+.p-location .HeroProductMock_agentReplyAvatar img{display:block;width:100%;height:100%;-o-object-fit:contain;object-fit:contain}
+.p-location .HeroProductMock_agentReplyLead{font-size:.7rem;font-weight:500;letter-spacing:-.015em;line-height:1.4;color:var(--ink)}
+.p-location .HeroProductMock_caret{display:inline-block;width:.08rem;height:.85em;margin-left:.08rem;vertical-align:-.08em;background:var(--accent);animation:location-HeroProductMock_caretBlink .9s step-end infinite}
+@keyframes location-HeroProductMock_caretBlink{0%,to{opacity:1}50%{opacity:0}}
+.p-location .HeroProductMock_planList{display:flex;flex-direction:column;gap:.28rem;margin:0;padding:0;list-style:none}
+.p-location .HeroProductMock_planList li{display:flex;align-items:flex-start;gap:.35rem;color:var(--muted);font-size:.66rem;line-height:1.3}
+.p-location .HeroProductMock_planList li:before{content:"";width:.28rem;height:.28rem;margin-top:.32rem;flex-shrink:0;border-radius:999px;background:var(--accent)}
+.p-location .HeroProductMock_assignRow{display:flex;flex-wrap:wrap;gap:.28rem}
+.p-location .HeroProductMock_chip{display:inline-flex;align-items:center;gap:.25rem;border:1px solid var(--line);border-radius:999px;padding:.18rem .45rem;background:var(--soft);color:var(--ink);font-size:.58rem;font-weight:550}
+.p-location .HeroProductMock_chipLive{border-color:rgba(30,58,138,.22);background:var(--accent-soft);color:var(--accent-text)}
+.p-location .HeroProductMock_runPlan{align-self:flex-start;border:1px solid var(--accent);border-radius:var(--r-xs);padding:.28rem .55rem;background:var(--accent);color:#fff;font-size:.62rem;font-weight:600;letter-spacing:-.01em}
+.p-location .HeroProductMock_composer{display:flex;align-items:center;gap:.45rem;border:1px solid var(--line-2);border-radius:14px;padding:.55rem .65rem;background:var(--surface);box-shadow:0 4px 16px rgba(17,24,39,.04);transition:border-color .2s ease,box-shadow .2s ease}
+.p-location .HeroProductMock_composerTyping{border-color:rgba(30,58,138,.28);box-shadow:0 0 0 3px rgba(233,237,255,.85),0 4px 16px rgba(17,24,39,.04)}
+.p-location .HeroProductMock_composerText{flex:1;min-width:0;color:var(--faint);font-size:.7rem;font-weight:500;line-height:1.35}
+.p-location .HeroProductMock_composerTyping .HeroProductMock_composerText{color:var(--ink)}
+.p-location .HeroProductMock_composerMeta{color:var(--faint);font-size:.58rem;font-weight:500}
+.p-location .HeroProductMock_sendBtn{display:grid;width:1.55rem;height:1.55rem;place-items:center;border-radius:999px;background:rgba(30,58,138,.35);color:#fff;font-size:.7rem;line-height:1;transition:background .2s ease}
+.p-location .HeroProductMock_sendBtnHot{background:var(--accent)}
+.p-location .HeroProductMock_pipeline{display:flex;flex:1;min-height:0;flex-direction:column;padding:.4rem .55rem;background:var(--surface);gap:.25rem}
+.p-location .HeroProductMock_pipelineToolbar{display:flex;flex-shrink:0;align-items:center;justify-content:space-between;gap:.4rem;padding:.1rem .15rem .2rem}
+.p-location .HeroProductMock_pipelineTabs{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem;color:var(--muted);font-size:.58rem;font-weight:500}
+.p-location .HeroProductMock_pipelineTabs span{border-radius:999px;padding:.14rem .4rem;background:var(--soft)}
+.p-location .HeroProductMock_pipelineTabActive{background:var(--accent-soft)!important;color:var(--accent-text);font-weight:650}
+.p-location .HeroProductMock_pipelineFilter{color:var(--faint);font-size:.52rem;font-weight:500;white-space:nowrap}
+.p-location .HeroProductMock_pipelineFoot{display:flex;flex-shrink:0;margin-top:auto;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:.35rem .15rem .05rem;color:var(--faint);font-size:.55rem;font-weight:500}
+.p-location .HeroProductMock_pipelineFoot strong{color:var(--muted);font-weight:600}
+.p-location .HeroProductMock_tableBody{display:flex;min-height:0;flex:1;flex-direction:column;gap:.12rem;overflow:hidden}
+.p-location .HeroProductMock_tableHead,.p-location .HeroProductMock_tableRow{display:grid;grid-template-columns:1.45fr .95fr .9fr .9fr 1.15fr;gap:.3rem;align-items:center;padding:0 .3rem}
+.p-location .HeroProductMock_tableHead{flex-shrink:0;min-height:1.35rem;color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+.p-location .HeroProductMock_tableRow{min-height:1.95rem;border:1px solid transparent;border-radius:var(--r-sm);font-size:.62rem;font-weight:500;color:var(--ink)}
+.p-location .HeroProductMock_tableRowActive{border-color:rgba(30,58,138,.2);background:linear-gradient(90deg,rgba(233,237,255,.7),rgba(255,255,255,.4));box-shadow:0 1px 0 rgba(17,24,39,.03)}
+.p-location .HeroProductMock_companyCell{display:flex;min-width:0;align-items:center;gap:.4rem}
+.p-location .HeroProductMock_avatar{display:grid;width:1.35rem;height:1.35rem;flex-shrink:0;place-items:center;overflow:hidden;border-radius:999px;background:#f3f4f6;color:#0b6b3a;font-size:.52rem;font-weight:700}
+.p-location .HeroProductMock_avatar img{display:block;width:100%;height:100%;-o-object-fit:cover;object-fit:cover}
+.p-location .HeroProductMock_companyCopy{display:flex;min-width:0;flex-direction:column;gap:.05rem}
+.p-location .HeroProductMock_companyCopy strong{overflow:hidden;font-size:.7rem;font-weight:650;letter-spacing:-.02em;text-overflow:ellipsis;white-space:nowrap}
+.p-location .HeroProductMock_companyCopy small{overflow:hidden;color:var(--muted);font-size:.58rem;text-overflow:ellipsis;white-space:nowrap}
+.p-location .HeroProductMock_stagePill{display:inline-flex;width:-moz-fit-content;width:fit-content;align-items:center;border-radius:999px;padding:.14rem .42rem;background:var(--soft);color:var(--muted);font-size:.58rem;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.p-location .HeroProductMock_stagePillHot{background:var(--accent-soft);color:var(--accent-text)}
+.p-location .HeroProductMock_owner{display:inline-flex;align-items:center;gap:.25rem;color:var(--muted);font-size:.62rem;white-space:nowrap}
+.p-location .HeroProductMock_ownerDot{width:.35rem;height:.35rem;border-radius:999px;background:var(--accent)}
+.p-location .HeroProductMock_actionMeta{color:var(--muted);font-size:.62rem;white-space:nowrap}
+.p-location .HeroProductMock_mutedRow{opacity:.72}
+.p-location .HeroProductMock_inbox{display:grid;flex:1;min-height:0;grid-template-columns:11.25rem 1fr;background:var(--surface)}
+.p-location .HeroProductMock_threadList{display:flex;min-height:0;flex-direction:column;border-right:1px solid var(--line);background:#fafafb;overflow:hidden}
+.p-location .HeroProductMock_threadListHead{display:flex;flex-shrink:0;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:.4rem .5rem}
+.p-location .HeroProductMock_threadListHead strong{font-size:.64rem;font-weight:650;letter-spacing:-.02em}
+.p-location .HeroProductMock_threadListHead span{color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.5rem;font-weight:500}
+.p-location .HeroProductMock_threadItem{display:flex;flex-direction:column;gap:.08rem;border-bottom:1px solid var(--line);padding:.38rem .5rem .36rem}
+.p-location .HeroProductMock_threadItemActive{background:var(--surface);box-shadow:inset 2px 0 0 var(--accent)}
+.p-location .HeroProductMock_threadItemUnread strong{font-weight:700}
+.p-location .HeroProductMock_threadItemTop{display:flex;align-items:center;justify-content:space-between;gap:.3rem}
+.p-location .HeroProductMock_threadItemTop strong{font-size:.62rem;font-weight:650;letter-spacing:-.02em}
+.p-location .HeroProductMock_threadItemTop span{color:var(--faint);font-size:.5rem}
+.p-location .HeroProductMock_threadPerson{color:var(--ink);font-size:.56rem;font-weight:550}
+.p-location .HeroProductMock_threadPreview{overflow:hidden;color:var(--muted);font-size:.54rem;text-overflow:ellipsis;white-space:nowrap}
+.p-location .HeroProductMock_threadMain{display:flex;min-width:0;min-height:0;flex-direction:column;padding:.5rem .65rem .55rem;gap:.4rem;overflow:hidden}
+.p-location .HeroProductMock_inboxSources{display:flex;flex-direction:column;gap:.18rem;border:1px solid var(--line);border-radius:var(--r-sm);padding:.35rem .45rem;background:var(--soft)}
+.p-location .HeroProductMock_sectionLabelInline{color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.48rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.p-location .HeroProductMock_sourceRow{display:flex;align-items:center;justify-content:space-between;gap:.4rem;font-size:.58rem;font-weight:550;color:var(--ink)}
+.p-location .HeroProductMock_sourceRow small{color:var(--faint);font-size:.5rem;font-weight:500}
+.p-location .HeroProductMock_personRow{display:flex;align-items:center;gap:.45rem}
+.p-location .HeroProductMock_personRow strong{font-size:.74rem;font-weight:650;letter-spacing:-.02em}
+.p-location .HeroProductMock_personRow small{display:block;color:var(--muted);font-size:.58rem}
+.p-location .HeroProductMock_tag{display:inline-flex;margin-left:auto;align-items:center;border-radius:999px;padding:.14rem .42rem;font-size:.55rem;font-weight:650;letter-spacing:.02em;text-transform:uppercase}
+.p-location .HeroProductMock_tagAmber{background:var(--amber-soft);color:var(--amber-text)}
+.p-location .HeroProductMock_tagBlue{background:var(--accent-soft);color:var(--accent-text)}
+.p-location .HeroProductMock_tagGreen{background:var(--green-soft);color:var(--green-text)}
+.p-location .HeroProductMock_bubble{border:1px solid var(--line);border-radius:10px;padding:.55rem .65rem;background:var(--soft);color:var(--ink);font-size:.68rem;line-height:1.4}
+.p-location .HeroProductMock_bubbleAgent{background:var(--surface);box-shadow:0 6px 16px rgba(17,24,39,.04)}
+.p-location .HeroProductMock_bubbleLabel{display:block;margin-bottom:.2rem;color:var(--faint);font-family:var(--font-technical),ui-monospace,monospace;font-size:.52rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.p-location .HeroProductMock_scoreRow{display:flex;flex-wrap:wrap;gap:.3rem}
+.p-location .HeroProductMock_metaChip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:.14rem .42rem;background:var(--surface);color:var(--muted);font-size:.58rem;font-weight:550}
+.p-location .HeroProductMock_actions{display:flex;gap:.35rem;margin-top:auto}
+.p-location .HeroProductMock_btn{display:inline-flex;min-height:1.7rem;align-items:center;justify-content:center;border:1px solid var(--line-2);border-radius:var(--r-xs);padding:0 .65rem;background:var(--surface);color:var(--ink);font-size:.65rem;font-weight:600}
+.p-location .HeroProductMock_btnPrimary{border-color:var(--accent);background:var(--accent);color:#fff}
+@container maquette (max-width:768px){
+.p-location .HeroProductMock_app{grid-template-columns:1fr}
+.p-location .HeroProductMock_sidebar{display:none}
+.p-location .HeroProductMock_chatThreadActive{justify-content:flex-start}
+.p-location .HeroProductMock_tableHead,.p-location .HeroProductMock_tableRow{grid-template-columns:1.4fr 1fr 1fr}
+.p-location .HeroProductMock_tableHead span:nth-child(4),.p-location .HeroProductMock_tableHead span:nth-child(5),.p-location .HeroProductMock_tableRow>:nth-child(4),.p-location .HeroProductMock_tableRow>:nth-child(5){display:none}
+.p-location .HeroProductMock_inbox{grid-template-columns:1fr}
+.p-location .HeroProductMock_threadList{display:none}
+.p-location .HeroProductMock_orgBody{grid-template-columns:1fr}
+.p-location .HeroProductMock_orgFeed{display:none}
+.p-location .HeroProductMock_orgStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+.p-location .HeroProductMock_agentCard{min-width:5.4rem;max-width:7rem;padding:.34rem .4rem}
+.p-location .HeroProductMock_orgRow{gap:.28rem}
+.p-location .HeroProductMock_chromeTitle{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){
+.p-location .HeroProductMock_liveDot{animation:none}
+}
