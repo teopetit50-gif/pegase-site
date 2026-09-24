@@ -22,6 +22,16 @@ import "./secteurs.css";
    Le relevé au pixel, la police et les écarts de forme sont en tête de
    ./secteurs.css ; les animations, dans components/secteurs/Mouvements.tsx.
 
+   ── 24/09 AU SOIR : BLANC, ET CINQ SAAS ──────────────────────────────
+   « Omega c'est blanc » : le hero et l'appel, noirs dans la référence,
+   passent au clair (fond gris très pâle, voile blanc, bouton noir), et
+   l'appel perd sa photo pour les signes des SaaS. Les captures sont celles
+   des pages RAPATRIÉES (/secteurs/<slug>, blanches), plus des sites
+   Vercel. Avec Tiroma, cinq SaaS : les cartes et les aperçus se rangent
+   trois puis deux (secteurs.css, `:has(> :nth-child(5):last-child)`), la
+   cinquième fenêtre du hero n'apparaît que dès 1280. Le compte écrit en
+   toutes lettres (« les cinq logiciels ») est lu dans SECTEURS.
+
    ── LES SECTIONS, DANS L'ORDRE DE LA RÉFÉRENCE ───────────────────────
     1 hero pleine image + bouton     → « Logiciels métier », les quatre
                                        captures en fenêtres dans le noir
@@ -84,7 +94,13 @@ export const metadata: Metadata = {
    (RAPATRIEMENT.md). Couleurs : celles des quatre cartes de la référence,
    dans leur ordre. */
 const signe = (saas: string) => `url(/logos/${saas.toLowerCase()}-mark.png)`;
-const TEINTES = ["#273252", "#193a29", "#79648c", "#a8927c"];
+const TEINTES = ["#273252", "#193a29", "#79648c", "#a8927c", "#839cb2"];
+const signeStyle = (i: number, saas: string) =>
+  ({ backgroundColor: TEINTES[i % TEINTES.length], "--sct-signe": signe(saas) }) as React.CSSProperties;
+
+/* « les cinq logiciels » : le compte suit la table */
+const EN_LETTRES = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit"];
+const COMPTE = EN_LETTRES[SECTEURS.length] ?? String(SECTEURS.length);
 
 /* La méthode commune — voir « ce qui n'est pas inventé » plus haut.
    Couleurs des pastilles : celles des trois piliers de la référence. */
@@ -248,7 +264,7 @@ export default function SecteursPage() {
           <div className="sct-wrap">
             <Entete etiquette="Aperçu" titre="Chaque logiciel rend un document à valider" />
             <div className="sct-apercus">
-              {SECTEURS.map((s) => (
+              {SECTEURS.map((s, i) => (
                 <CarteApercu key={s.slug} href={`/secteurs/${s.slug}`}>
                   <div className="sct-apercu__image">
                     <Image
@@ -260,7 +276,10 @@ export default function SecteursPage() {
                   </div>
                   <div className="sct-apercu__texte">
                     <p className="sct-apercu__metier">{s.metier}</p>
-                    <h3 className="sct-apercu__titre">{s.saas}</h3>
+                    <h3 className="sct-apercu__titre sct-apercu__nom">
+                      <span aria-hidden className="sct-apercu__signe" style={signeStyle(i, s.saas)} />
+                      {s.saas}
+                    </h3>
                     <p className="sct-apercu__legende">{s.apercu}</p>
                   </div>
                 </CarteApercu>
@@ -278,7 +297,7 @@ export default function SecteursPage() {
           <div className="sct-piliers__grille">
             <div className="sct-piliers__gauche">
               <p className="sct-piliers__etiquette">Le principe</p>
-              <h2 className="sct-piliers__titre">Les quatre logiciels suivent la même méthode</h2>
+              <h2 className="sct-piliers__titre">Les {COMPTE} logiciels suivent la même méthode</h2>
               <p className="sct-piliers__chapo">
                 Ils partent des documents que vous produisez déjà, relèvent chaque écart avec la
                 pièce qui le fonde et laissent la décision à la personne qui signe.
@@ -320,23 +339,20 @@ export default function SecteursPage() {
 
         {/* ════════ 5 · L'APPEL ════════
             La carte s'ouvre au défilement (clip-path 5 % → 0), comme leur
-            « ClipScrollSection ». La photo : un couloir sombre déjà au
-            dépôt (crédits dans public/photos/CREDITS.txt) — la référence
-            pose ici une photo sombre, pas une capture, et une cinquième
-            capture sous le titre aurait fait lire deux textes l'un sur
-            l'autre. */}
+            « ClipScrollSection ». La référence y pose une photo sombre ;
+            depuis le 24/09 au soir la carte est claire (le gris des
+            cartes) et porte les signes des SaaS au-dessus du titre. */}
         <div className="sct-cadre sct-cadre--appel">
           <div className="sct-clip" data-sct-clip>
             <section className="sct-plein sct-plein--appel">
-              <Image
-                src="/photos/donnees-couloir.jpg"
-                alt=""
-                fill
-                loading="lazy"
-                sizes="100vw"
-              />
-              <div aria-hidden className="sct-voile" />
               <div className="sct-plein__texte">
+                <div aria-hidden className="sct-signes">
+                  {SECTEURS.map((s, i) => (
+                    <span key={s.slug}>
+                      <span style={signeStyle(i, s.saas)} />
+                    </span>
+                  ))}
+                </div>
                 <h2 className="sct-h1" data-sct-texte="appel">
                   Tester sur un dossier que vous connaissez
                 </h2>

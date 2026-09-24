@@ -29,11 +29,11 @@ app/secteurs/<slug>/page.tsx        la page, métadonnées comprises
 app/secteurs/<slug>/<slug>.css      le bloc .p-<…>, relevé et écarts en tête
 components/secteurs/<slug>/*        les composants copiés
 public/secteurs-<slug>/*            ses images (JAMAIS public/secteurs/…)
-lib/secteurs.ts                     une seule clé : integre: true sur sa ligne
+lib/secteurs.ts                     sa ligne dans SECTEURS (menu et /secteurs la lisent)
 ```
 
 Ne pas toucher : `lib/menu.ts`, `next.config.ts`, `app/secteurs/page.tsx`,
-`app/secteurs/[metier]/`, `components/logos.tsx`, `globals.css`. Ne pas
+`components/logos.tsx`, `globals.css`. Ne pas
 commiter : l'orchestrateur s'en charge.
 
 ## La page est pleine : aucun filet qui l'encadre (24/09, soir)
@@ -82,8 +82,10 @@ barres sur les côtés ». Règle, pour les quatre :
 7. **Écrire `page.tsx`** : `PageShell`, `data-monde="clair"`, le cadre de la
    source moins entête et pied, métadonnées copiées de CASHD avec
    `images: ["/opengraph-image"]`.
-8. **Brancher** : `integre: true` dans `lib/secteurs.ts`. Le build doit
-   afficher `○ /secteurs/<slug>` hors de la liste `[metier]`.
+8. **Brancher** : la ligne du SaaS dans `SECTEURS` (`lib/secteurs.ts`), son
+   signe dans `public/logos/<nom>-mark.png` et sa capture à 1440 × 1080
+   dans `public/apercus-secteurs/<slug>.png`. La route à cadre `[metier]`
+   n'existe plus depuis le 24/09 au soir : toute ligne DOIT avoir sa page.
 9. **Vert** : `npx tsc --noEmit`, `npx eslint <tes fichiers>`,
    `npm run build`. Puis `npx next start -p 3471` (jamais `next dev`, un seul
    serveur sur ce Mac) et l'arrêter à la fin.

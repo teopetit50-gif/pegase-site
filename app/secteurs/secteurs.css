@@ -248,8 +248,8 @@
   height: 40px;
   overflow: hidden;
   border-radius: var(--sct-r-sm);
-  background: #ffffff;
-  color: #000000;
+  background: #000000; /* 24/09 soir : noir sur le hero devenu blanc */
+  color: #ffffff;
   text-decoration: none;
   letter-spacing: normal;
 }
@@ -290,8 +290,8 @@
   justify-content: center;
   overflow: hidden;
   border-radius: 6px;
-  background: #000000;
-  color: #ffffff;
+  background: #ffffff;
+  color: #000000;
 }
 .sct .sct-pastille__rail {
   position: absolute;
@@ -313,7 +313,7 @@
   justify-content: center;
 }
 .sct .sct-cta:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid #000000;
   outline-offset: 2px;
 }
 
@@ -378,10 +378,16 @@
 /* 24/09, « trop sombre le fond » : le voile uniforme descend de 45 à 30 %
    (les fenêtres ne passent jamais sous le texte, le dégradé suffit à le
    porter) et le fond de .sct-media monte d'un demi-cran. */
+/* 24/09 au soir — « Omega c'est blanc » : le hero passe au clair. Le voile
+   devient BLANC, toujours appuyé vers le bas-gauche où est le texte, et
+   plus rien d'uniforme : les captures sont désormais des pages claires. */
 .sct .sct-voile--hero {
-  background-image:
-    linear-gradient(to top right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 55%),
-    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
+  background-image: linear-gradient(
+    to top right,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 0.82) 30%,
+    rgba(255, 255, 255, 0) 62%
+  );
 }
 
 .sct .sct-plein__texte {
@@ -392,7 +398,7 @@
   max-width: 72rem;
   flex-direction: column;
   gap: 24px;
-  color: #ffffff;
+  color: var(--sct-texte);
 }
 .sct .sct-plein__actions {
   display: flex;
@@ -410,13 +416,13 @@
   line-height: 1.05;
   font-weight: 400;
   text-wrap: balance;
-  color: #ffffff;
+  color: var(--sct-texte);
 }
 .sct .sct-lead {
   font-size: 1rem;
   line-height: 1.45;
   text-wrap: balance;
-  color: #ffffff;
+  color: var(--sct-doux);
 }
 @media (min-width: 768px) {
   .sct .sct-lead {
@@ -437,12 +443,12 @@
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
-  background-image: linear-gradient(#1a1a1d, #1a1a1d);
+  background-image: linear-gradient(#eeeff1, #eeeff1);
 }
 .sct .sct-lueur {
   position: absolute;
   inset: 0;
-  background: radial-gradient(55% 60% at 58% 12%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(55% 60% at 58% 12%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%);
 }
 .sct .sct-fenetre {
   position: absolute;
@@ -453,8 +459,8 @@
   overflow: hidden;
   border-radius: 10px;
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 30px 80px rgba(0, 0, 0, 0.6);
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 24px 60px -12px rgba(0, 0, 0, 0.18);
   animation: sct-flotte var(--sct-duree, 9s) ease-in-out var(--sct-delai, 0s) infinite alternate;
   will-change: transform;
 }
@@ -491,7 +497,8 @@
   --sct-duree: 11s;
   --sct-delai: -6s;
 }
-.sct .sct-fenetre--3 {
+.sct .sct-fenetre--3,
+.sct .sct-fenetre--4 {
   display: none;
 }
 /* 768 → 1279 — carte paysage, mais le chapô passe sur deux lignes (768)
@@ -543,9 +550,20 @@
     --sct-l: 27%;
   }
   .sct .sct-fenetre--3 {
-    --sct-x: 60%;
-    --sct-y: 58%;
-    --sct-l: 33%;
+    --sct-x: 55%;
+    --sct-y: 60%;
+    --sct-l: 30%;
+  }
+  /* la cinquième (24/09 au soir, Tiroma) : au bord droit, coupée comme
+     la quatrième, entre la troisième et elle. Sous 1280 elle tomberait
+     sous le texte : elle n'y est pas. */
+  .sct .sct-fenetre--4 {
+    display: block;
+    --sct-x: 87%;
+    --sct-y: 50%;
+    --sct-l: 24%;
+    --sct-duree: 10.5s;
+    --sct-delai: -5s;
   }
 }
 
@@ -574,10 +592,28 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  /* un compte impair : la dernière prend la rangée entière */
+  .sct .sct-cartes > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 @media (min-width: 1280px) {
   .sct .sct-cartes {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .sct .sct-cartes > :last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+  /* CINQ SaaS (24/09 au soir) : six colonnes, trois cartes puis deux.
+     Cinq de front laisseraient 190 px de texte par carte. */
+  .sct .sct-cartes:has(> :nth-child(5):last-child) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .sct .sct-cartes:has(> :nth-child(5):last-child) > * {
+    grid-column: span 2;
+  }
+  .sct .sct-cartes:has(> :nth-child(5):last-child) > :nth-child(n + 4) {
+    grid-column: span 3;
   }
 }
 /* Le porteur de l'entrée au défilement (x, échelle, opacité) : la
@@ -700,6 +736,40 @@
 @media (min-width: 768px) {
   .sct .sct-apercus {
     grid-template-columns: repeat(2, minmax(0, 1fr)); /* écart nº 5 */
+  }
+  /* un compte impair (cinq SaaS, 24/09 au soir) : la dernière carte prend
+     la rangée et se couche, capture à gauche, texte à droite — une
+     capture pleine largeur ferait une carte de 700 px de haut. */
+  .sct .sct-apercus > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .sct .sct-apercus > :last-child:nth-child(odd) .sct-apercu {
+    flex-direction: row;
+  }
+  .sct .sct-apercus > :last-child:nth-child(odd) .sct-apercu__image {
+    width: 50%;
+    flex-shrink: 0;
+  }
+  .sct .sct-apercus > :last-child:nth-child(odd) .sct-apercu__texte {
+    justify-content: center;
+  }
+}
+/* dès 1280, cinq SaaS se rangent trois puis deux, comme les cartes */
+@media (min-width: 1280px) {
+  .sct .sct-apercus:has(> :nth-child(5):last-child) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .sct .sct-apercus:has(> :nth-child(5):last-child) > * {
+    grid-column: span 2;
+  }
+  .sct .sct-apercus:has(> :nth-child(5):last-child) > :nth-child(n + 4) {
+    grid-column: span 3;
+  }
+  .sct .sct-apercus:has(> :nth-child(5):last-child) > :last-child .sct-apercu {
+    flex-direction: column;
+  }
+  .sct .sct-apercus:has(> :nth-child(5):last-child) > :last-child .sct-apercu__image {
+    width: 100%;
   }
 }
 /* Le support porte l'inclinaison (components/secteurs/CarteApercu.tsx) ;
@@ -967,8 +1037,44 @@
   clip-path: inset(0 round var(--sct-r-xl));
 }
 .sct .sct-plein--appel {
-  /* le fond de secours de la référence, sous la photo — en image */
-  background-image: linear-gradient(#193a29, #193a29);
+  /* 24/09 au soir : la carte d'appel passe au clair, sans photo — le gris
+     des cartes, en image pour la sonde de l'entête. Les signes des SaaS
+     montent au-dessus du titre. */
+  background-image: linear-gradient(var(--sct-fond), var(--sct-fond));
+}
+.sct .sct-signes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sct .sct-signes > span {
+  display: flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--sct-filet);
+}
+.sct .sct-signes > span > span {
+  width: 24px;
+  height: 24px;
+  -webkit-mask: var(--sct-signe) center / contain no-repeat;
+  mask: var(--sct-signe) center / contain no-repeat;
+}
+/* le signe du SaaS devant son nom, sur la carte d'aperçu */
+.sct .sct-apercu__nom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sct .sct-apercu__signe {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  -webkit-mask: var(--sct-signe) center / contain no-repeat;
+  mask: var(--sct-signe) center / contain no-repeat;
 }
 
 @media (prefers-reduced-motion: reduce) {
