@@ -96,7 +96,7 @@ export function MagicCard({
             radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px,
               ${gradientFrom}, 
               ${gradientTo}, 
-              #e5e1d8 100%
+              #e6e6e6 100%
             )
           `;
 
@@ -109,7 +109,7 @@ export function MagicCard({
         style={{ background: lueur, opacity: gradientOpacity }}
       />
       <motion.div
-        className="pointer-events-none absolute inset-0 rounded-xl bg-[#e5e1d8] duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 rounded-xl bg-[#e6e6e6] duration-300 group-hover:opacity-100"
         style={{ background: liseré }}
       />
     </div>

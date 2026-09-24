@@ -134,7 +134,7 @@ export default function ApercuDossier() {
         style={{ width: L, height: H, transform: `scale(${echelle})` }}
       >
         {/* barre latérale */}
-        <aside className="w-[268px] shrink-0 border-r border-black/[0.08] flex flex-col px-5 pt-5 bg-[#fcfbf9]">
+        <aside className="w-[268px] shrink-0 border-r border-black/[0.08] flex flex-col px-5 pt-5 bg-[#fafafa]">
           <div className="flex gap-2 pb-6">
             <span className="size-3 rounded-full bg-[#ff5f57]" />
             <span className="size-3 rounded-full bg-[#febc2e]" />
@@ -242,7 +242,7 @@ export default function ApercuDossier() {
                   <span className="flex items-center gap-1.5 rounded-[0.6rem] border border-black/10 px-3 h-8 text-zinc-700"><Download className="size-3.5" />Word</span>
                 </div>
               </div>
-              <div className="relative mt-4 min-h-0 flex-1 overflow-hidden rounded-t-xl bg-[#f3f1ec] px-6 pt-6">
+              <div className="relative mt-4 min-h-0 flex-1 overflow-hidden rounded-t-xl bg-[#f5f5f5] px-6 pt-6">
                 <div className="grid grid-cols-[1fr_214px] gap-x-6 rounded-t-[4px] bg-white px-9 pt-8 pb-10 shadow-[0_1px_3px_rgba(30,22,10,0.10),0_8px_24px_-8px_rgba(30,22,10,0.12)] avocats-serif text-[15px] leading-[1.6] text-zinc-800">
                   <div className="col-start-1 pb-5">
                     <p className="text-right text-[12px] tracking-wide text-zinc-500">RG n° 24/03817</p>

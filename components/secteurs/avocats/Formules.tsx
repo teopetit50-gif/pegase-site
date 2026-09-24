@@ -93,7 +93,7 @@ export default function Formules() {
                   <h3 className="font-medium text-xl text-[#171717] pt-5">{plan.titre}</h3>
                   {/* py 0,25em : la hauteur du compteur NumberFlow de la référence (48 → 72 px, 30 → 45 px) */}
                   <p className="mt-3 text-3xl md:text-5xl leading-none py-[0.25em] avocats-serif">{plan.prix}</p>
-                  <p className="text-sm md:text-base text-[#6f6a62] mt-2">{plan.desc}</p>
+                  <p className="text-sm md:text-base text-[#737373] mt-2">{plan.desc}</p>
                 </div>
                 <div className="flex flex-col items-start w-full px-4 py-2 md:px-8">
                   <Button asChild size="lg" variant={vedette ? "marque" : "white"} className="w-full">
@@ -107,7 +107,7 @@ export default function Formules() {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: -20, opacity: 0 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="text-sm text-center text-[#6f6a62] mt-3 mx-auto block"
+                        className="text-sm text-center text-[#737373] mt-3 mx-auto block"
                       >
                         {plan.note[mode]}
                       </motion.span>

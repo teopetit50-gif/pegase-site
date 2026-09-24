@@ -38,8 +38,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-[#171717] text-[#ffffff] hover:opacity-70 hover:ring-4 hover:ring-[#171717]/10",
-        outline: "border border-[#e5e1d8] bg-[#ffffff] hover:bg-[#f3f1ec] hover:text-[#171717]",
-        subtle: "border border-[#e5e1d8] bg-[#f3f1ec]/20 hover:bg-[#171717]/5 hover:text-[#171717]",
+        outline: "border border-[#e6e6e6] bg-[#ffffff] hover:bg-[#f5f5f5] hover:text-[#171717]",
+        subtle: "border border-[#e6e6e6] bg-[#f5f5f5]/20 hover:bg-[#171717]/5 hover:text-[#171717]",
         /* 24/09 au soir : l'ancienne variante `blue` (bleu-500), passée au vert de Tamila. */
         marque: "border border-[#193a29] bg-[#193a29] text-white hover:bg-[#0f2a1c]",
         ghost: "hover:bg-[#171717]/5 hover:text-[#171717]",

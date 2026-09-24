@@ -41,7 +41,7 @@
    `bleu` reste pour ne pas réécrire chaque dessin. */
 const bleu = "#193a29";
 const trait = "#e5e5e5";
-const texte = "#6f6a62";
+const texte = "#737373";
 
 const Cadre = ({ w, h, label, children }: { w: number; h: number; label: string; children: React.ReactNode }) => (
   <svg
@@ -83,7 +83,7 @@ export function IllusPieces() {
       <circle cx="198" cy="107" r="6.5" fill={bleu} />
       <text x="211" y="113" fill={bleu} fontSize="16" letterSpacing="1">NOUVELLE</text>
       <text x="190" y="148" fill="#171717" fontSize="25" fontWeight="500">Pièce adverse n° 23</text>
-      <text x="190" y="174" fill="#6f6a62" fontSize="16">Aujourd&apos;hui, 10 h 25</text>
+      <text x="190" y="174" fill="#737373" fontSize="16">Aujourd&apos;hui, 10 h 25</text>
       {[232, 256, 280].map((y, i) => (
         <line key={y} x1={110 + i * 18} x2="444" y1={y} y2={y} stroke="#d4d4d4" strokeWidth="2" strokeDasharray="8 7" />
       ))}
@@ -175,10 +175,10 @@ const Panneau = ({ x, source, page, date, actif }: { x: number; source: string; 
   <g transform={`translate(${x} 12)`}>
     <rect width="206" height="163" rx="14" fill="#ffffff" stroke={actif ? "url(#avocats-liseré-contra)" : trait} strokeWidth={actif ? 1.5 : 1} />
     <text x="16" y="28" fill="#171717" fontSize="13" fontWeight="500">{source}</text>
-    <text x="16" y="45" fill="#6f6a62" fontSize="10.5">{page}</text>
+    <text x="16" y="45" fill="#737373" fontSize="10.5">{page}</text>
     {[60, 74].map((y, i) => <rect key={y} x="16" y={y} width={i ? 120 : 172} height="6" rx="3" fill="#ececec" />)}
     <rect x="10" y="88" width="186" height="38" rx="8" fill={actif ? "rgba(25,58,41,.08)" : "rgba(244,63,94,.09)"} />
-    <text x="20" y="104" fill="#6f6a62" fontSize="10">remise des clés</text>
+    <text x="20" y="104" fill="#737373" fontSize="10">remise des clés</text>
     <text x="20" y="119" fill={actif ? "#193a29" : "#e11d48"} fontSize="13" fontWeight="500">{date}</text>
     {[138, 150].map((y, i) => <rect key={y} x="16" y={y} width={i ? 140 : 172} height="6" rx="3" fill="#ececec" />)}
   </g>
@@ -223,9 +223,9 @@ export function IllusSecret() {
         <rect x="30" width="30" height="60" fill="#fff" />
         <rect x="60" width="30" height="60" rx="4" fill="#E1000F" />
         <rect x="60" width="8" height="60" fill="#E1000F" />
-        <text x="0" y="92" fill="#6f6a62" fontSize="13">Éditeur français</text>
+        <text x="0" y="92" fill="#737373" fontSize="13">Éditeur français</text>
       </g>
-      <circle cx="335" cy="175" r="25" fill="#f3f1ec" />
+      <circle cx="335" cy="175" r="25" fill="#f5f5f5" />
       <g transform="translate(323 162)" fill="none" stroke="#171717" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="11" width="18" height="12" rx="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />

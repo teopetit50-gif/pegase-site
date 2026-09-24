@@ -63,7 +63,8 @@ import "./avocats.css";
    24/09 (SOIR) — « ON NE VOIT PAS ASSEZ QUE ÇA FAIT AVOCAT » (Teo). La
    page quitte les codes du gabarit vetra pour ceux des sites du métier :
    titres en serif (Newsreader, app/_polices/serif.ts, posée ici par
-   `serifAvocats.variable`), fond papier, vert de Tamila au lieu du bleu,
+   `serifAvocats.variable`), fond blanc (le papier crème essayé le même
+   soir a été refusé), vert de Tamila au lieu du bleu,
    plus d'orbites, de halos ni de particules (orbites.tsx, particules.tsx
    et halo.tsx supprimés), photos du Palais de justice de Paris, et un
    écran produit qui montre des conclusions annotées. Le détail et le

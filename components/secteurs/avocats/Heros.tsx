@@ -79,7 +79,7 @@ export default function Hero() {
           <AnimationContainer className="relative hidden lg:block" delay={0.1}>
             <Link
               href="#fonctionnalites"
-              className="group mx-auto flex w-fit items-center rounded-full border border-[#e5e1d8] bg-[#ffffff] px-2 py-1 text-sm text-[#171717] transition-colors duration-200 hover:border-[#193a29]/30"
+              className="group mx-auto flex w-fit items-center rounded-full border border-[#e6e6e6] bg-[#ffffff] px-2 py-1 text-sm text-[#171717] transition-colors duration-200 hover:border-[#193a29]/30"
             >
               <span className="mr-2 flex h-[18px] items-center justify-center rounded-full bg-[#193a29] px-2 text-[9px] font-medium tracking-wide text-white">
                 {HERO.badge}
@@ -95,7 +95,7 @@ export default function Hero() {
           </AnimationContainer>
 
           <AnimationContainer delay={0.2}>
-            <p className="max-w-xl mx-auto mt-2 text-base lg:text-lg text-center text-[#6f6a62]">{HERO.texte}</p>
+            <p className="max-w-xl mx-auto mt-2 text-base lg:text-lg text-center text-[#737373]">{HERO.texte}</p>
           </AnimationContainer>
 
           <AnimationContainer delay={0.25} className="z-20">
@@ -124,7 +124,7 @@ export default function Hero() {
               <div className="relative -mt-[16%] mx-3 sm:mx-8 lg:mx-16 overflow-hidden rounded-[0.6rem] lg:rounded-[18px] border border-black/10 bg-[#ffffff] shadow-[0_24px_60px_-20px_rgba(30,22,10,0.35)]">
                 <ApercuDossier />
               </div>
-              <figcaption className="mt-3 text-left text-xs text-[#6f6a62]">
+              <figcaption className="mt-3 text-left text-xs text-[#737373]">
                 {HERO.legende}
               </figcaption>
             </figure>

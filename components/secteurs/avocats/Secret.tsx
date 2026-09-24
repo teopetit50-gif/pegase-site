@@ -83,12 +83,12 @@ export default function Secret() {
             <dl className="divide-y divide-[#171717]/10 border-y border-[#171717]/10">
               {SECRET.faits.map(([cle, valeur]) => (
                 <div key={cle} className="flex items-baseline justify-between gap-4 py-3">
-                  <dt className="text-sm text-[#6f6a62]">{cle}</dt>
+                  <dt className="text-sm text-[#737373]">{cle}</dt>
                   <dd className="text-right text-sm md:text-base font-medium">{valeur}</dd>
                 </div>
               ))}
             </dl>
-            <Link href={CONTACT.audit} className="text-sm text-[#6f6a62] avocats-lien w-fit hover:text-[#171717] transition-colors">
+            <Link href={CONTACT.audit} className="text-sm text-[#737373] avocats-lien w-fit hover:text-[#171717] transition-colors">
               Recevoir le projet de contrat lors de l&apos;audit
             </Link>
           </div>
@@ -102,13 +102,13 @@ export default function Secret() {
                     <I className="size-5" aria-hidden="true" />
                   </span>
                   <h3 className="text-base font-semibold">{e.titre}</h3>
-                  <p className="text-sm text-[#6f6a62] leading-relaxed">{e.texte}</p>
+                  <p className="text-sm text-[#737373] leading-relaxed">{e.texte}</p>
                 </li>
               );
             })}
           </ul>
 
-          <p className="lg:col-span-5 flex items-center justify-center gap-3 border-t border-[#171717]/10 px-6 py-4 text-xs text-[#6f6a62] text-center">
+          <p className="lg:col-span-5 flex items-center justify-center gap-3 border-t border-[#171717]/10 px-6 py-4 text-xs text-[#737373] text-center">
             <Tricolore className="h-2.5 w-4 shrink-0 rounded-[1px]" />
             {SECRET.mention}
           </p>

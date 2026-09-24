@@ -43,14 +43,14 @@ export default function Matieres() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.05 * i, duration: 0.4, type: "spring" }}
-            className="w-full flex items-center space-x-2 text-sm text-[#6f6a62] hover:text-[#171717] transition-colors h-auto"
+            className="w-full flex items-center space-x-2 text-sm text-[#737373] hover:text-[#171717] transition-colors h-auto"
           >
             {pict && <span className="text-2xl" aria-hidden="true">{pict}</span>}
             <span className="text-lg lg:text-xl">{nom}</span>
           </motion.li>
         ))}
-        <li className="flex items-center space-x-2 text-sm text-[#6f6a62]">
-          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#f3f1ec]">
+        <li className="flex items-center space-x-2 text-sm text-[#737373]">
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#f5f5f5]">
             <Plus className="w-4 h-4" aria-hidden="true" />
           </span>
           <span>{MATIERES.plus}</span>

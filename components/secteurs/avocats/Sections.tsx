@@ -91,7 +91,7 @@ export function Pieces() {
         </div>
       </AnimationContainer>
       <AnimationContainer delay={0.45}>
-        <ul className="flex flex-row flex-wrap items-center justify-center gap-8 max-w-xl mx-auto pt-16 text-[#6f6a62] transition-all">
+        <ul className="flex flex-row flex-wrap items-center justify-center gap-8 max-w-xl mx-auto pt-16 text-[#737373] transition-all">
           {PIECES.familles.map((f, i) => {
             const I = iconesPieces[i];
             return (
@@ -136,7 +136,7 @@ export function Fonctionnalites() {
             <AnimationContainer
               key={c.titre}
               delay={0.2 + 0.1 * i}
-              className={cn("relative flex flex-col rounded-2xl lg:rounded-3xl bg-[#ffffff] border border-[#e5e1d8]/50 hover:border-[#e5e1d8]/100 transition-colors", span)}
+              className={cn("relative flex flex-col rounded-2xl lg:rounded-3xl bg-[#ffffff] border border-[#e6e6e6]/50 hover:border-[#e6e6e6]/100 transition-colors", span)}
             >
               <MagicCard className="p-4 lg:p-6 lg:rounded-3xl">
                 <div className="flex items-center space-x-4 mb-4">
@@ -145,7 +145,7 @@ export function Fonctionnalites() {
                     {c.titre}
                   </h3>
                 </div>
-                <p className="text-sm text-[#6f6a62]">{c.texte}</p>
+                <p className="text-sm text-[#737373]">{c.texte}</p>
                 <div className="mt-6 w-full bg-[#ffffff]/50 overflow-hidden">
                   <Illus />
                 </div>
@@ -175,14 +175,14 @@ export function PointDuMatin() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative w-full">
         {POINT.cartes.map((c, i) => (
           <AnimationContainer key={c.titre} delay={0.2 + 0.1 * i}>
-            <div className="rounded-2xl bg-[#ffffff]/40 relative border border-[#e5e1d8]/50">
+            <div className="rounded-2xl bg-[#ffffff]/40 relative border border-[#e6e6e6]/50">
               <MagicCard className="p-4 lg:p-8 w-full overflow-hidden">
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold flex items-center justify-between gap-2">
                     {c.titre}
-                    <span className="rounded-[calc(0.6rem-2px)] border border-[#e5e1d8] px-2 py-0.5 text-[11px] font-normal uppercase tracking-wider text-[#6f6a62]">{POINT.exemple}</span>
+                    <span className="rounded-[calc(0.6rem-2px)] border border-[#e6e6e6] px-2 py-0.5 text-[11px] font-normal uppercase tracking-wider text-[#737373]">{POINT.exemple}</span>
                   </h3>
-                  <p className="text-sm text-[#6f6a62]">{c.texte}</p>
+                  <p className="text-sm text-[#737373]">{c.texte}</p>
                   <div className="space-y-4">
                     <div className="flex justify-between items-baseline">
                       <div>
@@ -202,11 +202,11 @@ export function PointDuMatin() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <div className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 text-[#6f6a62] py-2">
+                      <div className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 text-[#737373] py-2">
                         {c.colonnes.map((col) => <div key={col}>{col}</div>)}
                       </div>
                       {c.lignes.map((l) => (
-                        <div key={l[0]} className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 py-2 border-t border-[#e5e1d8]/50">
+                        <div key={l[0]} className="grid grid-cols-[86fr_79fr_44fr_76fr] lg:grid-cols-4 text-sm md:max-lg:text-[13px] md:max-lg:leading-5 py-2 border-t border-[#e6e6e6]/50">
                           <div>{l[0]}</div>
                           <div>{l[1]}</div>
                           <div>{l[2]}</div>
