@@ -2,16 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
-import {
-  Briefcase,
-  CarFront,
-  DraftingCompass,
-  FolderOpen,
-  HardHat,
-  ScanSearch,
-  Scale,
-  CircleCheck,
-} from "lucide-react";
+import { FolderOpen, ScanSearch, CircleCheck } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import Mouvements from "@/components/secteurs/Mouvements";
 import { SECTEURS } from "@/lib/secteurs";
@@ -82,15 +73,12 @@ export const metadata: Metadata = {
   ).join(", ")}.`,
 };
 
-/* Un pictogramme par métier, lu par slug ; un métier ajouté sans
-   pictogramme prend la mallette. Couleurs : celles des quatre cartes de
-   la référence, dans leur ordre. */
-const PICTOS: Record<string, LucideIcon> = {
-  btp: HardHat,
-  avocats: Scale,
-  architectes: DraftingCompass,
-  "location-automobile": CarFront,
-};
+/* Le vrai signe de chaque SaaS, lu par son nom : public/logos/<nom>-mark.png,
+   un MASQUE ALPHA (voir components/logos.tsx) — la couleur vient du fond
+   du calque, donc de TEINTES. Un SaaS ajouté doit y déposer son signe
+   (RAPATRIEMENT.md). Couleurs : celles des quatre cartes de la référence,
+   dans leur ordre. */
+const signe = (saas: string) => `url(/logos/${saas.toLowerCase()}-mark.png)`;
 const TEINTES = ["#273252", "#193a29", "#79648c", "#a8927c"];
 
 /* La méthode commune — voir « ce qui n'est pas inventé » plus haut.
@@ -213,13 +201,20 @@ export default function SecteursPage() {
           <section className="sct-grille" data-sct-grille>
             <div className="sct-cartes">
               {SECTEURS.map((s, i) => {
-                const Picto = PICTOS[s.slug] ?? Briefcase;
                 return (
                   <div key={s.slug} className="sct-carte-base" data-sct-carte>
                     <Link href={`/secteurs/${s.slug}`} className="sct-carte">
                       <span className="sct-carte__tete">
-                        <span className="sct-carte__picto" style={{ color: TEINTES[i % TEINTES.length] }}>
-                          <Picto strokeWidth={1.5} aria-hidden />
+                        <span className="sct-carte__picto">
+                          <span
+                            aria-hidden
+                            className="sct-carte__signe"
+                            style={{
+                              backgroundColor: TEINTES[i % TEINTES.length],
+                              WebkitMaskImage: signe(s.saas),
+                              maskImage: signe(s.saas),
+                            }}
+                          />
                         </span>
                         <span className="sct-carte__nom">{s.saas}</span>
                       </span>
