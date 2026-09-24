@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { FolderOpen, ScanSearch, CircleCheck } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import Mouvements from "@/components/secteurs/Mouvements";
+import CarteApercu from "@/components/secteurs/CarteApercu";
 import { SECTEURS } from "@/lib/secteurs";
 import "./secteurs.css";
 
@@ -31,24 +32,28 @@ import "./secteurs.css";
     5 « Environment Types »          → la méthode commune aux quatre
     6 appel pleine image             → réserver un audit
 
-   ── LE BUDGET DE TEXTE ───────────────────────────────────────────────
-   Tenu sur la référence, emplacement par emplacement (signes) :
+   ── LES TEXTES (réécrits le 24/09 au soir) ───────────────────────────
+   Teo, sur la première version : « trop basique, pas pro, on ne comprend
+   pas vraiment ». Une carte d'une phrase nommait le résultat sans dire
+   ce que le logiciel lit ni ce qu'il rend. Chaque bloc suit désormais
+   l'ordre de OMEGA/DOCTRINE-TEXTES-SAAS.md (§ 12, § 16) : ce qu'il lit →
+   ce qu'il prépare → ce qui reste au client, en deux phrases conjuguées.
+   Tout fait avancé est repris du site déployé du SaaS (relevé du 24/09) ;
+   rien n'est promis que ces sites ne disent déjà.
 
                           référence   ici
-     titre du hero            15       16
-     chapô du hero            75       68
-     titre de section      23-46    25-28
-     carte : titre         24-40     3-19   (le métier)
-     carte : texte        87-150    57-66   (lib/secteurs.ts, `texte`)
-     aperçu : texte      105-200     3-19   (le métier, sous le nom)
-     titre des piliers        17       12   (« Même méthode » : une ligne
-                                             à 1440, comme la leur)
-     chapô des piliers       104      106
-     item des piliers      41-57    44-56
+     titre du hero            15       22
+     chapô du hero            75      143
+     titre de section      23-46    31-40
+     carte : texte        87-150  166-196   (lib/secteurs.ts, `detail`)
+     aperçu : texte      105-200  146-171   (lib/secteurs.ts, `apercu`)
+     titre des piliers        17       17
+     chapô des piliers       104      159
+     item des piliers      41-57  128-148
      titre de l'appel         25       23
 
-   Partout en dessous ou au niveau de la référence : une carte = une
-   phrase. Sur téléphone, aucun bloc ne dépasse trois lignes.
+   Au-dessus de la référence, à la demande de Teo (« pas détaillé »).
+   La figure de la page (règle 5) : le ternaire du chapô du hero.
 
    ── CE QUI N'EST PAS INVENTÉ ─────────────────────────────────────────
    • Aucun client, logo, chiffre ni témoignage : la référence n'en a pas
@@ -87,20 +92,23 @@ const PILIERS: { Icone: LucideIcon; fond: string; titre: string; texte: string }
   {
     Icone: FolderOpen,
     fond: "#273252",
-    titre: "Vos données",
-    texte: "Photos, pièces, plans, contrats : ce que vous avez déjà.",
+    titre: "Vos documents, tels qu'ils sont",
+    texte:
+      "Photos de chantier, pièces scannées, plans en PDF ou contrats : le logiciel lit ce que vos équipes envoient déjà, sans saisie ni outil à installer.",
   },
   {
     Icone: ScanSearch,
     fond: "#193a29",
-    titre: "Les écarts",
-    texte: "Repérés un à un, chacun renvoyé à sa preuve.",
+    titre: "Chaque écart, avec sa preuve",
+    texte:
+      "Un travail hors devis, deux pièces qui se contredisent ou un dommage au retour : chaque point relevé renvoie à la photo, à la page ou à l'article qui le fonde.",
   },
   {
     Icone: CircleCheck,
     fond: "#839cb2",
-    titre: "Votre décision",
-    texte: "Il prépare le travail, la décision reste la vôtre.",
+    titre: "La décision vous revient",
+    texte:
+      "Le logiciel prépare l'avenant, la liste de points ou la facture, puis vous la soumet. Rien ne part tant que vous ne l'avez pas validée.",
   },
 ];
 
@@ -181,10 +189,11 @@ export default function SecteursPage() {
             <div aria-hidden className="sct-voile sct-voile--hero" />
             <div className="sct-plein__texte">
               <h1 className="sct-h1" data-sct-texte="hero">
-                Logiciels métier
+                Un logiciel par métier
               </h1>
               <p className="sct-lead" data-sct-texte="hero">
-                Un logiciel par métier, qui lit vos données et prépare vos décisions.
+                Chacun lit les documents que vos équipes produisent déjà, relève ce qui doit être
+                facturé, corrigé ou tranché, puis vous le remet prêt à valider.
               </p>
               <div className="sct-plein__actions" data-sct-cta>
                 <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>
@@ -197,7 +206,7 @@ export default function SecteursPage() {
             Quatre cartes chez eux, quatre SaaS chez nous : la grille est
             reprise au compte près. Chaque carte mène à la page du SaaS. */}
         <div className="sct-wrap">
-          <Entete etiquette="Secteurs" titre="Faits pour un seul métier" />
+          <Entete etiquette="Secteurs" titre="Chacun connaît les pièces de son métier" />
           <section className="sct-grille" data-sct-grille>
             <div className="sct-cartes">
               {SECTEURS.map((s, i) => {
@@ -222,7 +231,7 @@ export default function SecteursPage() {
                         {s.metier}
                       </h3>
                       <p className="sct-texte-carte" data-sct-texte="carte">
-                        {s.texte}
+                        {s.detail}
                       </p>
                     </Link>
                   </div>
@@ -237,10 +246,10 @@ export default function SecteursPage() {
             entière mène à la page du SaaS. */}
         <section className="sct-bande">
           <div className="sct-wrap">
-            <Entete etiquette="Aperçu" titre="Chaque logiciel, sur sa page" />
+            <Entete etiquette="Aperçu" titre="Voir chaque logiciel au travail" />
             <div className="sct-apercus">
               {SECTEURS.map((s) => (
-                <Link key={s.slug} href={`/secteurs/${s.slug}`} className="sct-apercu">
+                <CarteApercu key={s.slug} href={`/secteurs/${s.slug}`}>
                   <div className="sct-apercu__image">
                     <Image
                       src={capture(s.slug)}
@@ -250,10 +259,11 @@ export default function SecteursPage() {
                     />
                   </div>
                   <div className="sct-apercu__texte">
+                    <p className="sct-apercu__metier">{s.metier}</p>
                     <h3 className="sct-apercu__titre">{s.saas}</h3>
-                    <p className="sct-apercu__legende">{s.metier}</p>
+                    <p className="sct-apercu__legende">{s.apercu}</p>
                   </div>
-                </Link>
+                </CarteApercu>
               ))}
             </div>
           </div>
@@ -268,10 +278,11 @@ export default function SecteursPage() {
           <div className="sct-piliers__grille">
             <div className="sct-piliers__gauche">
               <p className="sct-piliers__etiquette">Le principe</p>
-              <h2 className="sct-piliers__titre">Même méthode</h2>
+              <h2 className="sct-piliers__titre">Une seule méthode</h2>
               <p className="sct-piliers__chapo">
-                Quatre métiers, une même façon de faire&nbsp;: partir de vos données, trouver les
-                écarts, vous laisser décider.
+                Les quatre logiciels suivent le même principe&nbsp;: ils partent des documents que
+                vous produisez déjà, relèvent chaque écart avec sa preuve et vous laissent la
+                décision.
               </p>
               <div className="sct-piliers__media">
                 <div className="sct-piliers__capture">
@@ -328,8 +339,11 @@ export default function SecteursPage() {
               <div aria-hidden className="sct-voile" />
               <div className="sct-plein__texte">
                 <h2 className="sct-h1" data-sct-texte="appel">
-                  Parler de votre métier.
+                  Parlons de votre métier
                 </h2>
+                <p className="sct-lead" data-sct-texte="appel">
+                  {"En trente minutes, nous regardons vos documents et vos processus, puis nous vous disons lequel de ces logiciels s'applique chez vous, ou ce qu'il faudrait construire."}
+                </p>
                 <div className="sct-plein__actions" data-sct-cta-appel>
                   <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>
                 </div>

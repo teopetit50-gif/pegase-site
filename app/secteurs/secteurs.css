@@ -566,9 +566,17 @@
   flex-direction: column;
   gap: 8px;
 }
-@media (min-width: 1024px) {
+/* Deux colonnes avant 1280 : depuis le 24/09 une carte porte deux
+   phrases (lib/secteurs.ts, `detail`), qui montaient à huit lignes dans
+   un quart de 1024. */
+@media (min-width: 768px) {
   .sct .sct-cartes {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .sct .sct-cartes {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
@@ -694,7 +702,15 @@
     grid-template-columns: repeat(2, minmax(0, 1fr)); /* écart nº 5 */
   }
 }
+/* Le support porte l'inclinaison (components/secteurs/CarteApercu.tsx) ;
+   la carte garde son arrondi et son `overflow: hidden`, qu'un transform
+   3D sur le même nœud ferait sauter dans Safari. */
+.sct .sct-apercu-support {
+  display: flex;
+  will-change: transform;
+}
 .sct .sct-apercu {
+  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -703,10 +719,16 @@
   background: #ffffff;
   color: var(--sct-texte);
   text-decoration: none;
-  transition: border-color 300ms ease;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition:
+    border-color 300ms ease,
+    box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .sct .sct-apercu:hover {
   border-color: #d4d4d4; /* écart nº 6 */
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 28px 56px -28px rgba(0, 0, 0, 0.22);
 }
 .sct .sct-apercu:focus-visible {
   outline: 2px solid #000000;
@@ -722,6 +744,11 @@
 .sct .sct-apercu__image > img {
   object-fit: cover;
   object-position: left top;
+  transform-origin: left top;
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sct .sct-apercu:hover .sct-apercu__image > img {
+  transform: scale(1.035);
 }
 .sct .sct-apercu__texte {
   display: flex;
@@ -741,10 +768,25 @@
     line-height: 1.5;
   }
 }
+.sct .sct-apercu__metier {
+  margin-bottom: 8px;
+  font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--sct-etiquette);
+}
 .sct .sct-apercu__legende {
-  font-size: 0.875rem;
-  line-height: 1.625;
+  max-width: 36rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
   color: var(--sct-legende);
+}
+@media (min-width: 768px) {
+  .sct .sct-apercu__legende {
+    font-size: 1rem;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -936,7 +978,11 @@
   .sct .sct-cta__voile,
   .sct .sct-pastille__rail,
   .sct .sct-carte,
-  .sct .sct-apercu {
+  .sct .sct-apercu,
+  .sct .sct-apercu__image > img {
     transition: none;
+  }
+  .sct .sct-apercu:hover .sct-apercu__image > img {
+    transform: none;
   }
 }
