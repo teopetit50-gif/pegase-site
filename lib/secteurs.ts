@@ -94,6 +94,7 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Chaque matin à 7 h, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
     url: "https://rentalos-site.vercel.app",
+    integre: true,
   },
 ];
 

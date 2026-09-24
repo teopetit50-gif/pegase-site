@@ -1,0 +1,33 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Tavaro — styles/PilotProductPreview.css
+
+   COPIÉ le 24/09/2026 à 14 h 58 de `OMEGA/rentalos-site/src/styles/PilotProductPreview.css`
+   (module CSS de la référence daliagency, noms de classes débarrassés de
+   leur hachage par la session qui l'a relevé). Recopié tel quel puis SCOPÉ
+   par script : chaque sélecteur est préfixé de `.p-location ` (la feuille
+   n'agit que sur la page /secteurs/location-automobile), les conditions
+   `@media` / `@container` sont gardées, et les `@keyframes` — globales
+   quoi qu'on fasse — sont renommées `location-*` sans leur hachage, avec
+   chaque `animation` qui les appelle. Importée par page.tsx après
+   location.css, dans l'ordre du layout de la source.
+
+   Seule `.PilotProductPreview_url` sert (l'aperçu flottant de la grille).
+   ══════════════════════════════════════════════════════════════════════ */
+.p-location .PilotProductPreview_frame{width:100%;min-width:0;border:1px solid #e2e2e5;border-radius:.75rem;background:#f7f7f8;box-shadow:0 1px 0 rgba(17,24,39,.03),0 18px 48px rgba(15,23,42,.08);overflow:hidden}
+.p-location .PilotProductPreview_chrome{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.65rem;min-height:2.2rem;border-bottom:1px solid #ebebed;padding:.45rem .7rem;background:#ffffff}
+.p-location .PilotProductPreview_dots{display:inline-flex;gap:.28rem}
+.p-location .PilotProductPreview_dots i{width:.5rem;height:.5rem;border-radius:999px;background:#e5e5e7}
+.p-location .PilotProductPreview_dots i:first-child{background:#ff5f57}
+.p-location .PilotProductPreview_dots i:nth-child(2){background:#febc2e}
+.p-location .PilotProductPreview_dots i:nth-child(3){background:#28c840}
+.p-location .PilotProductPreview_url{display:inline-flex;min-width:0;align-items:center;justify-content:center;gap:.35rem;overflow:hidden;border:1px solid #ebebed;border-radius:999px;background:#f7f7f8;padding:.28rem .7rem;color:#6b7280;font-family:var(--font-body);font-size:.68rem;font-weight:500;letter-spacing:-.01em;text-align:center;text-overflow:ellipsis;text-transform:capitalize;white-space:nowrap}
+.p-location .PilotProductPreview_urlFavicon{flex-shrink:0;width:.75rem;height:.75rem;border-radius:.12rem;-o-object-fit:contain;object-fit:contain}
+.p-location .PilotProductPreview_live{display:inline-flex;align-items:center;gap:.32rem;color:#6b7280;font-family:var(--font-body);font-size:.62rem;font-weight:500;white-space:nowrap}
+.p-location .PilotProductPreview_live i{width:.35rem;height:.35rem;border-radius:999px;background:#0a9f6e;box-shadow:0 0 0 .14rem #e8faf2}
+.p-location .PilotProductPreview_viewport{padding:.15rem}
+.p-location .PilotProductPreview_viewport [data-agent-ux]{border:0;border-radius:.55rem;box-shadow:none}
+.p-location .PilotProductPreview_viewport [class*=canvas]{min-height:clamp(18.5rem,36vh,23rem)}
+@media (max-width:720px){
+.p-location .PilotProductPreview_frame{border-radius:.65rem}
+.p-location .PilotProductPreview_live{display:none}
+}

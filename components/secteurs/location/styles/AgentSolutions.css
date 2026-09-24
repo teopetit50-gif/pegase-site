@@ -1,0 +1,87 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Tavaro — styles/AgentSolutions.css
+
+   COPIÉ le 24/09/2026 à 14 h 58 de `OMEGA/rentalos-site/src/styles/AgentSolutions.css`
+   (module CSS de la référence daliagency, noms de classes débarrassés de
+   leur hachage par la session qui l'a relevé). Recopié tel quel puis SCOPÉ
+   par script : chaque sélecteur est préfixé de `.p-location ` (la feuille
+   n'agit que sur la page /secteurs/location-automobile), les conditions
+   `@media` / `@container` sont gardées, et les `@keyframes` — globales
+   quoi qu'on fasse — sont renommées `location-*` sans leur hachage, avec
+   chaque `animation` qui les appelle. Importée par page.tsx après
+   location.css, dans l'ordre du layout de la source.
+
+   LA PAGE EST PLEINE (Teo, 24/09 au soir : « il y a les barres sur les
+   côtés »). `.AgentSolutions_showcase` posait `border: 1px solid` sur la
+   vitrine entière — cinq panneaux, quatre à cinq écrans de haut — soit
+   deux filets verticaux à 36 px des bords à 1440 : les flancs sont
+   retirés. Son filet haut (le séparateur entre l'étiquette « 02 /
+   Solutions » et la vitrine) court désormais sur toute la largeur de la
+   fenêtre (`::before` en 100vw, le `border-top` transparent garde le pixel
+   de la géométrie). Le filet entre la barre latérale et les panneaux
+   reste : c'est une colonne de la vitrine, pas un cadre de page.
+   MONDE BLANC : la section posait son propre fond #fafafa (et
+   `--scene-bg`) sur 4 500 px de haut, un gris à peine visible sur le
+   #fcfcfa de la source, une bande grise sur le blanc d'Omega → #ffffff.
+   Les maquettes gardent leurs surfaces (#f7f7f8, cartes blanches filetées).
+   ══════════════════════════════════════════════════════════════════════ */
+.p-location .AgentSolutions_section{position:relative;z-index:11;overflow:visible;scroll-margin-top:4.75rem;--scene-bg:#ffffff;--scene-surface:#ffffff;--scene-surface-strong:#ffffff;--scene-surface-soft:#f7f7f8;--scene-border:#e5e5e7;--scene-text:#171717;--scene-muted:#6b7280;--scene-accent:#2563eb;--scene-accent-soft:#eef2ff;--scene-shadow:0 12px 40px rgba(17,24,39,0.06);--folk-radius:0.5rem;--folk-radius-sm:0.375rem;--folk-radius-xs:0.25rem;background:#ffffff;color:#171717;font-family:var(--font-body)}
+.p-location .AgentSolutions_sectionIntro{position:relative;z-index:1;margin:0 0 clamp(.85rem,1.6vw,1.25rem);padding:clamp(1.35rem,2.5vw,2rem) clamp(.25rem,1vw,.75rem) 0}
+.p-location .AgentSolutions_showcase{position:relative;z-index:1;display:grid;grid-template-columns:minmax(13.5rem,.28fr) minmax(0,1fr);border:0;border-top:1px solid transparent;background:transparent}
+.p-location .AgentSolutions_showcase::before{content:"";position:absolute;top:-1px;left:50%;width:100vw;height:1px;transform:translateX(-50%);background:var(--scene-border);pointer-events:none}
+.p-location .AgentSolutions_sidebar{position:relative;min-width:0;border-right:1px solid var(--scene-border);background:transparent}
+.p-location .AgentSolutions_sidebarInner{position:sticky;top:clamp(5.5rem,14vh,8.5rem);max-height:calc(100vh - clamp(6rem, 16vh, 10rem));overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:clamp(1.5rem,2.6vw,2.5rem) clamp(1rem,2vw,1.75rem);scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--scene-text) 18%,transparent) transparent}
+.p-location .AgentSolutions_sidebarInner::-webkit-scrollbar{width:.35rem}
+.p-location .AgentSolutions_sidebarInner::-webkit-scrollbar-thumb{border-radius:999px;background:color-mix(in srgb,var(--scene-text) 16%,transparent)}
+.p-location .AgentSolutions_sidebarKicker{margin:0 0 1.15rem;color:var(--scene-muted);font-family:var(--font-body);font-size:.62rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.p-location .AgentSolutions_sidebar nav{display:grid;gap:.2rem}
+.p-location .AgentSolutions_sidebarLink{border-left:2px solid transparent;padding:.52rem 0 .52rem .8rem;color:color-mix(in srgb,var(--scene-muted) 55%,transparent);font-family:var(--font-body);font-size:clamp(.88rem,1.1vw,1.02rem);font-weight:500;letter-spacing:-.02em;line-height:1.2;text-decoration:none;transition:border-color .22s ease,color .22s ease,transform .22s ease}
+.p-location .AgentSolutions_sidebarLink:hover{color:var(--scene-text);transform:translateX(.2rem)}
+.p-location .AgentSolutions_sidebarLink[aria-current=location]{border-left-color:var(--scene-accent);color:var(--scene-text);transform:translateX(.25rem)}
+.p-location .AgentSolutions_panels{min-width:0}
+.p-location .AgentSolutions_panel{min-height:min(82vh,48rem);border-bottom:1px solid color-mix(in srgb,var(--scene-border) 70%,transparent);scroll-margin-top:4.75rem;background:transparent}
+.p-location .AgentSolutions_panel:last-child{border-bottom:0}
+.p-location .AgentSolutions_panel[data-in-view=false] *,.p-location .AgentSolutions_panel[data-in-view=false] :after,.p-location .AgentSolutions_panel[data-in-view=false] :before{animation-play-state:paused!important}
+.p-location .AgentSolutions_panelCopy{display:grid;gap:.65rem;align-content:start;justify-items:start;padding:clamp(1rem,1.8vw,1.4rem) clamp(1rem,2vw,1.5rem) clamp(.7rem,1.3vw,1rem)}
+.p-location .AgentSolutions_panelKicker{margin:0;display:inline-flex;align-items:center;min-height:1.35rem;border:1px solid #dbe4ff;border-radius:var(--folk-radius-xs);padding:0 .45rem;background:#eef2ff;color:#3730a3;font-family:var(--font-body);font-size:.68rem;font-weight:500;letter-spacing:-.01em;text-transform:none}
+.p-location .AgentSolutions_panelMeta{display:flex;width:100%;max-width:64rem;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:.75rem 1.5rem}
+.p-location .AgentSolutions_panelMeta .AgentSolutions_panelHeadline{flex:1 1 auto;min-width:0;max-width:none;font-size:clamp(1.05rem,1.35vw,1.28rem)}
+.p-location .AgentSolutions_panelMeta .AgentSolutions_panelLink{flex:0 0 auto;margin-top:0}
+.p-location .AgentSolutions_panelSummary{max-width:40rem;margin:0;color:var(--scene-muted);font-family:var(--font-body);font-size:clamp(.84rem,1.05vw,.95rem);font-weight:400;letter-spacing:-.01em;line-height:1.5}
+.p-location .AgentSolutions_overviewPoints{margin:.15rem 0 0;padding:0;list-style:none;display:grid;gap:.32rem;max-width:40rem}
+.p-location .AgentSolutions_overviewPoints li{position:relative;padding-left:.9rem;color:color-mix(in srgb,var(--scene-text) 78%,transparent);font-size:clamp(.8rem,.98vw,.9rem);line-height:1.45;letter-spacing:-.01em}
+.p-location .AgentSolutions_overviewPoints li:before{position:absolute;top:.5em;left:0;width:.3rem;height:.3rem;border-radius:999px;background:var(--scene-accent);content:""}
+.p-location .AgentSolutions_panelHeadline{max-width:42rem;margin:0;font-family:var(--font-body);font-size:clamp(1.2rem,1.7vw,1.55rem);font-weight:550;letter-spacing:-.03em;line-height:1.2;text-transform:none}
+.p-location .AgentSolutions_panelHeadline span{color:var(--scene-text)}
+.p-location .AgentSolutions_panelHeadline em{color:var(--scene-muted);font-style:normal;font-weight:400}
+.p-location .AgentSolutions_panelLink{flex:0 0 auto;display:inline-flex;align-items:center;gap:.3rem;min-height:1.85rem;border:1px solid var(--scene-border);border-radius:var(--folk-radius-xs);padding:0 .7rem;background:#ffffff;color:var(--scene-text);font-family:var(--font-body);font-size:.75rem;font-weight:500;letter-spacing:-.01em;text-decoration:none;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+.p-location .AgentSolutions_panelLink:hover{border-color:#d4d4d8;background:#f7f7f8;color:var(--scene-text)}
+.p-location .AgentSolutions_panelLink span{display:inline-block;transition:transform .22s cubic-bezier(.22,1,.36,1)}
+.p-location .AgentSolutions_panelLink:hover span{transform:translate(.1rem,-.1rem)}
+.p-location .AgentSolutions_visualStage{display:flex;min-height:clamp(28rem,54vh,36rem);align-items:stretch;overflow:visible;padding:0 clamp(1rem,2vw,1.5rem) clamp(.9rem,1.6vw,1.25rem);background:transparent}
+@media (max-width:1100px){
+.p-location .AgentSolutions_showcase{grid-template-columns:minmax(11.5rem,.26fr) minmax(0,1fr)}
+.p-location .AgentSolutions_sidebarInner{padding:1.5rem 1rem}
+.p-location .AgentSolutions_sidebarLink{font-size:.92rem}
+.p-location .AgentSolutions_panelCopy{padding:1.1rem .5rem .7rem}
+.p-location .AgentSolutions_visualStage{min-height:30rem;padding:0 .5rem 1.1rem}
+}
+@media (max-width:720px){
+.p-location .AgentSolutions_section{scroll-margin-top:8rem}
+.p-location .AgentSolutions_showcase{display:block;border-right:0;border-left:0}
+.p-location .AgentSolutions_sidebar{position:sticky;z-index:20;top:4rem;overflow:hidden;border-right:0;border-bottom:1px solid var(--scene-border);background:var(--scene-surface-strong)}
+.p-location .AgentSolutions_sidebarInner{position:relative;top:auto;max-height:none;overflow:visible;padding:.55rem 0}
+.p-location .AgentSolutions_sidebarKicker{display:none}
+.p-location .AgentSolutions_sidebar nav{display:flex;gap:.2rem;overflow-x:auto;overscroll-behavior-x:contain;padding:0 .75rem;scrollbar-width:none}
+.p-location .AgentSolutions_sidebar nav::-webkit-scrollbar{display:none}
+.p-location .AgentSolutions_sidebarLink{flex:0 0 auto;border-bottom:2px solid transparent;border-left:0;padding:.65rem .75rem;font-size:var(--type-small);white-space:nowrap}
+.p-location .AgentSolutions_sidebarLink[aria-current=location]{border-bottom-color:var(--scene-accent);transform:none}
+.p-location .AgentSolutions_sidebarLink:hover{transform:none}
+.p-location .AgentSolutions_panel{min-height:auto;scroll-margin-top:8rem}
+.p-location .AgentSolutions_panelCopy{padding:1.1rem 0 .55rem}
+.p-location .AgentSolutions_panelMeta{align-items:flex-start;flex-direction:column;flex-wrap:wrap;gap:.45rem}
+.p-location .AgentSolutions_visualStage{min-height:26rem;padding:0 0 1rem}
+}
+@media (prefers-reduced-motion:reduce){
+.p-location .AgentSolutions_panelLink,.p-location .AgentSolutions_panelLink span,.p-location .AgentSolutions_sidebarLink{transition:none}
+}

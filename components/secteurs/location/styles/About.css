@@ -1,0 +1,74 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Tavaro — styles/About.css
+
+   COPIÉ le 24/09/2026 à 14 h 58 de `OMEGA/rentalos-site/src/styles/About.css`
+   (module CSS de la référence daliagency, noms de classes débarrassés de
+   leur hachage par la session qui l'a relevé). Recopié tel quel puis SCOPÉ
+   par script : chaque sélecteur est préfixé de `.p-location ` (la feuille
+   n'agit que sur la page /secteurs/location-automobile), les conditions
+   `@media` / `@container` sont gardées, et les `@keyframes` — globales
+   quoi qu'on fasse — sont renommées `location-*` sans leur hachage, avec
+   chaque `animation` qui les appelle. Importée par page.tsx après
+   location.css, dans l'ordre du layout de la source.
+
+   Section claire : aucune couleur ne change. `--background` vaut ici
+   #ffffff (location.css), le fond de section suit.
+   ══════════════════════════════════════════════════════════════════════ */
+.p-location .About_section{position:relative;isolation:isolate;z-index:3;scroll-margin-top:5rem;background:var(--background,#fcfcfa);padding:4rem 0 4.5rem}
+@media (min-width:768px){
+.p-location .About_section{scroll-margin-top:4rem;padding:6.25rem 0 6.5rem}
+}
+.p-location .About_inner{padding-inline:clamp(6px,1vw,16px)}
+.p-location .About_header{margin:0 0 1.75rem;max-width:42rem}
+@media (min-width:768px){
+.p-location .About_header{margin-bottom:2.5rem}
+}
+.p-location .About_people{display:grid;gap:2.25rem;align-items:center}
+@media (min-width:1024px){
+.p-location .About_people{grid-template-columns:repeat(12,minmax(0,1fr));gap:4rem}
+}
+.p-location .About_identity{margin:0;max-width:42rem;color:var(--text)}
+@media (min-width:1024px){
+.p-location .About_identity{grid-column:span 7;max-width:none}
+}
+.p-location .About_founders{display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:2rem}
+@media (min-width:640px){
+.p-location .About_founders{gap:3rem}
+}
+@media (min-width:1024px){
+.p-location .About_founders{grid-column:span 5}
+}
+.p-location .About_divider{margin:2.5rem 0 2rem;border:0;border-top:1px solid color-mix(in srgb,var(--text) 9%,transparent)}
+@media (min-width:768px){
+.p-location .About_divider{margin:3rem 0 2.25rem}
+}
+.p-location .About_builds{display:grid;gap:2rem}
+@media (min-width:1024px){
+.p-location .About_builds{grid-template-columns:repeat(12,minmax(0,1fr));gap:4rem;align-items:start}
+}
+.p-location .About_buildsLead{display:flex;flex-direction:column;gap:.85rem;min-width:0}
+@media (min-width:1024px){
+.p-location .About_buildsLead{grid-column:span 7}
+}
+.p-location .About_buildsLabel{margin:0}
+.p-location .About_buildsBody{margin:0;max-width:42rem;color:var(--muted)}
+@media (min-width:1024px){
+.p-location .About_buildsBody{max-width:none}
+}
+.p-location .About_side{display:flex;flex-direction:column;gap:1.5rem;min-width:0}
+@media (min-width:1024px){
+.p-location .About_side{grid-column:span 5;gap:1.75rem}
+}
+.p-location .About_list{list-style:none;margin:0;padding:0;border-top:1px solid color-mix(in srgb,var(--text) 10%,transparent)}
+.p-location .About_item{display:grid;grid-template-columns:2rem 1fr;gap:.75rem;align-items:baseline;padding:.85rem 0;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent);color:var(--text)}
+@media (min-width:768px){
+.p-location .About_item{padding:.95rem 0}
+}
+.p-location .About_index{color:var(--section-label-color,color-mix(in srgb,var(--text) 42%,transparent));font-family:var(--font-technical);font-size:var(--section-label-size,.6875rem);font-weight:400;letter-spacing:var(--section-label-tracking,.16em);line-height:1.2;text-transform:uppercase;-webkit-user-select:none;-moz-user-select:none;user-select:none}
+.p-location .About_itemText{min-width:0}
+.p-location .About_nav{display:flex;flex-direction:column;align-items:flex-start;gap:.65rem;padding-top:.15rem}
+.p-location .About_navLabel{margin:0;color:var(--section-label-color,color-mix(in srgb,var(--text) 42%,transparent));font-family:var(--font-technical);font-size:var(--section-label-size,.6875rem);font-weight:400;letter-spacing:var(--section-label-tracking,.16em);line-height:1.2;text-transform:uppercase}
+.p-location .About_links{display:flex;flex-wrap:wrap;gap:.55rem 1.15rem;margin:0;padding:0;list-style:none}
+.p-location .About_link{color:var(--text);letter-spacing:.03em;text-decoration:none;text-underline-offset:.22em;transition:color .16s ease}
+.p-location .About_link:hover{color:var(--muted);text-decoration:underline}
+.p-location .About_link:focus-visible{outline:2px solid color-mix(in srgb,var(--text) 35%,transparent);outline-offset:3px;border-radius:2px}
