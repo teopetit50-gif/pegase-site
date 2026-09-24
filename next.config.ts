@@ -20,9 +20,6 @@ const POLITIQUE_RAPPORT = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https://www.facebook.com https://connect.facebook.net",
-  /* 24/09 — /secteurs/<slug> affiche le site du SaaS dans un cadre
-     (lib/secteurs.ts). Un hôte ajouté à la table s'ajoute ici. */
-  "frame-src https://chantieros-site.vercel.app https://cabinetos-site-two.vercel.app https://dossieros-site.vercel.app https://rentalos-site.vercel.app",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
