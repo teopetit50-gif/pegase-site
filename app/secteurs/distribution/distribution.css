@@ -636,10 +636,10 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 46%;
+  width: 50%;
   aspect-ratio: 0.84;
-  margin-left: -23%;
-  margin-top: -27.4%;
+  margin-left: -25%;
+  margin-top: -29.8%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -661,7 +661,8 @@
 }
 .p-distribution .nm-verre__phrase {
   font-family: var(--nm-sans);
-  font-size: clamp(11px, 3.6cqw, 16px);
+  /* leur phrase fait ≈ 5,5 % de la largeur de la carte */
+  font-size: clamp(9px, 2.8cqw, 15px);
   line-height: 1.35;
   letter-spacing: -0.01em;
 }
@@ -676,12 +677,12 @@
 .p-distribution .nm-verre__rond {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
   color: #0a0a0a;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
 }
 .p-distribution .nm-verre__lignes {
@@ -689,8 +690,9 @@
   justify-content: space-between;
   gap: 8px;
   font-family: var(--nm-mono);
-  font-size: 8.5px;
+  font-size: 7.5px;
   line-height: 1.5;
+  white-space: nowrap;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.85);

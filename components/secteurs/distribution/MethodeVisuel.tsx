@@ -22,22 +22,22 @@ type Carte = { phrase: string; code: string; g1: string; g2: string; d1: string;
 
 const JEUX: Carte[][] = [
   [
-    { phrase: "« 214 références dans le conteneur du 8 octobre, trois fournisseurs. »", code: "AG", g1: "Achats groupe", g2: "ERP · commandes", d1: "40 pieds", d2: "J-6" },
-    { phrase: "« 38 ventilateurs vendus hier, 22 semaines de stock au magasin 1. »", code: "M1", g1: "Magasin 1", g2: "Caisses · tickets", d1: "Rayon 12", d2: "7 h 00" },
-    { phrase: "« Le navire du 8 octobre arrive le 3 novembre, dédouanement compris. »", code: "TR", g1: "Transitaire", g2: "Fichier d'arrivée", d1: "26 jours", d2: "Mer" },
-    { phrase: "« Vigilance orange au sud de l'île. Bâches et contreplaqué en tête. »", code: "MF", g1: "Vigilance météo", g2: "Saison cyclonique", d1: "Juin-nov.", d2: "Alerte" },
+    { phrase: "« 214 références dans le conteneur du 8 octobre, trois fournisseurs. »", code: "AG", g1: "Achats groupe", g2: "ERP", d1: "40 pieds", d2: "J-6" },
+    { phrase: "« 38 ventilateurs vendus hier, 22 semaines de stock au magasin 1. »", code: "M1", g1: "Magasin 1", g2: "Caisses", d1: "Rayon 12", d2: "7 h" },
+    { phrase: "« Le navire du 8 octobre arrive le 3 novembre, dédouanement compris. »", code: "TR", g1: "Transitaire", g2: "Arrivée", d1: "26 j", d2: "Mer" },
+    { phrase: "« Vigilance orange au sud de l'île. Bâches et contreplaqué en tête. »", code: "MF", g1: "Météo", g2: "Cyclones", d1: "Orange", d2: "Sud" },
   ],
   [
-    { phrase: "« Bâche 4 × 5 m : rupture le 14 novembre si rien n'est ajouté. »", code: "M2", g1: "Magasin 2", g2: "Couverture 3 sem.", d1: "−480 u.", d2: "14/11" },
-    { phrase: "« Le conteneur est rempli à 86 %. Il reste la place de 480 bâches. »", code: "40", g1: "Conteneur 40 pieds", g2: "Départ Le Havre", d1: "86 %", d2: "J-6" },
-    { phrase: "« 60 disjoncteurs arriveraient après la rupture : l'avion s'impose. »", code: "AV", g1: "Arbitrage avion", g2: "Bouclier qualité-prix", d1: "60 u.", d2: "Lundi" },
-    { phrase: "« Magasin 1 : 22 semaines de stock. Magasin 3 : trois. Écart à combler. »", code: "M3", g1: "Deux îles", g2: "Ventilateur colonne", d1: "140 u.", d2: "8/10" },
+    { phrase: "« Bâche 4 × 5 m : rupture le 14 novembre si rien n'est ajouté. »", code: "M2", g1: "Magasin 2", g2: "3 semaines", d1: "−480", d2: "14/11" },
+    { phrase: "« Le conteneur est rempli à 86 %. Il reste la place de 480 bâches. »", code: "40", g1: "Conteneur", g2: "Le Havre", d1: "86 %", d2: "J-6" },
+    { phrase: "« 60 disjoncteurs arriveraient après la rupture : l'avion s'impose. »", code: "AV", g1: "Avion", g2: "Bouclier", d1: "60 u.", d2: "Lundi" },
+    { phrase: "« Magasin 1 : 22 semaines de stock. Magasin 3 : trois. Écart à combler. »", code: "M3", g1: "Deux îles", g2: "Caboteur", d1: "140 u.", d2: "8/10" },
   ],
   [
-    { phrase: "« Ajouter 480 bâches au conteneur du 8 octobre. »", code: "1", g1: "Décision 1 sur 3", g2: "Direction des achats", d1: "À valider", d2: "7 h 00" },
-    { phrase: "« Faire venir 60 disjoncteurs par avion avant lundi. »", code: "2", g1: "Décision 2 sur 3", g2: "Bouclier qualité-prix", d1: "À valider", d2: "7 h 00" },
-    { phrase: "« Transférer 140 ventilateurs par le caboteur du 8 octobre. »", code: "3", g1: "Décision 3 sur 3", g2: "Martinique → Guadeloupe", d1: "À valider", d2: "7 h 00" },
-    { phrase: "« Trois décisions validées. Le journal garde la trace de chacune. »", code: "✓", g1: "Journal", g2: "Direction des achats", d1: "Validé", d2: "7 h 12" },
+    { phrase: "« Ajouter 480 bâches au conteneur du 8 octobre. »", code: "1", g1: "Décision 1/3", g2: "Achats", d1: "À valider", d2: "7 h" },
+    { phrase: "« Faire venir 60 disjoncteurs par avion avant lundi. »", code: "2", g1: "Décision 2/3", g2: "Avion", d1: "À valider", d2: "7 h" },
+    { phrase: "« Transférer 140 ventilateurs par le caboteur du 8 octobre. »", code: "3", g1: "Décision 3/3", g2: "Transfert", d1: "À valider", d2: "7 h" },
+    { phrase: "« Trois décisions validées. Le journal garde la trace de chacune. »", code: "✓", g1: "Journal", g2: "Achats", d1: "Validé", d2: "7 h 12" },
   ],
 ];
 
