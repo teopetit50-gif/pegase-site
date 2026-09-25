@@ -95,7 +95,12 @@
   }
   /* « Chaque matin, l'état du cabinet » : quatre fiches d'exemple à
      tableau, des écrans d'application — réduites comme tels. */
+  /* 0,82 puis 0,72 (25/09, Teo : « ces cards sont encore un peu trop
+     zoomées ») ; les blancs internes se resserrent avec. */
   .p-avocats #point-du-matin .grid > * {
-    zoom: 0.82;
+    zoom: 0.72;
+  }
+  .p-avocats #point-du-matin .space-y-4 > :not(:last-child) {
+    margin-block-end: 10px;
   }
 }

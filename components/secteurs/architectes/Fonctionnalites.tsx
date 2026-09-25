@@ -4,14 +4,14 @@
    COPIÉ le 24/09/2026 à 14 h 57 de `OMEGA/dossieros-site/src/components/
    sections/09-features.tsx` (GÉNÉRÉ côté source par l'assembleur ; ici une
    copie du résultat, corrigée à la main). L'en-tête de section ; la grille
-   est dans GrilleFonctions.tsx. Ce qui change : jetons clairs (#0a0a0a,
+   est dans FileDesPoints.tsx (GrilleFonctions.tsx jusqu'au 25/09). Ce qui change : jetons clairs (#0a0a0a,
    #737373) ; la planche d'architecte du fond passe des traits blancs aux
    traits d'encre (public/secteurs-architectes/plans/, voir
    Fonctionnement.tsx) ; posée dans la marge de 30 px de la page (page.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 /* eslint-disable @next/next/no-img-element -- planche décorative à 22 % d'opacité, masquée en CSS : pas d'optimiseur. */
 import React from "react";
-import GrilleFonctions from "./GrilleFonctions";
+import FileDesPoints from "./FileDesPoints";
 
 export default function Fonctionnalites() {
   return (
@@ -41,7 +41,7 @@ export default function Fonctionnalites() {
               <span className="text-[#0a0a0a]">Chaque point relevé attend</span> <br /> l&apos;arbitrage de
               l&apos;architecte.
             </h2>
-            <GrilleFonctions />
+            <FileDesPoints />
           </div>
         </section>
       </div>

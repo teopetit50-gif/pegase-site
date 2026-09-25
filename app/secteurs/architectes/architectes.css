@@ -106,8 +106,8 @@
   --architectes-texte: #0a0a0a; /* --foreground */
   --architectes-filet: #e5e5e5; /* --border, --input */
   --architectes-anneau: #a1a1a1; /* --ring */
-  /* `rounded-tl-(--radius)` (GrilleFonctions.tsx) lit cette variable, que
-     la source posait sur :root. */
+  /* `rounded-tl-(--radius)` (GrilleFonctions.tsx, retirée le 25/09) lisait
+     cette variable, que la source posait sur :root. */
   --radius: 0.625rem;
   /* Le héros de la référence, thème clair (son `:root`) : fond, voile,
      éclosion et deux halos. En sombre : #070707, un voile #252525 → #070707
