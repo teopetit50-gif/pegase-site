@@ -30,7 +30,10 @@
    référence                      ici
    concurrence-orange #aa412a  →  --nm-bande    #1c2d57  (bleu nuit)
    concurrence-blue   #083241  →  --nm-bande-2  #17171a  (la nuit de /tarifs)
-   concurrence-green  #2c3827  →  --nm-sombre   #17171a  (carte sécurité)
+   concurrence-green  #2c3827  →  --nm-sombre   #1c2d57  (carte sécurité :
+                                  le bleu des bandes du haut, Teo le
+                                  25/09 : « mets-la avec le fond bleu,
+                                  le même bleu qu'en haut »)
    concurrence-black  #100f0f  →  --nm-noir     #0a0a0a
    lavande des lumières        →  bleu glacier sur le bleu, gris clair
                                   sur la nuit (--nm-lum)
@@ -53,7 +56,7 @@
 .p-distribution {
   --nm-bande: #1c2d57;
   --nm-bande-2: #17171a;
-  --nm-sombre: #17171a;
+  --nm-sombre: #1c2d57;
   --nm-noir: #0a0a0a;
   --nm-g1: #f2f2f0;
   --nm-g2: #dcdcd9;
