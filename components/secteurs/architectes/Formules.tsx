@@ -64,7 +64,7 @@ export default function Formules() {
                   06 — Formules
                 </span>
                 <h2 className="text-[#737373] text-balance text-4xl font-medium tracking-tight">
-                  <span className="text-[#0a0a0a]">Des formules</span> pour chaque taille d&apos;agence
+                  <span className="text-[#0a0a0a]">Le prix dépend</span> de la taille de votre agence
                 </h2>
               </div>
             </div>

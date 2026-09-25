@@ -54,11 +54,11 @@ export const SECTEURS: Secteur[] = [
     slug: "btp",
     metier: "BTP",
     saas: "Daliro",
-    texte: "Travaux supplémentaires chiffrés et signés avant exécution.",
+    texte: "Les travaux supplémentaires sont chiffrés et signés avant exécution.",
     detail:
       "Daliro relève dans les photos et les vocaux de vos équipes les travaux absents du marché, puis les chiffre sur vos prix unitaires. Vous obtenez l'accord écrit du client avant que l'ouvrage soit refermé.",
     apercu:
-      "Chaque matin à 7 h, le conducteur de travaux reçoit trois listes par chantier : les travaux à facturer, les sous-traitants à confirmer à J-2 et les livraisons à caler sur le planning.",
+      "Avant le départ sur chantier, le conducteur de travaux reçoit trois listes par chantier : les travaux à facturer, les sous-traitants à confirmer à J-2 et les livraisons à caler sur le planning.",
     combine: [
       { offre: "CASHD", raison: "Les situations et les factures échues relancées selon vos règles, après votre validation." },
       { offre: "FILED", raison: "Les factures des fournisseurs et des sous-traitants lues, contrôlées, transmises à la comptabilité." },
@@ -68,11 +68,11 @@ export const SECTEURS: Secteur[] = [
     slug: "avocats",
     metier: "Cabinets d'avocats",
     saas: "Tamila",
-    texte: "Chaque fait rattaché à la pièce et à la page qui le fondent.",
+    texte: "Chaque fait renvoie à la pièce et à la page qui le fondent.",
     detail:
       "Tamila lit chaque pièce du dossier, y compris scannée ou manuscrite, et rattache chaque fait à la page qui le fonde. L'avocat reçoit une chronologie sourcée, les contradictions entre pièces et un bordereau rapproché des conclusions.",
     apercu:
-      "Chaque matin à 7 h, l'associé reçoit les pièces communiquées la veille, les honoraires forfaitaires dépassés et les dossiers sans diligence depuis trente jours.",
+      "Avant la première audience, l'associé sait quelles pièces ont été communiquées la veille, quels honoraires forfaitaires sont dépassés et quels dossiers sont sans diligence depuis trente jours.",
     combine: [
       { offre: "CASHD", raison: "Les notes d'honoraires échues suivies et relancées, chaque envoi validé par le cabinet." },
       { offre: "FRONTD", raison: "Les demandes des nouveaux clients qualifiées et le premier rendez-vous proposé, à toute heure." },
@@ -82,9 +82,9 @@ export const SECTEURS: Secteur[] = [
     slug: "architectes",
     metier: "Architectes",
     saas: "Lorani",
-    texte: "Plans, CCTP et DPGF croisés avant le permis et le DCE.",
+    texte: "Les plans, le CCTP et la DPGF sont croisés avant le permis.",
     detail:
-      "Lorani croise chaque planche avec les autres, le CCTP et la DPGF, puis relève chaque incohérence avec la planche et l'article concernés. L'architecte arbitre avant le dépôt du permis ou la consultation des entreprises.",
+      "Lorani croise chaque planche avec les autres planches, le cahier des clauses techniques (CCTP) et la décomposition des prix (DPGF), puis relève chaque incohérence avec la planche et l'article concernés. L'architecte arbitre avant le dépôt du permis ou la consultation des entreprises.",
     apercu:
       "Quatre contrôles suivent la mission de maîtrise d'œuvre, du permis à la réception : le permis et le DCE, l'analyse des offres, le visa des documents d'exécution et les situations de travaux.",
     combine: [
@@ -96,11 +96,11 @@ export const SECTEURS: Secteur[] = [
     slug: "location-automobile",
     metier: "Loueurs automobiles",
     saas: "Tavaro",
-    texte: "Restitutions chiffrées sur votre barème, preuves jointes.",
+    texte: "Chaque restitution est chiffrée sur votre barème, preuves jointes.",
     detail:
-      "Tavaro rapproche les photos de restitution de l'état des lieux de départ, puis chiffre carburant, retard et dommages selon votre barème de remise en état. Chaque facture part avec ses preuves datées, après validation de l'agence.",
+      "Tavaro rapproche les photos de restitution de l'état des lieux de départ, puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état. Chaque facture part avec ses preuves datées, après validation de l'agence.",
     apercu:
-      "Chaque matin à 7 h, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
+      "Avant l'ouverture du comptoir, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
     combine: [
       { offre: "FRONTD", raison: "Les demandes de réservation traitées à toute heure, y compris agence fermée." },
       { offre: "CASHD", raison: "Les factures de restitution échues relancées selon vos règles, après votre validation." },
@@ -117,11 +117,11 @@ export const SECTEURS: Secteur[] = [
     slug: "dentaire",
     metier: "Cabinets dentaires",
     saas: "Tiroma",
-    texte: "Créneaux libérés repris, plans signés mis à l'agenda.",
+    texte: "Les créneaux libérés sont repris et les plans signés planifiés.",
     detail:
       "Tiroma lit l'agenda, les plans de traitement et les devis signés de votre logiciel, en lecture seule. Chaque créneau libéré arrive avec les patients qui peuvent le prendre, et l'assistante appelle dans l'ordre.",
     apercu:
-      "Chaque matin à 7 h, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
+      "Avant le premier patient, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
     combine: [
       { offre: "FRONTD", raison: "Les demandes de rendez-vous des patients traitées à toute heure, hors des heures du secrétariat." },
       { offre: "CASHD", raison: "Les devis de soins restés sans réponse relancés, chaque envoi validé par le cabinet." },

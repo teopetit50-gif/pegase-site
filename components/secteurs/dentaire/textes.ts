@@ -47,10 +47,10 @@ import {
 
 /* La deuxième ligne du titre, qui change toutes les 3 s (`mV`). */
 export const LIGNES_TOURNANTES = [
-  "Chaque créneau sauvé.",
-  "Chaque plan planifié.",
-  "Chaque contrôle revu.",
-  "Chaque matin à 7 h.",
+  "un créneau annulé",
+  "un plan signé",
+  "un contrôle dû",
+  "un accord de mutuelle",
 ];
 
 /* Les six pastilles sous les boutons : à la place des réseaux sociaux de
@@ -92,7 +92,7 @@ export const ECRANS: Ecran[] = [
     id: "point",
     badge: "Chaque matin",
     titre: "Point du matin",
-    texte: "Les trois décisions du jour, prêtes à 7 h.",
+    texte: "Les trois décisions du jour sont prêtes avant le premier patient.",
     src: `${ECRANS_DOSSIER}/point-du-matin.png`,
   },
   {
@@ -106,21 +106,21 @@ export const ECRANS: Ecran[] = [
     id: "fauteuils",
     badge: "En direct",
     titre: "Charge des fauteuils",
-    texte: "Qui tourne à vide aujourd'hui, et quoi déplacer.",
+    texte: "Tiroma montre quel fauteuil tourne à vide aujourd'hui et quels soins déplacer.",
     src: `${ECRANS_DOSSIER}/fauteuils.png`,
   },
   {
     id: "plans",
     badge: "En direct",
     titre: "Plans sans rendez-vous",
-    texte: "Les devis signés qui dorment, du plus ancien au plus récent.",
+    texte: "Les devis signés sans rendez-vous remontent, du plus ancien au plus récent.",
     src: `${ECRANS_DOSSIER}/plans.png`,
   },
   {
     id: "avant",
     badge: "À J-2",
     titre: "Avant les rendez-vous",
-    texte: "La prothèse revenue du laboratoire, l'implant en stock, l'accord de la mutuelle.",
+    texte: "Deux jours avant, Tiroma vérifie le retour du laboratoire, l'implant en stock et l'accord de la mutuelle.",
     src: `${ECRANS_DOSSIER}/avant.png`,
   },
 ];
@@ -137,39 +137,39 @@ export const ONGLETS_ECRANS: { titre: string; valeur: string; src: string; legen
 
 export const ETAPES = [
   {
-    titre: "L'agenda et les plans, lus",
+    titre: "Tiroma lit l'agenda et les plans",
     texte:
       "Tout au long de la journée, Tiroma lit l'agenda, les plans, les devis, les travaux confiés au laboratoire et les réponses des mutuelles. Une annulation saisie à 8 h remonte dans les minutes qui suivent, en lecture seule.",
   },
   {
-    titre: "Le créneau sauvé",
+    titre: "Le créneau libéré est repris",
     texte:
-      "Un patient annule la veille : Tiroma dit qui peut prendre sa place. D'abord un plan accepté, puis la liste d'attente, puis un contrôle dû. L'assistante appelle, le fauteuil reste occupé.",
+      "Quand un patient annule la veille, Tiroma indique qui peut prendre sa place : d'abord un patient dont le plan est accepté, puis la liste d'attente, puis un contrôle dû. L'assistante n'a plus qu'à appeler, et le fauteuil reste occupé.",
   },
   {
-    titre: "Le plan planifié",
+    titre: "Le plan signé trouve son rendez-vous",
     texte:
       "Les devis signés sans rendez-vous remontent chaque matin, du plus ancien au plus récent, avec le créneau qui leur convient.",
   },
   {
-    titre: "Le fauteuil qui tourne",
+    titre: "Chaque fauteuil reste occupé",
     texte:
-      "Fauteuil sans assistante, demi-journée vide, séance longue mal placée : la charge se lit par fauteuil, pour le titulaire seul, jamais par personne.",
+      "Tiroma repère le fauteuil sans assistante, la demi-journée vide et la séance longue mal placée. La charge se lit par fauteuil, jamais par personne, et seul le titulaire la voit.",
   },
 ];
 
 /* ── Avant / après (section Écrans) ─────────────────────────────────── */
 
 export const SANS_TIROMA = [
-  "L'annulation découverte en ouvrant l'agenda",
+  "L'annulation se découvre en ouvrant l'agenda",
   "Le créneau libre reste vide ou part au premier qui appelle",
-  "Le devis signé dort : le patient attendait l'accord de sa mutuelle, puis personne n'a rappelé",
-  "La prothèse pas revenue du laboratoire se découvre le jour de la pose",
+  "Le devis signé reste en attente : le patient attendait l'accord de sa mutuelle, puis personne ne l'a rappelé",
+  "Une prothèse encore au laboratoire se découvre le jour de la pose",
 ];
 export const AVEC_TIROMA = [
-  "À 7 h, chaque créneau libéré arrive avec ses patients",
-  "Plan accepté d'abord, puis liste d'attente, puis contrôle dû",
-  "Les plans signés sans rendez-vous remontent seuls",
+  "Avant le premier patient, chaque créneau libéré arrive avec les patients qui peuvent le prendre",
+  "Le créneau va d'abord à un plan accepté, puis à la liste d'attente, puis à un contrôle dû",
+  "Les plans signés sans rendez-vous remontent chaque matin",
   "Deux jours avant la pose, le retour du laboratoire est vérifié",
 ];
 
@@ -186,7 +186,7 @@ export const COMPARATIF: { critere: string; cases: [Case, Case, Case, Case] }[] 
   { critere: "Retour du laboratoire vérifié avant la pose", cases: [true, false, false, "Au téléphone"] },
   { critere: "Accords des mutuelles rapprochés de l'agenda", cases: [true, false, false, "Manuel"] },
   { critere: "Implants des chirurgies rapprochés du stock", cases: [true, "Stock général", false, "De mémoire"] },
-  { critere: "Charge lue par fauteuil, jamais par personne", cases: [true, "Partiel", false, false] },
+  { critere: "Charge suivie par fauteuil, jamais par personne", cases: [true, "Partiel", false, false] },
   { critere: "Point du matin par WhatsApp ou e-mail", cases: [true, false, false, "À l'oral"] },
   { critere: "Aucune double saisie", cases: [true, true, "Partiel", false] },
   { critere: "Mise en route", cases: ["Sur audit", true, "Abonnement", "Formation"] },
@@ -201,7 +201,7 @@ export const CABINETS = [
     Icone: Stethoscope,
     titre: "Cabinet de 2 à 3 fauteuils",
     texte:
-      "Le titulaire soigne toute la journée. Tiroma prépare le matin ce qu'il n'a pas le temps de regarder : les trous, les plans qui dorment, les contrôles dus.",
+      "Le titulaire soigne toute la journée. Chaque matin, Tiroma prépare ce qu'il n'a pas le temps de regarder : les créneaux vides, les plans signés sans rendez-vous et les contrôles dus.",
     points: [
       "Créneaux libérés avec leurs patients",
       "Plans signés sans rendez-vous",
@@ -209,7 +209,7 @@ export const CABINETS = [
       "Retours du laboratoire vérifiés avant la pose",
       "Point du matin sur WhatsApp",
     ],
-    fait: "⏱ Prêt chaque jour à 7 h",
+    fait: "Prêt chaque jour à 7 h",
     lueur: "bg-gradient-to-br from-[#4f9587]/10 to-[#4f9587]/0",
     fondIcone: "group-hover:bg-gradient-to-br group-hover:from-[#4f9587]/20 group-hover:to-[#4f9587]/0",
     couleurIcone: "group-hover:text-[#3b7a6e]",
@@ -218,7 +218,7 @@ export const CABINETS = [
     Icone: Users,
     titre: "Cabinet de groupe",
     texte:
-      "Plusieurs praticiens, plusieurs assistantes, un agenda qui bouge toute la journée. Tiroma dit quel fauteuil tourne à vide et quoi déplacer.",
+      "Avec plusieurs praticiens et plusieurs assistantes, l'agenda change toute la journée. Tiroma indique quel fauteuil tourne à vide et quels soins déplacer.",
     points: [
       "Charge par fauteuil et par demi-journée",
       "Assistante absente : soins à basculer",
@@ -226,7 +226,7 @@ export const CABINETS = [
       "Une liste d'attente commune",
       "Implants des chirurgies rapprochés du stock",
     ],
-    fait: "🦷 Lu par fauteuil",
+    fait: "Suivi par fauteuil",
     lueur: "bg-gradient-to-br from-[#4f9587]/10 to-[#4f9587]/0",
     fondIcone: "group-hover:bg-gradient-to-br group-hover:from-[#4f9587]/20 group-hover:to-[#4f9587]/0",
     couleurIcone: "group-hover:text-[#3b7a6e]",
@@ -235,7 +235,7 @@ export const CABINETS = [
     Icone: Building2,
     titre: "Centre dentaire",
     texte:
-      "Plusieurs sites, une direction. Chaque centre reçoit son point du matin, la direction voit la synthèse de la semaine.",
+      "Quand plusieurs sites dépendent d'une même direction, chaque centre reçoit son point du matin et la direction reçoit la synthèse de la semaine.",
     points: [
       "Un point du matin par centre",
       "Synthèse de la semaine pour la direction",
@@ -243,7 +243,7 @@ export const CABINETS = [
       "Droits d'accès par rôle",
       "Taux de réinscription et d'acceptation des devis",
     ],
-    fait: "✨ Un point par centre",
+    fait: "Un point par centre",
     lueur: "bg-gradient-to-br from-[#4f9587]/10 to-[#4f9587]/0",
     fondIcone: "group-hover:bg-gradient-to-br group-hover:from-[#4f9587]/20 group-hover:to-[#4f9587]/0",
     couleurIcone: "group-hover:text-[#3b7a6e]",
@@ -285,7 +285,7 @@ export const SITUATIONS: { quand: string; cabinet: string; sujet: string; Icone:
     sujet: "Liste d'attente",
     Icone: ListChecks,
     recit:
-      "Neuf patients veulent venir plus tôt. Le créneau libéré part au premier qui appelle, pas à celui qui en a le plus besoin.",
+      "Neuf patients veulent venir plus tôt. Le créneau libéré part au premier qui appelle, plutôt qu'à celui qui en a le plus besoin.",
   },
   {
     quand: "Le vendredi, 17 h",
@@ -381,7 +381,7 @@ export const FORMULES: Formule[] = [
   {
     cle: "cabinet",
     nom: "Cabinet",
-    texte: "2 à 3 fauteuils, un titulaire.",
+    texte: "Pour 2 à 3 fauteuils et un titulaire.",
     conseillee: false,
     points: [
       "Point du matin chaque jour ouvré",
@@ -408,7 +408,7 @@ export const FORMULES: Formule[] = [
   {
     cle: "groupe",
     nom: "Groupe",
-    texte: "4 à 6 fauteuils, plusieurs praticiens.",
+    texte: "Pour 4 à 6 fauteuils et plusieurs praticiens.",
     conseillee: false,
     points: [
       "Tout ce que contient Cabinet",
@@ -432,7 +432,7 @@ export const FORMULES: Formule[] = [
   {
     cle: "centre",
     nom: "Centre",
-    texte: "7 à 10 fauteuils, une équipe.",
+    texte: "Pour 7 à 10 fauteuils et une équipe.",
     conseillee: true,
     points: [
       "Tout ce que contient Groupe",
@@ -454,7 +454,7 @@ export const FORMULES: Formule[] = [
   {
     cle: "reseau",
     nom: "Réseau",
-    texte: "Plusieurs sites, une direction.",
+    texte: "Pour plusieurs sites et une direction.",
     conseillee: false,
     points: [
       "Tout ce que contient Centre",
@@ -478,7 +478,7 @@ export const QUESTIONS = [
     r: "Non. Tiroma se branche sur le logiciel que vous utilisez déjà et le lit, sans y écrire. Vos assistantes continuent de travailler comme aujourd'hui ; seul le point du matin s'ajoute.",
   },
   {
-    q: "Que fait Tiroma de mes données patients ?",
+    q: "Que fait Tiroma des données des patients ?",
     r: "Il les lit pour préparer le point du matin, rien de plus. Les accès sont journalisés, les droits se donnent par rôle, et vous pouvez tout exporter ou tout effacer à tout moment. Les conditions d'hébergement sont écrites dans le contrat.",
   },
   {
@@ -502,7 +502,7 @@ export const QUESTIONS = [
     r: "Non. Tiroma lit l'agenda tout au long de la journée : une annulation saisie à 8 h remonte avec les patients qui peuvent la reprendre dans les minutes qui suivent, sans attendre le point du lendemain.",
   },
   {
-    q: "Et pour l'orthodontie et les implants ?",
+    q: "Tiroma suit-il l'orthodontie et les implants ?",
     r: "Tiroma signale l'accord de l'Assurance maladie dont le traitement n'a pas commencé, alors que l'accord ne vaut que six mois, et le semestre suivant qui n'a pas été posé. Pour chaque chirurgie de la semaine, il vérifie que l'implant prévu est en stock, dans la bonne référence.",
   },
   {
@@ -510,7 +510,7 @@ export const QUESTIONS = [
     r: "Le prix dépend du nombre de fauteuils et de sites. Il se fixe à l'audit, en une demi-heure, avant tout engagement.",
   },
   {
-    q: "Est-ce que Tiroma note mon équipe ?",
+    q: "Tiroma évalue-t-il le travail de l'équipe ?",
     r: "Non. La charge se lit par fauteuil et par demi-journée, jamais par personne, et la vue « charge des fauteuils » est réservée au titulaire.",
   },
 ];

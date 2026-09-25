@@ -84,13 +84,13 @@ const QUESTIONS = [
   },
   {
     id: "honoraires",
-    q: "Lorani suit-il nos honoraires ?",
+    q: "Lorani suit-il les honoraires de l'agence ?",
     a: "Oui, phase par phase : le temps passé est rapporté aux honoraires de chaque élément de mission, de l'esquisse à la réception. Une phase qui consomme plus que prévu remonte avant la fin de la mission.",
   },
   {
     id: "decennale",
     q: "Que reste-t-il des contrôles des années plus tard ?",
-    a: "Un dossier daté, exportable en une fois : chaque point signalé, chaque visa rendu, chaque refus, avec la pièce et la date. S'il y a un sinistre des années après la réception, vous retrouvez ce que l'agence avait relevé et quand.",
+    a: "Vous gardez un dossier daté, exportable en une fois : chaque point signalé, chaque visa rendu et chaque refus, avec la pièce et la date. S'il y a un sinistre des années après la réception, vous retrouvez ce que l'agence avait relevé et quand.",
   },
   {
     id: "indice",
@@ -99,18 +99,18 @@ const QUESTIONS = [
   },
   {
     id: "fichiers",
-    q: "Lorani modifie-t-il mes fichiers ?",
+    q: "Lorani modifie-t-il les fichiers de l'agence ?",
     a: "Non. Il lit vos fichiers et n'en écrit aucun. Le rapport, en PDF annoté et en Excel, est un document à part que vous gardez ou joignez au dossier.",
   },
   {
     id: "hebergement",
     q: "Où sont hébergés les dossiers ?",
-    a: "Dans l'Union européenne, chiffrés au repos et en transit. Ils ne servent à entraîner aucun modèle, et vous pouvez les retirer à tout moment, rapports compris.",
+    a: "Ils sont hébergés dans l'Union européenne et chiffrés pendant leur transfert comme pendant leur conservation. Ils ne servent à entraîner aucun modèle, et vous pouvez les retirer à tout moment, rapports compris.",
   },
   {
     id: "essai",
     q: "Comment l'essayer ?",
-    a: "Sur un permis déjà instruit que vous connaissez : vous comparez ce que Lorani relève à ce que l'instruction a relevé, puis l'audit fixe la formule.",
+    a: "L'audit se fait sur un permis déjà instruit que vous connaissez. Vous comparez ce que Lorani relève à ce que l'instruction avait relevé, puis l'audit fixe la formule.",
   },
 ];
 

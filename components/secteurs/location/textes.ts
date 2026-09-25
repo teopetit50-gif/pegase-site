@@ -49,11 +49,11 @@ export const HERO = {
   pastilleSuite: "Conçu et développé en France",
   /* La seule figure de la page : deux affirmations parallèles, comme le hero
      d'omegaai.fr (« Vos équipes ont les outils. Nous les faisons travailler ensemble. »). */
-  ligne1: "Facturez chaque restitution",
-  ligne2: "sur votre barème,",
-  accent: "preuves à l’appui.",
+  ligne1: "Un dommage non relevé au retour",
+  ligne2: "se facture rarement",
+  accent: "au client.",
   chapo:
-    "Tavaro rapproche les photos de restitution de l’état des lieux de départ, puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état. Chaque facture part avec les photos datées du départ et du retour, après validation de l’agence.",
+    "Au retour du véhicule, Tavaro compare les photos de restitution à l’état des lieux de départ, puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état. Chaque facture part avec les photos datées du départ et du retour, après validation de l’agence.",
   chapoCourt: "Tavaro chiffre chaque restitution sur votre barème et prépare la facture avec ses preuves, que l’agence valide avant envoi.",
   boutonPrincipal: "Réserver un audit",
   boutonSecondaire: "Voir les modules",
@@ -81,7 +81,7 @@ export const SOLUTIONS: { etiquette: string; kicker: string; panneaux: Panneau[]
       lienTexte: "Voir le point du matin",
       lienHref: "#top",
       resume:
-        "Tavaro lit ce que vos agences produisent déjà, comme les photos de retour, les contrats, le planning et la messagerie d’équipe. Chaque matin à 7 h, il en tire une page par agence qui décrit l’état du parking et les décisions en attente.",
+        "Tavaro lit ce que vos agences produisent déjà : les photos de retour, les contrats, le planning et la messagerie d’équipe. Avant l’ouverture du comptoir, chaque agence reçoit une page qui décrit l’état de son parking et les décisions qui l’attendent.",
       points: [
         "Votre logiciel de réservation reste en place, et rien ne s’y branche.",
         "Chaque retour, facture, remise en état ou incident est attribué à une personne nommée.",
@@ -143,8 +143,8 @@ export const SOLUTIONS: { etiquette: string; kicker: string; panneaux: Panneau[]
       resume:
         "Tavaro tient une fiche économique par véhicule, avec son revenu, son entretien, ses jours d’immobilisation et sa valeur de revente. Il désigne ceux qui coûtent plus qu’ils ne rapportent, puis propose le moment et le canal de revente.",
       points: [
-        "Chaque véhicule est comparé à son prix de revente réel, pas à sa valeur comptable.",
-        "Vendre, garder ou renouveler se décide véhicule par véhicule, chiffres à l’appui.",
+        "Chaque véhicule est comparé à son prix de revente réel plutôt qu’à sa valeur comptable.",
+        "La décision de vendre, de garder ou de renouveler se prend véhicule par véhicule, chiffres à l’appui.",
         "La direction valide chaque mise en vente, et le journal en garde la trace.",
       ],
     },
@@ -161,20 +161,20 @@ export const MOTEURS: { etiquette: string; liste: Moteur[] } = {
   liste: [
     { numero: "01", nom: "Facturation des retours", role: "Carburant, retard et dommages", detail: "Chaque restitution est comparée à l’état des lieux de départ, puis chiffrée selon votre barème. L’agence valide la facture avant envoi.", chiffre: "302 €", chiffreLegende: "proposés sur un retour d’exemple" },
     { numero: "02", nom: "Remise en location", role: "Inspection, nettoyage, recharge", detail: "La tâche d’inspection, de nettoyage et de recharge est créée dès le retour, et le responsable est alerté si le prochain départ est menacé.", chiffre: "2 h 48", chiffreLegende: "de remise en location, agence d’exemple" },
-    { numero: "03", nom: "Entretien", role: "Révisions hors location", detail: "Les révisions sont placées dans les creux du planning, hors des réservations, et l’atelier est prévenu à l’avance.", chiffre: "4", chiffreLegende: "entretiens placés cette semaine" },
+    { numero: "03", nom: "Entretien", role: "Révisions hors location", detail: "Tavaro place les révisions dans les creux du planning, hors des réservations, et prévient l’atelier à l’avance.", chiffre: "4", chiffreLegende: "entretiens placés cette semaine" },
     { numero: "04", nom: "Assistance", role: "Panne, accident, clé perdue", detail: "L’assistant répond à l’appel, ouvre le dossier, envoie la dépanneuse selon votre grille et prévient l’agence.", chiffre: "35 min", chiffreLegende: "d’arrivée de la dépanneuse, exemple" },
-    { numero: "05", nom: "Sortie de flotte", role: "Revente au bon moment", detail: "Le revenu, l’entretien, l’immobilisation et la valeur de revente de chaque véhicule sont rapprochés pour désigner ceux qui coûtent plus qu’ils ne rapportent.", chiffre: "12", chiffreLegende: "véhicules à sortir ce trimestre" },
-    { numero: "06", nom: "Questions", role: "Votre parking en questions", detail: "Une question posée en français reçoit une réponse chiffrée, avec la cause de l’écart et la décision proposée.", chiffre: "42", chiffreLegende: "retours relus en une question", vedette: true },
+    { numero: "05", nom: "Sortie de flotte", role: "Revente au bon moment", detail: "Tavaro rapproche le revenu, l’entretien, l’immobilisation et la valeur de revente de chaque véhicule pour désigner ceux qui coûtent plus qu’ils ne rapportent.", chiffre: "12", chiffreLegende: "véhicules à sortir ce trimestre" },
+    { numero: "06", nom: "Questions", role: "Votre parking en questions", detail: "Posez une question en français : Tavaro répond chiffres à l’appui, avec la cause de l’écart et la décision proposée.", chiffre: "42", chiffreLegende: "retours relus en une question", vedette: true },
     { numero: "07", nom: "Réservations à risque", role: "Non-présentations anticipées", detail: "Les réservations exposées à une non-présentation sont repérées, avec la confirmation, l’acompte ou la relance à proposer avant le départ.", chiffre: "19", chiffreLegende: "réservations à risque ce matin" },
     { numero: "08", nom: "Montée en gamme", role: "L’offre au comptoir", detail: "La montée en gamme est proposée au comptoir lorsqu’un véhicule supérieur est libre et que le profil du client s’y prête.", chiffre: "34", chiffreLegende: "clients à qui proposer une offre" },
     { numero: "09", nom: "Contrats à risque", role: "Un score par contrat", detail: "Chaque contrat reçoit un score établi à partir du conducteur, de l’historique et de la sinistralité ; la pièce d’identité et le permis sont contrôlés.", chiffre: "3", chiffreLegende: "contrats signalés à risque ce matin" },
     { numero: "10", nom: "Véhicules inactifs", role: "Le risque d’inactivité à 72 h", detail: "La probabilité qu’un véhicule reste trois jours au parking est calculée chaque matin, avec l’action qui permet de l’éviter.", chiffre: "28", chiffreLegende: "véhicules à risque ce matin" },
-    { numero: "11", nom: "Transferts", role: "Entre agences, avant le pic", detail: "Les transferts entre agences sont organisés avant le pic de demande, en une seule tournée, selon les réservations de chaque site.", chiffre: "14", chiffreLegende: "transferts proposés pour samedi" },
+    { numero: "11", nom: "Transferts", role: "Entre agences, avant le pic", detail: "Tavaro organise les transferts entre agences avant le pic de demande, en une seule tournée, selon les réservations de chaque site.", chiffre: "14", chiffreLegende: "transferts proposés pour samedi" },
     { numero: "12", nom: "État des lieux signé", role: "Photos guidées, signées au départ", detail: "L’agent est guidé angle par angle, la photo floue est refusée, puis le client signe l’état des lieux au départ comme au retour.", chiffre: "12", chiffreLegende: "photos par état des lieux, exemple" },
     { numero: "13", nom: "Péages", role: "Flux libre et télépéage", detail: "Chaque passage sous un portique sans barrière est rattaché au contrat, payé dans les 72 heures, puis refacturé au client.", chiffre: "7", chiffreLegende: "passages à payer avant jeudi" },
-    { numero: "14", nom: "Amendes", role: "La désignation à l’ANTAI", detail: "Chaque avis de contravention est rapproché du contrat, le locataire est désigné dans les 45 jours et les frais de dossier lui sont refacturés.", chiffre: "9", chiffreLegende: "avis à désigner cette semaine" },
+    { numero: "14", nom: "Amendes", role: "La désignation à l’ANTAI", detail: "Chaque avis de contravention est rapproché du contrat, et le locataire est désigné dans les 45 jours. Les frais de dossier lui sont refacturés.", chiffre: "9", chiffreLegende: "avis à désigner cette semaine" },
     { numero: "15", nom: "Rappels", role: "Rappels, contrôle technique, Crit’Air", detail: "Un véhicule rappelé par le constructeur, ou dont le contrôle technique arrive à échéance, sort des réservations. Sa vignette Crit’Air est rappelée au comptoir.", chiffre: "3", chiffreLegende: "véhicules rappelés, dont 2 réservés demain" },
-    { numero: "16", nom: "Garage et carrosserie", role: "Le retour du véhicule immobilisé", detail: "Chaque véhicule chez le carrossier garde une date de retour. Sans date, ou trop tard pour le pic, les transferts sont proposés.", chiffre: "12 j", chiffreLegende: "chez le carrossier, sans date de retour" },
+    { numero: "16", nom: "Garage et carrosserie", role: "Le retour du véhicule immobilisé", detail: "Chaque véhicule chez le carrossier garde une date de retour. Si cette date manque ou tombe après le pic, Tavaro propose des transferts.", chiffre: "12 j", chiffreLegende: "chez le carrossier, sans date de retour" },
     { numero: "17", nom: "Contestations bancaires", role: "Le dossier de preuve", detail: "Quand un client conteste auprès de sa banque le débit des dommages, le dossier part en un clic : état des lieux signé, photos datées, barème appliqué et contrat.", chiffre: "4", chiffreLegende: "pièces jointes à chaque dossier" },
     { numero: "18", nom: "Sinistres et recours", role: "Suivis jusqu’au règlement", detail: "Chaque accident est suivi du constat au règlement, et le recours contre l’assureur du client est préparé pour les jours d’immobilisation.", chiffre: "5", chiffreLegende: "dossiers ouverts ce mois-ci" },
     { numero: "19", nom: "Relevés constructeur", role: "Sans boîtier à installer", detail: "Le carburant, le kilométrage et la charge de la batterie sont lus auprès du constructeur au moment du retour, puis confirment ce que montrent les photos.", chiffre: "0", chiffreLegende: "boîtier à installer" },
@@ -184,9 +184,9 @@ export const MOTEURS: { etiquette: string; liste: Moteur[] } = {
 
 export const METHODE = {
   etiquette: "03 / Méthode",
-  titre: "L’audit commence par vingt retours.",
+  titre: "Vingt retours suffisent à mesurer ce qui n’a pas été facturé",
   chapo:
-    "Nous relisons vos vingt derniers retours dans une agence, pour mesurer ce qui a été facturé et ce qui ne l’a pas été. Le premier module s’installe là où l’écart est le plus grand, pour quatre semaines, et un seul indicateur est lu à la fin du mois.",
+    "Pendant l’audit, nous relisons les vingt derniers retours d’une de vos agences et nous mesurons ce qui a été facturé et ce qui ne l’a pas été. Le premier module s’installe là où l’écart est le plus grand, pour quatre semaines, et un seul indicateur est lu à la fin du mois.",
   cta: "Réserver un audit",
 };
 
@@ -205,7 +205,7 @@ export const A_PROPOS = {
   liste: [
     "Les retours sont comparés aux photos de départ, et la facture est proposée avec les preuves.",
     "La remise en location et l’entretien sont placés dans les creux du planning, puis suivis par l’équipe.",
-    "Les incidents et la sortie de flotte sont chiffrés, puis validés par vous.",
+    "Les incidents et la sortie de flotte sont chiffrés, puis vous les validez.",
   ],
   explorer: "Explorer",
   liens: [

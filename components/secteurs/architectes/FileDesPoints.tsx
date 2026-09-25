@@ -46,26 +46,26 @@ const FONCTIONS = [
   {
     valeur: "planches",
     icone: Layers,
-    titre: "Toutes les planches relues",
+    titre: "Toutes les planches sont relues",
     resume: "Chaque planche est croisée avec les autres et avec les pièces écrites : aucune n'est lue seule.",
   },
   {
     valeur: "lecteur",
     icone: FileSearch,
-    titre: "Un lecteur par pièce",
+    titre: "Chaque type de pièce a sa lecture",
     resume:
-      "Chaque type de pièce a sa propre lecture : un plan, une DPGF et une fiche technique ne se contrôlent pas de la même façon.",
+      "Un plan, une DPGF et une fiche technique ne se contrôlent pas de la même façon : Lorani applique à chacun sa propre lecture.",
   },
   {
     valeur: "situations",
     icone: ReceiptText,
-    titre: "Situations suivies",
-    resume: "La situation reçue est comparée au marché et à la précédente, puis l'écart est chiffré.",
+    titre: "Les situations sont suivies",
+    resume: "Lorani compare chaque situation reçue au marché et à la précédente, puis chiffre l'écart.",
   },
   {
     valeur: "alertes",
     icone: Bell,
-    titre: "Alertes à réception",
+    titre: "Une alerte dès la réception",
     resume:
       "Chaque situation, indice ou offre est lu dès sa réception, et l'écart est signalé le jour même. La date butoir de chaque visa est calée sur le délai de commande de l'ouvrage.",
   },

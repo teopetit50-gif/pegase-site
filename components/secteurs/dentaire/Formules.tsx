@@ -37,7 +37,7 @@ export default function Formules() {
       <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
         <Apparition className="mb-16 max-w-3xl lg:mb-24">
           <Surtitre mono>Formules</Surtitre>
-          <h2 className="mb-6 font-sans text-4xl text-slate-900 md:text-5xl lg:text-6xl">Des formules simples</h2>
+          <h2 className="mb-6 font-sans text-4xl text-slate-900 md:text-5xl lg:text-6xl">Le prix dépend du nombre de fauteuils</h2>
           <p className="max-w-xl text-lg text-slate-600 lg:text-xl">
             Le prix dépend du nombre de fauteuils : il se fixe à l&apos;audit, pas sur une grille.
           </p>

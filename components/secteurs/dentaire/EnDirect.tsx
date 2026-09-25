@@ -14,8 +14,8 @@ export default function EnDirect() {
       <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
         <Apparition className="mb-12 max-w-3xl lg:mb-16">
           <Surtitre>En direct</Surtitre>
-          <h2 className="mb-6 text-3xl text-slate-900 lg:text-5xl">Votre cabinet, lu en une page.</h2>
-          <p className="text-lg text-slate-600">Créneaux, plans, fauteuils : ce qui compte ce matin, au même endroit.</p>
+          <h2 className="mb-6 text-3xl text-slate-900 lg:text-5xl">Votre cabinet tient sur une seule page</h2>
+          <p className="text-lg text-slate-600">Les créneaux, les plans et les fauteuils qui comptent ce matin sont réunis au même endroit.</p>
         </Apparition>
         <Apparition delay={200}>
           <div className="relative mx-auto max-w-6xl [perspective:1000px]">

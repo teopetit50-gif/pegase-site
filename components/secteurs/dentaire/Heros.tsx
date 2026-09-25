@@ -59,7 +59,7 @@ export default function Heros() {
         <Apparition delay={100} duration="slow">
           <div className="relative mx-auto mb-5 max-w-4xl">
             <h1 className="font-sans text-[clamp(2rem,6vw,4.5rem)] leading-[1] tracking-tight">
-              <span className="block">Des fauteuils pleins.</span>
+              <span className="block">Chaque semaine,</span>
               <span className="block">
                 <span className="relative inline-block">
                   <span key={ligne} className="dentaire-lettres inline-block whitespace-nowrap">
@@ -67,14 +67,13 @@ export default function Heros() {
                   </span>
                 </span>
               </span>
-              <span className="block text-[#3b7a6e]">Sans rien changer.</span>
+              <span className="block text-[#3b7a6e]">reste sans suite.</span>
             </h1>
           </div>
         </Apparition>
         <Apparition delay={200}>
           <p className="mx-auto mb-6 max-w-xl text-base leading-normal text-slate-600 lg:text-lg">
-            Tiroma lit votre agenda, vos plans de traitement et vos devis signés. Chaque matin, il vous dit quel
-            créneau sauver, quel plan planifier et quel fauteuil tourne à vide.
+            Tiroma lit votre agenda, vos plans de traitement et vos devis signés. Avant le premier patient, votre secrétariat sait quel créneau proposer et à qui, quel plan planifier et quel fauteuil tourne à vide.
           </p>
         </Apparition>
         <div className="relative z-20">

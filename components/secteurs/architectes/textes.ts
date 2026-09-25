@@ -22,9 +22,9 @@ export const CONTACT = {
 };
 export const HERO = {
   cercle: ["Contrôleur de dossier", "Agences d'architecture", "Permis · DCE · Visa · Chantier"],
-  titre: "Les incohérences du dossier relevées avant le chantier",
+  titre: "Une incohérence entre deux planches se paie sur le chantier",
   texte:
-    "Lorani croise chaque planche avec le CCTP, la DPGF et les pièces du permis, puis vous remet en quelques heures la liste des incohérences, chacune avec la page, l'article et la correction proposée.",
+    "Lorani croise chaque planche avec le cahier des clauses techniques (CCTP), la décomposition des prix (DPGF) et les pièces du permis. En quelques heures, vous recevez la liste des incohérences, chacune avec la page, l'article et la correction proposée.",
   garanties: ["Sans BIM", "Vos PDF, même scannés", "Lecture seule", "Données hébergées dans l'UE"],
   audit: "Réserver un audit",
   demo: "Voir la démo",
@@ -41,7 +41,7 @@ export const COMPTEURS = {
   ],
 };
 export const APPEL = {
-  titre: "Essayez sur un permis déjà instruit",
+  titre: "Jugez Lorani sur un permis déjà instruit",
   audit: "Réserver un audit",
   formules: "Voir les formules",
   glyphes: [

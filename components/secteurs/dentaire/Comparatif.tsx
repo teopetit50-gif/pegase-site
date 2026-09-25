@@ -26,7 +26,7 @@ export default function Comparatif() {
       <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
         <Apparition className="mx-auto mb-12 max-w-2xl text-center">
           <SurtitrePerle className="mb-4">Pourquoi Tiroma</SurtitrePerle>
-          <h2 className="mb-4 text-3xl text-slate-900 lg:text-4xl">Ni un logiciel, ni une assistante de plus.</h2>
+          <h2 className="mb-4 text-3xl text-slate-900 lg:text-4xl">Un logiciel de cabinet garde l&apos;agenda sans dire qui appeler</h2>
           <p className="text-lg text-slate-600">
             Tiroma lit ce que votre logiciel de cabinet sait déjà, et en tire trois décisions par matin.
           </p>

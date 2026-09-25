@@ -32,12 +32,12 @@ export const CONTACT = {
 
 export const HERO = {
   badge: "NOUVEAU",
-  annonce: "Délais d'appel et contrôles de procédure",
-  titreAvant: "Chaque fait du dossier,",
-  titreMot: "renvoyé",
-  titreApres: "à sa pièce",
-  texte: "Tamila lit chaque pièce du dossier et vous remet une chronologie sourcée, les contradictions entre pièces et un bordereau rapproché de vos conclusions.",
-  bouton: "Soumettre un dossier",
+  annonce: "Tamila suit désormais vos délais d'appel",
+  titreAvant: "Une pièce reçue la veille peut",
+  titreMot: "contredire",
+  titreApres: "tout votre dossier",
+  texte: "Tamila la rapproche de vos faits dès son arrivée et vous signale ce qu'elle change. Pour chaque dossier, vous disposez d'une chronologie dont chaque fait renvoie à sa pièce, des contradictions relevées entre pièces et d'un bordereau rapproché de vos conclusions.",
+  bouton: "Réserver un audit",
   legende: "Palais de justice de Paris, boulevard du Palais. À l'écran, des conclusions et leur dossier de faits (exemple).",
 };
 
@@ -49,27 +49,27 @@ export const PIECES = {
 };
 
 export const FONCTIONNALITES = {
-  titreL1: "Ce que prouvent les pièces,",
-  titreL2: "établi et",
-  titreMot: "sourcé",
-  texte: "Tamila reconstitue les faits à partir de chaque pièce, y compris scannée, et renvoie chacun d'eux à la page qui le fonde, afin que vous le vérifiiez avant de vous en servir.",
+  titreL1: "À l'audience, un fait vaut",
+  titreL2: "ce que vaut",
+  titreMot: "sa pièce",
+  texte: "Tamila reconstitue les faits à partir de chaque pièce, même scannée, et renvoie chacun d'eux à la page qui le fonde. Vous vérifiez chaque fait avant de vous en servir.",
   cartes: [
-    { titre: "Pièces adverses du jour", texte: "Ce que les pièces reçues hier modifient dans votre dossier de faits" },
-    { titre: "Chronologie sourcée", texte: "Chaque fait daté, résumé et rattaché à la page de sa pièce" },
-    { titre: "Bordereau contrôlé", texte: "Chaque prétention rapprochée des pièces invoquées et de leur numérotation" },
-    { titre: "Contradictions relevées", texte: "Deux pièces qui divergent, présentées côte à côte et soumises à votre appréciation" },
-    { titre: "Secret professionnel", texte: "Éditeur français, pièces hébergées en France" },
+    { titre: "Pièces adverses du jour", texte: "Avant l'audience, vous savez ce que les pièces reçues hier changent à votre dossier de faits." },
+    { titre: "Chronologie sourcée", texte: "Chaque fait est daté, résumé et rattaché à la page de sa pièce." },
+    { titre: "Bordereau contrôlé", texte: "Chaque prétention est rapprochée des pièces invoquées et de leur numérotation." },
+    { titre: "Contradictions relevées", texte: "Quand deux pièces divergent, Tamila les présente côte à côte et vous laisse trancher." },
+    { titre: "Secret professionnel", texte: "L'éditeur est français, et vos pièces sont hébergées en France." },
   ],
 };
 
 export const POINT = {
-  titreL1: "Chaque matin, l'état",
-  titreMot: "du cabinet",
-  texte: "Un courriel à 7 h vous signale les délais de procédure de la semaine, ce que le cabinet attend encore, les forfaits dépassés et les dossiers sans diligence, chacun avec l'action à engager.",
+  titreL1: "Les échéances du cabinet se suivent",
+  titreMot: "dossier par dossier",
+  texte: "Chaque matin à 7 h, avant votre première audience, un courriel réunit les délais de procédure de la semaine, les pièces que le cabinet attend encore, les forfaits dépassés et les dossiers sans diligence, chacun avec l'action à engager.",
   cartes: [
     {
       titre: "Forfaits dépassés",
-      texte: "Temps passé rapporté à la convention d'honoraires.",
+      texte: "Le temps passé est rapporté à la convention d'honoraires.",
       valeur: "3 dossiers",
       tendance: "2 factures à émettre",
       colonnes: ["Dossier", "Mode", "Temps", "Consommé"],
@@ -81,7 +81,7 @@ export const POINT = {
     },
     {
       titre: "Sans diligence",
-      texte: "Aucun acte depuis trente jours.",
+      texte: "Ces dossiers n'ont connu aucun acte depuis trente jours.",
       valeur: "7 dossiers",
       tendance: "2 avec audience en octobre",
       colonnes: ["Dossier", "Acte", "Jours", "Audience"],
@@ -93,7 +93,7 @@ export const POINT = {
     },
     {
       titre: "Délais de procédure",
-      texte: "Lus dans l'avis RPVA, du plus proche au plus lointain.",
+      texte: "Les délais sont lus dans les avis RPVA et classés du plus proche au plus lointain.",
       valeur: "4 délais",
       tendance: "1 cette semaine",
       colonnes: ["Dossier", "Acte attendu", "Échéance", "Reste"],
@@ -105,7 +105,7 @@ export const POINT = {
     },
     {
       titre: "Ce que le cabinet attend",
-      texte: "Pièces promises, pré-rapports et pièces citées par le confrère.",
+      texte: "Le cabinet attend encore des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère.",
       valeur: "5 attentes",
       tendance: "2 dires à rendre en octobre",
       colonnes: ["Dossier", "Attendu de", "Objet", "Date"],
@@ -129,9 +129,9 @@ export const CONNEXIONS = {
    rien n'y décrit une certification que nous n'avons pas. Références : loi n° 71-1130 du 31 décembre 1971,
    art. 66-5 ; Règlement intérieur national de la profession d'avocat (RIN), art. 2 ; RGPD, art. 28. */
 export const SECRET = {
-  titreAvant: "Le secret professionnel,",
-  titreMot: "écrit au contrat",
-  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Elles sont hébergées et lues en France, chez un hébergeur français, et chacun de nos engagements figure dans le contrat que vous signez.",
+  titreAvant: "Confier vos pièces à un logiciel engage",
+  titreMot: "votre secret professionnel",
+  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Tamila les héberge et les lit en France, chez un hébergeur français, et chacun de nos engagements figure dans le contrat que vous signez.",
   badge: "Français, hébergé en France",
   accroche: "Le contrat précise les dossiers que Tamila lit, le lieu où les pièces sont conservées et la date de leur effacement.",
   faits: [
@@ -153,9 +153,9 @@ export const SECRET = {
 };
 
 export const FORMULES = {
-  titreAvant: "Un prix par cabinet,",
-  titreMot: "jamais par avocat",
-  texte: "Le tarif est fixé à l'issue d'un audit conduit sur l'un de vos dossiers, une fois que vous avez jugé le dossier de faits sur pièces.",
+  titreAvant: "Un seul prix pour",
+  titreMot: "tout le cabinet",
+  texte: "Le tarif est fixé à l'issue d'un audit mené sur l'un de vos dossiers, une fois que vous avez jugé le dossier de faits sur pièces.",
   bascule: ["Contentieux", "Dommage corporel"],
   plans: [
     {
@@ -163,7 +163,7 @@ export const FORMULES = {
       titre: "Pré-lecture",
       desc: "Pour le cabinet qui veut aborder chaque audience avec un dossier de faits complet, dont chaque fait renvoie à sa pièce.",
       prix: "Sur audit",
-      bouton: "Soumettre un dossier",
+      bouton: "Réserver un audit",
       note: { Contentieux: "Réalisé pendant l'audit, sur un dossier réel", "Dommage corporel": "Réalisé pendant l'audit, sur un dossier réel" },
       inclut: {
         Contentieux: ["Dossier de faits daté et sourcé", "Contradictions entre pièces", "Bordereau contrôlé (art. 768)", "Dispositif contre motifs (art. 954)", "Prétentions nouvelles et concentration en appel", "Pièces citées jamais communiquées, sommation prête", "Dires à l'expert préparés sur le pré-rapport", "Trous de la chronologie et faits contredits", "Index des personnes et faits classés par moyen", "Questions posées au dossier", "Premier jet de l'exposé des faits", "Dossier de plaidoirie et renvois cliquables", "Pièces adverses du jour", "Pièces scannées et manuscrites", "Export Word et PDF", "Hébergement en France"],
@@ -201,7 +201,7 @@ export const MATIERES = {
 export const APPEL = {
   titreAvant: "Jugez-en sur",
   titreMot: "un dossier déjà plaidé",
-  texte: "Lors de l'audit, vous nous confiez les pièces d'un dossier clos et comparez le dossier de faits obtenu à celui que vous aviez constitué,",
+  texte: "Lors de l'audit, vous nous confiez les pièces d'un dossier clos, puis vous comparez le dossier de faits obtenu à celui que vous aviez constitué,",
   texteSuite: "sans rien installer.",
   bouton: "Réserver un audit",
   legende: "Palais de justice de Paris, cour du Mai",

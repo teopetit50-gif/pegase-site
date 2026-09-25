@@ -145,8 +145,7 @@ export default function Fonctionnement() {
                     <div className="md:pr-6 lg:pr-0">
                       <h3 className="text-[#737373] mb-6 text-sm font-medium">Permis et DCE</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
-                        <span className="text-[#0a0a0a]">Le dossier relu en entier.</span> Lorani relit chaque planche
-                        contre les autres et contre le CCTP, puis signale chaque incohérence avec la page concernée.
+                        <span className="text-[#0a0a0a]">Aucune planche n&apos;est lue seule.</span> Lorani compare chaque planche aux autres et au CCTP, puis signale chaque incohérence avec la page concernée.
                       </p>
                     </div>
                     <ul className="text-[#737373] mt-8 divide-y *:flex *:items-center *:gap-3 *:py-3">
@@ -476,9 +475,7 @@ export default function Fonctionnement() {
                     <div className="md:pr-6 lg:pr-0">
                       <h3 className="text-[#737373] mb-6 text-sm font-medium">Analyse des offres</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
-                        <span className="text-[#0a0a0a]">Offres posées sur la DPGF.</span> Les offres reçues sont
-                        alignées ligne par ligne, si bien que les postes non chiffrés ressortent avant
-                        l&apos;attribution.
+                        <span className="text-[#0a0a0a]">Chaque offre est alignée sur la DPGF.</span> Lorani compare les offres reçues ligne par ligne, si bien que les postes non chiffrés ressortent avant l&apos;attribution.
                       </p>
                     </div>
                     <ul className="text-[#737373] mt-8 divide-y *:flex *:items-center *:gap-3 *:py-3">
@@ -673,7 +670,7 @@ export default function Fonctionnement() {
                       </div>
                       <div className="absolute inset-x-3 bottom-3 z-20 sm:inset-x-5 sm:bottom-5">
                         <div
-                          aria-label="Parlo continuously scans connected inboxes"
+                          aria-label="Lorani lit chaque pièce dès sa réception"
                           className="relative flex h-30 w-full items-center justify-center overflow-hidden px-5 sm:h-34"
                         >
                           <div
@@ -780,9 +777,7 @@ export default function Fonctionnement() {
                     <div className="md:pr-6 lg:pr-0">
                       <h3 className="text-[#737373] mb-6 text-sm font-medium">Situations de travaux</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
-                        <span className="text-[#0a0a0a]">Chaque situation contrôlée.</span> La situation reçue est
-                        comparée au marché, à la précédente et au compte rendu de chantier, puis l&apos;écart est
-                        chiffré.
+                        <span className="text-[#0a0a0a]">Chaque situation est contrôlée.</span> Lorani compare la situation reçue au marché, à la précédente et au compte rendu de chantier, puis chiffre l&apos;écart.
                       </p>
                     </div>
                     <ul className="text-[#737373] mt-8 divide-y *:flex *:items-center *:gap-3 *:py-3">
@@ -1083,9 +1078,7 @@ export default function Fonctionnement() {
                     <div className="md:pr-6 lg:pr-0">
                       <h3 className="text-[#737373] mb-6 text-sm font-medium">Visa des documents</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
-                        <span className="text-[#0a0a0a]">Fiches techniques contre CCTP.</span> Chaque document
-                        d&apos;exécution est confronté au CCTP (classement au feu, Avis Technique, PV d&apos;essai),
-                        puis le bordereau de visa se prépare avec les observations en regard : VSO, VAO ou refus.
+                        <span className="text-[#0a0a0a]">Chaque fiche technique est confrontée au CCTP.</span> Lorani vérifie le classement au feu, l&apos;Avis Technique et les PV d&apos;essai de chaque document d&apos;exécution, puis prépare le bordereau de visa avec les observations en regard : visa sans observation (VSO), visa avec observations (VAO) ou refus.
                       </p>
                     </div>
                     <ul className="text-[#737373] mt-8 divide-y *:flex *:items-center *:gap-3 *:py-3">

@@ -109,21 +109,21 @@ const PILIERS: { Icone: LucideIcon; fond: string; titre: string; texte: string }
   {
     Icone: FolderOpen,
     fond: "#273252",
-    titre: "Vos pièces, dans leur format d'origine",
+    titre: "Vos pièces restent dans leur format d'origine",
     texte:
       "Le logiciel lit les photos, les vocaux, les PDF et les scans que vos équipes produisent déjà. Elles continuent d'envoyer ce qu'elles envoient aujourd'hui, sans ressaisie ni application à installer.",
   },
   {
     Icone: ScanSearch,
     fond: "#193a29",
-    titre: "Chaque écart, avec sa preuve",
+    titre: "Chaque écart arrive avec sa preuve",
     texte:
       "Qu'il s'agisse d'un travail supplémentaire, de deux pièces qui se contredisent ou d'un dommage constaté à la restitution, chaque point renvoie à la photo, à la page ou à l'article qui le fonde.",
   },
   {
     Icone: CircleCheck,
     fond: "#839cb2",
-    titre: "Une validation avant chaque envoi",
+    titre: "Rien ne part sans votre validation",
     texte:
       "Le logiciel prépare l'avenant, la note d'anomalies ou la facture, puis la soumet à la personne habilitée. Aucun document ne part sans sa validation, et le journal garde la trace de chaque décision.",
   },
@@ -206,11 +206,10 @@ export default function SecteursPage() {
             <div aria-hidden className="sct-voile sct-voile--hero" />
             <div className="sct-plein__texte">
               <h1 className="sct-h1" data-sct-texte="hero">
-                Un logiciel par métier
+                Un logiciel généraliste ignore les règles de votre métier
               </h1>
               <p className="sct-lead" data-sct-texte="hero">
-                Chaque logiciel lit les pièces de son métier, des photos de chantier aux conclusions
-                adverses, et vous remet chaque écart avec la page qui le prouve.
+                Chaque logiciel d’Omega lit les pièces d’un seul métier, des photos de chantier aux conclusions adverses, et vous signale chaque écart avec la page qui le prouve.
               </p>
               <div className="sct-plein__actions" data-sct-cta>
                 <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>
@@ -355,7 +354,7 @@ export default function SecteursPage() {
                   ))}
                 </div>
                 <h2 className="sct-h1" data-sct-texte="appel">
-                  Tester sur un dossier que vous connaissez
+                  Jugez sur un dossier que vous connaissez
                 </h2>
                 <p className="sct-lead" data-sct-texte="appel">
                   {"L'audit dure trente minutes : nous examinons vos pièces et vos processus, puis nous vous indiquons lequel de ces logiciels s'applique à votre organisation, ou ce qu'il faudrait construire."}

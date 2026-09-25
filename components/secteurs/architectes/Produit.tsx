@@ -372,12 +372,11 @@ export default function Produit() {
                       01 — Le produit
                     </span>
                     <h2 className="text-balance text-4xl font-semibold text-[#0a0a0a]">
-                      <span className="block">Chaque dossier,</span>
-                      <span className="block text-[#737373]">contrôlé avant de partir.</span>
+                      <span className="block">Une incohérence entre deux pièces</span>
+                      <span className="block text-[#737373]">ne se voit qu&apos;en les lisant ensemble.</span>
                     </h2>
                     <p className="mt-6 text-balance text-lg text-[#737373]">
-                      Lorani lit toutes les planches, les unes contre les autres et contre les pièces écrites, si bien
-                      que l&apos;architecte arbitre sur un dossier vérifié avant l&apos;envoi.
+                      Lorani lit toutes les planches, les unes contre les autres et contre les pièces écrites. Vous arbitrez sur un dossier vérifié avant l&apos;envoi.
                     </p>
                     <div className="mt-8">
                       <StarButton href={CONTACT.audit}>Réserver un audit</StarButton>
@@ -414,10 +413,9 @@ export default function Produit() {
                 ></div>
                 <div className="relative z-10">
                   <span className="text-[14px] tabular-nums text-[#0a0a0a]/25">01</span>
-                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Chaque planche croisée</h3>
+                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Chaque planche est croisée avec les autres</h3>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-[#0a0a0a]/45">
-                    Plans, coupes, façades, nomenclatures et renvois sont relus ensemble : une cote qui change à un
-                    endroit est retrouvée partout.
+                    Lorani relit ensemble les plans, les coupes, les façades, les nomenclatures et les renvois. Une cote modifiée à un endroit est retrouvée partout où elle apparaît.
                   </p>
                 </div>
               </div>
@@ -445,10 +443,9 @@ export default function Produit() {
                 ></div>
                 <div className="relative z-10">
                   <span className="text-[14px] tabular-nums text-[#0a0a0a]/25">02</span>
-                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Les règles opposables</h3>
+                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Les règles opposables sont citées</h3>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-[#0a0a0a]/45">
-                    PLU de la zone, accessibilité, sécurité incendie des ERP, RE2020 : chaque point cite l&apos;article
-                    qu&apos;il met en défaut.
+                    Chaque point cite l&apos;article qu&apos;il met en défaut : règlement du plan local d&apos;urbanisme (PLU), accessibilité, sécurité incendie des établissements recevant du public (ERP) ou RE2020.
                   </p>
                 </div>
               </div>
@@ -476,7 +473,7 @@ export default function Produit() {
                 ></div>
                 <div className="relative z-10">
                   <span className="text-[14px] tabular-nums text-[#0a0a0a]/25">03</span>
-                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Une preuve par point</h3>
+                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Une preuve pour chaque point</h3>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-[#0a0a0a]/45">
                     Chaque point cite la planche, l&apos;extrait et les deux valeurs lues, puis explique l&apos;écart et
                     propose une correction.
