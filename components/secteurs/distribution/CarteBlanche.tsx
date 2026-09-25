@@ -32,7 +32,10 @@ export default function CarteBlanche({ className = "", children }: { className?:
 
   const { scrollYProgress: sortie } = useScroll({ target: ref, offset: ["end end", "end 0.48"] });
   const { scrollYProgress: entree } = useScroll({ target: ref, offset: ["start 0.95", "start 0.4"] });
-  const brut = useTransform(() => (large.get() ? 32 * Math.max(sortie.get(), 1 - entree.get()) : 0));
+  /* forme explicite : la forme fonction ne s'abonne qu'aux valeurs lues au
+     premier calcul, et au premier calcul `large` vaut 0 — elle ne lisait
+     donc jamais la position de la carte (marge figée à 0, 25/09) */
+  const brut = useTransform([sortie, entree, large], ([s, e, l]: number[]) => (l ? 32 * Math.max(s, 1 - e) : 0));
   const marge = useSpring(brut, { stiffness: 220, damping: 34, mass: 0.7 });
 
   return (
