@@ -1,0 +1,38 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   /secteurs/location-automobile — ÉCHELLE MOBILE           (24/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo : « tout est trop zoomé et pas adapté à la version mobile ; regarde
+   comment ils font sur Scale ». Tavaro était déjà la mieux traitée des
+   pages sectorielles : ses maquettes sont réduites d'un bloc depuis le
+   23/09 (ui/miniature du site source), et la page mobile est plus courte
+   que la page de bureau (8 537 contre 9 004 px). Il ne restait que ce
+   qui dépasse le barème du site (app/echelle-mobile.css, relevé sur
+   scale.com le 16/09) :
+     le titre du héros, à 36 px sur quatre lignes — les quatre autres
+     pages sont désormais à 28 – 30 ;
+     le titre « L'audit commence par vingt retours », à 28 ;
+     les sections à 64 – 72 px de rembourrage.
+
+   Rien au-dessus de 767 px. Le titre du héros porte sa taille en style
+   en ligne (`clamp(36px, 6,1vw, 88px)`, Heros.tsx) : seul `!important`
+   l'atteint.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .p-location #home-hero-title {
+    font-size: 31px !important;
+    line-height: 1.02;
+  }
+  .p-location .DesignSprints_heading {
+    font-size: 24px;
+    line-height: 1.04;
+  }
+  .p-location section.py-\[64px\] {
+    padding-top: 44px;
+    padding-bottom: 44px;
+  }
+  .p-location .About_section {
+    padding: 44px 0 48px;
+  }
+}

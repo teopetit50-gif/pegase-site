@@ -16,6 +16,7 @@ import "@/components/secteurs/location/styles/AgentUxPreview.css";
 import "@/components/secteurs/location/styles/PilotProductPreview.css";
 import "@/components/secteurs/location/styles/DesignSprints.css";
 import "@/components/secteurs/location/styles/About.css";
+import "./mobile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/location-automobile — TAVARO (24/09/2026, après-midi)

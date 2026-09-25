@@ -8,6 +8,7 @@ import Methode from "@/components/secteurs/distribution/Methode";
 import Etapes from "@/components/secteurs/distribution/Etapes";
 import Fin from "@/components/secteurs/distribution/Fin";
 import "./distribution.css";
+import "./mobile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/distribution — Namolu, le produit des groupes de distribution
