@@ -6144,10 +6144,14 @@ button.rounded-full:active {
   white-space: nowrap;
 }
 
-/* pied de page noir */
+/* pied de page — BLANC depuis le 24/09 (Teo : « change la section noire en
+   blanc, et ça sur tout le site »), comme le pied commun de
+   components/Footer.tsx. Le filet du haut le sépare de la dernière section,
+   blanche elle aussi ; le logo passe à la version noire (page.tsx). */
 .vd .vd-pied {
-  background: #000000;
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--vd-text);
+  border-top: 1px solid var(--vd-line);
 }
 .vd .vd-pied-label {
   font-family: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
@@ -6158,15 +6162,15 @@ button.rounded-full:active {
 }
 /* Une classe portée par les liens de colonne, et non `.vd-pied a` : la ligne
    de copyright contient elle aussi un lien, qui doit rester en 12 monospace
-   gris et non passer en 14 gras blanc. */
+   gris et non passer en 14 gras noir. */
 .vd .vd-pied-lien {
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--vd-text);
   transition: color 0.2s ease;
 }
 .vd .vd-pied-lien:hover {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--vd-muted);
 }
 .vd .vd-signature {
   font-size: clamp(2rem, 6.2vw, 5.5rem);

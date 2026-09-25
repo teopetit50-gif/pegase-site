@@ -26,17 +26,23 @@ const LIENS: { label: string; href: string }[] = [
   { label: "Où vont vos données", href: "/vos-donnees" },
 ];
 
+/* 24/09 — le pied passe au BLANC (Teo : « change la section noire en blanc,
+   et ça sur tout le site »). Il n'avait pas de fond à lui : il laissait voir
+   le `bg-panel` noir de PageShell, colonne de 1440 et bandes latérales
+   comprises. Il sort donc du cadre en 100vw (même technique que le hero
+   de /offres ; l'`overflow-x-clip` de PageShell absorbe la barre) et remet
+   son contenu dans la colonne de 1440. */
 export default function Footer() {
   return (
-    <footer>
-      <div className="flex flex-col gap-4 border-t border-white/[0.08] px-6 py-10 text-[13px] sm:flex-row sm:items-center sm:justify-between sm:px-10">
-        <div className="text-white/40">© 2026 Omega.AI</div>
+    <footer className="mx-[calc(50%-50vw)] border-t border-neutral-200 bg-white">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-6 py-10 text-[13px] sm:flex-row sm:items-center sm:justify-between sm:px-10">
+        <div className="text-neutral-500">© 2026 Omega.AI</div>
         <nav className="flex flex-wrap items-center gap-x-7 gap-y-2">
           {LIENS.map((l) => (
             <Link
               key={l.label}
               href={l.href}
-              className="text-white/40 transition hover:text-white/75"
+              className="text-neutral-500 transition hover:text-neutral-900"
             >
               {l.label}
             </Link>

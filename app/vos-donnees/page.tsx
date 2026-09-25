@@ -582,7 +582,7 @@ export default function VosDonnees() {
           <div className="mx-auto max-w-[1440px] px-6 pb-10 pt-16 sm:px-10">
             <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
               <Image
-                src="/logo-pegase-blanc.png"
+                src="/logo-pegase.png"
                 alt=""
                 width={96}
                 height={96}
