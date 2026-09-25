@@ -1,0 +1,109 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   /secteurs/btp — ÉCHELLE MOBILE                           (24/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo, le soir de la mise en ligne des cinq pages : « tout est trop zoomé
+   et pas adapté à la version mobile ; regarde comment ils font sur Scale ».
+
+   La page est la page d'accueil de Daliro, rapatriée telle quelle : elle
+   gardait sous 768 px l'échelle mobile du GABARIT (titres `text-4xl` à
+   36 px, sections `py-16`/`py-24`, héros à 160 px du haut) et non celle
+   du site, et la maquette d'application du héros s'affichait à l'échelle
+   1, rognée à droite, sur un écran et demi. Mesuré à 390 : 14 867 px de
+   haut contre 11 305 au bureau (+31 %).
+
+   Le barème est celui du reste d'omegaai.fr, relevé sur scale.com le
+   16/09 (app/echelle-mobile.css) :
+     titre de page 28 / 1,12   titre de section 24 / 1,18
+     intertitre 17 – 18        courant 15 / 1,5
+     sections 40 – 48          maquettes réduites d'un bloc (`zoom`),
+                               jamais rognées ni réempilées à l'échelle 1
+
+   Rien au-dessus de 767 px : le bureau reste celui qui a été relevé.
+   Les utilitaires sont atteints par leur nom DANS la portée `.p-btp` :
+   une règle hors couche bat `@layer utilities`, sans `!important`.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ── Titres ─────────────────────────────────────────────────────── */
+  .p-btp h1 {
+    font-size: 28px;
+    line-height: 1.12;
+  }
+  .p-btp h2.text-4xl,
+  .p-btp h2.text-3xl,
+  .p-btp h2.text-xl {
+    font-size: 24px;
+    line-height: 1.18;
+  }
+  /* La citation de l'article 1793 : 24 / 1,63 sur six lignes. */
+  .p-btp p.text-2xl {
+    font-size: 19px;
+    line-height: 1.42;
+  }
+  .p-btp .text-base {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .p-btp .text-lg {
+    font-size: 16.5px;
+    line-height: 1.45;
+  }
+
+  /* ── Rythme ─────────────────────────────────────────────────────── */
+  /* Héros : 96 + 64 px au-dessus du surtitre. */
+  .p-btp > div.pt-24 {
+    padding-top: 24px;
+  }
+  .p-btp section.py-16 {
+    padding-top: 44px;
+    padding-bottom: 44px;
+  }
+  .p-btp .py-24 {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .p-btp .pt-24 {
+    padding-top: 48px;
+  }
+  .p-btp .py-16:not(section) {
+    padding-top: 44px;
+    padding-bottom: 44px;
+  }
+  .p-btp .pt-16 {
+    padding-top: 40px;
+  }
+  .p-btp .mt-16 {
+    margin-top: 40px;
+  }
+  .p-btp .mt-12 {
+    margin-top: 32px;
+  }
+
+  /* ── Blocs ──────────────────────────────────────────────────────── */
+  /* « Ce que Daliro lit » : dix cases de 62 px sur cinq rangées. */
+  .p-btp .py-7 {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+  /* Les chiffres : `pb-72` réserve 288 px à la courbe peinte en fond du
+     bloc (svg `absolute inset-0`) ; elle se resserre, rien d'autre. */
+  .p-btp .pb-72 {
+    padding-bottom: 150px;
+  }
+  /* Comparatif des formules, version téléphone (`md:hidden`) : les trois
+     formules tenaient sur deux lignes par fonction (Démarrage, Chantiers
+     / Entreprise) — trente-deux fonctions, quatre écrans. Une ligne. */
+  .p-btp .md\:hidden .grid-cols-2.mt-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 10px;
+  }
+
+  /* ── Maquettes : réduites d'un bloc, comme sur scale.com ────────── */
+  /* La pile de fiches chantier du héros. `zoom` réduit la mise en page
+     elle-même (pas seulement l'image, comme `transform`) : la fiche se
+     compose sur 390 / 0,72 = 540 px et rend 390, sans trou dessous. */
+  .p-btp section > .mt-12.px-4 {
+    zoom: 0.72;
+  }
+}

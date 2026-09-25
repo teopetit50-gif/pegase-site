@@ -1,0 +1,108 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   /secteurs/architectes — ÉCHELLE MOBILE                   (24/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo : « tout est trop zoomé et pas adapté à la version mobile ; regarde
+   comment ils font sur Scale ». Même passe que btp/mobile.css, sur le
+   barème du site (app/echelle-mobile.css, relevé sur scale.com le 16/09).
+
+   C'était la page la plus gonflée des cinq : 18 686 px à 390 contre
+   12 410 au bureau (+51 %). Trois causes, par ordre de poids :
+   1. les titres de section en `text-4xl` (36 px) sur six à sept lignes,
+      dans une colonne de 282 px ;
+   2. cette colonne elle-même : `mx-[30px]` autour d'un `px-6`, soit 54 px
+      de marge de chaque côté au lieu des 24 du site ;
+   3. les cartes « Où le dossier se perd-il ? » en `min-h-48 p-6 text-xl`,
+      huit fois 192 px.
+   S'y ajoute la maquette « Pièces / Points relevés », composée sur
+   `min-w-2xl` (672 px) et rognée à droite : elle est réduite d'un bloc,
+   comme les visuels de produit de scale.com, au lieu d'être coupée.
+
+   Rien au-dessus de 767 px. Utilitaires atteints par leur nom dans la
+   portée `.p-architectes` (hors couche, donc sans `!important`).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ── Colonne : 54 px de marge → 24, celle du site ────────────────── */
+  .p-architectes .mx-\[30px\] {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* ── Titres ─────────────────────────────────────────────────────── */
+  .p-architectes h1 {
+    font-size: 30px;
+    line-height: 1.08;
+  }
+  .p-architectes h2.text-4xl,
+  .p-architectes p.text-4xl {
+    font-size: 25px;
+    line-height: 1.14;
+  }
+  .p-architectes h3.text-3xl {
+    font-size: 22px;
+  }
+  .p-architectes span.text-5xl {
+    font-size: 38px;
+  }
+  /* « Sur audit » des quatre formules. */
+  .p-architectes div.text-4xl.my-8 {
+    font-size: 28px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  /* Les huit cartes « Où le dossier se perd-il ? ». */
+  .p-architectes p.min-h-48 {
+    min-height: 0;
+    padding: 20px;
+    font-size: 16.5px;
+    line-height: 1.42;
+  }
+
+  /* ── Rythme ─────────────────────────────────────────────────────── */
+  .p-architectes section.py-16 {
+    padding-top: 44px;
+    padding-bottom: 44px;
+  }
+  .p-architectes section.pt-20 {
+    padding-top: 44px;
+  }
+  .p-architectes .py-20 {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .p-architectes .min-h-\[400px\] {
+    min-height: 0;
+  }
+  .p-architectes .pb-14 {
+    padding-bottom: 32px;
+  }
+  .p-architectes .mt-14 {
+    margin-top: 32px;
+  }
+  .p-architectes .mb-14 {
+    margin-bottom: 32px;
+  }
+  .p-architectes .mt-16 {
+    margin-top: 36px;
+  }
+  .p-architectes .gap-16.md\:gap-32 {
+    gap: 40px;
+  }
+
+  /* ── Maquettes : réduites d'un bloc, comme sur scale.com ────────── */
+  /* « Pièces / Points relevés » : composée sur 672 px (`min-w-2xl`),
+     rognée à 330. `zoom` réduit la mise en page elle-même : elle se
+     compose sur 342 / 0,49 ≈ 700 px et rend 342, sans trou dessous. */
+  .p-architectes div[inert].-mx-6.overflow-hidden {
+    zoom: 0.49;
+  }
+  /* Les quatre vignettes de « Quatre contrôles suivent la mission » :
+     carrées, donc 342 px de haut chacune à 390. Réduites à 0,8 et
+     moins hautes que larges ; la scène qu'elles portent garde sa
+     composition (elle est calée en bas ou au centre de la vignette). */
+  .p-architectes .aspect-square.rounded-3xl.md\:col-span-3 {
+    zoom: 0.8;
+    aspect-ratio: 5 / 4;
+  }
+}

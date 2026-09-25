@@ -12,6 +12,7 @@ import Formules from "@/components/secteurs/dentaire/Formules";
 import Questions from "@/components/secteurs/dentaire/Questions";
 import Appel from "@/components/secteurs/dentaire/Appel";
 import "./dentaire.css";
+import "./mobile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/dentaire — TIROMA (nom provisoire, 24/09/2026)

@@ -11,6 +11,7 @@ import { Faq } from "@/components/secteurs/btp/Questions";
 import { Cta } from "@/components/secteurs/btp/Appel";
 import { Bande } from "@/components/secteurs/btp/Bande";
 import "./btp.css";
+import "./mobile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/btp — DALIRO (24/09/2026, soir)

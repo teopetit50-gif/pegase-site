@@ -1,0 +1,70 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   /secteurs/avocats — ÉCHELLE MOBILE                       (24/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo : « tout est trop zoomé et pas adapté à la version mobile ; regarde
+   comment ils font sur Scale ». Même passe que btp/mobile.css : le barème
+   du site (app/echelle-mobile.css, relevé sur scale.com le 16/09).
+
+   Tamila avait déjà ses titres de section à 24 px ; ce qui « zoomait »,
+   c'était le rythme du gabarit : chaque section en `py-20`, soit 160 px
+   de blanc entre deux titres, et le héros à 160 px du haut de la page.
+   Mesuré à 390 : 12 942 px contre 10 201 au bureau (+27 %).
+
+   Le serif (Newsreader) paraît plus petit qu'un sans à taille égale :
+   ses titres gardent deux pixels de plus que ceux de Daliro.
+
+   Rien au-dessus de 767 px. Utilitaires atteints par leur nom dans la
+   portée `.p-avocats` (hors couche, donc sans `!important`).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ── Titres ─────────────────────────────────────────────────────── */
+  .p-avocats h1 {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+  .p-avocats h2.text-3xl {
+    font-size: 26px;
+    line-height: 1.14;
+  }
+  .p-avocats h3.text-xl {
+    font-size: 17.5px;
+    line-height: 1.4;
+  }
+  .p-avocats p.text-xl {
+    font-size: 17px;
+    line-height: 1.42;
+  }
+  /* « Sur audit » des formules, et les compteurs des fiches d'exemple. */
+  .p-avocats p.text-3xl {
+    font-size: 26px;
+  }
+  .p-avocats div.text-3xl {
+    font-size: 24px;
+  }
+
+  /* ── Rythme : 80 + 80 px entre deux sections → 44 + 44 ──────────── */
+  .p-avocats > .pt-20 {
+    padding-top: 16px;
+  }
+  .p-avocats .py-20 {
+    padding-top: 44px;
+    padding-bottom: 44px;
+  }
+  .p-avocats > .pb-20 {
+    padding-bottom: 32px;
+  }
+  .p-avocats .mt-16 {
+    margin-top: 28px;
+  }
+  .p-avocats .mb-16 {
+    margin-bottom: 32px;
+  }
+  .p-avocats .pt-16 {
+    padding-top: 32px;
+  }
+  .p-avocats .gap-8 {
+    gap: 20px;
+  }
+}

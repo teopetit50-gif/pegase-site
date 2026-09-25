@@ -16,6 +16,7 @@ import Bande from "@/components/secteurs/architectes/Bande";
 import Apparition from "@/components/secteurs/architectes/apparition";
 import Apparitions from "@/components/secteurs/architectes/apparitions";
 import "./architectes.css";
+import "./mobile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/architectes — LORANI (24/09/2026, après-midi)

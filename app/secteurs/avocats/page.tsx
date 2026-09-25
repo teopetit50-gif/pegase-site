@@ -7,6 +7,7 @@ import Formules from "@/components/secteurs/avocats/Formules";
 import Matieres from "@/components/secteurs/avocats/Matieres";
 import { serifAvocats } from "@/app/_polices/serif";
 import "./avocats.css";
+import "./mobile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/avocats — TAMILA (24/09/2026, après-midi)

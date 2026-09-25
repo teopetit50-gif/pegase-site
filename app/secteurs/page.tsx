@@ -8,6 +8,7 @@ import Mouvements from "@/components/secteurs/Mouvements";
 import CarteApercu from "@/components/secteurs/CarteApercu";
 import { SECTEURS } from "@/lib/secteurs";
 import "./secteurs.css";
+import "./mobile.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs — décalque de scale.com/rlenvironments (24/09/2026)

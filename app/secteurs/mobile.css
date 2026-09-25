@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   /secteurs — ÉCHELLE MOBILE                               (24/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo : « tout est trop zoomé et pas adapté à la version mobile ; regarde
+   comment ils font sur Scale ».
+
+   Cette page est le décalque de scale.com/rlenvironments, et ses valeurs
+   à 390 sont celles de la référence (titres 30 – 32, intertitres 22,
+   sections 64 et 96). Mais elle porte presque trois fois son texte (447
+   lignes vues contre 162) : à la même échelle, elle se lisait plus
+   « grosse » que la référence, et plus grosse que le reste du site, dont
+   le barème mobile descend un cran sous scale.com (app/echelle-mobile.css,
+   16/09 : titre de page 27 – 28, titre de section 23 – 24, courant 15).
+   Elle est alignée sur ce barème ; rien au-dessus de 767 px.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .sct .sct-h1 {
+    font-size: 28px;
+    line-height: 1.08;
+  }
+  .sct .sct-h2 {
+    font-size: 25px;
+    line-height: 1.2;
+  }
+  .sct .sct-piliers__titre {
+    font-size: 26px;
+    line-height: 1.1;
+  }
+  .sct .sct-apercu__titre,
+  .sct .sct-pilier__titre {
+    font-size: 19px;
+  }
+  .sct .sct-lead,
+  .sct .sct-texte-carte,
+  .sct .sct-piliers__chapo {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* Rythme : 64 et 96 px entre deux blocs → 44 et 52. */
+  .sct .sct-bande {
+    padding-block: 44px;
+  }
+  .sct .sct-piliers {
+    padding-block: 52px;
+  }
+  .sct .sct-grille {
+    padding-block: 36px;
+  }
+  .sct .sct-plein {
+    min-height: 420px;
+    padding: 24px;
+  }
+}

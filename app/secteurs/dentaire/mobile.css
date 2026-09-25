@@ -1,0 +1,109 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   /secteurs/dentaire — ÉCHELLE MOBILE                      (24/09/2026)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Teo : « tout est trop zoomé et pas adapté à la version mobile ; regarde
+   comment ils font sur Scale ». Même passe que btp/mobile.css, sur le
+   barème du site (app/echelle-mobile.css, relevé sur scale.com le 16/09).
+
+   Tiroma gardait sous 768 px le rythme de bureau de son gabarit : sections
+   en `py-24` et `py-32` (96 et 128 px, deux fois le plafond de scale.com),
+   blocs séparés de `mb-16`/`mt-24`, titres de section à 30 – 36 px et
+   « Sur audit » à 48. Mesuré à 390 : 19 972 px contre 14 604 au bureau
+   (+37 %).
+
+   Rien au-dessus de 767 px. Utilitaires atteints par leur nom dans la
+   portée `.p-dentaire` (hors couche, donc sans `!important`).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ── Titres ─────────────────────────────────────────────────────── */
+  .p-dentaire h1 {
+    font-size: 28px;
+    line-height: 1.1;
+  }
+  .p-dentaire h2.text-4xl {
+    font-size: 26px;
+    line-height: 1.15;
+  }
+  .p-dentaire h2.text-3xl {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+  .p-dentaire h2.text-2xl {
+    font-size: 21px;
+    line-height: 1.3;
+  }
+  /* L'appel final : 36 / 0,95 sur quatre lignes. */
+  .p-dentaire h2.leading-\[0\.95\] {
+    font-size: 30px;
+    line-height: 1.04;
+  }
+  .p-dentaire h3.text-3xl {
+    font-size: 24px;
+  }
+  .p-dentaire h3.text-2xl {
+    font-size: 19px;
+    line-height: 1.35;
+  }
+  .p-dentaire h3.text-xl,
+  .p-dentaire div.text-xl {
+    font-size: 17.5px;
+    line-height: 1.4;
+  }
+  .p-dentaire p.text-xl {
+    font-size: 16.5px;
+    line-height: 1.5;
+  }
+  .p-dentaire p.text-2xl {
+    font-size: 21px;
+  }
+  /* Grands nombres : « Sur audit » des formules, le calculateur. */
+  .p-dentaire span.text-5xl {
+    font-size: 34px;
+  }
+  .p-dentaire div.text-5xl {
+    font-size: 38px;
+  }
+  .p-dentaire div.text-4xl {
+    font-size: 30px;
+  }
+
+  /* ── Rythme ─────────────────────────────────────────────────────── */
+  .p-dentaire section.py-24 {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .p-dentaire section.py-32 {
+    padding-top: 56px;
+    padding-bottom: 56px;
+  }
+  .p-dentaire .mb-16 {
+    margin-bottom: 32px;
+  }
+  .p-dentaire .mt-16 {
+    margin-top: 32px;
+  }
+  .p-dentaire .mt-24 {
+    margin-top: 44px;
+  }
+  .p-dentaire .gap-16 {
+    gap: 40px;
+  }
+  .p-dentaire .mb-12 {
+    margin-bottom: 28px;
+  }
+  .p-dentaire .pt-24.pb-16 {
+    padding-top: 48px;
+    padding-bottom: 40px;
+  }
+
+  /* ── Schéma : réduit d'un bloc, comme sur scale.com ─────────────── */
+  /* Le circuit « Annulation reçue → Fauteuil occupé » est vertical à
+     toutes les largeurs (colonne de 360 px) : au bureau il tient à côté
+     du texte, au téléphone il occupait deux écrans. Il garde sa forme,
+     en plus petit (`zoom` réduit la mise en page, sans trou dessous). */
+  .p-dentaire .min-w-\[280px\].max-w-\[360px\] {
+    zoom: 0.74;
+  }
+}
