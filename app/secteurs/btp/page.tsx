@@ -12,6 +12,7 @@ import { Cta } from "@/components/secteurs/btp/Appel";
 import { Bande } from "@/components/secteurs/btp/Bande";
 import "./btp.css";
 import "./mobile.css";
+import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/btp — DALIRO (24/09/2026, soir)
@@ -144,6 +145,7 @@ export default function PageBtp() {
           <Cta />
         </Section>
       </div>
+      <SeCombine slug="btp" />
     </PageShell>
   );
 }

@@ -17,6 +17,7 @@ import "@/components/secteurs/location/styles/PilotProductPreview.css";
 import "@/components/secteurs/location/styles/DesignSprints.css";
 import "@/components/secteurs/location/styles/About.css";
 import "./mobile.css";
+import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/location-automobile — TAVARO (24/09/2026, après-midi)
@@ -140,6 +141,7 @@ export default function PageLocationAutomobile() {
           <APropos />
         </Bloc>
       </div>
+      <SeCombine slug="location-automobile" />
     </PageShell>
   );
 }

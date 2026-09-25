@@ -8,6 +8,7 @@ import Matieres from "@/components/secteurs/avocats/Matieres";
 import { serifAvocats } from "@/app/_polices/serif";
 import "./avocats.css";
 import "./mobile.css";
+import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/avocats — TAMILA (24/09/2026, après-midi)
@@ -148,6 +149,7 @@ export default function PageAvocats() {
           <Appel />
         </Section>
       </div>
+      <SeCombine slug="avocats" />
     </PageShell>
   );
 }

@@ -9,6 +9,7 @@ import Etapes from "@/components/secteurs/distribution/Etapes";
 import Fin from "@/components/secteurs/distribution/Fin";
 import "./distribution.css";
 import "./mobile.css";
+import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/distribution — Namolu, le produit des groupes de distribution
@@ -65,6 +66,7 @@ export default function PageDistribution() {
         <Etapes />
         <Fin />
       </div>
+      <SeCombine slug="distribution" />
     </PageShell>
   );
 }

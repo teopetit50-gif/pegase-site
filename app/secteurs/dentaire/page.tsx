@@ -13,6 +13,7 @@ import Questions from "@/components/secteurs/dentaire/Questions";
 import Appel from "@/components/secteurs/dentaire/Appel";
 import "./dentaire.css";
 import "./mobile.css";
+import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/dentaire — TIROMA (nom provisoire, 24/09/2026)
@@ -107,6 +108,7 @@ export default function PageDentaire() {
         <Questions />
         <Appel />
       </div>
+      <SeCombine slug="dentaire" />
     </PageShell>
   );
 }

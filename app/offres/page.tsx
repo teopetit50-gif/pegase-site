@@ -22,6 +22,7 @@ import Ajuste from "@/components/surmesure/Ajuste";
 import Cycle from "@/components/offres/Cycle";
 import PageMotion from "@/components/PageMotion";
 import { POSTS } from "@/lib/content";
+import { SECTEURS } from "@/lib/secteurs";
 import "./nos-offres.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -796,8 +797,11 @@ export default function OffresPage() {
           {/* ─── 5c · les quatre cartes à liste ─── */}
           <section id="catalogue" data-monde="clair" className="ofd-sec ofd-ancre">
             <div className="ofd-wrap">
+              {/* 25/09 (Teo) — le catalogue a désormais deux parties, les
+                  mêmes que les deux colonnes du menu : ce qui sert à toute
+                  entreprise, puis le logiciel de chaque métier (5c bis). */}
               <TeteSection
-                etiquette="Le catalogue"
+                etiquette="Pour toutes les entreprises"
                 titre="Quatre processus, quatre systèmes déjà construits."
               />
 
@@ -820,6 +824,55 @@ export default function OffresPage() {
                     </ul>
                   </Link>
                 ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ─── 5c bis · le logiciel de chaque métier ───
+              25/09 (Teo) — « on peut aussi bien prendre le SaaS BTP et vouloir
+              prendre CASHD ». Les logiciels métier vivaient dans une rubrique
+              à part (« Secteurs ») : deux catalogues côte à côte, qu'on
+              lisait comme un choix. Ils rejoignent ici le catalogue, sous le
+              titre qui dit qu'ils s'ajoutent aux quatre. Le métier en titre,
+              le logiciel en dessous : on cherche « BTP », pas « Daliro ». */}
+          <section id="metiers" data-monde="clair" className="ofd-sec ofd-ancre">
+            <div className="ofd-wrap">
+              <TeteSection
+                etiquette="Pour votre métier"
+                titre="Un logiciel par métier, qui se combine avec les quatre."
+                chapo="Un seul audit cadre l'ensemble."
+              />
+
+              <div className="ofd-cartes3">
+                {SECTEURS.map((s) => (
+                  <Link
+                    key={s.slug}
+                    href={`/secteurs/${s.slug}`}
+                    data-reveal
+                    className="ofd-fiche ofd-fiche--metier"
+                  >
+                    <div className="ofd-fiche__tete">
+                      <span
+                        aria-hidden
+                        className="ofd-fiche__icone ofd-fiche__signe"
+                        style={
+                          {
+                            "--ofd-signe": `url(/logos/${s.saas.toLowerCase()}-mark.png)`,
+                          } as React.CSSProperties
+                        }
+                      />
+                      <h3 className="ofd-h5">{s.metier}</h3>
+                      <p className="ofd-fiche__saas">{s.saas}</p>
+                    </div>
+                    <p className="ofd-body">{s.texte}</p>
+                  </Link>
+                ))}
+              </div>
+
+              <div data-reveal className="ofd-metiers__pied">
+                <Cta href="/secteurs" variante="trait">
+                  Voir tous les métiers
+                </Cta>
               </div>
             </div>
           </section>

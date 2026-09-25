@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import MenuPrincipal from "./MenuPrincipal";
 import { GROUPES, NB_RANGEES } from "@/lib/menu";
 
@@ -112,7 +112,6 @@ export default function Header() {
      sous elle en temps normal, forcée en clair dès que le panneau est
      ouvert. Logo, marque, CTA et burger s'y accrochent tous. */
   const clairEff = open || clair;
-
 
   useEffect(() => {
     const check = () => {
@@ -266,7 +265,9 @@ export default function Header() {
     let brut = 0;
     const mesure = () => {
       brut = 0;
-      setCtaBarre(!cible || cible.getBoundingClientRect().bottom <= hauteurBarre());
+      setCtaBarre(
+        !cible || cible.getBoundingClientRect().bottom <= hauteurBarre(),
+      );
     };
     const surDefilement = () => {
       if (!brut) brut = requestAnimationFrame(mesure);
@@ -341,7 +342,10 @@ export default function Header() {
       /* viewTransitionName : pendant une transition de page, le header est
          ÉPINGLÉ — capturé sous son propre nom, posé au-dessus de la page
          qui sort, jamais animé (règles ::view-transition-*(site-header)). */
-      style={{ backgroundColor: open ? "#ffffff" : fond || undefined, viewTransitionName: "site-header" }}
+      style={{
+        backgroundColor: open ? "#ffffff" : fond || undefined,
+        viewTransitionName: "site-header",
+      }}
     >
       <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-10">
         <Link href="/" className="flex shrink-0 items-center gap-2.5 py-3">
@@ -405,7 +409,9 @@ export default function Header() {
             aria-hidden={!ctaBarre}
             tabIndex={ctaBarre ? undefined : -1}
             className={`hidden h-9 items-center rounded-[10px] border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform,opacity] duration-200 active:scale-[0.97] md:inline-flex ${
-              ctaBarre ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
+              ctaBarre
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none -translate-y-1 opacity-0"
             } ${
               clairEff
                 ? "border-[#09090b]/25 text-[#09090b] hover:border-[#09090b]/60 hover:bg-black/[0.05]"
@@ -558,7 +564,9 @@ export default function Header() {
                 <div key={g.titre}>
                   <button
                     type="button"
-                    onClick={() => setDeplie((d) => (d === g.titre ? null : g.titre))}
+                    onClick={() =>
+                      setDeplie((d) => (d === g.titre ? null : g.titre))
+                    }
                     aria-expanded={ouvert}
                     aria-controls={`menu-groupe-${g.rang}`}
                     tabIndex={open ? undefined : -1}
@@ -592,21 +600,36 @@ export default function Header() {
                       sans effet — l'utilitaire bat la feuille du navigateur
                       — et le sous-menu resterait déplié en permanence, sans
                       un bruit. La marge basse seule. */}
-                  <div id={`menu-groupe-${g.rang}`} hidden={!ouvert} className="pb-2">
-                    {g.entrees.map((e) => (
-                      <Link
-                        key={e.href}
-                        href={e.href}
-                        onClick={() => setOpen(false)}
-                        tabIndex={ouvert && open ? undefined : -1}
-                        /* Un cran en dessous de la rubrique : retrait, corps
+                  <div
+                    id={`menu-groupe-${g.rang}`}
+                    hidden={!ouvert}
+                    className="pb-2"
+                  >
+                    {g.entrees.map((e, i) => (
+                      <Fragment key={e.href}>
+                        {/* 25/09 — « Nos offres » range ses entrées en deux
+                          colonnes titrées ; au doigt, le titre devient un
+                          intertitre, posé avant la première entrée de sa
+                          colonne. Pas un lien, pas une cible tactile. */}
+                        {e.colonne &&
+                          e.colonne !== g.entrees[i - 1]?.colonne && (
+                            <p className="pt-3 pb-1 pl-3.5 text-[12px] font-medium tracking-[0.01em] text-[#0f1013]/45">
+                              {e.colonne}
+                            </p>
+                          )}
+                        <Link
+                          href={e.href}
+                          onClick={() => setOpen(false)}
+                          tabIndex={ouvert && open ? undefined : -1}
+                          /* Un cran en dessous de la rubrique : retrait, corps
                            plus petit, encre diluée. C'est ce qui fait lire la
                            pile comme un dépli et non comme dix liens de même
                            poids. Hauteur 44 px — le minimum tactile. */
-                        className="flex h-11 items-center pl-3.5 text-[16px] font-normal leading-[1.3] tracking-[-0.012em] text-[#0f1013]/65 transition-colors hover:text-[#0f1013] sm:text-[17px]"
-                      >
-                        {e.label}
-                      </Link>
+                          className="flex h-11 items-center pl-3.5 text-[16px] font-normal leading-[1.3] tracking-[-0.012em] text-[#0f1013]/65 transition-colors hover:text-[#0f1013] sm:text-[17px]"
+                        >
+                          {e.label}
+                        </Link>
+                      </Fragment>
                     ))}
                   </div>
                 </div>
@@ -643,7 +666,9 @@ export default function Header() {
               tabIndex={open ? undefined : -1}
               style={{
                 transition: "transform 0.32s cubic-bezier(0.16,1,0.3,1)",
-                transitionDelay: open ? `${60 + (NB_RANGEES + 1) * 55}ms` : "0ms",
+                transitionDelay: open
+                  ? `${60 + (NB_RANGEES + 1) * 55}ms`
+                  : "0ms",
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",
               }}

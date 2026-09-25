@@ -64,6 +64,18 @@ import { SECTEURS } from "@/lib/secteurs";
      SaaS là-bas l'ajoute ici. Six rubriques au lieu de cinq : le panneau
      mobile les rend repliées, il tient toujours sans défilement.
 
+   · 25/09 — « Secteurs » RENTRE dans « Nos offres », en seconde colonne.
+     Teo : « on peut aussi bien prendre le SaaS BTP et vouloir prendre CASHD
+     aussi, mais c'est pas très compréhensible ». Deux rubriques côte à côte
+     qui vendent chacune des logiciels faisaient croire à un choix entre
+     elles. Un seul panneau, deux colonnes titrées (`colonne`) : « Pour
+     toutes les entreprises » et « Pour votre métier », et la vedette dit
+     que tout se combine. On n'a PAS renommé en « Par besoin / Par métier » :
+     chez les SaaS qui font ça, ce sont les MÊMES produits rangés deux fois ;
+     ici ce sont des produits différents, et ce nommage aurait fait croire
+     que Daliro est CASHD vu autrement. /secteurs reste la page d'ensemble
+     des métiers, atteinte depuis /offres. Cinq rubriques au lieu de six.
+
    · 10/09 — /offres/sur-mesure : la page n'était atteignable que par un
      lien en bas de /offres. Le seul endroit du site où l'on vend ce qui ne
      rentre dans aucun paquet était donc le seul qu'on ne pouvait pas
@@ -86,6 +98,10 @@ export type Entree = {
   /* la ligne grise sous l'intitulé, dans le panneau déroulant. Absente, la
      rangée se rend en une seule ligne (cas des « Ressources »). */
   texte?: string;
+  /* 25/09 — le titre de la colonne où l'entrée se range, dans un panneau
+     à plusieurs colonnes (« Nos offres »). Les entrées d'une même colonne
+     se suivent dans la liste ; le panneau mobile en fait un intertitre. */
+  colonne?: string;
 };
 
 export type Rubrique = {
@@ -93,8 +109,11 @@ export type Rubrique = {
   /* rubrique SIMPLE : un lien direct dans le bandeau, sans chevron. */
   href?: string;
   /* rubrique à panneau : la case large en tête, puis les rangées. */
-  vedette?: Required<Entree>;
+  vedette?: Required<Omit<Entree, "colonne">>;
   entrees?: Entree[];
+  /* chemins hors entrées qui allument aussi la rubrique (page d'ensemble
+     d'une colonne, par exemple /secteurs) */
+  racines?: string[];
 };
 
 export const MENU: Rubrique[] = [
@@ -104,48 +123,51 @@ export const MENU: Rubrique[] = [
       href: "/offres",
       label: "Toutes les offres",
       texte:
-        "Quatre systèmes prêts à déployer. Sur vos outils en place, sous votre validation.",
+        "Pour toute entreprise ou pour votre métier. Tout se combine, sur un seul audit.",
     },
+    racines: ["/secteurs"],
     entrees: [
       {
         href: "/offres/relances-impayes",
         label: "CASHD",
-        texte: "Les échéances suivies, les relances préparées selon vos règles.",
+        texte:
+          "Les échéances suivies, les relances préparées selon vos règles.",
+        colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/nouvelles-affaires",
         label: "RELOAD",
         texte: "Les comptes qui n'ont plus commandé, remis dans le circuit.",
+        colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/demandes-clients",
         label: "FRONTD",
         texte: "Chaque demande entrante qualifiée et traitée, à toute heure.",
+        colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/factures-fournisseurs",
         label: "FILED",
-        texte: "Les pièces fournisseurs lues, contrôlées, transmises à la comptabilité.",
+        texte:
+          "Les pièces fournisseurs lues, contrôlées, transmises à la comptabilité.",
+        colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/sur-mesure",
         label: "Sur mesure",
         texte: "Le système propre à votre organisation, cadré puis construit.",
+        colonne: "Pour toutes les entreprises",
       },
+      /* Le métier en intitulé, le logiciel dans la ligne : le visiteur
+         cherche « BTP », pas « Daliro ». */
+      ...SECTEURS.map((s) => ({
+        href: `/secteurs/${s.slug}`,
+        label: s.metier,
+        texte: `${s.saas} · ${s.texte}`,
+        colonne: "Pour votre métier",
+      })),
     ],
-  },
-  {
-    label: "Secteurs",
-    vedette: {
-      href: "/secteurs",
-      label: "Tous les secteurs",
-      texte: "Un logiciel par métier, construit sur la décision du matin.",
-    },
-    entrees: SECTEURS.map((s) => ({
-      href: `/secteurs/${s.slug}`,
-      label: s.metier,
-      texte: s.texte,
-    })),
   },
   {
     label: "Votre site",
@@ -190,12 +212,14 @@ export const MENU: Rubrique[] = [
    d'entrée (un délai par rangée) : on la calcule ici pour que les deux
    surfaces comptent la même chose. La vedette d'un groupe n'y figure qu'une
    fois, en tête de son groupe. */
-export const RANGEES: { groupe: string; entrees: Entree[] }[] = MENU.map((r) => ({
-  groupe: r.label,
-  entrees: r.href
-    ? [{ href: r.href, label: r.label }]
-    : [...(r.vedette ? [r.vedette] : []), ...(r.entrees ?? [])],
-}));
+export const RANGEES: { groupe: string; entrees: Entree[] }[] = MENU.map(
+  (r) => ({
+    groupe: r.label,
+    entrees: r.href
+      ? [{ href: r.href, label: r.label }]
+      : [...(r.vedette ? [r.vedette] : []), ...(r.entrees ?? [])],
+  }),
+);
 
 /* Le panneau du téléphone rend les MÊMES CINQ RUBRIQUES que le bandeau, et
    rien de plus : les groupes s'y déplient au doigt au lieu d'être aplatis.
@@ -216,9 +240,9 @@ export const GROUPES = MENU.map((r, rang) => ({
   /* rubrique simple : une rangée-lien, exactement celle d'avant ce chantier */
   href: r.href,
   seul: Boolean(r.href),
-  entrees: r.href
+  entrees: (r.href
     ? []
-    : [...(r.vedette ? [r.vedette] : []), ...(r.entrees ?? [])],
+    : [...(r.vedette ? [r.vedette] : []), ...(r.entrees ?? [])]) as Entree[],
 }));
 
 /* Cinq rangées, pas onze : le pied enchaîne sa cascade derrière elles. */
@@ -227,8 +251,13 @@ export const NB_RANGEES = GROUPES.length;
 export function rubriqueCourante(pathname: string): string | null {
   for (const r of RANGEES) {
     for (const e of r.entrees) {
-      if (pathname === e.href || pathname.startsWith(e.href + "/")) return r.groupe;
+      if (pathname === e.href || pathname.startsWith(e.href + "/"))
+        return r.groupe;
     }
+  }
+  for (const r of MENU) {
+    if (r.racines?.some((h) => pathname === h || pathname.startsWith(h + "/")))
+      return r.label;
   }
   return null;
 }

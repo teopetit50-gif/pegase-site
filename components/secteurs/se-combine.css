@@ -1,0 +1,149 @@
+/* ══════════════════════════════════════════════════════════════════════
+   .scb — le bloc « Se combine avec » des pages métier (25/09/2026)
+   Voir SeCombine.tsx. Tout est scopé sous `.scb` : rien n'en sort, et les
+   feuilles des pages métier (scopées sous `.p-<slug>`) ne l'atteignent pas.
+   Monde clair d'omegaai.fr : blanc, encre quasi noire, cartes gris pâle,
+   titres en General Sans 500 (--font-jakarta), sans gras. Coins à 6 px,
+   la règle des pages secteurs du 25/09 (app/secteurs/arrondis.css, qui ne
+   voit pas ce bloc : il vit hors des portées `.p-<slug>`).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.scb {
+  background: #ffffff;
+  color: #0f1013;
+  padding: 72px 0 88px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+@media (min-width: 768px) {
+  .scb {
+    padding: 104px 0 120px;
+  }
+}
+
+.scb .scb-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+@media (min-width: 768px) {
+  .scb .scb-wrap {
+    padding: 0 32px;
+  }
+}
+
+.scb .scb-tete {
+  max-width: 640px;
+  margin-bottom: 40px;
+}
+.scb .scb-etiquette {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #525252;
+}
+.scb .scb-titre {
+  margin: 0;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+@media (min-width: 768px) {
+  .scb .scb-titre {
+    font-size: 40px;
+  }
+}
+.scb .scb-chapo {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #52525b;
+}
+
+.scb .scb-cartes {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .scb .scb-cartes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.scb .scb-carte {
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  background: #f4f4f3;
+  padding: 24px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 300ms ease-out, box-shadow 300ms ease-out;
+}
+@media (min-width: 768px) {
+  .scb .scb-carte {
+    padding: 32px;
+  }
+}
+.scb .scb-carte:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+}
+
+/* le signe de l'offre, en masque alpha (public/logos/<code>-mark.png) */
+.scb .scb-signe {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #ffffff;
+}
+.scb .scb-signe::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background: #0f1013;
+  -webkit-mask: var(--scb-signe) center / contain no-repeat;
+  mask: var(--scb-signe) center / contain no-repeat;
+}
+
+.scb .scb-nom {
+  margin: 28px 0 0;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.scb .scb-raison {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #3f3f46;
+}
+.scb .scb-lien,
+.scb .scb-tout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f1013;
+}
+.scb .scb-lien {
+  margin-top: auto;
+  padding-top: 24px;
+}
+.scb .scb-tout {
+  margin-top: 28px;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.25);
+  text-underline-offset: 4px;
+}
+.scb .scb-tout:hover {
+  text-decoration-color: currentColor;
+}

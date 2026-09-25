@@ -17,6 +17,7 @@ import Apparition from "@/components/secteurs/architectes/apparition";
 import Apparitions from "@/components/secteurs/architectes/apparitions";
 import "./architectes.css";
 import "./mobile.css";
+import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/architectes — LORANI (24/09/2026, après-midi)
@@ -203,6 +204,7 @@ export default function PageArchitectes() {
         <Apparition />
         <Apparitions />
       </div>
+      <SeCombine slug="architectes" />
     </PageShell>
   );
 }

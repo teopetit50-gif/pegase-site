@@ -1565,6 +1565,55 @@
   color: var(--ofd-encre);
 }
 
+/* 12 bis · LE LOGICIEL DE CHAQUE MÉTIER (25/09)
+   Les fiches du catalogue, sans liste : un signe, le métier, le logiciel,
+   une ligne. Trois de front dès 1024 — six cartes, deux rangées pleines. */
+.ofd .ofd-cartes3 {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .ofd .ofd-cartes3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-cartes3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.ofd .ofd-fiche--metier {
+  min-height: 0;
+}
+.ofd .ofd-fiche--metier .ofd-fiche__tete {
+  min-height: 0;
+  margin-bottom: 16px;
+}
+.ofd .ofd-fiche--metier .ofd-fiche__tete .ofd-h5 {
+  margin-top: 28px;
+}
+/* le signe du logiciel, en masque alpha (public/logos/<nom>-mark.png),
+   teint à l'encre de la page comme les pictogrammes des quatre fiches */
+.ofd .ofd-fiche__signe::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background: currentColor;
+  -webkit-mask: var(--ofd-signe) center / contain no-repeat;
+  mask: var(--ofd-signe) center / contain no-repeat;
+}
+.ofd .ofd-fiche__saas {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ofd-etiquette);
+}
+.ofd .ofd-metiers__pied {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
 /* ─────────────────────────────────────────────────────────────────────
    13 · RESSOURCES
    ───────────────────────────────────────────────────────────────────── */

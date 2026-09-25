@@ -25,13 +25,28 @@ export type Secteur = {
   metier: string;
   saas: string;
   /* une ligne, 40 à 60 signes : la décision que le SaaS prend chaque matin
-     (menu « Secteurs ») */
+     (menu « Nos offres », colonne « Pour votre métier ») */
   texte: string;
   /* /secteurs, carte du métier : deux phrases, ce qu'il lit → ce qu'il
      prépare → ce qui reste au client. Tout est repris du site du SaaS. */
   detail: string;
   /* /secteurs, carte d'aperçu : ce que le client reçoit, et quand */
   apercu: string;
+  /* 25/09 (Teo) — les offres pour toute entreprise qu'un client de ce
+     métier prend le plus souvent avec son logiciel. Lu par le bloc « Se
+     combine avec » en bas de chaque page métier (components/secteurs/
+     SeCombine.tsx). Chaque raison dit ce que l'offre fait POUR CE MÉTIER,
+     avec les mots de sa page produit : rien qu'elle ne fasse déjà. */
+  combine: { offre: Offre; raison: string }[];
+};
+
+/* Les quatre offres pour toute entreprise, et leur page produit. */
+export type Offre = "CASHD" | "RELOAD" | "FRONTD" | "FILED";
+export const PAGE_OFFRE: Record<Offre, string> = {
+  CASHD: "/offres/relances-impayes",
+  RELOAD: "/offres/nouvelles-affaires",
+  FRONTD: "/offres/demandes-clients",
+  FILED: "/offres/factures-fournisseurs",
 };
 
 export const SECTEURS: Secteur[] = [
@@ -44,6 +59,10 @@ export const SECTEURS: Secteur[] = [
       "Daliro relève dans les photos et les vocaux de vos équipes les travaux absents du marché, puis les chiffre sur vos prix unitaires. Vous obtenez l'accord écrit du client avant que l'ouvrage soit refermé.",
     apercu:
       "Chaque matin à 7 h, le conducteur de travaux reçoit trois listes par chantier : les travaux à facturer, les sous-traitants à confirmer à J-2 et les livraisons à caler sur le planning.",
+    combine: [
+      { offre: "CASHD", raison: "Les situations et les factures échues relancées selon vos règles, après votre validation." },
+      { offre: "FILED", raison: "Les factures des fournisseurs et des sous-traitants lues, contrôlées, transmises à la comptabilité." },
+    ],
   },
   {
     slug: "avocats",
@@ -54,6 +73,10 @@ export const SECTEURS: Secteur[] = [
       "Tamila lit chaque pièce du dossier, y compris scannée ou manuscrite, et rattache chaque fait à la page qui le fonde. L'avocat reçoit une chronologie sourcée, les contradictions entre pièces et un bordereau rapproché des conclusions.",
     apercu:
       "Chaque matin à 7 h, l'associé reçoit les pièces communiquées la veille, les honoraires forfaitaires dépassés et les dossiers sans diligence depuis trente jours.",
+    combine: [
+      { offre: "CASHD", raison: "Les notes d'honoraires échues suivies et relancées, chaque envoi validé par le cabinet." },
+      { offre: "FRONTD", raison: "Les demandes des nouveaux clients qualifiées et le premier rendez-vous proposé, à toute heure." },
+    ],
   },
   {
     slug: "architectes",
@@ -64,6 +87,10 @@ export const SECTEURS: Secteur[] = [
       "Lorani croise chaque planche avec les autres, le CCTP et la DPGF, puis relève chaque incohérence avec la planche et l'article concernés. L'architecte arbitre avant le dépôt du permis ou la consultation des entreprises.",
     apercu:
       "Quatre contrôles suivent la mission de maîtrise d'œuvre, du permis à la réception : le permis et le DCE, l'analyse des offres, le visa des documents d'exécution et les situations de travaux.",
+    combine: [
+      { offre: "CASHD", raison: "Les honoraires de chaque phase suivis et relancés à l'échéance, après votre validation." },
+      { offre: "FRONTD", raison: "Les demandes de projet qualifiées avant le premier rendez-vous, à toute heure." },
+    ],
   },
   {
     slug: "location-automobile",
@@ -74,6 +101,10 @@ export const SECTEURS: Secteur[] = [
       "Tavaro rapproche les photos de restitution de l'état des lieux de départ, puis chiffre carburant, retard et dommages selon votre barème de remise en état. Chaque facture part avec ses preuves datées, après validation de l'agence.",
     apercu:
       "Chaque matin à 7 h, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
+    combine: [
+      { offre: "FRONTD", raison: "Les demandes de réservation traitées à toute heure, y compris agence fermée." },
+      { offre: "CASHD", raison: "Les factures de restitution échues relancées selon vos règles, après votre validation." },
+    ],
   },
   /* 24/09 (soir) — Tiroma, NOM PROVISOIRE (dossier OMEGA/dentaire-site,
      projet Vercel tiroma-site). Pas encore de logo officiel : les masques
@@ -91,6 +122,10 @@ export const SECTEURS: Secteur[] = [
       "Tiroma lit l'agenda, les plans de traitement et les devis signés de votre logiciel, en lecture seule. Chaque créneau libéré arrive avec les patients qui peuvent le prendre, et l'assistante appelle dans l'ordre.",
     apercu:
       "Chaque matin à 7 h, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
+    combine: [
+      { offre: "FRONTD", raison: "Les demandes de rendez-vous des patients traitées à toute heure, hors des heures du secrétariat." },
+      { offre: "CASHD", raison: "Les devis de soins restés sans réponse relancés, chaque envoi validé par le cabinet." },
+    ],
   },
   /* 24/09 (soir) — Namolu, NOM DE TRAVAIL (rapports
      plans-et-decisions/secteurs/groupes-*-2026-09.md : un produit, trois
@@ -107,6 +142,10 @@ export const SECTEURS: Secteur[] = [
       "Namolu lit les ventes, les stocks et les conteneurs en mer de votre groupe, magasin par magasin et île par île. La direction des achats reçoit ce qu'il faut commander, faire venir par avion, transférer ou démarquer, et décide.",
     apercu:
       "Chaque matin à 7 h, la direction des achats reçoit trois listes : le prochain conteneur à compléter, les articles à faire venir par avion et le stock à transférer ou à démarquer.",
+    combine: [
+      { offre: "FILED", raison: "Les factures des fournisseurs et des transitaires lues, contrôlées, transmises à la comptabilité." },
+      { offre: "CASHD", raison: "Les échéances des comptes professionnels suivies et relancées selon vos règles." },
+    ],
   },
 ];
 
