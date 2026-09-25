@@ -105,4 +105,36 @@
     zoom: 0.8;
     aspect-ratio: 5 / 4;
   }
+
+  /* Second cran, sur capture de Teo (« ces sections sont encore trop
+     grosses ») : les cinq cartes de « Chaque point relevé attend
+     l'arbitrage de l'architecte » (1 943 px empilées). Leurs dessins —
+     l'anneau « 100 % », l'empreinte, les deux courbes, le fil des
+     questions — étaient composés pour des cartes de bureau et
+     s'affichaient à l'échelle 1. */
+  .p-architectes .grid-cols-6 > * > .m-auto.size-fit {
+    zoom: 0.8;
+  }
+  .p-architectes .grid-cols-6 .size-32 {
+    zoom: 0.75;
+  }
+  .p-architectes .grid-cols-6 .pt-6.lg\:px-6 {
+    zoom: 0.78;
+  }
+  /* La courbe des alertes est un SVG `w-full` : `zoom` ne la réduit pas,
+     sa largeur si. Le panneau reste accroché à l'angle bas droit. */
+  .p-architectes .grid-cols-6 .rounded-tl-\(--radius\) {
+    width: 72%;
+    margin-left: auto;
+    padding: 16px;
+  }
+  .p-architectes .grid-cols-6 .before\:bg-\[\#e5e5e5\].mt-6 {
+    zoom: 0.8;
+  }
+  .p-architectes .grid-cols-6 .space-y-12 > :not(:last-child) {
+    margin-block-end: 20px;
+  }
+  .p-architectes .grid-cols-6 .text-lg {
+    font-size: 16.5px;
+  }
 }

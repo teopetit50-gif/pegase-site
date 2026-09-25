@@ -67,4 +67,35 @@
   .p-avocats .gap-8 {
     gap: 20px;
   }
+
+  /* ── Second cran, sur capture de Teo (« ces sections sont encore trop
+     grosses », les cartes « Chronologie sourcée », « Bordereau
+     contrôlé ») ─────────────────────────────────────────────────── */
+  /* Les familles de pièces sous « Chaque pièce est lue » : 18 px gras. */
+  .p-avocats .avocats-pieces li.text-lg {
+    font-size: 15px;
+  }
+  .p-avocats .avocats-pieces ul.gap-8 {
+    gap: 12px 18px;
+  }
+  /* Les cinq cartes de fonctionnalités : au bureau, trois par rangée à
+     ~380 px ; au téléphone, chacune pleine largeur, donc son
+     illustration à l'échelle 1 (190 à 210 px de dessin sous le texte).
+     Elle est réduite d'un bloc, comme les visuels de scale.com : `zoom`
+     pour les illustrations en balisage (tailles en px), largeur à 76 %
+     pour celles en SVG (`w-full h-auto`) — les deux ensemble donnent le
+     même facteur aux unes et aux autres. */
+  .p-avocats #fonctionnalites h3.text-xl {
+    font-size: 16.5px;
+  }
+  .p-avocats #fonctionnalites .mt-6.w-full.overflow-hidden {
+    zoom: 0.76;
+    width: 76%;
+    margin: 18px auto 0;
+  }
+  /* « Chaque matin, l'état du cabinet » : quatre fiches d'exemple à
+     tableau, des écrans d'application — réduites comme tels. */
+  .p-avocats #point-du-matin .grid > * {
+    zoom: 0.82;
+  }
 }

@@ -106,4 +106,21 @@
   .p-btp section > .mt-12.px-4 {
     zoom: 0.72;
   }
+  /* Second cran, sur capture de Teo (« ces sections sont encore trop
+     grosses ») : les visuels des fonctionnalités — l'accueil « Bonjour
+     Thomas », la fiche du sous-traitant, le vocal résumé, l'avenant, la
+     demande de validation, la liste du matin — étaient composés pour une
+     cellule de ~400 px et s'affichaient à l'échelle 1, pleine largeur. */
+  .p-btp #features .mt-16.max-w-4xl {
+    zoom: 0.8;
+  }
+  .p-btp #features .max-w-xl.self-center {
+    zoom: 0.76;
+  }
+  .p-btp #features .max-w-sm.self-center {
+    zoom: 0.8;
+  }
+  .p-btp #features .h-\[320px\] {
+    zoom: 0.74;
+  }
 }

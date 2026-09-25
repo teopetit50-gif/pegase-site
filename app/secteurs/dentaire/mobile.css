@@ -113,4 +113,24 @@
   .p-dentaire .lg\:col-span-3 > .overflow-hidden.rounded-xl {
     zoom: 0.8;
   }
+
+  /* Second cran, sur capture de Teo (« ces sections sont encore trop
+     grosses ») : les trois cartes « Pour quels cabinets ? », en `p-8`
+     et séparées de 64 px, font deux écrans et demi à elles seules. */
+  .p-dentaire .grid.gap-16.lg\:grid-cols-3 {
+    gap: 16px;
+  }
+  .p-dentaire .grid.gap-16.lg\:grid-cols-3 > * > .p-8,
+  .p-dentaire .grid.gap-16.lg\:grid-cols-3 > .p-8 {
+    padding: 20px;
+  }
+  .p-dentaire .grid.gap-16.lg\:grid-cols-3 .mb-6 {
+    margin-bottom: 14px;
+  }
+  .p-dentaire .grid.gap-16.lg\:grid-cols-3 .mb-8 {
+    margin-bottom: 18px;
+  }
+  .p-dentaire .grid.gap-16.lg\:grid-cols-3 .pt-6 {
+    padding-top: 14px;
+  }
 }
