@@ -117,14 +117,15 @@ export const SECURITE = {
    magasins de chaque secteur en Guadeloupe ». Photos Wikimedia Commons
    (licences libres, crédits sous les cartes et dans CREDITS.txt) ; la
    ligne du pied précise « à titre d'illustration ». `cadrage` : la
-   position de la photo dans la carte, pour garder le logo entier. */
+   position de la photo dans la carte, pour garder le logo entier ; `zoom`
+   (ancré en bas) remonte le logo au-dessus de l'étiquette centrale. */
 export const ENSEIGNES = {
   titre: "Pensé pour chaque enseigne du groupe.",
   cartes: [
-    { nom: "Mr.Bricolage", secteur: "Bricolage", image: "/secteurs-distribution/enseigne-mrbricolage.jpg", cadrage: "60% 40%" },
-    { nom: "Carrefour", secteur: "Alimentaire", image: "/secteurs-distribution/enseigne-carrefour.jpg", cadrage: "47% 50%" },
-    { nom: "Conforama", secteur: "Maison", image: "/secteurs-distribution/enseigne-conforama.jpg", cadrage: "35% 50%" },
-    { nom: "Decathlon", secteur: "Sport", image: "/secteurs-distribution/enseigne-decathlon.jpg", cadrage: "22% 40%" },
+    { nom: "Mr.Bricolage", secteur: "Bricolage", image: "/secteurs-distribution/enseigne-mrbricolage.jpg", cadrage: "60% 40%", zoom: 1.15 },
+    { nom: "Carrefour", secteur: "Alimentaire", image: "/secteurs-distribution/enseigne-carrefour.jpg", cadrage: "47% 50%", zoom: 1.18 },
+    { nom: "Conforama", secteur: "Maison", image: "/secteurs-distribution/enseigne-conforama.jpg", cadrage: "35% 50%", zoom: 1 },
+    { nom: "Decathlon", secteur: "Sport", image: "/secteurs-distribution/enseigne-decathlon.jpg", cadrage: "22% 40%", zoom: 1 },
   ],
   pied: "Votre enseigne n'est pas dans la liste ? Namolu sert la plupart des magasins d'un groupe.",
   lien: "Parlons-en.",

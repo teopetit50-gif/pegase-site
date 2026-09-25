@@ -89,7 +89,7 @@ export default function Securite() {
                       alt={`Magasin ${c.nom}, ${c.secteur.toLowerCase()}`}
                       loading="lazy"
                       className="absolute inset-0 h-full w-full object-cover"
-                      style={{ objectPosition: c.cadrage }}
+                      style={{ objectPosition: c.cadrage, transform: `scale(${c.zoom})`, transformOrigin: "50% 100%" }}
                       src={c.image}
                     />
                     <div className="absolute inset-0 bg-black/10" />
