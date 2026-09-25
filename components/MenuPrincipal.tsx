@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -106,7 +107,19 @@ export default function MenuPrincipal({
                   }
                 >
                   {rubrique.vedette && (
-                    <li className="md:row-span-5">
+                    /* 24/09 (Teo) — la case vedette couvre autant de rangées
+                       que la liste a d'entrées. Écrite en dur à 5, elle
+                       laissait le sixième secteur (« Groupes de
+                       distribution ») retomber sous elle, à gauche, au lieu
+                       de le ranger dans la colonne de droite. */
+                    <li
+                      className="md:row-span-(--rangs)"
+                      style={
+                        {
+                          "--rangs": rubrique.entrees?.length || 1,
+                        } as CSSProperties
+                      }
+                    >
                       <NavigationMenuLink asChild>
                         <Link
                           href={rubrique.vedette.href}
