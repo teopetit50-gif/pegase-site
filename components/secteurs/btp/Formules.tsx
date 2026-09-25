@@ -24,9 +24,13 @@
      bg-primary, text-primary-foreground → #171717, #ffffff · bg-foreground/N → #171717/N ·
      border-border → #e6e6e6. Les `border-t` / `border-b` sans couleur sont peints par la règle de base de
      btp.css. Les 4 utilitaires `dark:` sont retirés.
-   · « J-2 » (Confirmation à J-2) : insécable. */
+   · « J-2 » (Confirmation à J-2) : insécable.
+   · 25/09/2026 — sous md, chaque groupe du comparatif se PLIE (`<details>` natif, fermé par défaut). Teo, sur
+     capture : « juste sur mobile cette section est trop longue, mets des trucs qui se plient et déplient ».
+     Déplié, le comparatif faisait vingt-cinq lignes, trois écrans ; plié, cinq titres. Le tableau de bureau
+     (hidden md:block) ne change pas. */
 import * as React from "react";
-import { Check, Minus } from "lucide-react";
+import { Check, ChevronDown, Minus } from "lucide-react";
 import Lien from "@/components/Lien";
 import { cn } from "@/lib/cn";
 import { Button } from "./bouton";
@@ -156,12 +160,19 @@ export function Pricing() {
             <div className="mt-6 grid grid-cols-1 gap-3 px-6 sm:grid-cols-3">
               {PLANS.map((p) => <CarteEtroite key={p.id} p={p} />)}
             </div>
+            <div className="mt-8">
             {FORMULES.groupes.map((g) => (
-              <div key={g.title}>
-                <div className="px-6 pt-10 pb-4">
-                  <h3 className="font-medium text-[#171717] text-lg">{g.title}</h3>
-                  <p className="mt-1 text-[#737373] text-sm">{g.description}</p>
-                </div>
+              <details key={g.title} className="group border-[#e6e6e6] border-t last:border-b">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-4 [&::-webkit-details-marker]:hidden">
+                  <div className="min-w-0">
+                    <h3 className="font-medium text-[#171717] text-base">{g.title}</h3>
+                    <p className="mt-0.5 text-[#737373] text-sm">{g.description}</p>
+                  </div>
+                  <span className="flex shrink-0 items-center gap-x-1.5 text-[#737373] text-xs tabular-nums">
+                    {g.features.length}
+                    <ChevronDown className="size-4 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+                  </span>
+                </summary>
                 {g.features.map((f) => (
                   <div key={f.name} className="border-t px-6 py-4">
                     <div className="flex items-start gap-x-2">
@@ -180,8 +191,9 @@ export function Pricing() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </details>
             ))}
+            </div>
           </div>
 
           <div className="hidden md:block">
