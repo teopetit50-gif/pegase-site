@@ -160,7 +160,7 @@ export const MENU: Rubrique[] = [
         colonne: "Pour toutes les entreprises",
       },
       /* Le métier en intitulé, le logiciel en gris sur la même ligne, sans
-         description : le visiteur cherche « BTP », pas « Daliro ». 25/09,
+         une ligne courte dessous (`ligne`) : le visiteur cherche « BTP », pas « Daliro ». 25/09,
          seconde passe (Teo, « un peu trop chargé ») : onze entrées à deux
          lignes de gris faisaient 22 lignes à lire pour choisir. La colonne
          métier passe à une ligne par entrée, les offres à une ligne de
@@ -169,6 +169,7 @@ export const MENU: Rubrique[] = [
         href: `/secteurs/${s.slug}`,
         label: s.metier,
         cote: s.saas,
+        texte: s.ligne,
         colonne: "Pour votre métier",
       })),
     ],

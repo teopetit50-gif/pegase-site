@@ -27,6 +27,11 @@ export type Secteur = {
   /* une ligne, 40 à 60 signes : la décision que le SaaS prend chaque matin
      (cartes de /offres, #metiers) */
   texte: string;
+  /* le menu « Nos offres », colonne « Pour votre métier » : UNE ligne de
+     40 signes au plus sous le métier (25/09, Teo : « quand même une ligne
+     descriptive par métier »). Au-delà, elle passe sur deux lignes et le
+     panneau redevient chargé. */
+  ligne: string;
   /* /secteurs, carte du métier : deux phrases, ce qu'il lit → ce qu'il
      prépare → ce qui reste au client. Tout est repris du site du SaaS. */
   detail: string;
@@ -55,6 +60,7 @@ export const SECTEURS: Secteur[] = [
     metier: "BTP",
     saas: "Daliro",
     texte: "Les travaux supplémentaires sont chiffrés et signés avant exécution.",
+    ligne: "Travaux supplémentaires signés d'avance",
     detail:
       "Daliro relève dans les photos et les vocaux de vos équipes les travaux absents du marché, puis les chiffre sur vos prix unitaires. Vous obtenez l'accord écrit du client avant que l'ouvrage soit refermé.",
     apercu:
@@ -69,6 +75,7 @@ export const SECTEURS: Secteur[] = [
     metier: "Cabinets d'avocats",
     saas: "Tamila",
     texte: "Chaque fait renvoie à la pièce et à la page qui le fondent.",
+    ligne: "Chaque fait relié à sa pièce",
     detail:
       "Tamila lit chaque pièce du dossier, y compris scannée ou manuscrite, et rattache chaque fait à la page qui le fonde. L'avocat reçoit une chronologie sourcée, les contradictions entre pièces et un bordereau rapproché des conclusions.",
     apercu:
@@ -83,6 +90,7 @@ export const SECTEURS: Secteur[] = [
     metier: "Architectes",
     saas: "Lorani",
     texte: "Les plans, le CCTP et la DPGF sont croisés avant le permis.",
+    ligne: "Plans, CCTP et DPGF croisés",
     detail:
       "Lorani croise chaque planche avec les autres planches, le cahier des clauses techniques (CCTP) et la décomposition des prix (DPGF), puis relève chaque incohérence avec la planche et l'article concernés. L'architecte arbitre avant le dépôt du permis ou la consultation des entreprises.",
     apercu:
@@ -97,6 +105,7 @@ export const SECTEURS: Secteur[] = [
     metier: "Loueurs automobiles",
     saas: "Tavaro",
     texte: "Chaque restitution est chiffrée sur votre barème, preuves jointes.",
+    ligne: "Restitutions chiffrées, preuves jointes",
     detail:
       "Tavaro rapproche les photos de restitution de l'état des lieux de départ, puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état. Chaque facture part avec ses preuves datées, après validation de l'agence.",
     apercu:
@@ -118,6 +127,7 @@ export const SECTEURS: Secteur[] = [
     metier: "Cabinets dentaires",
     saas: "Tiroma",
     texte: "Les créneaux libérés sont repris et les plans signés planifiés.",
+    ligne: "Créneaux libérés proposés aux patients",
     detail:
       "Tiroma lit l'agenda, les plans de traitement et les devis signés de votre logiciel, en lecture seule. Chaque créneau libéré arrive avec les patients qui peuvent le prendre, et l'assistante appelle dans l'ordre.",
     apercu:
@@ -138,6 +148,7 @@ export const SECTEURS: Secteur[] = [
     metier: "Groupes de distribution",
     saas: "Namolu",
     texte: "Conteneurs, transferts entre îles et démarque, chaque matin.",
+    ligne: "Conteneurs, transferts et démarque",
     detail:
       "Namolu lit les ventes, les stocks et les conteneurs en mer de votre groupe, magasin par magasin et île par île. La direction des achats reçoit ce qu'il faut commander, faire venir par avion, transférer ou démarquer, et décide.",
     apercu:

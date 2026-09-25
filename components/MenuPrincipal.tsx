@@ -204,7 +204,7 @@ export default function MenuPrincipal({
           );
 
           return (
-            /* 25/09 — le panneau à colonnes fait 740 px : posé sous son
+            /* 25/09 — le panneau à colonnes fait 800 px : posé sous son
                intitulé, il sortait de l'écran à droite dès 1280. L'item
                passe en `static`, le panneau se place donc par rapport au
                bandeau entier (la racine, `relative`) et s'y centre. */
@@ -221,12 +221,12 @@ export default function MenuPrincipal({
               </NavigationMenuTrigger>
 
               <NavigationMenuContent
-                className={colonnes ? "md:left-[calc(50%-370px)]" : undefined}
+                className={colonnes ? "md:left-[calc(50%-400px)]" : undefined}
               >
                 {colonnes ? (
                   /* 25/09 — la vedette, puis une colonne par titre. La
                      vedette tient toute la hauteur (`h-full` dans sa case). */
-                  <div className="grid w-[740px] grid-cols-[196px_1fr_236px] gap-x-1.5">
+                  <div className="grid w-[800px] grid-cols-[196px_1fr_1fr] gap-x-1.5">
                     <ul className="grid">{vedette}</ul>
                     {colonnes.map((c) => (
                       <div key={c.titre}>
