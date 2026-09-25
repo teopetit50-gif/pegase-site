@@ -117,6 +117,13 @@
   .p-btp #features .max-w-xl.self-center {
     zoom: 0.76;
   }
+  /* Réduite, la pile de fiches sous-traitants laissait dépasser les deux
+     fiches latérales (Marc L., Brigitte H.) de part et d'autre de celle
+     du milieu, noms tranchés (« Ma… », « …itte H. »). Teo : « masque les
+     fiches qui dépassent ». Seule reste Cédric F. */
+  .p-btp #features .max-w-xl.self-center .absolute.top-12.w-72 {
+    display: none;
+  }
   .p-btp #features .max-w-sm.self-center {
     zoom: 0.8;
   }
