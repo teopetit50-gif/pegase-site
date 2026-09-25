@@ -1,1388 +1,549 @@
 /* ══════════════════════════════════════════════════════════════════════
-   .p-distribution — /secteurs/distribution, Namolu (24/09/2026)
-   Décalque de https://www.toolio.com (page d'accueil, Webflow).
+   .p-distribution — /secteurs/distribution, Namolu (24/09/2026, v2)
+   Décalque de https://www.concurrence.com (page d'accueil).
 
-   Teo, 24/09 : « groupe on va lancer », puis « Toolio, prends-le et
-   commence ». Toolio vend la planification et la répartition de la
-   marchandise aux enseignes ; c'est le plus proche de Namolu parmi douze
-   sites relevés (planches du 24/09 : Rundoo, Afresh, RELEX, invent.ai,
-   Onebeat, Nextail, Toolio, Flexport, Terminal49, Stord, Didero, Pando).
+   Teo, 24/09 au soir, sur la v1 (décalque de toolio.com) : « j'aime pas
+   du tout le design de la page de Namolu ; voici le site de référence, tu
+   vas devoir le reproduire à l'identique […] les couleurs, tu prends
+   celles de Omega ». La v1 est remplacée entièrement.
 
-   Tout vit sous `.p-distribution`, préfixé `nm-`. Rien dans globals.css.
-   Fichier hors couche : il passe devant les utilitaires Tailwind, d'où
-   les enfants directs (`>`) sur les éléments génériques.
+   ── LA MÉTHODE ───────────────────────────────────────────────────────
+   Le balisage est celui de la référence, relevé HYDRATÉ par CDP après
+   défilement (Next.js + Tailwind v3) : les classes Tailwind standard sont
+   reprises telles quelles dans le TSX (notre Tailwind v4 les régénère aux
+   mêmes valeurs, paliers 640/768/1024/1280/1536 identiques). Leurs jetons
+   et utilitaires maison sont réécrits ici, préfixés `nm-`. Deux composants
+   viennent de 21st.dev : l'Infinite Slider d'ibelick (les trois bandeaux
+   défilants) ; le reste de la référence n'a pas d'équivalent exact là-bas
+   et a été reproduit depuis son propre DOM.
 
-   ── LE RELEVÉ (feuille Webflow compilée + getComputedStyle, 24/09) ────
-   Paliers de la référence, écrits en max-width : 991, 767, 479.
+   ── LES COULEURS : CELLES D'OMEGA ────────────────────────────────────
+   référence                      ici
+   concurrence-orange #aa412a  →  --nm-bande    #08090c  (le fond du site)
+   concurrence-blue   #083241  →  --nm-bande-2  #17171a  (la « nuit » de /tarifs)
+   concurrence-green  #2c3827  →  --nm-sombre   #111113  (carte sécurité)
+   concurrence-black  #100f0f  →  --nm-noir     #0a0a0a
+   warm-gray-1…6 (gris chauds) →  gris neutres, même clarté un à un
+   linework orange / bleu      →  blanc à 16 % / 14 %
+   Le bouton plein orange devient noir. Les vidéos de lumière des deux
+   bandes (fichiers de la référence) sont redessinées en CSS (.nm-lumieres).
 
-   couleurs   --dark #0c2542 (texte et bouton) · --blue #0c66dc (chiffres,
-              survol) · --grey #5c6a7c (texte courant) · --smoke-grey
-              #d7dbe1 (filets) · jaune #ffc53a (onglet actif) · --yellow
-              #ffbb16 (bouton d'appel) · --light-cream #f7f6f3 (chiffres)
-              · --turquoise-tint #e8f5f9 (carrousel) · --background
-              #eef1f5 · --blue-tint #dae8fa
-   hero       750 de haut (630 sous 991, 520 sous 479) ; dégradé 315°
-              #c6e8ff33 → #fefceb33 ; colonne 1140, padding 30 → texte à
-              x 180 à 1440 ; titre 94/96, 300 puis 600, interlettre −4 px
-              (72/72 −2 px sous 767, 42/44 −1,5 px sous 479) ; chapô 18/30
-              sur 734 ; bouton 54 de haut, rayon 2, padding 24, texte
-              15/600 ; capture décalée de 387 à gauche, remontée de 55,
-              693 de large, rognée par le bas du hero
-   bandeau    120 de haut
-   atouts     deux cellules de 720 à 1440, padding 64, filets #d7dbe1 ;
-              titre à 90 du haut, 35/40, 400, −1 px (28/36 sous 479) ;
-              texte 16/26, 300, #5c6a7c ; lien souligné 46 de haut, filet
-              bas 3 px ; illustration carrée de 591
-   chiffres   fond crème, 75 + 75 ; titre 32/42, 600, −1 px ; rangée à 75 ;
-              quatre colonnes de 160 de haut, séparées d'un filet ;
-              chiffre 52/52, 600, bleu ; libellé 16/24, 500
-   modules    marge haute 64 ; onglets 260 × 52 collés ; volet 50 / 90 ;
-              capture 1080 × 703 ; carte 400 × 252 à 41 du bas (leur
-              bordure 6 px et leur ombre dure 20 × 20 : refusées, voir
-              .nm-module)
-   carrousel  fond #e8f5f9 ; 100 / 100 ; colonne 1040 ; étiquette 163 × 100
-              + 60 ; citation serif italique 18/36 sur 120 ; chiffres
-              52/52 ; flèches 54 × 54
-   appel      capture 406 à gauche, marge 64 ; titre 45/52, 500, −1 px ;
-              texte 18/30 ; bouton jaune de 260
+   ── LES POLICES : CELLES DU SITE ─────────────────────────────────────
+   Flecha S (serif sous licence) → Newsreader (app/_polices/serif.ts, déjà
+   servie pour /secteurs/avocats) ; Inter → General Sans ; ABC Diatype Mono
+   → la mono du site.
 
-   ── ÉCARTS ASSUMÉS ───────────────────────────────────────────────────
-   1. POLICES. Manrope et Helvetica → General Sans, la police du site
-      (app/polices.css) ; Noticia Text (la citation) → Newsreader italique,
-      déjà déclarée pour /secteurs/avocats (app/_polices/serif.ts).
-   2. PLEINE LARGEUR, SANS RAILS. Toolio plafonne sa page à 1440 entre
-      deux filets verticaux ; Teo les a refusés sur toutes les pages de
-      secteur (24/09). Chaque fond court d'un bord à l'autre ; seules les
-      colonnes de texte gardent leur plafond.
-   3. PAS DE BANDE SOMBRE. Les modules et l'appel sont BLEU NUIT chez
-      Toolio ; ici clairs (#eef1f5), comme tout omegaai.fr (bandes noires
-      refusées trois fois sur l'accueil).
-   4. AUCUNE CAPTURE D'AUTRUI. Leurs captures d'application et leurs
-      illustrations sont des images ; les nôtres sont en balisage
-      (components/secteurs/distribution/Ecran.tsx, Illustrations.tsx),
-      mises à l'échelle comme une image par <Echelle>.
-   5. RÈGLES MAISON. Logos clients → métiers ; chiffres de résultat →
-      faits de conception ; témoignages → situations de secteur sourcées
-      (textes.ts). L'effet « glare » du titre (dégradé qui suit la souris)
-      n'est pas repris.
+   ── RÈGLES MAISON ────────────────────────────────────────────────────
+   Leurs logos clients, témoignages signés, financeurs et chiffres de
+   résultat ne sont pas repris : métiers, problèmes, territoires et faits
+   de conception à la même place (components/secteurs/distribution/textes.ts).
    ══════════════════════════════════════════════════════════════════════ */
 
 .p-distribution {
-  --nm-dark: #0c2542;
-  --nm-blue: #0c66dc;
-  --nm-grey: #5c6a7c;
-  --nm-filet: #d7dbe1;
-  --nm-jaune: #ffc53a;
-  --nm-jaune-appel: #ffbb16;
-  --nm-creme: #f7f6f3;
-  --nm-turquoise: #e8f5f9;
-  --nm-fond: #eef1f5;
-  --nm-bleu-pale: #dae8fa;
+  --nm-bande: #08090c;
+  --nm-bande-2: #17171a;
+  --nm-sombre: #111113;
+  --nm-noir: #0a0a0a;
+  --nm-g1: #f2f2f0;
+  --nm-g2: #dcdcd9;
+  --nm-g3: #b1b1ae;
+  --nm-g4: #939390;
+  --nm-g5: #767673;
+  --nm-g6: #575754;
+  --nm-trait: rgba(255, 255, 255, 0.16);
+  --nm-trait-2: rgba(255, 255, 255, 0.14);
+
+  /* leurs espacements fluides, tels quels */
+  --space-edge: clamp(1rem, calc(0.82394rem + 0.75117vw), 1.5rem);
+  --space-section-y: clamp(5rem, calc(3.94366rem + 4.50704vw), 8rem);
+  --space-gap-lg: clamp(3rem, calc(2.29577rem + 3.00469vw), 5rem);
+  --space-gap-xl: clamp(5rem, calc(4.11972rem + 3.75587vw), 7.5rem);
+
+  --nm-serif: var(--font-avocats-serif), Georgia, serif;
+  --nm-sans: var(--font-omega), ui-sans-serif, system-ui, sans-serif;
+  --nm-mono: var(--font-omega-mono), ui-monospace, monospace;
 
   width: 100vw;
   margin-inline: calc(50% - 50vw);
   overflow-x: clip;
-  background: #ffffff;
-  color: var(--nm-dark);
-  font-family: var(--font-omega), ui-sans-serif, system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
+  background: var(--nm-bande-2);
+  color: var(--nm-noir);
+  font-family: var(--nm-sans);
   -webkit-font-smoothing: antialiased;
 }
-.p-distribution p,
-.p-distribution h1,
-.p-distribution h2,
-.p-distribution h3 {
-  margin: 0;
+/* Pas de remise à zéro des marges ici : ce fichier est hors couche et
+   battrait les `mb-4`, `mt-8`… des éléments (le préflight de Tailwind
+   remet déjà p et h1-h3 à zéro, dans sa couche). */
+
+/* ── leurs utilitaires maison, préfixés ─────────────────────────────── */
+.p-distribution .nm-px-edge {
+  padding-left: var(--space-edge);
+  padding-right: var(--space-edge);
+}
+.p-distribution .nm-pl-edge {
+  padding-left: var(--space-edge);
+}
+.p-distribution .nm-section-py {
+  padding-top: var(--space-section-y);
+  padding-bottom: var(--space-section-y);
+}
+.p-distribution .nm-gap-fluid-lg {
+  gap: var(--space-gap-lg);
+}
+.p-distribution .nm-gap-fluid-xl {
+  gap: var(--space-gap-xl);
+}
+.p-distribution .nm-serif {
+  font-family: var(--nm-serif);
+}
+.p-distribution .nm-sans {
+  font-family: var(--nm-sans);
+}
+.p-distribution .nm-backface {
+  backface-visibility: hidden;
 }
 
-/* ── communs ─────────────────────────────────────────────────────────── */
-.p-distribution .nm-colonne {
-  width: 100%;
-  max-width: 1140px;
-  margin-inline: auto;
+/* typographie de la référence (relevé des paliers : 768, 1024, 1280) */
+.p-distribution .nm-type-display,
+.p-distribution .nm-type-h1 {
+  font-family: var(--nm-serif);
+  font-size: 38px;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
 }
-.p-distribution .nm-fleche {
-  flex: none;
+.p-distribution .nm-type-h2 {
+  font-family: var(--nm-serif);
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
 }
-.p-distribution .nm-filet {
-  height: 1px;
-  background: var(--nm-filet);
+.p-distribution .nm-type-h3 {
+  font-family: var(--nm-serif);
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
 }
-.p-distribution .nm-bouton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  height: 54px;
-  padding-inline: 24px;
-  border-radius: 2px;
-  background: var(--nm-dark);
-  color: #ffffff;
+.p-distribution .nm-type-h4 {
+  font-family: var(--nm-serif);
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.p-distribution .nm-type-body {
+  font-family: var(--nm-sans);
   font-size: 15px;
-  font-weight: 600;
-  line-height: 1;
-  text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  letter-spacing: -0.01em;
+  line-height: 1.35;
 }
-.p-distribution .nm-bouton:hover {
-  background: var(--nm-blue);
-  transform: scale(1.01);
-  box-shadow: 0 0 8px #0c66dc26;
-  filter: drop-shadow(4px 4px #0000004d);
+.p-distribution .nm-type-caption {
+  font-family: var(--nm-sans);
+  font-size: 13px;
+  line-height: 1.35;
 }
-.p-distribution .nm-bouton--appel {
-  width: 260px;
-  margin-top: 20px;
-  background: var(--nm-jaune-appel);
-  color: #000000;
-  font-size: 16px;
+.p-distribution .nm-type-btn {
+  font-family: var(--nm-sans);
+  font-size: 13px;
+  letter-spacing: 0.07px;
+  line-height: 1.35;
 }
-.p-distribution .nm-bouton--appel:hover {
-  background: var(--nm-blue);
-  color: #ffffff;
+.p-distribution .nm-type-btn-sm {
+  font-family: var(--nm-sans);
+  font-size: 11px;
+  letter-spacing: 0.12px;
+  line-height: 1.41;
 }
-.p-distribution .nm-souligne {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 46px;
-  border-bottom: 3px solid var(--nm-dark);
-  color: var(--nm-dark);
-  font-size: 16px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: color 0.2s, border-color 0.2s;
-}
-.p-distribution .nm-souligne:hover {
-  color: var(--nm-blue);
-  border-color: var(--nm-blue);
-}
-.p-distribution .nm-t32 {
-  font-size: 32px;
-  line-height: 42px;
-  font-weight: 600;
-  letter-spacing: -1px;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-t52 {
-  font-size: 52px;
-  line-height: 52px;
-  font-weight: 600;
-  color: var(--nm-blue);
-  font-variant-numeric: tabular-nums;
-}
-
-/* la mise à l'échelle des écrans codés (Echelle.tsx) */
-.p-distribution .nm-echelle {
-  width: 100%;
-  overflow: hidden;
-}
-.p-distribution .nm-echelle__in {
-  width: var(--nm-l);
-  transform: scale(var(--nm-k, 1));
-  transform-origin: left top;
-}
-
-/* ══ 1 · HERO ═══════════════════════════════════════════════════════════ */
-.p-distribution .nm-heros {
-  position: relative;
-  height: 750px;
-  overflow: clip;
-  background-image: linear-gradient(315deg, #c6e8ff33, #fefceb33);
-}
-.p-distribution .nm-heros__dedans {
-  position: relative;
-  z-index: 3;
-  /* en PADDING, pas en marge comme chez eux : `overflow: clip` ne crée
-     pas de contexte de formatage, la marge traversait le hero et <main>,
-     et ouvrait 40 px de fond noir sous l'entête du site */
-  padding-top: 40px;
-  padding-inline: 30px;
-}
-.p-distribution .nm-heros__titre {
-  margin-top: 16px;
-  font-size: 94px;
-  line-height: 96px;
-  font-weight: 300;
-  letter-spacing: -4px;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-heros__titre > strong {
-  display: block;
-  font-weight: 600;
-}
-.p-distribution .nm-heros__chapo {
-  max-width: 734px;
-  margin-top: 10px;
-  font-size: 18px;
-  line-height: 30px;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-heros__cta {
-  display: flex;
-  margin-top: 40px;
-}
-.p-distribution .nm-heros__image {
-  width: calc(100% - 387px);
-  margin-top: -55px;
-  margin-left: 387px;
-}
-.p-distribution .nm-heros__image .nm-ecran {
-  box-shadow: 0 30px 80px -20px rgba(12, 37, 66, 0.22);
-}
-
-/* ══ 2 · BANDEAU DES MÉTIERS (leur carrousel de logos) ══════════════════ */
-.p-distribution .nm-bandeau {
-  display: flex;
-  align-items: center;
-  height: 120px;
-  overflow: hidden;
-  border-bottom: 1px solid var(--nm-filet);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
-.p-distribution .nm-bandeau__piste {
-  display: flex;
-  flex: none;
-  gap: 72px;
-  padding-right: 72px;
-  animation: nm-defile 40s linear infinite;
-}
-.p-distribution .nm-bandeau__piste > span {
-  flex: none;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+.p-distribution .nm-type-mono {
+  font-family: var(--nm-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1.45;
   text-transform: uppercase;
-  white-space: nowrap;
-  color: #a2adbb;
 }
-@keyframes nm-defile {
-  to {
-    transform: translateX(-100%);
+.p-distribution .nm-text-h1-mobile {
+  font-size: 38px;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+.p-distribution .nm-text-h2 {
+  font-size: 48px;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+.p-distribution .nm-text-subtitle {
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.p-distribution .nm-text-subtitle-mobile {
+  font-size: 18px;
+  letter-spacing: 0;
+  line-height: 1.41;
+}
+.p-distribution .nm-text-body {
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+.p-distribution .nm-text-body-sm {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+.p-distribution .nm-text-caption {
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+@media (min-width: 768px) {
+  .p-distribution .nm-type-display,
+  .p-distribution .nm-type-h1 {
+    font-size: 48px;
+  }
+  .p-distribution .nm-type-h2 {
+    font-size: 32px;
+    line-height: 1.08;
+  }
+}
+@media (min-width: 1024px) {
+  .p-distribution .nm-type-h2 {
+    font-size: 48px;
+    line-height: 1.02;
+  }
+  .p-distribution .lg\:nm-text-body {
+    font-size: 17px;
+  }
+  .p-distribution .lg\:nm-text-body-sm {
+    font-size: 15px;
+  }
+}
+@media (min-width: 1280px) {
+  .p-distribution .nm-type-display {
+    font-size: 60px;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
   }
 }
 
-/* ══ 3 · ATOUTS (leur « benefits-section ») ═════════════════════════════ */
-.p-distribution .nm-atouts__rangee {
-  display: flex;
-}
-.p-distribution .nm-atout {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 50%;
-  padding-inline: 64px;
-  border-bottom: 1px solid var(--nm-filet);
-}
-.p-distribution .nm-atout:first-child {
-  border-right: 1px solid var(--nm-filet);
-}
-.p-distribution .nm-atout__texte {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  width: 100%;
-  max-width: 592px;
-  margin-top: 90px;
-}
-.p-distribution .nm-atout__titre {
-  font-size: 35px;
-  line-height: 40px;
-  font-weight: 400;
-  letter-spacing: -1px;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-atout__para {
-  font-size: 16px;
-  line-height: 26px;
-  font-weight: 300;
-  color: var(--nm-grey);
-}
-.p-distribution .nm-atout__image {
-  width: 100%;
-  max-width: 591px;
-  padding-top: 30px;
-  padding-bottom: 20px;
-}
-
-/* les illustrations (Illustrations.tsx), largeur naturelle 591 */
-.p-distribution .nm-il {
-  position: relative;
-  width: 591px;
-  height: 520px;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-il__carte {
-  position: absolute;
-  border: 1px solid var(--nm-filet);
-  border-radius: 6px;
-  background: #ffffff;
-  box-shadow: 0 18px 40px -18px rgba(12, 37, 66, 0.25);
-}
-.p-distribution .nm-il__personne {
-  position: absolute;
+/* ── les boutons (leur composant Button, trois variantes) ────────────── */
+.p-distribution .nm-btn {
   display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 14px 6px 6px;
-  border-radius: 999px;
-  background: var(--nm-bleu-pale);
-  font-weight: 600;
-  white-space: nowrap;
-  box-shadow: 0 8px 20px -10px rgba(12, 37, 66, 0.3);
-}
-.p-distribution .nm-il__initiales {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--nm-blue);
-  font-size: 12px;
-  font-weight: 700;
-}
-.p-distribution .nm-il__action {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: #5c6a7c;
-  color: #ffffff;
-  font-weight: 600;
-  white-space: nowrap;
-  box-shadow: 0 10px 24px -12px rgba(12, 37, 66, 0.5);
-}
-.p-distribution .nm-il__signe,
-.p-distribution .nm-ecran__signe {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
   flex: none;
-  background: var(--nm-blue);
-  -webkit-mask: url(/logos/namolu-mark.png) center / contain no-repeat;
-  mask: url(/logos/namolu-mark.png) center / contain no-repeat;
-}
-/* 1 · le message du matin */
-.p-distribution .nm-il__message {
-  left: 40px;
-  top: 80px;
-  width: 440px;
-  padding: 16px;
-}
-.p-distribution .nm-il__message-tete {
-  display: flex;
   align-items: center;
-  gap: 8px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--nm-fond);
-}
-.p-distribution .nm-il__heure {
-  margin-left: auto;
-  color: var(--nm-grey);
-}
-.p-distribution .nm-il__decision {
-  display: flex;
-  gap: 12px;
-  padding-block: 12px;
-  border-bottom: 1px solid var(--nm-fond);
-}
-.p-distribution .nm-il__decision:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-}
-.p-distribution .nm-il__decision > i {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  margin-top: 5px;
-  border-radius: 999px;
-}
-.p-distribution .nm-il__decision > span {
-  display: flex;
-  flex-direction: column;
-}
-.p-distribution .nm-il__decision small,
-.p-distribution .nm-il__carte small {
-  font-size: 12px;
-  color: var(--nm-grey);
-}
-.p-distribution .nm-il__message ~ .nm-il__action {
-  left: 290px;
-  top: 360px;
-}
-.p-distribution .nm-il__pos-a {
-  left: 300px;
-  top: 30px;
-}
-.p-distribution .nm-il__pos-b {
-  left: 10px;
-  top: 420px;
-}
-/* 2 · le conteneur */
-.p-distribution .nm-il__conteneur {
-  left: 30px;
-  top: 90px;
-  width: 390px;
-  padding: 18px;
-}
-.p-distribution .nm-il__ligne-titre {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  font-weight: 600;
-}
-.p-distribution .nm-il__ligne-titre > b {
-  font-size: 22px;
-  color: var(--nm-blue);
-}
-.p-distribution .nm-il__jauge {
-  display: flex;
-  height: 14px;
-  margin-block: 14px;
-  overflow: hidden;
-  border-radius: 3px;
-  background: var(--nm-fond);
-}
-.p-distribution .nm-il__jauge > i:nth-child(1) {
-  background: var(--nm-blue);
-}
-.p-distribution .nm-il__jauge > i:nth-child(2) {
-  background: #2b98f0;
-}
-.p-distribution .nm-il__jauge > i:nth-child(3) {
-  background: #17c7ff;
-}
-.p-distribution .nm-il__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-.p-distribution .nm-il__table td {
-  padding: 7px 0;
-  border-top: 1px solid var(--nm-fond);
-  color: var(--nm-grey);
-}
-.p-distribution .nm-il__table td:first-child {
-  color: var(--nm-dark);
-  font-weight: 600;
-}
-.p-distribution .nm-il__table td:last-child {
-  text-align: right;
-}
-.p-distribution .nm-il__pos-c {
-  left: 270px;
-  top: 40px;
-}
-.p-distribution .nm-il__avion {
-  left: 320px;
-  top: 300px;
-  display: flex;
-  flex-direction: column;
-  width: 230px;
-  padding: 14px 16px;
-}
-.p-distribution .nm-il__avion > b {
-  font-size: 20px;
-  line-height: 28px;
-  color: var(--nm-blue);
-}
-.p-distribution .nm-il__pos-d {
-  left: 40px;
-  top: 360px;
-}
-/* 3 · chaque magasin, chaque île */
-.p-distribution .nm-il__couverture {
-  left: 30px;
-  top: 60px;
-  width: 380px;
-  padding: 18px;
-}
-.p-distribution .nm-il__barre {
-  display: grid;
-  grid-template-columns: 76px 1fr 28px;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-  font-size: 12px;
-}
-.p-distribution .nm-il__barre > span {
-  color: var(--nm-grey);
-}
-.p-distribution .nm-il__barre > i {
-  height: 12px;
-  border-radius: 2px;
-  background: var(--nm-blue);
-}
-.p-distribution .nm-il__barre > i.is-bas {
-  background: #de444c;
-}
-.p-distribution .nm-il__barre > b {
-  text-align: right;
-}
-.p-distribution .nm-il__transfert {
-  left: 160px;
-  top: 290px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 10px;
-  width: 400px;
-  padding: 16px;
-}
-.p-distribution .nm-il__ile {
-  padding: 8px 10px;
-  border-radius: 4px;
-  background: var(--nm-fond);
-  font-weight: 600;
-  font-size: 12px;
-  text-align: center;
-}
-.p-distribution .nm-il__vers {
-  color: var(--nm-blue);
-}
-.p-distribution .nm-il__transfert > small {
-  grid-column: 1 / -1;
-  text-align: center;
-}
-.p-distribution .nm-il__pos-e {
-  left: 360px;
-  top: 20px;
-}
-.p-distribution .nm-il__pos-f {
-  left: 40px;
-  top: 440px;
-}
-/* 4 · les sources lues (leur grille d'intégrations) */
-.p-distribution .nm-il--sources {
-  display: grid;
-  place-items: center;
-}
-.p-distribution .nm-il__grille {
-  display: grid;
-  grid-template-columns: repeat(3, 150px);
-  border-top: 1px solid var(--nm-filet);
-  border-left: 1px solid var(--nm-filet);
-}
-.p-distribution .nm-il__source {
-  display: grid;
-  place-items: center;
-  height: 110px;
-  padding: 10px;
-  border-right: 1px solid var(--nm-filet);
-  border-bottom: 1px solid var(--nm-filet);
-  font-size: 15px;
-  font-weight: 600;
-  text-align: center;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-il__source--plus {
-  align-content: center;
-  gap: 2px;
-  background: var(--nm-fond);
-  color: var(--nm-blue);
-}
-.p-distribution .nm-il__source--plus > b {
-  font-size: 26px;
-}
-
-/* ══ 4 · CE QUE NAMOLU TIENT (leur « roi-section ») ══════════════════════ */
-.p-distribution .nm-garanties {
-  padding-inline: 24px;
-  border-bottom: 1px solid var(--nm-filet);
-  background: var(--nm-creme);
-}
-.p-distribution .nm-garanties__dedans {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-block: 75px;
-}
-.p-distribution .nm-garanties__grille {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 75px;
-}
-.p-distribution .nm-garanties__fait {
-  display: flex;
-  flex-direction: column;
   justify-content: center;
   gap: 6px;
-  height: 160px;
-}
-.p-distribution .nm-garanties__sep {
-  width: 1px;
-  background: var(--nm-filet);
-}
-.p-distribution .nm-garanties__libelle {
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 500;
-  color: var(--nm-dark);
-}
-
-/* ══ 5 · MODULES (Modules.tsx) ═══════════════════════════════════════════ */
-.p-distribution .nm-modules {
-  display: flex;
-  justify-content: center;
-  background: var(--nm-fond);
-  scroll-margin-top: 80px;
-}
-.p-distribution .nm-modules__cadre {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  max-width: 1140px;
-  margin-top: 64px;
-  padding-inline: 30px;
-  box-sizing: content-box;
-}
-.p-distribution .nm-tabs {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 1140px;
-}
-.p-distribution .nm-tabs__menu {
-  display: flex;
-  justify-content: center;
-}
-.p-distribution .nm-tabs__lien {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 260px;
-  height: 52px;
-  margin-left: -1px;
-  border: 1px solid var(--nm-filet);
-  background: #ffffff;
-  color: var(--nm-dark);
-  font: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.p-distribution .nm-tabs__lien:hover {
-  background: #f6f8fa;
-}
-.p-distribution .nm-tabs__lien.is-actif {
-  border: 0;
-  border-top: 4px solid #0003;
-  background: var(--nm-jaune);
-}
-.p-distribution .nm-tabs__lien:focus-visible {
-  outline: 2px solid var(--nm-blue);
-  outline-offset: 2px;
-}
-.p-distribution .nm-tabs__volet {
-  position: relative;
-  margin-top: 50px;
-  margin-bottom: 90px;
-}
-.p-distribution .nm-tabs__volet[hidden] {
-  display: none;
-}
-.p-distribution .nm-module {
-  position: absolute;
-  bottom: 41px;
-  left: 0;
-  z-index: 20;
-  width: 400px;
-  padding: 30px;
-  /* 24/09 — Teo : « j'aime pas l'effet ». La bordure de 6 px et l'ombre
-     dure de 20 × 20 de Toolio sont remplacées par un filet et une ombre
-     douce, comme les autres cartes de la page. */
-  border: 1px solid var(--nm-filet);
+  min-width: fit-content;
+  white-space: nowrap;
   border-radius: 6px;
-  background: #ffffff;
-  box-shadow: 0 24px 60px -24px rgba(12, 37, 66, 0.28);
-}
-.p-distribution .nm-module__texte {
-  margin-top: 12px;
-  margin-bottom: 24px;
-  font-size: 16px;
-  line-height: 28px;
-  color: var(--nm-dark);
-}
-
-/* ══ 6 · SITUATIONS (Cas.tsx, leur carrousel) ═══════════════════════════ */
-.p-distribution .nm-cas {
-  display: flex;
-  justify-content: center;
-  padding: 100px 24px;
-  background: var(--nm-turquoise);
-}
-.p-distribution .nm-cas__colonne {
-  width: 100%;
-  max-width: 1040px;
-}
-.p-distribution .nm-cas__masque {
-  overflow: hidden;
-}
-.p-distribution .nm-cas__piste {
-  display: flex;
-  transition: transform 500ms ease;
-}
-.p-distribution .nm-cas__slide {
-  flex: none;
-  width: 100%;
-}
-.p-distribution .nm-cas__tete {
-  display: flex;
-  align-items: center;
-  margin-bottom: 40px;
-}
-.p-distribution .nm-cas__marque {
-  display: flex;
-  flex: none;
-  align-items: center;
-  width: 163px;
-  height: 100px;
-  margin-right: 60px;
-}
-.p-distribution .nm-cas__marque > span {
-  padding: 8px 14px;
-  background: var(--nm-dark);
-  color: #ffffff;
-  font-size: 22px;
-  line-height: 28px;
-  font-weight: 600;
-  letter-spacing: -0.5px;
-}
-.p-distribution .nm-cas__contexte {
-  font-size: 16px;
-  line-height: 180%;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-cas__milieu {
-  display: flex;
-  align-items: center;
-  margin-block: 40px;
-}
-.p-distribution .nm-cas__vide {
-  flex: none;
-  width: 163px;
-  margin-right: 60px;
-}
-.p-distribution .nm-cas__qui {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
-}
-.p-distribution .nm-cas__pastille {
-  display: grid;
-  place-items: center;
-  width: 80px;
-  height: 80px;
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--nm-blue);
-  box-shadow: inset 0 0 0 1px var(--nm-filet);
-}
-.p-distribution .nm-cas__pastille .nm-fleche {
-  width: 28px;
-  height: 28px;
-}
-.p-distribution .nm-cas__qui > div {
-  padding-left: 24px;
-}
-.p-distribution .nm-cas__qui-titre {
-  font-size: 18px;
-  line-height: 30px;
-  font-weight: 600;
-}
-.p-distribution .nm-cas__qui-sous {
-  font-size: 16px;
-  line-height: 30px;
-}
-.p-distribution .nm-cas__citation {
-  height: 120px;
-  font-family: var(--font-avocats-serif), Georgia, serif;
-  font-size: 20px;
-  line-height: 36px;
-  font-style: italic;
-  color: var(--nm-dark);
-}
-.p-distribution .nm-cas__chiffres {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  margin-block: 36px 12px;
-}
-.p-distribution .nm-cas__chiffre {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.p-distribution .nm-cas__libelle {
-  max-width: 260px;
-  font-size: 16px;
-  line-height: 26px;
   font-weight: 500;
-  color: var(--nm-blue);
-}
-.p-distribution .nm-cas__source {
-  margin-bottom: 24px;
-  font-size: 13px;
-  line-height: 20px;
-  color: var(--nm-grey);
-}
-.p-distribution .nm-cas__commandes {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 40px;
-}
-.p-distribution .nm-cas__fleches {
-  display: flex;
-  gap: 16px;
-}
-.p-distribution .nm-cas__fleche {
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border: 0;
-  border-radius: 2px;
-  background: var(--nm-grey);
-  color: #ffffff;
   cursor: pointer;
-  transition: background-color 0.2s;
+  text-decoration: none;
+  transition: all 200ms;
 }
-.p-distribution .nm-cas__fleche:hover {
-  background: var(--nm-dark);
+.p-distribution .nm-btn:active {
+  transform: scale(0.98);
 }
-.p-distribution .nm-cas__fleche--g .nm-fleche {
-  transform: rotate(180deg);
-}
-
-/* ══ 7 · APPEL (leur « cta-section ») ═══════════════════════════════════ */
-.p-distribution .nm-appel {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  padding: 24px 30px;
-  overflow: hidden;
-  background: var(--nm-fond);
-}
-.p-distribution .nm-appel__motif {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 420px;
-  height: auto;
+.p-distribution .nm-btn > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
   pointer-events: none;
 }
-.p-distribution .nm-appel__dedans {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 1040px;
-  margin-block: 20px 40px;
-  padding-top: 44px;
+.p-distribution .nm-btn--md {
+  height: 39px;
+  padding: 8px 16px;
 }
-.p-distribution .nm-appel__image {
-  flex: none;
-  width: 406px;
-  margin-right: 64px;
+.p-distribution .nm-btn--sm {
+  height: 33px;
+  padding: 8px 12px;
 }
-.p-distribution .nm-appel__texte {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.p-distribution .nm-btn--plein {
+  background: var(--nm-noir);
+  color: #ffffff;
 }
-.p-distribution .nm-appel__titre {
-  margin-bottom: 10px;
-  font-size: 45px;
-  line-height: 52px;
-  font-weight: 500;
-  letter-spacing: -1px;
-  color: var(--nm-dark);
+.p-distribution .nm-btn--plein:hover {
+  background: #2a2a2d;
 }
-.p-distribution .nm-appel__para {
-  font-size: 18px;
-  line-height: 30px;
-  color: var(--nm-dark);
+.p-distribution .nm-btn--verre {
+  -webkit-backdrop-filter: blur(30.15px);
+  backdrop-filter: blur(30.15px);
+  background-image: linear-gradient(to right, rgba(196, 196, 194, 0.2), rgba(201, 201, 199, 0.2));
+  color: var(--nm-noir);
+}
+.p-distribution .nm-btn--verre:hover {
+  background-image: linear-gradient(to right, rgba(201, 201, 199, 0.3), rgba(167, 167, 166, 0.3));
+}
+.p-distribution .nm-btn--verre-sombre {
+  -webkit-backdrop-filter: blur(30.15px);
+  backdrop-filter: blur(30.15px);
+  background-image: linear-gradient(to right, rgba(196, 196, 194, 0.3), rgba(201, 201, 199, 0.3));
+  color: #ffffff;
+}
+.p-distribution .nm-btn--verre-sombre:hover {
+  background-image: linear-gradient(to right, rgba(201, 201, 199, 0.4), rgba(167, 167, 166, 0.4));
+}
+.p-distribution .nm-btn:focus-visible {
+  outline: 2px solid var(--nm-noir);
+  outline-offset: 2px;
 }
 
-/* ══ L'ÉCRAN CODÉ (Ecran.tsx), largeur naturelle 940 ════════════════════ */
-.p-distribution .nm-ecran {
-  overflow: hidden;
-  border: 1px solid var(--nm-filet);
-  border-radius: 6px;
+/* ── les cartes blanches (leur « section bg-white rounded ») ─────────
+   Leur marge latérale suit le défilement (0 → 32 px dès 1024, écrite
+   par CarteBlanche.tsx dans --nm-marge). */
+.p-distribution .nm-carte {
+  position: relative;
+  z-index: 10;
   background: #ffffff;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--nm-dark);
-  box-shadow: 0 20px 50px -24px rgba(12, 37, 66, 0.25);
+  margin-left: var(--nm-marge, 0px);
+  margin-right: var(--nm-marge, 0px);
 }
-.p-distribution .nm-ecran__barre-haut {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  height: 46px;
-  padding-inline: 16px;
-  border-bottom: 1px solid var(--nm-filet);
+
+/* ── les apparitions (leur `opacity 0, translateY 20` au premier regard) */
+.p-distribution [data-nm-apparait] {
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.p-distribution .nm-ecran__logo {
+.p-distribution [data-nm-apparait="attente"] {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.p-distribution [data-nm-apparait="attente"][data-nm-effet="fondu"] {
+  transform: none;
+}
+.p-distribution [data-nm-apparait="attente"][data-nm-effet="zoom"] {
+  transform: scale(0.95);
+}
+/* leurs filets verticaux qui se tracent (scaleY 0 → 1) */
+.p-distribution .nm-trait-v {
+  width: 1px;
+  height: 100%;
+  transform-origin: 50% 0;
+  transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.p-distribution .nm-trait-v[data-nm-apparait="attente"] {
+  opacity: 1;
+  transform: scaleY(0);
+}
+
+/* ── les bandeaux défilants (Infinite Slider d'ibelick, 21st.dev) ───── */
+.p-distribution .nm-mot {
+  font-family: var(--nm-sans);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* ── les lumières (leurs vidéos « parallel-processing », redessinées) ─
+   Des colonnes de lumière verticales, floues, qui respirent chacune à son
+   rythme, comme les fenêtres de la vidéo. */
+.p-distribution .nm-lumieres {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.p-distribution .nm-lumieres > i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--x);
+  width: var(--l);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, var(--a)) 45%,
+    rgba(255, 255, 255, var(--a)) 55%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(var(--f, 6px));
+  opacity: 0.35;
+  animation: nm-respire var(--d, 7s) ease-in-out var(--r, 0s) infinite alternate;
+}
+@keyframes nm-respire {
+  to {
+    opacity: 1;
+    transform: translateY(var(--y, 4%));
+  }
+}
+
+/* ── le visuel du hero (HerosVisuel.tsx) ─────────────────────────────── */
+.p-distribution .nm-hv {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #111113;
+  color: #ffffff;
+}
+.p-distribution .nm-hv__fond {
+  position: absolute;
+  inset: -12%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(26px) brightness(0.42) saturate(0.65);
+}
+.p-distribution .nm-hv__grain {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(80% 70% at 50% 50%, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.35));
+}
+.p-distribution .nm-hv__puce {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 700;
-}
-.p-distribution .nm-ecran__fil {
-  padding: 5px 10px;
-  border-radius: 4px;
-  background: var(--nm-fond);
-  font-weight: 600;
-}
-.p-distribution .nm-ecran__exemple {
-  padding: 3px 8px;
-  border: 1px dashed var(--nm-filet);
+  height: 30px;
+  padding: 0 12px 0 5px;
   border-radius: 999px;
-  color: var(--nm-grey);
-  font-size: 11px;
-}
-.p-distribution .nm-ecran__avatars {
-  display: flex;
-  margin-left: auto;
-}
-.p-distribution .nm-ecran__avatars > span {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  margin-left: -6px;
-  border: 2px solid #ffffff;
-  border-radius: 999px;
-  background: var(--nm-bleu-pale);
-  color: var(--nm-blue);
-  font-size: 9px;
-  font-weight: 700;
-}
-.p-distribution .nm-ecran__corps {
-  display: flex;
-}
-.p-distribution .nm-ecran__menu {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  gap: 2px;
-  width: 150px;
-  padding: 14px 10px;
-  border-right: 1px solid var(--nm-filet);
-  background: #fafbfc;
-}
-.p-distribution .nm-ecran__menu > span {
-  padding: 7px 10px;
-  border-radius: 4px;
-  color: var(--nm-grey);
-}
-.p-distribution .nm-ecran__menu > span.is-actif {
-  background: var(--nm-bleu-pale);
-  color: var(--nm-blue);
-  font-weight: 600;
-}
-.p-distribution .nm-ecran__contenu {
-  flex: 1;
-  min-width: 0;
-  padding: 16px 18px 18px;
-}
-.p-distribution .nm-ecran__sous-titre {
-  margin-bottom: 12px;
-  color: var(--nm-grey);
-}
-.p-distribution .nm-ecran__tuiles {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-.p-distribution .nm-ecran__tuile {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px;
-  border-radius: 4px;
-  background: var(--nm-blue);
-  color: #ffffff;
-}
-.p-distribution .nm-ecran__tuile-libelle,
-.p-distribution .nm-ecran__tuile-detail {
-  font-size: 11px;
-  opacity: 0.85;
-}
-.p-distribution .nm-ecran__tuile-valeur {
-  font-size: 24px;
-  line-height: 30px;
-  font-weight: 600;
-  letter-spacing: -0.5px;
-}
-.p-distribution .nm-ecran__carte {
-  margin-top: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--nm-filet);
-  border-radius: 4px;
-}
-.p-distribution .nm-ecran__carte-tete {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-.p-distribution .nm-ecran__legende {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--nm-grey);
-  font-weight: 400;
-}
-.p-distribution .nm-ecran__legende > i {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-left: 8px;
-  border-radius: 2px;
-}
-.p-distribution .nm-ecran__legende-barre {
-  background: var(--nm-blue);
-}
-.p-distribution .nm-ecran__legende-courbe {
-  background: var(--nm-jaune-appel);
-}
-.p-distribution .nm-ecran__svg {
-  display: block;
-  width: 100%;
-  height: 150px;
-}
-.p-distribution .nm-ecran__grille {
-  stroke: var(--nm-fond);
-  stroke-width: 1;
-}
-.p-distribution .nm-ecran__barre {
-  fill: var(--nm-blue);
-  opacity: 0.9;
-}
-.p-distribution .nm-ecran__courbe {
-  fill: none;
-  stroke: var(--nm-jaune-appel);
-  stroke-width: 2.5;
-  stroke-linejoin: round;
-}
-.p-distribution .nm-ecran__point {
-  fill: #ffffff;
-  stroke: var(--nm-jaune-appel);
-  stroke-width: 2;
-}
-.p-distribution .nm-ecran__table {
-  width: 100%;
-  margin-top: 12px;
-  border-collapse: collapse;
-}
-.p-distribution .nm-ecran__table th {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--nm-filet);
-  color: var(--nm-grey);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-family: var(--nm-mono);
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-align: left;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-.p-distribution .nm-ecran__table td {
-  padding: 8px;
-  border-bottom: 1px solid var(--nm-fond);
   white-space: nowrap;
 }
-.p-distribution .nm-ecran__table td:last-child,
-.p-distribution .nm-ecran__table th:last-child {
-  text-align: right;
-  font-weight: 600;
-}
-.p-distribution .nm-ecran__decision {
-  display: inline-block;
-  padding: 2px 8px;
+.p-distribution .nm-hv__pastille {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
   border-radius: 999px;
-  background: var(--nm-bleu-pale);
-  color: var(--nm-blue);
-  font-size: 11px;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--nm-noir);
 }
-
-/* ══ PALIERS DE LA RÉFÉRENCE ════════════════════════════════════════════ */
-@media screen and (max-width: 991px) {
-  .p-distribution .nm-heros {
-    height: 630px;
-  }
-  .p-distribution .nm-heros__dedans {
-    padding-top: 30px;
-  }
-  .p-distribution .nm-heros__image {
-    width: calc(100% - 264px);
-    margin-left: 264px;
-  }
-  .p-distribution .nm-atouts__rangee {
-    flex-direction: column;
-  }
-  .p-distribution .nm-atout {
-    width: 100%;
-    padding-inline: 30px;
-  }
-  .p-distribution .nm-atout:first-child {
-    border-right: 0;
-  }
-  .p-distribution .nm-atout__image {
-    padding-block: 24px;
-  }
-  .p-distribution .nm-garanties__dedans {
-    padding-block: 44px;
-  }
-  .p-distribution .nm-garanties__grille {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 24px;
-  }
-  .p-distribution .nm-garanties__sep {
-    display: none;
-  }
-  .p-distribution .nm-modules__cadre {
-    padding-inline: 24px;
-  }
-  .p-distribution .nm-tabs__lien {
-    width: 100%;
-  }
-  .p-distribution .nm-tabs__menu {
-    width: 100%;
-  }
-  .p-distribution .nm-tabs__volet {
-    margin-bottom: 50px;
-  }
-  .p-distribution .nm-module {
-    position: static;
-    width: 100%;
-    margin-top: 20px;
-  }
-  .p-distribution .nm-cas {
-    padding: 36px 30px;
-  }
-  .p-distribution .nm-cas__tete {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 12px;
-  }
-  .p-distribution .nm-cas__marque {
-    height: auto;
-    margin-bottom: 16px;
-  }
-  .p-distribution .nm-cas__milieu {
-    margin-block: 12px 30px;
-  }
-  .p-distribution .nm-cas__vide {
-    display: none;
-  }
-  .p-distribution .nm-cas__citation {
-    height: auto;
-  }
-  .p-distribution .nm-cas__chiffres {
-    flex-direction: column;
-    margin-top: 30px;
-  }
-  .p-distribution .nm-appel__dedans {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-block: 0;
-    padding-block: 44px;
-  }
-  .p-distribution .nm-appel__image {
-    width: 100%;
-    max-width: 560px;
-    margin: 0 0 30px;
-  }
-  .p-distribution .nm-appel__titre {
-    font-size: 44px;
-  }
-  /* le motif descend sous le bouton au lieu de passer sous le texte */
-  .p-distribution .nm-appel {
-    padding-bottom: 150px;
-  }
-  .p-distribution .nm-appel__motif {
-    width: 300px;
+.p-distribution .nm-hv__fil {
+  height: 1px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.05));
+}
+.p-distribution .nm-hv__liste {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+}
+.p-distribution .nm-hv__piste {
+  animation: nm-liste var(--nm-duree, 36s) linear infinite;
+}
+.p-distribution .nm-hv__piste > p {
+  height: var(--nm-ligne, 21px);
+  font-family: var(--nm-serif);
+  font-size: var(--nm-taille, 15px);
+  line-height: var(--nm-ligne, 21px);
+  white-space: nowrap;
+}
+.p-distribution .nm-hv__calque--terne {
+  color: rgba(255, 255, 255, 0.34);
+}
+.p-distribution .nm-hv__calque--vif {
+  position: absolute;
+  inset: 0;
+  color: #ffffff;
+  clip-path: inset(calc(50% - var(--nm-ligne, 21px) / 2) 0 calc(50% - var(--nm-ligne, 21px) / 2) 0);
+}
+@keyframes nm-liste {
+  to {
+    transform: translateY(-50%);
   }
 }
 
-@media screen and (max-width: 767px) {
-  .p-distribution .nm-heros__titre {
-    font-size: 72px;
-    line-height: 72px;
-    letter-spacing: -2px;
-  }
-  .p-distribution .nm-heros__chapo {
-    max-width: none;
-  }
-  .p-distribution .nm-heros__image {
-    width: 100%;
-    margin-top: 32px;
-    margin-left: 0;
-  }
-  .p-distribution .nm-heros__cta > .nm-bouton {
-    width: 100%;
-    height: 51px;
-  }
-  .p-distribution .nm-atout__para {
-    font-size: 15px;
-    line-height: 24px;
-  }
-  .p-distribution .nm-t52 {
-    font-size: 44px;
-    line-height: 1.3;
-  }
-  .p-distribution .nm-module__texte {
-    font-size: 15px;
-    line-height: 20px;
-  }
-  .p-distribution .nm-tabs__lien {
-    padding-inline: 12px;
-    font-size: 12px;
-    line-height: 18px;
-  }
-  .p-distribution .nm-cas {
-    padding-inline: 24px;
-  }
-  .p-distribution .nm-appel__image {
-    max-width: none;
-  }
+/* ── les cartes « enseignes » (leur « Solutions designed for… ») ───── */
+.p-distribution .nm-enseigne .nm-enseigne__voile {
+  transition: all 300ms;
+}
+.p-distribution .nm-enseigne:hover .nm-enseigne__voile {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.p-distribution .nm-enseigne:hover .nm-enseigne__pastille {
+  opacity: 0;
+}
+.p-distribution .nm-enseigne:hover .nm-enseigne__nom {
+  opacity: 1;
 }
 
-@media screen and (max-width: 479px) {
-  .p-distribution .nm-heros {
-    height: 520px;
+/* ── le carré de la méthode et le volume des étapes (Methode.tsx) ──── */
+.p-distribution .nm-flotte {
+  animation: nm-flotte 6s ease-in-out infinite alternate;
+}
+@keyframes nm-flotte {
+  to {
+    transform: translate3d(0, -8px, 0);
   }
-  .p-distribution .nm-heros__dedans {
-    padding: 21px 20px 20px;
-  }
-  .p-distribution .nm-heros__titre {
-    margin-top: 0;
-    font-size: 42px;
-    line-height: 44px;
-    letter-spacing: -1.5px;
-  }
-  .p-distribution .nm-heros__chapo {
-    font-size: 15px;
-    line-height: 24px;
-  }
-  .p-distribution .nm-bandeau {
-    height: 88px;
-  }
-  .p-distribution .nm-atout,
-  .p-distribution .nm-atout:first-child {
-    padding-inline: 20px;
-  }
-  .p-distribution .nm-atout__texte {
-    margin-top: 24px;
-    margin-bottom: 16px;
-  }
-  .p-distribution .nm-atout__titre {
-    font-size: 28px;
-    line-height: 36px;
-  }
-  .p-distribution .nm-atout__image {
-    padding-top: 0;
-  }
-  .p-distribution .nm-souligne {
-    font-size: 13px;
-  }
-  .p-distribution .nm-garanties {
-    padding-inline: 20px;
-  }
-  .p-distribution .nm-garanties__dedans {
-    padding-block: 30px;
-  }
-  .p-distribution .nm-garanties__grille {
-    gap: 0;
-  }
-  .p-distribution .nm-garanties__fait {
-    align-items: center;
-    height: 100px;
-    text-align: center;
-  }
-  .p-distribution .nm-garanties__libelle {
-    font-size: 12px;
-    line-height: 16px;
-  }
-  .p-distribution .nm-t32 {
-    letter-spacing: -0.5px;
-  }
-  .p-distribution .nm-t52 {
-    font-size: 32px;
-  }
-  .p-distribution .nm-modules__cadre {
-    margin-top: 20px;
-    padding-inline: 20px;
-  }
-  .p-distribution .nm-tabs__menu {
-    flex-direction: column;
-  }
-  .p-distribution .nm-tabs__lien {
-    margin-left: 0;
-    margin-bottom: -1px;
-  }
-  .p-distribution .nm-tabs__volet {
-    margin-top: 20px;
-    margin-bottom: 30px;
-  }
-  .p-distribution .nm-module {
-    padding: 20px;
-  }
-  .p-distribution .nm-cas {
-    padding: 24px 20px;
-  }
-  .p-distribution .nm-cas__commandes {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 24px;
-    margin-top: 36px;
-  }
-  .p-distribution .nm-cas__commandes > .nm-bouton {
-    width: 100%;
-  }
-  .p-distribution .nm-cas__fleches {
-    justify-content: center;
-  }
-  .p-distribution .nm-appel {
-    padding-inline: 20px;
-  }
-  .p-distribution .nm-appel__titre {
-    margin-bottom: 0;
-    font-size: 32px;
-    line-height: 36px;
-  }
-  .p-distribution .nm-appel__para {
-    font-size: 16px;
-    line-height: 24px;
-  }
-  .p-distribution .nm-bouton--appel {
-    width: 100%;
-  }
+}
+.p-distribution .nm-pile {
+  perspective: 1400px;
+}
+.p-distribution .nm-pile > div {
+  transform-style: preserve-3d;
+  transform: rotateX(58deg) rotateZ(-38deg);
+}
+/* leur volume est lavande et translucide sur le blanc ; ici gris d'Omega,
+   assez dense pour se lire sur la carte blanche, et l'étape active en noir */
+.p-distribution .nm-pile__plaque {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #efefed, #d7d7d4);
+  box-shadow:
+    0 0 0 1px rgba(10, 10, 10, 0.08),
+    0 34px 60px -26px rgba(10, 10, 10, 0.4);
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 600ms, background 600ms;
+}
+.p-distribution .nm-pile__plaque.is-actif {
+  background: linear-gradient(135deg, #2c2c30, #0a0a0a);
+}
+.p-distribution .nm-pile__plaque.is-actif > span {
+  color: #ffffff;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .p-distribution .nm-bandeau__piste {
+  .p-distribution [data-nm-apparait],
+  .p-distribution .nm-trait-v {
+    transition: none;
+  }
+  .p-distribution .nm-lumieres > i,
+  .p-distribution .nm-hv__piste,
+  .p-distribution .nm-flotte {
     animation: none;
   }
-  .p-distribution .nm-cas__piste,
-  .p-distribution .nm-bouton {
-    transition: none;
+}
+
+/* ── compléments : bouton gris de l'appel, fondu d'onglet, frise ────── */
+.p-distribution .nm-btn--gris {
+  background: var(--nm-g6);
+  color: #ffffff;
+}
+.p-distribution .nm-btn--gris:hover {
+  background: #4a4a48;
+}
+.p-distribution .nm-fondu-entree {
+  animation: nm-fondu 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes nm-fondu {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.p-distribution .nm-frise {
+  width: 0;
+  animation: nm-frise 7.2s linear infinite;
+}
+@keyframes nm-frise {
+  0% {
+    width: 0;
+  }
+  16%,
+  100% {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-distribution .nm-fondu-entree,
+  .p-distribution .nm-frise {
+    animation: none;
+    width: 100%;
   }
 }
