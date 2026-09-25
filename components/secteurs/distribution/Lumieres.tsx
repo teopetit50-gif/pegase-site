@@ -31,9 +31,9 @@ const PANNEAUX: Panneau[] = [
 ];
 
 
-/* la teinte des barres, en triplet RVB : bleu glacier sur le cobalt, vert
-   d'eau sur le jade (leur lavande sur l'orange) */
-const TEINTES = { bleu: "214 226 255", vert: "204 240 226" };
+/* la teinte des barres, en triplet RVB : bleu glacier sur le bleu nuit,
+   gris clair sur la nuit (leur lavande sur l'orange) */
+const TEINTES = { bleu: "205 218 250", gris: "224 224 228" };
 
 export default function Lumieres({
   fond,

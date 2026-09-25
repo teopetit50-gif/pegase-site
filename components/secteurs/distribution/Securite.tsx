@@ -8,7 +8,7 @@ import { AUDIT, ENSEIGNES, SECURITE } from "./textes";
    « Solutions designed for your organization. »), relevé hydraté.
    Leurs pastilles de certification (images SOC 2, HIPAA…) deviennent des
    pictogrammes au trait dans un anneau, même taille (48 / 56 px) ; leur
-   carte vert sombre (#2c3827) devient le jade de la page. Les cartes
+   carte vert sombre (#2c3827) devient la nuit du site. Les cartes
    montrent des enseignes françaises (25/09, voir textes.ts) : photos
    Wikimedia Commons sans le zoom ×1,25 de la référence, qui coupait les
    logos, et cadrées une à une ; crédits sous les cartes.

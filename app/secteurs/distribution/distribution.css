@@ -23,13 +23,17 @@
    sombres (noir #08090c et nuit #17171a jusque-là) prennent deux couleurs
    profondes, tirées du ciel et de la menthe d'Omega (--sky #67caf2,
    --mint #2fe6a8), à la même clarté que les leurs :
+   Puis, le même jour : « bleu et vert ensemble ça va pas ; garde le bleu,
+   pas le vert, mais il est un peu trop pétant » et « remets du classique »
+   pour le vert. Le cobalt #1f3f8f descend à un bleu nuit sourd, le jade
+   redevient la nuit classique du site :
    référence                      ici
-   concurrence-orange #aa412a  →  --nm-bande    #1f3f8f  (cobalt)
-   concurrence-blue   #083241  →  --nm-bande-2  #0e3a33  (jade)
-   concurrence-green  #2c3827  →  --nm-sombre   #0e3a33  (carte sécurité)
+   concurrence-orange #aa412a  →  --nm-bande    #1c2d57  (bleu nuit)
+   concurrence-blue   #083241  →  --nm-bande-2  #17171a  (la nuit de /tarifs)
+   concurrence-green  #2c3827  →  --nm-sombre   #17171a  (carte sécurité)
    concurrence-black  #100f0f  →  --nm-noir     #0a0a0a
-   lavande des lumières        →  bleu glacier sur le cobalt, vert d'eau
-                                  sur le jade (--nm-lum)
+   lavande des lumières        →  bleu glacier sur le bleu, gris clair
+                                  sur la nuit (--nm-lum)
    warm-gray-1…6 (gris chauds) →  gris neutres, même clarté un à un
    linework orange / bleu      →  blanc à 16 % / 14 %
    Le bouton plein orange devient noir. Les vidéos de lumière des deux
@@ -47,9 +51,9 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 .p-distribution {
-  --nm-bande: #1f3f8f;
-  --nm-bande-2: #0e3a33;
-  --nm-sombre: #0e3a33;
+  --nm-bande: #1c2d57;
+  --nm-bande-2: #17171a;
+  --nm-sombre: #17171a;
   --nm-noir: #0a0a0a;
   --nm-g1: #f2f2f0;
   --nm-g2: #dcdcd9;

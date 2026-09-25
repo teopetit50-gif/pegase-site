@@ -114,8 +114,11 @@ export const SECURITE = {
 /* 25/09 — Teo : « à la place des photos, mets des enseignes françaises
    pour chaque secteur, Mr Bricolage pour le bricolage… ; c'est légal tant
    qu'on ne dit pas qu'on travaille avec eux, et j'ai l'autorisation des
-   magasins de chaque secteur en Guadeloupe ». Photos Wikimedia Commons
-   (licences libres, crédits sous les cartes et dans CREDITS.txt) ; la
+   magasins de chaque secteur en Guadeloupe ». Puis : « à part Bricolage,
+   ces photos ne sont pas professionnelles » — Carrefour, Conforama et
+   Decathlon (Commons) remplacés par Monoprix, Fnac et Galeries Lafayette
+   (Pexels, photos pro en portrait ; le gros plan Decathlon, en paysage,
+   coupait le logo). Crédits sous les cartes et dans CREDITS.txt ; la
    ligne du pied précise « à titre d'illustration ». `cadrage` : la
    position de la photo dans la carte, pour garder le logo entier ; `zoom`
    (ancré en bas) remonte le logo au-dessus de l'étiquette centrale. */
@@ -123,14 +126,14 @@ export const ENSEIGNES = {
   titre: "Pensé pour chaque enseigne du groupe.",
   cartes: [
     { nom: "Mr.Bricolage", secteur: "Bricolage", image: "/secteurs-distribution/enseigne-mrbricolage.jpg", cadrage: "60% 40%", zoom: 1.15 },
-    { nom: "Carrefour", secteur: "Alimentaire", image: "/secteurs-distribution/enseigne-carrefour.jpg", cadrage: "47% 50%", zoom: 1.18 },
-    { nom: "Conforama", secteur: "Maison", image: "/secteurs-distribution/enseigne-conforama.jpg", cadrage: "35% 50%", zoom: 1 },
-    { nom: "Decathlon", secteur: "Sport", image: "/secteurs-distribution/enseigne-decathlon.jpg", cadrage: "22% 40%", zoom: 1 },
+    { nom: "Monoprix", secteur: "Alimentaire", image: "/secteurs-distribution/enseigne-monoprix.jpg", cadrage: "50% 45%", zoom: 1 },
+    { nom: "Fnac", secteur: "Électroménager et culture", image: "/secteurs-distribution/enseigne-fnac.jpg", cadrage: "50% 40%", zoom: 1 },
+    { nom: "Galeries Lafayette", secteur: "Grands magasins", image: "/secteurs-distribution/enseigne-galeries-lafayette.jpg", cadrage: "50% 30%", zoom: 1 },
   ],
   pied: "Votre enseigne n'est pas dans la liste ? Namolu sert la plupart des magasins d'un groupe.",
   lien: "Parlons-en.",
   mention:
-    "Enseignes citées à titre d'illustration, sans lien commercial. Photos Wikimedia Commons : Micki (CC BY-SA 3.0), GD13 (CC BY 4.0), Tabl-trai et Chabe01 (CC BY-SA 4.0).",
+    "Enseignes citées à titre d'illustration, sans lien commercial. Photos : Micki, Wikimedia Commons (CC BY-SA 3.0) ; Mathias Reding et Zak H, Pexels.",
 };
 
 /* leur « Digital Residency » : la méthode, en trois temps */
