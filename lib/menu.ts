@@ -249,6 +249,23 @@ export const GROUPES = MENU.map((r, rang) => ({
 /* Cinq rangées, pas onze : le pied enchaîne sa cascade derrière elles. */
 export const NB_RANGEES = GROUPES.length;
 
+/* 25/09 — un panneau à plusieurs colonnes (« Nos offres ») : les entrées
+   portent le titre de leur colonne, et celles d'une même colonne se
+   suivent. On les regroupe dans l'ordre de la liste. Aucune entrée
+   titrée : `null`, le panneau garde sa géométrie d'origine. Partagé par
+   le bandeau (MenuPrincipal) et le dépli du téléphone (Header). */
+export function enColonnes(entrees: Entree[] = []) {
+  if (!entrees.some((e) => e.colonne)) return null;
+  const colonnes: { titre: string; entrees: Entree[] }[] = [];
+  for (const e of entrees) {
+    const titre = e.colonne ?? "";
+    const derniere = colonnes[colonnes.length - 1];
+    if (derniere && derniere.titre === titre) derniere.entrees.push(e);
+    else colonnes.push({ titre, entrees: [e] });
+  }
+  return colonnes;
+}
+
 export function rubriqueCourante(pathname: string): string | null {
   for (const r of RANGEES) {
     for (const e of r.entrees) {

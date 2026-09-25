@@ -12,7 +12,12 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { MENU, rubriqueCourante, type Entree } from "@/lib/menu";
+import {
+  MENU,
+  enColonnes,
+  rubriqueCourante,
+  type Entree,
+} from "@/lib/menu";
 import "./menu-principal.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -48,22 +53,6 @@ import "./menu-principal.css";
    marque, calqué sur la case vedette de la démo d'origine, qui donne au
    panneau un point d'entrée au lieu d'une liste nue de cinq lignes.
    ══════════════════════════════════════════════════════════════════════ */
-
-/* 25/09 — un panneau à plusieurs colonnes (« Nos offres ») : les entrées
-   portent le titre de leur colonne, et celles d'une même colonne se
-   suivent. On les regroupe dans l'ordre de la liste. Aucune entrée
-   titrée : `null`, le panneau garde sa géométrie d'origine. */
-function enColonnes(entrees: Entree[] = []) {
-  if (!entrees.some((e) => e.colonne)) return null;
-  const colonnes: { titre: string; entrees: Entree[] }[] = [];
-  for (const e of entrees) {
-    const titre = e.colonne ?? "";
-    const derniere = colonnes[colonnes.length - 1];
-    if (derniere && derniere.titre === titre) derniere.entrees.push(e);
-    else colonnes.push({ titre, entrees: [e] });
-  }
-  return colonnes;
-}
 
 function Rangee({ entree, pathname }: { entree: Entree; pathname: string }) {
   return (

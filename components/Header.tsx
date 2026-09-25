@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import MenuPrincipal from "./MenuPrincipal";
-import { GROUPES, NB_RANGEES } from "@/lib/menu";
+import { GROUPES, NB_RANGEES, enColonnes, type Entree } from "@/lib/menu";
 
 /* 22/07 — le pégase (SVG d'après l'icône « pegasus » de Skoll, game-icons.net,
    CC BY 3.0) est retiré du header ET du footer à la demande de Teo. Le crédit
@@ -605,19 +605,23 @@ export default function Header() {
                     hidden={!ouvert}
                     className="pb-2"
                   >
-                    {g.entrees.map((e, i) => (
-                      <Fragment key={e.href}>
-                        {/* 25/09 — « Nos offres » range ses entrées en deux
-                          colonnes titrées ; au doigt, le titre devient un
-                          intertitre, posé avant la première entrée de sa
-                          colonne. Pas un lien, pas une cible tactile. */}
-                        {e.colonne &&
-                          e.colonne !== g.entrees[i - 1]?.colonne && (
-                            <p className="pt-3 pb-1 pl-3.5 text-[12px] font-medium tracking-[0.01em] text-[#0f1013]/45">
-                              {e.colonne}
-                            </p>
-                          )}
+                    {/* 25/09 (Teo : « ça se déplie mal ») — « Nos offres »
+                        range ses entrées en deux familles titrées. Empilées,
+                        elles faisaient treize rangées : le dépli mesurait
+                        516 px et poussait les quatre autres rubriques sous
+                        le bas de l'écran, même sur le plus grand iPhone. Au
+                        doigt comme au bandeau, les deux familles se posent
+                        donc CÔTE À CÔTE ; la vedette (« Toutes les offres »)
+                        garde sa rangée pleine au-dessus. Hauteur tactile
+                        inchangée (44 px) : c'est la pile qui raccourcit. */}
+                    {(() => {
+                      const lien = (
+                        e: Entree,
+                        retrait: boolean,
+                        vedette = false,
+                      ) => (
                         <Link
+                          key={e.href}
                           href={e.href}
                           onClick={() => setOpen(false)}
                           tabIndex={ouvert && open ? undefined : -1}
@@ -625,12 +629,72 @@ export default function Header() {
                            plus petit, encre diluée. C'est ce qui fait lire la
                            pile comme un dépli et non comme dix liens de même
                            poids. Hauteur 44 px — le minimum tactile. */
-                          className="flex h-11 items-center pl-3.5 text-[16px] font-normal leading-[1.3] tracking-[-0.012em] text-[#0f1013]/65 transition-colors hover:text-[#0f1013] sm:text-[17px]"
+                          className={`flex min-h-11 items-center gap-1.5 py-1 text-[16px] font-normal leading-[1.25] tracking-[-0.012em] transition-colors sm:text-[17px] ${
+                            vedette
+                              ? "text-[#0f1013] hover:text-[#0f1013]/55"
+                              : "text-[#0f1013]/65 hover:text-[#0f1013]"
+                          } ${retrait ? "pl-3.5" : ""}`}
                         >
                           {e.label}
+                          {vedette && (
+                            <span aria-hidden className="text-[#0f1013]/40">
+                              →
+                            </span>
+                          )}
                         </Link>
-                      </Fragment>
-                    ))}
+                      );
+                      const colonnes = enColonnes(
+                        g.entrees.filter((e) => e.colonne),
+                      );
+                      const libres = g.entrees.filter((e) => !e.colonne);
+                      if (!colonnes) return libres.map((e) => lien(e, true));
+
+                      /* La vedette prend la case vide sous la colonne la
+                         plus courte (5 offres face à 6 métiers) : une
+                         rangée pleine de moins. Colonnes à égalité, elle
+                         garde sa rangée au-dessus. Placement explicite par
+                         case : l'ordre du DOM reste colonne par colonne,
+                         celui qu'on lit, et les intertitres partagent la
+                         même rangée même quand l'un passe à la ligne. */
+                      const haut = Math.max(
+                        ...colonnes.map((c) => c.entrees.length),
+                      );
+                      const hote = colonnes.findIndex(
+                        (c) => c.entrees.length + libres.length <= haut,
+                      );
+                      return (
+                        <>
+                          {hote < 0 && libres.map((e) => lien(e, true))}
+                          <div className="grid grid-cols-2 gap-x-4 pl-3.5">
+                            {colonnes.flatMap((c, ci) => [
+                              /* le titre de colonne du bandeau, en
+                                 intertitre : pas un lien, pas une cible
+                                 tactile */
+                              <p
+                                key={c.titre}
+                                style={{ gridColumn: ci + 1, gridRow: 1 }}
+                                className="self-end pt-3 pb-1 text-[12px] font-medium leading-[1.3] tracking-[0.01em] text-[#0f1013]/45"
+                              >
+                                {c.titre}
+                              </p>,
+                              ...[
+                                ...c.entrees.map((e) => ({ e, v: false })),
+                                ...(ci === hote
+                                  ? libres.map((e) => ({ e, v: true }))
+                                  : []),
+                              ].map(({ e, v }, ri) => (
+                                <div
+                                  key={e.href}
+                                  style={{ gridColumn: ci + 1, gridRow: ri + 2 }}
+                                >
+                                  {lien(e, false, v)}
+                                </div>
+                              )),
+                            ])}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               );
