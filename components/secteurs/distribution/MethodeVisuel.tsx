@@ -1,88 +1,95 @@
-/* ══ le carré de la méthode ════════════════════════════════════════════
-   Chez eux, trois VIDÉOS carrées (virtual-patients.webm…) : des cartes de
-   verre gris qui flottent sur le bleu de la bande, avec une bulle de
-   texte et un portrait. Même matière ici (verre blanc à 8-14 %, filet
-   à 16 %, flou), en balisage, avec nos trois temps : lire, calculer,
-   proposer. Données d'exemple. */
-function Verre({ className = "", style, children }: { className?: string; style?: React.CSSProperties; children: React.ReactNode }) {
-  return (
-    <div
-      style={style}
-      className={`absolute rounded-[14px] border border-white/15 bg-white/[0.09] p-4 text-white backdrop-blur-md shadow-[0_30px_60px_-30px_rgba(0,0,0,0.6)] ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
+"use client";
 
-const mono = "font-[family-name:var(--nm-mono)] text-[9px] uppercase tracking-[0.08em] text-white/60";
+import { useEffect, useState } from "react";
 
-export function VisuelLire() {
-  return (
-    <div className="absolute inset-0">
-      {[
-        ["ERP", "Ventes et stocks · 4 magasins", "left-[12%] top-[16%] w-[62%]", "0s"],
-        ["Caisses", "Tickets d'hier, 7 h 00", "left-[24%] top-[40%] w-[60%]", "-2s"],
-        ["Transitaire", "Conteneur 40 pieds · départ 8/10", "left-[16%] top-[64%] w-[66%]", "-4s"],
-      ].map(([t, s, pos, d]) => (
-        <Verre key={t} className={`nm-flotte ${pos}`} style={{ animationDelay: d }}>
-          <div className="flex items-center gap-3">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/90 text-[11px] font-semibold text-[#0a0a0a]">{t[0]}</span>
-            <span className="flex flex-col">
-              <span className="text-[13px] font-semibold">{t}</span>
-              <span className={mono}>{s}</span>
-            </span>
-          </div>
-        </Verre>
-      ))}
-    </div>
-  );
-}
+/* ══ le carré de la méthode : un carrousel de cartes de verre ═════════
+   Chez eux (residency/virtual-patients.webm, décomposée image par image
+   le 24/09) : des cartes de VERRE dépoli en portrait, en perspective
+   comme un coverflow. Celle de face est nette ; deux autres attendent de
+   biais, à gauche et à droite, plus petites, floues et plus sombres.
+   Toutes les 3,6 s environ, la carte de face pivote et part en arrière à
+   gauche pendant que celle de droite vient de face. Sur chaque carte :
+   une grande phrase entre guillemets (blanc, sans-serif), un rond en bas
+   à gauche (leur portrait), deux lignes mono en bas à gauche (nom, rôle),
+   deux à droite (âge, sexe).
+   Ici, même carte et même mouvement ; pas de personne (règles maison) :
+   la phrase est ce que Namolu lit, calcule ou propose ; le rond porte le
+   code du magasin ; les lignes mono, le magasin, le rayon et l'échéance.
+   Données d'exemple. Un jeu de cartes par onglet (Lire, Calculer,
+   Proposer). */
 
-export function VisuelCalculer() {
-  const barres = [9, 8, 8, 7, 6, 6, 5, 4, 4, 3, 3, 2];
+type Carte = { phrase: string; code: string; g1: string; g2: string; d1: string; d2: string };
+
+const JEUX: Carte[][] = [
+  [
+    { phrase: "« 214 références dans le conteneur du 8 octobre, trois fournisseurs. »", code: "AG", g1: "Achats groupe", g2: "ERP · commandes", d1: "40 pieds", d2: "J-6" },
+    { phrase: "« 38 ventilateurs vendus hier, 22 semaines de stock au magasin 1. »", code: "M1", g1: "Magasin 1", g2: "Caisses · tickets", d1: "Rayon 12", d2: "7 h 00" },
+    { phrase: "« Le navire du 8 octobre arrive le 3 novembre, dédouanement compris. »", code: "TR", g1: "Transitaire", g2: "Fichier d'arrivée", d1: "26 jours", d2: "Mer" },
+    { phrase: "« Vigilance orange au sud de l'île. Bâches et contreplaqué en tête. »", code: "MF", g1: "Vigilance météo", g2: "Saison cyclonique", d1: "Juin-nov.", d2: "Alerte" },
+  ],
+  [
+    { phrase: "« Bâche 4 × 5 m : rupture le 14 novembre si rien n'est ajouté. »", code: "M2", g1: "Magasin 2", g2: "Couverture 3 sem.", d1: "−480 u.", d2: "14/11" },
+    { phrase: "« Le conteneur est rempli à 86 %. Il reste la place de 480 bâches. »", code: "40", g1: "Conteneur 40 pieds", g2: "Départ Le Havre", d1: "86 %", d2: "J-6" },
+    { phrase: "« 60 disjoncteurs arriveraient après la rupture : l'avion s'impose. »", code: "AV", g1: "Arbitrage avion", g2: "Bouclier qualité-prix", d1: "60 u.", d2: "Lundi" },
+    { phrase: "« Magasin 1 : 22 semaines de stock. Magasin 3 : trois. Écart à combler. »", code: "M3", g1: "Deux îles", g2: "Ventilateur colonne", d1: "140 u.", d2: "8/10" },
+  ],
+  [
+    { phrase: "« Ajouter 480 bâches au conteneur du 8 octobre. »", code: "1", g1: "Décision 1 sur 3", g2: "Direction des achats", d1: "À valider", d2: "7 h 00" },
+    { phrase: "« Faire venir 60 disjoncteurs par avion avant lundi. »", code: "2", g1: "Décision 2 sur 3", g2: "Bouclier qualité-prix", d1: "À valider", d2: "7 h 00" },
+    { phrase: "« Transférer 140 ventilateurs par le caboteur du 8 octobre. »", code: "3", g1: "Décision 3 sur 3", g2: "Martinique → Guadeloupe", d1: "À valider", d2: "7 h 00" },
+    { phrase: "« Trois décisions validées. Le journal garde la trace de chacune. »", code: "✓", g1: "Journal", g2: "Direction des achats", d1: "Validé", d2: "7 h 12" },
+  ],
+];
+
+/* position relative à la carte de face : −1 à gauche, 0 de face, 1 à
+   droite, 2 cachée derrière (elle revient par la droite) */
+const POSE: Record<number, React.CSSProperties> = {
+  [-1]: { transform: "translate3d(-58%, 0, -260px) rotateY(38deg)", filter: "blur(5px) brightness(0.55)", opacity: 0.9, zIndex: 1 },
+  0: { transform: "translate3d(0, 0, 0) rotateY(0deg)", filter: "blur(0px) brightness(1)", opacity: 1, zIndex: 3 },
+  1: { transform: "translate3d(58%, 0, -260px) rotateY(-38deg)", filter: "blur(5px) brightness(0.55)", opacity: 0.9, zIndex: 2 },
+  2: { transform: "translate3d(0, 0, -520px) rotateY(0deg)", filter: "blur(8px) brightness(0.4)", opacity: 0, zIndex: 0 },
+};
+
+function CarteVerre({ c, pose }: { c: Carte; pose: number }) {
   return (
-    <div className="absolute inset-0">
-      <Verre className="nm-flotte left-[10%] top-[18%] w-[80%]">
-        <p className={mono}>Couverture du stock · semaines</p>
-        <div className="mt-4 flex h-[120px] items-end gap-[6px]">
-          {barres.map((b, i) => (
-            <span key={i} className={`flex-1 rounded-[2px] ${b < 4 ? "bg-white" : "bg-white/35"}`} style={{ height: `${b * 11}%` }} />
-          ))}
+    <div className="nm-verre" style={POSE[pose]}>
+      <p className="nm-verre__phrase">{c.phrase}</p>
+      <div className="nm-verre__pied">
+        <span className="nm-verre__rond">{c.code}</span>
+        <div className="nm-verre__lignes">
+          <span>
+            {c.g1}
+            <br />
+            {c.g2}
+          </span>
+          <span className="text-right">
+            {c.d1}
+            <br />
+            {c.d2}
+          </span>
         </div>
-        <div className="mt-3 flex justify-between text-[11px] text-white/70">
-          <span>Délai de mer : 26 jours</span>
-          <span>Départ J-6</span>
-        </div>
-      </Verre>
-      <Verre className="nm-flotte left-[36%] top-[66%] w-[54%] !py-3">
-        <p className="text-[13px] font-semibold">Rupture le 14/11</p>
-        <p className={mono}>Bâche 4 × 5 m · tous magasins</p>
-      </Verre>
-    </div>
-  );
-}
-
-export function VisuelProposer() {
-  return (
-    <div className="absolute inset-0">
-      <Verre className="nm-flotte left-[9%] top-[14%] w-[82%]">
-        <div className="flex items-center justify-between border-b border-white/15 pb-3">
-          <span className="text-[13px] font-semibold">Point du matin</span>
-          <span className={mono}>7 h 00</span>
-        </div>
-        {["Ajouter 480 bâches au conteneur", "60 disjoncteurs par avion", "Transférer 140 ventilateurs"].map((d, i) => (
-          <div key={d} className="flex items-center gap-3 border-b border-white/10 py-3 last:border-0">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-white" style={{ opacity: 1 - i * 0.3 }} />
-            <span className="text-[13px]">{d}</span>
-          </div>
-        ))}
-      </Verre>
-      <div className="nm-flotte absolute left-[48%] top-[72%] rounded-full bg-white px-4 py-2 text-[12px] font-semibold text-[#0a0a0a]">
-        Valider les trois
       </div>
     </div>
   );
 }
 
-export const VISUELS_METHODE = [VisuelLire, VisuelCalculer, VisuelProposer];
+export function VisuelVerre({ jeu }: { jeu: number }) {
+  const cartes = JEUX[jeu];
+  const [face, setFace] = useState(0);
+  /* le composant est remonté à chaque onglet (key) : il repart de la
+     première carte sans remise à zéro ici */
+  useEffect(() => {
+    const id = window.setInterval(() => setFace((f) => (f + 1) % cartes.length), 3600);
+    return () => window.clearInterval(id);
+  }, [cartes.length]);
+  const n = cartes.length;
+  return (
+    <div className="nm-coverflow" aria-hidden>
+      {cartes.map((c, i) => {
+        let pose = (i - face + n) % n; // 0 face, 1 droite, 2 derrière, 3 = gauche
+        if (pose === n - 1) pose = -1;
+        return <CarteVerre key={i} c={c} pose={pose} />;
+      })}
+    </div>
+  );
+}

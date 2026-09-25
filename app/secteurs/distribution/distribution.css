@@ -26,7 +26,7 @@
    warm-gray-1…6 (gris chauds) →  gris neutres, même clarté un à un
    linework orange / bleu      →  blanc à 16 % / 14 %
    Le bouton plein orange devient noir. Les vidéos de lumière des deux
-   bandes (fichiers de la référence) sont redessinées (Lumieres.tsx, .nm-dalle).
+   bandes (fichiers de la référence) sont redessinées (Lumieres.tsx, .nm-barre).
 
    ── LES POLICES : CELLES DU SITE ─────────────────────────────────────
    Flecha S (serif sous licence) → Newsreader (app/_polices/serif.ts, déjà
@@ -287,14 +287,12 @@
 }
 
 /* ── les cartes blanches (leur « section bg-white rounded ») ─────────
-   Leur marge latérale suit le défilement (0 → 32 px dès 1024, écrite
-   par CarteBlanche.tsx dans --nm-marge). */
+   Leur marge latérale suit le défilement, par un ressort (0 → 32 px dès
+   1024) : elle est posée en style par CarteBlanche.tsx (motion). */
 .p-distribution .nm-carte {
   position: relative;
   z-index: 10;
   background: #ffffff;
-  margin-left: var(--nm-marge, 0px);
-  margin-right: var(--nm-marge, 0px);
 }
 
 /* ── les apparitions (leur `opacity 0, translateY 20` au premier regard) */
@@ -333,42 +331,78 @@
   white-space: nowrap;
 }
 
-/* ── les lumières (leurs vidéos « parallel-processing », redessinées) ─
-   Lumieres.tsx fait naître et mourir les dalles ; ici leur matière et
-   leur vie : entrée en fondu, palier, sortie en fondu, sur la durée de vie
-   de chaque dalle (animation-duration posée par le composant). */
-.p-distribution .nm-dalle {
+/* ── les lumières (Lumieres.tsx) : six panneaux, quatre barres chacun ─
+   Grille relevée sur leurs images : colonnes 1 / 1,25 / 1, deux rangées.
+   Chaque barre pousse depuis son bord (scaleY 0 → --m), tient, puis se
+   rétracte vers ce même bord ; pleine près du bord, fondue au bout. */
+.p-distribution .nm-barres {
   position: absolute;
-  opacity: 0;
-  animation: nm-dalle linear forwards;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  grid-template-rows: 1fr 1fr;
 }
-.p-distribution .nm-dalle--bas {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.16) 70%, rgba(255, 255, 255, 0.2));
+.p-distribution .nm-panneau {
+  position: relative;
+  display: flex;
 }
-.p-distribution .nm-dalle--haut {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.14) 70%, rgba(255, 255, 255, 0.18));
+.p-distribution .nm-barre {
+  flex: 1;
+  height: 100%;
+  transform: scaleY(0);
+  animation-name: nm-barre;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-iteration-count: infinite;
+  will-change: transform;
 }
-/* leur dalle lavande, pleine en bas : ici le gris très clair d'Omega */
-.p-distribution .nm-dalle--claire.nm-dalle--bas {
-  background: linear-gradient(to bottom, rgba(226, 226, 230, 0), rgba(226, 226, 230, 0.75) 55%, rgba(226, 226, 230, 0.85));
+.p-distribution .nm-barre--bas {
+  transform-origin: 50% 100%;
+  background: linear-gradient(to top, rgba(222, 222, 226, 0.95), rgba(222, 222, 226, 0.88) 50%, rgba(222, 222, 226, 0));
 }
-.p-distribution .nm-dalle--claire.nm-dalle--haut {
-  background: linear-gradient(to top, rgba(226, 226, 230, 0), rgba(226, 226, 230, 0.7) 55%, rgba(226, 226, 230, 0.8));
+.p-distribution .nm-barre--haut {
+  transform-origin: 50% 0;
+  background: linear-gradient(to bottom, rgba(222, 222, 226, 0.95), rgba(222, 222, 226, 0.88) 50%, rgba(222, 222, 226, 0));
 }
-.p-distribution .nm-dalle--trait {
-  width: 1px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
-}
-@keyframes nm-dalle {
+@keyframes nm-barre {
   0% {
-    opacity: 0;
+    transform: scaleY(0);
   }
-  18%,
-  72% {
-    opacity: 1;
+  40%,
+  60% {
+    transform: scaleY(var(--m));
   }
   100% {
+    transform: scaleY(0);
+  }
+}
+.p-distribution .nm-trait-lum {
+  position: absolute;
+  width: 1px;
+  height: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  animation: nm-trait 5.2s ease-in-out infinite;
+}
+.p-distribution .nm-trait-lum > b {
+  position: absolute;
+  left: 7px;
+  top: 38%;
+  font-family: var(--nm-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.7);
+}
+@keyframes nm-trait {
+  0%,
+  100% {
     opacity: 0;
+  }
+  30%,
+  70% {
+    opacity: 1;
   }
 }
 
@@ -542,7 +576,8 @@
   .p-distribution .nm-trait-v {
     transition: none;
   }
-  .p-distribution .nm-dalle,
+  .p-distribution .nm-barre,
+  .p-distribution .nm-trait-lum,
   .p-distribution .nm-hv__piste,
   .p-distribution .nm-flotte {
     animation: none;
@@ -584,5 +619,84 @@
   .p-distribution .nm-frise {
     animation: none;
     width: 100%;
+  }
+}
+
+/* ── le carrousel de verre de la méthode (MethodeVisuel.tsx) ─────────
+   Relevé sur leur vidéo : carte en portrait (≈ 0,84), rayon 10, verre
+   dépoli gris translucide avec une tache de lumière au centre, filet clair ;
+   phrase en blanc 16/1,35 ; rond de 34 px ; mono 8,5 px en capitales. */
+.p-distribution .nm-coverflow {
+  position: absolute;
+  inset: 0;
+  perspective: 1100px;
+  transform-style: preserve-3d;
+}
+.p-distribution .nm-verre {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46%;
+  aspect-ratio: 0.84;
+  margin-left: -23%;
+  margin-top: -27.4%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 7% 6.5% 6%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background:
+    radial-gradient(60% 45% at 55% 62%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(165deg, rgba(150, 150, 154, 0.62), rgba(96, 96, 100, 0.55));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  transition:
+    transform 1100ms cubic-bezier(0.65, 0, 0.35, 1),
+    filter 1100ms cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 900ms ease;
+  will-change: transform, filter;
+}
+.p-distribution .nm-verre__phrase {
+  font-family: var(--nm-sans);
+  font-size: clamp(11px, 3.6cqw, 16px);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+.p-distribution .nm-coverflow {
+  container-type: inline-size;
+}
+.p-distribution .nm-verre__pied {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.p-distribution .nm-verre__rond {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0a0a0a;
+  font-size: 11px;
+  font-weight: 700;
+}
+.p-distribution .nm-verre__lignes {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--nm-mono);
+  font-size: 8.5px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-distribution .nm-verre {
+    transition: none;
   }
 }

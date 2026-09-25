@@ -2,7 +2,7 @@
 
 import Apparait, { Filet } from "./Apparait";
 import { InfiniteSlider } from "./Defilant";
-import { VISUELS_METHODE } from "./MethodeVisuel";
+import { VisuelVerre } from "./MethodeVisuel";
 import { num, useOnglets } from "./Onglets";
 import { AUDIT, METHODE, SOURCES } from "./textes";
 
@@ -17,13 +17,9 @@ import { AUDIT, METHODE, SOURCES } from "./textes";
    bandeau d'intégrations, cellules de 120 × 90 : ici les sources lues. */
 function Visuel({ actif }: { actif: number }) {
   return (
-    <>
-      {VISUELS_METHODE.map((V, i) => (
-        <div key={i} className={`absolute inset-0 transition-opacity duration-500 ${i === actif ? "opacity-100" : "opacity-0"}`} aria-hidden>
-          <V />
-        </div>
-      ))}
-    </>
+    <div key={actif} className="absolute inset-0 nm-fondu-entree">
+      <VisuelVerre jeu={actif} />
+    </div>
   );
 }
 
