@@ -309,6 +309,11 @@ export const ERREURS: Record<string, string> = {
   creneau_requis: "Choisissez un créneau avant d'envoyer votre demande.",
   trop_de_demandes:
     "Trois demandes sont déjà enregistrées avec cette adresse cette semaine. Écrivez-nous directement en cas d'urgence.",
+  /* 25/09/2026 — audit sécurité : plafond global des demandes sans compte
+     dans reserver_audit (6 par heure, 20 par jour), contre un robot qui
+     changerait d'adresse à chaque essai pour prendre tout l'agenda. */
+  agenda_sature:
+    "Beaucoup de demandes arrivent en même temps. Réessayez dans une heure, ou écrivez-nous à contact@omegaai.fr.",
   champs_invalides: "Un des champs n'est pas valide. Vérifiez l'adresse e-mail notamment.",
   formule_inconnue: "Ce format n'existe plus. Rechargez la page.",
   modules_requis: "Choisissez au moins un poste avant de réserver l'installation.",

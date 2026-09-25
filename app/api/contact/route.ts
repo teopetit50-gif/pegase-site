@@ -1,4 +1,6 @@
+import { createHash } from "node:crypto";
 import { COURRIEL } from "@/lib/reservation";
+import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 /* ══════════════════════════════════════════════════════════════════════
    POST /api/contact — le formulaire du service client part par e-mail
@@ -45,6 +47,39 @@ function texte(v: unknown, max: number): string {
   return typeof v === "string" ? v.replace(/[\r\n]+/g, " ").trim().slice(0, max) : "";
 }
 
+/* 25/09/2026 — audit sécurité : sans limite, un robot pouvait envoyer ce
+   formulaire en boucle, noyer la boîte de l'agence et vider le quota du
+   service d'envoi, partagé avec les codes de connexion. Au plus 3 envois
+   par heure et par empreinte d'adresse IP, 20 par heure et 60 par jour au
+   total — compté en base (public.limiter_contact, migration
+   base-de-donnees/2026-09-25-securite-limites.sql) : un compteur en
+   mémoire se remettrait à zéro à chaque démarrage à froid.
+   L'IP n'est jamais stockée, seulement son empreinte, purgée après 48 h.
+   Sans réponse claire de la base (panne, migration annulée), on ENVOIE :
+   la limite arrête un robot, elle ne doit jamais faire taire un client
+   par accident. Refus → 429 : le formulaire affiche « réessayez dans un
+   instant, ou écrivez-nous » avec l'adresse, sans changement d'écran. */
+async function envoiAutorise(req: Request): Promise<boolean> {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "inconnue";
+  const empreinte = createHash("sha256").update(ip).digest("hex").slice(0, 32);
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/limiter_contact`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ p_cle: empreinte }),
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!r.ok) return true;
+    return (await r.json()) !== false;
+  } catch {
+    return true;
+  }
+}
+
 function echapper(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
@@ -89,7 +124,12 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, motif: "indisponible" }, { status: 503 });
   }
 
-  const qui = `${prenom} ${nom}${entreprise ? ` (${entreprise})` : ""}`;
+  if (!(await envoiAutorise(req))) {
+    console.warn("[contact] limite d'envoi atteinte : message refusé (", sujet, ")");
+    return Response.json({ ok: false, motif: "limite" }, { status: 429 });
+  }
+
+  const qui =`${prenom} ${nom}${entreprise ? ` (${entreprise})` : ""}`;
   const lignes = [
     `De : ${qui}`,
     `E-mail : ${email}`,
