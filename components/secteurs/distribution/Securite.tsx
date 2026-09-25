@@ -8,8 +8,10 @@ import { AUDIT, ENSEIGNES, SECURITE } from "./textes";
    « Solutions designed for your organization. »), relevé hydraté.
    Leurs pastilles de certification (images SOC 2, HIPAA…) deviennent des
    pictogrammes au trait dans un anneau, même taille (48 / 56 px) ; leur
-   carte vert sombre (#2c3827) devient le sombre d'Omega. Les photos des
-   cartes : Unsplash, crédits dans public/secteurs-distribution/CREDITS.txt.
+   carte vert sombre (#2c3827) devient le jade de la page. Les cartes
+   montrent des enseignes françaises (25/09, voir textes.ts) : photos
+   Wikimedia Commons sans le zoom ×1,25 de la référence, qui coupait les
+   logos, et cadrées une à une ; crédits sous les cartes.
    Sur la carte, au survol : le voile floute, la pastille s'efface et le nom
    reste seul au centre — comme chez eux. */
 const ICONES = [BookOpenCheck, Globe, LockKeyhole, ScrollText];
@@ -83,7 +85,13 @@ export default function Securite() {
                     style={{ width: "100%", aspectRatio: "360 / 500" }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={c.nom} loading="lazy" className="absolute inset-0 h-full w-full object-cover scale-125" src={c.image} />
+                    <img
+                      alt={`Magasin ${c.nom}, ${c.secteur.toLowerCase()}`}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover"
+                      style={{ objectPosition: c.cadrage }}
+                      src={c.image}
+                    />
                     <div className="absolute inset-0 bg-black/10" />
                     <div className="nm-enseigne__voile absolute inset-0 rounded-[20px]" />
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -112,6 +120,7 @@ export default function Securite() {
                   {ENSEIGNES.lien}
                 </a>
               </p>
+              <p className="text-center mt-3 nm-px-edge text-[11px] leading-[1.4] text-[var(--nm-g4)]">{ENSEIGNES.mention}</p>
             </Apparait>
           </section>
         </CarteBlanche>

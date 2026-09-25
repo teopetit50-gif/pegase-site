@@ -9,12 +9,13 @@
 
    Ce qui n'est pas repris, à dessein (règles maison) :
    • leurs logos clients (bandeau)            → les métiers des groupes ;
-   • leurs chiffres de résultat (10M+, 24x)    → des faits de conception ;
+   • leurs chiffres de résultat (10M+, 24x)    → de grands chiffres du secteur, sourcés ;
    • leurs témoignages signés                  → le problème de chaque module ;
    • leurs certifications (SOC 2, HIPAA)       → nos engagements écrits ;
    • leurs financeurs                          → les territoires servis ;
    • leurs articles de blog                    → les trois modules.
-   Aucun groupe nommé, aucun gain promis en pourcentage, aucun prix.
+   Aucun groupe nommé, aucun gain promis en pourcentage, aucun prix. Les
+   enseignes des cartes sont citées à titre d'illustration (voir ENSEIGNES).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const HEROS = {
@@ -57,12 +58,17 @@ export const DECISIONS = [
   "Avancer la commande de contreplaqué",
 ];
 
-/* leurs trois chiffres de résultat : des faits de conception */
+/* leurs trois chiffres de résultat (10M+, 24x, 100 %) : de GRANDS chiffres
+   vrais, ceux du secteur, sourcés sous la rangée. Teo, 25/09 : « eux c'est
+   des gros chiffres, nous ça fait amateur des petits chiffres » (3, 7 h,
+   0 avant). Espaces fines insécables dans les milliers. */
 export const CHIFFRES = [
-  { valeur: "3", libelle: "Modules sur un seul produit" },
-  { valeur: "7 h", libelle: "Le point du matin, chaque jour" },
-  { valeur: "0", libelle: "Écriture dans vos logiciels" },
+  { valeur: "34\u202f000", libelle: "Références dans un réseau de quatre magasins" },
+  { valeur: "2\u202f500", libelle: "Conteneurs importés chaque année par ce réseau" },
+  { valeur: "33\u202f%", libelle: "Du coût d'achat part en frais d'approche" },
 ];
+export const CHIFFRES_SOURCE =
+  "Réseau de bricolage à La Réunion : Le Moniteur, 2020. Frais d'approche en Martinique : Autorité de la concurrence, avis 26-A-01.";
 
 /* leurs trois témoignages : le problème que règle chaque module */
 export const PROBLEMES = [
@@ -105,16 +111,25 @@ export const SECURITE = {
   lien: "Où vivent vos données",
 };
 
+/* 25/09 — Teo : « à la place des photos, mets des enseignes françaises
+   pour chaque secteur, Mr Bricolage pour le bricolage… ; c'est légal tant
+   qu'on ne dit pas qu'on travaille avec eux, et j'ai l'autorisation des
+   magasins de chaque secteur en Guadeloupe ». Photos Wikimedia Commons
+   (licences libres, crédits sous les cartes et dans CREDITS.txt) ; la
+   ligne du pied précise « à titre d'illustration ». `cadrage` : la
+   position de la photo dans la carte, pour garder le logo entier. */
 export const ENSEIGNES = {
   titre: "Pensé pour chaque enseigne du groupe.",
   cartes: [
-    { nom: "Bricolage", image: "/secteurs-distribution/enseigne-bricolage.jpg" },
-    { nom: "Alimentaire", image: "/secteurs-distribution/enseigne-frais.jpg" },
-    { nom: "Maison", image: "/secteurs-distribution/enseigne-maison.jpg" },
-    { nom: "Sport", image: "/secteurs-distribution/enseigne-sport.jpg" },
+    { nom: "Mr.Bricolage", secteur: "Bricolage", image: "/secteurs-distribution/enseigne-mrbricolage.jpg", cadrage: "60% 40%" },
+    { nom: "Carrefour", secteur: "Alimentaire", image: "/secteurs-distribution/enseigne-carrefour.jpg", cadrage: "47% 50%" },
+    { nom: "Conforama", secteur: "Maison", image: "/secteurs-distribution/enseigne-conforama.jpg", cadrage: "35% 50%" },
+    { nom: "Decathlon", secteur: "Sport", image: "/secteurs-distribution/enseigne-decathlon.jpg", cadrage: "22% 40%" },
   ],
   pied: "Votre enseigne n'est pas dans la liste ? Namolu sert la plupart des magasins d'un groupe.",
   lien: "Parlons-en.",
+  mention:
+    "Enseignes citées à titre d'illustration, sans lien commercial. Photos Wikimedia Commons : Micki (CC BY-SA 3.0), GD13 (CC BY 4.0), Tabl-trai et Chabe01 (CC BY-SA 4.0).",
 };
 
 /* leur « Digital Residency » : la méthode, en trois temps */

@@ -1,7 +1,7 @@
 import Apparait from "./Apparait";
 import Lumieres from "./Lumieres";
 import Temoins from "./Temoins";
-import { CHIFFRES } from "./textes";
+import { CHIFFRES, CHIFFRES_SOURCE } from "./textes";
 
 /* ══ 2 · LA BANDE SOMBRE : chiffres, lumières, problèmes ══════════════
    Leur bande orange (#aa412a) → le fond du site (#08090c). Balisage
@@ -29,6 +29,7 @@ export default function Chiffres() {
             </Apparait>
           ))}
         </div>
+        <p className="max-w-[1392px] mx-auto pt-4 nm-type-caption text-white/55">{CHIFFRES_SOURCE}</p>
       </section>
       <div data-header-theme="orange" className="relative bg-[var(--nm-bande)] overflow-hidden">
         <div className="absolute left-0 right-0 top-[550px] h-[1200px] z-0 overflow-hidden pointer-events-none">
