@@ -23,8 +23,8 @@ import PortesHover from "@/components/offres/PortesHover";
 import FondSilk from "@/components/accueil/FondSilk";
 import FriseDeroule from "@/components/accueil/FriseDeroule";
 import TableauEntrees from "@/components/accueil/TableauEntrees";
-import { CasColonnes } from "@/components/ui/cas-colonnes";
-import { CAS_ACCUEIL } from "@/lib/cas-accueil";
+import { SecteursDepliants } from "@/components/accueil/SecteursDepliants";
+import { CARTES_SECTEURS } from "@/lib/secteurs-accueil";
 import TexteRevele from "@/components/accueil/TexteRevele";
 import Apparition, {
   GroupeApparition,
@@ -1231,46 +1231,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 4 ter · LES NEUF CAS — trois colonnes qui remontent ════════
-            15/09/2026. Le gabarit de témoignages de 21st.dev
-            (`CasColonnes`, déjà en bas de /offres/sur-mesure), rempli de
-            SITUATIONS et non d'avis : Omega n'a aucun client à citer, et un
-            faux avis sur un site commercial est une pratique trompeuse.
-            Le détail de ce qui remplace quoi est en tête de `lib/cas-accueil`.
+        {/* ════════ 4 ter · PAR SECTEUR — les photos qui s'ouvrent ════════
+            25/09/2026 (Teo : « un composant qui présente avec photo les
+            secteurs et leurs problèmes qu'on résout »). Remplace les neuf
+            situations de `CasColonnes` : elles disaient déjà « chez qui ça
+            arrive », mais en cas généraux écrits avant que chaque métier ait
+            son logiciel. Chaque carte mène maintenant à sa page /secteurs.
+            Composant : components/accueil/SecteursDepliants (21st.dev,
+            `expanding-cards`) ; données : lib/secteurs-accueil.
 
-            Teo a d'abord demandé la version à neuf faux clients « juste pour
-            voir » : elle existe, elle est restée sur le banc et s'éteint
-            partout ailleurs (`omega-site-v3/lib/temoignages-essai.ts`).
-            Ne pas la rapatrier ici.
+            La règle des neuf cas ne change pas : aucun client, aucun avis,
+            aucun chiffre de résultat — un métier, son problème, ce que le
+            logiciel en fait. `CasColonnes` et lib/cas-accueil restent au dépôt
+            (le premier sert aussi /offres/sur-mesure).
 
-            15/09, Teo : « il doit être écrit nulle part des choses comme ça
-            qui nous décrédibilisent ». Le chapô disait « ce ne sont pas des
-            témoignages : nous n'en publions pas tant que nous n'en avons pas
-            de vrais » — c'est-à-dire, en clair, « nous n'avons aucun client »,
-            écrit noir sur blanc sur l'accueil. La section reste (elle ne
-            prétend rien), le chapô ne dit plus que ce qu'elle EST : neuf
-            situations, leur poste et leur secteur. La règle « jamais de faux
-            avis » ne change pas — elle se tient en n'en publiant pas, pas en
-            l'annonçant. Vérifié le 15/09 : c'était la seule phrase de ce
-            genre visible sur les 21 routes.
-
-            LA PLACE : après l'équipe depuis le 16/09/2026 (Teo l'a
-            échangée avec elle). L'ordre se lit donc : ce que ça change,
-            qui on est, puis chez qui ça arrive — la preuve par les
-            situations arrive une fois qu'on sait à qui on parle, et juste
-            avant le déroulé. Elle n'ouvre plus le bloc, elle le referme.
-            Les deux sections échangées portent les mêmes écarts (`pb`
-            seul, la section 4 du bento gardant son `py-[110px]`), donc
-            l'échange ne change rien au rythme vertical. */}
+            LA PLACE : inchangée, après l'équipe et avant le déroulé (Teo,
+            16/09) — mêmes écarts `pb` seuls. */}
         <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
           <div className="o-wrap">
             <EnTete
-              pastille="LES SITUATIONS"
-              titre="Ce que les systèmes tiennent, et chez qui ça arrive."
-              chapo="Neuf situations telles qu'elles se présentent avant l'audit, et le poste qui les tient."
+              pastille="PAR SECTEUR"
+              titre="À chaque métier son problème, et son logiciel."
+              chapo="Six métiers, six logiciels, chacun écrit pour un problème précis."
             />
             <Apparition className="mt-8 md:mt-16" delai={120}>
-              <CasColonnes cas={CAS_ACCUEIL} />
+              <SecteursDepliants cartes={CARTES_SECTEURS} />
+            </Apparition>
+            <Apparition className="mt-10 flex justify-center" delai={180}>
+              <Link href="/secteurs" className="o-btn o-btn--ghost">
+                Voir tous les secteurs
+                <Chevron taille={13} />
+              </Link>
             </Apparition>
           </div>
         </section>

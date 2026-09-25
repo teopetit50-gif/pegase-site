@@ -1,0 +1,15 @@
+Photos de la section « Par secteur » de l'accueil — Unsplash, bibliothèque GRATUITE uniquement
+(aucune photo Unsplash+, aucune image générée). Choisies le 25/09/2026, pour les deux secteurs
+dont la page n'a pas de photo. Les quatre autres cartes reprennent les photos de leur page métier.
+Licence Unsplash : usage commercial autorisé sans redevance ; le crédit est donné ici.
+
+btp.jpg
+    Auteur  : Sim Kimhort
+    Profil  : https://unsplash.com/@simkimhort
+    Photo   : https://unsplash.com/photos/t5j-XCZDSfw
+
+location-automobile.jpg
+    Auteur  : Mehmet Talha Onuk
+    Profil  : https://unsplash.com/@mtonuk
+    Photo   : https://unsplash.com/photos/6AbkEt7-lCA
+    Note    : une plaque partielle est en haut du cadre ; la carte est cadrée plus bas (cadrage 50% 78%).
