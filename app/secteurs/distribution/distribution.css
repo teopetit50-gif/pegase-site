@@ -26,7 +26,7 @@
    warm-gray-1…6 (gris chauds) →  gris neutres, même clarté un à un
    linework orange / bleu      →  blanc à 16 % / 14 %
    Le bouton plein orange devient noir. Les vidéos de lumière des deux
-   bandes (fichiers de la référence) sont redessinées en CSS (.nm-lumieres).
+   bandes (fichiers de la référence) sont redessinées (Lumieres.tsx, .nm-dalle).
 
    ── LES POLICES : CELLES DU SITE ─────────────────────────────────────
    Flecha S (serif sous licence) → Newsreader (app/_polices/serif.ts, déjà
@@ -334,35 +334,74 @@
 }
 
 /* ── les lumières (leurs vidéos « parallel-processing », redessinées) ─
-   Des colonnes de lumière verticales, floues, qui respirent chacune à son
-   rythme, comme les fenêtres de la vidéo. */
-.p-distribution .nm-lumieres {
+   Lumieres.tsx fait naître et mourir les dalles ; ici leur matière et
+   leur vie : entrée en fondu, palier, sortie en fondu, sur la durée de vie
+   de chaque dalle (animation-duration posée par le composant). */
+.p-distribution .nm-dalle {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
+  opacity: 0;
+  animation: nm-dalle linear forwards;
 }
-.p-distribution .nm-lumieres > i {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: var(--x);
-  width: var(--l);
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, var(--a)) 45%,
-    rgba(255, 255, 255, var(--a)) 55%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  filter: blur(var(--f, 6px));
-  opacity: 0.35;
-  animation: nm-respire var(--d, 7s) ease-in-out var(--r, 0s) infinite alternate;
+.p-distribution .nm-dalle--bas {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.16) 70%, rgba(255, 255, 255, 0.2));
 }
-@keyframes nm-respire {
-  to {
+.p-distribution .nm-dalle--haut {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.14) 70%, rgba(255, 255, 255, 0.18));
+}
+/* leur dalle lavande, pleine en bas : ici le gris très clair d'Omega */
+.p-distribution .nm-dalle--claire.nm-dalle--bas {
+  background: linear-gradient(to bottom, rgba(226, 226, 230, 0), rgba(226, 226, 230, 0.75) 55%, rgba(226, 226, 230, 0.85));
+}
+.p-distribution .nm-dalle--claire.nm-dalle--haut {
+  background: linear-gradient(to top, rgba(226, 226, 230, 0), rgba(226, 226, 230, 0.7) 55%, rgba(226, 226, 230, 0.8));
+}
+.p-distribution .nm-dalle--trait {
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+}
+@keyframes nm-dalle {
+  0% {
+    opacity: 0;
+  }
+  18%,
+  72% {
     opacity: 1;
-    transform: translateY(var(--y, 4%));
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ── le remplissage de la pastille active du carrousel (Temoins.tsx) ── */
+.p-distribution .nm-remplit {
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+.p-distribution .nm-remplit--v {
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  height: 0;
+  animation-name: nm-remplit-v;
+}
+.p-distribution .nm-remplit--h {
+  top: 2px;
+  left: 2px;
+  bottom: 2px;
+  width: 0;
+  animation-name: nm-remplit-h;
+}
+.p-distribution [data-nm-vu="non"] .nm-remplit {
+  animation-play-state: paused;
+}
+@keyframes nm-remplit-v {
+  to {
+    height: calc(100% - 4px);
+  }
+}
+@keyframes nm-remplit-h {
+  to {
+    width: calc(100% - 4px);
   }
 }
 
@@ -503,7 +542,7 @@
   .p-distribution .nm-trait-v {
     transition: none;
   }
-  .p-distribution .nm-lumieres > i,
+  .p-distribution .nm-dalle,
   .p-distribution .nm-hv__piste,
   .p-distribution .nm-flotte {
     animation: none;

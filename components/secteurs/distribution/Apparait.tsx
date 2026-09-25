@@ -33,7 +33,7 @@ export default function Apparait({
         window.setTimeout(() => el.setAttribute("data-nm-apparait", "vu"), delai);
         io.disconnect();
       },
-      { rootMargin: "0px 0px -8% 0px" }
+      { rootMargin: "0px 0px -2% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();

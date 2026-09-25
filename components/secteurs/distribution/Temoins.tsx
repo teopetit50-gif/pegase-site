@@ -18,7 +18,13 @@ import { PROBLEMES } from "./textes";
    le module et son périmètre. */
 const DUREE = 8000;
 
-function Gelule({ actif, progres, vertical, aller }: { actif: number; progres: number; vertical: boolean; aller: (i: number) => void }) {
+/* 24/09 — le remplissage de la pastille active est une animation CSS
+   (distribution.css, .nm-remplit), relancée à chaque diapositive par sa
+   `key` ; sa fin fait avancer le carrousel. La première version posait la
+   progression dans l'état React à chaque image : la carte entière se
+   redessinait 60 fois par seconde et retardait tout le reste de la page
+   (les chiffres apparaissaient 600 px trop tard). */
+function Gelule({ actif, vertical, aller, suivant }: { actif: number; vertical: boolean; aller: (i: number) => void; suivant: () => void }) {
   return (
     <div
       className={`relative rounded-full flex ${vertical ? "flex-col" : ""} items-center`}
@@ -58,12 +64,10 @@ function Gelule({ actif, progres, vertical, aller }: { actif: number; progres: n
           >
             {i === actif && (
               <span
-                className="absolute rounded-full block"
-                style={
-                  vertical
-                    ? { top: 2, left: 2, right: 2, height: `calc(${progres * 100}% - 4px)`, backgroundColor: "#fff" }
-                    : { top: 2, left: 2, bottom: 2, width: `calc(${progres * 100}% - 4px)`, backgroundColor: "#fff" }
-                }
+                key={actif}
+                className={`absolute rounded-full block bg-white nm-remplit ${vertical ? "nm-remplit--v" : "nm-remplit--h"}`}
+                style={{ animationDuration: `${DUREE}ms` }}
+                onAnimationEnd={suivant}
               />
             )}
           </span>
@@ -75,45 +79,22 @@ function Gelule({ actif, progres, vertical, aller }: { actif: number; progres: n
 
 export default function Temoins() {
   const [actif, setActif] = useState(0);
-  const [progres, setProgres] = useState(0);
-  const debut = useRef(0);
-  const courant = useRef(0);
-  const vu = useRef(false);
+  const [vu, setVu] = useState(false);
   const cadre = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let raf = 0;
-    const io = new IntersectionObserver(([e]) => (vu.current = e.isIntersecting));
+    const io = new IntersectionObserver(([e]) => setVu(e.isIntersecting));
     if (cadre.current) io.observe(cadre.current);
-    debut.current = performance.now();
-    const tic = (t: number) => {
-      /* hors de l'écran, la minuterie s'arrête là où elle en était */
-      if (!vu.current) debut.current = t - courant.current * DUREE;
-      const p = Math.min(1, (t - debut.current) / DUREE);
-      courant.current = p;
-      setProgres(p);
-      if (p >= 1) {
-        debut.current = t;
-        setActif((a) => (a + 1) % PROBLEMES.length);
-      }
-      raf = requestAnimationFrame(tic);
-    };
-    raf = requestAnimationFrame(tic);
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-    };
+    return () => io.disconnect();
   }, []);
 
-  const aller = (i: number) => {
-    setActif(i);
-    setProgres(0);
-    courant.current = 0;
-    debut.current = performance.now();
-  };
+  /* une seule gélule est affichée à la fois (l'autre est en display:none,
+     son animation ne tourne pas) : les deux peuvent porter la fin */
+  const aller = (i: number) => setActif(i);
+  const suivant = () => setActif((a) => (a + 1) % PROBLEMES.length);
 
   return (
-    <div ref={cadre}>
+    <div ref={cadre} data-nm-vu={vu ? "oui" : "non"}>
       {/* dès 768 */}
       <div className="hidden md:block w-full">
         <div
@@ -145,7 +126,7 @@ export default function Temoins() {
             ))}
           </div>
           <div className="absolute right-[20px] xl:right-[48px] top-1/2 -translate-y-1/2">
-            <Gelule actif={actif} progres={progres} vertical aller={aller} />
+            <Gelule actif={actif} vertical aller={aller} suivant={suivant} />
           </div>
         </div>
       </div>
@@ -181,7 +162,7 @@ export default function Temoins() {
             </div>
           </div>
           <div>
-            <Gelule actif={actif} progres={progres} vertical={false} aller={aller} />
+            <Gelule actif={actif} vertical={false} aller={aller} suivant={suivant} />
           </div>
         </div>
       </div>
