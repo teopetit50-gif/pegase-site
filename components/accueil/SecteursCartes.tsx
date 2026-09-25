@@ -26,7 +26,11 @@
    · photo en 3:2 et non en 16:9 : ce sont les photos qui font comprendre ;
    · sous 768 px, les cartes défilent à l'horizontale (80 % de largeur, la
      suivante dépasse) au lieu de s'empiler : six photos l'une sous l'autre
-     faisaient quatre écrans de haut.
+     faisaient quatre écrans de haut ;
+   · sous 640 px, un cran plus bas (25/09, Teo : « vérifie si c'est pas trop
+     zoomé ») : intitulé 16,5 px au lieu de 18 (4 lignes → 3), texte à 20 px
+     d'interligne, rembourrage 16 px — le barème mobile relevé sur Scale.
+     La carte passe de 437 à 389 px de haut à 390 px de large.
    ══════════════════════════════════════════════════════════════════════ */
 import Image from "next/image";
 import Link from "next/link";
@@ -69,15 +73,15 @@ export function SecteursCartes({ cartes }: { cartes: CarteSecteur[] }) {
               </span>
             </div>
 
-            <div className="flex flex-1 flex-col p-5 sm:p-6">
+            <div className="flex flex-1 flex-col p-4 sm:p-6">
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--o-muted)]">{c.metier}</p>
-              <h3 className="mt-2.5 text-[18px] font-medium leading-[1.35] tracking-[-0.01em] text-[var(--o-text)] sm:text-[19px]">
+              <h3 className="mt-2 text-[16.5px] font-medium leading-[1.35] tracking-[-0.01em] text-[var(--o-text)] sm:mt-2.5 sm:text-[19px]">
                 {c.probleme}
               </h3>
-              <p className="mt-2 flex-1 text-[14px] leading-[22px] text-[var(--o-muted)] sm:text-[15px] sm:leading-[24px]">
+              <p className="mt-2 flex-1 text-[14px] leading-[20px] text-[var(--o-muted)] sm:text-[15px] sm:leading-[24px]">
                 {c.reponse}
               </p>
-              <span className="mt-4 inline-flex items-center gap-1.5 self-start text-[14px] font-semibold text-[var(--o-text)]">
+              <span className="mt-3 inline-flex items-center gap-1.5 self-start text-[14px] font-semibold text-[var(--o-text)] sm:mt-4">
                 Voir {c.saas}
                 <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-[3px]">
                   →
