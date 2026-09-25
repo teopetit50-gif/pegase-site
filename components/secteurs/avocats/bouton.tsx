@@ -23,8 +23,9 @@
      ils foncent d'autant (`hover:bg-[#171717]/5`).
 
    RAYON : la source posait `--radius: 0.6rem` et `rounded-md` y valait
-   `calc(var(--radius) - 2px)` (7,6 px) ; ici `rounded-md` vaut 6 px.
-   Écrit en valeur : `rounded-[calc(0.6rem-2px)]`.
+   `calc(var(--radius) - 2px)` (7,6 px). Depuis le 25/09 (Teo), tous les
+   boutons des pages secteurs prennent l'arrondi des cartes de l'accueil :
+   `rounded-[6px]`, écrit en valeur.
    `cn` vient de `@/lib/cn`.
    ══════════════════════════════════════════════════════════════════════ */
 import * as React from "react";
@@ -33,7 +34,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[calc(0.6rem-2px)] text-sm font-medium ring-offset-[#ffffff] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:-translate-y-0.5 transition-all duration-300",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium ring-offset-[#ffffff] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:-translate-y-0.5 transition-all duration-300",
   {
     variants: {
       variant: {

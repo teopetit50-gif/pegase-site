@@ -79,7 +79,7 @@ function Noeud({ titre, sous, Icone, icone, petit, vedette, appel }: NoeudProps)
       {appel && (
         <Link
           href={RESERVER}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#29514a] transition-colors hover:bg-[#f3f8f7]"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-[6px] bg-white px-4 py-2 text-sm font-semibold text-[#29514a] transition-colors hover:bg-[#f3f8f7]"
         >
           {appel}
           <ArrowRight size={14} />

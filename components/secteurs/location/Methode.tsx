@@ -66,7 +66,7 @@ export function Methode() {
               <p className="DesignSprints_introBody text-[clamp(18px,1.5vw,20px)]/[1.5] font-normal">{METHODE.chapo}</p>
               <Link
                 href="/reserver-un-audit"
-                className="DesignSprints_contactButton inline-flex items-center justify-between gap-[12px] rounded-[8px] bg-[#1E3A8A] px-[20px] py-[12px] f-syne text-white transition-colors hover:bg-[#172A66]"
+                className="DesignSprints_contactButton inline-flex items-center justify-between gap-[12px] rounded-[6px] bg-[#1E3A8A] px-[20px] py-[12px] f-syne text-white transition-colors hover:bg-[#172A66]"
                 data-cta="methode-demo"
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5 2.5h6l3 3V15.5H5v-13Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" /><path d="M7.5 9h3M7.5 11.5h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>

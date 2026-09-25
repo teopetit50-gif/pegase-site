@@ -75,7 +75,7 @@ export default function Formules() {
                   <p className="text-[#737373] text-lg font-medium">Pour les agences de 1 à 5 personnes</p>
                   <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
                   <Link
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
+                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
                     href={CONTACT.audit}
                   >
                     Réserver un audit
@@ -516,7 +516,7 @@ export default function Formules() {
                   <p className="text-[#737373] text-lg font-medium">Pour les groupements de maîtrise d&apos;œuvre</p>
                   <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
                   <Link
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
+                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
                     href={CONTACT.audit}
                   >
                     Réserver un audit
@@ -713,7 +713,7 @@ export default function Formules() {
                   </p>
                   <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
                   <Link
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
+                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
                     href={CONTACT.audit}
                   >
                     Réserver un audit

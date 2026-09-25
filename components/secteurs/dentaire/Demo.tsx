@@ -267,7 +267,7 @@ export default function Demo() {
                   type="button"
                   onClick={preparer}
                   disabled={enCours}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#3b7a6e] py-4 text-white transition-all hover:bg-[#30635a] active:scale-[0.98] disabled:opacity-70"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-[6px] bg-[#3b7a6e] py-4 text-white transition-all hover:bg-[#30635a] active:scale-[0.98] disabled:opacity-70"
                 >
                   {enCours ? <LoaderCircle className="animate-spin" size={18} /> : <Bot size={18} />}
                   Préparer le point du matin
@@ -524,7 +524,7 @@ function Resultat({ point }: { point: Saisie }) {
         </span>
         <Link
           href={RESERVER}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#3b7a6e] px-6 py-3 text-sm text-white transition-all hover:bg-[#30635a] sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-[6px] bg-[#3b7a6e] px-6 py-3 text-sm text-white transition-all hover:bg-[#30635a] sm:w-auto"
         >
           Réserver un audit <ChevronRight size={14} />
         </Link>

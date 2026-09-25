@@ -247,7 +247,9 @@
   width: fit-content;
   height: 40px;
   overflow: hidden;
-  border-radius: var(--sct-r-sm);
+  /* 25/09 (Teo) : tous les boutons des pages secteurs prennent l'arrondi
+     des cartes de l'accueil (`rounded-md` de PatternCard, 6 px). */
+  border-radius: 6px;
   background: #000000; /* 24/09 soir : noir sur le hero devenu blanc */
   color: #ffffff;
   text-decoration: none;

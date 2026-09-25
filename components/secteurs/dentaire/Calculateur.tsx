@@ -187,7 +187,7 @@ export default function Calculateur() {
           </div>
           <Link
             href={RESERVER}
-            className="group relative mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#3b7a6e] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#30635a]"
+            className="group relative mt-2 inline-flex items-center justify-center gap-2 rounded-[6px] bg-[#3b7a6e] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[#30635a]"
           >
             Voir ce que Tiroma reprendrait
             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />

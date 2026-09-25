@@ -238,7 +238,7 @@ export default function Heros() {
                 <StarButton href={CONTACT.audit}>{HERO.audit}</StarButton>
                 <Lien
                   href={CONTACT.demo}
-                  className="relative inline-flex shrink-0 touch-manipulation items-center justify-center overflow-clip rounded-[32px] font-sans text-[20px] font-medium leading-[1.2] tracking-[-0.4px] transition-[opacity,transform] duration-200 ease [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a0a0a] active:scale-[0.97] motion-reduce:active:scale-100 cursor-pointer group border border-solid border-[#e5e5e5] px-4 py-[10px] text-[#303030]"
+                  className="relative inline-flex shrink-0 touch-manipulation items-center justify-center overflow-clip rounded-[6px] font-sans text-[20px] font-medium leading-[1.2] tracking-[-0.4px] transition-[opacity,transform] duration-200 ease [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a0a0a] active:scale-[0.97] motion-reduce:active:scale-100 cursor-pointer group border border-solid border-[#e5e5e5] px-4 py-[10px] text-[#303030]"
                 >
                   <span
                     aria-hidden="true"

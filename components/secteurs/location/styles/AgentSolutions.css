@@ -54,7 +54,7 @@
 .p-location .AgentSolutions_panelHeadline{max-width:42rem;margin:0;font-family:var(--font-body);font-size:clamp(1.2rem,1.7vw,1.55rem);font-weight:550;letter-spacing:-.03em;line-height:1.2;text-transform:none}
 .p-location .AgentSolutions_panelHeadline span{color:var(--scene-text)}
 .p-location .AgentSolutions_panelHeadline em{color:var(--scene-muted);font-style:normal;font-weight:400}
-.p-location .AgentSolutions_panelLink{flex:0 0 auto;display:inline-flex;align-items:center;gap:.3rem;min-height:1.85rem;border:1px solid var(--scene-border);border-radius:var(--folk-radius-xs);padding:0 .7rem;background:#ffffff;color:var(--scene-text);font-family:var(--font-body);font-size:.75rem;font-weight:500;letter-spacing:-.01em;text-decoration:none;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+.p-location .AgentSolutions_panelLink{flex:0 0 auto;display:inline-flex;align-items:center;gap:.3rem;min-height:1.85rem;border:1px solid var(--scene-border);border-radius:6px;padding:0 .7rem;background:#ffffff;color:var(--scene-text);font-family:var(--font-body);font-size:.75rem;font-weight:500;letter-spacing:-.01em;text-decoration:none;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
 .p-location .AgentSolutions_panelLink:hover{border-color:#d4d4d8;background:#f7f7f8;color:var(--scene-text)}
 .p-location .AgentSolutions_panelLink span{display:inline-block;transition:transform .22s cubic-bezier(.22,1,.36,1)}
 .p-location .AgentSolutions_panelLink:hover span{transform:translate(.1rem,-.1rem)}

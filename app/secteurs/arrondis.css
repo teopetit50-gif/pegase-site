@@ -1,0 +1,159 @@
+/* ══════════════════════════════════════════════════════════════════════
+   ARRONDIS DES PAGES SECTEURS — 25/09/2026 (Teo)
+
+   « Tous les boutons doivent avoir le même degré d'arrondi que les cards
+   de la page d'accueil », puis, sur les photos et les écrans de Tiroma :
+   « toutes les choses trop arrondies sur cette page en fait ».
+
+   La référence : la carte du catalogue de l'accueil (`PatternCard`,
+   `rounded-md` = 6 px). Tout ce qui dépasse 6 px sur les pages secteurs
+   (cartes, photos, maquettes, fenêtres d'écran, tuiles d'icône, champs,
+   boutons) y est ramené. Restent ronds, parce que ce sont des ronds et
+   non des coins : points, avatars, interrupteurs, pastilles en pilule,
+   halos flous et orbites.
+
+   Pourquoi un fichier et pas les classes : les sept pages portent plus de
+   600 coins, répartis dans une centaine de fichiers que d'autres sessions
+   modifient en même temps. Il est chargé par app/secteurs/layout.tsx,
+   donc AVANT les feuilles des pages : chaque règle qui doit battre une
+   feuille de page double sa dernière classe (spécificité 0,3,0 contre
+   0,2,0), pour ne jamais dépendre de l'ordre de chargement. Hors couche,
+   il bat de toute façon les utilitaires Tailwind.
+
+   Trois mécanismes :
+   1. Les utilitaires nommés de Tailwind v4 (`rounded-lg` à `rounded-4xl`,
+      avec leurs variantes `rounded-t-*`, `md:rounded-*`) lisent
+      `var(--radius-*)` : on redéfinit ces jetons dans la portée des pages.
+   2. Les jetons propres à chaque peau (`--sct-r-*`, `--radius` des
+      reprises shadcn, `--r` et `--folk-radius` des maquettes de Tavaro).
+   3. Le reste est écrit en valeur : `rounded-[24px]` dans les classes
+      (liste tirée des sources le 25/09 : un nouveau `rounded-[Npx]` au-
+      dessus de 6 px n'y est PAS, il faut l'ajouter) et `border-radius`
+      dans les feuilles de page, par sélecteur.
+   Vérifié au style calculé sur les sept pages, à 1440 et 390 px.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* 1. Utilitaires nommés de Tailwind. */
+.sct,
+.p-btp,
+.p-avocats,
+.p-architectes,
+.p-location,
+.p-dentaire,
+.p-distribution {
+  --radius-lg: 6px;
+  --radius-xl: 6px;
+  --radius-2xl: 6px;
+  --radius-3xl: 6px;
+  --radius-4xl: 6px;
+}
+
+/* 2. Jetons des peaux. */
+.sct.sct {
+  --sct-r-xl: 6px;
+  --sct-r-lg: 6px;
+  --sct-r-sm: 6px;
+}
+.p-btp.p-btp,
+.p-architectes.p-architectes {
+  --radius: 6px;
+}
+.p-location .AgentUxPreview_root.AgentUxPreview_root,
+.p-location .HeroProductMock_root.HeroProductMock_root {
+  --r: 6px;
+}
+.p-location .AgentSolutions_section.AgentSolutions_section {
+  --folk-radius: 6px;
+}
+
+/* 3a. Valeurs écrites dans les classes. */
+/* Tous les coins */
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+  :is(
+    [class~="lg:rounded-[18px]"],
+    [class~="lg:rounded-[24px]"],
+    [class~="lg:rounded-[28px]"],
+    [class~="md:rounded-[24px]"],
+    [class~="rounded-[0.6rem]"],
+    [class~="rounded-[1.5rem]"],
+    [class~="rounded-[1.75rem]"],
+    [class~="rounded-[10px]"],
+    [class~="rounded-[12px]"],
+    [class~="rounded-[14px]"],
+    [class~="rounded-[15px]"],
+    [class~="rounded-[16px]"],
+    [class~="rounded-[2.25rem]"],
+    [class~="rounded-[2.5rem]"],
+    [class~="rounded-[20px]"],
+    [class~="rounded-[24px]"],
+    [class~="rounded-[2rem]"],
+    [class~="rounded-[30px]"],
+    [class~="rounded-[32px]"],
+    [class~="rounded-[7px]"],
+    [class~="rounded-[8px]"],
+    [class~="rounded-[calc(0.6rem-2px)]"],
+    [class~="rounded-[calc(2.25rem-2px)]"]
+  ) {
+  border-radius: 6px;
+}
+
+/* Tous les coins (pseudo-élément) */
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+  :is(
+    [class~="before:rounded-[1.75rem]"],
+    [class~="before:rounded-[14px]"]
+  )::before {
+  border-radius: 6px;
+}
+
+/* Coins du haut */
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+  :is(
+    [class~="rounded-t-[1.5rem]"],
+    [class~="rounded-t-[14px]"],
+    [class~="rounded-t-[2.25rem]"],
+    [class~="rounded-t-[24px]"],
+    [class~="rounded-t-[3rem]"],
+    [class~="rounded-t-[4rem]"]
+  ) {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+/* Coins du bas */
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+  :is(
+    [class~="rounded-b-[24px]"]
+  ) {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* 3b. Valeurs écrites dans les feuilles de page. */
+.sct .sct-fenetre.sct-fenetre,
+.sct .sct-carte__picto.sct-carte__picto,
+.sct .sct-piliers__capture.sct-piliers__capture,
+.sct .sct-pilier__picto.sct-pilier__picto,
+.sct .sct-signes.sct-signes > span,
+.p-location .AgentUxPreview_kindFallback.AgentUxPreview_kindFallback,
+.p-location .AgentUxPreview_rfAgent.AgentUxPreview_rfAgent,
+.p-location .AgentUxPreview_chatBubbleAgent.AgentUxPreview_chatBubbleAgent,
+.p-location .AgentUxPreview_chatBubbleUser.AgentUxPreview_chatBubbleUser,
+.p-location .DesignSprints_card.DesignSprints_card,
+.p-location .DesignSprints_pipeLane.DesignSprints_pipeLane,
+.p-location .DesignSprints_ticket.DesignSprints_ticket,
+.p-location .DesignSprints_replyBubble.DesignSprints_replyBubble,
+.p-location .DesignSprints_radarPill.DesignSprints_radarPill,
+.p-location .DesignSprints_ctrlStep.DesignSprints_ctrlStep,
+.p-location .DesignSprints_ctrlLink.DesignSprints_ctrlLink,
+.p-location .DesignSprints_composer.DesignSprints_composer,
+.p-location .HeroProductMock_agentReply.HeroProductMock_agentReply,
+.p-location .HeroProductMock_composer.HeroProductMock_composer,
+.p-location .HeroProductMock_bubble.HeroProductMock_bubble,
+.p-location .PilotProductPreview_frame.PilotProductPreview_frame,
+.p-location .PilotProductPreview_viewport.PilotProductPreview_viewport [data-agent-ux],
+.p-location .container-scroll-animation_cardLayer.container-scroll-animation_cardLayer,
+.p-distribution .nm-pile__plaque.nm-pile__plaque,
+.p-distribution .nm-verre.nm-verre {
+  border-radius: 6px;
+}

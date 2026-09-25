@@ -115,7 +115,7 @@ function EnteteLarge({ p }: { p: Plan }) {
       </div>
       <Prix />
       <div className="mt-4 flex flex-col items-stretch">
-        <Button asChild size="sm" variant={p.popular ? "default" : "outline"} className="h-9 rounded-[10px]"><Lien href={CONTACT.audit}>{p.cta}</Lien></Button>
+        <Button asChild size="sm" variant={p.popular ? "default" : "outline"} className="h-9 rounded-[6px]"><Lien href={CONTACT.audit}>{p.cta}</Lien></Button>
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ function CarteEtroite({ p }: { p: Plan }) {
         {p.popular && <Conseille />}
       </div>
       <Prix />
-      <Button asChild size="sm" variant={p.popular ? "default" : "outline"} className="mt-3 h-9 w-full rounded-[10px]"><Lien href={CONTACT.audit}>{p.cta}</Lien></Button>
+      <Button asChild size="sm" variant={p.popular ? "default" : "outline"} className="mt-3 h-9 w-full rounded-[6px]"><Lien href={CONTACT.audit}>{p.cta}</Lien></Button>
     </div>
   );
 }

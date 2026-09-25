@@ -60,7 +60,7 @@ export default function StarButton({
     <Lien
       href={href}
       className={cn(
-        "group/star-button relative z-[3] inline-flex h-10 shrink-0 rounded-3xl text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a0a0a]",
+        "group/star-button relative z-[3] inline-flex h-10 shrink-0 rounded-[6px] text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a0a0a]",
         className,
       )}
       {...rest}

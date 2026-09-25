@@ -57,14 +57,14 @@ export default function OngletsEmpiles({ onglets, classeConteneur, classeActif, 
             onClick={() => choisir(rang)}
             onMouseEnter={() => setSurvol(true)}
             onMouseLeave={() => setSurvol(false)}
-            className={cn("relative rounded-full px-4 py-2", classeOnglet)}
+            className={cn("relative rounded-[6px] px-4 py-2", classeOnglet)}
             style={{ transformStyle: "preserve-3d" }}
           >
             {actif.valeur === o.valeur && (
               <motion.div
                 layoutId="dentaire-onglet-actif"
                 transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
-                className={cn("absolute inset-0 rounded-full bg-gray-200", classeActif)}
+                className={cn("absolute inset-0 rounded-[6px] bg-gray-200", classeActif)}
               />
             )}
             <span className="relative block text-black">{o.titre}</span>

@@ -67,7 +67,7 @@ export default function Appel() {
             </BoutonDegrade>
             <LienAncre
               cible="demo"
-              className="inline-flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white/70 px-8 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+              className="inline-flex h-14 items-center gap-2 rounded-[6px] border border-slate-200 bg-white/70 px-8 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
               <Play size={18} />
               Voir la démo

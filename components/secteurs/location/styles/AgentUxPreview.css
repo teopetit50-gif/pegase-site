@@ -30,7 +30,7 @@
 .p-location .AgentUxPreview_crumb:after{content:"/";margin:0 .28rem;color:var(--line-2)}
 .p-location .AgentUxPreview_search{display:flex;min-width:7.5rem;max-width:11rem;min-height:1.45rem;align-items:center;gap:.3rem;border:1px solid var(--line);border-radius:var(--r-xs);padding:0 .45rem;background:var(--canvas);color:var(--faint);font-size:.5rem}
 .p-location .AgentUxPreview_search b{overflow:hidden;color:var(--muted);font-weight:500;text-overflow:ellipsis;white-space:nowrap}
-.p-location .AgentUxPreview_btn{display:inline-flex;min-height:1.85rem;align-items:center;justify-content:center;gap:.32rem;border:1px solid var(--line-2);border-radius:var(--r-xs);padding:0 .7rem;background:var(--surface);color:var(--ink);font-family:inherit;font-size:.75rem;font-weight:550;letter-spacing:-.01em;white-space:nowrap;cursor:default}
+.p-location .AgentUxPreview_btn{display:inline-flex;min-height:1.85rem;align-items:center;justify-content:center;gap:.32rem;border:1px solid var(--line-2);border-radius:6px;padding:0 .7rem;background:var(--surface);color:var(--ink);font-family:inherit;font-size:.75rem;font-weight:550;letter-spacing:-.01em;white-space:nowrap;cursor:default}
 .p-location .AgentUxPreview_btnPrimary{border-color:var(--ink);background:var(--ink);color:#fff}
 .p-location .AgentUxPreview_btnGreen{border-color:#0cc78a;background:#0cc78a;color:#fff}
 .p-location .AgentUxPreview_btnGhost{border-color:transparent;background:transparent;color:var(--muted)}

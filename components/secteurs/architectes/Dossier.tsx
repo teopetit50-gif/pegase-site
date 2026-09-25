@@ -64,7 +64,7 @@ export default function Dossier() {
                         type="button"
                         tabIndex={0}
                         data-slot="button"
-                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[10px] px-2 text-sm bg-[#0a0a0a]/8 hover:bg-[#0a0a0a]/10"
+                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[6px] px-2 text-sm bg-[#0a0a0a]/8 hover:bg-[#0a0a0a]/10"
                       >
                         <img
                           alt=""
@@ -90,7 +90,7 @@ export default function Dossier() {
                         type="button"
                         tabIndex={0}
                         data-slot="button"
-                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[10px] px-2 text-sm"
+                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[6px] px-2 text-sm"
                       >
                         <img
                           alt=""
@@ -116,7 +116,7 @@ export default function Dossier() {
                         type="button"
                         tabIndex={0}
                         data-slot="button"
-                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[10px] px-2 text-sm"
+                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[6px] px-2 text-sm"
                       >
                         <img
                           alt=""
@@ -142,7 +142,7 @@ export default function Dossier() {
                         type="button"
                         tabIndex={0}
                         data-slot="button"
-                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[10px] px-2 text-sm"
+                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[6px] px-2 text-sm"
                       >
                         <img
                           alt=""
@@ -168,7 +168,7 @@ export default function Dossier() {
                         type="button"
                         tabIndex={0}
                         data-slot="button"
-                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[10px] px-2 text-sm"
+                        className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-[#0a0a0a]/6.5 hover:text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-10 w-full justify-start rounded-[6px] px-2 text-sm"
                       >
                         <img
                           alt=""
@@ -473,7 +473,7 @@ export default function Dossier() {
                             type="button"
                             tabIndex={0}
                             data-slot="button"
-                            className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-8 rounded-[10px] border border-[#d4d4d4] bg-transparent px-3 text-xs hover:bg-[#0a0a0a]/5"
+                            className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 text-[#171717] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5 h-8 rounded-[6px] border border-[#d4d4d4] bg-transparent px-3 text-xs hover:bg-[#0a0a0a]/5"
                           >
                             Ouvrir la planche
                           </button>

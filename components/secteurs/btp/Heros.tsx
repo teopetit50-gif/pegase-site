@@ -176,7 +176,7 @@ function Onglets({ actif, choisir }: { actif: string; choisir: (id: string) => v
                 onClick={() => choisir(c.id)}
                 aria-pressed={on}
                 className={cn(
-                  "flex shrink-0 cursor-pointer items-center gap-x-1 rounded-[10px] border border-[#e6e6e6] py-[5px] pr-[11px] pl-[9px] text-sm transition-colors hover:bg-[#f5f5f5]/60",
+                  "flex shrink-0 cursor-pointer items-center gap-x-1 rounded-[6px] border border-[#e6e6e6] py-[5px] pr-[11px] pl-[9px] text-sm transition-colors hover:bg-[#f5f5f5]/60",
                   on ? "bg-[#f5f5f5] text-[#171717]" : "text-[#737373]",
                 )}
               >

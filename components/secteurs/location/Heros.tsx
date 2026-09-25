@@ -65,7 +65,7 @@ export function Hero() {
             <div className="mb-[4px] flex w-full max-w-[22rem] flex-col items-stretch justify-center gap-3 sm:w-auto sm:max-w-none sm:flex-row md:mb-[8px]">
               <Link
                 href="/reserver-un-audit"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-[8px] border border-black/10 bg-[#1E3A8A] px-[20px] py-[12px] text-center f-syne text-[14px]/[1.5] uppercase text-white transition-colors hover:bg-[#172A66]"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-[6px] border border-black/10 bg-[#1E3A8A] px-[20px] py-[12px] text-center f-syne text-[14px]/[1.5] uppercase text-white transition-colors hover:bg-[#172A66]"
                 data-cta="hero-demo"
               >
                 {HERO.boutonPrincipal}
@@ -73,7 +73,7 @@ export function Hero() {
               <a
                 href="#moteurs"
                 data-cta="hero-moteurs"
-                className="hidden min-h-[44px] items-center justify-center rounded-[8px] border border-black/15 bg-[var(--page-bg-color)] px-[20px] py-[12px] text-center f-syne text-[14px]/[1.5] uppercase text-[color:var(--text)] transition-colors hover:bg-black hover:text-white sm:inline-flex"
+                className="hidden min-h-[44px] items-center justify-center rounded-[6px] border border-black/15 bg-[var(--page-bg-color)] px-[20px] py-[12px] text-center f-syne text-[14px]/[1.5] uppercase text-[color:var(--text)] transition-colors hover:bg-black hover:text-white sm:inline-flex"
               >
                 {HERO.boutonSecondaire}
               </a>

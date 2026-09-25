@@ -133,7 +133,7 @@ export default function Formules() {
                   </div>
                   <Link
                     href={RESERVER}
-                    className={`group flex w-full items-center justify-center gap-2 rounded-xl py-4 text-sm font-medium transition-all ${f.conseillee ? "bg-[#3b7a6e] text-white hover:bg-[#30635a]" : "border border-slate-200 text-slate-700 hover:border-[#3b7a6e] hover:bg-slate-50 hover:text-[#3b7a6e]"}`}
+                    className={`group flex w-full items-center justify-center gap-2 rounded-[6px] py-4 text-sm font-medium transition-all ${f.conseillee ? "bg-[#3b7a6e] text-white hover:bg-[#30635a]" : "border border-slate-200 text-slate-700 hover:border-[#3b7a6e] hover:bg-slate-50 hover:text-[#3b7a6e]"}`}
                   >
                     Réserver un audit
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

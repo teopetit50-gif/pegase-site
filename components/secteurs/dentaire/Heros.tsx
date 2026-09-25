@@ -87,7 +87,7 @@ export default function Heros() {
             </BoutonDegrade>
             <LienAncre
               cible="demo"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-[6px] border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 sm:w-auto"
             >
               <Play size={18} className="text-[#3b7a6e]" />
               Voir la démo
