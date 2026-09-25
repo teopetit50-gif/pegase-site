@@ -148,7 +148,7 @@ export default function Etapes() {
         </CarteBlanche>
         <div className="relative -mt-[120px] pointer-events-none h-[240px] lg:h-[350px] xl:h-[495px] overflow-hidden">
           <div data-header-theme="blue" className="relative w-full overflow-hidden pointer-events-none h-[480px] lg:h-[700px] xl:h-[990px] bg-[var(--nm-bande-2)]" aria-hidden>
-            <Lumieres fond="var(--nm-bande-2)" />
+            <Lumieres fond="var(--nm-bande-2)" teinte="vert" />
           </div>
         </div>
       </div>

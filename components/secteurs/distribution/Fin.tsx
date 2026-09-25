@@ -188,8 +188,13 @@ export default function Fin() {
         </div>
       </div>
       {/* le haut de leur pied de page : la lumière sous la dernière carte */}
-      <div data-header-theme="orange" className="relative -mt-[50px] h-[260px] lg:h-[360px] overflow-hidden bg-[var(--nm-bande)]">
-        <Lumieres fond="var(--nm-bande)" />
+      {/* elle fond vers le noir du pied d'Omega, qui la suit */}
+      <div
+        data-header-theme="orange"
+        className="relative -mt-[50px] h-[260px] lg:h-[360px] overflow-hidden bg-[var(--nm-bande)]"
+        style={{ backgroundImage: "linear-gradient(to bottom, var(--nm-bande) 35%, #000000)" }}
+      >
+        <Lumieres fond="var(--nm-bande)" fondBas="#000000" />
       </div>
     </>
   );

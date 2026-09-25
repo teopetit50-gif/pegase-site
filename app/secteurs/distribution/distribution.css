@@ -17,12 +17,19 @@
    défilants) ; le reste de la référence n'a pas d'équivalent exact là-bas
    et a été reproduit depuis son propre DOM.
 
-   ── LES COULEURS : CELLES D'OMEGA ────────────────────────────────────
+   ── LES COULEURS ─────────────────────────────────────────────────────
+   25/09 — Teo : « prends une autre couleur que le noir, j'aime pas trop
+   le fond comme ça, refais avec des belles couleurs ». Les deux bandes
+   sombres (noir #08090c et nuit #17171a jusque-là) prennent deux couleurs
+   profondes, tirées du ciel et de la menthe d'Omega (--sky #67caf2,
+   --mint #2fe6a8), à la même clarté que les leurs :
    référence                      ici
-   concurrence-orange #aa412a  →  --nm-bande    #08090c  (le fond du site)
-   concurrence-blue   #083241  →  --nm-bande-2  #17171a  (la « nuit » de /tarifs)
-   concurrence-green  #2c3827  →  --nm-sombre   #111113  (carte sécurité)
+   concurrence-orange #aa412a  →  --nm-bande    #1f3f8f  (cobalt)
+   concurrence-blue   #083241  →  --nm-bande-2  #0e3a33  (jade)
+   concurrence-green  #2c3827  →  --nm-sombre   #0e3a33  (carte sécurité)
    concurrence-black  #100f0f  →  --nm-noir     #0a0a0a
+   lavande des lumières        →  bleu glacier sur le cobalt, vert d'eau
+                                  sur le jade (--nm-lum)
    warm-gray-1…6 (gris chauds) →  gris neutres, même clarté un à un
    linework orange / bleu      →  blanc à 16 % / 14 %
    Le bouton plein orange devient noir. Les vidéos de lumière des deux
@@ -40,9 +47,9 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 .p-distribution {
-  --nm-bande: #08090c;
-  --nm-bande-2: #17171a;
-  --nm-sombre: #111113;
+  --nm-bande: #1f3f8f;
+  --nm-bande-2: #0e3a33;
+  --nm-sombre: #0e3a33;
   --nm-noir: #0a0a0a;
   --nm-g1: #f2f2f0;
   --nm-g2: #dcdcd9;
@@ -351,58 +358,25 @@
   height: 100%;
   transform: scaleY(0);
   animation-name: nm-barre;
-  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
   animation-iteration-count: infinite;
   will-change: transform;
 }
 .p-distribution .nm-barre--bas {
   transform-origin: 50% 100%;
-  background: linear-gradient(to top, rgba(222, 222, 226, 0.95), rgba(222, 222, 226, 0.88) 50%, rgba(222, 222, 226, 0));
+  background: linear-gradient(to top, rgb(var(--nm-lum) / 0.95), rgb(var(--nm-lum) / 0.88) 50%, rgb(var(--nm-lum) / 0));
 }
 .p-distribution .nm-barre--haut {
   transform-origin: 50% 0;
-  background: linear-gradient(to bottom, rgba(222, 222, 226, 0.95), rgba(222, 222, 226, 0.88) 50%, rgba(222, 222, 226, 0));
+  background: linear-gradient(to bottom, rgb(var(--nm-lum) / 0.95), rgb(var(--nm-lum) / 0.88) 50%, rgb(var(--nm-lum) / 0));
 }
 @keyframes nm-barre {
-  0% {
-    transform: scaleY(0);
-  }
-  40%,
-  60% {
-    transform: scaleY(var(--m));
-  }
-  100% {
-    transform: scaleY(0);
-  }
-}
-.p-distribution .nm-trait-lum {
-  position: absolute;
-  width: 1px;
-  height: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  opacity: 0;
-  animation: nm-trait 5.2s ease-in-out infinite;
-}
-.p-distribution .nm-trait-lum > b {
-  position: absolute;
-  left: 7px;
-  top: 38%;
-  font-family: var(--nm-mono);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: rgba(255, 255, 255, 0.7);
-}
-@keyframes nm-trait {
   0%,
   100% {
-    opacity: 0;
+    transform: scaleY(0);
   }
-  30%,
-  70% {
-    opacity: 1;
+  50% {
+    transform: scaleY(var(--m));
   }
 }
 
@@ -577,7 +551,6 @@
     transition: none;
   }
   .p-distribution .nm-barre,
-  .p-distribution .nm-trait-lum,
   .p-distribution .nm-hv__piste,
   .p-distribution .nm-flotte {
     animation: none;
