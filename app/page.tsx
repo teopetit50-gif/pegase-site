@@ -23,7 +23,7 @@ import PortesHover from "@/components/offres/PortesHover";
 import FondSilk from "@/components/accueil/FondSilk";
 import FriseDeroule from "@/components/accueil/FriseDeroule";
 import TableauEntrees from "@/components/accueil/TableauEntrees";
-import { SecteursDepliants } from "@/components/accueil/SecteursDepliants";
+import { SecteursCartes } from "@/components/accueil/SecteursCartes";
 import { CARTES_SECTEURS } from "@/lib/secteurs-accueil";
 import TexteRevele from "@/components/accueil/TexteRevele";
 import Apparition, {
@@ -1231,14 +1231,17 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 4 ter · PAR SECTEUR — les photos qui s'ouvrent ════════
+        {/* ════════ 4 ter · PAR SECTEUR — six cartes à photo ════════
             25/09/2026 (Teo : « un composant qui présente avec photo les
             secteurs et leurs problèmes qu'on résout »). Remplace les neuf
             situations de `CasColonnes` : elles disaient déjà « chez qui ça
             arrive », mais en cas généraux écrits avant que chaque métier ait
             son logiciel. Chaque carte mène maintenant à sa page /secteurs.
-            Composant : components/accueil/SecteursDepliants (21st.dev,
-            `expanding-cards`) ; données : lib/secteurs-accueil.
+            Composant : components/accueil/SecteursCartes (21st.dev,
+            `project-card`) ; données : lib/secteurs-accueil. Le même jour,
+            une première version à photos repliées qui s'ouvraient au survol
+            (`expanding-cards`) a été refusée : « un composant où on peut voir
+            toutes les photos, et comme ces visuels on comprend direct ».
 
             La règle des neuf cas ne change pas : aucun client, aucun avis,
             aucun chiffre de résultat — un métier, son problème, ce que le
@@ -1255,7 +1258,7 @@ export default function Home() {
               chapo="Six métiers, six logiciels, chacun écrit pour un problème précis."
             />
             <Apparition className="mt-8 md:mt-16" delai={120}>
-              <SecteursDepliants cartes={CARTES_SECTEURS} />
+              <SecteursCartes cartes={CARTES_SECTEURS} />
             </Apparition>
             <Apparition className="mt-10 flex justify-center" delai={180}>
               <Link href="/secteurs" className="o-btn o-btn--ghost">

@@ -13,13 +13,25 @@
    (public/accueil-secteurs/, crédits à côté). Un secteur ajouté à
    SECTEURS sans ligne ici n'apparaît pas sur l'accueil.
    ══════════════════════════════════════════════════════════════════════ */
-import type { CarteSecteur } from "@/components/accueil/SecteursDepliants";
 import { SECTEURS } from "@/lib/secteurs";
+
+/* Une carte de la section (components/accueil/SecteursCartes). */
+export type CarteSecteur = {
+  slug: string;
+  metier: string;
+  saas: string;
+  probleme: string;
+  reponse: string;
+  photo: string;
+  /* `object-position` de la photo, quand le centre coupe mal */
+  cadrage?: string;
+};
 
 const ACCUEIL: Record<string, { probleme: string; photo: string; cadrage?: string }> = {
   btp: {
     probleme: "Les travaux supplémentaires se perdent entre le chantier et la facture.",
     photo: "/accueil-secteurs/btp.jpg",
+    cadrage: "50% 38%",
   },
   avocats: {
     probleme: "Une pièce reçue la veille peut contredire tout votre dossier.",
@@ -31,14 +43,13 @@ const ACCUEIL: Record<string, { probleme: string; photo: string; cadrage?: strin
   },
   "location-automobile": {
     probleme: "Un dommage constaté au retour se conteste s'il n'a pas sa preuve.",
+    /* la plaque du véhicule est tout en haut de la photo : le cadrage 3:2
+       centré la laisse hors champ */
     photo: "/accueil-secteurs/location-automobile.jpg",
-    /* la plaque du véhicule est en haut du cadre : on la laisse hors champ */
-    cadrage: "50% 78%",
   },
   dentaire: {
     probleme: "Un créneau annulé la veille se perd, faute de patient prévenu à temps.",
     photo: "/secteurs-dentaire/photos/praticien-au-fauteuil.jpg",
-    cadrage: "72% 50%",
   },
   distribution: {
     probleme: "Ce qui n'entre pas dans le conteneur arrive après la rupture.",
