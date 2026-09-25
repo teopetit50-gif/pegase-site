@@ -68,12 +68,13 @@ export function HerosVisuelLarge() {
         <div className="absolute left-[30%] top-1/2 -translate-y-1/2">
           <Puce signe>Namolu</Puce>
         </div>
-        <div className="nm-hv__fil absolute left-[43%] right-[48%] top-1/2" />
-        <div className="absolute bottom-0 left-[54%] top-0 w-[27%]">
+        <div className="nm-hv__fil absolute left-[42%] right-[50%] top-1/2" />
+        {/* 31 % et non 27 % : nos lignes sont plus longues que les leurs */}
+        <div className="absolute bottom-0 left-[51.5%] top-0 w-[31%]">
           <Colonne taille={15} ligne={21} duree={38} />
         </div>
-        <div className="nm-hv__fil absolute left-[79%] right-[15%] top-1/2" />
-        <div className="absolute left-[86%] top-1/2 -translate-y-1/2">
+        <div className="nm-hv__fil absolute left-[83%] right-[12.5%] top-1/2" />
+        <div className="absolute left-[87.5%] top-1/2 -translate-y-1/2">
           <Puce>Achats</Puce>
         </div>
       </div>
