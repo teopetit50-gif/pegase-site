@@ -33,9 +33,9 @@ export const CONTACT = {
 
 export const HERO = {
   pastille: "Entreprises du bâtiment",
-  titre: "Les travaux supplémentaires se perdent entre le chantier et la facture",
+  titre: "Les travaux hors devis se perdent entre le chantier et la facture",
   texte:
-    "Daliro repère chaque ouvrage hors devis dans les photos et les vocaux de vos équipes, le chiffre sur vos prix unitaires et prépare l'avenant, que le client signe avant l'exécution. Il confirme aussi vos sous-traitants deux jours avant leur passage.",
+    "Daliro repère ces travaux dans les photos et les vocaux de vos équipes, les chiffre sur vos prix unitaires et prépare l'avenant, que le client signe avant l'exécution. Il confirme aussi vos sous-traitants deux jours avant leur passage.",
   audit: "Réserver un audit",
   demo: "Voir la démo",
   signature: "Conçu par",

@@ -33,7 +33,7 @@ export const CONTACT = {
 export const HERO = {
   badge: "NOUVEAU",
   annonce: "Tamila suit désormais vos délais d'appel",
-  titreAvant: "Une pièce reçue la veille peut",
+  titreAvant: "Une pièce reçue hier peut",
   titreMot: "contredire",
   titreApres: "tout votre dossier",
   texte: "Tamila la rapproche de vos faits dès son arrivée et vous signale ce qu'elle change. Pour chaque dossier, vous disposez d'une chronologie dont chaque fait renvoie à sa pièce, des contradictions relevées entre pièces et d'un bordereau rapproché de vos conclusions.",

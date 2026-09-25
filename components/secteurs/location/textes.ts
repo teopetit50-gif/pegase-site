@@ -49,9 +49,9 @@ export const HERO = {
   pastilleSuite: "Conçu et développé en France",
   /* La seule figure de la page : deux affirmations parallèles, comme le hero
      d'omegaai.fr (« Vos équipes ont les outils. Nous les faisons travailler ensemble. »). */
-  ligne1: "Un dommage non relevé au retour",
-  ligne2: "se facture rarement",
-  accent: "au client.",
+  ligne1: "Un dommage non relevé",
+  ligne2: "au retour se facture",
+  accent: "rarement.",
   chapo:
     "Au retour du véhicule, Tavaro compare les photos de restitution à l’état des lieux de départ, puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état. Chaque facture part avec les photos datées du départ et du retour, après validation de l’agence.",
   chapoCourt: "Tavaro chiffre chaque restitution sur votre barème et prépare la facture avec ses preuves, que l’agence valide avant envoi.",
