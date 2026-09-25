@@ -9,8 +9,9 @@
    `rounded-md` = 6 px). Tout ce qui dépasse 6 px sur les pages secteurs
    (cartes, photos, maquettes, fenêtres d'écran, tuiles d'icône, champs,
    boutons) y est ramené. Restent ronds, parce que ce sont des ronds et
-   non des coins : points, avatars, interrupteurs, pastilles en pilule,
-   halos flous et orbites.
+   non des coins : points, avatars, interrupteurs, halos flous et
+   orbites. Les pastilles en pilule, d'abord épargnées, ont suivi le même
+   jour (section 4).
 
    Pourquoi un fichier et pas les classes : les sept pages portent plus de
    600 coins, répartis dans une centaine de fichiers que d'autres sessions
@@ -156,4 +157,45 @@
 .p-distribution .nm-pile__plaque.nm-pile__plaque,
 .p-distribution .nm-verre.nm-verre {
   border-radius: 6px;
+}
+
+/* 4. Pastilles en pilule — 25/09/2026, après coup (Teo, sur « Produit
+   français · Conçu et développé en France » de Tavaro et « Cabinets
+   dentaires · Lecture seule » de Tiroma) : « ils sont trop arrondis ».
+   Toute pilule qui porte du texte passe à 6 px. Restent ronds les points,
+   avatars, interrupteurs, pouces de curseur, barres de progression et
+   disques d'icône : ils n'ont pas de marge horizontale.
+   4a. Tailwind : `rounded-full` + une marge `px-`/`pl-` = une pilule à
+   texte. La règle du site entier (fin de app/globals.css) épargne liens et
+   boutons ; ici non, les boutons des secteurs sont déjà à 6 px. */
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+  [class~="rounded-full"]:is([class^="px-"], [class*=" px-"], [class^="pl-"], [class*=" pl-"]) {
+  border-radius: 6px;
+}
+
+/* 4b. Pilules écrites dans les feuilles de page. Celles des maquettes de
+   Tavaro font 12 à 20 px de haut : 4 px, sinon 6 px les referait rondes. */
+.p-distribution .nm-hv__puce.nm-hv__puce {
+  border-radius: 6px;
+}
+.p-location .HeroProductMock_liveBadge.HeroProductMock_liveBadge,
+.p-location .HeroProductMock_navBadge.HeroProductMock_navBadge,
+.p-location .HeroProductMock_userBubble.HeroProductMock_userBubble,
+.p-location .HeroProductMock_thinkingCard.HeroProductMock_thinkingCard,
+.p-location .HeroProductMock_toolChip.HeroProductMock_toolChip,
+.p-location .HeroProductMock_toolChipSm.HeroProductMock_toolChipSm,
+.p-location .HeroProductMock_chip.HeroProductMock_chip,
+.p-location .HeroProductMock_pipelineTabs.HeroProductMock_pipelineTabs span,
+.p-location .HeroProductMock_stagePill.HeroProductMock_stagePill,
+.p-location .HeroProductMock_tag.HeroProductMock_tag,
+.p-location .HeroProductMock_metaChip.HeroProductMock_metaChip,
+.p-location .AgentUxPreview_citeChip.AgentUxPreview_citeChip,
+.p-location .AgentUxPreview_rfTool.AgentUxPreview_rfTool,
+.p-location .AgentUxPreview_toolStatus.AgentUxPreview_toolStatus,
+.p-location .AgentUxPreview_chatBubbleSystem.AgentUxPreview_chatBubbleSystem,
+.p-location .AgentUxPreview_stageChip.AgentUxPreview_stageChip,
+.p-location .AgentUxPreview_intentPill.AgentUxPreview_intentPill,
+.p-location .DesignSprints_tool.DesignSprints_tool,
+.p-location .PilotProductPreview_url.PilotProductPreview_url {
+  border-radius: 4px;
 }

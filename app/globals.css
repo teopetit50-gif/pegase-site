@@ -8435,3 +8435,19 @@ button.rounded-full:active {
     transition: none;
   }
 }
+
+/* Pastilles à texte : 6 px, plus en pilule — 25/09/2026. Teo, sur les
+   pastilles d'en-tête des pages secteurs : « ils sont trop arrondis ».
+   `rounded-full` + une marge horizontale = une pilule qui porte du texte ;
+   les ronds (points, avatars, interrupteurs) n'ont pas de marge
+   horizontale et restent ronds. Liens et boutons sont épargnés : ce sont
+   des boutons, pas des pastilles. Hors couche, la règle bat l'utilitaire.
+   Les pages secteurs vont plus loin : app/secteurs/arrondis.css, § 4. */
+:is(span, p, div, li, small, strong, em, label, time, figcaption)[class~="rounded-full"]:is(
+    [class^="px-"],
+    [class*=" px-"],
+    [class^="pl-"],
+    [class*=" pl-"]
+  ) {
+  border-radius: 6px;
+}
