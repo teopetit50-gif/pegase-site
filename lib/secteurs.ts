@@ -25,7 +25,7 @@ export type Secteur = {
   metier: string;
   saas: string;
   /* une ligne, 40 à 60 signes : la décision que le SaaS prend chaque matin
-     (menu « Nos offres », colonne « Pour votre métier ») */
+     (cartes de /offres, #metiers) */
   texte: string;
   /* /secteurs, carte du métier : deux phrases, ce qu'il lit → ce qu'il
      prépare → ce qui reste au client. Tout est repris du site du SaaS. */

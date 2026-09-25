@@ -102,6 +102,9 @@ export type Entree = {
      à plusieurs colonnes (« Nos offres »). Les entrées d'une même colonne
      se suivent dans la liste ; le panneau mobile en fait un intertitre. */
   colonne?: string;
+  /* 25/09 — un mot court en gris, sur la même ligne que l'intitulé, à
+     droite (le nom du logiciel d'un métier). Se passe de `texte`. */
+  cote?: string;
 };
 
 export type Rubrique = {
@@ -109,7 +112,7 @@ export type Rubrique = {
   /* rubrique SIMPLE : un lien direct dans le bandeau, sans chevron. */
   href?: string;
   /* rubrique à panneau : la case large en tête, puis les rangées. */
-  vedette?: Required<Omit<Entree, "colonne">>;
+  vedette?: Required<Omit<Entree, "colonne" | "cote">>;
   entrees?: Entree[];
   /* chemins hors entrées qui allument aussi la rubrique (page d'ensemble
      d'une colonne, par exemple /secteurs) */
@@ -122,49 +125,50 @@ export const MENU: Rubrique[] = [
     vedette: {
       href: "/offres",
       label: "Toutes les offres",
-      texte:
-        "Pour toute entreprise ou pour votre métier. Tout se combine, sur un seul audit.",
+      texte: "Tout se combine, sur un seul audit.",
     },
     racines: ["/secteurs"],
     entrees: [
       {
         href: "/offres/relances-impayes",
         label: "CASHD",
-        texte:
-          "Les échéances suivies, les relances préparées selon vos règles.",
+        texte: "Relance des devis et des factures échues",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/nouvelles-affaires",
         label: "RELOAD",
-        texte: "Les comptes qui n'ont plus commandé, remis dans le circuit.",
+        texte: "Relance des clients inactifs",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/demandes-clients",
         label: "FRONTD",
-        texte: "Chaque demande entrante qualifiée et traitée, à toute heure.",
+        texte: "Chaque demande traitée, à toute heure",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/factures-fournisseurs",
         label: "FILED",
-        texte:
-          "Les pièces fournisseurs lues, contrôlées, transmises à la comptabilité.",
+        texte: "Factures fournisseurs lues et transmises",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/sur-mesure",
         label: "Sur mesure",
-        texte: "Le système propre à votre organisation, cadré puis construit.",
+        texte: "Le système propre à votre organisation",
         colonne: "Pour toutes les entreprises",
       },
-      /* Le métier en intitulé, le logiciel dans la ligne : le visiteur
-         cherche « BTP », pas « Daliro ». */
+      /* Le métier en intitulé, le logiciel en gris sur la même ligne, sans
+         description : le visiteur cherche « BTP », pas « Daliro ». 25/09,
+         seconde passe (Teo, « un peu trop chargé ») : onze entrées à deux
+         lignes de gris faisaient 22 lignes à lire pour choisir. La colonne
+         métier passe à une ligne par entrée, les offres à une ligne de
+         description chacune. */
       ...SECTEURS.map((s) => ({
         href: `/secteurs/${s.slug}`,
         label: s.metier,
-        texte: `${s.saas} · ${s.texte}`,
+        cote: s.saas,
         colonne: "Pour votre métier",
       })),
     ],
