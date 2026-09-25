@@ -1148,31 +1148,50 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 4 · CE QUE ÇA CHANGE — le bento à cartes ════════
-            11/09/2026 (Teo) : « la section sur le screen doit être
-            remplacée par ce composant ». Les deux colonnes symétriques
-            (maquette au-dessus, label, titre, texte — deux fois) laissent
-            la place au bento pointillé repris de 21st.dev. L'origine, ce
-            qui en a été retiré (dont cinq liens sortants publicitaires) et
-            les écarts sont dans l'en-tête de `BentoChange`.
+        {/* ════════ 4 · PAR SECTEUR — six cartes à photo ════════
+            25/09/2026 (Teo : « un composant qui présente avec photo les
+            secteurs et leurs problèmes qu'on résout »). Remplace les neuf
+            situations de `CasColonnes` : elles disaient déjà « chez qui ça
+            arrive », mais en cas généraux écrits avant que chaque métier ait
+            son logiciel. Chaque carte mène maintenant à sa page /secteurs.
+            Composant : components/accueil/SecteursCartes (21st.dev,
+            `project-card`) ; données : lib/secteurs-accueil. Le même jour,
+            une première version à photos repliées qui s'ouvraient au survol
+            (`expanding-cards`) a été refusée : « un composant où on peut voir
+            toutes les photos, et comme ces visuels on comprend direct ».
 
-            Pas d'`EnTete` ici : ce composant porte son titre LUI-MÊME, et
-            en bas à droite. C'est le seul endroit de la page où l'ordre
-            s'inverse, et c'est précisément ce qu'on est venu chercher. */}
+            La règle des neuf cas ne change pas : aucun client, aucun avis,
+            aucun chiffre de résultat — un métier, son problème, ce que le
+            logiciel en fait. `CasColonnes` et lib/cas-accueil restent au dépôt
+            (le premier sert aussi /offres/sur-mesure).
+
+            LA PLACE : remontée le 25/09/2026 (Teo : « place cette section à
+            la place d'une section du haut qui est moins importante »),
+            échangée avec le bento « ce que ça change ». Elle suit
+            désormais « Organisations » : ce qui s'installe partout, que ça
+            tient à l'échelle d'un groupe, puis le logiciel de chaque
+            métier — avant l'argumentaire. « Organisations » n'a pas bougé :
+            sa place derrière le catalogue est un arbitrage de Teo (15/09).
+            L'ÉCART : `py` et non plus `pb` seul — la section qui précède
+            (« Organisations ») n'a pas d'écart bas, c'est celle-ci qui le
+            porte, comme le bento avant elle. */}
         <section data-monde="clair" className="py-[62px] md:py-[110px]">
-          {/* 16/09 — enveloppé et non repris de l'intérieur : ce bloc porte
-              son titre LUI-MÊME, en bas à droite, et c'est justement ce qui
-              en fait le seul endroit de la page où l'ordre s'inverse. Le
-              peindre mot à mot depuis ce coin-là se lirait comme une
-              cascade à l'envers ; il arrive donc d'un seul mouvement. */}
-          <Apparition>
-            <BentoChange
-              cartes={CARTES_CHANGE}
-              pastille="CE QUE ÇA CHANGE"
-              titre="Moins de tâches. Plus de temps. Plus de marge."
-              chapo="Ce que les systèmes prennent en charge, et ce qui reste entre vos mains."
+          <div className="o-wrap">
+            <EnTete
+              pastille="PAR SECTEUR"
+              titre="À chaque métier son problème, et son logiciel."
+              chapo="Six métiers, six logiciels, chacun écrit pour un problème précis."
             />
-          </Apparition>
+            <Apparition className="mt-8 md:mt-16" delai={120}>
+              <SecteursCartes cartes={CARTES_SECTEURS} />
+            </Apparition>
+            <Apparition className="mt-10 flex justify-center" delai={180}>
+              <Link href="/secteurs" className="o-btn o-btn--ghost">
+                Voir tous les secteurs
+                <Chevron taille={13} />
+              </Link>
+            </Apparition>
+          </div>
         </section>
 
         {/* ════════ 4 bis · L'ÉQUIPE — la mosaïque de portraits ════════
@@ -1194,8 +1213,12 @@ export default function Home() {
             garanties), où elle répondait à la dernière objection, celle
             qu'on ne pose pas à voix haute — à qui je parle quand ça coince.
 
-            L'ÉCART DU HAUT : la section qui précède (le bento) porte son
-            `py-[110px]`, celle-ci n'a donc que son écart bas — inchangé,
+            25/09/2026 : elle suit maintenant « Par secteur », remontée à la
+            place du bento, qui passe juste sous elle.
+
+            L'ÉCART DU HAUT : la section qui précède (« Par secteur »,
+            avant le 25/09 le bento) porte son `py-[110px]`, celle-ci n'a
+            donc que son écart bas — inchangé,
             les deux sections échangées portent exactement les mêmes
             classes, l'échange ne déplace aucun blanc.
 
@@ -1231,42 +1254,35 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ 4 ter · PAR SECTEUR — six cartes à photo ════════
-            25/09/2026 (Teo : « un composant qui présente avec photo les
-            secteurs et leurs problèmes qu'on résout »). Remplace les neuf
-            situations de `CasColonnes` : elles disaient déjà « chez qui ça
-            arrive », mais en cas généraux écrits avant que chaque métier ait
-            son logiciel. Chaque carte mène maintenant à sa page /secteurs.
-            Composant : components/accueil/SecteursCartes (21st.dev,
-            `project-card`) ; données : lib/secteurs-accueil. Le même jour,
-            une première version à photos repliées qui s'ouvraient au survol
-            (`expanding-cards`) a été refusée : « un composant où on peut voir
-            toutes les photos, et comme ces visuels on comprend direct ».
+        {/* ════════ 4 ter · CE QUE ÇA CHANGE — le bento à cartes ════════
+            11/09/2026 (Teo) : « la section sur le screen doit être
+            remplacée par ce composant ». Les deux colonnes symétriques
+            (maquette au-dessus, label, titre, texte — deux fois) laissent
+            la place au bento pointillé repris de 21st.dev. L'origine, ce
+            qui en a été retiré (dont cinq liens sortants publicitaires) et
+            les écarts sont dans l'en-tête de `BentoChange`.
 
-            La règle des neuf cas ne change pas : aucun client, aucun avis,
-            aucun chiffre de résultat — un métier, son problème, ce que le
-            logiciel en fait. `CasColonnes` et lib/cas-accueil restent au dépôt
-            (le premier sert aussi /offres/sur-mesure).
-
-            LA PLACE : inchangée, après l'équipe et avant le déroulé (Teo,
-            16/09) — mêmes écarts `pb` seuls. */}
+            Pas d'`EnTete` ici : ce composant porte son titre LUI-MÊME, et
+            en bas à droite. C'est le seul endroit de la page où l'ordre
+            s'inverse, et c'est précisément ce qu'on est venu chercher. 
+            LA PLACE — descendue le 25/09/2026 après l'équipe, en échange de
+            « Par secteur » (Teo : remonter les secteurs à la place d'une
+            section du haut moins importante). Écart bas seul désormais :
+            l'équipe qui précède porte déjà le sien. */}
         <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="PAR SECTEUR"
-              titre="À chaque métier son problème, et son logiciel."
-              chapo="Six métiers, six logiciels, chacun écrit pour un problème précis."
+          {/* 16/09 — enveloppé et non repris de l'intérieur : ce bloc porte
+              son titre LUI-MÊME, en bas à droite, et c'est justement ce qui
+              en fait le seul endroit de la page où l'ordre s'inverse. Le
+              peindre mot à mot depuis ce coin-là se lirait comme une
+              cascade à l'envers ; il arrive donc d'un seul mouvement. */}
+          <Apparition>
+            <BentoChange
+              cartes={CARTES_CHANGE}
+              pastille="CE QUE ÇA CHANGE"
+              titre="Moins de tâches. Plus de temps. Plus de marge."
+              chapo="Ce que les systèmes prennent en charge, et ce qui reste entre vos mains."
             />
-            <Apparition className="mt-8 md:mt-16" delai={120}>
-              <SecteursCartes cartes={CARTES_SECTEURS} />
-            </Apparition>
-            <Apparition className="mt-10 flex justify-center" delai={180}>
-              <Link href="/secteurs" className="o-btn o-btn--ghost">
-                Voir tous les secteurs
-                <Chevron taille={13} />
-              </Link>
-            </Apparition>
-          </div>
+          </Apparition>
         </section>
 
         {/* ════════ 5 · COMMENT ÇA MARCHE — frise de quatre étapes ════════ */}
