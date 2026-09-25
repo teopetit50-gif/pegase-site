@@ -278,7 +278,7 @@
   gap: 3px;
   height: 18px;
   padding: 0 7px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--o-text);
   color: #ffffff;
   font-size: 10px;

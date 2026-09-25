@@ -408,7 +408,7 @@ export default function Header() {
                un bouton qu'on ne voit pas ne doit pas se tabuler. */
             aria-hidden={!ctaBarre}
             tabIndex={ctaBarre ? undefined : -1}
-            className={`hidden h-9 items-center rounded-[10px] border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform,opacity] duration-200 active:scale-[0.97] md:inline-flex ${
+            className={`hidden h-9 items-center rounded-md border px-4 text-[14px] font-medium leading-none tracking-[-0.01em] transition-[background-color,border-color,transform,opacity] duration-200 active:scale-[0.97] md:inline-flex ${
               ctaBarre
                 ? "translate-y-0 opacity-100"
                 : "pointer-events-none -translate-y-1 opacity-0"
@@ -437,7 +437,7 @@ export default function Header() {
             /* 06/08 — panneau ouvert, la croix vit dans un carré arrondi à
                filet clair, comme dans la référence. Le filet était blanc sur
                noir ; il devient noir très dilué sur blanc. */
-            className={`group -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-200 md:h-9 md:w-9 lg:hidden ${
+            className={`group -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors duration-200 md:h-9 md:w-9 lg:hidden ${
               open
                 ? "border border-black/15 hover:bg-black/[0.04]"
                 : clair
@@ -672,7 +672,7 @@ export default function Header() {
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",
               }}
-              className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-full border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
+              className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-md border border-black/[0.07] bg-[#f5f5f4] text-[15px] font-medium tracking-[-0.01em] text-[#0f1013] transition-colors hover:bg-[#ebebe9]"
             >
               Nous contacter
             </Link>
@@ -688,7 +688,7 @@ export default function Header() {
                 opacity: open ? 1 : 0,
                 transform: open ? "none" : "translateY(14px)",
               }}
-              className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-full bg-[#0f1013] text-[15px] font-medium tracking-[-0.01em] text-white transition-colors hover:bg-[#26272b]"
+              className="mt-2.5 flex h-[52px] w-full items-center justify-center rounded-md bg-[#0f1013] text-[15px] font-medium tracking-[-0.01em] text-white transition-colors hover:bg-[#26272b]"
             >
               Commencer
             </Link>

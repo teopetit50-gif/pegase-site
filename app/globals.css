@@ -936,7 +936,7 @@ button.rounded-full:active {
   gap: 6px;
   padding: 10px 22px;
   border: 1.5px solid transparent;
-  border-radius: 100px;
+  border-radius: 6px;
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   font-weight: 500;
@@ -975,7 +975,7 @@ button.rounded-full:active {
 .offres .o-btn:hover {
   color: var(--btn-contre, #ffffff);
   border-color: transparent;
-  border-radius: 12px;
+  border-radius: 6px;
 }
 /* le chevron, quand il y en a un : le reste du ballet de flèches de la
    source, réduit à ce que notre balisage porte déjà. */
@@ -1014,7 +1014,7 @@ button.rounded-full:active {
     transition: none;
   }
   .offres .o-btn:hover {
-    border-radius: 100px;
+    border-radius: 6px;
   }
 }
 
@@ -1199,7 +1199,7 @@ button.rounded-full:active {
 .offres .o-flux-pastille {
   display: inline-flex;
   align-items: center;
-  border-radius: 9999px;
+  border-radius: 6px;
   border: 1px solid rgba(235, 235, 235, 0.6);
   background: rgba(255, 255, 255, 0.6);
   padding: 6px 14px;
@@ -2965,7 +2965,7 @@ button.rounded-full:active {
   align-items: center;
   height: 20px;
   padding: 0 8px;
-  border-radius: 9999px;
+  border-radius: 6px;
   background: #ffffff;
   font-size: 12px;
   line-height: 16px;
@@ -3381,7 +3381,7 @@ button.rounded-full:active {
   right: 5.5cqw;
   z-index: 2;
   padding: 1.9cqw 3cqw;
-  border-radius: 100px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -5107,7 +5107,7 @@ button.rounded-full:active {
    plus haut) : sa règle de base vit donc toujours ici. */
 .resa .cm-kicker {
   align-self: flex-start;
-  border-radius: 9999px;
+  border-radius: 6px;
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 600;
@@ -6074,7 +6074,7 @@ button.rounded-full:active {
   display: inline-flex;
   padding: 4px;
   border: 1px solid var(--vd-line);
-  border-radius: 999px;
+  border-radius: 6px;
   background: #ffffff;
   max-width: 100%;
   overflow-x: auto;
@@ -6085,7 +6085,7 @@ button.rounded-full:active {
 }
 .vd .vd-onglet {
   padding: 8px 18px;
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: 14px;
   letter-spacing: -0.01em;
   color: #8a8a8a;
@@ -8076,7 +8076,7 @@ button.rounded-full:active {
   margin-left: 6px;
   padding: 1px 7px;
   border: 1px solid var(--r-or-fonce);
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -8440,10 +8440,14 @@ button.rounded-full:active {
    pastilles d'en-tête des pages secteurs : « ils sont trop arrondis ».
    `rounded-full` + une marge horizontale = une pilule qui porte du texte ;
    les ronds (points, avatars, interrupteurs) n'ont pas de marge
-   horizontale et restent ronds. Liens et boutons sont épargnés : ce sont
-   des boutons, pas des pastilles. Hors couche, la règle bat l'utilitaire.
+   horizontale et restent ronds. Hors couche, la règle bat l'utilitaire.
+   Liens et boutons, d'abord épargnés, ont suivi le même jour (« continue ») :
+   `.o-btn` est passé de 100 px à 6 px, et son morph au survol aussi
+   (12 px). Les pilules écrites en `border-radius: 999px` dans les
+   feuilles (.o-flux-pastille, .bc-cat, .cm-kicker, .r-badge, .vd-onglet…)
+   ont été corrigées à la source, à 4 px sous 20 px de haut.
    Les pages secteurs vont plus loin : app/secteurs/arrondis.css, § 4. */
-:is(span, p, div, li, small, strong, em, label, time, figcaption)[class~="rounded-full"]:is(
+[class~="rounded-full"]:is(
     [class^="px-"],
     [class*=" px-"],
     [class^="pl-"],

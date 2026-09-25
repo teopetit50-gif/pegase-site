@@ -392,7 +392,7 @@ function SelecteurMonde({
     <div
       role="radiogroup"
       aria-label="À qui s'adresse la grille"
-      className="inline-flex rounded-full border border-[#e3e3e3] bg-white p-1"
+      className="inline-flex rounded-md border border-[#e3e3e3] bg-white p-1"
     >
       {MONDES.map((m) => {
         const actif = m.id === monde;
@@ -404,7 +404,7 @@ function SelecteurMonde({
             aria-checked={actif}
             onClick={() => choisir(m.id)}
             className={cn(
-              "cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+              "cursor-pointer rounded-sm px-4 py-1.5 text-sm font-medium transition-colors",
               "outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#050505]/70",
               actif ? "bg-[#050505] text-white" : "text-[#3d3d3d] hover:text-[#050505]",
             )}

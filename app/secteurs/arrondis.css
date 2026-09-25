@@ -166,8 +166,8 @@
    avatars, interrupteurs, pouces de curseur, barres de progression et
    disques d'icône : ils n'ont pas de marge horizontale.
    4a. Tailwind : `rounded-full` + une marge `px-`/`pl-` = une pilule à
-   texte. La règle du site entier (fin de app/globals.css) épargne liens et
-   boutons ; ici non, les boutons des secteurs sont déjà à 6 px. */
+   texte. La règle du site entier (fin de app/globals.css) fait la même
+   chose ; celle-ci reste pour la portée des pages secteurs. */
 :is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
   [class~="rounded-full"]:is([class^="px-"], [class*=" px-"], [class^="pl-"], [class*=" pl-"]) {
   border-radius: 6px;

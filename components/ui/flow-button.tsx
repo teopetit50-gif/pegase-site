@@ -29,7 +29,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, CSSProperties } from "
 import { cn } from "@/lib/cn";
 
 const BASE =
-  "group relative inline-flex items-center gap-1 overflow-hidden rounded-[100px] border-[1.5px] border-[#333333]/40 bg-transparent px-8 py-3 text-sm font-semibold text-[#111111] cursor-pointer transition-all duration-[600ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-transparent hover:text-white hover:rounded-[12px] active:scale-[0.95]";
+  "group relative inline-flex items-center gap-1 overflow-hidden rounded-md border-[1.5px] border-[#333333]/40 bg-transparent px-8 py-3 text-sm font-semibold text-[#111111] cursor-pointer transition-all duration-[600ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-transparent hover:text-white hover:rounded-md active:scale-[0.95]";
 
 function Contenu({ text }: { text: string }) {
   return (
