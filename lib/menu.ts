@@ -102,9 +102,6 @@ export type Entree = {
      à plusieurs colonnes (« Nos offres »). Les entrées d'une même colonne
      se suivent dans la liste ; le panneau mobile en fait un intertitre. */
   colonne?: string;
-  /* 25/09 — un mot court en gris, sur la même ligne que l'intitulé, à
-     droite (le nom du logiciel d'un métier). Se passe de `texte`. */
-  cote?: string;
 };
 
 export type Rubrique = {
@@ -112,7 +109,7 @@ export type Rubrique = {
   /* rubrique SIMPLE : un lien direct dans le bandeau, sans chevron. */
   href?: string;
   /* rubrique à panneau : la case large en tête, puis les rangées. */
-  vedette?: Required<Omit<Entree, "colonne" | "cote">>;
+  vedette?: Required<Omit<Entree, "colonne">>;
   entrees?: Entree[];
   /* chemins hors entrées qui allument aussi la rubrique (page d'ensemble
      d'une colonne, par exemple /secteurs) */
@@ -159,16 +156,15 @@ export const MENU: Rubrique[] = [
         texte: "Le système propre à votre organisation",
         colonne: "Pour toutes les entreprises",
       },
-      /* Le métier en intitulé, le logiciel en gris sur la même ligne, sans
-         une ligne courte dessous (`ligne`) : le visiteur cherche « BTP », pas « Daliro ». 25/09,
-         seconde passe (Teo, « un peu trop chargé ») : onze entrées à deux
-         lignes de gris faisaient 22 lignes à lire pour choisir. La colonne
-         métier passe à une ligne par entrée, les offres à une ligne de
-         description chacune. */
+      /* Le métier en intitulé, une ligne courte dessous (`ligne`) : le
+         visiteur cherche « BTP », pas « Daliro ». 25/09, trois passes le
+         même jour (Teo) : « un peu trop chargé » (22 lignes de gris à lire),
+         puis « quand même une ligne descriptive par métier », puis
+         « enlève les noms à côté » — le nom du logiciel ne figure plus dans
+         le menu, il reste sur la page du métier. */
       ...SECTEURS.map((s) => ({
         href: `/secteurs/${s.slug}`,
         label: s.metier,
-        cote: s.saas,
         texte: s.ligne,
         colonne: "Pour votre métier",
       })),

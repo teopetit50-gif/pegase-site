@@ -75,18 +75,7 @@ function Rangee({ entree, pathname }: { entree: Entree; pathname: string }) {
         }
       >
         <Link href={entree.href}>
-          {entree.cote ? (
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="font-medium tracking-[-0.01em]">
-                {entree.label}
-              </span>
-              <span className="text-[13px] text-[var(--omenu-panneau-douce)]">
-                {entree.cote}
-              </span>
-            </div>
-          ) : (
-            <div className="font-medium tracking-[-0.01em]">{entree.label}</div>
-          )}
+          <div className="font-medium tracking-[-0.01em]">{entree.label}</div>
           {entree.texte && (
             <p className="text-[13px] leading-[1.45] text-[var(--omenu-panneau-douce)]">
               {entree.texte}
