@@ -181,8 +181,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useCallback, useState, type ComponentType } from "react";
-import NumberFlow from "@number-flow/react";
+import { useState, type ComponentType } from "react";
 import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroSection } from "@/components/ui/hero-section-dark";
@@ -193,26 +192,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Comparator } from "@/components/ui/comparator-1";
 import { cn } from "@/lib/cn";
 import { lienAudit, lienContact } from "@/lib/reservation";
-import Calculateur from "@/components/tarifs/Calculateur";
 import { useChoisirMonde, useMonde } from "@/components/tarifs/monde";
 
 import {
-  CALCULATEUR,
   CARTE_SUR_MESURE,
-  comparatifPaliers,
   GRANDE_STRUCTURE,
   MONDES,
   PALIERS,
   POSTES,
-  heuresRecuperees,
-  piecesPourPostes,
-  postesPourCarte,
-  prixPourVolume,
   type Monde,
-  type SaisieVolumes,
   type Palier,
 } from "@/lib/paliers";
 
@@ -233,25 +223,6 @@ const ICONE_PALIER: Record<Palier["id"], Icone> = {
    d'URL et son instantané serveur étaient du code qui ne produisait plus
    de pixel. Le paramètre `?periodicite=` continue d'exister pour
    /installation, qui le lit lui-même. */
-
-/* le lien d'un palier — « Tout Omega » n'a rien à choisir, il part droit
-   sur l'audit ; les deux autres renvoient aux cartes où le choix se fait.
-
-   15/09, SECONDE PASSE (Teo) : il menait à /installation — réserver la mise
-   en route et enregistrer un moyen de paiement. « Ce n'est pas un SaaS, on
-   ne vend plus de prix direct » : il mène maintenant à l'audit, avec les
-   postes et le volume déclarés. La périodicité ne l'accompagne plus — un
-   audit n'a pas de mensuel ni d'annuel. */
-function lienPalier(p: Palier, pieces: number) {
-  if (p.aChoisir !== null) return "#grille";
-  return lienAudit(POSTES.map((x) => x.id), pieces);
-}
-
-/* 08/09 — le bouton d'un palier dans le comparatif :
-   noir pour Trois postes ET Tout Omega, filet pour Un poste. */
-function boutonPalier(p: Palier) {
-  return p.id === "un" ? "r-btn--fil" : "r-btn--noir";
-}
 
 /* 08/09 — l'argument de Tout Omega : ce que coûte le quatrième poste par
    rapport à Trois postes. CALCULÉ depuis PALIERS, jamais écrit en dur ;
@@ -424,66 +395,22 @@ function CartePalier({
   choisis,
   bascule,
   monde,
-  volumes,
 }: {
   p: Palier;
   /* la sélection vit dans Grille : vide dès qu'un AUTRE palier est actif */
   choisis: string[];
   bascule: (id: string) => void;
   monde: Monde;
-  /* les volumes saisis au calculateur — null tant qu'il n'a rien reçu. La
-     carte en tire SON prix, sur les pièces de SES propres postes : deux
-     cartes voisines affichent donc deux montants différents. */
-  volumes: SaisieVolumes | null;
 }) {
-  /* 15/09 — LE PRIX DE CETTE CARTE. Il ne se lit plus dans PALIERS : il se
-     calcule sur les pièces des postes que CETTE carte comprend. */
-  const postesFactures = volumes ? postesPourCarte(volumes, p.aChoisir, choisis) : [];
-  const piecesCarte = volumes ? piecesPourPostes(volumes, postesFactures) : 0;
-  /* 15/09, dernière passe — le garde-fou reste, son nom change : ce qu'il
-     autorise n'est plus un prix mais l'affichage du volume et du bouton.
-     `prixPourVolume` rend null dans les deux cas où il ne faut rien
-     montrer — aucune réponse, ou volume au-delà du plafond de la grille. */
-  const volumeValide = volumes ? prixPourVolume(piecesCarte) !== null : false;
-  /* 15/09 (Teo : « ça sert à quoi d'afficher les pièces ? ils en font quoi
-     de cette info ») — LA CARTE ANNONCE DES HEURES, PLUS DES PIÈCES. La
-     pièce est NOTRE unité de facturation : le visiteur ne sait pas si 135
-     est beaucoup, et posée au-dessus de « jusqu'à 150 pièces » elle se
-     lisait comme une jauge de quota — la seule question qu'une carte de
-     prix ne doit pas faire naître. Les heures répondent à ce qu'il
-     cherche vraiment à cet endroit : ce que ça lui rend. Même source
-     (ses réponses), même propriété (chaque carte ne compte que SES
-     postes, donc trois chiffres différents). Les pièces restent, en
-     petit : elles expliquent le plafond du palier, c'est leur seul
-     emploi côté visiteur. */
-  const heuresCarte = volumes
-    ? Math.round(
-        heuresRecuperees(
-          Object.fromEntries(
-            Object.entries(volumes).filter(([id]) => postesFactures.includes(id)),
-          ) as SaisieVolumes,
-        ),
-      )
-    : 0;
-  /* LE VOLUME PEUT DÉPASSER LE PLAFOND DE SA PROPRE CARTE, et ça se voyait
-     dès qu'on a mis le volume à la place du prix : « 620 pièces » en grand,
-     au-dessus de « Jusqu'à 150 pièces traitées par mois » trois lignes plus
-     bas. `postesPourCarte` retient les postes les plus chargés, sans
-     regarder le plafond du palier — c'était invisible tant qu'un montant
-     occupait la place. La carte le dit maintenant, et oriente. */
-  const depasse = volumeValide && piecesCarte > p.plafond;
   const manque = p.aChoisir === null ? 0 : p.aChoisir - choisis.length;
   /* côté grande structure le bouton ne commande rien : il mène au
      diagnostic, le compte des postes ne le conditionne plus */
   const devis = monde === "structure";
-  /* 15/09, correctif (Teo : « je n'avais pas encore mis de donnée dans le
-     calculateur, il a inventé un chiffre ») — LE BOUTON ATTEND LES VOLUMES.
-     La carte retenait son prix sans volumes, mais son bouton menait quand
-     même à /installation, dont le récapitulatif affiche le montant du
-     palier : le chiffre que la grille refusait de montrer sortait par la
-     porte d'à côté, et sans avoir vérifié que le volume tient sous le
-     plafond du palier. Même verrou que `volumeValide`, même raison. */
-  const pret = devis || (manque <= 0 && volumeValide);
+  /* 25/09 (Teo : « enlève la section comparateur ») — LE BOUTON N'ATTEND
+     PLUS QUE LES POSTES. Il attendait le cas type du comparateur, qui
+     fournissait les volumes ; sans lui, le choix des postes suffit, et le
+     volume se relève à l'audit, comme le tarif. */
+  const pret = devis || manque <= 0;
   const phare = Boolean(p.phare);
   /* 15/09, SECONDE PASSE (Teo) — LE BOUTON MÈNE À L'AUDIT, PAS À L'ACHAT.
      « C'est une estimation qui amène au bouton réserver un audit ; ça ne
@@ -496,23 +423,7 @@ function CartePalier({
      recalcule à l'arrivée (voir app/reserver/page.tsx), et il n'y arrive
      que comme une phrase du message, pour que l'entretien parte des
      chiffres du visiteur. */
-  const href = lienAudit(postesFactures, piecesCarte);
-  /* 15/09, dernière passe — « Quatrième poste inclus pour N € de plus »
-     était un montant, et il part avec les autres. Ce qu'on peut encore
-     dire sans euro, c'est le VOLUME que le quatrième poste ajoute. */
-  const ecart = (() => {
-    if (p.id !== "complet" || devis || !volumes) return null;
-    const troisPostes = postesPourCarte(volumes, 3, []);
-    const trois = Math.round(
-      heuresRecuperees(
-        Object.fromEntries(
-          Object.entries(volumes).filter(([id]) => troisPostes.includes(id)),
-        ) as SaisieVolumes,
-      ),
-    );
-    const d = heuresCarte - trois;
-    return d > 0 ? d : null;
-  })();
+  const href = lienAudit(p.aChoisir === null ? POSTES.map((x) => x.id) : choisis, 0);
   const Icone = ICONE_PALIER[p.id];
 
   return (
@@ -574,70 +485,14 @@ function CartePalier({
               <p className="text-sm text-[#616161]">{GRANDE_STRUCTURE.sousPrix}</p>
               <p className="mt-2 text-xs text-[#767676]">{GRANDE_STRUCTURE.note}</p>
             </>
-          ) : !volumeValide ? (
-            /* 15/09 — l'attente du chiffre. Elle occupe la MÊME place que le
-               prix pour que la carte ne saute pas quand il arrive, et elle
-               dit pourquoi elle est là plutôt que de laisser un tiret muet. */
-            /* 15/09, passe de compression (Teo : « trop de trucs, plus
-               court ») — l'attente tenait trois lignes de 36 px en gras
-               plus une note de trois lignes, répétée à l'identique sur
-               les trois cartes : neuf lignes pour dire « remplissez le
-               formulaire ». Deux lignes discrètes suffisent, et la note
-               est déjà dans le bloc de tête de page. */
-            <>
-              <p className="text-2xl font-semibold text-[#c2c2c2]">{CALCULATEUR.avant.grand}</p>
-              <p className="mt-1 text-sm text-[#616161]">{CALCULATEUR.avant.sous}</p>
-            </>
           ) : (
-          <>
-          {/* 15/09, dernière passe — LE VOLUME À LA PLACE DU MONTANT.
-              Chaque carte ne compte que les pièces de SES postes : les
-              trois affichent donc trois chiffres différents, tirés des
-              mêmes réponses. C'est ce qui évite de répéter « sur devis »
-              trois fois de suite — chaque carte dit quelque chose qui
-              n'est vrai que pour elle. */}
-          <div className="flex flex-wrap items-baseline justify-center gap-x-2">
-            <NumberFlow
-              aria-label={`${heuresCarte} heures rendues par mois`}
-              className="text-4xl font-bold tabular-nums text-[#050505]"
-              locales="fr-FR"
-              value={heuresCarte}
-            />
-            <span className="text-lg font-semibold text-[#050505]">
-              {heuresCarte > 1 ? "heures" : "heure"}
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-[#616161]">rendues chaque mois, d&apos;après le cas choisi</p>
-          {depasse ? (
-            <p className="mt-3 rounded-lg bg-[#fdf3e7] px-3 py-2 text-xs text-[#8a5a12]">
-              {piecesCarte.toLocaleString("fr-FR")} pièces à traiter, au-delà des{" "}
-              {p.plafond.toLocaleString("fr-FR")} de ce palier.
-            </p>
-          ) : (
-            <p className="mt-2 text-xs text-[#767676]">
-              {piecesCarte.toLocaleString("fr-FR")} pièces à traiter, sur{" "}
-              {p.plafond.toLocaleString("fr-FR")} incluses
-            </p>
-          )}
-          </>
-          )}
-
-          {/* dans l'ATTENTE seulement : une fois les volumes donnés, la
-              ligne sous le chiffre porte déjà le plafond, et le répéter
-              donnait deux fois le même nombre à deux lignes d'écart. */}
-          {devis || volumeValide ? null : (
-            <p className="mt-2 text-xs text-[#767676]">
+            /* 25/09 — le comparateur parti, la carte n'a plus de cas dont
+               tirer des heures : elle garde la seule ligne qui ne dépend
+               que d'elle, son plafond. */
+            <p className="text-sm text-[#616161]">
               Jusqu&apos;à {p.plafond.toLocaleString("fr-FR")} pièces traitées par mois
             </p>
           )}
-
-          {ecart !== null ? (
-            <p className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#050505]">
-              <span aria-hidden className="size-1.5 rounded-full bg-[#050505]" />
-              Quatrième poste&nbsp;: {ecart.toLocaleString("fr-FR")} heure{ecart > 1 ? "s" : ""} de
-              plus.
-            </p>
-          ) : null}
         </div>
 
       </div>
@@ -727,11 +582,7 @@ function CartePalier({
           </Button>
         ) : (
           <Button disabled variant="outline" className="h-11 w-full text-[15px]">
-            {manque > 0
-              ? manque === 1
-                ? "Sélectionnez 1 poste"
-                : `Sélectionnez encore ${manque} postes`
-              : "Choisissez un cas type"}
+            {manque === 1 ? "Sélectionnez 1 poste" : `Sélectionnez encore ${manque} postes`}
           </Button>
         )}
       </CardFooter>
@@ -757,12 +608,6 @@ export default function Grille() {
      est inchangée — même useSyncExternalStore, même instantané serveur.
      La périodicité n'est PAS remise à zéro quand on passe côté devis : on
      revient côté PME avec la formule qu'on y avait laissée. */
-  /* 15/09 (Teo) — « je veux pas que les prix s'affichent avant d'avoir
-     rempli le truc, sinon on reste sur un truc inventé ». Tant que le
-     calculateur n'a pas reçu un volume, les cartes montrent tout SAUF leur
-     chiffre, et le comparatif — qui ne compare que des prix — attend. */
-  const [volumes, setVolumes] = useState<SaisieVolumes | null>(null);
-  const noterVolumes = useCallback((v: SaisieVolumes | null) => setVolumes(v), []);
   const monde = useMonde();
   const choisirMonde = useChoisirMonde();
   const devis = monde === "structure";
@@ -834,32 +679,6 @@ export default function Grille() {
             · à partir de 1280 px, quatre colonnes et quatre rangées.
             Pourquoi pas quatre colonnes dès 1024 px : la colonne utile y
             vaut 928 px, soit 208 px par carte — deux mots par ligne. */}
-        {/* ═══ LE CALCULATEUR — AVANT LES CARTES (15/09, Teo), PUIS APRÈS
-            (22/09, Teo) — il vit désormais sous la grille, voir plus bas.
-            L'historique du 15/09 reste ici parce qu'il dit pourquoi les
-            cartes retiennent leur chiffre tant qu'aucun cas n'est choisi. ═══
-            Il est passé DEVANT le 15/09 : « je veux pas que les prix
-            s'affichent avant d'avoir rempli le truc, sinon on reste sur un
-            truc inventé. » Les cartes en dépendent maintenant — tant qu'il
-            n'a pas de volumes, elles montrent tout sauf leur chiffre. Le
-            mettre après les cartes reviendrait à demander au visiteur de
-            redescendre pour débloquer ce qu'il regarde.
-
-            PAS DU CÔTÉ GRANDE STRUCTURE : là-bas il n'y a pas de palier à
-            trouver, le prix sort de l'audit. Même raison que le comparatif.
-
-            Il reçoit ce qui est déjà coché dans les cartes pour ne pas
-            reposer la question ; questions, coefficients, durées et textes
-            vivent tous dans lib/paliers.ts.
-
-            15/09, seconde passe — `max-w-5xl` et non `4xl` : le calculateur
-            est passé à deux panneaux (modèle pricing-12) et sa colonne de
-            résultat en prend 400 px à partir de 1024 px.
-            15/09, troisième passe — `lg:max-w-none` : le cadre prend toute la
-            colonne de la page (1 184 px dans le `.r-wrap`) au lieu de 1 024.
-            Ce n'est pas de la largeur pour de la largeur — c'est ce qui donne
-            aux questions les 705 px où elles tiennent sur deux colonnes, et
-            le cadre perd d'un coup la moitié de sa hauteur. */}
         <div
           id="grille"
           className="mx-auto mt-10 grid max-w-md scroll-mt-32 gap-6 pt-4 md:max-w-3xl md:grid-cols-2 md:grid-rows-[auto_auto_1fr_auto_auto_auto_1fr_auto] md:gap-x-6 md:gap-y-10 xl:max-w-none xl:grid-cols-4 xl:grid-rows-[auto_auto_1fr_auto] xl:gap-x-6 xl:gap-y-0"
@@ -871,107 +690,19 @@ export default function Grille() {
               choisis={choix.palier === p.id ? choix.postes : []}
               bascule={basculePour(p)}
               monde={monde}
-              volumes={volumes}
             />
           ))}
           <CarteSurMesure monde={monde} />
         </div>
 
-        {/* 22/09 (Teo : « déplace la section comparatif avec la section
-            des postes ») — LE COMPARATEUR DE CAS PASSE SOUS LES CARTES.
-            L'ordre du 15/09 (calculateur devant) tenait à ce que les cartes
-            affichaient un prix qu'il fallait mériter ; depuis qu'elles ne
-            montrent plus que « Choisissez un cas », l'offre se lit d'abord,
-            le cas type s'y choisit ensuite. Le renvoi des cartes dit donc
-            « ci-dessous » (lib/paliers.ts, CALCULATEUR.avant.sous). Même
-            écart que les cartes avaient sous lui : mt-12, lg:mt-16. */}
-        {devis ? null : (
-          <div className="mx-auto mt-12 max-w-5xl lg:mt-16 lg:max-w-none">
-            <Calculateur
-              postesChoisis={choix.postes}
-              palierChoisi={choix.palier}
-              onVerdict={noterVolumes}
-            />
-          </div>
-        )}
+        {/* 25/09 (Teo : « enlève la section comparateur ») — le comparateur
+            de cas types (components/tarifs/Calculateur.tsx) ne se monte plus
+            sous les cartes. Il fournissait les volumes dont vivaient les
+            heures des cartes et le tableau « Comparer les paliers » : les
+            cartes ne gardent que leur plafond, et le tableau, qui ne
+            s'affichait qu'après le choix d'un cas, part avec lui. */}
       </section>
 
-      {/* ═══ 2. comparatif — côté grande structure il ne s'affiche PAS
-             (15/09) : ses quinze lignes comparent des prix mensuels, une
-             réunion d'installation de 45 minutes et un satisfait ou
-             remboursé qui n'ont pas été promis de ce côté-là ; les
-             réécrire aurait été inventer. L'appel final porte la suite.
-             15/09, soir — la ligne « Inclus à tous les paliers », la note
-             de bas de grille (montants TTC, facturation, résiliation) et
-             le bandeau d'orientation « Nous identifions le palier » sont
-             retirés : Teo les a supprimés de la page.
-
-             14/09 : le « Comparator one » de Tailark, en
-             carte à quatre colonnes (voir components/ui/comparator-1).
-             Les deux en-têtes collants du 05/09 et le repli « Voir tous
-             les points » partent avec lui : quinze lignes en trois
-             familles se lisent d'un coup, et la tête de la carte porte
-             déjà les prix — qui suivent la périodicité choisie plus haut. */}
-      {/* 15/09 — le comparatif attend lui aussi les volumes : ses lignes
-          « Mensuel », « Annuel », « Vous économisez » et « Installation » ne
-          sont QUE des prix. L'afficher avant, ce serait donner par la porte
-          de derrière les montants que les cartes retiennent. */}
-      {devis || volumes === null ? null : (() => {
-      /* 15/09, correctif — LE COMPARATIF LIT LES MÊMES CHIFFRES QUE LES
-         CARTES. Prix comme lignes sortaient de PALIERS, les trois repères :
-         sous des cartes à 220 / 620 / 800 €, le tableau redisait
-         299 / 790 / 1 990 € et son bouton emmenait sur ce dernier montant.
-         On refait ici le calcul d'une carte — ses postes, leurs pièces, le
-         prix continu — et on le donne au tableau comme aux boutons. Hors
-         grille (le prix sort d'un audit), on retombe sur le repère plutôt
-         que d'inventer un chiffre, et le lien n'emporte aucun volume. */
-      const colonnes = PALIERS.map((p) => {
-        const postesP = postesPourCarte(volumes, p.aChoisir, choix.palier === p.id ? choix.postes : []);
-        const piecesP = piecesPourPostes(volumes, postesP);
-        const calcule = prixPourVolume(piecesP);
-        return {
-          p,
-          piecesP: calcule === null ? p.plafond : piecesP,
-          prixP: calcule ?? p.prix,
-          volumeLien: calcule === null ? 0 : piecesP,
-        };
-      });
-      return (
-      <section id="comparatif" data-monde="clair" className="r-blanc">
-        <div className="r-wrap py-14 sm:py-20">
-          <div className="text-center">
-            <h2 className="r-h2 text-balance">Comparer les paliers</h2>
-            <p className="mx-auto mt-4 max-w-md text-balance text-[#616161]">
-              Le détail ligne à ligne des trois paliers&nbsp;: périmètre, facturation, mise en
-              service.{" "}
-              <a href={lienContact("avant")} className="r-lien">
-                Poser une question
-              </a>
-            </p>
-          </div>
-          <Comparator
-            className="mx-auto mt-12 max-w-4xl"
-            plans={colonnes.map(({ p, piecesP, volumeLien }) => ({
-              id: p.id,
-              nom: p.nom,
-              prix: `${piecesP.toLocaleString("fr-FR")} pièces`,
-              periode: "par mois, d'après le cas choisi",
-              href: lienPalier(p, volumeLien),
-              cta: p.aChoisir === null ? "Réserver un audit" : "Sélectionner les postes",
-              bouton: boutonPalier(p),
-              phare: p.phare,
-            }))}
-            familles={comparatifPaliers(
-              colonnes.map((c) => c.piecesP) as [number, number, number],
-            ).map((f) => ({
-              titre: f.titre,
-              lignes: f.lignes.map((l) => ({ libelle: l.libelle, aide: l.aide, valeurs: l.valeurs })),
-            }))}
-          />
-        </div>
-      </section>
-      );
-      })()}
     </>
   );
 }
