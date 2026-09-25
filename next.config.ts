@@ -24,9 +24,18 @@ const POLITIQUE_RAPPORT = [
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
+  /* 25/09/2026 — audit sécurité : le mode rapport n'avait nulle part où
+     envoyer ses rapports, donc aucune violation n'était jamais relevée et
+     la politique ne pouvait pas être durcie. Ils partent maintenant vers
+     /api/csp (app/api/csp/route.ts), qui les écrit dans les journaux
+     Vercel. report-to pour Chrome et Edge, report-uri pour Firefox et
+     Safari. Après une semaine de relevés : passer en politique appliquée. */
+  "report-uri /api/csp",
+  "report-to csp",
 ].join("; ");
 
 const EN_TETES_SECURITE = [
+  { key: "Reporting-Endpoints", value: 'csp="/api/csp"' },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
