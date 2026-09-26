@@ -1,5 +1,6 @@
 import { createClient, utilisateurCourant } from "@/lib/supabase/server";
 import { creerSessionEnregistrement, stripeDisponible } from "@/lib/stripe/serveur";
+import { limiteDepassee, lireJson, origineRefusee } from "@/lib/securite";
 
 /* ══════════════════════════════════════════════════════════════════════
    POST /api/paiement/setup — ouvrir l'enregistrement du moyen de paiement
@@ -65,15 +66,16 @@ function erreur(code: string, status: number) {
 }
 
 export async function POST(request: Request) {
+  /* 25/09 — gardes de lib/securite.ts : la session Stripe ne s'ouvre que
+     depuis nos pages, et pas en boucle (dix par heure et par adresse). */
+  if (origineRefusee(request)) return erreur("origine", 403);
+  if (limiteDepassee("paiement", request, 10, 3_600_000)) return erreur("trop", 429);
+
   const utilisateur = await utilisateurCourant();
   if (!utilisateur) return erreur("connexion_requise", 401);
 
-  let corps: unknown = null;
-  try {
-    corps = await request.json();
-  } catch {
-    /* corps absent ou pas JSON : traité juste en dessous */
-  }
+  /* corps absent, trop gros ou pas JSON : `undefined`, traité juste en dessous */
+  const corps: unknown = await lireJson(request, 2_000);
   const demandeId =
     corps && typeof corps === "object" && typeof (corps as { demande?: unknown }).demande === "string"
       ? (corps as { demande: string }).demande.trim()

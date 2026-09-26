@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { COURRIEL } from "@/lib/reservation";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
+import { lireJson, origineRefusee } from "@/lib/securite";
 
 /* ══════════════════════════════════════════════════════════════════════
    POST /api/contact — le formulaire du service client part par e-mail
@@ -81,14 +82,24 @@ async function envoiAutorise(req: Request): Promise<boolean> {
 }
 
 function echapper(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export async function POST(req: Request) {
-  let corps: Record<string, unknown>;
-  try {
-    corps = (await req.json()) as Record<string, unknown>;
-  } catch {
+  /* 25/09 — gardes de lib/securite.ts : une page tierce ne fait pas poster
+     ce formulaire par le navigateur de ses visiteurs, et le corps est lu
+     borné (16 Ko). La limite d'envoi, elle, est comptée en base juste avant
+     l'envoi (envoiAutorise, plus haut) — pas de second compteur en mémoire. */
+  if (origineRefusee(req)) {
+    return Response.json({ ok: false, motif: "origine" }, { status: 403 });
+  }
+  const corps = (await lireJson(req, 16_000)) as Record<string, unknown> | undefined;
+  if (corps === undefined) {
     return Response.json({ ok: false, motif: "requete" }, { status: 400 });
   }
 

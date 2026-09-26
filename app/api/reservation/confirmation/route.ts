@@ -2,6 +2,7 @@ import { composerConfirmation, FORMATS } from "@/lib/mail/confirmation";
 import { COURRIEL } from "@/lib/reservation";
 import { lienVisio } from "@/lib/visio";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
+import { limiteDepassee, lireJson, origineRefusee } from "@/lib/securite";
 
 /* ══════════════════════════════════════════════════════════════════════
    POST /api/reservation/confirmation — l'accusé de réception du créneau
@@ -85,10 +86,18 @@ type Ligne = {
 };
 
 export async function POST(req: Request) {
-  let corps: Record<string, unknown>;
-  try {
-    corps = (await req.json()) as Record<string, unknown>;
-  } catch {
+  /* 25/09 — mêmes gardes que /api/contact (lib/securite.ts). Une
+     confirmation par réservation, c'est la SQL qui le garantit ; ici on
+     empêche seulement une boucle de cogner la base et le service d'envoi.
+     Dix appels par heure et par adresse : un vrai visiteur en fait un. */
+  if (origineRefusee(req)) {
+    return Response.json({ ok: false, motif: "origine", envoye: false }, { status: 403 });
+  }
+  if (limiteDepassee("confirmation", req, 10, 3_600_000, 60)) {
+    return Response.json({ ok: false, motif: "trop", envoye: false }, { status: 429 });
+  }
+  const corps = (await lireJson(req, 2_000)) as Record<string, unknown> | null | undefined;
+  if (corps === undefined) {
     return Response.json({ ok: false, motif: "requete" }, { status: 400 });
   }
   const id = typeof corps?.id === "string" ? corps.id.trim() : "";

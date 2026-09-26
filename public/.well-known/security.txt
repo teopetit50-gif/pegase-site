@@ -1,0 +1,4 @@
+Contact: mailto:contact@omegaai.fr
+Expires: 2027-09-25T00:00:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://omegaai.fr/.well-known/security.txt

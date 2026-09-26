@@ -7,46 +7,83 @@ import type { NextConfig } from "next";
    n'importe quel site pouvait encadrer omegaai.fr dans une iframe et
    l'habiller à sa façon.
 
-   Même parti que sur l'espace client : les quatre en-têtes sont APPLIQUÉS
-   (aucun ne dépend des ressources de la page), la politique de contenu part
-   en MODE RAPPORT. Le site a quatre routes API et des formulaires ; une CSP
-   appliquée d'emblée peut couper un envoi sans que rien ne le signale. On la
-   durcit au second passage, une fois les violations relevées dans la console.
+   25/09/2026 — phase de sécurisation : la politique de contenu passe du MODE
+   RAPPORT au mode APPLIQUÉ. En rapport, elle ne protégeait de rien : aucune
+   adresse de rapport n'était déclarée, les violations mouraient dans la
+   console de chaque visiteur. Relevé fait avant de l'écrire (accueil, offres,
+   tarifs, réservation, contact, modèles, blog) : tout vient de notre origine,
+   sauf trois choses, nommées une par une ci-dessous —
+     · l'armoire Supabase, appelée DEPUIS le navigateur par le calendrier
+       (agenda_public) et la réservation (reserver_audit). Oubliée dans la
+       politique en rapport : appliquée telle quelle, elle aurait coupé la
+       prise de rendez-vous sans une ligne dans les journaux
+       (mémoire csp-connect-src-avale-lappel). L'URL est écrite en dur :
+       next.config est évalué au build, où les variables Vercel ne sont pas
+       toujours là ;
+     · le pixel Meta (script + envois), chargé seulement après consentement ;
+     · les images et médias en https, gardés larges : c'est le seul endroit
+       où un visuel hébergé ailleurs pourrait apparaître sans qu'on le sache.
+   'unsafe-inline' reste nécessaire aux scripts d'amorçage de Next sur des
+   pages statiques (un nonce rendrait chaque page dynamique). 'unsafe-eval'
+   ne sert qu'au serveur de développement : il sort de la production.
    ═══════════════════════════════════════════════════════════════════════ */
-const POLITIQUE_RAPPORT = [
+const DEV = process.env.NODE_ENV !== "production";
+const ARMOIRE = "https://noepmkkplxshjbmqqxft.supabase.co";
+const ARMOIRE_ENV = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+
+const POLITIQUE = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net",
+  `script-src 'self' 'unsafe-inline'${DEV ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""} https://connect.facebook.net`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://www.facebook.com https://connect.facebook.net",
+  `connect-src 'self' ${ARMOIRE}${ARMOIRE_ENV && ARMOIRE_ENV !== ARMOIRE ? ` ${ARMOIRE_ENV}` : ""} https://www.facebook.com https://connect.facebook.net${DEV ? " ws: https://va.vercel-scripts.com" : ""}`,
+  "worker-src 'self' blob:",
+  "frame-src 'self'",
+  "manifest-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  /* 25/09/2026 — audit sécurité : le mode rapport n'avait nulle part où
-     envoyer ses rapports, donc aucune violation n'était jamais relevée et
-     la politique ne pouvait pas être durcie. Ils partent maintenant vers
-     /api/csp (app/api/csp/route.ts), qui les écrit dans les journaux
-     Vercel. report-to pour Chrome et Edge, report-uri pour Firefox et
-     Safari. Après une semaine de relevés : passer en politique appliquée. */
+  ...(DEV ? [] : ["upgrade-insecure-requests"]),
+  /* 25/09/2026 — les rapports partent vers /api/csp (app/api/csp/route.ts),
+     qui les écrit dans les journaux Vercel ; report-to pour Chrome et Edge,
+     report-uri pour Firefox et Safari. Posés d'abord pour une semaine de
+     relevés en mode rapport ; la politique est appliquée le même soir (0
+     violation sur huit pages en recette) et les rapports restent : en mode
+     appliqué, chaque ligne « [csp] violation » est une ressource BLOQUÉE —
+     c'est là qu'on voit si un visuel ou un script manque à la liste. */
   "report-uri /api/csp",
   "report-to csp",
 ].join("; ");
 
 const EN_TETES_SECURITE = [
+  /* HSTS : Vercel pose max-age seul. includeSubDomains couvre app.omegaai.fr
+     (déjà en HTTPS) et interdit qu'un sous-domaine soit un jour servi en
+     clair ; preload rend l'inscription possible sur hstspreload.org — elle
+     reste un geste à faire, à part, et difficile à défaire. */
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "Content-Security-Policy", value: POLITIQUE },
   { key: "Reporting-Endpoints", value: 'csp="/api/csp"' },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  /* Coupe le lien entre un onglet ouvert depuis ailleurs et le nôtre
+     (window.opener) : ni redirection de l'onglet d'origine, ni fuite par
+     fenêtre croisée. Aucune fenêtre surgissante ne parle au site. */
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    value:
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), hid=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), browsing-topics=()",
   },
-  { key: "Content-Security-Policy-Report-Only", value: POLITIQUE_RAPPORT },
 ];
 
 const nextConfig: NextConfig = {
+  /* 25/09 — ne pas annoncer le cadriciel dans chaque réponse. */
+  poweredByHeader: false,
   /* 01/09 — transitions de page : <ViewTransition> React dans PageShell.
      10/09 — le drapeau `experimental.viewTransition` a DISPARU de Next 16.3 :
      il n'existe plus dans le paquet, et `tsc` refuse la clé. On l'enlève ; le
