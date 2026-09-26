@@ -1,16 +1,3 @@
-Photos de /secteurs/groupes (Varelo ; jusqu'au 25/09/2026 : public/secteurs-distribution, Namolu).
-
-Photos Unsplash (licence Unsplash, gratuites, ni « premium » ni « plus »), 25/09/2026 :
-carte-direction.jpg — photo de Christina @ wocintechchat.com M, Unsplash (https://unsplash.com/photos/faEfWCdOKIg), licence Unsplash
-  (la carte « Grands groupes » de l'accueil, lib/secteurs-accueil.ts ; et, estompée, dans l'écran « collage »)
-carte-juridique.jpg — photo de Leon Seibert, Unsplash (https://unsplash.com/photos/9i5eqBarv-k), licence Unsplash
-carte-operations.jpg — photo de Bernd Dittrich, Unsplash (https://unsplash.com/photos/iDSXatl7yNo), licence Unsplash, recadrée en 3:4
-pole-immobilier.jpg — photo de Sung Jin Cho, Unsplash (https://unsplash.com/photos/BbVGAjfAQ4o), licence Unsplash
-  (ces trois-là en vignettes de pièces dans l'écran « collage »)
-
-Photos incrustées dans les écrans de la page (ecrans/*.webp), fabriqués par
-outils/ecrans-varelo/ — les originaux y sont, dans photos/ (licence Unsplash,
-gratuites, ni « premium » ni « plus », vérifiées plein cadre), 25/09/2026 :
 frais-tomates.jpg — photo de Mockup Graphics, Unsplash (https://unsplash.com/photos/ND9W782cP-Q), licence Unsplash — red tomatoes on white surface
 frais-yaourt.jpg — photo de Melody Zimmerman, Unsplash (https://unsplash.com/photos/TVe27buT1yQ), licence Unsplash — a bowl of cereal and a bowl of blueberries
 frais-salade.jpg — photo de this life's illusions, Unsplash (https://unsplash.com/photos/6_SGrUywWOQ), licence Unsplash — a square white bowl filled with green leaves
@@ -26,9 +13,3 @@ produit-chaise.jpg — photo de Hamza Nahal, Unsplash (https://unsplash.com/phot
 avarie-cartons.jpg — photo de Mel —, Unsplash (https://unsplash.com/photos/quTvuVu0ghQ), licence Unsplash — A pile of cardboard sitting on top of a wooden floor
 avarie-dechirure.jpg — photo de Bunheng Tong, Unsplash (https://unsplash.com/photos/8kNeEsJBuqs), licence Unsplash — a large piece of cloth sitting on top of a table
 avarie-camion.jpg — photo de Joseph Prospere, Unsplash (https://unsplash.com/photos/z0ujM01KhBI), licence Unsplash — Blue shipping container on a truck parked by a building
-
-(25/09 au soir, v3 de la page, décalque de payload-marketing-v1.21st.app :
-heros-port, pilote-equipe, carte-conteneur, carte-entrepot et la photo de
-magasin Monoprix retirées ; plus aucune page ne les montrait.
-Auparavant : Mr.Bricolage, Fnac, Galeries Lafayette et carte-frais,
-retirées quand la page a quitté la seule distribution.)

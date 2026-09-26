@@ -1,686 +1,616 @@
 /* ══════════════════════════════════════════════════════════════════════
-   .p-groupes — /secteurs/groupes, Varelo (24/09/2026, v2). Jusqu'au 25/09
-   au soir : Namolu, /secteurs/distribution, « groupes de distribution ».
-   Le préfixe `nm-` des classes et des jetons en est le reste.
-   Décalque de https://www.concurrence.com (page d'accueil).
+   .p-groupes — /secteurs/groupes, Varelo (v3 du 25/09/2026)
+   Décalque 1:1 de https://payload-marketing-v1.21st.app/ (le gabarit
+   « Payload marketing » de 21st.dev), passé en BLANC.
 
-   Teo, 24/09 au soir, sur la v1 (décalque de toolio.com) : « j'aime pas
-   du tout le design de la page de Namolu ; voici le site de référence, tu
-   vas devoir le reproduire à l'identique […] les couleurs, tu prends
-   celles de Omega ». La v1 est remplacée entièrement.
+   Teo, 25/09 au soir : « j'aime pas du tout le design de la page groupe
+   de distribution […] je veux que tu reproduises le site référence […]
+   du 1:1, genre tout pareil […] je préfère un truc fait à l'identique
+   plutôt qu'un truc fait à 80 % », puis : « la page ne doit pas être
+   noire, le SaaS référence est noir, je veux qu'il soit blanc (Omega)
+   mais fais le même genre 1:1 ». La v2 (décalque de concurrence.com)
+   et la v1 (toolio.com) sont remplacées entièrement.
 
-   ── LA MÉTHODE ───────────────────────────────────────────────────────
-   Le balisage est celui de la référence, relevé HYDRATÉ par CDP après
-   défilement (Next.js + Tailwind v3) : les classes Tailwind standard sont
-   reprises telles quelles dans le TSX (notre Tailwind v4 les régénère aux
-   mêmes valeurs, paliers 640/768/1024/1280/1536 identiques). Leurs jetons
-   et utilitaires maison sont réécrits ici, préfixés `nm-`. Deux composants
-   viennent de 21st.dev : l'Infinite Slider d'ibelick (les trois bandeaux
-   défilants) ; le reste de la référence n'a pas d'équivalent exact là-bas
-   et a été reproduit depuis son propre DOM.
+   ── LE RELEVÉ ─────────────────────────────────────────────────────────
+   La référence est une appli Vite rendue au client : le HTML servi est
+   vide, tout est dans deux fichiers compilés, lus en entier le 25/09 :
+   /assets/index-Cr8N7aKC.js (les sept composants et leurs contenus) et
+   /assets/index-Db10dl4U.css (8,8 ko, la feuille ENTIÈRE). Chaque règle
+   ci-dessous est la sienne, dans le même ordre, à valeur égale ; seuls
+   changent les couleurs (table ci-dessous), les polices et le nom des
+   classes (préfixe grp-, table en bas de ce bloc). Les sélecteurs gardent
+   la MÊME structure de spécificité que la source : certains de ses rendus
+   en dépendent (l'étiquette « Situation type » est en 15 px parce que
+   `.quote-card p` bat `.demo-label`).
+   Géométrie relevée au style calculé à 390, 768, 1024, 1440 et 1700 px
+   (outils/ecrans-varelo/LISEZ-MOI.md, tableau de concordance).
 
-   ── LES COULEURS ─────────────────────────────────────────────────────
-   25/09 — Teo : « prends une autre couleur que le noir, j'aime pas trop
-   le fond comme ça, refais avec des belles couleurs ». Les deux bandes
-   sombres (noir #08090c et nuit #17171a jusque-là) prennent deux couleurs
-   profondes, tirées du ciel et de la menthe d'Omega (--sky #67caf2,
-   --mint #2fe6a8), à la même clarté que les leurs :
-   Puis, le même jour : « bleu et vert ensemble ça va pas ; garde le bleu,
-   pas le vert, mais il est un peu trop pétant » et « remets du classique »
-   pour le vert. Le cobalt #1f3f8f descend à un bleu nuit sourd, le jade
-   redevient la nuit classique du site :
-   référence                      ici
-   concurrence-orange #aa412a  →  --nm-bande    #1c2d57  (bleu nuit)
-   concurrence-blue   #083241  →  --nm-bande-2  #17171a  (la nuit de /tarifs)
-   concurrence-green  #2c3827  →  --nm-sombre   #1c2d57  (carte sécurité :
-                                  le bleu des bandes du haut, Teo le
-                                  25/09 : « mets-la avec le fond bleu,
-                                  le même bleu qu'en haut »)
-   concurrence-black  #100f0f  →  --nm-noir     #0a0a0a
-   lavande des lumières        →  bleu glacier sur le bleu, gris clair
-                                  sur la nuit (--nm-lum)
-   warm-gray-1…6 (gris chauds) →  gris neutres, même clarté un à un
-   linework orange / bleu      →  blanc à 16 % / 14 %
-   Le bouton plein orange devient noir. Les vidéos de lumière des deux
-   bandes (fichiers de la référence) sont redessinées (Lumieres.tsx, .nm-barre).
+   ── LES COULEURS : LE MÊME ÉCART AU FOND, À L'ENVERS ──────────────────
+   Chaque couleur garde sa DISTANCE au fond (en clarté L*), mesurée depuis
+   le blanc au lieu du noir :
+   référence (sombre)          ici (clair)
+   --bg    #0b0b0d        →    --grp-fond      #ffffff
+   héros   #07080b        →    #ffffff (même fond)
+   --panel #111116        →    --grp-panneau   #f8f8f9
+   --line  #33333a        →    --grp-filet     #dcdce0
+   --text  #f4f4f2        →    --grp-texte     #0b0b0d
+   --muted #aaaab0        →    --grp-attenue   #55555c
+   --acid  #ffffff        →    --grp-acide     #000000
+   trame   #ffffff0d      →    #0000000f (6 % de noir)
+   chapô   #d0d0d2        →    #2e2e32     énoncé  #cacacf  →  #333338
+   survol  #89898f        →    #707077     puce    #25252b  →  #e6e6ea
+   cadre des écrans #48484f → #c9c9ce ; ombre 0 30px 80px #0008 →
+   0 30px 80px rgba(15,15,25,.14) (sur du blanc, 53 % de noir se verrait
+   dix fois plus que sur leur fond presque noir).
+   Survol d'un bouton : fond --acid et texte #101010 → fond noir, texte
+   blanc.
 
-   ── LES POLICES : CELLES DU SITE ─────────────────────────────────────
-   Flecha S (serif sous licence) → Newsreader (app/_polices/serif.ts, déjà
-   servie pour /secteurs/avocats) ; Inter → General Sans ; ABC Diatype Mono
-   → la mono du site.
+   ── LE FOND ANIMÉ DU HÉROS ────────────────────────────────────────────
+   Leur `glass-animation.mp4` (60 s, bandes de verre diagonales bleu nuit
+   à reflets dorés, à 32 % en `screen`) est leur fichier : il n'est pas
+   repris. Il est redessiné en WebGL (components/secteurs/groupes/
+   Verre.tsx), à la même opacité, en `multiply` : l'inverse exact de
+   `screen` sur un fond clair.
 
-   ── RÈGLES MAISON ────────────────────────────────────────────────────
-   Leurs logos clients, témoignages signés, financeurs et chiffres de
-   résultat ne sont pas repris : métiers, problèmes, territoires et faits
-   de conception à la même place (components/secteurs/distribution/textes.ts).
+   ── LES POLICES : CELLES DU SITE ──────────────────────────────────────
+   Inter → General Sans (--font-omega) ; Roboto Mono et ui-monospace →
+   Geist Mono (--font-omega-mono). Leur interligne `normal` (celui
+   d'Inter, 1,21) est posé en valeur : sinon chaque bloc prendrait
+   l'interligne de General Sans et la page s'allongerait.
+
+   ── CE QUE LA PRÉ-FEUILLE DE TAILWIND A EFFACÉ ────────────────────────
+   La référence n'a pas de remise à zéro : ses paragraphes, ses h2 et h3
+   gardent les marges et la graisse du navigateur. Ici Tailwind les met à
+   zéro. Chaque valeur du navigateur dont la page dépend est donc écrite
+   dans SA règle (marges de 1em des p, graisse 700 et marges .83em du
+   titre du carrousel, 700 du h3 de l'accordéon, img en ligne dans la
+   carte). Jamais de règle d'élément globale (`p { margin }`) : elle
+   écraserait les utilitaires Tailwind de toute la portée.
+
+   ── RÈGLES MAISON (elles priment sur la ressemblance) ─────────────────
+   Leurs captures de Payload ne sont pas reprises : chaque image a son
+   équivalent en écran de Varelo, au même rapport largeur/hauteur, peint
+   en HTML sur des données d'exemple et photographié
+   (outils/ecrans-varelo/). Leurs faux témoignages (« Editable demo
+   testimonial ») deviennent des situations types, sans nom ni société.
+   Leur en-tête et leur pied de page : ceux d'Omega (PageShell).
+
+   ── CLASSES : référence → ici ─────────────────────────────────────────
+   grid-bg → grp-trame · hero → grp-heros · hero-flow → grp-heros-verre ·
+   hero-copy → grp-heros-texte · hero-actions → grp-heros-actions ·
+   hero-media → grp-heros-ecrans · logo-caption → grp-legende ·
+   statement → grp-enonce · statement-copy → grp-enonce-texte ·
+   spacer → grp-espace · button-row → grp-boutons · statement-media
+   (.full) → grp-enonce-image (.grp-plein) · highlights → grp-survol ·
+   highlight-list → grp-survol-liste · highlight-entry (.active) →
+   grp-survol-entree (.grp-actif) · mini-button → grp-mini ·
+   highlight-visual → grp-survol-visuel · highlight-overlay →
+   grp-survol-dessus · slider → grp-carrousel · slider-intro →
+   grp-carrousel-intro · quote-card → grp-carte · demo-label →
+   grp-etiquette · slider-nav → grp-carrousel-nav · accordion →
+   grp-accordeon · accordion-heading → grp-accordeon-tete ·
+   accordion-items → grp-accordeon-items · accordion-media →
+   grp-accordeon-media.
    ══════════════════════════════════════════════════════════════════════ */
 
 .p-groupes {
-  --nm-bande: #1c2d57;
-  --nm-bande-2: #17171a;
-  --nm-sombre: #1c2d57;
-  --nm-noir: #0a0a0a;
-  --nm-g1: #f2f2f0;
-  --nm-g2: #dcdcd9;
-  --nm-g3: #b1b1ae;
-  --nm-g4: #939390;
-  --nm-g5: #767673;
-  --nm-g6: #575754;
-  --nm-trait: rgba(255, 255, 255, 0.16);
-  --nm-trait-2: rgba(255, 255, 255, 0.14);
+  --grp-fond: #ffffff;
+  --grp-panneau: #f8f8f9;
+  --grp-filet: #dcdce0;
+  --grp-texte: #0b0b0d;
+  --grp-attenue: #55555c;
+  --grp-acide: #000000;
+  --grp-sans: var(--font-omega), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --grp-mono: var(--font-omega-mono), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
 
-  /* leurs espacements fluides, tels quels */
-  --space-edge: clamp(1rem, calc(0.82394rem + 0.75117vw), 1.5rem);
-  --space-section-y: clamp(5rem, calc(3.94366rem + 4.50704vw), 8rem);
-  --space-gap-lg: clamp(3rem, calc(2.29577rem + 3.00469vw), 5rem);
-  --space-gap-xl: clamp(5rem, calc(4.11972rem + 3.75587vw), 7.5rem);
-
-  --nm-serif: var(--font-avocats-serif), Georgia, serif;
-  --nm-sans: var(--font-omega), ui-sans-serif, system-ui, sans-serif;
-  --nm-mono: var(--font-omega-mono), ui-monospace, monospace;
-
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
-  overflow-x: clip;
-  background: var(--nm-bande-2);
-  color: var(--nm-noir);
-  font-family: var(--nm-sans);
-  -webkit-font-smoothing: antialiased;
-}
-/* Pas de remise à zéro des marges ici : ce fichier est hors couche et
-   battrait les `mb-4`, `mt-8`… des éléments (le préflight de Tailwind
-   remet déjà p et h1-h3 à zéro, dans sa couche). */
-
-/* ── leurs utilitaires maison, préfixés ─────────────────────────────── */
-.p-groupes .nm-px-edge {
-  padding-left: var(--space-edge);
-  padding-right: var(--space-edge);
-}
-.p-groupes .nm-pl-edge {
-  padding-left: var(--space-edge);
-}
-.p-groupes .nm-section-py {
-  padding-top: var(--space-section-y);
-  padding-bottom: var(--space-section-y);
-}
-.p-groupes .nm-gap-fluid-lg {
-  gap: var(--space-gap-lg);
-}
-.p-groupes .nm-gap-fluid-xl {
-  gap: var(--space-gap-xl);
-}
-.p-groupes .nm-serif {
-  font-family: var(--nm-serif);
-}
-.p-groupes .nm-sans {
-  font-family: var(--nm-sans);
-}
-.p-groupes .nm-backface {
-  backface-visibility: hidden;
+  color: var(--grp-texte);
+  background: var(--grp-fond);
+  font-synthesis: none;
+  font-family: var(--grp-sans);
+  font-size: 16px;
+  line-height: 1.21;
+  letter-spacing: normal;
 }
 
-/* typographie de la référence (relevé des paliers : 768, 1024, 1280) */
-.p-groupes .nm-type-display,
-.p-groupes .nm-type-h1 {
-  font-family: var(--nm-serif);
-  font-size: 38px;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
-}
-.p-groupes .nm-type-h2 {
-  font-family: var(--nm-serif);
-  font-size: 28px;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
-}
-.p-groupes .nm-type-h3 {
-  font-family: var(--nm-serif);
-  font-size: 28px;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
-}
-.p-groupes .nm-type-h4 {
-  font-family: var(--nm-serif);
-  font-size: 22px;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-.p-groupes .nm-type-body {
-  font-family: var(--nm-sans);
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
-}
-.p-groupes .nm-type-caption {
-  font-family: var(--nm-sans);
-  font-size: 13px;
-  line-height: 1.35;
-}
-.p-groupes .nm-type-btn {
-  font-family: var(--nm-sans);
-  font-size: 13px;
-  letter-spacing: 0.07px;
-  line-height: 1.35;
-}
-.p-groupes .nm-type-btn-sm {
-  font-family: var(--nm-sans);
-  font-size: 11px;
-  letter-spacing: 0.12px;
-  line-height: 1.41;
-}
-.p-groupes .nm-type-mono {
-  font-family: var(--nm-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-.p-groupes .nm-text-h1-mobile {
-  font-size: 38px;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
-}
-.p-groupes .nm-text-h2 {
-  font-size: 48px;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
-}
-.p-groupes .nm-text-subtitle {
-  font-size: 22px;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-.p-groupes .nm-text-subtitle-mobile {
-  font-size: 18px;
-  letter-spacing: 0;
-  line-height: 1.41;
-}
-.p-groupes .nm-text-body {
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
-}
-.p-groupes .nm-text-body-sm {
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
-}
-.p-groupes .nm-text-caption {
-  font-size: 13px;
-  letter-spacing: 0;
-  line-height: 1.35;
-}
-@media (min-width: 768px) {
-  .p-groupes .nm-type-display,
-  .p-groupes .nm-type-h1 {
-    font-size: 48px;
-  }
-  .p-groupes .nm-type-h2 {
-    font-size: 32px;
-    line-height: 1.08;
-  }
-}
-@media (min-width: 1024px) {
-  .p-groupes .nm-type-h2 {
-    font-size: 48px;
-    line-height: 1.02;
-  }
-  .p-groupes .lg\:nm-text-body {
-    font-size: 17px;
-  }
-  .p-groupes .lg\:nm-text-body-sm {
-    font-size: 15px;
-  }
-}
-@media (min-width: 1280px) {
-  .p-groupes .nm-type-display {
-    font-size: 60px;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
-  }
-}
-
-/* ── les boutons (leur composant Button, trois variantes) ────────────── */
-.p-groupes .nm-btn {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: fit-content;
-  white-space: nowrap;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
+.p-groupes a {
+  color: inherit;
   text-decoration: none;
-  transition: all 200ms;
 }
-.p-groupes .nm-btn:active {
-  transform: scale(0.98);
+
+.p-groupes button {
+  font: inherit;
+  color: inherit;
 }
-.p-groupes .nm-btn > svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
+
+.p-groupes .grp-trame {
+  border-bottom: 1px solid var(--grp-filet);
+  background-image: repeating-linear-gradient(
+    90deg,
+    #0000 0 calc(8.33333% - 1px),
+    #0000000f calc(8.33333% - 1px) 8.33333%
+  );
+}
+
+/* ── boutons à filet (nav-cta, button-row a, hero-actions > a) ─────── */
+.p-groupes .grp-boutons a,
+.p-groupes .grp-heros-actions > a {
+  border: 1px solid var(--grp-filet);
+  padding: 12px 16px;
+  color: var(--grp-texte) !important;
+}
+.p-groupes .grp-boutons a:hover,
+.p-groupes .grp-heros-actions > a:hover {
+  background: var(--grp-acide);
+  color: #fff !important;
+}
+
+/* ── héros ─────────────────────────────────────────────────────────── */
+.p-groupes .grp-heros {
+  background-color: #ffffff;
+  grid-template-columns: 5fr 7fr;
+  gap: clamp(30px, 6vw, 100px);
+  padding: clamp(80px, 10vw, 152px) max(20px, 8.3vw) 72px;
+  display: grid;
+  position: relative;
+  overflow: hidden;
+}
+.p-groupes .grp-heros-verre {
+  opacity: 0.32;
+  mix-blend-mode: multiply;
   pointer-events: none;
-}
-.p-groupes .nm-btn--md {
-  height: 39px;
-  padding: 8px 16px;
-}
-.p-groupes .nm-btn--sm {
-  height: 33px;
-  padding: 8px 12px;
-}
-.p-groupes .nm-btn--plein {
-  background: var(--nm-noir);
-  color: #ffffff;
-}
-.p-groupes .nm-btn--plein:hover {
-  background: #2a2a2d;
-}
-.p-groupes .nm-btn--verre {
-  -webkit-backdrop-filter: blur(30.15px);
-  backdrop-filter: blur(30.15px);
-  background-image: linear-gradient(to right, rgba(196, 196, 194, 0.2), rgba(201, 201, 199, 0.2));
-  color: var(--nm-noir);
-}
-.p-groupes .nm-btn--verre:hover {
-  background-image: linear-gradient(to right, rgba(201, 201, 199, 0.3), rgba(167, 167, 166, 0.3));
-}
-.p-groupes .nm-btn--verre-sombre {
-  -webkit-backdrop-filter: blur(30.15px);
-  backdrop-filter: blur(30.15px);
-  background-image: linear-gradient(to right, rgba(196, 196, 194, 0.3), rgba(201, 201, 199, 0.3));
-  color: #ffffff;
-}
-.p-groupes .nm-btn--verre-sombre:hover {
-  background-image: linear-gradient(to right, rgba(201, 201, 199, 0.4), rgba(167, 167, 166, 0.4));
-}
-.p-groupes .nm-btn:focus-visible {
-  outline: 2px solid var(--nm-noir);
-  outline-offset: 2px;
-}
-
-/* ── les cartes blanches (leur « section bg-white rounded ») ─────────
-   Leur marge latérale suit le défilement, par un ressort (0 → 32 px dès
-   1024) : elle est posée en style par CarteBlanche.tsx (motion). */
-.p-groupes .nm-carte {
-  position: relative;
-  z-index: 10;
-  background: #ffffff;
-}
-
-/* ── les apparitions (leur `opacity 0, translateY 20` au premier regard) */
-.p-groupes [data-nm-apparait] {
-  transition:
-    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.p-groupes [data-nm-apparait="attente"] {
-  opacity: 0;
-  transform: translateY(20px);
-}
-.p-groupes [data-nm-apparait="attente"][data-nm-effet="fondu"] {
-  transform: none;
-}
-.p-groupes [data-nm-apparait="attente"][data-nm-effet="zoom"] {
-  transform: scale(0.95);
-}
-/* leurs filets verticaux qui se tracent (scaleY 0 → 1) */
-.p-groupes .nm-trait-v {
-  width: 1px;
+  width: 100%;
   height: 100%;
-  transform-origin: 50% 0;
-  transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.p-groupes .nm-trait-v[data-nm-apparait="attente"] {
-  opacity: 1;
-  transform: scaleY(0);
-}
-
-/* ── les bandeaux défilants (Infinite Slider d'ibelick, 21st.dev) ───── */
-.p-groupes .nm-mot {
-  font-family: var(--nm-sans);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-
-/* ── les lumières (Lumieres.tsx) : six panneaux, quatre barres chacun ─
-   Grille relevée sur leurs images : colonnes 1 / 1,25 / 1, deux rangées.
-   Chaque barre pousse depuis son bord (scaleY 0 → --m), tient, puis se
-   rétracte vers ce même bord ; pleine près du bord, fondue au bout. */
-.p-groupes .nm-barres {
   position: absolute;
   inset: 0;
-  display: grid;
-  grid-template-columns: 1fr 1.25fr 1fr;
-  grid-template-rows: 1fr 1fr;
 }
-.p-groupes .nm-panneau {
+.p-groupes .grp-heros-verre canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.p-groupes .grp-heros-texte {
+  z-index: 1;
+  align-self: center;
   position: relative;
+}
+.p-groupes .grp-heros h1,
+.p-groupes .grp-enonce h2,
+.p-groupes .grp-accordeon h2 {
+  letter-spacing: -0.05em;
+  max-width: 800px;
+  margin: 0 0 28px;
+  font-size: clamp(43px, 5.7vw, 92px);
+  font-weight: 550;
+  line-height: 0.96;
+}
+.p-groupes .grp-heros h1 {
+  letter-spacing: -0.055em;
+  font-weight: 550;
+}
+.p-groupes .grp-heros-texte > p {
+  color: #2e2e32;
+  white-space: pre-line;
+  max-width: 440px;
+  margin: 20px 0;
+  font-size: 20px;
+  line-height: 1.4;
+}
+.p-groupes .grp-heros-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 40px;
   display: flex;
 }
-.p-groupes .nm-barre {
-  flex: 1;
-  height: 100%;
-  transform: scaleY(0);
-  animation-name: nm-barre;
-  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
-  animation-iteration-count: infinite;
-  will-change: transform;
-}
-.p-groupes .nm-barre--bas {
-  transform-origin: 50% 100%;
-  background: linear-gradient(to top, rgb(var(--nm-lum) / 0.95), rgb(var(--nm-lum) / 0.88) 50%, rgb(var(--nm-lum) / 0));
-}
-.p-groupes .nm-barre--haut {
-  transform-origin: 50% 0;
-  background: linear-gradient(to bottom, rgb(var(--nm-lum) / 0.95), rgb(var(--nm-lum) / 0.88) 50%, rgb(var(--nm-lum) / 0));
-}
-@keyframes nm-barre {
-  0%,
-  100% {
-    transform: scaleY(0);
-  }
-  50% {
-    transform: scaleY(var(--m));
-  }
-}
-
-/* ── le remplissage de la pastille active du carrousel (Temoins.tsx) ── */
-.p-groupes .nm-remplit {
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-.p-groupes .nm-remplit--v {
-  top: 2px;
-  left: 2px;
-  right: 2px;
-  height: 0;
-  animation-name: nm-remplit-v;
-}
-.p-groupes .nm-remplit--h {
-  top: 2px;
-  left: 2px;
-  bottom: 2px;
-  width: 0;
-  animation-name: nm-remplit-h;
-}
-.p-groupes [data-nm-vu="non"] .nm-remplit {
-  animation-play-state: paused;
-}
-@keyframes nm-remplit-v {
-  to {
-    height: calc(100% - 4px);
-  }
-}
-@keyframes nm-remplit-h {
-  to {
-    width: calc(100% - 4px);
-  }
-}
-
-/* ── le visuel du hero (HerosVisuel.tsx) ─────────────────────────────── */
-.p-groupes .nm-hv {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: #111113;
-  color: #ffffff;
-}
-.p-groupes .nm-hv__fond {
-  position: absolute;
-  inset: -12%;
-  background-size: cover;
-  background-position: center;
-  filter: blur(26px) brightness(0.42) saturate(0.65);
-}
-.p-groupes .nm-hv__grain {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(80% 70% at 50% 50%, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.35));
-}
-.p-groupes .nm-hv__puce {
-  display: inline-flex;
+.p-groupes .grp-heros-actions code {
+  border: 1px solid var(--grp-filet);
   align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 12px 0 5px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  font-family: var(--nm-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  gap: 9px;
+  padding: 12px 13px;
+  font: 14px/1.32 var(--grp-mono);
+  display: flex;
 }
-.p-groupes .nm-hv__pastille {
+.p-groupes .grp-heros-actions code span {
+  color: var(--grp-acide);
+}
+.p-groupes .grp-heros-actions code button {
+  cursor: pointer;
+  background: #e6e6ea;
+  border: 0;
+  padding: 4px 7px;
+  font-size: 11px;
+}
+.p-groupes .grp-heros-ecrans {
+  z-index: 1;
+  align-self: center;
+  height: min(46vw, 610px);
+  min-height: 380px;
+  position: relative;
+}
+.p-groupes .grp-heros-ecrans img {
+  border: 1px solid #c9c9ce;
+  width: 82%;
+  height: auto;
+  max-width: none;
+  position: absolute;
+  right: 0;
+  box-shadow: 0 30px 80px rgba(15, 15, 25, 0.14);
+}
+.p-groupes .grp-heros-ecrans img + img {
+  width: 48%;
+  bottom: 0;
+  left: 0;
+}
+.p-groupes .grp-legende {
+  text-align: center;
+  max-width: 720px;
+  color: var(--grp-attenue);
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+/* ── énoncé ────────────────────────────────────────────────────────── */
+.p-groupes .grp-enonce {
+  text-align: center;
+  padding: clamp(90px, 12vw, 190px) clamp(20px, 20vw, 22%);
+}
+.p-groupes .grp-enonce-texte {
+  max-width: 850px;
+  margin: auto;
+}
+.p-groupes .grp-enonce h2 {
+  white-space: pre-line;
+  font-size: clamp(38px, 5vw, 76px);
+}
+.p-groupes .grp-enonce p {
+  color: #333338;
+  white-space: pre-line;
+  margin: 19px 0;
+  font-size: 19px;
+  line-height: 1.5;
+}
+.p-groupes .grp-espace {
+  height: 18px;
+}
+.p-groupes .grp-boutons {
+  justify-content: center;
+  gap: 10px;
+  margin: 36px 0;
+  display: flex;
+}
+.p-groupes .grp-enonce-image {
+  border: 1px solid var(--grp-filet);
+  width: min(1200px, 100%);
+  height: auto;
+  margin: 65px auto 0;
+  display: block;
+}
+
+/* ── survol (hoverHighlights) ──────────────────────────────────────── */
+.p-groupes .grp-survol {
+  grid-template-columns: 5fr 7fr;
+  min-height: 680px;
+  padding: clamp(80px, 10vw, 150px) max(20px, 8.3vw);
   display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--nm-noir);
-}
-.p-groupes .nm-hv__fil {
-  height: 1px;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.05));
-}
-.p-groupes .nm-hv__liste {
   position: relative;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
 }
-.p-groupes .nm-hv__piste {
-  animation: nm-liste var(--nm-duree, 36s) linear infinite;
+.p-groupes .grp-survol-liste {
+  z-index: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 15px;
+  display: flex;
 }
-.p-groupes .nm-hv__piste > p {
-  height: var(--nm-ligne, 21px);
-  font-family: var(--nm-serif);
-  font-size: var(--nm-taille, 15px);
-  line-height: var(--nm-ligne, 21px);
+.p-groupes .grp-survol-liste > p {
+  color: var(--grp-attenue);
+  margin: 19px 0;
+  font-size: 19px;
+}
+.p-groupes .grp-survol-entree {
+  align-items: baseline;
+  gap: 14px;
+  display: flex;
+}
+.p-groupes .grp-survol-entree button {
+  color: #707077;
+  cursor: pointer;
+  letter-spacing: -0.06em;
+  text-align: left;
+  background: 0 0;
+  border: 0;
+  padding: 0;
+  font-size: clamp(32px, 4vw, 62px);
+  line-height: 1.21;
+  transition: color 0.35s;
+}
+.p-groupes .grp-survol-entree.grp-actif button,
+.p-groupes .grp-survol-entree button:hover,
+.p-groupes .grp-survol-entree button:focus-visible {
+  color: var(--grp-texte);
+}
+.p-groupes .grp-survol-entree > a {
   white-space: nowrap;
+  color: var(--grp-attenue);
+  text-underline-offset: 3px;
+  flex-shrink: 0;
+  font-size: 12px;
+  text-decoration: underline;
 }
-.p-groupes .nm-hv__calque--terne {
-  color: rgba(255, 255, 255, 0.34);
-}
-.p-groupes .nm-hv__calque--vif {
-  position: absolute;
-  inset: 0;
-  color: #ffffff;
-  clip-path: inset(calc(50% - var(--nm-ligne, 21px) / 2) 0 calc(50% - var(--nm-ligne, 21px) / 2) 0);
-}
-@keyframes nm-liste {
-  to {
-    transform: translateY(-50%);
-  }
-}
-
-/* ── les cartes « enseignes » (leur « Solutions designed for… ») ───── */
-.p-groupes .nm-enseigne .nm-enseigne__voile {
-  transition: all 300ms;
-}
-.p-groupes .nm-enseigne:hover .nm-enseigne__voile {
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  background-color: rgba(255, 255, 255, 0.08);
-}
-.p-groupes .nm-enseigne:hover .nm-enseigne__pastille {
-  opacity: 0;
-}
-.p-groupes .nm-enseigne:hover .nm-enseigne__nom {
-  opacity: 1;
-}
-
-/* ── le carré de la méthode et le volume des étapes (Methode.tsx) ──── */
-.p-groupes .nm-flotte {
-  animation: nm-flotte 6s ease-in-out infinite alternate;
-}
-@keyframes nm-flotte {
-  to {
-    transform: translate3d(0, -8px, 0);
-  }
-}
-.p-groupes .nm-pile {
-  perspective: 1400px;
-}
-.p-groupes .nm-pile > div {
-  transform-style: preserve-3d;
-  transform: rotateX(58deg) rotateZ(-38deg);
-}
-/* leur volume est lavande et translucide sur le blanc ; ici gris d'Omega,
-   assez dense pour se lire sur la carte blanche, et l'étape active en noir */
-.p-groupes .nm-pile__plaque {
-  position: absolute;
-  inset: 0;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #efefed, #d7d7d4);
-  box-shadow:
-    0 0 0 1px rgba(10, 10, 10, 0.08),
-    0 34px 60px -26px rgba(10, 10, 10, 0.4);
-  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 600ms, background 600ms;
-}
-.p-groupes .nm-pile__plaque.is-actif {
-  background: linear-gradient(135deg, #2c2c30, #0a0a0a);
-}
-.p-groupes .nm-pile__plaque.is-actif > span {
-  color: #ffffff;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .p-groupes [data-nm-apparait],
-  .p-groupes .nm-trait-v {
-    transition: none;
-  }
-  .p-groupes .nm-barre,
-  .p-groupes .nm-hv__piste,
-  .p-groupes .nm-flotte {
-    animation: none;
-  }
-}
-
-/* ── compléments : bouton gris de l'appel, fondu d'onglet, frise ────── */
-.p-groupes .nm-btn--gris {
-  background: var(--nm-g6);
-  color: #ffffff;
-}
-.p-groupes .nm-btn--gris:hover {
-  background: #4a4a48;
-}
-.p-groupes .nm-fondu-entree {
-  animation: nm-fondu 450ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes nm-fondu {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-.p-groupes .nm-frise {
-  width: 0;
-  animation: nm-frise 7.2s linear infinite;
-}
-@keyframes nm-frise {
-  0% {
-    width: 0;
-  }
-  16%,
-  100% {
-    width: 100%;
-  }
+.p-groupes .grp-etiquette {
+  color: var(--grp-attenue);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font: 12px/1.32 var(--grp-mono);
 }
 @media (prefers-reduced-motion: reduce) {
-  .p-groupes .nm-fondu-entree,
-  .p-groupes .nm-frise {
-    animation: none;
-    width: 100%;
+  .p-groupes .grp-heros-verre {
+    display: none;
   }
 }
+.p-groupes .grp-survol-liste span {
+  color: var(--grp-acide);
+  font-size: 0.55em;
+}
+.p-groupes .grp-mini {
+  border: 1px solid var(--grp-filet);
+  width: max-content;
+  margin-top: 22px;
+  padding: 12px 16px;
+}
+.p-groupes .grp-survol-visuel {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+.p-groupes .grp-survol-visuel img {
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  transition: opacity 0.3s;
+}
 
-/* ── le carrousel de verre de la méthode (MethodeVisuel.tsx) ─────────
-   Relevé sur leur vidéo : carte en portrait (≈ 0,84), rayon 10, verre
-   dépoli gris translucide avec une tache de lumière au centre, filet clair ;
-   phrase en blanc 16/1,35 ; rond de 34 px ; mono 8,5 px en capitales. */
-.p-groupes .nm-coverflow {
-  position: absolute;
-  inset: 0;
-  perspective: 1100px;
-  transform-style: preserve-3d;
+/* ── carrousel (slider) ────────────────────────────────────────────── */
+.p-groupes .grp-carrousel {
+  padding: clamp(80px, 10vw, 140px) 0 80px;
+  overflow: hidden;
 }
-.p-groupes .nm-verre {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 50%;
-  aspect-ratio: 0.84;
-  margin-left: -25%;
-  margin-top: -29.8%;
+.p-groupes .grp-carrousel-intro {
+  padding: 0 max(20px, 8.3vw) 50px;
+}
+.p-groupes .grp-carrousel-intro h2 {
+  letter-spacing: -0.06em;
+  max-width: 700px;
+  margin: 0.83em 0;
+  font-size: clamp(32px, 4vw, 58px);
+  font-weight: 700;
+  line-height: 1.05;
+}
+.p-groupes .grp-carte {
+  border: 1px solid var(--grp-filet);
+  background: var(--grp-panneau);
+  width: min(680px, 100% - 40px);
+  min-height: 380px;
+  margin-left: max(20px, 8.3vw);
+  padding: clamp(28px, 4vw, 65px);
+}
+.p-groupes .grp-carte img {
+  display: inline;
+  vertical-align: baseline;
+  object-fit: contain;
+  object-position: left;
+  width: 120px;
+  height: 45px;
+  max-width: none;
+}
+.p-groupes .grp-carte blockquote {
+  letter-spacing: -0.05em;
+  margin: 60px 0;
+  font-size: clamp(24px, 3vw, 43px);
+  line-height: 1.13;
+}
+.p-groupes .grp-carte p {
+  margin: 15px 0;
+  font-size: 15px;
+}
+.p-groupes .grp-carte p span {
+  color: var(--grp-attenue);
+}
+.p-groupes .grp-carte a {
+  color: var(--grp-acide);
+  font-size: 14px;
+}
+.p-groupes .grp-carrousel-nav {
+  align-items: center;
+  gap: 22px;
+  margin: 32px max(20px, 8.3vw);
+  font: 14px/1.2 var(--grp-mono);
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 7% 6.5% 6%;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background:
-    radial-gradient(60% 45% at 55% 62%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 70%),
-    linear-gradient(165deg, rgba(150, 150, 154, 0.62), rgba(96, 96, 100, 0.55));
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
-  color: #ffffff;
-  transition:
-    transform 1100ms cubic-bezier(0.65, 0, 0.35, 1),
-    filter 1100ms cubic-bezier(0.65, 0, 0.35, 1),
-    opacity 900ms ease;
-  will-change: transform, filter;
 }
-.p-groupes .nm-verre__phrase {
-  font-family: var(--nm-sans);
-  /* leur phrase fait ≈ 5,5 % de la largeur de la carte */
-  font-size: clamp(9px, 2.8cqw, 15px);
-  line-height: 1.35;
-  letter-spacing: -0.01em;
+.p-groupes .grp-carrousel-nav button {
+  border: 1px solid var(--grp-filet);
+  cursor: pointer;
+  background: 0 0;
+  width: 38px;
+  height: 38px;
 }
-.p-groupes .nm-coverflow {
-  container-type: inline-size;
+.p-groupes .grp-carrousel-nav button:disabled {
+  opacity: 0.35;
 }
-.p-groupes .nm-verre__pied {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.p-groupes .nm-verre__rond {
+
+/* ── accordéon (mediaContentAccordion) ─────────────────────────────── */
+.p-groupes .grp-accordeon {
+  grid-template-columns: 5fr 7fr;
+  gap: 50px;
+  padding: clamp(85px, 10vw, 150px) max(20px, 8.3vw);
   display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #0a0a0a;
-  font-size: 10px;
+}
+/* leur `leader` est vide : un <p> sans texte dont les deux marges de
+   14 px se fondent en une. On garde l'écart, sans le paragraphe vide. */
+.p-groupes .grp-accordeon-tete {
+  grid-column: 1 / -1;
+  padding-top: 14px;
+}
+.p-groupes .grp-accordeon-tete h2 {
+  max-width: 800px;
+}
+.p-groupes .grp-accordeon-items {
+  border-top: 1px solid var(--grp-filet);
+}
+.p-groupes .grp-accordeon-items button {
+  border: 0;
+  border-bottom: 1px solid var(--grp-filet);
+  text-align: left;
+  cursor: pointer;
+  background: 0 0;
+  grid-template-columns: 45px 1fr 20px;
+  width: 100%;
+  padding: 21px 4px;
+  font-size: 19px;
+  display: grid;
+}
+.p-groupes .grp-accordeon-items button span {
+  color: var(--grp-attenue);
+  padding-top: 5px;
+  font: 12px/1.2 var(--grp-mono);
+}
+.p-groupes .grp-accordeon-items button b {
   font-weight: 700;
 }
-.p-groupes .nm-verre__lignes {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-family: var(--nm-mono);
-  font-size: 7.5px;
-  line-height: 1.5;
-  white-space: nowrap;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
+.p-groupes .grp-accordeon-items button.grp-actif {
+  color: var(--grp-acide);
 }
-@media (prefers-reduced-motion: reduce) {
-  .p-groupes .nm-verre {
-    transition: none;
+.p-groupes .grp-accordeon-media {
+  border: 1px solid var(--grp-filet);
+  background: var(--grp-panneau);
+}
+.p-groupes .grp-accordeon-media img {
+  border-bottom: 1px solid var(--grp-filet);
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.p-groupes .grp-accordeon-media > div {
+  padding: 26px;
+}
+.p-groupes .grp-accordeon-media h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.p-groupes .grp-accordeon-media p {
+  color: var(--grp-attenue);
+  margin: 16px 0;
+  line-height: 1.5;
+}
+.p-groupes .grp-accordeon-media a {
+  color: var(--grp-acide);
+  font-size: 14px;
+}
+
+/* ── le palier de la référence : 760 px ────────────────────────────── */
+@media (width <= 760px) {
+  .p-groupes .grp-heros,
+  .p-groupes .grp-survol,
+  .p-groupes .grp-accordeon {
+    grid-template-columns: 1fr;
+    padding-left: 20px;
+    padding-right: 20px;
   }
+  .p-groupes .grp-heros {
+    padding-top: 70px;
+  }
+  .p-groupes .grp-heros h1 {
+    font-size: 51px;
+  }
+  .p-groupes .grp-heros-ecrans {
+    grid-row: 2;
+    height: 330px;
+    min-height: 0;
+  }
+  .p-groupes .grp-legende {
+    grid-column: 1;
+  }
+  .p-groupes .grp-enonce {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .p-groupes .grp-enonce h2 {
+    font-size: 44px;
+  }
+  .p-groupes .grp-survol {
+    min-height: auto;
+  }
+  .p-groupes .grp-survol-visuel {
+    grid-row: 1;
+    min-height: 280px;
+  }
+  .p-groupes .grp-survol-liste {
+    grid-row: 2;
+  }
+  .p-groupes .grp-accordeon-tete {
+    grid-column: 1;
+  }
+  .p-groupes .grp-accordeon h2 {
+    font-size: 44px;
+  }
+}
+.p-groupes .grp-survol-visuel {
+  position: relative;
+}
+.p-groupes .grp-survol-visuel .grp-survol-dessus {
+  object-fit: contain;
+  pointer-events: none;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+.p-groupes .grp-enonce-image.grp-plein {
+  border: 0;
+  width: min(1500px, 160%);
+  max-width: none;
+  margin-left: 50%;
+  transform: translate(-50%);
+}
+@media (width <= 760px) {
+  .p-groupes .grp-enonce-image.grp-plein {
+    width: 100%;
+  }
+  .p-groupes .grp-survol-entree {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+/* ── écarts assumés : les écrans montés d'avance ───────────────────────
+   Chez eux, le survol et l'accordéon changent le `src` d'une seule
+   image : chaque première visite d'une entrée montre un cadre vide le
+   temps du chargement. Ici tous les écrans sont montés ; celui de
+   l'entrée active est seul dans le flux, les autres attendent dessous,
+   invisibles, au même cadre. Leur `transition: opacity .3s` (déjà dans
+   leur feuille, sans effet chez eux) fait le fondu. */
+.p-groupes .grp-survol-visuel img:not(.grp-actif) {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s,
+    visibility 0s 0.3s;
+}
+.p-groupes .grp-survol-visuel .grp-survol-bas:not(.grp-actif) {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}
+.p-groupes .grp-accordeon-media {
+  position: relative;
+  overflow: hidden;
+}
+.p-groupes .grp-accordeon-media img:not(.grp-actif) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
 }

@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import { serifAvocats } from "@/app/_polices/serif";
+import SeCombine from "@/components/secteurs/SeCombine";
 import Heros from "@/components/secteurs/groupes/Heros";
-import Chiffres from "@/components/secteurs/groupes/Chiffres";
-import Securite from "@/components/secteurs/groupes/Securite";
-import Methode from "@/components/secteurs/groupes/Methode";
-import Etapes from "@/components/secteurs/groupes/Etapes";
-import Fin from "@/components/secteurs/groupes/Fin";
+import Enonce from "@/components/secteurs/groupes/Enonce";
+import Survol from "@/components/secteurs/groupes/Survol";
+import Carrousel from "@/components/secteurs/groupes/Carrousel";
+import Accordeon from "@/components/secteurs/groupes/Accordeon";
+import { ENONCE_1, ENONCE_2 } from "@/components/secteurs/groupes/textes";
 import "./groupes.css";
 import "./mobile.css";
-import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/groupes — Varelo, le point du matin des grands groupes (nom
@@ -19,19 +18,25 @@ import SeCombine from "@/components/secteurs/SeCombine";
    à plusieurs sociétés et plusieurs pôles. L'ancienne adresse redirige
    ici (next.config.ts).
 
-   Mise en page v2 du 24/09 : décalque de la page d'accueil de
-   concurrence.com, aux couleurs et aux polices d'Omega. Le relevé, les
-   conversions et les écarts sont en tête de ./groupes.css ; les textes et
-   ce qui n'est pas repris de la référence, dans
-   components/secteurs/groupes/textes.ts.
+   Mise en page v3 du 25/09 au soir : décalque 1:1 de
+   https://payload-marketing-v1.21st.app/ (le gabarit « Payload marketing »
+   de 21st.dev), passé en blanc. Teo : « je préfère un truc fait à
+   l'identique plutôt qu'un truc fait à 80 % », puis « le SaaS référence
+   est noir, je veux qu'il soit blanc (Omega) ». La v2 (concurrence.com)
+   et la v1 (toolio.com) sont remplacées.
+
+   Le relevé, la table des couleurs et les écarts sont en tête de
+   ./groupes.css ; les textes et les écrans, dans
+   components/secteurs/groupes/textes.ts ; la fabrique des écrans, dans
+   outils/ecrans-varelo/.
 
    Les blocs, dans l'ordre de la référence :
-    1 carte blanche : hero, visuel animé, bandeau des pôles       Heros
-    2 bande sombre : trois chiffres, lumières, problèmes          Chiffres
-    3 carte blanche : sécurité, pôles du groupe                   Securite
-    4 bande sombre 2 : méthode (01-03), sources                   Methode
-    5 carte blanche : étapes (01-04), faits ; lumières dessous    Etapes
-    6 carte blanche : pilote, territoires, modules, appel         Fin
+    1 hero            le verre animé, le texte, deux écrans   Heros
+    2 statement       le titre, l'assemblage d'écrans          Enonce
+    3 hoverHighlights quatre entrées, l'écran de l'entrée      Survol
+    4 slider          les situations types, une à la fois      Carrousel
+    5 accordion       quatre éléments, l'écran de l'ouvert     Accordeon
+    6 statement       le titre, trois paragraphes, deux boutons Enonce
    Entête et pied : ceux d'Omega (PageShell).
    ══════════════════════════════════════════════════════════════════════ */
 
@@ -58,17 +63,17 @@ export const metadata: Metadata = {
 export default function PageGroupes() {
   return (
     <PageShell>
-      <div className={`p-groupes ${serifAvocats.variable}`}>
-        <div className="bg-[var(--nm-bande-2)]">
-          <div className="bg-[var(--nm-bande)]">
-            <Heros />
-            <Chiffres />
-          </div>
-        </div>
-        <Securite />
-        <Methode />
-        <Etapes />
-        <Fin />
+      <div className="p-groupes">
+        <Heros />
+        <Enonce titre={ENONCE_1.titre} ecran={ENONCE_1.ecran} />
+        <Survol />
+        <Carrousel />
+        <Accordeon />
+        <Enonce
+          titre={ENONCE_2.titre}
+          paragraphes={ENONCE_2.paragraphes}
+          boutons={ENONCE_2.boutons}
+        />
       </div>
       <SeCombine slug="groupes" />
     </PageShell>

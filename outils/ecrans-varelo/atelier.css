@@ -1,0 +1,510 @@
+/* ══════════════════════════════════════════════════════════════════════
+   L'atelier des écrans de Varelo — le système d'interface commun
+   (25/09/2026, /secteurs/groupes v3).
+
+   Varelo n'a pas encore d'application : ces écrans en sont la maquette,
+   sur des données d'exemple (aucun groupe, aucune société réelle). Ils
+   suivent la charte de l'espace client d'Omega : clair, quasi
+   monochrome, filets fins, arrondis 6/5 px, pas d'ombre lourde ; la
+   couleur ne porte que le sens (vert, ambre, rouge, bleu).
+   ══════════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: "General Sans";
+  src: url(GeneralSans-Variable.woff2) format("woff2");
+  font-weight: 200 700;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url(GeistMono-latin.woff2) format("woff2");
+  font-weight: 100 900;
+}
+
+:root {
+  --v-fond: #ffffff;
+  --v-cote: #fafafa;
+  --v-filet: #e7e7ea;
+  --v-filet-2: #f0f0f2;
+  --v-encre: #0b0b0d;
+  --v-encre-2: #3f3f46;
+  --v-gris: #71717a;
+  --v-pale: #a1a1aa;
+  --v-remplir: #f4f4f5;
+  --v-vert: #15803d;
+  --v-vert-f: #f0fdf4;
+  --v-vert-l: #bbf7d0;
+  --v-ambre: #b45309;
+  --v-ambre-f: #fffbeb;
+  --v-ambre-l: #fde68a;
+  --v-rouge: #b91c1c;
+  --v-rouge-f: #fef2f2;
+  --v-rouge-l: #fecaca;
+  --v-bleu: #1d4ed8;
+  --v-bleu-f: #eff6ff;
+  --v-bleu-l: #bfdbfe;
+  --v-ombre: 0 1px 2px rgba(15, 15, 25, 0.04), 0 12px 32px rgba(15, 15, 25, 0.08);
+  --v-ombre-forte: 0 2px 4px rgba(15, 15, 25, 0.05), 0 24px 60px rgba(15, 15, 25, 0.14);
+  --v-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: transparent;
+}
+body {
+  font-family: "General Sans", system-ui, sans-serif;
+  color: var(--v-encre);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1;
+}
+p,
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+.mono {
+  font-family: var(--v-mono);
+}
+
+/* Un écran = un plan de travail, à sa taille CSS ; le rendu le
+   photographie à la densité 2. Les autres sont masqués par ?seul=. */
+[data-ecran] {
+  position: relative;
+  overflow: hidden;
+}
+body.seul [data-ecran] {
+  display: none;
+}
+body.seul [data-ecran].choisi {
+  display: block;
+}
+body:not(.seul) [data-ecran] {
+  margin: 40px;
+  outline: 1px dashed #f0f;
+}
+.opaque {
+  background: #fff;
+}
+
+/* ── fenêtre d'application ─────────────────────────────────────────── */
+.app {
+  background: var(--v-fond);
+  border: 1px solid var(--v-filet);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.app.plein {
+  border: 0;
+  border-radius: 0;
+}
+.barre {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--v-filet);
+  background: #fff;
+}
+.signe {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--v-encre);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.signe img {
+  width: 14px;
+  height: 14px;
+  display: block;
+  filter: invert(1);
+}
+.marque {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+.fil {
+  color: var(--v-gris);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.fil b {
+  color: var(--v-encre);
+  font-weight: 500;
+}
+.fil s {
+  text-decoration: none;
+  color: var(--v-pale);
+}
+.pousse {
+  margin-left: auto;
+}
+.exemple {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--v-ambre);
+  background: var(--v-ambre-f);
+  border: 1px solid var(--v-ambre-l);
+  border-radius: 5px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #e4e4e7;
+  color: var(--v-encre-2);
+  font-size: 10.5px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.onglets {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+.onglets span {
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--v-gris);
+  font-weight: 500;
+}
+.onglets span.on {
+  background: var(--v-remplir);
+  color: var(--v-encre);
+}
+.onglets-bas {
+  display: flex;
+  gap: 18px;
+  border-bottom: 1px solid var(--v-filet);
+  padding: 0 20px;
+}
+.onglets-bas span {
+  padding: 10px 0 9px;
+  color: var(--v-gris);
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.onglets-bas span.on {
+  color: var(--v-encre);
+  border-color: var(--v-encre);
+}
+
+/* ── barre latérale ────────────────────────────────────────────────── */
+.corps {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.cote {
+  width: 212px;
+  flex: none;
+  background: var(--v-cote);
+  border-right: 1px solid var(--v-filet);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cote h6 {
+  margin: 14px 8px 6px;
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--v-pale);
+}
+.cote a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 5px;
+  color: var(--v-encre-2);
+  text-decoration: none;
+  font-weight: 450;
+}
+.cote a.on {
+  background: #fff;
+  color: var(--v-encre);
+  box-shadow: 0 0 0 1px var(--v-filet);
+  font-weight: 550;
+}
+.cote a em {
+  font-style: normal;
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--v-gris);
+}
+.cote svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.8;
+}
+.contenu {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── pièces communes ───────────────────────────────────────────────── */
+.carte {
+  background: #fff;
+  border: 1px solid var(--v-filet);
+  border-radius: 6px;
+}
+.flottant {
+  box-shadow: var(--v-ombre);
+}
+.flottant-fort {
+  box-shadow: var(--v-ombre-forte);
+}
+.tete-carte {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--v-filet);
+}
+.tete-carte h4 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.tete-carte small {
+  color: var(--v-gris);
+  font-size: 11.5px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  border: 1px solid var(--v-filet);
+  background: #fff;
+  font-weight: 500;
+  color: var(--v-encre);
+  white-space: nowrap;
+}
+.btn.noir {
+  background: var(--v-encre);
+  border-color: var(--v-encre);
+  color: #fff;
+}
+.btn.petit {
+  height: 26px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+.pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.pastille::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.pastille.nue::before {
+  display: none;
+}
+.p-vert {
+  color: var(--v-vert);
+  background: var(--v-vert-f);
+  border-color: var(--v-vert-l);
+}
+.p-ambre {
+  color: var(--v-ambre);
+  background: var(--v-ambre-f);
+  border-color: var(--v-ambre-l);
+}
+.p-rouge {
+  color: var(--v-rouge);
+  background: var(--v-rouge-f);
+  border-color: var(--v-rouge-l);
+}
+.p-bleu {
+  color: var(--v-bleu);
+  background: var(--v-bleu-f);
+  border-color: var(--v-bleu-l);
+}
+.p-gris {
+  color: var(--v-encre-2);
+  background: var(--v-remplir);
+  border-color: var(--v-filet);
+}
+
+/* champs de formulaire */
+.champ label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--v-encre-2);
+  margin-bottom: 5px;
+}
+.champ label i {
+  color: var(--v-rouge);
+  font-style: normal;
+  margin-left: 2px;
+}
+.saisie {
+  height: 32px;
+  border: 1px solid var(--v-filet);
+  border-radius: 5px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: var(--v-encre);
+}
+.saisie.remplie {
+  background: var(--v-cote);
+}
+.saisie .fin {
+  margin-left: auto;
+  color: var(--v-pale);
+}
+.saisie.focus {
+  border-color: var(--v-encre);
+  box-shadow: 0 0 0 3px rgba(11, 11, 13, 0.08);
+}
+.grille-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.grille-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+/* tableaux */
+table.tab {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tab th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--v-gris);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--v-filet);
+  white-space: nowrap;
+  background: var(--v-cote);
+}
+.tab td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--v-filet-2);
+  white-space: nowrap;
+}
+.tab .n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.tab tr.vue td {
+  background: #fafaf9;
+}
+.moins {
+  color: var(--v-rouge);
+}
+.plus {
+  color: var(--v-vert);
+}
+.gris {
+  color: var(--v-gris);
+}
+.pale {
+  color: var(--v-pale);
+}
+
+/* icônes (tracés à la Lucide, 24 × 24) */
+.ico {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* éditeur de code, thème clair */
+.code {
+  font-family: var(--v-mono);
+  font-size: 12.5px;
+  line-height: 21px;
+}
+.code .l {
+  display: flex;
+  white-space: pre;
+}
+.code .l > u {
+  text-decoration: none;
+  width: 44px;
+  flex: none;
+  text-align: right;
+  padding-right: 18px;
+  color: #b4b4bb;
+}
+.code .l.vue {
+  background: #fdf8e6;
+}
+.k {
+  color: #8250df;
+}
+.s {
+  color: #0a7f53;
+}
+.nb {
+  color: #b35900;
+}
+.c {
+  color: #9a9aa3;
+}
+.cle {
+  color: #0550ae;
+}
+.sep {
+  color: #c2c2c8;
+}

@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Varelo — atelier des écrans</title>
+<link rel="stylesheet" href="atelier.css" />
+<link rel="stylesheet" href="ecrans.css" />
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-soleil" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-groupe" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-journal" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></symbol>
+    <symbol id="i-tresor" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12.5h2M3 9.5h18"/></symbol>
+    <symbol id="i-facture" viewBox="0 0 24 24"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></symbol>
+    <symbol id="i-bail" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></symbol>
+    <symbol id="i-sinistre" viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6z"/><path d="M12 9v4M12 16h.01"/></symbol>
+    <symbol id="i-controle" viewBox="0 0 24 24"><path d="M9 11l2 2 4-4"/><rect x="4" y="3" width="16" height="18" rx="2"/></symbol>
+    <symbol id="i-societe" viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-5h4v5"/></symbol>
+    <symbol id="i-ref" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2"/></symbol>
+    <symbol id="i-source" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+    <symbol id="i-camion" viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+    <symbol id="i-contrat" viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M7 7l-3 7a3 3 0 0 0 6 0zM17 7l-3 7a3 3 0 0 0 6 0z"/></symbol>
+    <symbol id="i-rapport" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></symbol>
+    <symbol id="i-reglages" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-bas" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-droite" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-haut" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+    <symbol id="i-cadenas" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-cherche" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-dossier" viewBox="0 0 24 24"><path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-points" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+    <symbol id="i-horloge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-agenda" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-trombone" viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7L14 4.5a3.3 3.3 0 0 1 4.7 4.7L10 18a1.7 1.7 0 0 1-2.4-2.4L15.5 7.7"/></symbol>
+    <symbol id="i-oeil" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-courrier" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="i-fleche" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+    <symbol id="i-poignee" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/></symbol>
+    <symbol id="i-fichier" viewBox="0 0 24 24"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4"/></symbol>
+    <symbol id="i-tableur" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 9h16M4 15h16M10 3v18"/></symbol>
+    <symbol id="i-croix" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-alerte" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol>
+    <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></symbol>
+    <symbol id="i-lien" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-envoi" viewBox="0 0 24 24"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></symbol>
+    <symbol id="i-gras" viewBox="0 0 24 24"><path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/></symbol>
+    <symbol id="i-italique" viewBox="0 0 24 24"><path d="M14 5h-4M14 19h-4M13 5l-2 14"/></symbol>
+    <symbol id="i-souligne" viewBox="0 0 24 24"><path d="M7 4v7a5 5 0 0 0 10 0V4M5 20h14"/></symbol>
+    <symbol id="i-liste" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-titre" viewBox="0 0 24 24"><path d="M5 5v14M13 5v14M5 12h8M17 10l2-1v10"/></symbol>
+  </defs>
+</svg>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     HÉROS 1 — leur 3.0-homepage-live-preview-hero.png (3200 × 1915)
+     Le point du matin de la direction financière : la liste des trois
+     décisions à gauche, l'aperçu de la pièce de la décision ouverte à
+     droite (leur éditeur + aperçu en direct).
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="heros-point-du-matin" class="opaque" style="width:1600px;height:957.5px">
+  <div class="app plein" style="height:100%">
+    <div class="barre">
+      <div class="signe"><img src="../../public/logos/varelo-mark.png" alt=""></div>
+      <span class="marque">Varelo</span>
+      <div class="fil"><s>/</s><span>Groupe exemple</span><s>/</s><span>Direction financière</span><s>/</s><b>Point du matin</b></div>
+      <div class="pousse"></div>
+      <div class="onglets"><span class="on">Point du matin</span><span>Le groupe</span><span>Journal</span></div>
+      <span class="exemple">Données d'exemple</span>
+      <span class="gris">Jeudi 25 septembre · 7 h 00</span>
+      <div class="avatar">DF</div>
+    </div>
+    <div class="corps">
+      <nav class="cote">
+        <h6>Aujourd'hui</h6>
+        <a class="on"><svg><use href="#i-soleil"/></svg>Point du matin<em>3</em></a>
+        <a><svg><use href="#i-groupe"/></svg>Le groupe</a>
+        <a><svg><use href="#i-journal"/></svg>Journal</a>
+        <h6>Direction financière</h6>
+        <a><svg><use href="#i-tresor"/></svg>Trésorerie</a>
+        <a><svg><use href="#i-facture"/></svg>Factures et livraisons<em>3</em></a>
+        <a><svg><use href="#i-bail"/></svg>Baux et loyers<em>1</em></a>
+        <a><svg><use href="#i-sinistre"/></svg>Sinistres<em>1</em></a>
+        <a><svg><use href="#i-controle"/></svg>Contrôles</a>
+        <h6>Groupe</h6>
+        <a><svg><use href="#i-societe"/></svg>Sociétés<em>38</em></a>
+        <a><svg><use href="#i-ref"/></svg>Référentiel</a>
+        <a><svg><use href="#i-source"/></svg>Sources</a>
+        <div style="flex:1"></div>
+        <a><svg><use href="#i-reglages"/></svg>Réglages</a>
+      </nav>
+      <div class="contenu">
+        <div class="pdm-tete">
+          <div>
+            <h1>Point du matin</h1>
+            <p class="gris">Direction financière · trois décisions, chacune avec son calcul</p>
+          </div>
+          <div class="pousse"></div>
+          <span class="pdm-lu"><svg class="ico"><use href="#i-source"/></svg>Sources lues à 6 h 42 · 38 sociétés</span>
+          <span class="btn">Journal</span>
+          <span class="btn noir">Valider les trois décisions</span>
+        </div>
+        <div class="pdm-statut">
+          <span>Statut : <b>3 à valider</b></span><s>·</s>
+          <span>Envoyé à 7 h 00</span><s>·</s>
+          <span>Plus proche échéance : <b>aujourd'hui, 12 h</b></span><s>·</s>
+          <span>Validées cette semaine : 11</span>
+        </div>
+        <div class="pdm-split">
+          <div class="pdm-liste">
+            <div class="pdm-dec on">
+              <div class="pdm-dec-l1"><span class="pdm-num">1 / 3</span><span class="pastille p-ambre">À valider</span><span class="pousse gris">Factures et livraisons</span></div>
+              <h3>Bloquer le paiement de la facture F-0917</h3>
+              <p class="gris">Trois lignes facturées ne sont pas sur le bon de livraison du 22 septembre. Le paiement part vendredi.</p>
+              <div class="pdm-chiffres">
+                <div><small>Écart</small><b class="moins">− 4 836 €</b></div>
+                <div><small>Lignes en écart</small><b>3 sur 42</b></div>
+                <div><small>Échéance</small><b>vendredi</b></div>
+              </div>
+              <div class="pdm-actions"><span class="btn noir petit">Valider</span><span class="btn petit">Modifier</span><span class="btn petit">Refuser</span><span class="pousse gris"><svg class="ico"><use href="#i-trombone"/></svg> 2 pièces</span></div>
+            </div>
+            <div class="pdm-dec">
+              <div class="pdm-dec-l1"><span class="pdm-num">2 / 3</span><span class="pastille p-ambre">À valider</span><span class="pousse gris">Baux et loyers</span></div>
+              <h3>Réviser le loyer de la boutique 14</h3>
+              <p class="gris">L'indice du deuxième trimestre est publié ; le bail prévoit une révision annuelle au 1er octobre.</p>
+              <div class="pdm-chiffres">
+                <div><small>Loyer révisé</small><b>3 212 € / mois</b></div>
+                <div><small>Indice</small><b>+ 2,1 %</b></div>
+                <div><small>Date</small><b>1er octobre</b></div>
+              </div>
+            </div>
+            <div class="pdm-dec">
+              <div class="pdm-dec-l1"><span class="pdm-num">3 / 3</span><span class="pastille p-ambre">À valider</span><span class="pousse gris">Sinistres</span></div>
+              <h3>Relancer l'expert du sinistre de la plateforme 2</h3>
+              <p class="gris">Aucune réponse depuis 18 jours ; le contrat prévoit un rapport sous 30 jours.</p>
+              <div class="pdm-chiffres">
+                <div><small>Sans réponse</small><b>18 jours</b></div>
+                <div><small>Rapport attendu</small><b>sous 30 jours</b></div>
+                <div><small>Site</small><b>Plateforme 2</b></div>
+              </div>
+            </div>
+            <div class="pdm-hier">
+              <div class="pdm-hier-t"><span>Validées hier</span><span class="gris">4</span></div>
+              <div class="pdm-hier-l"><svg class="ico"><use href="#i-ok"/></svg><span>Payer l'échéance de la société Froid Caraïbes</span><span class="gris">Trésorerie · 7 h 18</span></div>
+              <div class="pdm-hier-l"><svg class="ico"><use href="#i-ok"/></svg><span>Transmettre les pièces du contrôle de mardi</span><span class="gris">Contrôles · 7 h 25</span></div>
+              <div class="pdm-hier-l"><svg class="ico"><use href="#i-ok"/></svg><span>Régulariser les charges de la galerie 2</span><span class="gris">Baux · 8 h 02</span></div>
+            </div>
+          </div>
+          <div class="pdm-apercu">
+            <div class="pdm-apercu-barre">
+              <span class="onglets"><span class="on">Aperçu</span><span>Calcul</span><span>Sources</span></span>
+              <span class="pousse"></span>
+              <span class="gris">Facture F-0917 ↔ Bon de livraison BL-4471</span>
+              <span class="pdm-zoom">100 %</span>
+            </div>
+            <div class="pdm-doc-fond">
+              <div class="pdm-doc">
+                <div class="pdm-doc-tete">
+                  <div><b>Facture F-0917</b><br><span class="gris">Fournisseur exemple · reçue le 23 septembre</span></div>
+                  <div class="pousse"></div>
+                  <div class="pdm-doc-soc">Société<br><b>Import Antilles 2</b></div>
+                </div>
+                <table class="tab pdm-lignes">
+                  <tr><th>Réf.</th><th>Désignation</th><th class="n">Facturé</th><th class="n">Livré</th><th class="n">Montant</th></tr>
+                  <tr><td class="mono">A-2210</td><td>Palettes de boissons, lot 12</td><td class="n">40</td><td class="n">40</td><td class="n">3 920,00</td></tr>
+                  <tr><td class="mono">A-2214</td><td>Conserves, carton de 24</td><td class="n">120</td><td class="n">120</td><td class="n">2 164,80</td></tr>
+                  <tr class="ecart"><td class="mono">A-2231</td><td>Riz long grain, sac de 20 kg</td><td class="n">96</td><td class="n moins">72</td><td class="n">1 944,00</td></tr>
+                  <tr><td class="mono">A-2240</td><td>Huile, bidon de 5 L</td><td class="n">60</td><td class="n">60</td><td class="n">1 470,00</td></tr>
+                  <tr class="ecart"><td class="mono">A-2256</td><td>Farine, sac de 25 kg</td><td class="n">48</td><td class="n moins">0</td><td class="n">1 632,00</td></tr>
+                  <tr><td class="mono">A-2263</td><td>Sucre, carton de 10 kg</td><td class="n">80</td><td class="n">80</td><td class="n">1 088,00</td></tr>
+                  <tr class="ecart"><td class="mono">A-2270</td><td>Lait UHT, pack de 6</td><td class="n">300</td><td class="n moins">260</td><td class="n">1 260,00</td></tr>
+                  <tr><td class="mono">A-2281</td><td>Café moulu, carton de 12</td><td class="n">36</td><td class="n">36</td><td class="n">1 296,00</td></tr>
+                  <tr><td class="mono">A-2290</td><td>Eau minérale, pack de 6 × 1,5 L</td><td class="n">400</td><td class="n">400</td><td class="n">1 880,00</td></tr>
+                  <tr><td class="mono">A-2302</td><td>Pâtes, carton de 20</td><td class="n">90</td><td class="n">90</td><td class="n">1 215,00</td></tr>
+                  <tr><td class="mono">A-2315</td><td>Tomates pelées, carton de 12</td><td class="n">110</td><td class="n">110</td><td class="n">1 540,00</td></tr>
+                  <tr><td class="mono">A-2318</td><td>Lessive, bidon de 3 L</td><td class="n">75</td><td class="n">75</td><td class="n">1 687,50</td></tr>
+                  <tr><td class="mono">A-2324</td><td>Papier essuie-tout, colis de 24</td><td class="n">64</td><td class="n">64</td><td class="n">1 318,40</td></tr>
+                </table>
+                <div class="pdm-doc-pied">
+                  <span class="pastille p-rouge">3 lignes en écart</span>
+                  <span class="pousse"></span>
+                  <span class="gris">Total facturé</span><b>28 412,60 €</b>
+                </div>
+              </div>
+              <div class="pdm-note carte flottant">
+                <b>Le calcul</b>
+                <p class="gris">42 lignes rapprochées une à une du bon de livraison signé. Trois quantités manquent ; la facture n'est pas encore payée.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     HÉROS 2 — leur config.webp (3200 × 1973) : un éditeur de code.
+     Ici le référentiel du groupe ouvert comme un fichier : les codes de
+     chaque société rangés sous un seul nom.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="heros-referentiel" class="opaque" style="width:1600px;height:986.5px">
+  <div class="ed">
+    <div class="ed-titre">
+      <span class="ed-feux"><i></i><i></i><i></i></span>
+      <span class="pousse"></span>
+      <span class="gris">referentiel — Varelo</span>
+      <span class="pousse"></span>
+      <span class="exemple">Données d'exemple</span>
+    </div>
+    <div class="ed-corps">
+      <div class="ed-arbre">
+        <div class="ed-arbre-t">Référentiel du groupe</div>
+        <div class="ed-n o"><svg class="ico"><use href="#i-bas"/></svg><svg class="ico"><use href="#i-dossier"/></svg>referentiel</div>
+        <div class="ed-n f on" style="--p:2"><svg class="ico"><use href="#i-tableur"/></svg>clients.csv</div>
+        <div class="ed-n f" style="--p:2"><svg class="ico"><use href="#i-tableur"/></svg>fournisseurs.csv</div>
+        <div class="ed-n f" style="--p:2"><svg class="ico"><use href="#i-tableur"/></svg>articles.csv</div>
+        <div class="ed-n f" style="--p:2"><svg class="ico"><use href="#i-tableur"/></svg>sites.csv</div>
+        <div class="ed-n o" style="--p:1"><svg class="ico"><use href="#i-bas"/></svg><svg class="ico"><use href="#i-dossier"/></svg>societes</div>
+        <div class="ed-n o" style="--p:2"><svg class="ico"><use href="#i-droite"/></svg><svg class="ico"><use href="#i-dossier"/></svg>import-antilles</div>
+        <div class="ed-n o" style="--p:2"><svg class="ico"><use href="#i-droite"/></svg><svg class="ico"><use href="#i-dossier"/></svg>froid-caraibes</div>
+        <div class="ed-n o" style="--p:2"><svg class="ico"><use href="#i-droite"/></svg><svg class="ico"><use href="#i-dossier"/></svg>galerie-2</div>
+        <div class="ed-n o" style="--p:2"><svg class="ico"><use href="#i-droite"/></svg><svg class="ico"><use href="#i-dossier"/></svg>agence-marques</div>
+        <div class="ed-n o" style="--p:2"><svg class="ico"><use href="#i-droite"/></svg><svg class="ico"><use href="#i-dossier"/></svg>logistique-sud</div>
+        <div class="ed-n gris" style="--p:2">… 33 autres</div>
+        <div class="ed-n o" style="--p:1"><svg class="ico"><use href="#i-bas"/></svg><svg class="ico"><use href="#i-dossier"/></svg>regles</div>
+        <div class="ed-n f" style="--p:2"><svg class="ico"><use href="#i-fichier"/></svg>rapprochement.yml</div>
+        <div class="ed-n f" style="--p:2"><svg class="ico"><use href="#i-fichier"/></svg>echeances.yml</div>
+        <div class="ed-n f" style="--p:2"><svg class="ico"><use href="#i-fichier"/></svg>reserves.yml</div>
+        <div class="ed-n o" style="--p:1"><svg class="ico"><use href="#i-droite"/></svg><svg class="ico"><use href="#i-dossier"/></svg>journal</div>
+      </div>
+      <div class="ed-droite">
+        <div class="ed-onglets"><span class="on"><svg class="ico"><use href="#i-tableur"/></svg>clients.csv</span><span><svg class="ico"><use href="#i-tableur"/></svg>fournisseurs.csv</span><span><svg class="ico"><use href="#i-fichier"/></svg>rapprochement.yml</span></div>
+        <div class="ed-chemin gris">referentiel <s>›</s> clients.csv <s>›</s> <b>C-00412</b></div>
+        <div class="code ed-code">
+          <div class="l"><u>1</u><span class="c">code_groupe;nom_groupe;societe;code_local;nom_local;encours</span></div>
+          <div class="l"><u>2</u><span><span class="cle">C-00398</span><span class="sep">;</span>Martin Équipement<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411MAR</span><span class="sep">;</span>MARTIN EQUIPEMENT SAS<span class="sep">;</span><span class="nb">12 480,00</span></span></div>
+          <div class="l"><u>3</u><span><span class="cle">C-00398</span><span class="sep">;</span>Martin Équipement<span class="sep">;</span>Logistique Sud<span class="sep">;</span><span class="s">CL-0214</span><span class="sep">;</span>Martin Equip.<span class="sep">;</span><span class="nb">3 105,40</span></span></div>
+          <div class="l vue"><u>4</u><span><span class="cle">C-00412</span><span class="sep">;</span>Dupont Distribution<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411DUP</span><span class="sep">;</span>SARL DUPONT DISTRIBUTION<span class="sep">;</span><span class="nb">21 940,00</span></span></div>
+          <div class="l vue"><u>5</u><span><span class="cle">C-00412</span><span class="sep">;</span>Dupont Distribution<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-0877</span><span class="sep">;</span>DUPONT DIST.<span class="sep">;</span><span class="nb">18 360,50</span></span></div>
+          <div class="l vue"><u>6</u><span><span class="cle">C-00412</span><span class="sep">;</span>Dupont Distribution<span class="sep">;</span>Galerie 2<span class="sep">;</span><span class="s">DUPONT</span><span class="sep">;</span>Dupont D.<span class="sep">;</span><span class="nb">7 910,00</span></span></div>
+          <div class="l"><u>7</u><span><span class="cle">C-00427</span><span class="sep">;</span>Hôtel de la Baie<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-0902</span><span class="sep">;</span>HOTEL DE LA BAIE<span class="sep">;</span><span class="nb">5 212,00</span></span></div>
+          <div class="l"><u>8</u><span><span class="cle">C-00431</span><span class="sep">;</span>Restaurant du Port<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-0915</span><span class="sep">;</span>REST. DU PORT<span class="sep">;</span><span class="nb">2 480,90</span></span></div>
+          <div class="l"><u>9</u><span><span class="cle">C-00431</span><span class="sep">;</span>Restaurant du Port<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411RES</span><span class="sep">;</span>RESTAURANT DU PORT<span class="sep">;</span><span class="nb">1 106,00</span></span></div>
+          <div class="l"><u>10</u><span><span class="cle">C-00440</span><span class="sep">;</span>Maison Lebrun<span class="sep">;</span>Agence Marques<span class="sep">;</span><span class="s">AM-118</span><span class="sep">;</span>LEBRUN ET FILS<span class="sep">;</span><span class="nb">9 870,00</span></span></div>
+          <div class="l"><u>11</u><span><span class="cle">C-00452</span><span class="sep">;</span>Clinique des Îles<span class="sep">;</span>Logistique Sud<span class="sep">;</span><span class="s">CL-0301</span><span class="sep">;</span>CLINIQUE DES ILES<span class="sep">;</span><span class="nb">14 025,00</span></span></div>
+          <div class="l"><u>12</u><span><span class="cle">C-00452</span><span class="sep">;</span>Clinique des Îles<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411CLI</span><span class="sep">;</span>CLINIQUE DES ILES SA<span class="sep">;</span><span class="nb">6 480,00</span></span></div>
+          <div class="l"><u>13</u><span><span class="cle">C-00468</span><span class="sep">;</span>Collège Saint-Joseph<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1004</span><span class="sep">;</span>COLLEGE ST JOSEPH<span class="sep">;</span><span class="nb">3 390,00</span></span></div>
+          <div class="l"><u>14</u><span><span class="cle">C-00471</span><span class="sep">;</span>Boulangerie Moreau<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411BOU</span><span class="sep">;</span>BOULANGERIE MOREAU<span class="sep">;</span><span class="nb">1 944,20</span></span></div>
+          <div class="l"><u>15</u><span><span class="cle">C-00480</span><span class="sep">;</span>Traiteur Solène<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1027</span><span class="sep">;</span>TRAITEUR SOLENE<span class="sep">;</span><span class="nb">2 760,00</span></span></div>
+          <div class="l"><u>16</u><span><span class="cle">C-00493</span><span class="sep">;</span>Camping des Pins<span class="sep">;</span>Logistique Sud<span class="sep">;</span><span class="s">CL-0388</span><span class="sep">;</span>CAMPING DES PINS<span class="sep">;</span><span class="nb">880,00</span></span></div>
+          <div class="l"><u>17</u><span><span class="cle">C-00502</span><span class="sep">;</span>Pharmacie Centrale<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411PHA</span><span class="sep">;</span>PHARMACIE CENTRALE<span class="sep">;</span><span class="nb">4 115,00</span></span></div>
+          <div class="l"><u>18</u><span><span class="cle">C-00502</span><span class="sep">;</span>Pharmacie Centrale<span class="sep">;</span>Galerie 2<span class="sep">;</span><span class="s">PHARMA</span><span class="sep">;</span>Pharmacie Centr.<span class="sep">;</span><span class="nb">2 300,00</span></span></div>
+          <div class="l"><u>19</u><span><span class="cle">C-00517</span><span class="sep">;</span>Garage de l'Anse<span class="sep">;</span>Agence Marques<span class="sep">;</span><span class="s">AM-140</span><span class="sep">;</span>GARAGE DE L'ANSE<span class="sep">;</span><span class="nb">6 725,00</span></span></div>
+          <div class="l"><u>20</u><span><span class="cle">C-00526</span><span class="sep">;</span>Supérette du Bourg<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411SUP</span><span class="sep">;</span>SUPERETTE DU BOURG<span class="sep">;</span><span class="nb">3 518,60</span></span></div>
+          <div class="l"><u>21</u><span><span class="cle">C-00526</span><span class="sep">;</span>Supérette du Bourg<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1066</span><span class="sep">;</span>SUPERETTE BOURG<span class="sep">;</span><span class="nb">1 902,00</span></span></div>
+          <div class="l"><u>22</u><span><span class="cle">C-00538</span><span class="sep">;</span>Cave des Alizés<span class="sep">;</span>Agence Marques<span class="sep">;</span><span class="s">AM-151</span><span class="sep">;</span>CAVE DES ALIZES<span class="sep">;</span><span class="nb">11 240,00</span></span></div>
+          <div class="l"><u>23</u><span><span class="cle">C-00544</span><span class="sep">;</span>Marché Frais Est<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1081</span><span class="sep">;</span>MARCHE FRAIS EST<span class="sep">;</span><span class="nb">7 610,00</span></span></div>
+          <div class="l"><u>24</u><span><span class="cle">C-00551</span><span class="sep">;</span>Hôtel Bellevue<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411HOT</span><span class="sep">;</span>HOTEL BELLEVUE SARL<span class="sep">;</span><span class="nb">8 004,00</span></span></div>
+          <div class="l"><u>25</u><span><span class="cle">C-00551</span><span class="sep">;</span>Hôtel Bellevue<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1090</span><span class="sep">;</span>HOTEL BELLEVUE<span class="sep">;</span><span class="nb">5 367,00</span></span></div>
+          <div class="l"><u>26</u><span><span class="cle">C-00560</span><span class="sep">;</span>Crèche Les Coccinelles<span class="sep">;</span>Logistique Sud<span class="sep">;</span><span class="s">CL-0412</span><span class="sep">;</span>CRECHE COCCINELLES<span class="sep">;</span><span class="nb">640,00</span></span></div>
+          <div class="l"><u>27</u><span><span class="cle">C-00573</span><span class="sep">;</span>Snack de la Plage<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1112</span><span class="sep">;</span>SNACK PLAGE<span class="sep">;</span><span class="nb">1 205,00</span></span></div>
+          <div class="l"><u>28</u><span><span class="cle">C-00580</span><span class="sep">;</span>Quincaillerie Ravin<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411QUI</span><span class="sep">;</span>QUINCAILLERIE RAVIN<span class="sep">;</span><span class="nb">2 998,00</span></span></div>
+          <div class="l"><u>29</u><span><span class="cle">C-00592</span><span class="sep">;</span>Résidence Les Palmiers<span class="sep">;</span>Galerie 2<span class="sep">;</span><span class="s">PALMIE</span><span class="sep">;</span>Res. Les Palmiers<span class="sep">;</span><span class="nb">3 150,00</span></span></div>
+          <div class="l"><u>30</u><span><span class="cle">C-00605</span><span class="sep">;</span>Épicerie Fine Anaïs<span class="sep">;</span>Agence Marques<span class="sep">;</span><span class="s">AM-166</span><span class="sep">;</span>EPICERIE FINE ANAIS<span class="sep">;</span><span class="nb">2 410,00</span></span></div>
+          <div class="l"><u>31</u><span><span class="cle">C-00611</span><span class="sep">;</span>Location Soleil<span class="sep">;</span>Logistique Sud<span class="sep">;</span><span class="s">CL-0450</span><span class="sep">;</span>LOCATION SOLEIL<span class="sep">;</span><span class="nb">1 760,00</span></span></div>
+          <div class="l"><u>32</u><span><span class="cle">C-00624</span><span class="sep">;</span>Bar Le Carbet<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1140</span><span class="sep">;</span>BAR LE CARBET<span class="sep">;</span><span class="nb">985,00</span></span></div>
+          <div class="l"><u>33</u><span><span class="cle">C-00630</span><span class="sep">;</span>Primeurs du Marché<span class="sep">;</span>Import Antilles<span class="sep">;</span><span class="s">411PRI</span><span class="sep">;</span>PRIMEURS DU MARCHE<span class="sep">;</span><span class="nb">4 870,00</span></span></div>
+          <div class="l"><u>34</u><span><span class="cle">C-00641</span><span class="sep">;</span>Hôtel des Flamboyants<span class="sep">;</span>Froid Caraïbes<span class="sep">;</span><span class="s">CLI-1163</span><span class="sep">;</span>HOTEL FLAMBOYANTS<span class="sep">;</span><span class="nb">6 380,00</span></span></div>
+          <div class="l"><u>35</u><span><span class="cle">C-00655</span><span class="sep">;</span>Salle de sport Atlas<span class="sep">;</span>Galerie 2<span class="sep">;</span><span class="s">ATLAS</span><span class="sep">;</span>Atlas Fitness<span class="sep">;</span><span class="nb">2 100,00</span></span></div>
+        </div>
+        <div class="ed-bulle carte flottant-fort">
+          <div class="ed-bulle-t"><b>C-00412 · Dupont Distribution</b><span class="pastille p-vert">3 noms rangés</span></div>
+          <div class="ed-bulle-l"><span class="gris">Import Antilles</span><span class="mono">411DUP</span><span class="mono">21 940,00</span></div>
+          <div class="ed-bulle-l"><span class="gris">Froid Caraïbes</span><span class="mono">CLI-0877</span><span class="mono">18 360,50</span></div>
+          <div class="ed-bulle-l"><span class="gris">Galerie 2</span><span class="mono">DUPONT</span><span class="mono">7 910,00</span></div>
+          <div class="ed-bulle-l total"><span>Encours du groupe</span><span></span><span class="mono">48 210,50 €</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ed-etat"><span><svg class="ico"><use href="#i-cadenas"/></svg>Lecture seule</span><span>CSV · UTF-8</span><span>1 248 clients · 3 116 codes de société</span><span class="pousse"></span><span>Ln 4, Col 1</span><span>Relu à 6 h 42</span></div>
+  </div>
+</section>
+
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     ASSEMBLAGE — leur 3.0-collage-3.webp (2880 × 1940), sous « Code-first
+     for developers. / Content-first for marketers. ». Même composition,
+     pièce pour pièce : tableau dépliable à gauche, texte riche en bas à
+     gauche, liste au centre, code au centre, dossiers et images en bas,
+     aperçu à droite, commentaires à droite ; leurs curseurs de
+     collaborateurs étiquetés (Marketer, Developer…) deviennent les
+     directions du groupe.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="collage" data-transparent style="width:1440px;height:970px">
+  <div class="cl">
+
+    <!-- derrière, à gauche : des fiches de sociétés estompées -->
+    <div class="cl-fantome" style="left:0;top:190px;width:150px;height:420px">
+      <img src="../../public/secteurs-groupes/pole-immobilier.jpg" alt="">
+    </div>
+    <div class="cl-fantome" style="left:160px;top:430px;width:150px;height:175px">
+      <img src="../../public/secteurs-groupes/carte-operations.jpg" alt="">
+    </div>
+
+    <!-- 1. les sociétés du pôle, tableau dépliable -->
+    <div class="cl-bloc" style="left:45px;top:108px;width:360px">
+      <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="mono gris">01</span><span class="gris">Import</span><b>Import Antilles</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+      <div class="cl-rang ouvert"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="mono gris">02</span><span class="gris">Froid</span><b>Froid Caraïbes</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-haut"/></svg></div>
+      <div class="cl-deplie">
+        <div class="champ"><label>Nom de la société</label><div class="saisie remplie">Froid Caraïbes</div></div>
+        <div class="champ"><label>Territoire</label><div class="saisie remplie">Martinique</div></div>
+        <div class="saisie">Logiciel de gestion<span class="fin"><svg class="ico"><use href="#i-bas"/></svg></span></div>
+        <div class="saisie">Nomenclature des clients<span class="fin"><svg class="ico"><use href="#i-bas"/></svg></span></div>
+      </div>
+      <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="mono gris">03</span><span class="gris">Immobilier</span><b>Galerie 2</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+      <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="mono gris">04</span><span class="gris">Marques</span><b>Agence Marques</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+      <div class="cl-ajout gris"><svg class="ico"><use href="#i-plus"/></svg>Ajouter une société</div>
+    </div>
+
+    <!-- 2. texte riche, en bas à gauche -->
+    <div class="cl-outils carte flottant" style="left:12px;top:650px;width:393px">
+      <span class="mono">H2</span><svg class="ico"><use href="#i-bas"/></svg><i></i>
+      <svg class="ico"><use href="#i-liste"/></svg><svg class="ico"><use href="#i-titre"/></svg><i></i>
+      <b class="cl-actif"><svg class="ico"><use href="#i-gras"/></svg></b><svg class="ico"><use href="#i-italique"/></svg><svg class="ico"><use href="#i-souligne"/></svg><i></i>
+      <svg class="ico"><use href="#i-lien"/></svg><svg class="ico"><use href="#i-trombone"/></svg>
+    </div>
+    <div class="cl-riche" style="left:30px;top:686px;width:380px">
+      <span class="pale">Le</span> <mark>référentiel range chaque client</mark> <span class="pale">sous un seul nom, dans toutes les</span> <span class="cl-curseur-texte pale">sociétés.</span>
+      <span class="cl-tag violet" style="left:118px;top:88px">Présidence</span>
+    </div>
+
+    <!-- 3. les clients du groupe, au centre en haut -->
+    <div class="cl-bloc carte flottant" style="left:455px;top:5px;width:530px;height:285px">
+      <div class="cl-liste-t"><h3>Clients du groupe</h3><span class="btn petit">Nouveau</span><span class="pousse"></span><span class="exemple">Données d'exemple</span></div>
+      <div class="cl-cherche"><svg class="ico"><use href="#i-cherche"/></svg><span class="pale">Rechercher un client</span><span class="pousse"></span><span class="btn petit">Colonnes <svg class="ico"><use href="#i-bas"/></svg></span><span class="btn petit">Filtres <svg class="ico"><use href="#i-bas"/></svg></span></div>
+      <table class="tab cl-tab">
+        <tr><th></th><th>Nom</th><th>Code</th><th class="n">Sociétés</th><th class="n">Encours</th></tr>
+        <tr class="cl-verrou"><td><svg class="ico"><use href="#i-cadenas"/></svg></td><td><u>Dupont Distribution</u></td><td class="mono">C-00412</td><td class="n">3</td><td class="n">48 210 €</td></tr>
+        <tr><td><i class="cl-case"></i></td><td><u>Martin Équipement</u></td><td class="mono">C-00398</td><td class="n">2</td><td class="n">15 585 €</td></tr>
+        <tr><td><i class="cl-case"></i></td><td><u>Clinique des Îles</u></td><td class="mono">C-00452</td><td class="n">2</td><td class="n">20 505 €</td></tr>
+        <tr><td><i class="cl-case"></i></td><td><u>Hôtel Bellevue</u></td><td class="mono">C-00551</td><td class="n">2</td><td class="n">13 371 €</td></tr>
+      </table>
+      <div class="cl-bulle" style="left:-12px;top:104px">La direction financière consulte</div>
+    </div>
+
+    <!-- 4. une règle, dans l'éditeur, au centre -->
+    <div class="cl-bloc carte flottant cl-code" style="left:455px;top:325px;width:530px;height:330px">
+      <div class="cl-code-t"><svg class="ico"><use href="#i-fichier"/></svg>regles/reserves.yml<span class="pousse"></span><span class="pastille p-gris nue">lecture seule</span></div>
+      <div class="code">
+        <div class="l"><u>1</u><span class="c"># Réserves aux transporteurs</span></div>
+        <div class="l"><u>2</u><span><span class="cle">regle</span>: reserve_transporteur</span></div>
+        <div class="l"><u>3</u><span><span class="cle">source</span>: receptions        <span class="c"># bons de livraison signés</span></span></div>
+        <div class="l"><u>4</u><span><span class="cle">declencheur</span>:</span></div>
+        <div class="l"><u>5</u><span>  <span class="cle">avarie</span>: <span class="s">constatee</span></span></div>
+        <div class="l"><u>6</u><span><span class="cle">delai</span>:</span></div>
+        <div class="l vue"><u>7</u><span>  <span class="cle">jours</span>: <span class="nb">3</span>              <span class="c"># art. L133-3 du Code de commerce</span></span></div>
+        <div class="l"><u>8</u><span>  <span class="cle">depuis</span>: <span class="s">reception</span></span></div>
+        <div class="l"><u>9</u><span><span class="cle">alerte</span>:</span></div>
+        <div class="l"><u>10</u><span>  <span class="cle">direction</span>: <span class="s">operations</span></span></div>
+        <div class="l"><u>11</u><span>  <span class="cle">heure</span>: <span class="s">"07:00"</span></span></div>
+        <div class="l"><u>12</u><span><span class="cle">proposition</span>: <span class="cl-curseur-texte">envoyer_reserve</span></span></div>
+        <div class="l"><u>13</u><span><span class="cle">validation</span>: <span class="k">humaine</span>     <span class="c"># rien ne part sans accord</span></span></div>
+      </div>
+      <span class="cl-tag rouge" style="left:262px;top:260px">Opérations</span>
+    </div>
+
+    <!-- 5. dossiers et pièces, en bas au centre -->
+    <div class="cl-dossier carte flottant" style="left:450px;top:688px"><svg class="ico"><use href="#i-dossier"/></svg><div><b>Contrats</b><small>214 pièces</small></div><svg class="ico pale"><use href="#i-points"/></svg></div>
+    <div class="cl-dossier carte flottant" style="left:633px;top:688px"><svg class="ico"><use href="#i-dossier"/></svg><div><b>Baux</b><small>64 pièces</small></div><svg class="ico pale"><use href="#i-points"/></svg></div>
+    <div class="cl-dossier carte flottant on" style="left:817px;top:688px"><svg class="ico"><use href="#i-dossier"/></svg><div><b>Sinistres</b><small>12 pièces</small></div><svg class="ico pale"><use href="#i-points"/></svg></div>
+    <div class="cl-image carte flottant" style="left:450px;top:745px"><img src="../../public/secteurs-groupes/carte-juridique.jpg" alt=""><div><span>contrat-maintenance.pdf</span><svg class="ico pale"><use href="#i-points"/></svg></div></div>
+    <div class="cl-image carte flottant" style="left:633px;top:745px"><img src="../../public/secteurs-groupes/pole-immobilier.jpg" alt=""><div><span>bail-galerie-2.pdf</span><svg class="ico pale"><use href="#i-points"/></svg></div></div>
+    <div class="cl-image carte flottant" style="left:817px;top:745px"><img src="../../public/secteurs-groupes/carte-operations.jpg" alt=""><div><span>plateforme-2.jpg</span><svg class="ico pale"><use href="#i-points"/></svg></div></div>
+
+    <!-- 6. l'aperçu du point du matin, à droite en haut, coupé au bord -->
+    <div class="cl-bloc carte flottant cl-apercu" style="left:1046px;top:90px;width:430px;height:342px">
+      <div class="cl-apercu-fil gris"><svg class="ico"><use href="#i-soleil"/></svg>Point du matin <s>/</s> Direction juridique</div>
+      <h3>Point du matin : trois décisions, dont une avant mardi</h3>
+      <div class="cl-apercu-statut gris">Statut : <b>envoyé</b> · 7 h 00 · Lu à 7 h 06</div>
+      <div class="cl-apercu-corps">
+        <div class="cl-apercu-g">
+          <div class="onglets-bas" style="padding:0"><span class="on">Décision</span><span>Calcul</span><span>Pièces</span></div>
+          <div class="champ" style="margin-top:10px"><label>Décision<i>*</i></label><div class="saisie">Dénoncer la maintenance</div></div>
+          <div class="champ" style="margin-top:8px"><label>Date limite</label><div class="saisie focus">30 septembre</div></div>
+          <div class="champ" style="margin-top:8px"><label>Raison</label><div class="saisie" style="height:52px;align-items:flex-start;padding-top:7px;font-size:11.5px;line-height:1.4">Reconduction tacite au 31 décembre ; préavis de trois mois.</div></div>
+        </div>
+        <div class="cl-apercu-d">
+          <div class="cl-mail">
+            <small class="gris">7 h 00 · de Varelo</small>
+            <b>Direction juridique : trois décisions</b>
+            <p>1. Dénoncer le contrat de maintenance avant le 30 septembre.</p>
+            <p>2. Relancer l'expert du sinistre de la plateforme 2.</p>
+            <p>3. Réviser le loyer de la boutique 14.</p>
+            <span class="btn noir petit">Ouvrir le point du matin</span>
+          </div>
+        </div>
+      </div>
+      <span class="cl-tag bleu" style="left:150px;top:222px">Direction juridique</span>
+    </div>
+
+    <!-- 7. les commentaires, à droite -->
+    <div class="cl-fantome" style="left:1217px;top:615px;width:200px;height:228px">
+      <img src="../../public/secteurs-groupes/carte-direction.jpg" alt="">
+    </div>
+    <div class="cl-bloc" style="left:1041px;top:512px;width:360px">
+      <div class="cl-rang ouvert"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="mono gris">01</span><b>Vérifier la date de préavis</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-haut"/></svg></div>
+      <div class="cl-deplie">
+        <div class="champ"><label>Note</label><div class="saisie" style="height:56px;align-items:flex-start;padding-top:8px;line-height:1.45"><span>Le bail de la boutique 14 prévoit six mois ; à confirmer avant de <span class="cl-curseur-texte">dénoncer.</span></span></div></div>
+        <div class="champ"><label>Étiquettes</label><div class="saisie"><span class="cl-puce">Bail <svg class="ico"><use href="#i-croix"/></svg></span><span class="cl-puce">Galerie 2 <svg class="ico"><use href="#i-croix"/></svg></span><span class="fin"><svg class="ico"><use href="#i-bas"/></svg></span></div></div>
+        <span class="cl-tag ambre" style="left:196px;top:86px">Direction financière</span>
+      </div>
+      <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="mono gris">02</span><b>Rapprocher avec le relevé du 30</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+      <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="mono gris">03</span><b>Validé par la présidence</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+      <div class="cl-ajout gris"><svg class="ico"><use href="#i-plus"/></svg>Ajouter un commentaire</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SURVOL 1 — leur hh-cms-new-1.png (1800 × 1440) : une fenêtre
+     d'application sur fond transparent. Ici la page du groupe.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="survol-groupe" data-transparent style="width:900px;height:720px">
+  <div class="app flottant-fort sv-fenetre" style="left:75px;top:130px;width:735px;height:460px">
+    <div class="barre sv-barre">
+      <div class="signe"><img src="../../public/logos/varelo-mark.png" alt=""></div>
+      <div class="fil"><b>Le groupe</b><s>/</s><span>Semaine 39</span></div>
+      <div class="pousse"></div>
+      <span class="exemple">Données d'exemple</span>
+      <div class="avatar">PR</div>
+    </div>
+    <div class="sv-page">
+      <div class="sv-titre"><h3>Le groupe sur une page</h3><span class="onglets"><span class="on">Semaine</span><span>Mois</span><span>Trimestre</span></span></div>
+      <div class="sv-kpi">
+        <div><small>Ventes du groupe</small><b>4,82 M€</b><em class="plus">+ 3,4 %</em></div>
+        <div><small>Trésorerie disponible</small><b>11,4 M€</b><em class="gris">38 sociétés</em></div>
+        <div><small>Échéances à 30 jours</small><b>23</b><em class="moins">5 cette semaine</em></div>
+        <div><small>Reportings reçus</small><b>35 / 38</b><em class="moins">3 en retard</em></div>
+      </div>
+      <table class="tab sv-tab">
+        <tr><th>Société</th><th>Pôle</th><th class="n">Ventes</th><th class="n">Écart</th><th class="n">Trésorerie</th><th>Reporting</th></tr>
+        <tr><td>Import Antilles</td><td class="gris">Import</td><td class="n">1 240 k€</td><td class="n plus">+ 4,1 %</td><td class="n">3 180 k€</td><td><span class="pastille p-vert">Reçu</span></td></tr>
+        <tr><td>Froid Caraïbes</td><td class="gris">Logistique du froid</td><td class="n">612 k€</td><td class="n moins">− 2,3 %</td><td class="n">940 k€</td><td><span class="pastille p-vert">Reçu</span></td></tr>
+        <tr><td>Galerie 2</td><td class="gris">Centres commerciaux</td><td class="n">318 k€</td><td class="n plus">+ 1,2 %</td><td class="n">1 410 k€</td><td><span class="pastille p-ambre">En retard</span></td></tr>
+        <tr><td>Agence Marques</td><td class="gris">Agences de marques</td><td class="n">455 k€</td><td class="n plus">+ 6,8 %</td><td class="n">720 k€</td><td><span class="pastille p-vert">Reçu</span></td></tr>
+        <tr><td>Logistique Sud</td><td class="gris">Logistique</td><td class="n">286 k€</td><td class="n moins">− 0,6 %</td><td class="n">515 k€</td><td><span class="pastille p-vert">Reçu</span></td></tr>
+        <tr><td>Magasins Nord</td><td class="gris">Magasins</td><td class="n">1 031 k€</td><td class="n plus">+ 2,9 %</td><td class="n">2 260 k€</td><td><span class="pastille p-rouge">Manquant</span></td></tr>
+        <tr><td>Gros Caraïbes</td><td class="gris">Commerce de gros</td><td class="n">702 k€</td><td class="n plus">+ 0,8 %</td><td class="n">1 090 k€</td><td><span class="pastille p-vert">Reçu</span></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SURVOL 2 — leurs hh-ecom-2 (dessous) et hh-ecom-1 (dessus),
+     1800 × 1587 chacun : une grille de fiches à droite, un tableau
+     dépliable posé par-dessus à gauche. Ici les contrats à dénoncer.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="survol-contrats" data-transparent style="width:900px;height:793.5px">
+  <div class="sv-grille" style="left:330px;top:137px">
+    <div class="sv-fiche carte flottant"><div class="sv-doc"><i class="t"></i><i></i><i></i><i class="c"></i><i></i><i></i><i class="c"></i><i class="sig"></i></div><div class="sv-fiche-l"><small>Contrat de maintenance</small><b>Ascenseurs · Galerie 2</b><span class="pastille p-rouge nue">30/09</span></div></div>
+    <div class="sv-fiche carte flottant"><div class="sv-doc"><i class="t"></i><i></i><i class="c"></i><i></i><i></i><i></i><i class="c"></i><i class="sig"></i></div><div class="sv-fiche-l"><small>Contrat de service</small><b>Nettoyage · Plateforme froid</b><span class="pastille p-ambre nue">31/10</span></div></div>
+    <div class="sv-fiche carte flottant"><div class="sv-doc"><i class="t"></i><i></i><i></i><i></i><i class="c"></i><i></i><i></i><i class="sig"></i></div><div class="sv-fiche-l"><small>Contrat de service</small><b>Télésurveillance · Import</b><span class="pastille p-gris nue">15/11</span></div></div>
+    <div class="sv-fiche carte flottant"><div class="sv-doc"><i class="t"></i><i class="c"></i><i></i><i></i><i></i><i class="c"></i><i></i><i class="sig"></i></div><div class="sv-fiche-l"><small>Contrat de location</small><b>Chariots · Logistique Sud</b><span class="pastille p-gris nue">02/12</span></div></div>
+  </div>
+</section>
+<section data-ecran="survol-contrats-fiche" data-transparent style="width:900px;height:793.5px">
+  <div class="cl-bloc sv-rangs" style="left:75px;top:60px;width:405px">
+    <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="gris">Contrat</span><b>Nettoyage · Plateforme froid</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+    <div class="cl-rang ouvert"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="gris">Contrat</span><b>Maintenance · Galerie 2</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-haut"/></svg></div>
+    <div class="cl-deplie">
+      <div class="champ"><label>Cocontractant<i>*</i></label><div class="saisie remplie">Prestataire exemple</div></div>
+      <div class="champ"><label>Échéance<i>*</i></label><div class="saisie remplie">31 décembre 2026 · reconduction tacite</div></div>
+      <div class="saisie">Préavis : 3 mois<span class="fin"><svg class="ico"><use href="#i-bas"/></svg></span></div>
+      <div class="saisie sv-limite">Dénoncer avant le 30 septembre<span class="pastille p-rouge nue">J − 5</span><span class="fin"><svg class="ico"><use href="#i-bas"/></svg></span></div>
+    </div>
+    <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="gris">Contrat</span><b>Télésurveillance · Import</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+    <div class="cl-rang"><svg class="ico pale"><use href="#i-poignee"/></svg><span class="gris">Contrat</span><b>Chariots · Logistique Sud</b><span class="pousse"></span><svg class="ico pale"><use href="#i-points"/></svg><svg class="ico"><use href="#i-bas"/></svg></div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SURVOL 3 — leurs hh-etb-02 (dessous, 1800 × 1500) et hh-etb-01
+     (dessus, 1800 × 1518) : une fiche à groupes dépliables à gauche, une
+     carte d'état posée au centre. Ici la réserve à émettre.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="survol-reserves" data-transparent style="width:900px;height:750px">
+  <div class="sv-spec" style="left:76px;top:84px;width:450px">
+    <div class="sv-spec-t"><b>Livraison du 23 septembre</b><span class="pastille p-gris nue">Réception · Plateforme 2</span></div>
+    <div class="sv-groupe carte flottant">
+      <div class="sv-groupe-t">Transport<svg class="ico"><use href="#i-haut"/></svg></div>
+      <div class="sv-groupe-c grille-2">
+        <div class="champ"><label>Transporteur</label><div class="saisie">Transporteur exemple</div></div>
+        <div class="champ"><label>Lettre de voiture</label><div class="saisie mono">LV-20931</div></div>
+      </div>
+    </div>
+    <div class="sv-groupe carte flottant">
+      <div class="sv-groupe-t">Colis et avarie<svg class="ico"><use href="#i-haut"/></svg></div>
+      <div class="sv-groupe-c">
+        <div class="grille-2">
+          <div class="champ"><label>Constat</label><div class="saisie">3 cartons écrasés</div></div>
+          <div class="champ"><label>Reçu le</label><div class="saisie">23/09 · 14 h 10</div></div>
+        </div>
+        <div class="champ" style="margin-top:10px"><label>Photos du constat</label>
+          <div class="sv-photos"><img src="photos/avarie-cartons.jpg" alt=""><img src="photos/avarie-dechirure.jpg" alt=""><img src="photos/avarie-camion.jpg" alt=""><span class="gris"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+        </div>
+        <div class="grille-3" style="margin-top:10px">
+          <div class="champ"><label>Palettes</label><div class="saisie">6<span class="fin sv-pas">⌃⌄</span></div></div>
+          <div class="champ"><label>Cartons</label><div class="saisie">18<span class="fin sv-pas">⌃⌄</span></div></div>
+          <div class="champ"><label>Abîmés</label><div class="saisie">3<span class="fin sv-pas">⌃⌄</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sv-groupe carte flottant sv-ferme"><div class="sv-groupe-t">Réserve au transporteur<svg class="ico"><use href="#i-bas"/></svg></div></div>
+    <div class="sv-groupe carte flottant sv-ferme"><div class="sv-groupe-t">Documents<svg class="ico"><use href="#i-bas"/></svg></div></div>
+    <div class="sv-groupe carte flottant sv-ferme"><div class="sv-groupe-t">Historique<svg class="ico"><use href="#i-bas"/></svg></div></div>
+  </div>
+</section>
+<section data-ecran="survol-reserves-delai" data-transparent style="width:900px;height:759px">
+  <div class="sv-etat carte flottant-fort" style="left:375px;top:169px;width:300px">
+    <b>Réserve au transporteur</b>
+    <div class="sv-pas-l fait"><i><svg class="ico"><use href="#i-ok"/></svg></i>Avarie constatée à la réception</div>
+    <div class="sv-pas-l fait"><i><svg class="ico"><use href="#i-ok"/></svg></i>Photos jointes au dossier</div>
+    <div class="sv-pas-l encours"><i></i><div class="sv-alerte">À envoyer avant jeudi 26, 18 h<br><span>Il reste 2 jours et 4 heures</span><span class="btn noir petit">Envoyer la réserve</span></div></div>
+    <div class="sv-pas-l"><i></i>Réponse du transporteur</div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SURVOL 4 — leur hh-dam-new-1.png (1800 × 1440) : une médiathèque,
+     dossiers puis vignettes. Ici les reportings dus aux marques.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="survol-reportings" data-transparent style="width:900px;height:720px">
+  <div class="app flottant-fort sv-fenetre" style="left:76px;top:137px;width:749px;height:447px">
+    <div class="barre sv-barre">
+      <div class="signe"><img src="../../public/logos/varelo-mark.png" alt=""></div>
+      <div class="fil"><span>Agences de marques</span><s>/</s><b>Reportings</b></div>
+      <div class="pousse"></div>
+      <span class="exemple">Données d'exemple</span>
+      <div class="avatar">OP</div>
+    </div>
+    <div class="sv-page">
+      <div class="sv-titre"><h3>Reportings dus</h3><span class="btn petit">Nouveau</span><span class="btn petit">Tout préparer</span><span class="pousse"></span><span class="gris" style="font-size:11px">12 à envoyer en octobre</span></div>
+      <div class="cl-cherche sv-cherche"><svg class="ico"><use href="#i-cherche"/></svg><span class="pale">Rechercher une marque</span><span class="pousse"></span><span class="btn petit">Échéance</span><span class="btn petit">Filtres</span></div>
+      <div class="sv-dossiers">
+        <div class="on"><svg class="ico"><use href="#i-dossier"/></svg><b>Octobre</b><small>12</small></div>
+        <div><svg class="ico"><use href="#i-dossier"/></svg><b>Novembre</b><small>9</small></div>
+        <div><svg class="ico"><use href="#i-dossier"/></svg><b>Trimestriels</b><small>4</small></div>
+        <div><svg class="ico"><use href="#i-dossier"/></svg><b>Annuels</b><small>2</small></div>
+        <div><svg class="ico"><use href="#i-dossier"/></svg><b>Envoyés</b><small>31</small></div>
+      </div>
+      <div class="sv-tuiles">
+        <div class="on"><img src="photos/produit-ventilateur.jpg" alt=""><span>Ventilation · dû le 5</span></div>
+        <div class="on"><img src="photos/produit-salon-jardin.jpg" alt=""><span>Mobilier de jardin · le 5</span></div>
+        <div><img src="photos/produit-parasol.jpg" alt=""><span>Plein air · le 8</span></div>
+        <div class="on"><img src="photos/produit-sapin.jpg" alt=""><span>Décoration · le 10</span></div>
+        <div><img src="photos/produit-tuyau.jpg" alt=""><span>Arrosage · le 12</span></div>
+        <div><img src="photos/produit-torche.jpg" alt=""><span>Éclairage · le 15</span></div>
+        <div><img src="photos/produit-chaise.jpg" alt=""><span>Plage · le 15</span></div>
+        <div><img src="photos/produit-glaciere.jpg" alt=""><span>Bagagerie · le 20</span></div>
+        <div><img src="photos/frais-fraises.jpg" alt=""><span>Fruits · le 20</span></div>
+        <div><img src="photos/frais-tomates.jpg" alt=""><span>Légumes · le 22</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     ACCORDÉON 1 — leur folder-structure-mockup-1.webp (2291 × 1442) : un
+     portable, l'arborescence du projet posée devant. Ici les sources
+     d'une société, branchées en lecture seule.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="systemes-lecture-seule" data-transparent style="width:1146px;height:721px">
+  <div class="ls-sol"></div>
+  <div class="ls-ecran">
+    <div class="ls-verre">
+      <div class="app plein" style="height:100%">
+        <div class="barre sv-barre">
+          <div class="signe"><img src="../../public/logos/varelo-mark.png" alt=""></div>
+          <div class="fil"><span>Import Antilles</span><s>/</s><b>Sources</b></div>
+          <div class="pousse"></div>
+          <span class="exemple">Données d'exemple</span>
+        </div>
+        <div class="ls-page">
+          <h3>Sources</h3>
+          <div class="ls-tuiles">
+            <div><svg class="ico"><use href="#i-source"/></svg><b>Logiciel de gestion</b><small>12 842 lignes · 6 h 42</small><span class="pastille p-gris nue"><svg class="ico"><use href="#i-cadenas"/></svg>Lecture seule</span></div>
+            <div><svg class="ico"><use href="#i-tresor"/></svg><b>Caisses</b><small>14 magasins · 6 h 40</small><span class="pastille p-gris nue"><svg class="ico"><use href="#i-cadenas"/></svg>Lecture seule</span></div>
+            <div><svg class="ico"><use href="#i-tableur"/></svg><b>Tableurs partagés</b><small>212 fichiers · 6 h 38</small><span class="pastille p-gris nue"><svg class="ico"><use href="#i-cadenas"/></svg>Lecture seule</span></div>
+            <div><svg class="ico"><use href="#i-courrier"/></svg><b>Boîte des factures</b><small>1 204 pièces · 6 h 35</small><span class="pastille p-gris nue"><svg class="ico"><use href="#i-cadenas"/></svg>Lecture seule</span></div>
+          </div>
+          <h4>Documents</h4>
+          <div class="ls-tuiles">
+            <div><svg class="ico"><use href="#i-contrat"/></svg><b>Contrats</b><small>214</small></div>
+            <div><svg class="ico"><use href="#i-bail"/></svg><b>Baux</b><small>64</small></div>
+            <div><svg class="ico"><use href="#i-sinistre"/></svg><b>Sinistres</b><small>12</small></div>
+            <div><svg class="ico"><use href="#i-camion"/></svg><b>Bons de livraison</b><small>3 318</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ls-base"></div>
+  <div class="ls-arbre carte flottant-fort">
+    <div class="ls-n"><svg class="ico"><use href="#i-dossier"/></svg>sources</div>
+    <div class="ls-n p1"><svg class="ico"><use href="#i-dossier"/></svg>import-antilles</div>
+    <div class="ls-n p1 sel"><svg class="ico"><use href="#i-dossier"/></svg>froid-caraibes <span class="ls-cad"><svg class="ico"><use href="#i-cadenas"/></svg></span></div>
+    <div class="ls-n p2 sel"><svg class="ico"><use href="#i-source"/></svg>logiciel-de-gestion <span class="ls-cad"><svg class="ico"><use href="#i-cadenas"/></svg></span></div>
+    <div class="ls-n p2 sel"><svg class="ico"><use href="#i-tableur"/></svg>tableurs <span class="ls-cad"><svg class="ico"><use href="#i-cadenas"/></svg></span></div>
+    <div class="ls-n p2 sel"><svg class="ico"><use href="#i-courrier"/></svg>factures <span class="ls-cad"><svg class="ico"><use href="#i-cadenas"/></svg></span></div>
+    <div class="ls-n p1"><svg class="ico"><use href="#i-dossier"/></svg>galerie-2</div>
+    <div class="ls-n p1"><svg class="ico"><use href="#i-dossier"/></svg>agence-marques</div>
+    <div class="ls-n p1"><svg class="ico"><use href="#i-dossier"/></svg>logistique-sud</div>
+    <div class="ls-n"><svg class="ico"><use href="#i-fichier"/></svg>referentiel.csv</div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     ACCORDÉON 2 — leur visual-editing.webp (2400 × 1275) : une page en
+     cours d'édition, cadres de sélection, barre d'outils, menu. Ici la
+     fiche d'un client rangé sous un seul nom.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="systemes-referentiel" data-transparent style="width:1200px;height:637.5px">
+  <div class="rf-page">
+    <div class="rf-tete"><div class="signe"><img src="../../public/logos/varelo-mark.png" alt=""></div><b>Varelo</b><span class="gris">Référentiel · Clients</span><span class="pousse"></span><svg class="ico gris"><use href="#i-liste"/></svg></div>
+    <div class="rf-etiq"><span>Client</span><span>Modifier</span></div>
+    <div class="rf-cadre">
+      <h2>Dupont Distribution</h2>
+      <p>Un seul nom dans les trois sociétés</p>
+      <div class="rf-outils carte flottant"><span class="mono">H1</span><svg class="ico"><use href="#i-bas"/></svg><i></i><svg class="ico"><use href="#i-liste"/></svg><i></i><svg class="ico"><use href="#i-gras"/></svg><svg class="ico"><use href="#i-italique"/></svg><svg class="ico"><use href="#i-souligne"/></svg><i></i><svg class="ico"><use href="#i-lien"/></svg></div>
+    </div>
+    <div class="rf-champ carte"><span class="mono">C-00412</span><svg class="ico gris"><use href="#i-lien"/></svg><svg class="ico gris"><use href="#i-croix"/></svg><span class="pousse"></span><svg class="ico gris"><use href="#i-bas"/></svg></div>
+    <div class="rf-qui"><div class="avatar">DD</div><div><b>Encours du groupe</b><br><span class="gris">48 210,50 € · 3 sociétés</span></div></div>
+    <div class="rf-texte">
+      <p>Trois sociétés du groupe connaissent ce client sous trois noms : <b>SARL DUPONT DISTRIBUTION</b> dans la première, <b>DUPONT DIST.</b> dans la deuxième, <b>Dupont D.</b> dans la troisième. Chacune voyait son encours, aucune ne voyait le total.</p>
+      <p>Rangés sous le code C-00412, les trois comptes gardent leur code local dans chaque logiciel : Varelo ne réécrit rien, il fait le lien.</p>
+    </div>
+    <div class="rf-q"><i>Q.</i> Où en est ce client dans le groupe ?</div>
+    <div class="rf-a"><i>R.</i> Trois comptes, un seul encours :</div>
+    <div class="rf-bloc sel"><b>Import Antilles · 411DUP</b><p>SARL DUPONT DISTRIBUTION — 21 940,00 € d'encours, dont 6 200 € à plus de 60 jours.</p></div>
+    <div class="rf-bloc"><b>Froid Caraïbes · CLI-0877</b><p>DUPONT DIST. — 18 360,50 € d'encours, réglé à 45 jours en moyenne.</p></div>
+    <div class="rf-bloc pointille"><b>Galerie 2 · DUPONT</b><p>Dupont D. — 7 910,00 € de loyers et de charges.</p></div>
+    <div class="rf-menu carte flottant">
+      <div><svg class="ico"><use href="#i-haut"/></svg>Monter</div>
+      <div class="on"><svg class="ico"><use href="#i-bas"/></svg>Descendre</div>
+      <div><svg class="ico"><use href="#i-plus"/></svg>Ajouter une société</div>
+      <div><svg class="ico"><use href="#i-lien"/></svg>Détacher</div>
+      <div><svg class="ico"><use href="#i-croix"/></svg>Retirer</div>
+    </div>
+    <div class="rf-mini"><span>Compte 01</span><span>Modifier</span><span class="rf-trois"><svg class="ico"><use href="#i-points"/></svg></span></div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     ACCORDÉON 3 — leur vectordatabase-v2.webp (3200 × 1644) : une
+     question, une réponse tirée de trois sources, deux cartes ; dessous,
+     des données brutes. Ici une décision proposée, son calcul, et le
+     journal dessous.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="systemes-validation" data-transparent style="width:1600px;height:822px">
+  <div class="vl-brut" style="left:152px;top:398px"><pre>{
+  "decision": "d-2026-0925-02",
+  "societe": "galerie-2",
+  "source": "contrats/maintenance.pdf",
+  "calcul": [
+    "echeance 2026-12-31",
+    "preavis 3 mois",
+    "limite 2026-09-30",
+    "reconduction tacite"
+  ],
+  "etat": "a_valider"
+}</pre></div>
+  <div class="vl-brut" style="left:585px;top:398px"><pre>{
+  "decision": "d-2026-0925-01",
+  "societe": "import-antilles",
+  "source": "factures/F-0917.pdf",
+  "calcul": [
+    "lignes 42",
+    "ecarts 3",
+    "montant -4836.00",
+    "paiement vendredi"
+  ],
+  "etat": "valide 07:18"
+}</pre></div>
+  <div class="vl-brut" style="left:1018px;top:398px"><pre>{
+  "decision": "d-2026-0925-03",
+  "societe": "logistique-sud",
+  "source": "receptions/BL-4471",
+  "calcul": [
+    "avarie constatee",
+    "delai 3 jours",
+    "limite 2026-09-26 18:00",
+    "photos 3"
+  ],
+  "etat": "a_valider"
+}</pre></div>
+  <div class="vl-carte carte flottant-fort">
+    <div class="vl-question"><span>Pourquoi dénoncer le contrat de maintenance de la galerie 2 ?</span><svg class="ico"><use href="#i-envoi"/></svg></div>
+    <div class="avatar vl-av">DJ</div>
+    <div class="vl-rep"><div class="signe"><img src="../../public/logos/varelo-mark.png" alt=""></div><div><b>Voici la décision proposée, et son calcul.</b><br><span class="gris">Tiré de 3 sources</span></div></div>
+    <div class="vl-bas">
+      <div class="vl-calc">
+        <b>Le calcul</b>
+        <div><span class="vl-puce">Contrat</span><span>Échéance</span><em>31/12/2026</em></div>
+        <div><span class="vl-puce">Contrat</span><span>Préavis</span><em>3 mois</em></div>
+        <div><span class="vl-puce">Contrat</span><span>Reconduction</span><em>tacite</em></div>
+        <div><span class="vl-puce">Calcul</span><span>Date limite</span><em>30/09/2026</em></div>
+        <div><span class="vl-puce">Compta</span><span>Coût annuel</span><em>18 400 €</em></div>
+      </div>
+      <div class="vl-dec">
+        <span class="gris">La décision</span>
+        <p>« Dénoncer le contrat avant le 30 septembre, pour le renégocier ou changer de prestataire. »</p>
+        <span class="gris">En attente : direction juridique</span>
+        <div class="vl-boutons"><span class="btn noir petit">Valider</span><span class="btn petit">Modifier</span><span class="btn petit">Refuser</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     ACCORDÉON 4 — leur Define-schema.webp (2400 × 1600) : deux fenêtres
+     de code côte à côte. Ici les réglages d'hébergement et le journal.
+     ═════════════════════════════════════════════════════════════════════ -->
+<section data-ecran="systemes-europe" data-transparent style="width:1200px;height:800px">
+  <div class="eu-fen carte flottant-fort" style="left:15px;top:37px;width:362px;height:410px">
+    <div class="cl-code-t"><svg class="ico"><use href="#i-fichier"/></svg>reglages/hebergement.yml</div>
+    <div class="code">
+      <div class="l"><u>1</u><span class="c"># Où vivent les données</span></div>
+      <div class="l"><u>2</u><span><span class="cle">hebergement</span>:</span></div>
+      <div class="l"><u>3</u><span>  <span class="cle">region</span>: <span class="s">union_europeenne</span></span></div>
+      <div class="l"><u>4</u><span>  <span class="cle">ville</span>: <span class="s">francfort</span></span></div>
+      <div class="l"><u>5</u><span>  <span class="cle">copie_hors_ue</span>: <span class="k">non</span></span></div>
+      <div class="l"><u>6</u><span><span class="cle">chiffrement</span>:</span></div>
+      <div class="l"><u>7</u><span>  <span class="cle">en_transit</span>: <span class="k">oui</span></span></div>
+      <div class="l"><u>8</u><span>  <span class="cle">au_repos</span>: <span class="k">oui</span></span></div>
+      <div class="l"><u>9</u><span><span class="cle">sources</span>:</span></div>
+      <div class="l"><u>10</u><span>  <span class="cle">acces</span>: <span class="s">lecture_seule</span></span></div>
+      <div class="l"><u>11</u><span>  <span class="cle">ecriture</span>: <span class="k">aucune</span></span></div>
+      <div class="l"><u>12</u><span><span class="cle">journal</span>:</span></div>
+      <div class="l"><u>13</u><span>  <span class="cle">chaque_lecture</span>: <span class="k">oui</span></span></div>
+      <div class="l"><u>14</u><span>  <span class="cle">export</span>: <span class="s">csv</span></span></div>
+      <div class="l"><u>15</u><span><span class="cle">sur_demande</span>:</span></div>
+      <div class="l"><u>16</u><span>  <span class="cle">serveur_dans_vos_locaux</span>: <span class="k">oui</span></span></div>
+    </div>
+  </div>
+  <div class="eu-fen carte flottant-fort" style="left:377px;top:0;width:820px;height:800px">
+    <div class="cl-code-t"><svg class="ico"><use href="#i-journal"/></svg>journal/2026-09-25.log<span class="pousse"></span><span class="pastille p-gris nue">exportable</span></div>
+    <div class="code eu-journal">
+      <div class="l"><u>1</u><span><span class="c">06:35:02</span>  <span class="cle">lecture</span>   import-antilles  factures        <span class="nb">1 204</span> pièces</span></div>
+      <div class="l"><u>2</u><span><span class="c">06:38:10</span>  <span class="cle">lecture</span>   import-antilles  tableurs        <span class="nb">212</span> fichiers</span></div>
+      <div class="l"><u>3</u><span><span class="c">06:40:44</span>  <span class="cle">lecture</span>   import-antilles  caisses         <span class="nb">14</span> magasins</span></div>
+      <div class="l"><u>4</u><span><span class="c">06:42:31</span>  <span class="cle">lecture</span>   import-antilles  gestion         <span class="nb">12 842</span> lignes</span></div>
+      <div class="l"><u>5</u><span><span class="c">06:43:05</span>  <span class="cle">lecture</span>   froid-caraibes   gestion         <span class="nb">6 118</span> lignes</span></div>
+      <div class="l"><u>6</u><span><span class="c">06:44:52</span>  <span class="cle">lecture</span>   galerie-2        baux            <span class="nb">64</span> pièces</span></div>
+      <div class="l"><u>7</u><span><span class="c">06:46:10</span>  <span class="cle">lecture</span>   logistique-sud   receptions      <span class="nb">318</span> bons</span></div>
+      <div class="l"><u>8</u><span><span class="c">06:51:37</span>  <span class="s">referentiel</span> 1 248 clients · 3 116 codes · <span class="nb">0</span> écriture</span></div>
+      <div class="l"><u>9</u><span><span class="c">06:58:02</span>  <span class="s">calcul</span>    direction-financiere  <span class="nb">3</span> décisions</span></div>
+      <div class="l"><u>10</u><span><span class="c">06:58:04</span>  <span class="s">calcul</span>    direction-juridique   <span class="nb">3</span> décisions</span></div>
+      <div class="l"><u>11</u><span><span class="c">06:58:05</span>  <span class="s">calcul</span>    direction-operations  <span class="nb">2</span> décisions</span></div>
+      <div class="l"><u>12</u><span><span class="c">06:58:09</span>  <span class="s">calcul</span>    presidence            <span class="nb">1</span> page</span></div>
+      <div class="l"><u>13</u><span><span class="c">07:00:00</span>  <span class="k">envoi</span>     point du matin · <span class="nb">4</span> directions</span></div>
+      <div class="l"><u>14</u><span><span class="c">07:06:41</span>  <span class="k">ouverture</span> direction-juridique</span></div>
+      <div class="l vue"><u>15</u><span><span class="c">07:18:12</span>  <span class="k">validation</span> d-2026-0925-01 · direction-financiere</span></div>
+      <div class="l"><u>16</u><span><span class="c">07:25:40</span>  <span class="k">refus</span>     d-2026-0924-07 · motif : déjà traité</span></div>
+      <div class="l"><u>17</u><span><span class="c">07:31:02</span>  <span class="k">validation</span> d-2026-0925-04 · direction-operations</span></div>
+      <div class="l"><u>18</u><span><span class="c">07:44:19</span>  <span class="k">ouverture</span> presidence</span></div>
+      <div class="l"><u>19</u><span><span class="c">08:02:55</span>  <span class="k">validation</span> d-2026-0925-06 · direction-financiere</span></div>
+      <div class="l"><u>20</u><span><span class="c">08:10:03</span>  <span class="cle">export</span>    journal du 24/09 · csv</span></div>
+      <div class="l"><u>21</u><span><span class="c">09:12:47</span>  <span class="k">modification</span> d-2026-0925-05 · quantité 60 → 48</span></div>
+      <div class="l"><u>22</u><span><span class="c">09:13:02</span>  <span class="k">validation</span> d-2026-0925-05 · direction-operations</span></div>
+      <div class="l"><u>23</u><span><span class="c">10:05:30</span>  <span class="cle">lecture</span>   agence-marques   reportings      <span class="nb">12</span> dus</span></div>
+      <div class="l"><u>24</u><span><span class="c">10:05:31</span>  <span class="s">calcul</span>    reportings dus en octobre · <span class="nb">12</span></span></div>
+      <div class="l"><u>25</u><span><span class="c">11:40:18</span>  <span class="k">validation</span> d-2026-0925-02 · direction-juridique</span></div>
+      <div class="l"><u>26</u><span><span class="c">12:00:00</span>  <span class="cle">controle</span>  aucune écriture dans les sources</span></div>
+      <div class="l"><u>27</u><span><span class="c">14:10:26</span>  <span class="cle">lecture</span>   logistique-sud   receptions      <span class="nb">41</span> bons</span></div>
+      <div class="l"><u>28</u><span><span class="c">14:10:40</span>  <span class="s">calcul</span>    réserve à émettre · avant le 26, 18 h</span></div>
+      <div class="l"><u>29</u><span><span class="c">14:11:02</span>  <span class="k">alerte</span>    direction-operations</span></div>
+      <div class="l"><u>30</u><span><span class="c">18:00:00</span>  <span class="cle">sauvegarde</span> union européenne · chiffrée</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- /ecrans -->
+
+<script>
+  const nom = new URLSearchParams(location.search).get("seul");
+  if (nom) {
+    document.body.classList.add("seul");
+    const e = document.querySelector('[data-ecran="' + nom + '"]');
+    if (e) e.classList.add("choisi");
+  }
+</script>
+</body>
+</html>

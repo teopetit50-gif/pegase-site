@@ -153,9 +153,7 @@
 .p-location .HeroProductMock_bubble.HeroProductMock_bubble,
 .p-location .PilotProductPreview_frame.PilotProductPreview_frame,
 .p-location .PilotProductPreview_viewport.PilotProductPreview_viewport [data-agent-ux],
-.p-location .container-scroll-animation_cardLayer.container-scroll-animation_cardLayer,
-.p-groupes .nm-pile__plaque.nm-pile__plaque,
-.p-groupes .nm-verre.nm-verre {
+.p-location .container-scroll-animation_cardLayer.container-scroll-animation_cardLayer {
   border-radius: 6px;
 }
 
@@ -175,9 +173,6 @@
 
 /* 4b. Pilules écrites dans les feuilles de page. Celles des maquettes de
    Tavaro font 12 à 20 px de haut : 4 px, sinon 6 px les referait rondes. */
-.p-groupes .nm-hv__puce.nm-hv__puce {
-  border-radius: 6px;
-}
 .p-location .HeroProductMock_liveBadge.HeroProductMock_liveBadge,
 .p-location .HeroProductMock_navBadge.HeroProductMock_navBadge,
 .p-location .HeroProductMock_userBubble.HeroProductMock_userBubble,
