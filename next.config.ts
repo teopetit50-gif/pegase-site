@@ -127,6 +127,8 @@ const nextConfig: NextConfig = {
          retirée. Les navigateurs qui ont mémorisé le 308 le gardent un
          temps ; une visite en navigation privée le confirme. */
       { source: "/audit", destination: "/reserver-un-audit", permanent: true },
+      // 25/09 — Namolu (groupes de distribution) devient Varelo (grands groupes).
+      { source: "/secteurs/distribution", destination: "/secteurs/groupes", permanent: true },
       /* 30/07 : /articles devient /blog (reproduction de la référence
          blog.ocoya.com, liste + articles). Slugs inchangés. */
       /* 01/08 : /offres/moteurs n'a jamais existé mais circulait — 404 sèche. */

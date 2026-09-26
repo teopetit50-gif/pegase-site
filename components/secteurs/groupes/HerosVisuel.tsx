@@ -8,11 +8,11 @@ import { DECISIONS } from "./textes";
    AI ») et à une pastille à droite (« Patient »). La vidéo est à eux : on
    la redessine en balisage, même composition, avec nos objets.
    • le fond : une photo de port la nuit (Unsplash, crédits dans
-     public/secteurs-distribution/CREDITS.txt), floutée à 26 px ;
+     public/secteurs-groupes/CREDITS.txt), floutée à 26 px ;
    • la colonne : les décisions d'un matin (données d'exemple), en deux
      calques synchrones — terne partout, blanc dans la bande du milieu ;
-   • les pastilles : « Votre ERP » → « Namolu » → la colonne →
-     « Direction des achats ».
+   • les pastilles : « Vos sociétés » → « Varelo » → la colonne →
+     « Directions » (« Chaque direction » sur téléphone).
    Positions relevées sur la vidéo à 1440 : pastilles à 5 % et 30 % de la
    largeur, colonne de 54 % à 80 %, pastille de droite à 86 %. */
 
@@ -44,7 +44,7 @@ function Puce({ children, signe = false }: { children: React.ReactNode; signe?: 
         {signe ? (
           <span
             className="block h-[11px] w-[11px] bg-[#0a0a0a]"
-            style={{ WebkitMask: "url(/logos/namolu-mark.png) center / contain no-repeat", mask: "url(/logos/namolu-mark.png) center / contain no-repeat" }}
+            style={{ WebkitMask: "url(/logos/varelo-mark.png) center / contain no-repeat", mask: "url(/logos/varelo-mark.png) center / contain no-repeat" }}
           />
         ) : (
           <span className="block h-[7px] w-[7px] rounded-full bg-[#0a0a0a]" />
@@ -58,15 +58,15 @@ function Puce({ children, signe = false }: { children: React.ReactNode; signe?: 
 export function HerosVisuelLarge() {
   return (
     <div className="nm-hv" aria-hidden>
-      <div className="nm-hv__fond" style={{ backgroundImage: "url(/secteurs-distribution/heros-port.jpg)" }} />
+      <div className="nm-hv__fond" style={{ backgroundImage: "url(/secteurs-groupes/heros-port.jpg)" }} />
       <div className="nm-hv__grain" />
       <div className="absolute inset-0 flex items-center">
         <div className="absolute left-[5%] top-1/2 -translate-y-1/2">
-          <Puce>Votre ERP</Puce>
+          <Puce>Vos sociétés</Puce>
         </div>
         <div className="nm-hv__fil absolute left-[17%] right-[73%] top-1/2" />
         <div className="absolute left-[30%] top-1/2 -translate-y-1/2">
-          <Puce signe>Namolu</Puce>
+          <Puce signe>Varelo</Puce>
         </div>
         <div className="nm-hv__fil absolute left-[42%] right-[50%] top-1/2" />
         {/* 31 % et non 27 % : nos lignes sont plus longues que les leurs */}
@@ -75,7 +75,7 @@ export function HerosVisuelLarge() {
         </div>
         <div className="nm-hv__fil absolute left-[83%] right-[12.5%] top-1/2" />
         <div className="absolute left-[87.5%] top-1/2 -translate-y-1/2">
-          <Puce>Achats</Puce>
+          <Puce>Directions</Puce>
         </div>
       </div>
     </div>
@@ -85,18 +85,18 @@ export function HerosVisuelLarge() {
 export function HerosVisuelEtroit() {
   return (
     <div className="nm-hv" aria-hidden>
-      <div className="nm-hv__fond" style={{ backgroundImage: "url(/secteurs-distribution/heros-port.jpg)" }} />
+      <div className="nm-hv__fond" style={{ backgroundImage: "url(/secteurs-groupes/heros-port.jpg)" }} />
       <div className="nm-hv__grain" />
       <div className="absolute left-[7%] top-[7%] flex items-center gap-2">
-        <Puce>Votre ERP</Puce>
+        <Puce>Vos sociétés</Puce>
         <span className="nm-hv__fil block w-6" />
-        <Puce signe>Namolu</Puce>
+        <Puce signe>Varelo</Puce>
       </div>
       <div className="absolute inset-x-[7%] bottom-[16%] top-[18%]">
         <Colonne taille={17} ligne={25} duree={40} />
       </div>
       <div className="absolute bottom-[7%] left-[7%]">
-        <Puce>Direction des achats</Puce>
+        <Puce>Chaque direction</Puce>
       </div>
     </div>
   );

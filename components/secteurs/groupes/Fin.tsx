@@ -13,8 +13,8 @@ import { APPEL, AUDIT, MODULES, PILOTE, TERRITOIRES } from "./textes";
    Leur pied de page orange remonte de 50 px sous la carte avec sa
    lumière ; ici la bande sombre fait de même, avant le pied d'Omega.
    • la vidéo du partenariat (une photo et une frise « Week 01…08 ») →
-     une photo d'équipe en entrepôt (Unsplash) et la frise d'une saison
-     cyclonique, juin à novembre, qui avance ;
+     une photo d'équipe (Unsplash) et la frise du premier pôle au groupe
+     entier (audit, pilote, bilan, pôles suivants), qui avance ;
    • les financeurs → les territoires servis, en mots ;
    • les articles → les trois modules, photos Unsplash. */
 
@@ -22,11 +22,11 @@ function PiloteVisuel() {
   return (
     <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4 / 5" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/secteurs-distribution/pilote-equipe.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <img src="/secteurs-groupes/pilote-equipe.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-x-[6%] bottom-[8%] rounded-[14px] border border-white/25 bg-white/15 p-4 text-white backdrop-blur-md">
         <p className="nm-type-mono text-white/80">{PILOTE.etiquette}</p>
         <div className="mt-3 grid grid-cols-6 gap-1">
-          {PILOTE.mois.map((m, i) => (
+          {PILOTE.frise.map((m, i) => (
             <div key={m} className="flex flex-col gap-2">
               <span className="relative block h-[3px] overflow-hidden rounded-full bg-white/25">
                 <span className="nm-frise absolute inset-y-0 left-0 bg-white" style={{ animationDelay: `${i * 1.2}s` }} />

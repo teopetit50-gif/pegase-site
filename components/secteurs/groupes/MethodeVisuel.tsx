@@ -13,8 +13,8 @@ import { useEffect, useState } from "react";
    à gauche (leur portrait), deux lignes mono en bas à gauche (nom, rôle),
    deux à droite (âge, sexe).
    Ici, même carte et même mouvement ; pas de personne (règles maison) :
-   la phrase est ce que Namolu lit, calcule ou propose ; le rond porte le
-   code du magasin ; les lignes mono, le magasin, le rayon et l'échéance.
+   la phrase est ce que Varelo lit, calcule ou propose ; le rond porte le
+   code du pôle ; les lignes mono, le pôle, la source et l'échéance.
    Données d'exemple. Un jeu de cartes par onglet (Lire, Calculer,
    Proposer). */
 
@@ -22,22 +22,22 @@ type Carte = { phrase: string; code: string; g1: string; g2: string; d1: string;
 
 const JEUX: Carte[][] = [
   [
-    { phrase: "« 214 références dans le conteneur du 8 octobre, trois fournisseurs. »", code: "AG", g1: "Achats groupe", g2: "ERP", d1: "40 pieds", d2: "J-6" },
-    { phrase: "« 38 ventilateurs vendus hier, 22 semaines de stock au magasin 1. »", code: "M1", g1: "Magasin 1", g2: "Caisses", d1: "Rayon 12", d2: "7 h" },
-    { phrase: "« Le navire du 8 octobre arrive le 3 novembre, dédouanement compris. »", code: "TR", g1: "Transitaire", g2: "Arrivée", d1: "26 j", d2: "Mer" },
-    { phrase: "« Vigilance orange au sud de l'île. Bâches et contreplaqué en tête. »", code: "MF", g1: "Météo", g2: "Cyclones", d1: "Orange", d2: "Sud" },
+    { phrase: "« 38 sociétés, 4 ERP et 212 tableurs partagés, lus chaque nuit. »", code: "GR", g1: "Groupe", g2: "Inventaire", d1: "38", d2: "7 h" },
+    { phrase: "« Galerie 2 : 64 baux, dont 9 loyers à réviser cette année. »", code: "IM", g1: "Immobilier", g2: "Baux", d1: "64", d2: "2026" },
+    { phrase: "« Plateforme froid : deux attestations de camion expirent en novembre. »", code: "LG", g1: "Logistique", g2: "Flotte", d1: "2", d2: "Nov." },
+    { phrase: "« Le même client porte trois noms dans trois sociétés. »", code: "RF", g1: "Référentiel", g2: "Clients", d1: "3 noms", d2: "1 fiche" },
   ],
   [
-    { phrase: "« Bâche 4 × 5 m : rupture le 14 novembre si rien n'est ajouté. »", code: "M2", g1: "Magasin 2", g2: "3 semaines", d1: "−480", d2: "14/11" },
-    { phrase: "« Le conteneur est rempli à 86 %. Il reste la place de 480 bâches. »", code: "40", g1: "Conteneur", g2: "Le Havre", d1: "86 %", d2: "J-6" },
-    { phrase: "« 60 disjoncteurs arriveraient après la rupture : l'avion s'impose. »", code: "AV", g1: "Avion", g2: "Bouclier", d1: "60 u.", d2: "Lundi" },
-    { phrase: "« Magasin 1 : 22 semaines de stock. Magasin 3 : trois. Écart à combler. »", code: "M3", g1: "Deux îles", g2: "Caboteur", d1: "140 u.", d2: "8/10" },
+    { phrase: "« Contrat de maintenance : dénonciation possible jusqu'au 30 septembre. »", code: "CT", g1: "Juridique", g2: "Contrats", d1: "J-5", d2: "30/09" },
+    { phrase: "« Livraison du 23 : avarie constatée, réserve à envoyer avant le 26. »", code: "RS", g1: "Réception", g2: "Transport", d1: "3 j", d2: "26/09" },
+    { phrase: "« 42 factures rapprochées de leurs livraisons : trois écarts à voir. »", code: "FR", g1: "Fournisseurs", g2: "Livraisons", d1: "3 écarts", d2: "7 h" },
+    { phrase: "« Sinistre de la plateforme 2 : l'expert n'a pas répondu depuis 18 jours. »", code: "SN", g1: "Sinistres", g2: "Assureur", d1: "18 j", d2: "Relance" },
   ],
   [
-    { phrase: "« Ajouter 480 bâches au conteneur du 8 octobre. »", code: "1", g1: "Décision 1/3", g2: "Achats", d1: "À valider", d2: "7 h" },
-    { phrase: "« Faire venir 60 disjoncteurs par avion avant lundi. »", code: "2", g1: "Décision 2/3", g2: "Avion", d1: "À valider", d2: "7 h" },
-    { phrase: "« Transférer 140 ventilateurs par le caboteur du 8 octobre. »", code: "3", g1: "Décision 3/3", g2: "Transfert", d1: "À valider", d2: "7 h" },
-    { phrase: "« Trois décisions validées. Le journal garde la trace de chacune. »", code: "✓", g1: "Journal", g2: "Achats", d1: "Validé", d2: "7 h 12" },
+    { phrase: "« Dénoncer le contrat de maintenance avant le 30 septembre. »", code: "1", g1: "Décision 1/3", g2: "Juridique", d1: "À valider", d2: "7 h" },
+    { phrase: "« Envoyer la réserve au transporteur avant le 26. »", code: "2", g1: "Décision 2/3", g2: "Opérations", d1: "À valider", d2: "7 h" },
+    { phrase: "« Relancer l'expert du sinistre de la plateforme 2. »", code: "3", g1: "Décision 3/3", g2: "Finance", d1: "À valider", d2: "7 h" },
+    { phrase: "« Trois décisions validées. Le journal garde la trace de chacune. »", code: "✓", g1: "Journal", g2: "Directions", d1: "Validé", d2: "7 h 12" },
   ],
 ];
 

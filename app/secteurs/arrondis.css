@@ -41,7 +41,7 @@
 .p-architectes,
 .p-location,
 .p-dentaire,
-.p-distribution {
+.p-groupes {
   --radius-lg: 6px;
   --radius-xl: 6px;
   --radius-2xl: 6px;
@@ -69,7 +69,7 @@
 
 /* 3a. Valeurs écrites dans les classes. */
 /* Tous les coins */
-:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-groupes)
   :is(
     [class~="lg:rounded-[18px]"],
     [class~="lg:rounded-[24px]"],
@@ -99,7 +99,7 @@
 }
 
 /* Tous les coins (pseudo-élément) */
-:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-groupes)
   :is(
     [class~="before:rounded-[1.75rem]"],
     [class~="before:rounded-[14px]"]
@@ -108,7 +108,7 @@
 }
 
 /* Coins du haut */
-:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-groupes)
   :is(
     [class~="rounded-t-[1.5rem]"],
     [class~="rounded-t-[14px]"],
@@ -122,7 +122,7 @@
 }
 
 /* Coins du bas */
-:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-groupes)
   :is(
     [class~="rounded-b-[24px]"]
   ) {
@@ -154,8 +154,8 @@
 .p-location .PilotProductPreview_frame.PilotProductPreview_frame,
 .p-location .PilotProductPreview_viewport.PilotProductPreview_viewport [data-agent-ux],
 .p-location .container-scroll-animation_cardLayer.container-scroll-animation_cardLayer,
-.p-distribution .nm-pile__plaque.nm-pile__plaque,
-.p-distribution .nm-verre.nm-verre {
+.p-groupes .nm-pile__plaque.nm-pile__plaque,
+.p-groupes .nm-verre.nm-verre {
   border-radius: 6px;
 }
 
@@ -168,14 +168,14 @@
    4a. Tailwind : `rounded-full` + une marge `px-`/`pl-` = une pilule à
    texte. La règle du site entier (fin de app/globals.css) fait la même
    chose ; celle-ci reste pour la portée des pages secteurs. */
-:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-distribution)
+:is(.sct, .p-btp, .p-avocats, .p-architectes, .p-location, .p-dentaire, .p-groupes)
   [class~="rounded-full"]:is([class^="px-"], [class*=" px-"], [class^="pl-"], [class*=" pl-"]) {
   border-radius: 6px;
 }
 
 /* 4b. Pilules écrites dans les feuilles de page. Celles des maquettes de
    Tavaro font 12 à 20 px de haut : 4 px, sinon 6 px les referait rondes. */
-.p-distribution .nm-hv__puce.nm-hv__puce {
+.p-groupes .nm-hv__puce.nm-hv__puce {
   border-radius: 6px;
 }
 .p-location .HeroProductMock_liveBadge.HeroProductMock_liveBadge,

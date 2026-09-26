@@ -86,7 +86,7 @@ export default function Securite() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      alt={`Magasin ${c.nom}, ${c.secteur.toLowerCase()}`}
+                      alt={c.alt}
                       loading="lazy"
                       className="absolute inset-0 h-full w-full object-cover"
                       style={{ objectPosition: c.cadrage, transform: `scale(${c.zoom})`, transformOrigin: "50% 100%" }}

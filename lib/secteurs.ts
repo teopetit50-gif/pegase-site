@@ -137,25 +137,26 @@ export const SECTEURS: Secteur[] = [
       { offre: "CASHD", raison: "Les devis de soins restés sans réponse relancés, chaque envoi validé par le cabinet." },
     ],
   },
-  /* 24/09 (soir) — Namolu, NOM DE TRAVAIL (rapports
-     plans-et-decisions/secteurs/groupes-*-2026-09.md : un produit, trois
-     modules, pour les groupes de distribution d'outre-mer). Décalque de
-     toolio.com. Signe PROVISOIRE (public/logos/namolu-{mark,lockup}.png,
-     monogramme « N » au format des logos de Teo) : à remplacer par le vrai,
-     sans toucher au code. */
+  /* 25/09 (soir) — Varelo, NOM DE TRAVAIL, le produit des grands groupes :
+     toutes les sociétés d'un groupe, pôle par pôle, direction par
+     direction. C'était Namolu, pour les seuls groupes de distribution
+     (slug « distribution », redirigé ici par next.config.ts) ; Teo l'a
+     renommé et élargi le 25/09. Signe PROVISOIRE
+     (public/logos/varelo-{mark,lockup}.png, monogramme « V » au format des
+     logos de Teo) : à remplacer par le vrai, sans toucher au code. */
   {
-    slug: "distribution",
-    metier: "Groupes de distribution",
-    saas: "Namolu",
-    texte: "Conteneurs, transferts entre îles et démarque, chaque matin.",
-    ligne: "Conteneurs, transferts et démarque",
+    slug: "groupes",
+    metier: "Grands groupes",
+    saas: "Varelo",
+    texte: "Toutes les sociétés du groupe sont réunies chaque matin sur une page.",
+    ligne: "Toutes les sociétés sur une page",
     detail:
-      "Namolu lit les ventes, les stocks et les conteneurs en mer de votre groupe, magasin par magasin et île par île. La direction des achats reçoit ce qu'il faut commander, faire venir par avion, transférer ou démarquer, et décide.",
+      "Varelo lit les logiciels et les tableurs de chaque société du groupe et range leurs chiffres sous un seul référentiel. Chaque direction reçoit ce qu'elle doit décider, et la présidence voit le groupe sur une page.",
     apercu:
-      "Chaque matin à 7 h, la direction des achats reçoit trois listes : le prochain conteneur à compléter, les articles à faire venir par avion et le stock à transférer ou à démarquer.",
+      "Chaque matin à 7 h, chaque direction reçoit au plus trois décisions, et la présidence une page : les ventes, la trésorerie et les échéances de chaque société.",
     combine: [
-      { offre: "FILED", raison: "Les factures des fournisseurs et des transitaires lues, contrôlées, transmises à la comptabilité." },
-      { offre: "CASHD", raison: "Les échéances des comptes professionnels suivies et relancées selon vos règles." },
+      { offre: "FILED", raison: "Les factures fournisseurs de chaque société lues, contrôlées, transmises à sa comptabilité." },
+      { offre: "CASHD", raison: "Les encours clients de chaque société suivis et relancés selon les règles du groupe." },
     ],
   },
 ];

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   /secteurs/distribution — ÉCHELLE MOBILE                  (24/09/2026)
+   /secteurs/groupes (ex-distribution) — ÉCHELLE MOBILE     (24/09/2026)
    ═══════════════════════════════════════════════════════════════════════
 
    Teo : « tout est trop zoomé et pas adapté à la version mobile ; regarde
@@ -25,58 +25,58 @@
 
 @media (max-width: 767px) {
   /* ── Rythme : les jetons de la référence, d'un cran ─────────────── */
-  .p-distribution {
+  .p-groupes {
     --space-section-y: 52px;
     --space-gap-lg: 36px;
     --space-gap-xl: 44px;
   }
-  .p-distribution .pt-\[112px\] {
+  .p-groupes .pt-\[112px\] {
     padding-top: 56px;
   }
-  .p-distribution .pt-\[80px\] {
+  .p-groupes .pt-\[80px\] {
     padding-top: 52px;
   }
-  .p-distribution .pb-\[80px\] {
+  .p-groupes .pb-\[80px\] {
     padding-bottom: 56px;
   }
-  .p-distribution .mb-\[112px\] {
+  .p-groupes .mb-\[112px\] {
     margin-bottom: 52px;
   }
-  .p-distribution .mb-20 {
+  .p-groupes .mb-20 {
     margin-bottom: 40px;
   }
-  .p-distribution .mt-16 {
+  .p-groupes .mt-16 {
     margin-top: 36px;
   }
-  .p-distribution .gap-16 {
+  .p-groupes .gap-16 {
     gap: 36px;
   }
-  .p-distribution .gap-\[60px\] {
+  .p-groupes .gap-\[60px\] {
     gap: 36px;
   }
   /* Les trois grands chiffres, empilés : 64 px au-dessus et au-dessous
      de chacun. */
-  .p-distribution .pt-16.pb-16 {
+  .p-groupes .pt-16.pb-16 {
     padding-top: 32px;
     padding-bottom: 32px;
   }
 
   /* ── Titres ─────────────────────────────────────────────────────── */
-  .p-distribution .nm-type-display,
-  .p-distribution .nm-type-h1,
-  .p-distribution .nm-text-h1-mobile {
+  .p-groupes .nm-type-display,
+  .p-groupes .nm-type-h1,
+  .p-groupes .nm-text-h1-mobile {
     font-size: 31px;
     line-height: 1.04;
   }
-  .p-distribution .nm-type-h2,
-  .p-distribution .nm-type-h3 {
+  .p-groupes .nm-type-h2,
+  .p-groupes .nm-type-h3 {
     font-size: 24px;
     line-height: 1.06;
   }
-  .p-distribution .nm-text-h2 {
+  .p-groupes .nm-text-h2 {
     font-size: 38px;
   }
-  .p-distribution .text-\[100px\] {
+  .p-groupes .text-\[100px\] {
     font-size: 72px;
   }
 }

@@ -4,7 +4,7 @@
 
    Le nom, le métier et la réponse (`texte`) viennent de lib/secteurs.ts :
    le menu dit la même chose, mot pour mot. Le problème est repris du héros
-   de chaque page métier (Daliro, Tamila, Namolu mot pour mot) ou de sa
+   de chaque page métier (Daliro, Tamila, Varelo mot pour mot) ou de sa
    promesse retournée en situation (Lorani, Tavaro, Tiroma). Il décrit
    la situation, jamais un défaut du lecteur.
 
@@ -51,9 +51,9 @@ const ACCUEIL: Record<string, { probleme: string; photo: string; cadrage?: strin
     probleme: "Un créneau annulé la veille se perd, faute de patient prévenu à temps.",
     photo: "/secteurs-dentaire/photos/praticien-au-fauteuil.jpg",
   },
-  distribution: {
-    probleme: "Ce qui n'entre pas dans le conteneur arrive après la rupture.",
-    photo: "/secteurs-distribution/heros-port.jpg",
+  groupes: {
+    probleme: "Chaque société du groupe tient ses chiffres à sa façon.",
+    photo: "/secteurs-groupes/carte-direction.jpg",
   },
 };
 
