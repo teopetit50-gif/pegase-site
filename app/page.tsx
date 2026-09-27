@@ -982,11 +982,15 @@ export default function Home() {
               `public/produits/relances/*`.
 
               Nom de fichier neuf plutôt qu'écrasé : le CDN sert l'ancienne
-              image pendant des heures quand on réécrit un chemin existant. */}
+              image pendant des heures quand on réécrit un chemin existant.
+
+              27/09/2026 — `-v2` : la capture portait encore l'ancien signe
+              CASHD à côté du titre. Seul ce signe est redessiné dans l'image
+              (outils/logos-modules/signes.py), le reste de l'écran ne bouge pas. */}
           <div data-reveal className="o-flux-maquette relative z-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/fonds/tableau-de-bord.webp"
+              src="/fonds/tableau-de-bord-v2.webp"
               alt="L'espace client Omega : qui doit de l'argent, où en est la relance, et l'encours échu au total."
               width={2160}
               height={1350}

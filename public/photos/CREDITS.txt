@@ -156,38 +156,9 @@ collect.jpg  (1600 px, 199 Ko)
 VISUELS DÉRIVÉS — maquettes produit, hors Unsplash
 ==============================================================
 
-answr-conversation.jpg  (941x1672, portrait — MASTER)
-    Origine : maquette produit réalisée en interne (rendu iPhone
-              tenu à deux mains, conversation ANSWR composée sur
-              l'écran). Aucune source Unsplash, aucune attribution
-              due.
-    Usage   : master de travail. N'est plus servi par le site.
-
-answr-carte.jpg  (1400x1125, ratio 1,2444)
-    Dérivé de : answr-conversation.jpg
-    Servi par : app/offres/page.tsx — carton « 24 h/24 » de /offres
-    Pourquoi  : le master est portrait (0,563) et le cadre .o-photo
-                est paysage (560/450 = 1,244). En object-fit: cover
-                le master était agrandi à 995 px de haut pour 450
-                visibles — 55 % hors champ, téléphone démesuré
-                (Teo, 29/07 : « la photo est trop grosse »).
-    Recette   : îlot propre du sujet cherché dans la bande
-                (150, 172, 941, 1360) — au-delà de y≈1350 les poignets
-                touchent les deux bords latéraux et la découpe cesse
-                d'être invisible — puis resserré sur la bbox RÉELLE du
-                sujet (la bande gardait 13 px de blanc à droite, ce qui
-                décalait le sujet de 5 px après centrage) ;
-                remis à l'échelle à 82 % de la hauteur du cadre,
-                ancré en bas (la coupe tombe sur le bord, donc ne se
-                voit pas) et CENTRÉ horizontalement — 398 px de marge
-                à gauche, 398 à droite, écart nul (Teo, 29/07 : « c'est
-                pas centrée » ; la version précédente était décalée à
-                droite pour dégager le titre) ;
-                fond #FEFEFE, le blanc mesuré du master. JPEG q84.
-    Contrôlé  : ratio identique au cadre → cover ne recadre plus rien.
-                Contraste du titre blanc 4,29:1 (seuil AA grand texte
-                3,0) et du lien 7,34:1 (seuil 4,5), voile .o-photo
-                inclus dans la mesure.
+27/09/2026 — answr-conversation.jpg et answr-carte.jpg retirés du site :
+    plus aucune page ne les servait, et la conversation composée sur
+    l'écran portait encore le nom d'un ancien moteur.
 
 ==============================================================
 Ajout du 30/07/2026 — page À propos (architecture hyperstack)

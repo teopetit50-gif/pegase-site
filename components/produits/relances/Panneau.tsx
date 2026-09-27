@@ -30,12 +30,17 @@ import { getImageProps } from "next/image";
 
    ── Chemin des images ───────────────────────────────────────────────
    `/apercus/<x>.png` sur le site source → `/produits/relances/<x>.png`
-   ici : le dossier public est partagé par les quatre pages produit. */
+   ici : le dossier public est partagé par les quatre pages produit.
+
+   27/09/2026 → `/produits/relances/v2/` : les captures portaient encore
+   l'ancien signe CASHD. Seuls les signes ont été redessinés dans les images
+   (outils/logos-modules/signes.py). Le dossier est neuf parce que
+   l'optimiseur d'images garde une URL déjà servie en cache pendant des heures. */
 
 const LARGE = { width: 2880, height: 1640, sizes: "(min-width: 1280px) 840px, 100vw" };
 const ETROIT = { width: 1120, height: 1800, sizes: "100vw" };
 
-const DOSSIER = "/produits/relances";
+const DOSSIER = "/produits/relances/v2";
 
 export function Panneau({
   apercu,

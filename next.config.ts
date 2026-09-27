@@ -151,7 +151,13 @@ const nextConfig: NextConfig = {
          (le nouveau nom de FRONTD) prend la sienne. */
       { source: "/offres/offload", destination: "/offres/nouvelles-affaires", permanent: true },
       { source: "/offres/reput", destination: "/offres/demandes-clients", permanent: true },
-      { source: "/offres/brief", destination: "/offres/point-du-matin", permanent: true },
+      /* 27/09/2026 — PULSE et VAULT ne sont plus des paquets depuis le 15/09 :
+         leurs deux fiches restaient joignables à la main, les derniers
+         endroits du site où ces noms s'écrivaient encore. Elles retombent
+         sur /offres, comme les moteurs qui n'existent plus. */
+      { source: "/offres/brief", destination: "/offres", permanent: true },
+      { source: "/offres/point-du-matin", destination: "/offres", permanent: true },
+      { source: "/offres/securite", destination: "/offres", permanent: true },
       { source: "/offres/revive", destination: "/offres/nouvelles-affaires", permanent: true },
       { source: "/offres/publiq", destination: "/offres/nouvelles-affaires", permanent: true },
       { source: "/offres/postd", destination: "/offres", permanent: true },
