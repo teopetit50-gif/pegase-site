@@ -838,7 +838,8 @@ export default function Home() {
       <PageMotion />
       {/* 16/09 — la barre d'action flottante du téléphone est retirée
           (Teo). Le composant `accueil/BarreAction.tsx` et ses règles
-          `.o-barre*` dans globals.css ne sont plus appelés par personne. */}
+          `.o-barre*` de globals.css, orphelins depuis, sont supprimés le
+          27/09. */}
 
       <div className="offres">
         {/* ════════ 1 · HERO CLAIR — clone du template Flux ════════
