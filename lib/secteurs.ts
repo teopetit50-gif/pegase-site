@@ -148,10 +148,12 @@ export const SECTEURS: Secteur[] = [
     slug: "groupes",
     metier: "Grands groupes",
     saas: "Varelo",
-    texte: "Toutes les sociétés du groupe sont réunies chaque matin sur une page.",
-    ligne: "Toutes les sociétés sur une page",
+    /* 26/09 — l'accent passe sur la centralisation de l'IA du groupe
+       (voir components/secteurs/groupes/textes.ts). */
+    texte: "Toutes les sociétés du groupe travaillent avec la même IA, sur un seul référentiel.",
+    ligne: "Une seule IA pour tout le groupe",
     detail:
-      "Varelo lit les logiciels et les tableurs de chaque société du groupe et range leurs chiffres sous un seul référentiel. Chaque direction reçoit ce qu'elle doit décider, et la présidence voit le groupe sur une page.",
+      "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule, et range leurs chiffres sous un seul référentiel. Chaque direction reçoit ce qu'elle doit décider, et la présidence voit le groupe sur une page.",
     apercu:
       "Chaque matin à 7 h, chaque direction reçoit au plus trois décisions, et la présidence une page : les ventes, la trésorerie et les échéances de chaque société.",
     combine: [

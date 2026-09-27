@@ -18,6 +18,24 @@
    Les écrans (`ecran`) sont fabriqués en HTML sur des données d'exemple
    puis photographiés : outils/ecrans-varelo/. Leurs rapports
    largeur/hauteur sont ceux des images de la référence, un pour un.
+
+   26/09/2026 — l'accent passe sur la CENTRALISATION de l'IA. Teo : « on n'a
+   pas assez de texte qui explique ce que ça permet à un groupe genre SAFO
+   de faire ; la plupart des gros groupes ne centralisent pas leur IA, c'est
+   ça le problème, chacun utilise la sienne ». La matière vient du call avec
+   la DSI de ce groupe (25/08) : une IA générative partout, une autre en
+   logistique, rien de centralisé, une nomenclature par entité, des
+   logiciels achetés hors DSI. D'où un bloc de plus, le constat (ENONCE_0),
+   et des textes allongés dans les autres : ce que le socle fait, puis ce
+   qui reste à chaque direction.
+   Chiffres publics du constat (doctrine des textes, décision 1) :
+   • 78 % — Microsoft et LinkedIn, 2024 Work Trend Index, publié le
+     08/05/2024 (31 000 personnes, 31 pays) : « 78% of AI users are
+     bringing their own AI tools to work ».
+   • 9 % — Ifop pour Talan, baromètre « Les Français et les IA
+     génératives », vague 3, 2025 : « seuls 9 % des répondants travaillant
+     en entreprise indiquent que leur organisation leur a mis à disposition
+     des IA génératives ».
    ══════════════════════════════════════════════════════════════════════ */
 
 export const AUDIT = "/reserver-un-audit";
@@ -38,9 +56,9 @@ const E = (nom: string, l: number, h: number, alt: string): Ecran => ({
 
 /* ── 1. héros ──────────────────────────────────────────────────────── */
 export const HEROS = {
-  titre: "Chaque société tient ses chiffres à part.",
+  titre: "Une seule IA pour tout le groupe.",
   chapo:
-    "Varelo les réunit chaque matin et dit à chaque direction du groupe ce qu'elle doit décider.",
+    "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule. Chaque matin, elle dit à chaque direction ce qu'elle doit décider.",
   bouton: "Réserver un audit",
   legende:
     "Le point du matin d'une direction financière, sur des données d'exemple.",
@@ -62,9 +80,30 @@ export const HEROS = {
   ] as const,
 };
 
+/* ── 1 bis. le constat (26/09) ─────────────────────────────────────────
+   Un bloc `statement` de plus, sans écran, entre le héros et le collage :
+   le problème que Varelo règle, dit au niveau du marché (les deux
+   chiffres sourcés en tête de fichier), jamais comme un reproche fait au
+   lecteur. */
+export const ENONCE_0 = {
+  titre: "Chaque équipe a sa propre IA.",
+  paragraphes: [
+    "Dans la plupart des groupes, l'IA est entrée par les équipes : la finance utilise un assistant, la logistique en teste un autre, une filiale a pris le sien.",
+    "D'après Microsoft et LinkedIn, 78 % des salariés qui se servent de l'IA au travail y viennent avec leurs propres outils. En France, 9 % seulement des salariés disent que leur entreprise leur a mis une IA à disposition.",
+    "Chaque outil lit alors les fichiers qu'on lui confie, avec la nomenclature de la société qui les a exportés. Les réponses changent d'une filiale à l'autre, et les données du groupe se dispersent entre autant d'outils qu'il y a d'équipes.",
+  ],
+};
+
 /* ── 2. énoncé 1 (leur « Code-first for developers. ») ─────────────── */
 export const ENONCE_1 = {
   titre: "Une page pour la présidence.\nUne liste par direction.",
+  /* 26/09 — la réponse au constat, avant le collage : le socle commun,
+     les règles écrites une fois, puis ce que chacun reçoit. */
+  paragraphes: [
+    "Varelo réunit ces usages sur un seul socle. La même IA lit les logiciels et les tableurs de toutes les sociétés, en lecture seule, et range leurs données sous un seul référentiel.",
+    "Une règle s'écrit une fois pour le groupe et s'applique dans chaque filiale, qu'il s'agisse d'un délai de réserve, d'un préavis de contrat ou d'un seuil d'encours.",
+    "Chaque matin, la présidence lit le groupe sur une page, et chaque direction reçoit ses décisions avec le calcul et la pièce qui les justifient.",
+  ],
   /* leur 3.0-collage-3.webp (2880 × 1940), posé en pleine largeur */
   ecran: E(
     "collage",
@@ -139,12 +178,20 @@ export const SURVOL = {
 
 /* ── 4. carrousel (leur slider de témoignages) ─────────────────────── */
 export const CARROUSEL = {
-  titre: "Quatre situations types",
+  titre: "Cinq situations types",
   etiquette: "Situation type",
   lien: "En parler",
   /* chaque carte : la situation, qui la vit (leur « author ») et, en gris,
      ce que Varelo lui envoie (leur « role ») */
   cartes: [
+    /* 26/09 — la situation de la DSI ouvre le carrousel : c'est celle
+       du constat (ENONCE_0), dite par qui la vit. */
+    {
+      citation:
+        "Chaque filiale a pris son propre assistant d'IA, et les données du groupe circulent dans des outils que la DSI n'a pas choisis.",
+      role: "Direction des systèmes d'information",
+      liste: "Une seule IA pour le groupe",
+    },
     {
       citation:
         "Chaque société envoie son reporting à sa façon, et le chiffre du groupe arrive en retard.",
@@ -174,14 +221,20 @@ export const CARROUSEL = {
 
 /* ── 5. accordéon (leur mediaContentAccordion) ─────────────────────── */
 export const ACCORDEON = {
-  titre: "Vos systèmes restent à vous",
+  /* 26/09 — les quatre garanties parlent à la DSI : c'est elle qui décide
+     de centraliser, et elle garde la main sur ce que l'IA lit. Chaque
+     texte passe à deux phrases : la garantie, puis ce qu'elle permet.
+     Les engagements repris ici sont ceux de /vos-donnees (hébergement à
+     Francfort ou chez le client, chiffrement, journal, aucun entraînement). */
+  titre: "La DSI garde la main sur l'IA du groupe",
   /* rapports de la référence : folder-structure 2291 × 1442 ;
      visual-editing 2400 × 1275 ; vectordatabase 3200 × 1644 ;
      Define-schema 2400 × 1600 */
   elements: [
     {
       titre: "Lecture seule",
-      texte: "Varelo lit vos logiciels et vos tableurs sans jamais rien y écrire.",
+      texte:
+        "Varelo lit vos logiciels de gestion, vos caisses et vos tableurs sans jamais rien y écrire. Chaque source se branche avec l'accord de la DSI et se débranche de la même façon.",
       lien: { texte: "Où vivent vos données", href: DONNEES },
       ecran: E(
         "systemes-lecture-seule",
@@ -193,7 +246,7 @@ export const ACCORDEON = {
     {
       titre: "Un seul référentiel",
       texte:
-        "Chaque client, fournisseur ou article porte le même nom dans tout le groupe.",
+        "Chaque client, fournisseur ou article reçoit un seul nom pour tout le groupe, rattaché aux codes de chaque société. L'IA raisonne donc sur les mêmes données dans toutes les filiales.",
       lien: { texte: "En parler", href: AUDIT },
       ecran: E(
         "systemes-referentiel",
@@ -205,7 +258,7 @@ export const ACCORDEON = {
     {
       titre: "Validation humaine",
       texte:
-        "Rien ne part sans l'accord de la direction concernée, décision par décision.",
+        "Rien ne part sans l'accord de la direction concernée, décision par décision. Chaque proposition arrive avec son calcul et sa pièce, et le journal garde qui a validé quoi.",
       lien: { texte: "En parler", href: AUDIT },
       ecran: E(
         "systemes-validation",
@@ -217,7 +270,7 @@ export const ACCORDEON = {
     {
       titre: "Données en Europe",
       texte:
-        "Les données restent dans l'Union européenne, chiffrées, avec un journal.",
+        "Les données restent dans l'Union européenne ou sur vos propres serveurs, chiffrées, et chaque lecture est inscrite au journal. Aucune d'elles ne sert à entraîner un modèle.",
       lien: { texte: "Où vivent vos données", href: DONNEES },
       ecran: E(
         "systemes-europe",
@@ -234,8 +287,8 @@ export const ENONCE_2 = {
   titre: "Un pôle, puis le groupe.",
   paragraphes: [
     "Nous commençons par un pôle, une société et une direction. Le pilote se juge sur un trimestre complet, avec ses clôtures, ses échéances et ses chiffres réels.",
-    "Puis le groupe entier suit.",
-    "Chaque société suivante reprend le même référentiel et les mêmes règles : un processus validé une fois se déploie dans les autres, d'un territoire à l'autre.",
+    "Chaque société suivante se branche ensuite sur le même socle : elle reprend le référentiel, les règles et l'IA déjà validés, d'un territoire à l'autre.",
+    "Le groupe garde ainsi une seule IA à gouverner, quel que soit le nombre de sociétés qui la rejoignent.",
   ],
   boutons: [
     { texte: "Réserver un audit", href: AUDIT },

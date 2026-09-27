@@ -6,7 +6,7 @@ import Enonce from "@/components/secteurs/groupes/Enonce";
 import Survol from "@/components/secteurs/groupes/Survol";
 import Carrousel from "@/components/secteurs/groupes/Carrousel";
 import Accordeon from "@/components/secteurs/groupes/Accordeon";
-import { ENONCE_1, ENONCE_2 } from "@/components/secteurs/groupes/textes";
+import { ENONCE_0, ENONCE_1, ENONCE_2 } from "@/components/secteurs/groupes/textes";
 import "./groupes.css";
 import "./mobile.css";
 
@@ -32,17 +32,23 @@ import "./mobile.css";
 
    Les blocs, dans l'ordre de la référence :
     1 hero            le verre animé, le texte, deux écrans   Heros
-    2 statement       le titre, l'assemblage d'écrans          Enonce
+    1b statement      le constat, trois paragraphes (26/09)   Enonce
+    2 statement       le titre, trois paragraphes, l'assemblage d'écrans  Enonce
     3 hoverHighlights quatre entrées, l'écran de l'entrée      Survol
     4 slider          les situations types, une à la fois      Carrousel
     5 accordion       quatre éléments, l'écran de l'ouvert     Accordeon
     6 statement       le titre, trois paragraphes, deux boutons Enonce
    Entête et pied : ceux d'Omega (PageShell).
+
+   26/09/2026 — la page met l'accent sur la centralisation de l'IA du
+   groupe (Teo : « la plupart des gros groupes ne centralisent pas leur IA,
+   chacun utilise la sienne »). Le bloc 1b n'existe pas chez la référence :
+   c'est un second `statement`, au même dessin, sans écran.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Varelo · le point du matin des grands groupes";
+const TITRE = "Varelo · une seule IA pour tout le groupe";
 const DESCRIPTION =
-  "Chaque matin, Varelo lit les logiciels et les tableurs de toutes les sociétés d'un groupe et dit à chaque direction ce qu'elle doit décider : contrats, baux, sinistres, livraisons, reportings et trésorerie. Conçu par Omega.";
+  "Varelo réunit l'IA de toutes les sociétés d'un groupe : un seul référentiel, les mêmes règles, et chaque matin ce que chaque direction doit décider.";
 
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,
@@ -65,7 +71,12 @@ export default function PageGroupes() {
     <PageShell>
       <div className="p-groupes">
         <Heros />
-        <Enonce titre={ENONCE_1.titre} ecran={ENONCE_1.ecran} />
+        <Enonce titre={ENONCE_0.titre} paragraphes={ENONCE_0.paragraphes} />
+        <Enonce
+          titre={ENONCE_1.titre}
+          paragraphes={ENONCE_1.paragraphes}
+          ecran={ENONCE_1.ecran}
+        />
         <Survol />
         <Carrousel />
         <Accordeon />
