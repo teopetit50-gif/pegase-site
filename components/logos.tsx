@@ -30,10 +30,28 @@ type Logo = { mark: string; lockup: string };
    mais lib/content.ts ne les publie pas tant que les paquets sont vides —
    « rien de ce qui n'existe pas ne figure ici ». Leurs fichiers attendent
    ici pour que le jour où ils se remplissent, il n'y ait rien à refaire. */
+/* 27/09/2026 — NOUVEAUX LOGOS, ET DEUX NOMS QUI CHANGENT. Teo livre
+   quatre logos plats (signe + mot-marque) : Cashd, Filed, Reput, Offload.
+   REPUT prend la place de FRONTD (demandes entrantes et avis), OFFLOAD
+   celle de RELOAD (clients dormants). Les pages et leurs adresses ne
+   bougent pas, seuls le nom et le signe changent. Les fichiers sont
+   extraits des PNG de Teo par
+   `outils/logos-modules/extraire.py` : même convention de masque alpha, signe
+   centré dans 512 × 512, lockup à plat (et non plus empilé).
+
+   RELOAD et FRONTD restent ci-dessous comme ALIAS : ce sont les anciens
+   sigles internes, et un appel oublié affichera le bon signe plutôt
+   qu'une case vide. Les commentaires du dépôt datés d'avant le 27/09
+   parlent encore de RELOAD et FRONTD : c'est leur histoire, pas un oubli. */
+const OFFLOAD: Logo = { mark: "/logos/offload-mark.png", lockup: "/logos/offload-lockup.png" };
+const REPUT: Logo = { mark: "/logos/reput-mark.png", lockup: "/logos/reput-lockup.png" };
+
 const LOGOS: Record<string, Logo> = {
   CASHD: { mark: "/logos/cashd-mark.png", lockup: "/logos/cashd-lockup.png" },
-  RELOAD: { mark: "/logos/reload-mark.png", lockup: "/logos/reload-lockup.png" },
-  FRONTD: { mark: "/logos/frontd-mark.png", lockup: "/logos/frontd-lockup.png" },
+  OFFLOAD,
+  REPUT,
+  RELOAD: OFFLOAD,
+  FRONTD: REPUT,
   FILED: { mark: "/logos/filed-mark.png", lockup: "/logos/filed-lockup.png" },
   AHEAD: { mark: "/logos/ahead-mark.png", lockup: "/logos/ahead-lockup.png" },
   COVERD: { mark: "/logos/coverd-mark.png", lockup: "/logos/coverd-lockup.png" },

@@ -11,7 +11,7 @@ import { HERO, MARQUE } from "@/lib/produits/accueil";
    produit qu'on est en train de lire. Sans ce trait, la page ne se nomme
    plus qu'en clôture.
 
-   Le signe est `/logos/frontd-mark.png`, déjà dans public/logos : c'est un
+   Le signe est `/logos/reput-mark.png`, déjà dans public/logos : c'est un
    MASQUE ALPHA (encre dans le canal alpha, pixels blancs). Un `<img>` n'en
    affiche rien — il se pose en `mask-image` et c'est `background` qui donne
    l'encre, d'où la classe `.a-marque` du fichier de portée. */

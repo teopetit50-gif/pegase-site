@@ -14,7 +14,7 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce que FRONTD prend en charge.",
+  titre: "Tout ce que REPUT prend en charge.",
   chapo:
     "Une demande entrante traverse cinq étapes avant d'être traitée : elle arrive, elle est comprise, elle reçoit une réponse, elle se transforme en rendez-vous ou elle remonte. Voici ce que le système tient à chacune.",
   mention:

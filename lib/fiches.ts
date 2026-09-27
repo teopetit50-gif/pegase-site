@@ -231,7 +231,7 @@ export const FICHES: Record<string, Fiche> = {
       ],
     },
   },
-  FRONTD: {
+  REPUT: {
     photo: "/photos/answr.jpg",
     photoAlt: "Les mains d'une personne qui répond à un message sur son téléphone.",
     photoVoile: 0.79,
@@ -248,7 +248,7 @@ export const FICHES: Record<string, Fiche> = {
         "L'audit gratuit chiffre ce que vous coûtent les demandes restées sans réponse, et le compare à ce que les autres moteurs vous feraient gagner.",
     },
     fonctionnement: [
-      "À l'installation, on construit ensemble la base de connaissances de votre entreprise : horaires, tarifs, prestations, durées d'intervention, politique d'annulation, et les questions qui reviennent le plus souvent. FRONTD s'appuie exclusivement dessus. Il ne comble jamais un trou par une supposition : une demande hors périmètre déclenche un transfert vers vous, pas une approximation.",
+      "À l'installation, on construit ensemble la base de connaissances de votre entreprise : horaires, tarifs, prestations, durées d'intervention, politique d'annulation, et les questions qui reviennent le plus souvent. REPUT s'appuie exclusivement dessus. Il ne comble jamais un trou par une supposition : une demande hors périmètre déclenche un transfert vers vous, pas une approximation.",
       "Sur WhatsApp comme par mail, il répond en moins d'une minute à toute heure, week-ends et jours fériés compris, et commence par qualifier : devis, urgence, réclamation ou simple renseignement. Chaque type suit ensuite son circuit. S'il s'agit d'un rendez-vous, il propose un créneau réellement libre dans votre agenda, le réserve, confirme au client et programme un rappel la veille.",
       "Les situations sensibles et les mots d'urgence sont définis avec vous à l'installation, et ne sont jamais traités à l'aveugle : votre téléphone sonne immédiatement, la conversation vous est transférée avec tout son historique. Le reste tourne seul, et chaque échange reste archivé.",
       "Une fois l'affaire faite et la facture réglée, le même poste prend le relais sur votre réputation. Une demande d'avis part dans les trois jours, relancée une fois, puis une seconde si rien ne vient, avec six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et ça finit toujours par se voir.",
@@ -295,7 +295,7 @@ export const FICHES: Record<string, Fiche> = {
     demo: {
       type: "chat",
       title: "Samedi, 21 h 47",
-      sub: "L'atelier est fermé, FRONTD répond",
+      sub: "L'atelier est fermé, REPUT répond",
       messages: [
         {
           from: "client",
@@ -493,7 +493,7 @@ export const FICHES: Record<string, Fiche> = {
       ],
     },
   },
-  RELOAD: {
+  OFFLOAD: {
     photo: "/photos/revive.jpg",
     photoAlt: "L'intérieur d'une boutique de vêtements, articles présentés en rayon.",
     photoVoile: 0.83,
@@ -510,7 +510,7 @@ export const FICHES: Record<string, Fiche> = {
         "L'audit gratuit chiffre ce qui dort dans votre fichier client, et le compare à ce que les autres moteurs vous feraient gagner.",
     },
     fonctionnement: [
-      "RELOAD croise votre historique de ventes et votre fichier de contacts pour cartographier vos clients silencieux, puis les classe par valeur et par récence. On réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher, avant les occasionnels plus anciens : l'effort va là où le retour est le plus probable.",
+      "OFFLOAD croise votre historique de ventes et votre fichier de contacts pour cartographier vos clients silencieux, puis les classe par valeur et par récence. On réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher, avant les occasionnels plus anciens : l'effort va là où le retour est le plus probable.",
       "Chaque client reçoit un message écrit pour lui, ancré dans son historique réel : dernier achat, dernier passage, prestation habituelle. C'est l'inverse exact d'une newsletter envoyée à tous, et c'est ce qui sépare un message qu'on ouvre d'un message qu'on supprime.",
       "Le plafond est volontaire : une sollicitation par trimestre et par client, sur WhatsApp en priorité quand le numéro existe, sinon par mail, jamais les deux. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation vous revient.",
       "La deuxième liste est datée d'avance. Les entretiens annuels, les révisions et les contrôles périodiques redeviennent dus à une date connue, et le client est prévenu la semaine qui précède plutôt que le jour où l'échéance tombe. La troisième rassemble les affaires restées en plan : la pièce arrivée que personne n'est venu chercher, l'intervention terminée qui dort sur une étagère, et le stock qu'elles immobilisent.",
@@ -529,7 +529,7 @@ export const FICHES: Record<string, Fiche> = {
     etapes: [
       {
         t: "Analyse du fichier",
-        d: "RELOAD croise votre historique de ventes et votre fichier de contacts, et dresse la carte de vos dormants : qui, depuis quand, pour quelle valeur historique.",
+        d: "OFFLOAD croise votre historique de ventes et votre fichier de contacts, et dresse la carte de vos dormants : qui, depuis quand, pour quelle valeur historique.",
       },
       {
         t: "Validation de la première vague",
@@ -557,7 +557,7 @@ export const FICHES: Record<string, Fiche> = {
     demo: {
       type: "chat",
       title: "Cliente inactive depuis 8 mois",
-      sub: "Institut Beauté Kréol, réactivation RELOAD",
+      sub: "Institut Beauté Kréol, réactivation OFFLOAD",
       messages: [
         {
           from: "bot",
@@ -593,7 +593,7 @@ export const FICHES: Record<string, Fiche> = {
       faqChapo: "Le contrôle, la sortie, les données : les trois questions posées à chaque diagnostic.",
       integrationsTitre: "Le socle est posé sous tous les systèmes",
       integrationsChapo:
-        "VAULT ne s'installe pas à côté des autres systèmes : il s'installe en dessous. Tout ce que CASHD, RELOAD, FRONTD ou FILED préparent passe par lui avant de partir. Un système mal configuré ne peut pas le contourner : le contrôle est en dessous de lui, pas à côté.",
+        "VAULT ne s'installe pas à côté des autres systèmes : il s'installe en dessous. Tout ce que CASHD, OFFLOAD, REPUT ou FILED préparent passe par lui avant de partir. Un système mal configuré ne peut pas le contourner : le contrôle est en dessous de lui, pas à côté.",
       marcheTitre: "Un envoi préparé, douze contrôles, votre décision.",
       marcheChapo:
         "Entre le moment où un système prépare un message et celui où il part, douze vérifications s'exécutent dans la base de données. Un message qui échoue à l'une d'elles n'est pas reporté à plus tard : il n'est jamais écrit.",

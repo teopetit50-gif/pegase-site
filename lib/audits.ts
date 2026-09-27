@@ -139,7 +139,7 @@ export const AUDITS: Audit[] = [
         douleurs: "douleurs 1 et 2",
       },
       {
-        system: "FRONTD",
+        system: "REPUT",
         slug: "demandes-clients",
         raison:
           "Reçoit les demandes (mail, WhatsApp), dans une seule file, répond aux questions simples sans jamais donner de prix ni de délai, et vous transmet le reste. Plus rien n'attend quarante-huit heures.",

@@ -29,7 +29,7 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce que RELOAD prend en charge.",
+  titre: "Tout ce qu'OFFLOAD prend en charge.",
   chapo:
     "Trois relances, un seul système : le compte qui n'a plus commandé, l'échéance qui redevient due et l'affaire restée en plan. Voici ce qu'il lit, ce qu'il écarte et ce qu'il vous laisse décider.",
   mention:

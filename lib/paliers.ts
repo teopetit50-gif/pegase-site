@@ -139,7 +139,7 @@ export const POSTES: Poste[] = [
   },
   {
     id: "frontd",
-    system: "FRONTD",
+    system: "REPUT",
     nom: "Réponse aux demandes clients",
     slug: "demandes-clients",
     resume:
@@ -148,7 +148,7 @@ export const POSTES: Poste[] = [
   },
   {
     id: "reload",
-    system: "RELOAD",
+    system: "OFFLOAD",
     nom: "Relance des clients inactifs",
     slug: "nouvelles-affaires",
     resume:

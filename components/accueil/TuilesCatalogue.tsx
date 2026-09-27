@@ -300,9 +300,9 @@ function Visuel({ system, fige }: { system: string; fige: boolean }) {
   switch (system) {
     case "CASHD":
       return <Echeancier fige={fige} />;
-    case "RELOAD":
+    case "OFFLOAD":
       return <Repriorisation fige={fige} />;
-    case "FRONTD":
+    case "REPUT":
       return <Qualification fige={fige} />;
     case "FILED":
       return <Classement fige={fige} />;

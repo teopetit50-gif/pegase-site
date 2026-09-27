@@ -70,7 +70,7 @@
  */
 
 export const MARQUE = {
-  nom: "RELOAD",
+  nom: "OFFLOAD",
   bailleur: "un système Omega.AI",
   /* Sur le site source, la signature d'éditeur était réduite au seul logo,
      lien vers omegaai.fr. Ici on EST omegaai.fr : le lien devient relatif, et
@@ -102,7 +102,7 @@ export const HEROS = {
      chercher. La troisième, l'échéance qui redevient due, est portée par la
      section des fonctionnalités et par la carte du message. */
   chapo:
-    "Un compte qui commandait deux fois par an cesse de commander, et le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. RELOAD relit votre base clients chaque matin et vous dit à qui écrire.",
+    "Un compte qui commandait deux fois par an cesse de commander, et le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. OFFLOAD relit votre base clients chaque matin et vous dit à qui écrire.",
   /* 15/09/2026 — LES DEUX BOUTONS DU HÉROS MENAIENT AU MÊME ENDROIT.
      Ils portaient tous les deux « /contact » : le principal et le
      secondaire d'un héros de page produit ouvraient le même formulaire,
@@ -126,7 +126,7 @@ export const OUTILS = {
      de lg. Au-delà de ~150 signes il passe à cinq lignes et fait grandir le
      bandeau. */
   phrase:
-    "Votre historique de ventes vit dans un CRM, un ERP ou un tableur, et vos clients écrivent à votre messagerie. RELOAD lit les deux, donc vous ne déployez rien.",
+    "Votre historique de ventes vit dans un CRM, un ERP ou un tableur, et vos clients écrivent à votre messagerie. OFFLOAD lit les deux, donc vous ne déployez rien.",
   /* Un seul mot par case : les cases font 5 à 7 rem, « Google Sheets » y
      passe à la ligne et chevauche ses voisines. */
   noms: ["Gmail", "Outlook", "Sheets", "Excel", "CSV"],
@@ -141,7 +141,7 @@ export const MANIFESTE = {
      quota de figures de la page est dépensé sous la FAQ. */
   phrase:
     "Un client ne part presque jamais chez un concurrent : il cesse de penser à vous, parce que personne ne lui a écrit entre-temps.",
-  signature: "Le problème que RELOAD règle",
+  signature: "Le problème qu'OFFLOAD règle",
   /* La règle interdit d'inventer une preuve, pas de se taire sur ce qu'on n'a
      pas. La phrase dit qui parle, et rien de plus. */
   precision: "Nous parlons ici en notre nom",
@@ -154,7 +154,7 @@ export const FONCTIONNALITES = {
      pour toutes ; le reste de la page s'y adosse sans les redire en bloc. */
   titre: "Une relance se lit dans votre historique.",
   suite:
-    "RELOAD y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan.",
+    "OFFLOAD y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan.",
 
   /* ── Carte 1 · la lecture du fichier ────────────────────────────────── */
   carteCarte: {
@@ -163,7 +163,7 @@ export const FONCTIONNALITES = {
        trois épingles portent les trois relances, dans l'ordre de la suite. */
     titre: "À 7 h 30, votre liste de relances est prête.",
     suite:
-      "RELOAD lit votre CRM et votre historique de facturation pendant la nuit, puis il ne garde que les comptes dont le silence dépasse votre délai.",
+      "OFFLOAD lit votre CRM et votre historique de facturation pendant la nuit, puis il ne garde que les comptes dont le silence dépasse votre délai.",
     epingles: [
       /* Le champ `drapeau` portait un numéro de département ; il porte
          maintenant la durée du silence, rendue à gauche de l'étiquette.
@@ -207,7 +207,7 @@ export const FONCTIONNALITES = {
     texte:
       "« Vos règles de ton, vos interdits et vos tournures sont écrits avant la première vague. Le système n'en sort pas, et il s'arrête au premier doute. »",
     signataire: "La règle qui ne se négocie pas",
-    role: "Sur RELOAD comme sur tout le système Omega.AI",
+    role: "Sur OFFLOAD comme sur tout le système Omega.AI",
   },
 
   /* ── Carte 3 · la consigne en français ──────────────────────────────── */
@@ -293,7 +293,7 @@ export const METIERS = {
      choses (planning, stock, atelier, caisse) reste au logiciel métier. */
   blocs: {
     echappe: "Ce qui vous échappe",
-    cherche: "Ce que RELOAD va chercher",
+    cherche: "Ce qu'OFFLOAD va chercher",
     reste: "Ce qui reste chez vous",
   },
   secteurs: [
@@ -305,9 +305,9 @@ export const METIERS = {
       echappe:
         "La révision d'un client tombe pendant un mois chargé, personne ne l'appelle, et il finit par la faire dans un centre auto en passant.",
       cherche:
-        "RELOAD suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises.",
+        "OFFLOAD suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises.",
       reste:
-        "Votre planning d'atelier et votre stock de pièces restent dans votre DMS, parce que RELOAD ne s'y substitue pas : il le lit, puis il écrit ailleurs.",
+        "Votre planning d'atelier et votre stock de pièces restent dans votre DMS, parce qu'OFFLOAD ne s'y substitue pas : il le lit, puis il écrit ailleurs.",
     },
     {
       cle: "negoce",
@@ -317,9 +317,9 @@ export const METIERS = {
       echappe:
         "Un compte qui commandait tous les mois espace ses commandes, puis il s'arrête. Personne ne l'appelle, parce que rien n'a été réclamé et que le chiffre global tient encore.",
       cherche:
-        "RELOAD mesure la fréquence de commande habituelle de chaque compte dans votre ERP, puis il signale ceux qui décrochent avant que le trimestre le montre.",
+        "OFFLOAD mesure la fréquence de commande habituelle de chaque compte dans votre ERP, puis il signale ceux qui décrochent avant que le trimestre le montre.",
       reste:
-        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre ERP, parce que RELOAD y lit sans jamais y écrire.",
+        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre ERP, parce qu'OFFLOAD y lit sans jamais y écrire.",
     },
     {
       cle: "clim",
@@ -329,7 +329,7 @@ export const METIERS = {
       echappe:
         "L'entretien annuel saute une année, puis il saute la suivante, et le contrat s'éteint sans que personne l'ait jamais résilié.",
       cherche:
-        "RELOAD tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il écrit au client la semaine d'avant.",
+        "OFFLOAD tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il écrit au client la semaine d'avant.",
       reste: "Vous gardez l'intervention, le déplacement et le prix que vous facturez.",
     },
     {
@@ -340,7 +340,7 @@ export const METIERS = {
       echappe:
         "Vous avez livré un chantier il y a trois ans. Le client engage une nouvelle tranche cette année, et il consulte quelqu'un d'autre parce qu'il ne vous a plus vu depuis la réception.",
       cherche:
-        "RELOAD reprend vos chantiers réceptionnés, puis il propose un mot aux clients dont le dernier passage remonte à plus longtemps que le délai que vous fixez.",
+        "OFFLOAD reprend vos chantiers réceptionnés, puis il propose un mot aux clients dont le dernier passage remonte à plus longtemps que le délai que vous fixez.",
       reste:
         "Vous fixez vos prix, vous choisissez vos équipes et vous décidez d'y retourner ou non.",
     },
@@ -352,7 +352,7 @@ export const METIERS = {
       echappe:
         "La facture est soldée et le dossier se referme. Six mois plus tard, le client rappelle un concurrent qui, lui, avait écrit.",
       cherche:
-        "RELOAD repère les missions closes depuis assez longtemps pour qu'une prise de contact se justifie, sans insistance.",
+        "OFFLOAD repère les missions closes depuis assez longtemps pour qu'une prise de contact se justifie, sans insistance.",
       reste: "Vous choisissez ce que vous souhaitez leur proposer, et à quel prix.",
     },
   ],
@@ -373,8 +373,8 @@ export const QUESTIONS = {
   lien: "/contact",
   items: [
     {
-      q: "Qu'est-ce que RELOAD, concrètement ?",
-      r: "RELOAD lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse. Vous ne changez pas d'outil, puisque tout vous arrive dans votre messagerie.",
+      q: "Qu'est-ce qu'OFFLOAD, concrètement ?",
+      r: "OFFLOAD lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse. Vous ne changez pas d'outil, puisque tout vous arrive dans votre messagerie.",
     },
     {
       q: "Nos clients vont-ils se sentir sollicités de trop près ?",
@@ -389,7 +389,7 @@ export const QUESTIONS = {
       r: "Un export CSV de votre CRM ou de votre ERP suffit pour commencer, et un tableur fait aussi l'affaire. Ce qu'il faut sur chaque ligne, c'est un identifiant de compte, une date et un montant, parce que le reste se déduit. Ce qui dort sur papier n'entre pas de lui-même, donc nous arbitrons ensemble ce qui vaut la peine d'être saisi.",
     },
     {
-      q: "RELOAD peut-il écrire n'importe quoi à nos clients ?",
+      q: "OFFLOAD peut-il écrire n'importe quoi à nos clients ?",
       r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vos équipes relisent la première vague nom par nom, puis vous décidez ce qui part seul et ce qui attend votre accord.",
     },
     {
@@ -448,7 +448,7 @@ export const FRANCAIS = {
 export const APPEL = {
   titre: "Reprendre contact avec vos anciens clients",
   texte:
-    "RELOAD relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange.",
+    "OFFLOAD relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange.",
   /* Réaiguillé sur le parcours du site : le site source envoyait sur son
      propre /contact, qui n'existe pas ici sous cette forme. */
   bouton: { texte: "Commencer", lien: "/reserver-un-audit" },

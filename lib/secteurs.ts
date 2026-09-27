@@ -46,11 +46,11 @@ export type Secteur = {
 };
 
 /* Les quatre offres pour toute entreprise, et leur page produit. */
-export type Offre = "CASHD" | "RELOAD" | "FRONTD" | "FILED";
+export type Offre = "CASHD" | "OFFLOAD" | "REPUT" | "FILED";
 export const PAGE_OFFRE: Record<Offre, string> = {
   CASHD: "/offres/relances-impayes",
-  RELOAD: "/offres/nouvelles-affaires",
-  FRONTD: "/offres/demandes-clients",
+  OFFLOAD: "/offres/nouvelles-affaires",
+  REPUT: "/offres/demandes-clients",
   FILED: "/offres/factures-fournisseurs",
 };
 
@@ -82,7 +82,7 @@ export const SECTEURS: Secteur[] = [
       "Avant la première audience, l'associé sait quelles pièces ont été communiquées la veille, quels honoraires forfaitaires sont dépassés et quels dossiers sont sans diligence depuis trente jours.",
     combine: [
       { offre: "CASHD", raison: "Les notes d'honoraires échues suivies et relancées, chaque envoi validé par le cabinet." },
-      { offre: "FRONTD", raison: "Les demandes des nouveaux clients qualifiées et le premier rendez-vous proposé, à toute heure." },
+      { offre: "REPUT", raison: "Les demandes des nouveaux clients qualifiées et le premier rendez-vous proposé, à toute heure." },
     ],
   },
   {
@@ -97,7 +97,7 @@ export const SECTEURS: Secteur[] = [
       "Quatre contrôles suivent la mission de maîtrise d'œuvre, du permis à la réception : le permis et le DCE, l'analyse des offres, le visa des documents d'exécution et les situations de travaux.",
     combine: [
       { offre: "CASHD", raison: "Les honoraires de chaque phase suivis et relancés à l'échéance, après votre validation." },
-      { offre: "FRONTD", raison: "Les demandes de projet qualifiées avant le premier rendez-vous, à toute heure." },
+      { offre: "REPUT", raison: "Les demandes de projet qualifiées avant le premier rendez-vous, à toute heure." },
     ],
   },
   {
@@ -111,7 +111,7 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Avant l'ouverture du comptoir, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
     combine: [
-      { offre: "FRONTD", raison: "Les demandes de réservation traitées à toute heure, y compris agence fermée." },
+      { offre: "REPUT", raison: "Les demandes de réservation traitées à toute heure, y compris agence fermée." },
       { offre: "CASHD", raison: "Les factures de restitution échues relancées selon vos règles, après votre validation." },
     ],
   },
@@ -133,7 +133,7 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Avant le premier patient, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
     combine: [
-      { offre: "FRONTD", raison: "Les demandes de rendez-vous des patients traitées à toute heure, hors des heures du secrétariat." },
+      { offre: "REPUT", raison: "Les demandes de rendez-vous des patients traitées à toute heure, hors des heures du secrétariat." },
       { offre: "CASHD", raison: "Les devis de soins restés sans réponse relancés, chaque envoi validé par le cabinet." },
     ],
   },

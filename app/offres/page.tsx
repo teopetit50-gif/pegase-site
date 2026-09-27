@@ -386,13 +386,13 @@ const PAQUETS = [
   },
   {
     icone: Users,
-    titre: "RELOAD",
+    titre: "OFFLOAD",
     href: "/offres/nouvelles-affaires",
     lignes: ["Clients inactifs", "Classement par valeur", "Un message par trimestre"],
   },
   {
     icone: MessageSquare,
-    titre: "FRONTD",
+    titre: "REPUT",
     href: "/offres/demandes-clients",
     lignes: ["Réponse à toute heure", "Prise de rendez-vous"],
   },

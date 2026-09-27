@@ -614,7 +614,7 @@ const FAQ = [
    affichés du tout : ni carte, ni lien, ni mention nommée. Ce qu'ils font
    reste dit (l'état chaque matin, la validation avant envoi), mais comme une
    garantie comprise, jamais comme un système de plus à découvrir. */
-const VEDETTES = ["CASHD", "RELOAD", "FRONTD", "FILED"];
+const VEDETTES = ["CASHD", "OFFLOAD", "REPUT", "FILED"];
 
 const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
   .filter((m) => VEDETTES.includes(m.system))
@@ -688,12 +688,12 @@ const ACCROCHES_VITRINE: Record<
     texte:
       "Relit le facturier chaque matin. Vous décidez ce qui part.",
   },
-  RELOAD: {
+  OFFLOAD: {
     objectif: "Un client qui s'éteint, vous le voyez avant la clôture.",
     texte:
       "Relit votre base la nuit, remonte les comptes silencieux.",
   },
-  FRONTD: {
+  REPUT: {
     objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
     texte:
       "Lit le message dès son arrivée et répond dans la minute.",

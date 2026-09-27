@@ -196,7 +196,7 @@
   }
 }
 
-/* ─── Le signe du produit, dans le héros. `/logos/frontd-mark.png` est un
+/* ─── Le signe du produit, dans le héros. `/logos/reput-mark.png` est un
    MASQUE ALPHA : l'encre est dans le canal alpha, les pixels sont blancs.
    Posé en `<img>` il n'afficherait rien de lisible — c'est `background` qui
    donne la couleur à travers le masque, ici `currentColor` pour qu'il suive
@@ -204,8 +204,8 @@
 .p-accueil .a-marque {
   display: inline-block;
   background-color: currentColor;
-  -webkit-mask-image: url("/logos/frontd-mark.png");
-  mask-image: url("/logos/frontd-mark.png");
+  -webkit-mask-image: url("/logos/reput-mark.png");
+  mask-image: url("/logos/reput-mark.png");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;

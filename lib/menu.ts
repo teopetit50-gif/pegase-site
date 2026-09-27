@@ -134,13 +134,13 @@ export const MENU: Rubrique[] = [
       },
       {
         href: "/offres/nouvelles-affaires",
-        label: "RELOAD",
+        label: "OFFLOAD",
         texte: "Relance des clients inactifs",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/demandes-clients",
-        label: "FRONTD",
+        label: "REPUT",
         texte: "Chaque demande traitée, à toute heure",
         colonne: "Pour toutes les entreprises",
       },

@@ -83,8 +83,8 @@ export type Famille = {
    ══════════════════════════════════════════════════════════════════════ */
 export const NOM_PAQUET: Record<string, string> = {
   CASHD: "CASHD",
-  RELOAD: "RELOAD",
-  FRONTD: "FRONTD",
+  OFFLOAD: "OFFLOAD",
+  REPUT: "REPUT",
   FILED: "FILED",
 };
 
@@ -113,16 +113,16 @@ export const FAMILLES: Famille[] = [
         benefit: "Relance à J+3, J+7, J+21, aucun envoi sans votre validation.",
       },
       {
-        system: "RELOAD",
+        system: "OFFLOAD",
         slug: "nouvelles-affaires",
-        title: "RELOAD · réactivation commerciale",
+        title: "OFFLOAD · réactivation commerciale",
         job: "Les clients inactifs sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. Les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre entrent dans la même liste.",
         benefit: "Les clients inactifs classés par valeur, un message par compte et par trimestre.",
       },
       {
-        system: "FRONTD",
+        system: "REPUT",
         slug: "demandes-clients",
-        title: "FRONTD · demandes entrantes & avis",
+        title: "REPUT · demandes entrantes & avis",
         job: "Les demandes reçues par e-mail et par WhatsApp (horaires, tarifs, disponibilités, prise de rendez-vous) obtiennent une réponse à toute heure, tirée de la base de connaissances validée par vos équipes et jamais inventée. Chaque client satisfait se voit ensuite demander un avis au moment où il est le plus enclin à le laisser.",
         benefit: "Une demande reçue à 21 h reçoit sa réponse à 21 h, sur son canal.",
       },
@@ -248,12 +248,12 @@ export const POSTS: Post[] = [
         p: "La plupart des garages ont ce fichier : des années de clients, avec la date du dernier passage et ce qui a été fait. Personne n'a le temps de l'exploiter : les journées se passent sous les ponts, pas au téléphone. Rappeler chaque client à l'approche de l'anniversaire de sa révision serait le travail le plus rentable de la semaine, et c'est précisément celui qui saute toujours.",
       },
       {
-        h: "Ce que fait RELOAD dans un garage",
-        p: "Le système RELOAD lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
+        h: "Ce que fait OFFLOAD dans un garage",
+        p: "Le système OFFLOAD lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
       },
       {
         h: "Pendant ce temps, l'accueil répond",
-        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. Le système FRONTD les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
+        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. Le système REPUT les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
       },
       {
         h: "Et les factures d'atelier suivent le même chemin",
@@ -292,7 +292,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Les demandes entrantes et les pièces fournisseurs suivent",
-        p: "Le système FRONTD accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. Le système FILED lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
+        p: "Le système REPUT accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. Le système FILED lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
       },
       {
         p: "L'installation se fait sur les outils existants, sans changer de méthode de travail. Elle commence par une mesure, pas par une promesse : l'audit gratuit compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien, et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
@@ -322,12 +322,12 @@ export const POSTS: Post[] = [
         p: "Le coût ne se limite pas à la visite manquée. Un contact mal qualifié fait perdre du temps à tout le monde : visites organisées sans vérifier le financement, critères jamais posés, allers-retours pour des informations qui tenaient en trois questions. Et pendant que l'entrant déborde, le stock dort : les acquéreurs dont le projet n'a pas abouti, les vendeurs qui « attendaient de voir », les contacts d'estimation restés sans suite, personne n'a le temps de les rappeler, alors que ce sont les affaires les moins chères à conclure.",
       },
       {
-        h: "Ce que fait FRONTD dans une agence",
-        p: "Le système FRONTD rassemble les demandes entrantes (mail, WhatsApp), dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
+        h: "Ce que fait REPUT dans une agence",
+        p: "Le système REPUT rassemble les demandes entrantes (mail, WhatsApp), dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
       },
       {
-        h: "RELOAD : la base dormante d'une agence vaut de l'or",
-        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le système RELOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
+        h: "OFFLOAD : la base dormante d'une agence vaut de l'or",
+        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le système OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
       },
       {
         h: "Le matin, deux minutes pour tout voir",

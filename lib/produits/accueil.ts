@@ -53,7 +53,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 export const MARQUE = {
-  nom: "FRONTD",
+  nom: "REPUT",
   role: "demandes entrantes & avis",
   signature: "un système Omega.AI",
   /* 17/09 — `espace` (app.omegaai.fr) retirée : plus aucun lien du site
@@ -93,7 +93,7 @@ export const HERO = {
   chapo:
     "Pendant que vos équipes sont en intervention ou que le service est fermé, votre client reçoit sa réponse, et elle ne dit rien que vous n'ayez validé.",
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
-  secondaire: { libelle: "Voir ce que FRONTD répond", href: "#apport" },
+  secondaire: { libelle: "Voir ce que REPUT répond", href: "#apport" },
 };
 
 /* Le ruban de la référence fait défiler des logos de clients. FRONTD n'a
@@ -163,7 +163,7 @@ export const APPORT = {
    fait, ce qui vous reste. Tenue à une seule phrase, chaque carte se
    réécrivait en fragment sans verbe. */
 export const CAPACITES = {
-  etiquette: "Ce que FRONTD fait",
+  etiquette: "Ce que REPUT fait",
   titreDebut: "Quand un client écrit à 21 h 47, il obtient",
   titreMots: ["sa réponse", "son créneau"],
   titreLiaison: "et",
@@ -174,7 +174,7 @@ export const CAPACITES = {
       etiquette: "Réception",
       titre: "La réponse part avant la réouverture",
       texte:
-        "FRONTD lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vos équipes relisent l'échange le lendemain.",
+        "REPUT lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vos équipes relisent l'échange le lendemain.",
       panneau: "conversation",
     },
     {
@@ -231,7 +231,7 @@ export const ETAPES = {
       numero: "03",
       titre: "Une semaine en double",
       texte:
-        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. FRONTD prend ensuite son rythme sur les postes que vous ouvrez.",
+        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. REPUT prend ensuite son rythme sur les postes que vous ouvrez.",
     },
   ],
 };
@@ -262,7 +262,7 @@ export const CANAUX = {
      de ligne — le chapô tient en deux lignes à `max-w-lg`. */
   titre: "Vous n'avez aucun logiciel de plus à ouvrir",
   chapo:
-    "FRONTD se place derrière les canaux que vous utilisez déjà, puis répond à partir de votre base.",
+    "REPUT se place derrière les canaux que vous utilisez déjà, puis répond à partir de votre base.",
   bouton: { libelle: "Voir l'installation", href: "#etapes" },
   /* Deux libellés, comme la référence : la pastille flottante est centrée
      sur sa tuile, donc un nom long déborde sur le bouton du centre — les
@@ -418,8 +418,8 @@ export const QUESTIONS = {
       r: "La mention figure dans la première réponse, dans les termes que vous choisissez à l'installation. Un client s'accommode de parler à une machine. Ce qui l'agace, c'est d'attendre jusqu'à lundi.",
     },
     {
-      q: "Et si FRONTD invente une réponse ?",
-      r: "FRONTD ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec la fiche de son escalade.",
+      q: "Et si REPUT invente une réponse ?",
+      r: "REPUT ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec la fiche de son escalade.",
     },
     {
       q: "Que se passe-t-il si deux clients demandent le même créneau ?",
@@ -515,7 +515,7 @@ export const FRANCAIS = {
    Rien n'est retouché : c'est le scénario écrit dans le texte source. */
 export const CONVERSATION = {
   contexte: "Samedi, 21 h 47",
-  sousTitre: "Le service est fermé, FRONTD répond",
+  sousTitre: "Le service est fermé, REPUT répond",
   messages: [
     {
       de: "client",

@@ -68,7 +68,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Notion: {
     famille: "Tableur & base",
-    role: "Base de connaissances de FRONTD : horaires, tarifs, conditions. Le système y puise ses réponses au lieu de les inventer.",
+    role: "Base de connaissances de REPUT : horaires, tarifs, conditions. Le système y puise ses réponses au lieu de les inventer.",
   },
   "Google Drive": {
     famille: "Fichiers",
@@ -88,7 +88,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Shopify: {
     famille: "E-commerce",
-    role: "RELOAD lit l'historique de commandes pour identifier les clients inactifs et les classer par valeur et par récence.",
+    role: "OFFLOAD lit l'historique de commandes pour identifier les clients inactifs et les classer par valeur et par récence.",
   },
   WooCommerce: {
     famille: "E-commerce",
@@ -96,7 +96,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   "Google Calendar": {
     famille: "Agenda",
-    role: "FRONTD propose des créneaux réellement libres et pose le rendez-vous, sans double réservation.",
+    role: "REPUT propose des créneaux réellement libres et pose le rendez-vous, sans double réservation.",
   },
   Calendly: {
     famille: "Agenda",
@@ -175,7 +175,7 @@ export const MOTEUR_OUTILS = [
     outils: ["Gmail", "Google Sheets", "Stripe", "WhatsApp"],
   },
   {
-    system: "FRONTD",
+    system: "REPUT",
     slug: "demandes-clients",
     role: "Demandes entrantes & avis",
     outils: ["WhatsApp", "Gmail", "Google Calendar", "Notion"],
@@ -187,7 +187,7 @@ export const MOTEUR_OUTILS = [
     outils: ["Gmail", "Google Drive", "QuickBooks", "Sage"],
   },
   {
-    system: "RELOAD",
+    system: "OFFLOAD",
     slug: "nouvelles-affaires",
     role: "Relance des comptes inactifs",
     /* « MailChimp » : même casse que le `title` de simple-icons et que la

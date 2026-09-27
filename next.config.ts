@@ -146,7 +146,11 @@ const nextConfig: NextConfig = {
          mais aucune adresse morte depuis juillet. */
       { source: "/offres/payd", destination: "/offres/relances-impayes", permanent: true },
       { source: "/offres/answr", destination: "/offres/demandes-clients", permanent: true },
-      { source: "/offres/offload", destination: "/offres/factures-fournisseurs", permanent: true },
+      /* 27/09/2026 — OFFLOAD n'est plus l'ancien moteur de FILED : c'est le
+         nouveau nom de RELOAD. Son adresse mène donc à sa page, et REPUT
+         (le nouveau nom de FRONTD) prend la sienne. */
+      { source: "/offres/offload", destination: "/offres/nouvelles-affaires", permanent: true },
+      { source: "/offres/reput", destination: "/offres/demandes-clients", permanent: true },
       { source: "/offres/brief", destination: "/offres/point-du-matin", permanent: true },
       { source: "/offres/revive", destination: "/offres/nouvelles-affaires", permanent: true },
       { source: "/offres/publiq", destination: "/offres/nouvelles-affaires", permanent: true },

@@ -203,7 +203,7 @@ function depuisFiche(
 }
 
 export const SERVICES_DETAIL: Record<string, ServiceDetail> = {
-  FRONTD: ANSWR,
+  REPUT: ANSWR,
   CASHD: depuisFiche("CASHD", {
     probleme: "[PAYD : problème à remplir : la douleur avant la solution]",
     demoContexte: "Le protocole appliqué à une facture échue",
@@ -243,7 +243,7 @@ export const SERVICES_DETAIL: Record<string, ServiceDetail> = {
     tarif: undefined,
     tarifDetail: undefined,
   },
-  RELOAD: depuisFiche("RELOAD", {
+  OFFLOAD: depuisFiche("OFFLOAD", {
     probleme: "[REVIVE : problème à remplir : la douleur avant la solution]",
     demoContexte: "Une cliente silencieuse depuis huit mois",
     stats: [

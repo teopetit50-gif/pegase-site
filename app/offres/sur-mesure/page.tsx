@@ -424,8 +424,8 @@ const EXEMPLES: Cas[] = [
    prérendu. Voir le commentaire de `Volet.icone`. */
 const PICTOS: Record<string, React.ReactNode> = {
   CASHD: <Bell size={16} strokeWidth={1.75} />,
-  RELOAD: <Users size={16} strokeWidth={1.75} />,
-  FRONTD: <MessageSquare size={16} strokeWidth={1.75} />,
+  OFFLOAD: <Users size={16} strokeWidth={1.75} />,
+  REPUT: <MessageSquare size={16} strokeWidth={1.75} />,
   FILED: <FileText size={16} strokeWidth={1.75} />,
 };
 
@@ -433,7 +433,7 @@ const PICTOS: Record<string, React.ReactNode> = {
    Lus dans FAMILLES : si un paquet change de nom ou de slug, la page
    suit. La photo et le pitch viennent de la fiche du paquet — ce sont
    exactement ceux que porte sa propre page. */
-const CATALOGUE = ["CASHD", "RELOAD", "FRONTD", "FILED"];
+const CATALOGUE = ["CASHD", "OFFLOAD", "REPUT", "FILED"];
 
 /* « CASHD · encaissements » → « encaissements ». Le séparateur du
    catalogue est le point médian ; les autres formes sont acceptées parce

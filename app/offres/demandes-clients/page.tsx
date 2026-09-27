@@ -61,7 +61,7 @@ import "./accueil.css";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/offres/demandes-clients" },
-  title: "FRONTD · demandes entrantes & avis | Omega.AI",
+  title: "REPUT · demandes entrantes & avis | Omega.AI",
   /* 11/09 — la description reprenait le titre principal, qui est une
      accroche : il travaille au-dessus du pli, le contexte déjà posé par
      la page. Une description de référencement travaille sans contexte,

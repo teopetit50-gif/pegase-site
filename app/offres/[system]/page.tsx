@@ -38,9 +38,9 @@ import {
 
 const GABARITS: Record<string, "home" | "integration" | "publish" | "frise"> = {
   CASHD: "home",
-  FRONTD: "integration",
+  REPUT: "integration",
   FILED: "publish",
-  RELOAD: "integration",
+  OFFLOAD: "integration",
   /* 15/09 — les DEUX seuls paquets encore servis par cette route : les quatre
      autres ont leur route statique (voir RAPATRIES plus bas), donc les quatre
      lignes du dessus ne s'appliquent plus à aucune URL, et GabaritIntegration
