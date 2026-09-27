@@ -1,0 +1,296 @@
+/* ══════════════════════════════════════════════════════════════════════
+   <CalculCout> — feuille du simulateur à curseurs (27/09/2026)
+
+   Préfixe `cc-`, règles scopées sous `.resa .cc`. Reprise de
+   `pricing-slider-loops` (@radu, 21st.dev) : ses deux cartes, son curseur
+   natif habillé (piste de 6 px remplie jusqu'au pouce, pouce blanc
+   ombré). L'orange #F97316 de Loops devient le noir de la charte ; la
+   piste vide, le filet #e3e3e3 du monde `.resa`.
+
+   La section est posée sur le gris de `.resa` (#f5f5f5) : les deux cartes
+   blanches s'en détachent sans filet, comme les cartes de formats du haut
+   de page.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .cc {
+  --cc-pouce: 22px;
+}
+
+/* ——— tête centrée, comme la page de prix de Loops ——— */
+.resa .cc-tete {
+  max-width: 780px;
+  margin-inline: auto;
+  text-align: center;
+}
+.resa .cc-chapo {
+  max-width: 56ch;
+  margin: 16px auto 0;
+}
+
+/* ——— les deux cartes ——— */
+.resa .cc-cartes {
+  display: grid;
+  gap: 16px;
+  margin-top: 40px;
+}
+.resa .cc-carte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 24px 20px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+.resa .cc-surtitre {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+
+/* profils */
+.resa .cc-profils {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.resa .cc-profil {
+  padding: 8px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--r-doux);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+.resa .cc-profil:hover {
+  border-color: #b5b5b5;
+  color: var(--r-texte);
+}
+.resa .cc-profil[aria-pressed="true"] {
+  border-color: var(--r-texte);
+  background: #fafafa;
+  color: var(--r-texte);
+}
+.resa .cc-profil:focus-visible {
+  outline: 2px solid var(--r-texte);
+  outline-offset: 2px;
+}
+
+/* curseurs */
+.resa .cc-curseurs {
+  display: grid;
+  gap: 24px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--r-filet);
+}
+.resa .cc-curseur-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.resa .cc-curseur-label {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--r-doux);
+}
+.resa .cc-curseur-valeur {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .cc-bornes {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 16px;
+  color: #a1a1a1;
+}
+
+/* le curseur natif : 26 px de haut pour le doigt, 6 px de piste visible.
+   La fin du noir est recalée sur le CENTRE du pouce (qui ne parcourt que
+   largeur − pouce) : sans ce recalage, le noir dépasse le pouce au début
+   de la course et reste en deçà à la fin. */
+.resa .cc-range {
+  --cc-fin: calc(var(--cc-pouce) / 2 + var(--cc-part, 0) * (100% - var(--cc-pouce)));
+  display: block;
+  width: 100%;
+  height: 26px;
+  margin-top: 8px;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+.resa .cc-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--r-texte) 0,
+    var(--r-texte) var(--cc-fin),
+    var(--r-filet) var(--cc-fin),
+    var(--r-filet) 100%
+  );
+}
+.resa .cc-range::-webkit-slider-thumb {
+  width: var(--cc-pouce);
+  height: var(--cc-pouce);
+  margin-top: -8px;
+  border: 1px solid #d4d4d4;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(5, 5, 5, 0.18);
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.resa .cc-range:active::-webkit-slider-thumb {
+  transform: scale(1.1);
+}
+.resa .cc-range:focus-visible {
+  outline: none;
+}
+.resa .cc-range:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 5px var(--r-texte);
+}
+/* Firefox : piste, portion remplie et pouce ont chacun leur pseudo */
+.resa .cc-range::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--r-filet);
+}
+.resa .cc-range::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--r-texte);
+}
+.resa .cc-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #d4d4d4;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(5, 5, 5, 0.18);
+}
+.resa .cc-range:focus-visible::-moz-range-thumb {
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 5px var(--r-texte);
+}
+
+/* ——— carte de droite ——— */
+.resa .cc-total {
+  margin-top: 6px;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 44px;
+  line-height: 52px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--r-texte);
+}
+.resa .cc-total-sous {
+  margin-top: 6px;
+  max-width: 44ch;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--r-doux);
+}
+.resa .cc-detail {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--r-filet);
+}
+.resa .cc-detail-ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--r-doux);
+}
+.resa .cc-detail-ligne dd,
+.resa .cc-apart-valeur {
+  flex-shrink: 0;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .cc-formule {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--r-faible);
+}
+.resa .cc-apart {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--r-fond);
+}
+.resa .cc-apart .cc-formule {
+  margin-top: 2px;
+}
+/* le bouton descend au pied de la carte quand les deux cartes sont côte
+   à côte et que la gauche est la plus haute */
+.resa .cc-action {
+  margin-top: auto;
+  padding-top: 24px;
+}
+.resa .cc-action-note {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.resa .cc-avertissement {
+  max-width: 92ch;
+  margin: 24px auto 0;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .resa .cc-carte {
+    padding: 32px;
+  }
+  .resa .cc-total {
+    font-size: 56px;
+    line-height: 64px;
+  }
+}
+@media (min-width: 1024px) {
+  .resa .cc-cartes {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+  .resa .cc-carte {
+    padding: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resa .cc-profil,
+  .resa .cc-range::-webkit-slider-thumb {
+    transition: none;
+  }
+}

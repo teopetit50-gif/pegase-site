@@ -1,0 +1,115 @@
+/* ══════════════════════════════════════════════════════════════════════
+   <AppelCreneau> — feuille de l'appel final (27/09/2026)
+
+   Préfixe `ac-`, règles scopées sous `.resa .ac`. Reprise de `cta-3`
+   (efferd, 21st.dev) : cadre ouvert à filets, montants qui dépassent de
+   24 px, croix de 24 px aux quatre coins (décalées de −12,5 / −11,5 px
+   comme dans la source, pour que le trait de la croix tombe sur le
+   filet), axe en pointillés derrière le texte, halo en haut à gauche.
+
+   Un écart assumé : le cadre est BLANC. La source est posée sur une page
+   blanche ; ici la bande est le gris de `.resa`, et un cadre transparent
+   y perdait ses filets. Le blanc en fait une carte ouverte, et le halo de
+   la source (foreground à 8 %) est ramené à 6 % sur ce fond.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .ac-cadre {
+  position: relative;
+  isolation: isolate;
+  max-width: 880px;
+  margin-inline: auto;
+  padding: 44px 20px;
+  border-block: 1px solid #d4d4d4;
+  background:
+    radial-gradient(35% 80% at 25% 0%, rgba(5, 5, 5, 0.06), transparent),
+    #ffffff;
+}
+.resa .ac-croix {
+  position: absolute;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  color: var(--r-doux);
+}
+.resa .ac-croix--hg {
+  top: -12.5px;
+  left: -11.5px;
+}
+.resa .ac-croix--hd {
+  top: -12.5px;
+  right: -11.5px;
+}
+.resa .ac-croix--bg {
+  bottom: -12.5px;
+  left: -11.5px;
+}
+.resa .ac-croix--bd {
+  right: -11.5px;
+  bottom: -12.5px;
+}
+.resa .ac-montant {
+  position: absolute;
+  top: -24px;
+  bottom: -24px;
+  width: 1px;
+  background: #d4d4d4;
+  pointer-events: none;
+}
+.resa .ac-montant--g {
+  left: 0;
+}
+.resa .ac-montant--d {
+  right: 0;
+}
+.resa .ac-axe {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -1;
+  height: 100%;
+  border-left: 1px dashed var(--r-filet);
+  pointer-events: none;
+}
+
+.resa .ac-corps {
+  text-align: center;
+}
+.resa .ac-titre {
+  max-width: 20ch;
+  margin-inline: auto;
+}
+.resa .ac-texte {
+  max-width: 58ch;
+  margin: 16px auto 0;
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--r-doux);
+}
+/* sur mobile les boutons s'empilent, le principal EN HAUT */
+.resa .ac-boutons {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  margin-top: 28px;
+}
+.resa .ac-courriel {
+  margin-top: 18px;
+}
+.resa .ac-adresse {
+  color: var(--r-texte);
+}
+
+@media (min-width: 640px) {
+  .resa .ac-cadre {
+    padding: 64px 48px;
+  }
+  .resa .ac-texte {
+    font-size: 17px;
+    line-height: 27px;
+  }
+  .resa .ac-boutons {
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+  }
+}

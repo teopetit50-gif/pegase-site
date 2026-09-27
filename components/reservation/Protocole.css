@@ -1,0 +1,202 @@
+/* ══════════════════════════════════════════════════════════════════════
+   <Protocole> — feuille de la grille du protocole (27/09/2026)
+
+   Préfixe `po-`, règles scopées sous `.resa .po`. Reprise de
+   `feature-section-with-hover-effects` (Aceternity, 21st.dev) : la grille
+   à filets verticaux, la barre à gauche du titre, le lavis au survol.
+   Le bleu de survol de la barre (blue-500) devient le noir de la charte ;
+   les gris neutral-300/600 deviennent les filets et encres `.resa`.
+
+   Les filets suivent la grille à chaque palier (1, 2 puis 3 colonnes) :
+   chez Aceternity ils n'existent qu'à partir de `lg`, et la grille à deux
+   colonnes de `md` flottait sans cadre.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .po-tete {
+  max-width: 62ch;
+}
+.resa .po-surtitre {
+  font-family: var(--font-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--r-faible);
+}
+.resa .po-titre {
+  margin-top: 14px;
+}
+.resa .po-chapo {
+  margin-top: 16px;
+}
+
+/* ——— grille ——— */
+.resa .po-grille {
+  display: grid;
+  margin-top: 40px;
+}
+.resa .po-article {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0;
+}
+.resa .po-article + .po-article {
+  border-top: 1px solid var(--r-filet);
+}
+.resa .po-haut,
+.resa .po-intitule,
+.resa .po-texte {
+  position: relative;
+  z-index: 1;
+  padding-inline: 20px;
+}
+
+/* le lavis : monte depuis le filet qui sépare les deux rangées */
+.resa .po-lavis {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--r-fond), rgba(245, 245, 245, 0));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.resa .po-haut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.resa .po-icone {
+  display: grid;
+  color: var(--r-faible);
+}
+.resa .po-icone > svg {
+  width: 22px;
+  height: 22px;
+}
+.resa .po-numero {
+  font-family: var(--font-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  color: #a1a1a1;
+}
+
+.resa .po-intitule {
+  margin-top: 18px;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 500;
+  color: var(--r-texte);
+}
+.resa .po-barre {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: 4px;
+  height: 24px;
+  border-radius: 0 999px 999px 0;
+  background: #d4d4d4;
+  transition:
+    height 0.2s ease,
+    top 0.2s ease,
+    background-color 0.2s ease;
+}
+.resa .po-intitule-texte {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.resa .po-texte {
+  max-width: 40ch;
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--r-doux);
+}
+
+@media (hover: hover) {
+  .resa .po-article:hover .po-lavis {
+    opacity: 1;
+  }
+  .resa .po-article:hover .po-barre {
+    top: -3px;
+    height: 32px;
+    background: var(--r-texte);
+  }
+  .resa .po-article:hover .po-intitule-texte {
+    transform: translateX(8px);
+  }
+}
+
+/* deux colonnes */
+@media (min-width: 768px) {
+  .resa .po-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 48px;
+  }
+  .resa .po-article {
+    padding: 36px 0;
+    border-right: 1px solid var(--r-filet);
+  }
+  .resa .po-article + .po-article {
+    border-top: 0;
+  }
+  .resa .po-article:nth-child(2n + 1) {
+    border-left: 1px solid var(--r-filet);
+  }
+  .resa .po-article:nth-child(-n + 4) {
+    border-bottom: 1px solid var(--r-filet);
+  }
+  .resa .po-article:nth-child(n + 5) .po-lavis {
+    background: linear-gradient(to bottom, var(--r-fond), rgba(245, 245, 245, 0));
+  }
+  .resa .po-haut,
+  .resa .po-intitule,
+  .resa .po-texte {
+    padding-inline: 32px;
+  }
+}
+
+/* trois colonnes */
+@media (min-width: 1024px) {
+  .resa .po-grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 56px;
+  }
+  .resa .po-article {
+    padding: 40px 0;
+  }
+  .resa .po-article:nth-child(2n + 1) {
+    border-left: 0;
+  }
+  .resa .po-article:nth-child(3n + 1) {
+    border-left: 1px solid var(--r-filet);
+  }
+  .resa .po-article:nth-child(-n + 4) {
+    border-bottom: 0;
+  }
+  .resa .po-article:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--r-filet);
+  }
+  .resa .po-article:nth-child(n + 4) .po-lavis {
+    background: linear-gradient(to bottom, var(--r-fond), rgba(245, 245, 245, 0));
+  }
+  .resa .po-haut,
+  .resa .po-intitule,
+  .resa .po-texte {
+    padding-inline: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resa .po-lavis,
+  .resa .po-barre,
+  .resa .po-intitule-texte {
+    transition: none;
+  }
+  .resa .po-article:hover .po-intitule-texte {
+    transform: none;
+  }
+}

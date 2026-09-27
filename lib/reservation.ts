@@ -399,7 +399,24 @@ export const PROFILS: [Profil, Profil] = [
 /* ——— comparatif ———
    `valeurs` suit l'ordre des formules du profil affiché. Le tiret « — »
    signifie « non compris » : la référence utilise le même signe plutôt
-   qu'une croix, qui se lit comme un reproche. */
+   qu'une croix, qui se lit comme un reproche.
+
+   27/09/2026 — LE COMPARATIF NE GARDE QUE CE QUI DIFFÈRE. Il est rendu
+   en tableau à trois colonnes (<TableauFormats>, reprise de
+   `comparison-3` sur 21st.dev) :
+   · la ligne « Durée » est sortie — la durée est le grand chiffre de la
+     tête de chaque colonne, lu dans les formules : le tableau ne peut
+     plus contredire les cartes (le correctif du 15/09, qui dérivait cette
+     ligne des formules, devient sans objet) ;
+   · la famille « Après l'audit » est sortie — trois de ses quatre
+     lignes valaient la même chose pour les trois formats (réponse le
+     jour même, aucun engagement, aucune donnée conservée). Ce ne sont
+     pas des différences mais des règles : elles sont devenues des
+     articles de <Protocole>, plus bas sur la page. Le point de suivi,
+     lui, diffère d'un format à l'autre : il rejoint « Ce que vous
+     recevez ».
+   Le drapeau `repliee` (familles cachées derrière « Voir tous les
+   points ») disparaît avec l'ancien tableau : tout tient à l'écran. */
 
 export type LigneComparatif = {
   libelle: string;
@@ -409,42 +426,16 @@ export type LigneComparatif = {
 
 export type FamilleComparatif = {
   titre: string;
-  /* les deux premières familles sont visibles, les suivantes sont derrière
-     le bouton « Voir tous les points » — comme la référence */
-  repliee?: boolean;
   lignes: LigneComparatif[];
 };
-
-/* 15/09, correctif — LE COMPARATIF LIT LES MÊMES DURÉES QUE LES CARTES.
-   Cette ligne portait « 30 minutes / 90 minutes / Une demi-journée », les
-   durées du profil TPE, alors que <ComparerFormats> affiche PROFILS[1]
-   (groupes) et que ses cartes annoncent 45 min / 2 h / 1 journée. La page
-   se contredisait donc à dix centimètres d'intervalle, sur les trois
-   formats : « Audit process — 2 h » ouvrait un tableau disant « 90
-   minutes ». Le même correctif avait été passé sur lib/paliers.ts le
-   15/09 et oublié ici.
-   Les durées sont désormais DÉRIVÉES des formules : on ne peut plus
-   changer une carte sans que le tableau suive. Si <ComparerFormats>
-   devait un jour rendre le profil TPE, c'est cet index qu'il faudrait
-   rendre variable — pas ces trois chaînes. */
-const DUREES_COMPARATIF = PROFILS[1].formules;
 
 export const COMPARATIF: FamilleComparatif[] = [
   {
     titre: "Le déroulé de l'entretien",
     lignes: [
       {
-        libelle: "Durée",
-        aide: "Le format est cadré et se termine à l'heure annoncée. Si le sujet mérite davantage, c'est vous qui décidez de la suite.",
-        valeurs: [
-          DUREES_COMPARATIF[0].duree,
-          DUREES_COMPARATIF[1].duree,
-          DUREES_COMPARATIF[2].duree,
-        ],
-      },
-      {
         libelle: "Format",
-        aide: "La visioconférence suffit dans la très grande majorité des cas : ce que nous examinons, ce sont vos fichiers et vos messageries, pas vos locaux.",
+        aide: "La visioconférence suffit dans la très grande majorité des cas : ce que nous examinons, ce sont vos fichiers et vos messageries, pas vos locaux.",
         valeurs: ["Visio", "Visio ou sur place", "Sur place, dans vos locaux"],
       },
       {
@@ -458,7 +449,7 @@ export const COMPARATIF: FamilleComparatif[] = [
       },
       {
         libelle: "Ce que vous préparez",
-        aide: "Rien d'administratif à produire : nous travaillons sur ce qui existe déjà chez vous, dans l'état où il est.",
+        aide: "Rien d'administratif à produire : nous travaillons sur ce qui existe déjà chez vous, dans l'état où il est.",
         valeurs: [
           "Rien",
           "Vos trois derniers mois d'échéances",
@@ -477,7 +468,6 @@ export const COMPARATIF: FamilleComparatif[] = [
      3 lignes le même jour. Les anciens découpages restent dans git. */
   {
     titre: "Ce que vous recevez",
-    repliee: true,
     lignes: [
       {
         libelle: "Recommandation et chiffrage",
@@ -502,39 +492,14 @@ export const COMPARATIF: FamilleComparatif[] = [
           "Dossier monté et instruction suivie",
         ],
       },
-    ],
-  },
-  {
-    titre: "Après l'audit",
-    repliee: true,
-    lignes: [
-      {
-        libelle: "Délai de réponse",
-        aide: "Toute demande obtient une réponse dans ce délai, y compris pour dire non.",
-        valeurs: ["Le jour même", "Le jour même", "Le jour même"],
-      },
       {
         libelle: "Point de suivi",
         aide: "Trente jours après l'audit, nous reprenons les chiffres, ce qui a évolué et ce qui n'a pas bougé, et la cartographie est mise à jour en conséquence.",
-        /* Le Diagnostic n'a pas de point de suivi : « — », le signe de
+        /* Le Cadrage n'a pas de point de suivi : « — », le signe de
            « non compris » posé en tête du comparatif. La cellule portait
            « , » — une virgule seule, reste d'une valeur effacée. Elle
            s'affichait telle quelle en production (repéré le 16/08). */
         valeurs: ["—", "À 30 jours, sur demande", "À 30 jours, compris"],
-      },
-      {
-        libelle: "Engagement",
-        aide: "La recommandation vous appartient, que vous installiez un système ou non.",
-        valeurs: ["Aucun", "Aucun", "Aucun"],
-      },
-      {
-        libelle: "Confidentialité",
-        aide: "Les chiffres partagés pendant l'entretien n'en sortent pas.",
-        valeurs: [
-          "Aucune donnée conservée sans accord",
-          "Aucune donnée conservée sans accord",
-          "Aucune donnée conservée sans accord",
-        ],
       },
     ],
   },
@@ -560,8 +525,8 @@ export const FAQ: { q: string; r: string[] }[] = [
   {
     q: "Faut-il préparer des documents ?",
     r: [
-      "Pour le Diagnostic, rien. Nous travaillons à partir de ce que vous savez déjà, et c'est suffisant pour identifier le poste qui coûte le plus cher.",
-      "Pour l'Audit complet, vos trois derniers mois d'échéances rendent le chiffrage nettement plus précis : un export de logiciel de facturation ou un tableur suffit. Rien n'est à mettre en forme : nous prenons les fichiers dans l'état où ils sont.",
+      "Pour le Cadrage, rien. Nous travaillons à partir de ce que vous savez déjà, et c'est suffisant pour identifier le poste qui coûte le plus cher.",
+      "Pour l'Audit process, vos trois derniers mois d'échéances rendent le chiffrage nettement plus précis : un export de logiciel de facturation ou un tableur suffit. Rien n'est à mettre en forme : nous prenons les fichiers dans l'état où ils sont.",
     ],
   },
   {

@@ -1,0 +1,504 @@
+/* ══════════════════════════════════════════════════════════════════════
+   <TableauFormats> — feuille du tableau des formats (27/09/2026)
+
+   Préfixe `tb-`, règles scopées sous `.resa .tb`. Reprise de
+   `comparison-3` (@7ovr, 21st.dev) : ses valeurs Tailwind sont traduites
+   dans les jetons du monde `.resa` (filet #e3e3e3, encres #050505 /
+   #3d3d3d / #616161), la teinte `primary/5` de la colonne recommandée
+   devient l'or très clair de la carte phare du haut de page.
+
+   Le tableau est un vrai <table> en `border-collapse: separate` : c'est
+   ce qui permet à la fois les coins arrondis (le cadre de 16 px des cartes
+   de la page) et la tête collante — `overflow: hidden` pour arrondir
+   aurait tué le `position: sticky` des têtes de colonne. Aucune cellule
+   d'angle n'est teintée (la colonne recommandée est celle du milieu),
+   donc rien ne déborde des arrondis.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .tb {
+  /* hauteur de l'en-tête du site, collant : 72 px dès 768 (relevé au
+     style calculé le 27/09 à 768, 1024 et 1440) — la tête du tableau ne
+     colle qu'à partir de là */
+  --tb-haut: 72px;
+  /* l'or de .r-carte--phare (#fdf3dd), dilué pour une colonne entière */
+  --tb-or: #fef7e9;
+  --tb-filet-doux: #efefef;
+}
+
+/* ——— tête de section ——— */
+.resa .tb-tete {
+  max-width: 62ch;
+}
+.resa .tb-pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--r-doux);
+}
+.resa .tb-pastille > svg {
+  width: 15px;
+  height: 15px;
+}
+.resa .tb-titre {
+  margin-top: 18px;
+}
+.resa .tb-chapo {
+  margin-top: 16px;
+}
+
+/* ——— sélecteur mobile ——— */
+.resa .tb-choix {
+  display: flex;
+  min-width: 0;
+  margin: 32px 0 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--r-seg);
+}
+.resa .tb-choix-seg {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 9px 6px;
+  border-radius: 9px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--r-doux);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.resa .tb-choix-seg:has(input:checked) {
+  background: #ffffff;
+  color: var(--r-texte);
+  box-shadow: 0 1px 2px rgba(5, 5, 5, 0.1);
+}
+.resa .tb-choix-seg:has(input:focus-visible) {
+  outline: 2px solid var(--r-texte);
+  outline-offset: 2px;
+}
+
+/* ——— le cadre et la table ——— */
+.resa .tb-cadre {
+  margin-top: 16px;
+}
+.resa .tb-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--r-filet);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+/* têtes de colonne (collantes sous l'en-tête du site à partir de 768 px,
+   voir plus bas) */
+.resa .tb-table thead th {
+  padding: 18px 12px 16px;
+  border-bottom: 1px solid var(--r-filet);
+  background: #ffffff;
+  vertical-align: bottom;
+  font-weight: 400;
+}
+.resa .tb-table thead th:first-child {
+  border-top-left-radius: 15px;
+}
+.resa .tb-table thead th:last-child {
+  border-top-right-radius: 15px;
+}
+.resa .tb-coin {
+  width: 44%;
+  text-align: left;
+}
+.resa .tb-table thead .tb-coin {
+  padding-left: 16px;
+}
+.resa .tb-etiquette {
+  font-family: var(--font-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--r-faible);
+}
+.resa .tb-format {
+  text-align: center;
+}
+.resa .tb-format-corps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.resa .tb-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  margin-bottom: 10px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--r-texte);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+.resa .tb-icone {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+  border: 1px solid var(--r-filet);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--r-doux);
+}
+.resa .tb-icone > svg {
+  width: 17px;
+  height: 17px;
+}
+.resa .tb-nom {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .tb-duree {
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--r-texte);
+}
+.resa .tb-conditions {
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--r-faible);
+}
+
+/* familles : un bandeau gris sur toute la largeur */
+.resa .tb-famille th {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--r-filet);
+  background: #fafafa;
+  text-align: left;
+  font-family: var(--font-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--r-doux);
+}
+/* la famille qui suit une autre : un filet au-dessus, pour la détacher */
+.resa .tb-table tbody + tbody .tb-famille th {
+  border-top: 1px solid var(--r-filet);
+}
+
+/* lignes */
+.resa .tb-ligne > th,
+.resa .tb-ligne > td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+.resa .tb-ligne + .tb-ligne > th,
+.resa .tb-ligne + .tb-ligne > td {
+  border-top: 1px solid var(--tb-filet-doux);
+}
+.resa .tb-ligne > .tb-libelle {
+  padding-left: 16px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--r-texte);
+}
+.resa .tb-ligne > td {
+  text-align: center;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--r-doux);
+  overflow-wrap: anywhere;
+}
+.resa .tb-ligne > td[data-phare] {
+  font-weight: 500;
+  color: var(--r-texte);
+}
+.resa .tb-absent {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  color: #a1a1a1;
+}
+
+/* la colonne recommandée, de la tête au pied */
+.resa .tb-table [data-phare] {
+  background: var(--tb-or);
+}
+
+/* pied : les boutons */
+.resa .tb-actions > td {
+  padding: 18px 12px 20px;
+  border-top: 1px solid var(--r-filet);
+  text-align: center;
+  vertical-align: top;
+}
+.resa .tb-actions > td:first-child {
+  border-bottom-left-radius: 15px;
+}
+.resa .tb-actions > td:last-child {
+  border-bottom-right-radius: 15px;
+}
+.resa .tb-actions .r-btn {
+  padding-inline: 12px;
+  font-size: 15px;
+}
+.resa .tb-souscta {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 300;
+  color: var(--r-faible);
+}
+
+/* ——— la bulle d'aide ——— */
+.resa .tb-info {
+  position: relative;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: -3px;
+}
+.resa .tb-info-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  color: #a1a1a1;
+  cursor: help;
+  transition: color 0.16s ease;
+}
+/* zone de toucher de 34 px autour d'une icône de 18 */
+.resa .tb-info-btn::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+.resa .tb-info-btn > svg {
+  width: 15px;
+  height: 15px;
+}
+.resa .tb-info-btn:focus-visible {
+  outline: 2px solid var(--r-texte);
+  outline-offset: 2px;
+}
+.resa .tb-info-bulle {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: -10px;
+  z-index: 5;
+  width: max-content;
+  max-width: min(300px, 70vw);
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: var(--r-texte);
+  box-shadow:
+    0 10px 24px -8px rgba(5, 5, 5, 0.35),
+    0 2px 6px rgba(5, 5, 5, 0.12);
+  font-size: 13px;
+  line-height: 19px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: left;
+  color: #ffffff;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease,
+    visibility 0s linear 0.16s;
+}
+.resa .tb-info[data-ouvert] .tb-info-btn,
+.resa .tb-info:has(.tb-info-btn:focus-visible) .tb-info-btn {
+  color: var(--r-texte);
+}
+.resa .tb-info[data-ouvert] .tb-info-bulle,
+.resa .tb-info:has(.tb-info-btn:focus-visible) .tb-info-bulle {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+@media (hover: hover) {
+  .resa .tb-info:hover .tb-info-btn {
+    color: var(--r-texte);
+  }
+  .resa .tb-info:hover .tb-info-bulle {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+}
+
+/* ——— l'orientation, au pied ——— */
+.resa .tb-conseil {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--r-fond);
+}
+.resa .tb-conseil-texte {
+  max-width: 68ch;
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--r-doux);
+}
+.resa .tb-conseil-fort {
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .tb-conseil-btn {
+  align-self: flex-start;
+}
+
+/* ——— mobile : une colonne de valeurs à la fois ——— */
+@media (max-width: 767.98px) {
+  /* DISPOSITION AUTOMATIQUE, et pas fixe : les bandeaux de famille
+     s'étalent sur 4 colonnes (colSpan). En `table-layout: fixed`, ces
+     deux colonnes sans cellule visible prenaient chacune leur part de la
+     largeur, et la seule colonne de valeurs affichée tombait à 50 px — un
+     mot par ligne (vu en recette le 27/09). En disposition automatique,
+     une colonne vide ne réclame rien : la colonne affichée prend tout ce
+     que le libellé laisse. */
+  .resa .tb-table {
+    table-layout: auto;
+  }
+  .resa .tb [data-col] {
+    display: none;
+  }
+  /* la tête ne colle pas sur mobile : elle mangerait un quart de l'écran,
+     et le sélecteur juste au-dessus nomme déjà le format affiché */
+  .resa .tb-icone {
+    display: none;
+  }
+  .resa .tb:has([data-choix="0"]:checked) [data-col="0"],
+  .resa .tb:has([data-choix="1"]:checked) [data-col="1"],
+  .resa .tb:has([data-choix="2"]:checked) [data-col="2"] {
+    display: table-cell;
+  }
+  /* les coins arrondis suivent la seule colonne visible */
+  .resa .tb-table thead th[data-col] {
+    border-top-right-radius: 15px;
+  }
+  .resa .tb-actions > td[data-col] {
+    border-bottom-right-radius: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .resa .tb-table thead th {
+    position: sticky;
+    top: var(--tb-haut);
+    z-index: 3;
+  }
+  .resa .tb-choix {
+    display: none;
+  }
+  .resa .tb-cadre {
+    margin-top: 48px;
+  }
+  .resa .tb-coin {
+    width: 31%;
+  }
+  .resa .tb-table thead th {
+    padding: 22px 16px 20px;
+  }
+  .resa .tb-ligne > th,
+  .resa .tb-ligne > td {
+    padding: 16px;
+  }
+  .resa .tb-table thead .tb-coin,
+  .resa .tb-famille th,
+  .resa .tb-ligne > .tb-libelle {
+    padding-left: 24px;
+  }
+  .resa .tb-libelle,
+  .resa .tb-ligne > td {
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .resa .tb-duree {
+    font-size: 28px;
+    line-height: 34px;
+  }
+  .resa .tb-conditions {
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .resa .tb-actions > td {
+    padding: 20px 16px 24px;
+  }
+  .resa .tb-actions .r-btn {
+    font-size: 16px;
+  }
+  .resa .tb-conseil {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 22px 28px;
+  }
+  .resa .tb-conseil-btn {
+    align-self: auto;
+    flex-shrink: 0;
+  }
+}
+
+/* 768–1023 : trois colonnes de ~170 px — « Réserver ce créneau » y
+   passait sur deux lignes. Libellé plus étroit, bouton et cellule
+   resserrés : il tient sur une ligne dès 768. */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .resa .tb-coin {
+    width: 27%;
+  }
+  .resa .tb-actions > td {
+    padding-inline: 8px;
+  }
+  .resa .tb-actions .r-btn {
+    padding-inline: 8px;
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resa .tb-info-bulle,
+  .resa .tb-choix-seg {
+    transition: none;
+  }
+}
