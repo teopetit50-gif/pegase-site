@@ -1,15 +1,18 @@
-produit-ventilateur.jpg — photo de Call Me Fred, Unsplash (https://unsplash.com/photos/6KZcjJoaqNI), licence Unsplash — ventilateur de bureau sur fond blanc
-produit-fauteuil.jpg — photo de Rabie Madaci, Unsplash (https://unsplash.com/photos/4iwG8QD17AE), licence Unsplash — fauteuil orange contre un mur blanc
-produit-sac-a-dos.jpg — photo de K8, Unsplash (https://unsplash.com/photos/VDow9qDDMKc), licence Unsplash — sac à dos en toile blanche
-produit-vases.jpg — photo de Maarten Deckers, Unsplash (https://unsplash.com/photos/5GKdpmo0wI8), licence Unsplash — deux vases blancs et hortensias
-produit-arrosoir.jpg — photo de Markus Winkler, Unsplash (https://unsplash.com/photos/ypOsSfRgKZ4), licence Unsplash — arrosoir jaune sur fond blanc
-produit-lampe.jpg — photo de Bhautik Patel, Unsplash (https://unsplash.com/photos/VdrwI_63-Po), licence Unsplash — lampe à pied de bois allumée
-produit-lunettes.jpg — photo de Anton Be, Unsplash (https://unsplash.com/photos/ODhxNCO8XHY), licence Unsplash — lunettes de soleil écaille sur une table blanche
-produit-valise.jpg — photo de Cyberbackpack.com, Unsplash (https://unsplash.com/photos/RPq5WLS6wRQ), licence Unsplash — valise noire et argent sur fond blanc
-frais-fraises.jpg — photo de Sandy Millar, Unsplash (https://unsplash.com/photos/MXXHCK2jJlM), licence Unsplash — fraises sur une table blanche
-frais-tomates.jpg — photo de Cobus Redelinghuys, Unsplash (https://unsplash.com/photos/MTLVhPJ1KVs), licence Unsplash — tomates en grappe sur fond blanc
-frais-yaourt.jpg — photo de Melody Zimmerman, Unsplash (https://unsplash.com/photos/TVe27buT1yQ), licence Unsplash — a bowl of cereal and a bowl of blueberries
-frais-salade.jpg — photo de this life's illusions, Unsplash (https://unsplash.com/photos/6_SGrUywWOQ), licence Unsplash — a square white bowl filled with green leaves
+Vignettes des reportings (27/09/2026) : des packshots de catalogue, chaque produit détouré
+(detourer.swift, le détourage de macOS) et posé sur un carré blanc pur (poser.py).
+Photos Unsplash gratuites (ni « premium » ni « plus »).
+outillage-marteau.jpg — photo de Jozsef Hocza, Unsplash (https://unsplash.com/photos/D3nouOYbALc), licence Unsplash — marteau à manche en bois, détouré et posé sur fond blanc
+peinture-pot.jpg — photo de benjamin lehman, Unsplash (https://unsplash.com/photos/w6slclJPb9M), licence Unsplash — pot de peinture métallique, détouré et posé sur fond blanc
+ventilation-ventilateur.jpg — photo de Call Me Fred, Unsplash (https://unsplash.com/photos/6KZcjJoaqNI), licence Unsplash — ventilateur de bureau, détouré et posé sur fond blanc
+jardin-fauteuil.jpg — photo de Rabie Madaci, Unsplash (https://unsplash.com/photos/4iwG8QD17AE), licence Unsplash — fauteuil orange, détouré et posé sur fond blanc
+arrosage-arrosoir.jpg — photo de Laura Roberts, Unsplash (https://unsplash.com/photos/soh2mw-c0F8), licence Unsplash — arrosoir jaune, détouré et posé sur fond blanc
+eclairage-ampoule.jpg — photo de Federico Bottos, Unsplash (https://unsplash.com/photos/TuAtSs8peoM), licence Unsplash — ampoule LED, détouré et posé sur fond blanc
+rangement-caisses.jpg — photo de Susan Holt Simpson, Unsplash (https://unsplash.com/photos/2nSdQEd-Exc), licence Unsplash — deux caisses à outils, détouré et posé sur fond blanc
+jardin-brouette.jpg — photo de Marc Pell, Unsplash (https://unsplash.com/photos/L9e7PdFZ5y4), licence Unsplash — brouette, détouré et posé sur fond blanc
+fruits-fraises.jpg — photo de Sandy Millar, Unsplash (https://unsplash.com/photos/MXXHCK2jJlM), licence Unsplash — fraises, détouré et posé sur fond blanc
+legumes-tomates.jpg — photo de Cobus Redelinghuys, Unsplash (https://unsplash.com/photos/MTLVhPJ1KVs), licence Unsplash — tomates en grappe, détouré et posé sur fond blanc
+
+Photos du constat d'avarie :
 avarie-cartons.jpg — photo de Mel —, Unsplash (https://unsplash.com/photos/quTvuVu0ghQ), licence Unsplash — A pile of cardboard sitting on top of a wooden floor
 avarie-dechirure.jpg — photo de Bunheng Tong, Unsplash (https://unsplash.com/photos/8kNeEsJBuqs), licence Unsplash — a large piece of cloth sitting on top of a table
 avarie-camion.jpg — photo de Joseph Prospere, Unsplash (https://unsplash.com/photos/z0ujM01KhBI), licence Unsplash — Blue shipping container on a truck parked by a building

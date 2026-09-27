@@ -1082,10 +1082,15 @@ table.cl-tab {
   border-color: #9ec0fa;
   box-shadow: 0 0 0 2px #dbe8fe;
 }
+/* 27/09 — Teo : les photos « comme sur des sites comme Mr Bricolage,
+   mais le fond blanc ». Des packshots de catalogue : chaque produit
+   détouré (detourer.swift) et posé sur un carré blanc pur (poser.py), vu
+   en entier dans sa vignette, jamais recadré. */
 .sv-tuiles img {
   width: 100%;
   height: 96px;
-  object-fit: cover;
+  object-fit: contain;
+  background: #fff;
   border-radius: 3px;
   display: block;
   margin-bottom: 5px;

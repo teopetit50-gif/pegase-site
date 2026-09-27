@@ -61,3 +61,40 @@ publics sont recopiés dans `public/secteurs-groupes/CREDITS.txt`.
 `GeneralSans-Variable.woff2` (copie de `app/_polices/`) et
 `GeistMono-latin.woff2` (Google Fonts, OFL) : les polices du site, pour que
 les écrans parlent comme la page.
+
+## Détourer un produit sur fond blanc (27/09/2026)
+
+Teo, sur les vignettes des reportings : des photos « comme sur des sites comme
+Mr Bricolage, mais avec le fond blanc ». Les photos produit des enseignes
+appartiennent à l'enseigne ou au fabricant et portent leurs marques (sur un
+écran « reportings dus aux marques », une perceuse DeWalt ferait croire à une
+relation) : on prend une photo libre (Unsplash, `w=2000`), on détoure le
+produit, on le pose sur un carré blanc pur. Même rendu qu'une fiche de
+catalogue, sans rien emprunter.
+
+```bash
+# une fois : compiler l'outil (détourage « copier le sujet » de macOS 14+)
+printf '' > /tmp/vide.modulemap
+cat > /tmp/surcouche.yaml <<'YAML'
+{"version": 0, "case-sensitive": "false", "roots": [{"type": "directory",
+ "name": "/Library/Developer/CommandLineTools/usr/include/swift",
+ "contents": [{"type": "file", "name": "module.modulemap",
+ "external-contents": "/tmp/vide.modulemap"}]}]}
+YAML
+swiftc -O -vfsoverlay /tmp/surcouche.yaml -Xcc -ivfsoverlay -Xcc /tmp/surcouche.yaml \
+  detourer.swift -o .detourer
+
+# puis, pour chaque photo
+./.detourer source.jpg /tmp/sujet.png
+python3 poser.py /tmp/sujet.png photos/<rayon>-<objet>.jpg
+```
+
+- La surcouche masque un module `SwiftBridging` déclaré deux fois par les
+  Command Line Tools actuelles (« redefinition of module 'SwiftBridging' ») :
+  sans elle, `swiftc` ne compile rien qui importe Foundation. Aucun fichier
+  système n'est touché.
+- `https://unsplash.com/photos/<id>/download?force=true` redirige vers le
+  fichier plein format : c'est ainsi qu'on retrouve une photo déjà en place.
+- Choisir un produit entier (pas coupé par le bord), seul, et sans marque
+  lisible ; Vision prend parfois deux objets pour un seul sujet (un deuxième
+  arrosoir derrière le premier) : changer de photo.
