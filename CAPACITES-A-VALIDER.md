@@ -9,8 +9,8 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 |---|---|---|---|---|
 | FILED | `/offres/factures-fournisseurs` | 41 | 10 | **31** |
 | CASHD | `/offres/relances-impayes` | 50 | 19 | **31** |
-| RELOAD | `/offres/nouvelles-affaires` | 45 | 19 | **26** |
-| FRONTD | `/offres/demandes-clients` | 44 | 14 | **30** |
+| OFFLOAD | `/offres/nouvelles-affaires` | 45 | 19 | **26** |
+| REPUT | `/offres/demandes-clients` | 44 | 14 | **30** |
 | **Total** | | **180** | **62** | **118** |
 
 ## FILED — `/offres/factures-fournisseurs`
@@ -115,7 +115,7 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 - [ ] Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe.
 - [ ] Les seuils et les cadences se modifient, et chaque changement reste daté.
 
-## RELOAD — `/offres/nouvelles-affaires`
+## OFFLOAD — `/offres/nouvelles-affaires`
 
 **Lecture du fichier client**
 
@@ -161,7 +161,7 @@ Chaque ligne cochée existe et se montre en démonstration. Chaque ligne **non c
 - [ ] Les résultats se lisent par entité, par site et en consolidé.
 - [ ] Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe.
 
-## FRONTD — `/offres/demandes-clients`
+## REPUT — `/offres/demandes-clients`
 
 **Canaux et réception**
 
