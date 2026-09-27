@@ -38,6 +38,14 @@
 .resa .qa-titre {
   margin-top: 16px;
 }
+/* téléphone : 24 px, comme tous les titres de section de la page (le
+   barème relevé sur scale.com dit 23–24) — `.r-h3` y tombait à 19 */
+@media (max-width: 639.98px) {
+  .resa .r-h3.qa-titre {
+    font-size: 24px;
+    line-height: 1.18;
+  }
+}
 .resa .qa-texte {
   max-width: 40ch;
   margin-top: 14px;

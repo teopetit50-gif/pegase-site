@@ -29,7 +29,7 @@ import "./AppelCreneau.css";
 
 export default function AppelCreneau() {
   return (
-    <section id="reserver" data-monde="clair" className="r-wrap ac py-20 sm:py-28">
+    <section id="reserver" data-monde="clair" className="r-wrap ac py-14 sm:py-28">
       <div data-reveal className="ac-cadre">
         <Plus aria-hidden strokeWidth={1} className="ac-croix ac-croix--hg" />
         <Plus aria-hidden strokeWidth={1} className="ac-croix ac-croix--hd" />

@@ -3,12 +3,14 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import FormulesGrille from "@/components/reservation/FormulesGrille";
 import TableauFormats from "@/components/reservation/TableauFormats";
-import CalculCout from "@/components/reservation/CalculCout";
+import UnSeulAudit from "@/components/reservation/UnSeulAudit";
 import Protocole from "@/components/reservation/Protocole";
 import AppelCreneau from "@/components/reservation/AppelCreneau";
 import QuestionsAudit from "@/components/reservation/QuestionsAudit";
+import BarreReservation from "@/components/reservation/BarreReservation";
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES } from "@/lib/paliers";
+import { PROFILS } from "@/lib/reservation";
 import {
   ModeleRetenu,
   SiteRetenu,
@@ -62,7 +64,9 @@ import {
    proprement avec des composants » — skill methode-site, composants
    repris de 21st.dev, registres ouverts lus le jour même) :
      · comparatif      → <TableauFormats>  (@7ovr comparison-3)
-     · simulateur      → <CalculCout>      (@radu pricing-slider-loops)
+     · simulateur      → <CalculCout>      (@radu pricing-slider-loops) —
+                          REMPLACÉ le même jour par <UnSeulAudit>
+                          (Tailark integrations-5), voir plus bas
      · engagements     → <Protocole>       (Aceternity feature-section-
                                             with-hover-effects)
      · appel final     → <AppelCreneau>    (efferd cta-3)
@@ -74,6 +78,18 @@ import {
    importée ici directement : l'assembleur <Formules> ne portait plus
    qu'elle. Les détails de chaque reprise sont en tête de chaque
    composant.
+
+   27/09/2026, après-midi — LE SIMULATEUR SORT, ET LA PAGE A SA VERSION
+   MOBILE. Teo, sur capture : « remplace cette section complet, je veux
+   pas de comparateur », puis « oublie pas de faire la version mobile de
+   la page ». À sa place, <UnSeulAudit> : ce qu'un seul audit passe en
+   revue — les quatre systèmes et le sur-mesure autour d'Omega, avec la
+   ligne du menu de chacun et un lien vers sa page ; rien à régler. Pour
+   le téléphone : sections à 48 px de marge (le barème relevé sur
+   scale.com le 16/09 dit 40 à 48, elles en avaient 64), titres de
+   section tous à 24 px, articles du protocole compactés, et
+   <BarreReservation>, la barre de réservation qui paraît quand plus aucun
+   bouton de réservation n'est à l'écran.
 
    Le chrome reste celui du site : header caméléon (les sections claires
    portent data-monde="clair") et footer sombre hérités de PageShell.
@@ -118,6 +134,10 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
+/* le format que la page recommande (la carte « Recommandé ») : c'est lui
+   que la barre du téléphone propose */
+const PHARE = PROFILS[1].formules.find((f) => f.phare) ?? PROFILS[1].formules[0];
+
 export default function ReserverUnAuditPage() {
   return (
     <PageShell>
@@ -138,8 +158,9 @@ export default function ReserverUnAuditPage() {
         {/* ═══ 2 — comparatif, et l'orientation à son pied ═══ */}
         <TableauFormats />
 
-        {/* ═══ 3 — simulateur ═══ */}
-        <CalculCout />
+        {/* ═══ 3 — ce qu'un seul audit passe en revue (remplace le
+               simulateur, 27/09) ═══ */}
+        <UnSeulAudit />
 
         {/* ═══ 4 — protocole d'audit (emplacement des témoignages de la
                référence) ═══ */}
@@ -150,6 +171,10 @@ export default function ReserverUnAuditPage() {
 
         {/* ═══ 6 — FAQ ═══ */}
         <QuestionsAudit />
+
+        {/* ═══ téléphone : la barre de réservation (masquée dès 1024) —
+               elle propose le format recommandé des cartes du haut ═══ */}
+        <BarreReservation formule={PHARE.id} titre={`${PHARE.nom} · ${PHARE.duree}`} sous={PHARE.conditions} />
       </div>
     </PageShell>
   );

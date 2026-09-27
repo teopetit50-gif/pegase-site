@@ -29,7 +29,7 @@ import "./QuestionsAudit.css";
 export default function QuestionsAudit() {
   return (
     <section id="faq" data-monde="clair" className="r-blanc qa">
-      <div className="r-wrap py-16 sm:py-24">
+      <div className="r-wrap py-12 sm:py-24">
         <div className="qa-grille">
           <div className="qa-gauche">
             <span className="qa-pastille">FAQ</span>

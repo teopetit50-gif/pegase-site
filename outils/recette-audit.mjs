@@ -1,6 +1,7 @@
 /** Recette des interactions de /reserver-un-audit (27/09/2026) — ce qu'une
  *  capture ne montre pas : colonnes du tableau, sélecteur mobile, bulles
- *  d'aide, curseurs du simulateur, accordéon de la FAQ, débordement.
+ *  d'aide, section « Tout se combine », barre du téléphone, accordéon de la
+ *  FAQ, débordement.
  *
  *    node outils/recette-audit.mjs <url de la page> [largeur]
  *
@@ -85,37 +86,55 @@ try {
     await new Promise(r => setTimeout(r, 400));
     btn.click();
     await new Promise(r => setTimeout(r, 600));
-    const ouverte = getComputedStyle(bulle).opacity;
+    /* l'ÉTAT, pas l'opacité : dans le Chromium de recette l'horloge des
+       transitions avance par à-coups, l'opacité peut rester à 0 une
+       seconde après le clic (vu le 27/09) ; « visibility » bascule, elle,
+       dès le début de la transition */
+    const ouverte = btn.parentElement.hasAttribute('data-ouvert') && getComputedStyle(bulle).visibility === 'visible' ? '1' : '0';
     const r = bulle.getBoundingClientRect();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     await new Promise(r => setTimeout(r, 350));
-    return { ouverte, fermee: getComputedStyle(bulle).opacity, droite: Math.round(r.right), texte: bulle.textContent.slice(0, 40) };
+    return { ouverte, fermee: btn.parentElement.hasAttribute('data-ouvert') ? '1' : '0', droite: Math.round(r.right), texte: bulle.textContent.slice(0, 40) };
   })()`);
   verifier('bulle ouverte au clic', b.ouverte === '1', b.texte);
   verifier('bulle refermée par Échap', b.fermee === '0');
   verifier('bulle dans la fenêtre', b.droite <= largeur, `bord droit à ${b.droite} px`);
 
-  /* ——— simulateur : un curseur bouge le total, un profil le rétablit ——— */
-  const k = await s.evaluer(`(async () => {
-    /* le total se lit dans son double accessible : les roues de
-       NumberFlow sont dans un shadow DOM, et le textContent de .cc-total
-       garde le rendu serveur */
-    const total = () => document.querySelector('.cc-total-lu').textContent.replace(/\\s/g, '');
-    const avant = total();
-    const r = document.querySelector('#cc-heures');
-    const poser = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-    poser.call(r, '20');
-    r.dispatchEvent(new Event('input', { bubbles: true }));
-    await new Promise(r => setTimeout(r, 1200));
-    const apres = total();
-    const lu = document.querySelector('#cc-heures').closest('.cc-curseur').querySelector('output').textContent;
-    document.querySelectorAll('.cc-profil')[1].click();
-    await new Promise(r => setTimeout(r, 1200));
-    return { avant, apres, lu, profil: total(), heures: document.querySelector('#cc-heures').value,
-             presse: document.querySelectorAll('.cc-profil')[1].getAttribute('aria-pressed') };
+  /* ——— « Tout se combine » : cinq signes autour d'Omega, cinq liens ——— */
+  const u = await s.evaluer(`(() => {
+    const tuiles = document.querySelectorAll('.ua-orbite .ua-tuile').length;
+    const liens = [...document.querySelectorAll('.ua-liste a')].map(a => a.getAttribute('href'));
+    const hors = [...document.querySelectorAll('.ua-orbite .ua-tuile:not(.ua-tuile--centre)')]
+      .filter(t => { const r = t.getBoundingClientRect(); return r.left < 0 || r.right > innerWidth; }).length;
+    return { tuiles, liens, hors, simulateur: !!document.querySelector('#simulateur, .cc-range') };
   })()`);
-  verifier('le curseur change le total', k.avant !== k.apres, `${k.avant} → ${k.apres} (lu : ${k.lu})`);
-  verifier('le profil rétablit ses valeurs', k.heures === '8' && k.presse === 'true', `heures ${k.heures}, total ${k.profil}`);
+  verifier('plus de simulateur', !u.simulateur);
+  verifier('cinq signes et Omega', u.tuiles === 6, `${u.tuiles} tuiles`);
+  verifier('cinq offres liées', u.liens.length === 5 && u.liens.every(h => h.startsWith('/offres/')), u.liens.join(' '));
+  verifier('signes dans la fenêtre', u.hors === 0, `${u.hors} hors cadre`);
+
+  /* ——— barre du téléphone : absente en haut, présente à mi-page,
+     effacée devant l'appel final ——— */
+  const br = await s.evaluer(`(async () => {
+    const barre = document.querySelector('.br');
+    const etat = () => barre ? getComputedStyle(barre).visibility + '/' + getComputedStyle(barre).display : 'absente';
+    const aller = async (y) => { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 900)); };
+    await aller(0);
+    const haut = etat();
+    const milieu = document.querySelector('#engagements');
+    await aller(milieu.getBoundingClientRect().top + scrollY);
+    const mi = etat();
+    await aller(document.querySelector('#reserver').getBoundingClientRect().top + scrollY - 200);
+    const fin = etat();
+    return { haut, mi, fin };
+  })()`);
+  if (largeur < 1024) {
+    verifier('barre cachée en haut de page', br.haut.startsWith('hidden'), br.haut);
+    verifier('barre visible à mi-page', br.mi.startsWith('visible'), br.mi);
+    verifier("barre effacée devant l'appel final", br.fin.startsWith('hidden'), br.fin);
+  } else {
+    verifier('pas de barre au bureau', br.mi.endsWith('/none'), br.mi);
+  }
 
   /* ——— FAQ : ouvrir, puis refermer ——— */
   const f = await s.evaluer(`(async () => {

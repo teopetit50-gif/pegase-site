@@ -79,7 +79,7 @@ const ARTICLES: { intitule: string; texte: string; Icone: LucideIcon }[] = [
 export default function Protocole() {
   return (
     <section id="engagements" data-monde="clair" className="r-blanc po">
-      <div className="r-wrap py-16 sm:py-24">
+      <div className="r-wrap py-12 sm:py-24">
         <div className="po-tete">
           <p className="po-surtitre">Protocole d&apos;audit</p>
           <h2 className="r-h2 po-titre">Ce qui est écrit noir sur blanc</h2>

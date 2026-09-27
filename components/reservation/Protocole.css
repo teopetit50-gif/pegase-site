@@ -116,6 +116,45 @@
   color: var(--r-doux);
 }
 
+/* ——— téléphone : l'icône passe à gauche du titre ———
+   La rangée « icône · numéro » coûtait 40 px par article, six fois, pour
+   un numéro que la liste dit déjà par son ordre ; le protocole faisait
+   1 576 px à 390. L'icône prend la marge gauche, le titre et la phrase se
+   rangent à côté, sans barre ni lavis (gestes de survol, sans objet au
+   doigt). */
+@media (max-width: 767.98px) {
+  .resa .po-article {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    column-gap: 14px;
+    padding: 20px 0;
+  }
+  .resa .po-haut {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    align-self: start;
+    padding: 2px 0 0;
+  }
+  .resa .po-numero,
+  .resa .po-barre,
+  .resa .po-lavis {
+    display: none;
+  }
+  .resa .po-intitule {
+    grid-column: 2;
+    margin-top: 0;
+    padding: 0;
+    font-size: 17px;
+    line-height: 24px;
+  }
+  .resa .po-texte {
+    grid-column: 2;
+    margin-top: 4px;
+    padding: 0;
+    line-height: 22px;
+  }
+}
+
 @media (hover: hover) {
   .resa .po-article:hover .po-lavis {
     opacity: 1;

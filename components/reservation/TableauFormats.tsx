@@ -67,7 +67,7 @@ export default function TableauFormats() {
 
   return (
     <section id="comparatif" data-monde="clair" className="r-blanc tb">
-      <div className="r-wrap py-16 sm:py-24">
+      <div className="r-wrap py-12 sm:py-24">
         <div className="tb-tete">
           <span className="tb-pastille">
             <Building2 aria-hidden strokeWidth={1.4} />

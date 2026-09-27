@@ -1,0 +1,302 @@
+/* ══════════════════════════════════════════════════════════════════════
+   <UnSeulAudit> — feuille de « Tout se combine, sur un seul audit »
+   (27/09/2026)
+
+   Préfixe `ua-`, règles scopées sous `.resa .ua`. Reprise de
+   `integrations-5` (Tailark, 21st.dev) : cadre 16/10 de 22 rem, tuiles
+   rondes de 48 px (44 ici) au trait `border` + ombre `shadow-black/5`,
+   tuile centrale de 64 px sur un socle gris `p-1`, dôme dégradé
+   `from-muted-foreground/15 → transparent 25 %` bordé en haut.
+
+   LA GÉOMÉTRIE DES ARCS. Deux cercles concentriques, de centre
+   (50 % ; W/2) où W est la largeur du cadre — le cadre ne fait que 0,625 W
+   de haut, le bas des cercles déborde donc sous lui et s'efface par un
+   masque. Positions des tuiles, calculées (pas estimées) :
+     arc extérieur, rayon 0,5 W — à 150° : x = 0,5 − 0,5·cos 30° = 6,7 %,
+       y = 0,25 W = 40 % de la hauteur ; au sommet : 50 % / 0 ;
+     arc intérieur, rayon 0,31 W — à 150° : x = 0,5 − 0,31·cos 30° =
+       23,2 %, y = 0,345 W = 55,2 % de la hauteur.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .ua {
+  --ua-trait: rgba(5, 5, 5, 0.12);
+  --ua-or: rgba(201, 162, 74, 0.9);
+}
+
+/* ——— l'orbite ——— */
+.resa .ua-orbite {
+  position: relative;
+  width: min(100%, 22rem);
+  aspect-ratio: 16 / 10;
+  margin: 24px auto 0;
+}
+.resa .ua-arc {
+  position: absolute;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-top-color: var(--ua-trait);
+  border-radius: 50%;
+  background: linear-gradient(to bottom, rgba(97, 97, 97, 0.1), rgba(97, 97, 97, 0) 25%)
+    padding-box;
+  /* le bas du cercle, sous le cadre, s'efface */
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 58%);
+  mask-image: linear-gradient(to bottom, #000 30%, transparent 58%);
+  pointer-events: none;
+}
+.resa .ua-arc--ext {
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+.resa .ua-arc--int {
+  top: 30.4%;
+  left: 19%;
+  width: 62%;
+}
+/* la lueur : un anneau d'un pixel et demi, doré sur un quart de tour,
+   qui fait lentement le tour du cercle — le masque de l'arc parent n'en
+   laisse voir que le dôme */
+.resa .ua-lueur {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 290deg,
+    var(--ua-or) 340deg,
+    transparent 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1px));
+  animation: ua-tour 9s linear infinite;
+}
+.resa .ua-lueur--int {
+  animation-duration: 13s;
+  animation-direction: reverse;
+}
+@keyframes ua-tour {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* tuiles */
+.resa .ua-tuile {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e6e6e6;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(5, 5, 5, 0.05),
+    0 6px 14px -6px rgba(5, 5, 5, 0.1);
+  transform: translate(-50%, -50%);
+}
+.resa .ua-tuile--ext-g {
+  top: 40%;
+  left: 6.7%;
+}
+.resa .ua-tuile--ext-h {
+  top: 0;
+  left: 50%;
+}
+.resa .ua-tuile--ext-d {
+  top: 40%;
+  left: 93.3%;
+}
+.resa .ua-tuile--int-g {
+  top: 55.2%;
+  left: 23.2%;
+}
+.resa .ua-tuile--int-d {
+  top: 55.2%;
+  left: 76.8%;
+}
+/* la tuile d'Omega, sur son socle, à la base des deux arcs */
+.resa .ua-socle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  z-index: 3;
+  padding: 4px;
+  border: 1px solid #e3e3e3;
+  border-radius: 999px;
+  background: #ececec;
+  transform: translateX(-50%);
+}
+.resa .ua-tuile--centre {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 64px;
+  height: 64px;
+  border-color: rgba(5, 5, 5, 0.2);
+  box-shadow: 0 14px 30px -12px rgba(5, 5, 5, 0.3);
+  transform: none;
+}
+.resa .ua-omega {
+  width: 30px;
+  height: 30px;
+}
+
+/* ——— titre ——— */
+.resa .ua-texte {
+  max-width: 640px;
+  margin: 32px auto 0;
+  text-align: center;
+}
+/* lignes équilibrées : sans quoi « audit » restait seul sur la seconde
+   ligne, à 390 comme à 1440 */
+.resa .ua-titre {
+  text-wrap: balance;
+}
+.resa .ua-chapo {
+  max-width: 54ch;
+  margin: 14px auto 0;
+}
+
+/* ——— les cinq offres : une liste à filets, puis cinq cartes ——— */
+.resa .ua-liste {
+  margin-top: 28px;
+  border-top: 1px solid var(--r-filet);
+}
+.resa .ua-item {
+  border-bottom: 1px solid var(--r-filet);
+}
+.resa .ua-offre {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 2px;
+  border-radius: 8px;
+  color: inherit;
+}
+.resa .ua-offre:focus-visible {
+  outline: 2px solid var(--r-texte);
+  outline-offset: 2px;
+}
+.resa .ua-offre-signe {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #ffffff;
+}
+.resa .ua-offre-corps {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+.resa .ua-offre-nom {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--r-texte);
+}
+.resa .ua-offre-ligne {
+  margin-top: 1px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--r-faible);
+}
+.resa .ua-offre-fleche {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: #a1a1a1;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+@media (hover: hover) {
+  .resa .ua-offre:hover .ua-offre-fleche {
+    color: var(--r-texte);
+    transform: translate(2px, -2px);
+  }
+}
+
+@media (min-width: 640px) {
+  .resa .ua-orbite {
+    width: min(100%, 24rem);
+    margin-top: 28px;
+  }
+  .resa .ua-tuile {
+    width: 48px;
+    height: 48px;
+  }
+  .resa .ua-tuile--centre {
+    width: 64px;
+    height: 64px;
+  }
+  .resa .ua-texte {
+    margin-top: 44px;
+  }
+  .resa .ua-chapo {
+    margin-top: 18px;
+  }
+  .resa .ua-liste {
+    margin-top: 40px;
+  }
+  .resa .ua-offre {
+    padding: 16px 4px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .resa .ua-liste {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 56px;
+    border-top: 0;
+  }
+  .resa .ua-item {
+    border-bottom: 0;
+  }
+  .resa .ua-offre {
+    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    height: 100%;
+    padding: 22px 20px 24px;
+    border-radius: 16px;
+    background: #ffffff;
+    transition: box-shadow 0.2s ease;
+  }
+  .resa .ua-offre-fleche {
+    position: absolute;
+    top: 20px;
+    right: 18px;
+  }
+  .resa .ua-offre-ligne {
+    margin-top: 4px;
+  }
+}
+@media (min-width: 1024px) and (hover: hover) {
+  .resa .ua-offre:hover {
+    box-shadow:
+      0 1px 2px rgba(5, 5, 5, 0.04),
+      0 12px 28px -14px rgba(5, 5, 5, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resa .ua-lueur {
+    display: none;
+  }
+  .resa .ua-offre,
+  .resa .ua-offre-fleche {
+    transition: none;
+  }
+}
