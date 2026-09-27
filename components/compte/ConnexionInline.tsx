@@ -40,15 +40,16 @@
 
    À CONFIGURER PAR TEO dans Supabase Auth : le modèle « Magic Link » doit
    afficher {{ .Token }} (sinon l'e-mail porte un lien, pas un code) ; la
-   longueur minimale de mot de passe à 8 (Auth → Passwords) — vérifiée
-   ici aussi ; et le taux d'envoi : une adresse ne peut redemander un code
+   règle des mots de passe (Auth → Passwords, 12 caractères et quatre
+   familles depuis le 27/09, lib/compte.ts) — vérifiée ici aussi ; et le
+   taux d'envoi : une adresse ne peut redemander un code
    qu'après 60 s — d'où le compte à rebours.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useRef, useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
-import { MDP_LONGUEUR_MIN, signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
+import { MDP_LONGUEUR_MIN, REGLE_MDP, manqueMdp, signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
 
 const DELAI_RENVOI_S = 60;
 const NBSP = " "; // insécable, pour les intros en chaîne
@@ -123,7 +124,7 @@ const INTROS: Record<ModeConnexion, string> = {
     "Un code à six chiffres envoyé à votre adresse ouvre votre session, sans mot de passe pour cette fois.",
   reinit:
     `Votre adresse e-mail${NBSP}: vous recevez un code à six chiffres, puis vous choisissez un nouveau mot de passe.`,
-  definir: `Choisissez un nouveau mot de passe${NBSP}: ${MDP_LONGUEUR_MIN} caractères minimum.`,
+  definir: `Choisissez un nouveau mot de passe${NBSP}: ${REGLE_MDP}.`,
 };
 
 type Phase = "envoi" | "code" | "mdp" | "definir";
@@ -165,8 +166,8 @@ function lireErreur(e: { code?: string; status?: number; message: string }, phas
     return "La connexion n'a pas abouti. Vérifiez votre connexion et réessayez.";
   }
   /* definir : updateUser({ password }) */
-  if (e.code === "weak_password" || /at least|too short|weak/.test(m)) {
-    return `Le mot de passe doit contenir au moins ${MDP_LONGUEUR_MIN} caractères.`;
+  if (e.code === "weak_password" || /at least|too short|weak|should contain/.test(m)) {
+    return `Ce mot de passe est trop simple${NBSP}: ${REGLE_MDP}.`;
   }
   if (e.code === "same_password" || /different from the old/.test(m)) {
     return "Choisissez un mot de passe différent de l'ancien.";
@@ -233,7 +234,7 @@ export default function ConnexionInline({
   const emailNet = email.trim().toLowerCase();
   const emailOk = /\S+@\S+\.\S+/.test(emailNet);
   const codeOk = /^\d{6}$/.test(code);
-  const mdpOk = mdp.length >= MDP_LONGUEUR_MIN;
+  const mdpOk = !manqueMdp(mdp);
   const profilDemande = mode === "creation" && avecProfil;
   const profilOk = !profilDemande || Boolean(profil.prenom.trim() && profil.nom.trim() && profil.entreprise.trim());
 
@@ -351,7 +352,7 @@ export default function ConnexionInline({
   const definirMdp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mdpOk) {
-      setErreur(`Le mot de passe doit contenir au moins ${MDP_LONGUEUR_MIN} caractères.`);
+      setErreur(`Mot de passe trop faible. ${manqueMdp(mdp) ?? ""}`);
       return;
     }
     if (mdp !== mdp2) {
@@ -683,7 +684,7 @@ export default function ConnexionInline({
 
           <label className={`rv-libelle ${profilDemande || prouve ? "mt-4" : ""}`} htmlFor="cx-mdp-neuf">
             {mode === "reinit" || mode === "definir" ? "Nouveau mot de passe" : "Votre mot de passe"}{" "}
-            <small>— {MDP_LONGUEUR_MIN} caractères minimum</small>
+            <small>— {MDP_LONGUEUR_MIN} caractères, avec minuscule, majuscule, chiffre et symbole</small>
           </label>
           <div className="relative">
             <input

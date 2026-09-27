@@ -111,10 +111,28 @@ export function siretLisible(s: string): string {
   return `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6, 9)} ${n.slice(9)}`;
 }
 
-/* Longueur minimale d'un mot de passe — la même que celle réglée par Teo
-   dans le dashboard Supabase (Auth → Passwords). Vérifiée ici AVANT
-   l'appel, pour que le message soit le nôtre et pas celui de Supabase. */
-export const MDP_LONGUEUR_MIN = 8;
+/* La règle des mots de passe — la même que celle réglée dans Supabase
+   (Auth → Passwords, 27/09/2026) : 12 caractères au moins, avec une
+   minuscule, une majuscule, un chiffre et un symbole, dans les ensembles
+   de Supabase (un « é » n'est pas une minuscule, un « € » pas un symbole).
+   Vérifiée ici AVANT l'appel, pour que le message soit le nôtre et pas
+   celui de Supabase. Jumelle : pegase-dashboard/lib/auth/regle-mdp.ts. */
+export const MDP_LONGUEUR_MIN = 12;
+
+const SYMBOLES = "!@#$%^&*()_+-=[]{};':\"|<>?,./`~";
+
+export const REGLE_MDP = `${MDP_LONGUEUR_MIN} caractères au moins, avec une minuscule, une majuscule, un chiffre et un symbole`;
+
+/** Ce qui manque au mot de passe, en toutes lettres ; null s'il est conforme. */
+export function manqueMdp(mdp: string): string | null {
+  const manque: string[] = [];
+  if (mdp.length < MDP_LONGUEUR_MIN) manque.push(`${MDP_LONGUEUR_MIN} caractères au moins`);
+  if (!/[a-z]/.test(mdp)) manque.push("une minuscule");
+  if (!/[A-Z]/.test(mdp)) manque.push("une majuscule");
+  if (!/[0-9]/.test(mdp)) manque.push("un chiffre");
+  if (![...mdp].some((c) => SYMBOLES.includes(c))) manque.push("un symbole comme ! ? # ou @");
+  return manque.length ? `Il manque : ${manque.join(", ")}.` : null;
+}
 
 /* ?suite= : la page où revenir après connexion. Filtrée pour ne jamais
    servir de tremplin vers un autre site.
