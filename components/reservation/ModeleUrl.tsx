@@ -23,6 +23,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { lienReservation } from "@/lib/reservation";
+import { formuleSite, type FormuleSite } from "@/lib/formules-site";
 
 /** Le slug présent dans l'URL, ou "" tant qu'on ne le sait pas.
  *
@@ -50,6 +51,23 @@ function useModeleUrl(noms?: Record<string, string>) {
     }
   }, [noms]);
   return slug;
+}
+
+/** La formule de site choisie sur /tarifs/site (27/09), lue dans l'URL au
+ *  montage — même motif que le modèle. La liste des formules tient en
+ *  trois lignes : on la vérifie ici, un identifiant inventé est ignoré. */
+function useSiteUrl(): FormuleSite | undefined {
+  const [formule, setFormule] = useState<FormuleSite | undefined>(undefined);
+  useEffect(() => {
+    try {
+      const f = formuleSite(new URLSearchParams(window.location.search).get("site"));
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- une seule fois au montage, depuis l'URL (système externe) : pas de cascade
+      if (f) setFormule(f);
+    } catch {
+      /* pas de window : rien à reprendre */
+    }
+  }, []);
+  return formule;
 }
 
 /** Ce que le visiteur a déclaré au calculateur de /tarifs, lu dans l'URL
@@ -137,6 +155,25 @@ export function ModeleRetenu({ noms }: { noms: Record<string, string> }) {
   );
 }
 
+/** La ligne de rappel de la formule de site — pas de montant : le prix
+ *  public est sur /tarifs/site, et c'est /reserver qui le relit. */
+export function SiteRetenu() {
+  const f = useSiteUrl();
+  if (!f) return null;
+  return (
+    <section data-monde="clair" className="r-wrap pt-10 sm:pt-12">
+      <p className="r-note">
+        Formule de site retenue&nbsp;:{" "}
+        <strong className="font-medium text-[#050505]">{f.nom}</strong> — elle part avec votre
+        demande, et reste modifiable jusqu&apos;à la commande.{" "}
+        <Link href="/tarifs/site#offre" className="underline underline-offset-4 hover:text-[#050505]">
+          Changer de formule
+        </Link>
+      </p>
+    </section>
+  );
+}
+
 /** Tout bouton « Réserver ce créneau » de la page d'audit : il emporte le
  *  modèle s'il y en a un. Le rendu sans JavaScript, et celui d'avant
  *  l'hydratation, restent le lien nu — donc toujours cliquable. */
@@ -155,12 +192,18 @@ export function BoutonReservation({
      de zéro. Les noms ne sont pas vérifiés ici : /reserver les revalide
      contre POSTES avant d'en faire une phrase. */
   const { postes, pieces } = useEstimationUrl();
+  const site = useSiteUrl();
   return (
     <Link
-      href={lienReservation(formule, slug || undefined, {
-        postes: postes.length ? postes.join(",") : undefined,
-        pieces: pieces ? String(pieces) : undefined,
-      })}
+      href={lienReservation(
+        formule,
+        slug || undefined,
+        {
+          postes: postes.length ? postes.join(",") : undefined,
+          pieces: pieces ? String(pieces) : undefined,
+        },
+        site?.id,
+      )}
       className={className}
     >
       {children}
@@ -170,4 +213,4 @@ export function BoutonReservation({
 
 /** Pour les composants DÉJÀ clients (comparatif, simulateur) qui
  *  fabriquent leur lien eux-mêmes. */
-export { useModeleUrl, useEstimationUrl };
+export { useModeleUrl, useEstimationUrl, useSiteUrl };

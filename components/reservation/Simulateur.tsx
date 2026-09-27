@@ -16,7 +16,7 @@
 
 import { useState } from "react";
 import { lienReservation } from "@/lib/reservation";
-import { useEstimationUrl, useModeleUrl } from "./ModeleUrl";
+import { useEstimationUrl, useModeleUrl, useSiteUrl } from "./ModeleUrl";
 import Lien from "@/components/Lien";
 
 /* 46 semaines travaillées : 52 moins congés et jours fériés — l'hypothèse
@@ -84,6 +84,8 @@ export default function Simulateur() {
   /* 15/09 — l'estimation de /tarifs suit aussi par ici : ce bouton fabrique
      son lien lui-même, il ne passe pas par <BoutonReservation>. */
   const { postes, pieces } = useEstimationUrl();
+  /* 27/09 — et la formule de site choisie sur /tarifs/site */
+  const site = useSiteUrl();
   const estimation = {
     postes: postes.length ? postes.join(",") : undefined,
     pieces: pieces ? String(pieces) : undefined,
@@ -220,7 +222,7 @@ export default function Simulateur() {
           </div>
 
           <Lien
-            href={lienReservation("process", modele || undefined, estimation)}
+            href={lienReservation("process", modele || undefined, estimation, site?.id)}
             className="r-btn r-btn--noir mt-7 w-full"
           >
             Faire chiffrer ma situation réelle

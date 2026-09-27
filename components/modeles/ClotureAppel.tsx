@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PRIX_MIN_SITE, euros } from "@/lib/formules-site";
 import "./ClotureAppel.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -140,12 +141,12 @@ export default function ClotureAppel() {
             href="/tarifs/site"
             className="ca-btn w-full justify-center border border-white/25 px-6 py-3 text-white/90 transition-colors hover:border-white/45 hover:text-white sm:w-auto"
           >
-            990&nbsp;€ le site catalogue
+            Site catalogue dès {euros(PRIX_MIN_SITE)}
           </Link>
 
           <p className="text-[13px] leading-relaxed text-white/55 sm:basis-full lg:max-w-[30ch] lg:basis-auto">
-            Prix public, le même pour tout le monde. Plusieurs enseignes ou un besoin
-            hors catalogue&nbsp;: sur devis, après diagnostic.
+            Trois formules à prix public, les mêmes pour tout le monde. Plusieurs enseignes
+            ou un besoin hors catalogue&nbsp;: sur devis, après diagnostic.
           </p>
         </div>
       </div>

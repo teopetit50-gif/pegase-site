@@ -2,12 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import Partage from "@/components/Partage";
 import { Chevron } from "@/components/offres/MediaMoteurs";
 import MurModeles from "@/components/tarifs/site/MurModeles";
 import FaitsSite from "@/components/tarifs/site/FaitsSite";
 import { MODELES } from "@/components/modeles/donnees";
-import PrixSite from "@/components/tarifs/site/PrixSite";
+import {
+  FORMULES_SITE,
+  MAINTENANCE_SITE_EUR,
+  PRIX_MAX_SITE,
+  PRIX_MIN_SITE,
+  SUPPLEMENT_SITE_EUR,
+  euros,
+  pluriel,
+  resteChequeTic,
+} from "@/lib/formules-site";
+import GrilleSite from "@/components/tarifs/site/GrilleSite";
 import JournalDemandes from "@/components/tarifs/site/JournalDemandes";
 import EtapesDefilantes from "@/components/tarifs/site/EtapesDefilantes";
 import CircuitNuit from "@/components/tarifs/site/CircuitNuit";
@@ -89,13 +98,25 @@ import ClotureSite from "@/components/tarifs/site/ClotureSite";
    maquettes locales (BarreFenetre, MaqCommande, MaqDemandes) et les
    constantes ETAPES, CIRCUIT, VITRINE sont parties avec elles : leur
    contenu vit désormais dans le composant qui le rend.
+
+   27/09/2026 — TROIS FORMULES (Teo : « trois prix par site, 990 pour un
+   site vitrine simple, 1 990 avec x pages et allers-retours, et un
+   au-dessus »). Le prix unique de 990 € n'avait aucune borne, ni pages
+   ni allers-retours, et ne payait que 6,6 h de travail. La section 3
+   porte maintenant <GrilleSite> (21st.dev « blueprint-tiers ») :
+   Essentiel, Standard, Complet, le taux du Chèque TIC en sélecteur, SANS
+   aide par défaut (le site parle à toute la France). <PrixSite> est parti
+   avec l'ancienne colonne de gauche ; le cadre partagé « cadre-modeles »
+   est désormais celui de la grille, et « la suite » passe dessous. Les
+   montants vivent dans lib/formules-site.ts et nulle part ailleurs : la
+   FAQ et la méta-description les y lisent.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
   alternates: { canonical: "/tarifs/site" },
   title: "Votre site, à prix public | Omega.AI",
   description:
-    `Le site catalogue : 990 € une fois, pas d'abonnement, maintenance comprise tant qu'un poste Omega.AI est en service. ${MODELES.length} modèles en ligne.`,
+    `Trois formules de site catalogue, de ${euros(PRIX_MIN_SITE)} à ${euros(PRIX_MAX_SITE)}, payées une fois, sans abonnement, maintenance comprise tant qu'un poste Omega.AI est en service. ${MODELES.length} modèles en ligne.`,
 };
 
 /* ——— les quatre modèles du mur : le premier de chaque famille du
@@ -107,15 +128,23 @@ const FAITS: [string, string][] = [
   ["Plusieurs enseignes", "un socle commun, une vue unique"],
 ];
 
-/* ——— ce que les 990 € comprennent ——— */
+/* ——— ce que les trois formules comprennent : la bande commune de la
+   grille (les différences — pages, allers-retours, mise en page — sont
+   dans lib/formules-site.ts) ——— */
 const COMPRIS_SITE: string[] = [
-  `Un modèle au choix : les ${MODELES.length} sont en ligne, tous consultables`,
-  "Contenu intégralement réécrit en français, à votre métier et à votre marque",
-  "Vos visuels, vos coordonnées, vos horaires, vos points de vente en place",
+  `Un des ${MODELES.length} modèles, au choix, tous consultables`,
+  "Textes réécrits à votre métier et à votre marque",
+  "Vos visuels, coordonnées, horaires et points de vente en place",
   "Nom de domaine la première année, mise en ligne comprise",
-  "Formulaire branché sur vos postes : chaque demande entre dans votre espace, relance et avis compris",
-  "Le relevé de ce que le site reçoit : d'où viennent les demandes, ce qui revient le plus souvent",
+  "Formulaire branché\u00a0: chaque demande entre dans votre espace",
+  "Le relevé de ce que le site reçoit, chaque semaine",
 ];
+
+/** « 198 €, 398 € ou 698 € » */
+const enListe = (xs: string[]) =>
+  xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} ou ${xs[xs.length - 1]}`;
+const restes = (taux: 40 | 80) =>
+  enListe(FORMULES_SITE.map((f) => euros(resteChequeTic(f.prix, taux))));
 
 /* ——— la FAQ site — les questions qu'un prix affiché doit prendre de front ——— */
 const FAQ_SITE: { q: string; a: string }[] = [
@@ -124,8 +153,8 @@ const FAQ_SITE: { q: string; a: string }[] = [
     a: "À vous, dès le premier jour. Le nom de domaine est au vôtre, les accès vous sont remis, et si nous nous quittons, le site part avec vous, fichiers et contenus compris. Rien n'est loué, rien n'est retenu. Sans maintenance, rien ne s'éteint sans prévenir : l'hébergement et le domaine passent à votre nom, et nous vous accompagnons pour la bascule.",
   },
   {
-    q: "Que comprennent les 990 €, exactement ?",
-    a: "Le modèle choisi dans le catalogue, la réécriture intégrale du contenu en français, à votre métier et à votre marque, vos visuels et vos coordonnées en place, le nom de domaine la première année, la mise en ligne, et le formulaire branché : dès qu'un poste Omega.AI est en service chez vous, chaque demande reçue entre dans le circuit devis, relance, avis, et le relevé de ce que le site reçoit vous revient chaque semaine. Un besoin hors catalogue — boutique en ligne, espace membre, logiciel particulier, plusieurs enseignes sur un même socle — se chiffre sur devis, après diagnostic.",
+    q: "Que comprend chaque formule\u00a0?",
+    a: `Les trois partent d'un modèle du catalogue, réécrit en français à votre métier et à votre marque, avec vos visuels et vos coordonnées, le nom de domaine la première année, la mise en ligne et le formulaire branché. Ce qui change, c'est l'ampleur\u00a0: ${FORMULES_SITE.map((f) => `${f.nom}, ${euros(f.prix)}, ${pluriel(f.pages, "page", "pages")} et ${pluriel(f.allersRetours, "aller-retour", "allers-retours")}`).join("\u00a0; ")}, avec en plus une mise en page adaptée pour le Complet. Les mentions légales ne comptent pas dans les pages. Au-delà, chaque page ou aller-retour de plus coûte ${euros(SUPPLEMENT_SITE_EUR)}\u00a0; un aller-retour, c'est une liste de corrections envoyée en une fois. Un besoin hors catalogue — boutique en ligne, espace membre, logiciel particulier, plusieurs enseignes sur un même socle — se chiffre sur devis, après diagnostic.`,
   },
   {
     q: "Que devient ce que le site enregistre ?",
@@ -137,11 +166,11 @@ const FAQ_SITE: { q: string; a: string }[] = [
   },
   {
     q: "Le Chèque TIC, concrètement ?",
-    a: "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible qui y est immatriculée. Il porte sur la création du site, un investissement sur facture, pas sur une mensualité. À 80 %, il reste 198 € à votre charge ; à 40 %, 594 €. Votre éligibilité est vérifiée pendant l'audit, avant tout engagement, et si un dossier se justifie, nous le montons avec vous.",
+    a: `Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour une entreprise éligible qui y est immatriculée. Il porte sur la création du site, un investissement sur facture, pas sur une mensualité. À 80 %, il reste ${restes(80)} à votre charge selon la formule\u00a0; à 40 %, ${restes(40)}. Votre éligibilité est vérifiée pendant l'audit, avant tout engagement, et si un dossier se justifie, nous le montons avec vous.`,
   },
   {
     q: "Pourquoi la maintenance est-elle comprise avec l'abonnement ?",
-    a: "Parce qu'un site branché sur les systèmes vit avec eux : ce qu'il reçoit alimente la relance, les avis et le point du matin, et ce qu'il enregistre dit quoi corriger sur le site lui-même. Entretenir la vitrine fait partie du travail, et la facturer à part n'aurait pas de sens. Sans abonnement, elle reste disponible à 19 € par mois, sans engagement.",
+    a: `Parce qu'un site branché sur les systèmes vit avec eux : ce qu'il reçoit alimente la relance, les avis et le point du matin, et ce qu'il enregistre dit quoi corriger sur le site lui-même. Entretenir la vitrine fait partie du travail, et la facturer à part n'aurait pas de sens. Sans abonnement, elle reste disponible à ${euros(MAINTENANCE_SITE_EUR)} par mois, sans engagement.`,
   },
   {
     q: "Et si aucun modèle ne convient ?",
@@ -203,7 +232,7 @@ export default function TarifsSitePage() {
                   </Link>
                 </div>
                 <span className="o-flux-sous">
-                  990&nbsp;€ une fois, pas d&apos;abonnement — plusieurs enseignes&nbsp;: sur devis, après diagnostic
+                  De {euros(PRIX_MIN_SITE)} à {euros(PRIX_MAX_SITE)}, une fois, pas d&apos;abonnement — plusieurs enseignes&nbsp;: sur devis, après diagnostic
                 </span>
               </div>
             </div>
@@ -230,62 +259,34 @@ export default function TarifsSitePage() {
           </div>
         </section>
 
-        {/* ════════ 3 · L'OFFRE — le prix et la suite, en deux blocs ════════ */}
+        {/* ════════ 3 · L'OFFRE — les trois formules, puis la suite ════════
+            27/09 : <GrilleSite> remplace le récapitulatif à prix unique
+            (<PrixSite>) ; « la suite » passe sous la grille. */}
         <section id="offre" data-monde="clair" className="scroll-mt-24 py-[110px]">
           <div className="o-wrap">
             <EnTete
               pastille="LE PRIX"
-              titre="Le prix, l'aide régionale et ce qui est compris ensuite"
-              chapo="La création se paie une fois, comme un investissement — celui que le Chèque TIC peut financer. Ce qui vient après est compris : tant qu'un poste Omega.AI est en service chez vous, la vitrine est entretenue, et ce qu'elle reçoit alimente vos systèmes."
+              titre="Trois formules à prix fixe"
+              chapo="La création se paie une fois. Chaque formule fixe son nombre de pages et d'allers-retours ; l'entretien, lui, est compris tant qu'un poste Omega.AI est en service chez vous."
             />
 
-            <div className="mt-16 grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-20">
-              {/* ——— le prix — la maquette est l'objet partagé qui arrive
-                     de /commencer ——— */}
-              <div className="flex flex-col">
-                <Partage
-                  nom="cadre-modeles"
-                  share="voyage-modeles"
-                  as="div"
-                  className="o-card overflow-hidden"
-                >
-                  <PrixSite />
-                </Partage>
-                <p data-reveal className="o-small mt-8 !text-[14px] uppercase tracking-[0.08em]">
-                  Le prix
-                </p>
-                <h3 data-reveal className="o-h4 mt-2">
-                  990&nbsp;€, une fois. Pas d&apos;abonnement.
-                </h3>
-                <p data-reveal className="o-body mt-4">
-                  Un des {MODELES.length} modèles du catalogue, réécrit pour votre métier, en ligne sous votre nom. Le même prix pour une entreprise de trois personnes et pour une direction de groupe. Le catalogue contient aussi des gabarits de boutique et d&apos;espace membre : le dessin est compris, mais leur mécanique — paiement, stock, comptes — et les montages à plusieurs enseignes se chiffrent sur devis, après diagnostic.
-                </p>
-                <ul data-reveal className="mt-6 space-y-2.5">
-                  {COMPRIS_SITE.map((t) => (
-                    <li key={t} className="o-small flex gap-3 !text-[15px] !leading-[24px]">
-                      <span aria-hidden className="mt-[11px] h-1 w-1 shrink-0 rounded-full bg-[#09090b]" />
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-                <div data-reveal className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-                  <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                    Réserver un audit
-                  </Link>
-                  <Link href="/modeles" className="o-link !text-[15px]">
-                    Voir les modèles d&apos;abord
-                    <Chevron taille={13} />
-                  </Link>
-                </div>
-              </div>
+            <GrilleSite compris={COMPRIS_SITE} />
 
-              {/* ——— la suite — le site nourrit les postes, la maintenance
-                     est comprise avec eux ——— */}
+            <p data-reveal className="o-small mx-auto mt-8 max-w-[760px] text-center !text-[14px] !leading-[22px]">
+              Pages comptées hors mentions légales. Au-delà de la formule&nbsp;:{" "}
+              {euros(SUPPLEMENT_SITE_EUR)} la page ou l&apos;aller-retour — un aller-retour, c&apos;est
+              une liste de corrections envoyée en une fois. Boutique, espace membre ou plusieurs
+              enseignes&nbsp;: sur devis, après diagnostic.
+            </p>
+
+            {/* ——— la suite — le site nourrit les postes, la maintenance
+                   est comprise avec eux ——— */}
+            <div className="mt-24 grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
+              <div data-reveal className="o-card overflow-hidden">
+                <JournalDemandes />
+              </div>
               <div className="flex flex-col">
-                <div data-reveal className="o-card overflow-hidden">
-                  <JournalDemandes />
-                </div>
-                <p data-reveal className="o-small mt-8 !text-[14px] uppercase tracking-[0.08em]">
+                <p data-reveal className="o-small !text-[14px] uppercase tracking-[0.08em]">
                   La suite
                 </p>
                 <h3 data-reveal className="o-h4 mt-2">
@@ -295,7 +296,8 @@ export default function TarifsSitePage() {
                   Modifications courantes, hébergement, domaine renouvelé, sauvegardes, tant qu&apos;un poste est en service chez vous. Un site branché sur vos systèmes vit avec eux&nbsp;: ce qu&apos;il reçoit alimente la relance, les avis et le point du matin, et ce qu&apos;il enregistre vous dit quoi corriger. Entretenir la vitrine fait partie du travail.
                 </p>
                 <p data-reveal className="o-body mt-4">
-                  Sans abonnement&nbsp;: 19&nbsp;€ par mois, sans engagement. Et le site vous appartient quoi qu&apos;il arrive, domaine, accès et fichiers à votre nom.
+                  Sans abonnement&nbsp;: {euros(MAINTENANCE_SITE_EUR)} par mois, sans engagement. Et le
+                  site vous appartient quoi qu&apos;il arrive, domaine, accès et fichiers à votre nom.
                 </p>
                 <div data-reveal className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                   <Link href="/tarifs" className="o-btn o-btn--ghost">
@@ -311,11 +313,10 @@ export default function TarifsSitePage() {
             </div>
 
             <p data-reveal className="o-small mx-auto mt-14 max-w-[760px] text-center !text-[13px] !leading-[20px]">
-              Prix TTC, offre en vigueur au 01/09/2026. Le devis remis à l&apos;audit reprend ce
-              prix tel quel pour un site catalogue — il n&apos;existe pas de version plus chère de
-              la même chose. Le Chèque TIC est un dispositif de la Région Guadeloupe, réservé
-              aux entreprises éligibles&nbsp;; son taux est fixé par la Région, dossier par
-              dossier.
+              Prix TTC, grille en vigueur au 27/09/2026. Le devis remis à l&apos;audit reprend le prix
+              de la formule tel quel — il n&apos;existe pas de version plus chère de la même chose. Le
+              Chèque TIC est un dispositif de la Région Guadeloupe, réservé aux entreprises
+              éligibles&nbsp;; son taux est fixé par la Région, dossier par dossier.
             </p>
           </div>
         </section>
@@ -326,7 +327,7 @@ export default function TarifsSitePage() {
             <EnTete
               pastille="LE DÉROULÉ"
               titre="Du modèle à la mise en ligne."
-              chapo="Vous choisissez un modèle, vous déposez votre brief, nous écrivons, nous mettons en ligne et nous branchons le formulaire. Le règlement se fait avec nous, au téléphone, avant le lancement de la production."
+              chapo="Vous choisissez une formule et un modèle, vous déposez votre brief, nous écrivons, nous mettons en ligne et nous branchons le formulaire. Le règlement se fait avec nous, au téléphone, avant le lancement de la production."
             />
             <EtapesDefilantes />
           </div>

@@ -9,6 +9,7 @@ import { MODELES } from "@/components/modeles/donnees";
 import { POSTES } from "@/lib/paliers";
 import {
   ModeleRetenu,
+  SiteRetenu,
   EstimationRetenue,
   BoutonReservation,
 } from "@/components/reservation/ModeleUrl";
@@ -111,6 +112,7 @@ export default function ReserverUnAuditPage() {
         {/* ═══ 0 — ce que le visiteur apporte : le modèle de site retenu,
                et l'estimation faite sur /tarifs ═══ */}
         <ModeleRetenu noms={NOMS_MODELES} />
+        <SiteRetenu />
         <EstimationRetenue noms={NOMS_POSTES} />
 
         {/* ═══ 1 à 3 — formules, orientation, comparatif ═══ */}

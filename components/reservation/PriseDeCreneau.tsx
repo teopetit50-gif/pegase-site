@@ -150,6 +150,10 @@ type Props = {
      pas dans la demande comme une colonne (reserver_audit n'en a que
      sept) : il ouvre le message, visible et modifiable. */
   modeleNom?: string;
+  /* 27/09/2026 — la formule de site choisie sur /tarifs/site, déjà mise
+     en phrase par la page avec son prix PUBLIC relu côté serveur. Elle
+     ouvre le message, juste après le modèle. */
+  formuleSite?: string;
   /* 15/09/2026 — l'estimation faite sur /tarifs, déjà mise en phrase et
      RECALCULÉE par la page (jamais lue dans l'URL). Elle ouvre le message
      de la demande : l'audit démarre sur les chiffres du visiteur. Ce n'est
@@ -165,6 +169,7 @@ export default function PriseDeCreneau({
   periodicite: periodiciteInitiale = "mensuel",
   utilisateur,
   modeleNom,
+  formuleSite,
   estimation,
 }: Props) {
   /* ——— le verrou compte (02/09 ; étendu le 15/09 au matin, REPLIÉ le
@@ -298,6 +303,7 @@ export default function PriseDeCreneau({
        remet pas — c'est sa demande. */
     message: [
       modeleNom ? `Modèle de site retenu : ${modeleNom}.` : null,
+      formuleSite,
       estimation,
     ]
       .filter(Boolean)

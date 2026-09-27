@@ -4,6 +4,7 @@ import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES, prixPourVolume } from "@/lib/paliers";
+import { formuleSite, phraseFormuleSite } from "@/lib/formules-site";
 
 /* ══════════════════════════════════════════════════════════════════════
    /reserver — bloquer un créneau d'audit (28/08/2026)
@@ -48,6 +49,7 @@ export default async function ReserverPage({
   searchParams: Promise<{
     formule?: string;
     modele?: string;
+    site?: string;
     postes?: string;
     pieces?: string;
   }>;
@@ -61,6 +63,13 @@ export default async function ReserverPage({
      corriger. */
   const demandeModele = (sp.modele ?? "").trim();
   const modeleNom = MODELES.find((m) => m.slug === demandeModele)?.nom;
+  /* 27/09/2026 — la formule de site choisie sur /tarifs/site (Essentiel,
+     Standard, Complet). Seul l'identifiant a voyagé ; le prix se relit
+     ICI dans lib/formules-site.ts — un montant venu de l'URL se
+     réécrirait dans la barre d'adresse. C'est un prix PUBLIC : il peut
+     entrer dans le message, contrairement à l'estimation d'abonnement. */
+  const choixSite = formuleSite(sp.site);
+  const formuleSiteTexte = choixSite ? phraseFormuleSite(choixSite) : undefined;
   /* ══════════════════════════════════════════════════════════════════
      15/09/2026 (Teo) — L'ESTIMATION DE /tarifs ARRIVE ICI, EN PHRASE.
 
@@ -121,6 +130,7 @@ export default async function ReserverPage({
               parcours="audit"
               formuleInitiale={sp.formule}
               modeleNom={modeleNom}
+              formuleSite={formuleSiteTexte}
               estimation={estimation}
             />
           </div>

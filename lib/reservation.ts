@@ -1,4 +1,5 @@
 import { MODELES } from "@/components/modeles/donnees";
+import { FORMULES_SITE, PRIX_MAX_SITE, PRIX_MIN_SITE, euros } from "@/lib/formules-site";
 /* ══════════════════════════════════════════════════════════════════════
    Contenu de /reserver-un-audit — source unique (26/07/2026)
 
@@ -13,7 +14,8 @@ import { MODELES } from "@/components/modeles/donnees";
    partir de l'existant (page /audit, section Chèque TIC, articles). Les formules d'audit restent sans prix — les
    deux payantes sont « sur devis », précisément pour ne rien figer ici.
    EXCEPTION depuis le 01/09/2026 : le site catalogue a un prix public
-   (990 €, décision Teo — voir /tarifs/site), mentionné dans le livrable
+   (990 €, décision Teo — voir /tarifs/site ; trois formules depuis le
+   27/09, lues dans lib/formules-site.ts), mentionné dans le livrable
    « Devis » de l'audit complet et la FAQ « Je veux surtout un site ».
    Aucun chiffre de preuve sociale, aucun avis client : la règle posée
    dans refs-qonto/NOTES-DESIGN.md tient toujours.
@@ -99,9 +101,14 @@ export function lienReservation(
   formuleId: string,
   modele?: string,
   estimation?: ContexteEstimation,
+  /* 27/09 — la formule de SITE (essentiel, standard, complet) choisie sur
+     /tarifs/site. L'identifiant seulement : /reserver relit le prix dans
+     lib/formules-site.ts. `formule`, lui, reste celle de l'audit. */
+  site?: string,
 ) {
   const q = new URLSearchParams({ formule: formuleId });
   if (modele) q.set("modele", modele);
+  if (site) q.set("site", site);
   if (estimation?.postes) q.set("postes", estimation.postes);
   if (estimation?.pieces) q.set("pieces", estimation.pieces);
   return `/reserver?${q}`;
@@ -259,7 +266,7 @@ export const PROFILS: [Profil, Profil] = [
           },
           {
             texte:
-              "Devis du système recommandé et du modèle de site associé (site catalogue : 990 €, prix public), valables 30 jours",
+              `Devis du système recommandé et du modèle de site associé (site catalogue\u00a0: de ${euros(PRIX_MIN_SITE)} à ${euros(PRIX_MAX_SITE)} selon la formule, prix publics), valables 30 jours`,
             fort: "Devis",
           },
           {
@@ -591,7 +598,7 @@ export const FAQ: { q: string; r: string[] }[] = [
          le 15/09 — et c'est cette réponse-là qui restait en arrière. */
       /* 01/09 — le prix devient public (voir /tarifs/site) : la réponse
          le donne plutôt que de le garder pour l'audit. */
-      `Oui, et vous pouvez déjà en visiter ${MODELES.length} : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, nous réécrivons tout le contenu en français, pour votre métier. Le prix est public : 990 € le site catalogue, soit de 198 à 594 € restant à charge selon le taux du Chèque TIC.`,
+      `Oui, et vous pouvez déjà en visiter ${MODELES.length} : chaque modèle du catalogue est en ligne et se parcourt en vrai. Vous choisissez l'allure, nous réécrivons tout le contenu en français, pour votre métier. Les prix sont publics : ${FORMULES_SITE.map((f) => `${f.nom} ${euros(f.prix)}`).join(", ")}, selon le nombre de pages et d'allers-retours.`,
       "L'audit sert à regarder ce qui se passe une fois qu'un visiteur a cliqué : où part la demande, qui la voit, en combien de temps il obtient une réponse, et ce que devient le devis. C'est cette partie que nous chiffrons d'abord, parce qu'elle décide de ce que le site rapporte, à trois demandes par semaine comme à trois cents.",
     ],
   },

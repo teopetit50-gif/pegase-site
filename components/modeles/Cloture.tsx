@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PRIX_MAX_SITE, PRIX_MIN_SITE, euros } from "@/lib/formules-site";
 
 /* ══════════════════════════════════════════════════════════════════════
    <Cloture> — le dernier bloc de /modeles.
@@ -130,14 +131,14 @@ export default function Cloture() {
             clôture le mentionne sans vendre — la règle de la page tient,
             le lien porte la transaction ailleurs. */}
         <p className="mt-6 text-[13px] text-white/55">
-          Le prix est public&nbsp;:{" "}
+          Les prix sont publics&nbsp;:{" "}
           <Link
             href="/tarifs/site"
             className="text-white/80 underline underline-offset-4 hover:text-white"
           >
-            990&nbsp;€ le site catalogue
+            le site catalogue de {euros(PRIX_MIN_SITE)} à {euros(PRIX_MAX_SITE)}
           </Link>{" "}
-          — 198&nbsp;€ restant à charge si le Chèque TIC finance 80&nbsp;%.
+          selon la formule.
         </p>
       </div>
     </div>
