@@ -1,6 +1,6 @@
 /** Recette des interactions de /reserver-un-audit (27/09/2026) — ce qu'une
  *  capture ne montre pas : colonnes du tableau, sélecteur mobile, bulles
- *  d'aide, panneau des garanties, section « Tout se combine », accordéon
+ *  d'aide, bento des garanties, section « Tout se combine », accordéon
  *  de la FAQ, débordement.
  *
  *    node outils/recette-audit.mjs <url de la page> [largeur]
@@ -118,18 +118,23 @@ try {
   const barre = await s.evaluer(`!!document.querySelector('.br, .o-barre')`);
   verifier('aucune barre flottante', !barre);
 
-  /* ——— le panneau sous les cartes (GarantiesAudit) ——— */
-  const g = await s.evaluer(`(() => {
-    const p = document.querySelector('.ga');
-    if (!p) return null;
-    const montant = p.querySelector('.ga-montant');
-    const r = montant.getBoundingClientRect();
-    return { cases: p.querySelectorAll('.ga-case').length, montant: montant.textContent,
-             deborde: montant.scrollWidth > montant.clientWidth + 1 || r.right > innerWidth,
-             region: p.textContent.includes('Région Guadeloupe') };
+  /* ——— le bento sous les cartes (GarantiesAudit) : quatre cartes, la
+     mention de la Région, et sous 768 un rail qui ne doit PAS élargir la
+     fenêtre de mise en page (piège noté le 14/09 sur un tableau) ——— */
+  const g = await s.evaluer(`(async () => {
+    const b = document.querySelector('.ga');
+    if (!b) return null;
+    b.scrollIntoView({ block: 'center' });
+    await new Promise(r => setTimeout(r, 1500));
+    return { cartes: b.querySelectorAll('.ga-carte').length,
+             region: b.textContent.includes('Région Guadeloupe'),
+             vu: b.hasAttribute('data-vu'),
+             rail: getComputedStyle(b.querySelector('.ga-grille')).display,
+             fenetre: innerWidth, visuelle: Math.round(visualViewport.width) };
   })()`);
-  verifier('panneau des garanties', !!g && g.cases === 2 && g.region, g ? `${g.cases} cases, « ${g.montant} »` : 'absent');
-  verifier('le montant tient sur sa ligne', !!g && !g.deborde);
+  verifier('bento des garanties', !!g && g.cartes === 4 && g.region, g ? `${g.cartes} cartes, ${g.rail}` : 'absent');
+  verifier('animations lancées à l\u2019écran', !!g && g.vu);
+  verifier('fenêtre non élargie', !!g && g.fenetre === g.visuelle, g ? `${g.fenetre} / ${g.visuelle}` : '');
 
   /* ——— FAQ : ouvrir, puis refermer ——— */
   const f = await s.evaluer(`(async () => {

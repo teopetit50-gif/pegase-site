@@ -1,138 +1,556 @@
 /* ══════════════════════════════════════════════════════════════════════
-   <GarantiesAudit> — feuille du panneau sous les cartes (27/09/2026)
+   <GarantiesAudit> — feuille du bento sous les cartes (27/09/2026)
 
-   Préfixe `ga-`, sous `.resa`. Reprise de `features-9` (Tailark,
-   21st.dev) : `grid border md:grid-cols-2`, cases en `p-6 sm:p-12`
-   (24 → 36 px ici, le panneau vit sous trois cartes et non seul sur sa
-   page), libellé `text-muted-foreground` + icône `size-4`, énoncé
-   `text-2xl font-semibold` ramené au 500 de la page, case de droite en
-   `bg-zinc-50`, rangée du chiffre `col-span-full border-y`.
+   Préfixe `ga-`, sous `.resa`. Composition reprise de `bento-grid`
+   (@arihantcodes, 21st.dev) d'après son aperçu : cartes claires à filet
+   #ebebeb, rayon 16, scène de ~200 px où flotte une mini-interface
+   blanche ombrée, pied « pastille d'icône 36 px (fond #f2f2f2) · titre ·
+   phrase grise ». Leur fond #fafafa passe au blanc ici : la bande de la
+   première section est déjà le gris de `.resa`, et la trame de points de
+   la scène suffit à la détacher.
 
-   Le seul accent est l'icône du Chèque TIC, dans l'or de la carte
-   recommandée juste au-dessus : l'aide et le format phare se répondent
-   sans qu'aucune surface ne soit teintée.
+   Grille : 3 colonnes dès 1024 (cartes 1 + 2, puis 2 + 1, en quinconce),
+   2 dès 768, et sous 768 un RAIL horizontal à cartes magnétiques
+   (scroll-snap) qui déborde dans la gouttière de 24 px.
+
+   LE MOUVEMENT n'a lieu que sous `[data-vu]` (posé par <QuandVisible>) :
+   avant, et sans JavaScript, chaque dessin est dans son état final. Les
+   cartes elles-mêmes entrent par le reveal GSAP de la page
+   (`data-reveal`).
    ══════════════════════════════════════════════════════════════════════ */
 
 .resa .ga {
-  display: grid;
+  --ga-ombre:
+    0 1px 2px rgba(5, 5, 5, 0.04),
+    0 12px 28px -14px rgba(5, 5, 5, 0.22);
+  --ga-courbe: cubic-bezier(0.16, 1, 0.3, 1);
   margin-top: 32px;
+}
+
+/* ——— la grille : rail sous 768 ——— */
+.resa .ga-grille {
+  display: flex;
+  gap: 12px;
+  margin-inline: -24px;
+  padding: 2px 24px 14px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 24px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.resa .ga-grille::-webkit-scrollbar {
+  display: none;
+}
+.resa .ga-carte {
+  display: flex;
+  flex: 0 0 min(84%, 360px);
+  flex-direction: column;
+  min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--r-filet);
+  border: 1px solid #ebebeb;
   border-radius: 16px;
   background: #ffffff;
-}
-.resa .ga-case {
-  padding: 22px 20px 24px;
-}
-.resa .ga-case + .ga-case {
-  border-top: 1px solid var(--r-filet);
-}
-.resa .ga-case--grise {
-  background: #fafafa;
+  scroll-snap-align: start;
 }
 
-.resa .ga-libelle {
+@media (min-width: 768px) {
+  .resa .ga-grille {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-inline: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .resa .ga-carte {
+    flex: none;
+  }
+}
+@media (min-width: 1024px) {
+  .resa .ga-grille {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .resa .ga-carte--b,
+  .resa .ga-carte--c {
+    grid-column: span 2;
+  }
+}
+
+/* ——— la scène et le pied ——— */
+.resa .ga-scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 212px;
+  padding: 18px;
+  overflow: hidden;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fafafa;
+  background-image: radial-gradient(#e2e2e2 1px, transparent 1.2px);
+  background-size: 14px 14px;
+}
+/* la trame s'éteint vers les bords */
+.resa .ga-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(250, 250, 250, 0) 40%, #fafafa 88%);
+  pointer-events: none;
+}
+.resa .ga-scene > * {
+  position: relative;
+  z-index: 1;
+}
+.resa .ga-pied {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--r-faible);
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px 20px;
 }
-.resa .ga-libelle > svg {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+.resa .ga-icone {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f2f2f2;
+  color: var(--r-doux);
 }
-.resa .ga-libelle--or > svg {
-  color: #b8912f;
+.resa .ga-icone > svg {
+  width: 18px;
+  height: 18px;
 }
-
-.resa .ga-enonce {
-  margin-top: 14px;
-  font-size: 18px;
-  line-height: 26px;
+.resa .ga-titre {
+  font-size: 17px;
+  line-height: 24px;
   font-weight: 500;
   letter-spacing: -0.005em;
   color: var(--r-texte);
 }
-.resa .ga-suite {
+.resa .ga-texte {
+  margin-top: 3px;
+  font-size: 14px;
+  line-height: 21px;
   color: var(--r-faible);
 }
+@media (min-width: 1024px) {
+  .resa .ga-pied {
+    padding: 18px 22px 22px;
+  }
+  .resa .ga-titre {
+    font-size: 18px;
+    line-height: 25px;
+  }
+}
 
-/* la rangée du chiffre */
-.resa .ga-chiffre {
-  padding: 22px 20px 24px;
-  border-top: 1px solid var(--r-filet);
-}
-.resa .ga-montant {
-  margin-top: 10px;
-  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  font-size: 32px;
-  line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: var(--r-texte);
-  white-space: nowrap;
-}
-.resa .ga-chiffre-texte {
-  max-width: 60ch;
-  margin-top: 10px;
-  font-size: 15px;
-  line-height: 22px;
+/* ——— les mini-interfaces : même carton ——— */
+.resa .ga-recu,
+.resa .ga-jauge,
+.resa .ga-agenda,
+.resa .ga-notif-carte {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: var(--ga-ombre);
+  font-size: 12px;
+  line-height: 16px;
   color: var(--r-doux);
 }
 
-.resa .ga-note {
-  max-width: 48rem;
-  margin-top: 16px;
+/* A · le reçu */
+.resa .ga-recu {
+  width: min(100%, 300px);
+  padding: 12px 14px;
+}
+.resa .ga-recu-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.resa .ga-recu-titre {
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .ga-pastille {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #f2f2f2;
+  font-size: 10.5px;
+  line-height: 14px;
+  font-weight: 600;
+  color: var(--r-doux);
+}
+.resa .ga-recu-lignes {
+  margin-top: 6px;
+}
+.resa .ga-recu-ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+}
+/* la durée ne se coupe jamais : « 1 journée » passait en « 1 / journée » */
+.resa .ga-recu-duree {
+  color: #a1a1a1;
+  white-space: nowrap;
+}
+.resa .ga-recu-prix {
+  flex-shrink: 0;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--r-texte);
+}
+.resa .ga-recu-prix--devis {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-weight: 500;
+  color: var(--r-doux);
+}
+.resa .ga-recu-deduit {
+  font-size: 10px;
+  line-height: 13px;
+  font-weight: 400;
+  color: #a1a1a1;
+}
+.resa .ga-recu-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed #dcdcdc;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--r-texte);
 }
 
-@media (min-width: 768px) {
-  .resa .ga {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .resa .ga-case {
-    padding: 30px 32px 32px;
-  }
-  .resa .ga-case + .ga-case {
-    border-top: 0;
-    border-left: 1px solid var(--r-filet);
-  }
-  .resa .ga-enonce {
-    margin-top: 18px;
-    font-size: 20px;
-    line-height: 28px;
-  }
-  .resa .ga-chiffre {
-    grid-column: 1 / -1;
-    padding: 30px 32px 32px;
-  }
-  .resa .ga-montant {
-    font-size: 44px;
-  }
-  .resa .ga-note {
-    margin-top: 20px;
+/* B · la jauge du Chèque TIC */
+.resa .ga-jauge {
+  width: min(100%, 440px);
+  padding: 14px 16px;
+}
+.resa .ga-jauge-tete,
+.resa .ga-jauge-pied {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.resa .ga-jauge-libelle,
+.resa .ga-jauge-pied {
+  color: var(--r-faible);
+}
+.resa .ga-jauge-valeur {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .ga-jauge-piste {
+  position: relative;
+  height: 10px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: #efefef;
+}
+.resa .ga-jauge-bande {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 40%;
+  width: 40%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f4e0ae, #e2c27d);
+  transform-origin: left center;
+}
+/* un reflet qui parcourt la bande */
+.resa .ga-jauge-bande::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent)
+    no-repeat;
+  background-size: 45% 100%;
+  background-position: -60% 0;
+}
+.resa .ga-jauge-repere {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 1px;
+  background: #bdbdbd;
+}
+.resa .ga-jauge-graduations {
+  position: relative;
+  height: 14px;
+  margin-top: 6px;
+  font-size: 10.5px;
+  line-height: 14px;
+  color: #a1a1a1;
+}
+.resa .ga-jauge-graduations > span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.resa .ga-jauge-graduations > span:first-child {
+  transform: none;
+}
+.resa .ga-jauge-graduations > span:last-child {
+  transform: translateX(-100%);
+}
+.resa .ga-jauge-pied {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+.resa .ga-jauge-plafond {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+
+/* C · l'agenda de la semaine */
+.resa .ga-agenda {
+  width: min(100%, 440px);
+  padding: 12px 14px;
+  font-size: 11px;
+  line-height: 14px;
+}
+.resa .ga-agenda-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.resa .ga-agenda-titre {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .ga-agenda-legende {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--r-faible);
+}
+.resa .ga-agenda-point {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--r-texte);
+}
+.resa .ga-agenda-grille {
+  display: grid;
+  grid-template-columns: 30px repeat(7, minmax(0, 1fr));
+  align-items: center;
+  gap: 5px;
+}
+.resa .ga-agenda-rangee {
+  display: contents;
+}
+.resa .ga-agenda-jour {
+  font-weight: 500;
+  text-align: center;
+  color: #a1a1a1;
+}
+.resa .ga-agenda-heure {
+  padding-right: 2px;
+  text-align: right;
+  color: #a1a1a1;
+}
+.resa .ga-agenda-case {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 20px;
+  border-radius: 5px;
+  background: #f1f1f1;
+}
+.resa .ga-agenda-case--ferme {
+  background: repeating-linear-gradient(135deg, #f5f5f5 0 3px, #e8e8e8 3px 5px);
+}
+.resa .ga-agenda-case--bloque {
+  background: var(--r-texte);
+  color: #ffffff;
+}
+.resa .ga-agenda-case--bloque > svg {
+  width: 11px;
+  height: 11px;
+}
+.resa .ga-agenda-case--bloque::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1.5px solid var(--r-texte);
+  border-radius: 7px;
+  opacity: 0;
+}
+
+/* D · la notification de confirmation */
+.resa .ga-notif {
+  position: relative;
+  width: min(100%, 300px);
+  padding-top: 12px;
+}
+.resa .ga-notif-dessous {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  left: 14px;
+  height: 44px;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #ffffff;
+  opacity: 0.7;
+}
+.resa .ga-notif-carte {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+}
+.resa .ga-notif-icone {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--r-texte);
+  color: #ffffff;
+}
+.resa .ga-notif-icone > svg {
+  width: 14px;
+  height: 14px;
+}
+.resa .ga-notif-corps {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+.resa .ga-notif-titre {
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .ga-notif-texte {
+  font-size: 11.5px;
+  color: var(--r-faible);
+}
+.resa .ga-notif-heure {
+  align-self: flex-start;
+  font-size: 10.5px;
+  white-space: nowrap;
+  color: #a1a1a1;
+}
+
+/* ═══ le mouvement, une fois le bento à l'écran ═══ */
+.resa .ga[data-vu] .ga-recu-ligne {
+  animation: ga-ligne 0.45s ease calc(var(--i) * 120ms + 250ms) both;
+}
+.resa .ga[data-vu] .ga-recu-total {
+  animation: ga-ligne 0.45s ease 0.7s both;
+}
+.resa .ga[data-vu] .ga-jauge-bande {
+  animation: ga-bande 1.1s var(--ga-courbe) 0.3s both;
+}
+.resa .ga[data-vu] .ga-jauge-bande::after {
+  animation: ga-reflet 2.8s ease-in-out 1.4s infinite;
+}
+.resa .ga[data-vu] .ga-agenda-case {
+  animation: ga-case 0.45s ease calc(var(--c) * 60ms + 200ms) both;
+}
+.resa .ga[data-vu] .ga-agenda-case--bloque {
+  animation:
+    ga-case 0.45s ease calc(var(--c) * 60ms + 200ms) both,
+    ga-bloque 0.45s var(--ga-courbe) 1s both;
+}
+.resa .ga[data-vu] .ga-agenda-case--bloque::after {
+  animation: ga-onde 2.4s ease-out 1.5s infinite;
+}
+.resa .ga[data-vu] .ga-notif-carte {
+  animation: ga-arrive 0.7s var(--ga-courbe) 0.5s both;
+}
+.resa .ga[data-vu] .ga-notif-dessous {
+  animation: ga-fond 0.6s ease 0.9s both;
+}
+
+@keyframes ga-ligne {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
   }
 }
-@media (min-width: 1024px) {
-  .resa .ga-case,
-  .resa .ga-chiffre {
-    padding-inline: 36px;
+@keyframes ga-bande {
+  from {
+    transform: scaleX(0);
   }
-  /* le chiffre à gauche, sa phrase à droite, alignés sur leur pied — pas
-     avant 1024 : à 768, « Jusqu'à 10 000 € » en 44 px (≈ 380 px) ne
-     tenait pas dans une demi-colonne de 310 (vu en recette le 27/09) */
-  .resa .ga-chiffre {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: end;
-    gap: 32px;
+}
+@keyframes ga-reflet {
+  from {
+    background-position: -60% 0;
   }
-  .resa .ga-montant {
-    font-size: 52px;
+  to {
+    background-position: 160% 0;
   }
-  .resa .ga-chiffre-texte {
-    margin-top: 0;
+}
+@keyframes ga-case {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes ga-bloque {
+  from {
+    background-color: #f1f1f1;
+    color: transparent;
+    transform: scale(0.8);
+  }
+}
+@keyframes ga-onde {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+@keyframes ga-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.97);
+  }
+}
+@keyframes ga-fond {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resa .ga[data-vu] .ga-recu-ligne,
+  .resa .ga[data-vu] .ga-recu-total,
+  .resa .ga[data-vu] .ga-jauge-bande,
+  .resa .ga[data-vu] .ga-jauge-bande::after,
+  .resa .ga[data-vu] .ga-agenda-case,
+  .resa .ga[data-vu] .ga-agenda-case--bloque,
+  .resa .ga[data-vu] .ga-agenda-case--bloque::after,
+  .resa .ga[data-vu] .ga-notif-carte,
+  .resa .ga[data-vu] .ga-notif-dessous {
+    animation: none;
   }
 }
