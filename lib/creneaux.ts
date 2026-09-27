@@ -272,6 +272,21 @@ export async function reserver(d: Demande, jeton?: string): Promise<Reponse> {
     ...(d.periodicite ? { p_periodicite: d.periodicite } : {}),
   };
   try {
+    /* 27/09/2026 — audit sécurité : SANS compte, la demande passe par
+       notre serveur (/api/reservation), seul à connaître l'adresse IP
+       réelle du visiteur. La base refusera l'appel direct de
+       reserver_audit avec la clé publique : c'est ce qui permettait à un
+       script de saturer l'agenda sans compte en une vingtaine d'appels.
+       L'installation, elle, part toujours en direct avec la session. */
+    if (!jeton) {
+      const r = await fetch("/api/reservation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corps),
+      });
+      const rep = (await r.json().catch(() => null)) as Reponse | null;
+      return rep && typeof rep.ok === "boolean" ? rep : { ok: false, erreur: "reseau" };
+    }
     try {
       return await rpc<Reponse>("reserver_audit", corps, jeton);
     } catch (e) {

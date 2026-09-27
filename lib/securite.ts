@@ -103,3 +103,21 @@ export async function lireJson(req: Request, maxOctets: number): Promise<unknown
     return undefined;
   }
 }
+
+/* 27/09/2026 — la clé des routes (suite de l'audit du 25/09, « agenda
+   saturable »). reserver_audit sans compte et limiter_contact
+   s'appelaient en direct depuis Internet avec la clé publique : une
+   vingtaine d'appels fermaient la réservation sans compte pour la
+   journée, une soixantaine le formulaire de contact. Les deux passent
+   désormais par nos routes, seules à connaître l'adresse IP réelle, et
+   la base refuse l'appel direct une fois la bascule faite.
+
+   Les routes se présentent à la base avec CLE_ROUTES_SITE, un secret que
+   Teo pose sur Vercel et dont la base ne garde que l'empreinte
+   (public.cles_routes_site). Ce n'est PAS la clé de service : elle
+   n'ouvre que reserver_audit_serveur et limiter_contact_serveur.
+   Absente, ou pas encore connue de la base, les routes font l'appel
+   d'avant : rien ne casse pendant la bascule. */
+export function cleRoutes(): string | undefined {
+  return process.env.CLE_ROUTES_SITE?.trim() || undefined;
+}
