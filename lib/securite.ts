@@ -27,6 +27,8 @@
       lui envoie avant qu'on ait pu compter.
    ══════════════════════════════════════════════════════════════════════ */
 
+import { SUPABASE_URL } from "@/lib/supabase/config";
+
 const ORIGINES_SITE = new Set(["https://omegaai.fr", "https://www.omegaai.fr"]);
 
 export function origineRefusee(req: Request): boolean {
@@ -104,20 +106,51 @@ export async function lireJson(req: Request, maxOctets: number): Promise<unknown
   }
 }
 
-/* 27/09/2026 — la clé des routes (suite de l'audit du 25/09, « agenda
+/* 27/09/2026 — la porte des routes (suite de l'audit du 25/09, « agenda
    saturable »). reserver_audit sans compte et limiter_contact
    s'appelaient en direct depuis Internet avec la clé publique : une
    vingtaine d'appels fermaient la réservation sans compte pour la
    journée, une soixantaine le formulaire de contact. Les deux passent
-   désormais par nos routes, seules à connaître l'adresse IP réelle, et
-   la base refuse l'appel direct une fois la bascule faite.
+   désormais par la fonction Edge « routes-site » (source :
+   OMEGA/base-de-donnees/fonctions-edge/routes-site), et la base refuse
+   l'appel direct.
 
-   Les routes se présentent à la base avec CLE_ROUTES_SITE, un secret que
-   Teo pose sur Vercel et dont la base ne garde que l'empreinte
-   (public.cles_routes_site). Ce n'est PAS la clé de service : elle
-   n'ouvre que reserver_audit_serveur et limiter_contact_serveur.
-   Absente, ou pas encore connue de la base, les routes font l'appel
-   d'avant : rien ne casse pendant la bascule. */
-export function cleRoutes(): string | undefined {
-  return process.env.CLE_ROUTES_SITE?.trim() || undefined;
+   Les routes s'y présentent avec le jeton OIDC que Vercel remet à chaque
+   fonction : la porte vérifie sa signature auprès de Vercel (projet
+   pegase-site2, production), puis appelle la base avec ses propres
+   droits. Aucun secret partagé à garder ni à faire tourner. Sans jeton
+   (développement local), `appelPorte` rend `undefined` et la route fait
+   l'appel d'avant — qui ne passe plus que tant que la base l'accepte. */
+type ContexteVercel = { get?: () => { headers?: Record<string, string | undefined> } };
+
+export function jetonVercel(req: Request): string | undefined {
+  const contexte = (globalThis as unknown as Record<symbol, ContexteVercel | undefined>)[
+    Symbol.for("@vercel/request-context")
+  ];
+  return (
+    req.headers.get("x-vercel-oidc-token")?.trim() ||
+    contexte?.get?.()?.headers?.["x-vercel-oidc-token"]?.trim() ||
+    process.env.VERCEL_OIDC_TOKEN?.trim() ||
+    undefined
+  );
+}
+
+export async function appelPorte(
+  req: Request,
+  action: "sante" | "reserver" | "limiter_contact",
+  donnees: Record<string, unknown> = {},
+): Promise<Response | undefined> {
+  const jeton = jetonVercel(req);
+  if (!jeton) return undefined;
+  try {
+    return await fetch(`${SUPABASE_URL}/functions/v1/routes-site`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-jeton-vercel": jeton },
+      body: JSON.stringify({ action, ...donnees }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    return undefined;
+  }
 }

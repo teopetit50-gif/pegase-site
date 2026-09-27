@@ -1,5 +1,5 @@
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
-import { cleRoutes } from "@/lib/securite";
+import { appelPorte, jetonVercel } from "@/lib/securite";
 
 /* ══════════════════════════════════════════════════════════════════════
    GET /api/sante — la sonde de disponibilité du site (25/09/2026)
@@ -23,7 +23,7 @@ import { cleRoutes } from "@/lib/securite";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req: Request) {
   const debut = Date.now();
   const jour = new Date().toISOString().slice(0, 10);
   let base = false;
@@ -43,31 +43,14 @@ export async function GET() {
   } catch {
     base = false;
   }
-  /* 27/09/2026 — la clé des routes (lib/securite.ts) : absente, reconnue
-     ou refusée par la base. Un état, jamais la clé. C'est ce qui dit
-     quand fermer l'appel direct des fonctions de réservation et de
-     contact (étape B du SQL du 27/09). */
-  let routes = "cle_absente";
-  const cle = cleRoutes();
-  if (cle && base) {
-    try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/cle_site_valide`, {
-        method: "POST",
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ p_cle: cle }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(5_000),
-      });
-      routes = r.ok
-        ? (await r.json()) === true ? "cle_ok" : "cle_refusee"
-        : r.status === 404 ? "base_pas_prete" : "inconnu";
-    } catch {
-      routes = "inconnu";
-    }
+  /* 27/09/2026 — la porte des routes (appelPorte, lib/securite.ts) :
+     « ok », « jeton_absent » (Vercel n'a pas remis de jeton OIDC),
+     « refusee » (jeton rejeté), « absente » (fonction non déployée) ou
+     « inconnu ». Un état, jamais le jeton. */
+  let routes = "jeton_absent";
+  if (jetonVercel(req)) {
+    const r = await appelPorte(req, "sante");
+    routes = !r ? "inconnu" : r.ok ? "ok" : r.status === 401 ? "refusee" : r.status === 404 ? "absente" : "inconnu";
   }
   return Response.json(
     { ok: base, site: "ok", base: base ? "ok" : "injoignable", routes, duree_ms: Date.now() - debut },

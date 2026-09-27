@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
-import { adresseIp, cleRoutes, limiteDepassee, lireJson, origineRefusee } from "@/lib/securite";
+import { adresseIp, appelPorte, limiteDepassee, lireJson, origineRefusee } from "@/lib/securite";
 
 /* ══════════════════════════════════════════════════════════════════════
    POST /api/reservation — la réservation SANS compte (27/09/2026)
@@ -12,16 +12,17 @@ import { adresseIp, cleRoutes, limiteDepassee, lireJson, origineRefusee } from "
    arme : vingt appels, et plus personne ne réservait de la journée.
 
    Ici la demande passe par le serveur, qui connaît l'adresse IP réelle
-   (Vercel réécrit x-forwarded-for) et en transmet l'empreinte à
+   (Vercel réécrit x-forwarded-for) et en transmet l'empreinte, par la
+   porte « routes-site » (appelPorte, lib/securite.ts), à
    reserver_audit_serveur : au plus 2 demandes par heure et 3 par jour et
    par adresse. Atteindre le plafond global demande alors de nombreuses
-   adresses. La base reconnaît la route à CLE_ROUTES_SITE (lib/securite.ts).
+   adresses. L'en-tête x-omega-voie dit par où la demande est passée.
 
    L'installation (parcours « reglage ») ne passe pas ici : elle part avec
    la session du compte, en direct, et la base la rattache à auth.uid().
 
-   Sans CLE_ROUTES_SITE, ou tant que la base ne connaît pas la fonction
-   serveur, on fait l'appel d'avant : la bascule ne coupe rien.
+   Porte injoignable ou jeton refusé : l'appel d'avant, qui ne passe plus
+   que tant que la base l'accepte.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const runtime = "nodejs";
@@ -73,22 +74,15 @@ export async function POST(req: Request) {
   for (const [k, v] of Object.entries(brut)) if (CHAMPS.has(k)) corps[k] = v;
   if (corps.p_parcours === "reglage") return refus("connexion_requise", 400);
 
+  const empreinte = createHash("sha256").update(adresseIp(req)).digest("hex").slice(0, 32);
   try {
-    const cle = cleRoutes();
-    let r: Response | undefined;
-    if (cle) {
-      const empreinte = createHash("sha256").update(adresseIp(req)).digest("hex").slice(0, 32);
-      r = await appel("reserver_audit_serveur", { p_cle_site: cle, p_ip: empreinte, ...corps });
-      if (r.ok) {
-        const rep = (await r.json()) as { ok?: unknown; erreur?: unknown };
-        if (rep?.erreur !== "cle_refusee") return Response.json(rep);
-        console.error("[securite] reserver_audit_serveur refuse CLE_ROUTES_SITE : variable Vercel et public.cles_routes_site à comparer");
-      }
-      /* 404 : la base ne connaît pas encore la fonction serveur */
-    }
-    r = await appel("reserver_audit", corps);
+    const porte = await appelPorte(req, "reserver", { ip: empreinte, corps });
+    if (porte?.ok) return Response.json(await porte.json(), { headers: { "x-omega-voie": "porte" } });
+    if (porte?.status === 400) return refus("champs_invalides", 400);
+    if (porte) console.error(`[securite] porte routes-site, réservation : HTTP ${porte.status}`);
+    const r = await appel("reserver_audit", corps);
     if (!r.ok) return refus(r.status === 400 ? "champs_invalides" : "reseau", 502);
-    return Response.json(await r.json());
+    return Response.json(await r.json(), { headers: { "x-omega-voie": "direct" } });
   } catch {
     return refus("reseau", 502);
   }

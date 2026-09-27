@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { COURRIEL } from "@/lib/reservation";
 import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
-import { cleRoutes, lireJson, origineRefusee } from "@/lib/securite";
+import { appelPorte, lireJson, origineRefusee } from "@/lib/securite";
 
 /* ══════════════════════════════════════════════════════════════════════
    POST /api/contact — le formulaire du service client part par e-mail
@@ -75,22 +75,16 @@ async function envoiAutorise(req: Request): Promise<boolean> {
       signal: AbortSignal.timeout(5_000),
     });
   try {
-    /* 27/09/2026 — la limite passe par limiter_contact_serveur, qui exige
-       la clé des routes (cleRoutes, lib/securite.ts) : la base refuse
-       limiter_contact en direct une fois la bascule faite — un script
-       l'appelait pour remplir le compteur global et fermer le formulaire
-       à tout le monde. Fonction pas encore créée (404) ou clé refusée :
-       l'appel d'avant. */
-    const cle = cleRoutes();
-    let r: Response | undefined;
-    if (cle) {
-      r = await appel("limiter_contact_serveur", { p_cle_site: cle, p_cle: empreinte });
-      if (!r.ok) {
-        if (r.status !== 404) console.error("[securite] limiter_contact_serveur refuse CLE_ROUTES_SITE");
-        r = undefined;
-      }
-    }
-    r ??= await appel("limiter_contact", { p_cle: empreinte });
+    /* 27/09/2026 — la limite passe par la porte « routes-site »
+       (appelPorte, lib/securite.ts) : la base refuse limiter_contact en
+       direct, qu'un script appelait pour remplir le compteur global et
+       fermer le formulaire à tout le monde. Porte injoignable : l'appel
+       d'avant, tant que la base l'accepte, sinon on envoie (règle
+       ci-dessus). */
+    const porte = await appelPorte(req, "limiter_contact", { ip: empreinte });
+    if (porte?.ok) return (await porte.json()) !== false;
+    if (porte) console.error(`[securite] porte routes-site, contact : HTTP ${porte.status}`);
+    const r = await appel("limiter_contact", { p_cle: empreinte });
     if (!r.ok) return true;
     return (await r.json()) !== false;
   } catch {
