@@ -505,11 +505,29 @@ export const COMPARATIF: FamilleComparatif[] = [
   },
 ];
 
-/* ——— FAQ ——— */
+/* ——— FAQ ———
+   27/09/2026 — chaque question porte un THÈME (le filtre de la FAQ de
+   /reserver-un-audit, <FaqAudit>) et, quand une page du site en dit plus,
+   des LIENS « pour aller plus loin ». Les liens ne mènent qu'à des pages
+   ou des ancres qui existent : #comparatif et #engagements sont sur la
+   page elle-même. */
 
-export const FAQ: { q: string; r: string[] }[] = [
+export type ThemeFaq = "Conditions" | "Déroulé" | "Confidentialité" | "Financement" | "Périmètre";
+
+export type QuestionFaq = {
+  q: string;
+  r: string[];
+  theme: ThemeFaq;
+  liens?: { label: string; href: string }[];
+};
+
+export const FAQ: QuestionFaq[] = [
   {
     q: "L'audit est-il vraiment gratuit ?",
+    theme: "Conditions",
+    liens: [
+      { label: "Comparer les formats", href: "#comparatif" },
+    ],
     r: [
       "Le Cadrage et l'Audit process le sont, et le demeurent : aucune facture n'arrive après coup, aucune contrepartie n'est demandée. Vous repartez avec le chiffrage et la recommandation, que vous installiez un système ou non.",
       "Le format dans vos locaux est facturé parce qu'il mobilise une journée de déplacement et de relevé. Son montant est déduit de l'installation si vous décidez d'aller plus loin.",
@@ -517,6 +535,7 @@ export const FAQ: { q: string; r: string[] }[] = [
   },
   {
     q: "Que se passe-t-il concrètement après ma demande ?",
+    theme: "Déroulé",
     r: [
       "Votre créneau est bloqué à l'instant où vous le choisissez : l'agenda n'affiche que les disponibilités réelles, personne ne peut prendre le même. Vous recevez une confirmation le jour même, par WhatsApp ou par e-mail, avec le lien de la visioconférence. Si votre demande relève d'un autre format que celui que vous avez coché, nous vous le disons à ce moment-là.",
       "À l'issue de l'entretien, le chiffrage écrit part sous 72 heures pour les formats qui le comprennent. Il n'y a pas de relance commerciale ensuite : si vous ne donnez pas suite, le dossier se ferme.",
@@ -524,6 +543,10 @@ export const FAQ: { q: string; r: string[] }[] = [
   },
   {
     q: "Faut-il préparer des documents ?",
+    theme: "Déroulé",
+    liens: [
+      { label: "Ce que chaque format demande", href: "#comparatif" },
+    ],
     r: [
       "Pour le Cadrage, rien. Nous travaillons à partir de ce que vous savez déjà, et c'est suffisant pour identifier le poste qui coûte le plus cher.",
       "Pour l'Audit process, vos trois derniers mois d'échéances rendent le chiffrage nettement plus précis : un export de logiciel de facturation ou un tableur suffit. Rien n'est à mettre en forme : nous prenons les fichiers dans l'état où ils sont.",
@@ -531,6 +554,7 @@ export const FAQ: { q: string; r: string[] }[] = [
   },
   {
     q: "Rien n'est formalisé chez nous, est-ce bloquant ?",
+    theme: "Déroulé",
     r: [
       "Non, c'est le cas de la majorité des entreprises auditées : les décisions se prennent à l'oral et les habitudes vivent dans la mémoire des personnes. Ce n'est pas un obstacle à l'entretien, qui consiste précisément à vous faire décrire ce fonctionnement.",
       "C'est même une partie du travail. La cartographie met votre fonctionnement à plat, noir sur blanc, et un système ne se déploie que sur un processus formalisé. À la fin de l'audit, le vôtre l'est, que vous installiez un système ou non.",
@@ -538,12 +562,20 @@ export const FAQ: { q: string; r: string[] }[] = [
   },
   {
     q: "Mes chiffres restent-ils confidentiels ?",
+    theme: "Confidentialité",
+    liens: [
+      { label: "Où vont vos données", href: "/vos-donnees" },
+    ],
     r: [
       "Oui. Les montants et les fichiers partagés pendant l'entretien ne sortent pas de l'audit et ne sont conservés qu'avec votre accord explicite. Rien n'est recopié dans une base tierce pour être analysé : l'audit se fait sur vos fichiers, en lecture.",
     ],
   },
   {
     q: "Le Chèque TIC, c'est automatique ?",
+    theme: "Financement",
+    liens: [
+      { label: "Estimer votre prix", href: "/tarifs" },
+    ],
     r: [
       "Non. C'est un dispositif de la Région Guadeloupe qui finance de 40 à 80 % d'un projet numérique selon le poste, dans la limite de 10 000 €, pour une entreprise immatriculée en Guadeloupe depuis au moins un an et à jour de ses obligations sociales et fiscales. Les critères et les enveloppes évoluent.",
       "Votre éligibilité est vérifiée pendant l'audit, avant tout engagement. Si vous n'êtes pas éligible, nous vous le disons à ce moment-là plutôt qu'après signature.",
@@ -556,6 +588,11 @@ export const FAQ: { q: string; r: string[] }[] = [
        réponse dit oui, puis explique pourquoi on regarde d'abord ce qui se
        passe APRÈS le clic — sans quoi on livre une vitrine qui dort. */
     q: "Je cherche avant tout un site, le proposez-vous ?",
+    theme: "Périmètre",
+    liens: [
+      { label: "Voir les modèles", href: "/modeles" },
+      { label: "Prix du site", href: "/tarifs/site" },
+    ],
     r: [
       /* Le compte n'est plus écrit à la main : il vient de MODELES.length
          (components/modeles/donnees.ts). Il avait déjà dérivé deux fois —
@@ -569,6 +606,7 @@ export const FAQ: { q: string; r: string[] }[] = [
   },
   {
     q: "Vous intervenez partout en France ?",
+    theme: "Périmètre",
     r: [
       "Oui pour tous les formats à distance, où que vous soyez. Pour les formats dans vos locaux, le déplacement se vérifie avec vous avant de confirmer le rendez-vous.",
       "Le déploiement d'un système ne demande aucune présence permanente : l'intégration se fait sur vos outils existants.",
@@ -576,6 +614,10 @@ export const FAQ: { q: string; r: string[] }[] = [
   },
   {
     q: "Et si l'audit conclut qu'il n'y a rien à automatiser ?",
+    theme: "Conditions",
+    liens: [
+      { label: "Nos engagements", href: "#engagements" },
+    ],
     r: [
       "Cela arrive, et c'est une conclusion valable. Un système ne se justifie que si la difficulté qu'il traite coûte plus cher que lui : quand ce n'est pas le cas, la recommandation est de ne rien installer.",
       "C'est précisément pour cette raison que l'audit chiffre avant de recommander, et jamais l'inverse.",

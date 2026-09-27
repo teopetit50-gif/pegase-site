@@ -1,0 +1,600 @@
+/* ══════════════════════════════════════════════════════════════════════
+   <FaqAudit> — feuille de la FAQ (27/09/2026)
+
+   Préfixe `qf-`, règles scopées sous `.resa .qf`. Reprise de `faq-block`
+   (@preetsuthar17, 21st.dev : champ de recherche à icône, questions en
+   cartes à filet, état vide, suggestions en pied), des numéros
+   d'`interactive-accordion` (@jatin-yadav05 : pastille « 01 » qui passe
+   au noir à l'ouverture, « + » qui tourne en « × ») et de la barre de
+   contact de `faqs-01` (@ln-dev7 : pastille sombre, deux lignes, bouton).
+
+   Bureau : deux colonnes, la gauche (titre, thèmes, contact) collante.
+   Téléphone : les thèmes deviennent un rail de pastilles, le contact
+   passe sous les questions, les étiquettes de thème des cartes sont
+   masquées (le filtre les dit déjà).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .qf {
+  --qf-filet: #ebebeb;
+  --qf-courbe: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resa .qf-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+}
+/* SANS CES DEUX min-width, la colonne unique du téléphone prenait la
+   largeur minimale du rail de thèmes (toutes les pastilles côte à côte,
+   ~600 px) : la FAQ sortait de l'écran à droite, rognée par la page, sans
+   qu'aucun défilement latéral ne le signale (vu en capture le 27/09) */
+.resa .qf-gauche,
+.resa .qf-droite {
+  min-width: 0;
+}
+
+/* ——— colonne de gauche ——— */
+.resa .qf-pastille {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--r-filet);
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--r-doux);
+}
+.resa .qf-titre {
+  margin-top: 16px;
+}
+.resa .qf-intro {
+  max-width: 40ch;
+  margin-top: 12px;
+  font-size: 16px;
+  line-height: 25px;
+  color: var(--r-doux);
+}
+
+/* thèmes : rail de pastilles sur téléphone, liste au bureau */
+.resa .qf-themes {
+  display: flex;
+  gap: 8px;
+  margin: 20px -24px 0;
+  padding: 0 24px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.resa .qf-themes::-webkit-scrollbar {
+  display: none;
+}
+.resa .qf-theme {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--qf-filet);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--r-doux);
+  white-space: nowrap;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.resa .qf-theme:hover {
+  border-color: #cfcfcf;
+  color: var(--r-texte);
+}
+.resa .qf-theme[aria-pressed="true"] {
+  border-color: var(--r-texte);
+  background: var(--r-texte);
+  color: #ffffff;
+}
+.resa .qf-theme-compte {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: #f2f2f2;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--r-faible);
+}
+.resa .qf-theme[aria-pressed="true"] .qf-theme-compte {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+.resa .qf-theme:focus-visible,
+.resa .qf-question:focus-visible,
+.resa .qf-lien:focus-visible,
+.resa .qf-suggestion:focus-visible,
+.resa .qf-effacer:focus-visible {
+  outline: 2px solid var(--r-texte);
+  outline-offset: 2px;
+}
+
+/* ——— recherche ——— */
+.resa .qf-recherche {
+  position: relative;
+}
+.resa .qf-recherche-icone {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  width: 18px;
+  height: 18px;
+  color: #a1a1a1;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.resa .qf-champ {
+  width: 100%;
+  height: 50px;
+  padding: 0 44px 0 44px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  background: #fafafa;
+  font-size: 15px;
+  color: var(--r-texte);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.resa .qf-champ::placeholder {
+  color: #9a9a9a;
+}
+.resa .qf-champ::-webkit-search-cancel-button {
+  display: none;
+}
+.resa .qf-champ:focus {
+  border-color: var(--r-texte);
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(5, 5, 5, 0.06);
+}
+.resa .qf-effacer {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--r-faible);
+  transform: translateY(-50%);
+}
+.resa .qf-effacer:hover {
+  background: #f0f0f0;
+  color: var(--r-texte);
+}
+.resa .qf-effacer > svg {
+  width: 16px;
+  height: 16px;
+}
+.resa .qf-resume {
+  margin: 12px 2px 12px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--r-faible);
+}
+
+/* ——— les questions, en cartes ——— */
+.resa .qf-liste {
+  display: grid;
+  gap: 10px;
+}
+.resa .qf-item {
+  border: 1px solid var(--qf-filet);
+  border-radius: 12px;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.25s ease;
+}
+.resa .qf-item[data-state="open"] {
+  border-color: #d6d6d6;
+  box-shadow: 0 12px 30px -18px rgba(5, 5, 5, 0.28);
+}
+.resa .qf-entete {
+  display: flex;
+}
+.resa .qf-question {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 16px;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.resa .qf-numero {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--r-filet);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--r-faible);
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+.resa .qf-question[data-state="open"] .qf-numero {
+  border-color: var(--r-texte);
+  background: var(--r-texte);
+  color: #ffffff;
+}
+.resa .qf-question-texte {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 16px;
+  line-height: 23px;
+  font-weight: 500;
+  color: var(--r-texte);
+}
+.resa .qf-marque {
+  padding: 0 1px;
+  border-radius: 3px;
+  background: #fdf0c8;
+  color: inherit;
+}
+.resa .qf-tag {
+  display: none;
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f4f4f4;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--r-faible);
+}
+.resa .qf-signe {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--r-faible);
+  transition: transform 0.3s var(--qf-courbe);
+}
+.resa .qf-question[data-state="open"] .qf-signe {
+  transform: rotate(45deg);
+  color: var(--r-texte);
+}
+
+/* la réponse : hauteur animée sur la variable de Radix */
+.resa .qf-contenu {
+  overflow: hidden;
+}
+@keyframes qf-ouvre {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes qf-ferme {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+.resa .qf-contenu[data-state="open"] {
+  animation: qf-ouvre 260ms var(--qf-courbe);
+}
+.resa .qf-contenu[data-state="closed"] {
+  animation: qf-ferme 260ms var(--qf-courbe);
+}
+.resa .qf-reponse {
+  padding: 0 16px 18px 60px;
+}
+.resa .qf-reponse p {
+  max-width: 64ch;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--r-doux);
+}
+.resa .qf-reponse p + p {
+  margin-top: 10px;
+}
+.resa .qf-liens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #e2e2e2;
+}
+.resa .qf-liens-titre {
+  margin-right: 4px;
+  font-family: var(--font-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a1a1a1;
+}
+.resa .qf-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--qf-filet);
+  border-radius: 8px;
+  background: #fafafa;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--r-texte);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+.resa .qf-lien:hover {
+  border-color: #cfcfcf;
+  background: #ffffff;
+}
+.resa .qf-lien > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--r-faible);
+}
+
+/* ——— état vide ——— */
+.resa .qf-vide {
+  padding: 28px 24px;
+  border: 1px dashed #dcdcdc;
+  border-radius: 12px;
+  background: #fafafa;
+  text-align: center;
+}
+.resa .qf-vide-titre {
+  font-size: 16px;
+  line-height: 23px;
+  font-weight: 500;
+  color: var(--r-texte);
+}
+.resa .qf-vide-texte {
+  max-width: 46ch;
+  margin: 6px auto 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--r-faible);
+}
+.resa .qf-vide-btn {
+  margin-top: 16px;
+}
+
+/* ——— dans le même thème ——— */
+.resa .qf-suggestions {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #fafafa;
+}
+.resa .qf-suggestions-titre {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--r-faible);
+}
+.resa .qf-suggestions ul {
+  margin-top: 6px;
+}
+.resa .qf-suggestion {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 0;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--r-doux);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease;
+}
+.resa .qf-suggestion:hover {
+  color: var(--r-texte);
+  text-decoration-color: rgba(5, 5, 5, 0.35);
+}
+.resa .qf-suggestion-numero {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: #a1a1a1;
+}
+
+/* ——— la barre de contact ——— */
+.resa .qf-contact--gauche {
+  display: none;
+}
+.resa .qf-contact--bas {
+  margin-top: 18px;
+}
+.resa .qf-contact-corps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px;
+  border: 1px solid var(--qf-filet);
+  border-radius: 14px;
+  background: #fafafa;
+}
+.resa .qf-contact-icone {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--r-texte);
+  color: #ffffff;
+}
+.resa .qf-contact-icone > svg {
+  width: 19px;
+  height: 19px;
+}
+.resa .qf-contact-texte {
+  display: flex;
+  flex: 1 1 160px;
+  flex-direction: column;
+  min-width: 0;
+}
+.resa .qf-contact-titre {
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.resa .qf-contact-sous {
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--r-faible);
+}
+.resa .qf-contact-btn {
+  gap: 8px;
+  padding: 9px 14px;
+  font-size: 14px;
+}
+.resa .qf-contact-btn > svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ——— paliers ——— */
+@media (max-width: 639.98px) {
+  .resa .r-h3.qf-titre {
+    font-size: 24px;
+    line-height: 1.18;
+  }
+  .resa .qf-question {
+    gap: 12px;
+    padding: 14px 14px;
+  }
+  .resa .qf-numero {
+    width: 26px;
+    height: 26px;
+    font-size: 10.5px;
+  }
+  .resa .qf-question-texte {
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .resa .qf-reponse {
+    padding: 0 14px 16px 14px;
+  }
+  .resa .qf-contact-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+@media (min-width: 640px) {
+  .resa .qf-tag {
+    display: inline-flex;
+  }
+  .resa .qf-question {
+    padding: 18px 20px;
+  }
+  .resa .qf-question-texte {
+    font-size: 17px;
+    line-height: 24px;
+  }
+  .resa .qf-reponse {
+    padding: 0 20px 20px 64px;
+  }
+}
+@media (min-width: 1024px) {
+  .resa .qf-grille {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 56px;
+  }
+  .resa .qf-gauche {
+    position: sticky;
+    top: 112px;
+    align-self: start;
+  }
+  /* au bureau, les thèmes sont une liste verticale */
+  .resa .qf-themes {
+    flex-direction: column;
+    gap: 2px;
+    margin: 28px 0 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .resa .qf-theme {
+    justify-content: space-between;
+    height: 42px;
+    padding: 0 12px;
+    border-color: transparent;
+    background: transparent;
+  }
+  .resa .qf-theme:hover {
+    border-color: transparent;
+    background: #f7f7f7;
+  }
+  .resa .qf-theme[aria-pressed="true"] {
+    border-color: transparent;
+    background: #f2f2f2;
+    color: var(--r-texte);
+    box-shadow: inset 2px 0 0 var(--r-texte);
+  }
+  .resa .qf-theme[aria-pressed="true"] .qf-theme-compte {
+    background: #ffffff;
+    color: var(--r-texte);
+  }
+  .resa .qf-contact--gauche {
+    display: block;
+    margin-top: 28px;
+  }
+  .resa .qf-contact--bas {
+    display: none;
+  }
+  .resa .qf-contact-corps {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .resa .qf-contact-texte {
+    flex: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resa .qf-contenu[data-state="open"],
+  .resa .qf-contenu[data-state="closed"] {
+    animation: none;
+  }
+  .resa .qf-signe,
+  .resa .qf-numero,
+  .resa .qf-item,
+  .resa .qf-theme,
+  .resa .qf-champ {
+    transition: none;
+  }
+}

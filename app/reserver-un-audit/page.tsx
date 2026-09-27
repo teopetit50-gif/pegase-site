@@ -6,7 +6,8 @@ import TableauFormats from "@/components/reservation/TableauFormats";
 import UnSeulAudit from "@/components/reservation/UnSeulAudit";
 import Protocole from "@/components/reservation/Protocole";
 import AppelCreneau from "@/components/reservation/AppelCreneau";
-import QuestionsAudit from "@/components/reservation/QuestionsAudit";
+import FaqAudit from "@/components/reservation/FaqAudit";
+import { FAQ, lienContact } from "@/lib/reservation";
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES } from "@/lib/paliers";
 import {
@@ -68,7 +69,11 @@ import {
      · engagements     → <Protocole>       (Aceternity feature-section-
                                             with-hover-effects)
      · appel final     → <AppelCreneau>    (efferd cta-3)
-     · FAQ             → <QuestionsAudit>  (@tommyjepsen faq-section)
+     · FAQ             → <QuestionsAudit>  (@tommyjepsen faq-section) —
+                          REMPLACÉ le même jour par <FaqAudit>
+                          (@preetsuthar17 faq-block : recherche, thèmes,
+                          réponses numérotées, liens) — Teo : « trouves-en
+                          un plus détaillé et pro »
    Le bandeau d'orientation, qui faisait une section à lui seul, se range
    au pied du tableau. Les fonds alternent désormais d'une section à
    l'autre (gris de `.resa`, puis blanc, puis gris…) au lieu de deux
@@ -169,8 +174,8 @@ export default function ReserverUnAuditPage() {
         {/* ═══ 5 — appel final ═══ */}
         <AppelCreneau />
 
-        {/* ═══ 6 — FAQ ═══ */}
-        <QuestionsAudit />
+        {/* ═══ 6 — FAQ : recherche, thèmes, liens (27/09, second passage) ═══ */}
+        <FaqAudit questions={FAQ} contact={lienContact("avant")} />
       </div>
     </PageShell>
   );

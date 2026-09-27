@@ -1,7 +1,7 @@
 /** Recette des interactions de /reserver-un-audit (27/09/2026) — ce qu'une
  *  capture ne montre pas : colonnes du tableau, sélecteur mobile, bulles
- *  d'aide, bento des garanties, section « Tout se combine », accordéon
- *  de la FAQ, débordement.
+ *  d'aide, bento des garanties, section « Tout se combine », FAQ
+ *  (recherche, thèmes, accordéon), débordement.
  *
  *    node outils/recette-audit.mjs <url de la page> [largeur]
  *
@@ -58,10 +58,22 @@ try {
   if (largeur >= 768) {
   const c = await s.evaluer(`(async () => {
     const table = document.querySelector('.tb-table');
-    const y = table.getBoundingClientRect().top + scrollY + table.offsetHeight / 2;
-    window.scrollTo(0, y - 300);
-    await new Promise(r => setTimeout(r, 1600));
+    /* on amène le HAUT du tableau 160 px au-dessus du bas de l'en-tête :
+       la tête doit alors coller. (« milieu − 300 » ne suffisait pas à
+       1700, où le tableau est moins haut : sa tête n'avait pas encore à
+       coller, et la sonde criait au défaut) */
+    const y = table.getBoundingClientRect().top + scrollY - 72 + 160;
+    window.scrollTo(0, y);
+    /* le défilement est lissé (Lenis) : on attend que la tête ne bouge
+       plus, au lieu d'un délai fixe qui mesure parfois en pleine course */
     const th = document.querySelector('.tb-table thead th');
+    let avant = -1;
+    for (let k = 0; k < 20; k++) {
+      await new Promise(r => setTimeout(r, 250));
+      const top = Math.round(th.getBoundingClientRect().top);
+      if (top === avant) break;
+      avant = top;
+    }
     const entete = document.querySelector('header').getBoundingClientRect().bottom;
     return { haut: Math.round(th.getBoundingClientRect().top), entete: Math.round(entete) };
   })()`);
@@ -136,22 +148,55 @@ try {
   verifier('animations lancées à l\u2019écran', !!g && g.vu);
   verifier('fenêtre non élargie', !!g && g.fenetre === g.visuelle, g ? `${g.fenetre} / ${g.visuelle}` : '');
 
-  /* ——— FAQ : ouvrir, puis refermer ——— */
+  /* ——— FAQ : recherche, thème, ouverture, fermeture ——— */
   const f = await s.evaluer(`(async () => {
-    const q = document.querySelector('.qa-question');
-    q.scrollIntoView({ block: 'center' });
-    await new Promise(r => setTimeout(r, 300));
+    const attendre = (ms) => new Promise(r => setTimeout(r, ms));
+    const faq = document.querySelector('#faq');
+    faq.scrollIntoView({ block: 'start' });
+    await attendre(500);
+    const total = faq.querySelectorAll('.qf-item').length;
+    const champ = faq.querySelector('.qf-champ');
+    const poser = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    poser.call(champ, 'cheque');
+    champ.dispatchEvent(new Event('input', { bubbles: true }));
+    await attendre(400);
+    const apresRecherche = faq.querySelectorAll('.qf-item').length;
+    const surligne = faq.querySelectorAll('.qf-marque').length;
+    poser.call(champ, '');
+    champ.dispatchEvent(new Event('input', { bubbles: true }));
+    await attendre(300);
+    const theme = [...faq.querySelectorAll('.qf-theme')].find(b => b.textContent.includes('Périmètre'));
+    theme.click();
+    await attendre(300);
+    const apresTheme = faq.querySelectorAll('.qf-item').length;
+    theme.click();
+    await attendre(300);
+    const q = faq.querySelector('.qf-question');
     q.click();
-    await new Promise(r => setTimeout(r, 600));
-    const item = q.closest('.qa-item');
-    const contenu = item.querySelector('.qa-contenu');
-    const ouvert = { etat: q.getAttribute('aria-expanded'), h: contenu ? Math.round(contenu.getBoundingClientRect().height) : 0 };
+    await attendre(600);
+    const item = q.closest('.qf-item');
+    /* la hauteur du bloc INTÉRIEUR : le conteneur, lui, est animé de 0 à
+       sa hauteur, et l'horloge des animations du Chromium de recette
+       avance par à-coups (vu le 27/09 : 0 px sur une réponse ouverte) */
+    const reponse = item.querySelector('.qf-reponse');
+    const ouvert = { etat: q.getAttribute('aria-expanded'), h: reponse ? Math.round(reponse.getBoundingClientRect().height) : 0,
+                     liens: item.querySelectorAll('.qf-lien').length, suggestions: faq.querySelectorAll('.qf-suggestion').length };
     q.click();
-    await new Promise(r => setTimeout(r, 600));
-    return { ouvert, ferme: q.getAttribute('aria-expanded'), reste: !!item.querySelector('.qa-contenu') };
+    await attendre(600);
+    return { total, apresRecherche, surligne, apresTheme, ouvert, ferme: q.getAttribute('aria-expanded') };
   })()`);
-  verifier('réponse ouverte', f.ouvert.etat === 'true' && f.ouvert.h > 40, `hauteur ${f.ouvert.h} px`);
+  verifier('neuf questions', f.total === 9, `${f.total}`);
+  verifier('la recherche filtre et surligne', f.apresRecherche >= 1 && f.apresRecherche < 9 && f.surligne >= 1, `${f.apresRecherche} carte(s), ${f.surligne} surlignage(s)`);
+  verifier('le thème filtre', f.apresTheme === 2, `${f.apresTheme} carte(s) « Périmètre »`);
+  verifier('réponse ouverte, avec ses liens', f.ouvert.etat === 'true' && f.ouvert.h > 40 && f.ouvert.liens >= 1, `hauteur ${f.ouvert.h} px, ${f.ouvert.liens} lien(s), ${f.ouvert.suggestions} suggestion(s)`);
   verifier('réponse refermée', f.ferme === 'false');
+
+  /* ——— rien ne sort de l'écran à droite, même rogné par la page : la
+     FAQ l'a fait le 27/09 sans faire défiler la page (la colonne prenait la
+     largeur minimale du rail de thèmes) ——— */
+  const hors = await s.evaluer(`[...document.querySelectorAll('main .r-wrap > *, #faq .qf-droite, #faq .qf-gauche, .ga, .tb-cadre, .ua-liste')]
+    .filter(e => e.getBoundingClientRect().right > innerWidth + 1).map(e => e.className.split(' ')[0]).slice(0, 5)`);
+  verifier('aucun bloc hors de l\u2019écran', hors.length === 0, hors.join(', '));
 
   /* ——— la page ne défile pas de côté ——— */
   const d = await s.evaluer(`({ sw: document.documentElement.scrollWidth, iw: innerWidth })`);
