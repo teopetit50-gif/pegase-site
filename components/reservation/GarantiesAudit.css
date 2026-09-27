@@ -1,0 +1,138 @@
+/* ══════════════════════════════════════════════════════════════════════
+   <GarantiesAudit> — feuille du panneau sous les cartes (27/09/2026)
+
+   Préfixe `ga-`, sous `.resa`. Reprise de `features-9` (Tailark,
+   21st.dev) : `grid border md:grid-cols-2`, cases en `p-6 sm:p-12`
+   (24 → 36 px ici, le panneau vit sous trois cartes et non seul sur sa
+   page), libellé `text-muted-foreground` + icône `size-4`, énoncé
+   `text-2xl font-semibold` ramené au 500 de la page, case de droite en
+   `bg-zinc-50`, rangée du chiffre `col-span-full border-y`.
+
+   Le seul accent est l'icône du Chèque TIC, dans l'or de la carte
+   recommandée juste au-dessus : l'aide et le format phare se répondent
+   sans qu'aucune surface ne soit teintée.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.resa .ga {
+  display: grid;
+  margin-top: 32px;
+  overflow: hidden;
+  border: 1px solid var(--r-filet);
+  border-radius: 16px;
+  background: #ffffff;
+}
+.resa .ga-case {
+  padding: 22px 20px 24px;
+}
+.resa .ga-case + .ga-case {
+  border-top: 1px solid var(--r-filet);
+}
+.resa .ga-case--grise {
+  background: #fafafa;
+}
+
+.resa .ga-libelle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--r-faible);
+}
+.resa .ga-libelle > svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+.resa .ga-libelle--or > svg {
+  color: #b8912f;
+}
+
+.resa .ga-enonce {
+  margin-top: 14px;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--r-texte);
+}
+.resa .ga-suite {
+  color: var(--r-faible);
+}
+
+/* la rangée du chiffre */
+.resa .ga-chiffre {
+  padding: 22px 20px 24px;
+  border-top: 1px solid var(--r-filet);
+}
+.resa .ga-montant {
+  margin-top: 10px;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--r-texte);
+  white-space: nowrap;
+}
+.resa .ga-chiffre-texte {
+  max-width: 60ch;
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--r-doux);
+}
+
+.resa .ga-note {
+  max-width: 48rem;
+  margin-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .resa .ga {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .resa .ga-case {
+    padding: 30px 32px 32px;
+  }
+  .resa .ga-case + .ga-case {
+    border-top: 0;
+    border-left: 1px solid var(--r-filet);
+  }
+  .resa .ga-enonce {
+    margin-top: 18px;
+    font-size: 20px;
+    line-height: 28px;
+  }
+  .resa .ga-chiffre {
+    grid-column: 1 / -1;
+    padding: 30px 32px 32px;
+  }
+  .resa .ga-montant {
+    font-size: 44px;
+  }
+  .resa .ga-note {
+    margin-top: 20px;
+  }
+}
+@media (min-width: 1024px) {
+  .resa .ga-case,
+  .resa .ga-chiffre {
+    padding-inline: 36px;
+  }
+  /* le chiffre à gauche, sa phrase à droite, alignés sur leur pied — pas
+     avant 1024 : à 768, « Jusqu'à 10 000 € » en 44 px (≈ 380 px) ne
+     tenait pas dans une demi-colonne de 310 (vu en recette le 27/09) */
+  .resa .ga-chiffre {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 32px;
+  }
+  .resa .ga-montant {
+    font-size: 52px;
+  }
+  .resa .ga-chiffre-texte {
+    margin-top: 0;
+  }
+}

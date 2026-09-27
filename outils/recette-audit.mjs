@@ -1,7 +1,7 @@
 /** Recette des interactions de /reserver-un-audit (27/09/2026) — ce qu'une
  *  capture ne montre pas : colonnes du tableau, sélecteur mobile, bulles
- *  d'aide, section « Tout se combine », barre du téléphone, accordéon de la
- *  FAQ, débordement.
+ *  d'aide, panneau des garanties, section « Tout se combine », accordéon
+ *  de la FAQ, débordement.
  *
  *    node outils/recette-audit.mjs <url de la page> [largeur]
  *
@@ -113,28 +113,23 @@ try {
   verifier('cinq offres liées', u.liens.length === 5 && u.liens.every(h => h.startsWith('/offres/')), u.liens.join(' '));
   verifier('signes dans la fenêtre', u.hors === 0, `${u.hors} hors cadre`);
 
-  /* ——— barre du téléphone : absente en haut, présente à mi-page,
-     effacée devant l'appel final ——— */
-  const br = await s.evaluer(`(async () => {
-    const barre = document.querySelector('.br');
-    const etat = () => barre ? getComputedStyle(barre).visibility + '/' + getComputedStyle(barre).display : 'absente';
-    const aller = async (y) => { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 900)); };
-    await aller(0);
-    const haut = etat();
-    const milieu = document.querySelector('#engagements');
-    await aller(milieu.getBoundingClientRect().top + scrollY);
-    const mi = etat();
-    await aller(document.querySelector('#reserver').getBoundingClientRect().top + scrollY - 200);
-    const fin = etat();
-    return { haut, mi, fin };
+  /* ——— pas de barre flottante : Teo l'a fait retirer de l'accueil le
+     16/09 ; posée ici le 27/09, retirée le même jour ——— */
+  const barre = await s.evaluer(`!!document.querySelector('.br, .o-barre')`);
+  verifier('aucune barre flottante', !barre);
+
+  /* ——— le panneau sous les cartes (GarantiesAudit) ——— */
+  const g = await s.evaluer(`(() => {
+    const p = document.querySelector('.ga');
+    if (!p) return null;
+    const montant = p.querySelector('.ga-montant');
+    const r = montant.getBoundingClientRect();
+    return { cases: p.querySelectorAll('.ga-case').length, montant: montant.textContent,
+             deborde: montant.scrollWidth > montant.clientWidth + 1 || r.right > innerWidth,
+             region: p.textContent.includes('Région Guadeloupe') };
   })()`);
-  if (largeur < 1024) {
-    verifier('barre cachée en haut de page', br.haut.startsWith('hidden'), br.haut);
-    verifier('barre visible à mi-page', br.mi.startsWith('visible'), br.mi);
-    verifier("barre effacée devant l'appel final", br.fin.startsWith('hidden'), br.fin);
-  } else {
-    verifier('pas de barre au bureau', br.mi.endsWith('/none'), br.mi);
-  }
+  verifier('panneau des garanties', !!g && g.cases === 2 && g.region, g ? `${g.cases} cases, « ${g.montant} »` : 'absent');
+  verifier('le montant tient sur sa ligne', !!g && !g.deborde);
 
   /* ——— FAQ : ouvrir, puis refermer ——— */
   const f = await s.evaluer(`(async () => {

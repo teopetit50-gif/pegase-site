@@ -2,6 +2,7 @@ import { BoutonReservation } from "./ModeleUrl";
 import { Check } from "lucide-react";
 import Partage from "@/components/Partage";
 import { ICONES_FORMAT, ICONE_DEFAUT } from "./icones";
+import GarantiesAudit from "./GarantiesAudit";
 import {
   PROFILS,
   type Formule,
@@ -58,6 +59,10 @@ import "./FormulesGrille.css";
    La colonne de gauche de l'ancienne grille (« Gratuit, sans engagement »
    + Chèque TIC) n'a pas d'équivalent dans une composition centrée : ses
    deux blocs descendent sous les cartes, en bandeau, sans perdre un mot.
+
+   27/09/2026 — ce bandeau et la note de bas de section deviennent
+   <GarantiesAudit> (fichier à part, reprise de Tailark features-9) ; les
+   cartes, elles, ne bougent pas.
    ══════════════════════════════════════════════════════════════════════ */
 
 /* Le libellé d'un point comporte une portion en gras (`fort`) — la
@@ -178,31 +183,12 @@ export default function FormulesGrille() {
         ))}
       </div>
 
-      {/* les deux faits qui décident réellement — c'est gratuit, et c'est
-          financé. Ils tenaient la colonne de gauche de l'ancienne grille,
-          où la référence loge sa preuve sociale (que nous n'avons pas). */}
-      <div data-arrivee="colonne" className="fg-socle">
-        <p className="fg-socle-fort">
-          Gratuit, sans engagement.
-          <br />
-          Toute installation commence par cet audit.
-        </p>
-        <div className="fg-socle-aide">
-          <div className="fg-socle-titre">Chèque TIC</div>
-          <p className="fg-socle-texte">
-            Jusqu&apos;à 10 000 € d&apos;une installation financés par la Région Guadeloupe
-            pour les entreprises éligibles. Votre éligibilité est vérifiée pendant
-            l&apos;audit, avant tout engagement.
-          </p>
-        </div>
-      </div>
-
-      <p data-arrivee="colonne" className="r-note fg-note">
-        *Créneaux du lundi au vendredi, 9 h – 17 h (heure Guadeloupe). Les durées
-        annoncées sont tenues : l&apos;entretien se termine à l&apos;heure. Le format dans
-        vos locaux est facturé sur devis et déduit de l&apos;installation si vous décidez
-        d&apos;aller plus loin.
-      </p>
+      {/* 27/09/2026 — le bandeau « Gratuit, sans engagement | Chèque TIC »
+          et la note des créneaux laissent la place à <GarantiesAudit>
+          (Tailark features-9) : Teo, « change ça par un component plus
+          pro ». Mêmes faits, mêmes mots, redistribués dans un panneau à
+          filets ; les rôles d'arrivée (data-arrivee) suivent. */}
+      <GarantiesAudit />
     </section>
   );
 }

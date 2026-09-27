@@ -7,10 +7,8 @@ import UnSeulAudit from "@/components/reservation/UnSeulAudit";
 import Protocole from "@/components/reservation/Protocole";
 import AppelCreneau from "@/components/reservation/AppelCreneau";
 import QuestionsAudit from "@/components/reservation/QuestionsAudit";
-import BarreReservation from "@/components/reservation/BarreReservation";
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES } from "@/lib/paliers";
-import { PROFILS } from "@/lib/reservation";
 import {
   ModeleRetenu,
   SiteRetenu,
@@ -87,9 +85,15 @@ import {
    ligne du menu de chacun et un lien vers sa page ; rien à régler. Pour
    le téléphone : sections à 48 px de marge (le barème relevé sur
    scale.com le 16/09 dit 40 à 48, elles en avaient 64), titres de
-   section tous à 24 px, articles du protocole compactés, et
-   <BarreReservation>, la barre de réservation qui paraît quand plus aucun
-   bouton de réservation n'est à l'écran.
+   section tous à 24 px, articles du protocole compactés. Une barre de
+   réservation flottante a été posée puis RETIRÉE le même jour : Teo avait
+   fait retirer la même de l'accueil le 16/09 (commentaire en tête de
+   app/page.tsx) — ne pas la remettre sans lui demander.
+
+   27/09/2026, fin d'après-midi — le bandeau sous les cartes de formats
+   (« Gratuit, sans engagement | Chèque TIC ») et sa note deviennent
+   <GarantiesAudit>, dans <FormulesGrille> (Teo : « change ça par un
+   component plus pro »).
 
    Le chrome reste celui du site : header caméléon (les sections claires
    portent data-monde="clair") et footer sombre hérités de PageShell.
@@ -134,10 +138,6 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
-/* le format que la page recommande (la carte « Recommandé ») : c'est lui
-   que la barre du téléphone propose */
-const PHARE = PROFILS[1].formules.find((f) => f.phare) ?? PROFILS[1].formules[0];
-
 export default function ReserverUnAuditPage() {
   return (
     <PageShell>
@@ -171,10 +171,6 @@ export default function ReserverUnAuditPage() {
 
         {/* ═══ 6 — FAQ ═══ */}
         <QuestionsAudit />
-
-        {/* ═══ téléphone : la barre de réservation (masquée dès 1024) —
-               elle propose le format recommandé des cartes du haut ═══ */}
-        <BarreReservation formule={PHARE.id} titre={`${PHARE.nom} · ${PHARE.duree}`} sous={PHARE.conditions} />
       </div>
     </PageShell>
   );
