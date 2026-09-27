@@ -569,7 +569,12 @@
   width: 12px;
   height: 12px;
 }
-.cl-tab {
+/* 26/09 — `table.cl-tab` et pas `.cl-tab` : la règle commune `table.tab
+   { width: 100% }` d'atelier.css pèse plus lourd qu'une classe seule. La
+   largeur réduite était ignorée, le tableau prenait toute la carte plus ses
+   deux marges et sortait de 25 px à droite (Teo : « c'est pas un peu sorti
+   du cadre ? »). */
+table.cl-tab {
   width: calc(100% - 52px);
   margin: 0 26px;
 }
