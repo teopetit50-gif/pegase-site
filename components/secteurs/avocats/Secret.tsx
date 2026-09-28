@@ -38,7 +38,8 @@ import { CONTACT, SECRET } from "./textes";
    Composée dans l'idiome de la référence : en-tête centré à mot en italique, puis un grand cadre
    rounded-3xl liseré de foreground/10 avec une lueur bleue, comme les formules et l'appel final.
    Le drapeau aux teintes officielles (#000091, #E1000F), repris de filed-site/components/ui/drapeau.tsx.
-   Hébergement et lecture en France : décision de Teo du 24/09 (hébergeur français pour Tamila).
+   Hébergement en France (décision de Teo du 24/09, hébergeur français pour Tamila) ; lecture en Europe,
+   sans conservation (décision du 28/09).
    24/09 au soir (registre d'un cabinet, avocats.css) : la tache bleue floue du cadre est retirée ; la colonne
    de gauche s'ouvre sur la grille du Palais de justice de Paris, « Liberté · Fraternité » et les écussons RF
    (Nathan Cima, Unsplash) — le droit français en image, à côté du drapeau et de la mention des textes. */

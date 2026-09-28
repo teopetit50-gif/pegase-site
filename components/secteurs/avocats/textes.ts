@@ -22,9 +22,11 @@
    conjugué (OMEGA/DOCTRINE-TEXTES-SAAS.md, partie II : ni fragments, ni ternaires, ni antithèses en série).
    Règles maison : aucun client, logo, avis ni chiffre de traction inventé ; aucun prix public ; nos outils
    jamais nommés ; données des cartes étiquetées « exemple ».
-   Souveraineté — DÉCISION DE TEO DU 24/09/2026 : Tamila aura un hébergeur français et les pièces restent en
-   France (stockage ET lecture). Par exception à la doctrine §6 (qui vaut pour les autres SaaS), on écrit donc
-   « hébergé en France » et « vos pièces restent en France ». L'infrastructure du produit doit s'y conformer. */
+   Souveraineté — DÉCISION DE TEO DU 24/09/2026 : Tamila a un hébergeur français, les pièces sont stockées en
+   France. Par exception à la doctrine §6 (qui vaut pour les autres SaaS), on écrit donc « hébergé en France ».
+   DÉCISION DE TEO DU 28/09/2026 : les pièces sont lues par le meilleur modèle, qui n'est servi qu'en Europe,
+   sans aucune conservation. La page dit donc « stockées en France, lues en Europe ». L'infrastructure du
+   produit doit s'y conformer. */
 
 export const CONTACT = {
   audit: "/reserver-un-audit",
@@ -131,21 +133,21 @@ export const CONNEXIONS = {
 export const SECRET = {
   titreAvant: "Confier vos pièces à un logiciel engage",
   titreMot: "votre secret professionnel",
-  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Tamila les héberge et les lit en France, chez un hébergeur français, et chacun de nos engagements figure dans le contrat que vous signez.",
+  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Tamila les stocke en France, chez un hébergeur français, et les lit en Europe, sans rien en conserver. Chacun de nos engagements figure dans le contrat que vous signez.",
   badge: "Français, hébergé en France",
   accroche: "Le contrat précise les dossiers que Tamila lit, le lieu où les pièces sont conservées et la date de leur effacement.",
   faits: [
     ["Éditeur", "France"],
     ["Droit applicable", "Français"],
     ["Hébergement", "France, hébergeur français"],
-    ["Lecture des pièces", "En France"],
+    ["Lecture des pièces", "En Europe, sans conservation"],
     ["Statut", "Sous-traitant, art. 28 RGPD"],
   ],
   engagements: [
     { titre: "Vous choisissez les dossiers lus", texte: "Tamila ne lit que les dossiers que vous lui ouvrez, un par un, et ne parcourt jamais votre messagerie de lui-même." },
     { titre: "Aucun entraînement sur vos pièces", texte: "Vos pièces ne servent à entraîner aucun modèle, ni le nôtre ni celui d'un fournisseur. Cette exclusion est une clause du contrat." },
     { titre: "Effacement à la clôture", texte: "Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez l'export que vous avez téléchargé." },
-    { titre: "Vos pièces restent en France", texte: "Les pièces sont chiffrées pendant leur transfert et pendant leur conservation. Elles ne quittent jamais la France." },
+    { titre: "Stockées en France, lues en Europe", texte: "Les pièces sont chiffrées pendant leur transfert et pendant leur conservation. Elles sont conservées en France. Leur lecture se fait dans l'Union européenne, et aucune copie n'y est gardée." },
     { titre: "Chaque accès est journalisé", texte: "Le journal indique qui a consulté quel dossier, et à quelle date. Vous pouvez l'exporter à tout moment." },
     { titre: "Aucune écriture dans vos outils", texte: "Tamila dispose d'un accès en lecture seule : il n'envoie aucun message, ne communique aucune pièce et ne modifie rien dans votre logiciel." },
   ],
