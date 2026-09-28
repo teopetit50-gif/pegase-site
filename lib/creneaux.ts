@@ -349,19 +349,28 @@ export const ERREURS: Record<string, string> = {
    Alignés sur les profils métier de l'armoire (btp, garage, immo,
    pharmacie, resto, services) + les deux cibles du moment sans profil
    dédié (commerce, tourisme) + la sortie de secours. La valeur stockée est
-   la clé, pas le libellé. */
+   la clé, pas le libellé.
+   28/09 — les six métiers des pages /secteurs ont chacun leur case
+   (architecture, location de véhicules, cabinet dentaire, cabinet
+   d'avocats, groupe ; le BTP l'avait déjà) : un visiteur venu de ces pages
+   n'en trouvait aucune pour quatre d'entre eux. La base garde le secteur
+   tel quel (demandes_audit : 40 caractères au plus, vérifié dans
+   reserver_audit_serveur le 28/09) ; les nouvelles clés prennent le profil
+   « generique ». MIROIR : pegase-dashboard/lib/espace/profil.ts porte les
+   mêmes clés (le cockpit affiche le libellé) — modifier les deux. */
 export const SECTEURS: { valeur: string; libelle: string }[] = [
   { valeur: "btp", libelle: "Bâtiment & travaux publics" },
-  /* 28/09 — les agences venues de /secteurs/architectes (Lorani) n'avaient
-     aucune case à cocher. La base garde le secteur tel quel (demandes_audit :
-     40 caractères au plus, vérifié dans reserver_audit_serveur le 28/09). */
   { valeur: "archi", libelle: "Architecture & maîtrise d’œuvre" },
   { valeur: "garage", libelle: "Automobile & après-vente" },
+  { valeur: "location", libelle: "Location de véhicules" },
   { valeur: "commerce", libelle: "Distribution & négoce" },
   { valeur: "resto", libelle: "Restauration & agroalimentaire" },
   { valeur: "tourisme", libelle: "Tourisme & hôtellerie" },
   { valeur: "immo", libelle: "Immobilier & gestion" },
   { valeur: "pharmacie", libelle: "Santé & pharmacie" },
+  { valeur: "dentaire", libelle: "Cabinet dentaire" },
+  { valeur: "avocats", libelle: "Cabinet d’avocats" },
   { valeur: "services", libelle: "Services & prestataires" },
+  { valeur: "groupe", libelle: "Groupe de plusieurs sociétés" },
   { valeur: "autre", libelle: "Autre activité" },
 ];
