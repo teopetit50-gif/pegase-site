@@ -352,6 +352,10 @@ export const ERREURS: Record<string, string> = {
    la clé, pas le libellé. */
 export const SECTEURS: { valeur: string; libelle: string }[] = [
   { valeur: "btp", libelle: "Bâtiment & travaux publics" },
+  /* 28/09 — les agences venues de /secteurs/architectes (Lorani) n'avaient
+     aucune case à cocher. La base garde le secteur tel quel (demandes_audit :
+     40 caractères au plus, vérifié dans reserver_audit_serveur le 28/09). */
+  { valeur: "archi", libelle: "Architecture & maîtrise d’œuvre" },
   { valeur: "garage", libelle: "Automobile & après-vente" },
   { valeur: "commerce", libelle: "Distribution & négoce" },
   { valeur: "resto", libelle: "Restauration & agroalimentaire" },

@@ -882,7 +882,7 @@ export default function Fonctionnement() {
                               <div className="flex gap-2">
                                 <div className="size-18 relative overflow-hidden rounded-[1.75rem] shadow-md before:absolute before:inset-0 before:rounded-[1.75rem] before:border before:border-black/20">
                                   <img
-                                    alt="Amanda Myburg"
+                                    alt=""
                                     loading="lazy"
                                     width="136"
                                     height="136"
@@ -949,7 +949,7 @@ export default function Fonctionnement() {
                                 <div className="text-[#737373] mt-1 flex items-center gap-1.5 whitespace-nowrap text-xs">
                                   <span>Avancement retenu</span>
                                   <img
-                                    alt="Amanda Myburg"
+                                    alt=""
                                     loading="lazy"
                                     width="20"
                                     height="20"

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { FAMILLES, POSTS } from "@/lib/content";
+import { SECTEURS } from "@/lib/secteurs";
 import { SITE_URL } from "@/lib/site";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -28,8 +29,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
        que /offres, dont elle est le complément. */
     { url: "/offres/sur-mesure", priorite: 0.9, frequence: "monthly" },
     /* 24/09 — les SaaS verticaux, un par métier : une porte d'entrée
-       comme /offres. Les pages métier (/secteurs/<slug>) affichent le site
-       du SaaS dans un cadre : rien à indexer, elles ne sont pas déclarées. */
+       comme /offres. Les pages métier (/secteurs/<slug>) sont déclarées
+       plus bas, tirées de SECTEURS (28/09 : elles ne sont plus un cadre
+       sur le site du SaaS, et chacune a son adresse canonique). */
     { url: "/secteurs", priorite: 0.9, frequence: "monthly" },
     { url: "/modeles", priorite: 0.9, frequence: "monthly" },
     { url: "/tarifs", priorite: 0.9, frequence: "monthly" },
@@ -70,13 +72,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       frequence: "monthly" as const,
     }));
 
+  /* 28/09 — les six pages métier, rapatriées dans omegaai.fr depuis le
+     24/09 : chacune a son adresse canonique et se cherche par métier
+     (« contrôle des plans architecte », « logiciel loueur »…). Même rang
+     que les pages d'offre. Relevé par l'inventaire Lorani du 28/09. */
+  const secteurs = SECTEURS.map((s) => ({
+    url: `/secteurs/${s.slug}`,
+    priorite: 0.8,
+    frequence: "monthly" as const,
+  }));
+
   const articles = POSTS.map((p) => ({
     url: `/blog/${p.slug}`,
     priorite: 0.6,
     frequence: "monthly" as const,
   }));
 
-  return [...fixes, ...moteurs, ...articles].map((e) => ({
+  return [...fixes, ...moteurs, ...secteurs, ...articles].map((e) => ({
     url: `${SITE_URL}${e.url}`,
     lastModified: maj,
     changeFrequency: e.frequence,

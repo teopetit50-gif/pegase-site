@@ -27,6 +27,10 @@
    · Rayons : `rounded-lg` / `rounded-xl` / `rounded-md` → 10 / 14 / 8 px.
    · Posée dans la marge de 30 px de la page (page.tsx) : le bloc à
      `-mx-6 md:-mx-8` y déborde comme dans la source.
+   · 28/09 — deux gravités corrigées, comme dans le tableau de bord de
+     démonstration : la porte EI 30 pour un EI 60 exigé passe en
+     « Bloquant » (on la refuse avant la commande, section Métiers), la
+     retenue de garantie non déduite en « À vérifier ».
    ══════════════════════════════════════════════════════════════════════ */
 /* eslint-disable @next/next/no-img-element -- icônes d'application SVG de 20 px dans une maquette décorative : pas d'optimiseur. */
 import React from "react";
@@ -335,9 +339,9 @@ export default function Dossier() {
                                 <span
                                   data-slot="badge"
                                   data-variant="default"
-                                  className="group/badge inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border-transparent py-0.5 font-medium whitespace-nowrap transition-all focus-visible:border-[#a1a1a1] focus-visible:ring-[3px] focus-visible:ring-[#a1a1a1]/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-[#e40014] aria-invalid:ring-[#e40014]/20 [&>svg]:pointer-events-none [&>svg]:size-3! [a]:hover:bg-[#171717]/80 h-4 border-0 px-1.5 text-[9px] bg-[#0a0a0a]/10 text-[#0a0a0a]/60"
+                                  className="group/badge inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border-transparent py-0.5 font-medium whitespace-nowrap transition-all focus-visible:border-[#a1a1a1] focus-visible:ring-[3px] focus-visible:ring-[#a1a1a1]/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-[#e40014] aria-invalid:ring-[#e40014]/20 [&>svg]:pointer-events-none [&>svg]:size-3! [a]:hover:bg-[#171717]/80 h-4 border-0 px-1.5 text-[9px] bg-transparent text-[#0a0a0a] ring-1 ring-inset ring-[#0a0a0a]/45"
                                 >
-                                  Mineur
+                                  À vérifier
                                 </span>
                               </span>
                               <span className="text-[#737373] shrink-0 text-[11px]">lot 08</span>
@@ -387,9 +391,9 @@ export default function Dossier() {
                                 <span
                                   data-slot="badge"
                                   data-variant="default"
-                                  className="group/badge inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border-transparent py-0.5 font-medium whitespace-nowrap transition-all focus-visible:border-[#a1a1a1] focus-visible:ring-[3px] focus-visible:ring-[#a1a1a1]/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-[#e40014] aria-invalid:ring-[#e40014]/20 [&>svg]:pointer-events-none [&>svg]:size-3! [a]:hover:bg-[#171717]/80 h-4 border-0 px-1.5 text-[9px] bg-[#0a0a0a]/10 text-[#0a0a0a]/60"
+                                  className="group/badge inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border-transparent py-0.5 font-medium whitespace-nowrap transition-all focus-visible:border-[#a1a1a1] focus-visible:ring-[3px] focus-visible:ring-[#a1a1a1]/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-[#e40014] aria-invalid:ring-[#e40014]/20 [&>svg]:pointer-events-none [&>svg]:size-3! [a]:hover:bg-[#171717]/80 h-4 border-0 px-1.5 text-[9px] bg-[#0a0a0a] text-[#ffffff]"
                                 >
-                                  Mineur
+                                  Bloquant
                                 </span>
                               </span>
                               <span className="text-[#737373] shrink-0 text-[11px]">lot 10</span>

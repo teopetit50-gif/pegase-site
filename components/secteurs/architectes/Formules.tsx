@@ -30,6 +30,8 @@
      métré, décennales, comptes rendus, réserves, honoraires, dossier de
      défense décennale…). Toujours aucun prix : chaque formule reste « Sur
      audit ». Report par fusion à trois voies, vérifié ligne à ligne.
+   · 28/09 — Cabinet : « 6 à 20 personnes » au lieu de « 5 à 20 », qui
+     chevauchait la formule Agence (« 1 à 5 »).
    ══════════════════════════════════════════════════════════════════════ */
 /* eslint-disable @next/next/no-img-element -- planche décorative à 22 % d'opacité, masquée en CSS : pas d'optimiseur. */
 import React from "react";
@@ -231,7 +233,7 @@ export default function Formules() {
               <div className="bg-[#fafafa] flex flex-col gap-8 max-lg:border-y lg:border-x">
                 <div>
                   <p className="text-lg font-medium">Cabinet</p>
-                  <p className="text-[#737373] text-lg font-medium">Pour les agences de 5 à 20 personnes</p>
+                  <p className="text-[#737373] text-lg font-medium">Pour les agences de 6 à 20 personnes</p>
                   <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
                   <StarButton href={CONTACT.audit} className="w-full">
                     Réserver un audit
