@@ -14,16 +14,52 @@ import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE, AGENCE, ilYa, dans, CLAIRE, SOFI
 const C = EXEMPLE_CLIENT_ID;
 const u = (p: string, n: number) => `00000000-0000-4000-8000-00000000${p}${n.toString(16).padStart(2, "0")}`;
 
-/* Les motifs officiels (filed_motifs_refus : 40 lignes en recette). Ici,
-   les six qui servent aux exemples — la base réelle est lue telle quelle. */
+/* Les motifs officiels de refus (filed_motifs_refus) : les 40 codes de la
+   plateforme de facturation électronique, transmis par le coordinateur le
+   05/10 (lot 19). L'exemple les porte à l'identique ; en base réelle la
+   table est lue telle quelle. */
 export const MOTIFS_EXEMPLE: MotifRefus[] = [
-  { code: "MENTION_OBLIGATOIRE_MANQUANTE", libelle: "Mention obligatoire manquante", description: "Une des mentions exigées par l'article 242 nonies A de l'annexe II au CGI est absente ou illisible." },
-  { code: "TVA_INCOHERENTE", libelle: "TVA incohérente", description: "Le montant de TVA ne correspond pas aux bases et aux taux portés sur la facture." },
-  { code: "COORDONNEES_BANCAIRES_NON_RECONNUES", libelle: "Coordonnées bancaires non reconnues", description: "L'IBAN porté sur la facture n'est pas celui connu pour ce fournisseur ; la facture est retenue jusqu'à confirmation par un canal indépendant." },
-  { code: "DOUBLON", libelle: "Facture en double", description: "Une facture de même numéro et de même fournisseur a déjà été reçue." },
-  { code: "ECART_AVEC_LA_COMMANDE", libelle: "Écart avec la commande", description: "Prix ou quantités facturés différents de la commande acceptée." },
-  { code: "FOURNISSEUR_NON_IDENTIFIE", libelle: "Fournisseur non identifié", description: "Aucun SIREN, numéro de TVA ou identifiant étranger exploitable." },
-];
+  ["ADR_ERR", "Adresse de facturation électronique erronée"],
+  ["ANNUL_ENC", "Encaissement non réalisé ou annulation d'encaissement"],
+  ["ART_ERR", "Article facturé incorrect"],
+  ["AUT_MOTIF_ERR_VALIDEUR", "Autre motif que « Erreur de valideur »"],
+  ["AUTRE", "Autre"],
+  ["CALCUL_ERR", "Erreur de calcul de la facture"],
+  ["CMD_EJ_ERR", "Numéro de commande ou d'engagement incorrect ou manquant"],
+  ["CODE_ROUTAGE_ERR", "Code de routage absent ou erroné"],
+  ["CONTACT_ACHTR", "Autres : contacter votre acheteur"],
+  ["CONTRAT_TERM", "Contrat terminé"],
+  ["COORD_BANC_ERR", "Erreur de coordonnées bancaires"],
+  ["CREANCIER_ERR", "Créancier inconnu ou différent de celui du marché ou de la commande"],
+  ["DEST_ERR", "Erreur de destinataire"],
+  ["DEST_INC", "Destinataire inconnu"],
+  ["DOUBLE_FACT", "Données réglementaires F1 en doublon"],
+  ["DOUBLON", "Facture en doublon (déjà émise ou reçue)"],
+  ["EMMET_INC", "Émetteur inconnu"],
+  ["ERR_VALIDEUR", "Mauvais valideur"],
+  ["FACT_NON_CONFORME", "Facture non conforme à la commande"],
+  ["JUSTIF_ABS", "Justificatif absent ou insuffisant"],
+  ["LIVR_INCOMP", "Livraison incomplète ou non effectuée"],
+  ["MARCHE_TERM", "Marché terminé"],
+  ["MODPAI_ERR", "Modalités de paiement incorrectes"],
+  ["MONTANT_ERR", "Montant de la facture erroné"],
+  ["MONTANTTOTAL_ERR", "Montant total erroné"],
+  ["NON_CONFORME", "Mention légale manquante"],
+  ["PU_ERR", "Prix unitaires incorrects"],
+  ["QTE_ERR", "Quantité facturée incorrecte"],
+  ["QUALITE_ERR", "Qualité d'article livré incorrecte"],
+  ["REF_CT_ABSENT", "Référence contractuelle nécessaire au traitement manquante"],
+  ["REF_ERR", "Référence incorrecte"],
+  ["REM_ERR", "Remise erronée"],
+  ["ROUTAGE_ERR", "Erreur de routage"],
+  ["SE_ERR", "Service destinataire incorrect"],
+  ["SIRET_ERR", "SIRET erroné ou absent"],
+  ["ST_CT_NON_DECLAR", "Sous-traitant ou cotraitant non déclaré"],
+  ["SUPPR_COMP_AVOIR", "Suppression pour compensation d'avoirs"],
+  ["TRANSAC_INC", "Transaction inconnue"],
+  ["TRANSF_PMNT_REGIE", "Transfert pour paiement en régie"],
+  ["TX_TVA_ERR", "Taux de TVA erroné"],
+].map(([code, libelle]) => ({ code, libelle, description: null }));
 
 /* ——— un gabarit de facture : les boîtes communes à toutes les factures
    dessinées (page A4 portrait, fractions de page) ——— */
@@ -295,11 +331,11 @@ const D09: DossierFiled = {
       "bloquant",
       "anomalie",
       "L'IBAN porté sur la facture (FR76 3000 •••• 0143) n'est pas celui validé pour Métallerie Roux (FR76 1027 •••• 0183). Confirmer par téléphone au numéro connu avant toute levée.",
-      "COORDONNEES_BANCAIRES_NON_RECONNUES",
+      "COORD_BANC_ERR",
       { iban_lu: "FR76 3000 •••• 0143", iban_connu: "FR76 1027 •••• 0183", page: 1, champ: "paiement.iban" },
     ),
     ctrl(f09.facture.id, "tva.coherence", "bloquant", "ok", "10 400,00 € × 20 % = 2 080,00 € : la TVA correspond."),
-    ctrl(f09.facture.id, "tva.arrondi", "attention", "anomalie", "La TVA de la ligne 3 (4,00 €) est arrondie différemment du total ; écart de 0,00 € après recalcul — à confirmer.", "TVA_INCOHERENTE", { ligne: 3, attendu: 4, lu: 4 }),
+    ctrl(f09.facture.id, "tva.arrondi", "attention", "anomalie", "La TVA de la ligne 3 (4,00 €) est arrondie différemment du total ; écart de 0,00 € après recalcul — à confirmer.", "CALCUL_ERR", { ligne: 3, attendu: 4, lu: 4 }),
     ctrl(f09.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
     ctrl(f09.facture.id, "rapprochement.commande_citee", "attention", "ok", "La facture cite BC-2026-0064 ; commande acceptée le 02/09.", null, { commande: "BC-2026-0064" }),
     ctrl(f09.facture.id, "rapprochement.prix_ligne", "attention", "ok", "3 lignes appariées, prix identiques à la commande."),
@@ -354,7 +390,7 @@ const D11: DossierFiled = {
       "attention",
       "anomalie",
       "Ligne 1 : 590,00 € facturés contre 560,00 € sur la commande BC-2026-0077 (+ 30,00 € × 12 = + 360,00 €). Ligne 2 conforme.",
-      "ECART_AVEC_LA_COMMANDE",
+      "PU_ERR",
       { commande: "BC-2026-0077", ligne: 1, prix_commande: 560, prix_facture: 590, ecart_total: 360 },
     ),
     ctrl(f11.facture.id, "rapprochement.quantite_ligne", "attention", "ok", "Quantités identiques à la commande (12 et 12)."),
@@ -489,7 +525,7 @@ const D08: DossierFiled = {
     ctrl(f08.facture.id, "fournisseur.iban_connu", "bloquant", "ok", "IBAN identique à celui validé."),
     ctrl(f08.facture.id, "tva.coherence", "bloquant", "ok", "1 915,33 € × 20 % = 383,07 €."),
     ctrl(f08.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
-    ctrl(f08.facture.id, "lignes.somme", "attention", "levee", "La somme des lignes (1 915,30 €) diffère du total HT de 0,03 € (arrondi du prix unitaire).", "TVA_INCOHERENTE", { ecart: 0.03 }, u("lv", 8)),
+    ctrl(f08.facture.id, "lignes.somme", "attention", "levee", "La somme des lignes (1 915,30 €) diffère du total HT de 0,03 € (arrondi du prix unitaire).", "CALCUL_ERR", { ecart: 0.03 }, u("lv", 8)),
   ],
   levees: [{ id: u("lv", 8), code: "lignes.somme", cle: "", motif: "Arrondi du prix du kWh à cinq décimales — écart de 3 centimes, sans incidence.", leve_par: CLAIRE, leve_le: ilYa(19, 11), leve_par_nom: "Claire Morel" }],
   ibans: [{ id: u("ib", 8), fournisseur_id: f08.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 3456", statut: "valide", propose_le: ilYa(400) }],
