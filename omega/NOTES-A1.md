@@ -1,7 +1,29 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
-Branche `worker-a1`. Périmètre : `omega/functions/lecteur/` et `omega/functions/_partage/`.
+Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.
 Dernière mise à jour : 05/10/2026.
+
+## Vague 2 — lecteur-exports : le scénario réel (écrit avant le code)
+
+**Le trou.** Les six modules sectoriels reçoivent des exports CSV/XLSX des logiciels métier par `recevoir_releve` : un relevé, un instantané par fichier à l'état `recu`, une pièce `export` déjà en `en_lecture`, un travail `releve.lire` avec `{"instantane": "<uuid>"}`. Personne ne prend ce travail : les instantanés restent `recu`, `avancer_releves` n'a rien à avancer, les moteurs n'appliquent rien.
+
+**L'ouvrier.** Une fonction Edge `lecteur-exports`, appelée chaque minute, même socle que le lecteur (portes par `rpc()` de `_partage/portes.ts`, dépôt `omega-clients`, battement `lecteur_exports` sur les genres `releve.lire`). Pas d'IA pour un tableau : les colonnes se reconnaissent par leur en-tête.
+
+**Un passage, une pièce.**
+1. `prendre_travaux(['releve.lire'], 5, '10 minutes', 'lecteur-exports')`.
+2. `commencer_releve(instantane)` → le jsonb de l'instantané (client, branchement, module, logiciel, fuseau, nom_fichier, chemin, mime, octets, sha256, force, jeu, jeux déclarés avec `entetes`, `colonnes`, `cle`, `options`). `null` = plus rien à lire (déjà lu, écarté) → `finir_travail(id, {ignore})`. Un essai interrompu repart de zéro : la porte vide les lignes.
+3. Téléchargement du fichier (`pieces.chemin`, sous `<client>/branchement/<id>/`). Absent → `terminer_lecture` statut d'échec motivé « fichier absent du dépôt », puis `finir_travail`.
+4. Décodage : CSV (BOM et UTF-8 reconnus, sinon Windows-1252 ; séparateur deviné parmi `;` `,` tabulation `|` sur les premières lignes ; guillemets doublés ; fins de ligne CRLF/LF) ou XLSX (SheetJS, première feuille non vide, ou la feuille nommée par le jeu). Une ligne d'en-tête, puis les lignes ; les lignes entièrement vides sont ignorées.
+5. Reconnaissance du jeu : celui de l'instantané s'il est donné ; sinon, parmi les jeux actifs du branchement, celui dont `motif_fichier` reconnaît le nom du fichier, sinon celui dont les en-têtes déclarés se retrouvent tous dans l'en-tête du fichier (comparaison normalisée : minuscules, sans accents, espaces/points/tirets ramenés à `_`). Aucun jeu reconnu → `terminer_lecture` statut « à classer » (une personne le tranche par `classer_instantane`), pas d'IA en vague 1 de ce lecteur.
+6. Rapprochement des colonnes : chaque colonne déclarée du jeu trouve sa colonne de fichier par en-tête ; en-tête absente → anomalie sur toutes les lignes (`colonne_absente`) si la colonne est obligatoire, ignorée sinon. Les colonnes du fichier non déclarées sont gardées dans la ligne brute.
+7. Lignes : pour chaque ligne du fichier, `n` (rang à partir de 1, en-tête exclu), `valeurs` (clé de colonne → texte tel que lu, nettoyé des espaces de bord), `brute` (en-tête normalisé du fichier → texte), `anomalies` (clé de colonne → motif : vide alors qu'obligatoire, nombre ou date illisible). Dépôt par `deposer_lignes` par paquets de 500. Le socle calcule la clé (`cle` du jeu) et l'empreinte, ou les reçoit : à confirmer (demandé au coordinateur).
+8. `terminer_lecture(instantane, {statut, lignes, colonnes, format, anomalies, motif}, 'lecteur-exports/<AAAA-MM-JJ>')` clôt l'instantané (`lu`) ; `avancer_releves` enchaîne vers `<module>.appliquer_releve`. Puis `finir_travail(id, {lignes, colonnes, format, statut, duree_ms})`.
+9. Pannes : réseau/5xx/429 → `echouer_travail` repris (`FOURNISSEUR_INDISPONIBLE`), 401/403 → `PORTE_REFUSEE`, exception → `ERREUR_INTERNE` repris. Fichier illisible (ni CSV ni XLSX, zip, PDF) → `terminer_lecture` échec motivé, travail fini. Jamais d'exception non rattrapée. `battre_ouvrier('lecteur_exports', ['releve.lire'], {...})` en fin de passage, même à vide.
+
+**Validation.** `deno task verifier` dans `lecteur-exports/` : tests sur doubles (portes en mémoire, dépôt en mémoire) avec un CSV `;` en Windows-1252 et un XLSX d'exemple dans `exemples/` (fichiers fictifs : un export de patients Tiroma anonymes, un export d'articles Varelo) ; cas : CSV `;` latin1, CSV `,` UTF-8 avec BOM, tabulation, XLSX, jeu donné, jeu reconnu par motif de fichier, jeu reconnu par en-têtes, aucun jeu (à classer), colonne obligatoire absente, fichier absent, fichier illisible, commencer_releve null, 1 200 lignes → 3 paquets. Puis l'essai réel par le coordinateur : un `recevoir_releve` sur un branchement de la recette, et le résultat (instantané `lu`, lignes déposées, écarts calculés par `avancer_jeu`).
+
+**Ce que j'attends du coordinateur** (demandé le 05/10 au soir) : le corps de `private.deposer_lignes` (forme des éléments de `p_lignes`), celui de `private.terminer_lecture` (clés de `p_resultat`, statuts admis), le DDL d'`instantanes_lignes` (vu : `cle`, `valeurs` objet, `anomalies` objet, `empreinte` sha256, `n`), le format de `branchements_jeux.colonnes` et un jeu réel de la recette. Tant que je ne les ai pas, le code porte ces hypothèses, isolées dans un seul fichier (`lecteur-exports/portes_releve.ts`) pour être corrigées d'un bloc.
+
 
 ## Fait
 
