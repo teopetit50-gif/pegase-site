@@ -138,6 +138,25 @@ export type TypeRdv = {
   statut: "a_classer" | "propose" | "valide";
 };
 
+export type Attente = {
+  id: string;
+  entite_id: string;
+  patient_id: string;
+  famille: Famille | null;
+  duree_min: number | null;
+  praticien_id: string | null;
+  preavis_minutes: number | null;
+  drapeau_gene: boolean;
+  source: "logiciel" | "tiroma" | "reput";
+  ajoute_le: string;
+  retire_le: string | null;
+  motif_retrait: "rdv_obtenu" | "date_passee" | "annule" | "doublon" | "autre" | null;
+  /* enrichissement d'affichage : le patient, lu sous RLS */
+  patient_nom?: string;
+};
+
+export type PatientCourt = { id: string; nom: string; prenom: string | null; praticien_habituel_id: string | null; ne_pas_contacter: boolean };
+
 /* ——— les portes de lecture (b3_02 à b3_05) ——— */
 
 export type Candidat = {
@@ -251,6 +270,7 @@ export type Dossier = {
   releves: Releve[];
   capacites: CapaciteLue[];
   types: TypeRdv[];
+  attente: Attente[];
   creneaux: Creneau[];
   plans: PlanSansRdv[];
   verifications: Verification[];

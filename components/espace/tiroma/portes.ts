@@ -21,7 +21,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import type {
-  Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PlanSansRdv, Praticien, Profil,
+  Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
   Regles, Releve, TypeRdv, Verification,
 } from "./types";
 
@@ -90,7 +90,7 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   };
   const e = cabinet.entite_id;
   const c = cabinet.client_id;
-  const [profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, creneaux, plans, verifications] = await Promise.all([
+  const [profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications] = await Promise.all([
     quiet(monProfil(cabinet, compte.user_id), null, "profil"),
     quiet(tableau<Fauteuil>("tiroma_fauteuils", e, "nom"), [], "fauteuils"),
     quiet(tableau<Praticien>("tiroma_praticiens", e, "nom_affiche"), [], "praticiens"),
@@ -101,6 +101,7 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
     quiet(tableau<Releve>("tiroma_releves", e, "recu_le").then((r) => r.reverse().slice(0, 30)), [], "relevés"),
     quiet(tableau<CapaciteLue>("tiroma_capacites", e, "domaine"), [], "capacités"),
     quiet(tableau<TypeRdv>("tiroma_types_rdv", e, "libelle_source"), [], "vocabulaire"),
+    quiet(listerAttente(e), [], "liste d'attente"),
     quiet(rpc<Creneau[]>("tiroma_creneaux_a_sauver", { p_client: c, p_entite: e }, []), [], "créneaux à sauver"),
     quiet(rpc<PlanSansRdv[]>("tiroma_plans_sans_rendez_vous", { p_client: c, p_entite: e }, []), [], "plans sans rendez-vous"),
     quiet(rpc<Verification[]>("tiroma_avant_rendez_vous", { p_client: c, p_entite: e, p_jours: null }, []), [], "avant les rendez-vous"),
@@ -108,12 +109,52 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   /* la charge des fauteuils est réservée au titulaire : on ne la demande que pour lui */
   const charge = profil === "titulaire" ? await quiet(rpc<Charge | null>("tiroma_charge_fauteuils", { p_client: c, p_entite: e, p_jour: null }, null), null, "charge des fauteuils") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, creneaux, plans, verifications, charge },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge },
     avis,
   };
 }
 
+/** La liste d'attente ouverte, avec le nom des patients qu'on a le droit de voir (RLS). */
+export async function listerAttente(entite_id: string): Promise<Attente[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("tiroma_liste_attente").select("*").eq("entite_id", entite_id).is("retire_le", null).order("ajoute_le");
+  if (error) throw new ErreurPorte(message(error));
+  const liste = (data ?? []) as Attente[];
+  const ids = Array.from(new Set(liste.map((a) => a.patient_id)));
+  if (!ids.length) return liste;
+  const { data: pats } = await supabase.from("tiroma_patients").select("id, nom, prenom").in("id", ids);
+  const noms = new Map(((pats ?? []) as { id: string; nom: string; prenom: string | null }[]).map((p) => [p.id, [p.prenom, p.nom].filter(Boolean).join(" ")]));
+  return liste.map((a) => ({ ...a, patient_nom: noms.get(a.patient_id) ?? "Patient (hors de votre périmètre)" }));
+}
+
+/** Les patients dont le nom commence par ce qu'on tape, sous RLS. */
+export async function chercherPatients(entite_id: string, texte: string): Promise<PatientCourt[]> {
+  const supabase = createClient();
+  const t = texte.trim().replace(/[%_,]/g, "");
+  if (t.length < 2) return [];
+  const { data, error } = await supabase.from("tiroma_patients").select("id, nom, prenom, praticien_habituel_id, ne_pas_contacter").eq("entite_id", entite_id).eq("actif", true).or(`nom.ilike.${t}%,prenom.ilike.${t}%`).order("nom").limit(12);
+  if (error) throw new ErreurPorte(message(error));
+  return (data ?? []) as PatientCourt[];
+}
+
 /* ——— les écritures ——— */
+
+/* b3_09 : la liste d'attente commune */
+export async function ajouterAttente(cabinet: Cabinet, a: { patient_id: string; famille: string | null; duree_min: number | null; praticien_id: string | null; preavis_minutes: number | null; gene: boolean }): Promise<string> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("tiroma_ajouter_attente", {
+    p_client: cabinet.client_id, p_entite: cabinet.entite_id, p_patient: a.patient_id, p_famille: a.famille, p_duree_min: a.duree_min,
+    p_praticien: a.praticien_id, p_preavis_minutes: a.preavis_minutes, p_disponibilites: null, p_gene: a.gene,
+  });
+  if (error) throw new ErreurPorte(message(error));
+  return data as string;
+}
+
+export async function retirerAttente(id: string, motif: Attente["motif_retrait"]): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("tiroma_retirer_attente", { p_attente: id, p_motif: motif });
+  if (error) throw new ErreurPorte(message(error));
+}
 
 export async function installerCabinet(a: { client_id: string; entite_id: string; logiciel: Logiciel; perimetre: "cabinet" | "praticien"; version: string | null; user_id: string }): Promise<string> {
   const supabase = createClient();

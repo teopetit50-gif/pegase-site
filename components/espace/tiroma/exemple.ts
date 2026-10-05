@@ -124,6 +124,11 @@ export const DOSSIER_EXEMPLE: Dossier = {
     { id: "k-6", domaine: "dates_creation", etat: "non_tenu", mesure: { rendez_vous: 212, avec_date: 0, jours: 30 }, calcule_le: a(0, 7, 42) },
   ],
   types,
+  attente: [
+    { id: "at-1", entite_id: ENTITE_CABINET, patient_id: "pa-2", famille: "soin_conservateur", duree_min: 30, praticien_id: null, preavis_minutes: 60, drapeau_gene: true, source: "logiciel", ajoute_le: ilYa(9), retire_le: null, motif_retrait: null, patient_nom: "Kévin Bazile" },
+    { id: "at-2", entite_id: ENTITE_CABINET, patient_id: "pa-4", famille: "detartrage", duree_min: 30, praticien_id: null, preavis_minutes: null, drapeau_gene: false, source: "logiciel", ajoute_le: ilYa(16), retire_le: null, motif_retrait: null, patient_nom: "Jean-Luc Nabajoth" },
+    { id: "at-3", entite_id: ENTITE_CABINET, patient_id: "pa-14", famille: "controle", duree_min: 20, praticien_id: P2, preavis_minutes: 120, drapeau_gene: false, source: "tiroma", ajoute_le: ilYa(3), retire_le: null, motif_retrait: null, patient_nom: "Aurélie Cornélie" },
+  ],
   creneaux: [
     {
       evenement_id: 9101, type: "annulation", detecte_le: a(0, 7, 42), rendez_vous_id: "rdv-1", debut: a(1, 9, 0), fin: a(1, 9, 45), minutes: 45,
