@@ -119,8 +119,8 @@ for (const [nom, chemin] of ECRANS) {
   await s.dormir(400);
   await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Déposer un document/.test(b.textContent))?.click()`);
   await s.dormir(400);
-  const depot = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, gris: [...d.querySelectorAll('button')].find(b => b.textContent.trim() === 'Déposer')?.disabled, anglais: /Choose|No file/.test(d.innerText) } : null; })()`);
-  ok(depot && /Déposer un document/.test(depot.titre) && depot.gris === true && !depot.anglais, 'le dépôt s\'ouvre, « Déposer » gris sans fichier, aucun libellé anglais');
+  const depot = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, gris: [...d.querySelectorAll('button')].find(b => b.textContent.trim() === 'Déposer')?.disabled, natifCache: (() => { const i = d.querySelector('input[type="file"]'); if (!i) return false; const st = getComputedStyle(i); return st.opacity === '0' && st.position === 'absolute'; })() } : null; })()`);
+  ok(depot && /Déposer un document/.test(depot.titre) && depot.gris === true && depot.natifCache, 'le dépôt s\'ouvre, « Déposer » gris sans fichier, le contrôle natif (libellé anglais du navigateur) est caché');
   await s.capturer(`${dossier}filed-depot-1440.jpg`, { qualite: 55 });
   s.fermer();
 }

@@ -1310,8 +1310,11 @@
 .esp .esp-carte-corps[style*="grid"] {
   grid-template-columns: minmax(0, 1fr);
 }
-/* le contrôle de fichier natif, caché mais accessible (focus sur le label) */
-.esp .esp-fichier-natif {
+/* le contrôle de fichier natif, caché mais accessible (focus sur le label).
+   SANS le préfixe .esp : les dialogues sont rendus dans un portail, hors de
+   la racine .esp — vu le 05/10, le « Choose File » du navigateur dépassait
+   au-dessus de notre bouton. */
+.esp-fichier-natif {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1319,7 +1322,7 @@
   overflow: hidden;
   pointer-events: none;
 }
-.esp .esp-fichier-natif:focus-visible + label {
+.esp-fichier-natif:focus-visible + label {
   outline: 2px solid rgba(5, 5, 5, 0.7);
   outline-offset: 2px;
 }
