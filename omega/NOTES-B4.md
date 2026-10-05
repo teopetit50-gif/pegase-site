@@ -1,14 +1,14 @@
 # Session B4 — TAMILA, le module des cabinets d'avocats
 
 Branche `worker-b4`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE.
-Dernière mise à jour : 05/10/2026, 23 h (lot B4-1 envoyé au coordinateur).
+Dernière mise à jour : 06/10/2026, matin (lot B4-2 : corrections du retour de recette, b4_01 et b4_04, pièces chiffrées à l'écran).
 
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **25 %** — 13 fichiers de tests écrits (≈ 340 contrôles) d'après la photographie du socle, aucun encore joué | les lots joués par le coordinateur, verts ; chaque rouge corrigé |
-| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **35 %** — l'écran est écrit, vert (tsc, eslint, build, recette cinq largeurs), sur l'exemple ; la base réelle n'a pas encore été appelée | l'écran en ligne (fusion), les portes appelées avec le compte de recette, la navigation (ecrans.ts), le coffre |
+| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **60 %** — joué par le coordinateur sur a05d25c : 6 fichiers verts sur 11 (01, 02, 03, 06, 07, 08) ; les 5 rouges corrigés (3 défauts de mes tests, 1 trou du socle → b4_04) ; 12 et 13 écrits, pas encore joués | 00 à 13 verts sur la recette après b4_01 à b4_04 |
+| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **50 %** — écran complet (9 cartes, dépôt de pièce chiffrée), onglet dans la navigation, vert (tsc, eslint, build, recette cinq largeurs) ; la base réelle n'a pas encore été appelée | fusion sur main, relecture avec le compte du banc (tamila_installer puis un dossier réel), le coffre |
 
 ## Ce qui manque, ce que Teo doit fournir
 
@@ -185,7 +185,52 @@ fait jouer l'augmentation d'un mois de l'art. 915-4).
   d'une pièce chiffrée depuis l'écran (question 3) ; les captures en base
   réelle avec le compte du banc.
 
-## 5. Lot B4-1 au coordinateur (05/10, 23 h)
+## 5. Retour de recette sur a05d25c (coordinateur, 05/10 soir) et ce qui en est fait
+
+- 6 fichiers verts sur 11 : 01 (10/10), 02 (31/31), 03 (29/29), 06 (24/24), 07 (28/28), 08 (25/25).
+- **04 et 10** « Vous n'écrivez pas dans ce dossier » : l'assistante (collaborateur) posait une
+  date sans être membre du dossier — un collaborateur n'écrit qu'en étant membre. Corrigé dans
+  `tests.tamila_scene` : elle entre en intervenante.
+- **05** `pieces_une_fois` (UNIQUE client, module, objet, sha256) : `tests.tamila_piece` réutilisait
+  le même sha. Corrigé : un sha par nom de pièce.
+- **09** `demandes_validation_idempotence` : **trou du socle** — la clé de
+  `tamila_demander_cloture` est à la seconde ; deux demandes dans la même seconde (demande, décision
+  du gérant, annulation, nouvelle demande) se confondent. Migration `b4_04_tamila_demander_cloture.sql`
+  (clé au microseconde, `create or replace`).
+- **11** test 38 : le journal n'a de ligne qu'après un geste journalisé ; le test annule un délai
+  avant de compter. Corrigé.
+- Faits reçus : 26 règles de procédure (cpc et cpc2017 : 902, 906_1, 906_2.*, 908, 909, 910.*,
+  911.signification), `public.pieces` complète (chiffrement CHECK 'dossier:v1', UNIQUE sur le sha),
+  `tamila_registre` déjà en security_invoker (lot 19p : pas de b4_05), politique Storage INSERT des
+  membres sous `<client>/<objet_type>/…` (lot 19o), banc sans `tamila_reglages`, comptes referent /
+  daf / daf2 valideurs, mot de passe Recette-Omega-2026, `private.preparer_effacement(uuid, text, text)`.
+- **b4_01_tamila_deposer_piece.sql** posé : la porte de dépôt calquée sur filed_deposer_piece,
+  chiffrement obligatoire, idempotente sur le sha du chiffré, journalisée ; test 13. L'écran dépose :
+  le fichier est chiffré dans le navigateur avec la clé du dossier (`chiffrerOctets`), son empreinte
+  est celle du chiffré, il part au bucket sous `<client>/tamila_dossier/<dossier>/<nom>.chiffre`, puis
+  la porte. Carte « Pièces » (statut, chiffrée, nature, motif du lecteur).
+- `components/espace/ecrans.ts` : la ligne `tamila` (et son type), autorisée (réponse 9).
+
+## 6. Lot B4-2 au coordinateur (06/10, matin) — SHA 367fc44 + captures
+
+À poser : `b4_01_tamila_deposer_piece.sql`, `b4_04_tamila_demander_cloture.sql` (b4_02 et b4_03 déjà
+posés). À rejouer : `00_jeu_tamila.sql` (modifié), puis 04, 05, 09, 10, 11 (corrigés), 12 et 13
+(nouveaux) ; les six verts n'ont pas changé de fond (00 ajoute l'assistante en intervenante : 03 et 07
+restent valables). **Écran prêt à fusionner** : `app/espace/tamila/page.tsx`,
+`components/espace/tamila/{types,chiffrement,regles,exemples,portes}.ts`,
+`components/espace/tamila/{EcranTamila,DossierTamila}.tsx`, `components/espace/tamila/tamila.css`,
+`components/espace/ecrans.ts` (ligne tamila + son type), `omega/recette-b4/*`.
+
+## 7. Prochaine étape
+
+1. Relecture en base réelle avec le compte du banc (dev pointé sur la recette, variables
+   NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY données par le coordinateur) :
+   installer Tamila, ouvrir un dossier chiffré, parties, appel, confirmer un délai avec referent,
+   déposer une pièce ; captures `omega/recette-b4/reel-*.jpg`.
+2. Souche locale (`omega/tests/tamila/souche_locale/`, en cours) : finir 03_pgtap et jouer.sh pour
+   jouer les tests ici avant chaque lot.
+
+## 5 bis. Lot B4-1 au coordinateur (05/10, 23 h)
 
 1. Poser `omega/tests/tamila/00_jeu_tamila.sql` (après le `00_installation.sql`
    d'A5), puis jouer `01` à `11` dans l'ordre et me renvoyer la sortie brute de
@@ -201,3 +246,6 @@ fait jouer l'augmentation d'un mois de l'art. 915-4).
   /secteurs/avocats. Scénario écrit, envoyé au coordinateur.
 - 05/10, 22 h–23 h — tests 00 à 12, migrations b4_02 et b4_03, écran
   /espace/tamila et sa recette. Lot B4-1 envoyé.
+- 05/10, 23 h — pause demandée par le coordinateur (limite d'usage) ; reprise le 06/10.
+- 06/10, matin — retour de recette traité (00, 11, b4_04), b4_01 + test 13, carte Pièces et dépôt
+  chiffré à l'écran, onglet dans ecrans.ts, souche locale commencée. Lot B4-2 envoyé (367fc44).
