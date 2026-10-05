@@ -26,6 +26,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_06_filed_lot6a_pilotage.sql` | `filed_reglements`, `filed_litiges` et leurs portes ; `filed_engage_mois`, `filed_echeancier`, `filed_delai_traitement`, `filed_pieces_en_cours` ; huit indicateurs `filed.*` et `private.filed_mesurer` ; `filed_exporter_tableau` (CSV, journal avec empreinte) ; exports programmés (`filed_programmer_export`, `filed_arreter_export`, `private.filed_produire_exports`). |
 | `a4_07_filed_lot4f_circuit_validation.sql` | `filed_circuits` (→ `regles_validation`), `filed_validations`, `filed_factures_annexes` ; `filed_regler_circuit`, `filed_retirer_circuit`, `filed_joindre_annexe`, `filed_comptabiliser_facture` ; `private.filed_deposer_validation` (type `filed.valider_facture[.<centre>][.direction]`), `filed_decider_facture`, `filed_relancer_validations`, `filed_saisisseurs`. |
 | `a4_09_filed_lot4g_acquittement_alerte.sql` | correctif : `private.filed_reconnaitre_charge` acquitte l'alerte « facture attendue absente » (`alertes.acquittee_le`) quand la facture arrive tard. |
+| `a4_10_filed_lot7_identite_fournisseur.sql` | lot 7 : `filed_fournisseurs.identite_verifiee_le / identite_source / identite_verdict` ; `private.filed_completer_fournisseur_lu` (SIREN, TVA, IBAN lus par le lecteur remontés vers `fournisseur_lu`, `filed_factures.iban` et le fournisseur) en tête de `filed_controler_facture` (repère, corps en place) ; `filed_repondre_verification` pose le verdict sur le fournisseur et recontrôle ses factures ; `filed_attester_identite` (une personne) ; `filed_controles_identite` lit le verdict ; porte `filed_confirmer_fournisseur`. |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -38,7 +39,7 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## À faire par le coordinateur, dans l'ordre
 
-1. Appliquer `a4_01` → `a4_09` sur la recette.
+1. Appliquer `a4_01` → `a4_10` sur la recette (a4_10 : lot 7, après tout le reste).
 2. **Après `a4_02`** : retirer à la main l'ancienne contrainte CHECK de `filed_factures.statut`
    (celle sans nom explicite, « statut in (a_completer, bloquee, a_valider, ecartee) »). Sans
    cela, la première validation échoue sur « violates check constraint ». La v2 la remplace.
@@ -98,6 +99,22 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
   peuvent passer à `atteste: true` une fois la recette verte et la production poussée.
 - Le `cron.job 'omega-filed'` suffit : le balayage du lot 4 tourne dans `filed_traiter`, une
   fois par heure et par organisation. Aucune tâche cron à ajouter.
+
+## Lot 7 (05/10 soir) — première vraie facture
+
+- Constat en base réelle (A3) : `filed_integrer_facture` ne remonte que `{nom}` dans `fournisseur_lu`
+  alors que le lecteur a lu `fournisseur.siren / tva / iban` ; `identite.siren` disait à tort
+  « aucun SIREN ». Réponse en deux temps : (1) a4_10 remonte ces valeurs au contrôle (répare aussi
+  la facture déjà intégrée au prochain recontrôle) ; (2) la remontée à l'intégration même, dans
+  `filed_integrer_facture` / `filed_creer_fournisseur`, attend leurs corps (demandés au
+  coordinateur, points A à D) : lot 7b.
+- Verdict externe : l'ouvrier B7 passe par `public.filed_repondre_verification` (service_role) ;
+  le verdict se pose sur `filed_fournisseurs.identite_*` et les factures sont recontrôlées.
+  `identite.registre` passe à « ok » quand le verdict est bon. Une personne peut attester
+  (`filed_attester_identite`).
+- `filed_confirmer_fournisseur(p_fournisseur, p_motif)` : gérant, admin, valideur ; jamais le
+  déposant de la pièce d'origine ; IBAN proposé avec lui validé ; demande `filed.valider_fournisseur`
+  en attente annulée ; factures recontrôlées. Test `a4_05_identite_fournisseur.sql`.
 
 ## Lignes de factures.ts rendues vraies
 

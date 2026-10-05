@@ -51,7 +51,12 @@ create or replace function private.battre(p_client uuid, p_moteur text, p_detail
   insert into public.battements (client_id, module, dernier_le) values (p_client, p_moteur, now()) on conflict (client_id, module) do update set dernier_le = now() $$;
 create or replace function private.regler_battement(p_client uuid, p_moteur text, p_tous_les interval, p_x uuid, p_fuseau text) returns void language sql as $$ select null::void $$;
 create or replace function private.filed_integrer_piece(p_piece uuid) returns text language sql as $$ select 'souche' $$;
-create or replace function private.filed_recontroler_fournisseur(p_f uuid) returns void language sql as $$ select null::void $$;
+create or replace function private.filed_recontroler_fournisseur(p_f uuid) returns void language plpgsql security definer set search_path to '' as $$
+declare r record; begin
+  for r in select f.id from public.filed_factures f where f.fournisseur_id = p_f and f.statut in ('a_completer', 'bloquee', 'a_valider') loop
+    perform private.filed_controler_facture(r.id);
+  end loop;
+end $$;
 create or replace function private.filed_rapprocher_facture(p_facture uuid) returns void language plpgsql security definer set search_path to '' as $$
 declare v_f public.filed_factures; v_l public.filed_factures_lignes; v_c public.filed_commandes_lignes; v_r public.filed_reglages;
 begin

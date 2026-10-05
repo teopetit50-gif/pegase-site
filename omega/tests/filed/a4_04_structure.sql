@@ -34,6 +34,8 @@ begin
   assert pg_get_functiondef('private.filed_traiter'::regproc) like '%filed_balayer_lot4%', 'filed_traiter branché';
   assert pg_get_functiondef('private.filed_executer_decision'::regproc) like '%filed_decider_facture%', 'filed_executer_decision branché';
   assert pg_get_functiondef('private.filed_rapprocher_ligne'::regproc) like '%dans_tolerance%', 'filed_rapprocher_ligne branché';
+  assert pg_get_functiondef('private.filed_controler_facture'::regproc) like '%filed_completer_fournisseur_lu%', 'lot 7 branché en tête de filed_controler_facture';
+  assert exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'filed_fournisseurs' and column_name = 'identite_verdict'), 'verdict d''identité sur le fournisseur';
   raise notice 'STRUCTURE : tous les contrôles passent.';
 end $$;
 rollback;
