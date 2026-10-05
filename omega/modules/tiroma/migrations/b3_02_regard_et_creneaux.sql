@@ -270,12 +270,16 @@ begin
                'preferences_ok', x.preferences_ok, 'ne_pas_contacter', x.ne_pas_contacter) order by x.rang), '[]'::jsonb)
         into v_cands
       from (
-        select k.*, row_number() over (order by k.priorite, k.gene desc, k.depuis nulls last, k.patient_id) as rang
-        from classes k
-        where not k.ne_pas_contacter
-          and k.preavis_ok
-          and (not g.tenir_duree or k.duree_ok)
-          and (not g.tenir_preferences or k.preferences_ok)
+        select u.*, row_number() over (order by u.priorite, u.gene desc, u.depuis nulls last, u.patient_id) as rang
+        from (
+          -- Un patient n'est proposé qu'une fois, par sa meilleure voie (plan avant attente avant contrôle).
+          select distinct on (k.patient_id) k.*
+          from classes k
+          where not k.ne_pas_contacter
+            and k.preavis_ok
+            and (not g.tenir_duree or k.duree_ok)
+            and (not g.tenir_preferences or k.preferences_ok)
+          order by k.patient_id, k.priorite, k.depuis nulls last) u
         limit g.nb_propositions) x;
     end if;
 

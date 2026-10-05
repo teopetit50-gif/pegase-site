@@ -19,10 +19,12 @@ begin
   select id into v_mondesir from public.tiroma_patients where entite_id = entite and source_ref = 'P007';
 
   perform tests.b3_endosser('referent');
-  v_attente := public.tiroma_ajouter_attente(banc, entite, v_nestor, 'controle', 20, null, 60, '[{"jours": [1, 2, 3, 4, 5], "demi_journee": "matin"}]'::jsonb, false);
-  return next ok(v_attente is not null, 'l''assistante inscrit Rosalie Nestor en liste d''attente');
-  return next ok((select l.source = 'tiroma' and l.ajoute_par = tests.b3_compte('referent') and l.famille = 'controle' and l.duree_min = 20 and l.retire_le is null
-                  from public.tiroma_liste_attente l where l.id = v_attente), 'source « tiroma », inscrite par elle, contrôle de 20 minutes');
+  return next throws_ok(format('select public.tiroma_ajouter_attente(%L, %L, %L, ''soin_conservateur'', 20, null, 60, ''{"x": 1}''::jsonb)', banc, entite, v_nestor),
+                        '22023', null, 'des disponibilités qui ne forment pas un tableau sont refusées (22023)');
+  v_attente := public.tiroma_ajouter_attente(banc, entite, v_nestor, 'soin_conservateur', 20, null, 60, null, false);
+  return next ok(v_attente is not null, 'l''assistante inscrit Rosalie Nestor en liste d''attente (soin, 20 min)');
+  return next ok((select l.source = 'tiroma' and l.ajoute_par = tests.b3_compte('referent') and l.famille = 'soin_conservateur' and l.duree_min = 20 and l.retire_le is null
+                  from public.tiroma_liste_attente l where l.id = v_attente), 'source « tiroma », inscrite par elle, soin de 20 minutes');
   v_bis := public.tiroma_ajouter_attente(banc, entite, v_nestor, null, 30, null, null, null, true);
   return next is(v_bis, v_attente, 'une seconde inscription du même patient complète la première (une seule entrée ouverte)');
   return next ok((select l.duree_min = 30 and l.drapeau_gene from public.tiroma_liste_attente l where l.id = v_attente), 'durée mise à jour, patient gêné noté');

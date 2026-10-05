@@ -19,10 +19,10 @@ Dernière mise à jour : 06/10/2026 (reprise après la pause de Teo).
 ## État exact au 06/10 et prochaine étape
 
 - **Posé sur la recette** (par le coordinateur) : b3_01 (portes + droits), b3_02 à b3_05 (portes de lecture, avec variantes `_pour`), b3_06 (point du matin + cron tiroma-matin). Lot 1 (`^test_b3_0[1-4]`) : 98/98 verts.
-- **Écrit, pas encore posé** : `b3_07_mutuelle.sql` (porte `tiroma_noter_mutuelle`), `b3_08_heures_locales.sql` (correctif de `private.tiroma_v_instant` : les heures d'un export sont lues dans le fuseau du cabinet).
-- **Écrit, pas encore joué** : `00b_export_logosw.sql` (export Logos_w d'exemple, dix jeux, dates relatives ; dépôt par `recevoir_releve` → `commencer_releve` → `deposer_lignes` → `terminer_lecture`, puis `avancer_releves()` et `tiroma_traiter_travaux()`), tests `05_releve_initial`, `06_releve_courant`, `07_portes_metier`, `08_point_du_matin`.
-- **Prochaine étape** : le coordinateur pose b3_07 et b3_08, pose la ligne `reglages_envois (banc, tiroma, essai, sante=true)`, rejoue 00, 00b puis 05 → 08, me renvoie les sorties brutes ; je corrige jusqu'au vert. Puis : tests 09 (mesures du soir par `tiroma_horloge`, indicateurs inscrits — fait F8), 10 (relevé en retard, purge/conservation — fait F9), et l'écran branché sur `tiroma_noter_mutuelle`.
-- **Écran** : /espace/tiroma au SHA f7194d6, « prêt à fusionner » envoyé ; fichiers à prendre : `app/espace/tiroma/page.tsx`, `components/espace/tiroma/*` (types, exemple, portes, libelles, EcranTiroma, Creneaux, Plans, AvantRendezVous, ChargeFauteuils, Cabinet), `omega/recette-b3/*` ; ligne à ajouter dans `components/espace/ecrans.ts` : `{ cle: "tiroma", href: "/espace/tiroma", libelle: "Cabinet dentaire", court: "TIROMA" }`.
+- **Écrit, pas encore posé** : `b3_07_mutuelle.sql` (porte `tiroma_noter_mutuelle`), `b3_08_heures_locales.sql` (correctif de `private.tiroma_v_instant` : les heures d'un export sont lues dans le fuseau du cabinet), `b3_09_liste_attente.sql` (portes `tiroma_ajouter_attente` / `tiroma_retirer_attente`), et `b3_02` à reposer (un patient, une voie).
+- **Écrit, pas encore joué** : `00b_export_logosw.sql` (export Logos_w d'exemple, dix jeux, dates relatives ; dépôt par `recevoir_releve` → `commencer_releve` → `deposer_lignes` → `terminer_lecture`, puis `avancer_releves()` et `tiroma_traiter_travaux()`), tests `05_releve_initial`, `06_releve_courant`, `07_portes_metier`, `08_point_du_matin`, `09_mesures_du_soir`, `10_retard_et_purge`, `11_liste_attente`.
+- **Prochaine étape** : le coordinateur pose b3_07 et b3_08, pose la ligne `reglages_envois (banc, tiroma, essai, sante=true)`, rejoue 00, 00b puis 05 → 08, me renvoie les sorties brutes ; je corrige jusqu'au vert. Puis : le gabarit validé du point sans santé (b3_10), l'inscription en liste d'attente depuis l'écran, la règle santé stricte du socle commun.
+- **Écran** : /espace/tiroma, « prêt à fusionner » envoyé (dernier SHA de worker-b3 : la mutuelle se note depuis la carte Plans) ; fichiers à prendre : `app/espace/tiroma/page.tsx`, `components/espace/tiroma/*` (types, exemple, portes, libelles, EcranTiroma, Creneaux, Plans, AvantRendezVous, ChargeFauteuils, Cabinet), `omega/recette-b3/*` ; ligne à ajouter dans `components/espace/ecrans.ts` : `{ cle: "tiroma", href: "/espace/tiroma", libelle: "Cabinet dentaire", court: "TIROMA" }`.
 
 ## Le scénario réel de bout en bout (ce que les tests jouent)
 
@@ -62,6 +62,8 @@ d'écriture directe hors RLS.
 7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte « permis_sante ET agree_sante » à proposer sur le socle commun après le lot 2.
 8. **Liste d'attente « commune »** (`source = 'tiroma'`) sans porte d'écriture : à faire (b3_09) après le lot 2.
 9. **`private.tiroma_trace_ecriture()` inexécutable par authenticated** (23 triggers) : corrigé côté socle par le coordinateur (lot 19u).
+10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** `gabarits_messages` (module tiroma, canal email, `donnees_sante = false`) : à écrire (b3_10) une fois la forme des gabarits connue (demande d'extrait au coordinateur).
+11. **Un même patient pouvait être proposé deux fois** pour un créneau (par son plan et par la liste d'attente) : corrigé dans b3_02 (une voie par patient, la meilleure) — à reposer.
 
 ## Journal des échanges avec le coordinateur
 

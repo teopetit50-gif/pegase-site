@@ -82,9 +82,12 @@ begin
                jsonb_build_object('email', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
                'Point du matin — Tiroma', '1 créneau à reprendre, 4 plans sans rendez-vous, 6 vérifications : https://app.omegaai.fr/espace/tiroma', null,
                'b3:sante:compteurs:' || v_cabinet::text, entite, false, false, null, '{}'::jsonb);
-  return next ok((select statut in ('a_valider', 'differe', 'pret') from public.envois where id = v_envoi),
-                 'courriel sans donnée de santé (compteurs + lien) : accepté (' || (select statut from public.envois where id = v_envoi) || ')');
-  return next ok((select not donnees_sante from public.envois where id = v_envoi), 'il n''est pas marqué santé');
+  -- Le socle tient tout texte libre d'un module de santé pour de la santé (creer_envoi : v_contexte_sante) : même le
+  -- courriel des seuls compteurs est bloqué. Pour qu'il parte, il faudra un gabarit validé (gabarits_messages,
+  -- donnees_sante = false) : trou n° 10 dans omega/NOTES-B3.md.
+  return next is((select statut || '/' || coalesce(verrou, '') from public.envois where id = v_envoi), 'bloque/SANTE_HORS_CANAL_AGREE',
+                 'courriel des compteurs en texte libre : bloqué lui aussi, le module est un contexte de santé (il faudra un gabarit validé)');
+  return next ok((select donnees_sante from public.envois where id = v_envoi), 'le socle l''a marqué santé de lui-même');
 end $f$;
 
 select * from runtests('tests'::name, '^test_b3_08_');
