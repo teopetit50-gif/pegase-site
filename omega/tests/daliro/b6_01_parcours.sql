@@ -29,7 +29,7 @@ begin
   -- ── 1. Omega installe Daliro, formule Chantiers (serveur) ──
   perform tests.redevenir_admin();
   perform public.btp_installer(v_client, 'chantiers');
-  return next is((select r.quota_chantiers || '/' || r.quota_comptes_bureau from public.btp_reglages r where r.client_id = v_client),
+  return next is((select g.quota_chantiers || '/' || g.quota_comptes_bureau from public.btp_reglages g where g.client_id = v_client),
                  '20/5', '1. Formule Chantiers : 20 chantiers, 5 comptes bureau');
   return next ok(tests.b6_journal(v_client, 'daliro.installe') is not null, '1. L''installation est au journal');
 

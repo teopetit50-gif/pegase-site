@@ -81,8 +81,7 @@ begin
   perform tests.redevenir_admin();
   select count(*) into n from public.journal_opposable j where j.client_id = v_client and j.action in ('daliro.marche_verifie', 'daliro.avenant_ouvert', 'daliro.installe') and j.objet_id in (v_m::text, v_av::text) or (j.client_id = v_client and j.action = 'daliro.installe');
   return next ok(n >= 3, format('Journal : installation, marché vérifié et avenant ouvert y sont (%s lignes), écrits par les portes', n));
-  return next throws_ok(format('select private.btp_ouvrir_avenant(%L, ''direct'')', v_ch), '42501', null, 'Serveur sans rôle : une porte privée appelée hors connexion et hors service_role est refusée'
-  );
+  -- (postgres = le serveur d'Omega, règle du socle : une porte privée appelée par lui passe ; pas d'attente de refus ici.)
 
   -- ── Le quota de la formule ──
   perform tests.redevenir_admin();

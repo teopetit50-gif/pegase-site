@@ -254,6 +254,10 @@ create or replace view public.btp_debourse_lots with (security_invoker = true) a
    left join avenants a on a.client_id = l.client_id and a.lot_id = l.id
    left join factures f on f.client_id = l.client_id and f.lot_id = l.id;
 
+-- Les vues security_invoker appellent ces fonctions de private sous le rôle du lecteur (règle du lot 19w : exécutables par authenticated).
+grant execute on function private.btp_est_serveur() to authenticated, service_role;
+grant execute on function private.btp_voit_prix(uuid) to authenticated, service_role;
+
 revoke all on public.btp_factures_chantier_detail from anon;
 revoke all on public.btp_debourse_lots from anon;
 grant select on public.btp_factures_chantier_detail to authenticated;
