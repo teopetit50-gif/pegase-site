@@ -12,6 +12,11 @@
      · modifier : RPC modifier_demande(p_demande, p_resume, p_montant,
        p_payload) → id de la nouvelle demande ;
      · déléguer : INSERT dans public.delegations (policy du délégant) ;
+       révoquer : UPDATE revoquee_le sur sa propre délégation (seule
+       écriture directe que la policy ouvre au délégant) ;
+     · annuler : UPDATE statut = 'annulee' sur SA demande en attente (la
+       policy « le demandeur peut annuler » — la seule écriture directe sur
+       demandes_validation) ;
      · pièce jointe (lot 19, 05/10) : approbations.piece_id → public.pieces.
        Pour une demande du module FILED, le fichier est déposé par la porte
        du module, filed_deposer_piece, après envoi dans le bucket
@@ -140,6 +145,18 @@ export async function deleguer(o: {
   if (error) throw new ErreurPorte(message(error));
 }
 
+export async function revoquer(delegation: Delegation): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("delegations").update({ revoquee_le: new Date().toISOString() }).eq("id", delegation.id).is("revoquee_le", null);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function annuler(demande: Demande): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("demandes_validation").update({ statut: "annulee" }).eq("id", demande.id).eq("statut", "en_attente");
+  if (error) throw new ErreurPorte(message(error));
+}
+
 async function sha256Hex(fichier: File): Promise<string> {
   const empreinte = await crypto.subtle.digest("SHA-256", await fichier.arrayBuffer());
   return Array.from(new Uint8Array(empreinte)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -172,8 +189,10 @@ export async function joindrePiece(o: { demande: Demande; client_id: string; ent
       p_expediteur: o.expediteur,
     });
     if (error) throw new ErreurPorte(message(error));
+    /* filed_deposer_piece rend {document, reference, piece, etat, doublon_de}
+       (coordinateur, 05/10) : la clé est `piece` ; `piece_id` reste lu en repli */
     const r = (data ?? {}) as Record<string, unknown>;
-    const piece_id = typeof r.piece_id === "string" ? r.piece_id : typeof r.piece === "string" ? r.piece : null;
+    const piece_id = typeof r.piece === "string" ? r.piece : typeof r.piece_id === "string" ? r.piece_id : null;
     return { piece_id, chemin };
   }
 

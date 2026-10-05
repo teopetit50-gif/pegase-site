@@ -32,6 +32,7 @@ import type { Approbation, Delegation, Demande, Entite, Role } from "../types";
 import { GROUPES, STATUTS, compteApprobations, groupeDe, trier, type Decideur } from "./regles";
 import { chargerContexte, chargerFile, type ContexteSocle } from "./portes";
 import DetailDemande from "./DetailDemande";
+import MesDelegations from "./MesDelegations";
 
 type Etat = {
   demandes: Demande[];
@@ -197,6 +198,14 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
     setChoix(d.id);
   }, []);
 
+  const annulerLocal = useCallback((id: string) => {
+    setLocal((prev) => ({ ...prev, demandes: prev.demandes.map((x) => (x.id === id ? { ...x, statut: "annulee" as const, decide_le: new Date().toISOString() } : x)) }));
+  }, []);
+
+  const revoquerLocal = useCallback((id: string) => {
+    setLocal((prev) => ({ ...prev, delegations: prev.delegations.map((g) => (g.id === id ? { ...g, revoquee_le: new Date().toISOString() } : g)) }));
+  }, []);
+
   const ajouterDelegationLocal = useCallback((g: Delegation) => {
     setLocal((prev) => ({ ...prev, delegations: [g, ...prev.delegations] }));
   }, []);
@@ -253,93 +262,98 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
       ) : null}
 
       <div className="esp-grille">
-        <section className="esp-carte" aria-label="File des demandes">
-          <div className="esp-carte-tete">
-            <h2 className="esp-carte-titre">File</h2>
-            <span className="esp-kpi-sous">{visibles.length} demande{visibles.length > 1 ? "s" : ""}</span>
-          </div>
-          <div className="esp-carte-corps" style={{ display: "grid", gap: 8 }}>
-            <div className="esp-filtres" role="group" aria-label="Filtrer la file">
-              {FILTRES.map((f) => (
-                <button key={f.cle} type="button" className="esp-filtre" aria-pressed={filtre === f.cle} onClick={() => setFiltre(f.cle)}>
-                  {f.libelle}
-                </button>
-              ))}
+        <div style={{ display: "grid", gap: 14 }}>
+          <section className="esp-carte" aria-label="File des demandes">
+            <div className="esp-carte-tete">
+              <h2 className="esp-carte-titre">File</h2>
+              <span className="esp-kpi-sous">{visibles.length} demande{visibles.length > 1 ? "s" : ""}</span>
             </div>
-            {modules.length > 1 ? (
-              <div className="esp-filtres" role="group" aria-label="Filtrer par module">
-                <button type="button" className="esp-filtre" aria-pressed={module === null} onClick={() => setModule(null)}>
-                  Tous les modules
-                </button>
-                {modules.map((m) => (
-                  <button key={m} type="button" className="esp-filtre" aria-pressed={module === m} onClick={() => setModule(m)}>
-                    {libelleModule(m)}
+            <div className="esp-carte-corps" style={{ display: "grid", gap: 8 }}>
+              <div className="esp-filtres" role="group" aria-label="Filtrer la file">
+                {FILTRES.map((f) => (
+                  <button key={f.cle} type="button" className="esp-filtre" aria-pressed={filtre === f.cle} onClick={() => setFiltre(f.cle)}>
+                    {f.libelle}
                   </button>
                 ))}
               </div>
-            ) : null}
-          </div>
+              {modules.length > 1 ? (
+                <div className="esp-filtres" role="group" aria-label="Filtrer par module">
+                  <button type="button" className="esp-filtre" aria-pressed={module === null} onClick={() => setModule(null)}>
+                    Tous les modules
+                  </button>
+                  {modules.map((m) => (
+                    <button key={m} type="button" className="esp-filtre" aria-pressed={module === m} onClick={() => setModule(m)}>
+                      {libelleModule(m)}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
 
-          {!etat ? (
-            <Chargement texte="Lecture de la file…" />
-          ) : visibles.length === 0 ? (
-            <Vide titre="Rien à décider">
-              {filtre === "a_decider" ? "Aucune demande n'attend votre décision pour l'instant." : "Aucune demande ne correspond à ce filtre."}
-            </Vide>
-          ) : (
-            <>
-              {[...GROUPES, { cle: "decidees" as const, libelle: "Décidées" }].map((g) => {
-                const liste = groupes.get(g.cle);
-                if (!liste?.length) return null;
-                return (
-                  <div key={g.cle}>
-                    <div className="esp-groupe-titre" data-teinte={"teinte" in g ? g.teinte : undefined}>
-                      <span>{g.libelle}</span>
-                      <span>{liste.length}</span>
-                    </div>
-                    <ul className="esp-liste" role="listbox" aria-label={g.libelle}>
-                      {liste.map((d) => {
-                        const c = compteApprobations(d, etat.approbations);
-                        const grp = groupeDe(d);
-                        const moiDemandeur = d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id;
-                        return (
-                          <li key={d.id}>
-                            <button
-                              type="button"
-                              role="option"
-                              aria-selected={choisie === d.id}
-                              className="esp-item"
-                              onClick={() => {
-                                setChoix(d.id);
-                                if (window.innerWidth < 1024) document.getElementById("esp-detail")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                              }}
-                            >
-                              <span className="esp-item-haut">
-                                <Pastille teinte="noir">{libelleModule(d.module)}</Pastille>
-                                {d.statut !== "en_attente" ? <Pastille teinte={STATUTS[d.statut].teinte}>{STATUTS[d.statut].libelle}</Pastille> : null}
-                                {d.approbations_requises > 1 ? <Pastille contour>{c.faites}/{c.requises} approbations</Pastille> : null}
-                                {moiDemandeur ? <Pastille teinte="ambre">Saisie par vous</Pastille> : null}
-                              </span>
-                              <span className="esp-item-montant">{d.montant !== null ? montant(d.montant, d.devise) : ""}</span>
-                              <span className="esp-item-titre">{d.resume}</span>
-                              <span className="esp-item-bas">
-                                <span className="esp-item-echeance" data-retard={grp === "retard"} data-proche={grp === "aujourdhui"}>
-                                  {d.echeance ? `Échéance ${relatif(d.echeance)}` : "Sans échéance"}
+            {!etat ? (
+              <Chargement texte="Lecture de la file…" />
+            ) : visibles.length === 0 ? (
+              <Vide titre="Rien à décider">
+                {filtre === "a_decider" ? "Aucune demande n'attend votre décision pour l'instant." : "Aucune demande ne correspond à ce filtre."}
+              </Vide>
+            ) : (
+              <>
+                {[...GROUPES, { cle: "decidees" as const, libelle: "Décidées" }].map((g) => {
+                  const liste = groupes.get(g.cle);
+                  if (!liste?.length) return null;
+                  return (
+                    <div key={g.cle}>
+                      <div className="esp-groupe-titre" data-teinte={"teinte" in g ? g.teinte : undefined}>
+                        <span>{g.libelle}</span>
+                        <span>{liste.length}</span>
+                      </div>
+                      <ul className="esp-liste" role="listbox" aria-label={g.libelle}>
+                        {liste.map((d) => {
+                          const c = compteApprobations(d, etat.approbations);
+                          const grp = groupeDe(d);
+                          const moiDemandeur = d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id;
+                          return (
+                            <li key={d.id}>
+                              <button
+                                type="button"
+                                role="option"
+                                aria-selected={choisie === d.id}
+                                className="esp-item"
+                                onClick={() => {
+                                  setChoix(d.id);
+                                  if (window.innerWidth < 1024) document.getElementById("esp-detail")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }}
+                              >
+                                <span className="esp-item-haut">
+                                  <Pastille teinte="noir">{libelleModule(d.module)}</Pastille>
+                                  {d.statut !== "en_attente" ? <Pastille teinte={STATUTS[d.statut].teinte}>{STATUTS[d.statut].libelle}</Pastille> : null}
+                                  {d.approbations_requises > 1 ? <Pastille contour>{c.faites}/{c.requises} approbations</Pastille> : null}
+                                  {moiDemandeur ? <Pastille teinte="ambre">Saisie par vous</Pastille> : null}
                                 </span>
-                                <span>{nommerEntite(d.entite_id)}</span>
-                                <span>Demandé par {nommer(d.demandeur_id)} le {dateCourte(d.cree_le)}</span>
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                );
-              })}
-            </>
-          )}
-        </section>
+                                <span className="esp-item-montant">{d.montant !== null ? montant(d.montant, d.devise) : ""}</span>
+                                <span className="esp-item-titre">{d.resume}</span>
+                                <span className="esp-item-bas">
+                                  <span className="esp-item-echeance" data-retard={grp === "retard"} data-proche={grp === "aujourdhui"}>
+                                    {d.echeance ? `Échéance ${relatif(d.echeance)}` : "Sans échéance"}
+                                  </span>
+                                  <span>{nommerEntite(d.entite_id)}</span>
+                                  <span>Demandé par {nommer(d.demandeur_id)} le {dateCourte(d.cree_le)}</span>
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </section>
+          {etat ? (
+            <MesDelegations delegations={etat.delegations} moi={moi.id} source={source} nommer={nommer} onRevocationLocale={revoquerLocal} recharger={charger} />
+          ) : null}
+        </div>
 
         <section id="esp-detail" className="esp-detail-mobile" aria-label="Détail de la demande">
           {etat && demande ? (
@@ -357,6 +371,7 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
               nommerEntite={nommerEntite}
               onDecisionLocale={appliquerLocal}
               onDemandeLocale={ajouterLocal}
+              onAnnulationLocale={annulerLocal}
               onDelegationLocale={ajouterDelegationLocal}
               recharger={charger}
             />

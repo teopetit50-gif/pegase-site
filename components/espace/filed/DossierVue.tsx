@@ -16,15 +16,15 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, Ban, Check, CheckCircle2, FolderInput, Landmark, Link2, Pencil, ShieldCheck, Unlock } from "lucide-react";
+import { AlertTriangle, Ban, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, ShieldCheck, Unlock } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, masquerIban, montant, nombreFr, pourcent } from "../format";
-import type { Controle, DossierFiled, Fournisseur, MotifRefus, NatureDocument } from "../types";
+import type { Commande, Controle, DossierFiled, Fournisseur, LigneCommande, LigneFacture, MotifRefus, NatureDocument } from "../types";
 import { CHAMPS_CORRIGEABLES, CHAMP_PAR_COLONNE, ETATS, FAMILLES_CONTROLE, NATURES, STATUTS_FACTURE, grouperControles, libelleChamp } from "./etats";
-import { bloquerFournisseur, classerDocument, confirmerValeurs, corrigerFacture, leverAnomalie, proposerIban, rattacherFournisseur } from "./portes";
+import { apparierLigne, bloquerFournisseur, classerDocument, confirmerValeurs, corrigerFacture, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
 import VisionneusePiece from "./VisionneusePiece";
 
 type Props = {
@@ -32,6 +32,8 @@ type Props = {
   source: Source;
   motifs: MotifRefus[];
   fournisseurs: Fournisseur[];
+  commandes: Commande[];
+  lignesCommande: LigneCommande[];
   onLocal: (d: DossierFiled) => void;
   relire: () => Promise<void>;
 };
@@ -44,11 +46,13 @@ type Form =
   | { type: "rattacher" }
   | { type: "iban" }
   | { type: "bloquer"; bloquer: boolean }
+  | { type: "commande" }
+  | { type: "apparier"; ligne: LigneFacture }
   | null;
 
 const maintenant = () => new Date().toISOString();
 
-export default function DossierVue({ dossier, source, motifs, fournisseurs, onLocal, relire }: Props) {
+export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire }: Props) {
   const { document: doc, facture, fournisseur } = dossier;
   const [actif, setActif] = useState<string | null>(null);
   const [form, setForm] = useState<Form>(null);
@@ -61,6 +65,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, onLo
   const [nature, setNature] = useState<NatureDocument>("facture");
   const [fournisseurChoisi, setFournisseurChoisi] = useState("");
   const [iban, setIban] = useState("");
+  const [commandeChoisie, setCommandeChoisie] = useState("");
+  const [ligneCommandeChoisie, setLigneCommandeChoisie] = useState("");
 
   const groupes = useMemo(() => grouperControles(dossier.controles), [dossier.controles]);
   const motifOfficiel = (code: string | null) => (code ? motifs.find((m) => m.code === code) ?? { code, libelle: code.replace(/_/g, " ").toLowerCase(), description: null } : null);
@@ -80,6 +86,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, onLo
     setValeur("");
     setIban("");
     setFournisseurChoisi("");
+    setCommandeChoisie(facture?.commande_id ?? "");
+    setLigneCommandeChoisie("");
     if (f?.type === "corriger" && f.champ) setChamp(f.champ);
     if (f?.type === "classer") setNature(doc.nature ?? "facture");
     setForm(f);
@@ -192,6 +200,39 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, onLo
     );
   };
 
+  /* la commande retenue et ses lignes — pour « rattacher » et « apparier » */
+  const commandeDe = (id: string | null) => commandes.find((c) => c.id === id) ?? null;
+  const commandeRetenue = commandeDe(facture?.commande_id ?? null);
+  const lignesDeLaCommande = (id: string) => lignesCommande.filter((l) => l.commande_id === id);
+  const ligneCommandeDe = (ligne: LigneFacture) => {
+    const a = dossier.appariements.find((x) => x.facture_ligne_id === ligne.id);
+    return a ? lignesCommande.find((l) => l.id === a.commande_ligne_id) ?? null : null;
+  };
+
+  const soumettreCommande = () => {
+    if (!facture) return;
+    const c = commandeDe(commandeChoisie);
+    return envoyer(
+      () => rattacherCommande(facture.id, commandeChoisie, motif.trim()).then(() => undefined),
+      () => ajouterFil({ ...dossier, facture: { ...facture, commande_id: commandeChoisie }, rapprochement: dossier.rapprochement ? { ...dossier.rapprochement, commande_id: commandeChoisie } : { id: `rp-${Date.now()}`, commande_id: commandeChoisie, mode: "lignes", nb_lignes: dossier.lignes.length, nb_appariees: 0, nb_sans_commande: dossier.lignes.length, ecart_prix: 0, ecart_quantite: 0, deja_facture: 0, non_recu: 0, ecart_montant: null } }, "rattachement_commande", `Commande ${c?.numero ?? commandeChoisie} désignée — ${motif.trim()}`),
+      "La commande est rattachée ; le rapprochement est rejoué sur ses lignes.",
+    );
+  };
+
+  const soumettreAppariement = (ligne: LigneFacture) => {
+    if (!facture) return;
+    const lc = lignesCommande.find((l) => l.id === ligneCommandeChoisie);
+    return envoyer(
+      () => apparierLigne(facture.id, ligne.id, ligneCommandeChoisie, motif.trim()).then(() => undefined),
+      () => {
+        const appariements = [...dossier.appariements.filter((x) => x.facture_ligne_id !== ligne.id), { facture_ligne_id: ligne.id, commande_ligne_id: ligneCommandeChoisie }];
+        const rapprochement = dossier.rapprochement ? { ...dossier.rapprochement, nb_appariees: appariements.length, nb_sans_commande: Math.max(0, dossier.lignes.length - appariements.length) } : dossier.rapprochement;
+        return ajouterFil({ ...dossier, appariements, rapprochement }, "appariement", `Ligne ${ligne.rang} appariée à la ligne ${lc?.rang ?? "?"} de la commande — ${motif.trim()}`);
+      },
+      "La ligne est appariée à la commande.",
+    );
+  };
+
   const soumettreBlocage = (bloquer: boolean) => {
     if (!fournisseur) return;
     return envoyer(
@@ -252,6 +293,7 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, onLo
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "corriger" })}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> Confirmer les {nonVerifiees.length || ""} valeurs non vérifiées</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rattacher" })}><Link2 width={13} height={13} aria-hidden="true" /> Rattacher à un fournisseur</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!commandes.length} onClick={() => ouvrir({ type: "commande" })}><ClipboardList width={13} height={13} aria-hidden="true" /> {commandeRetenue ? `Commande ${commandeRetenue.numero} · changer` : "Désigner une commande"}</button>
                     {fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button> : null}
                     {fournisseur ? (
                       <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "bloquer", bloquer: fournisseur.statut !== "bloque" })}>
@@ -316,7 +358,7 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, onLo
                     <div className="esp-tableau-cadre">
                       <table className="esp-tableau">
                         <thead>
-                          <tr><th>#</th><th>Désignation</th><th className="esp-num">Qté</th><th className="esp-num">P.U. HT</th><th className="esp-num">Montant HT</th><th className="esp-num">TVA</th><th>Commande</th></tr>
+                          <tr><th>#</th><th>Désignation</th><th className="esp-num">Qté</th><th className="esp-num">P.U. HT</th><th className="esp-num">Montant HT</th><th className="esp-num">TVA</th><th>Commande</th><th aria-label="Apparier" /></tr>
                         </thead>
                         <tbody>
                           {dossier.lignes.map((l) => (
@@ -327,7 +369,28 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, onLo
                               <td className="esp-num">{montant(l.prix_unitaire, facture.devise)}</td>
                               <td className="esp-num">{montant(l.montant_ht, facture.devise)}</td>
                               <td className="esp-num">{pourcent(l.taux_tva)}</td>
-                              <td className="esp-mono">{l.commande_ligne ?? "—"}</td>
+                              <td>
+                                {(() => {
+                                  const lc = ligneCommandeDe(l);
+                                  if (lc) {
+                                    const ecart = l.prix_unitaire !== null && lc.prix_unitaire !== null ? l.prix_unitaire - lc.prix_unitaire : 0;
+                                    return (
+                                      <span className="esp-item-haut">
+                                        <span className="esp-mono">{commandeDe(lc.commande_id)?.numero ?? ""}/{lc.rang}</span>
+                                        {ecart ? <Pastille teinte="ambre">{ecart > 0 ? "+" : ""}{montant(ecart, facture.devise)} / u.</Pastille> : <Pastille teinte="vert">conforme</Pastille>}
+                                      </span>
+                                    );
+                                  }
+                                  return <span className="esp-mono">{l.commande_ligne ?? "—"}</span>;
+                                })()}
+                              </td>
+                              <td>
+                                {commandeRetenue || commandes.length ? (
+                                  <button type="button" className="esp-lien-bouton" onClick={() => { ouvrir({ type: "apparier", ligne: l }); if (commandeRetenue) setCommandeChoisie(commandeRetenue.id); }}>
+                                    {ligneCommandeDe(l) ? "Changer" : "Apparier"}
+                                  </button>
+                                ) : null}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -537,6 +600,69 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, onLo
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !ibanOk || envoi} onClick={soumettreIban}>{envoi ? <Loader variant="spin" /> : null} Proposer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "commande"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ClipboardList width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Désigner la commande</DialogTitle>
+            <DialogDescription>La commande que vous désignez l&apos;emporte sur celle que la facture cite ; le rapprochement est rejoué ligne à ligne.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Commande
+                <select className="rv-champ" value={commandeChoisie} onChange={(e2) => setCommandeChoisie(e2.target.value)}>
+                  <option value="">Choisir…</option>
+                  {commandes.filter((c) => !fournisseur || !c.fournisseur_id || c.fournisseur_id === fournisseur.id).map((c) => <option key={c.id} value={c.id}>{c.numero}{c.date_commande ? ` — ${dateCourte(c.date_commande)}` : ""}{c.montant_ht !== null ? ` — ${montant(c.montant_ht, c.devise ?? "EUR")} HT` : ""}{c.reference_externe ? ` (${c.reference_externe})` : ""}</option>)}
+                </select>
+              </label>
+              {commandeChoisie ? (
+                <ul className="esp-fil">
+                  {lignesDeLaCommande(commandeChoisie).map((l) => (
+                    <li key={l.id}><span className="esp-fil-point" /><div><div className="esp-fil-texte">{l.rang}. {l.designation}</div><div className="esp-fil-meta">{nombreFr(l.quantite)}{l.unite ? ` ${l.unite}` : ""} × {montant(l.prix_unitaire)} = {montant(l.montant_ht)}</div></div></li>
+                  ))}
+                </ul>
+              ) : null}
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !commandeChoisie || commandeChoisie === facture?.commande_id || envoi} onClick={soumettreCommande}>{envoi ? <Loader variant="spin" /> : null} Rattacher la commande</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "apparier"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ClipboardList width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Apparier la ligne</DialogTitle>
+            <DialogDescription>{form?.type === "apparier" ? `Ligne ${form.ligne.rang} — ${form.ligne.designation ?? ""} : ${montant(form.ligne.montant_ht, facture?.devise)}` : ""}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Commande
+                <select className="rv-champ" value={commandeChoisie} onChange={(e2) => { setCommandeChoisie(e2.target.value); setLigneCommandeChoisie(""); }}>
+                  <option value="">Choisir…</option>
+                  {commandes.map((c) => <option key={c.id} value={c.id}>{c.numero}</option>)}
+                </select>
+              </label>
+              <label className="rv-libelle">Ligne de commande
+                <select className="rv-champ" value={ligneCommandeChoisie} disabled={!commandeChoisie} onChange={(e2) => setLigneCommandeChoisie(e2.target.value)}>
+                  <option value="">Choisir…</option>
+                  {lignesDeLaCommande(commandeChoisie).map((l) => <option key={l.id} value={l.id}>{l.rang}. {l.designation} — {nombreFr(l.quantite)}{l.unite ? ` ${l.unite}` : ""} × {montant(l.prix_unitaire)}</option>)}
+                </select>
+              </label>
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !ligneCommandeChoisie || envoi} onClick={() => form?.type === "apparier" && soumettreAppariement(form.ligne)}>{envoi ? <Loader variant="spin" /> : null} Apparier</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

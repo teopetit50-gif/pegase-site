@@ -12,12 +12,18 @@
      filed_rattacher_fournisseur(p_facture, p_fournisseur, p_motif)
      filed_proposer_iban(p_fournisseur, p_iban, p_motif) → uuid
      filed_bloquer_fournisseur(p_fournisseur, p_bloquer bool, p_motif)
+     filed_rattacher_commande(p_facture, p_commande, p_motif)
+     filed_apparier_ligne(p_facture, p_facture_ligne, p_commande_ligne, p_motif)
+     filed_deposer_piece(p_client, p_document, p_nom_fichier, p_mime,
+       p_octets, p_sha256, p_chemin, p_entite, p_source, p_expediteur) → jsonb,
+       le fichier étant d'abord mis dans le bucket omega-clients sous
+       <client_id>/filed_document/<document_id>/<nom>.
    Signatures lues dans le message du coordinateur du 05/10 ; si la base
    répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { DocumentFiled, DossierFiled, Facture, Fournisseur, MotifRefus, NatureDocument } from "../types";
+import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
 
 export class ErreurPorte extends Error {}
 
@@ -61,7 +67,7 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
   const supabase = createClient();
   const fid = a.facture?.id;
   const pid = a.document.piece_id;
-  const [lignes, tva, controles, levees, ibans, rapp, hist, piece, pages, valeurs] = await Promise.all([
+  const [lignes, tva, controles, levees, ibans, rapp, hist, piece, pages, valeurs, appar] = await Promise.all([
     fid ? supabase.from("filed_factures_lignes").select("*").eq("facture_id", fid).order("rang") : null,
     fid ? supabase.from("filed_factures_tva").select("*").eq("facture_id", fid) : null,
     fid ? supabase.from("filed_controles").select("*").eq("facture_id", fid).eq("version", a.facture!.version).order("cree_le") : null,
@@ -72,6 +78,7 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     pid ? supabase.from("pieces").select("*").eq("id", pid).maybeSingle() : null,
     pid ? supabase.from("pieces_pages").select("n, texte, largeur, hauteur").eq("piece_id", pid).order("n") : null,
     pid ? supabase.from("pieces_valeurs").select("*").eq("piece_id", pid) : null,
+    fid ? supabase.from("filed_appariements").select("facture_ligne_id, commande_ligne_id").eq("facture_id", fid) : null,
   ]);
   return {
     document: a.document,
@@ -87,7 +94,69 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     piece: (piece?.data ?? null) as DossierFiled["piece"],
     pages: (pages?.data ?? []) as DossierFiled["pages"],
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
+    appariements: (appar?.data ?? []) as DossierFiled["appariements"],
   };
+}
+
+export async function chargerCommandes(): Promise<{ commandes: Commande[]; lignes: LigneCommande[] }> {
+  const supabase = createClient();
+  const c = await supabase.from("filed_commandes").select("id, numero, date_commande, devise, montant_ht, statut, fournisseur_id, reference_externe").neq("statut", "annulee").order("date_commande", { ascending: false }).limit(300);
+  if (c.error) throw new ErreurPorte(message(c.error));
+  const commandes = (c.data ?? []) as Commande[];
+  let lignes: LigneCommande[] = [];
+  if (commandes.length) {
+    const l = await supabase.from("filed_commandes_lignes").select("id, commande_id, rang, designation, quantite, unite, prix_unitaire, montant_ht").in("commande_id", commandes.map((x) => x.id)).order("rang");
+    lignes = (l.data ?? []) as LigneCommande[];
+  }
+  return { commandes, lignes };
+}
+
+async function sha256Hex(fichier: File): Promise<string> {
+  const empreinte = await crypto.subtle.digest("SHA-256", await fichier.arrayBuffer());
+  return Array.from(new Uint8Array(empreinte)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/* Déposer un document depuis l'espace : le fichier dans le bucket, puis la
+   porte du module qui crée le document (numéroté) et sa pièce, et dépose
+   le travail de lecture. Elle rend {document, reference, piece, etat,
+   doublon_de} (coordinateur, 05/10) : la référence sert au message, et un
+   `doublon_de` dit que le fichier était déjà connu. */
+export type Depot = { document_id: string; reference: string | null; etat: string | null; doublon_de: string | null };
+
+export async function deposerDocument(o: { client_id: string; entite_id: string | null; fichier: File; expediteur: string | null }): Promise<Depot> {
+  const supabase = createClient();
+  const document_id = crypto.randomUUID();
+  const nom = o.fichier.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+  const mime = o.fichier.type || "application/octet-stream";
+  const chemin = `${o.client_id}/filed_document/${document_id}/${nom}`;
+  const envoi = await supabase.storage.from("omega-clients").upload(chemin, o.fichier, { upsert: false, contentType: mime });
+  if (envoi.error) throw new ErreurPorte(message(envoi.error));
+  const resultat = await rpc<Record<string, unknown>>("filed_deposer_piece", {
+    p_client: o.client_id,
+    p_document: document_id,
+    p_nom_fichier: nom,
+    p_mime: mime,
+    p_octets: o.fichier.size,
+    p_sha256: await sha256Hex(o.fichier),
+    p_chemin: chemin,
+    p_entite: o.entite_id,
+    p_source: "depot",
+    p_expediteur: o.expediteur,
+  });
+  const r = resultat && typeof resultat === "object" ? resultat : {};
+  const texte = (v: unknown) => (typeof v === "string" ? v : null);
+  return { document_id: texte(r.document) ?? document_id, reference: texte(r.reference), etat: texte(r.etat), doublon_de: texte(r.doublon_de) };
+}
+
+export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; entites: { id: string; nom: string }[] } | null> {
+  const supabase = createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return null;
+  const { data } = await supabase.from("comptes").select("client_id").eq("user_id", auth.user.id).limit(1);
+  const c = (data ?? [])[0] as { client_id: string } | undefined;
+  if (!c) return null;
+  const e = await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false });
+  return { user_id: auth.user.id, client_id: c.client_id, email: auth.user.email ?? null, entites: (e.data ?? []) as { id: string; nom: string }[] };
 }
 
 export async function chargerFournisseurs(): Promise<Fournisseur[]> {
@@ -111,3 +180,5 @@ export const classerDocument = (p_document: string, p_nature: NatureDocument, p_
 export const rattacherFournisseur = (p_facture: string, p_fournisseur: string, p_motif: string) => rpc("filed_rattacher_fournisseur", { p_facture, p_fournisseur, p_motif });
 export const proposerIban = (p_fournisseur: string, p_iban: string, p_motif: string) => rpc<string>("filed_proposer_iban", { p_fournisseur, p_iban, p_motif });
 export const bloquerFournisseur = (p_fournisseur: string, p_bloquer: boolean, p_motif: string) => rpc("filed_bloquer_fournisseur", { p_fournisseur, p_bloquer, p_motif });
+export const rattacherCommande = (p_facture: string, p_commande: string, p_motif: string) => rpc("filed_rattacher_commande", { p_facture, p_commande, p_motif });
+export const apparierLigne = (p_facture: string, p_facture_ligne: string, p_commande_ligne: string, p_motif: string) => rpc("filed_apparier_ligne", { p_facture, p_facture_ligne, p_commande_ligne, p_motif });

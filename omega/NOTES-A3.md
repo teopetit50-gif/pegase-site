@@ -52,6 +52,19 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   `lire_point(p_point)`, sections dans l'ordre, gravité par ligne, rang 0 =
   « rien à signaler », sections incomplètes et motifs du point ; flèches
   pour les jours passés ; sans point du jour, `apercu_point` à la demande.
+- **Suites du lot 19** (05/10, après les réponses du coordinateur) :
+  - validations : **annuler sa propre demande** en attente (UPDATE
+    `statut = 'annulee'`, policy du demandeur) et une carte **« Mes
+    délégations »** (données et reçues, en cours) avec **révocation**
+    (UPDATE `revoquee_le`, policy du délégant) ;
+  - FILED : **désigner une commande** (`filed_rattacher_commande`, liste de
+    `filed_commandes` filtrée par fournisseur, lignes montrées avant de
+    confirmer), **apparier une ligne** (`filed_apparier_ligne`, par ligne
+    du tableau ; la colonne « Commande » montre la ligne appariée et
+    l'écart de prix unitaire ou « conforme », d'après `filed_appariements`),
+    **déposer un document** depuis l'espace (fichier dans `omega-clients`
+    puis `filed_deposer_piece` ; le document reçoit son numéro et part en
+    lecture).
 - **Validation** : `npx tsc --noEmit` ✓, `npx eslint components/espace
   app/espace` ✓ (0 erreur, 0 avertissement), `npm run build` ✓, recette
   aux cinq largeurs (390 / 768 / 1024 / 1440 / 1700) ✓ —
@@ -59,7 +72,8 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   chargement, débordement
   horizontal, éléments plus larges que l'écran, mots anglais, plus trois
   enchaînements (règle qui exige un commentaire, citation surlignée dans
-  la pièce, veille du point). Captures légères dans `omega/recette-a3/`.
+  la pièce, veille du point, annulation, délégations, appariements,
+  commande, dépôt). Captures légères dans `omega/recette-a3/`.
 
 ## Bloqué / contourné
 
@@ -126,11 +140,6 @@ Reste à confirmer côté coordinateur : la clé exacte du jsonb rendu par
   image par le lecteur et rangées dans `pieces_pages`) : aujourd'hui le PDF
   réel s'ouvre dans un onglet, les boîtes sont posées sur le texte de la
   page.
-- Révoquer une délégation depuis l'écran (UPDATE `revoquee_le` autorisé au
-  délégant) et lister « mes délégations » ; annuler sa propre demande en
-  attente (UPDATE autorisé au demandeur).
-- `filed_rattacher_commande` et `filed_apparier_ligne` (porte connue, écran
-  non fait) ; dépôt d'un document depuis l'espace (`filed_deposer_piece`).
 - Relecture en conditions réelles dès qu'un client a des lignes : premier
   appel de chaque porte, messages d'erreur de la base en clair.
 - Temps réel (Supabase Realtime) sur `demandes_validation` et

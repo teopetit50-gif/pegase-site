@@ -72,6 +72,16 @@ for (const [nom, chemin] of ECRANS) {
   const sep = await s.evaluer(`(() => { const d = document.querySelector('.esp-detail-mobile'); return { texte: /Séparation saisie/.test(d.innerText), gris: [...d.querySelectorAll('.esp-actions .r-btn')].filter(b => /Approuver|Refuser/.test(b.textContent)).every(b => b.disabled) }; })()`);
   ok(sep.texte && sep.gris, 'la séparation saisie / approbation est affichée et les deux boutons de décision sont gris');
   await s.capturer(`${dossier}validations-separation-1440.jpg`, { qualite: 55 });
+  const annuler = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-detail-mobile .esp-actions .r-btn')].find(b => /Annuler ma demande/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  ok(annuler === true, '« Annuler ma demande » est proposé au demandeur');
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Annuler la demande/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  const annulee = await s.evaluer(`/Annulée|C.est fait/.test(document.querySelector('.esp-detail-mobile')?.innerText || '')`);
+  ok(annulee, 'la demande passe « Annulée » (en mémoire)');
+  const deleg = await s.evaluer(`(() => { const c = [...document.querySelectorAll('section')].find(x => x.getAttribute('aria-label') === 'Mes délégations'); if (!c) return null;
+    const b = [...c.querySelectorAll('button')].find(b => /Révoquer/.test(b.textContent)); return { donnees: (c.innerText.match(/Donnée/g) || []).length, recues: (c.innerText.match(/Reçue/g) || []).length, revocable: !!b }; })()`);
+  ok(deleg && deleg.donnees >= 1 && deleg.recues >= 1 && deleg.revocable, `« Mes délégations » : ${deleg?.donnees} donnée(s), ${deleg?.recues} reçue(s), révocation proposée`);
   s.fermer();
 }
 
@@ -95,6 +105,23 @@ for (const [nom, chemin] of ECRANS) {
   const lever = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { bloquant: /Contrôle bloquant/.test(d.textContent), gris: [...d.querySelectorAll('button')].find(b => /Lever l/.test(b.textContent))?.disabled } : null; })()`);
   ok(lever?.bloquant && lever?.gris, 'le dialogue de levée prévient que le contrôle est bloquant et exige un motif');
   await s.capturer(`${dossier}filed-lever-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`document.querySelector('[role="dialog"] .dlg-fermer')?.click()`);
+  await s.dormir(400);
+  const appar = await s.evaluer(`(() => { const t = document.querySelector('.esp-tableau'); if (!t) return null;
+    return { conformes: (t.innerText.match(/conforme/g) || []).length, boutons: [...t.querySelectorAll('button')].filter(b => /Apparier|Changer/.test(b.textContent)).length, commande: /BC-2026-0064/.test(t.innerText) }; })()`);
+  ok(appar && appar.commande && appar.conformes === 3 && appar.boutons === 3, `les trois lignes sont appariées à BC-2026-0064 et conformes, chaque ligne a son bouton (${JSON.stringify(appar)})`);
+  const cmd = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-actions .r-btn')].find(b => /Commande BC-2026-0064/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  ok(cmd === true, 'le bouton de commande nomme la commande retenue et ouvre le dialogue');
+  await s.dormir(400);
+  const dlgCmd = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, lignes: d.querySelectorAll('.esp-fil li').length } : null; })()`);
+  ok(dlgCmd && /Désigner la commande/.test(dlgCmd.titre) && dlgCmd.lignes === 3, `dialogue « ${dlgCmd?.titre} », ${dlgCmd?.lignes} lignes de commande montrées`);
+  await s.evaluer(`document.querySelector('[role="dialog"] .dlg-fermer')?.click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Déposer un document/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const depot = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, gris: [...d.querySelectorAll('button')].find(b => b.textContent.trim() === 'Déposer')?.disabled, natifCache: (() => { const i = d.querySelector('input[type="file"]'); if (!i) return false; const st = getComputedStyle(i); return st.opacity === '0' && st.position === 'absolute'; })() } : null; })()`);
+  ok(depot && /Déposer un document/.test(depot.titre) && depot.gris === true && depot.natifCache, 'le dépôt s\'ouvre, « Déposer » gris sans fichier, le contrôle natif (libellé anglais du navigateur) est caché');
+  await s.capturer(`${dossier}filed-depot-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 
