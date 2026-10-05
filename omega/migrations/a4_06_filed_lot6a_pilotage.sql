@@ -38,7 +38,7 @@ do $$ begin
     execute 'create policy filed_reglements_lecture on public.filed_reglements for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
   end if;
 end $$;
-revoke insert, update, delete on public.filed_reglements from anon, authenticated;
+revoke all on table public.filed_reglements from anon, authenticated;
 grant select on public.filed_reglements to authenticated;
 
 create table if not exists public.filed_litiges (
@@ -64,7 +64,7 @@ do $$ begin
     execute 'create policy filed_litiges_lecture on public.filed_litiges for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
   end if;
 end $$;
-revoke insert, update, delete on public.filed_litiges from anon, authenticated;
+revoke all on table public.filed_litiges from anon, authenticated;
 grant select on public.filed_litiges to authenticated;
 
 insert into private.tables_locataires (nom, ordre_effacement, note) values ('filed_reglements', 2, 'FILED, lot 6'), ('filed_litiges', 2, 'FILED, lot 6')
@@ -494,7 +494,7 @@ do $$ begin
     execute 'create policy filed_exports_programmes_lecture on public.filed_exports_programmes for select to authenticated using (client_id in (select private.mes_clients()))';
   end if;
 end $$;
-revoke insert, update, delete on public.filed_exports_programmes from anon, authenticated;
+revoke all on table public.filed_exports_programmes from anon, authenticated;
 grant select on public.filed_exports_programmes to authenticated;
 
 create table if not exists public.filed_exports (
@@ -521,7 +521,7 @@ do $$ begin
     execute 'create policy filed_exports_lecture on public.filed_exports for select to authenticated using (client_id in (select private.mes_clients()) and (entite_id is null or private.perimetre_couvre((select auth.uid()), client_id, entite_id)))';
   end if;
 end $$;
-revoke insert, update, delete on public.filed_exports from anon, authenticated;
+revoke all on table public.filed_exports from anon, authenticated;
 grant select on public.filed_exports to authenticated;
 
 insert into private.tables_locataires (nom, ordre_effacement, note) values ('filed_exports', 1, 'FILED, lot 6'), ('filed_exports_programmes', 2, 'FILED, lot 6')

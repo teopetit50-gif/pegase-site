@@ -12,7 +12,8 @@
 --   private.filed_deposer_validation(p_facture, p_niveau)   dépose la demande « filed.valider_facture[.<centre>][.direction] » ;
 --   private.filed_decider_facture(p_d, …)                   l'exécution de la décision (branchée au lot 4e) :
 --                                validée (archivée au journal) ou refusée, avec le commentaire attaché ;
---                                celui qui a saisi la pièce n'est jamais celui qui l'approuve ;
+--                                celui qui a saisi la pièce n'est jamais celui qui l'approuve : la demande porte
+--                                payload->'saisi_par' (filed_saisisseurs), que private.preparer_approbation refuse ;
 --   private.filed_relancer_validations()                    relance l'approbateur silencieux, puis remonte d'un niveau.
 --
 -- Le socle garde la décision (approbations, délégations datées, demandeur refusé comme décideur) ;
@@ -63,7 +64,7 @@ create table if not exists public.filed_validations (
   deposee_le    timestamptz not null default now(),
   relance_le    timestamptz,
   remontee_le   timestamptz,
-  -- approuvee, rejetee, annulee (nouvelle version ou remontée), expiree, separation (décideur = saisisseur), perimee
+  -- approuvee, rejetee, annulee (nouvelle version ou remontée), expiree, perimee, refus_accord
   issue         text,
   decide_le     timestamptz
 );
@@ -95,7 +96,7 @@ create index if not exists filed_factures_annexes_facture on public.filed_factur
 do $$ declare t text; begin
   foreach t in array array['filed_circuits', 'filed_validations', 'filed_factures_annexes'] loop
     execute format('alter table public.%I enable row level security', t);
-    execute format('revoke insert, update, delete on public.%I from anon, authenticated', t);
+    execute format('revoke all on table public.%I from anon, authenticated', t);
     execute format('grant select on public.%I to authenticated', t);
   end loop;
   if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_circuits' and policyname = 'filed_circuits_lecture') then
@@ -367,7 +368,7 @@ grant execute on function public.filed_joindre_annexe(uuid, text, uuid) to authe
 create or replace function private.filed_decider_facture(p_d public.demandes_validation, p_decideur uuid, p_commentaire text)
 returns text language plpgsql security definer set search_path to '' as $$
 declare
-  v_f public.filed_factures; v_v public.filed_validations; v_saisisseurs uuid[]; v_decideurs uuid[]; v_commun uuid[]; v_a public.filed_archives; r record; v_n integer;
+  v_f public.filed_factures; v_v public.filed_validations; v_decideurs uuid[]; v_a public.filed_archives; r record;
 begin
   select * into v_f from public.filed_factures where client_id = p_d.client_id and id::text = p_d.objet_id for update;
   if not found then return 'facture_effacee'; end if;
@@ -390,25 +391,9 @@ begin
   end if;
 
   if p_d.statut = 'approuvee' then
-    -- Celui qui saisit et celui qui approuve ne sont pas la même personne.
-    v_saisisseurs := private.filed_saisisseurs(v_f.id);
+    -- Celui qui saisit et celui qui approuve ne sont pas la même personne : le socle le refuse à l'insertion
+    -- de l'approbation (preparer_approbation lit payload->'saisi_par', posé par filed_deposer_validation).
     select coalesce(array_agg(distinct coalesce(a.au_nom_de, a.user_id)), '{}') into v_decideurs from public.approbations a where a.demande_id = p_d.id and a.decision = 'approuve';
-    select coalesce(array_agg(x), '{}') into v_commun from unnest(v_decideurs) x where x = any (v_saisisseurs);
-    if cardinality(v_commun) > 0 then
-      update public.demandes_validation set statut = 'echec_execution', motif_echec = 'Celui qui a saisi la pièce ne l''approuve pas : une autre personne décide.' where id = p_d.id;
-      update public.filed_validations set issue = 'separation', decide_le = now() where demande_id = p_d.id;
-      perform private.filed_historiser(v_f.client_id, v_f.document_id, 'filed_facture', v_f.id::text, 'approbation_refusee',
-        'Approbation sans effet : la personne qui a saisi ou corrigé la pièce ne peut pas l''approuver. La demande est redéposée.',
-        jsonb_build_object('demande', p_d.id, 'personnes', to_jsonb(v_commun)));
-      perform private.lever_alerte_module(v_f.client_id, 'filed', 'attention',
-        left(format('Facture %s : la personne qui l''a saisie a tenté de l''approuver. Une autre personne doit décider.', coalesce(v_f.numero, '?')), 200),
-        jsonb_build_object('facture', v_f.id, 'demande', p_d.id), 'separation:' || p_d.id::text, true, null);
-      perform private.filed_journaliser(v_f.client_id, 'filed.validation.separation', 'filed_facture', v_f.id::text, jsonb_build_object('demande', p_d.id), v_f.entite_id);
-      select count(*) into v_n from public.filed_validations where facture_id = v_f.id and version = v_f.version;
-      perform private.filed_deposer_validation(v_f.id, coalesce(v_v.niveau, 1), ':s' || v_n::text);
-      return 'separation_refusee';
-    end if;
-
     update public.filed_factures set statut = 'validee', maj_le = now() where id = v_f.id;
     v_f.statut := 'validee';
     for r in select a.user_id, a.au_nom_de, a.commentaire from public.approbations a where a.demande_id = p_d.id and nullif(btrim(a.commentaire), '') is not null loop
@@ -450,7 +435,7 @@ begin
   return 'expiree';
 end $$;
 comment on function private.filed_decider_facture(public.demandes_validation, uuid, text) is
-  'Exécute la décision de la file sur une facture : validée (classée, archivée au journal) ou refusée (motif attaché). Celui qui a saisi la pièce ne l''approuve pas.';
+  'Exécute la décision de la file sur une facture : validée (classée, archivée au journal) ou refusée (motif attaché).';
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 8. Relancer, puis remonter d'un niveau

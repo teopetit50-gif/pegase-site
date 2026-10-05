@@ -46,7 +46,26 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 4. Si `public.filed_installer(uuid)` n'existe pas sous ce nom sur la recette, le test 1 le dit
    à sa première ligne : me le signaler.
 
-## Bloqué / à vérifier sur la recette (écarts possibles avec la souche locale)
+## État sur la recette (05/10, 17:50 UTC, coordinateur)
+
+- Les neuf migrations sont posées ; `filed_controler_facture` branché ; `filed_factures_statut_check`
+  retiré, v2 en place.
+- Tests : a4_03 et a4_04 verts ; a4_01 vert de bout en bout ; a4_02 vert jusqu'à la section 5 avec
+  les adaptations ci-dessous, fin en cours (charges récurrentes, rapprochement, litige, export).
+- Adaptations reportées dans les tests et la souche (commit du 05/10 soir) : l'entité principale
+  est créée par le socle avec le client (on la lit, on ne l'insère pas) ; `filed_fournisseurs.source`
+  = 'saisie' ; `filed_documents.reference` est générée, `nom_fichier` obligatoire, `nature_source`
+  = 'humain' ; `filed_commandes.numero_normalise` et `source`, `filed_commandes_lignes.source`,
+  `filed_factures_lignes.source` obligatoires ; `pieces.source` = 'depot' ; SIREN unique par
+  organisation (l'artisan d'exemple porte 100000009).
+- Séparation saisie / approbation : le coordinateur l'a posée dans `private.preparer_approbation`
+  (refus à l'insertion si le décideur ou le délégant est dans `payload->'saisi_par'`). FILED ne
+  redépose plus après décision : `filed_decider_facture` allégé (a4_07), test réécrit.
+- Droits : patron du socle appliqué à toutes les tables des lots 4 à 6 (`revoke all on table …
+  from anon, authenticated ; grant select … to authenticated`), comme posé en recette par le
+  coordinateur (TRUNCATE/REFERENCES/TRIGGER retirés).
+
+## À vérifier sur la recette (écarts possibles avec la souche locale)
 
 - `private.filed_rapprocher_facture` réel : le test 8 de `a4_02` suppose qu'une ligne de facture
   de même rang qu'une ligne de commande est appariée (la souche le fait par rang). Si le réel
@@ -60,12 +79,8 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## Demandes au coordinateur
 
-- **Séparation saisie / approbation** : le coordinateur l'ajoute dans `private.preparer_approbation`
-  (refus si le décideur est dans `payload->'saisi_par'`) ; FILED garde son filet *après* la décision
-  (`filed_decider_facture` : approbation sans effet, demande redéposée, alerte). Le socle ne
-  refuse que le `demandeur_id`, nul pour une demande système. Pour refuser *avant* la décision,
-  une ligne dans `private.preparer_approbation` suffirait : refuser `v_decideur` s'il est dans
-  `v_d.payload->'saisi_par'` (FILED y met les déposants et correcteurs). À votre main.
+- **Séparation saisie / approbation** : posée par le coordinateur dans `private.preparer_approbation`
+  (lot 19) à partir de `payload->'saisi_par'` que FILED remplit (`private.filed_saisisseurs`). Fait.
 - **Alerte « facture attendue absente »** : acquittée (`acquittee_le`) par
   `private.filed_reconnaitre_charge` quand la facture arrive tard (a4_09, sur indication du
   coordinateur : pas de porte générique, un update sur `public.alertes`).
@@ -120,6 +135,6 @@ Famille « Pilotage » :
 ## Demain
 
 - Retours de la recette : corriger, re-pousser.
-- Si le coordinateur retient la ligne dans `preparer_approbation`, retirer la redéposition
-  post-décision de `filed_decider_facture` (elle devient inutile).
+- Fin de a4_02 sur la recette (sections 7 à 9) : corriger si le rapprochement réel apparie
+  autrement que par rang.
 - L'écran : rien ici ; les portes et les fonctions de lecture sont prêtes pour lui.

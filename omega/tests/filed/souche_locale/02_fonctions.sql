@@ -389,6 +389,10 @@ begin
   if v_d.demandeur_id is not null and (v_uid = v_d.demandeur_id or v_decideur = v_d.demandeur_id) then
     raise exception 'Le demandeur ne décide pas de sa propre demande.' using errcode = '42501';
   end if;
+  -- Lot 19 (coordinateur) : celui qui a saisi la pièce ne l'approuve pas.
+  if (v_d.payload->'saisi_par') ? v_uid::text or (v_d.payload->'saisi_par') ? v_decideur::text then
+    raise exception 'Celui qui a saisi la pièce ne l''approuve pas.' using errcode = '42501';
+  end if;
 
   perform private.exiger_decideur(v_d, v_decideur);
   if not private.voit_objet_pour(v_uid, v_d.client_id, v_d.objet_type, v_d.objet_id) then

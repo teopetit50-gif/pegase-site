@@ -5,7 +5,7 @@
 begin;
 do $$
 declare
-  v_cl uuid := gen_random_uuid(); v_e uuid := gen_random_uuid();
+  v_cl uuid := gen_random_uuid(); v_e uuid;
   v_g uuid := gen_random_uuid(); v_v uuid := gen_random_uuid(); v_c uuid := gen_random_uuid();
   v_four uuid; v_piece uuid; v_doc uuid; v_f uuid; v_f2 uuid; v_exo uuid; v_compte uuid; v_centre uuid;
   v_statut text; v_d public.demandes_validation; v_n int; v_j jsonb; v_imp public.filed_imputations; v_csv text; v_r record;
@@ -16,13 +16,14 @@ begin
     (v_v, 'valideur@exemple.test', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '', now(), now()),
     (v_c, 'collaborateur@exemple.test', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '', now(), now());
   insert into public.clients (id, nom) values (v_cl, 'Organisation d''exemple A4');
-  insert into public.entites (id, client_id, nom, type, principale, fuseau, siren) values (v_e, v_cl, 'Société d''exemple', 'societe', true, 'Europe/Paris', '987654329');
+  select e.id into v_e from public.entites e where e.client_id = v_cl and e.principale; -- le socle crée l'entité principale avec le client
+  update public.entites set siren = '987654329', fuseau = 'Europe/Paris' where id = v_e;
   insert into public.comptes (user_id, client_id, role) values (v_g, v_cl, 'gerant'), (v_v, v_cl, 'valideur'), (v_c, v_cl, 'collaborateur');
   set local role service_role;
   perform public.filed_installer(v_cl);
   reset role;
-  insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, siren, tva, pays, statut)
-  values (v_cl, 'FOUR1', 'Fournisseur d''exemple', 'fournisseur d exemple', '123456782', 'FR11123456782', 'FR', 'actif') returning id into v_four;
+  insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, siren, tva, pays, statut, source)
+  values (v_cl, 'FOUR1', 'Fournisseur d''exemple', 'fournisseur d exemple', '123456782', 'FR11123456782', 'FR', 'actif', 'saisie') returning id into v_four;
 
   -- ── Le gérant pose l'exercice, un compte et un centre ──
   set local role authenticated;
@@ -35,9 +36,9 @@ begin
   raise notice 'OK plan comptable et centre de coût par organisation';
 
   -- ── Une facture reçue, déposée par le collaborateur ──
-  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-x.pdf', 'application/pdf', 1024, repeat('a', 64), v_cl::text || '/filed_document/test/facture-x.pdf', 'filed_document', 'x', 'lue') returning id into v_piece;
-  insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
-  values (v_cl, v_e, 2026, 1, 'R2026-000001', v_piece, 'courriel', v_c, repeat('a', 64), now() - interval '2 days', 'a_traiter', 'facture') returning id into v_doc;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'depot', 'facture-x.pdf', 'application/pdf', 1024, repeat('a', 64), v_cl::text || '/filed_document/test/facture-x.pdf', 'filed_document', 'x', 'lue') returning id into v_piece;
+  insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, depose_par, nom_fichier, sha256, recu_le, etat, nature, nature_source)
+  values (v_cl, v_e, 2026, 1, v_piece, 'courriel', v_c, 'facture-1.pdf', repeat('a', 64), now() - interval '2 days', 'a_traiter', 'facture', 'humain') returning id into v_doc;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, echeance_lue, devise, montant_ht, montant_tva, montant_ttc,
                                      fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
   values (v_cl, v_e, v_doc, 'facture', 'F-2026-001', 'F2026001', date '2026-03-10', current_date, current_date + 20, 'EUR', 100.00, 20.00, 120.00,
@@ -98,9 +99,9 @@ begin
   raise notice 'OK chaque pièce est affectée au plan comptable et au centre de coût';
 
   -- ── Une deuxième facture du même fournisseur : l'imputation est proposée, jamais écrite ──
-  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-y.pdf', 'application/pdf', 1024, repeat('c', 64), v_cl::text || '/filed_document/test/facture-y.pdf', 'filed_document', 'y', 'lue') returning id into v_piece;
-  insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
-  values (v_cl, v_e, 2026, 2, 'R2026-000002', v_piece, 'courriel', v_c, repeat('c', 64), now() - interval '1 day', 'a_traiter', 'facture') returning id into v_doc;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'depot', 'facture-y.pdf', 'application/pdf', 1024, repeat('c', 64), v_cl::text || '/filed_document/test/facture-y.pdf', 'filed_document', 'y', 'lue') returning id into v_piece;
+  insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, depose_par, nom_fichier, sha256, recu_le, etat, nature, nature_source)
+  values (v_cl, v_e, 2026, 2, v_piece, 'courriel', v_c, 'facture-2.pdf', repeat('c', 64), now() - interval '1 day', 'a_traiter', 'facture', 'humain') returning id into v_doc;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, echeance_lue, devise, montant_ht, montant_tva, montant_ttc,
                                      fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
   values (v_cl, v_e, v_doc, 'facture', 'F-2026-002', 'F2026002', date '2026-04-02', current_date, current_date + 45, 'EUR', 250.00, 50.00, 300.00,

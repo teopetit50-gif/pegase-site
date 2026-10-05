@@ -54,7 +54,7 @@ do $$ begin
     execute 'create policy filed_factures_exercices_lecture on public.filed_factures_exercices for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
   end if;
 end $$;
-revoke insert, update, delete on public.filed_factures_exercices from anon, authenticated;
+revoke all on table public.filed_factures_exercices from anon, authenticated;
 grant select on public.filed_factures_exercices to authenticated;
 
 insert into private.tables_locataires (nom, ordre_effacement, note) values ('filed_factures_exercices', 2, 'FILED, lot 4')

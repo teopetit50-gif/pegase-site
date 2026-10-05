@@ -280,7 +280,7 @@ begin
 end $$;
 
 -- Aucun droit d''écriture direct : tout passe par les portes (lot 4b et suivants).
-revoke insert, update, delete on public.filed_exercices, public.filed_plan_comptable, public.filed_centres_cout,
+revoke all on table public.filed_exercices, public.filed_plan_comptable, public.filed_centres_cout,
   public.filed_imputations, public.filed_imputations_apprises, public.filed_charges_recurrentes,
   public.filed_charges_attendues from anon, authenticated;
 grant select on public.filed_exercices, public.filed_plan_comptable, public.filed_centres_cout,

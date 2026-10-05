@@ -228,7 +228,7 @@ do $$ begin
     execute 'create policy filed_verifications_tiers_lecture on public.filed_verifications_tiers for select to authenticated using (client_id in (select private.mes_clients()))';
   end if;
 end $$;
-revoke insert, update, delete on public.filed_verifications_tiers from anon, authenticated;
+revoke all on table public.filed_verifications_tiers from anon, authenticated;
 grant select on public.filed_verifications_tiers to authenticated;
 insert into private.tables_locataires (nom, ordre_effacement, note) values ('filed_verifications_tiers', 5, 'FILED, lot 4')
 on conflict (nom) do update set ordre_effacement = excluded.ordre_effacement, note = excluded.note;
