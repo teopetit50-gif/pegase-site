@@ -1,15 +1,16 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
-Branche `worker-b1`. Dernière mise à jour : 05/10/2026, 23 h (écran écrit et
-recetté sur l'exemple, b1_01 posée, b1_02 et les tests en attente de pose et de
-rejeu). Le coordinateur lit ce fichier.
+Branche `worker-b1`. Dernière mise à jour : 06/10/2026, 02 h 30 (écran relu
+en base réelle avec les trois comptes du banc : prêt à fusionner ; b1_02 et
+les tests en cours de pose et de rejeu par le coordinateur). Le coordinateur
+lit ce fichier.
 
 ## Les deux jauges
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
 | **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **25 %** | b1_01 est posée ; b1_02 (GRANT) à poser ; les 14 fonctions de test (6 lots) écrites et poussées, **aucune encore verte** : premier jeu mort sur une aide absente (corrigé), second jeu demandé. Ensuite : les trous que le rouge révélera, une migration par trou |
-| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **55 %** | l'écran est écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓ (exemple) ; **reste** : relecture en base réelle avec gerant/referent/daf du banc (en cours), l'onglet dans la barre (fichier d'A3, demandé), la fusion sur main et la vérification sur omegaai.fr |
+| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **80 %** | l'écran est écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓ (exemple), **relecture en base réelle ✓** avec gerant / referent / daf du banc (lecture, et une écriture par `grp_proposer_nom`) ; l'onglet est dans la barre (deux lignes dans les fichiers d'A3, à reporter sur main) ; **reste** : la fusion sur main et la vérification sur omegaai.fr, puis rejouer sur le banc un dépôt d'export et un passage depuis l'écran dès que b1_02 est posée (les portes étaient service_role) |
 
 ### Ce que Teo doit fournir ou décider lui-même
 
@@ -130,8 +131,39 @@ export → cinq lignes, colonnes reconnues par synonymes, trois rejets avec
 motifs, une anomalie ; passage → deux objets ouverts ; nature clients,
 recherche, export CSV) : « tout passe ». Captures `omega/recette-b1/`.
 
-**Relecture en base réelle** : `omega/recette-b1/relecture-reelle-varelo.mjs`
-(décalque d'A3), en cours avec gerant / referent / daf du banc.
+**Relecture en base réelle — faite le 06/10 (01 h 50 – 02 h 20 UTC)** :
+`node omega/recette-b1/relecture-reelle-varelo.mjs <session.json> [origine]
+[--ecrire]` (décalque d'A3 ; session obtenue par `POST /auth/v1/token` sur la
+recette ; site construit avec les `NEXT_PUBLIC_*` de la recette ; dans ce
+conteneur le navigateur d'essai doit ignorer le certificat du mandataire et
+être le Chromium complet, voir l'en-tête du script). Captures
+`omega/recette-b1/reel-varelo-*-1440.jpg`. Résultat :
+
+- **gérant** : identité affichée, interrupteur sur « Base réelle », aucun avis
+  rouge, aucun refus de la base en console. Fournisseurs : 134 codes, 87
+  objets, 58 paires à valider, taux 100 % ; 226 paires dans 7 lots en tout ;
+  les 3 sociétés du banc (Métalco Martinique MQ, Novasud Antilles GP, Sodimat
+  Guadeloupe GP) avec SIREN, territoire, fuseau et nombre de codes ; les
+  boutons Déposer / Lancer / Exporter ; `F-00003` ouvert d'office avec ses
+  deux codes (FRN-00021 seul, 40100010 proposé « même SIREN »). **Une
+  écriture** : « Proposer un nom » → `grp_proposer_nom` accepté, la demande
+  « Renommer un objet » apparaît aussitôt dans les lots (relecture après la
+  porte). Cette demande (nom « … (relecture B1) ») est **à refuser dans la
+  file de validation** par le référent du banc.
+- **référent** (valideur, équipe Référent données) : même lecture, 59 paires /
+  8 lots après l'écriture ; « Écarter cette paire » proposé sur 225 paires
+  (toutes sauf le lot IBAN différent de la DF et la correction humaine).
+- **DAF** (valideur, Direction financière) : même lecture ; « Écarter » proposé
+  sur 1 paire seulement (le lot IBAN différent). Le rôle et l'équipe sont lus
+  de `comptes` / `equipes_membres`, la base restant juge.
+- **Non rejoué en réel** : écarter une paire (irréversible sur les données du
+  banc ; prouvé par pgTAP b1_04), déposer un export et lancer un passage
+  (portes service_role jusqu'à b1_02), approuver un lot (écran d'A3).
+- **Relevé pour le coordinateur** : la CSP du site (`next.config.ts`,
+  `connect-src`) n'autorise pas `wss://<projet>.supabase.co` → le navigateur
+  refuse le canal Realtime (« Refused to connect to wss://… ») : les écrans
+  d'A3 et le mien ne se relisent pas d'eux-mêmes en production non plus, ce
+  n'est pas le conteneur. Une entrée `wss://` à ajouter à `connect-src`.
 
 **Hors périmètre, demandé au coordinateur** : l'onglet dans
 `components/espace/ecrans.ts` (A3) et `varelo` dans `MODULES` de

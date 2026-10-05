@@ -12,7 +12,17 @@
    nom sur le premier objet (une demande de validation s'ouvre chez le banc).
 
    usage : node omega/recette-b1/relecture-reelle-varelo.mjs <session.json> [origine] [--ecrire]
-   Le fichier de session ne se commite jamais. */
+   Le fichier de session ne se commite jamais.
+
+   Conteneur de recette (06/10) : la sortie HTTPS passe par un mandataire dont
+   Chromium ne connaît pas l'autorité (ERR_CERT_AUTHORITY_INVALID sur
+   supabase.co, « Failed to fetch » à l'écran). Le navigateur d'essai, et lui
+   seul, est lancé avec --ignore-certificate-errors ; et c'est le Chromium
+   complet qu'il faut (headless_shell tombe en ERR_TOO_MANY_RETRIES) :
+   PLAYWRIGHT_BROWSERS_PATH pointé sur un dossier qui ne contient que
+   <cache>/chromium-9999/chrome-linux → lien vers
+   /opt/pw-browsers/chromium-1194/chrome-linux (outils/chrome.mjs prend alors
+   chrome-linux/chrome). Rien de tout cela ne touche au site. */
 import { readFileSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
 
@@ -47,8 +57,12 @@ const morceaux = [];
 }
 console.log(`— cookie ${nom} en ${morceaux.length} morceau(x), utilisateur ${session.user?.email}`);
 
-const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: `b1-reel-${marque}`, densite: 1 });
+const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: `b1-reel-${marque}`, densite: 1, flags: ['--ignore-certificate-errors'] });
 console.log(`— /espace/varelo (base réelle, ${marque})`);
+/* le conteneur de recette sort par un mandataire dont Chromium ne connaît pas l'autorité
+   (ERR_CERT_AUTHORITY_INVALID sur supabase.co, relevé le 06/10) : le navigateur d'essai, et lui
+   seul, ignore ces erreurs. Rien de tel dans le site. */
+await s.envoyer('Security.setIgnoreCertificateErrors', { ignore: true });
 await s.envoyer('Page.addScriptToEvaluateOnNewDocument', { source: `window.__erreurs = []; const o = console.error; console.error = (...a) => { try { window.__erreurs.push(a.map(x => (x && x.message) ? x.message : (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(' ')); } catch {} o.apply(console, a); };` });
 for (const m of morceaux) await s.envoyer('Network.setCookie', { name: m.name, value: m.value, url: base, path: '/' });
 ok(await s.aller(base + '/espace/varelo', { signe: `document.readyState === 'complete' && !!document.querySelector('.esp-kpi-valeur')` }), 'page chargée avec le cookie de session');
