@@ -1,6 +1,6 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 1 h 25 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 1 h 55 Paris.
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
@@ -205,10 +205,23 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
   `nature_juridique`, `activite_principale`, `date_creation`, `etat_administratif: "A"`. Conforme à `sirene.ts`.
 - **INSEE sans clé** : HTTP 401 → `PORTE_REFUSEE` → repli sur l'annuaire, comme prévu.
 
+### Lot b7_02 — demander une vérification soi-même (6/10, 1 h 55)
+
+- `omega/modules/identite/migrations/b7_02_demander.sql` : `public.identite_demander(p_client, p_registre, p_identifiant,
+  p_fournisseur = null, p_force = false) → uuid`, pour une personne de l'organisation (gérant, admin, valideur,
+  collaborateur, par `private.filed_exiger_acteur`) ou le service (un autre module). Normalise l'identifiant, refuse
+  un registre inconnu ou une forme fausse, rend la demande déjà ouverte s'il y en a une. `p_force` : la ligne ouverte
+  porte `{"force": true}` dans sa preuve, le déclencheur (remplacé) le recopie dans la charge du travail, et l'ouvrier
+  ignore le cache de trente jours (« revérifier maintenant »). Grant : authenticated et service_role.
+- `omega/tests/identite/b7_03_demander.sql` : test_b7_09, 16 assertions vertes en local (service, membre endossé,
+  personne étrangère refusée 42501, force sur un travail existant et sur une demande neuve, formes refusées).
+- À brancher côté écran (A3) : un bouton « revérifier » sur la fiche fournisseur appelle
+  `identite_demander(client, 'sirene', siren, fournisseur, true)` (ou `'vies'`, tva).
+
 ## 8. À faire par le coordinateur
 
-1. Poser `b7_01_portes.sql` sur la recette (après a4_04 ; a4_10 facultatif).
-2. Jouer `omega/tests/identite/b7_01_portes.sql` (pgTAP, schéma `tests` d'A5) puis `b7_02_scenario.sql`.
+1. ~~Poser `b7_01_portes.sql`~~ (posé le 5/10, reposé à e5aa5dd) ; poser `b7_02_demander.sql`.
+2. Jouer `omega/tests/identite/b7_01_portes.sql` (pgTAP, schéma `tests` d'A5), `b7_02_scenario.sql`, `b7_03_demander.sql`.
 3. Déployer la coquille `identite` (verify_jwt true, `@partage/` → SHA d'A1), secrets : `SIRENE_API_KEY` (quand
    Teo l'a ; sans elle, repli annuaire et le battement dit `sirene: "repli"`), facultatifs `IDENTITE_VERSION`,
    `IDENTITE_CACHE_JOURS` (30), `SIRENE_REPLI` (`non` pour couper le repli), `IDENTITE_NOM`.
@@ -233,6 +246,9 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 - 5/10 22 h 52 Z (coordinateur, 158277d reposé) : 7/8 ; deux contraintes d'a4_10 : `identite_source` n'admet que
   `sirene | vies | humain` (= le registre, pas la source d'ouvrier) ; la forme du verdict lue par A4 est
   `{resultat, identifiant, registre, preuve}`. Et le scénario heurtait `UNIQUE (piece_id)` sur `filed_documents`.
+- 5/10 23 h 01 Z : pause demandée par Teo (limite d'usage) ; tout était poussé (e5aa5dd). Reprise 6/10 1 h 40 Paris :
+  le coordinateur repose b7_01 d'e5aa5dd et rejoue les tests.
+- 6/10 1 h 55 : lot b7_02 (`identite_demander`, force) écrit et testé en local.
 - 6/10 1 h 25 : aligné — `identite_source` = le registre ; `identite_verdict` = `{resultat, identifiant, registre,
   preuve}` où la preuve est celle de la vérification plus `source` (d'ouvrier), `verifie_le`, `verification` ;
   jsonb seulement. Scénario : une pièce par document. Test b7_08 pose aussi la contrainte d'A4 en local. 8/8 et
