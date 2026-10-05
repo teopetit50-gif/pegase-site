@@ -1,9 +1,9 @@
-// L'extraction structurée par Claude sur Bedrock. Trois entrées possibles :
+// L'extraction structurée par Claude (API Anthropic ou Bedrock). Trois entrées possibles :
 // du texte (pages natives, OCR, tableur), un PDF entier (pages sans texte,
 // lecture visuelle), une image (photo, scan, ticket). Une seule sortie : le
 // résultat de l'outil « lire_piece », au schéma FILED.
 
-import { base64, type ClientBedrock, coutEur, type Usage } from "@partage/bedrock.ts";
+import { base64, type ClientClaude, coutEur, type Usage } from "@partage/claude.ts";
 import { ErreurOuvrier } from "@partage/erreurs.ts";
 import type { FormatImage } from "./detecter.ts";
 import { SCHEMA_OUTIL_LECTURE, SCHEMA_OUTIL_TRANSCRIPTION, type TypePiece } from "./schemas/facture.ts";
@@ -93,8 +93,12 @@ function consigneTexte(pages: { n: number; texte: string }[], piece: ContextePie
   return `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}. Voici le texte du document, page par page. Lis-le et rends l'outil lire_piece.\n\n${corps}`;
 }
 
-export class ExtracteurBedrock implements Extracteur {
-  constructor(private readonly client: ClientBedrock) {}
+export class ExtracteurClaude implements Extracteur {
+  constructor(private readonly client: ClientClaude) {}
+
+  get fournisseur(): string {
+    return this.client.fournisseur;
+  }
 
   get modele(): string {
     return this.client.modele;
@@ -105,7 +109,7 @@ export class ExtracteurBedrock implements Extracteur {
     if (e.mode === "texte") entree += Math.ceil(e.pages.reduce((s, p) => s + p.texte.length, 0) / 3.5);
     else if (e.mode === "document") entree += e.nbPages * 1800;
     else entree += 1800;
-    return coutEur(this.client.cfg, { tokens_entree: entree, tokens_sortie: 2500 });
+    return coutEur(this.client.prix, { tokens_entree: entree, tokens_sortie: 2500 });
   }
 
   async extraire(e: EntreeIa, piece: ContextePiece): Promise<SortieIa> {
@@ -142,7 +146,7 @@ export class ExtracteurBedrock implements Extracteur {
       maxTokens: 16000,
     });
     const brut = normaliserSortie(rep.entree);
-    return { brut, usage: rep.usage, modele: this.modele, cout_eur: coutEur(this.client.cfg, rep.usage) };
+    return { brut, usage: rep.usage, modele: this.modele, cout_eur: coutEur(this.client.prix, rep.usage) };
   }
 
   async transcrire(m: MorceauATranscrire, piece: ContextePiece): Promise<SortieTranscription> {
@@ -165,7 +169,7 @@ export class ExtracteurBedrock implements Extracteur {
     const pages = (Array.isArray(o.pages) ? (o.pages as PageTranscrite[]) : [])
       .filter((p) => p && typeof p === "object" && typeof p.texte === "string")
       .map((p, i) => ({ ...p, n: Number.isInteger(p.n) && p.n >= m.debut && p.n <= m.fin ? p.n : m.debut + i }));
-    return { pages, usage: rep.usage, modele: this.modele, cout_eur: coutEur(this.client.cfg, rep.usage) };
+    return { pages, usage: rep.usage, modele: this.modele, cout_eur: coutEur(this.client.prix, rep.usage) };
   }
 }
 

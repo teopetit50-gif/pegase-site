@@ -16,7 +16,8 @@ Dernière mise à jour : 05/10/2026.
   - Plafond : réglage `plafond_ia_jour_client` lu par `lire_parametre` (posé à 5 € sur la recette), sinon `PLAFOND_IA_JOUR_CLIENT_EUR`, sinon 5 € ; estimation du coût avant appel, `PLAFOND_IA` non définitif.
 - **Banc** : `lecteur/banc/` — dix pièces fictives engendrées par `deno task banc` (un écrivain PDF/PNG minimal, sans dépendance) et leurs attendus JSON : natif, scanné, deux factures dans un fichier, Factur-X, UBL, ticket manuscrit, illisible, avoir, tableur, pièce chiffrée.
 - **Gros documents et boîtes** (demandés par le coordinateur) : un PDF sans texte au-delà de 20 pages ou de 4,5 Mo est découpé par pdf-lib en morceaux (`pdf_decouper.ts`), chaque morceau transcrit par Claude (outil `transcrire_pages`, numéros de page du document complet), puis **une seule extraction** sur le texte réuni ; les morceaux entièrement natifs ne sont pas transcrits ; le plafond se contrôle une fois sur le coût total ; `finir_travail` rend `appels_ia`, jetons et coût cumulés. En lecture visuelle, le modèle peut rendre une `boite` approximative par valeur : gardée si plausible (dans la page, surface non nulle), marquée « boîte estimée par le modèle » dans `controle` ; jamais sur un PDF natif, où la boîte vient des mots du PDF.
-- **Tests** : `deno task test` → **42 tests verts** (10 cas du banc + 25 règles : IA non branchée, plafond, fichier absent, format inconnu, citation fausse, SIREN à clé fausse, OCR branché, pannes IA/porte, battement à vide, outils, SigV4 ; 3 tests des portes RPC avec un faux `fetch` ; 4 tests des gros PDF et des boîtes estimées).
+- **Fournisseur « anthropic »** (décision de Teo, 05/10 au soir) : `_partage/anthropic.ts` appelle `POST https://api.anthropic.com/v1/messages` (`x-api-key`, `anthropic-version: 2023-06-01`), modèle par défaut `claude-sonnet-5-5` (`ANTHROPIC_MODEL_ID`), choisi dès que `ANTHROPIC_API_KEY` est posée ; Bedrock sinon ; `IA_NON_BRANCHEE` seulement si ni l'un ni l'autre (le motif cite les deux). Mêmes consignes, même schéma d'outil, même découpage, même plafond, mêmes jetons (`usage.input_tokens` / `output_tokens`) et coût (2 $ / 10 $ par million de jetons pour Sonnet 5.5, surchargeables par `ANTHROPIC_PRIX_*_USD_MTOK`). Particularités de l'API sur les modèles récents : pas de choix d'outil forcé ni de température (400) → `tool_choice: auto` + consigne, `output_config.effort` (`ANTHROPIC_EFFORT`, `medium` par défaut, `aucun` pour l'omettre) ; 401/403 → `IA_NON_BRANCHEE` (clé refusée), 429/529/5xx → `FOURNISSEUR_INDISPONIBLE` (repris), refus du modèle → `ERREUR_INTERNE`.
+- **Tests** : `deno task test` → **47 tests verts** (10 cas du banc + 25 règles : IA non branchée, plafond, fichier absent, format inconnu, citation fausse, SIREN à clé fausse, OCR branché, pannes IA/porte, battement à vide, outils, SigV4 ; 3 tests des portes RPC avec un faux `fetch` ; 4 tests des gros PDF et des boîtes estimées ; 5 tests du fournisseur Anthropic : choix, forme de la requête, 401/429/529/400/refus, lecture de bout en bout avec le double de l'API).
 - **Recette** (`omega-recette`) : FILED installé sur l'organisation du banc `Groupe Sogexal (banc)` (`cccccccc-0000-4000-8000-00000000000c`) par `filed_installer` en rôle de service ; une pièce de test déposée par `filed_deposer_piece` (document `a1a1a1a1-0000-4000-8000-000000000001`, fichier `01_facture_native.pdf`, sha256 `a38514ce…58aa9`) → pièce `0e8d16cf-b2bd-48fe-9397-b579bca0c0fc`, travail **2138** `lecteur.lire` en `a_faire`. La chaîne socle (dépôt → `pieces` → trigger `pieces_demander_lecture` → `travaux`) est donc vérifiée.
 - **Déploiement** : voir la section « Déploiement » en bas (mise à jour à la fin de la session).
 
@@ -59,13 +60,14 @@ Secrets de la fonction Edge `lecteur` sur la recette (Dashboard → Edge Functio
 
 | Variable | Rôle |
 |---|---|
-| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Identifiants IAM avec `bedrock:InvokeModel` sur le modèle choisi |
+| `ANTHROPIC_API_KEY` | **Recette : l'IA passe par là.** Clé de l'API Anthropic ; facultatifs `ANTHROPIC_MODEL_ID` (défaut `claude-sonnet-5-5`), `ANTHROPIC_EFFORT` (`medium`) |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Second choix, sans clé Anthropic : identifiants IAM avec `bedrock:InvokeModel` sur le modèle choisi |
 | `AWS_REGION` | `eu-central-1` (défaut si absent) |
 | `BEDROCK_MODEL_ID` | ex. `eu.anthropic.claude-sonnet-4-5-20250929-v1:0` (profil d'inférence européen) |
 | `MISTRAL_API_KEY` | facultatif : OCR classique des pages scannées |
 | `PLAFOND_IA_JOUR_CLIENT_EUR` | facultatif, 5 € par défaut |
 
-Sans ces variables la fonction tourne, bat, et reprend chaque travail avec `IA_NON_BRANCHEE` ; aucune exception ne sort.
+Sans clé Anthropic ni identifiants Bedrock, la fonction tourne, bat, et reprend chaque travail avec `IA_NON_BRANCHEE` ; aucune exception ne sort.
 
 Puis le secret Vault **`cle_service`** (la clé de service du projet) : c'est lui que lit le cron `omega-lecteur` déjà posé.
 
@@ -76,3 +78,5 @@ Puis le secret Vault **`cle_service`** (la clé de service du projet) : c'est lu
 - Pas encore appelée : le cron attend le secret `cle_service` (voir « Bloqué »). Rejouer le déploiement après une modification : `deno task deployer` produit `outils/paquet.json`, à passer tel quel à l'outil de déploiement.
 - Le coordinateur a déployé la **version 3** (18:05 UTC) depuis le commit `976853d` : portes du lot 19, lecture par morceaux, boîtes estimées. C'est la version courante. Toute version suivante poussée sur `worker-a1` sera signalée ici avec son commit ; le coordinateur redéploie lui-même.
 - Point de suivi du 05/10 17:36 UTC : travail 2138 toujours `a_faire`, 0 essai ; aucun passage n'a eu lieu, le secret `cle_service` n'est pas encore posé.
+- 05/10 18:37 UTC : secret posé, le cron tourne, la fonction répond 200 chaque minute et bat (`battements.lecteur`). Premier passage réel : travail 2138 en `echec` après 5 essais sur `permission denied for function piece_a_lire` (le durcissement a5_01 avait retiré l'EXECUTE au rôle de service entre 18:55 et 19:05, remis par le lot 19j). Travail 2147 redéposé sur la même pièce : 5 essais, `echec` final avec `IA_NON_BRANCHEE`, comme attendu sans clé. Pour les repérer d'un coup d'œil, un 401/403 d'une porte s'appelle désormais `PORTE_REFUSEE` (commit a66402f).
+- Version à déployer : le dernier commit de `worker-a1` (fournisseur Anthropic). Après la pose de `ANTHROPIC_API_KEY`, redéposer un travail sur une pièce dont le fichier est dans le bucket.

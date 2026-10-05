@@ -1,20 +1,21 @@
 // Claude sur AWS Bedrock, API Converse, région européenne. Les identifiants et
 // le modèle viennent de l'environnement de la fonction ; s'ils manquent, le
-// client n'existe pas (null) et l'ouvrier répond IA_NON_BRANCHEE.
+// client n'existe pas (null). Second choix derrière l'API Anthropic en direct
+// (voir claude.ts et anthropic.ts).
 
 import { signerRequete } from "./aws_sigv4.ts";
+import { base64, type BlocContenu, type ClientClaude, coutEur, type DemandeConverse, nombreOu, type Prix, type ReponseConverse, type Usage } from "./claude.ts";
 import { ErreurOuvrier } from "./erreurs.ts";
 
-export interface ConfigBedrock {
+export { base64, coutEur };
+export type { BlocContenu, DemandeConverse, ReponseConverse, Usage };
+
+export interface ConfigBedrock extends Prix {
   region: string;
   modelId: string;
   accessKeyId: string;
   secretAccessKey: string;
   sessionToken?: string;
-  /** Prix en dollars par million de jetons, pour le coût rendu au socle. */
-  prixEntreeUsdMtok: number;
-  prixSortieUsdMtok: number;
-  tauxUsdEur: number;
 }
 
 export const REGION_PAR_DEFAUT = "eu-central-1";
@@ -35,70 +36,28 @@ export function configBedrockDepuisEnv(env: { get(n: string): string | undefined
   if (!accessKeyId || !secretAccessKey || !modelId) return null;
   const region = env.get("AWS_REGION") || REGION_PAR_DEFAUT;
   const defaut = prixParDefaut(modelId);
-  const nombre = (n: string | undefined, d: number) => {
-    const v = Number(n);
-    return n !== undefined && Number.isFinite(v) && v >= 0 ? v : d;
-  };
   return {
     region,
     modelId,
     accessKeyId,
     secretAccessKey,
     sessionToken: env.get("AWS_SESSION_TOKEN") || undefined,
-    prixEntreeUsdMtok: nombre(env.get("BEDROCK_PRIX_ENTREE_USD_MTOK"), defaut.entree),
-    prixSortieUsdMtok: nombre(env.get("BEDROCK_PRIX_SORTIE_USD_MTOK"), defaut.sortie),
-    tauxUsdEur: nombre(env.get("TAUX_USD_EUR"), 0.92),
+    prixEntreeUsdMtok: nombreOu(env.get("BEDROCK_PRIX_ENTREE_USD_MTOK"), defaut.entree),
+    prixSortieUsdMtok: nombreOu(env.get("BEDROCK_PRIX_SORTIE_USD_MTOK"), defaut.sortie),
+    tauxUsdEur: nombreOu(env.get("TAUX_USD_EUR"), 0.92),
   };
 }
 
-export interface Usage {
-  tokens_entree: number;
-  tokens_sortie: number;
-}
-
-export function coutEur(cfg: Pick<ConfigBedrock, "prixEntreeUsdMtok" | "prixSortieUsdMtok" | "tauxUsdEur">, u: Usage): number {
-  const usd = (u.tokens_entree * cfg.prixEntreeUsdMtok + u.tokens_sortie * cfg.prixSortieUsdMtok) / 1_000_000;
-  return Math.round(usd * cfg.tauxUsdEur * 1_000_000) / 1_000_000;
-}
-
-/** Blocs de contenu Converse, dans leur forme de fil. */
-export type BlocContenu =
-  | { text: string }
-  | { document: { format: "pdf" | "csv" | "txt" | "xlsx"; name: string; source: { bytes: string } } }
-  | { image: { format: "png" | "jpeg" | "gif" | "webp"; source: { bytes: string } } }
-  | { toolUse: { toolUseId: string; name: string; input: unknown } };
-
-export interface OutilConverse {
-  name: string;
-  description: string;
-  schema: Record<string, unknown>;
-}
-
-export interface DemandeConverse {
-  system: string;
-  contenu: BlocContenu[];
-  outil: OutilConverse;
-  maxTokens?: number;
-}
-
-export interface ReponseConverse {
-  entree: unknown; // l'input de l'outil, tel que rendu par le modèle
-  usage: Usage;
-  stopReason: string;
-}
-
-export function base64(o: Uint8Array): string {
-  let s = "";
-  const bloc = 0x8000;
-  for (let i = 0; i < o.length; i += bloc) s += String.fromCharCode(...o.subarray(i, i + bloc));
-  return btoa(s);
-}
-
-export class ClientBedrock {
+export class ClientBedrock implements ClientClaude {
+  readonly fournisseur = "bedrock" as const;
   constructor(public readonly cfg: ConfigBedrock, private readonly fetchFn: typeof fetch = fetch) {}
 
   get modele(): string {
     return this.cfg.modelId;
+  }
+
+  get prix(): Prix {
+    return this.cfg;
   }
 
   async converse(d: DemandeConverse): Promise<ReponseConverse> {

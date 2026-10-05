@@ -3,6 +3,7 @@
 // qui sorte d'ici.
 
 import type { Depot } from "@partage/depot.ts";
+import { MOTIF_IA_NON_BRANCHEE } from "@partage/claude.ts";
 import { ErreurOuvrier } from "@partage/erreurs.ts";
 import { journal, messageDe } from "@partage/journal.ts";
 import type { PageLue, Piece, Portes, ResultatLecture, StatutLecture, Travail, ValeurLue } from "@partage/portes.ts";
@@ -204,11 +205,7 @@ function lireXml(xml: string, pagesPdf: PageLue[]): Bilan {
 
 function exigerIa(ctx: Contexte): Extracteur {
   if (!ctx.extracteur) {
-    throw new ErreurOuvrier(
-      "IA_NON_BRANCHEE",
-      "AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY ou BEDROCK_MODEL_ID absente : l'extraction attend que Bedrock soit branché.",
-      true,
-    );
+    throw new ErreurOuvrier("IA_NON_BRANCHEE", MOTIF_IA_NON_BRANCHEE, true);
   }
   return ctx.extracteur;
 }
