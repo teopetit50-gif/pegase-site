@@ -73,4 +73,6 @@ Puis le déclencheur (à faire par le coordinateur, c'est une migration) : secre
 
 ## Déploiement
 
-(renseigné en fin de session)
+- Fonction Edge **`lecteur`** déployée sur `omega-recette` (`ygwbgpowzlbdaajlsqkn`) le 05/10/2026 : id `bf04c3c1-7764-4baf-9320-b9262cbcb000`, version 1, statut ACTIVE, `verify_jwt = true`, import map `deno.json`, 20 fichiers (le lecteur, `schemas/`, `_partage/` copié sous la fonction).
+- Source servie relue par `get_edge_function` et comparée au paquet local : **les 20 fichiers sont identiques** au commit `15156cf` de `worker-a1`.
+- Pas encore appelée : aucun secret posé, pas de déclencheur (voir « Bloqué »). Rejouer le déploiement après une modification : `deno task deployer` produit `outils/paquet.json`, à passer tel quel à l'outil de déploiement.
