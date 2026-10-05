@@ -37,7 +37,7 @@ for (const largeur of LARGEURS) {
   ok(mesure.h1 === 'Dossiers du cabinet', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 5, `${mesure.kpis} compteurs`);
   ok(mesure.items === 6, `${mesure.items} dossiers dans la liste`);
-  ok(mesure.cartes >= 8, `${mesure.cartes} cartes dans le dossier ouvert`);
+  ok(mesure.cartes >= 9, `${mesure.cartes} cartes dans le dossier ouvert`);
   await s.capturer(`${dossier}tamila-${largeur}.jpg`, { qualite: 55 });
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();

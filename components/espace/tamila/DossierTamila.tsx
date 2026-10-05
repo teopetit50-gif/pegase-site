@@ -17,13 +17,13 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
-import { Archive, Ban, CalendarClock, CalendarPlus, Check, FileSignature, Gavel, Lock, Pencil, ShieldOff, UserPlus, Users, X } from "lucide-react";
+import { Archive, Ban, CalendarClock, CalendarPlus, Check, FileSignature, Gavel, Lock, Pencil, ShieldOff, Upload, UserPlus, Users, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure } from "../format";
-import { chiffrer } from "./chiffrement";
+import { chiffrer, chiffrerOctets, empreinte } from "./chiffrement";
 import { MOI } from "./exemples";
 import * as portes from "./portes";
 import {
@@ -65,6 +65,7 @@ type Form =
   | { type: "decider"; demande: DemandeTamila }
   | { type: "cloture" }
   | { type: "export" }
+  | { type: "piece" }
   | null;
 
 const maintenant = () => new Date().toISOString();
@@ -72,7 +73,8 @@ const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const CHIFFRE = "\\x01" + "00".repeat(28);
 
 export default function DossierTamila({ complet, source, moi, personnes, regles, reglages, cle, clientId, onLocal, relire }: Props) {
-  const { dossier: d, clair, parties, appel, delais, audiences, avis, membres, murailles, exports, lectures, demandes } = complet;
+  const { dossier: d, clair, parties, appel, delais, audiences, avis, membres, murailles, exports, pieces, lectures, demandes } = complet;
+  const [fichier, setFichier] = useState<File | null>(null);
   const [form, setForm] = useState<Form>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -99,6 +101,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
     setFait(null);
     setCalcul(null);
     setF({});
+    setFichier(null);
     setForm(x);
   };
 
@@ -369,6 +372,24 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           () => ({ ...complet, demandes: [...demandes, { id: crypto.randomUUID(), type_action: "cloturer_dossier", objet_id: d.id, resume: "Clôture d'un dossier et effacement de son contenu", payload: { dossier_id: d.id }, statut: "en_attente", cree_le: maintenant(), roles_autorises: ["gerant", "admin"] }] }),
           "La clôture est demandée : un associé la décide ; l'effacement suivra à l'échéance.",
         );
+      case "piece": {
+        if (!fichier) return;
+        const nom = fichier.name;
+        const type = champ("type_piece") || null;
+        return envoyer(
+          async () => {
+            if (!cle) throw new Error("Sans la phrase du cabinet, la pièce ne peut pas être chiffrée.");
+            const clair = new Uint8Array(await fichier.arrayBuffer());
+            const chiffre = await chiffrerOctets(cle, clair);
+            const sha = await empreinte(chiffre);
+            const chemin = `${clientId}/tamila_dossier/${d.id}/${nom}.chiffre`;
+            await portes.televerser(chemin, chiffre);
+            return portes.deposerPiece(d.id, nom, fichier.type || "application/octet-stream", chiffre.length, sha, chemin, type);
+          },
+          () => ({ ...complet, pieces: [{ id: crypto.randomUUID(), client_id: d.client_id, objet_id: d.id, nom_fichier: nom, mime: fichier.type || "application/octet-stream", octets: fichier.size + 29, sha256: "0".repeat(64), chemin: `${d.client_id}/tamila_dossier/${d.id}/${nom}.chiffre`, statut: d.statut === "attente" ? "a_rattacher" : "recue", type_piece: type, nb_pages: null, chiffrement: "dossier:v1", depose_par: moi?.user_id ?? MOI, recue_le: maintenant(), motif: null }, ...pieces] }),
+          `${nom} est chiffré dans votre navigateur et déposé dans le dossier ; sa lecture attend le coffre (le lecteur ne lit pas encore les pièces chiffrées).`,
+        );
+      }
       case "export":
         return envoyer(
           () => portes.demanderExport(d.id),
@@ -421,7 +442,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
   const dialogueTitre: Record<NonNullable<Form>["type"], string> = {
     partie: "Ajouter une partie", residence: "Corriger la résidence", appel: appel ? "Modifier l'appel" : "Déclarer l'appel", delai_regle: "Poser un délai de procédure", delai_date: "Poser une date fixée par le juge",
     confirmer: "Confirmer le délai", corriger: "Corriger la date retenue", interrompre: "Interrompre le délai", annuler: "Annuler le délai", acte: "Déclarer l'acte déposé", audience: "Ajouter une audience",
-    renvoyer: "Renvoyer, tenir ou annuler l'audience", avis: "Saisir un avis RPVA", membre: "Ajouter une personne au dossier", muraille: "Poser une muraille", decider: "Décider", cloture: "Demander la clôture", export: "Exporter le dossier",
+    renvoyer: "Renvoyer, tenir ou annuler l'audience", avis: "Saisir un avis RPVA", membre: "Ajouter une personne au dossier", muraille: "Poser une muraille", decider: "Décider", cloture: "Demander la clôture", export: "Exporter le dossier", piece: "Déposer une pièce",
   };
 
   return (
@@ -638,6 +659,31 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
         </div>
       </section>
 
+      {/* ——— les pièces ——— */}
+      <section className="esp-carte" aria-label="Pièces">
+        <div className="esp-carte-tete">
+          <h2 className="esp-carte-titre">Pièces</h2>
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || (source === "reelle" && !cle)} title={source === "reelle" && !cle ? "La phrase du cabinet est nécessaire pour chiffrer la pièce" : undefined} onClick={() => ouvrir({ type: "piece" })}><Upload width={14} height={14} aria-hidden="true" /> Déposer</button>
+        </div>
+        <div className="esp-carte-corps">
+          {pieces.length === 0 ? <p className="esp-kpi-sous">Aucune pièce. Chaque pièce est chiffrée dans votre navigateur avec la clé du dossier avant de partir ; le socle n&apos;en voit que des octets.</p> : pieces.map((pc) => (
+            <div key={pc.id} className="tam-ligne">
+              <div className="tam-ligne-haut">
+                <span className="tam-ligne-titre">{pc.nom_fichier}</span>
+                <Pastille teinte={pc.statut === "lue" ? "vert" : pc.statut === "echec" || pc.statut === "rejetee" ? "rouge" : pc.statut === "a_rattacher" ? "ambre" : "bleu"}>{pc.statut === "lue" ? "Lue" : pc.statut === "a_rattacher" ? "Attend l'ouverture" : pc.statut === "en_lecture" ? "En lecture" : pc.statut === "echec" ? "Lecture en échec" : pc.statut === "rejetee" ? "Rejetée" : pc.statut === "a_verifier" ? "À vérifier" : "Reçue"}</Pastille>
+                {pc.chiffrement ? <Pastille teinte="noir" contour><Lock width={11} height={11} aria-hidden="true" /> Chiffrée</Pastille> : null}
+                {pc.type_piece ? <Pastille teinte="gris" contour>{TYPES_AVIS[pc.type_piece as keyof typeof TYPES_AVIS] ?? pc.type_piece}</Pastille> : null}
+              </div>
+              <div className="tam-ligne-meta">
+                <span>Déposée le {dateCourte(pc.recue_le)} par {nomDe(pc.depose_par)}</span>
+                <span>{(pc.octets / 1024).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} Ko</span>
+                {pc.motif ? <span>{pc.motif === "CHIFFREMENT_NON_PRIS_EN_CHARGE" ? "Le lecteur ne lit pas encore les pièces chiffrées" : pc.motif}</span> : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ——— les avis RPVA ——— */}
       <section className="esp-carte" aria-label="Avis RPVA">
         <div className="esp-carte-tete">
@@ -793,6 +839,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
                   {form.type === "cloture" ? `Un associé décide. Une fois clos, le dossier est effacé ${reglages?.delai_cloture_jours ?? 7} jours plus tard, à 3 h : pièces, parties, clé. Vous gardez l'export téléchargé.` : null}
                   {form.type === "export" ? "L'archive (pièces, chronologie, délais, journal) est préparée par le serveur, puis disponible quelques jours. Exporter est une lecture tracée." : null}
                   {form.type === "residence" ? "Le domicile de la partie ; pour le client, il décide de l'augmentation des délais (art. 915-4)." : null}
+                  {form.type === "piece" ? "Une pièce du dossier : conclusions, bordereau, pièce adverse, avis RPVA… Chiffrée avant de partir ; lue par le lecteur quand le coffre lui rendra la clé." : null}
                 </DialogDescription>
               </DialogHeader>
               <DialogBody>
@@ -945,6 +992,31 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
                   ) : null}
                   {form.type === "cloture" ? <Avis teinte="ambre"><strong>Le contenu sera effacé</strong> {reglages?.delai_cloture_jours ?? 7} jours après l&apos;approbation. Téléchargez l&apos;export avant.</Avis> : null}
                   {form.type === "export" ? <Avis teinte="bleu">L&apos;export est tracé au journal des accès, comme toute lecture.</Avis> : null}
+                  {form.type === "piece" ? (
+                    <>
+                      <div>
+                        <span className="rv-libelle">Fichier <span className="esp-obligatoire">(obligatoire)</span></span>
+                        <div className="esp-fichier">
+                          <input id="tam-piece-fichier" type="file" className="esp-fichier-natif" accept=".pdf,.png,.jpg,.jpeg,.docx,.eml,.msg" onChange={(e) => setFichier(e.target.files?.[0] ?? null)} />
+                          <label htmlFor="tam-piece-fichier" className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{fichier ? "Changer de fichier" : "Choisir un fichier"}</label>
+                          <span className="esp-kpi-sous">{fichier ? `${fichier.name} · ${Math.round(fichier.size / 1024)} Ko` : "PDF, image, courriel ou document."}</span>
+                        </div>
+                      </div>
+                      <label className="rv-libelle">Nature (facultatif)
+                        <select className="rv-champ" value={champ("type_piece")} onChange={(e) => poser("type_piece", e.target.value)}>
+                          <option value="">À déterminer</option>
+                          <option value="conclusions">Conclusions</option>
+                          <option value="bordereau">Bordereau de communication</option>
+                          <option value="piece_adverse">Pièce adverse</option>
+                          <option value="expertise">Rapport d&apos;expertise</option>
+                          <option value="constat">Constat</option>
+                          <option value="courriel">Courriel</option>
+                          {(Object.keys(TYPES_AVIS) as (keyof typeof TYPES_AVIS)[]).map((t) => <option key={t} value={t}>{TYPES_AVIS[t]} (avis RPVA)</option>)}
+                        </select>
+                      </label>
+                      <Avis teinte="bleu">La pièce est chiffrée ici, dans votre navigateur, avec la clé du dossier ; seul l&apos;octet chiffré part au coffre, et son empreinte est celle du chiffré.</Avis>
+                    </>
+                  ) : null}
                   {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
                 </div>
               </DialogBody>
@@ -952,11 +1024,11 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
                 <button
                   type="button"
                   className={`r-btn ${form.type === "annuler" || form.type === "muraille" || form.type === "cloture" ? "r-btn--rouge" : "r-btn--noir"}`}
-                  disabled={envoi || (form.type === "partie" && champ("nom").trim().length < 2) || ((form.type === "membre" || form.type === "muraille") && !champ("user")) || (form.type === "renvoyer" && champ("statut", "renvoyee") === "renvoyee" && !champ("date")) || (form.type === "avis" && champ("type", "rpva_avis_audience") === "rpva_accuse_depot" && !champ("depose_le"))}
+                  disabled={envoi || (form.type === "piece" && !fichier) || (form.type === "partie" && champ("nom").trim().length < 2) || ((form.type === "membre" || form.type === "muraille") && !champ("user")) || (form.type === "renvoyer" && champ("statut", "renvoyee") === "renvoyee" && !champ("date")) || (form.type === "avis" && champ("type", "rpva_avis_audience") === "rpva_accuse_depot" && !champ("depose_le"))}
                   onClick={soumettre}
                 >
                   {envoi ? <Loader variant="spin" /> : null}{" "}
-                  {form.type === "confirmer" || form.type === "decider" ? (champ("decision", "approuve") === "approuve" ? "Approuver" : "Refuser") : form.type === "cloture" ? "Demander la clôture" : form.type === "export" ? "Demander l'export" : form.type === "muraille" ? "Poser la muraille" : form.type === "annuler" ? "Annuler le délai" : "Enregistrer"}
+                  {form.type === "confirmer" || form.type === "decider" ? (champ("decision", "approuve") === "approuve" ? "Approuver" : "Refuser") : form.type === "cloture" ? "Demander la clôture" : form.type === "export" ? "Demander l'export" : form.type === "piece" ? "Chiffrer et déposer" : form.type === "muraille" ? "Poser la muraille" : form.type === "annuler" ? "Annuler le délai" : "Enregistrer"}
                 </button>
               </DialogFooter>
             </>

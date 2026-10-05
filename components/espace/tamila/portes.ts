@@ -22,6 +22,7 @@
      tamila_corriger_delai / tamila_interrompre_delai / tamila_annuler_delai / tamila_declarer_acte
      tamila_ajouter_audience / tamila_changer_audience
      tamila_avis_lu(p_client, p_dossier, p_piece, p_type, p_valeurs, p_confiance, p_rg_concorde) → jsonb
+     tamila_deposer_piece(p_dossier, p_nom_fichier, p_mime, p_octets, p_sha256, p_chemin, p_type_piece) → jsonb (b4_01)
      tamila_consulter(p_dossier, p_contexte) → timestamptz
      tamila_cle_dossier(p_dossier) → bytea (b4_03) ; tamila_journal_acces(p_dossier, p_depuis) (b4_02)
      tamila_poser_muraille / tamila_demander_levee_muraille
@@ -33,7 +34,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Appel, Audience, Avis, CalculDelai, Cle, Delai, DemandeTamila, Dossier, DossierComplet, Export, Lecture, Membre, Muraille, Partie, Personne, RegleProcedure, Reglages } from "./types";
+import type { Appel, Audience, Avis, CalculDelai, Cle, Delai, DemandeTamila, Dossier, DossierComplet, Export, Lecture, Membre, Muraille, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -127,7 +128,7 @@ export async function chargerDossier(d: Dossier, cle: Cle | null, consulter: boo
       consulteJusqu = null;
     }
   }
-  const [p, a, t, au, av, m, mu, x, dem, le] = await Promise.all([
+  const [p, a, t, au, av, m, mu, x, dem, le, pc] = await Promise.all([
     supabase.from("tamila_parties").select("*").eq("dossier_id", d.id).order("cree_le"),
     supabase.from("tamila_appels").select("*").eq("dossier_id", d.id).maybeSingle(),
     supabase.from("tamila_delais").select("*").eq("dossier_id", d.id).order("echeance_retenue"),
@@ -138,6 +139,7 @@ export async function chargerDossier(d: Dossier, cle: Cle | null, consulter: boo
     supabase.from("tamila_exports").select("*").eq("dossier_id", d.id).order("cree_le", { ascending: false }),
     supabase.from("demandes_validation").select("id, type_action, objet_id, resume, payload, statut, cree_le, roles_autorises").eq("module", "tamila").eq("objet_id", d.id).eq("statut", "en_attente"),
     supabase.rpc("tamila_journal_acces", { p_dossier: d.id }),
+    supabase.from("pieces").select("id, client_id, objet_id, nom_fichier, mime, octets, sha256, chemin, statut, type_piece, nb_pages, chiffrement, depose_par, recue_le, motif").eq("objet_type", "tamila_dossier").eq("objet_id", d.id).order("recue_le", { ascending: false }),
   ]);
   return {
     dossier: d,
@@ -152,6 +154,7 @@ export async function chargerDossier(d: Dossier, cle: Cle | null, consulter: boo
     membres: (m.data ?? []) as Membre[],
     murailles: (mu.data ?? []) as Muraille[],
     exports: (x.data ?? []) as Export[],
+    pieces: (pc.data ?? []) as Piece[],
     /* la porte tamila_journal_acces (migration b4_02) ; sans elle, la section reste vide */
     lectures: (Array.isArray(le.data) ? le.data : []) as Lecture[],
     demandes: (dem.data ?? []) as DemandeTamila[],
@@ -220,6 +223,15 @@ export const poserMuraille = (p_dossier: string, p_user: string, p_motif: string
 export const demanderLeveeMuraille = (p_muraille: string) => rpc<string>("tamila_demander_levee_muraille", { p_muraille });
 
 export const demanderExport = (p_dossier: string) => rpc<string>("tamila_demander_export", { p_dossier });
+
+/** Le fichier CHIFFRÉ part au bucket omega-clients (politique INSERT des membres, lot 19o), puis la porte tamila_deposer_piece (b4_01). */
+export async function televerser(chemin: string, octets: Uint8Array): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.storage.from("omega-clients").upload(chemin, new Blob([octets.buffer.slice(octets.byteOffset, octets.byteOffset + octets.byteLength) as ArrayBuffer], { type: "application/octet-stream" }), { upsert: true, contentType: "application/octet-stream" });
+  if (error) throw new ErreurPorte(message(error));
+}
+export const deposerPiece = (p_dossier: string, p_nom_fichier: string, p_mime: string, p_octets: number, p_sha256: string, p_chemin: string, p_type_piece: string | null) =>
+  rpc<{ piece_id: string; statut: string; deja: boolean }>("tamila_deposer_piece", { p_dossier, p_nom_fichier, p_mime, p_octets, p_sha256, p_chemin, p_type_piece });
 export const demanderExportCabinet = (p_client: string) => rpc<string>("tamila_demander_export_cabinet", { p_client });
 export const telechargerExport = (p_export: string) => rpc<string>("tamila_telecharger_export", { p_export });
 

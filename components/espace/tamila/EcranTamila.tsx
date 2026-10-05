@@ -359,7 +359,7 @@ export default function EcranTamila() {
             clair: { reference: nv.reference.trim(), intitule: nv.intitule.trim(), numero_rg: nv.numero_rg.trim() || null },
             cle: null, parties: [], partiesClair: {}, appel: null, delais: [], audiences: [], avis: [],
             membres: [{ id: `${id}-m1`, client_id: EXEMPLE_CLIENT, dossier_id: id, user_id: nv.responsable || MOI, role_dossier: "responsable", jusqu_au: null, ajoute_par: MOI, ajoute_le: quand }],
-            murailles: [], exports: [], lectures: [], demandes: [], consulteJusqu: null,
+            murailles: [], exports: [], pieces: [], lectures: [], demandes: [], consulteJusqu: null,
           },
           ...prev,
         ]);

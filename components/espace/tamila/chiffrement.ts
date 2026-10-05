@@ -96,6 +96,21 @@ export async function chiffrer(cle: CryptoKey, texte: string): Promise<string> {
   return versHex(concat(new Uint8Array([VERSION]), nonce, ct));
 }
 
+/** Un fichier entier, chiffré au même format (01 ‖ nonce ‖ chiffré ‖ étiquette) : c'est ce qui part au bucket. */
+export async function chiffrerOctets(cle: CryptoKey, octets: Uint8Array): Promise<Uint8Array> {
+  const nonce = aleatoire(12);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: tampon(nonce) }, cle, tampon(octets)));
+  return concat(new Uint8Array([VERSION]), nonce, ct);
+}
+
+/** L'empreinte SHA-256 (hexadécimal) — celle du chiffré, jamais du clair. */
+export async function empreinte(octets: Uint8Array): Promise<string> {
+  const h = new Uint8Array(await crypto.subtle.digest("SHA-256", tampon(octets)));
+  let s = "";
+  for (const o of h) s += o.toString(16).padStart(2, "0");
+  return s;
+}
+
 export async function dechiffrer(cle: CryptoKey, hex: string | null | undefined): Promise<string | null> {
   const b = depuisHex(hex);
   if (!b || b.length < 29 || b[0] !== VERSION) return null;

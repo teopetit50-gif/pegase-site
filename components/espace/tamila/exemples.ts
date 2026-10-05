@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, ilYa } from "../exemples/socle";
-import type { Audience, CalculDelai, Delai, Dossier, DossierComplet, Export, Membre, Partie, Personne, RegleProcedure, Reglages } from "./types";
+import type { Audience, CalculDelai, Delai, Dossier, DossierComplet, Export, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
 
 export const EXEMPLE_CLIENT = "00000000-0000-4000-8000-00000000000b";
 export const EXEMPLE_ENTITE = "00000000-0000-4000-8000-0000000000e1";
@@ -97,6 +97,10 @@ function exportDe(d: string, n: number, x: Partial<Export> & Pick<Export, "statu
   return { id: `${d}-x${n}`, client_id: C, dossier_id: d, demande_par: MOI, chemin: null, octets: null, empreinte_manifeste: null, motif_echec: null, cree_le: ilYa(2), pret_le: null, expire_le: null, telecharge_le: null, telechargements: 0, purge_le: null, ...x };
 }
 
+function piece(d: string, n: number, nom: string, type_piece: string | null, statut: Piece["statut"], recue: string): Piece {
+  return { id: `${d}-pc${n}`, client_id: C, objet_id: d, nom_fichier: nom, mime: "application/pdf", octets: 180_000 + n * 1000, sha256: n.toString(16).padStart(64, "0"), chemin: `${C}/tamila_dossier/${d}/${nom}.chiffre`, statut, type_piece, nb_pages: null, chiffrement: "dossier:v1", depose_par: ROUSSEAU, recue_le: recue, motif: statut === "echec" ? "CHIFFREMENT_NON_PRIS_EN_CHARGE" : null };
+}
+
 /* ——— les six dossiers ——— */
 
 const D1 = u("d", 1);
@@ -133,6 +137,7 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
     membres: [membre(D1, 1, MOI, "responsable"), membre(D1, 2, ROUSSEAU, "intervenant"), membre(D1, 3, MARCHAND, "lecteur", dans(25))],
     murailles: [],
     exports: [exportDe(D1, 1, { statut: "pret", chemin: `${C}/tamila_dossier/${D1}/exports/${D1}-x1.zip`, octets: 18_432_112, empreinte_manifeste: "f".repeat(64), pret_le: ilYa(2), expire_le: dans(5), telechargements: 1, telecharge_le: ilYa(1) })],
+    pieces: [piece(D1, 1, "ordonnance-cme.pdf", "rpva_ordonnance_mee", "recue", ilYa(3)), piece(D1, 2, "conclusions-adverses.pdf", "conclusions", "recue", ilYa(6)), piece(D1, 3, "declaration-appel.pdf", "rpva_declaration_appel", "recue", ilYa(20))],
     lectures: [{ user_id: ROUSSEAU, lu_le: ilYa(1, 17), contexte: "dossier" }, { user_id: MOI, lu_le: ilYa(2, 9), contexte: "export" }, { user_id: MARCHAND, lu_le: ilYa(4, 11), contexte: "dossier" }],
     demandes: [{ id: `${D1}-dem1`, type_action: "confirmer_delai", objet_id: D1, resume: `Confirmer un délai de procédure : CPC, art. 908, échéance le ${echeance1.split("-").reverse().join("/")}`, payload: { delai_id: `${D1}-t1`, echeance: echeance1, regle: "tamila.cpc.908" }, statut: "en_attente", cree_le: ilYa(20), roles_autorises: ["gerant", "admin", "valideur"] }],
     consulteJusqu: dans(0, 23),
@@ -152,6 +157,7 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
     membres: [membre(D2, 1, ROUSSEAU, "responsable"), membre(D2, 2, BENALI, "intervenant")],
     murailles: [],
     exports: [],
+    pieces: [],
     lectures: [{ user_id: ROUSSEAU, lu_le: ilYa(0, 8), contexte: "dossier" }],
     demandes: [],
     consulteJusqu: null,
@@ -172,6 +178,7 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
     membres: [membre(D3, 1, MOI, "responsable"), membre(D3, 2, BENALI, "intervenant")],
     murailles: [{ id: `${D3}-mu1`, client_id: C, dossier_id: D3, user_id: HADDAD, motif_chiffre: CHIFFRE, pose_par: MOI, pose_le: ilYa(88), leve_le: null, leve_par: null, demande_levee_id: null }],
     exports: [],
+    pieces: [piece(D3, 1, "accuse-depot-conclusions.pdf", "rpva_accuse_depot", "recue", ilYa(5))],
     lectures: [{ user_id: MOI, lu_le: ilYa(1, 18), contexte: "dossier" }],
     demandes: [{ id: `${D3}-dem1`, type_action: "confirmer_delai", objet_id: D3, resume: "Confirmer un délai de procédure : CPC, art. 908", payload: { delai_id: `${D3}-t1` }, statut: "en_attente", cree_le: ilYa(85), roles_autorises: ["gerant", "admin", "valideur"] }],
     consulteJusqu: null,
@@ -186,6 +193,7 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
     membres: [membre(D4, 1, MOI, "responsable")],
     murailles: [],
     exports: [exportDe(D4, 1, { statut: "pret", chemin: `${C}/tamila_dossier/${D4}/exports/${D4}-x1.zip`, octets: 61_204_990, empreinte_manifeste: "a".repeat(64), pret_le: ilYa(2), expire_le: dans(5), telechargements: 2, telecharge_le: ilYa(1) })],
+    pieces: [],
     lectures: [{ user_id: MOI, lu_le: ilYa(2, 10), contexte: "export" }],
     demandes: [],
     consulteJusqu: null,
@@ -196,7 +204,7 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
     cle: null,
     parties: [], partiesClair: {}, appel: null, delais: [], audiences: [], avis: [],
     membres: [membre(D5, 1, ROUSSEAU, "responsable"), membre(D5, 2, BENALI, "intervenant")],
-    murailles: [], exports: [], lectures: [],
+    murailles: [], exports: [], pieces: [piece(D5, 1, "bail-commercial.pdf", null, "a_rattacher", ilYa(1))], lectures: [],
     demandes: [{ id: `${D5}-dem1`, type_action: "ouvrir_dossier", objet_id: D5, resume: "Ouverture d'un dossier à la lecture", payload: { initiateur: BENALI, responsable: ROUSSEAU }, statut: "en_attente", cree_le: ilYa(1), roles_autorises: ["gerant", "admin", "valideur"] }],
     consulteJusqu: null,
   },
@@ -211,7 +219,7 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
     audiences: [],
     avis: [],
     membres: [membre(D6, 1, MOI, "responsable"), membre(D6, 2, HADDAD, "intervenant")],
-    murailles: [], exports: [], lectures: [{ user_id: HADDAD, lu_le: ilYa(0, 9), contexte: "dossier" }],
+    murailles: [], exports: [], pieces: [], lectures: [{ user_id: HADDAD, lu_le: ilYa(0, 9), contexte: "dossier" }],
     demandes: [],
     consulteJusqu: null,
   },

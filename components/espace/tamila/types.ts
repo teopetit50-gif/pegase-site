@@ -289,6 +289,25 @@ export type DemandeTamila = {
   roles_autorises: string[];
 };
 
+/* public.pieces, la part utile ici : les pièces chiffrées d'un dossier (dépôt par tamila_deposer_piece, b4_01). */
+export type Piece = {
+  id: string;
+  client_id: string;
+  objet_id: string | null;
+  nom_fichier: string;
+  mime: string;
+  octets: number;
+  sha256: string;
+  chemin: string;
+  statut: "recue" | "a_rattacher" | "en_attente_expediteur" | "en_lecture" | "lue" | "a_verifier" | "a_classer" | "rejetee" | "echec";
+  type_piece: string | null;
+  nb_pages: number | null;
+  chiffrement: "dossier:v1" | null;
+  depose_par: string | null;
+  recue_le: string;
+  motif: string | null;
+};
+
 /* public.lectures (tracées par tamila_consulter et les téléchargements). */
 export type Lecture = { user_id: string; lu_le: string; contexte: string | null };
 
@@ -309,6 +328,7 @@ export type DossierComplet = {
   membres: Membre[];
   murailles: Muraille[];
   exports: Export[];
+  pieces: Piece[];
   lectures: Lecture[];
   demandes: DemandeTamila[];
   /* la fenêtre de lecture tracée (tamila_consulter) : jusqu'à quand les parties se lisent */
