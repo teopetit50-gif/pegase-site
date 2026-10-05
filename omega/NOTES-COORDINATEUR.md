@@ -21,6 +21,8 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | socle_lot19h | publication Realtime `supabase_realtime` : `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`, `delegations`, `filed_controles`, `filed_historique`, `points_du_jour` (demandé par A3) |
 | socle_lot19i | `private.fournisseurs_envoi` : Brevo `branche = true` sur la recette |
 | a5_01_private_execute | EXECUTE sur `private` retiré à PUBLIC/anon/authenticated puis rendu à la liste requise (migration d'A5 + compléments c/d/e du coordinateur : fonctions des triggers SECURITY INVOKER de private, des vues de public lisibles, des CHECK/defaults). Résultat : authenticated 187/741, anon 0. Liste figée : `omega/a5_01_liste_figee.txt` |
+| socle_lot19k | relevé par A3 en relecture réelle : des politiques RLS INSERT/UPDATE existaient sans GRANT pour authenticated (approbations, delegations, demandes_validation et 40 autres tables). Pour chaque politique de public visant authenticated, le GRANT correspondant est donné (75 grants, générés depuis pg_policies) ; les politiques restent juges |
+| socle_lot19l | `revoke insert, update, delete` d'authenticated sur `clients`, `audit_journal`, `catalogue_site`, `moteurs_reconnus`, `profils_metier` (RLS actif, aucune politique d'écriture : grants sans objet) |
 | socle_lot19j | effet de bord d'a5_01 : le service_role n'avait EXECUTE sur `private` que par PUBLIC → « permission denied for function piece_a_lire » chez le lecteur à 18 h 55 Z. `grant execute on all functions in schema private to service_role` + default privileges (19 h 05 Z). À intégrer dans a5_01 (demandé à A5) |
 | filed_lot4a … filed_lot4g, filed_lot5a, filed_lot6a | les neuf migrations d'A4 (`omega/migrations/a4_01` à `a4_09`) : exercices, plan comptable, centres, imputations apprises, charges récurrentes, identité TVA/SIREN, archivage probant, pilotage, circuit de validation, branchements, acquittement d'alerte. `filed_factures_statut_check` retiré, `filed_factures_statut_v2` en place |
 
@@ -115,8 +117,11 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 - `apply_migration` expire ; on passe par `execute_sql` et on inscrit la ligne
   dans `supabase_migrations.schema_migrations` à la main.
 - Toute nouvelle table de `public` : `revoke all … from anon, authenticated`
-  puis `grant select … to authenticated` si une politique la lit. Les default
-  privileges retirent désormais TRUNCATE/REFERENCES/TRIGGER d'office.
+  puis, pour chaque politique visant authenticated, le GRANT de la même
+  commande (SELECT/INSERT/UPDATE/DELETE). Une politique sans GRANT ne sert à
+  rien (vu le 5/10 sur delegations). Les default privileges retirent
+  TRUNCATE/REFERENCES/TRIGGER d'office. Diagnostic : comparer `pg_policies`
+  (cmd, roles) à `has_table_privilege('authenticated', …)`.
 - Faits du socle que les tests doivent respecter : l'entité principale est
   créée à l'insertion du client ; `filed_documents.reference` est générée ;
   `journal_opposable` ne s'écrit que par `private.journaliser(...)` ; les
