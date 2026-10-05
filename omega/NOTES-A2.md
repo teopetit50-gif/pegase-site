@@ -1,6 +1,6 @@
 # NOTES-A2 — ouvrier EXPÉDITEUR et RÉCEPTION
 
-Session worker A2, branche `worker-a2`. Dernière mise à jour : 05/10/2026.
+Session worker A2, branche `worker-a2`. Dernière mise à jour : 05/10/2026, soir.
 Périmètre : `omega/functions/expediteur/`, `omega/functions/reception/`,
 `omega/functions/webhooks/`. Aucune migration SQL, aucune écriture directe en table :
 tout passe par les portes du socle, appelées en RPC avec la clé de service.
@@ -81,7 +81,23 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
     l'e-mail, `context.id` pour WhatsApp), `fil` (première `References` ou Message-ID ;
     numéro de l'interlocuteur pour WhatsApp). La porte rattache elle-même la réception
     à l'envoi d'origine et publie `reception.nouvelle` : l'ouvrier ne publie rien.
-- **Tests** : 57 tests Deno verts sur doubles (expéditeur 20, webhook 11, réception 26).
+- **Rapprochement « accepté par Brevo mais non confirmé »** : quand `confirmer_envoi`
+  tombe trois fois après une remise acceptée, l'expéditeur dépose lui-même un travail
+  `envois.confirmer` `{envoi, reference}` (porte `deposer_travail`, clé
+  `confirmer:<envoi>`, priorité 1, client = `client_id` du travail d'origine) et finit
+  le travail avec `{confirme: false, rapprochement: <id>}`. Il prend ce genre à chaque
+  passage et rejoue `confirmer_envoi` ; repris tant que la porte tombe, jamais de
+  ré-émission. Si le dépôt est impossible (travail sans `client_id`, porte en panne),
+  journal `RAPPROCHEMENT IMPOSSIBLE` et `rapprochement: null`.
+- **`omega/functions/README.md`** : déploiement de chaque fonction, variables, tests
+  en local, essais à la main ; `reception/outils/signer_formulaire.ts` fabrique une
+  requête de formulaire signée (imprime la commande `curl`).
+- **Déployé sur la recette** par le coordinateur le 05/10 (version 1, active) :
+  `expediteur` (verify_jwt true), `webhooks-brevo` et `reception` (verify_jwt false).
+  Cron `omega-expediteur` posé, inactif tant que la clé de service n'est pas au coffre.
+  La boîte `site:omegaai.fr` est portée par `clients.config.boite_formulaire`
+  (client du banc, module reput).
+- **Tests** : 60 tests Deno verts sur doubles (expéditeur 23, webhook 11, réception 26).
   Chaque dossier : `deno test --allow-env` (et `deno lint`, `deno check index.ts`).
   Cas couverts : passage à vide avec battement, e-mail et SMS remis, pièces, refus du
   socle, clé absente, erreurs 400 / 503 Brevo, `confirmer_envoi` en panne, idempotence
@@ -91,12 +107,10 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 ## Bloqué
 
 - ~~Push GitHub~~ : poussé, voir la fin de ce fichier.
-- **Déploiement sur la recette** : le coordinateur déploie (plus d'appel Supabase
-  depuis cette session). Message « prêt à déployer » envoyé avec la liste des
-  fichiers et des secrets. `webhooks-brevo` et `reception` doivent être déployées
-  avec `verify_jwt = false` (Brevo, Meta et le site n'envoient pas de JWT Supabase ;
-  chaque entrée porte sa propre authentification). `expediteur` garde `verify_jwt =
-  true` (appelée par pg_cron avec la clé de service).
+- **Secrets** : `BREVO_API_KEY`, `BREVO_WEBHOOK_JETON`, `FORMULAIRE_SECRET`,
+  `META_*` sont entre les mains de Teo (liste transmise par le coordinateur). Tant
+  qu'ils manquent, `webhooks-brevo` et `reception` répondent 503, l'expéditeur
+  reporte.
 - **Envoi réel** (un e-mail et un SMS vers une adresse et un numéro de test) : impossible
   tant que `BREVO_API_KEY` n'existe pas et que `brevo` / `brevo_sms` ne sont pas
   `branche = true` sur la recette. À faire dès que Teo a posé la clé.
@@ -111,8 +125,6 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 3. Brancher le formulaire du site (`app/.../route.ts`, hors de mon périmètre : à
    confier à la session vitrine) : signer avec `FORMULAIRE_SECRET`, générer
    l'`identifiant` côté serveur, renvoyer vers `/reception/formulaire`.
-4. Rapprochement « accepté par Brevo mais non confirmé » : un passage de contrôle qui
-   relit les `confirme: false` dans les résultats de travaux (ou le socle).
 
 ## Portes du socle utilisées (toutes posées sur la recette, lot 18 du 05/10/2026)
 
@@ -210,9 +222,12 @@ et la fonction `reception`.
   un trou de configuration de quelques heures peut clore des envois : au coordinateur
   de ne pas compter les erreurs `FOURNISSEUR_NON_BRANCHE`, ou de ne brancher le
   fournisseur qu'une fois la clé posée (c'est déjà la règle).
-- **Accepté par Brevo, non confirmé** (`confirmer_envoi` trois fois en panne) : le
-  travail est fini avec `{"confirme": false, "fournisseur_id"}` et un journal
-  `NON CONFIRMÉ`, pour ne jamais ré-émettre ; l'envoi reste `en_cours` jusqu'au bail.
+- **Accepté par Brevo, non confirmé** (`confirmer_envoi` trois fois en panne) : travail
+  `envois.confirmer` déposé et rejoué au passage suivant, une minute plus tard, bien
+  avant la fin du bail de 15 minutes de l'envoi. Le seul trou restant : travail
+  d'origine sans `client_id` ou `deposer_travail` en panne au même moment ; le journal
+  `RAPPROCHEMENT IMPOSSIBLE` porte l'envoi et la référence à rejouer à la main.
+  Hypothèse à confirmer : `prendre_travaux` rend bien `client_id` sur chaque travail.
 - **Corps HTML ou texte** : heuristique (`corpsEstHtml`) ; si le socle sait le canal
   de rendu, autant l'ajouter à la réponse de `commencer_envoi`.
 - **Date Brevo** sans fuseau (`AAAA-MM-JJ HH:MM:SS`) : lue en UTC quand `ts_event`

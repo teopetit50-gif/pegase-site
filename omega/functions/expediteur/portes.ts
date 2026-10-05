@@ -100,6 +100,15 @@ export interface Portes {
     erreur: string,
     definitif: boolean,
   ): Promise<ResultatEchecEnvoi>;
+  /** Dépose un travail, idempotent sur (genre, cle). Rend l'id du travail. */
+  deposerTravail(
+    client: string,
+    module: string,
+    genre: string,
+    charge: Record<string, unknown>,
+    cle: string,
+    priorite: number,
+  ): Promise<number>;
 }
 
 export class ErreurPorte extends Error {
@@ -200,6 +209,17 @@ export function portesSupabase(rpc: AppelRpc): Portes {
         p_definitif: definitif,
       });
       return r === "echec" ? "echec" : "pret";
+    },
+    async deposerTravail(client, module, genre, charge, cle, priorite) {
+      const r = await rpc("deposer_travail", {
+        p_client: client,
+        p_module: module,
+        p_genre: genre,
+        p_charge: charge,
+        p_cle: cle,
+        p_priorite: priorite,
+      });
+      return typeof r === "number" ? r : Number(r ?? 0);
     },
   };
 }

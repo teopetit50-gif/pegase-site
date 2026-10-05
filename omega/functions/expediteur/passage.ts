@@ -26,7 +26,13 @@ import {
 import { type Stockage, versBase64 } from "./stockage.ts";
 
 export const MODULE = "expediteur";
-export const GENRES = ["envois.brevo", "envois.brevo_sms"] as const;
+/** Genre interne : confirmation différée d'un envoi accepté par Brevo (voir rapprochement). */
+export const GENRE_CONFIRMATION = "envois.confirmer";
+export const GENRES = [
+  "envois.brevo",
+  "envois.brevo_sms",
+  GENRE_CONFIRMATION,
+] as const;
 export const CANAUX_PRIS_EN_CHARGE = new Set(["email", "sms"]);
 
 export type Journal = {
@@ -58,6 +64,14 @@ export type Issue =
     envoi: string;
     fournisseur_id: string;
     confirme: boolean;
+    /** Id du travail envois.confirmer déposé quand confirme = false, null si impossible. */
+    rapprochement?: number | null;
+  }
+  | {
+    sortie: "confirme";
+    travail: number;
+    envoi: string;
+    fournisseur_id: string;
   }
   | { sortie: "non_envoye"; travail: number; envoi: string; statut: string }
   | { sortie: "reporte"; travail: number; envoi: string; erreur: string }
@@ -67,6 +81,7 @@ export type Bilan = {
   ouvrier: string;
   pris: number;
   remis: number;
+  confirmes: number;
   non_envoyes: number;
   reportes: number;
   echecs: number;
@@ -94,6 +109,7 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
     ouvrier: deps.ouvrier,
     pris: 0,
     remis: 0,
+    confirmes: 0,
     non_envoyes: 0,
     reportes: 0,
     echecs: 0,
@@ -117,6 +133,7 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
     const issue = await traiterTravail(travail, deps);
     bilan.issues.push(issue);
     if (issue.sortie === "remis") bilan.remis++;
+    else if (issue.sortie === "confirme") bilan.confirmes++;
     else if (issue.sortie === "non_envoye") bilan.non_envoyes++;
     else if (issue.sortie === "reporte") bilan.reportes++;
     else bilan.echecs++;
@@ -131,6 +148,7 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
         ouvrier: deps.ouvrier,
         pris: bilan.pris,
         remis: bilan.remis,
+        confirmes: bilan.confirmes,
         non_envoyes: bilan.non_envoyes,
         reportes: bilan.reportes,
         echecs: bilan.echecs,
@@ -170,6 +188,11 @@ export async function traiterTravail(
       travail.id,
     );
     return { sortie: "echec", travail: travail.id, erreur };
+  }
+
+  // 1 bis. Travail de rapprochement : seulement confirmer_envoi, jamais de ré-émission.
+  if (travail.genre === GENRE_CONFIRMATION) {
+    return traiterConfirmation(travail, envoiId, deps);
   }
 
   // 2. commencer_envoi : lecture et transition. Si la porte tombe, le travail est repris (rien n'a bougé).
@@ -224,13 +247,16 @@ export async function traiterTravail(
       fournisseurId,
       deps,
     );
+    const rapprochement = confirme
+      ? undefined
+      : await deposerRapprochement(travail, envoi.envoi, fournisseurId, deps);
     const remisA = (deps.maintenant?.() ?? new Date()).toISOString();
     await sansLever(
       () =>
         portes.finirTravail(travail.id, {
           fournisseur_id: fournisseurId,
           remis_a: remisA,
-          ...(confirme ? {} : { confirme: false }),
+          ...(confirme ? {} : { confirme: false, rapprochement }),
         }),
       journal,
       "finir_travail",
@@ -250,6 +276,7 @@ export async function traiterTravail(
       envoi: envoi.envoi,
       fournisseur_id: fournisseurId,
       confirme,
+      ...(confirme ? {} : { rapprochement }),
     };
   } catch (e) {
     const { message, definitive } = qualifier(e);
@@ -371,10 +398,130 @@ async function confirmerAvecReprises(
     }
   }
   deps.journal.erreur(
-    "ENVOI ACCEPTÉ PAR BREVO MAIS NON CONFIRMÉ : à rapprocher à la main",
+    "ENVOI ACCEPTÉ PAR BREVO MAIS NON CONFIRMÉ : rapprochement déposé",
     { envoi, reference },
   );
   return false;
+}
+
+/**
+ * Rapprochement : Brevo a accepté mais confirmer_envoi est tombée trois fois. On ne
+ * ré-émet jamais ; on dépose un travail envois.confirmer {envoi, reference}, clé
+ * confirmer:<envoi>, que ce même ouvrier reprend au passage suivant (bien avant la fin
+ * du bail de l'envoi) pour rejouer confirmer_envoi. Rend l'id du travail, ou null si
+ * le dépôt est impossible (client inconnu, porte en panne) : il reste alors le journal.
+ */
+async function deposerRapprochement(
+  travail: Travail,
+  envoi: string,
+  reference: string,
+  deps: Dependances,
+): Promise<number | null> {
+  const client = typeof travail.client_id === "string"
+    ? travail.client_id
+    : null;
+  if (!client) {
+    deps.journal.erreur(
+      "RAPPROCHEMENT IMPOSSIBLE : le travail ne porte pas de client_id, confirmer_envoi à rejouer à la main",
+      { travail: travail.id, envoi, reference },
+    );
+    return null;
+  }
+  try {
+    const id = await deps.portes.deposerTravail(
+      client,
+      MODULE,
+      GENRE_CONFIRMATION,
+      { envoi, reference },
+      `confirmer:${envoi}`,
+      1,
+    );
+    deps.journal.info("travail de rapprochement déposé", {
+      travail: id,
+      envoi,
+      reference,
+    });
+    return id;
+  } catch (e) {
+    deps.journal.erreur(
+      "RAPPROCHEMENT IMPOSSIBLE : deposer_travail a échoué, confirmer_envoi à rejouer à la main",
+      {
+        travail: travail.id,
+        envoi,
+        reference,
+        erreur: String(e).slice(0, 300),
+      },
+    );
+    return null;
+  }
+}
+
+/** Travail envois.confirmer : rejoue confirmer_envoi(envoi, reference). Repris tant que la porte tombe. */
+async function traiterConfirmation(
+  travail: Travail,
+  envoi: string,
+  deps: Dependances,
+): Promise<Issue> {
+  const { portes, journal } = deps;
+  const reference = typeof travail.charge?.reference === "string"
+    ? travail.charge.reference.trim()
+    : "";
+  if (!reference) {
+    const erreur = `CHARGE_INVALIDE : rapprochement sans reference : ${
+      JSON.stringify(travail.charge)
+    }`;
+    journal.erreur("rapprochement en échec définitif", {
+      travail: travail.id,
+      envoi,
+      erreur,
+    });
+    await sansLever(
+      () => portes.echouerTravail(travail.id, erreur, false),
+      journal,
+      "echouer_travail",
+      travail.id,
+    );
+    return { sortie: "echec", travail: travail.id, envoi, erreur };
+  }
+  try {
+    await portes.confirmerEnvoi(envoi, reference);
+  } catch (e) {
+    const erreur = `CONFIRMATION_EN_ATTENTE : ${String(e).slice(0, 300)}`;
+    journal.erreur("rapprochement reporté, confirmer_envoi tombe encore", {
+      travail: travail.id,
+      envoi,
+      reference,
+      erreur,
+    });
+    await sansLever(
+      () => portes.echouerTravail(travail.id, erreur, true),
+      journal,
+      "echouer_travail",
+      travail.id,
+    );
+    return { sortie: "reporte", travail: travail.id, envoi, erreur };
+  }
+  await sansLever(
+    () =>
+      portes.finirTravail(travail.id, {
+        confirme: true,
+        fournisseur_id: reference,
+      }),
+    journal,
+    "finir_travail",
+    travail.id,
+  );
+  journal.info("rapprochement : envoi confirmé", {
+    travail: travail.id,
+    envoi,
+    reference,
+  });
+  return {
+    sortie: "confirme",
+    travail: travail.id,
+    envoi,
+    fournisseur_id: reference,
+  };
 }
 
 async function sansLever(

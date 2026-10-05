@@ -24,6 +24,15 @@ export class PortesDouble implements Portes {
   travauxEchoues = new Map<number, { erreur: string; reprendre: boolean }>();
   confirmes = new Map<string, string>();
   envoisEchoues = new Map<string, { erreur: string; definitif: boolean }>();
+  deposes: {
+    id: number;
+    client: string;
+    module: string;
+    genre: string;
+    charge: Record<string, unknown>;
+    cle: string;
+    priorite: number;
+  }[] = [];
   battements: Record<string, unknown>[] = [];
   /** Pour simuler une porte qui tombe (toujours, ou n fois). */
   panne: Partial<Record<keyof Portes, Error>> = {};
@@ -102,6 +111,24 @@ export class PortesDouble implements Portes {
     this.noter("echouerEnvoi", envoi, erreur, definitif);
     this.envoisEchoues.set(envoi, { erreur, definitif });
     return definitif ? "echec" : "pret";
+  }
+  // deno-lint-ignore require-await
+  async deposerTravail(
+    client: string,
+    module: string,
+    genre: string,
+    charge: Record<string, unknown>,
+    cle: string,
+    priorite: number,
+  ) {
+    this.noter("deposerTravail", client, module, genre, charge, cle, priorite);
+    const existant = this.deposes.find((d) =>
+      d.genre === genre && d.cle === cle
+    );
+    if (existant) return existant.id;
+    const id = 900 + this.deposes.length + 1;
+    this.deposes.push({ id, client, module, genre, charge, cle, priorite });
+    return id;
   }
 }
 
@@ -188,10 +215,20 @@ export function envoiExemple(
   };
 }
 
+export const CLIENT = "22222222-2222-4222-8222-222222222222";
+
 export function travailExemple(
   id: number,
   genre: string,
   envoi: string,
+  client: string | null = CLIENT,
 ): Travail {
-  return { id, genre, charge: { envoi }, cle: `envoi:${envoi}`, essais: 0 };
+  return {
+    id,
+    genre,
+    charge: { envoi },
+    cle: `envoi:${envoi}`,
+    essais: 0,
+    client_id: client,
+  };
 }

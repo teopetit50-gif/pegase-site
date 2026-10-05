@@ -1,6 +1,7 @@
 import { assert, assertEquals, assertMatch } from "@std/assert";
 import {
   BrevoDouble,
+  CLIENT,
   ENVOI,
   envoiExemple,
   journalMemoire,
@@ -58,7 +59,11 @@ Deno.test("passage à vide : aucun travail, mais battre_ouvrier est appelé", as
   assertEquals(portes.battements[0].module, MODULE);
   assertEquals(portes.battements[0].genres, [...GENRES]);
   assertEquals(portes.appels[0].porte, "prendreTravaux");
-  assertEquals(portes.appels[0].args[0], ["envois.brevo", "envois.brevo_sms"]);
+  assertEquals(portes.appels[0].args[0], [
+    "envois.brevo",
+    "envois.brevo_sms",
+    "envois.confirmer",
+  ]);
 });
 
 Deno.test("e-mail remis : commencer_envoi → Brevo → confirmer_envoi(messageId) → finir_travail {fournisseur_id, remis_a}", async () => {
@@ -372,7 +377,7 @@ Deno.test("confirmer_envoi tombe deux fois puis passe : l'envoi n'est jamais ré
   assertEquals(portes.finis.get(15)!.confirme, undefined);
 });
 
-Deno.test("confirmer_envoi tombe trois fois : Brevo a accepté, le travail est fini avec confirme:false et un journal d'alerte", async () => {
+Deno.test("confirmer_envoi tombe trois fois : Brevo a accepté, rapprochement envois.confirmer déposé (clé confirmer:<envoi>), travail fini avec confirme:false", async () => {
   const { portes, journal, deps } = monter();
   portes.envois.set(ENVOI, envoiExemple());
   portes.panne.confirmerEnvoi = new Error("porte hors service");
@@ -380,8 +385,93 @@ Deno.test("confirmer_envoi tombe trois fois : Brevo a accepté, le travail est f
   const bilan = await executerPassage(deps);
   assertEquals(bilan.remis, 1);
   assertEquals(portes.finis.get(16)!.confirme, false);
+  assertEquals(portes.finis.get(16)!.rapprochement, 901);
   assertEquals(portes.envoisEchoues.size, 0);
+  assertEquals(portes.deposes, [{
+    id: 901,
+    client: CLIENT,
+    module: "expediteur",
+    genre: "envois.confirmer",
+    charge: { envoi: ENVOI, reference: "<1@smtp-relay.mailin.fr>" },
+    cle: `confirmer:${ENVOI}`,
+    priorite: 1,
+  }]);
   assert(journal.lignes.some((l) => l.includes("NON CONFIRMÉ")));
+});
+
+Deno.test("rapprochement impossible (travail sans client_id, ou deposer_travail en panne) : rapprochement null, journal d'alerte, jamais de ré-émission", async () => {
+  const a = monter();
+  a.portes.envois.set(ENVOI, envoiExemple());
+  a.portes.panne.confirmerEnvoi = new Error("porte hors service");
+  a.portes.travaux = [travailExemple(20, "envois.brevo", ENVOI, null)];
+  await executerPassage(a.deps);
+  assertEquals(a.portes.finis.get(20)!.rapprochement, null);
+  assertEquals(a.portes.deposes.length, 0);
+  assert(a.journal.lignes.some((l) => l.includes("RAPPROCHEMENT IMPOSSIBLE")));
+  assertEquals(a.brevo.emails.length, 1);
+
+  const b = monter();
+  b.portes.envois.set(ENVOI, envoiExemple());
+  b.portes.panne.confirmerEnvoi = new Error("porte hors service");
+  b.portes.panne.deposerTravail = new Error("porte hors service");
+  b.portes.travaux = [travailExemple(21, "envois.brevo", ENVOI)];
+  await executerPassage(b.deps);
+  assertEquals(b.portes.finis.get(21)!.rapprochement, null);
+  assert(b.journal.lignes.some((l) => l.includes("RAPPROCHEMENT IMPOSSIBLE")));
+});
+
+Deno.test("travail envois.confirmer : rejoue confirmer_envoi sans commencer_envoi ni Brevo, finit {confirme:true}", async () => {
+  const { portes, brevo, deps } = monter();
+  portes.travaux = [{
+    id: 22,
+    genre: "envois.confirmer",
+    charge: { envoi: ENVOI, reference: "<9@smtp-relay.mailin.fr>" },
+    cle: `confirmer:${ENVOI}`,
+    client_id: CLIENT,
+  }];
+  const bilan = await executerPassage(deps);
+  assertEquals(bilan.confirmes, 1);
+  assertEquals(portes.confirmes.get(ENVOI), "<9@smtp-relay.mailin.fr>");
+  assertEquals(portes.finis.get(22), {
+    confirme: true,
+    fournisseur_id: "<9@smtp-relay.mailin.fr>",
+  });
+  assertEquals(brevo.emails.length, 0);
+  assert(!portes.appels.some((a) => a.porte === "commencerEnvoi"));
+  assertEquals(
+    (portes.battements[0].detail as Record<string, unknown>).confirmes,
+    1,
+  );
+});
+
+Deno.test("travail envois.confirmer : porte encore en panne → repris ; charge sans reference → échec définitif", async () => {
+  const a = monter();
+  a.portes.panne.confirmerEnvoi = new Error("toujours en panne");
+  a.portes.travaux = [{
+    id: 23,
+    genre: "envois.confirmer",
+    charge: { envoi: ENVOI, reference: "<9@x>" },
+    client_id: CLIENT,
+  }];
+  const bilan = await executerPassage(a.deps);
+  assertEquals(bilan.reportes, 1);
+  assertEquals(a.portes.travauxEchoues.get(23)!.reprendre, true);
+  assertMatch(
+    a.portes.travauxEchoues.get(23)!.erreur,
+    /^CONFIRMATION_EN_ATTENTE/,
+  );
+
+  const b = monter();
+  b.portes.travaux = [{
+    id: 24,
+    genre: "envois.confirmer",
+    charge: { envoi: ENVOI },
+    client_id: CLIENT,
+  }];
+  await executerPassage(b.deps);
+  assertEquals(b.portes.travauxEchoues.get(24)!.reprendre, false);
+  assertMatch(b.portes.travauxEchoues.get(24)!.erreur, /^CHARGE_INVALIDE/);
+  assertEquals(b.portes.confirmes.size, 0);
 });
 
 Deno.test("commencer_envoi en panne : echouer_travail avec reprise, rien d'autre ne bouge", async () => {
