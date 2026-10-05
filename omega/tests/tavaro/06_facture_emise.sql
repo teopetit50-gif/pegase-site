@@ -37,7 +37,7 @@ begin
   return next ok(f.mentions ->> 'mandat' like 'Facture établie par Omega au nom et pour le compte de Loueur Essai B2%', 'La mention de mandat est posée');
   return next ok(f.mentions ->> 'restitution' like '05/10/2026 à 11:30%', format('La restitution est datée à l''heure de Paris (%s)', f.mentions ->> 'restitution'));
   return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L', f.id)), 4::bigint, 'Quatre lignes de frais');
-  return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L and jsonb_array_length(preuves) > 0', f.id)), 4::bigint, 'Chaque ligne garde ses preuves');
+  return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L and jsonb_array_length(preuves) > 0', f.id)), 3::bigint, 'Carburant, kilomètres et nettoyage gardent leurs photos (le retard n''en a pas : ce sont les heures du contrat)');
   return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L', f2.id)), 1::bigint, 'Une ligne de dommage');
   return next ok(tests.tavaro_journal(v_client, 'tavaro.proposition_validee') >= 1, 'Le journal opposable porte tavaro.proposition_validee');
   return next is(tests.tavaro_journal(v_client, 'tavaro.facture_emise'), 2::bigint, 'Le journal opposable porte deux tavaro.facture_emise');

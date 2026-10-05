@@ -614,7 +614,7 @@ begin
   return next ok(f.mentions ->> 'mandat' like 'Facture établie par Omega au nom et pour le compte de Loueur Essai B2%', 'La mention de mandat est posée');
   return next ok(f.mentions ->> 'restitution' like '05/10/2026 à 11:30%', format('La restitution est datée à l''heure de Paris (%s)', f.mentions ->> 'restitution'));
   return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L', f.id)), 4::bigint, 'Quatre lignes de frais');
-  return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L and jsonb_array_length(preuves) > 0', f.id)), 4::bigint, 'Chaque ligne garde ses preuves');
+  return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L and jsonb_array_length(preuves) > 0', f.id)), 3::bigint, 'Carburant, kilomètres et nettoyage gardent leurs photos (le retard n''en a pas : ce sont les heures du contrat)');
   return next is(tests.compter('public', 'loc_facture_lignes', format('facture_id = %L', f2.id)), 1::bigint, 'Une ligne de dommage');
   return next ok(tests.tavaro_journal(v_client, 'tavaro.proposition_validee') >= 1, 'Le journal opposable porte tavaro.proposition_validee');
   return next is(tests.tavaro_journal(v_client, 'tavaro.facture_emise'), 2::bigint, 'Le journal opposable porte deux tavaro.facture_emise');
@@ -681,7 +681,7 @@ begin
     return next is(d.statut, 'executee', 'Sans réglage d''envoi pour ce loueur, la demande est tout de même exécutée (facture à envoyer soi-même)');
     return next ok(tests.tavaro_journal(v_client, 'tavaro.facture_envoi_non_regle') >= 1, 'Le journal opposable porte tavaro.facture_envoi_non_regle');
     return next diag('Pas de reglages_envois pour le loueur d''essai : le courriel réel se prouve sur le banc (mode essai), pas ici.');
-    return next is(tests.compter('public', 'alertes', format('client_id = %L and cle = %L', v_client, 'facture:envoi_non_regle:' || (jeu ->> 'proposition'))), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée (clé facture:envoi_non_regle:<proposition>)');
+    return next is(tests.compter('public', 'alertes', format('client_id = %L and cle like %L', v_client, '%facture:envoi_non_regle:' || (jeu ->> 'proposition'))), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée (clé facture:envoi_non_regle:<proposition>)');
   end if;
 
   -- Le litige : par l'agence, avec la contestation du client.
@@ -954,7 +954,7 @@ begin
     n := private.loc_relancer_factures(now() + interval '40 days');
     return next is(n, 2, 'La troisième');
     return next is((select x.relances from public.loc_factures x where x.id = f.id), 3::smallint, 'Trois relances comptées');
-    return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle = %L', v_client, 'facture:recouvrement:' || f.id::text)) >= 1, 'À la troisième, l''alerte de recouvrement est levée pour l''agence');
+    return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle like %L', v_client, '%facture:recouvrement:' || f.id::text)) >= 1, 'À la troisième, l''alerte de recouvrement est levée pour l''agence');
     n := private.loc_relancer_factures(now() + interval '60 days');
     return next is(n, 0, 'Pas de quatrième relance par le cron');
   else

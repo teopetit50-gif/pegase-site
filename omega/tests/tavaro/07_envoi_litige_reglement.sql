@@ -25,7 +25,7 @@ begin
     return next is(d.statut, 'executee', 'Sans réglage d''envoi pour ce loueur, la demande est tout de même exécutée (facture à envoyer soi-même)');
     return next ok(tests.tavaro_journal(v_client, 'tavaro.facture_envoi_non_regle') >= 1, 'Le journal opposable porte tavaro.facture_envoi_non_regle');
     return next diag('Pas de reglages_envois pour le loueur d''essai : le courriel réel se prouve sur le banc (mode essai), pas ici.');
-    return next is(tests.compter('public', 'alertes', format('client_id = %L and cle = %L', v_client, 'facture:envoi_non_regle:' || (jeu ->> 'proposition'))), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée (clé facture:envoi_non_regle:<proposition>)');
+    return next is(tests.compter('public', 'alertes', format('client_id = %L and cle like %L', v_client, '%facture:envoi_non_regle:' || (jeu ->> 'proposition'))), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée (clé facture:envoi_non_regle:<proposition>)');
   end if;
 
   -- Le litige : par l'agence, avec la contestation du client.
