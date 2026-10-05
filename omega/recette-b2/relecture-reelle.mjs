@@ -45,7 +45,13 @@ const morceaux = [];
 }
 console.log(`— cookie ${nom} en ${morceaux.length} morceau(x), utilisateur ${session.user?.email}`);
 
-const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-reel', densite: 1 });
+/* Le Chromium de recette sort par le mandataire du conteneur (chrome.mjs lui
+   passe --proxy-server) mais ne lit pas le magasin NSS où la CA du mandataire
+   est posée : tout fetch vers supabase.co tombe en ERR_CERT_AUTHORITY_INVALID
+   (« Failed to fetch » à l'écran). Pour cette relecture seulement, on lui fait
+   accepter ce certificat ; le trafic passe toujours par le mandataire. Sur un
+   navigateur ordinaire, rien de tout cela. */
+const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-reel', densite: 1, flags: ['--ignore-certificate-errors'] });
 await s.envoyer('Page.addScriptToEvaluateOnNewDocument', { source: `window.__erreurs = []; const o = console.error; console.error = (...a) => { try { window.__erreurs.push(a.map(x => (x && x.message) ? x.message : (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(' ')); } catch {} o.apply(console, a); };` });
 for (const m of morceaux) await s.envoyer('Network.setCookie', { name: m.name, value: m.value, url: base, path: '/' });
 console.log('— /espace/tavaro (base réelle)');
@@ -69,7 +75,10 @@ const releve = await s.evaluer(`(() => ({
 ok(releve.ruban === 'Base réelle', `ruban : ${releve.ruban}`);
 console.log('    compteurs :', releve.kpis.join(' · ') || '—', '| contrats :', releve.contrats.join(', ') || 'aucun', '| lignes de barème :', releve.bareme);
 releve.ambre.forEach((a) => console.log('    avis ambre :', a));
-ok(releve.avis.length === 0, releve.avis.length ? `avis rouge : ${releve.avis.join(' / ')}` : 'aucun avis rouge');
+/* « Aucun barème publié » est un fait du banc tant que la direction n'en a pas publié, pas un défaut d'écran */
+const avisInattendus = releve.avis.filter((a) => !/^Aucun barème publié/.test(a));
+releve.avis.filter((a) => /^Aucun barème publié/.test(a)).forEach((a) => console.log('    avis attendu :', a.slice(0, 80)));
+ok(avisInattendus.length === 0, avisInattendus.length ? `avis rouge : ${avisInattendus.join(' / ')}` : 'aucun avis rouge inattendu');
 const refus = releve.erreurs.filter((e) => /permission denied|does not exist|42501|42883|PGRST/.test(e));
 ok(refus.length === 0, refus.length ? `refus de la base : ${refus.join(' / ')}` : 'aucun refus de la base en console');
 s.soucis.filter((x) => !/CERT|insights|404|favicon|vercel/i.test(x)).forEach((x) => console.log('  !', x));
