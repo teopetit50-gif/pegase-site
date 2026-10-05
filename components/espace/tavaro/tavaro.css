@@ -1,0 +1,123 @@
+/* ══════════════════════════════════════════════════════════════════════
+   tavaro.css — ce qui est propre à /espace/tavaro (06/10/2026, B2)
+
+   Tout le reste vient d'espace.css (A3) : cartes, listes, pastilles,
+   tableaux, formulaires. Ici seulement les lignes de saisie du retour, la
+   case à cocher, le dialogue large et les totaux du chiffrage. Préfixe
+   `tav-`, scopé sous `.esp`.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.esp .tav-ligne-saisie {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  background: var(--r-fond, #fafafa);
+  min-width: 0;
+}
+.esp .tav-coche {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  color: var(--r-doux);
+  cursor: pointer;
+}
+.esp .tav-coche input {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: #050505;
+  flex: none;
+}
+.esp .tav-totaux {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .esp .tav-totaux {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.esp .tav-total {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--r-filet);
+  display: grid;
+  gap: 2px;
+}
+.esp .tav-total span:first-child {
+  font-size: 12px;
+  color: var(--r-faible);
+}
+.esp .tav-total span:last-child {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.esp .tav-total[data-fort="true"] {
+  background: #050505;
+  color: #ffffff;
+  border-color: #050505;
+}
+.esp .tav-total[data-fort="true"] span:first-child {
+  color: rgba(255, 255, 255, 0.7);
+}
+.esp .tav-facture {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+}
+.esp .tav-facture + .tav-facture {
+  margin-top: 10px;
+}
+.esp .tav-preuves {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.esp .tav-preuve {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--r-doux);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--r-seg, #f0f0f0);
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.esp .tav-bareme-tete {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+/* trois classes : plus fort que `.dlg-panneau.resa` (460 px), quel que soit
+   l'ordre des feuilles */
+.dlg-panneau.resa.tav-dialogue-large {
+  max-width: 760px;
+}
+.esp .tav-avert {
+  display: grid;
+  gap: 6px;
+}
+.esp .tav-avert li {
+  display: flex;
+  gap: 8px;
+  font-size: 13.5px;
+  align-items: baseline;
+}
+.esp .tav-avert code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--r-faible);
+}
