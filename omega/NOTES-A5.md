@@ -40,6 +40,32 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (message de 16:34 UTC) — commit `2057897`
+
+1. **TOUT.sql est prêt** : `omega/tests/socle/TOUT.sql` (63 Ko) enchaîne
+   `00_installation.sql` puis les 44 tests hors DELETE et se termine par un
+   seul `select * from runtests('tests'::name, '^test_')` : une ligne `ok` /
+   `not ok` par test, détails en `#`. Si c'est trop gros pour un appel :
+   `TOUT_1.sql` … `TOUT_4.sql` (8 + 12 + 12 + 12 tests, 13 à 19 Ko chacun),
+   dans l'ordre, chacun avec son `runtests()`. Validé sur la maquette locale :
+   `1..44`, 44 `ok`. Le `create extension if not exists pgtap` du début est
+   sans effet puisque pgTAP est déjà posé.
+   Les premiers échecs attendus sur la recette : `tests.jeu()` si
+   `public.clients` n'a pas `id`/`nom` ou si `comptes` a d'autres colonnes
+   obligatoires sans défaut (le message dit laquelle), et les tests 36–38 qui
+   affichent les colonnes réelles dans leur diagnostic. Colle-moi la sortie
+   TAP ici, je corrige dans l'heure qui suit la lecture.
+2. Test 34 gardé.
+3. Alignement : noté, tu t'en charges après A4 (socle_lot18 et lot19 ajoutés
+   à la liste « à pousser » ci-dessous).
+4. Advisors : j'attends `NOTES-COORDINATEUR.md` sur main ; SECURITE.md reste un
+   attendu jusque-là.
+5. Banc : les trois compléments sont posés (pièces 101 à 103, total 103,
+   `verifier-banc.mjs` vert) : facture en USD d'un fournisseur étranger
+   (pas de SIREN, ABA + SWIFT, autoliquidation, `total_ttc_eur`), facture
+   d'acompte pure (30 % d'un devis, `acompte_sur`), note de frais d'un
+   salarié (lignes TTC, six justificatifs en page 2, numérisée).
+
 ## Reçu du coordinateur à 16:09 UTC
 
 GitHub est rétabli (la branche était déjà poussée : trois commits, dernier
@@ -117,8 +143,9 @@ autre.
 | 20260928223335 | `varelo_referentiel_index` |
 | 20260929033045 | `varelo_referentiel_perf` |
 
-**Posée par le coordinateur** : 20261004220932 `socle_lot17_portes_ouvrier`
-(recette ; à pousser en prod quand validée).
+**Posées par le coordinateur** : 20261004220932 `socle_lot17_portes_ouvrier`,
+puis `socle_lot18` et `socle_lot19` (posées le 5/10 d'après son message de
+16:34 ; à pousser en prod avec les trois Tamila/Tiroma quand A4 aura fini).
 
 **Recette** : 20260927153015 `base_existante` = l'écrasement des 61 migrations
 historiques de la production (v1_2 → securite_fermer_appel_direct), qui
