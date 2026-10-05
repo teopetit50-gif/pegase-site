@@ -8,8 +8,16 @@ create or replace function tests.b3_banc() returns uuid language sql immutable a
   select 'cccccccc-0000-4000-8000-00000000000c'::uuid
 $$;
 
+-- Le cabinet du scénario est à Pointe-à-Pitre : l'entité « Novasud Antilles » du banc (territoire guadeloupe, calendrier
+-- complet, fuseau America/Guadeloupe — fait F2 du coordinateur, 05/10). L'entité principale du banc n'a pas de territoire
+-- et tiroma_installer_cabinet la refuse à juste titre. Repli : la première entité du banc dont le territoire est complet.
 create or replace function tests.b3_entite() returns uuid language sql stable as $$
-  select e.id from public.entites e where e.client_id = tests.b3_banc() order by e.principale desc, e.id limit 1
+  select coalesce(
+    (select e.id from public.entites e where e.client_id = tests.b3_banc() and e.id = '1e3a72a6-f99c-45f3-b4ac-d02f4f09a839'),
+    (select e.id from public.entites e
+     join public.territoires t on t.code = private.territoire_de_entite(e.client_id, e.id)
+     where e.client_id = tests.b3_banc() and t.complet and e.fuseau = t.fuseau
+     order by e.nom limit 1))
 $$;
 
 -- Un compte du banc par son préfixe : gerant | referent | daf | daf2 (adresses <prefixe>@banc-varelo.test).
