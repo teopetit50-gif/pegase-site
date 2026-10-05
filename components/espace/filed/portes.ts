@@ -118,8 +118,12 @@ async function sha256Hex(fichier: File): Promise<string> {
 
 /* Déposer un document depuis l'espace : le fichier dans le bucket, puis la
    porte du module qui crée le document (numéroté) et sa pièce, et dépose
-   le travail de lecture. */
-export async function deposerDocument(o: { client_id: string; entite_id: string | null; fichier: File; expediteur: string | null }): Promise<{ document_id: string; resultat: unknown }> {
+   le travail de lecture. Elle rend {document, reference, piece, etat,
+   doublon_de} (coordinateur, 05/10) : la référence sert au message, et un
+   `doublon_de` dit que le fichier était déjà connu. */
+export type Depot = { document_id: string; reference: string | null; etat: string | null; doublon_de: string | null };
+
+export async function deposerDocument(o: { client_id: string; entite_id: string | null; fichier: File; expediteur: string | null }): Promise<Depot> {
   const supabase = createClient();
   const document_id = crypto.randomUUID();
   const nom = o.fichier.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
@@ -127,7 +131,7 @@ export async function deposerDocument(o: { client_id: string; entite_id: string 
   const chemin = `${o.client_id}/filed_document/${document_id}/${nom}`;
   const envoi = await supabase.storage.from("omega-clients").upload(chemin, o.fichier, { upsert: false, contentType: mime });
   if (envoi.error) throw new ErreurPorte(message(envoi.error));
-  const resultat = await rpc("filed_deposer_piece", {
+  const resultat = await rpc<Record<string, unknown>>("filed_deposer_piece", {
     p_client: o.client_id,
     p_document: document_id,
     p_nom_fichier: nom,
@@ -139,7 +143,9 @@ export async function deposerDocument(o: { client_id: string; entite_id: string 
     p_source: "depot",
     p_expediteur: o.expediteur,
   });
-  return { document_id, resultat };
+  const r = resultat && typeof resultat === "object" ? resultat : {};
+  const texte = (v: unknown) => (typeof v === "string" ? v : null);
+  return { document_id: texte(r.document) ?? document_id, reference: texte(r.reference), etat: texte(r.etat), doublon_de: texte(r.doublon_de) };
 }
 
 export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; entites: { id: string; nom: string }[] } | null> {

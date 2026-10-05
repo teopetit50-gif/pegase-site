@@ -146,11 +146,15 @@ export default function EcranFiled() {
     setEnvoiDepot(true);
     setErreurDepot(null);
     try {
+      let message = `${fichier.name} est déposé : il reçoit son numéro et part en lecture.`;
       if (source === "reelle") {
         const c = await monClient();
         if (!c) throw new Error("Aucun compte rattaché à cette session.");
-        await deposerDocument({ client_id: c.client_id, entite_id: entiteDepot || null, fichier, expediteur: c.email });
+        const depose = await deposerDocument({ client_id: c.client_id, entite_id: entiteDepot || null, fichier, expediteur: c.email });
+        if (depose.doublon_de) message = `${fichier.name} était déjà reçu : il est marqué doublon${depose.reference ? ` (${depose.reference})` : ""}.`;
+        else if (depose.reference) message = `${fichier.name} est déposé sous le numéro ${depose.reference} et part en lecture.`;
         await charger();
+        setChoix(depose.document_id);
       } else {
         await new Promise((r) => setTimeout(r, 400));
         const id = crypto.randomUUID();
@@ -168,7 +172,7 @@ export default function EcranFiled() {
         ]);
         setChoix(id);
       }
-      setFaitDepot(`${fichier.name} est déposé : il reçoit son numéro et part en lecture.`);
+      setFaitDepot(message);
       setDepot(false);
     } catch (e) {
       setErreurDepot(e instanceof Error ? e.message : "Le dépôt a échoué.");

@@ -189,8 +189,10 @@ export async function joindrePiece(o: { demande: Demande; client_id: string; ent
       p_expediteur: o.expediteur,
     });
     if (error) throw new ErreurPorte(message(error));
+    /* filed_deposer_piece rend {document, reference, piece, etat, doublon_de}
+       (coordinateur, 05/10) : la clé est `piece` ; `piece_id` reste lu en repli */
     const r = (data ?? {}) as Record<string, unknown>;
-    const piece_id = typeof r.piece_id === "string" ? r.piece_id : typeof r.piece === "string" ? r.piece : null;
+    const piece_id = typeof r.piece === "string" ? r.piece : typeof r.piece_id === "string" ? r.piece_id : null;
     return { piece_id, chemin };
   }
 
