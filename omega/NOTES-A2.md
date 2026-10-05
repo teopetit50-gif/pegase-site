@@ -235,7 +235,18 @@ Rien à changer côté ouvrier.
 levée par Teo : envoi `0a607529-…` en statut `envoye` au troisième essai,
 `reference_externe` `<202610051905.67751143774@smtp-relay.mailin.fr>`, travail 2146
 fini avec `{fournisseur_id, remis_a}`. **L'expéditeur est validé en réel pour
-l'e-mail.** Restent à vérifier en réel : le webhook Brevo (`noter_remise`) dès que Teo
+l'e-mail** : l'envoi `08ae112f-…` de 19:17Z (référence
+`<202610051917.97558286656@smtp-relay.mailin.fr>`) est arrivé dans la boîte de Teo.
+
+**Condition de mise en service, rien à coder** : les deux premiers e-mails, partis
+avant que l'expéditeur `essais@omegaai.fr` soit déclaré chez Brevo, ne sont jamais
+arrivés bien que Brevo ait répondu 201 et rendu un `messageId`. Un 201 Brevo n'est
+donc pas une preuve de remise : avant tout envoi réel, **l'adresse expéditrice doit
+être déclarée et validée chez Brevo et le domaine authentifié (SPF, DKIM, DMARC)**.
+Le webhook de remise (`delivered` / `blocked`) est le seul vrai signal ; d'ici là,
+seuls des envois vers des adresses de test.
+
+Restent à vérifier en réel : le webhook Brevo (`noter_remise`) dès que Teo
 a configuré le webhook chez Brevo avec le jeton, puis un SMS d'essai (émetteur
 alphanumérique à valider chez Brevo).
 
