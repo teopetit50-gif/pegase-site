@@ -155,9 +155,24 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
    75 GRANT en face des policies. Délégation et révocation vérifiées.
    `comptes` DELETE, `entites` INSERT + DELETE, `regles_validation`
    INSERT + UPDATE + DELETE : voulus par le socle (policies `ALL`), pas
-   touchés. **Reste à demander** : un mot de passe pour `referent` (membre de
-   « Référent données ») ou `daf` pour rejouer approuver / refuser, et une
-   demande saisie par le gérant pour rejouer l'annulation.
+   touchés. Approuver / refuser rejoués avec `referent`. **Reste** : une
+   demande saisie par le gérant pour rejouer l'annulation (promise au
+   prochain point).
+11. **Vu sur la première vraie facture** (05/10, 20:05) — pour A1 / le
+   coordinateur, pas pour l'écran : le contrôle `identite.siren` dit
+   « Aucun SIREN sur la pièce ni sur le fournisseur » alors que
+   `pieces_valeurs` porte `fournisseur.siren = "SIREN 842 115 763"` (et
+   `fournisseur.tva`) — le contrôle ne lit pas la valeur lue, ou la valeur
+   n'est pas remontée sur `filed_factures.fournisseur_lu`. Et le contrôle
+   bloquant `fournisseur.a_confirmer` demande qu'« une personne confirme »
+   le fournisseur nouveau : **il n'y a pas de porte pour ça** —
+   `filed_bloquer_fournisseur(false)` débloque un bloqué, ce n'est pas
+   confirmer un `a_confirmer`. Proposition : `filed_confirmer_fournisseur
+   (p_fournisseur, p_motif)` (statut `actif`, `confirme_le`/`confirme_par`),
+   que j'ajoute à l'écran dès qu'elle existe.
+12. **Contrat des champs de lecture** : `omega/CHAMPS-LECTURE.md` n'est pas
+   sur `main` ; la visionneuse lit aujourd'hui les deux jeux de noms. Un
+   seul jeu, écrit, éviterait les repli.
 9. **Realtime** — posé en partie (socle_lot19h, 05/10 18:25) :
    `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`
    sont dans la publication `supabase_realtime`. Les écrans écoutent déjà
@@ -218,10 +233,27 @@ sur la recette, cookie de session posé par
   et le dit AVANT le clic (règle « · équipe : Référent données », avis
   ambre, boutons gris ; « À décider par moi » vide à juste titre), une
   délégation d'un membre rouvrant la décision — même ordre que le trigger.
-  **Approuver / refuser restent à rejouer** avec un compte membre
-  (referent c2 pour « Référent données », daf/daf2 pour « Direction
-  financière ») : il leur faut un mot de passe. **Annuler sa demande**
-  demande une demande saisie par la personne : aucune sur le banc.
+  **Approuver et refuser rejoués à 20:09 UTC avec `referent`** (membre de
+  « Référent données », mot de passe posé par le coordinateur) : une
+  demande VARELO approuvée (passée `executee` par le trigger, l'action du
+  module a tourné), une refusée avec motif (`rejetee`) ; les deux lignes
+  d'`approbations` portent le commentaire. Le message « C'est fait » est
+  désormais dit au-dessus de la file, parce que la demande décidée quitte
+  la vue quand la file se relit. **Annuler sa demande** reste à rejouer :
+  le coordinateur fournit une demande saisie par le gérant au prochain
+  point.
+- **FILED, première vraie facture** (`R2026-000003`, F-2026-0413 de
+  Papeterie Delorme, lue par l'ouvrier lecteur à 20:05) : le dossier se
+  lit, le PDF réel se dessine avec ses onze boîtes, 18 contrôles (4
+  échoués dont « fournisseur à confirmer » bloquant), le fil. Trois
+  retouches à chaud : les **noms de champ du lecteur réel** (`numero`,
+  `date`, `echeance`, `montant_*`, `fournisseur.iban`, `fournisseur.siren`)
+  diffèrent du gabarit (`facture.numero`, `totaux.*`, `paiement.iban`) —
+  la visionneuse lit les deux par notion, et une valeur absente de la
+  facture retombe sur le texte cité (le SIREN lu sur la pièce s'affiche) ;
+  le **motif officiel n'est plus dit sur un contrôle passé** (c'est celui
+  qui vaudrait s'il échouait) ; les familles du lecteur réel (`identite`,
+  `date`, `exercice`, `montant`, `lecture`) ont leur libellé.
 - `apercu_point(p_client, p_user, p_jour)` répond 200 avec
   `{jour, du_le, fuseau, motifs: [], prevu_le, sections: []}` pour le banc
   (aucun gabarit de point posé) : l'écran dit « Pas de point ce jour-là »

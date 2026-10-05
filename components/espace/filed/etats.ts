@@ -61,12 +61,17 @@ export const SOURCES: Record<DocumentFiled["source"], string> = {
 export const FAMILLES_CONTROLE: Record<string, string> = {
   mentions: "Mentions obligatoires",
   fournisseur: "Fournisseur",
+  identite: "Identité du fournisseur",
   tva: "TVA",
   totaux: "Totaux",
+  montant: "Montants",
   lignes: "Lignes",
   doublon: "Doublon",
   rapprochement: "Rapprochement commande",
   echeance: "Échéance",
+  date: "Dates",
+  exercice: "Exercice",
+  lecture: "Lecture de la pièce",
   avoir: "Avoir",
   iban: "Coordonnées bancaires",
 };
@@ -92,20 +97,37 @@ export const CHAMPS_CORRIGEABLES: { cle: string; libelle: string; type: "texte" 
   { cle: "iban", libelle: "IBAN", type: "texte" },
 ];
 
-/* Le champ d'une valeur lue (pieces_valeurs.champ) ↔ la colonne de facture :
-   pour surligner la bonne boîte quand on clique une valeur de l'en-tête. */
-export const CHAMP_PAR_COLONNE: Record<string, string> = {
-  numero: "facture.numero",
-  date_emission: "facture.date_emission",
-  echeance_lue: "facture.echeance",
-  montant_ht: "totaux.ht",
-  montant_tva: "totaux.tva",
-  montant_ttc: "totaux.ttc",
-  net_a_payer: "totaux.ttc",
-  iban: "paiement.iban",
-  fournisseur: "fournisseur.nom",
-  siren: "fournisseur.siren",
-  tva: "fournisseur.tva",
+/* Les noms de champ des valeurs lues (pieces_valeurs.champ), par notion :
+   le lecteur réel (vu le 05/10 sur R2026-000003) écrit `numero`, `date`,
+   `echeance`, `montant_ht`, `montant_tva`, `montant_ttc`, `fournisseur.iban`,
+   `fournisseur.siren`… ; l'exemple et le gabarit du contrat de lecture
+   écrivent `facture.numero`, `totaux.ht`, `paiement.iban`… Les deux sont
+   lus : le premier nom trouvé dans la pièce gagne. */
+export const CHAMPS_PAR_NOTION: Record<string, string[]> = {
+  fournisseur: ["fournisseur.nom", "fournisseur"],
+  siren: ["fournisseur.siren", "siren"],
+  tva_intracom: ["fournisseur.tva", "tva_intracom"],
+  numero: ["facture.numero", "numero"],
+  date_emission: ["facture.date_emission", "date_emission", "date"],
+  echeance_lue: ["facture.echeance", "echeance"],
+  montant_ht: ["totaux.ht", "montant_ht"],
+  montant_tva: ["totaux.tva", "montant_tva"],
+  montant_ttc: ["totaux.ttc", "montant_ttc"],
+  net_a_payer: ["totaux.net_a_payer", "net_a_payer", "totaux.ttc", "montant_ttc"],
+  iban: ["paiement.iban", "fournisseur.iban", "iban"],
+  acheteur: ["acheteur.nom", "acheteur"],
+};
+
+/* La colonne corrigeable (CHAMPS_CORRIGEABLES.cle) → la notion citée */
+export const NOTION_PAR_COLONNE: Record<string, string> = {
+  numero: "numero",
+  date_emission: "date_emission",
+  echeance_lue: "echeance_lue",
+  montant_ht: "montant_ht",
+  montant_tva: "montant_tva",
+  montant_ttc: "montant_ttc",
+  net_a_payer: "net_a_payer",
+  iban: "iban",
 };
 
 export function libelleChamp(champ: string): string {
@@ -113,6 +135,7 @@ export function libelleChamp(champ: string): string {
     "fournisseur.nom": "Fournisseur",
     "fournisseur.siren": "SIREN",
     "fournisseur.tva": "N° TVA",
+    "fournisseur.iban": "IBAN",
     "facture.numero": "N° de facture",
     "facture.date_emission": "Date d'émission",
     "facture.echeance": "Échéance",
@@ -122,6 +145,18 @@ export function libelleChamp(champ: string): string {
     "totaux.ttc": "Total TTC",
     "paiement.iban": "IBAN",
     "document.type": "Nature",
+    numero: "N° de facture",
+    date: "Date d'émission",
+    date_emission: "Date d'émission",
+    echeance: "Échéance",
+    montant_ht: "Total HT",
+    montant_tva: "TVA",
+    montant_ttc: "Total TTC",
+    net_a_payer: "Net à payer",
+    iban: "IBAN",
+    siren: "SIREN",
+    lignes: "Lignes",
+    "tva.ventilation": "Ventilation de la TVA",
   };
   if (d[champ]) return d[champ];
   const m = champ.match(/^lignes\.(\d+)\.(\w+)$/);
