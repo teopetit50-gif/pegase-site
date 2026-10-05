@@ -114,19 +114,38 @@ Le socle dépose un travail pour chaque envoi `pret` chez un fournisseur
 
 Clôture : `finir_travail(id, {"fournisseur_id": "…", "remis_a": "…"})`. Les
 événements de remise (remis, rebond, plainte) reviennent par webhook et
-s'écrivent par la porte d'événements d'envoi : **à ajouter par le coordinateur**
-(`noter_evenement_envoi(p_envoi uuid, p_type text, p_detail jsonb, p_cle text)`),
-idempotente sur `p_cle` (identifiant d'événement du fournisseur).
+s'écrivent par la porte `noter_remise`, **idempotente sur la clé** :
+
+| Porte | Signature |
+|---|---|
+| `noter_remise` | `(p_fournisseur text, p_reference text, p_evenement text, p_detail jsonb, p_survenu_le timestamptz, p_cle text) → boolean` |
+
+`p_evenement` : `remis | rebond_temporaire | rebond | plainte | refuse` ;
+`p_detail` : `{code, raison}` ; `p_cle` : l'identifiant de l'événement chez le
+fournisseur (un même événement rejoué rend `true` sans rien réécrire) ;
+`false` si l'envoi (fournisseur, référence) est inconnu. (Lot 18c.)
 
 Un fournisseur ne devient `branche = true` que par une migration du
 coordinateur, après un envoi réel réussi.
 
 ## 4. La RÉCEPTION (session A2)
 
-Le socle n'a pas encore de file de réception entrante. A2 décrit dans
-`NOTES-A2.md` les colonnes dont elle a besoin ; le coordinateur crée
-`public.receptions` et la porte `deposer_reception(...)` idempotente sur
-(client, canal, identifiant externe).
+Posée au lot 18 (table `public.receptions` : id bigint, client_id, entite_id,
+module, canal, boite, identifiant_externe, de_adresse, de_empreinte, de_nom,
+sujet, corps, corps_html, pieces, detail, en_reponse_a → envois, fil, langue,
+statut `nouvelle | lue | traitee | ignoree | indesirable`, traite_par, recu_le).
+
+| Porte | Signature | Ce qu'elle fait |
+|---|---|---|
+| `resoudre_boite` | `(p_canal text, p_boite text) → jsonb` | Retrouve l'expéditeur dont `identite` = boîte (courriel) ou `parametres.phone_number_id` = boîte (WhatsApp). Rend `{client_id, entite_id, module, expediteur_id}`, ou `null` : boîte inconnue, on ignore. |
+| `deposer_reception` | `(p_client uuid, p_canal text, p_boite text, p_identifiant text, p_de text, p_de_nom text, p_sujet text, p_corps text, p_corps_html text, p_pieces jsonb = '[]', p_detail jsonb = '{}', p_recu_le timestamptz) → jsonb {id, nouvelle}` | Idempotente sur (client, canal, identifiant externe). Rattache à l'envoi d'origine (`detail.envoi_id` ou `detail.en_reponse_a` = référence externe citée). Publie elle-même `reception.nouvelle`. |
+
+- `canal` : `email | whatsapp | sms | formulaire`.
+- `p_pieces` : `[{nom, mime, taille, chemin}]` ; les fichiers sont déposés
+  **avant** dans le bucket `omega-clients` sous
+  `<client_id>/receptions/<identifiant externe>/<nom>`.
+- `p_detail` : clés consommées `module`, `entite_id`, `envoi_id`,
+  `en_reponse_a`, `fil`, `langue` ; le reste est gardé tel quel.
 
 ## 5. Ce qu'un ouvrier ne fait jamais
 
@@ -136,3 +155,5 @@ Le socle n'a pas encore de file de réception entrante. A2 décrit dans
 - Garder un secret ailleurs que dans les variables d'environnement de la
   fonction ou dans le coffre (Vault).
 - Écrire du contenu de pièce dans un journal ou un log.
+- Donner au coordinateur du SQL avec `DROP` ou `DELETE` : l'outil de pose
+  bloque dessus. `create or replace`, `if not exists`, `on conflict`.
