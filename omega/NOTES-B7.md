@@ -1,0 +1,167 @@
+# NOTES — session B7 (identité des tiers)
+
+Branche `worker-b7`. Mise à jour : 5 octobre 2026, 23 h 30 Paris.
+
+| Jauge | % | Ce que ça veut dire |
+|---|---|---|
+| **Mécanique** | 5 | Scénario et portes écrits ; rien de codé, rien de posé. |
+| **Livrable client** | 0 | Le client ne voit encore aucun « vérifié le … par … ». |
+
+## 1. Le scénario
+
+Ce qui existe déjà (lot 4d d'A4, posé sur la recette le 5/10) :
+
+- `private.filed_controles_identite(p_facture)` est appelée par `filed_controler_facture` et pose
+  quatre contrôles : `identite.tva_intracom` (format + clé, en SQL), `identite.siren` (clé de Luhn, en
+  SQL), `identite.coherence` (le SIREN que porte la TVA FR = le SIREN lu) et `identite.registre`.
+- Pour `identite.registre`, le contrôle lit `private.filed_verification_recente(client, registre,
+  identifiant, 90 jours)` dans `public.filed_verifications_tiers`. S'il n'y a rien, il **demande** une
+  vérification (`private.filed_demander_verification` → une ligne `repondu_le is null`) et pose
+  « attention : vérification demandée ». Un seul registre par facture : VIES si le numéro de TVA tient,
+  Sirene sinon.
+- La porte de réponse existe : `public.filed_repondre_verification(id, 'valide'|'invalide'|'indisponible',
+  preuve)` (service_role). **Mais rien ne lit les demandes ouvertes** : aucun travail n'est déposé dans
+  `travaux`, aucun ouvrier ne les prend. C'est le trou que B7 bouche.
+
+Le scénario complet, de bout en bout :
+
+1. Une facture est lue (lecteur A1) → `filed.integrer` crée ou rattache le fournisseur → `filed_controler_facture`
+   → `filed_controles_identite` → ligne ouverte dans `filed_verifications_tiers` (registre `vies` ou `sirene`).
+2. **Nouveau (B7)** : un déclencheur sur `filed_verifications_tiers` dépose un travail
+   `identite.verifier` (module `filed`, charge `{verification, registre, identifiant, fournisseur}`,
+   clé `verification:<uuid>`). Les lignes déjà ouvertes (dont celle de la facture de ce soir) sont
+   rattrapées par la migration.
+3. L'ouvrier `identite` (fonction Edge, cron chaque minute comme le lecteur) prend `['identite.verifier']`,
+   lit la demande par la porte `identite_a_verifier`, et :
+   - **cache** : si le même (registre, identifiant) a été vérifié il y a moins de 30 jours (table globale
+     `public.identites_registre`, les registres sont publics donc le cache n'est pas par client) et que la
+     charge ne porte pas `"force": true`, il répond depuis le cache, source `cache`, sans appel réseau ;
+   - **Sirene** (registre `sirene`) : `GET https://api.insee.fr/api-sirene/3.11/siren/{siren}` avec la clé
+     `SIRENE_API_KEY` → unité légale active (`A`) = `valide` ; cessée (`C`) ou 404 = `invalide` avec le motif
+     dans la preuve ; 429/5xx/réseau = indisponible (voir 5) ;
+   - **VIES** (registre `vies`) : `POST https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number`
+     `{countryCode, vatNumber}` → `valid` = `valide`/`invalide` ; `MS_UNAVAILABLE`, `SERVICE_UNAVAILABLE`,
+     `TIMEOUT`, `*_MAX_CONCURRENT_REQ` = indisponible ;
+   - **cohérence** (TVA FR) : la clé `(12 + 3 × (SIREN mod 97)) mod 97` est recalculée côté ouvrier, et pour un
+     numéro FR l'ouvrier interroge **aussi Sirene** sur le SIREN porté : la réponse s'écrit comme
+     vérification complémentaire (registre `sirene`, même client, même fournisseur) ; la preuve VIES note si
+     les deux registres désignent la même entreprise (nom VIES ≈ dénomination Sirene).
+4. L'ouvrier écrit par la porte `noter_identite` : la réponse (via `private.filed_repondre_verification`),
+   le cache global, les compléments, puis **recontrôle les factures du fournisseur** en `a_valider` /
+   `bloquee` (`private.filed_recontroler_fournisseur`, ou `filed_controler_facture` facture par facture).
+   `filed_controler_facture` efface et repose les contrôles : `identite.registre` passe à `ok` avec le
+   message d'A4 « SIREN confirmé par Sirene le JJ/MM/AAAA » / « Numéro de TVA confirmé par VIES le … » — c'est
+   le « vérifié le … par … » que voit le client. Une réponse `invalide` le rend `bloquant`.
+5. Indisponibilité (VIES tombe souvent) : `echouer_travail` non définitif (`FOURNISSEUR_INDISPONIBLE`,
+   reprise à délai croissant) tant qu'il reste des essais ; au dernier essai, l'ouvrier écrit
+   `indisponible` (le travail est fait, pas d'alerte critique chez le client) et la porte
+   `identite_relancer` (appelée à chaque passage) rouvre après 2 h toute vérification `indisponible` sans
+   réponse plus récente → nouveau travail. Rien n'est définitif.
+6. Fin de passage : `battre_ouvrier('identite', ['identite.verifier'], {…})`.
+
+## 2. Les portes demandées au coordinateur (migration `omega/modules/identite/migrations/b7_01_portes.sql`)
+
+| Porte | Signature | Rôle |
+|---|---|---|
+| déclencheur `identite_demander_travail` | AFTER INSERT sur `public.filed_verifications_tiers` (quand `repondu_le is null`) | `private.deposer_travail(client, 'filed', 'identite.verifier', {verification, registre, identifiant, fournisseur}, 'verification:<id>', 0)`. La migration rattrape les lignes déjà ouvertes. |
+| `public.identite_a_verifier` | `(p_verification uuid) → jsonb` | La demande (`id, client_id, fournisseur_id, registre, identifiant, demande_le, repondu_le`), le fournisseur (`id, pays, siren, tva`) et le `cache` (dernière entrée de `identites_registre` pour (registre, identifiant) : `resultat, preuve, verifie_le, source, age_jours`), ou `null`. |
+| `public.noter_identite` | `(p_verification uuid, p_resultat text, p_preuve jsonb, p_source text, p_complements jsonb = '[]') → jsonb {verification, deja_repondue, complements, recontrolees}` | Réponse + cache + compléments `[{registre, identifiant, resultat, preuve}]` (lignes répondues d'office) + recontrôle des factures. Idempotente : une vérification déjà répondue rend `deja_repondue = true` sans rien réécrire. |
+| `public.identite_relancer` | `(p_heures int = 2) → int` | Rouvre les vérifications `indisponible` plus vieilles que p_heures sans réponse plus récente pour le même (client, registre, identifiant) ; rend le nombre rouvert. |
+| table `public.identites_registre` | `(registre, identifiant) unique, resultat, preuve, source, version, verifie_le` | Le cache global, sans `client_id` (données publiques). RLS activée, aucune politique : service seul. |
+
+Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon, authenticated`,
+`grant execute … to service_role`. Aucun `DROP`, aucun `DELETE`.
+
+**Questions au coordinateur**
+
+1. La facture bloquée ce soir : les deux anomalies citées (`identite.siren`, `identite.tva_intracom`) sont
+   les contrôles **de forme** d'A4 (clé de Luhn, clé de TVA) — ils ne dépendent pas d'un registre. Si elles
+   sont `bloquant`, c'est que la clé ne tombe pas juste (valeur mal lue : SIRET dans `siren` ? espace ?) ;
+   si elles sont `attention`, c'est qu'il n'y a ni SIREN ni TVA sur la pièce. Peux-tu me coller les lignes
+   `filed_controles` de cette facture où `code like 'identite.%'` (code, gravite, resultat, message, preuve) ?
+   Selon la réponse, la correction est chez A1 (lecture) ou chez A4 (normalisation), pas chez moi — mais
+   `identite.registre` est à moi dans tous les cas.
+2. `private.filed_verification_recente` rend aussi une réponse `indisponible` pendant 90 jours, et le
+   contrôle ne redemande pas tant qu'elle est là. Ma porte `identite_relancer` contourne ça en rouvrant une
+   demande ; proposition pour A4 : ignorer les `indisponible` de plus de 2 h dans `filed_verification_recente`.
+3. Pour « servir tous les modules », la table de vérification est aujourd'hui `filed_*`. Je propose de la
+   garder (FILED est le seul demandeur) et de n'exposer, pour les autres modules, qu'une porte
+   `identite_demander(p_client, p_registre, p_identifiant, p_module, p_objet_type, p_objet_id)` plus tard.
+4. `_partage/portes.ts` garde `rpc()` privé : mes trois portes recopient 25 lignes d'appel RPC dans
+   `identite/portes.ts`. Proposition : exporter une fonction `rpc(cfg, fetch, nom, params)` depuis
+   `_partage/portes.ts` (je ne touche pas à `_partage`).
+
+## 3. Les sources exactes
+
+### API Sirene (INSEE) — secret `SIRENE_API_KEY`
+
+- Depuis septembre 2024, l'INSEE sert Sirene par son portail `https://portail-api.insee.fr` (l'ancien
+  `api.insee.fr` à jeton OAuth est fermé). Ce que Teo fait, une fois :
+  1. Créer un compte sur https://portail-api.insee.fr (adresse courriel, gratuit).
+  2. Catalogue → **API Sirene** → « Souscrire » (offre gratuite : 30 requêtes par minute, suffisant :
+     un fournisseur n'est vérifié qu'une fois par mois).
+  3. Mes applications → créer une application (nom libre, « Omega identité ») → onglet « Clés » →
+     copier la **clé d'intégration**.
+  4. Supabase → projet recette `ygwbgpowzlbdaajlsqkn` → Edge Functions → Secrets → `SIRENE_API_KEY` = la clé.
+     (La console ne montre la clé entière qu'à la création : la copier d'un bloc, cf. le piège d'A1.)
+- Appel : `GET https://api.insee.fr/api-sirene/3.11/siren/{siren}`, en-tête `X-INSEE-Api-Key-Integration: <clé>`,
+  `Accept: application/json`. 200 → `uniteLegale` (`statutDiffusionUniteLegale`, `dateCreationUniteLegale`,
+  `periodesUniteLegale[0]` : `etatAdministratifUniteLegale` A/C, `denominationUniteLegale`,
+  `categorieJuridiqueUniteLegale`, `activitePrincipaleUniteLegale` ; `nomUniteLegale` / `prenom1UniteLegale`
+  pour une personne physique). 404 → SIREN inconnu. 401/403 → clé absente ou refusée. 429 → quota.
+- **Sans clé** (ou clé refusée) : repli sur l'annuaire public `https://recherche-entreprises.api.gouv.fr/search?q=<siren>`
+  (DINUM, sans clé, 7 requêtes/s, pas de garantie de service). La preuve porte `source: "recherche-entreprises"`
+  et le battement signale `sirene: "repli"`. C'est pour voir la chaîne tourner avant la clé, pas pour durer.
+
+### VIES (Commission européenne) — sans clé
+
+- `POST https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number`, corps JSON
+  `{"countryCode": "FR", "vatNumber": "12345678901"}` → `{valid, name, address, requestDate, userError}`.
+- `userError` : `VALID`, `INVALID`, `MS_UNAVAILABLE` (l'État membre ne répond pas), `SERVICE_UNAVAILABLE`,
+  `TIMEOUT`, `MS_MAX_CONCURRENT_REQ`, `GLOBAL_MAX_CONCURRENT_REQ`, `INVALID_INPUT`. Tout sauf VALID/INVALID
+  = indisponible → report non définitif.
+- Horaires : VIES s'appuie sur les bases nationales, dont certaines sont coupées la nuit ou le week-end ;
+  d'où la reprise automatique et la relance après 2 h.
+
+### Cohérence SIREN ↔ TVA FR (en local, sans réseau)
+
+- `FR` + clé (2 chiffres) + SIREN (9 chiffres) ; clé = `(12 + 3 × (SIREN mod 97)) mod 97`.
+- L'ouvrier recalcule la clé, compare le SIREN porté par la TVA à celui de la demande, et vérifie que le
+  nom rendu par VIES ressemble à la dénomination Sirene (comparaison sans accents ni forme juridique).
+
+### IBAN (à terme)
+
+- Structure ISO 13616 : pays (2 lettres), clé (2 chiffres), BBAN selon la longueur du pays, contrôle mod 97
+  des caractères déplacés ; côté ouvrier, `iban.ts` (pur, testé). Aucun registre public ne confirme un IBAN
+  gratuitement : la vérification « ce compte appartient à ce fournisseur » reste humaine (contrôle
+  `iban.nouveau` d'A4).
+
+## 4. Les limites
+
+- **Tiers étrangers** : pas de SIREN. Un numéro de TVA de l'Union passe par VIES ; hors Union (CH, GB, US…)
+  rien n'est vérifiable → le contrôle d'A4 reste « attention ». Même chose pour un particulier.
+- **SIREN radié** (`C`) : `invalide`, preuve avec la date de cessation. Une facture d'une entreprise
+  cessée est bloquée : c'est voulu.
+- **TVA non assujetti** : une entreprise en franchise en base (art. 293 B) ou un auto-entrepreneur a un SIREN
+  valide mais **VIES répond `invalid`** (numéro jamais activé pour l'intracommunautaire). L'ouvrier le dit
+  dans la preuve (« SIREN actif à Sirene, numéro de TVA non reconnu par VIES : non assujetti probable ») ;
+  le contrôle d'A4 le pose quand même en `bloquant`. À adoucir chez A4 quand on aura vu de vrais cas.
+- **Unités non diffusibles** (`statutDiffusionUniteLegale = 'P'`) : l'INSEE ne rend presque rien ; on
+  garde `valide` si l'état est actif, preuve « diffusion partielle », sans nom.
+- **Données personnelles** : un entrepreneur individuel est une personne. Le journal (logs) ne porte jamais
+  d'identifiant ni de nom : seulement l'id de la vérification, le registre, l'issue et la durée. La preuve
+  en base garde le nom rendu par le registre (donnée publique du registre, nécessaire au « vérifié : X »).
+- **Cache** : 30 jours, global. `"force": true` dans la charge d'un travail l'ignore (pour une demande
+  humaine « revérifier maintenant », porte à prévoir).
+
+## 5. Ce que Teo doit fournir
+
+1. La clé d'intégration Sirene (section 3) posée en secret Edge `SIRENE_API_KEY` sur la recette.
+2. Rien pour VIES.
+3. Le coordinateur : poser `b7_01_portes.sql`, déployer la coquille `identite` (verify_jwt true, cron
+   `omega-identite` chaque minute comme le lecteur), poser `IDENTITE_VERSION` si on veut tracer le commit.
+
+## 6. Journal des étapes
+
+- 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
+  envoyés au coordinateur.
