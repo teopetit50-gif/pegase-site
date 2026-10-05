@@ -83,7 +83,7 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 
 ## Bloqué
 
-- **Push GitHub** : voir la fin de ce fichier (état du push).
+- ~~Push GitHub~~ : poussé, voir la fin de ce fichier.
 - **Déploiement sur la recette** : le coordinateur déploie (plus d'appel Supabase
   depuis cette session). Message « prêt à déployer » envoyé avec la liste des
   fichiers et des secrets. `webhooks-brevo` et `reception` doivent être déployées
@@ -219,6 +219,5 @@ et la fonction `reception`.
 
 ## État du push
 
-Voir le journal de la session : le push `git push -u origin worker-a2` est tenté à
-chaque étape ; GitHub peut refuser (403) quelques heures, auquel cas les commits
-restent locaux et le push est retenté toutes les 30 minutes.
+`worker-a2` poussé sur GitHub le 05/10/2026 (cinq commits, pas de 403). Pas de PR :
+le coordinateur intègre.
