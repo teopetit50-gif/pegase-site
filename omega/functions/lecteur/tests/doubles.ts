@@ -4,7 +4,7 @@
 
 import type { Depot, Telechargement } from "@partage/depot.ts";
 import type { Piece, Portes, ResultatLecture, Travail } from "@partage/portes.ts";
-import type { ContextePiece, EntreeIa, Extracteur, SortieIa, SortieOutil } from "../ia.ts";
+import type { ContextePiece, EntreeIa, Extracteur, MorceauATranscrire, PageTranscrite, SortieIa, SortieOutil, SortieTranscription } from "../ia.ts";
 import type { Ocr, ResultatOcr } from "../ocr.ts";
 import type { Contexte } from "../lire_piece.ts";
 
@@ -103,8 +103,17 @@ export class ExtracteurFactice implements Extracteur {
   prochaine: SortieOutil | null = null;
   appels: { entree: EntreeIa; piece: ContextePiece }[] = [];
   estimation = 0.01;
+  /** La transcription rendue pour une page donnée (gros documents lus par morceaux). */
+  transcription: (n: number) => PageTranscrite = (n) => ({ n, texte: `Page ${n} transcrite`, confiance: 0.9 });
+  morceaux: MorceauATranscrire[] = [];
   estimer(): number {
     return this.estimation;
+  }
+  async transcrire(m: MorceauATranscrire): Promise<SortieTranscription> {
+    this.morceaux.push(m);
+    const pages: PageTranscrite[] = [];
+    for (let n = m.debut; n <= m.fin; n++) pages.push(this.transcription(n));
+    return { pages, usage: { tokens_entree: 20000, tokens_sortie: 3000 }, modele: this.modele, cout_eur: 0.0966 };
   }
   async extraire(entree: EntreeIa, piece: ContextePiece): Promise<SortieIa> {
     this.appels.push({ entree, piece });

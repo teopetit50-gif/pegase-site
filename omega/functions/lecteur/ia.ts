@@ -6,7 +6,7 @@
 import { base64, type ClientBedrock, coutEur, type Usage } from "@partage/bedrock.ts";
 import { ErreurOuvrier } from "@partage/erreurs.ts";
 import type { FormatImage } from "./detecter.ts";
-import { SCHEMA_OUTIL_LECTURE, type TypePiece } from "./schemas/facture.ts";
+import { SCHEMA_OUTIL_LECTURE, SCHEMA_OUTIL_TRANSCRIPTION, type TypePiece } from "./schemas/facture.ts";
 import type { LigneBrute, ValeurBrute } from "./verifier.ts";
 
 export type EntreeIa =
@@ -41,11 +41,34 @@ export interface ContextePiece {
   module: string;
 }
 
+export interface PageTranscrite {
+  n: number;
+  texte: string;
+  confiance?: number;
+  manuscrit?: boolean;
+}
+
+export interface SortieTranscription {
+  pages: PageTranscrite[];
+  usage: Usage;
+  modele: string;
+  cout_eur: number;
+}
+
+export interface MorceauATranscrire {
+  octets: Uint8Array;
+  /** Numéro, dans le document complet, de la première et de la dernière page du morceau. */
+  debut: number;
+  fin: number;
+}
+
 export interface Extracteur {
   readonly modele: string;
   /** Coût estimé en euros avant d'appeler, pour le plafond. */
   estimer(e: EntreeIa): number;
   extraire(e: EntreeIa, piece: ContextePiece): Promise<SortieIa>;
+  /** Transcription seule d'un morceau de PDF sans texte (gros documents). */
+  transcrire(m: MorceauATranscrire, piece: ContextePiece): Promise<SortieTranscription>;
 }
 
 export const LIMITE_DOCUMENT_OCTETS = 4_500_000; // Bedrock Converse : 4,5 Mo par document.
@@ -120,6 +143,29 @@ export class ExtracteurBedrock implements Extracteur {
     });
     const brut = normaliserSortie(rep.entree);
     return { brut, usage: rep.usage, modele: this.modele, cout_eur: coutEur(this.client.cfg, rep.usage) };
+  }
+
+  async transcrire(m: MorceauATranscrire, piece: ContextePiece): Promise<SortieTranscription> {
+    if (m.octets.length > LIMITE_DOCUMENT_OCTETS) {
+      throw new ErreurOuvrier("ERREUR_INTERNE", `morceau de ${m.octets.length} octets : au-delà des 4,5 Mo de la lecture visuelle`, false);
+    }
+    const rep = await this.client.converse({
+      system: CONSIGNE_SYSTEME,
+      contenu: [
+        { document: { format: "pdf", name: "morceau", source: { bytes: base64(m.octets) } } },
+        {
+          text:
+            `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}. Ce PDF est un MORCEAU d'un document plus long : ses pages sont les pages ${m.debut} à ${m.fin} du document complet. Transcris fidèlement chaque page, numérotée de ${m.debut} à ${m.fin}, et rends l'outil transcrire_pages.`,
+        },
+      ],
+      outil: { name: "transcrire_pages", description: "Rend la transcription page par page d'un morceau de document.", schema: SCHEMA_OUTIL_TRANSCRIPTION },
+      maxTokens: 16000,
+    });
+    const o = (rep.entree && typeof rep.entree === "object" ? rep.entree : {}) as { pages?: unknown };
+    const pages = (Array.isArray(o.pages) ? (o.pages as PageTranscrite[]) : [])
+      .filter((p) => p && typeof p === "object" && typeof p.texte === "string")
+      .map((p, i) => ({ ...p, n: Number.isInteger(p.n) && p.n >= m.debut && p.n <= m.fin ? p.n : m.debut + i }));
+    return { pages, usage: rep.usage, modele: this.modele, cout_eur: coutEur(this.client.cfg, rep.usage) };
   }
 }
 

@@ -15,7 +15,8 @@ Dernière mise à jour : 05/10/2026.
   - `schemas/facture.ts` : les champs **exactement** lus par `private.filed_integrer_facture` et `private.filed_valeurs` (relues le 05/10) : `numero`, `date`, `echeance`, `devise`, `montant_ht`, `montant_tva`, `montant_ttc`, `net_a_payer`, `montant_prepaye`, `type_code`, `cadre_facturation`, `fournisseur.{nom,siren,siret,tva,id_legal,pays,iban}`, `acheteur.{nom,siren,siret,tva,pays,reference}`, `commande.reference`, `livraison.{reference,date}`, `contrat.reference`, `facture_origine.{reference,date}`, `mention.{autoliquidation,franchise_293b}`, `lignes[]`, `tva.ventilation[]`. Le schéma d'outil Converse en découle.
   - Plafond : réglage `plafond_ia_jour_client` lu par `lire_parametre` (posé à 5 € sur la recette), sinon `PLAFOND_IA_JOUR_CLIENT_EUR`, sinon 5 € ; estimation du coût avant appel, `PLAFOND_IA` non définitif.
 - **Banc** : `lecteur/banc/` — dix pièces fictives engendrées par `deno task banc` (un écrivain PDF/PNG minimal, sans dépendance) et leurs attendus JSON : natif, scanné, deux factures dans un fichier, Factur-X, UBL, ticket manuscrit, illisible, avoir, tableur, pièce chiffrée.
-- **Tests** : `deno task test` → **38 tests verts** (10 cas du banc + 25 règles : IA non branchée, plafond, fichier absent, format inconnu, citation fausse, SIREN à clé fausse, OCR branché, pannes IA/porte, battement à vide, outils, SigV4 ; + 3 tests des portes RPC avec un faux `fetch`).
+- **Gros documents et boîtes** (demandés par le coordinateur) : un PDF sans texte au-delà de 20 pages ou de 4,5 Mo est découpé par pdf-lib en morceaux (`pdf_decouper.ts`), chaque morceau transcrit par Claude (outil `transcrire_pages`, numéros de page du document complet), puis **une seule extraction** sur le texte réuni ; les morceaux entièrement natifs ne sont pas transcrits ; le plafond se contrôle une fois sur le coût total ; `finir_travail` rend `appels_ia`, jetons et coût cumulés. En lecture visuelle, le modèle peut rendre une `boite` approximative par valeur : gardée si plausible (dans la page, surface non nulle), marquée « boîte estimée par le modèle » dans `controle` ; jamais sur un PDF natif, où la boîte vient des mots du PDF.
+- **Tests** : `deno task test` → **42 tests verts** (10 cas du banc + 25 règles : IA non branchée, plafond, fichier absent, format inconnu, citation fausse, SIREN à clé fausse, OCR branché, pannes IA/porte, battement à vide, outils, SigV4 ; 3 tests des portes RPC avec un faux `fetch` ; 4 tests des gros PDF et des boîtes estimées).
 - **Recette** (`omega-recette`) : FILED installé sur l'organisation du banc `Groupe Sogexal (banc)` (`cccccccc-0000-4000-8000-00000000000c`) par `filed_installer` en rôle de service ; une pièce de test déposée par `filed_deposer_piece` (document `a1a1a1a1-0000-4000-8000-000000000001`, fichier `01_facture_native.pdf`, sha256 `a38514ce…58aa9`) → pièce `0e8d16cf-b2bd-48fe-9397-b579bca0c0fc`, travail **2138** `lecteur.lire` en `a_faire`. La chaîne socle (dépôt → `pieces` → trigger `pieces_demander_lecture` → `travaux`) est donc vérifiée.
 - **Déploiement** : voir la section « Déploiement » en bas (mise à jour à la fin de la session).
 
@@ -31,8 +32,8 @@ Dernière mise à jour : 05/10/2026.
 - Dès l'appel branché : lire les journaux (`query_logs`, source `function_edge_logs`), vérifier `travaux` 2138 (`repris`, `IA_NON_BRANCHEE`) et `battements` (`lecteur`).
 - Dès Bedrock branché : déposer une vraie pièce du banc **avec** son fichier dans `omega-clients` (chemin `<client>/filed_document/<document>/<nom>`), suivre `pieces_pages`, `pieces_valeurs`, puis `filed.integrer` → `filed_factures`.
 - Essayer Mistral OCR sur le scanné et comparer avec la lecture visuelle de Claude (qualité, coût).
-- `boite` pour les pages OCR/vision (aujourd'hui seulement sur le PDF natif).
-- Lecture par morceaux des PDF au-delà de 4,5 Mo ou de 60 pages (aujourd'hui : échec motivé).
+- `boite` sur les pages passées par **Mistral OCR** : l'API ne rend pas de position par mot ; voir si une passe de mise en page vaut son coût.
+- Une image seule au-delà de 3,75 Mo : la réduire sans canvas (aujourd'hui : échec motivé).
 
 ## Décisions prises
 
@@ -73,4 +74,4 @@ Puis le secret Vault **`cle_service`** (la clé de service du projet) : c'est lu
 - Fonction Edge **`lecteur`** déployée sur `omega-recette` (`ygwbgpowzlbdaajlsqkn`) le 05/10/2026 : id `bf04c3c1-7764-4baf-9320-b9262cbcb000`, version 1, statut ACTIVE, `verify_jwt = true`, import map `deno.json`, 20 fichiers (le lecteur, `schemas/`, `_partage/` copié sous la fonction).
 - Source servie relue par `get_edge_function` et comparée au paquet local : **les 20 fichiers sont identiques** au commit `15156cf` de `worker-a1`.
 - Pas encore appelée : le cron attend le secret `cle_service` (voir « Bloqué »). Rejouer le déploiement après une modification : `deno task deployer` produit `outils/paquet.json`, à passer tel quel à l'outil de déploiement.
-- La version 1 porte encore les lectures directes ; la version suivante (portes du lot 19, commit ci-dessous) est à redéployer par le coordinateur, qui l'a demandé.
+- Le coordinateur a déployé une **version 2** à 16:43 UTC ; relue par `get_edge_function`, elle précède le commit des portes (`portes.ts` y lit encore `public.pieces`). La version à déployer est celle du dernier commit de `worker-a1` ; le coordinateur redéploie lui-même.

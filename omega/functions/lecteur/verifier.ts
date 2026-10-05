@@ -14,6 +14,20 @@ export interface ValeurBrute {
   texte?: string;
   page?: number;
   confiance?: number;
+  /** Position estimée par le modèle (lecture visuelle seulement). */
+  boite?: unknown;
+}
+
+/** Une boîte normalisée plausible : quatre nombres entre 0 et 1, une surface non nulle. */
+export function boiteEstimee(b: unknown): Boite | null {
+  if (!b || typeof b !== "object") return null;
+  const o = b as Record<string, unknown>;
+  const n = (k: string) => (typeof o[k] === "number" && Number.isFinite(o[k]) ? (o[k] as number) : NaN);
+  const x = n("x"), y = n("y"), l = n("l"), h = n("h");
+  if ([x, y, l, h].some(Number.isNaN)) return null;
+  if (x < 0 || y < 0 || l <= 0 || h <= 0 || x + l > 1.001 || y + h > 1.001) return null;
+  const arr = (v: number) => Math.round(Math.min(1, Math.max(0, v)) * 10000) / 10000;
+  return { x: arr(x), y: arr(y), l: arr(l), h: arr(h) };
 }
 
 export interface LigneBrute extends Record<string, unknown> {
@@ -106,6 +120,13 @@ export function verifierValeurs(
         controle = `citation retrouvée page ${page}${r.mode === "compact" ? " (espaces près)" : ""}`;
         const pdf = pdfParNumero.get(page!);
         if (pdf) boite = boiteDe(pdf, citation) ?? undefined;
+        if (!boite && (pageLue.methode === "vision" || pageLue.methode === "ocr_manuscrit")) {
+          const estimee = boiteEstimee(b.boite);
+          if (estimee) {
+            boite = estimee;
+            controle += " ; boîte estimée par le modèle";
+          }
+        }
       } else {
         controle = `citation introuvable page ${page}`;
       }

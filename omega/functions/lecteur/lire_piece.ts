@@ -7,7 +7,9 @@ import { ErreurOuvrier } from "@partage/erreurs.ts";
 import { journal, messageDe } from "@partage/journal.ts";
 import type { PageLue, Piece, Portes, ResultatLecture, StatutLecture, Travail, ValeurLue } from "@partage/portes.ts";
 import { detecter, type Detection } from "./detecter.ts";
-import type { EntreeIa, Extracteur, SortieIa } from "./ia.ts";
+import type { EntreeIa, Extracteur, PageTranscrite, SortieIa } from "./ia.ts";
+import { LIMITE_DOCUMENT_OCTETS } from "./ia.ts";
+import { decouperSousLimite, PAGES_PAR_MORCEAU } from "./pdf_decouper.ts";
 import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
 import { controlerPlafond } from "./plafond.ts";
@@ -41,10 +43,21 @@ export function versionLecteur(maintenant: Date, modele: string | null): string 
   return `lecteur/${jour}/${court}`.slice(0, 40);
 }
 
+/** Ce que les appels d'IA préalables (transcriptions par morceaux) ont déjà coûté. */
+export interface Prealable {
+  cout_eur: number;
+  tokens_entree: number;
+  tokens_sortie: number;
+  appels_ia: number;
+}
+
+const SANS_PREALABLE: Prealable = { cout_eur: 0, tokens_entree: 0, tokens_sortie: 0, appels_ia: 0 };
+
 interface Bilan {
   resultat: ResultatLecture;
   ia: SortieIa | null;
   cout_ocr: number;
+  prealable?: Prealable;
   decoupage?: { pages: number[]; type_piece?: string; numero?: string | null }[];
 }
 
@@ -76,7 +89,8 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
     const modele = bilan.ia?.modele ?? null;
     const version = versionLecteur(ctx.maintenant(), modele);
     const enregistre = await ctx.portes.enregistrerLecture(pieceId, bilan.resultat, version);
-    const cout = Math.round(((bilan.ia?.cout_eur ?? 0) + bilan.cout_ocr) * 1e6) / 1e6;
+    const prealable = bilan.prealable ?? SANS_PREALABLE;
+    const cout = Math.round(((bilan.ia?.cout_eur ?? 0) + bilan.cout_ocr + prealable.cout_eur) * 1e6) / 1e6;
     await ctx.portes.finirTravail(travail.id, {
       pages: enregistre.pages,
       valeurs: enregistre.valeurs,
@@ -84,8 +98,9 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
       type_piece: bilan.resultat.type_piece ?? null,
       methode: bilan.resultat.methode ?? null,
       modele,
-      tokens_entree: bilan.ia?.usage.tokens_entree ?? 0,
-      tokens_sortie: bilan.ia?.usage.tokens_sortie ?? 0,
+      tokens_entree: (bilan.ia?.usage.tokens_entree ?? 0) + prealable.tokens_entree,
+      tokens_sortie: (bilan.ia?.usage.tokens_sortie ?? 0) + prealable.tokens_sortie,
+      appels_ia: (bilan.ia ? 1 : 0) + prealable.appels_ia,
       cout_eur: cout,
       ...(bilan.decoupage && bilan.decoupage.length > 1 ? { decoupage: bilan.decoupage } : {}),
     });
@@ -247,8 +262,73 @@ async function lirePdf(ctx: Contexte, piece: Piece, octets: Uint8Array, contexte
     const methode = sansTexte.length === analyse.pages.length ? "ocr" : "mixte";
     return await extraireDepuisTexte(ctx, piece, pages, analyse.pages, methode, contexte, ocr.cout_eur);
   }
-  const ia = await appelerIa(ctx, piece, { mode: "document", octets, nbPages: analyse.nbPages }, contexte);
-  return assembler(ia, analyse.pages, pagesNatives, sansTexte.length === analyse.pages.length ? "ocr" : "mixte", 0);
+  const methode = sansTexte.length === analyse.pages.length ? "ocr" : "mixte";
+  if (octets.length <= LIMITE_DOCUMENT_OCTETS && analyse.nbPages <= PAGES_PAR_MORCEAU) {
+    const ia = await appelerIa(ctx, piece, { mode: "document", octets, nbPages: analyse.nbPages }, contexte);
+    return assembler(ia, analyse.pages, pagesNatives, methode, 0);
+  }
+  return await lirePdfParMorceaux(ctx, piece, octets, analyse.pages, analyse.nbPages, methode, contexte);
+}
+
+/** Gros PDF sans texte : transcription morceau par morceau, puis extraction sur le texte réuni. */
+async function lirePdfParMorceaux(
+  ctx: Contexte,
+  piece: Piece,
+  octets: Uint8Array,
+  pagesPdf: PagePdf[],
+  nbPages: number,
+  methode: "ocr" | "mixte",
+  contexte: { nom_fichier: string; mime: string; module: string },
+): Promise<Bilan> {
+  const ia = exigerIa(ctx);
+  // Le plafond se contrôle une fois, sur le coût de toute la lecture : transcriptions, puis extraction.
+  const estimation = ia.estimer({ mode: "document", octets, nbPages }) +
+    ia.estimer({ mode: "texte", pages: pagesPdf.map((p) => ({ n: p.n, texte: " ".repeat(3000) })) });
+  await controlerPlafond(ctx.portes, ctx.env, piece.client_id, estimation);
+
+  let morceaux;
+  try {
+    morceaux = await decouperSousLimite(octets, nbPages, LIMITE_DOCUMENT_OCTETS);
+  } catch (e) {
+    return echec(`PDF indécoupable : ${messageDe(e, 200)}`);
+  }
+  if (!morceaux) return echec("Une page du PDF dépasse à elle seule 4,5 Mo : lecture visuelle impossible.");
+
+  const prealable: Prealable = { ...SANS_PREALABLE };
+  const transcrites = new Map<number, PageTranscrite>();
+  const natives = new Map(pagesPdf.map((p) => [p.n, p]));
+  for (const m of morceaux) {
+    let aTranscrire = false;
+    for (let n = m.morceau.debut; n <= m.morceau.fin; n++) {
+      const p = natives.get(n);
+      if (!p || pageSansTexte(p)) aTranscrire = true;
+    }
+    if (!aTranscrire) continue;
+    const t = await ia.transcrire({ octets: m.octets, debut: m.morceau.debut, fin: m.morceau.fin }, contexte);
+    prealable.cout_eur += t.cout_eur;
+    prealable.tokens_entree += t.usage.tokens_entree;
+    prealable.tokens_sortie += t.usage.tokens_sortie;
+    prealable.appels_ia++;
+    for (const p of t.pages) transcrites.set(p.n, p);
+  }
+  const pages: PageLue[] = [];
+  for (let n = 1; n <= nbPages; n++) {
+    const p = natives.get(n);
+    if (p && !pageSansTexte(p)) {
+      pages.push({ n, methode: "natif", texte: p.texte.slice(0, MAX_TEXTE_PAGE), confiance: 1, largeur: p.largeur, hauteur: p.hauteur });
+      continue;
+    }
+    const t = transcrites.get(n);
+    pages.push({
+      n,
+      methode: t?.manuscrit ? "ocr_manuscrit" : "vision",
+      texte: (t?.texte ?? "").slice(0, MAX_TEXTE_PAGE),
+      confiance: t ? (typeof t.confiance === "number" ? t.confiance : 0.8) : 0,
+      largeur: p?.largeur,
+      hauteur: p?.hauteur,
+    });
+  }
+  return await extraireDepuisTexte(ctx, piece, pages, pagesPdf, methode, contexte, 0, prealable);
 }
 
 async function lireImage(
@@ -296,12 +376,13 @@ async function extraireDepuisTexte(
   methode: "natif" | "ocr" | "mixte" | "tableur",
   contexte: { nom_fichier: string; mime: string; module: string },
   coutOcr: number,
+  prealable: Prealable = SANS_PREALABLE,
 ): Promise<Bilan> {
   if (pages.every((p) => p.texte.replace(/\s+/g, "") === "")) {
-    return { ...echec("Aucun texte lisible sur les pages."), cout_ocr: coutOcr };
+    return { ...echec("Aucun texte lisible sur les pages."), cout_ocr: coutOcr, prealable };
   }
   const ia = await appelerIa(ctx, piece, { mode: "texte", pages: pages.map((p) => ({ n: p.n, texte: p.texte })) }, contexte);
-  return assembler(ia, pagesPdf, pages, methode, coutOcr);
+  return { ...assembler(ia, pagesPdf, pages, methode, coutOcr), prealable };
 }
 
 /** Du résultat brut de l'IA au résultat de lecture : pages, valeurs vérifiées, statut. */

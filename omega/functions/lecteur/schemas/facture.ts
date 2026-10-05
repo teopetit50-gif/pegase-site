@@ -165,6 +165,18 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
           },
           page: { type: "integer", minimum: 1, description: "La page où se trouve la citation (1 = première)." },
           confiance: { type: "number", minimum: 0, maximum: 1 },
+          boite: {
+            type: "object",
+            description:
+              "Seulement quand le document est fourni en image ou en PDF sans texte : position approximative de la citation sur sa page, en fractions de la largeur et de la hauteur (origine en haut à gauche).",
+            required: ["x", "y", "l", "h"],
+            properties: {
+              x: { type: "number", minimum: 0, maximum: 1 },
+              y: { type: "number", minimum: 0, maximum: 1 },
+              l: { type: "number", minimum: 0, maximum: 1 },
+              h: { type: "number", minimum: 0, maximum: 1 },
+            },
+          },
         },
       },
     },
@@ -220,6 +232,30 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
           pages: { type: "array", items: { type: "integer", minimum: 1 }, minItems: 1 },
           type_piece: { type: "string", enum: [...TYPES_PIECE] },
           numero: { type: ["string", "null"] },
+        },
+      },
+    },
+  },
+};
+
+/** L'outil de transcription seule, pour les gros documents lus morceau par morceau. */
+export const SCHEMA_OUTIL_TRANSCRIPTION: Record<string, unknown> = {
+  type: "object",
+  additionalProperties: false,
+  required: ["pages"],
+  properties: {
+    pages: {
+      type: "array",
+      description:
+        "La transcription fidèle et complète de chaque page du morceau, dans l'ordre, sans rien omettre ni corriger. n est le numéro de page DANS LE DOCUMENT COMPLET (indiqué dans la consigne).",
+      items: {
+        type: "object",
+        required: ["n", "texte"],
+        properties: {
+          n: { type: "integer", minimum: 1 },
+          texte: { type: "string" },
+          confiance: { type: "number", minimum: 0, maximum: 1 },
+          manuscrit: { type: "boolean" },
         },
       },
     },

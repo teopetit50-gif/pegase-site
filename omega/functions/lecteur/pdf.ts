@@ -39,7 +39,7 @@ export function pageSansTexte(p: Pick<PagePdf, "texte">): boolean {
   return p.texte.replace(/\s+/g, "").length < 20;
 }
 
-export async function analyserPdf(octets: Uint8Array, maxPages = 60): Promise<AnalysePdf> {
+export async function analyserPdf(octets: Uint8Array, maxPages = 300): Promise<AnalysePdf> {
   const pdf = await getDocumentProxy(new Uint8Array(octets));
   const nbPages = pdf.numPages;
   const pages: PagePdf[] = [];
