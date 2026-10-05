@@ -77,8 +77,8 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 - **`outils/chrome.mjs` ne trouve pas Chromium sous Linux** (chemins macOS
   seulement) : `omega/recette-a3/chrome-linux.mjs` est un décalque qui lit
   `PLAYWRIGHT_BROWSERS_PATH`. Hors périmètre, non modifié.
-- **GitHub** : voir le journal de la branche ; en cas de 403, les commits
-  sont locaux et le push est retenté toutes les 30 minutes.
+- **GitHub** : le push de `worker-a3` est passé du premier coup le 05/10
+  (sept commits) ; rien à retenter.
 - `package-lock.json` bouge à l'installation (`npm ci` refuse : lock
   désynchronisé de `package.json`, `@emnapi/*` manquants) : **non commité**,
   ce n'est pas mon travail.
