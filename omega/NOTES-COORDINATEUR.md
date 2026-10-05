@@ -17,7 +17,7 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | socle_lot19d | droits par défaut retirés : `revoke all` de anon/authenticated sur `abonnements_modules`, `demandes_audit`, `receptions` et les 20 tables FILED des lots 4-6 ; `grant select` à authenticated là où une politique existe |
 | socle_lot19e | `revoke truncate, references, trigger on all tables in schema public from anon, authenticated` + default privileges (TRUNCATE ignore la RLS) |
 | socle_lot19f | `revoke insert, update` d'anon sur `audit_journal`, `catalogue_site`, `clients`, `lorani_echeances_permis`, `moteurs_reconnus`, `profils_metier`, `tamila_registre` |
-| socle_lot19g | `private.canaux_envoi` : sms et whatsapp bornés pour le non-transactionnel à 08:00–20:00, lundi–samedi (décision du coordinateur, à confirmer par Teo) |
+| socle_lot19g | `private.canaux_envoi` : sms et whatsapp bornés pour le non-transactionnel à 08:00–20:00, lundi–samedi (confirmé par Teo le 5/10 à 22 h 10) |
 | socle_lot19h | publication Realtime `supabase_realtime` : `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`, `delegations`, `filed_controles`, `filed_historique`, `points_du_jour` (demandé par A3) |
 | socle_lot19i | `private.fournisseurs_envoi` : Brevo `branche = true` sur la recette |
 | a5_01_private_execute | EXECUTE sur `private` retiré à PUBLIC/anon/authenticated puis rendu à la liste requise (migration d'A5 + compléments c/d/e du coordinateur : fonctions des triggers SECURITY INVOKER de private, des vues de public lisibles, des CHECK/defaults). Résultat : authenticated 187/741, anon 0. Liste figée : `omega/a5_01_liste_figee.txt` |
@@ -123,7 +123,6 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
    (workflow de sauvegarde d'A5).
 4. Brevo : domaine inbound vers `/functions/v1/reception/brevo` (le webhook
    transactionnel est posé).
-5. Confirmer la décision sms/whatsapp 08 h–20 h lundi–samedi (lot 19g).
 
 ### Règles de pose
 
