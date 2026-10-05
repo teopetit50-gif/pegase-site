@@ -6,12 +6,44 @@
    rendez-vous, le devis qui expire et la famille à planifier dans la foulée
    sont dits sur la ligne. */
 
-import { Pastille, Vide } from "../ui";
+import { useState } from "react";
+import { ShieldCheck } from "lucide-react";
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
+import { Loader } from "@/components/ui/loader";
+import { Avis, Pastille, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { FAMILLES, MUTUELLES } from "./libelles";
 import type { PlanSansRdv } from "./types";
 
-export default function Plans({ plans }: { plans: PlanSansRdv[] }) {
+export type Mutuelle = { plan: PlanSansRdv; statut: NonNullable<PlanSansRdv["mutuelle_statut"]>; le: string | null; motif: string | null };
+
+export default function Plans({ plans, noterMutuelle }: { plans: PlanSansRdv[]; noterMutuelle?: (m: Mutuelle) => Promise<void> }) {
+  const [choix, setChoix] = useState<PlanSansRdv | null>(null);
+  const [statut, setStatut] = useState<Mutuelle["statut"]>("accord");
+  const [le, setLe] = useState("");
+  const [motif, setMotif] = useState("");
+  const [occupe, setOccupe] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const ouvrir = (p: PlanSansRdv) => {
+    setChoix(p);
+    setStatut(p.mutuelle_statut === "demandee" ? "accord" : p.mutuelle_statut ?? "demandee");
+    setLe(new Date().toISOString().slice(0, 10));
+    setMotif("");
+    setErreur(null);
+  };
+  const confirmer = async () => {
+    if (!choix || !noterMutuelle) return;
+    setOccupe(true);
+    setErreur(null);
+    try {
+      await noterMutuelle({ plan: choix, statut, le: le || null, motif: motif.trim() || null });
+      setChoix(null);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    } finally {
+      setOccupe(false);
+    }
+  };
   return (
     <section id="tiroma-plans" className="esp-carte" aria-label="Plans sans rendez-vous">
       <div className="esp-carte-tete">
@@ -42,12 +74,41 @@ export default function Plans({ plans }: { plans: PlanSansRdv[] }) {
                   {p.praticien_nom ? <span>{p.praticien_nom}</span> : null}
                   <span>{p.lignes_faites} faite{p.lignes_faites > 1 ? "s" : ""} · {p.lignes_a_faire} à faire{p.prochaine?.duree_min ? ` · ${p.prochaine.duree_min} min` : ""}</span>
                   {p.proches_a_planifier ? <span>Famille : {p.proches_a_planifier} proche{p.proches_a_planifier > 1 ? "s" : ""} à planifier dans la foulée</span> : null}
+                  {noterMutuelle ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir(p)}>Noter la mutuelle</button> : null}
                 </span>
               </li>
             ))}
           </ul>
         )}
       </div>
+      <Dialog open={!!choix} onOpenChange={(o) => !o && setChoix(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ShieldCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>La mutuelle, devis {choix?.devis_numero ?? "—"}</DialogTitle>
+            <DialogDescription>Le logiciel du cabinet n&apos;exporte pas la mutuelle : notez ici la demande et la réponse. Un accord reçu sans rendez-vous remonte chaque matin.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Où en est la mutuelle
+                <select className="rv-champ" value={statut} onChange={(e) => setStatut(e.target.value as Mutuelle["statut"])}>
+                  {(Object.keys(MUTUELLES) as Mutuelle["statut"][]).map((k) => <option key={k} value={k}>{MUTUELLES[k]}</option>)}
+                </select>
+              </label>
+              <label className="rv-libelle">Date
+                <input className="rv-champ" type="date" value={le} onChange={(e) => setLe(e.target.value)} />
+              </label>
+              <label className="rv-libelle">Note (facultatif)
+                <input className="rv-champ" value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={200} placeholder="Accord reçu par courrier." />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={occupe} onClick={confirmer}>{occupe ? <Loader variant="spin" /> : null} Noter</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

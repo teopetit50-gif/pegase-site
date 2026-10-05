@@ -91,6 +91,17 @@ for (const largeur of LARGEURS) {
   const ligne = await s.evaluer(`(() => { const r = [...document.querySelectorAll('section[aria-label="Le cabinet"] table tr')].find(t => /RDV LV/.test(t.textContent)); return r ? r.innerText : null; })()`);
   ok(ligne && /Prothèse — pose/.test(ligne) && /Validé/.test(ligne), `« RDV LV » est classé : ${ligne?.replace(/\\s+/g, ' ').slice(0, 80)}`);
 
+  console.log('— /espace/tiroma : noter l\'accord de la mutuelle (exemple)');
+  const mut = await s.evaluer(`(() => { const c = [...document.querySelectorAll('section[aria-label="Plans sans rendez-vous"] .esp-item')].find(i => /Nadège Hilaire/.test(i.textContent)); const b = c && [...c.querySelectorAll('button')].find(b => /Noter la mutuelle/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  ok(mut === true, 'bouton « Noter la mutuelle » cliqué sur le plan de Nadège Hilaire');
+  await s.dormir(500);
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, 'accord'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const accord = await s.evaluer(`(() => { const c = [...document.querySelectorAll('section[aria-label="Plans sans rendez-vous"] .esp-item')].find(i => /Nadège Hilaire/.test(i.textContent)); return c ? /Accord de mutuelle reçu/.test(c.textContent) : null; })()`);
+  ok(accord === true, 'le plan de Nadège Hilaire porte « Accord de mutuelle reçu » (en mémoire)');
+
   console.log('— /espace/tiroma : repasser à blanc puis en mode réel (exemple)');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Le cabinet"] button')].find(b => /Repasser à blanc/.test(b.textContent))?.click()`);
   await s.dormir(400);

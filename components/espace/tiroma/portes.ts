@@ -13,6 +13,7 @@
      tiroma_installer_cabinet(p_client, p_entite, p_logiciel, p_perimetre, p_logiciel_version) → uuid
      tiroma_brancher_cabinet(p_client, p_entite, p_voie, p_libelle) → uuid
      tiroma_changer_mode(p_client, p_entite, p_mode)
+     tiroma_noter_mutuelle(p_plan, p_statut, p_le, p_motif) → jsonb   (b3_07)
    et par les écritures que les politiques prévoient (le titulaire pose un
    fauteuil, un horaire, une fermeture, un profil ; classe le vocabulaire).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -178,6 +179,13 @@ export async function ajouterPraticien(cabinet: Cabinet, p: { nom_affiche: strin
 export async function classerType(t: TypeRdv, v: { famille: TypeRdv["famille"]; statut: "propose" | "valide"; necessite_labo: boolean; chirurgie: boolean; exige_assistante: boolean; duree_defaut_min: number | null }): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from("tiroma_types_rdv").update(v).eq("id", t.id);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+/* b3_07 : l'assistante ou le titulaire note la demande et la réponse de la mutuelle (l'export ne les porte pas). */
+export async function noterMutuelle(plan_id: string, statut: PlanSansRdv["mutuelle_statut"], le: string | null, motif: string | null): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("tiroma_noter_mutuelle", { p_plan: plan_id, p_statut: statut, p_le: le, p_motif: motif });
   if (error) throw new ErreurPorte(message(error));
 }
 

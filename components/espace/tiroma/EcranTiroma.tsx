@@ -23,12 +23,12 @@ import AvantRendezVous from "./AvantRendezVous";
 import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
 import Creneaux from "./Creneaux";
-import Plans from "./Plans";
+import Plans, { type Mutuelle } from "./Plans";
 import { DOSSIER_EXEMPLE } from "./exemple";
 import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
-  classerType, installerCabinet, listerCabinets, monCompte, retirerHoraire, type Compte,
+  classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerHoraire, type Compte,
 } from "./portes";
 import type { Cabinet as CabinetT, Dossier, Logiciel } from "./types";
 
@@ -134,6 +134,20 @@ export default function EcranTiroma() {
       case "classer": await classerType(a.typeRdv, { famille: a.famille, statut: a.statut, necessite_labo: a.necessite_labo, chirurgie: a.chirurgie, exige_assistante: a.exige_assistante, duree_defaut_min: a.duree_defaut_min }); break;
     }
     await charger(d.cabinet.id);
+  }, [source, reel, charger]);
+
+  /* b3_07 : la mutuelle, notée sur un plan ; en exemple, la ligne change en mémoire */
+  const noter = useCallback(async (m: Mutuelle) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => ({
+        ...prev,
+        plans: prev.plans.map((p) => (p.plan_id === m.plan.plan_id ? { ...p, mutuelle_statut: m.statut, mutuelle_reponse_le: m.statut === "accord" || m.statut === "refus" ? m.le : null, mutuelle_accord_sans_rdv: m.statut === "accord" } : p)),
+      }));
+      return;
+    }
+    await noterMutuelle(m.plan.plan_id, m.statut, m.le, m.motif);
+    await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
   const installer = async () => {
@@ -255,7 +269,7 @@ export default function EcranTiroma() {
         <div style={{ display: "grid", gap: 14 }}>
           <div className="esp-grille">
             <Creneaux creneaux={dossier.creneaux} horizon={dossier.regles?.horizon_creneaux_jours ?? 2} />
-            <Plans plans={dossier.plans} />
+            <Plans plans={dossier.plans} noterMutuelle={noter} />
           </div>
           <div className="esp-grille">
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />
