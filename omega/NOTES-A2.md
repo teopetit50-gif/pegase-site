@@ -112,9 +112,9 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
   `META_*` sont entre les mains de Teo (liste transmise par le coordinateur). Tant
   qu'ils manquent, `webhooks-brevo` et `reception` répondent 503, l'expéditeur
   reporte.
-- **Envoi réel** (un e-mail et un SMS vers une adresse et un numéro de test) : impossible
-  tant que `BREVO_API_KEY` n'existe pas et que `brevo` / `brevo_sms` ne sont pas
-  `branche = true` sur la recette. À faire dès que Teo a posé la clé.
+- **Envoi réel** : e-mail fait le 05/10 (voir « Premier envoi réel »). SMS d'essai et
+  webhook de remise à vérifier dès que Teo a configuré l'émetteur SMS et le webhook
+  chez Brevo.
 
 ## Demain
 
@@ -229,8 +229,15 @@ d'IP fixe. L'ouvrier a bien classé l'erreur en transitoire (`reporte: true`, en
 Reprise après report vérifiée par le coordinateur : `tache_envois` a reconfié un
 deuxième travail `envois.brevo` pour l'envoi `0a607529-…` (essais 2), la clé
 `envoi:<uuid>` ne bloque pas ; le différé `6be6e6cd-…` porte `reprise_le` au 06/10 06:00Z.
-Rien à changer côté ouvrier. Dès que la restriction d'IP Brevo est levée, le passage
-suivant remettra l'envoi sans intervention.
+Rien à changer côté ouvrier.
+
+**Premier e-mail réel parti le 05/10 à 19:05:01Z**, une fois la restriction d'IP Brevo
+levée par Teo : envoi `0a607529-…` en statut `envoye` au troisième essai,
+`reference_externe` `<202610051905.67751143774@smtp-relay.mailin.fr>`, travail 2146
+fini avec `{fournisseur_id, remis_a}`. **L'expéditeur est validé en réel pour
+l'e-mail.** Restent à vérifier en réel : le webhook Brevo (`noter_remise`) dès que Teo
+a configuré le webhook chez Brevo avec le jeton, puis un SMS d'essai (émetteur
+alphanumérique à valider chez Brevo).
 
 ## Reste
 
