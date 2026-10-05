@@ -110,41 +110,51 @@ export function configSupabaseDepuisEnv(env: { get(n: string): string | undefine
   return { url: url.replace(/\/+$/, ""), cleService };
 }
 
+function entetesService(cfg: ConfigSupabase, extra: Record<string, string> = {}): Record<string, string> {
+  return {
+    apikey: cfg.cleService,
+    Authorization: `Bearer ${cfg.cleService}`,
+    "Content-Type": "application/json",
+    ...extra,
+  };
+}
+
+/**
+ * Appelle une porte : POST /rest/v1/rpc/<nom> avec la clé de service.
+ * Réutilisable par tout ouvrier. Lève ErreurOuvrier : FOURNISSEUR_INDISPONIBLE
+ * (réseau, 5xx, 429), PORTE_REFUSEE (401/403), ERREUR_INTERNE (autre 4xx).
+ * Une réponse vide (fonction void) rend null.
+ */
+export async function rpc<T>(cfg: ConfigSupabase, fetchFn: typeof fetch, nom: string, params: Record<string, unknown>): Promise<T> {
+  let rep: Response;
+  try {
+    rep = await fetchFn(`${cfg.url}/rest/v1/rpc/${nom}`, {
+      method: "POST",
+      headers: entetesService(cfg),
+      body: JSON.stringify(params),
+    });
+  } catch (e) {
+    throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `porte ${nom} injoignable : ${(e as Error).message}`);
+  }
+  const texte = await rep.text();
+  if (!rep.ok) {
+    if (rep.status >= 500 || rep.status === 429) {
+      throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`);
+    }
+    if (rep.status === 401 || rep.status === 403) {
+      throw new ErreurOuvrier("PORTE_REFUSEE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
+    }
+    throw new ErreurOuvrier("ERREUR_INTERNE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
+  }
+  return (texte === "" ? null : JSON.parse(texte)) as T;
+}
+
 /** Les portes par RPC PostgREST, avec la clé de service. */
 export class PortesRpc implements Portes {
   constructor(private readonly cfg: ConfigSupabase, private readonly fetchFn: typeof fetch = fetch) {}
 
-  private entetes(extra: Record<string, string> = {}): Record<string, string> {
-    return {
-      apikey: this.cfg.cleService,
-      Authorization: `Bearer ${this.cfg.cleService}`,
-      "Content-Type": "application/json",
-      ...extra,
-    };
-  }
-
-  private async rpc<T>(nom: string, params: Record<string, unknown>): Promise<T> {
-    let rep: Response;
-    try {
-      rep = await this.fetchFn(`${this.cfg.url}/rest/v1/rpc/${nom}`, {
-        method: "POST",
-        headers: this.entetes(),
-        body: JSON.stringify(params),
-      });
-    } catch (e) {
-      throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `porte ${nom} injoignable : ${(e as Error).message}`);
-    }
-    const texte = await rep.text();
-    if (!rep.ok) {
-      if (rep.status >= 500 || rep.status === 429) {
-        throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`);
-      }
-      if (rep.status === 401 || rep.status === 403) {
-        throw new ErreurOuvrier("PORTE_REFUSEE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
-      }
-      throw new ErreurOuvrier("ERREUR_INTERNE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
-    }
-    return (texte === "" ? null : JSON.parse(texte)) as T;
+  private rpc<T>(nom: string, params: Record<string, unknown>): Promise<T> {
+    return rpc<T>(this.cfg, this.fetchFn, nom, params);
   }
 
   async prendreTravaux(genres: string[], nombre: number, bail: string, ouvrier: string): Promise<Travail[]> {

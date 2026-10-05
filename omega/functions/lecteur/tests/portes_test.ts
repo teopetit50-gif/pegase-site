@@ -96,3 +96,20 @@ Deno.test("portes : un 5xx est une panne fournisseur, un 401/403 une porte refus
     assert(e.message.includes("introuvable"));
   }
 });
+
+Deno.test("rpc() seule : réutilisable par un autre ouvrier, mêmes codes d'erreur", async () => {
+  const { rpc } = await import("@partage/portes.ts");
+  const { f, appels } = fauxFetch({ identite_tiers: { siren: "812345676" } });
+  const r = await rpc<{ siren: string }>(cfg, f, "identite_tiers", { p_siren: "812345676" });
+  assertEquals(r.siren, "812345676");
+  assertEquals(appels[0].url, "https://exemple.supabase.co/rest/v1/rpc/identite_tiers");
+  assertEquals(appels[0].entetes.Authorization, "Bearer cle-de-test");
+  assertEquals(await rpc<null>(cfg, fauxFetch({ vide: undefined }).f, "vide", {}), null);
+  try {
+    await rpc(cfg, fauxFetch({ x: {} }, 403).f, "x", {});
+    assert(false, "aurait dû lever");
+  } catch (e) {
+    assert(e instanceof ErreurOuvrier);
+    assertEquals(e.code, "PORTE_REFUSEE");
+  }
+});
