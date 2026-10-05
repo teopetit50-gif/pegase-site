@@ -43,6 +43,11 @@ RLS dépend (`pg_depend`, exact) ou qu'une fonction publique SECURITY INVOKER
 exécutable par `authenticated` appelle (ainsi que les déclencheurs SECURITY
 INVOKER de `private`, les vues lisibles et les CHECK/DEFAULT de `public`),
 avec fermeture transitive, puis coupe l'EXECUTE par défaut pour l'avenir.
+Deux pièges rencontrés en recette : la **clause WHEN** d'un déclencheur
+s'évalue avec les droits de l'utilisateur qui écrit (une fonction de
+`private` qui y figure doit lui être exécutable : source (f) de la règle),
+alors que la **fonction de déclencheur** elle-même n'a besoin d'aucun
+EXECUTE au déclenchement (Postgres ne le vérifie qu'au `CREATE TRIGGER`).
 `service_role`, la clé d'Omega (lecteur, tâches), garde tout explicitement :
 avant la migration il n'avait EXECUTE que par PUBLIC, et le lecteur a perdu
 `piece_a_lire` jusqu'au complément (lot 19j). Elle écrit la liste retenue en NOTICE et

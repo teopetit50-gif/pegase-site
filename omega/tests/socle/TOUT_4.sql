@@ -120,8 +120,10 @@ end $f$;
 
 -- 44 — dans private, anon n'exécute rien, authenticated n'exécute que les fonctions requises, service_role exécute tout
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- Requises = citées par une politique RLS (pg_depend) ou appelées par une fonction publique SECURITY INVOKER
--- exécutable par authenticated, avec fermeture transitive (tests.fonctions_private_requises()).
+-- Requises = citées par une politique RLS, appelées par une fonction publique SECURITY INVOKER exécutable par authenticated,
+-- par un déclencheur SECURITY INVOKER de private, utilisées par une vue lisible, un CHECK/DEFAULT ou la clause WHEN d'un
+-- déclencheur de public, avec fermeture transitive (tests.fonctions_private_requises()). Les fonctions de déclencheur
+-- elles-mêmes sont hors sujet : Postgres ne vérifie EXECUTE dessus qu'à la création du déclencheur, jamais au déclenchement.
 -- La migration omega/migrations/a5_01_private_execute.sql applique exactement cette règle.
 
 create or replace function tests.test_44_private_fonctions_exposees() returns setof text

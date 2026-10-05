@@ -291,7 +291,7 @@ end $$;
 -- Fonctions de private dont authenticated a légitimement besoin : (a) citées par une politique RLS, (b) appelées par
 -- une fonction publique SECURITY INVOKER exécutable par authenticated, (c) appelées par un déclencheur SECURITY INVOKER
 -- de private, (d) utilisées par une vue de public lisible par authenticated, (e) utilisées par un CHECK ou un DEFAULT
--- d'une table de public ; puis fermeture transitive à travers les SECURITY INVOKER retenues. Les fonctions déclencheur
+-- d'une table de public, (f) utilisées dans la clause WHEN d'un déclencheur d'une table de public ; puis fermeture transitive à travers les SECURITY INVOKER retenues. Les fonctions déclencheur
 -- elles-mêmes n'ont jamais besoin d'EXECUTE. Même règle que omega/migrations/a5_01_private_execute.sql.
 create or replace function tests.fonctions_private_requises() returns table(oid oid, nom text, raison text)
 language sql stable as $$
@@ -340,6 +340,16 @@ language sql stable as $$
     ) src on true
     join pg_class c on c.oid = src.relid join pg_namespace nc on nc.oid = c.relnamespace
     where nc.nspname = 'public' and n.nspname = 'private' and p.prokind = 'f'
+    union
+    -- (f) utilisées dans la clause WHEN d'un déclencheur d'une table de public : évaluée avec les droits de l'utilisateur qui écrit
+    --     (pg_depend enregistre les dépendances de la clause WHEN ; la définition textuelle sert de ceinture)
+    select distinct p.oid, p.proname, 'clause WHEN du déclencheur ' || t.tgname || ' sur public.' || c.relname
+    from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace nc on nc.oid = c.relnamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where not t.tgisinternal and nc.nspname = 'public' and n.nspname = 'private' and p.prokind = 'f' and p.oid <> t.tgfoid
+      and p.prorettype <> 'trigger'::regtype
+      and (exists (select 1 from pg_depend d where d.classid = 'pg_trigger'::regclass and d.objid = t.oid and d.refclassid = 'pg_proc'::regclass and d.refobjid = p.oid)
+           or pg_get_triggerdef(t.oid) ~ ('WHEN .*private\.' || p.proname || '\s*\('))
     union
     -- fermeture transitive à travers les SECURITY INVOKER retenues
     select distinct p.oid, p.proname, 'appelée par private.' || q.proname

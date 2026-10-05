@@ -40,6 +40,35 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (message de 20:39 UTC, compléments f/g/h)
+
+- **(f) clause WHEN des déclencheurs** : intégrée comme sixième source dans
+  `tests.fonctions_private_requises()`, `a5_01_private_execute.sql` et
+  `a5_01_liste_requises.sql`. Règle : fonction de `private` dont dépend un
+  déclencheur non interne d'une table de `public` (`pg_depend`, qui
+  enregistre les dépendances de la clause WHEN), autre que la fonction de
+  déclencheur elle-même, **ou** citée après `WHEN` dans
+  `pg_get_triggerdef()` (ta regex, en ceinture). Sur la maquette, un
+  déclencheur `WHEN (private.tiroma_trace_ecriture())` est bien retenu.
+  Ton lot 19u correspond à cette règle.
+- **(g) les 89 fonctions de déclencheur (lot 19r) : inutile, à retirer.**
+  Postgres vérifie EXECUTE sur la fonction de déclencheur au `CREATE
+  TRIGGER` (pour celui qui crée) et jamais au déclenchement :
+  `ExecCallTriggerFunc` n'appelle pas de contrôle d'ACL, c'est pourquoi
+  les déclencheurs des tables de `public` tournaient déjà pour les clients
+  avant a5_01 alors que ces fonctions n'étaient exécutables que par PUBLIC…
+  et c'est aussi pourquoi `verifier_brique`/`*_tracer` continuent de
+  tourner après la révocation. Sans risque non plus (une fonction de
+  déclencheur ne s'appelle pas directement : « trigger functions can only
+  be called as triggers »), donc le test 44 les ignore (`prorettype <>
+  trigger`) dans les deux cas. Je recommande de retirer 19r pour la
+  lisibilité de la liste figée : l'erreur de B3 venait de la clause WHEN
+  (f), pas de la fonction de déclencheur.
+- **(h)** : noté, zéro manque, cohérent avec la fermeture implémentée ici.
+- Le lot corrigé des tests 11/12/18/24/30/32/34/36/37/43/44 est poussé
+  depuis `ced7895` (puis `372b1c4`, `fbbf153` et le présent commit) : TOUT_1
+  à TOUT_4 sur `worker-a5` sont à jour. Maquette : 51/51, TOUT.sql → 45 `ok`.
+
 ## Réponse au coordinateur (message de 19:48 UTC, lots 19k et 19l)
 
 Règle figée dans un nouveau test, **51_politiques_et_grants.sql**, inclus

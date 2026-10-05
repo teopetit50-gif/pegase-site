@@ -206,6 +206,9 @@ create or replace function private.verifier_brique() returns trigger language pl
 begin if not private.ecrit_par_la_brique(new.client_id) then raise exception 'client requis'; end if; return new; end $$;
 create table public.notes_internes (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), texte text not null, cree_le timestamptz not null default private.horodatage());
 create trigger t_notes_brique before insert on public.notes_internes for each row execute function private.verifier_brique();
+create or replace function private.tiroma_trace_ecriture() returns boolean language sql stable as $$ select coalesce(current_setting('omega.tracer', true), 'oui') = 'oui' $$;
+create or replace function private.tracer() returns trigger language plpgsql as $$ begin return new; end $$;
+create trigger t_notes_tracer after insert on public.notes_internes for each row when (private.tiroma_trace_ecriture()) execute function private.tracer();
 create view public.v_envois_libelles with (security_invoker = on) as select e.id, e.client_id, e.canal, private.libelle_canal(e.canal) as canal_libelle, e.statut from public.envois e;
 grant select on public.v_envois_libelles to authenticated;
 
