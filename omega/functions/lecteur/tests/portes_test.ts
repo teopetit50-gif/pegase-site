@@ -68,7 +68,7 @@ Deno.test("portes : piece_a_lire, consommation_ia_jour, lire_parametre", async (
   assert(appels.every((a) => a.url.includes("/rest/v1/rpc/")));
 });
 
-Deno.test("portes : un 5xx est une panne fournisseur, un 4xx une erreur interne", async () => {
+Deno.test("portes : un 5xx est une panne fournisseur, un 401/403 une porte refusée, un autre 4xx une erreur interne", async () => {
   const p5 = new PortesRpc(cfg, fauxFetch({ commencer_lecture: { message: "boom" } }, 503).f);
   try {
     await p5.commencerLecture("p");
@@ -76,6 +76,15 @@ Deno.test("portes : un 5xx est une panne fournisseur, un 4xx une erreur interne"
   } catch (e) {
     assert(e instanceof ErreurOuvrier);
     assertEquals(e.code, "FOURNISSEUR_INDISPONIBLE");
+  }
+  const p403 = new PortesRpc(cfg, fauxFetch({ piece_a_lire: { code: "42501", message: "permission denied for function piece_a_lire" } }, 403).f);
+  try {
+    await p403.lirePiece("p");
+    assert(false, "aurait dû lever");
+  } catch (e) {
+    assert(e instanceof ErreurOuvrier);
+    assertEquals(e.code, "PORTE_REFUSEE");
+    assert(e.motif.startsWith("PORTE_REFUSEE : porte piece_a_lire : HTTP 403"));
   }
   const p4 = new PortesRpc(cfg, fauxFetch({ finir_travail: { message: "Travail introuvable ou pas en cours : 1." } }, 400).f);
   try {

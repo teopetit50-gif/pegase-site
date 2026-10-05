@@ -6,6 +6,8 @@ export type CodeOuvrier =
   | "FOURNISSEUR_INDISPONIBLE"
   | "PLAFOND_IA"
   | "CHIFFREMENT_NON_PRIS_EN_CHARGE"
+  /** Une porte refuse l'ouvrier (401/403) : droits du socle à poser, rien à relire. */
+  | "PORTE_REFUSEE"
   | "ERREUR_INTERNE";
 
 export class ErreurOuvrier extends Error {

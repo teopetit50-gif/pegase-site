@@ -139,6 +139,9 @@ export class PortesRpc implements Portes {
       if (rep.status >= 500 || rep.status === 429) {
         throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`);
       }
+      if (rep.status === 401 || rep.status === 403) {
+        throw new ErreurOuvrier("PORTE_REFUSEE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
+      }
       throw new ErreurOuvrier("ERREUR_INTERNE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
     }
     return (texte === "" ? null : JSON.parse(texte)) as T;
