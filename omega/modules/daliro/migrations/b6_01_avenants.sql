@@ -474,7 +474,7 @@ begin
   select count(*) + 1 into v_version from public.demandes_validation d
   where d.client_id = a.client_id and d.objet_type = 'btp_avenant' and d.objet_id = a.id::text;
   v_cle := 'daliro:avenant:' || a.id::text || ':v' || v_version;
-  select c.* into c from public.btp_chantiers c where c.id = a.chantier_id;
+  select ch.* into c from public.btp_chantiers ch where ch.id = a.chantier_id;
   insert into public.demandes_validation (client_id, entite_id, module, type_action, objet_type, objet_id, resume,
                                           montant, payload, cle_idempotence)
   values (a.client_id, a.entite_id, 'daliro', 'daliro.signer_avenant', 'btp_avenant', a.id::text,
