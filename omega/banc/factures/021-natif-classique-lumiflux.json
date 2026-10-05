@@ -1,0 +1,89 @@
+{
+  "fichier": "021-natif-classique-lumiflux.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0186",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-21",
+      "date_echeance": "2026-06-20",
+      "date_livraison": null,
+      "periode": "du 01/02/2026 au 30/02/2026",
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Lumiflux Énergie SA",
+        "siren": "992334169",
+        "siret": "99233416930054",
+        "tva_intracom": "FR60992334169",
+        "adresse": "62 rue Camille-Verdier",
+        "code_postal": "59000",
+        "ville": "Lille",
+        "pays": "FR",
+        "iban": "FR7692967066114874077878744",
+        "bic": "DEFDFRPPXXX",
+        "courriel": "compta@lumiflux-energie.example",
+        "telephone": "05 25 54 08 34"
+      },
+      "client": {
+        "raison_sociale": "Garage Électrique Solvan SARL",
+        "siren": "975600248",
+        "siret": "97560024804285",
+        "tva_intracom": "FR65975600248",
+        "adresse": "42 quai des Chartrons",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "code_client": "C33428"
+      },
+      "lignes": [
+        {
+          "designation": "Consommation eau",
+          "quantite": 63,
+          "unite": "m3",
+          "prix_unitaire_ht": 2.66,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 167.58,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 167.58,
+      "tva": [
+        {
+          "taux": 5.5,
+          "base": 167.58,
+          "montant": 9.22
+        }
+      ],
+      "total_tva": 9.22,
+      "total_ttc": 176.8,
+      "acompte": null,
+      "net_a_payer": 176.8,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-07422",
+        "bon_livraison": "BL-767053",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "période de consommation, pas de date de livraison"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,109 @@
+{
+  "fichier": "099-natif-sobre-cabinet.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F26/03/328",
+      "facture_rectifiee": null,
+      "date_emission": "2026-03-15",
+      "date_echeance": "2026-03-15",
+      "date_livraison": "2026-03-11",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Cabinet Orvane Conseil SELARL",
+        "siren": "946148947",
+        "siret": "94614894719835",
+        "tva_intracom": "FR67946148947",
+        "adresse": "76 zone artisanale des Quatre-Vents",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "iban": "FR7690477739333154877304429",
+        "bic": "HNUCFRPP",
+        "courriel": "compta@cabinet-orvane-conseil.example",
+        "telephone": "02 82 30 02 07"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Tenue de comptabilité trimestrielle",
+          "quantite": 2,
+          "unite": "trimestre",
+          "prix_unitaire_ht": 846.54,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1693.08,
+          "code": "REF-87201"
+        },
+        {
+          "designation": "Établissement liasse fiscale",
+          "quantite": 3,
+          "unite": "forfait",
+          "prix_unitaire_ht": 971.32,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2913.96,
+          "code": "REF-50038"
+        },
+        {
+          "designation": "Tenue de comptabilité trimestrielle",
+          "quantite": 3,
+          "unite": "trimestre",
+          "prix_unitaire_ht": 770.31,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2310.93,
+          "code": "REF-63095"
+        }
+      ],
+      "remise_globale_pct": 3,
+      "remise_globale": 207.54,
+      "total_ht": 6710.43,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 6710.43,
+          "montant": 1342.09
+        }
+      ],
+      "total_tva": 1342.09,
+      "total_ttc": 8052.52,
+      "acompte": 4026.26,
+      "net_a_payer": 4026.26,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": "BC-17053",
+        "bon_livraison": null,
+        "reference_paiement": "F2603328"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "acompte de 50 % déduit et remise globale : trois montants différents (HT, TTC, net à payer)"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

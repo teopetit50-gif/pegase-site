@@ -1,0 +1,140 @@
+{
+  "fichier": "026-natif-moderne-carrieres.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "INV-101782",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-09",
+      "date_echeance": "2026-06-08",
+      "date_livraison": "2026-05-07",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Carrières de Montjoie SAS",
+        "siren": "961386406",
+        "siret": "96138640639582",
+        "tva_intracom": "FR30961386406",
+        "adresse": "40 impasse des Peupliers",
+        "code_postal": "33000",
+        "ville": "Bordeaux",
+        "pays": "FR",
+        "iban": "FR7694978437681242234431894",
+        "bic": "MAAEFRPP",
+        "courriel": "compta@carrieres-de-montjoie.example",
+        "telephone": "03 59 55 78 23"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Livraison grue",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 105.71,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 634.26,
+          "code": "REF-86621"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 5,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 27.6,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 138,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 1,
+          "unite": "tonne",
+          "prix_unitaire_ht": 49.8,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 42.33,
+          "code": "REF-65715"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 6.15,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 12.3,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 3,
+          "unite": "tonne",
+          "prix_unitaire_ht": 49.91,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 149.73,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 3,
+          "unite": "tonne",
+          "prix_unitaire_ht": 44.29,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 132.87,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 2,
+      "remise_globale": 22.19,
+      "total_ht": 1087.3,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1087.3,
+          "montant": 217.46
+        }
+      ],
+      "total_tva": 217.46,
+      "total_ttc": 1304.76,
+      "acompte": null,
+      "net_a_payer": 1304.76,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-65638",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remise globale",
+    "remises par ligne"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

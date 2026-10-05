@@ -1,0 +1,201 @@
+{
+  "fichier": "066-multi-factures-classique-electromenager.pdf",
+  "format": "pdf",
+  "type": "multi-factures",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 2,
+  "lisible": true,
+  "nb_factures": 2,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC202607-142",
+      "facture_rectifiee": null,
+      "date_emission": "2026-07-01",
+      "date_echeance": "2026-07-16",
+      "date_livraison": "2026-06-29",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Électroménager Pro Rochebrune SARL",
+        "siren": "922874797",
+        "siret": "92287479718894",
+        "tva_intracom": "FR60922874797",
+        "adresse": "20 avenue du Bois-Joli",
+        "code_postal": "63000",
+        "ville": "Clermont-Ferrand",
+        "pays": "FR",
+        "iban": "FR7697292627707471904928780",
+        "bic": "BMFVFRPP",
+        "courriel": "compta@electromenager-pro-rochebrune.example",
+        "telephone": "04 61 07 31 46"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 14,
+          "unite": "u",
+          "prix_unitaire_ht": 5,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 70,
+          "code": null
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 54.13,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 54.13,
+          "code": "REF-19833"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 8,
+          "unite": "u",
+          "prix_unitaire_ht": 7.21,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 57.68,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 4,
+          "unite": "u",
+          "prix_unitaire_ht": 13.77,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 55.08,
+          "code": "REF-37746"
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 60.14,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1443.36,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 84.01,
+      "total_ht": 1596.24,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1596.24,
+          "montant": 319.25
+        }
+      ],
+      "total_tva": 319.25,
+      "total_ttc": 1915.49,
+      "acompte": null,
+      "net_a_payer": 1915.49,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": "BC-66751",
+        "bon_livraison": "BL-607949",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    },
+    {
+      "type_document": "facture",
+      "numero": "FAC202601-273",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-02",
+      "date_echeance": "2026-02-01",
+      "date_livraison": "2025-12-30",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Nettoyage Clairpont SAS",
+        "siren": "972223614",
+        "siret": "97222361401916",
+        "tva_intracom": "FR67972223614",
+        "adresse": "9 route de la Plaine",
+        "code_postal": "63000",
+        "ville": "Clermont-Ferrand",
+        "pays": "FR",
+        "iban": "FR7690947489636203669656566",
+        "bic": "JVNXFRPPXXX",
+        "courriel": "compta@nettoyage-clairpont.example",
+        "telephone": "03 69 01 48 26"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Vitrerie intérieure/extérieure",
+          "quantite": 5,
+          "unite": "passage",
+          "prix_unitaire_ht": 147.98,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 739.9,
+          "code": "REF-07784"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 739.9,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 739.9,
+          "montant": 147.98
+        }
+      ],
+      "total_tva": 147.98,
+      "total_ttc": 887.88,
+      "acompte": null,
+      "net_a_payer": 887.88,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-79934",
+        "bon_livraison": "BL-817107",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "2 factures de fournisseurs différents dans un seul fichier : découper avant de lire"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

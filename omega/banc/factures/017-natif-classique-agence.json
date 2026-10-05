@@ -1,0 +1,139 @@
+{
+  "fichier": "017-natif-classique-agence.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC26/02/273",
+      "facture_rectifiee": null,
+      "date_emission": "2026-02-18",
+      "date_echeance": "2026-03-05",
+      "date_livraison": "2026-02-17",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Agence Web Kalistra SAS",
+        "siren": "954062535",
+        "siret": "95406253511872",
+        "tva_intracom": "FR81954062535",
+        "adresse": "106 allée des Charmes",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7698207719117052765064652",
+        "bic": "CBYCFRPP",
+        "courriel": "compta@agence-web-kalistra.example",
+        "telephone": "04 83 91 15 45"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Licence suite bureautique annuelle",
+          "quantite": 6,
+          "unite": "poste",
+          "prix_unitaire_ht": 131.37,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 788.22,
+          "code": null
+        },
+        {
+          "designation": "Prestation développement",
+          "quantite": 4,
+          "unite": "jour",
+          "prix_unitaire_ht": 554.71,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2218.84,
+          "code": null
+        },
+        {
+          "designation": "Licence suite bureautique annuelle",
+          "quantite": 2,
+          "unite": "poste",
+          "prix_unitaire_ht": 131.84,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 263.68,
+          "code": "REF-49398"
+        },
+        {
+          "designation": "Prestation développement",
+          "quantite": 1,
+          "unite": "jour",
+          "prix_unitaire_ht": 495.81,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 495.81,
+          "code": null
+        },
+        {
+          "designation": "Licence suite bureautique annuelle",
+          "quantite": 6,
+          "unite": "poste",
+          "prix_unitaire_ht": 111.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 670.38,
+          "code": null
+        },
+        {
+          "designation": "Éco-participation (dont)",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 3,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 3,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 4439.93,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 4439.93,
+          "montant": 887.99
+        }
+      ],
+      "total_tva": 887.99,
+      "total_ttc": 5327.92,
+      "acompte": null,
+      "net_a_payer": 5327.92,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "éco-participation"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

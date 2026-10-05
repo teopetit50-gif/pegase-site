@@ -1,0 +1,211 @@
+{
+  "fichier": "065-multi-factures-courrier-nordelec.pdf",
+  "format": "pdf",
+  "type": "multi-factures",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 2,
+  "lisible": true,
+  "nb_factures": 2,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FA2026-0078",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-19",
+      "date_echeance": "2026-10-19",
+      "date_livraison": "2026-09-13",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Nordélec Distribution SARL",
+        "siren": "919687541",
+        "siret": "91968754157756",
+        "tva_intracom": "FR67919687541",
+        "adresse": "81 parc d'activités du Levant",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7693010991145298096825593",
+        "bic": "AXWZFRPPXXX",
+        "courriel": "compta@nordelec-distribution.example",
+        "telephone": "01 99 44 02 89"
+      },
+      "client": {
+        "raison_sociale": "Garage Électrique Solvan SARL",
+        "siren": "975600248",
+        "siret": "97560024804285",
+        "tva_intracom": "FR65975600248",
+        "adresse": "42 quai des Chartrons",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "code_client": "C33428"
+      },
+      "lignes": [
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 53,
+          "unite": "h",
+          "prix_unitaire_ht": 60.79,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 3221.87,
+          "code": "REF-93777"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 7.74,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 147.06,
+          "code": "REF-64163"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 85.96,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 171.92,
+          "code": "REF-37202"
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 10.93,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 163.95,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 3704.8,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 3704.8,
+          "montant": 740.96
+        }
+      ],
+      "total_tva": 740.96,
+      "total_ttc": 4445.76,
+      "acompte": null,
+      "net_a_payer": 4445.76,
+      "mode_paiement": "Prélèvement SEPA",
+      "references": {
+        "commande": "BC-82216",
+        "bon_livraison": "BL-877202",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    },
+    {
+      "type_document": "facture",
+      "numero": "F2026-0272",
+      "facture_rectifiee": null,
+      "date_emission": "2026-07-07",
+      "date_echeance": "2026-08-06",
+      "date_livraison": "2026-07-06",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Serrurerie Vendrel EI",
+        "siren": "981327240",
+        "siret": "98132724055136",
+        "tva_intracom": null,
+        "adresse": "106 chemin de la Fontaine",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "iban": "FR7696407962677595462598362",
+        "bic": "TFPJFRPP",
+        "courriel": "compta@serrurerie-vendrel.example",
+        "telephone": "04 67 00 39 88"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Cadenas laiton 40 mm",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 12.39,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 198.24,
+          "code": "REF-77657"
+        },
+        {
+          "designation": "Déplacement dépannage",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 47.66,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 285.96,
+          "code": null
+        },
+        {
+          "designation": "Cadenas laiton 40 mm",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 13.78,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 13.78,
+          "code": "REF-96225"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 497.98,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 497.98,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 497.98,
+      "acompte": null,
+      "net_a_payer": 497.98,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": "BL-870269",
+        "reference_paiement": "F20260272"
+      },
+      "mentions": [
+        "TVA non applicable, art. 293 B du CGI",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "2 factures de fournisseurs différents dans un seul fichier : découper avant de lire"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

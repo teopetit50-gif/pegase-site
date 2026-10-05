@@ -1,0 +1,121 @@
+{
+  "fichier": "018-natif-moderne-serrurerie.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F2026-0261",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-16",
+      "date_echeance": "2026-08-16",
+      "date_livraison": "2026-08-16",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Serrurerie Vendrel EI",
+        "siren": "981327240",
+        "siret": "98132724055136",
+        "tva_intracom": null,
+        "adresse": "106 chemin de la Fontaine",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "iban": "FR7696407962677595462598362",
+        "bic": "TFPJFRPP",
+        "courriel": "compta@serrurerie-vendrel.example",
+        "telephone": "04 67 00 39 88"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Reproduction de clé",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 5.63,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 90.08,
+          "code": null
+        },
+        {
+          "designation": "Vis bois 4x40 (boîte 500)",
+          "quantite": 1,
+          "unite": "boîte",
+          "prix_unitaire_ht": 13.47,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 13.47,
+          "code": "REF-64497"
+        },
+        {
+          "designation": "Cylindre européen 30x30",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 29.99,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 179.94,
+          "code": null
+        },
+        {
+          "designation": "Reproduction de clé",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 6.42,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 154.08,
+          "code": "REF-86936"
+        }
+      ],
+      "remise_globale_pct": 10,
+      "remise_globale": 43.76,
+      "total_ht": 393.81,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 393.81,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 393.81,
+      "acompte": 157.52,
+      "net_a_payer": 236.29,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-24236",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA non applicable, art. 293 B du CGI",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remise globale",
+    "acompte déduit : net à payer différent du TTC",
+    "franchise en base : TVA à zéro, pas de n° intracom"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

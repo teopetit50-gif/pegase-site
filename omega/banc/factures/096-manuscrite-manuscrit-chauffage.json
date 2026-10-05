@@ -1,0 +1,131 @@
+{
+  "fichier": "096-manuscrite-manuscrit-chauffage.pdf",
+  "format": "pdf",
+  "type": "manuscrite",
+  "gabarit": "manuscrit",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F2026-0354",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-23",
+      "date_echeance": "2026-10-23",
+      "date_livraison": null,
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Chauffage Thermoval SARL",
+        "siren": "935648899",
+        "siret": "93564889966050",
+        "tva_intracom": null,
+        "adresse": "78 zone artisanale des Quatre-Vents",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "iban": "FR7697386449264214002562589",
+        "bic": "SBMXFRPPXXX",
+        "courriel": "compta@chauffage-thermoval.example",
+        "telephone": "04 18 81 51 06"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Entretien chaudière gaz",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 142.27,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 711.35,
+          "code": null
+        },
+        {
+          "designation": "Tube cuivre 14 mm (barre 4 m)",
+          "quantite": 2,
+          "unite": "barre",
+          "prix_unitaire_ht": 22.78,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 45.56,
+          "code": null
+        },
+        {
+          "designation": "Chauffe-eau 200 L stéatite",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 437.71,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 437.71,
+          "code": "REF-51297"
+        },
+        {
+          "designation": "Tube cuivre 14 mm (barre 4 m)",
+          "quantite": 5,
+          "unite": "barre",
+          "prix_unitaire_ht": 25.6,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 128,
+          "code": "REF-78553"
+        },
+        {
+          "designation": "Entretien chaudière gaz",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 114.95,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 229.9,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1552.52,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 1552.52,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 1552.52,
+      "acompte": null,
+      "net_a_payer": 1552.52,
+      "mode_paiement": "Prélèvement SEPA",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA non applicable, art. 293 B du CGI",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "facture manuscrite sur feuille libre, numérisée (qualité moyenne)",
+    "aucun IBAN sur le document",
+    "TVA non applicable (art. 293 B)"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

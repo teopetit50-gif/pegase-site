@@ -1,0 +1,104 @@
+{
+  "fichier": "035-natif-sobre-peintures.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202601-112",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-09",
+      "date_echeance": "2026-02-23",
+      "date_livraison": "2026-01-05",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Peintures Aubrac-Delmas SARL",
+        "siren": "946298411",
+        "siret": "94629841145892",
+        "tva_intracom": "FR28946298411",
+        "adresse": "23 rue des Tanneurs",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "iban": "FR7690098743652669623205648",
+        "bic": "EXXEFRPP",
+        "courriel": "compta@peintures-aubrac-delmas.example",
+        "telephone": "03 47 90 69 32"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Application peinture (travaux rénovation)",
+          "quantite": 19.5,
+          "unite": "m2",
+          "prix_unitaire_ht": 34.38,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 670.41,
+          "code": null
+        },
+        {
+          "designation": "Bâche de protection 4x5 m",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 10.48,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 167.68,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 838.09,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 167.68,
+          "montant": 33.54
+        },
+        {
+          "taux": 10,
+          "base": 670.41,
+          "montant": 67.04
+        }
+      ],
+      "total_tva": 100.58,
+      "total_ttc": 938.67,
+      "acompte": null,
+      "net_a_payer": 938.67,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-38589",
+        "bon_livraison": null,
+        "reference_paiement": "2026202601112"
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "plusieurs taux de TVA"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

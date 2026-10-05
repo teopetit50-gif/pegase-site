@@ -1,0 +1,93 @@
+{
+  "fichier": "078-ubl-xml-assurances.xml",
+  "format": "xml",
+  "type": "ubl",
+  "gabarit": null,
+  "qualite": "native",
+  "pages": null,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202609-325",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-01",
+      "date_echeance": "2026-10-31",
+      "date_livraison": "2026-08-26",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Assurances Mutuelle du Plateau SA",
+        "siren": "963505151",
+        "siret": "96350515104655",
+        "tva_intracom": "FR49963505151",
+        "adresse": "51 rue de la Forge",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694387849208962229674584",
+        "bic": "ZSYNFRPPXXX",
+        "courriel": "compta@assurances-mutuelle-du-plateau.example",
+        "telephone": "03 34 16 10 66"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 6,
+          "unite": "an",
+          "prix_unitaire_ht": 838.34,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 5030.04,
+          "code": "REF-85942"
+        }
+      ],
+      "remise_globale_pct": 10,
+      "remise_globale": 503,
+      "total_ht": 4527.04,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 4527.04,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 4527.04,
+      "acompte": null,
+      "net_a_payer": 4527.04,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": "BC-91092",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "UBL 2.1 Invoice (EN 16931) : XML seul, sans PDF"
+  ],
+  "ubl": {
+    "racine": "Invoice",
+    "customization": "urn:cen.eu:en16931:2017"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

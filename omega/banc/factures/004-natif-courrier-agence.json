@@ -1,0 +1,109 @@
+{
+  "fichier": "004-natif-courrier-agence.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC26/07/267",
+      "facture_rectifiee": null,
+      "date_emission": "2026-07-05",
+      "date_echeance": "2026-08-04",
+      "date_livraison": "2026-06-29",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Agence Web Kalistra SAS",
+        "siren": "954062535",
+        "siret": "95406253511872",
+        "tva_intracom": "FR81954062535",
+        "adresse": "106 allée des Charmes",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7698207719117052765064652",
+        "bic": "CBYCFRPP",
+        "courriel": "compta@agence-web-kalistra.example",
+        "telephone": "04 83 91 15 45"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Abonnement hébergement mensuel",
+          "quantite": 3,
+          "unite": "mois",
+          "prix_unitaire_ht": 40.57,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 121.71,
+          "code": null
+        },
+        {
+          "designation": "Écran 27\" IPS",
+          "quantite": 14,
+          "unite": "u",
+          "prix_unitaire_ht": 273.05,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 3822.7,
+          "code": null
+        },
+        {
+          "designation": "Frais de port",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 8.5,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 8.5,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 3952.91,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 3952.91,
+          "montant": 790.58
+        }
+      ],
+      "total_tva": 790.58,
+      "total_ttc": 4743.49,
+      "acompte": null,
+      "net_a_payer": 4743.49,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-17507",
+        "bon_livraison": null,
+        "reference_paiement": "FAC2607267"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "frais de port en ligne séparée"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

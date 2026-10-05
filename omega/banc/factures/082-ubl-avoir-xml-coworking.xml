@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>202601-195</cbc:ID>
+  <cbc:IssueDate>2026-01-15</cbc:IssueDate>
+  
+  <cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>
+  <cbc:Note>TVA sur les encaissements</cbc:Note>
+  <cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note>
+  <cbc:Note>Pas d'escompte pour paiement anticipé.</cbc:Note>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>C37115</cbc:BuyerReference>
+  
+  <cac:BillingReference><cac:InvoiceDocumentReference><cbc:ID>202512-192</cbc:ID></cac:InvoiceDocumentReference></cac:BillingReference>
+  
+  <cac:AccountingSupplierParty><cac:Party><cbc:EndpointID schemeID="0009">93807288184621</cbc:EndpointID><cac:PartyName><cbc:Name>Coworking La Halle Neuve SAS</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>52 route de la Plaine</cbc:StreetName><cbc:CityName>Limoges</cbc:CityName><cbc:PostalZone>87000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR44938072881</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Coworking La Halle Neuve SAS</cbc:RegistrationName><cbc:CompanyID schemeID="0002">938072881</cbc:CompanyID></cac:PartyLegalEntity><cac:Contact><cbc:Telephone>03 91 19 52 78</cbc:Telephone><cbc:ElectronicMail>compta@coworking-la-halle-neuve.example</cbc:ElectronicMail></cac:Contact></cac:Party></cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty><cac:Party><cbc:EndpointID schemeID="0009">94977999582410</cbc:EndpointID><cac:PartyName><cbc:Name>Architecture Lorbeck SAS</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>72 quai des Chartrons</cbc:StreetName><cbc:CityName>Rouen</cbc:CityName><cbc:PostalZone>76000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR14949779995</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Architecture Lorbeck SAS</cbc:RegistrationName><cbc:CompanyID schemeID="0002">949779995</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty>
+  <cac:Delivery><cbc:ActualDeliveryDate>2026-01-10</cbc:ActualDeliveryDate></cac:Delivery>
+  <cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode><cac:PayeeFinancialAccount><cbc:ID>FR7696934118946682184437850</cbc:ID><cac:FinancialInstitutionBranch><cbc:ID>WNCNFRPP</cbc:ID></cac:FinancialInstitutionBranch></cac:PayeeFinancialAccount></cac:PaymentMeans>
+  <cac:PaymentTerms><cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note></cac:PaymentTerms>
+  
+  <cac:TaxTotal><cbc:TaxAmount currencyID="EUR">347.50</cbc:TaxAmount>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">1737.52</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">347.50</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="EUR">1737.52</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID="EUR">1737.52</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="EUR">2085.02</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="EUR">2085.02</cbc:PayableAmount></cac:LegalMonetaryTotal>
+  <cac:CreditNoteLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:CreditedQuantity unitCode="HUR">26.5</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">1535.94</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Salle de réunion 8 pers.</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-88120</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">57.96</cbc:PriceAmount></cac:Price>
+  </cac:CreditNoteLine>
+  <cac:CreditNoteLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:CreditedQuantity unitCode="DAY">1</cbc:CreditedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">201.58</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Location nacelle 12 m</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-11960</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">201.58</cbc:PriceAmount></cac:Price>
+  </cac:CreditNoteLine>
+</CreditNote>

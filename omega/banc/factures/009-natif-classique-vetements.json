@@ -1,0 +1,147 @@
+{
+  "fichier": "009-natif-classique-vetements.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F26/03/247",
+      "facture_rectifiee": null,
+      "date_emission": "2026-03-11",
+      "date_echeance": "2026-03-26",
+      "date_livraison": "2026-03-07",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Vêtements de Travail Marnier SAS",
+        "siren": "982596116",
+        "siret": "98259611667580",
+        "tva_intracom": "FR70982596116",
+        "adresse": "41 rue du Moulin-à-Vent",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "iban": "FR7693082615171575287255205",
+        "bic": "QCSBFRPPXXX",
+        "courriel": "compta@vetements-de-travail-marnier.example",
+        "telephone": "04 02 88 57 32"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Classeur à levier dos 8 cm",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 2.8,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 50.4,
+          "code": null
+        },
+        {
+          "designation": "Stylo bille (boîte 50)",
+          "quantite": 2,
+          "unite": "boîte",
+          "prix_unitaire_ht": 13.79,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 27.58,
+          "code": "REF-60872"
+        },
+        {
+          "designation": "Pantalon de travail multipoches",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 32.25,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 483.75,
+          "code": "REF-88386"
+        },
+        {
+          "designation": "Cartouche encre noire",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 39.06,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 195.3,
+          "code": null
+        },
+        {
+          "designation": "Marquage logo brodé",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 6.12,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 91.8,
+          "code": null
+        },
+        {
+          "designation": "Ramette A4 80 g",
+          "quantite": 5,
+          "unite": "ramette",
+          "prix_unitaire_ht": 6.38,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 31.9,
+          "code": "REF-33418"
+        },
+        {
+          "designation": "Marquage logo brodé",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 6.98,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 125.64,
+          "code": "REF-11673"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1006.37,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1006.37,
+          "montant": 201.27
+        }
+      ],
+      "total_tva": 201.27,
+      "total_ttc": 1207.64,
+      "acompte": null,
+      "net_a_payer": 1207.64,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-21698",
+        "bon_livraison": "BL-415205",
+        "reference_paiement": "F2603247"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

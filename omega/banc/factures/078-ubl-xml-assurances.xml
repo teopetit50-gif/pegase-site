@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>2026-202609-325</cbc:ID>
+  <cbc:IssueDate>2026-09-01</cbc:IssueDate>
+  <cbc:DueDate>2026-10-31</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>TVA sur les débits</cbc:Note>
+  <cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note>
+  <cbc:Note>Pas d'escompte pour paiement anticipé.</cbc:Note>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>C49234</cbc:BuyerReference>
+  <cac:OrderReference><cbc:ID>BC-91092</cbc:ID></cac:OrderReference>
+  
+  
+  <cac:AccountingSupplierParty><cac:Party><cbc:EndpointID schemeID="0009">96350515104655</cbc:EndpointID><cac:PartyName><cbc:Name>Assurances Mutuelle du Plateau SA</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>51 rue de la Forge</cbc:StreetName><cbc:CityName>Besançon</cbc:CityName><cbc:PostalZone>25000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR49963505151</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Assurances Mutuelle du Plateau SA</cbc:RegistrationName><cbc:CompanyID schemeID="0002">963505151</cbc:CompanyID></cac:PartyLegalEntity><cac:Contact><cbc:Telephone>03 34 16 10 66</cbc:Telephone><cbc:ElectronicMail>compta@assurances-mutuelle-du-plateau.example</cbc:ElectronicMail></cac:Contact></cac:Party></cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty><cac:Party><cbc:EndpointID schemeID="0009">94490556145522</cbc:EndpointID><cac:PartyName><cbc:Name>Cabinet d'Avocats Tessier-Mahaut SELARL</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>89 impasse des Peupliers</cbc:StreetName><cbc:CityName>Besançon</cbc:CityName><cbc:PostalZone>25000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR44944905561</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Cabinet d'Avocats Tessier-Mahaut SELARL</cbc:RegistrationName><cbc:CompanyID schemeID="0002">944905561</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty>
+  <cac:Delivery><cbc:ActualDeliveryDate>2026-08-26</cbc:ActualDeliveryDate></cac:Delivery>
+  <cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode><cac:PayeeFinancialAccount><cbc:ID>FR7694387849208962229674584</cbc:ID><cac:FinancialInstitutionBranch><cbc:ID>ZSYNFRPPXXX</cbc:ID></cac:FinancialInstitutionBranch></cac:PayeeFinancialAccount></cac:PaymentMeans>
+  <cac:PaymentTerms><cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note></cac:PaymentTerms>
+  <cac:AllowanceCharge><cbc:ChargeIndicator>false</cbc:ChargeIndicator><cbc:AllowanceChargeReason>Remise commerciale</cbc:AllowanceChargeReason><cbc:Amount currencyID="EUR">503.00</cbc:Amount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>0</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:AllowanceCharge>
+  <cac:TaxTotal><cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">4527.04</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount><cac:TaxCategory><cbc:ID>Z</cbc:ID><cbc:Percent>0</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="EUR">5030.04</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID="EUR">4527.04</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="EUR">4527.04</cbc:TaxInclusiveAmount><cbc:AllowanceTotalAmount currencyID="EUR">503.00</cbc:AllowanceTotalAmount><cbc:PayableAmount currencyID="EUR">4527.04</cbc:PayableAmount></cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="ANN">6</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">5030.04</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Prime multirisque professionnelle</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-85942</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>Z</cbc:ID><cbc:Percent>0</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">838.34</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

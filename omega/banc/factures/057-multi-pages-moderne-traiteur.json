@@ -1,0 +1,680 @@
+{
+  "fichier": "057-multi-pages-moderne-traiteur.pdf",
+  "format": "pdf",
+  "type": "multi-pages",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 3,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FA2026-0243",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-17",
+      "date_echeance": "2026-06-01",
+      "date_livraison": "2026-05-16",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Traiteur Les Deux Noyers SARL",
+        "siren": "904974888",
+        "siret": "90497488821926",
+        "tva_intracom": "FR18904974888",
+        "adresse": "105 chemin de la Fontaine",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "iban": "FR7693026850721912956027693",
+        "bic": "PFMWFRPP",
+        "courriel": "compta@traiteur-les-deux-noyers.example",
+        "telephone": "03 74 80 76 71"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Vin rouge AOP 75 cl",
+          "quantite": 5,
+          "unite": "bouteille",
+          "prix_unitaire_ht": 13.67,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 68.35,
+          "code": "REF-16997"
+        },
+        {
+          "designation": "Café (préparé)",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 1.42,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 32.66,
+          "code": null
+        },
+        {
+          "designation": "Pain de campagne 800 g",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 3.83,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 68.94,
+          "code": null
+        },
+        {
+          "designation": "Bouteille eau 1 L",
+          "quantite": 8,
+          "unite": "u",
+          "prix_unitaire_ht": 1.26,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 10.08,
+          "code": null
+        },
+        {
+          "designation": "Cageot pommes 10 kg",
+          "quantite": 2,
+          "unite": "cageot",
+          "prix_unitaire_ht": 17.97,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 35.94,
+          "code": null
+        },
+        {
+          "designation": "Café (préparé)",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 2.07,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 22.77,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 43.65,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 261.9,
+          "code": "REF-49184"
+        },
+        {
+          "designation": "Bouteille eau 1 L",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 1.1,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 1.1,
+          "code": "REF-51741"
+        },
+        {
+          "designation": "Bière artisanale blonde 33 cl (carton 24)",
+          "quantite": 1,
+          "unite": "carton",
+          "prix_unitaire_ht": 42.65,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 42.65,
+          "code": null
+        },
+        {
+          "designation": "Bière artisanale blonde 33 cl (carton 24)",
+          "quantite": 2,
+          "unite": "carton",
+          "prix_unitaire_ht": 41.65,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 83.3,
+          "code": "REF-54334"
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 4,
+          "unite": "forfait",
+          "prix_unitaire_ht": 14.49,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 57.96,
+          "code": null
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 1.15,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 27.6,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 33.92,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 237.44,
+          "code": "REF-30139"
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 1.33,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 21.28,
+          "code": null
+        },
+        {
+          "designation": "Vin rouge AOP 75 cl",
+          "quantite": 3,
+          "unite": "bouteille",
+          "prix_unitaire_ht": 11.74,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 35.22,
+          "code": null
+        },
+        {
+          "designation": "Café (préparé)",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 1.45,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 23.2,
+          "code": null
+        },
+        {
+          "designation": "Plateau repas",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 18.72,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 336.96,
+          "code": "REF-92941"
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 11.52,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 69.12,
+          "code": "REF-90626"
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 46.35,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1066.05,
+          "code": "REF-22627"
+        },
+        {
+          "designation": "Cageot pommes 10 kg",
+          "quantite": 3,
+          "unite": "cageot",
+          "prix_unitaire_ht": 20.06,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 60.18,
+          "code": "REF-17757"
+        },
+        {
+          "designation": "Pain de campagne 800 g",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 3.63,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 58.08,
+          "code": null
+        },
+        {
+          "designation": "Bière artisanale blonde 33 cl (carton 24)",
+          "quantite": 6,
+          "unite": "carton",
+          "prix_unitaire_ht": 40.22,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 241.32,
+          "code": "REF-02842"
+        },
+        {
+          "designation": "Bouteille eau 1 L",
+          "quantite": 22,
+          "unite": "u",
+          "prix_unitaire_ht": 1.11,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 24.42,
+          "code": "REF-37018"
+        },
+        {
+          "designation": "Vin rouge AOP 75 cl",
+          "quantite": 2,
+          "unite": "bouteille",
+          "prix_unitaire_ht": 7.94,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 15.88,
+          "code": null
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 3,
+          "unite": "forfait",
+          "prix_unitaire_ht": 11.36,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 34.08,
+          "code": null
+        },
+        {
+          "designation": "Pain de campagne 800 g",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 3.19,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 60.61,
+          "code": null
+        },
+        {
+          "designation": "Vin rouge AOP 75 cl",
+          "quantite": 1,
+          "unite": "bouteille",
+          "prix_unitaire_ht": 8.48,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 8.48,
+          "code": "REF-15468"
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 1.36,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 14.96,
+          "code": null
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 1.42,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 7.1,
+          "code": null
+        },
+        {
+          "designation": "Bière artisanale blonde 33 cl (carton 24)",
+          "quantite": 2,
+          "unite": "carton",
+          "prix_unitaire_ht": 43.63,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 87.26,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 49.17,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1180.08,
+          "code": "REF-70777"
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 22,
+          "unite": "u",
+          "prix_unitaire_ht": 1.49,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 32.78,
+          "code": null
+        },
+        {
+          "designation": "Bière artisanale blonde 33 cl (carton 24)",
+          "quantite": 4,
+          "unite": "carton",
+          "prix_unitaire_ht": 48.38,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 193.52,
+          "code": "REF-77610"
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 1.55,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 23.25,
+          "code": "REF-99890"
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 15.1,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 30.2,
+          "code": "REF-51712"
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 49.16,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 737.4,
+          "code": "REF-31804"
+        },
+        {
+          "designation": "Cageot pommes 10 kg",
+          "quantite": 1,
+          "unite": "cageot",
+          "prix_unitaire_ht": 22.32,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 22.32,
+          "code": null
+        },
+        {
+          "designation": "Bière artisanale blonde 33 cl (carton 24)",
+          "quantite": 5,
+          "unite": "carton",
+          "prix_unitaire_ht": 46.94,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 234.7,
+          "code": "REF-43505"
+        },
+        {
+          "designation": "Plateau repas",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 14.75,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 250.75,
+          "code": null
+        },
+        {
+          "designation": "Pain de campagne 800 g",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 3.36,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 23.52,
+          "code": null
+        },
+        {
+          "designation": "Café (préparé)",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 2.03,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 46.69,
+          "code": "REF-33223"
+        },
+        {
+          "designation": "Cageot pommes 10 kg",
+          "quantite": 5,
+          "unite": "cageot",
+          "prix_unitaire_ht": 17.18,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 85.9,
+          "code": "REF-72538"
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 3,
+          "unite": "forfait",
+          "prix_unitaire_ht": 18.93,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 56.79,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 14,
+          "unite": "u",
+          "prix_unitaire_ht": 33.11,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 463.54,
+          "code": "REF-01786"
+        },
+        {
+          "designation": "Café (préparé)",
+          "quantite": 14,
+          "unite": "u",
+          "prix_unitaire_ht": 1.47,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 20.58,
+          "code": null
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 10.23,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 51.15,
+          "code": "REF-13587"
+        },
+        {
+          "designation": "Bouteille eau 1 L",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 1.06,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 15.9,
+          "code": "REF-34140"
+        },
+        {
+          "designation": "Bouteille eau 1 L",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 0.96,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 0.96,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 28.85,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 375.05,
+          "code": "REF-05364"
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 33.88,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 643.72,
+          "code": "REF-00461"
+        },
+        {
+          "designation": "Café (préparé)",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 1.41,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 12.69,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 8,
+          "unite": "u",
+          "prix_unitaire_ht": 56.51,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 452.08,
+          "code": null
+        },
+        {
+          "designation": "Plateau repas",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 18.94,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 132.58,
+          "code": null
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 1.36,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 31.28,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 32.36,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 226.52,
+          "code": null
+        },
+        {
+          "designation": "Bouquet composé",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 54.23,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1030.37,
+          "code": "REF-79353"
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 14.47,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 86.82,
+          "code": "REF-76196"
+        },
+        {
+          "designation": "Café (préparé)",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 2.13,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 51.12,
+          "code": "REF-67224"
+        },
+        {
+          "designation": "Pain de campagne 800 g",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 4.16,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 74.88,
+          "code": "REF-01569"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 9702.03,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1396.8,
+          "montant": 279.36
+        },
+        {
+          "taux": 10,
+          "base": 7604.15,
+          "montant": 760.42
+        },
+        {
+          "taux": 5.5,
+          "base": 701.08,
+          "montant": 38.56
+        }
+      ],
+      "total_tva": 1078.34,
+      "total_ttc": 10780.37,
+      "acompte": null,
+      "net_a_payer": 10780.37,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": "BC-73157",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "3 pages, report de sous-total entre les pages",
+    "totaux sur la dernière page"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

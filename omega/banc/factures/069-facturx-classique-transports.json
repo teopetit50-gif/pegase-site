@@ -1,0 +1,105 @@
+{
+  "fichier": "069-facturx-classique-transports.pdf",
+  "format": "pdf",
+  "type": "facturx",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC26/08/402",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-05",
+      "date_echeance": "2026-08-20",
+      "date_livraison": "2026-08-04",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Transports Galibert-Roux SAS",
+        "siren": "903017770",
+        "siret": "90301777009203",
+        "tva_intracom": "FR74903017770",
+        "adresse": "56 rue Pasteur",
+        "code_postal": "38000",
+        "ville": "Grenoble",
+        "pays": "FR",
+        "iban": "FR7699548474853068358308370",
+        "bic": "DAKAFRPPXXX",
+        "courriel": "compta@transports-galibert-roux.example",
+        "telephone": "02 88 97 33 75"
+      },
+      "client": {
+        "raison_sociale": "Cabinet Dentaire des Tilleuls SELARL",
+        "siren": "924961014",
+        "siret": "92496101445814",
+        "tva_intracom": "FR77924961014",
+        "adresse": "5 avenue du Bois-Joli",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "code_client": "C95117"
+      },
+      "lignes": [
+        {
+          "designation": "Course express intra-muros",
+          "quantite": 5,
+          "unite": "course",
+          "prix_unitaire_ht": 32.98,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 164.9,
+          "code": null
+        },
+        {
+          "designation": "Supplément hayon",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 24.65,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 147.9,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 312.8,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 312.8,
+          "montant": 62.56
+        }
+      ],
+      "total_tva": 62.56,
+      "total_ttc": 375.36,
+      "acompte": null,
+      "net_a_payer": 375.36,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-40455",
+        "bon_livraison": "BL-752423",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "Factur-X profil BASIC : lire le XML joint (factur-x.xml), le PDF n'est qu'une vue",
+    "le XML fait foi en cas d'écart avec la vue"
+  ],
+  "facturx": {
+    "profil": "BASIC",
+    "piece_jointe": "factur-x.xml",
+    "type_code": "380"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

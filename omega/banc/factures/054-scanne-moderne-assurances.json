@@ -1,0 +1,164 @@
+{
+  "fichier": "054-scanne-moderne-assurances.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "moderne",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202609-323",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-17",
+      "date_echeance": "2026-11-01",
+      "date_livraison": "2026-09-16",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Assurances Mutuelle du Plateau SA",
+        "siren": "963505151",
+        "siret": "96350515104655",
+        "tva_intracom": "FR49963505151",
+        "adresse": "51 rue de la Forge",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694387849208962229674584",
+        "bic": "ZSYNFRPPXXX",
+        "courriel": "compta@assurances-mutuelle-du-plateau.example",
+        "telephone": "03 34 16 10 66"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Frais de gestion",
+          "quantite": 1,
+          "unite": "an",
+          "prix_unitaire_ht": 34.21,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 34.21,
+          "code": null
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 1,
+          "unite": "an",
+          "prix_unitaire_ht": 27.59,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 27.59,
+          "code": "REF-50756"
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 6,
+          "unite": "an",
+          "prix_unitaire_ht": 47.36,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 284.16,
+          "code": null
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 2,
+          "unite": "an",
+          "prix_unitaire_ht": 842.21,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 1684.42,
+          "code": null
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 6,
+          "unite": "an",
+          "prix_unitaire_ht": 27.86,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 167.16,
+          "code": "REF-84885"
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 4,
+          "unite": "an",
+          "prix_unitaire_ht": 1728.57,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 6914.28,
+          "code": null
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 5,
+          "unite": "an",
+          "prix_unitaire_ht": 1195.7,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 5978.5,
+          "code": "REF-68874"
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 1,
+          "unite": "an",
+          "prix_unitaire_ht": 529.06,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 529.06,
+          "code": "REF-09835"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 15619.38,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 513.12,
+          "montant": 102.62
+        },
+        {
+          "taux": 0,
+          "base": 15106.26,
+          "montant": 0
+        }
+      ],
+      "total_tva": 102.62,
+      "total_ttc": 15722,
+      "acompte": 4716.6,
+      "net_a_payer": 11005.4,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-79070",
+        "bon_livraison": null,
+        "reference_paiement": "2026202609323"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité moyenne : pas de couche texte, rotation, bruit"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,141 @@
+{
+  "fichier": "089-ticket-ticket-fleurs.pdf",
+  "format": "pdf",
+  "type": "ticket",
+  "gabarit": "ticket",
+  "qualite": "faible",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-0282",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-24",
+      "date_echeance": "2026-08-24",
+      "date_livraison": "2026-08-24",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Fleurs du Vieux-Port EI",
+        "siren": "946804135",
+        "siret": "94680413584372",
+        "tva_intracom": "FR23946804135",
+        "adresse": "91 rue Pasteur",
+        "code_postal": "38000",
+        "ville": "Grenoble",
+        "pays": "FR",
+        "iban": "FR7698027573174121583234497",
+        "bic": "YMSXFRPPXXX",
+        "courriel": "compta@fleurs-du-vieux-port.example",
+        "telephone": "05 94 53 35 77"
+      },
+      "client": {
+        "raison_sociale": "Cabinet Dentaire des Tilleuls SELARL",
+        "siren": "924961014",
+        "siret": "92496101445814",
+        "tva_intracom": "FR77924961014",
+        "adresse": "5 avenue du Bois-Joli",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "code_client": "C95117"
+      },
+      "lignes": [
+        {
+          "designation": "Cageot pommes 10 kg",
+          "quantite": 5,
+          "unite": "cageot",
+          "prix_unitaire_ht": 17.2,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 86,
+          "code": null
+        },
+        {
+          "designation": "Viennoiseries assorties",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 1.42,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 14.2,
+          "code": null
+        },
+        {
+          "designation": "Plateau repas",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 17.53,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 105.18,
+          "code": null
+        },
+        {
+          "designation": "Livraison",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 12.61,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 63.05,
+          "code": "REF-39889"
+        },
+        {
+          "designation": "Bière artisanale blonde 33 cl (carton 24)",
+          "quantite": 6,
+          "unite": "carton",
+          "prix_unitaire_ht": 49.39,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 296.34,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 564.77,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 359.39,
+          "montant": 71.88
+        },
+        {
+          "taux": 10,
+          "base": 105.18,
+          "montant": 10.52
+        },
+        {
+          "taux": 5.5,
+          "base": 100.2,
+          "montant": 5.51
+        }
+      ],
+      "total_tva": 87.91,
+      "total_ttc": 652.68,
+      "acompte": null,
+      "net_a_payer": 652.68,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "20260282"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "ticket de caisse : montants lignes en TTC, totaux HT/TVA en pied, pas d'IBAN",
+    "ticket photographié/numérisé (qualité faible)"
+  ],
+  "lignes_affichees_en": "TTC",
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

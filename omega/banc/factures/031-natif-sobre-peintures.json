@@ -1,0 +1,97 @@
+{
+  "fichier": "031-natif-sobre-peintures.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202604-110",
+      "facture_rectifiee": null,
+      "date_emission": "2026-04-10",
+      "date_echeance": "2026-06-09",
+      "date_livraison": "2026-04-06",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Peintures Aubrac-Delmas SARL",
+        "siren": "946298411",
+        "siret": "94629841145892",
+        "tva_intracom": "FR28946298411",
+        "adresse": "23 rue des Tanneurs",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "iban": "FR7690098743652669623205648",
+        "bic": "EXXEFRPP",
+        "courriel": "compta@peintures-aubrac-delmas.example",
+        "telephone": "03 47 90 69 32"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Peinture acrylique mate 15 L",
+          "quantite": 1,
+          "unite": "pot",
+          "prix_unitaire_ht": 72.42,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 72.42,
+          "code": "REF-44307"
+        },
+        {
+          "designation": "Peinture acrylique mate 15 L",
+          "quantite": 4,
+          "unite": "pot",
+          "prix_unitaire_ht": 86.47,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 345.88,
+          "code": "REF-85359"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 418.3,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 418.3,
+          "montant": 83.66
+        }
+      ],
+      "total_tva": 83.66,
+      "total_ttc": 501.96,
+      "acompte": null,
+      "net_a_payer": 501.96,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-96840",
+        "bon_livraison": "BL-648572",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,149 @@
+{
+  "fichier": "043-scanne-sobre-nordelec.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "sobre",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FA2026-0070",
+      "facture_rectifiee": null,
+      "date_emission": "2026-07-15",
+      "date_echeance": "2026-08-14",
+      "date_livraison": "2026-07-15",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Nordélec Distribution SARL",
+        "siren": "919687541",
+        "siret": "91968754157756",
+        "tva_intracom": "FR67919687541",
+        "adresse": "81 parc d'activités du Levant",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7693010991145298096825593",
+        "bic": "AXWZFRPPXXX",
+        "courriel": "compta@nordelec-distribution.example",
+        "telephone": "01 99 44 02 89"
+      },
+      "client": {
+        "raison_sociale": "Cabinet Dentaire des Tilleuls SELARL",
+        "siren": "924961014",
+        "siret": "92496101445814",
+        "tva_intracom": "FR77924961014",
+        "adresse": "5 avenue du Bois-Joli",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "code_client": "C95117"
+      },
+      "lignes": [
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 85.53,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 513.18,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 6.54,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 124.26,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 4.34,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 4.34,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 6.56,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 98.4,
+          "code": "REF-37644"
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 57.08,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 114.16,
+          "code": "REF-39651"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 7.19,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 115.04,
+          "code": null
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 10.91,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 54.55,
+          "code": "REF-04239"
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 51.2,
+      "total_ht": 972.73,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 972.73,
+          "montant": 194.55
+        }
+      ],
+      "total_tva": 194.55,
+      "total_ttc": 1167.28,
+      "acompte": null,
+      "net_a_payer": 1167.28,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-37123",
+        "bon_livraison": null,
+        "reference_paiement": "FA20260070"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité moyenne : pas de couche texte, rotation, bruit"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

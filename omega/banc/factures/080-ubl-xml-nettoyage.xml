@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>FAC202609-278</cbc:ID>
+  <cbc:IssueDate>2026-09-13</cbc:IssueDate>
+  <cbc:DueDate>2026-09-13</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>TVA sur les débits</cbc:Note>
+  <cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note>
+  <cbc:Note>Pas d'escompte pour paiement anticipé.</cbc:Note>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>C98060</cbc:BuyerReference>
+  <cac:OrderReference><cbc:ID>BC-63282</cbc:ID></cac:OrderReference>
+  
+  
+  <cac:AccountingSupplierParty><cac:Party><cbc:EndpointID schemeID="0009">97222361401916</cbc:EndpointID><cac:PartyName><cbc:Name>Nettoyage Clairpont SAS</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>9 route de la Plaine</cbc:StreetName><cbc:CityName>Clermont-Ferrand</cbc:CityName><cbc:PostalZone>63000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR67972223614</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Nettoyage Clairpont SAS</cbc:RegistrationName><cbc:CompanyID schemeID="0002">972223614</cbc:CompanyID></cac:PartyLegalEntity><cac:Contact><cbc:Telephone>03 69 01 48 26</cbc:Telephone><cbc:ElectronicMail>compta@nettoyage-clairpont.example</cbc:ElectronicMail></cac:Contact></cac:Party></cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty><cac:Party><cbc:EndpointID schemeID="0009">94889837456998</cbc:EndpointID><cac:PartyName><cbc:Name>Boutique Fil &amp; Trame EURL</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>33 place du Marché-Neuf</cbc:StreetName><cbc:CityName>Angers</cbc:CityName><cbc:PostalZone>49000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR50948898374</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Boutique Fil &amp; Trame EURL</cbc:RegistrationName><cbc:CompanyID schemeID="0002">948898374</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty>
+  <cac:Delivery><cbc:ActualDeliveryDate>2026-09-09</cbc:ActualDeliveryDate></cac:Delivery>
+  <cac:PaymentMeans><cbc:PaymentMeansCode>48</cbc:PaymentMeansCode><cac:PayeeFinancialAccount><cbc:ID>FR7690947489636203669656566</cbc:ID><cac:FinancialInstitutionBranch><cbc:ID>JVNXFRPPXXX</cbc:ID></cac:FinancialInstitutionBranch></cac:PayeeFinancialAccount></cac:PaymentMeans>
+  <cac:PaymentTerms><cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note></cac:PaymentTerms>
+  
+  <cac:TaxTotal><cbc:TaxAmount currencyID="EUR">407.60</cbc:TaxAmount>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">2037.99</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">407.60</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="EUR">2037.99</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID="EUR">2037.99</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="EUR">2445.59</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="EUR">2445.59</cbc:PayableAmount></cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="MON">4</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">1135.16</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Nettoyage bureaux hebdomadaire</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-97491</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">283.79</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">18</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">199.80</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Vérification extincteurs</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-94177</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">11.10</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="MON">5</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">284.70</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Produits consommables</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-11462</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">56.94</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">11</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">418.33</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Recharge extincteur 6 L</cbc:Name><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">38.03</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

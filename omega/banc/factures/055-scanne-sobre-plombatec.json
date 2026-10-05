@@ -1,0 +1,99 @@
+{
+  "fichier": "055-scanne-sobre-plombatec.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "sobre",
+  "qualite": "bonne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC202608-076",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-17",
+      "date_echeance": "2026-10-16",
+      "date_livraison": "2026-08-11",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Plombatec Ouest SARL",
+        "siren": "940503048",
+        "siret": "94050304834551",
+        "tva_intracom": "FR25940503048",
+        "adresse": "103 boulevard de la Marne",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "iban": "FR7694177863771765195555710",
+        "bic": "YKKTFRPPXXX",
+        "courriel": "compta@plombatec-ouest.example",
+        "telephone": "01 95 13 95 88"
+      },
+      "client": {
+        "raison_sociale": "Garage Électrique Solvan SARL",
+        "siren": "975600248",
+        "siret": "97560024804285",
+        "tva_intracom": "FR65975600248",
+        "adresse": "42 quai des Chartrons",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "code_client": "C33428"
+      },
+      "lignes": [
+        {
+          "designation": "Intervention plombier",
+          "quantite": 24,
+          "unite": "h",
+          "prix_unitaire_ht": 66.15,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1587.6,
+          "code": "REF-21630"
+        },
+        {
+          "designation": "Chauffe-eau 200 L stéatite",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 536.31,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 5899.41,
+          "code": "REF-37946"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 7487.01,
+      "tva": [
+        {
+          "taux": 10,
+          "base": 7487.01,
+          "montant": 748.7
+        }
+      ],
+      "total_tva": 748.7,
+      "total_ttc": 8235.71,
+      "acompte": null,
+      "net_a_payer": 8235.71,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-62664",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité bonne : pas de couche texte, rotation, bruit"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

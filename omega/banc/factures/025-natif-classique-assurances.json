@@ -1,0 +1,144 @@
+{
+  "fichier": "025-natif-classique-assurances.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202602-304",
+      "facture_rectifiee": null,
+      "date_emission": "2026-02-22",
+      "date_echeance": "2026-03-24",
+      "date_livraison": "2026-02-17",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Assurances Mutuelle du Plateau SA",
+        "siren": "963505151",
+        "siret": "96350515104655",
+        "tva_intracom": "FR49963505151",
+        "adresse": "51 rue de la Forge",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694387849208962229674584",
+        "bic": "ZSYNFRPPXXX",
+        "courriel": "compta@assurances-mutuelle-du-plateau.example",
+        "telephone": "03 34 16 10 66"
+      },
+      "client": {
+        "raison_sociale": "Boutique Fil & Trame EURL",
+        "siren": "948898374",
+        "siret": "94889837456998",
+        "tva_intracom": "FR50948898374",
+        "adresse": "33 place du Marché-Neuf",
+        "code_postal": "49000",
+        "ville": "Angers",
+        "pays": "FR",
+        "code_client": "C98060"
+      },
+      "lignes": [
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 5,
+          "unite": "an",
+          "prix_unitaire_ht": 836.63,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 4183.15,
+          "code": "REF-29701"
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 3,
+          "unite": "an",
+          "prix_unitaire_ht": 1651.98,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 4955.94,
+          "code": null
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 1,
+          "unite": "an",
+          "prix_unitaire_ht": 45.91,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 45.91,
+          "code": null
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 1,
+          "unite": "an",
+          "prix_unitaire_ht": 941.58,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 941.58,
+          "code": "REF-20020"
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 2,
+          "unite": "an",
+          "prix_unitaire_ht": 737.9,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 1475.8,
+          "code": null
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 3,
+          "unite": "an",
+          "prix_unitaire_ht": 33.64,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 100.92,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 11703.3,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 146.83,
+          "montant": 29.37
+        },
+        {
+          "taux": 0,
+          "base": 11556.47,
+          "montant": 0
+        }
+      ],
+      "total_tva": 29.37,
+      "total_ttc": 11732.67,
+      "acompte": null,
+      "net_a_payer": 11732.67,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "2026202602304"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "plusieurs taux de TVA"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,149 @@
+{
+  "fichier": "097-natif-moderne-eau.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC101785",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-26",
+      "date_echeance": "2026-06-25",
+      "date_livraison": null,
+      "periode": "du 01/03/2026 au 31/05/2026",
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Eau et Assainissement du Bassin SA",
+        "siren": "984253401",
+        "siret": "98425340124868",
+        "tva_intracom": "FR93984253401",
+        "adresse": "83 rue Pasteur",
+        "code_postal": "68100",
+        "ville": "Mulhouse",
+        "pays": "FR",
+        "iban": "FR7694962002607771311418389",
+        "bic": "ZBTQFRPP",
+        "courriel": "compta@eau-et-assainissement-du-bassin.example",
+        "telephone": "02 33 76 61 74"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Consommation eau",
+          "quantite": 98,
+          "unite": "m3",
+          "prix_unitaire_ht": 2.15,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 210.7,
+          "code": "REF-17122"
+        },
+        {
+          "designation": "Redevance assainissement",
+          "quantite": 45,
+          "unite": "m3",
+          "prix_unitaire_ht": 2.03,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 91.35,
+          "code": "REF-09324"
+        },
+        {
+          "designation": "Consommation heures creuses",
+          "quantite": 2897,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.1792,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 519.14,
+          "code": "REF-81102"
+        },
+        {
+          "designation": "Taxe accise électricité",
+          "quantite": 1737,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.0286,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 49.68,
+          "code": null
+        },
+        {
+          "designation": "Abonnement eau potable",
+          "quantite": 6,
+          "unite": "mois",
+          "prix_unitaire_ht": 9.87,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 59.22,
+          "code": null
+        },
+        {
+          "designation": "Consommation heures creuses",
+          "quantite": 3898,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.1858,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 724.25,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1654.34,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1293.07,
+          "montant": 258.61
+        },
+        {
+          "taux": 10,
+          "base": 91.35,
+          "montant": 9.14
+        },
+        {
+          "taux": 5.5,
+          "base": 269.92,
+          "montant": 14.85
+        }
+      ],
+      "total_tva": 282.6,
+      "total_ttc": 1936.94,
+      "acompte": null,
+      "net_a_payer": 1936.94,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": "BC-02772",
+        "bon_livraison": "BL-745224",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "facture d'énergie : période de consommation, trois taux de TVA, quantités en kWh et m3 avec prix unitaires à 4 décimales"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

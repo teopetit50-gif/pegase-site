@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>FC2026-0204</cbc:ID>
+  <cbc:IssueDate>2026-06-22</cbc:IssueDate>
+  <cbc:DueDate>2026-07-07</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>TVA sur les débits</cbc:Note>
+  <cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note>
+  <cbc:Note>Pas d'escompte pour paiement anticipé.</cbc:Note>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>C33428</cbc:BuyerReference>
+  <cac:OrderReference><cbc:ID>BC-10117</cbc:ID></cac:OrderReference>
+  
+  <cac:DespatchDocumentReference><cbc:ID>BL-778537</cbc:ID></cac:DespatchDocumentReference>
+  <cac:AccountingSupplierParty><cac:Party><cbc:EndpointID schemeID="0009">99233416930054</cbc:EndpointID><cac:PartyName><cbc:Name>Lumiflux Énergie SA</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>62 rue Camille-Verdier</cbc:StreetName><cbc:CityName>Lille</cbc:CityName><cbc:PostalZone>59000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR60992334169</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Lumiflux Énergie SA</cbc:RegistrationName><cbc:CompanyID schemeID="0002">992334169</cbc:CompanyID></cac:PartyLegalEntity><cac:Contact><cbc:Telephone>05 25 54 08 34</cbc:Telephone><cbc:ElectronicMail>compta@lumiflux-energie.example</cbc:ElectronicMail></cac:Contact></cac:Party></cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty><cac:Party><cbc:EndpointID schemeID="0009">97560024804285</cbc:EndpointID><cac:PartyName><cbc:Name>Garage Électrique Solvan SARL</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>42 quai des Chartrons</cbc:StreetName><cbc:CityName>Brest</cbc:CityName><cbc:PostalZone>29200</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR65975600248</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Garage Électrique Solvan SARL</cbc:RegistrationName><cbc:CompanyID schemeID="0002">975600248</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty>
+  <cac:Delivery><cbc:ActualDeliveryDate>2026-06-19</cbc:ActualDeliveryDate></cac:Delivery>
+  <cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode><cac:PayeeFinancialAccount><cbc:ID>FR7692967066114874077878744</cbc:ID><cac:FinancialInstitutionBranch><cbc:ID>DEFDFRPPXXX</cbc:ID></cac:FinancialInstitutionBranch></cac:PayeeFinancialAccount></cac:PaymentMeans>
+  <cac:PaymentTerms><cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note></cac:PaymentTerms>
+  
+  <cac:TaxTotal><cbc:TaxAmount currencyID="EUR">14.73</cbc:TaxAmount>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">117.73</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">11.77</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>10</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">53.82</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">2.96</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>5.5</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="EUR">171.55</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID="EUR">171.55</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="EUR">186.28</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="EUR">186.28</cbc:PayableAmount></cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="MON">3</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">53.82</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Abonnement électricité 12 kVA</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-83619</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>5.5</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">17.94</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="MTQ">61</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">117.73</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Redevance assainissement</cbc:Name><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>10</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">1.93</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

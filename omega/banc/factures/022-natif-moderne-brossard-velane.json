@@ -1,0 +1,160 @@
+{
+  "fichier": "022-natif-moderne-brossard-velane.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202607-204",
+      "facture_rectifiee": null,
+      "date_emission": "2026-07-28",
+      "date_echeance": "2026-09-11",
+      "date_livraison": "2026-07-23",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Brossard-Vélane Matériaux SAS",
+        "siren": "943661264",
+        "siret": "94366126482001",
+        "tva_intracom": "FR04943661264",
+        "adresse": "75 boulevard de la Marne",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7691134950227997224268366",
+        "bic": "YBAJFRPPXXX",
+        "courriel": "compta@brossard-velane-materiaux.example",
+        "telephone": "04 39 66 30 91"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 3,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 29.11,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 87.33,
+          "code": "REF-68598"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 4,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 27.81,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 111.24,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 6,
+          "unite": "tonne",
+          "prix_unitaire_ht": 39.96,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 239.76,
+          "code": "REF-51358"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 1.71,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 30.78,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 6,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 114,
+          "code": "REF-90830"
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 3,
+          "unite": "sac",
+          "prix_unitaire_ht": 7.42,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 22.26,
+          "code": null
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 5,
+          "unite": "sac",
+          "prix_unitaire_ht": 8.43,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 42.15,
+          "code": null
+        },
+        {
+          "designation": "Frais de port",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 8.5,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 8.5,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 2,
+      "remise_globale": 13.12,
+      "total_ht": 642.9,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 642.9,
+          "montant": 128.58
+        }
+      ],
+      "total_tva": 128.58,
+      "total_ttc": 771.48,
+      "acompte": null,
+      "net_a_payer": 771.48,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-49773",
+        "bon_livraison": "BL-809915",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remise globale",
+    "frais de port en ligne séparée"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

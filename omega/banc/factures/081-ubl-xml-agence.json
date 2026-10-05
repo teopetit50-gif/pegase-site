@@ -1,0 +1,123 @@
+{
+  "fichier": "081-ubl-xml-agence.xml",
+  "format": "xml",
+  "type": "ubl",
+  "gabarit": null,
+  "qualite": "native",
+  "pages": null,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC26/05/288",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-11",
+      "date_echeance": "2026-06-10",
+      "date_livraison": "2026-05-05",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Agence Web Kalistra SAS",
+        "siren": "954062535",
+        "siret": "95406253511872",
+        "tva_intracom": "FR81954062535",
+        "adresse": "106 allée des Charmes",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7698207719117052765064652",
+        "bic": "CBYCFRPP",
+        "courriel": "compta@agence-web-kalistra.example",
+        "telephone": "04 83 91 15 45"
+      },
+      "client": {
+        "raison_sociale": "Garage Électrique Solvan SARL",
+        "siren": "975600248",
+        "siret": "97560024804285",
+        "tva_intracom": "FR65975600248",
+        "adresse": "42 quai des Chartrons",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "code_client": "C33428"
+      },
+      "lignes": [
+        {
+          "designation": "Ordinateur portable 14\" 16 Go",
+          "quantite": 20,
+          "unite": "u",
+          "prix_unitaire_ht": 1098.75,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 21975,
+          "code": null
+        },
+        {
+          "designation": "Licence suite bureautique annuelle",
+          "quantite": 6,
+          "unite": "poste",
+          "prix_unitaire_ht": 105.37,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 632.22,
+          "code": null
+        },
+        {
+          "designation": "Ordinateur portable 14\" 16 Go",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 1089.67,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2179.34,
+          "code": "REF-32291"
+        },
+        {
+          "designation": "Ordinateur portable 14\" 16 Go",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 1008.61,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 16137.76,
+          "code": "REF-68346"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 40924.32,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 40924.32,
+          "montant": 8184.86
+        }
+      ],
+      "total_tva": 8184.86,
+      "total_ttc": 49109.18,
+      "acompte": null,
+      "net_a_payer": 49109.18,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-51706",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "UBL 2.1 Invoice (EN 16931) : XML seul, sans PDF"
+  ],
+  "ubl": {
+    "racine": "Invoice",
+    "customization": "urn:cen.eu:en16931:2017"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

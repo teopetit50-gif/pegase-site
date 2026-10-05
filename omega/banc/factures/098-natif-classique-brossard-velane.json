@@ -1,0 +1,120 @@
+{
+  "fichier": "098-natif-classique-brossard-velane.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202601-229",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-01",
+      "date_echeance": "2026-02-15",
+      "date_livraison": "2025-12-29",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Brossard-Vélane Matériaux SAS",
+        "siren": "943661264",
+        "siret": "94366126482001",
+        "tva_intracom": "FR04943661264",
+        "adresse": "75 boulevard de la Marne",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7691134950227997224268366",
+        "bic": "YBAJFRPPXXX",
+        "courriel": "compta@brossard-velane-materiaux.example",
+        "telephone": "04 39 66 30 91"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Livraison grue",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 120.52,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 602.6,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 1.45,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 18.85,
+          "code": null
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 4,
+          "unite": "sac",
+          "prix_unitaire_ht": 7.69,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 30.76,
+          "code": "REF-67722"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 3,
+          "unite": "forfait",
+          "prix_unitaire_ht": 92.08,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 276.24,
+          "code": "REF-28954"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 928.45,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 928.45,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 928.45,
+      "acompte": null,
+      "net_a_payer": 928.45,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-16105",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "Autoliquidation de la TVA — art. 283-2 nonies du CGI (sous-traitance bâtiment)",
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "autoliquidation de la TVA (sous-traitance) : TVA à zéro avec n° intracom présent, mention obligatoire"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

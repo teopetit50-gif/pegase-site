@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>INV-2026-0071</cbc:ID>
+  <cbc:IssueDate>2026-04-04</cbc:IssueDate>
+  <cbc:DueDate>2026-04-04</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>TVA sur les débits</cbc:Note>
+  <cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note>
+  <cbc:Note>Pas d'escompte pour paiement anticipé.</cbc:Note>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>C42883</cbc:BuyerReference>
+  
+  
+  
+  <cac:AccountingSupplierParty><cac:Party><cbc:EndpointID schemeID="0009">92959531205298</cbc:EndpointID><cac:PartyName><cbc:Name>Papeterie Marcenac SARL</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>115 impasse des Peupliers</cbc:StreetName><cbc:CityName>Le Mans</cbc:CityName><cbc:PostalZone>72000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR58929595312</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Papeterie Marcenac SARL</cbc:RegistrationName><cbc:CompanyID schemeID="0002">929595312</cbc:CompanyID></cac:PartyLegalEntity><cac:Contact><cbc:Telephone>05 61 34 25 72</cbc:Telephone><cbc:ElectronicMail>compta@papeterie-marcenac.example</cbc:ElectronicMail></cac:Contact></cac:Party></cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty><cac:Party><cbc:EndpointID schemeID="0009">93135112621596</cbc:EndpointID><cac:PartyName><cbc:Name>Pépinières du Haut-Vallon EARL</cbc:Name></cac:PartyName><cac:PostalAddress><cbc:StreetName>84 place du Marché-Neuf</cbc:StreetName><cbc:CityName>Nantes</cbc:CityName><cbc:PostalZone>44000</cbc:PostalZone><cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country></cac:PostalAddress><cac:PartyTaxScheme><cbc:CompanyID>FR12931351126</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>Pépinières du Haut-Vallon EARL</cbc:RegistrationName><cbc:CompanyID schemeID="0002">931351126</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty>
+  <cac:Delivery><cbc:ActualDeliveryDate>2026-04-03</cbc:ActualDeliveryDate></cac:Delivery>
+  <cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode><cbc:PaymentID>INV20260071</cbc:PaymentID><cac:PayeeFinancialAccount><cbc:ID>FR7699631792043412270896361</cbc:ID><cac:FinancialInstitutionBranch><cbc:ID>TUZEFRPP</cbc:ID></cac:FinancialInstitutionBranch></cac:PayeeFinancialAccount></cac:PaymentMeans>
+  <cac:PaymentTerms><cbc:Note>En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).</cbc:Note></cac:PaymentTerms>
+  
+  <cac:TaxTotal><cbc:TaxAmount currencyID="EUR">277.73</cbc:TaxAmount>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">1388.67</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">277.73</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="EUR">1388.67</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID="EUR">1388.67</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="EUR">1666.40</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="EUR">1666.40</cbc:PayableAmount></cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">6</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">219.66</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Pantalon de travail multipoches</cbc:Name><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">36.61</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="PR">3</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">153.33</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Chaussures de sécurité S3</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-95108</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">51.11</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">19</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">693.88</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Cartouche encre noire</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-73332</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">36.52</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>4</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">10</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">321.80</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Name>Pantalon de travail multipoches</cbc:Name><cac:SellersItemIdentification><cbc:ID>REF-94866</cbc:ID></cac:SellersItemIdentification><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">32.18</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

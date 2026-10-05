@@ -1,0 +1,119 @@
+{
+  "fichier": "049-scanne-classique-saverdun.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "classique",
+  "qualite": "faible",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202608-396",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-19",
+      "date_echeance": "2026-09-18",
+      "date_livraison": "2026-08-15",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Saverdun Informatique SASU",
+        "siren": "961364833",
+        "siret": "96136483316870",
+        "tva_intracom": "FR10961364833",
+        "adresse": "28 zone artisanale des Quatre-Vents",
+        "code_postal": "33000",
+        "ville": "Bordeaux",
+        "pays": "FR",
+        "iban": "FR7690518565934998589901526",
+        "bic": "FCLCFRPPXXX",
+        "courriel": "compta@saverdun-informatique.example",
+        "telephone": "01 85 35 11 55"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Maintenance infogérance",
+          "quantite": 5,
+          "unite": "mois",
+          "prix_unitaire_ht": 230.53,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1152.65,
+          "code": null
+        },
+        {
+          "designation": "Ordinateur portable 14\" 16 Go",
+          "quantite": 3,
+          "unite": "u",
+          "prix_unitaire_ht": 1171.89,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 3515.67,
+          "code": "REF-91980"
+        },
+        {
+          "designation": "Prestation développement",
+          "quantite": 4,
+          "unite": "jour",
+          "prix_unitaire_ht": 515.08,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2060.32,
+          "code": "REF-19837"
+        },
+        {
+          "designation": "Prestation développement",
+          "quantite": 4,
+          "unite": "jour",
+          "prix_unitaire_ht": 541.75,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2167,
+          "code": "REF-60794"
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 444.78,
+      "total_ht": 8450.86,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 8450.86,
+          "montant": 1690.17
+        }
+      ],
+      "total_tva": 1690.17,
+      "total_ttc": 10141.03,
+      "acompte": null,
+      "net_a_payer": 10141.03,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-19123",
+        "bon_livraison": null,
+        "reference_paiement": "2026202608396"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité faible : pas de couche texte, rotation, bruit, flou et taches"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

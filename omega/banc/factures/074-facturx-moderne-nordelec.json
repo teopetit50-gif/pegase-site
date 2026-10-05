@@ -1,0 +1,115 @@
+{
+  "fichier": "074-facturx-moderne-nordelec.pdf",
+  "format": "pdf",
+  "type": "facturx",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FA2026-0085",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-17",
+      "date_echeance": "2026-09-01",
+      "date_livraison": "2026-08-14",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Nordélec Distribution SARL",
+        "siren": "919687541",
+        "siret": "91968754157756",
+        "tva_intracom": "FR67919687541",
+        "adresse": "81 parc d'activités du Levant",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7693010991145298096825593",
+        "bic": "AXWZFRPPXXX",
+        "courriel": "compta@nordelec-distribution.example",
+        "telephone": "01 99 44 02 89"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 76.13,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 837.43,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 5.13,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 46.17,
+          "code": null
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 80.88,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 889.68,
+          "code": "REF-33695"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1773.28,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1773.28,
+          "montant": 354.66
+        }
+      ],
+      "total_tva": 354.66,
+      "total_ttc": 2127.94,
+      "acompte": null,
+      "net_a_payer": 2127.94,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-38298",
+        "bon_livraison": null,
+        "reference_paiement": "FA20260085"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "Factur-X profil EN 16931 : lire le XML joint (factur-x.xml), le PDF n'est qu'une vue",
+    "le XML fait foi en cas d'écart avec la vue"
+  ],
+  "facturx": {
+    "profil": "EN 16931",
+    "piece_jointe": "factur-x.xml",
+    "type_code": "380"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

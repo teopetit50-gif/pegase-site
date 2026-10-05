@@ -1,0 +1,109 @@
+{
+  "fichier": "012-natif-courrier-vetements.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F26/05/254",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-19",
+      "date_echeance": "2026-07-18",
+      "date_livraison": "2026-05-13",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Vêtements de Travail Marnier SAS",
+        "siren": "982596116",
+        "siret": "98259611667580",
+        "tva_intracom": "FR70982596116",
+        "adresse": "41 rue du Moulin-à-Vent",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "iban": "FR7693082615171575287255205",
+        "bic": "QCSBFRPPXXX",
+        "courriel": "compta@vetements-de-travail-marnier.example",
+        "telephone": "04 02 88 57 32"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Stylo bille (boîte 50)",
+          "quantite": 6,
+          "unite": "boîte",
+          "prix_unitaire_ht": 16.83,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 100.98,
+          "code": "REF-98771"
+        },
+        {
+          "designation": "Stylo bille (boîte 50)",
+          "quantite": 1,
+          "unite": "boîte",
+          "prix_unitaire_ht": 15.67,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 15.67,
+          "code": null
+        },
+        {
+          "designation": "Cartouche encre noire",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 41.13,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 534.69,
+          "code": "REF-25017"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 651.34,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 651.34,
+          "montant": 130.27
+        }
+      ],
+      "total_tva": 130.27,
+      "total_ttc": 781.61,
+      "acompte": null,
+      "net_a_payer": 781.61,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-96972",
+        "bon_livraison": "BL-767059",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remises par ligne"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

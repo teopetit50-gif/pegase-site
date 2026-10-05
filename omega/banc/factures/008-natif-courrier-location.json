@@ -1,0 +1,89 @@
+{
+  "fichier": "008-natif-courrier-location.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FA202606-097",
+      "facture_rectifiee": null,
+      "date_emission": "2026-06-13",
+      "date_echeance": "2026-06-28",
+      "date_livraison": "2026-06-08",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Location Bréhal Engins SAS",
+        "siren": "933972986",
+        "siret": "93397298627132",
+        "tva_intracom": "FR56933972986",
+        "adresse": "91 rue Camille-Verdier",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "iban": "FR7699038171001550323145165",
+        "bic": "RUFTFRPP",
+        "courriel": "compta@location-brehal-engins.example",
+        "telephone": "01 90 37 35 89"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Poste de travail nomade",
+          "quantite": 3,
+          "unite": "mois",
+          "prix_unitaire_ht": 282.3,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 846.9,
+          "code": "REF-56129"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 846.9,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 846.9,
+          "montant": 169.38
+        }
+      ],
+      "total_tva": 169.38,
+      "total_ttc": 1016.28,
+      "acompte": 304.88,
+      "net_a_payer": 711.4,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "acompte déduit : net à payer différent du TTC"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

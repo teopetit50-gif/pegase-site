@@ -1,0 +1,155 @@
+{
+  "fichier": "005-natif-classique-vitrerie.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F202606-305",
+      "facture_rectifiee": null,
+      "date_emission": "2026-06-24",
+      "date_echeance": "2026-08-08",
+      "date_livraison": "2026-06-22",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Vitrerie Serval EURL",
+        "siren": "977355254",
+        "siret": "97735525488628",
+        "tva_intracom": "FR20977355254",
+        "adresse": "12 chemin de la Fontaine",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7690068388032829960221257",
+        "bic": "MJLBFRPP",
+        "courriel": "compta@vitrerie-serval.example",
+        "telephone": "03 84 18 67 33"
+      },
+      "client": {
+        "raison_sociale": "Cabinet Dentaire des Tilleuls SELARL",
+        "siren": "924961014",
+        "siret": "92496101445814",
+        "tva_intracom": "FR77924961014",
+        "adresse": "5 avenue du Bois-Joli",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "code_client": "C95117"
+      },
+      "lignes": [
+        {
+          "designation": "Remplacement vitrage cassé",
+          "quantite": 11,
+          "unite": "h",
+          "prix_unitaire_ht": 79.96,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 879.56,
+          "code": "REF-91439"
+        },
+        {
+          "designation": "Remplacement vitrage cassé",
+          "quantite": 16,
+          "unite": "h",
+          "prix_unitaire_ht": 74.59,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1193.44,
+          "code": "REF-50017"
+        },
+        {
+          "designation": "Double vitrage 4/16/4 sur mesure",
+          "quantite": 1,
+          "unite": "m2",
+          "prix_unitaire_ht": 197.07,
+          "remise_pct": 15,
+          "taux_tva": 10,
+          "montant_ht": 167.51,
+          "code": null
+        },
+        {
+          "designation": "Remplacement vitrage cassé",
+          "quantite": 3,
+          "unite": "h",
+          "prix_unitaire_ht": 60.87,
+          "remise_pct": 10,
+          "taux_tva": 10,
+          "montant_ht": 164.35,
+          "code": null
+        },
+        {
+          "designation": "Déplacement",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 41.98,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 199.4,
+          "code": null
+        },
+        {
+          "designation": "Miroir argenté 6 mm",
+          "quantite": 18,
+          "unite": "m2",
+          "prix_unitaire_ht": 81.8,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1472.4,
+          "code": "REF-16132"
+        },
+        {
+          "designation": "Miroir argenté 6 mm",
+          "quantite": 56,
+          "unite": "m2",
+          "prix_unitaire_ht": 119.3,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 5678.68,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 9755.34,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 7350.48,
+          "montant": 1470.1
+        },
+        {
+          "taux": 10,
+          "base": 2404.86,
+          "montant": 240.49
+        }
+      ],
+      "total_tva": 1710.59,
+      "total_ttc": 11465.93,
+      "acompte": null,
+      "net_a_payer": 11465.93,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remises par ligne",
+    "plusieurs taux de TVA"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

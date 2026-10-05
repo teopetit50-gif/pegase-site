@@ -1,0 +1,97 @@
+{
+  "fichier": "029-natif-classique-quincaillerie.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0291",
+      "facture_rectifiee": null,
+      "date_emission": "2026-03-14",
+      "date_echeance": "2026-03-29",
+      "date_livraison": "2026-03-11",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Quincaillerie Toribel SAS",
+        "siren": "968546713",
+        "siret": "96854671334410",
+        "tva_intracom": "FR10968546713",
+        "adresse": "21 boulevard de la Marne",
+        "code_postal": "35000",
+        "ville": "Rennes",
+        "pays": "FR",
+        "iban": "FR7690441226631289871239513",
+        "bic": "HZMLFRPPXXX",
+        "courriel": "compta@quincaillerie-toribel.example",
+        "telephone": "04 71 91 03 11"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Déplacement dépannage",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 46.37,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 46.37,
+          "code": null
+        },
+        {
+          "designation": "Déplacement dépannage",
+          "quantite": 3,
+          "unite": "forfait",
+          "prix_unitaire_ht": 54.29,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 162.87,
+          "code": "REF-95594"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 209.24,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 209.24,
+          "montant": 41.85
+        }
+      ],
+      "total_tva": 41.85,
+      "total_ttc": 251.09,
+      "acompte": null,
+      "net_a_payer": 251.09,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": "BL-526585",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

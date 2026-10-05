@@ -1,0 +1,103 @@
+{
+  "fichier": "082-ubl-avoir-xml-coworking.xml",
+  "format": "xml",
+  "type": "ubl-avoir",
+  "gabarit": null,
+  "qualite": "native",
+  "pages": null,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "avoir",
+      "numero": "202601-195",
+      "facture_rectifiee": "202512-192",
+      "date_emission": "2026-01-15",
+      "date_echeance": null,
+      "date_livraison": "2026-01-10",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Coworking La Halle Neuve SAS",
+        "siren": "938072881",
+        "siret": "93807288184621",
+        "tva_intracom": "FR44938072881",
+        "adresse": "52 route de la Plaine",
+        "code_postal": "87000",
+        "ville": "Limoges",
+        "pays": "FR",
+        "iban": "FR7696934118946682184437850",
+        "bic": "WNCNFRPP",
+        "courriel": "compta@coworking-la-halle-neuve.example",
+        "telephone": "03 91 19 52 78"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Salle de réunion 8 pers.",
+          "quantite": -26.5,
+          "unite": "h",
+          "prix_unitaire_ht": 57.96,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -1535.94,
+          "code": "REF-88120"
+        },
+        {
+          "designation": "Location nacelle 12 m",
+          "quantite": -1,
+          "unite": "jour",
+          "prix_unitaire_ht": 201.58,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -201.58,
+          "code": "REF-11960"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": -1737.52,
+      "tva": [
+        {
+          "taux": 20,
+          "base": -1737.52,
+          "montant": -347.5
+        }
+      ],
+      "total_tva": -347.5,
+      "total_ttc": -2085.02,
+      "acompte": null,
+      "net_a_payer": -2085.02,
+      "mode_paiement": "Remboursement par virement",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "UBL 2.1 CreditNote (EN 16931) : XML seul, sans PDF"
+  ],
+  "ubl": {
+    "racine": "CreditNote",
+    "customization": "urn:cen.eu:en16931:2017"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

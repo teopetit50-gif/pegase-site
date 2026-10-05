@@ -1,0 +1,130 @@
+{
+  "fichier": "019-natif-sobre-telecom.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0250",
+      "facture_rectifiee": null,
+      "date_emission": "2026-04-01",
+      "date_echeance": "2026-05-16",
+      "date_livraison": null,
+      "periode": "du 01/05/2026 au 30/04/2026",
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Télécom Arvennes SA",
+        "siren": "964252092",
+        "siret": "96425209213580",
+        "tva_intracom": "FR75964252092",
+        "adresse": "111 rue du Moulin-à-Vent",
+        "code_postal": "37000",
+        "ville": "Tours",
+        "pays": "FR",
+        "iban": "FR7698029419042736559537890",
+        "bic": "BDEEFRPP",
+        "courriel": "compta@telecom-arvennes.example",
+        "telephone": "04 94 52 56 06"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Abonnement fibre pro 1 Gb/s",
+          "quantite": 4,
+          "unite": "mois",
+          "prix_unitaire_ht": 60.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 242.92,
+          "code": null
+        },
+        {
+          "designation": "Forfait mobile 100 Go",
+          "quantite": 1,
+          "unite": "ligne",
+          "prix_unitaire_ht": 20.66,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 17.56,
+          "code": null
+        },
+        {
+          "designation": "Forfait mobile 100 Go",
+          "quantite": 1,
+          "unite": "ligne",
+          "prix_unitaire_ht": 15.96,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 15.96,
+          "code": "REF-91626"
+        },
+        {
+          "designation": "Abonnement fibre pro 1 Gb/s",
+          "quantite": 1,
+          "unite": "mois",
+          "prix_unitaire_ht": 49.86,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 42.38,
+          "code": "REF-59196"
+        },
+        {
+          "designation": "Communications hors forfait",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 14.94,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 14.94,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 333.76,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 333.76,
+          "montant": 66.75
+        }
+      ],
+      "total_tva": 66.75,
+      "total_ttc": 400.51,
+      "acompte": null,
+      "net_a_payer": 400.51,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-00952",
+        "bon_livraison": null,
+        "reference_paiement": "FC20260250"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remises par ligne",
+    "période de consommation, pas de date de livraison"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

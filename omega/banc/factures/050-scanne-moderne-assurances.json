@@ -1,0 +1,144 @@
+{
+  "fichier": "050-scanne-moderne-assurances.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "moderne",
+  "qualite": "faible",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202608-314",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-18",
+      "date_echeance": "2026-10-17",
+      "date_livraison": "2026-08-16",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Assurances Mutuelle du Plateau SA",
+        "siren": "963505151",
+        "siret": "96350515104655",
+        "tva_intracom": "FR49963505151",
+        "adresse": "51 rue de la Forge",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694387849208962229674584",
+        "bic": "ZSYNFRPPXXX",
+        "courriel": "compta@assurances-mutuelle-du-plateau.example",
+        "telephone": "03 34 16 10 66"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 4,
+          "unite": "an",
+          "prix_unitaire_ht": 992.54,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 3970.16,
+          "code": "REF-41836"
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 2,
+          "unite": "an",
+          "prix_unitaire_ht": 30.92,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 61.84,
+          "code": "REF-83398"
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 6,
+          "unite": "an",
+          "prix_unitaire_ht": 54.4,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 326.4,
+          "code": null
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 6,
+          "unite": "an",
+          "prix_unitaire_ht": 1048.68,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 6292.08,
+          "code": "REF-16189"
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 3,
+          "unite": "an",
+          "prix_unitaire_ht": 1681.24,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 5043.72,
+          "code": null
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 1,
+          "unite": "an",
+          "prix_unitaire_ht": 992.11,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 992.11,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 16686.31,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 388.24,
+          "montant": 77.65
+        },
+        {
+          "taux": 0,
+          "base": 16298.07,
+          "montant": 0
+        }
+      ],
+      "total_tva": 77.65,
+      "total_ttc": 16763.96,
+      "acompte": null,
+      "net_a_payer": 16763.96,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": "BC-24708",
+        "bon_livraison": null,
+        "reference_paiement": "2026202608314"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité faible : pas de couche texte, rotation, bruit, flou et taches"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

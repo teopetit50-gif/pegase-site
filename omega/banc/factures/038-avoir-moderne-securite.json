@@ -1,0 +1,90 @@
+{
+  "fichier": "038-avoir-moderne-securite.pdf",
+  "format": "pdf",
+  "type": "avoir",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "avoir",
+      "numero": "FC101293",
+      "facture_rectifiee": "FC101270",
+      "date_emission": "2026-03-01",
+      "date_echeance": null,
+      "date_livraison": "2026-02-23",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Sécurité Incendie Préval SAS",
+        "siren": "903653442",
+        "siret": "90365344259252",
+        "tva_intracom": "FR70903653442",
+        "adresse": "65 chemin de la Fontaine",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "iban": "FR7698243238034123170621105",
+        "bic": "AUHXFRPPXXX",
+        "courriel": "compta@securite-incendie-preval.example",
+        "telephone": "04 37 34 20 31"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Vérification extincteurs",
+          "quantite": -3,
+          "unite": "u",
+          "prix_unitaire_ht": 13.68,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -41.04,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": -41.04,
+      "tva": [
+        {
+          "taux": 20,
+          "base": -41.04,
+          "montant": -8.21
+        }
+      ],
+      "total_tva": -8.21,
+      "total_ttc": -49.25,
+      "acompte": null,
+      "net_a_payer": -49.25,
+      "mode_paiement": "Remboursement par virement",
+      "references": {
+        "commande": null,
+        "bon_livraison": "BL-693710",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "avoir : montants négatifs, référence à la facture rectifiée",
+    "pas de date d'échéance"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

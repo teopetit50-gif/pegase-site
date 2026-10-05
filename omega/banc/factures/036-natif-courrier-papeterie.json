@@ -1,0 +1,147 @@
+{
+  "fichier": "036-natif-courrier-papeterie.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "INV-2026-0066",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-18",
+      "date_echeance": "2026-09-17",
+      "date_livraison": "2026-08-17",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Papeterie Marcenac SARL",
+        "siren": "929595312",
+        "siret": "92959531205298",
+        "tva_intracom": "FR58929595312",
+        "adresse": "115 impasse des Peupliers",
+        "code_postal": "72000",
+        "ville": "Le Mans",
+        "pays": "FR",
+        "iban": "FR7699631792043412270896361",
+        "bic": "TUZEFRPP",
+        "courriel": "compta@papeterie-marcenac.example",
+        "telephone": "05 61 34 25 72"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Pantalon de travail multipoches",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 40.64,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 243.84,
+          "code": "REF-67794"
+        },
+        {
+          "designation": "Marquage logo brodé",
+          "quantite": 8,
+          "unite": "u",
+          "prix_unitaire_ht": 4.54,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 36.32,
+          "code": null
+        },
+        {
+          "designation": "Cartouche encre noire",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 35.29,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 70.58,
+          "code": null
+        },
+        {
+          "designation": "Ramette A4 80 g",
+          "quantite": 2,
+          "unite": "ramette",
+          "prix_unitaire_ht": 5.98,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 11.96,
+          "code": "REF-33955"
+        },
+        {
+          "designation": "Marquage logo brodé",
+          "quantite": 22,
+          "unite": "u",
+          "prix_unitaire_ht": 5.68,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 124.96,
+          "code": null
+        },
+        {
+          "designation": "Ramette A4 80 g",
+          "quantite": 1,
+          "unite": "ramette",
+          "prix_unitaire_ht": 6.79,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 6.79,
+          "code": null
+        },
+        {
+          "designation": "Chaussures de sécurité S3",
+          "quantite": 6,
+          "unite": "paire",
+          "prix_unitaire_ht": 62.16,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 372.96,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 867.41,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 867.41,
+          "montant": 173.48
+        }
+      ],
+      "total_tva": 173.48,
+      "total_ttc": 1040.89,
+      "acompte": null,
+      "net_a_payer": 1040.89,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-24729",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

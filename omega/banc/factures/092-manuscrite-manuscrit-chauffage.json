@@ -1,0 +1,115 @@
+{
+  "fichier": "092-manuscrite-manuscrit-chauffage.pdf",
+  "format": "pdf",
+  "type": "manuscrite",
+  "gabarit": "manuscrit",
+  "qualite": "faible",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F2026-0339",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-15",
+      "date_echeance": "2026-01-30",
+      "date_livraison": null,
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Chauffage Thermoval SARL",
+        "siren": "935648899",
+        "siret": "93564889966050",
+        "tva_intracom": "FR91935648899",
+        "adresse": "78 zone artisanale des Quatre-Vents",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "iban": "FR7697386449264214002562589",
+        "bic": "SBMXFRPPXXX",
+        "courriel": "compta@chauffage-thermoval.example",
+        "telephone": "04 18 81 51 06"
+      },
+      "client": {
+        "raison_sociale": "Boutique Fil & Trame EURL",
+        "siren": "948898374",
+        "siret": "94889837456998",
+        "tva_intracom": "FR50948898374",
+        "adresse": "33 place du Marché-Neuf",
+        "code_postal": "49000",
+        "ville": "Angers",
+        "pays": "FR",
+        "code_client": "C98060"
+      },
+      "lignes": [
+        {
+          "designation": "Tube cuivre 14 mm (barre 4 m)",
+          "quantite": 5,
+          "unite": "barre",
+          "prix_unitaire_ht": 20.82,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 104.1,
+          "code": "REF-29464"
+        },
+        {
+          "designation": "Intervention plombier",
+          "quantite": 7,
+          "unite": "h",
+          "prix_unitaire_ht": 61.25,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 428.75,
+          "code": "REF-44132"
+        },
+        {
+          "designation": "Robinet mitigeur évier",
+          "quantite": 4,
+          "unite": "u",
+          "prix_unitaire_ht": 81.59,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 326.36,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 859.21,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 430.46,
+          "montant": 86.09
+        },
+        {
+          "taux": 10,
+          "base": 428.75,
+          "montant": 42.88
+        }
+      ],
+      "total_tva": 128.97,
+      "total_ttc": 988.18,
+      "acompte": null,
+      "net_a_payer": 988.18,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "facture manuscrite sur carnet pré-imprimé, numérisée (qualité faible)",
+    "aucun IBAN sur le document"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

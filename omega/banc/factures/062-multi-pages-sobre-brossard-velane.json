@@ -1,0 +1,751 @@
+{
+  "fichier": "062-multi-pages-sobre-brossard-velane.pdf",
+  "format": "pdf",
+  "type": "multi-pages",
+  "gabarit": "sobre",
+  "qualite": "moyenne",
+  "pages": 3,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202604-217",
+      "facture_rectifiee": null,
+      "date_emission": "2026-04-22",
+      "date_echeance": "2026-06-06",
+      "date_livraison": "2026-04-16",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Brossard-Vélane Matériaux SAS",
+        "siren": "943661264",
+        "siret": "94366126482001",
+        "tva_intracom": "FR04943661264",
+        "adresse": "75 boulevard de la Marne",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7691134950227997224268366",
+        "bic": "YBAJFRPPXXX",
+        "courriel": "compta@brossard-velane-materiaux.example",
+        "telephone": "04 39 66 30 91"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 5,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 24.55,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 122.75,
+          "code": "REF-78997"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 119.07,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 238.14,
+          "code": null
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 3,
+          "unite": "sac",
+          "prix_unitaire_ht": 9.41,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 28.23,
+          "code": "REF-47779"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 107.86,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 215.72,
+          "code": "REF-42717"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 127.95,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 255.9,
+          "code": "REF-54849"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 4,
+          "unite": "u",
+          "prix_unitaire_ht": 1.37,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 5.48,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 115.81,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 694.86,
+          "code": "REF-03057"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 1.7,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 8.5,
+          "code": "REF-18762"
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 5,
+          "unite": "sac",
+          "prix_unitaire_ht": 9.59,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 47.95,
+          "code": "REF-19376"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 2,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 24.26,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 48.52,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 12,
+          "unite": "u",
+          "prix_unitaire_ht": 1.36,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 16.32,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 138.18,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 829.08,
+          "code": "REF-18094"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 1.55,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 15.5,
+          "code": "REF-56485"
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 6,
+          "unite": "sac",
+          "prix_unitaire_ht": 9.29,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 55.74,
+          "code": "REF-37531"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 5.55,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 72.15,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 5.97,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 101.49,
+          "code": "REF-99417"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 12,
+          "unite": "u",
+          "prix_unitaire_ht": 1.62,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 19.44,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 6.16,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 61.6,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 1.37,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2.74,
+          "code": "REF-56594"
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 5,
+          "unite": "sac",
+          "prix_unitaire_ht": 9.47,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 47.35,
+          "code": null
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 1,
+          "unite": "sac",
+          "prix_unitaire_ht": 9.25,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 9.25,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 2,
+          "unite": "tonne",
+          "prix_unitaire_ht": 44.8,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 89.6,
+          "code": null
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 2,
+          "unite": "sac",
+          "prix_unitaire_ht": 7.43,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 14.86,
+          "code": "REF-49167"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 6.42,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 64.2,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 1.57,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 36.11,
+          "code": "REF-61487"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 5.8,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 5.8,
+          "code": "REF-94451"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 1.42,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 14.2,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 4,
+          "unite": "tonne",
+          "prix_unitaire_ht": 49.68,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 198.72,
+          "code": "REF-92913"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 4,
+          "unite": "forfait",
+          "prix_unitaire_ht": 112.39,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 449.56,
+          "code": "REF-13945"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 132.68,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 265.36,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 4,
+          "unite": "forfait",
+          "prix_unitaire_ht": 119.55,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 478.2,
+          "code": "REF-02262"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 3,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 25.6,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 76.8,
+          "code": "REF-49416"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 115.72,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 115.72,
+          "code": "REF-91396"
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 2,
+          "unite": "sac",
+          "prix_unitaire_ht": 7.74,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 15.48,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 6.66,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 66.6,
+          "code": "REF-23143"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 4,
+          "unite": "u",
+          "prix_unitaire_ht": 6.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 26.92,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 3,
+          "unite": "forfait",
+          "prix_unitaire_ht": 104.89,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 314.67,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 6.33,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 31.65,
+          "code": "REF-97309"
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 6,
+          "unite": "tonne",
+          "prix_unitaire_ht": 47.05,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 282.3,
+          "code": "REF-50456"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 14,
+          "unite": "u",
+          "prix_unitaire_ht": 6.59,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 92.26,
+          "code": "REF-82771"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 3,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 28.99,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 86.97,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 6.42,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 32.1,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 12,
+          "unite": "u",
+          "prix_unitaire_ht": 1.87,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 22.44,
+          "code": "REF-62204"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 5.84,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 75.92,
+          "code": "REF-26500"
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 3,
+          "unite": "sac",
+          "prix_unitaire_ht": 7.87,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 23.61,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 4,
+          "unite": "u",
+          "prix_unitaire_ht": 1.79,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 7.16,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 4,
+          "unite": "forfait",
+          "prix_unitaire_ht": 109.39,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 437.56,
+          "code": null
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 6,
+          "unite": "sac",
+          "prix_unitaire_ht": 8.9,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 53.4,
+          "code": "REF-87150"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 139.54,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 139.54,
+          "code": null
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 1,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 29.39,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 29.39,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 5,
+          "unite": "tonne",
+          "prix_unitaire_ht": 50.89,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 254.45,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 118.23,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 236.46,
+          "code": "REF-43378"
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 2,
+          "unite": "tonne",
+          "prix_unitaire_ht": 50,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 100,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 6,
+          "unite": "tonne",
+          "prix_unitaire_ht": 46.8,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 280.8,
+          "code": "REF-72814"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 4,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 27.98,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 111.92,
+          "code": "REF-33788"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 1.68,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 18.48,
+          "code": "REF-99915"
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 5.51,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 82.65,
+          "code": null
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 1,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 30.76,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 30.76,
+          "code": "REF-85264"
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 2,
+          "unite": "tonne",
+          "prix_unitaire_ht": 44.29,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 88.58,
+          "code": "REF-48448"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 3,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 25.22,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 75.66,
+          "code": "REF-45833"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 106.4,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 532,
+          "code": null
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 3,
+          "unite": "sac",
+          "prix_unitaire_ht": 8,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 24,
+          "code": "REF-78181"
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 1.53,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1.53,
+          "code": "REF-32830"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 1,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 26.29,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 26.29,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 138.93,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 833.58,
+          "code": null
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 1,
+          "unite": "tonne",
+          "prix_unitaire_ht": 51.62,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 51.62,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 1.81,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 10.86,
+          "code": "REF-30396"
+        }
+      ],
+      "remise_globale_pct": 2,
+      "remise_globale": 184.07,
+      "total_ht": 9019.38,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 9019.38,
+          "montant": 1803.88
+        }
+      ],
+      "total_tva": 1803.88,
+      "total_ttc": 10823.26,
+      "acompte": null,
+      "net_a_payer": 10823.26,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "2026202604217"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "3 pages, report de sous-total entre les pages",
+    "totaux sur la dernière page",
+    "numérisé (qualité moyenne)"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

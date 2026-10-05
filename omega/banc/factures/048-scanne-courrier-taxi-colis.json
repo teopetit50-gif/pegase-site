@@ -1,0 +1,129 @@
+{
+  "fichier": "048-scanne-courrier-taxi-colis.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "courrier",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0082",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-19",
+      "date_echeance": "2026-03-05",
+      "date_livraison": "2026-01-19",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Taxi-Colis Rapide Ségur EI",
+        "siren": "916834815",
+        "siret": "91683481592627",
+        "tva_intracom": null,
+        "adresse": "111 route de la Plaine",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694193752861217042058594",
+        "bic": "DSEAFRPPXXX",
+        "courriel": "compta@taxi-colis-rapide-segur.example",
+        "telephone": "04 97 90 90 75"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Affrètement camion 20 m3",
+          "quantite": 2,
+          "unite": "jour",
+          "prix_unitaire_ht": 466.9,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 933.8,
+          "code": "REF-15913"
+        },
+        {
+          "designation": "Course express intra-muros",
+          "quantite": 5,
+          "unite": "course",
+          "prix_unitaire_ht": 25.68,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 128.4,
+          "code": "REF-43633"
+        },
+        {
+          "designation": "Course express intra-muros",
+          "quantite": 2,
+          "unite": "course",
+          "prix_unitaire_ht": 27.32,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 54.64,
+          "code": null
+        },
+        {
+          "designation": "Supplément hayon",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 15.3,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 367.2,
+          "code": null
+        },
+        {
+          "designation": "Surcharge carburant",
+          "quantite": 1,
+          "unite": "%",
+          "prix_unitaire_ht": 12.57,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 12.57,
+          "code": "REF-21351"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1496.61,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 1496.61,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 1496.61,
+      "acompte": 448.98,
+      "net_a_payer": 1047.63,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": "BC-21292",
+        "bon_livraison": null,
+        "reference_paiement": "FC20260082"
+      },
+      "mentions": [
+        "TVA non applicable, art. 293 B du CGI",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité moyenne : pas de couche texte, rotation, bruit"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,120 @@
+{
+  "fichier": "093-manuscrite-manuscrit-vitrerie.pdf",
+  "format": "pdf",
+  "type": "manuscrite",
+  "gabarit": "manuscrit",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F202607-324",
+      "facture_rectifiee": null,
+      "date_emission": "2026-07-13",
+      "date_echeance": "2026-08-12",
+      "date_livraison": null,
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Vitrerie Serval EURL",
+        "siren": "977355254",
+        "siret": "97735525488628",
+        "tva_intracom": "FR20977355254",
+        "adresse": "12 chemin de la Fontaine",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7690068388032829960221257",
+        "bic": "MJLBFRPP",
+        "courriel": "compta@vitrerie-serval.example",
+        "telephone": "03 84 18 67 33"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Déplacement",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 51.65,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 309.9,
+          "code": null
+        },
+        {
+          "designation": "Miroir argenté 6 mm",
+          "quantite": 23.5,
+          "unite": "m2",
+          "prix_unitaire_ht": 102.65,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2412.28,
+          "code": null
+        },
+        {
+          "designation": "Miroir argenté 6 mm",
+          "quantite": 11.5,
+          "unite": "m2",
+          "prix_unitaire_ht": 87.43,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1005.45,
+          "code": "REF-14834"
+        },
+        {
+          "designation": "Miroir argenté 6 mm",
+          "quantite": 18,
+          "unite": "m2",
+          "prix_unitaire_ht": 95.31,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1715.58,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 5443.21,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 5443.21,
+          "montant": 1088.64
+        }
+      ],
+      "total_tva": 1088.64,
+      "total_ttc": 6531.85,
+      "acompte": null,
+      "net_a_payer": 6531.85,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "facture manuscrite sur feuille libre, numérisée (qualité moyenne)",
+    "IBAN écrit à la main"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

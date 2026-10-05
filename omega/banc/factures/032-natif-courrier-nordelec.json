@@ -1,0 +1,147 @@
+{
+  "fichier": "032-natif-courrier-nordelec.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FA2026-0063",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-26",
+      "date_echeance": "2026-10-11",
+      "date_livraison": "2026-09-25",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Nordélec Distribution SARL",
+        "siren": "919687541",
+        "siret": "91968754157756",
+        "tva_intracom": "FR67919687541",
+        "adresse": "81 parc d'activités du Levant",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7693010991145298096825593",
+        "bic": "AXWZFRPPXXX",
+        "courriel": "compta@nordelec-distribution.example",
+        "telephone": "01 99 44 02 89"
+      },
+      "client": {
+        "raison_sociale": "Garage Électrique Solvan SARL",
+        "siren": "975600248",
+        "siret": "97560024804285",
+        "tva_intracom": "FR65975600248",
+        "adresse": "42 quai des Chartrons",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "code_client": "C33428"
+      },
+      "lignes": [
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 20,
+          "unite": "h",
+          "prix_unitaire_ht": 48.14,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 962.8,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 14.33,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 329.59,
+          "code": "REF-05206"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 4,
+          "unite": "u",
+          "prix_unitaire_ht": 6.09,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 24.36,
+          "code": "REF-68656"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 6.08,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 54.72,
+          "code": "REF-22010"
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 3,
+          "unite": "u",
+          "prix_unitaire_ht": 72.28,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 216.84,
+          "code": "REF-44104"
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 21,
+          "unite": "u",
+          "prix_unitaire_ht": 8.75,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 183.75,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 3,
+          "unite": "u",
+          "prix_unitaire_ht": 5.02,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 15.06,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1787.12,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1787.12,
+          "montant": 357.42
+        }
+      ],
+      "total_tva": 357.42,
+      "total_ttc": 2144.54,
+      "acompte": null,
+      "net_a_payer": 2144.54,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-82508",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

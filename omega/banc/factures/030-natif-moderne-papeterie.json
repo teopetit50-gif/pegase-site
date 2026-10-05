@@ -1,0 +1,129 @@
+{
+  "fichier": "030-natif-moderne-papeterie.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "INV-2026-0058",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-04",
+      "date_echeance": "2026-10-04",
+      "date_livraison": "2026-09-01",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Papeterie Marcenac SARL",
+        "siren": "929595312",
+        "siret": "92959531205298",
+        "tva_intracom": "FR58929595312",
+        "adresse": "115 impasse des Peupliers",
+        "code_postal": "72000",
+        "ville": "Le Mans",
+        "pays": "FR",
+        "iban": "FR7699631792043412270896361",
+        "bic": "TUZEFRPP",
+        "courriel": "compta@papeterie-marcenac.example",
+        "telephone": "05 61 34 25 72"
+      },
+      "client": {
+        "raison_sociale": "Boutique Fil & Trame EURL",
+        "siren": "948898374",
+        "siret": "94889837456998",
+        "tva_intracom": "FR50948898374",
+        "adresse": "33 place du Marché-Neuf",
+        "code_postal": "49000",
+        "ville": "Angers",
+        "pays": "FR",
+        "code_client": "C98060"
+      },
+      "lignes": [
+        {
+          "designation": "Ramette A4 80 g",
+          "quantite": 1,
+          "unite": "ramette",
+          "prix_unitaire_ht": 4.82,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 4.82,
+          "code": null
+        },
+        {
+          "designation": "Chaussures de sécurité S3",
+          "quantite": 4,
+          "unite": "paire",
+          "prix_unitaire_ht": 78.63,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 314.52,
+          "code": null
+        },
+        {
+          "designation": "Cartouche encre noire",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 31.27,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 62.54,
+          "code": "REF-52665"
+        },
+        {
+          "designation": "Cartouche encre noire",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 34.05,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 612.9,
+          "code": "REF-11601"
+        },
+        {
+          "designation": "Stylo bille (boîte 50)",
+          "quantite": 4,
+          "unite": "boîte",
+          "prix_unitaire_ht": 16.89,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 67.56,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 10,
+      "remise_globale": 106.23,
+      "total_ht": 956.11,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 956.11,
+          "montant": 191.22
+        }
+      ],
+      "total_tva": 191.22,
+      "total_ttc": 1147.33,
+      "acompte": null,
+      "net_a_payer": 1147.33,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-66397",
+        "bon_livraison": "BL-299602",
+        "reference_paiement": "INV20260058"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remise globale"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

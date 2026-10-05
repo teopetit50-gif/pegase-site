@@ -1,0 +1,89 @@
+{
+  "fichier": "052-scanne-courrier-brossard-velane.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "courrier",
+  "qualite": "bonne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202604-208",
+      "facture_rectifiee": null,
+      "date_emission": "2026-04-26",
+      "date_echeance": "2026-05-26",
+      "date_livraison": "2026-04-22",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Brossard-Vélane Matériaux SAS",
+        "siren": "943661264",
+        "siret": "94366126482001",
+        "tva_intracom": "FR04943661264",
+        "adresse": "75 boulevard de la Marne",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7691134950227997224268366",
+        "bic": "YBAJFRPPXXX",
+        "courriel": "compta@brossard-velane-materiaux.example",
+        "telephone": "04 39 66 30 91"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 1.66,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 21.58,
+          "code": "REF-05102"
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 1.08,
+      "total_ht": 20.5,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 20.5,
+          "montant": 4.1
+        }
+      ],
+      "total_tva": 4.1,
+      "total_ttc": 24.6,
+      "acompte": 7.38,
+      "net_a_payer": 17.22,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": "BC-70336",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité bonne : pas de couche texte, rotation, bruit"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

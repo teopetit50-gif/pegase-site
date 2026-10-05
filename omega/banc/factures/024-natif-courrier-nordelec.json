@@ -1,0 +1,107 @@
+{
+  "fichier": "024-natif-courrier-nordelec.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FA2026-0056",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-27",
+      "date_echeance": "2026-10-27",
+      "date_livraison": "2026-09-25",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Nordélec Distribution SARL",
+        "siren": "919687541",
+        "siret": "91968754157756",
+        "tva_intracom": "FR67919687541",
+        "adresse": "81 parc d'activités du Levant",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "iban": "FR7693010991145298096825593",
+        "bic": "AXWZFRPPXXX",
+        "courriel": "compta@nordelec-distribution.example",
+        "telephone": "01 99 44 02 89"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 75.63,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 75.63,
+          "code": "REF-11690"
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 57,
+          "unite": "h",
+          "prix_unitaire_ht": 50.3,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2867.1,
+          "code": "REF-63854"
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 17,
+          "unite": "h",
+          "prix_unitaire_ht": 58.1,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 987.7,
+          "code": "REF-86932"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 3930.43,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 3930.43,
+          "montant": 786.09
+        }
+      ],
+      "total_tva": 786.09,
+      "total_ttc": 4716.52,
+      "acompte": null,
+      "net_a_payer": 4716.52,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-08816",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

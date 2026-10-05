@@ -1,0 +1,131 @@
+{
+  "fichier": "090-ticket-ticket-serrurerie.pdf",
+  "format": "pdf",
+  "type": "ticket",
+  "gabarit": "ticket",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F2026-0286",
+      "facture_rectifiee": null,
+      "date_emission": "2026-07-14",
+      "date_echeance": "2026-07-14",
+      "date_livraison": "2026-07-14",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Serrurerie Vendrel EI",
+        "siren": "981327240",
+        "siret": "98132724055136",
+        "tva_intracom": null,
+        "adresse": "106 chemin de la Fontaine",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "iban": "FR7696407962677595462598362",
+        "bic": "TFPJFRPP",
+        "courriel": "compta@serrurerie-vendrel.example",
+        "telephone": "04 67 00 39 88"
+      },
+      "client": {
+        "raison_sociale": "Garage Électrique Solvan SARL",
+        "siren": "975600248",
+        "siret": "97560024804285",
+        "tva_intracom": "FR65975600248",
+        "adresse": "42 quai des Chartrons",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "code_client": "C33428"
+      },
+      "lignes": [
+        {
+          "designation": "Déplacement dépannage",
+          "quantite": 4,
+          "unite": "forfait",
+          "prix_unitaire_ht": 68.8,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 275.2,
+          "code": null
+        },
+        {
+          "designation": "Cheville à frapper 8x80 (100)",
+          "quantite": 4,
+          "unite": "boîte",
+          "prix_unitaire_ht": 14,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 56,
+          "code": "REF-29094"
+        },
+        {
+          "designation": "Déplacement dépannage",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 55.97,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 111.94,
+          "code": "REF-02660"
+        },
+        {
+          "designation": "Cylindre européen 30x30",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 30.63,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 581.97,
+          "code": "REF-96464"
+        },
+        {
+          "designation": "Vis bois 4x40 (boîte 500)",
+          "quantite": 6,
+          "unite": "boîte",
+          "prix_unitaire_ht": 13.22,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 79.32,
+          "code": "REF-59295"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1104.43,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 1104.43,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 1104.43,
+      "acompte": null,
+      "net_a_payer": 1104.43,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "F20260286"
+      },
+      "mentions": [
+        "TVA non applicable, art. 293 B du CGI",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "ticket de caisse : montants lignes en TTC, totaux HT/TVA en pied, pas d'IBAN",
+    "ticket photographié/numérisé (qualité moyenne)"
+  ],
+  "lignes_affichees_en": "TTC",
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

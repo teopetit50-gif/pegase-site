@@ -1,0 +1,130 @@
+{
+  "fichier": "006-natif-moderne-plombatec.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC202603-068",
+      "facture_rectifiee": null,
+      "date_emission": "2026-03-23",
+      "date_echeance": "2026-04-22",
+      "date_livraison": "2026-03-18",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Plombatec Ouest SARL",
+        "siren": "940503048",
+        "siret": "94050304834551",
+        "tva_intracom": "FR25940503048",
+        "adresse": "103 boulevard de la Marne",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "iban": "FR7694177863771765195555710",
+        "bic": "YKKTFRPPXXX",
+        "courriel": "compta@plombatec-ouest.example",
+        "telephone": "01 95 13 95 88"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Tube cuivre 14 mm (barre 4 m)",
+          "quantite": 1,
+          "unite": "barre",
+          "prix_unitaire_ht": 26.82,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 26.82,
+          "code": "REF-74716"
+        },
+        {
+          "designation": "Tube cuivre 14 mm (barre 4 m)",
+          "quantite": 1,
+          "unite": "barre",
+          "prix_unitaire_ht": 19.93,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 19.93,
+          "code": null
+        },
+        {
+          "designation": "Joint fibre 15/21 (10)",
+          "quantite": 6,
+          "unite": "sachet",
+          "prix_unitaire_ht": 3.11,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 18.66,
+          "code": "REF-24880"
+        },
+        {
+          "designation": "Joint fibre 15/21 (10)",
+          "quantite": 1,
+          "unite": "sachet",
+          "prix_unitaire_ht": 3.11,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 3.11,
+          "code": "REF-89217"
+        },
+        {
+          "designation": "Éco-participation (dont)",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 3,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 3,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 3.58,
+      "total_ht": 67.94,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 67.94,
+          "montant": 13.59
+        }
+      ],
+      "total_tva": 13.59,
+      "total_ttc": 81.53,
+      "acompte": null,
+      "net_a_payer": 81.53,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "FAC202603068"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remise globale",
+    "éco-participation"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

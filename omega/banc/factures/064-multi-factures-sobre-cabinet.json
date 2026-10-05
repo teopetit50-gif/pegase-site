@@ -1,0 +1,226 @@
+{
+  "fichier": "064-multi-factures-sobre-cabinet.pdf",
+  "format": "pdf",
+  "type": "multi-factures",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 2,
+  "lisible": true,
+  "nb_factures": 2,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F26/03/319",
+      "facture_rectifiee": null,
+      "date_emission": "2026-03-25",
+      "date_echeance": "2026-04-24",
+      "date_livraison": "2026-03-21",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Cabinet Orvane Conseil SELARL",
+        "siren": "946148947",
+        "siret": "94614894719835",
+        "tva_intracom": "FR67946148947",
+        "adresse": "76 zone artisanale des Quatre-Vents",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "iban": "FR7690477739333154877304429",
+        "bic": "HNUCFRPP",
+        "courriel": "compta@cabinet-orvane-conseil.example",
+        "telephone": "02 82 30 02 07"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Déplacement et frais",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 107.05,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 535.25,
+          "code": "REF-60207"
+        },
+        {
+          "designation": "Déplacement et frais",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 80.25,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 160.5,
+          "code": null
+        },
+        {
+          "designation": "Honoraires conseil",
+          "quantite": 49,
+          "unite": "h",
+          "prix_unitaire_ht": 209.83,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 10281.67,
+          "code": "REF-28769"
+        },
+        {
+          "designation": "Déplacement et frais",
+          "quantite": 4,
+          "unite": "forfait",
+          "prix_unitaire_ht": 133.81,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 535.24,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 11512.66,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 11512.66,
+          "montant": 2302.53
+        }
+      ],
+      "total_tva": 2302.53,
+      "total_ttc": 13815.19,
+      "acompte": null,
+      "net_a_payer": 13815.19,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "F2603319"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    },
+    {
+      "type_document": "facture",
+      "numero": "2026-202603-324",
+      "facture_rectifiee": null,
+      "date_emission": "2026-03-17",
+      "date_echeance": "2026-05-16",
+      "date_livraison": "2026-03-14",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Assurances Mutuelle du Plateau SA",
+        "siren": "963505151",
+        "siret": "96350515104655",
+        "tva_intracom": "FR49963505151",
+        "adresse": "51 rue de la Forge",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694387849208962229674584",
+        "bic": "ZSYNFRPPXXX",
+        "courriel": "compta@assurances-mutuelle-du-plateau.example",
+        "telephone": "03 34 16 10 66"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Frais de gestion",
+          "quantite": 4,
+          "unite": "an",
+          "prix_unitaire_ht": 32.44,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 129.76,
+          "code": "REF-84821"
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 3,
+          "unite": "an",
+          "prix_unitaire_ht": 1164.21,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 3492.63,
+          "code": "REF-55864"
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 2,
+          "unite": "an",
+          "prix_unitaire_ht": 28.23,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 56.46,
+          "code": "REF-62265"
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 3,
+          "unite": "an",
+          "prix_unitaire_ht": 1193.64,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 3580.92,
+          "code": "REF-82412"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 7259.77,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 186.22,
+          "montant": 37.24
+        },
+        {
+          "taux": 0,
+          "base": 7073.55,
+          "montant": 0
+        }
+      ],
+      "total_tva": 37.24,
+      "total_ttc": 7297.01,
+      "acompte": null,
+      "net_a_payer": 7297.01,
+      "mode_paiement": "Prélèvement SEPA",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "2 factures de fournisseurs différents dans un seul fichier : découper avant de lire"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

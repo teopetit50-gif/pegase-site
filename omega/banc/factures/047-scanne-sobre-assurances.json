@@ -1,0 +1,154 @@
+{
+  "fichier": "047-scanne-sobre-assurances.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "sobre",
+  "qualite": "faible",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202609-305",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-07",
+      "date_echeance": "2026-10-07",
+      "date_livraison": "2026-09-06",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Assurances Mutuelle du Plateau SA",
+        "siren": "963505151",
+        "siret": "96350515104655",
+        "tva_intracom": "FR49963505151",
+        "adresse": "51 rue de la Forge",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694387849208962229674584",
+        "bic": "ZSYNFRPPXXX",
+        "courriel": "compta@assurances-mutuelle-du-plateau.example",
+        "telephone": "03 34 16 10 66"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Frais de gestion",
+          "quantite": 1,
+          "unite": "an",
+          "prix_unitaire_ht": 28.92,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 28.92,
+          "code": null
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 2,
+          "unite": "an",
+          "prix_unitaire_ht": 25.59,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 51.18,
+          "code": "REF-82466"
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 4,
+          "unite": "an",
+          "prix_unitaire_ht": 840.2,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 3360.8,
+          "code": null
+        },
+        {
+          "designation": "Frais de gestion",
+          "quantite": 4,
+          "unite": "an",
+          "prix_unitaire_ht": 26.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 106.92,
+          "code": "REF-46485"
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 6,
+          "unite": "an",
+          "prix_unitaire_ht": 1535.83,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 9214.98,
+          "code": "REF-41458"
+        },
+        {
+          "designation": "Prime multirisque professionnelle",
+          "quantite": 6,
+          "unite": "an",
+          "prix_unitaire_ht": 871.72,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 5230.32,
+          "code": "REF-25023"
+        },
+        {
+          "designation": "Prime flotte automobile",
+          "quantite": 3,
+          "unite": "an",
+          "prix_unitaire_ht": 620.07,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 1860.21,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 992.67,
+      "total_ht": 18860.66,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 177.67,
+          "montant": 35.53
+        },
+        {
+          "taux": 0,
+          "base": 18682.99,
+          "montant": 0
+        }
+      ],
+      "total_tva": 35.53,
+      "total_ttc": 18896.19,
+      "acompte": null,
+      "net_a_payer": 18896.19,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": null,
+        "bon_livraison": "BL-744809",
+        "reference_paiement": "2026202609305"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité faible : pas de couche texte, rotation, bruit, flou et taches"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,145 @@
+{
+  "fichier": "075-facturx-sobre-taxi-colis.pdf",
+  "format": "pdf",
+  "type": "facturx",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0089",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-21",
+      "date_echeance": "2026-03-07",
+      "date_livraison": "2026-01-19",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Taxi-Colis Rapide Ségur EI",
+        "siren": "916834815",
+        "siret": "91683481592627",
+        "tva_intracom": null,
+        "adresse": "111 route de la Plaine",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "iban": "FR7694193752861217042058594",
+        "bic": "DSEAFRPPXXX",
+        "courriel": "compta@taxi-colis-rapide-segur.example",
+        "telephone": "04 97 90 90 75"
+      },
+      "client": {
+        "raison_sociale": "Boutique Fil & Trame EURL",
+        "siren": "948898374",
+        "siret": "94889837456998",
+        "tva_intracom": "FR50948898374",
+        "adresse": "33 place du Marché-Neuf",
+        "code_postal": "49000",
+        "ville": "Angers",
+        "pays": "FR",
+        "code_client": "C98060"
+      },
+      "lignes": [
+        {
+          "designation": "Surcharge carburant",
+          "quantite": 1,
+          "unite": "%",
+          "prix_unitaire_ht": 13.63,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 13.63,
+          "code": "REF-23450"
+        },
+        {
+          "designation": "Transport palette 80x120",
+          "quantite": 1,
+          "unite": "palette",
+          "prix_unitaire_ht": 48.14,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 48.14,
+          "code": null
+        },
+        {
+          "designation": "Transport palette 80x120",
+          "quantite": 4,
+          "unite": "palette",
+          "prix_unitaire_ht": 94.51,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 378.04,
+          "code": null
+        },
+        {
+          "designation": "Affrètement camion 20 m3",
+          "quantite": 1,
+          "unite": "jour",
+          "prix_unitaire_ht": 382.68,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 382.68,
+          "code": null
+        },
+        {
+          "designation": "Supplément hayon",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 16.03,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 32.06,
+          "code": "REF-16068"
+        },
+        {
+          "designation": "Course express intra-muros",
+          "quantite": 6,
+          "unite": "course",
+          "prix_unitaire_ht": 34.44,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 206.64,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1061.19,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 1061.19,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 1061.19,
+      "acompte": null,
+      "net_a_payer": 1061.19,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-58303",
+        "bon_livraison": "BL-280260",
+        "reference_paiement": "FC20260089"
+      },
+      "mentions": [
+        "TVA non applicable, art. 293 B du CGI",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "Factur-X profil EN 16931 : lire le XML joint (factur-x.xml), le PDF n'est qu'une vue",
+    "le XML fait foi en cas d'écart avec la vue"
+  ],
+  "facturx": {
+    "profil": "EN 16931",
+    "piece_jointe": "factur-x.xml",
+    "type_code": "380"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

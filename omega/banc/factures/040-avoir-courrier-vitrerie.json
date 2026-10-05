@@ -1,0 +1,90 @@
+{
+  "fichier": "040-avoir-courrier-vitrerie.pdf",
+  "format": "pdf",
+  "type": "avoir",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "avoir",
+      "numero": "F202606-312",
+      "facture_rectifiee": "F202606-309",
+      "date_emission": "2026-06-27",
+      "date_echeance": null,
+      "date_livraison": "2026-06-25",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Vitrerie Serval EURL",
+        "siren": "977355254",
+        "siret": "97735525488628",
+        "tva_intracom": "FR20977355254",
+        "adresse": "12 chemin de la Fontaine",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7690068388032829960221257",
+        "bic": "MJLBFRPP",
+        "courriel": "compta@vitrerie-serval.example",
+        "telephone": "03 84 18 67 33"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Déplacement",
+          "quantite": -6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 42.75,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -256.5,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": -256.5,
+      "tva": [
+        {
+          "taux": 20,
+          "base": -256.5,
+          "montant": -51.3
+        }
+      ],
+      "total_tva": -51.3,
+      "total_ttc": -307.8,
+      "acompte": null,
+      "net_a_payer": -307.8,
+      "mode_paiement": "Remboursement par virement",
+      "references": {
+        "commande": "BC-93659",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "avoir : montants négatifs, référence à la facture rectifiée",
+    "pas de date d'échéance"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

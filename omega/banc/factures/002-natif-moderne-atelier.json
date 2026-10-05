@@ -1,0 +1,155 @@
+{
+  "fichier": "002-natif-moderne-atelier.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC100370",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-20",
+      "date_echeance": "2026-10-05",
+      "date_livraison": "2026-09-15",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Atelier Mirvault & Fils SARL",
+        "siren": "998237812",
+        "siret": "99823781269052",
+        "tva_intracom": "FR50998237812",
+        "adresse": "16 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "iban": "FR7696223193033986732420108",
+        "bic": "ZDVZFRPP",
+        "courriel": "compta@atelier-mirvault-fils.example",
+        "telephone": "01 13 90 20 55"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Plinthe chêne 10 cm",
+          "quantite": 14,
+          "unite": "ml",
+          "prix_unitaire_ht": 7.92,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 110.88,
+          "code": "REF-21149"
+        },
+        {
+          "designation": "Fenêtre bois 2 vantaux 120x135",
+          "quantite": 15,
+          "unite": "u",
+          "prix_unitaire_ht": 446.28,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 6694.2,
+          "code": "REF-79063"
+        },
+        {
+          "designation": "Quincaillerie de pose",
+          "quantite": 6,
+          "unite": "lot",
+          "prix_unitaire_ht": 19.38,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 116.28,
+          "code": null
+        },
+        {
+          "designation": "Plinthe chêne 10 cm",
+          "quantite": 17,
+          "unite": "ml",
+          "prix_unitaire_ht": 9.12,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 155.04,
+          "code": null
+        },
+        {
+          "designation": "Plinthe chêne 10 cm",
+          "quantite": 27,
+          "unite": "ml",
+          "prix_unitaire_ht": 6.58,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 177.66,
+          "code": "REF-46526"
+        },
+        {
+          "designation": "Fenêtre bois 2 vantaux 120x135",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 426.56,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 2559.36,
+          "code": "REF-75676"
+        },
+        {
+          "designation": "Fenêtre bois 2 vantaux 120x135",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 641.32,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 3206.6,
+          "code": "REF-64337"
+        }
+      ],
+      "remise_globale_pct": 2,
+      "remise_globale": 260.4,
+      "total_ht": 12759.62,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 548.66,
+          "montant": 109.73
+        },
+        {
+          "taux": 10,
+          "base": 12210.96,
+          "montant": 1221.1
+        }
+      ],
+      "total_tva": 1330.83,
+      "total_ttc": 14090.45,
+      "acompte": null,
+      "net_a_payer": 14090.45,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-49519",
+        "bon_livraison": "BL-819661",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remise globale",
+    "plusieurs taux de TVA"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,123 @@
+{
+  "fichier": "080-ubl-xml-nettoyage.xml",
+  "format": "xml",
+  "type": "ubl",
+  "gabarit": null,
+  "qualite": "native",
+  "pages": null,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC202609-278",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-13",
+      "date_echeance": "2026-09-13",
+      "date_livraison": "2026-09-09",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Nettoyage Clairpont SAS",
+        "siren": "972223614",
+        "siret": "97222361401916",
+        "tva_intracom": "FR67972223614",
+        "adresse": "9 route de la Plaine",
+        "code_postal": "63000",
+        "ville": "Clermont-Ferrand",
+        "pays": "FR",
+        "iban": "FR7690947489636203669656566",
+        "bic": "JVNXFRPPXXX",
+        "courriel": "compta@nettoyage-clairpont.example",
+        "telephone": "03 69 01 48 26"
+      },
+      "client": {
+        "raison_sociale": "Boutique Fil & Trame EURL",
+        "siren": "948898374",
+        "siret": "94889837456998",
+        "tva_intracom": "FR50948898374",
+        "adresse": "33 place du Marché-Neuf",
+        "code_postal": "49000",
+        "ville": "Angers",
+        "pays": "FR",
+        "code_client": "C98060"
+      },
+      "lignes": [
+        {
+          "designation": "Nettoyage bureaux hebdomadaire",
+          "quantite": 4,
+          "unite": "mois",
+          "prix_unitaire_ht": 283.79,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1135.16,
+          "code": "REF-97491"
+        },
+        {
+          "designation": "Vérification extincteurs",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 11.1,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 199.8,
+          "code": "REF-94177"
+        },
+        {
+          "designation": "Produits consommables",
+          "quantite": 5,
+          "unite": "mois",
+          "prix_unitaire_ht": 56.94,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 284.7,
+          "code": "REF-11462"
+        },
+        {
+          "designation": "Recharge extincteur 6 L",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 38.03,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 418.33,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 2037.99,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 2037.99,
+          "montant": 407.6
+        }
+      ],
+      "total_tva": 407.6,
+      "total_ttc": 2445.59,
+      "acompte": null,
+      "net_a_payer": 2445.59,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": "BC-63282",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "UBL 2.1 Invoice (EN 16931) : XML seul, sans PDF"
+  ],
+  "ubl": {
+    "racine": "Invoice",
+    "customization": "urn:cen.eu:en16931:2017"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

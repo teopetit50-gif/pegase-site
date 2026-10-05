@@ -1,0 +1,159 @@
+{
+  "fichier": "053-scanne-classique-brossard-velane.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "classique",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202606-215",
+      "facture_rectifiee": null,
+      "date_emission": "2026-06-27",
+      "date_echeance": "2026-06-27",
+      "date_livraison": "2026-06-27",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Brossard-Vélane Matériaux SAS",
+        "siren": "943661264",
+        "siret": "94366126482001",
+        "tva_intracom": "FR04943661264",
+        "adresse": "75 boulevard de la Marne",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7691134950227997224268366",
+        "bic": "YBAJFRPPXXX",
+        "courriel": "compta@brossard-velane-materiaux.example",
+        "telephone": "04 39 66 30 91"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 1,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 25.64,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 25.64,
+          "code": "REF-73654"
+        },
+        {
+          "designation": "Sac ciment CEM II 35 kg",
+          "quantite": 6,
+          "unite": "sac",
+          "prix_unitaire_ht": 8.28,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 49.68,
+          "code": "REF-52967"
+        },
+        {
+          "designation": "Sable 0/4 lavé",
+          "quantite": 4,
+          "unite": "tonne",
+          "prix_unitaire_ht": 49.79,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 199.16,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 105.79,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 634.74,
+          "code": null
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 113.3,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 226.6,
+          "code": null
+        },
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 1.77,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 28.32,
+          "code": "REF-08839"
+        },
+        {
+          "designation": "Laine de verre 100 mm rouleau",
+          "quantite": 3,
+          "unite": "rouleau",
+          "prix_unitaire_ht": 24.77,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 74.31,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 7.03,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 126.54,
+          "code": "REF-82077"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1364.99,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1364.99,
+          "montant": 273
+        }
+      ],
+      "total_tva": 273,
+      "total_ttc": 1637.99,
+      "acompte": null,
+      "net_a_payer": 1637.99,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-51678",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité moyenne : pas de couche texte, rotation, bruit"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

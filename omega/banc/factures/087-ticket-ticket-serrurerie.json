@@ -1,0 +1,171 @@
+{
+  "fichier": "087-ticket-ticket-serrurerie.pdf",
+  "format": "pdf",
+  "type": "ticket",
+  "gabarit": "ticket",
+  "qualite": "bonne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F2026-0277",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-22",
+      "date_echeance": "2026-05-22",
+      "date_livraison": "2026-05-22",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Serrurerie Vendrel EI",
+        "siren": "981327240",
+        "siret": "98132724055136",
+        "tva_intracom": null,
+        "adresse": "106 chemin de la Fontaine",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "iban": "FR7696407962677595462598362",
+        "bic": "TFPJFRPP",
+        "courriel": "compta@serrurerie-vendrel.example",
+        "telephone": "04 67 00 39 88"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Cadenas laiton 40 mm",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 12.97,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 220.49,
+          "code": "REF-65264"
+        },
+        {
+          "designation": "Reproduction de clé",
+          "quantite": 22,
+          "unite": "u",
+          "prix_unitaire_ht": 8.82,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 194.04,
+          "code": "REF-56273"
+        },
+        {
+          "designation": "Cylindre européen 30x30",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 33.81,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 67.62,
+          "code": "REF-01584"
+        },
+        {
+          "designation": "Reproduction de clé",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 6.13,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 36.78,
+          "code": null
+        },
+        {
+          "designation": "Cadenas laiton 40 mm",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 13.3,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 79.8,
+          "code": "REF-67320"
+        },
+        {
+          "designation": "Cheville à frapper 8x80 (100)",
+          "quantite": 3,
+          "unite": "boîte",
+          "prix_unitaire_ht": 16.99,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 50.97,
+          "code": "REF-27471"
+        },
+        {
+          "designation": "Cadenas laiton 40 mm",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 13.69,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 314.87,
+          "code": null
+        },
+        {
+          "designation": "Cylindre européen 30x30",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 28.09,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 196.63,
+          "code": null
+        },
+        {
+          "designation": "Déplacement dépannage",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 68.31,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 409.86,
+          "code": "REF-07944"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1571.06,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 1571.06,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 1571.06,
+      "acompte": null,
+      "net_a_payer": 1571.06,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA non applicable, art. 293 B du CGI",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "ticket de caisse : montants lignes en TTC, totaux HT/TVA en pied, pas d'IBAN",
+    "ticket photographié/numérisé (qualité bonne)"
+  ],
+  "lignes_affichees_en": "TTC",
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

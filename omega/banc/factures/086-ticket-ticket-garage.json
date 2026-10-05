@@ -1,0 +1,100 @@
+{
+  "fichier": "086-ticket-ticket-garage.pdf",
+  "format": "pdf",
+  "type": "ticket",
+  "gabarit": "ticket",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202601-403",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-08",
+      "date_echeance": "2026-01-08",
+      "date_livraison": "2026-01-08",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Garage Pontarlin SARL",
+        "siren": "996775862",
+        "siret": "99677586267129",
+        "tva_intracom": "FR55996775862",
+        "adresse": "87 parc d'activités du Levant",
+        "code_postal": "86000",
+        "ville": "Poitiers",
+        "pays": "FR",
+        "iban": "FR7695289242249434294635089",
+        "bic": "KBUBFRPP",
+        "courriel": "compta@garage-pontarlin.example",
+        "telephone": "03 76 50 65 80"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Main-d'œuvre atelier",
+          "quantite": 42,
+          "unite": "h",
+          "prix_unitaire_ht": 64.76,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2719.92,
+          "code": null
+        },
+        {
+          "designation": "Plaquettes de frein avant",
+          "quantite": 6,
+          "unite": "jeu",
+          "prix_unitaire_ht": 68.62,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 411.72,
+          "code": "REF-14579"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 3131.64,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 3131.64,
+          "montant": 626.33
+        }
+      ],
+      "total_tva": 626.33,
+      "total_ttc": 3757.97,
+      "acompte": null,
+      "net_a_payer": 3757.97,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "2026202601403"
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "ticket de caisse : montants lignes en TTC, totaux HT/TVA en pied, pas d'IBAN"
+  ],
+  "lignes_affichees_en": "TTC",
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

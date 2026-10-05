@@ -1,0 +1,130 @@
+{
+  "fichier": "094-manuscrite-manuscrit-chauffage.pdf",
+  "format": "pdf",
+  "type": "manuscrite",
+  "gabarit": "manuscrit",
+  "qualite": "bonne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F2026-0347",
+      "facture_rectifiee": null,
+      "date_emission": "2026-02-18",
+      "date_echeance": "2026-02-18",
+      "date_livraison": null,
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Chauffage Thermoval SARL",
+        "siren": "935648899",
+        "siret": "93564889966050",
+        "tva_intracom": "FR91935648899",
+        "adresse": "78 zone artisanale des Quatre-Vents",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "iban": "FR7697386449264214002562589",
+        "bic": "SBMXFRPPXXX",
+        "courriel": "compta@chauffage-thermoval.example",
+        "telephone": "04 18 81 51 06"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Entretien chaudière gaz",
+          "quantite": 6,
+          "unite": "forfait",
+          "prix_unitaire_ht": 119.25,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 715.5,
+          "code": "REF-52823"
+        },
+        {
+          "designation": "Intervention plombier",
+          "quantite": 22,
+          "unite": "h",
+          "prix_unitaire_ht": 55.23,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1215.06,
+          "code": null
+        },
+        {
+          "designation": "Entretien chaudière gaz",
+          "quantite": 4,
+          "unite": "forfait",
+          "prix_unitaire_ht": 115.5,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 462,
+          "code": "REF-34612"
+        },
+        {
+          "designation": "Intervention plombier",
+          "quantite": 29,
+          "unite": "h",
+          "prix_unitaire_ht": 58,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1682,
+          "code": "REF-58173"
+        },
+        {
+          "designation": "Intervention plombier",
+          "quantite": 12,
+          "unite": "h",
+          "prix_unitaire_ht": 67.24,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 806.88,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 4881.44,
+      "tva": [
+        {
+          "taux": 10,
+          "base": 4881.44,
+          "montant": 488.14
+        }
+      ],
+      "total_tva": 488.14,
+      "total_ttc": 5369.58,
+      "acompte": null,
+      "net_a_payer": 5369.58,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "facture manuscrite sur carnet pré-imprimé, numérisée (qualité bonne)",
+    "aucun IBAN sur le document"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

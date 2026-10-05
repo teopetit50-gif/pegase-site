@@ -1,0 +1,124 @@
+{
+  "fichier": "045-scanne-classique-atelier.pdf",
+  "format": "pdf",
+  "type": "scanne",
+  "gabarit": "classique",
+  "qualite": "bonne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC100403",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-09",
+      "date_echeance": "2026-09-09",
+      "date_livraison": "2026-09-06",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Atelier Mirvault & Fils SARL",
+        "siren": "998237812",
+        "siret": "99823781269052",
+        "tva_intracom": "FR50998237812",
+        "adresse": "16 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "iban": "FR7696223193033986732420108",
+        "bic": "ZDVZFRPP",
+        "courriel": "compta@atelier-mirvault-fils.example",
+        "telephone": "01 13 90 20 55"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Fenêtre bois 2 vantaux 120x135",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 486.27,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 11184.21,
+          "code": "REF-92057"
+        },
+        {
+          "designation": "Pose et dépose",
+          "quantite": 19,
+          "unite": "h",
+          "prix_unitaire_ht": 58.62,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1113.78,
+          "code": "REF-36597"
+        },
+        {
+          "designation": "Pose et dépose",
+          "quantite": 10,
+          "unite": "h",
+          "prix_unitaire_ht": 56.96,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 569.6,
+          "code": null
+        },
+        {
+          "designation": "Plinthe chêne 10 cm",
+          "quantite": 53,
+          "unite": "ml",
+          "prix_unitaire_ht": 9,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 477,
+          "code": "REF-95718"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 13344.59,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 477,
+          "montant": 95.4
+        },
+        {
+          "taux": 10,
+          "base": 12867.59,
+          "montant": 1286.76
+        }
+      ],
+      "total_tva": 1382.16,
+      "total_ttc": 14726.75,
+      "acompte": null,
+      "net_a_payer": 14726.75,
+      "mode_paiement": "Prélèvement SEPA",
+      "references": {
+        "commande": "BC-31197",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "numérisation de qualité bonne : pas de couche texte, rotation, bruit"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

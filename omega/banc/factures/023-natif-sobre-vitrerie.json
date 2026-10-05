@@ -1,0 +1,135 @@
+{
+  "fichier": "023-natif-sobre-vitrerie.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F202605-311",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-26",
+      "date_echeance": "2026-05-26",
+      "date_livraison": "2026-05-26",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Vitrerie Serval EURL",
+        "siren": "977355254",
+        "siret": "97735525488628",
+        "tva_intracom": "FR20977355254",
+        "adresse": "12 chemin de la Fontaine",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7690068388032829960221257",
+        "bic": "MJLBFRPP",
+        "courriel": "compta@vitrerie-serval.example",
+        "telephone": "03 84 18 67 33"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Miroir argenté 6 mm",
+          "quantite": 25.5,
+          "unite": "m2",
+          "prix_unitaire_ht": 80.36,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 2049.18,
+          "code": "REF-57923"
+        },
+        {
+          "designation": "Double vitrage 4/16/4 sur mesure",
+          "quantite": 7.5,
+          "unite": "m2",
+          "prix_unitaire_ht": 189.22,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1419.15,
+          "code": "REF-90425"
+        },
+        {
+          "designation": "Remplacement vitrage cassé",
+          "quantite": 29,
+          "unite": "h",
+          "prix_unitaire_ht": 68.24,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1978.96,
+          "code": "REF-50037"
+        },
+        {
+          "designation": "Miroir argenté 6 mm",
+          "quantite": 4,
+          "unite": "m2",
+          "prix_unitaire_ht": 118.64,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 474.56,
+          "code": null
+        },
+        {
+          "designation": "Déplacement",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 45.37,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 90.74,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 6012.59,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 2614.48,
+          "montant": 522.9
+        },
+        {
+          "taux": 10,
+          "base": 3398.11,
+          "montant": 339.81
+        }
+      ],
+      "total_tva": 862.71,
+      "total_ttc": 6875.3,
+      "acompte": 2750.12,
+      "net_a_payer": 4125.18,
+      "mode_paiement": "Prélèvement SEPA",
+      "references": {
+        "commande": "BC-51690",
+        "bon_livraison": null,
+        "reference_paiement": "F202605311"
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "acompte déduit : net à payer différent du TTC",
+    "plusieurs taux de TVA"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

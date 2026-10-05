@@ -1,0 +1,108 @@
+{
+  "fichier": "079-ubl-xml-lumiflux.xml",
+  "format": "xml",
+  "type": "ubl",
+  "gabarit": null,
+  "qualite": "native",
+  "pages": null,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0204",
+      "facture_rectifiee": null,
+      "date_emission": "2026-06-22",
+      "date_echeance": "2026-07-07",
+      "date_livraison": "2026-06-19",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Lumiflux Énergie SA",
+        "siren": "992334169",
+        "siret": "99233416930054",
+        "tva_intracom": "FR60992334169",
+        "adresse": "62 rue Camille-Verdier",
+        "code_postal": "59000",
+        "ville": "Lille",
+        "pays": "FR",
+        "iban": "FR7692967066114874077878744",
+        "bic": "DEFDFRPPXXX",
+        "courriel": "compta@lumiflux-energie.example",
+        "telephone": "05 25 54 08 34"
+      },
+      "client": {
+        "raison_sociale": "Garage Électrique Solvan SARL",
+        "siren": "975600248",
+        "siret": "97560024804285",
+        "tva_intracom": "FR65975600248",
+        "adresse": "42 quai des Chartrons",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "code_client": "C33428"
+      },
+      "lignes": [
+        {
+          "designation": "Abonnement électricité 12 kVA",
+          "quantite": 3,
+          "unite": "mois",
+          "prix_unitaire_ht": 17.94,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 53.82,
+          "code": "REF-83619"
+        },
+        {
+          "designation": "Redevance assainissement",
+          "quantite": 61,
+          "unite": "m3",
+          "prix_unitaire_ht": 1.93,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 117.73,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 171.55,
+      "tva": [
+        {
+          "taux": 10,
+          "base": 117.73,
+          "montant": 11.77
+        },
+        {
+          "taux": 5.5,
+          "base": 53.82,
+          "montant": 2.96
+        }
+      ],
+      "total_tva": 14.73,
+      "total_ttc": 186.28,
+      "acompte": null,
+      "net_a_payer": 186.28,
+      "mode_paiement": "Virement à 30 jours",
+      "references": {
+        "commande": "BC-10117",
+        "bon_livraison": "BL-778537",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "UBL 2.1 Invoice (EN 16931) : XML seul, sans PDF"
+  ],
+  "ubl": {
+    "racine": "Invoice",
+    "customization": "urn:cen.eu:en16931:2017"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

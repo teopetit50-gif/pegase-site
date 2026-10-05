@@ -1,0 +1,123 @@
+{
+  "fichier": "077-ubl-xml-papeterie.xml",
+  "format": "xml",
+  "type": "ubl",
+  "gabarit": null,
+  "qualite": "native",
+  "pages": null,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "INV-2026-0071",
+      "facture_rectifiee": null,
+      "date_emission": "2026-04-04",
+      "date_echeance": "2026-04-04",
+      "date_livraison": "2026-04-03",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Papeterie Marcenac SARL",
+        "siren": "929595312",
+        "siret": "92959531205298",
+        "tva_intracom": "FR58929595312",
+        "adresse": "115 impasse des Peupliers",
+        "code_postal": "72000",
+        "ville": "Le Mans",
+        "pays": "FR",
+        "iban": "FR7699631792043412270896361",
+        "bic": "TUZEFRPP",
+        "courriel": "compta@papeterie-marcenac.example",
+        "telephone": "05 61 34 25 72"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Pantalon de travail multipoches",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 36.61,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 219.66,
+          "code": null
+        },
+        {
+          "designation": "Chaussures de sécurité S3",
+          "quantite": 3,
+          "unite": "paire",
+          "prix_unitaire_ht": 51.11,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 153.33,
+          "code": "REF-95108"
+        },
+        {
+          "designation": "Cartouche encre noire",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 36.52,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 693.88,
+          "code": "REF-73332"
+        },
+        {
+          "designation": "Pantalon de travail multipoches",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 32.18,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 321.8,
+          "code": "REF-94866"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1388.67,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1388.67,
+          "montant": 277.73
+        }
+      ],
+      "total_tva": 277.73,
+      "total_ttc": 1666.4,
+      "acompte": null,
+      "net_a_payer": 1666.4,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "INV20260071"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "UBL 2.1 Invoice (EN 16931) : XML seul, sans PDF"
+  ],
+  "ubl": {
+    "racine": "Invoice",
+    "customization": "urn:cen.eu:en16931:2017"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

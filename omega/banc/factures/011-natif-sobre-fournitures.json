@@ -1,0 +1,107 @@
+{
+  "fichier": "011-natif-sobre-fournitures.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC100307",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-23",
+      "date_echeance": "2026-10-23",
+      "date_livraison": "2026-09-17",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Fournitures Médicales Sorinel SAS",
+        "siren": "932305428",
+        "siret": "93230542820577",
+        "tva_intracom": "FR60932305428",
+        "adresse": "43 route de la Plaine",
+        "code_postal": "68100",
+        "ville": "Mulhouse",
+        "pays": "FR",
+        "iban": "FR7696686054959200550119458",
+        "bic": "EYTGFRPPXXX",
+        "courriel": "compta@fournitures-medicales-sorinel.example",
+        "telephone": "04 24 13 79 39"
+      },
+      "client": {
+        "raison_sociale": "Cabinet Dentaire des Tilleuls SELARL",
+        "siren": "924961014",
+        "siret": "92496101445814",
+        "tva_intracom": "FR77924961014",
+        "adresse": "5 avenue du Bois-Joli",
+        "code_postal": "67000",
+        "ville": "Strasbourg",
+        "pays": "FR",
+        "code_client": "C95117"
+      },
+      "lignes": [
+        {
+          "designation": "Compresses stériles 10x10 (100)",
+          "quantite": 6,
+          "unite": "boîte",
+          "prix_unitaire_ht": 8.32,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 49.92,
+          "code": null
+        },
+        {
+          "designation": "Solution hydroalcoolique 1 L",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 10.55,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 179.35,
+          "code": null
+        },
+        {
+          "designation": "Compresses stériles 10x10 (100)",
+          "quantite": 1,
+          "unite": "boîte",
+          "prix_unitaire_ht": 6.56,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 6.56,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 235.83,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 235.83,
+          "montant": 47.17
+        }
+      ],
+      "total_tva": 47.17,
+      "total_ttc": 283,
+      "acompte": null,
+      "net_a_payer": 283,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": "BC-30424",
+        "bon_livraison": "BL-764540",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,150 @@
+{
+  "fichier": "076-facturx-avoir-courrier-signaletique.pdf",
+  "format": "pdf",
+  "type": "facturx-avoir",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "avoir",
+      "numero": "100743",
+      "facture_rectifiee": "100724",
+      "date_emission": "2026-09-15",
+      "date_echeance": null,
+      "date_livraison": "2026-09-14",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Signalétique Dorvane SAS",
+        "siren": "956321244",
+        "siret": "95632124496700",
+        "tva_intracom": "FR79956321244",
+        "adresse": "73 rue Pasteur",
+        "code_postal": "72000",
+        "ville": "Le Mans",
+        "pays": "FR",
+        "iban": "FR7697154070893798937491246",
+        "bic": "ATYUFRPPXXX",
+        "courriel": "compta@signaletique-dorvane.example",
+        "telephone": "01 27 79 97 58"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Panneau dibond 60x80",
+          "quantite": -23,
+          "unite": "u",
+          "prix_unitaire_ht": 76.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -1764.79,
+          "code": null
+        },
+        {
+          "designation": "Livre broché 120 p.",
+          "quantite": -9,
+          "unite": "u",
+          "prix_unitaire_ht": 8.99,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": -80.91,
+          "code": "REF-34158"
+        },
+        {
+          "designation": "Cartes de visite 350 g (500)",
+          "quantite": -1,
+          "unite": "lot",
+          "prix_unitaire_ht": 56.97,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -56.97,
+          "code": null
+        },
+        {
+          "designation": "Enseigne bâche 3x1 m",
+          "quantite": -3,
+          "unite": "u",
+          "prix_unitaire_ht": 141.23,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -423.69,
+          "code": "REF-23227"
+        },
+        {
+          "designation": "Panneau dibond 60x80",
+          "quantite": -22,
+          "unite": "u",
+          "prix_unitaire_ht": 50.23,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -1105.06,
+          "code": null
+        },
+        {
+          "designation": "Cartes de visite 350 g (500)",
+          "quantite": -5,
+          "unite": "lot",
+          "prix_unitaire_ht": 49.28,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": -246.4,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": -183.89,
+      "total_ht": -3493.93,
+      "tva": [
+        {
+          "taux": 20,
+          "base": -3417.07,
+          "montant": -683.41
+        },
+        {
+          "taux": 5.5,
+          "base": -76.86,
+          "montant": -4.23
+        }
+      ],
+      "total_tva": -687.64,
+      "total_ttc": -4181.57,
+      "acompte": null,
+      "net_a_payer": -4181.57,
+      "mode_paiement": "Remboursement par virement",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "100743"
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "Factur-X profil EN 16931 : lire le XML joint (factur-x.xml), le PDF n'est qu'une vue",
+    "le XML fait foi en cas d'écart avec la vue"
+  ],
+  "facturx": {
+    "profil": "EN 16931",
+    "piece_jointe": "factur-x.xml",
+    "type_code": "381"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

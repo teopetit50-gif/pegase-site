@@ -1,0 +1,107 @@
+{
+  "fichier": "015-natif-sobre-brossard-velane.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202609-202",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-23",
+      "date_echeance": "2026-10-23",
+      "date_livraison": "2026-09-18",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Brossard-Vélane Matériaux SAS",
+        "siren": "943661264",
+        "siret": "94366126482001",
+        "tva_intracom": "FR04943661264",
+        "adresse": "75 boulevard de la Marne",
+        "code_postal": "69007",
+        "ville": "Lyon",
+        "pays": "FR",
+        "iban": "FR7691134950227997224268366",
+        "bic": "YBAJFRPPXXX",
+        "courriel": "compta@brossard-velane-materiaux.example",
+        "telephone": "04 39 66 30 91"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Parpaing creux 20x20x50",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 1.48,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 35.52,
+          "code": null
+        },
+        {
+          "designation": "Plaque de plâtre BA13 2,5 m",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 6.96,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 90.48,
+          "code": "REF-57070"
+        },
+        {
+          "designation": "Livraison grue",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 125.19,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 125.19,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 251.19,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 251.19,
+          "montant": 50.24
+        }
+      ],
+      "total_tva": 50.24,
+      "total_ttc": 301.43,
+      "acompte": null,
+      "net_a_payer": 301.43,
+      "mode_paiement": "Prélèvement SEPA",
+      "references": {
+        "commande": "BC-35997",
+        "bon_livraison": null,
+        "reference_paiement": "2026202609202"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

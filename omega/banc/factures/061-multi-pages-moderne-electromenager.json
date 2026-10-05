@@ -1,0 +1,700 @@
+{
+  "fichier": "061-multi-pages-moderne-electromenager.pdf",
+  "format": "pdf",
+  "type": "multi-pages",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 3,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FAC202609-134",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-08",
+      "date_echeance": "2026-10-23",
+      "date_livraison": "2026-09-05",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Électroménager Pro Rochebrune SARL",
+        "siren": "922874797",
+        "siret": "92287479718894",
+        "tva_intracom": "FR60922874797",
+        "adresse": "20 avenue du Bois-Joli",
+        "code_postal": "63000",
+        "ville": "Clermont-Ferrand",
+        "pays": "FR",
+        "iban": "FR7697292627707471904928780",
+        "bic": "BMFVFRPP",
+        "courriel": "compta@electromenager-pro-rochebrune.example",
+        "telephone": "04 61 07 31 46"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 4.83,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 77.28,
+          "code": null
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 10.64,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 54.26,
+          "code": null
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 68.18,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 613.62,
+          "code": null
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 9.07,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 69.39,
+          "code": "REF-63132"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 4.65,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 9.3,
+          "code": "REF-10989"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 6.05,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 5.14,
+          "code": "REF-00347"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 69.59,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 487.13,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 4.78,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 47.32,
+          "code": "REF-08552"
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 27,
+          "unite": "h",
+          "prix_unitaire_ht": 57.57,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1554.39,
+          "code": "REF-33350"
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 8.65,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 16.43,
+          "code": "REF-90254"
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 16.07,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 351.13,
+          "code": null
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 5,
+          "unite": "h",
+          "prix_unitaire_ht": 53.81,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 269.05,
+          "code": null
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 20,
+          "unite": "u",
+          "prix_unitaire_ht": 70.65,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 1201.05,
+          "code": "REF-48805"
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 8,
+          "unite": "u",
+          "prix_unitaire_ht": 17.06,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 136.48,
+          "code": null
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 22,
+          "unite": "u",
+          "prix_unitaire_ht": 13.74,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 302.28,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 3,
+          "unite": "u",
+          "prix_unitaire_ht": 4.87,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 13.88,
+          "code": null
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 56.75,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 113.5,
+          "code": "REF-45569"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 7.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 146.87,
+          "code": "REF-93225"
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 16,
+          "unite": "u",
+          "prix_unitaire_ht": 71.05,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1136.8,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 14,
+          "unite": "u",
+          "prix_unitaire_ht": 18.07,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 252.98,
+          "code": "REF-71922"
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 23,
+          "unite": "h",
+          "prix_unitaire_ht": 57.5,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1322.5,
+          "code": "REF-12326"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 21,
+          "unite": "u",
+          "prix_unitaire_ht": 85.56,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1796.76,
+          "code": "REF-89899"
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 24,
+          "unite": "h",
+          "prix_unitaire_ht": 56.67,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 1292.08,
+          "code": null
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 10,
+          "unite": "h",
+          "prix_unitaire_ht": 60.04,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 600.4,
+          "code": "REF-98362"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 75.67,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 454.02,
+          "code": "REF-26559"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 85.57,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 145.47,
+          "code": null
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 32,
+          "unite": "h",
+          "prix_unitaire_ht": 55.62,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1779.84,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 18.01,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 275.55,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 13.48,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 274.99,
+          "code": "REF-43382"
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 12.16,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 80.86,
+          "code": null
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 64.41,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 367.14,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 14,
+          "unite": "u",
+          "prix_unitaire_ht": 6.54,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 91.56,
+          "code": null
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 13,
+          "unite": "h",
+          "prix_unitaire_ht": 50.84,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 660.92,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 4,
+          "unite": "u",
+          "prix_unitaire_ht": 13.26,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 47.74,
+          "code": null
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 19,
+          "unite": "u",
+          "prix_unitaire_ht": 68.66,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1304.54,
+          "code": "REF-40115"
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 23,
+          "unite": "u",
+          "prix_unitaire_ht": 14.45,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 332.35,
+          "code": null
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 91.75,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 183.5,
+          "code": "REF-25418"
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 6,
+          "unite": "u",
+          "prix_unitaire_ht": 14.34,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 86.04,
+          "code": null
+        },
+        {
+          "designation": "Disjoncteur 20 A courbe C",
+          "quantite": 22,
+          "unite": "u",
+          "prix_unitaire_ht": 13.74,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 256.94,
+          "code": null
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 23,
+          "unite": "h",
+          "prix_unitaire_ht": 58.74,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 1215.92,
+          "code": "REF-26262"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 81.95,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 811.31,
+          "code": "REF-64430"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 73.31,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 659.79,
+          "code": null
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 5,
+          "unite": "u",
+          "prix_unitaire_ht": 80.91,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 364.1,
+          "code": "REF-39754"
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 55.36,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 473.33,
+          "code": null
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 54.64,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 546.4,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 12,
+          "unite": "u",
+          "prix_unitaire_ht": 16.78,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 201.36,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 6.38,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 108.46,
+          "code": null
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 54,
+          "unite": "h",
+          "prix_unitaire_ht": 60.16,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 2923.78,
+          "code": "REF-51696"
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 22,
+          "unite": "u",
+          "prix_unitaire_ht": 5.28,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 110.35,
+          "code": "REF-63642"
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 11.18,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 22.36,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 12.96,
+          "remise_pct": 5,
+          "taux_tva": 20,
+          "montant_ht": 123.12,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 13.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 96.11,
+          "code": null
+        },
+        {
+          "designation": "Main-d'œuvre électricien",
+          "quantite": 26,
+          "unite": "h",
+          "prix_unitaire_ht": 53.3,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1385.8,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 21,
+          "unite": "u",
+          "prix_unitaire_ht": 15.8,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 331.8,
+          "code": "REF-47527"
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 66.91,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1137.47,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 17,
+          "unite": "u",
+          "prix_unitaire_ht": 7.68,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 130.56,
+          "code": "REF-71544"
+        },
+        {
+          "designation": "Tableau 3 rangées 39 modules",
+          "quantite": 9,
+          "unite": "u",
+          "prix_unitaire_ht": 56.38,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 507.42,
+          "code": null
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 11,
+          "unite": "u",
+          "prix_unitaire_ht": 86.49,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 951.39,
+          "code": "REF-47750"
+        },
+        {
+          "designation": "Câble R2V 3G2,5 (couronne 100 m)",
+          "quantite": 13,
+          "unite": "u",
+          "prix_unitaire_ht": 82.04,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 959.87,
+          "code": null
+        },
+        {
+          "designation": "Prise 2P+T encastrée blanche",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 5.62,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 56.2,
+          "code": "REF-61126"
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 24,
+          "unite": "u",
+          "prix_unitaire_ht": 16.94,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 345.58,
+          "code": null
+        },
+        {
+          "designation": "Spot LED 7 W orientable",
+          "quantite": 10,
+          "unite": "u",
+          "prix_unitaire_ht": 17.87,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 160.83,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 1591.74,
+      "total_ht": 30243.05,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 30243.05,
+          "montant": 6048.61
+        }
+      ],
+      "total_tva": 6048.61,
+      "total_ttc": 36291.66,
+      "acompte": null,
+      "net_a_payer": 36291.66,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "3 pages, report de sous-total entre les pages",
+    "totaux sur la dernière page"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

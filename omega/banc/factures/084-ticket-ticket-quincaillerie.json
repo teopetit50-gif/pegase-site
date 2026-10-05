@@ -1,0 +1,150 @@
+{
+  "fichier": "084-ticket-ticket-quincaillerie.pdf",
+  "format": "pdf",
+  "type": "ticket",
+  "gabarit": "ticket",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0295",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-12",
+      "date_echeance": "2026-09-12",
+      "date_livraison": "2026-09-12",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Quincaillerie Toribel SAS",
+        "siren": "968546713",
+        "siret": "96854671334410",
+        "tva_intracom": "FR10968546713",
+        "adresse": "21 boulevard de la Marne",
+        "code_postal": "35000",
+        "ville": "Rennes",
+        "pays": "FR",
+        "iban": "FR7690441226631289871239513",
+        "bic": "HZMLFRPPXXX",
+        "courriel": "compta@quincaillerie-toribel.example",
+        "telephone": "04 71 91 03 11"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Cadenas laiton 40 mm",
+          "quantite": 7,
+          "unite": "u",
+          "prix_unitaire_ht": 12.21,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 85.47,
+          "code": "REF-10100"
+        },
+        {
+          "designation": "Vis bois 4x40 (boîte 500)",
+          "quantite": 5,
+          "unite": "boîte",
+          "prix_unitaire_ht": 10.46,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 52.3,
+          "code": "REF-12542"
+        },
+        {
+          "designation": "Reproduction de clé",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 5.01,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 90.18,
+          "code": "REF-41510"
+        },
+        {
+          "designation": "Cadenas laiton 40 mm",
+          "quantite": 12,
+          "unite": "u",
+          "prix_unitaire_ht": 12.08,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 144.96,
+          "code": "REF-49004"
+        },
+        {
+          "designation": "Cylindre européen 30x30",
+          "quantite": 2,
+          "unite": "u",
+          "prix_unitaire_ht": 37.98,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 75.96,
+          "code": null
+        },
+        {
+          "designation": "Déplacement dépannage",
+          "quantite": 3,
+          "unite": "forfait",
+          "prix_unitaire_ht": 47.68,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 143.04,
+          "code": "REF-22058"
+        },
+        {
+          "designation": "Cheville à frapper 8x80 (100)",
+          "quantite": 3,
+          "unite": "boîte",
+          "prix_unitaire_ht": 13.75,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 41.25,
+          "code": "REF-67344"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 633.16,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 633.16,
+          "montant": 126.63
+        }
+      ],
+      "total_tva": 126.63,
+      "total_ttc": 759.79,
+      "acompte": null,
+      "net_a_payer": 759.79,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "ticket de caisse : montants lignes en TTC, totaux HT/TVA en pied, pas d'IBAN"
+  ],
+  "lignes_affichees_en": "TTC",
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

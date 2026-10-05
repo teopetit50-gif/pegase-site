@@ -1,0 +1,131 @@
+{
+  "fichier": "033-natif-classique-lumiflux.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0202",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-06",
+      "date_echeance": "2026-10-05",
+      "date_livraison": null,
+      "periode": "du 01/02/2026 au 30/06/2026",
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Lumiflux Énergie SA",
+        "siren": "992334169",
+        "siret": "99233416930054",
+        "tva_intracom": "FR60992334169",
+        "adresse": "62 rue Camille-Verdier",
+        "code_postal": "59000",
+        "ville": "Lille",
+        "pays": "FR",
+        "iban": "FR7692967066114874077878744",
+        "bic": "DEFDFRPPXXX",
+        "courriel": "compta@lumiflux-energie.example",
+        "telephone": "05 25 54 08 34"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Consommation heures creuses",
+          "quantite": 461,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.1557,
+          "remise_pct": 10,
+          "taux_tva": 20,
+          "montant_ht": 64.6,
+          "code": "REF-32317"
+        },
+        {
+          "designation": "Contribution tarifaire acheminement",
+          "quantite": 6,
+          "unite": "mois",
+          "prix_unitaire_ht": 2.86,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 17.16,
+          "code": null
+        },
+        {
+          "designation": "Taxe accise électricité",
+          "quantite": 287,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.0325,
+          "remise_pct": 15,
+          "taux_tva": 20,
+          "montant_ht": 7.93,
+          "code": "REF-37882"
+        },
+        {
+          "designation": "Contribution tarifaire acheminement",
+          "quantite": 2,
+          "unite": "mois",
+          "prix_unitaire_ht": 3.08,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 6.16,
+          "code": null
+        },
+        {
+          "designation": "Consommation heures creuses",
+          "quantite": 3556,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.1808,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 642.92,
+          "code": "REF-29925"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 738.77,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 738.77,
+          "montant": 147.75
+        }
+      ],
+      "total_tva": 147.75,
+      "total_ttc": 886.52,
+      "acompte": 265.96,
+      "net_a_payer": 620.56,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "acompte déduit : net à payer différent du TTC",
+    "remises par ligne",
+    "période de consommation, pas de date de livraison"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

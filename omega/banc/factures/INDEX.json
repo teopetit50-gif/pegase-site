@@ -1,0 +1,1311 @@
+{
+  "graine": 2026,
+  "genere_le": "2026-10-05",
+  "nombre": 100,
+  "pieces": [
+    {
+      "numero": "001",
+      "fichier": "001-natif-classique-telecom.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        511.62
+      ]
+    },
+    {
+      "numero": "002",
+      "fichier": "002-natif-moderne-atelier.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        14090.45
+      ]
+    },
+    {
+      "numero": "003",
+      "fichier": "003-natif-sobre-quincaillerie.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        171.67
+      ]
+    },
+    {
+      "numero": "004",
+      "fichier": "004-natif-courrier-agence.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        4743.49
+      ]
+    },
+    {
+      "numero": "005",
+      "fichier": "005-natif-classique-vitrerie.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        11465.93
+      ]
+    },
+    {
+      "numero": "006",
+      "fichier": "006-natif-moderne-plombatec.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        81.53
+      ]
+    },
+    {
+      "numero": "007",
+      "fichier": "007-natif-sobre-fournitures.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        319.75
+      ]
+    },
+    {
+      "numero": "008",
+      "fichier": "008-natif-courrier-location.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1016.28
+      ]
+    },
+    {
+      "numero": "009",
+      "fichier": "009-natif-classique-vetements.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1207.64
+      ]
+    },
+    {
+      "numero": "010",
+      "fichier": "010-natif-moderne-lumiflux.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1451.04
+      ]
+    },
+    {
+      "numero": "011",
+      "fichier": "011-natif-sobre-fournitures.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        283
+      ]
+    },
+    {
+      "numero": "012",
+      "fichier": "012-natif-courrier-vetements.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        781.61
+      ]
+    },
+    {
+      "numero": "013",
+      "fichier": "013-natif-classique-brossard-velane.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        466.63
+      ]
+    },
+    {
+      "numero": "014",
+      "fichier": "014-natif-moderne-brossard-velane.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        823.98
+      ]
+    },
+    {
+      "numero": "015",
+      "fichier": "015-natif-sobre-brossard-velane.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        301.43
+      ]
+    },
+    {
+      "numero": "016",
+      "fichier": "016-natif-courrier-transports.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        17.95
+      ]
+    },
+    {
+      "numero": "017",
+      "fichier": "017-natif-classique-agence.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        5327.92
+      ]
+    },
+    {
+      "numero": "018",
+      "fichier": "018-natif-moderne-serrurerie.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        393.81
+      ]
+    },
+    {
+      "numero": "019",
+      "fichier": "019-natif-sobre-telecom.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        400.51
+      ]
+    },
+    {
+      "numero": "020",
+      "fichier": "020-natif-courrier-eau.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        53.57
+      ]
+    },
+    {
+      "numero": "021",
+      "fichier": "021-natif-classique-lumiflux.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        176.8
+      ]
+    },
+    {
+      "numero": "022",
+      "fichier": "022-natif-moderne-brossard-velane.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        771.48
+      ]
+    },
+    {
+      "numero": "023",
+      "fichier": "023-natif-sobre-vitrerie.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        6875.3
+      ]
+    },
+    {
+      "numero": "024",
+      "fichier": "024-natif-courrier-nordelec.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        4716.52
+      ]
+    },
+    {
+      "numero": "025",
+      "fichier": "025-natif-classique-assurances.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        11732.67
+      ]
+    },
+    {
+      "numero": "026",
+      "fichier": "026-natif-moderne-carrieres.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1304.76
+      ]
+    },
+    {
+      "numero": "027",
+      "fichier": "027-natif-sobre-telecom.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1593.17
+      ]
+    },
+    {
+      "numero": "028",
+      "fichier": "028-natif-courrier-lumiflux.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        881.31
+      ]
+    },
+    {
+      "numero": "029",
+      "fichier": "029-natif-classique-quincaillerie.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        251.09
+      ]
+    },
+    {
+      "numero": "030",
+      "fichier": "030-natif-moderne-papeterie.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1147.33
+      ]
+    },
+    {
+      "numero": "031",
+      "fichier": "031-natif-sobre-peintures.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        501.96
+      ]
+    },
+    {
+      "numero": "032",
+      "fichier": "032-natif-courrier-nordelec.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        2144.54
+      ]
+    },
+    {
+      "numero": "033",
+      "fichier": "033-natif-classique-lumiflux.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        886.52
+      ]
+    },
+    {
+      "numero": "034",
+      "fichier": "034-natif-moderne-carrieres.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        730.03
+      ]
+    },
+    {
+      "numero": "035",
+      "fichier": "035-natif-sobre-peintures.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        938.67
+      ]
+    },
+    {
+      "numero": "036",
+      "fichier": "036-natif-courrier-papeterie.pdf",
+      "type": "natif",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1040.89
+      ]
+    },
+    {
+      "numero": "037",
+      "fichier": "037-natif-classique-telecom.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        73.92
+      ]
+    },
+    {
+      "numero": "038",
+      "fichier": "038-avoir-moderne-securite.pdf",
+      "type": "avoir",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        -49.25
+      ]
+    },
+    {
+      "numero": "039",
+      "fichier": "039-avoir-sobre-serrurerie.pdf",
+      "type": "avoir",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        -224.61
+      ]
+    },
+    {
+      "numero": "040",
+      "fichier": "040-avoir-courrier-vitrerie.pdf",
+      "type": "avoir",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        -307.8
+      ]
+    },
+    {
+      "numero": "041",
+      "fichier": "041-scanne-classique-agence.pdf",
+      "type": "scanne",
+      "gabarit": "classique",
+      "qualite": "bonne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        9618.23
+      ]
+    },
+    {
+      "numero": "042",
+      "fichier": "042-scanne-moderne-carrieres.pdf",
+      "type": "scanne",
+      "gabarit": "moderne",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        731.26
+      ]
+    },
+    {
+      "numero": "043",
+      "fichier": "043-scanne-sobre-nordelec.pdf",
+      "type": "scanne",
+      "gabarit": "sobre",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1167.28
+      ]
+    },
+    {
+      "numero": "044",
+      "fichier": "044-scanne-courrier-papeterie.pdf",
+      "type": "scanne",
+      "gabarit": "courrier",
+      "qualite": "faible",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        2494.84
+      ]
+    },
+    {
+      "numero": "045",
+      "fichier": "045-scanne-classique-atelier.pdf",
+      "type": "scanne",
+      "gabarit": "classique",
+      "qualite": "bonne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        14726.75
+      ]
+    },
+    {
+      "numero": "046",
+      "fichier": "046-scanne-moderne-papeterie.pdf",
+      "type": "scanne",
+      "gabarit": "moderne",
+      "qualite": "bonne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        46.02
+      ]
+    },
+    {
+      "numero": "047",
+      "fichier": "047-scanne-sobre-assurances.pdf",
+      "type": "scanne",
+      "gabarit": "sobre",
+      "qualite": "faible",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        18896.19
+      ]
+    },
+    {
+      "numero": "048",
+      "fichier": "048-scanne-courrier-taxi-colis.pdf",
+      "type": "scanne",
+      "gabarit": "courrier",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1496.61
+      ]
+    },
+    {
+      "numero": "049",
+      "fichier": "049-scanne-classique-saverdun.pdf",
+      "type": "scanne",
+      "gabarit": "classique",
+      "qualite": "faible",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        10141.03
+      ]
+    },
+    {
+      "numero": "050",
+      "fichier": "050-scanne-moderne-assurances.pdf",
+      "type": "scanne",
+      "gabarit": "moderne",
+      "qualite": "faible",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        16763.96
+      ]
+    },
+    {
+      "numero": "051",
+      "fichier": "051-scanne-sobre-vitrerie.pdf",
+      "type": "scanne",
+      "gabarit": "sobre",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        2288.58
+      ]
+    },
+    {
+      "numero": "052",
+      "fichier": "052-scanne-courrier-brossard-velane.pdf",
+      "type": "scanne",
+      "gabarit": "courrier",
+      "qualite": "bonne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        24.6
+      ]
+    },
+    {
+      "numero": "053",
+      "fichier": "053-scanne-classique-brossard-velane.pdf",
+      "type": "scanne",
+      "gabarit": "classique",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1637.99
+      ]
+    },
+    {
+      "numero": "054",
+      "fichier": "054-scanne-moderne-assurances.pdf",
+      "type": "scanne",
+      "gabarit": "moderne",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        15722
+      ]
+    },
+    {
+      "numero": "055",
+      "fichier": "055-scanne-sobre-plombatec.pdf",
+      "type": "scanne",
+      "gabarit": "sobre",
+      "qualite": "bonne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        8235.71
+      ]
+    },
+    {
+      "numero": "056",
+      "fichier": "056-multi-pages-classique-micro-brasserie.pdf",
+      "type": "multi-pages",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 2,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        5469.49
+      ]
+    },
+    {
+      "numero": "057",
+      "fichier": "057-multi-pages-moderne-traiteur.pdf",
+      "type": "multi-pages",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 3,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        10780.37
+      ]
+    },
+    {
+      "numero": "058",
+      "fichier": "058-multi-pages-sobre-boulangerie.pdf",
+      "type": "multi-pages",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 3,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        7665.46
+      ]
+    },
+    {
+      "numero": "059",
+      "fichier": "059-multi-pages-courrier-traiteur.pdf",
+      "type": "multi-pages",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 2,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        10948.68
+      ]
+    },
+    {
+      "numero": "060",
+      "fichier": "060-multi-pages-classique-traiteur.pdf",
+      "type": "multi-pages",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 2,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        2847.89
+      ]
+    },
+    {
+      "numero": "061",
+      "fichier": "061-multi-pages-moderne-electromenager.pdf",
+      "type": "multi-pages",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 3,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        36291.66
+      ]
+    },
+    {
+      "numero": "062",
+      "fichier": "062-multi-pages-sobre-brossard-velane.pdf",
+      "type": "multi-pages",
+      "gabarit": "sobre",
+      "qualite": "moyenne",
+      "pages": 3,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        10823.26
+      ]
+    },
+    {
+      "numero": "063",
+      "fichier": "063-multi-pages-courrier-carrieres.pdf",
+      "type": "multi-pages",
+      "gabarit": "courrier",
+      "qualite": "bonne",
+      "pages": 2,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        10754.24
+      ]
+    },
+    {
+      "numero": "064",
+      "fichier": "064-multi-factures-sobre-cabinet.pdf",
+      "type": "multi-factures",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 2,
+      "nb_factures": 2,
+      "lisible": true,
+      "total_ttc": [
+        13815.19,
+        7297.01
+      ]
+    },
+    {
+      "numero": "065",
+      "fichier": "065-multi-factures-courrier-nordelec.pdf",
+      "type": "multi-factures",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 2,
+      "nb_factures": 2,
+      "lisible": true,
+      "total_ttc": [
+        4445.76,
+        497.98
+      ]
+    },
+    {
+      "numero": "066",
+      "fichier": "066-multi-factures-classique-electromenager.pdf",
+      "type": "multi-factures",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 2,
+      "nb_factures": 2,
+      "lisible": true,
+      "total_ttc": [
+        1915.49,
+        887.88
+      ]
+    },
+    {
+      "numero": "067",
+      "fichier": "067-multi-factures-moderne-eau.pdf",
+      "type": "multi-factures",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 3,
+      "nb_factures": 3,
+      "lisible": true,
+      "total_ttc": [
+        2120.63,
+        21479.3,
+        464.88
+      ]
+    },
+    {
+      "numero": "068",
+      "fichier": "068-multi-factures-sobre-peintures.pdf",
+      "type": "multi-factures",
+      "gabarit": "sobre",
+      "qualite": "moyenne",
+      "pages": 2,
+      "nb_factures": 2,
+      "lisible": true,
+      "total_ttc": [
+        1303.52,
+        21940
+      ]
+    },
+    {
+      "numero": "069",
+      "fichier": "069-facturx-classique-transports.pdf",
+      "type": "facturx",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        375.36
+      ]
+    },
+    {
+      "numero": "070",
+      "fichier": "070-facturx-moderne-nordelec.pdf",
+      "type": "facturx",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        161.2
+      ]
+    },
+    {
+      "numero": "071",
+      "fichier": "071-facturx-sobre-pharmacie.pdf",
+      "type": "facturx",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        801.23
+      ]
+    },
+    {
+      "numero": "072",
+      "fichier": "072-facturx-courrier-chauffage.pdf",
+      "type": "facturx",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        326.19
+      ]
+    },
+    {
+      "numero": "073",
+      "fichier": "073-facturx-classique-carrieres.pdf",
+      "type": "facturx",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        27.42
+      ]
+    },
+    {
+      "numero": "074",
+      "fichier": "074-facturx-moderne-nordelec.pdf",
+      "type": "facturx",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        2127.94
+      ]
+    },
+    {
+      "numero": "075",
+      "fichier": "075-facturx-sobre-taxi-colis.pdf",
+      "type": "facturx",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1061.19
+      ]
+    },
+    {
+      "numero": "076",
+      "fichier": "076-facturx-avoir-courrier-signaletique.pdf",
+      "type": "facturx-avoir",
+      "gabarit": "courrier",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        -4181.57
+      ]
+    },
+    {
+      "numero": "077",
+      "fichier": "077-ubl-xml-papeterie.xml",
+      "type": "ubl",
+      "gabarit": null,
+      "qualite": "native",
+      "pages": null,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1666.4
+      ]
+    },
+    {
+      "numero": "078",
+      "fichier": "078-ubl-xml-assurances.xml",
+      "type": "ubl",
+      "gabarit": null,
+      "qualite": "native",
+      "pages": null,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        4527.04
+      ]
+    },
+    {
+      "numero": "079",
+      "fichier": "079-ubl-xml-lumiflux.xml",
+      "type": "ubl",
+      "gabarit": null,
+      "qualite": "native",
+      "pages": null,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        186.28
+      ]
+    },
+    {
+      "numero": "080",
+      "fichier": "080-ubl-xml-nettoyage.xml",
+      "type": "ubl",
+      "gabarit": null,
+      "qualite": "native",
+      "pages": null,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        2445.59
+      ]
+    },
+    {
+      "numero": "081",
+      "fichier": "081-ubl-xml-agence.xml",
+      "type": "ubl",
+      "gabarit": null,
+      "qualite": "native",
+      "pages": null,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        49109.18
+      ]
+    },
+    {
+      "numero": "082",
+      "fichier": "082-ubl-avoir-xml-coworking.xml",
+      "type": "ubl-avoir",
+      "gabarit": null,
+      "qualite": "native",
+      "pages": null,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        -2085.02
+      ]
+    },
+    {
+      "numero": "083",
+      "fichier": "083-ticket-ticket-papeterie.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        566.11
+      ]
+    },
+    {
+      "numero": "084",
+      "fichier": "084-ticket-ticket-quincaillerie.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        759.79
+      ]
+    },
+    {
+      "numero": "085",
+      "fichier": "085-ticket-ticket-vetements.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1268.3
+      ]
+    },
+    {
+      "numero": "086",
+      "fichier": "086-ticket-ticket-garage.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        3757.97
+      ]
+    },
+    {
+      "numero": "087",
+      "fichier": "087-ticket-ticket-serrurerie.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "bonne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1571.06
+      ]
+    },
+    {
+      "numero": "088",
+      "fichier": "088-ticket-ticket-vetements.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        940.37
+      ]
+    },
+    {
+      "numero": "089",
+      "fichier": "089-ticket-ticket-fleurs.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "faible",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        652.68
+      ]
+    },
+    {
+      "numero": "090",
+      "fichier": "090-ticket-ticket-serrurerie.pdf",
+      "type": "ticket",
+      "gabarit": "ticket",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1104.43
+      ]
+    },
+    {
+      "numero": "091",
+      "fichier": "091-manuscrite-manuscrit-atelier.pdf",
+      "type": "manuscrite",
+      "gabarit": "manuscrit",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        11679.18
+      ]
+    },
+    {
+      "numero": "092",
+      "fichier": "092-manuscrite-manuscrit-chauffage.pdf",
+      "type": "manuscrite",
+      "gabarit": "manuscrit",
+      "qualite": "faible",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        988.18
+      ]
+    },
+    {
+      "numero": "093",
+      "fichier": "093-manuscrite-manuscrit-vitrerie.pdf",
+      "type": "manuscrite",
+      "gabarit": "manuscrit",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        6531.85
+      ]
+    },
+    {
+      "numero": "094",
+      "fichier": "094-manuscrite-manuscrit-chauffage.pdf",
+      "type": "manuscrite",
+      "gabarit": "manuscrit",
+      "qualite": "bonne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        5369.58
+      ]
+    },
+    {
+      "numero": "095",
+      "fichier": "095-manuscrite-manuscrit-atelier.pdf",
+      "type": "manuscrite",
+      "gabarit": "manuscrit",
+      "qualite": "faible",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        5797.71
+      ]
+    },
+    {
+      "numero": "096",
+      "fichier": "096-manuscrite-manuscrit-chauffage.pdf",
+      "type": "manuscrite",
+      "gabarit": "manuscrit",
+      "qualite": "moyenne",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1552.52
+      ]
+    },
+    {
+      "numero": "097",
+      "fichier": "097-natif-moderne-eau.pdf",
+      "type": "natif",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1936.94
+      ]
+    },
+    {
+      "numero": "098",
+      "fichier": "098-natif-classique-brossard-velane.pdf",
+      "type": "natif",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        928.45
+      ]
+    },
+    {
+      "numero": "099",
+      "fichier": "099-natif-sobre-cabinet.pdf",
+      "type": "natif",
+      "gabarit": "sobre",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        8052.52
+      ]
+    },
+    {
+      "numero": "100",
+      "fichier": "100-illisible-classique-papeterie.pdf",
+      "type": "illisible",
+      "gabarit": "classique",
+      "qualite": "illisible",
+      "pages": 1,
+      "nb_factures": 0,
+      "lisible": false,
+      "total_ttc": null
+    }
+  ]
+}

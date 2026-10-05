@@ -1,0 +1,105 @@
+{
+  "fichier": "091-manuscrite-manuscrit-atelier.pdf",
+  "format": "pdf",
+  "type": "manuscrite",
+  "gabarit": "manuscrit",
+  "qualite": "moyenne",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC100458",
+      "facture_rectifiee": null,
+      "date_emission": "2026-01-24",
+      "date_echeance": "2026-02-08",
+      "date_livraison": null,
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Atelier Mirvault & Fils SARL",
+        "siren": "998237812",
+        "siret": "99823781269052",
+        "tva_intracom": "FR50998237812",
+        "adresse": "16 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "iban": "FR7696223193033986732420108",
+        "bic": "ZDVZFRPP",
+        "courriel": "compta@atelier-mirvault-fils.example",
+        "telephone": "01 13 90 20 55"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Fenêtre bois 2 vantaux 120x135",
+          "quantite": 18,
+          "unite": "u",
+          "prix_unitaire_ht": 561.42,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 10105.56,
+          "code": "REF-38766"
+        },
+        {
+          "designation": "Plinthe chêne 10 cm",
+          "quantite": 58,
+          "unite": "ml",
+          "prix_unitaire_ht": 8.09,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 469.22,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 10574.78,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 469.22,
+          "montant": 93.84
+        },
+        {
+          "taux": 10,
+          "base": 10105.56,
+          "montant": 1010.56
+        }
+      ],
+      "total_tva": 1104.4,
+      "total_ttc": 11679.18,
+      "acompte": null,
+      "net_a_payer": 11679.18,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "facture manuscrite sur carnet pré-imprimé, numérisée (qualité moyenne)",
+    "IBAN écrit à la main"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

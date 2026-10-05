@@ -1,0 +1,95 @@
+{
+  "fichier": "072-facturx-courrier-chauffage.pdf",
+  "format": "pdf",
+  "type": "facturx",
+  "gabarit": "courrier",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "F2026-0337",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-14",
+      "date_echeance": "2026-10-29",
+      "date_livraison": "2026-09-09",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Chauffage Thermoval SARL",
+        "siren": "935648899",
+        "siret": "93564889966050",
+        "tva_intracom": "FR91935648899",
+        "adresse": "78 zone artisanale des Quatre-Vents",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "iban": "FR7697386449264214002562589",
+        "bic": "SBMXFRPPXXX",
+        "courriel": "compta@chauffage-thermoval.example",
+        "telephone": "04 18 81 51 06"
+      },
+      "client": {
+        "raison_sociale": "Cabinet d'Avocats Tessier-Mahaut SELARL",
+        "siren": "944905561",
+        "siret": "94490556145522",
+        "tva_intracom": "FR44944905561",
+        "adresse": "89 impasse des Peupliers",
+        "code_postal": "25000",
+        "ville": "Besançon",
+        "pays": "FR",
+        "code_client": "C49234"
+      },
+      "lignes": [
+        {
+          "designation": "Entretien chaudière gaz",
+          "quantite": 2,
+          "unite": "forfait",
+          "prix_unitaire_ht": 148.27,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 296.54,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 296.54,
+      "tva": [
+        {
+          "taux": 10,
+          "base": 296.54,
+          "montant": 29.65
+        }
+      ],
+      "total_tva": 29.65,
+      "total_ttc": 326.19,
+      "acompte": null,
+      "net_a_payer": 326.19,
+      "mode_paiement": "Chèque",
+      "references": {
+        "commande": null,
+        "bon_livraison": "BL-801688",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "Factur-X profil EN 16931 : lire le XML joint (factur-x.xml), le PDF n'est qu'une vue",
+    "le XML fait foi en cas d'écart avec la vue"
+  ],
+  "facturx": {
+    "profil": "EN 16931",
+    "piece_jointe": "factur-x.xml",
+    "type_code": "380"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

@@ -1,0 +1,129 @@
+{
+  "fichier": "027-natif-sobre-telecom.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "sobre",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0256",
+      "facture_rectifiee": null,
+      "date_emission": "2026-02-12",
+      "date_echeance": "2026-02-27",
+      "date_livraison": null,
+      "periode": "du 01/02/2026 au 30/03/2026",
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Télécom Arvennes SA",
+        "siren": "964252092",
+        "siret": "96425209213580",
+        "tva_intracom": "FR75964252092",
+        "adresse": "111 rue du Moulin-à-Vent",
+        "code_postal": "37000",
+        "ville": "Tours",
+        "pays": "FR",
+        "iban": "FR7698029419042736559537890",
+        "bic": "BDEEFRPP",
+        "courriel": "compta@telecom-arvennes.example",
+        "telephone": "04 94 52 56 06"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Frais de mise en service",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 96.84,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 484.2,
+          "code": "REF-95659"
+        },
+        {
+          "designation": "Communications hors forfait",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 14.59,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 14.59,
+          "code": "REF-22604"
+        },
+        {
+          "designation": "Frais de mise en service",
+          "quantite": 5,
+          "unite": "forfait",
+          "prix_unitaire_ht": 91.83,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 459.15,
+          "code": null
+        },
+        {
+          "designation": "Abonnement fibre pro 1 Gb/s",
+          "quantite": 5,
+          "unite": "mois",
+          "prix_unitaire_ht": 56.29,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 281.45,
+          "code": "REF-28884"
+        },
+        {
+          "designation": "Forfait mobile 100 Go",
+          "quantite": 5,
+          "unite": "ligne",
+          "prix_unitaire_ht": 17.65,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 88.25,
+          "code": "REF-72136"
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1327.64,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 1327.64,
+          "montant": 265.53
+        }
+      ],
+      "total_tva": 265.53,
+      "total_ttc": 1593.17,
+      "acompte": null,
+      "net_a_payer": 1593.17,
+      "mode_paiement": "Prélèvement SEPA",
+      "references": {
+        "commande": "BC-60768",
+        "bon_livraison": null,
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "période de consommation, pas de date de livraison"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

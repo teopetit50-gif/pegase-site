@@ -1,0 +1,162 @@
+{
+  "fichier": "010-natif-moderne-lumiflux.pdf",
+  "format": "pdf",
+  "type": "natif",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "FC2026-0179",
+      "facture_rectifiee": null,
+      "date_emission": "2026-02-27",
+      "date_echeance": "2026-03-29",
+      "date_livraison": null,
+      "periode": "du 01/07/2026 au 30/01/2026",
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Lumiflux Énergie SA",
+        "siren": "992334169",
+        "siret": "99233416930054",
+        "tva_intracom": "FR60992334169",
+        "adresse": "62 rue Camille-Verdier",
+        "code_postal": "59000",
+        "ville": "Lille",
+        "pays": "FR",
+        "iban": "FR7692967066114874077878744",
+        "bic": "DEFDFRPPXXX",
+        "courriel": "compta@lumiflux-energie.example",
+        "telephone": "05 25 54 08 34"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Redevance assainissement",
+          "quantite": 147,
+          "unite": "m3",
+          "prix_unitaire_ht": 2.17,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 318.99,
+          "code": null
+        },
+        {
+          "designation": "Taxe accise électricité",
+          "quantite": 3347,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.0318,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 106.43,
+          "code": "REF-81570"
+        },
+        {
+          "designation": "Consommation heures creuses",
+          "quantite": 2963,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.1796,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 532.15,
+          "code": null
+        },
+        {
+          "designation": "Redevance assainissement",
+          "quantite": 54,
+          "unite": "m3",
+          "prix_unitaire_ht": 2.14,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 115.56,
+          "code": "REF-72421"
+        },
+        {
+          "designation": "Consommation heures creuses",
+          "quantite": 654,
+          "unite": "kWh",
+          "prix_unitaire_ht": 0.1588,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 103.86,
+          "code": "REF-40346"
+        },
+        {
+          "designation": "Consommation eau",
+          "quantite": 34,
+          "unite": "m3",
+          "prix_unitaire_ht": 2.83,
+          "remise_pct": 0,
+          "taux_tva": 5.5,
+          "montant_ht": 96.22,
+          "code": "REF-66373"
+        },
+        {
+          "designation": "Frais de port",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 8.5,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 8.5,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 2,
+      "remise_globale": 25.63,
+      "total_ht": 1256.08,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 735.92,
+          "montant": 147.18
+        },
+        {
+          "taux": 10,
+          "base": 425.86,
+          "montant": 42.59
+        },
+        {
+          "taux": 5.5,
+          "base": 94.3,
+          "montant": 5.19
+        }
+      ],
+      "total_tva": 194.96,
+      "total_ttc": 1451.04,
+      "acompte": null,
+      "net_a_payer": 1451.04,
+      "mode_paiement": "Espèces",
+      "references": {
+        "commande": "BC-82492",
+        "bon_livraison": null,
+        "reference_paiement": "FC20260179"
+      },
+      "mentions": [
+        "TVA sur les débits",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "remise globale",
+    "frais de port en ligne séparée",
+    "période de consommation, pas de date de livraison",
+    "plusieurs taux de TVA"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

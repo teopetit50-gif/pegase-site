@@ -1,0 +1,227 @@
+{
+  "fichier": "068-multi-factures-sobre-peintures.pdf",
+  "format": "pdf",
+  "type": "multi-factures",
+  "gabarit": "sobre",
+  "qualite": "moyenne",
+  "pages": 2,
+  "lisible": true,
+  "nb_factures": 2,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "2026-202609-117",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-14",
+      "date_echeance": "2026-09-29",
+      "date_livraison": "2026-09-09",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Peintures Aubrac-Delmas SARL",
+        "siren": "946298411",
+        "siret": "94629841145892",
+        "tva_intracom": "FR28946298411",
+        "adresse": "23 rue des Tanneurs",
+        "code_postal": "29200",
+        "ville": "Brest",
+        "pays": "FR",
+        "iban": "FR7690098743652669623205648",
+        "bic": "EXXEFRPP",
+        "courriel": "compta@peintures-aubrac-delmas.example",
+        "telephone": "03 47 90 69 32"
+      },
+      "client": {
+        "raison_sociale": "Restaurant La Table d'Ambroise SAS",
+        "siren": "950938704",
+        "siret": "95093870460681",
+        "tva_intracom": "FR49950938704",
+        "adresse": "4 rue de la Forge",
+        "code_postal": "13001",
+        "ville": "Marseille",
+        "pays": "FR",
+        "code_client": "C68177"
+      },
+      "lignes": [
+        {
+          "designation": "Bâche de protection 4x5 m",
+          "quantite": 12,
+          "unite": "u",
+          "prix_unitaire_ht": 7.83,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 93.96,
+          "code": null
+        },
+        {
+          "designation": "Application peinture (travaux rénovation)",
+          "quantite": 36,
+          "unite": "m2",
+          "prix_unitaire_ht": 30.07,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 1082.52,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1176.48,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 93.96,
+          "montant": 18.79
+        },
+        {
+          "taux": 10,
+          "base": 1082.52,
+          "montant": 108.25
+        }
+      ],
+      "total_tva": 127.04,
+      "total_ttc": 1303.52,
+      "acompte": null,
+      "net_a_payer": 1303.52,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "BC-66637",
+        "bon_livraison": "BL-216299",
+        "reference_paiement": null
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    },
+    {
+      "type_document": "facture",
+      "numero": "FC26/08/126",
+      "facture_rectifiee": null,
+      "date_emission": "2026-08-18",
+      "date_echeance": "2026-10-02",
+      "date_livraison": "2026-08-13",
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Logiciels Ambrelys SAS",
+        "siren": "910005115",
+        "siret": "91000511562290",
+        "tva_intracom": "FR21910005115",
+        "adresse": "106 impasse des Peupliers",
+        "code_postal": "21000",
+        "ville": "Dijon",
+        "pays": "FR",
+        "iban": "FR7697061067880913920396559",
+        "bic": "ENRKFRPP",
+        "courriel": "compta@logiciels-ambrelys.example",
+        "telephone": "02 32 10 02 47"
+      },
+      "client": {
+        "raison_sociale": "Pépinières du Haut-Vallon EARL",
+        "siren": "931351126",
+        "siret": "93135112621596",
+        "tva_intracom": "FR12931351126",
+        "adresse": "84 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "code_client": "C42883"
+      },
+      "lignes": [
+        {
+          "designation": "Licence suite bureautique annuelle",
+          "quantite": 4,
+          "unite": "poste",
+          "prix_unitaire_ht": 106.34,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 425.36,
+          "code": "REF-71867"
+        },
+        {
+          "designation": "Prestation développement",
+          "quantite": 3,
+          "unite": "jour",
+          "prix_unitaire_ht": 502.17,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1506.51,
+          "code": "REF-69866"
+        },
+        {
+          "designation": "Maintenance infogérance",
+          "quantite": 6,
+          "unite": "mois",
+          "prix_unitaire_ht": 246.73,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1480.38,
+          "code": "REF-91188"
+        },
+        {
+          "designation": "Prestation développement",
+          "quantite": 2,
+          "unite": "jour",
+          "prix_unitaire_ht": 619.18,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 1238.36,
+          "code": null
+        },
+        {
+          "designation": "Ordinateur portable 14\" 16 Go",
+          "quantite": 12,
+          "unite": "u",
+          "prix_unitaire_ht": 936.35,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 11236.2,
+          "code": "REF-99493"
+        },
+        {
+          "designation": "Ordinateur portable 14\" 16 Go",
+          "quantite": 3,
+          "unite": "u",
+          "prix_unitaire_ht": 1119.6,
+          "remise_pct": 0,
+          "taux_tva": 20,
+          "montant_ht": 3358.8,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": 5,
+      "remise_globale": 962.28,
+      "total_ht": 18283.33,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 18283.33,
+          "montant": 3656.67
+        }
+      ],
+      "total_tva": 3656.67,
+      "total_ttc": 21940,
+      "acompte": null,
+      "net_a_payer": 21940,
+      "mode_paiement": "Carte bancaire",
+      "references": {
+        "commande": "BC-47478",
+        "bon_livraison": "BL-387614",
+        "reference_paiement": "FC2608126"
+      },
+      "mentions": [
+        "TVA sur les encaissements",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ]
+    }
+  ],
+  "difficultes": [
+    "2 factures de fournisseurs différents dans un seul fichier : découper avant de lire",
+    "lot numérisé en une fois"
+  ],
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}
