@@ -78,6 +78,7 @@ const MODULES: Record<string, string> = {
   tresorerie: "Trésorerie",
   socle: "Socle",
   point: "Point du matin",
+  varelo: "VARELO",
 };
 
 export function libelleModule(cle: string | null | undefined): string {
