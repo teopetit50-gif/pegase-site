@@ -560,7 +560,7 @@ begin
   perform private.loc_ouvrier(50);
   select p.demande_id into v_demande from public.loc_propositions p where p.id = v_prop2;
   return next isnt(v_demande, null, 'La v2 a sa propre demande après le passage de l''ouvrier');
-  return next is((select x.montant from public.demandes_validation x where x.id = v_demande), 443.20::numeric, 'Pour 443,20 € (100 km au-delà du forfait)');
+  return next is((select x.montant from public.demandes_validation x where x.id = v_demande), 433.20::numeric, 'Pour 433,20 € (100 km au-delà du forfait : 36 + 25 + 90 + 60 HT, TVA 20 %, plus 180 de dommage)');
 
   -- Hors barème : la direction seule.
   perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
