@@ -82,7 +82,7 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   await s.dormir(400);
   await s.evaluer(`${dlgBouton('/Vérifier et figer/')}?.click()`);
   await s.dormir(800);
-  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-dossier')?.innerText || ''; return { fige: /Vérifié, figé/.test(t), rouvrir: /Rouvrir \\(gérant\\)/.test(t), proposes: (t.match(/Proposé/g) || []).length }; })()`);
+  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-dossier')?.innerText || ''; return { fige: /Vérifié, figé/i.test(t), rouvrir: /Rouvrir \\(gérant\\)/.test(t), proposes: (t.match(/Proposé/g) || []).length }; })()`);  /* les titres de section sont en capitales (CSS) : innerText les rend ainsi */
   ok(apres.fige && apres.rouvrir, 'le marché est « Vérifié, figé », « Rouvrir (gérant) » apparaît');
   ok(apres.proposes >= 2, `la bibliothèque reçoit les prix du marché en « Proposé » (${apres.proposes})`);
   await s.capturer(`${dossier}daliro-verifie-1440.jpg`, { qualite: 55 });

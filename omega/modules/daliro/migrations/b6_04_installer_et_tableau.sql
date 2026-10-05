@@ -118,7 +118,7 @@ begin
     'marches', (select coalesce(jsonb_agg(to_jsonb(m) || jsonb_build_object(
         'lignes', (select coalesce(jsonb_agg(to_jsonb(li) order by li.ordre), '[]'::jsonb) from public.btp_lignes_marche_chiffrees li where li.marche_id = m.id),
         'controles', (select coalesce(jsonb_agg(to_jsonb(k) order by k.ordre nulls last), '[]'::jsonb) from public.btp_controle_marches k where k.marche_id = m.id))
-        order by m.statut = 'verifie' desc, m.verifie_le desc nulls last, m.cree_le desc), '[]'::jsonb)
+        order by m.statut = 'verifie' desc, m.verifie_le desc nulls last, m.id), '[]'::jsonb)
       from public.btp_marches_chiffres m where m.chantier_id = c.id),
     'controles', (select coalesce(jsonb_agg(to_jsonb(k) order by case k.gravite when 'bloquant' then 0 when 'attention' then 1 else 2 end, k.code), '[]'::jsonb)
       from public.btp_controle k where k.chantier_id = c.id),
