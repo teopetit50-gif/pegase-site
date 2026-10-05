@@ -66,6 +66,8 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
   const [filtre, setFiltre] = useState<Filtre>("a_decider");
   const [module, setModule] = useState<string | null>(null);
   const [choix, setChoix] = useState<string | null>(null);
+  /* le dernier succès, dit au-dessus de la file (la demande décidée a pu quitter la vue) */
+  const [fait, setFait] = useState<string | null>(null);
 
   const etat = source === "exemple" ? local : reel;
 
@@ -276,6 +278,14 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
           </Avis>
         </div>
       ) : null}
+      {fait ? (
+        <div style={{ marginBottom: 14 }}>
+          <Avis teinte="vert" role="status">
+            <strong>C&apos;est fait.</strong> {fait}{" "}
+            <button type="button" className="esp-lien-bouton" onClick={() => setFait(null)}>Fermer</button>
+          </Avis>
+        </div>
+      ) : null}
 
       <div className="esp-grille">
         <div style={{ display: "grid", gap: 14 }}>
@@ -391,6 +401,7 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
               onAnnulationLocale={annulerLocal}
               onDelegationLocale={ajouterDelegationLocal}
               recharger={charger}
+              onFait={setFait}
             />
           ) : etat ? (
             <div className="esp-carte">
