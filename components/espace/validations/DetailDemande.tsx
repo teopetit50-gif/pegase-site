@@ -36,6 +36,9 @@ type Props = {
   onAnnulationLocale: (id: string) => void;
   onDelegationLocale: (g: Delegation) => void;
   recharger: () => Promise<void>;
+  /* en base réelle, la file se relit après une décision et la demande
+     décidée quitte la vue : le message de succès remonte à la file */
+  onFait?: (message: string) => void;
 };
 
 type Formulaire = "approuver" | "refuser" | "modifier" | "deleguer" | "annuler" | null;
@@ -122,6 +125,7 @@ export default function DetailDemande(p: Props) {
     try {
       await action();
       setFait(message);
+      p.onFait?.(message);
       setForm(null);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base a refusé l'opération.");
