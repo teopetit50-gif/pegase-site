@@ -53,7 +53,9 @@ function message(e: unknown): string {
 
 export async function chargerContexte(): Promise<ContexteSocle> {
   const supabase = createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth, error: erreurAuth } = await supabase.auth.getUser();
+  /* une panne réseau n'est pas une absence de session : on dit laquelle */
+  if (erreurAuth) throw new ErreurPorte(message(erreurAuth));
   const user_id = auth.user?.id;
   if (!user_id) throw new ErreurPorte("Aucune session ouverte.");
   const { data: comptes, error } = await supabase.from("comptes").select("user_id, client_id, role, perimetre_total");

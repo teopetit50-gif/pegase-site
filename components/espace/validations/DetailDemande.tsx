@@ -39,6 +39,26 @@ type Props = {
 
 type Formulaire = "approuver" | "refuser" | "modifier" | "deleguer" | "annuler" | null;
 
+/* Une valeur de payload, lisible : une liste longue (les identifiants d'un
+   lot, par exemple) se résume à son compte et à ses trois premiers
+   éléments ; un objet se montre clé par clé ; le reste tel quel. */
+function valeurLisible(val: unknown): string {
+  if (val === null || val === undefined) return "—";
+  if (Array.isArray(val)) {
+    const n = val.length;
+    if (n === 0) return "aucun";
+    const extrait = val.slice(0, 3).map((x) => (typeof x === "object" && x !== null ? JSON.stringify(x) : String(x))).join(", ");
+    return n > 3 ? `${n} éléments — ${extrait}…` : extrait;
+  }
+  if (typeof val === "object") {
+    return Object.entries(val as Record<string, unknown>)
+      .map(([k, v]) => `${phrase(k)} : ${typeof v === "object" && v !== null ? JSON.stringify(v) : String(v)}`)
+      .join(" · ");
+  }
+  if (typeof val === "boolean") return val ? "oui" : "non";
+  return String(val);
+}
+
 const uuidLocal = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -244,7 +264,7 @@ export default function DetailDemande(p: Props) {
             <div className="esp-section-titre">Ce que porte la demande</div>
             <dl className="esp-def">
               {payloadVisible.map(([k, val]) => (
-                <Def key={k} etiquette={LIBELLES_PAYLOAD[k] ?? phrase(k)}>{typeof val === "object" && val !== null ? JSON.stringify(val) : String(val)}</Def>
+                <Def key={k} etiquette={LIBELLES_PAYLOAD[k] ?? phrase(k)}>{valeurLisible(val)}</Def>
               ))}
             </dl>
           </div>
