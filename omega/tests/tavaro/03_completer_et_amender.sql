@@ -25,8 +25,8 @@ begin
     jsonb_build_array(jsonb_build_object('n', 1, 'nature', 'ajout', 'valeurs', jsonb_build_object('numero', 'C-2026-0001', 'agence', 'SIEGE', 'km_inclus', 300))),
     jsonb_build_object('cle', 'export:b2:4', 'source', 'export', 'lu_le', now()));
   return next is((select x.km_inclus from public.loc_contrats x where x.id = v_contrat), 600, 'Le forfait saisi par une personne n''est pas écrasé par l''export');
-  return next ok((select x.avertissements from public.loc_contrats x where x.id = v_contrat) @> '[{"code": "ecart_avec_le_logiciel"}]'::jsonb
-                 or (r -> 'avertissements')::text like '%ecart%', format('L''écart avec le logiciel est signalé (%s)', r -> 'avertissements'));
+  return next ok((r -> 'avertissements') @> '[{"code": "saisie_protegee", "champ": "km_inclus"}]'::jsonb,
+                 format('Le relevé signale la saisie protégée sur km_inclus (code saisie_protegee) : %s', r -> 'avertissements'));
 
   -- Le collaborateur d'une autre agence, et le gérant d'un autre loueur.
   perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre-loueur@essai.invalid');

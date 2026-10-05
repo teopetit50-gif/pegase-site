@@ -22,21 +22,20 @@ language sql immutable as $$
   )
 $$;
 
--- Pose un utilisateur d'authentification (si la table est accessible), rend son id.
+-- Pose un utilisateur d'authentification, rend son id. L'adresse reçoit un suffixe unique : un même test
+-- peut rappeler tavaro_jeu() plusieurs fois dans sa transaction (jeu_contrat → jeu_facture, puis un second jeu),
+-- et auth.users refuse deux fois la même adresse. Une erreur ici remonte : un compte sans utilisateur casserait
+-- plus loin (comptes_user_id_fkey) sans dire pourquoi.
 create or replace function tests.tavaro_personne(p_email text) returns uuid
 language plpgsql as $$
-declare v uuid := gen_random_uuid();
+declare v uuid := gen_random_uuid(); v_email text := replace(p_email, '@', '-' || left(v::text, 8) || '@');
 begin
-  begin
-    insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at,
-                            raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous,
-                            confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current,
-                            phone_change, phone_change_token, reauthentication_token)
-    values (v, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', p_email, 'x', now(), now(), now(),
-            '{"provider":"email","providers":["email"]}', '{}', false, false, '', '', '', '', '', '', '', '');
-  exception when others then
-    raise notice 'tests.tavaro_personne : auth.users non alimentée (%), uuid libre', sqlerrm;
-  end;
+  insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at,
+                          raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous,
+                          confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current,
+                          phone_change, phone_change_token, reauthentication_token)
+  values (v, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', v_email, 'x', now(), now(), now(),
+          '{"provider":"email","providers":["email"]}', '{}', false, false, '', '', '', '', '', '', '', '');
   return v;
 end $$;
 

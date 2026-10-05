@@ -27,21 +27,20 @@ language sql immutable as $$
   )
 $$;
 
--- Pose un utilisateur d'authentification (si la table est accessible), rend son id.
+-- Pose un utilisateur d'authentification, rend son id. L'adresse reçoit un suffixe unique : un même test
+-- peut rappeler tavaro_jeu() plusieurs fois dans sa transaction (jeu_contrat → jeu_facture, puis un second jeu),
+-- et auth.users refuse deux fois la même adresse. Une erreur ici remonte : un compte sans utilisateur casserait
+-- plus loin (comptes_user_id_fkey) sans dire pourquoi.
 create or replace function tests.tavaro_personne(p_email text) returns uuid
 language plpgsql as $$
-declare v uuid := gen_random_uuid();
+declare v uuid := gen_random_uuid(); v_email text := replace(p_email, '@', '-' || left(v::text, 8) || '@');
 begin
-  begin
-    insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at,
-                            raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous,
-                            confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current,
-                            phone_change, phone_change_token, reauthentication_token)
-    values (v, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', p_email, 'x', now(), now(), now(),
-            '{"provider":"email","providers":["email"]}', '{}', false, false, '', '', '', '', '', '', '', '');
-  exception when others then
-    raise notice 'tests.tavaro_personne : auth.users non alimentée (%), uuid libre', sqlerrm;
-  end;
+  insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at,
+                          raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous,
+                          confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current,
+                          phone_change, phone_change_token, reauthentication_token)
+  values (v, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', v_email, 'x', now(), now(), now(),
+          '{"provider":"email","providers":["email"]}', '{}', false, false, '', '', '', '', '', '', '', '');
   return v;
 end $$;
 
@@ -369,8 +368,8 @@ begin
     jsonb_build_array(jsonb_build_object('n', 1, 'nature', 'ajout', 'valeurs', jsonb_build_object('numero', 'C-2026-0001', 'agence', 'SIEGE', 'km_inclus', 300))),
     jsonb_build_object('cle', 'export:b2:4', 'source', 'export', 'lu_le', now()));
   return next is((select x.km_inclus from public.loc_contrats x where x.id = v_contrat), 600, 'Le forfait saisi par une personne n''est pas écrasé par l''export');
-  return next ok((select x.avertissements from public.loc_contrats x where x.id = v_contrat) @> '[{"code": "ecart_avec_le_logiciel"}]'::jsonb
-                 or (r -> 'avertissements')::text like '%ecart%', format('L''écart avec le logiciel est signalé (%s)', r -> 'avertissements'));
+  return next ok((r -> 'avertissements') @> '[{"code": "saisie_protegee", "champ": "km_inclus"}]'::jsonb,
+                 format('Le relevé signale la saisie protégée sur km_inclus (code saisie_protegee) : %s', r -> 'avertissements'));
 
   -- Le collaborateur d'une autre agence, et le gérant d'un autre loueur.
   perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre-loueur@essai.invalid');
@@ -531,7 +530,7 @@ begin
   return next is(d.statut, 'en_attente', 'La demande est en attente');
   return next is(d.module || ' ' || d.type_action, 'tavaro facture.envoyer', 'Type facture.envoyer (au barème)');
   return next is(d.montant, 418.20::numeric, 'Pour 418,20 €');
-  return next is(d.approbations_requises, 1, 'Sous 1 500 € : un accord suffit (règle par défaut)');
+  return next is(d.approbations_requises::integer, 1, 'Sous 1 500 € : un accord suffit (règle par défaut)');
   return next ok(d.roles_autorises @> array['valideur']::text[] and d.roles_autorises @> array['gerant']::text[], format('Les valideurs et la direction décident (%s)', d.roles_autorises));
   return next ok(d.resume like 'Facturer le retour du contrat C-2026-0001%', format('Le résumé dit le contrat et le montant : %s', d.resume));
   return next is((d.payload ->> 'proposition')::uuid, p.id, 'Le payload désigne la proposition');
@@ -682,7 +681,7 @@ begin
     return next is(d.statut, 'executee', 'Sans réglage d''envoi pour ce loueur, la demande est tout de même exécutée (facture à envoyer soi-même)');
     return next ok(tests.tavaro_journal(v_client, 'tavaro.facture_envoi_non_regle') >= 1, 'Le journal opposable porte tavaro.facture_envoi_non_regle');
     return next diag('Pas de reglages_envois pour le loueur d''essai : le courriel réel se prouve sur le banc (mode essai), pas ici.');
-    return next is(tests.compter('public', 'alertes', format('client_id = %L and module = %L', v_client, 'tavaro')), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée');
+    return next is(tests.compter('public', 'alertes', format('client_id = %L and cle = %L', v_client, 'facture:envoi_non_regle:' || (jeu ->> 'proposition'))), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée (clé facture:envoi_non_regle:<proposition>)');
   end if;
 
   -- Le litige : par l'agence, avec la contestation du client.

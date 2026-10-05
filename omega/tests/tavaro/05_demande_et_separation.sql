@@ -16,7 +16,7 @@ begin
   return next is(d.statut, 'en_attente', 'La demande est en attente');
   return next is(d.module || ' ' || d.type_action, 'tavaro facture.envoyer', 'Type facture.envoyer (au barème)');
   return next is(d.montant, 418.20::numeric, 'Pour 418,20 €');
-  return next is(d.approbations_requises, 1, 'Sous 1 500 € : un accord suffit (règle par défaut)');
+  return next is(d.approbations_requises::integer, 1, 'Sous 1 500 € : un accord suffit (règle par défaut)');
   return next ok(d.roles_autorises @> array['valideur']::text[] and d.roles_autorises @> array['gerant']::text[], format('Les valideurs et la direction décident (%s)', d.roles_autorises));
   return next ok(d.resume like 'Facturer le retour du contrat C-2026-0001%', format('Le résumé dit le contrat et le montant : %s', d.resume));
   return next is((d.payload ->> 'proposition')::uuid, p.id, 'Le payload désigne la proposition');
