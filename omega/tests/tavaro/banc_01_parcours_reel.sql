@@ -3,7 +3,7 @@
 -- laissant le cron tavaro-ouvrier (chaque minute) passer entre les étapes B et C, puis C et D.
 -- Prérequis : b2_01 et b2_02 posés ; reglages_envois tavaro en mode essai pour le banc (adresse d'essai de Teo).
 -- Tout ce qui est du module passe par ses portes, sous la personne qui le ferait (tests.endosser du schéma tests d'A5).
--- Aucun DROP, aucun DELETE. Rejouable : chaque étape vérifie si elle est déjà faite.
+-- Rien n'y est effacé ni détruit. Rejouable : chaque étape vérifie si elle est déjà faite.
 
 -- ═══ A. La direction règle l'agence, le module, publie le barème (gérant du banc)
 do $$

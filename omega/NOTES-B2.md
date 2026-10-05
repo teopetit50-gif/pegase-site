@@ -54,12 +54,17 @@ journal opposable ; rien ne s'écrit directement dans une table là où une port
 | H3 | `public.loc_appliquer_releve(p_client, …)` ne vérifie aucun droit : si `authenticated` peut l'exécuter, n'importe quel membre importe des contrats chez n'importe quel client | à vérifier avec le coordinateur (grants) ; sinon `b2_03` : porte de saisie au comptoir `loc_saisir_contrat(p_valeurs)` avec contrôle du rôle et du périmètre |
 | H4 | Pas de porte de lecture « mon dossier de retour » pour l'écran : il lira les tables sous RLS (comme A3) | aucune, sauf besoin |
 
-## 3. Questions posées au coordinateur (06/10)
+## 3. Questions posées au coordinateur (06/10) — et ses réponses
 
-1. Qui peut exécuter les douze portes `public.loc_*` (authenticated ? service_role ?) — surtout `loc_appliquer_releve`.
-2. La chaîne décision → `tavaro.decision` : qui dépose le travail (abonnement sur quel événement ?), forme de la charge (`demande, statut, objet_type, objet_id, decideurs`) ; idem `tavaro.envoi` (`envoi, objet_type, objet_id, evenement`) et `tavaro.piece_lue`.
-3. Le banc : fuseau et territoire des entités (TVA), rôles exacts de referent/daf/daf2 (`valideur` ?), ligne `reglages_envois` pour `tavaro`, `loc_reglages`/`loc_agences` déjà posés ou non.
-4. Le schéma `tests` d'A5 (`tests.jeu`, `tests.endosser`, `runtests`) est-il en place sur la recette ?
+1. **Portes `public.loc_*`** : enveloppes d'une ligne vers `private.loc_*` ; EXECUTE `authenticated` sur amender_contrat, anonymiser_locataire, chiffrer_retour, completer_contrat, demander_avoir, marquer_litige, marquer_reglee, publier_bareme, retirer_bareme ; **service_role seul** sur `loc_appliquer_releve`, `loc_confirmer_purge_pieces`, `loc_pieces_a_purger` ; anon nulle part. → **H3 n'est pas un trou** : le relevé est une porte d'ouvrier.
+2. **Abonnements de tavaro** (`private.abonnements`) : `releve.pret.tavaro → tavaro.appliquer_releve`, `releve.en_retard.tavaro → tavaro.releve_en_retard`, `demande.decidee.tavaro → tavaro.decision`, `envoi.<issue>.tavaro → tavaro.envoi`, `piece_lue.tavaro → tavaro.piece_lue`. Le trigger `private.publier_decision` sur `demandes_validation` publie `demande.decidee.<module>` ; `publier_evenement` dépose chez chaque abonné `charge || {evenement}`, clé `evenement:cle`. Charge de `tavaro.decision` : `{demande, statut, type_action, objet_type, objet_id, entite, politique, decide_le, decideurs: [{user, au_nom_de, decision}], evenement}`.
+3. **Le banc** : entité principale `2d1ed71f-…` « Groupe Sogexal (banc) », Europe/Paris, territoire null (TVA à fixer sur l'agence) ; trois entités DOM (Novasud Antilles et Sodimat Guadeloupe : America/Guadeloupe, GP ; Métalco Martinique : America/Martinique, MQ → TVA 8,5). Comptes : gerant = gerant ; referent, daf, daf2 = valideur ; tous `perimetre_total`, aucun collaborateur. `reglages_envois` : organisation et reput en essai, **rien pour tavaro** (le coordinateur posera la ligne au premier test d'envoi). `loc_agences`, `loc_reglages`, `abonnements_modules` : vides → installation vierge.
+4. **Schéma `tests` d'A5** : en place (jeu, endosser, redevenir_admin, journaliser, appeler_privee, compter, inserer_minimal, table_existe, runtests).
+5. **`alertes`** n'a pas de colonne `module` (cle, cle_regroupement, gravite, titre, detail, acquittee_le…) ; le périmètre par entité = `public.comptes_entites(client_id, user_id, entite_id)` + `comptes.perimetre_total` (`private.voit_entite`).
+
+## 3 bis. Premier TAP sur la recette (06/10, coordinateur)
+
+Lot 1 posé (b2_01, b2_02 inscrits), TOUT_B2 joué : **5 fichiers verts sur 11** (01 : 21/21, 02 : 30/30, 04 : 46/46, 08 : 29/29 avec AV-2026-000001/000002 et le refus, 10 : 32/32). Rouges : 03 (le socle signale l'écart sous `saisie_protegee`), 05 (`is(smallint, integer)`), 06/09/11 (adresse d'auth.users en double quand `tavaro_jeu()` est rappelée dans la même transaction : l'exception était avalée), 07 (`alertes.module` n'existe pas). Les quatre corrigés et poussés ; relecture demandée.
 
 ## 4. Fait / en cours
 
