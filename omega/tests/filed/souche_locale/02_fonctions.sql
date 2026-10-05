@@ -1,5 +1,36 @@
 
 -- ── Fonctions du socle : souches ──
+CREATE OR REPLACE FUNCTION private.filed_valeurs(p_piece uuid)
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+  with scalaires as (
+    select distinct on (pv.champ) pv.champ, pv.valeur, pv.verifiee, pv.source, pv.texte, pv.page, pv.controle
+    from public.pieces_valeurs pv
+    where pv.piece_id = p_piece and pv.champ <> 'lignes'
+    order by pv.champ, (pv.source = 'humain') desc, pv.cree_le desc, pv.id desc
+  ), lignes as (
+    select 'lignes'::text as champ,
+           jsonb_agg(e.ligne order by pv.page nulls last, pv.cree_le, pv.id, e.n) as valeur,
+           bool_and(pv.verifiee) as verifiee, min(pv.source) as source, null::text as texte,
+           min(pv.page) as page, null::text as controle
+    from public.pieces_valeurs pv
+    cross join lateral jsonb_array_elements(case when jsonb_typeof(pv.valeur) = 'array' then pv.valeur
+                                                 else '[]'::jsonb end) with ordinality as e(ligne, n)
+    where pv.piece_id = p_piece and pv.champ = 'lignes'
+      and (pv.source = 'humain'
+           or not exists (select 1 from public.pieces_valeurs h
+                          where h.piece_id = p_piece and h.champ = 'lignes' and h.source = 'humain'))
+    having count(*) > 0
+  )
+  select coalesce(jsonb_object_agg(x.champ, jsonb_build_object(
+      'valeur', x.valeur, 'sure', x.verifiee or x.source = 'humain', 'source', x.source,
+      'texte', x.texte, 'page', x.page, 'controle', x.controle)), '{}'::jsonb)
+  from (select * from scalaires union all select * from lignes) x
+$function$;
+
 create or replace function private.mes_clients() returns setof uuid language sql stable security definer set search_path to '' as $$
   select c.client_id from public.comptes c where c.user_id = (select auth.uid()) $$;
 create or replace function private.perimetre_couvre(p_user uuid, p_client uuid, p_entite uuid) returns boolean language sql stable security definer set search_path to '' as $$

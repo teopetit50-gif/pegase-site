@@ -83,6 +83,37 @@ begin
   assert (select resultat from public.filed_controles where facture_id = v_f and code = 'identite.registre') = 'ok', 'identite.registre passé après le verdict (facture recontrôlée)';
   raise notice 'OK verdict du registre : fournisseur marqué, contrôle levé';
 
+  -- ── Une pièce dont le SIREN et la TVA sont lus mais NON vérifiés : rien n'est repris, le contrôle le dit ──
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut)
+  values (gen_random_uuid(), v_cl, 'filed', 'courriel', 'facture-douteuse.pdf', 'application/pdf', 2048, repeat('3', 64), v_cl::text || '/filed_document/test/facture-douteuse.pdf', 'filed_document', 'douteuse', 'lue') returning id into v_piece;
+  insert into public.pieces_valeurs (client_id, piece_id, champ, valeur, texte, source, confiance, verifiee) values
+    (v_cl, v_piece, 'fournisseur.nom', to_jsonb('Papeterie d''exemple SAS'::text), 'Papeterie d''exemple SAS', 'ia', 0.98, true),
+    (v_cl, v_piece, 'fournisseur.siren', to_jsonb('842115763'::text), 'SIREN 842 115 763', 'ia', 0.6, false),
+    (v_cl, v_piece, 'fournisseur.tva', to_jsonb('FR42842115763'::text), 'TVA FR42842115763', 'ia', 0.6, false);
+  insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, depose_par, nom_fichier, sha256, recu_le, etat, nature, nature_source)
+  values (v_cl, v_e, 2026, 4, v_piece, 'courriel', v_c, 'facture-douteuse.pdf', repeat('3', 64), now(), 'a_traiter', 'facture', 'lecteur') returning id into v_doc;
+  insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, pays, statut, source, document_origine)
+  values (v_cl, 'PAP', 'Papeterie d''exemple SAS', 'papeterie d exemple sas', 'FR', 'a_confirmer', 'facture', v_doc) returning id into v_four;
+  insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
+  values (v_cl, v_e, v_doc, 'facture', 'F-2026-0413', 'F20260413', date '2026-10-05', current_date, 'EUR', 366, 73.2, 439.2, v_four, 'creation', '{"nom": "Papeterie d''exemple SAS"}', '{"siren": "987654329"}', repeat('4', 64), 'a_completer')
+  returning id into v_f;
+  v_statut := private.filed_controler_facture(v_f);
+  select * into v_r from public.filed_factures where id = v_f;
+  assert v_r.fournisseur_lu->>'siren' is null and v_r.fournisseur_lu->>'tva' is null, 'rien de non vérifié n''est repris';
+  assert v_r.fournisseur_lu->'non_verifie'->>'siren' = '842115763', 'le SIREN lu non vérifié est gardé à part';
+  assert (select siren from public.filed_fournisseurs where id = v_four) is null, 'le fournisseur ne reçoit pas un SIREN non vérifié';
+  assert (select message from public.filed_controles where facture_id = v_f and code = 'identite.siren') like 'SIREN lu (842115763) mais non vérifié%', 'le contrôle dit « lu, non vérifié » : ' || (select message from public.filed_controles where facture_id = v_f and code = 'identite.siren');
+  raise notice 'OK une valeur lue mais non vérifiée n''est pas reprise, et le contrôle le dit';
+
+  -- ── Un « indisponible » ne vaut que deux heures ──
+  insert into public.filed_verifications_tiers (client_id, fournisseur_id, registre, identifiant, demande_le, repondu_le, resultat)
+  values (v_cl, null, 'sirene', '842115763', now() - interval '3 hours', now() - interval '3 hours', 'indisponible');
+  assert (private.filed_verification_recente(v_cl, 'sirene', '842115763')).id is null, 'un indisponible de trois heures ne compte plus';
+  insert into public.filed_verifications_tiers (client_id, fournisseur_id, registre, identifiant, demande_le, repondu_le, resultat)
+  values (v_cl, null, 'sirene', '842115763', now() - interval '1 hour', now() - interval '1 hour', 'indisponible');
+  assert (private.filed_verification_recente(v_cl, 'sirene', '842115763')).id is not null, 'un indisponible d''une heure compte encore';
+  raise notice 'OK un « indisponible » ne vaut que deux heures';
+
   -- ── Une personne atteste l'identité d'un fournisseur hors registre ──
   update public.filed_fournisseurs set identite_verifiee_le = null, identite_source = null, identite_verdict = null where id = v_four;
   set local role authenticated;

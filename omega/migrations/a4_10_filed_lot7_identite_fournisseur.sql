@@ -3,10 +3,12 @@
 -- Ce que ce lot pose :
 --   filed_fournisseurs.identite_verifiee_le / identite_source / identite_verdict   le verdict externe (Sirene, VIES, ou une
 --                                                     personne), écrit par l'ouvrier ou par une personne, lu par les contrôles ;
---   private.filed_completer_fournisseur_lu(p_facture)  remonte SIREN, TVA et IBAN lus par le lecteur (pieces_valeurs) vers
---                                                     filed_factures.fournisseur_lu, filed_factures.iban et le fournisseur
---                                                     (quand ils y manquent et tombent juste à la clé) ; appelée en tête de
---                                                     filed_controler_facture (repère posé par lecture du corps en place) ;
+--   private.filed_completer_fournisseur_lu(p_facture)  remonte SIREN, TVA et IBAN lus par le lecteur (private.filed_valeurs,
+--                                                     valeurs sûres seulement, comme à l'intégration) vers fournisseur_lu,
+--                                                     filed_factures.iban et le fournisseur (quand ils y manquent) ; ce qui est
+--                                                     lu sans être vérifié est gardé à part (fournisseur_lu.non_verifie) et le
+--                                                     contrôle le dit ; appelée en tête de filed_controler_facture (repère) ;
+--   private.filed_verification_recente                  un « indisponible » ne vaut que deux heures ;
 --   private.filed_repondre_verification                 la réponse d'un registre remplit aussi le verdict du fournisseur et
 --                                                     recontrôle ses factures ;
 --   private.filed_controles_identite                    lit le verdict du fournisseur comme une réponse de registre ;
@@ -31,6 +33,18 @@ end $$;
 comment on column public.filed_fournisseurs.identite_verifiee_le is 'Quand l''identité du fournisseur a été vérifiée pour la dernière fois (registre public ou personne).';
 comment on column public.filed_fournisseurs.identite_source is 'Qui a vérifié : sirene (INSEE), vies (Union), humain.';
 comment on column public.filed_fournisseurs.identite_verdict is 'Le verdict : {"resultat": valide | invalide | indisponible, "identifiant": …, "registre": …, "preuve": {…}}.';
+
+-- Une réponse « indisponible » ne vaut que deux heures : l'ouvrier B7 redemande ensuite (remplace la version du lot 4d).
+create or replace function private.filed_verification_recente(p_client uuid, p_registre text, p_identifiant text, p_jours int default 90)
+returns public.filed_verifications_tiers
+language sql stable set search_path to '' as $$
+  select v from public.filed_verifications_tiers v
+  where v.client_id = p_client and v.registre = p_registre
+    and v.identifiant = upper(regexp_replace(coalesce(p_identifiant, ''), '[^A-Za-z0-9]', '', 'g'))
+    and v.repondu_le is not null and v.repondu_le >= now() - make_interval(days => p_jours)
+    and (v.resultat <> 'indisponible' or v.repondu_le >= now() - interval '2 hours')
+  order by v.repondu_le desc limit 1
+$$;
 
 -- Le verdict qui vaut pour un identifiant : celui du fournisseur s'il porte cet identifiant et date de moins de
 -- p_jours jours, sinon la dernière réponse du registre (filed_verifications_tiers).
@@ -115,48 +129,51 @@ grant execute on function public.filed_attester_identite(uuid, text) to authenti
 -- ───────────────────────────────────────────────────────────────────────────
 -- 2. Ce que le lecteur a lu remonte : SIREN, TVA, IBAN
 -- ───────────────────────────────────────────────────────────────────────────
--- Les valeurs de la pièce (pieces_valeurs, champs fournisseur.siren / fournisseur.tva / fournisseur.iban /
--- fournisseur.nom) complètent fournisseur_lu quand la clé y manque, l'IBAN de la facture quand il est nul, et
--- le fournisseur rattaché quand il n'a ni SIREN ni TVA — seulement si la valeur tombe juste à la clé et
--- qu'aucun autre fournisseur de l'organisation ne la porte. Rend vrai si quelque chose a changé.
-create or replace function private.filed_valeur_lue(p_piece uuid, p_champ text)
-returns text language sql stable set search_path to '' as $$
-  select nullif(btrim(coalesce(case when jsonb_typeof(v.valeur) = 'string' then v.valeur #>> '{}' else v.valeur->>'valeur' end, v.texte)), '')
-    from public.pieces_valeurs v
-   where v.piece_id = p_piece and v.champ = p_champ
-   order by (v.source = 'humain') desc, v.verifiee desc, v.confiance desc nulls last
-   limit 1
-$$;
-
+-- Les valeurs de la pièce (private.filed_valeurs : champs fournisseur.siren / fournisseur.tva / fournisseur.siret /
+-- fournisseur.iban / fournisseur.nom) complètent fournisseur_lu quand la clé y manque, l'IBAN de la facture quand il
+-- est nul, et le fournisseur rattaché quand il n'a ni SIREN ni TVA. Même règle qu'à l'intégration : seule une valeur
+-- SÛRE (vérifiée par le lecteur, ou saisie par une personne) et juste à la clé est reprise ; une valeur lue mais non
+-- vérifiée est gardée à part, sous fournisseur_lu.non_verifie, pour que le contrôle le dise au lieu de « aucun ».
+-- Rend vrai si quelque chose a changé.
 create or replace function private.filed_completer_fournisseur_lu(p_facture uuid)
 returns boolean language plpgsql security definer set search_path to '' as $$
 declare
-  v_f public.filed_factures; v_doc public.filed_documents; v_four public.filed_fournisseurs;
-  v_siren text; v_tva text; v_iban text; v_nom text; v_lu jsonb; v_change boolean := false; v_a record; v_detail jsonb := '{}'::jsonb;
+  v_f public.filed_factures; v_doc public.filed_documents; v_four public.filed_fournisseurs; v jsonb;
+  v_siren text; v_tva text; v_iban text; v_nom text; v_lu jsonb; v_nv jsonb := '{}'::jsonb; v_change boolean := false; v_a record; v_detail jsonb := '{}'::jsonb;
+  v_siren_lu text; v_tva_lu text; v_siret_lu text;
 begin
   select * into v_f from public.filed_factures where id = p_facture;
   if not found then return false; end if;
   select * into v_doc from public.filed_documents where id = v_f.document_id;
   if v_doc.piece_id is null then return false; end if;
+  v := private.filed_valeurs(v_doc.piece_id);
   v_lu := coalesce(v_f.fournisseur_lu, '{}'::jsonb);
 
-  v_siren := nullif(regexp_replace(coalesce(private.filed_valeur_lue(v_doc.piece_id, 'fournisseur.siren'), ''), '[^0-9]', '', 'g'), '');
-  if v_siren is not null and char_length(v_siren) = 14 then v_siren := left(v_siren, 9); end if;
-  v_tva := nullif(upper(regexp_replace(coalesce(private.filed_valeur_lue(v_doc.piece_id, 'fournisseur.tva'), ''), '[^A-Za-z0-9]', '', 'g')), '');
-  v_iban := nullif(upper(regexp_replace(coalesce(private.filed_valeur_lue(v_doc.piece_id, 'fournisseur.iban'), ''), '[^A-Za-z0-9]', '', 'g')), '');
-  v_nom := private.filed_valeur_lue(v_doc.piece_id, 'fournisseur.nom');
-  if v_tva is not null then
-    select * into v_a from private.filed_tva_intracom_analyser(v_tva);
-    if not v_a.valide then v_tva := null; end if;
+  v_siren_lu := nullif(regexp_replace(coalesce(v -> 'fournisseur.siren' ->> 'valeur', ''), '[^0-9]', '', 'g'), '');
+  v_siret_lu := nullif(regexp_replace(coalesce(v -> 'fournisseur.siret' ->> 'valeur', ''), '[^0-9]', '', 'g'), '');
+  v_tva_lu := nullif(upper(regexp_replace(coalesce(v -> 'fournisseur.tva' ->> 'valeur', ''), '[^A-Za-z0-9]', '', 'g')), '');
+  v_nom := nullif(btrim(coalesce(v -> 'fournisseur.nom' ->> 'valeur', '')), '');
+
+  -- Ce qui est sûr et juste à la clé.
+  if coalesce((v -> 'fournisseur.siren' ->> 'sure')::boolean, false) and private.filed_siren_valide(v_siren_lu) then v_siren := v_siren_lu; end if;
+  if v_siren is null and coalesce((v -> 'fournisseur.siret' ->> 'sure')::boolean, false) and v_siret_lu ~ '^[0-9]{14}$' and private.filed_siren_valide(left(v_siret_lu, 9)) then v_siren := left(v_siret_lu, 9); end if;
+  if coalesce((v -> 'fournisseur.tva' ->> 'sure')::boolean, false) and v_tva_lu is not null then
+    select * into v_a from private.filed_tva_intracom_analyser(v_tva_lu);
+    if v_a.valide then v_tva := v_tva_lu; end if;
   end if;
   if v_siren is null and private.filed_siren_de_tva_fr(v_tva) is not null then v_siren := private.filed_siren_de_tva_fr(v_tva); end if;
-  if v_siren is not null and not private.filed_siren_valide(v_siren) then v_siren := null; end if;
+  -- Ce qui est lu sans être sûr : gardé à part, jamais repris.
+  if v_siren is null and v_siren_lu is not null then v_nv := v_nv || jsonb_build_object('siren', v_siren_lu); end if;
+  if v_tva is null and v_tva_lu is not null then v_nv := v_nv || jsonb_build_object('tva', v_tva_lu); end if;
+  -- L'IBAN : comme à l'intégration, le format et la clé suffisent (il se valide ensuite par la file).
+  v_iban := nullif(upper(regexp_replace(coalesce(v -> 'fournisseur.iban' ->> 'valeur', ''), '[^A-Za-z0-9]', '', 'g')), '');
   if v_iban is not null and not (v_iban ~ '^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$' and private.filed_iban_valide(v_iban)) then v_iban := null; end if;
 
   -- fournisseur_lu : ce que la pièce donne, sans écraser ce qui y est déjà.
   if v_siren is not null and nullif(v_lu->>'siren', '') is null then v_lu := v_lu || jsonb_build_object('siren', v_siren); v_change := true; v_detail := v_detail || jsonb_build_object('siren', v_siren); end if;
   if v_tva is not null and nullif(v_lu->>'tva', '') is null then v_lu := v_lu || jsonb_build_object('tva', v_tva); v_change := true; v_detail := v_detail || jsonb_build_object('tva', v_tva); end if;
   if v_nom is not null and nullif(v_lu->>'nom', '') is null then v_lu := v_lu || jsonb_build_object('nom', left(v_nom, 200)); v_change := true; end if;
+  if v_nv <> '{}'::jsonb and coalesce(v_lu->'non_verifie', '{}'::jsonb) <> v_nv then v_lu := v_lu || jsonb_build_object('non_verifie', v_nv); v_change := true; end if;
   if v_change then
     update public.filed_factures set fournisseur_lu = v_lu where id = v_f.id;
   end if;
@@ -182,12 +199,12 @@ begin
 
   if v_detail <> '{}'::jsonb then
     perform private.filed_historiser(v_f.client_id, v_f.document_id, 'filed_facture', v_f.id::text, 'identite_completee',
-      'Identité du fournisseur complétée depuis la pièce : ' || (select string_agg(k || ' ' || v, ', ') from jsonb_each_text(v_detail) e(k, v)) || '.', v_detail);
+      'Identité du fournisseur complétée depuis la pièce : ' || (select string_agg(e.cle || ' ' || e.val, ', ') from jsonb_each_text(v_detail) e(cle, val)) || '.', v_detail);
   end if;
   return v_change;
 end $$;
 comment on function private.filed_completer_fournisseur_lu(uuid) is
-  'Remonte SIREN, TVA et IBAN lus sur la pièce vers la facture (fournisseur_lu, iban) et le fournisseur rattaché, quand ils manquent et tombent juste à la clé.';
+  'Remonte SIREN, TVA et IBAN lus sur la pièce (valeurs sûres seulement) vers la facture et le fournisseur rattaché, quand ils manquent ; garde à part ce qui est lu sans être vérifié.';
 
 -- En tête de filed_controler_facture : le corps en place, un repère, une insertion (robuste aux autres lots).
 do $$
@@ -244,8 +261,10 @@ begin
   -- identite.tva_intracom
   if v_tva is null then
     perform private.filed_poser_resultat(v_f, 'identite.tva_intracom', 'attention', true,
-      'Aucun numéro de TVA intracommunautaire sur la pièce ni sur le fournisseur.', 'EMMET_INC',
-      jsonb_build_object('tva', null), 'absent');
+      case when nullif(v_f.fournisseur_lu->'non_verifie'->>'tva', '') is not null
+           then format('Numéro de TVA lu (%s) mais non vérifié par le lecteur : à confirmer sur la pièce.', v_f.fournisseur_lu->'non_verifie'->>'tva')
+           else 'Aucun numéro de TVA intracommunautaire sur la pièce ni sur le fournisseur.' end, 'EMMET_INC',
+      jsonb_build_object('tva', null, 'lu_non_verifie', v_f.fournisseur_lu->'non_verifie'->>'tva'), 'absent');
   else
     select * into v_a from private.filed_tva_intracom_analyser(v_tva);
     v_tva_ok := coalesce(v_a.valide, false);
@@ -260,7 +279,10 @@ begin
   -- identite.siren
   if v_siren is null then
     perform private.filed_poser_resultat(v_f, 'identite.siren', 'attention', true,
-      'Aucun SIREN sur la pièce ni sur le fournisseur.', 'EMMET_INC', jsonb_build_object('siren', null), 'absent');
+      case when nullif(v_f.fournisseur_lu->'non_verifie'->>'siren', '') is not null
+           then format('SIREN lu (%s) mais non vérifié par le lecteur : à confirmer sur la pièce.', v_f.fournisseur_lu->'non_verifie'->>'siren')
+           else 'Aucun SIREN sur la pièce ni sur le fournisseur.' end, 'EMMET_INC',
+      jsonb_build_object('siren', null, 'lu_non_verifie', v_f.fournisseur_lu->'non_verifie'->>'siren'), 'absent');
   else
     perform private.filed_poser_resultat(v_f, 'identite.siren', 'bloquant', not private.filed_siren_valide(v_siren),
       case when private.filed_siren_valide(v_siren) then format('SIREN %s : clé correcte.', v_siren)

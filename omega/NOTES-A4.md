@@ -102,12 +102,17 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## Lot 7 (05/10 soir) — première vraie facture
 
-- Constat en base réelle (A3) : `filed_integrer_facture` ne remonte que `{nom}` dans `fournisseur_lu`
-  alors que le lecteur a lu `fournisseur.siren / tva / iban` ; `identite.siren` disait à tort
-  « aucun SIREN ». Réponse en deux temps : (1) a4_10 remonte ces valeurs au contrôle (répare aussi
-  la facture déjà intégrée au prochain recontrôle) ; (2) la remontée à l'intégration même, dans
-  `filed_integrer_facture` / `filed_creer_fournisseur`, attend leurs corps (demandés au
-  coordinateur, points A à D) : lot 7b.
+- Constat en base réelle (A3) : `filed_integrer_facture` n'avait remonté que `{nom}` dans
+  `fournisseur_lu` alors que le lecteur avait lu `fournisseur.siren / tva / iban`. Lecture des
+  corps (`omega/SOCLE-EXTRAITS-COMMUN.sql`) : l'intégration ne reprend que les valeurs SÛRES
+  (`verifiee` ou saisies par une personne, `private.filed_valeurs` → `sure`), et le SIREN / la TVA
+  de cette pièce étaient lus sans être vérifiés (clé fausse) : l'intégration avait raison. Pas de
+  lot 7b. a4_10 garde la même règle : `private.filed_completer_fournisseur_lu` ne reprend que les
+  valeurs sûres et justes à la clé, garde à part ce qui est lu sans être vérifié
+  (`fournisseur_lu.non_verifie`), et le contrôle dit « SIREN lu (…) mais non vérifié » au lieu
+  de « aucun SIREN ». Champs du lecteur : `omega/CHAMPS-LECTURE.md` (worker-a1).
+- `private.filed_verification_recente` : une réponse « indisponible » ne vaut que deux heures
+  (demande de B7), les autres 90 jours.
 - Verdict externe : l'ouvrier B7 passe par `public.filed_repondre_verification` (service_role) ;
   le verdict se pose sur `filed_fournisseurs.identite_*` et les factures sont recontrôlées.
   `identite.registre` passe à « ok » quand le verdict est bon. Une personne peut attester
