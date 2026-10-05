@@ -1,9 +1,9 @@
 // Les portes de l'ouvrier IDENTITÉ : la file des travaux (socle partagé) et les
 // trois portes du lot b7_01 : identite_a_verifier, noter_identite,
-// identite_relancer. Jamais de lecture ni d'écriture directe dans une table.
+// identite_relancer, par la fonction rpc() exportée du socle partagé (A1,
+// commit 7425991). Jamais de lecture ni d'écriture directe dans une table.
 
-import { ErreurOuvrier } from "@partage/erreurs.ts";
-import { type ConfigSupabase, type Portes, PortesRpc } from "@partage/portes.ts";
+import { type ConfigSupabase, type Portes, PortesRpc, rpc } from "@partage/portes.ts";
 
 export type Registre = "sirene" | "vies";
 export type ResultatRegistre = "valide" | "invalide" | "indisponible";
@@ -83,33 +83,8 @@ export class PortesIdentiteRpc implements PortesIdentite {
     return this.file.battreOuvrier(module, genres, detail, attendu);
   }
 
-  // Même mécanique que PortesRpc.rpc (privée là-bas) : 5xx/429 = panne, 401/403 = porte refusée, autre 4xx = erreur interne.
-  private async rpc<T>(nom: string, params: Record<string, unknown>): Promise<T> {
-    let rep: Response;
-    try {
-      rep = await this.fetchFn(`${this.cfg.url}/rest/v1/rpc/${nom}`, {
-        method: "POST",
-        headers: {
-          apikey: this.cfg.cleService,
-          Authorization: `Bearer ${this.cfg.cleService}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      });
-    } catch (e) {
-      throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `porte ${nom} injoignable : ${(e as Error).message}`);
-    }
-    const texte = await rep.text();
-    if (!rep.ok) {
-      if (rep.status >= 500 || rep.status === 429) {
-        throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`);
-      }
-      if (rep.status === 401 || rep.status === 403) {
-        throw new ErreurOuvrier("PORTE_REFUSEE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
-      }
-      throw new ErreurOuvrier("ERREUR_INTERNE", `porte ${nom} : HTTP ${rep.status} ${texte.slice(0, 300)}`, true);
-    }
-    return (texte === "" ? null : JSON.parse(texte)) as T;
+  private rpc<T>(nom: string, params: Record<string, unknown>): Promise<T> {
+    return rpc<T>(this.cfg, this.fetchFn, nom, params);
   }
 
   async aVerifier(verification: string): Promise<Demande | null> {
