@@ -14,17 +14,20 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
-import { nomEntite } from "../exemples/socle";
+import { Upload } from "lucide-react";
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
+import { Loader } from "@/components/ui/loader";
+import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
+import { ENTITES, EXEMPLE_CLIENT_ID, SIEGE, nomEntite } from "../exemples/socle";
 import { useSource } from "../source";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
-import type { DossierFiled, Fournisseur, MotifRefus } from "../types";
+import type { Commande, DossierFiled, Fournisseur, LigneCommande, MotifRefus } from "../types";
 import { ETATS, FAMILLES, NATURES, STATUTS_FACTURE, famille, type Famille } from "./etats";
-import { chargerDossier, chargerFournisseurs, chargerListe, type Apercu } from "./portes";
+import { chargerCommandes, chargerDossier, chargerFournisseurs, chargerListe, deposerDocument, monClient, type Apercu } from "./portes";
 import DossierVue from "./DossierVue";
 
-type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; dossiers: Record<string, DossierFiled> };
+type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; commandes: Commande[]; lignesCommande: LigneCommande[]; dossiers: Record<string, DossierFiled> };
 
 export default function EcranFiled() {
   const { source } = useSource();
@@ -40,11 +43,15 @@ export default function EcranFiled() {
     setErreur(null);
     setReel(null);
     try {
-      const [liste, fournisseurs] = await Promise.all([chargerListe(), chargerFournisseurs().catch(() => [] as Fournisseur[])]);
-      setReel({ ...liste, fournisseurs, dossiers: {} });
+      const [liste, fournisseurs, cmd] = await Promise.all([
+        chargerListe(),
+        chargerFournisseurs().catch(() => [] as Fournisseur[]),
+        chargerCommandes().catch(() => ({ commandes: [] as Commande[], lignes: [] as LigneCommande[] })),
+      ]);
+      setReel({ ...liste, fournisseurs, commandes: cmd.commandes, lignesCommande: cmd.lignes, dossiers: {} });
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ apercus: [], motifs: [], fournisseurs: [], dossiers: {} });
+      setReel({ apercus: [], motifs: [], fournisseurs: [], commandes: [], lignesCommande: [], dossiers: {} });
     }
   }, []);
 
@@ -110,6 +117,66 @@ export default function EcranFiled() {
 
   const motifs = source === "exemple" ? MOTIFS_EXEMPLE : (reel?.motifs ?? []);
   const fournisseurs = source === "exemple" ? FOURNISSEURS_EXEMPLE : (reel?.fournisseurs ?? []);
+  const commandes = source === "exemple" ? COMMANDES_EXEMPLE : (reel?.commandes ?? []);
+  const lignesCommande = source === "exemple" ? LIGNES_COMMANDE_EXEMPLE : (reel?.lignesCommande ?? []);
+
+  /* ——— déposer un document depuis l'espace ——— */
+  const [depot, setDepot] = useState(false);
+  const [fichier, setFichier] = useState<File | null>(null);
+  const [entiteDepot, setEntiteDepot] = useState<string>("");
+  const [envoiDepot, setEnvoiDepot] = useState(false);
+  const [erreurDepot, setErreurDepot] = useState<string | null>(null);
+  const [faitDepot, setFaitDepot] = useState<string | null>(null);
+  const [entitesReelles, setEntitesReelles] = useState<{ id: string; nom: string }[]>([]);
+  const ouvrirDepot = async () => {
+    setErreurDepot(null);
+    setFichier(null);
+    setEntiteDepot(source === "exemple" ? SIEGE : "");
+    setDepot(true);
+    if (source === "reelle" && !entitesReelles.length) {
+      const c = await monClient().catch(() => null);
+      if (c) {
+        setEntitesReelles(c.entites);
+        setEntiteDepot(c.entites[0]?.id ?? "");
+      }
+    }
+  };
+  const soumettreDepot = async () => {
+    if (!fichier) return;
+    setEnvoiDepot(true);
+    setErreurDepot(null);
+    try {
+      if (source === "reelle") {
+        const c = await monClient();
+        if (!c) throw new Error("Aucun compte rattaché à cette session.");
+        await deposerDocument({ client_id: c.client_id, entite_id: entiteDepot || null, fichier, expediteur: c.email });
+        await charger();
+      } else {
+        await new Promise((r) => setTimeout(r, 400));
+        const id = crypto.randomUUID();
+        const quand = new Date().toISOString();
+        const numero = Math.max(0, ...local.map((d) => Number(d.document.reference.slice(-6)) || 0)) + 1;
+        setLocal((prev) => [
+          {
+            document: { id, client_id: EXEMPLE_CLIENT_ID, entite_id: entiteDepot || null, reference: `R${new Date().getFullYear()}-${String(numero).padStart(6, "0")}`, piece_id: `${id}-p`, source: "depot", expediteur: null, nom_fichier: fichier.name, recu_le: quand, etat: "en_lecture", nature: null, nature_source: null, doublon_de: null, motif: null, lu_le: null, traite_le: null },
+            facture: null, lignes: [], tva: [], controles: [], levees: [], fournisseur: null, ibans: [], appariements: [], rapprochement: null,
+            piece: { id: `${id}-p`, nom_fichier: fichier.name, mime: fichier.type || "application/octet-stream", chemin: `${EXEMPLE_CLIENT_ID}/filed_document/${id}/${fichier.name}`, nb_pages: null, statut: "recue", type_piece: null, methode: null },
+            pages: [], valeurs: [],
+            historique: [{ id: `depot-${quand}`, etape: "reception", message: "Déposé depuis l'espace par vous.", detail: {}, acteur_type: "utilisateur", acteur_libelle: "Vous", survenu_le: quand }, { id: `lecture-${quand}`, etape: "lecture", message: "Lecture en cours…", detail: {}, acteur_type: "systeme", acteur_libelle: null, survenu_le: quand }],
+          },
+          ...prev,
+        ]);
+        setChoix(id);
+      }
+      setFaitDepot(`${fichier.name} est déposé : il reçoit son numéro et part en lecture.`);
+      setDepot(false);
+    } catch (e) {
+      setErreurDepot(e instanceof Error ? e.message : "Le dépôt a échoué.");
+    } finally {
+      setEnvoiDepot(false);
+    }
+  };
+  const entitesDepot = source === "exemple" ? ENTITES : entitesReelles;
 
   /* en mode exemple, une correction remplace le dossier en mémoire ; en
      base réelle, on relit le dossier après la porte */
@@ -132,8 +199,13 @@ export default function EcranFiled() {
             Chaque document reçu a son numéro, ses contrôles et sa pièce. Ce qui bloque est en tête ; chaque correction passe par une porte et reste dans le fil.
           </p>
         </div>
-        <Ruban source={source} />
+        <div className="esp-item-haut">
+          <button type="button" className="r-btn r-btn--noir" onClick={ouvrirDepot}><Upload width={15} height={15} aria-hidden="true" /> Déposer un document</button>
+          <Ruban source={source} />
+        </div>
       </div>
+
+      {faitDepot ? <div style={{ marginBottom: 14 }}><Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {faitDepot}</Avis></div> : null}
 
       <div className="esp-kpis" data-arrivee="">
         {FAMILLES.map((f) => (
@@ -212,6 +284,8 @@ export default function EcranFiled() {
               source={source}
               motifs={motifs}
               fournisseurs={fournisseurs}
+              commandes={commandes}
+              lignesCommande={lignesCommande}
               onLocal={remplacerLocal}
               relire={() => (apercu ? relireReel(apercu) : Promise.resolve())}
             />
@@ -222,6 +296,39 @@ export default function EcranFiled() {
           )}
         </section>
       </div>
+
+      <Dialog open={depot} onOpenChange={(o) => !o && setDepot(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Upload width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Déposer un document</DialogTitle>
+            <DialogDescription>Le fichier reçoit un numéro, est lu par le lecteur, puis contrôlé comme tout document reçu.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <div>
+                <span className="rv-libelle">Fichier <span className="esp-obligatoire">(obligatoire)</span></span>
+                <div className="esp-fichier">
+                  <input id="esp-depot-fichier" type="file" className="esp-fichier-natif" accept=".pdf,.png,.jpg,.jpeg,.xml,.csv,.xlsx" onChange={(e) => setFichier(e.target.files?.[0] ?? null)} />
+                  <label htmlFor="esp-depot-fichier" className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{fichier ? "Changer de fichier" : "Choisir un fichier"}</label>
+                  <span className="esp-kpi-sous">{fichier ? `${fichier.name} · ${Math.round(fichier.size / 1024)} Ko` : "PDF, image, Factur-X (XML), CSV ou tableur."}</span>
+                </div>
+              </div>
+              {entitesDepot.length > 1 ? (
+                <label className="rv-libelle">Entité
+                  <select className="rv-champ" value={entiteDepot} onChange={(e) => setEntiteDepot(e.target.value)}>
+                    {entitesDepot.map((en) => <option key={en.id} value={en.id}>{en.nom}</option>)}
+                  </select>
+                </label>
+              ) : null}
+              {erreurDepot ? <Avis teinte="rouge" role="alert">{erreurDepot}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!fichier || envoiDepot} onClick={soumettreDepot}>{envoiDepot ? <Loader variant="spin" /> : null} Déposer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

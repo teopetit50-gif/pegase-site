@@ -8,7 +8,7 @@
    cité. En base réelle, c'est l'image de la pièce (URL signée) qui prend
    la place du dessin, les boîtes sont les mêmes. */
 
-import type { DossierFiled, Facture, MotifRefus } from "../types";
+import type { Commande, DossierFiled, Facture, LigneCommande, MotifRefus } from "../types";
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE, AGENCE, ilYa, dans, CLAIRE, SOFIA } from "./socle";
 
 const C = EXEMPLE_CLIENT_ID;
@@ -286,6 +286,7 @@ const D14: DossierFiled = {
   ],
   levees: [],
   ibans: [{ id: u("ib", 14), fournisseur_id: f14.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 0183", statut: "valide", propose_le: ilYa(200) }],
+  appariements: [],
   rapprochement: { id: u("rp", 14), commande_id: null, mode: "aucun", nb_lignes: 2, nb_appariees: 0, nb_sans_commande: 2, ecart_prix: 0, ecart_quantite: 0, deja_facture: 0, non_recu: 0, ecart_montant: null },
   historique: [
     hist("reception", "Reçue par courriel de compta@papeterie-durand.fr.", ilYa(4, 10)),
@@ -346,6 +347,11 @@ const D09: DossierFiled = {
     { id: u("ib", 9), fournisseur_id: f09.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 0183", statut: "valide", propose_le: ilYa(300) },
     { id: u("ib", 19), fournisseur_id: f09.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 0143", statut: "propose", propose_le: ilYa(9, 14) },
   ],
+  appariements: [
+    { facture_ligne_id: u("11", 90), commande_ligne_id: u("cl", 1) },
+    { facture_ligne_id: u("11", 91), commande_ligne_id: u("cl", 2) },
+    { facture_ligne_id: u("11", 92), commande_ligne_id: u("cl", 3) },
+  ],
   rapprochement: { id: u("rp", 9), commande_id: u("bc", 64), mode: "lignes", nb_lignes: 3, nb_appariees: 3, nb_sans_commande: 0, ecart_prix: 0, ecart_quantite: 0, deja_facture: 0, non_recu: 0, ecart_montant: 0 },
   historique: [
     hist("reception", "Reçue par courriel de facturation@metallerie-roux.fr.", ilYa(9, 14)),
@@ -398,6 +404,10 @@ const D11: DossierFiled = {
   ],
   levees: [],
   ibans: [{ id: u("ib", 11), fournisseur_id: f11.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 7612", statut: "valide", propose_le: ilYa(120) }],
+  appariements: [
+    { facture_ligne_id: u("11", 110), commande_ligne_id: u("cl", 4) },
+    { facture_ligne_id: u("11", 111), commande_ligne_id: u("cl", 5) },
+  ],
   rapprochement: { id: u("rp", 11), commande_id: u("bc", 77), mode: "lignes", nb_lignes: 2, nb_appariees: 2, nb_sans_commande: 0, ecart_prix: 360, ecart_quantite: 0, deja_facture: 0, non_recu: 0, ecart_montant: 360 },
   historique: [
     hist("reception", "Reçue par courriel de billing@techpro-informatique.fr.", ilYa(6, 9)),
@@ -432,6 +442,7 @@ const D12: DossierFiled = {
   ],
   levees: [],
   ibans: [],
+  appariements: [],
   rapprochement: null,
   historique: [
     hist("reception", "Reçu par courriel de facturation@metallerie-roux.fr.", ilYa(2, 16)),
@@ -450,6 +461,7 @@ const D10: DossierFiled = {
   levees: [],
   fournisseur: null,
   ibans: [],
+  appariements: [],
   rapprochement: null,
   piece: { id: u("ee", 10), nom_fichier: "Facture_MR-2026-0412 (1).pdf", mime: "application/pdf", chemin: `${C}/filed_document/${u("dd", 10)}/doublon.pdf`, nb_pages: 1, statut: "lue", type_piece: "facture", methode: "natif" },
   pages: [{ n: 1, texte: "", largeur: 595, hauteur: 842 }],
@@ -470,6 +482,7 @@ const D13: DossierFiled = {
   levees: [],
   fournisseur: null,
   ibans: [],
+  appariements: [],
   rapprochement: null,
   piece: { id: u("ee", 13), nom_fichier: "scan_20261001_0932.pdf", mime: "application/pdf", chemin: `${C}/filed_document/${u("dd", 13)}/scan.pdf`, nb_pages: 2, statut: "a_classer", type_piece: null, methode: "ocr" },
   pages: [
@@ -497,6 +510,7 @@ const D15: DossierFiled = {
   levees: [],
   fournisseur: null,
   ibans: [],
+  appariements: [],
   rapprochement: null,
   piece: { id: u("ee", 15), nom_fichier: "facture-octobre.pdf", mime: "application/pdf", chemin: `${C}/filed_document/${u("dd", 15)}/facture-octobre.pdf`, nb_pages: null, statut: "en_lecture", type_piece: null, methode: null },
   pages: [],
@@ -529,6 +543,7 @@ const D08: DossierFiled = {
   ],
   levees: [{ id: u("lv", 8), code: "lignes.somme", cle: "", motif: "Arrondi du prix du kWh à cinq décimales — écart de 3 centimes, sans incidence.", leve_par: CLAIRE, leve_le: ilYa(19, 11), leve_par_nom: "Claire Morel" }],
   ibans: [{ id: u("ib", 8), fournisseur_id: f08.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 3456", statut: "valide", propose_le: ilYa(400) }],
+  appariements: [],
   rapprochement: null,
   historique: [
     hist("reception", "Reçue par courriel de factures@electricite-lyon.fr.", ilYa(20, 7)),
@@ -540,6 +555,22 @@ const D08: DossierFiled = {
   ],
 };
 D08.facture!.statut = "a_valider";
+
+/* Les commandes connues (filed_commandes) et leurs lignes : celles que les
+   factures d'exemple citent, plus une ouverte sans facture. */
+export const COMMANDES_EXEMPLE: Commande[] = [
+  { id: u("bc", 64), numero: "BC-2026-0064", date_commande: isoFr(fr(ilYa(34))), devise: "EUR", montant_ht: 10400, statut: "ouverte", fournisseur_id: u("ff", 9), reference_externe: null },
+  { id: u("bc", 77), numero: "BC-2026-0077", date_commande: isoFr(fr(ilYa(12))), devise: "EUR", montant_ht: 7320, statut: "ouverte", fournisseur_id: u("ff", 11), reference_externe: null },
+  { id: u("bc", 80), numero: "BC-2026-0080", date_commande: isoFr(fr(ilYa(3))), devise: "EUR", montant_ht: 4850, statut: "ouverte", fournisseur_id: null, reference_externe: "Devis D-2026-218" },
+];
+export const LIGNES_COMMANDE_EXEMPLE: LigneCommande[] = [
+  { id: u("cl", 1), commande_id: u("bc", 64), rang: 1, designation: "Garde-corps acier thermolaqué", quantite: 24, unite: "ml", prix_unitaire: 310, montant_ht: 7440 },
+  { id: u("cl", 2), commande_id: u("bc", 64), rang: 2, designation: "Pose sur site", quantite: 6, unite: "jour", prix_unitaire: 490, montant_ht: 2940 },
+  { id: u("cl", 3), commande_id: u("bc", 64), rang: 3, designation: "Déplacement et levage", quantite: 1, unite: "forfait", prix_unitaire: 20, montant_ht: 20 },
+  { id: u("cl", 4), commande_id: u("bc", 77), rang: 1, designation: "Poste de travail Dell OptiPlex 7020", quantite: 12, unite: "pièce", prix_unitaire: 560, montant_ht: 6720 },
+  { id: u("cl", 5), commande_id: u("bc", 77), rang: 2, designation: "Écran 27'' Dell P2723", quantite: 12, unite: "pièce", prix_unitaire: 50, montant_ht: 600 },
+  { id: u("cl", 6), commande_id: u("bc", 80), rang: 1, designation: "Agencement comptoir d'accueil — chêne massif, fourniture et pose", quantite: 1, unite: "forfait", prix_unitaire: 4850, montant_ht: 4850 },
+];
 
 export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D09, D11, D13, D12, D14, D10, D08];
 
