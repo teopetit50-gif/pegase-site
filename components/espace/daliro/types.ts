@@ -1,0 +1,327 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les formes de l'écran DALIRO (05/10/2026, session B6)
+
+   Décalquées des tables btp_* de la recette (omega/SOCLE-EXTRAITS-DALIRO.sql)
+   et des migrations b6_01 à b6_04 : les noms de champs sont CEUX des
+   tables et des vues, pour qu'une ligne lue par Supabase entre ici sans
+   traduction, et que le jeu d'exemple ait exactement la même forme. Le
+   tableau d'un chantier est la forme rendue par public.btp_tableau_chantier
+   (jsonb) ; la liste, celle de public.btp_liste_chantiers.
+   ══════════════════════════════════════════════════════════════════════ */
+
+export type StatutChantier = "preparation" | "ouvert" | "suspendu" | "receptionne" | "clos" | "annule";
+export type Gravite = "bloquant" | "attention" | "info";
+
+export type Etape = { etape: number; etapes: number; lot_id: string | null; lot_libelle: string | null; avancement_pct: number };
+
+export type Chantier = {
+  id: string;
+  client_id: string;
+  entite_id: string;
+  nom: string;
+  reference: string | null;
+  adresse: string | null;
+  code_postal: string;
+  commune: string;
+  departement: string;
+  territoire: string;
+  zone_tva: string;
+  regime_tva: string;
+  maitre_ouvrage_type: "particulier" | "professionnel" | "acheteur_public";
+  nature_marche: "public" | "prive" | null;
+  place_client: "titulaire" | "sous_traitant" | "cotraitant";
+  maitre_ouvrage_id: string | null;
+  maitre_oeuvre_id: string | null;
+  donneur_ordre_id: string | null;
+  conducteur_id: string | null;
+  statut: StatutChantier;
+  date_debut: string | null;
+  date_fin_prevue: string | null;
+  date_reception: string | null;
+  ouvert_le: string | null;
+  cree_le: string;
+  /* enrichissements de btp_liste_chantiers / btp_tableau_chantier */
+  etape?: Etape | null;
+  maitre_ouvrage_nom?: string | null;
+  maitre_oeuvre_nom?: string | null;
+  donneur_ordre_nom?: string | null;
+  nb_lots?: number;
+  nb_bloquants?: number;
+  nb_attention?: number;
+  marche_verifie?: boolean;
+  prochain_passage?: { id: string; debut: string; fin: string; tache: string | null; confirmation: Confirmation; intervenant_type: string; intervenant_nom: string | null } | null;
+  nb_avenants_en_cours?: number;
+  nb_avenants_signes?: number;
+};
+
+export type Lot = {
+  id: string;
+  chantier_id: string;
+  code: string;
+  libelle: string;
+  corps_etat: string | null;
+  corps_etat_libelle?: string | null;
+  rang: number;
+  execution: "client" | "sous_traitant" | "autre_titulaire";
+  tiers_id: string | null;
+  tiers_nom?: string | null;
+  equipe_id: string | null;
+  equipe_nom?: string | null;
+  exterieur: boolean;
+  statut: "a_venir" | "en_cours" | "termine";
+  acceptation?: "a_demander" | "demandee" | "acceptee" | "refusee" | "caduque" | null;
+};
+
+export type ControleLigne = "ok" | "incomplet" | "montant_faux";
+
+export type LigneMarche = {
+  id: string;
+  marche_id: string;
+  lot_id: string | null;
+  ordre: number;
+  numero: string | null;
+  section: string | null;
+  designation: string;
+  unite: string | null;
+  quantite: number | null;
+  nature: "ouvrage" | "fourniture" | "forfait" | "option";
+  controle: ControleLigne;
+  ecart_accepte: boolean;
+  ecart_motif: string | null;
+  corrigee: boolean;
+  /* null sans le droit voir_prix (vue btp_lignes_marche_chiffrees) */
+  prix_unitaire_ht: number | null;
+  montant_ht: number | null;
+  ecart: number | null;
+};
+
+export type ControleMarche = { ligne_id: string | null; ordre: number | null; code: string; bloquant: boolean; message: string | null };
+
+export type Marche = {
+  id: string;
+  chantier_id: string;
+  reference: string | null;
+  objet: string | null;
+  date_signature: string | null;
+  mode_prix: "forfait" | "unitaire" | "mixte";
+  retenue_taux: number;
+  retenue_base: "ht" | "ttc";
+  retenue_caution: boolean;
+  source: "saisie" | "tableur" | "pdf" | "api";
+  piece_id: string | null;
+  statut: "a_verifier" | "verifie";
+  verifie_par: string | null;
+  verifie_libelle: string | null;
+  verifie_le: string | null;
+  montant_ht_declare: number | null;
+  total_ht_lignes: number | null;
+  lignes: LigneMarche[];
+  controles: ControleMarche[];
+};
+
+export type Controle = {
+  chantier_id: string | null;
+  objet_type: string;
+  objet_id: string;
+  code: string;
+  gravite: Gravite;
+  message: string;
+};
+
+export type Confirmation = "non_demandee" | "demandee" | "confirmee" | "declinee" | "sans_reponse";
+
+export type EvenementConfirmation = {
+  id: string;
+  passage_id: string;
+  evenement: "demandee" | "confirmee" | "declinee" | "sans_reponse";
+  canal: string | null;
+  cle: string;
+  detail: Record<string, unknown>;
+  survenu_le: string;
+};
+
+export type Passage = {
+  id: string;
+  chantier_id: string;
+  lot_id: string | null;
+  lot_code?: string | null;
+  lot_libelle?: string | null;
+  equipe_id: string | null;
+  tiers_id: string | null;
+  intervenant_type: "equipe" | "tiers" | "inconnu";
+  intervenant_lu: string | null;
+  intervenant_nom?: string | null;
+  rapprochement: "identique" | "ressemblance" | "manuel" | null;
+  tache: string | null;
+  debut: string;
+  fin: string;
+  exterieur: boolean;
+  statut: "prevu" | "fait" | "annule";
+  confirmation: Confirmation;
+  confirmation_le: string | null;
+  source: "saisie" | "tableur" | "alobees" | "api";
+  source_ref: string | null;
+  version: number;
+  confirmations?: EvenementConfirmation[];
+};
+
+export type Dependance = {
+  id: string;
+  chantier_id: string;
+  amont_id: string;
+  aval_id: string;
+  delai_min_jours: number;
+  origine: "saisie" | "gabarit" | "import";
+  confirmee: boolean;
+  amont_tache?: string | null;
+  aval_tache?: string | null;
+};
+
+export type Acceptation = {
+  id: string;
+  chantier_id: string;
+  tiers_id: string;
+  tiers_nom?: string | null;
+  mode: "acte_special" | "lettre" | "avenant" | "autre";
+  statut: "a_demander" | "demandee" | "acceptee" | "refusee" | "caduque";
+  paiement_direct: boolean;
+  demandee_le: string | null;
+  decidee_le: string | null;
+};
+
+export type StatutAvenant = "brouillon" | "soumis" | "signe" | "refuse" | "abandonne";
+
+export type LigneAvenant = {
+  id: string;
+  avenant_id: string;
+  lot_id: string | null;
+  prix_id: string | null;
+  ordre: number;
+  designation: string;
+  unite: string;
+  quantite: number;
+  sens: 1 | -1;
+  nature: "ouvrage" | "fourniture" | "forfait";
+  origine_prix: "bibliotheque" | "saisie";
+  prix_unitaire_ht: number | null;
+  montant_ht: number | null;
+};
+
+export type Avenant = {
+  id: string;
+  chantier_id: string;
+  marche_id: string | null;
+  numero: number;
+  objet: string;
+  origine: { canal?: string; auteur?: string; date?: string; texte?: string } & Record<string, unknown>;
+  statut: StatutAvenant;
+  demande_id: string | null;
+  demande_statut?: string | null;
+  piece_id: string | null;
+  soumis_le: string | null;
+  signe_le: string | null;
+  signe_par: string | null;
+  signe_libelle: string | null;
+  motif: string | null;
+  cree_le: string;
+  nb_lignes: number;
+  montant_ht: number | null;
+  lignes: LigneAvenant[];
+};
+
+export type FactureChantier = {
+  id: string;
+  facture_id: string;
+  document_id: string | null;
+  chantier_id: string;
+  lot_id: string | null;
+  lot_code: string | null;
+  lot_libelle: string | null;
+  marche_id: string | null;
+  statut: "rattachee" | "detachee";
+  motif: string | null;
+  fournisseur_siren: string | null;
+  fournisseur_id: string | null;
+  fournisseur_nom: string | null;
+  facture_numero: string | null;
+  facture_nature: "facture" | "avoir" | null;
+  facture_statut: string | null;
+  document_reference: string | null;
+  date_emission: string | null;
+  echeance_lue: string | null;
+  montant_ht: number | null;
+  montant_ttc: number | null;
+  rattache_libelle: string | null;
+  cree_le: string;
+};
+
+export type DebourseLot = {
+  lot_id: string;
+  code: string;
+  libelle: string;
+  execution: Lot["execution"];
+  tiers_id: string | null;
+  lot_statut: Lot["statut"];
+  nb_factures: number;
+  engage_marche_ht: number | null;
+  engage_avenants_ht: number | null;
+  facture_ht: number | null;
+  reste_ht: number | null;
+};
+
+export type Vigilance = "sans_objet" | "absente" | "echue" | "a_verifier" | "a_renouveler" | "a_jour";
+
+export type Tiers = {
+  id: string;
+  roles: string[];
+  nom: string;
+  siren: string | null;
+  telephone: string | null;
+  email: string | null;
+  canal: string | null;
+  commune: string | null;
+  corps_etat: string[];
+  departements: string[];
+  confirmer_passages: boolean;
+  vigilance_attestation_le: string | null;
+  vigilance_verifiee_le: string | null;
+  actif: boolean;
+  vigilance?: Vigilance;
+};
+
+export type Prix = {
+  id: string;
+  designation: string;
+  unite: string;
+  corps_etat: string | null;
+  origine: "marche" | "saisie";
+  ligne_marche_id: string | null;
+  date_prix: string;
+  statut: "propose" | "valide" | "retire";
+  prix_unitaire_ht: number | null;
+};
+
+export type Remplacant = { tiers_id: string; nom: string; telephone: string | null; email: string | null; canal: string; vigilance: Vigilance; corps_commun: boolean; departement_ok: boolean };
+
+/* une facture FILED du client, pas encore rattachée, candidate au rattachement */
+export type FactureCandidate = { id: string; numero: string | null; date_emission: string | null; montant_ht: number | null; fournisseur_nom: string | null; fournisseur_siren: string | null; statut: string };
+
+/* le tableau complet d'un chantier (public.btp_tableau_chantier) */
+export type Tableau = {
+  chantier: Chantier;
+  reglages: { formule: "demarrage" | "chantiers" | "entreprise"; quota_chantiers: number; quota_comptes_bureau: number } | null;
+  voit_prix: boolean;
+  lots: Lot[];
+  marches: Marche[];
+  controles: Controle[];
+  controles_organisation: Controle[];
+  passages: Passage[];
+  dependances: Dependance[];
+  acceptations: Acceptation[];
+  avenants: Avenant[];
+  factures: FactureChantier[];
+  debourse: DebourseLot[];
+  tiers: Tiers[];
+  equipes: { id: string; nom: string }[];
+  bibliotheque: Prix[];
+};
