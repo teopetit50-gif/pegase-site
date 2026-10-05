@@ -103,16 +103,22 @@ export function nomSur(nom: string | null | undefined, repli: string): string {
   return propre || repli;
 }
 
-/** Chemin d'une pièce reçue : <client>/receptions/<canal>/<sha256(identifiant)[0:16]>/<n>-<nom>. */
-export async function cheminPiece(
+/** Identifiant externe rendu sûr pour un segment de chemin : <…@…> → sans chevrons, caractères hors [A-Za-z0-9._@-] remplacés. */
+export function segmentSur(identifiant: string): string {
+  const propre = identifiant.trim().replace(/^<|>$/g, "").replace(
+    /[^A-Za-z0-9._@-]/g,
+    "_",
+  ).slice(0, 120);
+  return propre.replace(/^\.+/, "") || "sans-id";
+}
+
+/** Chemin d'une pièce reçue, forme posée par le coordinateur : <client>/receptions/<id externe>/<nom>. */
+export function cheminPiece(
   client: string,
-  canal: Canal,
   identifiant: string,
-  rang: number,
   nom: string,
-): Promise<string> {
-  const dossier = (await sha256Hex(identifiant)).slice(0, 16);
-  return `${client}/receptions/${canal}/${dossier}/${rang}-${nom}`;
+): string {
+  return `${client}/receptions/${segmentSur(identifiant)}/${nom}`;
 }
 
 export type PieceADeposer = {
@@ -125,20 +131,23 @@ export type PieceADeposer = {
 export async function deposerPieces(
   stockage: Stockage,
   client: string,
-  canal: Canal,
   identifiant: string,
   pieces: PieceADeposer[],
 ): Promise<PieceRecue[]> {
   const recues: PieceRecue[] = [];
+  const nomsVus = new Set<string>();
   let rang = 0;
   for (const p of pieces) {
     rang++;
-    const nom = nomSur(p.nom, `piece-${rang}`);
-    const chemin = await cheminPiece(client, canal, identifiant, rang, nom);
+    let nom = nomSur(p.nom, `piece-${rang}`);
+    // Deux pièces du même nom dans un même message : la seconde est préfixée de son rang.
+    if (nomsVus.has(nom)) nom = `${rang}-${nom}`;
+    nomsVus.add(nom);
+    const chemin = cheminPiece(client, identifiant, nom);
     await stockage.deposer(chemin, p.octets, p.typeMime);
     recues.push({
       nom,
-      type_mime: p.typeMime || "application/octet-stream",
+      mime: p.typeMime || "application/octet-stream",
       taille: p.octets.byteLength,
       chemin,
     });
@@ -197,7 +206,6 @@ export async function recevoir(
     const deposees = await deposerPieces(
       deps.stockage,
       boite.client,
-      canal,
       identifiant,
       pieces,
     );

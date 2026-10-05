@@ -370,6 +370,7 @@ export async function recevoirMessage(
             ignore: mediaIgnore !== null,
           }
           : null,
+        en_reponse_a: m.contexte?.wamid ?? null,
         fil: m.de,
       },
       recuLe: m.recuLe,

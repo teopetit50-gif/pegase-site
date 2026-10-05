@@ -204,11 +204,11 @@ Deno.test("document : média lu par Graph, déposé dans omega-clients, légende
   const chemin = [...stockage.objets.keys()][0];
   assertMatch(
     chemin,
-    new RegExp(`^${CLIENT}/receptions/whatsapp/[0-9a-f]{16}/1-devis\\.pdf$`),
+    new RegExp(`^${CLIENT}/receptions/wamid\\.DOC1/devis\\.pdf$`),
   );
   assertEquals(portes.receptions[0].corps, "Le devis signé");
   assertEquals(portes.receptions[0].pieces[0].nom, "devis.pdf");
-  assertEquals(portes.receptions[0].pieces[0].type_mime, "application/pdf");
+  assertEquals(portes.receptions[0].pieces[0].mime, "application/pdf");
 });
 
 Deno.test("image sans nom : nom par défaut image.jpg ; META_ACCESS_TOKEN absent : message reçu, média ignoré et signalé", async () => {

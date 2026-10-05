@@ -101,7 +101,7 @@ Deno.test("e-mail entrant : boîte résolue par le destinataire, réception dép
   assertEquals(rec.corpsHtml, "<div>Bonjour, c'est réglé.</div>");
   assertEquals(rec.recuLe, "2026-10-05T09:30:00.000Z");
   assertEquals(
-    rec.detail.in_reply_to,
+    rec.detail.en_reponse_a,
     "<202610051200.999@smtp-relay.mailin.fr>",
   );
   assertEquals(rec.detail.references, ["<a@x>", "<b@y>"]);
@@ -142,13 +142,13 @@ Deno.test("pièce jointe : téléchargée chez Brevo, déposée dans omega-clien
   assertMatch(
     chemin,
     new RegExp(
-      `^${CLIENT}/receptions/email/[0-9a-f]{16}/1-facture signée\\.pdf$`,
+      `^${CLIENT}/receptions/CAF-123@mail.exemple.test/facture signée\\.pdf$`,
     ),
   );
   assertEquals(stockage.objets.get(chemin)!.typeMime, "application/pdf");
   assertEquals(portes.receptions[0].pieces, [{
     nom: "facture signée.pdf",
-    type_mime: "application/pdf",
+    mime: "application/pdf",
     taille: 14,
     chemin,
   }]);
@@ -291,4 +291,46 @@ Deno.test("lireItem : repli sur Uuid et RawTextBody, date illisible → maintena
   assertEquals(m.corps, "texte brut");
   assertEquals(m.recuLe, MAINTENANT.toISOString());
   assertEquals(lireItem({}, MAINTENANT), null);
+});
+
+Deno.test("chemins des pièces : identifiant assaini (chevrons, caractères spéciaux), deux pièces de même nom", async () => {
+  const { segmentSur, cheminPiece } = await import("./commun.ts");
+  assertEquals(
+    segmentSur("<CAF-123@mail.exemple.test>"),
+    "CAF-123@mail.exemple.test",
+  );
+  assertEquals(segmentSur("wamid.HBgLMzM2MTI=/x"), "wamid.HBgLMzM2MTI__x");
+  assertEquals(segmentSur("  "), "sans-id");
+  assertEquals(
+    cheminPiece(CLIENT, "<a@b>", "x.pdf"),
+    `${CLIENT}/receptions/a@b/x.pdf`,
+  );
+
+  const { portes, stockage, pieces, deps } = monter();
+  pieces!.tokens.set("t1", new Uint8Array([1]));
+  pieces!.tokens.set("t2", new Uint8Array([2]));
+  await traiterBrevoEntrant(
+    requete({
+      items: [item({
+        Attachments: [
+          {
+            Name: "scan.pdf",
+            ContentType: "application/pdf",
+            DownloadToken: "t1",
+          },
+          {
+            Name: "scan.pdf",
+            ContentType: "application/pdf",
+            DownloadToken: "t2",
+          },
+        ],
+      })],
+    }),
+    deps,
+  );
+  assertEquals(stockage.objets.size, 2);
+  assertEquals(portes.receptions[0].pieces.map((p) => p.nom), [
+    "scan.pdf",
+    "2-scan.pdf",
+  ]);
 });

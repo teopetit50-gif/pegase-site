@@ -72,9 +72,16 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
     (défaut `site:omegaai.fr`). Réponse 201 `{id, nouvelle: true}` ou 200 `{id,
     nouvelle: false}`.
   - Pièces déposées en **upsert** dans `omega-clients` sous
-    `<client_id>/receptions/<canal>/<sha256(identifiant)[0:16]>/<n>-<nom>` : une
-    relivraison réécrit le même objet, jamais de doublon.
-- **Tests** : 56 tests Deno verts sur doubles (expéditeur 20, webhook 11, réception 25).
+    `<client_id>/receptions/<identifiant externe assaini>/<nom>` (forme posée par le
+    coordinateur ; chevrons retirés, caractères hors `[A-Za-z0-9._@-]` remplacés ;
+    deux pièces de même nom dans un message : la seconde est préfixée de son rang) :
+    une relivraison réécrit le même objet, jamais de doublon. `p_pieces` =
+    `[{nom, mime, taille, chemin}]`.
+  - `detail` porte les clés que la porte consomme : `en_reponse_a` (In-Reply-To pour
+    l'e-mail, `context.id` pour WhatsApp), `fil` (première `References` ou Message-ID ;
+    numéro de l'interlocuteur pour WhatsApp). La porte rattache elle-même la réception
+    à l'envoi d'origine et publie `reception.nouvelle` : l'ouvrier ne publie rien.
+- **Tests** : 57 tests Deno verts sur doubles (expéditeur 20, webhook 11, réception 26).
   Chaque dossier : `deno test --allow-env` (et `deno lint`, `deno check index.ts`).
   Cas couverts : passage à vide avec battement, e-mail et SMS remis, pièces, refus du
   socle, clé absente, erreurs 400 / 503 Brevo, `confirmer_envoi` en panne, idempotence
@@ -93,9 +100,6 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 - **Envoi réel** (un e-mail et un SMS vers une adresse et un numéro de test) : impossible
   tant que `BREVO_API_KEY` n'existe pas et que `brevo` / `brevo_sms` ne sont pas
   `branche = true` sur la recette. À faire dès que Teo a posé la clé.
-- **Réception** : les portes `resoudre_boite` et `deposer_reception` n'existent pas
-  encore ; le coordinateur les pose à partir de la forme ci-dessous. Si sa signature
-  finale diffère, seul `omega/functions/reception/portes.ts` change.
 
 ## Demain
 
@@ -110,30 +114,29 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 4. Rapprochement « accepté par Brevo mais non confirmé » : un passage de contrôle qui
    relit les `confirme: false` dans les résultats de travaux (ou le socle).
 
-## Portes demandées au coordinateur
+## Portes du socle utilisées (toutes posées sur la recette, lot 18 du 05/10/2026)
 
-Toutes SECURITY DEFINER, EXECUTE réservé à `service_role`, REVOKE au public.
+Toutes réservées à `service_role`, appelées par RPC.
 
 1. **`noter_remise(p_fournisseur, p_reference, p_evenement, p_detail, p_survenu_le, p_cle text) → boolean`**
-   (surcharge à six arguments annoncée par le coordinateur) : ignore un événement
-   déjà noté sous `p_cle`. Le webhook appelle déjà la forme à six arguments.
+   : déjà notée sous `p_cle` → `true` sans rien réécrire ; `false` si l'envoi
+   (fournisseur, référence) est inconnu. Le webhook appelle cette forme à six arguments.
    Point d'attention SMS : la référence que je confirme est `messageId` (nombre) ;
    si le webhook SMS de Brevo ne renvoie que `reference`, la porte ne retrouvera pas
    l'envoi. Le webhook essaie les deux ; si ça ne suffit pas, une variante acceptant
    `p_reference = 'envoi:<uuid>'` (le tag revient dans tous les webhooks) règle le cas.
-2. **`resoudre_boite(p_canal text, p_boite text) → jsonb`**
-   `{"client_id": uuid, "entite_id": uuid|null, "module": text|null, "expediteur_id": uuid|null}`
-   ou NULL. `p_boite` : adresse e-mail destinataire (inbound Brevo),
-   `phone_number_id` Meta (WhatsApp ; peut vivre dans `expediteurs.parametres->>'phone_number_id'`),
-   `site:omegaai.fr` (formulaire). Nécessaire **avant** le dépôt pour ranger les pièces
-   sous le bon client dans le bucket.
-3. **`deposer_reception(p_client uuid, p_canal text, p_boite text, p_identifiant text, p_de text, p_de_nom text, p_sujet text, p_corps text, p_corps_html text, p_pieces jsonb, p_detail jsonb, p_recu_le timestamptz) → jsonb`**
-   `{"id": bigint, "nouvelle": bool}`, idempotente sur
-   `(client_id, canal, identifiant_externe)`. `p_pieces` =
-   `[{"nom", "type_mime", "taille", "chemin"}]` (déjà dans le bucket). Suggestion :
-   publier `reception.nouvelle` quand `nouvelle = true`, et poser `en_reponse_a` quand
-   `p_detail->>'in_reply_to'` correspond à un `envois.reference_externe`.
-4. **Table `public.receptions`** :
+2. **`resoudre_boite(p_canal text, p_boite text) → jsonb | null`** : retrouve
+   l'expéditeur dont `identite` = boîte (courriel, insensible à la casse) ou
+   `parametres->>'phone_number_id'` = boîte (WhatsApp). Rend `{client_id, entite_id,
+   module, expediteur_id}`. **À déclarer** : une ligne `expediteurs` par boîte de
+   réception, dont `site:omegaai.fr` (canal `formulaire`) pour le formulaire du site,
+   sinon la réception répond 500 et le site réessaie.
+3. **`deposer_reception(p_client, p_canal, p_boite, p_identifiant, p_de, p_de_nom, p_sujet, p_corps, p_corps_html, p_pieces, p_detail, p_recu_le) → {id, nouvelle}`**
+   idempotente sur `(client, canal, identifiant externe)` ; `p_pieces`
+   `[{nom, mime, taille, chemin}]` ; `p_detail` : `module`, `entite_id`, `envoi_id`,
+   `en_reponse_a`, `fil`, `langue` consommées, le reste gardé. Calcule l'empreinte,
+   rattache à l'envoi d'origine, publie `reception.nouvelle`.
+4. **Table `public.receptions`** (posée) :
    `id bigint generated always as identity PK ; client_id uuid NN ; entite_id uuid ;
    module text ; canal text NN check in ('email','whatsapp','sms','formulaire') ;
    boite text NN ; identifiant_externe text NN ; de_adresse text ; de_empreinte text ;

@@ -1,7 +1,5 @@
-// Portes du socle pour la réception. Les deux portes ci-dessous n'existent pas
-// encore : leur forme est celle demandée au coordinateur le 05/10/2026 (voir
-// omega/NOTES-A2.md), qui les pose sur la recette. Le code est écrit contre cette
-// forme, avec des doubles pour les tests.
+// Portes du socle pour la réception, posées sur la recette par le coordinateur
+// (lot 18, 05/10/2026). Signatures exactes ci-dessous ; doubles pour les tests.
 //
 //   resoudre_boite(p_canal text, p_boite text) → jsonb
 //     {"client_id": uuid, "entite_id": uuid|null, "module": text|null, "expediteur_id": uuid|null} | null
@@ -9,6 +7,9 @@
 //                     p_de text, p_de_nom text, p_sujet text, p_corps text, p_corps_html text,
 //                     p_pieces jsonb, p_detail jsonb, p_recu_le timestamptz) → jsonb
 //     {"id": bigint, "nouvelle": bool} — idempotente sur (client_id, canal, identifiant_externe)
+//     p_pieces : [{nom, mime, taille, chemin}] ; p_detail : clés consommées module, entite_id,
+//     envoi_id, en_reponse_a (reference_externe du message auquel on répond), fil, langue ;
+//     le reste est gardé tel quel. La porte publie elle-même reception.nouvelle.
 
 export type Canal = "email" | "whatsapp" | "sms" | "formulaire";
 
@@ -21,7 +22,7 @@ export type Boite = {
 
 export type PieceRecue = {
   nom: string;
-  type_mime: string;
+  mime: string;
   taille: number | null;
   chemin: string;
 };

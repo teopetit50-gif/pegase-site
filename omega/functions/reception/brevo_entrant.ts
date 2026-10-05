@@ -250,7 +250,8 @@ export async function recevoirMessage(
       detail: {
         source: "brevo_entrant",
         message_id: m.messageId,
-        in_reply_to: m.inReplyTo,
+        en_reponse_a: m.inReplyTo,
+        fil: m.references[0] ?? m.inReplyTo ?? m.messageId,
         references: m.references,
         a: m.a,
         cc: m.cc,
