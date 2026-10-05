@@ -3,7 +3,7 @@
 Tenu par le coordinateur (session chef). Les ouvriers A1 à A5 lisent ce
 fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 
-## Recette `omega-recette` (ygwbgpowzlbdaajlsqkn) — état au 5 octobre 2026, 20 h
+## Recette `omega-recette` (ygwbgpowzlbdaajlsqkn) — état au 5 octobre 2026, 21 h
 
 ### Migrations posées aujourd'hui (par `execute_sql`, inscrites dans `schema_migrations`)
 
@@ -18,13 +18,37 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | socle_lot19e | `revoke truncate, references, trigger on all tables in schema public from anon, authenticated` + default privileges (TRUNCATE ignore la RLS) |
 | socle_lot19f | `revoke insert, update` d'anon sur `audit_journal`, `catalogue_site`, `clients`, `lorani_echeances_permis`, `moteurs_reconnus`, `profils_metier`, `tamila_registre` |
 | socle_lot19g | `private.canaux_envoi` : sms et whatsapp bornés pour le non-transactionnel à 08:00–20:00, lundi–samedi (décision du coordinateur, à confirmer par Teo) |
+| socle_lot19h | publication Realtime `supabase_realtime` : `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`, `delegations`, `filed_controles`, `filed_historique`, `points_du_jour` (demandé par A3) |
+| socle_lot19i | `private.fournisseurs_envoi` : Brevo `branche = true` sur la recette |
+| a5_01_private_execute | EXECUTE sur `private` retiré à PUBLIC/anon/authenticated puis rendu à la liste requise (migration d'A5 + compléments c/d/e du coordinateur : fonctions des triggers SECURITY INVOKER de private, des vues de public lisibles, des CHECK/defaults). Résultat : authenticated 187/741, anon 0. Liste figée : `omega/a5_01_liste_figee.txt` |
 | filed_lot4a … filed_lot4g, filed_lot5a, filed_lot6a | les neuf migrations d'A4 (`omega/migrations/a4_01` à `a4_09`) : exercices, plan comptable, centres, imputations apprises, charges récurrentes, identité TVA/SIREN, archivage probant, pilotage, circuit de validation, branchements, acquittement d'alerte. `filed_factures_statut_check` retiré, `filed_factures_statut_v2` en place |
 
-Tests sur la recette : a4_01 à a4_04 verts (après adaptation des jeux de
-données aux colonnes réelles, renvoyée à A4) ; pgTAP d'A5 : 26 verts sur 44,
-le reste renvoyé à A5 avec les faits du socle (voir messages du 5/10, 17 h 40
-et 18 h 00). Vrai trou relevé par le test 44 : EXECUTE à PUBLIC sur les
-fonctions de `private` ; migration `a5_01` demandée à A5.
+Tests sur la recette : a4_01 à a4_04 verts (A4 a aligné ses jeux de données,
+1500b1a et 17bb7f2). pgTAP d'A5 (TOUT_1..4 régénérés, joués après a5_01) :
+restent rouges 11/12/30/32 (comptage du journal sans filtre, et le
+collaborateur ne lit pas le journal : politique « gerants et admins lisent le
+journal »), 18/24 (FK envoi_id/suivi_id sans parent), 34 (regex), 36 (canal
+'email'), 37 (envois.id uuid), 43 (regex des politiques), 44 (les « en trop »
+sont les compléments c/d/e). Tout renvoyé à A5 le 5/10 à 21 h. Smoke test du
+gérant du banc après a5_01 : vert.
+
+### Compte de recette et premier envoi
+
+- Compte `gerant@banc-varelo.test` / `Recette-Omega-2026` (auth.users +
+  auth.identities), gérant du client banc `cccccccc-0000-4000-8000-00000000000c`
+  « Groupe Sogexal (banc) », `config.boite_formulaire = site:omegaai.fr` ;
+  comptes referent/daf/daf2 valideurs. Donné à A3 pour sa relecture.
+- `public.reglages_envois` n'a **aucune porte** : Omega les pose à la main
+  (ligne organisation `module null` + une ligne par module). Posé pour le banc :
+  mode `essai`, `essai_adresse` = adresse de Teo, plages 24 h/7 sur `reput`
+  pour l'essai.
+- Chaîne vérifiée le 5/10 à 20 h 56 Paris : `private.creer_envoi` → verrous
+  (`HORS_HEURES` à 20 h 55 → différé au 06/10 08 h 00 ; `DOUBLON` sur le même
+  message : bon) → statut `pret`, fournisseur `brevo` → travail `envois.brevo`
+  pris par l'expéditeur en 15 s → **Brevo 401 « unrecognised IP address »**
+  (restriction d'IP activée côté Brevo ; les Edge Functions n'ont pas d'IP
+  fixe). Envoi `0a607529-4303-474d-bb43-b6a7c30298a0` en attente, `essais 1`.
+  Envoi différé `6be6e6cd-…` partira demain 8 h si Brevo est ouvert.
 
 ### Fonctions Edge déployées
 
@@ -40,17 +64,23 @@ Le paquet du lecteur se construit comme `lecteur/outils/preparer_deploiement.ts`
 `deno.json` avec `@partage/` → `./_partage/`), `import_map_path = deno.json`.
 
 Les crons appellent les fonctions avec `Authorization: Bearer <cle_service>`
-lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). **Tant que ce
-secret n'est pas posé, les crons ne font rien.**
+lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
+5/10 à 18 h 37 Z : les deux crons tournent chaque minute (lecteur 200,
+`IA_NON_BRANCHEE` sans Bedrock ; expéditeur 200). Secrets Edge posés par Teo à
+18 h 45 Z (webhooks-brevo et reception répondent 401 sans signature : bon).
 
-### Ce que Teo doit poser (recette)
+### Ce que Teo doit encore poser (recette)
 
-1. Supabase → Edge Functions → Secrets : la liste ci-dessus.
-2. Supabase → Vault : `cle_service` = clé `service_role` du projet.
+1. **Brevo → Sécurité → IP autorisées : désactiver la restriction** (ou l'essai
+   d'envoi ne partira jamais). Puis expéditeur `essais@omegaai.fr` authentifié,
+   suivi d'ouverture/clic coupé.
+2. Edge Secrets manquants : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+   (Bedrock, eu-central-1), `META_APP_SECRET`, `META_ACCESS_TOKEN`.
 3. GitHub → Settings → Secrets : `SUPABASE_DB_URL`, `SAUVEGARDE_PHRASE`
    (workflow de sauvegarde d'A5).
 4. Brevo : webhook transactionnel vers `/functions/v1/webhooks-brevo`, avec le
    jeton ; domaine inbound vers `/functions/v1/reception/brevo`.
+5. Confirmer la décision sms/whatsapp 08 h–20 h lundi–samedi (lot 19g).
 
 ### Règles de pose
 
@@ -79,13 +109,18 @@ secret n'est pas posé, les crons ne font rien.**
 - 372df1c : suite A3 (annulation d'une demande, « Mes délégations », désigner
   une commande, apparier une ligne, dépôt depuis l'espace) ; servi par
   omegaai.fr 40 s après le push.
+- 3aa753d : rendu PDF dans l'espace (`PagePdf.tsx`, pdfjs-dist ; worker servi
+  sous `/_next/static/media`).
+- b99131d : les trois écrans se relisent d'eux-mêmes (Supabase Realtime,
+  `tempsReel.ts`) ; Vercel READY. Reste sur worker-a3 : 4735bf2 (notes), à
+  fusionner avec le prochain lot.
 
 ## Branches des ouvriers
 
 | Session | Branche | État |
 |---|---|---|
-| A1 lecteur | worker-a1 | v3 déployée ; 42 tests ; attend les secrets Bedrock et le Vault |
-| A2 expéditeur / réception | worker-a2 | fini, déployé, 60 tests ; attend les secrets pour l'essai réel |
-| A3 écran client | worker-a3 | deux lots fusionnés ; rendu PDF en cours |
-| A4 FILED compta | worker-a4 | neuf lots posés ; tests à aligner sur les colonnes de la recette (renvoyé) |
-| A5 garde-fous | worker-a5 | 44 tests lancés sur la recette : 26 verts ; corrections et `a5_01` (EXECUTE sur private) attendues |
+| A1 lecteur | worker-a1 | v3 déployée, crons actifs ; 42 tests ; attend les clés Bedrock (Teo) |
+| A2 expéditeur / réception | worker-a2 | fini, déployé, 60 tests ; chaîne d'envoi vérifiée jusqu'à Brevo (401 IP, côté Teo) |
+| A3 écran client | worker-a3 | quatre lots en ligne (43c4f68, 372df1c, 3aa753d, b99131d) ; compte de recette fourni pour la relecture |
+| A4 FILED compta | worker-a4 | neuf lots posés, tests verts ; fini, attend la prod |
+| A5 garde-fous | worker-a5 | `a5_01` posé avec compléments ; 10 tests à corriger (renvoyés) ; liste figée dans `omega/a5_01_liste_figee.txt` |
