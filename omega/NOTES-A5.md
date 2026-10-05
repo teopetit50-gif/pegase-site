@@ -40,6 +40,49 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (message de 18:56 UTC, a5_01 posé, TOUT_1..4 rejoués)
+
+Poussé sur `worker-a5` ; TOUT*.sql régénérés ; maquette alignée (canal
+`email`, `envois.id` uuid, journal réservé aux gérants/admins, création de
+client journalisée, FK non nulles vers `envois` et `suivis`, exemples des
+sources c/d/e) : 50/50 verts, TOUT.sql → 44 `ok`.
+
+- **Sources (c), (d), (e)** intégrées à `tests.fonctions_private_requises()`,
+  à `omega/migrations/a5_01_private_execute.sql` et à
+  `a5_01_liste_requises.sql`, avec la même fermeture transitive :
+  (c) fonctions appelées dans le corps d'un déclencheur SECURITY INVOKER de
+  `private` effectivement attaché à une table ; (d) fonctions dont dépend une
+  vue ou vue matérialisée de `public` lisible par authenticated (`pg_depend`
+  via `pg_rewrite`, exact) ; (e) fonctions dont dépend un CHECK ou un DEFAULT
+  d'une table de `public` (`pg_depend` via `pg_constraint` et `pg_attrdef`,
+  exact). Sur la maquette, la migration retient bien les cinq cas. Si ta
+  liste de 187 et la mienne divergent sur la recette, le test 44 affiche
+  « en trop » et « manquantes » : colle-les, j'ajuste la règle plutôt que la
+  liste.
+- **11, 12, 30, 32** : comptages filtrés sur `action like 'essai_a5%'`.
+  `tests.jeu()` crée désormais aussi un **gérant** de A (`gerant_a`,
+  rôle `gerant` s'il est admis) : 11 vérifie que ni le gérant ni le
+  collaborateur de A ne voient le journal de B ; 12 vérifie que le gérant de
+  A voit sa ligne et note en diag ce que voit le collaborateur (0 attendu
+  chez vous).
+- **18, 24** : `tests.inserer_minimal()` pose désormais les lignes parentes
+  des clés étrangères NOT NULL (récursif, `client_id` propagé) ; pour une
+  table de référence (hors `public` ou sans `client_id`, comme
+  `canaux_envoi`) il prend une valeur existante.
+- **34** : lecture du verdict par `tests.verdict_signale_rupture()` :
+  `premiere_ligne_fausse` (ou toute clé « faux/rupture/écart ») non nulle,
+  ou `ok`/`valide` à faux, ou un mot explicite. 33 utilise la négation.
+- **36** : canal pris dans `private.canaux_envoi` (`email` chez vous,
+  `courriel` sur la maquette). **37** : `envois.id` comparé en texte, quel
+  que soit son type.
+- **43** : admet toute politique non triviale : aide de `private`,
+  `client_id`, `auth.uid()` ou `exists (select …)` (jointure parente) ; le
+  diag garde la liste hors mes_clients()/lit_objet().
+- Pris note des lots 19e à 19i ; rien à changer dans les tests pour 19h
+  (Realtime) et 19i (Brevo).
+
+À rejouer : TOUT_1 à TOUT_4 en un passage.
+
 ## Réponse au coordinateur (message de 18:00 UTC, retour de TOUT_3 et TOUT_4)
 
 Tout est poussé ensemble sur `worker-a5` ; TOUT*.sql régénérés ; maquette

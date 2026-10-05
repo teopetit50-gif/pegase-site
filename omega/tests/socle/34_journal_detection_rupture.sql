@@ -13,14 +13,14 @@ begin
   end loop;
   begin
     execute 'alter table public.journal_opposable disable trigger user';
-    execute format('update public.journal_opposable set hash = decode(repeat(''ab'', 32), ''hex'') where client_id = %L and id = (select min(id) from public.journal_opposable where client_id = %L)', jeu ->> 'client_a', jeu ->> 'client_a');
+    execute format('update public.journal_opposable set hash = decode(repeat(''ab'', 32), ''hex'') where client_id = %L and id = (select min(id) from public.journal_opposable where client_id = %L and action like ''essai_a5%%'')', jeu ->> 'client_a', jeu ->> 'client_a');
     execute 'alter table public.journal_opposable enable trigger user';
   exception when others then
     return next pass('Altération impossible même déclencheurs désactivés (' || sqlerrm || ') : rupture non simulable, test sans objet');
     return;
   end;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
-  return next ok(verdict::text ~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict signale la rupture');
+  return next ok(tests.verdict_signale_rupture(verdict), 'Le verdict signale la rupture (clé premiere_ligne_fausse/rupture non nulle, ok = false ou mot explicite)');
   return next diag('Verdict rendu : ' || left(verdict::text, 400));
 end $f$;
 

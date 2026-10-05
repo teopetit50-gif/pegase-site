@@ -12,7 +12,7 @@ begin
     perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
-  return next ok(verdict::text !~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict ne signale aucune rupture');
+  return next ok(not tests.verdict_signale_rupture(verdict), 'Le verdict ne signale aucune rupture');
   return next diag('Verdict rendu : ' || left(verdict::text, 400));
 end $f$;
 

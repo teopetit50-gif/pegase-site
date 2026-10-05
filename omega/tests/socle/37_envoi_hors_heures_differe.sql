@@ -23,8 +23,8 @@ begin
   elsif col_trans = 'nature' then valeurs := valeurs || jsonb_build_object('nature', 'prospection'); end if;
   ligne := tests.inserer_minimal('public', 'envois', valeurs);
   begin
-    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_nuit using (ligne ->> 'id')::bigint, dimanche_soir;
-    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_jour using (ligne ->> 'id')::bigint, mardi_matin;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id::text = $1' into verrous_nuit using ligne ->> 'id', dimanche_soir;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id::text = $1' into verrous_jour using ligne ->> 'id', mardi_matin;
   exception when others then
     return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return;

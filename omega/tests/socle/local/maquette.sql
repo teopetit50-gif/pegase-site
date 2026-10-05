@@ -41,6 +41,10 @@ create table public.comptes (
   role text not null check (role in ('gerant', 'valideur', 'collaborateur', 'admin')), perimetre_total boolean not null default false,
   primary key (user_id, client_id)
 );
+-- La création d'un client est journalisée (comme sur le socle)
+create or replace function private.journaliser_client() returns trigger language plpgsql security definer set search_path = public, private, pg_temp as $$
+begin perform private.journaliser(new.id, 'client.cree', 'client', new.id::text, jsonb_build_object('nom', new.nom), null); return new; end $$;
+
 create table public.delegations (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), de_user uuid not null, a_user uuid not null, jusqu_au timestamptz);
 
 create or replace function private.mes_clients() returns setof uuid
@@ -96,6 +100,8 @@ begin
   return v_id;
 end $$;
 
+create trigger t_clients_journal after insert on public.clients for each row execute function private.journaliser_client();
+
 create or replace function public.verifier_journal_client(p_client uuid) returns table(ok boolean, lignes bigint, premiere_rupture bigint)
 language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
 declare r record; precedent bytea := null; attendu bytea; n bigint := 0; rupture bigint := null;
@@ -115,16 +121,15 @@ end $$;
 grant execute on function public.verifier_journal_client(uuid) to authenticated;
 
 -- Autres tables en ajout seul ----------------------------------------------------
-create table public.envois_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), envoi_id bigint, survenu_le timestamptz not null default now(), type text not null constraint envois_evenements_type_check check (type = any (array['remis', 'rebond_temporaire', 'rebond', 'plainte', 'refuse'])), detail jsonb);
 create table public.effacements (client_efface uuid primary key, nom_client text not null, efface_le timestamptz not null default now(), par uuid, empreinte_export text not null constraint effacements_empreinte_export_check check (empreinte_export ~ '^[0-9a-f]{64}$'), lignes jsonb not null default '{}', comptes_orphelins int not null default 0, fichiers jsonb);
 create table public.effacements_objets (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text not null, objet_id text not null, efface_le timestamptz not null default now(), par uuid, lignes jsonb not null default '{}');
 create table public.filed_historique (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), facture_id bigint, survenu_le timestamptz not null default now(), etape text not null check (etape ~ '^[a-z][a-z0-9_.]{1,59}$'), objet_type text not null check (objet_type ~ '^filed_[a-z_]{1,33}$'), message text not null check (length(message) between 1 and 500), acteur_type text not null check (acteur_type in ('utilisateur', 'operateur', 'systeme')), detail jsonb);
 create table public.suivis (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet text not null);
-create table public.suivis_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), suivi_id bigint, survenu_le timestamptz not null default now(), type text not null constraint suivis_evenements_type_check check (type = any (array['ouverture', 'promesse', 'glissement', 'relance', 'signe', 'cloture', 'expiration'])));
+create table public.suivis_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), suivi_id bigint not null references public.suivis(id), survenu_le timestamptz not null default now(), type text not null constraint suivis_evenements_type_check check (type = any (array['ouverture', 'promesse', 'glissement', 'relance', 'signe', 'cloture', 'expiration'])));
 create table public.echeances_pro (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), libelle text not null, echeance date not null);
 create table public.echeances_pro_journal (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), echeance_id bigint, survenu_le timestamptz not null default now(), action text not null);
 do $$ declare t text; begin
-  foreach t in array array['envois_evenements', 'effacements', 'effacements_objets', 'filed_historique', 'suivis_evenements', 'echeances_pro_journal'] loop
+  foreach t in array array['effacements', 'effacements_objets', 'filed_historique', 'suivis_evenements', 'echeances_pro_journal'] loop
     execute format('create trigger t_%s_ajout_seul before update or delete on public.%I for each row execute function private.ajout_seul()', t, t);
   end loop;
 end $$;
@@ -132,7 +137,10 @@ end $$;
 -- Envois soumis à accord ---------------------------------------------------------
 create table private.canaux_envoi (canal text primary key, libelle text not null, adresse text, sujet boolean default false, longueur_max int, pieces boolean default false, consentement_toujours boolean not null default false, permis_sante boolean not null default false, plages_non_transactionnel jsonb, note text);
 insert into private.canaux_envoi (canal, libelle, consentement_toujours, plages_non_transactionnel, note) values
-  ('courriel', 'Courriel', false, '{"jours": [1,2,3,4,5,6], "debut": "08:00", "fin": "20:00"}', 'Prospection B2C : opposition respectée'),
+  ('email', 'Courriel', false, '{"jours": [1,2,3,4,5,6], "debut": "08:00", "fin": "20:00"}', 'Prospection B2C : opposition respectée'),
+  ('whatsapp', 'WhatsApp', true, '{"jours": [1,2,3,4,5,6], "debut": "08:00", "fin": "20:00"}', null),
+  ('lre', 'Lettre recommandée électronique', false, null, null),
+  ('appel', 'Appel', true, '{"jours": [1,2,3,4,5], "debut": "10:00", "fin": "20:00"}', null),
   ('sms', 'SMS', true, '{"jours": [1,2,3,4,5,6], "debut": "08:00", "fin": "20:00"}', 'Jamais le dimanche ni les jours fériés'),
   ('telephone', 'Téléphone', true, '{"jours": [1,2,3,4,5], "debut": "10:00", "fin": "20:00", "pause": ["13:00", "14:00"]}', 'Démarchage : plages légales'),
   ('courrier', 'Courrier postal', false, null, null);
@@ -146,12 +154,15 @@ begin
 end $$;
 create table public.consentements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), canal text not null, adresse text not null, donne_le timestamptz not null default now(), retire_le timestamptz);
 create table public.envois (
-  id bigint generated always as identity primary key, client_id uuid not null references public.clients(id),
+  id uuid primary key default gen_random_uuid(), client_id uuid not null references public.clients(id),
   canal text not null references private.canaux_envoi(canal), destinataire_adresse text not null,
   transactionnel boolean not null default true,
   echeance timestamptz, reprise_le timestamptz,
   statut text not null default 'a_envoyer', cree_le timestamptz not null default now()
 );
+create table public.envois_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), envoi_id uuid not null references public.envois(id), survenu_le timestamptz not null default now(), type text not null constraint envois_evenements_type_check check (type = any (array['remis', 'rebond_temporaire', 'rebond', 'plainte', 'refuse'])), detail jsonb);
+create trigger t_envois_evenements_ajout_seul before update or delete on public.envois_evenements for each row execute function private.ajout_seul();
+
 -- Les verrous : lus par la tâche d'envoi, pas un déclencheur d'insertion.
 create or replace function private.verrous_envoi(p_e public.envois, p_complet boolean, p_instant timestamptz) returns jsonb
 language plpgsql stable security definer set search_path = public, private, pg_temp as $$
@@ -185,6 +196,18 @@ language sql stable security definer set search_path = public, private, pg_temp 
           or exists (select 1 from public.acces_objets a where a.client_id = p_client and a.objet_type = p_type and a.objet_id = p_objet and a.user_id = auth.uid())
           or exists (select 1 from private.gardiens_objets g where g.client_id = p_client and g.objet_type = p_type and g.user_id = auth.uid()))
 $$;
+
+-- Sources (c), (d), (e) de fonctions de private requises par authenticated :
+-- (c) un déclencheur SECURITY INVOKER qui appelle une aide ; (d) une vue lisible qui appelle une aide ; (e) un DEFAULT qui appelle une aide.
+create or replace function private.horodatage() returns timestamptz language sql stable as $$ select now() $$;
+create or replace function private.ecrit_par_la_brique(p_client uuid) returns boolean language sql stable as $$ select p_client is not null $$;
+create or replace function private.libelle_canal(p_canal text) returns text language sql stable security definer set search_path = private, pg_temp as $$ select libelle from private.canaux_envoi where canal = p_canal $$;
+create or replace function private.verifier_brique() returns trigger language plpgsql as $$
+begin if not private.ecrit_par_la_brique(new.client_id) then raise exception 'client requis'; end if; return new; end $$;
+create table public.notes_internes (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), texte text not null, cree_le timestamptz not null default private.horodatage());
+create trigger t_notes_brique before insert on public.notes_internes for each row execute function private.verifier_brique();
+create view public.v_envois_libelles with (security_invoker = on) as select e.id, e.client_id, e.canal, private.libelle_canal(e.canal) as canal_libelle, e.statut from public.envois e;
+grant select on public.v_envois_libelles to authenticated;
 
 -- Pièces : lisibles par lit_objet() (droits par objet) ------------------------------------
 create table public.pieces (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text, objet_id uuid, nom text not null, cree_le timestamptz not null default now());
@@ -240,7 +263,7 @@ create table public.filed_compteurs (id bigint generated always as identity prim
 
 -- Registre des locataires : toutes les tables publiques à client_id ------------------------
 insert into private.tables_locataires (nom, ordre_effacement)
-select table_name, row_number() over (order by table_name) from information_schema.columns where table_schema = 'public' and column_name = 'client_id';
+select c.table_name, row_number() over (order by c.table_name) from information_schema.columns c join information_schema.tables t on t.table_schema = c.table_schema and t.table_name = c.table_name where c.table_schema = 'public' and c.column_name = 'client_id' and t.table_type = 'BASE TABLE';
 insert into private.tables_objets (nom, objet_type, colonne, ordre_effacement) values ('acces_objets', '*', 'objet_id', 1);
 
 -- RLS et droits -----------------------------------------------------------------------
@@ -262,6 +285,10 @@ drop policy lecture_client on public.pieces;
 create policy lecture_piece on public.pieces for select to authenticated
   using (case when objet_id is not null then private.lit_objet(client_id, objet_type, objet_id)
               else exists (select 1 from public.comptes c where c.user_id = auth.uid() and c.client_id = pieces.client_id and c.role in ('gerant', 'admin')) end);
+-- Le journal se lit par les gérants et admins seulement
+drop policy lecture_client on public.journal_opposable;
+create policy lecture_journal on public.journal_opposable for select to authenticated
+  using (client_id in (select c.client_id from public.comptes c where c.user_id = auth.uid() and c.role in ('gerant', 'admin')));
 alter table public.clients enable row level security;
 create policy lecture_client on public.clients for select to authenticated using (id in (select private.mes_clients()));
 grant select on public.clients to authenticated;
@@ -272,7 +299,7 @@ create policy ecriture_client on public.envois for insert to authenticated with 
 create policy ecriture_client on public.approbations for insert to authenticated
   with check (client_id in (select private.mes_clients()) and (approuve_par = auth.uid()
     or exists (select 1 from public.delegations d where d.client_id = approbations.client_id and d.de_user = approuve_par and d.a_user = auth.uid() and coalesce(d.jusqu_au, 'infinity') > now())));
-grant insert on public.acces_objets, public.oppositions, public.envois, public.approbations to authenticated;
+grant insert on public.acces_objets, public.oppositions, public.envois, public.approbations, public.notes_internes to authenticated;
 -- clés Tamila : la colonne de clé n'est jamais lisible par un client
 revoke select on public.tamila_cles from authenticated;
 grant select (id, client_id, dossier_id, cree_le) on public.tamila_cles to authenticated;

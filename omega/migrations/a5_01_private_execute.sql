@@ -5,10 +5,13 @@
 -- deposer_reception, noter_remise…). Le schéma n'étant pas exposé par PostgREST, l'appel direct est
 -- improbable, mais rien ne doit tenir à ça.
 --
--- Règle appliquée : authenticated garde EXECUTE sur les seules fonctions dont une politique RLS dépend
--- (pg_depend : exact, pas une regex) ou qu'une fonction publique SECURITY INVOKER exécutable par
--- authenticated appelle (texte du corps), avec fermeture transitive sur les fonctions SECURITY INVOKER
--- ainsi retenues. Les fonctions déclencheur n'ont jamais besoin d'EXECUTE. anon ne garde rien.
+-- Règle appliquée : authenticated garde EXECUTE sur les seules fonctions (a) dont une politique RLS dépend
+-- (pg_depend : exact), (b) qu'une fonction publique SECURITY INVOKER exécutable par authenticated appelle
+-- (texte du corps), (c) qu'un déclencheur SECURITY INVOKER de private appelle, (d) qu'une vue de public
+-- lisible par authenticated utilise (pg_depend), (e) qu'un CHECK ou un DEFAULT d'une table de public utilise
+-- (pg_depend) ; avec fermeture transitive sur les fonctions SECURITY INVOKER ainsi retenues. Les fonctions
+-- déclencheur elles-mêmes n'ont jamais besoin d'EXECUTE. anon ne garde rien.
+-- Posée sur la recette le 5/10/2026 (version 20261005185500) : 187 fonctions sur 741 restent à authenticated.
 -- La liste retenue est écrite en NOTICE et dans le journal de la migration ; la figer en clair est le
 -- travail du coordinateur après lecture (voir omega/migrations/a5_01_liste_requises.sql).
 --
@@ -16,38 +19,65 @@
 
 do $$
 declare
-  r record; ajout int; liste text;
+  r record; liste text;
 begin
-  -- 1) Calculer l'ensemble requis AVANT de révoquer quoi que ce soit.
+  -- 1) Calculer l'ensemble requis AVANT de révoquer quoi que ce soit (mêmes sources que tests.fonctions_private_requises()).
   create temp table _a5_requises (oid oid primary key, nom text, signature text, raison text) on commit drop;
-
   insert into _a5_requises
-  select distinct p.oid, p.proname, p.oid::regprocedure::text, 'politique RLS'
-  from pg_depend d join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
-  join pg_namespace n on n.oid = p.pronamespace
-  where d.classid = 'pg_policy'::regclass and n.nspname = 'private'
-  on conflict do nothing;
-
-  insert into _a5_requises
-  select distinct p.oid, p.proname, p.oid::regprocedure::text, 'appelée par public.' || q.proname
-  from pg_proc q join pg_namespace m on m.oid = q.pronamespace
-  join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
-  where m.nspname = 'public' and q.prokind = 'f' and not q.prosecdef and has_function_privilege('authenticated', q.oid, 'execute')
-    and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
-    and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
-  on conflict do nothing;
-
-  loop
-    insert into _a5_requises
-    select distinct p.oid, p.proname, p.oid::regprocedure::text, 'appelée par private.' || q.proname
-    from _a5_requises x join pg_proc q on q.oid = x.oid
+  with recursive requises as (
+    -- (a) citées par une politique RLS (pg_depend : exact)
+    select distinct p.oid, p.proname, 'politique RLS'::text as raison
+    from pg_depend d join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
+    join pg_namespace n on n.oid = p.pronamespace
+    where d.classid = 'pg_policy'::regclass and n.nspname = 'private'
+    union
+    -- (b) appelées par une fonction publique SECURITY INVOKER exécutable par authenticated
+    select distinct p.oid, p.proname, 'appelée par public.' || q.proname
+    from pg_proc q join pg_namespace m on m.oid = q.pronamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where m.nspname = 'public' and q.prokind = 'f' and not q.prosecdef and has_function_privilege('authenticated', q.oid, 'execute')
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
+    union
+    -- (c) appelées par un déclencheur SECURITY INVOKER de private (il s'exécute avec les droits de l'utilisateur qui écrit)
+    select distinct p.oid, p.proname, 'appelée par le déclencheur private.' || t.proname
+    from pg_proc t join pg_namespace nt on nt.oid = t.pronamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where nt.nspname = 'private' and t.prorettype = 'trigger'::regtype and not t.prosecdef
+      and exists (select 1 from pg_trigger tg where tg.tgfoid = t.oid and not tg.tgisinternal)
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and t.prosrc ~ ('private\.' || p.proname || '\s*\(')
+    union
+    -- (d) utilisées par une vue de public lisible par authenticated (pg_depend via la règle de réécriture : exact)
+    select distinct p.oid, p.proname, 'vue public.' || v.relname
+    from pg_depend d join pg_rewrite rw on rw.oid = d.objid and d.classid = 'pg_rewrite'::regclass
+    join pg_class v on v.oid = rw.ev_class join pg_namespace nv on nv.oid = v.relnamespace
+    join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
+    join pg_namespace n on n.oid = p.pronamespace
+    where nv.nspname = 'public' and v.relkind in ('v', 'm') and has_table_privilege('authenticated', v.oid, 'select')
+      and n.nspname = 'private' and p.prokind = 'f'
+    union
+    -- (e) utilisées par un CHECK ou un DEFAULT d'une table de public (pg_depend : exact)
+    select distinct p.oid, p.proname, 'contrainte/défaut de public.' || c.relname
+    from pg_depend d
+    join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
+    join pg_namespace n on n.oid = p.pronamespace
+    join lateral (
+      select con.conrelid as relid from pg_constraint con where d.classid = 'pg_constraint'::regclass and con.oid = d.objid
+      union all
+      select ad.adrelid from pg_attrdef ad where d.classid = 'pg_attrdef'::regclass and ad.oid = d.objid
+    ) src on true
+    join pg_class c on c.oid = src.relid join pg_namespace nc on nc.oid = c.relnamespace
+    where nc.nspname = 'public' and n.nspname = 'private' and p.prokind = 'f'
+    union
+    -- fermeture transitive à travers les SECURITY INVOKER retenues
+    select distinct p.oid, p.proname, 'appelée par private.' || q.proname
+    from requises x join pg_proc q on q.oid = x.oid
     join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
     where not q.prosecdef and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and p.oid <> q.oid
       and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
-    on conflict do nothing;
-    get diagnostics ajout = row_count;
-    exit when ajout = 0;
-  end loop;
+  )
+  select oid, proname, oid::regprocedure::text, string_agg(distinct raison, ' ; ') from requises group by oid, proname;
 
   -- 2) Reprendre tout, pour tout le monde sauf le propriétaire.
   revoke execute on all functions in schema private from public, anon, authenticated;

@@ -112,7 +112,8 @@ begin
       else v := format('%L::%s', p_valeurs ->> r.colonne, typ);
       end if;
     elsif r.non_nul and not r.a_defaut and not r.identite and not r.generee then
-      v := coalesce(tests.valeur_selon_check(format('%I.%I', p_schema, p_table)::regclass, r.colonne, typ), tests.valeur_exemple(typ));
+      v := tests.valeur_parente(format('%I.%I', p_schema, p_table)::regclass, r.colonne, p_valeurs);
+      if v is null then v := coalesce(tests.valeur_selon_check(format('%I.%I', p_schema, p_table)::regclass, r.colonne, typ), tests.valeur_exemple(typ)); end if;
       if v is null then raise exception 'tests.inserer_minimal : pas de valeur d''exemple pour %.%.% (type %)', p_schema, p_table, r.colonne, typ; end if;
     else
       continue;
@@ -124,14 +125,41 @@ begin
   return resultat;
 end $$;
 
+-- Si la colonne est une clé étrangère mono-colonne, pose une ligne parente minimale (client_id propagé) et rend sa clé.
+create or replace function tests.valeur_parente(p_table regclass, p_colonne name, p_valeurs jsonb) returns text
+language plpgsql as $$
+declare fk record; parent jsonb; valeurs jsonb := '{}'::jsonb; typ regtype; existante text;
+begin
+  select c.confrelid, (select attname from pg_attribute where attrelid = c.confrelid and attnum = c.confkey[1]) as colonne_parente,
+         n.nspname as schema_parent, cl.relname as table_parente
+    into fk
+  from pg_constraint c join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
+  join pg_class cl on cl.oid = c.confrelid join pg_namespace n on n.oid = cl.relnamespace
+  where c.conrelid = p_table and c.contype = 'f' and array_length(c.conkey, 1) = 1 and a.attname = p_colonne
+  limit 1;
+  if fk is null or fk.table_parente = 'clients' then return null; end if;
+  select atttypid::regtype into typ from pg_attribute where attrelid = p_table and attname = p_colonne;
+  -- Table de référence (hors public, ou sans client_id) : on prend une valeur existante plutôt que d'en créer une.
+  if fk.schema_parent <> 'public' or not exists (select 1 from pg_attribute where attrelid = fk.confrelid and attname = 'client_id') then
+    execute format('select %I::text from %I.%I limit 1', fk.colonne_parente, fk.schema_parent, fk.table_parente) into existante;
+    if existante is not null then return format('%L::%s', existante, typ); end if;
+    if fk.schema_parent <> 'public' then return null; end if;
+  end if;
+  if p_valeurs ? 'client_id' and exists (select 1 from pg_attribute where attrelid = fk.confrelid and attname = 'client_id') then
+    valeurs := jsonb_build_object('client_id', p_valeurs ->> 'client_id');
+  end if;
+  parent := tests.inserer_minimal(fk.schema_parent, fk.table_parente, valeurs);
+  return format('%L::%s', parent ->> fk.colonne_parente, typ);
+end $$;
+
 -- Jeu d'essai : deux clients fictifs, deux utilisateurs, deux comptes. Renvoie les identifiants.
 -- Tout est annulé par runtests() à la fin de chaque test.
 create or replace function tests.jeu() returns jsonb
 language plpgsql as $$
 declare
-  client_a uuid; client_b uuid; user_a uuid := gen_random_uuid(); user_b uuid := gen_random_uuid();
+  client_a uuid; client_b uuid; user_a uuid := gen_random_uuid(); user_b uuid := gen_random_uuid(); gerant_a uuid := gen_random_uuid();
   ligne jsonb;
-  role_membre text;
+  role_membre text; role_gerant text;
 begin
   perform set_config('tests.jeu_actif', 'oui', true);
   ligne := tests.inserer_minimal('public', 'clients', jsonb_build_object('nom', 'Client A — essai A5'));
@@ -143,27 +171,36 @@ begin
   begin
     insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous)
     values (user_a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a5-client-a@essai.invalid', 'x', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false, false),
-           (user_b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a5-client-b@essai.invalid', 'x', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false, false);
+           (user_b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a5-client-b@essai.invalid', 'x', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false, false),
+           (gerant_a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a5-gerant-a@essai.invalid', 'x', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false, false);
   exception when others then
     raise notice 'tests.jeu : auth.users non alimentée (%), on continue avec des uuid libres', sqlerrm;
   end;
 
-  -- Rôle de membre « simple » : 'collaborateur' s'il est admis, sinon la première valeur admise (enum ou contrainte CHECK), sinon 'collaborateur'.
-  select coalesce(
-    (select enumlabel from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
-      where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' and enumlabel = 'collaborateur'),
-    (select enumlabel from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
-      where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' order by enumsortorder limit 1),
-    (select 'collaborateur' from pg_constraint c where c.conrelid = 'public.comptes'::regclass and c.contype = 'c'
-      and pg_get_constraintdef(c.oid) ~ '''collaborateur''' limit 1),
-    (select (regexp_match(pg_get_constraintdef(c.oid), '''([^'']*)'''))[1] from pg_constraint c
-      where c.conrelid = 'public.comptes'::regclass and c.contype = 'c' and pg_get_constraintdef(c.oid) ~ 'role' limit 1),
-    'collaborateur') into role_membre;
+  -- Rôles : un membre « simple » (collaborateur) pour A et B, un gérant pour A.
+  role_membre := tests.role_admis('collaborateur');
+  role_gerant := tests.role_admis('gerant');
   perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', user_a, 'client_id', client_a, 'role', role_membre, 'perimetre_total', true));
   perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', user_b, 'client_id', client_b, 'role', role_membre, 'perimetre_total', true));
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', gerant_a, 'client_id', client_a, 'role', role_gerant, 'perimetre_total', true));
 
-  return jsonb_build_object('client_a', client_a, 'client_b', client_b, 'user_a', user_a, 'user_b', user_b, 'role_membre', role_membre);
+  return jsonb_build_object('client_a', client_a, 'client_b', client_b, 'user_a', user_a, 'user_b', user_b, 'gerant_a', gerant_a, 'role_membre', role_membre, 'role_gerant', role_gerant);
 end $$;
+
+-- Un rôle de compte admis : p_prefere s'il est accepté par l'enum ou la contrainte CHECK de comptes.role, sinon le premier admis.
+create or replace function tests.role_admis(p_prefere text) returns text
+language sql stable as $$
+  select coalesce(
+    (select enumlabel::text from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
+      where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' and enumlabel = p_prefere),
+    (select p_prefere from pg_constraint c where c.conrelid = 'public.comptes'::regclass and c.contype = 'c'
+      and pg_get_constraintdef(c.oid) ~ ('''' || p_prefere || '''') limit 1),
+    (select enumlabel::text from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
+      where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' order by enumsortorder limit 1),
+    (select (regexp_match(pg_get_constraintdef(c.oid), '''([^'']*)'''))[1] from pg_constraint c
+      where c.conrelid = 'public.comptes'::regclass and c.contype = 'c' and pg_get_constraintdef(c.oid) ~ 'role' limit 1),
+    p_prefere)
+$$;
 
 -- Endosser un utilisateur authentifié : JWT simulé + rôle authenticated (RLS active).
 create or replace function tests.endosser(p_user uuid, p_email text default 'essai@essai.invalid') returns void
@@ -256,18 +293,21 @@ begin
   return resultat;
 end $$;
 
--- Fonctions de private dont authenticated a légitimement besoin : citées par une politique RLS (pg_depend, exact),
--- ou appelées par une fonction publique SECURITY INVOKER exécutable par authenticated, puis fermeture transitive
--- sur les fonctions SECURITY INVOKER ainsi retenues. Les fonctions déclencheur n'ont jamais besoin d'EXECUTE.
--- Même logique que omega/migrations/a5_01_private_execute.sql.
+-- Fonctions de private dont authenticated a légitimement besoin : (a) citées par une politique RLS, (b) appelées par
+-- une fonction publique SECURITY INVOKER exécutable par authenticated, (c) appelées par un déclencheur SECURITY INVOKER
+-- de private, (d) utilisées par une vue de public lisible par authenticated, (e) utilisées par un CHECK ou un DEFAULT
+-- d'une table de public ; puis fermeture transitive à travers les SECURITY INVOKER retenues. Les fonctions déclencheur
+-- elles-mêmes n'ont jamais besoin d'EXECUTE. Même règle que omega/migrations/a5_01_private_execute.sql.
 create or replace function tests.fonctions_private_requises() returns table(oid oid, nom text, raison text)
 language sql stable as $$
   with recursive requises as (
+    -- (a) citées par une politique RLS (pg_depend : exact)
     select distinct p.oid, p.proname, 'politique RLS'::text as raison
     from pg_depend d join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
     join pg_namespace n on n.oid = p.pronamespace
     where d.classid = 'pg_policy'::regclass and n.nspname = 'private'
     union
+    -- (b) appelées par une fonction publique SECURITY INVOKER exécutable par authenticated
     select distinct p.oid, p.proname, 'appelée par public.' || q.proname
     from pg_proc q join pg_namespace m on m.oid = q.pronamespace
     join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
@@ -275,6 +315,38 @@ language sql stable as $$
       and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
       and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
     union
+    -- (c) appelées par un déclencheur SECURITY INVOKER de private (il s'exécute avec les droits de l'utilisateur qui écrit)
+    select distinct p.oid, p.proname, 'appelée par le déclencheur private.' || t.proname
+    from pg_proc t join pg_namespace nt on nt.oid = t.pronamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where nt.nspname = 'private' and t.prorettype = 'trigger'::regtype and not t.prosecdef
+      and exists (select 1 from pg_trigger tg where tg.tgfoid = t.oid and not tg.tgisinternal)
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and t.prosrc ~ ('private\.' || p.proname || '\s*\(')
+    union
+    -- (d) utilisées par une vue de public lisible par authenticated (pg_depend via la règle de réécriture : exact)
+    select distinct p.oid, p.proname, 'vue public.' || v.relname
+    from pg_depend d join pg_rewrite rw on rw.oid = d.objid and d.classid = 'pg_rewrite'::regclass
+    join pg_class v on v.oid = rw.ev_class join pg_namespace nv on nv.oid = v.relnamespace
+    join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
+    join pg_namespace n on n.oid = p.pronamespace
+    where nv.nspname = 'public' and v.relkind in ('v', 'm') and has_table_privilege('authenticated', v.oid, 'select')
+      and n.nspname = 'private' and p.prokind = 'f'
+    union
+    -- (e) utilisées par un CHECK ou un DEFAULT d'une table de public (pg_depend : exact)
+    select distinct p.oid, p.proname, 'contrainte/défaut de public.' || c.relname
+    from pg_depend d
+    join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
+    join pg_namespace n on n.oid = p.pronamespace
+    join lateral (
+      select con.conrelid as relid from pg_constraint con where d.classid = 'pg_constraint'::regclass and con.oid = d.objid
+      union all
+      select ad.adrelid from pg_attrdef ad where d.classid = 'pg_attrdef'::regclass and ad.oid = d.objid
+    ) src on true
+    join pg_class c on c.oid = src.relid join pg_namespace nc on nc.oid = c.relnamespace
+    where nc.nspname = 'public' and n.nspname = 'private' and p.prokind = 'f'
+    union
+    -- fermeture transitive à travers les SECURITY INVOKER retenues
     select distinct p.oid, p.proname, 'appelée par private.' || q.proname
     from requises x join pg_proc q on q.oid = x.oid
     join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
@@ -282,6 +354,18 @@ language sql stable as $$
       and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
   )
   select oid, proname, string_agg(distinct raison, ' ; ') from requises group by oid, proname order by proname;
+$$;
+
+-- Le verdict de verifier_journal_client() signale-t-il une rupture ? Lecture tolérante à la forme du retour :
+-- un booléen faux sous une clé « ok/valide/coherent/intact », une clé « rupture/faux/ecart » non nulle, ou un mot dans le texte.
+create or replace function tests.verdict_signale_rupture(p_verdict jsonb) returns boolean
+language sql immutable as $$
+  select coalesce(p_verdict::text ~* '(rompu|invalide|cass[ée]e|erreur)', false)
+      or exists (select 1 from jsonb_array_elements(case when jsonb_typeof(p_verdict) = 'array' then p_verdict else jsonb_build_array(p_verdict) end) v
+                 cross join lateral (select * from jsonb_each(case when jsonb_typeof(v) = 'object' then v else '{}'::jsonb end)) kv
+                 where (kv.key ~* '(faus|ruptur|rompu|ecart|écart|invalide)' and jsonb_typeof(kv.value) <> 'null' and kv.value::text not in ('false', '0', '[]', '{}'))
+                    or (kv.key ~* '^(ok|valide|coherent|cohérent|intact|chaine_ok|chaîne_ok)$' and kv.value::text = 'false'))
+      or (jsonb_typeof(p_verdict) = 'array' and p_verdict @> '[false]'::jsonb)
 $$;
 
 -- Tables du socle devant être en ajout seul.
@@ -543,10 +627,12 @@ declare
 begin
   jeu := tests.jeu();
   perform tests.journaliser((jeu ->> 'client_b')::uuid, 'essai_a5');
+  perform tests.endosser((jeu ->> 'gerant_a')::uuid);
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'Le gérant de A ne voit aucune ligne du journal de B');
   perform tests.endosser((jeu ->> 'user_a')::uuid);
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'A ne voit aucune ligne du journal de B');
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'Le collaborateur de A non plus');
   perform tests.redevenir_admin();
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 1::bigint, 'La ligne de B existe pourtant (vue en admin)');
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_b', 'essai_a5%')), 1::bigint, 'La ligne de B existe pourtant (vue en admin)');
 end $f$;
 
 
@@ -562,8 +648,10 @@ declare
 begin
   jeu := tests.jeu();
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5');
+  perform tests.endosser((jeu ->> 'gerant_a')::uuid);
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')), 1::bigint, 'Le gérant de A voit la ligne de journal de A');
   perform tests.endosser((jeu ->> 'user_a')::uuid);
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 1::bigint, 'A voit sa ligne de journal');
+  return next diag('Collaborateur de A : ' || tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')) || ' ligne(s) visible(s) (le socle réserve le journal aux gérants et admins : 0 attendu là-bas)');
   perform tests.redevenir_admin();
 end $f$;
 
@@ -840,7 +928,7 @@ begin
     select id, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable) s
     where precedent is distinct from hash_precedent;
   return next ok(ruptures_client = 0 or ruptures_globale = 0, format('La chaîne se suit (ruptures : %s par client, %s en global)', ruptures_client, ruptures_globale));
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 3::bigint, 'Les trois lignes d''essai sont écrites');
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')), 3::bigint, 'Les trois lignes d''essai sont écrites');
   return next is_empty($q$
     select client_id, count(*) from public.journal_opposable where hash_precedent is null group by client_id having count(*) > 1
   $q$, 'Au plus une ligne de genèse (hash_precedent null) par client');
@@ -886,10 +974,10 @@ begin
   jeu := tests.jeu();
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_1');
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_2');
-  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid order by id loop
+  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid and action like 'essai_a5%' order by id loop
     n := n + 1;
     return next is(octet_length(r.hash), 32, format('Ligne %s : empreinte de 32 octets', n));
-    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1'); end if;
+    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1 (lignes d''essai consécutives)'); end if;
   end loop;
   return next is(n, 2, 'Deux lignes écrites par la porte');
 end $f$;
@@ -910,7 +998,7 @@ begin
     perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
-  return next ok(verdict::text !~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict ne signale aucune rupture');
+  return next ok(not tests.verdict_signale_rupture(verdict), 'Le verdict ne signale aucune rupture');
   return next diag('Verdict rendu : ' || left(verdict::text, 400));
 end $f$;
 
@@ -931,14 +1019,14 @@ begin
   end loop;
   begin
     execute 'alter table public.journal_opposable disable trigger user';
-    execute format('update public.journal_opposable set hash = decode(repeat(''ab'', 32), ''hex'') where client_id = %L and id = (select min(id) from public.journal_opposable where client_id = %L)', jeu ->> 'client_a', jeu ->> 'client_a');
+    execute format('update public.journal_opposable set hash = decode(repeat(''ab'', 32), ''hex'') where client_id = %L and id = (select min(id) from public.journal_opposable where client_id = %L and action like ''essai_a5%%'')', jeu ->> 'client_a', jeu ->> 'client_a');
     execute 'alter table public.journal_opposable enable trigger user';
   exception when others then
     return next pass('Altération impossible même déclencheurs désactivés (' || sqlerrm || ') : rupture non simulable, test sans objet');
     return;
   end;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
-  return next ok(verdict::text ~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict signale la rupture');
+  return next ok(tests.verdict_signale_rupture(verdict), 'Le verdict signale la rupture (clé premiere_ligne_fausse/rupture non nulle, ok = false ou mot explicite)');
   return next diag('Verdict rendu : ' || left(verdict::text, 400));
 end $f$;
 
@@ -973,7 +1061,7 @@ end $f$;
 create or replace function tests.test_36_envoi_opposition_refuse() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; col_dest text; col_canal text; col_trans text; type_oppos text; valeurs jsonb; ligne jsonb; verrous jsonb; sans_opposition jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; type_oppos text; canal_courriel text; valeurs jsonb; ligne jsonb; verrous jsonb; sans_opposition jsonb;
 begin
   jeu := tests.jeu();
   if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
@@ -985,13 +1073,15 @@ begin
     return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
+  -- Le canal courriel sous son nom réel : 'email' sur le socle (envois.canal ∈ email | sms | whatsapp | lre | appel), 'courriel' ailleurs.
+  canal_courriel := coalesce((select canal from private.canaux_envoi where canal in ('email', 'courriel') limit 1), 'email');
   valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, 'oppose-a5@essai.invalid');
-  if col_canal is not null then valeurs := valeurs || jsonb_build_object(col_canal, 'courriel'); end if;
+  if col_canal is not null then valeurs := valeurs || jsonb_build_object(col_canal, canal_courriel); end if;
   if col_trans is not null then valeurs := valeurs || jsonb_build_object(col_trans, true); end if;
   ligne := tests.inserer_minimal('public', 'envois', valeurs);
   -- Verrous AVANT opposition : témoin
   begin
-    execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into sans_opposition using (ligne ->> 'id')::bigint;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id::text = $1' into sans_opposition using ligne ->> 'id';
   exception when others then
     return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return next diag('Signatures : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname ~ 'verrou'), 'aucune'));
@@ -1000,13 +1090,13 @@ begin
   -- Opposition par la porte du socle
   type_oppos := coalesce(nullif(regexp_replace(coalesce(tests.valeur_selon_check('public.oppositions'::regclass, 'type', 'text'::regtype), ''), '::.*$|''', '', 'g'), ''), 'prospect');
   begin
-    perform tests.appeler_privee('opposer', jeu ->> 'client_a', type_oppos, 'oppose-a5@essai.invalid', 'courriel', null, null, 'essai A5', 'essai_a5', null);
+    perform tests.appeler_privee('opposer', jeu ->> 'client_a', type_oppos, 'oppose-a5@essai.invalid', canal_courriel, null, null, 'essai A5', 'essai_a5', null);
   exception when others then
     return next fail('private.opposer(...) refuse l''appel d''essai : ' || sqlerrm);
     return next diag('Signature : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = 'opposer'), 'absente') || ' ; type essayé : ' || type_oppos);
     return;
   end;
-  execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into verrous using (ligne ->> 'id')::bigint;
+  execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id::text = $1' into verrous using ligne ->> 'id';
   return next ok(verrous::text ~* 'oppos', 'Avec une opposition posée, verrous_envoi() nomme l''opposition');
   return next ok(sans_opposition::text !~* 'oppos', 'Sans opposition, verrous_envoi() ne la nommait pas (témoin)');
   return next diag('Verrous avec opposition : ' || left(verrous::text, 400));
@@ -1040,8 +1130,8 @@ begin
   elsif col_trans = 'nature' then valeurs := valeurs || jsonb_build_object('nature', 'prospection'); end if;
   ligne := tests.inserer_minimal('public', 'envois', valeurs);
   begin
-    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_nuit using (ligne ->> 'id')::bigint, dimanche_soir;
-    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_jour using (ligne ->> 'id')::bigint, mardi_matin;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id::text = $1' into verrous_nuit using ligne ->> 'id', dimanche_soir;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id::text = $1' into verrous_jour using ligne ->> 'id', mardi_matin;
   exception when others then
     return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return;
@@ -1187,11 +1277,12 @@ begin
     select tl.nom from private.tables_locataires tl
     where not exists (
       select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = regexp_replace(tl.nom, '^public\.', '')
-        and (coalesce(p.qual, '') || coalesce(p.with_check, '')) ~ '(private\.[a-z_]+\(|client_id IN \( ?SELECT|client_id in \( ?select)')
+        -- une aide de private, un filtre sur client_id, l'identité (auth.uid()), ou une jointure sur la table parente
+        and (coalesce(p.qual, '') || coalesce(p.with_check, '')) ~* '(private\.[a-z_]+\(|client_id|auth\.uid\(\)|exists ?\( ?select)')
       -- une table interne fermée à authenticated (aucun SELECT) n'a pas besoin de politique
       and has_table_privilege('authenticated', to_regclass('public.' || quote_ident(regexp_replace(tl.nom, '^public\.', ''))), 'SELECT')
     order by 1
-  $q$, 'Toute table locataire lisible par authenticated a une politique fondée sur une aide de private ou sur client_id in (select …)');
+  $q$, 'Toute table locataire lisible par authenticated a une politique non triviale (aide de private, client_id, auth.uid() ou jointure)');
   -- Pour SECURITE.md : les politiques qui ne passent ni par mes_clients() ni par lit_objet() (autres aides ou jointure sur la table parente)
   return next diag('Politiques hors mes_clients()/lit_objet() : ' || coalesce((
     select string_agg(p.tablename || '.' || p.policyname, ', ' order by 1) from pg_policies p

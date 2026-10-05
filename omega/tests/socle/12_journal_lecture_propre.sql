@@ -9,8 +9,10 @@ declare
 begin
   jeu := tests.jeu();
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5');
+  perform tests.endosser((jeu ->> 'gerant_a')::uuid);
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')), 1::bigint, 'Le gérant de A voit la ligne de journal de A');
   perform tests.endosser((jeu ->> 'user_a')::uuid);
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 1::bigint, 'A voit sa ligne de journal');
+  return next diag('Collaborateur de A : ' || tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')) || ' ligne(s) visible(s) (le socle réserve le journal aux gérants et admins : 0 attendu là-bas)');
   perform tests.redevenir_admin();
 end $f$;
 

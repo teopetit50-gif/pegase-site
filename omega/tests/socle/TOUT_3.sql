@@ -80,7 +80,7 @@ begin
     select id, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable) s
     where precedent is distinct from hash_precedent;
   return next ok(ruptures_client = 0 or ruptures_globale = 0, format('La chaîne se suit (ruptures : %s par client, %s en global)', ruptures_client, ruptures_globale));
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 3::bigint, 'Les trois lignes d''essai sont écrites');
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')), 3::bigint, 'Les trois lignes d''essai sont écrites');
   return next is_empty($q$
     select client_id, count(*) from public.journal_opposable where hash_precedent is null group by client_id having count(*) > 1
   $q$, 'Au plus une ligne de genèse (hash_precedent null) par client');
@@ -126,10 +126,10 @@ begin
   jeu := tests.jeu();
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_1');
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_2');
-  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid order by id loop
+  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid and action like 'essai_a5%' order by id loop
     n := n + 1;
     return next is(octet_length(r.hash), 32, format('Ligne %s : empreinte de 32 octets', n));
-    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1'); end if;
+    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1 (lignes d''essai consécutives)'); end if;
   end loop;
   return next is(n, 2, 'Deux lignes écrites par la porte');
 end $f$;
@@ -150,7 +150,7 @@ begin
     perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
-  return next ok(verdict::text !~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict ne signale aucune rupture');
+  return next ok(not tests.verdict_signale_rupture(verdict), 'Le verdict ne signale aucune rupture');
   return next diag('Verdict rendu : ' || left(verdict::text, 400));
 end $f$;
 
@@ -171,14 +171,14 @@ begin
   end loop;
   begin
     execute 'alter table public.journal_opposable disable trigger user';
-    execute format('update public.journal_opposable set hash = decode(repeat(''ab'', 32), ''hex'') where client_id = %L and id = (select min(id) from public.journal_opposable where client_id = %L)', jeu ->> 'client_a', jeu ->> 'client_a');
+    execute format('update public.journal_opposable set hash = decode(repeat(''ab'', 32), ''hex'') where client_id = %L and id = (select min(id) from public.journal_opposable where client_id = %L and action like ''essai_a5%%'')', jeu ->> 'client_a', jeu ->> 'client_a');
     execute 'alter table public.journal_opposable enable trigger user';
   exception when others then
     return next pass('Altération impossible même déclencheurs désactivés (' || sqlerrm || ') : rupture non simulable, test sans objet');
     return;
   end;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
-  return next ok(verdict::text ~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict signale la rupture');
+  return next ok(tests.verdict_signale_rupture(verdict), 'Le verdict signale la rupture (clé premiere_ligne_fausse/rupture non nulle, ok = false ou mot explicite)');
   return next diag('Verdict rendu : ' || left(verdict::text, 400));
 end $f$;
 
@@ -213,7 +213,7 @@ end $f$;
 create or replace function tests.test_36_envoi_opposition_refuse() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; col_dest text; col_canal text; col_trans text; type_oppos text; valeurs jsonb; ligne jsonb; verrous jsonb; sans_opposition jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; type_oppos text; canal_courriel text; valeurs jsonb; ligne jsonb; verrous jsonb; sans_opposition jsonb;
 begin
   jeu := tests.jeu();
   if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
@@ -225,13 +225,15 @@ begin
     return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
+  -- Le canal courriel sous son nom réel : 'email' sur le socle (envois.canal ∈ email | sms | whatsapp | lre | appel), 'courriel' ailleurs.
+  canal_courriel := coalesce((select canal from private.canaux_envoi where canal in ('email', 'courriel') limit 1), 'email');
   valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, 'oppose-a5@essai.invalid');
-  if col_canal is not null then valeurs := valeurs || jsonb_build_object(col_canal, 'courriel'); end if;
+  if col_canal is not null then valeurs := valeurs || jsonb_build_object(col_canal, canal_courriel); end if;
   if col_trans is not null then valeurs := valeurs || jsonb_build_object(col_trans, true); end if;
   ligne := tests.inserer_minimal('public', 'envois', valeurs);
   -- Verrous AVANT opposition : témoin
   begin
-    execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into sans_opposition using (ligne ->> 'id')::bigint;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id::text = $1' into sans_opposition using ligne ->> 'id';
   exception when others then
     return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return next diag('Signatures : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname ~ 'verrou'), 'aucune'));
@@ -240,13 +242,13 @@ begin
   -- Opposition par la porte du socle
   type_oppos := coalesce(nullif(regexp_replace(coalesce(tests.valeur_selon_check('public.oppositions'::regclass, 'type', 'text'::regtype), ''), '::.*$|''', '', 'g'), ''), 'prospect');
   begin
-    perform tests.appeler_privee('opposer', jeu ->> 'client_a', type_oppos, 'oppose-a5@essai.invalid', 'courriel', null, null, 'essai A5', 'essai_a5', null);
+    perform tests.appeler_privee('opposer', jeu ->> 'client_a', type_oppos, 'oppose-a5@essai.invalid', canal_courriel, null, null, 'essai A5', 'essai_a5', null);
   exception when others then
     return next fail('private.opposer(...) refuse l''appel d''essai : ' || sqlerrm);
     return next diag('Signature : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = 'opposer'), 'absente') || ' ; type essayé : ' || type_oppos);
     return;
   end;
-  execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into verrous using (ligne ->> 'id')::bigint;
+  execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id::text = $1' into verrous using ligne ->> 'id';
   return next ok(verrous::text ~* 'oppos', 'Avec une opposition posée, verrous_envoi() nomme l''opposition');
   return next ok(sans_opposition::text !~* 'oppos', 'Sans opposition, verrous_envoi() ne la nommait pas (témoin)');
   return next diag('Verrous avec opposition : ' || left(verrous::text, 400));
@@ -280,8 +282,8 @@ begin
   elsif col_trans = 'nature' then valeurs := valeurs || jsonb_build_object('nature', 'prospection'); end if;
   ligne := tests.inserer_minimal('public', 'envois', valeurs);
   begin
-    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_nuit using (ligne ->> 'id')::bigint, dimanche_soir;
-    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_jour using (ligne ->> 'id')::bigint, mardi_matin;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id::text = $1' into verrous_nuit using ligne ->> 'id', dimanche_soir;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id::text = $1' into verrous_jour using ligne ->> 'id', mardi_matin;
   exception when others then
     return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return;

@@ -18,7 +18,7 @@ begin
     select id, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable) s
     where precedent is distinct from hash_precedent;
   return next ok(ruptures_client = 0 or ruptures_globale = 0, format('La chaîne se suit (ruptures : %s par client, %s en global)', ruptures_client, ruptures_globale));
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 3::bigint, 'Les trois lignes d''essai sont écrites');
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')), 3::bigint, 'Les trois lignes d''essai sont écrites');
   return next is_empty($q$
     select client_id, count(*) from public.journal_opposable where hash_precedent is null group by client_id having count(*) > 1
   $q$, 'Au plus une ligne de genèse (hash_precedent null) par client');

@@ -20,10 +20,10 @@ begin
   jeu := tests.jeu();
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_1');
   perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_2');
-  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid order by id loop
+  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid and action like 'essai_a5%' order by id loop
     n := n + 1;
     return next is(octet_length(r.hash), 32, format('Ligne %s : empreinte de 32 octets', n));
-    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1'); end if;
+    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1 (lignes d''essai consécutives)'); end if;
   end loop;
   return next is(n, 2, 'Deux lignes écrites par la porte');
 end $f$;
