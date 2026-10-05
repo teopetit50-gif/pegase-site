@@ -105,6 +105,12 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## Lot 7 (05/10 soir) — première vraie facture
 
+- **État (20:50 UTC)** : a4_10 et a4_11 posés sur la recette depuis le dépôt (SHA 179fd13), test a4_05
+  vert. Recontrôle réel de F-2026-0413 : `identite.siren` « SIREN lu (842115763) mais non vérifié par
+  le lecteur », `identite.tva_intracom` idem, `fournisseur.a_confirmer` bloquant, `fournisseur_lu`
+  porte `non_verifie`. Le coordinateur ne reposera plus une photo par-dessus : a4_11 est le texte
+  de référence de `filed_controler_facture`. Rien d'autre attendu d'A4 sauf remontée de B7 ou A3.
+
 - Constat en base réelle (A3) : `filed_integrer_facture` n'avait remonté que `{nom}` dans
   `fournisseur_lu` alors que le lecteur avait lu `fournisseur.siren / tva / iban`. Lecture des
   corps (`omega/SOCLE-EXTRAITS-COMMUN.sql`) : l'intégration ne reprend que les valeurs SÛRES
