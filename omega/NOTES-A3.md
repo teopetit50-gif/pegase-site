@@ -181,6 +181,22 @@ ruban « Données d'exemple » et le titre « Espace client Omega » (relevé pa
 curl sur le HTML servi). Le lot « temps réel » (commits 34227cc et bc512b3)
 attend sa fusion.
 
+## Relecture en conditions réelles — en cours (05/10, 19:05 UTC)
+
+Compte de recette fourni par le coordinateur (`gerant@banc-varelo.test`,
+client banc « Groupe Sogexal (banc) »). **Bloqué à la connexion** : Auth
+rend 500 « Database error querying schema » ; les journaux Auth disent
+« error finding user: sql: Scan error on column index 3, name
+"confirmation_token": converting NULL to string is unsupported » —
+l'utilisateur a été inséré directement dans `auth.users` avec des NULL là
+où GoTrue veut des chaînes vides (`confirmation_token`, `recovery_token`,
+`email_change*`, `phone_change*`, `reauthentication_token`). Correctif
+transmis au coordinateur (UPDATE sur `auth.users`, ou création par l'API
+Admin). Prêt de mon côté : serveur de dev pointé sur la recette et
+`omega/recette-a3/relecture-reelle.mjs` (pose le cookie de session à la
+façon de @supabase/ssr, bascule « Base réelle », relève compteurs, avis
+rouges, refus de la base en console, captures `reel-*-1440.jpg`).
+
 ## Demain
 
 - Relecture en conditions réelles dès qu'un client a des lignes : premier
