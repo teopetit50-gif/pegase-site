@@ -92,8 +92,9 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 - **`omega/functions/README.md`** : déploiement de chaque fonction, variables, tests
   en local, essais à la main ; `reception/outils/signer_formulaire.ts` fabrique une
   requête de formulaire signée (imprime la commande `curl`).
-- **Déployé sur la recette** par le coordinateur le 05/10 (version 1, active) :
-  `expediteur` (verify_jwt true), `webhooks-brevo` et `reception` (verify_jwt false).
+- **Déployé sur la recette** par le coordinateur le 05/10 : `expediteur` (version 2,
+  avec le rapprochement, verify_jwt true), `webhooks-brevo` et `reception` (version 1,
+  verify_jwt false).
   Cron `omega-expediteur` posé, inactif tant que la clé de service n'est pas au coffre.
   La boîte `site:omegaai.fr` est portée par `clients.config.boite_formulaire`
   (client du banc, module reput).
@@ -215,6 +216,24 @@ update private.fournisseurs_envoi set branche = true
 **Site** : `FORMULAIRE_SECRET` (32 octets hex) partagé entre Vercel (`pegase-site2`)
 et la fonction `reception`.
 
+## Reste
+
+Plus rien en attente côté A2 : tout le périmètre est codé, testé, déployé sur la
+recette et poussé. Ce qui suit ne dépend pas de cette session :
+
+1. **Teo** pose les secrets (`BREVO_API_KEY`, `BREVO_WEBHOOK_JETON`,
+   `FORMULAIRE_SECRET`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`)
+   et la configuration Brevo / Meta décrite plus bas.
+2. **Le coordinateur** fait alors l'appel signé `/reception/formulaire`
+   (`reception/outils/signer_formulaire.ts`), branche `brevo` / `brevo_sms` sur la
+   recette, dépose un envoi e-mail et un envoi SMS d'essai, et renvoie les lignes
+   `envois` + résultat du travail à A2 pour vérification de bout en bout.
+3. **La session vitrine** branche le formulaire du site (signature HMAC côté
+   serveur, `identifiant` uuid généré côté serveur, POST vers `/reception/formulaire`).
+4. À la première livraison réelle des webhooks Brevo SMS : vérifier que la référence
+   renvoyée (`messageId` ou `reference`) retrouve bien l'envoi, sinon la variante
+   `p_reference = 'envoi:<uuid>'` de `noter_remise`.
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
@@ -227,7 +246,9 @@ et la fonction `reception`.
   avant la fin du bail de 15 minutes de l'envoi. Le seul trou restant : travail
   d'origine sans `client_id` ou `deposer_travail` en panne au même moment ; le journal
   `RAPPROCHEMENT IMPOSSIBLE` porte l'envoi et la référence à rejouer à la main.
-  Hypothèse à confirmer : `prendre_travaux` rend bien `client_id` sur chaque travail.
+  Confirmé par le coordinateur : `prendre_travaux` rend des lignes complètes de
+  `public.travaux`, `client_id` est toujours présent ; `deposer_travail` est bien
+  exécutable par `service_role`.
 - **Corps HTML ou texte** : heuristique (`corpsEstHtml`) ; si le socle sait le canal
   de rendu, autant l'ajouter à la réponse de `commencer_envoi`.
 - **Date Brevo** sans fuseau (`AAAA-MM-JJ HH:MM:SS`) : lue en UTC quand `ts_event`
