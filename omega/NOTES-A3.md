@@ -65,6 +65,19 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
     **déposer un document** depuis l'espace (fichier dans `omega-clients`
     puis `filed_deposer_piece` ; le document reçoit son numéro et part en
     lecture).
+- **Rendu des pages PDF** (05/10, soir) : `components/espace/filed/PagePdf.tsx`
+  dessine chaque page d'un PDF réel (URL signée) dans un canvas par pdf.js
+  (`pdfjs-dist`, build **legacy** : la moderne lève
+  `getOrInsertComputed is not a function` sur le Chromium de recette) ;
+  le worker est servi par le bundler (`new URL(…, import.meta.url)` →
+  `/_next/static/media/pdf.worker.min.….mjs`, vérifié en dev et en build) ;
+  nombre de pages et rapport de page lus dans le fichier quand `pieces`
+  ne les a pas ; les boîtes des valeurs restent en pourcentages par-dessus.
+  Vérifié avec une route temporaire (supprimée) et un PDF de deux pages
+  imprimé par Chromium : les deux pages se dessinent, la boîte « Total
+  TTC » tombe sur le texte — capture `omega/recette-a3/filed-pdf-essai-900.jpg`.
+  La recette automatique ne couvre pas ce rendu : il faut une session et une
+  pièce réelle.
 - **Validation** : `npx tsc --noEmit` ✓, `npx eslint components/espace
   app/espace` ✓ (0 erreur, 0 avertissement), `npm run build` ✓, recette
   aux cinq largeurs (390 / 768 / 1024 / 1440 / 1700) ✓ —
@@ -95,9 +108,9 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   `capturer`. Le décalque `omega/recette-a3/chrome-linux.mjs` est supprimé.
 - **GitHub** : le push de `worker-a3` est passé du premier coup le 05/10
   (sept commits) ; rien à retenter.
-- `package-lock.json` bouge à l'installation (`npm ci` refuse : lock
-  désynchronisé de `package.json`, `@emnapi/*` manquants) : **non commité**,
-  ce n'est pas mon travail.
+- `package-lock.json` était désynchronisé de `package.json` (`npm ci`
+  refusait, `@emnapi/*` manquants) ; il est commité avec l'ajout de
+  `pdfjs-dist` (lot « rendu PDF »), donc à jour désormais.
 
 ## Demandes au coordinateur — réponses du lot 19 (05/10) et ce qui en est fait
 
@@ -134,12 +147,16 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 Reste à confirmer côté coordinateur : la clé exacte du jsonb rendu par
 `filed_deposer_piece` (point 2).
 
+## Prêt à fusionner
+
+Lot « rendu PDF » (05/10, soir) : tsc ✓, eslint ✓, build ✓, recette aux
+cinq largeurs ✓ (104 contrôles). Il ajoute la dépendance `pdfjs-dist` à
+`package.json` ; `package-lock.json` est commité avec elle (il était
+désynchronisé de `package.json` — `@emnapi/*` manquants — et `npm ci`
+refusait ; il est maintenant à jour).
+
 ## Demain
 
-- Rendu des pages PDF dans la visionneuse (pdf.js, ou pages rendues en
-  image par le lecteur et rangées dans `pieces_pages`) : aujourd'hui le PDF
-  réel s'ouvre dans un onglet, les boîtes sont posées sur le texte de la
-  page.
 - Relecture en conditions réelles dès qu'un client a des lignes : premier
   appel de chaque porte, messages d'erreur de la base en clair.
 - Temps réel (Supabase Realtime) sur `demandes_validation` et
