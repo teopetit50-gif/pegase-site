@@ -1,6 +1,6 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 1 h 10 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 1 h 25 Paris.
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
@@ -230,3 +230,10 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
   objet `{resultat, registre, identifiant, source, verifie_le, verification}` en jsonb (ou le seul résultat si la
   colonne est texte) ; test_b7_08 réécrit avec la colonne en jsonb ; 8/8 et scénario verts en local, avec et sans
   les colonnes d'a4_10. Au passage, `portes.ts` passe par `rpc()` exportée par A1 (7425991), fin de la recopie.
+- 5/10 22 h 52 Z (coordinateur, 158277d reposé) : 7/8 ; deux contraintes d'a4_10 : `identite_source` n'admet que
+  `sirene | vies | humain` (= le registre, pas la source d'ouvrier) ; la forme du verdict lue par A4 est
+  `{resultat, identifiant, registre, preuve}`. Et le scénario heurtait `UNIQUE (piece_id)` sur `filed_documents`.
+- 6/10 1 h 25 : aligné — `identite_source` = le registre ; `identite_verdict` = `{resultat, identifiant, registre,
+  preuve}` où la preuve est celle de la vérification plus `source` (d'ouvrier), `verifie_le`, `verification` ;
+  jsonb seulement. Scénario : une pièce par document. Test b7_08 pose aussi la contrainte d'A4 en local. 8/8 et
+  scénario verts, avec et sans les colonnes et la contrainte d'a4_10.
