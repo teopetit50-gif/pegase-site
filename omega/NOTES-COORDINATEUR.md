@@ -64,7 +64,14 @@ gérant du banc après a5_01 : vert.
   (référence `<202610051917.97558286656@smtp-relay.mailin.fr>`), **a été reçu
   par Teo à 21 h 19** : premier email réel d'Omega, chaîne complète validée.
   Envoi différé `6be6e6cd-…` partira demain 8 h.
-  Reste à vérifier : le webhook Brevo → `noter_remise` (Teo doit le poser).
+- **Accusé de remise vérifié à 19 h 38 Z** : webhook Brevo posé par Teo en
+  *Transactionnel* (un premier, créé en *Marketing*, ne voyait pas nos mails ;
+  à supprimer), URL `/functions/v1/webhooks-brevo`, Bearer = nouveau
+  `BREVO_WEBHOOK_JETON` (régénéré le 5/10, posé dans Supabase et Brevo). Envoi
+  `c3e142bb-…` parti à 19 h 38 : 00, rappel Brevo `delivered` à 19 h 38 : 03,
+  ligne `envois_evenements` type `remis` écrite par `noter_remise`. Boucle
+  complète validée : envoi → Brevo → boîte de Teo → accusé de remise dans Omega.
+  Brevo renvoie aussi `opened` : le suivi d'ouverture est encore actif, à couper.
 
 ### Fonctions Edge déployées
 
@@ -87,14 +94,15 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 
 ### Ce que Teo doit encore poser (recette)
 
-1. Brevo : restriction d'IP désactivée, expéditeur `essais@omegaai.fr` déclaré
-   (fait le 5/10). Reste : suivi d'ouverture/clic coupé.
+1. Brevo : restriction d'IP désactivée, expéditeur `essais@omegaai.fr` déclaré,
+   webhook transactionnel posé (fait le 5/10). Reste : couper le suivi
+   d'ouverture/clic ; supprimer le webhook « omega » Marketing.
 2. Edge Secrets manquants : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
    (Bedrock, eu-central-1), `META_APP_SECRET`, `META_ACCESS_TOKEN`.
 3. GitHub → Settings → Secrets : `SUPABASE_DB_URL`, `SAUVEGARDE_PHRASE`
    (workflow de sauvegarde d'A5).
-4. Brevo : webhook transactionnel vers `/functions/v1/webhooks-brevo`, avec le
-   jeton ; domaine inbound vers `/functions/v1/reception/brevo`.
+4. Brevo : domaine inbound vers `/functions/v1/reception/brevo` (le webhook
+   transactionnel est posé).
 5. Confirmer la décision sms/whatsapp 08 h–20 h lundi–samedi (lot 19g).
 
 ### Règles de pose
