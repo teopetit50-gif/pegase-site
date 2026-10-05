@@ -2,11 +2,20 @@
    Les formes sont celles de components/espace/types.ts, donc celles des
    tables demandes_validation, approbations, delegations, regles_validation. */
 
-import type { Approbation, Delegation, Demande, Regle } from "../types";
+import type { Approbation, Delegation, Demande, EquipesContexte, Regle } from "../types";
 import { AGENCE, CLAIRE, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, MARC, SIEGE, SOFIA, YANIS, dans, ilYa } from "./socle";
 
 const C = EXEMPLE_CLIENT_ID;
 const id = (n: number) => `00000000-0000-4000-8000-0000000000d${n.toString(16)}`;
+
+/* L'équipe qui décide des levées d'anomalie FILED : Claire et Marc. La
+   personne connectée n'en est pas membre ; elle ne peut décider la demande
+   6 que par la délégation de Claire (c1). */
+export const EQUIPE_FINANCE = "00000000-0000-4000-8000-0000000000e9";
+export const EQUIPES_EXEMPLE: EquipesContexte = {
+  noms: { [EQUIPE_FINANCE]: "Direction financière" },
+  membres: { [EQUIPE_FINANCE]: [CLAIRE, MARC] },
+};
 
 export const DEMANDES_EXEMPLE: Demande[] = [
   {
@@ -170,7 +179,7 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     echeance: dans(5, 18),
     cree_le: ilYa(0, 10),
     decide_le: null,
-    equipe_id: null,
+    equipe_id: EQUIPE_FINANCE,
     politique_id: null,
     exige_commentaire: true,
     exige_piece: true,
@@ -411,5 +420,5 @@ export const REGLES_EXEMPLE: Regle[] = [
   { id: "00000000-0000-4000-8000-0000000000f3", entite_id: null, module: "achats", type_action: "commande", montant_min: 2000, montant_max: null, approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null, exige_commentaire: false, exige_piece: true, exige_motif: true },
   { id: "00000000-0000-4000-8000-0000000000f4", entite_id: null, module: "rh", type_action: "conge", montant_min: 0, montant_max: null, approbations_requises: 1, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null, exige_commentaire: false, exige_piece: false, exige_motif: true },
   { id: "00000000-0000-4000-8000-0000000000f5", entite_id: null, module: "tresorerie", type_action: null, montant_min: 20000, montant_max: null, approbations_requises: 3, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null, exige_commentaire: true, exige_piece: true, exige_motif: true },
-  { id: "00000000-0000-4000-8000-0000000000f6", entite_id: null, module: "filed", type_action: "lever_anomalie", montant_min: 0, montant_max: null, approbations_requises: 2, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null, exige_commentaire: true, exige_piece: true, exige_motif: true },
+  { id: "00000000-0000-4000-8000-0000000000f6", entite_id: null, module: "filed", type_action: "lever_anomalie", montant_min: 0, montant_max: null, approbations_requises: 2, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: EQUIPE_FINANCE, exige_commentaire: true, exige_piece: true, exige_motif: true },
 ];

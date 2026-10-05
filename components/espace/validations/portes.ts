@@ -30,7 +30,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Approbation, Compte, Delegation, Demande, Entite, Personne } from "../types";
+import type { Approbation, Compte, Delegation, Demande, Entite, EquipesContexte, Personne } from "../types";
 
 export type ContexteSocle = {
   user_id: string;
@@ -40,6 +40,8 @@ export type ContexteSocle = {
   comptes: Compte[];
   /* l'annuaire de l'organisation (lot 19) ; vide si la porte manque */
   annuaire: Personne[];
+  /* les équipes et leurs membres : une règle peut réserver la décision à une équipe */
+  equipes: EquipesContexte;
 };
 
 export class ErreurPorte extends Error {}
@@ -64,15 +66,20 @@ export async function chargerContexte(): Promise<ContexteSocle> {
   const compte = liste.find((c) => c.user_id === user_id) ?? null;
   let entites: Entite[] = [];
   let annuaire: Personne[] = [];
+  const equipes: EquipesContexte = { noms: {}, membres: {} };
   if (compte) {
-    const [e, a] = await Promise.all([
+    const [e, a, q, m] = await Promise.all([
       supabase.from("entites").select("id, nom, principale").eq("client_id", compte.client_id).order("principale", { ascending: false }),
       supabase.rpc("annuaire", { p_client: compte.client_id }),
+      supabase.from("equipes").select("id, cle, nom").eq("client_id", compte.client_id),
+      supabase.from("equipes_membres").select("equipe_id, user_id").eq("client_id", compte.client_id),
     ]);
     entites = (e.data ?? []) as Entite[];
     annuaire = (Array.isArray(a.data) ? a.data : []) as Personne[];
+    for (const x of (q.data ?? []) as { id: string; nom: string }[]) equipes.noms[x.id] = x.nom;
+    for (const x of (m.data ?? []) as { equipe_id: string; user_id: string }[]) (equipes.membres[x.equipe_id] ??= []).push(x.user_id);
   }
-  return { user_id, compte, entites, comptes: liste, annuaire };
+  return { user_id, compte, entites, comptes: liste, annuaire, equipes };
 }
 
 export async function chargerFile(): Promise<{ demandes: Demande[]; approbations: Approbation[]; delegations: Delegation[] }> {
@@ -130,7 +137,7 @@ export async function deleguer(o: {
   delegataire: string;
   module: string | null;
   entite_id: string | null;
-  fin: string | null;
+  fin: string;
   motif: string | null;
 }): Promise<void> {
   const supabase = createClient();

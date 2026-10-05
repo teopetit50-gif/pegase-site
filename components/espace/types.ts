@@ -88,7 +88,8 @@ export type Delegation = {
   entite_id: string | null;
   module: string | null;
   debut: string;
-  fin: string | null;
+  /* obligatoire en base (NOT NULL) : une délégation a toujours un terme */
+  fin: string;
   motif: string | null;
   revoquee_le: string | null;
   delegant_nom?: string;
@@ -109,6 +110,15 @@ export type Regle = {
   exige_commentaire?: boolean;
   exige_piece?: boolean;
   exige_motif?: boolean;
+};
+
+/* public.equipes et equipes_membres : une règle peut réserver la décision aux
+   membres d'une équipe (regles_validation.equipe_id → demande.equipe_id) */
+export type Equipe = { id: string; cle: string; nom: string };
+export type EquipesContexte = {
+  noms: Record<string, string>;
+  /* equipe_id → user_id des membres */
+  membres: Record<string, string[]>;
 };
 
 /* public.annuaire(p_client) — qui est qui dans l'organisation (lot 19) */
