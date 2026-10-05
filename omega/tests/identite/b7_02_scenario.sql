@@ -57,7 +57,9 @@ begin
   assert (select statut from public.filed_factures where id = v_f) = 'a_valider', 'facture toujours à valider';
   assert (select count(*) from public.identites_registre) = 2, 'deux entrées de cache (vies + sirene)';
 
-  -- 4. Une seconde facture du même fournisseur : le contrôle trouve la réponse récente, aucune nouvelle demande.
+  -- 4. Une seconde facture du même fournisseur (sa propre pièce : une pièce = un document) : le contrôle trouve la
+  --    réponse récente, aucune nouvelle demande.
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'depot', 'facture-2.pdf', 'application/pdf', 1024, repeat('c', 64), v_cl::text || '/filed_document/test/facture-2.pdf', 'filed_document', 'y', 'lue') returning id into v_piece;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, depose_par, nom_fichier, sha256, recu_le, etat, nature, nature_source)
   values (v_cl, v_e, 2026, 2, v_piece, 'courriel', v_c, 'facture-2.pdf', repeat('c', 64), now() - interval '1 day', 'a_traiter', 'facture', 'humain') returning id into v_doc;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc,
