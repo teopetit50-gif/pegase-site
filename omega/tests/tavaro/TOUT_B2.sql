@@ -557,7 +557,7 @@ begin
   return next is((select x.version from public.loc_propositions x where x.id = v_prop2), 2, 'La nouvelle est la v2');
   return next ok(tests.tavaro_journal(v_client, 'tavaro.demande_annulee') >= 1, 'Le journal opposable porte tavaro.demande_annulee');
   perform private.loc_ouvrier(50);
-  select p.demande_id into v_demande from public.loc_propositions p where p.id = v_prop2;
+  select x.demande_id into v_demande from public.loc_propositions x where x.id = v_prop2;
   return next isnt(v_demande, null, 'La v2 a sa propre demande après le passage de l''ouvrier');
   return next is((select x.montant from public.demandes_validation x where x.id = v_demande), 433.20::numeric, 'Pour 433,20 € (100 km au-delà du forfait : 36 + 25 + 90 + 60 HT, TVA 20 %, plus 180 de dommage)');
 
@@ -566,7 +566,7 @@ begin
   v_prop2 := public.loc_chiffrer_retour((jeu ->> 'contrat')::uuid, tests.tavaro_retour() || '{"non_contradictoire": true}'::jsonb);
   perform tests.redevenir_admin();
   perform private.loc_ouvrier(50);
-  select d.* into d from public.demandes_validation d join public.loc_propositions p on p.demande_id = d.id where p.id = v_prop2;
+  select dv.* into d from public.demandes_validation dv join public.loc_propositions px on px.demande_id = dv.id where px.id = v_prop2;
   return next is(d.type_action, 'facture.envoyer_hors_bareme', 'Hors barème : type facture.envoyer_hors_bareme');
   return next ok(not (d.roles_autorises @> array['valideur']::text[]), format('Le valideur n''est pas autorisé sur le hors barème (%s)', d.roles_autorises));
   return next throws_ok(format('select tests.tavaro_decider(%L::jsonb, %L::uuid, %L)', jeu::text, d.id, 'daf'), null, null, 'La DAF (valideur) ne décide pas un hors barème');
@@ -681,7 +681,7 @@ begin
     return next is(d.statut, 'executee', 'Sans réglage d''envoi pour ce loueur, la demande est tout de même exécutée (facture à envoyer soi-même)');
     return next ok(tests.tavaro_journal(v_client, 'tavaro.facture_envoi_non_regle') >= 1, 'Le journal opposable porte tavaro.facture_envoi_non_regle');
     return next diag('Pas de reglages_envois pour le loueur d''essai : le courriel réel se prouve sur le banc (mode essai), pas ici.');
-    return next is(tests.compter('public', 'alertes', format('client_id = %L and cle like %L', v_client, '%facture:envoi_non_regle:' || (jeu ->> 'proposition'))), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée (clé facture:envoi_non_regle:<proposition>)');
+    return next is(tests.compter('public', 'alertes', format('client_id = %L and cle_regroupement like %L', v_client, '%facture:envoi_non_regle:' || (jeu ->> 'proposition'))), 1::bigint, 'Une alerte « envoyez-la vous-même » est levée (clé facture:envoi_non_regle:<proposition>)');
   end if;
 
   -- Le litige : par l'agence, avec la contestation du client.
@@ -797,15 +797,17 @@ create or replace function tests.test_b2_09_point_mesure_journal() returns setof
 language plpgsql as $f$
 declare
   jeu jsonb; v_client uuid; v_section jsonb; v_reseau jsonb; n integer; col text; nb bigint;
+  -- le « jour » des factures et des mesures est celui de l'agence (Europe/Paris), pas celui du serveur (UTC) : entre 0 h et 2 h Paris ils diffèrent
+  v_jour date := (now() at time zone 'Europe/Paris')::date;
 begin
   jeu := tests.tavaro_chiffrer(tests.tavaro_jeu_contrat(), 'collab');
   v_client := (jeu ->> 'client')::uuid;
 
   -- La section de l'agence : une proposition à décider.
-  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, current_date);
+  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, v_jour);
   return next ok(v_section @> '[{"gabarit": "tavaro.propositions_a_decider", "valeurs": {"n": 1}}]'::jsonb, format('La section de l''agence compte la proposition à décider (%s)', v_section));
   return next ok((v_section -> 0 -> 'valeurs' ->> 'montant')::numeric = 418.20, 'Pour 418,20 €');
-  v_reseau := private.loc_section_reseau(v_client, current_date);
+  v_reseau := private.loc_section_reseau(v_client, v_jour);
   return next ok(v_reseau @> '[{"gabarit": "tavaro.agence_reseau"}]'::jsonb and (v_reseau -> 0 ->> 'texte') like 'Loueur Essai B2 — Siège :%', format('La section réseau de la direction nomme l''agence (%s)', v_reseau -> 0 ->> 'texte'));
   -- Le dépôt des sections passe (il écrit dans le point du jour du socle).
   n := private.loc_deposer_points(now());
@@ -814,9 +816,9 @@ begin
   -- Après facturation : la mesure du jour.
   jeu := tests.tavaro_jeu_facture();
   v_client := (jeu ->> 'client')::uuid;
-  n := private.loc_mesurer(v_client, current_date);
+  n := private.loc_mesurer(v_client, v_jour);
   return next ok(n >= 2, format('loc_mesurer enregistre les euros facturés et les retours facturés du jour (%s mesures)', n));
-  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, current_date + 1);
+  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, v_jour + 1);
   return next ok(v_section @> '[{"gabarit": "tavaro.factures_emises_hier", "valeurs": {"n": 2}}]'::jsonb, format('Le lendemain, la section compte les deux factures émises la veille (%s)', v_section));
 
   -- Le journal opposable : une ligne par étape, par private.journaliser seulement.
@@ -954,7 +956,7 @@ begin
     n := private.loc_relancer_factures(now() + interval '40 days');
     return next is(n, 2, 'La troisième');
     return next is((select x.relances from public.loc_factures x where x.id = f.id), 3::smallint, 'Trois relances comptées');
-    return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle like %L', v_client, '%facture:recouvrement:' || f.id::text)) >= 1, 'À la troisième, l''alerte de recouvrement est levée pour l''agence');
+    return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle_regroupement like %L', v_client, '%facture:recouvrement:' || f.id::text)) >= 1, 'À la troisième, l''alerte de recouvrement est levée pour l''agence');
     n := private.loc_relancer_factures(now() + interval '60 days');
     return next is(n, 0, 'Pas de quatrième relance par le cron');
   else

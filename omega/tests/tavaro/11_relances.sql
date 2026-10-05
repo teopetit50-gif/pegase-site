@@ -34,7 +34,7 @@ begin
     n := private.loc_relancer_factures(now() + interval '40 days');
     return next is(n, 2, 'La troisième');
     return next is((select x.relances from public.loc_factures x where x.id = f.id), 3::smallint, 'Trois relances comptées');
-    return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle like %L', v_client, '%facture:recouvrement:' || f.id::text)) >= 1, 'À la troisième, l''alerte de recouvrement est levée pour l''agence');
+    return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle_regroupement like %L', v_client, '%facture:recouvrement:' || f.id::text)) >= 1, 'À la troisième, l''alerte de recouvrement est levée pour l''agence');
     n := private.loc_relancer_factures(now() + interval '60 days');
     return next is(n, 0, 'Pas de quatrième relance par le cron');
   else

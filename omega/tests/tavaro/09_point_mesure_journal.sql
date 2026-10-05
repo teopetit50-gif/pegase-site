@@ -4,15 +4,17 @@ create or replace function tests.test_b2_09_point_mesure_journal() returns setof
 language plpgsql as $f$
 declare
   jeu jsonb; v_client uuid; v_section jsonb; v_reseau jsonb; n integer; col text; nb bigint;
+  -- le « jour » des factures et des mesures est celui de l'agence (Europe/Paris), pas celui du serveur (UTC) : entre 0 h et 2 h Paris ils diffèrent
+  v_jour date := (now() at time zone 'Europe/Paris')::date;
 begin
   jeu := tests.tavaro_chiffrer(tests.tavaro_jeu_contrat(), 'collab');
   v_client := (jeu ->> 'client')::uuid;
 
   -- La section de l'agence : une proposition à décider.
-  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, current_date);
+  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, v_jour);
   return next ok(v_section @> '[{"gabarit": "tavaro.propositions_a_decider", "valeurs": {"n": 1}}]'::jsonb, format('La section de l''agence compte la proposition à décider (%s)', v_section));
   return next ok((v_section -> 0 -> 'valeurs' ->> 'montant')::numeric = 418.20, 'Pour 418,20 €');
-  v_reseau := private.loc_section_reseau(v_client, current_date);
+  v_reseau := private.loc_section_reseau(v_client, v_jour);
   return next ok(v_reseau @> '[{"gabarit": "tavaro.agence_reseau"}]'::jsonb and (v_reseau -> 0 ->> 'texte') like 'Loueur Essai B2 — Siège :%', format('La section réseau de la direction nomme l''agence (%s)', v_reseau -> 0 ->> 'texte'));
   -- Le dépôt des sections passe (il écrit dans le point du jour du socle).
   n := private.loc_deposer_points(now());
@@ -21,9 +23,9 @@ begin
   -- Après facturation : la mesure du jour.
   jeu := tests.tavaro_jeu_facture();
   v_client := (jeu ->> 'client')::uuid;
-  n := private.loc_mesurer(v_client, current_date);
+  n := private.loc_mesurer(v_client, v_jour);
   return next ok(n >= 2, format('loc_mesurer enregistre les euros facturés et les retours facturés du jour (%s mesures)', n));
-  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, current_date + 1);
+  v_section := private.loc_section_facturation(v_client, (jeu ->> 'siege')::uuid, v_jour + 1);
   return next ok(v_section @> '[{"gabarit": "tavaro.factures_emises_hier", "valeurs": {"n": 2}}]'::jsonb, format('Le lendemain, la section compte les deux factures émises la veille (%s)', v_section));
 
   -- Le journal opposable : une ligne par étape, par private.journaliser seulement.

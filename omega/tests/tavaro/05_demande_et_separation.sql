@@ -43,7 +43,7 @@ begin
   return next is((select x.version from public.loc_propositions x where x.id = v_prop2), 2, 'La nouvelle est la v2');
   return next ok(tests.tavaro_journal(v_client, 'tavaro.demande_annulee') >= 1, 'Le journal opposable porte tavaro.demande_annulee');
   perform private.loc_ouvrier(50);
-  select p.demande_id into v_demande from public.loc_propositions p where p.id = v_prop2;
+  select x.demande_id into v_demande from public.loc_propositions x where x.id = v_prop2;
   return next isnt(v_demande, null, 'La v2 a sa propre demande après le passage de l''ouvrier');
   return next is((select x.montant from public.demandes_validation x where x.id = v_demande), 433.20::numeric, 'Pour 433,20 € (100 km au-delà du forfait : 36 + 25 + 90 + 60 HT, TVA 20 %, plus 180 de dommage)');
 
@@ -52,7 +52,7 @@ begin
   v_prop2 := public.loc_chiffrer_retour((jeu ->> 'contrat')::uuid, tests.tavaro_retour() || '{"non_contradictoire": true}'::jsonb);
   perform tests.redevenir_admin();
   perform private.loc_ouvrier(50);
-  select d.* into d from public.demandes_validation d join public.loc_propositions p on p.demande_id = d.id where p.id = v_prop2;
+  select dv.* into d from public.demandes_validation dv join public.loc_propositions px on px.demande_id = dv.id where px.id = v_prop2;
   return next is(d.type_action, 'facture.envoyer_hors_bareme', 'Hors barème : type facture.envoyer_hors_bareme');
   return next ok(not (d.roles_autorises @> array['valideur']::text[]), format('Le valideur n''est pas autorisé sur le hors barème (%s)', d.roles_autorises));
   return next throws_ok(format('select tests.tavaro_decider(%L::jsonb, %L::uuid, %L)', jeu::text, d.id, 'daf'), null, null, 'La DAF (valideur) ne décide pas un hors barème');
