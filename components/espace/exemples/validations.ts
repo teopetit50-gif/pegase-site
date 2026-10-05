@@ -25,7 +25,6 @@ export const DEMANDES_EXEMPLE: Demande[] = [
       iban: "FR76 3000 4000 0512 3456 7890 143",
       reference: "MR-2026-0412",
       date_execution: dans(1).slice(0, 10),
-      exigences: { commentaire: true, piece_jointe: false, motif_refus: true },
     },
     demandeur_type: "utilisateur",
     demandeur_id: SOFIA,
@@ -38,6 +37,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: true,
+    exige_piece: false,
+    exige_motif: true,
   },
   {
     id: id(2),
@@ -62,6 +64,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: false,
+    exige_motif: true,
   },
   {
     id: id(3),
@@ -86,6 +91,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: false,
+    exige_motif: true,
   },
   {
     id: id(4),
@@ -98,7 +106,7 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     resume: "Commande de 12 postes de travail — TechPro Informatique, 8 940,00 €",
     montant: 8940,
     devise: "EUR",
-    payload: { fournisseur: "TechPro Informatique", lignes: 3, livraison: dans(14).slice(0, 10), exigences: { commentaire: false, piece_jointe: true, motif_refus: true } },
+    payload: { fournisseur: "TechPro Informatique", lignes: 3, livraison: dans(14).slice(0, 10) },
     demandeur_type: "utilisateur",
     demandeur_id: EXEMPLE_MOI,
     statut: "en_attente",
@@ -110,6 +118,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: true,
+    exige_motif: true,
   },
   {
     id: id(5),
@@ -134,6 +145,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: true,
+    exige_piece: true,
+    exige_motif: true,
   },
   {
     id: id(6),
@@ -158,6 +172,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: true,
+    exige_piece: true,
+    exige_motif: true,
   },
   {
     id: id(7),
@@ -182,6 +199,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: false,
+    exige_motif: true,
   },
   {
     id: id(8),
@@ -206,6 +226,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: null,
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: false,
+    exige_motif: true,
   },
   /* ——— déjà décidées, pour l'historique ——— */
   {
@@ -231,6 +254,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: ilYa(7, 10),
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: false,
+    exige_motif: true,
   },
   {
     id: id(10),
@@ -255,6 +281,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: ilYa(5, 15),
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: false,
+    exige_motif: true,
   },
   {
     id: id(11),
@@ -279,6 +308,9 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     decide_le: ilYa(11, 9),
     equipe_id: null,
     politique_id: null,
+    exige_commentaire: false,
+    exige_piece: false,
+    exige_motif: true,
   },
 ];
 
@@ -290,6 +322,7 @@ export const APPROBATIONS_EXEMPLE: Approbation[] = [
     user_id: YANIS,
     au_nom_de: null,
     delegation_id: null,
+    piece_id: null,
     decision: "approuve",
     commentaire: "Facture rapprochée du bon de commande BC-2026-0064, montants identiques.",
     decide_le: ilYa(2, 15),
@@ -301,6 +334,7 @@ export const APPROBATIONS_EXEMPLE: Approbation[] = [
     user_id: CLAIRE,
     au_nom_de: null,
     delegation_id: null,
+    piece_id: null,
     decision: "approuve",
     commentaire: "Vu avec la banque ce matin : accord de principe, taux inchangé.",
     decide_le: ilYa(0, 11),
@@ -312,6 +346,7 @@ export const APPROBATIONS_EXEMPLE: Approbation[] = [
     user_id: EXEMPLE_MOI,
     au_nom_de: null,
     delegation_id: null,
+    piece_id: null,
     decision: "approuve",
     commentaire: null,
     decide_le: ilYa(7, 10),
@@ -323,6 +358,7 @@ export const APPROBATIONS_EXEMPLE: Approbation[] = [
     user_id: CLAIRE,
     au_nom_de: null,
     delegation_id: null,
+    piece_id: null,
     decision: "rejete",
     commentaire: "Hors budget du trimestre — à représenter en janvier avec le devis Facom en comparaison.",
     decide_le: ilYa(5, 15),
@@ -334,6 +370,7 @@ export const APPROBATIONS_EXEMPLE: Approbation[] = [
     user_id: EXEMPLE_MOI,
     au_nom_de: CLAIRE,
     delegation_id: "00000000-0000-4000-8000-0000000000c1",
+    piece_id: null,
     decision: "approuve",
     commentaire: "Au nom de Claire Morel (délégation du mois).",
     decide_le: ilYa(11, 9),
@@ -356,10 +393,10 @@ export const DELEGATIONS_EXEMPLE: Delegation[] = [
 ];
 
 export const REGLES_EXEMPLE: Regle[] = [
-  { id: "00000000-0000-4000-8000-0000000000f1", entite_id: null, module: "*", type_action: null, montant_min: 0, montant_max: 5000, approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null },
-  { id: "00000000-0000-4000-8000-0000000000f2", entite_id: null, module: "cashd", type_action: "virement_fournisseur", montant_min: 5000, montant_max: 20000, approbations_requises: 2, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null },
-  { id: "00000000-0000-4000-8000-0000000000f3", entite_id: null, module: "achats", type_action: "commande", montant_min: 2000, montant_max: null, approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null },
-  { id: "00000000-0000-4000-8000-0000000000f4", entite_id: null, module: "rh", type_action: "conge", montant_min: 0, montant_max: null, approbations_requises: 1, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null },
-  { id: "00000000-0000-4000-8000-0000000000f5", entite_id: null, module: "tresorerie", type_action: null, montant_min: 20000, montant_max: null, approbations_requises: 3, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null },
-  { id: "00000000-0000-4000-8000-0000000000f6", entite_id: null, module: "filed", type_action: "lever_anomalie", montant_min: 0, montant_max: null, approbations_requises: 2, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null },
+  { id: "00000000-0000-4000-8000-0000000000f1", entite_id: null, module: "*", type_action: null, montant_min: 0, montant_max: 5000, approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null, exige_commentaire: false, exige_piece: false, exige_motif: true },
+  { id: "00000000-0000-4000-8000-0000000000f2", entite_id: null, module: "cashd", type_action: "virement_fournisseur", montant_min: 5000, montant_max: 20000, approbations_requises: 2, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null, exige_commentaire: true, exige_piece: false, exige_motif: true },
+  { id: "00000000-0000-4000-8000-0000000000f3", entite_id: null, module: "achats", type_action: "commande", montant_min: 2000, montant_max: null, approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null, exige_commentaire: false, exige_piece: true, exige_motif: true },
+  { id: "00000000-0000-4000-8000-0000000000f4", entite_id: null, module: "rh", type_action: "conge", montant_min: 0, montant_max: null, approbations_requises: 1, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null, exige_commentaire: false, exige_piece: false, exige_motif: true },
+  { id: "00000000-0000-4000-8000-0000000000f5", entite_id: null, module: "tresorerie", type_action: null, montant_min: 20000, montant_max: null, approbations_requises: 3, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null, exige_commentaire: true, exige_piece: true, exige_motif: true },
+  { id: "00000000-0000-4000-8000-0000000000f6", entite_id: null, module: "filed", type_action: "lever_anomalie", montant_min: 0, montant_max: null, approbations_requises: 2, roles_autorises: ["gerant", "admin"], actif: true, equipe_id: null, exige_commentaire: true, exige_piece: true, exige_motif: true },
 ];

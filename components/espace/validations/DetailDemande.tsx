@@ -24,6 +24,8 @@ type Props = {
   moi: Decideur;
   source: Source;
   clientId: string;
+  /* l'adresse de la personne connectée, expéditeur du dépôt d'une pièce */
+  email: string | null;
   entites: Entite[];
   personnes: { id: string; libelle: string }[];
   nommer: (id: string | null | undefined) => string;
@@ -109,16 +111,19 @@ export default function DetailDemande(p: Props) {
   const soumettreDecision = (decision: "approuve" | "rejete") =>
     envoyer(async () => {
       let texte = decision === "approuve" ? commentaire.trim() : [motifComplet, commentaire.trim()].filter(Boolean).join(" — ");
+      let piece_id: string | null = null;
       if (fichier) {
         if (source === "reelle") {
-          const chemin = await joindrePiece({ client_id: p.clientId, demande_id: d.id, fichier });
-          texte = `${texte}${texte ? "\n" : ""}Pièce jointe : ${chemin}`;
+          const jointe = await joindrePiece({ demande: d, client_id: p.clientId, entite_id: d.entite_id, fichier, expediteur: p.email });
+          piece_id = jointe.piece_id;
+          /* sans identifiant de pièce (module sans porte de dépôt), le chemin reste cité */
+          if (!piece_id) texte = `${texte}${texte ? "\n" : ""}Pièce jointe : ${jointe.chemin}`;
         } else {
           texte = `${texte}${texte ? "\n" : ""}Pièce jointe : ${fichier.name}`;
         }
       }
       if (source === "reelle") {
-        await decider({ demande: d, user_id: moi.id, decision, commentaire: texte || null, au_nom_de: delegChoisie });
+        await decider({ demande: d, user_id: moi.id, decision, commentaire: texte || null, au_nom_de: delegChoisie, piece_id });
         await p.recharger();
       } else {
         await new Promise((r) => setTimeout(r, 350));
@@ -131,6 +136,7 @@ export default function DetailDemande(p: Props) {
           delegation_id: delegChoisie?.id ?? null,
           decision,
           commentaire: texte || null,
+          piece_id: null,
           decide_le: new Date().toISOString(),
         });
       }

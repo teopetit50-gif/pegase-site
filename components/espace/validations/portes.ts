@@ -12,14 +12,20 @@
      · modifier : RPC modifier_demande(p_demande, p_resume, p_montant,
        p_payload) → id de la nouvelle demande ;
      · déléguer : INSERT dans public.delegations (policy du délégant) ;
-     · pièce jointe : bucket omega-clients, chemin
-       <client_id>/demande_validation/<demande_id>/<nom> ; le chemin est
-       cité dans le commentaire (approbations n'a pas de colonne pièce —
-       demande au coordinateur, omega/NOTES-A3.md).
+     · pièce jointe (lot 19, 05/10) : approbations.piece_id → public.pieces.
+       Pour une demande du module FILED, le fichier est déposé par la porte
+       du module, filed_deposer_piece, après envoi dans le bucket
+       omega-clients sous <client_id>/filed_document/<document_id>/<nom> ;
+       l'identifiant de pièce rendu est posé sur l'approbation. Pour les
+       autres modules (dépôt générique au lot 20), le fichier part sous
+       <client_id>/demande_validation/<demande_id>/<nom> et son chemin est
+       cité dans le commentaire — toléré jusque-là.
+     · qui est qui : public.annuaire(p_client) → user_id, nom, email, role,
+       réservée aux membres de l'organisation.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Approbation, Compte, Delegation, Demande, Entite } from "../types";
+import type { Approbation, Compte, Delegation, Demande, Entite, Personne } from "../types";
 
 export type ContexteSocle = {
   user_id: string;
@@ -27,6 +33,8 @@ export type ContexteSocle = {
   entites: Entite[];
   /* les comptes du même client — pour nommer qui décide et à qui déléguer */
   comptes: Compte[];
+  /* l'annuaire de l'organisation (lot 19) ; vide si la porte manque */
+  annuaire: Personne[];
 };
 
 export class ErreurPorte extends Error {}
@@ -48,11 +56,16 @@ export async function chargerContexte(): Promise<ContexteSocle> {
   const liste = (comptes ?? []) as Compte[];
   const compte = liste.find((c) => c.user_id === user_id) ?? null;
   let entites: Entite[] = [];
+  let annuaire: Personne[] = [];
   if (compte) {
-    const { data } = await supabase.from("entites").select("id, nom, principale").eq("client_id", compte.client_id).order("principale", { ascending: false });
-    entites = (data ?? []) as Entite[];
+    const [e, a] = await Promise.all([
+      supabase.from("entites").select("id, nom, principale").eq("client_id", compte.client_id).order("principale", { ascending: false }),
+      supabase.rpc("annuaire", { p_client: compte.client_id }),
+    ]);
+    entites = (e.data ?? []) as Entite[];
+    annuaire = (Array.isArray(a.data) ? a.data : []) as Personne[];
   }
-  return { user_id, compte, entites, comptes: liste };
+  return { user_id, compte, entites, comptes: liste, annuaire };
 }
 
 export async function chargerFile(): Promise<{ demandes: Demande[]; approbations: Approbation[]; delegations: Delegation[] }> {
@@ -76,6 +89,7 @@ export async function decider(o: {
   decision: "approuve" | "rejete";
   commentaire: string | null;
   au_nom_de?: Delegation | null;
+  piece_id?: string | null;
 }): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from("approbations").insert({
@@ -86,6 +100,7 @@ export async function decider(o: {
     delegation_id: o.au_nom_de?.id ?? null,
     decision: o.decision,
     commentaire: o.commentaire,
+    piece_id: o.piece_id ?? null,
   });
   if (error) throw new ErreurPorte(message(error));
 }
@@ -125,11 +140,45 @@ export async function deleguer(o: {
   if (error) throw new ErreurPorte(message(error));
 }
 
-export async function joindrePiece(o: { client_id: string; demande_id: string; fichier: File }): Promise<string> {
+async function sha256Hex(fichier: File): Promise<string> {
+  const empreinte = await crypto.subtle.digest("SHA-256", await fichier.arrayBuffer());
+  return Array.from(new Uint8Array(empreinte)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/* Le résultat d'une pièce jointe : soit un identifiant de pièce (porte du
+   module), soit le chemin Storage à citer dans le commentaire. */
+export type PieceJointe = { piece_id: string | null; chemin: string };
+
+export async function joindrePiece(o: { demande: Demande; client_id: string; entite_id: string | null; fichier: File; expediteur: string | null }): Promise<PieceJointe> {
   const supabase = createClient();
   const nom = o.fichier.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
-  const chemin = `${o.client_id}/demande_validation/${o.demande_id}/${Date.now()}-${nom}`;
-  const { error } = await supabase.storage.from("omega-clients").upload(chemin, o.fichier, { upsert: false, contentType: o.fichier.type || undefined });
+  const mime = o.fichier.type || "application/octet-stream";
+
+  if (o.demande.module === "filed") {
+    const document_id = crypto.randomUUID();
+    const chemin = `${o.client_id}/filed_document/${document_id}/${nom}`;
+    const envoi = await supabase.storage.from("omega-clients").upload(chemin, o.fichier, { upsert: false, contentType: mime });
+    if (envoi.error) throw new ErreurPorte(message(envoi.error));
+    const { data, error } = await supabase.rpc("filed_deposer_piece", {
+      p_client: o.client_id,
+      p_document: document_id,
+      p_nom_fichier: nom,
+      p_mime: mime,
+      p_octets: o.fichier.size,
+      p_sha256: await sha256Hex(o.fichier),
+      p_chemin: chemin,
+      p_entite: o.entite_id,
+      p_source: "depot",
+      p_expediteur: o.expediteur,
+    });
+    if (error) throw new ErreurPorte(message(error));
+    const r = (data ?? {}) as Record<string, unknown>;
+    const piece_id = typeof r.piece_id === "string" ? r.piece_id : typeof r.piece === "string" ? r.piece : null;
+    return { piece_id, chemin };
+  }
+
+  const chemin = `${o.client_id}/demande_validation/${o.demande.id}/${Date.now()}-${nom}`;
+  const { error } = await supabase.storage.from("omega-clients").upload(chemin, o.fichier, { upsert: false, contentType: mime });
   if (error) throw new ErreurPorte(message(error));
-  return chemin;
+  return { piece_id: null, chemin };
 }

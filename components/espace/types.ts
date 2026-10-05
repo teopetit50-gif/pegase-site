@@ -54,6 +54,12 @@ export type Demande = {
   decide_le: string | null;
   equipe_id: string | null;
   politique_id: string | null;
+  /* 05/10 (lot 19) : recopiées de la règle par preparer_demande ; le plus
+     strict de la règle et de payload.exigences l'emporte. Absentes sur les
+     demandes créées avant le lot 19 : l'écran retombe sur payload.exigences. */
+  exige_commentaire?: boolean | null;
+  exige_piece?: boolean | null;
+  exige_motif?: boolean | null;
   /* enrichissements d'affichage (jointures faites côté écran) */
   entite_nom?: string;
   demandeur_nom?: string;
@@ -68,6 +74,8 @@ export type Approbation = {
   delegation_id: string | null;
   decision: "approuve" | "rejete";
   commentaire: string | null;
+  /* 05/10 (lot 19) : la pièce jointe à la décision (→ public.pieces) */
+  piece_id?: string | null;
   decide_le: string;
   user_nom?: string;
 };
@@ -98,7 +106,13 @@ export type Regle = {
   roles_autorises: Role[];
   actif: boolean;
   equipe_id: string | null;
+  exige_commentaire?: boolean;
+  exige_piece?: boolean;
+  exige_motif?: boolean;
 };
+
+/* public.annuaire(p_client) — qui est qui dans l'organisation (lot 19) */
+export type Personne = { user_id: string; nom: string; email: string | null; role: Role };
 
 /* ——— FILED ——— */
 

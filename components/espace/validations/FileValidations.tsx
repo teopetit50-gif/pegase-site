@@ -100,6 +100,8 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
       if (!id) return "Système";
       if (id === moi.id) return "Vous";
       if (source === "exemple") return nomPersonne(id);
+      const a = etat?.contexte?.annuaire.find((x) => x.user_id === id);
+      if (a) return a.nom;
       const c = etat?.contexte?.comptes.find((x) => x.user_id === id);
       return c ? `${id.slice(0, 8)} (${c.role})` : id.slice(0, 8);
     },
@@ -201,6 +203,8 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
 
   const personnes = useMemo(() => {
     if (source === "exemple") return Object.entries(PERSONNES).filter(([id]) => id !== EXEMPLE_MOI).map(([id, p]) => ({ id, libelle: `${p.nom} (${p.role})` }));
+    const annuaire = etat?.contexte?.annuaire ?? [];
+    if (annuaire.length) return annuaire.filter((a) => a.user_id !== moi.id).map((a) => ({ id: a.user_id, libelle: `${a.nom} (${a.role})` }));
     return (etat?.contexte?.comptes ?? []).filter((c) => c.user_id !== moi.id).map((c) => ({ id: c.user_id, libelle: `${c.user_id.slice(0, 8)} (${c.role})` }));
   }, [source, etat, moi.id]);
 
@@ -346,6 +350,7 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
               moi={moi}
               source={source}
               clientId={etat.contexte?.compte?.client_id ?? demande.client_id}
+              email={utilisateur?.email ?? null}
               entites={entites}
               personnes={personnes}
               nommer={nommer}

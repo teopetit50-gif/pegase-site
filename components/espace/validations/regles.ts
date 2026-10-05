@@ -12,14 +12,22 @@ import type { Approbation, Delegation, Demande, Role } from "../types";
 
 export type Exigences = { commentaire: boolean; piece_jointe: boolean; motif_refus: boolean };
 
-/* Ce que la règle exige au moment de décider. La table regles_validation
-   ne porte pas (encore) ces trois drapeaux : ils sont lus dans
-   demande.payload.exigences quand le module qui a créé la demande les a
-   posés, sinon déduits — un refus porte toujours un motif ; au-delà de
-   10 000 €, ou quand plusieurs approbations sont requises, un commentaire
-   accompagne l'approbation. (Demande au coordinateur : trois colonnes sur
-   regles_validation, voir omega/NOTES-A3.md.) */
+/* Ce que la règle exige au moment de décider. Depuis le lot 19 (05/10),
+   la demande porte exige_commentaire / exige_piece / exige_motif, recopiés
+   de regles_validation par preparer_demande (le plus strict de la règle et
+   de payload.exigences l'emporte, côté base). Les demandes créées avant
+   n'ont pas ces colonnes : on relit payload.exigences, sinon on déduit —
+   un refus porte toujours un motif ; au-delà de 10 000 €, ou quand
+   plusieurs approbations sont requises, un commentaire accompagne
+   l'approbation. */
 export function exigences(d: Demande): Exigences {
+  if (typeof d.exige_commentaire === "boolean" || typeof d.exige_piece === "boolean" || typeof d.exige_motif === "boolean") {
+    return {
+      commentaire: d.exige_commentaire === true,
+      piece_jointe: d.exige_piece === true,
+      motif_refus: d.exige_motif !== false,
+    };
+  }
   const p = d.payload?.exigences as Partial<Exigences> | undefined;
   const base: Exigences = {
     commentaire: (d.montant ?? 0) >= 10_000 || d.approbations_requises > 1,
