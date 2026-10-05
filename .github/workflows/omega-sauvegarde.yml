@@ -1,0 +1,323 @@
+# Sauvegarde nocturne de la base Omega (socle Postgres sur Supabase).
+#
+# Chaque nuit : pg_dump → chiffrement symétrique (gpg, phrase SAUVEGARDE_PHRASE)
+# → restauration d'essai dans un Postgres de service du runner → preuve écrite
+# dans private.sauvegardes (taille, empreinte SHA-256, verdict, lien vers
+# l'exécution) → artefact chiffré gardé 30 jours.
+#
+# private.verifier_sauvegardes() (08:07 UTC) lève une alerte critique si aucune
+# ligne « reussie » n'a moins de 26 heures : cette tâche doit donc réussir
+# chaque nuit. Elle ne tourne que si les deux secrets existent et échoue
+# proprement (message explicite) sinon.
+#
+# Secrets attendus (Settings → Secrets and variables → Actions) :
+#   SUPABASE_DB_URL     URL postgres de la production, de préférence le « Session pooler »
+#                       (port 5432, utilisateur postgres.<ref>) car les runners GitHub
+#                       n'ont pas d'IPv6 et la connexion directe db.<ref>.supabase.co est IPv6.
+#   SAUVEGARDE_PHRASE   phrase de chiffrement (longue, gardée aussi hors GitHub : sans elle,
+#                       les artefacts sont irrécupérables).
+# Procédure, RPO, RTO et restauration réelle : omega/docs/SAUVEGARDE.md.
+
+name: Sauvegarde de la base
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # 02:17 UTC, soit 04:17 à Paris l'été ; bien avant le contrôle de 08:07 UTC
+  workflow_dispatch:
+    inputs:
+      motif:
+        description: 'Pourquoi cette sauvegarde manuelle (consigné dans la preuve)'
+        required: false
+        default: 'manuelle'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-sauvegarde
+  cancel-in-progress: false
+
+env:
+  PG_MAJEUR: '17'
+  RETENTION_JOURS: 30
+
+jobs:
+  verifier-secrets:
+    name: Les deux secrets existent
+    runs-on: ubuntu-24.04
+    outputs:
+      pret: ${{ steps.controle.outputs.pret }}
+    steps:
+      - id: controle
+        env:
+          URL_PRESENTE: ${{ secrets.SUPABASE_DB_URL != '' }}
+          PHRASE_PRESENTE: ${{ secrets.SAUVEGARDE_PHRASE != '' }}
+        run: |
+          manquants=()
+          [ "$URL_PRESENTE" = "true" ] || manquants+=("SUPABASE_DB_URL")
+          [ "$PHRASE_PRESENTE" = "true" ] || manquants+=("SAUVEGARDE_PHRASE")
+          if [ "${#manquants[@]}" -gt 0 ]; then
+            echo "pret=false" >> "$GITHUB_OUTPUT"
+            echo "::error title=Sauvegarde impossible::Secret(s) manquant(s) : ${manquants[*]}. À poser dans Settings → Secrets and variables → Actions. Voir omega/docs/SAUVEGARDE.md."
+            {
+              echo "## Sauvegarde non exécutée"
+              echo
+              echo "Secret(s) manquant(s) : \`${manquants[*]}\`."
+              echo
+              echo "Tant qu'ils ne sont pas posés, \`private.verifier_sauvegardes()\` maintient l'alerte critique \`sauvegarde:manquante\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "pret=true" >> "$GITHUB_OUTPUT"
+          echo "Les deux secrets sont présents."
+
+  sauvegarder:
+    name: Sauvegarder, chiffrer, restaurer à l'essai, prouver
+    needs: verifier-secrets
+    if: needs.verifier-secrets.outputs.pret == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres-essai:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: essai
+          POSTGRES_USER: essai
+          POSTGRES_DB: essai
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U essai -d essai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SAUVEGARDE_PHRASE: ${{ secrets.SAUVEGARDE_PHRASE }}
+      ESSAI_URL: postgresql://essai:essai@localhost:5432/essai
+      TRAVAIL: ${{ runner.temp }}/sauvegarde
+      EXECUTION_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      PGCONNECT_TIMEOUT: '30'
+    steps:
+      - name: Masquer les secrets dans les journaux
+        run: |
+          echo "::add-mask::$SAUVEGARDE_PHRASE"
+          echo "::add-mask::$SUPABASE_DB_URL"
+          # Le mot de passe seul, au cas où l'URL serait reformatée par un outil
+          motdepasse="$(printf '%s' "$SUPABASE_DB_URL" | sed -n 's#^[a-z]*://[^:]*:\([^@]*\)@.*#\1#p')"
+          [ -n "$motdepasse" ] && echo "::add-mask::$motdepasse"
+          mkdir -p "$TRAVAIL"
+
+      - name: Installer les clients PostgreSQL ${{ env.PG_MAJEUR }} et gpg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common gnupg >/dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y -qq "postgresql-client-$PG_MAJEUR" >/dev/null
+          export PATH="/usr/lib/postgresql/$PG_MAJEUR/bin:$PATH"
+          echo "/usr/lib/postgresql/$PG_MAJEUR/bin" >> "$GITHUB_PATH"
+          pg_dump --version
+          gpg --version | head -1
+
+      - name: Vérifier la connexion et relever les comptages de référence
+        id: source
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -Atc "select version()" | sed 's/ on .*//'
+          # Comptage exact de chaque table public/private : c'est la référence pour juger la restauration.
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At -F $'\t' -c "
+            select table_schema, table_name,
+                   (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I.%I', table_schema, table_name), false, true, '')))[1]::text::bigint
+            from information_schema.tables
+            where table_schema in ('public','private') and table_type = 'BASE TABLE'
+            order by 1, 2" > "$TRAVAIL/comptages-source.tsv"
+          nb_tables=$(wc -l < "$TRAVAIL/comptages-source.tsv")
+          nb_lignes=$(awk -F'\t' '{s+=$3} END {print s+0}' "$TRAVAIL/comptages-source.tsv")
+          echo "tables=$nb_tables" >> "$GITHUB_OUTPUT"
+          echo "lignes=$nb_lignes" >> "$GITHUB_OUTPUT"
+          echo "$nb_tables tables public/private, $nb_lignes lignes au total."
+
+      - name: pg_dump (format custom, schémas du socle et des comptes)
+        id: dump
+        run: |
+          set -euo pipefail
+          debut=$(date -u +%s)
+          # --no-owner/--no-privileges : les rôles Supabase n'existent pas ailleurs ; l'important est le contenu.
+          pg_dump "$SUPABASE_DB_URL" \
+            --format=custom --compress=zstd:9 \
+            --no-owner --no-privileges --no-comments \
+            --schema=public --schema=private --schema=tests \
+            --schema=auth --schema=storage --schema=supabase_migrations \
+            --file="$TRAVAIL/omega.dump"
+          duree=$(( $(date -u +%s) - debut ))
+          octets=$(stat -c %s "$TRAVAIL/omega.dump")
+          echo "duree_s=$duree" >> "$GITHUB_OUTPUT"
+          echo "octets_clair=$octets" >> "$GITHUB_OUTPUT"
+          echo "Dump en clair : $octets octets en ${duree}s (reste dans le runner, jamais publié)."
+          pg_restore --list "$TRAVAIL/omega.dump" | grep -c ' TABLE DATA ' | sed 's/^/Tables avec données : /'
+
+      - name: Chiffrer (gpg symétrique AES-256, phrase SAUVEGARDE_PHRASE)
+        id: chiffrer
+        run: |
+          set -euo pipefail
+          horodatage=$(date -u +%Y%m%dT%H%M%SZ)
+          nom="omega-${horodatage}.dump.gpg"
+          gpg --batch --yes --quiet \
+              --pinentry-mode loopback --passphrase-fd 3 \
+              --symmetric --cipher-algo AES256 \
+              --s2k-mode 3 --s2k-digest-algo SHA512 --s2k-count 65011712 \
+              --compress-algo none \
+              --output "$TRAVAIL/$nom" "$TRAVAIL/omega.dump" 3<<<"$SAUVEGARDE_PHRASE"
+          octets=$(stat -c %s "$TRAVAIL/$nom")
+          sha=$(sha256sum "$TRAVAIL/$nom" | cut -d' ' -f1)
+          echo "nom=$nom" >> "$GITHUB_OUTPUT"
+          echo "octets=$octets" >> "$GITHUB_OUTPUT"
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
+          echo "$sha  $nom" > "$TRAVAIL/$nom.sha256"
+          echo "Artefact chiffré : $nom, $octets octets, SHA-256 $sha"
+
+      - name: Restauration d'essai dans le Postgres de service (depuis l'artefact chiffré)
+        id: essai
+        run: |
+          set -uo pipefail
+          debut=$(date -u +%s)
+          # 1) Déchiffrer l'artefact (et non le dump en clair) : c'est l'artefact que l'on devra restaurer un jour.
+          gpg --batch --quiet --pinentry-mode loopback --passphrase-fd 3 \
+              --decrypt --output "$TRAVAIL/essai.dump" "$TRAVAIL/${{ steps.chiffrer.outputs.nom }}" 3<<<"$SAUVEGARDE_PHRASE"
+          cmp -s "$TRAVAIL/essai.dump" "$TRAVAIL/omega.dump" && echo "Déchiffrement : identique à l'original." || { echo "::error::Le déchiffrement ne redonne pas le dump d'origine"; exit 1; }
+          # 2) Préparer une base vierge qui ressemble assez à Supabase pour accueillir le socle.
+          psql "$ESSAI_URL" -v ON_ERROR_STOP=1 -q <<'SQL'
+            do $$ declare r text; begin
+              foreach r in array array['anon','authenticated','service_role','authenticator','supabase_admin','supabase_auth_admin','supabase_storage_admin','dashboard_user','postgres','pgbouncer'] loop
+                if not exists (select 1 from pg_roles where rolname = r) then execute format('create role %I nologin', r); end if;
+              end loop;
+            end $$;
+            create schema if not exists extensions;
+            create extension if not exists pgcrypto with schema extensions;
+            create extension if not exists "uuid-ossp" with schema extensions;
+            create extension if not exists citext with schema extensions;
+            create extension if not exists unaccent with schema extensions;
+            create extension if not exists pg_trgm with schema extensions;
+            create extension if not exists btree_gist with schema extensions;
+            alter database essai set search_path = "$user", public, extensions;
+          SQL
+          # 3) Restaurer. On ne s'arrête pas à la première erreur : on compte, puis on tranche sur les comptages.
+          pg_restore --dbname="$ESSAI_URL" --no-owner --no-privileges --no-comments \
+                     --jobs=2 --exit-on-error "$TRAVAIL/essai.dump" 2> "$TRAVAIL/restore-strict.log"
+          code_strict=$?
+          if [ "$code_strict" -ne 0 ]; then
+            echo "Restauration stricte en échec (code $code_strict), seconde passe tolérante pour mesurer ce qui manque."
+            psql "$ESSAI_URL" -v ON_ERROR_STOP=1 -q -c "drop schema if exists public, private, tests, auth, storage, supabase_migrations cascade; create schema public;"
+            pg_restore --dbname="$ESSAI_URL" --no-owner --no-privileges --no-comments \
+                       --jobs=2 "$TRAVAIL/essai.dump" 2> "$TRAVAIL/restore-tolerant.log" || true
+          fi
+          erreurs=$(grep -c '^pg_restore: error' "$TRAVAIL"/restore-*.log 2>/dev/null | awk -F: '{s+=$2} END {print s+0}')
+          # 4) Comparer les comptages table par table avec la source.
+          psql "$ESSAI_URL" -v ON_ERROR_STOP=1 -At -F $'\t' -c "
+            select table_schema, table_name,
+                   (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I.%I', table_schema, table_name), false, true, '')))[1]::text::bigint
+            from information_schema.tables
+            where table_schema in ('public','private') and table_type = 'BASE TABLE'
+            order by 1, 2" > "$TRAVAIL/comptages-essai.tsv"
+          ecarts=$(diff "$TRAVAIL/comptages-source.tsv" "$TRAVAIL/comptages-essai.tsv" | grep -c '^[<>]' || true)
+          # 5) Le journal opposable restauré doit toujours se vérifier (chaîne SHA-256) s'il y a une porte pour cela.
+          chaine="non_verifiee"
+          if psql "$ESSAI_URL" -Atc "select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='verifier_journal_client'" | grep -q 1; then
+            if psql "$ESSAI_URL" -v ON_ERROR_STOP=1 -Atc "select coalesce(bool_and((public.verifier_journal_client(c) ->> 'ok')::boolean), true) from (select distinct client_id as c from public.journal_opposable) s" 2>/dev/null | grep -q '^t$'; then chaine="ok"; else chaine="a_verifier"; fi
+          fi
+          duree=$(( $(date -u +%s) - debut ))
+          verdict="echouee"
+          if [ "$code_strict" -eq 0 ] && [ "$ecarts" -eq 0 ]; then verdict="reussie"; fi
+          {
+            echo "verdict=$verdict"; echo "duree_s=$duree"; echo "erreurs=$erreurs"; echo "ecarts=$ecarts"; echo "chaine=$chaine"; echo "code_strict=$code_strict"
+          } >> "$GITHUB_OUTPUT"
+          echo "Restauration d'essai : $verdict en ${duree}s — $erreurs erreur(s) pg_restore, $ecarts écart(s) de comptage, chaîne du journal : $chaine"
+          if [ "$ecarts" -ne 0 ]; then echo "Écarts de comptage (source < > essai) :"; diff "$TRAVAIL/comptages-source.tsv" "$TRAVAIL/comptages-essai.tsv" | head -40; fi
+          if [ "$erreurs" -ne 0 ]; then echo "Premières erreurs pg_restore :"; grep '^pg_restore: error' "$TRAVAIL"/restore-*.log | head -20; fi
+
+      - name: Écrire la preuve dans private.sauvegardes
+        id: preuve
+        if: always() && steps.chiffrer.outcome == 'success'
+        env:
+          VERDICT: ${{ steps.essai.outputs.verdict || 'echouee' }}
+          OCTETS: ${{ steps.chiffrer.outputs.octets }}
+          SHA256: ${{ steps.chiffrer.outputs.sha256 }}
+          NOM: ${{ steps.chiffrer.outputs.nom }}
+          DETAIL_JSON: >-
+            {
+              "artefact": "${{ steps.chiffrer.outputs.nom }}",
+              "chiffrement": "gpg symétrique AES-256, S2K SHA-512 iteré, phrase SAUVEGARDE_PHRASE",
+              "format": "pg_dump custom, zstd:9, schémas public/private/tests/auth/storage/supabase_migrations, sans propriétaires ni droits",
+              "octets_clair": ${{ steps.dump.outputs.octets_clair || 0 }},
+              "duree_dump_s": ${{ steps.dump.outputs.duree_s || 0 }},
+              "duree_restauration_s": ${{ steps.essai.outputs.duree_s || 0 }},
+              "tables_source": ${{ steps.source.outputs.tables || 0 }},
+              "lignes_source": ${{ steps.source.outputs.lignes || 0 }},
+              "restauration": {
+                "cible": "postgres:17 de service du runner GitHub",
+                "code_pg_restore_strict": ${{ steps.essai.outputs.code_strict || -1 }},
+                "erreurs_pg_restore": ${{ steps.essai.outputs.erreurs || -1 }},
+                "ecarts_comptage": ${{ steps.essai.outputs.ecarts || -1 }},
+                "chaine_journal": "${{ steps.essai.outputs.chaine || 'non_verifiee' }}"
+              },
+              "declencheur": "${{ github.event_name }}",
+              "motif": "${{ github.event.inputs.motif || 'nocturne' }}",
+              "retention_artefact_jours": ${{ env.RETENTION_JOURS }},
+              "depot": "${{ github.repository }}",
+              "run_id": ${{ github.run_id }},
+              "tentative": ${{ github.run_attempt }},
+              "commit_workflow": "${{ github.sha }}"
+            }
+        run: |
+          set -euo pipefail
+          printf '%s' "$DETAIL_JSON" | python3 -c 'import json,sys; json.load(sys.stdin)' || { echo "::error::detail n'est pas un JSON valide"; exit 1; }
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -q \
+               -v octets="$OCTETS" -v sha="$SHA256" -v verdict="$VERDICT" -v detail="$DETAIL_JSON" -v execution="$EXECUTION_URL" <<'SQL'
+            insert into private.sauvegardes (faite_le, octets, sha256, restauration, detail, execution)
+            values (now(), :octets, :'sha', :'verdict', :'detail'::jsonb, :'execution');
+          SQL
+          echo "Preuve écrite : restauration=$VERDICT, $OCTETS octets, sha256 $SHA256, $EXECUTION_URL"
+          # Lance le contrôle tout de suite pour acquitter l'alerte sans attendre 08:07 UTC (s'il existe).
+          psql "$SUPABASE_DB_URL" -Atc "select private.verifier_sauvegardes()" >/dev/null 2>&1 && echo "verifier_sauvegardes() rejoué." || echo "verifier_sauvegardes() non rejoué (absente ou non appelable ici) : le contrôle de 08:07 UTC fera foi."
+
+      - name: Garder l'artefact chiffré 30 jours
+        if: always() && steps.chiffrer.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.chiffrer.outputs.nom }}
+          path: |
+            ${{ runner.temp }}/sauvegarde/${{ steps.chiffrer.outputs.nom }}
+            ${{ runner.temp }}/sauvegarde/${{ steps.chiffrer.outputs.nom }}.sha256
+            ${{ runner.temp }}/sauvegarde/comptages-source.tsv
+            ${{ runner.temp }}/sauvegarde/restore-*.log
+          retention-days: ${{ env.RETENTION_JOURS }}
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Résumé
+        if: always()
+        env:
+          VERDICT: ${{ steps.essai.outputs.verdict || 'echouee' }}
+        run: |
+          {
+            echo "## Sauvegarde de la base — ${VERDICT}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Artefact | \`${{ steps.chiffrer.outputs.nom }}\` |"
+            echo "| Taille chiffrée | ${{ steps.chiffrer.outputs.octets }} octets |"
+            echo "| SHA-256 | \`${{ steps.chiffrer.outputs.sha256 }}\` |"
+            echo "| Dump | ${{ steps.dump.outputs.duree_s }} s, ${{ steps.source.outputs.tables }} tables, ${{ steps.source.outputs.lignes }} lignes |"
+            echo "| Restauration d'essai | ${VERDICT} en ${{ steps.essai.outputs.duree_s }} s, ${{ steps.essai.outputs.erreurs }} erreur(s), ${{ steps.essai.outputs.ecarts }} écart(s) |"
+            echo "| Chaîne du journal | ${{ steps.essai.outputs.chaine }} |"
+            echo "| Preuve | ${{ steps.preuve.outcome }} dans private.sauvegardes |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -f "$TRAVAIL/omega.dump" "$TRAVAIL/essai.dump"
+          if [ "$VERDICT" != "reussie" ]; then
+            echo "::error title=Sauvegarde non prouvée::La restauration d'essai n'est pas « reussie ». private.verifier_sauvegardes() lèvera l'alerte critique si aucune autre sauvegarde réussie n'a moins de 26 h."
+            exit 1
+          fi
+
+      - name: Nettoyer le dump en clair (même en cas d'échec)
+        if: always()
+        run: rm -f "$TRAVAIL/omega.dump" "$TRAVAIL/essai.dump" || true
