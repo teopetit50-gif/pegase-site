@@ -392,6 +392,19 @@ export const DELEGATIONS_EXEMPLE: Delegation[] = [
   },
 ];
 
+DELEGATIONS_EXEMPLE.push({
+  id: "00000000-0000-4000-8000-0000000000c2",
+  client_id: C,
+  delegant: EXEMPLE_MOI,
+  delegataire: YANIS,
+  entite_id: null,
+  module: "loc",
+  debut: ilYa(2),
+  fin: dans(5),
+  motif: "Semaine de formation : Yanis décide pour LOC à ma place.",
+  revoquee_le: null,
+});
+
 export const REGLES_EXEMPLE: Regle[] = [
   { id: "00000000-0000-4000-8000-0000000000f1", entite_id: null, module: "*", type_action: null, montant_min: 0, montant_max: 5000, approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null, exige_commentaire: false, exige_piece: false, exige_motif: true },
   { id: "00000000-0000-4000-8000-0000000000f2", entite_id: null, module: "cashd", type_action: "virement_fournisseur", montant_min: 5000, montant_max: 20000, approbations_requises: 2, roles_autorises: ["gerant", "admin", "valideur"], actif: true, equipe_id: null, exige_commentaire: true, exige_piece: false, exige_motif: true },

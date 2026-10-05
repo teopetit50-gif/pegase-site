@@ -269,6 +269,28 @@ export type Rapprochement = {
   ecart_montant: number | null;
 };
 
+export type Commande = {
+  id: string;
+  numero: string;
+  date_commande: string | null;
+  devise: string | null;
+  montant_ht: number | null;
+  statut: "ouverte" | "soldee" | "annulee";
+  fournisseur_id: string | null;
+  reference_externe: string | null;
+};
+
+export type LigneCommande = {
+  id: string;
+  commande_id: string;
+  rang: number;
+  designation: string | null;
+  quantite: number | null;
+  unite: string | null;
+  prix_unitaire: number | null;
+  montant_ht: number | null;
+};
+
 export type Historique = {
   id: number | string;
   etape: string;
@@ -321,6 +343,8 @@ export type DossierFiled = {
   fournisseur: Fournisseur | null;
   ibans: IbanFournisseur[];
   rapprochement: Rapprochement | null;
+  /* les appariements posés à la main : ligne de facture → ligne de commande */
+  appariements: { facture_ligne_id: string; commande_ligne_id: string }[];
   historique: Historique[];
   piece: Piece | null;
   pages: PagePiece[];

@@ -7,7 +7,7 @@
    tant que ce qu'elle exige n'est pas là. */
 
 import { useId, useMemo, useState } from "react";
-import { Check, FileText, Pencil, Users, X } from "lucide-react";
+import { Ban, Check, FileText, Pencil, Users, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -15,7 +15,7 @@ import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, libelleModule, montant, phrase, relatif } from "../format";
 import type { Approbation, Delegation, Demande, Entite } from "../types";
 import { MOTIFS_REFUS, STATUTS, compteApprobations, delegationsUtilisables, exigences, groupeDe, verdict, type Decideur } from "./regles";
-import { decider, deleguer, joindrePiece, modifier } from "./portes";
+import { annuler, decider, deleguer, joindrePiece, modifier } from "./portes";
 
 type Props = {
   demande: Demande;
@@ -32,11 +32,12 @@ type Props = {
   nommerEntite: (id: string | null | undefined) => string;
   onDecisionLocale: (a: Approbation) => void;
   onDemandeLocale: (d: Demande, remplace: string) => void;
+  onAnnulationLocale: (id: string) => void;
   onDelegationLocale: (g: Delegation) => void;
   recharger: () => Promise<void>;
 };
 
-type Formulaire = "approuver" | "refuser" | "modifier" | "deleguer" | null;
+type Formulaire = "approuver" | "refuser" | "modifier" | "deleguer" | "annuler" | null;
 
 const uuidLocal = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -153,6 +154,20 @@ export default function DetailDemande(p: Props) {
         p.onDemandeLocale({ ...d, id: uuidLocal(), resume: resume.trim(), montant: montantNum, payload, cree_le: new Date().toISOString(), demandeur_id: moi.id, demandeur_type: "utilisateur" }, d.id);
       }
     }, "La demande modifiée remplace l'ancienne ; elle repart en validation — et comme vous l'avez saisie, c'est à quelqu'un d'autre de la décider.");
+
+  /* annuler SA demande en attente : la seule écriture directe sur
+     demandes_validation que la policy ouvre, et seulement au demandeur */
+  const estMaDemande = d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id && d.statut === "en_attente";
+  const soumettreAnnulation = () =>
+    envoyer(async () => {
+      if (source === "reelle") {
+        await annuler(d);
+        await p.recharger();
+      } else {
+        await new Promise((r) => setTimeout(r, 350));
+        p.onAnnulationLocale(d.id);
+      }
+    }, "Votre demande est annulée ; elle quitte la file.");
 
   const soumettreDelegation = () =>
     envoyer(async () => {
@@ -302,6 +317,11 @@ export default function DetailDemande(p: Props) {
             <button type="button" className="r-btn r-btn--fil" onClick={() => ouvrir("deleguer")}>
               <Users width={16} height={16} aria-hidden="true" /> Déléguer
             </button>
+            {estMaDemande ? (
+              <button type="button" className="r-btn r-btn--fil" onClick={() => ouvrir("annuler")}>
+                <Ban width={15} height={15} aria-hidden="true" /> Annuler ma demande
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -416,6 +436,28 @@ export default function DetailDemande(p: Props) {
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!pretModifier || envoi} onClick={soumettreModification}>
               {envoi ? <Loader variant="spin" /> : null} Créer la demande modifiée
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ——— Annuler ma demande ——— */}
+      <Dialog open={form === "annuler"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Ban width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Annuler ma demande</DialogTitle>
+            <DialogDescription>{d.resume}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <Avis teinte="ambre">Une demande annulée ne se rouvre pas : pour la représenter, il faudra en saisir une nouvelle. Les décisions déjà prises restent dans le journal.</Avis>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--rouge" disabled={envoi} onClick={soumettreAnnulation}>
+              {envoi ? <Loader variant="spin" /> : null} Annuler la demande
             </button>
           </DialogFooter>
         </DialogContent>

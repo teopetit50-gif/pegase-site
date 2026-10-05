@@ -12,6 +12,11 @@
      · modifier : RPC modifier_demande(p_demande, p_resume, p_montant,
        p_payload) → id de la nouvelle demande ;
      · déléguer : INSERT dans public.delegations (policy du délégant) ;
+       révoquer : UPDATE revoquee_le sur sa propre délégation (seule
+       écriture directe que la policy ouvre au délégant) ;
+     · annuler : UPDATE statut = 'annulee' sur SA demande en attente (la
+       policy « le demandeur peut annuler » — la seule écriture directe sur
+       demandes_validation) ;
      · pièce jointe (lot 19, 05/10) : approbations.piece_id → public.pieces.
        Pour une demande du module FILED, le fichier est déposé par la porte
        du module, filed_deposer_piece, après envoi dans le bucket
@@ -137,6 +142,18 @@ export async function deleguer(o: {
     motif: o.motif,
     cree_par: o.delegant,
   });
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function revoquer(delegation: Delegation): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("delegations").update({ revoquee_le: new Date().toISOString() }).eq("id", delegation.id).is("revoquee_le", null);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function annuler(demande: Demande): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("demandes_validation").update({ statut: "annulee" }).eq("id", demande.id).eq("statut", "en_attente");
   if (error) throw new ErreurPorte(message(error));
 }
 
