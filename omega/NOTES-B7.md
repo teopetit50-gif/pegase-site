@@ -194,6 +194,17 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 - Vérifié localement sur un Postgres 16 jetable : souche d'A4 + `a4_01..09` + pgTAP d'A5 + `b7_01` : 8/8 verts,
   scénario vert. (Souche alignée sur le contrat : `travaux.etat`, dépôt idempotent sur la clé.)
 
+### Vérifié en réel le 5/10 à 22 h 42 Z (sondages à la main, hors tests : les tests restent sur doubles)
+
+- **Coquille** : un `index.ts` qui importe `…/e4fd65f/omega/functions/identite/index.ts` avec `@partage/` mappé sur
+  `…/e483a22/omega/functions/_partage/` passe `deno check` : tout se résout depuis GitHub.
+- **VIES** (SIREN public de l'INSEE, 120 027 016, TVA calculée FR85120027016) : `valid: true`, `name` avec un espace
+  en tête (rogné), `address` sur deux lignes (repliées), `traderName: "---"`, **pas de `userError` quand c'est
+  valide** (le code lit `valid` quand le code manque). Format conforme à `vies.ts`.
+- **Annuaire des entreprises** : `results[0]` porte `siren`, `nom_raison_sociale`, `nom_complet`,
+  `nature_juridique`, `activite_principale`, `date_creation`, `etat_administratif: "A"`. Conforme à `sirene.ts`.
+- **INSEE sans clé** : HTTP 401 → `PORTE_REFUSEE` → repli sur l'annuaire, comme prévu.
+
 ## 8. À faire par le coordinateur
 
 1. Poser `b7_01_portes.sql` sur la recette (après a4_04 ; a4_10 facultatif).
