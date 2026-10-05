@@ -216,6 +216,23 @@ update private.fournisseurs_envoi set branche = true
 **Site** : `FORMULAIRE_SECRET` (32 octets hex) partagé entre Vercel (`pegase-site2`)
 et la fonction `reception`.
 
+## Premier envoi réel (05/10, 21h Paris)
+
+Chaîne vérifiée par le coordinateur sur la recette, secrets posés : `creer_envoi` →
+verrous (hors heures → différé, doublon détecté) → `pret`, fournisseur `brevo` →
+travail pris par l'expéditeur en 15 s → Brevo répond **401 « unrecognised IP
+address »** : la clé API Brevo est restreinte par IP, or les Edge Functions n'ont pas
+d'IP fixe. L'ouvrier a bien classé l'erreur en transitoire (`reporte: true`, envoi
+`0a607529-…` revenu `pret`, essais 1). **Teo** : retirer la restriction d'IP de la clé
+(Brevo → Sécurité → Adresses IP autorisées), ou créer une clé sans restriction.
+
+Point ouvert chez le coordinateur : après un report, la reprise dépend de
+`private.tache_envois`, qui doit déposer un **nouveau** travail pour l'envoi `pret` ;
+si `deposer_travail` est idempotent sur (genre, clé `envoi:<uuid>`) y compris face à un
+travail déjà fini, l'envoi reste `pret` sans jamais être repris (idempotence à limiter
+aux travaux ouverts, ou clé `envoi:<uuid>:<essais>`). Rien à changer côté ouvrier ;
+`reprise_le` est l'affaire d'`echouer_envoi` si le socle veut espacer les reprises.
+
 ## Reste
 
 Plus rien en attente côté A2 : tout le périmètre est codé, testé, déployé sur la
