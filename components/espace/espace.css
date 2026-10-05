@@ -115,6 +115,22 @@
   display: none;
 }
 @media (max-width: 479px) {
+  /* Cinq onglets et plus : la barre défile de côté plutôt que de déborder. */
+  .esp .esp-nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .esp .esp-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .esp .esp-nav-lien {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 8px 11px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
   .esp .esp-nav-long {
     display: none;
   }
