@@ -1,6 +1,6 @@
 # Tests du socle — pgTAP
 
-Cinquante tests qui vérifient les garde-fous du socle Omega : isolement par
+Cinquante et un tests qui vérifient les garde-fous du socle Omega : isolement par
 client, journal opposable en ajout seul et chaîné, verrous d'envoi, droits par
 objet, preuves d'effacement, sauvegardes. Session A5.
 
@@ -26,16 +26,16 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 
 ## Fichiers groupés pour le coordinateur
 
-- `TOUT.sql` : `00_installation.sql` suivi des 44 tests sans DELETE (17, 19,
+- `TOUT.sql` : `00_installation.sql` suivi des 45 tests sans DELETE (17, 19,
   21, 23, 25, 27 laissés de côté : leur `throws_ok` contient le mot DELETE que
   l'outil d'exécution bloque), terminé par un seul `runtests()` qui rend une
   ligne `ok` / `not ok` par test. 63 Ko, un seul appel.
 - `TOUT_1.sql` à `TOUT_4.sql` : le même contenu en quatre parts (8 + 12 + 12 +
-  12 tests), chacune terminée par son `runtests()`, à lancer dans l'ordre si
+  13 tests), chacune terminée par son `runtests()`, à lancer dans l'ordre si
   un seul appel est trop gros.
 - Ils sont générés depuis les fichiers numérotés ; pour les refaire après une
   modification d'un test, relancer le script de la section « Régénérer ».
-- Validés sur la maquette locale : `TOUT.sql` rend `1..44`, 44 `ok`.
+- Validés sur la maquette locale : `TOUT.sql` rend `1..45`, 45 `ok`.
 
 ## Ce que chaque test vérifie
 
@@ -63,6 +63,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 | 48 | Alertes internes Omega (client_id null) invisibles aux clients |
 | 49 | `private.verifier_sauvegardes()` lève l'alerte sans preuve, l'acquitte avec une preuve `reussie` récente, refuse un verdict hors liste |
 | 50 | Export et effacement outillés, preuves d'effacement immuables |
+| 51 | Toute politique visant authenticated a son GRANT ; tout GRANT d'écriture sur une table en RLS a sa politique ; aucune écriture sur une table sans RLS (lots 19k/19l) |
 
 ## Mécanique réelle du socle prise en compte (retours de la recette du 5 octobre)
 

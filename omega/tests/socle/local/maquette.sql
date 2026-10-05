@@ -296,6 +296,7 @@ grant select on public.clients to authenticated;
 create policy ecriture_client on public.acces_objets for insert to authenticated with check (client_id in (select private.mes_clients()));
 create policy ecriture_client on public.oppositions for insert to authenticated with check (client_id in (select private.mes_clients()));
 create policy ecriture_client on public.envois for insert to authenticated with check (client_id in (select private.mes_clients()));
+create policy ecriture_client on public.notes_internes for insert to authenticated with check (client_id in (select private.mes_clients()));
 create policy ecriture_client on public.approbations for insert to authenticated
   with check (client_id in (select private.mes_clients()) and (approuve_par = auth.uid()
     or exists (select 1 from public.delegations d where d.client_id = approbations.client_id and d.de_user = approuve_par and d.a_user = auth.uid() and coalesce(d.jusqu_au, 'infinity') > now())));
@@ -305,4 +306,6 @@ revoke select on public.tamila_cles from authenticated;
 grant select (id, client_id, dossier_id, cree_le) on public.tamila_cles to authenticated;
 -- lecture seule des pièces de journal pour authenticated, écriture par les portes seulement
 revoke insert, update, delete, truncate on all tables in schema public from anon, authenticated;
-grant insert on public.acces_objets, public.oppositions, public.envois, public.approbations to authenticated;
+grant insert on public.acces_objets, public.oppositions, public.envois, public.approbations, public.notes_internes to authenticated;
+-- les preuves d'effacement n'ont pas de client_id (le client n'existe plus) : RLS activée, lecture par personne côté client
+alter table public.effacements enable row level security;

@@ -40,6 +40,24 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (message de 19:48 UTC, lots 19k et 19l)
+
+Règle figée dans un nouveau test, **51_politiques_et_grants.sql**, inclus
+dans TOUT.sql (45 tests désormais) et TOUT_4 :
+
+1. toute politique de `public` visant `authenticated` (ou `public`) a le
+   droit de sa commande (`has_any_column_privilege`, pour admettre les
+   droits par colonne comme sur `tamila_cles`) ;
+2. tout INSERT/UPDATE/DELETE accordé à `authenticated` sur une table en RLS
+   a une politique de la même commande (ou `ALL`) ;
+3. aucun droit d'écriture pour `authenticated` sur une table de `public`
+   **sans** RLS ; le diag liste les tables sans RLS pour SECURITE.md
+   (`lorani_echeances_permis`, `tamila_registre` attendues).
+
+Maquette : 51/51, TOUT.sql → 45 `ok`. Les lots 19k/19l devraient le rendre
+vert chez vous ; s'il reste rouge, les triplets (table, politique, commande)
+sont dans la sortie.
+
 ## Réponse au coordinateur (message de 19:02 UTC, complément (f) service_role)
 
 Intégré : `a5_01_private_execute.sql` accorde désormais à `service_role`
