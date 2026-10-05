@@ -54,10 +54,12 @@ begin
     raise notice 'tests.tamila_jeu : auth.users non alimentée (%), on continue avec des uuid libres', sqlerrm;
   end;
 
-  insert into public.comptes (user_id, client_id, role, perimetre_total) values
-    (v_gerant, v_client, 'gerant', true), (v_admin, v_client, 'admin', true), (v_avocat, v_client, 'valideur', true),
-    (v_assistante, v_client, 'collaborateur', true), (v_stagiaire, v_client, 'lecteur', true),
-    (v_autre_gerant, v_autre_client, 'gerant', true);
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', v_gerant, 'client_id', v_client, 'role', 'gerant', 'perimetre_total', true));
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', v_admin, 'client_id', v_client, 'role', 'admin', 'perimetre_total', true));
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', v_avocat, 'client_id', v_client, 'role', 'valideur', 'perimetre_total', true));
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', v_assistante, 'client_id', v_client, 'role', 'collaborateur', 'perimetre_total', true));
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', v_stagiaire, 'client_id', v_client, 'role', 'lecteur', 'perimetre_total', true));
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', v_autre_gerant, 'client_id', v_autre_client, 'role', 'gerant', 'perimetre_total', true));
 
   return jsonb_build_object('client', v_client, 'entite', v_entite, 'gerant', v_gerant, 'admin', v_admin, 'avocat', v_avocat,
                             'assistante', v_assistante, 'stagiaire', v_stagiaire,
@@ -93,8 +95,8 @@ begin
   return v_rendu;
 end $$;
 
--- La scène complète : cabinet installé, dossier ouvert, trois parties, l'avocat intervenant,
--- le stagiaire lecteur. Renvoie le jeu enrichi (dossier, parties).
+-- La scène complète : cabinet installé, dossier ouvert, trois parties, l'avocat et l'assistante
+-- intervenants (un collaborateur n'écrit dans un dossier qu'en y étant membre), le stagiaire lecteur. Renvoie le jeu enrichi (dossier, parties).
 create or replace function tests.tamila_scene(p_territoire text default 'metropole') returns jsonb
 language plpgsql as $$
 declare jeu jsonb; v_dossier uuid; v_client_partie uuid; v_adverse uuid; v_confrere uuid;
@@ -109,6 +111,7 @@ begin
                                             'metropole', 'intime', null);
   v_confrere := public.tamila_ajouter_partie(v_dossier, tests.tamila_chiffre('Me Lenoir'), 'confrere_adverse', 'metropole', null, null);
   perform public.tamila_ajouter_membre(v_dossier, (jeu ->> 'avocat')::uuid, 'intervenant', null);
+  perform public.tamila_ajouter_membre(v_dossier, (jeu ->> 'assistante')::uuid, 'intervenant', null);
   perform public.tamila_ajouter_membre(v_dossier, (jeu ->> 'stagiaire')::uuid, 'lecteur', now() + interval '30 days');
   perform tests.redevenir_admin();
   return jeu || jsonb_build_object('dossier', v_dossier, 'partie_client', v_client_partie, 'partie_adverse', v_adverse,
@@ -123,7 +126,7 @@ declare ligne jsonb; v jsonb;
 begin
   perform tests.redevenir_admin();
   v := jsonb_build_object('client_id', p_jeu ->> 'client', 'module', 'tamila', 'source', 'depot', 'nom_fichier', p_nom,
-                          'mime', 'application/pdf', 'octets', 2048, 'sha256', repeat('b', 64),
+                          'mime', 'application/pdf', 'octets', 2048, 'sha256', md5(p_nom || (p_jeu ->> 'dossier')) || md5('b4:' || p_nom),
                           'chemin', (p_jeu ->> 'client') || '/tamila_dossier/' || (p_jeu ->> 'dossier') || '/' || p_nom,
                           'objet_type', 'tamila_dossier', 'objet_id', p_jeu ->> 'dossier', 'chiffrement', 'dossier:v1');
   if p_type is not null then v := v || jsonb_build_object('type_piece', p_type); end if;

@@ -13,6 +13,8 @@ begin
   perform public.tamila_consulter(v_dossier, 'dossier');
   v_e := public.tamila_demander_export(v_dossier);
   perform public.tamila_demander_cloture(v_dossier);
+  -- un geste journalisé (tamila.delai.annule) pour que le journal porte une ligne du dossier
+  perform public.tamila_annuler_delai((select t.id from public.tamila_delais t where t.appel_id = v_appel order by t.echeance_retenue limit 1), 'erreur');
   perform tests.redevenir_admin();
 
   -- ── Aucune écriture directe par une personne connectée, même le gérant ──
