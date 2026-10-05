@@ -35,7 +35,7 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', v_g, 'role', 'authenticated')::text, true);
   v_n := public.filed_cloturer_exercice(v_exo, date '2026-03-31', 'Bilan arrêté');
   reset role;
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p1', repeat('1', 64), 'lue') returning id into v_r;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-p1.pdf', 'application/pdf', 1024, repeat('1', 64), v_cl::text || '/filed_document/test/facture-p1.pdf', 'filed_document', 'p1', 'lue') returning id into v_r;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 11, 'R2026-000011', v_r.id, 'courriel', v_c, repeat('1', 64), now(), 'a_traiter', 'facture') returning id into v_r;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
@@ -49,7 +49,7 @@ begin
   raise notice 'OK pièce reçue après la clôture : orientée vers l''exercice suivant, avec sa mention';
 
   -- ══ 2. Deux approbations distinctes au-dessus du seuil, dont une par délégation datée ══
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p2', repeat('3', 64), 'lue') returning id into v_r;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-p2.pdf', 'application/pdf', 1024, repeat('3', 64), v_cl::text || '/filed_document/test/facture-p2.pdf', 'filed_document', 'p2', 'lue') returning id into v_r;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 12, 'R2026-000012', v_r.id, 'courriel', v_c, repeat('3', 64), now(), 'a_traiter', 'facture') returning id into v_r;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
@@ -80,7 +80,7 @@ begin
   raise notice 'OK deux approbations distinctes au-delà du seuil ; délégation datée honorée';
 
   -- ══ 3. Celui qui saisit n''approuve pas : le déposant (valideur v2 ici) tente d''approuver ══
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p3', repeat('5', 64), 'lue') returning id into v_r;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-p3.pdf', 'application/pdf', 1024, repeat('5', 64), v_cl::text || '/filed_document/test/facture-p3.pdf', 'filed_document', 'p3', 'lue') returning id into v_r;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 13, 'R2026-000013', v_r.id, 'depot', v_v2, repeat('5', 64), now(), 'a_traiter', 'facture') returning id into v_r;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
@@ -131,7 +131,7 @@ begin
   raise notice 'OK commentaire, pièce jointe et motif de refus attachés à la facture';
 
   -- ══ 6. Un numéro de TVA faux bloque la pièce ══
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p4', repeat('7', 64), 'lue') returning id into v_r;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-p4.pdf', 'application/pdf', 1024, repeat('7', 64), v_cl::text || '/filed_document/test/facture-p4.pdf', 'filed_document', 'p4', 'lue') returning id into v_r;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 14, 'R2026-000014', v_r.id, 'courriel', v_c, repeat('7', 64), now(), 'a_traiter', 'facture') returning id into v_r;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
@@ -144,7 +144,7 @@ begin
   raise notice 'OK numéro de TVA faux : la pièce ne se classe pas';
   -- Un fournisseur sans numéro de TVA (SIREN seul) : vérification Sirene demandée, pas de blocage.
   insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, siren, pays, statut) values (v_cl, 'SIR', 'Artisan d''exemple', 'artisan d exemple', '123456782', 'FR', 'actif') returning id into v_r;
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p4b', repeat('e', 64), 'lue') returning id into v_exp;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-p4b.pdf', 'application/pdf', 1024, repeat('e', 64), v_cl::text || '/filed_document/test/facture-p4b.pdf', 'filed_document', 'p4b', 'lue') returning id into v_exp;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 17, 'R2026-000017', v_exp, 'courriel', v_c, repeat('e', 64), now(), 'a_traiter', 'facture') returning id into v_exp;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
@@ -171,7 +171,7 @@ begin
   assert exists (select 1 from public.alertes where client_id = v_cl and niveau = 'attention' and titre like 'Facture attendue absente : Hébergement mensuel%03/2026%'), 'alerte : facture attendue absente';
   raise notice 'OK charges récurrentes : écritures attendues, facture absente → alerte';
   -- La facture de mars arrive : reconnue, l'imputation de la charge est proposée.
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p5', repeat('9', 64), 'lue') returning id into v_r;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-p5.pdf', 'application/pdf', 1024, repeat('9', 64), v_cl::text || '/filed_document/test/facture-p5.pdf', 'filed_document', 'p5', 'lue') returning id into v_r;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 15, 'R2026-000015', v_r.id, 'courriel', v_c, repeat('9', 64), now(), 'a_traiter', 'facture') returning id into v_r;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
@@ -181,12 +181,14 @@ begin
   assert (select statut from public.filed_charges_attendues where charge_id = v_charge and periode = date '2026-03-01') = 'recue', 'mars servie par la facture';
   assert (select facture_id from public.filed_charges_attendues where charge_id = v_charge and periode = date '2026-03-01') = v_f, 'rattachée';
   assert exists (select 1 from public.filed_imputations i where i.facture_id = v_f and i.statut = 'proposee' and i.origine = 'recurrente' and i.compte_id = v_compte and i.centre_id = v_centre), 'imputation de la charge proposée, à valider';
+  assert exists (select 1 from public.alertes a join public.filed_charges_attendues ca on a.cle_regroupement = 'filed:charge_manquante:' || ca.id::text
+                 where ca.charge_id = v_charge and ca.periode = date '2026-03-01' and a.acquittee_le is not null), 'l''alerte de mars est acquittée par la facture arrivée tard';
   raise notice 'OK la facture d''abonnement reçue sert son écriture attendue, imputation proposée';
 
   -- ══ 8. Écart de prix dans la tolérance : signalé, pas absorbé ══
   insert into public.filed_commandes (id, client_id, entite_id, fournisseur_id, numero) values (gen_random_uuid(), v_cl, v_e, v_four, 'CMD-1') returning id into v_cmd;
   insert into public.filed_commandes_lignes (client_id, commande_id, rang, designation, quantite, prix_unitaire, montant_ht) values (v_cl, v_cmd, 1, 'Licence', 10, 10.00, 100.00) returning id into v_cmdl;
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p6', repeat('b', 64), 'lue') returning id into v_r;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-p6.pdf', 'application/pdf', 1024, repeat('b', 64), v_cl::text || '/filed_document/test/facture-p6.pdf', 'filed_document', 'p6', 'lue') returning id into v_r;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 16, 'R2026-000016', v_r.id, 'courriel', v_c, repeat('b', 64), now(), 'a_traiter', 'facture') returning id into v_r;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut, commande_id)

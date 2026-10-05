@@ -25,6 +25,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_05_filed_lot5a_archivage_probant.sql` | `filed_archives` (ajout seul), `private.filed_archiver` (empreinte SHA-256 : fichier, valeurs lues, numéro de réception, version ; inscrite au journal opposable), `filed_verifier_archive`, `filed_piste_audit`. |
 | `a4_06_filed_lot6a_pilotage.sql` | `filed_reglements`, `filed_litiges` et leurs portes ; `filed_engage_mois`, `filed_echeancier`, `filed_delai_traitement`, `filed_pieces_en_cours` ; huit indicateurs `filed.*` et `private.filed_mesurer` ; `filed_exporter_tableau` (CSV, journal avec empreinte) ; exports programmés (`filed_programmer_export`, `filed_arreter_export`, `private.filed_produire_exports`). |
 | `a4_07_filed_lot4f_circuit_validation.sql` | `filed_circuits` (→ `regles_validation`), `filed_validations`, `filed_factures_annexes` ; `filed_regler_circuit`, `filed_retirer_circuit`, `filed_joindre_annexe`, `filed_comptabiliser_facture` ; `private.filed_deposer_validation` (type `filed.valider_facture[.<centre>][.direction]`), `filed_decider_facture`, `filed_relancer_validations`, `filed_saisisseurs`. |
+| `a4_09_filed_lot4g_acquittement_alerte.sql` | correctif : `private.filed_reconnaitre_charge` acquitte l'alerte « facture attendue absente » (`alertes.acquittee_le`) quand la facture arrive tard. |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -37,7 +38,7 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## À faire par le coordinateur, dans l'ordre
 
-1. Appliquer `a4_01` → `a4_08` sur la recette.
+1. Appliquer `a4_01` → `a4_09` sur la recette.
 2. **Après `a4_02`** : retirer à la main l'ancienne contrainte CHECK de `filed_factures.statut`
    (celle sans nom explicite, « statut in (a_completer, bloquee, a_valider, ecartee) »). Sans
    cela, la première validation échoue sur « violates check constraint ». La v2 la remplace.
@@ -50,8 +51,8 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 - `private.filed_rapprocher_facture` réel : le test 8 de `a4_02` suppose qu'une ligne de facture
   de même rang qu'une ligne de commande est appariée (la souche le fait par rang). Si le réel
   apparie autrement, seul ce test est à adapter, pas le code.
-- `public.pieces` : les tests insèrent `(id, client_id, objet_type, objet_id, sha256, statut)`.
-  S'il y a d'autres colonnes NOT NULL, les tests sont à compléter.
+- `public.pieces` : les tests insèrent les colonnes NOT NULL données par le coordinateur (module,
+  source, nom_fichier, mime, octets, sha256, chemin) ; corrigé le 05/10 à 16:50.
 - Les droits `filed.pilotage` des indicateurs (`droit_lecture`, `droit_detail`) : nom choisi
   faute de catalogue des droits ; à aligner si le socle en a un.
 - Le push GitHub a été refusé (403) de 16:00 à 16:15 UTC, puis rétabli. Rappel posé à 16:37
@@ -59,15 +60,15 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## Demandes au coordinateur
 
-- **Séparation saisie / approbation** : elle est appliquée par FILED *après* la décision
+- **Séparation saisie / approbation** : le coordinateur l'ajoute dans `private.preparer_approbation`
+  (refus si le décideur est dans `payload->'saisi_par'`) ; FILED garde son filet *après* la décision
   (`filed_decider_facture` : approbation sans effet, demande redéposée, alerte). Le socle ne
   refuse que le `demandeur_id`, nul pour une demande système. Pour refuser *avant* la décision,
   une ligne dans `private.preparer_approbation` suffirait : refuser `v_decideur` s'il est dans
   `v_d.payload->'saisi_par'` (FILED y met les déposants et correcteurs). À votre main.
-- **Alerte « facture attendue absente »** : levée une fois par écriture (clé
-  `filed:charge_manquante:<id>`). Quand la facture arrive tard, l'écriture passe en `recue`
-  mais l'alerte reste ouverte : je n'ai pas trouvé de porte de clôture d'alerte. S'il en
-  existe une, l'appel va dans `private.filed_reconnaitre_charge`.
+- **Alerte « facture attendue absente »** : acquittée (`acquittee_le`) par
+  `private.filed_reconnaitre_charge` quand la facture arrive tard (a4_09, sur indication du
+  coordinateur : pas de porte générique, un update sur `public.alertes`).
 - **Ouvrier VIES / Sirene** (hors base, à confier à un ouvrier) : lire
   `filed_verifications_tiers` où `repondu_le is null` ; pour `registre = 'vies'`, appeler le
   service SOAP/REST VIES de la Commission (`checkVatService`, pays = 2 premières lettres,

@@ -35,7 +35,7 @@ begin
   raise notice 'OK plan comptable et centre de coût par organisation';
 
   -- ── Une facture reçue, déposée par le collaborateur ──
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'x', repeat('a', 64), 'lue') returning id into v_piece;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-x.pdf', 'application/pdf', 1024, repeat('a', 64), v_cl::text || '/filed_document/test/facture-x.pdf', 'filed_document', 'x', 'lue') returning id into v_piece;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 1, 'R2026-000001', v_piece, 'courriel', v_c, repeat('a', 64), now() - interval '2 days', 'a_traiter', 'facture') returning id into v_doc;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, echeance_lue, devise, montant_ht, montant_tva, montant_ttc,
@@ -98,7 +98,7 @@ begin
   raise notice 'OK chaque pièce est affectée au plan comptable et au centre de coût';
 
   -- ── Une deuxième facture du même fournisseur : l'imputation est proposée, jamais écrite ──
-  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'y', repeat('c', 64), 'lue') returning id into v_piece;
+  insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'test', 'facture-y.pdf', 'application/pdf', 1024, repeat('c', 64), v_cl::text || '/filed_document/test/facture-y.pdf', 'filed_document', 'y', 'lue') returning id into v_piece;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
   values (v_cl, v_e, 2026, 2, 'R2026-000002', v_piece, 'courriel', v_c, repeat('c', 64), now() - interval '1 day', 'a_traiter', 'facture') returning id into v_doc;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, echeance_lue, devise, montant_ht, montant_tva, montant_ttc,
