@@ -1,40 +1,38 @@
--- 37 — un envoi non transactionnel hors heures légales est différé, pas parti
+-- 37 — un envoi non transactionnel hors heures légales est différé par les verrous, pas parti
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
 
 create or replace function tests.test_37_envoi_hors_heures_differe() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; t_envois text; col_dest text; col_quand text; col_nature text; col_statut text; col_differe text; valeurs jsonb; ligne jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; valeurs jsonb; ligne jsonb; verrous_nuit jsonb; verrous_jour jsonb;
+  dimanche_soir timestamptz := '2026-10-11T23:00:00+02:00'; mardi_matin timestamptz := '2026-10-13T10:30:00+02:00';
 begin
   jeu := tests.jeu();
-  t_envois := tests.table_parmi(array['envois']);
-  if t_envois is null then return next fail('Table envois introuvable'); return; end if;
-  col_dest := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
-  col_quand := tests.colonne_parmi(('public.' || t_envois)::regclass, array['prevu_le', 'programme_le', 'envoyer_le', 'souhaite_le', 'demande_le', 'a_partir_de']);
-  col_nature := tests.colonne_parmi(('public.' || t_envois)::regclass, array['nature', 'type_envoi', 'categorie', 'transactionnel']);
-  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat']);
-  if col_dest is null then
-    return next fail('Colonne du destinataire introuvable dans envois — adapter la liste de candidates');
-    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+  if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
+  col_dest := tests.colonne_parmi('public.envois'::regclass, array['destinataire_adresse', 'adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
+  col_canal := tests.colonne_parmi('public.envois'::regclass, array['canal']);
+  col_trans := tests.colonne_parmi('public.envois'::regclass, array['transactionnel', 'nature']);
+  if col_dest is null or col_canal is null then
+    return next fail('Colonnes destinataire/canal introuvables dans envois — adapter la liste de candidates');
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
-  -- Un dimanche à 23 h : hors plage quel que soit le canal
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, '+33600000000', 'canal', 'sms');
-  if col_quand is not null then valeurs := valeurs || jsonb_build_object(col_quand, '2026-10-11T23:00:00+02:00'); end if;
-  if col_nature is not null then valeurs := valeurs || jsonb_build_object(col_nature, case when col_nature = 'transactionnel' then 'false' else 'prospection' end); end if;
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, '+33600000000', col_canal, 'sms');
+  if col_trans = 'transactionnel' then valeurs := valeurs || jsonb_build_object('transactionnel', false);
+  elsif col_trans = 'nature' then valeurs := valeurs || jsonb_build_object('nature', 'prospection'); end if;
+  ligne := tests.inserer_minimal('public', 'envois', valeurs);
   begin
-    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_nuit using (ligne ->> 'id')::bigint, dimanche_soir;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_jour using (ligne ->> 'id')::bigint, mardi_matin;
   exception when others then
-    return next fail('L''envoi hors heures est rejeté au lieu d''être différé : ' || sqlerrm);
+    return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return;
   end;
-  col_differe := tests.colonne_parmi(('public.' || t_envois)::regclass, array['differe_a', 'reporte_a', 'envoi_prevu_le', 'prochaine_fenetre', 'prevu_le', 'programme_le']);
-  return next ok((col_statut is not null and (ligne ->> col_statut) ~* '(differ|report|attente|planifi|programm)')
-              or (col_differe is not null and col_quand is not null and col_differe <> col_quand and (ligne ->> col_differe) is not null
-                  and (ligne ->> col_differe)::timestamptz > '2026-10-11T23:00:00+02:00'::timestamptz),
-    format('L''envoi est différé (%s = %L ; %s = %L)', col_statut, ligne ->> col_statut, col_differe, ligne ->> col_differe));
-  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+  return next ok(verrous_nuit::text ~* '(differ|hors|plage|heure|report|dimanche|fenetre|fenêtre)', 'Dimanche 23 h, SMS non transactionnel : verrous_envoi() diffère (hors plage)');
+  return next ok(verrous_jour::text !~* '(hors.?plage|differ)', 'Mardi 10 h 30 : pas de verrou horaire (témoin)');
+  return next diag('Verrous dimanche soir : ' || left(verrous_nuit::text, 400));
+  return next diag('Verrous mardi matin : ' || left(verrous_jour::text, 400));
 end $f$;
 
 select * from runtests('tests'::name, '^test_37_');

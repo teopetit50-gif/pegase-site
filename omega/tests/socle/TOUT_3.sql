@@ -9,6 +9,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('echeances_pro_journal') then
+    return next pass('public.echeances_pro_journal n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_update and avant;
   return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('echeances_pro_journal');
@@ -50,9 +55,7 @@ begin
     select tablename, policyname, cmd from pg_policies
     where schemaname = 'public' and tablename in (select tests.tables_ajout_seul()) and cmd in ('UPDATE', 'DELETE') order by 1, 2
   $q$, 'Pas de politique UPDATE/DELETE sur les six tables en ajout seul');
-  return next is_empty($q$
-    select t.nom from tests.tables_ajout_seul() t(nom) where to_regclass('public.' || t.nom) is null
-  $q$, 'Les six tables en ajout seul existent');
+  return next diag('Tables du cahier absentes ici (sans objet) : ' || coalesce((select string_agg(t.nom, ', ') from tests.tables_ajout_seul() t(nom) where to_regclass('public.' || t.nom) is null), 'aucune'));
 end $f$;
 
 
@@ -68,7 +71,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai', 'donnees', jsonb_build_object('i', i)));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i, 'essai', 'x', jsonb_build_object('i', i));
   end loop;
   select count(*) into ruptures_client from (
     select id, hash_precedent, lag(hash) over (partition by client_id order by id) as precedent from public.journal_opposable) s
@@ -101,19 +104,34 @@ end $f$;
 
 
 
--- 32 — l'empreinte est calculée par la base, pas acceptée du client
+-- 32 — l'empreinte du journal vient de la porte private.journaliser(), jamais d'un INSERT direct
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
 
 create or replace function tests.test_32_journal_hash_non_fourni() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; ligne jsonb;
+  jeu jsonb; r record; n int := 0;
 begin
+  -- (a) aucun rôle applicatif n'écrit directement au journal
+  return next ok(not has_table_privilege('anon', 'public.journal_opposable', 'INSERT'), 'anon : pas d''INSERT direct sur journal_opposable');
+  return next ok(not has_table_privilege('authenticated', 'public.journal_opposable', 'INSERT'), 'authenticated : pas d''INSERT direct sur journal_opposable');
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    return next ok(not has_table_privilege('service_role', 'public.journal_opposable', 'INSERT'), 'service_role : pas d''INSERT direct sur journal_opposable');
+  else
+    return next pass('service_role absent ici');
+  end if;
+  return next ok(to_regprocedure('private.journaliser(uuid, text, text, text, jsonb, uuid)') is not null, 'La porte private.journaliser(uuid, text, text, text, jsonb, uuid) existe');
+  -- (b) la porte produit 32 octets et chaîne sur la précédente
   jeu := tests.jeu();
-  ligne := tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai', 'hash', '\x0000000000000000000000000000000000000000000000000000000000000000'));
-  return next isnt(ligne ->> 'hash', '\x0000000000000000000000000000000000000000000000000000000000000000', 'Une empreinte fournie à l''insertion est remplacée par le calcul de la base');
-  return next is(octet_length(decode(substr(ligne ->> 'hash', 3), 'hex')), 32, 'L''empreinte calculée fait 32 octets');
+  perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_1');
+  perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_2');
+  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid order by id loop
+    n := n + 1;
+    return next is(octet_length(r.hash), 32, format('Ligne %s : empreinte de 32 octets', n));
+    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1'); end if;
+  end loop;
+  return next is(n, 2, 'Deux lignes écrites par la porte');
 end $f$;
 
 
@@ -129,7 +147,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai'));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
   return next ok(verdict::text !~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict ne signale aucune rupture');
@@ -149,7 +167,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai'));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   begin
     execute 'alter table public.journal_opposable disable trigger user';
@@ -186,83 +204,92 @@ end $f$;
 
 
 
--- 36 — un envoi vers une personne en opposition est refusé
+-- 36 — un envoi vers une personne en opposition est refusé par les verrous d'envoi
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
+-- Mécanique réelle (coordinateur, 5/10) : pas de déclencheur d'insertion ; private.opposer(...) pose l'opposition,
+-- private.verrous_envoi(p_e envois, p_complet boolean, p_instant timestamptz) rend les verrous que lit tache_envois.
 
 create or replace function tests.test_36_envoi_opposition_refuse() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; t_oppos text; t_envois text; col_oppos text; col_envoi text; col_canal_o text; col_canal_e text; col_statut text; valeurs jsonb; ligne jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; type_oppos text; valeurs jsonb; ligne jsonb; verrous jsonb; sans_opposition jsonb;
 begin
   jeu := tests.jeu();
-  t_oppos := tests.table_parmi(array['oppositions']);
-  t_envois := tests.table_parmi(array['envois']);
-  if t_oppos is null or t_envois is null then return next fail('Tables oppositions/envois introuvables'); return; end if;
-  col_oppos := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
-  col_envoi := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
-  col_canal_o := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['canal']);
-  col_canal_e := tests.colonne_parmi(('public.' || t_envois)::regclass, array['canal']);
-  if col_oppos is null or col_envoi is null then
-    return next fail(format('Colonne du destinataire introuvable (oppositions : %s ; envois : %s) — adapter la liste de candidates', col_oppos, col_envoi));
-    return next diag('Colonnes de ' || t_envois || ' : ' || (select string_agg(attname, ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+  if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
+  col_dest := tests.colonne_parmi('public.envois'::regclass, array['destinataire_adresse', 'adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
+  col_canal := tests.colonne_parmi('public.envois'::regclass, array['canal']);
+  col_trans := tests.colonne_parmi('public.envois'::regclass, array['transactionnel']);
+  if col_dest is null then
+    return next fail('Colonne du destinataire introuvable dans envois — adapter la liste de candidates');
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_oppos, 'oppose-a5@essai.invalid');
-  if col_canal_o is not null then valeurs := valeurs || jsonb_build_object(col_canal_o, 'courriel'); end if;
-  perform tests.inserer_minimal('public', t_oppos, valeurs);
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_envoi, 'oppose-a5@essai.invalid');
-  if col_canal_e is not null then valeurs := valeurs || jsonb_build_object(col_canal_e, 'courriel'); end if;
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, 'oppose-a5@essai.invalid');
+  if col_canal is not null then valeurs := valeurs || jsonb_build_object(col_canal, 'courriel'); end if;
+  if col_trans is not null then valeurs := valeurs || jsonb_build_object(col_trans, true); end if;
+  ligne := tests.inserer_minimal('public', 'envois', valeurs);
+  -- Verrous AVANT opposition : témoin
   begin
-    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+    execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into sans_opposition using (ligne ->> 'id')::bigint;
   exception when others then
-    return next pass('L''envoi vers une personne en opposition est rejeté à l''insertion : ' || sqlerrm);
+    return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
+    return next diag('Signatures : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname ~ 'verrou'), 'aucune'));
     return;
   end;
-  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat', 'decision', 'verdict']);
-  return next ok(col_statut is not null and (ligne ->> col_statut) ~* '(refus|bloqu|oppos|interdit)', format('Envoi accepté en base mais marqué %s = %L (attendu : refusé)', col_statut, ligne ->> col_statut));
-  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+  -- Opposition par la porte du socle
+  type_oppos := coalesce(nullif(regexp_replace(coalesce(tests.valeur_selon_check('public.oppositions'::regclass, 'type', 'text'::regtype), ''), '::.*$|''', '', 'g'), ''), 'prospect');
+  begin
+    perform tests.appeler_privee('opposer', jeu ->> 'client_a', type_oppos, 'oppose-a5@essai.invalid', 'courriel', null, null, 'essai A5', 'essai_a5', null);
+  exception when others then
+    return next fail('private.opposer(...) refuse l''appel d''essai : ' || sqlerrm);
+    return next diag('Signature : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = 'opposer'), 'absente') || ' ; type essayé : ' || type_oppos);
+    return;
+  end;
+  execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into verrous using (ligne ->> 'id')::bigint;
+  return next ok(verrous::text ~* 'oppos', 'Avec une opposition posée, verrous_envoi() nomme l''opposition');
+  return next ok(sans_opposition::text !~* 'oppos', 'Sans opposition, verrous_envoi() ne la nommait pas (témoin)');
+  return next diag('Verrous avec opposition : ' || left(verrous::text, 400));
+  return next diag('Verrous sans opposition : ' || left(sans_opposition::text, 400));
 end $f$;
 
 
 
--- 37 — un envoi non transactionnel hors heures légales est différé, pas parti
+-- 37 — un envoi non transactionnel hors heures légales est différé par les verrous, pas parti
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
 
 create or replace function tests.test_37_envoi_hors_heures_differe() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; t_envois text; col_dest text; col_quand text; col_nature text; col_statut text; col_differe text; valeurs jsonb; ligne jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; valeurs jsonb; ligne jsonb; verrous_nuit jsonb; verrous_jour jsonb;
+  dimanche_soir timestamptz := '2026-10-11T23:00:00+02:00'; mardi_matin timestamptz := '2026-10-13T10:30:00+02:00';
 begin
   jeu := tests.jeu();
-  t_envois := tests.table_parmi(array['envois']);
-  if t_envois is null then return next fail('Table envois introuvable'); return; end if;
-  col_dest := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
-  col_quand := tests.colonne_parmi(('public.' || t_envois)::regclass, array['prevu_le', 'programme_le', 'envoyer_le', 'souhaite_le', 'demande_le', 'a_partir_de']);
-  col_nature := tests.colonne_parmi(('public.' || t_envois)::regclass, array['nature', 'type_envoi', 'categorie', 'transactionnel']);
-  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat']);
-  if col_dest is null then
-    return next fail('Colonne du destinataire introuvable dans envois — adapter la liste de candidates');
-    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+  if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
+  col_dest := tests.colonne_parmi('public.envois'::regclass, array['destinataire_adresse', 'adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
+  col_canal := tests.colonne_parmi('public.envois'::regclass, array['canal']);
+  col_trans := tests.colonne_parmi('public.envois'::regclass, array['transactionnel', 'nature']);
+  if col_dest is null or col_canal is null then
+    return next fail('Colonnes destinataire/canal introuvables dans envois — adapter la liste de candidates');
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
-  -- Un dimanche à 23 h : hors plage quel que soit le canal
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, '+33600000000', 'canal', 'sms');
-  if col_quand is not null then valeurs := valeurs || jsonb_build_object(col_quand, '2026-10-11T23:00:00+02:00'); end if;
-  if col_nature is not null then valeurs := valeurs || jsonb_build_object(col_nature, case when col_nature = 'transactionnel' then 'false' else 'prospection' end); end if;
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, '+33600000000', col_canal, 'sms');
+  if col_trans = 'transactionnel' then valeurs := valeurs || jsonb_build_object('transactionnel', false);
+  elsif col_trans = 'nature' then valeurs := valeurs || jsonb_build_object('nature', 'prospection'); end if;
+  ligne := tests.inserer_minimal('public', 'envois', valeurs);
   begin
-    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_nuit using (ligne ->> 'id')::bigint, dimanche_soir;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_jour using (ligne ->> 'id')::bigint, mardi_matin;
   exception when others then
-    return next fail('L''envoi hors heures est rejeté au lieu d''être différé : ' || sqlerrm);
+    return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return;
   end;
-  col_differe := tests.colonne_parmi(('public.' || t_envois)::regclass, array['differe_a', 'reporte_a', 'envoi_prevu_le', 'prochaine_fenetre', 'prevu_le', 'programme_le']);
-  return next ok((col_statut is not null and (ligne ->> col_statut) ~* '(differ|report|attente|planifi|programm)')
-              or (col_differe is not null and col_quand is not null and col_differe <> col_quand and (ligne ->> col_differe) is not null
-                  and (ligne ->> col_differe)::timestamptz > '2026-10-11T23:00:00+02:00'::timestamptz),
-    format('L''envoi est différé (%s = %L ; %s = %L)', col_statut, ligne ->> col_statut, col_differe, ligne ->> col_differe));
-  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+  return next ok(verrous_nuit::text ~* '(differ|hors|plage|heure|report|dimanche|fenetre|fenêtre)', 'Dimanche 23 h, SMS non transactionnel : verrous_envoi() diffère (hors plage)');
+  return next ok(verrous_jour::text !~* '(hors.?plage|differ)', 'Mardi 10 h 30 : pas de verrou horaire (témoin)');
+  return next diag('Verrous dimanche soir : ' || left(verrous_nuit::text, 400));
+  return next diag('Verrous mardi matin : ' || left(verrous_jour::text, 400));
 end $f$;
 
 

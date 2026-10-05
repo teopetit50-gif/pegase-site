@@ -64,11 +64,31 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 | 49 | `private.verifier_sauvegardes()` lève l'alerte sans preuve, l'acquitte avec une preuve `reussie` récente, refuse un verdict hors liste |
 | 50 | Export et effacement outillés, preuves d'effacement immuables |
 
+## Mécanique réelle du socle prise en compte (retours de la recette du 5 octobre)
+
+- Le journal ne se nourrit pas par INSERT : `private.journaliser(uuid, text,
+  text, text, jsonb, uuid)` calcule `hash` et `hash_precedent` sous verrou.
+  `tests.journaliser()` passe par elle (tests 11, 12, 30, 32, 33, 34) ; le
+  test 32 vérifie en plus qu'aucun rôle applicatif n'a INSERT sur la table.
+- Les verrous d'envoi ne sont pas des déclencheurs : `private.opposer(...)`
+  pose l'opposition, `private.verrous_envoi(envois, boolean, timestamptz)`
+  rend les verrous que lit la tâche d'envoi. Tests 36 et 37, avec témoin.
+- `comptes.role` ∈ gerant | valideur | collaborateur | admin ; les valeurs
+  d'exemple respectent les contraintes CHECK mono-colonne (`tests.valeur_selon_check`).
+- Une table interne peut n'avoir aucune politique si `authenticated` n'a pas
+  SELECT dessus (tests 05, 43) ; un `client_id` nullable est admis si toute
+  politique de lecture le conditionne (test 42) ; une table du cahier absente
+  de l'environnement rend le test sans objet, en diag (tests 16–29).
+- `echeances_pro_journal` n'existe pas sur la recette : les tests 26 et 27 le
+  disent et passent.
+- Test 44 : règle exacte des fonctions de `private` requises par
+  `authenticated`, la même que la migration `omega/migrations/a5_01_private_execute.sql`.
+
 ## Tests qui s'adaptent au schéma (à relire au premier passage sur la recette)
 
 Le dépôt des migrations n'étant pas accessible à A5, les tests 36, 37 et 38
-cherchent eux-mêmes les colonnes utiles (`adresse`/`destinataire`/…,
-`prevu_le`/`programme_le`/…, `approuve_par`/`par`/…) et le disent dans leur
+cherchent eux-mêmes les colonnes utiles (`destinataire_adresse`/`adresse`/…,
+`transactionnel`/`nature`, `approuve_par`/`par`/…) et le disent dans leur
 diagnostic. S'ils échouent avec « colonne introuvable », ajouter le vrai nom à
 la liste de candidates dans le fichier. Si la règle est portée par une fonction
 (porte) plutôt que par un déclencheur sur la table, brancher l'appel à la place
@@ -84,7 +104,7 @@ exact) et un lanceur pour un cluster Postgres jetable :
 ```bash
 # pgtap.sql : sql/pgtap.sql.in de https://github.com/theory/pgtap (v1.3.3), avec
 #   sed -e 's,MODULE_PATHNAME,$libdir/pgtap,g' -e 's,__OS__,linux,g' -e 's,__VERSION__,1.3,g'
-bash omega/tests/socle/local/lancer.sh
+bash omega/tests/socle/local/lancer.sh   # charge pgTAP, la maquette, puis la migration a5_01, puis les 50 tests
 ```
 
 ### Régénérer TOUT.sql

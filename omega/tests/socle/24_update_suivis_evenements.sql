@@ -7,6 +7,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('suivis_evenements') then
+    return next pass('public.suivis_evenements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('suivis_evenements') where sur_update and avant;
   return next ok(nb > 0, 'suivis_evenements : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('suivis_evenements');

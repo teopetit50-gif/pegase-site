@@ -220,6 +220,67 @@ begin
   return coalesce(resultat, false);
 end $$;
 
+-- Une table publique existe-t-elle ici ? (certaines tables du cahier n'existent pas sur tous les environnements)
+create or replace function tests.table_existe(p_table text) returns boolean
+language sql stable as $$ select to_regclass('public.' || quote_ident(p_table)) is not null $$;
+
+-- Écrit une ligne au journal opposable par la porte du socle (private.journaliser) ; à défaut, insertion directe.
+create or replace function tests.journaliser(p_client uuid, p_action text, p_objet_type text default 'essai', p_objet_id text default 'x', p_donnees jsonb default '{}'::jsonb) returns void
+language plpgsql as $$
+begin
+  if to_regprocedure('private.journaliser(uuid, text, text, text, jsonb, uuid)') is not null then
+    perform private.journaliser(p_client, p_action, p_objet_type, p_objet_id, p_donnees, null::uuid);
+  else
+    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', p_client, 'action', p_action, 'acteur_type', 'systeme', 'objet_type', p_objet_type, 'objet_id', p_objet_id, 'donnees', p_donnees));
+  end if;
+end $$;
+
+-- Appelle une fonction de private en castant chaque argument positionnel vers son vrai type ; rend le résultat en jsonb.
+create or replace function tests.appeler_privee(p_nom text, variadic p_valeurs text[]) returns jsonb
+language plpgsql as $$
+declare types text[]; appel text; args text := ''; i int; resultat jsonb;
+begin
+  select array_agg(format_type(u.t, null) order by u.o) into types
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  cross join lateral unnest(p.proargtypes) with ordinality u(t, o)
+  where n.nspname = 'private' and p.proname = p_nom and p.pronargs = array_length(p_valeurs, 1);
+  if types is null then raise exception 'tests.appeler_privee : private.%(%) introuvable (% arguments)', p_nom, array_to_string(p_valeurs, ', '), array_length(p_valeurs, 1); end if;
+  for i in 1..array_length(p_valeurs, 1) loop
+    args := args || case when i > 1 then ', ' else '' end || case when p_valeurs[i] is null then 'null' else format('%L', p_valeurs[i]) end || '::' || types[i];
+  end loop;
+  appel := format('select to_jsonb(private.%I(%s))', p_nom, args);
+  execute appel into resultat;
+  return resultat;
+end $$;
+
+-- Fonctions de private dont authenticated a légitimement besoin : citées par une politique RLS (pg_depend, exact),
+-- ou appelées par une fonction publique SECURITY INVOKER exécutable par authenticated, puis fermeture transitive
+-- sur les fonctions SECURITY INVOKER ainsi retenues. Les fonctions déclencheur n'ont jamais besoin d'EXECUTE.
+-- Même logique que omega/migrations/a5_01_private_execute.sql.
+create or replace function tests.fonctions_private_requises() returns table(oid oid, nom text, raison text)
+language sql stable as $$
+  with recursive requises as (
+    select distinct p.oid, p.proname, 'politique RLS'::text as raison
+    from pg_depend d join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
+    join pg_namespace n on n.oid = p.pronamespace
+    where d.classid = 'pg_policy'::regclass and n.nspname = 'private'
+    union
+    select distinct p.oid, p.proname, 'appelée par public.' || q.proname
+    from pg_proc q join pg_namespace m on m.oid = q.pronamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where m.nspname = 'public' and q.prokind = 'f' and not q.prosecdef and has_function_privilege('authenticated', q.oid, 'execute')
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
+    union
+    select distinct p.oid, p.proname, 'appelée par private.' || q.proname
+    from requises x join pg_proc q on q.oid = x.oid
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where not q.prosecdef and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and p.oid <> q.oid
+      and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
+  )
+  select oid, proname, string_agg(distinct raison, ' ; ') from requises group by oid, proname order by proname;
+$$;
+
 -- Tables du socle devant être en ajout seul.
 create or replace function tests.tables_ajout_seul() returns setof text language sql immutable as $$
   select unnest(array['journal_opposable', 'envois_evenements', 'effacements', 'filed_historique', 'suivis_evenements', 'echeances_pro_journal']);

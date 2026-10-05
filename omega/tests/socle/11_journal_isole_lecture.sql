@@ -8,7 +8,7 @@ declare
   jeu jsonb;
 begin
   jeu := tests.jeu();
-  perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_b', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai'));
+  perform tests.journaliser((jeu ->> 'client_b')::uuid, 'essai_a5');
   perform tests.endosser((jeu ->> 'user_a')::uuid);
   return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'A ne voit aucune ligne du journal de B');
   perform tests.redevenir_admin();

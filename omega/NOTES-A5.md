@@ -40,6 +40,67 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (message de 18:00 UTC, retour de TOUT_3 et TOUT_4)
+
+Tout est poussé ensemble sur `worker-a5` ; TOUT*.sql régénérés ; maquette
+locale alignée sur la mécanique réelle (journaliser, opposer, verrous_envoi,
+colonnes d'envois, EXECUTE à PUBLIC puis migration) : 50/50 verts, TOUT.sql →
+44 `ok`, migration rejouée deux fois sans erreur.
+
+- **Migration demandée** : `omega/migrations/a5_01_private_execute.sql`.
+  Calcule d'abord l'ensemble requis (politiques via `pg_depend`, exact ;
+  fonctions publiques SECURITY INVOKER exécutables par authenticated via le
+  texte du corps ; fermeture transitive sur les SECURITY INVOKER retenues ;
+  jamais les fonctions déclencheur), puis `revoke execute on all functions
+  in schema private from public, anon, authenticated`, puis `grant` explicite
+  de chaque signature retenue, puis `alter default privileges` (schéma et
+  `for role postgres`), puis contrôle immédiat (exception si anon exécute
+  encore quelque chose ou si authenticated exécute hors liste). La liste
+  retenue sort en NOTICE. Sans DROP ni DELETE, rejouable.
+  `omega/migrations/a5_01_liste_requises.sql` (lecture seule) rend la même
+  liste en `grant … ;` prêts à figer : lance-le avant pour relire, après pour
+  vérifier, et colle le résultat dans NOTES-COORDINATEUR.md ; je ne peux pas
+  la générer moi-même depuis la recette. Le test 44 rejoue la règle.
+  Précaution : les fonctions publiques `SECURITY DEFINER` qui appellent du
+  `private` ne sont pas comptées (elles s'exécutent avec les droits de
+  `postgres`) ; si une porte publique est en fait SECURITY INVOKER et
+  n'apparaît pas exécutable par authenticated au moment de la migration,
+  elle ne compte pas non plus. Le contrôle immédiat et le test 44 le diront.
+- **Journal** : `tests.journaliser()` passe par
+  `private.journaliser(uuid, text, text, text, jsonb, uuid)` (tests 11, 12,
+  30, 33, 34). Test 32 reformulé : ni anon, ni authenticated, ni service_role
+  n'ont INSERT sur `journal_opposable` ; la porte existe ; deux lignes écrites
+  par elle font 32 octets et la seconde pointe la première.
+- **26 / 29** : `echeances_pro_journal` absente → le test le dit et passe
+  (tous les tests 16–27 sont tolérants à une table absente ; 29 liste les
+  absentes en diag). Question en retour : le cahier la nomme ; est-ce une
+  table à venir (Lorani ?) ou un nom périmé ?
+- **36 / 37** : insertion de l'envoi par `inserer_minimal` (colonnes
+  `destinataire_adresse`, `canal`, `transactionnel`), opposition par
+  `private.opposer(...)` (le `type` est pris dans la contrainte CHECK de
+  `oppositions.type` s'il y en a une, sinon `prospect`), puis
+  `private.verrous_envoi(e, true, p_instant)` ; le résultat est lu en jsonb
+  et doit nommer l'opposition (36) ou un verrou horaire (37, dimanche
+  11/10 23 h, SMS non transactionnel), avec un témoin sans opposition / un
+  mardi 10 h 30. Si la forme du retour ne contient ni « oppos » ni
+  « differ|hors|plage|heure|report », le diag montre le JSON et j'ajuste.
+- **35** : rien à changer (lot19g).
+- **42** : `client_id` nullable admis si toute politique SELECT permissive
+  pour authenticated conditionne `client_id` (un null n'y passe jamais) ;
+  diag des tables concernées (`demandes_audit`, `gabarits_messages`,
+  `travaux`). Si l'une d'elles a une politique sans `client_id`, elle reste
+  rouge, à raison.
+- **43** : accepte toute politique qui appelle une fonction `private.` ou
+  contient `client_id in (select` ; diag des politiques hors
+  mes_clients()/lit_objet() pour SECURITE.md.
+- **44** : liste exacte (voir migration) ; rouge tant que a5_01 n'est pas
+  posée, vert après.
+- **05 / 08 / 18 / 20 / 24 / 11-12** : déjà couverts par le commit précédent
+  (CHECK lus, rôle lu dans la contrainte, tables internes sans politique).
+
+Tu peux relancer TOUT_1 à TOUT_4 en un passage, puis poser a5_01 et relancer
+TOUT_4 (test 44).
+
 ## Réponse au coordinateur (message de 17:40 UTC, retour de TOUT_1 et TOUT_2)
 
 Corrections poussées sur `worker-a5` (commit indiqué dans le journal git,

@@ -47,7 +47,7 @@ create or replace function private.mes_clients() returns setof uuid
 language sql stable security definer set search_path = public, pg_temp as $$
   select client_id from public.comptes where user_id = auth.uid()
 $$;
-grant execute on function private.mes_clients() to authenticated;
+-- (EXECUTE reste à PUBLIC comme sur le socle réel ; la migration a5_01 le reprend, lancer.sh l'applique après la maquette)
 
 -- Registre des tables locataires -----------------------------------------------
 create table private.tables_locataires (nom text primary key, ordre_effacement smallint not null, note text);
@@ -81,8 +81,20 @@ create or replace function private.ajout_seul() returns trigger language plpgsql
 begin
   raise exception 'Table % en ajout seul : % interdit', tg_table_name, tg_op using errcode = 'P0001';
 end $$;
-create trigger t_journal_chainer before insert on public.journal_opposable for each row execute function private.journal_chainer();
 create trigger t_journal_ajout_seul before update or delete on public.journal_opposable for each row execute function private.ajout_seul();
+-- La porte d'écriture : calcule hash et hash_precedent sous verrou consultatif (comme sur le socle réel ; pas de déclencheur de calcul).
+create or replace function private.journaliser(p_client uuid, p_action text, p_objet_type text, p_objet_id text, p_donnees jsonb, p_entite uuid) returns bigint
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
+declare precedent bytea; v_id bigint; quand timestamptz := clock_timestamp(); acteur uuid := auth.uid();
+begin
+  perform pg_advisory_xact_lock(hashtext(p_client::text));
+  select hash into precedent from public.journal_opposable where client_id = p_client order by id desc limit 1;
+  insert into public.journal_opposable (client_id, entite_id, survenu_le, acteur_type, acteur_id, action, objet_type, objet_id, donnees, hash_precedent, hash)
+  values (p_client, p_entite, quand, case when acteur is null then 'systeme' else 'utilisateur' end, acteur, p_action, p_objet_type, p_objet_id, p_donnees, precedent,
+          extensions.digest(coalesce(precedent, '\x'::bytea) || convert_to(concat_ws('|', p_client, p_entite, quand, case when acteur is null then 'systeme' else 'utilisateur' end, acteur, null, p_action, p_objet_type, p_objet_id, coalesce(p_donnees::text, '')), 'utf8'), 'sha256'))
+  returning id into v_id;
+  return v_id;
+end $$;
 
 create or replace function public.verifier_journal_client(p_client uuid) returns table(ok boolean, lignes bigint, premiere_rupture bigint)
 language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
@@ -124,44 +136,43 @@ insert into private.canaux_envoi (canal, libelle, consentement_toujours, plages_
   ('sms', 'SMS', true, '{"jours": [1,2,3,4,5,6], "debut": "08:00", "fin": "20:00"}', 'Jamais le dimanche ni les jours fériés'),
   ('telephone', 'Téléphone', true, '{"jours": [1,2,3,4,5], "debut": "10:00", "fin": "20:00", "pause": ["13:00", "14:00"]}', 'Démarchage : plages légales'),
   ('courrier', 'Courrier postal', false, null, null);
-create table public.oppositions (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), canal text not null, adresse text not null, depuis timestamptz not null default now(), motif text);
+create table public.oppositions (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), type text not null check (type in ('prospect', 'client', 'contact')), canal text not null, adresse text not null, ref text, depuis timestamptz not null default now(), jusqu_au timestamptz, motif text, source text, par uuid);
+create or replace function private.opposer(p_client uuid, p_type text, p_adresse text, p_canal text, p_ref text, p_jusqu_au timestamptz, p_motif text, p_source text, p_par uuid) returns bigint
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_id bigint;
+begin
+  insert into public.oppositions (client_id, type, canal, adresse, ref, jusqu_au, motif, source, par) values (p_client, p_type, p_canal, lower(p_adresse), p_ref, p_jusqu_au, p_motif, p_source, p_par) returning id into v_id;
+  return v_id;
+end $$;
 create table public.consentements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), canal text not null, adresse text not null, donne_le timestamptz not null default now(), retire_le timestamptz);
 create table public.envois (
   id bigint generated always as identity primary key, client_id uuid not null references public.clients(id),
-  canal text not null references private.canaux_envoi(canal), adresse text not null,
-  nature text not null default 'transactionnel' check (nature in ('transactionnel', 'prospection', 'information')),
-  prevu_le timestamptz not null default now(), differe_a timestamptz,
+  canal text not null references private.canaux_envoi(canal), destinataire_adresse text not null,
+  transactionnel boolean not null default true,
+  echeance timestamptz, reprise_le timestamptz,
   statut text not null default 'a_envoyer', cree_le timestamptz not null default now()
 );
-create or replace function private.envois_verrous() returns trigger
-language plpgsql security definer set search_path = public, private, pg_temp as $$
-declare plages jsonb; debut time; fin time; jours int[]; local_ts timestamptz; d date; prochain timestamptz;
+-- Les verrous : lus par la tâche d'envoi, pas un déclencheur d'insertion.
+create or replace function private.verrous_envoi(p_e public.envois, p_complet boolean, p_instant timestamptz) returns jsonb
+language plpgsql stable security definer set search_path = public, private, pg_temp as $$
+declare verrous jsonb := '[]'::jsonb; plages jsonb; debut time; fin time; jours int[]; local_ts timestamptz;
 begin
-  if exists (select 1 from public.oppositions o where o.client_id = new.client_id and o.canal = new.canal and lower(o.adresse) = lower(new.adresse)) then
-    raise exception 'Envoi refusé : % est en opposition sur le canal %', new.adresse, new.canal using errcode = 'P0001';
+  if exists (select 1 from public.oppositions o where o.client_id = p_e.client_id and o.canal = p_e.canal and o.adresse = lower(p_e.destinataire_adresse) and coalesce(o.jusqu_au, 'infinity') > p_instant) then
+    verrous := verrous || jsonb_build_object('verrou', 'opposition', 'detail', 'destinataire en opposition sur ce canal');
   end if;
-  if new.nature <> 'transactionnel' then
-    select plages_non_transactionnel into plages from private.canaux_envoi where canal = new.canal;
+  if not p_e.transactionnel then
+    select plages_non_transactionnel into plages from private.canaux_envoi where canal = p_e.canal;
     if plages is not null then
       debut := (plages ->> 'debut')::time; fin := (plages ->> 'fin')::time;
       select array_agg(x::int) into jours from jsonb_array_elements_text(plages -> 'jours') x;
-      local_ts := new.prevu_le at time zone 'Europe/Paris';
+      local_ts := p_instant at time zone 'Europe/Paris';
       if not (extract(isodow from local_ts)::int = any(jours) and local_ts::time >= debut and local_ts::time < fin) then
-        d := local_ts::date;
-        loop
-          if local_ts::time >= fin or not (extract(isodow from local_ts)::int = any(jours)) then d := d + 1; end if;
-          exit when extract(isodow from d)::int = any(jours);
-          d := d + 1;
-        end loop;
-        prochain := (d + debut) at time zone 'Europe/Paris';
-        if prochain <= new.prevu_le then prochain := ((d + 1) + debut) at time zone 'Europe/Paris'; end if;
-        new.statut := 'differe'; new.differe_a := prochain;
+        verrous := verrous || jsonb_build_object('verrou', 'hors_plage', 'detail', 'différé à la prochaine plage légale du canal ' || p_e.canal);
       end if;
     end if;
   end if;
-  return new;
+  return jsonb_build_object('bloque', jsonb_array_length(verrous) > 0, 'verrous', verrous);
 end $$;
-create trigger t_envois_verrous before insert on public.envois for each row execute function private.envois_verrous();
 
 -- Droits par objet -----------------------------------------------------------------
 create table public.objets_restreints (client_id uuid not null references public.clients(id), objet_type text not null, primary key (client_id, objet_type));
@@ -174,7 +185,6 @@ language sql stable security definer set search_path = public, private, pg_temp 
           or exists (select 1 from public.acces_objets a where a.client_id = p_client and a.objet_type = p_type and a.objet_id = p_objet and a.user_id = auth.uid())
           or exists (select 1 from private.gardiens_objets g where g.client_id = p_client and g.objet_type = p_type and g.user_id = auth.uid()))
 $$;
-grant execute on function private.lit_objet(uuid, text, uuid) to authenticated;
 
 -- Pièces : lisibles par lit_objet() (droits par objet) ------------------------------------
 create table public.pieces (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text, objet_id uuid, nom text not null, cree_le timestamptz not null default now());
@@ -221,10 +231,9 @@ create or replace function public.exporter_client(p_client uuid) returns jsonb l
 create or replace function private.effacer_client(p_client uuid, p_par uuid) returns void language plpgsql security definer set search_path = public, private, pg_temp as $$ begin null; end $$;
 grant execute on function public.exporter_client(uuid) to authenticated;
 
--- Hygiène des fonctions : rien n'est exécutable par défaut dans private, sauf ce que les politiques utilisent.
-revoke execute on all functions in schema private from public, anon, authenticated;
-grant execute on function private.mes_clients() to authenticated;
-grant execute on function private.lit_objet(uuid, text, uuid) to authenticated;
+
+-- Gabarits communs : client_id null = gabarit global Omega, visible de tous les clients
+create table public.gabarits_messages (id bigint generated always as identity primary key, client_id uuid references public.clients(id), canal text not null, nom text not null, corps text not null);
 
 -- Table interne : RLS activée, aucune politique, aucun droit pour authenticated (cas voulu)
 create table public.filed_compteurs (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), compteur int not null default 0);
@@ -239,6 +248,11 @@ do $$ declare t text; begin
   for t in select nom from private.tables_locataires loop
     execute format('alter table public.%I enable row level security', t);
     if t = 'filed_compteurs' then continue; end if;
+    if t = 'gabarits_messages' then
+      execute 'create policy lecture_client on public.gabarits_messages for select to authenticated using (client_id is null or client_id in (select private.mes_clients()))';
+      execute 'grant select on public.gabarits_messages to authenticated';
+      continue;
+    end if;
     execute format('create policy lecture_client on public.%I for select to authenticated using (client_id in (select private.mes_clients()))', t);
     execute format('grant select on public.%I to authenticated', t);
   end loop;

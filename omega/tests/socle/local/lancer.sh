@@ -23,6 +23,7 @@ PSQL="$PSQL -d socle_a5"
 $PSQL -c "create schema extensions" -c "alter database socle_a5 set search_path = \"\$user\", public, extensions"
 $PSQL -c "set search_path = extensions" -f "$PGTAP" >/dev/null
 $PSQL -f "$ICI/maquette.sql"
+$PSQL -f "$ICI/../../../migrations/a5_01_private_execute.sql" 2>&1 | grep -v "^NOTICE" || true
 # 00 crée l'extension pgtap « with schema extensions » : sur la maquette, pgTAP est chargé à la main, on neutralise cette ligne.
 sed 's/^create extension if not exists pgtap with schema extensions;/-- (pgTAP chargé par lancer.sh)/' "$ICI/../00_installation.sql" | $PSQL -f -
 echo "Maquette prête. Tests :"

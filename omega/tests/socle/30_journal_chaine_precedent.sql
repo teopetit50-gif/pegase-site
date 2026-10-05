@@ -9,7 +9,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai', 'donnees', jsonb_build_object('i', i)));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i, 'essai', 'x', jsonb_build_object('i', i));
   end loop;
   select count(*) into ruptures_client from (
     select id, hash_precedent, lag(hash) over (partition by client_id order by id) as precedent from public.journal_opposable) s

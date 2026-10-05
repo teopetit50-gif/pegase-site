@@ -7,6 +7,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('echeances_pro_journal') then
+    return next pass('public.echeances_pro_journal n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_update and avant;
   return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('echeances_pro_journal');

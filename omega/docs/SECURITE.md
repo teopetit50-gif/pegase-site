@@ -33,7 +33,19 @@ Ce que l'on veut vraiment, c'est que `authenticated` ne puisse rien faire dans
 cas pour les tables (aucun droit, vérifié). Pour les fonctions, Postgres accorde
 EXECUTE à PUBLIC par défaut à la création : il faut le reprendre.
 
-**Correction proposée** (recette d'abord) :
+**Relevé du 5 octobre (test 44 sur la recette)** : c'est bien le cas, et c'est
+le trou le plus sérieux de la série. `anon` et `authenticated` exécutaient
+environ 110 fonctions de `private`, dont `filed_decider_facture`,
+`deposer_reception`, `noter_remise`. La migration
+`omega/migrations/a5_01_private_execute.sql` reprend tout (PUBLIC, anon,
+authenticated), rend à `authenticated` les seules fonctions dont une politique
+RLS dépend (`pg_depend`, exact) ou qu'une fonction publique SECURITY INVOKER
+exécutable par `authenticated` appelle, avec fermeture transitive, puis coupe
+l'EXECUTE par défaut pour l'avenir. Elle écrit la liste retenue en NOTICE et
+se vérifie elle-même ; `a5_01_liste_requises.sql` donne la même liste en
+`grant` prêts à figer. Le test 44 rejoue la règle à chaque passage.
+
+**Correction proposée** (ce que fait a5_01, détaillé) :
 
 ```sql
 -- 1) État des lieux : fonctions de private exécutables par authenticated et leur usage connu

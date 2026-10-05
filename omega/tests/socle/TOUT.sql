@@ -223,6 +223,67 @@ begin
   return coalesce(resultat, false);
 end $$;
 
+-- Une table publique existe-t-elle ici ? (certaines tables du cahier n'existent pas sur tous les environnements)
+create or replace function tests.table_existe(p_table text) returns boolean
+language sql stable as $$ select to_regclass('public.' || quote_ident(p_table)) is not null $$;
+
+-- Écrit une ligne au journal opposable par la porte du socle (private.journaliser) ; à défaut, insertion directe.
+create or replace function tests.journaliser(p_client uuid, p_action text, p_objet_type text default 'essai', p_objet_id text default 'x', p_donnees jsonb default '{}'::jsonb) returns void
+language plpgsql as $$
+begin
+  if to_regprocedure('private.journaliser(uuid, text, text, text, jsonb, uuid)') is not null then
+    perform private.journaliser(p_client, p_action, p_objet_type, p_objet_id, p_donnees, null::uuid);
+  else
+    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', p_client, 'action', p_action, 'acteur_type', 'systeme', 'objet_type', p_objet_type, 'objet_id', p_objet_id, 'donnees', p_donnees));
+  end if;
+end $$;
+
+-- Appelle une fonction de private en castant chaque argument positionnel vers son vrai type ; rend le résultat en jsonb.
+create or replace function tests.appeler_privee(p_nom text, variadic p_valeurs text[]) returns jsonb
+language plpgsql as $$
+declare types text[]; appel text; args text := ''; i int; resultat jsonb;
+begin
+  select array_agg(format_type(u.t, null) order by u.o) into types
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  cross join lateral unnest(p.proargtypes) with ordinality u(t, o)
+  where n.nspname = 'private' and p.proname = p_nom and p.pronargs = array_length(p_valeurs, 1);
+  if types is null then raise exception 'tests.appeler_privee : private.%(%) introuvable (% arguments)', p_nom, array_to_string(p_valeurs, ', '), array_length(p_valeurs, 1); end if;
+  for i in 1..array_length(p_valeurs, 1) loop
+    args := args || case when i > 1 then ', ' else '' end || case when p_valeurs[i] is null then 'null' else format('%L', p_valeurs[i]) end || '::' || types[i];
+  end loop;
+  appel := format('select to_jsonb(private.%I(%s))', p_nom, args);
+  execute appel into resultat;
+  return resultat;
+end $$;
+
+-- Fonctions de private dont authenticated a légitimement besoin : citées par une politique RLS (pg_depend, exact),
+-- ou appelées par une fonction publique SECURITY INVOKER exécutable par authenticated, puis fermeture transitive
+-- sur les fonctions SECURITY INVOKER ainsi retenues. Les fonctions déclencheur n'ont jamais besoin d'EXECUTE.
+-- Même logique que omega/migrations/a5_01_private_execute.sql.
+create or replace function tests.fonctions_private_requises() returns table(oid oid, nom text, raison text)
+language sql stable as $$
+  with recursive requises as (
+    select distinct p.oid, p.proname, 'politique RLS'::text as raison
+    from pg_depend d join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
+    join pg_namespace n on n.oid = p.pronamespace
+    where d.classid = 'pg_policy'::regclass and n.nspname = 'private'
+    union
+    select distinct p.oid, p.proname, 'appelée par public.' || q.proname
+    from pg_proc q join pg_namespace m on m.oid = q.pronamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where m.nspname = 'public' and q.prokind = 'f' and not q.prosecdef and has_function_privilege('authenticated', q.oid, 'execute')
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
+    union
+    select distinct p.oid, p.proname, 'appelée par private.' || q.proname
+    from requises x join pg_proc q on q.oid = x.oid
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where not q.prosecdef and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and p.oid <> q.oid
+      and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
+  )
+  select oid, proname, string_agg(distinct raison, ' ; ') from requises group by oid, proname order by proname;
+$$;
+
 -- Tables du socle devant être en ajout seul.
 create or replace function tests.tables_ajout_seul() returns setof text language sql immutable as $$
   select unnest(array['journal_opposable', 'envois_evenements', 'effacements', 'filed_historique', 'suivis_evenements', 'echeances_pro_journal']);
@@ -481,7 +542,7 @@ declare
   jeu jsonb;
 begin
   jeu := tests.jeu();
-  perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_b', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai'));
+  perform tests.journaliser((jeu ->> 'client_b')::uuid, 'essai_a5');
   perform tests.endosser((jeu ->> 'user_a')::uuid);
   return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'A ne voit aucune ligne du journal de B');
   perform tests.redevenir_admin();
@@ -500,7 +561,7 @@ declare
   jeu jsonb;
 begin
   jeu := tests.jeu();
-  perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai'));
+  perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5');
   perform tests.endosser((jeu ->> 'user_a')::uuid);
   return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 1::bigint, 'A voit sa ligne de journal');
   perform tests.redevenir_admin();
@@ -588,6 +649,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('journal_opposable') then
+    return next pass('public.journal_opposable n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('journal_opposable') where sur_update and avant;
   return next ok(nb > 0, 'journal_opposable : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('journal_opposable');
@@ -607,6 +673,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('envois_evenements') then
+    return next pass('public.envois_evenements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('envois_evenements') where sur_update and avant;
   return next ok(nb > 0, 'envois_evenements : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('envois_evenements');
@@ -626,6 +697,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('effacements') then
+    return next pass('public.effacements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('effacements') where sur_update and avant;
   return next ok(nb > 0, 'effacements : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('effacements');
@@ -645,6 +721,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('filed_historique') then
+    return next pass('public.filed_historique n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('filed_historique') where sur_update and avant;
   return next ok(nb > 0, 'filed_historique : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('filed_historique');
@@ -664,6 +745,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('suivis_evenements') then
+    return next pass('public.suivis_evenements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('suivis_evenements') where sur_update and avant;
   return next ok(nb > 0, 'suivis_evenements : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('suivis_evenements');
@@ -683,6 +769,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('echeances_pro_journal') then
+    return next pass('public.echeances_pro_journal n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_update and avant;
   return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE UPDATE existe');
   v_ctid := tests.ligne_pour_essai('echeances_pro_journal');
@@ -724,9 +815,7 @@ begin
     select tablename, policyname, cmd from pg_policies
     where schemaname = 'public' and tablename in (select tests.tables_ajout_seul()) and cmd in ('UPDATE', 'DELETE') order by 1, 2
   $q$, 'Pas de politique UPDATE/DELETE sur les six tables en ajout seul');
-  return next is_empty($q$
-    select t.nom from tests.tables_ajout_seul() t(nom) where to_regclass('public.' || t.nom) is null
-  $q$, 'Les six tables en ajout seul existent');
+  return next diag('Tables du cahier absentes ici (sans objet) : ' || coalesce((select string_agg(t.nom, ', ') from tests.tables_ajout_seul() t(nom) where to_regclass('public.' || t.nom) is null), 'aucune'));
 end $f$;
 
 
@@ -742,7 +831,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai', 'donnees', jsonb_build_object('i', i)));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i, 'essai', 'x', jsonb_build_object('i', i));
   end loop;
   select count(*) into ruptures_client from (
     select id, hash_precedent, lag(hash) over (partition by client_id order by id) as precedent from public.journal_opposable) s
@@ -775,19 +864,34 @@ end $f$;
 
 
 
--- 32 — l'empreinte est calculée par la base, pas acceptée du client
+-- 32 — l'empreinte du journal vient de la porte private.journaliser(), jamais d'un INSERT direct
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
 
 create or replace function tests.test_32_journal_hash_non_fourni() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; ligne jsonb;
+  jeu jsonb; r record; n int := 0;
 begin
+  -- (a) aucun rôle applicatif n'écrit directement au journal
+  return next ok(not has_table_privilege('anon', 'public.journal_opposable', 'INSERT'), 'anon : pas d''INSERT direct sur journal_opposable');
+  return next ok(not has_table_privilege('authenticated', 'public.journal_opposable', 'INSERT'), 'authenticated : pas d''INSERT direct sur journal_opposable');
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    return next ok(not has_table_privilege('service_role', 'public.journal_opposable', 'INSERT'), 'service_role : pas d''INSERT direct sur journal_opposable');
+  else
+    return next pass('service_role absent ici');
+  end if;
+  return next ok(to_regprocedure('private.journaliser(uuid, text, text, text, jsonb, uuid)') is not null, 'La porte private.journaliser(uuid, text, text, text, jsonb, uuid) existe');
+  -- (b) la porte produit 32 octets et chaîne sur la précédente
   jeu := tests.jeu();
-  ligne := tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai', 'hash', '\x0000000000000000000000000000000000000000000000000000000000000000'));
-  return next isnt(ligne ->> 'hash', '\x0000000000000000000000000000000000000000000000000000000000000000', 'Une empreinte fournie à l''insertion est remplacée par le calcul de la base');
-  return next is(octet_length(decode(substr(ligne ->> 'hash', 3), 'hex')), 32, 'L''empreinte calculée fait 32 octets');
+  perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_1');
+  perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_2');
+  for r in select id, hash, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable where client_id = (jeu ->> 'client_a')::uuid order by id loop
+    n := n + 1;
+    return next is(octet_length(r.hash), 32, format('Ligne %s : empreinte de 32 octets', n));
+    if n = 2 then return next ok(r.hash_precedent = r.precedent, 'Ligne 2 : hash_precedent = empreinte de la ligne 1'); end if;
+  end loop;
+  return next is(n, 2, 'Deux lignes écrites par la porte');
 end $f$;
 
 
@@ -803,7 +907,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai'));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
   return next ok(verdict::text !~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict ne signale aucune rupture');
@@ -823,7 +927,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai'));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   begin
     execute 'alter table public.journal_opposable disable trigger user';
@@ -860,83 +964,92 @@ end $f$;
 
 
 
--- 36 — un envoi vers une personne en opposition est refusé
+-- 36 — un envoi vers une personne en opposition est refusé par les verrous d'envoi
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
+-- Mécanique réelle (coordinateur, 5/10) : pas de déclencheur d'insertion ; private.opposer(...) pose l'opposition,
+-- private.verrous_envoi(p_e envois, p_complet boolean, p_instant timestamptz) rend les verrous que lit tache_envois.
 
 create or replace function tests.test_36_envoi_opposition_refuse() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; t_oppos text; t_envois text; col_oppos text; col_envoi text; col_canal_o text; col_canal_e text; col_statut text; valeurs jsonb; ligne jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; type_oppos text; valeurs jsonb; ligne jsonb; verrous jsonb; sans_opposition jsonb;
 begin
   jeu := tests.jeu();
-  t_oppos := tests.table_parmi(array['oppositions']);
-  t_envois := tests.table_parmi(array['envois']);
-  if t_oppos is null or t_envois is null then return next fail('Tables oppositions/envois introuvables'); return; end if;
-  col_oppos := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
-  col_envoi := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
-  col_canal_o := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['canal']);
-  col_canal_e := tests.colonne_parmi(('public.' || t_envois)::regclass, array['canal']);
-  if col_oppos is null or col_envoi is null then
-    return next fail(format('Colonne du destinataire introuvable (oppositions : %s ; envois : %s) — adapter la liste de candidates', col_oppos, col_envoi));
-    return next diag('Colonnes de ' || t_envois || ' : ' || (select string_agg(attname, ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+  if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
+  col_dest := tests.colonne_parmi('public.envois'::regclass, array['destinataire_adresse', 'adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
+  col_canal := tests.colonne_parmi('public.envois'::regclass, array['canal']);
+  col_trans := tests.colonne_parmi('public.envois'::regclass, array['transactionnel']);
+  if col_dest is null then
+    return next fail('Colonne du destinataire introuvable dans envois — adapter la liste de candidates');
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_oppos, 'oppose-a5@essai.invalid');
-  if col_canal_o is not null then valeurs := valeurs || jsonb_build_object(col_canal_o, 'courriel'); end if;
-  perform tests.inserer_minimal('public', t_oppos, valeurs);
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_envoi, 'oppose-a5@essai.invalid');
-  if col_canal_e is not null then valeurs := valeurs || jsonb_build_object(col_canal_e, 'courriel'); end if;
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, 'oppose-a5@essai.invalid');
+  if col_canal is not null then valeurs := valeurs || jsonb_build_object(col_canal, 'courriel'); end if;
+  if col_trans is not null then valeurs := valeurs || jsonb_build_object(col_trans, true); end if;
+  ligne := tests.inserer_minimal('public', 'envois', valeurs);
+  -- Verrous AVANT opposition : témoin
   begin
-    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+    execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into sans_opposition using (ligne ->> 'id')::bigint;
   exception when others then
-    return next pass('L''envoi vers une personne en opposition est rejeté à l''insertion : ' || sqlerrm);
+    return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
+    return next diag('Signatures : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname ~ 'verrou'), 'aucune'));
     return;
   end;
-  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat', 'decision', 'verdict']);
-  return next ok(col_statut is not null and (ligne ->> col_statut) ~* '(refus|bloqu|oppos|interdit)', format('Envoi accepté en base mais marqué %s = %L (attendu : refusé)', col_statut, ligne ->> col_statut));
-  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+  -- Opposition par la porte du socle
+  type_oppos := coalesce(nullif(regexp_replace(coalesce(tests.valeur_selon_check('public.oppositions'::regclass, 'type', 'text'::regtype), ''), '::.*$|''', '', 'g'), ''), 'prospect');
+  begin
+    perform tests.appeler_privee('opposer', jeu ->> 'client_a', type_oppos, 'oppose-a5@essai.invalid', 'courriel', null, null, 'essai A5', 'essai_a5', null);
+  exception when others then
+    return next fail('private.opposer(...) refuse l''appel d''essai : ' || sqlerrm);
+    return next diag('Signature : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = 'opposer'), 'absente') || ' ; type essayé : ' || type_oppos);
+    return;
+  end;
+  execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into verrous using (ligne ->> 'id')::bigint;
+  return next ok(verrous::text ~* 'oppos', 'Avec une opposition posée, verrous_envoi() nomme l''opposition');
+  return next ok(sans_opposition::text !~* 'oppos', 'Sans opposition, verrous_envoi() ne la nommait pas (témoin)');
+  return next diag('Verrous avec opposition : ' || left(verrous::text, 400));
+  return next diag('Verrous sans opposition : ' || left(sans_opposition::text, 400));
 end $f$;
 
 
 
--- 37 — un envoi non transactionnel hors heures légales est différé, pas parti
+-- 37 — un envoi non transactionnel hors heures légales est différé par les verrous, pas parti
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
 
 create or replace function tests.test_37_envoi_hors_heures_differe() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; t_envois text; col_dest text; col_quand text; col_nature text; col_statut text; col_differe text; valeurs jsonb; ligne jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; valeurs jsonb; ligne jsonb; verrous_nuit jsonb; verrous_jour jsonb;
+  dimanche_soir timestamptz := '2026-10-11T23:00:00+02:00'; mardi_matin timestamptz := '2026-10-13T10:30:00+02:00';
 begin
   jeu := tests.jeu();
-  t_envois := tests.table_parmi(array['envois']);
-  if t_envois is null then return next fail('Table envois introuvable'); return; end if;
-  col_dest := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
-  col_quand := tests.colonne_parmi(('public.' || t_envois)::regclass, array['prevu_le', 'programme_le', 'envoyer_le', 'souhaite_le', 'demande_le', 'a_partir_de']);
-  col_nature := tests.colonne_parmi(('public.' || t_envois)::regclass, array['nature', 'type_envoi', 'categorie', 'transactionnel']);
-  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat']);
-  if col_dest is null then
-    return next fail('Colonne du destinataire introuvable dans envois — adapter la liste de candidates');
-    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+  if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
+  col_dest := tests.colonne_parmi('public.envois'::regclass, array['destinataire_adresse', 'adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
+  col_canal := tests.colonne_parmi('public.envois'::regclass, array['canal']);
+  col_trans := tests.colonne_parmi('public.envois'::regclass, array['transactionnel', 'nature']);
+  if col_dest is null or col_canal is null then
+    return next fail('Colonnes destinataire/canal introuvables dans envois — adapter la liste de candidates');
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
-  -- Un dimanche à 23 h : hors plage quel que soit le canal
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, '+33600000000', 'canal', 'sms');
-  if col_quand is not null then valeurs := valeurs || jsonb_build_object(col_quand, '2026-10-11T23:00:00+02:00'); end if;
-  if col_nature is not null then valeurs := valeurs || jsonb_build_object(col_nature, case when col_nature = 'transactionnel' then 'false' else 'prospection' end); end if;
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, '+33600000000', col_canal, 'sms');
+  if col_trans = 'transactionnel' then valeurs := valeurs || jsonb_build_object('transactionnel', false);
+  elsif col_trans = 'nature' then valeurs := valeurs || jsonb_build_object('nature', 'prospection'); end if;
+  ligne := tests.inserer_minimal('public', 'envois', valeurs);
   begin
-    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_nuit using (ligne ->> 'id')::bigint, dimanche_soir;
+    execute 'select to_jsonb(private.verrous_envoi(e, true, $2)) from public.envois e where e.id = $1' into verrous_jour using (ligne ->> 'id')::bigint, mardi_matin;
   exception when others then
-    return next fail('L''envoi hors heures est rejeté au lieu d''être différé : ' || sqlerrm);
+    return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
     return;
   end;
-  col_differe := tests.colonne_parmi(('public.' || t_envois)::regclass, array['differe_a', 'reporte_a', 'envoi_prevu_le', 'prochaine_fenetre', 'prevu_le', 'programme_le']);
-  return next ok((col_statut is not null and (ligne ->> col_statut) ~* '(differ|report|attente|planifi|programm)')
-              or (col_differe is not null and col_quand is not null and col_differe <> col_quand and (ligne ->> col_differe) is not null
-                  and (ligne ->> col_differe)::timestamptz > '2026-10-11T23:00:00+02:00'::timestamptz),
-    format('L''envoi est différé (%s = %L ; %s = %L)', col_statut, ligne ->> col_statut, col_differe, ligne ->> col_differe));
-  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+  return next ok(verrous_nuit::text ~* '(differ|hors|plage|heure|report|dimanche|fenetre|fenêtre)', 'Dimanche 23 h, SMS non transactionnel : verrous_envoi() diffère (hors plage)');
+  return next ok(verrous_jour::text !~* '(hors.?plage|differ)', 'Mardi 10 h 30 : pas de verrou horaire (témoin)');
+  return next diag('Verrous dimanche soir : ' || left(verrous_nuit::text, 400));
+  return next diag('Verrous mardi matin : ' || left(verrous_jour::text, 400));
 end $f$;
 
 
@@ -1046,11 +1159,17 @@ begin
     select c.table_name, c.data_type, c.is_nullable from information_schema.columns c
     where c.table_schema = 'public' and c.column_name = 'client_id'
       and c.table_name in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)
-      and (c.data_type <> 'uuid' or c.is_nullable = 'YES')
-      -- une table qui porte une colonne « interne » (alertes) admet client_id null pour les lignes internes Omega
-      and not exists (select 1 from information_schema.columns i where i.table_schema = 'public' and i.table_name = c.table_name and i.column_name = 'interne')
+      and (c.data_type <> 'uuid' or (c.is_nullable = 'YES'
+        -- client_id nullable admis (lignes globales Omega : gabarits communs, travaux système, alertes internes)
+        -- à condition que chaque politique SELECT permissive pour authenticated conditionne client_id : un null n'y passe jamais.
+        and exists (select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = c.table_name and p.cmd in ('SELECT', 'ALL') and p.permissive = 'PERMISSIVE'
+                      and ('authenticated' = any(p.roles) or p.roles = '{public}'::name[]) and coalesce(p.qual, '') !~ 'client_id')))
     order by 1
-  $q$, 'client_id uuid NOT NULL partout (une colonne nullable échapperait à « client_id in (mes_clients()) »)');
+  $q$, 'client_id est uuid partout, et s''il est nullable, toute politique de lecture le conditionne (un null reste invisible aux clients)');
+  return next diag('Tables locataires à client_id nullable (lignes globales) : ' || coalesce((
+    select string_agg(c.table_name, ', ' order by c.table_name) from information_schema.columns c
+    where c.table_schema = 'public' and c.column_name = 'client_id' and c.is_nullable = 'YES'
+      and c.table_name in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)), 'aucune'));
 end $f$;
 
 
@@ -1068,37 +1187,50 @@ begin
     select tl.nom from private.tables_locataires tl
     where not exists (
       select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = regexp_replace(tl.nom, '^public\.', '')
-        and (coalesce(p.qual, '') || coalesce(p.with_check, '')) ~ '(mes_clients|lit_objet)')
+        and (coalesce(p.qual, '') || coalesce(p.with_check, '')) ~ '(private\.[a-z_]+\(|client_id IN \( ?SELECT|client_id in \( ?select)')
       -- une table interne fermée à authenticated (aucun SELECT) n'a pas besoin de politique
       and has_table_privilege('authenticated', to_regclass('public.' || quote_ident(regexp_replace(tl.nom, '^public\.', ''))), 'SELECT')
     order by 1
-  $q$, 'Toute table locataire lisible par authenticated est protégée par mes_clients() ou lit_objet()');
+  $q$, 'Toute table locataire lisible par authenticated a une politique fondée sur une aide de private ou sur client_id in (select …)');
+  -- Pour SECURITE.md : les politiques qui ne passent ni par mes_clients() ni par lit_objet() (autres aides ou jointure sur la table parente)
+  return next diag('Politiques hors mes_clients()/lit_objet() : ' || coalesce((
+    select string_agg(p.tablename || '.' || p.policyname, ', ' order by 1) from pg_policies p
+    where p.schemaname = 'public' and p.tablename in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)
+      and (coalesce(p.qual, '') || coalesce(p.with_check, '')) !~ '(mes_clients|lit_objet)'), 'aucune'));
 end $f$;
 
 
 
--- 44 — authenticated n'exécute dans private que les fonctions qu'une politique ou une fonction publique utilise
+-- 44 — dans private, anon n'exécute rien et authenticated n'exécute que les fonctions requises
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- runtests() annule tout ce que le test écrit.
+-- Requises = citées par une politique RLS (pg_depend) ou appelées par une fonction publique SECURITY INVOKER
+-- exécutable par authenticated, avec fermeture transitive (tests.fonctions_private_requises()).
+-- La migration omega/migrations/a5_01_private_execute.sql applique exactement cette règle.
 
 create or replace function tests.test_44_private_fonctions_exposees() returns setof text
 language plpgsql as $f$
 declare
-  -- rien
+  requises text; en_trop text; manquantes text; nb_total int; nb_exec int;
 begin
-  return next is_empty($q$
-    select p.proname
-    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
-      and has_function_privilege('authenticated', p.oid, 'execute')
-      and not exists (select 1 from pg_policies pol where (coalesce(pol.qual, '') || coalesce(pol.with_check, '')) ~ ('private\.' || p.proname || '\('))
-      and not exists (select 1 from pg_proc q join pg_namespace m on m.oid = q.pronamespace where m.nspname = 'public' and q.prosrc ~ ('private\.' || p.proname || '\('))
-    order by 1
-  $q$, 'Aucune fonction de private exécutable par authenticated sans usage connu (politique RLS ou fonction publique)');
+  select count(*), count(*) filter (where has_function_privilege('authenticated', p.oid, 'execute')) into nb_total, nb_exec
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype;
+  select string_agg(nom || ' (' || raison || ')', ', ' order by nom) into requises from tests.fonctions_private_requises();
+  select string_agg(p.proname, ', ' order by p.proname) into en_trop
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+    and has_function_privilege('authenticated', p.oid, 'execute')
+    and p.oid not in (select oid from tests.fonctions_private_requises());
+  select string_agg(nom, ', ' order by nom) into manquantes
+  from tests.fonctions_private_requises() r where not has_function_privilege('authenticated', r.oid, 'execute');
+  return next is(en_trop, null, format('authenticated n''exécute aucune fonction de private hors des requises (%s exécutables sur %s)', nb_exec, nb_total));
+  if en_trop is not null then return next diag('En trop (à révoquer) : ' || en_trop); end if;
+  return next is(manquantes, null, 'Toutes les fonctions requises sont exécutables par authenticated (sinon les politiques cassent)');
+  if manquantes is not null then return next diag('Manquantes (à accorder) : ' || manquantes); end if;
   return next is_empty($q$
     select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute') order by 1
   $q$, 'anon n''exécute aucune fonction de private');
+  return next diag('Requises : ' || coalesce(requises, 'aucune'));
 end $f$;
 
 

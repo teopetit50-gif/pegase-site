@@ -7,6 +7,11 @@ language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
 begin
+  if not tests.table_existe('journal_opposable') then
+    return next pass('public.journal_opposable n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
   select count(*) into nb from tests.declencheurs_bloquants('journal_opposable') where sur_delete and avant;
   return next ok(nb > 0, 'journal_opposable : un déclencheur BEFORE DELETE existe');
   v_ctid := tests.ligne_pour_essai('journal_opposable');

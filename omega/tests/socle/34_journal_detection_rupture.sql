@@ -9,7 +9,7 @@ declare
 begin
   jeu := tests.jeu();
   for i in 1..3 loop
-    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai'));
+    perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5_' || i);
   end loop;
   begin
     execute 'alter table public.journal_opposable disable trigger user';

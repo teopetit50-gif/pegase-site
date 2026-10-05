@@ -1,39 +1,50 @@
--- 36 — un envoi vers une personne en opposition est refusé
+-- 36 — un envoi vers une personne en opposition est refusé par les verrous d'envoi
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
+-- Mécanique réelle (coordinateur, 5/10) : pas de déclencheur d'insertion ; private.opposer(...) pose l'opposition,
+-- private.verrous_envoi(p_e envois, p_complet boolean, p_instant timestamptz) rend les verrous que lit tache_envois.
 
 create or replace function tests.test_36_envoi_opposition_refuse() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; t_oppos text; t_envois text; col_oppos text; col_envoi text; col_canal_o text; col_canal_e text; col_statut text; valeurs jsonb; ligne jsonb;
+  jeu jsonb; col_dest text; col_canal text; col_trans text; type_oppos text; valeurs jsonb; ligne jsonb; verrous jsonb; sans_opposition jsonb;
 begin
   jeu := tests.jeu();
-  t_oppos := tests.table_parmi(array['oppositions']);
-  t_envois := tests.table_parmi(array['envois']);
-  if t_oppos is null or t_envois is null then return next fail('Tables oppositions/envois introuvables'); return; end if;
-  col_oppos := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
-  col_envoi := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
-  col_canal_o := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['canal']);
-  col_canal_e := tests.colonne_parmi(('public.' || t_envois)::regclass, array['canal']);
-  if col_oppos is null or col_envoi is null then
-    return next fail(format('Colonne du destinataire introuvable (oppositions : %s ; envois : %s) — adapter la liste de candidates', col_oppos, col_envoi));
-    return next diag('Colonnes de ' || t_envois || ' : ' || (select string_agg(attname, ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+  if not tests.table_existe('envois') then return next fail('Table envois introuvable'); return; end if;
+  col_dest := tests.colonne_parmi('public.envois'::regclass, array['destinataire_adresse', 'adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
+  col_canal := tests.colonne_parmi('public.envois'::regclass, array['canal']);
+  col_trans := tests.colonne_parmi('public.envois'::regclass, array['transactionnel']);
+  if col_dest is null then
+    return next fail('Colonne du destinataire introuvable dans envois — adapter la liste de candidates');
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = 'public.envois'::regclass and attnum > 0 and not attisdropped));
     return;
   end if;
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_oppos, 'oppose-a5@essai.invalid');
-  if col_canal_o is not null then valeurs := valeurs || jsonb_build_object(col_canal_o, 'courriel'); end if;
-  perform tests.inserer_minimal('public', t_oppos, valeurs);
-  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_envoi, 'oppose-a5@essai.invalid');
-  if col_canal_e is not null then valeurs := valeurs || jsonb_build_object(col_canal_e, 'courriel'); end if;
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, 'oppose-a5@essai.invalid');
+  if col_canal is not null then valeurs := valeurs || jsonb_build_object(col_canal, 'courriel'); end if;
+  if col_trans is not null then valeurs := valeurs || jsonb_build_object(col_trans, true); end if;
+  ligne := tests.inserer_minimal('public', 'envois', valeurs);
+  -- Verrous AVANT opposition : témoin
   begin
-    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+    execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into sans_opposition using (ligne ->> 'id')::bigint;
   exception when others then
-    return next pass('L''envoi vers une personne en opposition est rejeté à l''insertion : ' || sqlerrm);
+    return next fail('private.verrous_envoi(envois, boolean, timestamptz) injoignable : ' || sqlerrm);
+    return next diag('Signatures : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname ~ 'verrou'), 'aucune'));
     return;
   end;
-  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat', 'decision', 'verdict']);
-  return next ok(col_statut is not null and (ligne ->> col_statut) ~* '(refus|bloqu|oppos|interdit)', format('Envoi accepté en base mais marqué %s = %L (attendu : refusé)', col_statut, ligne ->> col_statut));
-  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+  -- Opposition par la porte du socle
+  type_oppos := coalesce(nullif(regexp_replace(coalesce(tests.valeur_selon_check('public.oppositions'::regclass, 'type', 'text'::regtype), ''), '::.*$|''', '', 'g'), ''), 'prospect');
+  begin
+    perform tests.appeler_privee('opposer', jeu ->> 'client_a', type_oppos, 'oppose-a5@essai.invalid', 'courriel', null, null, 'essai A5', 'essai_a5', null);
+  exception when others then
+    return next fail('private.opposer(...) refuse l''appel d''essai : ' || sqlerrm);
+    return next diag('Signature : ' || coalesce((select string_agg(p.oid::regprocedure::text, ' ; ') from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = 'opposer'), 'absente') || ' ; type essayé : ' || type_oppos);
+    return;
+  end;
+  execute 'select to_jsonb(private.verrous_envoi(e, true, now())) from public.envois e where e.id = $1' into verrous using (ligne ->> 'id')::bigint;
+  return next ok(verrous::text ~* 'oppos', 'Avec une opposition posée, verrous_envoi() nomme l''opposition');
+  return next ok(sans_opposition::text !~* 'oppos', 'Sans opposition, verrous_envoi() ne la nommait pas (témoin)');
+  return next diag('Verrous avec opposition : ' || left(verrous::text, 400));
+  return next diag('Verrous sans opposition : ' || left(sans_opposition::text, 400));
 end $f$;
 
 select * from runtests('tests'::name, '^test_36_');
