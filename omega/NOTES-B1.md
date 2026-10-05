@@ -1,14 +1,15 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
-Branche `worker-b1`. Dernière mise à jour : 05/10/2026, soir (lecture du socle,
-scénario écrit, rien de posé ni de joué encore). Le coordinateur lit ce fichier.
+Branche `worker-b1`. Dernière mise à jour : 05/10/2026, 23 h (écran écrit et
+recetté sur l'exemple, b1_01 posée, b1_02 et les tests en attente de pose et de
+rejeu). Le coordinateur lit ce fichier.
 
 ## Les deux jauges
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
-| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **0 %** | les 6 lots de tests ci-dessous joués verts sur la recette ; les trous relevés (§ Trous) bouchés par migration et prouvés |
-| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **0 %** | l'écran écrit, tsc/eslint/build verts, recette aux cinq largeurs, relecture réelle avec gerant/referent/daf du banc, et la fusion sur main (déploiement omegaai.fr) |
+| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **25 %** | b1_01 est posée ; b1_02 (GRANT) à poser ; les 14 fonctions de test (6 lots) écrites et poussées, **aucune encore verte** : premier jeu mort sur une aide absente (corrigé), second jeu demandé. Ensuite : les trous que le rouge révélera, une migration par trou |
+| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **55 %** | l'écran est écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓ (exemple) ; **reste** : relecture en base réelle avec gerant/referent/daf du banc (en cours), l'onglet dans la barre (fichier d'A3, demandé), la fusion sur main et la vérification sur omegaai.fr |
 
 ### Ce que Teo doit fournir ou décider lui-même
 
@@ -25,6 +26,10 @@ scénario écrit, rien de posé ni de joué encore). Le coordinateur lit ce fich
    l'écran — les comptes fournis (gerant, referent, daf, daf2) voient tout.
 3. Rien d'autre côté clés ou comptes tiers : le module tourne entièrement
    dans Postgres (crons `varelo-referentiel*`), sans fonction Edge ni IA.
+4. **Décider qui dépose les exports** : b1_01 + b1_02 ouvrent `grp_installer`
+   et `grp_deposer_codes` au gérant et à l'administrateur (la DSI, comme le
+   site le promet). Si Teo veut qu'un collaborateur d'une société dépose
+   l'export de SA société, c'est une règle de plus (voit_entite) à écrire.
 
 ## 1. Le scénario réel de bout en bout
 
@@ -64,33 +69,70 @@ le veut (INSERT `grp_poles`, INSERT `approbations`). Lots :
 
 | Fichier | Étapes du scénario | État |
 |---|---|---|
-| `b1_01_installation.sql` | 1, 2, 3, 4 | à écrire |
-| `b1_02_depot_codes.sql` | 5, 6 | à écrire |
-| `b1_03_rapprochement.sql` | 7, 8, 14 | à écrire |
-| `b1_04_decisions.sql` | 9, 10, 12, 13 | à écrire |
-| `b1_05_corrections.sql` | 11 | à écrire |
-| `b1_06_garde_fous.sql` | 15, 16, 17 | à écrire |
+| `b1_00_aides.sql` | le groupe vierge et ses personnes, `b1_preparer(palier)`, les deux exports, `b1_code`, `b1_decider` | écrit (2e version, 99ecb89) |
+| `b1_01_installation.sql` | 1, 2, 3, 4 (dont périmètre partiel par `comptes_entites`) — 4 tests | écrit, à rejouer |
+| `b1_02_depot_codes.sql` | 5, 6 — 2 tests | écrit, à rejouer |
+| `b1_03_rapprochement.sql` | 7, 8, 14 + périmètre partiel sur codes/objets/propositions — 1 test | écrit, à rejouer |
+| `b1_04_decisions.sql` | 9, 10, 12, 13 + lot refusé — 3 tests | écrit, à rejouer |
+| `b1_05_corrections.sql` | 11 (nom, rattachement, fusion, refus) — 1 test | écrit, à rejouer |
+| `b1_06_garde_fous.sql` | 15, 16, 17 + battement — 3 tests | écrit, à rejouer |
 
-## 3. Trous du socle relevés à la lecture (à confirmer sur la recette)
+Premier jeu (05/10, 22 h 44) : 14 tests morts sur `tests.role_admis` absente de
+la recette → aides réécrites sans elle, sur le groupe vierge. Second jeu demandé
+avec la pose de b1_02.
 
-| # | Trou | Migration |
-|---|---|---|
-| T1 | `public.grp_installer`, `grp_deposer_codes`, `grp_rapprocher`, `grp_appliquer_decisions` passent à des fonctions `SECURITY DEFINER` **sans contrôle de rôle** quand `auth.uid()` est posé (seule `grp_demander_rapprochement` et `grp_exporter_referentiel` vérifient). Si `authenticated` a EXECUTE dessus (défaut PUBLIC sur `public`), un membre d'une autre organisation installe, dépose des codes ou lance un passage **chez le banc**. | `b1_01_portes_roles.sql` : gérant/admin pour installer et déposer ; gérant/admin/valideur pour rapprocher et appliquer ; membre du client exigé partout |
-| T2 | `grp_ajouter_societe` n'est pas `SECURITY DEFINER` : elle écrit `entites` et `grp_societes` sous la RLS de l'appelant. Si la politique INSERT d'`entites` n'ouvre pas au gérant, la porte échoue pour tout le monde. À vérifier en réel. | selon la réponse |
-| T3 | Aucune porte de **lecture du lot** pour l'écran (paires d'une demande avec les deux codes, leurs sociétés, la preuve) : l'écran peut joindre `grp_ref_propositions` × `grp_ref_codes` × `entites` sous RLS, mais `grp_ref_codes` n'est lisible que dans le périmètre de la personne : le référent au périmètre total voit tout, c'est ce qu'on veut. Pas de migration si la vue suffit. | — |
-| T4 | Aucune table `grp_*` n'est dans la publication Realtime (`socle_lot19h` n'en cite aucune) : l'écran se relira à la main. À demander si on veut le direct comme A3. | demande au coordinateur |
+## 3. Trous du socle (relevés à la lecture, confirmés ou infirmés par le coordinateur le 05/10)
 
-## 4. Questions de faits au coordinateur (envoyées le 05/10 au soir)
+| # | Trou | État | Migration |
+|---|---|---|---|
+| T1 | Les quatre enveloppes `grp_installer`, `grp_deposer_codes`, `grp_rapprocher`, `grp_appliquer_decisions` ne contrôlaient ni rôle ni appartenance. **À moitié vrai** : elles étaient réservées à `service_role` (authenticated sans EXECUTE), donc pas de fuite ; mais le scénario veut que le gérant installe et que la DSI dépose depuis l'écran. | b1_01 **posée** (varelo_b1_01) : contrôle de rôle quand `auth.uid()` est posé. | `b1_01_portes_roles.sql` ✓ posée ; `b1_02_portes_authenticated.sql` à poser : GRANT à authenticated des quatre public et des quatre private appelées (à ajouter à la liste figée d'A5) |
+| T2 | `grp_ajouter_societe` sous la RLS de l'appelant. **Infirmé** : `entites` a une politique INSERT gérant/admin (et `not principale`) avec son GRANT ; la porte marche pour le gérant, et refuse les autres (42501) — c'est ce qu'on veut. | clos | — |
+| T3 | Pas de porte de lecture du lot. **Sans objet** : l'écran lit `grp_ref_propositions` × `grp_referentiel_codes` sous RLS ; `comptes_entites` porte le périmètre partiel (un collaborateur rattaché à une société ne voit que ses codes et leurs objets), testé en b1_01 et b1_03. | clos | — |
+| T4 | Aucune table `grp_*` dans Realtime. **Posé par le coordinateur** (lot 19n) : `grp_ref_propositions`, `grp_ref_codes`, `grp_ref_objets`, `grp_societes` publiées ; l'écran les écoute (`tempsReel.ts`) avec `demandes_validation`. | clos | — |
+| T5 | `private.grp_proposer` ne pose pas `payload.saisi_par` : la séparation saisie/approbation (lot 19c) ne peut tenir que si `demandes_validation.demandeur_id` est posé par le socle. **À prouver** par b1_04 (test « séparation ») et b1_05. | en attente du rejeu | si rouge : `b1_03_saisi_par.sql` (create or replace de `private.grp_proposer` avec `'saisi_par', v_uid` dans la charge) |
+| T6 | Les aides d'A5 sur la recette n'ont pas `tests.role_admis` (présente sur worker-a5, absente en base). Pas un trou du socle : mes aides n'en dépendent plus. | clos | — |
 
-Voir le message. Réponses à recopier ici.
+## 4. Réponses du coordinateur (05/10, 22 h 30), recopiées
 
-## 5. Écran /espace/varelo
+- **Portes** : authenticated exécute `grp_ajouter_societe`, `grp_demander_rapprochement`, `grp_ecarter_proposition`, `grp_etat_referentiel`, `grp_exporter_referentiel`, `grp_proposer_*` ; pas `grp_appliquer_decisions`, `grp_deposer_codes`, `grp_installer`, `grp_rapprocher` (service_role) → b1_02.
+- **Banc** : installé le 29/09 (seuils 0,970 / 0,800, lots de 50, IBAN partagé ≤ 3) ; 3 sociétés (Novasud Antilles GP, Sodimat Guadeloupe GP, Métalco Martinique MQ), 0 pôle, 892 codes (articles 125, fournisseurs 134, clients 633), 686 objets, 226 propositions à valider, 7 demandes en attente (rapprocher_codes 2, rattacher_codes 4, rattacher_iban_different 1), 1 exécutée, 1 refusée ; chargé par les jeux fictifs du socle puis rapproché par le cron. Conseil suivi : les tests jouent sur un **groupe vierge** (`tests.jeu()`), le banc sert à la relecture écran.
+- **Socle commun** : `entites(id, client_id, parent_id, nom, type, siren, principale, cree_le, fuseau, territoire)` ; `voit_entite` = périmètre total ou ligne `comptes_entites(client_id, user_id, entite_id)` ; `a_un_role` = compte du uid chez le client avec le rôle ; `exiger_decideur` = rôle autorisé + périmètre + équipe + objet ; `equipes(id, client_id, cle, nom)`, `equipes_membres(id, client_id, equipe_id, user_id)`.
+- **Comptes du banc** : gerant …c1 (gerant), referent …c2, daf …c3, daf2 …c4 (valideurs, périmètre total) ; referent ∈ `referent_donnees`, daf et daf2 ∈ `direction_financiere`.
+- **Journal** : `journal_opposable(id, client_id, entite_id, survenu_le, acteur_type, acteur_id, acteur_libelle, action, objet_type, objet_id, donnees, hash_precedent, hash)`, SELECT gérants et admins seulement, écriture par `private.journaliser` seule. `private.battre` upsert `battements` et acquitte l'alerte `battement:<module>`.
+- **Session de relecture** : `POST /auth/v1/token?grant_type=password` sur la recette avec la clé publique `sb_publishable_a12GN1jHf0IJR4xcKvPTXw_NlPb51zl` ; comptes gerant/referent/daf@banc-varelo.test. Le site construit avec `NEXT_PUBLIC_SUPABASE_URL` / `_PUBLISHABLE_KEY` de la recette (le défaut de `lib/supabase/config.ts` est la production).
 
-À écrire après le premier lot de tests vert. Dicté par le scénario :
-sociétés et pôles (étapes 1-4), dépôt d'un export et passage (5-7), le
-référentiel du groupe par objet avec ses codes par société (10, 14),
-corrections proposées (11), lots à valider avec « écarter cette paire » (8-9)
-et renvoi vers /espace/validations pour approuver, export CSV (15), journal
-(17). Données d'exemple marquées (le monde Atelier Bertin d'A3 devient un
-petit groupe fictif), interrupteur base réelle, portes RPC, jamais d'UPDATE
-là où une porte existe.
+## 5. Écran /espace/varelo (8f92b47)
+
+`app/espace/varelo/page.tsx` + `components/espace/varelo/` : `types.ts`
+(décalque du socle), `exemples.ts` (le groupe Bertin : trois sociétés, deux
+pôles, dix codes fournisseurs sous sept objets, quatre paires à valider dont
+une IBAN différent, une probable à 86 % et une correction humaine),
+`portes.ts` (lectures sous RLS + les portes `grp_*`, INSERT `grp_poles`
+seul), `csv.ts` (lecture d'un export, synonymes d'en-têtes Sage/EBP/Cegid),
+`EcranVarelo.tsx` (compteurs par nature, objets ↔ objet ouvert, dépôt,
+passage, export CSV, installation), `ObjetDetail.tsx` (codes par société,
+nom / fusion / rattachement / détachement / scission → `grp_proposer_*`),
+`Lots.tsx` (paires par demande avec la preuve, « écarter cette paire » →
+`grp_ecarter_proposition`, renvoi vers /espace/validations, dernières
+décisions), `Societes.tsx` (pôles, sociétés, inscription avec territoire
+obligatoire), `Depot.tsx` (export → `grp_deposer_codes`, compte rendu et
+rejets), `varelo.css` (compléments, rien de `.esp-*` redéfini).
+
+Vérifié : `npx tsc --noEmit` ✓, `npx eslint components/espace/varelo
+app/espace/varelo` ✓ (0/0), `npm run build` ✓, recette
+`node omega/recette-b1/recette-varelo.mjs` ✓ aux cinq largeurs (390 / 768 /
+1024 / 1440 / 1700 : chargement, débordement, éléments larges, mots anglais,
+titre, compteurs, 7 objets / 4 paires / 3 sociétés) + cinq enchaînements
+(écarter la paire 4471 → le code repart seul, un objet de plus ; proposer un
+nom → demande ouverte, seconde proposition refusée ; inscrire une société →
+SIREN à cinq chiffres refusé avant l'envoi, Guadeloupe → fuseau ; déposer un
+export → cinq lignes, colonnes reconnues par synonymes, trois rejets avec
+motifs, une anomalie ; passage → deux objets ouverts ; nature clients,
+recherche, export CSV) : « tout passe ». Captures `omega/recette-b1/`.
+
+**Relecture en base réelle** : `omega/recette-b1/relecture-reelle-varelo.mjs`
+(décalque d'A3), en cours avec gerant / referent / daf du banc.
+
+**Hors périmètre, demandé au coordinateur** : l'onglet dans
+`components/espace/ecrans.ts` (A3) et `varelo` dans `MODULES` de
+`components/espace/format.ts`.
