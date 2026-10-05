@@ -7,7 +7,7 @@
 --                                                      devient un travail `identite.verifier` ;
 --   public.identite_a_verifier(p_verification)         porte : la demande, le fournisseur, le cache ;
 --   public.noter_identite(p_verification, …)           porte : la réponse, le cache, les compléments, le verdict sur la
---                                                      fiche fournisseur (colonnes d'A4 si elles existent), le recontrôle ;
+--                                                      fiche fournisseur (colonnes d'a4_10, forme lue par A4), le recontrôle ;
 --   public.identite_relancer(p_heures)                 porte : rouvre les « indisponible » trop vieux.
 -- Toutes les portes sont réservées au rôle de service. Migration idempotente : create or replace, if not exists,
 -- on conflict ; aucun DROP, aucun DELETE.
@@ -153,36 +153,28 @@ begin
 end $$;
 
 -- Le verdict sur la fiche fournisseur (colonnes posées par A4 en a4_10 : identite_verifiee_le timestamptz,
--- identite_source text, identite_verdict jsonb). Tant qu'elles n'existent pas, rien n'est écrit : la vérification
--- reste lisible dans filed_verifications_tiers et dans le contrôle identite.registre. Le type réel de chaque
--- colonne est lu dans pg_attribute : jsonb → objet {resultat, registre, identifiant, source, verifie_le,
--- verification} ; texte → le seul résultat.
+-- identite_source text contraint à sirene | vies | humain, identite_verdict jsonb). Tant qu'elles n'existent pas,
+-- rien n'est écrit : la vérification reste lisible dans filed_verifications_tiers et dans le contrôle
+-- identite.registre. La forme est celle qu'A4 lit (filed_completer_fournisseur_lu, identite.registre) :
+--   identite_source  = le registre (sirene / vies), jamais la source d'ouvrier (recherche-entreprises, cache) ;
+--   identite_verdict = {resultat, identifiant, registre, preuve} ; la preuve est celle de la vérification
+--                      (déjà enrichie de source) plus verifie_le et verification.
 create or replace function private.identite_poser_verdict(p_v public.filed_verifications_tiers, p_resultat text, p_source text)
 returns boolean language plpgsql set search_path to '' as $$
 declare
-  v_type_verdict text;
-  v_type_source text;
   v_verdict jsonb;
 begin
   if p_v.fournisseur_id is null then return false; end if;
-  select format_type(a.atttypid, a.atttypmod) into v_type_verdict from pg_attribute a
-   where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_verdict' and not a.attisdropped;
-  select format_type(a.atttypid, a.atttypmod) into v_type_source from pg_attribute a
-   where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_source' and not a.attisdropped;
-  if v_type_verdict is null or v_type_source is null
+  if not exists (select 1 from pg_attribute a where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_verdict' and not a.attisdropped and a.atttypid = 'jsonb'::regtype)
+     or not exists (select 1 from pg_attribute a where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_source' and not a.attisdropped)
      or not exists (select 1 from pg_attribute a where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_verifiee_le' and not a.attisdropped) then
     return false;
   end if;
-  -- Le verdict : un objet si la colonne est jsonb (a4_10), le seul résultat si elle est texte.
-  v_verdict := jsonb_build_object('resultat', p_resultat, 'registre', p_v.registre, 'identifiant', p_v.identifiant,
-                                  'source', p_source, 'verifie_le', now(), 'verification', p_v.id);
-  if v_type_verdict in ('jsonb', 'json') then
-    execute format('update public.filed_fournisseurs set identite_verifiee_le = now(), identite_source = $2::%s, identite_verdict = $3::%s, maj_le = now() where id = $1', v_type_source, v_type_verdict)
-      using p_v.fournisseur_id, left(p_source, 40), v_verdict;
-  else
-    execute format('update public.filed_fournisseurs set identite_verifiee_le = now(), identite_source = $2::%s, identite_verdict = $3::%s, maj_le = now() where id = $1', v_type_source, v_type_verdict)
-      using p_v.fournisseur_id, left(p_source, 40), p_resultat;
-  end if;
+  v_verdict := jsonb_build_object(
+    'resultat', p_resultat, 'identifiant', p_v.identifiant, 'registre', p_v.registre,
+    'preuve', coalesce(p_v.preuve, '{}'::jsonb) || jsonb_build_object('source', p_source, 'verifie_le', now(), 'verification', p_v.id));
+  execute 'update public.filed_fournisseurs set identite_verifiee_le = now(), identite_source = $2, identite_verdict = $3, maj_le = now() where id = $1'
+    using p_v.fournisseur_id, p_v.registre, v_verdict;
   return true;
 end $$;
 
@@ -232,7 +224,7 @@ begin
 
   select * into v from public.filed_verifications_tiers where id = p_verification;
   if p_resultat <> 'indisponible' then
-    perform private.identite_poser_verdict(v, p_resultat, case when p_source = 'cache' then coalesce(p_preuve ->> 'source_initiale', 'cache') else p_source end);
+    perform private.identite_poser_verdict(v, p_resultat, p_source);
     n_recontrolees := private.identite_recontroler(v);
   end if;
   return jsonb_build_object('verification', v.id, 'deja_repondue', false, 'complements', n_compl, 'recontrolees', n_recontrolees);
