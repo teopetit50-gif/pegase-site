@@ -151,16 +151,13 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
    `omega-clients` (premier segment = un client de `mes_clients()`). Rien à
    changer : l'action serveur signe déjà avec la session de la personne.
 
-10. **GRANT manquants pour les écritures directes du socle** (05/10, relecture
-   réelle) : `authenticated` n'a que SELECT sur `approbations`,
-   `delegations` et `demandes_validation`. Pour que l'écran décide, délègue,
-   révoque et annule comme convenu : `grant insert on public.approbations,
-   public.delegations to authenticated ; grant update on public.delegations,
-   public.demandes_validation to authenticated ;` (les policies restent
-   juges) — ou des portes RPC `decider`, `deleguer`, `revoquer_delegation`,
-   `annuler_demande`, et je bascule dessus. Au passage, vus dans les mêmes
-   grants : `comptes` a DELETE, `entites` INSERT + DELETE, `regles_validation`
-   INSERT + UPDATE + DELETE pour `authenticated` — voulu ?
+10. **GRANT des écritures directes** — posé (lot 19k, 19:50 UTC) : voie (a),
+   75 GRANT en face des policies. Délégation et révocation vérifiées.
+   `comptes` DELETE, `entites` INSERT + DELETE, `regles_validation`
+   INSERT + UPDATE + DELETE : voulus par le socle (policies `ALL`), pas
+   touchés. **Reste à demander** : un mot de passe pour `referent` (membre de
+   « Référent données ») ou `daf` pour rejouer approuver / refuser, et une
+   demande saisie par le gérant pour rejouer l'annulation.
 9. **Realtime** — posé en partie (socle_lot19h, 05/10 18:25) :
    `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`
    sont dans la publication `supabase_realtime`. Les écrans écoutent déjà
@@ -207,15 +204,24 @@ sur la recette, cookie de session posé par
   dans « À qui déléguer » (Daf, Daf2, Referent). FILED : 1 document
   `R2026-000001` en lecture, nature à classer. Point : aucun point assemblé
   pour le banc (attendu).
-- **Les écritures directes sont refusées** : poser une délégation rend
-  « permission denied for table delegations ». Vérifié dans
-  `information_schema.role_table_grants` : `authenticated` n'a que SELECT
-  sur `approbations`, `delegations`, `demandes_validation` (les policies
-  d'INSERT/UPDATE existent, mais sans GRANT elles ne servent à rien —
-  effet d'a5_01). Donc **approuver / refuser (INSERT approbations),
-  déléguer (INSERT delegations), révoquer (UPDATE delegations), annuler sa
-  demande (UPDATE demandes_validation) ne passent pas aujourd'hui** en
-  base réelle. Demande au coordinateur (point 10 ci-dessous).
+- **Les écritures** : d'abord refusées (« permission denied for table
+  delegations » — `authenticated` n'avait que SELECT sur `approbations`,
+  `delegations`, `demandes_validation`, effet d'a5_01), puis **ouvertes par
+  le lot 19k** du coordinateur (75 GRANT en face des policies). Rejoué à
+  19:55 UTC : **poser une délégation** (Vous → Daf, tous modules, un mois)
+  et **la révoquer** passent, la carte « Mes délégations » suit. Deux
+  leçons prises à chaud : `delegations.fin` est NOT NULL — le terme devient
+  obligatoire dans le formulaire (un mois par défaut) ; et le trigger
+  refuse « Cette demande revient à l'équipe « Référent données » » : les
+  neuf demandes du banc sont **réservées à une équipe** dont le gérant
+  n'est pas membre. L'écran lit désormais `equipes` et `equipes_membres`
+  et le dit AVANT le clic (règle « · équipe : Référent données », avis
+  ambre, boutons gris ; « À décider par moi » vide à juste titre), une
+  délégation d'un membre rouvrant la décision — même ordre que le trigger.
+  **Approuver / refuser restent à rejouer** avec un compte membre
+  (referent c2 pour « Référent données », daf/daf2 pour « Direction
+  financière ») : il leur faut un mot de passe. **Annuler sa demande**
+  demande une demande saisie par la personne : aucune sur le banc.
 - `apercu_point(p_client, p_user, p_jour)` répond 200 avec
   `{jour, du_le, fuseau, motifs: [], prevu_le, sections: []}` pour le banc
   (aucun gabarit de point posé) : l'écran dit « Pas de point ce jour-là »
