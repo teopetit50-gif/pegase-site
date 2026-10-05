@@ -121,3 +121,11 @@
   font-size: 12px;
   color: var(--r-faible);
 }
+
+/* ——— le formulaire de retour : de l'air entre les blocs ——— */
+.esp .esp-form .tav-coche {
+  margin: 4px 0;
+}
+.esp .esp-form .esp-section-titre {
+  margin-top: 8px;
+}
