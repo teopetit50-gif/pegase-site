@@ -18,7 +18,9 @@ language plpgsql as $$
 declare
   jeu jsonb := tests.jeu();
   v_client uuid := (jeu ->> 'client_a')::uuid;
-  v_gerant uuid := (jeu ->> 'gerant_a')::uuid;
+  -- le gérant est créé ICI (06/10 : le tests.jeu() posé sur la recette ne rend pas de clé « gerant_a »,
+  -- et un uuid nul endossé donne auth.uid() nul : toutes les politiques gérant/admin refusent)
+  v_gerant uuid := gen_random_uuid();
   v_referent uuid := gen_random_uuid();
   v_daf uuid := gen_random_uuid();
   v_daf2 uuid := gen_random_uuid();
@@ -26,7 +28,11 @@ declare
   v_partiel uuid := gen_random_uuid();
   p record;
 begin
+  if v_client is null then
+    raise exception 'tests.b1_banc : tests.jeu() ne rend pas de client_a (%)', jeu::text;
+  end if;
   for p in select * from (values
+      (v_gerant, 'b1-gerant@essai.invalid', 'gerant', true),
       (v_referent, 'b1-referent@essai.invalid', 'valideur', true),
       (v_daf, 'b1-daf@essai.invalid', 'valideur', true),
       (v_daf2, 'b1-daf2@essai.invalid', 'valideur', true),
