@@ -152,20 +152,37 @@ begin
   return n;
 end $$;
 
--- Le verdict sur la fiche fournisseur (colonnes posées par A4 en a4_10 : identite_verifiee_le, identite_source,
--- identite_verdict). Tant qu'elles n'existent pas, rien n'est écrit : la vérification reste lisible dans
--- filed_verifications_tiers et dans le contrôle identite.registre.
+-- Le verdict sur la fiche fournisseur (colonnes posées par A4 en a4_10 : identite_verifiee_le timestamptz,
+-- identite_source text, identite_verdict jsonb). Tant qu'elles n'existent pas, rien n'est écrit : la vérification
+-- reste lisible dans filed_verifications_tiers et dans le contrôle identite.registre. Le type réel de chaque
+-- colonne est lu dans pg_attribute : jsonb → objet {resultat, registre, identifiant, source, verifie_le,
+-- verification} ; texte → le seul résultat.
 create or replace function private.identite_poser_verdict(p_v public.filed_verifications_tiers, p_resultat text, p_source text)
 returns boolean language plpgsql set search_path to '' as $$
+declare
+  v_type_verdict text;
+  v_type_source text;
+  v_verdict jsonb;
 begin
   if p_v.fournisseur_id is null then return false; end if;
-  if not exists (select 1 from pg_attribute where attrelid = 'public.filed_fournisseurs'::regclass and attname = 'identite_verifiee_le' and not attisdropped)
-     or not exists (select 1 from pg_attribute where attrelid = 'public.filed_fournisseurs'::regclass and attname = 'identite_source' and not attisdropped)
-     or not exists (select 1 from pg_attribute where attrelid = 'public.filed_fournisseurs'::regclass and attname = 'identite_verdict' and not attisdropped) then
+  select format_type(a.atttypid, a.atttypmod) into v_type_verdict from pg_attribute a
+   where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_verdict' and not a.attisdropped;
+  select format_type(a.atttypid, a.atttypmod) into v_type_source from pg_attribute a
+   where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_source' and not a.attisdropped;
+  if v_type_verdict is null or v_type_source is null
+     or not exists (select 1 from pg_attribute a where a.attrelid = 'public.filed_fournisseurs'::regclass and a.attname = 'identite_verifiee_le' and not a.attisdropped) then
     return false;
   end if;
-  execute 'update public.filed_fournisseurs set identite_verifiee_le = now(), identite_source = $2, identite_verdict = $3, maj_le = now() where id = $1'
-    using p_v.fournisseur_id, left(p_source, 40), p_resultat;
+  -- Le verdict : un objet si la colonne est jsonb (a4_10), le seul résultat si elle est texte.
+  v_verdict := jsonb_build_object('resultat', p_resultat, 'registre', p_v.registre, 'identifiant', p_v.identifiant,
+                                  'source', p_source, 'verifie_le', now(), 'verification', p_v.id);
+  if v_type_verdict in ('jsonb', 'json') then
+    execute format('update public.filed_fournisseurs set identite_verifiee_le = now(), identite_source = $2::%s, identite_verdict = $3::%s, maj_le = now() where id = $1', v_type_source, v_type_verdict)
+      using p_v.fournisseur_id, left(p_source, 40), v_verdict;
+  else
+    execute format('update public.filed_fournisseurs set identite_verifiee_le = now(), identite_source = $2::%s, identite_verdict = $3::%s, maj_le = now() where id = $1', v_type_source, v_type_verdict)
+      using p_v.fournisseur_id, left(p_source, 40), p_resultat;
+  end if;
   return true;
 end $$;
 
