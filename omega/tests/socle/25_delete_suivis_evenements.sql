@@ -1,0 +1,17 @@
+-- 25 — DELETE sur public.suivis_evenements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_25_delete_suivis_evenements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  select count(*) into nb from tests.declencheurs_bloquants('suivis_evenements') where sur_delete and avant;
+  return next ok(nb > 0, 'suivis_evenements : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('suivis_evenements');
+  return next throws_ok(format('delete from public.suivis_evenements where ctid = %L', v_ctid), null, null, 'DELETE sur suivis_evenements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'suivis_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
+end $f$;
+
+select * from runtests('tests'::name, '^test_25_');
