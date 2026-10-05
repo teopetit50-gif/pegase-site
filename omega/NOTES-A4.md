@@ -50,14 +50,16 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 - Les neuf migrations sont posées ; `filed_controler_facture` branché ; `filed_factures_statut_check`
   retiré, v2 en place.
-- Tests : a4_03 et a4_04 verts ; a4_01 vert de bout en bout ; a4_02 vert jusqu'à la section 5 avec
-  les adaptations ci-dessous, fin en cours (charges récurrentes, rapprochement, litige, export).
+- Tests : **les quatre sont verts sur la recette** (18:05 UTC), avec les adaptations ci-dessous,
+  toutes reportées dans les tests et la souche locale.
 - Adaptations reportées dans les tests et la souche (commit du 05/10 soir) : l'entité principale
   est créée par le socle avec le client (on la lit, on ne l'insère pas) ; `filed_fournisseurs.source`
   = 'saisie' ; `filed_documents.reference` est générée, `nom_fichier` obligatoire, `nature_source`
   = 'humain' ; `filed_commandes.numero_normalise` et `source`, `filed_commandes_lignes.source`,
   `filed_factures_lignes.source` obligatoires ; `pieces.source` = 'depot' ; SIREN unique par
-  organisation (l'artisan d'exemple porte 100000009).
+  organisation (l'artisan d'exemple porte 100000009) ; la commande se cite dans
+  `filed_factures.refs` (`{"commande": "CMD-1"}`), le rapprochement du socle pose `commande_id`
+  lui-même ; `ecart_prix_pct` vaut 0 % à l'installation, le test le règle à 2 %.
 - Séparation saisie / approbation : le coordinateur l'a posée dans `private.preparer_approbation`
   (refus à l'insertion si le décideur ou le délégant est dans `payload->'saisi_par'`). FILED ne
   redépose plus après décision : `filed_decider_facture` allégé (a4_07), test réécrit.
@@ -67,9 +69,8 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## À vérifier sur la recette (écarts possibles avec la souche locale)
 
-- `private.filed_rapprocher_facture` réel : le test 8 de `a4_02` suppose qu'une ligne de facture
-  de même rang qu'une ligne de commande est appariée (la souche le fait par rang). Si le réel
-  apparie autrement, seul ce test est à adapter, pas le code.
+- `private.filed_rapprocher_facture` réel : vérifié, la ligne de facture de même rang est appariée
+  (test 8 de `a4_02` vert sur la recette).
 - `public.pieces` : les tests insèrent les colonnes NOT NULL données par le coordinateur (module,
   source, nom_fichier, mime, octets, sha256, chemin) ; corrigé le 05/10 à 16:50.
 - Les droits `filed.pilotage` des indicateurs (`droit_lecture`, `droit_detail`) : nom choisi
@@ -135,6 +136,6 @@ Famille « Pilotage » :
 ## Demain
 
 - Retours de la recette : corriger, re-pousser.
-- Fin de a4_02 sur la recette (sections 7 à 9) : corriger si le rapprochement réel apparie
-  autrement que par rang.
+- Le coordinateur repose la migration correctrice (a4_07 allégé, droits) ; puis la production,
+  à sa main, et les lignes du site à `atteste: true`.
 - L'écran : rien ici ; les portes et les fonctions de lecture sont prêtes pour lui.

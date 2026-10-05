@@ -55,8 +55,12 @@ create or replace function private.filed_recontroler_fournisseur(p_f uuid) retur
 create or replace function private.filed_rapprocher_facture(p_facture uuid) returns void language plpgsql security definer set search_path to '' as $$
 declare v_f public.filed_factures; v_l public.filed_factures_lignes; v_c public.filed_commandes_lignes; v_r public.filed_reglages;
 begin
-  -- Souche : chaque ligne de facture rapprochée de la ligne de commande de même rang (quand une commande est rattachée).
+  -- Souche : la commande citée dans refs (numéro) est retrouvée et posée, comme le socle ; puis chaque ligne de
+  -- facture est rapprochée de la ligne de commande de même rang.
   select * into v_f from public.filed_factures where id = p_facture;
+  if v_f.commande_id is null and v_f.refs ? 'commande' then
+    update public.filed_factures set commande_id = (select c.id from public.filed_commandes c where c.client_id = v_f.client_id and c.numero = v_f.refs->>'commande' limit 1) where id = v_f.id returning commande_id into v_f.commande_id;
+  end if;
   if v_f.commande_id is null then return; end if;
   v_r := private.filed_reglage(v_f.client_id, v_f.entite_id);
   for v_l in select * from public.filed_factures_lignes where facture_id = v_f.id order by rang loop

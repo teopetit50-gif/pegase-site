@@ -194,8 +194,11 @@ begin
   insert into public.pieces (id, client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut) values (gen_random_uuid(), v_cl, 'filed', 'depot', 'facture-p6.pdf', 'application/pdf', 1024, repeat('b', 64), v_cl::text || '/filed_document/test/facture-p6.pdf', 'filed_document', 'p6', 'lue') returning id into v_r;
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, depose_par, nom_fichier, sha256, recu_le, etat, nature, nature_source)
   values (v_cl, v_e, 2026, 16, v_r.id, 'courriel', v_c, 'facture-16.pdf', repeat('b', 64), now(), 'a_traiter', 'facture', 'humain') returning id into v_r;
-  insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut, commande_id)
-  values (v_cl, v_e, v_r.id, 'facture', 'F-2026-103', 'F2026103', date '2026-05-05', current_date, 'EUR', 101.00, 20.20, 121.20, v_four, 'siren', '{"siren": "123456782", "tva": "FR11123456782"}', '{"siren": "987654329"}', repeat('c', 64), 'a_completer', v_cmd)
+  -- La commande se cite dans refs (le rapprochement du socle retrouve la commande et pose commande_id lui-même) ;
+  -- la tolérance de prix vaut 0 % à l'installation : on la règle à 2 % pour ce cas.
+  update public.filed_reglages set ecart_prix_pct = 2 where client_id = v_cl and entite_id is null;
+  insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut, refs)
+  values (v_cl, v_e, v_r.id, 'facture', 'F-2026-103', 'F2026103', date '2026-05-05', current_date, 'EUR', 101.00, 20.20, 121.20, v_four, 'siren', '{"siren": "123456782", "tva": "FR11123456782"}', '{"siren": "987654329"}', repeat('c', 64), 'a_completer', '{"commande": "CMD-1"}')
   returning id into v_f;
   insert into public.filed_factures_lignes (client_id, facture_id, document_id, rang, designation, quantite, prix_unitaire, montant_ht, source) values (v_cl, v_f, v_r.id, 1, 'Licence', 10, 10.10, 101.00, 'humain');
   v_statut := private.filed_controler_facture(v_f);
