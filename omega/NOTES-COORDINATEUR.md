@@ -21,6 +21,7 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | socle_lot19h | publication Realtime `supabase_realtime` : `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`, `delegations`, `filed_controles`, `filed_historique`, `points_du_jour` (demandé par A3) |
 | socle_lot19i | `private.fournisseurs_envoi` : Brevo `branche = true` sur la recette |
 | a5_01_private_execute | EXECUTE sur `private` retiré à PUBLIC/anon/authenticated puis rendu à la liste requise (migration d'A5 + compléments c/d/e du coordinateur : fonctions des triggers SECURITY INVOKER de private, des vues de public lisibles, des CHECK/defaults). Résultat : authenticated 187/741, anon 0. Liste figée : `omega/a5_01_liste_figee.txt` |
+| socle_lot19j | effet de bord d'a5_01 : le service_role n'avait EXECUTE sur `private` que par PUBLIC → « permission denied for function piece_a_lire » chez le lecteur à 18 h 55 Z. `grant execute on all functions in schema private to service_role` + default privileges (19 h 05 Z). À intégrer dans a5_01 (demandé à A5) |
 | filed_lot4a … filed_lot4g, filed_lot5a, filed_lot6a | les neuf migrations d'A4 (`omega/migrations/a4_01` à `a4_09`) : exercices, plan comptable, centres, imputations apprises, charges récurrentes, identité TVA/SIREN, archivage probant, pilotage, circuit de validation, branchements, acquittement d'alerte. `filed_factures_statut_check` retiré, `filed_factures_statut_v2` en place |
 
 Tests sur la recette : a4_01 à a4_04 verts (A4 a aligné ses jeux de données,
@@ -38,6 +39,12 @@ gérant du banc après a5_01 : vert.
   auth.identities), gérant du client banc `cccccccc-0000-4000-8000-00000000000c`
   « Groupe Sogexal (banc) », `config.boite_formulaire = site:omegaai.fr` ;
   comptes referent/daf/daf2 valideurs. Donné à A3 pour sa relecture.
+  **Piège** : un utilisateur inséré à la main dans `auth.users` doit avoir ''
+  (pas NULL) dans `confirmation_token`, `recovery_token`,
+  `email_change_token_new`, `email_change`, `email_change_token_current`,
+  `phone_change`, `phone_change_token`, `reauthentication_token`, sinon GoTrue
+  rend 500 « Database error querying schema » à la connexion (relevé par A3,
+  corrigé à 19 h 05 Z ; les quatre emails sont confirmés).
 - `public.reglages_envois` n'a **aucune porte** : Omega les pose à la main
   (ligne organisation `module null` + une ligne par module). Posé pour le banc :
   mode `essai`, `essai_adresse` = adresse de Teo, plages 24 h/7 sur `reput`
