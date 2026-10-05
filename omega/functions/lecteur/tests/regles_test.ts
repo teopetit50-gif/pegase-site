@@ -41,6 +41,20 @@ Deno.test("sans Bedrock : IA_NON_BRANCHEE, travail repris, rien d'enregistré", 
   assertEquals(portes.finis.length, 0);
 });
 
+Deno.test("sans Bedrock, un PDF n'est même pas téléchargé", async () => {
+  const { ctx, portes, depot } = contexteDeTest({ ia: null });
+  const piece = await poserPiece(portes, depot);
+  let telechargements = 0;
+  const original = depot.telecharger.bind(depot);
+  depot.telecharger = (chemin: string) => {
+    telechargements++;
+    return original(chemin);
+  };
+  assertEquals(await lirePiece(ctx, travailDeTest(1, piece.id)), "repris");
+  assertEquals(telechargements, 0);
+  assert(portes.echoues[0].erreur.startsWith("IA_NON_BRANCHEE"));
+});
+
 Deno.test("sans Bedrock, un XML se lit quand même (source xml)", async () => {
   const { ctx, portes, depot } = contexteDeTest({ ia: null });
   const cas = CAS.find((c) => c.id === "05_facture_ubl")!;

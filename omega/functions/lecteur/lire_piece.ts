@@ -119,8 +119,15 @@ async function echouer(ctx: Contexte, travail: Travail, e: unknown, trace: Recor
 
 // ---------------------------------------------------------------------------
 
+/** Une pièce qui se lira sans IA (XML Factur-X / UBL nu) : on la télécharge même si Bedrock n'est pas branché. */
+export function sembleXml(piece: Pick<Piece, "mime" | "nom_fichier">): boolean {
+  return /xml/i.test(piece.mime) || /\.xml$/i.test(piece.nom_fichier);
+}
+
 async function lire(ctx: Contexte, piece: Piece): Promise<Bilan> {
   const contexte = { nom_fichier: piece.nom_fichier, mime: piece.mime, module: piece.module };
+  // Sans IA, inutile de télécharger ce qu'on ne saura pas lire : on le dit tout de suite.
+  if (!ctx.extracteur && !sembleXml(piece)) exigerIa(ctx);
   const tele = await ctx.depot.telecharger(piece.chemin);
   if (!tele.present) {
     return echec(`Fichier absent du dépôt (${piece.chemin}).`);
