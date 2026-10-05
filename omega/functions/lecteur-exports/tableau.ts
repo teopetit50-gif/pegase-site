@@ -6,6 +6,8 @@ export interface Feuille {
   nom: string;
   entetes: string[];
   lignes: string[][];
+  /** Pour chaque ligne, son numéro dans le fichier (en-tête compris, à partir de 1). */
+  numeros: number[];
 }
 
 export interface Tableau {
@@ -76,43 +78,53 @@ export function decouperLigne(ligne: string, sep: string): string[] {
   return cellules;
 }
 
-/** Les enregistrements d'un CSV, en tenant compte des sauts de ligne entre guillemets. */
-function enregistrements(texte: string): string[] {
-  const sortie: string[] = [];
+/** Les enregistrements d'un CSV avec leur numéro de ligne, en tenant compte des sauts de ligne entre guillemets. */
+function enregistrements(texte: string): { texte: string; ligne: number }[] {
+  const sortie: { texte: string; ligne: number }[] = [];
   let courant = "";
+  let debut = 1;
+  let ligne = 1;
   let entre = false;
   for (let i = 0; i < texte.length; i++) {
     const c = texte[i];
     if (c === '"') entre = !entre;
-    if (!entre && (c === "\n" || (c === "\r" && texte[i + 1] === "\n"))) {
-      if (c === "\r") i++;
-      sortie.push(courant);
-      courant = "";
+    const fin = c === "\n" || (c === "\r" && texte[i + 1] === "\n") || (c === "\r" && !entre);
+    if (c === "\n" || c === "\r") {
+      if (c === "\r" && texte[i + 1] === "\n") i++;
+      ligne++;
+      if (!entre) {
+        sortie.push({ texte: courant, ligne: debut });
+        courant = "";
+        debut = ligne;
+        continue;
+      }
+      courant += "\n";
       continue;
     }
-    if (!entre && c === "\r") {
-      sortie.push(courant);
-      courant = "";
-      continue;
-    }
+    if (fin) continue;
     courant += c;
   }
-  if (courant !== "") sortie.push(courant);
+  if (courant !== "") sortie.push({ texte: courant, ligne: debut });
   return sortie;
 }
 
 export function lireCsv(octets: Uint8Array, separateur?: string): Tableau {
   const { texte, encodage } = decoderTexte(octets);
   const sep = separateur ?? devinerSeparateur(texte);
-  const brutes = enregistrements(texte).filter((l) => l.trim() !== "");
-  const [tete, ...reste] = brutes.map((l) => decouperLigne(l, sep).map((c) => c.trim()));
-  const entetes = (tete ?? []).map((e) => e.replace(/^﻿/, ""));
-  const lignes = reste.filter((l) => l.some((c) => c !== "")).map((l) => {
+  const brutes = enregistrements(texte).filter((l) => l.texte.trim() !== "");
+  const [tete, ...reste] = brutes;
+  const entetes = (tete ? decouperLigne(tete.texte, sep) : []).map((e) => e.trim().replace(/^\uFEFF/, ""));
+  const lignes: string[][] = [];
+  const numeros: number[] = [];
+  for (const r of reste) {
+    const l = decouperLigne(r.texte, sep).map((c) => c.trim());
+    if (!l.some((c) => c !== "")) continue;
     // Une ligne plus courte que l'en-tête se complète ; plus longue, elle garde ses cellules en trop.
     while (l.length < entetes.length) l.push("");
-    return l;
-  });
-  return { format: "csv", encodage, separateur: sep, feuilles: [{ nom: "csv", entetes, lignes }] };
+    lignes.push(l);
+    numeros.push(r.ligne);
+  }
+  return { format: "csv", encodage, separateur: sep, feuilles: [{ nom: "csv", entetes, lignes, numeros }] };
 }
 
 export async function lireXlsx(octets: Uint8Array): Promise<Tableau> {
@@ -127,11 +139,15 @@ export async function lireXlsx(octets: Uint8Array): Promise<Tableau> {
     const premiere = lignesTexte.findIndex((l) => l.some((c) => c !== ""));
     if (premiere < 0) continue;
     const entetes = lignesTexte[premiere];
-    const lignes = lignesTexte.slice(premiere + 1).filter((l) => l.some((c) => c !== "")).map((l) => {
+    const lignes: string[][] = [];
+    const numeros: number[] = [];
+    lignesTexte.forEach((l, i) => {
+      if (i <= premiere || !l.some((c) => c !== "")) return;
       while (l.length < entetes.length) l.push("");
-      return l;
+      lignes.push(l);
+      numeros.push(i + 1);
     });
-    feuilles.push({ nom, entetes, lignes });
+    feuilles.push({ nom, entetes, lignes, numeros });
   }
   return { format: "xlsx", feuilles };
 }
