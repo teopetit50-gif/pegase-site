@@ -7,13 +7,14 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 35 % | le test pgTAP du parcours (20 étapes, ~95 contrôles) est écrit et les trois migrations aussi ; rien n'est encore joué sur la recette — le lot 1 est chez le coordinateur |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 55 % | l'écran est écrit, recetté aux cinq largeurs sur l'exemple, build vert ; reste la relecture en base réelle avec le compte du banc (clé publique de la recette à fournir), la fusion dans main et la vérification sur omegaai.fr |
+| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 45 % | b5_01 et b5_02 posés sur la recette par le coordinateur ; b5_03 en cours de pose ; le test pgTAP (20 étapes, ~95 contrôles) est rejoué à 5a4a2e6, le TAP brut est attendu ; en réel, l'écran a ouvert un projet et un PCMI sur le banc et le moteur a calculé 3 étapes et posé 2 échéances dans `delais` |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 75 % | écran écrit, recetté aux cinq largeurs sur l'exemple (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` (identité, interrupteur, aucun refus de la base, projet et permis créés par l'écran, calendrier du socle affiché — capture `reel-permis-1440.jpg`) ; reste la fusion dans `main`, la vérification sur omegaai.fr, et la lecture d'un vrai récépissé par le lecteur |
 
-**Ce qui manque** : la pose des migrations b5_01 à b5_03 et le premier passage du test (lot 1 envoyé), la clé `publishable`
-de la recette pour la relecture réelle, la fusion dans `main`. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
-les rappels partent réellement, un accord permanent (politique de validation) sur les envois `envoi.email` du module
-lorani chez chaque agence, ou l'approbation au cas par cas dans /espace/validations — c'est le dessin du socle.
+**Ce qui manque** : le TAP du test (coordinateur), la fusion dans `main`, un vrai courrier de mairie déposé et lu par le
+lecteur (chaîne prouvée en test, pas encore à l'écran avec un fichier réel). **Ce que Teo doit fournir** : rien pour
+l'instant ; pour que les rappels partent réellement, un accord permanent (politique de validation) sur les envois
+`envoi.email` du module lorani chez chaque agence, ou l'approbation au cas par cas dans /espace/validations — c'est le
+dessin du socle (un moteur ne se passe jamais de la validation).
 
 ## La promesse faite aux clients (app/secteurs/architectes)
 
@@ -128,19 +129,42 @@ Dialog de `components/ui`, temps réel sur les quatre tables publiées.
   l'affichage, saisir un recours et le voir suspendre la purge, ouvrir par `?permis=`). Captures dans
   `omega/recette-b5/` (`lorani-<largeur>.jpg`, `lorani-confirmer-1440.jpg`, `lorani-implicite-1440.jpg`,
   `lorani-recours-1440.jpg`, `lorani-purge-1024.jpg`).
-- **Pas encore fait** : la relecture en base réelle avec `gerant@banc-varelo.test` (il faut la clé `publishable` de la
-  recette `ygwbgpowzlbdaajlsqkn` pour pointer le serveur de dev dessus, comme A3) ; les cases du régime (secteur
-  protégé, MH, ERP, IGH, évaluation environnementale, cas de rejet) se lisent mais ne se cochent pas encore à l'écran.
+- **Régime du permis** (06/10) : bouton « Régime » dans l'en-tête → Dialog à cases (secteur protégé, monument
+  inscrit, ERP, IGH, évaluation environnementale, cas de l'art. R*424-2 lus dans `lorani_cas_rejet`) → UPDATE
+  `lorani_permis` ; en exemple l'effet du silence et les articles se recalculent en mémoire (recette : « rejet
+  implicite (art. R*424-2, d) »).
+- **Relecture en base réelle** (06/10, `omega/recette-b5/relecture-reelle.mjs`, calqué sur A3) : serveur de dev pointé
+  sur la recette (`NEXT_PUBLIC_SUPABASE_URL` + clé `publishable` reçues du coordinateur), session de
+  `gerant@banc-varelo.test` posée en cookie, Chromium avec `--ignore-certificate-errors` (le mandataire du conteneur ;
+  sans lui, « Failed to fetch »). Résultat : identité affichée, interrupteur sur « Base réelle », toutes les lectures
+  passent (la seule erreur 400 était `pieces.cree_le`, corrigée en `recue_le`), **puis l'écran a écrit pour de vrai** :
+  projet « Maison Lemoine (banc) » (INSERT `lorani_projets` sous RLS, territoire déduit) et PCMI « Pavillon Lemoine »
+  déposé il y a vingt jours (INSERT `lorani_permis`) → le trigger du socle a calculé : état « complétude », règle
+  `lorani.urbanisme.instruction_pcmi`, décision attendue à deux mois, 3 étapes, 2 échéances posées dans `delais`,
+  article R*423 cité. Captures `reel-lorani-1440.jpg`, `reel-permis-1440.jpg`. Ces deux lignes restent sur le banc
+  (données de recette, comme la délégation d'A3). Realtime : la poignée de main WebSocket échoue depuis le conteneur
+  (mandataire sans WebSocket), comme pour A3 — à vérifier depuis un navigateur ordinaire.
+- **Pas encore fait** : déposer un vrai récépissé par l'écran et le voir lu par le lecteur (bucket + `lorani_deposer_piece`
+  + lecteur réel) ; les annexes de la purge (`chantier_sans_risque_le`) ne s'affichent qu'une fois l'affichage saisi.
 
-## 4. Questions ouvertes au coordinateur
+## 4. Réponses du coordinateur (05/10, 23 h 43) et ce qui reste ouvert
 
-1. `private.resoudre_destinataire` : accepte-t-elle `{"membre": <user_id>}` (b5_03) ? Sinon, quelle forme ?
-2. `private.modules_envois` : une ligne `lorani` est-elle nécessaire (canaux `["email"]`) ? `reglages_envois` du banc
-   porte-t-il une ligne `lorani` (mode essai) ?
-3. La clé `publishable` de la recette, pour la relecture réelle de l'écran.
+1. `private.resoudre_destinataire(p_client, p_canal, p_destinataire, p_entite)` : `{"membre": "<user_id>"}` est exactement
+   la forme (clés admises : membre ou adresse, nom, ref, fuseau, territoire, professionnel, langue) ; l'adresse vient
+   d'`auth.users.email`, sans adresse l'envoi naît `bloque` (pas d'exception). b5_03 est juste.
+2. `private.modules_envois` n'a pas de ligne lorani ; `reglages_envois` du banc : lignes `lorani` et `tavaro` posées en
+   mode essai (adresse de Teo). Si `preparer_envoi` exige `modules_envois`, le test le dira (étape 10).
+3. Clé publique de la recette reçue, relecture réelle faite (§ 3).
+
+Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion de l'écran sur `main`.
 
 ## 5. Journal de bord
 
 - 05/10 soir : lecture du cadre, scénario écrit et envoyé ; test pgTAP, migrations b5_01/02/03, écran, recette ;
   réponses du coordinateur intégrées (dates du test recalées sur la vraie chaîne des délais, colonnes de `pieces`,
   comptes du banc). Lot 1 envoyé au coordinateur : poser b5_01, b5_02, b5_03, jouer `omega/tests/lorani/b5_01_parcours_permis.sql`.
+- 05/10, 23 h : pause générale demandée par Teo (limite d'usage) ; reprise à 23 h 43. Le coordinateur a posé b5_01 et
+  b5_02, rejoue le test à 5a4a2e6 (la version 50ccebd mourait sur `deposer_travail(…, integer)` ; 5a4a2e6 passe par
+  `controler_delais`, plus d'appel direct).
+- 06/10, nuit : dialogue « Régime », relecture en base réelle (projet + permis créés par l'écran sur le banc),
+  `pieces.recue_le`, notes. Prêt à fusionner — liste des fichiers envoyée au coordinateur.

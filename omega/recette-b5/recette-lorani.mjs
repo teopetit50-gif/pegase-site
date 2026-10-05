@@ -95,6 +95,18 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const lem = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { pieces: /Pièces à fournir avant le/i.test(d.innerText), rappel: /10 jours avant \\(parti\\)/.test(d.innerText), bouton: !![...d.querySelectorAll('.r-btn')].find(b => /Pièces reçues par la mairie/.test(b.textContent)) }; })()`);
   ok(lem.pieces && lem.rappel && lem.bouton, 'Maison Lemoine : pièces à fournir, rappel J-10 parti, « Pièces reçues » à saisir');
+
+  console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
+  await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const reg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, cases: d.querySelectorAll('input[type="checkbox"]').length } : null; })()`);
+  ok(reg && /Régime du permis/.test(reg.titre) && reg.cases >= 10, `dialogue « ${reg?.titre} », ${reg?.cases} cases (cinq du régime + les cas de l'art. R*424-2)`);
+  await s.evaluer(`(() => { const c = [...document.querySelectorAll('[role="dialog"] label')].find(l => l.textContent.includes('R*424-2, d'))?.querySelector('input'); c?.click(); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer le régime/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  const regle = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail')?.innerText || ''; const i = t.indexOf('sans réponse de la mairie'); return t.slice(i, i + 80); })()`);
+  ok(regle.includes('rejet implicite (art. R*424-2, d)'), `le régime dit « rejet implicite (art. R*424-2, d) » après la saisie : « ${regle} »`);
   s.fermer();
 }
 

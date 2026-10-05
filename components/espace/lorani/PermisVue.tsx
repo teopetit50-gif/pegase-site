@@ -22,7 +22,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
-import { CalendarCheck, CalendarPlus, Check, FileSignature, Gavel, ListChecks, Scale, XCircle } from "lucide-react";
+import { CalendarCheck, CalendarPlus, Check, FileSignature, Gavel, ListChecks, Scale, SlidersHorizontal, XCircle } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -54,6 +54,7 @@ type Form =
   | { type: "saisir"; quoi: Quoi }
   | { type: "recours" }
   | { type: "issue"; recours: Recours }
+  | { type: "regime" }
   | null;
 
 const aujourdHuiIso = () => {
@@ -298,6 +299,23 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
     );
   };
 
+  /* ——— le régime : les cases qui changent la règle et l'effet du silence ——— */
+  const [regime, setRegime] = useState({ secteur_protege: false, immeuble_inscrit_mh: false, erp_autorisation: false, igh: false, evaluation_environnementale: false, cas_rejet: [] as string[] });
+  const ouvrirRegime = () => {
+    setRegime({ secteur_protege: p.secteur_protege, immeuble_inscrit_mh: p.immeuble_inscrit_mh, erp_autorisation: p.erp_autorisation, igh: p.igh, evaluation_environnementale: p.evaluation_environnementale, cas_rejet: [...(p.cas_rejet ?? [])] });
+    setErreur(null);
+    setForm({ type: "regime" });
+  };
+  const soumettreRegime = async () => {
+    const v: SaisiePermis = { ...regime };
+    const silence: "tacite" | "rejet" = regime.cas_rejet.length || regime.immeuble_inscrit_mh || regime.evaluation_environnementale ? "rejet" : "tacite";
+    await appliquer(
+      () => saisirPermis(p.id, v),
+      () => majPermis(dossier, p.id, { ...regime, silence, calcul: { ...c, regime: c.regime ? { ...c.regime, silence, effet_silence: silence === "rejet" ? (dp ? "opposition tacite" : "rejet implicite") : c.regime.effet_silence, motifs_silence: dossier.casRejet.filter((x) => regime.cas_rejet.includes(x.code)) } : undefined } }),
+      "Régime saisi : la règle d'instruction et l'effet du silence sont recalculés.",
+    );
+  };
+
   const gris = !peutEcrire || envoi;
 
   return (
@@ -323,6 +341,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
             {p.igh ? <Pastille contour>IGH</Pastille> : null}
             {p.evaluation_environnementale ? <Pastille contour>Évaluation environnementale</Pastille> : null}
             {!p.actif ? <Pastille teinte="gris">Inactif</Pastille> : null}
+            {peutEcrire && p.actif ? <button type="button" className="esp-lien-bouton" disabled={gris} onClick={ouvrirRegime}><SlidersHorizontal width={14} height={14} aria-hidden="true" style={{ verticalAlign: "-2px", marginRight: 4 }} />Régime</button> : null}
           </span>
         </div>
         <div className="esp-carte-corps">
@@ -719,6 +738,43 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!/^\d{4}-\d{2}-\d{2}$/.test(rec.date) || envoi} onClick={soumettreRecours}>{envoi ? <Loader variant="spin" /> : null} Saisir le recours</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "regime"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><SlidersHorizontal width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Régime du permis</DialogTitle>
+            <DialogDescription>Ces cases changent le délai d&apos;instruction (secteur protégé : un mois de plus ; ERP ou IGH : cinq mois ; monument inscrit : cinq mois) et l&apos;effet du silence de la mairie (art. R*424-2 : le silence vaut rejet).</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <div className="lor-cases">
+                <label><input type="checkbox" checked={regime.secteur_protege} onChange={(e) => setRegime((r) => ({ ...r, secteur_protege: e.target.checked }))} /> Secteur protégé (site patrimonial remarquable, abords d&apos;un monument historique, site classé) : avis de l&apos;architecte des Bâtiments de France</label>
+                <label><input type="checkbox" checked={regime.immeuble_inscrit_mh} onChange={(e) => setRegime((r) => ({ ...r, immeuble_inscrit_mh: e.target.checked }))} /> Travaux sur un immeuble inscrit au titre des monuments historiques</label>
+                <label><input type="checkbox" checked={regime.erp_autorisation} onChange={(e) => setRegime((r) => ({ ...r, erp_autorisation: e.target.checked }))} /> Établissement recevant du public soumis à autorisation (accessibilité, sécurité)</label>
+                <label><input type="checkbox" checked={regime.igh} onChange={(e) => setRegime((r) => ({ ...r, igh: e.target.checked }))} /> Immeuble de grande hauteur</label>
+                <label><input type="checkbox" checked={regime.evaluation_environnementale} onChange={(e) => setRegime((r) => ({ ...r, evaluation_environnementale: e.target.checked }))} /> Projet soumis à évaluation environnementale</label>
+              </div>
+              <div>
+                <span className="rv-libelle">Autres cas où le silence vaut rejet (art. R*424-2)</span>
+                <div className="lor-cases" style={{ marginTop: 6 }}>
+                  {dossier.casRejet.filter((x) => !["r424_2_c", "r424_2_1"].includes(x.code)).map((x) => (
+                    <label key={x.code}>
+                      <input type="checkbox" checked={regime.cas_rejet.includes(x.code)} onChange={(e) => setRegime((r) => ({ ...r, cas_rejet: e.target.checked ? [...r.cas_rejet, x.code] : r.cas_rejet.filter((k) => k !== x.code) }))} />
+                      <span><strong>{x.article}</strong> — {x.libelle}</span>
+                    </label>
+                  ))}
+                  {!dossier.casRejet.length ? <span className="lor-tableau-vide">La liste des cas de rejet n&apos;a pas été lue.</span> : null}
+                </div>
+              </div>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={soumettreRegime}>{envoi ? <Loader variant="spin" /> : null} Enregistrer le régime</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
