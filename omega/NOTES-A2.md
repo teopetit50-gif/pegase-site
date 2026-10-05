@@ -226,12 +226,11 @@ d'IP fixe. L'ouvrier a bien classé l'erreur en transitoire (`reporte: true`, en
 `0a607529-…` revenu `pret`, essais 1). **Teo** : retirer la restriction d'IP de la clé
 (Brevo → Sécurité → Adresses IP autorisées), ou créer une clé sans restriction.
 
-Point ouvert chez le coordinateur : après un report, la reprise dépend de
-`private.tache_envois`, qui doit déposer un **nouveau** travail pour l'envoi `pret` ;
-si `deposer_travail` est idempotent sur (genre, clé `envoi:<uuid>`) y compris face à un
-travail déjà fini, l'envoi reste `pret` sans jamais être repris (idempotence à limiter
-aux travaux ouverts, ou clé `envoi:<uuid>:<essais>`). Rien à changer côté ouvrier ;
-`reprise_le` est l'affaire d'`echouer_envoi` si le socle veut espacer les reprises.
+Reprise après report vérifiée par le coordinateur : `tache_envois` a reconfié un
+deuxième travail `envois.brevo` pour l'envoi `0a607529-…` (essais 2), la clé
+`envoi:<uuid>` ne bloque pas ; le différé `6be6e6cd-…` porte `reprise_le` au 06/10 06:00Z.
+Rien à changer côté ouvrier. Dès que la restriction d'IP Brevo est levée, le passage
+suivant remettra l'envoi sans intervention.
 
 ## Reste
 
