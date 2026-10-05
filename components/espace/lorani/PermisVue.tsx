@@ -178,7 +178,15 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
     }
     const patch: Partial<Permis> = {};
     if (d.nature === "depot") Object.assign(patch, { date_depot: v.date_depot as string, numero: (v.numero as string) ?? null, etat: "instruction" as const });
-    if (d.nature === "delai_notifie") Object.assign(patch, { delai_notifie_mois: v.delai_notifie_mois as number, date_notification_delai: (v.date_notification_delai as string) ?? null });
+    if (d.nature === "delai_notifie") {
+      const cible = dossier.permis.find((x) => x.id === permisVise);
+      Object.assign(patch, {
+        delai_notifie_mois: v.delai_notifie_mois as number,
+        date_notification_delai: (v.date_notification_delai as string) ?? null,
+        /* en exemple, le régime du calcul dit le délai notifié ; en base réelle, le moteur le recalcule */
+        calcul: cible ? { ...cible.calcul, regime: cible.calcul.regime ? { ...cible.calcul.regime, delai_notifie_mois: v.delai_notifie_mois as number } : undefined } : undefined,
+      });
+    }
     if (d.nature === "demande_pieces") Object.assign(patch, { date_demande_pieces: v.date_demande_pieces as string, pieces_demandees: (v.pieces as { code: string }[]) ?? [], etat: "pieces_demandees" as const });
     if (d.nature === "decision") Object.assign(patch, { decision: v.decision as Permis["decision"], date_decision: v.date_decision as string, etat: v.decision === "favorable" ? ("accorde" as const) : ("refuse" as const) });
     if (d.nature === "decision_tacite") Object.assign(patch, { decision: "tacite" as const, date_decision: v.date_decision as string, etat: "accorde" as const });
@@ -293,13 +301,13 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
   const gris = !peutEcrire || envoi;
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
+    <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0, 1fr)" }}>
       {/* ——— en-tête ——— */}
       <section className="esp-carte" aria-label="Le permis">
         <div className="esp-carte-tete">
           <div>
             <h2 className="esp-carte-titre">{titre}</h2>
-            <div className="esp-kpi-sous" style={{ marginTop: 4 }}>
+            <div className="lor-sous">
               {TYPES[p.type_autorisation].libelle}
               {p.numero ? <> · <span className="esp-mono">{p.numero}</span></> : " · sans numéro"}
               {" · "}

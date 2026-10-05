@@ -23,10 +23,14 @@ declare
   r jsonb := jsonb_build_object('client', v_client);
   v_nom text; v_id uuid;
 begin
+  -- Les quatre comptes du banc (coordinateur, 05/10) : …c1 gérant, …c2 referent, …c3 daf, …c4 daf2 (valideurs).
   foreach v_nom in array array['gerant', 'referent', 'daf', 'daf2'] loop
-    select u.id into v_id from auth.users u where u.email = v_nom || '@banc-varelo.test';
+    v_id := ('cccccccc-0000-4000-8000-0000000000c' || (array_position(array['gerant', 'referent', 'daf', 'daf2'], v_nom))::text)::uuid;
+    if not exists (select 1 from auth.users u where u.id = v_id) then
+      select u.id into v_id from auth.users u where u.email = v_nom || '@banc-varelo.test';
+    end if;
     if v_id is null then
-      raise exception 'tests.b5_jeu : compte %@banc-varelo.test introuvable dans auth.users', v_nom;
+      raise exception 'tests.b5_jeu : compte % du banc introuvable dans auth.users', v_nom;
     end if;
     if not exists (select 1 from public.comptes c where c.user_id = v_id and c.client_id = v_client) then
       raise exception 'tests.b5_jeu : % n''a pas de compte chez le client du banc', v_nom;
@@ -116,7 +120,21 @@ declare
   v_projet uuid; v_lot1 uuid; v_pc uuid; v_dp uuid; v_piece uuid; v_prop uuid; v_delai uuid; v_recours uuid;
   v_calcul jsonb; r jsonb; n integer; v_texte text; v_date date; v_travail bigint;
   x public.lorani_permis;
+  v_d integer; v_j_demande integer; v_j_depot integer;
 begin
+  -- La demande de pièces est datée pour que le rappel J-10 de l'échéance « pieces » (trois mois) tombe AUJOURD'HUI :
+  -- c'est ainsi que la vraie chaîne des délais (controler_delais) se joue sans attendre. Le dépôt la précède de trois jours.
+  v_j_demande := null;
+  for v_d in reverse -70..-100 loop
+    if (public.echeance_de('lorani.urbanisme.pieces_manquantes', current_date + v_d, 'metropole') ->> 'echeance')::date - 10 = current_date then
+      v_j_demande := v_d;
+      exit;
+    end if;
+  end loop;
+  if v_j_demande is null then
+    raise exception 'tests.b5 : aucune date de demande ne met le rappel J-10 à aujourd''hui (echeance_de pieces_manquantes)';
+  end if;
+  v_j_depot := v_j_demande - 3;
   jeu := tests.b5_jeu();
   v_client := (jeu ->> 'client')::uuid; v_gerant := (jeu ->> 'gerant')::uuid; v_referent := (jeu ->> 'referent')::uuid;
   v_daf := (jeu ->> 'daf')::uuid; v_daf2 := (jeu ->> 'daf2')::uuid; v_entite := (jeu ->> 'entite')::uuid;
@@ -137,7 +155,7 @@ begin
   -- ── 1. Le gérant ouvre le projet ──
   perform tests.b5_endosser(v_gerant);
   insert into public.lorani_projets (client_id, nom, reference, adresse, code_postal, commune, code_insee, parcelles, nature, phase)
-  values (v_client, '  Maison Lemoine ', 'B5-LEMOINE', '12 rue des Hauts-Pavés', '44000', 'Nantes', '44109', array['ab 123', 'AB  124'], 'maison_individuelle', 'pc')
+  values (v_client, '  Maison Lemoine ', 'B5-LEMOINE', '12 rue des Hauts-Pavés', '44000', 'Nantes', '44109', array['ab 123', 'AB  124'], 'logement_collectif', 'pc')
   returning id into v_projet;
   perform tests.b5_admin();
   return next is((select territoire from public.lorani_projets where id = v_projet), 'metropole', '1. territoire « metropole » déduit du code INSEE 44109');
@@ -176,17 +194,17 @@ begin
   return next is((select count(*) from public.lorani_projets where id = v_projet), 1::bigint, '3. le chef de projet voit le projet');
 
   -- ── 4. Le permis, sans date de dépôt ──
-  insert into public.lorani_permis (client_id, projet_id, type_autorisation, intitule) values (v_client, v_projet, 'pcmi', 'Maison Lemoine — construction neuve') returning id into v_pc;
+  insert into public.lorani_permis (client_id, projet_id, type_autorisation, intitule) values (v_client, v_projet, 'pc', 'Résidence Lemoine — six logements') returning id into v_pc;
   perform tests.b5_admin();
   select * into x from public.lorani_permis where id = v_pc;
   return next is(x.etat, 'a_deposer', '4. permis saisi : état « a_deposer »');
   return next is(x.calcul #>> '{regime,silence}', 'tacite', '4. régime : le silence vaut accord');
-  return next is(x.calcul #>> '{regime,regle_instruction}', 'lorani.urbanisme.instruction_pcmi', '4. règle d''instruction du PCMI');
+  return next is(x.calcul #>> '{regime,regle_instruction}', 'lorani.urbanisme.instruction_pc', '4. règle d''instruction du PC (trois mois)');
   return next is((select count(*) from public.lorani_permis_echeances where permis_id = v_pc), 0::bigint, '4. aucune échéance avant le dépôt');
 
   -- ── 5. Le récépissé de dépôt, lu ──
   v_piece := tests.b5_lire(v_referent, v_projet, 'recepisse-depot.pdf', 'lorani_recepisse_depot', jsonb_build_array(
-    jsonb_build_object('champ', 'date_depot', 'valeur', tests.b5_iso(-40), 'texte', 'Dossier déposé le ' || tests.b5_fr(-40)),
+    jsonb_build_object('champ', 'date_depot', 'valeur', tests.b5_iso(v_j_depot), 'texte', 'Dossier déposé le ' || tests.b5_fr(v_j_depot)),
     jsonb_build_object('champ', 'numero_dossier', 'valeur', 'PC 044109 26 A0042', 'texte', 'N° PC 044109 26 A0042')));
   return next is((select statut from public.pieces where id = v_piece), 'lue', '5. la pièce est lue');
   return next is((select module from public.pieces where id = v_piece), 'lorani', '5. … dans le module lorani, sur le projet');
@@ -196,7 +214,7 @@ begin
   select id into v_prop from public.lorani_permis_dates_lues where piece_id = v_piece and nature = 'depot';
   return next ok(v_prop is not null, '5. une proposition « depot » est née de la lecture');
   return next is((select permis_id from public.lorani_permis_dates_lues where id = v_prop), v_pc, '5. … rattachée au seul permis du dossier');
-  return next is((select proposition from public.lorani_permis_dates_lues where id = v_prop), jsonb_build_object('date_depot', tests.b5_iso(-40), 'numero', 'PC04410926A0042'), '5. … avec la date et le numéro normalisé');
+  return next is((select proposition from public.lorani_permis_dates_lues where id = v_prop), jsonb_build_object('date_depot', tests.b5_iso(v_j_depot), 'numero', 'PC04410926A0042'), '5. … avec la date et le numéro normalisé');
   return next ok((select verifiee from public.lorani_permis_dates_lues where id = v_prop), '5. … citation retrouvée : vérifiée');
   return next ok(exists (select 1 from public.alertes where client_id = v_client and cle_regroupement = 'lorani:lecture:' || v_prop and acquittee_le is null), '5. alerte « date de dépôt lue, à confirmer » levée');
 
@@ -207,10 +225,10 @@ begin
   r := public.lorani_confirmer_date_lue(v_prop);
   perform tests.b5_admin();
   select * into x from public.lorani_permis where id = v_pc;
-  return next is(x.date_depot, current_date - 40, '6. date de dépôt posée');
+  return next is(x.date_depot, current_date + v_j_depot, '6. date de dépôt posée');
   return next is(x.numero, 'PC04410926A0042', '6. numéro posé');
-  return next is(x.etat, 'instruction', '6. le mois de complétude est passé sans demande : « instruction »');
-  return next ok(x.date_decision_attendue > current_date, format('6. fin d''instruction calculée au %s (deux mois après le dépôt)', x.date_decision_attendue));
+  return next is(x.etat, 'instruction', '6. le mois de complétude est passé sans demande connue : « instruction »');
+  return next ok(x.date_decision_attendue > current_date, format('6. fin d''instruction calculée au %s (trois mois après le dépôt)', x.date_decision_attendue));
   return next is((select statut from public.lorani_permis_dates_lues where id = v_prop), 'confirmee', '6. proposition confirmée');
   return next ok(exists (select 1 from public.lorani_echeances_permis where permis_id = v_pc and nature = 'instruction' and statut = 'ouvert'), '6. échéance « instruction » posée dans delais');
   return next ok(exists (select 1 from public.journal_opposable where client_id = v_client and action = 'lorani.date_permis_confirmee' and objet_id = v_pc::text), '6. journal : lorani.date_permis_confirmee');
@@ -219,7 +237,7 @@ begin
 
   -- ── 7. La demande de pièces, lue ──
   v_piece := tests.b5_lire(v_referent, v_projet, 'demande-pieces.pdf', 'lorani_demande_pieces', jsonb_build_array(
-    jsonb_build_object('champ', 'date_lettre', 'valeur', tests.b5_iso(-30), 'texte', 'Nantes, le ' || tests.b5_fr(-30)),
+    jsonb_build_object('champ', 'date_lettre', 'valeur', tests.b5_iso(v_j_demande), 'texte', 'Nantes, le ' || tests.b5_fr(v_j_demande)),
     jsonb_build_object('champ', 'numero_dossier', 'valeur', 'PC 044109 26 A0042', 'texte', 'Dossier n° PC 044109 26 A0042'),
     jsonb_build_object('champ', 'pieces', 'valeur', 'PC5', 'texte', 'PC5 — plan des façades'),
     jsonb_build_object('champ', 'pieces', 'valeur', 'PC 8', 'texte', 'PC 8 — photographie du terrain')));
@@ -244,18 +262,18 @@ begin
   perform tests.b5_admin();
   select * into x from public.lorani_permis where id = v_pc;
   return next is(x.etat, 'pieces_demandees', '8. état « pieces_demandees »');
-  return next is(x.date_demande_pieces, current_date - 30, '8. date de la demande posée');
+  return next is(x.date_demande_pieces, current_date + v_j_demande, '8. date de la demande posée');
   return next is(x.pieces_demandees, '[{"code": "PC5"}, {"code": "PC8"}]'::jsonb, '8. pièces demandées gardées');
   return next ok(x.date_decision_attendue is null, '8. pas de fin d''instruction tant que les pièces manquent');
   select delai_id, echeance into v_delai, v_date from public.lorani_echeances_permis where permis_id = v_pc and nature = 'pieces';
-  return next ok(v_delai is not null and v_date > current_date, format('8. échéance « pieces » ouverte dans delais, le %s', v_date));
+  return next ok(v_delai is not null and v_date = current_date + 10, format('8. échéance « pieces » ouverte dans delais, le %s (dans dix jours)', v_date));
   return next is((select rappels from public.lorani_echeances_permis where permis_id = v_pc and nature = 'pieces'), array[10, 3, 0], '8. rappels à J-10, J-3, J');
   return next is((select responsable from public.lorani_echeances_permis where permis_id = v_pc and nature = 'pieces'), v_referent, '8. responsable : le chef de projet');
   return next ok(exists (select 1 from public.journal_opposable where client_id = v_client and action = 'lorani.date_permis_confirmee' and objet_id = v_pc::text and donnees ->> 'nature' = 'demande_pieces'), '8. journal : demande de pièces confirmée');
 
   -- ── 9. Une lettre de délai mal lue est écartée ──
   v_piece := tests.b5_lire(v_referent, v_projet, 'lettre-delai.pdf', 'lorani_lettre_delai', jsonb_build_array(
-    jsonb_build_object('champ', 'date_lettre', 'valeur', tests.b5_iso(-28), 'texte', 'Nantes, le ' || tests.b5_fr(-28)),
+    jsonb_build_object('champ', 'date_lettre', 'valeur', tests.b5_iso(v_j_demande + 2), 'texte', 'Nantes, le ' || tests.b5_fr(v_j_demande + 2)),
     jsonb_build_object('champ', 'delai_mois', 'valeur', '5', 'texte', 'délai d''instruction porté à 5 mois')));
   r := private.lorani_lectures_passage();
   select id into v_prop from public.lorani_permis_dates_lues where piece_id = v_piece and nature = 'delai_notifie';
@@ -270,18 +288,29 @@ begin
   return next ok((select delai_notifie_mois is null from public.lorani_permis where id = v_pc), '9. le permis ne porte pas le délai écarté');
   return next ok(exists (select 1 from public.journal_opposable where client_id = v_client and action = 'lorani.date_lue_ecartee' and objet_id = v_prop::text), '9. journal : lorani.date_lue_ecartee');
 
-  -- ── 10. Le rappel J-10 des pièces ──
-  perform tests.b5_ouvrier();
-  v_travail := public.deposer_travail(v_client, 'lorani', 'lorani.calendrier.rappel',
-    jsonb_build_object('delai', v_delai, 'rappel', 10, 'echeance', v_date), format('delai:%s:rappel:10', v_delai), 5);
-  perform tests.b5_admin();
+  -- ── 10. Le rappel J-10 des pièces : le contrôle des délais le publie, le passage du calendrier l'alerte et l'envoie ──
+  n := private.controler_delais(now());
+  select id into v_travail from public.travaux
+   where genre = 'lorani.calendrier.rappel' and client_id = v_client and (charge ->> 'delai')::uuid = v_delai and etat = 'a_faire';
+  return next ok(v_travail is not null, format('10. controler_delais publie delai.proche.lorani → travail lorani.calendrier.rappel (%s événements)', n));
+  return next is((select (charge ->> 'rappel')::integer from public.travaux where id = v_travail), 10, '10. … pour le rappel J-10');
+  return next is((select rappels_faits from public.delais where id = v_delai), array[10], '10. … et le marque fait sur le délai');
   r := private.lorani_calendrier_passage();
   return next ok((r ->> 'evenements')::integer >= 1, '10. le passage du calendrier a pris le rappel : ' || r::text);
   return next is((select etat from public.travaux where id = v_travail), 'fait', '10. travail clos');
   select titre into v_texte from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc);
   return next ok(v_texte is not null, '10. alerte de rappel levée au chef de projet');
-  return next ok(v_texte like 'PCMI « Maison Lemoine » : pièces manquantes à faire recevoir par la mairie au plus tard le ' || to_char(v_date, 'DD/MM/YYYY') || '%', '10. … qui dit la date butoir : ' || coalesce(v_texte, ''));
+  return next ok(v_texte like 'PC « Maison Lemoine » : pièces manquantes à faire recevoir par la mairie au plus tard le ' || to_char(v_date, 'DD/MM/YYYY') || ' (dans 10 jours)%', '10. … qui dit la date butoir : ' || coalesce(v_texte, ''));
   return next is((select niveau from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc)), 'attention', '10. … niveau « attention » à J-10');
+  return next is((select destinataire_id from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc)), v_referent, '10. … adressée au chef de projet');
+  -- b5_03 : le rappel part au chef de projet par courriel, par la file des envois.
+  return next ok(exists (select 1 from public.envois e where e.client_id = v_client and e.cle_idempotence = format('lorani:permis:%s:pieces:rappel:10', v_pc)
+                         and e.module = 'lorani' and e.canal = 'email' and e.statut <> 'bloque'),
+                 '10. un envoi « rappel » est préparé au chef de projet (b5_03) : ' || coalesce((select e.statut || ' → ' || coalesce(e.destinataire_adresse, 'sans adresse') from public.envois e where e.client_id = v_client and e.cle_idempotence = format('lorani:permis:%s:pieces:rappel:10', v_pc)), 'aucun'));
+  return next ok(exists (select 1 from public.envois e where e.client_id = v_client and e.cle_idempotence = format('lorani:permis:%s:pieces:rappel:10', v_pc)
+                         and e.sujet like 'Omega — PC « Maison Lemoine » : pièces manquantes%' and e.corps like '%PC5, PC8%' and e.corps like '%/espace/lorani?permis=' || v_pc::text || '%'),
+                 '10. … qui nomme les pièces et mène au dossier');
+  return next ok(not exists (select 1 from public.alertes where client_id = v_client and interne and cle_regroupement like 'lorani:envoi_rappel:%'), '10. … sans alerte interne d''échec');
 
   -- La mesure du jour : un permis en cours, dates complètes.
   n := private.lorani_enregistrer_mesures(v_client, current_date, true);
@@ -293,7 +322,7 @@ begin
   perform tests.b5_admin();
   select * into x from public.lorani_permis where id = v_pc;
   return next is(x.etat, 'instruction', '11. l''instruction repart des pièces reçues');
-  return next ok(x.date_decision_attendue > current_date + 30, format('11. décision attendue le %s (deux mois après les pièces)', x.date_decision_attendue));
+  return next ok(x.date_decision_attendue > current_date + 30, format('11. décision attendue le %s (trois mois après les pièces)', x.date_decision_attendue));
   return next is((select statut from public.delais where id = v_delai), 'tenu', '11. l''échéance « pieces » est close « tenu »');
   return next ok((select acquittee_le is not null from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc)), '11. le rappel est acquitté');
   return next ok(exists (select 1 from public.lorani_echeances_permis where permis_id = v_pc and nature = 'instruction' and statut = 'ouvert' and echeance = x.date_decision_attendue), '11. échéance « instruction » recalculée sur les pièces reçues');

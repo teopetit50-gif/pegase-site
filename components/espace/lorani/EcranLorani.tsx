@@ -138,6 +138,10 @@ export default function EcranLorani() {
       const fa = rangFamille[famille(a, proposeesPar[a.id] ?? 0)];
       const fb = rangFamille[famille(b, proposeesPar[b.id] ?? 0)];
       if (fa !== fb) return fa - fb;
+      /* ce qu'un membre doit lire sur un courrier passe avant tout */
+      const na = proposeesPar[a.id] ?? 0;
+      const nb = proposeesPar[b.id] ?? 0;
+      if (na !== nb) return nb - na;
       const da = prochaineDate(a) ?? "9999";
       const db = prochaineDate(b) ?? "9999";
       if (da !== db) return da < db ? -1 : 1;
@@ -394,8 +398,18 @@ export default function EcranLorani() {
           {!pret ? (
             <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>
           ) : permis && projet ? (
-            <div style={{ display: "grid", gap: 14 }}>
-              <PermisVue permis={permis} projet={projet} dossier={dossier} source={source} peutEcrire={peutEcrire} nommer={nommer} onLocal={setLocal} relire={relire} />
+            <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0, 1fr)" }}>
+              <PermisVue
+                permis={permis}
+                projet={projet}
+                dossier={dossier}
+                source={source}
+                peutEcrire={peutEcrire}
+                nommer={nommer}
+                /* une saisie fixe le permis ouvert : la liste se retrie, lui reste à l'écran */
+                onLocal={(d) => { setChoix(permis.id); setLocal(d); }}
+                relire={async () => { setChoix(permis.id); await relire(); }}
+              />
               <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} />
             </div>
           ) : projet ? (
@@ -650,7 +664,7 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm }:
       <div className="esp-carte-tete">
         <div>
           <h2 className="esp-carte-titre">{projet.nom}</h2>
-          <div className="esp-kpi-sous" style={{ marginTop: 4 }}>
+          <div className="lor-sous">
             {[projet.reference, projet.adresse, [projet.code_postal, projet.commune].filter(Boolean).join(" "), projet.parcelles.length ? `parcelles ${projet.parcelles.join(", ")}` : null].filter(Boolean).join(" · ")}
           </div>
         </div>

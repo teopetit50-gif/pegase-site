@@ -1,10 +1,10 @@
 -- LORANI, lot B5-02 — les liens des alertes et du point du matin mènent à l'écran client.
 --
--- Ce que ça corrige : lorani_lien_permis, lorani_alerter_rappel, lorani_alerter_transition et lorani_lire_piece
+-- Ce que ça corrige : lorani_lien_permis, lorani_alerter_transition et lorani_lire_piece (lorani_alerter_rappel : b5_03)
 -- renvoyaient vers /secteurs/architectes/permis, une page qui n'existe pas sur omegaai.fr (la page des architectes
 -- est une vitrine). Les alertes, le point du matin et les lignes « à confirmer » pointent désormais l'écran client
 -- /espace/lorani : ?permis=<id> ouvre le permis, ?projet=<id> le projet.
--- Les corps des trois fonctions sont ceux du socle photographié le 05/10/2026 (omega/SOCLE-EXTRAITS-LORANI.sql),
+-- Les corps des deux fonctions sont ceux du socle photographié le 05/10/2026 (omega/SOCLE-EXTRAITS-LORANI.sql),
 -- seuls les liens changent. Migration idempotente (create or replace).
 
 create or replace function private.lorani_lien_permis(p_permis uuid)
@@ -16,40 +16,6 @@ create or replace function private.lorani_lien_projet(p_projet uuid)
 returns text language sql immutable set search_path to '' as $$
   select '/espace/lorani?projet=' || p_projet::text
 $$;
-
-CREATE OR REPLACE FUNCTION private.lorani_alerter_rappel(p public.lorani_permis, p_projet public.lorani_projets, p_nature text, p_rappel integer, p_echeance date, p_calcul jsonb)
- RETURNS uuid
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO ''
-AS $function$
-declare
-  v_titre text;
-  v_niveau text;
-  v_quand text := case p_rappel when 0 then 'aujourd''hui' when 1 then 'demain' else format('dans %s jours', p_rappel) end;
-begin
-  if p_nature = 'pieces' and p.date_pieces_fournies is null then
-    v_niveau := case when p_rappel >= 10 then 'attention' else 'critique' end;
-    v_titre := format('%s : pièces manquantes à faire recevoir par la mairie au plus tard le %s (%s), sinon rejet tacite.',
-      private.lorani_titre_permis(p, p_projet), to_char(p_echeance, 'DD/MM/YYYY'), v_quand);
-  elsif p_nature = 'instruction' and p.decision is null then
-    v_niveau := 'info';
-    v_titre := format('%s : décision de la mairie attendue au plus tard le %s (%s) ; sans réponse, %s.',
-      private.lorani_titre_permis(p, p_projet), to_char(p_echeance, 'DD/MM/YYYY'), v_quand,
-      coalesce(p_calcul #>> '{regime,effet_silence}', 'permis tacite'));
-  elsif p_nature = 'affichage' and p.date_affichage is null then
-    v_niveau := 'attention';
-    v_titre := format('%s : affichage sur le terrain non saisi quinze jours après la décision. Tant qu''il n''est pas fait, le recours des tiers ne court pas.',
-      private.lorani_titre_permis(p, p_projet));
-  else
-    return null;
-  end if;
-  return private.lever_alerte_module(p.client_id, 'lorani', v_niveau, left(v_titre, 200),
-    jsonb_build_object('projet', p.projet_id, 'permis', p.id, 'nature', p_nature, 'echeance', p_echeance,
-                       'rappel', p_rappel, 'lien', private.lorani_lien_permis(p.id)),
-    format('permis:%s:%s:rappel:%s', p.id, p_nature, p_rappel), true,
-    private.lorani_chef_de_projet(p.client_id, p.projet_id));
-end $function$;
 
 CREATE OR REPLACE FUNCTION private.lorani_alerter_transition(p public.lorani_permis, p_projet public.lorani_projets, p_calcul jsonb)
  RETURNS uuid

@@ -10,8 +10,8 @@
 --   <client_id>/lorani_projet/<projet_id>/<nom> ; la pièce part en lecture par le trigger du socle
 --   (pieces_demander_lecture). Réservée à qui écrit sur le projet (private.lorani_ecrit_projet) ; la clé de service
 --   passe (réception par courriel, lot à venir). Journal : lorani.piece_deposee.
--- Politique Storage INSERT pour les membres sur <client>/lorani_projet/… (la 19m ne couvre que filed_document).
--- Migration idempotente (create or replace, politique posée si absente).
+-- Le bucket : la politique Storage INSERT des membres sous <client>/<objet_type>/… est posée par le coordinateur
+-- (lot 19o), elle couvre <client>/lorani_projet/<projet>/<nom>. Migration idempotente (create or replace).
 
 create or replace function public.lorani_deposer_piece(
   p_projet uuid, p_nom_fichier text, p_mime text, p_octets bigint, p_sha256 text, p_chemin text, p_type_piece text default null)
@@ -45,9 +45,15 @@ begin
     raise exception 'Type de pièce illisible : %.', p_type_piece using errcode = '22023';
   end if;
 
-  insert into public.pieces (client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, type_piece)
-  values (pr.client_id, 'lorani', 'depot', v_nom, p_mime, p_octets, lower(p_sha256), p_chemin, 'lorani_projet', pr.id::text, p_type_piece)
-  returning id into v_id;
+  begin
+    insert into public.pieces (client_id, module, objet_type, objet_id, source, depose_par, nom_fichier, mime, octets, sha256, chemin,
+                               statut, type_piece)
+    values (pr.client_id, 'lorani', 'lorani_projet', pr.id::text, 'depot', (select auth.uid()), v_nom, p_mime, p_octets,
+            lower(p_sha256), p_chemin, 'recue', p_type_piece)
+    returning id into v_id;
+  exception when unique_violation then
+    raise exception 'Ce fichier est déjà déposé sur ce projet (même empreinte).' using errcode = '23505';
+  end;
 
   perform private.journaliser_module(pr.client_id, 'lorani', 'lorani.piece_deposee', 'lorani_projet', pr.id::text,
     jsonb_strip_nulls(jsonb_build_object('piece', v_id, 'nom', v_nom, 'mime', p_mime, 'octets', p_octets, 'type_piece', p_type_piece,
@@ -61,19 +67,3 @@ grant execute on function public.lorani_deposer_piece(uuid, text, text, bigint, 
 
 comment on function public.lorani_deposer_piece(uuid, text, text, bigint, text, text, text) is
   'Lorani : attache un fichier déjà mis dans omega-clients (<client>/lorani_projet/<projet>/<nom>) au projet ; la pièce part en lecture. Qui écrit sur le projet.';
-
--- Les membres déposent dans le bucket sous <client>/lorani_projet/… (même forme que la politique 19m pour filed_document).
-do $$
-begin
-  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
-                 and policyname = 'les membres deposent une piece lorani') then
-    execute $p$
-      create policy "les membres deposent une piece lorani" on storage.objects for insert to authenticated
-      with check (
-        bucket_id = 'omega-clients'
-        and (storage.foldername(name))[2] = 'lorani_projet'
-        and (storage.foldername(name))[1] in (select c::text from private.mes_clients() c)
-      )
-    $p$;
-  end if;
-end $$;
