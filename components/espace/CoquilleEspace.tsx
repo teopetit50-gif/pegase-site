@@ -2,9 +2,8 @@
    La coquille des écrans client — /espace/validations, /espace/filed,
    /espace/point (05/10/2026, session A3)
 
-   Il n'existe pas encore de app/espace/layout.tsx : ce composant en tient
-   lieu, posé par chacune des trois pages, et le jour où le coordinateur
-   écrit le layout commun, il suffit de l'y déplacer. Il porte :
+   Posée par app/espace/layout.tsx (depuis le lot 19, 05/10) autour des
+   trois écrans — avant, chaque page la posait elle-même. Elle porte :
      · PageShell + PageMotion — la même enveloppe que /installation ;
      · le monde `.resa` (globals.css) et sa déclinaison `.esp`
        (components/espace/espace.css) ;
@@ -36,7 +35,8 @@ export default function CoquilleEspace({
   utilisateur,
   children,
 }: {
-  ecran: EcranEspace;
+  /* l'écran actif ; sans lui, la navigation le lit dans la route */
+  ecran?: EcranEspace;
   utilisateur: Utilisateur | null;
   children: React.ReactNode;
 }) {

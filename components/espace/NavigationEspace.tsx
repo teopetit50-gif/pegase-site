@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ECRANS, type EcranEspace } from "./ecrans";
 
-export default function NavigationEspace({ ecran }: { ecran: EcranEspace }) {
+export default function NavigationEspace({ ecran }: { ecran?: EcranEspace }) {
   const chemin = usePathname();
   return (
     <nav className="esp-nav" aria-label="Écrans de l'espace client">

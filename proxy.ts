@@ -21,6 +21,13 @@
    exactement ce qui devait disparaître. Le cockpit tient sa propre porte.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* 05/10/2026 — /espace/* ENTRE dans le matcher. Les écrans client
+   (/espace/validations, /espace/filed, /espace/point) lisent la session côté
+   serveur (utilisateurCourant) et signent les pièces avec elle
+   (app/espace/filed/actions.ts) : le jeton doit être à jour quand la page
+   se rend. Ils ne renvoient vers aucune page de connexion — sans session,
+   ils montrent l'exemple. Décision du coordinateur, lot 19. */
+
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
@@ -31,5 +38,5 @@ export async function proxy(request: NextRequest) {
 export const config = {
   /* 17/09 — /site/* sort du matcher : le tunnel de commande de site est
      supprimé (plus aucun compte ne se crée depuis omegaai.fr). */
-  matcher: ["/installation", "/auth/:path*"],
+  matcher: ["/installation", "/auth/:path*", "/espace/:path*"],
 };
