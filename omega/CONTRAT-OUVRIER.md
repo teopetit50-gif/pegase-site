@@ -50,9 +50,12 @@ Le lecteur prend `['lecteur.lire']`. Pour chaque travail :
    (demande au coordinateur) ou, en attendant, par la charge : le chemin du
    fichier est `pieces.chemin` dans le bucket Storage `omega-clients`, le
    `mime`, le `module`, le `type_piece` attendu et `chiffrement`.
-   Le coordinateur ajoute dès que possible une porte `piece_a_lire(p_piece)`
-   qui rend `{chemin, mime, module, objet_type, type_piece, chiffrement,
-   schema}`.
+   Posée au lot 19 : `piece_a_lire(p_piece uuid) → jsonb`, la ligne entière
+   de `public.pieces` (`chemin`, `mime`, `module`, `objet_type`, `statut`,
+   `chiffrement`…), `null` si absente. Avec elle : `consommation_ia_jour
+   (p_client uuid) → numeric` (euros d'IA dépensés aujourd'hui, heure de
+   Paris) et `lire_parametre(p_cle text) → text` (réglages globaux, dont
+   `plafond_ia_jour_client`).
 3. Lire le fichier, puis `enregistrer_lecture(p_piece uuid, p_resultat jsonb,
    p_version text)`. **Le format du résultat est celui du socle, pas un autre** :
 
@@ -98,8 +101,8 @@ Le lecteur prend `['lecteur.lire']`. Pour chaque travail :
    ou `FOURNISSEUR_INDISPONIBLE`.
 7. Fin de passage : `battre_ouvrier('lecteur', ['lecteur.lire'], {…})`.
 
-Plafond : réglage `plafond_ia_jour_client` dans `public.parametres`
-(global) ; par organisation dans `public.reglages_client` si présent. Au-delà,
+Plafond : réglage `plafond_ia_jour_client` lu par `lire_parametre` (5 € par
+défaut), consommation du jour par `consommation_ia_jour`. Au-delà,
 `echouer_travail` non définitif, motif `PLAFOND_IA`.
 
 ## 3. L'ouvrier EXPÉDITEUR (session A2)
