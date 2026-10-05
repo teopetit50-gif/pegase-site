@@ -30,7 +30,7 @@ import { dateCourte } from "../format";
 import { Trousseau, chiffrer, dechiffrer, envelopper, genererCle, memoriserPhrase, phraseMemorisee } from "./chiffrement";
 import { DOSSIERS_EXEMPLE, EXEMPLE_CLIENT, MOI, PERSONNES_EXEMPLE, REGLAGES_EXEMPLE, REGLES_EXEMPLE } from "./exemples";
 import { MATIERES, STATUTS_DOSSIER, TERRITOIRES, delaiCourt, estAssocie, joursAvant, libelleMatiere, libelleTerritoire, type Moi } from "./regles";
-import { chargerCabinet, chargerDossier, creerDossier, installer, type Cabinet } from "./portes";
+import { chargerCabinet, chargerDossier, cleDossier, creerDossier, installer, type Cabinet } from "./portes";
 import type { Clair, Dossier, DossierComplet } from "./types";
 import DossierTamila from "./DossierTamila";
 import "./tamila.css";
@@ -215,11 +215,14 @@ export default function EcranTamila() {
       if (!cabinet) return;
       const k = cabinet.cles.find((c) => c.dossier_id === d.id && c.statut === "active") ?? null;
       const c = await chargerDossier(d, k, ["attente", "ouvert", "audit", "clos"].includes(d.statut));
-      const cle = trousseau.current.lire(d.id) ?? (k && phrase ? await trousseau.current.ouvrir(d.id, k.enveloppe, phrase) : null);
+      /* l'enveloppe : lue dans tamila_cles (associés), sinon rendue par la porte tamila_cle_dossier (membres, b4_03) */
+      const enveloppe = k?.enveloppe ?? (phrase ? await cleDossier(d.id) : null);
+      const cle = trousseau.current.lire(d.id) ?? (enveloppe && phrase ? await trousseau.current.ouvrir(d.id, enveloppe, phrase) : null);
       setClesOuvertes((prev) => ({ ...prev, [d.id]: cle }));
       if (cle) {
         const [reference, intitule, numero_rg] = await Promise.all([dechiffrer(cle, d.reference_chiffree), dechiffrer(cle, d.intitule_chiffre), dechiffrer(cle, d.numero_rg_chiffre)]);
         c.clair = reference !== null && intitule !== null ? { reference, intitule, numero_rg } : null;
+        setClairs((prev) => ({ ...prev, [d.id]: c.clair }));
         for (const p of c.parties) {
           const nom = await dechiffrer(cle, p.nom_chiffre);
           const courriels = await dechiffrer(cle, p.courriels_chiffres);

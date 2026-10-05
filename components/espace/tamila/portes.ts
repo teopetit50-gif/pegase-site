@@ -23,6 +23,7 @@
      tamila_ajouter_audience / tamila_changer_audience
      tamila_avis_lu(p_client, p_dossier, p_piece, p_type, p_valeurs, p_confiance, p_rg_concorde) → jsonb
      tamila_consulter(p_dossier, p_contexte) → timestamptz
+     tamila_cle_dossier(p_dossier) → bytea (b4_03) ; tamila_journal_acces(p_dossier, p_depuis) (b4_02)
      tamila_poser_muraille / tamila_demander_levee_muraille
      tamila_demander_export / tamila_demander_export_cabinet / tamila_telecharger_export
      tamila_demander_cloture / tamila_annuler_cloture / tamila_convertir_audit
@@ -212,6 +213,8 @@ export const avisLu = (p_client: string, p_dossier: string, p_type: string, p_va
   rpc<Record<string, unknown>>("tamila_avis_lu", { p_client, p_dossier, p_piece: null, p_type, p_valeurs, p_confiance: "gabarit", p_rg_concorde: null });
 
 export const consulter = (p_dossier: string, p_contexte = "dossier") => rpc<string>("tamila_consulter", { p_dossier, p_contexte });
+/** L'enveloppe de la clé d'un dossier pour un membre qui n'est pas associé (migration b4_03) ; null sans porte ou sans clé active. */
+export const cleDossier = (p_dossier: string) => rpc<string | null>("tamila_cle_dossier", { p_dossier }).catch(() => null);
 
 export const poserMuraille = (p_dossier: string, p_user: string, p_motif: string | null) => rpc<string>("tamila_poser_muraille", { p_dossier, p_user, p_motif });
 export const demanderLeveeMuraille = (p_muraille: string) => rpc<string>("tamila_demander_levee_muraille", { p_muraille });
