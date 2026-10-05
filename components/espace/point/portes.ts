@@ -3,10 +3,22 @@
 
    Lecture seule : points_du_jour (mes points, par jour), puis la porte
    lire_point(p_point uuid) → jsonb pour le contenu — c'est elle qui pose
-   ouvert_le. Si le jsonb ne porte pas les lignes sous une forme connue
-   (clé `lignes` ou `sections[].lignes`), on retombe sur la lecture directe
-   de points_du_jour_lignes. apercu_point(p_client, p_user, p_jour) → jsonb
-   fabrique un aperçu quand aucun point n'a été assemblé pour le jour.
+   ouvert_le. Forme confirmée par le coordinateur (lot 19) :
+     { id, jour, statut, heure 'HH:MM', fuseau, territoire, prevu_le, du_le,
+       assemble_le, incomplet, motifs, canal, contenu, ouvert_le, envoi_id,
+       version, expurge_le,
+       sections: [{ rang, module, nom_module, entite_id, entite_nom, titre,
+                    sante, incomplete, donnees_du,
+                    lignes: [{ rang, texte, lien, gravite, objet_type, objet_id }] }] }
+   apercu_point(p_client, p_user = null, p_jour = null) → jsonb fabrique un
+   aperçu quand aucun point n'a été assemblé :
+     { jour, fuseau, prevu_le, du_le, motifs,
+       sections: [{ section_id, module, entite_id, entite_nom, titre, sante,
+                    incomplete, donnees_du, ordre,
+                    lignes: [{ rang, texte, lien, gravite, objet_type, objet_id,
+                               gabarit, gabarit_version, valeurs }] }] }
+   Toujours sections[].lignes[] ; une section sans ligne vaut « rien à
+   signaler » (rang 0 à l'écran).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
@@ -28,61 +40,77 @@ export async function listerPoints(): Promise<PointDuJour[]> {
 
 type Brut = Record<string, unknown>;
 
-/* Les lignes d'un jsonb de lire_point, sous les deux formes qu'on sait lire. */
-function lignesDepuis(j: unknown): LignePoint[] | null {
-  if (!j || typeof j !== "object") return null;
-  const o = j as Brut;
-  const liste = Array.isArray(o.lignes) ? (o.lignes as Brut[]) : null;
-  if (liste) return liste.map(normaliser);
-  if (Array.isArray(o.sections)) {
-    const out: LignePoint[] = [];
-    (o.sections as Brut[]).forEach((s, i) => {
-      const lg = Array.isArray(s.lignes) ? (s.lignes as Brut[]) : Array.isArray(s.items) ? (s.items as Brut[]) : [];
-      if (!lg.length) out.push(normaliser({ ...s, section_rang: s.rang ?? i + 1, rang: 0, titre: s.titre, texte: s.texte ?? "Rien à signaler." }));
-      lg.forEach((l, k) => out.push(normaliser({ titre: s.titre, module: s.module, section_incomplete: s.incomplete, ...l, section_rang: s.rang ?? i + 1, rang: l.rang ?? k + 1 })));
+const n = (v: unknown, d = 0) => (typeof v === "number" ? v : Number(v ?? d) || d);
+const t = (v: unknown) => (typeof v === "string" ? v : v == null ? null : String(v));
+
+/* Les lignes d'un jsonb (lire_point ou apercu_point) : sections[].lignes[]. */
+function lignesDepuis(j: unknown): LignePoint[] {
+  if (!j || typeof j !== "object" || !Array.isArray((j as Brut).sections)) return [];
+  const out: LignePoint[] = [];
+  ((j as Brut).sections as Brut[]).forEach((s, i) => {
+    const rangSection = n(s.rang ?? s.ordre, i + 1);
+    const commun = {
+      section_rang: rangSection,
+      module: t(s.module),
+      entite_nom: t(s.entite_nom),
+      titre: t(s.titre) ?? t(s.nom_module) ?? `Section ${rangSection}`,
+      sante: s.sante === true,
+      section_incomplete: s.incomplete === true,
+    };
+    const lignes = Array.isArray(s.lignes) ? (s.lignes as Brut[]) : [];
+    if (!lignes.length) {
+      out.push({ id: `${rangSection}-0`, ...commun, rang: 0, texte: "Rien à signaler.", lien: null, gravite: null, objet_type: null, objet_id: null });
+      return;
+    }
+    lignes.forEach((l, k) => {
+      const g = t(l.gravite);
+      out.push({
+        id: `${rangSection}-${n(l.rang, k + 1)}`,
+        ...commun,
+        rang: n(l.rang, k + 1),
+        texte: t(l.texte),
+        lien: t(l.lien),
+        gravite: g === "info" || g === "attention" || g === "critique" ? g : null,
+        objet_type: t(l.objet_type),
+        objet_id: t(l.objet_id),
+      });
     });
-    return out;
-  }
-  return null;
+  });
+  return out;
 }
 
-function normaliser(b: Brut): LignePoint {
-  const n = (v: unknown, d = 0) => (typeof v === "number" ? v : Number(v ?? d) || d);
-  const t = (v: unknown) => (typeof v === "string" ? v : v == null ? null : String(v));
-  const g = t(b.gravite);
+/* L'en-tête d'un point tel que lire_point le rend, fusionné sur la ligne de points_du_jour. */
+function enTeteDepuis(point: PointDuJour, j: unknown): PointDuJour {
+  if (!j || typeof j !== "object") return point;
+  const o = j as Brut;
   return {
-    id: t(b.id) ?? `${n(b.section_rang)}-${n(b.rang)}-${Math.random().toString(16).slice(2)}`,
-    section_rang: n(b.section_rang, 1),
-    rang: n(b.rang),
-    module: t(b.module),
-    entite_nom: t(b.entite_nom),
-    titre: t(b.titre),
-    sante: b.sante === true,
-    section_incomplete: b.section_incomplete === true,
-    texte: t(b.texte),
-    lien: t(b.lien),
-    gravite: g === "info" || g === "attention" || g === "critique" ? g : null,
-    objet_type: t(b.objet_type),
-    objet_id: t(b.objet_id),
+    ...point,
+    heure: t(o.heure) ?? point.heure,
+    fuseau: t(o.fuseau) ?? point.fuseau,
+    territoire: t(o.territoire) ?? point.territoire,
+    incomplet: typeof o.incomplet === "boolean" ? o.incomplet : point.incomplet,
+    motifs: Array.isArray(o.motifs) ? (o.motifs as unknown[]) : point.motifs,
+    canal: (t(o.canal) as PointDuJour["canal"]) ?? point.canal,
+    contenu: (t(o.contenu) as PointDuJour["contenu"]) ?? point.contenu,
+    ouvert_le: t(o.ouvert_le) ?? point.ouvert_le,
+    nb_sections: Array.isArray(o.sections) ? (o.sections as unknown[]).length : point.nb_sections,
   };
 }
 
-export async function lirePoint(point: PointDuJour): Promise<{ lignes: LignePoint[]; brut: unknown }> {
+export async function lirePoint(point: PointDuJour): Promise<{ point: PointDuJour; lignes: LignePoint[]; motifs: unknown[] }> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("lire_point", { p_point: point.id });
   if (error) throw new ErreurPorte(message(error));
-  const lignes = lignesDepuis(data);
-  if (lignes) return { lignes, brut: data };
-  const direct = await supabase.from("points_du_jour_lignes").select("*").eq("point_id", point.id).order("section_rang").order("rang");
-  if (direct.error) throw new ErreurPorte(message(direct.error));
-  return { lignes: (direct.data ?? []).map((x) => normaliser(x as Brut)), brut: data };
+  const enTete = enTeteDepuis(point, data);
+  return { point: enTete, lignes: lignesDepuis(data), motifs: enTete.motifs };
 }
 
-export async function apercuPoint(client_id: string, user_id: string, jour: string): Promise<{ lignes: LignePoint[]; brut: unknown }> {
+export async function apercuPoint(client_id: string, user_id: string, jour: string): Promise<{ lignes: LignePoint[]; motifs: unknown[]; fuseau: string | null }> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("apercu_point", { p_client: client_id, p_user: user_id, p_jour: jour });
   if (error) throw new ErreurPorte(message(error));
-  return { lignes: lignesDepuis(data) ?? [], brut: data };
+  const o = (data && typeof data === "object" ? data : {}) as Brut;
+  return { lignes: lignesDepuis(data), motifs: Array.isArray(o.motifs) ? (o.motifs as unknown[]) : [], fuseau: t(o.fuseau) };
 }
 
 export async function monCompte(): Promise<{ user_id: string; client_id: string } | null> {

@@ -10,7 +10,9 @@
    disent, et les motifs du point (connecteur muet…) sont en tête.
 
    Flèches pour relire les points des jours passés. Sans point assemblé
-   pour le jour (base réelle), on propose l'aperçu (apercu_point).
+   pour le jour (base réelle), on propose l'aperçu (apercu_point). Les deux
+   portes rendent sections[].lignes[] (portes.ts) ; l'exemple a la même
+   forme une fois aplati.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -24,7 +26,7 @@ import { dateHeure, dateLongue, libelleModule } from "../format";
 import type { LignePoint, PointDuJour } from "../types";
 import { apercuPoint, lirePoint, listerPoints, monCompte } from "./portes";
 
-type Contenu = { point: PointDuJour | null; lignes: LignePoint[]; apercu?: boolean };
+type Contenu = { point: PointDuJour | null; lignes: LignePoint[]; apercu?: boolean; motifs?: unknown[] };
 
 const STATUTS: Record<PointDuJour["statut"], { libelle: string; teinte: "vert" | "ambre" | "rouge" | "bleu" | "gris" }> = {
   pret: { libelle: "Prêt", teinte: "bleu" },
@@ -75,7 +77,7 @@ export default function PointDuMatin() {
     const t = window.setTimeout(async () => {
       try {
         const r = await lirePoint(pointDuJour);
-        if (actif) setContenus((prev) => ({ ...prev, [pointDuJour.id]: { point: pointDuJour, lignes: r.lignes } }));
+        if (actif) setContenus((prev) => ({ ...prev, [pointDuJour.id]: { point: r.point, lignes: r.lignes, motifs: r.motifs } }));
       } catch (e) {
         if (actif) setErreur(e instanceof Error ? e.message : "Le point n'a pas pu être lu.");
       }
@@ -93,7 +95,7 @@ export default function PointDuMatin() {
       const c = await monCompte();
       if (!c) throw new Error("Aucun compte rattaché à cette session.");
       const r = await apercuPoint(c.client_id, c.user_id, jour);
-      setContenus((prev) => ({ ...prev, [`apercu-${jour}`]: { point: null, lignes: r.lignes, apercu: true } }));
+      setContenus((prev) => ({ ...prev, [`apercu-${jour}`]: { point: null, lignes: r.lignes, apercu: true, motifs: r.motifs } }));
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "L'aperçu n'a pas pu être fabriqué.");
     } finally {
@@ -122,7 +124,7 @@ export default function PointDuMatin() {
   const p = contenu?.point ?? null;
   const critiques = (contenu?.lignes ?? []).filter((l) => l.gravite === "critique").length;
   const attention = (contenu?.lignes ?? []).filter((l) => l.gravite === "attention").length;
-  const motifs = (p?.motifs ?? []) as { module?: string; motif?: string }[];
+  const motifs = (contenu?.motifs ?? p?.motifs ?? []) as { module?: string; motif?: string }[];
 
   return (
     <>
