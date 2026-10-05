@@ -1,11 +1,11 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 5 octobre 2026, 23 h 30 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 0 h 50 Paris.
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
-| **Mécanique** | 5 | Scénario et portes écrits ; rien de codé, rien de posé. |
-| **Livrable client** | 0 | Le client ne voit encore aucun « vérifié le … par … ». |
+| **Mécanique** | 70 | Ouvrier écrit (43 tests Deno verts), migration b7_01 écrite et jouée sur une souche locale (8 tests pgTAP verts, scénario de bout en bout vert). Reste : pose sur la recette, déploiement, premier passage réel. |
+| **Livrable client** | 0 | Le client ne voit encore aucun « vérifié le … par … » : rien n'est posé ni déployé. Dès la pose + le déploiement, un vrai SIREN donne la ligne « SIREN confirmé par Sirene le … » dans les contrôles de la facture. |
 
 ## 1. Le scénario
 
@@ -161,7 +161,52 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 3. Le coordinateur : poser `b7_01_portes.sql`, déployer la coquille `identite` (verify_jwt true, cron
    `omega-identite` chaque minute comme le lecteur), poser `IDENTITE_VERSION` si on veut tracer le commit.
 
-## 6. Journal des étapes
+## 6. Réponses du coordinateur (5/10, 22 h 34 Z)
+
+- **La facture de ce soir** (df280c36) : `identite.siren` et `identite.tva_intracom` sont en `attention`
+  « absent » : le SIREN d'essai (842115763) a une clé de Luhn fausse, le lecteur l'a lu avec `verifiee = false`,
+  `filed_integrer_facture` ne remonte pas une valeur non sûre, le contrôle dit « absent ». Ni A1 ni A4 ne se
+  trompent ; `identite.registre` n'a pas été posé faute d'identifiant valide. Le test réel se fera avec une
+  pièce portant un vrai SIREN (le coordinateur la refait).
+- A4 pose en **a4_10** la remontée siren/tva/iban vers `fournisseur_lu` et trois colonnes de verdict sur
+  `filed_fournisseurs` : `identite_verifiee_le`, `identite_source`, `identite_verdict`. `noter_identite` les
+  remplit **si elles existent** (test `pg_attribute`, rien sinon) : la pose de b7_01 ne dépend pas d'a4_10.
+- `filed_verification_recente` : « ignorer les indisponible de plus de 2 h » transmis à A4 ; `identite_relancer`
+  reste.
+- `rpc()` exporté depuis `_partage/portes.ts` : demandé à A1 ; je bascule quand il est là.
+- Déploiement en coquille : aucun import relatif ne sort de `omega/functions/` (seulement `./` et `@partage/`).
+  **`_partage/` n'est pas sur `worker-b7`** (il est à A1) : le `deno.json` de la coquille mappe `@partage/` sur le
+  SHA d'A1 (`e483a22`, ou `main` une fois fusionné) et `index.ts` importe
+  `…/<sha de worker-b7>/omega/functions/identite/index.ts`.
+
+## 7. Ce qui est fait (6/10, 0 h 50)
+
+- `omega/modules/identite/migrations/b7_01_portes.sql` : table `identites_registre`, déclencheur
+  `identite_demander_travail` (+ rattrapage des demandes ouvertes), portes `identite_a_verifier`,
+  `noter_identite` (réponse, cache, compléments, verdict fournisseur, recontrôle des factures
+  `a_completer`/`bloquee`/`a_valider`, 500 au plus), `identite_relancer`. Rejouable (vérifié deux fois).
+- `omega/functions/identite/` : `index.ts`, `passage.ts`, `verifier.ts`, `portes.ts`, `sirene.ts` (INSEE 3.11 +
+  repli annuaire), `vies.ts`, `coherence.ts`, `iban.ts` ; `deno task verifier` = check + lint + fmt + **43 tests**.
+- `omega/tests/identite/b7_01_portes.sql` : **8 tests pgTAP** (déclencheur, lecture, réponse, cache, compléments,
+  relance, droits, verdict fournisseur) ; `b7_02_scenario.sql` : le parcours complet (contrôle A4 → demande →
+  travail → `noter_identite` → `identite.registre` ok « Numéro de TVA confirmé par VIES le 05/10/2026 » → seconde
+  facture servie par la réponse récente).
+- Vérifié localement sur un Postgres 16 jetable : souche d'A4 + `a4_01..09` + pgTAP d'A5 + `b7_01` : 8/8 verts,
+  scénario vert. (Souche alignée sur le contrat : `travaux.etat`, dépôt idempotent sur la clé.)
+
+## 8. À faire par le coordinateur
+
+1. Poser `b7_01_portes.sql` sur la recette (après a4_04 ; a4_10 facultatif).
+2. Jouer `omega/tests/identite/b7_01_portes.sql` (pgTAP, schéma `tests` d'A5) puis `b7_02_scenario.sql`.
+3. Déployer la coquille `identite` (verify_jwt true, `@partage/` → SHA d'A1), secrets : `SIRENE_API_KEY` (quand
+   Teo l'a ; sans elle, repli annuaire et le battement dit `sirene: "repli"`), facultatifs `IDENTITE_VERSION`,
+   `IDENTITE_CACHE_JOURS` (30), `SIRENE_REPLI` (`non` pour couper le repli), `IDENTITE_NOM`.
+4. Cron `omega-identite` chaque minute, comme le lecteur (`Authorization: Bearer <cle_service>` du Vault).
+5. Une pièce d'essai avec un vrai SIREN et sa TVA ; puis me coller `battements.identite`, le travail
+   `identite.verifier` (resultat), la ligne `filed_verifications_tiers` et le contrôle `identite.registre`.
+
+## 9. Journal des étapes
 
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
   envoyés au coordinateur.
+- 6/10 0 h 50 : ouvrier, migration, tests Deno et pgTAP écrits et verts en local ; b7_01 envoyé à la pose.
