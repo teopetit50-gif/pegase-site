@@ -1,0 +1,41 @@
+{
+  "titre": "Facture PDF native, une page, toutes valeurs citées",
+  "fichier": "01_facture_native.pdf",
+  "mime": "application/pdf",
+  "issue": "lue",
+  "statut": "lue",
+  "type_piece": "facture",
+  "methode": "natif",
+  "nb_pages": 1,
+  "methode_page_1": "natif",
+  "ia_appelee": true,
+  "source": "ia",
+  "valeurs": {
+    "numero": "F-2026-0417",
+    "date": "2026-03-12",
+    "echeance": "2026-04-11",
+    "montant_ht": 1234.4,
+    "montant_tva": 246.88,
+    "montant_ttc": 1481.28,
+    "fournisseur.nom": "ATELIERS BRINDILLE SAS",
+    "fournisseur.siren": "812345676",
+    "fournisseur.tva": "FR19812345676",
+    "fournisseur.iban": "FR7630006000011234567890189",
+    "acheteur.siren": "908765431",
+    "commande.reference": "BC-7781"
+  },
+  "verifiees": [
+    "numero",
+    "date",
+    "montant_ht",
+    "montant_tva",
+    "montant_ttc",
+    "fournisseur.nom",
+    "fournisseur.siren",
+    "fournisseur.siret",
+    "fournisseur.tva",
+    "acheteur.siren",
+    "lignes",
+    "tva.ventilation"
+  ]
+}

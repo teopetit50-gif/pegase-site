@@ -1,0 +1,27 @@
+{
+  "titre": "Facture scannée (PDF image), lecture visuelle par Claude",
+  "fichier": "02_facture_scannee.pdf",
+  "mime": "application/pdf",
+  "issue": "lue",
+  "statut": "lue",
+  "type_piece": "facture",
+  "methode": "ocr",
+  "nb_pages": 1,
+  "methode_page_1": "vision",
+  "ia_appelee": true,
+  "valeurs": {
+    "numero": "2026-088",
+    "date": "2026-02-05",
+    "montant_ttc": 935,
+    "fournisseur.siren": "812345676"
+  },
+  "verifiees": [
+    "numero",
+    "date",
+    "montant_ht",
+    "montant_tva",
+    "montant_ttc",
+    "fournisseur.nom",
+    "fournisseur.siren"
+  ]
+}

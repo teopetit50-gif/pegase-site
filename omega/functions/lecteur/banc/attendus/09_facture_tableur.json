@@ -1,0 +1,26 @@
+{
+  "titre": "Export tableur CSV : lu comme une page de texte",
+  "fichier": "09_facture_tableur.csv",
+  "mime": "text/csv",
+  "issue": "lue",
+  "statut": "lue",
+  "type_piece": "facture",
+  "methode": "tableur",
+  "nb_pages": 1,
+  "methode_page_1": "natif",
+  "ia_appelee": true,
+  "valeurs": {
+    "numero": "LM-2026-315",
+    "montant_ttc": 648,
+    "fournisseur.siren": "812345676"
+  },
+  "verifiees": [
+    "numero",
+    "date",
+    "montant_ht",
+    "montant_tva",
+    "montant_ttc",
+    "fournisseur.nom",
+    "fournisseur.siren"
+  ]
+}

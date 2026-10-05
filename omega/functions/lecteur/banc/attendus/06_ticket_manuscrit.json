@@ -1,0 +1,23 @@
+{
+  "titre": "Ticket manuscrit photographié : transcription, pas de numéro, à vérifier",
+  "fichier": "06_ticket_manuscrit.png",
+  "mime": "image/png",
+  "issue": "a_verifier",
+  "statut": "a_verifier",
+  "type_piece": "facture",
+  "methode": "ocr",
+  "nb_pages": 1,
+  "methode_page_1": "ocr_manuscrit",
+  "ia_appelee": true,
+  "valeurs": {
+    "date": "2026-03-14",
+    "montant_ttc": 9,
+    "fournisseur.nom": "Chez Marthe - bar tabac"
+  },
+  "verifiees": [
+    "date",
+    "montant_ttc",
+    "fournisseur.nom"
+  ],
+  "motif_contient": "numero"
+}

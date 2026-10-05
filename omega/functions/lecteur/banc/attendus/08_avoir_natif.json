@@ -1,0 +1,26 @@
+{
+  "titre": "Avoir PDF natif, référence à la facture d'origine",
+  "fichier": "08_avoir_natif.pdf",
+  "mime": "application/pdf",
+  "issue": "lue",
+  "statut": "lue",
+  "type_piece": "avoir",
+  "methode": "natif",
+  "nb_pages": 1,
+  "ia_appelee": true,
+  "valeurs": {
+    "numero": "AV-2026-0031",
+    "montant_ttc": -257.28,
+    "facture_origine.reference": "F-2026-0417",
+    "facture_origine.date": "2026-03-12"
+  },
+  "verifiees": [
+    "numero",
+    "date",
+    "montant_ht",
+    "montant_tva",
+    "montant_ttc",
+    "fournisseur.nom",
+    "facture_origine.reference"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "titre": "Factur-X : le XML CII joint fait foi, sans IA",
+  "fichier": "04_facture_facturx.pdf",
+  "mime": "application/pdf",
+  "issue": "lue",
+  "statut": "lue",
+  "type_piece": "facture",
+  "methode": "xml",
+  "nb_pages": 1,
+  "methode_page_1": "natif",
+  "ia_appelee": false,
+  "source": "xml",
+  "valeurs": {
+    "numero": "FX-2026-0042",
+    "date": "2026-03-01",
+    "echeance": "2026-03-31",
+    "montant_ht": 120,
+    "montant_tva": 24,
+    "montant_ttc": 144,
+    "net_a_payer": 144,
+    "type_code": "380",
+    "fournisseur.nom": "NUAGE ET CIE",
+    "fournisseur.siren": "812345676",
+    "fournisseur.tva": "FR19812345676",
+    "fournisseur.pays": "FR",
+    "fournisseur.iban": "FR7630006000011234567890189",
+    "acheteur.nom": "SOGEXAL BATIMENT",
+    "acheteur.siren": "908765431",
+    "acheteur.reference": "SERVICE-TECH",
+    "commande.reference": "PO-5567",
+    "devise": "EUR"
+  },
+  "verifiees": [
+    "numero",
+    "date",
+    "montant_ttc",
+    "fournisseur.siren",
+    "fournisseur.tva",
+    "lignes",
+    "tva.ventilation"
+  ]
+}

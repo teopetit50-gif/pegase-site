@@ -1,0 +1,29 @@
+{
+  "titre": "Deux factures dans un fichier : la première est lue, le découpage est rendu",
+  "fichier": "03_multi_factures.pdf",
+  "mime": "application/pdf",
+  "issue": "lue",
+  "statut": "lue",
+  "type_piece": "facture",
+  "methode": "natif",
+  "nb_pages": 4,
+  "ia_appelee": true,
+  "valeurs": {
+    "numero": "TL-1001",
+    "montant_ttc": 360
+  },
+  "decoupage": [
+    {
+      "pages": [
+        1,
+        2
+      ]
+    },
+    {
+      "pages": [
+        3,
+        4
+      ]
+    }
+  ]
+}

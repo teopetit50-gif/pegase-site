@@ -1,0 +1,11 @@
+{
+  "titre": "Page grise illisible : échec motivé, travail fini",
+  "fichier": "07_illisible.pdf",
+  "mime": "application/pdf",
+  "issue": "echec",
+  "statut": "echec",
+  "methode": "ocr",
+  "nb_pages": 1,
+  "ia_appelee": true,
+  "motif_contient": "grise"
+}

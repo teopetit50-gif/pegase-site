@@ -1,0 +1,8 @@
+{
+  "titre": "Pièce d'un dossier chiffré : hors vague 1, reprise plus tard",
+  "fichier": "10_facture_chiffree.pdf",
+  "mime": "application/pdf",
+  "issue": "repris",
+  "ia_appelee": false,
+  "erreur_contient": "CHIFFREMENT_NON_PRIS_EN_CHARGE"
+}

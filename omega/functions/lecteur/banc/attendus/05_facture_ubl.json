@@ -1,0 +1,32 @@
+{
+  "titre": "Facture UBL nue, sans IA",
+  "fichier": "05_facture_ubl.xml",
+  "mime": "application/xml",
+  "issue": "lue",
+  "statut": "lue",
+  "type_piece": "facture",
+  "methode": "xml",
+  "nb_pages": 1,
+  "ia_appelee": false,
+  "source": "xml",
+  "valeurs": {
+    "numero": "UBL-2026-7",
+    "date": "2026-04-02",
+    "echeance": "2026-05-02",
+    "montant_ht": 200,
+    "montant_tva": 11,
+    "montant_ttc": 211,
+    "fournisseur.nom": "IMPRIMERIE GALET SARL",
+    "fournisseur.siret": "81234567600033",
+    "fournisseur.tva": "FR19812345676",
+    "acheteur.siren": "908765431",
+    "commande.reference": "CMD-31"
+  },
+  "verifiees": [
+    "numero",
+    "date",
+    "montant_ttc",
+    "fournisseur.siret",
+    "lignes"
+  ]
+}
