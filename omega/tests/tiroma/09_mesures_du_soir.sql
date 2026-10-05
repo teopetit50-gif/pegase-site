@@ -36,8 +36,12 @@ begin
                  'patients sans contrôle depuis 18 mois : mesuré sur les patients actifs');
   return next ok(exists (select 1 from public.mesures m where m.client_id = banc and m.entite_id = entite and m.indicateur = 'tiroma.taux_acceptation_devis' and m.debut = j - 50 and m.valeur = 1),
                  'taux d''acceptation des devis présentés le J-50 : 1 (D001 signé)');
-  return next ok(exists (select 1 from public.mesures m where m.client_id = banc and m.entite_id = entite and m.indicateur = 'tiroma.occupation_prevue' and m.debut = j),
-                 'occupation prévue du jour J mesurée (matin)') or skip('occupation prévue : pas d''horaire ce jour-là');
+  if extract(isodow from j) between 1 and 6 then
+    return next ok(exists (select 1 from public.mesures m where m.client_id = banc and m.entite_id = entite and m.indicateur = 'tiroma.occupation_prevue' and m.debut = j),
+                   'occupation prévue du jour J mesurée (matin)');
+  else
+    return next skip('occupation prévue : le cabinet est fermé le dimanche');
+  end if;
   return next ok((select bool_and(m.mode = 'a_blanc') from public.mesures m where m.client_id = banc and m.entite_id = entite and m.indicateur like 'tiroma.%'), 'toutes les mesures sont « à blanc » (mode du cabinet)');
   return next ok(exists (select 1 from public.journal_opposable x where x.client_id = banc and x.action = 'tiroma.indicateurs_calcules'), 'journal : « tiroma.indicateurs_calcules »');
   -- Rejouer l'horloge ne remesure pas.
