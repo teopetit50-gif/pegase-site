@@ -305,6 +305,7 @@ declare
   v_a      record;
   v_verif  public.filed_verifications_tiers;
   v_siren_tva text;
+  v_tva_ok boolean := false;
 begin
   select * into v_f from public.filed_factures where id = p_facture;
   if not found then return; end if;
@@ -321,14 +322,15 @@ begin
   -- identite.tva_intracom
   if v_tva is null then
     perform private.filed_poser_resultat(v_f, 'identite.tva_intracom', 'attention', true,
-      'Aucun numéro de TVA intracommunautaire sur la pièce ni sur le fournisseur.', 'MOTIF_IDENTIFICATION',
+      'Aucun numéro de TVA intracommunautaire sur la pièce ni sur le fournisseur.', 'EMMET_INC',
       jsonb_build_object('tva', null), 'absent');
   else
     select * into v_a from private.filed_tva_intracom_analyser(v_tva);
+    v_tva_ok := coalesce(v_a.valide, false);
     perform private.filed_poser_resultat(v_f, 'identite.tva_intracom', 'bloquant', not v_a.valide,
       case when v_a.valide then format('Numéro de TVA %s : %s.', v_a.pays, v_a.motif)
            else format('Numéro de TVA intracommunautaire invalide : %s.', v_a.motif) end,
-      'MOTIF_IDENTIFICATION',
+      'EMMET_INC',
       jsonb_build_object('tva', v_tva, 'pays', v_a.pays, 'format_ok', v_a.format_ok, 'cle_verifiee', v_a.cle_verifiee),
       v_a.numero);
   end if;
@@ -336,12 +338,12 @@ begin
   -- identite.siren
   if v_siren is null then
     perform private.filed_poser_resultat(v_f, 'identite.siren', 'attention', true,
-      'Aucun SIREN sur la pièce ni sur le fournisseur.', 'MOTIF_IDENTIFICATION', jsonb_build_object('siren', null), 'absent');
+      'Aucun SIREN sur la pièce ni sur le fournisseur.', 'EMMET_INC', jsonb_build_object('siren', null), 'absent');
   else
     perform private.filed_poser_resultat(v_f, 'identite.siren', 'bloquant', not private.filed_siren_valide(v_siren),
       case when private.filed_siren_valide(v_siren) then format('SIREN %s : clé correcte.', v_siren)
            else format('SIREN %s : clé de contrôle fausse.', v_siren) end,
-      'MOTIF_IDENTIFICATION', jsonb_build_object('siren', v_siren), v_siren);
+      'EMMET_INC', jsonb_build_object('siren', v_siren), v_siren);
   end if;
 
   -- identite.coherence : le SIREN de la TVA française doit être le SIREN lu.
@@ -350,24 +352,24 @@ begin
     perform private.filed_poser_resultat(v_f, 'identite.coherence', 'bloquant', v_siren_tva <> v_siren,
       case when v_siren_tva = v_siren then 'Le numéro de TVA et le SIREN désignent la même entreprise.'
            else format('Le numéro de TVA porte le SIREN %s, la pièce donne %s.', v_siren_tva, v_siren) end,
-      'MOTIF_IDENTIFICATION', jsonb_build_object('siren_tva', v_siren_tva, 'siren', v_siren), v_siren_tva || '/' || v_siren);
+      'EMMET_INC', jsonb_build_object('siren_tva', v_siren_tva, 'siren', v_siren), v_siren_tva || '/' || v_siren);
   end if;
 
   -- identite.registre : ce que VIES / Sirene ont répondu, ou la demande à l'ouvrier.
-  if v_tva is not null and (v_a.valide is true) then
+  if v_tva_ok then
     v_verif := private.filed_verification_recente(v_f.client_id, 'vies', v_tva);
     if v_verif.id is null then
       perform private.filed_demander_verification(v_f.client_id, v_f.fournisseur_id, 'vies', v_tva);
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'attention', true,
-        'Numéro de TVA pas encore confirmé par VIES : vérification demandée.', 'MOTIF_IDENTIFICATION',
+        'Numéro de TVA pas encore confirmé par VIES : vérification demandée.', 'EMMET_INC',
         jsonb_build_object('registre', 'vies', 'identifiant', v_tva), 'vies:' || v_tva);
     elsif v_verif.resultat = 'invalide' then
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'bloquant', true,
         format('VIES ne reconnaît pas le numéro de TVA %s (réponse du %s).', v_tva, to_char(v_verif.repondu_le, 'DD/MM/YYYY')),
-        'MOTIF_IDENTIFICATION', jsonb_build_object('registre', 'vies', 'identifiant', v_tva, 'repondu_le', v_verif.repondu_le, 'preuve', v_verif.preuve), 'vies:' || v_tva);
+        'EMMET_INC', jsonb_build_object('registre', 'vies', 'identifiant', v_tva, 'repondu_le', v_verif.repondu_le, 'preuve', v_verif.preuve), 'vies:' || v_tva);
     elsif v_verif.resultat = 'indisponible' then
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'attention', true,
-        'VIES n''a pas répondu : numéro de TVA à confirmer.', 'MOTIF_IDENTIFICATION',
+        'VIES n''a pas répondu : numéro de TVA à confirmer.', 'EMMET_INC',
         jsonb_build_object('registre', 'vies', 'identifiant', v_tva, 'repondu_le', v_verif.repondu_le), 'vies:' || v_tva);
     else
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'attention', false,
@@ -379,15 +381,15 @@ begin
     if v_verif.id is null then
       perform private.filed_demander_verification(v_f.client_id, v_f.fournisseur_id, 'sirene', v_siren);
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'attention', true,
-        'SIREN pas encore confirmé par Sirene : vérification demandée.', 'MOTIF_IDENTIFICATION',
+        'SIREN pas encore confirmé par Sirene : vérification demandée.', 'EMMET_INC',
         jsonb_build_object('registre', 'sirene', 'identifiant', v_siren), 'sirene:' || v_siren);
     elsif v_verif.resultat = 'invalide' then
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'bloquant', true,
         format('Sirene ne connaît pas le SIREN %s, ou l''entreprise est fermée (réponse du %s).', v_siren, to_char(v_verif.repondu_le, 'DD/MM/YYYY')),
-        'MOTIF_IDENTIFICATION', jsonb_build_object('registre', 'sirene', 'identifiant', v_siren, 'repondu_le', v_verif.repondu_le, 'preuve', v_verif.preuve), 'sirene:' || v_siren);
+        'EMMET_INC', jsonb_build_object('registre', 'sirene', 'identifiant', v_siren, 'repondu_le', v_verif.repondu_le, 'preuve', v_verif.preuve), 'sirene:' || v_siren);
     elsif v_verif.resultat = 'indisponible' then
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'attention', true,
-        'Sirene n''a pas répondu : SIREN à confirmer.', 'MOTIF_IDENTIFICATION',
+        'Sirene n''a pas répondu : SIREN à confirmer.', 'EMMET_INC',
         jsonb_build_object('registre', 'sirene', 'identifiant', v_siren, 'repondu_le', v_verif.repondu_le), 'sirene:' || v_siren);
     else
       perform private.filed_poser_resultat(v_f, 'identite.registre', 'attention', false,

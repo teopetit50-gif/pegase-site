@@ -142,6 +142,19 @@ begin
   assert (select resultat || '/' || gravite from public.filed_controles where facture_id = v_f and code = 'identite.tva_intracom') = 'anomalie/bloquant', 'identite.tva_intracom bloquant';
   assert not exists (select 1 from public.demandes_validation where objet_type = 'filed_facture' and objet_id = v_f::text and statut = 'en_attente'), 'aucune demande pour une pièce bloquée';
   raise notice 'OK numéro de TVA faux : la pièce ne se classe pas';
+  -- Un fournisseur sans numéro de TVA (SIREN seul) : vérification Sirene demandée, pas de blocage.
+  insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, siren, pays, statut) values (v_cl, 'SIR', 'Artisan d''exemple', 'artisan d exemple', '123456782', 'FR', 'actif') returning id into v_r;
+  insert into public.pieces (id, client_id, objet_type, objet_id, sha256, statut) values (gen_random_uuid(), v_cl, 'filed_document', 'p4b', repeat('e', 64), 'lue') returning id into v_exp;
+  insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, reference, piece_id, source, depose_par, sha256, recu_le, etat, nature)
+  values (v_cl, v_e, 2026, 17, 'R2026-000017', v_exp, 'courriel', v_c, repeat('e', 64), now(), 'a_traiter', 'facture') returning id into v_exp;
+  insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc, fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
+  values (v_cl, v_e, v_exp, 'facture', 'ART-7', 'ART7', date '2026-05-06', current_date, 'EUR', 100, 20, 120, v_r.id, 'siren', '{"siren": "123456782"}', '{"siren": "987654329"}', repeat('f', 64), 'a_completer')
+  returning id into v_f;
+  v_statut := private.filed_controler_facture(v_f);
+  assert v_statut = 'a_valider', 'SIREN seul : à valider (reçu : ' || v_statut || ')';
+  assert (select resultat || '/' || gravite from public.filed_controles where facture_id = v_f and code = 'identite.tva_intracom') = 'anomalie/attention', 'sans TVA : attention, pas blocage';
+  assert exists (select 1 from public.filed_verifications_tiers where client_id = v_cl and registre = 'sirene' and identifiant = '123456782'), 'vérification Sirene demandée';
+  raise notice 'OK fournisseur sans numéro de TVA : SIREN vérifié, Sirene demandé';
 
   -- ══ 7. Charges récurrentes : écritures attendues, facture absente, facture reconnue ══
   set local role authenticated;

@@ -162,7 +162,7 @@ begin
      where dv.client_id = v_f.client_id and dv.module = 'filed'
        and ((dv.objet_type = 'filed_facture' and dv.objet_id = v_f.id::text) or (dv.objet_type = 'filed_document' and dv.objet_id = v_f.document_id::text))
     union all
-    select (to_jsonb(a)->>'cree_le')::timestamptz, 'validation', 'approbation', coalesce(to_jsonb(a)->>'commentaire', to_jsonb(a)->>'decision', 'décision'), coalesce(to_jsonb(a)->>'decideur_libelle', to_jsonb(a)->>'acteur_libelle', 'personne'),
+    select coalesce(to_jsonb(a)->>'decide_le', to_jsonb(a)->>'cree_le')::timestamptz, 'validation', 'approbation', coalesce(to_jsonb(a)->>'commentaire', to_jsonb(a)->>'decision', 'décision'), coalesce(to_jsonb(a)->>'decideur_libelle', to_jsonb(a)->>'acteur_libelle', 'personne'),
            to_jsonb(a) - 'id' - 'client_id'
       from public.approbations a
       join public.demandes_validation dv on dv.id = a.demande_id
