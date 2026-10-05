@@ -78,6 +78,13 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   TTC » tombe sur le texte — capture `omega/recette-a3/filed-pdf-essai-900.jpg`.
   La recette automatique ne couvre pas ce rendu : il faut une session et une
   pièce réelle.
+- **Temps réel** (05/10, soir) : `components/espace/tempsReel.ts` — un canal
+  Realtime (`postgres_changes`) par écran, ouvert seulement en base réelle,
+  qui relit l'écran avec un délai de regroupement (800 ms) : validations
+  sur `demandes_validation`, `approbations`, `delegations` ; FILED sur
+  `filed_documents`, `filed_factures`, `filed_controles`, `filed_historique`
+  (le dossier ouvert est relu avec la liste) ; point sur `points_du_jour`.
+  Sans table publiée, rien n'arrive et l'écran marche comme avant.
 - **Validation** : `npx tsc --noEmit` ✓, `npx eslint components/espace
   app/espace` ✓ (0 erreur, 0 avertissement), `npm run build` ✓, recette
   aux cinq largeurs (390 / 768 / 1024 / 1440 / 1700) ✓ —
@@ -144,20 +151,27 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
    `omega-clients` (premier segment = un client de `mes_clients()`). Rien à
    changer : l'action serveur signe déjà avec la session de la personne.
 
-Reste à confirmer côté coordinateur : la clé exacte du jsonb rendu par
-`filed_deposer_piece` (point 2).
+9. **Realtime** — posé en partie (socle_lot19h, 05/10 18:25) :
+   `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`
+   sont dans la publication `supabase_realtime`. Les écrans écoutent déjà
+   ces quatre tables : la file et la liste FILED se relisent d'elles-mêmes.
+   **Restent à publier** : `delegations` (carte « Mes délégations »),
+   `filed_controles` et `filed_historique` (contrôles rejoués, fil du
+   dossier — la liste couvre déjà le changement d'état de la facture),
+   `points_du_jour` (point remis pendant qu'on regarde). Sans eux, ces
+   détails se relisent au prochain changement d'une table publiée ou à la
+   main, sans erreur.
 
 ## Prêt à fusionner
 
-Lot « rendu PDF » (05/10, soir) : tsc ✓, eslint ✓, build ✓, recette aux
-cinq largeurs ✓ (104 contrôles). Il ajoute la dépendance `pdfjs-dist` à
-`package.json` ; `package-lock.json` est commité avec elle (il était
-désynchronisé de `package.json` — `@emnapi/*` manquants — et `npm ci`
-refusait ; il est maintenant à jour).
+Lot « rendu PDF + temps réel » (05/10, soir) : tsc ✓, eslint ✓, build ✓,
+recette aux cinq largeurs ✓ (104 contrôles). Il ajoute la dépendance
+`pdfjs-dist` à `package.json` ; `package-lock.json` est commité avec elle
+(il était désynchronisé de `package.json` — `@emnapi/*` manquants — et
+`npm ci` refusait ; il est maintenant à jour). Le temps réel est actif sur
+les quatre tables publiées (demande 9 pour les autres).
 
 ## Demain
 
 - Relecture en conditions réelles dès qu'un client a des lignes : premier
   appel de chaque porte, messages d'erreur de la base en clair.
-- Temps réel (Supabase Realtime) sur `demandes_validation` et
-  `filed_documents` pour que la file bouge sans recharger.
