@@ -31,6 +31,9 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | filed_lot7 (a4_10, 316697e) | identité du fournisseur : colonnes de verdict, filed_confirmer_fournisseur, filed_attester_identite, « indisponible » vaut 2 h. Test a4_05 vert. **Mais** le branchement de filed_completer_fournisseur_lu en tête de filed_controler_facture n'a pas pris (patch par repère) : F-2026-0413 dit toujours « Aucun SIREN » ; a4_11 demandé (corps complet) |
 | tavaro_b2_01 / b2_02 (d8698d8) | séparation saisie/approbation (payload.saisi_par) ; relances des impayés (colonnes, portes, cron tavaro-relances 09:15 UTC). TOUT_B2 : 5 fichiers verts sur 11 (158 ok), 6 renvoyés (attente saisie_protegee, cast smallint, emails en doublon dans le jeu, alertes sans colonne module) |
 | varelo_b1_01 (3c6561f) | rôles exigés sur grp_installer / deposer_codes / rapprocher / appliquer_decisions. Tests B1 : 14/14 morts sur tests.role_admis manquante (aide de B1 non définie), renvoyé |
+| identite_b7_01 (e4fd65f) | B7 : cache identites_registre, déclencheur sur filed_verifications_tiers → travail identite.verifier, portes identite_a_verifier / noter_identite / identite_relancer. Tests 7/8 verts (test 08 et scénario : cast jsonb manquant, renvoyé). Fonction Edge `identite` v1 déployée en coquille, cron omega-identite chaque minute (lot 19v). Secret SIRENE_API_KEY à poser par Teo (repli recherche-entreprises sinon) |
+| daliro_b6_01..04 (b672b32) | B6 : avenants, confirmations J-2 (cron daliro-confirmations-j2 15:00), factures de chantier, installation/tableau. Garde-fous 38/39 (après lot 19w : EXECUTE sur private.btp_est_serveur, appelée par une vue) ; parcours : alias masqué par une variable, renvoyé |
+| socle_lot19w | règle générale rejouée après les lots B6/B7 : fonctions de private référencées par une vue lisible, une politique, un trigger, un CHECK ou une fonction INVOKER exécutable → EXECUTE à authenticated |
 | socle_lot19j | effet de bord d'a5_01 : le service_role n'avait EXECUTE sur `private` que par PUBLIC → « permission denied for function piece_a_lire » chez le lecteur à 18 h 55 Z. `grant execute on all functions in schema private to service_role` + default privileges (19 h 05 Z). À intégrer dans a5_01 (demandé à A5) |
 | filed_lot4a … filed_lot4g, filed_lot5a, filed_lot6a | les neuf migrations d'A4 (`omega/migrations/a4_01` à `a4_09`) : exercices, plan comptable, centres, imputations apprises, charges récurrentes, identité TVA/SIREN, archivage probant, pilotage, circuit de validation, branchements, acquittement d'alerte. `filed_factures_statut_check` retiré, `filed_factures_statut_v2` en place |
 
@@ -90,6 +93,7 @@ gérant du banc après a5_01 : vert.
 | `lecteur` (v4.1, commit 7425991, version 13 ; rpc() exportée de _partage) | A1 | true | `ANTHROPIC_API_KEY` (posée le 5/10, fournisseur anthropic, modèle claude-sonnet-5-5) ou `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION` + `BEDROCK_MODEL_ID` (Bedrock) ; `MISTRAL_API_KEY` (OCR, facultatif) |
 | `expediteur` (v2) | A2 | true | `BREVO_API_KEY` |
 | `webhooks-brevo` (v1) | A2 | false | `BREVO_WEBHOOK_JETON` |
+| `identite` (v1, B7 e4fd65f, _partage A1 7425991) | B7 | true | `SIRENE_API_KEY` (facultatif : repli), `IDENTITE_CACHE_JOURS` (30) |
 | `reception` (v1) | A2 | false | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` |
 
 **Déploiement du lecteur depuis la v4 : une coquille de deux fichiers.** Le
