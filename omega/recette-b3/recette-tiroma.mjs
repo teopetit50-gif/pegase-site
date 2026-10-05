@@ -121,6 +121,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(900);
   const finAtt = await s.evaluer(`document.querySelectorAll('section[aria-label="Liste d\\'attente"] .esp-liste > li').length`);
   ok(finAtt === avantAtt, `elle est retirée : ${finAtt} patients`);
+  await s.evaluer(`document.getElementById('tiroma-attente')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
   await s.capturer(`${dossier}tiroma-attente-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : repasser à blanc puis en mode réel (exemple)');
