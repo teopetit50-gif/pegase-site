@@ -249,6 +249,8 @@ export type PieceProjet = {
   mime: string;
   statut: string;
   type_piece: string | null;
+  /* le motif du lecteur quand il n'a pas reconnu le courrier (a_classer) ou n'a pas pu le lire */
+  motif?: string | null;
   cree_le?: string;
 };
 

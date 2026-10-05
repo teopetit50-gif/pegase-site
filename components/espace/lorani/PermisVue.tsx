@@ -878,17 +878,19 @@ function EcheanceLigne({ e, nommer }: { e: Echeance; nommer: (id: string | null 
 
 /* ——— un courrier du dossier et ce qu'on en a décidé ——— */
 function PieceLigne({ piece, decisions, nommer }: { piece: PieceProjet; decisions: DateLue[]; nommer: (id: string | null | undefined) => string }) {
-  const teinte = piece.statut === "lue" ? "vert" : piece.statut === "echec" || piece.statut === "rejetee" ? "rouge" : piece.statut === "a_verifier" ? "ambre" : "gris";
+  const teinte = piece.statut === "lue" ? "vert" : piece.statut === "echec" || piece.statut === "rejetee" ? "rouge" : piece.statut === "a_verifier" || piece.statut === "a_classer" ? "ambre" : "gris";
   return (
     <li>
       <span className="esp-fil-point" data-teinte={teinte} />
       <div>
         <div className="esp-fil-texte">
           <strong>{libelleTypePiece(piece.type_piece)}</strong> · {piece.nom_fichier}{" "}
-          <Pastille teinte={teinte}>{piece.statut === "lue" ? "Lue" : piece.statut === "en_lecture" ? "En lecture" : piece.statut === "a_verifier" ? "À vérifier" : piece.statut === "echec" ? "Illisible" : piece.statut === "rejetee" ? "Rejetée" : "Reçue"}</Pastille>
+          <Pastille teinte={teinte}>{piece.statut === "lue" ? "Lue" : piece.statut === "en_lecture" ? "En lecture" : piece.statut === "a_verifier" ? "À vérifier" : piece.statut === "a_classer" ? "Courrier non reconnu" : piece.statut === "echec" ? "Illisible" : piece.statut === "rejetee" ? "Rejetée" : "Reçue"}</Pastille>
         </div>
         <div className="esp-fil-meta">
           {piece.cree_le ? `Déposé le ${dateHeure(piece.cree_le)}. ` : ""}
+          {piece.statut === "a_classer" ? `Le lecteur n'a pas reconnu un courrier de la mairie${piece.motif ? ` : « ${piece.motif} »` : ""}. Aucune date n'en est proposée ; saisissez-la à la main. ` : ""}
+          {piece.statut === "echec" && piece.motif ? `Motif : « ${piece.motif} ». ` : ""}
           {decisions.map((d) => (
             <span key={d.id}>
               {NATURES_DATE_LUE[d.nature].libelle} {d.statut === "confirmee" ? "confirmée" : "écartée"} par {nommer(d.decide_par)}{d.decide_le ? ` le ${dateHeure(d.decide_le)}` : ""}{d.motif ? ` (« ${d.motif} »)` : ""}.{" "}
