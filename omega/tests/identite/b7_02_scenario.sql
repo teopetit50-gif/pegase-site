@@ -55,7 +55,8 @@ begin
   raise notice 'après réponse : identite.registre = % « % »', ctl.resultat, ctl.message;
   assert ctl.resultat = 'ok', 'identite.registre levé';
   assert (select statut from public.filed_factures where id = v_f) = 'a_valider', 'facture toujours à valider';
-  assert (select count(*) from public.identites_registre) = 2, 'deux entrées de cache (vies + sirene)';
+  -- Le cache est global : on ne compte que les deux identifiants du scénario (la recette en porte d'autres).
+  assert (select count(*) from public.identites_registre where identifiant in ('FR11123456782', '123456782')) = 2, 'deux entrées de cache (vies + sirene)';
 
   -- 4. Une seconde facture du même fournisseur (sa propre pièce : une pièce = un document) : le contrôle trouve la
   --    réponse récente, aucune nouvelle demande.
