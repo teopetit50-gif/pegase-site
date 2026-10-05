@@ -23,6 +23,7 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | a5_01_private_execute | EXECUTE sur `private` retiré à PUBLIC/anon/authenticated puis rendu à la liste requise (migration d'A5 + compléments c/d/e du coordinateur : fonctions des triggers SECURITY INVOKER de private, des vues de public lisibles, des CHECK/defaults). Résultat : authenticated 187/741, anon 0. Liste figée : `omega/a5_01_liste_figee.txt` |
 | socle_lot19k | relevé par A3 en relecture réelle : des politiques RLS INSERT/UPDATE existaient sans GRANT pour authenticated (approbations, delegations, demandes_validation et 40 autres tables). Pour chaque politique de public visant authenticated, le GRANT correspondant est donné (75 grants, générés depuis pg_policies) ; les politiques restent juges |
 | socle_lot19l | `revoke insert, update, delete` d'authenticated sur `clients`, `audit_journal`, `catalogue_site`, `moteurs_reconnus`, `profils_metier` (RLS actif, aucune politique d'écriture : grants sans objet) |
+| socle_lot19m | politique `storage.objects` INSERT pour authenticated sur `omega-clients`, chemin `<client>/filed_document/…`, client ∈ `private.mes_clients()` (la SELECT existait depuis 19b, pas l'INSERT : le dépôt depuis l'espace était impossible) |
 | socle_lot19j | effet de bord d'a5_01 : le service_role n'avait EXECUTE sur `private` que par PUBLIC → « permission denied for function piece_a_lire » chez le lecteur à 18 h 55 Z. `grant execute on all functions in schema private to service_role` + default privileges (19 h 05 Z). À intégrer dans a5_01 (demandé à A5) |
 | filed_lot4a … filed_lot4g, filed_lot5a, filed_lot6a | les neuf migrations d'A4 (`omega/migrations/a4_01` à `a4_09`) : exercices, plan comptable, centres, imputations apprises, charges récurrentes, identité TVA/SIREN, archivage probant, pilotage, circuit de validation, branchements, acquittement d'alerte. `filed_factures_statut_check` retiré, `filed_factures_statut_v2` en place |
 
@@ -79,14 +80,30 @@ gérant du banc après a5_01 : vert.
 
 | Fonction | Session | verify_jwt | Secrets attendus |
 |---|---|---|---|
-| `lecteur` (v3, commit 976853d) | A1 | true | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` (eu-central-1), `BEDROCK_MODEL_ID`, `MISTRAL_API_KEY` (facultatif) |
+| `lecteur` (v4, commit e483a22, version 11) | A1 | true | `ANTHROPIC_API_KEY` (posée le 5/10, fournisseur anthropic, modèle claude-sonnet-5-5) ou `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION` + `BEDROCK_MODEL_ID` (Bedrock) ; `MISTRAL_API_KEY` (OCR, facultatif) |
 | `expediteur` (v2) | A2 | true | `BREVO_API_KEY` |
 | `webhooks-brevo` (v1) | A2 | false | `BREVO_WEBHOOK_JETON` |
 | `reception` (v1) | A2 | false | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` |
 
-Le paquet du lecteur se construit comme `lecteur/outils/preparer_deploiement.ts`
-(fichiers `.ts` hors tests, `schemas/`, `_partage/` copié sous la fonction,
-`deno.json` avec `@partage/` → `./_partage/`), `import_map_path = deno.json`.
+**Déploiement du lecteur depuis la v4 : une coquille de deux fichiers.** Le
+dépôt étant public, `index.ts` fait
+`import "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/<sha>/omega/functions/lecteur/index.ts"`
+et `deno.json` mappe `@partage/` sur `…/<sha>/omega/functions/_partage/` plus
+les alias npm du `deno.json` du lecteur. Pour livrer une version : changer le
+SHA, redéployer (`import_map_path = deno.json`, verify_jwt true). Plus de
+recopie de 125 Ko, et la version en ligne est figée au commit. (L'ancienne
+méthode, `lecteur/outils/preparer_deploiement.ts`, reste valable.)
+
+**Première lecture réelle le 5/10 à 20 h 03 Z** : facture PDF native déposée
+par le gérant du banc comme le ferait un client (upload Storage sous
+`<client>/filed_document/<document>/<nom>` puis `filed_deposer_piece`), document
+R2026-000003, pièce `35cfdcfc-…` : `lue`, facture, natif, 13 valeurs toutes
+justes avec leurs boîtes (numéro, dates, fournisseur SIREN/TVA/IBAN, acheteur,
+HT/TVA/TTC, lignes, ventilation TVA), 1 appel IA, 3 815 + 811 tokens,
+0,0145 €. Deux faux départs instructifs : la politique Storage INSERT pour les
+membres manquait (lot 19m, sinon l'écran de dépôt d'A3 échoue), et une clé
+Anthropic copiée tronquée donne « invalid x-api-key » (la console ne montre la
+clé entière qu'à la création).
 
 Les crons appellent les fonctions avec `Authorization: Bearer <cle_service>`
 lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
@@ -99,10 +116,9 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 1. Brevo : restriction d'IP désactivée, expéditeur `essais@omegaai.fr` déclaré,
    webhook transactionnel posé (fait le 5/10). Reste : couper le suivi
    d'ouverture/clic ; supprimer le webhook « omega » Marketing.
-2. Edge Secrets manquants : `ANTHROPIC_API_KEY` (décision de Teo le 5/10 à
-   21 h 45 : API Anthropic en direct pour la recette, pas de compte AWS ; lot
-   demandé à A1 pour que le lecteur accepte ce fournisseur — données hors UE,
-   à retrancher pour la prod), `META_APP_SECRET`, `META_ACCESS_TOKEN`.
+2. Edge Secrets manquants : `META_APP_SECRET`, `META_ACCESS_TOKEN` (WhatsApp).
+   `ANTHROPIC_API_KEY` est posée (décision de Teo le 5/10 : API Anthropic en
+   direct pour la recette — données hors UE, repasser par Bedrock pour la prod).
 3. GitHub → Settings → Secrets : `SUPABASE_DB_URL`, `SAUVEGARDE_PHRASE`
    (workflow de sauvegarde d'A5).
 4. Brevo : domaine inbound vers `/functions/v1/reception/brevo` (le webhook
@@ -149,7 +165,7 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 
 | Session | Branche | État |
 |---|---|---|
-| A1 lecteur | worker-a1 | v3 déployée, crons actifs ; 42 tests ; attend les clés Bedrock (Teo) |
+| A1 lecteur | worker-a1 | v4 en ligne (fournisseur anthropic), première lecture réelle réussie ; 47 tests |
 | A2 expéditeur / réception | worker-a2 | fini, déployé, 60 tests ; chaîne d'envoi vérifiée jusqu'à Brevo (401 IP, côté Teo) |
 | A3 écran client | worker-a3 | quatre lots en ligne (43c4f68, 372df1c, 3aa753d, b99131d) ; compte de recette fourni pour la relecture |
 | A4 FILED compta | worker-a4 | neuf lots posés, tests verts ; fini, attend la prod |
