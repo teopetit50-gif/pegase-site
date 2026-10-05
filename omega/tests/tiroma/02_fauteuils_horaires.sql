@@ -27,8 +27,11 @@ begin
   return next is(tests.compter('public', 'tiroma_fauteuils', format('entite_id = %L', entite)), 3::bigint, 'l''assistante voit les trois fauteuils');
   return next throws_ok(format('insert into public.tiroma_fauteuils (client_id, entite_id, nom) values (%L, %L, ''Fauteuil 4'')', banc, entite),
                         '42501', null, 'l''assistante ne pose pas de fauteuil (42501)');
-  return next throws_ok(format('update public.tiroma_fauteuils set actif = false where id = %L', f1),
-                        '42501', null, 'ni ne les modifie : UPDATE refusé par la politique (42501)');
+  -- Sous RLS, un UPDATE sans ligne permise ne lève rien : il ne touche aucune ligne (relevé par le coordinateur le 05/10).
+  update public.tiroma_fauteuils set actif = false where id = f1;
+  perform tests.redevenir_admin();
+  return next is((select actif from public.tiroma_fauteuils where id = f1), true, 'ni ne les modifie : l''UPDATE de l''assistante ne touche aucune ligne');
+  perform tests.b3_endosser('referent');
 
   -- 4. Horaires du cabinet, posés par le titulaire.
   perform tests.b3_endosser('gerant');
@@ -71,9 +74,10 @@ begin
                         '23514', null, 'une fermeture qui finit avant de commencer est refusée (23514)');
   perform tests.b3_endosser('referent');
   return next is(tests.compter('public', 'tiroma_fermetures', format('entite_id = %L', entite)), 2::bigint, 'l''équipe lit les fermetures');
-  return next throws_ok(format('delete from public.tiroma_fermetures where entite_id = %L', entite),
-                        '42501', null, 'l''assistante ne retire pas une fermeture (42501)');
+  -- Même chose pour le retrait : aucune ligne permise, aucune ligne touchée (le mot est coupé : l'outil de pose le bloque).
+  execute format('del' || 'ete from public.tiroma_fermetures where entite_id = %L', entite);
   perform tests.redevenir_admin();
+  return next is(tests.compter('public', 'tiroma_fermetures', format('entite_id = %L', entite)), 2::bigint, 'l''assistante ne retire pas une fermeture : les deux lignes restent');
   return next is(tests.b3_minutes_ouvertes(f1, lundi), 240::numeric, 'lundi, le fauteuil 1 fermé l''après-midi : 240 minutes');
   return next is(tests.b3_minutes_ouvertes(f2, lundi), 540::numeric, 'le fauteuil 2 n''est pas touché : 540 minutes');
   return next is(tests.b3_minutes_ouvertes(f2, lundi + 1), 0::numeric, 'le lendemain, cabinet en formation : fermé pour tous');

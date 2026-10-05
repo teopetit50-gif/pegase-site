@@ -21,10 +21,12 @@ create or replace function tests.b3_entite() returns uuid language sql stable as
 $$;
 
 -- Un compte du banc par son préfixe : gerant | referent | daf | daf2 (adresses <prefixe>@banc-varelo.test).
-create or replace function tests.b3_compte(p_prefixe text) returns uuid language plpgsql stable as $$
+-- SECURITY DEFINER : auth.users n'est pas lisible sous le jeton d'un membre (relevé par le coordinateur le 05/10).
+create or replace function tests.b3_compte(p_prefixe text) returns uuid language plpgsql stable security definer set search_path to '' as $$
 declare v uuid;
 begin
   select u.id into v from auth.users u where lower(u.email) = lower(p_prefixe || '@banc-varelo.test') limit 1;
+  -- (search_path vide : les objets sont nommés en entier)
   if v is null then
     raise exception 'tests.b3_compte : aucun compte % sur le banc', p_prefixe;
   end if;
