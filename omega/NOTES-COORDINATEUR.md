@@ -36,6 +36,8 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | tiroma_b3_02..06 (f7194d6) | B3 lot 2 : regard et créneaux, plans sans rendez-vous, avant rendez-vous, charge des fauteuils, point du matin ; tests 00_aides_b3 + 02_fauteuils_horaires. `^test_b3_` : 4/4 fichiers verts (24+21+18+35) le 6/10 à 00 h 55 Z. Écran /espace/tiroma à fusionner sur son « prêt » |
 | lorani_b5_01 / b5_02 (50ccebd) | B5 : porte lorani_deposer_piece, liens des alertes vers /espace/lorani. Test b5_01_parcours_permis rouge : deposer_travail appelé avec un integer pour p_priorite (smallint), renvoyé |
 | tamila (tests seuls, a05d25c) | B4 : 12 fichiers pgTAP joués dans l'ordre des noms : 6/11 verts (01, 02, 03, 06, 07, 08). Rouges renvoyés : 04 et 10 (« Vous n'écrivez pas dans ce dossier » : qui est endossé ?), 05 (pieces_une_fois : même sha pour deux pièces), 09 (**trou du socle** : clé d'idempotence de tamila_demander_cloture à la seconde, b4_0x attendu), 11 (40/41, test 38 journal vide) |
+| socle_lot19y | Realtime des tables loc_contrats, loc_propositions, loc_factures, loc_avoirs (demande de B2). La politique Storage 19o couvre déjà `<client>/loc_contrat/…` |
+| socle_lot19z | test 44 d'A5 (e35b825) joué : **anon exécutait 30 fonctions de private** (fonctions créées après a5_01, EXECUTE pour PUBLIC par défaut). Pour chaque fonction de private : EXECUTE explicite à authenticated si elle l'avait, puis revoke from public, anon ; default privileges de postgres dans private (public sans EXECUTE, service_role avec). État : anon 0/881, authenticated 330/881, service_role 881/881. Test 44 : 4/5 (restent 58 « en trop » pour authenticated à trier par A5 : CHECK/defaults, triggers, vues). Test 51 meurt (« unrecognized privilege type DELETE »), renvoyé à A5 — message non envoyé, Teo a mis en pause |
 | socle_lot19x | publication Realtime des tables tiroma_* demandées par B3 pour son écran /espace/tiroma |
 | socle_lot19w | règle générale rejouée après les lots B6/B7 : fonctions de private référencées par une vue lisible, une politique, un trigger, un CHECK ou une fonction INVOKER exécutable → EXECUTE à authenticated |
 | socle_lot19j | effet de bord d'a5_01 : le service_role n'avait EXECUTE sur `private` que par PUBLIC → « permission denied for function piece_a_lire » chez le lecteur à 18 h 55 Z. `grant execute on all functions in schema private to service_role` + default privileges (19 h 05 Z). À intégrer dans a5_01 (demandé à A5) |
@@ -201,6 +203,16 @@ fonctions Edge se déploient de même en coquille sur un SHA (voir lecteur).
 | A4 FILED compta | worker-a4 | neuf lots posés, tests verts ; fini, attend la prod |
 | A5 garde-fous | worker-a5 | `a5_01` posé avec compléments ; 10 tests à corriger (renvoyés) ; liste figée dans `omega/a5_01_liste_figee.txt` |
 
+
+## PAUSE — 6 octobre 2026, 01 h 00 (Paris)
+
+Teo a mis toutes les sessions en pause (limite d'usage atteinte). Chaque ouvrier
+a reçu l'ordre de commiter/pousser et de s'arrêter ; le point automatique de 2 h
+est désactivé (trig_01EUyxfyvgvmXW3C5sv93rd3). À la reprise : réarmer le point,
+relancer les ouvriers par message, puis traiter dans l'ordre : B7 v3 (forme du
+verdict d'A4), B4 corrections (04/05/09/10/11 + b4_0x clôture), B5 (smallint),
+B2 (6 tests), B1 (role_admis), B6 (parcours), A5 (test 44 « en trop », test 51),
+A1 (lecteur-exports), fusions d'écrans B2/B3/B4/B5 sur « prêt à fusionner ».
 
 ## Vague 2 — lancée le 5 octobre 2026 à 22 h 20 (décision de Teo)
 
