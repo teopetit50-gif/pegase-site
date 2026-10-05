@@ -90,6 +90,40 @@ Le mot de passe de ce rôle va dans le secret GitHub ; celui de `postgres` n'en
 sort jamais. Les schémas `auth` et `storage` appartiennent aux rôles Supabase :
 si le `grant select` y échoue, retirer ces schémas du `pg_dump` du workflow.
 
+### 1.4 Relevé du 5 octobre sur la recette (coordinateur, après TOUT_1)
+
+- **Trou réel, corrigé** : `anon` avait INSERT/UPDATE/DELETE/TRUNCATE sur
+  `abonnements_modules`, `demandes_audit`, `receptions`, et TRUNCATE sur les
+  vingt tables FILED des lots 4 à 6. Posé par le coordinateur en recette :
+  `socle_lot19d` (revoke all … from anon, authenticated ; grant select … to
+  authenticated), `socle_lot19e` (revoke truncate, references, trigger on all
+  tables in schema public from anon, authenticated + alter default
+  privileges), `socle_lot19f` (revoke insert, update from anon sur
+  `audit_journal`, `catalogue_site`, `clients`, `lorani_echeances_permis`,
+  `moteurs_reconnus`, `profils_metier`, `tamila_registre`). **À pousser en
+  production avec le lot 19.** Le test 08 fige ce point ; une variante pour
+  `authenticated` (aucun TRUNCATE/REFERENCES/TRIGGER nulle part) serait utile :
+  à ajouter au prochain lot de tests.
+- **Sans RLS** : `public.lorani_echeances_permis` et `public.tamila_registre`
+  n'ont pas la RLS activée. Le coordinateur ne l'active pas sans savoir qui les
+  lit. Analyse : si ces tables n'ont pas de `client_id`, ce sont des
+  référentiels (calendrier des permis, registre Tamila) ; la bonne forme est
+  RLS activée + une politique `for select to authenticated using (true)`
+  explicite (lecture assumée) et aucune écriture pour `anon`/`authenticated`,
+  ou le déplacement dans `private` avec une fonction de lecture. Si elles ont
+  un `client_id`, elles doivent entrer dans `tables_locataires` avec la
+  politique standard (le test 02 les attraperait). Priorité haute si
+  `tamila_registre` porte des données personnelles (registre des traitements
+  ou des dossiers), moyenne sinon. Requête pour trancher :
+  `select column_name from information_schema.columns where table_name in
+  ('lorani_echeances_permis','tamila_registre') order by table_name, ordinal_position;`
+- **Tables internes sans politique** (`demandes_audit`, `grp_ref_compteurs`,
+  `travaux`, `tiroma_effaces`, `filed_compteurs`) : RLS activée, aucune
+  politique, aucun SELECT pour `authenticated` → tout refusé, voulu. Les
+  tests 05 et 43 l'admettent désormais à cette condition précise (aucun
+  droit SELECT) ; une table de cette liste qui recevrait un `grant select`
+  par mégarde redeviendrait rouge.
+
 ## 2. Priorité moyenne
 
 ### 2.1 Vues en `security_invoker`

@@ -32,12 +32,51 @@ begin
     when nom in ('time with time zone', 'time without time zone') then format('%L::%s', '12:00', nom)
     when nom = 'interval' then '''0''::interval'
     when nom in ('jsonb', 'json') then format('%L::%s', '{}', nom)
-    when nom = 'bytea' then '''\x00''::bytea'
+    when nom = 'bytea' then 'decode(repeat(''00'', 32), ''hex'')'
     when nom = 'inet' then '''127.0.0.1''::inet'
     when nom = 'tstzrange' then 'tstzrange(now(), now() + interval ''1 hour'')'
     when nom = 'daterange' then 'daterange(current_date, current_date + 1)'
     else null
   end;
+end $$;
+
+-- Valeur d'exemple qui respecte les contraintes CHECK mono-colonne de la colonne (liste de valeurs, regex, longueur d'octets).
+-- Renvoie une expression SQL, ou null si aucune contrainte n'impose quelque chose de reconnaissable.
+create or replace function tests.valeur_selon_check(p_table regclass, p_colonne name, p_type regtype) returns text
+language plpgsql stable as $$
+declare
+  def text; m text[]; attnum_col int2; regexes text[] := '{}'; candidat text; tous_ok boolean; rx text;
+  candidats text[] := array['essai_a5', 'essai', 'filed_essai', 'essai.a5', repeat('0', 64), repeat('a', 64), 'a', 'A5', '0'];
+begin
+  select attnum into attnum_col from pg_attribute where attrelid = p_table and attname = p_colonne;
+  for def in
+    select pg_get_constraintdef(c.oid) from pg_constraint c
+    where c.conrelid = p_table and c.contype = 'c' and c.conkey = array[attnum_col]
+  loop
+    -- col = ANY (ARRAY['a'::text, 'b'::text]) → première valeur
+    m := regexp_match(def, '= ANY \(ARRAY\[''([^'']*)''');
+    if m is not null then return format('%L::%s', m[1], p_type); end if;
+    -- col IN (...) rendu parfois sous forme OR : col = 'a' OR col = 'b'
+    m := regexp_match(def, '= ''([^'']*)''::');
+    if m is not null and def !~ '~' then return format('%L::%s', m[1], p_type); end if;
+    -- octet_length(col) = n → n octets nuls
+    m := regexp_match(def, 'octet_length\([^)]*\) = (\d+)');
+    if m is not null then return format('decode(repeat(''00'', %s), ''hex'')::%s', m[1], p_type); end if;
+    -- col ~ 'regex' (une ou plusieurs) → on testera des candidats
+    for rx in select r[1] from regexp_matches(def, '~\*? ''((?:[^'']|'''')*)''', 'g') r loop
+      regexes := regexes || replace(rx, '''''', '''');
+    end loop;
+  end loop;
+  if array_length(regexes, 1) > 0 then
+    foreach candidat in array candidats loop
+      tous_ok := true;
+      foreach rx in array regexes loop
+        if not (candidat ~ rx) then tous_ok := false; exit; end if;
+      end loop;
+      if tous_ok then return format('%L::%s', candidat, p_type); end if;
+    end loop;
+  end if;
+  return null;
 end $$;
 
 -- Insère une ligne minimale dans une table : les colonnes fournies, plus une valeur d'exemple pour chaque
@@ -68,7 +107,7 @@ begin
       else v := format('%L::%s', p_valeurs ->> r.colonne, typ);
       end if;
     elsif r.non_nul and not r.a_defaut and not r.identite and not r.generee then
-      v := tests.valeur_exemple(typ);
+      v := coalesce(tests.valeur_selon_check(format('%I.%I', p_schema, p_table)::regclass, r.colonne, typ), tests.valeur_exemple(typ));
       if v is null then raise exception 'tests.inserer_minimal : pas de valeur d''exemple pour %.%.% (type %)', p_schema, p_table, r.colonne, typ; end if;
     else
       continue;
@@ -104,10 +143,17 @@ begin
     raise notice 'tests.jeu : auth.users non alimentée (%), on continue avec des uuid libres', sqlerrm;
   end;
 
-  -- Rôle de membre « simple » : première étiquette de l'énumération si public.comptes.role est un enum, sinon 'membre'.
-  select coalesce((select enumlabel from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
-                   where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' order by enumsortorder limit 1), 'membre')
-    into role_membre;
+  -- Rôle de membre « simple » : 'collaborateur' s'il est admis, sinon la première valeur admise (enum ou contrainte CHECK), sinon 'collaborateur'.
+  select coalesce(
+    (select enumlabel from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
+      where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' and enumlabel = 'collaborateur'),
+    (select enumlabel from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
+      where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' order by enumsortorder limit 1),
+    (select 'collaborateur' from pg_constraint c where c.conrelid = 'public.comptes'::regclass and c.contype = 'c'
+      and pg_get_constraintdef(c.oid) ~ '''collaborateur''' limit 1),
+    (select (regexp_match(pg_get_constraintdef(c.oid), '''([^'']*)'''))[1] from pg_constraint c
+      where c.conrelid = 'public.comptes'::regclass and c.contype = 'c' and pg_get_constraintdef(c.oid) ~ 'role' limit 1),
+    'collaborateur') into role_membre;
   perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', user_a, 'client_id', client_a, 'role', role_membre, 'perimetre_total', true));
   perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', user_b, 'client_id', client_b, 'role', role_membre, 'perimetre_total', true));
 

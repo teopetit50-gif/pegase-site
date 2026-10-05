@@ -38,7 +38,7 @@ create table public.clients (id uuid primary key default gen_random_uuid(), nom 
 create table public.entites (id uuid primary key default gen_random_uuid(), client_id uuid not null references public.clients(id), nom text not null);
 create table public.comptes (
   user_id uuid not null, client_id uuid not null references public.clients(id),
-  role text not null check (role in ('membre', 'gerant', 'admin')), perimetre_total boolean not null default false,
+  role text not null check (role in ('gerant', 'valideur', 'collaborateur', 'admin')), perimetre_total boolean not null default false,
   primary key (user_id, client_id)
 );
 create table public.delegations (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), de_user uuid not null, a_user uuid not null, jusqu_au timestamptz);
@@ -60,7 +60,11 @@ create table public.journal_opposable (
   survenu_le timestamptz not null default now(),
   acteur_type text not null, acteur_id uuid, acteur_libelle text,
   action text not null, objet_type text, objet_id text, donnees jsonb,
-  hash_precedent bytea, hash bytea not null
+  hash_precedent bytea, hash bytea not null,
+  constraint journal_opposable_hash_check check (octet_length(hash) = 32),
+  constraint journal_opposable_acteur_type_check check (acteur_type in ('utilisateur', 'operateur', 'systeme')),
+  constraint journal_opposable_action_check check (length(action) between 1 and 120),
+  constraint journal_opposable_objet_type_check check (objet_type is null or length(objet_type) between 1 and 80)
 );
 create or replace function private.journal_chainer() returns trigger
 language plpgsql security definer set search_path = public, extensions, pg_temp as $$
@@ -99,12 +103,12 @@ end $$;
 grant execute on function public.verifier_journal_client(uuid) to authenticated;
 
 -- Autres tables en ajout seul ----------------------------------------------------
-create table public.envois_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), envoi_id bigint, survenu_le timestamptz not null default now(), evenement text not null, detail jsonb);
-create table public.effacements (client_efface uuid primary key, nom_client text not null, efface_le timestamptz not null default now(), par uuid, empreinte_export text, lignes jsonb not null default '{}', comptes_orphelins int not null default 0, fichiers jsonb);
+create table public.envois_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), envoi_id bigint, survenu_le timestamptz not null default now(), type text not null constraint envois_evenements_type_check check (type = any (array['remis', 'rebond_temporaire', 'rebond', 'plainte', 'refuse'])), detail jsonb);
+create table public.effacements (client_efface uuid primary key, nom_client text not null, efface_le timestamptz not null default now(), par uuid, empreinte_export text not null constraint effacements_empreinte_export_check check (empreinte_export ~ '^[0-9a-f]{64}$'), lignes jsonb not null default '{}', comptes_orphelins int not null default 0, fichiers jsonb);
 create table public.effacements_objets (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text not null, objet_id text not null, efface_le timestamptz not null default now(), par uuid, lignes jsonb not null default '{}');
-create table public.filed_historique (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), facture_id bigint, survenu_le timestamptz not null default now(), etat text not null, detail jsonb);
+create table public.filed_historique (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), facture_id bigint, survenu_le timestamptz not null default now(), etape text not null check (etape ~ '^[a-z][a-z0-9_.]{1,59}$'), objet_type text not null check (objet_type ~ '^filed_[a-z_]{1,33}$'), message text not null check (length(message) between 1 and 500), acteur_type text not null check (acteur_type in ('utilisateur', 'operateur', 'systeme')), detail jsonb);
 create table public.suivis (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet text not null);
-create table public.suivis_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), suivi_id bigint, survenu_le timestamptz not null default now(), evenement text not null);
+create table public.suivis_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), suivi_id bigint, survenu_le timestamptz not null default now(), type text not null constraint suivis_evenements_type_check check (type = any (array['ouverture', 'promesse', 'glissement', 'relance', 'signe', 'cloture', 'expiration'])));
 create table public.echeances_pro (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), libelle text not null, echeance date not null);
 create table public.echeances_pro_journal (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), echeance_id bigint, survenu_le timestamptz not null default now(), action text not null);
 do $$ declare t text; begin
@@ -222,6 +226,9 @@ revoke execute on all functions in schema private from public, anon, authenticat
 grant execute on function private.mes_clients() to authenticated;
 grant execute on function private.lit_objet(uuid, text, uuid) to authenticated;
 
+-- Table interne : RLS activée, aucune politique, aucun droit pour authenticated (cas voulu)
+create table public.filed_compteurs (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), compteur int not null default 0);
+
 -- Registre des locataires : toutes les tables publiques à client_id ------------------------
 insert into private.tables_locataires (nom, ordre_effacement)
 select table_name, row_number() over (order by table_name) from information_schema.columns where table_schema = 'public' and column_name = 'client_id';
@@ -231,6 +238,7 @@ insert into private.tables_objets (nom, objet_type, colonne, ordre_effacement) v
 do $$ declare t text; begin
   for t in select nom from private.tables_locataires loop
     execute format('alter table public.%I enable row level security', t);
+    if t = 'filed_compteurs' then continue; end if;
     execute format('create policy lecture_client on public.%I for select to authenticated using (client_id in (select private.mes_clients()))', t);
     execute format('grant select on public.%I to authenticated', t);
   end loop;

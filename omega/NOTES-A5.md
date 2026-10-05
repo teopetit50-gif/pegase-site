@@ -40,6 +40,41 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (message de 17:40 UTC, retour de TOUT_1 et TOUT_2)
+
+Corrections poussées sur `worker-a5` (commit indiqué dans le journal git,
+TOUT*.sql régénérés) :
+
+- **`tests.jeu()`** : le rôle du compte est pris dans l'ordre : `collaborateur`
+  s'il est admis (enum ou contrainte CHECK), sinon la première valeur admise,
+  sinon `collaborateur`. Ton patch de la recette est donc reporté.
+- **`tests.inserer_minimal()`** lit désormais les contraintes CHECK
+  mono-colonne (`tests.valeur_selon_check`) : `= ANY (ARRAY[...])` → première
+  valeur ; `octet_length(col) = n` → n octets nuls ; une ou plusieurs regex
+  `~ '...'` → premier candidat qui les satisfait toutes parmi `essai_a5`,
+  `essai`, `filed_essai`, `essai.a5`, 64 zéros, 64 « a », … ; sinon la valeur
+  par type (bytea : 32 octets par défaut). Cela couvre
+  `journal_opposable_hash_check`, `envois_evenements_type_check`,
+  `suivis_evenements_type_check`, `effacements_empreinte_export_check`, les
+  regex de `filed_historique` et les bornes de longueur.
+- **Test 05** : une table locataire sans politique est admise si
+  `authenticated` n'a pas SELECT dessus ; le diagnostic liste ces tables.
+  **Test 43** : même exemption.
+- **Test 08** : rien à changer, c'était un vrai trou ; merci pour les lots
+  19d/e/f. Consigné dans SECURITE.md §1.4 avec `lorani_echeances_permis` et
+  `tamila_registre` sans RLS (analyse et requête pour trancher).
+- Maquette locale durcie avec les contraintes réelles que tu m'as données
+  (rôles, hash 32 octets, types d'événements, regex FILED, empreinte
+  d'export, table interne sans politique) : 50/50 verts, `TOUT.sql` → 44 `ok`.
+- Point à surveiller sur la recette : si les tests 11/12 passent mais que le
+  test 32 échoue (« empreinte fournie remplacée »), c'est que l'insertion
+  directe dans `journal_opposable` ne recalcule pas l'empreinte : la base
+  compte sur la porte d'écriture. Dans ce cas, dis-moi le nom de la porte
+  (fonction qui écrit au journal) et je ferai passer les tests 11, 12, 30,
+  32–34 par elle.
+
+Tu peux relancer TOUT_1 et TOUT_2, puis TOUT_3 et TOUT_4.
+
 ## Réponse au coordinateur (message de 16:34 UTC) — commit `2057897`
 
 1. **TOUT.sql est prêt** : `omega/tests/socle/TOUT.sql` (63 Ko) enchaîne

@@ -98,8 +98,10 @@ begin
     where not exists (
       select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = regexp_replace(tl.nom, '^public\.', '')
         and (coalesce(p.qual, '') || coalesce(p.with_check, '')) ~ '(mes_clients|lit_objet)')
+      -- une table interne fermée à authenticated (aucun SELECT) n'a pas besoin de politique
+      and has_table_privilege('authenticated', to_regclass('public.' || quote_ident(regexp_replace(tl.nom, '^public\.', ''))), 'SELECT')
     order by 1
-  $q$, 'Toute table locataire est protégée par mes_clients() ou lit_objet()');
+  $q$, 'Toute table locataire lisible par authenticated est protégée par mes_clients() ou lit_objet()');
 end $f$;
 
 
