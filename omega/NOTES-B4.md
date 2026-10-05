@@ -1,14 +1,14 @@
 # Session B4 — TAMILA, le module des cabinets d'avocats
 
 Branche `worker-b4`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE.
-Dernière mise à jour : 05/10/2026, soir (scénario écrit, rien codé).
+Dernière mise à jour : 05/10/2026, 23 h (lot B4-1 envoyé au coordinateur).
 
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **0 %** | les lots de tests joués par le coordinateur, verts |
-| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **0 %** | l'écran en ligne, les portes appelées pour de vrai avec le compte de recette |
+| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **25 %** — 13 fichiers de tests écrits (≈ 340 contrôles) d'après la photographie du socle, aucun encore joué | les lots joués par le coordinateur, verts ; chaque rouge corrigé |
+| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **35 %** — l'écran est écrit, vert (tsc, eslint, build, recette cinq largeurs), sur l'exemple ; la base réelle n'a pas encore été appelée | l'écran en ligne (fusion), les portes appelées avec le compte de recette, la navigation (ecrans.ts), le coffre |
 
 ## Ce qui manque, ce que Teo doit fournir
 
@@ -143,8 +143,61 @@ fait jouer l'augmentation d'un mois de l'art. 915-4).
   diligence, murailles en place), une seule porte.
 - `b4_04_tamila_registre_invoker` si la question 4 le confirme.
 
+## 4. Fait (05/10, soir)
+
+- **Tests pgTAP** `omega/tests/tamila/` : `00_jeu_tamila.sql` (le cabinet
+  « Delorme & Associés », cinq comptes, un chiffré d'exemple au format du socle,
+  la scène complète), puis `01` à `12`, un par étape du scénario. Tout passe par
+  les portes publiques sous `tests.endosser` (rôle `authenticated`, RLS) ; les
+  gestes du serveur sous `tests.endosser_serveur()` (`service_role`) ; les
+  rondes par `private.tamila_*` en postgres. Un mot sentinelle chiffré dans la
+  référence, l'intitulé, deux parties et un motif de muraille, puis cherché en
+  clair dans vingt tables (test 11). Les règles de procédure sont découvertes à
+  l'exécution (`tests.tamila_regles`) : le test 04 vérifie l'échéance avec
+  `regles_delais` + `ajouter_mois` + `proroger`, pas une date en dur.
+- **Migrations** `omega/modules/tamila/migrations/` :
+  `b4_02_tamila_journal_acces.sql` (la promesse « chaque accès est journalisé,
+  exportable » : `tamila_journal_acces(p_dossier, p_depuis)` pour le
+  responsable et les associés, lecture elle-même tracée) et
+  `b4_03_tamila_cle_dossier.sql` (`tamila_cle_dossier(p_dossier)` rend
+  l'enveloppe de la clé à un membre qui voit le dossier : sans elle, un avocat
+  collaborateur ne peut rien déchiffrer, `tamila_cles` n'étant lue que par les
+  associés). Testées par `12_journal_et_cle.sql`.
+- **Écran** `/espace/tamila` — `components/espace/tamila/` : `types.ts`
+  (formes = colonnes), `chiffrement.ts` (WebCrypto : AES-256-GCM, format
+  `01 ‖ nonce ‖ chiffré ‖ étiquette`, enveloppe de 77 octets sous la phrase du
+  cabinet par PBKDF2, trousseau d'onglet, bytea en hexadécimal), `regles.ts`
+  (libellés français, ce que la personne peut faire avant le clic), `exemples.ts`
+  (six dossiers du cabinet fictif), `portes.ts` (lectures sous RLS, les 30
+  portes RPC), `EcranTamila.tsx` (cinq compteurs-filtres, liste l'urgence en
+  tête, phrase du cabinet, nouveau dossier chiffré dans le navigateur,
+  installation par le gérant), `DossierTamila.tsx` (huit cartes : identité et
+  décisions en attente, parties, appel et délais avec le calcul en toutes
+  lettres et les cinq gestes de l'avocat, audiences, avis RPVA saisis, membres
+  et murailles, exports, journal des accès ; dix-huit dialogues).
+  `npx tsc --noEmit` ✓, `npx eslint components/espace/tamila app/espace/tamila`
+  ✓ (0 erreur, 0 avertissement), `npm run build` ✓ (`ƒ /espace/tamila`),
+  `node omega/recette-b4/recette-tamila.mjs` ✓ aux cinq largeurs (40 contrôles
+  + 19 d'enchaînements : calcul 908 + 915-4 relu avant de signer, confirmation,
+  acte déposé, muraille, nouveau dossier). Captures dans `omega/recette-b4/`.
+- **Pas encore fait** : aucune porte appelée pour de vrai (pas de pose, pas de
+  session) ; la navigation de l'espace (`ecrans.ts`, question 9) ; le dépôt
+  d'une pièce chiffrée depuis l'écran (question 3) ; les captures en base
+  réelle avec le compte du banc.
+
+## 5. Lot B4-1 au coordinateur (05/10, 23 h)
+
+1. Poser `omega/tests/tamila/00_jeu_tamila.sql` (après le `00_installation.sql`
+   d'A5), puis jouer `01` à `11` dans l'ordre et me renvoyer la sortie brute de
+   chaque `runtests`.
+2. Poser `b4_02_tamila_journal_acces.sql` et `b4_03_tamila_cle_dossier.sql`,
+   puis jouer `12_journal_et_cle.sql`.
+3. Les réponses aux questions de faits (§2) : surtout 1 à 3 et 5.
+
 ## Journal
 
 - 05/10 soir — lecture de CLAUDE.md, AGENTS.md, CONTRAT-OUVRIER, NOTES-COORDINATEUR,
   NOTES-A3, SOCLE-EXTRAITS-TAMILA (13 tables, 110 fonctions, 3 crons), la page
   /secteurs/avocats. Scénario écrit, envoyé au coordinateur.
+- 05/10, 22 h–23 h — tests 00 à 12, migrations b4_02 et b4_03, écran
+  /espace/tamila et sa recette. Lot B4-1 envoyé.
