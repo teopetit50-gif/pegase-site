@@ -1,0 +1,115 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /espace/tamila — ce que l'écran des dossiers ajoute à la charte .esp
+   (05/10/2026, session B4). Tout le reste vient de components/espace/
+   espace.css (cartes, listes, pastilles, formulaires, avis).
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* cinq compteurs : deux par rang sur téléphone, cinq dès 1024 */
+.esp .tam-kpis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 768px) {
+  .esp .tam-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .esp .tam-kpis {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* la phrase du cabinet : fermée (gris) ou mémorisée (vert) */
+.esp .tam-phrase--fermee {
+  color: var(--r-faible);
+}
+.esp .tam-phrase:not(.tam-phrase--fermee) {
+  border-color: #1e6b3a;
+  color: #1e6b3a;
+}
+
+/* le calcul d'un délai, en toutes lettres */
+.esp .tam-calcul {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f6f6f4;
+  border: 1px solid var(--r-filet);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--r-texte);
+}
+.esp .tam-calcul b {
+  font-weight: 600;
+}
+.esp .tam-calcul-source {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--r-faible);
+}
+
+/* une ligne de délai / d'audience : titre, méta, actions */
+.esp .tam-ligne {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  border-top: 1px solid var(--r-filet);
+}
+.esp .tam-ligne:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.esp .tam-ligne-haut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.esp .tam-ligne-titre {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.esp .tam-ligne-date {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 15px;
+}
+.esp .tam-ligne-date[data-retard="true"] {
+  color: var(--esp-rouge);
+}
+.esp .tam-ligne-date[data-proche="true"] {
+  color: #9a5b00;
+}
+.esp .tam-ligne-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12.5px;
+  color: var(--r-faible);
+}
+.esp .tam-ligne-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ce qui est chiffré et qu'on ne peut pas lire */
+.esp .tam-chiffre {
+  color: var(--r-faible);
+  font-style: italic;
+}
+
+/* le bouton « comment la date est calculée » */
+.esp .tam-depli {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--r-doux);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
