@@ -1,10 +1,10 @@
--- TOUT_3.sql — partie 3/4 de TOUT.sql (tests 26 à 38). Lancer les quatre dans l'ordre.
+-- TOUT_3.sql — partie 3/4 de TOUT.sql (tests 27 à 39). Lancer les quatre dans l'ordre.
 
--- 26 — UPDATE sur public.echeances_pro_journal échoue (ajout seul)
+-- 27 — DELETE sur public.echeances_pro_journal échoue (ajout seul)
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
 
-create or replace function tests.test_26_update_echeances_pro_journal() returns setof text
+create or replace function tests.test_27_delete_echeances_pro_journal() returns setof text
 language plpgsql as $f$
 declare
   nb int; v_ctid tid; col name;
@@ -14,12 +14,11 @@ begin
     return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
     return;
   end if;
-  select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_update and avant;
-  return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE UPDATE existe');
+  select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_delete and avant;
+  return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE DELETE existe');
   v_ctid := tests.ligne_pour_essai('echeances_pro_journal');
-  select attname into col from pg_attribute where attrelid = 'public.echeances_pro_journal'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
-  return next throws_ok(format('update public.echeances_pro_journal set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur echeances_pro_journal échoue, même pour le propriétaire');
-  return next is(tests.compter('public', 'echeances_pro_journal', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+  return next throws_ok(format('delete from public.echeances_pro_journal where ctid = %L', v_ctid), null, null, 'DELETE sur echeances_pro_journal échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'echeances_pro_journal', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
 end $f$;
 
 
@@ -326,4 +325,23 @@ end $f$;
 
 
 
-select * from runtests('tests'::name, '^test_(26|28|29|30|31|32|33|34|35|36|37|38)_');
+-- 39 — un objet d'un type restreint n'est pas lisible sans ligne dans acces_objets
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_39_objet_restreint_sans_acces() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; objet uuid;
+begin
+  jeu := tests.jeu();
+  objet := gen_random_uuid();
+  perform tests.inserer_minimal('public', 'objets_restreints', jsonb_build_object('client_id', jeu ->> 'client_a', 'objet_type', 'dossier_essai_a5'));
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next ok(not tests.lit_objet((jeu ->> 'client_a')::uuid, 'dossier_essai_a5', objet), 'lit_objet() refuse un objet restreint sans acces_objets');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+select * from runtests('tests'::name, '^test_(27|28|29|30|31|32|33|34|35|36|37|38|39)_');

@@ -1,108 +1,4 @@
--- TOUT_2.sql — partie 2/4 de TOUT.sql (tests 09 à 24). Lancer les quatre dans l'ordre.
-
--- 09 — private.mes_clients() ne rend rien sans JWT
--- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- runtests() annule tout ce que le test écrit.
-
-create or replace function tests.test_09_mes_clients_sans_jwt() returns setof text
-language plpgsql as $f$
-declare
-  n bigint;
-begin
-  perform tests.redevenir_admin();
-  perform set_config('role', 'authenticated', true);
-  begin
-    execute 'select count(*) from private.mes_clients()' into n;
-    return next is(n, 0::bigint, 'Sans JWT, mes_clients() est vide');
-  exception when others then
-    return next pass('Sans JWT, mes_clients() refuse : ' || sqlerrm);
-  end;
-  perform tests.redevenir_admin();
-end $f$;
-
-
-
--- 10 — private.mes_clients() rend le client du compte endossé, et lui seul
--- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- runtests() annule tout ce que le test écrit.
-
-create or replace function tests.test_10_mes_clients_avec_compte() returns setof text
-language plpgsql as $f$
-declare
-  jeu jsonb; present boolean; present_b boolean; n bigint;
-begin
-  jeu := tests.jeu();
-  perform tests.endosser((jeu ->> 'user_a')::uuid);
-  execute format('select %L::uuid in (select * from private.mes_clients())', jeu ->> 'client_a') into present;
-  execute format('select %L::uuid in (select * from private.mes_clients())', jeu ->> 'client_b') into present_b;
-  execute 'select count(*) from private.mes_clients()' into n;
-  return next ok(present, 'Le client A est dans mes_clients() pour l''utilisateur A');
-  return next ok(not present_b, 'Le client B n''y est pas');
-  return next is(n, 1::bigint, 'Exactement un client');
-  perform tests.redevenir_admin();
-end $f$;
-
-
-
--- 11 — un client ne lit pas le journal d'un autre
--- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- runtests() annule tout ce que le test écrit.
-
-create or replace function tests.test_11_journal_isole_lecture() returns setof text
-language plpgsql as $f$
-declare
-  jeu jsonb;
-begin
-  jeu := tests.jeu();
-  perform tests.journaliser((jeu ->> 'client_b')::uuid, 'essai_a5');
-  perform tests.endosser((jeu ->> 'gerant_a')::uuid);
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'Le gérant de A ne voit aucune ligne du journal de B');
-  perform tests.endosser((jeu ->> 'user_a')::uuid);
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'Le collaborateur de A non plus');
-  perform tests.redevenir_admin();
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_b', 'essai_a5%')), 1::bigint, 'La ligne de B existe pourtant (vue en admin)');
-end $f$;
-
-
-
--- 12 — un client lit bien son propre journal
--- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- runtests() annule tout ce que le test écrit.
-
-create or replace function tests.test_12_journal_lecture_propre() returns setof text
-language plpgsql as $f$
-declare
-  jeu jsonb;
-begin
-  jeu := tests.jeu();
-  perform tests.journaliser((jeu ->> 'client_a')::uuid, 'essai_a5');
-  perform tests.endosser((jeu ->> 'gerant_a')::uuid);
-  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')), 1::bigint, 'Le gérant de A voit la ligne de journal de A');
-  perform tests.endosser((jeu ->> 'user_a')::uuid);
-  return next diag('Collaborateur de A : ' || tests.compter('public', 'journal_opposable', format('client_id = %L and action like %L', jeu ->> 'client_a', 'essai_a5%')) || ' ligne(s) visible(s) (le socle réserve le journal aux gérants et admins : 0 attendu là-bas)');
-  perform tests.redevenir_admin();
-end $f$;
-
-
-
--- 13 — un client ne peut pas écrire une ligne au nom d'un autre client
--- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- runtests() annule tout ce que le test écrit.
-
-create or replace function tests.test_13_ecriture_chez_autrui_refusee() returns setof text
-language plpgsql as $f$
-declare
-  jeu jsonb;
-begin
-  jeu := tests.jeu();
-  perform tests.endosser((jeu ->> 'user_a')::uuid);
-  return next throws_ok(
-    format('select tests.inserer_minimal(''public'', ''acces_objets'', %L::jsonb)', jsonb_build_object('client_id', jeu ->> 'client_b', 'objet_type', 'essai_a5', 'objet_id', gen_random_uuid(), 'user_id', jeu ->> 'user_a')::text),
-    '42501', null, 'INSERT dans acces_objets avec le client_id de B, par A : refusé (42501)');
-  perform tests.redevenir_admin();
-end $f$;
-
-
+-- TOUT_2.sql — partie 2/4 de TOUT.sql (tests 14 à 26). Lancer les quatre dans l'ordre.
 
 -- 14 — sous le rôle authenticated d'un client, aucune ligne d'un autre client n'est lisible, sur toutes les tables locataires
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
@@ -180,6 +76,29 @@ end $f$;
 
 
 
+-- 17 — DELETE sur public.journal_opposable échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_17_delete_journal_opposable() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('journal_opposable') then
+    return next pass('public.journal_opposable n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('journal_opposable') where sur_delete and avant;
+  return next ok(nb > 0, 'journal_opposable : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('journal_opposable');
+  return next throws_ok(format('delete from public.journal_opposable where ctid = %L', v_ctid), null, null, 'DELETE sur journal_opposable échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'journal_opposable', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
+end $f$;
+
+
+
 -- 18 — UPDATE sur public.envois_evenements échoue (ajout seul)
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
@@ -200,6 +119,29 @@ begin
   select attname into col from pg_attribute where attrelid = 'public.envois_evenements'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
   return next throws_ok(format('update public.envois_evenements set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur envois_evenements échoue, même pour le propriétaire');
   return next is(tests.compter('public', 'envois_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 19 — DELETE sur public.envois_evenements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_19_delete_envois_evenements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('envois_evenements') then
+    return next pass('public.envois_evenements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('envois_evenements') where sur_delete and avant;
+  return next ok(nb > 0, 'envois_evenements : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('envois_evenements');
+  return next throws_ok(format('delete from public.envois_evenements where ctid = %L', v_ctid), null, null, 'DELETE sur envois_evenements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'envois_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
 end $f$;
 
 
@@ -228,6 +170,29 @@ end $f$;
 
 
 
+-- 21 — DELETE sur public.effacements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_21_delete_effacements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('effacements') then
+    return next pass('public.effacements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('effacements') where sur_delete and avant;
+  return next ok(nb > 0, 'effacements : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('effacements');
+  return next throws_ok(format('delete from public.effacements where ctid = %L', v_ctid), null, null, 'DELETE sur effacements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'effacements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
+end $f$;
+
+
+
 -- 22 — UPDATE sur public.filed_historique échoue (ajout seul)
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
@@ -248,6 +213,29 @@ begin
   select attname into col from pg_attribute where attrelid = 'public.filed_historique'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
   return next throws_ok(format('update public.filed_historique set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur filed_historique échoue, même pour le propriétaire');
   return next is(tests.compter('public', 'filed_historique', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 23 — DELETE sur public.filed_historique échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_23_delete_filed_historique() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('filed_historique') then
+    return next pass('public.filed_historique n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('filed_historique') where sur_delete and avant;
+  return next ok(nb > 0, 'filed_historique : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('filed_historique');
+  return next throws_ok(format('delete from public.filed_historique where ctid = %L', v_ctid), null, null, 'DELETE sur filed_historique échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'filed_historique', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
 end $f$;
 
 
@@ -276,4 +264,51 @@ end $f$;
 
 
 
-select * from runtests('tests'::name, '^test_(09|10|11|12|13|14|15|16|18|20|22|24)_');
+-- 25 — DELETE sur public.suivis_evenements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_25_delete_suivis_evenements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('suivis_evenements') then
+    return next pass('public.suivis_evenements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('suivis_evenements') where sur_delete and avant;
+  return next ok(nb > 0, 'suivis_evenements : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('suivis_evenements');
+  return next throws_ok(format('delete from public.suivis_evenements where ctid = %L', v_ctid), null, null, 'DELETE sur suivis_evenements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'suivis_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
+end $f$;
+
+
+
+-- 26 — UPDATE sur public.echeances_pro_journal échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_26_update_echeances_pro_journal() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('echeances_pro_journal') then
+    return next pass('public.echeances_pro_journal n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_update and avant;
+  return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE UPDATE existe');
+  v_ctid := tests.ligne_pour_essai('echeances_pro_journal');
+  select attname into col from pg_attribute where attrelid = 'public.echeances_pro_journal'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
+  return next throws_ok(format('update public.echeances_pro_journal set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur echeances_pro_journal échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'echeances_pro_journal', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+select * from runtests('tests'::name, '^test_(14|15|16|17|18|19|20|21|22|23|24|25|26)_');

@@ -24,6 +24,9 @@ $PSQL -c "create schema extensions" -c "alter database socle_a5 set search_path 
 $PSQL -c "set search_path = extensions" -f "$PGTAP" >/dev/null
 $PSQL -f "$ICI/maquette.sql"
 $PSQL -f "$ICI/../../../migrations/a5_01_private_execute.sql" 2>&1 | grep -v "^NOTICE" || true
+# Une fonction créée APRÈS la migration ne doit plus naître avec EXECUTE à PUBLIC (défauts posés par a5_01)
+$PSQL -c "create or replace function private.nee_apres_a5_01() returns int language sql as 'select 1'"
+$PSQL -Atc "select case when has_function_privilege('anon', 'private.nee_apres_a5_01()', 'execute') then 'ÉCHEC : défauts non appliqués' else 'Défauts OK : une fonction née après a5_01 n''est pas exécutable par anon' end"
 # 00 crée l'extension pgtap « with schema extensions » : sur la maquette, pgTAP est chargé à la main, on neutralise cette ligne.
 sed 's/^create extension if not exists pgtap with schema extensions;/-- (pgTAP chargé par lancer.sh)/' "$ICI/../00_installation.sql" | $PSQL -f -
 echo "Maquette prête. Tests :"

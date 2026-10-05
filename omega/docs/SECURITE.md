@@ -43,7 +43,15 @@ RLS dépend (`pg_depend`, exact) ou qu'une fonction publique SECURITY INVOKER
 exécutable par `authenticated` appelle (ainsi que les déclencheurs SECURITY
 INVOKER de `private`, les vues lisibles et les CHECK/DEFAULT de `public`),
 avec fermeture transitive, puis coupe l'EXECUTE par défaut pour l'avenir.
-Deux pièges rencontrés en recette : la **clause WHEN** d'un déclencheur
+Troisième piège, le plus coûteux : un `ALTER DEFAULT PRIVILEGES … IN SCHEMA
+private REVOKE EXECUTE … FROM PUBLIC` ne retire pas le défaut intégré de
+Postgres (EXECUTE à PUBLIC sur toute nouvelle fonction) ; les défauts par
+schéma s'ajoutent aux défauts globaux et seul un REVOKE global l'enlève.
+C'est pourquoi des fonctions créées après la première pose étaient encore
+exécutables par `anon`. a5_01 pose désormais le REVOKE global pour chaque
+rôle créateur et redonne par schéma (`public`, `extensions`) ce que Supabase
+accorde d'habitude aux rôles applicatifs.
+Deux autres pièges rencontrés en recette : la **clause WHEN** d'un déclencheur
 s'évalue avec les droits de l'utilisateur qui écrit (une fonction de
 `private` qui y figure doit lui être exécutable : source (f) de la règle),
 alors que la **fonction de déclencheur** elle-même n'a besoin d'aucun

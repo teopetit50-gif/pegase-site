@@ -209,6 +209,19 @@ create trigger t_notes_brique before insert on public.notes_internes for each ro
 create or replace function private.tiroma_trace_ecriture() returns boolean language sql stable as $$ select coalesce(current_setting('omega.tracer', true), 'oui') = 'oui' $$;
 create or replace function private.tracer() returns trigger language plpgsql as $$ begin return new; end $$;
 create trigger t_notes_tracer after insert on public.notes_internes for each row when (private.tiroma_trace_ecriture()) execute function private.tracer();
+-- Cas réels de la recette : appel NON qualifié via search_path, CHECK de domaine, vue servie par une fonction publique INVOKER
+create or replace function private.format_valide(p_texte text) returns boolean language sql immutable as $$ select p_texte ~ '^[A-Za-z0-9 ._-]+$' $$;
+create domain public.libelle_sur as text check (private.format_valide(value));
+create or replace function private.effacement_en_cours(p_client uuid) returns boolean language sql stable as $$ select false $$;
+create or replace function private.refuser_si_effacement() returns trigger language plpgsql set search_path = private, public, pg_temp as $$
+begin if effacement_en_cours(new.client_id) then raise exception 'effacement en cours'; end if; return new; end $$;
+create or replace function private.btp_est_serveur() returns boolean language sql stable as $$ select current_setting('role', true) is distinct from 'authenticated' $$;
+create or replace function public.contexte_serveur() returns boolean language sql stable as $$ select private.btp_est_serveur() $$;
+revoke execute on function public.contexte_serveur() from public, anon, authenticated;
+alter table public.notes_internes add column libelle public.libelle_sur;
+create trigger t_notes_effacement before insert on public.notes_internes for each row execute function private.refuser_si_effacement();
+create view public.v_notes_contexte with (security_invoker = on) as select n.id, n.client_id, public.contexte_serveur() as serveur from public.notes_internes n;
+grant select on public.v_notes_contexte to authenticated;
 create view public.v_envois_libelles with (security_invoker = on) as select e.id, e.client_id, e.canal, private.libelle_canal(e.canal) as canal_libelle, e.statut from public.envois e;
 grant select on public.v_envois_libelles to authenticated;
 

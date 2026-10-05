@@ -1,23 +1,4 @@
--- TOUT_4.sql — partie 4/4 de TOUT.sql (tests 39 à 51). Lancer les quatre dans l'ordre.
-
--- 39 — un objet d'un type restreint n'est pas lisible sans ligne dans acces_objets
--- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
--- runtests() annule tout ce que le test écrit.
-
-create or replace function tests.test_39_objet_restreint_sans_acces() returns setof text
-language plpgsql as $f$
-declare
-  jeu jsonb; objet uuid;
-begin
-  jeu := tests.jeu();
-  objet := gen_random_uuid();
-  perform tests.inserer_minimal('public', 'objets_restreints', jsonb_build_object('client_id', jeu ->> 'client_a', 'objet_type', 'dossier_essai_a5'));
-  perform tests.endosser((jeu ->> 'user_a')::uuid);
-  return next ok(not tests.lit_objet((jeu ->> 'client_a')::uuid, 'dossier_essai_a5', objet), 'lit_objet() refuse un objet restreint sans acces_objets');
-  perform tests.redevenir_admin();
-end $f$;
-
-
+-- TOUT_4.sql — partie 4/4 de TOUT.sql (tests 40 à 51). Lancer les quatre dans l'ordre.
 
 -- 40 — le même objet devient lisible avec une ligne acces_objets pour l'utilisateur
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
@@ -352,4 +333,4 @@ end $f$;
 
 
 
-select * from runtests('tests'::name, '^test_(39|40|41|42|43|44|45|46|47|48|49|50|51)_');
+select * from runtests('tests'::name, '^test_(40|41|42|43|44|45|46|47|48|49|50|51)_');

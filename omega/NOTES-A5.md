@@ -40,6 +40,62 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (REPRISE, message de 23:41 UTC) — commit à lire : le dernier de `worker-a5`
+
+Fichiers touchés : `omega/migrations/a5_01_private_execute.sql`,
+`omega/migrations/a5_01_liste_requises.sql`, `omega/tests/socle/00_installation.sql`
+(`tests.fonctions_private_requises()`), `omega/tests/socle/51_politiques_et_grants.sql`
+(déjà corrigé en `72053b1`), `TOUT.sql` et `TOUT_1..4.sql` (51 tests désormais),
+`local/maquette.sql`, `local/lancer.sh`, `README.md`, `docs/SECURITE.md`.
+
+1. **La règle qui manquait, trouvée et corrigée.** Ce n'était pas l'absence
+   du revoke (a5_01 l'avait) mais un piège de Postgres : un `alter default
+   privileges … in schema private revoke execute … from public` **ne retire
+   pas** le défaut intégré (EXECUTE à PUBLIC) : les défauts par schéma
+   s'ajoutent aux défauts globaux, seul un REVOKE **global** (sans `in
+   schema`) l'enlève. D'où les fonctions de la vague 2 nées exécutables par
+   anon après la première pose. a5_01 pose maintenant, pour `postgres`, le
+   rôle courant et chaque rôle propriétaire d'une fonction de `private` :
+   `alter default privileges for role R revoke execute on functions from
+   public` (global), puis redonne par schéma ce que Supabase donne
+   d'habitude (`public` et `extensions` : EXECUTE à anon, authenticated,
+   service_role) et `private` → service_role. Vérifié sur la maquette : une
+   fonction créée après la migration n'est plus exécutable par anon, une
+   porte publique reste exécutable par authenticated. **Conséquence à
+   connaître** : une fonction créée par `postgres` dans un autre schéma que
+   `public`/`extensions`/`private` (par exemple `tests`, `graphql_public`)
+   ne naît plus exécutable par PUBLIC ; `tests` a déjà ses propres défauts.
+   Si tu préfères ne pas toucher au défaut global, supprime la ligne du
+   REVOKE global et rejoue a5_01 après chaque lot : elle est idempotente.
+2. **Sources élargies** (même CTE dans l'aide, la migration et la liste) :
+   - appels **non qualifiés** reconnus (`f(` autant que `private.f(`, via
+     `search_path`) : c'est ce qui manquait pour `ecrit_par_la_brique`,
+     `effacement_en_cours`, les `_pour` de Tiroma et les `*_valide` appelées
+     depuis d'autres fonctions ;
+   - CHECK de **domaines** (`contypid`), en plus des tables de `public`, par
+     `pg_depend` et par le texte de `pg_get_constraintdef` ; DEFAULT et
+     colonnes générées par `pg_depend` et `pg_get_expr(adbin)` ;
+   - vues lisibles : directement (`pg_depend`) **et** via une fonction
+     publique SECURITY INVOKER qu'elles appellent (`btp_est_serveur` par
+     `contexte_serveur`) ; ces fonctions publiques servies par une vue
+     comptent comme exécutables par le client ;
+   - clauses WHEN (f) ; déclencheurs SECURITY INVOKER de `private` (c) ;
+     fermeture transitive à travers toute fonction retenue SECURITY INVOKER.
+   - Les **fonctions de déclencheur** elles-mêmes restent hors règle (ni
+     requises ni « en trop ») : Postgres ne vérifie pas EXECUTE au
+     déclenchement ; garder ou retirer 19r ne change rien au test 44.
+   Sur la maquette, les neuf cas (politique, fonction publique, déclencheur,
+   vue directe, vue via fonction publique, CHECK de domaine, DEFAULT, WHEN,
+   appel non qualifié) sont retenus. Rejoue le 44 : ce qui restera « en
+   trop » est à révoquer pour de vrai ; si une fonction légitime y figure,
+   colle-moi son usage et j'ajoute la source.
+3. **Test 51** : corrigé en `72053b1` (DELETE n'existe pas au niveau
+   colonne : `has_table_privilege` pour DELETE, `has_any_column_privilege`
+   pour SELECT/INSERT/UPDATE). Vert sur la maquette.
+4. Règle « pas de DELETE en clair » levée : `TOUT.sql` porte les **51**
+   tests, `TOUT_1..4` = 13 + 13 + 13 + 12. Maquette : 51/51, `TOUT.sql` →
+   51 `ok`, migration rejouée sans effet.
+
 ## PAUSE du 5 octobre, 21:00 UTC — état exact à la reprise
 
 Teo arrête toutes les sessions. Tout est commité et poussé sur `worker-a5`.

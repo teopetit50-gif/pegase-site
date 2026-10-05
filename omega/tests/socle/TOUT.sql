@@ -1,4 +1,4 @@
--- TOUT.sql — installation + 45 tests du socle (sans 17, 19, 21, 23, 25, 27 qui contiennent un DELETE).
+-- TOUT.sql — installation + les 51 tests du socle (la règle « pas de DELETE en clair » est levée depuis la pose par dépôt).
 -- Généré depuis les fichiers numérotés ; ne pas éditer à la main (voir README). Un seul appel execute_sql :
 -- crée les fonctions puis rend une ligne TAP par test (ok / not ok) via runtests().
 -- Tout ce que les tests écrivent est annulé par runtests().
@@ -300,68 +300,88 @@ end $$;
 -- elles-mêmes n'ont jamais besoin d'EXECUTE. Même règle que omega/migrations/a5_01_private_execute.sql.
 create or replace function tests.fonctions_private_requises() returns table(oid oid, nom text, raison text)
 language sql stable as $$
-  with recursive requises as (
+  with recursive
+  -- Qui appelle quelle fonction de private, d'après le corps : nom qualifié (private.f) ou non (f, via search_path).
+  -- Inclusif à dessein : accorder une fonction de trop est bénin, en oublier une casse une écriture client.
+  appels as (
+    select q.oid as appelant, p.oid as appelee
+    from pg_proc q join pg_namespace m on m.oid = q.pronamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where m.nspname in ('public', 'private') and q.prokind = 'f'
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and p.oid <> q.oid
+      and position(p.proname in q.prosrc) > 0
+      and q.prosrc ~ ('(^|[^A-Za-z0-9_])(private\.)?' || p.proname || '\s*\(')
+  ),
+  -- Fonctions publiques SECURITY INVOKER qui s'exécutent avec les droits du client : exécutables par authenticated,
+  -- ou utilisées par une vue de public lisible par authenticated (la vue les appelle pour lui).
+  publiques_invoker as (
+    select q.oid, 'public.' || q.proname as nom
+    from pg_proc q join pg_namespace m on m.oid = q.pronamespace
+    where m.nspname = 'public' and q.prokind = 'f' and not q.prosecdef
+      and (has_function_privilege('authenticated', q.oid, 'execute')
+           or exists (select 1 from pg_depend d join pg_rewrite rw on rw.oid = d.objid and d.classid = 'pg_rewrite'::regclass
+                      join pg_class v on v.oid = rw.ev_class join pg_namespace nv on nv.oid = v.relnamespace
+                      where d.refclassid = 'pg_proc'::regclass and d.refobjid = q.oid
+                        and nv.nspname = 'public' and v.relkind in ('v', 'm') and has_table_privilege('authenticated', v.oid, 'select')))
+  ),
+  requises as (
     -- (a) citées par une politique RLS (pg_depend : exact)
     select distinct p.oid, p.proname, 'politique RLS'::text as raison
     from pg_depend d join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
     join pg_namespace n on n.oid = p.pronamespace
-    where d.classid = 'pg_policy'::regclass and n.nspname = 'private'
+    where d.classid = 'pg_policy'::regclass and n.nspname = 'private' and p.prorettype <> 'trigger'::regtype
     union
-    -- (b) appelées par une fonction publique SECURITY INVOKER exécutable par authenticated
-    select distinct p.oid, p.proname, 'appelée par public.' || q.proname
-    from pg_proc q join pg_namespace m on m.oid = q.pronamespace
-    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
-    where m.nspname = 'public' and q.prokind = 'f' and not q.prosecdef and has_function_privilege('authenticated', q.oid, 'execute')
-      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
-      and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
+    -- (b) appelées par une fonction publique SECURITY INVOKER exécutable par authenticated ou servie par une vue lisible
+    select distinct p.oid, p.proname, 'appelée par ' || pi.nom
+    from publiques_invoker pi join appels a on a.appelant = pi.oid join pg_proc p on p.oid = a.appelee
     union
-    -- (c) appelées par un déclencheur SECURITY INVOKER de private (il s'exécute avec les droits de l'utilisateur qui écrit)
+    -- (c) appelées par un déclencheur SECURITY INVOKER de private attaché à une table (il s'exécute avec les droits de celui qui écrit)
     select distinct p.oid, p.proname, 'appelée par le déclencheur private.' || t.proname
     from pg_proc t join pg_namespace nt on nt.oid = t.pronamespace
-    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    join appels a on a.appelant = t.oid join pg_proc p on p.oid = a.appelee
     where nt.nspname = 'private' and t.prorettype = 'trigger'::regtype and not t.prosecdef
       and exists (select 1 from pg_trigger tg where tg.tgfoid = t.oid and not tg.tgisinternal)
-      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
-      and t.prosrc ~ ('private\.' || p.proname || '\s*\(')
     union
-    -- (d) utilisées par une vue de public lisible par authenticated (pg_depend via la règle de réécriture : exact)
+    -- (d) utilisées directement par une vue de public lisible par authenticated (pg_depend via la règle de réécriture : exact)
     select distinct p.oid, p.proname, 'vue public.' || v.relname
     from pg_depend d join pg_rewrite rw on rw.oid = d.objid and d.classid = 'pg_rewrite'::regclass
     join pg_class v on v.oid = rw.ev_class join pg_namespace nv on nv.oid = v.relnamespace
     join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
     join pg_namespace n on n.oid = p.pronamespace
     where nv.nspname = 'public' and v.relkind in ('v', 'm') and has_table_privilege('authenticated', v.oid, 'select')
-      and n.nspname = 'private' and p.prokind = 'f'
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
     union
-    -- (e) utilisées par un CHECK ou un DEFAULT d'une table de public (pg_depend : exact)
-    select distinct p.oid, p.proname, 'contrainte/défaut de public.' || c.relname
-    from pg_depend d
-    join pg_proc p on p.oid = d.refobjid and d.refclassid = 'pg_proc'::regclass
-    join pg_namespace n on n.oid = p.pronamespace
-    join lateral (
-      select con.conrelid as relid from pg_constraint con where d.classid = 'pg_constraint'::regclass and con.oid = d.objid
-      union all
-      select ad.adrelid from pg_attrdef ad where d.classid = 'pg_attrdef'::regclass and ad.oid = d.objid
-    ) src on true
-    join pg_class c on c.oid = src.relid join pg_namespace nc on nc.oid = c.relnamespace
-    where nc.nspname = 'public' and n.nspname = 'private' and p.prokind = 'f'
+    -- (e1) utilisées par un CHECK d'une table de public ou d'un domaine (pg_depend, et la définition textuelle en ceinture)
+    select distinct p.oid, p.proname, 'contrainte ' || con.conname
+    from pg_constraint con
+    left join pg_class c on c.oid = con.conrelid left join pg_namespace nc on nc.oid = c.relnamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where con.contype = 'c' and (con.contypid <> 0 or nc.nspname = 'public')
+      and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and (exists (select 1 from pg_depend d where d.classid = 'pg_constraint'::regclass and d.objid = con.oid and d.refclassid = 'pg_proc'::regclass and d.refobjid = p.oid)
+           or pg_get_constraintdef(con.oid) ~ ('(^|[^A-Za-z0-9_])(private\.)?' || p.proname || '\s*\('))
     union
-    -- (f) utilisées dans la clause WHEN d'un déclencheur d'une table de public : évaluée avec les droits de l'utilisateur qui écrit
-    --     (pg_depend enregistre les dépendances de la clause WHEN ; la définition textuelle sert de ceinture)
+    -- (e2) utilisées par un DEFAULT ou une colonne générée d'une table de public
+    select distinct p.oid, p.proname, 'défaut de public.' || c.relname
+    from pg_attrdef ad join pg_class c on c.oid = ad.adrelid join pg_namespace nc on nc.oid = c.relnamespace
+    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
+    where nc.nspname = 'public' and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and (exists (select 1 from pg_depend d where d.classid = 'pg_attrdef'::regclass and d.objid = ad.oid and d.refclassid = 'pg_proc'::regclass and d.refobjid = p.oid)
+           or pg_get_expr(ad.adbin, ad.adrelid) ~ ('(^|[^A-Za-z0-9_])(private\.)?' || p.proname || '\s*\('))
+    union
+    -- (f) utilisées dans la clause WHEN d'un déclencheur d'une table de public (évaluée avec les droits de celui qui écrit)
     select distinct p.oid, p.proname, 'clause WHEN du déclencheur ' || t.tgname || ' sur public.' || c.relname
     from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace nc on nc.oid = c.relnamespace
     join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
     where not t.tgisinternal and nc.nspname = 'public' and n.nspname = 'private' and p.prokind = 'f' and p.oid <> t.tgfoid
       and p.prorettype <> 'trigger'::regtype
       and (exists (select 1 from pg_depend d where d.classid = 'pg_trigger'::regclass and d.objid = t.oid and d.refclassid = 'pg_proc'::regclass and d.refobjid = p.oid)
-           or pg_get_triggerdef(t.oid) ~ ('WHEN .*private\.' || p.proname || '\s*\('))
+           or pg_get_triggerdef(t.oid) ~ ('WHEN .*(^|[^A-Za-z0-9_])(private\.)?' || p.proname || '\s*\('))
     union
-    -- fermeture transitive à travers les SECURITY INVOKER retenues
+    -- fermeture transitive : ce qu'appelle une fonction retenue qui s'exécute encore avec les droits du client (SECURITY INVOKER)
     select distinct p.oid, p.proname, 'appelée par private.' || q.proname
-    from requises x join pg_proc q on q.oid = x.oid
-    join pg_proc p on true join pg_namespace n on n.oid = p.pronamespace
-    where not q.prosecdef and n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and p.oid <> q.oid
-      and q.prosrc ~ ('private\.' || p.proname || '\s*\(')
+    from requises x join pg_proc q on q.oid = x.oid join appels a on a.appelant = q.oid join pg_proc p on p.oid = a.appelee
+    where not q.prosecdef
   )
   select oid, proname, string_agg(distinct raison, ' ; ') from requises group by oid, proname order by proname;
 $$;
@@ -762,6 +782,29 @@ end $f$;
 
 
 
+-- 17 — DELETE sur public.journal_opposable échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_17_delete_journal_opposable() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('journal_opposable') then
+    return next pass('public.journal_opposable n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('journal_opposable') where sur_delete and avant;
+  return next ok(nb > 0, 'journal_opposable : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('journal_opposable');
+  return next throws_ok(format('delete from public.journal_opposable where ctid = %L', v_ctid), null, null, 'DELETE sur journal_opposable échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'journal_opposable', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
+end $f$;
+
+
+
 -- 18 — UPDATE sur public.envois_evenements échoue (ajout seul)
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
@@ -782,6 +825,29 @@ begin
   select attname into col from pg_attribute where attrelid = 'public.envois_evenements'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
   return next throws_ok(format('update public.envois_evenements set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur envois_evenements échoue, même pour le propriétaire');
   return next is(tests.compter('public', 'envois_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 19 — DELETE sur public.envois_evenements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_19_delete_envois_evenements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('envois_evenements') then
+    return next pass('public.envois_evenements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('envois_evenements') where sur_delete and avant;
+  return next ok(nb > 0, 'envois_evenements : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('envois_evenements');
+  return next throws_ok(format('delete from public.envois_evenements where ctid = %L', v_ctid), null, null, 'DELETE sur envois_evenements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'envois_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
 end $f$;
 
 
@@ -810,6 +876,29 @@ end $f$;
 
 
 
+-- 21 — DELETE sur public.effacements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_21_delete_effacements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('effacements') then
+    return next pass('public.effacements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('effacements') where sur_delete and avant;
+  return next ok(nb > 0, 'effacements : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('effacements');
+  return next throws_ok(format('delete from public.effacements where ctid = %L', v_ctid), null, null, 'DELETE sur effacements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'effacements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
+end $f$;
+
+
+
 -- 22 — UPDATE sur public.filed_historique échoue (ajout seul)
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
@@ -830,6 +919,29 @@ begin
   select attname into col from pg_attribute where attrelid = 'public.filed_historique'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
   return next throws_ok(format('update public.filed_historique set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur filed_historique échoue, même pour le propriétaire');
   return next is(tests.compter('public', 'filed_historique', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 23 — DELETE sur public.filed_historique échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_23_delete_filed_historique() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('filed_historique') then
+    return next pass('public.filed_historique n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('filed_historique') where sur_delete and avant;
+  return next ok(nb > 0, 'filed_historique : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('filed_historique');
+  return next throws_ok(format('delete from public.filed_historique where ctid = %L', v_ctid), null, null, 'DELETE sur filed_historique échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'filed_historique', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
 end $f$;
 
 
@@ -858,6 +970,29 @@ end $f$;
 
 
 
+-- 25 — DELETE sur public.suivis_evenements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_25_delete_suivis_evenements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('suivis_evenements') then
+    return next pass('public.suivis_evenements n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('suivis_evenements') where sur_delete and avant;
+  return next ok(nb > 0, 'suivis_evenements : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('suivis_evenements');
+  return next throws_ok(format('delete from public.suivis_evenements where ctid = %L', v_ctid), null, null, 'DELETE sur suivis_evenements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'suivis_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
+end $f$;
+
+
+
 -- 26 — UPDATE sur public.echeances_pro_journal échoue (ajout seul)
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- runtests() annule tout ce que le test écrit.
@@ -878,6 +1013,29 @@ begin
   select attname into col from pg_attribute where attrelid = 'public.echeances_pro_journal'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
   return next throws_ok(format('update public.echeances_pro_journal set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur echeances_pro_journal échoue, même pour le propriétaire');
   return next is(tests.compter('public', 'echeances_pro_journal', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 27 — DELETE sur public.echeances_pro_journal échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_27_delete_echeances_pro_journal() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  if not tests.table_existe('echeances_pro_journal') then
+    return next pass('public.echeances_pro_journal n''existe pas sur cet environnement : règle sans objet ici');
+    return next diag('Le cahier des charges la nomme ; à confirmer par le coordinateur si elle doit exister.');
+    return;
+  end if;
+  select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_delete and avant;
+  return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE DELETE existe');
+  v_ctid := tests.ligne_pour_essai('echeances_pro_journal');
+  return next throws_ok(format('delete from public.echeances_pro_journal where ctid = %L', v_ctid), null, null, 'DELETE sur echeances_pro_journal échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'echeances_pro_journal', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est toujours là');
 end $f$;
 
 
