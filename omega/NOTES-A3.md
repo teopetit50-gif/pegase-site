@@ -151,6 +151,16 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
    `omega-clients` (premier segment = un client de `mes_clients()`). Rien à
    changer : l'action serveur signe déjà avec la session de la personne.
 
+10. **GRANT manquants pour les écritures directes du socle** (05/10, relecture
+   réelle) : `authenticated` n'a que SELECT sur `approbations`,
+   `delegations` et `demandes_validation`. Pour que l'écran décide, délègue,
+   révoque et annule comme convenu : `grant insert on public.approbations,
+   public.delegations to authenticated ; grant update on public.delegations,
+   public.demandes_validation to authenticated ;` (les policies restent
+   juges) — ou des portes RPC `decider`, `deleguer`, `revoquer_delegation`,
+   `annuler_demande`, et je bascule dessus. Au passage, vus dans les mêmes
+   grants : `comptes` a DELETE, `entites` INSERT + DELETE, `regles_validation`
+   INSERT + UPDATE + DELETE pour `authenticated` — voulu ?
 9. **Realtime** — posé en partie (socle_lot19h, 05/10 18:25) :
    `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`
    sont dans la publication `supabase_realtime`. Les écrans écoutent déjà
@@ -181,21 +191,45 @@ ruban « Données d'exemple » et le titre « Espace client Omega » (relevé pa
 curl sur le HTML servi). Le lot « temps réel » (commits 34227cc et bc512b3)
 attend sa fusion.
 
-## Relecture en conditions réelles — en cours (05/10, 19:05 UTC)
+## Relecture en conditions réelles — faite le 05/10 (19:10–19:30 UTC)
 
-Compte de recette fourni par le coordinateur (`gerant@banc-varelo.test`,
-client banc « Groupe Sogexal (banc) »). **Bloqué à la connexion** : Auth
-rend 500 « Database error querying schema » ; les journaux Auth disent
-« error finding user: sql: Scan error on column index 3, name
-"confirmation_token": converting NULL to string is unsupported » —
-l'utilisateur a été inséré directement dans `auth.users` avec des NULL là
-où GoTrue veut des chaînes vides (`confirmation_token`, `recovery_token`,
-`email_change*`, `phone_change*`, `reauthentication_token`). Correctif
-transmis au coordinateur (UPDATE sur `auth.users`, ou création par l'API
-Admin). Prêt de mon côté : serveur de dev pointé sur la recette et
-`omega/recette-a3/relecture-reelle.mjs` (pose le cookie de session à la
-façon de @supabase/ssr, bascule « Base réelle », relève compteurs, avis
-rouges, refus de la base en console, captures `reel-*-1440.jpg`).
+Compte de recette du coordinateur (`gerant@banc-varelo.test`, client banc
+« Groupe Sogexal (banc) »), après deux corrections de `auth.users` de son
+côté (jetons NULL → '', puis `created_at`/identités). Serveur de dev pointé
+sur la recette, cookie de session posé par
+`omega/recette-a3/relecture-reelle.mjs`. Résultat, captures
+`omega/recette-a3/reel-*-1440.jpg` :
+
+- **Les trois écrans se chargent avec la session** : identité affichée,
+  interrupteur sur « Base réelle », aucun avis rouge, aucun « permission
+  denied for function » en console. Validations : 9 demandes VARELO en
+  attente (règle 1 approbation, demandeur « Système »), noms de l'annuaire
+  dans « À qui déléguer » (Daf, Daf2, Referent). FILED : 1 document
+  `R2026-000001` en lecture, nature à classer. Point : aucun point assemblé
+  pour le banc (attendu).
+- **Les écritures directes sont refusées** : poser une délégation rend
+  « permission denied for table delegations ». Vérifié dans
+  `information_schema.role_table_grants` : `authenticated` n'a que SELECT
+  sur `approbations`, `delegations`, `demandes_validation` (les policies
+  d'INSERT/UPDATE existent, mais sans GRANT elles ne servent à rien —
+  effet d'a5_01). Donc **approuver / refuser (INSERT approbations),
+  déléguer (INSERT delegations), révoquer (UPDATE delegations), annuler sa
+  demande (UPDATE demandes_validation) ne passent pas aujourd'hui** en
+  base réelle. Demande au coordinateur (point 10 ci-dessous).
+- `apercu_point(p_client, p_user, p_jour)` répond 200 avec
+  `{jour, du_le, fuseau, motifs: [], prevu_le, sections: []}` pour le banc
+  (aucun gabarit de point posé) : l'écran dit « Pas de point ce jour-là »
+  sans erreur. `lire_point` reste à voir sur un point assemblé.
+- La pièce du document banc n'a pas de fichier dans le bucket (« Object
+  not found », dit désormais en français) : donnée du banc, pas un défaut
+  d'écran.
+- Realtime : la poignée de main WebSocket échoue depuis le conteneur de
+  recette (mandataire sortant sans WebSocket) — non vérifiable ici, à
+  vérifier depuis un navigateur ordinaire.
+- Deux retouches faites à chaud : les listes longues d'un payload (les 36
+  identifiants d'un lot VARELO) se résument à leur compte et leurs trois
+  premiers éléments ; une panne réseau à `getUser` n'est plus dite
+  « Aucune session ouverte ».
 
 ## Demain
 
