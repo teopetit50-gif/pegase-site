@@ -23,7 +23,7 @@ import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, masquerIban, montant, nombreFr, pourcent } from "../format";
 import type { Commande, Controle, DossierFiled, Fournisseur, LigneCommande, LigneFacture, MotifRefus, NatureDocument } from "../types";
-import { CHAMPS_CORRIGEABLES, CHAMP_PAR_COLONNE, ETATS, FAMILLES_CONTROLE, NATURES, STATUTS_FACTURE, grouperControles, libelleChamp } from "./etats";
+import { CHAMPS_CORRIGEABLES, CHAMPS_PAR_NOTION, ETATS, FAMILLES_CONTROLE, NATURES, NOTION_PAR_COLONNE, STATUTS_FACTURE, grouperControles, libelleChamp } from "./etats";
 import { apparierLigne, bloquerFournisseur, classerDocument, confirmerValeurs, corrigerFacture, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
 import VisionneusePiece from "./VisionneusePiece";
 
@@ -71,12 +71,23 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
   const groupes = useMemo(() => grouperControles(dossier.controles), [dossier.controles]);
   const motifOfficiel = (code: string | null) => (code ? motifs.find((m) => m.code === code) ?? { code, libelle: code.replace(/_/g, " ").toLowerCase(), description: null } : null);
 
-  /* une valeur de l'en-tête → la boîte citée dans la pièce */
-  const valeurDe = (champPiece: string) => dossier.valeurs.find((v) => v.champ === champPiece) ?? null;
-  const citer = (champPiece: string) => {
-    const v = valeurDe(champPiece);
+  /* une notion de l'en-tête → la valeur citée dans la pièce, sous l'un de
+     ses noms possibles (lecteur réel ou gabarit) ; un nom de champ exact
+     passe aussi (preuve d'un contrôle) */
+  const valeurDe = (notion: string) => {
+    const noms = CHAMPS_PAR_NOTION[notion] ?? [notion];
+    for (const nom of noms) {
+      const v = dossier.valeurs.find((x) => x.champ === nom);
+      if (v) return v;
+    }
+    return null;
+  };
+  const citer = (notion: string) => {
+    const v = valeurDe(notion);
     setActif((a) => (v && a !== v.id ? v.id : null));
   };
+  /* la valeur de la facture, sinon le texte cité dans la pièce */
+  const ou = (valeur: string | null | undefined, v: DossierFiled["valeurs"][number] | null) => (valeur && valeur !== "—" ? valeur : (v?.texte ?? "—"));
   const nonVerifiees = dossier.valeurs.filter((v) => !v.verifiee);
 
   const ouvrir = (f: Form) => {
@@ -132,9 +143,9 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     return envoyer(
       () => corrigerFacture(facture.id, { [champ]: val }, motif.trim()).then(() => undefined),
       () => {
-        const f = { ...facture, [champ]: val, version: facture.version + 1, champs_douteux: facture.champs_douteux.filter((c) => c !== CHAMP_PAR_COLONNE[champ]) };
-        const champPiece = CHAMP_PAR_COLONNE[champ];
-        const valeurs = dossier.valeurs.map((v) => (v.champ === champPiece ? { ...v, texte: def.type === "montant" ? montant(val as number) : brut, valeur: val, source: "humain" as const, verifiee: true, confiance: 1 } : v));
+        const cite = valeurDe(NOTION_PAR_COLONNE[champ] ?? champ);
+        const f = { ...facture, [champ]: val, version: facture.version + 1, champs_douteux: facture.champs_douteux.filter((c) => c !== cite?.champ) };
+        const valeurs = dossier.valeurs.map((v) => (cite && v.id === cite.id ? { ...v, texte: def.type === "montant" ? montant(val as number) : brut, valeur: val, source: "humain" as const, verifiee: true, confiance: 1 } : v));
         return ajouterFil({ ...dossier, facture: f, valeurs }, "correction", `${def.libelle} corrigé(e) : ${brut} — ${motif.trim()}`);
       },
       "La valeur est corrigée ; les contrôles vont être rejoués sur la nouvelle version.",
@@ -279,15 +290,22 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                 <div>
                   <div className="esp-section-titre">Valeurs lues — cliquer pour voir la citation dans la pièce</div>
                   <div className="esp-valeurs">
-                    <Valeur champ="fournisseur.nom" texte={fournisseur?.nom ?? String(facture.fournisseur_lu?.nom ?? "—")} v={valeurDe("fournisseur.nom")} actif={actif} onClick={() => citer("fournisseur.nom")} douteux={facture.champs_douteux.includes("fournisseur.nom")} />
-                    <Valeur champ="facture.numero" texte={facture.numero ?? "—"} v={valeurDe("facture.numero")} actif={actif} onClick={() => citer("facture.numero")} douteux={facture.champs_douteux.includes("facture.numero")} />
-                    <Valeur champ="facture.date_emission" texte={dateCourte(facture.date_emission)} v={valeurDe("facture.date_emission")} actif={actif} onClick={() => citer("facture.date_emission")} douteux={false} />
-                    <Valeur champ="facture.echeance" texte={dateCourte(facture.echeance_lue)} v={valeurDe("facture.echeance")} actif={actif} onClick={() => citer("facture.echeance")} douteux={false} />
-                    <Valeur champ="totaux.ht" texte={montant(facture.montant_ht, facture.devise)} v={valeurDe("totaux.ht")} actif={actif} onClick={() => citer("totaux.ht")} douteux={false} />
-                    <Valeur champ="totaux.tva" texte={montant(facture.montant_tva, facture.devise)} v={valeurDe("totaux.tva")} actif={actif} onClick={() => citer("totaux.tva")} douteux={false} />
-                    <Valeur champ="totaux.ttc" texte={montant(facture.montant_ttc, facture.devise)} v={valeurDe("totaux.ttc")} actif={actif} onClick={() => citer("totaux.ttc")} douteux={false} />
-                    <Valeur champ="paiement.iban" texte={masquerIban(facture.iban)} v={valeurDe("paiement.iban")} actif={actif} onClick={() => citer("paiement.iban")} douteux={facture.champs_douteux.includes("paiement.iban")} />
-                    <Valeur champ="fournisseur.siren" texte={fournisseur?.siren ?? String(facture.fournisseur_lu?.siren ?? "—")} v={valeurDe("fournisseur.siren")} actif={actif} onClick={() => citer("fournisseur.siren")} douteux={false} />
+                    {(
+                      [
+                        ["fournisseur", fournisseur?.nom ?? String(facture.fournisseur_lu?.nom ?? ""), facture.champs_douteux.some((c) => /fournisseur\.nom|^fournisseur$/.test(c))],
+                        ["numero", facture.numero ?? "", facture.champs_douteux.some((c) => /numero/.test(c))],
+                        ["date_emission", facture.date_emission ? dateCourte(facture.date_emission) : "", false],
+                        ["echeance_lue", facture.echeance_lue ? dateCourte(facture.echeance_lue) : "", false],
+                        ["montant_ht", facture.montant_ht !== null ? montant(facture.montant_ht, facture.devise) : "", false],
+                        ["montant_tva", facture.montant_tva !== null ? montant(facture.montant_tva, facture.devise) : "", false],
+                        ["montant_ttc", facture.montant_ttc !== null ? montant(facture.montant_ttc, facture.devise) : "", false],
+                        ["iban", facture.iban ? masquerIban(facture.iban) : "", facture.champs_douteux.some((c) => /iban/.test(c))],
+                        ["siren", fournisseur?.siren ?? String(facture.fournisseur_lu?.siren ?? ""), false],
+                      ] as [string, string, boolean][]
+                    ).map(([notion, texte, douteux]) => {
+                      const v = valeurDe(notion);
+                      return <Valeur key={notion} champ={v?.champ ?? CHAMPS_PAR_NOTION[notion][0]} texte={ou(texte, v)} v={v} actif={actif} onClick={() => citer(notion)} douteux={douteux} />;
+                    })}
                   </div>
                   <div className="esp-actions" style={{ marginTop: 10 }}>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "corriger" })}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
@@ -308,7 +326,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                     Contrôles — {groupes.passes.length} passé{groupes.passes.length > 1 ? "s" : ""}, {groupes.echoues.length} échoué{groupes.echoues.length > 1 ? "s" : ""}, {groupes.leves.length} levé{groupes.leves.length > 1 ? "s" : ""}
                   </div>
                   {[...groupes.echoues, ...groupes.leves, ...groupes.passes].map((c) => {
-                    const m = motifOfficiel(c.motif_officiel);
+                    /* le motif officiel est celui qui VAUDRAIT si le contrôle échouait : on ne le dit que sur une anomalie ou une levée */
+                    const m = c.resultat === "ok" ? null : motifOfficiel(c.motif_officiel);
                     const levee = c.levee_id ? dossier.levees.find((l) => l.id === c.levee_id) : null;
                     const preuve = Object.entries(c.preuve ?? {});
                     return (
