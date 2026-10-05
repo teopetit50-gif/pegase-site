@@ -64,3 +64,14 @@ journal opposable ; rien ne s'écrit directement dans une table là où une port
 ## 4. Fait / en cours
 
 - 06/10 matin : lecture de CLAUDE.md, AGENTS.md, CONTRAT-OUVRIER, NOTES-COORDINATEUR, NOTES-A3, SOCLE-EXTRAITS-TAVARO (17 tables, 110 fonctions, 4 crons) et de la promesse du site ; scénario écrit (ci-dessus) et envoyé au coordinateur.
+- 06/10 : **lot 1 de tests** — `omega/tests/tavaro/00_jeu_tavaro.sql` (le loueur fictif, ses deux agences, ses cinq personnes, le barème publié par la porte, le contrat arrivé par le relevé, le retour type) et onze tests `01` à `11` qui jouent les 19 étapes du scénario par les portes publiques sous le rôle de chaque personne (`tests.endosser` d'A5). Assemblés en `TOUT_B2.sql` (un seul appel, `runtests('^test_b2_')`). Syntaxe vérifiée sur un Postgres 16 local (`check_function_bodies = off` : les tables n'existent pas ici) ; le fond se joue sur la recette par le coordinateur.
+- 06/10 : **deux migrations** — `b2_01_separation_saisie_approbation.sql` (H1 : `payload.saisi_par` et demandeur sur les demandes de facture et d'avoir) et `b2_02_relances_factures.sql` (H2 : relance des impayés, cron `tavaro-relances`, porte `loc_relancer_facture`). Envoyées à la pose avec le lot de tests.
+
+## 5. Ce que les tests attendent du socle (à confirmer par le coordinateur, sinon les tests le diront)
+
+- `public.loc_appliquer_releve` exécutable par le propriétaire de la base (les tests l'appellent en `postgres`, comme le ferait le connecteur en service_role).
+- Les colonnes `demandes_validation.demandeur_type` / `demandeur_id` acceptent `('utilisateur', <uuid>)` à l'insertion (b2_01) ; sinon, retirer ces deux colonnes de l'INSERT et garder `payload.saisi_par`.
+- `preparer_approbation` lit bien `payload.saisi_par` (lot 19c) : test 05 « celui qui a chiffré n'approuve pas ».
+- La décision d'une demande dépose un travail `tavaro.decision` chez le module (abonnement) avec `{demande, statut, objet_type, objet_id, decideurs}` : test 06 le compte dans `travaux`.
+- `alertes` (table) porte `client_id`, `module`, `cle` : tests 07 et 11 y comptent les alertes « envoyez-la vous-même » et « recouvrement ».
+- Une table de périmètre par entité (`comptes_perimetres` ou autre) : test 10 la cherche, sinon dit qu'il ne peut pas tester le périmètre par agence.
