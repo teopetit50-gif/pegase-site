@@ -58,7 +58,12 @@ gérant du banc après a5_01 : vert.
   a reconfié le travail sans attendre la reprise, et l'envoi
   `0a607529-4303-474d-bb43-b6a7c30298a0` est **parti à 19 h 05 Z** (statut
   `envoye`, essais 3, référence Brevo `<202610051905.67751143774@smtp-relay.mailin.fr>`).
-  Premier email réel d'Omega. Envoi différé `6be6e6cd-…` partira demain 8 h.
+  Les deux premiers (sans expéditeur déclaré chez Brevo) ne sont pas arrivés ;
+  Teo a déclaré l'expéditeur `essais@omegaai.fr` (domaine omegaai.fr déjà
+  authentifié) et le troisième essai, envoi `08ae112f-…`, parti à 19 h 17 Z
+  (référence `<202610051917.97558286656@smtp-relay.mailin.fr>`), **a été reçu
+  par Teo à 21 h 19** : premier email réel d'Omega, chaîne complète validée.
+  Envoi différé `6be6e6cd-…` partira demain 8 h.
   Reste à vérifier : le webhook Brevo → `noter_remise` (Teo doit le poser).
 
 ### Fonctions Edge déployées
@@ -82,8 +87,8 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 
 ### Ce que Teo doit encore poser (recette)
 
-1. Brevo : restriction d'IP désactivée (fait le 5/10). Reste : expéditeur
-   `essais@omegaai.fr` authentifié, suivi d'ouverture/clic coupé.
+1. Brevo : restriction d'IP désactivée, expéditeur `essais@omegaai.fr` déclaré
+   (fait le 5/10). Reste : suivi d'ouverture/clic coupé.
 2. Edge Secrets manquants : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
    (Bedrock, eu-central-1), `META_APP_SECRET`, `META_ACCESS_TOKEN`.
 3. GitHub → Settings → Secrets : `SUPABASE_DB_URL`, `SAUVEGARDE_PHRASE`
