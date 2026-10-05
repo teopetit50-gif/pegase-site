@@ -40,6 +40,28 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Reçu du coordinateur à 16:09 UTC
+
+GitHub est rétabli (la branche était déjà poussée : trois commits, dernier
+`1f2585f`). Règle pour le SQL que je confie : jamais de DROP ni de DELETE,
+l'outil bloque dessus. État de mes fichiers au regard de cette règle :
+
+- `00_installation.sql` et les tests : uniquement `create or replace`,
+  `create ... if not exists`, `grant`. Aucun DROP.
+- **Six tests contiennent le mot DELETE** à l'intérieur d'une chaîne passée à
+  `throws_ok()` : 17, 19, 21, 23, 25, 27 (« DELETE sur une table en ajout
+  seul échoue »). C'est l'objet même du test, l'instruction doit lever une
+  erreur et runtests() annule tout. Je ne contourne pas le filtre : si l'outil
+  les bloque, les passer par une autre voie ou les laisser de côté ; les tests
+  UPDATE (16, 18, 20, 22, 24, 26) et les tests de droits (28, 29) couvrent
+  déjà le reste de la règle.
+- Le test 34 fait `alter table public.journal_opposable disable trigger user`
+  puis un UPDATE d'une empreinte, pour vérifier que `verifier_journal_client()`
+  détecte l'altération ; le tout est annulé par runtests(). À signaler si
+  l'outil s'en inquiète.
+- `local/maquette.sql` et `local/lancer.sh` contiennent `drop` : ils ne
+  servent qu'au cluster local jetable, jamais à la recette.
+
 ## Bloqué
 
 1. **Outil Supabase** : chaque appel (`execute_sql`, `list_extensions`,
