@@ -40,6 +40,29 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## PAUSE du 5 octobre, 21:00 UTC — état exact à la reprise
+
+Teo arrête toutes les sessions. Tout est commité et poussé sur `worker-a5`.
+
+- **Dernier geste** : test 51 corrigé pour l'erreur « unrecognized privilege
+  type DELETE » signalée par le coordinateur (`has_any_column_privilege`
+  n'accepte pas DELETE : `has_table_privilege` pour DELETE, colonne pour
+  SELECT/INSERT/UPDATE). TOUT*.sql régénérés. **Non rejoué sur la maquette
+  locale** (consigne : ne plus rien lancer) ; la modification tient en trois
+  lignes, à vérifier au premier passage.
+- **Attendu du coordinateur à la reprise** : sortie des tests 44 (4/5 après
+  son lot 19z : il reste une assertion rouge, probablement « en trop » ou
+  « manquantes » à lire) et 51 sur la recette.
+- **Prochaine étape A5** : lire ces deux sorties, ajuster la règle de
+  `tests.fonctions_private_requises()` si 44 nomme des fonctions, puis
+  relancer `bash omega/tests/socle/local/lancer.sh` (51/51 attendu) et
+  régénérer TOUT*.sql.
+- **Reste ouvert** (inchangé) : advisors de production (NOTES-COORDINATEUR.md),
+  secrets GitHub à poser par Teo, première exécution du workflow de
+  sauvegarde, migrations Tamila/Tiroma et lots 17 à 19 à pousser en
+  production par le coordinateur, `echeances_pro_journal` (table à venir
+  ou nom périmé ?), retrait conseillé du lot 19r.
+
 ## Réponse au coordinateur (message de 20:39 UTC, compléments f/g/h)
 
 - **(f) clause WHEN des déclencheurs** : intégrée comme sixième source dans

@@ -313,7 +313,9 @@ begin
     )
     select tablename, policyname, commande from pol
     -- has_any_column_privilege : vrai aussi quand le droit n'est donné que sur certaines colonnes (clés Tamila par exemple)
-    where not has_any_column_privilege('authenticated', ('public.' || quote_ident(tablename))::regclass, commande)
+    -- DELETE n'existe pas au niveau colonne : has_table_privilege pour lui, has_any_column_privilege pour les trois autres
+    where not case when commande = 'DELETE' then has_table_privilege('authenticated', ('public.' || quote_ident(tablename))::regclass, commande)
+                   else has_any_column_privilege('authenticated', ('public.' || quote_ident(tablename))::regclass, commande) end
     order by 1, 2, 3
   $q$, 'Chaque politique visant authenticated a le GRANT de sa commande (sinon elle ne sert à rien)');
 
