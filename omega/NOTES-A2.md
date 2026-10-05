@@ -112,9 +112,8 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
   `META_*` sont entre les mains de Teo (liste transmise par le coordinateur). Tant
   qu'ils manquent, `webhooks-brevo` et `reception` répondent 503, l'expéditeur
   reporte.
-- **Envoi réel** : e-mail fait le 05/10 (voir « Premier envoi réel »). SMS d'essai et
-  webhook de remise à vérifier dès que Teo a configuré l'émetteur SMS et le webhook
-  chez Brevo.
+- **Envoi réel** : e-mail et webhook de remise validés le 05/10 (voir « Premier envoi
+  réel »). SMS d'essai à vérifier dès que Teo a validé l'émetteur SMS chez Brevo.
 
 ## Demain
 
@@ -246,9 +245,20 @@ donc pas une preuve de remise : avant tout envoi réel, **l'adresse expéditrice
 Le webhook de remise (`delivered` / `blocked`) est le seul vrai signal ; d'ici là,
 seuls des envois vers des adresses de test.
 
-Restent à vérifier en réel : le webhook Brevo (`noter_remise`) dès que Teo
-a configuré le webhook chez Brevo avec le jeton, puis un SMS d'essai (émetteur
-alphanumérique à valider chez Brevo).
+**Webhook de remise validé en réel le 05/10 à 19:38Z** : envoi `c3e142bb-…` parti à
+19:38:00, Brevo a rappelé `webhooks-brevo` (200) à 19:38:03 avec `delivered`,
+`noter_remise` a écrit `envois_evenements` id 13 de type `remis` sous la clé
+`brevo:email:<message-id>:delivered:<horodatage>`.
+Conditions côté Brevo, rien à coder : le webhook doit être créé en type
+**Transactionnel** (un webhook Marketing ne voit pas les e-mails transactionnels),
+authentification **Bearer token** = `BREVO_WEBHOOK_JETON`. Tant que le suivi
+d'ouverture n'est pas coupé au niveau du compte, Brevo envoie aussi `opened` :
+le webhook l'ignore sans erreur ni ligne (répond 200, compté `ignores` ; test
+« ouvertures et clics : ignorés, jamais notés »), mais Teo doit quand même couper
+le suivi d'ouverture et de clic, le socle l'interdit.
+
+Restent à vérifier en réel : un SMS d'essai (émetteur alphanumérique à valider chez
+Brevo) et les trois entrées de la réception.
 
 ## Reste
 
