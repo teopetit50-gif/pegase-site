@@ -171,6 +171,16 @@ recette aux cinq largeurs ✓ (104 contrôles). Il ajoute la dépendance
 `npm ci` refusait ; il est maintenant à jour). Le temps réel est actif sur
 les quatre tables publiées (demande 9 pour les autres).
 
+## Vérifié en ligne (05/10, 18:45 UTC)
+
+Après la fusion du lot « rendu PDF » (main 3aa753d, Vercel READY) :
+`omegaai.fr/espace/validations`, `/espace/filed` et `/espace/point`
+répondent 200 et servent « À valider » avec « Mes délégations »,
+« Documents reçus » avec « Déposer un document », « Point du matin », le
+ruban « Données d'exemple » et le titre « Espace client Omega » (relevé par
+curl sur le HTML servi). Le lot « temps réel » (commits 34227cc et bc512b3)
+attend sa fusion.
+
 ## Demain
 
 - Relecture en conditions réelles dès qu'un client a des lignes : premier
