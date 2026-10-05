@@ -13,7 +13,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, libelleModule, montant, phrase, relatif } from "../format";
-import type { Approbation, Delegation, Demande, Entite } from "../types";
+import type { Approbation, Delegation, Demande, Entite, EquipesContexte } from "../types";
 import { MOTIFS_REFUS, STATUTS, compteApprobations, delegationsUtilisables, exigences, groupeDe, verdict, type Decideur } from "./regles";
 import { annuler, decider, deleguer, joindrePiece, modifier } from "./portes";
 
@@ -21,6 +21,7 @@ type Props = {
   demande: Demande;
   approbations: Approbation[];
   delegations: Delegation[];
+  equipes: EquipesContexte;
   moi: Decideur;
   source: Source;
   clientId: string;
@@ -39,18 +40,38 @@ type Props = {
 
 type Formulaire = "approuver" | "refuser" | "modifier" | "deleguer" | "annuler" | null;
 
+/* Une valeur de payload, lisible : une liste longue (les identifiants d'un
+   lot, par exemple) se résume à son compte et à ses trois premiers
+   éléments ; un objet se montre clé par clé ; le reste tel quel. */
+function valeurLisible(val: unknown): string {
+  if (val === null || val === undefined) return "—";
+  if (Array.isArray(val)) {
+    const n = val.length;
+    if (n === 0) return "aucun";
+    const extrait = val.slice(0, 3).map((x) => (typeof x === "object" && x !== null ? JSON.stringify(x) : String(x))).join(", ");
+    return n > 3 ? `${n} éléments — ${extrait}…` : extrait;
+  }
+  if (typeof val === "object") {
+    return Object.entries(val as Record<string, unknown>)
+      .map(([k, v]) => `${phrase(k)} : ${typeof v === "object" && v !== null ? JSON.stringify(v) : String(v)}`)
+      .join(" · ");
+  }
+  if (typeof val === "boolean") return val ? "oui" : "non";
+  return String(val);
+}
+
 const uuidLocal = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 export default function DetailDemande(p: Props) {
-  const { demande: d, approbations, delegations, moi, source } = p;
+  const { demande: d, approbations, delegations, equipes, moi, source } = p;
   const [form, setForm] = useState<Formulaire>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
 
   const ex = useMemo(() => exigences(d), [d]);
-  const v = useMemo(() => verdict(d, moi, approbations, delegations), [d, moi, approbations, delegations]);
+  const v = useMemo(() => verdict(d, moi, approbations, delegations, new Date(), equipes), [d, moi, approbations, delegations, equipes]);
   const compte = useMemo(() => compteApprobations(d, approbations), [d, approbations]);
   const delegs = useMemo(() => delegationsUtilisables(d, moi, delegations), [d, moi, delegations]);
   const grp = groupeDe(d);
@@ -80,7 +101,7 @@ export default function DetailDemande(p: Props) {
     setMontantMod(d.montant?.toString() ?? "");
     setDelegataire("");
     setDelegModule(d.module);
-    setDelegFin("");
+    setDelegFin(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
     setDelegMotif("");
     setForm(f);
   };
@@ -91,7 +112,7 @@ export default function DetailDemande(p: Props) {
   const pretRefuser = (!ex.motif_refus || motifComplet.length >= 3) && (!ex.piece_jointe || !!fichier);
   const montantNum = montantMod.trim() === "" ? null : Number(montantMod.replace(/\s/g, "").replace(",", "."));
   const pretModifier = resume.trim().length >= 1 && resume.trim().length <= 500 && (montantNum === null || (Number.isFinite(montantNum) && montantNum >= 0)) && (resume.trim() !== d.resume || montantNum !== d.montant);
-  const pretDeleguer = !!delegataire && delegataire !== moi.id;
+  const pretDeleguer = !!delegataire && delegataire !== moi.id && !!delegFin;
 
   const delegChoisie = delegs.find((g) => g.id === auNomDe) ?? null;
 
@@ -171,7 +192,8 @@ export default function DetailDemande(p: Props) {
 
   const soumettreDelegation = () =>
     envoyer(async () => {
-      const fin = delegFin ? new Date(`${delegFin}T23:59:59`).toISOString() : null;
+      /* la base exige un terme (delegations.fin NOT NULL) : fin de journée du jour choisi */
+      const fin = new Date(`${delegFin}T23:59:59`).toISOString();
       const mod = delegModule === "*" ? null : delegModule;
       if (source === "reelle") {
         await deleguer({ client_id: p.clientId, delegant: moi.id, delegataire, module: mod, entite_id: null, fin, motif: delegMotif.trim() || null });
@@ -235,6 +257,7 @@ export default function DetailDemande(p: Props) {
           {d.objet_type ? <Def etiquette="Objet">{phrase(d.objet_type)} {d.objet_id ? <span className="esp-mono">{d.objet_id}</span> : null}</Def> : null}
           <Def etiquette="Règle">
             {d.approbations_requises} approbation{d.approbations_requises > 1 ? "s" : ""} · rôles : {d.roles_autorises.join(", ")}
+            {d.equipe_id ? <> · équipe : {equipes.noms[d.equipe_id] ?? "réservée"}</> : null}
           </Def>
           <Def etiquette="Politique">{d.politique_id ? "Approuvée d'office par un accord permanent" : "Décidée par des personnes"}</Def>
         </dl>
@@ -244,7 +267,7 @@ export default function DetailDemande(p: Props) {
             <div className="esp-section-titre">Ce que porte la demande</div>
             <dl className="esp-def">
               {payloadVisible.map(([k, val]) => (
-                <Def key={k} etiquette={LIBELLES_PAYLOAD[k] ?? phrase(k)}>{typeof val === "object" && val !== null ? JSON.stringify(val) : String(val)}</Def>
+                <Def key={k} etiquette={LIBELLES_PAYLOAD[k] ?? phrase(k)}>{valeurLisible(val)}</Def>
               ))}
             </dl>
           </div>
@@ -291,6 +314,10 @@ export default function DetailDemande(p: Props) {
         {!v.peut && v.separation ? (
           <Avis teinte="ambre" role="status">
             <strong>Séparation saisie / approbation.</strong> {v.raison}
+          </Avis>
+        ) : !v.peut && v.equipe && d.statut === "en_attente" ? (
+          <Avis teinte="ambre" role="status">
+            <strong>Réservée à l&apos;équipe « {v.equipe} ».</strong> {v.raison}
           </Avis>
         ) : !v.peut && d.statut === "en_attente" ? (
           <Avis teinte="gris">{v.raison}</Avis>

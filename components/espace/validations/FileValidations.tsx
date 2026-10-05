@@ -23,14 +23,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Utilisateur } from "@/lib/compte";
-import { APPROBATIONS_EXEMPLE, DELEGATIONS_EXEMPLE, DEMANDES_EXEMPLE } from "../exemples/validations";
+import { APPROBATIONS_EXEMPLE, DELEGATIONS_EXEMPLE, DEMANDES_EXEMPLE, EQUIPES_EXEMPLE } from "../exemples/validations";
 import { EXEMPLE_MOI, PERSONNES, nomEntite, nomPersonne } from "../exemples/socle";
 import { useSource } from "../source";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, libelleModule, montant, relatif } from "../format";
 import type { Approbation, Delegation, Demande, Entite, Role } from "../types";
-import { GROUPES, STATUTS, compteApprobations, groupeDe, trier, type Decideur } from "./regles";
+import { GROUPES, STATUTS, compteApprobations, groupeDe, trier, verdict, type Decideur } from "./regles";
 import { chargerContexte, chargerFile, type ContexteSocle } from "./portes";
 import DetailDemande from "./DetailDemande";
 import MesDelegations from "./MesDelegations";
@@ -122,6 +122,8 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
     [source, etat, moi.id],
   );
 
+  const equipes = useMemo(() => (source === "exemple" ? EQUIPES_EXEMPLE : (etat?.contexte?.equipes ?? { noms: {}, membres: {} })), [source, etat]);
+
   const entites: Entite[] = useMemo(() => {
     if (source === "exemple") return [];
     return etat?.contexte?.entites ?? [];
@@ -147,15 +149,16 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
       if (filtre === "decidees") return d.statut !== "en_attente";
       if (d.statut !== "en_attente") return false;
       if (filtre === "en_attente") return true;
-      /* à décider par moi : la règle m'autorise (rôle ou délégation) et je n'ai pas encore décidé */
+      /* à décider par moi : le même verdict que le détail (équipe, rôle,
+         délégation) ; une demande saisie par moi reste visible, grisée,
+         pour que la séparation saisie / approbation se voie */
       const dejaMoi = etat.approbations.some((a) => a.demande_id === d.id && a.user_id === moi.id);
       if (dejaMoi) return false;
-      if (d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id) return true; // visible, mais grisée : la séparation s'affiche
-      if (moi.role && d.roles_autorises.includes(moi.role)) return true;
-      return etat.delegations.some((g) => g.delegataire === moi.id && !g.revoquee_le && (!g.module || g.module === d.module));
+      if (d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id) return true;
+      return verdict(d, moi, etat.approbations, etat.delegations, new Date(), equipes).peut;
     });
     return trier(base);
-  }, [etat, filtre, module, moi]);
+  }, [etat, filtre, module, moi, equipes]);
 
   const groupes = useMemo(() => {
     const m = new Map<string, Demande[]>();
@@ -374,6 +377,7 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
               demande={demande}
               approbations={etat.approbations}
               delegations={etat.delegations}
+              equipes={equipes}
               moi={moi}
               source={source}
               clientId={etat.contexte?.compte?.client_id ?? demande.client_id}

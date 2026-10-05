@@ -8,7 +8,7 @@
    juge en dernier ressort : si elle refuse, l'écran affiche son message.
    ══════════════════════════════════════════════════════════════════════ */
 
-import type { Approbation, Delegation, Demande, Role } from "../types";
+import type { Approbation, Delegation, Demande, EquipesContexte, Role } from "../types";
 
 export type Exigences = { commentaire: boolean; piece_jointe: boolean; motif_refus: boolean };
 
@@ -87,12 +87,18 @@ export type Decideur = { id: string; role: Role | null };
 
 export type Verdict =
   | { peut: true; au_nom_de: Delegation | null }
-  | { peut: false; raison: string; separation?: boolean };
+  | { peut: false; raison: string; separation?: boolean; equipe?: string };
+
+const SANS_EQUIPES: EquipesContexte = { noms: {}, membres: {} };
 
 /* Qui peut décider, et pourquoi pas : la séparation saisie / approbation
-   d'abord (c'est celle qu'on affiche), puis « déjà décidé », puis le rôle,
-   que la délégation en cours peut suppléer. */
-export function verdict(d: Demande, moi: Decideur, approbations: Approbation[], delegations: Delegation[], maintenant = new Date()): Verdict {
+   d'abord (c'est celle qu'on affiche), puis « déjà décidé », puis l'équipe
+   quand la règle en réserve la décision à une (demande.equipe_id : il faut
+   en être membre, ou tenir la délégation d'un membre), puis le rôle, que la
+   délégation en cours peut suppléer. C'est le même ordre que le trigger
+   approbations_preparer, vu en base réelle le 05/10 (« Cette demande
+   revient à l'équipe « Référent données » »). */
+export function verdict(d: Demande, moi: Decideur, approbations: Approbation[], delegations: Delegation[], maintenant = new Date(), equipes: EquipesContexte = SANS_EQUIPES): Verdict {
   if (d.statut !== "en_attente") return { peut: false, raison: "Cette demande est déjà décidée." };
   if (d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id) {
     return {
@@ -104,9 +110,8 @@ export function verdict(d: Demande, moi: Decideur, approbations: Approbation[], 
   if (approbations.some((a) => a.demande_id === d.id && (a.user_id === moi.id || a.au_nom_de === moi.id))) {
     return { peut: false, raison: "Vous avez déjà pris votre décision sur cette demande." };
   }
-  if (moi.role && d.roles_autorises.includes(moi.role)) return { peut: true, au_nom_de: null };
   const t = maintenant.getTime();
-  const deleg = delegations.find(
+  const delegationsEnCours = delegations.filter(
     (g) =>
       g.delegataire === moi.id &&
       !g.revoquee_le &&
@@ -116,6 +121,21 @@ export function verdict(d: Demande, moi: Decideur, approbations: Approbation[], 
       (!g.entite_id || g.entite_id === d.entite_id) &&
       !approbations.some((a) => a.demande_id === d.id && a.user_id === g.delegant),
   );
+  if (d.equipe_id) {
+    const membres = equipes.membres[d.equipe_id] ?? [];
+    const nom = equipes.noms[d.equipe_id] ?? "une équipe";
+    if (!membres.includes(moi.id)) {
+      const parMembre = delegationsEnCours.find((g) => membres.includes(g.delegant));
+      if (parMembre) return { peut: true, au_nom_de: parMembre };
+      return {
+        peut: false,
+        equipe: nom,
+        raison: `Cette demande revient à l'équipe « ${nom} » : vous n'en êtes pas membre, et aucun membre ne vous a délégué sa décision.`,
+      };
+    }
+  }
+  if (moi.role && d.roles_autorises.includes(moi.role)) return { peut: true, au_nom_de: null };
+  const deleg = delegationsEnCours[0];
   if (deleg) return { peut: true, au_nom_de: deleg };
   return {
     peut: false,

@@ -54,11 +54,20 @@ export function trouverChrome() {
 
 /** Sous Linux en root (conteneur), Chromium refuse de démarrer sans
  *  --no-sandbox ; et sans carte graphique, --disable-gpu évite une attente
- *  inutile. Ailleurs, rien n'est ajouté. */
+ *  inutile. Et quand la machine sort par un mandataire (HTTPS_PROXY posé,
+ *  cas du conteneur de recette), Chromium ne le lit pas de lui-même en
+ *  headless : sans --proxy-server il sort en direct et tombe sur un
+ *  certificat qu'il ne connaît pas (ERR_CERT_AUTHORITY_INVALID) ; on le lui
+ *  donne, en laissant localhost en direct. Ailleurs, rien n'est ajouté. */
 function drapeauxSysteme() {
   if (process.platform !== 'linux') return [];
   const root = typeof process.getuid === 'function' && process.getuid() === 0;
-  return [...(root ? ['--no-sandbox'] : []), '--disable-gpu'];
+  const mandataire = process.env.HTTPS_PROXY || process.env.https_proxy;
+  return [
+    ...(root ? ['--no-sandbox'] : []),
+    '--disable-gpu',
+    ...(mandataire ? [`--proxy-server=${mandataire}`, '--proxy-bypass-list=<local>;localhost;127.0.0.1'] : []),
+  ];
 }
 
 /** Ouvre une session CDP attachée à un onglet neuf.

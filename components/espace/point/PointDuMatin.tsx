@@ -198,8 +198,10 @@ export default function PointDuMatin() {
         <div className="esp-carte" style={{ marginTop: 14 }}><Chargement texte="Lecture du point…" /></div>
       ) : !contenu || !sections.length ? (
         <div className="esp-carte" style={{ marginTop: 14 }}>
-          <Vide titre="Pas de point ce jour-là">
-            {source === "reelle" && decalage === 0 ? (
+          <Vide titre={contenu?.apercu ? "Un aperçu sans rien dedans" : "Pas de point ce jour-là"}>
+            {contenu?.apercu ? (
+              "L'aperçu a été fabriqué, mais il ne porte aucune section : aucun gabarit de point n'est réglé pour votre organisation, ou rien n'est à signaler."
+            ) : source === "reelle" && decalage === 0 ? (
               <>
                 <p>Le point du matin n&apos;a pas encore été assemblé pour aujourd&apos;hui.</p>
                 <div className="esp-actions" style={{ justifyContent: "center", marginTop: 12 }}>
