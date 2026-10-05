@@ -55,7 +55,8 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 - **Validation** : `npx tsc --noEmit` ✓, `npx eslint components/espace
   app/espace` ✓ (0 erreur, 0 avertissement), `npm run build` ✓, recette
   aux cinq largeurs (390 / 768 / 1024 / 1440 / 1700) ✓ —
-  `node omega/recette-a3/recette-espace.mjs` : chargement, débordement
+  `node omega/recette-a3/recette-espace.mjs` (sur `outils/chrome.mjs`) :
+  chargement, débordement
   horizontal, éléments plus larges que l'écran, mots anglais, plus trois
   enchaînements (règle qui exige un commentaire, citation surlignée dans
   la pièce, veille du point). Captures légères dans `omega/recette-a3/`.
@@ -71,51 +72,53 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   client ; le mode « base réelle » est écrit d'après les signatures et
   affiche le message de la base s'il diffère.
 - **`app/espace/` n'existait pas** (ni réglages, ni compte) : la coquille
-  commune est dans `components/espace/CoquilleEspace.tsx`, posée par
-  chacune des trois pages — à déplacer dans un `app/espace/layout.tsx` le
-  jour où il existe (hors de mon périmètre).
-- **`outils/chrome.mjs` ne trouve pas Chromium sous Linux** (chemins macOS
-  seulement) : `omega/recette-a3/chrome-linux.mjs` est un décalque qui lit
-  `PLAYWRIGHT_BROWSERS_PATH`. Hors périmètre, non modifié.
+  commune (`components/espace/CoquilleEspace.tsx`) était posée par chaque
+  page ; depuis le lot 19 (périmètre étendu par le coordinateur) elle vit
+  dans `app/espace/layout.tsx`, et `proxy.ts` porte `/espace/:path*`.
+- **`outils/chrome.mjs` ne trouvait pas Chromium sous Linux** : réglé le
+  05/10 (périmètre étendu) — lecture de `PLAYWRIGHT_BROWSERS_PATH`,
+  `chrome-linux/headless_shell`, `--no-sandbox` en root, et une méthode
+  `capturer`. Le décalque `omega/recette-a3/chrome-linux.mjs` est supprimé.
 - **GitHub** : le push de `worker-a3` est passé du premier coup le 05/10
   (sept commits) ; rien à retenter.
 - `package-lock.json` bouge à l'installation (`npm ci` refuse : lock
   désynchronisé de `package.json`, `@emnapi/*` manquants) : **non commité**,
   ce n'est pas mon travail.
 
-## Demandes au coordinateur (portes et socle manquants)
+## Demandes au coordinateur — réponses du lot 19 (05/10) et ce qui en est fait
 
-1. **`regles_validation` : les exigences de décision.** L'écran doit rendre
-   commentaire / pièce jointe / motif de refus obligatoires « quand la règle
-   l'exige », mais la table n'a aucune colonne pour le dire. Aujourd'hui
-   l'écran lit `demandes_validation.payload.exigences = { commentaire,
-   piece_jointe, motif_refus }` quand le module l'a posé, sinon déduit
-   (motif de refus toujours ; commentaire si montant ≥ 10 000 € ou plusieurs
-   approbations). Proposition : trois booléens sur `regles_validation`,
-   recopiés sur la demande à sa création comme `approbations_requises`.
-2. **`approbations` : la pièce jointe.** Pas de colonne ; le chemin Storage
-   est cité dans `commentaire`. Proposition : `piece_id uuid` (→ `pieces`)
-   ou `piece_chemin text`, et une porte `joindre_piece_approbation`.
-3. **Un annuaire lisible sous RLS** (`user_id` → nom affiché, rôle) pour
-   nommer demandeurs, décideurs, délégants et délégataires : aujourd'hui
-   `comptes` ne porte que `user_id` et `role`, l'écran affiche l'identifiant
-   court. Une vue `annuaire(user_id, nom, role, client_id)` suffirait.
-4. **`lire_point` : la forme du jsonb.** L'écran lit `lignes[]` ou
-   `sections[].lignes[]` (chaque ligne avec les colonnes de
-   `points_du_jour_lignes`) ; à défaut il relit `points_du_jour_lignes`
-   directement. Me confirmer la forme réelle, et celle d'`apercu_point`.
-5. **`filed_motifs_refus` : les 40 codes réels.** L'exemple en porte six
-   plausibles (`COORDONNEES_BANCAIRES_NON_RECONNUES`, `TVA_INCOHERENTE`,
-   `ECART_AVEC_LA_COMMANDE`…) ; la base réelle est lue telle quelle.
-6. **`proxy.ts` : ajouter `/espace/:path*` au matcher** pour que la session
-   soit rafraîchie côté serveur sur ces pages (le client navigateur
-   rafraîchit déjà le jeton pour ses propres appels). Hors périmètre.
-7. **Storage `omega-clients`** : confirmer que la policy SELECT laisse une
-   personne signer les chemins `<client_id>/filed_document/<doc>/…` de ses
-   clients (l'action serveur signe avec SA session, pas la service_role).
-8. **`outils/chrome.mjs`** : ajouter la découverte Linux
-   (`PLAYWRIGHT_BROWSERS_PATH`, `chrome-linux/headless_shell`) et supprimer
-   `omega/recette-a3/chrome-linux.mjs`.
+1. **Exigences de décision** — posé : `regles_validation` et
+   `demandes_validation` portent `exige_commentaire`, `exige_piece`,
+   `exige_motif` ; `preparer_demande` recopie, le plus strict avec
+   `payload.exigences` l'emporte. **Fait** : l'écran lit les trois colonnes
+   de la demande, repli sur `payload.exigences` pour les demandes
+   antérieures (`regles.ts → exigences()`).
+2. **Pièce jointe d'une approbation** — posé : `approbations.piece_id`.
+   **Fait** : pour une demande FILED, le fichier est déposé par
+   `filed_deposer_piece` (bucket `omega-clients`, chemin
+   `<client>/filed_document/<doc>/<nom>`, SHA-256 calculé dans le
+   navigateur) et l'identifiant de pièce rendu est posé sur l'INSERT ;
+   pour les autres modules, le chemin reste cité dans le commentaire
+   jusqu'au dépôt générique (lot 20). La clé du jsonb rendu est supposée
+   `piece_id` (ou `piece`) : à confirmer.
+3. **Annuaire** — posé : `public.annuaire(p_client)`. **Fait** : noms des
+   demandeurs, décideurs, délégants et délégataires ; liste « à qui
+   déléguer ». Repli sur l'identifiant court si la porte ne répond pas.
+4. **`lire_point` / `apercu_point`** — forme confirmée
+   (`sections[].lignes[]`). **Fait** : lecture de cette seule forme, en-tête
+   du point fusionné (heure, fuseau, motifs, canal) ; le repli direct sur
+   `points_du_jour_lignes` est retiré.
+5. **Motifs officiels** — les 40 codes transmis. **Fait** : l'exemple les
+   porte à l'identique, les contrôles d'exemple citent `COORD_BANC_ERR`,
+   `CALCUL_ERR`, `PU_ERR`.
+6. et 8. **`proxy.ts`, `app/espace/layout.tsx`, `outils/chrome.mjs`** —
+   périmètre étendu. **Fait**, voir ci-dessus.
+7. **Storage** — policy SELECT posée pour `authenticated` sur
+   `omega-clients` (premier segment = un client de `mes_clients()`). Rien à
+   changer : l'action serveur signe déjà avec la session de la personne.
+
+Reste à confirmer côté coordinateur : la clé exacte du jsonb rendu par
+`filed_deposer_piece` (point 2).
 
 ## Demain
 
