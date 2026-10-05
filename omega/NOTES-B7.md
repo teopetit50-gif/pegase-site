@@ -1,10 +1,10 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 0 h 50 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 1 h 10 Paris.
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
-| **Mécanique** | 70 | Ouvrier écrit (43 tests Deno verts), migration b7_01 écrite et jouée sur une souche locale (8 tests pgTAP verts, scénario de bout en bout vert). Reste : pose sur la recette, déploiement, premier passage réel. |
+| **Mécanique** | 85 | Ouvrier écrit (43 tests Deno verts), migration b7_01 écrite et jouée sur une souche locale (8 tests pgTAP verts, scénario de bout en bout vert). b7_01 posé sur la recette (identite_b7_01_portes), fonction Edge `identite` v1 déployée en coquille, cron chaque minute. Reste : le correctif du verdict jsonb à reposer, le premier passage réel sur une pièce à vrai SIREN. |
 | **Livrable client** | 0 | Le client ne voit encore aucun « vérifié le … par … » : rien n'est posé ni déployé. Dès la pose + le déploiement, un vrai SIREN donne la ligne « SIREN confirmé par Sirene le … » dans les contrôles de la facture. |
 
 ## 1. Le scénario
@@ -221,3 +221,12 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
   envoyés au coordinateur.
 - 6/10 0 h 50 : ouvrier, migration, tests Deno et pgTAP écrits et verts en local ; b7_01 envoyé à la pose.
+- 5/10 22 h 47 Z (coordinateur) : b7_01 posé (`identite_b7_01_portes`), fonction `identite` v1 déployée en coquille
+  (index.ts à e4fd65f, `@partage/` sur worker-a1 7425991), cron `omega-identite` chaque minute, `SIRENE_API_KEY`
+  pas encore posée (repli annuaire). Tests : test_b7_01..07 verts sur la recette ; **test_b7_08 et le scénario
+  tombent** : `identite_verdict` est **jsonb** chez A4 (a4_10 déjà posé), mon `EXECUTE … USING` passait un texte
+  (42804).
+- 6/10 1 h 10 : corrigé — `identite_poser_verdict` lit le type réel des colonnes dans `pg_attribute` et écrit un
+  objet `{resultat, registre, identifiant, source, verifie_le, verification}` en jsonb (ou le seul résultat si la
+  colonne est texte) ; test_b7_08 réécrit avec la colonne en jsonb ; 8/8 et scénario verts en local, avec et sans
+  les colonnes d'a4_10. Au passage, `portes.ts` passe par `rpc()` exportée par A1 (7425991), fin de la recopie.
