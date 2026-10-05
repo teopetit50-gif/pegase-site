@@ -1,0 +1,6 @@
+N° dossier;Nom;Prénom;Date de naissance;Téléphone;Dernière visite;Praticien
+D-0001;DURAND;Élodie;12/03/1988;06 12 34 56 78;02/09/2026;Dr Lefèvre
+D-0002;MARTIN;Noé;05/11/2015;;15/09/2026;Dr Lefèvre
+D-0003;NGUYEN;Linh;30/07/1979;06 98 76 54 32;;Dr Aït
+"D-0004";"PÉREZ, José";"Ángel";"01/01/1990";"07 00 00 00 00";"20/09/2026";"Dr Lefèvre"
+;;;;;;

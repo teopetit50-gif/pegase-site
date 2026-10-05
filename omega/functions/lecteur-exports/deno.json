@@ -1,0 +1,15 @@
+{
+  "imports": {
+    "@partage/": "../_partage/",
+    "xlsx": "npm:xlsx@0.18.5",
+    "@std/assert": "jsr:@std/assert@^1.0.14"
+  },
+  "tasks": {
+    "verifier": "deno fmt --line-width 160 --check . ../_partage && deno lint . ../_partage && deno check index.ts tests/*.ts && deno test -A tests/",
+    "test": "deno test -A tests/",
+    "exemples": "deno run -A exemples/generer.ts"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}
