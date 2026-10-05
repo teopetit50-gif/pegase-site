@@ -54,8 +54,12 @@ gérant du banc après a5_01 : vert.
   message : bon) → statut `pret`, fournisseur `brevo` → travail `envois.brevo`
   pris par l'expéditeur en 15 s → **Brevo 401 « unrecognised IP address »**
   (restriction d'IP activée côté Brevo ; les Edge Functions n'ont pas d'IP
-  fixe). Envoi `0a607529-4303-474d-bb43-b6a7c30298a0` en attente, `essais 1`.
-  Envoi différé `6be6e6cd-…` partira demain 8 h si Brevo est ouvert.
+  fixe). Teo a désactivé la restriction à 21 h 02 ; `private.tache_envois(now())`
+  a reconfié le travail sans attendre la reprise, et l'envoi
+  `0a607529-4303-474d-bb43-b6a7c30298a0` est **parti à 19 h 05 Z** (statut
+  `envoye`, essais 3, référence Brevo `<202610051905.67751143774@smtp-relay.mailin.fr>`).
+  Premier email réel d'Omega. Envoi différé `6be6e6cd-…` partira demain 8 h.
+  Reste à vérifier : le webhook Brevo → `noter_remise` (Teo doit le poser).
 
 ### Fonctions Edge déployées
 
@@ -78,9 +82,8 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 
 ### Ce que Teo doit encore poser (recette)
 
-1. **Brevo → Sécurité → IP autorisées : désactiver la restriction** (ou l'essai
-   d'envoi ne partira jamais). Puis expéditeur `essais@omegaai.fr` authentifié,
-   suivi d'ouverture/clic coupé.
+1. Brevo : restriction d'IP désactivée (fait le 5/10). Reste : expéditeur
+   `essais@omegaai.fr` authentifié, suivi d'ouverture/clic coupé.
 2. Edge Secrets manquants : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
    (Bedrock, eu-central-1), `META_APP_SECRET`, `META_ACCESS_TOKEN`.
 3. GitHub → Settings → Secrets : `SUPABASE_DB_URL`, `SAUVEGARDE_PHRASE`
