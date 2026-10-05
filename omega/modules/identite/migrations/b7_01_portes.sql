@@ -6,7 +6,8 @@
 --   private.identite_demander_travail()                déclencheur sur filed_verifications_tiers : chaque demande ouverte
 --                                                      devient un travail `identite.verifier` ;
 --   public.identite_a_verifier(p_verification)         porte : la demande, le fournisseur, le cache ;
---   public.noter_identite(p_verification, …)           porte : la réponse, le cache, les compléments, le recontrôle ;
+--   public.noter_identite(p_verification, …)           porte : la réponse, le cache, les compléments, le verdict sur la
+--                                                      fiche fournisseur (colonnes d'A4 si elles existent), le recontrôle ;
 --   public.identite_relancer(p_heures)                 porte : rouvre les « indisponible » trop vieux.
 -- Toutes les portes sont réservées au rôle de service. Migration idempotente : create or replace, if not exists,
 -- on conflict ; aucun DROP, aucun DELETE.
@@ -124,7 +125,8 @@ begin
 end $$;
 
 -- Recontrôle les factures qu'une vérification concerne : celles du fournisseur, ou, sans fournisseur rattaché,
--- celles dont la pièce porte cet identifiant. Seules les factures encore ouvertes (a_valider, bloquee) bougent.
+-- celles dont la pièce porte cet identifiant. Mêmes statuts et même plafond que private.filed_recontroler_fournisseur ;
+-- une facture décidée (validee, refusee, comptabilisee) ne bouge pas.
 create or replace function private.identite_recontroler(p_v public.filed_verifications_tiers) returns integer
 language plpgsql set search_path to '' as $$
 declare
@@ -133,11 +135,11 @@ declare
 begin
   for r in
     select f.id from public.filed_factures f
-    where f.client_id = p_v.client_id and f.statut in ('a_valider', 'bloquee')
+    where f.client_id = p_v.client_id and f.statut in ('a_completer', 'bloquee', 'a_valider')
       and ((p_v.fournisseur_id is not null and f.fournisseur_id = p_v.fournisseur_id)
            or private.identite_normaliser(f.fournisseur_lu ->> 'siren') = p_v.identifiant
            or private.identite_normaliser(f.fournisseur_lu ->> 'tva') = p_v.identifiant)
-    order by f.cree_le
+    order by f.cree_le limit 500
   loop
     begin
       perform private.filed_controler_facture(r.id);
@@ -148,6 +150,23 @@ begin
     end;
   end loop;
   return n;
+end $$;
+
+-- Le verdict sur la fiche fournisseur (colonnes posées par A4 en a4_10 : identite_verifiee_le, identite_source,
+-- identite_verdict). Tant qu'elles n'existent pas, rien n'est écrit : la vérification reste lisible dans
+-- filed_verifications_tiers et dans le contrôle identite.registre.
+create or replace function private.identite_poser_verdict(p_v public.filed_verifications_tiers, p_resultat text, p_source text)
+returns boolean language plpgsql set search_path to '' as $$
+begin
+  if p_v.fournisseur_id is null then return false; end if;
+  if not exists (select 1 from pg_attribute where attrelid = 'public.filed_fournisseurs'::regclass and attname = 'identite_verifiee_le' and not attisdropped)
+     or not exists (select 1 from pg_attribute where attrelid = 'public.filed_fournisseurs'::regclass and attname = 'identite_source' and not attisdropped)
+     or not exists (select 1 from pg_attribute where attrelid = 'public.filed_fournisseurs'::regclass and attname = 'identite_verdict' and not attisdropped) then
+    return false;
+  end if;
+  execute 'update public.filed_fournisseurs set identite_verifiee_le = now(), identite_source = $2, identite_verdict = $3, maj_le = now() where id = $1'
+    using p_v.fournisseur_id, left(p_source, 40), p_resultat;
+  return true;
 end $$;
 
 create or replace function public.noter_identite(p_verification uuid, p_resultat text, p_preuve jsonb, p_source text, p_complements jsonb default '[]'::jsonb)
@@ -196,6 +215,7 @@ begin
 
   select * into v from public.filed_verifications_tiers where id = p_verification;
   if p_resultat <> 'indisponible' then
+    perform private.identite_poser_verdict(v, p_resultat, case when p_source = 'cache' then coalesce(p_preuve ->> 'source_initiale', 'cache') else p_source end);
     n_recontrolees := private.identite_recontroler(v);
   end if;
   return jsonb_build_object('verification', v.id, 'deja_repondue', false, 'complements', n_compl, 'recontrolees', n_recontrolees);
@@ -237,3 +257,4 @@ grant execute on function private.identite_normaliser(text) to service_role;
 grant execute on function private.identite_deposer_travail(public.filed_verifications_tiers) to service_role;
 grant execute on function private.identite_memoriser(text, text, text, jsonb, text, text) to service_role;
 grant execute on function private.identite_recontroler(public.filed_verifications_tiers) to service_role;
+grant execute on function private.identite_poser_verdict(public.filed_verifications_tiers, text, text) to service_role;
