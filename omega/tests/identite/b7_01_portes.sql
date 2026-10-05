@@ -162,4 +162,29 @@ begin
   return next ok(exists (select 1 from pg_trigger where tgname = 'identite_demander_travail' and tgrelid = 'public.filed_verifications_tiers'::regclass and tgenabled <> 'D'), 'le déclencheur est posé et actif');
 end $f$;
 
+create or replace function tests.test_b7_08_verdict_fournisseur() returns setof text
+language plpgsql as $f$
+declare v_four uuid; v_id uuid; r record;
+begin
+  -- Les colonnes d'A4 (a4_10) : posées si elles manquent encore ici (annulé par runtests), sinon laissées telles quelles.
+  alter table public.filed_fournisseurs add column if not exists identite_verifiee_le timestamptz;
+  alter table public.filed_fournisseurs add column if not exists identite_source text;
+  alter table public.filed_fournisseurs add column if not exists identite_verdict text;
+  insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, siren, pays, statut, source)
+  values (tests.b7_client(), 'B7-ESSAI', 'Fournisseur d''essai B7', 'fournisseur d essai b7', '999999998', 'FR', 'a_confirmer', 'saisie') returning id into v_four;
+  insert into public.filed_verifications_tiers (client_id, fournisseur_id, registre, identifiant) values (tests.b7_client(), v_four, 'sirene', '999999998') returning id into v_id;
+  return next is((public.identite_a_verifier(v_id) -> 'fournisseur' ->> 'siren'), '999999998', 'La porte rend le fournisseur rattaché');
+  perform public.noter_identite(v_id, 'valide', '{"registre":"sirene","etat":"actif"}'::jsonb, 'sirene');
+  execute 'select identite_verifiee_le, identite_source, identite_verdict from public.filed_fournisseurs where id = $1' into r using v_four;
+  return next ok(r.identite_verifiee_le is not null, 'Le verdict est daté sur la fiche fournisseur');
+  return next is(r.identite_source, 'sirene', 'verdict : source');
+  return next is(r.identite_verdict, 'valide', 'verdict : valide');
+  -- Depuis le cache : la source initiale est reportée, pas « cache ».
+  insert into public.filed_verifications_tiers (client_id, fournisseur_id, registre, identifiant) values (tests.b7_client(), v_four, 'sirene', '999999998') returning id into v_id;
+  perform public.noter_identite(v_id, 'invalide', '{"registre":"sirene","source_initiale":"recherche-entreprises"}'::jsonb, 'cache');
+  execute 'select identite_verifiee_le, identite_source, identite_verdict from public.filed_fournisseurs where id = $1' into r using v_four;
+  return next is(r.identite_source, 'recherche-entreprises', 'verdict depuis le cache : la source initiale');
+  return next is(r.identite_verdict, 'invalide', 'verdict : invalide');
+end $f$;
+
 select * from runtests('tests'::name, '^test_b7_');
