@@ -1,29 +1,44 @@
 // Doubles des portes, de Brevo et du stockage pour les tests.
 
 import type {
-  EnvoiARemettre,
+  EnvoiAEnvoyer,
   Portes,
-  ResultatEchec,
+  ReponseCommencer,
+  ResultatEchecEnvoi,
+  ResultatEchecTravail,
   Travail,
 } from "./portes.ts";
 import type { ClientBrevo, EmailBrevo, SmsBrevo } from "./brevo.ts";
 import type { Stockage } from "./stockage.ts";
 import type { Journal } from "./passage.ts";
 
-export type AppelPorte = { porte: string; args: unknown[] };
+export type AppelPorte = { porte: keyof Portes; args: unknown[] };
 
 export class PortesDouble implements Portes {
   appels: AppelPorte[] = [];
   travaux: Travail[] = [];
-  envois = new Map<string, EnvoiARemettre>();
+  /** Réponse de commencer_envoi par uuid d'envoi ; absent → statut introuvable. */
+  envois = new Map<string, ReponseCommencer>();
+  secrets = new Map<string, string>();
   finis = new Map<number, Record<string, unknown>>();
-  echoues = new Map<number, { erreur: string; reprendre: boolean }>();
+  travauxEchoues = new Map<number, { erreur: string; reprendre: boolean }>();
+  confirmes = new Map<string, string>();
+  envoisEchoues = new Map<string, { erreur: string; definitif: boolean }>();
   battements: Record<string, unknown>[] = [];
-  /** Pour simuler une porte qui tombe. */
+  /** Pour simuler une porte qui tombe (toujours, ou n fois). */
   panne: Partial<Record<keyof Portes, Error>> = {};
+  pannesRestantes: Partial<Record<keyof Portes, number>> = {};
 
   private noter(porte: keyof Portes, ...args: unknown[]) {
     this.appels.push({ porte, args });
+    const restantes = this.pannesRestantes[porte];
+    if (restantes !== undefined) {
+      if (restantes > 0) {
+        this.pannesRestantes[porte] = restantes - 1;
+        throw new Error(`panne simulée de ${porte}`);
+      }
+      return;
+    }
     const p = this.panne[porte];
     if (p) throw p;
   }
@@ -47,9 +62,9 @@ export class PortesDouble implements Portes {
     id: number,
     erreur: string,
     reprendre: boolean,
-  ): Promise<ResultatEchec> {
+  ): Promise<ResultatEchecTravail> {
     this.noter("echouerTravail", id, erreur, reprendre);
-    this.echoues.set(id, { erreur, reprendre });
+    this.travauxEchoues.set(id, { erreur, reprendre });
     return reprendre ? "repris" : "echec";
   }
   // deno-lint-ignore require-await
@@ -64,15 +79,37 @@ export class PortesDouble implements Portes {
     return 1;
   }
   // deno-lint-ignore require-await
-  async envoiARemettre(envoi: string) {
-    this.noter("envoiARemettre", envoi);
-    return this.envois.get(envoi) ?? null;
+  async commencerEnvoi(envoi: string): Promise<ReponseCommencer> {
+    this.noter("commencerEnvoi", envoi);
+    return this.envois.get(envoi) ?? { envoyer: false, statut: "introuvable" };
+  }
+  // deno-lint-ignore require-await
+  async secretExpediteur(envoi: string) {
+    this.noter("secretExpediteur", envoi);
+    return this.secrets.get(envoi) ?? null;
+  }
+  // deno-lint-ignore require-await
+  async confirmerEnvoi(envoi: string, reference: string) {
+    this.noter("confirmerEnvoi", envoi, reference);
+    this.confirmes.set(envoi, reference);
+  }
+  // deno-lint-ignore require-await
+  async echouerEnvoi(
+    envoi: string,
+    erreur: string,
+    definitif: boolean,
+  ): Promise<ResultatEchecEnvoi> {
+    this.noter("echouerEnvoi", envoi, erreur, definitif);
+    this.envoisEchoues.set(envoi, { erreur, definitif });
+    return definitif ? "echec" : "pret";
   }
 }
 
 export class BrevoDouble implements ClientBrevo {
   emails: EmailBrevo[] = [];
   sms: SmsBrevo[] = [];
+  /** Clés API avec lesquelles le client a été fabriqué, dans l'ordre. */
+  cles: string[] = [];
   erreur: Error | null = null;
   compteur = 0;
   // deno-lint-ignore require-await
@@ -95,17 +132,12 @@ export class BrevoDouble implements ClientBrevo {
 export class StockageDouble implements Stockage {
   objets = new Map<string, Uint8Array>();
   // deno-lint-ignore require-await
-  async lirePiece(
-    piece: { id: string; chemin?: string | null; url?: string | null },
-  ) {
-    const cle = piece.chemin ?? piece.url ?? "";
-    const o = this.objets.get(cle);
-    if (!o) throw new Error(`objet absent : ${cle}`);
+  async lirePiece(piece: { id: string; chemin: string }) {
+    const o = this.objets.get(piece.chemin);
+    if (!o) throw new Error(`objet absent : ${piece.chemin}`);
     return o;
   }
 }
-
-export const journalMuet: Journal = { info: () => {}, erreur: () => {} };
 
 export function journalMemoire(): Journal & { lignes: string[] } {
   const lignes: string[] = [];
@@ -116,39 +148,42 @@ export function journalMemoire(): Journal & { lignes: string[] } {
   };
 }
 
+export const ENVOI = "11111111-1111-4111-8111-111111111111";
+
 export function envoiExemple(
-  partiel: Partial<EnvoiARemettre> = {},
-): EnvoiARemettre {
+  partiel: Partial<EnvoiAEnvoyer> = {},
+): EnvoiAEnvoyer {
+  const id = partiel.envoi ?? ENVOI;
   return {
-    id: "11111111-1111-4111-8111-111111111111",
-    client_id: "22222222-2222-4222-8222-222222222222",
+    envoyer: true,
+    envoi: id,
+    mode: "reel",
     module: "cashd",
     canal: "email",
-    statut: "pret",
-    essais: 0,
-    reference_externe: null,
-    cle_idempotence: "cashd:relance:1",
+    fournisseur: "brevo",
+    expediteur: {
+      identite: "relances@client.test",
+      nom_affiche: "Client Test",
+      repondre_a: "reponses@client.test",
+      parametres: {},
+      secret: false,
+    },
     destinataire: {
       adresse: "destinataire@exemple.test",
       nom: "Destinataire Test",
       langue: "fr",
-      fuseau: "Europe/Paris",
-      territoire: "FR",
+      professionnel: true,
     },
-    expediteur: {
-      id: "33333333-3333-4333-8333-333333333333",
-      identite: "essais@omegaai.fr",
-      nom_affiche: "Omega — essais",
-      repondre_a: "reponses@omegaai.fr",
-      fournisseur: "brevo",
-      parametres: {},
-    },
-    repondre_a: null,
     sujet: "Relance de facture",
     corps: "Bonjour,\n\nVotre facture est en attente.",
-    transactionnel: true,
-    donnees_sante: false,
     pieces: [],
+    modele_externe: null,
+    langue: "fr",
+    parametres_modele: null,
+    repondre_a: null,
+    transactionnel: true,
+    cle: id,
+    objet: { type: "facture", id: "f1" },
     ...partiel,
   };
 }

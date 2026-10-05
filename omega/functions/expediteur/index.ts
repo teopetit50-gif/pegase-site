@@ -23,7 +23,7 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST" && req.method !== "GET") {
     return new Response("Méthode non autorisée", { status: 405 });
   }
-  const cleBrevo = Deno.env.get("BREVO_API_KEY")?.trim() || null;
+  const cleEnvironnement = Deno.env.get("BREVO_API_KEY")?.trim() || null;
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const cleService = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const ouvrier = `expediteur@${
@@ -32,7 +32,8 @@ Deno.serve(async (req: Request) => {
 
   const bilan = await executerPassage({
     portes: portesDepuisEnvironnement(),
-    brevo: cleBrevo ? clientBrevo(cleBrevo) : null,
+    brevoPour: (cleApi) => clientBrevo(cleApi),
+    cleEnvironnement,
     stockage: stockageSupabase(url, cleService),
     ouvrier,
     journal,
@@ -40,7 +41,8 @@ Deno.serve(async (req: Request) => {
   journal.info("passage terminé", {
     pris: bilan.pris,
     remis: bilan.remis,
-    repris: bilan.repris,
+    non_envoyes: bilan.non_envoyes,
+    reportes: bilan.reportes,
     echecs: bilan.echecs,
     duree_ms: bilan.duree_ms,
   });

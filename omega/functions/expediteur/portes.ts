@@ -1,6 +1,7 @@
 // Portes du socle : l'ouvrier ne voit Postgres que par ces fonctions,
 // appelées en RPC avec la clé de service fournie par Supabase à la fonction.
-// Aucune écriture directe dans une table.
+// Aucune écriture directe dans une table. Signatures lues sur la recette par le
+// coordinateur (05/10/2026), voir omega/NOTES-A2.md.
 
 export type Travail = {
   id: number;
@@ -13,46 +14,60 @@ export type Travail = {
 
 export type PieceAEnvoyer = {
   id: string;
+  chemin: string;
   nom: string;
-  type_mime: string;
-  taille: number | null;
-  chemin?: string | null;
-  url?: string | null;
+  mime: string;
+  octets?: number | null;
+  sha256?: string | null;
 };
 
-export type EnvoiARemettre = {
-  id: string;
-  client_id: string;
-  module: string;
-  canal: string;
+/** Réponse de commencer_envoi quand l'envoi n'est pas à envoyer. */
+export type EnvoiRefuse = {
+  envoyer: false;
   statut: string;
-  essais: number;
-  reference_externe: string | null;
-  cle_idempotence: string;
-  destinataire: {
-    adresse: string;
-    nom: string | null;
-    langue: string;
-    fuseau: string;
-    territoire: string | null;
-  };
+  verrou?: string | null;
+  motif?: string | null;
+  reprise_le?: string | null;
+};
+
+/** Réponse de commencer_envoi quand l'envoi est passé en 'en_cours'. */
+export type EnvoiAEnvoyer = {
+  envoyer: true;
+  envoi: string;
+  mode: "reel" | "essai";
+  module: string;
+  canal: "email" | "sms" | "whatsapp" | "lre" | string;
+  fournisseur: string;
   expediteur: {
-    id: string;
     identite: string;
     nom_affiche: string | null;
     repondre_a: string | null;
-    fournisseur: string;
     parametres: Record<string, unknown>;
-  } | null;
-  repondre_a: string | null;
+    /** true : la clé API vient du coffre, par secret_expediteur. */
+    secret: boolean;
+  };
+  destinataire: {
+    adresse: string;
+    nom: string | null;
+    langue: string | null;
+    professionnel: boolean | null;
+  };
   sujet: string | null;
   corps: string;
-  transactionnel: boolean;
-  donnees_sante: boolean;
   pieces: PieceAEnvoyer[];
+  modele_externe: string | null;
+  langue: string | null;
+  parametres_modele: Record<string, unknown> | null;
+  repondre_a: string | null;
+  transactionnel: boolean;
+  /** = id de l'envoi : clé d'idempotence côté fournisseur. */
+  cle: string;
+  objet: { type: string | null; id: string | null } | null;
 };
 
-export type ResultatEchec = "repris" | "echec";
+export type ReponseCommencer = EnvoiRefuse | EnvoiAEnvoyer;
+export type ResultatEchecTravail = "repris" | "echec";
+export type ResultatEchecEnvoi = "pret" | "echec";
 
 export interface Portes {
   prendreTravaux(
@@ -66,15 +81,25 @@ export interface Portes {
     id: number,
     erreur: string,
     reprendre: boolean,
-  ): Promise<ResultatEchec>;
+  ): Promise<ResultatEchecTravail>;
   battreOuvrier(
     module: string,
     genres: string[],
     detail: Record<string, unknown>,
     attendu: string,
   ): Promise<number>;
-  /** Porte demandée au coordinateur (voir NOTES-A2.md). NULL si l'envoi est inconnu. */
-  envoiARemettre(envoi: string): Promise<EnvoiARemettre | null>;
+  /** Lecture ET transition : verrouille, passe en 'en_cours' (essais+1, bail 15 min) ou refuse. */
+  commencerEnvoi(envoi: string): Promise<ReponseCommencer>;
+  /** Clé API du fournisseur pour cet envoi, lue dans le coffre. */
+  secretExpediteur(envoi: string): Promise<string | null>;
+  /** Passe l'envoi à 'envoye' avec la référence du fournisseur. Rejouable. */
+  confirmerEnvoi(envoi: string, reference: string): Promise<void>;
+  /** 'pret' (reconfié plus tard) ou 'echec' (définitif). */
+  echouerEnvoi(
+    envoi: string,
+    erreur: string,
+    definitif: boolean,
+  ): Promise<ResultatEchecEnvoi>;
 }
 
 export class ErreurPorte extends Error {
@@ -147,9 +172,34 @@ export function portesSupabase(rpc: AppelRpc): Portes {
       });
       return typeof r === "number" ? r : 0;
     },
-    async envoiARemettre(envoi) {
-      const r = await rpc("envoi_a_remettre", { p_envoi: envoi });
-      return (r as EnvoiARemettre | null) ?? null;
+    async commencerEnvoi(envoi) {
+      const r = await rpc("commencer_envoi", { p_envoi: envoi });
+      if (!r || typeof r !== "object") {
+        return {
+          envoyer: false,
+          statut: "introuvable",
+          motif: "commencer_envoi a rendu null",
+        };
+      }
+      return r as ReponseCommencer;
+    },
+    async secretExpediteur(envoi) {
+      const r = await rpc("secret_expediteur", { p_envoi: envoi });
+      return typeof r === "string" && r.trim() !== "" ? r.trim() : null;
+    },
+    async confirmerEnvoi(envoi, reference) {
+      await rpc("confirmer_envoi", {
+        p_envoi: envoi,
+        p_reference: reference.slice(0, 300),
+      });
+    },
+    async echouerEnvoi(envoi, erreur, definitif) {
+      const r = await rpc("echouer_envoi", {
+        p_envoi: envoi,
+        p_erreur: erreur,
+        p_definitif: definitif,
+      });
+      return r === "echec" ? "echec" : "pret";
     },
   };
 }
