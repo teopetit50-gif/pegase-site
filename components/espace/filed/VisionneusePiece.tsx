@@ -13,18 +13,21 @@
      · exemple — la facture est DESSINÉE à partir des valeurs
        (FactureDessinee) : ce qui est cité est ce qui est écrit ;
      · base réelle, image — l'image signée (URL de 10 min, action serveur) ;
-     · base réelle, PDF — le texte de la page (pieces_pages.texte) posé
-       sur une page blanche au bon rapport, et un lien pour ouvrir le PDF.
-       Le rendu des pages de PDF (pdf.js) est noté pour demain.
+     · base réelle, PDF — chaque page est RENDUE par pdf.js (PagePdf),
+       depuis l'URL signée ; le nombre de pages vient du fichier quand
+       pieces.nb_pages manque, le rapport de la page aussi. En attendant
+       le rendu, ou s'il échoue, le texte de la page (pieces_pages.texte)
+       tient lieu de page, et un lien ouvre le fichier.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import type { Source } from "../source";
 import type { DossierFiled, ValeurPiece } from "../types";
 import { urlSigneePiece } from "@/app/espace/filed/actions";
 import { libelleChamp } from "./etats";
 import FactureDessinee from "./FactureDessinee";
+import PagePdf, { nombreDePages } from "./PagePdf";
 
 type Props = {
   dossier: DossierFiled;
@@ -39,8 +42,14 @@ export default function VisionneusePiece({ dossier, source, actif, onChoisir }: 
   const [erreur, setErreur] = useState<string | null>(null);
   const refs = useRef(new Map<number, HTMLDivElement>());
 
-  const nbPages = Math.max(piece?.nb_pages ?? 0, pages.length, ...valeurs.map((v) => v.page ?? 1), 1);
+  const [nbPagesPdf, setNbPagesPdf] = useState<number | null>(null);
+  const [rapports, setRapports] = useState<Record<number, number>>({});
+  const nbPages = Math.max(piece?.nb_pages ?? 0, nbPagesPdf ?? 0, pages.length, ...valeurs.map((v) => v.page ?? 1), 1);
   const estImage = !!piece && piece.mime.startsWith("image/");
+  const estPdf = !!piece && piece.mime === "application/pdf";
+  const poserRapport = useCallback((n: number, r: number) => {
+    setRapports((prev) => (prev[n] === r ? prev : { ...prev, [n]: r }));
+  }, []);
 
   useEffect(() => {
     if (source !== "reelle" || !piece) return;
@@ -56,6 +65,20 @@ export default function VisionneusePiece({ dossier, source, actif, onChoisir }: 
       window.clearTimeout(t);
     };
   }, [source, piece]);
+
+  /* le nombre de pages du PDF réel, quand pieces.nb_pages manque */
+  useEffect(() => {
+    if (source !== "reelle" || !estPdf || !url || piece?.nb_pages) return;
+    let actifEffet = true;
+    nombreDePages(url)
+      .then((n) => {
+        if (actifEffet) setNbPagesPdf(n);
+      })
+      .catch(() => {});
+    return () => {
+      actifEffet = false;
+    };
+  }, [source, estPdf, url, piece]);
 
   useEffect(() => {
     if (!actif) return;
@@ -95,7 +118,7 @@ export default function VisionneusePiece({ dossier, source, actif, onChoisir }: 
       {Array.from({ length: nbPages }).map((_, i) => {
         const n = i + 1;
         const page = pages.find((p) => p.n === n);
-        const ratio = page?.largeur && page?.hauteur ? page.hauteur / page.largeur : 842 / 595;
+        const ratio = rapports[n] ?? (page?.largeur && page?.hauteur ? page.hauteur / page.largeur : 842 / 595);
         const boites = valeurs.filter((v) => (v.page ?? 1) === n && v.boite);
         return (
           <div
@@ -112,6 +135,8 @@ export default function VisionneusePiece({ dossier, source, actif, onChoisir }: 
             ) : estImage && url ? (
               // eslint-disable-next-line @next/next/no-img-element -- URL signée, hôte privé, taille connue par la page
               <img src={url} alt={`${piece.nom_fichier}, page ${n}`} />
+            ) : estPdf && url ? (
+              <PagePdf url={url} page={n} onRapport={(r) => poserRapport(n, r)} />
             ) : (
               <div className="esp-page-texte" aria-label={`Texte de la page ${n}`}>
                 {page?.texte || (source === "reelle" && !url && !erreur ? "Chargement de la pièce…" : "Le texte de cette page n'est pas disponible.")}
