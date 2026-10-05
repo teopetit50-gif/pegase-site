@@ -13,7 +13,8 @@ const err = (f, m) => erreurs.push(`${f} : ${m}`);
 const arr = (x) => Math.round(x * 100) / 100;
 
 const jsons = fs.readdirSync(DOSSIER).filter((n) => /^\d{3}-.*\.json$/.test(n)).sort();
-if (jsons.length !== 100) err('banc', `${jsons.length} fichiers attendus au lieu de 100`);
+const ATTENDU = 103; // 100 + 3 compléments du 5/10/2026
+if (jsons.length !== ATTENDU) err('banc', `${jsons.length} fichiers attendus au lieu de ${ATTENDU}`);
 const types = {}; const qualites = {};
 for (const nom of jsons) {
   const a = JSON.parse(fs.readFileSync(path.join(DOSSIER, nom), 'utf8'));
@@ -40,12 +41,19 @@ for (const nom of jsons) {
   if (!a.lisible) { if (a.factures.length) err(nom, 'illisible mais factures renseignées'); continue; }
   if (a.factures.length !== a.nb_factures) err(nom, 'nb_factures incohérent');
   for (const f of a.factures) {
-    if (!sirenValide(f.fournisseur.siren)) err(nom, `SIREN fournisseur invalide ${f.fournisseur.siren}`);
-    if (!siretValide(f.fournisseur.siret)) err(nom, `SIRET fournisseur invalide ${f.fournisseur.siret}`);
+    const francais = f.fournisseur.pays === 'FR' && f.fournisseur.type !== 'particulier';
+    if (francais) {
+      if (!sirenValide(f.fournisseur.siren)) err(nom, `SIREN fournisseur invalide ${f.fournisseur.siren}`);
+      if (!siretValide(f.fournisseur.siret)) err(nom, `SIRET fournisseur invalide ${f.fournisseur.siret}`);
+      if (!/^9\d{8}$/.test(f.fournisseur.siren)) err(nom, 'SIREN hors plage fictive 9xxxxxxxx');
+    } else if (f.fournisseur.siren) err(nom, 'fournisseur étranger ou particulier avec un SIREN');
     if (f.fournisseur.tva_intracom && !tvaValide(f.fournisseur.tva_intracom)) err(nom, `TVA fournisseur invalide ${f.fournisseur.tva_intracom}`);
-    if (!ibanValide(f.fournisseur.iban)) err(nom, `IBAN invalide ${f.fournisseur.iban}`);
-    if (!/^9\d{8}$/.test(f.fournisseur.siren) || !/^9\d{8}$/.test(f.client.siren)) err(nom, 'SIREN hors plage fictive 9xxxxxxxx');
-    if (!/^FR\d{2}9\d{4}/.test(f.fournisseur.iban)) err(nom, 'IBAN hors plage fictive (code banque 9xxxx)');
+    if (f.fournisseur.iban) {
+      if (!ibanValide(f.fournisseur.iban)) err(nom, `IBAN invalide ${f.fournisseur.iban}`);
+      if (!/^FR\d{2}9\d{4}/.test(f.fournisseur.iban)) err(nom, 'IBAN hors plage fictive (code banque 9xxxx)');
+    } else if (f.fournisseur.pays === 'FR') err(nom, 'fournisseur français sans IBAN');
+    if (!/^9\d{8}$/.test(f.client.siren)) err(nom, 'SIREN client hors plage fictive 9xxxxxxxx');
+    if (f.devise !== 'EUR' && !(f.taux_change > 0 && arr(f.total_ttc * f.taux_change) === f.total_ttc_eur)) err(nom, 'contre-valeur EUR incohérente');
     if (!sirenValide(f.client.siren) || !siretValide(f.client.siret) || !tvaValide(f.client.tva_intracom)) err(nom, 'identifiants client invalides');
     const brut = arr(f.lignes.reduce((s, l) => s + l.montant_ht, 0));
     if (arr(brut - (f.remise_globale ?? 0)) !== f.total_ht) err(nom, `total HT ${f.total_ht} ≠ lignes ${brut} - remise ${f.remise_globale ?? 0}`);

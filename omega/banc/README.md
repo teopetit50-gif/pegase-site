@@ -1,8 +1,9 @@
-# Banc de factures fournisseurs — cent pièces fictives
+# Banc de factures fournisseurs — cent pièces fictives (+ trois compléments)
 
 Jeu d'essai pour l'ouvrier lecteur (session A1). Cent documents variés, tous
 inventés, chacun accompagné d'un fichier JSON qui dit ce qu'un lecteur parfait
-doit en extraire.
+doit en extraire. Trois compléments demandés par le coordinateur le 5 octobre
+(pièces 101 à 103) portent le total à 103.
 
 ## Contenu de `factures/`
 
@@ -18,8 +19,11 @@ doit en extraire.
 | `ticket` | 8 | Tickets de caisse 58 ou 80 mm, lignes en TTC, quatre numérisés |
 | `manuscrite` | 6 | Écriture manuscrite (carnet pré-imprimé ou feuille libre), toujours numérisées |
 | `illisible` | 1 | Dégradé au point d'être illisible : la bonne réponse est de refuser |
+| `natif-devise` | 1 (n° 101) | Fournisseur étranger, montants en USD au format anglo-saxon, pas de SIREN ni d'IBAN (ABA + SWIFT), autoliquidation, contre-valeur EUR (`total_ttc_eur`) |
+| `facture-acompte` | 1 (n° 102) | Facture d'acompte pure : 30 % d'un devis dont le montant figure dans le libellé (`acompte_sur`) |
+| `note-de-frais` | 1 (n° 103) | Note de frais d'un salarié (émetteur sans SIREN, `fournisseur.type = "particulier"`), lignes en TTC, six justificatifs en page 2, numérisée |
 
-`INDEX.json` récapitule les cent pièces (type, qualité, pages, TTC attendus).
+`INDEX.json` récapitule les 103 pièces (type, qualité, pages, TTC attendus).
 
 ## Le JSON attendu
 
@@ -55,7 +59,7 @@ le champ `lignes_affichees_en: "TTC"` le signale.
 cd omega/banc
 npm install                 # pdf-lib, fontkit, trois polices manuscrites (licence OFL)
 node generer-factures.mjs   # ~25 s ; exige pdftoppm (poppler-utils) et convert (ImageMagick)
-node verifier-banc.mjs      # 100 pièces, identifiants valides, totaux justes
+node verifier-banc.mjs      # 103 pièces, identifiants valides, totaux justes
 ```
 
 `--graine N` change le tirage, `--sortie dossier` change la destination.

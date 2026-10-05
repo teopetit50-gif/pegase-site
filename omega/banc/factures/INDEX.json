@@ -1,7 +1,7 @@
 {
   "graine": 2026,
   "genere_le": "2026-10-05",
-  "nombre": 100,
+  "nombre": 103,
   "pieces": [
     {
       "numero": "001",
@@ -1306,6 +1306,45 @@
       "nb_factures": 0,
       "lisible": false,
       "total_ttc": null
+    },
+    {
+      "numero": "101",
+      "fichier": "101-natif-devise-moderne-harbor.pdf",
+      "type": "natif-devise",
+      "gabarit": "moderne",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        1006.62
+      ]
+    },
+    {
+      "numero": "102",
+      "fichier": "102-facture-acompte-classique-atelier.pdf",
+      "type": "facture-acompte",
+      "gabarit": "classique",
+      "qualite": "native",
+      "pages": 1,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        2772
+      ]
+    },
+    {
+      "numero": "103",
+      "fichier": "103-note-de-frais-note-de-frais-camille.pdf",
+      "type": "note-de-frais",
+      "gabarit": "note_de_frais",
+      "qualite": "bonne",
+      "pages": 2,
+      "nb_factures": 1,
+      "lisible": true,
+      "total_ttc": [
+        294.9
+      ]
     }
   ]
 }

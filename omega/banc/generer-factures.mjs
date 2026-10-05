@@ -6,10 +6,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { creerAlea } from './lib/alea.mjs';
 import { creerFournisseurs, creerClients, composerFacture } from './lib/donnees.mjs';
-import { GABARITS, creerDocument, attacherFacturX } from './lib/rendu.mjs';
+import { GABARITS, creerDocument, attacherFacturX, definirDevise } from './lib/rendu.mjs';
+import { arrondir } from './lib/donnees.mjs';
+import { ibanFictif, bicFictif } from './lib/identifiants.mjs';
 import { facturXCii, ubl21 } from './lib/xml.mjs';
+import { euros } from './lib/rendu.mjs';
 import { scanner, verifierOutils } from './lib/scan.mjs';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -34,7 +37,9 @@ function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '
 async function rendre(gabarit, factures, options = {}) {
   const doc = await creerDocument();
   let pages = 0;
+  definirDevise(factures[0].devise);
   for (const f of factures) pages += await GABARITS[gabarit](doc, f, alea, options);
+  definirDevise('EUR');
   if (options.facturx) attacherFacturX(doc, facturXCii(factures[0], options.facturx), options.facturx);
   doc.setTitle(`${factures[0].type_document === 'avoir' ? 'Avoir' : 'Facture'} ${factures[0].numero}`);
   doc.setAuthor(factures[0].fournisseur.raison_sociale);
@@ -212,6 +217,71 @@ for (let i = 0; i < 6; i++) {
   await publier({ type: 'illisible', gabarit: 'classique', factures: [f], pdf, pages, qualite: 'illisible', lisible: false, difficultes: ['document illisible : le lecteur doit le signaler comme tel et ne rien inventer'], extra: { attendu: 'refus_de_lecture' } });
 }
 
+// 12) Compléments demandés par le coordinateur le 5/10 : devise étrangère, facture d'acompte pure, note de frais -------
+{
+  // 101 — fournisseur étranger, facture en USD, sans TVA française, contre-valeur EUR indiquée
+  const fourUS = { id: 900, raison_sociale: 'Harbor & Pike Instruments LLC', forme: 'LLC', metier: 'informatique', siren: null, siret: null, tva_intracom: null,
+    adresse: '2140 Marlowe Avenue, Suite 400', code_postal: 'DE 19801', ville: 'Wilmington', pays: 'US', iban: null, bic: null,
+    telephone: '+1 302 555 0147', courriel: 'billing@harborpike.example', capital: null, rcs: null, prefixe_numero: 'INV-', style_numero: 2, regime_tva: 'etranger' };
+  const f = composerFacture(alea, fourUS, CLIENTS[4], { compteur: 7310, nbLignes: 2, sansTva: true, dateLivraison: false });
+  f.devise = 'USD'; f.taux_change = 0.921; f.total_ttc_eur = arrondir(f.total_ttc * f.taux_change);
+  f.fournisseur = { raison_sociale: fourUS.raison_sociale, siren: null, siret: null, tva_intracom: null, identifiant_etranger: 'EIN 98-7654321', adresse: fourUS.adresse, code_postal: fourUS.code_postal, ville: fourUS.ville, pays: 'US',
+    iban: null, bic: null, coordonnees_bancaires: { 'Bank': 'First Meridian Bank (fictive)', 'ABA routing': '021000089', 'Account': '4471 0092 3351', 'SWIFT': 'FMBKUS33XXX' }, courriel: fourUS.courriel, telephone: fourUS.telephone };
+  f.mentions = ['Amounts in US dollars (USD). VAT not charged: services supplied to a VAT-registered business in France — reverse charge by the recipient (art. 283-2 CGI).', 'Montants en dollars américains. TVA non facturée : prestation auto-liquidée par le preneur français. Contre-valeur EUR indicative au cours du jour de facturation.', 'Payment due within 30 days by international wire transfer. Please quote the invoice number.'];
+  f.mode_paiement = 'Virement international (wire)';
+  f.references = { commande: 'PO-2026-0188', bon_livraison: null, reference_paiement: f.numero };
+  const { pdf, pages } = await rendre('moderne', [f], { accent: rgb(0.18, 0.2, 0.45) });
+  await publier({ type: 'natif-devise', gabarit: 'moderne', factures: [f], pdf, pages, difficultes: ['facture en USD d\'un fournisseur étranger : pas de SIREN ni de TVA française, pas d\'IBAN (ABA + SWIFT), montants au format anglo-saxon, autoliquidation par le preneur', 'contre-valeur EUR indicative : total_ttc est en USD, total_ttc_eur est le montant en euros'], extra: { devise: 'USD', taux_change: f.taux_change, total_ttc_eur: f.total_ttc_eur } });
+}
+{
+  // 102 — facture d'acompte pure : 30 % d'un devis, une seule ligne, TVA sur l'acompte
+  const four = fournisseurMetier('menuiserie');
+  const montantDevisHt = 8400; const pct = 30; const acompteHt = arrondir(montantDevisHt * pct / 100);
+  const f = composerFacture(alea, four, CLIENTS[0], { compteur: prochainNumero(four), nbLignes: 1, dateLivraison: false });
+  f.type_document = 'facture_acompte';
+  f.lignes = [{ designation: `Acompte ${pct} % devis D-2026-0412 (total HT ${euros(montantDevisHt)})`, quantite: 1, unite: 'forfait', prix_unitaire_ht: acompteHt, remise_pct: 0, taux_tva: 10, montant_ht: acompteHt, code: null }];
+  f.total_ht = acompteHt; f.tva = [{ taux: 10, base: acompteHt, montant: arrondir(acompteHt * 0.10) }]; f.total_tva = f.tva[0].montant; f.total_ttc = arrondir(acompteHt + f.total_tva); f.net_a_payer = f.total_ttc;
+  f.remise_globale = null; f.remise_globale_pct = null; f.acompte = null;
+  f.acompte_sur = { devis: 'D-2026-0412', montant_devis_ht: montantDevisHt, pourcentage: pct, solde_a_facturer_ht: arrondir(montantDevisHt - acompteHt) };
+  f.mentions = ['Facture d\'acompte : la TVA est exigible à l\'encaissement de l\'acompte (art. 269-2 c CGI). Le solde fera l\'objet d\'une facture définitive reprenant cet acompte en déduction.', 'Travaux de rénovation d\'un local professionnel : TVA à 10 % (attestation simplifiée à fournir).', ...f.mentions.slice(-2)];
+  f.references = { commande: 'D-2026-0412', bon_livraison: null, reference_paiement: f.numero };
+  const { pdf, pages } = await rendre('classique', [f], { tableauTva: true });
+  await publier({ type: 'facture-acompte', gabarit: 'classique', factures: [f], pdf, pages, difficultes: ['facture d\'acompte pure : une seule ligne, 30 % d\'un devis dont le montant figure dans le libellé ; ne pas confondre le montant du devis avec le HT facturé', 'TVA 10 % sur l\'acompte, exigible à l\'encaissement'], extra: { acompte_sur: f.acompte_sur } });
+}
+{
+  // 103 — note de frais d'un salarié : lignes en TTC, justificatifs en page 2, numérisée
+  const client = CLIENTS[4];
+  const iban = ibanFictif(alea);
+  const depenses = [
+    { date: '2026-09-14', heure: '07:42', nature: 'Transport', designation: 'Train Paris – Lyon, 2e classe, aller', emetteur: 'Rail Express (fictif)', lieu: 'Gare de Lyon', montant_ttc: 78.00, taux_tva: 10, paiement: 'CB ****2210' },
+    { date: '2026-09-14', heure: '13:05', nature: 'Repas', designation: 'Déjeuner client — 2 couverts', emetteur: 'Brasserie du Quai (fictive)', lieu: 'Lyon 2e', montant_ttc: 49.80, taux_tva: 10, paiement: 'CB ****2210' },
+    { date: '2026-09-14', heure: '22:30', nature: 'Hébergement', designation: 'Hôtel 1 nuit, chambre simple', emetteur: 'Hôtel des Arcades (fictif)', lieu: 'Lyon 1er', montant_ttc: 112.00, taux_tva: 10, paiement: 'CB ****2210' },
+    { date: '2026-09-15', heure: '08:15', nature: 'Transport', designation: 'Taxi hôtel – client', emetteur: 'Taxis Lumière (fictif)', lieu: 'Lyon', montant_ttc: 31.00, taux_tva: 10, paiement: 'Espèces' },
+    { date: '2026-09-15', heure: '17:50', nature: 'Péage', designation: 'Péage A6 retour (véhicule de service)', emetteur: 'Autoroutes du Centre (fictif)', lieu: 'Villefranche', montant_ttc: 14.20, taux_tva: 20, paiement: 'Badge' },
+    { date: '2026-09-15', heure: '18:40', nature: 'Fournitures', designation: 'Câble HDMI pour la présentation', emetteur: 'Papeterie Marcenac SARL', lieu: 'Lyon 7e', montant_ttc: 9.90, taux_tva: 20, paiement: 'CB ****2210' },
+  ].map((d) => { const ht = arrondir(d.montant_ttc / (1 + d.taux_tva / 100)); return { ...d, quantite: 1, unite: 'u', prix_unitaire_ht: ht, remise_pct: 0, montant_ht: ht, montant_tva: arrondir(d.montant_ttc - ht), code: null }; });
+  const parTaux = new Map(); for (const d of depenses) parTaux.set(d.taux_tva, arrondir((parTaux.get(d.taux_tva) ?? 0) + d.montant_ht));
+  const tva = [...parTaux.entries()].sort((a, b) => b[0] - a[0]).map(([taux, base]) => ({ taux, base, montant: arrondir(depenses.filter((d) => d.taux_tva === taux).reduce((s2, d) => s2 + d.montant_tva, 0)) }));
+  const totalHt = arrondir(depenses.reduce((s2, d) => s2 + d.montant_ht, 0)); const totalTva = arrondir(tva.reduce((s2, t) => s2 + t.montant, 0));
+  const totalTtc = arrondir(depenses.reduce((s2, d) => s2 + d.montant_ttc, 0));
+  const f = {
+    type_document: 'note_de_frais', numero: 'NF-2026-09-017', facture_rectifiee: null, date_emission: '2026-09-18', date_echeance: '2026-10-18', date_livraison: null, periode: 'du 14/09/2026 au 15/09/2026', devise: 'EUR',
+    fournisseur: { raison_sociale: 'Camille Delorme-Vasseur (salarié·e) — note de frais', type: 'particulier', siren: null, siret: null, tva_intracom: null, adresse: '—', code_postal: client.code_postal, ville: client.ville, pays: 'FR', iban, bic: bicFictif(alea), courriel: 'c.delorme-vasseur@essai.invalid', telephone: null },
+    client: { raison_sociale: client.raison_sociale, siren: client.siren, siret: client.siret, tva_intracom: client.tva_intracom, adresse: client.adresse, code_postal: client.code_postal, ville: client.ville, pays: 'FR', code_client: null },
+    salarie: { initiales: 'C. D.-V.', service: 'Études et chantiers', objet: 'Rendez-vous client à Lyon (projet rue Camille-Verdier)', matricule: 'S-0142' },
+    lignes: depenses, remise_globale_pct: null, remise_globale: null, total_ht: totalHt, tva, total_tva: totalTva, total_ttc: totalTtc, acompte: null, net_a_payer: totalTtc,
+    mode_paiement: 'Remboursement par virement sur le compte du salarié', references: { commande: null, bon_livraison: null, reference_paiement: 'NF-2026-09-017' },
+    mentions: ['Note de frais interne : les montants des lignes sont TTC, la TVA n\'est récupérable que sur les justificatifs qui la mentionnent (pas sur le taxi payé en espèces sans facture).'],
+  };
+  // TTC - HT - TVA : l'arrondi par ligne peut créer un centime d'écart ; on le porte sur la plus grosse base.
+  const ecart = arrondir(totalTtc - totalHt - totalTva);
+  if (ecart !== 0) { const g = tva.reduce((a, b) => (b.base > a.base ? b : a)); g.base = arrondir(g.base + ecart); f.total_ht = arrondir(f.total_ht + ecart); for (const d of depenses) { if (d.taux_tva === g.taux) { d.montant_ht = arrondir(d.montant_ht + ecart); d.prix_unitaire_ht = d.montant_ht; break; } } }
+  const natif = await rendre('note_de_frais', [f]);
+  const { pdf, pages } = await scanner(natif.pdf, 'bonne', alea);
+  await publier({ type: 'note-de-frais', gabarit: 'note_de_frais', factures: [f], pdf, pages, qualite: 'bonne', difficultes: ['note de frais d\'un salarié, pas une facture fournisseur : l\'émetteur est une personne (pas de SIREN), le bénéficiaire du remboursement est le salarié', 'lignes en TTC avec taux de TVA par ligne ; justificatifs en page 2 (six petits reçus)', 'numérisée (qualité bonne)'], extra: { lignes_affichees_en: 'TTC', salarie: f.salarie } });
+}
+
 fs.writeFileSync(path.join(SORTIE, 'INDEX.json'), JSON.stringify({ graine: GRAINE, genere_le: '2026-10-05', nombre: index.length, pieces: index }, null, 2) + '\n');
 console.log(`\n${index.length} pièces écrites dans ${SORTIE}`);
-if (index.length !== 100) { console.error('ATTENTION : le banc doit compter exactement 100 pièces'); process.exit(1); }
+const ATTENDU = 103; // 100 pièces du banc initial + 3 compléments demandés par le coordinateur le 5/10/2026
+if (index.length !== ATTENDU) { console.error(`ATTENTION : le banc doit compter exactement ${ATTENDU} pièces`); process.exit(1); }

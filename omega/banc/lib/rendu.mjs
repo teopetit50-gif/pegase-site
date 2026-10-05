@@ -11,11 +11,19 @@ const ICI = path.dirname(fileURLToPath(import.meta.url));
 const A4 = [595.28, 841.89];
 const MM = 2.8346;
 
-export function euros(x, { signeDevise = true } = {}) {
+// Devise courante du rendu (EUR par défaut) : fixée par definirDevise() avant chaque document.
+let DEVISE = 'EUR';
+export function definirDevise(d) { DEVISE = d ?? 'EUR'; }
+export function euros(x, { signeDevise = true, devise } = {}) {
+  const d = devise ?? DEVISE;
   const neg = x < 0;
   const [ent, dec] = Math.abs(x).toFixed(2).split('.');
+  if (d === 'USD' || d === 'GBP') {
+    const entA = ent.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `${neg ? '-' : ''}${signeDevise ? (d === 'USD' ? '$' : '£') : ''}${entA}.${dec}`;
+  }
   const entG = ent.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  return `${neg ? '-' : ''}${entG},${dec}${signeDevise ? ' €' : ''}`;
+  return `${neg ? '-' : ''}${entG},${dec}${signeDevise ? (d === 'EUR' ? ' €' : ' ' + d) : ''}`;
 }
 export function nombre(x) {
   if (Number.isInteger(x)) return String(x);
@@ -86,6 +94,7 @@ function blocAdresse(toile, partie, x, y, o = {}) {
   toile.texte(`${partie.code_postal} ${partie.ville}`, x, yy, { taille }); yy -= taille * 1.3;
   if (o.identifiants !== false) {
     if (partie.siret) { toile.texte(`SIRET ${formaterSiret(partie.siret)}`, x, yy, { taille: taille - 1 }); yy -= taille * 1.25; }
+    if (partie.identifiant_etranger) { toile.texte(partie.identifiant_etranger, x, yy, { taille: taille - 1 }); yy -= taille * 1.25; }
     if (partie.tva_intracom) { toile.texte(`TVA ${partie.tva_intracom}`, x, yy, { taille: taille - 1 }); yy -= taille * 1.25; }
   }
   return yy;
@@ -93,7 +102,7 @@ function blocAdresse(toile, partie, x, y, o = {}) {
 
 function piedLegal(toile, f, o = {}) {
   const taille = 6.5; const y0 = 12 * MM;
-  const texte = `${f.fournisseur.raison_sociale} — ${f.fournisseur.adresse}, ${f.fournisseur.code_postal} ${f.fournisseur.ville} — SIREN ${formaterSiren(f.fournisseur.siren)}` +
+  const texte = `${f.fournisseur.raison_sociale} — ${f.fournisseur.adresse}, ${f.fournisseur.code_postal} ${f.fournisseur.ville}` + (f.fournisseur.siren ? ` — SIREN ${formaterSiren(f.fournisseur.siren)}` : f.fournisseur.identifiant_etranger ? ` — ${f.fournisseur.identifiant_etranger}` : '') +
     (f.fournisseur.tva_intracom ? ` — TVA ${f.fournisseur.tva_intracom}` : '') + ` — ${f.fournisseur.courriel} — ${f.fournisseur.telephone}`;
   toile.paragraphe(texte, 15 * MM, y0 + taille * 1.3, toile.largeur - 30 * MM, { taille, couleur: rgb(0.35, 0.35, 0.35) });
   if (o.numeroPage) toile.texte(o.numeroPage, toile.largeur - 15 * MM, y0 - 2, { taille, aligne: 'droite', couleur: rgb(0.35, 0.35, 0.35) });
@@ -177,6 +186,7 @@ function blocTotaux(toile, f, xDroite, y, o = {}) {
   toile.rect(x - 4, yy - 4, l + 8, taille * 1.6, { fond: o.fondTtc ?? rgb(0.92, 0.92, 0.92) });
   ligneT('Total TTC', euros(f.total_ttc), true);
   if (f.acompte) { ligneT('Acompte versé', `- ${euros(f.acompte)}`); ligneT('NET À PAYER', euros(f.net_a_payer), true); }
+  if (f.taux_change && f.devise !== 'EUR') { yy -= 2; ligneT(`Contre-valeur EUR (1 ${f.devise} = ${String(f.taux_change).replace('.', ',')} EUR)`, euros(f.total_ttc_eur, { devise: 'EUR' })); }
   return yy;
 }
 
@@ -185,9 +195,11 @@ function blocPaiement(toile, f, x, y, o = {}) {
   toile.texte(f.type_document === 'avoir' ? 'Remboursement' : 'Règlement', x, yy, { taille: taille + 1, police: toile.polices.grasse }); yy -= taille * 1.5;
   toile.texte(`Mode : ${f.mode_paiement}`, x, yy, { taille }); yy -= taille * 1.4;
   if (f.date_echeance) { toile.texte(`Échéance : ${dateFr(f.date_echeance)}`, x, yy, { taille }); yy -= taille * 1.4; }
-  if (o.iban !== false) {
+  if (o.iban !== false && f.fournisseur.iban) {
     toile.texte(`IBAN : ${formaterIban(f.fournisseur.iban)}`, x, yy, { taille }); yy -= taille * 1.4;
     toile.texte(`BIC : ${f.fournisseur.bic}`, x, yy, { taille }); yy -= taille * 1.4;
+  } else if (f.fournisseur.coordonnees_bancaires) {
+    for (const [k, v] of Object.entries(f.fournisseur.coordonnees_bancaires)) { toile.texte(`${k} : ${v}`, x, yy, { taille }); yy -= taille * 1.4; }
   }
   if (f.references.reference_paiement) { toile.texte(`Référence à rappeler : ${f.references.reference_paiement}`, x, yy, { taille }); yy -= taille * 1.4; }
   return yy;
@@ -205,7 +217,7 @@ export async function gabaritClassique(doc, f, alea, o = {}) {
   const polices = await chargerPolices(doc, o.famille ?? 'helvetica');
   const toile = new Toile(doc, polices);
   const marge = 15 * MM; const largeur = toile.largeur - 2 * marge;
-  const titre = f.type_document === 'avoir' ? 'AVOIR' : 'FACTURE';
+  const titre = f.type_document === 'avoir' ? 'AVOIR' : f.type_document === 'facture_acompte' ? 'FACTURE D\'ACOMPTE' : 'FACTURE';
   toile.texte(f.fournisseur.raison_sociale.toUpperCase(), marge, toile.y - 10, { police: polices.grasse, taille: 15, couleur: o.couleur ?? rgb(0.12, 0.25, 0.45) });
   blocAdresse(toile, f.fournisseur, marge, toile.y - 26, { taille: 8.5, identifiants: false });
   toile.texte(`Tél. ${f.fournisseur.telephone} — ${f.fournisseur.courriel}`, marge, toile.y - 66, { taille: 7.5 });
@@ -266,7 +278,7 @@ export async function gabaritModerne(doc, f, alea, o = {}) {
   for (const [k, v] of det) { toile.texte(`${k} : ${v}`, marge + colL, yy, { taille: 8.5 }); yy -= 11.5; }
   toile.texte('Émetteur', marge + 2 * colL, toile.y, { taille: 7.5, couleur: accent, police: polices.grasse });
   yy = toile.y - 12;
-  for (const t of [`SIRET ${formaterSiret(f.fournisseur.siret)}`, f.fournisseur.tva_intracom ? `TVA ${f.fournisseur.tva_intracom}` : null, `Tél. ${f.fournisseur.telephone}`].filter(Boolean)) { toile.texte(t, marge + 2 * colL, yy, { taille: 8.5 }); yy -= 11.5; }
+  for (const t of [f.fournisseur.siret ? `SIRET ${formaterSiret(f.fournisseur.siret)}` : f.fournisseur.identifiant_etranger, f.fournisseur.tva_intracom ? `TVA ${f.fournisseur.tva_intracom}` : null, `Tél. ${f.fournisseur.telephone}`].filter(Boolean)) { toile.texte(t, marge + 2 * colL, yy, { taille: 8.5 }); yy -= 11.5; }
   toile.y -= 80;
   const { numeroPage } = tableauLignes(toile, f, marge, toile.y, largeur, { pagine: true, fondEntete: rgb(0.9, 0.96, 0.95), lignesSeparation: true });
   toile.y -= 16;
@@ -435,6 +447,53 @@ export async function gabaritManuscrit(doc, f, alea, o = {}) {
   return 1;
 }
 
+export async function gabaritNoteDeFrais(doc, f, alea, o = {}) {
+  const polices = await chargerPolices(doc, 'helvetica');
+  const toile = new Toile(doc, polices);
+  const marge = 15 * MM; const largeur = toile.largeur - 2 * marge;
+  toile.texte(f.client.raison_sociale, marge, toile.y - 8, { police: polices.grasse, taille: 12 });
+  toile.texte('Formulaire interne — remboursement des frais professionnels', marge, toile.y - 20, { taille: 8, police: polices.italique });
+  toile.texte('NOTE DE FRAIS', toile.largeur - marge, toile.y - 8, { police: polices.grasse, taille: 16, aligne: 'droite' });
+  toile.texte(`N° ${f.numero}`, toile.largeur - marge, toile.y - 24, { taille: 10, aligne: 'droite' });
+  toile.y -= 50;
+  const champs = [['Salarié·e', f.fournisseur.raison_sociale.replace(/ — note de frais$/, '')], ['Service', f.salarie.service], ['Période', f.periode], ['Objet', f.salarie.objet], ['Date de remise', dateFr(f.date_emission)], ['IBAN de remboursement', formaterIban(f.fournisseur.iban)]];
+  for (const [k, v] of champs) { toile.texte(`${k} :`, marge, toile.y, { taille: 9, police: polices.grasse }); toile.texte(v, marge + 120, toile.y, { taille: 9 }); toile.y -= 13; }
+  toile.y -= 10;
+  const cols = [['Date', 52, 'gauche'], ['Nature', 70, 'gauche'], ['Détail', 0, 'gauche'], ['TVA', 36, 'droite'], ['HT', 60, 'droite'], ['TVA €', 54, 'droite'], ['TTC', 62, 'droite']];
+  cols[2][1] = largeur - cols.reduce((s2, c) => s2 + c[1], 0);
+  const h = 16; toile.rect(marge, toile.y - h + 4, largeur, h, { fond: rgb(0.9, 0.9, 0.9) });
+  let xx = marge + 3; for (const [t, l, al] of cols) { toile.texte(t, al === 'droite' ? xx + l - 6 : xx, toile.y - h + 9, { police: polices.grasse, taille: 8.5, aligne: al === 'droite' ? 'droite' : undefined }); xx += l; }
+  toile.y -= h + 2;
+  for (const l of f.lignes) {
+    xx = marge + 3;
+    const vals = [dateFr(l.date), l.nature, l.designation, tauxFr(l.taux_tva), euros(l.montant_ht, { signeDevise: false }), euros(l.montant_tva, { signeDevise: false }), euros(l.montant_ttc, { signeDevise: false })];
+    cols.forEach(([t, lg, al], i) => { let v = vals[i]; if (i === 2) { while (toile.largeurTexte(v, { taille: 8.5 }) > lg - 6 && v.length > 4) v = v.slice(0, -2); } toile.texte(v, al === 'droite' ? xx + lg - 6 : xx, toile.y - 4, { taille: 8.5, aligne: al === 'droite' ? 'droite' : undefined }); xx += lg; });
+    toile.y -= h; toile.ligne(marge, toile.y + 6, marge + largeur, toile.y + 6, { epaisseur: 0.3, couleur: rgb(0.8, 0.8, 0.8) });
+  }
+  toile.y -= 10;
+  blocTotaux(toile, f, toile.largeur - marge, toile.y, { tableauTva: true });
+  toile.texte(`À rembourser au salarié : ${euros(f.net_a_payer)}`, marge, toile.y - 130, { police: polices.grasse, taille: 10 });
+  toile.paragraphe(`${f.lignes.length} justificatifs joints (page 2). TVA récupérable uniquement sur les postes où elle figure sur le justificatif.`, marge, toile.y - 146, largeur * 0.6, { taille: 8 });
+  toile.texte('Signature du salarié', marge, toile.y - 200, { taille: 8.5 }); toile.ligne(marge, toile.y - 230, marge + 160, toile.y - 230);
+  toile.texte('Visa du responsable', marge + 220, toile.y - 200, { taille: 8.5 }); toile.ligne(marge + 220, toile.y - 230, marge + 380, toile.y - 230);
+  toile.texte('Comptabilité : imputation 625x / TVA déductible', marge + 220, toile.y - 245, { taille: 7, couleur: rgb(0.4, 0.4, 0.4) });
+  // Page 2 : justificatifs (reçus réduits collés)
+  toile.nouvellePage();
+  toile.texte(`Justificatifs — note de frais ${f.numero}`, marge, toile.y, { police: polices.grasse, taille: 11 });
+  const mono = await chargerPolices(doc, 'courier');
+  let x0 = marge, y0 = toile.y - 30;
+  f.lignes.forEach((l, i) => {
+    const w = 150, hh = 120;
+    if (x0 + w > toile.largeur - marge) { x0 = marge; y0 -= hh + 20; }
+    const rot = (alea.reel() * 4 - 2);
+    toile.rect(x0, y0 - hh, w, hh, { fond: rgb(0.985, 0.98, 0.96), bord: rgb(0.75, 0.75, 0.75) });
+    const lignes = [l.emetteur.toUpperCase(), l.lieu, dateFr(l.date) + ' ' + l.heure, '-'.repeat(22), l.designation.slice(0, 24), `TTC ${euros(l.montant_ttc)}`, `dont TVA ${tauxFr(l.taux_tva)} ${euros(l.montant_tva)}`, l.paiement, '-'.repeat(22), 'MERCI'];
+    lignes.forEach((t, j) => toile.texte(t, x0 + 8, y0 - 14 - j * 10.5, { police: j === 0 ? mono.grasse : mono.normale, taille: 6.8, rotation: undefined }));
+    x0 += w + 20;
+  });
+  return 2;
+}
+
 export async function creerDocument() {
   const doc = await PDFDocument.create();
   doc.setProducer('Banc Omega — générateur de factures fictives');
@@ -461,5 +520,5 @@ export function attacherFacturX(doc, xml, profil) {
   doc.catalog.set(PDFName.of('Metadata'), doc.context.register(flux));
 }
 
-export const GABARITS = { classique: gabaritClassique, moderne: gabaritModerne, sobre: gabaritSobre, courrier: gabaritCourrier, ticket: gabaritTicket, manuscrit: gabaritManuscrit };
+export const GABARITS = { classique: gabaritClassique, moderne: gabaritModerne, sobre: gabaritSobre, courrier: gabaritCourrier, ticket: gabaritTicket, manuscrit: gabaritManuscrit, note_de_frais: gabaritNoteDeFrais };
 export { PDFString, PDFHexString };

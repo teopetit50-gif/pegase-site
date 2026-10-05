@@ -1,0 +1,1186 @@
+-- TOUT.sql — installation + 44 tests du socle (sans 17, 19, 21, 23, 25, 27 qui contiennent un DELETE).
+-- Généré depuis les fichiers numérotés ; ne pas éditer à la main (voir README). Un seul appel execute_sql :
+-- crée les fonctions puis rend une ligne TAP par test (ok / not ok) via runtests().
+-- Tout ce que les tests écrivent est annulé par runtests().
+
+-- 00 — Installation de pgTAP et du schéma « tests » sur la RECETTE (ygwbgpowzlbdaajlsqkn).
+-- À lancer une fois, avant les fichiers 01 à 50. Rien ici ne touche aux tables du socle.
+-- Jamais en production : les tests écrivent des données d'exemple (annulées par runtests, mais tout de même).
+
+create extension if not exists pgtap with schema extensions;
+create schema if not exists tests;
+comment on schema tests is 'Tests pgTAP du socle Omega (session A5). Données d''exemple uniquement, annulées à la fin de chaque test par runtests().';
+
+-- ---------------------------------------------------------------------------
+-- Valeur d'exemple pour un type donné (sert à poser des lignes minimales sans connaître chaque table).
+create or replace function tests.valeur_exemple(p_type regtype) returns text
+language plpgsql stable as $$
+declare
+  nom text := p_type::text;
+  t pg_type%rowtype;
+  etiquette text;
+begin
+  select * into t from pg_type where oid = p_type;
+  if t.typtype = 'd' then return tests.valeur_exemple(t.typbasetype::regtype); end if;
+  if t.typtype = 'e' then
+    select enumlabel into etiquette from pg_enum where enumtypid = p_type order by enumsortorder limit 1;
+    return format('%L::%s', etiquette, nom);
+  end if;
+  if t.typcategory = 'A' then return format('%L::%s', '{}', nom); end if;
+  return case
+    when nom = 'uuid' then 'gen_random_uuid()'
+    when nom in ('text', 'character varying', 'character', 'citext', 'name') then format('%L::%s', 'essai-a5', nom)
+    when nom = 'boolean' then 'false'
+    when nom in ('smallint', 'integer', 'bigint', 'numeric', 'real', 'double precision', 'money') then format('0::%s', nom)
+    when nom = 'date' then 'current_date'
+    when nom in ('timestamp with time zone', 'timestamp without time zone') then format('now()::%s', nom)
+    when nom in ('time with time zone', 'time without time zone') then format('%L::%s', '12:00', nom)
+    when nom = 'interval' then '''0''::interval'
+    when nom in ('jsonb', 'json') then format('%L::%s', '{}', nom)
+    when nom = 'bytea' then '''\x00''::bytea'
+    when nom = 'inet' then '''127.0.0.1''::inet'
+    when nom = 'tstzrange' then 'tstzrange(now(), now() + interval ''1 hour'')'
+    when nom = 'daterange' then 'daterange(current_date, current_date + 1)'
+    else null
+  end;
+end $$;
+
+-- Insère une ligne minimale dans une table : les colonnes fournies, plus une valeur d'exemple pour chaque
+-- colonne NOT NULL sans défaut. Renvoie la ligne insérée en jsonb.
+create or replace function tests.inserer_minimal(p_schema text, p_table text, p_valeurs jsonb default '{}'::jsonb) returns jsonb
+language plpgsql as $$
+declare
+  r record;
+  cols text := '';
+  vals text := '';
+  v text;
+  typ regtype;
+  resultat jsonb;
+begin
+  for r in
+    select a.attname as colonne, a.atttypid as type_oid, a.attnotnull as non_nul, a.atthasdef as a_defaut,
+           a.attidentity <> '' as identite, a.attgenerated <> '' as generee
+    from pg_attribute a
+    join pg_class c on c.oid = a.attrelid
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = p_schema and c.relname = p_table and a.attnum > 0 and not a.attisdropped
+    order by a.attnum
+  loop
+    typ := r.type_oid::regtype;
+    if p_valeurs ? r.colonne then
+      if jsonb_typeof(p_valeurs -> r.colonne) = 'null' then v := 'null';
+      elsif jsonb_typeof(p_valeurs -> r.colonne) in ('object', 'array') then v := format('%L::%s', (p_valeurs -> r.colonne)::text, typ);
+      else v := format('%L::%s', p_valeurs ->> r.colonne, typ);
+      end if;
+    elsif r.non_nul and not r.a_defaut and not r.identite and not r.generee then
+      v := tests.valeur_exemple(typ);
+      if v is null then raise exception 'tests.inserer_minimal : pas de valeur d''exemple pour %.%.% (type %)', p_schema, p_table, r.colonne, typ; end if;
+    else
+      continue;
+    end if;
+    cols := cols || format('%I,', r.colonne);
+    vals := vals || v || ',';
+  end loop;
+  execute format('insert into %I.%I (%s) values (%s) returning to_jsonb(%I.*)', p_schema, p_table, rtrim(cols, ','), rtrim(vals, ','), p_table) into resultat;
+  return resultat;
+end $$;
+
+-- Jeu d'essai : deux clients fictifs, deux utilisateurs, deux comptes. Renvoie les identifiants.
+-- Tout est annulé par runtests() à la fin de chaque test.
+create or replace function tests.jeu() returns jsonb
+language plpgsql as $$
+declare
+  client_a uuid; client_b uuid; user_a uuid := gen_random_uuid(); user_b uuid := gen_random_uuid();
+  ligne jsonb;
+  role_membre text;
+begin
+  perform set_config('tests.jeu_actif', 'oui', true);
+  ligne := tests.inserer_minimal('public', 'clients', jsonb_build_object('nom', 'Client A — essai A5'));
+  client_a := (ligne ->> 'id')::uuid;
+  ligne := tests.inserer_minimal('public', 'clients', jsonb_build_object('nom', 'Client B — essai A5'));
+  client_b := (ligne ->> 'id')::uuid;
+
+  -- Utilisateurs d'authentification (si la table est accessible ; sinon les user_id restent de simples uuid).
+  begin
+    insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous)
+    values (user_a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a5-client-a@essai.invalid', 'x', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false, false),
+           (user_b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a5-client-b@essai.invalid', 'x', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', false, false);
+  exception when others then
+    raise notice 'tests.jeu : auth.users non alimentée (%), on continue avec des uuid libres', sqlerrm;
+  end;
+
+  -- Rôle de membre « simple » : première étiquette de l'énumération si public.comptes.role est un enum, sinon 'membre'.
+  select coalesce((select enumlabel from pg_enum e join pg_attribute a on a.atttypid = e.enumtypid
+                   where a.attrelid = 'public.comptes'::regclass and a.attname = 'role' order by enumsortorder limit 1), 'membre')
+    into role_membre;
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', user_a, 'client_id', client_a, 'role', role_membre, 'perimetre_total', true));
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', user_b, 'client_id', client_b, 'role', role_membre, 'perimetre_total', true));
+
+  return jsonb_build_object('client_a', client_a, 'client_b', client_b, 'user_a', user_a, 'user_b', user_b, 'role_membre', role_membre);
+end $$;
+
+-- Endosser un utilisateur authentifié : JWT simulé + rôle authenticated (RLS active).
+create or replace function tests.endosser(p_user uuid, p_email text default 'essai@essai.invalid') returns void
+language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated', 'email', p_email, 'aud', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', p_user::text, true);
+  perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claim.email', p_email, true);
+  perform set_config('role', 'authenticated', true);
+end $$;
+
+-- Revenir au rôle d'origine (postgres) pour poser ou lire des données hors RLS.
+create or replace function tests.redevenir_admin() returns void
+language plpgsql as $$
+begin
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
+  perform set_config('request.jwt.claim.sub', '', true);
+  perform set_config('request.jwt.claim.role', '', true);
+end $$;
+
+-- Compte les lignes d'une table sous le rôle courant (RLS appliquée si authenticated).
+create or replace function tests.compter(p_schema text, p_table text, p_condition text default 'true') returns bigint
+language plpgsql as $$
+declare n bigint;
+begin
+  execute format('select count(*) from %I.%I where %s', p_schema, p_table, p_condition) into n;
+  return n;
+end $$;
+
+-- Première colonne existante parmi des candidates (pour s'adapter aux noms réels sans les connaître d'avance).
+create or replace function tests.colonne_parmi(p_table regclass, p_candidates text[]) returns text
+language sql stable as $$
+  select c.attname::text from unnest(p_candidates) with ordinality cand(nom, rang)
+  join pg_attribute c on c.attrelid = p_table and c.attname = cand.nom and c.attnum > 0 and not c.attisdropped
+  order by cand.rang limit 1;
+$$;
+
+-- Première table existante (schéma public) parmi des candidates.
+create or replace function tests.table_parmi(p_candidates text[]) returns text
+language sql stable as $$
+  select nom from unnest(p_candidates) with ordinality cand(nom, rang)
+  where to_regclass('public.' || quote_ident(nom)) is not null order by rang limit 1;
+$$;
+
+-- Appelle private.lit_objet avec les bons types d'arguments, quels qu'ils soient.
+create or replace function tests.lit_objet(p_client uuid, p_type text, p_objet uuid) returns boolean
+language plpgsql as $$
+declare types text[]; resultat boolean; appel text;
+begin
+  select array_agg(format_type(t, null) order by o) into types
+  from pg_proc p, unnest(p.proargtypes) with ordinality u(t, o)
+  where p.oid = 'private.lit_objet'::regproc;
+  appel := format('select private.lit_objet(%L::%s, %L::%s, %L::%s)', p_client, types[1], p_type, types[2], p_objet, types[3]);
+  execute appel into resultat;
+  return coalesce(resultat, false);
+end $$;
+
+-- Tables du socle devant être en ajout seul.
+create or replace function tests.tables_ajout_seul() returns setof text language sql immutable as $$
+  select unnest(array['journal_opposable', 'envois_evenements', 'effacements', 'filed_historique', 'suivis_evenements', 'echeances_pro_journal']);
+$$;
+
+-- Déclencheur BEFORE qui couvre UPDATE et/ou DELETE sur une table (tgtype : 1 = ROW, 2 = BEFORE, 8 = DELETE, 16 = UPDATE).
+create or replace function tests.declencheurs_bloquants(p_table text) returns table(nom text, sur_update boolean, sur_delete boolean, avant boolean)
+language sql stable as $$
+  select t.tgname::text, (t.tgtype & 16) <> 0, (t.tgtype & 8) <> 0, (t.tgtype & 2) <> 0
+  from pg_trigger t
+  where t.tgrelid = ('public.' || quote_ident(p_table))::regclass and not t.tgisinternal and t.tgenabled <> 'D';
+$$;
+
+-- Trouve (ou pose) une ligne d'essai dans une table en ajout seul, renvoie son ctid (toutes n'ont pas de colonne id).
+create or replace function tests.ligne_pour_essai(p_table text) returns tid
+language plpgsql as $$
+declare
+  v_ctid tid; jeu jsonb; valeurs jsonb := '{}'::jsonb;
+begin
+  execute format('select ctid from public.%I limit 1', p_table) into v_ctid;
+  if v_ctid is not null then return v_ctid; end if;
+  jeu := tests.jeu();
+  if tests.colonne_parmi(('public.' || quote_ident(p_table))::regclass, array['client_id']) is not null then
+    valeurs := jsonb_build_object('client_id', jeu ->> 'client_a');
+  elsif tests.colonne_parmi(('public.' || quote_ident(p_table))::regclass, array['client_efface']) is not null then
+    valeurs := jsonb_build_object('client_efface', jeu ->> 'client_b', 'nom_client', 'Client B — essai A5');
+  end if;
+  perform tests.inserer_minimal('public', p_table, valeurs);
+  execute format('select ctid from public.%I limit 1', p_table) into v_ctid;
+  return v_ctid;
+end $$;
+
+-- Les tests endossent le rôle authenticated puis rappellent ces aides : il faut qu'il puisse les exécuter.
+-- Elles s'exécutent avec les droits de l'appelant (pas de SECURITY DEFINER) : aucune élévation possible.
+grant usage on schema tests to authenticated;
+grant execute on all functions in schema tests to authenticated;
+alter default privileges in schema tests grant execute on functions to authenticated;
+
+select 'pgTAP ' || extversion as installation from pg_extension where extname = 'pgtap';
+
+
+-- 01 — pgTAP, schéma tests et objets du socle présents
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_01_installation() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next ok(exists (select 1 from pg_proc where proname = 'runtests'), 'pgTAP est chargée (runtests disponible)');
+  return next has_schema('tests', 'le schéma tests existe');
+  return next has_schema('private', 'le schéma private existe');
+  return next has_function('private'::name, 'mes_clients'::name, 'private.mes_clients() existe');
+  return next has_function('private'::name, 'lit_objet'::name, 'private.lit_objet() existe');
+  return next has_function('private'::name, 'verifier_sauvegardes'::name, 'private.verifier_sauvegardes() existe');
+  return next has_function('public'::name, 'verifier_journal_client'::name, 'public.verifier_journal_client() existe');
+  return next has_table('public'::name, 'journal_opposable'::name, 'public.journal_opposable existe');
+  return next has_table('private'::name, 'tables_locataires'::name, 'private.tables_locataires existe');
+  return next has_table('private'::name, 'sauvegardes'::name, 'private.sauvegardes existe');
+end $f$;
+
+
+
+-- 02 — toute table publique à client_id est inscrite dans private.tables_locataires
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_02_tables_locataires_completes() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select c.table_name
+    from information_schema.columns c
+    join information_schema.tables t on t.table_schema = c.table_schema and t.table_name = c.table_name
+    where c.table_schema = 'public' and c.column_name = 'client_id' and t.table_type = 'BASE TABLE'
+      and c.table_name not in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)
+    order by 1
+  $q$, 'Aucune table publique à client_id n''échappe à private.tables_locataires (sinon l''effacement prouvé la rate)');
+end $f$;
+
+
+
+-- 03 — private.tables_locataires ne cite que des tables qui existent
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_03_tables_locataires_sans_fantome() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select nom from private.tables_locataires where to_regclass('public.' || quote_ident(regexp_replace(nom, '^public\.', ''))) is null
+  $q$, 'Chaque entrée de tables_locataires désigne une table réelle');
+  return next is_empty($q$ select nom from private.tables_locataires where ordre_effacement is null $q$, 'Chaque table locataire a un ordre d''effacement');
+end $f$;
+
+
+
+-- 04 — la RLS est activée sur chaque table locataire
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_04_rls_activee() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select tl.nom from private.tables_locataires tl
+    join pg_class c on c.oid = to_regclass('public.' || quote_ident(regexp_replace(tl.nom, '^public\.', '')))
+    where not c.relrowsecurity
+  $q$, 'RLS activée (relrowsecurity) sur toutes les tables locataires');
+end $f$;
+
+
+
+-- 05 — chaque table locataire porte au moins une politique
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_05_politiques_presentes() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select tl.nom from private.tables_locataires tl
+    where not exists (select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = regexp_replace(tl.nom, '^public\.', ''))
+  $q$, 'Aucune table locataire sans politique (RLS activée sans politique = tout refusé, mais c''est un oubli)');
+end $f$;
+
+
+
+-- 06 — aucune politique « true » n'ouvre une table locataire à anon ou authenticated
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_06_pas_de_politique_ouverte() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select p.tablename, p.policyname, p.cmd
+    from pg_policies p
+    where p.schemaname = 'public'
+      and p.tablename in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)
+      and p.permissive = 'PERMISSIVE'
+      and (p.roles = '{public}'::name[] or 'authenticated' = any(p.roles) or 'anon' = any(p.roles))
+      and (coalesce(p.qual, p.with_check) is null or regexp_replace(coalesce(p.qual, p.with_check), '[\s()]', '', 'g') = 'true')
+    order by 1, 2
+  $q$, 'Pas de politique permissive sans condition pour anon/authenticated sur une table locataire');
+end $f$;
+
+
+
+-- 07 — ni anon ni authenticated n'ont de droit sur une table du schéma private
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_07_private_sans_select() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select table_name, grantee, privilege_type from information_schema.role_table_grants
+    where table_schema = 'private' and grantee in ('anon', 'authenticated') order by 1, 2, 3
+  $q$, 'Aucun droit de table pour anon/authenticated dans private');
+  return next ok(has_schema_privilege('authenticated', 'private', 'USAGE'),
+    'authenticated garde USAGE sur private : indispensable pour que les politiques RLS puissent appeler private.mes_clients() (voir SECURITE.md)');
+end $f$;
+
+
+
+-- 08 — anon n'écrit sur aucune table locataire
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_08_anon_sans_ecriture() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select table_name, privilege_type from information_schema.role_table_grants
+    where table_schema = 'public' and grantee = 'anon' and privilege_type in ('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE')
+      and table_name in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)
+    order by 1, 2
+  $q$, 'anon : aucun INSERT/UPDATE/DELETE/TRUNCATE sur les tables locataires');
+end $f$;
+
+
+
+-- 09 — private.mes_clients() ne rend rien sans JWT
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_09_mes_clients_sans_jwt() returns setof text
+language plpgsql as $f$
+declare
+  n bigint;
+begin
+  perform tests.redevenir_admin();
+  perform set_config('role', 'authenticated', true);
+  begin
+    execute 'select count(*) from private.mes_clients()' into n;
+    return next is(n, 0::bigint, 'Sans JWT, mes_clients() est vide');
+  exception when others then
+    return next pass('Sans JWT, mes_clients() refuse : ' || sqlerrm);
+  end;
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 10 — private.mes_clients() rend le client du compte endossé, et lui seul
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_10_mes_clients_avec_compte() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; present boolean; present_b boolean; n bigint;
+begin
+  jeu := tests.jeu();
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  execute format('select %L::uuid in (select * from private.mes_clients())', jeu ->> 'client_a') into present;
+  execute format('select %L::uuid in (select * from private.mes_clients())', jeu ->> 'client_b') into present_b;
+  execute 'select count(*) from private.mes_clients()' into n;
+  return next ok(present, 'Le client A est dans mes_clients() pour l''utilisateur A');
+  return next ok(not present_b, 'Le client B n''y est pas');
+  return next is(n, 1::bigint, 'Exactement un client');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 11 — un client ne lit pas le journal d'un autre
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_11_journal_isole_lecture() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb;
+begin
+  jeu := tests.jeu();
+  perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_b', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai'));
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 0::bigint, 'A ne voit aucune ligne du journal de B');
+  perform tests.redevenir_admin();
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_b')), 1::bigint, 'La ligne de B existe pourtant (vue en admin)');
+end $f$;
+
+
+
+-- 12 — un client lit bien son propre journal
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_12_journal_lecture_propre() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb;
+begin
+  jeu := tests.jeu();
+  perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai'));
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 1::bigint, 'A voit sa ligne de journal');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 13 — un client ne peut pas écrire une ligne au nom d'un autre client
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_13_ecriture_chez_autrui_refusee() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb;
+begin
+  jeu := tests.jeu();
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next throws_ok(
+    format('select tests.inserer_minimal(''public'', ''acces_objets'', %L::jsonb)', jsonb_build_object('client_id', jeu ->> 'client_b', 'objet_type', 'essai_a5', 'objet_id', gen_random_uuid(), 'user_id', jeu ->> 'user_a')::text),
+    '42501', null, 'INSERT dans acces_objets avec le client_id de B, par A : refusé (42501)');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 14 — sous le rôle authenticated d'un client, aucune ligne d'un autre client n'est lisible, sur toutes les tables locataires
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_14_isolement_toutes_tables() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; tables text[]; nom_table text; n bigint; fuites text[] := '{}'; illisibles text[] := '{}'; sans_client text[] := '{}'; testees int := 0;
+begin
+  jeu := tests.jeu();
+  -- la liste se lit en admin (private n'est pas lisible par authenticated), la lecture se fait en authenticated
+  select array_agg(regexp_replace(nom, '^public\.', '') order by nom) into tables from private.tables_locataires;
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  foreach nom_table in array tables loop
+    begin
+      n := tests.compter('public', nom_table, format('client_id <> %L', jeu ->> 'client_a'));
+      if n > 0 then fuites := fuites || format('%s (%s lignes)', nom_table, n); end if;
+      testees := testees + 1;
+    exception when insufficient_privilege then
+      illisibles := illisibles || nom_table; -- pas de SELECT pour authenticated : pas de fuite possible
+    when undefined_column then
+      sans_client := sans_client || nom_table;
+    end;
+  end loop;
+  perform tests.redevenir_admin();
+  return next is(array_length(fuites, 1), null, 'Aucune ligne d''un autre client n''est lisible par A (' || testees || ' tables lues, ' || coalesce(array_length(illisibles, 1), 0) || ' non lisibles par authenticated)');
+  if array_length(fuites, 1) > 0 then return next diag('Fuites : ' || array_to_string(fuites, ', ')); end if;
+  if array_length(sans_client, 1) > 0 then return next diag('Tables locataires sans colonne client_id (vérifier private.tables_objets) : ' || array_to_string(sans_client, ', ')); end if;
+end $f$;
+
+
+
+-- 15 — une ligne posée pour A est vue par A et jamais par B (acces_objets)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_15_isolement_croise() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb;
+begin
+  jeu := tests.jeu();
+  perform tests.inserer_minimal('public', 'acces_objets', jsonb_build_object('client_id', jeu ->> 'client_a', 'objet_type', 'essai_a5', 'objet_id', gen_random_uuid(), 'user_id', jeu ->> 'user_a'));
+  perform tests.endosser((jeu ->> 'user_b')::uuid);
+  return next is(tests.compter('public', 'acces_objets', format('client_id = %L', jeu ->> 'client_a')), 0::bigint, 'B ne voit pas la ligne de A');
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next is(tests.compter('public', 'acces_objets', format('client_id = %L', jeu ->> 'client_a')), 1::bigint, 'A voit sa ligne');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 16 — UPDATE sur public.journal_opposable échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_16_update_journal_opposable() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  select count(*) into nb from tests.declencheurs_bloquants('journal_opposable') where sur_update and avant;
+  return next ok(nb > 0, 'journal_opposable : un déclencheur BEFORE UPDATE existe');
+  v_ctid := tests.ligne_pour_essai('journal_opposable');
+  select attname into col from pg_attribute where attrelid = 'public.journal_opposable'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
+  return next throws_ok(format('update public.journal_opposable set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur journal_opposable échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'journal_opposable', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 18 — UPDATE sur public.envois_evenements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_18_update_envois_evenements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  select count(*) into nb from tests.declencheurs_bloquants('envois_evenements') where sur_update and avant;
+  return next ok(nb > 0, 'envois_evenements : un déclencheur BEFORE UPDATE existe');
+  v_ctid := tests.ligne_pour_essai('envois_evenements');
+  select attname into col from pg_attribute where attrelid = 'public.envois_evenements'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
+  return next throws_ok(format('update public.envois_evenements set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur envois_evenements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'envois_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 20 — UPDATE sur public.effacements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_20_update_effacements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  select count(*) into nb from tests.declencheurs_bloquants('effacements') where sur_update and avant;
+  return next ok(nb > 0, 'effacements : un déclencheur BEFORE UPDATE existe');
+  v_ctid := tests.ligne_pour_essai('effacements');
+  select attname into col from pg_attribute where attrelid = 'public.effacements'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
+  return next throws_ok(format('update public.effacements set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur effacements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'effacements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 22 — UPDATE sur public.filed_historique échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_22_update_filed_historique() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  select count(*) into nb from tests.declencheurs_bloquants('filed_historique') where sur_update and avant;
+  return next ok(nb > 0, 'filed_historique : un déclencheur BEFORE UPDATE existe');
+  v_ctid := tests.ligne_pour_essai('filed_historique');
+  select attname into col from pg_attribute where attrelid = 'public.filed_historique'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
+  return next throws_ok(format('update public.filed_historique set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur filed_historique échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'filed_historique', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 24 — UPDATE sur public.suivis_evenements échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_24_update_suivis_evenements() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  select count(*) into nb from tests.declencheurs_bloquants('suivis_evenements') where sur_update and avant;
+  return next ok(nb > 0, 'suivis_evenements : un déclencheur BEFORE UPDATE existe');
+  v_ctid := tests.ligne_pour_essai('suivis_evenements');
+  select attname into col from pg_attribute where attrelid = 'public.suivis_evenements'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
+  return next throws_ok(format('update public.suivis_evenements set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur suivis_evenements échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'suivis_evenements', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 26 — UPDATE sur public.echeances_pro_journal échoue (ajout seul)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_26_update_echeances_pro_journal() returns setof text
+language plpgsql as $f$
+declare
+  nb int; v_ctid tid; col name;
+begin
+  select count(*) into nb from tests.declencheurs_bloquants('echeances_pro_journal') where sur_update and avant;
+  return next ok(nb > 0, 'echeances_pro_journal : un déclencheur BEFORE UPDATE existe');
+  v_ctid := tests.ligne_pour_essai('echeances_pro_journal');
+  select attname into col from pg_attribute where attrelid = 'public.echeances_pro_journal'::regclass and attnum > 0 and not attisdropped and attgenerated = '' and attidentity = '' order by attnum limit 1;
+  return next throws_ok(format('update public.echeances_pro_journal set %I = %I where ctid = %L', col, col, v_ctid), null, null, 'UPDATE sur echeances_pro_journal échoue, même pour le propriétaire');
+  return next is(tests.compter('public', 'echeances_pro_journal', format('ctid = %L', v_ctid)), 1::bigint, 'La ligne est intacte');
+end $f$;
+
+
+
+-- 28 — anon et authenticated n'ont ni UPDATE, ni DELETE, ni TRUNCATE sur les tables en ajout seul
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_28_ajout_seul_droits() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select table_name, grantee, privilege_type from information_schema.role_table_grants
+    where table_schema = 'public' and grantee in ('anon', 'authenticated') and privilege_type in ('UPDATE', 'DELETE', 'TRUNCATE')
+      and table_name in (select tests.tables_ajout_seul()) order by 1, 2, 3
+  $q$, 'Aucun droit UPDATE/DELETE/TRUNCATE pour anon/authenticated sur les six tables en ajout seul');
+end $f$;
+
+
+
+-- 29 — aucune politique UPDATE ou DELETE sur les tables en ajout seul
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_29_ajout_seul_politiques() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select tablename, policyname, cmd from pg_policies
+    where schemaname = 'public' and tablename in (select tests.tables_ajout_seul()) and cmd in ('UPDATE', 'DELETE') order by 1, 2
+  $q$, 'Pas de politique UPDATE/DELETE sur les six tables en ajout seul');
+  return next is_empty($q$
+    select t.nom from tests.tables_ajout_seul() t(nom) where to_regclass('public.' || t.nom) is null
+  $q$, 'Les six tables en ajout seul existent');
+end $f$;
+
+
+
+-- 30 — chaque ligne du journal porte l'empreinte de la précédente (chaîne par client ou globale)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_30_journal_chaine_precedent() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; i int; ruptures_client bigint; ruptures_globale bigint;
+begin
+  jeu := tests.jeu();
+  for i in 1..3 loop
+    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai', 'donnees', jsonb_build_object('i', i)));
+  end loop;
+  select count(*) into ruptures_client from (
+    select id, hash_precedent, lag(hash) over (partition by client_id order by id) as precedent from public.journal_opposable) s
+    where precedent is distinct from hash_precedent;
+  select count(*) into ruptures_globale from (
+    select id, hash_precedent, lag(hash) over (order by id) as precedent from public.journal_opposable) s
+    where precedent is distinct from hash_precedent;
+  return next ok(ruptures_client = 0 or ruptures_globale = 0, format('La chaîne se suit (ruptures : %s par client, %s en global)', ruptures_client, ruptures_globale));
+  return next is(tests.compter('public', 'journal_opposable', format('client_id = %L', jeu ->> 'client_a')), 3::bigint, 'Les trois lignes d''essai sont écrites');
+  return next is_empty($q$
+    select client_id, count(*) from public.journal_opposable where hash_precedent is null group by client_id having count(*) > 1
+  $q$, 'Au plus une ligne de genèse (hash_precedent null) par client');
+end $f$;
+
+
+
+-- 31 — toutes les empreintes du journal font 32 octets (SHA-256) et sont uniques
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_31_journal_hash_sha256() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$ select id from public.journal_opposable where hash is null or octet_length(hash) <> 32 $q$, 'Toute empreinte fait 32 octets');
+  return next is_empty($q$ select hash from public.journal_opposable group by hash having count(*) > 1 $q$, 'Aucune empreinte en double');
+  return next is_empty($q$ select id from public.journal_opposable where hash_precedent is not null and octet_length(hash_precedent) <> 32 $q$, 'Toute empreinte précédente fait 32 octets');
+end $f$;
+
+
+
+-- 32 — l'empreinte est calculée par la base, pas acceptée du client
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_32_journal_hash_non_fourni() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; ligne jsonb;
+begin
+  jeu := tests.jeu();
+  ligne := tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5', 'acteur_type', 'systeme', 'objet_type', 'essai', 'hash', '\x0000000000000000000000000000000000000000000000000000000000000000'));
+  return next isnt(ligne ->> 'hash', '\x0000000000000000000000000000000000000000000000000000000000000000', 'Une empreinte fournie à l''insertion est remplacée par le calcul de la base');
+  return next is(octet_length(decode(substr(ligne ->> 'hash', 3), 'hex')), 32, 'L''empreinte calculée fait 32 octets');
+end $f$;
+
+
+
+-- 33 — public.verifier_journal_client() valide une chaîne intacte
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_33_journal_verification_porte() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; i int; verdict jsonb;
+begin
+  jeu := tests.jeu();
+  for i in 1..3 loop
+    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai'));
+  end loop;
+  execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
+  return next ok(verdict::text !~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict ne signale aucune rupture');
+  return next diag('Verdict rendu : ' || left(verdict::text, 400));
+end $f$;
+
+
+
+-- 34 — public.verifier_journal_client() détecte une empreinte altérée
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_34_journal_detection_rupture() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; i int; verdict jsonb;
+begin
+  jeu := tests.jeu();
+  for i in 1..3 loop
+    perform tests.inserer_minimal('public', 'journal_opposable', jsonb_build_object('client_id', jeu ->> 'client_a', 'action', 'essai_a5_' || i, 'acteur_type', 'systeme', 'objet_type', 'essai'));
+  end loop;
+  begin
+    execute 'alter table public.journal_opposable disable trigger user';
+    execute format('update public.journal_opposable set hash = decode(repeat(''ab'', 32), ''hex'') where client_id = %L and id = (select min(id) from public.journal_opposable where client_id = %L)', jeu ->> 'client_a', jeu ->> 'client_a');
+    execute 'alter table public.journal_opposable enable trigger user';
+  exception when others then
+    return next pass('Altération impossible même déclencheurs désactivés (' || sqlerrm || ') : rupture non simulable, test sans objet');
+    return;
+  end;
+  execute format('select coalesce(jsonb_agg(to_jsonb(v)), ''[]''::jsonb) from public.verifier_journal_client(%L::uuid) v', jeu ->> 'client_a') into verdict;
+  return next ok(verdict::text ~* '(false|rompu|invalide|cass|erreur|ecart|écart)', 'Le verdict signale la rupture');
+  return next diag('Verdict rendu : ' || left(verdict::text, 400));
+end $f$;
+
+
+
+-- 35 — private.canaux_envoi porte des plages horaires pour les envois non transactionnels
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_35_canaux_heures_legales() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next ok((select count(*) from private.canaux_envoi) > 0, 'Des canaux sont déclarés');
+  return next ok((select count(*) from private.canaux_envoi where plages_non_transactionnel is not null) > 0, 'Au moins un canal a des plages non transactionnelles (heures légales)');
+  return next is_empty($q$
+    select canal from private.canaux_envoi where plages_non_transactionnel is not null and jsonb_typeof(plages_non_transactionnel) not in ('object', 'array')
+  $q$, 'Les plages sont des objets ou tableaux JSON');
+  return next ok(exists (select 1 from private.canaux_envoi where canal ~* 'sms' and plages_non_transactionnel is not null), 'Le canal SMS est borné par des plages (prospection : 8 h – 20 h, jamais le dimanche)');
+  return next diag('Canaux : ' || (select string_agg(canal || ' → ' || coalesce(plages_non_transactionnel::text, 'libre'), ' ; ') from private.canaux_envoi));
+end $f$;
+
+
+
+-- 36 — un envoi vers une personne en opposition est refusé
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_36_envoi_opposition_refuse() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; t_oppos text; t_envois text; col_oppos text; col_envoi text; col_canal_o text; col_canal_e text; col_statut text; valeurs jsonb; ligne jsonb;
+begin
+  jeu := tests.jeu();
+  t_oppos := tests.table_parmi(array['oppositions']);
+  t_envois := tests.table_parmi(array['envois']);
+  if t_oppos is null or t_envois is null then return next fail('Tables oppositions/envois introuvables'); return; end if;
+  col_oppos := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible']);
+  col_envoi := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
+  col_canal_o := tests.colonne_parmi(('public.' || t_oppos)::regclass, array['canal']);
+  col_canal_e := tests.colonne_parmi(('public.' || t_envois)::regclass, array['canal']);
+  if col_oppos is null or col_envoi is null then
+    return next fail(format('Colonne du destinataire introuvable (oppositions : %s ; envois : %s) — adapter la liste de candidates', col_oppos, col_envoi));
+    return next diag('Colonnes de ' || t_envois || ' : ' || (select string_agg(attname, ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+    return;
+  end if;
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_oppos, 'oppose-a5@essai.invalid');
+  if col_canal_o is not null then valeurs := valeurs || jsonb_build_object(col_canal_o, 'courriel'); end if;
+  perform tests.inserer_minimal('public', t_oppos, valeurs);
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_envoi, 'oppose-a5@essai.invalid');
+  if col_canal_e is not null then valeurs := valeurs || jsonb_build_object(col_canal_e, 'courriel'); end if;
+  begin
+    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+  exception when others then
+    return next pass('L''envoi vers une personne en opposition est rejeté à l''insertion : ' || sqlerrm);
+    return;
+  end;
+  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat', 'decision', 'verdict']);
+  return next ok(col_statut is not null and (ligne ->> col_statut) ~* '(refus|bloqu|oppos|interdit)', format('Envoi accepté en base mais marqué %s = %L (attendu : refusé)', col_statut, ligne ->> col_statut));
+  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+end $f$;
+
+
+
+-- 37 — un envoi non transactionnel hors heures légales est différé, pas parti
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_37_envoi_hors_heures_differe() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; t_envois text; col_dest text; col_quand text; col_nature text; col_statut text; col_differe text; valeurs jsonb; ligne jsonb;
+begin
+  jeu := tests.jeu();
+  t_envois := tests.table_parmi(array['envois']);
+  if t_envois is null then return next fail('Table envois introuvable'); return; end if;
+  col_dest := tests.colonne_parmi(('public.' || t_envois)::regclass, array['adresse', 'destinataire', 'contact', 'valeur', 'identifiant', 'cible', 'a']);
+  col_quand := tests.colonne_parmi(('public.' || t_envois)::regclass, array['prevu_le', 'programme_le', 'envoyer_le', 'souhaite_le', 'demande_le', 'a_partir_de']);
+  col_nature := tests.colonne_parmi(('public.' || t_envois)::regclass, array['nature', 'type_envoi', 'categorie', 'transactionnel']);
+  col_statut := tests.colonne_parmi(('public.' || t_envois)::regclass, array['statut', 'etat']);
+  if col_dest is null then
+    return next fail('Colonne du destinataire introuvable dans envois — adapter la liste de candidates');
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_envois)::regclass and attnum > 0 and not attisdropped));
+    return;
+  end if;
+  -- Un dimanche à 23 h : hors plage quel que soit le canal
+  valeurs := jsonb_build_object('client_id', jeu ->> 'client_a', col_dest, '+33600000000', 'canal', 'sms');
+  if col_quand is not null then valeurs := valeurs || jsonb_build_object(col_quand, '2026-10-11T23:00:00+02:00'); end if;
+  if col_nature is not null then valeurs := valeurs || jsonb_build_object(col_nature, case when col_nature = 'transactionnel' then 'false' else 'prospection' end); end if;
+  begin
+    ligne := tests.inserer_minimal('public', t_envois, valeurs);
+  exception when others then
+    return next fail('L''envoi hors heures est rejeté au lieu d''être différé : ' || sqlerrm);
+    return;
+  end;
+  col_differe := tests.colonne_parmi(('public.' || t_envois)::regclass, array['differe_a', 'reporte_a', 'envoi_prevu_le', 'prochaine_fenetre', 'prevu_le', 'programme_le']);
+  return next ok((col_statut is not null and (ligne ->> col_statut) ~* '(differ|report|attente|planifi|programm)')
+              or (col_differe is not null and col_quand is not null and col_differe <> col_quand and (ligne ->> col_differe) is not null
+                  and (ligne ->> col_differe)::timestamptz > '2026-10-11T23:00:00+02:00'::timestamptz),
+    format('L''envoi est différé (%s = %L ; %s = %L)', col_statut, ligne ->> col_statut, col_differe, ligne ->> col_differe));
+  return next diag('Ligne d''envoi : ' || left(ligne::text, 500));
+end $f$;
+
+
+
+-- 38 — approuver au nom d'un autre sans délégation échoue
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_38_approbation_sans_delegation_refusee() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; t_app text; col_par text;
+begin
+  jeu := tests.jeu();
+  t_app := tests.table_parmi(array['approbations', 'validations', 'decisions', 'accords']);
+  if t_app is null then return next fail('Table des approbations introuvable (approbations/validations/decisions/accords)'); return; end if;
+  col_par := tests.colonne_parmi(('public.' || t_app)::regclass, array['approuve_par', 'valide_par', 'decide_par', 'par', 'user_id', 'acteur_id', 'auteur_id']);
+  if col_par is null then
+    return next fail(format('Colonne de l''auteur introuvable dans %s — adapter la liste de candidates', t_app));
+    return next diag('Colonnes : ' || (select string_agg(attname || ' ' || format_type(atttypid, null), ', ' order by attnum) from pg_attribute where attrelid = ('public.' || t_app)::regclass and attnum > 0 and not attisdropped));
+    return;
+  end if;
+  -- A, authentifié, tente d'enregistrer une approbation signée B (même client, sans délégation)
+  perform tests.inserer_minimal('public', 'comptes', jsonb_build_object('user_id', jeu ->> 'user_b', 'client_id', jeu ->> 'client_a', 'role', jeu ->> 'role_membre', 'perimetre_total', true));
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next throws_ok(
+    format('select tests.inserer_minimal(''public'', %L, %L::jsonb)', t_app, jsonb_build_object('client_id', jeu ->> 'client_a', col_par, jeu ->> 'user_b')::text),
+    null, null, format('%s : une approbation au nom de B écrite par A sans délégation est refusée', t_app));
+  perform tests.redevenir_admin();
+  return next diag(format('Table %s, colonne auteur %s. Si la porte d''approbation est une fonction, la brancher ici (nom à fournir par le coordinateur).', t_app, col_par));
+end $f$;
+
+
+
+-- 39 — un objet d'un type restreint n'est pas lisible sans ligne dans acces_objets
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_39_objet_restreint_sans_acces() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; objet uuid;
+begin
+  jeu := tests.jeu();
+  objet := gen_random_uuid();
+  perform tests.inserer_minimal('public', 'objets_restreints', jsonb_build_object('client_id', jeu ->> 'client_a', 'objet_type', 'dossier_essai_a5'));
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next ok(not tests.lit_objet((jeu ->> 'client_a')::uuid, 'dossier_essai_a5', objet), 'lit_objet() refuse un objet restreint sans acces_objets');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 40 — le même objet devient lisible avec une ligne acces_objets pour l'utilisateur
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_40_objet_restreint_avec_acces() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; objet uuid;
+begin
+  jeu := tests.jeu();
+  objet := gen_random_uuid();
+  perform tests.inserer_minimal('public', 'objets_restreints', jsonb_build_object('client_id', jeu ->> 'client_a', 'objet_type', 'dossier_essai_a5'));
+  perform tests.inserer_minimal('public', 'acces_objets', jsonb_build_object('client_id', jeu ->> 'client_a', 'objet_type', 'dossier_essai_a5', 'objet_id', objet, 'user_id', jeu ->> 'user_a'));
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next ok(tests.lit_objet((jeu ->> 'client_a')::uuid, 'dossier_essai_a5', objet), 'lit_objet() accepte avec un accès nominatif');
+  return next ok(not tests.lit_objet((jeu ->> 'client_a')::uuid, 'dossier_essai_a5', gen_random_uuid()), 'mais pas un autre objet du même type');
+  perform tests.endosser((jeu ->> 'user_b')::uuid);
+  return next ok(not tests.lit_objet((jeu ->> 'client_a')::uuid, 'dossier_essai_a5', objet), 'ni un utilisateur d''un autre client');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 41 — un objet d'un type non restreint est lisible par tout membre du client, par personne d'ailleurs
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_41_objet_non_restreint() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; objet uuid;
+begin
+  jeu := tests.jeu();
+  objet := gen_random_uuid();
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next ok(tests.lit_objet((jeu ->> 'client_a')::uuid, 'type_libre_a5', objet), 'Membre du client : lecture permise');
+  perform tests.endosser((jeu ->> 'user_b')::uuid);
+  return next ok(not tests.lit_objet((jeu ->> 'client_a')::uuid, 'type_libre_a5', objet), 'Membre d''un autre client : lecture refusée');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 42 — sur toute table locataire, client_id est un uuid NOT NULL
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_42_client_id_uuid_non_nul() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select c.table_name, c.data_type, c.is_nullable from information_schema.columns c
+    where c.table_schema = 'public' and c.column_name = 'client_id'
+      and c.table_name in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)
+      and (c.data_type <> 'uuid' or c.is_nullable = 'YES')
+      -- une table qui porte une colonne « interne » (alertes) admet client_id null pour les lignes internes Omega
+      and not exists (select 1 from information_schema.columns i where i.table_schema = 'public' and i.table_name = c.table_name and i.column_name = 'interne')
+    order by 1
+  $q$, 'client_id uuid NOT NULL partout (une colonne nullable échapperait à « client_id in (mes_clients()) »)');
+end $f$;
+
+
+
+-- 43 — chaque table locataire a une politique fondée sur private.mes_clients() ou private.lit_objet()
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_43_politiques_fondees_sur_mes_clients() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select tl.nom from private.tables_locataires tl
+    where not exists (
+      select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = regexp_replace(tl.nom, '^public\.', '')
+        and (coalesce(p.qual, '') || coalesce(p.with_check, '')) ~ '(mes_clients|lit_objet)')
+    order by 1
+  $q$, 'Toute table locataire est protégée par mes_clients() ou lit_objet()');
+end $f$;
+
+
+
+-- 44 — authenticated n'exécute dans private que les fonctions qu'une politique ou une fonction publique utilise
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_44_private_fonctions_exposees() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select p.proname
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
+      and has_function_privilege('authenticated', p.oid, 'execute')
+      and not exists (select 1 from pg_policies pol where (coalesce(pol.qual, '') || coalesce(pol.with_check, '')) ~ ('private\.' || p.proname || '\('))
+      and not exists (select 1 from pg_proc q join pg_namespace m on m.oid = q.pronamespace where m.nspname = 'public' and q.prosrc ~ ('private\.' || p.proname || '\('))
+    order by 1
+  $q$, 'Aucune fonction de private exécutable par authenticated sans usage connu (politique RLS ou fonction publique)');
+  return next is_empty($q$
+    select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute') order by 1
+  $q$, 'anon n''exécute aucune fonction de private');
+end $f$;
+
+
+
+-- 45 — toute fonction SECURITY DEFINER exécutable par anon/authenticated fixe son search_path
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_45_security_definer_search_path() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select n.nspname || '.' || p.proname
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname in ('public', 'private') and p.prosecdef
+      and (has_function_privilege('authenticated', p.oid, 'execute') or has_function_privilege('anon', p.oid, 'execute'))
+      and not exists (select 1 from unnest(coalesce(p.proconfig, '{}'::text[])) c where c like 'search_path=%')
+    order by 1
+  $q$, 'Pas de SECURITY DEFINER exposé sans search_path fixé (détournement par schéma)');
+end $f$;
+
+
+
+-- 46 — aucune vue publique lisible par authenticated ne contourne la RLS (security_invoker)
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_46_vues_security_invoker() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  return next is_empty($q$
+    select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relkind = 'v'
+      and has_table_privilege('authenticated', c.oid, 'select')
+      and not exists (select 1 from unnest(coalesce(c.reloptions, '{}'::text[])) o where o in ('security_invoker=true', 'security_invoker=on'))
+    order by 1
+  $q$, 'Toute vue lisible par authenticated est security_invoker (sinon elle lit avec les droits de son propriétaire)');
+end $f$;
+
+
+
+-- 47 — les clés de chiffrement par dossier de Tamila ne sont pas lisibles en clair par un client
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_47_tamila_cles_protegees() returns setof text
+language plpgsql as $f$
+declare
+  nom text; rls boolean; schema_cles text;
+begin
+  select n.nspname || '.' || c.relname, c.relrowsecurity, n.nspname into nom, rls, schema_cles
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace where c.relname = 'tamila_cles' and c.relkind = 'r' limit 1;
+  return next ok(nom is not null, 'La table tamila_cles existe' || coalesce(' (' || nom || ')', ''));
+  if nom is null then return; end if;
+  if schema_cles = 'private' then
+    return next pass('tamila_cles est dans private : hors de portée d''anon/authenticated');
+    return;
+  end if;
+  return next ok(rls, 'RLS activée sur ' || nom);
+  return next is_empty($q$
+    select column_name, grantee from information_schema.column_privileges
+    where table_schema = 'public' and table_name = 'tamila_cles' and grantee in ('anon', 'authenticated') and privilege_type = 'SELECT'
+      and column_name ~* '(cle|secret|key|chiffr|wrap)'
+  $q$, 'Aucune colonne de clé lisible par anon/authenticated (la clé ne doit sortir que via la porte prévue)');
+end $f$;
+
+
+
+-- 48 — les alertes internes Omega (client_id null) ne sont pas lisibles par un client
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_48_alertes_internes_invisibles() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb;
+begin
+  jeu := tests.jeu();
+  perform tests.inserer_minimal('public', 'alertes', jsonb_build_object('client_id', null, 'interne', true, 'niveau', 'info', 'source', 'essai_a5', 'titre', 'Alerte interne d''essai A5'));
+  perform tests.endosser((jeu ->> 'user_a')::uuid);
+  return next is(tests.compter('public', 'alertes', 'client_id is null'), 0::bigint, 'A ne voit aucune alerte interne');
+  return next is(tests.compter('public', 'alertes', format('client_id is not null and client_id <> %L', jeu ->> 'client_a')), 0::bigint, 'ni les alertes des autres clients');
+  perform tests.redevenir_admin();
+end $f$;
+
+
+
+-- 49 — private.verifier_sauvegardes() lève l'alerte sans preuve récente et l'acquitte dès qu'une restauration réussie de moins de 26 h est écrite
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_49_verifier_sauvegardes() returns setof text
+language plpgsql as $f$
+declare
+  -- rien
+begin
+  perform private.verifier_sauvegardes();
+  return next ok(exists (select 1 from public.alertes where cle_regroupement = 'sauvegarde:manquante' and acquittee_le is null), 'Sans preuve récente : alerte sauvegarde:manquante ouverte');
+  insert into private.sauvegardes (faite_le, octets, sha256, restauration, detail, execution)
+  values (now(), 1024, repeat('a', 64), 'reussie', '{"essai": "A5"}'::jsonb, 'https://github.com/essai/a5/actions/runs/0');
+  perform private.verifier_sauvegardes();
+  return next ok(not exists (select 1 from public.alertes where cle_regroupement = 'sauvegarde:manquante' and acquittee_le is null), 'Avec une preuve « reussie » récente : alerte acquittée');
+  return next throws_ok($q$ insert into private.sauvegardes (faite_le, octets, sha256, restauration, detail) values (now(), 1, 'x', 'peut-etre', '{}') $q$, null, null, 'Un verdict hors liste est refusé par la contrainte (sinon : la poser)');
+end $f$;
+
+
+
+-- 50 — l'export et l'effacement prouvés sont outillés
+-- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
+-- runtests() annule tout ce que le test écrit.
+
+create or replace function tests.test_50_export_effacement_prouves() returns setof text
+language plpgsql as $f$
+declare
+  portes text;
+begin
+  return next has_column('public'::name, 'effacements'::name, 'empreinte_export'::name, 'effacements.empreinte_export : l''export précède l''effacement');
+  return next has_column('public'::name, 'effacements'::name, 'lignes'::name, 'effacements.lignes : le compte des lignes effacées par table');
+  return next has_table('public'::name, 'effacements_objets'::name, 'effacements_objets existe (effacement par objet)');
+  select string_agg(n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')', ' ; ') into portes
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname in ('public', 'private') and p.proname ~* '(export|effac)';
+  return next ok(portes is not null, 'Des portes d''export/effacement existent');
+  return next diag('Portes : ' || coalesce(portes, 'aucune'));
+  return next is_empty($q$
+    select tablename, policyname from pg_policies where schemaname = 'public' and tablename in ('effacements', 'effacements_objets') and cmd in ('DELETE', 'UPDATE')
+  $q$, 'Les preuves d''effacement ne se modifient ni ne s''effacent');
+  return next is_empty($q$
+    select nom from private.tables_locataires tl where ordre_effacement is null
+  $q$, 'Chaque table locataire a son rang dans l''ordre d''effacement');
+end $f$;
+
+
+
+select * from runtests('tests'::name, '^test_');

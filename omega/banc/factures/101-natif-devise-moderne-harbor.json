@@ -1,0 +1,112 @@
+{
+  "fichier": "101-natif-devise-moderne-harbor.pdf",
+  "format": "pdf",
+  "type": "natif-devise",
+  "gabarit": "moderne",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture",
+      "numero": "INV-151175",
+      "facture_rectifiee": null,
+      "date_emission": "2026-05-07",
+      "date_echeance": "2026-06-06",
+      "date_livraison": null,
+      "periode": null,
+      "devise": "USD",
+      "fournisseur": {
+        "raison_sociale": "Harbor & Pike Instruments LLC",
+        "siren": null,
+        "siret": null,
+        "tva_intracom": null,
+        "identifiant_etranger": "EIN 98-7654321",
+        "adresse": "2140 Marlowe Avenue, Suite 400",
+        "code_postal": "DE 19801",
+        "ville": "Wilmington",
+        "pays": "US",
+        "iban": null,
+        "bic": null,
+        "coordonnees_bancaires": {
+          "Bank": "First Meridian Bank (fictive)",
+          "ABA routing": "021000089",
+          "Account": "4471 0092 3351",
+          "SWIFT": "FMBKUS33XXX"
+        },
+        "courriel": "billing@harborpike.example",
+        "telephone": "+1 302 555 0147"
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": "C37115"
+      },
+      "lignes": [
+        {
+          "designation": "Maintenance infogérance",
+          "quantite": 2,
+          "unite": "mois",
+          "prix_unitaire_ht": 166.1,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 332.2,
+          "code": null
+        },
+        {
+          "designation": "Maintenance infogérance",
+          "quantite": 2,
+          "unite": "mois",
+          "prix_unitaire_ht": 337.21,
+          "remise_pct": 0,
+          "taux_tva": 0,
+          "montant_ht": 674.42,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 1006.62,
+      "tva": [
+        {
+          "taux": 0,
+          "base": 1006.62,
+          "montant": 0
+        }
+      ],
+      "total_tva": 0,
+      "total_ttc": 1006.62,
+      "acompte": null,
+      "net_a_payer": 1006.62,
+      "mode_paiement": "Virement international (wire)",
+      "references": {
+        "commande": "PO-2026-0188",
+        "bon_livraison": null,
+        "reference_paiement": "INV-151175"
+      },
+      "mentions": [
+        "Amounts in US dollars (USD). VAT not charged: services supplied to a VAT-registered business in France — reverse charge by the recipient (art. 283-2 CGI).",
+        "Montants en dollars américains. TVA non facturée : prestation auto-liquidée par le preneur français. Contre-valeur EUR indicative au cours du jour de facturation.",
+        "Payment due within 30 days by international wire transfer. Please quote the invoice number."
+      ],
+      "taux_change": 0.921,
+      "total_ttc_eur": 927.1
+    }
+  ],
+  "difficultes": [
+    "facture en USD d'un fournisseur étranger : pas de SIREN ni de TVA française, pas d'IBAN (ABA + SWIFT), montants au format anglo-saxon, autoliquidation par le preneur",
+    "contre-valeur EUR indicative : total_ttc est en USD, total_ttc_eur est le montant en euros"
+  ],
+  "devise": "USD",
+  "taux_change": 0.921,
+  "total_ttc_eur": 927.1,
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

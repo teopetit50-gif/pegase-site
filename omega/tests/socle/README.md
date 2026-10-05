@@ -24,6 +24,19 @@ deux comptes, quelques lignes), même si `runtests()` les annule.
 clients fictifs, les comptes, les lignes de journal et d'envoi disparaissent à
 la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 
+## Fichiers groupés pour le coordinateur
+
+- `TOUT.sql` : `00_installation.sql` suivi des 44 tests sans DELETE (17, 19,
+  21, 23, 25, 27 laissés de côté : leur `throws_ok` contient le mot DELETE que
+  l'outil d'exécution bloque), terminé par un seul `runtests()` qui rend une
+  ligne `ok` / `not ok` par test. 63 Ko, un seul appel.
+- `TOUT_1.sql` à `TOUT_4.sql` : le même contenu en quatre parts (8 + 12 + 12 +
+  12 tests), chacune terminée par son `runtests()`, à lancer dans l'ordre si
+  un seul appel est trop gros.
+- Ils sont générés depuis les fichiers numérotés ; pour les refaire après une
+  modification d'un test, relancer le script de la section « Régénérer ».
+- Validés sur la maquette locale : `TOUT.sql` rend `1..44`, 44 `ok`.
+
 ## Ce que chaque test vérifie
 
 | N° | Règle |
@@ -72,6 +85,22 @@ exact) et un lanceur pour un cluster Postgres jetable :
 # pgtap.sql : sql/pgtap.sql.in de https://github.com/theory/pgtap (v1.3.3), avec
 #   sed -e 's,MODULE_PATHNAME,$libdir/pgtap,g' -e 's,__OS__,linux,g' -e 's,__VERSION__,1.3,g'
 bash omega/tests/socle/local/lancer.sh
+```
+
+### Régénérer TOUT.sql
+
+```bash
+cd omega/tests/socle && python3 - <<'PY'
+import re, glob
+exclus = {'17','19','21','23','25','27'}
+fichiers = sorted(f for f in glob.glob('[0-9][0-9]_*.sql') if f[:2] not in exclus and f[:2] != '00')
+corps = lambda f: re.sub(r"\nselect \* from runtests\('tests'::name, '\^test_\d\d_'\);\n", "\n", open(f).read())
+zero = open('00_installation.sql').read()
+open('TOUT.sql', 'w').write("-- TOUT.sql — installation + 44 tests (sans 17, 19, 21, 23, 25, 27).\n\n" + zero + "\n\n" + "\n\n".join(map(corps, fichiers)) + "\n\nselect * from runtests('tests'::name, '^test_');\n")
+for i, p in enumerate([fichiers[:8], fichiers[8:20], fichiers[20:32], fichiers[32:]], 1):
+    nums = '|'.join(f[:2] for f in p)
+    open(f'TOUT_{i}.sql', 'w').write(f"-- TOUT_{i}.sql — partie {i}/4.\n\n" + (zero + "\n\n" if i == 1 else "") + "\n\n".join(map(corps, p)) + f"\n\nselect * from runtests('tests'::name, '^test_({nums})_');\n")
+PY
 ```
 
 État au 5 octobre 2026 : **50 tests sur 50 verts sur la maquette**. Sur la

@@ -1,0 +1,206 @@
+{
+  "fichier": "103-note-de-frais-note-de-frais-camille.pdf",
+  "format": "pdf",
+  "type": "note-de-frais",
+  "gabarit": "note_de_frais",
+  "qualite": "bonne",
+  "pages": 2,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "note_de_frais",
+      "numero": "NF-2026-09-017",
+      "facture_rectifiee": null,
+      "date_emission": "2026-09-18",
+      "date_echeance": "2026-10-18",
+      "date_livraison": null,
+      "periode": "du 14/09/2026 au 15/09/2026",
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Camille Delorme-Vasseur (salarié·e) — note de frais",
+        "type": "particulier",
+        "siren": null,
+        "siret": null,
+        "tva_intracom": null,
+        "adresse": "—",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "iban": "FR7690887991516065361366548",
+        "bic": "BJHHFRPP",
+        "courriel": "c.delorme-vasseur@essai.invalid",
+        "telephone": null
+      },
+      "client": {
+        "raison_sociale": "Architecture Lorbeck SAS",
+        "siren": "949779995",
+        "siret": "94977999582410",
+        "tva_intracom": "FR14949779995",
+        "adresse": "72 quai des Chartrons",
+        "code_postal": "76000",
+        "ville": "Rouen",
+        "pays": "FR",
+        "code_client": null
+      },
+      "salarie": {
+        "initiales": "C. D.-V.",
+        "service": "Études et chantiers",
+        "objet": "Rendez-vous client à Lyon (projet rue Camille-Verdier)",
+        "matricule": "S-0142"
+      },
+      "lignes": [
+        {
+          "date": "2026-09-14",
+          "heure": "07:42",
+          "nature": "Transport",
+          "designation": "Train Paris – Lyon, 2e classe, aller",
+          "emetteur": "Rail Express (fictif)",
+          "lieu": "Gare de Lyon",
+          "montant_ttc": 78,
+          "taux_tva": 10,
+          "paiement": "CB ****2210",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 70.91,
+          "remise_pct": 0,
+          "montant_ht": 70.91,
+          "montant_tva": 7.09,
+          "code": null
+        },
+        {
+          "date": "2026-09-14",
+          "heure": "13:05",
+          "nature": "Repas",
+          "designation": "Déjeuner client — 2 couverts",
+          "emetteur": "Brasserie du Quai (fictive)",
+          "lieu": "Lyon 2e",
+          "montant_ttc": 49.8,
+          "taux_tva": 10,
+          "paiement": "CB ****2210",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 45.27,
+          "remise_pct": 0,
+          "montant_ht": 45.27,
+          "montant_tva": 4.53,
+          "code": null
+        },
+        {
+          "date": "2026-09-14",
+          "heure": "22:30",
+          "nature": "Hébergement",
+          "designation": "Hôtel 1 nuit, chambre simple",
+          "emetteur": "Hôtel des Arcades (fictif)",
+          "lieu": "Lyon 1er",
+          "montant_ttc": 112,
+          "taux_tva": 10,
+          "paiement": "CB ****2210",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 101.82,
+          "remise_pct": 0,
+          "montant_ht": 101.82,
+          "montant_tva": 10.18,
+          "code": null
+        },
+        {
+          "date": "2026-09-15",
+          "heure": "08:15",
+          "nature": "Transport",
+          "designation": "Taxi hôtel – client",
+          "emetteur": "Taxis Lumière (fictif)",
+          "lieu": "Lyon",
+          "montant_ttc": 31,
+          "taux_tva": 10,
+          "paiement": "Espèces",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 28.18,
+          "remise_pct": 0,
+          "montant_ht": 28.18,
+          "montant_tva": 2.82,
+          "code": null
+        },
+        {
+          "date": "2026-09-15",
+          "heure": "17:50",
+          "nature": "Péage",
+          "designation": "Péage A6 retour (véhicule de service)",
+          "emetteur": "Autoroutes du Centre (fictif)",
+          "lieu": "Villefranche",
+          "montant_ttc": 14.2,
+          "taux_tva": 20,
+          "paiement": "Badge",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 11.83,
+          "remise_pct": 0,
+          "montant_ht": 11.83,
+          "montant_tva": 2.37,
+          "code": null
+        },
+        {
+          "date": "2026-09-15",
+          "heure": "18:40",
+          "nature": "Fournitures",
+          "designation": "Câble HDMI pour la présentation",
+          "emetteur": "Papeterie Marcenac SARL",
+          "lieu": "Lyon 7e",
+          "montant_ttc": 9.9,
+          "taux_tva": 20,
+          "paiement": "CB ****2210",
+          "quantite": 1,
+          "unite": "u",
+          "prix_unitaire_ht": 8.25,
+          "remise_pct": 0,
+          "montant_ht": 8.25,
+          "montant_tva": 1.65,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 266.26,
+      "tva": [
+        {
+          "taux": 20,
+          "base": 20.08,
+          "montant": 4.02
+        },
+        {
+          "taux": 10,
+          "base": 246.18,
+          "montant": 24.62
+        }
+      ],
+      "total_tva": 28.64,
+      "total_ttc": 294.9,
+      "acompte": null,
+      "net_a_payer": 294.9,
+      "mode_paiement": "Remboursement par virement sur le compte du salarié",
+      "references": {
+        "commande": null,
+        "bon_livraison": null,
+        "reference_paiement": "NF-2026-09-017"
+      },
+      "mentions": [
+        "Note de frais interne : les montants des lignes sont TTC, la TVA n'est récupérable que sur les justificatifs qui la mentionnent (pas sur le taxi payé en espèces sans facture)."
+      ]
+    }
+  ],
+  "difficultes": [
+    "note de frais d'un salarié, pas une facture fournisseur : l'émetteur est une personne (pas de SIREN), le bénéficiaire du remboursement est le salarié",
+    "lignes en TTC avec taux de TVA par ligne ; justificatifs en page 2 (six petits reçus)",
+    "numérisée (qualité bonne)"
+  ],
+  "lignes_affichees_en": "TTC",
+  "salarie": {
+    "initiales": "C. D.-V.",
+    "service": "Études et chantiers",
+    "objet": "Rendez-vous client à Lyon (projet rue Camille-Verdier)",
+    "matricule": "S-0142"
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}

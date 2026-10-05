@@ -1,0 +1,103 @@
+{
+  "fichier": "102-facture-acompte-classique-atelier.pdf",
+  "format": "pdf",
+  "type": "facture-acompte",
+  "gabarit": "classique",
+  "qualite": "native",
+  "pages": 1,
+  "lisible": true,
+  "nb_factures": 1,
+  "factures": [
+    {
+      "type_document": "facture_acompte",
+      "numero": "FC100580",
+      "facture_rectifiee": null,
+      "date_emission": "2026-03-13",
+      "date_echeance": "2026-04-27",
+      "date_livraison": null,
+      "periode": null,
+      "devise": "EUR",
+      "fournisseur": {
+        "raison_sociale": "Atelier Mirvault & Fils SARL",
+        "siren": "998237812",
+        "siret": "99823781269052",
+        "tva_intracom": "FR50998237812",
+        "adresse": "16 place du Marché-Neuf",
+        "code_postal": "44000",
+        "ville": "Nantes",
+        "pays": "FR",
+        "iban": "FR7696223193033986732420108",
+        "bic": "ZDVZFRPP",
+        "courriel": "compta@atelier-mirvault-fils.example",
+        "telephone": "01 13 90 20 55"
+      },
+      "client": {
+        "raison_sociale": "Menuiserie Valrène SARL",
+        "siren": "917039331",
+        "siret": "91703933105305",
+        "tva_intracom": "FR28917039331",
+        "adresse": "71 rue Camille-Verdier",
+        "code_postal": "31000",
+        "ville": "Toulouse",
+        "pays": "FR",
+        "code_client": "C82323"
+      },
+      "lignes": [
+        {
+          "designation": "Acompte 30 % devis D-2026-0412 (total HT 8 400,00 €)",
+          "quantite": 1,
+          "unite": "forfait",
+          "prix_unitaire_ht": 2520,
+          "remise_pct": 0,
+          "taux_tva": 10,
+          "montant_ht": 2520,
+          "code": null
+        }
+      ],
+      "remise_globale_pct": null,
+      "remise_globale": null,
+      "total_ht": 2520,
+      "tva": [
+        {
+          "taux": 10,
+          "base": 2520,
+          "montant": 252
+        }
+      ],
+      "total_tva": 252,
+      "total_ttc": 2772,
+      "acompte": null,
+      "net_a_payer": 2772,
+      "mode_paiement": "Virement bancaire",
+      "references": {
+        "commande": "D-2026-0412",
+        "bon_livraison": null,
+        "reference_paiement": "FC100580"
+      },
+      "mentions": [
+        "Facture d'acompte : la TVA est exigible à l'encaissement de l'acompte (art. 269-2 c CGI). Le solde fera l'objet d'une facture définitive reprenant cet acompte en déduction.",
+        "Travaux de rénovation d'un local professionnel : TVA à 10 % (attestation simplifiée à fournir).",
+        "En cas de retard de paiement, pénalités au taux de 3 fois le taux d'intérêt légal et indemnité forfaitaire de recouvrement de 40 € (art. L441-10 C. com.).",
+        "Pas d'escompte pour paiement anticipé."
+      ],
+      "acompte_sur": {
+        "devis": "D-2026-0412",
+        "montant_devis_ht": 8400,
+        "pourcentage": 30,
+        "solde_a_facturer_ht": 5880
+      }
+    }
+  ],
+  "difficultes": [
+    "facture d'acompte pure : une seule ligne, 30 % d'un devis dont le montant figure dans le libellé ; ne pas confondre le montant du devis avec le HT facturé",
+    "TVA 10 % sur l'acompte, exigible à l'encaissement"
+  ],
+  "acompte_sur": {
+    "devis": "D-2026-0412",
+    "montant_devis_ht": 8400,
+    "pourcentage": 30,
+    "solde_a_facturer_ht": 5880
+  },
+  "graine": 2026,
+  "genere_par": "omega/banc/generer-factures.mjs"
+}
