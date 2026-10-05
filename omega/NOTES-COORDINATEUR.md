@@ -1,4 +1,4 @@
-# Notes du coordinateur — vague 1
+# Notes du coordinateur — vagues 1 et 2
 
 Tenu par le coordinateur (session chef). Les ouvriers A1 à A5 lisent ce
 fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
@@ -169,3 +169,44 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 | A3 écran client | worker-a3 | quatre lots en ligne (43c4f68, 372df1c, 3aa753d, b99131d) ; compte de recette fourni pour la relecture |
 | A4 FILED compta | worker-a4 | neuf lots posés, tests verts ; fini, attend la prod |
 | A5 garde-fous | worker-a5 | `a5_01` posé avec compléments ; 10 tests à corriger (renvoyés) ; liste figée dans `omega/a5_01_liste_figee.txt` |
+
+
+## Vague 2 — lancée le 5 octobre 2026 à 22 h 20 (décision de Teo)
+
+Cahier commun : scénario réel de bout en bout écrit avant de coder, tests pgTAP
+par les portes publiques, une migration `create or replace` par trou du socle,
+écran client `/espace/<module>` sur le modèle d'A3, notes avec deux jauges
+(« mécanique » et « livrable client »). **Les ouvriers n'appellent jamais
+Supabase** (interdit par leur consigne système) : le coordinateur pose, joue et
+relaie. Chaque ouvrier a sa photographie du socle dans
+`omega/SOCLE-EXTRAITS-<MODULE>.sql` (6 fichiers, 5/10 à 22 h 30).
+
+| Session | Module | Branche | Extrait | Promesse du site |
+|---|---|---|---|---|
+| B1 `session_01CrMrfRwPXbEdP2cxzcaCNh` | Varelo (groupes, référentiel) | worker-b1 | SOCLE-EXTRAITS-VARELO.sql (grp_) | app/secteurs/groupes |
+| B2 `session_01FifCHkLgBbAZrwtHTGDvzP` | Tavaro (location automobile) | worker-b2 | SOCLE-EXTRAITS-TAVARO.sql (loc_) | app/secteurs/location-automobile |
+| B3 `session_01XVDbxXV3nk5ANUdd5hfZHf` | Tiroma (cabinets dentaires) | worker-b3 | SOCLE-EXTRAITS-TIROMA.sql | app/secteurs/dentaire |
+| B4 `session_01HRJ7AmG9hKtDenMRTt1eW6` | Tamila (avocats) | worker-b4 | SOCLE-EXTRAITS-TAMILA.sql | app/secteurs/avocats |
+| B5 `session_013VSXzohLtDQS5bbWfRb4xR` | Lorani (architectes, permis) | worker-b5 | SOCLE-EXTRAITS-LORANI.sql | app/secteurs/architectes |
+| B6 `session_01DcUXF2LPTVH2CpVdget9fu` | Daliro (BTP) | worker-b6 | SOCLE-EXTRAITS-DALIRO.sql (btp_) | app/secteurs/btp |
+| B7 `session_011T7gKKsmg6y6ndZbzggDk5` | Identité des tiers (Sirene, VIES, SIREN↔TVA, IBAN) | worker-b7 | SOCLE-EXTRAITS-FILED.sql + lecteur d'A1 | sert tous les modules |
+
+Sessions de la vague 1 (A1 `session_01XQrgbohqqVEJwGK724wJ7h`, A2
+`session_01E3CW3mskiafCa1zPdxjrFo`, A3 `session_01DdgwRadkJFx5u9buwh5crS`,
+A4 `session_01ScVNMRrPwNeNjD9LBufDVP`, A5 `session_01HFL5DbN61Rux6iSMf2djPG`) :
+A3 et A5 finissent ; A1, A2, A4 au repos.
+
+### Jauges au 5 octobre, 22 h 20 (mécanique / livrable client)
+
+| Chantier | Mécanique | Livrable |
+|---|---|---|
+| Moteurs communs (lecteur, envois, réception, espace, droits) | 80 % | 35 % |
+| FILED | 85 % (recette) | 30 % (rien en prod) |
+| REPUT | 50 % | 15 % |
+| Varelo, Tavaro, Tiroma, Tamila, Lorani, Daliro | 40 % (socle + crons) | 10 % |
+| Mise en production | 0 % | 0 % |
+
+« Livrable » compte : vraies pièces et vrais cas, écran client, branchements aux
+logiciels tiers, épreuve par des utilisateurs, prod avec sauvegardes testées,
+surveillance, support, cadre juridique. Global : ~45 % de mécanique, 15–20 % de
+produit livrable.
