@@ -166,29 +166,34 @@ create or replace function tests.test_b7_08_verdict_fournisseur() returns setof 
 language plpgsql as $f$
 declare v_four uuid; v_id uuid; r record;
 begin
-  -- Les colonnes d'A4 (a4_10 : identite_verdict jsonb) : posées si elles manquent encore ici (annulé par runtests), sinon laissées telles quelles.
+  -- Les colonnes d'A4 (a4_10) : posées si elles manquent encore ici (annulé par runtests), sinon laissées telles quelles.
   alter table public.filed_fournisseurs add column if not exists identite_verifiee_le timestamptz;
   alter table public.filed_fournisseurs add column if not exists identite_source text;
   alter table public.filed_fournisseurs add column if not exists identite_verdict jsonb;
+  if not exists (select 1 from pg_constraint where conname = 'filed_fournisseurs_identite_source') then
+    alter table public.filed_fournisseurs add constraint filed_fournisseurs_identite_source check (identite_source is null or identite_source in ('sirene', 'vies', 'humain'));
+  end if;
   insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, siren, pays, statut, source)
   values (tests.b7_client(), 'B7-ESSAI', 'Fournisseur d''essai B7', 'fournisseur d essai b7', '999999998', 'FR', 'a_confirmer', 'saisie') returning id into v_four;
   insert into public.filed_verifications_tiers (client_id, fournisseur_id, registre, identifiant) values (tests.b7_client(), v_four, 'sirene', '999999998') returning id into v_id;
   return next is((public.identite_a_verifier(v_id) -> 'fournisseur' ->> 'siren'), '999999998', 'La porte rend le fournisseur rattaché');
-  perform public.noter_identite(v_id, 'valide', '{"registre":"sirene","etat":"actif"}'::jsonb, 'sirene');
+  perform public.noter_identite(v_id, 'valide', '{"registre":"sirene","etat":"actif","denomination":"FOURNISSEUR D ESSAI"}'::jsonb, 'recherche-entreprises');
   execute 'select identite_verifiee_le, identite_source, identite_verdict from public.filed_fournisseurs where id = $1' into r using v_four;
   return next ok(r.identite_verifiee_le is not null, 'Le verdict est daté sur la fiche fournisseur');
-  return next is(r.identite_source, 'sirene', 'verdict : source');
-  return next is(r.identite_verdict ->> 'resultat', 'valide', 'verdict : valide (objet jsonb)');
+  return next is(r.identite_source, 'sirene', 'identite_source = le registre, pas la source d''ouvrier');
+  return next is(r.identite_verdict ->> 'resultat', 'valide', 'verdict : resultat (forme lue par A4)');
   return next is(r.identite_verdict ->> 'registre', 'sirene', 'verdict : registre');
   return next is(r.identite_verdict ->> 'identifiant', '999999998', 'verdict : identifiant');
-  return next is(r.identite_verdict ->> 'verification', v_id::text, 'verdict : la vérification d''origine');
-  -- Depuis le cache : la source initiale est reportée, pas « cache ».
+  return next is(r.identite_verdict -> 'preuve' ->> 'denomination', 'FOURNISSEUR D ESSAI', 'verdict : la preuve du registre');
+  return next is(r.identite_verdict -> 'preuve' ->> 'source', 'recherche-entreprises', 'verdict : la source d''ouvrier est dans la preuve');
+  return next is(r.identite_verdict -> 'preuve' ->> 'verification', v_id::text, 'verdict : la vérification d''origine');
+  -- Depuis le cache : même forme, identite_source reste le registre.
   insert into public.filed_verifications_tiers (client_id, fournisseur_id, registre, identifiant) values (tests.b7_client(), v_four, 'sirene', '999999998') returning id into v_id;
-  perform public.noter_identite(v_id, 'invalide', '{"registre":"sirene","source_initiale":"recherche-entreprises"}'::jsonb, 'cache');
+  perform public.noter_identite(v_id, 'invalide', '{"registre":"sirene","source_initiale":"sirene","cache_du":"2026-10-01T00:00:00Z"}'::jsonb, 'cache');
   execute 'select identite_verifiee_le, identite_source, identite_verdict from public.filed_fournisseurs where id = $1' into r using v_four;
-  return next is(r.identite_source, 'recherche-entreprises', 'verdict depuis le cache : la source initiale');
+  return next is(r.identite_source, 'sirene', 'verdict depuis le cache : identite_source = le registre');
   return next is(r.identite_verdict ->> 'resultat', 'invalide', 'verdict : invalide');
-  return next is(r.identite_verdict ->> 'source', 'recherche-entreprises', 'verdict : source initiale dans l''objet');
+  return next is(r.identite_verdict -> 'preuve' ->> 'source', 'cache', 'verdict : source cache dans la preuve');
 end $f$;
 
 select * from runtests('tests'::name, '^test_b7_');
