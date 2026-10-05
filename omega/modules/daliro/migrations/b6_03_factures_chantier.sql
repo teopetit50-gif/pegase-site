@@ -259,6 +259,11 @@ revoke all on public.btp_debourse_lots from anon;
 grant select on public.btp_factures_chantier_detail to authenticated;
 grant select on public.btp_debourse_lots to authenticated;
 
-insert into private.tables_locataires (nom, note)
-select 'btp_factures_chantier', 'DALIRO — factures rattachées aux chantiers (B6)'
-where not exists (select 1 from private.tables_locataires t where t.nom = 'btp_factures_chantier');
+do $do$ begin
+  if to_regclass('private.tables_locataires') is not null then
+    begin
+      execute $q$insert into private.tables_locataires (nom) select x from unnest(array['btp_factures_chantier']) x
+               where not exists (select 1 from private.tables_locataires t where t.nom = x)$q$;
+    exception when others then raise notice 'tables_locataires : % (à inscrire à la main)', sqlerrm; end;
+  end if;
+end $do$;

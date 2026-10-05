@@ -463,11 +463,11 @@ begin
   end if;
   select * into v_acteur from private.acteur_courant();
   -- Ceux qui ont chiffré cet avenant : ils ne le signeront pas.
-  select coalesce(array_agg(distinct (j.donnees ->> 'acteur_id')::uuid), '{}') into v_saisi
+  select coalesce(array_agg(distinct j.acteur_id), '{}') into v_saisi
   from public.journal_opposable j
   where j.client_id = a.client_id and j.objet_type = 'btp_avenants' and j.objet_id = a.id::text
     and j.action in ('daliro.avenant_ouvert', 'daliro.avenant_ligne_chiffree')
-    and (j.donnees ->> 'acteur_id') ~ '^[0-9a-f-]{36}$';
+    and j.acteur_type = 'utilisateur' and j.acteur_id is not null;
   if v_acteur.acteur_type = 'utilisateur' and v_acteur.acteur_id is not null then
     v_saisi := array(select distinct x from unnest(v_saisi || v_acteur.acteur_id) x where x is not null);
   end if;
@@ -670,13 +670,17 @@ grant execute on function public.btp_abandonner_avenant(uuid, text) to authentic
 --    tables, on insère « where not exists ».
 -- ─────────────────────────────────────────────────────────────────────────
 
-insert into private.tables_objets (nom, objet_type, colonne)
-select 'btp_avenants', 'btp_avenant', 'id'
-where not exists (select 1 from private.tables_objets t where t.nom = 'btp_avenants' and t.objet_type = 'btp_avenant');
-
-insert into private.tables_locataires (nom, note)
-select 'btp_avenants', 'DALIRO — avenants (B6)'
-where not exists (select 1 from private.tables_locataires t where t.nom = 'btp_avenants');
-insert into private.tables_locataires (nom, note)
-select 'btp_avenants_lignes', 'DALIRO — lignes d''avenant (B6)'
-where not exists (select 1 from private.tables_locataires t where t.nom = 'btp_avenants_lignes');
+do $do$ begin
+  if to_regclass('private.tables_objets') is not null then
+    begin
+      execute $q$insert into private.tables_objets (nom, objet_type, colonne) select 'btp_avenants', 'btp_avenant', 'id'
+               where not exists (select 1 from private.tables_objets t where t.nom = 'btp_avenants')$q$;
+    exception when others then raise notice 'tables_objets : % (à inscrire à la main)', sqlerrm; end;
+  end if;
+  if to_regclass('private.tables_locataires') is not null then
+    begin
+      execute $q$insert into private.tables_locataires (nom) select x from unnest(array['btp_avenants', 'btp_avenants_lignes']) x
+               where not exists (select 1 from private.tables_locataires t where t.nom = x)$q$;
+    exception when others then raise notice 'tables_locataires : % (à inscrire à la main)', sqlerrm; end;
+  end if;
+end $do$;

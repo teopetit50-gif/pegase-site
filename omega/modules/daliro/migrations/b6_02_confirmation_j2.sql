@@ -316,9 +316,14 @@ grant execute on function public.btp_demander_confirmations(uuid, date) to authe
 grant execute on function public.btp_repondre_confirmation(uuid, text, text, jsonb) to authenticated, service_role;
 grant execute on function public.btp_proposer_remplacants(uuid) to authenticated, service_role;
 
-insert into private.tables_locataires (nom, note)
-select 'btp_confirmations', 'DALIRO — confirmations J-2 (B6)'
-where not exists (select 1 from private.tables_locataires t where t.nom = 'btp_confirmations');
+do $do$ begin
+  if to_regclass('private.tables_locataires') is not null then
+    begin
+      execute $q$insert into private.tables_locataires (nom) select x from unnest(array['btp_confirmations']) x
+               where not exists (select 1 from private.tables_locataires t where t.nom = x)$q$;
+    exception when others then raise notice 'tables_locataires : % (à inscrire à la main)', sqlerrm; end;
+  end if;
+end $do$;
 
 -- Le cron : 17 h Paris (15 h UTC l'été, 16 h l'hiver — le socle planifie en UTC).
 select cron.schedule('daliro-confirmations-j2', '0 15 * * *', $cron$select private.btp_tache_confirmations()$cron$)
