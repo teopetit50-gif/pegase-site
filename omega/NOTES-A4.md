@@ -27,6 +27,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_07_filed_lot4f_circuit_validation.sql` | `filed_circuits` (→ `regles_validation`), `filed_validations`, `filed_factures_annexes` ; `filed_regler_circuit`, `filed_retirer_circuit`, `filed_joindre_annexe`, `filed_comptabiliser_facture` ; `private.filed_deposer_validation` (type `filed.valider_facture[.<centre>][.direction]`), `filed_decider_facture`, `filed_relancer_validations`, `filed_saisisseurs`. |
 | `a4_09_filed_lot4g_acquittement_alerte.sql` | correctif : `private.filed_reconnaitre_charge` acquitte l'alerte « facture attendue absente » (`alertes.acquittee_le`) quand la facture arrive tard. |
 | `a4_10_filed_lot7_identite_fournisseur.sql` | lot 7 : `filed_fournisseurs.identite_verifiee_le / identite_source / identite_verdict` ; `private.filed_completer_fournisseur_lu` (SIREN, TVA, IBAN lus par le lecteur remontés vers `fournisseur_lu`, `filed_factures.iban` et le fournisseur) en tête de `filed_controler_facture` (repère, corps en place) ; `filed_repondre_verification` pose le verdict sur le fournisseur et recontrôle ses factures ; `filed_attester_identite` (une personne) ; `filed_controles_identite` lit le verdict ; porte `filed_confirmer_fournisseur`. |
+| `a4_11_filed_lot7_controler_facture_complet.sql` | `private.filed_controler_facture` en texte complet (corps de la recette + lignes « Lot 4 (A4) » + appel de `filed_completer_fournisseur_lu` en tête). Remplace les poses par repère d'a4_08 et a4_10, restées sans effet sur la recette pour lot 7. |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -39,7 +40,9 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
 ## À faire par le coordinateur, dans l'ordre
 
-1. Appliquer `a4_01` → `a4_10` sur la recette (a4_10 : lot 7, après tout le reste).
+1. Appliquer `a4_01` → `a4_11` sur la recette (a4_10 puis a4_11 : lot 7, après tout le reste). a4_11
+   porte le `delete from public.filed_controles` du socle dans le corps recopié : à poser par psql si
+   l'outil bloque sur le mot.
 2. **Après `a4_02`** : retirer à la main l'ancienne contrainte CHECK de `filed_factures.statut`
    (celle sans nom explicite, « statut in (a_completer, bloquee, a_valider, ecartee) »). Sans
    cela, la première validation échoue sur « violates check constraint ». La v2 la remplace.

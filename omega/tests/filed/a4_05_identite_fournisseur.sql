@@ -32,6 +32,10 @@ begin
   values (v_cl, v_e, v_doc, 'facture', 'NET-2026-07', 'NET202607', date '2026-07-03', current_date, 'EUR', 500, 100, 600, v_four, 'creation', '{"nom": "Nettoyage d''exemple SAS"}', '{"siren": "987654329"}', repeat('2', 64), 'a_completer')
   returning id into v_f;
 
+  -- ── Le branchement est en place dans le corps réel de filed_controler_facture ──
+  assert pg_get_functiondef('private.filed_controler_facture'::regproc) like '%filed_completer_fournisseur_lu%', 'filed_completer_fournisseur_lu appelée en tête de filed_controler_facture';
+  assert pg_get_functiondef('private.filed_controler_facture'::regproc) like '%filed_apres_controle%', 'lot 4e toujours branché';
+
   -- ── Le contrôle remonte ce que la pièce donne ──
   v_statut := private.filed_controler_facture(v_f);
   select * into v_r from public.filed_factures where id = v_f;
