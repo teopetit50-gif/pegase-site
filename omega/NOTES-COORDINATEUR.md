@@ -97,8 +97,10 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 1. Brevo : restriction d'IP désactivée, expéditeur `essais@omegaai.fr` déclaré,
    webhook transactionnel posé (fait le 5/10). Reste : couper le suivi
    d'ouverture/clic ; supprimer le webhook « omega » Marketing.
-2. Edge Secrets manquants : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
-   (Bedrock, eu-central-1), `META_APP_SECRET`, `META_ACCESS_TOKEN`.
+2. Edge Secrets manquants : `ANTHROPIC_API_KEY` (décision de Teo le 5/10 à
+   21 h 45 : API Anthropic en direct pour la recette, pas de compte AWS ; lot
+   demandé à A1 pour que le lecteur accepte ce fournisseur — données hors UE,
+   à retrancher pour la prod), `META_APP_SECRET`, `META_ACCESS_TOKEN`.
 3. GitHub → Settings → Secrets : `SUPABASE_DB_URL`, `SAUVEGARDE_PHRASE`
    (workflow de sauvegarde d'A5).
 4. Brevo : domaine inbound vers `/functions/v1/reception/brevo` (le webhook
