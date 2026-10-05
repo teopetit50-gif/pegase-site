@@ -20,18 +20,13 @@
 -- a_completer, bloquee, a_valider, ecartee (socle) + validee (une personne a approuvé : la pièce est
 -- classée, son empreinte est au journal), refusee (rejetée par la file), comptabilisee (transmise à
 -- la comptabilité du client, avec ses imputations).
-do $$
-declare v_nom text;
-begin
-  select c.conname into v_nom from pg_constraint c
-   where c.conrelid = 'public.filed_factures'::regclass and c.contype = 'c'
-     and pg_get_constraintdef(c.oid) ilike '%statut%' and pg_get_constraintdef(c.oid) ilike '%a_valider%';
-  if v_nom is not null and pg_get_constraintdef((select oid from pg_constraint where conname = v_nom and conrelid = 'public.filed_factures'::regclass)) not ilike '%comptabilisee%' then
-    execute format('alter table public.filed_factures drop constraint %I', v_nom);
-    execute format('alter table public.filed_factures add constraint %I check (statut in (''a_completer'', ''bloquee'', ''a_valider'', ''ecartee'', ''validee'', ''refusee'', ''comptabilisee''))', v_nom);
-  elsif v_nom is null then
-    alter table public.filed_factures add constraint filed_factures_statut_check
-      check (statut in ('a_completer', 'bloquee', 'a_valider', 'ecartee', 'validee', 'refusee', 'comptabilisee'));
+-- La contrainte v2 s'ajoute à côté de l'ancienne (CHECK sans nom explicite, « statut in (a_completer, bloquee,
+-- a_valider, ecartee) ») : le coordinateur retire l'ancienne à la main, rien ne se supprime ici.
+do $$ begin
+  if not exists (select 1 from pg_constraint where conrelid = 'public.filed_factures'::regclass and conname = 'filed_factures_statut_v2') then
+    alter table public.filed_factures add constraint filed_factures_statut_v2
+      check (statut in ('a_completer', 'bloquee', 'a_valider', 'ecartee', 'validee', 'refusee', 'comptabilisee')) not valid;
+    alter table public.filed_factures validate constraint filed_factures_statut_v2;
   end if;
 end $$;
 
@@ -54,9 +49,11 @@ comment on table public.filed_factures_exercices is
   'L''exercice comptable que porte chaque facture : celui de sa date d''émission, ou le suivant quand la pièce est reçue après la clôture, avec la mention qui le dit.';
 create index if not exists filed_factures_exercices_exercice on public.filed_factures_exercices (exercice_id);
 alter table public.filed_factures_exercices enable row level security;
-drop policy if exists filed_factures_exercices_lecture on public.filed_factures_exercices;
-create policy filed_factures_exercices_lecture on public.filed_factures_exercices for select to authenticated
-  using (exists (select 1 from public.filed_documents d where d.id = document_id));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_factures_exercices' and policyname = 'filed_factures_exercices_lecture') then
+    execute 'create policy filed_factures_exercices_lecture on public.filed_factures_exercices for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
+  end if;
+end $$;
 revoke insert, update, delete on public.filed_factures_exercices from anon, authenticated;
 grant select on public.filed_factures_exercices to authenticated;
 
@@ -106,7 +103,8 @@ begin
   if p_f.date_emission is null then return null; end if;
   v_nat := private.filed_exercice_pour(p_f.client_id, p_f.entite_id, p_f.date_emission);
   if v_nat.id is null then
-    delete from public.filed_factures_exercices where facture_id = p_f.id;
+    update public.filed_factures_exercices set exercice_naturel_id = null, exercice_id = null, orientee = false, mention = null, maj_le = now()
+     where facture_id = p_f.id;
     return null;
   end if;
   v_ret := v_nat;
@@ -347,17 +345,21 @@ begin
        where coalesce((l->>'compte')::uuid, (select c.id from public.filed_plan_comptable c where c.client_id = v_f.client_id and c.numero = l->>'numero' and (c.entite_id = v_f.entite_id or c.entite_id is null) order by (c.entite_id is not null) desc limit 1)) = v_p.compte_id
          and coalesce((l->>'centre')::uuid, (select k.id from public.filed_centres_cout k where k.client_id = v_f.client_id and k.code = upper(l->>'code') and (k.entite_id = v_f.entite_id or k.entite_id is null) order by (k.entite_id is not null) desc limit 1)) is not distinct from v_p.centre_id
     ) into v_meme;
-    perform private.filed_apprendre_imputation(v_f.client_id, v_f.fournisseur_id, v_p.compte_id, v_p.centre_id, v_meme, v_f.id);
-    update public.filed_imputations set statut = case when v_meme then 'validee' else 'refusee' end, decide_le = now(), decide_par = v_uid,
-      motif = case when v_meme then 'Confirmée par l''imputation posée' else 'Remplacée par l''imputation posée' end where id = v_p.id;
+    -- Une proposition reprise telle quelle est confirmée (la ligne posée porte l'apprentissage) ; une autre est refusée.
+    if not v_meme then
+      perform private.filed_apprendre_imputation(v_f.client_id, v_f.fournisseur_id, v_p.compte_id, v_p.centre_id, false, v_f.id);
+    end if;
+    update public.filed_imputations set statut = case when v_meme then 'remplacee' else 'refusee' end, decide_le = now(), decide_par = v_uid,
+      motif = case when v_meme then 'Confirmée par l''imputation posée' else 'Écartée par l''imputation posée' end where id = v_p.id;
     if v_p.demande_id is not null then
       perform private.filed_historiser(v_f.client_id, v_f.document_id, 'filed_facture', v_f.id::text, 'imputation_tranchee',
         format('Proposition d''imputation %s par une imputation posée à la main.', case when v_meme then 'confirmée' else 'remplacée' end),
         jsonb_build_object('imputation', v_p.id, 'demande', v_p.demande_id));
     end if;
   end loop;
-  -- Les lignes posées à la main occupent les rangs 1 à 100 ; les propositions tranchées restent, aux rangs 101 et plus.
-  delete from public.filed_imputations where facture_id = v_f.id and statut in ('validee', 'refusee') and origine = 'saisie';
+  -- Les lignes posées à la main occupent les rangs 1 à 100 ; celles d'une imputation précédente restent, remplacées.
+  update public.filed_imputations set statut = 'remplacee', decide_le = now(), decide_par = v_uid, motif = 'Remplacée par une nouvelle imputation'
+   where facture_id = v_f.id and statut = 'validee';
 
   for v_l in select * from jsonb_array_elements(p_lignes) loop
     v_rang := v_rang + 1;
@@ -465,7 +467,7 @@ begin
   select * into v_f from public.filed_factures where id = v_i.facture_id;
   v_ok := p_demande.statut = 'approuvee';
   update public.filed_imputations set statut = case when v_ok then 'validee' else 'refusee' end, decide_le = now(),
-    decide_par = (select a.decideur_id from public.approbations a where a.demande_id = p_demande.id order by a.cree_le desc limit 1),
+    decide_par = (select coalesce(a.au_nom_de, a.user_id) from public.approbations a where a.demande_id = p_demande.id order by a.decide_le desc limit 1),
     motif = case when v_ok then 'Approuvée par la file' else 'Rejetée par la file' end
   where id = v_i.id;
   perform private.filed_apprendre_imputation(v_f.client_id, v_f.fournisseur_id, v_i.compte_id, v_i.centre_id, v_ok, v_f.id);

@@ -223,11 +223,15 @@ create index if not exists filed_verifications_tiers_fournisseur
   on public.filed_verifications_tiers (fournisseur_id);
 
 alter table public.filed_verifications_tiers enable row level security;
-drop policy if exists filed_verifications_tiers_lecture on public.filed_verifications_tiers;
-create policy filed_verifications_tiers_lecture on public.filed_verifications_tiers for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_verifications_tiers' and policyname = 'filed_verifications_tiers_lecture') then
+    execute 'create policy filed_verifications_tiers_lecture on public.filed_verifications_tiers for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 revoke insert, update, delete on public.filed_verifications_tiers from anon, authenticated;
 grant select on public.filed_verifications_tiers to authenticated;
+insert into private.tables_locataires (nom, ordre_effacement, note) values ('filed_verifications_tiers', 5, 'FILED, lot 4')
+on conflict (nom) do update set ordre_effacement = excluded.ordre_effacement, note = excluded.note;
 
 -- La dernière réponse d'un registre pour un identifiant, si elle date de moins de p_jours jours.
 create or replace function private.filed_verification_recente(p_client uuid, p_registre text, p_identifiant text, p_jours int default 90)

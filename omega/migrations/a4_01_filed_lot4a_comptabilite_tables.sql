@@ -42,9 +42,11 @@ create unique index if not exists filed_exercices_un
 create index if not exists filed_exercices_client_fin on public.filed_exercices (client_id, fin);
 
 alter table public.filed_exercices enable row level security;
-drop policy if exists filed_exercices_lecture on public.filed_exercices;
-create policy filed_exercices_lecture on public.filed_exercices for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_exercices' and policyname = 'filed_exercices_lecture') then
+    execute 'create policy filed_exercices_lecture on public.filed_exercices for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 2. Plan comptable du client
@@ -72,9 +74,11 @@ create unique index if not exists filed_plan_comptable_un
 create index if not exists filed_plan_comptable_client_actif on public.filed_plan_comptable (client_id, actif);
 
 alter table public.filed_plan_comptable enable row level security;
-drop policy if exists filed_plan_comptable_lecture on public.filed_plan_comptable;
-create policy filed_plan_comptable_lecture on public.filed_plan_comptable for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_plan_comptable' and policyname = 'filed_plan_comptable_lecture') then
+    execute 'create policy filed_plan_comptable_lecture on public.filed_plan_comptable for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 3. Centres de coût
@@ -99,9 +103,11 @@ create unique index if not exists filed_centres_cout_un
 create index if not exists filed_centres_cout_client_actif on public.filed_centres_cout (client_id, actif);
 
 alter table public.filed_centres_cout enable row level security;
-drop policy if exists filed_centres_cout_lecture on public.filed_centres_cout;
-create policy filed_centres_cout_lecture on public.filed_centres_cout for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_centres_cout' and policyname = 'filed_centres_cout_lecture') then
+    execute 'create policy filed_centres_cout_lecture on public.filed_centres_cout for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 4. Imputations : ce que porte chaque facture
@@ -118,8 +124,8 @@ create table if not exists public.filed_imputations (
   montant_ht    numeric(14,2) not null check (montant_ht <> 0),
   libelle       text,
   -- proposee : écrite par le système, en attente d'une personne ; validee : une personne l'a posée
-  -- ou approuvée ; refusee : la proposition a été écartée.
-  statut        text not null default 'proposee' check (statut in ('proposee', 'validee', 'refusee')),
+  -- ou approuvée ; refusee : la proposition a été écartée ; remplacee : une imputation plus récente la remplace.
+  statut        text not null default 'proposee' check (statut in ('proposee', 'validee', 'refusee', 'remplacee')),
   -- apprise : tirée de filed_imputations_apprises ; recurrente : d'une charge récurrente ;
   -- saisie : posée par une personne.
   origine       text not null check (origine in ('apprise', 'recurrente', 'saisie')),
@@ -138,16 +144,19 @@ comment on table public.filed_imputations is
   'Le compte du plan comptable et le centre de coût que porte chaque facture classée, ligne par ligne. Proposée par le système (apprise, récurrente), validée par une personne : aucune écriture n''est automatique.';
 comment on column public.filed_imputations.mention is 'La mention portée quand la pièce est reçue après la clôture et orientée vers l''exercice suivant.';
 
-create unique index if not exists filed_imputations_un on public.filed_imputations (facture_id, rang);
+-- Un rang n'est occupé qu'une fois parmi les lignes vivantes ; une ligne refusée ou remplacée garde son rang, en mémoire.
+create unique index if not exists filed_imputations_un on public.filed_imputations (facture_id, rang) where statut in ('proposee', 'validee');
 create index if not exists filed_imputations_client_statut on public.filed_imputations (client_id, statut);
 create index if not exists filed_imputations_compte on public.filed_imputations (compte_id);
 create index if not exists filed_imputations_centre on public.filed_imputations (centre_id);
 create index if not exists filed_imputations_exercice on public.filed_imputations (exercice_id);
 
 alter table public.filed_imputations enable row level security;
-drop policy if exists filed_imputations_lecture on public.filed_imputations;
-create policy filed_imputations_lecture on public.filed_imputations for select to authenticated
-  using (exists (select 1 from public.filed_documents d where d.id = document_id));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_imputations' and policyname = 'filed_imputations_lecture') then
+    execute 'create policy filed_imputations_lecture on public.filed_imputations for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
+  end if;
+end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5. Imputations apprises
@@ -173,9 +182,11 @@ create unique index if not exists filed_imputations_apprises_un
 create index if not exists filed_imputations_apprises_client on public.filed_imputations_apprises (client_id, fournisseur_id);
 
 alter table public.filed_imputations_apprises enable row level security;
-drop policy if exists filed_imputations_apprises_lecture on public.filed_imputations_apprises;
-create policy filed_imputations_apprises_lecture on public.filed_imputations_apprises for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_imputations_apprises' and policyname = 'filed_imputations_apprises_lecture') then
+    execute 'create policy filed_imputations_apprises_lecture on public.filed_imputations_apprises for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 6. Charges récurrentes (abonnements) et leurs écritures attendues
@@ -211,9 +222,11 @@ create index if not exists filed_charges_recurrentes_client on public.filed_char
 create index if not exists filed_charges_recurrentes_fournisseur on public.filed_charges_recurrentes (fournisseur_id);
 
 alter table public.filed_charges_recurrentes enable row level security;
-drop policy if exists filed_charges_recurrentes_lecture on public.filed_charges_recurrentes;
-create policy filed_charges_recurrentes_lecture on public.filed_charges_recurrentes for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_charges_recurrentes' and policyname = 'filed_charges_recurrentes_lecture') then
+    execute 'create policy filed_charges_recurrentes_lecture on public.filed_charges_recurrentes for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 
 create table if not exists public.filed_charges_attendues (
   id              uuid primary key default gen_random_uuid(),
@@ -241,9 +254,11 @@ create index if not exists filed_charges_attendues_client_statut on public.filed
 create index if not exists filed_charges_attendues_facture on public.filed_charges_attendues (facture_id);
 
 alter table public.filed_charges_attendues enable row level security;
-drop policy if exists filed_charges_attendues_lecture on public.filed_charges_attendues;
-create policy filed_charges_attendues_lecture on public.filed_charges_attendues for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_charges_attendues' and policyname = 'filed_charges_attendues_lecture') then
+    execute 'create policy filed_charges_attendues_lecture on public.filed_charges_attendues for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 7. Horodatage de mise à jour (même mécanique que les autres tables FILED : maj_le)
@@ -260,8 +275,7 @@ declare t text;
 begin
   foreach t in array array['filed_exercices', 'filed_plan_comptable', 'filed_centres_cout', 'filed_imputations',
                            'filed_imputations_apprises', 'filed_charges_recurrentes', 'filed_charges_attendues'] loop
-    execute format('drop trigger if exists %I_maj_le on public.%I', t, t);
-    execute format('create trigger %I_maj_le before update on public.%I for each row execute function private.filed_lot4_maj_le()', t, t);
+    execute format('create or replace trigger %I_maj_le before update on public.%I for each row execute function private.filed_lot4_maj_le()', t, t);
   end loop;
 end $$;
 

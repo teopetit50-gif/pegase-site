@@ -180,10 +180,10 @@ begin
      order by a.attendue_le
   loop
     update public.filed_charges_attendues set statut = 'manquante', alerte_le = now() where id = v_a.id;
-    perform private.lever_alerte(p_client, false, 'attention', 'filed',
+    perform private.lever_alerte_module(p_client, 'filed', 'attention',
       left(format('Facture attendue absente : %s (%s), période %s', v_a.charge_libelle, v_a.fournisseur, to_char(v_a.periode, 'MM/YYYY')), 200),
       jsonb_build_object('charge', v_a.charge_id, 'attendue', v_a.id, 'periode', v_a.periode, 'attendue_le', v_a.attendue_le, 'montant_ht', v_a.montant_ht, 'entite', v_a.entite_id),
-      'filed.charge_manquante:' || v_a.id::text);
+      'charge_manquante:' || v_a.id::text, true, null);
     perform private.filed_journaliser(p_client, 'filed.charge_manquante', 'filed_charge_attendue', v_a.id::text,
       jsonb_build_object('charge', v_a.charge_id, 'periode', v_a.periode, 'attendue_le', v_a.attendue_le), v_a.entite_id);
     v_n := v_n + 1;

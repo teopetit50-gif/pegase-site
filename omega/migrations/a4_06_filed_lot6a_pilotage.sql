@@ -33,9 +33,11 @@ comment on table public.filed_reglements is
 create index if not exists filed_reglements_facture on public.filed_reglements (facture_id);
 create index if not exists filed_reglements_client on public.filed_reglements (client_id, regle_le);
 alter table public.filed_reglements enable row level security;
-drop policy if exists filed_reglements_lecture on public.filed_reglements;
-create policy filed_reglements_lecture on public.filed_reglements for select to authenticated
-  using (exists (select 1 from public.filed_documents d where d.id = document_id));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_reglements' and policyname = 'filed_reglements_lecture') then
+    execute 'create policy filed_reglements_lecture on public.filed_reglements for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
+  end if;
+end $$;
 revoke insert, update, delete on public.filed_reglements from anon, authenticated;
 grant select on public.filed_reglements to authenticated;
 
@@ -57,9 +59,11 @@ comment on table public.filed_litiges is
 create index if not exists filed_litiges_facture on public.filed_litiges (facture_id);
 create index if not exists filed_litiges_ouverts on public.filed_litiges (client_id) where clos_le is null;
 alter table public.filed_litiges enable row level security;
-drop policy if exists filed_litiges_lecture on public.filed_litiges;
-create policy filed_litiges_lecture on public.filed_litiges for select to authenticated
-  using (exists (select 1 from public.filed_documents d where d.id = document_id));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_litiges' and policyname = 'filed_litiges_lecture') then
+    execute 'create policy filed_litiges_lecture on public.filed_litiges for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
+  end if;
+end $$;
 revoke insert, update, delete on public.filed_litiges from anon, authenticated;
 grant select on public.filed_litiges to authenticated;
 
@@ -191,7 +195,7 @@ begin
     imp as (
       select i.facture_id, i.centre_id, sum(i.montant_ht) as part, sum(sum(i.montant_ht)) over (partition by i.facture_id) as total
         from public.filed_imputations i join f on f.id = i.facture_id
-       where i.statut = 'validee' and i.rang <= 100
+       where i.statut = 'validee'
        group by i.facture_id, i.centre_id
     ),
     rep as (
@@ -432,8 +436,8 @@ begin
       for v_r in
         select d.reference, e.nom as entite, fo.nom as fournisseur, f.nature, f.numero, f.date_emission, f.date_reception, f.echeance_lue, f.devise, f.montant_ht, f.montant_tva, f.montant_ttc, f.statut,
                array_to_string(f.anomalies, ' ') as anomalies,
-               (select string_agg(c.numero, ' ') from public.filed_imputations i join public.filed_plan_comptable c on c.id = i.compte_id where i.facture_id = f.id and i.statut = 'validee' and i.rang <= 100) as comptes,
-               (select string_agg(k.code, ' ') from public.filed_imputations i join public.filed_centres_cout k on k.id = i.centre_id where i.facture_id = f.id and i.statut = 'validee' and i.rang <= 100) as centres,
+               (select string_agg(c.numero, ' ') from public.filed_imputations i join public.filed_plan_comptable c on c.id = i.compte_id where i.facture_id = f.id and i.statut = 'validee') as comptes,
+               (select string_agg(k.code, ' ') from public.filed_imputations i join public.filed_centres_cout k on k.id = i.centre_id where i.facture_id = f.id and i.statut = 'validee') as centres,
                (select x.libelle from public.filed_factures_exercices fe join public.filed_exercices x on x.id = fe.exercice_id where fe.facture_id = f.id) as exercice
           from private.filed_factures_visibles(p_client, p_entite) f
           join public.filed_documents d on d.id = f.document_id
@@ -485,9 +489,11 @@ comment on table public.filed_exports_programmes is
   'Les exports à date fixe d''une organisation : quel tableau, à quelle cadence, pour qui. Le balayage de FILED les produit le jour venu dans filed_exports.';
 create index if not exists filed_exports_programmes_a_faire on public.filed_exports_programmes (prochain_le) where actif;
 alter table public.filed_exports_programmes enable row level security;
-drop policy if exists filed_exports_programmes_lecture on public.filed_exports_programmes;
-create policy filed_exports_programmes_lecture on public.filed_exports_programmes for select to authenticated
-  using (client_id in (select private.mes_clients()));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_exports_programmes' and policyname = 'filed_exports_programmes_lecture') then
+    execute 'create policy filed_exports_programmes_lecture on public.filed_exports_programmes for select to authenticated using (client_id in (select private.mes_clients()))';
+  end if;
+end $$;
 revoke insert, update, delete on public.filed_exports_programmes from anon, authenticated;
 grant select on public.filed_exports_programmes to authenticated;
 
@@ -501,16 +507,20 @@ create table if not exists public.filed_exports (
   au            date,
   nb_lignes     integer not null,
   sha256        text not null,
-  contenu       text not null,
+  -- Le CSV lui-même ; vidé à 90 jours (purge_le), l'empreinte et la période restent.
+  contenu       text,
+  purge_le      timestamptz,
   genere_le     timestamptz not null default now()
 );
 comment on table public.filed_exports is
-  'Les exports produits à date fixe : le CSV, son empreinte, sa période. Gardés pour être téléchargés ; purgés à 90 jours par le balayage.';
+  'Les exports produits à date fixe : le CSV, son empreinte, sa période. Le contenu est vidé à 90 jours par le balayage ; la ligne et son empreinte restent.';
 create index if not exists filed_exports_client on public.filed_exports (client_id, genere_le desc);
 alter table public.filed_exports enable row level security;
-drop policy if exists filed_exports_lecture on public.filed_exports;
-create policy filed_exports_lecture on public.filed_exports for select to authenticated
-  using (client_id in (select private.mes_clients()) and (entite_id is null or private.perimetre_couvre((select auth.uid()), client_id, entite_id)));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_exports' and policyname = 'filed_exports_lecture') then
+    execute 'create policy filed_exports_lecture on public.filed_exports for select to authenticated using (client_id in (select private.mes_clients()) and (entite_id is null or private.perimetre_couvre((select auth.uid()), client_id, entite_id)))';
+  end if;
+end $$;
 revoke insert, update, delete on public.filed_exports from anon, authenticated;
 grant select on public.filed_exports to authenticated;
 
@@ -582,16 +592,16 @@ begin
               encode(extensions.digest(convert_to(v_csv, 'UTF8'), 'sha256'), 'hex'), v_csv)
       returning id into v_id;
       update public.filed_exports_programmes set dernier_le = p_aujourdhui, prochain_le = private.filed_prochain_export(cadence, jour, p_aujourdhui), maj_le = now() where id = v_p.id;
-      perform private.lever_alerte(v_p.client_id, false, 'info', 'filed',
+      perform private.lever_alerte_module(v_p.client_id, 'filed', 'info',
         left(format('Export prêt : %s (%s au %s)', v_p.tableau, to_char(v_du, 'DD/MM/YYYY'), to_char(v_au, 'DD/MM/YYYY')), 200),
-        jsonb_build_object('export', v_id, 'programme', v_p.id, 'tableau', v_p.tableau, 'destinataire', v_p.destinataire),
-        'filed.export:' || v_id::text);
+        jsonb_build_object('export', v_id, 'programme', v_p.id, 'tableau', v_p.tableau),
+        'export:' || v_id::text, true, v_p.destinataire);
       v_n := v_n + 1;
     exception when others then
       raise warning 'FILED : export programmé % non produit (%)', v_p.id, sqlerrm;
       update public.filed_exports_programmes set prochain_le = p_aujourdhui + 1, maj_le = now() where id = v_p.id;
     end;
   end loop;
-  delete from public.filed_exports where genere_le < now() - interval '90 days';
+  update public.filed_exports set contenu = null, purge_le = now() where contenu is not null and genere_le < now() - interval '90 days';
   return v_n;
 end $$;

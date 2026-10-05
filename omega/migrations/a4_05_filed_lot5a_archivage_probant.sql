@@ -34,9 +34,11 @@ create index if not exists filed_archives_client on public.filed_archives (clien
 create index if not exists filed_archives_document on public.filed_archives (document_id);
 
 alter table public.filed_archives enable row level security;
-drop policy if exists filed_archives_lecture on public.filed_archives;
-create policy filed_archives_lecture on public.filed_archives for select to authenticated
-  using (exists (select 1 from public.filed_documents d where d.id = document_id));
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'filed_archives' and policyname = 'filed_archives_lecture') then
+    execute 'create policy filed_archives_lecture on public.filed_archives for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id))';
+  end if;
+end $$;
 revoke insert, update, delete on public.filed_archives from anon, authenticated;
 grant select on public.filed_archives to authenticated;
 
@@ -50,8 +52,7 @@ begin
   end if;
   raise exception 'Une archive ne se modifie pas et ne s''efface pas.' using errcode = '55000';
 end $$;
-drop trigger if exists filed_archives_immuable on public.filed_archives;
-create trigger filed_archives_immuable before update or delete on public.filed_archives
+create or replace trigger filed_archives_immuable before update or delete on public.filed_archives
   for each row execute function private.filed_archives_immuable();
 
 insert into private.tables_locataires (nom, ordre_effacement, note) values ('filed_archives', 3, 'FILED, lot 5')

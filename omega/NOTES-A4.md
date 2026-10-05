@@ -1,67 +1,124 @@
-# NOTES — worker A4 (FILED : comptabilité, archivage, pilotage)
+# NOTES — worker A4 (FILED : comptabilité, archivage, pilotage, circuit de validation)
 
-Branche `worker-a4`. Périmètre : `omega/migrations/*_filed_lot4_*` à `*_filed_lot6_*`,
-`omega/tests/filed/`. Recette seulement (omega-recette) ; la production est au coordinateur.
+Branche `worker-a4`. Périmètre : `omega/migrations/a4_*.sql`, `omega/tests/filed/`.
+Recette seulement (omega-recette) ; la production est au coordinateur.
 
 ## Organisation (05/10/2026)
 
-- Le coordinateur a repris la main sur la base : chaque appel à l'outil Supabase bloquait la
-  session sur une autorisation. Les migrations et les tests sont écrits ici, commités, puis
-  envoyés au coordinateur par message, qui les applique sur la recette et renvoie les erreurs.
-- Les corps de fonctions et le DDL du socle ont été demandés au coordinateur (message du
-  05/10, 20 points) ; en attendant, les lots qui n'en dépendent pas sont écrits.
+- Le coordinateur applique sur la recette : chaque appel direct à l'outil Supabase bloquait la
+  session. Les migrations et les tests sont écrits ici, commités et poussés sur `worker-a4`.
+- Les corps du socle viennent de `omega/SOCLE-EXTRAITS-FILED.sql` (origin/main) et des trois
+  messages du coordinateur. Rien n'a été écrit à l'aveugle.
+- **Validation locale** : un PostgreSQL 16 de la session, avec une souche du socle
+  (`omega/tests/filed/souche_locale/`). Les huit migrations s'appliquent dans l'ordre, puis une
+  seconde fois (idempotence), et les quatre fichiers de tests passent. Ce n'est pas la recette :
+  les écarts possibles sont listés plus bas.
 
-## Fait (écrit et commité sur worker-a4, pas encore appliqué sur la recette)
+## Fait (prêt à poser, dans l'ordre)
 
-- `omega/tests/0000_pgtap.sql` : installation de pgTAP (recette seulement).
-- `…_filed_lot4a_comptabilite_tables.sql` : exercices, plan comptable, centres de coût,
-  imputations, imputations apprises, charges récurrentes et charges attendues ; inscription
-  dans `private.tables_locataires` / `tables_objets`.
-- `…_filed_lot4b_comptabilite_portes.sql` : statut de facture étendu (validee, refusee,
-  comptabilisee) ; `filed_factures_exercices` et l'orientation vers l'exercice suivant après
-  clôture, avec sa mention ; portes `filed_ouvrir_exercice`, `filed_cloturer_exercice`,
-  `filed_poser_compte`, `filed_retirer_compte`, `filed_poser_centre`, `filed_retirer_centre`,
-  `filed_imputer_facture` ; apprentissage (`private.filed_apprendre_imputation`,
-  `filed_imputation_apprise`) ; proposition soumise à la file (`private.filed_proposer_imputation`,
-  demande `filed.imputer`) ; décision (`private.filed_decider_imputation`) ; contrôles
-  `exercice.cloture` / `exercice.absent`.
-- `…_filed_lot4c_charges_recurrentes.sql` : portes `filed_declarer_charge_recurrente`,
-  `filed_arreter_charge_recurrente` ; génération des écritures attendues treize mois devant ;
-  reconnaissance de la facture qui sert une écriture (contrôle `recurrence.reconnue`, imputation
-  proposée) ; facture attendue absente → alerte `attention` (`private.lever_alerte`).
-- `…_filed_lot4d_controles_identite.sql` : analyse d'un numéro de TVA de l'Union (format pour
-  les 27 États + Irlande du Nord, clé calculée pour FR, BE, DE, IT, LU, NL, PT, DK, FI, SE, PL,
-  AT, SI, HU), SIREN porté par la TVA française, `filed_verifications_tiers` (VIES / Sirene,
-  écrites par l'ouvrier), contrôles `identite.tva_intracom`, `identite.siren`,
-  `identite.coherence`, `identite.registre`.
-- `…_filed_lot5a_archivage_probant.sql` : `filed_archives` (ajout seul, trigger d'immuabilité),
-  `private.filed_archiver` (empreinte SHA-256 liant fichier, valeurs lues, numéro de réception,
-  version ; inscrite au journal opposable), `filed_verifier_archive`, `filed_piste_audit`.
-- `…_filed_lot6a_pilotage.sql` : `filed_reglements`, `filed_litiges` et leurs portes ;
-  `filed_engage_mois`, `filed_echeancier`, `filed_delai_traitement`, `filed_pieces_en_cours` ;
-  huit indicateurs `filed.*` et `private.filed_mesurer` ; `filed_exporter_tableau` (CSV, journal
-  avec empreinte) ; exports programmés (`filed_programmer_export`, `private.filed_produire_exports`).
-- Tests : `omega/tests/filed/lot4a_structure.sql`, `lot4c_periodes.sql`, `lot4d_identite.sql`,
-  `lot5a_archive_structure.sql`, `lot6a_pilotage_structure.sql`.
+| Fichier | Ce qu'il pose |
+|---|---|
+| `a4_01_filed_lot4a_comptabilite_tables.sql` | `filed_exercices`, `filed_plan_comptable`, `filed_centres_cout`, `filed_imputations`, `filed_imputations_apprises`, `filed_charges_recurrentes`, `filed_charges_attendues` ; RLS, `maj_le`, effacement. |
+| `a4_02_filed_lot4b_comptabilite_portes.sql` | statut de facture étendu (`validee`, `refusee`, `comptabilisee`, contrainte `filed_factures_statut_v2`) ; `filed_factures_exercices` et l'orientation après clôture avec sa mention ; portes `filed_ouvrir_exercice`, `filed_cloturer_exercice`, `filed_poser_compte`, `filed_retirer_compte`, `filed_poser_centre`, `filed_retirer_centre`, `filed_imputer_facture` ; apprentissage et proposition (`filed.imputer`, décision `private.filed_decider_imputation`) ; contrôles `exercice.cloture`, `exercice.absent`. |
+| `a4_03_filed_lot4c_charges_recurrentes.sql` | `filed_declarer_charge_recurrente`, `filed_arreter_charge_recurrente` ; écritures attendues treize mois devant ; facture reconnue (`recurrence.reconnue`, imputation proposée) ; facture attendue absente → alerte `attention` au client. |
+| `a4_04_filed_lot4d_controles_identite.sql` | `private.filed_tva_intracom_analyser` (format des 27 États + XI ; clé pour FR, BE, DE, IT, LU, NL, PT, DK, FI, SE, PL, AT, SI, HU), `filed_siren_de_tva_fr`, `filed_verifications_tiers` (VIES / Sirene, écrites par l'ouvrier par `public.filed_repondre_verification`, service_role), contrôles `identite.tva_intracom`, `identite.siren`, `identite.coherence`, `identite.registre`. |
+| `a4_05_filed_lot5a_archivage_probant.sql` | `filed_archives` (ajout seul), `private.filed_archiver` (empreinte SHA-256 : fichier, valeurs lues, numéro de réception, version ; inscrite au journal opposable), `filed_verifier_archive`, `filed_piste_audit`. |
+| `a4_06_filed_lot6a_pilotage.sql` | `filed_reglements`, `filed_litiges` et leurs portes ; `filed_engage_mois`, `filed_echeancier`, `filed_delai_traitement`, `filed_pieces_en_cours` ; huit indicateurs `filed.*` et `private.filed_mesurer` ; `filed_exporter_tableau` (CSV, journal avec empreinte) ; exports programmés (`filed_programmer_export`, `filed_arreter_export`, `private.filed_produire_exports`). |
+| `a4_07_filed_lot4f_circuit_validation.sql` | `filed_circuits` (→ `regles_validation`), `filed_validations`, `filed_factures_annexes` ; `filed_regler_circuit`, `filed_retirer_circuit`, `filed_joindre_annexe`, `filed_comptabiliser_facture` ; `private.filed_deposer_validation` (type `filed.valider_facture[.<centre>][.direction]`), `filed_decider_facture`, `filed_relancer_validations`, `filed_saisisseurs`. |
+| `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
-## Bloqué
+Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
+`a4_01_parcours_facture.sql` (identité, exercice, validation par la file, archive au journal, piste
+d'audit, imputation posée puis apprise et proposée, comptabilisation, échéancier, règlement,
+mesures, export), `a4_02_circuit_et_charges.sql` (circuit à deux approbations, délégation datée,
+séparation saisie/approbation, relance puis remontée, refus avec motif et annexes, TVA fausse
+bloquante, charges récurrentes et facture absente, écart de prix dans la tolérance signalé,
+litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
 
-- Lot 4e (branchements dans `filed_controler_facture`, `filed_rapprocher_ligne`,
-  `filed_traiter`, `filed_executer_decision`) et lot 4f (circuit de validation) : attente du
-  coordinateur (corps de `filed_executer_decision`, `filed_deposer_demande`, mécanique
-  d'approbation du socle, DDL de `demandes_validation` / `approbations` / `delegations`,
-  repères exacts dans les corps à modifier, colonnes des tables d'exemple pour les tests).
-- Aucune migration n'est encore appliquée sur la recette : le coordinateur applique.
+## À faire par le coordinateur, dans l'ordre
 
-## Demain
+1. Appliquer `a4_01` → `a4_08` sur la recette.
+2. **Après `a4_02`** : retirer à la main l'ancienne contrainte CHECK de `filed_factures.statut`
+   (celle sans nom explicite, « statut in (a_completer, bloquee, a_valider, ecartee) »). Sans
+   cela, la première validation échoue sur « violates check constraint ». La v2 la remplace.
+3. Lancer les quatre tests ; chacun finit par « … : tous les contrôles passent. ».
+4. Si `public.filed_installer(uuid)` n'existe pas sous ce nom sur la recette, le test 1 le dit
+   à sa première ligne : me le signaler.
 
-- Lot 4e, lot 4f, tests de bout en bout (organisation d'exemple, facture, imputation, clôture,
-  charge manquante, archive, export), application sur la recette, corrections.
+## Bloqué / à vérifier sur la recette (écarts possibles avec la souche locale)
 
-## Lignes de factures.ts rendues vraies
-
-(à compléter au fur et à mesure)
+- `private.filed_rapprocher_facture` réel : le test 8 de `a4_02` suppose qu'une ligne de facture
+  de même rang qu'une ligne de commande est appariée (la souche le fait par rang). Si le réel
+  apparie autrement, seul ce test est à adapter, pas le code.
+- `public.pieces` : les tests insèrent `(id, client_id, objet_type, objet_id, sha256, statut)`.
+  S'il y a d'autres colonnes NOT NULL, les tests sont à compléter.
+- Les droits `filed.pilotage` des indicateurs (`droit_lecture`, `droit_detail`) : nom choisi
+  faute de catalogue des droits ; à aligner si le socle en a un.
+- Le push GitHub a été refusé (403) de 16:00 à 16:15 UTC, puis rétabli. Rappel posé à 16:37
+  pour vérifier ; sans objet désormais.
 
 ## Demandes au coordinateur
 
-(à compléter)
+- **Séparation saisie / approbation** : elle est appliquée par FILED *après* la décision
+  (`filed_decider_facture` : approbation sans effet, demande redéposée, alerte). Le socle ne
+  refuse que le `demandeur_id`, nul pour une demande système. Pour refuser *avant* la décision,
+  une ligne dans `private.preparer_approbation` suffirait : refuser `v_decideur` s'il est dans
+  `v_d.payload->'saisi_par'` (FILED y met les déposants et correcteurs). À votre main.
+- **Alerte « facture attendue absente »** : levée une fois par écriture (clé
+  `filed:charge_manquante:<id>`). Quand la facture arrive tard, l'écriture passe en `recue`
+  mais l'alerte reste ouverte : je n'ai pas trouvé de porte de clôture d'alerte. S'il en
+  existe une, l'appel va dans `private.filed_reconnaitre_charge`.
+- **Ouvrier VIES / Sirene** (hors base, à confier à un ouvrier) : lire
+  `filed_verifications_tiers` où `repondu_le is null` ; pour `registre = 'vies'`, appeler le
+  service SOAP/REST VIES de la Commission (`checkVatService`, pays = 2 premières lettres,
+  numéro = le reste) ; pour `'sirene'`, l'API Sirene de l'INSEE (`/siren/{siren}`, état
+  administratif A/C) ; écrire la réponse par `public.filed_repondre_verification(id, 'valide' |
+  'invalide' | 'indisponible', preuve jsonb {nom, adresse, etat, date})` avec la clé service ;
+  puis recontrôler les factures du fournisseur (`private.filed_controler_facture` sur les
+  factures en `a_valider` / `bloquee`). Une réponse vaut 90 jours (`filed_verification_recente`).
+  Aucun secret en base : les clés d'API restent chez l'ouvrier.
+- **Site** (`lib/produits/capacites/factures.ts`, hors de mon périmètre) : les lignes ci-dessous
+  peuvent passer à `atteste: true` une fois la recette verte et la production poussée.
+- Le `cron.job 'omega-filed'` suffit : le balayage du lot 4 tourne dans `filed_traiter`, une
+  fois par heure et par organisation. Aucune tâche cron à ajouter.
+
+## Lignes de factures.ts rendues vraies
+
+Famille « Contrôles avant classement » :
+- « Le numéro de TVA intracommunautaire et le SIREN sont vérifiés avant classement. » — format
+  et clé en SQL, cohérence TVA/SIREN ; l'existence au registre (VIES, Sirene) par l'ouvrier
+  décrit ci-dessus, lue par le contrôle `identite.registre`.
+- « Un écart de prix ou de quantité par rapport à la commande est signalé, pas absorbé. »
+- « Une pièce reçue après la clôture est orientée vers l'exercice suivant, avec sa mention. »
+
+Famille « Circuit de validation » (reprise sur demande du coordinateur) :
+- « L'approbation suit le montant, le centre de coût et la société concernée. »
+- « Au-delà d'un seuil que vous fixez, deux approbations distinctes sont exigées. »
+- « Une délégation d'approbation se pose pour une absence, avec sa date de fin. » (socle,
+  testé par FILED)
+- « L'approbateur qui n'a pas répondu est relancé, puis la pièce remonte d'un niveau. »
+- « Le commentaire, la pièce jointe et le motif de refus restent attachés à la facture. »
+- « Celui qui saisit et celui qui approuve ne peuvent pas être la même personne. »
+
+Famille « Comptabilité et archivage » :
+- « L'imputation analytique s'apprend sur vos écritures passées, fournisseur par fournisseur. »
+- « Chaque pièce est affectée au plan comptable et au centre de coût qui la portent. »
+- « Les charges récurrentes produisent leurs écritures d'abonnement sans ressaisie. »
+- « L'archivage est à valeur probante, et la piste d'audit reste reconstituable. »
+- « Le journal des pièces reçues est numéroté en continu et ne se modifie pas. » — déjà vrai
+  par le lot F1 (`filed_documents` numérotées R2026-000001, `filed_historique` immuable) ; pas
+  mon travail, à attester par le coordinateur.
+
+Famille « Pilotage » :
+- « L'engagé du mois se lit par fournisseur, par société et par centre de coût. »
+- « L'échéancier fournisseur donne la prévision de décaissement à trente et soixante jours. »
+- « Le délai moyen de traitement se mesure de la réception au classement. »
+- « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
+- « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
+
+## Demain
+
+- Retours de la recette : corriger, re-pousser.
+- Si le coordinateur retient la ligne dans `preparer_approbation`, retirer la redéposition
+  post-décision de `filed_decider_facture` (elle devient inutile).
+- L'écran : rien ici ; les portes et les fonctions de lecture sont prêtes pour lui.
