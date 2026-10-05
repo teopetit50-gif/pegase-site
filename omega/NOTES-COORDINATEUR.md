@@ -28,6 +28,9 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | banc_lot19q | entité principale du banc : territoire 'FR' (était NULL : Tiroma refusait d'installer) |
 | socle_lot19r / 19s / 19t / 19u | compléments d'a5_01 trouvés en jouant B3 : 89 fonctions de trigger de private exécutables par authenticated (19r, précaution) ; fermeture transitive rejouée (19s, 0) ; fonctions des politiques/CHECK/defaults/vues (19t, 0) ; **fonctions dans la clause WHEN des triggers** (19u : `private.tiroma_trace_ecriture()` dans 23 triggers `tiroma_*_tracer`, « permission denied » sur un INSERT du gérant) |
 | tiroma_b3_01 | B3 : portes tiroma_installer_cabinet / brancher / changer_mode exécutables par un gérant/titulaire avec contrôle de droits (worker-b3 da2fc7a). Tests B3 01–04 : 96/98 ok (les 2 restants : attentes fausses sur UPDATE/DELETE sous RLS, renvoyées) |
+| filed_lot7 (a4_10, 316697e) | identité du fournisseur : colonnes de verdict, filed_confirmer_fournisseur, filed_attester_identite, « indisponible » vaut 2 h. Test a4_05 vert. **Mais** le branchement de filed_completer_fournisseur_lu en tête de filed_controler_facture n'a pas pris (patch par repère) : F-2026-0413 dit toujours « Aucun SIREN » ; a4_11 demandé (corps complet) |
+| tavaro_b2_01 / b2_02 (d8698d8) | séparation saisie/approbation (payload.saisi_par) ; relances des impayés (colonnes, portes, cron tavaro-relances 09:15 UTC). TOUT_B2 : 5 fichiers verts sur 11 (158 ok), 6 renvoyés (attente saisie_protegee, cast smallint, emails en doublon dans le jeu, alertes sans colonne module) |
+| varelo_b1_01 (3c6561f) | rôles exigés sur grp_installer / deposer_codes / rapprocher / appliquer_decisions. Tests B1 : 14/14 morts sur tests.role_admis manquante (aide de B1 non définie), renvoyé |
 | socle_lot19j | effet de bord d'a5_01 : le service_role n'avait EXECUTE sur `private` que par PUBLIC → « permission denied for function piece_a_lire » chez le lecteur à 18 h 55 Z. `grant execute on all functions in schema private to service_role` + default privileges (19 h 05 Z). À intégrer dans a5_01 (demandé à A5) |
 | filed_lot4a … filed_lot4g, filed_lot5a, filed_lot6a | les neuf migrations d'A4 (`omega/migrations/a4_01` à `a4_09`) : exercices, plan comptable, centres, imputations apprises, charges récurrentes, identité TVA/SIREN, archivage probant, pilotage, circuit de validation, branchements, acquittement d'alerte. `filed_factures_statut_check` retiré, `filed_factures_statut_v2` en place |
 
@@ -84,7 +87,7 @@ gérant du banc après a5_01 : vert.
 
 | Fonction | Session | verify_jwt | Secrets attendus |
 |---|---|---|---|
-| `lecteur` (v4, commit e483a22, version 11) | A1 | true | `ANTHROPIC_API_KEY` (posée le 5/10, fournisseur anthropic, modèle claude-sonnet-5-5) ou `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION` + `BEDROCK_MODEL_ID` (Bedrock) ; `MISTRAL_API_KEY` (OCR, facultatif) |
+| `lecteur` (v4.1, commit 7425991, version 13 ; rpc() exportée de _partage) | A1 | true | `ANTHROPIC_API_KEY` (posée le 5/10, fournisseur anthropic, modèle claude-sonnet-5-5) ou `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION` + `BEDROCK_MODEL_ID` (Bedrock) ; `MISTRAL_API_KEY` (OCR, facultatif) |
 | `expediteur` (v2) | A2 | true | `BREVO_API_KEY` |
 | `webhooks-brevo` (v1) | A2 | false | `BREVO_WEBHOOK_JETON` |
 | `reception` (v1) | A2 | false | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` |
@@ -127,6 +130,22 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
    (workflow de sauvegarde d'A5).
 4. Brevo : domaine inbound vers `/functions/v1/reception/brevo` (le webhook
    transactionnel est posé).
+
+### Pose depuis le dépôt (depuis le 5/10, 22 h 45) — la méthode à employer
+
+Plus de recopie de SQL dans l'outil. Deux fonctions sur la recette :
+`private.depot_demander(p_chemin, p_sha)` demande le fichier brut à
+raw.githubusercontent.com (pg_net, rend un id) ; au prochain appel,
+`private.depot_executer(p_id)` exécute le contenu tel quel (les lignes
+`begin;`/`rollback;`/`commit;` d'un fichier de test sont retirées, l'appel
+étant déjà une transaction). Séquence : (1) un appel qui fait les
+`net.http_get` et rend les ids ; (2) un appel par fichier
+`select private.depot_executer(<id>)`, dans l'ordre ; (3) pour des tests
+pgTAP, `select * from runtests('tests', '^test_xx_')` à part (la sortie d'un
+runtests lancé depuis EXECUTE est perdue). Inscrire la pose dans
+`schema_migrations` avec « posé depuis le dépôt : <branche> <sha> <chemin> ».
+Le mot DELETE n'est plus un problème (l'outil ne voit pas le contenu). Les
+fonctions Edge se déploient de même en coquille sur un SHA (voir lecteur).
 
 ### Règles de pose
 
