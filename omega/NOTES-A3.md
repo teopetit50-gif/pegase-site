@@ -151,13 +151,15 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
    `omega-clients` (premier segment = un client de `mes_clients()`). Rien à
    changer : l'action serveur signe déjà avec la session de la personne.
 
-9. **Realtime** (nouveau, 05/10 soir) : pour que les écrans se relisent
-   d'eux-mêmes, ajouter à la publication `supabase_realtime` les tables
-   `demandes_validation`, `approbations`, `delegations`, `filed_documents`,
-   `filed_factures`, `filed_controles`, `filed_historique`, `points_du_jour`
-   (`alter publication supabase_realtime add table …`). Les
-   `postgres_changes` passent par RLS : une personne ne reçoit que ce
-   qu'elle lit. Tant que ce n'est pas fait, les écrans ne bougent qu'à la
+9. **Realtime** — posé en partie (socle_lot19h, 05/10 18:25) :
+   `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`
+   sont dans la publication `supabase_realtime`. Les écrans écoutent déjà
+   ces quatre tables : la file et la liste FILED se relisent d'elles-mêmes.
+   **Restent à publier** : `delegations` (carte « Mes délégations »),
+   `filed_controles` et `filed_historique` (contrôles rejoués, fil du
+   dossier — la liste couvre déjà le changement d'état de la facture),
+   `points_du_jour` (point remis pendant qu'on regarde). Sans eux, ces
+   détails se relisent au prochain changement d'une table publiée ou à la
    main, sans erreur.
 
 ## Prêt à fusionner
@@ -166,8 +168,8 @@ Lot « rendu PDF + temps réel » (05/10, soir) : tsc ✓, eslint ✓, build ✓
 recette aux cinq largeurs ✓ (104 contrôles). Il ajoute la dépendance
 `pdfjs-dist` à `package.json` ; `package-lock.json` est commité avec elle
 (il était désynchronisé de `package.json` — `@emnapi/*` manquants — et
-`npm ci` refusait ; il est maintenant à jour). Le temps réel attend la
-publication des tables (demande 9).
+`npm ci` refusait ; il est maintenant à jour). Le temps réel est actif sur
+les quatre tables publiées (demande 9 pour les autres).
 
 ## Demain
 
