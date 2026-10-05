@@ -51,15 +51,16 @@ begin
   return v_cabinet;
 end $$;
 
--- L'équipe type du scénario : un praticien pour daf (collaborateur), un membre pour referent (assistante),
--- et trois fauteuils. À appeler sous le jeton du gérant titulaire (après b3_installer). Rend les identifiants.
+-- L'équipe type du scénario : deux praticiens nommés comme dans l'export Logos_w d'exemple (« Dr Lacour » titulaire,
+-- « Dr Rousseau » collaborateur relié à daf), un membre pour referent (assistante), et trois fauteuils nommés comme
+-- les salles de l'export. À appeler sous le jeton du gérant titulaire (après b3_installer). Rend les identifiants.
 create or replace function tests.b3_equipe() returns jsonb language plpgsql as $$
 declare v_prat uuid; v_prat2 uuid; v_membre uuid; f1 uuid; f2 uuid; f3 uuid;
 begin
   insert into public.tiroma_praticiens (client_id, entite_id, nom_affiche, metier)
-  values (tests.b3_banc(), tests.b3_entite(), 'Dr Titulaire (banc)', 'titulaire') returning id into v_prat;
+  values (tests.b3_banc(), tests.b3_entite(), 'Dr Lacour', 'titulaire') returning id into v_prat;
   insert into public.tiroma_praticiens (client_id, entite_id, nom_affiche, metier)
-  values (tests.b3_banc(), tests.b3_entite(), 'Dr Collaborateur (banc)', 'collaborateur') returning id into v_prat2;
+  values (tests.b3_banc(), tests.b3_entite(), 'Dr Rousseau', 'collaborateur') returning id into v_prat2;
   insert into public.tiroma_fauteuils (client_id, entite_id, nom, capacites)
   values (tests.b3_banc(), tests.b3_entite(), 'Fauteuil 1', array['soins', 'prevention']) returning id into f1;
   insert into public.tiroma_fauteuils (client_id, entite_id, nom, capacites)
