@@ -46,7 +46,7 @@ begin
                  'un travail de rapprochement est déposé pour le banc');
 
   -- rejoué à l'identique : rien ne bouge
-  perform tests.endosser((b ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
+  perform tests.endosser((b ->> 'gerant')::uuid, 'b1-gerant@essai.invalid');
   v_bis := public.grp_deposer_codes(v_client, v_soc_a, 'fournisseur', tests.b1_lignes_a(b ->> 'siren_b'), 'export Sage 100 du 05/10');
   return next is((v_bis ->> 'nouveaux')::integer, 0, 'rejoué : aucun nouveau');
   return next is((v_bis ->> 'modifies')::integer, 0, 'rejoué : aucun modifié');

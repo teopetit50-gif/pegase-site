@@ -76,9 +76,9 @@ begin
   -- le collaborateur n'approuve pas sa propre demande ; le référent si
   return next throws_ok(format('select tests.b1_decider(%L, ''b1-collaborateur@essai.invalid'', %L, %L, ''approuve'')', b ->> 'collab', v_client, v_dem), null, null,
                         'le collaborateur n''approuve pas sa propre proposition');
-  return next lives_ok(format('select tests.b1_decider(%L, ''referent@banc-varelo.test'', %L, %L, ''approuve'')', b ->> 'referent', v_client, v_dem), 'le référent approuve le nom');
-  return next lives_ok(format('select tests.b1_decider(%L, ''referent@banc-varelo.test'', %L, %L, ''approuve'')', b ->> 'referent', v_client, v_dem2), 'le référent approuve le rattachement');
-  perform tests.endosser((b ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
+  return next lives_ok(format('select tests.b1_decider(%L, ''b1-referent@essai.invalid'', %L, %L, ''approuve'')', b ->> 'referent', v_client, v_dem), 'le référent approuve le nom');
+  return next lives_ok(format('select tests.b1_decider(%L, ''b1-referent@essai.invalid'', %L, %L, ''approuve'')', b ->> 'referent', v_client, v_dem2), 'le référent approuve le rattachement');
+  perform tests.endosser((b ->> 'gerant')::uuid, 'b1-gerant@essai.invalid');
   perform public.grp_appliquer_decisions(v_client);
   perform tests.redevenir_admin();
   select * into o from public.grp_ref_objets k where k.id = f0300.objet_id;
