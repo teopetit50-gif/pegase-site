@@ -78,6 +78,13 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   TTC » tombe sur le texte — capture `omega/recette-a3/filed-pdf-essai-900.jpg`.
   La recette automatique ne couvre pas ce rendu : il faut une session et une
   pièce réelle.
+- **Temps réel** (05/10, soir) : `components/espace/tempsReel.ts` — un canal
+  Realtime (`postgres_changes`) par écran, ouvert seulement en base réelle,
+  qui relit l'écran avec un délai de regroupement (800 ms) : validations
+  sur `demandes_validation`, `approbations`, `delegations` ; FILED sur
+  `filed_documents`, `filed_factures`, `filed_controles`, `filed_historique`
+  (le dossier ouvert est relu avec la liste) ; point sur `points_du_jour`.
+  Sans table publiée, rien n'arrive et l'écran marche comme avant.
 - **Validation** : `npx tsc --noEmit` ✓, `npx eslint components/espace
   app/espace` ✓ (0 erreur, 0 avertissement), `npm run build` ✓, recette
   aux cinq largeurs (390 / 768 / 1024 / 1440 / 1700) ✓ —
@@ -144,20 +151,25 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
    `omega-clients` (premier segment = un client de `mes_clients()`). Rien à
    changer : l'action serveur signe déjà avec la session de la personne.
 
-Reste à confirmer côté coordinateur : la clé exacte du jsonb rendu par
-`filed_deposer_piece` (point 2).
+9. **Realtime** (nouveau, 05/10 soir) : pour que les écrans se relisent
+   d'eux-mêmes, ajouter à la publication `supabase_realtime` les tables
+   `demandes_validation`, `approbations`, `delegations`, `filed_documents`,
+   `filed_factures`, `filed_controles`, `filed_historique`, `points_du_jour`
+   (`alter publication supabase_realtime add table …`). Les
+   `postgres_changes` passent par RLS : une personne ne reçoit que ce
+   qu'elle lit. Tant que ce n'est pas fait, les écrans ne bougent qu'à la
+   main, sans erreur.
 
 ## Prêt à fusionner
 
-Lot « rendu PDF » (05/10, soir) : tsc ✓, eslint ✓, build ✓, recette aux
-cinq largeurs ✓ (104 contrôles). Il ajoute la dépendance `pdfjs-dist` à
-`package.json` ; `package-lock.json` est commité avec elle (il était
-désynchronisé de `package.json` — `@emnapi/*` manquants — et `npm ci`
-refusait ; il est maintenant à jour).
+Lot « rendu PDF + temps réel » (05/10, soir) : tsc ✓, eslint ✓, build ✓,
+recette aux cinq largeurs ✓ (104 contrôles). Il ajoute la dépendance
+`pdfjs-dist` à `package.json` ; `package-lock.json` est commité avec elle
+(il était désynchronisé de `package.json` — `@emnapi/*` manquants — et
+`npm ci` refusait ; il est maintenant à jour). Le temps réel attend la
+publication des tables (demande 9).
 
 ## Demain
 
 - Relecture en conditions réelles dès qu'un client a des lignes : premier
   appel de chaque porte, messages d'erreur de la base en clair.
-- Temps réel (Supabase Realtime) sur `demandes_validation` et
-  `filed_documents` pour que la file bouge sans recharger.
