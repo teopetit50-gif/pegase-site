@@ -1,11 +1,8 @@
 // Les PORTES : les seules voies d'un ouvrier vers la base. Des fonctions du
 // schéma public réservées au rôle de service, appelées par RPC avec la clé de
-// service que Supabase fournit aux fonctions Edge. Jamais d'écriture directe.
-//
-// Deux lectures directes sont tolérées, en lecture seule et en attendant une
-// porte : public.pieces (la pièce à lire) et public.travaux (la consommation
-// IA du jour, pour le plafond). Elles sont isolées ici pour être retirées
-// d'un coup le jour où la porte existe.
+// service que Supabase fournit aux fonctions Edge. Jamais d'écriture directe,
+// et depuis le lot 19 du socle plus aucune lecture directe non plus :
+// piece_a_lire, consommation_ia_jour et lire_parametre sont des portes.
 
 import { ErreurOuvrier } from "./erreurs.ts";
 
@@ -91,12 +88,11 @@ export interface Portes {
   ): Promise<{ pages: number; valeurs: number; statut: string }>;
   battreOuvrier(module: string, genres: string[], detail: unknown, attendu?: string): Promise<number>;
 
-  // --- Lectures tolérées, en attendant des portes dédiées. ---
-  /** public.pieces en lecture seule. null si la pièce n'existe pas. */
+  /** piece_a_lire : la ligne de public.pieces ; null si la pièce n'existe pas. */
   lirePiece(id: string): Promise<Piece | null>;
-  /** Somme des cout_eur des travaux lecteur.lire finis aujourd'hui pour ce client. */
+  /** consommation_ia_jour : somme des cout_eur des travaux lecteur.lire finis depuis minuit Paris. */
   consommationIaDuJour(client: string): Promise<number>;
-  /** public.parametres (cle, valeur) ; null si absent ou si la table n'existe pas. */
+  /** lire_parametre : un réglage global (private.reglages) ; null s'il n'existe pas. */
   lireParametre(cle: string): Promise<string | null>;
 }
 
@@ -148,23 +144,6 @@ export class PortesRpc implements Portes {
     return (texte === "" ? null : JSON.parse(texte)) as T;
   }
 
-  private async lire<T>(table: string, requete: string): Promise<{ ok: true; lignes: T[] } | { ok: false; status: number }> {
-    let rep: Response;
-    try {
-      rep = await this.fetchFn(`${this.cfg.url}/rest/v1/${table}?${requete}`, { headers: this.entetes() });
-    } catch (e) {
-      throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `lecture ${table} injoignable : ${(e as Error).message}`);
-    }
-    if (!rep.ok) {
-      await rep.text();
-      if (rep.status >= 500 || rep.status === 429) {
-        throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `lecture ${table} : HTTP ${rep.status}`);
-      }
-      return { ok: false, status: rep.status };
-    }
-    return { ok: true, lignes: (await rep.json()) as T[] };
-  }
-
   async prendreTravaux(genres: string[], nombre: number, bail: string, ouvrier: string): Promise<Travail[]> {
     const lignes = await this.rpc<Travail[] | null>("prendre_travaux", {
       p_genres: genres,
@@ -202,35 +181,18 @@ export class PortesRpc implements Portes {
   }
 
   async lirePiece(id: string): Promise<Piece | null> {
-    const r = await this.lire<Piece>(
-      "pieces",
-      `id=eq.${encodeURIComponent(id)}&select=id,client_id,module,objet_type,objet_id,source,nom_fichier,mime,octets,sha256,chemin,statut,chiffrement&limit=1`,
-    );
-    if (!r.ok) throw new ErreurOuvrier("ERREUR_INTERNE", `lecture de la pièce ${id} : HTTP ${r.status}`);
-    return r.lignes[0] ?? null;
+    const p = await this.rpc<Piece | null>("piece_a_lire", { p_piece: id });
+    return p && typeof p === "object" && typeof p.id === "string" ? p : null;
   }
 
   async consommationIaDuJour(client: string): Promise<number> {
-    // Le jour civil de Paris : les plafonds se raisonnent à l'heure du client.
-    const debut = debutDuJourParis(new Date()).toISOString();
-    const r = await this.lire<{ resultat: { cout_eur?: unknown } | null }>(
-      "travaux",
-      `client_id=eq.${encodeURIComponent(client)}&genre=eq.lecteur.lire&etat=eq.fait&fini_le=gte.${encodeURIComponent(debut)}&select=resultat&limit=5000`,
-    );
-    if (!r.ok) return 0;
-    let total = 0;
-    for (const l of r.lignes) {
-      const c = Number(l.resultat?.cout_eur ?? 0);
-      if (Number.isFinite(c)) total += c;
-    }
-    return total;
+    const n = Number(await this.rpc<number | string | null>("consommation_ia_jour", { p_client: client }));
+    return Number.isFinite(n) ? n : 0;
   }
 
   async lireParametre(cle: string): Promise<string | null> {
-    const r = await this.lire<{ valeur: unknown }>("parametres", `cle=eq.${encodeURIComponent(cle)}&select=valeur&limit=1`);
-    if (!r.ok) return null; // 404 : la table n'existe pas encore sur cette base.
-    const v = r.lignes[0]?.valeur;
-    return v === undefined || v === null ? null : String(v);
+    const v = await this.rpc<string | null>("lire_parametre", { p_cle: cle });
+    return v === null || v === undefined || v === "" ? null : String(v);
   }
 }
 

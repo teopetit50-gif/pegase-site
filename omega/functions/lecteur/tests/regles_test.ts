@@ -73,14 +73,14 @@ Deno.test("plafond IA atteint : PLAFOND_IA non définitif, IA non appelée", asy
   assertEquals(ia!.appels.length, 0);
 });
 
-Deno.test("plafond lu dans public.parametres avant l'environnement", async () => {
+Deno.test("plafond lu par lire_parametre avant l'environnement", async () => {
   const { ctx, portes, depot, ia } = contexteDeTest({ env: { PLAFOND_IA_JOUR_CLIENT_EUR: "100" } });
   const piece = await poserPiece(portes, depot);
   portes.parametres.set("plafond_ia_jour_client", "0,5");
   portes.consommation.set(piece.client_id, 0.499);
   ia!.prochaine = cas01.ia!;
   assertEquals(await lirePiece(ctx, travailDeTest(1, piece.id)), "repris");
-  assert(portes.echoues[0].erreur.includes("(parametres)"), portes.echoues[0].erreur);
+  assert(portes.echoues[0].erreur.includes("(reglage)"), portes.echoues[0].erreur);
 });
 
 Deno.test("fichier absent du dépôt : échec définitif motivé, travail fini", async () => {
