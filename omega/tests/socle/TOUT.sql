@@ -1292,7 +1292,7 @@ end $f$;
 
 
 
--- 44 — dans private, anon n'exécute rien et authenticated n'exécute que les fonctions requises
+-- 44 — dans private, anon n'exécute rien, authenticated n'exécute que les fonctions requises, service_role exécute tout
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql.
 -- Requises = citées par une politique RLS (pg_depend) ou appelées par une fonction publique SECURITY INVOKER
 -- exécutable par authenticated, avec fermeture transitive (tests.fonctions_private_requises()).
@@ -1321,6 +1321,14 @@ begin
     select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute') order by 1
   $q$, 'anon n''exécute aucune fonction de private');
+  -- (f) service_role, la clé d'Omega, garde tout : il n'est jamais compté parmi les « en trop »
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    return next is_empty($q$
+      select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'private' and p.prokind = 'f' and not has_function_privilege('service_role', p.oid, 'execute') order by 1
+    $q$, 'service_role exécute toutes les fonctions de private (lecteur, tâches)');
+    return next ok(has_schema_privilege('service_role', 'private', 'USAGE'), 'service_role a USAGE sur private');
+  end if;
   return next diag('Requises : ' || coalesce(requises, 'aucune'));
 end $f$;
 

@@ -10,8 +10,9 @@
 -- (texte du corps), (c) qu'un déclencheur SECURITY INVOKER de private appelle, (d) qu'une vue de public
 -- lisible par authenticated utilise (pg_depend), (e) qu'un CHECK ou un DEFAULT d'une table de public utilise
 -- (pg_depend) ; avec fermeture transitive sur les fonctions SECURITY INVOKER ainsi retenues. Les fonctions
--- déclencheur elles-mêmes n'ont jamais besoin d'EXECUTE. anon ne garde rien.
--- Posée sur la recette le 5/10/2026 (version 20261005185500) : 187 fonctions sur 741 restent à authenticated.
+-- déclencheur elles-mêmes n'ont jamais besoin d'EXECUTE. anon ne garde rien. (f) service_role garde tout.
+-- Posée sur la recette le 5/10/2026 (version 20261005185500, complément service_role en 20261005190500 « lot 19j ») :
+-- 187 fonctions sur 741 restent à authenticated.
 -- La liste retenue est écrite en NOTICE et dans le journal de la migration ; la figer en clair est le
 -- travail du coordinateur après lecture (voir omega/migrations/a5_01_liste_requises.sql).
 --
@@ -92,6 +93,16 @@ begin
   alter default privileges in schema private revoke execute on functions from public;
   alter default privileges for role postgres in schema private revoke execute on functions from public;
 
+  -- 4 bis) (f) service_role est la clé d'Omega (lecteur, tâches) : il garde tout, explicitement et pour l'avenir.
+  --        Avant a5_01 il n'avait EXECUTE que par PUBLIC ; sans ce bloc, « permission denied for function piece_a_lire ».
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    grant usage on schema private to service_role;
+    grant execute on all functions in schema private to service_role;
+    grant execute on all procedures in schema private to service_role;
+    alter default privileges in schema private grant execute on functions to service_role;
+    alter default privileges for role postgres in schema private grant execute on functions to service_role;
+  end if;
+
   -- 5) Dire ce qui a été fait.
   select string_agg(signature || ' — ' || raison, E'\n  ' order by nom) into liste from _a5_requises;
   raise notice E'a5_01_private_execute : % fonction(s) de private restent exécutables par authenticated :\n  %',
@@ -107,5 +118,10 @@ begin
              where n.nspname = 'private' and p.prokind = 'f' and p.prorettype <> 'trigger'::regtype
                and has_function_privilege('authenticated', p.oid, 'execute') and p.oid not in (select oid from _a5_requises)) then
     raise exception 'a5_01_private_execute : authenticated exécute encore une fonction de private hors liste';
+  end if;
+  if exists (select 1 from pg_roles where rolname = 'service_role')
+     and exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                 where n.nspname = 'private' and p.prokind = 'f' and not has_function_privilege('service_role', p.oid, 'execute')) then
+    raise exception 'a5_01_private_execute : service_role n''exécute pas toutes les fonctions de private';
   end if;
 end $$;

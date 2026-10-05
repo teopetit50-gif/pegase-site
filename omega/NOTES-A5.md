@@ -40,6 +40,17 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Réponse au coordinateur (message de 19:02 UTC, complément (f) service_role)
+
+Intégré : `a5_01_private_execute.sql` accorde désormais à `service_role`
+USAGE sur `private`, EXECUTE sur toutes les fonctions et procédures, et les
+default privileges correspondants (schéma et `for role postgres`) ; son
+contrôle immédiat exige que `service_role` exécute tout. Le test 44 ne
+comptait déjà que `authenticated` et `anon` ; il vérifie en plus que
+`service_role` exécute toutes les fonctions de `private` et a USAGE dessus.
+Maquette : 50/50, TOUT.sql → 44 `ok`. Rejouable sur la recette sans effet
+après ton lot 19j.
+
 ## Réponse au coordinateur (message de 18:56 UTC, a5_01 posé, TOUT_1..4 rejoués)
 
 Poussé sur `worker-a5` ; TOUT*.sql régénérés ; maquette alignée (canal

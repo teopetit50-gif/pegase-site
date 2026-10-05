@@ -40,8 +40,12 @@ environ 110 fonctions de `private`, dont `filed_decider_facture`,
 `omega/migrations/a5_01_private_execute.sql` reprend tout (PUBLIC, anon,
 authenticated), rend à `authenticated` les seules fonctions dont une politique
 RLS dépend (`pg_depend`, exact) ou qu'une fonction publique SECURITY INVOKER
-exécutable par `authenticated` appelle, avec fermeture transitive, puis coupe
-l'EXECUTE par défaut pour l'avenir. Elle écrit la liste retenue en NOTICE et
+exécutable par `authenticated` appelle (ainsi que les déclencheurs SECURITY
+INVOKER de `private`, les vues lisibles et les CHECK/DEFAULT de `public`),
+avec fermeture transitive, puis coupe l'EXECUTE par défaut pour l'avenir.
+`service_role`, la clé d'Omega (lecteur, tâches), garde tout explicitement :
+avant la migration il n'avait EXECUTE que par PUBLIC, et le lecteur a perdu
+`piece_a_lire` jusqu'au complément (lot 19j). Elle écrit la liste retenue en NOTICE et
 se vérifie elle-même ; `a5_01_liste_requises.sql` donne la même liste en
 `grant` prêts à figer. Le test 44 rejoue la règle à chaque passage.
 
