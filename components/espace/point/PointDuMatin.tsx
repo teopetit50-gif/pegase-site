@@ -21,6 +21,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { pointExemple } from "../exemples/point";
 import { aujourdHui } from "../exemples/socle";
 import { useSource } from "../source";
+import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateHeure, dateLongue, libelleModule } from "../format";
 import type { LignePoint, PointDuJour } from "../types";
@@ -68,6 +69,18 @@ export default function PointDuMatin() {
       window.clearTimeout(t);
     };
   }, [source]);
+
+  /* le point du matin assemblé ou remis pendant qu'on regarde : relire la liste */
+  const relire = useCallback(async () => {
+    try {
+      const l = await listerPoints();
+      setPoints(l);
+      setContenus({});
+    } catch {
+      /* la prochaine lecture à la main dira l'erreur */
+    }
+  }, []);
+  useTempsReel(["points_du_jour"], source === "reelle", relire);
 
   const pointDuJour = useMemo(() => (points ?? []).filter((p) => p.jour === jour).sort((a, b) => b.version - a.version)[0] ?? null, [points, jour]);
 

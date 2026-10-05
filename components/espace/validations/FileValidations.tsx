@@ -26,6 +26,7 @@ import type { Utilisateur } from "@/lib/compte";
 import { APPROBATIONS_EXEMPLE, DELEGATIONS_EXEMPLE, DEMANDES_EXEMPLE } from "../exemples/validations";
 import { EXEMPLE_MOI, PERSONNES, nomEntite, nomPersonne } from "../exemples/socle";
 import { useSource } from "../source";
+import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, libelleModule, montant, relatif } from "../format";
 import type { Approbation, Delegation, Demande, Entite, Role } from "../types";
@@ -89,6 +90,18 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
     const t = window.setTimeout(() => void charger(), 0);
     return () => window.clearTimeout(t);
   }, [source, charger]);
+
+  /* une demande qui arrive, une décision prise ailleurs, une délégation
+     posée : la file se relit d'elle-même */
+  const relire = useCallback(async () => {
+    try {
+      const [contexte, file] = await Promise.all([chargerContexte(), chargerFile()]);
+      setReel({ ...file, contexte });
+    } catch {
+      /* la prochaine lecture à la main dira l'erreur */
+    }
+  }, []);
+  useTempsReel(["demandes_validation", "approbations", "delegations"], source === "reelle", relire);
 
   /* ——— qui suis-je, dans cette source ——— */
   const moi: Decideur = useMemo(() => {

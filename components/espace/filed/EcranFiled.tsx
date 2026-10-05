@@ -20,6 +20,7 @@ import { Loader } from "@/components/ui/loader";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
 import { ENTITES, EXEMPLE_CLIENT_ID, SIEGE, nomEntite } from "../exemples/socle";
 import { useSource } from "../source";
+import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import type { Commande, DossierFiled, Fournisseur, LigneCommande, MotifRefus } from "../types";
@@ -60,6 +61,18 @@ export default function EcranFiled() {
     const t = window.setTimeout(() => void charger(), 0);
     return () => window.clearTimeout(t);
   }, [source, charger]);
+
+  /* un document reçu, une facture qui change d'état, un contrôle rejoué :
+     la liste se relit, et le dossier ouvert avec elle (son cache est vidé) */
+  const relire = useCallback(async () => {
+    try {
+      const liste = await chargerListe();
+      setReel((prev) => (prev ? { ...prev, apercus: liste.apercus, motifs: liste.motifs, dossiers: {} } : prev));
+    } catch {
+      /* la prochaine lecture à la main dira l'erreur */
+    }
+  }, []);
+  useTempsReel(["filed_documents", "filed_factures", "filed_controles", "filed_historique"], source === "reelle", relire);
 
   /* ——— la liste, sous une forme commune aux deux sources ——— */
   const apercus: Apercu[] = useMemo(() => {
