@@ -8,7 +8,7 @@
    boîte surlignée dans la pièce ; reculer d'un jour sur le point.
    usage : node omega/recette-a3/recette-espace.mjs [origine] */
 import { mkdirSync } from 'node:fs';
-import { ouvrirSession } from './chrome-linux.mjs';
+import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const base = process.argv[2] ?? 'http://localhost:3010';
 const dossier = new URL('.', import.meta.url).pathname;
@@ -87,7 +87,7 @@ for (const [nom, chemin] of ECRANS) {
   await s.dormir(400);
   const boite = await s.evaluer(`(() => { const b = document.querySelector('.esp-boite[data-actif="true"]'); if (!b) return null; const r = b.getBoundingClientRect(); const p = b.parentElement.getBoundingClientRect(); return { etiquette: b.textContent, x: Math.round((r.left - p.left) / p.width * 100), y: Math.round((r.top - p.top) / p.height * 100) }; })()`);
   ok(!!boite && boite.etiquette === 'IBAN', `une boîte est surlignée, étiquette « ${boite?.etiquette} », à ${boite?.x} % / ${boite?.y} % de la page`);
-  const motif = await s.evaluer(`/COORDONNEES_BANCAIRES_NON_RECONNUES/.test(document.querySelector('#esp-dossier').innerText)`);
+  const motif = await s.evaluer(`/COORD_BANC_ERR/.test(document.querySelector('#esp-dossier').innerText)`);
   ok(motif, 'le motif officiel DGFiP du contrôle échoué est affiché');
   await s.capturer(`${dossier}filed-citation-1440.jpg`, { qualite: 55 });
   await s.evaluer(`[...document.querySelectorAll('.esp-controle-actions .r-btn')].find(b => /Lever avec un motif/.test(b.textContent))?.click()`);

@@ -1,5 +1,5 @@
 /* essai rapide : une capture d'un écran à une largeur. usage : node omega/recette-a3/essai.mjs /espace/validations 1440 */
-import { ouvrirSession } from './chrome-linux.mjs';
+import { ouvrirSession } from '../../outils/chrome.mjs';
 const [chemin = '/espace/validations', l = '1440'] = process.argv.slice(2);
 const largeur = Number(l);
 const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'essai', densite: 1 });
