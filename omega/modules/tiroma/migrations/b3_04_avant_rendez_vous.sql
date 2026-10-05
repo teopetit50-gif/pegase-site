@@ -11,7 +11,7 @@
 --      gravite: critique|attention|info, quand (date), rendez_vous_id, patient_id, patient_nom, texte, objet_type, objet_id }]
 -- triés par gravité puis par date. p_jours vaut par défaut labo_verif_jours des règles (2). Lecture seule ; idempotent.
 
-create or replace function private.tiroma_avant_rendez_vous(p_client uuid, p_entite uuid, p_jours integer default null)
+create or replace function private.tiroma_avant_rendez_vous_pour(p_client uuid, p_entite uuid, p_jours integer, p_voit_tous boolean, p_praticien uuid)
  returns jsonb
  language plpgsql
  stable
@@ -19,14 +19,12 @@ create or replace function private.tiroma_avant_rendez_vous(p_client uuid, p_ent
  set search_path to ''
 as $function$
 declare
-  rg record;
   g public.tiroma_regles;
   v_fuseau text;
   v_jour date;
   v_jours integer;
   v_res jsonb;
 begin
-  rg := private.tiroma_exiger_regard(p_client, p_entite, array['titulaire', 'collaborateur', 'assistante']);
   select * into g from public.tiroma_regles where client_id = p_client and entite_id = p_entite;
   select e.fuseau into v_fuseau from public.entites e where e.client_id = p_client and e.id = p_entite;
   if g.id is null then
@@ -38,8 +36,8 @@ begin
 
   with
   voit as (
-    select pa.id, private.tiroma_nom_patient(rg.voit_tous or pa.praticien_habituel_id = rg.praticien_id, pa.nom, pa.prenom) as nom,
-           (rg.voit_tous or pa.praticien_habituel_id = rg.praticien_id) as visible, pa.praticien_habituel_id
+    select pa.id, private.tiroma_nom_patient(p_voit_tous or pa.praticien_habituel_id = p_praticien, pa.nom, pa.prenom) as nom,
+           (p_voit_tous or pa.praticien_habituel_id = p_praticien) as visible, pa.praticien_habituel_id
     from public.tiroma_patients pa where pa.client_id = p_client and pa.entite_id = p_entite
   ),
   rdv as (
@@ -48,7 +46,7 @@ begin
     join public.tiroma_types_rdv t on t.id = r.type_rdv_id
     where r.client_id = p_client and r.entite_id = p_entite and r.statut = 'prevu' and r.patient_id is not null
       and (r.debut at time zone v_fuseau)::date between v_jour and v_jour + v_jours
-      and (rg.voit_tous or r.praticien_id = rg.praticien_id)
+      and (p_voit_tous or r.praticien_id = p_praticien)
   ),
   -- a) Le laboratoire : chaque pose (ou rendez-vous qui exige le laboratoire) et sa fiche.
   labo as (
@@ -96,7 +94,7 @@ begin
     where pl.client_id = p_client and pl.entite_id = p_entite and pl.disparu_le is null
       and pl.statut in ('presente', 'signe', 'commence') and pl.valide_jusqu_au between v_jour and v_jour + g.alerte_devis_expire_jours
       and exists (select 1 from public.tiroma_plan_actes a where a.plan_id = pl.id and a.statut <> 'fait')
-      and (rg.voit_tous or pl.praticien_id = rg.praticien_id)
+      and (p_voit_tous or pl.praticien_id = p_praticien)
     union all
     -- d) La mutuelle a répondu, personne n'a rappelé.
     select 'mutuelle_accord', 'attention', coalesce(pl.mutuelle_reponse_le, v_jour), null, pl.patient_id,
@@ -108,7 +106,7 @@ begin
       and pl.statut in ('presente', 'signe', 'commence')
       and exists (select 1 from public.tiroma_plan_actes a where a.plan_id = pl.id and a.statut = 'a_faire')
       and not exists (select 1 from public.tiroma_rendez_vous r where r.plan_id = pl.id and r.statut = 'prevu' and r.debut > now())
-      and (rg.voit_tous or pl.praticien_id = rg.praticien_id)
+      and (p_voit_tous or pl.praticien_id = p_praticien)
     union all
     -- e) La mutuelle tarde.
     select 'mutuelle_attente', 'info', pl.mutuelle_demande_le, null, pl.patient_id,
@@ -117,7 +115,7 @@ begin
     from public.tiroma_plans pl
     where pl.client_id = p_client and pl.entite_id = p_entite and pl.disparu_le is null and pl.mutuelle_statut = 'demandee'
       and pl.mutuelle_demande_le is not null and pl.mutuelle_demande_le < v_jour - g.delai_reponse_mutuelle_jours
-      and (rg.voit_tous or pl.praticien_id = rg.praticien_id)
+      and (p_voit_tous or pl.praticien_id = p_praticien)
     union all
     -- f) L'accord de l'Assurance maladie (ODF) ne vaut que six mois.
     select 'odf_accord', case when o.accord_le + interval '6 months' - interval '30 days' <= v_jour then 'critique' else 'attention' end,
@@ -155,7 +153,7 @@ begin
       and d.derniere is not null and d.derniere < v_jour - g.delai_interruption_jours
       and exists (select 1 from public.tiroma_plan_actes a where a.plan_id = pl.id and a.statut = 'a_faire')
       and not exists (select 1 from public.tiroma_rendez_vous r where r.plan_id = pl.id and r.statut = 'prevu' and r.debut > now())
-      and (rg.voit_tous or pl.praticien_id = rg.praticien_id)
+      and (p_voit_tous or pl.praticien_id = p_praticien)
     union all
     -- i) Le devis présenté sans réponse.
     select 'devis_sans_reponse', 'info', pl.presente_le, null, pl.patient_id,
@@ -164,7 +162,7 @@ begin
     from public.tiroma_plans pl
     where pl.client_id = p_client and pl.entite_id = p_entite and pl.disparu_le is null and pl.statut = 'presente'
       and pl.presente_le is not null and pl.presente_le < v_jour - g.delai_devis_presente_jours
-      and (rg.voit_tous or pl.praticien_id = rg.praticien_id)
+      and (p_voit_tous or pl.praticien_id = p_praticien)
   )
   select coalesce(jsonb_agg(jsonb_build_object(
            'nature', l.nature, 'gravite', l.gravite, 'quand', l.quand, 'rendez_vous_id', l.rendez_vous_id,
@@ -174,6 +172,19 @@ begin
   from lignes l
   left join voit v on v.id = l.patient_id;
   return v_res;
+end $function$;
+
+create or replace function private.tiroma_avant_rendez_vous(p_client uuid, p_entite uuid, p_jours integer default null)
+ returns jsonb
+ language plpgsql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+declare rg record;
+begin
+  rg := private.tiroma_exiger_regard(p_client, p_entite, array['titulaire', 'collaborateur', 'assistante']);
+  return private.tiroma_avant_rendez_vous_pour(p_client, p_entite, p_jours, rg.voit_tous, rg.praticien_id);
 end $function$;
 
 create or replace function public.tiroma_avant_rendez_vous(p_client uuid, p_entite uuid, p_jours integer default null)
@@ -188,3 +199,4 @@ $function$;
 revoke all on function public.tiroma_avant_rendez_vous(uuid, uuid, integer) from public, anon;
 grant execute on function public.tiroma_avant_rendez_vous(uuid, uuid, integer) to authenticated, service_role;
 grant execute on function private.tiroma_avant_rendez_vous(uuid, uuid, integer) to authenticated, service_role;
+grant execute on function private.tiroma_avant_rendez_vous_pour(uuid, uuid, integer, boolean, uuid) to authenticated, service_role;

@@ -12,7 +12,7 @@
 --     total: {ouvert_min, prevu_min, taux}, demi_journees_vides }
 -- « vide » : une demi-journée ouverte dont le taux est sous seuil_demi_journee_vide. Lecture seule ; idempotent.
 
-create or replace function private.tiroma_charge_fauteuils(p_client uuid, p_entite uuid, p_jour date default null)
+create or replace function private.tiroma_charge_fauteuils_pour(p_client uuid, p_entite uuid, p_jour date)
  returns jsonb
  language plpgsql
  stable
@@ -20,7 +20,6 @@ create or replace function private.tiroma_charge_fauteuils(p_client uuid, p_enti
  set search_path to ''
 as $function$
 declare
-  rg record;
   g public.tiroma_regles;
   v_fuseau text;
   v_jour date;
@@ -38,7 +37,6 @@ declare
   n_sans integer;
   v_m jsonb; v_a jsonb; v_j jsonb;
 begin
-  rg := private.tiroma_exiger_regard(p_client, p_entite, array['titulaire']);
   select * into g from public.tiroma_regles where client_id = p_client and entite_id = p_entite;
   select e.fuseau into v_fuseau from public.entites e where e.client_id = p_client and e.id = p_entite;
   v_fuseau := coalesce(v_fuseau, 'UTC');
@@ -78,6 +76,18 @@ begin
     'demi_journees_vides', v_vides);
 end $function$;
 
+create or replace function private.tiroma_charge_fauteuils(p_client uuid, p_entite uuid, p_jour date default null)
+ returns jsonb
+ language plpgsql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+begin
+  perform private.tiroma_exiger_regard(p_client, p_entite, array['titulaire']);
+  return private.tiroma_charge_fauteuils_pour(p_client, p_entite, p_jour);
+end $function$;
+
 create or replace function private.tiroma_demi_journee(p_ouvert tstzmultirange, p_prevu tstzmultirange, p_seuil numeric)
  returns jsonb
  language sql
@@ -103,4 +113,5 @@ $function$;
 revoke all on function public.tiroma_charge_fauteuils(uuid, uuid, date) from public, anon;
 grant execute on function public.tiroma_charge_fauteuils(uuid, uuid, date) to authenticated, service_role;
 grant execute on function private.tiroma_charge_fauteuils(uuid, uuid, date) to authenticated, service_role;
+grant execute on function private.tiroma_charge_fauteuils_pour(uuid, uuid, date) to authenticated, service_role;
 grant execute on function private.tiroma_demi_journee(tstzmultirange, tstzmultirange, numeric) to authenticated, service_role;

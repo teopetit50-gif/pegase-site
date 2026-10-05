@@ -14,7 +14,7 @@
 --      prochaine: { rang, libelle, famille, duree_min, seance }, proches_a_planifier, ne_pas_contacter }]
 -- Les noms suivent le périmètre de la personne (private.tiroma_nom_patient). Lecture seule ; idempotent.
 
-create or replace function private.tiroma_plans_sans_rendez_vous(p_client uuid, p_entite uuid)
+create or replace function private.tiroma_plans_sans_rendez_vous_pour(p_client uuid, p_entite uuid, p_voit_tous boolean, p_praticien uuid)
  returns jsonb
  language plpgsql
  stable
@@ -22,12 +22,10 @@ create or replace function private.tiroma_plans_sans_rendez_vous(p_client uuid, 
  set search_path to ''
 as $function$
 declare
-  rg record;
   v_fuseau text;
   v_jour date;
   v_res jsonb;
 begin
-  rg := private.tiroma_exiger_regard(p_client, p_entite, array['titulaire', 'collaborateur', 'assistante']);
   select e.fuseau into v_fuseau from public.entites e where e.client_id = p_client and e.id = p_entite;
   v_jour := (now() at time zone coalesce(v_fuseau, 'UTC'))::date;
 
@@ -40,7 +38,7 @@ begin
     where pl.client_id = p_client and pl.entite_id = p_entite
       and pl.statut in ('signe', 'commence') and pl.disparu_le is null
       and pa.actif and pa.fusionne_dans_id is null
-      and (rg.voit_tous or (rg.praticien_id is not null and (pl.praticien_id = rg.praticien_id or pa.praticien_habituel_id = rg.praticien_id)))
+      and (p_voit_tous or (p_praticien is not null and (pl.praticien_id = p_praticien or pa.praticien_habituel_id = p_praticien)))
       and exists (select 1 from public.tiroma_plan_actes a where a.plan_id = pl.id and a.statut = 'a_faire')
       and not exists (select 1 from public.tiroma_rendez_vous r
                       where r.client_id = p_client and r.entite_id = p_entite and r.plan_id = pl.id and r.statut = 'prevu' and r.debut > now())
@@ -50,7 +48,7 @@ begin
   select coalesce(jsonb_agg(jsonb_build_object(
            'plan_id', p.id, 'devis_numero', p.devis_numero, 'type', p.type, 'statut', p.statut,
            'patient_id', p.patient_id,
-           'patient_nom', private.tiroma_nom_patient(rg.voit_tous or p.praticien_habituel_id = rg.praticien_id or p.praticien_id = rg.praticien_id, p.nom, p.prenom),
+           'patient_nom', private.tiroma_nom_patient(p_voit_tous or p.praticien_habituel_id = p_praticien or p.praticien_id = p_praticien, p.nom, p.prenom),
            'praticien_id', p.praticien_id, 'praticien_nom', p.praticien_nom,
            'signe_le', p.signe_le, 'depuis', p.depuis, 'jours_depuis', v_jour - p.depuis,
            'montant', p.montant, 'reste_a_charge', p.reste_a_charge,
@@ -75,6 +73,19 @@ begin
   return v_res;
 end $function$;
 
+create or replace function private.tiroma_plans_sans_rendez_vous(p_client uuid, p_entite uuid)
+ returns jsonb
+ language plpgsql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+declare rg record;
+begin
+  rg := private.tiroma_exiger_regard(p_client, p_entite, array['titulaire', 'collaborateur', 'assistante']);
+  return private.tiroma_plans_sans_rendez_vous_pour(p_client, p_entite, rg.voit_tous, rg.praticien_id);
+end $function$;
+
 create or replace function public.tiroma_plans_sans_rendez_vous(p_client uuid, p_entite uuid)
  returns jsonb
  language sql
@@ -87,3 +98,4 @@ $function$;
 revoke all on function public.tiroma_plans_sans_rendez_vous(uuid, uuid) from public, anon;
 grant execute on function public.tiroma_plans_sans_rendez_vous(uuid, uuid) to authenticated, service_role;
 grant execute on function private.tiroma_plans_sans_rendez_vous(uuid, uuid) to authenticated, service_role;
+grant execute on function private.tiroma_plans_sans_rendez_vous_pour(uuid, uuid, boolean, uuid) to authenticated, service_role;

@@ -117,7 +117,9 @@ begin
   return n = 0;  -- aucune préférence lisible : on ne contraint pas
 end $function$;
 
-create or replace function private.tiroma_creneaux_a_sauver(p_client uuid, p_entite uuid)
+-- Le calcul lui-même, pour un regard donné (celui de la personne connectée, ou celui que le point du matin
+-- compose pour chaque membre de l'équipe).
+create or replace function private.tiroma_creneaux_a_sauver_pour(p_client uuid, p_entite uuid, p_voit_tous boolean, p_praticien uuid)
  returns jsonb
  language plpgsql
  stable
@@ -125,7 +127,6 @@ create or replace function private.tiroma_creneaux_a_sauver(p_client uuid, p_ent
  set search_path to ''
 as $function$
 declare
-  rg record;
   g public.tiroma_regles;
   v_fuseau text;
   v_maintenant timestamptz := now();
@@ -135,7 +136,6 @@ declare
   v_res jsonb := '[]'::jsonb;
   v_quota_pris integer;
 begin
-  rg := private.tiroma_exiger_regard(p_client, p_entite, array['titulaire', 'collaborateur', 'assistante']);
   select * into g from public.tiroma_regles where client_id = p_client and entite_id = p_entite;
   select e.fuseau into v_fuseau from public.entites e where e.client_id = p_client and e.id = p_entite;
   if g.id is null or v_fuseau is null then
@@ -159,7 +159,7 @@ begin
         and ev.avant ? 'debut' and ev.avant ? 'fin'
         and (ev.avant ->> 'debut')::timestamptz > v_maintenant
         and (ev.avant ->> 'debut')::timestamptz < ((v_jour + g.horizon_creneaux_jours + 1)::timestamp at time zone v_fuseau)
-        and (rg.voit_tous or rg.praticien_id is null or nullif(ev.avant ->> 'praticien_id', '')::uuid = rg.praticien_id)
+        and (p_voit_tous or p_praticien is null or nullif(ev.avant ->> 'praticien_id', '')::uuid = p_praticien)
       order by ev.rendez_vous_id, ev.avant ->> 'debut', ev.detecte_le desc
     )
     select l.*, f.nom as fauteuil_nom, f.capacites, p.nom_affiche as praticien_nom,
@@ -265,7 +265,7 @@ begin
       )
       select coalesce(jsonb_agg(jsonb_build_object(
                'rang', x.rang, 'origine', x.origine, 'patient_id', x.patient_id,
-               'patient_nom', private.tiroma_nom_patient(rg.voit_tous or x.praticien_habituel_id = rg.praticien_id, x.nom, x.prenom),
+               'patient_nom', private.tiroma_nom_patient(p_voit_tous or x.praticien_habituel_id = p_praticien, x.nom, x.prenom),
                'motif', x.motif, 'duree_min', x.duree_min, 'plan_id', x.plan_id, 'attente_id', x.attente_id, 'depuis', x.depuis,
                'preferences_ok', x.preferences_ok, 'ne_pas_contacter', x.ne_pas_contacter) order by x.rang), '[]'::jsonb)
         into v_cands
@@ -288,6 +288,20 @@ begin
   return v_res;
 end $function$;
 
+-- La porte : le regard de la personne connectée, puis le calcul.
+create or replace function private.tiroma_creneaux_a_sauver(p_client uuid, p_entite uuid)
+ returns jsonb
+ language plpgsql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+declare rg record;
+begin
+  rg := private.tiroma_exiger_regard(p_client, p_entite, array['titulaire', 'collaborateur', 'assistante']);
+  return private.tiroma_creneaux_a_sauver_pour(p_client, p_entite, rg.voit_tous, rg.praticien_id);
+end $function$;
+
 create or replace function public.tiroma_creneaux_a_sauver(p_client uuid, p_entite uuid)
  returns jsonb
  language sql
@@ -300,6 +314,7 @@ $function$;
 revoke all on function public.tiroma_creneaux_a_sauver(uuid, uuid) from public, anon;
 grant execute on function public.tiroma_creneaux_a_sauver(uuid, uuid) to authenticated, service_role;
 grant execute on function private.tiroma_creneaux_a_sauver(uuid, uuid) to authenticated, service_role;
+grant execute on function private.tiroma_creneaux_a_sauver_pour(uuid, uuid, boolean, uuid) to authenticated, service_role;
 grant execute on function private.tiroma_regard(uuid, uuid) to authenticated, service_role;
 grant execute on function private.tiroma_exiger_regard(uuid, uuid, text[]) to authenticated, service_role;
 grant execute on function private.tiroma_nom_patient(boolean, text, text) to authenticated, service_role;
