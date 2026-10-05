@@ -1,14 +1,21 @@
 # Session B6 — DALIRO, le module des entreprises du bâtiment
 
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 05/10/2026, 23 h 30 (début de session).
+Dernière mise à jour : 05/10/2026, 23 h 05 UTC — SESSION MISE EN PAUSE par le coordinateur (limite d'usage de Teo) ; état exact et prochaine étape ci-dessous.
 
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **0 %** | aucun test joué encore ; le scénario est écrit, les trous du socle sont repérés (ci-dessous) |
-| **Livrable client** (/espace/daliro en ligne, relu avec le compte du banc) | **0 %** | l'écran n'existe pas encore |
+| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **45 %** | lot 1 posé par le coordinateur (b6_01 à b6_04, migration `daliro_b6_01_04_lot1`) ; garde-fous 38/39 verts au premier passage (le 39e retiré : postgres = Omega) ; le parcours b6_01 n'a pas encore été évalué (il mourait sur un alias masqué, corrigé en 7dbdc3a) → **à rejouer** |
+| **Livrable client** (/espace/daliro en ligne, relu avec le compte du banc) | **55 %** | l'écran est écrit, tsc ✓, eslint ✓, build ✓, recette aux cinq largeurs ✓ (captures dans omega/recette-b6/), enchaînements d'exemple 3/4 ✓ ; pas encore fusionné dans main, pas encore relu en base réelle |
+
+### État exact à la pause (05/10, 23 h 05 UTC) et prochaine étape
+
+- **Poussé sur worker-b6** : migrations b6_01..04, tests b6_00..02, l'onglet dans `components/espace/ecrans.ts`, l'écran complet (`components/espace/daliro/` : types, etats, exemples, portes, EcranDaliro, ChantierVue ; `app/espace/daliro/page.tsx`), le script `omega/recette-b6/recette-daliro.mjs` et onze captures.
+- **Dernier message du coordinateur** : lot 1 posé ; b6_03 à reposer (grants `btp_est_serveur` / `btp_voit_prix`) puis rejouer b6_01 et b6_02 sur 7dbdc3a. Il m'écrit à la reprise.
+- **Reste en rouge dans la recette d'exemple (1 sur 56)** : « Maison Rolland : le marché est Vérifié, figé ». Cause : dans `ChantierVue.tsx`, après le rattachement de la ligne sans lot, le bouton « Vérifier le marché » est bien actif mais le clic passe par `bouton('/Vérifier le marché/')` qui trouve d'abord un autre bouton ? À vérifier au prochain passage (lancer `node omega/recette-b6/recette-daliro.mjs http://localhost:3013` sur un `next dev -p 3013`) ; le flux à la main est à relire. Tout le reste passe (accepter l'écart, chiffrer/soumettre/signer un avenant, noter une réponse, remplaçants, facture refusée puis rattachée).
+- **Prochaine étape, dans l'ordre** : 1) résultats bruts de b6_01/b6_02 → corriger jusqu'au vert ; 2) le rouge de la recette ci-dessus ; 3) relecture réelle de /espace/daliro avec `gerant@banc-varelo.test` (recette ygwbgpowzlbdaajlsqkn, clé publique donnée par le coordinateur, `.env.local` non commité, méthode d'A3 `omega/recette-a3/relecture-reelle.mjs`) ; 4) prévenir le coordinateur pour la fusion (build vert déjà obtenu sur cet état) ; 5) mettre à jour les montants du scénario dans ce fichier (le marché d'exemple fait 90 625 € HT et le lot 02 24 020 €, pas 184 300 / 24 100).
 
 ### Ce qui manque au socle pour tenir la page /secteurs/btp (trous repérés à la lecture du 05/10)
 
@@ -74,5 +81,7 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 9. `filed_fournisseurs.siren` et `filed_factures.fournisseur_id` : confirmés tels que vus dans le test a4_01 ?
 
 ## Journal de session
+
+- 05/10, 23 h 30 → 23 h 05 UTC (minuit → 1 h Paris) : migrations b6_01..04 écrites et posées (lot 1), tests pgTAP écrits et joués une première fois (garde-fous 38/39, parcours à rejouer), écran /espace/daliro écrit, vérifié (tsc, eslint, build), recette cinq largeurs verte, captures. Pause demandée par le coordinateur.
 
 - 05/10, 22 h 40 → 23 h 30 : lecture de CLAUDE.md, AGENTS.md, CONTRAT-OUVRIER, NOTES-COORDINATEUR, NOTES-A3, SOCLE-EXTRAITS-DALIRO (2 789 lignes), FILED (rapprochement, signatures), tests A4/A5, écran A3. Scénario écrit, envoyé au coordinateur.
