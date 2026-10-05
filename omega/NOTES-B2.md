@@ -6,7 +6,7 @@ Branche `worker-b2`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE. Dernière 
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
-| **Mécanique** (le socle fait ce que la vitrine promet, prouvé sur la recette) | **35 %** — 11 tests pgTAP écrits sur les 19 étapes, deux migrations écrites ; rien n'est encore joué sur la recette (envoyé au coordinateur le 06/10) | le TAP vert sur la recette ; corrections jusqu'au vert ; l'envoi réel d'une facture et d'une relance (mode essai, Brevo) prouvé sur le banc |
+| **Mécanique** (le socle fait ce que la vitrine promet, prouvé sur la recette) | **65 %** — 8 des 11 fichiers de tests verts sur la recette (barème, contrat, conditions, chiffrage, factures, avoirs, RLS, relances) ; les trois derniers corrigés et renvoyés ; b2_01 et b2_02 posées | le TAP vert sur la recette ; corrections jusqu'au vert ; l'envoi réel d'une facture et d'une relance (mode essai, Brevo) prouvé sur le banc |
 | **Livrable client** (un loueur ouvre /espace/tavaro et travaille) | **75 %** — l'écran existe, tsc / eslint / build verts, recette aux cinq largeurs verte, onglet « Location » posé, **relecture en base réelle faite avec le gérant du banc** (lecture de tout le parking sous RLS sans aucun refus ; capture `omega/recette-b2/reel-tavaro-1440.jpg`) ; Realtime et Storage posés par le coordinateur | les gestes réels depuis l'écran (compléter, chiffrer, litige, avoir, relance) une fois le banc garni par `banc_01_parcours_reel.sql` : à rejouer avec `--geste=…` et un compte referent/daf ; la vérification de la page servie par omegaai.fr après fusion |
 
 **Ce que Teo doit fournir lui-même** (rien ne le remplace) :
@@ -65,6 +65,8 @@ journal opposable ; rien ne s'écrit directement dans une table là où une port
 ## 3 bis. Premier TAP sur la recette (06/10, coordinateur)
 
 Lot 1 posé (b2_01, b2_02 inscrits), TOUT_B2 joué : **5 fichiers verts sur 11** (01 : 21/21, 02 : 30/30, 04 : 46/46, 08 : 29/29 avec AV-2026-000001/000002 et le refus, 10 : 32/32). Rouges : 03 (le socle signale l'écart sous `saisie_protegee`), 05 (`is(smallint, integer)`), 06/09/11 (adresse d'auth.users en double quand `tavaro_jeu()` est rappelée dans la même transaction : l'exception était avalée), 07 (`alertes.module` n'existe pas). Les quatre corrigés et poussés ; relecture demandée.
+
+Second TAP (66f1d09, 01 h 43 Paris) : **8 fichiers verts sur 11** (01, 02, 03, 04, 06 avec FA-2026-000001/000002, 08, 10, 11). Rouges : 05 (alias `p` ambigu avec la variable), 07 (`alertes.cle` n'existe pas : la clé est `cle_regroupement`, préfixée par le module), 09 (joué entre 0 h et 2 h Paris : `current_date` est en UTC, les factures sont datées au fuseau de l'agence). Les trois corrigés, SHA 30877c2 ; le coordinateur a posé `reglages_envois` tavaro (essai) sur le banc et enchaîne banc_01 après le troisième TAP.
 
 ## 4. Fait / en cours
 
