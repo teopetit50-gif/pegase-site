@@ -14,7 +14,8 @@
    la réception (b6_13) : prononcer avec deux réserves, en lever une, noter une opposition, préparer et envoyer
    le décompte ; axe-core sur la carte et ses fenêtres ;
    les heures (b6_17) : 11 h (alerte L3121-18), 12,5 h (refus), le coût horaire chargé, la rentabilité ; axe-core ;
-   le recalage (b6_19) : recaler la pose des fenêtres, voir la suite glisser, appliquer ; axe-core.
+   le recalage (b6_19) : recaler la pose des fenêtres, voir la suite glisser, appliquer ; axe-core ;
+   la signature sur place (b6_20) : préparer le lien, puis /signer/exemple à 390 et 1440 (nom, tracé, lu et approuvé) ; axe-core.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -375,6 +376,59 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     ok(await s.evaluer(`/Planning recalé : [0-9]+ passages déplacés/.test(document.body.innerText)`), 'planning recalé, message affiché');
     const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
     ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  {
+    const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b6-surplace', densite: 1 });
+    console.log('— Les Tilleuls : faire signer l\'avenant n° 1 sur place (1024)');
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    ok(await s.evaluer(bouton('/Faire signer sur place/', `document.querySelector('section[aria-label="Avenants"]')`)) === true, 'clic sur « Faire signer sur place »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Faire signer sur place » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(`${dlgBouton('/Préparer le lien/')}?.click()`);
+    await s.dormir(400);
+    ok(await s.evaluer(`/\\/signer\\/exemple$/.test(document.querySelector('[role="dialog"] input[readonly]')?.value || '') && /Lien prêt/.test(document.querySelector('[role="dialog"]')?.innerText || '')`), 'le lien est prêt (/signer/exemple)');
+    s.fermer();
+  }
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-signer-${largeur}`, densite: 1 });
+    console.log(`— /signer/exemple : le client signe sur le téléphone (${largeur})`);
+    ok(await s.aller(base + '/signer/exemple'), 'page chargée');
+    await s.dormir(600);
+    const page = `document.querySelector('section[aria-label="Signature de l\\'avenant"]')`;
+    const t0 = await s.evaluer(`${page}?.innerText || ''`);
+    ok(/Avenant n° 1/i.test(t0) && /1[\s\u202f\u00a0]884,00/.test(t0) && /SCI Lefèvre Patrimoine/.test(t0), 'l\'avenant est lisible : n° 1, 1 884,00 € HT, le maître d\'ouvrage');
+    await s.evaluer(`[...${page}.querySelectorAll('button')].find(b => /Signer l.avenant/.test(b.textContent))?.click()`);
+    await s.dormir(300);
+    ok(await s.evaluer(`/nom et prénom sont nécessaires/.test(${page}?.innerText || '')`), 'sans nom : refusé');
+    await s.evaluer(saisir('section input[autocomplete="name"]', 'Paul Lefèvre'));
+    await s.dormir(150);
+    // un tracé au doigt : trois événements pointeur dans le cadre
+    await s.evaluer(`(() => { const c = document.querySelector('canvas'); const r = c.getBoundingClientRect();
+      const ev = (t, x, y) => c.dispatchEvent(new PointerEvent(t, { bubbles: true, pointerId: 1, clientX: r.left + x, clientY: r.top + y }));
+      ev('pointerdown', 20, 60); ev('pointermove', 120, 90); ev('pointermove', 220, 50); ev('pointerup', 220, 50); return true; })()`);
+    await s.evaluer(`document.querySelector('section input[type="checkbox"]')?.click()`);
+    await s.dormir(150);
+    await s.evaluer(axe + ';true');
+    const c1 = await s.evaluer(graves(page));
+    ok(c1.length === 0, `page de signature : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
+    await s.evaluer(`[...${page}.querySelectorAll('button')].find(b => /Signer l.avenant/.test(b.textContent))?.click()`);
+    await s.dormir(400);
+    ok(await s.evaluer(`/Avenant n° 1 signé \\(exemple/.test(${page}?.innerText || '') && /rendre le téléphone/.test(${page}?.innerText || '')`), 'signé (exemple) : le client peut rendre le téléphone');
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    await s.capturer(`${dossier}daliro-signer-${largeur}.jpg`, { qualite: 55 });
     s.fermer();
   }
 }
