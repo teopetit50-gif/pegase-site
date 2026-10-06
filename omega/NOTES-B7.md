@@ -327,3 +327,4 @@ sans redéploiement (la clé est lue à chaque passage).
   (identifiant `ZZ` + 11 caractères tirés au sort, aucune contrainte de format sur `filed_verifications_tiers.identifiant`).
   Les autres tests lisent le cache filtré sur leur propre identifiant. À reposer : `omega/tests/identite/b7_01_portes.sql`.
 - 6/10 1 h 35 Z : reprise par session_01967jUehrY7tLAXLn9pBaSw (Opus 5.5), Fable à court de crédit.
+- 6/10 1 h 31 Z (coordinateur) : b7_01_portes.sql reposé depuis 91b919d, `^test_b7_` rejoué → **10/10**. Identité verte.
