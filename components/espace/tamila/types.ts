@@ -421,3 +421,37 @@ export type Honoraires = {
   provisions: Provision[];
   factures: Facture[];
 };
+
+/* ——— conflits d'intérêts et vigilance LCB-FT (b4_07, 06/10/2026) ——— */
+export type ActiviteAssujettie = "transaction_immobiliere" | "transaction_financiere" | "gestion_fonds" | "constitution_societe" | "fiducie" | "cession_entreprise" | "autre_assujettie";
+
+export type Vigilance = {
+  dossier_id: string;
+  client_id: string;
+  assujetti: boolean;
+  activite: ActiviteAssujettie | null;
+  identification_le: string | null;
+  identification_piece: string | null;
+  beneficiaire_effectif_le: string | null;
+  risque: "faible" | "standard" | "eleve" | null;
+  revue_le: string | null;
+  par: string | null;
+  maj_le: string;
+};
+
+/* Ce que rend tamila_conformite. */
+export type Conformite = {
+  dossier: string;
+  index: boolean;
+  parties: number;
+  parties_indexees: number;
+  controles: number;
+  conflits_sans_decision: number;
+  dernier_controle: { le: string; correspondances: number; conflits: number; decision: string | null } | null;
+  vigilance: Vigilance | null;
+  vigilance_a_faire: boolean;
+};
+
+/* Une correspondance rendue par tamila_controler_conflits. */
+export type Trouve = { dossier: string | null; qualite: QualitePartie; statut: string | null; nature: "conflit" | "meme_cote" | "information" };
+export type ControleConflits = { controle: string; correspondances: number; conflits: number; hors_vue: number; trouves: Trouve[] };

@@ -386,6 +386,30 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   navigateur), le tableau des honoraires du cabinet (tous dossiers), le minuteur, l'export comptable.
   **Pas rejoué en base réelle** : b4_06 à poser d'abord.
 
+## 12. Conflits d'intérêts et vigilance LCB-FT (vague 3, n° 2 ; lot B4-8, 06/10)
+
+- **Base** (875e83f) : `b4_07_tamila_conflits.sql`, test `16_conflits.sql` (47 contrôles ; série locale 386/386).
+  Index aveugle : clé d'index du cabinet (enveloppée sous la phrase, ou sous la clé maître Scaleway par
+  tamila-coffre), empreintes HMAC-SHA-256 des noms normalisés et des SIREN, jamais lisibles en direct ; contrôle
+  client ↔ adverse = conflit, même côté = signalé, anciens clients (dossiers effacés) compris, dossiers hors de
+  vue comptés sans être nommés, partie retirée ignorée ; décision de l'avocat (conflit levé ou refus ; « pas de
+  conflit » interdit quand un conflit est trouvé), motif en code ; vigilance LCB-FT (activité assujettie,
+  identification du client et du bénéficiaire effectif, risque, revue annuelle) ; résumé `tamila_conformite`.
+  Empreintes et contrôles conservés après l'effacement du dossier (registre des conflits) : **à confirmer par
+  Teo** (sinon une ligne de `private.tables_objets`).
+- **Ouvrier** (2868bcb) : tamila-coffre `nouvelle_cle_index` (gérant) et `cle_index` (personne du cabinet), données
+  associées « index:<client> ». 20 tests Deno.
+- **Écran** : `components/espace/tamila/index.ts` (normalisation : accents, formes sociales, civilités, mots vides,
+  mots triés — « SCI du Moulin » = « Moulin (SCI du) » ; SIREN / SIRET ; HMAC) et la carte « Conflits d'intérêts
+  et vigilance » (`ConformiteTamila.tsx`, après les honoraires) : création de la clé d'index par le gérant,
+  indexation et contrôle des parties du dossier en un geste, résultats nommés (référence en clair du dossier si
+  on la connaît), décision, vigilance. Exemple : 2026-0430 « Garnier c/ SCI du Moulin » montre un conflit avec
+  2026-0412 (la SCI y est cliente). Recette cinq largeurs 89/89 (10 sur les conflits et la vigilance), axe-core
+  0 écart sur le dialogue de vigilance. **Pas rejoué en base réelle.**
+- **Limites** : un nom mal orthographié n'est pas trouvé (égalité stricte après normalisation, pas de
+  ressemblance : un index aveugle ne permet pas la recherche floue sans affaiblir l'aveuglement) ; la clé d'index
+  d'un cabinet local ne se ré-enveloppe pas encore au passage au coffre (à faire, comme les clés de dossier).
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

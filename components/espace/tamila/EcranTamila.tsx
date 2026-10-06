@@ -674,6 +674,7 @@ export default function EcranTamila() {
               clientId={source === "exemple" ? EXEMPLE_CLIENT : (cabinet?.moi.client_id ?? "")}
               onLocal={remplacerLocal}
               relire={relireDossier}
+              referenceDe={(id) => (source === "exemple" ? (local.find((c) => c.dossier.id === id)?.clair?.reference ?? null) : (clairs[id]?.reference ?? null))}
             />
           ) : chargeDossier || (source === "reelle" && ligne) ? (
             <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>
