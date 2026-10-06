@@ -217,4 +217,10 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
     `(PCMI|DPMI|PC|PA|PD|DP|CU)`) ; une assertion de plus dans le test (étape 19, b5_05) ; l'écran exige la liste des
     pièces pour confirmer une demande et ne coupe plus « PCMI 3 » en deux (`decouperCodes`) ; le script vérifie la liste
     elle-même. tsc, eslint, build, recette aux cinq largeurs : verts.
+- 06/10, 1 h 49 Z (coordinateur) : b5_05 posée, `^test_b5_` **112/112**, PermisVue.tsx fusionné dans main (9b7ab27).
+- 06/10, 1 h 50–2 h 00 Z : second dépôt réel, `demande-pieces-v2.pdf` (même lettre + une ligne de pied, autre
+  empreinte ; `fabriquer-courrier.mjs … [mention]`) : `Lue` à 71 s, **aucune proposition en 9 min** (deux passages de
+  `lorani_lectures_passage`). `lorani_deja_saisi` ne devrait pas l'écarter (permis `pieces_demandees = []`, lu
+  `[PCMI3, PCMI6]`) ; l'écran montre toute proposition du permis. Lignes brutes demandées au coordinateur (pièce,
+  `pieces_valeurs`, travail `lorani.piece_lue`, `lorani_permis_dates_lues`).
 

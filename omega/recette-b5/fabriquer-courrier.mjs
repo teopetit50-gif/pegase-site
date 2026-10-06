@@ -3,7 +3,8 @@
    passent), offsets de la table xref calculés. Sert à courrier-reel.mjs : chaque nature donne un fichier
    d'empreinte différente (la base refuse deux fois le même sha256 sur un même projet).
 
-   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces> <sortie.pdf> */
+   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces> <sortie.pdf> [mention]
+   mention : une ligne de plus en pied de page (« Réf. 2 »…), pour redéposer le même courrier sous une autre empreinte. */
 import { writeFileSync } from 'node:fs';
 
 const MODELES = {
@@ -53,13 +54,13 @@ const MODELES = {
   ],
 };
 
-const [nature, sortie] = process.argv.slice(2);
+const [nature, sortie, mention] = process.argv.slice(2);
 if (!MODELES[nature] || !sortie) { console.error('usage : node fabriquer-courrier.mjs <recepisse|demande_pieces> <sortie.pdf>'); process.exit(2); }
 
 const echapper = (t) => t.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
 let y = 790;
 const flux = ['BT'];
-for (const [corps, texte] of MODELES[nature]) {
+for (const [corps, texte] of [...MODELES[nature], ...(mention ? [[0, ''], [9, mention]] : [])]) {
   y -= corps ? Math.round(corps * 1.55) : 10;
   if (!corps) continue;
   flux.push(`/F1 ${corps} Tf 1 0 0 1 56 ${y} Tm (${echapper(texte)}) Tj`);
