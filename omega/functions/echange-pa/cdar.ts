@@ -93,6 +93,33 @@ function partie(balise: string, p: Partie): string {
     `</ram:${balise}>`;
 }
 
+/**
+ * La réponse de pa_commencer_statut (a4_18) porte des nombres (code smallint, montant numeric) :
+ * on les remet en texte, comme le veut le message.
+ */
+export function normaliserStatut(brut: StatutAEmettre): StatutAEmettre {
+  const s = brut as unknown as Record<string, unknown> & StatutAEmettre;
+  return {
+    ...s,
+    code: String(s.code),
+    facture: {
+      ...s.facture,
+      type_code: s.facture?.type_code != null
+        ? String(s.facture.type_code)
+        : null,
+    },
+    montant: s.montant
+      ? {
+        valeur: String(s.montant.valeur),
+        devise: String(s.montant.devise ?? "EUR"),
+      }
+      : null,
+    motif: s.motif
+      ? { code: String(s.motif.code), texte: s.motif.texte ?? null }
+      : null,
+  };
+}
+
 /** Règles vérifiées avant fabrication : celles qu'on peut tenir sans le XSD. */
 export function verifierStatut(s: StatutAEmettre): void {
   const libelle = STATUTS_CYCLE_DE_VIE[s.code];

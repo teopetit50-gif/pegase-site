@@ -1,7 +1,8 @@
 # Recevoir les courriels dans Omega : brancher l'« inbound » Brevo
 
 Pour Teo, pas à pas. Rédigé par A2 le 6 octobre 2026, d'après la documentation Brevo
-consultée le même jour (« Inbound parsing webhooks » et « Create a webhook »).
+consultée le même jour (« Inbound parsing webhooks » et « Create a webhook »), corrigé
+le même jour après le branchement réel (champ `domain` du webhook).
 
 ## En deux phrases
 
@@ -59,7 +60,7 @@ curl -s -X POST https://api.brevo.com/v3/webhooks \
   -d '{
     "type": "inbound",
     "events": ["inboundEmailProcessed"],
-    "domain": "recu.omegaai.fr",
+    "domain": "omegaai.fr",
     "url": "https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/reception/brevo",
     "description": "Omega recette : courriels entrants",
     "auth": {"type": "bearer", "token": "<BREVO_WEBHOOK_JETON>"},
@@ -68,6 +69,11 @@ curl -s -X POST https://api.brevo.com/v3/webhooks \
 ```
 
 La réponse attendue est courte, du genre `{"id":1234567}`. Notez ce numéro.
+
+- **`"domain"` est le domaine racine authentifié chez Brevo (`omegaai.fr`), pas le
+  sous-domaine.** Avec `recu.omegaai.fr`, Brevo refuse : « Domain is not found or is
+  inactive » (constaté le 6/10 ; le webhook de la recette, n° 2225428, est posé sur
+  `omegaai.fr`). Les MX, eux, restent sur `recu.omegaai.fr` (étape 1).
 
 - `"auth"` et `"headers"` portent le même jeton, deux fois. Omega accepte l'un ou
   l'autre. On met les deux parce que la documentation Brevo ne dit pas si un webhook
@@ -83,7 +89,7 @@ Pour vérifier que le webhook existe, collez cette commande, avec la même clé 
 curl -s "https://api.brevo.com/v3/webhooks?type=inbound" -H "api-key: <CLÉ API BREVO>"
 ```
 
-La liste doit contenir `recu.omegaai.fr` et l'URL `…/functions/v1/reception/brevo`.
+La liste doit contenir `omegaai.fr` et l'URL `…/functions/v1/reception/brevo`.
 
 ## Étape 3 — La boîte dans Omega (le coordinateur s'en charge)
 

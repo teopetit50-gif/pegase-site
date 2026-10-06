@@ -2,6 +2,7 @@
 
 import type {
   FluxANoter,
+  FluxNote,
   Portes,
   ReponseDepot,
   ReponseStatut,
@@ -110,12 +111,54 @@ export class PortesDouble implements Portes {
   async poserCurseur(c: string) {
     this.curseurActuel = c;
   }
+  /** SIREN de l'acheteur → client, comme filed_pa_trouver_client. */
+  clientsParSiren = new Map<string, string>();
+  /** Réponses rendues par pa_noter_flux, par clé. */
+  reponses = new Map<string, FluxNote>();
+  /** pa_deposer_facture : id du flux → octets annoncés. */
+  facturesDeposees = new Map<string, number>();
+  deposerFactureEnPanne = 0;
+  private prochainId = 1;
+
   // deno-lint-ignore require-await
-  async noterFlux(f: FluxANoter) {
+  async noterFlux(f: FluxANoter): Promise<FluxNote> {
     if (this.fluxEnPanne === f.flux) throw new Error("pa_noter_flux en panne");
-    const nouveau = !this.flux.has(f.cle);
+    const deja = this.reponses.get(f.cle);
+    if (deja) return { ...deja, nouveau: false };
     this.flux.set(f.cle, f);
-    return { id: f.cle, nouveau };
+    const id = this.prochainId++;
+    let r: FluxNote = { id, nouveau: true, etat: "note" };
+    const statut = f.syntaxe === "CDAR" || /LC$/.test(f.type);
+    if (f.sens === "entrant" && !statut) {
+      const client = this.clientsParSiren.get(
+        String(f.detail.acheteur_siren ?? ""),
+      );
+      r = client
+        ? {
+          id,
+          nouveau: true,
+          etat: "rattache",
+          client_id: client,
+          document: `doc-${id}`,
+          chemin_cible: `${client}/filed_document/doc-${id}/${
+            f.chemin?.split("/").pop()
+          }`,
+        }
+        : { id, nouveau: true, etat: "orphelin" };
+    }
+    this.reponses.set(f.cle, r);
+    return r;
+  }
+  // deno-lint-ignore require-await
+  async deposerFacture(fluxId: number | string, octets: number) {
+    if (this.deposerFactureEnPanne > 0) {
+      this.deposerFactureEnPanne--;
+      throw new Error("pa_deposer_facture en panne");
+    }
+    this.facturesDeposees.set(String(fluxId), octets);
+    for (const r of this.reponses.values()) {
+      if (String(r.id) === String(fluxId)) r.etat = "depose";
+    }
   }
 }
 

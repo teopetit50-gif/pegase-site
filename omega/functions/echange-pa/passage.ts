@@ -25,7 +25,13 @@ import {
   STATUTS_EMIS_PAR_L_ENTREPRISE,
   type Syntaxe,
 } from "./pa.ts";
-import { ErreurCdar, fabriquerCdar, lireCdar } from "./cdar.ts";
+import {
+  ErreurCdar,
+  fabriquerCdar,
+  lireCdar,
+  normaliserStatut,
+} from "./cdar.ts";
+import { sirenAcheteur } from "./acheteur.ts";
 import { sha256Hex } from "./afnor.ts";
 import { cheminEntrant, type Stockage } from "./stockage.ts";
 
@@ -63,6 +69,10 @@ export type Bilan = {
   echecs: number;
   releves: number;
   nouveaux: number;
+  /** Factures entrantes déposées dans FILED (pa_deposer_facture). */
+  factures_recues: number;
+  /** Factures entrantes sans client (SIREN de l'acheteur illisible, inconnu ou ambigu). */
+  orphelins: number;
   erreur_releve: string | null;
   duree_ms: number;
 };
@@ -133,6 +143,8 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
     echecs: 0,
     releves: 0,
     nouveaux: 0,
+    factures_recues: 0,
+    orphelins: 0,
     erreur_releve: null,
     duree_ms: 0,
   };
@@ -165,6 +177,8 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
       echecs: bilan.echecs,
       releves: bilan.releves,
       nouveaux: bilan.nouveaux,
+      factures_recues: bilan.factures_recues,
+      orphelins: bilan.orphelins,
       erreur_releve: bilan.erreur_releve,
     }, deps.attendu ?? "15 minutes");
   } catch (e) {
@@ -247,10 +261,12 @@ async function traiterTravail(
         await finir(deps, t.id, r as unknown as Record<string, unknown>);
         return;
       }
-      if (r.cdar && !STATUTS_EMIS_PAR_L_ENTREPRISE.has(r.cdar.code)) {
+      // a4_18 rend les nombres en nombres (code, montant) : remis en texte avant tout contrôle.
+      const cdar = r.cdar ? normaliserStatut(r.cdar) : null;
+      if (cdar && !STATUTS_EMIS_PAR_L_ENTREPRISE.has(cdar.code)) {
         throw new ErreurEchange(
           "STATUT_NON_EMIS_PAR_L_ENTREPRISE",
-          `le statut ${r.cdar.code} est émis par une plateforme, pas par l'entreprise`,
+          `le statut ${cdar.code} est émis par une plateforme, pas par l'entreprise`,
           true,
         );
       }
@@ -263,8 +279,8 @@ async function traiterTravail(
       }
       let octets: Uint8Array<ArrayBuffer>;
       if (r.chemin) octets = await deps.stockage.lire(r.chemin);
-      else if (r.cdar) {
-        octets = new TextEncoder().encode(fabriquerCdar(r.cdar)) as Uint8Array<
+      else if (cdar) {
+        octets = new TextEncoder().encode(fabriquerCdar(cdar)) as Uint8Array<
           ArrayBuffer
         >;
       } else {throw new ErreurEchange(
@@ -274,7 +290,7 @@ async function traiterTravail(
         );}
       document = {
         suivi: r.suivi,
-        nom: `cdar-${r.statut}.xml`,
+        nom: `cdar-${id}.xml`,
         syntaxe: "CDAR",
         octets,
         typeMime: "application/xml",
@@ -376,13 +392,24 @@ async function relever(pa: PlateformeAgreee, deps: Dependances, bilan: Bilan) {
         depose_le: f.depose_le,
         details: f.details,
       };
+      let fichier:
+        | { octets: Uint8Array<ArrayBuffer>; typeMime: string }
+        | null = null;
+      const estStatut = f.syntaxe === "CDAR" || /LC$/.test(f.type);
       if (f.sens === "entrant") {
-        const fichier = await pa.telecharger(f.flux);
+        fichier = await pa.telecharger(f.flux);
         chemin = cheminEntrant(f.flux, f.nom);
         await deps.stockage.deposer(chemin, fichier.octets, fichier.typeMime);
         sha = await sha256Hex(fichier.octets);
-        if (f.syntaxe === "CDAR") {
+        if (estStatut) {
           detail.cdar = lireCdar(new TextDecoder().decode(fichier.octets));
+        } else {
+          // C'est par lui que pa_noter_flux retrouve le client ; absent → flux « orphelin ».
+          detail.acheteur_siren = await sirenAcheteur(
+            fichier.octets,
+            f.syntaxe,
+            fichier.typeMime,
+          );
         }
       }
       const r = await deps.portes.noterFlux({
@@ -398,6 +425,29 @@ async function relever(pa: PlateformeAgreee, deps: Dependances, bilan: Bilan) {
         detail,
         cle: `pa:${f.flux}:${f.maj_le}:${f.accuse}`,
       });
+      // Second temps d'une facture entrante rattachée (a4_18) : copie au chemin cible, puis
+      // pa_deposer_facture. Rejoué tel quel si un passage précédent s'est arrêté entre les deux.
+      if (
+        fichier && !estStatut && r.chemin_cible &&
+        (r.etat === "rattache" || r.etat === "sans_suite")
+      ) {
+        await deps.stockage.deposer(
+          r.chemin_cible,
+          fichier.octets,
+          fichier.typeMime,
+        );
+        await deps.portes.deposerFacture(
+          r.flux_id ?? r.id,
+          fichier.octets.length,
+        );
+        bilan.factures_recues++;
+      } else if (r.etat === "orphelin" || r.etat === "ambigu") {
+        bilan.orphelins++;
+        deps.journal.erreur(`facture reçue ${r.etat}`, {
+          flux: f.flux,
+          acheteur_siren: detail.acheteur_siren ?? null,
+        });
+      }
       bilan.releves++;
       if (r.nouveau) bilan.nouveaux++;
       dernier = f.maj_le;

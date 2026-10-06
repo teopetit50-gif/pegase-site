@@ -13,7 +13,7 @@ RPC et le contrat des portes, `doubles.ts` les doubles de test.
 | `webhooks-brevo` | `webhooks/brevo/` | événements de remise Brevo (remis, rebond, plainte, refus) | `false` |
 | `reception` | `reception/` | e-mail entrant Brevo, WhatsApp Cloud API, formulaire du site | `false` |
 | `pa-bac-a-sable` | `pa-bac-a-sable/` | faux serveur AFNOR XP Z12-013 (recette seulement) pour jouer `echange-pa` sans compte PA | `false` |
-| `echange-pa` | `echange-pa/` | ouvrier `pa.deposer`, `pa.statut` + relevé de la plateforme agréée ; appelé chaque minute. **Pas encore déployable : portes `pa_*` à poser** | `true` |
+| `echange-pa` | `echange-pa/` | ouvrier `pa.statut` (et `pa.deposer`, refusé par FILED tant qu'Omega n'émet pas de factures) + relevé de la plateforme agréée ; appelé chaque minute. Portes `pa_*` : a4_18 | `true` |
 
 Projet de recette : `ygwbgpowzlbdaajlsqkn` (`https://ygwbgpowzlbdaajlsqkn.supabase.co`).
 Jamais la production depuis ces sessions.
@@ -183,12 +183,19 @@ de cycle de vie (CDAR), relevé des factures et statuts reçus. Même forme que 
 - `cdar.ts` : fabrication d'un CDAR de traitement (TypeCode 23) pour les statuts 204 à 212,
   lecture tolérante d'un CDAR reçu. **À valider contre le XSD CDAR D22B et le Schematron
   BR-FR-CDV dans le bac à sable de la PA avant tout envoi réel.**
+- `acheteur.ts` : le SIREN de l'acheteur d'une facture reçue (CII, UBL, et le CII joint d'un
+  PDF Factur-X, décompressé au besoin) ; c'est par lui que `pa_noter_flux` retrouve le client.
 - `passage.ts` : travaux `pa.deposer` {facture} et `pa.statut` {statut}, puis relevé depuis
-  le curseur, puis `battre_ouvrier('echange-pa', …)`.
+  le curseur, puis `battre_ouvrier('echange-pa', …)`. Une facture reçue se dépose en deux
+  temps (a4_18) : `pa_noter_flux` rend `chemin_cible` → l'ouvrier y copie le fichier →
+  `pa_deposer_facture(flux_id, octets)`. Si un passage s'arrête entre les deux, le suivant
+  relit le flux (curseur non avancé), la même clé rend `rattache`, et le dépôt est rejoué.
 - Variables : `PA_FLOW_URL` (racine du service Flow chez la PA, version comprise),
   `PA_TOKEN_URL`, `PA_CLIENT_ID`, `PA_CLIENT_SECRET`, `PA_SCOPE` (facultatif). Absentes :
   travaux reportés `PA_NON_BRANCHEE`, aucun relevé, battement `pa_branchee: false`.
-- Portes `pa_*` : contrat dans `omega/NOTES-A2.md` (« Échange PA »), **pas encore posées**.
+- Portes `pa_*` : FILED lot 11, `omega/migrations/a4_18_filed_lot11_echange_pa.sql` (A4),
+  posées sur la recette le 06/10. `pa_commencer_depot` répond « non pris en charge » (FILED
+  tient les achats ; l'émission viendra en 2027).
 
 ### Bac à sable de la PA (`pa-bac-a-sable/`, recette seulement)
 
@@ -199,27 +206,43 @@ un fichier contenant `REJET-BAC` (accusé « Error », motif `REJ_SEMAN`). Il re
 pour le même `trackingId`. Il ne valide ni Factur-X, ni UBL, ni CDAR : ce n'est pas une PA.
 `serveur_test.ts` le joue de bout en bout avec l'adaptateur AFNOR et le passage d'`echange-pa`.
 
-Pour le jouer sur la recette, **une fois les portes `pa_*` posées (a4_17)** :
+Pour le jouer sur la recette (portes `pa_*` posées : a4_18) :
 
-1. Déployer `pa-bac-a-sable` (verify_jwt **false**), secrets `PA_BAC_CLIENT_ID`,
-   `PA_BAC_CLIENT_SECRET`, `PA_BAC_CLE_JETONS` (trois chaînes aléatoires, 32 octets hex).
-2. Déployer `echange-pa` (verify_jwt true), secrets :
+1. **Déployer `pa-bac-a-sable`**, verify_jwt **false** (il fait son propre OAuth2). Secrets
+   de la fonction : `PA_BAC_CLIENT_ID`, `PA_BAC_CLIENT_SECRET`, `PA_BAC_CLE_JETONS`, trois
+   chaînes aléatoires (`openssl rand -hex 32`). Fumée : `GET …/pa-bac-a-sable/flow/v1/healthcheck`
+   sans jeton → 401 `UNAUTHORIZED` ; sans secrets → 503 `NOT_CONFIGURED`.
+2. **Déployer `echange-pa`**, verify_jwt **true**. Secrets de la fonction :
    `PA_FLOW_URL=https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/pa-bac-a-sable/flow/v1`,
    `PA_TOKEN_URL=https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/pa-bac-a-sable/oauth/token`,
-   `PA_CLIENT_ID` et `PA_CLIENT_SECRET` = ceux du bac à sable.
-3. Cron `omega-echange-pa` chaque minute (même forme que `omega-expediteur`), puis déposer un
-   travail `pa.deposer` pour une facture émise du banc.
-4. Simuler une facture fournisseur reçue :
+   `PA_CLIENT_ID` = `PA_BAC_CLIENT_ID`, `PA_CLIENT_SECRET` = `PA_BAC_CLIENT_SECRET`.
+3. **Cron `omega-echange-pa`** chaque minute, même forme que `omega-expediteur`
+   (`net.http_post` vers `…/functions/v1/echange-pa`, `Authorization: Bearer` clé de service
+   lue dans Vault). Premier battement attendu : `battements` module `echange-pa`,
+   `detail.pa_branchee` vrai, `erreur_releve` null.
+4. **Simuler une facture fournisseur reçue par le banc.** L'acheteur doit porter le SIREN
+   d'une entité du banc où FILED est actif (`select e.siren from public.entites e where
+   e.client_id = 'cccccccc-0000-4000-8000-00000000000c'`), sinon le flux reste « orphelin » :
 
    ```sh
+   BAC=https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/pa-bac-a-sable
    J=$(curl -s -X POST "$BAC/oauth/token" -d grant_type=client_credentials \
         -d client_id="$PA_BAC_CLIENT_ID" -d client_secret="$PA_BAC_CLIENT_SECRET" | jq -r .access_token)
    curl -s -X POST "$BAC/_bac/entrant" -H "Authorization: Bearer $J" -H 'Content-Type: application/json' \
-        -d '{"name":"facture-fournisseur.xml","flowSyntax":"UBL","contenu":"<Invoice>…</Invoice>"}'
+        -d '{"name":"FAC-BAC-0001.xml","flowSyntax":"UBL","contenu":"<Invoice><cbc:ID>FAC-BAC-0001</cbc:ID><cac:AccountingSupplierParty><cac:Party><cac:PartyLegalEntity><cbc:CompanyID schemeID=\"0002\">380129866</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingSupplierParty><cac:AccountingCustomerParty><cac:Party><cac:PartyLegalEntity><cbc:CompanyID schemeID=\"0002\">SIREN_DU_BANC</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty></Invoice>"}'
    ```
 
-   (`BAC=https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/pa-bac-a-sable`). Une minute
-   plus tard, `pa_noter_flux` l'a reçue (sens `entrant`, chemin `_pa/entrants/<flux>/…`).
+   Une à deux minutes plus tard :
+   `select id, flux, sens, etat, client_id, document_id, chemin_cible, detail->>'acheteur_siren' from public.filed_pa_flux order by id desc limit 5;`
+   → `etat` `depose`, `chemin_cible` `<client>/filed_document/<document>/FAC-BAC-0001.xml`,
+   puis la pièce FILED (source `connecteur`). Un vrai UBL complet est nécessaire pour que la
+   lecture xml de FILED aille au bout ; ce squelette prouve le canal, pas la lecture.
+5. **Un statut émis** : une décision sur cette facture dans FILED (refus → 210, approbation
+   → 205…) crée la ligne `filed_cycle_vie` « à émettre » et le travail `pa.statut` ; au
+   passage suivant, le CDAR est déposé au bac à sable, puis l'accusé « Ok » relevé :
+   `select code, etat, flux_pa, emis_le, erreur from public.filed_cycle_vie order by id desc limit 5;`
+   → `emis`. (Le rejet simulé `REJET-BAC` ne vaut que pour un fichier que nous déposons ;
+   un CDAR n'en contient jamais : le chemin « rejeté par la plateforme » se prouve par les tests.)
 
 ## Contrat des portes (rappel)
 

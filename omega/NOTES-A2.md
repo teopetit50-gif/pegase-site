@@ -516,6 +516,28 @@ joigne depuis la recette. Le test de bout en bout passe : dépôt, accusé relev
 (`REJET-BAC`), facture et CDAR entrants injectés par `/_bac/entrant`, idempotence au troisième
 passage. Mode d'emploi pour la recette : README des fonctions, § « Bac à sable de la PA ».
 
+**Aligné sur les portes réelles d'A4 (a4_18, worker-a4 00eeeeb, posées sur la recette 7/7)** :
+- `pa_commencer_depot` refuse toujours (FILED tient les achats ; émission en 2027) : le
+  travail `pa.deposer` finit avec la réponse, rien n'est déposé. Code gardé pour 2027.
+- `pa_commencer_statut` rend `statut` = le **code** (nombre) et `cdar` avec code et montant en
+  nombres : `normaliserStatut` (cdar.ts) les remet en texte avant tout contrôle ; le fichier
+  s'appelle `cdar-<id du statut>.xml`.
+- Facture entrante en deux temps : `pa_noter_flux` rend `{etat, client_id, document,
+  chemin_cible, flux_id?}` ; si `rattache` (ou `sans_suite` avec `chemin_cible`), l'ouvrier
+  copie le fichier à `chemin_cible` puis appelle `pa_deposer_facture(flux_id ?? id, octets)`.
+  Un échec entre les deux arrête le relevé sans avancer le curseur : rejoué au passage suivant.
+- Le client se retrouve par le SIREN de l'acheteur (`p_detail.acheteur_siren`) : `acheteur.ts`
+  le lit dans un CII, un UBL ou le CII joint d'un Factur-X (flux PDF décompressés). Illisible →
+  « orphelin », journalisé, compté au battement.
+- Tests : echange-pa 32/32, pa-bac-a-sable 5/5 (le parcours de bout en bout dépose une facture
+  reçue dans FILED par les deux temps). Marche à suivre de la recette : README des fonctions.
+
+**Inbound Brevo branché (06/10)** : webhook 2225428, `domain` = `omegaai.fr` (Brevo refuse
+`recu.omegaai.fr` : « Domain is not found or is inactive », il veut le domaine authentifié),
+MX de `recu.omegaai.fr` posés, boîte `banc@recu.omegaai.fr` (expediteurs a3630f13, reput,
+suspendu). GUIDE-INBOUND.md corrigé. Reste à voir au premier courriel de Teo si Brevo
+transmet bien les messages adressés au sous-domaine avec un webhook posé sur la racine.
+
 Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).

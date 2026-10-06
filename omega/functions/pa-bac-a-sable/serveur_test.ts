@@ -18,6 +18,8 @@ import {
   travail,
 } from "../echange-pa/doubles.ts";
 
+const FACTURE_RECUE =
+  '<Invoice><cbc:ID>FAC-2026-10-0471</cbc:ID><cac:AccountingCustomerParty><cac:Party><cac:PartyLegalEntity><cbc:CompanyID schemeID="0002">842115763</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty></Invoice>';
 const BASE = "https://recette.test/functions/v1/pa-bac-a-sable";
 
 function monter() {
@@ -136,6 +138,7 @@ Deno.test("dépôt : syntaxe inconnue → 400 (ErreurPA définitive) ; même tra
 Deno.test("de bout en bout : pa.deposer, accusé relevé, facture et CDAR entrants relevés, rejet simulé", async () => {
   const b = monter();
   const portes = new PortesDouble();
+  portes.clientsParSiren.set("842115763", CLIENT);
   const stockage = new StockageDouble();
   const chemin = `${CLIENT}/factures/F-2026-0001.xml`;
   stockage.objets.set(chemin, {
@@ -232,7 +235,7 @@ Deno.test("de bout en bout : pa.deposer, accusé relevé, facture et CDAR entran
       {
         name: "facture-orange.xml",
         flowSyntax: "UBL",
-        contenu: "<Invoice>FAC-2026-10-0471</Invoice>",
+        contenu: FACTURE_RECUE,
       },
       { name: "statut.xml", flowSyntax: "CDAR", contenu: cdar },
     ]
@@ -249,6 +252,19 @@ Deno.test("de bout en bout : pa.deposer, accusé relevé, facture et CDAR entran
   }
   const p2 = await executerPassage(deps);
   assertEquals(p2.nouveaux, 2);
+  assertEquals(
+    p2.factures_recues,
+    1,
+    "acheteur 842115763 rattaché au client du banc",
+  );
+  const cible = [...stockage.objets.keys()].find((k) =>
+    k.startsWith(`${CLIENT}/filed_document/`)
+  )!;
+  assertEquals(
+    new TextDecoder().decode(stockage.objets.get(cible)!.octets),
+    FACTURE_RECUE,
+  );
+  assertEquals(portes.facturesDeposees.size, 1);
   const entrants = [...portes.flux.values()].filter((f) =>
     f.sens === "entrant"
   );
@@ -256,7 +272,7 @@ Deno.test("de bout en bout : pa.deposer, accusé relevé, facture et CDAR entran
   assertMatch(recue.chemin!, /^_pa\/entrants\/flux-\d+\/facture-orange\.xml$/);
   assertEquals(
     new TextDecoder().decode(stockage.objets.get(recue.chemin!)!.octets),
-    "<Invoice>FAC-2026-10-0471</Invoice>",
+    FACTURE_RECUE,
   );
   const statut = entrants.find((f) => f.syntaxe === "CDAR")!;
   assertEquals((statut.detail.cdar as Record<string, unknown>).code, "205");

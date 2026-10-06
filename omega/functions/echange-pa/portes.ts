@@ -1,9 +1,10 @@
-// Portes du socle pour l'échange avec la plateforme agréée. Les quatre premières existent
-// (prendre_travaux, finir_travail, echouer_travail, battre_ouvrier). Les portes `pa_*`
-// sont PROPOSÉES par A2 : elles n'existent pas encore. Leur contrat est dans
-// omega/NOTES-A2.md (« Échange PA : portes à poser »), à écrire côté socle / FILED (A4 ou
-// coordinateur). Aucune écriture directe en table : tout passe par elles, en RPC, avec la
-// clé de service.
+// Portes du socle pour l'échange avec la plateforme agréée. Les quatre premières sont celles de
+// tous les ouvriers (prendre_travaux, finir_travail, echouer_travail, battre_ouvrier). Les portes
+// `pa_*` sont celles de FILED, lot 11 (A4, omega/migrations/a4_18_filed_lot11_echange_pa.sql,
+// posées sur la recette le 06/10) : FILED tient les achats, donc `pa_commencer_depot` refuse
+// toujours (« non pris en charge ») et `pa_noter_depot` / `pa_echouer_depot` lèvent 0A000 ;
+// une facture entrante se dépose en deux temps (pa_noter_flux, copie, pa_deposer_facture).
+// Aucune écriture directe en table : tout passe par elles, en RPC, avec la clé de service.
 
 import type { Syntaxe } from "./pa.ts";
 import type { StatutAEmettre } from "./cdar.ts";
@@ -47,7 +48,8 @@ export type StatutRefuse = {
 };
 export type StatutAFaire = {
   envoyer: true;
-  statut: string;
+  /** a4_18 : le code du statut (nombre), pas son id. */
+  statut: string | number | null;
   client_id: string;
   suivi: string;
   /** CDAR déjà fabriqué par le socle (bucket) ; sinon l'ouvrier le fabrique depuis `cdar`. */
@@ -55,6 +57,23 @@ export type StatutAFaire = {
   cdar?: StatutAEmettre | null;
 };
 export type ReponseStatut = StatutRefuse | StatutAFaire;
+
+/**
+ * Réponse de pa_noter_flux (a4_18). Pour une facture entrante rattachée à un client :
+ * `etat` 'rattache', `chemin_cible` (où copier le fichier) et `document` ; l'ouvrier copie
+ * puis appelle pa_deposer_facture(flux_id ?? id, octets). `sans_suite` avec `flux_id` : même
+ * flux déjà rattaché sous une autre clé (c'est ce `flux_id` qu'on dépose). `depose` : fait.
+ * `orphelin` / `ambigu` : aucun client, ou plusieurs, pour le SIREN de l'acheteur.
+ */
+export type FluxNote = {
+  id: number | string;
+  nouveau: boolean;
+  etat?: string | null;
+  client_id?: string | null;
+  document?: string | null;
+  chemin_cible?: string | null;
+  flux_id?: number | string | null;
+};
 
 /** pa_noter_flux : tout ce que le relevé rapporte, idempotent sur `cle`. */
 export type FluxANoter = {
@@ -120,7 +139,9 @@ export interface Portes {
   /** Horodatage du dernier flux relevé (maj_le), null au premier passage. */
   curseur(): Promise<string | null>;
   poserCurseur(curseur: string): Promise<void>;
-  noterFlux(f: FluxANoter): Promise<{ id: number | string; nouveau: boolean }>;
+  noterFlux(f: FluxANoter): Promise<FluxNote>;
+  /** Second temps d'une facture entrante, une fois le fichier copié à chemin_cible. Rejouable. */
+  deposerFacture(fluxId: number | string, octets: number): Promise<void>;
 }
 
 export class ErreurPorte extends Error {
@@ -256,8 +277,11 @@ export function portesSupabase(rpc: AppelRpc): Portes {
         p_sha256: f.sha256,
         p_detail: f.detail,
         p_cle: f.cle,
-      }) as { id?: number | string; nouveau?: boolean } | null;
-      return { id: r?.id ?? 0, nouveau: r?.nouveau === true };
+      }) as Partial<FluxNote> | null;
+      return { ...(r ?? {}), id: r?.id ?? 0, nouveau: r?.nouveau === true };
+    },
+    async deposerFacture(fluxId, octets) {
+      await rpc("pa_deposer_facture", { p_flux_id: fluxId, p_octets: octets });
     },
   };
 }

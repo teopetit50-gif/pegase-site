@@ -343,3 +343,96 @@ Deno.test("relevé interrompu : s'arrête au flux qui tombe, curseur posé au de
   assertEquals(b2.nouveaux, 2);
   assertEquals(a.portes.curseurActuel, "2026-10-06T10:02:00Z");
 });
+
+const UBL_BANC =
+  `<Invoice xmlns:cac="urn:cac" xmlns:cbc="urn:cbc"><cbc:ID>FAC-2026-10-0471</cbc:ID>` +
+  `<cac:AccountingSupplierParty><cac:Party><cac:PartyLegalEntity><cbc:CompanyID schemeID="0002">380129866</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingSupplierParty>` +
+  `<cac:AccountingCustomerParty><cac:Party><cac:PartyLegalEntity><cbc:CompanyID schemeID="0002">842115763</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty></Invoice>`;
+
+Deno.test("statut au format a4_18 (code et montant en nombres) : CDAR 212 fabriqué, nommé par l'id du statut", async () => {
+  const a = monter();
+  a.portes.statuts.set(STATUT, {
+    envoyer: true,
+    statut: 212,
+    client_id: CLIENT,
+    suivi: STATUT,
+    cdar: {
+      ...cdar("212"),
+      code: 212 as unknown as string,
+      montant: { valeur: 118.8 as unknown as string, devise: "EUR" },
+    },
+  });
+  a.portes.travaux = [travail(20, "pa.statut", { statut: STATUT })];
+  const bilan = await executerPassage(a.deps);
+  assertEquals(bilan.statuts, 1);
+  assertEquals(a.pa.depots[0].nom, `cdar-${STATUT}.xml`);
+  const xml = new TextDecoder().decode(a.pa.depots[0].octets);
+  assertMatch(xml, /<ram:ProcessConditionCode>212<\/ram:ProcessConditionCode>/);
+  assertMatch(xml, /currencyID="EUR">118.8<\/ram:ValueAmount>/);
+});
+
+Deno.test("facture reçue, acheteur connu : SIREN lu, fichier copié au chemin cible, pa_deposer_facture appelée", async () => {
+  const a = monter();
+  a.portes.clientsParSiren.set("842115763", CLIENT);
+  a.pa.documents.set("in-1", {
+    octets: new TextEncoder().encode(UBL_BANC) as Uint8Array<ArrayBuffer>,
+    typeMime: "application/xml",
+  });
+  a.pa.aRelever = [
+    fluxReleve({
+      flux: "in-1",
+      maj_le: "2026-10-06T16:00:00Z",
+      nom: "FAC-2026-10-0471.xml",
+    }),
+  ];
+  const bilan = await executerPassage(a.deps);
+  assertEquals(bilan.factures_recues, 1);
+  const note = [...a.portes.flux.values()][0];
+  assertEquals(note.detail.acheteur_siren, "842115763");
+  const cible = `${CLIENT}/filed_document/doc-1/FAC-2026-10-0471.xml`;
+  assertEquals(
+    new TextDecoder().decode(a.stockage.objets.get(cible)!.octets),
+    UBL_BANC,
+  );
+  assertEquals(
+    a.portes.facturesDeposees.get("1"),
+    new TextEncoder().encode(UBL_BANC).length,
+  );
+  assertEquals(a.portes.battements[0].factures_recues, 1);
+});
+
+Deno.test("facture reçue, acheteur inconnu : orpheline, rien n'est copié ni déposé, le relevé continue", async () => {
+  const a = monter();
+  a.pa.documents.set("in-1", {
+    octets: new TextEncoder().encode(UBL_BANC) as Uint8Array<ArrayBuffer>,
+    typeMime: "application/xml",
+  });
+  a.pa.aRelever = [
+    fluxReleve({ flux: "in-1", maj_le: "2026-10-06T16:00:00Z" }),
+  ];
+  const bilan = await executerPassage(a.deps);
+  assertEquals(bilan.orphelins, 1);
+  assertEquals(a.portes.facturesDeposees.size, 0);
+  assertEquals(a.portes.curseurActuel, "2026-10-06T16:00:00Z");
+});
+
+Deno.test("pa_deposer_facture en panne : relevé arrêté, curseur gardé ; au passage suivant, même clé → rattache → déposée", async () => {
+  const a = monter();
+  a.portes.clientsParSiren.set("842115763", CLIENT);
+  a.portes.deposerFactureEnPanne = 1;
+  a.pa.documents.set("in-1", {
+    octets: new TextEncoder().encode(UBL_BANC) as Uint8Array<ArrayBuffer>,
+    typeMime: "application/xml",
+  });
+  a.pa.aRelever = [
+    fluxReleve({ flux: "in-1", maj_le: "2026-10-06T16:00:00Z" }),
+  ];
+  const b1 = await executerPassage(a.deps);
+  assertMatch(b1.erreur_releve!, /pa_deposer_facture en panne/);
+  assertEquals(a.portes.curseurActuel, null);
+  const b2 = await executerPassage(a.deps);
+  assertEquals(b2.factures_recues, 1);
+  assertEquals(b2.nouveaux, 0);
+  assertEquals(a.portes.facturesDeposees.size, 1);
+  assertEquals(a.portes.curseurActuel, "2026-10-06T16:00:00Z");
+});
