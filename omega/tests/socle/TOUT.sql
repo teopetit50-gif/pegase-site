@@ -2112,6 +2112,19 @@ begin
   return next is(v_reprises, 1::bigint, 'une pièce reprise par un opérateur');
   return next is(v_part, 0.5000::numeric, 'part reprise : 0,5');
 
+  -- ── Ventilation par module (19ao) : les mêmes nombres, rangés sous le module des pièces ──
+  if to_regclass('public.facturation_mois_modules') is not null then
+    select coalesce(sum(pieces_lues), 0), coalesce(sum(pieces_reprises), 0) into v_lues, v_reprises
+    from public.facturation_mois_modules where client_id = client_a and mois = v_mois;
+    return next ok(v_lues = 2 and v_reprises = 1, 'la ventilation par module retrouve 2 lues et 1 reprise');
+    select count(*) into n from public.facturation_mois_modules f
+    where f.client_id = client_a and f.mois = v_mois
+      and f.module = (select coalesce(to_jsonb(p) ->> 'module', 'inconnu') from public.pieces p where p.id::text = p1);
+    return next is(n, 1::bigint, 'elles sont rangées sous le module de la pièce');
+    return next ok(not has_table_privilege('authenticated', 'public.facturation_mesures_modules', 'insert'),
+                   'authenticated n''écrit pas la ventilation');
+  end if;
+
   -- ── Cloisonnement ──
   perform tests.endosser(user_a);
   select count(*) into n from public.facturation_mois where client_id = client_a;
@@ -2120,6 +2133,10 @@ begin
   perform tests.endosser(user_b);
   select count(*) into n from public.facturation_mois where client_id = client_a;
   return next is(n, 0::bigint, 'le client B ne lit pas ceux de A');
+  if to_regclass('public.facturation_mois_modules') is not null then
+    select count(*) into n from public.facturation_mois_modules where client_id = client_a;
+    return next is(n, 0::bigint, 'ni leur ventilation par module');
+  end if;
   perform tests.redevenir_admin();
 end $f$;
 

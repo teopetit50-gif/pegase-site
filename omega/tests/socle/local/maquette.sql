@@ -241,7 +241,7 @@ create view public.v_envois_libelles with (security_invoker = on) as select e.id
 grant select on public.v_envois_libelles to authenticated;
 
 -- Pièces : lisibles par lit_objet() (droits par objet) ------------------------------------
-create table public.pieces (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text, objet_id uuid, nom text not null, statut text not null default 'recue', chemin text, cree_le timestamptz not null default now());
+create table public.pieces (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), module text not null default 'socle', objet_type text, objet_id uuid, nom text not null, statut text not null default 'recue', chemin text, cree_le timestamptz not null default now());
 
 -- Approbations (au nom de soi, ou par délégation) -------------------------------------
 create table public.approbations (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text not null default 'decision', objet_id text, approuve_par uuid not null, cree_le timestamptz not null default now());
