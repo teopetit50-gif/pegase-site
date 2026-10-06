@@ -30,7 +30,8 @@ import { relatif } from "@/components/espace/format";
 import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
 import Palette from "./Palette";
-import { MODULES, RACINE, porteeDe, titreDe } from "./modules";
+import { MODULES, MODULES_A_VENIR, RACINE, porteeDe, titreDe } from "./modules";
+import { useCompteurs } from "./compteurs";
 import { changerTheme, useTheme } from "./theme";
 import { useDonnees } from "./donnees";
 import { A_PAYER, groupeDe, minuit } from "./filed/calculs";
@@ -244,13 +245,14 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   );
 }
 
-type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; compteur?: number; sous?: { libelle: string; href: string }[] };
+type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
 
 function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisateur: Utilisateur | null; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
   const theme = useTheme();
   const toast = useToast();
   const { source, changer, connecte } = useSource();
   const { alertes, enAttente } = useAlertes();
+  const compteurs = useCompteurs();
   const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
   const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
@@ -279,12 +281,13 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
       { libelle: "Point du matin", href: `${RACINE}/point`, icone: <Sun {...I} /> },
       { libelle: "Activité", href: `${RACINE}/activite`, icone: <Activity {...I} /> },
     ],
-    MODULES.map((m) => ({
+    MODULES.map<Lien>((m) => ({
       libelle: m.nom,
       href: `${RACINE}/${m.cle}`,
       icone: <m.icone {...I} />,
+      compteur: compteurs[m.cle],
       sous: m.onglets.length > 1 ? m.onglets.map((o) => ({ libelle: o.libelle, href: o.href })) : undefined,
-    })),
+    })).concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
     [
       { libelle: "Aide", href: "/contact", icone: <LifeBuoy {...I} /> },
       {
@@ -453,6 +456,18 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
 function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
   const dedans = lien.exact ? chemin === lien.href : chemin === lien.href || chemin.startsWith(`${lien.href}/`);
   const [ouvert, setOuvert] = useState(dedans);
+  /* un module annoncé : sa place, sans lien tant que son écran n'existe pas */
+  if (lien.bientot) {
+    return (
+      <li>
+        <span className="v2-lien v2-lien--bientot" aria-disabled="true">
+          {lien.icone}
+          <span>{lien.libelle}</span>
+          <span className="v2-badge">bientôt</span>
+        </span>
+      </li>
+    );
+  }
   const id = `sous-${lien.href.replace(/\W+/g, "-")}`;
   if (lien.sous) {
     return (

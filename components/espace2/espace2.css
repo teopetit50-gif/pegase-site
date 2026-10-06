@@ -439,6 +439,12 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.v2-lien--bientot,
+.v2-lien--bientot:hover {
+  cursor: default;
+  background: transparent;
+  color: var(--v2-gray-900);
+}
 .v2-lien-chevron {
   color: var(--v2-gray-900);
   transition: transform 0.2s var(--v2-doux);
