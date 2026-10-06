@@ -555,3 +555,11 @@ taux de référence de la BCE chaque jour ouvré.
   (coquille 67fd7ff) ; crons `omega-taux-bce` (35 14,15 * * 1-5) et `taux-bce-veille` (0 17 * * 1-5). Le lot des
   contraintes d'A4 sera **a4_25** ; b7_06 attend derrière. Signalé : les créneaux du jour étaient passés, la veille de
   17 h Z lèverait une fausse alerte ; proposé un appel à la main avant 17 h Z.
+- 6/10 16 h 43 Z (coordinateur) : a4_26 et a4_26b posés (contraintes `_v2` élargies, anciennes retirées), puis b7_06 et
+  b7_07_etrangers ; appel manuel de taux-bce parti avant 17 h Z. test_b7_13 rouge sur 4 assertions : les formes
+  refusées étaient appelées sans rôle, la garde d'identité de FILED (42501) passait avant la forme (22023). Ma souche
+  locale laissait passer `postgres` et l'avait caché.
+- 6/10 17 h 00 Z : test corrigé (les formes refusées appelées en `service_role`, comme test_b7_09 ; la garde reste
+  avant la forme, un non-membre n'apprend rien). Souche locale rendue stricte (seul le rôle `service_role` ou une
+  personne passe) : elle reproduit les 4 échecs avec l'ancien test, 27 sur 27 verts avec le nouveau. Ajout : la forme
+  normalisée qu'A4 stockera (`CHE116281710`) donne bien `uid_ch:CHE116281710MWST`.
