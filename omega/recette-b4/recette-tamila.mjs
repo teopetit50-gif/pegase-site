@@ -12,7 +12,8 @@
    imprimable et l'en-tête du cabinet (b4_09) ; les avis RPVA reçus par
    courriel, à rattacher (b4_10), avec axe-core sur la carte et le dialogue ;
    le temps proposé à la saisie et le forfait consommé (b4_12) ; le contrôle
-   des conflits lancé de lui-même à l'ajout d'une partie.
+   des conflits lancé de lui-même à l'ajout d'une partie ; le tableau des
+   honoraires du cabinet (1440 et 390 px, axe-core).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -404,6 +405,44 @@ for (const largeur of LARGEURS) {
   const t2 = await carte();
   ok(/Nouvelle partie contrôlée d.elle-même : aucun conflit/.test(t2) && /Paule Neuve[\s\S]*Aucune correspondance/.test(t2), 'un client jamais vu : contrôlé de lui-même, aucun conflit');
   ok(/Moulin \(SCI du\)/.test(t2), 'le conflit précédent reste affiché');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-hono-cabinet', densite: 1 });
+  console.log(`— le tableau des honoraires du cabinet à ${largeur}`);
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Honoraires du cabinet/.test(b.textContent)))`);
+  await s.dormir(800);
+  const d = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const w = document.documentElement.clientWidth;
+    return { titre: d.querySelector('h2')?.textContent, texte: d.innerText, lignes: d.querySelectorAll('tbody tr').length, deb: document.documentElement.scrollWidth - w,
+             panneau: Math.round(d.getBoundingClientRect().right) <= w + 1, region: !!d.querySelector('.tam-cabinet-table[role="region"][tabindex="0"]') }; })()`);
+  ok(d && d.titre === 'Honoraires du cabinet', `dialogue « ${d?.titre} »`);
+  ok(d && d.lignes >= 5, `${d?.lignes} dossiers au tableau`);
+  ok(/485,00\s€/.test(d?.texte ?? '') && /312,50\s€/.test(d?.texte ?? ''), '2026-0412 : 312,50 € à facturer (1 h 15 à 250 €), 485 € restent dus');
+  ok(/3\s000,00\s€/.test(d?.texte ?? '') && /Forfait consommé à 85 %/.test(d?.texte ?? ''), '2026-0377 : le forfait de 3 000 € à facturer, consommé à 85 %');
+  ok(d && d.deb === 0 && d.panneau, `le dialogue tient dans ${largeur} px (débordement ${d?.deb})`);
+  ok(d && d.region, 'le tableau défile seul, atteignable au clavier');
+  if (largeur === 1440) {
+    const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('[role="dialog"]'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+      return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+    ok(g.length === 0, `axe sur le tableau : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
+    await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .tam-cabinet-filtres .r-btn')].find(b => /À traiter/.test(b.textContent))?.click()`);
+    await s.dormir(300);
+    const n = await s.evaluer(`document.querySelectorAll('[role="dialog"] tbody tr').length`);
+    ok(n >= 1 && n < d.lignes, `« À traiter » : ${n} dossier(s)`);
+    await s.capturer(`${dossier}tamila-honoraires-cabinet-1440.jpg`, { qualite: 55 });
+    await s.evaluer(`[...document.querySelectorAll('[role="dialog"] tbody .esp-lien-bouton')].find(b => /2026-0377/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const ref = await s.evaluer(`document.querySelector('[role="dialog"]') ? 'ouvert' : document.querySelector('#esp-dossier .esp-carte-titre .esp-mono')?.textContent`);
+    ok(ref === '2026-0377', `un clic sur la référence ouvre le dossier (${ref})`);
+  } else {
+    await s.capturer(`${dossier}tamila-honoraires-cabinet-390.jpg`, { qualite: 55 });
+  }
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }
