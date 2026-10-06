@@ -247,7 +247,8 @@ export default function EcranAPayer() {
                 <h2 className="esp-carte-titre">{g.libelle}</h2>
                 <span className="esp-kpi-sous">{parGroupe[g.cle].length} facture{parGroupe[g.cle].length > 1 ? "s" : ""} · {totaux(parGroupe[g.cle], etats)}</span>
               </div>
-              <div className="esp-tableau-cadre">
+              {/* un cadre qui défile se rejoint au clavier (axe : scrollable-region-focusable) */}
+              <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label={`Factures à payer — ${g.libelle.toLowerCase()}`}>
                 <table className="esp-tableau esp-a-payer" style={{ tableLayout: "fixed", minWidth: 860 }}>
                   {/* mêmes largeurs d'un groupe à l'autre : les colonnes s'alignent */}
                   <colgroup>
