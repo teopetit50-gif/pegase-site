@@ -303,9 +303,11 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
         </p>
         {(() => {
           const precedentes = demande.de_empreinte ? monde.demandes.filter((x) => x.id !== demande.id && x.de_empreinte === demande.de_empreinte) : [];
-          return precedentes.length || demande.litige || demande.escaladee_le ? (
+          const dossier = demande.dossier_id ? monde.demandes.filter((x) => x.dossier_id === demande.dossier_id).length : 1;
+          return precedentes.length || dossier > 1 || demande.litige || demande.escaladee_le ? (
             <p style={{ marginBottom: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
               {precedentes.length ? <Pastille contour>Client connu · {precedentes.length} demande{precedentes.length > 1 ? "s" : ""} avant celle-ci</Pastille> : null}
+              {dossier > 1 ? <Pastille teinte="bleu">Un seul dossier · {dossier} messages, une seule réponse</Pastille> : null}
               {demande.litige ? <Pastille teinte="rouge">Litige ouvert : jamais de réponse automatique</Pastille> : null}
               {demande.escaladee_le ? <Pastille teinte="rouge">Délai dépassé, remontée au responsable</Pastille> : null}
             </p>

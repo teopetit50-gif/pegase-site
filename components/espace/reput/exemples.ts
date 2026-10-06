@@ -99,6 +99,7 @@ export function mondeExemple(): Monde {
           { statut: "brouillon", valide_le: null, cree_le: ilYa(1) }),
   ];
   return {
+    equipes: [{ id: "00000000-0000-4000-8000-00000000c3c1", nom: "Accueil showroom" }, { id: "00000000-0000-4000-8000-00000000c3c2", nom: "Pose et SAV" }],
     reglages: {
       id: "00000000-0000-4000-8000-00000000c3a1", signature: "L'équipe de l'Atelier Bertin", formule_appel: "Bonjour,", formule_politesse: "Bien cordialement,",
       ton: "vouvoiement", mention_automatisee: MENTION, langues: ["fr", "en"], actif: true, accuse: true,
@@ -127,7 +128,7 @@ export function mondeExemple(): Monde {
       sujets: [
         { sujet: "accuse", libelle: "Accusés de réception", genre: "message" as const, autorisable: true, actif: true, statut: "active" as const,
           fin: dans(300), active_le: ilYa(65), donne_par_libelle: "Claire Morel", envoyees_seules_mois: 27 },
-        { sujet: "avis", libelle: "Demandes d'avis", genre: "message" as const, autorisable: true, actif: true, statut: "aucun" as const,
+        { sujet: "demande_avis", libelle: "Demandes d'avis", genre: "message" as const, autorisable: true, actif: true, statut: "aucun" as const,
           fin: null, active_le: null, donne_par_libelle: null, envoyees_seules_mois: 0 },
         ...SUJETS_EXEMPLE.map((s) => ({
         sujet: s.code, libelle: s.libelle, autorisable: s.autorisable, actif: true,

@@ -31,12 +31,13 @@
      · OS et réserves (b5_19) : INSERT / UPDATE lorani_ordres_service, lorani_reserves ;
        UPDATE lorani_marches.delai_execution_jours, lorani_projets.reception_le ;
      · comptes rendus (b5_20) : INSERT / UPDATE lorani_comptes_rendus, lorani_points
-       (statut diffuse = contenu figé par le socle).
+       (statut diffuse = contenu figé par le socle) ;
+     · DOE (b5_21) : RPC lorani_preparer_doe(p_projet), UPDATE lorani_doe.
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Attestation, CompteRendu, OrdreService, Point, Reserve, Calcul, CasRejet, Constat, Plu, Controle, ControlePiece, DateLue, Dossier, Echeance, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
+import type { Attestation, CompteRendu, OrdreService, PieceDoe, Point, Reserve, Calcul, CasRejet, Constat, Plu, Controle, ControlePiece, DateLue, Dossier, Echeance, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -61,7 +62,7 @@ export async function chargerDossier(): Promise<Dossier> {
   const supabase = createClient();
   const moi = await monCompte();
   if (!moi) throw new ErreurPorte("Aucune session ouverte : connectez-vous depuis le cockpit.");
-  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps, marches, situations, visas, controles, controlePieces, constats, plu, attestations, ordresService, reserves, comptesRendus, points] = await Promise.all([
+  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps, marches, situations, visas, controles, controlePieces, constats, plu, attestations, ordresService, reserves, comptesRendus, points, doe] = await Promise.all([
     supabase.from("lorani_projets").select("*").order("maj_le", { ascending: false }).limit(300),
     supabase.from("lorani_permis").select("*").order("cree_le", { ascending: false }).limit(600),
     supabase.from("lorani_permis_dates_lues").select("*").order("cree_le", { ascending: false }).limit(600),
@@ -95,6 +96,8 @@ export async function chargerDossier(): Promise<Dossier> {
     /* b5_20 : absentes tant que la migration n'est pas posée */
     supabase.from("lorani_comptes_rendus").select("id, projet_id, numero, visite_le, presents, notes, avancement, prochaine_visite, statut, diffuse_le, contenu").order("numero").limit(5000),
     supabase.from("lorani_points").select("id, projet_id, lot_id, intervenant_id, nature, texte, echeance, statut, reponse, repondu_le, ouvert_au_cr, clos_au_cr, cree_le, maj_le").order("cree_le").limit(20000),
+    /* b5_21 : absente tant que la migration n'est pas posée */
+    supabase.from("lorani_doe").select("id, projet_id, lot_id, nature, intitule, statut, piece_id, recu_le, motif").limit(20000),
   ]);
   /* le premier refus de la base est dit tel quel ; les lectures secondaires manquantes ne cachent pas les permis */
   for (const r of [projets, permis, dates]) if (r.error) throw new ErreurPorte(message(r.error));
@@ -122,6 +125,7 @@ export async function chargerDossier(): Promise<Dossier> {
     reserves: (reserves.data ?? []) as Reserve[],
     comptesRendus: (comptesRendus.data ?? []) as CompteRendu[],
     points: (points.data ?? []) as Point[],
+    doe: (doe.data ?? []) as PieceDoe[],
     attestations: ((attestations.data ?? []) as Attestation[]).map((x) => ({ ...x, plafond_eur: x.plafond_eur === null ? null : Number(x.plafond_eur) })),
     plu: ((plu.data ?? []) as Plu[]).map((x) => ({ ...x, point_score: x.point_score === null ? null : Number(x.point_score) })),
     pieces: ((pieces.data ?? []) as (Omit<PieceProjet, "cree_le"> & { recue_le: string | null })[]).map(({ recue_le, ...x }) => ({ ...x, cree_le: recue_le ?? undefined })),
@@ -470,5 +474,20 @@ export async function ajouterPoints(v: { client_id: string; entite_id: string; p
 export async function majPoint(id: string, v: Partial<Pick<Point, "statut" | "reponse" | "echeance">>): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from("lorani_points").update(v).eq("id", id);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+/* ——— le DOE (b5_21) ——— */
+
+export async function preparerDoe(projet: string): Promise<number> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("lorani_preparer_doe", { p_projet: projet });
+  if (error) throw new ErreurPorte(message(error));
+  return Number(data ?? 0);
+}
+
+export async function majDoe(id: string, v: Partial<Pick<PieceDoe, "statut" | "piece_id" | "motif" | "recu_le">>): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_doe").update(v).eq("id", id);
   if (error) throw new ErreurPorte(message(error));
 }

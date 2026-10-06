@@ -77,3 +77,21 @@ Aucun compte : un serveur et une décision d'hébergement, à voir avec le coord
 - Il compare la prévision aux seuils du passage, sinon aux seuils par défaut : 5 mm de pluie, 60 km/h de rafales,
   gel.
 - Il alerte le conducteur de travaux et inscrit la ligne au point du matin.
+
+## Décision du 06/10/2026, 18 h 25 Z : MET Norway
+
+Teo veut une source gratuite. Le coordinateur a choisi **MET Norway, Locationforecast 2.0**
+(api.met.no). Le service est gratuit y compris en usage commercial, sans compte ni clé.
+Les données sont sous licence CC BY 4.0. Daliro (b6_21b) respecte ses conditions :
+
+- l'attribution « Données météo : MET Norway » sur l'écran ;
+- un User-Agent qui identifie Omega et un contact ;
+- des coordonnées arrondies ;
+- `If-Modified-Since` et l'en-tête `Expires`.
+
+MET Norway ne donne pas les rafales en France. Le risque de vent se lit donc sur le vent
+moyen, à partir de 40 km/h (deux tiers du seuil de rafales de 60 km/h), et l'écran le dit.
+
+Pour l'activer, le coordinateur pose `omega/modules/daliro/reglages/meteo_met_norway.sql`.
+Rien à faire pour Teo. Les voies 1 à 3 ci-dessus restent possibles plus tard, par exemple
+pour avoir les rafales.

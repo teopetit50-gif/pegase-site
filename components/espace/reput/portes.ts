@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Accords, Avis, Client, Demande, Fiche, Indicateurs, Monde, Reception, Reglages, Reponse, Sujet } from "./types";
+import type { Accords, Avis, Client, Demande, Equipe, Fiche, Indicateurs, Monde, Reception, Reglages, Reponse, Sujet } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -39,10 +39,11 @@ export async function monClient(): Promise<Client | null> {
 export async function chargerMonde(client: Client): Promise<Monde> {
   const supabase = createClient();
   const depuis = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
-  const [g, av, ind] = await Promise.all([
+  const [g, av, ind, eq] = await Promise.all([
     supabase.from("reput_reglages").select("*").eq("client_id", client.client_id).is("entite_id", null).maybeSingle(),
     supabase.from("reput_avis").select("*").eq("client_id", client.client_id).order("cree_le", { ascending: false }).limit(100),
     supabase.from("reput_indicateurs").select("recues, repondues, parties_seules, hors_base, delai_median_minutes").eq("client_id", client.client_id).gte("jour", depuis),
+    supabase.from("equipes").select("id, nom").eq("client_id", client.client_id).order("nom"),
   ]);
   for (const r of [g, av, ind]) if (r.error) throw new ErreurPorte(message(r.error));
   const lignes = (ind.data ?? []) as Indicateurs[];
@@ -73,6 +74,7 @@ export async function chargerMonde(client: Client): Promise<Monde> {
   const receptions: Record<number, Reception> = {};
   for (const x of (r.data ?? []) as Reception[]) receptions[x.id] = x;
   return {
+    equipes: (eq.error ? [] : (eq.data ?? [])) as Equipe[],
     reglages: (g.data ?? null) as Reglages | null,
     avis: (av.data ?? []) as Avis[],
     indicateurs,
@@ -110,3 +112,5 @@ export const programmerAvis = (client: string, canal: string, adresse: string, n
   });
 export const avisRecu = (avis: string) => rpc("reput_avis_recu", { p_avis: avis });
 export const fixerDelai = (client: string, sujet: string, heures: number) => rpc("reput_fixer_delai", { p_client: client, p_sujet: sujet, p_heures: heures });
+export const routerSujet = (client: string, sujet: string, equipe: string | null) =>
+  rpc("reput_router_sujet", { p_client: client, p_sujet: sujet, p_equipe: equipe });

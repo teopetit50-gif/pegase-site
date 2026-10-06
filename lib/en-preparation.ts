@@ -69,22 +69,19 @@ const LIGNES = {
      calendrier du permis, contrôle des planches et du PLU avec
      revérification à chaque indice (b5_16), situations et visas
      (b5_13 à b5_15) ; ordres de service et réserves jusqu'à la GPA (b5_19) ; comptes rendus de
-     chantier et questions suivies jusqu'à la réponse (b5_20). */
+     chantier et questions suivies jusqu'à la réponse (b5_20) ; décennales
+     (b5_18, b5_09) ; accessibilité, ERP, RE2020, Cerfa, fonds BET et DOE
+     (b5_21). Restent : PLU (servitudes et risques non lus) et le métré, dont
+     la phrase promet une mesure sur le dessin que le lecteur ne fait pas. */
   lorani: [
     "Plans croisés, rapport PDF annoté",
-    "Accessibilité, ERP et RE2020",
     "PLU, servitudes et risques lus depuis l'adresse",
-    "Surfaces recalculées contre le Cerfa",
-    "RE2020 : attestation comparée aux plans",
     "Questions posées au dossier",
     "Analyse des offres sur DPGF",
     "Métré des plans contre la DPGF",
-    "Décennales contrôlées contre le lot",
     "Une question en un clic",
     "Checklists de l'agence",
     "Export Excel par lot",
-    "Fonds de plan BET croisés",
-    "Complétude du DOE à la réception",
     "Honoraires par phase contre temps passé",
     "Dossier de défense décennale",
     "Historique des indices sans limite",
@@ -96,10 +93,11 @@ const LIGNES = {
   /* DALIRO — ouvrier B6 (lecture des photos et vocaux avec A1 et A2).
      Retirés le 06/10 au soir : relance des avenants (b6_18), recalage des
      lots (b6_19), signature sur place (b6_20), liste cadencée, livraisons
-     calées, retours et bons rapprochés (b6_23). */
+     calées, retours et bons rapprochés (b6_23), alerte météo (b6_21b, MET
+     Norway). « Lecture des photos et vocaux » reste : les vocaux attendent la
+     transcription. */
   daliro: [
     "Lecture des photos et vocaux",
-    "Alerte météo",
     "Avancement lu dans les photos",
   ],
 
@@ -111,10 +109,9 @@ const LIGNES = {
 
   /* TAVARO — ouvrier B2, par paliers. Seuls 01 (facturation des retours),
      12 (état des lieux signé) et 14 (amendes) existent. 19 (relevés
-     constructeur) et l'assistance téléphonique (04) dépendent de tiers. */
+     constructeur) et l'assistance téléphonique (04) dépendent de tiers.
+     Retirés le 06/10 : remise en location et entretien (b2_10). */
   tavaro: [
-    "Remise en location",
-    "Entretien",
     "Assistance",
     "Sortie de flotte",
     "Questions",
@@ -134,9 +131,9 @@ const LIGNES = {
 
   /* OFFLOAD — ouvrier C4. Lignes « non construites » de NOTES-C4 (f9bf72d)
      qui apparaissent hors du catalogue. Le catalogue, lui, porte déjà
-     `atteste: false`. */
+     `atteste: false`. Retiré le 06/10 au soir : « Entretien annuel redevenu
+     dû » (c4_07, 5f2cc7e, échéances et renouvellements). */
   offload: [
-    "Entretien annuel redevenu dû",
     "Pièce arrivée, jamais reprise",
   ],
 

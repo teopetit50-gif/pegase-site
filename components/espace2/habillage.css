@@ -231,20 +231,39 @@ html.v2-actif .dlg-panneau .rv-champ {
 html.v2-actif .dlg-panneau .rv-champ:hover {
   box-shadow: 0 0 0 1px var(--v2-a-500);
 }
+/* 06/10 (retour de Teo) : à l'ouverture d'un dialogue, le premier champ
+   reçoit le focus par programme ; l'anneau épais faisait un double cadre
+   sur une liste qu'on n'a pas touchée. Un champ de saisie le garde au
+   clavier comme à la souris ; une liste ne le montre qu'au clavier. */
 .v2 .esp .rv-champ:focus,
 html.v2-actif .dlg-panneau .rv-champ:focus {
   outline: none;
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+}
+.v2 .esp input.rv-champ:focus,
+.v2 .esp textarea.rv-champ:focus,
+.v2 .esp .rv-champ:focus-visible,
+html.v2-actif .dlg-panneau input.rv-champ:focus,
+html.v2-actif .dlg-panneau textarea.rv-champ:focus,
+html.v2-actif .dlg-panneau .rv-champ:focus-visible {
   box-shadow: var(--v2-anneau);
 }
 .v2 .esp .rv-champ::placeholder,
 html.v2-actif .dlg-panneau .rv-champ::placeholder {
   color: var(--v2-gray-700);
 }
+/* 06/10 (retour de Teo) : la flèche native du navigateur dessinait un
+   second cadre sous notre anneau, en sombre surtout. On l'efface et on
+   pose notre chevron, gris moyen, lisible en clair comme en sombre. */
 .v2 .esp select.rv-champ,
 html.v2-actif .dlg-panneau select.rv-champ {
-  background-image: none;
-  padding-right: 12px;
-  appearance: auto;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238f8f8f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+  padding-right: 40px;
 }
 .v2 .esp textarea.rv-champ,
 html.v2-actif .dlg-panneau textarea.rv-champ {
@@ -605,10 +624,12 @@ html.v2-actif .dlg-icone {
   color: var(--v2-gray-1000);
   box-shadow: 0 0 0 1px var(--v2-a-400);
 }
+/* 06/10 (retour de Teo) : le fond plus sombre du pied, dans la marge
+   intérieure du panneau, faisait une bande noire au-dessus du bouton. Le
+   filet suffit à séparer le pied. */
 html.v2-actif .dlg-pied {
-  background: var(--v2-bg-200);
+  background: transparent;
   border-top: 1px solid var(--v2-a-400);
-  border-radius: 0 0 12px 12px;
 }
 html.v2-actif .dlg-fermer {
   color: var(--v2-gray-900);

@@ -541,9 +541,9 @@ export type Recalage = {
 };
 
 /* b6_21 : la météo du chantier (public.btp_meteo_chantier) */
-export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; tmin: number | null; tmax: number | null };
+export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; vent_kmh?: number | null; tmin: number | null; tmax: number | null };
 export type RisqueMeteo = { passage_id: string; tache: string | null; chantier_id: string; jour: string; motifs: string[]; texte: string };
-export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[] };
+export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[]; fournisseur?: "met_norway" | "open_meteo" | null };
 
 /* b6_22 : l'approvisionnement (public.btp_appro_chantier) */
 export type EtatCommande = "a_commander" | "a_commander_vite" | "commande_en_retard" | "commandee" | "livraison_tardive" | "livraison_trop_tot" | "livraison_attendue" | "livree_partielle" | "livree" | "annulee";
@@ -583,3 +583,40 @@ export type Commande = {
 };
 export type LivraisonCommande = { id: string; livree_le: string; quantite: number | null; bon_reference: string | null; piece_id: string | null; note: string | null };
 export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[]; devis_verifie?: boolean };
+
+/* b6_24 : le fil du chantier — messages, photos, vocaux du terrain */
+export type PieceMessage = { nom: string; mime: string | null; taille: number | null; chemin: string; vocal: boolean };
+export type MessageChantier = {
+  id: string;
+  reception_id: number;
+  chantier_id: string | null;
+  canal: "whatsapp" | "sms" | "email";
+  de_nom: string | null;
+  de_adresse: string | null;
+  intervenant_id: string | null;
+  tiers_id: string | null;
+  texte: string | null;
+  pieces: PieceMessage[];
+  rangement: "nom" | "passage" | "passage_proche" | "manuel" | null;
+  statut: "a_ranger" | "range" | "ecarte";
+  avenant_id: string | null;
+  recu_le: string;
+  /* b6_24b : la lecture rendue par le lecteur (CONTRAT-MEDIA d'A1) */
+  lecture?: LectureMedia | null;
+  lu_le?: string | null;
+  avenants?: string[];
+};
+export type DemandeLue = {
+  nature: "travail_supplementaire" | "probleme" | "question" | "information";
+  texte: string;
+  quantite?: number | null;
+  unite?: string | null;
+  lieu?: string | null;
+  source?: { media: number; extrait: string };
+  verifiee: boolean;
+};
+export type LectureMedia = {
+  resume?: string | null;
+  medias?: { n: number; chemin?: string; nature: "vocal" | "photo" | string; statut: string; transcription?: string | null; duree_s?: number | null }[];
+  demandes?: DemandeLue[];
+};

@@ -11,15 +11,20 @@ import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const base = process.argv[2] ?? 'http://localhost:3010';
-const dossier = new URL('.', import.meta.url).pathname;
+/* le préfixe de l'espace : /espace (défaut) ou /espace2 (le tableau de bord de C1) */
+const P = (process.env.PREFIXE ?? '/espace').replace(/\/$/, '');
+/* SAUTER=boite,demandes : les enchaînements d'écrans absents de la version jouée */
+const SAUTER = new Set((process.env.SAUTER ?? '').split(',').filter(Boolean));
+/* contre un autre préfixe, les captures vont ailleurs (CAPTURES), pas sur celles de /espace */
+const dossier = process.env.CAPTURES ? process.env.CAPTURES.replace(/\/?$/, '/') : new URL('.', import.meta.url).pathname;
 mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['comptabilite', '/espace/filed/comptabilite'], ['boite', '/espace/filed/boite'], ['demandes', '/espace/demandes'], ['reglages', '/espace/reglages'], ['point', '/espace/point']];
+const ECRANS = [['validations', P + '/validations'], ['filed', P + '/filed'], ['fournisseurs', P + '/filed/fournisseurs'], ['a-payer', P + '/filed/a-payer'], ['comptabilite', P + '/filed/comptabilite'], ['boite', P + '/filed/boite'], ['demandes', P + '/demandes'], ['reglages', P + '/reglages'], ['point', P + '/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
-for (const [nom, chemin] of ECRANS) {
+for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
   for (const largeur of LARGEURS) {
     const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `a3-${nom}`, densite: 1 });
     console.log(`— ${chemin} à ${largeur}`);
@@ -48,7 +53,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-approuver', densite: 1 });
   console.log('— /espace/validations : la règle exige un commentaire');
-  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  ok(await s.aller(base + P + '/validations'), 'page chargée');
   await s.dormir(400);
   const avant = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-actions .r-btn')].find(b => /Approuver/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
   ok(avant === true, 'bouton « Approuver » cliqué sur la demande en retard (12 480 €, 2 approbations)');
@@ -89,7 +94,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-piece', densite: 1 });
   console.log('— /espace/filed : la citation se surligne dans la pièce');
-  ok(await s.aller(base + '/espace/filed'), 'page chargée');
+  ok(await s.aller(base + P + '/filed'), 'page chargée');
   await s.dormir(400);
   const ref0 = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
   ok(ref0 === 'R2026-000016', `le document ouvert d'office est le bloqué le plus récent (${ref0})`);
@@ -147,20 +152,20 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lien', densite: 1 });
   console.log('— /espace/validations → /espace/filed : de la demande à son dossier');
-  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  ok(await s.aller(base + P + '/validations'), 'page chargée');
   await s.dormir(500);
   const choisie = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Lever le contrôle IBAN sur R2026-000009/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`);
   ok(choisie, 'la demande « Lever le contrôle IBAN sur R2026-000009 » est ouverte');
   await s.dormir(500);
   const apercu = await s.evaluer(`(() => { const a = document.querySelector('.esp-apercu-filed'); if (!a) return null; return { texte: a.innerText.replace(/\\s+/g, ' '), lien: a.querySelector('a')?.getAttribute('href') }; })()`);
   ok(apercu && /R2026-000009/.test(apercu.texte) && /Bloquée/.test(apercu.texte) && /Métallerie Roux/.test(apercu.texte), `aperçu du dossier dans la demande (${apercu?.texte})`);
-  ok(apercu?.lien === '/espace/filed?objet=facture:R2026-000009', `lien « Ouvrir le dossier » : ${apercu?.lien}`);
+  ok(apercu?.lien === P + '/filed?objet=facture:R2026-000009', `lien « Ouvrir le dossier » : ${apercu?.lien}`);
   await s.capturer(`${dossier}validations-dossier-1440.jpg`, { qualite: 55 });
-  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000011'), 'FILED ouvert par l\'URL d\'une demande');
+  ok(await s.aller(base + P + '/filed?objet=facture:R2026-000011'), 'FILED ouvert par l\'URL d\'une demande');
   await s.dormir(900);
   const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
   ok(ref === 'R2026-000011', `le dossier désigné s'ouvre d'office (${ref})`);
-  ok(await s.aller(base + '/espace/filed?objet=facture:inconnue'), 'FILED ouvert avec une cible inconnue');
+  ok(await s.aller(base + P + '/filed?objet=facture:inconnue'), 'FILED ouvert avec une cible inconnue');
   await s.dormir(900);
   const introuvable = await s.evaluer(`/Document introuvable/.test(document.querySelector('.esp').innerText)`);
   ok(introuvable, 'une cible inconnue est dite, sans erreur');
@@ -170,7 +175,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-fournisseurs', densite: 1 });
   console.log('— /espace/filed/fournisseurs : à confirmer en tête, fiche, factures');
-  ok(await s.aller(base + '/espace/filed/fournisseurs'), 'page chargée');
+  ok(await s.aller(base + P + '/filed/fournisseurs'), 'page chargée');
   await s.dormir(600);
   const tete = await s.evaluer(`(() => ({ premiers: [...document.querySelectorAll('.esp-item')].slice(0, 2).map(e => e.innerText.replace(/\\s+/g, ' ')), kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')) }))()`);
   ok(tete.premiers.length === 2 && tete.premiers.every(t => /^À confirmer/.test(t)), `les fournisseurs à confirmer sont en tête (${tete.premiers.join(' / ')})`);
@@ -198,7 +203,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-identifiants', densite: 1 });
   console.log('— /espace/filed : identifiants lus sur la pièce, non retenus');
-  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000017'), 'page chargée sur R2026-000017');
+  ok(await s.aller(base + P + '/filed?objet=facture:R2026-000017'), 'page chargée sur R2026-000017');
   await s.dormir(900);
   const bloc = await s.evaluer(`(() => { const b = document.querySelector('.esp-identifiants-lus'); if (!b) return null; return { texte: b.innerText.replace(/\\s+/g, ' '), confirmer: /Confirmer la valeur lue/.test(b.textContent) }; })()`);
   ok(bloc && /SIREN lu 519803417 clé de Luhn invalide/.test(bloc.texte) && /TVA lu FR45519803417/.test(bloc.texte) && !bloc.confirmer, `valeurs lues non retenues, avec leur raison, sans « confirmer » une clé fausse (${bloc?.texte?.slice(0, 220)})`);
@@ -222,10 +227,10 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('a-payer')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-a-payer', densite: 1 });
   console.log('— /espace/filed/a-payer : les factures validées par échéance');
-  ok(await s.aller(base + '/espace/filed/a-payer'), 'page chargée');
+  ok(await s.aller(base + P + '/filed/a-payer'), 'page chargée');
   await s.dormir(600);
   const r = await s.evaluer(`(() => ({ kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), groupes: [...document.querySelectorAll('section.esp-carte .esp-carte-titre')].map(e => e.textContent), lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')), avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent) }))()`);
   ok(r.groupes.join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
@@ -255,7 +260,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lot', densite: 1 });
   console.log('— /espace/validations : décider en lot');
-  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  ok(await s.aller(base + P + '/validations'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('button')].find(b => /Décider en lot/.test(b.textContent))?.click()`);
   await s.dormir(300);
@@ -286,7 +291,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'a3-point', densite: 1 });
   console.log('— /espace/point : reculer d\'un jour');
-  ok(await s.aller(base + '/espace/point'), 'page chargée');
+  ok(await s.aller(base + P + '/point'), 'page chargée');
   await s.dormir(400);
   const j1 = await s.evaluer(`document.querySelector('.esp-point-jour')?.textContent`);
   await s.evaluer(`document.querySelector('.esp-point-nav button[aria-label="Jour précédent"]').click()`);
@@ -298,10 +303,10 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('filed-electronique')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-electronique', densite: 1 });
   console.log('— /espace/filed : la facture électronique R2026-000014');
-  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000014'), 'page chargée');
+  ok(await s.aller(base + P + '/filed?objet=facture:R2026-000014'), 'page chargée');
   await s.dormir(700);
   const r = await s.evaluer(`(() => { const d = document.querySelector('#esp-dossier'); const c = [...d.querySelectorAll('button')].find(b => /Corriger une valeur/.test(b.textContent));
     return { pastille: /Facture électronique/.test(d.innerText), fichier: (d.innerText.match(/du fichier/g) ?? []).length, corriger: c?.disabled, aide: c?.title, onglets: [...d.querySelectorAll('[role="tab"]')].map(t => t.textContent) }; })()`);
@@ -333,10 +338,10 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('comptabilite')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-fec', densite: 1 });
   console.log('— /espace/filed/comptabilite : exporter le FEC, régler un compte');
-  ok(await s.aller(base + '/espace/filed/comptabilite'), 'page chargée');
+  ok(await s.aller(base + P + '/filed/comptabilite'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter le FEC/.test(b.textContent)).click()`);
   await s.dormir(800);
@@ -358,10 +363,10 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('boite')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-boite', densite: 1 });
   console.log('— /espace/filed/boite : les courriels reçus');
-  ok(await s.aller(base + '/espace/filed/boite'), 'page chargée');
+  ok(await s.aller(base + P + '/filed/boite'), 'page chargée');
   await s.dormir(600);
   const r = await s.evaluer(`(() => ({ boite: document.querySelector('.esp-avis strong.esp-mono')?.textContent, kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), lignes: [...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' ')), detail: document.querySelector('#esp-courriel')?.innerText ?? '' }))()`);
   ok(/@/.test(r.boite ?? ''), `l'adresse de la boîte est dite (${r.boite})`);
@@ -394,10 +399,10 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('demandes')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-demandes', densite: 1 });
   console.log('— /espace/demandes : toutes les demandes reçues, par enseigne');
-  ok(await s.aller(base + '/espace/demandes'), 'page chargée');
+  ok(await s.aller(base + P + '/demandes'), 'page chargée');
   await s.dormir(600);
   const r = await s.evaluer(`(() => ({ n: document.querySelectorAll('.esp-liste .esp-item').length, canaux: [...new Set([...document.querySelectorAll('.esp-liste .esp-pastille--contour')].map(p => p.textContent.trim()))], boites: [...document.querySelectorAll('.esp select option')].map(o => o.textContent) }))()`);
   ok(r.n >= 15, `${r.n} demandes`);
@@ -412,10 +417,10 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('reglages')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-reglages', densite: 1 });
   console.log('— /espace/reglages : exporter le journal, tout exporter, préparer l\'effacement');
-  ok(await s.aller(base + '/espace/reglages'), 'page chargée');
+  ok(await s.aller(base + P + '/reglages'), 'page chargée');
   await s.dormir(500);
   /* le contenu téléchargé se lit au passage (URL.createObjectURL) */
   await s.evaluer(`(() => { window.__blobs = []; const o = URL.createObjectURL; URL.createObjectURL = (b) => { b.arrayBuffer().then(a => window.__blobs.push(new TextDecoder('utf-8', { ignoreBOM: true }).decode(a))); return o(b); }; })()`);

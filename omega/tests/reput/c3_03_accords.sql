@@ -124,7 +124,7 @@ begin
   return next is((select e.corps from public.envois e join public.reput_reponses p on p.envoi_id = e.id where p.id = v_new),
                  E'Bonjour,\n\nLe diagnostic coûte 89 € TTC ; il est offert si vous commandez.\n\nL''équipe', 'L''envoi porte le texte corrigé');
   return next is((select d.type_action from public.demandes_validation d join public.reput_reponses p on p.demande_validation_id = d.id where p.id = v_new),
-                 'reput.transferer', 'Une réponse corrigée n''est jamais couverte par un accord');
+                 'reput.transferer.tarifs', 'Une réponse corrigée n''est jamais couverte par un accord (à relire, par sujet)');
   perform tests.endosser(v_daf, 'daf@banc-varelo.test');
   return next is(public.reput_decider(v_new, 'valider') ->> 'statut', 'approuvee', 'Le correcteur valide sa correction');
 

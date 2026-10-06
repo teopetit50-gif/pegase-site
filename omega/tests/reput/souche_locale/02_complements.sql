@@ -190,3 +190,5 @@ begin
   end loop;
   return n;
 end $$;
+alter table public.equipes_membres add column if not exists client_id uuid;
+alter table public.equipes add column if not exists cle text;

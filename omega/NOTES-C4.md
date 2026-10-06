@@ -318,12 +318,54 @@ fois ; tsc, eslint, build verts ; recette 5 largeurs sans débordement.
 **Limite** : une réponse du client à un message d'échéance n'est pas encore rattachée à l'échéance (le socle la
 reçoit ; la réponse arrête les reprises, pas les échéances qui n'ont qu'un message).
 
+## Lot c4_08 — affaires restées en plan (06/10, après c4_07 posé et vert)
+
+`omega/modules/offload/migrations/c4_08_affaires.sql` :
+
+- `public.offload_affaires` (RLS, lecture dans le périmètre, aucune écriture directe) : une commande arrivée ou une
+  intervention terminée, non retirée ; référence, libellé, date de disponibilité, **valeur HT immobilisée** ; statut
+  `en_attente` → `relancee_1` → `relancee_2` → `decision`, ou `repondue`, `retiree`, `close_sans_suite` ;
+  `offload_reglages.delai_retrait_jours` (7) et `delai_relance_retrait_jours` (7), réglables par `offload_regler` ;
+- modèle d'export « affaires » (clé `compte_ref` + `reference`, toutes deux obligatoires ; `disponible_le` date
+  obligatoire ; type, libellé, valeur, `retire_le` facultatifs) et `declarer_jeu` sur les branchements déjà posés ;
+  une affaire absente du dernier export est dite « plus vue », **jamais close d'office** ; une date de retrait dans
+  l'export la clôt ;
+- `private.offload_affaires_cycle` : après le délai, un message de retrait par `preparer_envoi` (validation, verrous,
+  mode du socle) ; **une seule** autre après le délai de relance ; sans réponse, `decision` avec « (480 € immobilisés
+  depuis le …) » ; jamais deux étapes dans un même passage. Un rappel de retrait n'est pas une sollicitation : un
+  compte inactif ou déjà contacté est prévenu ; arrêt demandé ou fiche fusionnée : écarté ; compte suivi en direct
+  ou sur liste d'exclusion : **tâche d'appel**, jamais de message automatique ; sans courriel : tâche d'appel ;
+- `private.offload_message_retrait` : **aucune mention de paiement, de prix ni de montant** (CASHD) ; intervention
+  dite « terminée », commande « arrivée », sans accord de genre ;
+- réponse du client (lien à l'envoi ou adresse) : `repondue`, tâche « répondre », relance en validation annulée ;
+  « stop » : désinscription au socle, compte `arrete` ; relance refusée en validation → `decision` ; message non
+  parti → tâche d'appel ;
+- portes `offload_saisir_affaire`, `offload_retirer_affaire`, `offload_decider_affaire` (relancer, garder,
+  retour_stock, sans_suite ; motif obligatoire, au journal) ; lectures `offload_affaires_liste(client)` (la plus
+  ancienne en tête, jours, valeur, total, à décider, closes sans suite à part) et `offload_affaires_compte(compte)` ;
+- redéfinitions par copie de la dernière version : `offload_appliquer_releve` (jeu « affaires »),
+  `offload_traiter_travaux` (après un import : détection, échéances, affaires), `offload_suivre_envoi`,
+  `offload_lire_reponse`, `offload_point_lignes` (décisions à prendre, stock immobilisé), `offload_detecter_tout`,
+  `offload_regler` ;
+- écran : carte « Affaires restées en plan » (totaux, liste, décision et retrait), fiche « En attente de retrait »
+  (saisie, retrait).
+
+**Tests** : `omega/tests/offload/c4_08_affaires.sql` — `test_c4_08_cycle`, `test_c4_08_inactif_et_reponse`,
+`test_c4_08_import` (42 assertions). Banc local : 26 tests, 294 assertions vertes, migrations posées deux fois ;
+tsc, eslint, build verts ; recette 5 largeurs sans débordement.
+
+**Ordre de pose** : `c4_08_affaires.sql`, puis `omega/tests/offload/c4_08_affaires.sql`
+(`runtests('tests', '^test_c4_08_')`).
+
+**À inscrire dans `a5_01`** : `offload_saisir_affaire(p_compte uuid, p_reference text, p_disponible_le date, p_champs jsonb)`,
+`offload_retirer_affaire(p_affaire uuid, p_retire_le date)`, `offload_decider_affaire(p_affaire uuid, p_decision text, p_motif text)`.
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`, 45 lignes) — tenue et preuve
 
 Recette du 06/10, 17 h 10 Z (coordinateur) : `^test_(b3_|c4_|b4_24_|b6_16_)` → 834 ok, 0 not ok ; migrations
 c4_01 à c4_06 posées ; `banc_offload.sql` joué (essai, branché, jeux « clients, ventes ») ; écran fusionné dans main.
-Le fichier compte 45 lignes (8+8+8+8+7+6), et non 46 comme l’audit l’indiquait. Bilan : **18 prouvées sur la recette**, 1 prouvée en local (assertion à rejouer), 4 partielles, 22 non
-construites. Rien n'est basculé `atteste: true` par moi ; c'est au coordinateur. Les lignes prouvées se voient à
+Le fichier compte 45 lignes (8+8+8+8+7+6), et non 46 comme l’audit l’indiquait. Bilan au 06/10 après c4_07 : **28 prouvées sur la recette** (ligne 39 et lignes 8, 17 à 24 comprises), 8 construites par
+c4_08 à poser (25 à 32), 4 partielles, 5 non construites. Rien n'est basculé `atteste: true` par moi ; c'est au coordinateur. Les lignes prouvées se voient à
 l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, tâches, doublons, reprise en main, contact).
 
 | # | Ligne | État | Preuve |
@@ -335,7 +377,7 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 5 | Les doublons de fiches sont rapprochés quand deux lignes désignent le même client. | **prouvée (recette)** | test_c4_05_doublons |
 | 6 | Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | partielle | `groupe` lu dans les exports, plafond au groupe (test_c4_05_exclusions) ; pas de vue consolidée par raison sociale mère |
 | 7 | Un tableur sans colonne de date est exploité à partir des dates de facture. | **prouvée (recette)** | test_c4_01_import ; test_c4_02_detection (`sans_achat` présenté à part) |
-| 8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | **c4_07, à poser** | test_c4_07_echeances, test_c4_07_contrats_et_parc |
+| 8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | **prouvée (recette)** | test_c4_07_echeances, test_c4_07_contrats_et_parc |
 | 9 | Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | **prouvée (recette)** | test_c4_03_message |
 | 10 | Un compte sans réponse reçoit un second message, puis il sort du cycle. | **prouvée (recette)** | test_c4_03_cycle |
 | 11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | partielle | seule la signature se règle ; pas de règles de ton appliquées au message |
@@ -344,29 +386,29 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 14 | Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | **prouvée (recette)** | test_c4_05_exclusions |
 | 15 | Les messages partent par courriel, depuis la boîte de votre entreprise. | partielle | OFFLOAD prépare des courriels validés ; la boîte de l'entreprise dépend de l'expéditeur du socle (A2 : Gmail / Microsoft 365 pas branchés) ; rien n'est parti en réel |
 | 16 | Les vagues s'enchaînent au rythme convenu, et chaque exécution laisse son bilan. | **prouvée (recette)** | test_c4_03_cycle (bilan `offload.cycle`) ; test_c4_05_exclusions (bilan des écartés) |
-| 17 | Les entretiens, révisions et contrôles périodiques sont suivis jusqu'à leur échéance. | **c4_07, à poser** | test_c4_07_echeances |
-| 18 | Chaque échéance est datée à partir de la dernière intervention enregistrée. | **c4_07, à poser** | test_c4_07_echeances, test_c4_07_import_et_groupe |
-| 19 | Le client est prévenu la semaine qui précède, pas le jour où l'échéance tombe. | **c4_07, à poser** | test_c4_07_echeances (J-5 → message ; J → rien) |
-| 20 | Une échéance déjà honorée ailleurs sort du cycle dès que la date est connue. | **c4_07, à poser** | test_c4_07_echeances |
-| 21 | Les contrats d'entretien qui s'éteignent faute de reconduction sont signalés. | **c4_07, à poser** | test_c4_07_contrats_et_parc |
-| 22 | Les équipements installés sont rattachés au compte qui les exploite. | **c4_07, à poser** | test_c4_07_import_et_groupe |
-| 23 | Un parc réparti sur plusieurs sites se lit site par site et en consolidé. | **c4_07, à poser** | test_c4_07_contrats_et_parc (offload_parc) |
-| 24 | Les échéances réglementaires sont distinguées des échéances commerciales. | **c4_07, à poser** | test_c4_07_echeances |
-| 25 | Les commandes arrivées qu'aucun client n'est venu reprendre sont listées. | non construite | — |
-| 26 | Les interventions terminées et non retirées sont relancées après le délai que vous fixez. | non construite | — |
-| 27 | Le stock immobilisé par une commande non reprise est chiffré. | non construite | — |
-| 28 | Une pièce commandée pour un compte inactif est rattachée à sa fiche. | non construite | — |
-| 29 | Les affaires closes sans suite sont distinguées de celles qui attendent encore. | non construite | — |
-| 30 | Un compte relancé deux fois sans réponse passe en décision manuelle. | non construite | — |
-| 31 | La relance de retrait ne porte aucune mention de paiement, qui relève de CASHD. | non construite | — |
-| 32 | Le magasin voit en une liste ce qui dort et depuis combien de temps. | non construite | — |
+| 17 | Les entretiens, révisions et contrôles périodiques sont suivis jusqu'à leur échéance. | **prouvée (recette)** | test_c4_07_echeances |
+| 18 | Chaque échéance est datée à partir de la dernière intervention enregistrée. | **prouvée (recette)** | test_c4_07_echeances, test_c4_07_import_et_groupe |
+| 19 | Le client est prévenu la semaine qui précède, pas le jour où l'échéance tombe. | **prouvée (recette)** | test_c4_07_echeances (J-5 → message ; J → rien) |
+| 20 | Une échéance déjà honorée ailleurs sort du cycle dès que la date est connue. | **prouvée (recette)** | test_c4_07_echeances |
+| 21 | Les contrats d'entretien qui s'éteignent faute de reconduction sont signalés. | **prouvée (recette)** | test_c4_07_contrats_et_parc |
+| 22 | Les équipements installés sont rattachés au compte qui les exploite. | **prouvée (recette)** | test_c4_07_import_et_groupe |
+| 23 | Un parc réparti sur plusieurs sites se lit site par site et en consolidé. | **prouvée (recette)** | test_c4_07_contrats_et_parc (offload_parc) |
+| 24 | Les échéances réglementaires sont distinguées des échéances commerciales. | **prouvée (recette)** | test_c4_07_echeances |
+| 25 | Les commandes arrivées qu'aucun client n'est venu reprendre sont listées. | **c4_08, à poser** | test_c4_08_cycle (liste, jours, compte) ; test_c4_08_import |
+| 26 | Les interventions terminées et non retirées sont relancées après le délai que vous fixez. | **c4_08, à poser** | test_c4_08_inactif_et_reponse (intervention relancée) ; test_c4_08_cycle (délai `delai_retrait_jours`, rien avant) |
+| 27 | Le stock immobilisé par une commande non reprise est chiffré. | **c4_08, à poser** | test_c4_08_cycle (total HT de la liste, point du matin) |
+| 28 | Une pièce commandée pour un compte inactif est rattachée à sa fiche. | **c4_08, à poser** | test_c4_08_inactif_et_reponse (`offload_affaires_compte`, compte éteint prévenu quand même) |
+| 29 | Les affaires closes sans suite sont distinguées de celles qui attendent encore. | **c4_08, à poser** | test_c4_08_cycle (`close_sans_suite` compté à part) ; test_c4_08_import (« plus vue », jamais close d'office) |
+| 30 | Un compte relancé deux fois sans réponse passe en décision manuelle. | **c4_08, à poser** | test_c4_08_cycle (deux relances, puis décision avec le montant ; jamais de troisième) |
+| 31 | La relance de retrait ne porte aucune mention de paiement, qui relève de CASHD. | **c4_08, à poser** | test_c4_08_cycle (aucun paiement, prix, montant, €, facture, règlement) |
+| 32 | Le magasin voit en une liste ce qui dort et depuis combien de temps. | **c4_08, à poser** | test_c4_08_cycle (la plus ancienne en tête, jours d'attente) |
 | 33 | Un compte suivi en direct par un commercial est exclu du cycle automatique. | **prouvée (recette)** | test_c4_05_reprise_en_main ; test_c4_03_cycle |
 | 34 | Le commercial en charge reprend la main sur un compte d'un seul geste. | **prouvée (recette)** | test_c4_05_reprise_en_main |
 | 35 | Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit. | **prouvée (recette)** | test_c4_03_message |
 | 36 | Une demande d'arrêt vaut retrait immédiat et définitif du cycle. | **prouvée (recette)** | test_c4_03_reponse |
 | 37 | Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **prouvée (recette)** | test_c4_05_exclusions |
 | 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | partielle | import douteux non appliqué et journalisé (test_c4_01_garde_fou) ; essai contre réel (test_c4_03_issues) ; verrous du socle. Pas un arrêt général du module |
-| 39 | Chaque message parti reste au journal, daté et consultable. | **prouvée (local)** | test_c4_03_cycle — assertion ajoutée le 06/10 (17 h 30), verte en local, **à rejouer** sur la recette |
+| 39 | Chaque message parti reste au journal, daté et consultable. | **prouvée (recette)** | test_c4_03_cycle (recette 17 h 25 Z, 1120 ok) |
 | 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | non construite | — |
 | 41 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **prouvée (recette)** | test_c4_03_issues |
 | 42 | Le taux de réponse se compare par segment, par canal et par message. | non construite | — |
@@ -374,9 +416,9 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 44 | Les résultats se lisent par entité, par site et en consolidé. | non construite | — |
 | 45 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | non construite | — |
 
-Non construites : les huit lignes « Échéances et renouvellements » et les huit « Affaires restées en plan » (moteur
-CYCLE), le suivi des contrats et équipements, et quatre lignes de « Pilotage » (chiffre remis en jeu par vague,
-taux de réponse par segment, tableau des échéances et commandes reprises, résultats par entité, export tableur).
+Non construites : les cinq lignes de « Pilotage » (chiffre remis en jeu par vague, taux de réponse par segment,
+tableau des échéances et commandes reprises, résultats par entité, export tableur). Les huit lignes « Affaires restées
+en plan » sont construites par c4_08, à poser. Partielles : 6, 11, 15, 38.
 
 ## Journal
 
@@ -400,3 +442,5 @@ taux de réponse par segment, tableau des échéances et commandes reprises, ré
   reproduisait les 20 rouges avant correction). Consentement : corrigé par c4_06. `test_c4_03_issues` n°4 : sur le
   banc, la ligne d'organisation garde le mode effectif en essai ; le test lit le mode effectif et vérifie la règle
   dans les deux cas. Local : 20 tests, 221 assertions vertes.
+- 06/10 — c4_07 posé et vert sur la recette (lignes 8, 17 à 24 prouvées). Lot c4_08 (affaires restées en plan) : 26 tests,
+  294 assertions vertes en local ; écran recetté.

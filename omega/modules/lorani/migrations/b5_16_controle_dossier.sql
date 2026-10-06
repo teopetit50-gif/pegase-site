@@ -10,8 +10,10 @@
 --   · public.lorani_controles : un contrôle d'un projet à un indice (intitulé, indice, contrôle précédent, statut
 --     en_lecture | controle | clos, lancé le, nombre de constats).
 --   · public.lorani_controle_pieces : les pièces du contrôle (une pièce Lorani du même projet, son rôle planche | cctp |
---     dpgf | plu | metre | autre, sa référence « PC2 »).
---   · public.lorani_constats : ce que le croisement relève (nature incoherence | plu | cctp_dpgf | metre_dpgf, gravité, grandeur,
+--     dpgf | plu | metre | cerfa | re2020 | bet | notice | autre, sa référence « PC2 »).
+--   · public.lorani_constats : ce que le croisement relève (nature incoherence | plu | cctp_dpgf | metre_dpgf | re2020 |
+--     accessibilite | securite_incendie — listes tenues par private.lorani_role_controle_valide et
+--     private.lorani_nature_constat_valide, redéfinissables —, gravité, grandeur,
 --     objet, valeurs citées [{piece, reference, page, boite, valeur, texte}], article, correction proposée, statut
 --     ouvert | corrige | accepte | ecarte, motif). Posés par le socle seul ; un membre qui écrit sur le projet ne change
 --     que le statut et le motif (motif obligatoire pour accepter ou écarter).
@@ -33,6 +35,26 @@
 --   · private.lorani_lectures_passage() (corps de b5_15) : quand une pièce d'un contrôle « en lecture » est lue et que
 --     toutes ses pièces le sont, le contrôle se lance seul.
 -- Fonctions nouvelles de private fermées au public. Migration idempotente ; rien n'est retiré.
+
+-- Les rôles de pièce et les natures de constat : des fonctions plutôt que des listes fermées dans les CHECK, pour qu'un
+-- lot suivant les élargisse par CREATE OR REPLACE (élargir un CHECK demanderait de retirer la contrainte).
+CREATE OR REPLACE FUNCTION private.lorani_role_controle_valide(p text)
+ RETURNS boolean
+ LANGUAGE sql
+ IMMUTABLE
+ SET search_path TO ''
+AS $function$
+  select p = any (array['planche', 'cctp', 'dpgf', 'plu', 'metre', 'cerfa', 're2020', 'bet', 'notice', 'autre'])
+$function$;
+CREATE OR REPLACE FUNCTION private.lorani_nature_constat_valide(p text)
+ RETURNS boolean
+ LANGUAGE sql
+ IMMUTABLE
+ SET search_path TO ''
+AS $function$
+  select p = any (array['incoherence', 'plu', 'cctp_dpgf', 'metre_dpgf', 're2020', 'accessibilite', 'securite_incendie'])
+$function$;
+GRANT EXECUTE ON FUNCTION private.lorani_role_controle_valide(text), private.lorani_nature_constat_valide(text) TO authenticated;
 
 CREATE TABLE IF NOT EXISTS public.lorani_controles (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -71,7 +93,7 @@ CREATE TABLE IF NOT EXISTS public.lorani_controle_pieces (
   CONSTRAINT lorani_controle_pieces_pkey PRIMARY KEY (id),
   CONSTRAINT lorani_controle_pieces_controle_fkey FOREIGN KEY (client_id, controle_id) REFERENCES public.lorani_controles (client_id, id),
   CONSTRAINT lorani_controle_pieces_projet_fkey FOREIGN KEY (client_id, projet_id) REFERENCES public.lorani_projets (client_id, id),
-  CONSTRAINT lorani_controle_pieces_role_check CHECK (role = ANY (ARRAY['planche', 'cctp', 'dpgf', 'plu', 'metre', 'autre'])),
+  CONSTRAINT lorani_controle_pieces_role_check CHECK (private.lorani_role_controle_valide(role)),
   CONSTRAINT lorani_controle_pieces_reference_check CHECK (reference IS NULL OR char_length(btrim(reference)) BETWEEN 1 AND 40),
   CONSTRAINT lorani_controle_pieces_une_fois UNIQUE (controle_id, piece_id)
 );
@@ -104,7 +126,7 @@ CREATE TABLE IF NOT EXISTS public.lorani_constats (
   CONSTRAINT lorani_constats_client_id_id_key UNIQUE (client_id, id),
   CONSTRAINT lorani_constats_controle_fkey FOREIGN KEY (client_id, controle_id) REFERENCES public.lorani_controles (client_id, id),
   CONSTRAINT lorani_constats_projet_fkey FOREIGN KEY (client_id, projet_id) REFERENCES public.lorani_projets (client_id, id),
-  CONSTRAINT lorani_constats_nature_check CHECK (nature = ANY (ARRAY['incoherence', 'plu', 'cctp_dpgf', 'metre_dpgf'])),
+  CONSTRAINT lorani_constats_nature_check CHECK (private.lorani_nature_constat_valide(nature)),
   CONSTRAINT lorani_constats_gravite_check CHECK (gravite = ANY (ARRAY['bloquant', 'majeur', 'mineur'])),
   CONSTRAINT lorani_constats_statut_check CHECK (statut = ANY (ARRAY['ouvert', 'corrige', 'accepte', 'ecarte'])),
   CONSTRAINT lorani_constats_titre_check CHECK (char_length(titre) BETWEEN 1 AND 300),
@@ -297,6 +319,17 @@ AS $function$
 $function$;
 REVOKE EXECUTE ON FUNCTION private.lorani_objet_de(text) FROM PUBLIC;
 
+-- Les constats d'un lot suivant (règles fixes, attestations) : vide ici, redéfini par CREATE OR REPLACE (b5_21).
+CREATE OR REPLACE FUNCTION private.lorani_constats_supplementaires(p_controle uuid)
+ RETURNS TABLE (nature text, gravite text, grandeur text, objet text, signature text, titre text, correction text, article text, valeurs jsonb)
+ LANGUAGE sql
+ STABLE
+ SET search_path TO ''
+AS $function$
+  select null::text, null::text, null::text, null::text, null::text, null::text, null::text, null::text, null::jsonb where false
+$function$;
+REVOKE EXECUTE ON FUNCTION private.lorani_constats_supplementaires(uuid) FROM PUBLIC;
+
 -- ——— le croisement ———
 
 CREATE OR REPLACE FUNCTION private.lorani_controler(p_controle uuid)
@@ -442,6 +475,9 @@ begin
            format('Porter la quantité du poste %s à %s%s à la DPGF, ou justifier l''écart.', replace(x.ref, '_', '.'), private.lorani_mesure_texte(x.mesuree, null), x.unite),
            null, x.valeurs || jsonb_build_array(jsonb_build_object('piece', x.piece_id, 'reference', x.reference, 'page', x.page, 'boite', x.boite, 'valeur', x.chiffree, 'texte', x.texte))
     from ecarts x
+    union all
+    select s.nature, s.gravite, s.grandeur, s.objet, s.signature, s.titre, s.correction, s.article, s.valeurs
+    from private.lorani_constats_supplementaires(c.id) s
   loop
     v_sigs := v_sigs || e.signature;
     insert into public.lorani_constats (client_id, entite_id, projet_id, controle_id, nature, gravite, grandeur, objet, signature, titre,
