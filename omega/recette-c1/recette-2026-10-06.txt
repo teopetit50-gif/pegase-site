@@ -24,6 +24,12 @@
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
   ✓ axe fournisseurs page : 0 écart grave
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ axe comptabilite page : 0 écart grave
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
+  ✓ axe filed-electronique page : 0 écart grave
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ axe varelo page : 0 écart grave
@@ -88,6 +94,12 @@
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
   ✓ axe fournisseurs page : 0 écart grave
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ axe comptabilite page : 0 écart grave
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
+  ✓ axe filed-electronique page : 0 écart grave
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ axe varelo page : 0 écart grave
@@ -144,6 +156,10 @@
   ✓ a-payer : aucun débordement horizontal (0 px)
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ tavaro se rend
@@ -175,6 +191,10 @@
   ✓ a-payer : aucun débordement horizontal (0 px)
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ tavaro se rend
@@ -206,6 +226,10 @@
   ✓ a-payer : aucun débordement horizontal (0 px)
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ tavaro se rend
@@ -237,6 +261,10 @@
   ✓ a-payer : aucun débordement horizontal (0 px)
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ tavaro se rend
@@ -276,6 +304,12 @@
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
   ✓ axe fournisseurs page : 0 écart grave
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ axe comptabilite page : 0 écart grave
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
+  ✓ axe filed-electronique page : 0 écart grave
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ axe varelo page : 0 écart grave
@@ -337,6 +371,12 @@
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
   ✓ axe fournisseurs page : 0 écart grave
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ axe comptabilite page : 0 écart grave
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
+  ✓ axe filed-electronique page : 0 écart grave
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ axe varelo page : 0 écart grave
@@ -390,6 +430,10 @@
   ✓ a-payer : aucun débordement horizontal (0 px)
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ tavaro se rend
@@ -421,6 +465,10 @@
   ✓ a-payer : aucun débordement horizontal (0 px)
   ✓ fournisseurs se rend
   ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ comptabilite se rend
+  ✓ comptabilite : aucun débordement horizontal (0 px)
+  ✓ filed-electronique se rend
+  ✓ filed-electronique : aucun débordement horizontal (0 px)
   ✓ varelo se rend
   ✓ varelo : aucun débordement horizontal (0 px)
   ✓ tavaro se rend
