@@ -311,7 +311,8 @@ cascade s'écrit avec un mot interdit dans un fichier à poser ; si le coordinat
   imité, socle Tamila extrait, b4_01 à b4_05, aides d'A5, pgTAP imité. Le 06/10 : 01, 02, 03, 05, 07, 08,
   09, 12, 13, 14 verts (288 contrôles) ; 04, 06, 10, 11 attendent les 26 règles de procédure dans la souche.
 - 06/10 après-midi : b4_05 posé par le coordinateur, 1 à 13 verts (388 ok). Le test 14 était mort sur un 42501
-  (`tests.tamila_cle_maitre()` appelée sous service_role) : corrigé en a90cd97, à rejouer.
+  (`tests.tamila_cle_maitre()` appelée sous service_role) : corrigé en a90cd97, rejoué par le coordinateur :
+  **14/14 fichiers verts sur la recette, le coffre 64/64** (06/10, 14 h 10 Z).
 - **Écran (lot B4-6, eaed84b)** : bouton « Coffre à clés » pour les associés (état, dossiers sous la phrase et au
   coffre) ; « Passer au coffre Scaleway » (gérant) ; « Ré-envelopper N dossiers » (la phrase déballe chaque clé
   ici, le coffre la vérifie et l'enveloppe ; échecs listés, un dossier perso ou muré se fait par son
