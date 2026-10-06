@@ -551,3 +551,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
 - 04 h 15 — b5_06 v2 (worker-b5 fcd1b1a) posé : lorani_valeurs_de_piece remonte un tableau en
   jsonb (plus en chaîne) ; `^test_b5_` 114/114 ; fiche Lorani ligne 23 alignée sur la règle
   commune ; branche fusionnée. B5 redépose une v3 par l'écran (lecteur v17).
+- 04 h 20 — **A3 7429d52 fusionné en urgence** : l'écran FILED plantait sur une facture
+  « validee » (statuts validee/refusee/comptabilisee inconnus ; un statut inconnu s'affiche
+  désormais tel quel). Lien Validations → dossier FILED (/espace/filed?objet=facture:<id>).
+  **Première vraie facture de bout en bout** : FAC-2026-10-0471 (ORANGE SA) déposée, lue,
+  contrôlée, VIES, fournisseur confirmé par daf@, validée par daf2@ (02:03:20 Z), exécutée
+  par le socle (02:04 Z), archivée avec empreinte au journal (ligne 76967). Pour B6 :
+  daliro/ChantierVue.tsx affiche le statut brut pour ces trois statuts.
