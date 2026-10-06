@@ -13,7 +13,8 @@
    l'encaissement (b6_16) : un paiement partiel sur la n° 1, le reste dû ;
    la réception (b6_13) : prononcer avec deux réserves, en lever une, noter une opposition, préparer et envoyer
    le décompte ; axe-core sur la carte et ses fenêtres ;
-   les heures (b6_17) : 11 h (alerte L3121-18), 12,5 h (refus), le coût horaire chargé, la rentabilité ; axe-core.
+   les heures (b6_17) : 11 h (alerte L3121-18), 12,5 h (refus), le coût horaire chargé, la rentabilité ; axe-core ;
+   le recalage (b6_19) : recaler la pose des fenêtres, voir la suite glisser, appliquer ; axe-core.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -343,6 +344,37 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     ok(deb === 0, `pas de débordement horizontal (${deb})`);
     await s.evaluer(`${carte}?.scrollIntoView()`);
     await s.capturer(`${dossier}daliro-heures-${largeur}.jpg`, { qualite: 55 });
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-recal-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : recaler la pose des fenêtres (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Planning"]')`;
+    ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tr')].find(t => /Pose des fenêtres/.test(t.textContent)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Recaler/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'clic sur « Recaler » (pose des fenêtres)');
+    await s.dormir(400);
+    await s.evaluer(`${dlgBouton('/Voir ce qui bouge/')}?.click()`);
+    await s.dormir(400);
+    const t = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/Pose des garde-corps/.test(t) && /Relevé des cotes garde-corps/.test(t) && /Peinture des menuiseries/.test(t), 'l\'aperçu montre la suite qui glisse (garde-corps, relevé, peinture)');
+    ok(/À reconfirmer/i.test(t) && /Dernier passage le/.test(t), 'les passages confirmés sont à reconfirmer ; la fin du planning est dite');
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Recaler » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(`${dlgBouton('/Recaler [0-9]+ passages/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Planning recalé : [0-9]+ passages déplacés/.test(document.body.innerText)`), 'planning recalé, message affiché');
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
     s.fermer();
   }
 }

@@ -19,14 +19,15 @@
      btp_prononcer_reception, btp_lever_reserve, btp_opposer_retenue, btp_liberer_retenue,
      btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13) ;
      btp_noter_paiement, btp_fixer_echeance (b6_16) ;
-     btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17).
+     btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17) ;
+     btp_proposer_recalage (lecture), btp_recaler, btp_terminer_passage (b6_19).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Chantier, FactureCandidate, HeuresChantier, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Chantier, FactureCandidate, HeuresChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -207,4 +208,17 @@ export async function pointerEquipe(chantier: string, equipe: string, jour: stri
 
 export async function poserCoutHoraire(client: string, intervenant: string | null, cout: number, depuis: string): Promise<unknown> {
   return rpc("btp_poser_cout_horaire", { p_client: client, p_intervenant: intervenant, p_cout: cout, p_depuis: depuis });
+}
+
+/* b6_19 : le recalage du planning */
+export async function proposerRecalage(passage: string, nouvelleFin: string): Promise<Recalage> {
+  return rpc<Recalage>("btp_proposer_recalage", { p_passage: passage, p_nouvelle_fin: nouvelleFin });
+}
+
+export async function recaler(passage: string, nouvelleFin: string, motif: string | null): Promise<Recalage> {
+  return rpc<Recalage>("btp_recaler", { p_passage: passage, p_nouvelle_fin: nouvelleFin, p_motif: motif });
+}
+
+export async function terminerPassage(passage: string, finReelle: string): Promise<unknown> {
+  return rpc("btp_terminer_passage", { p_passage: passage, p_fin_reelle: finReelle });
 }

@@ -516,3 +516,26 @@ export type HeuresChantier = {
 };
 /* Le retour d'un pointage : les totaux de l'intervenant et les alertes du Code du travail. */
 export type RetourPointage = { jour_total: number; semaine_total: number; alertes: string[] };
+
+/* b6_19 : le recalage du planning (public.btp_proposer_recalage, btp_recaler, btp_terminer_passage) */
+export type DeplacementPassage = {
+  passage_id: string;
+  tache: string | null;
+  lot_id: string | null;
+  intervenant: string | null;
+  ancien_debut: string;
+  ancien_fin: string;
+  nouveau_debut: string;
+  nouveau_fin: string;
+  reconfirmer: boolean;
+  exterieur: boolean;
+};
+export type Recalage = {
+  passage_id: string;
+  chantier_id: string;
+  nouvelle_fin: string;
+  deplaces: DeplacementPassage[];
+  nombre: number;
+  fin_planning: string | null;
+  fin_prevue_chantier: string | null;
+};
