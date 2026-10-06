@@ -384,5 +384,24 @@ for (const largeur of LARGEURS) {
   s.fermer();
 }
 
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b1-exports', densite: 1 });
+  console.log('— les exports automatiques (b1_10)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Exports automatiques"]')`;
+  const lu = await s.evaluer(`[...${carte}.querySelectorAll('li')].map(li => li.innerText.replace(/\\s+/g, ' '))`);
+  ok(lu.length === 3 && /Sage 100 : Fournisseurs \(dernier export le/.test(lu[0]) && /branché/.test(lu[0]) && lu.slice(1).every(l => /aucun logiciel branché/.test(l)), `trois sociétés, le siège branché sur Sage 100 (${lu[0]})`);
+  ok(await s.evaluer(`(() => { const li = [...${carte}.querySelectorAll('li')].find(x => /Annecy/.test(x.innerText)); const b = li && li.querySelector('button'); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Brancher » sur la menuiserie d\'Annecy');
+  await s.dormir(400);
+  const d = await s.evaluer(`(() => { const d = ${dlg()}; return { titre: d.querySelector('h2')?.textContent, cases: d.querySelectorAll('input[type="checkbox"]:checked').length, logiciel: d.querySelector('select')?.value }; })()`);
+  ok(/Brancher le logiciel — Bertin Menuiserie/.test(d.titre) && d.cases === 5 && d.logiciel === 'tableur', `le dialogue propose le tableur (logiciel de la société) et les cinq exports (${d.logiciel}, ${d.cases})`);
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Brancher\\s*$/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(`[...${carte}.querySelectorAll('li')].find(x => /Annecy/.test(x.innerText))?.innerText.replace(/\\s+/g, ' ')`);
+  ok(/Tableur \(Excel, CSV\) : Fournisseurs \(rien reçu\)/.test(apres) && /branché/.test(apres), `branchée : ${apres}`);
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);
