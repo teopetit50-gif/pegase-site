@@ -82,7 +82,7 @@ export const SECTEURS: Secteur[] = [
       "Avant la première audience, l'associé sait quelles pièces ont été communiquées la veille, quels honoraires forfaitaires sont dépassés et quels dossiers sont sans diligence depuis trente jours.",
     combine: [
       { offre: "CASHD", raison: "Les notes d'honoraires échues suivies et relancées, chaque envoi validé par le cabinet." },
-      { offre: "REPUT", raison: "Les demandes des nouveaux clients qualifiées et le premier rendez-vous proposé, à toute heure." },
+      { offre: "REPUT", raison: "Les demandes des nouveaux clients qualifiées, leur réponse prête à toute heure." },
     ],
   },
   {
@@ -111,7 +111,7 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Avant l'ouverture du comptoir, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
     combine: [
-      { offre: "REPUT", raison: "Les demandes de réservation traitées à toute heure, y compris agence fermée." },
+      { offre: "REPUT", raison: "Les demandes de réservation reçues à toute heure, leur réponse prête même agence fermée." },
       { offre: "CASHD", raison: "Les factures de restitution échues relancées selon vos règles, après votre validation." },
     ],
   },
@@ -133,7 +133,7 @@ export const SECTEURS: Secteur[] = [
     apercu:
       "Avant le premier patient, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
     combine: [
-      { offre: "REPUT", raison: "Les demandes de rendez-vous des patients traitées à toute heure, hors des heures du secrétariat." },
+      { offre: "REPUT", raison: "Les demandes des patients reçues à toute heure, transmises au secrétariat pour son retour." },
       { offre: "CASHD", raison: "Les devis de soins restés sans réponse relancés, chaque envoi validé par le cabinet." },
     ],
   },
@@ -153,7 +153,7 @@ export const SECTEURS: Secteur[] = [
     texte: "Toutes les sociétés du groupe travaillent avec la même IA, sur un seul référentiel.",
     ligne: "Une seule IA pour tout le groupe",
     detail:
-      "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule, et range leurs chiffres sous un seul référentiel. Chaque direction reçoit ce qu'elle doit décider, et la présidence voit le groupe sur une page.",
+      "Chaque société dépose l'export de son logiciel et de ses tableurs ; Varelo le lit sans rien y écrire et range leurs chiffres sous un seul référentiel. Chaque direction reçoit ce qu'elle doit décider, et la présidence voit le groupe sur une page.",
     apercu:
       "Chaque matin à 7 h, chaque direction reçoit au plus trois décisions, et la présidence une page : les ventes, la trésorerie et les échéances de chaque société.",
     combine: [

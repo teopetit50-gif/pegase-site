@@ -22,6 +22,8 @@ const ECRANS = [
   ['comptabilite', '/espace/filed/comptabilite', `[...document.querySelectorAll('.esp button')].find(b => /^Modifier le compte/.test(b.getAttribute('aria-label') ?? ''))?.click()`],
   ['filed-electronique', '/espace/filed?objet=facture:R2026-000014', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Ouvrir un litige/.test(b.textContent))?.click()`],
   ['boite', '/espace/filed/boite', null],
+  ['demandes', '/espace/demandes', null],
+  ['reglages', '/espace/reglages', null],
   ['point', '/espace/point', null],
 ];
 

@@ -458,6 +458,48 @@ export type Reserve = {
   motif: string | null;
 };
 
+/* les comptes rendus de chantier et leurs points (b5_20) */
+export type Present = { nom: string; organisme?: string | null; intervenant?: string | null; present: boolean };
+export type CompteRendu = {
+  id: string;
+  projet_id: string;
+  numero: number;
+  visite_le: string;
+  presents: Present[];
+  notes: string | null;
+  avancement: string | null;
+  prochaine_visite: string | null;
+  statut: "brouillon" | "diffuse";
+  diffuse_le: string | null;
+  contenu: ContenuCr | null;
+};
+export type Point = {
+  id: string;
+  projet_id: string;
+  lot_id: string | null;
+  intervenant_id: string | null;
+  nature: "question" | "action" | "decision" | "observation";
+  texte: string;
+  echeance: string | null;
+  statut: "ouvert" | "repondu" | "clos";
+  reponse: string | null;
+  repondu_le: string | null;
+  ouvert_au_cr: string | null;
+  clos_au_cr: string | null;
+  cree_le: string;
+  maj_le?: string;
+};
+/* le contenu d'un CR, tel que public.lorani_cr_contenu le rend (et tel qu'il est figé à la diffusion) */
+export type LigneCr = { id: string; nature: Point["nature"]; texte: string; lot: string | null; entreprise: string | null; echeance: string | null; statut: Point["statut"]; reponse: string | null; repondu_le: string | null; ne_au_cr: number | null; age_jours?: number };
+export type ContenuCr = {
+  cr: { id: string; numero: number; visite_le: string; prochaine_visite: string | null; statut: CompteRendu["statut"]; avancement: string | null; presents: Present[] };
+  projet: { nom: string; reference: string | null; adresse: string | null; commune: string | null } | null;
+  precedent: { numero: number; visite_le: string } | null;
+  nouveaux: LigneCr[];
+  en_suspens: LigneCr[];
+  soldes: LigneCr[];
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -482,6 +524,8 @@ export type Dossier = {
   attestations: Attestation[];
   ordresService: OrdreService[];
   reserves: Reserve[];
+  comptesRendus: CompteRendu[];
+  points: Point[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */
