@@ -54,7 +54,7 @@ create table public.filed_levees (id uuid primary key default gen_random_uuid(),
 create table public.filed_commandes (id uuid primary key default gen_random_uuid(), client_id uuid, entite_id uuid, document_id uuid, fournisseur_id uuid, numero text, numero_normalise text not null, source text not null check (source in ('piece','import','saisie')), statut text default 'ouverte', montant_ht numeric);
 create table public.filed_commandes_lignes (id uuid primary key default gen_random_uuid(), client_id uuid, commande_id uuid references public.filed_commandes(id), rang int, designation text, reference text, quantite numeric, prix_unitaire numeric, montant_ht numeric, source text not null check (source in ('xml','regle','ia','humain','tableur','import','saisie')));
 create table public.filed_receptions (id uuid primary key default gen_random_uuid(), client_id uuid, entite_id uuid not null, document_id uuid, commande_id uuid, statut text default 'enregistree');
-create table public.filed_receptions_lignes (id uuid primary key default gen_random_uuid(), reception_id uuid references public.filed_receptions(id), commande_ligne_id uuid, quantite numeric);
+create table public.filed_receptions_lignes (id uuid primary key default gen_random_uuid(), client_id uuid not null, reception_id uuid references public.filed_receptions(id), rang int not null, commande_ligne_id uuid, quantite numeric not null, source text not null check (source in ('saisie', 'piece', 'import')), reference text, designation text, designation_normalisee text, unite text, methode text);
 create table public.filed_rapprochements (id uuid primary key default gen_random_uuid(), client_id uuid, facture_id uuid unique references public.filed_factures(id) on delete cascade, document_id uuid, version int, commande_id uuid, commande_source text, reception_id uuid, mode text, nb_lignes int, nb_appariees int, nb_sans_commande int, ecart_prix numeric, ecart_quantite numeric, deja_facture numeric, non_recu numeric, ecart_montant numeric, preuve jsonb);
 create table public.filed_rapprochements_lignes (id uuid primary key default gen_random_uuid(), client_id uuid, facture_id uuid references public.filed_factures(id) on delete cascade, document_id uuid, facture_ligne_id uuid, commande_ligne_id uuid, methode text, sens smallint, quantite numeric, prix_facture numeric, prix_commande numeric, ecart_prix_unitaire numeric, ecart_prix numeric, quantite_commandee numeric, deja_facture numeric, quantite_recue numeric, ecart_quantite numeric, ecart_quantite_montant numeric, non_recu numeric, non_recu_montant numeric, resultat text);
 create table public.filed_appariements (id uuid primary key default gen_random_uuid(), client_id uuid, facture_id uuid, document_id uuid, facture_ligne_id uuid, commande_ligne_id uuid, motif text);
@@ -78,7 +78,7 @@ create table if not exists public.receptions (id bigint generated always as iden
   cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, canal, identifiant_externe));
 -- Lot 13 (a4_21) : la mère d'une pièce fille.
 alter table public.pieces add column if not exists piece_mere_id uuid references public.pieces(id);
-create table public.pieces_pages (id uuid primary key default gen_random_uuid(), client_id uuid, piece_id uuid, n integer, methode text, texte text, confiance numeric, manuscrit boolean, largeur numeric, hauteur numeric, texte_chiffre bytea);
+create table public.pieces_pages (id uuid primary key default gen_random_uuid(), client_id uuid, piece_id uuid, n integer, methode text not null check (methode in ('texte', 'ocr')), texte text, confiance numeric, manuscrit boolean, largeur numeric, hauteur numeric, texte_chiffre bytea);
 -- Un coffre minimal, à la manière de supabase_vault (secrets en clair : souche locale seulement).
 create schema if not exists vault;
 create table if not exists vault.secrets (id uuid primary key default gen_random_uuid(), name text unique, description text, secret text);
@@ -87,3 +87,5 @@ create or replace function vault.create_secret(new_secret text, new_name text de
 create or replace function vault.update_secret(secret_id uuid, new_secret text default null, new_name text default null, new_description text default null) returns void language sql as $$
   update vault.secrets set secret = coalesce(new_secret, secret), name = coalesce(new_name, name), description = coalesce(new_description, description) where id = secret_id $$;
 create or replace view vault.decrypted_secrets as select id, name, description, secret, secret as decrypted_secret from vault.secrets;
+
+alter table public.filed_fournisseurs add constraint filed_fournisseurs_tva_check check (tva ~ '^[A-Z]{2}[0-9A-Z]{2,13}$');

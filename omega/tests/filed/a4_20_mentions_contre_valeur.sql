@@ -1,6 +1,6 @@
 -- Tests A4 — lot 19 (a4_27) : les champs du lecteur v24 (mentions de paiement, TVA sur les débits, contre-valeur en euros).
 -- pgTAP, schéma « tests » d'A5 ; utilise tests.a4_organisation, tests.a4_facture (a4_10_facture_electronique.sql),
--- tests.a4_compte, tests.a4_imputer (a4_11_ecritures_fec.sql). `select * from runtests('tests', '^test_a4_')` ;
+-- tests.a4_compte, tests.a4_imputer (a4_11_ecritures_fec.sql), tests.a4_inserer (a4_16_rapprochement_3voies.sql). `select * from runtests('tests', '^test_a4_')` ;
 -- runtests() annule tout. Données d'exemple seulement.
 
 -- Une valeur lue sur la pièce d'une facture (source donnée ; « humain » passe devant le lecteur).
@@ -59,9 +59,9 @@ language plpgsql as $f$
 declare o jsonb := tests.a4_organisation(); fa jsonb;
 begin
   fa := tests.a4_facture(o, 'ia', 'MEN-010', 120);
-  insert into public.pieces_pages (client_id, piece_id, n, texte) values ((o ->> 'client')::uuid, (fa ->> 'piece')::uuid, 1,
+  perform tests.a4_inserer('public.pieces_pages', jsonb_build_object('client_id', o ->> 'client', 'piece_id', fa ->> 'piece', 'n', 1, 'texte',
     'Pénalités de retard : trois fois le taux d''intérêt légal. Indemnité forfaitaire pour frais de recouvrement : 40 €. '
-    || 'Option pour le paiement de la taxe d''après les débits.');
+    || 'Option pour le paiement de la taxe d''après les débits.'));
   perform private.filed_controler_facture((fa ->> 'facture')::uuid);
   return next is(tests.a4_controle(fa, 'mentions.penalites'), 'ok', 'Pénalités reconnues dans le texte');
   return next is(tests.a4_controle(fa, 'mentions.indemnite'), 'ok', 'indemnité aussi');
