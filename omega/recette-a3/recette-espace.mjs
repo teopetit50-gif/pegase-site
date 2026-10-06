@@ -172,9 +172,13 @@ for (const [nom, chemin] of ECRANS) {
   console.log('— /espace/filed/fournisseurs : à confirmer en tête, fiche, factures');
   ok(await s.aller(base + '/espace/filed/fournisseurs'), 'page chargée');
   await s.dormir(600);
-  const tete = await s.evaluer(`(() => ({ premier: document.querySelector('.esp-item .esp-item-titre')?.textContent, kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), titre: document.querySelector('#esp-fournisseur .esp-carte-titre')?.textContent }))()`);
-  ok(tete.premier === 'Imprimerie Vidal SAS' && tete.titre === 'Imprimerie Vidal SAS', `le fournisseur à confirmer est en tête et ouvert (${tete.premier})`);
-  ok(/À confirmer 1/.test(tete.kpi.join(' | ')), `compteurs : ${tete.kpi.join(' | ')}`);
+  const tete = await s.evaluer(`(() => ({ premiers: [...document.querySelectorAll('.esp-item')].slice(0, 2).map(e => e.innerText.replace(/\\s+/g, ' ')), kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')) }))()`);
+  ok(tete.premiers.length === 2 && tete.premiers.every(t => /^À confirmer/.test(t)), `les fournisseurs à confirmer sont en tête (${tete.premiers.join(' / ')})`);
+  ok(/À confirmer 2/.test(tete.kpi.join(' | ')), `compteurs : ${tete.kpi.join(' | ')}`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Imprimerie Vidal SAS/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const titreF = await s.evaluer(`document.querySelector('#esp-fournisseur .esp-carte-titre')?.textContent`);
+  ok(titreF === 'Imprimerie Vidal SAS', `fiche ouverte : ${titreF}`);
   const fiche = await s.evaluer(`(() => { const t = document.querySelector('#esp-fournisseur').innerText; return { vies: /par VIES/.test(t), iban: /validé avec le fournisseur à sa confirmation/.test(t), facture: !!document.querySelector('#esp-fournisseur a[href*="objet=facture"]') }; })()`);
   ok(fiche.vies && fiche.iban && fiche.facture, `fiche : identité VIES, IBAN proposé, lien vers la facture (${JSON.stringify(fiche)})`);
   await s.evaluer(`[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`);
@@ -188,6 +192,33 @@ for (const [nom, chemin] of ECRANS) {
   await s.dormir(400);
   const cherche = await s.evaluer(`[...document.querySelectorAll('.esp-item .esp-item-titre')].map(e => e.textContent)`);
   ok(cherche.length === 1 && cherche[0] === 'Métallerie Roux SARL', `la recherche par SIREN trouve le fournisseur (${cherche.join(', ')})`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-identifiants', densite: 1 });
+  console.log('— /espace/filed : identifiants lus sur la pièce, non retenus');
+  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000017'), 'page chargée sur R2026-000017');
+  await s.dormir(900);
+  const bloc = await s.evaluer(`(() => { const b = document.querySelector('.esp-identifiants-lus'); if (!b) return null; return { texte: b.innerText.replace(/\\s+/g, ' '), confirmer: /Confirmer la valeur lue/.test(b.textContent) }; })()`);
+  ok(bloc && /SIREN lu 519803417 clé de Luhn invalide/.test(bloc.texte) && /TVA lu FR45519803417/.test(bloc.texte) && !bloc.confirmer, `valeurs lues non retenues, avec leur raison, sans « confirmer » une clé fausse (${bloc?.texte?.slice(0, 220)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-identifiants-lus .r-btn')].find(b => /Saisir les vrais identifiants/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const saisir = async (sel, val) => s.evaluer(`(() => { const t = document.querySelector('[role="dialog"] ${sel}'); const proto = t.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto, 'value').set.call(t, ${JSON.stringify(val)}); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const gris = () => s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.disabled`);
+  await saisir('input[inputmode="numeric"]', '519 803 415');
+  await saisir('input:not([inputmode])', 'FR45519803417');
+  await saisir('textarea', 'Kbis du fournisseur reçu par courriel.');
+  await s.dormir(300);
+  ok(await gris() === true, 'une TVA qui porte un autre SIREN laisse « Enregistrer » gris');
+  await saisir('input:not([inputmode])', 'FR39519803415');
+  await s.dormir(300);
+  ok(await gris() === false, 'SIREN et TVA justes et cohérents : « Enregistrer » s\'allume');
+  await s.capturer(`${dossier}filed-identifiants-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => ({ bloc: !!document.querySelector('.esp-identifiants-lus'), fiche: document.querySelector('#esp-dossier').innerText.includes('SIREN 519803415') || /SIREN\\s*519 ?803 ?415/.test(document.querySelector('#esp-dossier').innerText) }))()`);
+  ok(!apres.bloc && apres.fiche, `saisis : le bloc tombe, la fiche porte le SIREN (${JSON.stringify(apres)})`);
   s.fermer();
 }
 
