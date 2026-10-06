@@ -605,3 +605,16 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   écran (« Corriger / confirmer sur la pièce ») confiée à A3, puis « À payer ».
 - B5 : arrêté et constat d'affichage réels verts (Extension Garnier, échéances justes) ; 4
   types sur 6 prouvés ; b5_07 en cours.
+- 04 h 40 — **Daliro : J-2 réel vert de bout en bout** (b6_06 697c580 + banc_j2_reel 60fa33c) :
+  Daliro installé sur le banc (chantiers/20/5), chantier ESSAI-J2, passage du 08/10, envoi
+  4742391e préparé → approuvé par daf@ → envoyé 02:33:00 Z par Brevo, **remis 02:33:05 Z**
+  (mode essai, adresse de Teo). Sept chantiers « Essai B6 » annulés. Reste chez B6 : réponse
+  OUI/NON entrante → btp_repondre_confirmation ; le fil btp_confirmations ne garde que
+  « demandee ».
+- **b5_07** (a4e3197) posé : `^test_b5_` 120/120 ; écran fusionné (en ligne au retour du
+  quota). **a4_14** (cf4c3af) posé : toute valeur humaine à clé fausse (SIREN/SIRET/TVA/IBAN)
+  refusée par déclencheur ; TVA FR au SIREN faux = clé fausse ; a4_08 vert.
+- A4, « ce qui manquerait pour une vraie PME » (NOTES-A4, 2681b33) : écritures/FEC, facture
+  électronique (Factur-X/UBL/CII, statuts de cycle de vie), mode de règlement/ICS, validation
+  auto des charges récurrentes, organisation d'une seule personne, TVA sur encaissements,
+  conservation vs effacement, fournisseurs étrangers, acomptes/avoirs, délais de paiement.
