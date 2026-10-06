@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -120,8 +120,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const reinscription = profil === "titulaire" || profil === "assistante" || profil === "direction" ? await quiet(rpc<Reinscription | null>("tiroma_reinscription", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "réinscription") : null;
   /* b3_17 : les absences probables des trois prochains jours (titulaire, assistante, collaborateur) */
   const absences = profil && profil !== "direction" ? await quiet(rpc<AbsenceProbable[] | null>("tiroma_absences_probables", { p_client: c, p_entite: e, p_jours: 3 }, null), null, "absences probables") : null;
+  /* b3_18 : l'équipe absente et les soins à basculer, sur sept jours (titulaire, assistante) */
+  const equipe = profil === "titulaire" || profil === "assistante" ? await quiet(rpc<AbsenceEquipe[] | null>("tiroma_soins_a_basculer", { p_client: c, p_entite: e, p_jours: 7 }, null), null, "soins à basculer") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe },
     avis,
   };
 }
@@ -257,6 +259,23 @@ export async function noterAppel(cabinet: Cabinet, a: { cible: CibleAppel; issue
   });
   if (error) throw new ErreurPorte(message(error));
   return data as string;
+}
+
+/** b3_18 : noter l'absence d'un membre de l'équipe (titulaire, assistante). */
+export async function noterAbsenceMembre(cabinet: Cabinet, a: { membre_id: string; debut: string; fin: string; motif: MotifAbsenceMembre }): Promise<string> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("tiroma_noter_absence_membre", {
+    p_client: cabinet.client_id, p_entite: cabinet.entite_id, p_membre: a.membre_id, p_debut: a.debut, p_fin: a.fin, p_motif: a.motif,
+  });
+  if (error) throw new ErreurPorte(message(error));
+  return data as string;
+}
+
+/** b3_18 : clore une absence (elle reste dans l'historique). */
+export async function retirerAbsenceMembre(id: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("tiroma_retirer_absence_membre", { p_absence: id });
+  if (error) throw new ErreurPorte(message(error));
 }
 
 /** b3_14 : noter le moyen de contact d'un patient et son accord. */

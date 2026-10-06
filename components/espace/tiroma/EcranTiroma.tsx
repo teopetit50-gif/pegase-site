@@ -25,6 +25,7 @@ import AvantRendezVous from "./AvantRendezVous";
 import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
 import Creneaux from "./Creneaux";
+import EquipeAbsente, { type NouvelleAbsence } from "./EquipeAbsente";
 import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
 import Pilotage from "./Pilotage";
 import Plans, { type Mutuelle } from "./Plans";
@@ -36,9 +37,9 @@ import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
   ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
-  noterAppel, noterContact, retirerContact,
+  noterAppel, noterContact, retirerContact, noterAbsenceMembre, retirerAbsenceMembre,
 } from "./portes";
-import type { Cabinet as CabinetT, CibleAppel, ContactPatient, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
+import type { AbsenceEquipe, Cabinet as CabinetT, CibleAppel, ContactPatient, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
 
 type Reel = { compte: Compte | null; cabinets: CabinetT[]; dossier: Dossier | null; avis: string[] };
 
@@ -254,6 +255,33 @@ export default function EcranTiroma() {
     await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
+  /* b3_18 : l'équipe absente ; en exemple, en mémoire (sans calcul des soins) */
+  const noterUneAbsence = useCallback(async (n: NouvelleAbsence) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => {
+        const m = prev.membres.find((x) => x.id === n.membre_id);
+        if (!prev.equipe || !m) return prev;
+        const f = prev.fauteuils.find((x) => x.id === m.fauteuil_habituel_id);
+        return { ...prev, equipe: [...prev.equipe, { absence_id: `ab-${Date.now()}`, membre_id: m.id, membre: m.prenom, motif: n.motif, debut: n.debut, fin: n.fin,
+          fauteuil_id: m.fauteuil_habituel_id, fauteuil_nom: f?.nom ?? null, soins: [] }] };
+      });
+      return;
+    }
+    const d = reel?.dossier;
+    if (!d) throw new Error("Aucun cabinet ouvert.");
+    await noterAbsenceMembre(d.cabinet, n);
+    await charger(d.cabinet.id);
+  }, [source, reel, charger]);
+  const cloreUneAbsence = useCallback(async (a: AbsenceEquipe) => {
+    if (source === "exemple") {
+      setLocal((prev) => prev.equipe ? ({ ...prev, equipe: prev.equipe.filter((x) => x.absence_id !== a.absence_id) }) : prev);
+      return;
+    }
+    await retirerAbsenceMembre(a.absence_id);
+    await charger(reel?.dossier?.cabinet.id);
+  }, [source, reel, charger]);
+
   const installer = async () => {
     if (!reel?.compte || !entiteInst) return;
     setInstalle(true);
@@ -376,6 +404,8 @@ export default function EcranTiroma() {
             <Plans plans={dossier.plans} noterMutuelle={noter} derniers={dossier.appels?.derniers} appeler={dossier.appels ? setCibleAppel : undefined} />
           </div>
           <Absences absences={dossier.absences} appeler={dossier.appels ? setCibleAppel : undefined} />
+          <EquipeAbsente equipe={dossier.profil === "titulaire" || dossier.profil === "assistante" ? dossier.equipe : null} membres={dossier.membres}
+            jour={dossier.appels?.jour ?? new Date().toISOString().slice(0, 10)} noter={noterUneAbsence} clore={cloreUneAbsence} />
           <Appels registre={dossier.appels} titulaire={titulaire} appeler={setCibleAppel} />
           <SyntheseSemaine synthese={dossier.profil === "titulaire" || dossier.profil === "direction" ? dossier.synthese : null} />
           <Reinscription reinscription={dossier.reinscription} appeler={dossier.appels ? setCibleAppel : undefined} />

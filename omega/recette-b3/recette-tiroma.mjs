@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Absences probables', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les douze cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les treize cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -152,6 +152,29 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-absences')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-absences-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : l\'équipe absente, les soins à basculer (exemple, b3_18)');
+  const eq = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Équipe absente"]'); if (!c) return null;
+    return { n: c.querySelectorAll('ul[aria-label^="Soins à basculer"] > li').length, texte: c.innerText }; })()`);
+  ok(eq && eq.n === 2, `deux soins à basculer pendant l'absence d'Élodie (${eq?.n})`);
+  ok(eq && /Vers Fauteuil 2 \(avec Karine\)/.test(eq.texte), 'le soin de Sylvie Marlin bascule vers le Fauteuil 2, avec Karine');
+  ok(eq && /Aucun fauteuil libre/.test(eq.texte), 'la chirurgie sans fauteuil libre le dit');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Équipe absente"] button')].find(b => /Noter une absence/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Noter une absence/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Noter une absence » s\'ouvre');
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, 'm-2'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.evaluer(`document.querySelector('[role="dialog"] input[type="radio"][value="maladie"]')?.click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const eq2 = await s.evaluer(`document.querySelector('section[aria-label="Équipe absente"]')?.innerText || ''`);
+  ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /Karine — Fauteuil 2/.test(eq2) && /Arrêt/.test(eq2), 'l\'absence de Karine (arrêt) est notée, le dialogue se ferme');
+  await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Équipe absente"]'); const b = [...c.querySelectorAll('button')].filter(b => /Clore l.absence/.test(b.textContent)).pop(); b?.click(); })()`);
+  await s.dormir(400);
+  ok(!/Karine — Fauteuil 2/.test(await s.evaluer(`document.querySelector('section[aria-label="Équipe absente"]')?.innerText || ''`)), '« Clore l\'absence » la retire');
+  await s.evaluer(`document.getElementById('tiroma-equipe')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-equipe-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : la synthèse de la semaine (exemple, b3_15)');
   const syn = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Synthèse de la semaine"]'); if (!c) return null;

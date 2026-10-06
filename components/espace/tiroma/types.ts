@@ -281,6 +281,7 @@ export type Dossier = {
   synthese: Synthese | null;
   reinscription: Reinscription | null;
   absences: AbsenceProbable[] | null;
+  equipe: AbsenceEquipe[] | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -455,4 +456,29 @@ export type AbsenceProbable = {
   niveau: "fort" | "moyen" | "annonce";
   raisons: string[];
   annonce: boolean;
+};
+
+/* ——— assistante absente : les soins à basculer (b3_18) ——— */
+
+export type MotifAbsenceMembre = "conge" | "maladie" | "formation" | "autre";
+
+export type SoinABasculer = {
+  rendez_vous_id: string;
+  debut: string;
+  fin: string;
+  patient_nom: string;
+  soin: string | null;
+  vers: { fauteuil_id: string; fauteuil_nom: string; assistante: string }[];
+};
+
+export type AbsenceEquipe = {
+  absence_id: string;
+  membre_id: string;
+  membre: string;
+  motif: MotifAbsenceMembre;
+  debut: string;
+  fin: string;
+  fauteuil_id: string | null;
+  fauteuil_nom: string | null;
+  soins: SoinABasculer[];
 };

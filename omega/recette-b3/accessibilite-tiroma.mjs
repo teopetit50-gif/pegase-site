@@ -60,6 +60,14 @@ for (const largeur of [390, 1440]) {
   await s.dormir(700);
   ok(await s.evaluer(`!!document.querySelector('[role="dialog"] ul[aria-label="Patients trouvés pour le contact"]')`), 'le dialogue « Ajouter un moyen de contact » est ouvert, patients trouvés');
   dire(`tiroma ${largeur}, dialogue moyen de contact`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+  /* b3_18 : le dialogue « Noter une absence » */
+  await s.aller(base + '/espace/tiroma');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Équipe absente"] button')].find(b => /Noter une absence/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Noter une absence/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Noter une absence » est ouvert');
+  dire(`tiroma ${largeur}, dialogue noter une absence`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

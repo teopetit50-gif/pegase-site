@@ -107,7 +107,10 @@ export const DOSSIER_EXEMPLE: Dossier = {
   profil: "titulaire",
   fauteuils,
   praticiens,
-  membres: [{ id: "m-1", entite_id: ENTITE_CABINET, prenom: "Élodie", fauteuil_habituel_id: F1, actif: true }],
+  membres: [
+    { id: "m-1", entite_id: ENTITE_CABINET, prenom: "Élodie", fauteuil_habituel_id: F1, actif: true },
+    { id: "m-2", entite_id: ENTITE_CABINET, prenom: "Karine", fauteuil_habituel_id: F2, actif: true },
+  ],
   horaires,
   fermetures: [
     { id: "fe-1", entite_id: ENTITE_CABINET, praticien_id: P2, fauteuil_id: null, debut: dans(8, 0), fin: dans(13, 0), nature: "conge", source: "saisie" },
@@ -286,5 +289,15 @@ export const DOSSIER_EXEMPLE: Dossier = {
     { rendez_vous_id: "rdv-12", debut: a(2, 9, 0), patient_id: "pa-13", patient_nom: "Georges Pétro", praticien_nom: "Dr Ambre Lacour", fauteuil_nom: "Fauteuil 2", score: 0, niveau: "annonce", raisons: ["a répondu NON au rappel : créneau à libérer"], annonce: true },
     { rendez_vous_id: "rdv-21", debut: a(1, 16, 30), patient_id: "pa-21", patient_nom: "Dimitri Saint-Ange", praticien_nom: "Dr Mathis Rousseau", fauteuil_nom: "Fauteuil 1", score: 4, niveau: "fort", raisons: ["2 rendez-vous manqués en 18 mois", "créneau où les absences sont fréquentes au cabinet"], annonce: false },
     { rendez_vous_id: "rdv-22", debut: a(1, 8, 30), patient_id: "pa-22", patient_nom: "Maëlys Darius", praticien_nom: "Dr Ambre Lacour", fauteuil_nom: "Fauteuil 3", score: 2, niveau: "moyen", raisons: ["nouveau patient", "pris il y a 74 jours"], annonce: false },
+  ],
+  /* b3_18 : Élodie, l'assistante du Fauteuil 1, est en formation demain et après-demain */
+  equipe: [
+    {
+      absence_id: "ab-1", membre_id: "m-1", membre: "Élodie", motif: "formation", debut: a(1, 0, 0), fin: a(3, 0, 0), fauteuil_id: F1, fauteuil_nom: "Fauteuil 1",
+      soins: [
+        { rendez_vous_id: "rdv-31", debut: a(1, 10, 0), fin: a(1, 11, 0), patient_nom: "Sylvie Marlin", soin: "Couronne — préparation", vers: [{ fauteuil_id: F2, fauteuil_nom: "Fauteuil 2", assistante: "Karine" }] },
+        { rendez_vous_id: "rdv-32", debut: a(2, 14, 0), fin: a(2, 15, 30), patient_nom: "Thierry Bellay", soin: "Implant — chirurgie", vers: [] },
+      ],
+    },
   ],
 };
