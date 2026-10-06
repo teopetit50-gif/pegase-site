@@ -25,9 +25,9 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
-import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, PARC_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, assignerRemise, avoirElectronique, chargerMonde, creneauxEntretien, entretienFait, envoyerDossier, etapeRemise, immobiliser, leverImmobilisation, planifierEntretien, prevoirEntretien, signalerAnomalie, traiterAnomalie, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
-import type { AvisContravention, Avoir, Contestation, Creneau, Entretien, Immobilisation, Parc, Remise, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
+import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, FLOTTE_EXEMPLE, PARC_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
+import { amenderContrat, annulerSortie, assignerRemise, conclureSortie, deciderSortie, poserEconomie, proposerSortie, avoirElectronique, chargerMonde, creneauxEntretien, entretienFait, envoyerDossier, etapeRemise, immobiliser, leverImmobilisation, planifierEntretien, prevoirEntretien, signalerAnomalie, traiterAnomalie, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import type { AvisContravention, Avoir, Contestation, Creneau, SortieFlotte, Entretien, Immobilisation, Parc, Remise, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
 import { appliquerEtats, empreinte } from "./edl";
@@ -36,6 +36,7 @@ import AnalysesParc from "./AnalysesParc";
 import AvisVue, { type GestesAvis } from "./AvisVue";
 import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
 import ParcVue, { type GestesParc } from "./ParcVue";
+import FlotteVue, { type GestesFlotte } from "./FlotteVue";
 import { forcesLocales } from "./contestations";
 import { Preparation2027, type Preparation } from "./FactureElectronique";
 import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
@@ -52,6 +53,7 @@ const MONDE_EXEMPLE: Monde = {
   avis: AVIS_EXEMPLE,
   contestations: CONTESTATIONS_EXEMPLE,
   parc: PARC_EXEMPLE,
+  flotte: FLOTTE_EXEMPLE,
 };
 
 const ids = () => crypto.randomUUID();
@@ -81,7 +83,7 @@ export default function EcranTavaro() {
       setMoi(compte);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [], contestations: [], parc: { vehicules: [], remises: [], anomalies: [], immobilisations: [], entretiens: [], membres: [] } });
+      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [], contestations: [], parc: { vehicules: [], remises: [], anomalies: [], immobilisations: [], entretiens: [], membres: [] }, flotte: null });
     }
   }, []);
 
@@ -127,7 +129,7 @@ export default function EcranTavaro() {
   }, [local]);
   const preparation = source === "exemple" ? prepExemple : prepReelle;
 
-  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux", "loc_contestations", "loc_remises", "loc_anomalies_retour", "loc_immobilisations", "loc_entretiens"], source === "reelle", relire);
+  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux", "loc_contestations", "loc_remises", "loc_anomalies_retour", "loc_immobilisations", "loc_entretiens", "loc_sorties_flotte"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
     if (!id) return "Système";
@@ -654,6 +656,57 @@ export default function EcranTavaro() {
     };
   }, [source, local, moiId, role, relire]);
 
+  /* ——— la flotte : la porte en base réelle ; en exemple, la fiche suit la cote saisie, la sortie suit la direction ——— */
+  const gestesFlotte: GestesFlotte = useMemo(() => {
+    const attendre = () => new Promise((r) => setTimeout(r, 300));
+    const changer = (f: (s: SortieFlotte[]) => SortieFlotte[], fiches?: (l: NonNullable<Monde["flotte"]>["fiches"]) => NonNullable<Monde["flotte"]>["fiches"]) =>
+      setLocal((prev) => (prev.flotte ? { ...prev, flotte: { sorties: f(prev.flotte.sorties), fiches: fiches ? fiches(prev.flotte.fiches) : prev.flotte.fiches } } : prev));
+    const directionStricte = role === "gerant" || role === "admin";
+    return {
+      poserEconomie: async (vehicule, valeurs) => {
+        if (source === "reelle") { await poserEconomie(vehicule, valeurs); await relire(); return; }
+        await attendre();
+        const cote = typeof valeurs.cote_eur === "number" ? valeurs.cote_eur : null;
+        changer((s) => s, (l) => l.map((f) => {
+          if (f.vehicule !== vehicule) return f;
+          const perte = cote !== null && f.financement === "achat" ? Math.round(cote * 0.15 * 100) / 100 : f.couts.perte_valeur;
+          const couts = { ...f.couts, perte_valeur: perte, total: Math.round((f.couts.atelier + f.couts.financement + (perte ?? 0)) * 100) / 100 };
+          const comptable = typeof valeurs.valeur_comptable_eur === "number" ? valeurs.valeur_comptable_eur : f.valeur_comptable;
+          return { ...f, couts, marge: Math.round((f.revenu.total - couts.total) * 100) / 100, valeur_comptable: comptable,
+            cote: cote !== null ? { eur: cote, source: valeurs.cote_source as NonNullable<typeof f.cote>["source"], le: String(valeurs.cote_le) } : null,
+            ecart_cote_comptable: cote !== null && comptable !== null ? cote - comptable : null, complet: cote !== null };
+        }));
+      },
+      proposer: async (vehicule, valeurs) => {
+        if (source === "reelle") { await proposerSortie(vehicule, valeurs); await relire(); return; }
+        await attendre();
+        const f = local.flotte?.fiches.find((x) => x.vehicule === vehicule);
+        if (!f) throw new Error("Véhicule introuvable.");
+        changer((s) => [{ id: ids(), vehicule_id: vehicule, statut: "proposee", canal: (valeurs.canal as SortieFlotte["canal"]) ?? f.canal,
+          prix_vise_eur: typeof valeurs.prix_vise_eur === "number" ? valeurs.prix_vise_eur : f.cote?.eur ?? null, mise_en_vente_le: null, motif: String(valeurs.motif), fiche: f,
+          propose_par: moiId, propose_le: maintenant(), decide_par: null, decide_le: null, refus_motif: null, prix_vente_eur: null, vendu_le: null, acheteur: null }, ...s]);
+      },
+      decider: async (sortie, valider, motif) => {
+        if (source === "reelle") { await deciderSortie(sortie.id, valider, motif); await relire(); return; }
+        await attendre();
+        if (!directionStricte) throw new Error("La direction seule valide une mise en vente.");
+        if (sortie.propose_par === moiId) throw new Error("Une autre personne de la direction valide ce que vous avez proposé.");
+        changer((s) => s.map((x) => (x.id === sortie.id ? { ...x, statut: valider ? "validee" : "refusee", decide_par: moiId, decide_le: maintenant(), refus_motif: valider ? null : motif } : x)));
+      },
+      conclure: async (sortie, prix, le, acheteur) => {
+        if (source === "reelle") { await conclureSortie(sortie.id, prix, le, acheteur); await relire(); return; }
+        await attendre();
+        changer((s) => s.map((x) => (x.id === sortie.id ? { ...x, statut: "vendue", prix_vente_eur: prix, vendu_le: le ?? maintenant().slice(0, 10), acheteur } : x)),
+          (l) => l.filter((f) => f.vehicule !== sortie.vehicule_id));
+      },
+      annuler: async (sortie, motif) => {
+        if (source === "reelle") { await annulerSortie(sortie.id, motif); await relire(); return; }
+        await attendre();
+        changer((s) => s.map((x) => (x.id === sortie.id ? { ...x, statut: "annulee" } : x)));
+      },
+    };
+  }, [source, local, moiId, role, relire]);
+
   const agences = monde?.agences ?? [];
   const nomAgenceDe = (entite_id: string) => agences.find((a) => a.entite_id === entite_id)?.nom ?? agences.find((a) => a.entite_id === entite_id)?.code ?? entite_id.slice(0, 8);
 
@@ -777,6 +830,12 @@ export default function EcranTavaro() {
       <div style={{ marginTop: 16 }}>
         <AnalysesParc source={source} moi={moi} role={role} />
       </div>
+
+      {role === "gerant" || role === "admin" || role === "valideur" ? (
+        <div style={{ marginTop: 16 }}>
+          <FlotteVue flotte={monde?.flotte ?? null} role={role} moi={moiId} nommer={nommer} gestes={gestesFlotte} />
+        </div>
+      ) : null}
 
       {role === "gerant" || role === "admin" || role === "valideur" ? (
         <div style={{ marginTop: 16 }}>

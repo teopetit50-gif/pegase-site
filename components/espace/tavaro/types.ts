@@ -530,3 +530,54 @@ export type Parc = {
   /* les personnes de l'organisation à qui confier une remise ou une anomalie */
   membres: { user_id: string; role: string }[];
 };
+
+/* b2_11 : la fiche économique d'un véhicule et les sorties de flotte */
+export type AvisFlotte = "sortir" | "surveiller" | "garder" | "restituer";
+export type CanalSortie = "reprise_concession" | "marchand" | "encheres" | "particulier" | "restitution_loueur";
+export type SourceCote = "argus" | "la_centrale" | "offre_reprise" | "offre_marchand" | "estimation";
+export type FicheVehicule = {
+  vehicule: string;
+  immatriculation: string;
+  modele: string | null;
+  utilitaire: boolean;
+  periode: { du: string; au: string; jours: number };
+  revenu: { location: number; frais: number; total: number; jours_loues: number; contrats_sans_tarif: number };
+  couts: { atelier: number; financement: number; perte_valeur: number | null; total: number };
+  marge: number;
+  utilisation_pct: number;
+  jours_immobilises: number;
+  km: number | null;
+  km_an: number | null;
+  age_mois: number | null;
+  financement: "achat" | "credit" | "lld" | "loa";
+  fin_contrat_le: string | null;
+  cote: { eur: number; source: SourceCote; le: string } | null;
+  valeur_comptable: number | null;
+  ecart_cote_comptable: number | null;
+  avis: AvisFlotte;
+  raisons: string[];
+  moment: string | null;
+  moment_le: string | null;
+  canal: CanalSortie;
+  canal_raison: string;
+  complet: boolean;
+};
+export type SortieFlotte = {
+  id: string;
+  vehicule_id: string;
+  statut: "proposee" | "validee" | "refusee" | "vendue" | "annulee";
+  canal: CanalSortie;
+  prix_vise_eur: number | null;
+  mise_en_vente_le: string | null;
+  motif: string;
+  fiche: FicheVehicule;
+  propose_par: string;
+  propose_le: string;
+  decide_par: string | null;
+  decide_le: string | null;
+  refus_motif: string | null;
+  prix_vente_eur: number | null;
+  vendu_le: string | null;
+  acheteur: string | null;
+};
+export type Flotte = { fiches: FicheVehicule[]; sorties: SortieFlotte[] };

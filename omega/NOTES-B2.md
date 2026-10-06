@@ -1,5 +1,54 @@
 # Session B2 — TAVARO, le module des loueurs (contrats, retours, barèmes, factures, avoirs, litiges)
 
+## REPRISE — pause demandée par Teo (06/10/2026, 21 h Z)
+
+**Branche** : `worker-b2`, tête 2613a68 au moment de la pause, avant ce commit de notes. Arbre propre, tout est poussé.
+Aucun fichier du site public n'a été modifié.
+
+**Fait, posé et vert sur la recette** (^test_b2_ 01 à 20, tous verts selon le coordinateur) :
+
+| Migration | Ce qu'elle porte | SHA |
+|---|---|---|
+| b2_03, b2_04 | avis de contravention, identité de la désignation gardée un an | |
+| b2_05, b2_05b | état des lieux signé | |
+| b2_06, b2_06b | facture électronique | 42fdbe4 |
+| b2_07 | photo floue refusée, frais d'avis refacturés | |
+| b2_08 | PDF et photos joints | ouvrier tavaro-pdf déployé en v2 |
+| b2_09, b2_09b | contestations bancaires, gardien des pièces | 3856716 |
+| b2_10 v2 | remise en location et entretien | 928b937, rejoué depuis 66d8199 |
+| b2_11 | sortie de flotte | a8f17be |
+| b2_11b | un véhicule vendu ne redevient pas actif par import | e9293de |
+
+**Attend le coordinateur** :
+- fusionner l'écran de la sortie de flotte (eb7d892 : f5d375f écran, b97b518 recette) au prochain lot groupé ;
+- les écrans antérieurs (contestations, parc) sont déjà fusionnés.
+
+**Attend Teo** (le détail est dans `omega/CHIFFRAGE/tavaro.md`, 2613a68) :
+- **Les tiers**, s'il veut garder ces modules sur la page (sinon les passer en « à venir ») :
+  - Assistance : un fournisseur de voix et des dépanneurs ;
+  - Péages : un compte flotte en flux libre ;
+  - Relevés constructeur : un agrégateur ;
+  - Questions : un modèle de langage.
+- **Pour le premier loueur** : son logiciel de réservation et un export d'exemple (pour le connecteur), son barème réel et les mentions de l'émetteur, une journée d'essai en agence sur un vrai téléphone.
+- **Trois phrases de la vitrine à reprendre** : « compare les photos », « le retire des réservations », « résumé dans votre logiciel ».
+- Lire la relance du banc partie le 09/10 (verrou DELAI_MINIMAL du socle).
+
+**Prochaine étape exacte**, à la reprise, sur l'ordre du coordinateur :
+1. Joindre aussi les photos **du départ** au courriel de facture. C'est la ligne 7 du chiffrage, une demi-journée, et le premier manque du module 01.
+2. Les contrats d'interface sans fournisseur du carnet :
+   - point 4 : Assistance et Relevés constructeur ;
+   - point 5 : caution, avec préautorisation, capture et libération.
+3. Puis les modules restants, dans l'ordre du carnet : 11 Transferts, 13 Péages, 15 Rappels et Crit'Air, 16 Garage (les transferts proposés), 18 Sinistres.
+
+Les lignes 07 à 10 et 20 sont à B3 (branche worker-b3).
+
+**Outils locaux** (perdus avec le conteneur, se recréent) :
+- un Postgres 16 dans /var/tmp/pgb2 (port 5499) ;
+- des souches dans le scratchpad ;
+- Deno pour l'ouvrier tavaro-pdf (`deno task test`) ;
+- les recettes : `omega/recette-b2/recette-tavaro.mjs` (122 contrôles) et `accessibilite-tavaro.mjs`.
+
+
 Branche `worker-b2`, fusionnée dans main. Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (depuis le 06/10, 03 h 10 Paris ; auparavant session_01B4JNQXyT69GytdvE9SjAnE). Dernière mise à jour : 06/10/2026, 03 h 15 Paris.
 
 ## Les deux jauges
@@ -273,3 +322,22 @@ La promesse (textes.ts) : « Quand un client conteste auprès de sa banque le d�
 - **Correction 928b937** : une préparation ouverte sans date de fin bloquait tous les créneaux d'entretien. Elle compte maintenant douze heures.
 - **Écran** (ddd161b) : la carte « Parc », juste après les contrats. Ses délais ne s'affichent qu'une fois la carte montée (sinon l'erreur d'hydratation React #418). Recette : 112 contrôles verts ; axe : 0 écart.
 - **Suite du carnet** : « Sortie de flotte ».
+
+### Carnet, point 3 — module 05, sortie de flotte (06/10, 22 h Z)
+
+- **b2_11** (a8f17be) :
+  - `loc_vehicules_economie` : financement ; cote réelle, avec sa source et sa date ; valeur comptable ;
+  - `private.loc_fiche_vehicule` sur douze mois :
+    - le revenu : jours loués × tarif, plus les frais ;
+    - les coûts : atelier, loyers, perte de valeur au prix réel ;
+    - la marge, l'utilisation, les jours d'immobilisation ;
+    - l'avis, ses raisons, le moment et le canal ;
+  - `loc_sorties_flotte` : la mise en vente est proposée, puis validée par la direction, jamais par la personne qui l'a proposée ; une fois conclue, le véhicule est « sorti ».
+
+  La validation est tenue dans la table et non par `demandes_validation`, parce que leur application passe par `loc_ouvrier` et une liste de genres que je ne remplace pas. Test 20 : 20 assertions.
+- **Écran** : la carte « Flotte », pour la direction et les valideurs seulement.
+  - Ce qu'elle montre : le tableau des fiches, la fiche détaillée, la saisie de la cote, la proposition de mise en vente, et la validation ou le refus et la vente.
+  - Un piège corrigé : un libellé `sr-only` (en position absolue) dans un cadre de tableau non positionné sortait du cadre et élargissait toute la page à 390 px. Le cadre est maintenant `position: relative`.
+  - Recette : 122 contrôles verts ; axe : 0 écart.
+- **À trancher** : si l'export du loueur réécrit `statut`, un véhicule sorti pourrait redevenir actif. J'ai posé la question au coordinateur.
+- **Suite** : les modules 02–11 restants du carnet. 13, 15, 16, 18 et 20 sont à reprendre dans `lib/en-preparation.ts`, après le partage avec B3.

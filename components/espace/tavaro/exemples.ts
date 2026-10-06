@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, dans, ilYa } from "../exemples/socle";
-import type { Agence, AnomalieRetour, Amendement, AvisContravention, Avoir, Contestation, Entretien, Immobilisation, Parc, Remise, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import type { Agence, AnomalieRetour, FicheVehicule, Flotte, Amendement, AvisContravention, Avoir, Contestation, Entretien, Immobilisation, Parc, Remise, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
 import { forcesLocales } from "./contestations";
 
 const C = EXEMPLE_CLIENT_ID;
@@ -438,5 +438,52 @@ export const PARC_EXEMPLE: Parc = {
       debut_le: ilYa(10, 8), fin_le: ilYa(10, 10), atelier_nom: "Garage Lumière", atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: ilYa(10, 10), km_fait: 11980, cout_eur: 312, notes: null },
   ] satisfies Entretien[],
   membres: Object.entries(PERSONNES_TAVARO).map(([user_id, p]) => ({ user_id, role: p.role })),
+};
+
+/* ——— la flotte (b2_11) : six fiches économiques sur douze mois. Le Master coûte plus qu'il ne rapporte (carrosserie,
+   utilitaire peu loué) : à sortir aux enchères ; la 308 approche 50 000 km ; la Golf est en LLD jusqu'au mois prochain :
+   à restituer ; la Clio, la Yaris et la C3 sont à garder. La Clio a une cote ; la C3 n'en a pas encore. Une sortie est
+   proposée (le Master) par Yanis, en attente de la direction. ——— */
+const fiche = (n: number, o: Partial<FicheVehicule> & Pick<FicheVehicule, "avis" | "canal" | "canal_raison">): FicheVehicule => {
+  const v = VEHICULES_EXEMPLE[n - 1];
+  const revenu = o.revenu ?? { location: 0, frais: 0, total: 0, jours_loues: 0, contrats_sans_tarif: 0 };
+  const couts = o.couts ?? { atelier: 0, financement: 0, perte_valeur: null, total: 0 };
+  return {
+    vehicule: v.id, immatriculation: v.immatriculation, modele: v.modele, utilitaire: false,
+    periode: { du: jourIso(ilYa(365)), au: jourIso(ilYa(0)), jours: 365 }, revenu, couts, marge: Math.round((revenu.total - couts.total) * 100) / 100,
+    utilisation_pct: Math.round((revenu.jours_loues / 365) * 1000) / 10, jours_immobilises: 0, km: v.km_dernier, km_an: null, age_mois: null,
+    financement: "achat", fin_contrat_le: null, cote: null, valeur_comptable: null, ecart_cote_comptable: null, raisons: [], moment: null, moment_le: null, complet: false, ...o,
+  };
+};
+const FICHES_EXEMPLE: FicheVehicule[] = [
+  fiche(1, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 9180, frais: 312, total: 9492, jours_loues: 204, contrats_sans_tarif: 0 }, couts: { atelier: 312, financement: 0, perte_valeur: 1785, total: 2097 },
+    km_an: 21400, age_mois: 14, cote: { eur: 11900, source: "argus", le: jourIso(ilYa(6)) }, valeur_comptable: 10450, ecart_cote_comptable: 1450,
+    moment: "avant 100 000 km, vers le 05/09/2030 au rythme actuel", complet: true }),
+  fiche(2, { avis: "surveiller", canal: "marchand", canal_raison: "un marchand règle vite au prix de la cote, sans annonce ni essais",
+    revenu: { location: 11960, frais: 238, total: 12198, jours_loues: 230, contrats_sans_tarif: 0 }, couts: { atelier: 640, financement: 0, perte_valeur: 2130, total: 2770 },
+    km_an: 26300, age_mois: 31, raisons: ["31 mois, près du seuil de 36 mois", "révision des 50 000 km à planifier"], cote: { eur: 14200, source: "la_centrale", le: jourIso(ilYa(20)) },
+    valeur_comptable: 12100, ecart_cote_comptable: 2100, moment: "avant 50 000 km, vers le 12/11/2026 au rythme actuel", complet: true }),
+  fiche(3, { avis: "sortir", canal: "encheres", canal_raison: "utilitaire ou kilométrage élevé : les ventes aux enchères professionnelles donnent le meilleur prix sans délai",
+    utilitaire: true, revenu: { location: 7200, frais: 0, total: 7200, jours_loues: 80, contrats_sans_tarif: 0 }, couts: { atelier: 4380, financement: 0, perte_valeur: 3150, total: 7530 },
+    jours_immobilises: 23, km_an: 31200, age_mois: 52, raisons: ["il a coûté 330 € de plus qu'il n'a rapporté sur douze mois", "52 mois, au-delà de votre seuil de 36 mois", "loué 21,9 % du temps", "23 jours chez le carrossier et au garage"],
+    cote: { eur: 21000, source: "offre_marchand", le: jourIso(ilYa(3)) }, valeur_comptable: 17800, ecart_cote_comptable: 3200, moment: "dès maintenant", moment_le: jourIso(ilYa(0)), complet: true }),
+  fiche(4, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 6750, frais: 120, total: 6870, jours_loues: 150, contrats_sans_tarif: 0 }, couts: { atelier: 89, financement: 0, perte_valeur: 2400, total: 2489 },
+    km_an: 9800, age_mois: 9, cote: { eur: 16000, source: "argus", le: jourIso(ilYa(30)) }, valeur_comptable: 17100, ecart_cote_comptable: -1100, complet: true }),
+  fiche(5, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 1890, frais: 0, total: 1890, jours_loues: 42, contrats_sans_tarif: 1 }, couts: { atelier: 0, financement: 0, perte_valeur: null, total: 0 }, age_mois: 3 }),
+  fiche(6, { avis: "restituer", canal: "restitution_loueur", canal_raison: "véhicule financé : il se restitue au loueur financier, sans frais de remise en état au-delà de l'usure normale",
+    financement: "lld", fin_contrat_le: jourIso(dans(38, 9)), revenu: { location: 10900, frais: 160, total: 11060, jours_loues: 218, contrats_sans_tarif: 0 },
+    couts: { atelier: 0, financement: 5160, perte_valeur: 0, total: 5160 }, km_an: 18900, age_mois: 35, raisons: [`le contrat de LLD finit le ${jourIso(dans(38, 9)).split("-").reverse().join("/")}`],
+    moment: "dès maintenant", moment_le: jourIso(ilYa(0)), complet: true }),
+];
+export const FLOTTE_EXEMPLE: Flotte = {
+  fiches: FICHES_EXEMPLE,
+  sorties: [
+    { id: u("sf", 1), vehicule_id: VEHICULES_EXEMPLE[2].id, statut: "proposee", canal: "encheres", prix_vise_eur: 21000, mise_en_vente_le: null,
+      motif: "Utilitaire loué un jour sur cinq, 4 380 € d'atelier et de carrosserie en douze mois, 52 mois : il coûte plus qu'il ne rapporte.",
+      fiche: FICHES_EXEMPLE[2], propose_par: YANIS, propose_le: ilYa(1, 16), decide_par: null, decide_le: null, refus_motif: null, prix_vente_eur: null, vendu_le: null, acheteur: null },
+  ],
 };
 

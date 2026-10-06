@@ -22,6 +22,7 @@ const ECRANS = [
   ['tavaro-avis', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Avis de contravention"] .r-btn')].find(b => /Désigner le conducteur/.test(b.textContent) && !b.disabled)?.click()`],
   ['tavaro-parc', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Parc : remise en location et entretien"] .r-btn')].find(b => /Trouver un créneau/.test(b.textContent) && !b.disabled)?.click()`],
   ['tavaro-parc-anomalie', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Parc : remise en location et entretien"] .r-btn')].find(b => /Signaler une anomalie/.test(b.textContent) && !b.disabled)?.click()`],
+  ['tavaro-flotte', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Flotte : garder, vendre ou renouveler"] .r-btn')].find(b => /Fiche/.test(b.textContent))?.click()`],
   ['tavaro-contestations', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Contestations bancaires"] .r-btn')].find(b => /Ouvrir une contestation/.test(b.textContent) && !b.disabled)?.click()`,
     `(() => { const d = document.querySelector('section[aria-label="Contestations bancaires"] .tav-forces'); if (d) d.open = true; })()`],
 ];
