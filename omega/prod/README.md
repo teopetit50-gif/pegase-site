@@ -85,3 +85,26 @@ Méthode proposée, dans l'ordre de préférence :
    répétition une fois toute la séquence posée. Les deux listes doivent être
    identiques, hors données. C'est la seule vérification qui dit que la
    production sera la recette.
+
+## Preuve : `empreinte.sql`
+
+Requête en lecture seule, jouée à l'identique sur la recette, sur la répétition,
+puis sur la production.
+- **Mode `resume`** (par défaut) : une ligne par catégorie (fonction, table,
+  contrainte, index, déclencheur, vue, politique, publication, cron, droit,
+  droit par défaut, enum, extension), avec le nombre d'objets et le md5 de
+  l'ensemble.
+- **Mode `detail`** (une catégorie, un préfixe de nom) : localise un écart.
+
+Les oid, les propriétaires et la référence de projet ne comptent pas. Sont
+exclus : les schémas `tests` et `scories`, et l'outillage propre à la recette.
+Essayé sur la maquette : un cron dont l'URL passe de la recette à la production
+garde la même empreinte.
+
+## Recherche des neuf bases de modules dans le dépôt (6/10)
+
+`daliro_m0a/b/c`, `varelo_referentiel`, `_index` et `_perf`, `tamila_m10`,
+`tamila_m10b` et `tiroma_releve` n'ont **aucun fichier** dans le dépôt : ni sur une
+branche, ni dans l'historique (`git log --all`). Elles ne sont citées que dans les
+notes et les extraits. Leur texte vient donc de la recette (pages 1 à 17 de
+`exporter.sql`).
