@@ -320,6 +320,58 @@ humaine (`filed_attester_identite`, A4), qui gagnerait à être proposée d'embl
 - ordre proposé : Suisse d'abord (sans clé, fréquente chez une PME française), puis GB quand Teo aura l'application
   HMRC, puis GLEIF pour les grands fournisseurs SaaS.
 
+## 13. Royaume-Uni : HMRC « Check a UK VAT number » v2 — ce que Teo doit faire (6/10, aucun appel réel)
+
+L'adaptateur `omega/functions/identite/hmrc.ts` est prêt (jeton OAuth, consultation, lecture des réponses, double
+`HmrcFactice`, 7 tests) mais **pas branché** et jamais appelé en réel : il manque l'application HMRC. La v1, ouverte,
+a été retirée le 17/02/2025 ; la v2 exige une application déclarée. HMRC annonce environ **deux semaines** d'examen
+avant les identifiants de production. C'est gratuit.
+
+Étapes (les libellés exacts des écrans peuvent changer : suivre le sens) :
+
+1. Créer un compte développeur sur https://developer.service.hmrc.gov.uk (« Register ») : nom, courriel, mot de
+   passe, puis confirmation par courriel. HMRC demande une vérification en deux étapes (application
+   d'authentification ou SMS).
+2. « Applications » → ajouter une application au **bac à sable** (sandbox), nom « Omega identité ».
+3. Dans l'application : abonner l'API **« Check a UK VAT number » version 2.0** (« Manage API subscriptions »).
+4. Onglet des identifiants du bac à sable : copier le **Client ID** et générer un **client secret**. Le secret ne
+   s'affiche qu'une fois : le copier d'un bloc (même piège que la clé Sirene).
+5. Me les transmettre par le coordinateur **en secrets Edge de la recette**, jamais dans un fichier ni un message :
+   `HMRC_CLIENT_ID`, `HMRC_CLIENT_SECRET`, et `HMRC_BASE = https://test-api.service.hmrc.gov.uk` pour le bac à
+   sable. Je ferai alors l'essai avec les numéros fictifs publiés par HMRC
+   (github.com/hmrc/vat-registered-companies-api, `public/api/conf/2.0/test-data`).
+6. Demander les identifiants de **production** (« Get production credentials »). HMRC demande notamment :
+   - l'organisation et une personne responsable ;
+   - l'adresse d'une politique de confidentialité et de conditions d'utilisation (omegaai.fr) ;
+   - quelques réponses sur le logiciel et la façon dont il traite les données ;
+   - l'acceptation des **Terms of Use 2.0**.
+
+   L'usage déclaré est de vérifier les fournisseurs britanniques d'une organisation avant de les payer (« due
+   diligence on VAT-registered businesses »), ce qui correspond exactement à l'objet de l'API.
+7. Une fois la production accordée : remplacer `HMRC_CLIENT_ID` et `HMRC_CLIENT_SECRET` par ceux de production, et
+   retirer `HMRC_BASE` (production par défaut).
+8. Facultatif : `HMRC_VRN_REQUERANT`, le numéro de TVA britannique de l'organisation qui vérifie. HMRC rend alors un
+   **numéro de consultation**, preuve opposable de la vérification. Une PME française n'en a en général pas : la
+   vérification simple, sans numéro de consultation, suffit.
+
+Ce que fait l'adaptateur :
+- **Jeton :** `POST /oauth/token` (client_credentials, scope `read:vat`), gardé quatre heures moins une minute,
+  redemandé après un 401.
+- **Consultation :** `GET /organisations/vat/check-vat-number/lookup/{vrn}[/{requérant}]`, en-tête
+  `Accept: application/vnd.hmrc.2.0+json`.
+- **Lecture :**
+  - 200 → valide (nom, adresse, référence de consultation) ;
+  - 404 `NOT_FOUND` → invalide (numéro non enregistré) ;
+  - 400 sur `targetVrn` → invalide (forme refusée) ;
+  - tout le reste → indisponible : 401 et 403 (jeton ou requérant), 429 `MESSAGE_THROTTLED_OUT` (3 requêtes par
+    seconde), 5xx, réseau.
+- **Clé mod 97 / 9755 :** notée dans la preuve, sans arrêter la consultation (les numéros du bac à sable ne la
+  respectent pas, et HMRC fait foi).
+- **Secret :** il ne passe jamais dans un motif ni dans le journal.
+
+Pour le brancher, il faut la même décision que pour la Suisse (le registre `hmrc` dans les contraintes, accord de
+Teo) et une branche `GB…` dans le contrôle `identite.registre` d'A4. XI (Irlande du Nord) reste à VIES.
+
 ## 11. Journal des étapes
 
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
@@ -410,3 +462,10 @@ humaine (`filed_attester_identite`, A4), qui gagnerait à être proposée d'embl
   Tests : `tests/uid_ch_test.ts` (10, sur une réponse réelle relevée sur un office fédéral) et le double `UidChFactice` ;
   58 tests Deno verts. Sondé en réel : CHE-116.068.369 et CHE-105.909.036 valides (TVA inscrite), CHE-100.000.006
   inconnue. 27 requêtes en une minute sans refus du service.
+- 6/10 14 h 45 Z (coordinateur) : la voie suisse retenue par A4 est d'élargir la contrainte à `uid_ch`, mais cela
+  suppose de la retirer, donc l'accord de Teo ; pas prioritaire, l'adaptateur reste prêt et non branché. Suivant :
+  HMRC.
+- 6/10 15 h 20 Z : `omega/functions/identite/hmrc.ts` + `tests/hmrc_test.ts` (7) + double `HmrcFactice` ; 65 tests
+  Deno verts ; formes prises dans la spécification OpenAPI publiée par HMRC (v2.0) ; aucun appel réel. Étapes pour
+  Teo en section 13.
+
