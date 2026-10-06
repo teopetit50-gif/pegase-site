@@ -35,6 +35,7 @@ import {
 import type { Audience, CalculDelai, Delai, DemandeTamila, DossierComplet, Partie, Personne, RegleProcedure, Reglages } from "./types";
 import HonorairesTamila from "./HonorairesTamila";
 import AnalysesTamila from "./AnalysesTamila";
+import ExpertiseTamila from "./ExpertiseTamila";
 import ConformiteTamila from "./ConformiteTamila";
 
 type Props = {
@@ -668,6 +669,9 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           })}
         </div>
       </section>
+
+      {/* ——— l'expertise (b4_16) ——— */}
+      <ExpertiseTamila dossier={d} source={source} peutEcrire={peutEcrire} />
 
       {/* ——— les lectures longues (carnet n° 4, b4_15, lecteur d'A1) ——— */}
       <AnalysesTamila dossier={d} source={source} cle={cle} pieces={pieces} clair={clair} peutDemander={peutEcrire && avocat} auCoffre={complet.cle?.fournisseur === "scaleway"} />
