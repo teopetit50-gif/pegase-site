@@ -9,7 +9,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import type { LucideIcon } from "lucide-react";
-import { Building, CarFront, FileText, FolderLock, HardHat, Smile, Stamp } from "lucide-react";
+import { Building, CarFront, FileText, FolderLock, HandCoins, HardHat, MessageSquareText, Smile, Stamp, UserMinus } from "lucide-react";
 
 export const RACINE = "/espace2";
 
@@ -58,6 +58,7 @@ export const MODULES: ModuleV2[] = [
       { libelle: "Documents reçus", href: `${RACINE}/filed`, exact: true },
       { libelle: "À payer", href: `${RACINE}/filed/a-payer` },
       { libelle: "Fournisseurs", href: `${RACINE}/filed/fournisseurs` },
+      { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` },
     ],
     true,
   ),
@@ -67,6 +68,13 @@ export const MODULES: ModuleV2[] = [
   m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
   m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat),
+];
+
+/* les modules annoncés, sans écran encore : une place dans la navigation, sans lien */
+export const MODULES_A_VENIR: { cle: string; nom: string; libelle: string; icone: LucideIcon }[] = [
+  { cle: "cashd", nom: "CASHD", libelle: "Relances d'impayés", icone: HandCoins },
+  { cle: "reput", nom: "REPUT", libelle: "Demandes reçues et réponses", icone: MessageSquareText },
+  { cle: "offload", nom: "OFFLOAD", libelle: "Clients qui décrochent", icone: UserMinus },
 ];
 
 export const moduleDe = (cle: string | undefined) => MODULES.find((x) => x.cle === cle);
