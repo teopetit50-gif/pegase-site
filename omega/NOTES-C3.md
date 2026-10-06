@@ -137,6 +137,24 @@ Note recette : c3_02 et c3_03 font `update public.envois set statut = 'envoye'` 
    cron reput-synchro par l'ouvrier de base ; pose reput-matin)
 2. `omega/tests/reput/c3_03_accords.sql` → `^test_c3_03_`, puis 44, 46, 51, 55.
 
+## Palier 4 — l'écran `/espace/reput`
+
+`app/espace/reput/page.tsx`, `components/espace/reput/` (EcranReput, BaseConnaissances, SujetsAutorises,
+portes, types, exemples). Trois onglets : **Demandes** (compteurs à valider / à traiter / répondues / reçues,
+liste, la demande ouverte : message reçu, réponse préparée, ses sources dans la base, Valider et envoyer /
+Corriger / Refuser avec motif), **Base de connaissances** (fiches par sujet, source, période, version ;
+nouvelle fiche, corriger = nouvelle version, valider un brouillon, retirer avec motif), **Sujets autorisés**
+(accord par sujet : autoriser, révoquer, activer seul ; réclamation, urgence, humain, autre « toujours relus,
+par principe »). Exemple en mémoire ou base réelle (RLS + portes reput_*), temps réel sur reput_demandes,
+reput_reponses, reput_connaissances.
+
+Recette : `omega/recette-c3/recette_reput.mjs` (390 / 768 / 1024 / 1440 / 1700 : chargement, aucun
+débordement, Corriger ouvre l'éditeur, Valider passe la demande en répondue, les deux autres onglets, console
+propre hors /_vercel/insights) : **verte**. Captures 390 et 1440 dans `omega/recette-c3/captures/`.
+
+**Hors de mon périmètre** : l'onglet de navigation (`components/espace/ecrans.ts`, coquille refaite par C1) —
+à ajouter : `{ cle: "reput", href: "/espace/reput", libelle: "Demandes clients", court: "REPUT" }`.
+
 ## Lignes de capacité (`lib/produits/capacites/accueil.ts`) : tenues et preuves
 
 | Ligne | État | Preuve |
@@ -168,6 +186,8 @@ Note recette : c3_02 et c3_03 font `update public.envois set statut = 'envoye'` 
 2. `private.politique_couvrante` : sa source aussi (le libellé du type d'action est-il comparé tel quel ?).
 
 ## Journal de session
+
+- 06/10, ~19 h 40 Z : palier 4 (écran) écrit ; tsc, eslint, build verts ; recette 5 largeurs verte.
 
 - 06/10, ~18 h 50 Z : palier 3 écrit (c3_03) ; souche 173/173.
 
