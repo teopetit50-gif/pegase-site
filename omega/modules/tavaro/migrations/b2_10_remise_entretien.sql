@@ -245,7 +245,10 @@ AS $function$
   from public.loc_reservations r
   where r.client_id = p_client and r.vehicule_id = p_vehicule and r.statut in ('option', 'confirmee') and r.disparue_le is null
   union all
-  select i.debut_le, coalesce(i.fin_le, i.fin_prevue_le, 'infinity'::timestamptz), 'immobilisation', i.motif
+  -- une préparation sans date de fin compte douze heures (elle se finit dans la journée) ; le reste, jusqu'à son retour
+  select i.debut_le, coalesce(i.fin_le, i.fin_prevue_le,
+                              case when i.motif = 'preparation' then greatest(now(), i.debut_le) + interval '12 hours' else 'infinity'::timestamptz end),
+         'immobilisation', i.motif
   from public.loc_immobilisations i
   where i.client_id = p_client and i.vehicule_id = p_vehicule and (i.fin_le is null or i.fin_le > now()) and i.id is distinct from p_sauf
 $function$;
