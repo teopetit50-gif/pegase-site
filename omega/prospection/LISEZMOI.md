@@ -5,16 +5,29 @@ Une ligne par établissement actif.
 
 ## Résumé
 
-- **7 026 établissements** en tout.
-- Tiroma (dentistes) : 312 lignes, dont 45 avec téléphone et 4 avec courriel (RPPS).
-- Tamila (avocats) : 452 lignes, dont 190 avec téléphone et 226 avec courriel (répertoire du Barreau).
-- Lorani (architectes, maîtres d'œuvre) : 399 lignes, dont 1 avec téléphone et courriel.
-- Daliro (BTP avec salariés) : 1 166 lignes, dont 1 avec téléphone et courriel.
-- Tavaro (loueurs de voitures) : 1 716 lignes, dont 411 entrepreneurs individuels.
-- Varelo (holdings, sièges sociaux) : 668 lignes.
-- FILED/CASHD/OFFLOAD/REPUT (PME de services et de distribution) : 2 313 lignes, dont 46 avec téléphone, 7 avec courriel et 21 avec site web.
-- Limite principale : SIRENE ne donne ni téléphone ni courriel. Le passage par le site officiel de chaque entreprise a commencé sur les 1 200 plus grosses, mais il a été coupé par la limite de 200 recherches web par tour. Il reste environ 4 100 entreprises à traiter, par vagues.
-- Les numéros de portable (06 et 07) ne sont pas repris des annuaires (Ordre, RPPS). Un portable n'est gardé que si l'entreprise le publie elle-même sur son site comme numéro de contact ; la colonne « remarque » le signale.
+- **7 188 établissements**, dont **778 avec téléphone**, 274 avec courriel et 105 avec site web.
+
+| Module | Lignes | Téléphone | Courriel |
+|---|---|---|---|
+| Tiroma (dentistes) | 316 | 54 | 4 |
+| Tamila (avocats) | 454 | 219 | 229 |
+| Lorani (architectes) | 499 | 201 | 3 |
+| Daliro (BTP) | 1 172 | 7 | 1 |
+| Tavaro (loueurs de voitures) | 1 719 | 56 | 30 |
+| Varelo (holdings) | 670 | 3 | 0 |
+| PME de services et de distribution, dont experts-comptables | 2 358 | 238 | 7 |
+
+- `martinique.csv` contient en plus 52 cibles de Martinique (972). Elles viennent toutes de la liste ChatGPT et sont à vérifier.
+- **Trous principaux :**
+  - BTP et holdings : très peu de ces entreprises ont un site web.
+  - Loueurs de voitures : seuls les 132 qui ont des salariés ont été cherchés ; les loueurs sans salariés n'ont pas été traités.
+  - Les autres secteurs n'ont été traités qu'en partie, à cause de la limite de 200 recherches web par tour. Une nouvelle vague complète les trous.
+- **Numéros de portable :**
+  - Les portables ne sont repris que s'ils sont publiés comme numéro professionnel, par un Ordre (avocats, architectes, experts-comptables) ou par l'entreprise sur son site.
+  - La colonne « remarque » le signale à chaque fois.
+- **Lignes marquées « Liste fournie par Teo (recherche ChatGPT) » :**
+  - ChatGPT a pris une partie de ses numéros sur PagesJaunes ou Pappers.
+  - Vérifiez ces numéros avant de les utiliser à grande échelle.
 
 ## Comment le fichier a été fait
 
@@ -23,6 +36,10 @@ Une ligne par établissement actif.
 | API publique SIRENE, recherche-entreprises.api.gouv.fr | Tous les établissements actifs du 971, par code NAF. Raison sociale, enseigne, SIRET, adresse, dirigeants publics (RNE), tranche d'effectif. Les entreprises en « diffusion partielle » à l'INSEE sont exclues. |
 | Annuaire Santé, extraction RPPS en open data (data.gouv.fr, 24/09/2026) | Chirurgiens-dentistes du 971 : nom du praticien, téléphone et courriel du cabinet quand ils sont publiés. Saint-Martin et Saint-Barthélemy sont exclus. |
 | FINESS, open data (data.gouv.fr, 04/05/2026) | Standard des cliniques et des laboratoires. |
+| Tableau officiel de l'Ordre des architectes (annuaire.architectes.org), consulté le 06/10/2026 | Les 217 architectes inscrits en Guadeloupe : adresse et téléphone professionnel. |
+| Annuaire officiel de l'Ordre des experts-comptables (annuaire.experts-comptables.org), consulté le 06/10/2026 | 242 cabinets d'expertise comptable : adresse et téléphone. |
+| Sites officiels des entreprises ou de leur réseau (pages agences Hertz, Europcar, Avis, Synergibio…), office du tourisme | Téléphone, courriel et site web, avec l'URL exacte de la page lue. |
+| Liste fournie par Teo (recherche ChatGPT du 06/10/2026) | Une centaine de cibles prioritaires en Guadeloupe et en Martinique. |
 | Barreau de la Guadeloupe, répertoire officiel 2022 (PDF de l'Ordre) et tableau en ligne consulté le 06/10/2026 | Coordonnées professionnelles des avocats encore inscrits en 2026. Les avocats de Saint-Martin et Saint-Barthélemy sont exclus. |
 
 Codes NAF retenus :
