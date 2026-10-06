@@ -175,9 +175,10 @@ conteneur le navigateur d'essai doit ignorer le certificat du mandataire et
   d'A3 et le mien ne se relisent pas d'eux-mêmes en production non plus, ce
   n'est pas le conteneur. Une entrée `wss://` à ajouter à `connect-src`.
 
-**Fusion** : demandée le 06/10 à 02 h 45 (4b55c1a, fusion propre avec
-main) ; en cours sur main par le coordinateur, avec l'onglet (`ecrans.ts`) et
-`MODULES.varelo` (`format.ts`) et la CSP `wss://`. omegaai.fr ne servira
+**Fusion faite** : main b287d04 (06/10, 02 h 17 UTC) porte /espace/varelo,
+l'onglet « Référentiel du groupe » (court VARELO), `MODULES.varelo` et la CSP
+`wss://` ; la barre de l'espace a été refaite à huit onglets par le
+coordinateur, recette cinq largeurs verte sur son build. omegaai.fr ne servira
 /espace/varelo qu'après la remise à zéro du quota Vercel (plan gratuit, 100
 déploiements par jour, consommés par les prévisualisations des branches
 worker-*, coupées depuis). **À vérifier en ligne dès que le déploiement passe** :
