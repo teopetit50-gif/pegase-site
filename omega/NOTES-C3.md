@@ -3,6 +3,14 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
+## REPRISE (pause demandée par Teo, 06/10/2026 21 h Z)
+
+- **Fait et posé sur la recette, vert** : c3_01 → c3_08 (migrations + tests pgTAP, dernier lot c3_08 bb153a2 vert, socle 44/46/51 verts, worker-c3 fusionnée par le coordinateur) ; Edge `reput-reponse` déployée (Deno 12/12) ; écran `app/espace/reput` + `components/espace/reput` ; souche locale 264/264.
+- **Dernier commit** : e125ccb — chiffrage `omega/CHIFFRAGE/reput.md` (document seul, rien à poser) ; ce commit-ci ajoute cette section.
+- **Attend le coordinateur** : rien à poser ; fusionner e125ccb + ce commit (documents). Export à date fixe : non construit (mis de côté).
+- **Attend Teo** : trancher les phrases du site relevées dans le chiffrage (rendez-vous/agenda, astreinte, « réponse à 21 h », « aucun logiciel de plus », contradictions A:94/A:177/A:430 et A:426/K:122) ; clé IA en UE (Bedrock eu-west) ; compte Meta WhatsApp ; un premier client réel (mail + formulaire).
+- **Prochaine étape exacte** : faire passer le circuit mail + formulaire en « prouvé en vrai » — rouvrir la boîte du banc banc@recu.omegaai.fr, envoyer un vrai courriel, vérifier préparation < 1 min, validation dans « À valider », envoi reçu, journal ; puis, selon les choix de Teo, le bloc rendez-vous/agenda (≈ 10 j) ou l'astreinte (≈ 3 j).
+
 ## Ce que le site promet et ce que C3 rend vrai
 
 La réception existe (A2 : courriel Brevo sur recu.omegaai.fr, formulaire signé, WhatsApp → `public.receptions`,
