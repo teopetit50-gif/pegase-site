@@ -26,6 +26,15 @@ Chaque ligne de `pieces_valeurs` porte :
 | `verifiee` | voir ci-dessous |
 | `controle` | une phrase qui dit pourquoi la valeur est vérifiée ou non (« citation retrouvée page 1 », « citation introuvable page 2 », « clé SIREN invalide »…) |
 
+### Une ligne par champ, jamais deux (règle commune à tous les modules)
+
+Le lecteur écrit **au plus une ligne de `pieces_valeurs` par `(piece_id, champ)`**. Un champ qui porte plusieurs
+éléments (une liste : `pieces` de Lorani ; un tableau d'objets : `lignes` et `tva.ventilation` de FILED) est **une
+seule ligne dont `valeur` est un tableau jsonb**, dans l'ordre du document : `["PCMI 3", "PCMI 6"]`, jamais deux
+lignes `pieces`. Raisons : la correction humaine (`source = humain`) remplace le champ entier, la vérification porte
+élément par élément sur la page citée, et un lecteur SQL lit `valeur` avec `jsonb_array_elements_text` (côté socle :
+`jsonb_typeof(valeur) = 'array'`, et non une chaîne `valeur #>> '{}'`). Un champ non liste n'a jamais de tableau.
+
 ### Ce que « verifiee » veut dire
 
 `verifiee = true` seulement si **toutes** ces conditions tiennent :
@@ -169,7 +178,7 @@ Six types, tels que `private.lorani_propositions` les attend (B5, `omega/modules
 | `date_depot` | texte `AAAA-MM-JJ` | date de dépôt en mairie | `"2026-09-14"` |
 | `delai_mois` | nombre entier, 1 à 24 | délai d'instruction notifié ; hors bornes → non vérifié | `3` |
 | `date_lettre` | texte `AAAA-MM-JJ` | date du courrier | `"2026-10-02"` |
-| `pieces` | tableau de textes | les pièces demandées, telles qu'imprimées ; vérifié si chaque élément se retrouve sur la page | `["PC5", "PC 8"]` |
+| `pieces` | tableau de textes (**une seule ligne**, voir « Une ligne par champ ») | les pièces demandées, telles qu'imprimées, dans l'ordre de la lettre ; vérifié si chaque élément se retrouve sur la page | `["PC5", "PC 8"]` |
 | `decision` | texte parmi `accorde`, `refuse`, `non_opposition`, `opposition`, `sursis` | une forme approchante (« Accordé », « non-opposition ») est ramenée à la valeur admise | `"accorde"` |
 | `date_decision` | texte `AAAA-MM-JJ` | date de l'arrêté | `"2026-11-20"` |
 | `date_tacite` | texte `AAAA-MM-JJ` | date d'acquisition de la décision tacite | `"2026-11-15"` |
