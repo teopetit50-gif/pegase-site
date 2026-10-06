@@ -70,8 +70,9 @@ end $$;
 select p.id, p.version, p.statut, p.total_ttc, p.demande_id, p.avertissements
 from public.loc_propositions p join public.loc_contrats c on c.id = p.contrat_id
 where c.client_id = 'cccccccc-0000-4000-8000-00000000000c' and c.numero = 'BANC-2026-0001' order by p.version;
--- → attendu : statut calculee, total 418.20, puis a_valider avec demande_id après le passage du cron (≤ 1 min).
--- Pour ne pas attendre : select private.loc_ouvrier(20);
+-- Le fichier se joue en une seule transaction : on passe l'ouvrier de base nous-mêmes (en postgres) pour ne pas attendre le cron.
+select private.loc_ouvrier(20);
+-- → attendu : statut a_valider, total 418.20, demande_id posé.
 
 -- ═══ C. La DAF approuve (le référent, qui a chiffré, serait refusé : b2_01) ; le cron émet les factures et prépare le courriel
 do $$
@@ -90,7 +91,8 @@ begin
   values (v_demande, v_client, v_daf, 'approuve', 'Vérifié avec les photos du retour (banc B2).');
   perform tests.redevenir_admin();
 end $$;
--- Après le cron (≤ 1 min), ou : select private.loc_ouvrier(20);
+-- La décision déposée par le socle est appliquée par l'ouvrier de base : factures émises, courriel préparé.
+select private.loc_ouvrier(20);
 select f.reference, f.nature, f.total_ttc, f.statut, f.envoi_id, e.statut as envoi_statut, e.verrou, e.fournisseur, e.programme_le
 from public.loc_factures f left join public.envois e on e.id = f.envoi_id
 where f.client_id = 'cccccccc-0000-4000-8000-00000000000c' order by f.numero;
