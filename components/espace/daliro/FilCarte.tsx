@@ -177,11 +177,13 @@ export default function FilCarte({ tableau, source, relire }: Props) {
                         <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
                           {(m.lecture.demandes ?? []).map((d, k) => (
                             <li key={k} className="esp-kpi-sous">
-                              {d.nature === "travail_supplementaire" ? "Travail supplémentaire" : d.nature === "probleme" ? "Problème" : d.nature === "question" ? "Question" : "Information"} : {d.texte}
+                              {d.nature === "avancement"
+                                ? <>Avancement{d.lot_code ? ` (lot ${d.lot_code})` : ""} : {d.ouvrage ?? d.texte ?? "ouvrage non nommé"}{d.pourcentage != null ? ` — ${d.pourcentage} %` : ""}</>
+                                : <>{d.nature === "travail_supplementaire" ? "Travail supplémentaire" : d.nature === "probleme" ? "Problème" : d.nature === "question" ? "Question" : "Information"} : {d.texte}</>}
                               {d.quantite != null ? ` — ${d.quantite} ${d.unite ?? ""}` : ""}{" "}
                               {d.verifiee ? <Pastille teinte="vert" contour>vérifié</Pastille> : <Pastille teinte="ambre" contour>à confirmer</Pastille>}
                               {d.nature === "travail_supplementaire" && !d.verifiee && !m.avenant_id
-                                ? <> <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => { setErreur(null); setObjet(`${d.texte}${d.quantite != null ? ` — ${d.quantite} ${d.unite ?? ""}`.trimEnd() : ""}`); setAvenant(m); }}>Ouvrir l&apos;avenant</button></>
+                                ? <> <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => { setErreur(null); setObjet(`${d.texte ?? ""}${d.quantite != null ? ` — ${d.quantite} ${d.unite ?? ""}`.trimEnd() : ""}`); setAvenant(m); }}>Ouvrir l&apos;avenant</button></>
                                 : null}
                             </li>
                           ))}

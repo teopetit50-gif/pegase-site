@@ -26,14 +26,15 @@
      btp_meteo_chantier (lecture, b6_21) ;
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
-     btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24).
+     btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
+     btp_avancement_photos (lecture, b6_25).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -168,6 +169,10 @@ export async function validerSituation(situation: string): Promise<unknown> {
 }
 export async function annulerSituation(situation: string, motif: string | null): Promise<unknown> {
   return rpc("btp_annuler_situation", { p_situation: situation, p_motif: motif });
+}
+/* b6_25 : l'avancement lu dans les photos, proposé (jamais appliqué seul) ; reprise par avancerSituation. */
+export async function avancementPhotos(situation: string): Promise<AvancementPhotos> {
+  return rpc<AvancementPhotos>("btp_avancement_photos", { p_situation: situation });
 }
 
 /* La réception, les réserves, la retenue, le décompte (b6_13). */

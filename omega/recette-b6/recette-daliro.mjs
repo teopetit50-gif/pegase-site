@@ -8,7 +8,7 @@
    un prix validé et la soumettre ; signer l'avenant validé ; noter la
    réponse d'un sous-traitant ; voir les remplaçants ; rattacher une facture
    (SIREN refusé sur le mauvais lot) ; l'accord permanent des J-2 (b6_08) :
-   révoquer avec un motif, puis le redonner (« à valider ») ; les situations de travaux (b6_12) : ouvrir
+   révoquer avec un motif, puis le redonner (« à valider ») ; les situations de travaux (b6_12, et l'avancement lu dans les photos b6_25) : ouvrir
    la n° 2 des Tilleuls, avancer une ligne, lire les totaux, soumettre ; axe-core sur la carte et sa fenêtre ;
    l'encaissement (b6_16) : un paiement partiel sur la n° 1, le reste dû ;
    la réception (b6_13) : prononcer avec deux réserves, en lever une, noter une opposition, préparer et envoyer
@@ -247,6 +247,12 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     await s.evaluer(axe + ';true');
     const sit = await s.evaluer(graves(carte));
     ok(sit.length === 0, `carte des situations : aucun écart axe grave ${sit.length ? JSON.stringify(sit) : ''}`);
+    // b6_25 : l'avancement lu dans les photos, proposé ligne à ligne, repris par « Reprendre »
+    ok(await s.evaluer(`/Lu dans les photos du chantier/.test(${carte}?.innerText || '') && /sans ligne de la situation/.test(${carte}?.innerText || '')`),
+       'l\'avancement lu dans les photos est proposé (et l\'ouvrage sans ligne rendu à part)');
+    ok(await s.evaluer(bouton('/^Reprendre$/', carte)) === true, 'clic sur « Reprendre »');
+    await s.dormir(500);
+    ok(await s.evaluer(`/repris de la photo de Chef d'équipe/.test(${carte}?.parentElement?.innerText || document.body.innerText)`), 'la proposition est reprise sur la ligne');
     ok(await s.evaluer(bouton('/Soumettre à la validation/', carte)) === true, 'clic sur « Soumettre à la validation »');
     await s.dormir(500);
     ok(await s.evaluer(`/Dans « À valider »/.test(${carte}?.innerText || '') && [...${carte}.querySelectorAll('button')].find(b => /Valider la situation/.test(b.textContent))?.disabled === true`),

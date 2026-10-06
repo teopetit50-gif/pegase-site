@@ -607,8 +607,12 @@ export type MessageChantier = {
   avenants?: string[];
 };
 export type DemandeLue = {
-  nature: "travail_supplementaire" | "probleme" | "question" | "information";
-  texte: string;
+  nature: "travail_supplementaire" | "probleme" | "question" | "information" | "avancement";
+  texte?: string | null;
+  /* b6_25 : nature « avancement » — l'ouvrage vu sur la photo, son lot, le pourcentage estimé */
+  ouvrage?: string | null;
+  lot_code?: string | null;
+  pourcentage?: number | null;
   quantite?: number | null;
   unite?: string | null;
   lieu?: string | null;
@@ -619,4 +623,26 @@ export type LectureMedia = {
   resume?: string | null;
   medias?: { n: number; chemin?: string; nature: "vocal" | "photo" | string; statut: string; transcription?: string | null; duree_s?: number | null }[];
   demandes?: DemandeLue[];
+};
+
+/* b6_25 : l'avancement lu dans les photos, proposé ligne à ligne sur une situation en préparation */
+export type PropositionAvancement = {
+  message: string;
+  le: string;
+  de_nom: string | null;
+  ouvrage: string | null;
+  lot_code: string | null;
+  pourcentage: number;
+  extrait: string | null;
+  photo: string | null;
+  ligne?: string;
+  designation?: string;
+  actuel?: number;
+  propose?: number;
+};
+export type AvancementPhotos = {
+  propositions: PropositionAvancement[];
+  non_rattaches: PropositionAvancement[];
+  depuis?: string | null;
+  motif?: string;
 };
