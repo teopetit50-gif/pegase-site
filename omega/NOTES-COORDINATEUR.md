@@ -558,3 +558,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   contrôlée, VIES, fournisseur confirmé par daf@, validée par daf2@ (02:03:20 Z), exécutée
   par le socle (02:04 Z), archivée avec empreinte au journal (ligne 76967). Pour B6 :
   daliro/ChantierVue.tsx affiche le statut brut pour ces trois statuts.
+- 04 h 20 — **Lorani : chaîne réelle complète** (B5, v3 par l'écran, lecteur v17) : pièce
+  2bfb560c lue en 35 s, proposition à 247 s « PCMI3, PCMI6 », confirmée 02:10:09 Z ; permis
+  56c88739 en pieces_demandees, échéance 2027-01-01, rappels [10,3,0]. Jauges B5 : mécanique
+  95 %, livrable 92 %. Reste sur le banc la demande confirmée vide de 01:40 (pièce 1c55b927).
