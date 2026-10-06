@@ -5,6 +5,23 @@ Commande : `omega/AUDIT-PROMESSES.md` § 1 (CASHD absent) ; promesses : `app/pag
 sont déjà écrites », capture « qui doit de l'argent, où en est la relance, et l'encours échu au total »),
 `app/offres/relances-impayes/page.tsx`, `lib/produits/relances.ts`, `lib/produits/capacites/relances.ts` (50 lignes).
 
+## REPRISE (pause demandée par Teo, 06/10/2026 au soir)
+
+- **Fait, posé, fusionné** : migrations c2_01 → c2_03 posées sur la recette ; tests ^test_c2_ verts (t1, t4 reposés depuis
+  a693a81 : verts ; t2, t3 verts depuis 8b8fbb4) ; worker-c2 fusionnée dans main (efd478e) ; banc_cashd.sql joué (CASHD
+  installé en essai sur le banc) ; écran /espace/cashd en ligne.
+- **Sur la branche, pas encore fusionné** : d7391be — `omega/CHIFFRAGE/cashd.md` (117 promesses, A 0 · B 71 · C 38 · D 1 ·
+  T 7 ; 38 j → B dont 18,5 CASHD ; 13 j + un mois de calendrier → A) et cette section. Documents seulement : rien à poser.
+- **Attend le coordinateur** : fusionner d7391be (ou le SHA de cette note) ; C1 a reçu de quoi reprendre l'écran dans
+  /espace2 (page prête + entrée de modules.ts) — rien n'est fait de mon côté dans /espace2.
+- **Attend Teo** : trancher construire ou reformuler (relecture quotidienne du facturier, gabarits, captures ;
+  `omega/CHIFFRAGE/cashd.md` § Synthèse et § Écarts de texte) ; tiers : AR24, prestataire de paiement, vérification
+  Google / Microsoft, WhatsApp Business ; région d'hébergement, CGV, DPA.
+- **Prochaine étape exacte** (au réveil) : selon la décision de Teo, soit G1 + G2 + G3 + G14 du chiffrage (~10,5 j,
+  dans l'ordre G2 → G3 → G14, G1 étant chez A1), soit le pilote chez un premier client (6,5 j minimum). Ligne 47 : preuve
+  stricte dès qu'un envoi réel existe. Banc local de test : Postgres 16 dans /tmp/pgc2 (à recréer, le conteneur est
+  éphémère).
+
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
