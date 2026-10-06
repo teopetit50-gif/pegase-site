@@ -536,6 +536,18 @@ avaient quitté le bucket.
 - **Test** `23_point_matin.sql` : 18 contrôles (souche : `deposer_section` / `retirer_section` imités). Série
   locale 530 ok (les 25 échecs connus de 04/06/10/11, faute des règles de procédure en local).
 
+## 20. Demander une lecture longue (carnet n° 4, part Tamila ; lot B4-15, 06/10)
+
+- **Base** : `b4_15_tamila_demander_analyse.sql` (APRÈS le socle `19an_analyses.sql` d'A1) —
+  `tamila_demander_analyse(dossier, type, pièces?)` : un avocat qui écrit dans le dossier ; prelecture |
+  chronologie | contradictions | bordereau ; clé du dossier au coffre Scaleway sinon 55000 ; pièces chiffrées du
+  dossier déjà lues (ou choisies, du dossier) ; 200 au plus, 60 en pré-lecture ; une analyse du même type en cours
+  est rendue telle quelle ; appelle `private.demander_analyse` (qui dépose `lecteur.analyser`). Politique
+  RESTRICTIVE sur `analyses` : module tamila ⇒ `tamila_voit_dossier_pour` (murailles), quel que soit le gardien de
+  `voit_objet`. Test `24_demander_analyse.sql` : 15 contrôles (souche : table et `demander_analyse` copiées de 19an,
+  `voit_objet` imité au plus large pour prouver la restriction).
+- **Écran** : à faire quand le lecteur rendra ses premiers résultats (déchiffrement, constats, citations).
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
