@@ -159,6 +159,13 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 - Le dossier se relit à 1, 2 et 4 minutes après « Revérifier » (le
   coordinateur ne peut pas publier `filed_fournisseurs` : laissé à Teo).
 
+- **a4_12** (A4, posé sur la recette) : la levée de `fournisseur.a_confirmer`
+  est refusée à tous (42501). L'écran ne propose plus « Lever avec un motif »
+  sur ce contrôle : seulement « Confirmer ce fournisseur », et pour le
+  déposant le bouton gris avec la phrase « Vous avez déposé la pièce
+  d'origine : une autre personne confirme ce fournisseur. » Recette : 104
+  contrôles, dont celui-ci.
+
 ### Reste
 
 - Publication Realtime de `filed_fournisseurs` (Teo).
@@ -169,7 +176,7 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   (séparation saisie / approbation) alors qu'il ne l'a pas saisie ; (b) un
   IBAN `propose` dont la demande est annulée reste `propose` sans demande
   ouverte (ici FR76 •••• 0189 d'ORANGE SA sur le banc) : rien ne le refuse ni
-  ne le repropose.
+  ne le repropose. (Le point « levable par le déposant » est fermé par a4_12.)
 - À voir par A4 / le coordinateur, pas par l'écran : `fournisseur.a_confirmer`
   porte « Lever avec un motif » comme tout contrôle ; si le déposant peut le
   lever, il contourne la séparation de `filed_confirmer_fournisseur`.
