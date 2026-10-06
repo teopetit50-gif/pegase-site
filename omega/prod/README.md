@@ -108,3 +108,43 @@ garde la même empreinte.
 branche, ni dans l'historique (`git log --all`). Elles ne sont citées que dans les
 notes et les extraits. Leur texte vient donc de la recette (pages 1 à 17 de
 `exporter.sql`).
+
+## Méthode (a) faite : `recupere/` (6/10, lecture autorisée par le coordinateur)
+
+Le fil de la session coordinateur Fable (`session_01B4JNQXyT69GytdvE9SjAnE`) a été
+lu en lecture seule, avec `list_events` uniquement, du 4/10 21:30 Z au 6/10
+01:11 Z. On y trouve 441 appels : 437 `execute_sql` et 4 `apply_migration`, dont
+69 en erreur.
+
+**Les 40 lots cherchés sont tous retrouvés**, chacun par un appel réussi :
+- socle 17, 18a–d, 19a–19h, 19j–19p, 19r–19z, 19aa ;
+- FILED 4a–4g, 5a, 6a et `filed_lot4f_decider_sans_separation` ;
+- a5_01 v1 avec les compléments du coordinateur.
+
+Trois cas particuliers :
+- **19h** tient en deux requêtes, réunies dans l'ordre (49490ae3, puis c087a3fc à
+  18:07 Z) ;
+- **19o** a été posé par la même requête que 19n (adc510cc) ;
+- les **essais en erreur** sont notés en tête de chaque fichier (18a, 19p, 19z).
+
+Chaque fichier `recupere/<version>_<nom>.sql` porte en tête l'`event_uuid`, l'outil
+et l'heure, puis la requête **brute**, telle que posée.
+
+`assembler.mjs` prend `recupere/` en priorité sur la note de pose. Il découpe la
+requête en instructions (chaînes, dollar-quotes et commentaires respectés ;
+recollage vérifié identique sur les 41 fichiers) et retire, en le notant :
+- la ligne de `schema_migrations` ;
+- les appels et grants `depot_*` (19y, 19z) ;
+- la ligne `boite_formulaire` du client du banc (18d) ;
+- la confirmation des comptes `@banc-varelo.test` (19j).
+
+Il réécrit ensuite l'URL de la recette et retire pgtap. Aucun résidu ne reste hors
+des commentaires.
+
+Vérifié aussi : `tiroma_b3_01`, posé en SQL direct (b7edd7cb), est identique au
+fichier `da2fc7a` que retient la note, à la ligne de migration près.
+
+**Pas de méthode (b) nécessaire** pour les lots du 4 au 6/10. Restent à exporter
+de la recette :
+- les neuf bases de modules (pages 1 à 17), qui n'existent que là ;
+- les lignes SQL posées après 01:15 Z le 6/10 (session coordinateur Opus, vague 3).

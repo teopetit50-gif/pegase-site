@@ -222,6 +222,12 @@ l'empreinte du catalogue) est dans `omega/prod/README.md`. L'outillage
 - exclut les poses de tests (`omega/tests/`) ;
 - marque « À RECONSTRUIRE » ce qu'aucun fichier ne porte.
 
+**Mise à jour du 6/10, 15 h Z.** La méthode (a) a abouti : les 40 lots sans SQL ont
+été retrouvés dans le fil de la session coordinateur Fable. Ils sont dans
+`omega/prod/recupere/` (requêtes brutes, `event_uuid` en tête). L'assembleur les
+nettoie (ligne de migration, banc, `depot_*`, URL, pgtap). Il ne reste rien à
+reconstruire.
+
 ### 1.6 Fichiers du dépôt concernés (pour la relecture)
 
 - FILED (`worker-a4`) : `omega/migrations/a4_01` … `a4_15`, derniers commits

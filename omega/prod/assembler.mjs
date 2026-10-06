@@ -131,6 +131,71 @@ function lireNote(texte) {
   return { fichiers, avertissements };
 }
 
+// Découpe un texte SQL en instructions, en respectant chaînes '…' (et E'…'), identifiants "…", dollar-quotes $tag$…$tag$
+// et commentaires -- / /* */. Chaque morceau garde ses commentaires de tête et son point-virgule.
+function decouper(sql) {
+  const morceaux = [];
+  let debut = 0;
+  let i = 0;
+  while (i < sql.length) {
+    const c = sql[i];
+    const suiv = sql[i + 1];
+    if (c === '-' && suiv === '-') { const f = sql.indexOf('\n', i); i = f < 0 ? sql.length : f + 1; continue; }
+    if (c === '/' && suiv === '*') { const f = sql.indexOf('*/', i + 2); i = f < 0 ? sql.length : f + 2; continue; }
+    if (c === "'") {
+      const echap = i > 0 && /[eE]/.test(sql[i - 1]) && !/[A-Za-z0-9_]/.test(sql[i - 2] || ' ');
+      i++;
+      while (i < sql.length) {
+        if (echap && sql[i] === '\\') { i += 2; continue; }
+        if (sql[i] === "'") { if (sql[i + 1] === "'") { i += 2; continue; } i++; break; }
+        i++;
+      }
+      continue;
+    }
+    if (c === '"') { const f = sql.indexOf('"', i + 1); i = f < 0 ? sql.length : f + 1; continue; }
+    if (c === '$') {
+      const m = /^\$([A-Za-z_][A-Za-z0-9_]*)?\$/.exec(sql.slice(i));
+      if (m && !/[A-Za-z0-9_]/.test(sql[i - 1] || ' ')) {
+        const f = sql.indexOf(m[0], i + m[0].length);
+        i = f < 0 ? sql.length : f + m[0].length;
+        continue;
+      }
+    }
+    if (c === ';') { morceaux.push(sql.slice(debut, i + 1)); debut = i + 1; }
+    i++;
+  }
+  if (sql.slice(debut).trim()) morceaux.push(sql.slice(debut));
+  return morceaux;
+}
+
+// Instructions d'une requête récupérée qui n'ont pas leur place en production.
+const A_RETIRER = [
+  [/^\s*(insert\s+into|update)\s+supabase_migrations\.schema_migrations\b/i, 'ligne de schema_migrations (db push écrit la sienne)'],
+  [/private\.(depot_demander|depot_executer)\b/i, 'outillage de pose de la recette (depot_*)'],
+  [/cccccccc-0000-4000-8000-00000000000c/i, 'donnée du client du banc'],
+  [/banc-varelo\.test/i, 'comptes de recette du banc'],
+];
+
+function nettoyer(sql) {
+  const retirees = [];
+  const gardees = [];
+  for (const m of decouper(sql)) {
+    const sansCommentaires = m.replace(/^(\s*--[^\n]*\n|\s*\/\*[\s\S]*?\*\/)*/g, '');
+    // Les règles portent sur l'instruction seule : une note en commentaire qui cite depot_* ne doit rien retirer.
+    const regle = A_RETIRER.find(([re]) => re.test(sansCommentaires));
+    if (regle) retirees.push(`${regle[1]} : ${sansCommentaires.trim().replace(/\s+/g, ' ').slice(0, 90)}`);
+    else gardees.push(m);
+  }
+  return { texte: gardees.join(''), retirees };
+}
+
+const RECUPERE = join(ICI, 'recupere');
+function fichierRecupere(version) {
+  if (!existsSync(RECUPERE)) return null;
+  const f = readdirSync(RECUPERE).find((x) => x.startsWith(version + '_') && x.endsWith('.sql'));
+  return f ? join(RECUPERE, f) : null;
+}
+
 function slug(nom) {
   return nom.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
 }
@@ -205,7 +270,13 @@ function principal() {
     let origine;
     const notesLigne = [];
     try {
-      if (l.source === 'note' || l.source === 'depot') {
+      const recupere = fichierRecupere(version);
+      if (recupere) {
+        const { texte: propre, retirees } = nettoyer(readFileSync(recupere, 'utf8'));
+        texte = propre;
+        origine = `requête retrouvée dans le fil de la session coordinateur : omega/prod/recupere/${recupere.split('/').pop()}`;
+        notesLigne.push(...retirees.map((r) => 'retiré : ' + r));
+      } else if (l.source === 'note' || l.source === 'depot') {
         const { fichiers, avertissements } = lireNote(l.provenance || '');
         notesLigne.push(...avertissements);
         const migrations = fichiers.filter((f) => !f.test);
