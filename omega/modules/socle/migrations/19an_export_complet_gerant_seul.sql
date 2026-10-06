@@ -1,7 +1,7 @@
 -- 19an_export_complet_gerant_seul.sql — l'export complet est réservé au gérant (A5, 06/10/2026, décision du coordinateur).
 -- 19aj laissait un admin du client DEMANDER l'export, mais la porte des données (exporter_donnees_client) n'accepte que
 -- le gérant : l'admin aurait vu la demande échouer en route. On s'aligne sur le plus strict : seul le gérant demande,
--- et l'admin reçoit un refus clair dès la demande. Remplace demander_export_complet (create or replace, sans DROP).
+-- et l'admin reçoit un refus clair dès la demande. Remplace demander_export_complet (create or replace, rien n'est supprimé).
 -- Idempotent : rejouable sans effet.
 
 create or replace function public.demander_export_complet(p_client uuid) returns uuid

@@ -1,5 +1,5 @@
 -- 19ao_facturation_par_module.sql — compteurs de facturation ventilés par module (A5, 06/10/2026).
--- Complète 19ai pour un devis par poste (FILED, Tamila, …). Sans DROP : la table de 19ai et sa clé restent telles quelles ;
+-- Complète 19ai pour un devis par poste (FILED, Tamila, …). Rien n'est supprimé : la table de 19ai et sa clé restent telles quelles ;
 -- une table voisine porte la ventilation, le compteur de 19ai (create or replace) écrit dans les deux, et une vue
 -- public.facturation_mois_modules la rend. Le module est celui de la pièce (public.pieces.module), « inconnu » s'il manque.
 -- Les totaux par client de facturation_mois ne changent pas. Pas de reprise de l'historique (décision du 6/10).

@@ -9,7 +9,7 @@
 --    réception : membre du client, dans son périmètre (politique de 18a), et selon la règle du module (19ak). La table
 --    ne connaît pas « ecartee » : c'est son « ignoree » (CHECK de 18a, inchangé). Une réception traitée ou indésirable
 --    ne se remarque pas. Chaque changement est inscrit au journal opposable (reception.marquee).
--- Sans DROP. Idempotent : rejouable sans effet.
+-- Rien n'est supprimé. Idempotent : rejouable sans effet.
 
 create or replace function public.apercu_effacement(p_client uuid) returns jsonb
 language plpgsql security definer set search_path = '' as $$
