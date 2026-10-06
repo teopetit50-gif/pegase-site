@@ -29,6 +29,7 @@ import { chargerListe, chargerTableau, monClient } from "./portes";
 import type { Chantier, Tableau } from "./types";
 import ChantierVue from "./ChantierVue";
 import AccordJ2 from "./AccordJ2";
+import ARangerCarte from "./ARangerCarte";
 
 type Reel = { liste: Chantier[]; tableaux: Record<string, Tableau>; client: { client_id: string; user_id: string; role: string } | null };
 
@@ -255,6 +256,7 @@ export default function EcranDaliro() {
       </div>
 
       <AccordJ2 key={`${source}:${reel?.client?.client_id ?? ""}`} source={source} client={source === "reelle" ? reel?.client ?? null : null} />
+      <ARangerCarte key={`fil-${source}:${reel?.client?.client_id ?? ""}`} source={source} client={source === "reelle" ? reel?.client?.client_id ?? null : null} chantiers={liste} relire={relire} />
 
       {erreur ? (
         <div style={{ marginBottom: 14 }}>

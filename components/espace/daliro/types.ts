@@ -583,3 +583,22 @@ export type Commande = {
 };
 export type LivraisonCommande = { id: string; livree_le: string; quantite: number | null; bon_reference: string | null; piece_id: string | null; note: string | null };
 export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[]; devis_verifie?: boolean };
+
+/* b6_24 : le fil du chantier — messages, photos, vocaux du terrain */
+export type PieceMessage = { nom: string; mime: string | null; taille: number | null; chemin: string; vocal: boolean };
+export type MessageChantier = {
+  id: string;
+  reception_id: number;
+  chantier_id: string | null;
+  canal: "whatsapp" | "sms" | "email";
+  de_nom: string | null;
+  de_adresse: string | null;
+  intervenant_id: string | null;
+  tiers_id: string | null;
+  texte: string | null;
+  pieces: PieceMessage[];
+  rangement: "nom" | "passage" | "passage_proche" | "manuel" | null;
+  statut: "a_ranger" | "range" | "ecarte";
+  avenant_id: string | null;
+  recu_le: string;
+};
