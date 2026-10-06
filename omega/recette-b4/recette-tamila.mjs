@@ -8,7 +8,8 @@
    acte déposé ; poser une muraille ; ouvrir un nouveau dossier ; passer le
    cabinet au coffre Scaleway et ré-envelopper ses dossiers (b4_05) ; les
    honoraires : saisir du temps, facturer, convention manquante (b4_06) ;
-   les conflits d'intérêts et la vigilance LCB-FT (b4_07).
+   les conflits d'intérêts et la vigilance LCB-FT (b4_07) ; la facture
+   imprimable et l'en-tête du cabinet (b4_09).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -252,6 +253,37 @@ for (const largeur of LARGEURS) {
   await s.dormir(700);
   const t3 = await carte();
   ok(/Transaction immobilière/.test(t3) && /identifiez le client et le bénéficiaire effectif/.test(t3), 'assujetti sans identification : encore à faire');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-facture-imprimee', densite: 1 });
+  console.log('— la facture imprimable (b4_09)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Honoraires"] .esp-lien-bouton')].find(b => /Imprimer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const apercu = () => s.evaluer(`document.querySelector('iframe.tam-facture-apercu')?.contentDocument?.body?.innerText || ''`);
+  const f0 = await apercu();
+  ok(/Facture/.test(f0) && /H-2026-000041/.test(f0), 'l\'aperçu de la facture H-2026-000041');
+  ok(/SIREN 552100554/.test(f0) && /TVA FR40552100554/.test(f0) && /barreau de Paris/.test(f0), 'les mentions du cabinet : SIREN, TVA, barreau');
+  ok(/SCI du Moulin/.test(f0), 'le client, déchiffré dans le navigateur');
+  ok(/Rédaction — Rédaction des conclusions d.appelant/.test(f0) && /625,00/.test(f0) && /250,00/.test(f0), 'le détail du temps : 2 h 30 de rédaction × 250 € = 625 €');
+  ok(/Reste à payer\s*485,00/.test(f0) && /Provisions reçues, déduites/.test(f0), 'provision déduite, reste à payer 485 €');
+  ok(/indemnité forfaitaire de 40 €/.test(f0) && /L\.441-10/.test(f0) && /Échéance le/.test(f0), 'échéance, pénalités de retard et indemnité de 40 € (L.441-10, D.441-5)');
+  await s.evaluer(`(() => { const ta = [...document.querySelectorAll('[role="dialog"] textarea')][0]; const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; set.call(ta, '3 chemin des Moulins\\n97100 Basse-Terre'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(500);
+  ok(/97100 Basse-Terre/.test(await apercu()), 'l\'adresse du client tapée pour l\'impression apparaît sur la facture');
+  await s.capturer(`${dossier}tamila-facture-imprimee-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lien-bouton')].find(b => /Modifier l.en-tête/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  await s.evaluer(`(() => { const l = [...document.querySelectorAll('[role="dialog"] label')].find(l => /^Toque/.test(l.textContent)); const i = l.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'P 0456'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer l.en-tête/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(/toque P 0456/.test(await apercu()), 'le gérant modifie l\'en-tête : la toque change sur la facture');
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }

@@ -425,6 +425,19 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   `rgConcorde`, `dossierPourLecteur`, `poserAvisLu`, 5 tests Deno de plus, 25 au total) ; CHAMPS-LECTURE-TAMILA
   mis à jour. **À A1** : le branchement dans `lire_piece.ts` (mode d'emploi en tête de la section de `lecteur.ts`).
 
+## 14. La facture imprimable et l'en-tête du cabinet (suite du n° 1 ; lot B4-10, 06/10)
+
+- **Base** (71b54f3) : `b4_09_tamila_facture_entete.sql` (colonne `tamila_reglages.facture_entete`, ajoutée si
+  absente ; porte `tamila_poser_entete_facture`, gérant seul, clés connues, SIREN, TVA FR, IBAN, délai de paiement
+  0-60 jours) ; test `18_facture_entete.sql` (11 contrôles, verts sur la souche).
+- **Écran** : `facture.ts` (la facture en HTML autonome : mentions CGI 242 nonies A et C. com. L.441-9, détail
+  du temps avec répartition au centime près du total facturé, forfait, déboursés hors TVA, provisions déduites,
+  reste à payer ou trop-perçu, échéance, pénalités L.441-10 et indemnité de 40 € D.441-5, compte définitif RIN
+  11.7 ; tout échappé) et `FactureImprimable.tsx` (aperçu dans un cadre isolé sans script, impression ou PDF par
+  le navigateur ; adresse du client tapée, jamais enregistrée ; le gérant modifie l'en-tête sur place). Lien
+  « Imprimer » sur chaque facture de la carte Honoraires. Recette 99/99 (9 sur la facture imprimée), axe-core
+  0 écart. **Rien ne part au serveur** : nom du client et détail du temps restent dans le navigateur.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

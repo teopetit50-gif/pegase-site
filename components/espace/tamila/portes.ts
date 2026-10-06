@@ -43,7 +43,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Appel, Audience, Avis, CalculDelai, Cle, Conformite, ControleConflits, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps } from "./types";
+import type { Appel, Audience, Avis, CalculDelai, Cle, Conformite, EnteteFacture, ControleConflits, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -346,3 +346,6 @@ export const controlerConflits = (p_client: string, p_dossier: string | null, p_
 export const deciderConflit = (p_controle: string, p_decision: string, p_motif: string) => rpc<void>("tamila_decider_conflit", { p_controle, p_decision, p_motif });
 export const poserVigilance = (p_dossier: string, p_assujetti: boolean, p_activite: string | null, p_identification_le: string | null, p_identification_piece: string | null, p_beneficiaire_effectif_le: string | null, p_risque: string | null) =>
   rpc<void>("tamila_poser_vigilance", { p_dossier, p_assujetti, p_activite, p_identification_le, p_identification_piece, p_beneficiaire_effectif_le, p_risque });
+
+/* ——— l'en-tête des factures du cabinet (b4_09) ——— */
+export const poserEnteteFacture = (p_client: string, p_entete: EnteteFacture) => rpc<EnteteFacture>("tamila_poser_entete_facture", { p_client, p_entete });

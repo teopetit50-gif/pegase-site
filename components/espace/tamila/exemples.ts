@@ -32,7 +32,13 @@ export const PERSONNES_EXEMPLE: Personne[] = [
   { user_id: MARCHAND, role: "lecteur", nom: "Théo Marchand" },
 ];
 
-export const REGLAGES_EXEMPLE: Reglages = { id: "00000000-0000-4000-8000-0000000000r1", client_id: EXEMPLE_CLIENT, delai_cloture_jours: 7, conservation_audit_jours: 30, conservation_exports_jours: 7, maj_le: ilYa(40) };
+export const REGLAGES_EXEMPLE: Reglages = { id: "00000000-0000-4000-8000-0000000000r1", client_id: EXEMPLE_CLIENT, delai_cloture_jours: 7, conservation_audit_jours: 30, conservation_exports_jours: 7, maj_le: ilYa(40),
+  facture_entete: {
+    nom: "Delorme & Associés", forme: "SELARL d'avocats", adresse: "12 rue de la Paix", code_postal_ville: "75002 Paris", siren: "552100554",
+    tva_intracom: "FR40552100554", barreau: "Paris", toque: "P 0123", telephone: "01 42 00 00 00", courriel: "cabinet@delorme.example",
+    iban: "FR76 3000 6000 0112 3456 7890 189", bic: "AGRIFRPP", delai_paiement_jours: 30,
+  },
+};
 
 /* Les règles de procédure telles que le socle les porte (tamila_regles_procedure) — l'exemple en montre quatre du régime cpc. */
 export const REGLES_EXEMPLE: RegleProcedure[] = [
