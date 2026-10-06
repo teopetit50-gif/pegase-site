@@ -1,13 +1,13 @@
 # Session B5 — LORANI, le calendrier du permis (vague 2)
 
-Branche `worker-b5`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE.
+Branche `worker-b5`. Session B5 : session_018iNiXjY8eWmMjaGrXSGgma (Opus 5.5, reprise de session_013VSXzohLtDQS5bbWfRb4xR le 06/10 à 1 h 30 Z). Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5, depuis le 06/10 à 1 h 10 ; auparavant session_01B4JNQXyT69GytdvE9SjAnE).
 Dernière mise à jour : 05/10/2026, 23 h.
 
 ## Jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 80 % | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges sont corrigés (b5_04 + lecture du point), rejoué à 9ba2900 ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
+| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
 | **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
 **Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
@@ -193,5 +193,12 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   https://omegaai.fr/espace/lorani répond 200 et sert « Calendrier des permis », « Vous savez quand le chantier peut
   démarrer », le ruban « Données d'exemple » et l'onglet « Permis ». omegaai.fr pointe sur la production (sans banc) :
   la base réelle s'y verra avec un compte de production ; la relecture réelle reste sur le Next local pointé sur la
-  recette. Dernier SHA de worker-b5 envoyé au coordinateur : voir le journal git. Jauges : mécanique 80 %, livrable
-  85 % (en ligne ; reste le lecteur et le rejeu du dépôt réel).
+  recette.
+- 06/10, 0 h 54 (coordinateur) : b5_04 posée (avec b5_01 v2 et b5_03 v2), `^test_b5_` rejoué : **111/111**. worker-b5
+  8f6d793 fusionné dans main (2e8bbf9). **Lot B5 clos** ; reprise si le lecteur d'A1 sort les six types de courriers
+  (rejeu de `courrier-reel.mjs`) ou si un TAP tombe. Jauges : mécanique 90 %, livrable 85 %.
+- 06/10, 1 h 30 Z (reprise, session_018iNiXjY8eWmMjaGrXSGgma) : le lecteur d'A1 v14 (055b29c) connaît les six types.
+  Rejeu préparé (531d0b3) : `fabriquer-courrier.mjs` fabrique les courriers d'essai sans dépendance (récépissé v2,
+  demande de pièces PCMI 3 / PCMI 6 — nouvelles empreintes, l'ancien récépissé reste en `a_classer`) ;
+  `courrier-reel.mjs <session.json> <courrier.pdf> [origine] [nature]`. **Bloqué** : le conteneur neuf n'a ni la clé
+  publishable de la recette ni la session de `gerant@banc-varelo.test` ; demandées au coordinateur.
