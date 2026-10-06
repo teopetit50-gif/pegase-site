@@ -66,3 +66,39 @@ begin
                  'État : deux pièces de la période, une rapprochée, une à regarder');
   return next is((r ->> 'achats_sans_piece')::int, 1, 'et l''achat du FEC dont la pièce manque (l''ordinateur de Pomme)');
 end $f$;
+
+create or replace function tests.test_a4_32_03_retablir() returns setof text
+language plpgsql as $f$
+declare o jsonb := tests.a4_reprise_2024(); fa jsonb; v_f uuid; v_s text; r jsonb;
+begin
+  fa := tests.a4_facture_delorme(o, 'FA 2024 001', date '2024-03-15');
+  v_f := (fa ->> 'facture')::uuid;
+  perform tests.a4_agir((o ->> 'valideur')::uuid);
+  return next throws_ok(format($$select public.filed_retablir_historique(%L, 'à revoir')$$, v_f), '42501', null, 'Un valideur ne rétablit pas');
+  reset role;
+  perform tests.a4_agir((o ->> 'gerant')::uuid);
+  return next throws_ok(format($$select public.filed_retablir_historique(%L, 'x')$$, v_f), '22023', null, 'Un rétablissement dit pourquoi');
+  v_s := public.filed_retablir_historique(v_f, 'Facture refaite par le fournisseur, à revoir');
+  reset role;
+  return next is(v_s, 'bloquee', 'Rétablie : de retour dans le circuit, bloquée sur le doublon jusqu''à décision');
+  perform private.filed_controler_facture(v_f);
+  return next is((select statut from public.filed_factures where id = v_f), 'bloquee', 'et plus jamais écartée d''office');
+  return next ok(exists (select 1 from public.journal_opposable where client_id = (o ->> 'client')::uuid and action = 'filed.reprise_retablie'), 'au journal');
+  return next ok(exists (select 1 from public.filed_archives where facture_id = v_f), 'L''archive déjà inscrite demeure');
+  perform tests.a4_agir((o ->> 'gerant')::uuid);
+  r := public.filed_etat_reprise((o ->> 'client')::uuid, (o ->> 'entite')::uuid) -> 0;
+  return next throws_ok(format($$select public.filed_retablir_historique(%L, 'encore')$$, v_f), '55000', null, 'On ne rétablit qu''une fois');
+  reset role;
+  return next is((r ->> 'retablies')::int || '/' || (r ->> 'rapprochees') || '/' || (r ->> 'a_regarder'), '1/0/1', 'L''état compte la pièce rétablie');
+end $f$;
+
+create or replace function tests.test_a4_32_04_exercice_ouvert() returns setof text
+language plpgsql as $f$
+declare o jsonb := tests.a4_reprise_2024(); fa jsonb;
+begin
+  update public.filed_exercices set statut = 'ouvert', cloture_le = null, cloture_par = null
+   where client_id = (o ->> 'client')::uuid and fin = date '2024-12-31';
+  fa := tests.a4_facture_delorme(o, 'FA 2024 001', date '2024-03-15');
+  return next is((select statut from public.filed_factures where id = (fa ->> 'facture')::uuid), 'bloquee',
+                 'Exercice repris rouvert : pas d''écart d''office, une personne regarde');
+end $f$;
