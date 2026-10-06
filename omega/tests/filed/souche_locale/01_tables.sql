@@ -76,3 +76,5 @@ create table if not exists public.receptions (id bigint generated always as iden
   canal text not null, boite text not null, identifiant_externe text not null, de_adresse text, de_nom text, sujet text, corps text, corps_html text,
   pieces jsonb not null default '[]', detail jsonb not null default '{}', statut text not null default 'nouvelle', recu_le timestamptz not null default now(),
   cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, canal, identifiant_externe));
+-- Lot 13 (a4_21) : la mère d'une pièce fille.
+alter table public.pieces add column if not exists piece_mere_id uuid references public.pieces(id);
