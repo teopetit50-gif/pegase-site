@@ -69,9 +69,10 @@ as $function$
                    order by c.depart_le desc limit 1), p_rattachement)
 $function$;
 
--- Les véhicules immobilisés (b2_10 de B2, public.loc_immobilisations : une période ouverte, fin_le null) ne sont ni au
--- parc ni « inactifs » : ils sont indisponibles pour une raison. Tant que la table n'est pas posée, aucun ne l'est.
-create or replace function private.loc_b3t_immobilises(p_client uuid)
+-- Les véhicules immobilisés (b2_10 de B2, public.loc_immobilisations : fin_le null et debut_le passé à la date
+-- p_avant) ne sont ni au parc ni « inactifs » : ils sont indisponibles pour une raison. Une immobilisation planifiée
+-- (un entretien) compte dès qu'elle commence avant p_avant. Tant que la table n'est pas posée, aucun ne l'est.
+create or replace function private.loc_b3t_immobilises(p_client uuid, p_avant timestamp with time zone default now())
  returns uuid[]
  language plpgsql
  stable
@@ -85,8 +86,8 @@ begin
     return '{}'::uuid[];
   end if;
   execute 'select coalesce(array_agg(distinct i.vehicule_id), ''{}''::uuid[]) from public.loc_immobilisations i
-           where i.client_id = $1 and i.fin_le is null and i.vehicule_id is not null'
-    into v using p_client;
+           where i.client_id = $1 and i.fin_le is null and i.debut_le <= $2 and i.vehicule_id is not null'
+    into v using p_client, p_avant;
   return coalesce(v, '{}'::uuid[]);
 end $function$;
 
@@ -97,7 +98,7 @@ create or replace function private.loc_b3t_flux(p_client uuid, p_debut timestamp
  security definer
  set search_path to ''
 as $function$
-  with immo as (select private.loc_b3t_immobilises(p_client) as ids),
+  with immo as (select private.loc_b3t_immobilises(p_client, p_debut) as ids),
   parc as (
     select private.loc_b3t_position(v.client_id, v.id, v.entite_id) as entite_id, v.categorie_id
     from public.loc_vehicules v
@@ -154,7 +155,7 @@ create or replace function private.loc_vehicules_inactifs_lire(p_client uuid, p_
 as $function$
 declare
   v_fin timestamptz := p_maintenant + interval '72 hours';
-  v_immo uuid[] := private.loc_b3t_immobilises(p_client);
+  v_immo uuid[] := private.loc_b3t_immobilises(p_client, p_maintenant + interval '72 hours');
   v_res jsonb;
 begin
   with flux as (select * from private.loc_b3t_flux(p_client, p_maintenant, v_fin)),
@@ -422,8 +423,8 @@ grant execute on function public.loc_montee_en_gamme(uuid, uuid, integer) to aut
 
 revoke all on function private.loc_b3t_regard(uuid, text[]) from public, anon, authenticated;
 grant execute on function private.loc_b3t_regard(uuid, text[]) to service_role;
-revoke all on function private.loc_b3t_immobilises(uuid) from public, anon, authenticated;
-grant execute on function private.loc_b3t_immobilises(uuid) to service_role;
+revoke all on function private.loc_b3t_immobilises(uuid, timestamp with time zone) from public, anon, authenticated;
+grant execute on function private.loc_b3t_immobilises(uuid, timestamp with time zone) to service_role;
 revoke all on function private.loc_b3t_position(uuid, uuid, uuid) from public, anon, authenticated;
 grant execute on function private.loc_b3t_position(uuid, uuid, uuid) to service_role;
 revoke all on function private.loc_b3t_flux(uuid, timestamp with time zone, timestamp with time zone) from public, anon, authenticated;

@@ -460,3 +460,8 @@ Les fichiers portent le préfixe b3t_. Aucune fonction ni table de B2 n'est modi
   - Les tests pgTAP ne couvrent pas ces deux chemins, faute de connaître le schéma définitif des tables de B2.
   - La recette de B3 et celle de B2 repassent.
   - Mes tests ne passent pas par `assembler.sh` de B2 (motif `[0-9][0-9]_*.sql`) : `b3t_01_analyses.sql` se pose seul, après `00_jeu_tavaro.sql`.
+- **b2_10 de B2** (1c467ef, pas encore posé) : le schéma de `loc_immobilisations` est définitif. Un véhicule est immobilisé si `fin_le is null and debut_le <= maintenant`.
+  - `private.loc_b3t_immobilises(client, avant)` a été adaptée en conséquence.
+  - L'offre de 72 h ne compte pas les véhicules immobilisés au début de la fenêtre.
+  - La liste des inactifs écarte aussi une immobilisation planifiée qui commence dans les 72 h : un entretien déjà prévu n'est pas un creux perdu.
+  - Vérifié en local : un entretien qui commence dans 30 h écarte le véhicule, un entretien dans 10 jours le laisse dans la liste.
