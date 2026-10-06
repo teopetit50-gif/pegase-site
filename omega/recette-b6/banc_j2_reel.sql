@@ -1,5 +1,5 @@
 -- banc_j2_reel — La confirmation J-2 RÉELLE sur le banc (cccccccc-0000-4000-8000-00000000000c), session B6, 06/10/2026.
--- PAS un test : rien n'est annulé. Prérequis : b6_01 à b6_06 posés, schéma tests d'A5 (tests.endosser).
+-- PAS un test : rien n'est annulé. Ordre : A, A bis, B, C, D, E. Prérequis : b6_01 à b6_06 posés, schéma tests d'A5 (tests.endosser).
 -- MODE ESSAI seulement : la ligne reglages_envois daliro reprend l'adresse d'essai de Teo (celle de la ligne
 -- tavaro du banc, à défaut celle de la ligne organisation). Le seul destinataire est un tiers fictif
 -- (j2@banc-daliro.test) : en essai, le socle remet le message à l'adresse d'essai, jamais au tiers.
@@ -30,6 +30,33 @@ begin
 end $$;
 select r.module, r.mode, r.essai_adresse is not null as adresse_essai, r.canaux, r.plages
 from public.reglages_envois r where r.client_id = 'cccccccc-0000-4000-8000-00000000000c' and (r.module = 'daliro' or r.module is null);
+
+-- ═══ A bis. Daliro installé sur le banc, formule Chantiers (porte b6_04 : public.btp_installer, gérant endossé)
+-- Sans installation, private.btp_preparer_chantier refuse d'ouvrir un chantier (P0001). Ne fait rien si déjà installé.
+do $$
+declare
+  v_client uuid := 'cccccccc-0000-4000-8000-00000000000c';
+  v_gerant uuid := (select id from auth.users where email = 'gerant@banc-varelo.test');
+begin
+  if exists (select 1 from public.btp_reglages where client_id = v_client) then
+    raise notice 'Daliro déjà installé sur le banc';
+    return;
+  end if;
+  begin
+    perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
+    perform public.btp_installer(v_client, 'chantiers');
+    perform tests.redevenir_admin();
+    raise notice 'Daliro installé par le gérant';
+  exception when insufficient_privilege then
+    -- le gérant n'a pas EXECUTE sur la porte après a5_01 : Omega l'installe (même porte, en serveur)
+    perform tests.redevenir_admin();
+    perform public.btp_installer(v_client, 'chantiers');
+    raise notice 'Daliro installé par le serveur (le gérant : %)', sqlerrm;
+  end;
+end $$;
+select r.client_id, r.formule, r.quota_chantiers, r.quota_comptes_bureau
+from public.btp_reglages r where r.client_id = 'cccccccc-0000-4000-8000-00000000000c';
+-- → attendu : chantiers, 20, 5.
 
 -- ═══ B. Le gérant pose un chantier ouvert avec un passage de sous-traitant dans deux jours ouvrés
 do $$
