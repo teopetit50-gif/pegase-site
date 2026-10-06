@@ -11,6 +11,9 @@
        l'intragroupe, et les corrections qu'on peut proposer (nom,
        fusion, rattachement, détachement, scission), chacune ouvrant une
        demande de validation ;
+     · pour les clients et les fournisseurs, l'encours du groupe (vague 3,
+       Encours.tsx) : la dernière balance âgée de chaque société rangée
+       par objet du groupe, le plafond et son dépassement ;
      · dessous, les lots à valider (paires proposées par le calcul, avec
        la preuve ; « écarter cette paire » ; le lot se décide dans
        /espace/validations) et les sociétés du groupe par pôle (inscrire
@@ -38,6 +41,7 @@ import ObjetDetail from "./ObjetDetail";
 import Lots from "./Lots";
 import Societes from "./Societes";
 import Depot from "./Depot";
+import Encours from "./Encours";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -513,6 +517,26 @@ export default function EcranVarelo() {
           )}
         </section>
       </div>
+
+      {donnees && contexte && (nature === "client" || nature === "fournisseur") ? (
+        <Encours
+          source={source}
+          contexte={contexte}
+          client_id={client_id}
+          nature={nature}
+          societes={donnees.societes}
+          codes={donnees.codes}
+          objets={donnees.objets}
+          onOuvrir={(id) => {
+            setRecherche("");
+            setChoix(id);
+            document.getElementById("vrl-objet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onFait={(m) => setFait(m)}
+          inscrireExemple={deposer}
+          relireReferentiel={relire}
+        />
+      ) : null}
 
       <div className="esp-grille" style={{ marginTop: 16 }}>
         {donnees ? <Lots donnees={donnees} actions={actions} /> : null}
