@@ -37,7 +37,9 @@ export interface TypeAnalyse {
   schemaDonnees: Record<string, unknown>;
   /** La passe de synthèse croise les pièces (contradictions, chronologie unique…). */
   synthese: boolean;
-  limites: { pieces: number; pages: number; coutMaxEur: number };
+  limites: { pieces: number; pages: number; pagesParPiece?: number; coutMaxEur: number };
+  /** Le tri et les règles propres au type, appliqués aux constats finaux (ordre chronologique, numérotation…). */
+  finaliser?: (constats: Constat[]) => Constat[];
 }
 
 export interface PieceDossier {
@@ -60,6 +62,10 @@ export interface EtatAnalyse {
 export interface ResultatAnalyse {
   type: string;
   fini: boolean;
+  /** finie ; partielle (plafond de coût atteint : des pièces n'ont pas été lues) ; en_cours (à reprendre). */
+  statut: "finie" | "partielle" | "en_cours";
+  /** Les pièces qu'une analyse partielle n'a pas lues. */
+  pieces_non_lues: string[];
   resume?: string;
   constats: Constat[];
   pieces_lues: number;
@@ -194,6 +200,10 @@ export interface OptionsAnalyse {
 
 export async function analyser(client: ClientClaude, t: TypeAnalyse, pieces: PieceDossier[], options: OptionsAnalyse = {}): Promise<ResultatAnalyse> {
   const nbPages = pieces.reduce((n, p) => n + p.pages.length, 0);
+  const tropLongue = t.limites.pagesParPiece !== undefined ? pieces.find((p) => p.pages.length > t.limites.pagesParPiece!) : undefined;
+  if (tropLongue) {
+    throw new ErreurOuvrier("ERREUR_INTERNE", `pièce trop longue pour ${t.type} : ${tropLongue.pages.length} pages (limite ${t.limites.pagesParPiece})`, false);
+  }
   if (pieces.length > t.limites.pieces || nbPages > t.limites.pages) {
     throw new ErreurOuvrier(
       "ERREUR_INTERNE",
@@ -217,21 +227,34 @@ export async function analyser(client: ClientClaude, t: TypeAnalyse, pieces: Pie
   };
   const systeme = `Tu es le lecteur d'Omega. Analyse demandée : ${t.libelle}.\n\n${t.consigne}\n\n${REGLES}\n\nCodes de constat admis : ${t.codes.join(", ")}.`;
 
-  // 1. Une passe par tranche.
-  for (const tr of trancher(pieces)) {
+  // 1. Une passe par tranche. Le plafond de coût atteint, on s'arrête : l'analyse est « partielle ».
+  const tranches = trancher(pieces);
+  let partielle = false;
+  for (const tr of tranches) {
     if (etat.tranches_faites.includes(tr.cle)) continue;
     if (maintenant() > fin) return rendu(t, client, pieces, nbPages, etat, false);
     const texte = `Pièce « ${tr.piece.nom} »${tr.piece.role ? ` (${tr.piece.role})` : ""}, identifiant ${tr.piece.piece}.\n\n` +
       tr.pages.map((p) => `=== Page ${p.n} ===\n${pageNumerotee(p.texte)}`).join("\n\n");
-    const brut = await appel(systeme, texte, { name: "rendre_constats", description: "Rend les constats relevés dans cette pièce, chacun cité.", schema: schemaConstats(t) });
+    let brut: unknown;
+    try {
+      brut = await appel(systeme, texte, { name: "rendre_constats", description: "Rend les constats relevés dans cette pièce, chacun cité.", schema: schemaConstats(t) });
+    } catch (e) {
+      if (e instanceof ErreurOuvrier && e.code === "PLAFOND_IA") {
+        partielle = true;
+        break;
+      }
+      throw e;
+    }
     etat.constats.push(...verifierConstats(nettoyerConstats(brut, t), pages));
     etat.tranches_faites.push(tr.cle);
   }
+  const lues = new Set(etat.tranches_faites.map((c) => c.split(":")[0]));
+  const nonLues = partielle ? pieces.map((p) => p.piece).filter((p) => !lues.has(p) || tranches.some((tr) => tr.piece.piece === p && !etat.tranches_faites.includes(tr.cle))) : [];
 
   // 2. La synthèse, sur les constats relevés (pas sur le texte).
   let resume: string | undefined;
   let constats = etat.constats;
-  if (t.synthese && etat.constats.length > 0) {
+  if (t.synthese && !partielle && etat.constats.length > 0) {
     if (maintenant() > fin) return rendu(t, client, pieces, nbPages, etat, false);
     const liste = etat.constats.filter((c) => c.source).map((c, i) => ({ n: i + 1, ...c }));
     const brut = await appel(
@@ -242,16 +265,26 @@ export async function analyser(client: ClientClaude, t: TypeAnalyse, pieces: Pie
     resume = typeof (brut as { resume?: unknown })?.resume === "string" ? String((brut as { resume: string }).resume).slice(0, 3000) : undefined;
     constats = verifierConstats(nettoyerConstats(brut, t), pages);
   }
-  const r = rendu(t, client, pieces, nbPages, { ...etat, constats }, true);
-  return { ...r, resume };
+  const r = rendu(t, client, pieces, nbPages, { ...etat, constats }, true, t.finaliser);
+  return { ...r, resume, statut: partielle ? "partielle" : "finie", pieces_non_lues: nonLues };
 }
 
-function rendu(t: TypeAnalyse, client: ClientClaude, _pieces: PieceDossier[], nbPages: number, etat: EtatAnalyse, fini: boolean): ResultatAnalyse {
+function rendu(
+  t: TypeAnalyse,
+  client: ClientClaude,
+  _pieces: PieceDossier[],
+  nbPages: number,
+  etat: EtatAnalyse,
+  fini: boolean,
+  finaliser?: (c: Constat[]) => Constat[],
+): ResultatAnalyse {
   const sources = etat.constats.filter((c) => c.source);
   return {
     type: t.type,
     fini,
-    constats: fini ? sources : [],
+    statut: fini ? "finie" : "en_cours",
+    pieces_non_lues: [],
+    constats: fini ? (finaliser ? finaliser(sources) : sources) : [],
     pieces_lues: new Set(etat.tranches_faites.map((c) => c.split(":")[0])).size,
     pages_lues: nbPages,
     ...(fini ? {} : { etat }),

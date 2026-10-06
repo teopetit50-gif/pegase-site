@@ -17,7 +17,7 @@ import type { PageLue, ResultatLecture, ValeurLue } from "@partage/portes.ts";
 // deno-lint-ignore no-import-prefix
 import { chiffrer } from "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/2556214e4befd2c8ad09f9a65c95227e70571e06/omega/functions/tamila-coffre/aesgcm.ts";
 // deno-lint-ignore no-import-prefix
-import { depuisHex, versBase64 } from "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/2556214e4befd2c8ad09f9a65c95227e70571e06/omega/functions/tamila-coffre/octets.ts";
+import { depuisBase64, depuisHex, versBase64 } from "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/2556214e4befd2c8ad09f9a65c95227e70571e06/omega/functions/tamila-coffre/octets.ts";
 import {
   type AvisLu,
   avisDepuisLecture,
@@ -99,6 +99,17 @@ export function depotDechiffrant(depot: Depot, cle: Uint8Array): Depot {
 }
 
 const utf8 = new TextEncoder();
+
+/** Un texte chiffré sous la clé du dossier, au format Tamila, en base64. */
+export async function chiffrerTexte(cle: Uint8Array, texte: string): Promise<string> {
+  return versBase64(await chiffrer(cle, utf8.encode(texte)));
+}
+
+/** L'inverse ; accepte le base64 ou l'hexadécimal « \\x… » d'un bytea rendu par PostgREST. */
+export async function dechiffrerTexte(cle: Uint8Array, chiffre: string): Promise<string> {
+  const octets = chiffre.startsWith("\\x") ? depuisHex(chiffre) : depuisBase64(chiffre);
+  return new TextDecoder().decode(await dechiffrerPiece(cle, octets));
+}
 
 /** Les motifs que le lecteur écrit lui-même (noms de champs, jamais de contenu) ; les autres sont remplacés. */
 function motifSansClair(r: ResultatLecture): string | undefined {

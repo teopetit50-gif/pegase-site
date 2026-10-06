@@ -2,10 +2,15 @@
 // l'autre dans le temps imparti, battre. Appelé chaque minute.
 
 import { journal, messageDe } from "@partage/journal.ts";
+import { analyserTravail, GENRE_ANALYSE } from "./analyse/travail.ts";
 import { type Contexte, type Issue, lirePiece, versionLecteur } from "./lire_piece.ts";
 
 export const MODULE = "lecteur";
+/** Les lectures de pièces ; les lectures longues seulement si leurs portes sont branchées. */
 export const GENRES = ["lecteur.lire"];
+export function genresPour(ctx: Contexte): string[] {
+  return ctx.portesAnalyse ? [...GENRES, GENRE_ANALYSE] : GENRES;
+}
 
 export interface OptionsPassage {
   nombre: number;
@@ -20,6 +25,8 @@ export interface BilanPassage {
   pris: number;
   issues: Record<Issue, number>;
   reportes: number;
+  /** Les lectures longues : issue → nombre. */
+  analyses: Record<string, number>;
   duree_ms: number;
   version: string;
   ia_branchee: boolean;
@@ -35,6 +42,7 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
     pris: 0,
     issues: { lue: 0, a_verifier: 0, a_classer: 0, rejetee: 0, echec: 0, ignore: 0, repris: 0, abandon: 0, erreur: 0 },
     reportes: 0,
+    analyses: {},
     duree_ms: 0,
     version: versionLecteur(ctx.maintenant(), ctx.extracteur?.modele ?? null),
     ia_branchee: ctx.extracteur !== null,
@@ -42,12 +50,24 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
     battus: null,
   };
   try {
-    const travaux = await ctx.portes.prendreTravaux(GENRES, o.nombre, o.bail, ctx.ouvrier);
+    const genres = genresPour(ctx);
+    const travaux = await ctx.portes.prendreTravaux(genres, o.nombre, o.bail, ctx.ouvrier);
     bilan.pris = travaux.length;
     for (const t of travaux) {
       if (Date.now() - debut > o.budgetMs) {
         bilan.reportes++;
         journal("alerte", "budget de temps épuisé : travail laissé à son bail", { travail: t.id });
+        continue;
+      }
+      if (t.genre === GENRE_ANALYSE && ctx.portesAnalyse) {
+        // Le temps qui reste au passage, moins une marge pour rendre l'état ; la suite au passage suivant.
+        const reste = Math.max(5_000, o.budgetMs - (Date.now() - debut) - 15_000);
+        const issue = await analyserTravail(
+          { portes: { ...ctx.portesAnalyse, finirTravail: (id, r) => ctx.portes.finirTravail(id, r), echouerTravail: (id, e, rep) => ctx.portes.echouerTravail(id, e, rep) }, claude: ctx.claude ?? null, coffre: ctx.coffre ?? null, maintenant: ctx.maintenant },
+          t,
+          reste,
+        );
+        bilan.analyses[issue] = (bilan.analyses[issue] ?? 0) + 1;
         continue;
       }
       const issue = await lirePiece(ctx, t);
@@ -59,11 +79,12 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
   } finally {
     bilan.duree_ms = Date.now() - debut;
     try {
-      bilan.battus = await ctx.portes.battreOuvrier(MODULE, GENRES, {
+      bilan.battus = await ctx.portes.battreOuvrier(MODULE, genresPour(ctx), {
         version: bilan.version,
         pris: bilan.pris,
         issues: bilan.issues,
         reportes: bilan.reportes,
+        ...(Object.keys(bilan.analyses).length ? { analyses: bilan.analyses } : {}),
         duree_ms: bilan.duree_ms,
         ia_branchee: bilan.ia_branchee,
         ocr: bilan.ocr,

@@ -101,8 +101,17 @@ Deno.test("paliers : budget épuisé → non finie avec son état, puis reprise 
 
 Deno.test("limites et plafond : dossier trop grand refusé ; plafond de coût atteint en cours de route", async () => {
   await assertRejects(() => analyser(new ClientFactice([]), { ...TYPE, limites: { ...TYPE.limites, pieces: 1 } }, pieces), Error, "dossier trop grand");
-  const client = new ClientFactice([() => ({ constats: [] }), () => ({ constats: [] })]);
-  await assertRejects(() => analyser(client, { ...TYPE, limites: { ...TYPE.limites, coutMaxEur: 0.01 } }, pieces), Error, "plafond");
+  const client = new ClientFactice([() => ({ constats: [constat(A, [3, 3], "Le 3 mars 2026, la société a livré le chantier.", "2026-03-03")] })]);
+  const r = await analyser(client, { ...TYPE, limites: { ...TYPE.limites, coutMaxEur: 0.01 } }, pieces);
+  assertEquals(r.statut, "partielle", "plafond atteint : on s'arrête, sans synthèse");
+  assertEquals(r.pieces_non_lues, [B]);
+  assertEquals(r.constats.length, 1, "ce qui a été lu est rendu");
+  assertEquals(client.demandes.length, 1);
+  await assertRejects(
+    () => analyser(new ClientFactice([]), { ...TYPE, limites: { ...TYPE.limites, pagesParPiece: 0 } }, pieces),
+    Error,
+    "pièce trop longue",
+  );
 });
 
 Deno.test("tranches : une grosse pièce se coupe par pages", () => {

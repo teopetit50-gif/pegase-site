@@ -15,6 +15,8 @@ import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
 import { controlerPlafond } from "./plafond.ts";
 import { champsPour, schemaPour } from "./schemas/modules.ts";
+import type { ClientClaude } from "@partage/claude.ts";
+import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
 import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts";
@@ -31,6 +33,10 @@ export interface Contexte {
   depot: Depot;
   /** Le coffre Tamila ; absent = toute pièce chiffrée est close sans lecture. */
   coffre?: CoffreTamila | null;
+  /** Le client Claude pour les lectures longues (lecteur.analyser) ; l'extracteur l'enveloppe pour les pièces. */
+  claude?: ClientClaude | null;
+  /** Les portes des lectures longues (commencer_analyse, terminer_analyse). */
+  portesAnalyse?: Pick<PortesAnalyse, "commencerAnalyse" | "terminerAnalyse"> | null;
   extracteur: Extracteur | null;
   ocr: Ocr | null;
   env: Environnement;

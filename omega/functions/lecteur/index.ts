@@ -10,6 +10,7 @@ import { clientClaudeDepuisEnv } from "@partage/fournisseur_ia.ts";
 import { journal, messageDe } from "@partage/journal.ts";
 import { configSupabaseDepuisEnv, PortesRpc } from "@partage/portes.ts";
 import { ExtracteurClaude } from "./ia.ts";
+import { PortesAnalyseRpc } from "./analyse/travail.ts";
 import { CoffreRpc } from "./coffre.ts";
 import type { Contexte } from "./lire_piece.ts";
 import { configMistralDepuisEnv, OcrMistral } from "./ocr.ts";
@@ -26,6 +27,9 @@ export function contexteDepuisEnv(env: { get(n: string): string | undefined } = 
     depot: new DepotStorage(supabase),
     coffre: new CoffreRpc(supabase),
     extracteur: claude ? new ExtracteurClaude(claude) : null,
+    claude,
+    // Les lectures longues : seulement quand le socle a posé commencer_analyse / terminer_analyse (LECTEUR_ANALYSES=1).
+    portesAnalyse: env.get("LECTEUR_ANALYSES") === "1" ? new PortesAnalyseRpc(supabase) : null,
     ocr: mistral ? new OcrMistral(mistral) : null,
     env,
     maintenant: () => new Date(),
