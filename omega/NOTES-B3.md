@@ -1,7 +1,7 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
 Branche `worker-b3`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 06/10/2026, nuit (lot 2 vert, relecture réelle faite).
+Dernière mise à jour : 06/10/2026, nuit (douze fichiers verts, branche fusionnée dans main d298f07, règle santé tranchée).
 
 ## Les deux jauges
 
@@ -15,6 +15,7 @@ Dernière mise à jour : 06/10/2026, nuit (lot 2 vert, relecture réelle faite).
 1. Un export Logos_w réel (ou le gabarit d'export du logiciel du premier cabinet) : les modèles `modeles_jeux` tiroma/logosw sont des **hypothèses d'en-têtes** (leur colonne `source` le dit) ; il faut un vrai fichier pour les confirmer.
 2. Le canal de remise du point du matin **agréé pour la santé** : aucun fournisseur d'envoi n'est `agree_sante` ; tant qu'il n'y en a pas, `verrous_envoi` bloque tout message nominatif (`SANTE_HORS_CANAL_AGREE`) et le point du matin TIROMA ne sort d'Omega que **sans donnée de santé** (compteurs + lien vers /espace/tiroma). Décision à prendre par Teo : ce repli convient-il, ou faut-il un canal HDS avant la première mise en route ?
 3. Le territoire des cabinets (code ISO sur l'entité) : `tiroma_installer_cabinet` refuse une entité sans territoire complet.
+4. **L'hébergement HDS** pour le premier cabinet : base de données et bucket `omega-clients` hébergés HDS (les réponses des patients arrivent dans `receptions`), et une preuve de certification HDS du fournisseur d'envoi avant de passer `fournisseurs_envoi.hds` à vrai. Sans cela, le point du matin nominatif reste derrière l'authentification.
 
 ## État exact au 06/10 (soir) et prochaine étape
 
@@ -47,6 +48,20 @@ le socle commun (je ne touche pas à `private.verrous_envoi` ni aux canaux) :
 4. **Rien ne change pour TIROMA** : le point nominatif reste derrière l'authentification tant qu'aucun
    fournisseur n'est agréé ; le courriel de compteurs (gabarit `tiroma.point_matin`, `donnees_sante =
    false`) continue de partir.
+
+**Décision du coordinateur (06/10, 00 h 55 Z, avis d'A2, NOTES-A2 fa62599)** — retenu, la restriction
+vit dans le socle, pas dans l'ouvrier. Deux colonnes : `fournisseurs_envoi.hds` (tous `false`
+aujourd'hui, Brevo compris, tant que Teo n'a pas de preuve de certification HDS ; `manuel` reste le seul
+chemin santé) et `canaux_envoi.sante_autorise` (courriel et LRE oui si le fournisseur est HDS ; SMS et
+WhatsApp non pour un contenu de santé — un SMS « neutre » est un envoi `donnees_sante = false` décidé par
+le gabarit). Un envoi `donnees_sante = true` n'est confié qu'à un fournisseur `hds = true` sur un canal
+`sante_autorise`, sinon verrou `SANTE_FOURNISSEUR` qui bloque (jamais un différé, jamais de repli). A2
+écrit le lot.
+
+**Vigilance à garder pour TIROMA** : la table `receptions` porte aussi des données de santé (les réponses
+des patients aux messages) ; pour un client santé, la base **et** le bucket `omega-clients` doivent être
+hébergés HDS. C'est une question d'hébergement pour Teo, pas un travail d'ouvrier : à inscrire dans la
+liste « ce que Teo doit fournir » avant la première mise en route d'un cabinet.
 
 ## Relecture de /espace/tiroma en base réelle — faite le 06/10 (00 h 37 Z)
 
@@ -103,7 +118,7 @@ d'écriture directe hors RLS.
 4. **Accords des mutuelles sans source** (modèle d'export devis sans colonne mutuelle, aucune porte) → b3_07 (écrit).
 5. **Heures d'export lues en UTC** (`tiroma_v_instant`) : 9 h à Pointe-à-Pitre devenait 5 h → b3_08 (écrit).
 6. **Aucun ouvrier ne lit les exports** (`releve.lire`) : trou commun n° 1, confié à A1 par le coordinateur.
-7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte « permis_sante ET agree_sante » à proposer sur le socle commun après le lot 2.
+7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte proposée puis **tranchée par le coordinateur** (`fournisseurs_envoi.hds`, `canaux_envoi.sante_autorise`, verrou `SANTE_FOURNISSEUR`) : A2 écrit le lot socle.
 8. **Liste d'attente « commune »** (`source = 'tiroma'`) sans porte d'écriture : à faire (b3_09) après le lot 2.
 9. **`private.tiroma_trace_ecriture()` inexécutable par authenticated** (23 triggers) : corrigé côté socle par le coordinateur (lot 19u).
 10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** sans variable libre : b3_10 pose `tiroma.point_matin` (global, courriel, compteurs + lien), validé par le serveur ; le test 08 vérifie qu'il part.
@@ -117,4 +132,5 @@ d'écriture directe hors RLS.
 - 05/10, 20 h 54 — b3_02 à b3_06 posés depuis f7194d6 ; Realtime publié sur cinq tables tiroma ; fusion de l'écran promise par le coordinateur.
 - 05/10, 20 h 58 — PAUSE demandée par Teo. 06/10 — REPRISE : F8 (13 indicateurs tiroma inscrits), F9 (tiroma_conservation et tiroma_passages existent).
 - 06/10 — b3_07 à b3_09 posés ; écran fusionné (d572973) ; lot 2 joué deux fois (retours : clé `jeu` de terminer_lecture, destinataire par `adresse`, somme des travaux, colonne `etat`, booléen mutuelle, périmètre du collaborateur, verrou consentement avant santé, patient gêné) ; b3_10 et le troisième passage demandés (5220b21).
-- 06/10, 00 h 25–00 h 37 Z — b3_10 refusé deux fois (« entier » n'est pas un type de variable ; « nombre ») ; troisième passage : 05/06/07/11 verts, 08 révèle l'item sans gravité ; quatrième passage : **28/28, 11 fichiers verts**. Clé publique de la recette reçue pour la relecture réelle (faite). Test 12 poussé (a4d1212) : 18/18 au premier passage, 12 fichiers verts ; règle santé stricte prise par le coordinateur pour le prochain lot socle.
+- 06/10, 00 h 25–00 h 37 Z — b3_10 refusé deux fois (« entier » n'est pas un type de variable ; « nombre ») ; troisième passage : 05/06/07/11 verts, 08 révèle l'item sans gravité ; quatrième passage : **28/28, 11 fichiers verts**. Clé publique de la recette reçue pour la relecture réelle (faite). Test 12 poussé (a4d1212) : 18/18 au premier passage, 12 fichiers verts.
+- 06/10, 00 h 51–00 h 55 Z — omegaai.fr sert /espace/tiroma (quota Vercel revenu) ; « terminé » envoyé (87b914e), fusionné dans main (d298f07) ; règle santé tranchée (hds / sante_autorise / SANTE_FOURNISSEUR, lot A2) ; vigilance `receptions` + hébergement HDS consignée.
