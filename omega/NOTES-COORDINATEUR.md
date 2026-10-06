@@ -633,3 +633,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   mort sur « Quota atteint : 5 chantiers ouverts » (installation du banc + ESSAI-J2 ; message
   « 5 » alors que quota_chantiers = 20 : colonne à vérifier). Renvoyé à B6 ; écran b6_07 non
   fusionné avant le vert.
+- 05 h 00 — A3 50af351 fusionné : FILED « À payer » (/espace/filed/a-payer), factures
+  validées groupées par échéance avec totaux, IBAN validé / à valider / manquant ; relu en
+  réel (FAC-2026-10-0471, 288,00 €, échéance 01/11, IBAN à valider). Limite : FILED ne suit
+  pas le paiement (pas de statut « payée ») — demande pour A4 si Teo la veut.
