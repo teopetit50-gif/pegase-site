@@ -1,13 +1,14 @@
--- Socle 19aj — les messageries connectées : droits, état OAuth à usage unique, jetons au Vault seulement, reconnexion,
--- « à reconnecter », déconnexion (écran) puis oubli (ouvrier), expéditeur créé puis suspendu. Après le lot 19aj.
+-- Socle 19al — les messageries connectées : droits, état OAuth à usage unique, jetons au Vault seulement, reconnexion,
+-- « à reconnecter », déconnexion (écran) puis oubli (ouvrier), expéditeur créé puis suspendu ; le statut d'envoi
+-- « brouillon_depose » (contrainte, garde, verrous, porte confirmer_brouillon). Après le lot 19al.
 -- Client A de tests.jeu() : un gérant (gerant_a) et un collaborateur (user_a). runtests() annule tout (Vault compris).
 
-create or replace function tests.test_socle_19aj_messageries() returns setof text
+create or replace function tests.test_socle_19al_messageries() returns setof text
 language plpgsql as $f$
 declare
   jeu jsonb; client uuid; gerant uuid; membre uuid;
   v_etat text; v_etat2 text; r jsonb; v_cx uuid; m public.messageries; v_exp public.expediteurs;
-  v_renouv uuid; code text;
+  v_renouv uuid; code text; v_envoi uuid; v_brevo uuid; e public.envois;
 begin
   perform tests.redevenir_admin();
   jeu := tests.jeu();
@@ -140,6 +141,54 @@ begin
   return next ok(position('(x.fournisseur in (''gmail'', ''microsoft'')) desc'
                           in pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure)) > 0,
                  'verrous_envoi préfère la boîte connectée');
+
+  -- ── 8. Le statut « brouillon_depose » ──
+  return next ok(position('brouillon_depose' in (select pg_get_constraintdef(c.oid) from pg_constraint c
+                   where c.conrelid = 'public.envois'::regclass and c.conname = 'envois_statut_check')) > 0,
+                 'la contrainte de statut admet brouillon_depose');
+  return next ok(position('''en_cours'' and new.statut in (''envoye'', ''brouillon_depose''' in pg_get_functiondef('private.garder_envoi()'::regprocedure)) > 0,
+                 'garder_envoi : en_cours → brouillon_depose');
+  return next ok((length(pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure))
+                  - length(replace(pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure),
+                                   '''envoye'', ''brouillon_depose'')', ''))) / length('''envoye'', ''brouillon_depose'')') = 4,
+                 'verrous_envoi : un brouillon déposé compte pour le doublon, le délai minimal et les plafonds (4 listes)');
+  return next ok(not has_function_privilege('authenticated', 'public.confirmer_brouillon(uuid, text, text)', 'execute')
+                 and not has_function_privilege('anon', 'public.confirmer_brouillon(uuid, text, text)', 'execute')
+                 and has_function_privilege('service_role', 'public.confirmer_brouillon(uuid, text, text)', 'execute'),
+                 'confirmer_brouillon : service_role seulement');
+  perform tests.redevenir_admin();
+  begin
+    insert into public.envois (client_id, module, canal, destinataire_adresse, destinataire_fuseau, transactionnel, donnees_sante,
+                               mode, fournisseur, statut, sujet, corps, empreinte, cle_idempotence, echeance)
+    values (client, 'tavaro', 'email', 'client@exemple.test', 'Europe/Paris', true, false, 'reel', 'gmail', 'en_cours',
+            'Votre facture', 'Bonjour', 'socle19al', 'socle19al:gmail:' || gen_random_uuid(), now() + interval '1 day')
+    returning id into v_envoi;
+    insert into public.envois (client_id, module, canal, destinataire_adresse, destinataire_fuseau, transactionnel, donnees_sante,
+                               mode, fournisseur, statut, sujet, corps, empreinte, cle_idempotence, echeance)
+    values (client, 'tavaro', 'email', 'client@exemple.test', 'Europe/Paris', true, false, 'reel', 'brevo', 'en_cours',
+            'Votre facture', 'Bonjour', 'socle19al', 'socle19al:brevo:' || gen_random_uuid(), now() + interval '1 day')
+    returning id into v_brevo;
+  exception when others then
+    return next diag('envoi d''essai non créé (garde de la brique) : ' || sqlstate || ' ' || sqlerrm || ' — partie fonctionnelle sautée');
+    return;
+  end;
+  begin
+    update public.envois set statut = 'brouillon_depose' where id = v_envoi; code := 'ok';
+  exception when others then code := sqlstate; end;
+  return next is(code, '42501', 'brouillon_depose est réservé à l''ouvrier (42501)');
+  perform tests.endosser_serveur();
+  perform public.confirmer_brouillon(v_envoi, '<omega.' || v_envoi || '@banc.test>', 'gmail:brouillon:r-1');
+  perform public.confirmer_brouillon(v_envoi, '<omega.' || v_envoi || '@banc.test>', 'gmail:brouillon:r-1');
+  begin perform public.confirmer_brouillon(v_brevo, '<x@banc.test>', 'brevo:1'); code := 'ok';
+  exception when others then code := sqlstate; end;
+  perform tests.redevenir_admin();
+  select * into e from public.envois where id = v_envoi;
+  return next is(e.statut || '/' || e.reference_externe || '/' || e.compte_rendu,
+                 'brouillon_depose/<omega.' || v_envoi || '@banc.test>/gmail:brouillon:r-1',
+                 'confirmer_brouillon : statut, Message-ID en référence, brouillon en compte rendu (rejouable)');
+  return next ok(e.envoye_le is not null and e.clos_le is not null and e.bail_jusqu_au is null,
+                 'heure de dépôt posée (espacement), envoi clos');
+  return next is(code, 'P0002', 'un envoi Brevo ne devient jamais « brouillon déposé » (P0002)');
 end $f$;
 
-select * from runtests('tests'::name, '^test_socle_19aj_');
+select * from runtests('tests'::name, '^test_socle_19al_');

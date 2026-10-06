@@ -1,7 +1,8 @@
--- 19aj_messageries — socle : les messageries connectées (Gmail, Microsoft 365) d'une organisation.
+-- 19al_messageries — socle : les messageries connectées (Gmail, Microsoft 365) d'une organisation.
 -- A2, 06/10/2026, sur décision du coordinateur (délégation de Teo). Pose : recette ygwbgpowzlbdaajlsqkn, puis production.
+-- Écrit d'après les définitions relevées sur la recette (omega/SOCLE-EXTRAITS-COMMUN.sql, SOCLE-EXTRAITS-ENVOIS.sql).
 -- Code des ouvriers : omega/functions/messagerie/ (contrat des portes : messagerie/portes.ts). Guides de Teo :
--- omega/GUIDE-GMAIL.md, omega/GUIDE-MICROSOFT.md. Le statut d'envoi « brouillon_depose » est au lot 19aj_b.
+-- omega/GUIDE-GMAIL.md, omega/GUIDE-MICROSOFT.md. Le statut d'envoi « brouillon_depose » est au § 7.
 --
 -- Promesses du site : « Vous connectez une messagerie, c'est la seule chose à faire » et « le message reste un brouillon
 -- dans votre outil ». Ce lot pose :
@@ -17,9 +18,16 @@
 --   5. L'expéditeur : connecter une boîte crée (ou réactive) la ligne public.expediteurs (canal email, fournisseur gmail /
 --      microsoft, identite = l'adresse, parametres.connexion) ; la révoquer la suspend. verrous_envoi préfère, à
 --      portée égale (module), la boîte connectée à l'expéditeur partagé : c'est la promesse du site.
+--   6. (§ 6) verrous_envoi : à portée égale (module), la boîte connectée passe avant l'expéditeur partagé.
+--   7. (§ 7) Le statut d'envoi « brouillon_depose » : le message est déposé en brouillon dans la boîte du client, qui
+--      l'enverra lui-même. Porte de l'ouvrier confirmer_brouillon (en_cours → brouillon_depose, réservée à l'ouvrier comme
+--      « envoye ») ; compté comme parti pour les doublons, l'espacement et les plafonds (verrous_envoi) ; événement
+--      « envoi.brouillon_depose.<module> ».
 -- Rien à faire pour les travaux : private.fournisseurs_envoi porte déjà gmail et microsoft (automatique, branche = faux),
 -- et confier_envoi dépose « envois.<fournisseur> ». Le coordinateur passe branche à vrai quand l'ouvrier est déployé.
--- Idempotent (if not exists, create or replace, where not exists) ; aucun DROP ; aucune donnée retirée.
+-- Idempotent (if not exists, create or replace, where not exists, repères déjà réécrits sautés) ; aucune donnée retirée.
+-- UN SEUL DROP, inévitable : élargir la contrainte public.envois.envois_statut_check (DROP CONSTRAINT puis ADD dans la
+-- même instruction ; aucune ligne touchée, la nouvelle liste contient l'ancienne). Sauté si déjà élargie.
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 1. public.messageries
@@ -58,7 +66,7 @@ create table if not exists public.messageries (
     references public.expediteurs (client_id, id) on delete set null (expediteur_id)
 );
 comment on table public.messageries is
-  'Lot 19aj : les messageries connectées par OAuth (Gmail, Microsoft 365). Jetons au Vault seulement (ids). Écriture par les portes messagerie_*.';
+  'Lot 19al : les messageries connectées par OAuth (Gmail, Microsoft 365). Jetons au Vault seulement (ids). Écriture par les portes messagerie_*.';
 
 alter table public.messageries enable row level security;
 revoke all on table public.messageries from public, anon, authenticated;
@@ -103,7 +111,7 @@ create table if not exists private.messageries_etats (
   constraint messageries_etats_retour_check check (retour_ecran ~ '^https://' and char_length(retour_ecran) <= 500)
 );
 comment on table private.messageries_etats is
-  'Lot 19aj : état OAuth à usage unique (15 minutes) d''une connexion de messagerie. Illisible hors des portes.';
+  'Lot 19al : état OAuth à usage unique (15 minutes) d''une connexion de messagerie. Illisible hors des portes.';
 alter table private.messageries_etats enable row level security;
 revoke all on table private.messageries_etats from public, anon, authenticated;
 grant all on table private.messageries_etats to service_role;
@@ -128,10 +136,10 @@ begin
     return p_id;
   end if;
   return vault.create_secret(p_valeur, p_nom || '_' || replace(gen_random_uuid()::text, '-', ''),
-                             'Lot 19aj : jeton de messagerie connectée. Ne jamais copier ailleurs.');
+                             'Lot 19al : jeton de messagerie connectée. Ne jamais copier ailleurs.');
 end $$;
 comment on function private.messagerie_poser_secret(uuid, text, text) is
-  'Lot 19aj : crée ou remplace un secret de messagerie au Vault, rend son id.';
+  'Lot 19al : crée ou remplace un secret de messagerie au Vault, rend son id.';
 revoke all on function private.messagerie_poser_secret(uuid, text, text) from public, anon, authenticated;
 
 create or replace function private.messagerie_lire_secret(p_id uuid)
@@ -196,7 +204,7 @@ returns text language sql set search_path to '' as $$
   select private.messagerie_preparer(p_client, p_fournisseur, p_retour_ecran)
 $$;
 comment on function public.messagerie_preparer(uuid, text, text) is
-  'Lot 19aj : état OAuth à usage unique (15 min) ; l''écran ouvre …/functions/v1/messagerie-oauth/{google|microsoft}/debut?etat=<état>.';
+  'Lot 19al : état OAuth à usage unique (15 min) ; l''écran ouvre …/functions/v1/messagerie-oauth/{google|microsoft}/debut?etat=<état>.';
 revoke all on function public.messagerie_preparer(uuid, text, text) from public, anon;
 grant execute on function public.messagerie_preparer(uuid, text, text) to authenticated, service_role;
 
@@ -232,7 +240,7 @@ returns jsonb language sql set search_path to '' as $$
   select private.messagerie_revoquer(p_connexion)
 $$;
 comment on function public.messagerie_revoquer(uuid) is
-  'Lot 19aj : déconnecte une messagerie (gérant ou admin) : plus de relève ni d''envoi, jetons effacés puis révoqués par l''ouvrier.';
+  'Lot 19al : déconnecte une messagerie (gérant ou admin) : plus de relève ni d''envoi, jetons effacés puis révoqués par l''ouvrier.';
 revoke all on function public.messagerie_revoquer(uuid) from public, anon;
 grant execute on function public.messagerie_revoquer(uuid) to authenticated, service_role;
 
@@ -379,12 +387,16 @@ begin
    where x.client_id = e.client_id and x.canal = 'email' and x.fournisseur = e.fournisseur and lower(x.identite) = v_adresse
    order by x.maj_le desc limit 1;
   if v_exp is null then
-    insert into public.expediteurs (client_id, module, canal, fournisseur, identite, parametres, statut, verifie_le)
-    values (e.client_id, null, 'email', e.fournisseur, v_adresse, jsonb_build_object('connexion', m.id), 'actif', now())
+    -- secret_nom (exigé par preparer_expediteur pour une boîte déléguée) : le nom de la connexion, pas un jeton ; les
+    -- jetons restent dans public.messageries → Vault.
+    insert into public.expediteurs (client_id, module, canal, fournisseur, identite, parametres, secret_nom, statut, verifie_le)
+    values (e.client_id, null, 'email', e.fournisseur, v_adresse, jsonb_build_object('connexion', m.id),
+            'messagerie_' || replace(m.id::text, '-', ''), 'actif', now())
     returning id into v_exp;
   else
     update public.expediteurs
-       set parametres = parametres || jsonb_build_object('connexion', m.id), statut = 'actif', verifie_le = now(), maj_le = now()
+       set parametres = parametres || jsonb_build_object('connexion', m.id),
+           secret_nom = 'messagerie_' || replace(m.id::text, '-', ''), statut = 'actif', verifie_le = now(), maj_le = now()
      where id = v_exp;
   end if;
   update public.messageries set expediteur_id = v_exp where id = m.id;
@@ -472,15 +484,111 @@ begin
   if position('(x.fournisseur in (''gmail'', ''microsoft'')) desc' in d) = 0 then
     n := (length(d) - length(replace(d, rep, ''))) / length(rep);
     if n <> 1 then
-      raise exception 'Lot 19aj, verrous_envoi : repère absent ou multiple (%) : %', n, rep;
+      raise exception 'Lot 19al, verrous_envoi : repère absent ou multiple (%) : %', n, rep;
     end if;
     execute replace(d, rep, par);
   end if;
 end $lot$;
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 7. Le statut « brouillon_depose »
+-- ───────────────────────────────────────────────────────────────────────────
+-- 7a. La contrainte de statut : la seule façon de l'élargir est de la remplacer (une instruction, aucune ligne touchée).
+do $$
+begin
+  if position('brouillon_depose' in coalesce((select pg_get_constraintdef(c.oid) from pg_constraint c
+       where c.conrelid = 'public.envois'::regclass and c.conname = 'envois_statut_check'), '')) = 0 then
+    alter table public.envois
+      drop constraint if exists envois_statut_check,
+      add constraint envois_statut_check check (statut in ('a_valider', 'differe', 'pret', 'en_cours', 'envoye', 'brouillon_depose',
+                                                           'bloque', 'refuse', 'annule', 'expire', 'echec'));
+  end if;
+end $$;
+
+-- 7b. garder_envoi : en_cours → brouillon_depose, réservé à l'ouvrier comme « envoye ». 7c. verrous_envoi : un brouillon
+-- déposé compte comme parti (doublon, délai minimal, plafonds). Réécriture par repères, comme 19ab et 19ah.
+do $lot$
+declare
+  d text;
+  rep text;
+  par text;
+  n integer;
+begin
+  select pg_get_functiondef('private.garder_envoi()'::regprocedure) into d;
+  if position('brouillon_depose' in d) = 0 then
+    rep := '    if new.statut = ''envoye'' and coalesce(current_setting(''omega.envois_ouvrier'', true), '''') <> ''oui'' then';
+    par := '    if new.statut in (''envoye'', ''brouillon_depose'') and coalesce(current_setting(''omega.envois_ouvrier'', true), '''') <> ''oui'' then';
+    n := (length(d) - length(replace(d, rep, ''))) / length(rep);
+    if n <> 1 then
+      raise exception 'Lot 19al, garder_envoi : repère absent ou multiple (%) : %', n, rep;
+    end if;
+    d := replace(d, rep, par);
+    rep := '(old.statut = ''en_cours'' and new.statut in (''envoye'', ''pret'',';
+    par := '(old.statut = ''en_cours'' and new.statut in (''envoye'', ''brouillon_depose'', ''pret'',';
+    n := (length(d) - length(replace(d, rep, ''))) / length(rep);
+    if n <> 1 then
+      raise exception 'Lot 19al, garder_envoi : repère absent ou multiple (%) : %', n, rep;
+    end if;
+    execute replace(d, rep, par);
+  end if;
+
+  select pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure) into d;
+  if position('brouillon_depose' in d) = 0 then
+    rep := '''en_cours'', ''envoye'')';
+    par := '''en_cours'', ''envoye'', ''brouillon_depose'')';
+    n := (length(d) - length(replace(d, rep, ''))) / length(rep);
+    if n <> 4 then
+      raise exception 'Lot 19al, verrous_envoi : repère attendu 4 fois (doublon, délai, plafond destinataire, plafonds), trouvé % : %', n, rep;
+    end if;
+    execute replace(d, rep, par);
+  end if;
+end $lot$;
+
+-- 7d. La porte de l'ouvrier : le brouillon est déposé chez le client.
+create or replace function private.confirmer_brouillon(p_envoi uuid, p_reference text, p_brouillon text default null)
+returns void language plpgsql security definer set search_path to '' as $$
+declare
+  e public.envois;
+begin
+  perform private.exiger_ouvrier();
+  perform set_config('omega.envois_ouvrier', 'oui', true);
+  -- envoye_le : l'heure du dépôt, pour l'espacement (max(coalesce(envoye_le, pret_le))). reference_externe : le Message-ID
+  -- que citeront les réponses (deposer_reception les rattache à l'envoi) ; compte_rendu : le brouillon chez le fournisseur.
+  update public.envois
+     set statut = 'brouillon_depose', envoye_le = now(), clos_le = now(), erreur = null, bail_jusqu_au = null,
+         reference_externe = left(nullif(btrim(p_reference), ''), 300),
+         compte_rendu = left(nullif(btrim(p_brouillon), ''), 300)
+   where id = p_envoi and statut = 'en_cours' and fournisseur in ('gmail', 'microsoft')
+  returning * into e;
+  perform set_config('omega.envois_ouvrier', '', true);
+  if e.id is null then
+    if exists (select 1 from public.envois x where x.id = p_envoi and x.statut = 'brouillon_depose') then
+      return;   -- une confirmation rejouée n'est pas une faute
+    end if;
+    raise exception 'Envoi introuvable, pas en cours, ou pas destiné à une messagerie connectée.' using errcode = 'P0002';
+  end if;
+  perform private.clore_demande_envoi(e, true, null);
+  perform private.publier_envoi(e, 'brouillon_depose');
+end $$;
+comment on function private.confirmer_brouillon(uuid, text, text) is
+  'Lot 19al : l''ouvrier messagerie a déposé le message en brouillon chez le client (statut brouillon_depose, compté comme parti).';
+revoke all on function private.confirmer_brouillon(uuid, text, text) from public, anon, authenticated;
+grant execute on function private.confirmer_brouillon(uuid, text, text) to service_role;
+
+create or replace function public.confirmer_brouillon(p_envoi uuid, p_reference text, p_brouillon text default null)
+returns void language sql set search_path to '' as $$ select private.confirmer_brouillon(p_envoi, p_reference, p_brouillon) $$;
+revoke all on function public.confirmer_brouillon(uuid, text, text) from public, anon, authenticated;
+grant execute on function public.confirmer_brouillon(uuid, text, text) to service_role;
 
 select (select count(*) from information_schema.tables where table_schema = 'public' and table_name = 'messageries') as messageries,
        (select count(*) from information_schema.tables where table_schema = 'private' and table_name = 'messageries_etats') as etats,
        (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
          where n.nspname = 'public' and p.proname like 'messagerie\_%') as portes_publiques,
        position('(x.fournisseur in (''gmail'', ''microsoft'')) desc'
-                in pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure)) > 0 as verrous;
+                in pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure)) > 0 as verrous,
+       position('brouillon_depose' in (select pg_get_constraintdef(c.oid) from pg_constraint c
+         where c.conrelid = 'public.envois'::regclass and c.conname = 'envois_statut_check')) > 0 as statut,
+       position('brouillon_depose' in pg_get_functiondef('private.garder_envoi()'::regprocedure)) > 0 as garde,
+       (length(pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure))
+        - length(replace(pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure),
+                         'brouillon_depose', ''))) / length('brouillon_depose') as verrous_brouillon;

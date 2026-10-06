@@ -2,7 +2,7 @@
 //   1. travaux `envois.gmail` / `envois.microsoft` {envoi} : commencer_envoi → jetons de la
 //      connexion de l'expéditeur (expediteur.parametres.connexion) → brouillon fabriqué (mime.ts)
 //      → dépôt dans la messagerie → confirmer_brouillon(envoi, <Message-ID>, "<fournisseur>:
-//      brouillon:<id>") : statut « brouillon_depose » (lot 19aj_b), compté comme parti pour
+//      brouillon:<id>") : statut « brouillon_depose » (lot 19al), compté comme parti pour
 //      l'espacement et les plafonds. Le message RESTE un brouillon dans la messagerie du client :
 //      rien n'est envoyé par Omega.
 //      travaux `messagerie.revoquer` {connexion} : messagerie_oublier (efface le Vault, rend le

@@ -657,14 +657,14 @@ réel** (ni application Google ni application Microsoft). Guides pour Teo :
 - Secrets que seul Teo peut poser : `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`
   (le secret client Azure expire : 24 mois au plus, à renouveler).
 
-### Lot socle 19aj (écrit par A2 sur décision du coordinateur, 06/10 16 h 08 Z)
+### Lot socle 19al (écrit par A2 sur décision du coordinateur, 06/10 16 h 08 Z)
 
 Le coordinateur, par délégation de Teo, lève pour ce connecteur la règle « aucune migration ».
 Il fixe aussi : statut d'envoi distinct `brouillon_depose`, compté comme « parti » pour
 l'espacement et les plafonds ; régime Test de Google pour la recette et les pilotes ; route de
 renvoi sur omegaai.fr.
 
-- `omega/modules/socle/migrations/19aj_messageries.sql` : `public.messageries` (RLS ; lecture
+- `omega/modules/socle/migrations/19al_messageries.sql` : `public.messageries` (RLS ; lecture
   colonne par colonne par gérant et admin, sans ids Vault ni curseur ; aucune écriture hors
   des portes), `private.messageries_etats` (état à usage unique, 15 minutes, 20 par quart d'heure
   et par organisation), Vault (`messagerie_poser_secret`, `_lire_secret`, `_effacer_secret` :
@@ -677,12 +677,23 @@ renvoi sur omegaai.fr.
 - `verrous_envoi` (réécriture par repère) : à portée égale (module), la boîte connectée passe
   avant l'expéditeur partagé (Brevo). **Choix à confirmer** : un client qui garde Brevo pour
   ses relances automatiques doit poser un expéditeur Brevo **par module**.
-- Test : `omega/tests/socle/19aj_messageries.sql` (37 assertions, vertes en local sur une
-  maquette PostgreSQL 16 du socle ; pas encore passées sur la recette).
-- **19aj_b (statut `brouillon_depose`, porte `confirmer_brouillon`) : en attente** des corps de
-  `private.confirmer_envoi`, `garder_envoi` et des autres fonctions demandées au coordinateur.
-  Il faudra une contrainte de statut élargie : c'est un `DROP CONSTRAINT` puis un `ADD`, que
-  le coordinateur doit accepter (aucune donnée retirée).
+- **Statut `brouillon_depose`** (§ 7 du même lot, écrit d'après SOCLE-EXTRAITS-ENVOIS.sql) :
+  la contrainte `envois_statut_check` est élargie. C'est **le seul DROP du lot** : DROP
+  CONSTRAINT puis ADD dans une seule instruction, sauté si la contrainte est déjà élargie.
+  `garder_envoi` accepte en_cours → brouillon_depose, réservé à l'ouvrier comme `envoye`.
+  `verrous_envoi` compte le brouillon déposé dans ses 4 listes (doublon, délai minimal, plafond
+  destinataire, plafonds). Nouvelle porte `confirmer_brouillon(p_envoi, p_reference, p_brouillon)`
+  (service_role, rejouable, gmail/microsoft seulement) : `envoye_le` = l'heure du dépôt, Message-ID
+  en `reference_externe`, id du brouillon en `compte_rendu`, événement
+  `envoi.brouillon_depose.<module>`.
+- **À voir par les modules** : les abonnements à `envoi.envoye.<module>` (tavaro…) ne voient pas
+  un brouillon déposé. Les fonctions qui citent 'envoye' (marquer_envoi_manuel, loc_envoi_issue,
+  tiroma_indicateurs_semaine, btp_*decompte) ne sont pas touchées.
+- `preparer_expediteur` exige `secret_nom` pour gmail/microsoft : l'expéditeur reçoit
+  `messagerie_<id de connexion>`. C'est un nom ; les jetons restent dans messageries → Vault.
+- Test : `omega/tests/socle/19al_messageries.sql`, 45 assertions vertes en local sur une maquette
+  qui reprend les vraies définitions (`garder_envoi`, `exiger_ouvrier`, `preparer_expediteur`,
+  `publier_envoi`, la contrainte de statut). Pas encore passées sur la recette.
 - `fournisseurs_envoi` porte déjà `gmail` et `microsoft` (automatique, branche = faux), et
   `confier_envoi` dépose déjà `envois.<fournisseur>` : seul `branche` est à passer à vrai au
   déploiement.

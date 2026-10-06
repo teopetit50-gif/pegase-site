@@ -1,7 +1,7 @@
 // Portes du socle pour les messageries connectées. Existantes : prendre_travaux, finir_travail,
 // echouer_travail, battre_ouvrier, commencer_envoi, echouer_envoi, deposer_reception. Lot
-// 19aj_messageries (omega/modules/socle/migrations/) : les portes `messagerie_*` (jetons au Vault,
-// jamais en clair dans une table, jamais rendus à authenticated). Lot 19aj_b : confirmer_brouillon.
+// 19al_messageries (omega/modules/socle/migrations/) : les portes `messagerie_*` (jetons au Vault,
+// jamais en clair dans une table, jamais rendus à authenticated). Lot 19al : confirmer_brouillon.
 
 import type { EnvoiAEnvoyer, ReponseCommencer } from "../expediteur/portes.ts";
 import type { Reception } from "../reception/portes.ts";
