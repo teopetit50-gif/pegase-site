@@ -463,3 +463,10 @@ Tâches données au départ : A3 (confirmer/attester le fournisseur, « revérif
 demande ») ; A5 (deux tests pgTAP santé des envois) ; B4 (CHAMPS-LECTURE-TAMILA.md pour A1) ;
 B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ; B7 (b7_02 test
 7, filtre sur la scène) ; les autres relisent leurs notes et attendent.
+- 03 h 31 : les douze nouveaux ouvriers ont confirmé leur reprise. **B7 91b919d posé,
+  `^test_b7_` 10/10** (identite_b7_01_portes_v4) : tous les modules sont verts sur la recette.
+  B4 a livré `omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md` (worker-b4 66ec6fb ; pièces
+  Tamila chiffrées, illisibles sans coffre) → relayé à A1 pour la table des types. A4 :
+  lignes de factures.ts à passer à atteste: true listées (worker-a4 aa909e0, après la prod).
+  B5 rejoue un courrier de mairie réel (accès recette renvoyés). B6 propose : envoi réel du
+  J-2 et clôture des sept chantiers « Essai B6 » du banc (décision du coordinateur, en attente).
