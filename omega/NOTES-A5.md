@@ -40,6 +40,23 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Lot 19ag — EXECUTE après a4_14 et b4_05 (6 octobre, 14 h 20 Z)
+
+Test 44 rejoué après 19af : 2 assertions rouges sur 5.
+- **Manquantes** : `filed_iban_valide`, `filed_luhn`, `filed_siren_valide`,
+  `filed_tva_intracom_analyser`. a4_14 (posé à 02:35:55, après a5_01_v2 à 01:18:40)
+  a créé le déclencheur `pieces_valeurs_cle_humaine` ; sa fonction
+  `filed_valeur_humaine_cle`, SECURITY INVOKER, appelle les quatre (filed_luhn par
+  filed_tva_intracom_analyser). C'est la règle (c).
+- **En trop** : `tamila_coffre_serveur`, `tamila_coffre_reference`, accordées par
+  b4_05 aux lignes 669-670. Tous leurs appelants sont SECURITY DEFINER.
+- **Le lot** : `omega/modules/socle/migrations/19ag_execute_apres_a4_14_b4_05.sql`.
+  Grant ciblé sur toutes les signatures, revoke, puis contrôle immédiat. Rejouable,
+  essayé deux fois en local.
+- **Reste aux auteurs** : A4 et B4 doivent corriger leurs fichiers ; sinon a5_01 en
+  clôture rattrape. Test 46 rouge sur deux vues de B6 (security_invoker), renvoyé
+  à B6 par le coordinateur.
+
 ## Lot 19af — activation par un seul décideur (6 octobre, demande du coordinateur, décision de Teo)
 
 - `omega/modules/socle/migrations/19af_activation_seul_decideur.sql` :

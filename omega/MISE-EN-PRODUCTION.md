@@ -159,12 +159,14 @@ sont livrés : leurs bases partent. **Teo confirme.**
 | 20261006045756, 045757 | `b6_07`, `b5_08` + `b5_09` | dépôt (b3bd323, 8b9ebbc, fbf4c98) | |
 | 20261006051221 | `a4_15` | dépôt (634fe24) | |
 | 20261006134231 | `filed_realtime_fournisseurs` | SQL | |
+| (version de la pose, à relever) | `socle_lot19af_activation_seul_decideur` | dépôt (worker-a5 430cf0e) : `omega/modules/socle/migrations/19af_activation_seul_decideur.sql` | un gérant **seul décideur** active lui-même un accord permanent de la liste blanche (Daliro J-2). Réécrit `preparer_approbation` par repère ; test 55 vert sur la recette |
+| (version de la pose, à relever) | `socle_lot19ag` | dépôt (worker-a5, ce commit) : `omega/modules/socle/migrations/19ag_execute_apres_a4_14_b4_05.sql` | EXECUTE à authenticated sur les quatre contrôles FILED rendus nécessaires par a4_14 ; retrait des deux outils du coffre Tamila accordés en trop par b4_05 (test 44) |
 
 **Étape C — clôture, toujours en dernier.**
 
 | Ordre | Quoi | Source |
 |---|---|---|
-| C1 | `a5_01_private_execute.sql` rejouée. Depuis sa v2 (011840), dix lots ont créé des fonctions dans `private` (b7_01_v4, b3_11, b5_05 → a4_15). Elle les range dans la règle et pose les droits par défaut globaux. Idempotente ; elle s'arrête par exception si anon exécute encore quelque chose | `omega/migrations/a5_01_private_execute.sql`, worker-a5 db8fb41 |
+| C1 | `a5_01_private_execute.sql` rejouée. Depuis sa v2 (011840), dix lots ont créé ou rendu nécessaires des fonctions de `private` (b7_01_v4, b3_11, b5_05 → a4_15). Le test 44 rejoué le 6/10 après 19af l'a montré : a4_14 en a rendu quatre nécessaires, b4_05 en a accordé deux en trop, et 19ag l'a corrigé. Elle les range dans la règle et pose les droits par défaut globaux. Idempotente ; elle s'arrête par exception si anon exécute encore quelque chose | `omega/migrations/a5_01_private_execute.sql`, worker-a5 db8fb41 |
 | C2 | `a5_01_liste_requises.sql` (lecture seule) : la liste à comparer à celle de la répétition et à la recette (221 le 6/10) | même SHA |
 
 ### 1.4 Lignes de la recette à ne pas rejouer
@@ -511,6 +513,22 @@ Reçues du coordinateur, en lecture seule, et intégrées aux § 1.2, 1.3, 2 et 
 3. `cron.job` de la recette ;
 4. fonctions Edge de la recette, avec le contenu des coquilles et la liste des fichiers
    de `reception` et `webhooks-brevo`.
+
+Constats du 6/10 vers 14 h 20 Z, en rejouant les tests 40 à 55 après 19af :
+- **test 44, rouge, puis corrigé par 19ag.** Quatre fonctions requises n'étaient pas
+  exécutables : `filed_iban_valide`, `filed_luhn`, `filed_siren_valide`,
+  `filed_tva_intracom_analyser`, rendues nécessaires par a4_14. Deux étaient en trop :
+  `tamila_coffre_serveur`, `tamila_coffre_reference`, accordées par b4_05.
+  - **Les fichiers sources ne sont pas corrigés.** Rejoués tels quels en
+    production, a4_14 laisse le manque et b4_05 remet l'excès. 19ag, puis a5_01 en
+    clôture (étape C), rétablissent la règle.
+  - Pour que les fichiers eux-mêmes soient justes : A4 ajoute le `grant` à
+    authenticated dans a4_14, et B4 retire `authenticated` des lignes 669-670 de
+    b4_05.
+- **test 46, rouge** : les vues `btp_avenants_chiffres` et
+  `btp_avenants_lignes_chiffrees` (Daliro, B6) ne sont pas `security_invoker`. Une
+  vue lisible sans `security_invoker` contourne la RLS. **Bloquant pour la
+  production** tant que B6 ne l'a pas corrigé.
 
 Restent ouverts :
 - la provenance de chaque ligne « dépôt », lue dans `statements` à l'export (§ 1.5) ;
