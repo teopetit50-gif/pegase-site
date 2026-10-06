@@ -9,7 +9,9 @@
    réponse d'un sous-traitant ; voir les remplaçants ; rattacher une facture
    (SIREN refusé sur le mauvais lot) ; l'accord permanent des J-2 (b6_08) :
    révoquer avec un motif, puis le redonner (« à valider ») ; les situations de travaux (b6_12) : ouvrir
-   la n° 2 des Tilleuls, avancer une ligne, lire les totaux, soumettre ; axe-core sur la carte et sa fenêtre.
+   la n° 2 des Tilleuls, avancer une ligne, lire les totaux, soumettre ; axe-core sur la carte et sa fenêtre ;
+   la réception (b6_13) : prononcer avec deux réserves, en lever une, noter une opposition, préparer et envoyer
+   le décompte ; axe-core sur la carte et ses fenêtres.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -232,6 +234,55 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     await s.dormir(500);
     ok(await s.evaluer(`/Dans « À valider »/.test(${carte}?.innerText || '') && [...${carte}.querySelectorAll('button')].find(b => /Valider la situation/.test(b.textContent))?.disabled === true`),
        'soumise : elle attend dans « À valider », « Valider la situation » reste gris');
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-recep-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : réception, réserves, retenue, décompte (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Réception des travaux"]')`;
+    ok(await s.evaluer(`/pas encore prononcée/i.test(${carte}?.innerText || '')`), 'la réception n\'est pas encore prononcée');
+    ok(await s.evaluer(bouton('/Prononcer la réception/', carte)) === true, 'clic sur « Prononcer la réception »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Prononcer la réception » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(saisir('[role="dialog"] textarea', 'Joint de la fenêtre du séjour à reprendre\nRayure sur la porte palière'));
+    await s.evaluer(`${dlgBouton('/Prononcer la réception/')}?.click()`);
+    await s.dormir(600);
+    const t1 = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/prononcée le/i.test(t1) && /2 réserves ouvertes/i.test(t1), 'réception prononcée, deux réserves ouvertes');
+    ok(/847,80/.test(t1) && /Due le/i.test(t1), 'la retenue de la situation n° 1 (847,80 €) est due dans un an');
+    ok(await s.evaluer(bouton('/Lever la réserve/', carte)) === true, 'clic sur « Lever la réserve »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/1 réserve ouverte/i.test(${carte}?.innerText || '') && /Levée le/.test(${carte}?.innerText || '')`), 'une réserve levée, une ouverte');
+    ok(await s.evaluer(bouton('/Noter une opposition/', carte)) === true, 'clic sur « Noter une opposition »');
+    await s.dormir(400);
+    await s.evaluer(saisir('[role="dialog"] input:not([type="date"])', 'Rayure sur la porte palière non reprise'));
+    await s.dormir(150);
+    await s.evaluer(`${dlgBouton('/Noter l.opposition/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Opposée le/i.test(${carte}?.innerText || '') && /non reprise/.test(${carte}?.innerText || '')`), 'retenue opposée, motif affiché');
+    ok(await s.evaluer(bouton('/Préparer le décompte/', carte)) === true, 'clic sur « Préparer le décompte »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/Reste à facturer HT/i.test(${carte}?.innerText || '')`), 'le projet de décompte affiche le reste à facturer');
+    ok(await s.evaluer(bouton('/Noter le décompte envoyé/', carte)) === true, 'clic sur « Noter le décompte envoyé »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/en attente de réponse/i.test(${carte}?.innerText || '')`), 'décompte envoyé, en attente de réponse');
+    await s.evaluer(axe + ';true');
+    const c1 = await s.evaluer(graves(carte));
+    ok(c1.length === 0, `carte de la réception : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
     const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
     ok(deb === 0, `pas de débordement horizontal (${deb})`);
     s.fermer();

@@ -341,6 +341,43 @@ export type Tableau = {
   bibliotheque: Prix[];
   /* b6_12 : les situations de travaux (vide sans le droit voir_prix) */
   situations?: Situation[];
+  /* b6_13 : la réception (null tant qu'elle n'est pas prononcée, ou sans le droit voir_prix) */
+  reception?: Reception | null;
+};
+
+export type Reserve = {
+  id: string;
+  reception_id: string;
+  lot_id: string | null;
+  ordre: number;
+  description: string;
+  statut: "ouverte" | "levee";
+  levee_le: string | null;
+};
+export type Reception = {
+  id: string;
+  chantier_id: string;
+  date_reception: string;
+  avec_reserves: boolean;
+  retenue_montant: number;
+  retenue_caution: boolean;
+  retenue_due_le: string;
+  retenue_statut: "bloquee" | "opposee" | "liberee";
+  retenue_etat?: "bloquee" | "liberable" | "opposee" | "liberee";
+  opposition_le: string | null;
+  opposition_motif: string | null;
+  liberee_le: string | null;
+  liberee_avant_terme: boolean;
+  decompte_statut: "a_preparer" | "projet" | "envoye" | "accepte" | "conteste";
+  decompte_marche_ht: number | null;
+  decompte_facture_ht: number | null;
+  decompte_reste_ht: number | null;
+  decompte_retenue: number | null;
+  decompte_envoye_le: string | null;
+  decompte_repondu_le: string | null;
+  decompte_motif: string | null;
+  decompte_echeance?: string;
+  reserves: Reserve[];
 };
 
 /* Une situation de travaux (b6_12) : acompte mensuel à l'avancement cumulé. */
