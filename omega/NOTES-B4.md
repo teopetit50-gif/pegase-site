@@ -8,7 +8,7 @@ Dernière mise à jour : 06/10/2026, matin (lot B4-2 : corrections du retour de 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
 | **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **65 %** — en plus des tests : la chaîne complète rejouée pour de vrai sur la recette depuis l'écran (voir § 8) — joué par le coordinateur sur a05d25c : 6 fichiers verts sur 11 (01, 02, 03, 06, 07, 08) ; les 5 rouges corrigés (3 défauts de mes tests, 1 trou du socle → b4_04) ; 12 et 13 écrits, pas encore joués | 00 à 13 verts sur la recette après b4_01 à b4_04 |
-| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **75 %** — écran complet, et **rejoué en base réelle avec les comptes du banc** (§ 8) : installation, dossier chiffré, partie, appel, délai calculé par le socle, pièce chiffrée déposée, membre, confirmation par l'avocat ; pas encore en ligne | fusion sur main et vérification sur omegaai.fr ; le coffre (lecture des pièces chiffrées) ; audiences, murailles, export et clôture rejoués en réel |
+| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **80 %** — écran complet, et **rejoué en base réelle avec les comptes du banc** (§ 8) : installation, dossier chiffré, partie, appel, délai calculé par le socle, pièce chiffrée déposée, membre, confirmation par l'avocat ; pas encore en ligne | fusion sur main et vérification sur omegaai.fr ; le coffre (lecture des pièces chiffrées) ; audiences, murailles, export et clôture rejoués en réel |
 
 ## Ce qui manque, ce que Teo doit fournir
 
@@ -244,12 +244,19 @@ passe**, captures `omega/recette-b4/reel-*-1440.jpg`.
   ni courriel au gérant du banc → repli « Vous » / rôle, jamais un identifiant brut.
 - Trois dossiers d'essai restent sur le banc (`BANC-10052357`, `BANC-10052359`, `BANC-10060001`) :
   données du banc, à clôturer un jour par le gérant.
-- Non rejoué en réel : audiences, avis saisi, muraille, export, clôture (verts en pgTAP).
+- Suite rejouée en réel (`TAMILA_SUITE=1`, mêmes comptes, 06/10) : audience de mise en état posée
+  (12/11/2026) ; avis d'audience saisi → le socle l'applique et pose l'audience du 04/02/2027 ;
+  muraille sur Daf (motif chiffré) → « En place », levée demandée → décision du gérant → « Levée » ;
+  export demandé → « En préparation » (le travail `tamila.exporter` attend son ouvrier, qui n'existe
+  pas encore) ; clôture demandée → approuvée par le gérant → « Clos », effacement daté → annulation
+  → « Ouvert » ; le journal des accès (b4_02) liste les consultations. Captures
+  `reel-audiences`, `reel-muraille`, `reel-cloture`, `reel-journal`. **Tout le scénario est donc
+  prouvé en réel, sauf l'effacement à l'échéance et l'archive (ouvriers absents).**
 
 ## 7. Prochaine étape
 
 1. Fusion sur main par le coordinateur, puis vérification sur omegaai.fr/espace/tamila.
-2. Rejouer en réel audiences, muraille, export, clôture ; relire les sorties pgTAP du lot B4-2.
+2. Relire les sorties pgTAP du lot B4-2 ; corriger jusqu'au vert.
 3. Souche locale (`omega/tests/tamila/souche_locale/`, en cours) : finir 03_pgtap et jouer.sh pour
    jouer les tests ici avant chaque lot.
 
