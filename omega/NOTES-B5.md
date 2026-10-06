@@ -246,4 +246,11 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   session du gérant : permis 56c88739… `pieces_demandees`, numéro PC04410926A0042, dépôt 2026-09-15, demande
   2026-10-01, `pieces_demandees = [PCMI3, PCMI6]` ; échéance `pieces` au 2027-01-01, ouverte, rappels [10, 3, 0].
   Reste sur le banc la proposition vide confirmée à 1 h 40 (pièce 1c55b927…), donnée de recette.
+- 06/10, 2 h 08 Z (coordinateur) : b5_06 **v2 posée depuis fcd1b1a**, `^test_b5_` **114/114** ; sur 059e705e,
+  `lorani_valeurs_de_piece` rend le tableau en jsonb.
+- 06/10, 2 h 11–2 h 15 Z : **dépôt réel avec le socle final et le lecteur v17** : `demande-pieces-2.pdf` (second
+  modèle de `fabriquer-courrier.mjs` : lettre du 03/10, PCMI 2 et PCMI 8 — une lettre identique à la v3 serait écartée
+  par `lorani_deja_saisi`), pièce 03cb0753… `lue`, `lorani_demande_pieces` 0,97, motif nul ; proposition à 211 s
+  [PCMI2, PCMI8] du 2026-10-03, confirmée par l'écran ; permis : `pieces_demandees = [PCMI2, PCMI8]`, demande
+  2026-10-03, échéance `pieces` 2027-01-03 ouverte, rappels [10, 3, 0]. `courrier-reel.mjs` : `PIECES_ATTENDUES`.
 
