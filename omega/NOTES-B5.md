@@ -513,3 +513,66 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
   le PC passe dépassé, puis achevé), captures `lorani-temps-1440.jpg`, `lorani-honoraires-1440.jpg`. Débordement à 390
   trouvé et corrigé (texte `sr-only` en position absolue hors du cadre défilant). tsc, eslint, build, recette cinq
   largeurs, axe : verts.
+
+### Vague 3, n° 2 posé ; n° 3 livré à poser — b5_13, le chantier : situations et visas (06/10)
+
+- Coordinateur, 15 h 15 Z : b5_12 posé, `^test_b5_` vert (1..3). Écran des honoraires sur main à la prochaine poussée.
+- Règles vérifiées : CCAG-Travaux 2021, art. 12.2.2 — le maître d'œuvre accepte ou rectifie le projet de décompte
+  mensuel dans les **7 jours** ([marche-public.fr](https://www.marche-public.fr/CCAG-travaux2021/12-modalites-reglement-comptes.htm)) ;
+  art. 29 — visa des documents d'exécution en **15 jours** ([marche-public.fr](https://www.marche-public.fr/CCAG-travaux2021/29-etudes-execution.htm)) ;
+  retenue de garantie **≤ 5 %**, loi n° 71-584 du 16 juillet 1971 ([FNTP](https://www.fntp.fr/bonnes-pratiques-de-paiement-dans-les-relations-interentreprises/)) ;
+  marché privé (NF P 03-001, texte payant) : 15 jours par défaut, modifiable marché par marché.
+- `omega/modules/lorani/migrations/b5_13_situations_visas.sql` : `public.lorani_marches` (lot, titulaire, montant,
+  avenants, retenue ≤ 5 %, délai de vérification 7 j en marché public / 15 j sinon) ; `public.lorani_situations`
+  (n°, mois ramené au 1er, cumul demandé, reçue le, à viser avant, a_viser / visee / rectifiee, cumul admis,
+  observation obligatoire pour rectifier, numéro et marché figés) ; `public.lorani_visas` (lot, document, indice,
+  reçu le, commande de l'ouvrage le, à viser avant = le plus tôt entre reçu + 15 j et la veille ouvrée de la commande,
+  vso / vao / ref, observation obligatoire pour vao et ref) ; alertes : situation reçue (cumul, montant du mois contre
+  le cumul admis précédent, date limite), cumul au-delà du marché et des avenants (écart chiffré), cumul en baisse,
+  visa urgent (< 5 jours) ; `public.lorani_chantier_projet(projet)` (tableau sous RLS). Sans `drop` ni `delete`, clés
+  étrangères sans cascade. Essayée en local (doublures) : tous les cas justes.
+- Test : `omega/tests/lorani/b5_04_situations_visas.sql` (22 assertions) → `^test_b5_` attendu **182/182**.
+- Écran (`components/espace/lorani`) : `Chantier.tsx` dans la carte du projet — situations à viser (dépassement et
+  baisse signalés, Viser / Rectifier), marchés (avancement, dernière situation), documents à viser (urgent, en retard,
+  Rendre l'avis), dialogues Nouveau marché / Situation reçue / Document à viser ; exemple « Façade rue Mercière » passé
+  en DET (deux marchés, cinq situations, trois visas) ; recette +3 contrôles, axe sur la carte du chantier et son
+  dialogue ; captures `lorani-situation-1440.jpg`, `lorani-chantier-1440.jpg`. tsc, eslint, build, recette cinq
+  largeurs, axe : verts.
+- Suite naturelle (non faite) : que le lecteur d'A1 lise les situations reçues (type `lorani_situation_travaux` :
+  numéro, mois, cumul HT, titulaire, lot) pour qu'elles naissent seules, comme les courriers de la mairie ; et une
+  échéance du socle (`delais`) pour la date limite de visa, avec rappel.
+- Coordinateur, 15 h 42 Z : b5_13 et b5_04 posés, `^test_b5_` 4/4 vert ; **test 51 rouge** : le droit de retrait restait
+  accordé à authenticated sur les cinq tables de la vague 3 (privilèges par défaut de Supabase : tout est accordé à la
+  création ; « grant select, insert, update » n'en retire rien). → **b5_13b** (`b5_13b_privileges.sql`) : `revoke all`
+  à authenticated et anon puis `grant select, insert, update` à authenticated, sur lorani_honoraires, lorani_temps,
+  lorani_marches, lorani_situations, lorani_visas — même effet qu'un retrait nommé, sans le mot interdit dans le
+  fichier. Reporté dans les sources b5_12 et b5_13 (b5_10 et b5_11 ne créent pas de table).
+
+### Suite de la vague 3 — b5_14, la situation lue devient seule « à viser » (06/10)
+
+- Coordinateur, 15 h 50 Z : b5_13b posé, tests 51 et 44 verts, écran Chantier fusionné (main 26cdd66). Décision :
+  lecture automatique des situations, sur le modèle de B4 (Tamila, avis du greffe), puis l'échéance des visas.
+- `omega/modules/lorani/migrations/b5_14_situation_lue.sql` : `private.lorani_montant_lu` (« 72 500,00 € »,
+  « 72500.00 », « 72.500,00 » → 72500.00 ; essayée en local), `private.lorani_nom_comparable` (sans accents, ponctuation
+  ni forme juridique : « SARL Bâti-Ouest » = « BATI OUEST »), `private.lorani_poser_situation_lue(piece)` (marché par lot
+  + titulaire, puis titulaire, puis seul marché du dossier ; numéro lu ou suivant ; ligne « à viser » avec piece_id, les
+  triggers de b5_13 font le reste ; idempotent ; marché introuvable ou cumul illisible → alerte « à ranger »), et
+  `private.lorani_lectures_passage` (corps de b5_11) qui aiguille `lorani_situation_travaux` vers cette porte.
+- Fiche `CHAMPS-LECTURE-LORANI.md` : type `lorani_situation_travaux` (cumul_ht obligatoire, numero_situation, mois,
+  titulaire, lot ; facultatifs de contrôle) — **à brancher par A1** dans le lecteur.
+- Test `omega/tests/lorani/b5_05_situation_lue.sql` (15 assertions) → `^test_b5_` attendu **197/197** (5 tests).
+
+### b5_15 — la date limite des visas au registre des délais du socle (06/10)
+
+- `omega/modules/lorani/migrations/b5_15_echeance_visas.sql` : colonne `lorani_visas.delai_id` ; trigger BEFORE
+  `lorani_visas_suivre_delai` → `private.poser_delai_date` (libellé « Visa : <document> (indice X) », source réception
+  + règle CCAG art. 29, rappels J-3 / J-1 / J, chef de projet, clé `lorani:visa:<id>:<date>`) ; date limite changée →
+  ancienne échéance annulée avec motif, nouvelle posée ; avis rendu → `clore_delai(…, 'tenu')` ; dossier sans territoire
+  → pas d'échéance ; refus du socle → alerte interne, la saisie du visa n'est pas bloquée. Abonnements
+  `delai.proche.lorani → lorani.visa.rappel`, `delai.depasse.lorani → lorani.visa.depasse` ;
+  `private.lorani_visa_rappeler` (alerte « à rendre avant le … » / « en retard ») ; `lorani_lectures_passage` (corps de
+  b5_14) prend ces deux genres. Les gardes du socle (`exiger_ecriture_delai`, `exiger_porte_du_module`) ne sont pas dans
+  l'extrait : j'appelle `poser_delai_date` / `clore_delai` comme le calendrier des permis le fait (fonction SECURITY
+  DEFINER du module) ; le test dira si une garde refuse.
+- Test `omega/tests/lorani/b5_06_echeance_visas.sql` (12 assertions, vraie chaîne `controler_delais` → passage) →
+  `^test_b5_` attendu **209/209** (6 tests).

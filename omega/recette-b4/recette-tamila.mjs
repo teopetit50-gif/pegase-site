@@ -7,7 +7,9 @@
    le calcul d'un délai (art. 908 + 915-4) ; confirmer ce délai ; déclarer un
    acte déposé ; poser une muraille ; ouvrir un nouveau dossier ; passer le
    cabinet au coffre Scaleway et ré-envelopper ses dossiers (b4_05) ; les
-   honoraires : saisir du temps, facturer, convention manquante (b4_06).
+   honoraires : saisir du temps, facturer, convention manquante (b4_06) ;
+   les conflits d'intérêts et la vigilance LCB-FT (b4_07) ; la facture
+   imprimable et l'en-tête du cabinet (b4_09).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -209,6 +211,80 @@ for (const largeur of LARGEURS) {
   const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Honoraires"]'); const w = document.documentElement.clientWidth; const larges = [...c.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1; }).length; return { larges, deb: document.documentElement.scrollWidth - w }; })()`);
   ok(m.larges === 0 && m.deb === 0, `la carte tient dans 390 px (${m.larges} élément(s) trop large(s), débordement ${m.deb})`);
   await s.capturer(`${dossier}tamila-honoraires-390.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-conflits', densite: 1 });
+  console.log('— les conflits d\'intérêts et la vigilance (b4_07)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0430/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const carte = () => s.evaluer(`document.querySelector('section[aria-label="Conflits d\\'intérêts et vigilance"]')?.innerText || ''`);
+  const t0 = await carte();
+  ok(/Jamais/.test(t0) && /2 sur 2/.test(t0), 'jamais contrôlé, deux parties indexées');
+  ok(/vigilance LCB-FT n.est pas posée/.test(t0), 'la vigilance est à poser');
+  ok(/Les noms ne sont jamais conservés en clair ; une empreinte reste pour détecter un conflit avec un ancien client\./.test(t0), 'la notice : pas de nom en clair, une empreinte reste pour les anciens clients');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Conflits d\\'intérêts et vigilance"] .r-btn')].find(b => /Contrôler les conflits/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const t1 = await carte();
+  ok(/Moulin \(SCI du\)/.test(t1) && /1 conflit/.test(t1) && /Conflit : client dans le dossier 2026-0412/.test(t1), 'l\'adversaire « Moulin (SCI du) » est client dans 2026-0412 : un conflit, malgré l\'écriture différente');
+  ok(/M\. Jean Garnier[\s\S]*Aucune correspondance/.test(t1), 'le client, jamais vu : aucune correspondance');
+  ok(/1 conflit sans décision/.test(t1), 'un conflit sans décision est signalé (RIN art. 4)');
+  await s.evaluer(`document.querySelector('section[aria-label="Conflits d\\'intérêts et vigilance"]')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tamila-conflits-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Conflits d\\'intérêts et vigilance"] .esp-lien-bouton')].find(b => /Décider/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const options = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] select')][0] ? [...[...document.querySelectorAll('[role="dialog"] select')][0].options].map(o => o.value).join(',') : ''`);
+  ok(options === 'conflit_leve,refus', `un conflit se lève ou le dossier se refuse, rien d'autre (${options})`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const t2 = await carte();
+  ok(/Conflit levé/.test(t2) && !/conflit sans décision/.test(t2), 'le conflit est levé, plus rien à décider');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Conflits d\\'intérêts et vigilance"] .r-btn')].find(b => /Vigilance LCB-FT/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select'); sel.value = 'oui'; sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  const champs = await s.evaluer(`document.querySelectorAll('[role="dialog"] select, [role="dialog"] input').length`);
+  ok(champs === 6, `assujetti : activité, deux dates, pièce, risque (${champs} champs)`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const t3 = await carte();
+  ok(/Transaction immobilière/.test(t3) && /identifiez le client et le bénéficiaire effectif/.test(t3), 'assujetti sans identification : encore à faire');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-facture-imprimee', densite: 1 });
+  console.log('— la facture imprimable (b4_09)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Honoraires"] .esp-lien-bouton')].find(b => /Imprimer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const apercu = () => s.evaluer(`document.querySelector('iframe.tam-facture-apercu')?.contentDocument?.body?.innerText || ''`);
+  const f0 = await apercu();
+  ok(/Facture/.test(f0) && /H-2026-000041/.test(f0), 'l\'aperçu de la facture H-2026-000041');
+  ok(/SIREN 552100554/.test(f0) && /TVA FR40552100554/.test(f0) && /barreau de Paris/.test(f0), 'les mentions du cabinet : SIREN, TVA, barreau');
+  ok(/SCI du Moulin/.test(f0), 'le client, déchiffré dans le navigateur');
+  ok(/Rédaction — Rédaction des conclusions d.appelant/.test(f0) && /625,00/.test(f0) && /250,00/.test(f0), 'le détail du temps : 2 h 30 de rédaction × 250 € = 625 €');
+  ok(/Reste à payer\s*485,00/.test(f0) && /Provisions reçues, déduites/.test(f0), 'provision déduite, reste à payer 485 €');
+  ok(/indemnité forfaitaire de 40 €/.test(f0) && /L\.441-10/.test(f0) && /Échéance le/.test(f0), 'échéance, pénalités de retard et indemnité de 40 € (L.441-10, D.441-5)');
+  await s.evaluer(`(() => { const ta = [...document.querySelectorAll('[role="dialog"] textarea')][0]; const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; set.call(ta, '3 chemin des Moulins\\n97100 Basse-Terre'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(500);
+  ok(/97100 Basse-Terre/.test(await apercu()), 'l\'adresse du client tapée pour l\'impression apparaît sur la facture');
+  await s.capturer(`${dossier}tamila-facture-imprimee-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lien-bouton')].find(b => /Modifier l.en-tête/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  await s.evaluer(`(() => { const l = [...document.querySelectorAll('[role="dialog"] label')].find(l => /^Toque/.test(l.textContent)); const i = l.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'P 0456'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer l.en-tête/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(/toque P 0456/.test(await apercu()), 'le gérant modifie l\'en-tête : la toque change sur la facture');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }
 

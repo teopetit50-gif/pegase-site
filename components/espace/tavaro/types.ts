@@ -283,7 +283,7 @@ export type LigneJournal = {
 };
 
 /* ce que l'agent saisit au retour : la forme exacte attendue par loc_chiffrer_retour */
-export type DommageSaisi = { code: string; libelle?: string; quantite?: number; prix_eur?: number; devis_eur?: number; regime_tva?: RegimeTva; preuves: Preuve[] };
+export type DommageSaisi = { code: string; zone?: ZoneDommage; libelle?: string; quantite?: number; prix_eur?: number; devis_eur?: number; regime_tva?: RegimeTva; preuves: Preuve[] };
 export type PosteSaisi = { code: string; libelle?: string; quantite?: number; prix_eur?: number; devis_eur?: number; nature?: "frais" | "dommage"; preuves: Preuve[] };
 export type Retour = {
   retour_reel_le: string;
@@ -311,6 +311,8 @@ export type Dossier = {
   avoirs: Avoir[];
   demandes: DemandeCourte[];
   journal: LigneJournal[];
+  /* b2_05 : les états des lieux de départ et de retour (vide tant que la migration n'est pas posée) */
+  etats: EtatDesLieux[];
 };
 
 export type Role = "gerant" | "admin" | "valideur" | "collaborateur" | "lecteur";
@@ -352,5 +354,39 @@ export type AvisContravention = {
   classe_par: string | null;
   source: "saisie" | "lecture";
   cree_par: string | null;
+  cree_le: string;
+};
+
+/* ——— l'état des lieux contradictoire (migration b2_05, vague 3) ——— */
+export type ZoneDommage = "avant" | "arriere" | "flanc_gauche" | "flanc_droit" | "toit" | "pare_brise" | "vitres" | "jantes" | "interieur" | "coffre";
+export type PhotoEtat = { vue: string; chemin: string; prise_le?: string };
+export type DommageConstate = { zone: ZoneDommage; code?: string; description: string; preuves: { chemin: string; prise_le?: string }[] };
+export type EtatDesLieux = {
+  id: string;
+  client_id: string;
+  entite_id: string;
+  contrat_id: string;
+  moment: "depart" | "retour";
+  statut: "brouillon" | "signe" | "refuse";
+  releve_le: string;
+  km: number | null;
+  carburant_8: number | null;
+  charge_pct: number | null;
+  photos: PhotoEtat[];
+  dommages: DommageConstate[];
+  observations: string | null;
+  caution_eur: number | null;
+  caution_mode: "empreinte_carte" | "cheque" | "especes" | "virement" | "aucune" | null;
+  caution_reference: string | null;
+  caution_statut: "prise" | "levee" | null;
+  caution_levee_le: string | null;
+  caution_motif: string | null;
+  signataire_nom: string | null;
+  signature_chemin: string | null;
+  signe_le: string | null;
+  empreinte: string | null;
+  refus_motif: string | null;
+  refuse_le: string | null;
+  etabli_par: string | null;
   cree_le: string;
 };

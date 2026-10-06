@@ -26,9 +26,11 @@ import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
 import { AGENCES_EXEMPLE, AVIS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, chargerMonde, chiffrerRetour, classerAvis, completerContrat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
-import type { AvisContravention, Avoir, Bareme, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
+import { amenderContrat, chargerMonde, chiffrerRetour, classerAvis, completerContrat, constaterRefus, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import type { AvisContravention, Avoir, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
+import type { GestesEtats } from "./EtatsDesLieux";
+import { appliquerEtats, empreinte } from "./edl";
 import BaremeVue from "./BaremeVue";
 import AvisVue, { type GestesAvis } from "./AvisVue";
 import "./tavaro.css";
@@ -88,7 +90,7 @@ export default function EcranTavaro() {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, []);
-  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention"], source === "reelle", relire);
+  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
     if (!id) return "Système";
@@ -187,7 +189,11 @@ export default function EcranTavaro() {
         const prolong = d.amendements.filter((a) => a.retour_prevu_le).map((a) => a.retour_prevu_le!).sort().pop();
         const retourPrevu = prolong && prolong > d.contrat.retour_prevu_le ? prolong : d.contrat.retour_prevu_le;
         const version = Math.max(0, ...d.propositions.map((p) => p.version)) + 1;
-        const { proposition, lignes } = chiffrerLocal({ contrat: d.contrat, vehicule: d.vehicule, retour, bareme: local.lignesBareme.filter((l) => l.bareme_id === BAREME_EXEMPLE.id), reglages: local.reglages ?? REGLAGES_EXEMPLE, version, par: moiId, ids, retourPrevu });
+        const applique = appliquerEtats(retour, d.etats);
+        retour = applique.retour;
+        const calc = chiffrerLocal({ contrat: d.contrat, vehicule: d.vehicule, retour, bareme: local.lignesBareme.filter((l) => l.bareme_id === BAREME_EXEMPLE.id), reglages: local.reglages ?? REGLAGES_EXEMPLE, version, par: moiId, ids, retourPrevu });
+        const proposition = { ...calc.proposition, avertissements: [...calc.proposition.avertissements, ...applique.avertissements] };
+        const lignes = calc.lignes;
         /* les précédentes non décidées sont remplacées ; une demande en attente est annulée */
         const propositions = d.propositions.map((p) => (["calculee", "preuve_manquante", "rien_a_facturer", "a_valider"].includes(p.statut) ? { ...p, statut: "remplacee" as const } : p));
         let demandes = d.demandes.map((x) => (d.propositions.some((p) => p.demande_id === x.id && p.statut === "a_valider") ? { ...x, statut: "annulee" } : x));
@@ -260,6 +266,85 @@ export default function EcranTavaro() {
     await new Promise((r) => setTimeout(r, 350));
     setLocal((prev) => ({ ...prev, baremes: prev.baremes.map((x) => (x.id === b.id ? { ...x, statut: "retire" as const, retire_le: maintenant(), motif_retrait: motif || null } : x)) }));
   };
+
+  /* ——— les états des lieux : les photos et la signature partent d'abord dans le bucket (base réelle), puis la porte ——— */
+  const gestesEtats: GestesEtats = useMemo(() => {
+    const d0 = () => dossier!;
+    const changerEtats = (f: (etats: EtatDesLieux[]) => EtatDesLieux[]) => {
+      const d = d0();
+      remplacerLocal({ ...d, etats: f(d.etats) });
+    };
+    const attendre = () => new Promise((r) => setTimeout(r, 350));
+    return {
+      etablir: async (moment, valeurs, fichiers) => {
+        const d = d0();
+        if (source === "reelle") {
+          const client = moi?.client_id;
+          if (!client) throw new Error("Compte introuvable : reconnectez-vous.");
+          const photos: Record<string, unknown>[] = [];
+          for (const [cle, fs] of fichiers) {
+            if (!cle.startsWith("vue:")) continue;
+            for (const f of fs) photos.push({ vue: cle.slice(4), chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString() });
+          }
+          const dommages = await Promise.all(((valeurs.dommages as Record<string, unknown>[]) ?? []).map(async (x, i) => ({
+            ...x, preuves: await Promise.all((fichiers.get(`dommage:${i}`) ?? []).map(async (f) => ({ chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString() }))),
+          })));
+          const id = await etablirEtat(d.contrat.id, moment, { ...valeurs, photos, dommages });
+          await relire();
+          return id;
+        }
+        await attendre();
+        const exist = d.etats.find((e) => e.moment === moment);
+        const photos = [...fichiers].filter(([k]) => k.startsWith("vue:")).flatMap(([k, fs]) => fs.map((f) => ({ vue: k.slice(4), chemin: f.name, prise_le: maintenant() })));
+        const dommages = ((valeurs.dommages as Record<string, unknown>[]) ?? []).map((x, i) => ({ ...x, preuves: (fichiers.get(`dommage:${i}`) ?? []).map((f) => ({ chemin: f.name, prise_le: maintenant() })) })) as EtatDesLieux["dommages"];
+        const caution = typeof valeurs.caution_eur === "number" ? valeurs.caution_eur : null;
+        const mode = (valeurs.caution_mode as EtatDesLieux["caution_mode"]) ?? null;
+        const e: EtatDesLieux = {
+          id: exist?.id ?? ids(), client_id: EXEMPLE_CLIENT_ID, entite_id: d.contrat.entite_id, contrat_id: d.contrat.id, moment, statut: "brouillon", releve_le: maintenant(),
+          km: (valeurs.km as number) ?? null, carburant_8: (valeurs.carburant_8 as number) ?? null, charge_pct: null, photos, dommages, observations: (valeurs.observations as string) ?? null,
+          caution_eur: moment === "depart" ? caution : null, caution_mode: moment === "depart" ? mode : null, caution_reference: moment === "depart" ? ((valeurs.caution_reference as string) ?? null) : null,
+          caution_statut: moment === "depart" && caution && mode !== "aucune" ? "prise" : null, caution_levee_le: null, caution_motif: null,
+          signataire_nom: null, signature_chemin: null, signe_le: null, empreinte: null, refus_motif: null, refuse_le: null, etabli_par: moiId, cree_le: maintenant(),
+        };
+        changerEtats((l) => [...l.filter((x) => x.moment !== moment), e]);
+        return e.id;
+      },
+      signer: async (etat, signataire, signature) => {
+        if (source === "reelle") {
+          const d = d0();
+          const client = moi?.client_id;
+          const chemin = client && signature ? await deposerPhoto(client, d.contrat.id, new File([signature], `signature-${etat.slice(0, 8)}.png`, { type: "image/png" })) : null;
+          await signerEtat(etat, signataire, chemin);
+          await relire();
+          return;
+        }
+        await attendre();
+        const e = d0().etats.find((x) => x.id === etat);
+        if (!e) return;
+        const quand = maintenant();
+        const h = await empreinte({ ...e, signataire, signe_le: quand });
+        changerEtats((l) => l.map((x) => (x.id === etat ? { ...x, statut: "signe", signataire_nom: signataire, signe_le: quand, signature_chemin: "signature.png", empreinte: h } : x)));
+      },
+      refuser: async (etat, motif) => {
+        if (source === "reelle") {
+          await constaterRefus(etat, motif);
+          await relire();
+          return;
+        }
+        await attendre();
+        changerEtats((l) => l.map((x) => (x.id === etat ? { ...x, statut: "refuse", refus_motif: motif, refuse_le: maintenant() } : x)));
+      },
+      leverCaution: async (motif) => {
+        if (source === "reelle") {
+          await leverCaution(d0().contrat.id, motif);
+          await relire();
+          return;
+        }
+        await attendre();
+        changerEtats((l) => l.map((x) => (x.moment === "depart" ? { ...x, caution_statut: "levee", caution_levee_le: maintenant(), caution_motif: motif } : x)));
+      },
+    };
+  }, [source, dossier, moi, moiId, relire, remplacerLocal]);
 
   /* ——— les avis de contravention : la porte en base réelle, le même rapprochement en mémoire pour l'exemple ——— */
   const gestesAvis: GestesAvis = useMemo(() => {
@@ -425,7 +510,7 @@ export default function EcranTavaro() {
 
         <section id="esp-dossier" className="esp-detail-mobile" aria-label="Dossier du contrat">
           {dossier ? (
-            <DossierContrat key={dossier.contrat.id} dossier={dossier} source={source} role={role} moi={moiId} bareme={monde?.lignesBareme ?? []} reglages={monde?.reglages ?? null} agences={agences} nommer={nommer} gestes={gestes} />
+            <DossierContrat key={dossier.contrat.id} dossier={dossier} source={source} role={role} moi={moiId} bareme={monde?.lignesBareme ?? []} reglages={monde?.reglages ?? null} agences={agences} nommer={nommer} gestes={gestes} gestesEtats={gestesEtats} />
           ) : source === "reelle" && !reel ? (
             <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>
           ) : (

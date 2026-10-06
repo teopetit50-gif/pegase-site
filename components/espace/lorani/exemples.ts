@@ -17,7 +17,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { CasRejet, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet, Recours, Temps } from "./types";
+import type { CasRejet, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -53,7 +53,7 @@ export const PROJETS_EXEMPLE: Projet[] = [
   projet({ id: P_LEMOINE, nom: "Maison Lemoine", reference: "26-014", adresse: "12 rue des Hauts-Pavés", code_postal: "44000", commune: "Nantes", code_insee: "44109", parcelles: ["AB 123", "AB 124"], nature: "maison_individuelle" }),
   projet({ id: P_ENFANCE, nom: "Pôle enfance de Vaulx-en-Velin", reference: "26-009", adresse: "4 avenue Roger-Salengro", code_postal: "69120", commune: "Vaulx-en-Velin", code_insee: "69256", parcelles: ["BK 58"], nature: "erp", marche_public: true }),
   projet({ id: P_MARTIN, nom: "Maison Martin", reference: "26-011", adresse: "27 rue Bellecombe", code_postal: "69003", commune: "Lyon 3e", code_insee: "69383", parcelles: ["AV 212"], nature: "maison_individuelle" }),
-  projet({ id: P_MERCIERE, nom: "Façade rue Mercière", reference: "25-031", adresse: "31 rue Mercière", code_postal: "69002", commune: "Lyon 2e", code_insee: "69382", parcelles: ["AC 77"], nature: "tertiaire", phase: "dce" }),
+  projet({ id: P_MERCIERE, nom: "Façade rue Mercière", reference: "25-031", adresse: "31 rue Mercière", code_postal: "69002", commune: "Lyon 2e", code_insee: "69382", parcelles: ["AC 77"], nature: "tertiaire", phase: "det" }),
   projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd" }),
 ];
 
@@ -428,6 +428,7 @@ export const LOTS_EXEMPLE: Lot[] = [
   { id: id("1", 6), projet_id: P_ENFANCE, numero: "08", intitule: "Électricité — SSI", activites_requises: ["electricite", "ssi"] },
   { id: id("1", 7), projet_id: P_MARTIN, numero: "01", intitule: "Maçonnerie", activites_requises: [] },
   { id: id("1", 8), projet_id: P_MERCIERE, numero: "01", intitule: "Ravalement — pierre de taille", activites_requises: ["pierre"] },
+  { id: id("1", 9), projet_id: P_MERCIERE, numero: "02", intitule: "Échafaudage", activites_requises: [] },
 ];
 
 export const INTERVENANTS_EXEMPLE: Intervenant[] = [
@@ -491,6 +492,26 @@ export const TEMPS_EXEMPLE: Temps[] = [
   { id: T(10), projet_id: P_ENFANCE, honoraire_id: H(8), membre: SOFIA, jour: j(-2), heures: 41, note: "Économie, estimation" },
 ];
 
+/* ——— le chantier (b5_13) : la façade rue Mercière, en travaux ——— */
+const M = (n: number) => id("m", n);
+export const MARCHES_EXEMPLE: Marche[] = [
+  { id: M(1), projet_id: P_MERCIERE, lot_id: id("1", 8), titulaire: "Pierres de Bourgogne SARL", montant_ht: 186000, avenants_ht: 7400, retenue_pct: 5, delai_verification_jours: 15, actif: true },
+  { id: M(2), projet_id: P_MERCIERE, lot_id: id("1", 9), titulaire: "Échafaudages Rhône", montant_ht: 24000, avenants_ht: 0, retenue_pct: 5, delai_verification_jours: 15, actif: true },
+];
+const mois = (n: number) => `${j(n).slice(0, 7)}-01`;
+export const SITUATIONS_EXEMPLE: Situation[] = [
+  { id: id("5", 1), projet_id: P_MERCIERE, marche_id: M(1), numero: 1, mois: mois(-95), cumul_ht: 42000, recue_le: j(-66), a_viser_avant: j(-51), statut: "visee", cumul_admis_ht: 42000, observation: null, visee_le: j(-60) },
+  { id: id("5", 2), projet_id: P_MERCIERE, marche_id: M(1), numero: 2, mois: mois(-65), cumul_ht: 98000, recue_le: j(-36), a_viser_avant: j(-21), statut: "rectifiee", cumul_admis_ht: 95500, observation: "Joints non réalisés sur la travée 3", visee_le: j(-30) },
+  { id: id("5", 3), projet_id: P_MERCIERE, marche_id: M(1), numero: 3, mois: mois(-35), cumul_ht: 201500, recue_le: j(-4), a_viser_avant: j(11), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null },
+  { id: id("5", 4), projet_id: P_MERCIERE, marche_id: M(2), numero: 1, mois: mois(-65), cumul_ht: 12000, recue_le: j(-36), a_viser_avant: j(-21), statut: "visee", cumul_admis_ht: 12000, observation: null, visee_le: j(-33) },
+  { id: id("5", 5), projet_id: P_MERCIERE, marche_id: M(2), numero: 2, mois: mois(-35), cumul_ht: 11000, recue_le: j(-9), a_viser_avant: j(6), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null },
+];
+export const VISAS_EXEMPLE: Visa[] = [
+  { id: id("6", 1), projet_id: P_MERCIERE, lot_id: id("1", 8), document: "Calepinage des pierres — façade sud", indice: "B", recu_le: j(-2), commande_le: j(3), delai_visa_jours: 15, a_viser_avant: j(2), avis: "a_viser", observation: null, vise_le: null },
+  { id: id("6", 2), projet_id: P_MERCIERE, lot_id: id("1", 9), document: "Plan d’échafaudage et notes de calcul", indice: "A", recu_le: j(-20), commande_le: null, delai_visa_jours: 15, a_viser_avant: j(-5), avis: "a_viser", observation: null, vise_le: null },
+  { id: id("6", 3), projet_id: P_MERCIERE, lot_id: id("1", 8), document: "Fiche technique du mortier de chaux", indice: "A", recu_le: j(-25), commande_le: null, delai_visa_jours: 15, a_viser_avant: j(-10), avis: "vso", observation: null, vise_le: j(-12) },
+];
+
 export function dossierExemple(): Dossier {
   return {
     projets: PROJETS_EXEMPLE,
@@ -505,6 +526,9 @@ export function dossierExemple(): Dossier {
     pieces: PIECES_EXEMPLE,
     honoraires: HONORAIRES_EXEMPLE,
     temps: TEMPS_EXEMPLE,
+    marches: MARCHES_EXEMPLE,
+    situations: SITUATIONS_EXEMPLE,
+    visas: VISAS_EXEMPLE,
     noms: {},
     moi: { user_id: EXEMPLE_MOI, client_id: C, role: "valideur" },
   };

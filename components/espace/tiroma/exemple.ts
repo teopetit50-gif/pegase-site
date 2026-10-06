@@ -193,4 +193,53 @@ export const DOSSIER_EXEMPLE: Dossier = {
     },
     bilan: { jours: 30, appels: 64, patients: 41, rdv_pris: 19, confirmes: 17, refus: 6, ne_plus_contacter: 1, a_reporter_logiciel: 1, valeur_plans: 8740, minutes_creneaux: 495 },
   },
+  /* b3_13 : trente jours de pilotage du cabinet d'exemple */
+  pilotage: {
+    periode: { du: aujourdHui(-29), au: aujourdHui(0), jours: 30 },
+    devis: {
+      presentes: 38, signes: 24, taux: 0.632, montant_presente: 61840, montant_signe: 39210,
+      par_panier: [
+        { panier: "100_sante", presentes: 11, signes: 9, montant_signe: 4120 },
+        { panier: "libre", presentes: 12, signes: 6, montant_signe: 21950 },
+        { panier: "maitrise", presentes: 15, signes: 9, montant_signe: 13140 },
+      ],
+      precedent: { presentes: 34, signes: 19, taux: 0.559 },
+    },
+    en_attente: {
+      devis: 9, montant: 18460, expirent_30j: 2, a_relancer: 3,
+      a_relancer_liste: [
+        { plan_id: "pl-9", patient_id: "pa-15", patient_nom: "Joëlle Céleste", devis_numero: "D-2026-0488", montant: 4280, reste_a_charge: 1960, presente_le: aujourdHui(-19), valide_jusqu_au: aujourdHui(161), panier: "libre" },
+        { plan_id: "pl-10", patient_id: "pa-16", patient_nom: "Firmin Bellance", devis_numero: "D-2026-0497", montant: 1350, reste_a_charge: 410, presente_le: aujourdHui(-12), valide_jusqu_au: aujourdHui(18), panier: "maitrise" },
+        { plan_id: "pl-11", patient_id: "pa-17", patient_nom: "Rose-Aimée Ternel", devis_numero: "D-2026-0503", montant: 690, reste_a_charge: 0, presente_le: aujourdHui(-9), valide_jusqu_au: aujourdHui(171), panier: "100_sante" },
+      ],
+    },
+    plans_sans_rdv: { nombre: 4, montant: 4865, reste_a_charge: 1748 },
+    rendez_vous: {
+      passes: 612, honores: 583, manques: 21, annules: 47, taux_manques: 0.034,
+      par_praticien: [
+        { praticien_id: P1, nom: "Dr Ambre Lacour", passes: 344, manques: 14, taux: 0.041 },
+        { praticien_id: P2, nom: "Dr Mathis Rousseau", passes: 268, manques: 7, taux: 0.026 },
+      ],
+      precedent: { passes: 590, manques: 26, taux_manques: 0.044 },
+    },
+    appels: { appels: 64, rdv_pris: 19 },
+  },
+  /* b3_14 : les rappels du cabinet d'exemple, en essai (patients fictifs) */
+  rappels: {
+    reglage: { mode: "essai", essai: true, canaux: ["email"] },
+    contacts: [
+      { id: "ct-1", patient_id: "pa-9", patient_nom: "Michel Dorville", canal: "email", adresse: "michel.dorville@exemple.test", rappels: true, relances: true, source: "oral", cree_le: ilYa(12) },
+      { id: "ct-2", patient_id: "pa-1", patient_nom: "Marguerite Delannoy", canal: "email", adresse: "m.delannoy@exemple.test", rappels: false, relances: true, source: "ecrit", cree_le: ilYa(30) },
+      { id: "ct-3", patient_id: "pa-6", patient_nom: "Patrice Zami", canal: "email", adresse: "patrice.zami@exemple.test", rappels: true, relances: false, source: "formulaire", cree_le: ilYa(4) },
+    ],
+    envois: [
+      { id: "en-1", type: "j2", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(0, 7, 7), envoye_le: null, patient_nom: "Michel Dorville" },
+      { id: "en-2", type: "plan", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(0, 7, 7), envoye_le: null, patient_nom: "Marguerite Delannoy" },
+      { id: "en-3", type: "devis", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(-1, 7, 7), envoye_le: null, patient_nom: "Michel Dorville" },
+    ],
+    reponses: [
+      { id: "rp-1", reponse: "confirme", recue_le: a(-1, 18, 2), rendez_vous_id: "rdv-11", debut: a(1, 14, 30), patient_nom: "Christiane Laurent" },
+      { id: "rp-2", reponse: "annule", recue_le: a(0, 7, 55), rendez_vous_id: "rdv-12", debut: a(2, 9, 0), patient_nom: "Georges Pétro" },
+    ],
+  },
 };

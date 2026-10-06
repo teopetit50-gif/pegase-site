@@ -182,3 +182,38 @@ Deno.test("demandes mal formées : action inconnue, uuid illisibles, région du 
   assertEquals(n.statut, 503);
   assertNotEquals(n.corps.erreur, undefined);
 });
+
+Deno.test("clé d'index : le gérant la fait émettre au coffre, un avocat la reçoit ; elle ne s'ouvre pas au nom d'un dossier", async () => {
+  const c = await cabinetActive();
+  const avocat = await traiter(c.ctx, personne(AVOCAT), { action: "nouvelle_cle_index", client: CLIENT });
+  assertEquals(avocat.statut, 403, "le gérant seul fait émettre la clé d'index");
+  const n = await traiter(c.ctx, personne(GERANT), { action: "nouvelle_cle_index", client: CLIENT });
+  assertEquals(n.statut, 200);
+  const cle = n.corps.cle as string;
+  assertEquals(depuisBase64(cle).length, 32);
+  assertEquals(c.portes.journal.at(-1)!.issue, "emise");
+  const encore = await traiter(c.ctx, personne(GERANT), { action: "nouvelle_cle_index", client: CLIENT });
+  assertEquals(encore.statut, 409, "une seule clé d'index par cabinet");
+  const r = await traiter(c.ctx, personne(AVOCAT), { action: "cle_index", client: CLIENT });
+  assertEquals(r.corps.cle, cle, "l'avocat reçoit la même clé");
+  assertEquals(c.portes.journal.at(-1)!.issue, "deballe");
+  const { cleMaitre } = lireReference(c.portes.index!.reference);
+  await c.km!.dechiffrer(cleMaitre, depuisHex(c.portes.index!.enveloppe), DOSSIER).then(
+    () => assert(false, "l'enveloppe de la clé d'index ne s'ouvre pas au nom d'un dossier"),
+    (e) => assert(e instanceof ErreurCoffre),
+  );
+  const voisin = await traiter(c.ctx, personne(VOISIN), { action: "cle_index", client: CLIENT });
+  assertEquals(voisin.statut, 403);
+});
+
+Deno.test("clé d'index : un cabinet local est renvoyé à la phrase ; sans clé, 404", async () => {
+  const c = contexte();
+  const sans = await traiter(c.ctx, personne(AVOCAT), { action: "cle_index", client: CLIENT });
+  assertEquals(sans.statut, 404);
+  c.portes.index = { fournisseur: "local", enveloppe: "", reference: "index:local" };
+  const local = await traiter(c.ctx, personne(AVOCAT), { action: "cle_index", client: CLIENT });
+  assertEquals(local.corps.fournisseur, "local");
+  assertFalse("cle" in local.corps);
+  const emise = await traiter(c.ctx, personne(GERANT), { action: "nouvelle_cle_index", client: CLIENT });
+  assertEquals(emise.statut, 409, "un cabinet local ne fait pas émettre de clé d'index au coffre");
+});

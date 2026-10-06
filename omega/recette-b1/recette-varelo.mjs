@@ -9,7 +9,9 @@
    société (territoire obligatoire), déposer un export (lecture des colonnes,
    lignes rejetées), lancer un passage (les codes à traiter ouvrent leurs
    objets), changer de nature, l'export CSV ; l'encours du groupe (vague 3 :
-   plafond, dépassement, dépôt d'une balance âgée).
+   plafond, dépassement, dépôt d'une balance âgée) ; les contrats du groupe
+   à dénoncer (date limite, reconduction tacite, dénonciation, ajout) ; les
+   comptes réciproques intragroupe (états, justification, export) ; « Ce matin ».
    usage : node omega/recette-b1/recette-varelo.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -221,6 +223,89 @@ for (const largeur of LARGEURS) {
   const fin = await s.evaluer(`(() => { const c = ${carte}; return [...c.querySelectorAll('tbody tr')].find(tr => /Hôtel des Alpes/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' '); })()`);
   ok(fin && /101\s000,00\s€/.test(fin) && /Au-dessus du plafond/.test(fin), `la nouvelle balance du siège : 70 000 + 31 000 = 101 000 €, au-dessus des 90 000 (${fin})`);
   ok(!(await s.evaluer(`/Erreur|undefined|NaN/.test(${carte}.innerText)`)), 'aucun « NaN », « undefined » ni « Erreur » dans la carte');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b1-contrats', densite: 1 });
+  console.log('— les contrats du groupe à dénoncer (vague 3)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Contrats du groupe à dénoncer"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(!!lu, 'la carte « Contrats du groupe à dénoncer » est là');
+  ok(lu && /Location de deux chariots/.test(lu.lignes[0]) && /dans 2 jours/.test(lu.lignes[0]) && /Moins de 30 jours/.test(lu.lignes[0]), `en tête, le contrat à dénoncer dans 2 jours (${lu?.lignes[0]})`);
+  ok(lu && /À dénoncer sous 30 jours 2 contrats/.test(lu.texte), 'deux contrats à dénoncer sous 30 jours');
+  ok(lu && lu.lignes.some(l => /Vérifications électriques/.test(l) && /reconduit \(échéance d.origine/.test(l)), 'le contrat dont l\'échéance est passée sans dénonciation est dit reconduit');
+  ok(lu && lu.lignes.some(l => /Livraisons régionales/.test(l) && /2 contrats chez ce tiers, 2 sociétés/.test(l)), 'Transports Deschamps : deux contrats dans deux sociétés, une négociation de groupe');
+  ok(lu && !lu.lignes.some(l => /Flotte automobile/.test(l)), 'le contrat déjà dénoncé n\'est pas « à surveiller »');
+  ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tbody tr')].find(t => /Livraisons régionales/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Dénoncé/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Dénoncé… » sur Livraisons régionales');
+  await s.dormir(400);
+  ok(!!(await s.evaluer(`/Noter la dénonciation — Livraisons régionales/.test(${dlg()}?.innerText || '')`)), 'le dialogue de la dénonciation s\'ouvre');
+  await s.evaluer(saisir('[role="dialog"] input.rv-champ:not([type="date"])', 'Appel d\'offres transport du groupe'));
+  await s.evaluer(clic('[role="dialog"] button', '/Noter la dénonciation/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(`(() => { const c = ${carte}; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), texte: c.innerText.replace(/\\s+/g, ' '), avis: document.querySelector('.esp [role="status"]')?.innerText || '' }; })()`);
+  ok(!apres.lignes.some(l => /Livraisons régionales/.test(l)) && /À dénoncer sous 30 jours 1 contrat/.test(apres.texte) && /dans le délai/.test(apres.avis), 'noté : le contrat sort de la liste, un seul reste sous 30 jours');
+  await s.evaluer(clic(`section[aria-label="Contrats du groupe à dénoncer"] .esp-filtres button`, '/^Dénoncés$/'));
+  await s.dormir(300);
+  const denonces = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' '))`);
+  ok(denonces.length === 2 && denonces.some(l => /Livraisons régionales/.test(l) && /Dénoncé le/.test(l)), `le filtre « Dénoncés » : ${denonces.length} contrats`);
+  await s.evaluer(clic(`section[aria-label="Contrats du groupe à dénoncer"] .esp-filtres button`, '/^À surveiller$/'));
+  ok(await s.evaluer(clic(`section[aria-label="Contrats du groupe à dénoncer"] .esp-carte-tete button`, '/Ajouter un contrat/')) === true, 'clic « Ajouter un contrat »');
+  await s.dormir(400);
+  const gris = await s.evaluer(`[...${dlg()}.querySelectorAll('button')].find(b => /Enregistrer le contrat/.test(b.textContent))?.disabled`);
+  ok(gris === true, 'vide, « Enregistrer le contrat » reste gris');
+  const dans40 = new Date(Date.now() + 40 * 86400000).toISOString().slice(0, 10);
+  await s.evaluer(`(() => { const d = ${dlg()}; const champs = [...d.querySelectorAll('input.rv-champ')]; const poser = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; poser(champs[0], 'Maintenance des climatisations'); poser(champs[1], 'Froid Caraïbes'); poser(d.querySelector('input[type="date"]'), '${dans40}'); const p = champs.find(x => x.getAttribute('inputmode') === 'numeric' && x.value === '3'); poser(p, '1'); })()`);
+  await s.dormir(300);
+  await s.evaluer(clic('[role="dialog"] button', '/Enregistrer le contrat/'));
+  await s.dormir(600);
+  const ajoute = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].find(tr => /Maintenance des climatisations/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' ')`);
+  ok(!!ajoute && /Froid Caraïbes/.test(ajoute) && /Moins de 30 jours/.test(ajoute), `le contrat ajouté (échéance J+40, préavis d'un mois) est à dénoncer sous 30 jours (${ajoute})`);
+  ok(!(await s.evaluer(`/NaN|undefined|Invalid/.test(${carte}.innerText)`)), 'aucun « NaN », « undefined » ni « Invalid » dans la carte');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 768, hauteur: 900, marque: 'b1-reciproques', densite: 1 });
+  console.log('— les comptes réciproques intragroupe (vague 3)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Comptes réciproques intragroupe"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(!!lu, 'la carte « Comptes réciproques intragroupe » est là');
+  ok(lu && /Bertin Menuiserie/.test(lu.lignes[0]) && /Écart à expliquer/.test(lu.lignes[0]) && /-500,00\s€/.test(lu.lignes[0]), `en tête, l'écart de 500 € entre la menuiserie et le siège (${lu?.lignes[0]})`);
+  ok(lu && /À traiter avant la clôture 3 paires/.test(lu.texte), 'trois paires à traiter avant la clôture');
+  ok(lu && lu.lignes.some(l => /Concorde/.test(l)) && lu.lignes.some(l => /Arrêtés différents/.test(l)) && lu.lignes.some(l => /Dette non reconnue/.test(l)), 'concorde, arrêtés différents, dette non reconnue : chaque état est dit');
+  ok(await s.evaluer(clic(`section[aria-label="Comptes réciproques intragroupe"] tbody button`, '/^Justifier$/')) === true, 'clic « Justifier » sur le premier écart');
+  await s.dormir(400);
+  ok((await s.evaluer(`[...${dlg()}.querySelectorAll('button')].find(b => /Justifier l.écart/.test(b.textContent))?.disabled`)) === true, 'sans explication, « Justifier l\'écart » reste gris');
+  await s.evaluer(saisir('[role="dialog"] textarea', 'Facture F-778 du 30/09 reçue par le siège le 2/10.'));
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Justifier l.écart/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(`(() => { const c = ${carte}; return { ligne: [...c.querySelectorAll('tbody tr')].find(tr => /Bertin Menuiserie/.test(tr.innerText) && /-500/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' '), texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(apres.ligne && /Écart justifié/.test(apres.ligne) && /Facture F-778/.test(apres.ligne) && /À traiter avant la clôture 2 paires/.test(apres.texte), `l'écart est justifié, deux paires restent (${apres.ligne})`);
+  const telecharge = await s.evaluer(`(() => { window.__csv = null; URL.createObjectURL = (b) => { b.text().then(t => { window.__csv = t; }); return 'blob:essai'; }; HTMLAnchorElement.prototype.click = function () {}; const b = [...${carte}.querySelectorAll('button')].find(b => /Exporter/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  ok(telecharge === true, 'clic « Exporter (CSV) »');
+  await s.dormir(500);
+  const csv = await s.evaluer(`window.__csv`);
+  ok(typeof csv === 'string' && /^﻿?creancier;debiteur;creance;arrete_creancier;dette;arrete_debiteur;ecart;etat;categorie;motif\n/.test(csv) && /;-500,00;justifie;en_transit;Facture F-778/.test(csv), 'le CSV porte l\'en-tête et l\'écart justifié');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b1-matin', densite: 1 });
+  console.log('— « Ce matin » : le point du matin Varelo en tête de l\'écran (vague 3)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Ce matin"]'); if (!c) return null; return { blocs: [...c.querySelectorAll('.vrl-matin-bloc')].map(b => ({ titre: b.querySelector('h3')?.innerText.replace(/\\s+/g, ' '), lignes: [...b.querySelectorAll('li[data-gravite]')].map(li => li.dataset.gravite + ' | ' + li.innerText) })), avant: c.compareDocumentPosition(document.querySelector('section[aria-label="Objets du groupe"]')) & 4 }; })()`);
+  ok(!!m && m.blocs.length === 3 && !!m.avant, '« Ce matin » est en tête, avec ses trois blocs');
+  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[0].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[0].lignes[0]), `contrats : ${m?.blocs[0].lignes[0]}`);
+  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[1].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[1].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
+  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[2].lignes.join(' ')) && m.blocs[2].lignes.length === 3, `réciproques : ${m?.blocs[2].lignes.length} lignes`);
+  ok(await s.evaluer(`(() => { const a = document.querySelector('section[aria-label="Ce matin"] a[href="#vrl-contrats"]'); return !!a && !!document.getElementById('vrl-contrats'); })()`), 'le titre « Contrats à dénoncer » mène à la carte des contrats');
   s.fermer();
 }
 

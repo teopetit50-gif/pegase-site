@@ -84,8 +84,8 @@ async function deballer(ctx: Contexte, remise: Remise): Promise<Uint8Array> {
 export async function traiter(ctx: Contexte, appelant: Appelant, d: Demande): Promise<Reponse> {
   const action = typeof d.action === "string" ? d.action : "";
   const pourServeur = action === "cle_piece";
-  if (!["activer", "nouvelle_cle", "cle_dossier", "cle_piece", "reenvelopper"].includes(action)) {
-    return refus(400, "ACTION_INCONNUE", "action attendue : activer, nouvelle_cle, cle_dossier, cle_piece ou reenvelopper");
+  if (!["activer", "nouvelle_cle", "cle_dossier", "cle_piece", "reenvelopper", "nouvelle_cle_index", "cle_index"].includes(action)) {
+    return refus(400, "ACTION_INCONNUE", "action attendue : activer, nouvelle_cle, cle_dossier, cle_piece, reenvelopper, nouvelle_cle_index ou cle_index");
   }
   if (pourServeur !== (appelant.type === "serveur")) {
     return refus(
@@ -104,6 +104,10 @@ export async function traiter(ctx: Contexte, appelant: Appelant, d: Demande): Pr
         return await cleDossier(ctx, (appelant as { jeton: string }).jeton, d);
       case "cle_piece":
         return await clePiece(ctx, d);
+      case "nouvelle_cle_index":
+        return await nouvelleCleIndex(ctx, (appelant as { jeton: string }).jeton, d);
+      case "cle_index":
+        return await cleIndex(ctx, (appelant as { jeton: string }).jeton, d);
       default:
         return await reenvelopper(ctx, (appelant as { jeton: string }).jeton, d);
     }
@@ -211,6 +215,50 @@ async function reenvelopper(ctx: Contexte, jeton: string, d: Demande): Promise<R
     const r = await ctx.portes.reenveloppe(a.journal, versHex(enveloppe));
     ctx.journal("info", "clé de dossier ré-enveloppée", { dossier, pieces_relancees: r.pieces_relancees, dossiers_locaux: r.dossiers_locaux });
     return { statut: 200, corps: { dossier, deja: false, statut: r.statut, pieces_relancees: r.pieces_relancees, dossiers_locaux: r.dossiers_locaux } };
+  } finally {
+    cle.fill(0);
+  }
+}
+
+// ─── La clé d'index aveugle du cabinet (b4_07, conflits d'intérêts) ───
+// Une clé de 32 octets par cabinet, sous laquelle le navigateur calcule les empreintes HMAC des noms des parties.
+// Données associées chez Scaleway : « index:<client> » (elle ne se déballe pas au nom d'un dossier).
+
+export const donneesIndex = (client: string) => `index:${client}`;
+
+async function nouvelleCleIndex(ctx: Contexte, jeton: string, d: Demande): Promise<Reponse> {
+  const client = uuid(d.client);
+  if (!client) return refus(400, "CLIENT_ILLISIBLE", "client attendu (uuid)");
+  const n = await ctx.portes.demanderIndex(jeton, client);
+  const cle = crypto.getRandomValues(new Uint8Array(LONGUEUR_CLE));
+  try {
+    const enveloppe = await kmPour(ctx, n.region).chiffrer(n.cle_maitre, cle, donneesIndex(client));
+    await ctx.portes.poserIndex(n.journal, versHex(enveloppe));
+    ctx.journal("info", "clé d'index du cabinet émise", { client });
+    return { statut: 200, corps: { client, fournisseur: "scaleway", cle: versBase64(cle) } };
+  } catch (e) {
+    await ctx.portes.conclure(n.journal, "echec", { code: e instanceof ErreurCoffre ? e.code : "ERREUR_INTERNE" }).catch(() => {});
+    throw e;
+  } finally {
+    cle.fill(0);
+  }
+}
+
+async function cleIndex(ctx: Contexte, jeton: string, d: Demande): Promise<Reponse> {
+  const client = uuid(d.client);
+  if (!client) return refus(400, "CLIENT_ILLISIBLE", "client attendu (uuid)");
+  const remise = await ctx.portes.indexPourMembre(jeton, client);
+  if (!remise) return refus(404, "INDEX_ABSENT", "le cabinet n'a pas encore de clé d'index");
+  if (remise.fournisseur === "local") return { statut: 200, corps: { client, fournisseur: "local" } };
+  const cle = await deballer(ctx, {
+    dossier: donneesIndex(client),
+    fournisseur: "scaleway",
+    journal: remise.journal,
+    reference: remise.reference,
+    enveloppe: remise.enveloppe,
+  });
+  try {
+    return { statut: 200, corps: { client, fournisseur: "scaleway", cle: versBase64(cle) } };
   } finally {
     cle.fill(0);
   }

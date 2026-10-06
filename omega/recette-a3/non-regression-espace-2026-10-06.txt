@@ -1,0 +1,443 @@
+— /espace/validations
+  ✓ la page se charge
+  ✓ titre « À valider » (h1 : À valider)
+  ✓ texte « Ce qui attend votre décision »
+  ✓ texte « En retard »
+  ✓ texte « Montant en attente »
+  ✓ texte « Mes délégations »
+  ✓ texte « Le dossier »
+  ✓ « Approuver » : présente
+  ✓ « Approuver » : atteignable au clavier (Tab)
+  ✓ « Approuver » : dialogue « Approuver »
+  ✓ « Approuver » : le focus entre dans le dialogue
+  ✓ « Approuver » : Échap ferme le dialogue
+  ✓ « Approuver » : le focus revient à la commande (Approuver)
+  ✓ « Refuser » : présente
+  ✓ « Refuser » : atteignable au clavier (Tab)
+  ✓ « Refuser » : dialogue « Refuser »
+  ✓ « Refuser » : le focus entre dans le dialogue
+  ✓ « Refuser » : Échap ferme le dialogue
+  ✓ « Refuser » : le focus revient à la commande (Refuser)
+  ✓ « Modifier » : présente
+  ✓ « Modifier » : atteignable au clavier (Tab)
+  ✓ « Modifier » : dialogue « Modifier la demande »
+  ✓ « Modifier » : le focus entre dans le dialogue
+  ✓ « Modifier » : Échap ferme le dialogue
+  ✓ « Modifier » : le focus revient à la commande (Modifier)
+  ✓ « Déléguer » : présente
+  ✓ « Déléguer » : atteignable au clavier (Tab)
+  ✓ « Déléguer » : dialogue « Déléguer ma décision »
+  ✓ « Déléguer » : le focus entre dans le dialogue
+  ✓ « Déléguer » : Échap ferme le dialogue
+  ✓ « Déléguer » : le focus revient à la commande (Déléguer)
+  ✓ « Décider en lot » : présente
+  ✓ « Décider en lot » : atteignable au clavier (Tab)
+  ✓ « Ouvrir le dossier » : présente
+  ✓ « Ouvrir le dossier » : atteignable au clavier (Tab)
+  ✓ « Ouvrir le dossier » : mène à /espace/filed (arrivé sur /espace/filed)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/filed?objet=facture:R2026-000016
+  ✓ la page se charge
+  ✓ titre « Documents reçus » (h1 : Documents reçus)
+  ✓ texte « Bloquées »
+  ✓ texte « En litige »
+  ✓ texte « Valeurs lues »
+  ✓ texte « Contrôles »
+  ✓ texte « Fil du document »
+  ✓ texte « Fournisseur nouveau »
+  ✓ texte « Vérifiée le »
+  ✓ « Déposer un document » : présente
+  ✓ « Déposer un document » : atteignable au clavier (Tab)
+  ✓ « Déposer un document » : dialogue « Déposer un document »
+  ✓ « Déposer un document » : le focus entre dans le dialogue
+  ✓ « Déposer un document » : Échap ferme le dialogue
+  ✓ « Déposer un document » : le focus revient à la commande (Déposer un document)
+  ✓ « Corriger une valeur » : présente
+  ✓ « Corriger une valeur » : atteignable au clavier (Tab)
+  ✓ « Corriger une valeur » : dialogue « Corriger une valeur »
+  ✓ « Corriger une valeur » : le focus entre dans le dialogue
+  ✓ « Corriger une valeur » : Échap ferme le dialogue
+  ✓ « Corriger une valeur » : le focus revient à la commande (Corriger une valeur)
+  ✓ « Rattacher à un fournisseur » : présente
+  ✓ « Rattacher à un fournisseur » : atteignable au clavier (Tab)
+  ✓ « Rattacher à un fournisseur » : dialogue « Rattacher à un fournisseur »
+  ✓ « Rattacher à un fournisseur » : le focus entre dans le dialogue
+  ✓ « Rattacher à un fournisseur » : Échap ferme le dialogue
+  ✓ « Rattacher à un fournisseur » : le focus revient à la commande (Rattacher à un fournisseur)
+  ✓ « Confirmer ce fournisseur » : présente
+  ✓ « Confirmer ce fournisseur » : atteignable au clavier (Tab)
+  ✓ « Confirmer ce fournisseur » : dialogue « Confirmer le fournisseur »
+  ✓ « Confirmer ce fournisseur » : le focus entre dans le dialogue
+  ✓ « Confirmer ce fournisseur » : Échap ferme le dialogue
+  ✓ « Confirmer ce fournisseur » : le focus revient à la commande (Confirmer ce fournisseur)
+  ✓ « Revérifier auprès de VIES » : présente
+  ✓ « Revérifier auprès de VIES » : atteignable au clavier (Tab)
+  ✓ « Fournisseurs » : présente
+  ✓ « Fournisseurs » : atteignable au clavier (Tab)
+  ✓ « Fournisseurs » : mène à /espace/filed/fournisseurs (arrivé sur /espace/filed/fournisseurs)
+  ✓ « À payer » : présente
+  ✓ « À payer » : atteignable au clavier (Tab)
+  ✓ « À payer » : mène à /espace/filed/a-payer (arrivé sur /espace/filed/a-payer)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/filed?objet=facture:R2026-000017
+  ✓ la page se charge
+  ✓ titre « Documents reçus » (h1 : Documents reçus)
+  ✓ texte « Identifiants lus sur la pièce, non retenus »
+  ✓ texte « clé de Luhn invalide »
+  ✓ « Saisir les vrais identifiants » : présente
+  ✓ « Saisir les vrais identifiants » : atteignable au clavier (Tab)
+  ✓ « Saisir les vrais identifiants » : dialogue « Saisir les identifiants du fournisseur »
+  ✓ « Saisir les vrais identifiants » : le focus entre dans le dialogue
+  ✓ « Saisir les vrais identifiants » : Échap ferme le dialogue
+  ✓ « Saisir les vrais identifiants » : le focus revient à la commande (Saisir les vrais identifiants)
+  ✓ « Voir sur la pièce » : présente
+  ✓ « Voir sur la pièce » : atteignable au clavier (Tab)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/filed?objet=facture:R2026-000014
+  ✓ la page se charge
+  ✓ titre « Documents reçus » (h1 : Documents reçus)
+  ✓ texte « Facture électronique »
+  ✓ texte « du fichier »
+  ✓ « Ouvrir un litige » : présente
+  ✓ « Ouvrir un litige » : atteignable au clavier (Tab)
+  ✓ « Ouvrir un litige » : dialogue « Ouvrir un litige »
+  ✓ « Ouvrir un litige » : le focus entre dans le dialogue
+  ✓ « Ouvrir un litige » : Échap ferme le dialogue
+  ✓ « Ouvrir un litige » : le focus revient à la commande (Ouvrir un litige)
+  ✓ « Cycle de vie » : présente
+  ✓ « Cycle de vie » : atteignable au clavier (Tab)
+  ✓ « Écritures » : présente
+  ✓ « Écritures » : atteignable au clavier (Tab)
+  ✓ « Comptabilité » : présente
+  ✓ « Comptabilité » : atteignable au clavier (Tab)
+  ✓ « Comptabilité » : mène à /espace/filed/comptabilite (arrivé sur /espace/filed/comptabilite)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/filed/comptabilite
+  ✓ la page se charge
+  ✓ titre « Comptabilité » (h1 : Comptabilité)
+  ✓ texte « Fichier des écritures comptables (FEC) — achats »
+  ✓ texte « Il ne remplace pas le FEC complet de votre comptabilité »
+  ✓ texte « Les comptes de FILED »
+  ✓ texte « par défaut »
+  ✓ « Exporter le FEC » : présente
+  ✓ « Exporter le FEC » : atteignable au clavier (Tab)
+  ✓ « Modifier le compte » : présente
+  ✓ « Modifier le compte » : atteignable au clavier (Tab)
+  ✓ « Modifier le compte » : dialogue « Modifier le compte »
+  ✓ « Modifier le compte » : le focus entre dans le dialogue
+  ✓ « Modifier le compte » : Échap ferme le dialogue
+  ✓ « Modifier le compte » : le focus revient à la commande (Modifier le compte : Compte fournisseurs)
+  ✓ « Documents reçus » : présente
+  ✓ « Documents reçus » : atteignable au clavier (Tab)
+  ✓ « Documents reçus » : mène à /espace/filed (arrivé sur /espace/filed)
+  ✓ « À payer » : présente
+  ✓ « À payer » : atteignable au clavier (Tab)
+  ✓ « À payer » : mène à /espace/filed/a-payer (arrivé sur /espace/filed/a-payer)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/filed/fournisseurs
+  ✓ la page se charge
+  ✓ titre « Fournisseurs » (h1 : Fournisseurs)
+  ✓ texte « À confirmer »
+  ✓ texte « Bloqués »
+  ✓ texte « Actifs »
+  ✓ texte « IBAN »
+  ✓ texte « Factures »
+  ✓ « Confirmer ce fournisseur » : présente
+  ✓ « Confirmer ce fournisseur » : atteignable au clavier (Tab)
+  ✓ « Confirmer ce fournisseur » : dialogue « Confirmer le fournisseur »
+  ✓ « Confirmer ce fournisseur » : le focus entre dans le dialogue
+  ✓ « Confirmer ce fournisseur » : Échap ferme le dialogue
+  ✓ « Confirmer ce fournisseur » : le focus revient à la commande (Confirmer ce fournisseur)
+  ✓ « Proposer un IBAN » : présente
+  ✓ « Proposer un IBAN » : atteignable au clavier (Tab)
+  ✓ « Proposer un IBAN » : dialogue « Proposer un IBAN »
+  ✓ « Proposer un IBAN » : le focus entre dans le dialogue
+  ✓ « Proposer un IBAN » : Échap ferme le dialogue
+  ✓ « Proposer un IBAN » : le focus revient à la commande (Proposer un IBAN)
+  ✓ « Documents reçus » : présente
+  ✓ « Documents reçus » : atteignable au clavier (Tab)
+  ✓ « Documents reçus » : mène à /espace/filed (arrivé sur /espace/filed)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/filed/a-payer
+  ✓ la page se charge
+  ✓ titre « À payer » (h1 : À payer)
+  ✓ texte « En retard »
+  ✓ texte « Cette semaine »
+  ✓ texte « Payée en partie »
+  ✓ texte « IBAN manquant »
+  ✓ texte « Reste à payer »
+  ✓ « Noter un paiement » : présente
+  ✓ « Noter un paiement » : atteignable au clavier (Tab)
+  ✓ « Noter un paiement » : dialogue « Noter un paiement »
+  ✓ « Noter un paiement » : le focus entre dans le dialogue
+  ✓ « Noter un paiement » : Échap ferme le dialogue
+  ✓ « Noter un paiement » : le focus revient à la commande (Noter un paiement)
+  ✓ « Fournisseurs » : présente
+  ✓ « Fournisseurs » : atteignable au clavier (Tab)
+  ✓ « Fournisseurs » : mène à /espace/filed/fournisseurs (arrivé sur /espace/filed/fournisseurs)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/varelo
+  ✓ la page se charge
+  ✓ titre « Référentiel du groupe » (h1 : Référentiel du groupe)
+  ✓ texte « Fournisseurs du groupe »
+  ✓ texte « Les codes de chaque société »
+  ✓ texte « Lots à valider »
+  ✓ texte « Sociétés et pôles »
+  ✓ « Déposer un export » : présente
+  ✓ « Déposer un export » : atteignable au clavier (Tab)
+  ✓ « Déposer un export » : dialogue « Déposer l'export d'une société »
+  ✓ « Déposer un export » : le focus entre dans le dialogue
+  ✓ « Déposer un export » : Échap ferme le dialogue
+  ✓ « Déposer un export » : le focus revient à la commande (Déposer un export)
+  ✓ « Lancer un passage » : présente
+  ✓ « Lancer un passage » : atteignable au clavier (Tab)
+  ✓ « Lancer un passage » : dialogue « Lancer un passage de rapprochement »
+  ✓ « Lancer un passage » : le focus entre dans le dialogue
+  ✓ « Lancer un passage » : Échap ferme le dialogue
+  ✓ « Lancer un passage » : le focus revient à la commande (Lancer un passage)
+  ✓ « Proposer un nom » : présente
+  ✓ « Proposer un nom » : atteignable au clavier (Tab)
+  ✓ « Proposer un nom » : dialogue « Proposer un nom pour le groupe »
+  ✓ « Proposer un nom » : le focus entre dans le dialogue
+  ✓ « Proposer un nom » : Échap ferme le dialogue
+  ✓ « Proposer un nom » : le focus revient à la commande (Proposer un nom)
+  ✓ « Inscrire une société » : présente
+  ✓ « Inscrire une société » : atteignable au clavier (Tab)
+  ✓ « Inscrire une société » : dialogue « Inscrire une société au groupe »
+  ✓ « Inscrire une société » : le focus entre dans le dialogue
+  ✓ « Inscrire une société » : Échap ferme le dialogue
+  ✓ « Inscrire une société » : le focus revient à la commande (Inscrire une société)
+  ✓ « Créer un pôle » : présente
+  ✓ « Créer un pôle » : atteignable au clavier (Tab)
+  ✓ « Créer un pôle » : dialogue « Créer un pôle »
+  ✓ « Créer un pôle » : le focus entre dans le dialogue
+  ✓ « Créer un pôle » : Échap ferme le dialogue
+  ✓ « Créer un pôle » : le focus revient à la commande (Créer un pôle)
+  ✓ « Exporter (CSV) » : présente
+  ✓ « Exporter (CSV) » : atteignable au clavier (Tab)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/tavaro
+  ✓ la page se charge
+  ✓ titre « Location : retours et factures » (h1 : Location : retours et factures)
+  ✓ texte « Tous les contrats »
+  ✓ texte « Le chiffrage du retour »
+  ✓ texte « Fil du dossier »
+  ✓ texte « Barème de remise en état »
+  ✓ « Compléter les conditions » : présente
+  ✓ « Compléter les conditions » : atteignable au clavier (Tab)
+  ✓ « Compléter les conditions » : dialogue « Compléter les conditions du contrat C-2026-0412 »
+  ✓ « Compléter les conditions » : le focus entre dans le dialogue
+  ✓ « Compléter les conditions » : Échap ferme le dialogue
+  ✓ « Compléter les conditions » : le focus revient à la commande (Compléter les conditions)
+  ✓ « Prolonger ou offrir le retard » : présente
+  ✓ « Prolonger ou offrir le retard » : atteignable au clavier (Tab)
+  ✓ « Prolonger ou offrir le retard » : dialogue « Amender le contrat C-2026-0412 »
+  ✓ « Prolonger ou offrir le retard » : le focus entre dans le dialogue
+  ✓ « Prolonger ou offrir le retard » : Échap ferme le dialogue
+  ✓ « Prolonger ou offrir le retard » : le focus revient à la commande (Prolonger ou offrir le retard)
+  ✓ « Chiffrer le retour » : présente
+  ✓ « Chiffrer le retour » : atteignable au clavier (Tab)
+  ✓ « Chiffrer le retour » : dialogue « Chiffrer le retour du contrat C-2026-0412 »
+  ✓ « Chiffrer le retour » : le focus entre dans le dialogue
+  ✓ « Chiffrer le retour » : Échap ferme le dialogue
+  ✓ « Chiffrer le retour » : le focus revient à la commande (Chiffrer le retour)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/tiroma
+  ✓ la page se charge
+  ✓ titre « Cabinet dentaire » (h1 : Cabinet dentaire)
+  ✓ texte « Créneaux à sauver »
+  ✓ texte « Plans sans rendez-vous »
+  ✓ texte « Avant les rendez-vous »
+  ✓ texte « Liste d'attente »
+  ✓ texte « Fauteuils »
+  ✓ « Noter la mutuelle » : présente
+  ✓ « Noter la mutuelle » : atteignable au clavier (Tab)
+  ✓ « Noter la mutuelle » : dialogue « La mutuelle, devis D-2026-0412 »
+  ✓ « Noter la mutuelle » : le focus entre dans le dialogue
+  ✓ « Noter la mutuelle » : Échap ferme le dialogue
+  ✓ « Noter la mutuelle » : le focus revient à la commande (Noter la mutuelle)
+  ✓ « Inscrire un patient » : présente
+  ✓ « Inscrire un patient » : atteignable au clavier (Tab)
+  ✓ « Inscrire un patient » : dialogue « Inscrire un patient en liste d'attente »
+  ✓ « Inscrire un patient » : le focus entre dans le dialogue
+  ✓ « Inscrire un patient » : Échap ferme le dialogue
+  ✓ « Inscrire un patient » : le focus revient à la commande (Inscrire un patient)
+  ✓ « Ajouter un praticien » : présente
+  ✓ « Ajouter un praticien » : atteignable au clavier (Tab)
+  ✓ « Ajouter un praticien » : dialogue « Ajouter un praticien »
+  ✓ « Ajouter un praticien » : le focus entre dans le dialogue
+  ✓ « Ajouter un praticien » : Échap ferme le dialogue
+  ✓ « Ajouter un praticien » : le focus revient à la commande (Ajouter un praticien)
+  ✓ « Ajouter un fauteuil » : présente
+  ✓ « Ajouter un fauteuil » : atteignable au clavier (Tab)
+  ✓ « Ajouter un fauteuil » : dialogue « Ajouter un fauteuil »
+  ✓ « Ajouter un fauteuil » : le focus entre dans le dialogue
+  ✓ « Ajouter un fauteuil » : Échap ferme le dialogue
+  ✓ « Ajouter un fauteuil » : le focus revient à la commande (Ajouter un fauteuil)
+  ✓ « Ajouter une fermeture » : présente
+  ✓ « Ajouter une fermeture » : atteignable au clavier (Tab)
+  ✓ « Ajouter une fermeture » : dialogue « Ajouter une fermeture »
+  ✓ « Ajouter une fermeture » : le focus entre dans le dialogue
+  ✓ « Ajouter une fermeture » : Échap ferme le dialogue
+  ✓ « Ajouter une fermeture » : le focus revient à la commande (Ajouter une fermeture)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/tamila
+  ✓ la page se charge
+  ✓ titre « Dossiers du cabinet » (h1 : Dossiers du cabinet)
+  ✓ texte « Tous les dossiers »
+  ✓ texte « Parties »
+  ✓ texte « Audiences »
+  ✓ texte « Pièces »
+  ✓ texte « Journal des accès »
+  ✓ « Nouveau dossier » : présente
+  ✓ « Nouveau dossier » : atteignable au clavier (Tab)
+  ✓ « Nouveau dossier » : dialogue « Ouvrir un dossier »
+  ✓ « Nouveau dossier » : le focus entre dans le dialogue
+  ✓ « Nouveau dossier » : Échap ferme le dialogue
+  ✓ « Nouveau dossier » : le focus revient à la commande (Nouveau dossier)
+  ✓ « Coffre à clés » : présente
+  ✓ « Coffre à clés » : atteignable au clavier (Tab)
+  ✓ « Coffre à clés » : dialogue « Le coffre à clés du cabinet »
+  ✓ « Coffre à clés » : le focus entre dans le dialogue
+  ✓ « Coffre à clés » : Échap ferme le dialogue
+  ✓ « Coffre à clés » : le focus revient à la commande (Coffre à clés)
+  ✓ « Exporter le dossier » : présente
+  ✓ « Exporter le dossier » : atteignable au clavier (Tab)
+  ✓ « Exporter le dossier » : dialogue « Exporter le dossier »
+  ✓ « Exporter le dossier » : le focus entre dans le dialogue
+  ✓ « Exporter le dossier » : Échap ferme le dialogue
+  ✓ « Exporter le dossier » : le focus revient à la commande (Exporter le dossier)
+  ✓ « Saisir un avis » : présente
+  ✓ « Saisir un avis » : atteignable au clavier (Tab)
+  ✓ « Saisir un avis » : dialogue « Saisir un avis RPVA »
+  ✓ « Saisir un avis » : le focus entre dans le dialogue
+  ✓ « Saisir un avis » : Échap ferme le dialogue
+  ✓ « Saisir un avis » : le focus revient à la commande (Saisir un avis)
+  ✓ « Clôturer le dossier » : présente
+  ✓ « Clôturer le dossier » : atteignable au clavier (Tab)
+  ✓ « Clôturer le dossier » : dialogue « Demander la clôture »
+  ✓ « Clôturer le dossier » : le focus entre dans le dialogue
+  ✓ « Clôturer le dossier » : Échap ferme le dialogue
+  ✓ « Clôturer le dossier » : le focus revient à la commande (Clôturer le dossier)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/lorani
+  ✓ la page se charge
+  ✓ titre « Calendrier des permis » (h1 : Calendrier des permis)
+  ✓ texte « Tous les permis »
+  ✓ texte « Lu sur les courriers de la mairie »
+  ✓ texte « Calendrier »
+  ✓ texte « Échéances et rappels »
+  ✓ « Nouveau projet » : présente
+  ✓ « Nouveau projet » : atteignable au clavier (Tab)
+  ✓ « Nouveau projet » : dialogue « Nouveau projet »
+  ✓ « Nouveau projet » : le focus entre dans le dialogue
+  ✓ « Nouveau projet » : Échap ferme le dialogue
+  ✓ « Nouveau projet » : le focus revient à la commande (Nouveau projet)
+  ✓ « Nouveau permis » : présente
+  ✓ « Nouveau permis » : atteignable au clavier (Tab)
+  ✓ « Nouveau permis » : dialogue « Nouveau permis »
+  ✓ « Nouveau permis » : le focus entre dans le dialogue
+  ✓ « Nouveau permis » : Échap ferme le dialogue
+  ✓ « Nouveau permis » : le focus revient à la commande (Nouveau permis)
+  ✓ « Déposer un courrier de la mairie » : présente
+  ✓ « Déposer un courrier de la mairie » : atteignable au clavier (Tab)
+  ✓ « Déposer un courrier de la mairie » : dialogue « Déposer un courrier de la mairie »
+  ✓ « Déposer un courrier de la mairie » : le focus entre dans le dialogue
+  ✓ « Déposer un courrier de la mairie » : Échap ferme le dialogue
+  ✓ « Déposer un courrier de la mairie » : le focus revient à la commande (Déposer un courrier de la mairie)
+  ✓ « Arrêté reçu » : présente
+  ✓ « Arrêté reçu » : atteignable au clavier (Tab)
+  ✓ « Arrêté reçu » : dialogue « Décision de la mairie reçue »
+  ✓ « Arrêté reçu » : le focus entre dans le dialogue
+  ✓ « Arrêté reçu » : Échap ferme le dialogue
+  ✓ « Arrêté reçu » : le focus revient à la commande (Arrêté reçu)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/daliro
+  ✓ la page se charge
+  ✓ titre « Chantiers » (h1 : Chantiers)
+  ✓ texte « Tous les chantiers »
+  ✓ texte « Avenants à signer »
+  ✓ texte « Passages à confirmer »
+  ✓ « Nouveau chantier » : présente
+  ✓ « Nouveau chantier » : atteignable au clavier (Tab)
+  ✓ « Nouveau chantier » : dialogue « Nouveau chantier »
+  ✓ « Nouveau chantier » : le focus entre dans le dialogue
+  ✓ « Nouveau chantier » : Échap ferme le dialogue
+  ✓ « Nouveau chantier » : le focus revient à la commande (Nouveau chantier)
+  ✓ « Rattacher une facture » : présente
+  ✓ « Rattacher une facture » : atteignable au clavier (Tab)
+  ✓ « Rattacher une facture » : dialogue « Rattacher une facture au chantier »
+  ✓ « Rattacher une facture » : le focus entre dans le dialogue
+  ✓ « Rattacher une facture » : Échap ferme le dialogue
+  ✓ « Rattacher une facture » : le focus revient à la commande (Rattacher une facture)
+  ✓ « Ajouter une ligne » : présente
+  ✓ « Ajouter une ligne » : atteignable au clavier (Tab)
+  ✓ « Ajouter une ligne » : dialogue « Ajouter une ligne au marché »
+  ✓ « Ajouter une ligne » : le focus entre dans le dialogue
+  ✓ « Ajouter une ligne » : Échap ferme le dialogue
+  ✓ « Ajouter une ligne » : le focus revient à la commande (Ajouter une ligne)
+  ✓ « Révoquer » : présente
+  ✓ « Révoquer » : atteignable au clavier (Tab)
+  ✓ « Révoquer » : dialogue « Révoquer l'accord permanent »
+  ✓ « Révoquer » : le focus entre dans le dialogue
+  ✓ « Révoquer » : Échap ferme le dialogue
+  ✓ « Révoquer » : le focus revient à la commande (Révoquer)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/point
+  ✓ la page se charge
+  ✓ titre « Point du matin » (h1 : Point du matin)
+  ✓ texte « Trésorerie »
+  ✓ texte « Factures reçues »
+  ✓ texte « Validations »
+  ✓ « Jour précédent » : présente
+  ✓ « Jour précédent » : atteignable au clavier (Tab)
+  ✓ « Ouvrir » : présente
+  ✓ « Ouvrir » : atteignable au clavier (Tab)
+  ✓ « Ouvrir » : mène à /espace/validations (arrivé sur /espace/validations)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+
+══ Bilan /espace (http://localhost:3010) ══
+✓ validations          39/39
+✓ filed                44/44
+✓ filed-identifiants   15/15
+✓ filed-electronique   20/20
+✓ comptabilite         23/23
+✓ fournisseurs         25/25
+✓ a-payer              19/19
+✓ varelo               41/41
+✓ tavaro               27/27
+✓ tiroma               40/40
+✓ tamila               40/40
+✓ lorani               33/33
+✓ daliro               32/32
+✓ point                13/13
+
+tout est là

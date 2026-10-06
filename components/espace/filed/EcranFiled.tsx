@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Building2, Upload, Wallet } from "lucide-react";
+import { BookOpen, Building2, Upload, Wallet } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
@@ -250,6 +250,7 @@ export default function EcranFiled() {
         <div className="esp-item-haut">
           <Link href="/espace/filed/a-payer" className="r-btn r-btn--fil"><Wallet width={15} height={15} aria-hidden="true" /> À payer</Link>
           <Link href="/espace/filed/fournisseurs" className="r-btn r-btn--fil"><Building2 width={15} height={15} aria-hidden="true" /> Fournisseurs</Link>
+          <Link href="/espace/filed/comptabilite" className="r-btn r-btn--fil"><BookOpen width={15} height={15} aria-hidden="true" /> Comptabilité</Link>
           <button type="button" className="r-btn r-btn--noir" onClick={ouvrirDepot}><Upload width={15} height={15} aria-hidden="true" /> Déposer un document</button>
           <Ruban source={source} />
         </div>

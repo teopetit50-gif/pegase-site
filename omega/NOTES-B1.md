@@ -279,3 +279,121 @@ demandent des bons de réception qu'aucun module ne lit encore.
   `accessibilite-varelo.mjs` : carte et dialogue du plafond, 0 écart à 390
   et 1440.
 - Ni coquille de l'espace ni fichier partagé touchés.
+
+### Retour de la recette sur b1_04 (coordinateur, 06/10, 15 h 08 Z)
+
+Posé (dépôt 4633, test 4634) : `^test_b1_` + socle 46/51 : **19/19 verts**, dont
+test_b1_07_depot, _perimetre, _plafond, test_46 (vues security_invoker) et
+test_51 (politiques et droits). La liste figée d'A5 se calcule en base : rien
+à y ajouter (test 44 vert).
+
+### N° 2 codé — les contrats du groupe à dénoncer (b1_05)
+
+- **Migration** `omega/modules/varelo/migrations/b1_05_contrats_groupe.sql` :
+  table `grp_contrats` (société, tiers du référentiel ou libellé, intitulé,
+  catégorie, échéance, reconduction tacite/expresse/aucune, durée d'une
+  reconduction, préavis en jours ou en mois, montant annuel ; statut actif →
+  denonce | archive, rien ne s'efface) ; vue security_invoker
+  `grp_contrats_echeancier` (échéance courante : un contrat tacite échu sans
+  dénonciation avance d'une période — art. 1215 C. civ. ; date limite =
+  échéance − préavis ; jours restants ; état depasse/urgent ≤ 30 j/bientot
+  ≤ 90 j/large/sans_objet ; contrats actifs du même tiers dans le groupe) ;
+  portes `grp_enregistrer_contrat` (créer ou corriger ; gérant, admin,
+  valideur, collaborateur, dans son périmètre), `grp_denoncer_contrat`
+  (gérant, admin, valideur DJ ou DF ; date ≤ aujourd'hui ; hors délai dit),
+  `grp_archiver_contrat` (gérant, admin) ; `grp_controler_contrats` (une
+  alerte par contrat tacite dont la date limite est à ≤ 30 j, « critique »
+  à ≤ 7 j, clé `varelo:contrats.<id>`, fermée au dénoncé/archivé/délai
+  passé) et cron **`varelo-contrats`** (`17 5 * * *`,
+  `private.grp_controler_contrats_tous()`) ; journal
+  `varelo.contrat.enregistre | denonce | archive`. Les deux fonctions de dates
+  (`grp_contrat_echeance`, `grp_contrat_limite`) sont exécutables par
+  authenticated : la vue les appelle.
+- **Défaut trouvé et corrigé avant envoi** : la contrainte « un tiers » laissait
+  passer un tiers nul (un CHECK à NULL passe) → `coalesce(…, 0) >= 1`.
+- **Tests** `omega/tests/varelo/b1_08_contrats.sql` (motif `^test_b1_08_`) :
+  `_echeances` (12), `_denonciation` (18), `_perimetre` (10) — dates relatives
+  à current_date. Maquette locale : **40/40** (et b1_07 toujours 58/58).
+- **Écran** `Contrats.tsx` + `contrats.ts` : carte « Contrats du groupe à
+  dénoncer » (sous 30 j, sous 90 j, montant en jeu, reconduits ; filtres À
+  surveiller / Dénoncés / Tous ; tableau par date limite ; pastille « N
+  contrats chez ce tiers, M sociétés » ; dialogues Ajouter/Corriger et Noter
+  la dénonciation ; Archiver). Recette `recette-varelo.mjs` : 104 contrôles,
+  cinq largeurs ✓ ; axe 0 écart à 390 et 1440 (carte et dialogue d'ajout).
+- **Corrigé au passage** : l'en-tête masqué « Action » (`.vrl-masque`) était
+  en position absolue et sortait du cadre qui défile : débordement de la page
+  à 390 et 768 en vue clients (carte Encours, déjà sur 786017e) et sous la
+  carte Contrats. Passé en bloc en ligne de 1 px.
+
+### Retour de la recette sur b1_05 (coordinateur, 06/10, 15 h 34 Z)
+
+b1_05 posé, `^test_b1_` **20/20 verts** ; carte Contrats fusionnée dans main
+(1f6427c) et poussée.
+
+### N° 3 codé — les comptes réciproques intragroupe (b1_06)
+
+- **Migration** `omega/modules/varelo/migrations/b1_06_reciproques.sql` (après
+  b1_04) : vue security_invoker `grp_reciproques` — pour chaque paire
+  (créancier, débiteur) de sociétés du groupe, la créance vue du créancier (sa
+  balance clients, codes dont l'objet est intragroupe = le débiteur) face à la
+  dette vue du débiteur (sa balance fournisseurs), les deux arrêtés, l'écart, et
+  l'état concorde (< 1 €, même arrêté) / ecart / justifie / dates_differentes /
+  manque_creancier / manque_debiteur ; table `grp_reciproques_justifs` (cause
+  en_transit, change, litige, decalage_periode, erreur_saisie, autre + motif),
+  valable pour l'écart ET les deux arrêtés du moment — un nouveau dépôt qui
+  change l'écart la rend caduque ; portes `grp_justifier_ecart` (gérant, admin,
+  valideur DF ; seulement un état ecart ou dates_differentes) et
+  `grp_exporter_reciproques` (gérant, admin, valideur ; CSV protégé par
+  `private.grp_csv`, montants à la française) ; journal
+  `varelo.reciproques.justification | export`.
+- **Défaut de b1_04 trouvé et corrigé ici** : deux dépôts d'une même transaction
+  avaient le même `now()` et le même arrêté → le « dépôt courant » tiré au
+  hasard. `alter table grp_encours_depots alter column depose_le set default
+  clock_timestamp()` en tête de b1_06.
+- **Tests** `omega/tests/varelo/b1_09_reciproques.sql` (motif `^test_b1_09_`) :
+  `_paires` (15), `_export_isolement` (10). Maquette locale : 25/25 (b1_07 et
+  b1_08 toujours verts, 122 assertions en tout). La maquette pose maintenant
+  `intragroupe_entite_id` comme `private.grp_marquer_intragroupe`.
+- **Écran** `Reciproques.tsx` + `reciproques.ts` : carte « Comptes réciproques
+  intragroupe » (paires, concordantes ou justifiées, à traiter avant la clôture
+  avec le montant ; tableau créancier → débiteur, créance et arrêté, dette
+  reconnue et arrêté, écart, état ; dialogue Justifier ; Exporter (CSV)).
+  `recette-varelo.mjs` : 114 contrôles, cinq largeurs ✓ ; axe 0 écart à 390 et
+  1440 (carte et dialogue de justification).
+- Limite dite : au périmètre partiel, on ne voit que le côté de ses sociétés
+  (l'autre apparaît « manquant ») ; le tableau de clôture se lit au périmètre
+  total.
+
+### Retour de la recette sur b1_06 (coordinateur, 06/10, 15 h 47 Z)
+
+b1_06 + test b1_09 posés : `^test_b1_09_` **2/2 verts**. Écran Réciproques
+fusionné après le vert du test 51. Suite décidée par le coordinateur : le point
+du matin et l'onglet reprennent les trois listes ; prod au gel avec A5.
+
+### Le point du matin Varelo (b1_07)
+
+- **Migration** `omega/modules/varelo/migrations/b1_07_point_du_matin.sql` :
+  `private.grp_lignes_matin(client, 'contrats'|'encours'|'reciproques')`
+  (SECURITY INVOKER, lit les vues de b1_04–b1_06 : contrats tacites à dénoncer
+  ≤ 30 j — critique ≤ 7 j ; clients au-dessus du plafond, balances de plus de
+  7 jours ; réciproques en écart, non reconnues ou à arrêtés différents) ;
+  `public.grp_ce_matin(client)` (les trois listes au périmètre de la personne,
+  pour l'écran) ; `private.grp_deposer_points(maintenant)` (dès 5 h, heure de
+  l'entité principale : « Contrats à dénoncer », « Encours du groupe »,
+  « Réciproques intragroupe » au rôle gérant et à l'équipe direction_financiere,
+  « Contrats à dénoncer » à direction_juridique, par `private.deposer_section` ;
+  section vide retirée ; battement `varelo_matin` ; erreur → alerte) ;
+  `private.grp_euros` (montants à la française) ; cron **`varelo-matin`**
+  (`*/30 * * * *`). Aucune donnée de santé.
+- **Tests** `omega/tests/varelo/b1_10_point_du_matin.sql` (motif
+  `^test_b1_10_`, après b1_08 et b1_09 dont il reprend les aides) : `_ce_matin`
+  (10), `_depot` (11). Maquette locale : 21/21, 143 assertions en tout de b1_07
+  à b1_10.
+- **Écran** `CeMatin.tsx` : le bloc « Ce matin » en tête de /espace/varelo,
+  mêmes phrases que le point du matin, trois blocs avec renvoi à leur carte
+  (`#vrl-contrats`, `#vrl-encours`, `#vrl-reciproques`). Recette 120 contrôles,
+  cinq largeurs ✓, axe 0 écart.
+- **Pour l'onglet de la barre** (fichier partagé de la coquille, chez C1) : un
+  compteur sur l'onglet VARELO se lit par `rpc('grp_ce_matin', {p_client})` —
+  nombre de lignes de gravité attention ou critique dans les trois listes.
+  Je n'ai pas touché la coquille.

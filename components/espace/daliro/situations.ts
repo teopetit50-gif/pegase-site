@@ -62,3 +62,19 @@ export function ouvrirLocale(t: Tableau, periodeFin: string, tauxChoisi: number 
     cumul_ht: 0, precedent_ht: 0, periode_ht: 0, tva: 0, retenue: 0, net_a_payer: 0, mentions: [], demande_id: null, demande_statut: null, soumise_le: null, validee_le: null, validee_libelle: null, motif: null, lignes,
   });
 }
+
+/* L'encaissement d'une situation validée à une date — le même calcul que private.btp_encaissement (b6_16). */
+export type Encaissement = { echeance: string | null; encaisse: number; reste: number; payeeLe: string | null; retard: number; etat: "a_echoir" | "partielle" | "en_retard" | "payee" | null; indemnite: number; penalites: number };
+const jours = (a: string, b: string) => Math.round((new Date(`${a}T12:00:00`).getTime() - new Date(`${b}T12:00:00`).getTime()) / 86400000);
+export function encaissement(s: Situation, jour: string): Encaissement {
+  const paiements = s.paiements ?? [];
+  const encaisse = arrondi(paiements.reduce((t, p) => t + p.montant, 0));
+  const reste = Math.max(arrondi(s.net_a_payer - encaisse), 0);
+  const payeeLe = reste <= 0.005 && paiements.length ? paiements.map((p) => p.recu_le).sort().slice(-1)[0] : null;
+  const ech = s.echeance ?? null;
+  const retard = ech ? Math.max(jours(payeeLe ?? jour, ech), 0) : 0;
+  const etat = s.statut !== "validee" ? null : payeeLe ? "payee" : ech && ech < jour ? "en_retard" : encaisse > 0 ? "partielle" : "a_echoir";
+  const taux = s.penalites_taux ?? null;
+  const penalites = !taux || !ech ? 0 : arrondi((taux / 365) * (paiements.reduce((t, p) => t + p.montant * Math.max(jours(p.recu_le, ech), 0), 0) + reste * Math.max(jours(jour, ech), 0)));
+  return { echeance: ech, encaisse, reste, payeeLe, retard, etat, indemnite: ech && retard > 0 ? 40 : 0, penalites };
+}

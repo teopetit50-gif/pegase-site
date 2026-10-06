@@ -276,6 +276,8 @@ export type Dossier = {
   verifications: Verification[];
   charge: Charge | null;
   appels: RegistreAppels | null;
+  pilotage: Pilotage | null;
+  rappels: Rappels | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -315,3 +317,87 @@ export type RegistreAppels = {
 
 /** Ce qu'on appelle : un patient, pour une raison, éventuellement un plan ou un créneau. */
 export type CibleAppel = { patient_id: string; patient_nom: string; motif: MotifAppel; plan_id: string | null; evenement_id: number | string | null };
+
+/* ——— le pilotage du titulaire (b3_13) ——— */
+
+export type DevisARelancer = {
+  plan_id: string;
+  patient_id: string;
+  patient_nom: string;
+  devis_numero: string | null;
+  montant: number | null;
+  reste_a_charge: number | null;
+  presente_le: string | null;
+  valide_jusqu_au: string | null;
+  panier: string | null;
+};
+
+export type Pilotage = {
+  periode: { du: string; au: string; jours: number };
+  devis: {
+    presentes: number;
+    signes: number;
+    taux: number | null;
+    montant_presente: number;
+    montant_signe: number;
+    par_panier: { panier: string; presentes: number; signes: number; montant_signe: number }[];
+    precedent: { presentes: number; signes: number; taux: number | null };
+  };
+  en_attente: { devis: number; montant: number; expirent_30j: number; a_relancer: number; a_relancer_liste: DevisARelancer[] };
+  plans_sans_rdv: { nombre: number; montant: number; reste_a_charge: number };
+  rendez_vous: {
+    passes: number;
+    honores: number;
+    manques: number;
+    annules: number;
+    taux_manques: number | null;
+    par_praticien: { praticien_id: string | null; nom: string | null; passes: number; manques: number; taux: number | null }[];
+    precedent: { passes: number; manques: number; taux_manques: number | null };
+  };
+  appels: { appels: number; rdv_pris: number };
+};
+
+/* ——— les rappels aux patients (b3_14) ——— */
+
+/** Le courriel seul : pas de SMS dans un contexte de santé (décision D6). */
+export type CanalPatient = "email";
+
+export type ContactPatient = {
+  id: string;
+  patient_id: string;
+  patient_nom: string;
+  canal: CanalPatient;
+  adresse: string;
+  rappels: boolean;
+  relances: boolean;
+  source: "oral" | "ecrit" | "formulaire";
+  cree_le: string;
+};
+
+export type EnvoiRappel = {
+  id: string;
+  type: "j2" | "plan" | "devis";
+  canal: CanalPatient;
+  mode: "essai" | "reel";
+  statut: string;
+  verrou: string | null;
+  cree_le: string;
+  envoye_le: string | null;
+  patient_nom: string;
+};
+
+export type ReponseRappel = {
+  id: string;
+  reponse: "confirme" | "annule" | "a_lire" | "autre_adresse";
+  recue_le: string;
+  rendez_vous_id: string | null;
+  debut: string | null;
+  patient_nom: string;
+};
+
+export type Rappels = {
+  reglage: { mode: "coupe" | "essai" | "reel"; essai: boolean; canaux: string[] | null } | null;
+  contacts: ContactPatient[];
+  envois: EnvoiRappel[];
+  reponses: ReponseRappel[];
+};

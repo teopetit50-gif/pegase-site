@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -110,8 +110,12 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const charge = profil === "titulaire" ? await quiet(rpc<Charge | null>("tiroma_charge_fauteuils", { p_client: c, p_entite: e, p_jour: null }, null), null, "charge des fauteuils") : null;
   /* b3_12 : le registre des appels (titulaire, assistante, collaborateur ; la direction ne l'a pas) */
   const appels = profil && profil !== "direction" ? await quiet(rpc<RegistreAppels | null>("tiroma_appels", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "registre des appels") : null;
+  /* b3_13 : le pilotage, pour le titulaire et la direction */
+  const pilotage = profil === "titulaire" || profil === "direction" ? await quiet(rpc<Pilotage | null>("tiroma_pilotage", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "pilotage") : null;
+  /* b3_14 : les rappels aux patients (titulaire, assistante, collaborateur) */
+  const rappels = profil && profil !== "direction" ? await quiet(rpc<Rappels | null>("tiroma_rappels", { p_client: c, p_entite: e }, null), null, "rappels aux patients") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels },
     avis,
   };
 }
@@ -247,4 +251,21 @@ export async function noterAppel(cabinet: Cabinet, a: { cible: CibleAppel; issue
   });
   if (error) throw new ErreurPorte(message(error));
   return data as string;
+}
+
+/** b3_14 : noter le moyen de contact d'un patient et son accord. */
+export async function noterContact(cabinet: Cabinet, c: { patient_id: string; canal: CanalPatient; adresse: string; rappels: boolean; relances: boolean; source: ContactPatient["source"]; preuve: string | null }): Promise<string> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("tiroma_noter_contact", {
+    p_client: cabinet.client_id, p_entite: cabinet.entite_id, p_patient: c.patient_id, p_canal: c.canal, p_adresse: c.adresse,
+    p_rappels: c.rappels, p_relances: c.relances, p_source: c.source, p_preuve: c.preuve,
+  });
+  if (error) throw new ErreurPorte(message(error));
+  return data as string;
+}
+
+export async function retirerContact(id: string, motif: string | null): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("tiroma_retirer_contact", { p_contact: id, p_motif: motif });
+  if (error) throw new ErreurPorte(message(error));
 }

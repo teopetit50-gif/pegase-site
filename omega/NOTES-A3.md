@@ -489,6 +489,87 @@ dit au lieu de planter.
   pour B7 ; un « Revérifier » quand VIES répond remettra le verdict.
 - Recette 190 ✓.
 
+## Lot du 06/10 (12) — suite de non-régression pour la migration vers /espace2
+
+- **`omega/recette-a3/non-regression.mjs [préfixe] [origine]`** — demandée par
+  le coordinateur pour le nouveau tableau de bord de C1 (/espace2). Le même
+  parcours se joue contre `/espace` et `/espace2` et dit ce qui MANQUE. Il ne
+  lit aucune classe CSS, seulement ce que voit l'utilisateur : h1, textes
+  clés, nom accessible des commandes, dialogues (role="dialog" et titre),
+  parcours clavier (Tab), axe-core, débordement à 390. Données d'exemple,
+  sans connexion. `NR_ECRANS=filed,varelo` pour n'en jouer que certains.
+- Douze écrans : validations, filed (dossier R2026-000016, par
+  `?objet=facture:…`), filed-identifiants (R2026-000017), fournisseurs, à
+  payer, varelo, tavaro, tiroma, tamila, lorani, daliro, point. Pour chaque
+  action : présente, visible, active, atteinte au clavier ; un « dialogue »
+  s'ouvre au bon titre, le focus y entre, Échap ferme et rend le focus ; un
+  « lien » mène à la bonne page **sous le même préfixe**.
+- Les attentes ont été relevées sur /espace (inventaire des commandes et
+  sonde des dialogues, 06/10 ~14 h 45 Z). **Contre /espace : 368/368**
+  (`non-regression-espace-2026-10-06.txt`). Contre un préfixe absent
+  (/espace2 sur ma branche), « À payer » sort 4/12 avec chaque manque nommé
+  : la suite sait échouer.
+- Je ne touche pas la branche de C1 (tableau-de-bord-v2).
+
+## 06/10 — service pour A1 : le vrai Factur-X déposé par l'écran
+
+- Le banc d'A1 (`omega/banc/facturx_reel.mjs`, worker-a1 883ee39) exige la
+  clé de service pour toutes ses lectures : je ne l'ai pas, je ne l'ai pas
+  jouée. Le dépôt est passé **par l'écran FILED**, au nom du gérant
+  (`omega/recette-a3/relecture-depot.mjs` : « Déposer un document », champ
+  fichier rempli par DOM.setFileInputFiles), avec la pièce
+  `EN16931_Einfach.pdf` lue à ce SHA (37 897 octets, sha256 05b5a382…d1d0).
+- 14:44:15 Z reçu **R2026-000005** ; 14:45:01 pièce **lue** — facture,
+  `methode xml`, 2 pages, `version_lecteur lecteur/2026-10-06/sans-ia`, sans
+  motif ; 14:46:00 document `integre`.
+- Relu sous la session du gérant (RLS) — mêmes contrôles que le script
+  d'A1 : 17 valeurs, une par champ, toutes `xml` confiance 1 ; lignes ×2,
+  ventilation TVA ×2 ; numéro 471102 ; HT 473, TVA 56.87 ; TTC 529.87 page 2,
+  avec boîte, « lu dans CII GrandTotalAmount ; concorde avec le PDF page 2 ».
+- Non lisible par le gérant (42501, voulu) : `travaux` (appels_ia du travail
+  lecteur.lire) et `consommation_ia_jour` — **contrôles SQL du coordinateur**
+  (`omega/banc/facturx_reel_controle.sql`).
+- FILED : facture 471102 du 15/11/2024 **bloquée** (3 bloquants, 2 à
+  vérifier : date.ancienne, fournisseur.a_confirmer, identite.siren,
+  identite.tva_intracom, tva.taux) — attendu pour un exemple allemand fictif
+  (TVA DE123456789, taux 7 % / 19 %), rien à corriger côté lecteur.
+
+## Lot du 06/10 (13) — l'écran FILED de la facture électronique (fiche d'A4, aa2e1fc)
+
+Dans `/espace/filed` seulement, la coquille et la barre ne bougent pas.
+- **Provenance** : pastille « Facture électronique » (structurée + reçue par
+  la plateforme : `filed_pa_flux` entrant déposé), « Fichier structuré »,
+  « Lue sur la pièce », « Saisie » ; repli `structuree` si une valeur xml
+  porte sur le numéro ou le TTC. Les valeurs xml disent « du fichier ».
+- **Corriger** : les champs xml sont grisés dans le dialogue (« — du fichier,
+  fait foi ») ; le bouton est grisé si tout fait foi. À côté : « Ouvrir un
+  litige » et « Refuser » (lien vers la file, à valider ou bloquée).
+- **Onglets** du dossier : Dossier · Cycle de vie (n) · Écritures. Frise de
+  `filed_cycle_vie_facture` (sens/erreur rapprochés de `filed_cycle_vie`),
+  « obligatoire » d'après `filed_cycle_vie_statuts`. Écritures : tableau
+  Journal · N° · Date · Compte · Libellé · Débit · Crédit · Lettrage, et
+  « Transmettre à la comptabilité » (`filed_comptabiliser_facture`).
+- **Litige** : motif normalisé (`filed_cycle_vie_motifs`, statut 207 ; AUTRE
+  = l'option vide), `p_motif = 'CODE : texte'` ; bandeau « En litige depuis… »
+  et « Clore le litige » (`filed_clore_litige`).
+- **Nouvelle page `/espace/filed/comptabilite`** (lien « Comptabilité » en
+  tête de FILED) : export FEC (`filed_exporter_fec`), titre et sous-titre
+  obligatoires, contenu téléchargé TEL QUEL (CRLF, UTF-8), bilan lignes /
+  écritures / débit = crédit ; les cinq comptes de FILED, « Modifier » pour
+  gérant/admin (`filed_regler_compte_systeme`, 3 à 12 chiffres).
+- Recette : `recette-espace.mjs` (+ comptabilité aux 5 largeurs, + deux
+  enchaînements : facture électronique, FEC/compte) tout passe ;
+  `accessibilite.mjs` tout passe ; `non-regression.mjs` 411/411 avec deux
+  écrans nouveaux (`filed-electronique`, `comptabilite`).
+- **Base réelle** (`relecture-facture-electronique.mjs`, gérant, R2026-000005) :
+  « Fichier structuré », 6 valeurs « du fichier », frise 204 « À transmettre
+  au fournisseur », Écritures vide, 12 motifs lus en base (le doublon
+  « Autre motif » corrigé à chaud), cinq comptes par défaut, export FEC
+  `500000013FEC20261231.txt` : 0 ligne (aucune écriture au banc). Rien
+  d'autre écrit (le litige n'a pas été ouvert ; l'export s'inscrit au journal).
+  « Corriger » reste actif sur R2026-000005 : certains champs n'y viennent pas
+  du xml — conforme.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

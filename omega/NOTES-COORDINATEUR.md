@@ -823,3 +823,48 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   **b6_13** réception (eec567e) **casse btp_tableau_chantier** (42702 « v » ambigu) : 2/8, renvoyé
   en urgence à B6, écran non fusionné. Le cron de test coupe à ~2 min : un motif par appel.
   Écrans fusionnés : Tavaro avis de contravention, Tiroma appels, Varelo encours.
+- 15 h 35 Z — **Teo valide le nouveau tableau de bord** (C1 366b75f, barre latérale + barre du
+  haut) → **phase 2 confiée à C1** : tous les écrans de /espace réhabillés sur tableau-de-bord-v2,
+  vraies données, mêmes portes ; bascule /espace2 → /espace après accord de Teo.
+  Poses : b2_05b (36bd54f), test b4 16 (5f490c4). Tests : g11 ^test_b3_ 15/15 (b3_13 compris),
+  g12 ^test_(b2_|44_) 15/15, g13 ^test_b4_16_ vert, g14 ^test_b1_ 20/20. tamila-coffre v2 (coquille
+  5f490c4). Fusionnés et poussés dans main 1f6427c : Tamila conflits (5f490c4), Varelo contrats
+  (d369676), Tiroma pilotage (29c453b), Tavaro état des lieux (36bd54f). Courriel d'essai de Teo
+  vers banc@recu.omegaai.fr : toujours 0 réception.
+- 15 h 55 Z — Poses : b5_13 + test b5_04 (53bc500), b6_16 + test b6_10 (187e1c1), 19ah_recette_seulement +
+  19ah + test socle (dcb2542), b3_14 v2 + test 15 (d64d4c1). Tests : ^test_b5_ 4/4, ^test_b6_ 10/10,
+  ^test_b3_ 17/17, 19ab 12/12, **19ah 18/19** (n° 15 : donnees_sante NULL au lieu de false → B3),
+  44 et 46 verts, **51 rouge** (DELETE accordé sans politique sur lorani_honoraires/marches/situations/
+  temps/visas → B5 b5_13b). echange-pa v2 (bb6ab78). Étape 5 PA : bloc A seul — le 204 de BAC-0001 est
+  en échec « CDAR_INVALIDE : SIREN invalide : undefined » (fournisseur allemand sans SIREN) → A2.
+  Fusionnés dans main : Daliro encaissement (187e1c1), notice Tamila (3d0e1a0) → 93ff8ee.
+  **Vercel : 93ff8ee refusé « Deployment rate limited — retry in 24 hours »** (quota gratuit). En ligne :
+  1f6427c. C1 limité à 2–3 pushes par jour. Les fusions suivantes partiront au retour du quota.
+- 16 h 05 Z — **Teo absent plusieurs heures : décisions par le coordinateur** (son autorisation ;
+  objectif « livrer tout ce que le site promet »). Routine passée à toutes les heures ; audit des
+  promesses du site lancé (agent en lecture). Poses : b4_08 + test 17 (2556214), test 19ah corrigé
+  (631ea79), b1_06 + test b1_09 (ccc8f8f), b5_13b (7515fbd). Tests : b4_17 vert, b1_09 2/2, 51 vert,
+  44 vert, **19ah 19/20** (n° 16 : donnees_fictives vrai sur un envoi ordinaire → B3 corrige le lot).
+  Fusionnés dans main 26cdd66 (build vert, en ligne au retour du quota) : Lorani chantier (7515fbd),
+  Varelo réciproques (ccc8f8f), FILED facture électronique + Comptabilité/FEC (A3 5091088), lecteur
+  Tamila (2556214). Décision Tamila : avis RPVA par le canal courriel (file « à rattacher », chiffrés
+  au rattachement, copie en clair purgée, 7 j max) → B4 b4_09. A4 : TVA dans le cdar (fournisseur
+  étranger) → a4_19, puis echange-pa 21466c7 et rejeu du 204. A1 : branchement avis Tamila.
+  B2 b2_06 annoncé mais pas poussé.
+- 16 h 20 Z — **Facture électronique : parcours PA du bac à sable prouvé de bout en bout** (a4_19 52100b4,
+  echange-pa v3 21466c7) : 204 et 207 (litige TX_TVA_ERR) émis en CDAR, accusés ok, battement echange_pa.
+  Lecteur v23 (A1 9eabc10 : pièces chiffrées lues chiffrées + passerelle avis RPVA). Poses : taux pénalités
+  Daliro 0.1240 (66f5ec6), 19ah v2 (77cecd9, test 20/20), b2_06 + test 15 (03a86fa : 14/15, loc_dec 42501
+  → B2). 44 vert.
+  **Audit des promesses du site** rendu → omega/AUDIT-PROMESSES.md (carnet de commandes). Nouveaux
+  ouvriers : **C2 CASHD** session_01FM1C6EZzNaNZdUh92m7KQP (worker-c2), **C3 REPUT réponse**
+  session_01Fb8QHDbEZep6P1zq77gN3n (worker-c3), **C4 OFFLOAD** session_01TzwZQvXaqH1JTKSGp7JmrX
+  (worker-c4), **C5 vitrine honnête** session_0165VcUYH1QptmMroZso9GQg (worker-c5) ; branches c2–c5
+  exclues des prévisualisations Vercel (6dfeb11). Carnets envoyés à A1–A5, B1–B7.
+  Main c239974 : voie C d'A5 (workflow de répétition, omega/prod ; omega-sauvegarde.yml NON repris :
+  dumps hors UE), écran Rappels Tiroma (e79c729 + 19ah v2).
+- 16 h 35 Z — Poses : b4_09 facture_entete + test 18 (99d0467), test b2_15 v2 (7bb5c00), b1_07 + test b1_10
+  (7512a38, cron varelo-matin actif), b5_14 + b5_05 et b5_15 + b5_06 (d9000ea). Tests : b4_18 vert,
+  b1_10 2/2, b5_05/06 2/2, 44 vert ; **b2_15 rouge** (loc_completer_locataire l. 32 : 22P02 « malformed
+  array literal: siren » → B2 b2_06b). Main a264a45 : facture imprimable Tamila, Ce matin Varelo, lots
+  Lorani (en ligne au retour du quota). C1 informé des nouveaux écrans et des modules CASHD/REPUT/OFFLOAD.

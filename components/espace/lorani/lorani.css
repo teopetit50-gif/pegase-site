@@ -340,3 +340,34 @@
 .esp .lor-honoraires + * {
   margin-top: 0;
 }
+
+/* ——— le chantier : situations à viser (b5_13) ——— */
+.esp .lor-situation {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--r-filet);
+}
+.esp .lor-situation[data-retard] {
+  box-shadow: 0 0 0 1px var(--esp-rouge);
+}
+.esp .lor-situation-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.esp .lor-situation .esp-actions {
+  margin: 0;
+}
+.esp .lor-chantier {
+  position: relative;
+}
+.esp .lor-chantier + * {
+  margin-top: 0;
+}
+.esp .esp-tableau-cadre + .esp-tableau-cadre {
+  margin-top: 12px;
+}

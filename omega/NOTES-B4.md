@@ -386,6 +386,58 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   navigateur), le tableau des honoraires du cabinet (tous dossiers), le minuteur, l'export comptable.
   **Pas rejoué en base réelle** : b4_06 à poser d'abord.
 
+## 12. Conflits d'intérêts et vigilance LCB-FT (vague 3, n° 2 ; lot B4-8, 06/10)
+
+- **Base** (875e83f) : `b4_07_tamila_conflits.sql`, test `16_conflits.sql` (47 contrôles ; série locale 386/386).
+  Index aveugle : clé d'index du cabinet (enveloppée sous la phrase, ou sous la clé maître Scaleway par
+  tamila-coffre), empreintes HMAC-SHA-256 des noms normalisés et des SIREN, jamais lisibles en direct ; contrôle
+  client ↔ adverse = conflit, même côté = signalé, anciens clients (dossiers effacés) compris, dossiers hors de
+  vue comptés sans être nommés, partie retirée ignorée ; décision de l'avocat (conflit levé ou refus ; « pas de
+  conflit » interdit quand un conflit est trouvé), motif en code ; vigilance LCB-FT (activité assujettie,
+  identification du client et du bénéficiaire effectif, risque, revue annuelle) ; résumé `tamila_conformite`.
+  Empreintes et contrôles conservés après l'effacement du dossier (registre des conflits) : **à confirmer par
+  Teo** (sinon une ligne de `private.tables_objets`). **Décision de Teo (06/10) : on les garde** ; la carte le dit en
+  une ligne (« les noms ne sont jamais conservés en clair ; une empreinte reste pour détecter un conflit avec un
+  ancien client »).
+- **Ouvrier** (2868bcb) : tamila-coffre `nouvelle_cle_index` (gérant) et `cle_index` (personne du cabinet), données
+  associées « index:<client> ». 20 tests Deno.
+- **Écran** : `components/espace/tamila/index.ts` (normalisation : accents, formes sociales, civilités, mots vides,
+  mots triés — « SCI du Moulin » = « Moulin (SCI du) » ; SIREN / SIRET ; HMAC) et la carte « Conflits d'intérêts
+  et vigilance » (`ConformiteTamila.tsx`, après les honoraires) : création de la clé d'index par le gérant,
+  indexation et contrôle des parties du dossier en un geste, résultats nommés (référence en clair du dossier si
+  on la connaît), décision, vigilance. Exemple : 2026-0430 « Garnier c/ SCI du Moulin » montre un conflit avec
+  2026-0412 (la SCI y est cliente). Recette cinq largeurs 90/90 (11 sur les conflits et la vigilance), axe-core
+  0 écart sur le dialogue de vigilance. **Pas rejoué en base réelle.**
+- **Limites** : un nom mal orthographié n'est pas trouvé (égalité stricte après normalisation, pas de
+  ressemblance : un index aveugle ne permet pas la recherche floue sans affaiblir l'aveuglement) ; la clé d'index
+  d'un cabinet local ne se ré-enveloppe pas encore au passage au coffre (à faire, comme les clés de dossier).
+
+## 13. Les avis RPVA lus (vague 3, n° 3 : la part faisable sans compte Scaleway ; lot B4-9, 06/10)
+
+- La porte d'entrée (relevé e-barreau ou transfert des notifications) reste à concevoir avec Teo : aucune API
+  publique e-barreau connue pour un logiciel tiers ; le socle a un canal courriel (`deposer_reception`) mais une
+  pièce arrivée par courriel est en clair et sans dossier : à rattacher puis chiffrer, ce qui suppose l'écran.
+- **Fait** : la passerelle « avis lu → délais » pour les pièces déposées dans un dossier, dès que le lecteur lit les
+  pièces chiffrées (coffre + A1). `b4_08_tamila_avis_lecteur.sql` (deux portes serveur : `tamila_dossier_pour_lecteur`,
+  `tamila_avis_du_lecteur`), test `17_avis_lecteur.sql` (15 contrôles : serveur seul, pièce lue, confiance,
+  **aucune valeur hors des sept clés** (un nom est refusé), avis idempotent, audience posée à l'heure de Paris, RG
+  différent → à vérifier + alerte critique) ; côté lecteur, `tamila-coffre/lecteur.ts` (`avisDepuisLecture`,
+  `rgConcorde`, `dossierPourLecteur`, `poserAvisLu`, 5 tests Deno de plus, 25 au total) ; CHAMPS-LECTURE-TAMILA
+  mis à jour. **À A1** : le branchement dans `lire_piece.ts` (mode d'emploi en tête de la section de `lecteur.ts`).
+
+## 14. La facture imprimable et l'en-tête du cabinet (suite du n° 1 ; lot B4-10, 06/10)
+
+- **Base** (71b54f3) : `b4_09_tamila_facture_entete.sql` (colonne `tamila_reglages.facture_entete`, ajoutée si
+  absente ; porte `tamila_poser_entete_facture`, gérant seul, clés connues, SIREN, TVA FR, IBAN, délai de paiement
+  0-60 jours) ; test `18_facture_entete.sql` (11 contrôles, verts sur la souche).
+- **Écran** : `facture.ts` (la facture en HTML autonome : mentions CGI 242 nonies A et C. com. L.441-9, détail
+  du temps avec répartition au centime près du total facturé, forfait, déboursés hors TVA, provisions déduites,
+  reste à payer ou trop-perçu, échéance, pénalités L.441-10 et indemnité de 40 € D.441-5, compte définitif RIN
+  11.7 ; tout échappé) et `FactureImprimable.tsx` (aperçu dans un cadre isolé sans script, impression ou PDF par
+  le navigateur ; adresse du client tapée, jamais enregistrée ; le gérant modifie l'en-tête sur place). Lien
+  « Imprimer » sur chaque facture de la carte Honoraires. Recette 99/99 (9 sur la facture imprimée), axe-core
+  0 écart. **Rien ne part au serveur** : nom du client et détail du temps restent dans le navigateur.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
