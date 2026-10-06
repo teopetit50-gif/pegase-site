@@ -128,6 +128,9 @@ begin
   r := tests.c4_reprise(v_d);
   perform tests.c4_evenement_envoi(r.envoi1_id, 'envoye');
   return next is((tests.c4_reprise(v_d)).statut, 'envoyee', 'Le message parti, la reprise attend la réponse');
+  return next ok(exists (select 1 from public.journal_opposable j where j.client_id = v_client and j.action = 'offload.message_envoye'
+                         and j.objet_id = r.id::text and (j.donnees ->> 'envoi')::uuid = r.envoi1_id and (j.donnees ->> 'rang')::int = 1),
+                 'Le message parti est au journal opposable, daté, avec son envoi et son rang');
   update public.offload_reprises set envoye1_le = now() - interval '8 days' where id = r.id;
   perform private.offload_cycle(v_client, null);
   r := tests.c4_reprise(v_d);
