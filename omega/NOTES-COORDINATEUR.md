@@ -712,3 +712,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   8. Courriel d'essai Tavaro : **reçu** par Teo → chaîne validée par un humain.
   9. Vercel Pro : **non**. On ne pousse sur main qu'à la fin d'un gros chantier.
   Préparation de la production confiée à A5 (omega/MISE-EN-PRODUCTION.md, prod non touchée).
+- 13 h 50 Z — **b5_10 posé** (worker-b5 027eca3, depot 4343 + tests 4344) : l'alerte de
+  seconde demande cite CE 30 avril 2024 n° 461958 ; `^test_b5_` 120/120. Écran fusionné et
+  poussé (f8ba169, Vercel success) ; « 461958 » relu dans les chunks servis par
+  omegaai.fr/espace/lorani. B6 : voie (A) retenue pour b6_08 (public.politiques ; corps des
+  fonctions d'accord relayés) — à vérifier si le créateur peut activer seul. A5 : sorties
+  brutes (migrations recette/prod en noms, crons, fonctions Edge) relayées. Une lecture de
+  ces notes a été refusée par le classifieur (« Production Reads ») : non contournée.
