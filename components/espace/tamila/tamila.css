@@ -185,3 +185,8 @@
   background: #f6f6f4;
   border: 1px solid var(--r-filet);
 }
+
+/* la notice de conservation de la carte des conflits (décision de Teo, 06/10) */
+.esp .tam-notice {
+  margin: 8px 0 4px;
+}
