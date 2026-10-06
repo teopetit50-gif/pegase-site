@@ -47,7 +47,7 @@ const morceaux = [];
 console.log(`— cookie ${nom} en ${morceaux.length} morceau(x), utilisateur ${session.user?.email}`);
 
 for (const largeur of [1440, 390]) {
-  const s = await ouvrirSession({ largeur, hauteur: largeur === 390 ? 844 : 900, marque: `b3-reel-${largeur}`, densite: 1 });
+  const s = await ouvrirSession({ largeur, hauteur: largeur === 390 ? 844 : 900, marque: `b3-reel-${largeur}`, densite: 1, flags: ['--ignore-certificate-errors'] });
   console.log(`— /espace/tiroma (base réelle, ${largeur} px)`);
   await s.envoyer('Page.addScriptToEvaluateOnNewDocument', { source: `window.__erreurs = []; const o = console.error; console.error = (...a) => { try { window.__erreurs.push(a.map(x => (x && x.message) ? x.message : (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(' ')); } catch {} o.apply(console, a); };` });
   for (const m of morceaux) await s.envoyer('Network.setCookie', { name: m.name, value: m.value, url: base, path: '/' });

@@ -25,6 +25,26 @@ Dernière mise à jour : 06/10/2026, soir (lot 2, troisième passage demandé).
 - **Prochaine étape** : lire la troisième sortie, corriger jusqu'au vert ; puis la règle santé stricte du socle commun (proposition au coordinateur), la relecture de /espace/tiroma en base réelle avec le compte du banc (comme A3 : omega/recette-a3/relecture-reelle.mjs) quand omegaai.fr sert la page.
 - **Écran** : /espace/tiroma fusionné sur main par le coordinateur (d572973), avec la ligne de navigation dans `components/espace/ecrans.ts`.
 
+## Relecture de /espace/tiroma en base réelle — faite le 06/10 (00 h 37 Z)
+
+Comme A3 : serveur `next start` local pointé sur la recette (`.env.local`, non commité), session du
+compte du banc `gerant@banc-varelo.test` ouverte par l'appel même du formulaire du site
+(`POST /auth/v1/token?grant_type=password`, clé publique), cookie posé par
+`omega/recette-b3/relecture-reelle.mjs`, captures `omega/recette-b3/reel-tiroma-{1440,390}.jpg`.
+
+- **L'écran se charge avec la session** aux deux largeurs : identité affichée, interrupteur sur
+  « Base réelle », aucun avis rouge, aucun « permission denied » en console, aucun débordement.
+- **Le banc n'a pas de cabinet** (les tests pgTAP annulent tout) : l'écran montre le formulaire
+  d'installation, avec l'entité principale « Groupe Sogexal (banc) » (territoire posé) et Logos_w.
+  Je n'ai **pas** installé de cabinet durable sur le banc : le test 04 compte les cabinets du client
+  sans filtre d'entité, un cabinet permanent casserait le lot 1, et rien ne s'efface. Les écritures
+  de l'écran (installer, brancher, fauteuils, horaires, mutuelle, liste d'attente) sont prouvées par
+  les tests sous les jetons des membres, pas par cette relecture.
+- **Observation hors périmètre** (site, pas TIROMA) : en local sur la recette, le WebSocket Realtime
+  `wss://ygwbgpowzlbdaajlsqkn.supabase.co` est refusé par la CSP `connect-src` (next.config.ts n'écrit
+  que l'armoire de production et l'URL d'environnement en https). Sans effet sur omegaai.fr ; signalé
+  au coordinateur.
+
 ## Le scénario réel de bout en bout (ce que les tests jouent)
 
 Un cabinet de trois fauteuils, un titulaire (le gérant de l'organisation), un
