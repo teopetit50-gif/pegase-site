@@ -199,11 +199,11 @@ Les clés sont les champs « obligatoires » de la fiche de B5 ; `numero_dossier
 
 Pas de `lignes` ni de `tva.ventilation` pour ce module.
 
-## Module Tamila — avis RPVA des cabinets d'avocats (table prête, lecture en attente du coffre)
+## Module Tamila — avis RPVA des cabinets d'avocats (lecture par le coffre serveur)
 
 Dix types d'avis, un par valeur de `tamila_avis.type_avis`, plus `tamila_piece_autre`, conformes à la fiche de B4 (`omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md`, worker-b4 66ec6fb), et des champs qui portent **le nom exact des clés de `p_valeurs`** de `public.tamila_avis_lu(p_client, p_dossier, p_piece, p_type, p_valeurs, p_confiance, p_rg_concorde)` (B4, `omega/SOCLE-EXTRAITS-TAMILA.sql`) : celui qui applique une lecture passe `type_piece` en `p_type` et l'objet `{champ: valeur}` des valeurs vérifiées en `p_valeurs`, `p_confiance = 'modele'`. `numero_rg` n'est pas lu par `tamila_avis_lu` : il sert à calculer `p_rg_concorde` contre le n° RG du dossier, qui est chiffré (le lecteur ne le voit pas, la comparaison se fait là où la clé du dossier est déballée).
 
-**Limite actuelle** : les pièces déposées par `tamila_deposer_piece` sont chiffrées (`chiffrement = dossier:v1`) et, tant qu'il n'y a pas de coffre pour déballer la clé du dossier, le lecteur clôt leur travail sans les télécharger (`finir_travail {"ignore": "chiffree_sans_coffre"}`, sans reprise) ; la pièce reste `recue`. La table sert dès qu'une pièce Tamila arrive en clair (`pieces.module = 'tamila'`, sans chiffrement) ou que le coffre existe.
+**Limite actuelle** : les pièces déposées par `tamila_deposer_piece` sont chiffrées (`chiffrement = dossier:v1`) Pour un cabinet à **coffre serveur** (`tamila-coffre`, b4_05, fournisseur `scaleway`), le lecteur demande la clé de la pièce au coffre (`action: cle_piece`, clé de service), déchiffre le fichier **en mémoire** et le lit comme une pièce en clair (`travaux.resultat.dechiffree = true`) ; la clé est effacée dès le déchiffrement, ni elle ni le clair ne sont journalisés. Coffre `local` ou absent : le lecteur clôt le travail sans télécharger (`finir_travail {"ignore": "chiffree_sans_coffre"}`, sans reprise) et la pièce reste `recue`. Coffre indisponible → `COFFRE_INDISPONIBLE`, repris ; coffre qui refuse → `COFFRE_REFUSE`, clé qui n'ouvre pas le fichier → `CHIFFRE_ILLISIBLE`, tous deux sans reprise. La table sert dès qu'une pièce Tamila arrive en clair (`pieces.module = 'tamila'`, sans chiffrement) ou que le coffre existe.
 
 | `type_piece` | Ce que c'est | Champs | Clés (toutes vérifiées → `lue`) |
 |---|---|---|---|

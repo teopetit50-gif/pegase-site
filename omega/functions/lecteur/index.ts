@@ -10,6 +10,7 @@ import { clientClaudeDepuisEnv } from "@partage/fournisseur_ia.ts";
 import { journal, messageDe } from "@partage/journal.ts";
 import { configSupabaseDepuisEnv, PortesRpc } from "@partage/portes.ts";
 import { ExtracteurClaude } from "./ia.ts";
+import { CoffreRpc } from "./coffre.ts";
 import type { Contexte } from "./lire_piece.ts";
 import { configMistralDepuisEnv, OcrMistral } from "./ocr.ts";
 import { passage } from "./passage.ts";
@@ -23,6 +24,7 @@ export function contexteDepuisEnv(env: { get(n: string): string | undefined } = 
   return {
     portes: new PortesRpc(supabase),
     depot: new DepotStorage(supabase),
+    coffre: new CoffreRpc(supabase),
     extracteur: claude ? new ExtracteurClaude(claude) : null,
     ocr: mistral ? new OcrMistral(mistral) : null,
     env,

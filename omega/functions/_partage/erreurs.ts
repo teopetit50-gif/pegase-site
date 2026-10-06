@@ -6,6 +6,12 @@ export type CodeOuvrier =
   | "FOURNISSEUR_INDISPONIBLE"
   | "PLAFOND_IA"
   | "CHIFFREMENT_NON_PRIS_EN_CHARGE"
+  /** Le coffre Tamila (ou son Key Manager) ne répond pas : repris. */
+  | "COFFRE_INDISPONIBLE"
+  /** Le coffre refuse la clé (pièce plus à lire, dossier fermé) : définitif. */
+  | "COFFRE_REFUSE"
+  /** La clé rendue par le coffre n'ouvre pas le fichier chiffré : définitif. */
+  | "CHIFFRE_ILLISIBLE"
   /** Une porte refuse l'ouvrier (401/403) : droits du socle à poser, rien à relire. */
   | "PORTE_REFUSEE"
   | "ERREUR_INTERNE";

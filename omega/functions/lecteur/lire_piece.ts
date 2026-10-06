@@ -15,6 +15,7 @@ import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
 import { controlerPlafond } from "./plafond.ts";
 import { champsPour, schemaPour } from "./schemas/modules.ts";
+import { type CoffreTamila, depotDechiffrant } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
 import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
@@ -26,6 +27,8 @@ export interface Environnement {
 export interface Contexte {
   portes: Portes;
   depot: Depot;
+  /** Le coffre Tamila ; absent = toute pièce chiffrée est close sans lecture. */
+  coffre?: CoffreTamila | null;
   extracteur: Extracteur | null;
   ocr: Ocr | null;
   env: Environnement;
@@ -77,52 +80,73 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
       journal("alerte", "pièce introuvable, travail ignoré", trace);
       return "ignore";
     }
+    // Une pièce chiffrée : seule une pièce Tamila (« dossier:v1 ») d'un cabinet à coffre serveur se lit,
+    // avec la clé de son dossier rendue par tamila-coffre et déchiffrée en mémoire au téléchargement.
+    let ctxLecture = ctx;
+    let cle: Uint8Array | null = null;
     if (piece.chiffrement) {
-      // Sans coffre, la clé du dossier n'est jamais là : reprendre ne servirait à rien (cinq échecs par
-      // pièce). Le travail est clos, la pièce reste « recue » ; le coffre la redemandera (NOTES-B4).
-      await ctx.portes.finirTravail(travail.id, { ignore: "chiffree_sans_coffre", chiffrement: piece.chiffrement, statut: piece.statut });
-      journal("info", "pièce chiffrée sans coffre, travail clos sans lecture", { ...trace, chiffrement: piece.chiffrement });
-      return "ignore";
+      const c = piece.chiffrement === "dossier:v1" && piece.module === "tamila" && ctx.coffre ? await ctx.coffre.clePiece(pieceId) : null;
+      if (!c || c.fournisseur !== "scaleway") {
+        // Sans coffre, la clé du dossier n'est jamais là : reprendre ne servirait à rien (cinq échecs par
+        // pièce). Le travail est clos, la pièce reste « recue » ; le coffre la redemandera (NOTES-B4).
+        await ctx.portes.finirTravail(travail.id, { ignore: "chiffree_sans_coffre", chiffrement: piece.chiffrement, statut: piece.statut });
+        journal("info", "pièce chiffrée sans coffre, travail clos sans lecture", { ...trace, chiffrement: piece.chiffrement });
+        return "ignore";
+      }
+      cle = c.cle;
+      ctxLecture = { ...ctx, depot: depotDechiffrant(ctx.depot, cle) };
+      journal("info", "clé de dossier reçue du coffre, déchiffrement en mémoire", { ...trace, chiffrement: piece.chiffrement });
     }
-    if (!(await ctx.portes.commencerLecture(pieceId))) {
-      await ctx.portes.finirTravail(travail.id, { ignore: "plus rien à lire", statut: piece.statut });
-      journal("info", "pièce déjà lue ou détachée, travail ignoré", { ...trace, statut: piece.statut });
-      return "ignore";
+    try {
+      if (!(await ctx.portes.commencerLecture(pieceId))) {
+        await ctx.portes.finirTravail(travail.id, { ignore: "plus rien à lire", statut: piece.statut });
+        journal("info", "pièce déjà lue ou détachée, travail ignoré", { ...trace, statut: piece.statut });
+        return "ignore";
+      }
+      return await lireEtRendre(ctxLecture, travail, piece, trace, cle !== null);
+    } finally {
+      // La clé ne survit pas au travail, même si le fichier n'a jamais été téléchargé.
+      cle?.fill(0);
     }
-
-    const bilan = await lire(ctx, piece);
-    const modele = bilan.ia?.modele ?? null;
-    const version = versionLecteur(ctx.maintenant(), modele);
-    const enregistre = await ctx.portes.enregistrerLecture(pieceId, bilan.resultat, version);
-    const prealable = bilan.prealable ?? SANS_PREALABLE;
-    const cout = Math.round(((bilan.ia?.cout_eur ?? 0) + bilan.cout_ocr + prealable.cout_eur) * 1e6) / 1e6;
-    await ctx.portes.finirTravail(travail.id, {
-      pages: enregistre.pages,
-      valeurs: enregistre.valeurs,
-      statut: bilan.resultat.statut,
-      type_piece: bilan.resultat.type_piece ?? null,
-      methode: bilan.resultat.methode ?? null,
-      modele,
-      tokens_entree: (bilan.ia?.usage.tokens_entree ?? 0) + prealable.tokens_entree,
-      tokens_sortie: (bilan.ia?.usage.tokens_sortie ?? 0) + prealable.tokens_sortie,
-      appels_ia: (bilan.ia ? 1 : 0) + prealable.appels_ia,
-      cout_eur: cout,
-      ...(bilan.decoupage && bilan.decoupage.length > 1 ? { decoupage: bilan.decoupage } : {}),
-    });
-    journal("info", "pièce lue", {
-      ...trace,
-      statut: bilan.resultat.statut,
-      type: bilan.resultat.type_piece,
-      methode: bilan.resultat.methode,
-      pages: enregistre.pages,
-      valeurs: enregistre.valeurs,
-      cout_eur: cout,
-      version,
-    });
-    return bilan.resultat.statut;
   } catch (e) {
     return await echouer(ctx, travail, e, trace);
   }
+}
+
+/** La lecture proprement dite, une fois la pièce à soi (et son dépôt déchiffrant pour une pièce chiffrée). */
+async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace: Record<string, unknown>, dechiffree: boolean): Promise<Issue> {
+  const pieceId = piece.id;
+  const bilan = await lire(ctx, piece);
+  const modele = bilan.ia?.modele ?? null;
+  const version = versionLecteur(ctx.maintenant(), modele);
+  const enregistre = await ctx.portes.enregistrerLecture(pieceId, bilan.resultat, version);
+  const prealable = bilan.prealable ?? SANS_PREALABLE;
+  const cout = Math.round(((bilan.ia?.cout_eur ?? 0) + bilan.cout_ocr + prealable.cout_eur) * 1e6) / 1e6;
+  await ctx.portes.finirTravail(travail.id, {
+    pages: enregistre.pages,
+    valeurs: enregistre.valeurs,
+    statut: bilan.resultat.statut,
+    type_piece: bilan.resultat.type_piece ?? null,
+    methode: bilan.resultat.methode ?? null,
+    modele,
+    tokens_entree: (bilan.ia?.usage.tokens_entree ?? 0) + prealable.tokens_entree,
+    tokens_sortie: (bilan.ia?.usage.tokens_sortie ?? 0) + prealable.tokens_sortie,
+    appels_ia: (bilan.ia ? 1 : 0) + prealable.appels_ia,
+    cout_eur: cout,
+    ...(bilan.decoupage && bilan.decoupage.length > 1 ? { decoupage: bilan.decoupage } : {}),
+    ...(dechiffree ? { dechiffree: true } : {}),
+  });
+  journal("info", "pièce lue", {
+    ...trace,
+    statut: bilan.resultat.statut,
+    type: bilan.resultat.type_piece,
+    methode: bilan.resultat.methode,
+    pages: enregistre.pages,
+    valeurs: enregistre.valeurs,
+    cout_eur: cout,
+    version,
+  });
+  return bilan.resultat.statut;
 }
 
 async function echouer(ctx: Contexte, travail: Travail, e: unknown, trace: Record<string, unknown>): Promise<Issue> {

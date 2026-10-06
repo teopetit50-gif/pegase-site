@@ -112,6 +112,11 @@
       "bin": true
     }
   },
+  "remote": {
+    "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/e0c4bcc82b0f916018af94f7535df37c2abc913a/omega/functions/tamila-coffre/aesgcm.ts": "319e9bdf9cc64ca8492d052f4a6a1008fcf07a9a403276da94d503541ceee479",
+    "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/e0c4bcc82b0f916018af94f7535df37c2abc913a/omega/functions/tamila-coffre/lecteur.ts": "45a736dfc9afcaf9d655ee8f96dbafa68361aaa6b9ac0914ac050c16e7e68d1f",
+    "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/e0c4bcc82b0f916018af94f7535df37c2abc913a/omega/functions/tamila-coffre/octets.ts": "f00d200cee71d5d154387eaee29fb068b38fac67a2fdb929044b90a8a9a878a2"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.14",
