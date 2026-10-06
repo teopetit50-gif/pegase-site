@@ -310,3 +310,94 @@ A3 et A5 finissent ; A1, A2, A4 au repos.
 logiciels tiers, épreuve par des utilisateurs, prod avec sauvegardes testées,
 surveillance, support, cadre juridique. Global : ~45 % de mécanique, 15–20 % de
 produit livrable.
+
+## PASSATION — 6 octobre 2026, 03 h 30 (Paris) : nouvelle session coordinateur (Opus 5.5)
+
+La session coordinateur Fable (session_01B4JNQXyT69GytdvE9SjAnE) s'arrête (limite
+d'usage). La session qui lit ceci prend TOUT le rôle de coordinateur / administrateur
+des ouvriers. Tout ce fichier reste valable ; voici l'essentiel pour reprendre sans
+relire la nuit.
+
+### Les règles posées par Teo (ne jamais les discuter)
+- Agir seul, ne jamais demander la permission (« j'ai tout autorisé »). Rendre compte
+  en français, honnêtement, par module, en cinq lignes.
+- **Les ouvriers n'appellent jamais Supabase.** Toute SQL / MCP passe par le
+  coordinateur : les ouvriers poussent des SHA sur leur branche `worker-xx`, le
+  coordinateur pose depuis le dépôt et relaie les résultats bruts.
+- Recette `ygwbgpowzlbdaajlsqkn` seulement. **Jamais d'écriture en prod
+  (`noepmkkplxshjbmqqxft`)** ; même une lecture prod a été refusée par le filtre.
+- Dépôt : jamais `git add -A` ni `commit -a` ; commit chemin par chemin ; `git push
+  origin main` déploie omegaai.fr (Vercel pegase-site2, ~45 s) ; `npx tsc --noEmit`,
+  eslint, `npm run build` avant tout push ; jamais un build rouge. Fusion d'une branche
+  d'ouvrier : `git merge -X theirs origin/worker-xx` puis
+  `git checkout HEAD -- components/espace/ecrans.ts components/espace/format.ts`
+  (la barre à huit onglets de main gagne toujours), vérifier `git diff --quiet …
+  -- components/ app/`.
+- omegaai.fr pointe sur la prod : le compte du banc (`gerant@banc-varelo.test` /
+  `Recette-Omega-2026`, client `cccccccc-0000-4000-8000-00000000000c`) n'existe que sur
+  la recette ; les relectures réelles se font sur un Next local pointé sur la recette
+  (`NEXT_PUBLIC_SUPABASE_URL=https://ygwbgpowzlbdaajlsqkn.supabase.co`, clé publique
+  `sb_publishable_a12GN1jHf0IJR4xcKvPTXw_NlPb51zl`).
+
+### Comment poser (voir « Pose depuis le dépôt » plus haut)
+- Fichier SQL d'un ouvrier : `select private.depot_demander('<chemin>', '<sha>')` →
+  id, puis `select private.depot_executer(<id>)` (une transaction, tout ou rien) ;
+  tests : poser le fichier puis `select * from runtests('tests', '^test_xx_')`.
+- Petit lot socle du coordinateur : `execute_sql` direct + insert dans
+  `supabase_migrations.schema_migrations` (version `to_char(now(),'YYYYMMDDHH24MISS')`,
+  name `socle_lotNN_…`, statements = provenance).
+- **Piège** : l'outil Supabase (`execute_sql` et `apply_migration`) attend une
+  confirmation humaine sur tout `drop …` (même `pg_temp`) et expire à 60 s sans rien
+  faire. Jamais de DROP dans une pose ; pas de fonction d'aide temporaire.
+- Toute nouvelle fonction de `private` naît EXECUTE pour PUBLIC : toujours
+  `revoke execute on function … from public` (lot 19z).
+- Fonctions Edge : « coquille » (index.ts qui importe l'URL raw GitHub au SHA +
+  deno.json), `verify_jwt` true, cron pg_cron → pg_net avec la clé `cle_service` du
+  vault. `deploy_edge_function` avec les fichiers.
+
+### Sessions des ouvriers (toutes joignables par send_message)
+- A1 session_01XQrgbohqqVEJwGK724wJ7h (lecteur, exports) — A2
+  session_01E3CW3mskiafCa1zPdxjrFo (envois, Brevo ; brief de Teo : aucune migration
+  SQL) — A3 session_01DdgwRadkJFx5u9buwh5crS (écran client /espace) — A4
+  session_01ScVNMRrPwNeNjD9LBufDVP (FILED) — A5 session_01HFL5DbN61Rux6iSMf2djPG
+  (socle, sécurité, tests 44 et 51).
+- Vague 2, **tous terminés et fusionnés dans main** : B1 Varelo
+  session_01CrMrfRwPXbEdP2cxzcaCNh, B2 Tavaro session_01FifCHkLgBbAZrwtHTGDvzP, B3
+  Tiroma session_01XVDbxXV3nk5ANUdd5hfZHf, B4 Tamila session_01HRJ7AmG9hKtDenMRTt1eW6,
+  B5 Lorani session_013VSXzohLtDQS5bbWfRb4xR, B6 Daliro
+  session_01DcUXF2LPTVH2CpVdget9fu, B7 Identité session_011T7gKKsmg6y6ndZbzggDk5.
+  Ils reprennent au premier message.
+
+### État au moment de la passation
+- Recette : tous les modules verts (Identité, Varelo 14/14, Tavaro 11/11, Lorani
+  111/111, Tamila 13/13, Daliro 154+38, Tiroma 12/12) ; preuve identité à vrai SIREN
+  faite (Orange SA, R2026-000004) ; parcours réel Tavaro (FA-2026-000001/000002,
+  courriel remis chez Teo 00 h 26 Z, relance différée au 09/10).
+- Site : six écrans en ligne sur omegaai.fr (varelo, tavaro, lorani, tiroma, tamila,
+  daliro), quota Vercel revenu ; dernier commit main 6b9c88d (lot 19ab).
+- Lot socle 19ab (santé des envois) posé et vert 12/12 ; B3-08 28/28.
+
+### À faire, dans l'ordre
+1. **Redéployer `expediteur`** (recette) avec la garde santé d'A2 : la version en
+   place (v10) est un dépôt de fichiers complets (index.ts, brevo.ts, passage.ts,
+   portes.ts, stockage.ts, deno.json) ; A2 a poussé la garde dans
+   `omega/functions/expediteur/passage.ts` au SHA **29ef6e6** sur `worker-a2`.
+   Redéployer avec les six fichiers lus à ce SHA (`git show origin/worker-a2:…`), même
+   `verify_jwt` true, puis vérifier un battement `expediteur` dans `battements`.
+   Prévenir A2 (clés rendues par commencer_envoi : `donnees_sante`,
+   `fournisseur_hds` = `agree_sante`) et B3 (lot posé).
+2. **A5** : attend sa réponse sur test 44 (liste « en trop » après 19z), test 51
+   (« unrecognized privilege type DELETE ») ; poser ses SHA depuis le dépôt.
+3. **B2** : test `test_b2_11_relances` n° 7 tombe (compte global, deux vraies factures
+   du banc) ; B2 prévenu, SHA à poser s'il corrige.
+4. **A3** : branchement de filed_confirmer_fournisseur / filed_attester_identite à
+   l'écran, bouton « revérifier » (contrat de B7, NOTES-B7 § 9 b), « Annuler ma
+   demande » ; fusionner son prochain lot.
+5. **A1** : premier vrai export via la chaîne Logos_w de B3 ; six types de courriers
+   Lorani (omega/modules/lorani/CHAMPS-LECTURE-LORANI.md) ; types Tamila.
+6. Point automatique : l'ancien (trig_01EUyxfyvgvmXW3C5sv93rd3) est désactivé ;
+   en recréer un (send_later, 2 h) qui résume à Teo en cinq lignes.
+7. **Teo doit encore** : confirmer le courriel Tavaro reçu ; poser SIRENE_API_KEY ;
+   décider `agree_sante` (aucun fournisseur agréé, manuel compris) et l'hébergement
+   HDS pour un client santé ; secrets GitHub / Meta ; nettoyage Brevo ; prod plus
+   tard (Bedrock).
