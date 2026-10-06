@@ -809,3 +809,17 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   C1 : palier 1 du tableau de bord montré à Teo. Teo a posé les MX de recu.omegaai.fr (la
   seconde vise inbound1 au lieu d'inbound2, à corriger). Écrans fusionnés : Tamila honoraires,
   Lorani courriels du guichet, Daliro situations.
+- 15 h 15 Z — **Inbound Brevo branché** par le coordinateur : fonction one-shot
+  brevo-inbound-installer (BREVO_API_KEY et BREVO_WEBHOOK_JETON lus dans les secrets, aucun
+  affiché ; désactivée ensuite, 410) → webhook **2225428**, domaine **omegaai.fr** (Brevo refuse le
+  sous-domaine : « Domain is not found or is inactive »), url reception/brevo. MX recu.omegaai.fr
+  10 inbound1 / 20 inbound2 (Teo, OVH). Boîte banc@recu.omegaai.fr dans expediteurs (a3630f13,
+  reput, suspendu). En attente du courriel d'essai de Teo. Teo a montré sa clé Brevo sur une
+  capture : à faire tourner (et mettre à jour BREVO_API_KEY dans Supabase).
+- Poses : **a4_16b/a4_17/a4_18** (00eeeeb : FEC, portes PA) `^test_a4_` 19/19 ; **b3_12 v2 + 12c**
+  (cef1ef4, 453e332) `^test_b3_` 15/15 et socle 44 vert ; **b2_03 v2 + b2_04** (7e97d91) `^test_b2_`
+  13/13 ; **b1_04** encours groupe (786017e) 19/19 avec 46/51 ; **lecteur v22** (36a88b2, avoirs) ;
+  **b4_07** conflits (875e83f) 15/16 (test 16 : clé étrangère auth.users, test à corriger) ;
+  **b6_13** réception (eec567e) **casse btp_tableau_chantier** (42702 « v » ambigu) : 2/8, renvoyé
+  en urgence à B6, écran non fusionné. Le cron de test coupe à ~2 min : un motif par appel.
+  Écrans fusionnés : Tavaro avis de contravention, Tiroma appels, Varelo encours.
