@@ -1,6 +1,6 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 2 h 35 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 3 h 05 Paris.
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
@@ -220,8 +220,8 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 
 ## 8. À faire par le coordinateur
 
-1. ~~Poser `b7_01_portes.sql`~~ (posé le 5/10, reposé à e5aa5dd) ; poser `b7_02_demander.sql`.
-2. Jouer `omega/tests/identite/b7_01_portes.sql` (pgTAP, schéma `tests` d'A5), `b7_02_scenario.sql`, `b7_03_demander.sql`.
+1. ~~Poser `b7_01_portes.sql`, `b7_02_demander.sql`~~ (posés) ; poser `b7_03_balayer.sql`.
+2. ~~Jouer `b7_01_portes.sql`, `b7_02_scenario.sql`, `b7_03_demander.sql`~~ (verts sur la recette) ; jouer `b7_04_balayer.sql`.
 3. Déployer la coquille `identite` (verify_jwt true, `@partage/` → SHA d'A1), secrets : `SIRENE_API_KEY` (quand
    Teo l'a ; sans elle, repli annuaire et le battement dit `sirene: "repli"`), facultatifs `IDENTITE_VERSION`,
    `IDENTITE_CACHE_JOURS` (30), `SIRENE_REPLI` (`non` pour couper le repli), `IDENTITE_NOM`.
@@ -231,7 +231,13 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 
 ## 9. Lot 3 proposé (scénario d'abord, rien de codé)
 
-**a. Balayage périodique : « vérifié le … » ne vieillit pas.** Aujourd'hui une vérification n'est demandée qu'au
+**a. Balayage périodique : « vérifié le … » ne vieillit pas.** — GO du coordinateur à 2 h 26 Z ; **fait** à 3 h 05 :
+`b7_03_balayer.sql` (porte, VIES si la TVA est valide sinon Sirene, SIREN à clé fausse et fournisseurs refusés
+ignorés, demande marquée `{"origine": "balayage"}`), `b7_04_balayer.sql` (test_b7_10, 16 assertions vertes en local),
+ouvrier : `balayer(jours, max)` appelé après la relance, `IDENTITE_BALAYAGE_JOURS` (90) et `IDENTITE_BALAYAGE_MAX`
+(**5 par passage** par défaut, soit 5 par minute, pour laisser place aux demandes à la volée ; 0 coupe), compteur
+`balayees` dans `battements.detail` ; 44 tests Deno verts. Reste : pose par le coordinateur, redéploiement de la
+coquille. Scénario d'origine : Aujourd'hui une vérification n'est demandée qu'au
 contrôle d'une facture, et elle vaut 90 jours (`filed_verification_recente`). Un fournisseur qui n'envoie rien
 pendant six mois, puis cesse son activité, n'est pas revu avant sa prochaine facture. Scénario :
 `public.identite_balayer(p_jours int = 90, p_max int = 50) → int` : pour chaque fournisseur FILED `actif` ou
@@ -289,4 +295,6 @@ ajouter sans cas réel.
   (absente de la recette) → test rendu autonome (69a0ba9) → **16/16**. Bilan recette : 9/9 fichiers pgTAP verts +
   scénario, b7_01 v3 et b7_02 posés, ouvrier v1 déployé, cron chaque minute. Manquent la pièce à vrai SIREN (dépôt
   de Teo à refaire : rien n'est arrivé en base) et `SIRENE_API_KEY`.
-- 6/10 2 h 35 : jauges à jour ; scénario du lot 3 écrit (section 10), envoyé au coordinateur avant de coder.
+- 6/10 2 h 35 : jauges à jour ; scénario du lot 3 écrit (section 9), envoyé au coordinateur avant de coder.
+- 6/10 2 h 26 Z (coordinateur) : GO sur le balayage ; p_max bas, compteur dans le battement ; SQL d'abord, coquille ensuite.
+- 6/10 3 h 05 : lot 3 écrit, testé en local (pgTAP 10 fichiers verts dont b7_04, scénario vert, 44 tests Deno), poussé.
