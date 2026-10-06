@@ -9,7 +9,7 @@ import { CHAMPS_FACTURE, SCHEMA_OUTIL_LECTURE, TYPES_PIECE } from "./facture.ts"
 import { SCHEMA_LORANI } from "./lorani.ts";
 import { SCHEMA_TAMILA } from "./tamila.ts";
 
-export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "dateheure" | "booleen" | "choix" | "liste";
+export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "dateheure" | "mois" | "booleen" | "choix" | "liste";
 
 export interface ChampDeclare {
   champ: string;
@@ -38,6 +38,21 @@ export interface TypeDeclare {
   lueSansValeur?: boolean;
 }
 
+/**
+ * Une famille de champs dont le nom se compose (« mesure.<grandeur>.<objet> », « poste.<référence> ») : le nom
+ * entier doit suivre le motif ; le type et la description valent pour toute la famille. `types` restreint la
+ * famille à certains types de pièce (un « poste » est un intitulé dans un CCTP, une quantité dans une DPGF).
+ */
+export interface FamilleChamps {
+  famille: string;
+  /** Expression régulière (source) du nom entier, ancrée. */
+  motif: string;
+  type: TypeChampDeclare;
+  description: string;
+  max?: number;
+  types?: string[];
+}
+
 export interface SchemaModule {
   module: string;
   /** La phrase qui dit au modèle ce qu'il lit. */
@@ -46,6 +61,8 @@ export interface SchemaModule {
   champs: ChampDeclare[];
   /** Le module attend des lignes de détail et une ventilation de TVA (factures). */
   lignes: boolean;
+  /** Les familles de champs à nom composé. */
+  familles?: FamilleChamps[];
 }
 
 /** FILED, construit depuis schemas/facture.ts pour ne rien dupliquer. */
@@ -84,8 +101,27 @@ export function schemaPour(module: string | null | undefined): SchemaModule {
   return SCHEMAS_PAR_MODULE[module ?? ""] ?? SCHEMA_FILED;
 }
 
-export function champsPour(module: string | null | undefined): ReadonlyMap<string, ChampDeclare> {
-  return new Map(schemaPour(module).champs.map((c) => [c.champ, c]));
+/** Les champs d'un module : les fixes, puis, pour un nom absent, la famille dont il suit le motif. */
+export class ChampsResolus extends Map<string, ChampDeclare> {
+  private readonly motifs: { re: RegExp; f: FamilleChamps }[];
+  constructor(fixes: ChampDeclare[], familles: FamilleChamps[], private readonly typePiece?: string | null) {
+    super(fixes.map((c) => [c.champ, c]));
+    this.motifs = familles.map((f) => ({ re: new RegExp(f.motif), f }));
+  }
+  override get(champ: string): ChampDeclare | undefined {
+    const fixe = super.get(champ);
+    if (fixe) return fixe;
+    const m = this.motifs.find(({ re, f }) => re.test(champ) && (!f.types || !this.typePiece || f.types.includes(this.typePiece)));
+    return m ? { champ, type: m.f.type, description: m.f.description, max: m.f.max } : undefined;
+  }
+  override has(champ: string): boolean {
+    return this.get(champ) !== undefined;
+  }
+}
+
+export function champsPour(module: string | null | undefined, typePiece?: string | null): ChampsResolus {
+  const s = schemaPour(module);
+  return new ChampsResolus(s.champs, s.familles ?? [], typePiece);
 }
 
 export function typesPour(module: string | null | undefined): string[] {
@@ -106,7 +142,13 @@ export function schemaOutilPour(module: string | null | undefined): Record<strin
   const valeurs = props.valeurs as Record<string, unknown>;
   const items = valeurs.items as Record<string, unknown>;
   const itemProps = items.properties as Record<string, Record<string, unknown>>;
-  itemProps.champ = { type: "string", enum: s.champs.map((c) => c.champ), description: s.champs.map((c) => `${c.champ} : ${c.description}`).join(" ; ") };
+  itemProps.champ = s.familles && s.familles.length > 0
+    ? {
+      type: "string",
+      description: "Un champ fixe (" + s.champs.map((c) => c.champ).join(", ") + ") ou un champ d'une famille : " +
+        s.familles.map((f) => `${f.famille} (motif ${f.motif})`).join(" ; "),
+    }
+    : { type: "string", enum: s.champs.map((c) => c.champ), description: s.champs.map((c) => `${c.champ} : ${c.description}`).join(" ; ") };
   itemProps.valeur = {
     type: ["string", "number", "boolean", "array"],
     items: { type: "string" },
@@ -133,10 +175,16 @@ export function consignePour(module: string | null | undefined, reglesCommunes: 
       ? ` (valeurs admises : ${c.choix.join(", ")})`
       : c.type === "entier" && c.min !== undefined
       ? ` (entier de ${c.min} à ${c.maximum})`
+      : c.type === "mois"
+      ? " (AAAA-MM)"
       : c.type === "dateheure"
       ? " (AAAA-MM-JJTHH:MM, heure locale sans fuseau ; AAAA-MM-JJ si l'heure n'est pas imprimée)"
       : "";
     return `- ${c.champ} (${c.type}${bornes}) : ${c.description}`;
   }).join("\n");
-  return `Tu es le lecteur d'Omega, ${s.presentation}.\n\n${reglesCommunes}\n\nTypes de pièce du module « ${s.module} » :\n${typesTexte}\n- autre : rien de tout cela (motif court).\n\nChamps :\n${champsTexte}`;
+  const famillesTexte = (s.familles ?? []).map((f) =>
+    `- ${f.famille} (${f.type}${f.types ? `, pour ${f.types.join(", ")}` : ""}) : ${f.description} Nom complet conforme à ${f.motif}.`
+  ).join("\n");
+  return `Tu es le lecteur d'Omega, ${s.presentation}.\n\n${reglesCommunes}\n\nTypes de pièce du module « ${s.module} » :\n${typesTexte}\n- autre : rien de tout cela (motif court).\n\nChamps :\n${champsTexte}` +
+    (famillesTexte ? `\n\nFamilles de champs (une ligne par champ, le nom se compose) :\n${famillesTexte}` : "");
 }

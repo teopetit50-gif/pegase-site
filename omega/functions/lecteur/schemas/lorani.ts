@@ -1,10 +1,76 @@
 // Lorani — urbanisme : les pièces reçues de la mairie ou de l'huissier sur
 // une demande d'autorisation (permis de construire, déclaration préalable…),
 // telles que private.lorani_propositions les attend (B5, CHAMPS-LECTURE-LORANI.md).
-// Six types, plus lorani_courrier_autre ; numero_dossier partout ; dates en AAAA-MM-JJ.
+// Six courriers, lorani_courrier_autre, la situation de travaux (b5_14) et les quatre pièces du contrôle du
+// dossier (b5_16 : planche, CCTP, DPGF, règlement du PLU, champs à nom composé) ; dates en AAAA-MM-JJ.
 // Les clés suivent les champs « obligatoires » de la fiche de B5 ; les autres champs sont facultatifs.
 
-import type { SchemaModule } from "./modules.ts";
+import type { FamilleChamps, SchemaModule } from "./modules.ts";
+
+/** Les grandeurs mesurées du contrôle du dossier (vocabulaire fermé de B5, b5_16) : l'unité fait partie du nom. */
+export const GRANDEURS = [
+  "hauteur_faitage_m",
+  "hauteur_egout_m",
+  "hauteur_acrotere_m",
+  "recul_voie_m",
+  "recul_limite_m",
+  "distance_batiments_m",
+  "emprise_sol_m2",
+  "emprise_sol_pct",
+  "surface_plancher_m2",
+  "surface_taxable_m2",
+  "espaces_verts_pct",
+  "pleine_terre_pct",
+  "stationnement_nb",
+  "logements_nb",
+  "niveaux_nb",
+  "pente_toiture_pct",
+  "longueur_m",
+  "largeur_m",
+  "cote_altimetrique_m",
+] as const;
+const G = GRANDEURS.join("|");
+
+const FAMILLES_CONTROLE: FamilleChamps[] = [
+  {
+    famille: "mesure.<grandeur>.<objet>",
+    motif: `^mesure\\.(${G})\\.[a-z0-9_]{1,40}$`,
+    type: "nombre",
+    types: ["lorani_planche", "lorani_cctp"],
+    description:
+      `une mesure lue (cote, surface, nombre), en nombre sans unité. <grandeur> parmi : ${GRANDEURS.join(", ")} ; <objet> = ce qu'elle qualifie, en minuscules sans accent (projet pour le tout, batiment_a, facade_sud, niveau_r1, limite_nord, voie_rue_x…) : deux pièces qui mesurent la même chose rendent le même objet. Une ligne par mesure, avec sa citation et sa page.`,
+  },
+  {
+    famille: "poste.<référence> (CCTP)",
+    motif: "^poste\\.[a-z0-9_]{1,40}$",
+    type: "texte",
+    max: 300,
+    types: ["lorani_cctp"],
+    description: "un poste décrit au CCTP : valeur = son intitulé ; <référence> = le numéro d'article normalisé (2.3.1 → 2_3_1, GO.04 → go_04).",
+  },
+  {
+    famille: "poste.<référence> (DPGF)",
+    motif: "^poste\\.[a-z0-9_]{1,40}$",
+    type: "nombre",
+    types: ["lorani_dpgf"],
+    description: "un poste chiffré à la DPGF : valeur = sa quantité, en nombre ; <référence> normalisée comme au CCTP.",
+  },
+  {
+    famille: "regle.<grandeur>.max|min",
+    motif: `^regle\\.(${G})\\.(max|min)$`,
+    type: "nombre",
+    types: ["lorani_plu_reglement"],
+    description: "une règle chiffrée du règlement du PLU : la valeur maximale ou minimale permise, en nombre sans unité.",
+  },
+  {
+    famille: "regle.<grandeur>.article",
+    motif: `^regle\\.(${G})\\.article$`,
+    type: "texte",
+    max: 40,
+    types: ["lorani_plu_reglement"],
+    description: "l'article du règlement qui porte la règle, tel qu'écrit (« UB 10 »).",
+  },
+];
 
 export const DECISIONS_ARRETE = ["accorde", "refuse", "non_opposition", "opposition", "sursis"] as const;
 export const TYPES_AUTORISATION = ["pc", "pcmi", "pa", "pd", "dp"] as const;
@@ -70,7 +136,46 @@ export const SCHEMA_LORANI: SchemaModule = {
       cles: [],
       lueSansValeur: true,
     },
+    {
+      type: "lorani_situation_travaux",
+      libelle: "situation de travaux",
+      description:
+        "la situation (état d'acompte, projet de décompte mensuel) d'une entreprise de travaux pendant le chantier : le cumul HT des travaux exécutés depuis le début de son marché, envoyé chaque mois à l'architecte pour visa",
+      champs: ["cumul_ht", "numero_situation", "mois", "titulaire", "lot", "montant_marche_ht", "cumul_precedent_ht", "montant_periode_ht"],
+      cles: ["cumul_ht"],
+    },
+    {
+      type: "lorani_planche",
+      libelle: "planche graphique",
+      description:
+        "une planche graphique d'un dossier de permis ou d'un DCE (plan de masse, plans de niveaux, coupes, façades, notice ; PC1 à PC8, PCMI1 à PCMI8) : sa référence, son indice, et une ligne par mesure lue (mesure.<grandeur>.<objet>) ; tu ne mesures rien sur le dessin, tu ne rends que les cotes et surfaces écrites",
+      champs: ["reference", "indice"],
+      cles: [],
+    },
+    {
+      type: "lorani_cctp",
+      libelle: "CCTP",
+      description: "le cahier des clauses techniques particulières d'un lot : le lot, une ligne par poste décrit (poste.<référence>) et les mesures écrites (mesure.<grandeur>.<objet>)",
+      champs: ["lot"],
+      cles: [],
+    },
+    {
+      type: "lorani_dpgf",
+      libelle: "DPGF",
+      description: "la décomposition du prix global et forfaitaire d'un lot : le lot et une ligne par poste chiffré (poste.<référence>, valeur = quantité)",
+      champs: ["lot"],
+      cles: [],
+    },
+    {
+      type: "lorani_plu_reglement",
+      libelle: "règlement du PLU",
+      description:
+        "le règlement écrit du PLU pour la zone du terrain : la zone, et par règle chiffrée regle.<grandeur>.max ou .min (la valeur) et regle.<grandeur>.article (l'article)",
+      champs: ["zone"],
+      cles: [],
+    },
   ],
+  familles: FAMILLES_CONTROLE,
   champs: [
     {
       champ: "numero_dossier",
@@ -122,6 +227,17 @@ export const SCHEMA_LORANI: SchemaModule = {
     { champ: "date_notification", type: "date", description: "la date de notification de l'arrêté, si elle est écrite" },
     { champ: "date_certificat", type: "date", description: "la date du certificat de décision tacite" },
     { champ: "commissaire", type: "texte", max: 200, description: "le nom du commissaire de justice (huissier) ou de son étude" },
+    { champ: "cumul_ht", type: "nombre", description: "situation : le montant HT cumulé des travaux exécutés à ce jour depuis le début du marché" },
+    { champ: "numero_situation", type: "entier", min: 1, maximum: 999, description: "situation : son numéro (« Situation n° 3 »)" },
+    { champ: "mois", type: "mois", description: "situation : le mois des travaux, en AAAA-MM" },
+    { champ: "titulaire", type: "texte", max: 200, description: "situation : la raison sociale de l'entreprise titulaire, telle qu'écrite" },
+    { champ: "lot", type: "texte", max: 20, description: "le numéro du lot, tel qu'écrit (« 02 », « 08.1 »)" },
+    { champ: "montant_marche_ht", type: "nombre", description: "situation : le montant HT du marché" },
+    { champ: "cumul_precedent_ht", type: "nombre", description: "situation : le cumul HT de la situation précédente" },
+    { champ: "montant_periode_ht", type: "nombre", description: "situation : le montant HT des travaux du mois" },
+    { champ: "reference", type: "texte", max: 40, description: "planche : sa référence (« PC2 », « A-102 »)" },
+    { champ: "indice", type: "texte", max: 20, description: "planche : son indice (« B », « ind. C »)" },
+    { champ: "zone", type: "texte", max: 20, description: "règlement du PLU : la zone (« UB »)" },
   ],
   lignes: false,
 };

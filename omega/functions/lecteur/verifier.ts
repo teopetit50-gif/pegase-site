@@ -76,6 +76,24 @@ export function dateHeureLocale(v: unknown): string | null {
   return `${jour}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
+const MOIS_FR = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"];
+
+/** Un mois en AAAA-MM : « 2026-03 », « 03/2026 », « mars 2026 ». */
+export function moisIso(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})$/);
+  let a: number | null = null, mo: number | null = null;
+  if (m) [a, mo] = [Number(m[1]), Number(m[2])];
+  else if ((m = s.match(/^(\d{1,2})[\/.\-](\d{4})$/))) [a, mo] = [Number(m[2]), Number(m[1])];
+  else if ((m = s.match(/^([a-z]+)\.?\s+(\d{4})$/))) {
+    const i = MOIS_FR.findIndex((x) => x.startsWith(m![1].slice(0, 3)));
+    if (i >= 0) [a, mo] = [Number(m[2]), i + 1];
+  }
+  if (a === null || mo === null || mo < 1 || mo > 12 || a < 1900 || a > 2199) return null;
+  return `${a}-${String(mo).padStart(2, "0")}`;
+}
+
 /** Met la valeur dans le type attendu par le module ; ok = false si elle n'y entre pas. */
 export function typerValeur(
   champ: string,
@@ -118,6 +136,10 @@ export function typerValeur(
     case "date": {
       const d = dateIso(valeur);
       return d === null ? { valeur, ok: false, detail: "date illisible" } : { valeur: d, ok: true };
+    }
+    case "mois": {
+      const m = moisIso(valeur);
+      return m === null ? { valeur, ok: false, detail: "mois illisible (AAAA-MM)" } : { valeur: m, ok: true };
     }
     case "dateheure": {
       const d = dateHeureLocale(valeur);

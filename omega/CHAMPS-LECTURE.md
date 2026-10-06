@@ -193,6 +193,10 @@ Six types, plus `lorani_courrier_autre`, tels que `private.lorani_propositions` 
 
 Les clés sont les champs « obligatoires » de la fiche de B5 ; `numero_dossier` est rendu partout où il est écrit, sans être une clé.
 
+**Situation de travaux (b5_14)** : `lorani_situation_travaux`, clé `cumul_ht` (nombre) ; facultatifs `numero_situation` (entier), `mois` (`AAAA-MM`), `titulaire`, `lot`, `montant_marche_ht`, `cumul_precedent_ht`, `montant_periode_ht`.
+
+**Contrôle du dossier (b5_16)** : `lorani_planche` (`reference`, `indice`), `lorani_cctp` (`lot`), `lorani_dpgf` (`lot`), `lorani_plu_reglement` (`zone`), plus des **champs à nom composé**, une ligne par champ : `mesure.<grandeur>.<objet>` (nombre ; planche et CCTP), `poste.<référence>` (intitulé au CCTP, quantité à la DPGF), `regle.<grandeur>.max|min` (nombre) et `regle.<grandeur>.article` (texte) au règlement du PLU. `<grandeur>` est le vocabulaire fermé de la fiche de B5 (`hauteur_faitage_m`… `cote_altimetrique_m`) : un nom hors vocabulaire, ou d'une famille qui n'est pas celle du type de pièce, n'est pas retenu. Le lecteur (`schemas/modules.ts`, `FamilleChamps`) valide le nom entier par motif et le type par famille.
+
 | Champ | Type de `valeur` | Description | Exemple |
 |---|---|---|---|
 | `numero_dossier` | texte (≤ 60) | numéro de dossier tel qu'imprimé | `"PC 069 123 26 A0042"` |

@@ -494,7 +494,7 @@ export function assembler(
   const schema = schemaPour(module);
   const typeDeclare = schema.types.find((t) => t.type === brut.type_piece);
   const type_piece = typeDeclare ? typeDeclare.type : "autre";
-  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champsPour(module), typeDeclare?.cles ?? []);
+  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champsPour(module, type_piece), typeDeclare?.cles ?? []);
   const valeurs: ValeurLue[] = [...verif.valeurs];
   if (schema.lignes) {
     const lignes = valeurLignes(brut.lignes, pages);

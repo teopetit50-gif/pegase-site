@@ -196,11 +196,16 @@ Deno.test("table des types par module : schémas d'outil et consignes", () => {
     "lorani_certificat_tacite",
     "lorani_constat_affichage",
     "lorani_courrier_autre",
+    "lorani_situation_travaux",
+    "lorani_planche",
+    "lorani_cctp",
+    "lorani_dpgf",
+    "lorani_plu_reglement",
     "autre",
   ]);
   const outil = schemaOutilPour("lorani") as { properties: Record<string, { enum?: string[]; items?: { properties: Record<string, { enum?: string[] }> } }> };
   assertEquals(outil.properties.type_piece.enum, typesPour("lorani"));
-  assertEquals(outil.properties.valeurs.items!.properties.champ.enum, [...champsPour("lorani").keys()]);
+  assertEquals(outil.properties.valeurs.items!.properties.champ.enum, undefined, "champs à nom composé : pas de liste fermée");
   assertEquals(outil.properties.lignes, undefined, "pas de lignes de facture pour Lorani");
   assertEquals(outil.properties.tva_ventilation, undefined);
   for (const t of typesPour("lorani")) assert(/^[a-z][a-z0-9_]{1,59}$/.test(t), t);
@@ -281,4 +286,64 @@ Deno.test("lorani : l'accusé de réception électronique (ARE) du guichet numé
   assertStringIncludes(consigne, "accusé de réception électronique (ARE)");
   assertStringIncludes(consigne, "accusé d'enregistrement électronique (AEE)");
   assertStringIncludes(consigne, "est un récépissé de dépôt, pas un autre courrier");
+});
+
+Deno.test("lorani : situation de travaux (b5_14), cumul HT clé, mois en AAAA-MM", async () => {
+  const octets = pdf(["SITUATION N° 3 — Lot 02 Gros œuvre", "Entreprise BATIR SAS", "Travaux de mars 2026", "Cumul HT des travaux exécutés : 72 500,00 €"]);
+  const { issue, portes } = await lireLorani("32", "situation.pdf", octets, {
+    lisible: true,
+    type_piece: "lorani_situation_travaux",
+    confiance_type: 0.93,
+    valeurs: [
+      { champ: "cumul_ht", valeur: "72 500,00", texte: "Cumul HT des travaux exécutés : 72 500,00 €", page: 1 },
+      { champ: "numero_situation", valeur: "3", texte: "SITUATION N° 3", page: 1 },
+      { champ: "mois", valeur: "mars 2026", texte: "Travaux de mars 2026", page: 1 },
+      { champ: "lot", valeur: "02", texte: "Lot 02 Gros œuvre", page: 1 },
+      { champ: "titulaire", valeur: "BATIR SAS", texte: "Entreprise BATIR SAS", page: 1 },
+    ],
+  });
+  assertEquals(issue, "lue");
+  const v = new Map(portes.enregistrements[0].resultat.valeurs.map((x) => [x.champ, x.valeur]));
+  assertEquals(v.get("cumul_ht"), 72500);
+  assertEquals(v.get("numero_situation"), 3);
+  assertEquals(v.get("mois"), "2026-03");
+});
+
+Deno.test("lorani : planche, une ligne par mesure à nom composé ; grandeur hors vocabulaire écartée", async () => {
+  const octets = pdf(["PC5 — Façades — indice B", "Hauteur au faîtage : 9,85 m", "Surface de plancher : 312,40 m²"]);
+  const { issue, portes } = await lireLorani("33", "pc5.pdf", octets, {
+    lisible: true,
+    type_piece: "lorani_planche",
+    confiance_type: 0.9,
+    valeurs: [
+      { champ: "reference", valeur: "PC5", texte: "PC5 — Façades", page: 1 },
+      { champ: "indice", valeur: "B", texte: "indice B", page: 1 },
+      { champ: "mesure.hauteur_faitage_m.batiment_a", valeur: "9,85", texte: "Hauteur au faîtage : 9,85 m", page: 1 },
+      { champ: "mesure.surface_plancher_m2.projet", valeur: 312.4, texte: "Surface de plancher : 312,40 m²", page: 1 },
+      { champ: "mesure.volume_m3.projet", valeur: 900, texte: "Surface de plancher", page: 1 },
+      { champ: "poste.2_3_1", valeur: "Maçonnerie", texte: "PC5", page: 1 },
+    ],
+  });
+  assertEquals(issue, "lue");
+  const r = portes.enregistrements[0].resultat;
+  const v = new Map(r.valeurs.map((x) => [x.champ, x]));
+  assertEquals(v.get("mesure.hauteur_faitage_m.batiment_a")!.valeur, 9.85);
+  assertEquals(v.get("mesure.hauteur_faitage_m.batiment_a")!.verifiee, true);
+  assert(v.get("mesure.hauteur_faitage_m.batiment_a")!.boite, "page et boîte : l'architecte est renvoyé à l'endroit exact");
+  assertEquals(v.get("mesure.surface_plancher_m2.projet")!.valeur, 312.4);
+  assertEquals(v.has("mesure.volume_m3.projet"), false, "grandeur hors vocabulaire");
+  assertEquals(v.has("poste.2_3_1"), false, "un poste n'est pas un champ de planche");
+});
+
+Deno.test("lorani : un « poste » est un intitulé au CCTP, une quantité à la DPGF ; règles du PLU", () => {
+  assertEquals(typerValeur("poste.go_04", "Béton armé", champsPour("lorani", "lorani_cctp")).ok, true);
+  assertEquals(typerValeur("poste.go_04", "Béton armé", champsPour("lorani", "lorani_dpgf")).ok, false);
+  assertEquals(typerValeur("poste.go_04", "12,5", champsPour("lorani", "lorani_dpgf")).valeur, 12.5);
+  assertEquals(typerValeur("regle.hauteur_faitage_m.max", "12", champsPour("lorani", "lorani_plu_reglement")).valeur, 12);
+  assertEquals(typerValeur("regle.hauteur_faitage_m.article", "UB 10", champsPour("lorani", "lorani_plu_reglement")).valeur, "UB 10");
+  assertEquals(champsPour("lorani", "lorani_planche").has("regle.hauteur_faitage_m.max"), false);
+  assertEquals(typerValeur("mois", "03/2026", champsPour("lorani")).valeur, "2026-03");
+  assertEquals(typerValeur("mois", "13/2026", champsPour("lorani")).ok, false);
+  assertStringIncludes(consigneSysteme("lorani"), "mesure.<grandeur>.<objet>");
+  assertStringIncludes(consigneSysteme("lorani"), "hauteur_faitage_m");
 });
