@@ -301,11 +301,12 @@ for (const largeur of LARGEURS) {
   ok(await s.aller(base + '/espace/varelo'), 'page chargée');
   await s.dormir(500);
   const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Ce matin"]'); if (!c) return null; return { blocs: [...c.querySelectorAll('.vrl-matin-bloc')].map(b => ({ titre: b.querySelector('h3')?.innerText.replace(/\\s+/g, ' '), lignes: [...b.querySelectorAll('li[data-gravite]')].map(li => li.dataset.gravite + ' | ' + li.innerText) })), avant: c.compareDocumentPosition(document.querySelector('section[aria-label="Objets du groupe"]')) & 4 }; })()`);
-  ok(!!m && m.blocs.length === 5 && !!m.avant, '« Ce matin » est en tête, avec ses cinq blocs');
-  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[2].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[2].lignes[0]), `contrats : ${m?.blocs[2].lignes[0]}`);
-  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[3].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[3].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
-  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[4].lignes.join(' ')) && m.blocs[4].lignes.length === 3, `réciproques : ${m?.blocs[4].lignes.length} lignes`);
-  ok(m && /Reportings dus/i.test(m.blocs[1].titre) && m.blocs[1].lignes.some(l => /^critique \| En retard depuis le .* pour /.test(l)), `reportings : ${m?.blocs[1].lignes[0]}`);
+  ok(!!m && m.blocs.length === 6 && !!m.avant, '« Ce matin » est en tête, avec ses six blocs');
+  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[3].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[3].lignes[0]), `contrats : ${m?.blocs[3].lignes[0]}`);
+  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[4].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[4].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
+  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[5].lignes.join(' ')) && m.blocs[5].lignes.length === 3, `réciproques : ${m?.blocs[5].lignes.length} lignes`);
+  ok(m && /Reportings dus/i.test(m.blocs[2].titre) && m.blocs[2].lignes.some(l => /^critique \| En retard depuis le .* pour /.test(l)), `reportings : ${m?.blocs[2].lignes[0]}`);
+  ok(m && /Réserves à émettre 2/i.test(m.blocs[1].titre) && /^critique \| Avant le .* : protestation à CMA CGM \(Bertin Menuiserie \(Annecy\), livraison du .*, Vernis Lacroix\)$/.test(m.blocs[1].lignes[0]) && /^attention \| Avant le .* : protestation à Transports Deschamps/.test(m.blocs[1].lignes[1]), `réserves : ${m?.blocs[1].lignes.join(' / ')}`);
   ok(m && m.blocs[0].lignes.length === 3 && /Agence de Grenoble : trésorerie de 18\s500\s€, sous son plancher de 25\s000\s€/.test(m.blocs[0].lignes.join(' ')) && /Bertin Menuiserie \(Annecy\) date du .* \(37 jours\)/.test(m.blocs[0].lignes.join(' ')), `le groupe ce matin : ${m?.blocs[0].lignes.join(' / ')}`);
   ok(await s.evaluer(`(() => { const a = document.querySelector('section[aria-label="Ce matin"] a[href="#vrl-contrats"]'); return !!a && !!document.getElementById('vrl-contrats'); })()`), 'le titre « Contrats à dénoncer » mène à la carte des contrats');
   s.fermer();
@@ -381,6 +382,53 @@ for (const largeur of LARGEURS) {
   await s.dormir(600);
   const ajoute = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].filter(tr => /Liasse mensuelle/.test(tr.innerText)).length`);
   ok(ajoute >= 1, `le reporting ajouté a ses échéances (${ajoute})`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b1-reserves', densite: 1 });
+  console.log('— les réserves à émettre (b1_11)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Réserves à émettre"]')`;
+  const lire = `(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), kpis: c.querySelector('dl')?.innerText.replace(/\\s+/g, ' ') }; })()`;
+  const lu = await s.evaluer(lire);
+  ok(!!lu && lu.lignes.length === 2 && /CMA CGM/.test(lu.lignes[0]) && /Demain/.test(lu.lignes[0]) && /Transports Deschamps/.test(lu.lignes[1]) && /dans 2 jours/.test(lu.lignes[1]), `deux livraisons à protester, la plus pressée en tête (${lu?.lignes[0]})`);
+  ok(lu && /À protester 2/.test(lu.kpis) && /1 livraison/.test(lu.kpis) && /4\s440,00\s€/.test(lu.kpis), `compteurs : ${lu?.kpis}`);
+  ok(/11\/12 colis/.test(lu?.lignes[1] ?? '') && /Avarie/.test(lu?.lignes[1] ?? '') && /Manquant/.test(lu?.lignes[1] ?? ''), 'avarie, manquant et colis comptés');
+  ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tbody tr')].find(t => /Deschamps/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Lettre/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Lettre » sur Transports Deschamps');
+  await s.dormir(400);
+  const lettre = await s.evaluer(`${dlg()}?.querySelector('textarea')?.value`);
+  ok(/À l'attention de Transports Deschamps/.test(lettre ?? '') && /document de transport n° LV-2026-0457/.test(lettre ?? '') && /12 colis annoncés, 11 reçus/.test(lettre ?? '') && /avarie et perte partielle/.test(lettre ?? '') && /L133-3/.test(lettre ?? ''), 'la lettre nomme le transporteur, la lettre de voiture, les colis, la nature et l\'article');
+  await s.dormir(400);
+  await s.evaluer(`${dlg()}?.querySelector('.dlg-fermer')?.click()`);
+  await s.dormir(300);
+  ok(await s.evaluer(`!${dlg()}`), 'la lettre se referme');
+  ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tbody tr')].find(t => /Deschamps/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Suite/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Suite… » sur Transports Deschamps');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const sel = [...${dlg()}.querySelectorAll('select')][1]; Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'courriel'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(/un courriel ou un portail ne suffit pas/.test(await s.evaluer(`${dlg()}?.innerText`) ?? ''), 'un courriel, en routier : l\'écran prévient qu\'il ne suffit pas');
+  await s.evaluer(`(() => { const sel = [...${dlg()}.querySelectorAll('select')][1]; Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'lrar'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Noter|Enregistrer|Valider/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(lire);
+  ok(apres.lignes.length === 1 && /CMA CGM/.test(apres.lignes[0]) && /À protester 1/.test(apres.kpis), `notée : il reste ${apres.lignes.length} livraison à protester`);
+  await s.evaluer(clic(`section[aria-label="Réserves à émettre"] .esp-filtres button`, '/Protestées ou classées/'));
+  await s.dormir(300);
+  const faites = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' '))`);
+  ok(faites.length === 1 && /Protestation partie/.test(faites[0]) && /lettre recommandée avec accusé de réception/.test(faites[0]), `« Protestées ou classées » : ${faites[0]}`);
+  await s.evaluer(clic(`section[aria-label="Réserves à émettre"] .esp-filtres button`, '/^À protester$/'));
+  ok(await s.evaluer(clic(`section[aria-label="Réserves à émettre"] .esp-carte-tete button`, '/Enregistrer une livraison/')) === true, 'clic « Enregistrer une livraison »');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const d = ${dlg()}; const poser = (el, v) => { const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; const ch = [...d.querySelectorAll('input.rv-champ:not([type="date"])')]; poser(ch[0], 'Geodis'); poser(d.querySelector('textarea'), 'Deux cartons de charnières écrasés'); })()`);
+  await s.dormir(200);
+  ok(/3 jours ouvrables/.test(await s.evaluer(`${dlg()}?.innerText`) ?? ''), 'le dialogue annonce le délai du routier : 3 jours ouvrables');
+  await s.evaluer(clic('[role="dialog"] button', '/Enregistrer la livraison/'));
+  await s.dormir(600);
+  const fin = await s.evaluer(lire);
+  ok(fin.lignes.length === 2 && fin.lignes.some(l => /Geodis/.test(l) && /dans 3 jours/.test(l)), `la livraison Geodis du jour : protester dans 3 jours (${fin.lignes.find(l => /Geodis/.test(l))})`);
   s.fermer();
 }
 

@@ -504,3 +504,76 @@ reformulé par C5.
   société, son logiciel branché, ses jeux et leur dernier export ; « Brancher »
   par la porte du socle `public.brancher`, voie `exports`, cinq jeux cochés).
   Recette 149 contrôles, cinq largeurs ✓ ; axe 0 écart.
+
+### 4. Les réserves à émettre — scénario (écrit avant le code) et besoin pour A1
+
+**Promesse** : « Une livraison reçue avec avarie : le transport, les colis et
+les photos du constat » ; « Le compte à rebours de la réserve : trois jours pour
+l'adresser au transporteur ».
+
+**Le droit** (sources) :
+- transport routier national : la réception éteint toute action contre le
+  voiturier pour avarie ou perte partielle si, dans les **trois jours, non
+  compris les jours fériés**, qui suivent la réception, le destinataire n'a pas
+  notifié par acte extrajudiciaire ou **lettre recommandée** sa **protestation
+  motivée** (C. com., art. L133-3 ; [Légifrance](https://www.legifrance.gouv.fr/codes/id/LEGIARTI000020899366/2009-07-25/),
+  [CMS](https://cms.law/en/fra/publication/avarie-ou-perte-partielle)) ;
+- routier international (CMR, art. 30) : réserves écrites dans les **7 jours,
+  dimanches et jours fériés non compris**, pour les dommages non apparents
+  ([Swim Legal](https://www.swim.legal/blog/responsabilite-transport-international-cmr-indemnisation)) ;
+- maritime (règles de La Haye-Visby) : **3 jours** après la livraison pour les
+  dommages non apparents ([Swim Legal](https://www.swim.legal/blog/contentieux-transport-responsabilites-reserves-recours)) —
+  le cas courant des groupes des Antilles, qui importent par conteneur ;
+- aérien (convention de Montréal, art. 31) : **14 jours** pour une avarie.
+Les délais se calculent par le moteur du socle (`regles_delais`,
+`public.echeance_de`) : jours ouvrables, fériés **du territoire de la société**
+(Guadeloupe, Martinique… ont leurs fériés propres).
+
+**Le scénario** : 1. le magasin reçoit une livraison avec avarie ou manquant ;
+il la saisit dans /espace/varelo (ou, plus tard, la pièce — bon de livraison,
+lettre de voiture, photos — est lue par A1) : société, date de réception, mode
+de transport, transporteur, n° de lettre de voiture ou de connaissement,
+fournisseur (référentiel), colis attendus/reçus, avarie/manquant, description,
+réserves écrites ou non sur le bon. 2. Varelo calcule la date limite de la
+protestation et la montre en compte à rebours ; alerte (critique à J-1) et
+point du matin « Réserves à émettre » au gérant et à la direction des
+opérations. 3. Varelo prépare la **lettre de protestation motivée** (date,
+document de transport, constat, montant estimé) à envoyer en recommandé.
+4. On note l'envoi (date, moyen : LRAR, acte, LRE) ; hors délai dit. 5. Une
+livraison sans suite se classe, motivée. Journal à chaque étape.
+
+**Ce qu'il faudra à A1** (lecture des pièces, après ce lot) : un type de pièce
+`bon_livraison` du module varelo, champs `transporteur`, `document_transport`
+(n° de lettre de voiture, CMR ou connaissement), `date_livraison`,
+`colis_annonces`, `colis_recus`, `reserves_ecrites` (texte porté sur le bon,
+« sous réserve de déballage » ne vaut pas réserve), `expediteur`
+(nom, SIREN si présent), `mode` (routier, maritime, aérien) ; à l'arrivée de la
+lecture (`piece_lue.varelo`), Varelo pré-remplit la réception par
+`grp_enregistrer_reception` (la porte de ce lot). Je n'écris rien chez A1.
+
+### 4 codé — b1_11, tests b1_14, carte « Réserves à émettre »
+
+- Migration `omega/modules/varelo/migrations/b1_11_reserves.sql` : les
+  quatre règles dans `regles_delais` (`varelo.reserves.routier` 3 jours
+  ouvrables, L133-3 ; `.cmr` 7 ouvrables, CMR art. 30 ; `.maritime` 3
+  calendaires, La Haye-Visby ; `.aerien` 14, Montréal art. 31), la table
+  `grp_receptions` (échéance par `public.echeance_de`, fériés du
+  territoire de la société), la vue `grp_reserves` (état dépassé /
+  aujourd'hui / demain / à venir / protestée / hors délai / sans suite),
+  le contrôle horaire `varelo-reserves` (alerte attention, critique à
+  J-1), les portes `grp_enregistrer_reception`, `grp_lettre_reserve`,
+  `grp_noter_protestation` (avertit si courriel ou portail en routier),
+  `grp_classer_reception` (motif obligatoire, gérant / DO / DJ), la ligne
+  « Réserves à émettre » du point du matin (gérant, DO, DJ ; pas DF).
+  Remplace `grp_ce_matin` et `grp_deposer_points` : repasser aussi
+  `^test_b1_10_`, `^test_b1_11_`, `^test_b1_12_`.
+- Tests `omega/tests/varelo/b1_14_reserves.sql` : 33 assertions, vertes
+  sur la maquette locale (258 au total, 07 à 14).
+- Écran : `Reserves.tsx` / `reserves.ts` (après « Reportings dus ») ;
+  bloc « Réserves à émettre » dans « Ce matin » (six blocs) ; recette
+  164 ✓ aux cinq largeurs, axe 0 écart sur les trois dialogues.
+- Pour A1 : le type de pièce `bon_livraison` (transporteur,
+  document_transport, date_livraison, colis_annonces, colis_recus,
+  reserves_ecrites, expediteur, mode) et, à la lecture, l'appel de
+  `private.grp_enregistrer_reception` — rien n'est branché tant que A1
+  n'a pas posé le type.
