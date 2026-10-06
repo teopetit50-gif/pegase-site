@@ -1,0 +1,208 @@
+
+— 390 px, clair
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ axe accueil page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ axe activite page : 0 écart grave
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ axe reglages page : 0 écart grave
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ axe a-venir page : 0 écart grave
+  ✓ Entrée ouvre le menu « … »
+  ✓ le focus est sur le premier choix (Noter un paiement…)
+  ✓ axe menu ouvert : 0 écart grave
+  ✓ Échap ferme et rend le focus au déclencheur (Actions sur R2026-000018)
+  ✓ la fenêtre « Noter un paiement » s'ouvre
+  ✓ axe fenêtre paiement : 0 écart grave
+  ✓ le paiement est noté (exemple) et un toast le dit
+  ✓ Ctrl+K ouvre la palette, le champ a le focus
+  ✓ la frappe filtre la liste (1 résultat pour « payer »)
+  ✓ axe palette : 0 écart grave
+  ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
+  ✓ Tab atteint la recherche et les onglets
+  ✓ axe menu compte : 0 écart grave
+  ✓ console propre
+
+— 390 px, sombre
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ axe accueil page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ axe activite page : 0 écart grave
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ axe reglages page : 0 écart grave
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ axe a-venir page : 0 écart grave
+  ✓ Entrée ouvre le menu « … »
+  ✓ le focus est sur le premier choix (Noter un paiement…)
+  ✓ axe menu ouvert : 0 écart grave
+  ✓ Échap ferme et rend le focus au déclencheur (Actions sur R2026-000018)
+  ✓ la fenêtre « Noter un paiement » s'ouvre
+  ✓ axe fenêtre paiement : 0 écart grave
+  ✓ le paiement est noté (exemple) et un toast le dit
+  ✓ Ctrl+K ouvre la palette, le champ a le focus
+  ✓ la frappe filtre la liste (1 résultat pour « payer »)
+  ✓ axe palette : 0 écart grave
+  ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
+  ✓ Tab atteint la recherche et les onglets
+  ✓ axe menu compte : 0 écart grave
+  ✓ console propre
+
+— 768 px, clair
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ console propre
+
+— 768 px, sombre
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ console propre
+
+— 1024 px, clair
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ console propre
+
+— 1024 px, sombre
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ console propre
+
+— 1440 px, clair
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ axe accueil page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ axe activite page : 0 écart grave
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ axe reglages page : 0 écart grave
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ axe a-venir page : 0 écart grave
+  ✓ Entrée ouvre le menu « … »
+  ✓ le focus est sur le premier choix (Noter un paiement…)
+  ✓ axe menu ouvert : 0 écart grave
+  ✓ Échap ferme et rend le focus au déclencheur (Actions sur R2026-000018)
+  ✓ la fenêtre « Noter un paiement » s'ouvre
+  ✓ axe fenêtre paiement : 0 écart grave
+  ✓ le paiement est noté (exemple) et un toast le dit
+  ✓ Ctrl+K ouvre la palette, le champ a le focus
+  ✓ la frappe filtre la liste (1 résultat pour « payer »)
+  ✓ axe palette : 0 écart grave
+  ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
+  ✓ Tab atteint la recherche et les onglets
+  ✓ axe menu compte : 0 écart grave
+  ✓ console propre
+
+— 1440 px, sombre
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ axe accueil page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ axe activite page : 0 écart grave
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ axe reglages page : 0 écart grave
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ axe a-venir page : 0 écart grave
+  ✓ Entrée ouvre le menu « … »
+  ✓ le focus est sur le premier choix (Noter un paiement…)
+  ✓ axe menu ouvert : 0 écart grave
+  ✓ Échap ferme et rend le focus au déclencheur (Actions sur R2026-000018)
+  ✓ la fenêtre « Noter un paiement » s'ouvre
+  ✓ axe fenêtre paiement : 0 écart grave
+  ✓ le paiement est noté (exemple) et un toast le dit
+  ✓ Ctrl+K ouvre la palette, le champ a le focus
+  ✓ la frappe filtre la liste (1 résultat pour « payer »)
+  ✓ axe palette : 0 écart grave
+  ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
+  ✓ Tab atteint la recherche et les onglets
+  ✓ axe menu compte : 0 écart grave
+  ✓ console propre
+
+— 1700 px, clair
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ console propre
+
+— 1700 px, sombre
+  ✓ accueil se rend
+  ✓ accueil : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ activite se rend
+  ✓ activite : aucun débordement horizontal (0 px)
+  ✓ reglages se rend
+  ✓ reglages : aucun débordement horizontal (0 px)
+  ✓ a-venir se rend
+  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ console propre
+
+✓ 0 échec
