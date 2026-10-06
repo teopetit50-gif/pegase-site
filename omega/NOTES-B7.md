@@ -400,3 +400,13 @@ humaine (`filed_attester_identite`, A4), qui gagnerait à être proposée d'embl
   celle d'A4 : s'il repose a4_10, il doit reprendre la condition. Test `omega/tests/identite/b7_06_recente.sql`
   (test_b7_12, 11 assertions vertes en local, dont les deux cas du test a4_05 d'A4) ; `^test_b7_` complet vert en local.
 
+- 6/10 14 h 37 Z (coordinateur) : b7_05 posé, `^test_b7_` **12/12** ; A4 prévenu (garder la condition, choisir entre
+  élargir la contrainte `registre` et une table à part). Demande : l'adaptateur suisse côté ouvrier, sans toucher à la base.
+- 6/10 15 h 00 Z : `omega/functions/identite/uid_ch.ts` écrit, **pas branché** sur `verifier.ts` (attend la voie d'A4) :
+  `analyserUidCh` (CHE-123.456.789, suffixe MWST/TVA/IVA), `cleUidChValide` (poids 5 4 3 2 7 6 5 4, mod 11), `UidChSoap`
+  (GetByUID, une requête : entreprise + statut TVA, sans clé), lecture des codes eCH-0108 v5.1 (IDE 3/4 actif, 1/2
+  valide avec remarque, 5/6/7 radié → invalide ; TVA 2 inscrit, 3 non inscrit → invalide si l'on vérifie un numéro de
+  TVA). Faute `Data_validation_failed` = refus du numéro ; toute autre faute, HTTP ≠ 200 ou réseau = indisponible.
+  Tests : `tests/uid_ch_test.ts` (10, sur une réponse réelle relevée sur un office fédéral) et le double `UidChFactice` ;
+  58 tests Deno verts. Sondé en réel : CHE-116.068.369 et CHE-105.909.036 valides (TVA inscrite), CHE-100.000.006
+  inconnue. 27 requêtes en une minute sans refus du service.
