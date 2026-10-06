@@ -21,8 +21,10 @@
      coûtent les créneaux perdus, avec les chiffres du visiteur.
    • Aucune promesse de lecture de radios ni d'aide au diagnostic : Tiroma
      lit l'agenda, les plans et les devis, rien de clinique.
-   • Aucun de nos outils techniques n'est nommé. WhatsApp et l'e-mail sont
-     les canaux où le CABINET reçoit son point du matin, pas notre pile.
+   • Aucun de nos outils techniques n'est nommé.
+   • 06/10/2026 (C5, décision D6) : le point du matin nominatif se lit dans
+     l'espace sécurisé du cabinet ; un courriel prévient, sans nom de
+     patient. Jamais WhatsApp ni SMS pour un contenu de santé.
    ══════════════════════════════════════════════════════════════════════ */
 import type { LucideIcon } from "lucide-react";
 import {
@@ -139,7 +141,7 @@ export const ETAPES = [
   {
     titre: "Tiroma lit l'agenda et les plans",
     texte:
-      "Tout au long de la journée, Tiroma lit l'agenda, les plans, les devis, les travaux confiés au laboratoire et les réponses des mutuelles. Une annulation saisie à 8 h remonte dans les minutes qui suivent, en lecture seule.",
+      "À chaque export de votre logiciel, Tiroma lit l'agenda, les plans, les devis, les travaux confiés au laboratoire et les réponses des mutuelles. Une annulation saisie à 8 h remonte au premier export qui la contient, en lecture seule.",
   },
   {
     titre: "Le créneau libéré est repris",
@@ -187,7 +189,7 @@ export const COMPARATIF: { critere: string; cases: [Case, Case, Case, Case] }[] 
   { critere: "Accords des mutuelles rapprochés de l'agenda", cases: [true, false, false, "Manuel"] },
   { critere: "Implants des chirurgies rapprochés du stock", cases: [true, "Stock général", false, "De mémoire"] },
   { critere: "Charge suivie par fauteuil, jamais par personne", cases: [true, "Partiel", false, false] },
-  { critere: "Point du matin par WhatsApp ou e-mail", cases: [true, false, false, "À l'oral"] },
+  { critere: "Point du matin dans un espace sécurisé", cases: [true, false, false, "À l'oral"] },
   { critere: "Aucune double saisie", cases: [true, true, "Partiel", false] },
   { critere: "Mise en route", cases: ["Sur audit", true, "Abonnement", "Formation"] },
   { critere: "Coût", cases: ["Sur audit", "Inclus", "Variable", "Un salaire"] },
@@ -207,7 +209,7 @@ export const CABINETS = [
       "Plans signés sans rendez-vous",
       "Contrôles dus rapprochés de l'agenda",
       "Retours du laboratoire vérifiés avant la pose",
-      "Point du matin sur WhatsApp",
+      "Point du matin dans votre espace sécurisé",
     ],
     fait: "Prêt chaque jour à 7 h",
     lueur: "bg-gradient-to-br from-[#4f9587]/10 to-[#4f9587]/0",
@@ -483,7 +485,7 @@ export const QUESTIONS = [
   },
   {
     q: "Qui appelle les patients ?",
-    r: "Votre assistante. Tiroma dit qui appeler en premier et pourquoi ; il ne contacte jamais un patient à votre place.",
+    r: "Votre assistante. Tiroma dit qui appeler en premier et pourquoi ; il ne contacte un patient qu'avec un message que vous avez validé.",
   },
   {
     q: "Comment Tiroma choisit-il le patient pour un créneau ?",
@@ -499,7 +501,7 @@ export const QUESTIONS = [
   },
   {
     q: "Une annulation du matin attend-elle le lendemain ?",
-    r: "Non. Tiroma lit l'agenda tout au long de la journée : une annulation saisie à 8 h remonte avec les patients qui peuvent la reprendre dans les minutes qui suivent, sans attendre le point du lendemain.",
+    r: "Non. Tiroma lit l'agenda à chaque export de votre logiciel : une annulation saisie à 8 h remonte avec les patients qui peuvent la reprendre au premier export qui la contient, sans attendre le point du lendemain.",
   },
   {
     q: "Tiroma suit-il l'orthodontie et les implants ?",
