@@ -276,6 +276,7 @@ export type Dossier = {
   verifications: Verification[];
   charge: Charge | null;
   appels: RegistreAppels | null;
+  pilotage: Pilotage | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -315,3 +316,42 @@ export type RegistreAppels = {
 
 /** Ce qu'on appelle : un patient, pour une raison, éventuellement un plan ou un créneau. */
 export type CibleAppel = { patient_id: string; patient_nom: string; motif: MotifAppel; plan_id: string | null; evenement_id: number | string | null };
+
+/* ——— le pilotage du titulaire (b3_13) ——— */
+
+export type DevisARelancer = {
+  plan_id: string;
+  patient_id: string;
+  patient_nom: string;
+  devis_numero: string | null;
+  montant: number | null;
+  reste_a_charge: number | null;
+  presente_le: string | null;
+  valide_jusqu_au: string | null;
+  panier: string | null;
+};
+
+export type Pilotage = {
+  periode: { du: string; au: string; jours: number };
+  devis: {
+    presentes: number;
+    signes: number;
+    taux: number | null;
+    montant_presente: number;
+    montant_signe: number;
+    par_panier: { panier: string; presentes: number; signes: number; montant_signe: number }[];
+    precedent: { presentes: number; signes: number; taux: number | null };
+  };
+  en_attente: { devis: number; montant: number; expirent_30j: number; a_relancer: number; a_relancer_liste: DevisARelancer[] };
+  plans_sans_rdv: { nombre: number; montant: number; reste_a_charge: number };
+  rendez_vous: {
+    passes: number;
+    honores: number;
+    manques: number;
+    annules: number;
+    taux_manques: number | null;
+    par_praticien: { praticien_id: string | null; nom: string | null; passes: number; manques: number; taux: number | null }[];
+    precedent: { passes: number; manques: number; taux_manques: number | null };
+  };
+  appels: { appels: number; rdv_pris: number };
+};

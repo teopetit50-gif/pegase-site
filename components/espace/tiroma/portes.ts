@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -110,8 +110,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const charge = profil === "titulaire" ? await quiet(rpc<Charge | null>("tiroma_charge_fauteuils", { p_client: c, p_entite: e, p_jour: null }, null), null, "charge des fauteuils") : null;
   /* b3_12 : le registre des appels (titulaire, assistante, collaborateur ; la direction ne l'a pas) */
   const appels = profil && profil !== "direction" ? await quiet(rpc<RegistreAppels | null>("tiroma_appels", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "registre des appels") : null;
+  /* b3_13 : le pilotage, pour le titulaire et la direction */
+  const pilotage = profil === "titulaire" || profil === "direction" ? await quiet(rpc<Pilotage | null>("tiroma_pilotage", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "pilotage") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage },
     avis,
   };
 }

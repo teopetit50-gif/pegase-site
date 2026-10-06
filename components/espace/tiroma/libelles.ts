@@ -162,3 +162,12 @@ export const MOTIFS_APPEL: Record<"creneau" | "plan" | "devis" | "controle" | "a
   attente: "liste d'attente",
   autre: "autre",
 };
+
+/* b3_13 : les paniers du devis (100 % Santé, reste à charge maîtrisé, libre) */
+export const PANIERS: Record<string, string> = {
+  "100_sante": "100 % Santé",
+  maitrise: "Reste à charge maîtrisé",
+  libre: "Tarifs libres",
+  mixte: "Mixte",
+  non_precise: "Panier non précisé",
+};
