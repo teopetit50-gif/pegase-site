@@ -15,7 +15,8 @@
    le décompte ; axe-core sur la carte et ses fenêtres ;
    les heures (b6_17) : 11 h (alerte L3121-18), 12,5 h (refus), le coût horaire chargé, la rentabilité ; axe-core ;
    le recalage (b6_19) : recaler la pose des fenêtres, voir la suite glisser, appliquer ; axe-core ;
-   la signature sur place (b6_20) : préparer le lien, puis /signer/exemple à 390 et 1440 (nom, tracé, lu et approuvé) ; axe-core.
+   la signature sur place (b6_20) : préparer le lien, puis /signer/exemple à 390 et 1440 (nom, tracé, lu et approuvé) ; axe-core ;
+   la météo (b6_21) : prévision des 7 jours et risques des passages extérieurs ; axe-core.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -429,6 +430,30 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
     ok(deb === 0, `pas de débordement horizontal (${deb})`);
     await s.capturer(`${dossier}daliro-signer-${largeur}.jpg`, { qualite: 55 });
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-meteo-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : la météo des 7 jours (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Météo du chantier"]')`;
+    const t = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/Météo des 7 jours/i.test(t) && /14,2 mm/.test(t) && /68 km\/h/.test(t), 'la prévision des 7 jours est affichée (14,2 mm, 68 km/h)');
+    ok(/décalez ou protégez|Aucun passage extérieur menacé/.test(t), 'les passages extérieurs sont confrontés à la prévision');
+    await s.evaluer(axe + ';true');
+    const c1 = await s.evaluer(graves(carte));
+    ok(c1.length === 0, `carte météo : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
     s.fermer();
   }
 }

@@ -27,6 +27,8 @@ import ReceptionCarte from "./ReceptionCarte";
 import HeuresCarte from "./HeuresCarte";
 import RecalageDialog from "./RecalageDialog";
 import SignatureLienDialog from "./SignatureLienDialog";
+import MeteoCarte from "./MeteoCarte";
+import ApproCarte from "./ApproCarte";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -447,6 +449,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         ) : <Avis teinte="ambre">Aucun marché : les avenants et les situations ne peuvent pas être chiffrés tant que le marché signé n&apos;est pas saisi puis vérifié ligne à ligne.</Avis>}
       </section>
 
+      {/* ——— météo des passages extérieurs (b6_21) ——— */}
+      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} />
+
       {/* ——— planning ——— */}
       <section className="esp-carte" aria-label="Planning">
         <div className="esp-carte-tete">
@@ -494,6 +499,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </div>
         ) : null}
       </section>
+
+      {/* ——— approvisionnement (b6_22) ——— */}
+      <ApproCarte key={`appro-${c.id}`} tableau={tableau} source={source} />
 
       {/* ——— avenants ——— */}
       <section className="esp-carte" aria-label="Avenants">
