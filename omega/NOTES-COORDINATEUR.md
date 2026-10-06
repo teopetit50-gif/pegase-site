@@ -851,3 +851,15 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   au rattachement, copie en clair purgée, 7 j max) → B4 b4_09. A4 : TVA dans le cdar (fournisseur
   étranger) → a4_19, puis echange-pa 21466c7 et rejeu du 204. A1 : branchement avis Tamila.
   B2 b2_06 annoncé mais pas poussé.
+- 16 h 20 Z — **Facture électronique : parcours PA du bac à sable prouvé de bout en bout** (a4_19 52100b4,
+  echange-pa v3 21466c7) : 204 et 207 (litige TX_TVA_ERR) émis en CDAR, accusés ok, battement echange_pa.
+  Lecteur v23 (A1 9eabc10 : pièces chiffrées lues chiffrées + passerelle avis RPVA). Poses : taux pénalités
+  Daliro 0.1240 (66f5ec6), 19ah v2 (77cecd9, test 20/20), b2_06 + test 15 (03a86fa : 14/15, loc_dec 42501
+  → B2). 44 vert.
+  **Audit des promesses du site** rendu → omega/AUDIT-PROMESSES.md (carnet de commandes). Nouveaux
+  ouvriers : **C2 CASHD** session_01FM1C6EZzNaNZdUh92m7KQP (worker-c2), **C3 REPUT réponse**
+  session_01Fb8QHDbEZep6P1zq77gN3n (worker-c3), **C4 OFFLOAD** session_01TzwZQvXaqH1JTKSGp7JmrX
+  (worker-c4), **C5 vitrine honnête** session_0165VcUYH1QptmMroZso9GQg (worker-c5) ; branches c2–c5
+  exclues des prévisualisations Vercel (6dfeb11). Carnets envoyés à A1–A5, B1–B7.
+  Main c239974 : voie C d'A5 (workflow de répétition, omega/prod ; omega-sauvegarde.yml NON repris :
+  dumps hors UE), écran Rappels Tiroma (e79c729 + 19ah v2).
