@@ -357,5 +357,74 @@ for (const largeur of LARGEURS) {
   s.fermer();
 }
 
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-parc', densite: 1 });
+  console.log('— /espace/tavaro : parc, remise en location et entretien (exemple, b2_10)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Parc : remise en location et entretien"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; const r = [...c.querySelectorAll('ul[aria-label^="Remises"] > li')]; return { n: r.length, premier: r[0]?.innerText ?? '', chiffres: c.querySelector('.tav-parc-chiffres')?.innerText ?? '', tete: c.querySelector('.esp-carte-tete').innerText }; })()`);
+  ok(etat.n === 2, `${etat.n} remises en cours (2 attendues)`);
+  ok(/GA-123-BC/.test(etat.premier) && /risque de manquer le départ/.test(etat.premier) && /R-55102/.test(etat.premier), 'la première est la Clio, qui risque de manquer son départ R-55102');
+  ok(/2 h 48/.test(etat.chiffres) && /3 \/ 3/.test(etat.chiffres), `la médiane de remise en location (2 h 48) et les prêtes à temps se lisent : « ${etat.chiffres.replace(/\s+/g, ' ').slice(0, 120)} »`);
+  ok(/1 en risque/.test(etat.tete), 'la tête de la carte compte la remise en risque');
+  /* l'anomalie confiée à Yanis : « Vous » êtes valideur, vous pouvez la clore */
+  await s.evaluer(`[...${sect}.querySelectorAll('.tav-anomalies .r-btn')].find(b => /Traitée/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  ok(/traitée/.test(await s.evaluer(`${sect}.querySelector('.tav-anomalies')?.innerText ?? ''`)), 'l\'anomalie confiée à Yanis Dupré est close par un valideur');
+  /* signaler une anomalie sur la 308 : bouton gris tant qu'il manque la personne */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GH-456-DE/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Signaler une anomalie/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const t = d.querySelector('textarea'); const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; set.call(t, 'Gilet de sécurité absent du coffre'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Signaler\\s*$/.test(b.textContent)).disabled`), 'sans personne nommée, « Signaler » reste gris');
+  await s.evaluer(`(() => { const sel = [...document.querySelectorAll('[role="dialog"] select')][1]; const o = [...sel.options].find(x => /Claire Morel/.test(x.textContent)); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Signaler\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const anomalie = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', li: [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GH-456-DE/.test(x.innerText))?.innerText ?? '' }))()`);
+  ok(/confiée à Claire Morel/.test(anomalie.fait) && /Gilet de sécurité/.test(anomalie.li), 'l\'anomalie est confiée à Claire Morel, nommée sur la remise');
+  /* finir la Clio : nettoyage, plein → prête, elle quitte la liste */
+  for (const etape of ['Nettoyage', 'Plein']) {
+    await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GA-123-BC/.test(x.innerText)); [...li.querySelectorAll('.tav-etape')].find(b => b.textContent.includes('${etape}')).click(); })()`);
+    await s.dormir(500);
+  }
+  const apres = await s.evaluer(`(() => ({ n: ${sect}.querySelectorAll('ul[aria-label^="Remises"] > li').length, chiffres: ${sect}.querySelector('.tav-parc-chiffres').innerText }))()`);
+  ok(apres.n === 1 && /4 retours/.test(apres.chiffres), 'les trois étapes faites : la Clio est prête, elle quitte la liste et entre dans la médiane');
+  /* immobiliser la 308 chez le carrossier : la date de retour est obligatoire */
+  await s.evaluer(`[...${sect}.querySelectorAll('.esp-carte-tete .r-btn')].find(b => /Immobiliser/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select'); const o = [...sel.options].find(x => /GH-456-DE/.test(x.textContent)); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Immobiliser\\s*$/.test(b.textContent)).disabled`), 'carrosserie sans date de retour : « Immobiliser » reste gris');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="datetime-local"]'); const d = new Date(Date.now() + 4 * 86400000); const v = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T17:00'; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, v); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Immobiliser\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const immo = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', n: ${sect}.querySelectorAll('ul[aria-label="Véhicules immobilisés"] > li').length }))()`);
+  ok(/GH-456-DE est immobilisé \(carrosserie\)/.test(immo.fait) && immo.n === 3, `la 308 part chez le carrossier avec sa date de retour : « ${immo.fait.slice(0, 90)} »`);
+  /* planifier la révision de la 308 dans un creux, atelier prévenu */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Entretiens"] > li')].find(x => /Révision 50 000 km/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Trouver un créneau/.test(b.textContent)).click(); })()`);
+  await s.dormir(900);
+  const creneaux = await s.evaluer(`document.querySelectorAll('[role="dialog"] .tav-creneau').length`);
+  ok(creneaux === 3, `${creneaux} créneaux proposés dans les creux (3 attendus), hors de l'immobilisation chez le carrossier`);
+  const premier = await s.evaluer(`document.querySelector('[role="dialog"] .tav-creneau')?.innerText ?? ''`);
+  const saisir = (k, v) => s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input:not([type="radio"])')][${k}]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '${v}'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir(0, 'Garage Lumière');
+  await saisir(1, 'pas-une-adresse');
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Planifier/.test(b.textContent)).disabled`), 'une adresse d\'atelier fausse : « Planifier » reste gris');
+  await saisir(1, 'atelier@garage-lumiere.example');
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Planifier/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const plan = await s.evaluer(`${sect}.querySelector('.esp-avis')?.innerText ?? ''`);
+  ok(/planifié le/.test(plan) && /l'atelier est prévenu/.test(plan), `la révision est planifiée dans un creux, l'atelier prévenu (${premier.trim().slice(0, 40)})`);
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tavaro-parc-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);

@@ -257,3 +257,19 @@ La promesse (textes.ts) : « Quand un client conteste auprès de sa banque le d�
   - Recette : 98 contrôles verts aux cinq largeurs ; axe : 0 écart, dialogue compris.
 - **À confirmer sur la recette** : `private.lit_objet` connaît-il `objet_type = 'loc_contestations'` ? Sinon, la pièce du dossier reste invisible aux personnes. L'envoi et le téléchargement par chemin ne changent pas.
 - **Suite du carnet** : « Remise en location et entretien ».
+
+### Carnet, point 3 — modules 02 et 03, remise en location et entretien (06/10, 21 h Z)
+
+- **b2_10** (1c467ef, corrigée en 928b937) :
+  - quatre tables : `loc_immobilisations` (lue aussi par B3), `loc_remises`, `loc_anomalies_retour`, `loc_entretiens` ;
+  - deux déclencheurs **ajoutés** sur les tables du socle, qui ne bloquent jamais l'écriture : le retour (contrat importé ou retour saisi à l'agence) crée la remise en location avec l'heure du prochain départ, et l'immobilisation « préparation » ;
+  - les portes :
+    - remise : étapes, personne responsable, annulation ;
+    - anomalies : chacune confiée à une personne nommée, qui est prévenue ;
+    - immobilisations : date de retour obligatoire, réservations à réaffecter listées ;
+    - entretien : créneaux dans les creux, planification refusée sur une réservation, atelier prévenu par `preparer_envoi`, entretien fait ;
+  - le cron `tavaro-parc` (toutes les 15 minutes) alerte quand une remise risque de manquer le départ ou est en retard, quand une immobilisation dépasse sa date ou chevauche une réservation, et quand un entretien dû n'est pas planifié ;
+  - test 19 : 25 assertions.
+- **Correction 928b937** : une préparation ouverte sans date de fin bloquait tous les créneaux d'entretien. Elle compte maintenant douze heures.
+- **Écran** (ddd161b) : la carte « Parc », juste après les contrats. Ses délais ne s'affichent qu'une fois la carte montée (sinon l'erreur d'hydratation React #418). Recette : 112 contrôles verts ; axe : 0 écart.
+- **Suite du carnet** : « Sortie de flotte ».
