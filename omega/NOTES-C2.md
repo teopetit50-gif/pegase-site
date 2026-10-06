@@ -10,7 +10,7 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
 | **Mécanique** (pgTAP sur la recette) | paliers 1 et 2 écrits, **111/111 verts en local** (Postgres 16 jetable + socle réduit ; trois passes, ordre des travaux aléatoire), à poser | c2_01 et c2_02 posés et `^test_c2_` vert sur la recette ; puis palier 4 |
-| **Livrable client** (/espace/cashd en ligne) | 0 % | palier 3 (écran), après la pose |
+| **Livrable client** (/espace/cashd) | écran écrit sur worker-c2 : **recette 67/67 aux cinq largeurs** (exemple) ; pas encore en ligne | fusion par le coordinateur ; lien de menu (C1) ; relecture réelle avec le compte du banc après la pose |
 
 ## Paliers
 
@@ -18,7 +18,7 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
    lettrage simple ; balance âgée ; deux voies d'entrée (export du facturier par la chaîne de relevés du socle, dépôt
    CSV depuis l'écran) ; saisie à la main.
 2. **Moteur de relance** — `c2_02_moteur.sql` (écrit, à poser). Voir plus bas.
-3. **Écran** — à faire : `components/espace/cashd/`, `app/espace/cashd/`.
+3. **Écran** — `app/espace/cashd/page.tsx`, `components/espace/cashd/` (écrit). Voir plus bas.
 4. **Les autres lignes de `capacites/relances.ts`**, une à une.
 
 ## Ordre de pose
@@ -90,6 +90,30 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   périmètre : gérant ou admin), `cashd_litige`, `cashd_regler_relances`, `cashd_regler_compte`,
   `cashd_relances_du_jour`.
 
+## L'écran /espace/cashd (palier 3)
+
+- **En haut** : l'encours échu au total (et l'encours total), les retards de plus de 90 jours, les relances à valider,
+  les comptes hors cycle — trois compteurs filtrent la liste. **Balance âgée** de tout l'encours (barre empilée,
+  cinq tranches), date du dernier export lu, crédits à déduire. Avis « mode essai ».
+- **Débiteurs** (qui doit quoi, depuis quand) et **fiche du compte** : contact de facturation, plafond, échu,
+  encours, crédits ; chaque pièce avec reste dû, retard, palier atteint et palier suivant (vue `cashd_suivi`) ;
+  règlements. Gestes : noter un règlement (sur une facture ou non), mettre en pause / reprendre (motif obligatoire),
+  litige ouvrir / clore.
+- **Relances écrites** : compte, palier, état dans la file (à valider, partie, coupée…), objet, montant, indemnité,
+  pénalités, motif ; le texte complet se déplie ; lien vers la file de validation (`/espace/validations`).
+- **Règlements à rapprocher** : « factures probables » (`cashd_propositions`) et « Lettrer ».
+- **Déposer un export** : CSV choisi ou collé, lu dans le navigateur (`lireTableau` de Varelo + synonymes identiques au
+  modèle cashd/tableur), compte des lignes et colonnes reconnues / ignorées avant l'envoi à `cashd_importer` ; case
+  « export complet ». L'XLSX passe par la chaîne de relevés.
+- Deux sources (interrupteur de la coquille) : l'exemple joué en mémoire (`exemples.ts`, `calcul.ts`, mêmes règles que
+  les vues) ; la base réelle (`portes.ts`, sous RLS ; temps réel sur cashd_factures, cashd_reglements, cashd_relances,
+  cashd_comptes). Aucune table écrite en direct.
+- Vérifié : `npx tsc --noEmit`, `npx eslint components/espace/cashd app/espace/cashd`, `npm run build` (route
+  `ƒ /espace/cashd`) ; `node omega/recette-c2/recette-cashd.mjs` : **67/67** — cinq largeurs (pas de débordement, pas de
+  mot anglais, échu 17 810 €, 4 tranches, 5 débiteurs, 5 relances, fiche à 3 pièces), puis règlement (F-2026-101
+  soldée, relance coupée, échu 5 810 €), pause (mise en demeure coupée), rapprochement (échu 3 960 €), dépôt collé
+  (2 lignes, colonne ignorée dite), relance dépliée à 390. Captures dans `omega/recette-c2/`.
+
 ## Lignes de `lib/produits/capacites/relances.ts` tenues (preuve)
 
 Une ligne est « tenue » quand sa preuve passe sur la recette ; d'ici là, « écrite, verte en local ».
@@ -142,6 +166,9 @@ Une ligne est « tenue » quand sa preuve passe sur la recette ; d'ici là, « �
   dans `components/espace/ecrans.ts` (fichier de la coquille, à C1).
 
 ## Journal de session
+
+- 06/10, nuit : palier 3, l'écran. Recette 67/67 (un défaut trouvé : après un geste, la liste se réordonnait et la
+  fiche changeait de compte, l'avis « C'est fait » disparaissait → le geste fige le compte ouvert).
 
 - 06/10, nuit : palier 2 écrit, `c2_02_moteur.sql`, test `c2_03_moteur` (42). Défaut trouvé en local et corrigé : quand
   le journal des encaissements arrive avant l'export des factures (ordre des travaux non garanti), le règlement restait
