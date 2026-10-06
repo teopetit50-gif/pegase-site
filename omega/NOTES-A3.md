@@ -312,6 +312,39 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 - Recette : 180 contrôles ✓ (la vue aux cinq largeurs et l'enchaînement :
   ordre des groupes, retard d'abord, IBAN manquant dit, avis).
 
+## Lot du 06/10 (6) — décider en lot dans /espace/validations
+
+- **« Décider en lot »** dans l'en-tête de la file (dès deux demandes en
+  attente) : une case par demande en attente, une barre « n cochées sur m
+  décidables par vous », « Cocher les décidables », « Approuver (n) »,
+  « Refuser (n) » (`validations/DecisionLot.tsx`, `FileValidations.tsx`).
+- **Avant le clic**, chaque demande cochée repasse par `verdict()` (séparation
+  saisie / approbation, déjà décidé, équipe, rôle, délégation — la même règle
+  qu'à l'unité) ; une demande qui exige une pièce jointe se décide une par
+  une. Les écartées sont listées avec leur raison ; le commentaire est
+  exigé dès qu'une demande retenue l'exige, le motif l'est pour un refus. Une
+  décision sous délégation est dite (« au nom de … »).
+- **Après** : une approbation par demande (INSERT dans `approbations`, comme
+  à l'unité, aucune porte nouvelle), puis un **bilan ligne à ligne** —
+  approuvée / refusée par la base avec son message tel quel ; les refusées
+  restent cochées dans la file. La liste est figée à l'ouverture du
+  dialogue (chaque décision fait sortir sa demande de la file).
+- **Défaut transversal corrigé** : les dialogues (`components/ui/dialog`)
+  sont rendus dans un portail **hors de `.esp`** ; les styles de l'espace n'y
+  valaient pas (boutons verts / rouges et leur état gris, fil, avis,
+  pastilles, formulaires, « obligatoire ») — vrai aussi pour « Approuver »
+  à l'unité et pour les dialogues des autres écrans /espace. 51 règles de
+  `espace.css` sont doublées pour `.dlg-panneau.resa`.
+- **Relu en réel** (referent@, 06/10 05 h 03 Z, `relecture-lot.mjs`), avec
+  l'accord du coordinateur pour **deux** demandes seulement : « rattacher 32
+  codes clients » et « rattacher 50 codes clients » cochées (et rien
+  d'autre : 2 cochées sur 8 décidables), retenues toutes deux, bilan
+  « Approuvée » ×2 ; en base : `executee` à 05:04:00 Z, sans motif d'échec.
+  **5 demandes VARELO restent en attente**, comme demandé.
+- Recette : l'enchaînement « décider en lot » (cases, exclusion motivée de
+  2 demandes saisies par vous, « Approuver » gris sans le commentaire exigé,
+  bilan 5/5, message de la file) — **186 contrôles ✓**.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
