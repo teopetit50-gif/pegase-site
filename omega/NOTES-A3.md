@@ -404,6 +404,25 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   refusé ; paiement complet → la facture sort, « Afficher les payées (1) ») ;
   accessibilité 26 ✓ (dont le dialogue de paiement au clavier).
 
+## Lot du 06/10 (9) — vérifier le site servi : `verifier-en-ligne.mjs`
+
+- `node omega/recette-a3/verifier-en-ligne.mjs [origine]` (défaut
+  https://omegaai.fr), lecture seule, sans session : les onze écrans de
+  l'espace (A3 : validations, filed, filed?objet=…R2026-000017, fournisseurs,
+  à payer, point ; B : varelo, tavaro, tiroma, tamila, lorani, daliro) —
+  200, titre, débordement aux cinq largeurs, axe à 390 et 1440, et pour A3
+  une phrase de chaque lot de la nuit. Un défaut A3 fait échouer ; un défaut
+  B est un constat listé à la fin.
+- Essai contre le Next local (06/10 ~05 h 45 Z) : **écrans d'A3, tout passe
+  (157 ✓)** ; **12 constats sur les B**, tous axe, aucun débordement :
+  varelo, tavaro, tamila, lorani, daliro — `listbox`/`option` sur des `li`
+  (required-children, required-parent, listitem) ; tiroma et lorani —
+  `aria-prohibited-attr` (aria-label sur un élément sans rôle) ; tavaro,
+  lorani, daliro à 390 — `scrollable-region-focusable` (une zone qui défile
+  sans être atteignable au clavier : `tabIndex={0}` sur le cadre).
+- À jouer contre omegaai.fr au retour du quota Vercel (07/10 ~04 h 30
+  Paris), au signal du coordinateur.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
