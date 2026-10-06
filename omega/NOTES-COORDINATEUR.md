@@ -490,3 +490,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   `^test_b3_` 12/12 après. A1 041f6a2 : modeles/tiroma_logosw.json aligné, test « chaque
   jeu reconnu par ses seuls en-têtes » vert ; pas de redéploiement (le JSON ne sert qu'à
   l'essai à blanc, la fonction lit les jeux en base).
+- 03 h 50 — **fusions faites avec l'accord écrit de Teo** : worker-b2, b3, b4, b5, b6, b7, a3
+  dans main (`-X theirs`, seulement omega/ : notes, tests tavaro 11 et identite b7_01,
+  b3_11, CHAMPS-LECTURE-TAMILA, scripts recette-b5). components/, app/, lib/ inchangés ;
+  tsc et build verts. A1, A2, A4, A5 toujours non fusionnées (code des fonctions, migrations,
+  workflow de sauvegarde : à traiter à part).
