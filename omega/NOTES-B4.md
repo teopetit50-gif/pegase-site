@@ -489,6 +489,22 @@ avaient quitté le bucket.
 - **Reste** : l'ancienne porte `tamila_effacer_dossier` reste appelable par le serveur sans la vérification (je ne
   la réécris pas) ; l'ouvrier, lui, ne passe que par la porte vérifiée.
 
+## 17. Le temps proposé à la saisie, le forfait consommé (carnet du coordinateur, n° 2 ; lot B4-13, 06/10)
+
+- **Base** : `b4_12_tamila_temps_propose.sql` — `tamila_temps.origine` (« audience:<id> », « acte:<id> »,
+  « avis:<id> » ; un même événement une fois par personne tant que le temps n'est pas annulé) ;
+  `tamila_temps_ecartes` (ce que chacun a ignoré, lu par son auteur seul, effacé avec le dossier) ;
+  `tamila_conventions.minutes_prevues`. Portes `tamila_saisir_temps_propose` (l'événement doit être du dossier ;
+  passe par `tamila_saisir_temps`, mêmes règles), `tamila_ecarter_proposition`, `tamila_prevoir_forfait` (qui
+  gère le dossier, convention au forfait ou mixte). Test `21_temps_propose.sql` : 20 contrôles verts (souche).
+- **Écran** : `temps.ts` (propositions des soixante derniers jours : audience tenue ou passée — plaidoiries 2 h,
+  mise en état 30 min… ; acte déposé — conclusions 4 h, signification 30 min ; avis reçu — 15 min, conclusions
+  adverses 1 h de lecture ; l'accusé de dépôt n'est pas reproposé ; filtre par personne) et carte Honoraires :
+  « Proposé à la saisie » (Saisir ouvre le formulaire pré-rempli, Ignorer ne le propose plus) ; « Forfait
+  consommé » (jauge, temps passé de tous contre temps prévu, taux horaire effectif, alerte à 80 % et au
+  dépassement). Exemple : 2026-0377 au forfait, 17 h sur 20 h. Recette 124/124, axe 0 écart grave.
+- Les durées proposées sont des usages, corrigeables ; rien ne se saisit sans le geste de l'avocat.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
