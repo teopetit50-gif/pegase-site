@@ -624,3 +624,12 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Écran : `components/espace/lorani/PluProjet.tsx` (« Règles d'urbanisme », avant le contrôle). Exemple : Lemoine (UMa,
   Nantes) et Mercière (UCe1b, Lyon) trouvés ; Dubois a une réponse préparée (URm1, PLU-H) au clic.
 - Fiche de lecture : paragraphe pour A1 — ne rendre que les règles de la zone de `lorani_plu.zone`.
+
+## n° 3 a — métré contre DPGF (dans b5_16, amendé AVANT pose) — 06/10/2026
+
+- b5_16 n'étant pas posé, je l'ai amendé plutôt que d'écrire un ALTER (élargir un CHECK demanderait de retirer
+  l'ancien : mot interdit). Rôle `metre`, nature `metre_dpgf`. Si b5_16 avait déjà été posé dans l'ancienne version :
+  le dire, il faudra un lot de reprise.
+- Règle : quantité mesurée = `quantite.<réf>` du métré (rôle metre) ou, sans métré, somme des planches ; DPGF
+  `poste.<réf>` (quantité) + `unite.<réf>` ; écart > 5 % = constat ; DPGF < 90 % du mesuré = majeur (sous-estimé).
+- Test b5_07 § 10 (2 assertions, 31 au total) ; type de pièce `lorani_metre` dans la fiche, le dépôt et le passage.

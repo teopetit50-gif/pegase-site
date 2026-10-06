@@ -526,8 +526,8 @@ export const PIECES_CONTROLE_EXEMPLE: PieceProjet[] = [
 const CA = id("8", 1);
 const CB = id("8", 2);
 export const CONTROLES_EXEMPLE: Controle[] = [
-  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 2, cree_le: ilYa(2) },
-  { id: CA, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "A", precedent_id: null, statut: "controle", lance_le: ilYa(21), constats_nb: 5, cree_le: ilYa(21) },
+  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2) },
+  { id: CA, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "A", precedent_id: null, statut: "controle", lance_le: ilYa(21), constats_nb: 6, cree_le: ilYa(21) },
 ];
 const roles: [string, ControlePiece["role"], string][] = [[PD(1), "planche", "PC2"], [PD(2), "planche", "PC3"], [PD(4), "plu", "PLU-H URm1"], [PD(5), "cctp", "CCTP 02"], [PD(6), "dpgf", "DPGF 02"]];
 export const CONTROLE_PIECES_EXEMPLE: ControlePiece[] = [
@@ -548,6 +548,16 @@ const POSTE_24 = {
   titre: "Le poste 2.4 « Isolation thermique par l'extérieur » est décrit au CCTP (CCTP 02, p. 9) mais n'est pas chiffré à la DPGF.",
   correction: "Ajouter le poste 2.4 à la DPGF, ou le retirer du CCTP.",
   valeurs: [{ piece: PD(5), reference: "CCTP 02", page: 9, valeur: "Isolation thermique par l'extérieur", texte: "2.4 Isolation thermique par l'extérieur (ITE)", boite: { x: 0.12, y: 0.33, l: 0.5, h: 0.02 } }],
+};
+const METRE_22 = {
+  nature: "metre_dpgf" as const, gravite: "majeur" as const, objet: "2_2",
+  titre: "Le poste 2.2 est chiffré à 64 m2 à la DPGF (DPGF 02, p. 1) pour 78,4 m2 mesurés (PC2, p. 1 ; PC3, p. 1) : sous-estimé de 18 %.",
+  correction: "Porter la quantité du poste 2.2 à 78,4 m2 à la DPGF, ou justifier l'écart.",
+  valeurs: [
+    { piece: PD(1), reference: "PC2", page: 1, valeur: 52.6, texte: "Dalle haute R+3 : 52,60 m²", boite: { x: 0.3, y: 0.55, l: 0.18, h: 0.025 } },
+    { piece: PD(2), reference: "PC3", page: 1, valeur: 25.8, texte: "Terrasse : 25,80 m²", boite: { x: 0.44, y: 0.22, l: 0.16, h: 0.025 } },
+    { piece: PD(6), reference: "DPGF 02", page: 1, valeur: 64, texte: "2.2 Plancher béton R+3 — m2 — 64,00" },
+  ],
 };
 const POSTE_27 = {
   nature: "cctp_dpgf" as const, gravite: "mineur" as const, objet: "2_7", statut: "ecarte" as const,
@@ -577,6 +587,8 @@ export const CONSTATS_EXEMPLE: Constat[] = [
   constat({ id: id("9", 6), controle_id: CB, ...RECUL, precedent_id: id("9", 3) }),
   constat({ id: id("9", 7), controle_id: CB, ...POSTE_24, precedent_id: id("9", 4) }),
   constat({ id: id("9", 8), controle_id: CB, ...POSTE_27, precedent_id: id("9", 5), decide_le: ilYa(15) }),
+  constat({ id: id("9", 10), controle_id: CA, ...METRE_22 }),
+  constat({ id: id("9", 11), controle_id: CB, ...METRE_22, precedent_id: id("9", 10) }),
 ];
 
 /* ——— le PLU trouvé depuis l'adresse (b5_17) : réponses du Géoportail de l'urbanisme, telles qu'au 06/10/2026 ——— */

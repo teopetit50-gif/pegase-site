@@ -58,6 +58,7 @@ il cite.
 | `lorani_planche` | Une planche graphique : plan de masse, plans de niveaux, coupes, façades, notice (PC1 à PC8, PCMI1 à PCMI8, planches de DCE) | `reference` (« PC2 », « A-102 ») ; `indice` ; et une ligne **par mesure lue** : `mesure.<grandeur>.<objet>` |
 | `lorani_cctp` | Le cahier des clauses techniques particulières (par lot) | `lot` ; une ligne par poste décrit : `poste.<référence>` (valeur = intitulé du poste, texte = la citation) ; et les mesures écrites : `mesure.<grandeur>.<objet>` |
 | `lorani_dpgf` | La décomposition du prix global et forfaitaire (par lot) | `lot` ; une ligne par poste chiffré : `poste.<référence>` (valeur = quantité canonique, texte = la ligne) |
+| `lorani_metre` | Le métré d'un lot (quantités mesurées sur les plans, par l'économiste ou le lecteur) | `lot` ; par poste : `quantite.<référence>` (quantité canonique), `unite.<référence>` (« m2 », « ml », « m3 », « u ») |
 | `lorani_plu_reglement` | Le règlement écrit du PLU (zone du terrain) | `zone` (« UB ») ; par règle chiffrée : `regle.<grandeur>.max` ou `regle.<grandeur>.min` (valeur canonique), et `regle.<grandeur>.article` (« UB 10 ») |
 
 - `<grandeur>` (vocabulaire fermé, l'unité fait partie du nom) : `hauteur_faitage_m`, `hauteur_egout_m`,
@@ -71,6 +72,9 @@ il cite.
 - `<référence>` d'un poste : le numéro d'article tel qu'écrit, normalisé (`2.3.1` → `2_3_1`, `GO.04` → `go_04`).
 - Valeurs canoniques : nombre avec un point (`9.85`, `312.40`), sans unité. `page` et `boite` obligatoires sur
   chaque mesure : le constat renvoie l'architecte à l'endroit exact.
+- Métré contre DPGF : une DPGF rend aussi `unite.<référence>` ; une planche peut rendre `quantite.<référence>` (surface,
+  longueur, volume mesuré pour ce poste sur cette planche) — le socle additionne les planches quand il n'y a pas de
+  métré. Écart de plus de 5 % = constat ; DPGF sous le métré de plus de 10 % = majeur.
 - La zone du terrain est connue avant la lecture du règlement (b5_17) : `public.lorani_plu` (une ligne par projet,
   `zone` = « UMa », `zones` si la parcelle en touche plusieurs, `document`, `reglement_url`), trouvée par la base au
   Géoportail de l'urbanisme. Un règlement de PLUi couvre toutes les zones : ne rendre que les `regle.*` de la zone de

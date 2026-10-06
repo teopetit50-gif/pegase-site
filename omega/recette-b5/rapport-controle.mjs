@@ -40,7 +40,7 @@ if (pdf) {
   ok(pages >= 4, `pdfinfo lit le PDF : ${pages} pages (rapport + pages citées annotées)`);
   ok(/Title:\s+Contrôle du dossier — Surélévation Dubois/.test(info), 'titre du document avec ses accents');
   const texte = execFileSync('pdftotext', ['-layout', chemin, '-']).toString();
-  ok(/2 constats ouverts, dont 1 bloquant/.test(texte) && /Corrigés depuis l'indice A/.test(texte), 'le résumé : 2 ouverts dont 1 bloquant, corrigés depuis l’indice A');
+  ok(/3 constats ouverts, dont 1 bloquant/.test(texte) && /sous-estimé de 18 %/.test(texte) && /Corrigés depuis l'indice A/.test(texte), 'le résumé : 3 ouverts dont 1 bloquant (métré compris), corrigés depuis l’indice A');
   ok(/Correction proposée : Ramener le recul sur limite séparative/.test(texte) && /PC2, p\. 1 : « 3,20 m »/.test(texte), 'chaque constat avec sa correction proposée et ses citations (page, texte lu)');
   ok(/Règle : au moins 4 m, article URm1 7 \(PLU-H URm1, p\. 41\)/.test(texte.replace(/\s+/g, ' ')), 'la règle du PLU et son article');
   ok(/PC2, page 1 — constat/.test(texte) && /CCTP 02, page 9 — constat/.test(texte), 'les pages citées suivent, légendées avec les numéros des constats');

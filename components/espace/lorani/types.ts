@@ -325,7 +325,7 @@ export type Visa = {
 };
 
 /* le contrôle du dossier (b5_16) : les pièces croisées, ce qui est relevé, ce qui est décidé */
-export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "autre";
+export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "metre" | "autre";
 export type Controle = {
   id: string;
   projet_id: string;
@@ -360,7 +360,7 @@ export type ValeurCitee = {
 export type Constat = {
   id: string;
   controle_id: string;
-  nature: "incoherence" | "plu" | "cctp_dpgf";
+  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf";
   gravite: "bloquant" | "majeur" | "mineur";
   grandeur: string | null;
   objet: string | null;

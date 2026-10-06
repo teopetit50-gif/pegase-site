@@ -10,8 +10,8 @@
 --   · public.lorani_controles : un contrôle d'un projet à un indice (intitulé, indice, contrôle précédent, statut
 --     en_lecture | controle | clos, lancé le, nombre de constats).
 --   · public.lorani_controle_pieces : les pièces du contrôle (une pièce Lorani du même projet, son rôle planche | cctp |
---     dpgf | plu | autre, sa référence « PC2 »).
---   · public.lorani_constats : ce que le croisement relève (nature incoherence | plu | cctp_dpgf, gravité, grandeur,
+--     dpgf | plu | metre | autre, sa référence « PC2 »).
+--   · public.lorani_constats : ce que le croisement relève (nature incoherence | plu | cctp_dpgf | metre_dpgf, gravité, grandeur,
 --     objet, valeurs citées [{piece, reference, page, boite, valeur, texte}], article, correction proposée, statut
 --     ouvert | corrige | accepte | ecarte, motif). Posés par le socle seul ; un membre qui écrit sur le projet ne change
 --     que le statut et le motif (motif obligatoire pour accepter ou écarter).
@@ -20,7 +20,10 @@
 --          tolérance (0,05 m, 0,5 m², 0,5 %, 0 pour un nombre) ; correction : aligner, avec la valeur la plus fréquente ;
 --       2. PLU : une mesure au-delà d'un maximum ou en deçà d'un minimum du règlement lu ; correction : ramener à la
 --          règle, article cité ;
---       3. CCTP / DPGF : un poste décrit et non chiffré, ou chiffré et non décrit.
+--       3. CCTP / DPGF : un poste décrit et non chiffré, ou chiffré et non décrit ;
+--       4. métré / DPGF : la quantité d'un poste à la DPGF s'écarte de plus de 5 % de la quantité mesurée (le métré,
+--          ou à défaut la somme des quantités lues sur les planches) ; sous-estimée de plus de 10 % = majeur (c'est la
+--          plus-value de chantier de demain) ; correction : porter la quantité mesurée.
 --     Un nouveau passage sur le même contrôle met à jour ses constats ; un constat disparu passe « corrige ».
 --     Revérification à l'indice suivant : un constat ouvert du contrôle précédent qui ne se retrouve plus passe
 --     « corrige » (corrigé au contrôle de l'indice suivant) ; celui qui se retrouve est reconduit (lien au précédent) et
@@ -68,7 +71,7 @@ CREATE TABLE IF NOT EXISTS public.lorani_controle_pieces (
   CONSTRAINT lorani_controle_pieces_pkey PRIMARY KEY (id),
   CONSTRAINT lorani_controle_pieces_controle_fkey FOREIGN KEY (client_id, controle_id) REFERENCES public.lorani_controles (client_id, id),
   CONSTRAINT lorani_controle_pieces_projet_fkey FOREIGN KEY (client_id, projet_id) REFERENCES public.lorani_projets (client_id, id),
-  CONSTRAINT lorani_controle_pieces_role_check CHECK (role = ANY (ARRAY['planche', 'cctp', 'dpgf', 'plu', 'autre'])),
+  CONSTRAINT lorani_controle_pieces_role_check CHECK (role = ANY (ARRAY['planche', 'cctp', 'dpgf', 'plu', 'metre', 'autre'])),
   CONSTRAINT lorani_controle_pieces_reference_check CHECK (reference IS NULL OR char_length(btrim(reference)) BETWEEN 1 AND 40),
   CONSTRAINT lorani_controle_pieces_une_fois UNIQUE (controle_id, piece_id)
 );
@@ -101,7 +104,7 @@ CREATE TABLE IF NOT EXISTS public.lorani_constats (
   CONSTRAINT lorani_constats_client_id_id_key UNIQUE (client_id, id),
   CONSTRAINT lorani_constats_controle_fkey FOREIGN KEY (client_id, controle_id) REFERENCES public.lorani_controles (client_id, id),
   CONSTRAINT lorani_constats_projet_fkey FOREIGN KEY (client_id, projet_id) REFERENCES public.lorani_projets (client_id, id),
-  CONSTRAINT lorani_constats_nature_check CHECK (nature = ANY (ARRAY['incoherence', 'plu', 'cctp_dpgf'])),
+  CONSTRAINT lorani_constats_nature_check CHECK (nature = ANY (ARRAY['incoherence', 'plu', 'cctp_dpgf', 'metre_dpgf'])),
   CONSTRAINT lorani_constats_gravite_check CHECK (gravite = ANY (ARRAY['bloquant', 'majeur', 'mineur'])),
   CONSTRAINT lorani_constats_statut_check CHECK (statut = ANY (ARRAY['ouvert', 'corrige', 'accepte', 'ecarte'])),
   CONSTRAINT lorani_constats_titre_check CHECK (char_length(titre) BETWEEN 1 AND 300),
@@ -344,6 +347,25 @@ begin
     ), p_dpgf as (
       select distinct on (split_part(v.champ, '.', 2)) split_part(v.champ, '.', 2) as ref, v.brut as quantite, v.reference, v.page, v.texte, v.boite, v.piece_id
       from v where v.role = 'dpgf' and v.champ ~ '^poste\.[a-z0-9_]+$' order by split_part(v.champ, '.', 2), v.page
+    ), q_metre as (
+      -- les quantités mesurées : le métré s'il y en a un, sinon la somme des planches
+      select split_part(v.champ, '.', 2) as ref, sum(v.brut::numeric) as quantite,
+             jsonb_agg(jsonb_build_object('piece', v.piece_id, 'reference', v.reference, 'page', v.page, 'boite', v.boite, 'valeur', v.brut::numeric, 'texte', v.texte)
+                       order by v.reference, v.page) as valeurs,
+             string_agg(format('%s, p. %s', v.reference, coalesce(v.page::text, '?')), ' ; ' order by v.reference, v.page) as sources
+      from v
+      where v.champ ~ '^quantite\.[a-z0-9_]+$' and v.brut ~ '^[0-9]+(\.[0-9]+)?$'
+        and (v.role = 'metre' or (v.role = 'planche' and not exists (select 1 from v w where w.role = 'metre' and w.champ ~ '^quantite\.')))
+      group by split_part(v.champ, '.', 2)
+    ), q_dpgf as (
+      select d.ref, d.quantite::numeric as quantite, d.reference, d.page, d.boite, d.texte, d.piece_id,
+             (select u.brut from v u where u.role = 'dpgf' and u.champ = 'unite.' || d.ref limit 1) as unite
+      from p_dpgf d where d.quantite ~ '^[0-9]+(\.[0-9]+)?$'
+    ), ecarts as (
+      select q.ref, q.quantite as mesuree, d.quantite as chiffree, coalesce(' ' || nullif(btrim(d.unite), ''), '') as unite, q.valeurs, q.sources,
+             d.reference, d.page, d.boite, d.texte, d.piece_id, round(100 * (d.quantite - q.quantite) / q.quantite) as pct
+      from q_metre q join q_dpgf d on d.ref = q.ref
+      where q.quantite > 0 and abs(d.quantite - q.quantite) > 0.05 * q.quantite
     ), inc as (
       select m.grandeur, m.objet, max(m.valeur) - min(m.valeur) as ecart,
              mode() within group (order by m.valeur) as frequente,
@@ -411,6 +433,15 @@ begin
            null, jsonb_build_array(jsonb_build_object('piece', d.piece_id, 'reference', d.reference, 'page', d.page, 'boite', d.boite, 'valeur', d.quantite, 'texte', d.texte))
     from p_dpgf d
     where exists (select 1 from p_cctp) and not exists (select 1 from p_cctp x where x.ref = d.ref)
+    union all
+    select 'metre_dpgf', case when x.chiffree < 0.9 * x.mesuree then 'majeur' else 'mineur' end, null, x.ref, format('metre_dpgf|%s', x.ref),
+           left(format('Le poste %s est chiffré à %s%s à la DPGF (%s, p. %s) pour %s%s mesurés (%s) : %s de %s %%.', replace(x.ref, '_', '.'),
+                       private.lorani_mesure_texte(x.chiffree, null), x.unite, x.reference, coalesce(x.page::text, '?'),
+                       private.lorani_mesure_texte(x.mesuree, null), x.unite, x.sources,
+                       case when x.chiffree < x.mesuree then 'sous-estimé' else 'surestimé' end, abs(x.pct)), 300),
+           format('Porter la quantité du poste %s à %s%s à la DPGF, ou justifier l''écart.', replace(x.ref, '_', '.'), private.lorani_mesure_texte(x.mesuree, null), x.unite),
+           null, x.valeurs || jsonb_build_array(jsonb_build_object('piece', x.piece_id, 'reference', x.reference, 'page', x.page, 'boite', x.boite, 'valeur', x.chiffree, 'texte', x.texte))
+    from ecarts x
   loop
     v_sigs := v_sigs || e.signature;
     insert into public.lorani_constats (client_id, entite_id, projet_id, controle_id, nature, gravite, grandeur, objet, signature, titre,
@@ -539,7 +570,7 @@ begin
         v_res := private.lorani_visa_rappeler(t);
       elsif v_type = 'lorani_situation_travaux' then
         v_res := private.lorani_poser_situation_lue((t.charge ->> 'piece')::uuid);
-      elsif v_type in ('lorani_planche', 'lorani_cctp', 'lorani_dpgf', 'lorani_plu_reglement')
+      elsif v_type in ('lorani_planche', 'lorani_cctp', 'lorani_dpgf', 'lorani_plu_reglement', 'lorani_metre')
             or exists (select 1 from public.lorani_controle_pieces cp where cp.piece_id = (t.charge ->> 'piece')::uuid) then
         v_res := private.lorani_piece_controle_lue((t.charge ->> 'piece')::uuid);
       else

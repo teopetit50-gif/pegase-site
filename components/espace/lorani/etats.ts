@@ -174,10 +174,11 @@ export const TYPES_PIECE: { cle: string; libelle: string }[] = [
   { cle: "lorani_cctp", libelle: "CCTP" },
   { cle: "lorani_dpgf", libelle: "DPGF" },
   { cle: "lorani_plu_reglement", libelle: "Règlement du PLU" },
+  { cle: "lorani_metre", libelle: "Métré" },
 ];
 
 /* les pièces du contrôle du dossier (b5_16) : pas des courriers de la mairie */
-export const TYPES_CONTROLE = ["lorani_planche", "lorani_cctp", "lorani_dpgf", "lorani_plu_reglement"];
+export const TYPES_CONTROLE = ["lorani_planche", "lorani_cctp", "lorani_dpgf", "lorani_plu_reglement", "lorani_metre"];
 
 export function libelleTypePiece(cle: string | null | undefined): string {
   return TYPES_PIECE.find((t) => t.cle === cle)?.libelle ?? "Courrier";
