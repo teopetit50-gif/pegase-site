@@ -165,13 +165,13 @@ Six types, plus `lorani_courrier_autre`, tels que `private.lorani_propositions` 
 
 | `type_piece` | Ce que c'est | Champs | Clés (tous vérifiés → `lue`) |
 |---|---|---|---|
-| `lorani_recepisse_depot` | récépissé de dépôt d'une demande d'autorisation, remis par la mairie | `numero_dossier`, `date_depot`, `type_autorisation`, `commune`, `demandeur` | `date_depot` |
+| `lorani_recepisse_depot` | récépissé de dépôt d'une demande d'autorisation, remis par la mairie, **ou accusé de réception / d'enregistrement électronique (ARE / AEE) du guichet numérique**, qui en tient lieu (L.112-11 CRPA, R*423-3 CU) : `date_depot` = la date de réception qu'il indique | `numero_dossier`, `date_depot`, `type_autorisation`, `commune`, `demandeur` | `date_depot` |
 | `lorani_lettre_delai` | lettre notifiant ou modifiant le délai d'instruction | `numero_dossier`, `delai_mois`, `date_lettre`, `motif_majoration` | `delai_mois` |
 | `lorani_demande_pieces` | demande de pièces complémentaires | `numero_dossier`, `date_lettre`, `pieces`, `delai_reponse_mois` | `date_lettre`, `pieces` |
 | `lorani_arrete` | arrêté du maire ou du préfet | `numero_dossier`, `decision`, `date_decision`, `prescriptions`, `date_notification` | `decision`, `date_decision` |
 | `lorani_certificat_tacite` | certificat de décision tacite acquise | `numero_dossier`, `date_tacite`, `date_certificat` | `date_tacite` |
 | `lorani_constat_affichage` | constat d'affichage par commissaire de justice | `numero_dossier`, `date_constat`, `passage`, `commissaire` | `date_constat` |
-| `lorani_courrier_autre` | autre courrier de la mairie (accusé de réception électronique, avis de commission, information) | `numero_dossier`, `date_lettre` | aucune : `lue` même sans date |
+| `lorani_courrier_autre` | autre courrier de la mairie (avis de commission, information ; un ARE / AEE est un récépissé, pas un autre courrier) | `numero_dossier`, `date_lettre` | aucune : `lue` même sans date |
 
 Les clés sont les champs « obligatoires » de la fiche de B5 ; `numero_dossier` est rendu partout où il est écrit, sans être une clé.
 

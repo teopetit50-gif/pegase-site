@@ -245,7 +245,7 @@ Deno.test("lorani : champs facultatifs de la fiche de B5 (récépissé, arrêté
 });
 
 Deno.test("lorani : un autre courrier de la mairie est lu, avec ou sans date", async () => {
-  const octets = pdf(["Accusé de réception électronique", "Votre envoi a bien été reçu."]);
+  const octets = pdf(["Avis de la commission d'accessibilité", "La commission se réunira prochainement."]);
   const { issue, portes } = await lireLorani("30", "ar.pdf", octets, {
     lisible: true,
     type_piece: "lorani_courrier_autre",
@@ -254,4 +254,31 @@ Deno.test("lorani : un autre courrier de la mairie est lu, avec ou sans date", a
   });
   assertEquals(issue, "lue");
   assertEquals(portes.enregistrements[0].resultat.type_piece, "lorani_courrier_autre");
+});
+
+Deno.test("lorani : l'accusé de réception électronique (ARE) du guichet numérique vaut récépissé de dépôt", async () => {
+  const octets = pdf([
+    "Guichet numérique des autorisations d'urbanisme — Commune de Saint-Herblain",
+    "ACCUSÉ DE RÉCEPTION ÉLECTRONIQUE",
+    "Votre demande de permis de construire a été reçue le 15/09/2026 à 10:42.",
+    "Numéro de dossier : PC 044109 26 A0042",
+  ]);
+  const { issue, portes } = await lireLorani("31", "are.pdf", octets, {
+    lisible: true,
+    type_piece: "lorani_recepisse_depot",
+    confiance_type: 0.94,
+    valeurs: [
+      { champ: "date_depot", valeur: "2026-09-15", texte: "a été reçue le 15/09/2026", page: 1 },
+      { champ: "numero_dossier", valeur: "PC 044109 26 A0042", texte: "Numéro de dossier : PC 044109 26 A0042", page: 1 },
+    ],
+  });
+  assertEquals(issue, "lue");
+  const r = portes.enregistrements[0].resultat;
+  assertEquals(r.type_piece, "lorani_recepisse_depot");
+  assertEquals(r.valeurs.find((v) => v.champ === "date_depot")!.valeur, "2026-09-15");
+  // La consigne apprend au modèle que l'ARE / AEE est un récépissé, pas un « autre courrier ».
+  const consigne = consigneSysteme("lorani");
+  assertStringIncludes(consigne, "accusé de réception électronique (ARE)");
+  assertStringIncludes(consigne, "accusé d'enregistrement électronique (AEE)");
+  assertStringIncludes(consigne, "est un récépissé de dépôt, pas un autre courrier");
 });

@@ -14,33 +14,47 @@
      · montant_ttc = 529.87, page 2, avec une boîte, contrôle « concorde avec le PDF page 2 » ;
      · aucune divergence XML / PDF dans le motif de la pièce.
 
-   usage : SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… node omega/banc/facturx_reel.mjs [session-gerant.json]
-   Avec une session (cookie Supabase du gérant, comme les scripts de recette d'A3/B5), le dépôt se fait en son nom ;
-   sans, en serveur. Les contrôles lisent toujours avec la clé de service. Aucune valeur secrète n'est affichée. */
+   usage, au choix :
+     · au nom du gérant (sans clé de service) :
+       SUPABASE_URL=… SUPABASE_ANON_KEY=… node omega/banc/facturx_reel.mjs <session-gerant.json>
+       (la session est celle des scripts de recette d'A3/B5 ; NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY sont aussi lues)
+       Le gérant ne lit ni les travaux ni la consommation IA : ces deux contrôles se font alors par
+       facturx_reel_controle.sql (bloc 1), joué avec execute_sql ; le script le rappelle.
+     · en serveur : SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… node omega/banc/facturx_reel.mjs
+   Aucune valeur secrète n'est affichée. */
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
-const URL_SB = (process.env.SUPABASE_URL ?? '').replace(/\/+$/, '');
-const CLE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
-if (!URL_SB || !CLE) { console.error('SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont nécessaires'); process.exit(2); }
+const URL_SB = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/+$/, '');
+const CLE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
+const CLE_ANON = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 const CLIENT = 'cccccccc-0000-4000-8000-00000000000c'; // Groupe Sogexal (banc)
 const FICHIER = new URL('../functions/lecteur/banc/publics/EN16931_Einfach.pdf', import.meta.url);
 const NOM = 'EN16931_Einfach_facturx.pdf';
 const session = process.argv[2] ? JSON.parse(readFileSync(process.argv[2], 'utf8')) : null;
+if (!URL_SB || !(CLE_SERVICE || (CLE_ANON && session?.access_token))) {
+  console.error('il faut SUPABASE_URL et soit SUPABASE_SERVICE_ROLE_KEY, soit SUPABASE_ANON_KEY avec une session du gérant');
+  process.exit(2);
+}
 
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
-const service = { apikey: CLE, Authorization: `Bearer ${CLE}` };
-const auteur = session?.access_token ? { apikey: CLE, Authorization: `Bearer ${session.access_token}` } : service;
+/* Qui agit et qui lit : le gérant s'il y a une session (RLS : il voit les pièces, valeurs et documents de son
+   organisation), le serveur sinon. Le serveur seul lit les travaux et la consommation IA. */
+const auteur = session?.access_token
+  ? { apikey: CLE_ANON || CLE_SERVICE, Authorization: `Bearer ${session.access_token}` }
+  : { apikey: CLE_SERVICE, Authorization: `Bearer ${CLE_SERVICE}` };
+const service = CLE_SERVICE ? { apikey: CLE_SERVICE, Authorization: `Bearer ${CLE_SERVICE}` } : null;
+const lecteurDonnees = service ?? auteur;
 
-async function rpc(nom, corps, entetes = service) {
+async function rpc(nom, corps, entetes = lecteurDonnees) {
   const r = await fetch(`${URL_SB}/rest/v1/rpc/${nom}`, { method: 'POST', headers: { ...entetes, 'Content-Type': 'application/json' }, body: JSON.stringify(corps) });
   const t = await r.text();
   if (!r.ok) throw new Error(`${nom} : HTTP ${r.status} ${t.slice(0, 300)}`);
   return t ? JSON.parse(t) : null;
 }
 async function lire(table, requete) {
-  const r = await fetch(`${URL_SB}/rest/v1/${table}?${requete}`, { headers: service });
+  const r = await fetch(`${URL_SB}/rest/v1/${table}?${requete}`, { headers: lecteurDonnees });
   if (!r.ok) throw new Error(`${table} : HTTP ${r.status} ${(await r.text()).slice(0, 300)}`);
   return r.json();
 }
@@ -50,8 +64,8 @@ const octets = readFileSync(FICHIER);
 const sha = createHash('sha256').update(octets).digest('hex');
 console.log(`— la pièce : ${NOM}, ${octets.length} octets, sha256 ${sha.slice(0, 12)}…`);
 
-const iaAvant = Number(await rpc('consommation_ia_jour', { p_client: CLIENT }));
-console.log(`  · consommation IA du jour avant : ${iaAvant} €`);
+const iaAvant = service ? Number(await rpc('consommation_ia_jour', { p_client: CLIENT }, service)) : null;
+console.log(service ? `  · consommation IA du jour avant : ${iaAvant} €` : '  · consommation IA : lue par facturx_reel_controle.sql (bloc 1), pas avec la session du gérant');
 
 let [piece] = await lire('pieces', `client_id=eq.${CLIENT}&module=eq.filed&sha256=eq.${sha}&select=id,statut&order=recue_le.asc&limit=1`);
 if (piece) {
@@ -87,13 +101,18 @@ ok(p?.statut === 'lue', `pièce lue (statut ${p?.statut}, version ${p?.version_l
 ok(p?.type_piece === 'facture' && p?.methode === 'xml', `facture lue par son XML (type ${p?.type_piece}, méthode ${p?.methode})`);
 ok(!p?.motif, p?.motif ? `motif : ${p.motif}` : 'aucune divergence XML / PDF ni champ manquant');
 
-const [t] = await lire('travaux', `genre=eq.lecteur.lire&charge->>piece=eq.${piece.id}&select=id,etat,resultat,essais&order=id.desc&limit=1`);
-ok(t?.etat === 'fait', `travail ${t?.id} fait (${t?.essais} essai·s)`);
-ok((t?.resultat?.appels_ia ?? -1) === 0 && !t?.resultat?.modele && Number(t?.resultat?.cout_eur ?? -1) === 0,
-  `aucun appel au modèle : appels_ia ${t?.resultat?.appels_ia}, modèle ${t?.resultat?.modele ?? 'aucun'}, coût ${t?.resultat?.cout_eur} €`);
-
-const iaApres = Number(await rpc('consommation_ia_jour', { p_client: CLIENT }));
-ok(iaApres === iaAvant, `consommation IA du jour inchangée (${iaAvant} € → ${iaApres} €)`);
+if (service) {
+  const [t] = await lire('travaux', `genre=eq.lecteur.lire&charge->>piece=eq.${piece.id}&select=id,etat,resultat,essais&order=id.desc&limit=1`);
+  ok(t?.etat === 'fait', `travail ${t?.id} fait (${t?.essais} essai·s)`);
+  ok((t?.resultat?.appels_ia ?? -1) === 0 && !t?.resultat?.modele && Number(t?.resultat?.cout_eur ?? -1) === 0,
+    `aucun appel au modèle : appels_ia ${t?.resultat?.appels_ia}, modèle ${t?.resultat?.modele ?? 'aucun'}, coût ${t?.resultat?.cout_eur} €`);
+  const iaApres = Number(await rpc('consommation_ia_jour', { p_client: CLIENT }, service));
+  ok(iaApres === iaAvant, `consommation IA du jour inchangée (${iaAvant} € → ${iaApres} €)`);
+} else {
+  // Sans clé de service, la version du lecteur dit déjà s'il y a eu un modèle : « sans-ia » au bout.
+  ok(/\/sans-ia$/.test(p?.version_lecteur ?? ''), `lue sans modèle : version ${p?.version_lecteur}`);
+  console.log(`  · travail et consommation IA : jouer facturx_reel_controle.sql, bloc 1 (pièce ${piece.id})`);
+}
 
 const valeurs = await lire('pieces_valeurs', `piece_id=eq.${piece.id}&select=champ,valeur,page,boite,source,confiance,verifiee,controle`);
 const champs = valeurs.map((v) => v.champ);

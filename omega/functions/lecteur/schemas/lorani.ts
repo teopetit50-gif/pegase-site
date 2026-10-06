@@ -18,7 +18,7 @@ export const SCHEMA_LORANI: SchemaModule = {
       type: "lorani_recepisse_depot",
       libelle: "récépissé de dépôt",
       description:
-        "le récépissé de dépôt d'une demande d'autorisation d'urbanisme, remis par la mairie : il porte le numéro de dossier (PC, DP, PA, PD + commune + année + numéro) et la date de dépôt, souvent le délai d'instruction de base",
+        "le récépissé de dépôt d'une demande d'autorisation d'urbanisme, remis par la mairie (Cerfa, cachet « déposé le ») ; OU, pour une demande déposée en ligne, l'accusé de réception électronique (ARE) ou l'accusé d'enregistrement électronique (AEE) envoyé par le guichet numérique d'urbanisme, qui tient lieu de récépissé (art. L.112-11 du CRPA, R*423-3 du code de l'urbanisme) : date_depot = la date de réception (ou d'enregistrement) qu'il indique ; il porte le numéro de dossier (PC, DP, PA, PD + commune + année + numéro), souvent le délai d'instruction de base",
       champs: ["numero_dossier", "date_depot", "type_autorisation", "commune", "demandeur"],
       cles: ["date_depot"],
     },
@@ -65,7 +65,7 @@ export const SCHEMA_LORANI: SchemaModule = {
       type: "lorani_courrier_autre",
       libelle: "autre courrier de la mairie",
       description:
-        "un autre courrier de la mairie ou de l'administration sur la demande, qui n'est aucun des six ci-dessus (accusé de réception électronique, avis d'une commission, courrier d'information) : seulement sa date s'il en porte une ; un document qui n'est pas un courrier (plan, CCTP, photo) est « autre »",
+        "un autre courrier de la mairie ou de l'administration sur la demande, qui n'est aucun des six ci-dessus (avis d'une commission, courrier d'information ; un accusé de réception ou d'enregistrement électronique du guichet numérique est un récépissé de dépôt, pas un autre courrier) : seulement sa date s'il en porte une ; un document qui n'est pas un courrier (plan, CCTP, photo) est « autre »",
       champs: ["numero_dossier", "date_lettre"],
       cles: [],
       lueSansValeur: true,
@@ -78,7 +78,7 @@ export const SCHEMA_LORANI: SchemaModule = {
       max: 60,
       description: "le numéro de dossier de la demande, tel qu'imprimé (ex. PC 069 123 26 A0042, DP 03412 26 00117)",
     },
-    { champ: "date_depot", type: "date", description: "la date de dépôt de la demande en mairie" },
+    { champ: "date_depot", type: "date", description: "la date de dépôt de la demande en mairie ; pour un ARE / AEE du guichet numérique, la date de réception (ou d'enregistrement) qu'il indique" },
     { champ: "delai_mois", type: "entier", min: 1, maximum: 24, description: "le délai d'instruction notifié, en mois (de 1 à 24)" },
     { champ: "date_lettre", type: "date", description: "la date du courrier" },
     {
