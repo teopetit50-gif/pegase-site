@@ -141,3 +141,74 @@ d'écriture directe hors RLS.
 - 06/10, matin — **accessibilité** (demande du coordinateur, mesure d'A3) : `ListeAttente.tsx`, la liste des patients trouvés n'est plus un `listbox`/`option` mais une liste de boutons (rien n'y reste « ouvert » : un patient choisi ferme la liste, donc pas d'`aria-current`) ; `AvantRendezVous.tsx`, la pastille de gravité portait un `aria-label` sans rôle (aria-prohibited-attr, grave) → `role="img"` comme le point du matin d'A3. Nouveau `omega/recette-b3/accessibilite-tiroma.mjs` (axe-core WCAG 2.1 A/AA, 390 et 1440, dialogue de la liste d'attente ouvert) : 0 écart. Recette cinq largeurs : tout passe (le sélecteur du script suit la liste de boutons).
 - 06/10, 05 h 30 Z — 8d20e49 fusionné dans main (fccee92). **Pas encore en ligne** à 05 h 33 Z : omegaai.fr sert toujours l'ancien chunk (`role:"listbox"`, `"aria-label":e.gravite`) ; Vercel refuse les déploiements de fccee92 par quota (NOTES-COORDINATEUR, « Vercel par créneaux ») ; le coordinateur retente. À revérifier : `node omega/recette-b3/accessibilite-tiroma.mjs https://omegaai.fr` (le Chrome du banc ne charge pas omegaai.fr ici ; à défaut, chercher « Patients trouvés » dans les chunks servis).
 - 06/10, ~05 h 40 Z — remarque de B6 (axe scrollable-region-focusable à 390) : les deux cadres `.esp-tableau-cadre` de `Cabinet.tsx` (Horaires, Vocabulaire du logiciel) portent `tabIndex={0}`, `role="region"` et un `aria-label` « … (tableau qui défile) », sur le modèle de daliro/ChantierVue. axe 390/1440 : 0 écart ; à 390, le tableau du vocabulaire défile bien.
+
+## Vague 3 — les 3 manques pour qu'un vrai cabinet paie Tiroma et l'ouvre chaque jour (06/10, 14 h 40 Z)
+
+Hors import Logos_w (reporté par le coordinateur). Ce que Tiroma fait déjà : il lit l'agenda, les plans et les
+devis, il propose qui appeler pour chaque créneau libéré, il fait remonter les plans signés sans rendez-vous, il
+vérifie le labo à J-2, il montre la charge des fauteuils et la liste d'attente, et il dépose le point du matin.
+Ce qui manque, par ordre d'importance :
+
+1. **Fermer la boucle de l'appel : un registre des appels et ce qu'ils ont rapporté.** Tiroma dit « appelez
+   Marguerite Delannoy » mais ne garde rien de ce que l'assistante a fait. Le lendemain, les mêmes noms reviennent ;
+   deux personnes appellent le même patient ; « message laissé » n'a pas de date ; et le titulaire ne voit jamais
+   en euros ce que l'outil lui a rapporté. Sans cette preuve de valeur, l'abonnement ne se renouvelle pas.
+   - Le prix du trou : les chirurgiens-dentistes sont la profession la plus touchée par les rendez-vous non honorés,
+     **4,7 %** des rendez-vous en juin 2024, soit près d'un patient sur 20 (Doctolib, communiqué du 3 juillet 2024,
+     <https://media.doctolib.com/image/upload/mkg/file/doctolib__actualise_ses_statistiques_annuelles_rendez_vous_non_honores.pdf>).
+     Chaque créneau libéré qu'on ne reprend pas, c'est du temps de fauteuil perdu ; chaque plan signé qu'on ne
+     replanifie pas, c'est du chiffre qui dort.
+   - Les concurrents : Doctolib propose aux patients les créneaux annulés par liste d'attente et rappelle les
+     rendez-vous par SMS, mais seulement pour les patients qui réservent en ligne. Les logiciels de cabinet vendent
+     le « suivi des plans de traitement avec relance » et des taux d'acceptation des devis (exemple, une source
+     commerciale à prendre avec prudence : de 58 % à 72 %, <https://kolonell.com/fr/blog/logiciel-gestion-cabinet-dentaire-bordeaux-2026>).
+     Weclever Dental, en SaaS à 68 € HT par mois et par praticien, vend l'automatisation des tâches et une
+     intégration Doctolib (<https://www.indy.fr/guide/profession-liberale/ouvrir-un-cabinet-medical/comparatif-logiciel-dentiste/>).
+     Tiroma ne remplace pas le logiciel : ce qu'il peut vendre, c'est « voici ce que vos appels ont repris ce mois-ci ».
+   - Les règles de santé : rien ne sort d'Omega, puisque c'est l'équipe qui téléphone ; le verrou HDS des envois
+     n'est donc pas en jeu. La gestion des rendez-vous est une finalité prévue par le référentiel de la CNIL pour
+     les cabinets (base légale : l'intérêt légitime pour la prise de rendez-vous ; référentiel du 28 juillet 2020,
+     § 3 et tableau des bases légales, <https://www.cnil.fr/sites/default/files/atoms/files/referentiel_-_cabinet.pdf>).
+     L'issue est codée, sans texte libre : aucune donnée médicale n'est écrite. L'hébergement reste celui de la
+     base, HDS chez Scaleway au premier client (même référentiel, § 7, et CSP art. L. 1111-8).
+   - **Fait (b3_12, test 13, carte « Appels »)** : chaque appel est noté en un geste (rendez-vous pris, message
+     laissé, pas de réponse, à rappeler le…, refus, ne plus contacter). Le patient « à rappeler » revient le jour
+     dit. Un « rendez-vous pris » n'est compté que lorsque le relevé suivant le trouve dans l'agenda du logiciel.
+     Le titulaire voit la valeur des plans remis à l'agenda et les minutes de fauteuil reprises.
+
+2. **La valeur en euros, en continu : le pilotage mensuel du titulaire.** Plans signés non planifiés en euros,
+   devis présentés et non signés (relance à J+7 / J+21 avant l'expiration), taux d'acceptation des devis par
+   praticien et par panier 100 % Santé, maîtrisé ou libre, taux de rendez-vous manqués par praticien et par jour,
+   heures de fauteuil vides. Les données sont déjà en base (plans.montant, panier, presente_le, signe_le,
+   rendez_vous.statut). Il manque la porte de lecture et un rapport mensuel déposé au point du matin du 1er.
+   - Règles : le devis est obligatoire avant tout traitement prothétique, avec une alternative 100 % Santé
+     ou à reste à charge maîtrisé chaque fois qu'elle existe (DGCCRF, fiche « Dentiste », 20/03/2026,
+     <https://www.economie.gouv.fr/dgccrf/les-fiches-pratiques/dentiste>). Suivre le panier choisi par devis,
+     c'est aussi montrer que le cabinet propose bien l'alternative. Les montants sont des données de gestion et
+     restent derrière l'authentification (agrégats seuls dans un courriel, pas de nom).
+
+3. **Les rappels et relances aux patients par un canal agréé santé.** Rappel J-2 avec confirmation ou
+   annulation en un clic : une annulation libère le créneau, donc un « créneau à sauver » le jour même et non au
+   relevé suivant. S'y ajoutent la relance des devis non signés et l'invitation au contrôle annuel.
+   - Concurrents : Doctolib rappelle sept ou deux jours avant, puis deux heures avant par l'application ; il
+     permet d'annuler à toute heure, propose les créneaux libérés à une liste d'attente, et bloque le compte
+     après trois absences non excusées (Le Quotidien du Médecin,
+     <https://cardiologie.lequotidiendumedecin.fr/liberal-soins-de-ville/exercice/baisse-generale-des-rendez-vous-non-honores-33-de-taux-de-lapins-toutes-specialites-revele-doctolib>).
+   - Règles de santé : un message qui dit « votre rendez-vous chez le Dr X » révèle un soin ; c'est une donnée de
+     santé (RGPD, art. 9). Le prestataire qui stocke ou transmet ces données doit être certifié HDS (CSP art.
+     L. 1111-8 ; référentiel CNIL, § 7 : « ce prestataire doit être hébergeur agréé ou certifié… » ;
+     <https://esante.gouv.fr/labels-certifications/hebergement-des-donnees-de-sante>), avec un contrat de
+     sous-traitance (RGPD, art. 28). Il faut aussi informer le patient (affichage, courriel de confirmation) et
+     respecter son droit d'opposition (`ne_pas_contacter`, déjà lu). Dans Omega, c'est exactement le verrou
+     `SANTE_FOURNISSEUR_NON_HDS` : rien ne part tant qu'un fournisseur d'envoi SMS ou courriel n'est pas `hds = true`.
+     L'hébergeur de la base est choisi (Scaleway) ; **il manque le fournisseur d'envoi HDS**, que Teo doit
+     choisir. D'ici là, le gabarit `tiroma.point_matin` (compteurs, sans nom) reste le seul message sortant.
+
+Non retenus pour cette vague : écrire dans l'agenda du logiciel (Tiroma lit les exports, il n'écrit pas ; il
+faudrait une API Logos_w), la prise de rendez-vous en ligne (Doctolib la tient), et la facturation (c'est le
+logiciel métier qui la fait).
+
+### Vague 3, n° 1 : où on en est (06/10, ~15 h Z)
+- `omega/modules/tiroma/migrations/b3_12_registre_appels.sql` : table `tiroma_appels` (RLS en lecture, sans écriture directe), portes `tiroma_noter_appel` et `tiroma_appels`. Rejouée deux fois sur un Postgres 16 local, avec un socle simulé (tables et fonctions de regard minimales) : idempotente, refus attendus (ne pas contacter, rappel sans date, plan d'un autre patient, hors périmètre), double clic, confirmation par un rendez-vous vu après l'appel, valeur du plan comptée. **Pas de clé étrangère** vers patients et plans : la clause de cascade porte le mot interdit ; question posée au coordinateur.
+- `omega/tests/tiroma/13_registre_appels.sql` : `test_b3_13_registre_appels`, 24 assertions, à jouer sur la recette après b3_12.
+- Écran (components/espace/tiroma seulement) : nouvelle carte « Appels » (à reprendre aujourd'hui, bilan sur 30 jours : appels, rendez-vous repris confirmés, plans remis à l'agenda en euros pour le titulaire, heures de fauteuil reprises, avis « à reporter dans le logiciel »). Bouton « Noter l'appel » sous chaque candidat d'un créneau et sur chaque plan sans rendez-vous, avec la ligne « dernier appel ». Recette cinq largeurs : 72 contrôles, tout passe ; axe 390/1440, dont le dialogue « Noter l'appel » : 0 écart.
