@@ -770,3 +770,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   échec sur 2 h). Repris sur main : omega/MISE-EN-PRODUCTION.md (A5 9ab08c0), NOTES-B2 (1a0a628),
   NOTES-B5 (70c54d4), NOTES-B7 (87be597). En attente : A5 19af (socle « seul décideur ») puis b6_10
   (79cb08a) ; C1 premier palier du tableau de bord ; secrets Scaleway (Teo, au premier client).
+- 14 h 22 Z — **19af posé** (A5 430cf0e : exception « seul décideur » dans preparer_approbation,
+  liste blanche daliro envoi.*), test 55 vert ; **b6_09 + b6_10 posés** (79cb08a : la porte insère
+  une approbation) ; test_b6_05 25/26 (le commentaire est préfixé « [seul décideur] » par le socle,
+  test à corriger). Écran Daliro « Activer moi-même » fusionné. **Rejeu socle 40–55** : test_44
+  rouge (filed_iban_valide, filed_luhn, filed_siren_valide, filed_tva_intracom_analyser non
+  exécutables par authenticated ; tamila_coffre_reference/serveur exécutables en trop) → A5 19ag ;
+  test_46 rouge (vues btp_avenants_chiffres, btp_avenants_lignes_chiffrees sans security_invoker)
+  → B6 b6_11.
