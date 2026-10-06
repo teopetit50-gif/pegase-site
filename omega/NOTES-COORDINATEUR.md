@@ -942,3 +942,14 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   44 : seul rouge = private.grp_exiger_decideur_reception (B1). WebDAV : la passerelle Supabase laisse passer
   PROPFIND/MKCOL/LOCK → A2 lot 19ao_depots. Main 5c3362c : vitrine passe 3 (C5).
   B6 a proposé meteo_url Open-Meteo : NON posé (décision Météo-France).
+- 19 h 40 Z — Poses : b5_18 + b5_09 (152721c), **19an analyses** (A1 fd0bb0e) + b4_15 + 24 (9e51869), test b4_23 v2
+  (5644c0d), b1_11b (d6bb557 → **44 vert**), a4_28 envoi API comptable (5e509db) + a4_29 TVA étrangère normalisée
+  (7a28a06) + tests → ^test_a4_2[36-9] 19/19, c3_05 accusés/avis (1ad1430), **19ao dépôts WebDAV** (A2 59fc8d0),
+  b6 test 15 v2 (571382c, vert) + b6_22 appro (00e3337 ; test 16 : 42501 btp_echeances_commande → B6),
+  **CASHD c2_01 à c2_03 + tests** (C2 6c29b77 : 3/4, assertion 42 « coupures au journal » → C2).
+  Tous les autres verts ; 44/46/51 verts.
+  **Dépôt par lot prouvé de bout en bout** : fonction depot v1 (verify_jwt false, 59fc8d0) ; OPTIONS 200 DAV 1,2 ;
+  PUT d'un PDF → 201 → filed_documents R2026-000007 (source connecteur, en lecture) ; boîte de test fermée → 401.
+  Décisions : météo = abonnement Open-Meteo à décider par Teo (Météo-France n'a pas d'API par point) ; pas d'agenda
+  pour REPUT maintenant ; LECTEUR_ANALYSES à lire en base (pas de moyen de poser un secret Edge ici) → A1.
+  Main 4238c6c : Varelo réserves + compteur d'exemple, REPUT réglages et avis, Lorani décennales, GUIDE-DEPOT.
