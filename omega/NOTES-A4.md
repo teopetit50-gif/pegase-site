@@ -176,6 +176,12 @@ Famille « Pilotage » :
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
 
+## a4_15 (06/10) — posé sur la recette (~05:12 UTC, 634fe24)
+
+- Test a4_09 vert (`tester_sans_trace`). anon sans EXECUTE sur `filed_noter_paiement` ; `private.filed_marquer_reglee`
+  avait déjà EXECUTE pour authenticated (rien d'élargi). Paiement non ouvert au collaborateur : validé (alors que
+  `filed_corriger_facture` l'est). Signatures relayées à A3 pour la vue « À payer ».
+
 ## a4_14 (06/10) — posé sur la recette (~02:35 UTC, cf4c3af)
 
 - Test a4_08 vert (`tester_sans_trace`) ; `filed_siren_de_tva_fr('FR52842115763')` → null ; aucune valeur humaine
