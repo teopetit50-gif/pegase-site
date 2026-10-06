@@ -69,7 +69,8 @@ const LIGNES = {
   /* LORANI — ouvrier B5. Construits et retirés d'ici le 06/10 au soir :
      calendrier du permis, contrôle des planches et du PLU avec
      revérification à chaque indice (b5_16), situations et visas
-     (b5_13 à b5_15) ; ordres de service et réserves jusqu'à la GPA (b5_19). */
+     (b5_13 à b5_15) ; ordres de service et réserves jusqu'à la GPA (b5_19) ; comptes rendus de
+     chantier et questions suivies jusqu'à la réponse (b5_20). */
   lorani: [
     "Plans croisés, rapport PDF annoté",
     "Accessibilité, ERP et RE2020",
@@ -78,7 +79,6 @@ const LIGNES = {
     "RE2020 : attestation comparée aux plans",
     "Questions posées au dossier",
     "Analyse des offres sur DPGF",
-    "Questions suivies jusqu'à la réponse",
     "Métré des plans contre la DPGF",
     "Décennales contrôlées contre le lot",
     "Une question en un clic",
@@ -86,7 +86,6 @@ const LIGNES = {
     "Export Excel par lot",
     "Fonds de plan BET croisés",
     "Complétude du DOE à la réception",
-    "Comptes rendus de chantier rédigés",
     "Honoraires par phase contre temps passé",
     "Dossier de défense décennale",
     "Historique des indices sans limite",
