@@ -148,7 +148,10 @@ begin
   return next is(t.statut, 'annule', 'délai annulé');
   return next is(t.annule_par, (jeu ->> 'gerant')::uuid, 'par le gérant');
   return next is((select statut from public.delais where id = t.delai_id), 'annule', 'B5 annulé aussi');
+  -- le socle vérifie qui parle avant l'état : c'est le gérant (avocat du dossier) qui réessaie, et tombe sur l'état
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b4-delorme@essai.invalid');
   return next throws_ok(format('select public.tamila_annuler_delai(%L::uuid, ''erreur'')', t.id), '55000', null, 'déjà annulé : on ne l''annule pas deux fois (55000)');
+  perform tests.redevenir_admin();
   return next throws_ok(format('update public.tamila_delais set statut = ''confirme'' where id = %L', t.id), '55000', null, 'un délai annulé ne change plus (déclencheur, 55000)');
   return next throws_ok(format('delete from public.tamila_delais where id = %L', t.id), '42501', null, 'un délai de procédure ne se retire jamais (42501)');
 
