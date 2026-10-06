@@ -3,6 +3,9 @@
 
 import { assert, assertEquals, assertMatch, assertRejects } from "@std/assert";
 import { creerBacASable } from "./serveur.ts";
+import { estRecette, REGLAGES_RECETTE } from "./garde.ts";
+import { sirenAcheteur } from "../echange-pa/acheteur.ts";
+import { configurationBacRecette } from "../echange-pa/garde.ts";
 import { depotBucket, depotMemoire } from "./depot.ts";
 import { plateformeAfnor } from "../echange-pa/afnor.ts";
 import { ErreurPA } from "../echange-pa/pa.ts";
@@ -339,4 +342,62 @@ Deno.test("dépôt bucket : chemins sous _pa/bac-a-sable, liste par préfixe", a
       .prefix,
     "_pa/bac-a-sable/flux/",
   );
+});
+
+Deno.test("exemple ubl-public : identifiants en en-têtes, SIREN de l'acheteur posé et relu par echange-pa", async () => {
+  const b = monter();
+  const poster = (corps: unknown, entetes: Record<string, string>) =>
+    b.fetchBac(`${BASE}/_bac/entrant`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...entetes },
+      body: JSON.stringify(corps),
+    });
+  const ids = { "X-Bac-Client-Id": "omega", "X-Bac-Client-Secret": "secret" };
+  assertEquals(
+    (await poster({ exemple: "ubl-public", acheteur_siren: "842115763" }, {
+      ...ids,
+      "X-Bac-Client-Secret": "non",
+    })).status,
+    401,
+  );
+  assertEquals(
+    (await poster({ exemple: "autre", acheteur_siren: "842115763" }, ids))
+      .status,
+    400,
+  );
+  assertEquals(
+    (await poster({ exemple: "ubl-public", acheteur_siren: "12" }, ids)).status,
+    400,
+  );
+  const r = await poster({
+    exemple: "ubl-public",
+    acheteur_siren: "842115763",
+    numero: "BAC-0001",
+  }, ids);
+  assertEquals(r.status, 201);
+  const flux = await r.json();
+  assertEquals(flux.name, "BAC-0001.xml");
+  const octets = (await b.depot.lireFichier(flux.flowId))!;
+  const xml = new TextDecoder().decode(octets);
+  assertMatch(xml, /<cbc:ID>BAC-0001<\/cbc:ID>/);
+  assertEquals(
+    await sirenAcheteur(octets, "UBL", "application/xml"),
+    "842115763",
+  );
+});
+
+Deno.test("garde de la recette : hôte exact seulement ; mêmes identifiants des deux côtés", () => {
+  assertEquals(estRecette("https://ygwbgpowzlbdaajlsqkn.supabase.co"), true);
+  assertEquals(
+    estRecette("https://ygwbgpowzlbdaajlsqkn.supabase.co.ailleurs.fr"),
+    false,
+  );
+  assertEquals(estRecette(undefined), false);
+  const c = configurationBacRecette(
+    "https://ygwbgpowzlbdaajlsqkn.supabase.co",
+  )!;
+  assertEquals([c.clientId, c.clientSecret], [
+    REGLAGES_RECETTE.clientId,
+    REGLAGES_RECETTE.clientSecret,
+  ]);
 });

@@ -206,7 +206,20 @@ un fichier contenant `REJET-BAC` (accusé « Error », motif `REJ_SEMAN`). Il re
 pour le même `trackingId`. Il ne valide ni Factur-X, ni UBL, ni CDAR : ce n'est pas une PA.
 `serveur_test.ts` le joue de bout en bout avec l'adaptateur AFNOR et le passage d'`echange-pa`.
 
-Pour le jouer sur la recette (portes `pa_*` posées : a4_18) :
+**Sans secret Edge (06/10)** : seul Teo peut poser des secrets Edge. Chaque fonction a donc
+une entrée `recette.ts` qui fixe ses réglages elle-même, **sans `Deno.env.set`** : les valeurs
+fixes (publiques, `garde.ts`) sont passées au démarrage, et ne valent que si `SUPABASE_URL`
+a pour hôte exact `ygwbgpowzlbdaajlsqkn.supabase.co` ; ailleurs, `pa-bac-a-sable` répond 503
+et `echange-pa` n'a aucune PA. Des secrets `PA_*` posés l'emportent (vraie PA). Coquille de
+déploiement : un `index.ts` d'une ligne, `import "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/<SHA>/omega/functions/<dossier>/recette.ts";`,
+avec un `deno.json` vide comme pour l'expéditeur. Identifiants du bac : `bac-recette` /
+`bac-recette-pas-un-secret`. Injection d'une facture d'une seule requête, possible depuis
+SQL par `net.http_post` : `POST …/pa-bac-a-sable/_bac/entrant`, en-têtes
+`X-Bac-Client-Id` / `X-Bac-Client-Secret`, corps `{"exemple": "ubl-public",
+"acheteur_siren": "<SIREN d'une entité du banc>", "numero": "BAC-0001"}` (la facture UBL
+publique du banc d'A1, acheteur remplacé).
+
+Avec des secrets (autre voie), pour le jouer sur la recette (portes `pa_*` posées : a4_18) :
 
 1. **Déployer `pa-bac-a-sable`**, verify_jwt **false** (il fait son propre OAuth2). Secrets
    de la fonction : `PA_BAC_CLIENT_ID`, `PA_BAC_CLIENT_SECRET`, `PA_BAC_CLE_JETONS`, trois

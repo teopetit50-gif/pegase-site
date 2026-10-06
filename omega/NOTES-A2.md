@@ -538,6 +538,16 @@ MX de `recu.omegaai.fr` posés, boîte `banc@recu.omegaai.fr` (expediteurs a3630
 suspendu). GUIDE-INBOUND.md corrigé. Reste à voir au premier courriel de Teo si Brevo
 transmet bien les messages adressés au sous-domaine avec un webhook posé sur la racine.
 
+**Recette sans secret (06/10)** : le coordinateur ne peut pas poser de secrets Edge. Entrées
+`recette.ts` dans `echange-pa/` et `pa-bac-a-sable/` : réglages fixes et publics (`garde.ts`)
+passés au démarrage, sans `Deno.env.set` (pas besoin de savoir s'il est permis par le runtime
+Edge). Garde dure : hôte exact `ygwbgpowzlbdaajlsqkn.supabase.co`, sinon 503 (bac) ou aucune PA
+(ouvrier) ; testée, y compris contre `…supabase.co.ailleurs.fr`. `/_bac/entrant` accepte
+`exemple: "ubl-public"` (UBL public XRechnung du banc d'A1, Apache-2.0, recopié dans
+`exemples.ts`) avec `acheteur_siren` et `numero`, et des identifiants en en-têtes (appel
+d'une seule requête, `net.http_post`). Fumée locale : bac sur l'URL de recette → 401 sans
+jeton, jeton fixe → healthcheck UP ; sur une autre URL → 503 « pas la recette ».
+
 Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).

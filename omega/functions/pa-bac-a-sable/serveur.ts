@@ -13,6 +13,7 @@
 // Ce n'est PAS une PA : aucune validation Factur-X / UBL / CDAR, aucun routage.
 
 import type { Depot, FluxBac } from "./depot.ts";
+import { ublAvecAcheteur } from "./exemples.ts";
 
 export type Configuration = {
   depot: Depot;
@@ -271,9 +272,31 @@ export function creerBacASable(
     if (!SYNTAXES.has(syntaxe)) {
       return erreur(400, "BAD_REQUEST", `flowSyntax inconnue : ${syntaxe}`);
     }
+    // `exemple: "ubl-public"` : la facture UBL publique du banc d'A1, avec pour acheteur le
+    // SIREN donné (`acheteur_siren`) et, au besoin, un autre numéro (`numero`).
+    let contenu = p.contenu;
+    if (p.exemple === "ubl-public") {
+      try {
+        contenu = ublAvecAcheteur(
+          String(p.acheteur_siren ?? ""),
+          typeof p.numero === "string" ? p.numero : null,
+        );
+      } catch (e) {
+        return erreur(400, "BAD_REQUEST", String((e as Error).message));
+      }
+      if (p.name === undefined) {
+        p.name = `${typeof p.numero === "string" ? p.numero : "471102"}.xml`;
+      }
+    } else if (p.exemple !== undefined) {
+      return erreur(
+        400,
+        "BAD_REQUEST",
+        `exemple inconnu : ${p.exemple} (seul « ubl-public » existe)`,
+      );
+    }
     const octets = typeof p.contenu_base64 === "string"
       ? Uint8Array.from(atob(p.contenu_base64), (ch) => ch.charCodeAt(0))
-      : new TextEncoder().encode(String(p.contenu ?? ""));
+      : new TextEncoder().encode(String(contenu ?? ""));
     if (octets.length === 0) return erreur(400, "BAD_REQUEST", "contenu vide");
     const quand = maintenant().toISOString();
     const flux: FluxBac = {
@@ -316,7 +339,12 @@ export function creerBacASable(
       if (route === "/oauth/token" && req.method === "POST") {
         return await jeton(req);
       }
-      if (!(await jetonValide(req))) {
+      // /_bac/entrant accepte aussi les identifiants en en-têtes (X-Bac-Client-Id,
+      // X-Bac-Client-Secret) : appelable d'une seule requête, par exemple par pg_net.
+      const parEntetes = route === "/_bac/entrant" &&
+        egal(req.headers.get("x-bac-client-id") ?? "", c.clientId) &&
+        egal(req.headers.get("x-bac-client-secret") ?? "", c.clientSecret);
+      if (!parEntetes && !(await jetonValide(req))) {
         return erreur(401, "UNAUTHORIZED", "jeton absent, faux ou expiré");
       }
       if (route === "/flow/v1/healthcheck" && req.method === "GET") {
