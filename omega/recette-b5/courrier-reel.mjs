@@ -28,6 +28,8 @@ const ATTENDU = {
   lorani_demande_pieces: ((l) => ({ re: /Demande de pièces/, valeurs: new RegExp(`Pièces réclamées : ${l}`), dit: `la demande de pièces et la liste ${l}` }))(process.env.PIECES_ATTENDUES ?? 'PCMI3, PCMI6'),
   lorani_arrete: { re: /Décision de la mairie/, valeurs: /20\/08\/2026/, dit: 'la décision du 20/08/2026' },
   lorani_constat_affichage: { re: /Premier jour d'affichage/, valeurs: /28\/08\/2026/, dit: 'le premier jour d\'affichage, 28/08/2026' },
+  lorani_lettre_delai: { re: /Délai d'instruction notifié/, valeurs: /Délai \(mois\) : 6/, dit: 'le délai notifié de 6 mois' },
+  lorani_certificat_tacite: { re: /Certificat de permis tacite/, valeurs: /02\/07\/2026/, dit: 'le permis tacite au 02/07/2026' },
 }[nature];
 /* le permis visé (PERMIS, son intitulé) et le numéro qu'il doit porter après la confirmation (NUMERO) */
 const PERMIS = process.env.PERMIS ?? 'Pavillon Lemoine';
@@ -61,7 +63,11 @@ const ouvrirReel = async () => {
 
 console.log('— déposer le récépissé par l\'écran');
 await ouvrirReel();
-ok(await s.evaluer(`(document.querySelector('#esp-detail h2')?.textContent || '').includes(${JSON.stringify(PERMIS)})`), `le permis du banc « ${PERMIS} » est ouvert en base réelle`);
+const ouvert = await s.evaluer(`(document.querySelector('#esp-detail h2')?.textContent || '').includes(${JSON.stringify(PERMIS)}) && document.querySelector('.esp-bascule [role="switch"]')?.getAttribute('aria-checked') === 'true'`);
+ok(ouvert, `le permis du banc « ${PERMIS} » est ouvert en base réelle`);
+/* le 06/10, un serveur sans les variables de la recette a servi les données d'exemple : le script a « confirmé » la
+   lettre d'exemple d'un autre permis (en mémoire seulement). Sans le bon permis en base réelle, on ne touche à rien. */
+if (!ouvert) { s.fermer(); console.log('\narrêt : permis introuvable ou base réelle inactive'); process.exit(1); }
 const dejaLu = await s.evaluer(`[...document.querySelectorAll('.lor-lecture')].length`);
 if (dejaLu === 0 && !(await s.evaluer(`(document.querySelector('#esp-detail')?.innerText || '').includes(${JSON.stringify(nomPdf)})`))) {
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .r-btn')].find(b => /Déposer un courrier de la mairie/.test(b.textContent))?.click()`);

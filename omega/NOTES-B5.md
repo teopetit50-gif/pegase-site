@@ -8,7 +8,7 @@ Dernière mise à jour : 05/10/2026, 23 h.
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
 | **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 95 % (114/114 le 06/10 à 2 h 05 Z, b5_05 et b5_06 posées ; avant :) 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 94 % (06/10, 2 h 26 Z : arrêté et constat d'affichage réels aussi ; 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 96 % (06/10, 2 h 46 Z : les six types de courriers réels ; 2 h 26 Z : arrêté et constat d'affichage réels aussi ; 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
 **Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
 la fusion dans `main` ; la vérification sur omegaai.fr. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
@@ -338,4 +338,22 @@ toucher « Pavillon Lemoine ». Courriers : `fabriquer-courrier.mjs arrete|const
 - **À faire valider par un juriste (remonté à Teo par le coordinateur)** : une seconde demande de pièces envoyée
   DANS le mois qui suit le dépôt — complète-t-elle valablement la première (et fait-elle partir le délai de trois mois
   de sa propre date pour les pièces qu'elle ajoute) ? b5_07 garde la date de la première lettre, le choix prudent.
+
+## 9. Les deux derniers types en réel : lettre de délai, certificat tacite (06/10, 2 h 33–2 h 46 Z, lecteur v17)
+
+Deux permis neufs dans le dossier « Extension Garnier (banc) », créés sous RLS par le gérant : PC « Surélévation
+Garnier » (ec65b452…, PC 044109 26 A0091, déposé le 2026-09-20) et DP « Clôture Garnier » (252ff65a…, DP 044109 26
+A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confirmer`, non-opposition tacite au 02/07).
+- `lettre-delai-garnier.pdf` (« porté à 6 mois », R*423-28, ABF) : proposition à 388 s `{delai_notifie_mois: 6,
+  date_notification_delai: 2026-10-02}`, vérifiée, confirmée → décision attendue **2027-03-20** (dépôt + 6 mois),
+  échéance `instruction` 2027-03-20 ouverte, complétude 2026-10-20 ouverte.
+- `certificat-tacite-garnier.pdf` (« non-opposition tacite à compter du 02/07/2026 ») : proposition à 247 s
+  `{date_decision: 2026-07-02}`, confirmée → `accorde`, décision `tacite` du 2026-07-02 ; retrait 2026-10-02 tenu ;
+  affichage 2026-07-17 encore `ouvert` (date passée, à voir si `controler_delais` le passe en dépassé) ; pas de
+  purge sans affichage, avertissement R*600-2 / R600-3. Juste.
+- **Les six types de courriers Lorani sont prouvés en réel** (lecteur → socle → écran → confirmation).
+- Incident sans conséquence : au premier essai, un `next start` resté d'une recette (build sans les variables de la
+  recette) servait les données d'exemple ; le script n'a pas trouvé le permis et a « confirmé » la lettre d'exemple
+  d'un autre permis, en mémoire seulement (rien en base). `courrier-reel.mjs` s'arrête désormais si le permis visé
+  n'est pas ouvert en base réelle.
 
