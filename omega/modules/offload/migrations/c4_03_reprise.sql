@@ -10,7 +10,9 @@
 --   · le MESSAGE, rédigé sans IA à partir de l'historique seul : la dernière commande du compte (date, référence,
 --     libellé, montant HT) et le temps écoulé depuis ; aucun prix, aucun délai, aucune remise ; une ligne pour dire
 --     « stop ». Il passe par private.preparer_envoi : le socle pose la DEMANDE DE VALIDATION (type envoi.email),
---     applique ses verrous (consentement, oppositions, heures, plafonds) et le mode des réglages d'envoi. OFFLOAD
+--     applique ses verrous (consentement, oppositions, heures, plafonds) et le mode des réglages d'envoi. Le
+--     consentement d'un client EXISTANT est noté avant (décision Q3 : intérêt légitime B2B pour un professionnel,
+--     soft opt-in pour un particulier ; jamais pour un contact sans achat, ni pour une adresse désinscrite). OFFLOAD
 --     reste en mode « essai » à l'installation : s'il trouve les envois du module réglés en réel, il ne prépare
 --     rien et le signale.
 --   · public.offload_taches : la tâche d'appel du commercial (son nom vient du fichier clients), datée avant la
@@ -28,6 +30,27 @@
 --
 -- Règles de pose : create … if not exists, alter … add column if not exists, create or replace, insert … where not
 -- exists, cron si absent. Aucun DROP, aucun DELETE.
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- 0. Le module se déclare (décision du coordinateur, Q2) : moteur reconnu, envois du module
+-- ─────────────────────────────────────────────────────────────────────────
+insert into private.modules_envois (module, sante, canaux, verrou, note)
+select 'offload', false, array['email', 'appel'], null,
+       'OFFLOAD : reprise de contact des clients qui décrochent, par courriel validé ; appel par le commercial.'
+where not exists (select 1 from private.modules_envois m where m.module = 'offload');
+
+-- moteurs_reconnus : la colonne code seule est sûre (le catalogue du site porte peut-être déjà OFFLOAD). Si la
+-- table exige d'autres colonnes, la pose continue et le dit ; le coordinateur complète.
+do $$
+begin
+  if not exists (select 1 from public.moteurs_reconnus r where lower(r.code) = 'offload') then
+    begin
+      insert into public.moteurs_reconnus (code) values ('OFFLOAD');
+    exception when others then
+      raise notice 'moteurs_reconnus : OFFLOAD non déclaré (%), à compléter par le coordinateur.', sqlerrm;
+    end;
+  end if;
+end $$;
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- 1. Réglages complémentaires, tables
@@ -255,6 +278,62 @@ as $function$
      and (private.reglages_envois_effectifs(p_client, 'offload') ->> 'mode') is not distinct from 'reel'
 $function$;
 
+-- Le consentement d'un client EXISTANT (décision du coordinateur, Q3, 06/10/2026). Avant de préparer un message :
+--   · pas d'achat non annulé : aucun consentement, rien n'est inventé pour un contact sans historique ;
+--   · une désinscription ou une adresse invalide, même levée, sur cette adresse : rien ;
+--   · un compte professionnel (raison sociale d'une personne morale : forme juridique, ou groupe connu) :
+--     source « interet_legitime_b2b », preuve « client existant, message en rapport avec son activité (CNIL,
+--     prospection B2B) » ;
+--   · un particulier qui a déjà acheté : source « soft_opt_in », preuve « client existant, produits analogues
+--     (CPCE L34-5) ».
+-- Chaque message porte déjà la désinscription (« stop »). Rend la source notée, ou null.
+create or replace function private.offload_est_professionnel(p_compte uuid)
+ returns boolean
+ language sql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+  select coalesce((select c.groupe is not null
+                       or lower(c.nom) ~ '(^|[^a-z])(sarl|sas|sasu|sa|eurl|sci|snc|scop|scp|selarl|sca|gie|ets|etablissements|soci[ée]t[ée]|ste|association|mairie|commune|syndic)([^a-z]|$)'
+                   from public.offload_comptes c where c.id = p_compte), false)
+$function$;
+
+create or replace function private.offload_assurer_consentement(p_compte uuid)
+ returns text
+ language plpgsql
+ security definer
+ set search_path to ''
+as $function$
+declare
+  c public.offload_comptes;
+  v_adresse text;
+  v_source text;
+begin
+  select * into c from public.offload_comptes where id = p_compte;
+  v_adresse := lower(btrim(c.email));
+  if v_adresse is null or c.statut = 'arrete' then
+    return null;
+  end if;
+  if not exists (select 1 from public.offload_achats a where a.compte_id = c.id and a.annule_le is null and a.nature <> 'avoir') then
+    return null;
+  end if;
+  if exists (select 1 from public.oppositions o where o.client_id = c.client_id and o.adresse = v_adresse
+             and o.type in ('desinscription', 'invalide')) then
+    return null;
+  end if;
+  if exists (select 1 from public.consentements k where k.client_id = c.client_id and k.canal = 'email' and k.adresse = v_adresse
+             and k.retire_le is null and k.portee = 'tout') then
+    return 'deja';
+  end if;
+  v_source := case when private.offload_est_professionnel(c.id) then 'interet_legitime_b2b' else 'soft_opt_in' end;
+  perform private.noter_consentement(c.client_id, 'email', v_adresse, v_source, 'tout',
+    case v_source when 'interet_legitime_b2b' then 'client existant, message en rapport avec son activité (CNIL, prospection B2B)'
+                  else 'client existant, produits analogues (CPCE L34-5)' end,
+    null, 'offload');
+  return v_source;
+end $function$;
+
 -- Prépare le message de rang 1 ou 2 d'une reprise par le socle (validation, verrous, mode). Rend l'envoi, ou null si
 -- le compte n'a pas de courriel. Refuse de préparer si les envois du module sont réglés en réel alors qu'OFFLOAD est
 -- en essai.
@@ -280,9 +359,11 @@ begin
   if private.offload_essai_contre_reel(r.client_id) then
     raise exception 'OFFLOAD est en mode essai et les envois du module sont réglés en réel : rien n''est préparé.' using errcode = '55000';
   end if;
+  perform private.offload_assurer_consentement(c.id);
   v_msg := private.offload_message(c.id, p_rang, r.envoye1_le, null);
   v_envoi := private.preparer_envoi(r.client_id, 'offload', 'offload_reprises', r.id::text, 'email',
-    jsonb_build_object('adresse', c.email, 'nom', coalesce(c.contact, c.nom), 'ref', c.ref, 'professionnel', true, 'langue', 'fr'),
+    jsonb_build_object('adresse', c.email, 'nom', coalesce(c.contact, c.nom), 'ref', c.ref,
+                       'professionnel', private.offload_est_professionnel(c.id), 'langue', 'fr'),
     null, '{}'::jsonb, v_msg ->> 'sujet', v_msg ->> 'corps', null::uuid[],
     'offload:reprise:' || r.id::text || ':' || p_rang, r.entite_id, false, false, null::timestamptz, '{}'::jsonb);
   return v_envoi;
@@ -945,6 +1026,8 @@ grant execute on function private.offload_ouvrir_reprise(uuid) to authenticated,
 grant execute on function private.offload_noter_tache(uuid, text, text) to authenticated, service_role;
 
 revoke execute on function private.offload_essai_contre_reel(uuid) from public, anon, authenticated;
+revoke execute on function private.offload_est_professionnel(uuid) from public, anon, authenticated;
+revoke execute on function private.offload_assurer_consentement(uuid) from public, anon, authenticated;
 revoke execute on function private.offload_duree(date, date) from public, anon, authenticated;
 revoke execute on function private.offload_date_longue(date) from public, anon, authenticated;
 revoke execute on function private.offload_message(uuid, integer, timestamptz, date) from public, anon, authenticated;
@@ -960,6 +1043,8 @@ revoke execute on function private.offload_traiter_travaux(integer) from public,
 revoke execute on function private.offload_point_lignes(uuid, date) from public, anon, authenticated;
 revoke execute on function private.offload_deposer_points(timestamp with time zone) from public, anon, authenticated;
 grant execute on function private.offload_essai_contre_reel(uuid) to service_role;
+grant execute on function private.offload_est_professionnel(uuid) to service_role;
+grant execute on function private.offload_assurer_consentement(uuid) to service_role;
 grant execute on function private.offload_duree(date, date) to service_role;
 grant execute on function private.offload_date_longue(date) to service_role;
 grant execute on function private.offload_message(uuid, integer, timestamptz, date) to service_role;

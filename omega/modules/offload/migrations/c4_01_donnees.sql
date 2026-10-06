@@ -10,6 +10,9 @@
 --     hors taxes, importée d'un export (les lignes d'une même pièce sont additionnées) ou saisie à la main.
 --     Rien ne s'efface : une pièce fausse est annulée.
 --   · deux modèles d'export (public.modeles_jeux, module offload, logiciel « tableur ») que le lecteur d'exports
+--     (clés de dédoublonnage sur des colonnes OBLIGATOIRES seulement, règle private.declaration_coherente :
+--     « ventes » sur code client + date ; plusieurs pièces le même jour sont départagées par le n° de pièce dans
+--     private.offload_appliquer_releve, qui additionne pièce par pièce)
 --     d'A1 reconnaît : « ventes » (une ligne par facture ou commande : code client, date, montant HT…) et
 --     « clients » (le référentiel : code client, raison sociale, contact, commercial…). Jeux non complets : un
 --     export qui ne couvre que les douze derniers mois AJOUTE à l'historique, il ne fait rien disparaître.
@@ -196,7 +199,7 @@ select 'offload', 'tableur', 'ventes', 1, 'Historique des ventes (factures ou co
          "commercial": {"type": "texte", "facultative": true, "entetes": ["Commercial", "Représentant", "Vendeur", "Chargé de compte"]},
          "groupe":     {"type": "texte", "facultative": true, "entetes": ["Groupe", "Société mère", "Maison mère"]}
        }$j$::jsonb,
-       array['compte_ref', 'date', 'reference'], false, '{"colonne": "date", "observee": true}'::jsonb, 1.000,
+       array['compte_ref', 'date'], false, '{"colonne": "date", "observee": true}'::jsonb, 1.000,
        'Modèle générique OFFLOAD (C4, 06/10/2026) : export CSV ou XLSX d''un logiciel de ventes ou d''un facturier, une ligne par pièce. En-têtes à confirmer sur un vrai export.'
 where not exists (select 1 from public.modeles_jeux m where m.module = 'offload' and m.logiciel = 'tableur' and m.code = 'ventes' and m.version = 1);
 

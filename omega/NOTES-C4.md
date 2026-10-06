@@ -72,13 +72,24 @@ vraies portes du relevé comme le lecteur d'A1), `c4_01_donnees.sql` — 5 tests
 `offload_saisir_achat(p_compte uuid, p_date date, p_montant numeric, p_reference text, p_libelle text, p_nature text)`,
 `offload_annuler_achat(p_achat uuid, p_motif text)`.
 
-**Questions au coordinateur** :
+**Correction après refus de pose (coordinateur, 06/10 16 h 14)** : `modeles_jeux_coherent` refusait le modèle
+« ventes » — sa clé portait `reference`, colonne facultative ; une clé de dédoublonnage ne porte que des colonnes
+obligatoires et non sensibles (`private.declaration_coherente`). Clé ramenée à `compte_ref, date` ; plusieurs
+pièces le même jour restent départagées par le n° de pièce dans `offload_appliquer_releve` (addition pièce par
+pièce, inchangée). Le modèle « clients » (clé `compte_ref`, obligatoire) était conforme. La règle est désormais
+reproduite dans le socle factice local : l'ancienne version y est refusée avec la même erreur, la nouvelle passe.
+
+**Questions au coordinateur** (réponses du 06/10 en dessous) :
 - Q1. Le dépôt d'un fichier depuis l'espace : `offload_deposer_export` attend un fichier déjà posé dans
   `omega-clients` sous `<client>/branchement/<id>/`. Les règles Storage laissent-elles un `authenticated`
   (gérant, collaborateur) y écrire ? Sinon, quelle voie préférez-vous (route serveur, ou une porte de dépôt du
   socle) ? En attendant, la saisie à la main et le dépôt par le coordinateur couvrent le palier.
 - Q2. Le module `offload` doit-il être déclaré quelque part (`moteurs_reconnus`, `modules_envois`) avant le palier 3
   (envois) ? Je le demanderai avec le lot des reprises.
+- **Réponses** : Q1 oui (lots socle 19m et 19o : les membres déposent sous `omega-clients/<client>/…`, le chemin
+  `branchement/<id>/` passe). Q2 oui : déclaré dans c4_03 (`private.modules_envois` offload, canaux courriel et
+  appel ; `public.moteurs_reconnus` OFFLOAD par sa seule colonne `code`, en `where not exists` ; si la table exige
+  d'autres colonnes, la pose continue et le signale par un NOTICE).
 
 ## Palier 2 — la détection (lot c4_02)
 
@@ -176,8 +187,23 @@ suivi. Banc local : 14 tests verts sur les trois paliers.
   (a) que le gérant enregistre un consentement par compte (`noter_consentement`, source `contrat`), (b) une règle
   socle « destinataire professionnel + courriel + lien de désinscription », ou (c) autre chose ? En attendant, un
   compte sans accord voit sa reprise passer par l'appel du commercial, rien n'est envoyé.
+- **Réponse Q3 (décision du coordinateur, option a automatisée), appliquée dans c4_03** —
+  `private.offload_assurer_consentement(compte)`, appelée avant chaque message :
+  > Pour un compte professionnel (raison sociale d'une personne morale : forme juridique dans le nom, ou groupe
+  > connu), le consentement est noté par `private.noter_consentement`, source « interet_legitime_b2b », preuve
+  > « client existant, message en rapport avec son activité (CNIL, prospection B2B) ». Pour un particulier qui a
+  > déjà acheté : source « soft_opt_in », preuve « client existant, produits analogues (CPCE L34-5) ». Seulement
+  > si le compte n'est pas désinscrit et que son adresse ne s'est jamais opposée (désinscription ou adresse
+  > invalide, même levée). Chaque message porte la désinscription (« stop »). Aucun consentement n'est inventé
+  > pour un contact sans historique d'achat (il passe par l'appel).
+  Le destinataire est marqué `professionnel` selon la même règle. ⚠ Le `noter_consentement` de l'extrait du
+  05/10 n'accepte que les sources `formulaire, ecrit, oral, contrat, message, import` : les deux sources décidées
+  doivent être acceptées par le socle, sinon la préparation du message échoue (travail repris, reprise non ouverte).
+  Test : `test_c4_03_consentement` (SARL → B2B avec preuve ; sans achat → rien ; désinscription levée → rien).
 - Q4. `reglages_envois` du module `offload` pour le banc (mode `essai`, `essai_adresse`) : le test le pose lui-même
   dans sa transaction ; pour un essai réel sur la recette, il faut la ligne (comme `recette-b6/banc_j2_reel.sql`).
+  **Réponse : oui** → `omega/recette-c4/banc_offload.sql` (ligne reglages_envois offload en ESSAI avec l'adresse
+  d'essai du banc, puis `offload_installer` sur le banc, puis contrôle). Pas un test : rien n'est annulé.
 
 ## Palier 4 — l'écran (lot c4_04)
 
@@ -283,4 +309,5 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 - 06/10 — palier 2 (détection) écrit et vérifié sur le banc local, poussé (ce6cd3c), envoyé au coordinateur.
 - 06/10 — palier 3 (reprise) poussé (376387e), envoyé au coordinateur.
 - 06/10 — palier 4 (écran) poussé (963b991), envoyé au coordinateur.
-- 06/10 — palier 5, lot c4_05 (garde-fous, doublons) : 207 assertions vertes en local, écran recetté.
+- 06/10 — palier 5, lot c4_05 (garde-fous, doublons) poussé (621e1af).
+- 06/10 — c4_01 refusé à la pose (clé facultative) : corrigé ; Q2, Q3, Q4 appliqués ; 19 tests, 214 assertions vertes en local.

@@ -113,8 +113,10 @@ begin
                  'Sans courriel, la reprise passe par l''appel seul');
   return next ok(tests.c4_reprise(v_x) is null or (tests.c4_reprise(v_x)).id is null, 'Le compte suivi en direct ne reçoit aucune reprise');
   r := tests.c4_reprise(v_b);
-  return next ok(r.statut = 'appel' and r.motif like 'Message retenu par le socle (CONSENTEMENT_ABSENT)%',
-                 'Sans accord du destinataire, le socle retient le message et la reprise passe par l''appel : ' || coalesce(r.motif, ''));
+  return next is(r.statut, 'a_valider', 'Un client existant sans accord noté : OFFLOAD note son consentement (Q3), le message va en validation');
+  return next ok(exists (select 1 from public.consentements k where k.client_id = v_client and k.adresse = 'achats@sans-accord.test'
+                         and k.source = 'soft_opt_in' and k.portee = 'tout' and k.preuve like 'client existant, produits analogues%'),
+                 'Particulier qui a déjà acheté : soft opt-in, avec sa preuve');
 
   return next ok(exists (select 1 from public.journal_opposable j where j.client_id = v_client and j.action = 'offload.cycle'
                          and (j.donnees ->> 'ouvertes')::integer = 3), 'Le cycle laisse son bilan au journal');
@@ -144,6 +146,34 @@ begin
                  'La quarantaine empêche une nouvelle reprise le même trimestre');
   return next ok(exists (select 1 from public.journal_opposable j where j.client_id = v_client and j.action = 'offload.reprise_close'
                          and j.objet_id = r.id::text), 'La sortie du cycle est au journal');
+end $f$;
+
+create or replace function tests.test_c4_03_consentement() returns setof text
+language plpgsql as $f$
+declare
+  banc jsonb := tests.c4_banc();
+  v_client uuid := (banc ->> 'client')::uuid;
+  v_pro uuid; v_neuf uuid; v_desinscrit uuid;
+  r public.offload_reprises;
+begin
+  perform tests.c4_reprises_pretes();
+  v_pro := tests.c4_compte_courriel('CP1', 'Froid Services SARL', 'achats@froid-sarl.test', 70, false);
+  perform tests.redevenir_admin();
+  v_neuf := public.offload_saisir_compte(v_client, null, 'CN9', 'Prospect Sans Achat', '{"email": "prospect@neuf.test"}');
+  v_desinscrit := tests.c4_compte_courriel('CQ1', 'Ancien Désinscrit', 'achats@desinscrit.test', 70, false);
+  perform private.opposer(v_client, 'desinscription', 'achats@desinscrit.test', null, null, null, 'Désinscrit l''an dernier.', 'demande', null);
+  update public.oppositions set levee_le = now() where client_id = v_client and adresse = 'achats@desinscrit.test';
+
+  return next is(private.offload_assurer_consentement(v_pro), 'interet_legitime_b2b', 'Personne morale (SARL) : intérêt légitime B2B');
+  return next ok(exists (select 1 from public.consentements k where k.adresse = 'achats@froid-sarl.test'
+                         and k.preuve = 'client existant, message en rapport avec son activité (CNIL, prospection B2B)'), 'Avec la preuve écrite');
+  return next is(private.offload_assurer_consentement(v_neuf), null::text, 'Aucun consentement inventé pour un contact sans achat');
+  return next is(private.offload_assurer_consentement(v_desinscrit), null::text, 'Ni pour une adresse qui s''est déjà opposée, même levée');
+  return next is(private.offload_assurer_consentement(v_pro), 'deja', 'Rejouer ne note rien de plus');
+  perform private.offload_ouvrir(v_neuf, 'manuel');
+  r := tests.c4_reprise(v_neuf);
+  return next ok(r.statut = 'appel' and r.motif like 'Message retenu par le socle (CONSENTEMENT_ABSENT)%',
+                 'Le prospect sans achat : le socle retient le message, la reprise passe par l''appel');
 end $f$;
 
 create or replace function tests.test_c4_03_reponse() returns setof text
