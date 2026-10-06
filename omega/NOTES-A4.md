@@ -174,6 +174,13 @@ Famille « Pilotage » :
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
 
+## Papeterie Delorme / R2026-000003 (06/10, 02:20 UTC) — pas d'a4_14
+
+- A3 : fiche « Sans identifiant ». Hypothèse « lue avant a4_10 » fausse : le recontrôle du 05/10 20:50 a déjà tourné.
+- Le SIREN lu 842115763 est non vérifié par le lecteur ET échoue à Luhn (somme 35) : il ne doit pas monter sur la
+  fiche. Chemin : une personne saisit les vrais identifiants (valeurs 'humain', donc sûres) par
+  `filed_corriger_facture` (à vérifier côté socle) ou confirme la TVA si elle est juste (`filed_confirmer_valeurs`).
+
 ## a4_13 (06/10) — posé sur la recette (~02:08 UTC, 5f6aa66)
 
 - Test a4_07 vert par `tester_sans_trace` (notices perdues : on ne sait pas si le cas replica a été joué).
