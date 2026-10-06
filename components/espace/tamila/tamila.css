@@ -253,3 +253,35 @@
   max-height: 180px;
   overflow: auto;
 }
+
+/* le forfait consommé contre prévu (b4_12) : une jauge sous la ligne de la convention */
+.esp .tam-forfait .tam-ligne-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.esp .tam-jauge {
+  height: 8px;
+  margin: 8px 0 2px;
+  border-radius: 999px;
+  background: var(--r-filet, #e5e5e0);
+  overflow: hidden;
+}
+.esp .tam-jauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #2f7d4f;
+}
+.esp .tam-jauge[data-teinte="ambre"] > span {
+  background: #b7791f;
+}
+.esp .tam-jauge[data-teinte="rouge"] > span {
+  background: #c0392b;
+}
+/* le temps proposé à la saisie : en retrait, pour ne pas se confondre avec le temps saisi */
+.esp .tam-propositions {
+  margin-top: 6px;
+  padding-left: 10px;
+  border-left: 3px solid var(--r-filet, #e5e5e0);
+}

@@ -470,6 +470,41 @@ coordinateur, du type `cabinet-x@recu.omegaai.fr`) ; `deposer_reception` publie 
   `<client>/receptions/…` — à vérifier en recette ; sinon il faut une URL signée par une fonction ;
   (3) un courriel sans pièce jointe ne se rattache pas : il s'écarte et l'avis se saisit à la main.
 
+## 16. L'effacement réel des fichiers à la clôture (carnet du coordinateur, n° 1 ; lot B4-12, 06/10)
+
+Constat : la ronde horaire déposait `tamila.effacer_dossier`, `tamila.purger_export` et `tamila.detruire_cle`, mais
+aucun ouvrier ne les prenait ; et `tamila_effacer_dossier` posait sa preuve sans vérifier que les pièces chiffrées
+avaient quitté le bucket.
+
+- **Base** : `b4_11_tamila_effacement_fichiers.sql` — `tamila_dossier_a_effacer` (mêmes refus que
+  `tamila_effacer_dossier` : clôture approuvée, échéance atteinte ; prépare le manifeste ; rend les fichiers du
+  manifeste et tout objet resté sous `<client>/tamila_dossier/<dossier>/`, buckets des locataires seulement) ;
+  `tamila_effacer_dossier_verifie` (55000 tant qu'un fichier du dossier est au stockage, sinon
+  `tamila_effacer_dossier` et sa preuve) ; `tamila_fichiers_restants`. service_role seul, revoke from public.
+  Test `20_effacement_fichiers.sql` : 20 contrôles, verts sur la souche (la souche imite `preparer_effacement`).
+- **Ouvrier** : `tamila-purge` prend désormais quatre genres (réception, dossier, archive, clé). Dossier : liste →
+  effacement au bucket (rien hors de `<client>/`) → constat ; s'il reste un fichier, le travail est repris au
+  passage suivant, le dossier reste intact. Archive : fichier effacé puis `tamila_export_purge`. Clé :
+  `tamila_cle_detruite` (enveloppe mise à zéro). 8 tests Deno.
+- **Reste** : l'ancienne porte `tamila_effacer_dossier` reste appelable par le serveur sans la vérification (je ne
+  la réécris pas) ; l'ouvrier, lui, ne passe que par la porte vérifiée.
+
+## 17. Le temps proposé à la saisie, le forfait consommé (carnet du coordinateur, n° 2 ; lot B4-13, 06/10)
+
+- **Base** : `b4_12_tamila_temps_propose.sql` — `tamila_temps.origine` (« audience:<id> », « acte:<id> »,
+  « avis:<id> » ; un même événement une fois par personne tant que le temps n'est pas annulé) ;
+  `tamila_temps_ecartes` (ce que chacun a ignoré, lu par son auteur seul, effacé avec le dossier) ;
+  `tamila_conventions.minutes_prevues`. Portes `tamila_saisir_temps_propose` (l'événement doit être du dossier ;
+  passe par `tamila_saisir_temps`, mêmes règles), `tamila_ecarter_proposition`, `tamila_prevoir_forfait` (qui
+  gère le dossier, convention au forfait ou mixte). Test `21_temps_propose.sql` : 20 contrôles verts (souche).
+- **Écran** : `temps.ts` (propositions des soixante derniers jours : audience tenue ou passée — plaidoiries 2 h,
+  mise en état 30 min… ; acte déposé — conclusions 4 h, signification 30 min ; avis reçu — 15 min, conclusions
+  adverses 1 h de lecture ; l'accusé de dépôt n'est pas reproposé ; filtre par personne) et carte Honoraires :
+  « Proposé à la saisie » (Saisir ouvre le formulaire pré-rempli, Ignorer ne le propose plus) ; « Forfait
+  consommé » (jauge, temps passé de tous contre temps prévu, taux horaire effectif, alerte à 80 % et au
+  dépassement). Exemple : 2026-0377 au forfait, 17 h sur 20 h. Recette 124/124, axe 0 écart grave.
+- Les durées proposées sont des usages, corrigeables ; rien ne se saisit sans le geste de l'avocat.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

@@ -1,5 +1,6 @@
-// Les portes de l'ouvrier TAMILA-PURGE : la file des travaux (socle) et les deux portes de b4_10, appelées avec la
-// clé de service. Jamais de lecture ni d'écriture directe dans une table.
+// Les portes de l'ouvrier TAMILA-PURGE : la file des travaux (socle), les portes de b4_10 (réceptions), de b4_11
+// (fichiers d'un dossier effacé) et du socle Tamila (archive purgée, clé détruite), appelées avec la clé de service.
+// Jamais de lecture ni d'écriture directe dans une table.
 
 export interface Travail {
   id: number;
@@ -26,6 +27,21 @@ export interface Portes {
   aPurger(reception: number): Promise<{ reception: number; client: string; chemins: string[] }>;
   /** tamila_reception_purgee : la purge constatée. */
   purgee(reception: number, fichiers: number): Promise<void>;
+  /** tamila_dossier_a_effacer (b4_11) : refuse avant l'échéance ; prépare le manifeste ; les fichiers à effacer. */
+  dossierAEffacer(dossier: string): Promise<DossierAEffacer>;
+  /** tamila_effacer_dossier_verifie (b4_11) : refuse tant qu'un fichier reste au stockage ; sinon la preuve. */
+  effacerDossierVerifie(dossier: string): Promise<Record<string, unknown>>;
+  /** tamila_export_purge (socle Tamila) : refuse tant que l'archive est au stockage. */
+  exportPurge(exportId: string): Promise<void>;
+  /** tamila_cle_detruite (socle Tamila) : l'enveloppe de la clé d'un dossier effacé, mise à zéro. */
+  cleDetruite(dossier: string, preuve: Record<string, unknown>): Promise<void>;
+}
+
+export interface DossierAEffacer {
+  dossier: string;
+  client: string;
+  deja_efface: boolean;
+  fichiers: { bucket: string; nom: string }[];
 }
 
 export class PortesRpc implements Portes {
@@ -73,5 +89,17 @@ export class PortesRpc implements Portes {
   }
   async purgee(reception: number, fichiers: number) {
     await this.rpc("tamila_reception_purgee", { p_reception: reception, p_fichiers: fichiers });
+  }
+  dossierAEffacer(dossier: string) {
+    return this.rpc<DossierAEffacer>("tamila_dossier_a_effacer", { p_dossier: dossier });
+  }
+  effacerDossierVerifie(dossier: string) {
+    return this.rpc<Record<string, unknown>>("tamila_effacer_dossier_verifie", { p_dossier: dossier });
+  }
+  async exportPurge(exportId: string) {
+    await this.rpc("tamila_export_purge", { p_export: exportId });
+  }
+  async cleDetruite(dossier: string, preuve: Record<string, unknown>) {
+    await this.rpc("tamila_cle_detruite", { p_dossier: dossier, p_preuve: preuve });
   }
 }

@@ -40,6 +40,8 @@
        tamila_controler_conflits, tamila_decider_conflit, tamila_poser_vigilance, tamila_conformite
      les avis reçus par courriel (b4_10) : lecture de tamila_avis_entrants et des réceptions (socle),
        tamila_rattacher_avis, tamila_ecarter_avis ; les pièces jointes se lisent au bucket
+     le temps proposé et le forfait prévu (b4_12) : tamila_temps_ecartes, tamila_saisir_temps_propose,
+       tamila_ecarter_proposition, tamila_prevoir_forfait
    Si la base répond autrement, l'écran montre son message tel quel.
    Les bytea partent en hexadécimal (« \x01… », chiffrement.ts).
    ══════════════════════════════════════════════════════════════════════ */
@@ -308,12 +310,15 @@ export async function chargerHonoraires(p_dossier: string): Promise<Honoraires |
   ]);
   if (c.error || t.error || p.error || f.error) return null;
   const conventions = (c.data ?? []) as Convention[];
+  /* b4_12 : ce que j'ai ignoré ; sans la table, rien */
+  const e = await supabase.from("tamila_temps_ecartes").select("origine").eq("dossier_id", p_dossier);
   return {
     conventions,
     convention: conventions.find((x) => x.statut !== "resiliee") ?? null,
     temps: (t.data ?? []) as Temps[],
     provisions: (p.data ?? []) as Provision[],
     factures: (f.data ?? []) as Facture[],
+    ecartes: e.error ? [] : ((e.data ?? []) as { origine: string }[]).map((x) => x.origine),
   };
 }
 
@@ -351,6 +356,12 @@ export const poserVigilance = (p_dossier: string, p_assujetti: boolean, p_activi
 
 /* ——— l'en-tête des factures du cabinet (b4_09) ——— */
 export const poserEnteteFacture = (p_client: string, p_entete: EnteteFacture) => rpc<EnteteFacture>("tamila_poser_entete_facture", { p_client, p_entete });
+
+/* ——— le temps proposé à la saisie, le forfait prévu (b4_12) ——— */
+export const saisirTempsPropose = (p_dossier: string, p_origine: string, p_jour: string, p_minutes: number, p_nature: NatureTemps, p_description: string | null, p_facturable: boolean) =>
+  rpc<string>("tamila_saisir_temps_propose", { p_dossier, p_origine, p_jour, p_minutes, p_nature, p_description, p_facturable });
+export const ecarterProposition = (p_dossier: string, p_origine: string) => rpc<void>("tamila_ecarter_proposition", { p_dossier, p_origine });
+export const prevoirForfait = (p_dossier: string, p_minutes: number | null) => rpc<void>("tamila_prevoir_forfait", { p_dossier, p_minutes });
 
 /* ——— les avis RPVA reçus par courriel, à rattacher (b4_10) ——— */
 export type PieceRecue = { nom: string; mime: string; taille: number; chemin: string };
