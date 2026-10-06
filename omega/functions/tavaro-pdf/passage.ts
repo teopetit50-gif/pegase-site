@@ -6,12 +6,23 @@
 // loc_enregistrer_pdf crée les pièces et prépare le courriel avec elles. Dix pièces au plus et 15 Mo au plus (règles
 // du socle) : les PDF d'abord, puis les photos tant qu'elles tiennent. Au dernier essai, loc_pdf_impossible : le
 // courriel part sans pièce jointe et l'agence est prévenue.
+//
+// Le genre tavaro.dossier_contestation (migration b2_09) : le dossier de réponse à une contestation bancaire est
+// composé (dossier.ts) avec les photos datées et les signatures intégrées, dans un budget qui laisse la place, dans le
+// courriel à la banque, au PDF de la facture et au contrat signé ; il est déposé sous
+// <client>/loc_contestations/<contestation>/ et enregistré par loc_enregistrer_dossier. Au dernier essai,
+// loc_dossier_impossible prévient l'agence, avec la date limite de la banque.
 
+import { composerDossier, photosDuDossier } from "./dossier.ts";
 import { composerPdf } from "./pdf.ts";
 import type { PieceProduite, Portes, Travail } from "./portes.ts";
 import { mimeDe, sha256, type Stockage } from "./stockage.ts";
 
 export const GENRE = "tavaro.pdf_factures";
+export const GENRE_DOSSIER = "tavaro.dossier_contestation";
+export const GENRES = [GENRE, GENRE_DOSSIER];
+/** Les images intégrées au dossier : le PDF de la facture et le contrat doivent encore tenir dans les 15 Mo du courriel. */
+export const BUDGET_IMAGES_DOSSIER = 9 * 1024 * 1024;
 export const MAX_PIECES = 10;
 export const MAX_OCTETS = 14 * 1024 * 1024; // sous les 15 Mo du socle, pour la marge du courriel
 
@@ -19,7 +30,15 @@ export type Journal = {
   info: (m: string, d?: Record<string, unknown>) => void;
   erreur: (m: string, d?: Record<string, unknown>) => void;
 };
-export type Bilan = { pris: number; faits: number; repris: number; sans_pdf: number; echecs: number; duree_ms: number };
+export type Bilan = {
+  pris: number;
+  faits: number;
+  repris: number;
+  sans_pdf: number;
+  dossiers_impossibles: number;
+  echecs: number;
+  duree_ms: number;
+};
 
 export async function traiter(t: Travail, portes: Portes, stockage: Stockage): Promise<Record<string, unknown>> {
   const proposition = String(t.charge?.proposition ?? "");
@@ -83,21 +102,57 @@ export async function traiter(t: Travail, portes: Portes, stockage: Stockage): P
   return { pieces: pieces.length, pdf: pieces.filter((p) => p.nature === "pdf").length, octets, envoi };
 }
 
+export async function traiterDossier(t: Travail, portes: Portes, stockage: Stockage): Promise<Record<string, unknown>> {
+  const contestation = String(t.charge?.contestation ?? "");
+  if (!contestation) return { ignore: "charge sans contestation" };
+  const d = await portes.dossierAProduire(contestation);
+  if (!d || !["ouverte", "dossier_pret", "envoyee"].includes(d.contestation.statut)) {
+    return { ignore: `contestation ${d?.contestation.statut ?? "introuvable"}` };
+  }
+  const images = new Map<string, Uint8Array>();
+  let budget = BUDGET_IMAGES_DOSSIER;
+  for (const chemin of photosDuDossier(d)) {
+    try {
+      const contenu = await stockage.lire(chemin);
+      if (contenu.length > budget) continue; // listée dans le PDF, « disponible sur demande »
+      budget -= contenu.length;
+      images.set(chemin, contenu);
+    } catch {
+      // une photo introuvable ne bloque pas le dossier : elle y est listée
+    }
+  }
+  const { pdf, pages, integrees } = await composerDossier(d, images);
+  const nom = `dossier-${d.contestation.reference_banque.replace(/[^0-9A-Za-z._-]+/g, "-")}.pdf`;
+  const chemin = `${d.client}/loc_contestations/${d.contestation.id}/${nom}`;
+  await stockage.deposer(chemin, pdf, "application/pdf");
+  const r = await portes.enregistrerDossier(contestation, {
+    chemin,
+    nom,
+    mime: "application/pdf",
+    octets: pdf.length,
+    sha256: await sha256(pdf),
+    pages,
+  });
+  return { dossier: chemin, pages, octets: pdf.length, images: integrees, resultat: r };
+}
+
 export async function executerPassage(
   o: { portes: Portes; stockage: Stockage; ouvrier: string; journal: Journal; nombre?: number },
 ): Promise<Bilan> {
   const debut = Date.now();
-  const bilan: Bilan = { pris: 0, faits: 0, repris: 0, sans_pdf: 0, echecs: 0, duree_ms: 0 };
+  const bilan: Bilan = { pris: 0, faits: 0, repris: 0, sans_pdf: 0, dossiers_impossibles: 0, echecs: 0, duree_ms: 0 };
   let travaux: Travail[] = [];
   try {
-    travaux = await o.portes.prendreTravaux([GENRE], o.nombre ?? 5, "10 min", o.ouvrier);
+    travaux = await o.portes.prendreTravaux(GENRES, o.nombre ?? 5, "10 min", o.ouvrier);
   } catch (e) {
     o.journal.erreur("prendre_travaux", { erreur: String(e) });
   }
   bilan.pris = travaux.length;
   for (const t of travaux) {
     try {
-      const r = await traiter(t, o.portes, o.stockage);
+      const r = t.genre === GENRE_DOSSIER
+        ? await traiterDossier(t, o.portes, o.stockage)
+        : await traiter(t, o.portes, o.stockage);
       await o.portes.finirTravail(t.id, r);
       bilan.faits++;
     } catch (e) {
@@ -105,7 +160,12 @@ export async function executerPassage(
       o.journal.erreur("travail", { id: t.id, erreur });
       try {
         const dernier = (t.essais ?? 1) >= (t.essais_max ?? 5);
-        if (dernier) {
+        if (dernier && t.genre === GENRE_DOSSIER) {
+          // Le dernier essai : l'agence est prévenue, avec la date limite de la banque.
+          const r = await o.portes.dossierImpossible(String(t.charge?.contestation ?? ""), erreur);
+          await o.portes.finirTravail(t.id, { dossier_impossible: true, erreur, resultat: r });
+          bilan.dossiers_impossibles++;
+        } else if (dernier) {
           // Le dernier essai : le courriel part sans pièce jointe plutôt que jamais.
           const r = await o.portes.pdfImpossible(String(t.charge?.proposition ?? ""), erreur);
           await o.portes.finirTravail(t.id, { sans_pdf: true, erreur, envoi: r });
@@ -124,8 +184,13 @@ export async function executerPassage(
   try {
     await o.portes.battreOuvrier(
       "tavaro",
-      [GENRE],
-      { pris: bilan.pris, faits: bilan.faits, sans_pdf: bilan.sans_pdf },
+      GENRES,
+      {
+        pris: bilan.pris,
+        faits: bilan.faits,
+        sans_pdf: bilan.sans_pdf,
+        dossiers_impossibles: bilan.dossiers_impossibles,
+      },
       "15 min",
     );
   } catch (e) {

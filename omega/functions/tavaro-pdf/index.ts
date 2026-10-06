@@ -1,6 +1,6 @@
 // Ouvrier TAVARO-PDF — fonction Edge appelée par pg_cron → pg_net chaque minute, avec la clé de service (comme
-// l'expéditeur d'A2). Prend les travaux tavaro.pdf_factures, compose les PDF des factures, joint les photos datées et
-// fait partir le courriel. Voir passage.ts. Session B2, 06/10/2026.
+// l'expéditeur d'A2). Prend les travaux tavaro.pdf_factures (PDF des factures, photos datées jointes, courriel) et
+// tavaro.dossier_contestation (dossier de réponse à une contestation bancaire). Voir passage.ts. Session B2, 06/10/2026.
 
 import { executerPassage } from "./passage.ts";
 import { portesDepuisEnvironnement } from "./portes.ts";

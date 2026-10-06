@@ -1,6 +1,7 @@
 // Portes du socle pour l'ouvrier TAVARO-PDF (session B2, 06/10/2026) : l'ouvrier ne voit Postgres que par ces
 // fonctions, appelées en RPC avec la clé de service. Aucune écriture directe dans une table (contrat de l'ouvrier).
-// Portes du module : loc_pdf_a_produire, loc_enregistrer_pdf, loc_pdf_impossible (migration b2_08).
+// Portes du module : loc_pdf_a_produire, loc_enregistrer_pdf, loc_pdf_impossible (migration b2_08) ;
+// loc_dossier_a_produire, loc_enregistrer_dossier, loc_dossier_impossible (migration b2_09, contestations bancaires).
 
 export type Travail = {
   id: number;
@@ -62,6 +63,105 @@ export type PieceProduite = {
   legende?: string;
 };
 
+export type Photo = { vue?: string; chemin: string; prise_le?: string; nettete?: number };
+
+export type EtatSigne = {
+  moment: "depart" | "retour";
+  statut: "signe" | "refuse";
+  releve_le: string;
+  km?: number;
+  carburant_8?: number;
+  charge_pct?: number;
+  photos: Photo[];
+  dommages: { zone: string; code?: string; description: string; preuves: Photo[] }[];
+  observations?: string;
+  caution_eur?: number;
+  caution_mode?: string;
+  signataire_nom?: string;
+  signature_chemin?: string;
+  signe_le?: string;
+  empreinte?: string;
+  refus_motif?: string;
+  refuse_le?: string;
+};
+
+export type LigneDossier = {
+  rang: number;
+  code: string;
+  libelle: string;
+  famille: string;
+  quantite: number;
+  unite?: string;
+  prix_unitaire?: number;
+  montant_ttc: number;
+  bareme?: { code: string; libelle: string; unite: string; prix_eur: number | null };
+  calcul?: Record<string, unknown>;
+  preuves: Photo[];
+};
+
+export type DossierAProduire = {
+  contestation: {
+    id: string;
+    reference_banque: string;
+    motif_banque: string;
+    montant_eur: number;
+    recue_le: string;
+    repondre_avant: string;
+    statut: string;
+  };
+  client: string;
+  agence?: string;
+  emetteur: Record<string, string>;
+  locataire: Record<string, string>;
+  contrat: {
+    numero: string;
+    depart_le: string;
+    retour_prevu_le: string;
+    retour_reel_le?: string;
+    km_depart?: number;
+    km_retour?: number;
+    franchise_eur?: number;
+    franchise_reduite_eur?: number;
+    rachat_franchise?: boolean;
+    depot_eur?: number;
+    conditions_version?: string;
+    politique_carburant?: string;
+    vehicule?: { immatriculation: string; modele?: string };
+    piece?: { id: string; nom: string; chemin: string };
+  };
+  etats: EtatSigne[];
+  facture: {
+    id: string;
+    reference: string;
+    nature: string;
+    date_facture: string;
+    echeance_le: string;
+    statut: string;
+    regle_le?: string | null;
+    mode_reglement?: string | null;
+    total_ht: number;
+    total_tva: number;
+    total_ttc: number;
+    lignes: LigneDossier[];
+  };
+  decision?: {
+    demandee_le: string;
+    decidee_le?: string | null;
+    statut: string;
+    approbations: { decision: string; decide_le: string; role?: string; autre_que_la_saisie: boolean }[];
+  } | null;
+  envoi_facture?: { prepare_le: string; statut: string; remise?: string; remise_le?: string } | null;
+};
+
+export type DossierProduit = {
+  chemin: string;
+  nom: string;
+  mime: "application/pdf";
+  octets: number;
+  sha256: string;
+  pages: number;
+};
+
 export interface Portes {
   prendreTravaux(genres: string[], nombre: number, bail: string, ouvrier: string): Promise<Travail[]>;
   finirTravail(id: number, resultat: Record<string, unknown>): Promise<void>;
@@ -70,6 +170,9 @@ export interface Portes {
   pdfAProduire(proposition: string): Promise<AProduire | null>;
   enregistrerPdf(proposition: string, pieces: PieceProduite[]): Promise<Record<string, unknown>>;
   pdfImpossible(proposition: string, erreur: string): Promise<Record<string, unknown>>;
+  dossierAProduire(contestation: string): Promise<DossierAProduire | null>;
+  enregistrerDossier(contestation: string, piece: DossierProduit): Promise<Record<string, unknown>>;
+  dossierImpossible(contestation: string, erreur: string): Promise<Record<string, unknown>>;
 }
 
 export class ErreurPorte extends Error {
@@ -131,6 +234,19 @@ export function portesSupabase(rpc: AppelRpc): Portes {
         string,
         unknown
       >;
+    },
+    async dossierAProduire(contestation) {
+      return (await rpc("loc_dossier_a_produire", { p_contestation: contestation })) as DossierAProduire | null;
+    },
+    async enregistrerDossier(contestation, piece) {
+      return ((await rpc("loc_enregistrer_dossier", { p_contestation: contestation, p_piece: piece })) ?? {}) as Record<
+        string,
+        unknown
+      >;
+    },
+    async dossierImpossible(contestation, erreur) {
+      return ((await rpc("loc_dossier_impossible", { p_contestation: contestation, p_erreur: erreur })) ??
+        {}) as Record<string, unknown>;
     },
   };
 }

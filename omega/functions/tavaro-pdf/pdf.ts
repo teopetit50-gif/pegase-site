@@ -12,14 +12,14 @@ const NOIR = rgb(0.02, 0.02, 0.02);
 const GRIS = rgb(0.42, 0.42, 0.46);
 const FILET = rgb(0.85, 0.85, 0.87);
 
-const eur = (n: number | null | undefined) =>
+export const eur = (n: number | null | undefined) =>
   n === null || n === undefined
     ? ""
     : `${(Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, " ")} €`;
-const date = (
+export const date = (
   iso: string | null | undefined,
 ) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : "");
-const nombre = (n: number) => String(Math.round(n * 1000) / 1000).replace(".", ",");
+export const nombre = (n: number) => String(Math.round(n * 1000) / 1000).replace(".", ",");
 const UNITES: Record<string, string> = {
   huitieme: "huitième(s)",
   litre: "l",
@@ -45,7 +45,7 @@ export function nettoyer(texte: string, police: PDFFont): string {
 }
 
 /** Coupe un texte en lignes qui tiennent dans la largeur. */
-function couper(texte: string, police: PDFFont, taille: number, largeur: number): string[] {
+export function couper(texte: string, police: PDFFont, taille: number, largeur: number): string[] {
   const lignes: string[] = [];
   for (const paragraphe of texte.split("\n")) {
     let courante = "";

@@ -118,6 +118,9 @@ function doubles(a: AProduire, o: { echouerEnregistrement?: boolean } = {}) {
       impossibles.push(e);
       return Promise.resolve({ statut: "prepare" });
     },
+    dossierAProduire: () => Promise.resolve(null),
+    enregistrerDossier: () => Promise.resolve({}),
+    dossierImpossible: () => Promise.resolve({}),
   };
   const stockage: Stockage = {
     lire: (chemin) =>
