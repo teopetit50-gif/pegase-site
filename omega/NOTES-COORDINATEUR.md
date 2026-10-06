@@ -974,3 +974,12 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   GUIDE-WHATSAPP (A2). Pastilles retirées : Tamila point du matin, marge, charge, séries, sans diligence ;
   Lorani OS et réserves/GPA ; Daliro signature sur place et 4 lignes d'appro ; Varelo réserves (plus aucune ligne).
   12 pages × 5 largeurs : 200, sans débord.
+- 17 h 45 Z (point horaire) — Pose : Lorani b5_20 comptes rendus + test b5_11 (B5 81d468d) ; ^test_b5_ : 323 ok, 0 échec
+  (la question suivie ouvre bien un suivi du socle, puis le clôt). banc_cashd joué (5781 : essai, email + lre).
+  Main : fusion worker-a3 (Demandes reçues, Réglages : journal CSV, export complet, aperçu d'effacement), worker-c5
+  passe 5 (Varelo point 9, REPUT sans prise de rendez-vous), worker-b4 jusqu'à a4b1cbc (écran des lectures longues,
+  citation non retrouvée mise à part), worker-b5 (CR de chantier), tableau-de-bord-v2 jusqu'à 7eabe12 (/espace2 :
+  REPUT, Boîte FILED) — SANS la bascule a1f12b2 (vérifié : pas ancêtre de main). Build vert ; 12 pages × 5 largeurs.
+  /espace (racine) est en 404 en ligne comme avant : c'est la bascule qui le résoudra.
+  Ouverts : export-complet appelle public.exporter_client (inexistante) → A5 ; « appel manqué par SMS » (lib/pub.ts)
+  → A2 dit si l'ouvrier envoie réellement en brevo_sms, sinon C5 reformule.
