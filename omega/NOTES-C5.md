@@ -425,3 +425,22 @@ non touchés : éditoriaux, à trancher.
 Recette : /offres et /offres/nouvelles-affaires aux 5 largeurs, aucun débordement ; anciennes phrases absentes.
 Eslint : une erreur préexistante sur main dans app/offres/page.tsx:635 (« où qu'elles soient », apostrophe non
 échappée), hors de mon diff.
+
+## Passe 7 — 06/10, 18 h 25 Z : OFFLOAD c4_07 livré (échéances et renouvellements)
+
+c4_07 (5f2cc7e, `^test_c4_07_` vert sur la recette d'après le coordinateur) rend vraies les lignes 8 et 17 à 24 de
+NOTES-C4. Seules les « affaires restées en plan » (25 à 32) restent en préparation.
+
+| Fichier:ligne | Passe 6 | Passe 7 |
+|---|---|---|
+| lib/produits/reprise.ts:157 | « … le compte qui n'a plus commandé. L'entretien redevenu dû et l'affaire restée en plan s'y ajoutent ensuite : leur lecture est en préparation. » | « … le compte qui n'a plus commandé et l'entretien redevenu dû. L'affaire restée en plan s'y ajoutera ensuite : sa lecture est en préparation. » |
+| lib/produits/reprise.ts:173 (maquette) | « Sans commande depuis la révision » | « Entretien sauté deux fois » (texte d'origine) |
+| lib/produits/reprise.ts:241 (message) | « … cela fait un an. Voulez-vous que nous en reparlions ? » | « … l'entretien annuel qui va avec est à refaire. Voulez-vous que nous le planifiions ? » (la prise de rendez-vous reste hors d'OFFLOAD) |
+| lib/produits/reprise.ts:308 (Garage) | entretiens et commandes non reprises en préparation | « OFFLOAD suit les entretiens qui arrivent à échéance et repère les comptes silencieux. Le suivi des commandes que personne n'a reprises est en préparation. » |
+| lib/produits/reprise.ts:332 (Maintenance) | liste des installations en préparation | « OFFLOAD tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il prépare le message au client la semaine d'avant. Un contrat qui s'éteint faute de reconduction vous est signalé. » |
+| lib/produits/reprise.ts:377 (FAQ) | une liste, deux en préparation | deux listes (comptes sans commande, entretiens dus), la troisième (affaires restées en plan) en préparation |
+| lib/en-preparation.ts, `offload` | « Entretien annuel redevenu dû », « Pièce arrivée, jamais reprise » | « Pièce arrivée, jamais reprise » seule |
+
+Pour la bascule `atteste: true` au palier de production : lib/produits/capacites/reprise.ts lignes 49 (contrats et
+équipements, n° 8 de C4) et 71 à 78 (n° 17 à 24), preuve c4_07 5f2cc7e, tests `test_c4_07_echeances`,
+`test_c4_07_contrats_et_parc`, `test_c4_07_import_et_groupe`.
