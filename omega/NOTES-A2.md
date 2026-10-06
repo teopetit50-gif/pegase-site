@@ -3,6 +3,72 @@
 Session worker A2, branche `worker-a2`. Dernière mise à jour : 06/10/2026.
 Coordinateur depuis le 06/10 : session `session_01BCGFdpRKBvXKjouC75sYBg` (passation
 de `session_01B4JNQXyT69GytdvE9SjAnE`).
+
+## REPRISE — pause demandée par Teo le 06/10/2026, 21 h Z
+
+La construction est arrêtée. Rien n'est en cours, l'arbre est propre. Branche `worker-a2` ;
+le dernier SHA est celui du commit qui pose cette section (voir `git log -1`). Le précédent est
+`ecf5275`.
+
+**États** :
+- **A** prouvé en vrai ;
+- **B** construit et testé (recette ou doubles) ;
+- **T** attend un compte de Teo.
+
+### Fait
+
+| Sujet | SHA | État | Sur la recette |
+|---|---|---|---|
+| Connecteur Gmail (relève, brouillons, OAuth) | e932599 → 72c21d5 | B (doubles), T | Fonctions `messagerie` et `messagerie-oauth` **non déployées** (attendent les secrets) |
+| Connecteur Microsoft 365 | 07d012d → 72c21d5 | B (doubles), T | Idem |
+| Lot `19al_messageries` (messageries, Vault, `brouillon_depose`, `confirmer_brouillon`) | e9f4ebc | B | **Posé**, test vert, 46 et 51 verts |
+| Route de renvoi OAuth `app/api/messagerie/[fournisseur]/retour` | e9f4ebc | B (tsc, eslint) | Prise dans main par le coordinateur |
+| Dépôt par lot WebDAV (fonction `depot`, lot `19ao_depots`) | 59fc8d0 | **A** (recette) | **Posé et déployé** ; PUT → pièce FILED R2026-000007 |
+| Réception WhatsApp (médias sans perte, MIME simple, vocaux) | 72c21d5 | B, T | `reception` **v12 déployée** sur 72c21d5 |
+| Erreurs de `messagerie-oauth` renvoyées vers l'écran | 72c21d5 | B | Non déployé (attend les secrets) |
+| Messagerie du site (fonction `widget`, lot `19ap_widgets`) | de501c4 | B (Chromium local) | **Posé**, test vert ; `widget` **v1 déployée** sur de501c4 ; pas encore de message réel sur la recette |
+| Script de mise en service des SMS | c1218ed | — | **Non joué** (attend les crédits SMS et l'accord de Teo) |
+| Guides : GMAIL (§ production), MICROSOFT, WHATSAPP, DEPOT, WIDGET | divers | — | Pris dans main : WHATSAPP, DEPOT, WIDGET |
+| Chiffrage des canaux `omega/CHIFFRAGE/canaux.md` | ecf5275 | — | Pour Teo |
+
+### Ce qui attend le coordinateur
+
+- Fusionner dans main ce qui n'y est pas encore : GUIDE-GMAIL (§ « Passer en production »),
+  GUIDE-MICROSOFT, `omega/CHIFFRAGE/canaux.md`, `omega/banc/mise_en_service_sms.sql`. Les
+  fonctions sont servies depuis leur SHA.
+- Quand les secrets Google ou Microsoft sont posés :
+  - déployer `messagerie` (verify_jwt true) et `messagerie-oauth` (verify_jwt false) depuis
+    72c21d5 ou un SHA plus récent ;
+  - poser le cron `omega-messagerie`, chaque minute ;
+  - passer `fournisseurs_envoi.gmail` et `microsoft` à `branche = true`.
+- Un message réel par le widget sur la recette (`widget_regler`, puis OPTIONS et POST ; voir
+  GUIDE-WIDGET).
+- WhatsApp : la ligne d'expéditeur `meta_whatsapp` (`phone_number_id`, module daliro) dès que
+  Teo a le numéro.
+- Abonner les modules à `envoi.brouillon_depose.<module>` (« remis au client pour envoi », pas
+  « parti »), à transmettre quand Gmail sera branché.
+
+### Ce qui attend Teo
+
+- **Google** : projet Cloud, client OAuth, régime Test, secrets `GOOGLE_CLIENT_ID` et
+  `GOOGLE_CLIENT_SECRET` (`GUIDE-GMAIL.md`). La décision CASA viendra plus tard.
+- **Microsoft** : inscription Entra, secrets `MICROSOFT_CLIENT_ID` et
+  `MICROSOFT_CLIENT_SECRET` (`GUIDE-MICROSOFT.md`). La vérification d'éditeur est conseillée.
+- **Meta WhatsApp** : portefeuille, app, numéro, secrets `META_APP_SECRET`,
+  `META_ACCESS_TOKEN` et `META_VERIFY_TOKEN` (`GUIDE-WHATSAPP.md`).
+- **Brevo** : crédits SMS, puis son accord pour jouer `omega/banc/mise_en_service_sms.sql`.
+- Le montage du dépôt dans l'Explorateur Windows, sur un vrai PC (`GUIDE-DEPOT.md`).
+
+### Prochaine étape exacte (au réveil)
+
+Relire les messages du coordinateur. Le premier compte que Teo crée décide de la suite :
+- secrets Google ou Microsoft → déploiement de `messagerie` et `messagerie-oauth`, connexion de
+  la boîte du banc, puis un courriel reçu et un brouillon déposé (A) ;
+- Meta → un message, une photo et un vocal reçus au numéro (A) ;
+- crédits SMS → le script de mise en service, puis un SMS réel au portable de Teo (A).
+
+Rien d'autre n'est ouvert.
+
 Périmètre : `omega/functions/expediteur/`, `omega/functions/reception/`,
 `omega/functions/webhooks/`. Aucune migration SQL, aucune écriture directe en table :
 tout passe par les portes du socle, appelées en RPC avec la clé de service.
