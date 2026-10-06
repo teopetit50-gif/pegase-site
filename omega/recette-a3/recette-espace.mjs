@@ -238,6 +238,37 @@ for (const [nom, chemin] of ECRANS) {
 }
 
 {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lot', densite: 1 });
+  console.log('— /espace/validations : décider en lot');
+  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => /Décider en lot/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  const n = await s.evaluer(`document.querySelectorAll('.esp-item-coche input').length`);
+  ok(n >= 3, `une case par demande en attente (${n})`);
+  /* tout cocher à la main, y compris ce qu'on ne peut pas décider */
+  await s.evaluer(`[...document.querySelectorAll('.esp-item-coche input')].forEach(i => { if (!i.checked) i.click(); })`);
+  await s.dormir(300);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lot-barre button')].find(b => /Approuver/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const dlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const b = [...d.querySelectorAll('button')].find(x => /Approuver \\d/.test(x.textContent)); return { retenues: d.querySelectorAll('.esp-lot-retenues li').length, ecartees: [...d.querySelectorAll('.esp-lot-ecartees li')].map(l => l.textContent), gris: b?.disabled, exige: /obligatoire/.test(d.textContent) }; })()`);
+  ok(dlg && dlg.ecartees.length >= 1 && dlg.ecartees.every(t => / — .{10,}/.test(t)), `les demandes non décidables sont écartées avec leur raison (${dlg?.ecartees.length} : ${dlg?.ecartees[0]?.slice(0, 120)})`);
+  ok(dlg?.gris === true && dlg.exige, 'sans commentaire exigé, « Approuver » reste gris');
+  await s.evaluer(`(() => { const t = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(t, 'Lot vérifié avec les justificatifs du mois.'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.capturer(`${dossier}validations-lot-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Approuver \\d/.test(x.textContent))?.click()`);
+  await s.dormir(1800);
+  const bilan = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lot-bilan li')].map(l => l.innerText.replace(/\\s+/g, ' '))`);
+  ok(bilan.length === dlg.retenues && bilan.every(l => /Approuvée/.test(l)), `bilan ligne à ligne : ${bilan.length} approuvées sur ${dlg.retenues}`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Fermer/.test(x.textContent) && !x.classList.contains('dlg-fermer'))?.click()`);
+  await s.dormir(500);
+  const fait = await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).find(t => /en lot/.test(t)) ?? null`);
+  ok(!!fait, `le message de la file le dit (${fait?.slice(0, 80)})`);
+  s.fermer();
+}
+
+{
   const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'a3-point', densite: 1 });
   console.log('— /espace/point : reculer d\'un jour');
   ok(await s.aller(base + '/espace/point'), 'page chargée');
