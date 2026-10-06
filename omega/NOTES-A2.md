@@ -429,6 +429,23 @@ par `/reception/formulaire` (`FORMULAIRE_SECRET` posé, boîte `site:omegaai.fr`
 `FORMULAIRE_SECRET=… deno run reception/outils/signer_formulaire.ts '<corps JSON>' [URL]` imprime la
 commande curl signée (il faut la valeur du secret : Teo, ou une session qui la lit).
 
+## Vague du 06/10 après-midi : guide inbound et preuve du formulaire
+
+- `omega/GUIDE-INBOUND.md` : guide pas à pas pour Teo, d'après la doc Brevo du 06/10.
+  Sous-domaine `recu.omegaai.fr` ; MX 10 `inbound1.sendinblue.com.` et MX 20
+  `inbound2.sendinblue.com.` ; webhook par l'API (`POST /v3/webhooks`, `type: inbound`,
+  `events: [inboundEmailProcessed]`, `domain`, `url` …/reception/brevo, jeton en `auth`
+  bearer **et** en en-tête `X-Omega-Jeton`, car la doc ne dit pas si l'inbound envoie
+  `auth`). Ligne `expediteurs` de la boîte d'essai `banc@recu.omegaai.fr`, posée par le
+  coordinateur, statut `suspendu` pour qu'aucun envoi ne la prenne. Contrôle en base.
+- `omega/functions/reception/outils/preuve_formulaire.ts` (demandé « dans omega/banc/ »,
+  placé sous `omega/functions/` parce que `tsconfig.json` de main n'exclut que
+  `omega/functions` : un `.ts` Deno dans `omega/banc/` casserait `npx tsc` / `npm run build`
+  du site). `FORMULAIRE_SECRET` lu dans l'environnement, jamais imprimé. Quatre contrôles :
+  signature fausse → 401, signée → 201 nouvelle, rejeu → 200 même id, une seule ligne dans
+  `public.receptions` (lue par REST si `SUPABASE_SERVICE_ROLE_KEY` est fournie, sinon
+  requête SQL imprimée). Vérifié en local contre `traiterFormulaire` et les doubles : 1–3 OK.
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
