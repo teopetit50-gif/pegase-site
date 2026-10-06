@@ -1,14 +1,14 @@
 # Session B6 — DALIRO, le module des entreprises du bâtiment
 
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 06/10/2026, 02 h 35 Paris.
+Dernière mise à jour : 06/10/2026, 02 h 45 Paris.
 
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **95 %** | lot 1 posé (b6_01 à b6_04 v2) ; **garde-fous 38/38** ; **parcours 153/154** : tout passe (installation, annuaire, chantier, lots, marché, écarts, vérification, bibliothèque, planning, dépendances, acceptation, J-2, avenant, facture, tableau) sauf le compte « à ranger » de l'import, qui est un défaut du socle → `b6_05_import_a_ranger.sql` à poser, puis rejeu attendu 154/154 |
-| **Livrable client** (/espace/daliro relu avec le compte du banc) | **95 %** | **fusionné sur main (d572973)** avec l'onglet « Chantiers » ; relecture réelle complète (lecture, création d'un chantier, marché et ligne par les portes). Reste : la page servie par omegaai.fr, après la remise à zéro du quota Vercel (06/10, 02 h) |
+| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **100 %** | cinq migrations posées (b6_01 à b6_05) ; **parcours 154/154** et **garde-fous 38/38 verts** sur la recette (coordinateur, 06/10 02 h 25 Paris) : installation, annuaire, chantier, lots, marché, écarts, vérification, bibliothèque, planning, dépendances, acceptation, J-2 et remplaçants, avenant chiffré, soumis, signé par la file, facture rattachée et déboursé, réouverture, tableau ; isolement, rôles, prix cachés, marché figé, journal |
+| **Livrable client** (/espace/daliro relu avec le compte du banc) | **95 %** | fusionné sur main (d572973) avec l'onglet « Chantiers » ; relecture réelle complète (lecture, création d'un chantier, marché et ligne par les portes). Reste : la page servie par omegaai.fr (déploiement Vercel après la remise à zéro du quota ; le coordinateur prévient, un rappel vérifie à 04 h 16 Paris) |
 
 ### Relecture réelle (06/10, 00 h 45 UTC) — ce qui a été prouvé
 
@@ -94,6 +94,7 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 ## Journal de session
 
 - 06/10, 00 h 55 → 01 h 35 UTC : écriture réelle complète depuis l'écran, lot « écran » fusionné sur main (d572973), parcours 153/154, b6_05 écrit (compte « à ranger » de l'import, défaut du socle).
+- 06/10, 02 h 25 Paris : b6_05 posé, **parcours 154/154**. Mécanique prouvée en entier sur la recette.
 
 - 05/10, 21 h 30 → 23 h 05 UTC (23 h 30 → 1 h 05 Paris) : migrations b6_01..04 écrites et posées (lot 1), tests pgTAP écrits et joués une première fois (garde-fous 38/39, parcours à rejouer), écran /espace/daliro écrit, vérifié (tsc, eslint, build), recette cinq largeurs verte, captures. Pause demandée par le coordinateur.
 - 06/10, 23 h 40 → 00 h 55 UTC : reprise ; garde-fous 38/38 ; relecture réelle de l'écran (lecture, création d'un chantier) ; deux corrections de migrations relevées par les tests et par le réel (alias masqué, tri sur colonne absente) ; recette d'exemple 56/56.
