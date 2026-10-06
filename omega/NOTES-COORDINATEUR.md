@@ -744,3 +744,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   A1 : brancher lecteur.ts du coffre. **A3 6cb0135 fusionné** : vue Fournisseurs écoute aussi
   filed_historique ; témoin « En direct » / « Relue toutes les 30 s » (le conteneur refuse le
   WebSocket ; à rejouer d'un poste ordinaire). VIES MS_MAX_CONCURRENT_REQ relayé à B7.
+- 14 h 10 Z — **b7_04 doute VIES posé** (0b1be57, depots 4429/4430) ; coquille **identite v4**
+  (0b1be57, _partage 7425991) déployée AVANT la migration ; `^test_b7_` 11/11. Le rattrapage a
+  redemandé ORANGE à 14:08:21 Z → **valide**, verdict du fournisseur 90cc1d86 rétabli.
+  **Coffre Tamila** : test 14 corrigé (a90cd97) → 64/64 ; `^test_b4_` 14/14.
