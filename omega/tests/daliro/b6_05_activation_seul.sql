@@ -57,7 +57,7 @@ begin
                  'Leurs demandes d''activation sont décidées (par la voie du socle)');
   return next is((select count(*)::int from public.approbations a join public.politiques p on p.demande_id = a.demande_id
                   where p.client_id = v_client and p.type_action like 'envoi.%' and p.statut = 'active' and a.user_id = v_gerant
-                    and a.commentaire like 'activé par le seul décideur de l''organisation, %'), 3,
+                    and a.commentaire like '%activé par le seul décideur de l''organisation, %'), 3,
                  'Chaque activation est une approbation du gérant, commentée « activé par le seul décideur de l''organisation »');
   return next is((select p.statut from public.politiques p where p.client_id = v_client and p.type_action = 'daliro.signer_avenant'), 'a_valider',
                  'La politique hors J-2 n''est pas activée par la porte « seul »');
