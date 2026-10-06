@@ -1,14 +1,18 @@
 # Session B6 — DALIRO, le module des entreprises du bâtiment
 
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 06/10/2026, 02 h 20 Paris.
+Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **65 %** | lot 1 posé (b6_01 à b6_04, reposés en v2) ; **garde-fous 38/38 verts** ; parcours b6_01 : passe désormais la soumission d'avenant (étape 16), mourait sur la seconde facture FILED (un document par facture, corrigé en cd3b831) → rejeu en cours chez le coordinateur |
-| **Livrable client** (/espace/daliro relu avec le compte du banc) | **85 %** | écran écrit, tsc ✓, eslint ✓, build ✓, recette d'exemple 56/56 ✓, **relecture réelle complète** : lecture sous RLS, création d'un chantier, saisie du marché (btp_ecrire_marche), ajout d'une ligne (btp_ecrire_ligne) avec le contrôle « montant ≠ quantité × PU » et « sans lot » calculés par la base — capture `omega/recette-b6/reel-daliro-ecriture-1440.jpg`. Reste : la fusion dans main et la vérification sur omegaai.fr |
+| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **100 %** | cinq migrations posées (b6_01 à b6_05) ; **parcours 154/154** et **garde-fous 38/38 verts** sur la recette (coordinateur, 06/10 02 h 25 Paris) : installation, annuaire, chantier, lots, marché, écarts, vérification, bibliothèque, planning, dépendances, acceptation, J-2 et remplaçants, avenant chiffré, soumis, signé par la file, facture rattachée et déboursé, réouverture, tableau ; isolement, rôles, prix cachés, marché figé, journal |
+| **Livrable client** (/espace/daliro en ligne, relu avec le compte du banc) | **100 %** | **en ligne : https://omegaai.fr/espace/daliro répond 200** (vérifié par curl le 06/10 à 00 h 52 UTC : titre « Chantiers \| Espace client Omega », « Nouveau chantier », « Résidence Les Tilleuls », la promesse de la page), fusionné sur main (d572973, déployé 7c7c934 puis 6635b1c) avec l'onglet « Chantiers » ; relecture réelle complète faite sur la recette (omegaai.fr pointe sur la prod, sans banc) |
+
+### Vérifié en ligne (06/10, 00 h 52 UTC)
+
+`https://omegaai.fr/espace/daliro` → HTTP 200, HTML servi avec « Chantiers | Espace client Omega », le ruban « Données d'exemple » (sans session), « Nouveau chantier », les deux chantiers d'exemple. La base réelle n'y a pas de banc : la preuve en réel reste celle du Next local pointé sur la recette (section suivante).
 
 ### Relecture réelle (06/10, 00 h 45 UTC) — ce qui a été prouvé
 
@@ -39,7 +43,8 @@ Dernière mise à jour : 06/10/2026, 02 h 20 Paris.
 
 ### Ce que Teo doit fournir
 
-- Rien pour l'instant. Si le J-2 doit partir pour de vrai (WhatsApp / SMS), ce sont les secrets Meta déjà listés par le coordinateur.
+- Rien côté B6. Le quota Vercel du jour est épuisé : omegaai.fr servira /espace/daliro après la remise à zéro (06/10, 02 h).
+- Rien d'autre pour l'instant. Si le J-2 doit partir pour de vrai (WhatsApp / SMS), ce sont les secrets Meta déjà listés par le coordinateur.
 
 ## 1. Le scénario réel de bout en bout
 
@@ -91,6 +96,10 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 9. `filed_fournisseurs.siren` et `filed_factures.fournisseur_id` : confirmés tels que vus dans le test a4_01 ?
 
 ## Journal de session
+
+- 06/10, 00 h 55 → 01 h 35 UTC : écriture réelle complète depuis l'écran, lot « écran » fusionné sur main (d572973), parcours 153/154, b6_05 écrit (compte « à ranger » de l'import, défaut du socle).
+- 06/10, 02 h 25 Paris : b6_05 posé, **parcours 154/154**. Mécanique prouvée en entier sur la recette.
+- 06/10, 02 h 52 Paris : omegaai.fr/espace/daliro en ligne (200). **Lot B6 terminé** : 5 migrations, 3 fichiers de tests (192 assertions vertes), l'écran et sa recette.
 
 - 05/10, 21 h 30 → 23 h 05 UTC (23 h 30 → 1 h 05 Paris) : migrations b6_01..04 écrites et posées (lot 1), tests pgTAP écrits et joués une première fois (garde-fous 38/39, parcours à rejouer), écran /espace/daliro écrit, vérifié (tsc, eslint, build), recette cinq largeurs verte, captures. Pause demandée par le coordinateur.
 - 06/10, 23 h 40 → 00 h 55 UTC : reprise ; garde-fous 38/38 ; relecture réelle de l'écran (lecture, création d'un chantier) ; deux corrections de migrations relevées par les tests et par le réel (alias masqué, tri sur colonne absente) ; recette d'exemple 56/56.
