@@ -1,6 +1,7 @@
 // L'ouvrier TAMILA-PURGE d'Omega : fonction Edge Deno appelée par le planificateur (toutes les 5 minutes). Il efface
-// au bucket la copie en clair d'un avis RPVA reçu par courriel, une fois l'avis rattaché, écarté ou expiré (b4_10).
-// Fournis par Supabase : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY. Voir omega/NOTES-B4.md § 15.
+// au bucket la copie en clair d'un avis RPVA reçu par courriel (b4_10), les fichiers d'un dossier à l'échéance de son
+// effacement (b4_11), les archives échues, et fait détruire la clé d'un dossier effacé (passage.ts).
+// Fournis par Supabase : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY. Voir omega/NOTES-B4.md § 15 et 16.
 
 import { passage } from "./passage.ts";
 import { PortesRpc } from "./portes.ts";

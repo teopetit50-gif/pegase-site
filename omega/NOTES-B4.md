@@ -470,6 +470,25 @@ coordinateur, du type `cabinet-x@recu.omegaai.fr`) ; `deposer_reception` publie 
   `<client>/receptions/…` — à vérifier en recette ; sinon il faut une URL signée par une fonction ;
   (3) un courriel sans pièce jointe ne se rattache pas : il s'écarte et l'avis se saisit à la main.
 
+## 16. L'effacement réel des fichiers à la clôture (carnet du coordinateur, n° 1 ; lot B4-12, 06/10)
+
+Constat : la ronde horaire déposait `tamila.effacer_dossier`, `tamila.purger_export` et `tamila.detruire_cle`, mais
+aucun ouvrier ne les prenait ; et `tamila_effacer_dossier` posait sa preuve sans vérifier que les pièces chiffrées
+avaient quitté le bucket.
+
+- **Base** : `b4_11_tamila_effacement_fichiers.sql` — `tamila_dossier_a_effacer` (mêmes refus que
+  `tamila_effacer_dossier` : clôture approuvée, échéance atteinte ; prépare le manifeste ; rend les fichiers du
+  manifeste et tout objet resté sous `<client>/tamila_dossier/<dossier>/`, buckets des locataires seulement) ;
+  `tamila_effacer_dossier_verifie` (55000 tant qu'un fichier du dossier est au stockage, sinon
+  `tamila_effacer_dossier` et sa preuve) ; `tamila_fichiers_restants`. service_role seul, revoke from public.
+  Test `20_effacement_fichiers.sql` : 20 contrôles, verts sur la souche (la souche imite `preparer_effacement`).
+- **Ouvrier** : `tamila-purge` prend désormais quatre genres (réception, dossier, archive, clé). Dossier : liste →
+  effacement au bucket (rien hors de `<client>/`) → constat ; s'il reste un fichier, le travail est repris au
+  passage suivant, le dossier reste intact. Archive : fichier effacé puis `tamila_export_purge`. Clé :
+  `tamila_cle_detruite` (enveloppe mise à zéro). 8 tests Deno.
+- **Reste** : l'ancienne porte `tamila_effacer_dossier` reste appelable par le serveur sans la vérification (je ne
+  la réécris pas) ; l'ouvrier, lui, ne passe que par la porte vérifiée.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

@@ -2,7 +2,8 @@
 // Un fichier déjà absent n'est pas une erreur (l'effacement est idempotent).
 
 export interface Stockage {
-  effacer(chemins: string[]): Promise<number>;
+  /** Efface ces chemins du bucket (omega-clients par défaut) ; rend le nombre d'objets effacés. */
+  effacer(chemins: string[], bucket?: string): Promise<number>;
 }
 
 export class StockageSupabase implements Stockage {
@@ -13,9 +14,9 @@ export class StockageSupabase implements Stockage {
     private readonly fetchFn: typeof fetch = fetch,
   ) {}
 
-  async effacer(chemins: string[]): Promise<number> {
+  async effacer(chemins: string[], bucket = this.bucket): Promise<number> {
     if (!chemins.length) return 0;
-    const rep = await this.fetchFn(`${this.url.replace(/\/+$/, "")}/storage/v1/object/${this.bucket}`, {
+    const rep = await this.fetchFn(`${this.url.replace(/\/+$/, "")}/storage/v1/object/${encodeURIComponent(bucket)}`, {
       method: "DELETE",
       headers: { apikey: this.cle, Authorization: `Bearer ${this.cle}`, "Content-Type": "application/json" },
       body: JSON.stringify({ prefixes: chemins }),
