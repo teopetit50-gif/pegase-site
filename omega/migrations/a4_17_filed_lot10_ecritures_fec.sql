@@ -189,7 +189,7 @@ returns date language sql stable set search_path to '' as $$ select greatest(lea
 revoke all on function private.filed_date_enregistrement(date, date) from public, anon, authenticated;
 
 -- Le prochain numéro d'écriture de la suite (société, exercice) ; verrou de transaction sur la suite.
-create or replace function private.filed_prochain_numero(p_client uuid, p_entite uuid, p_cle text)
+create or replace function private.filed_prochain_numero_ecriture(p_client uuid, p_entite uuid, p_cle text)
 returns integer language plpgsql security definer set search_path to '' as $$
 declare v_n integer;
 begin
@@ -198,7 +198,7 @@ begin
    where e.client_id = p_client and e.entite_id = p_entite and e.exercice_cle = p_cle;
   return v_n;
 end $$;
-revoke all on function private.filed_prochain_numero(uuid, uuid, text) from public, anon, authenticated;
+revoke all on function private.filed_prochain_numero_ecriture(uuid, uuid, text) from public, anon, authenticated;
 
 -- Les écritures d'achat d'une facture comptabilisée (journal HA). Rend le numéro d'écriture, ou null si déjà écrite.
 create or replace function private.filed_ecrire_facture(p_facture uuid)
@@ -229,7 +229,7 @@ begin
   end if;
 
   v_date := private.filed_date_enregistrement(v_x.debut, v_x.fin);
-  v_num := private.filed_prochain_numero(v_f.client_id, v_f.entite_id, v_x.cle);
+  v_num := private.filed_prochain_numero_ecriture(v_f.client_id, v_f.entite_id, v_x.cle);
   v_lib := left(format('%s %s %s', case when v_f.nature = 'avoir' then 'Avoir' else 'Facture' end,
                        coalesce(v_four.nom, 'fournisseur'), coalesce(v_f.numero, v_doc.reference)), 200);
   select * into v_four_c from private.filed_compte_systeme(v_f.client_id, 'fournisseurs');
@@ -305,7 +305,7 @@ begin
   -- Le règlement va dans l'exercice qui contient sa date ; EcritureDate = date d'enregistrement, PieceDate = date du règlement.
   select * into v_x from private.filed_exercice_a_date(v_f.client_id, v_f.entite_id, v_r.regle_le);
   v_date := private.filed_date_enregistrement(v_x.debut, v_x.fin);
-  v_num := private.filed_prochain_numero(v_f.client_id, v_f.entite_id, v_x.cle);
+  v_num := private.filed_prochain_numero_ecriture(v_f.client_id, v_f.entite_id, v_x.cle);
   select * into v_four_c from private.filed_compte_systeme(v_f.client_id, 'fournisseurs');
   if v_r.mode = 'especes' then
     select * into v_tres from private.filed_compte_systeme(v_f.client_id, 'caisse'); v_journal := 'CA'; v_jlib := 'Caisse';
@@ -396,10 +396,11 @@ create or replace function private.filed_fec_date(p date) returns text
 language sql immutable set search_path to '' as $$
   select coalesce(to_char(p, 'YYYYMMDD'), '')
 $$;
-revoke all on function private.filed_fec_texte(text) from public, anon;
-revoke all on function private.filed_fec_montant(numeric) from public, anon;
-revoke all on function private.filed_fec_date(date) from public, anon;
-grant execute on function private.filed_fec_texte(text), private.filed_fec_montant(numeric), private.filed_fec_date(date) to authenticated, service_role;
+-- Appelées seulement par private.filed_exporter_fec (definer) : pas d'EXECUTE pour les membres (règle du test socle 44).
+revoke all on function private.filed_fec_texte(text) from public, anon, authenticated;
+revoke all on function private.filed_fec_montant(numeric) from public, anon, authenticated;
+revoke all on function private.filed_fec_date(date) from public, anon, authenticated;
+grant execute on function private.filed_fec_texte(text), private.filed_fec_montant(numeric), private.filed_fec_date(date) to service_role;
 
 create or replace function private.filed_exporter_fec(p_client uuid, p_entite uuid, p_exercice uuid default null, p_du date default null, p_au date default null)
 returns jsonb language plpgsql security definer set search_path to '' as $$

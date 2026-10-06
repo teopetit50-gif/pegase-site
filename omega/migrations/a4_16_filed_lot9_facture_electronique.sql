@@ -172,8 +172,9 @@ begin
   end if;
   return upper(regexp_replace(ta, '\s', '', 'g')) = upper(regexp_replace(tb, '\s', '', 'g'));
 end $$;
-revoke all on function private.filed_meme_valeur(jsonb, jsonb) from public, anon;
-grant execute on function private.filed_meme_valeur(jsonb, jsonb) to authenticated, service_role;
+-- Appelée seulement par le déclencheur definer ci-dessous : pas d'EXECUTE pour les membres (a4_16b, test socle 44).
+revoke all on function private.filed_meme_valeur(jsonb, jsonb) from public, anon, authenticated;
+grant execute on function private.filed_meme_valeur(jsonb, jsonb) to service_role;
 
 create or replace function private.filed_xml_fait_foi()
 returns trigger language plpgsql security definer set search_path to '' as $$
