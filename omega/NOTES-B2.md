@@ -273,3 +273,22 @@ La promesse (textes.ts) : « Quand un client conteste auprès de sa banque le d�
 - **Correction 928b937** : une préparation ouverte sans date de fin bloquait tous les créneaux d'entretien. Elle compte maintenant douze heures.
 - **Écran** (ddd161b) : la carte « Parc », juste après les contrats. Ses délais ne s'affichent qu'une fois la carte montée (sinon l'erreur d'hydratation React #418). Recette : 112 contrôles verts ; axe : 0 écart.
 - **Suite du carnet** : « Sortie de flotte ».
+
+### Carnet, point 3 — module 05, sortie de flotte (06/10, 22 h Z)
+
+- **b2_11** (a8f17be) :
+  - `loc_vehicules_economie` : financement ; cote réelle, avec sa source et sa date ; valeur comptable ;
+  - `private.loc_fiche_vehicule` sur douze mois :
+    - le revenu : jours loués × tarif, plus les frais ;
+    - les coûts : atelier, loyers, perte de valeur au prix réel ;
+    - la marge, l'utilisation, les jours d'immobilisation ;
+    - l'avis, ses raisons, le moment et le canal ;
+  - `loc_sorties_flotte` : la mise en vente est proposée, puis validée par la direction, jamais par la personne qui l'a proposée ; une fois conclue, le véhicule est « sorti ».
+
+  La validation est tenue dans la table et non par `demandes_validation`, parce que leur application passe par `loc_ouvrier` et une liste de genres que je ne remplace pas. Test 20 : 20 assertions.
+- **Écran** : la carte « Flotte », pour la direction et les valideurs seulement.
+  - Ce qu'elle montre : le tableau des fiches, la fiche détaillée, la saisie de la cote, la proposition de mise en vente, et la validation ou le refus et la vente.
+  - Un piège corrigé : un libellé `sr-only` (en position absolue) dans un cadre de tableau non positionné sortait du cadre et élargissait toute la page à 390 px. Le cadre est maintenant `position: relative`.
+  - Recette : 122 contrôles verts ; axe : 0 écart.
+- **À trancher** : si l'export du loueur réécrit `statut`, un véhicule sorti pourrait redevenir actif. J'ai posé la question au coordinateur.
+- **Suite** : les modules 02–11 restants du carnet. 13, 15, 16, 18 et 20 sont à reprendre dans `lib/en-preparation.ts`, après le partage avec B3.
