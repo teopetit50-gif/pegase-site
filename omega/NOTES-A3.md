@@ -1,6 +1,6 @@
 # Session A3 — l'écran client (validations, FILED, point du matin)
 
-Branche `worker-a3`. Dernière mise à jour : 05/10/2026.
+Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
 
 ## Fait
 
@@ -94,6 +94,63 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   enchaînements (règle qui exige un commentaire, citation surlignée dans
   la pièce, veille du point, annulation, délégations, appariements,
   commande, dépôt). Captures légères dans `omega/recette-a3/`.
+
+## Lot du 06/10 — la fiche fournisseur de FILED (a4_10, b7_02)
+
+- **Fiche « Fournisseur »** dans le dossier (`DossierVue.tsx → FicheFournisseur`),
+  entre les valeurs lues et les contrôles : nom et statut (À confirmer /
+  Actif / Bloqué / Refusé), SIREN et TVA, **identité** lue sur
+  `filed_fournisseurs.identite_verifiee_le / identite_source /
+  identite_verdict` (contrat de B7, NOTES-B7 § 9 b) : « Vérifiée le
+  JJ/MM/AAAA HH:MM par VIES / Sirene », « Attestée par une personne … »,
+  « Registre indisponible … », « Invalide : <motif> », « Non vérifiée ».
+- **Confirmer ce fournisseur** → `filed_confirmer_fournisseur(p_fournisseur,
+  p_motif)` (motif facultatif). Le bouton est **gris, avec la raison**, pour
+  la personne qui a déposé la pièce d'origine (`fournisseur.document_origine`
+  → `filed_documents.depose_par`, lu par `chargerDossier`) : même règle que
+  la porte (42501). Il est aussi posé sur le contrôle `fournisseur.a_confirmer`.
+- **Revérifier auprès de VIES / Sirene** → `identite_demander(client,
+  'vies', tva | 'sirene', siren, fournisseur, p_force = true)` ; VIES quand
+  le fournisseur a une TVA, Sirene sinon (comme le balayage de B7). Posé
+  aussi sur le contrôle `identite.registre`. L'écran dit « la réponse arrive
+  en une à deux minutes » et se relit seul (Realtime sur
+  `filed_fournisseurs` ajouté à l'écoute ; sans publication, au prochain
+  changement d'une table publiée).
+- **Attester l'identité** → `filed_attester_identite(p_fournisseur, p_motif)`
+  (motif ≥ 3 caractères), proposé quand l'identité n'est pas « valide ».
+- Après une action, le dossier ouvert **reste ouvert** même s'il change de
+  rang (une facture débloquée passait derrière les bloquées et l'écran
+  sautait sur une autre) — vrai aussi pour « Lever avec un motif ».
+- Exemple : dossier `R2026-000016` (Imprimerie Vidal, fictive), déposé par
+  Sofia, fournisseur à confirmer, identité confirmée par VIES.
+- **Relecture réelle** (06/10, 01 h 35–01 h 45 Z, compte gérant, Next local
+  sur la recette, `omega/recette-a3/relecture-fournisseur.mjs`) : dossier
+  `R2026-000004` → fiche « ORANGE SA · À confirmer », « Vérifiée … par
+  VIES », **« Confirmer » gris** (le gérant a déposé la pièce : la règle est
+  dite avant le clic), aucun refus en console. **« Revérifier » rejoué deux
+  fois** : `identite_demander` accepté, l'ouvrier `identite` a répondu en
+  moins de quatre minutes, la fiche est passée de « 01:39 » à « 01:43 »
+  (capture `reel-fournisseur-reverifie-1440.jpg`).
+- Note de conteneur : le Chromium de recette refusait la recette
+  (`ERR_CERT_AUTHORITY_INVALID`) — le magasin NSS de root était vide ; la CA
+  du mandataire y est ajoutée (`certutil -A … -t "C,,"`, pas de
+  contournement TLS). À refaire dans un conteneur neuf.
+- Validation : tsc ✓, eslint ✓, build ✓, recette aux cinq largeurs ✓
+  (103 contrôles, dont l'enchaînement « confirmer le fournisseur »).
+
+### Reste
+
+- **Confirmer en réel** : il faut une **autre personne** que le gérant
+  (gérant, admin ou valideur, pas `referent` s'il n'a pas ce rôle) avec son
+  mot de passe, pour confirmer ORANGE SA sur le banc. Demandé au coordinateur.
+- **Annuler ma demande** : toujours aucune demande saisie par le gérant sur
+  le banc (10 en attente au 06/10 01 h 45 Z, toutes `demandeur_type =
+  systeme`). Le code est en place depuis le lot 19 ; à rejouer dès qu'une
+  demande du gérant existe.
+- Publication Realtime de `filed_fournisseurs` (avec la demande 9).
+- À voir par A4 / le coordinateur, pas par l'écran : `fournisseur.a_confirmer`
+  porte « Lever avec un motif » comme tout contrôle ; si le déposant peut le
+  lever, il contourne la séparation de `filed_confirmer_fournisseur`.
 
 ## Bloqué / contourné
 
@@ -275,7 +332,8 @@ La pause de la veille est tombée après le dernier push : rien d'inachevé,
 `worker-a3` (03ba1c9) est entièrement dans `main`, omegaai.fr le sert.
 **Prochaine étape** : rejouer « Annuler ma demande » dès qu'une demande
 saisie par le gérant existe sur le banc (aucune au 06/10 01 h 50) ; brancher
-`filed_confirmer_fournisseur` quand la porte existera (demande 11). Je ne
+`filed_confirmer_fournisseur` quand la porte existera (demande 11) — **fait
+le 06/10, voir « Lot du 06/10 »**. Je ne
 touche pas à `components/espace/ecrans.ts` (B3/B5 y ajoutent leurs onglets).
 
 ## Demain

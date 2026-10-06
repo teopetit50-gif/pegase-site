@@ -90,8 +90,24 @@ for (const [nom, chemin] of ECRANS) {
   console.log('— /espace/filed : la citation se surligne dans la pièce');
   ok(await s.aller(base + '/espace/filed'), 'page chargée');
   await s.dormir(400);
+  const ref0 = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
+  ok(ref0 === 'R2026-000016', `le document ouvert d'office est le bloqué le plus récent (${ref0})`);
+  /* le fournisseur nouveau : déposé par Sofia, « vous » le confirmez ; identité vérifiée par VIES, « Revérifier » répond */
+  const fiche = await s.evaluer(`(() => { const t = document.querySelector('#esp-dossier').innerText; return { nouveau: /Fournisseur nouveau/.test(t), vies: /Vérifiée le \\d{2}\\/\\d{2}\\/\\d{4}.* par VIES/.test(t), confirmer: !![...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent) && !b.disabled), reverifier: !![...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Revérifier auprès de VIES/.test(b.textContent)) }; })()`);
+  ok(fiche.nouveau && fiche.vies && fiche.confirmer && fiche.reverifier, `fiche fournisseur : nouveau, « Vérifiée le … par VIES », « Confirmer » actif, « Revérifier » présent (${JSON.stringify(fiche)})`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-actions .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const dlgF = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, avis: /ne confirme pas ce fournisseur/.test(d.textContent) } : null; })()`);
+  ok(dlgF && /Confirmer le fournisseur/.test(dlgF.titre) && dlgF.avis, `dialogue « ${dlgF?.titre} », la règle du déposant est dite`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Confirmer le fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-dossier').innerText; return { fait: /est confirmé/.test(t), actif: /Actif/.test(t), plusBloque: !/Fournisseur nouveau/.test(t) }; })()`);
+  ok(apres.fait && apres.actif && apres.plusBloque, `confirmé : le fournisseur passe actif, l'avis tombe (${JSON.stringify(apres)})`);
+  await s.capturer(`${dossier}filed-fournisseur-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.esp-liste button, .esp-liste a, li button')].find(b => /R2026-000009/.test(b.textContent))?.click()`);
+  await s.dormir(500);
   const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
-  ok(ref === 'R2026-000009', `le document ouvert d'office est le bloqué (${ref})`);
+  ok(ref === 'R2026-000009', `le dossier R2026-000009 s'ouvre depuis la liste (${ref})`);
   const clic = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-valeur')].find(b => /IBAN/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
   ok(clic === true, 'clic sur la valeur « IBAN »');
   await s.dormir(400);

@@ -14,6 +14,13 @@
      filed_bloquer_fournisseur(p_fournisseur, p_bloquer bool, p_motif)
      filed_rattacher_commande(p_facture, p_commande, p_motif)
      filed_apparier_ligne(p_facture, p_facture_ligne, p_commande_ligne, p_motif)
+     filed_confirmer_fournisseur(p_fournisseur, p_motif) → int (a4_10 :
+       gérant, admin, valideur ; jamais le déposant de la pièce d'origine)
+     filed_attester_identite(p_fournisseur, p_motif) (a4_10 : une personne
+       atteste l'identité quand le registre se tait)
+     identite_demander(p_client, p_registre, p_identifiant, p_fournisseur,
+       p_force) → uuid (b7_02 : « revérifier » ; l'ouvrier identite répond
+       en une à deux minutes et remplit le verdict du fournisseur)
      filed_deposer_piece(p_client, p_document, p_nom_fichier, p_mime,
        p_octets, p_sha256, p_chemin, p_entite, p_source, p_expediteur) → jsonb,
        le fichier étant d'abord mis dans le bucket omega-clients sous
@@ -95,7 +102,17 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     pages: (pages?.data ?? []) as DossierFiled["pages"],
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
     appariements: (appar?.data ?? []) as DossierFiled["appariements"],
+    origine_deposee_par: await deposantOrigine(a),
   };
+}
+
+/* qui a déposé la pièce qui a fait naître le fournisseur (null si inconnu) */
+async function deposantOrigine(a: Apercu): Promise<string | null> {
+  const origine = a.fournisseur?.document_origine;
+  if (!origine) return null;
+  if (origine === a.document.id) return a.document.depose_par ?? null;
+  const { data } = await createClient().from("filed_documents").select("depose_par").eq("id", origine).maybeSingle();
+  return ((data as { depose_par?: string | null } | null)?.depose_par ?? null);
 }
 
 export async function chargerCommandes(): Promise<{ commandes: Commande[]; lignes: LigneCommande[] }> {
@@ -181,4 +198,8 @@ export const rattacherFournisseur = (p_facture: string, p_fournisseur: string, p
 export const proposerIban = (p_fournisseur: string, p_iban: string, p_motif: string) => rpc<string>("filed_proposer_iban", { p_fournisseur, p_iban, p_motif });
 export const bloquerFournisseur = (p_fournisseur: string, p_bloquer: boolean, p_motif: string) => rpc("filed_bloquer_fournisseur", { p_fournisseur, p_bloquer, p_motif });
 export const rattacherCommande = (p_facture: string, p_commande: string, p_motif: string) => rpc("filed_rattacher_commande", { p_facture, p_commande, p_motif });
+export const confirmerFournisseur = (p_fournisseur: string, p_motif: string) => rpc<number>("filed_confirmer_fournisseur", { p_fournisseur, p_motif: p_motif || null });
+export const attesterIdentite = (p_fournisseur: string, p_motif: string) => rpc("filed_attester_identite", { p_fournisseur, p_motif });
+export const demanderVerification = (p_client: string, p_registre: "sirene" | "vies", p_identifiant: string, p_fournisseur: string) =>
+  rpc<string>("identite_demander", { p_client, p_registre, p_identifiant, p_fournisseur, p_force: true });
 export const apparierLigne = (p_facture: string, p_facture_ligne: string, p_commande_ligne: string, p_motif: string) => rpc("filed_apparier_ligne", { p_facture, p_facture_ligne, p_commande_ligne, p_motif });
