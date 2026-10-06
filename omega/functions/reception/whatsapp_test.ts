@@ -240,20 +240,52 @@ Deno.test("image sans nom : nom par défaut image.jpg ; META_ACCESS_TOKEN absent
   assert(b.journal.lignes.some((l) => l.includes("META_ACCESS_TOKEN absent")));
 });
 
-Deno.test("média introuvable chez Graph : issue erreur, rien n'est déposé", async () => {
+Deno.test("média introuvable chez Graph : le message est déposé quand même, média en erreur (rien de perdu en silence)", async () => {
   const { portes, deps } = monter();
   const img = {
     from: "33612345678",
     id: "wamid.IMG2",
     timestamp: "1791194400",
     type: "image",
-    image: { id: "absent", mime_type: "image/jpeg" },
+    image: {
+      id: "absent",
+      mime_type: "image/jpeg",
+      caption: "Photo du chantier",
+    },
   };
-  const issues =
-    await (await traiterWhatsApp(await post(notification([img])), deps))
-      .traitement!;
-  assertEquals(issues[0].sortie, "erreur");
-  assertEquals(portes.receptions.length, 0);
+  await (await traiterWhatsApp(await post(notification([img])), deps))
+    .traitement!;
+  assertEquals(portes.receptions.length, 1);
+  assertEquals(portes.receptions[0].corps, "Photo du chantier");
+  assertEquals(portes.receptions[0].pieces.length, 0);
+  const media = portes.receptions[0].detail.media as Record<string, unknown>;
+  assertEquals(media.id, "absent");
+  assertMatch(String(media.erreur), /média inconnu absent/);
+});
+
+Deno.test("message vocal : rangé en pièce vocal.ogg, type audio/ogg sans paramètre, drapeau vocal", async () => {
+  const { portes, deps, graph } = monter();
+  graph!.medias.set("voc-1", {
+    url: "https://lookaside.test/voc-1",
+    mime_type: "audio/ogg; codecs=opus",
+    octets: new Uint8Array([79, 103, 103, 83]),
+  });
+  const vocal = {
+    from: "33612345678",
+    id: "wamid.VOC1",
+    timestamp: "1791194400",
+    type: "audio",
+    audio: { id: "voc-1", mime_type: "audio/ogg; codecs=opus", voice: true },
+  };
+  await (await traiterWhatsApp(await post(notification([vocal])), deps))
+    .traitement!;
+  const r = portes.receptions[0];
+  assertEquals([r.pieces[0].nom, r.pieces[0].mime, r.pieces[0].taille], [
+    "vocal.ogg",
+    "audio/ogg",
+    4,
+  ]);
+  assertEquals((r.detail.media as Record<string, unknown>).vocal, true);
 });
 
 Deno.test("statuts de remise (value.statuses) : ignorés ; boîte inconnue : ignorée", async () => {

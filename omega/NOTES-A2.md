@@ -763,6 +763,32 @@ comptable. **Décision : WebDAV**, servi par une fonction Edge `depot`.
   dépôt, dont seule l'empreinte est en base, révocable (`depot_fermer`) et renouvelable
   (`depot_renouveler`), jamais le mot de passe d'un compte Omega.
 
+## WhatsApp (06/10) : guide pour Teo, médias vérifiés
+
+- Le dépôt par lot (19ao) marche de bout en bout sur la recette (coordinateur, 06/10 17 h) :
+  PUT → pièce FILED source « connecteur », R2026-000007 ; dépôt fermé → 401.
+- `omega/GUIDE-WHATSAPP.md` couvre :
+  - le portefeuille Meta Business, l'app, le numéro (coexistence possible) ;
+  - les trois secrets (`META_APP_SECRET`, `META_ACCESS_TOKEN` d'un utilisateur système sans
+    expiration, `META_VERIFY_TOKEN`) ;
+  - le webhook vers `reception/whatsapp`, champ `messages` ;
+  - la ligne d'expéditeur `meta_whatsapp` (`phone_number_id`, module daliro) à créer par le
+    coordinateur ;
+  - le coût. Recevoir est gratuit (Meta) ; répondre dans la fenêtre de 24 h est gratuit selon
+    Meta, mais des sources tierces annoncent une facturation au-delà de 1 000 par mois depuis
+    le 1er octobre 2026, à vérifier ; un modèle « utility » coûte environ 0,03 $ en France.
+- **Réception des médias corrigée** :
+  - un média illisible ne fait plus perdre le message. Meta a déjà reçu son accusé 200 et ne
+    rejoue pas : deux essais, puis la réception est déposée sans le média, avec
+    `detail.media.erreur` et l'id du média (relisible 30 jours) ;
+  - le type MIME est rendu simple (`audio/ogg` au lieu de `audio/ogg; codecs=opus`) ;
+  - un message vocal est marqué `detail.media.vocal = true` et nommé `vocal.ogg`.
+  - 27 tests verts.
+- **messagerie-oauth** : toute erreur repart vers l'écran (celui de l'état s'il est connu, sinon
+  `MESSAGERIE_ECRAN`) avec `?erreur=` lien_invalide | lien_expire | annulee |
+  connexion_impossible | indisponible. Une page n'est montrée qu'en dernier recours, parce que
+  la passerelle sert le HTML en texte brut. 35 tests verts.
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le

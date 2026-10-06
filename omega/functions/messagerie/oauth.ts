@@ -22,6 +22,12 @@ export type DependancesOAuth = {
    * elle-même : https://omegaai.fr/api/messagerie en production (la route du site renvoie ici).
    */
   retourBase?: string;
+  /**
+   * Écran d'Omega où renvoyer une erreur quand le lien de connexion n'en désigne pas (lien
+   * illisible ou expiré). La passerelle de Supabase sert le HTML en texte brut : toute erreur
+   * repart donc vers un écran d'Omega (?erreur=<code>), la page n'est qu'un dernier recours.
+   */
+  ecranParDefaut?: string;
   journal: { erreur(message: string, detail?: Record<string, unknown>): void };
 };
 
@@ -64,6 +70,13 @@ function retourSur(url: string | null | undefined): string | null {
   }
 }
 
+/** L'écran, avec ?erreur=<code> : lien_invalide, lien_expire, annulee, connexion_impossible, indisponible. */
+function versEcran(ecran: string, code: string): Response {
+  const u = new URL(ecran);
+  u.searchParams.set("erreur", code);
+  return redirection(u.toString());
+}
+
 /** Segment d'URL → messagerie. Le segment reste « google » : c'est l'URI déclarée chez Google. */
 const ROUTES: Record<string, { nom: NomMessagerie; marque: string }> = {
   google: { nom: "gmail", marque: "Google" },
@@ -83,8 +96,22 @@ export function creerOAuth(
     const { nom, marque } = ROUTES[trouve[1]];
     const geste = trouve[2];
     const m = deps.messageries[nom];
+    const defaut = retourSur(deps.ecranParDefaut);
+    // Une erreur repart vers l'écran (celui de l'état s'il est connu), sinon vers une page.
+    const echec = (
+      ecran: string | null,
+      code: string,
+      statut: number,
+      titre: string,
+      texte: string,
+    ) => {
+      const cible = ecran ?? defaut;
+      return cible ? versEcran(cible, code) : page(statut, titre, texte);
+    };
     if (!m) {
-      return page(
+      return echec(
+        null,
+        "indisponible",
         503,
         "Connexion indisponible",
         `L'application ${marque} d'Omega n'est pas encore configurée.`,
@@ -100,7 +127,9 @@ export function creerOAuth(
     if (geste === "debut") {
       const etat = url.searchParams.get("etat") ?? "";
       if (!/^[A-Za-z0-9_-]{16,200}$/.test(etat)) {
-        return page(
+        return echec(
+          null,
+          "lien_invalide",
           400,
           "Lien invalide",
           "Relancez la connexion depuis Omega.",
@@ -109,7 +138,9 @@ export function creerOAuth(
       try {
         await verifier(etat);
       } catch {
-        return page(
+        return echec(
+          null,
+          "lien_expire",
           400,
           "Lien expiré",
           "Ce lien de connexion n'est plus valable. Relancez la connexion depuis Omega.",
@@ -120,25 +151,41 @@ export function creerOAuth(
 
     // geste === "retour"
     const etat = url.searchParams.get("state") ?? "";
+    const etatLisible = /^[A-Za-z0-9_-]{16,200}$/.test(etat);
+    // L'écran de l'état, s'il est encore valable (sans le consommer).
+    let ecran: string | null = null;
+    let etatValable = false;
+    if (etatLisible) {
+      try {
+        ecran = retourSur((await verifier(etat)).retour_ecran);
+        etatValable = true;
+      } catch {
+        etatValable = false;
+      }
+    }
     if (url.searchParams.get("error")) {
-      return page(
+      return echec(
+        ecran,
+        "annulee",
         200,
         "Connexion annulée",
         "Aucune messagerie n'a été connectée. Vous pouvez fermer cette page.",
       );
     }
     const code = url.searchParams.get("code") ?? "";
-    if (!code || !/^[A-Za-z0-9_-]{16,200}$/.test(etat)) {
-      return page(
+    if (!code || !etatLisible) {
+      return echec(
+        null,
+        "lien_invalide",
         400,
         "Retour invalide",
         "Relancez la connexion depuis Omega.",
       );
     }
-    try {
-      await verifier(etat);
-    } catch {
-      return page(
+    if (!etatValable) {
+      return echec(
+        null,
+        "lien_expire",
         400,
         "Lien expiré",
         "Ce lien de connexion n'est plus valable. Relancez la connexion depuis Omega.",
@@ -158,8 +205,8 @@ export function creerOAuth(
         portees: c.portees,
         curseur: p.curseur,
       });
-      const ecran = retourSur(r.retour_ecran);
-      return ecran ? redirection(ecran) : page(
+      const fin = retourSur(r.retour_ecran) ?? ecran;
+      return fin ? redirection(fin) : page(
         200,
         "Messagerie connectée",
         `${p.adresse} est connectée à Omega. Vous pouvez fermer cette page.`,
@@ -171,7 +218,9 @@ export function creerOAuth(
       if (renouvellement && m.revocationDistante) {
         await m.revoquer(renouvellement).catch(() => {});
       }
-      return page(
+      return echec(
+        ecran,
+        "connexion_impossible",
         502,
         "Connexion impossible",
         "La messagerie n'a pas pu être connectée. Réessayez dans un instant ; si cela persiste, prévenez Omega.",

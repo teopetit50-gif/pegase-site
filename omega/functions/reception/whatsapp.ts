@@ -89,6 +89,8 @@ export type MessageWhatsApp = {
     typeMime: string | null;
     nom: string | null;
     sha256: string | null;
+    /** Message vocal (audio enregistré dans WhatsApp), à distinguer d'un fichier audio joint. */
+    vocal: boolean;
   } | null;
   contexte: { wamid: string | null; de: string | null } | null;
 };
@@ -186,6 +188,7 @@ function lireContenu(
             typeMime: texte(charge, "mime_type"),
             nom: texte(charge, "filename"),
             sha256: texte(charge, "sha256"),
+            vocal: type === "audio" && charge.voice === true,
           }
           : null,
       };
@@ -307,6 +310,7 @@ export async function recevoirMessage(
 ): Promise<Issue> {
   const pieces: PieceADeposer[] = [];
   let mediaIgnore: string | null = null;
+  let mediaErreur: string | null = null;
   if (m.media) {
     if (!deps.graph) {
       mediaIgnore = m.media.id;
@@ -315,29 +319,39 @@ export async function recevoirMessage(
         media: m.media.id,
       });
     } else {
-      try {
-        const info = await deps.graph.media(m.media.id);
-        if (info) {
+      // Deux essais. Meta a déjà reçu son accusé 200 et ne rejouera pas : si le média reste
+      // illisible, le message est quand même déposé (texte, légende, expéditeur), avec l'id du
+      // média (valable 30 jours chez Meta) pour le relire plus tard. Rien n'est perdu en silence.
+      for (let essai = 1; essai <= 2 && pieces.length === 0; essai++) {
+        try {
+          const info = await deps.graph.media(m.media.id);
+          if (!info) {
+            mediaErreur = "média introuvable chez Meta";
+            break;
+          }
           const octets = await deps.graph.telecharger(info.url);
-          const typeMime = info.mime_type ?? m.media.typeMime ??
-            "application/octet-stream";
+          const typeMime = mimeSimple(
+            info.mime_type ?? m.media.typeMime ?? "application/octet-stream",
+          );
           pieces.push({
-            nom: m.media.nom ?? nomParDefaut(m.type, typeMime),
+            nom: m.media.nom ?? nomParDefaut(m.type, typeMime, m.media.vocal),
             typeMime,
             octets,
           });
+          mediaErreur = null;
+        } catch (e) {
+          mediaErreur = String((e as Error)?.message ?? e).slice(0, 200);
         }
-      } catch (e) {
-        deps.journal.erreur("média WhatsApp non téléchargé", {
-          wamid: m.wamid,
-          media: m.media.id,
-          erreur: String(e).slice(0, 200),
-        });
-        return {
-          identifiant: m.wamid,
-          sortie: "erreur",
-          erreur: `MEDIA_ILLISIBLE : ${m.media.id}`,
-        };
+      }
+      if (mediaErreur) {
+        deps.journal.erreur(
+          "média WhatsApp non téléchargé : message déposé sans lui",
+          {
+            wamid: m.wamid,
+            media: m.media.id,
+            erreur: mediaErreur,
+          },
+        );
       }
     }
   }
@@ -367,7 +381,9 @@ export async function recevoirMessage(
           ? {
             id: m.media.id,
             sha256: m.media.sha256,
+            vocal: m.media.vocal,
             ignore: mediaIgnore !== null,
+            erreur: mediaErreur,
           }
           : null,
         en_reponse_a: m.contexte?.wamid ?? null,
@@ -378,7 +394,13 @@ export async function recevoirMessage(
   );
 }
 
-function nomParDefaut(type: string, typeMime: string): string {
+/** « audio/ogg; codecs=opus » → « audio/ogg » : le type seul, comme le reste du socle. */
+function mimeSimple(typeMime: string): string {
+  return typeMime.split(";")[0].trim().toLowerCase() ||
+    "application/octet-stream";
+}
+
+function nomParDefaut(type: string, typeMime: string, vocal = false): string {
   const ext = typeMime.split("/")[1]?.split(";")[0] ?? "bin";
-  return `${type}.${ext === "jpeg" ? "jpg" : ext}`;
+  return `${vocal ? "vocal" : type}.${ext === "jpeg" ? "jpg" : ext}`;
 }

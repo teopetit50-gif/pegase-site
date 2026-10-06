@@ -29,6 +29,7 @@ const servir = creerOAuth({
   retourBase:
     Deno.env.get("MESSAGERIE_RETOUR_BASE")?.trim().replace(/\/+$/, "") ||
     undefined,
+  ecranParDefaut: Deno.env.get("MESSAGERIE_ECRAN")?.trim() || undefined,
   journal: {
     erreur: (m, d) =>
       console.error(`[messagerie-oauth] ${m}`, d ? JSON.stringify(d) : ""),

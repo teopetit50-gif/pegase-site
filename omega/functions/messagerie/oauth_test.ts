@@ -72,28 +72,55 @@ Deno.test("retour : code échangé, connexion enregistrée (jetons, adresse, cur
   );
 });
 
-Deno.test("retour : refus de l'utilisateur, code refusé (jeton jamais obtenu), enregistrement en panne (jeton révoqué)", async () => {
+Deno.test("retour en erreur : renvoi vers l'écran de l'état avec ?erreur= (refus, code refusé, enregistrement en panne : jeton révoqué)", async () => {
+  const ecran = (r: Response) => new URL(r.headers.get("location")!);
   const a = monter();
+  const refus = await a.get(`/google/retour?error=access_denied&state=${ETAT}`);
+  assertEquals(refus.status, 302);
   assertEquals(
-    (await a.get(`/google/retour?error=access_denied&state=${ETAT}`)).status,
-    200,
+    ecran(refus).origin + ecran(refus).pathname,
+    "https://omegaai.fr/espace/messagerie",
   );
+  assertEquals(ecran(refus).searchParams.get("erreur"), "annulee");
   const b = monter();
-  assertEquals(
-    (await b.get(`/google/retour?code=code-faux-0123456789xx&state=${ETAT}`))
-      .status,
-    502,
+  const faux = await b.get(
+    `/google/retour?code=code-faux-0123456789xx&state=${ETAT}`,
   );
+  assertEquals(ecran(faux).searchParams.get("erreur"), "connexion_impossible");
   assertEquals(b.g.revoques, []);
   const c = monter();
   c.portes.enregistrer = () => Promise.reject(new Error("porte en panne"));
   const r = await c.get(
     `/google/retour?code=code-valide-0123456789&state=${ETAT}`,
   );
-  assertEquals(r.status, 502);
+  assertEquals(ecran(r).searchParams.get("erreur"), "connexion_impossible");
   assertEquals(c.g.revoques, ["renouv-1"]);
-  const texte = await r.text();
-  assertEquals(texte.includes("renouv-1") || texte.includes("acces-1"), false);
+  const loc = r.headers.get("location")!;
+  assertEquals(loc.includes("renouv-1") || loc.includes("acces-1"), false);
+});
+
+Deno.test("état inconnu : écran par défaut s'il est réglé, sinon une page (dernier recours)", async () => {
+  const portes = new PortesDouble();
+  const avec = creerOAuth({
+    portes,
+    messageries: { gmail: new GmailDouble() },
+    base: BASE,
+    ecranParDefaut: "https://omegaai.fr/espace/messagerie",
+    journal: journalMuet,
+  });
+  const r = await avec(
+    new Request(`${BASE}/google/debut?etat=inconnu_0123456789`),
+  );
+  assertEquals(r.status, 302);
+  assertEquals(
+    new URL(r.headers.get("location")!).searchParams.get("erreur"),
+    "lien_expire",
+  );
+  const sans = monter();
+  assertEquals(
+    (await sans.get(`/google/debut?etat=inconnu_0123456789`)).status,
+    400,
+  );
 });
 
 Deno.test("sans application Google configurée : 503", async () => {
