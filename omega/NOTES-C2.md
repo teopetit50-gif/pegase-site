@@ -186,7 +186,7 @@ t3 = test_c2_03_moteur, t4 = test_c2_04_capacites ; R = recette de l'écran (ome
 | 37 | Le dépassement du plafond déclenche une alerte avant toute nouvelle commande. | tenue | `cashd_alerter_plafonds` (t4) ; point du matin |
 | 38 | Une commande au-delà du plafond est bloquée jusqu'à la décision d'un responsable. | tenue (porte) ; raccord au logiciel de commandes : contrat d'interface | `cashd_verifier_commande` → demande `cashd.commande_hors_plafond` (t4) |
 | 39 | Vos règles de communication et vos interdits sont repris dans chaque message. | tenue | formule, signature, interdits (t3) |
-| 40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | tenue | vue `cashd_delais_reglement.se_degrade` ; alerte au commercial et point du matin (c2_03) |
+| 40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | tenue | vue `cashd_delais_reglement.se_degrade` ; alerte au commercial et point du matin (c2_03) ; assertion `test_c2_04` (30 j de retard contre 5 d'habitude) |
 | 41 | Un compte se met en pause, et il n'y revient que sur votre décision. | tenue | t3 |
 | 42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | tenue (avec les pièces que CASHD détient) | `cashd_dossier(…, 'assurance_credit')` (t4) ; les PDF des factures restent dans le facturier |
 | 43 | Le dossier de recouvrement judiciaire est remis complet à qui vous désignez. | tenue | `cashd_remettre_dossier` : compte en recouvrement, relances coupées, envoi du récapitulatif par la file (t4) |

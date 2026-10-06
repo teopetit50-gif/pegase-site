@@ -109,6 +109,14 @@ begin
   -- ── Délai moyen de règlement, dégradation, prévision ──
   return next is((select d.factures_payees || '/' || d.delai_moyen_jours from public.cashd_delais_reglement d where d.compte_id = (p ->> 'mairie')::uuid), '10/35.0',
                  'Le délai moyen de règlement se mesure compte par compte (mairie : 35 jours sur dix factures)');
+  -- Un compte qui se dégrade : la mairie paie d'habitude 5 jours après l'échéance ; une facture en retard de 30 jours le signale.
+  perform tests.redevenir_admin();
+  insert into public.cashd_factures (client_id, entite_id, compte_id, nature, numero, date_emission, echeance, montant_ttc, statut, source)
+  values (v_client, (banc ->> 'entite')::uuid, (p ->> 'mairie')::uuid, 'facture', 'F-2026-RETARD', j - 60, j - 30, 100, 'ouverte', 'saisie');
+  return next ok((select d.se_degrade and d.retard_actuel_jours = 30 and d.retard_moyen_jours = 5 from public.cashd_delais_reglement d where d.compte_id = (p ->> 'mairie')::uuid)
+                 and tests.c2_plat((select x ->> 'texte' from jsonb_array_elements(private.cashd_point_lignes(v_client, j)) x where x ->> 'texte' like 'Mairie de Caluire se dégrade%' limit 1))
+                     like '%30 jours de retard aujourd''hui, contre 5 jours en moyenne%',
+                 'Un compte qui se dégrade est signalé (30 jours de retard contre 5 d''habitude) au point du matin');
   v_r := public.cashd_prevision(v_client);
   return next ok((v_r ->> 'a_30_jours') is not null and (v_r ->> 'a_60_jours')::numeric >= (v_r ->> 'a_30_jours')::numeric and (v_r ->> 'tenu_a_part')::numeric > 0,
                  format('Prévision d''encaissement : %s € à 30 jours, %s € à 60 jours, %s € tenus à part (litiges, recouvrement)', v_r ->> 'a_30_jours', v_r ->> 'a_60_jours', v_r ->> 'tenu_a_part'));
