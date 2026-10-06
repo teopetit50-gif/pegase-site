@@ -748,3 +748,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (0b1be57, _partage 7425991) déployée AVANT la migration ; `^test_b7_` 11/11. Le rattrapage a
   redemandé ORANGE à 14:08:21 Z → **valide**, verdict du fournisseur 90cc1d86 rétabli.
   **Coffre Tamila** : test 14 corrigé (a90cd97) → 64/64 ; `^test_b4_` 14/14.
+- 14 h 12 Z — **Lecteur v19** (coquille 2bf6c298, _partage idem) : pièces chiffrées Tamila lues
+  via le coffre (scaleway), sinon ignore chiffree_sans_coffre comme avant ; battement 14:12 Z sain.
+  **b6_09 posé** (4fbd941) mais **test_b6_05 meurt** : le socle refuse d'approuver sans
+  approbation de personne (garder_demande 23514) — voulu. Écran b6_09 retiré de main (fusion
+  locale annulée, rien poussé). Suite : **A5 écrit le socle 19af** (exception étroite dans
+  preparer_approbation : seul décideur + liste blanche daliro envoi.*), puis B6 b6_10 (la porte
+  insère une approbation au lieu de forcer le statut).
