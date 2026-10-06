@@ -879,3 +879,17 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   uid_ch/hmrc, retrait de l'ancienne contrainte posé à part) ; A2 autorisé à écrire 19aj_messageries
   (statut brouillon_depose) ; Gmail en régime Test, CASA = décision de Teo ; Microsoft 365 ensuite.
   À dire à Teo : frais de gestion d'avis de contravention à mettre dans les CGV des loueurs.
+- 17 h 20 Z — Poses : b5_16 + b5_07 (a05f77c, contrôle du dossier Lorani), a4_22 + a4_15 (30d3991, FEC
+  autoliquidation / devise / extourne), a4_23 + a4_16 (11c1f8b, recontrôle 3 voies), b1_08 + b1_11 (fdd8e5c,
+  groupe sur une page), socle 19ai compteurs facturation (731eb98), 19aj export complet (27d1ad9), 19ak
+  réceptions confidentielles par module (72bc763), b4_11 + test 20 (814adee), b3_15 v2 + b3_16 (3dd4b88).
+  **c4_01 (C4 7c8c520) REFUSÉ** : modeles_jeux_coherent (clé « reference » facultative) → C4.
+  Tests verts : b5_07, a4_22 ×3, b1_10/11, 57, b4_20, 44, 46, 51. Rouges (préparation des tests) :
+  a4_23_02/03 (filed_receptions.entite_id NOT NULL → A4), 56 (sha256 en double → A5), 58 (fournisseur
+  essai_a5 inconnu → A5), b3_16/17 (daf2 « direction » refusé → B3).
+  Fonctions : lecteur v25 (A1 f893452 : Lorani), tamila-purge v2 (fab4e01), export-complet v1 (27d1ad9).
+  Main f77a674. C1 : phase 2 finie (5e64be7, 13 écrans, 368/368), prévisualisation refusée par le quota ;
+  captures envoyées à Teo.
+  **Bloqué, pour Teo** : la sauvegarde vers Scaleway (A5). Le contrôle des permissions de la session A5 a
+  refusé un workflow qui envoie les dumps de la prod hors de GitHub. Il faut l'accord explicite de Teo.
+  Numéros : a4_24 = CHECK uid_ch / hmrc + comptes système ; 19al = messageries d'A2. B7 : ouvrier taux BCE.
