@@ -338,6 +338,48 @@ Deno.test("canal whatsapp ou expéditeur absent : échec définitif de l'envoi, 
   assertEquals(portes.finis.get(12)!.echec, true);
 });
 
+Deno.test("santé : donnees_sante=true vers un fournisseur non HDS → échec définitif SANTE_FOURNISSEUR_NON_HDS, rien n'est envoyé ; HDS → passe ; clés absentes → no-op", async () => {
+  const a = monter();
+  a.portes.envois.set(
+    ENVOI,
+    envoiExemple({ donnees_sante: true, fournisseur_hds: false }),
+  );
+  a.portes.travaux = [travailExemple(30, "envois.brevo", ENVOI)];
+  const bilan = await executerPassage(a.deps);
+  assertEquals(bilan.echecs, 1);
+  assertEquals(a.brevo.emails.length, 0);
+  assertEquals(a.portes.envoisEchoues.get(ENVOI)!.definitif, true);
+  assertMatch(
+    a.portes.envoisEchoues.get(ENVOI)!.erreur,
+    /^SANTE_FOURNISSEUR_NON_HDS/,
+  );
+  assertEquals(a.portes.finis.get(30)!.echec, true);
+
+  const b = monter();
+  b.portes.envois.set(
+    ENVOI,
+    envoiExemple({ donnees_sante: true, fournisseur_hds: null }),
+  );
+  b.portes.travaux = [travailExemple(31, "envois.brevo", ENVOI)];
+  await executerPassage(b.deps);
+  assertEquals(b.brevo.emails.length, 0);
+
+  const c = monter();
+  c.portes.envois.set(
+    ENVOI,
+    envoiExemple({ donnees_sante: true, fournisseur_hds: true }),
+  );
+  c.portes.travaux = [travailExemple(32, "envois.brevo", ENVOI)];
+  await executerPassage(c.deps);
+  assertEquals(c.brevo.emails.length, 1);
+
+  const d = monter();
+  d.portes.envois.set(ENVOI, envoiExemple());
+  d.portes.travaux = [travailExemple(33, "envois.brevo", ENVOI)];
+  await executerPassage(d.deps);
+  assertEquals(d.brevo.emails.length, 1);
+});
+
 Deno.test("Brevo répond 400 : échec définitif de l'envoi ; 503 : reporté", async () => {
   const a = monter();
   a.brevo.erreur = new ErreurBrevo(

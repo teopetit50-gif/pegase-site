@@ -98,7 +98,7 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
   Cron `omega-expediteur` posé, inactif tant que la clé de service n'est pas au coffre.
   La boîte `site:omegaai.fr` est portée par `clients.config.boite_formulaire`
   (client du banc, module reput).
-- **Tests** : 60 tests Deno verts sur doubles (expéditeur 23, webhook 11, réception 26).
+- **Tests** : 61 tests Deno verts sur doubles (expéditeur 24, webhook 11, réception 26).
   Chaque dossier : `deno test --allow-env` (et `deno lint`, `deno check index.ts`).
   Cas couverts : passage à vide avec battement, e-mail et SMS remis, pièces, refus du
   socle, clé absente, erreurs 400 / 503 Brevo, `confirmer_envoi` en panne, idempotence
@@ -108,6 +108,9 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 ## Bloqué
 
 - ~~Push GitHub~~ : poussé, voir la fin de ce fichier.
+- **Migration santé** (trou n° 7) : demandée à A2, non écrite, voir « Avis A2 » plus
+  bas : hors brief (« aucune migration SQL ») et sans accès aux sources du socle.
+  Spécification complète fournie pour qui a les sources.
 - **Secrets** : `BREVO_API_KEY`, `BREVO_WEBHOOK_JETON`, `FORMULAIRE_SECRET`,
   `META_*` sont entre les mains de Teo (liste transmise par le coordinateur). Tant
   qu'ils manquent, `webhooks-brevo` et `reception` répondent 503, l'expéditeur
@@ -316,8 +319,64 @@ lui arriverait quand même vers un fournisseur non HDS. Une vérification, un te
 
 **Lot socle nécessaire : oui, petit** : deux colonnes (`fournisseurs_envoi.hds`,
 `canaux_envoi.sante_autorise`), le verrou dans la préparation et dans
-`confier_envoi`, et les deux clés dans la réponse de `commencer_envoi`. Côté A2, une
-vérification et un test une fois les clés exposées. Point de vigilance pour B3 :
+`confier_envoi`, et les deux clés dans la réponse de `commencer_envoi`.
+
+**Côté A2, fait le 06/10** : la vérification ceinture et bretelles est dans
+`expediteur/passage.ts` (`SANTE_FOURNISSEUR_NON_HDS`, échec définitif, rien n'est
+envoyé) avec son test ; no-op tant que `commencer_envoi` n'expose pas
+`donnees_sante` (clé absente → comportement inchangé ; `donnees_sante = true` et
+`fournisseur_hds` absent ou faux → refus).
+
+**Migration du lot : demandée à A2 par le coordinateur le 06/10, NON écrite par A2.**
+Deux raisons : le brief de Teo pose « aucune migration SQL » et un périmètre limité à
+`omega/functions/` ; et A2 n'a pas la source des fonctions du socle à modifier
+(préparation, `confier_envoi`, `commencer_envoi` vivent dans la base, qu'A2 ne lit
+pas). Une migration « corps complet » écrite à l'aveugle serait fausse. Décision à
+prendre par Teo ou le coordinateur : l'écrire côté socle (A5 ou coordinateur, qui ont
+les sources) à partir de la spécification ci-dessous, ou lever explicitement
+l'interdiction pour A2 **et** lui donner les sources.
+
+### Spécification de la migration santé (à poser par qui a les sources)
+
+```sql
+-- Colonnes (idempotent, pas de DROP)
+alter table private.fournisseurs_envoi
+  add column if not exists hds boolean not null default false;
+alter table public.canaux_envoi            -- ou private., selon où vit la table
+  add column if not exists sante_autorise boolean not null default false;
+update public.canaux_envoi set sante_autorise = true where code in ('email', 'lre');
+-- Aucun fournisseur hds = true tant que Teo n'a pas fourni la preuve de certification.
+```
+
+Verrou `SANTE_FOURNISSEUR`, à poser à deux endroits, même test :
+
+```
+si envoi.donnees_sante
+   et ( fournisseur choisi n'a pas hds
+        ou canal de l'envoi n'a pas sante_autorise )
+alors statut := 'bloque', verrou := 'SANTE_FOURNISSEUR',
+      motif := 'fournisseur <x> non HDS' | 'canal <c> interdit pour un contenu de santé',
+      événement envoi.bloque ; jamais 'differe', jamais de repli vers un autre fournisseur.
+```
+
+1. dans la préparation (`creer_envoi` / passage à `pret`, avec les autres verrous) ;
+2. dans `private.confier_envoi`, juste avant `deposer_travail` (le fournisseur a pu
+   changer entre les deux, et `manuel` reste le seul chemin tant qu'aucun HDS n'est
+   branché : `manuel` doit donc avoir `hds = true` si l'on veut que les envois de
+   santé passent en mode manuel, ce qui est cohérent : un humain les remet).
+
+`commencer_envoi` : ajouter `"donnees_sante": envois.donnees_sante` et
+`"fournisseur_hds": fournisseurs_envoi.hds` au jsonb rendu (mode essai compris :
+en mode essai, un envoi de santé part vers l'adresse d'essai par le fournisseur
+d'essai, donc `fournisseur_hds` vaut celui de `envois_essai_fournisseur`, ce qui le
+bloque chez l'ouvrier tant que brevo n'est pas HDS : voulu).
+
+Tests pgTAP attendus : (a) envoi `donnees_sante = true`, module santé, fournisseur
+`brevo` → `bloque`, verrou `SANTE_FOURNISSEUR`, aucun travail déposé ; (b) même envoi,
+fournisseur `manuel` (`hds = true`) → `pret`, travail déposé ; (c) envoi santé canal
+`sms` → `bloque` quel que soit le fournisseur ; (d) envoi `donnees_sante = false`
+vers `brevo` → inchangé ; (e) `commencer_envoi` rend les deux clés.
+Nouvelles fonctions privées : `revoke execute … from public` (lot 19z). Point de vigilance pour B3 :
 la réception (`receptions`) porte aussi des données de santé quand un patient
 répond ; même logique, le bucket `omega-clients` et la base doivent être HDS pour
 ces clients, ce qui est une question d'hébergement Supabase, pas d'ouvrier.

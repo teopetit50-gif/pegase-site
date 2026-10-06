@@ -333,6 +333,19 @@ async function remettre(
   if (!envoi.expediteur?.identite) {
     throw new ErreurRemise("EXPEDITEUR_ABSENT", envoi.envoi, true);
   }
+  // Ceinture et bretelles santé : la règle vit dans le socle (verrou SANTE_FOURNISSEUR
+  // avant confier_envoi) ; si un envoi de santé arrive quand même vers un fournisseur
+  // non HDS, on refuse définitivement, jamais de repli. No-op tant que commencer_envoi
+  // n'expose pas donnees_sante.
+  if (envoi.donnees_sante === true && envoi.fournisseur_hds !== true) {
+    throw new ErreurRemise(
+      "SANTE_FOURNISSEUR_NON_HDS",
+      `envoi de santé vers ${envoi.fournisseur} (hds = ${
+        String(envoi.fournisseur_hds ?? null)
+      })`,
+      true,
+    );
+  }
 
   const cleApi = await cleFournisseur(envoi, deps);
   const brevo = deps.brevoPour(cleApi);

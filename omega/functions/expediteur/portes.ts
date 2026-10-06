@@ -60,6 +60,9 @@ export type EnvoiAEnvoyer = {
   parametres_modele: Record<string, unknown> | null;
   repondre_a: string | null;
   transactionnel: boolean;
+  /** Clés du lot santé (trou commun n° 7), absentes tant que le socle ne les expose pas. */
+  donnees_sante?: boolean | null;
+  fournisseur_hds?: boolean | null;
   /** = id de l'envoi : clé d'idempotence côté fournisseur. */
   cle: string;
   objet: { type: string | null; id: string | null } | null;
