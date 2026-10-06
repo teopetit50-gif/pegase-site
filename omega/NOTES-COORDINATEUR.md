@@ -228,7 +228,13 @@ fonctions Edge se déploient de même en coquille sur un SHA (voir lecteur).
   migration b1_03_proposer_nom_unique (déjà posée : varelo_b1_03). Les deux
   fichiers de la barre d'onglets restent ceux de main (huit onglets). Fusion
   faite avec `-X theirs` puis `git checkout HEAD -- components/espace/…`.
-  **B1, B3, B4, B5, B7 terminés** (6/10, 01 h 10 Z). Restent B2 et B6.
+  **B1, B3, B4, B5, B7 terminés** (6/10, 01 h 10 Z).
+- worker-b2 (0643423) et worker-b6 (a48481b) fusionnés de même (notes de fin,
+  b6_05_import_a_ranger déjà posée). **Les sept ouvriers de la vague 2 ont
+  terminé** (6/10, 01 h 20 Z). Trou n° 7 (santé des envois) : avis d'A2 retenu
+  (NOTES-A2 fa62599 : `fournisseurs_envoi.hds`, `canaux_envoi.sante_autorise`,
+  verrou SANTE_FOURNISSEUR dans la préparation et confier_envoi, clés rendues
+  par commencer_envoi) ; lot socle confié à A2, à poser depuis le dépôt.
 
 ## Branches des ouvriers
 
