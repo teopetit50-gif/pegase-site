@@ -15,6 +15,10 @@
      loc_publier_bareme(p_libelle, p_date_effet, p_lignes jsonb) → uuid
      loc_retirer_bareme(p_bareme, p_motif) → void
      loc_anonymiser_locataire(p_locataire, p_motif) → jsonb
+     loc_enregistrer_avis(p_valeurs jsonb) → jsonb (migration b2_03)
+     loc_rattacher_avis(p_avis, p_contrat) → jsonb
+     loc_designer_conducteur(p_avis, p_designation jsonb, p_mode, p_reference) → jsonb
+     loc_classer_avis(p_avis, p_motif) → jsonb
    Deux exceptions, que le socle ouvre par une politique RLS au gérant
    seul : loc_reglages (INSERT/UPDATE) et loc_agences (INSERT/UPDATE).
    Signatures lues dans omega/SOCLE-EXTRAITS-TAVARO.sql ; si la base
@@ -23,7 +27,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { assemblerDossiers } from "./exemples";
-import type { Agence, Amendement, Avoir, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
+import type { Agence, Amendement, AvisContravention, Avoir, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -54,6 +58,8 @@ export type Monde = {
   lignesBareme: LigneBareme[];
   reglages: Reglages | null;
   entites: { id: string; nom: string }[];
+  /* les avis de contravention (b2_03) : vide sans erreur tant que la migration n'est pas posée */
+  avis: AvisContravention[];
 };
 
 /* Tout le parking en une passe : les tables sont petites par client, et la RLS
@@ -69,6 +75,7 @@ export async function chargerMonde(): Promise<Monde> {
     supabase.from("loc_reglages").select("tolerance_retard_min, echeance_pro_jours, tva_sur_debits, emetteur").limit(1),
     supabase.from("entites").select("id, nom"),
   ]);
+  const avisLus = await supabase.from("loc_avis_contravention").select("*").order("echeance_le").limit(500);
   if (contrats.error) throw new ErreurPorte(message(contrats.error));
   const liste = (contrats.data ?? []) as Contrat[];
   const ids = liste.map((c) => c.id);
@@ -124,6 +131,7 @@ export async function chargerMonde(): Promise<Monde> {
     lignesBareme: (lignesBareme.data ?? []) as LigneBareme[],
     reglages: ((reglages.data ?? [])[0] as Reglages | undefined) ?? null,
     entites: ents,
+    avis: avisLus.error ? [] : ((avisLus.data ?? []) as AvisContravention[]),
   };
 }
 
@@ -144,6 +152,11 @@ export const demanderAvoir = (p_facture: string, p_motif: string, p_montant_ttc:
 export const relancerFacture = (p_facture: string) => rpc<Record<string, unknown>>("loc_relancer_facture", { p_facture });
 export const publierBareme = (p_libelle: string, p_date_effet: string, p_lignes: Record<string, unknown>[]) => rpc<string>("loc_publier_bareme", { p_libelle, p_date_effet, p_lignes });
 export const retirerBareme = (p_bareme: string, p_motif: string) => rpc("loc_retirer_bareme", { p_bareme, p_motif });
+export const enregistrerAvis = (p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_enregistrer_avis", { p_valeurs });
+export const rattacherAvis = (p_avis: string, p_contrat: string) => rpc<Record<string, unknown>>("loc_rattacher_avis", { p_avis, p_contrat });
+export const designerConducteur = (p_avis: string, p_designation: Record<string, unknown>, p_mode: string, p_reference: string | null) =>
+  rpc<Record<string, unknown>>("loc_designer_conducteur", { p_avis, p_designation, p_mode, p_reference });
+export const classerAvis = (p_avis: string, p_motif: string) => rpc<Record<string, unknown>>("loc_classer_avis", { p_avis, p_motif });
 export const anonymiserLocataire = (p_locataire: string) => rpc<Record<string, unknown>>("loc_anonymiser_locataire", { p_locataire, p_motif: "demande" });
 
 /* Les réglages du module : la seule écriture directe, ouverte par la RLS au gérant. */

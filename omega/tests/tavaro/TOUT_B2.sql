@@ -1064,7 +1064,7 @@ begin
   -- Le collaborateur ne désigne pas : c'est un acte du représentant légal.
   return next throws_ok(format('select public.loc_designer_conducteur(%L::uuid, %L::jsonb, %L)', v_avis, v_personne, 'antai_en_ligne'),
                         '42501', null, 'Le collaborateur ne désigne pas le conducteur');
-  return next throws_ok(format('select public.loc_classer_avis(%L::uuid, %L)', v_parc, 'Véhicule au parc : l''agence paie.'),
+  return next throws_ok(format('select public.loc_classer_avis(%L::uuid, %L)', v_parc, 'Usurpation de plaque : requête en exonération.'),
                         '42501', null, 'Le collaborateur ne classe pas un avis');
   -- Une écriture directe dans la table est refusée.
   return next throws_ok(format('update public.loc_avis_contravention set statut = %L where id = %L', 'classe', v_avis), '42501', null,
@@ -1097,7 +1097,7 @@ begin
   -- Le gérant classe l'avis du parc, motif obligatoire.
   perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
   return next throws_ok(format('select public.loc_classer_avis(%L::uuid, %L)', v_parc, 'court'), '22023', null, 'Un classement sans vrai motif est refusé');
-  r := public.loc_classer_avis(v_parc, 'Véhicule au parc ce jour-là : l''agence paie l''avis.');
+  r := public.loc_classer_avis(v_parc, 'Usurpation de plaque : requête en exonération envoyée avec la plainte.');
   return next is(r ->> 'statut', 'classe', 'La direction classe l''avis avec son motif');
 
   -- Un avis reçu tard (envoyé il y a 43 jours) : l'alerte J-3 part dès la saisie, puis « dépassé » au passage du cron.

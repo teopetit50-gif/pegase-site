@@ -134,3 +134,16 @@ Sources :
 - Le marché : [Shiftor (G2)](https://www.g2.com/sellers/shiftor) ; [Boboloc](https://apps.apple.com/fr/app/boboloc-contrat-de-location/id6447763912) ; [Kolonell, modules attendus d'un logiciel de location de véhicules](https://kolonell.com/fr/blog/logiciel-location-vehicules-utilitaires-marseille-2026).
 
 À vérifier par Teo ou un juriste avant la mise en vente : la réforme du délai de désignation (l'article de presse parle d'un allongement) et le texte en vigueur au jour de la vente ; Tavaro garde l'échéance comme un **réglage** (`loc_reglages`), 45 jours par défaut.
+
+### Manque n° 1 — avis de contravention : état au 06/10, 15 h 30 Z
+
+- **Base** (8fd4e11 puis retouches de texte) : `omega/modules/tavaro/migrations/b2_03_avis_contravention.sql`. La table `loc_avis_contravention` est lisible sous RLS par agence ; on n'y écrit jamais directement. Quatre portes : `loc_enregistrer_avis`, `loc_rattacher_avis`, `loc_designer_conducteur` (direction et valideurs), `loc_classer_avis` (direction seule). Le cron `tavaro-avis` tourne à 6 h 05 UTC. Joué sur un Postgres 16 local contre une souche du socle (hors dépôt) : la migration passe, se rejoue, et le scénario complet passe. **Test 12 à jouer sur la recette** par le coordinateur.
+- **Correction de fond, en cours de route** : une personne morale qui paie l'avis sans désigner encourt quand même l'amende de non-désignation. Le classement sert donc à la contestation (usurpation de plaque, vol, véhicule cédé). Un salarié qui conduisait se désigne comme une personne : c'est possible sans contrat.
+- **Écran** : `components/espace/tavaro/AvisVue.tsx`, une carte sous la liste des contrats.
+  - La liste « À traiter » est triée par échéance, avec une pastille J-n (rouge à 3 jours, ambre à 10) ; la liste « Traités » suit.
+  - On enregistre un avis : le jour et l'heure se saisissent séparément (heure sur 24 h, sans contrôle natif en anglais).
+  - On le rattache à un contrat : ceux de la même plaque viennent en premier.
+  - On désigne : les champs sont préremplis depuis le locataire, et un locataire professionnel se désigne comme société.
+  - On classe, avec un motif.
+  - Dans l'exemple, cinq avis ; le même rapprochement est joué en mémoire. tsc, eslint et build verts. `recette-tavaro.mjs` passe tout (65 contrôles, dont l'enchaînement saisir → rapproché → désigner). axe : 0 écart à 390 et 1440 px, sur l'écran comme dans le dialogue de désignation.
+- **Ensuite** : les frais de gestion d'un avis refacturés au locataire (une ligne du barème, la facture validée) ; la lecture de l'avis par le lecteur de pièces (`source = 'lecture'`, porte privée déjà prête) ; l'effacement de `designation` à l'anonymisation (à trancher avec le coordinateur) ; la section « avis à désigner » dans le point du matin (gabarit du socle).

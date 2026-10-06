@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, dans, ilYa } from "../exemples/socle";
-import type { Agence, Amendement, Avoir, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import type { Agence, Amendement, AvisContravention, Avoir, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const u = (p: string, n: number) => `00000000-0000-4000-8000-0000000${p}${n.toString(16).padStart(3, "0")}`;
@@ -303,3 +303,32 @@ export const DOSSIERS_EXEMPLE: Dossier[] = assemblerDossiers(CONTRATS_EXEMPLE, {
   propositions: PROPOSITIONS_EXEMPLE, lignes: LIGNES_EXEMPLE, factures: FACTURES_EXEMPLE, lignesFactures: LIGNES_FACTURES_EXEMPLE,
   avoirs: AVOIRS_EXEMPLE, demandes: DEMANDES_EXEMPLE, journal: JOURNAL_EXEMPLE,
 });
+
+/* ——— les avis de contravention (b2_03) : un à désigner bientôt (société), un à désigner, un à rapprocher en urgence,
+   un désigné, un classé. L'échéance est la date d'envoi plus 45 jours, comme la base la calcule. ——— */
+const jourIso = (iso: string) => iso.slice(0, 10);
+const plus = (jour: string, n: number) => new Date(Date.parse(jour + "T12:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
+const avis = (n: number, o: Partial<AvisContravention> & Pick<AvisContravention, "numero_avis" | "immatriculation" | "infraction_le" | "avis_envoye_le" | "statut">): AvisContravention => ({
+  id: u("pv", n), client_id: C, entite_id: null, vehicule_id: null, lieu: null, nature: null, montant_eur: null, recu_le: o.avis_envoye_le,
+  echeance_le: plus(o.avis_envoye_le, 45), contrat_id: null, locataire_id: null, rapprochement: null, candidats: 0, designation: null,
+  mode_designation: null, reference_designation: null, designe_le: null, designe_par: null, hors_delai: null, motif_classement: null,
+  classe_le: null, classe_par: null, source: "saisie", cree_par: SOFIA, cree_le: o.avis_envoye_le + "T09:00:00Z", ...o,
+});
+export const AVIS_EXEMPLE: AvisContravention[] = [
+  avis(1, { numero_avis: "2026 0819 4471 02", immatriculation: VEHICULES_EXEMPLE[2].immatriculation, infraction_le: ilYa(48, 11), avis_envoye_le: jourIso(ilYa(40)), recu_le: jourIso(ilYa(37)),
+    lieu: "A48, Voreppe", nature: "Excès de vitesse inférieur à 20 km/h (limite 110)", montant_eur: 135, statut: "a_designer", entite_id: GRENOBLE,
+    vehicule_id: VEHICULES_EXEMPLE[2].id, contrat_id: u("co", 6), locataire_id: LOCATAIRES_EXEMPLE[5].id, rapprochement: "auto", candidats: 1 }),
+  avis(2, { numero_avis: "2026 0917 1023 88", immatriculation: VEHICULES_EXEMPLE[5].immatriculation, infraction_le: ilYa(20, 17), avis_envoye_le: jourIso(ilYa(12)), recu_le: jourIso(ilYa(9)),
+    lieu: "Lyon 3e, cours Gambetta", nature: "Franchissement de feu rouge", montant_eur: 135, statut: "a_designer", entite_id: LYON,
+    vehicule_id: VEHICULES_EXEMPLE[5].id, contrat_id: u("co", 5), locataire_id: LOCATAIRES_EXEMPLE[6].id, rapprochement: "auto", candidats: 1 }),
+  avis(3, { numero_avis: "2026 0822 5530 17", immatriculation: VEHICULES_EXEMPLE[3].immatriculation, infraction_le: ilYa(46, 8), avis_envoye_le: jourIso(ilYa(43)), recu_le: jourIso(ilYa(3)),
+    lieu: "Villeurbanne, boulevard du 11-Novembre", nature: "Stationnement gênant", montant_eur: 35, statut: "a_rapprocher", entite_id: LYON, vehicule_id: VEHICULES_EXEMPLE[3].id }),
+  avis(4, { numero_avis: "2026 0924 0310 45", immatriculation: VEHICULES_EXEMPLE[3].immatriculation, infraction_le: ilYa(14, 10), avis_envoye_le: jourIso(ilYa(9)), recu_le: jourIso(ilYa(6)),
+    lieu: "A43, Saint-Quentin-Fallavier", nature: "Excès de vitesse inférieur à 20 km/h (limite 90)", montant_eur: 68, statut: "designe", entite_id: LYON,
+    vehicule_id: VEHICULES_EXEMPLE[3].id, contrat_id: u("co", 4), locataire_id: LOCATAIRES_EXEMPLE[4].id, rapprochement: "auto", candidats: 1,
+    designation: { type: "personne", nom: "Haddad", prenom: "Samir", date_naissance: "1979-11-04", lieu_naissance: "Marseille", adresse: "45 avenue Berthelot, 69007 Lyon", permis_numero: "790469200123" },
+    mode_designation: "antai_en_ligne", reference_designation: "DES-2026-118842", designe_le: ilYa(2, 10), designe_par: EXEMPLE_MOI, hors_delai: false }),
+  avis(5, { numero_avis: "2026 0801 7712 30", immatriculation: VEHICULES_EXEMPLE[1].immatriculation, infraction_le: ilYa(60, 7), avis_envoye_le: jourIso(ilYa(55)), recu_le: jourIso(ilYa(50)),
+    lieu: "Grenoble, rocade sud", nature: "Excès de vitesse inférieur à 20 km/h (limite 90)", montant_eur: 68, statut: "classe", entite_id: GRENOBLE, vehicule_id: VEHICULES_EXEMPLE[1].id,
+    motif_classement: "Usurpation de plaque : la photo du radar montre une autre voiture, la Peugeot était au parc. Requête en exonération envoyée à l'ANTAI avec le dépôt de plainte.", classe_le: ilYa(48, 15), classe_par: CLAIRE }),
+];

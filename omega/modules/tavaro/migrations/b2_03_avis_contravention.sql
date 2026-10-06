@@ -16,8 +16,9 @@
 --   · public.loc_rattacher_avis(avis, contrat) : le rapprochement à la main (plusieurs contrats, plaque mal lue) ;
 --   · public.loc_designer_conducteur(avis, designation, mode, reference) : la désignation consignée (personne ou
 --     société locataire), par la direction ou un valideur ; journal tavaro.conducteur_designe (sans l'identité) ;
---   · public.loc_classer_avis(avis, motif) : classer sans désignation (l'agence paie, vol déclaré, avis contesté),
---     direction seule ; journal tavaro.avis_classe ;
+--   · public.loc_classer_avis(avis, motif) : classer sans désignation (usurpation de plaque, vol déclaré, véhicule cédé :
+--     requête en exonération), direction seule ; journal tavaro.avis_classe. Payer l'avis sans désigner n'éteint pas
+--     l'amende de non-désignation d'une personne morale : un salarié qui conduisait se désigne comme une personne ;
 --   · private.loc_surveiller_avis(maintenant) + cron tavaro-avis (6 h 05 UTC) : alertes à J-10, J-3 et au dépassement.
 -- Les frais de gestion d'un avis refacturés au locataire (une ligne du barème, une facture validée) viendront ensuite.
 
@@ -541,7 +542,7 @@ begin
     raise exception 'Cet avis est déjà traité (%).', a.statut using errcode = '23514';
   end if;
   if char_length(coalesce(btrim(p_motif), '')) < 10 then
-    raise exception 'Un classement a un motif (au moins dix caractères) : l''agence paie, vol déclaré, avis contesté…' using errcode = '22023';
+    raise exception 'Un classement a un motif (au moins dix caractères) : usurpation de plaque, vol déclaré, véhicule cédé…' using errcode = '22023';
   end if;
   update public.loc_avis_contravention
      set statut = 'classe', motif_classement = left(btrim(p_motif), 500), classe_le = now(), classe_par = (select auth.uid())
