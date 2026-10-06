@@ -35,6 +35,8 @@ comment on column public.filed_fournisseurs.identite_source is 'Qui a vérifié 
 comment on column public.filed_fournisseurs.identite_verdict is 'Le verdict : {"resultat": valide | invalide | indisponible, "identifiant": …, "registre": …, "preuve": {…}}.';
 
 -- Une réponse « indisponible » ne vaut que deux heures : l'ouvrier B7 redemande ensuite (remplace la version du lot 4d).
+-- Texte aligné le 06/10 sur b7_05_recente (B7, worker-b7 dbd308f, posé sur la recette) : un « indisponible » (doute
+-- compris) est ignoré dès qu'une réponse valide ou invalide de moins de p_jours existe. Ne pas reposer l'ancien texte.
 create or replace function private.filed_verification_recente(p_client uuid, p_registre text, p_identifiant text, p_jours int default 90)
 returns public.filed_verifications_tiers
 language sql stable set search_path to '' as $$
@@ -42,7 +44,12 @@ language sql stable set search_path to '' as $$
   where v.client_id = p_client and v.registre = p_registre
     and v.identifiant = upper(regexp_replace(coalesce(p_identifiant, ''), '[^A-Za-z0-9]', '', 'g'))
     and v.repondu_le is not null and v.repondu_le >= now() - make_interval(days => p_jours)
-    and (v.resultat <> 'indisponible' or v.repondu_le >= now() - interval '2 hours')
+    and (v.resultat <> 'indisponible'
+         or (v.repondu_le >= now() - interval '2 hours'
+             and not exists (select 1 from public.filed_verifications_tiers w
+                              where w.client_id = v.client_id and w.registre = v.registre and w.identifiant = v.identifiant
+                                and w.resultat in ('valide', 'invalide')
+                                and w.repondu_le >= now() - make_interval(days => p_jours))))
   order by v.repondu_le desc limit 1
 $$;
 

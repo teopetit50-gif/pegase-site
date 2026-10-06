@@ -135,6 +135,8 @@ litige, export à date fixe), `a4_03_identite_tva.sql`, `a4_04_structure.sql`.
   de « aucun SIREN ». Champs du lecteur : `omega/CHAMPS-LECTURE.md` (worker-a1).
 - `private.filed_verification_recente` : une réponse « indisponible » ne vaut que deux heures
   (demande de B7), les autres 90 jours.
+  Depuis b7_05 (B7, 06/10, accordé par le coordinateur) : un « indisponible » est ignoré dès qu'une réponse valide
+  ou invalide de moins de p_jours existe. Texte reporté dans a4_10 ; toute réécriture doit garder cette condition.
 - Verdict externe : l'ouvrier B7 passe par `public.filed_repondre_verification` (service_role) ;
   le verdict se pose sur `filed_fournisseurs.identite_*` et les factures sont recontrôlées.
   `identite.registre` passe à « ok » quand le verdict est bon. Une personne peut attester
