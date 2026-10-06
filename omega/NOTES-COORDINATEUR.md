@@ -526,3 +526,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   « Revérifier »). Renvoyé à A4 : la demande valider_facture née du recontrôle est
   attribuée à daf (auth.uid()), qui ne pourra pas la valider ; IBAN « propose » orphelin
   après annulation.
+- 04 h 20 — A3 64a5490 fusionné (0f8a2de) : sur fournisseur.a_confirmer, plus de « Lever avec
+  un motif », seulement « Confirmer ce fournisseur » (gris pour le déposant). Lot FILED
+  fournisseur clos ; en attente d'A4 (a4_13 : demandeur des demandes nées d'un recontrôle,
+  IBAN « propose » orphelin).
