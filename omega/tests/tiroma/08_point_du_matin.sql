@@ -67,19 +67,19 @@ begin
   v_reglage := private.reglages_envois_effectifs(banc, 'tiroma');
   return next ok(v_reglage ->> 'mode' is not null, 'reglages_envois (banc, tiroma) est posé : mode ' || coalesce(v_reglage ->> 'mode', 'ABSENT'));
   v_envoi := private.preparer_envoi(banc, 'tiroma', 'tiroma_cabinets', v_cabinet::text, 'email',
-               jsonb_build_object('email', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
+               jsonb_build_object('adresse', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
                'Point du matin — Tiroma', 'Annulation demain 9 h : appeler Marguerite Delannoy (plan accepté).', null,
                'b3:sante:email:' || v_cabinet::text, entite, false, true, null, '{}'::jsonb);
   return next is((select statut || '/' || coalesce(verrou, '') from public.envois where id = v_envoi), 'bloque/SANTE_HORS_CANAL_AGREE',
                  'courriel nominatif (données de santé) : bloqué, SANTE_HORS_CANAL_AGREE — aucun fournisseur n''est agréé');
   v_envoi := private.preparer_envoi(banc, 'tiroma', 'tiroma_cabinets', v_cabinet::text, 'sms',
-               jsonb_build_object('telephone', '+590690000000', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
+               jsonb_build_object('adresse', '+590690000000', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
                null, 'Point du matin : 1 créneau à reprendre.', null,
                'b3:sante:sms:' || v_cabinet::text, entite, false, false, null, '{}'::jsonb);
   return next is((select statut || '/' || coalesce(verrou, '') from public.envois where id = v_envoi), 'bloque/CANAL_NON_PERMIS',
                  'SMS, même sans nom : bloqué, CANAL_NON_PERMIS (contexte de santé, aucun prestataire certifié)');
   v_envoi := private.preparer_envoi(banc, 'tiroma', 'tiroma_cabinets', v_cabinet::text, 'email',
-               jsonb_build_object('email', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
+               jsonb_build_object('adresse', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
                'Point du matin — Tiroma', '1 créneau à reprendre, 4 plans sans rendez-vous, 6 vérifications : https://app.omegaai.fr/espace/tiroma', null,
                'b3:sante:compteurs:' || v_cabinet::text, entite, false, false, null, '{}'::jsonb);
   -- Le socle tient tout texte libre d'un module de santé pour de la santé (creer_envoi : v_contexte_sante) : même le

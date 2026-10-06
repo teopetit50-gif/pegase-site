@@ -182,7 +182,8 @@ begin
     v_jeu := (select bj.code from public.instantanes x join public.branchements_jeux bj on bj.id = x.jeu_id where x.id = (i ->> 'instantane')::uuid);
     v_lignes := tests.b3_lignes(v_jeu, p_variante);
     perform public.deposer_lignes((i ->> 'instantane')::uuid, v_lignes);
-    v_fin := public.terminer_lecture((i ->> 'instantane')::uuid, jsonb_build_object('statut', 'lu', 'lignes', jsonb_array_length(v_lignes)), 'tests/b3/logosw');
+    -- Le socle exige la clé « jeu » (le code du jeu de l'instantané) pour un statut « lu » (relevé par le coordinateur le 06/10).
+    v_fin := public.terminer_lecture((i ->> 'instantane')::uuid, jsonb_build_object('statut', 'lu', 'jeu', v_jeu, 'lignes', jsonb_array_length(v_lignes)), 'tests/b3/logosw');
     v_res := v_res || jsonb_build_object('instantane', i ->> 'instantane', 'jeu', v_jeu, 'lignes', jsonb_array_length(v_lignes), 'fin', v_fin);
   end loop;
   return jsonb_build_object('releve', v_recu ->> 'releve', 'instantanes', v_res);
