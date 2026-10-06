@@ -561,3 +561,18 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Fiche `CHAMPS-LECTURE-LORANI.md` : type `lorani_situation_travaux` (cumul_ht obligatoire, numero_situation, mois,
   titulaire, lot ; facultatifs de contrôle) — **à brancher par A1** dans le lecteur.
 - Test `omega/tests/lorani/b5_05_situation_lue.sql` (15 assertions) → `^test_b5_` attendu **197/197** (5 tests).
+
+### b5_15 — la date limite des visas au registre des délais du socle (06/10)
+
+- `omega/modules/lorani/migrations/b5_15_echeance_visas.sql` : colonne `lorani_visas.delai_id` ; trigger BEFORE
+  `lorani_visas_suivre_delai` → `private.poser_delai_date` (libellé « Visa : <document> (indice X) », source réception
+  + règle CCAG art. 29, rappels J-3 / J-1 / J, chef de projet, clé `lorani:visa:<id>:<date>`) ; date limite changée →
+  ancienne échéance annulée avec motif, nouvelle posée ; avis rendu → `clore_delai(…, 'tenu')` ; dossier sans territoire
+  → pas d'échéance ; refus du socle → alerte interne, la saisie du visa n'est pas bloquée. Abonnements
+  `delai.proche.lorani → lorani.visa.rappel`, `delai.depasse.lorani → lorani.visa.depasse` ;
+  `private.lorani_visa_rappeler` (alerte « à rendre avant le … » / « en retard ») ; `lorani_lectures_passage` (corps de
+  b5_14) prend ces deux genres. Les gardes du socle (`exiger_ecriture_delai`, `exiger_porte_du_module`) ne sont pas dans
+  l'extrait : j'appelle `poser_delai_date` / `clore_delai` comme le calendrier des permis le fait (fonction SECURITY
+  DEFINER du module) ; le test dira si une garde refuse.
+- Test `omega/tests/lorani/b5_06_echeance_visas.sql` (12 assertions, vraie chaîne `controler_delais` → passage) →
+  `^test_b5_` attendu **209/209** (6 tests).
