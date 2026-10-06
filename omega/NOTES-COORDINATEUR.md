@@ -1010,3 +1010,12 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   → B3 ; écran B3 non fusionné. 44/46/51/55/57 verts. btp_meteo_demander() = 0 (aucun passage extérieur au banc).
   Main : fusion b5, b6, b2, a4, c2, c3, a3, c5, c4. Pastilles retirées : alerte météo, 6 lignes Lorani, remise en
   location et entretien. Restent volontairement : métré (phrase trop forte), PLU servitudes/risques, vocaux.
+- 19 h 40 Z — DÉCISION DE TEO (19 h 20) : sur omegaai.fr, aucune modification, aucune pastille « En préparation ».
+  Fait : composants EnPreparation / SiEnPreparation neutralisés (88d2402) ; puis, avec son accord explicite, les 42
+  fichiers de la vitrine remis à leur état de a6b5e7a (15 h 55), SAUF trois phrases inexactes corrigées avec son accord
+  (6f2a957) : Tamila « hébergé dans l'UE » au lieu de « en France » ; Tiroma « point du matin dans l'espace sécurisé »
+  au lieu de « sur WhatsApp » ; Tiroma « ne contacte un patient qu'avec un message validé ». 0 mention « préparation »
+  sur 34 pages publiques. C5 arrêté sur la vitrine ; sa passe 8 (972ccfda) n'est PAS fusionnée. Routine horaire
+  réécrite en conséquence. Poses : c3_08 (bb153a2), a4_32 (19d98ea), b2_10 v2 (66d8199), b2_11 (a8f17be), 19ao
+  (f10a4b0) ; lots h1915tav 501/0, h1930lot 85/0 (44/46/51/56 compris). Fusion c3, a4, b2, b3 (espace client).
+  worker-a5 non fusionnée (omega-sauvegarde.yml, non approuvé). Vercel toujours limité : en ligne demain.
