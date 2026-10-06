@@ -668,3 +668,29 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
 .v2 .esp .esp-colle {
   top: 80px;
 }
+
+/* ——— les onglets d'un dossier (facture électronique : Dossier / Cycle de vie /
+   Écritures) : les onglets soulignés du design ——— */
+.v2 .esp .esp-onglets {
+  gap: 0;
+  border-bottom-color: var(--v2-a-400);
+}
+.v2 .esp .esp-onglet {
+  height: 40px;
+  padding: 0 12px;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+  border-bottom-color: transparent;
+  transition: color 0.15s, border-color 0.2s var(--v2-doux);
+}
+.v2 .esp .esp-onglet:hover {
+  color: var(--v2-gray-1000);
+}
+.v2 .esp .esp-onglet[aria-selected="true"] {
+  color: var(--v2-gray-1000);
+  border-bottom-color: var(--v2-gray-1000);
+}
+.v2 .esp .esp-onglet:focus-visible {
+  outline: none;
+  box-shadow: var(--v2-anneau);
+}
