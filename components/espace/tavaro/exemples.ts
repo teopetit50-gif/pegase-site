@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, dans, ilYa } from "../exemples/socle";
-import type { Agence, Amendement, AvisContravention, Avoir, Contestation, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import type { Agence, AnomalieRetour, Amendement, AvisContravention, Avoir, Contestation, Entretien, Immobilisation, Parc, Remise, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
 import { forcesLocales } from "./contestations";
 
 const C = EXEMPLE_CLIENT_ID;
@@ -387,4 +387,56 @@ export const CONTESTATIONS_EXEMPLE: Contestation[] = [
     dossier_chemin: `${C}/loc_contestations/${u("cb", 2)}/dossier-CB-2026-87105.pdf`, envoi_id: u("en", 90), envoyee_le: ilYa(9, 11), envoyee_par: SOFIA,
     notes: "Le client a déjà reçu un avoir de 72 € : seuls 126 € restent contestés." }),
 ];
+
+/* ——— le parc (b2_10) : deux remises en location en cours (la Clio rendue, qui risque de manquer son départ dans
+   50 minutes ; la 308, pour un départ demain matin), trois remises finies (2 h 31, 2 h 48, 3 h 10 : la médiane
+   affichée est 2 h 48), une anomalie confiée à Yanis, le Master chez le carrossier, la Golf sous rappel du
+   constructeur, une révision à planifier, un contrôle technique planifié, des pneus faits. ——— */
+const YANIS = "00000000-0000-4000-8000-0000000000a3";
+const minutes = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
+const plusMinutes = (iso: string, m: number) => new Date(Date.parse(iso) + m * 60_000).toISOString();
+const V = (n: number) => VEHICULES_EXEMPLE[n - 1].id;
+const remise = (n: number, o: Partial<Remise> & Pick<Remise, "vehicule_id" | "contrat_id" | "retour_le" | "statut">): Remise => ({
+  id: u("rm", n), client_id: C, entite_id: LYON, prochain_depart_le: null, prochain_depart_source: null, prochain_depart_ref: null, limite_le: null,
+  responsable: null, inspection_le: null, inspection_par: null, nettoyage_le: null, nettoyage_par: null, energie_le: null, energie_par: null, prete_le: null,
+  immobilisation_id: null, alerte: null, annulee_motif: null, cree_le: o.retour_le, ...o,
+});
+const finie = (n: number, vehicule: number, contrat: number, retour: string, duree: number): Remise => remise(n, {
+  vehicule_id: V(vehicule), contrat_id: u("co", contrat), retour_le: retour, statut: "prete", inspection_le: plusMinutes(retour, 20), inspection_par: SOFIA,
+  nettoyage_le: plusMinutes(retour, duree - 30), nettoyage_par: SOFIA, energie_le: plusMinutes(retour, duree), energie_par: EXEMPLE_MOI, prete_le: plusMinutes(retour, duree),
+});
+export const PARC_EXEMPLE: Parc = {
+  vehicules: VEHICULES_EXEMPLE.map((v, i) => ({ ...v, entite_id: i === 1 || i === 2 ? (i === 2 ? GRENOBLE : LYON) : LYON })),
+  remises: [
+    remise(1, { vehicule_id: V(1), contrat_id: u("co", 1), retour_le: minutes(-25), statut: "en_cours", prochain_depart_le: minutes(80), prochain_depart_source: "reservation",
+      prochain_depart_ref: "R-55102", limite_le: minutes(50), responsable: SOFIA, inspection_le: minutes(-10), inspection_par: SOFIA, alerte: "risque", immobilisation_id: u("im", 1) }),
+    remise(2, { vehicule_id: V(2), contrat_id: u("co", 2), retour_le: minutes(-90), statut: "a_faire", prochain_depart_le: dans(1, 9), prochain_depart_source: "categorie",
+      prochain_depart_ref: "R-55120", limite_le: plusMinutes(dans(1, 9), -30), immobilisation_id: u("im", 2) }),
+    finie(3, 4, 4, ilYa(12, 9), 168),
+    finie(4, 6, 5, ilYa(18, 10), 151),
+    finie(5, 3, 6, ilYa(45, 18), 190),
+  ],
+  anomalies: [
+    { id: u("an", 1), entite_id: LYON, remise_id: u("rm", 1), vehicule_id: V(1), type: "voyant", description: "Voyant de pression des pneus allumé au retour", responsable: YANIS,
+      statut: "ouverte", signalee_par: SOFIA, signalee_le: minutes(-8), traitee_le: null, traitee_par: null, note: null } satisfies AnomalieRetour,
+  ],
+  immobilisations: [
+    { id: u("im", 1), entite_id: LYON, vehicule_id: V(1), motif: "preparation", debut_le: minutes(-25), fin_prevue_le: null, fin_le: null, contrat_id: u("co", 1), prestataire: null, cout_eur: null, notes: null, cree_le: minutes(-25) },
+    { id: u("im", 2), entite_id: LYON, vehicule_id: V(2), motif: "preparation", debut_le: minutes(-90), fin_prevue_le: null, fin_le: null, contrat_id: u("co", 2), prestataire: null, cout_eur: null, notes: null, cree_le: minutes(-90) },
+    { id: u("im", 3), entite_id: GRENOBLE, vehicule_id: V(3), motif: "carrosserie", debut_le: ilYa(2, 9), fin_prevue_le: dans(3, 17), fin_le: null, contrat_id: null,
+      prestataire: "Carrosserie du Parc", cout_eur: 1350, notes: "Pare-chocs arrière et feu", cree_le: ilYa(2, 9) },
+    { id: u("im", 4), entite_id: LYON, vehicule_id: V(6), motif: "rappel_constructeur", debut_le: ilYa(0, 8), fin_prevue_le: dans(1, 18), fin_le: null, contrat_id: null,
+      prestataire: "Concession Volkswagen Lyon Est", cout_eur: 0, notes: "Rappel airbag passager", cree_le: ilYa(0, 8) },
+  ] satisfies Immobilisation[],
+  entretiens: [
+    { id: u("et", 1), entite_id: LYON, vehicule_id: V(2), nature: "revision", libelle: "Révision 50 000 km", echeance_le: null, echeance_km: 50000, duree_h: 6, statut: "a_planifier",
+      debut_le: null, fin_le: null, atelier_nom: null, atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: null, km_fait: null, cout_eur: null, notes: null },
+    { id: u("et", 2), entite_id: LYON, vehicule_id: V(4), nature: "controle_technique", libelle: "Contrôle technique", echeance_le: jourIso(dans(20, 9)), echeance_km: null, duree_h: 2, statut: "planifie",
+      debut_le: dans(4, 8), fin_le: dans(4, 10), atelier_nom: "Garage Lumière", atelier_adresse: "atelier@garage-lumiere.example", envoi_id: u("en", 91), immobilisation_id: null,
+      fait_le: null, km_fait: null, cout_eur: null, notes: null },
+    { id: u("et", 3), entite_id: LYON, vehicule_id: V(1), nature: "pneus", libelle: "Pneus avant", echeance_le: null, echeance_km: 12000, duree_h: 2, statut: "fait",
+      debut_le: ilYa(10, 8), fin_le: ilYa(10, 10), atelier_nom: "Garage Lumière", atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: ilYa(10, 10), km_fait: 11980, cout_eur: 312, notes: null },
+  ] satisfies Entretien[],
+  membres: Object.entries(PERSONNES_TAVARO).map(([user_id, p]) => ({ user_id, role: p.role })),
+};
 
