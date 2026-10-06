@@ -23,7 +23,7 @@ begin
   values (v_client, v_projet, '01', 'Ravalement — pierre de taille', array[' Pierre_Taille', 'ravalement', 'ravalement']) returning id into v_lot;
   insert into public.lorani_lots (client_id, projet_id, numero, intitule) values (v_client, v_projet, '02', 'Échafaudage') returning id into v_lot2;
   insert into public.lorani_intervenants (client_id, projet_id, nature, organisme, siren, lot_id)
-  values (v_client, v_projet, 'entreprise', 'Pierres de Bourgogne SARL', '538765432', v_lot) returning id into v_ent;
+  values (v_client, v_projet, 'entreprise', 'Pierres de Bourgogne SARL', '538765439', v_lot) returning id into v_ent;
   insert into public.lorani_marches (client_id, projet_id, lot_id, titulaire, montant_ht, avenants_ht)
   values (v_client, v_projet, v_lot, 'Pierres de Bourgogne SARL', 186000, 7400);
   insert into public.lorani_projets (client_id, nom, code_postal, commune, code_insee, nature)
@@ -38,7 +38,7 @@ begin
     jsonb_build_object('champ', 'assureur', 'valeur', 'SMABTP', 'texte', 'SMABTP'),
     jsonb_build_object('champ', 'numero_police', 'valeur', '123456 B 1234', 'texte', 'Contrat n° 123456 B 1234'),
     jsonb_build_object('champ', 'assure', 'valeur', 'PIERRES DE BOURGOGNE', 'texte', 'PIERRES DE BOURGOGNE'),
-    jsonb_build_object('champ', 'siren', 'valeur', '538 765 432', 'texte', 'SIREN 538 765 432'),
+    jsonb_build_object('champ', 'siren', 'valeur', '538 765 439', 'texte', 'SIREN 538 765 439'),
     jsonb_build_object('champ', 'activites', 'valeur', jsonb_build_array('ravalement', 'maconnerie_beton_arme'), 'texte', 'Activités : ravalement de façade ; maçonnerie et béton armé'),
     jsonb_build_object('champ', 'debut', 'valeur', tests.b5_iso(-100), 'texte', 'du ' || tests.b5_fr(-100)),
     jsonb_build_object('champ', 'fin', 'valeur', tests.b5_iso(20), 'texte', 'au ' || tests.b5_fr(20)),
@@ -46,7 +46,7 @@ begin
   r := private.lorani_lectures_passage();
   return next ok((r ->> 'erreurs')::integer = 0, '1. le passage des lectures prend l''attestation sans erreur : ' || r::text);
   select * into a from public.lorani_attestations where piece_id = v_piece;
-  return next ok(a.id is not null and a.intervenant_id = v_ent and a.lot_id = v_lot and a.siren = '538765432' and a.assureur = 'SMABTP'
+  return next ok(a.id is not null and a.intervenant_id = v_ent and a.lot_id = v_lot and a.siren = '538765439' and a.assureur = 'SMABTP'
                  and a.activites = array['maconnerie_beton_arme', 'ravalement'] and a.debut = current_date - 100 and a.fin = current_date + 20 and a.plafond_eur = 150000,
                  '1. lue : entreprise reconnue par son SIREN, lot 01, assureur, activités, période, plafond');
   return next ok(a.statut = 'non_conforme' and a.verifie_le is not null

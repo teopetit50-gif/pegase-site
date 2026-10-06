@@ -332,7 +332,7 @@ export type Visa = {
 };
 
 /* le contrôle du dossier (b5_16) : les pièces croisées, ce qui est relevé, ce qui est décidé */
-export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "metre" | "autre";
+export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "metre" | "cerfa" | "re2020" | "bet" | "notice" | "autre";
 export type Controle = {
   id: string;
   projet_id: string;
@@ -367,7 +367,7 @@ export type ValeurCitee = {
 export type Constat = {
   id: string;
   controle_id: string;
-  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf";
+  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf" | "re2020" | "accessibilite" | "securite_incendie";
   gravite: "bloquant" | "majeur" | "mineur";
   grandeur: string | null;
   objet: string | null;
@@ -500,6 +500,19 @@ export type ContenuCr = {
   soldes: LigneCr[];
 };
 
+/* une pièce attendue du dossier des ouvrages exécutés (b5_21) */
+export type PieceDoe = {
+  id: string;
+  projet_id: string;
+  lot_id: string | null;
+  nature: "plans" | "notices" | "fiches" | "pv_essais" | "garanties" | "diuo" | "autre";
+  intitule: string;
+  statut: "attendu" | "recu" | "sans_objet";
+  piece_id: string | null;
+  recu_le: string | null;
+  motif: string | null;
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -526,6 +539,7 @@ export type Dossier = {
   reserves: Reserve[];
   comptesRendus: CompteRendu[];
   points: Point[];
+  doe: PieceDoe[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

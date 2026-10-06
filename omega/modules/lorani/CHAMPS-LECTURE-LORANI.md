@@ -59,19 +59,29 @@ il cite.
 | `lorani_cctp` | Le cahier des clauses techniques particulières (par lot) | `lot` ; une ligne par poste décrit : `poste.<référence>` (valeur = intitulé du poste, texte = la citation) ; et les mesures écrites : `mesure.<grandeur>.<objet>` |
 | `lorani_dpgf` | La décomposition du prix global et forfaitaire (par lot) | `lot` ; une ligne par poste chiffré : `poste.<référence>` (valeur = quantité canonique, texte = la ligne) |
 | `lorani_metre` | Le métré d'un lot (quantités mesurées sur les plans, par l'économiste ou le lecteur) | `lot` ; par poste : `quantite.<référence>` (quantité canonique), `unite.<référence>` (« m2 », « ml », « m3 », « u ») |
+| `lorani_cerfa` | Le formulaire de la demande (Cerfa 13406, 13409…) | les surfaces et nombres déclarés en `mesure.<grandeur>.projet` : `surface_plancher_m2`, `emprise_sol_m2`, `surface_taxable_m2`, `logements_nb`, `stationnement_nb`, `niveaux_nb` |
+| `lorani_attestation_re2020` | L'attestation RE2020 (dépôt du PC ou achèvement) | par indicateur : `re2020.<indicateur>` et `re2020.<indicateur>_max` (valeurs canoniques) — `bbio`, `cep`, `cep_nr`, `ic_energie`, `ic_construction`, `dh` ; les surfaces en `mesure.sref_m2.projet`, `mesure.surface_plancher_m2.projet` |
+| `lorani_plan_bet` | Un fond de plan ou plan d'un bureau d'études (structure, fluides) | les mêmes `mesure.<grandeur>.<objet>` que les planches de l'architecte, avec les **mêmes objets** (trémies, cotes, largeurs) |
+| `lorani_notice` | Une notice (accessibilité, sécurité incendie, descriptive) | `mesure.<grandeur>.<objet>` qu'elle chiffre (effectif, dégagements, largeurs) |
 | `lorani_plu_reglement` | Le règlement écrit du PLU (zone du terrain) | `zone` (« UB ») ; par règle chiffrée : `regle.<grandeur>.max` ou `regle.<grandeur>.min` (valeur canonique), et `regle.<grandeur>.article` (« UB 10 ») |
 
 - `<grandeur>` (vocabulaire fermé, l'unité fait partie du nom) : `hauteur_faitage_m`, `hauteur_egout_m`,
   `hauteur_acrotere_m`, `recul_voie_m`, `recul_limite_m`, `distance_batiments_m`, `emprise_sol_m2`,
   `emprise_sol_pct`, `surface_plancher_m2`, `surface_taxable_m2`, `espaces_verts_pct`, `pleine_terre_pct`,
   `stationnement_nb`, `logements_nb`, `niveaux_nb`, `pente_toiture_pct`, `longueur_m`, `largeur_m`,
-  `cote_altimetrique_m` (NGF). Une grandeur hors liste est ignorée par le socle (à demander au coordinateur).
+  `cote_altimetrique_m` (NGF) ; depuis b5_21 : `surface_habitable_m2`, `sref_m2`, `largeur_porte_m` (passage utile),
+  `largeur_cheminement_m`, `largeur_degagement_m`, `pente_rampe_pct`, `ressaut_m`, `distance_escalier_m`, `effectif_nb`,
+  `degagements_nb`. Une grandeur hors liste est ignorée par le socle (à demander au coordinateur). Les règles fixes
+  d'accessibilité (ERP, logement collectif) et de sécurité incendie (ERP) s'appliquent seules à ces mesures.
 - `<objet>` : ce que la mesure qualifie, en minuscules sans accent : `projet` (le tout), `batiment_a`, `facade_sud`,
   `niveau_r1`, `limite_nord`, `voie_rue_x`… Deux pièces qui mesurent la même chose doivent rendre le **même objet** :
   c'est la clé du croisement. Pour une grandeur du projet entier (`surface_plancher_m2`), `projet`.
 - `<référence>` d'un poste : le numéro d'article tel qu'écrit, normalisé (`2.3.1` → `2_3_1`, `GO.04` → `go_04`).
-- Valeurs canoniques : nombre avec un point (`9.85`, `312.40`), sans unité. `page` et `boite` obligatoires sur
-  chaque mesure : le constat renvoie l'architecte à l'endroit exact.
+- Valeurs canoniques : nombre avec un point (`9.85`, `312.40`), sans unité. `page` obligatoire sur chaque mesure ;
+  `boite` quand le lecteur l'a (exacte sur un PDF natif, estimée en vision, **absente après OCR** — A1, 06/10) : le
+  socle accepte une boîte nulle, le constat cite alors la page et le texte sans cadre dans le rapport annoté.
+- Seules les cotes et quantités **écrites** sont lues (A1 ne mesure rien sur le dessin) : un métré « mesuré sur les
+  plans » vient d'un métré déposé, ou des quantités écrites sur les planches.
 - Métré contre DPGF : une DPGF rend aussi `unite.<référence>` ; une planche peut rendre `quantite.<référence>` (surface,
   longueur, volume mesuré pour ce poste sur cette planche) — le socle additionne les planches quand il n'y a pas de
   métré. Écart de plus de 5 % = constat ; DPGF sous le métré de plus de 10 % = majeur.
@@ -91,7 +101,7 @@ Type `lorani_attestation_decennale` — l'attestation d'assurance de responsabil
 | `assureur` | la compagnie | « SMABTP » |
 | `numero_police` | le numéro du contrat | « 123456 B 1234 » |
 | `assure` | la raison sociale de l'assuré, telle qu'écrite | « PIERRES DE BOURGOGNE » |
-| `siren` | neuf chiffres (espaces admis) | « 538765432 » |
+| `siren` | neuf chiffres (espaces admis) | « 538765439 » |
 | `activites` | **tableau jsonb** des activités garanties, dans le vocabulaire ci-dessous | `["ravalement", "pierre_taille"]` |
 | `debut`, `fin` | période de validité, AAAA-MM-JJ | « 2026-01-01 », « 2026-12-31 » |
 | `plafond_eur` | plafond de garantie par sinistre (ouvrages non soumis à l'obligation), nombre | « 1500000 » |
