@@ -26,6 +26,7 @@ import SituationsCarte from "./SituationsCarte";
 import ReceptionCarte from "./ReceptionCarte";
 import HeuresCarte from "./HeuresCarte";
 import RecalageDialog from "./RecalageDialog";
+import SignatureLienDialog from "./SignatureLienDialog";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -45,6 +46,8 @@ type Form =
   | { type: "reponse"; passage: Passage }
   | { type: "remplacants"; passage: Passage }
   | { type: "recaler"; passage: Passage }
+  | { type: "sur_place"; avenant: Avenant }
+  | { type: "preuve"; avenant: Avenant }
   | { type: "terminer"; passage: Passage }
   | { type: "avenant" }
   | { type: "chiffrer"; avenant: Avenant }
@@ -527,7 +530,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                   </table>
                 </div>
               ) : <div className="esp-kpi-sous">Aucune ligne : chiffrez les travaux sur un prix validé de la bibliothèque.</div>}
-              {a.signe_le ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Signé le {dateCourte(a.signe_le)}{a.signe_libelle ? ` par ${a.signe_libelle}` : ""}.</div> : null}
+              {a.signe_le ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Signé le {dateCourte(a.signe_le)}{a.signe_libelle ? (a.signe_libelle.startsWith("Signé sur place") ? ` : ${a.signe_libelle.charAt(0).toLowerCase()}${a.signe_libelle.slice(1)}` : ` par ${a.signe_libelle}`) : ""}.{a.signe_libelle?.startsWith("Signé sur place") && voit_prix ? <> <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "preuve", avenant: a })}>Voir la preuve</button></> : null}</div> : null}
               {a.motif ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Motif : {a.motif}</div> : null}
               <div className="esp-controle-actions" style={{ marginTop: 8 }}>
                 {a.statut === "brouillon" ? <>
@@ -537,6 +540,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                 </> : null}
                 {a.statut === "soumis" ? <>
                   <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "signer", avenant: a })} disabled={a.demande_statut !== "approuvee" && a.demande_statut !== "executee"} title={a.demande_statut !== "approuvee" && a.demande_statut !== "executee" ? "La demande de validation n'est pas encore approuvée" : undefined}><PenLine width={14} height={14} aria-hidden="true" /> Signer</button>
+                  {a.demande_statut === "approuvee" && voit_prix ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "sur_place", avenant: a })}><FileSignature width={14} height={14} aria-hidden="true" /> Faire signer sur place</button> : null}
                   <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "abandonner", avenant: a })}>Abandonner</button>
                 </> : null}
                 {a.statut === "refuse" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "soumettre", avenant: a })}>Resoumettre</button> : null}
@@ -679,6 +683,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               </div></DialogBody>
               <DialogFooter><button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => faireReponse(form.passage)}>{envoi ? <Loader variant="spin" /> : null} Noter</button></DialogFooter>
             </>
+          ) : null}
+          {form?.type === "sur_place" || form?.type === "preuve" ? (
+            <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
           ) : null}
           {form?.type === "recaler" || form?.type === "terminer" ? (
             <RecalageDialog key={`${form.type}-${form.passage.id}`} mode={form.type} passage={form.passage} tableau={tableau} source={source} onLocal={onLocal} relire={relire}
