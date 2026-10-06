@@ -5,18 +5,19 @@
 -- Le geste du serveur (l'ouvrier tamila-coffre) : rôle de service, personne de connectée.
 create or replace function tests.tamila_cle_maitre() returns text
 language sql immutable as $$ select '0b5c1e2a-4d6f-4a8b-9c0d-1e2f3a4b5c6d' $$;
+grant execute on function tests.tamila_cle_maitre() to authenticated, service_role;
 
 create or replace function tests.test_b4_14_coffre() returns setof text
 language plpgsql as $f$
 declare
   jeu jsonb; v_client uuid; v_dossier uuid; v_dossier2 uuid; v_inconnu uuid := gen_random_uuid();
   r jsonb; r2 jsonb; v_ref text; v_env bytea := decode(repeat('5c', 120), 'hex');
-  v_piece uuid; v_piece2 uuid; v_piece_lue uuid; v_journal bigint; v_k public.tamila_cles; jeu2 jsonb; n bigint;
+  v_maitre text := tests.tamila_cle_maitre(); v_piece uuid; v_piece2 uuid; v_piece_lue uuid; v_journal bigint; v_k public.tamila_cles; jeu2 jsonb; n bigint;
 begin
   jeu := tests.tamila_scene();
   v_client := (jeu ->> 'client')::uuid;
   v_dossier := (jeu ->> 'dossier')::uuid;
-  v_ref := 'scaleway:fr-par:' || tests.tamila_cle_maitre();
+  v_ref := 'scaleway:fr-par:' || v_maitre;
   -- Une pièce chiffrée reçue que le lecteur a laissée faute de coffre (travail clos « chiffree_sans_coffre »).
   v_piece := tests.tamila_piece(jeu, 'avis-audience.pdf');
   update public.travaux set etat = 'fait', resultat = '{"ignore": "chiffree_sans_coffre"}' where cle = 'piece:' || v_piece::text;
@@ -54,17 +55,17 @@ begin
   perform tests.endosser((jeu ->> 'admin')::uuid, 'b4-haddad@essai.invalid');
   return next throws_ok(format('select public.tamila_coffre_demander_activation(%L::uuid)', v_client), '42501', null,
                         'un associé non gérant ne demande pas l''activation (42501)');
-  return next throws_ok(format('select public.tamila_coffre_activer(%L::uuid, ''fr-par'', %L, %L::uuid)', v_client, tests.tamila_cle_maitre(), jeu ->> 'gerant'),
+  return next throws_ok(format('select public.tamila_coffre_activer(%L::uuid, ''fr-par'', %L, %L::uuid)', v_client, v_maitre, jeu ->> 'gerant'),
                         '42501', null, 'une personne connectée ne pose pas la clé maître (42501)');
   perform tests.redevenir_admin();
   perform tests.endosser_serveur();
-  return next throws_ok(format('select public.tamila_coffre_activer(%L::uuid, ''fr-par'', %L, %L::uuid)', v_client, tests.tamila_cle_maitre(), jeu ->> 'avocat'),
+  return next throws_ok(format('select public.tamila_coffre_activer(%L::uuid, ''fr-par'', %L, %L::uuid)', v_client, v_maitre, jeu ->> 'avocat'),
                         '42501', null, 'le serveur refuse une activation au nom d''un non-gérant (42501)');
-  return next throws_ok(format('select public.tamila_coffre_activer(%L::uuid, ''Paris'', %L, %L::uuid)', v_client, tests.tamila_cle_maitre(), jeu ->> 'gerant'),
+  return next throws_ok(format('select public.tamila_coffre_activer(%L::uuid, ''Paris'', %L, %L::uuid)', v_client, v_maitre, jeu ->> 'gerant'),
                         '22023', null, 'une région mal formée est refusée (22023)');
-  r := public.tamila_coffre_activer(v_client, 'fr-par', tests.tamila_cle_maitre(), (jeu ->> 'gerant')::uuid);
+  r := public.tamila_coffre_activer(v_client, 'fr-par', v_maitre, (jeu ->> 'gerant')::uuid);
   return next is(r ->> 'statut', 'bascule', 'un dossier local reste : le coffre est en bascule');
-  r := public.tamila_coffre_activer(v_client, 'fr-par', tests.tamila_cle_maitre(), (jeu ->> 'gerant')::uuid);
+  r := public.tamila_coffre_activer(v_client, 'fr-par', v_maitre, (jeu ->> 'gerant')::uuid);
   return next ok((r ->> 'deja')::boolean, 'la même activation, rejouée : rien ne change');
   return next throws_ok(format('select public.tamila_coffre_activer(%L::uuid, ''fr-par'', %L, %L::uuid)', v_client, '1b5c1e2a-4d6f-4a8b-9c0d-1e2f3a4b5c6d', jeu ->> 'gerant'),
                         '55000', null, 'une autre clé maître ne remplace pas la première (55000)');

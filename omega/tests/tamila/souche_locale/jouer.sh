@@ -43,7 +43,6 @@ for m in "$RACINE"/omega/modules/tamila/migrations/b4_*.sql; do charger "$m" "$(
 charger "$ICI/03_pgtap.sql" 03_pgtap
 git -C "$RACINE" show origin/worker-a5:omega/tests/socle/00_installation.sql | sed -n '6,433p' > "$DIR/a5.sql"
 charger "$DIR/a5.sql" a5_installation
-"${S[@]}" -c "grant usage on schema tests to service_role; grant execute on all functions in schema tests to service_role" >/dev/null
 charger "$RACINE/omega/tests/tamila/00_jeu_tamila.sql" 00_jeu
 
 if [ "$#" -eq 0 ]; then set -- $(ls "$RACINE"/omega/tests/tamila/[0-9][0-9]_*.sql | xargs -n1 basename | cut -c1-2 | grep -v '^00$'); fi
