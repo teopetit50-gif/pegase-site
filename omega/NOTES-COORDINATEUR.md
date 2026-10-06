@@ -27,7 +27,36 @@ fichier ; Teo lit la session du coordinateur, pas celles des ouvriers.
 | socle_lot19n / 19o / 19p | Realtime vague 2 (grp_ref_*, grp_societes, lorani_permis*, delais) ; politique Storage INSERT membres sous `<client>/<objet_type>/…` ; vue `tamila_registre` : anon sans rien, authenticated SELECT seul (elle avait anon SELECT+DELETE) |
 | banc_lot19q | entité principale du banc : territoire 'FR' (était NULL : Tiroma refusait d'installer) |
 | socle_lot19r / 19s / 19t / 19u | compléments d'a5_01 trouvés en jouant B3 : 89 fonctions de trigger de private exécutables par authenticated (19r, précaution) ; fermeture transitive rejouée (19s, 0) ; fonctions des politiques/CHECK/defaults/vues (19t, 0) ; **fonctions dans la clause WHEN des triggers** (19u : `private.tiroma_trace_ecriture()` dans 23 triggers `tiroma_*_tracer`, « permission denied » sur un INSERT du gérant) |
-| tiroma_b3_01 | B3 : portes tiroma_installer_cabinet / brancher / changer_mode exécutables par un gérant/titulaire avec contrôle de droits (worker-b3 da2fc7a). Tests B3 01–04 : 96/98 ok (les 2 restants : attentes fausses sur UPDATE/DELETE sous RLS, renvoyées) |
+| tiroma_b3_01 | B3 : portes tiroma_installer_cabinet / brancher / changer_mode exécutables par un gérant/titulaire avec contrôle de droits (worker-b3 da2fc7a). Tests B3 01–04 : 96/98 puis **98/98** après correction de B3 (tests.b3_compte en SECURITY DEFINER, attentes UPDATE/DELETE sous RLS = 0 ligne), rejoué sur Novasud le 5/10 à 22 h 40 Z |
+| filed_lot7 (a4_10, 316697e) | identité du fournisseur : colonnes de verdict, filed_confirmer_fournisseur, filed_attester_identite, « indisponible » vaut 2 h. Test a4_05 vert. **Mais** le branchement de filed_completer_fournisseur_lu en tête de filed_controler_facture n'a pas pris (patch par repère) : F-2026-0413 dit toujours « Aucun SIREN » ; a4_11 (179fd13, corps complet) posé depuis le dépôt le 5/10 à 22 h 30 Z et vérifié par recontrôle de F-2026-0413 : identite.siren « SIREN lu … non vérifié », fournisseur_lu.non_verifie |
+| tavaro_b2_01 / b2_02 (d8698d8) | séparation saisie/approbation (payload.saisi_par) ; relances des impayés (colonnes, portes, cron tavaro-relances 09:15 UTC). TOUT_B2 : 5 fichiers verts sur 11 (158 ok), 6 renvoyés (attente saisie_protegee, cast smallint, emails en doublon dans le jeu, alertes sans colonne module) |
+| varelo_b1_01 (3c6561f) | rôles exigés sur grp_installer / deposer_codes / rapprocher / appliquer_decisions. Tests B1 : 14/14 morts sur tests.role_admis manquante (aide de B1 non définie), renvoyé |
+| identite_b7_01 (e4fd65f) | B7 : cache identites_registre, déclencheur sur filed_verifications_tiers → travail identite.verifier, portes identite_a_verifier / noter_identite / identite_relancer. Tests 7/8 verts (test 08 et scénario : cast jsonb manquant, renvoyé). V2 158277d reposée le 5/10 à 22 h 50 Z : toujours 7/8, test 08 et scénario butent sur deux contraintes d'A4 — `filed_fournisseurs_identite_source` n'admet que sirene/vies/humain (B7 y mettait la source d'ouvrier) et `filed_documents_piece_key` UNIQUE (piece_id). Forme du verdict d'A4 envoyée à B7 ({resultat, identifiant, registre, preuve}), v3 attendue. Fonction Edge `identite` v1 déployée en coquille, cron omega-identite chaque minute (lot 19v). Secret SIRENE_API_KEY à poser par Teo (repli recherche-entreprises sinon) |
+| daliro_b6_01..04 (b672b32) | B6 : avenants, confirmations J-2 (cron daliro-confirmations-j2 15:00), factures de chantier, installation/tableau. Garde-fous 38/39 (après lot 19w : EXECUTE sur private.btp_est_serveur, appelée par une vue) ; parcours : alias masqué par une variable, renvoyé |
+| tiroma_b3_02..06 (f7194d6) | B3 lot 2 : regard et créneaux, plans sans rendez-vous, avant rendez-vous, charge des fauteuils, point du matin ; tests 00_aides_b3 + 02_fauteuils_horaires. `^test_b3_` : 4/4 fichiers verts (24+21+18+35) le 6/10 à 00 h 55 Z. Écran /espace/tiroma à fusionner sur son « prêt » |
+| lorani_b5_01 / b5_02 (50ccebd) | B5 : porte lorani_deposer_piece, liens des alertes vers /espace/lorani. Test b5_01_parcours_permis rouge : deposer_travail appelé avec un integer pour p_priorite (smallint), renvoyé |
+| tamila (tests seuls, a05d25c) | B4 : 12 fichiers pgTAP joués dans l'ordre des noms : 6/11 verts (01, 02, 03, 06, 07, 08). Rouges renvoyés : 04 et 10 (« Vous n'écrivez pas dans ce dossier » : qui est endossé ?), 05 (pieces_une_fois : même sha pour deux pièces), 09 (**trou du socle** : clé d'idempotence de tamila_demander_cloture à la seconde, b4_0x attendu), 11 (40/41, test 38 journal vide) |
+| identite_b7_01_v3 (e5aa5dd) | B7 aligné sur A4 : identite_source = registre, verdict {resultat, identifiant, registre, preuve}. **`^test_b7_` 8/8 verts** (6/10 00 h 45 Z). Scénario b7_02 : étapes 1–3 passent, l'assert compte le cache global (renvoyé, filtrer). Pièce à vrai SIREN (Orange, FAC-2026-10-0471) remise à Teo pour dépôt par /espace/filed : rien n'est arrivé au premier essai |
+| tavaro TOUT_B2 (66f1d09) | `^test_b2_` 8/11 verts (01, 02, 03, 04, 06, 08, 10, 11). Renvoyés : 05 (variable p ambiguë), 07 (alertes.cle n'existe pas → cle_regroupement), 09 (jour UTC vs Paris entre 0 h et 2 h). reglages_envois tavaro et lorani posés sur le banc (mode essai → Teo) |
+| varelo_b1_02 (8a3c1f6) | GRANT aux quatre portes grp_* + private. `^test_b1_` 1/14 : tests.b1_banc() rend gerant = null → endosser(null) → RLS grp_poles. Diagnostic fait par DO bloc, renvoyé à B1 |
+| daliro_b6_03_v2 (7dbdc3a) | b6_02_garde_fous **38/38** ; b6_01_parcours meurt dans private.btp_soumettre_avenant (variable c masque l'alias c, ligne 40), renvoyé |
+| tamila_b4_02 / b4_03 (14e938e) | journal des accès, clé de dossier à un membre. `^test_b4_` 7/12 (01, 02, 03, 07, 08, 12 14/14). Renvoyés : 04 (appel redéclaré), 05 (sha dupliqué), 06 (jour UTC vs Paris), 09 (trou du socle : clé d'idempotence de tamila_demander_cloture, b4_04 attendu), 10 (droits d'écriture), 11 test 38. Mots de passe referent/daf/daf2 du banc = Recette-Omega-2026 |
+| lorani_b5_03 (5a4a2e6) | rappels envoyés par preparer_envoi. `^test_b5_` **110/111** après la ligne reglages_envois lorani ; reste le 40 (texte de la section) ; ordre des pièces non déterministe (renvoyé) |
+| identite_b7_02_demander (3e4616b) | porte identite_demander (revérifier un SIREN/TVA, p_force). `^test_b7_` 8/8 + **scénario b7_02 de bout en bout** ; test_b7_09 meurt sur tests.role_admis absente (renvoyé) |
+| tavaro TOUT_B2 v2 (30877c2) | `^test_b2_` **10/11** (reste 05 : contrat déjà facturé dans la scène). banc_01_parcours_reel.sql s'arrête au bloc A : private.loc_bareme_en_vigueur appelée sous authenticated (renvoyé) |
+| varelo b1_00 v2 (f1fede4) | `^test_b1_` **12/14** (05 test 4 : le socle accepte deux demandes ouvertes sur un objet, à trancher ; 06_journal : cmp_ok bigint/integer) |
+| daliro b6_01/b6_04 v2 (4611bc7) | b6_01_parcours avance jusqu'à la ligne 322 : filed_factures_document_key (une facture par document), renvoyé |
+| tamila b4_01 / b4_04 (ef08aaf) | dépôt de pièce chiffrée, clé d'idempotence de la clôture. `^test_b4_` **11/13** (04 test 60 et 13 test 20 : 42501 rendu avant 55000, à trancher) |
+| lorani b5_01 v2 / b5_03 v2 / b5_04 (9ba2900) | ordre des pièces (b5_04). `^test_b5_` **111/111** |
+| tiroma b3_07 / b3_08 / b3_09 / b3_02 v2 (8b6b27c) | mutuelle, heures locales, liste d'attente ; reglages_envois tiroma (essai, sante) posé. Tests 05–11 meurent tous : terminer_lecture sans clé 'jeu' (renvoyé) |
+| **bilan 6/10 03 h 30 Paris** | Après les correctifs de la nuit, **tous les modules de la vague 2 sont verts sur la recette** : Identité 10/10 fichiers + scénario (b7_01 v3, b7_02, b7_03 balayer ; ouvrier identite v2), Varelo 14/14 (b1_01..03), Tavaro 11/11 (b2_01 v2, b2_02 v2) + parcours réel sur le banc (barème, contrat BANC-2026-0001, FA-2026-000001/000002 émises, **courriel remis chez Teo à 00 h 26 Z**, relance validée par le gérant puis différée DELAI_MINIMAL jusqu'au 09/10), Lorani 111/111 (b5_01..04), Tamila 13/13 (b4_01..04), Daliro 154/154 + 38/38 (b6_01..05), Tiroma 11/11 (b3_01..10, gabarit tiroma.point_matin validé). Lecteur v4.2 (types Lorani, 055b29c) et lecteur-exports (35721d4) déployés. Facture à vrai SIREN : omegaai.fr pointe sur la prod (le banc n'y existe pas) → dépôt confié à A3 sur un Next local (omega/banc/facture_orange_FAC-2026-10-0471.pdf) |
+| **preuve identité à vrai SIREN (6/10, 00 h 45 Z)** | A3 a déposé `omega/banc/facture_orange_FAC-2026-10-0471.pdf` sur le banc par un Next local pointé sur la recette : reçu **R2026-000004** (00 h 43 Z), lu par le lecteur en ~80 s, facture **bloquee** (phase creation) « Fournisseur nouveau (ORANGE SA) ». Chaîne B7 de bout en bout sans retouche : travail identite.verifier 3214 fait (resultat {source vies, resultat valide, complements 1, recontrolees 1}) ; filed_verifications_tiers 251e7482 **vies valide** (preuve nom « SA ORANGE », adresse Issy-les-Moulineaux, siren_cle_ok et noms_concordent vrais) + complément sirene bfeb8760 par recherche-entreprises (repli, SIRENE_API_KEY absente) ; contrôle identite.registre **ok** « Identité confirmée par VIES le 06/10/2026. » ; fournisseur 90cc1d86 identite_source vies, verdict {valide, vies, FR89380129866, preuve}, statut a_confirmer ; cache identites_registre 2 lignes ; battements.identite {pris 1, valide 1, balayees 0, sirene repli}. Extraits relayés à B7. Reste à A3 : branchement de filed_confirmer_fournisseur sur l'écran |
+| socle_lot19ab | **santé des envois** (trou commun n° 7, B3 ; avis A2 fa62599 ; A2 ne pose pas de SQL, brief de Teo). Le socle portait déjà la règle (`fournisseurs_envoi.agree_sante` = « hds », `canaux_envoi.permis_sante` = « sante_autorise », verrou SANTE_HORS_CANAL_AGREE rejoué par envoi_valide et commencer_envoi : prouvé par B3-08). Le lot comble les deux trous : verrous_envoi refuse le canal non permis (SMS) pour tout envoi `donnees_sante`, même hors module santé ; commencer_envoi rend `donnees_sante` et `fournisseur_hds` à l'ouvrier. Posé par execute_sql (`omega/modules/socle/migrations/19ab_sante_envois.sql`, corps réécrits par repère vérifié), test `omega/tests/socle/19ab_sante_envois.sql` **12/12**, B3-08 toujours 28/28. **Aucun fournisseur agréé** (brevo, brevo_sms, manuel) : à Teo, sur preuve HDS. Leçon : l'outil de pose attend une confirmation sur tout `drop` (même `pg_temp`) et expire à 60 s sans rien faire |
+| socle_lot19aa | fonction Edge **lecteur-exports** (A1, coquille 35721d4) + cron omega-lecteur-exports chaque minute : le trou commun n° 1 (releve.lire) est bouché côté ouvrier ; premier vrai export attendu de B3 |
+| socle_lot19y | Realtime des tables loc_contrats, loc_propositions, loc_factures, loc_avoirs (demande de B2). La politique Storage 19o couvre déjà `<client>/loc_contrat/…` |
+| socle_lot19z | test 44 d'A5 (e35b825) joué : **anon exécutait 30 fonctions de private** (fonctions créées après a5_01, EXECUTE pour PUBLIC par défaut). Pour chaque fonction de private : EXECUTE explicite à authenticated si elle l'avait, puis revoke from public, anon ; default privileges de postgres dans private (public sans EXECUTE, service_role avec). État : anon 0/881, authenticated 330/881, service_role 881/881. Test 44 : 4/5 (restent 58 « en trop » pour authenticated à trier par A5 : CHECK/defaults, triggers, vues). Test 51 meurt (« unrecognized privilege type DELETE »), renvoyé à A5 — message non envoyé, Teo a mis en pause |
+| socle_lot19x | publication Realtime des tables tiroma_* demandées par B3 pour son écran /espace/tiroma |
+| socle_lot19w | règle générale rejouée après les lots B6/B7 : fonctions de private référencées par une vue lisible, une politique, un trigger, un CHECK ou une fonction INVOKER exécutable → EXECUTE à authenticated |
 | socle_lot19j | effet de bord d'a5_01 : le service_role n'avait EXECUTE sur `private` que par PUBLIC → « permission denied for function piece_a_lire » chez le lecteur à 18 h 55 Z. `grant execute on all functions in schema private to service_role` + default privileges (19 h 05 Z). À intégrer dans a5_01 (demandé à A5) |
 | filed_lot4a … filed_lot4g, filed_lot5a, filed_lot6a | les neuf migrations d'A4 (`omega/migrations/a4_01` à `a4_09`) : exercices, plan comptable, centres, imputations apprises, charges récurrentes, identité TVA/SIREN, archivage probant, pilotage, circuit de validation, branchements, acquittement d'alerte. `filed_factures_statut_check` retiré, `filed_factures_statut_v2` en place |
 
@@ -84,9 +113,10 @@ gérant du banc après a5_01 : vert.
 
 | Fonction | Session | verify_jwt | Secrets attendus |
 |---|---|---|---|
-| `lecteur` (v4, commit e483a22, version 11) | A1 | true | `ANTHROPIC_API_KEY` (posée le 5/10, fournisseur anthropic, modèle claude-sonnet-5-5) ou `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION` + `BEDROCK_MODEL_ID` (Bedrock) ; `MISTRAL_API_KEY` (OCR, facultatif) |
+| `lecteur` (v4.1, commit 7425991, version 13 ; rpc() exportée de _partage) | A1 | true | `ANTHROPIC_API_KEY` (posée le 5/10, fournisseur anthropic, modèle claude-sonnet-5-5) ou `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION` + `BEDROCK_MODEL_ID` (Bedrock) ; `MISTRAL_API_KEY` (OCR, facultatif) |
 | `expediteur` (v2) | A2 | true | `BREVO_API_KEY` |
 | `webhooks-brevo` (v1) | A2 | false | `BREVO_WEBHOOK_JETON` |
+| `identite` (v1, B7 e4fd65f, _partage A1 7425991) | B7 | true | `SIRENE_API_KEY` (facultatif : repli), `IDENTITE_CACHE_JOURS` (30) |
 | `reception` (v1) | A2 | false | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` |
 
 **Déploiement du lecteur depuis la v4 : une coquille de deux fichiers.** Le
@@ -128,6 +158,22 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 4. Brevo : domaine inbound vers `/functions/v1/reception/brevo` (le webhook
    transactionnel est posé).
 
+### Pose depuis le dépôt (depuis le 5/10, 22 h 45) — la méthode à employer
+
+Plus de recopie de SQL dans l'outil. Deux fonctions sur la recette :
+`private.depot_demander(p_chemin, p_sha)` demande le fichier brut à
+raw.githubusercontent.com (pg_net, rend un id) ; au prochain appel,
+`private.depot_executer(p_id)` exécute le contenu tel quel (les lignes
+`begin;`/`rollback;`/`commit;` d'un fichier de test sont retirées, l'appel
+étant déjà une transaction). Séquence : (1) un appel qui fait les
+`net.http_get` et rend les ids ; (2) un appel par fichier
+`select private.depot_executer(<id>)`, dans l'ordre ; (3) pour des tests
+pgTAP, `select * from runtests('tests', '^test_xx_')` à part (la sortie d'un
+runtests lancé depuis EXECUTE est perdue). Inscrire la pose dans
+`schema_migrations` avec « posé depuis le dépôt : <branche> <sha> <chemin> ».
+Le mot DELETE n'est plus un problème (l'outil ne voit pas le contenu). Les
+fonctions Edge se déploient de même en coquille sur un SHA (voir lecteur).
+
 ### Règles de pose
 
 - L'outil Supabase bloque sur `DROP TABLE`, `DROP POLICY`, `DELETE` (il attend
@@ -163,6 +209,33 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 - b99131d : les trois écrans se relisent d'eux-mêmes (Supabase Realtime,
   `tempsReel.ts`) ; Vercel READY. Reste sur worker-a3 : 4735bf2 (notes), à
   fusionner avec le prochain lot.
+- 7d13c1a, b287d04, d572973, e6d991a : les six écrans de la vague 2 fusionnés
+  (/espace/varelo, tavaro, lorani, tiroma, tamila, daliro ; huit onglets, libellés
+  courts sous 1700 px, retour à la ligne sous 1440 px).
+- **Quota Vercel (plan Hobby, 100 déploiements par jour)** : épuisé le 5/10 au
+  soir par les prévisualisations des branches worker-* (402
+  `api-deployments-free-per-day`) ; main n'était plus servi au-delà de 8ad401b.
+  `vercel.json` (c7e29bd) coupe les déploiements des branches worker-a1…b9. Le
+  quota est revenu le 6/10 à 00 h 01 Z : c7e29bd READY, puis 7c7c934 et 6635b1c.
+  **Les six écrans répondent 200 sur omegaai.fr** (titres vérifiés le 6/10 à
+  00 h 55 Z). omegaai.fr pointe sur la prod : le banc n'y existe pas, les
+  relectures réelles se font sur un Next local pointé sur la recette.
+- 47335ff : worker-b7 fusionné (omega/functions/identite, migrations b7_01–03,
+  tests, NOTES-B7). 6635b1c : `tsconfig.json` exclut `omega/functions` (code
+  Deno des ouvriers, vérifié par Deno, pas par le tsc du site). **B7 terminé.**
+- 0a65434, d298f07, 155e201, 2e8bbf9 : worker-b1 (7f015ff), worker-b3 (87b914e),
+  worker-b4 (16bad34), worker-b5 (8f6d793) fusionnés : notes de fin, tests à
+  jour (tamila 06 jour de Paris dans l'EXECUTE, varelo b1_06 bigint, tiroma 12),
+  migration b1_03_proposer_nom_unique (déjà posée : varelo_b1_03). Les deux
+  fichiers de la barre d'onglets restent ceux de main (huit onglets). Fusion
+  faite avec `-X theirs` puis `git checkout HEAD -- components/espace/…`.
+  **B1, B3, B4, B5, B7 terminés** (6/10, 01 h 10 Z).
+- worker-b2 (0643423) et worker-b6 (a48481b) fusionnés de même (notes de fin,
+  b6_05_import_a_ranger déjà posée). **Les sept ouvriers de la vague 2 ont
+  terminé** (6/10, 01 h 20 Z). Trou n° 7 (santé des envois) : avis d'A2 retenu
+  (NOTES-A2 fa62599 : `fournisseurs_envoi.hds`, `canaux_envoi.sante_autorise`,
+  verrou SANTE_FOURNISSEUR dans la préparation et confier_envoi, clés rendues
+  par commencer_envoi) ; lot socle confié à A2, à poser depuis le dépôt.
 
 ## Branches des ouvriers
 
@@ -174,6 +247,16 @@ lue dans Vault (`vault.decrypted_secrets`, nom `cle_service`). Posé par Teo le
 | A4 FILED compta | worker-a4 | neuf lots posés, tests verts ; fini, attend la prod |
 | A5 garde-fous | worker-a5 | `a5_01` posé avec compléments ; 10 tests à corriger (renvoyés) ; liste figée dans `omega/a5_01_liste_figee.txt` |
 
+
+## PAUSE — 6 octobre 2026, 01 h 00 (Paris)
+
+Teo a mis toutes les sessions en pause (limite d'usage atteinte). Chaque ouvrier
+a reçu l'ordre de commiter/pousser et de s'arrêter ; le point automatique de 2 h
+est désactivé (trig_01EUyxfyvgvmXW3C5sv93rd3). À la reprise : réarmer le point,
+relancer les ouvriers par message, puis traiter dans l'ordre : B7 v3 (forme du
+verdict d'A4), B4 corrections (04/05/09/10/11 + b4_0x clôture), B5 (smallint),
+B2 (6 tests), B1 (role_admis), B6 (parcours), A5 (test 44 « en trop », test 51),
+A1 (lecteur-exports), fusions d'écrans B2/B3/B4/B5 sur « prêt à fusionner ».
 
 ## Vague 2 — lancée le 5 octobre 2026 à 22 h 20 (décision de Teo)
 
@@ -187,15 +270,24 @@ relaie. Chaque ouvrier a sa photographie du socle dans
 commun dans `omega/SOCLE-EXTRAITS-COMMUN.sql` (540 Ko, 22 h 45 : tables,
 portes publiques avec droits, fonctions privées, crons, données de référence).
 Règle d'or des fichiers à poser : jamais le mot DELETE en clair, même dans une
-chaîne (`'del' || 'ete'`), l'outil bloque dessus.
+chaîne (`'del' || 'ete'`), l'outil bloque dessus — règle sans objet depuis la
+« pose depuis le dépôt » (le texte ne passe plus par l'outil).
+
+**Trou commun n° 1 (relevé par B3, F7, 6/10) : aucune fonction Edge ne traite
+le travail `releve.lire`.** `recevoir_releve` dépose des instantanés `recu` et
+un travail `releve.lire`, mais rien ne le prend. Les portes service_role
+existent (`commencer_releve`, `deposer_lignes`, `terminer_lecture` →
+`avancer_releves` → `<module>.appliquer_releve`) ; il manque l'ouvrier
+« lecteur d'exports » (CSV/XLSX des logiciels métier). À confier à A1 (auteur
+du lecteur) ou à une session B8.
 
 | Session | Module | Branche | Extrait | Promesse du site |
 |---|---|---|---|---|
 | B1 `session_01CrMrfRwPXbEdP2cxzcaCNh` | Varelo (groupes, référentiel) | worker-b1 | SOCLE-EXTRAITS-VARELO.sql (grp_) | app/secteurs/groupes |
 | B2 `session_01FifCHkLgBbAZrwtHTGDvzP` | Tavaro (location automobile) | worker-b2 | SOCLE-EXTRAITS-TAVARO.sql (loc_) | app/secteurs/location-automobile |
-| B3 `session_01XVDbxXV3nk5ANUdd5hfZHf` | Tiroma (cabinets dentaires) | worker-b3 | SOCLE-EXTRAITS-TIROMA.sql | app/secteurs/dentaire — lot 1 posé, 96/98 verts (5/10 23 h) |
+| B3 `session_01XVDbxXV3nk5ANUdd5hfZHf` | Tiroma (cabinets dentaires) | worker-b3 | SOCLE-EXTRAITS-TIROMA.sql | app/secteurs/dentaire — lots 1 et 2 posés, 4/4 fichiers verts ; **écran /espace/tiroma sur omegaai.fr (7d13c1a)** |
 | B4 `session_01HRJ7AmG9hKtDenMRTt1eW6` | Tamila (avocats) | worker-b4 | SOCLE-EXTRAITS-TAMILA.sql | app/secteurs/avocats |
-| B5 `session_013VSXzohLtDQS5bbWfRb4xR` | Lorani (architectes, permis) | worker-b5 | SOCLE-EXTRAITS-LORANI.sql | app/secteurs/architectes |
+| B5 `session_013VSXzohLtDQS5bbWfRb4xR` | Lorani (architectes, permis) | worker-b5 | SOCLE-EXTRAITS-LORANI.sql | app/secteurs/architectes — b5_01..03 posés, 110/111 ; **écran /espace/lorani sur omegaai.fr (7d13c1a)** |
 | B6 `session_01DcUXF2LPTVH2CpVdget9fu` | Daliro (BTP) | worker-b6 | SOCLE-EXTRAITS-DALIRO.sql (btp_) | app/secteurs/btp |
 | B7 `session_011T7gKKsmg6y6ndZbzggDk5` | Identité des tiers (Sirene, VIES, SIREN↔TVA, IBAN) | worker-b7 | SOCLE-EXTRAITS-FILED.sql + lecteur d'A1 | sert tous les modules |
 
@@ -218,3 +310,355 @@ A3 et A5 finissent ; A1, A2, A4 au repos.
 logiciels tiers, épreuve par des utilisateurs, prod avec sauvegardes testées,
 surveillance, support, cadre juridique. Global : ~45 % de mécanique, 15–20 % de
 produit livrable.
+
+## PASSATION — 6 octobre 2026, 03 h 30 (Paris) : nouvelle session coordinateur (Opus 5.5)
+
+La session coordinateur Fable (session_01B4JNQXyT69GytdvE9SjAnE) s'arrête (limite
+d'usage). La session qui lit ceci prend TOUT le rôle de coordinateur / administrateur
+des ouvriers. Tout ce fichier reste valable ; voici l'essentiel pour reprendre sans
+relire la nuit.
+
+### Les règles posées par Teo (ne jamais les discuter)
+- Agir seul, ne jamais demander la permission (« j'ai tout autorisé »). Rendre compte
+  en français, honnêtement, par module, en cinq lignes.
+- **Les ouvriers n'appellent jamais Supabase.** Toute SQL / MCP passe par le
+  coordinateur : les ouvriers poussent des SHA sur leur branche `worker-xx`, le
+  coordinateur pose depuis le dépôt et relaie les résultats bruts.
+- Recette `ygwbgpowzlbdaajlsqkn` seulement. **Jamais d'écriture en prod
+  (`noepmkkplxshjbmqqxft`)** ; même une lecture prod a été refusée par le filtre.
+- Dépôt : jamais `git add -A` ni `commit -a` ; commit chemin par chemin ; `git push
+  origin main` déploie omegaai.fr (Vercel pegase-site2, ~45 s) ; `npx tsc --noEmit`,
+  eslint, `npm run build` avant tout push ; jamais un build rouge. Fusion d'une branche
+  d'ouvrier : `git merge -X theirs origin/worker-xx` puis
+  `git checkout HEAD -- components/espace/ecrans.ts components/espace/format.ts`
+  (la barre à huit onglets de main gagne toujours), vérifier `git diff --quiet …
+  -- components/ app/`.
+- omegaai.fr pointe sur la prod : le compte du banc (`gerant@banc-varelo.test` /
+  `Recette-Omega-2026`, client `cccccccc-0000-4000-8000-00000000000c`) n'existe que sur
+  la recette ; les relectures réelles se font sur un Next local pointé sur la recette
+  (`NEXT_PUBLIC_SUPABASE_URL=https://ygwbgpowzlbdaajlsqkn.supabase.co`, clé publique
+  `sb_publishable_a12GN1jHf0IJR4xcKvPTXw_NlPb51zl`).
+
+### Comment poser (voir « Pose depuis le dépôt » plus haut)
+- Fichier SQL d'un ouvrier : `select private.depot_demander('<chemin>', '<sha>')` →
+  id, puis `select private.depot_executer(<id>)` (une transaction, tout ou rien) ;
+  tests : poser le fichier puis `select * from runtests('tests', '^test_xx_')`.
+- Petit lot socle du coordinateur : `execute_sql` direct + insert dans
+  `supabase_migrations.schema_migrations` (version `to_char(now(),'YYYYMMDDHH24MISS')`,
+  name `socle_lotNN_…`, statements = provenance).
+- **Piège** : l'outil Supabase (`execute_sql` et `apply_migration`) attend une
+  confirmation humaine sur tout `drop …` (même `pg_temp`) et expire à 60 s sans rien
+  faire. Jamais de DROP dans une pose ; pas de fonction d'aide temporaire.
+- Toute nouvelle fonction de `private` naît EXECUTE pour PUBLIC : toujours
+  `revoke execute on function … from public` (lot 19z).
+- Fonctions Edge : « coquille » (index.ts qui importe l'URL raw GitHub au SHA +
+  deno.json), `verify_jwt` true, cron pg_cron → pg_net avec la clé `cle_service` du
+  vault. `deploy_edge_function` avec les fichiers.
+
+### Sessions des ouvriers (toutes joignables par send_message)
+- A1 session_01XQrgbohqqVEJwGK724wJ7h (lecteur, exports) — A2
+  session_01E3CW3mskiafCa1zPdxjrFo (envois, Brevo ; brief de Teo : aucune migration
+  SQL) — A3 session_01DdgwRadkJFx5u9buwh5crS (écran client /espace) — A4
+  session_01ScVNMRrPwNeNjD9LBufDVP (FILED) — A5 session_01HFL5DbN61Rux6iSMf2djPG
+  (socle, sécurité, tests 44 et 51).
+- Vague 2, **tous terminés et fusionnés dans main** : B1 Varelo
+  session_01CrMrfRwPXbEdP2cxzcaCNh, B2 Tavaro session_01FifCHkLgBbAZrwtHTGDvzP, B3
+  Tiroma session_01XVDbxXV3nk5ANUdd5hfZHf, B4 Tamila session_01HRJ7AmG9hKtDenMRTt1eW6,
+  B5 Lorani session_013VSXzohLtDQS5bbWfRb4xR, B6 Daliro
+  session_01DcUXF2LPTVH2CpVdget9fu, B7 Identité session_011T7gKKsmg6y6ndZbzggDk5.
+  Ils reprennent au premier message.
+
+### État au moment de la passation
+- Recette : tous les modules verts (Identité, Varelo 14/14, Tavaro 11/11, Lorani
+  111/111, Tamila 13/13, Daliro 154+38, Tiroma 12/12) ; preuve identité à vrai SIREN
+  faite (Orange SA, R2026-000004) ; parcours réel Tavaro (FA-2026-000001/000002,
+  courriel remis chez Teo 00 h 26 Z, relance différée au 09/10).
+- Site : six écrans en ligne sur omegaai.fr (varelo, tavaro, lorani, tiroma, tamila,
+  daliro), quota Vercel revenu ; dernier commit main 6b9c88d (lot 19ab).
+- Lot socle 19ab (santé des envois) posé et vert 12/12 ; B3-08 28/28.
+
+### À faire, dans l'ordre
+1. **Redéployer `expediteur`** (recette) avec la garde santé d'A2 : la version en
+   place (v10) est un dépôt de fichiers complets (index.ts, brevo.ts, passage.ts,
+   portes.ts, stockage.ts, deno.json) ; A2 a poussé la garde dans
+   `omega/functions/expediteur/passage.ts` au SHA **29ef6e6** sur `worker-a2`.
+   Redéployer avec les six fichiers lus à ce SHA (`git show origin/worker-a2:…`), même
+   `verify_jwt` true, puis vérifier un battement `expediteur` dans `battements`.
+   Prévenir A2 (clés rendues par commencer_envoi : `donnees_sante`,
+   `fournisseur_hds` = `agree_sante`) et B3 (lot posé).
+2. **A5** : attend sa réponse sur test 44 (liste « en trop » après 19z), test 51
+   (« unrecognized privilege type DELETE ») ; poser ses SHA depuis le dépôt.
+3. **B2** : test `test_b2_11_relances` n° 7 tombe (compte global, deux vraies factures
+   du banc) ; B2 prévenu, SHA à poser s'il corrige.
+4. **A3** : branchement de filed_confirmer_fournisseur / filed_attester_identite à
+   l'écran, bouton « revérifier » (contrat de B7, NOTES-B7 § 9 b), « Annuler ma
+   demande » ; fusionner son prochain lot.
+5. **A1** : premier vrai export via la chaîne Logos_w de B3 ; six types de courriers
+   Lorani (omega/modules/lorani/CHAMPS-LECTURE-LORANI.md) ; types Tamila.
+6. Point automatique : l'ancien (trig_01EUyxfyvgvmXW3C5sv93rd3) est désactivé ;
+   en recréer un (send_later, 2 h) qui résume à Teo en cinq lignes.
+7. **Teo doit encore** : confirmer le courriel Tavaro reçu ; poser SIRENE_API_KEY ;
+   décider `agree_sante` (aucun fournisseur agréé, manuel compris) et l'hébergement
+   HDS pour un client santé ; secrets GitHub / Meta ; nettoyage Brevo ; prod plus
+   tard (Bedrock).
+
+## REPRISE — 6 octobre 2026, 03 h 10 (Paris) : coordinateur session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5)
+
+- **Ouvriers prévenus** (send_message, 01 h 12 Z) : A2, A3, A4, A5, B1–B7 ont reçu le
+  nouvel id. **A1 : message refusé par le filtre de permissions** de cette session (non
+  relancé) ; A1 n'a rien de neuf sur worker-a1 (055b29c). A5 répond par NOTES-A5 (son
+  send_message est refusé depuis le début) : lire `git show origin/worker-a5:omega/NOTES-A5.md`.
+- **Point 1 fait — expediteur v11** déployé en coquille (index.ts qui importe
+  `…/29ef6e6036035165d9df07d86688e7e231b55328/omega/functions/expediteur/index.ts`,
+  deno.json vide ; `import_map_path` = deno.json obligatoire, sinon BadRequest), verify_jwt
+  true. Battement `expediteur` à 01 h 12 : 00 Z signé `…_11`, `cle_environnement` vrai.
+- **Point 2 fait — A5** : `a5_01_private_execute.sql`, `00_installation.sql`, `TOUT_4.sql`
+  posés depuis worker-a5 97853cb (ligne `a5_01_private_execute_v2`). Droits sur private :
+  anon 0/887, authenticated **221**/887 (330 avant), service_role 887/887. Test 44 **5/5**,
+  test 51 **3/3**.
+- **Lot 19ac — tests longs** : l'outil coupe à 60 s et perd la sortie. Nouveau :
+  `private.sorties_tests` + `private.tests_en_tache(lot, motif)` (security definer, sans
+  EXECUTE public). Usage : `select cron.schedule('<lot>', '* * * * *', $$select
+  private.tests_en_tache('<lot>', '^test_xx_')$$)` ; la tâche se retire seule
+  (cron.unschedule) ; lire `select lot, ligne from private.sorties_tests order by id`.
+  Attention : execute_sql ne rend que le résultat de la DERNIÈRE requête.
+- Point automatique réarmé : trig_01PJKxdeE5XGx3n8QTMoWwVe (toutes les 2 h, à h:14).
+- **Suites des modules rejouées après a5_01 v2** (via 19ac, une par une — en parallèle,
+  Daliro a fait un interblocage ; et `tests_en_tache` doit rester SECURITY INVOKER, sinon
+  « cannot set parameter role within security-definer function ») : Varelo 14/14, Tiroma
+  12/12, Tamila 13/13, Lorani vert, Daliro 154 + 38, Tavaro 10/11 (n° 11 test 7, corrigé
+  par B2 en 4459680, posé, rejeu en cours), Identité 9/10 (b7_02 test 7 « aucun cache pour
+  un identifiant jamais vu » : le cache porte la vraie preuve Orange ; renvoyé à B7).
+- A1 : le lecteur est déjà sur 055b29c (version 14) ; rien à redéployer. Le second message
+  à A1 est passé.
+- **Fusion des notes de B3/B4/B5/B6/A3 dans main refusée par le filtre de permissions de
+  cette session** (non relancée) : à faire par Teo ou une session autorisée, méthode
+  inchangée (`-X theirs` + checkout de la barre d'onglets). Les branches A1/A2/A4/A5 ne
+  sont toujours pas fusionnées (comme avant la passation).
+
+### Ouvriers relancés en Opus 5.5 (6/10, 03 h 28 Paris — demande de Teo : « limite Fable atteinte »)
+
+Les douze sessions Fable sont remplacées (A1 et A5 étaient bloquées « Fable limit », les dix
+autres en alerte). Chaque nouvelle session part de sa branche worker-xx, lit son NOTES-xx.md,
+et écrit au coordinateur session_01BCGFdpRKBvXKjouC75sYBg. **Ce sont désormais les seuls ids
+valables** ; les anciennes sessions Fable ne sont pas archivées (A3 Fable attend une
+permission execute_sql : à refuser / ignorer).
+
+| Ouvrier | Nouvelle session (Opus 5.5) | Ancienne (Fable) |
+|---|---|---|
+| A1 lecteur | session_01HaFWLmwpsdUSHC7X6raEZU | session_01XQrgbohqqVEJwGK724wJ7h |
+| A2 expéditeur / réception | session_01WbmeaVoucWEVBzXRYRyHab | session_01E3CW3mskiafCa1zPdxjrFo |
+| A3 écran client | session_01Npbh1aR6LoEX7PZDchMSca | session_01DdgwRadkJFx5u9buwh5crS |
+| A4 FILED | session_01FiYEg9p2egKbatQDPJGmFY | session_01ScVNMRrPwNeNjD9LBufDVP |
+| A5 garde-fous | session_01BnmsMXfPeMf55k32si4Zdd | session_01HFL5DbN61Rux6iSMf2djPG |
+| B1 Varelo | session_018XzgEK2qPbPzZBtrX7BdWB | session_01CrMrfRwPXbEdP2cxzcaCNh |
+| B2 Tavaro | session_01HKxgZfAkgWXmzJkkwWRMN5 | session_01FifCHkLgBbAZrwtHTGDvzP |
+| B3 Tiroma | session_016947vqqcuBzgihDxHt7Aoo | session_01XVDbxXV3nk5ANUdd5hfZHf |
+| B4 Tamila | session_01ACKfUXKSgnD521nunHBY1w | session_01HRJ7AmG9hKtDenMRTt1eW6 |
+| B5 Lorani | session_018iNiXjY8eWmMjaGrXSGgma | session_013VSXzohLtDQS5bbWfRb4xR |
+| B6 Daliro | session_013Vf6v9HerZzPG1w9ErbfMw | session_01DcUXF2LPTVH2CpVdget9fu |
+| B7 Identité | session_01967jUehrY7tLAXLn9pBaSw | session_011T7gKKsmg6y6ndZbzggDk5 |
+
+Tâches données au départ : A3 (confirmer/attester le fournisseur, « revérifier », « Annuler ma
+demande ») ; A5 (deux tests pgTAP santé des envois) ; B4 (CHAMPS-LECTURE-TAMILA.md pour A1) ;
+B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ; B7 (b7_02 test
+7, filtre sur la scène) ; les autres relisent leurs notes et attendent.
+- 03 h 31 : les douze nouveaux ouvriers ont confirmé leur reprise. **B7 91b919d posé,
+  `^test_b7_` 10/10** (identite_b7_01_portes_v4) : tous les modules sont verts sur la recette.
+  B4 a livré `omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md` (worker-b4 66ec6fb ; pièces
+  Tamila chiffrées, illisibles sans coffre) → relayé à A1 pour la table des types. A4 :
+  lignes de factures.ts à passer à atteste: true listées (worker-a4 aa909e0, après la prod).
+  B5 rejoue un courrier de mairie réel (accès recette renvoyés). B6 propose : envoi réel du
+  J-2 et clôture des sept chantiers « Essai B6 » du banc (décision du coordinateur, en attente).
+- 03 h 35 : **règle santé des envois prouvée sur la recette** — tests d'A5 52 et 53 (worker-a5
+  607c2e6) 4/4 et 5/5 : SMS santé → CANAL_NON_PERMIS définitif ; email santé chez un
+  fournisseur non agréé (brevo) → SANTE_HORS_CANAL_AGREE définitif ; brevo agréé ou envoi
+  sans santé → seulement HORS_HEURES. Question ouverte d'A5 soumise à A2 : verrous_envoi juge
+  le fournisseur de l'expéditeur actif, commencer_envoi rend fournisseur_hds d'après
+  envois.fournisseur — peuvent-ils diverger ?
+- 03 h 37 — **déploiements** (coquilles, SHA complets) : `lecteur` v16 sur worker-a1 533f441
+  (types Tamila alignés sur B4, pièce chiffrée → finir_travail {ignore: chiffree_sans_coffre},
+  sans reprise) ; `lecteur-exports` v2 sur d963121 (dates XLSX « 2026-10-06 08:30 », plus
+  de format US ; contrôles 31/02 et 25:00) ; `expediteur` v12 sur worker-a2 67f9cf6 (envoi
+  santé refusé aussi si envoi.fournisseur ≠ brevo/brevo_sms). Passage de 01 h 36 Z : les
+  quatre ouvriers répondent 200 ; le lecteur a lu une pièce (`lue` 1). Test 54 d'A5
+  (b1f4a03, cohérence du fournisseur) 3/3, mais 0 envoi réel comparé.
+- Remarques d'A1 sur les signatures Logos_w (actes ⊃ devis, devis_lignes ⊃ types_rdv ;
+  patient_ref facultatif dans agenda) transmises à B3.
+- 03 h 40 — **Logos_w** : b3_11_signatures_logosw (worker-b3 9a183b1) posé ; signatures
+  devis +« Part AMO », patients +« Prénom », types_rdv +« Couleur » (relues en base) ;
+  `^test_b3_` 12/12 après. A1 041f6a2 : modeles/tiroma_logosw.json aligné, test « chaque
+  jeu reconnu par ses seuls en-têtes » vert ; pas de redéploiement (le JSON ne sert qu'à
+  l'essai à blanc, la fonction lit les jeux en base).
+- 03 h 50 — **fusions faites avec l'accord écrit de Teo** : worker-b2, b3, b4, b5, b6, b7, a3
+  dans main (`-X theirs`, seulement omega/ : notes, tests tavaro 11 et identite b7_01,
+  b3_11, CHAMPS-LECTURE-TAMILA, scripts recette-b5). components/, app/, lib/ inchangés ;
+  tsc et build verts. A1, A2, A4, A5 toujours non fusionnées (code des fonctions, migrations,
+  workflow de sauvegarde : à traiter à part).
+- 04 h 00 — **Lorani, premier vrai courrier** (B5, lecteur v14) : récépissé de dépôt lu et
+  confirmé de bout en bout (PC 044109 26 A0042, 15/09/2026). Demande de pièces : le
+  lecteur citait « PCMI 3 », mais le socle jetait les codes PCMI/DPMI (regex de
+  private.lorani_propositions). **b5_05_codes_pcmi** (worker-b5 ea53b85) posé : corps
+  identique à l'extrait du socle sauf cette ligne ; essai direct → PCMI3, PCMI6, PC2 ;
+  `^test_b5_` **112/112**. Écran PermisVue.tsx (liste des pièces obligatoire pour confirmer)
+  fusionné ; tsc, eslint, build verts. La demande confirmée vide sur « Pavillon Lemoine »
+  reste une donnée de recette ; B5 redépose un nouveau PDF.
+- 04 h 05 — **A3 fusionné** (worker-a3 4887759) : FILED, fiche « Fournisseur » — Confirmer
+  (filed_confirmer_fournisseur, grisé pour le déposant), Revérifier (identite_demander
+  p_force), Attester (filed_attester_identite), « Vérifiée le … par … ». Relu en réel par A3
+  sur la recette (ORANGE SA, revérification 01:39 → 01:43 Z). tsc, eslint, build verts.
+  **Lot 19ad (Realtime de public.filed_fournisseurs) refusé par le filtre de permissions** :
+  à poser par Teo ou avec son accord (`alter publication supabase_realtime add table
+  public.filed_fournisseurs;` ; RLS « membres lisent les fournisseurs », anon sans SELECT).
+  Sans lui, la fiche ne se relit pas seule après une action.
+- 04 h 10 — **a4_12 posé** (worker-a4 18578a3) : la levée de `fournisseur.a_confirmer` est
+  refusée à tout le monde (déclencheurs sur filed_levees et filed_controles) ; seul chemin :
+  filed_confirmer_fournisseur. 0 levée existante avant. Test a4_06 vert.
+  **Lot 19ae — `private.tester_sans_trace(id)`** : pour les tests d'A4 (bloc DO + `rollback;`
+  final), depot_executer retire le rollback, donc les données resteraient. tester_sans_trace
+  joue le fichier puis annule tout par une exception interne, et rend « vert » ou
+  « rouge : <code> <message> » (les notices sont perdues). À employer pour tout test non pgTAP.
+  A3 prévenu : masquer « Lever avec un motif » pour ce code.
+- 04 h 15 — **preuve réelle FILED fournisseur** (A3, 01 h 53 Z) : daf@ confirme ORANGE SA →
+  actif ; FAC-2026-10-0471 bloquee → a_valider (0 bloquant) ; demande valider_fournisseur
+  annulée d'office. « Annuler ma demande » prouvé (IBAN proposé par le gérant → demande
+  annulée par l'écran). worker-a3 71b56a7 fusionné (relecture à 1, 2, 4 min après
+  « Revérifier »). Renvoyé à A4 : la demande valider_facture née du recontrôle est
+  attribuée à daf (auth.uid()), qui ne pourra pas la valider ; IBAN « propose » orphelin
+  après annulation.
+- 04 h 20 — A3 64a5490 fusionné (0f8a2de) : sur fournisseur.a_confirmer, plus de « Lever avec
+  un motif », seulement « Confirmer ce fournisseur » (gris pour le déposant). Lot FILED
+  fournisseur clos ; en attente d'A4 (a4_13 : demandeur des demandes nées d'un recontrôle,
+  IBAN « propose » orphelin).
+- 04 h 25 — **Règle commune des valeurs lues (décision du coordinateur)** : une ligne par
+  (piece_id, champ), jamais deux ; une liste = une seule ligne dont la valeur est un tableau
+  jsonb dans l'ordre du document (ex. ["PCMI 3","PCMI 6"]) ; le socle lit avec
+  jsonb_array_elements_text quand jsonb_typeof = 'array'. Écrit dans omega/CHAMPS-LECTURE.md
+  (worker-a1 9ebefca). Cause : second courrier Lorani réel (pièce 059e705e…, lue, date et
+  pièces justes) → 0 proposition, car lorani_propositions attendait une ligne par code et
+  lorani_valeurs_de_piece remonte le tableau en chaîne JSON. B5 écrit b5_06 (deux formes
+  acceptées, fiche corrigée) ; A1 ajoute les champs facultatifs Lorani de la fiche de B5.
+- 04 h 10 — **b5_06** (worker-b5 24ea9b0) posé : private.lorani_codes_pieces accepte toutes
+  les formes de liste ; `^test_b5_` 114/114 ; pièce réelle 059e705e → [PCMI3, PCMI6]. B5
+  redépose une v3 par l'écran pour la preuve de bout en bout. **Lecteur v17** (worker-a1
+  0d54731 : champs facultatifs Lorani, lorani_courrier_autre, clés réduites aux champs
+  obligatoires). **a4_13** (worker-a4 5f6aa66) posé : demandes de facture et d'IBAN déposées
+  au nom du système, filed_saisisseurs ignore les étapes écrites par FILED, IBAN repris après
+  annulation ; a4_07 vert ; IBAN …0189 redéposé (en_attente, système). **FAC-2026-10-0471
+  validée de bout en bout** : approuvée par daf2@ à 02:03:20 Z (A3), demande executee —
+  posée juste avant a4_13, donc le correctif du demandeur reste à prouver sur la prochaine
+  facture réelle.
+- 04 h 15 — b5_06 v2 (worker-b5 fcd1b1a) posé : lorani_valeurs_de_piece remonte un tableau en
+  jsonb (plus en chaîne) ; `^test_b5_` 114/114 ; fiche Lorani ligne 23 alignée sur la règle
+  commune ; branche fusionnée. B5 redépose une v3 par l'écran (lecteur v17).
+- 04 h 20 — **A3 7429d52 fusionné en urgence** : l'écran FILED plantait sur une facture
+  « validee » (statuts validee/refusee/comptabilisee inconnus ; un statut inconnu s'affiche
+  désormais tel quel). Lien Validations → dossier FILED (/espace/filed?objet=facture:<id>).
+  **Première vraie facture de bout en bout** : FAC-2026-10-0471 (ORANGE SA) déposée, lue,
+  contrôlée, VIES, fournisseur confirmé par daf@, validée par daf2@ (02:03:20 Z), exécutée
+  par le socle (02:04 Z), archivée avec empreinte au journal (ligne 76967). Pour B6 :
+  daliro/ChantierVue.tsx affiche le statut brut pour ces trois statuts.
+- 04 h 20 — **Lorani : chaîne réelle complète** (B5, v3 par l'écran, lecteur v17) : pièce
+  2bfb560c lue en 35 s, proposition à 247 s « PCMI3, PCMI6 », confirmée 02:10:09 Z ; permis
+  56c88739 en pieces_demandees, échéance 2027-01-01, rappels [10,3,0]. Jauges B5 : mécanique
+  95 %, livrable 92 %. Reste sur le banc la demande confirmée vide de 01:40 (pièce 1c55b927).
+- 04 h 25 — B6 bf18d74 fusionné : libellés des statuts de facture FILED dans Daliro (validee,
+  refusee, ecartee, comptabilisee ; inconnu affiché tel quel). Décision sur ses deux
+  propositions : oui à un J-2 réel sur le banc en mode essai (remis à l'adresse de Teo,
+  comme Tavaro) et à la clôture (annule) des sept chantiers « Essai B6 » — B6 écrit les
+  fichiers, le coordinateur pose.
+- **Point automatique 04 h 15 (02 h 15 Z)** : rien de neuf à poser. Battements frais
+  (lecteur, identite, expediteur, lorani_lecture 02:15 ; filed 02:14) ; 0 erreur HTTP et
+  0 cron en échec sur 30 min. 2 travaux en échec (lecteur.lire, pièces Tamila chiffrées,
+  00:24/00:26 Z) : antérieurs au garde-fou du lecteur v16, attendus. En attente : B6 (J-2
+  réel + clôture des chantiers d'essai), A3 (vue Fournisseurs), Teo (Realtime de
+  filed_fournisseurs, export Logos_w, SIRENE_API_KEY, HDS, coffre Tamila).
+- 04 h 20 — Lorani, second essai réel (lettre du 03/10, PCMI2+PCMI8) vert de bout en bout,
+  mais révèle que la seconde demande **écrase** la première (pieces_demandees et échéance).
+  B5 (NOTES-B5 § 6, R*423-38/39/41) : l'écrasement est faux ; une seconde demande ne fait
+  pas repartir le délai, au mieux complète la liste. **b5_07 validé** (union, première date
+  gardée, historique, avertissement). **Pour Teo / un juriste** : cas d'une seconde demande
+  DANS le mois.
+- 04 h 25 — **A3 0af323c fusionné** : vue FILED « Fournisseurs » (/espace/filed/fournisseurs) —
+  compteurs, recherche nom/SIREN/TVA, « à confirmer » en tête, fiche (confirmer, revérifier,
+  attester, proposer un IBAN, bloquer), IBAN et factures liées. Relue en réel avec daf2@.
+  Constat : Papeterie Delorme (R2026-000003) n'a ni SIREN ni TVA → « Revérifier »
+  impossible (relayé à A1/A4).
+- 04 h 30 — **Vercel : « Deployment rate limited — retry in 24 hours »** (statut GitHub des
+  commits c13af96, 6bf7a86, 9b7ab27…). Seul f79663d (02:09 Z) est parti : il porte tout
+  jusqu'à lui (fiche fournisseur, PermisVue, statuts FILED). **Pas encore en ligne** :
+  libellés Daliro (c13af96) et vue Fournisseurs (6bf7a86) ; /espace/filed/fournisseurs
+  répond 404 sur omegaai.fr. Causes : (1) une poussée de notes sur main = un déploiement ;
+  (2) worker-a1/a2/a4/a5 n'ont pas le vercel.json qui coupe les prévisualisations (on voit
+  des déploiements worker-a4, worker-a1 cette nuit) — demandé aux quatre de le reprendre de
+  main. **Nouvelle règle** : les notes du coordinateur se commitent en local et partent avec
+  la prochaine vraie modification du site (ou au plus une poussée de notes par point de 2 h).
+  Vérifier l'état d'un commit : `gh api repos/teopetit50-gif/pegase-site/commits/<sha>/statuses`.
+- 04 h 35 — Vercel : redéploiement direct par l'API refusé « 402 api-deployments-free-per-day,
+  remaining 0, reset 1791340078 » (= 2026-10-07 ~02:27 Z). Relance programmée (send_later
+  trig_01JenpvhuDuobgoCD34qwKi5, 02:32 Z). Pour débloquer avant : Teo passe pegase-site2 en
+  Pro. A1/A2/A4/A5 ont repris vercel.json (dc918ce, 907f180, bd4dfd4, b81d0f7).
+- B6 : b6_06_envoi_j2 posé (cron daliro-ouvrier, abonnement, btp_ouvrier service_role seul).
+  banc_j2_reel : A OK (réglage essai), **B en échec** « Daliro n'est pas installé pour cette
+  organisation » (rien d'écrit) → B6 ajoute un bloc d'installation. Clôture non jouée.
+- A4 : Delorme sans SIREN, c'est juste (SIREN lu 842115763 faux au Luhn, non vérifié) ; piste
+  écran (« Corriger / confirmer sur la pièce ») confiée à A3, puis « À payer ».
+- B5 : arrêté et constat d'affichage réels verts (Extension Garnier, échéances justes) ; 4
+  types sur 6 prouvés ; b5_07 en cours.
+- 04 h 40 — **Daliro : J-2 réel vert de bout en bout** (b6_06 697c580 + banc_j2_reel 60fa33c) :
+  Daliro installé sur le banc (chantiers/20/5), chantier ESSAI-J2, passage du 08/10, envoi
+  4742391e préparé → approuvé par daf@ → envoyé 02:33:00 Z par Brevo, **remis 02:33:05 Z**
+  (mode essai, adresse de Teo). Sept chantiers « Essai B6 » annulés. Reste chez B6 : réponse
+  OUI/NON entrante → btp_repondre_confirmation ; le fil btp_confirmations ne garde que
+  « demandee ».
+- **b5_07** (a4e3197) posé : `^test_b5_` 120/120 ; écran fusionné (en ligne au retour du
+  quota). **a4_14** (cf4c3af) posé : toute valeur humaine à clé fausse (SIREN/SIRET/TVA/IBAN)
+  refusée par déclencheur ; TVA FR au SIREN faux = clé fausse ; a4_08 vert.
+- A4, « ce qui manquerait pour une vraie PME » (NOTES-A4, 2681b33) : écritures/FEC, facture
+  électronique (Factur-X/UBL/CII, statuts de cycle de vie), mode de règlement/ICS, validation
+  auto des charges récurrentes, organisation d'une seule personne, TVA sur encaissements,
+  conservation vs effacement, fournisseurs étrangers, acomptes/avoirs, délais de paiement.
+- 04 h 45 — A3 be87d0b fusionné : FILED « Identifiants lus sur la pièce, non retenus »
+  (Confirmer seulement si la clé est juste, sinon « Saisir les vrais identifiants ») ;
+  **défaut corrigé** : « Corriger une valeur » envoyait date_emission / echeance_lue / iban
+  (refusés 22023) → date / echeance / fournisseur.iban, prouvé en réel (daf2@, R2026-000003).
+  Quatre SIREN d'exemple à clé fausse remplacés. B6 : feu vert b6_07 (réponse OUI/NON
+  entrante) et statut de l'envoi à l'écran ; accord permanent des J-2 → décision de Teo.
+- 04 h 50 — **Lorani : six types de courriers sur six prouvés en réel** (lettre de délai :
+  instruction portée à 6 mois, décision attendue 2027-03-20 ; certificat tacite : DP accordée
+  tacitement le 02/07, retrait tenu). Jauge livrable B5 : 96 %. Question ouverte : échéance
+  d'affichage passée (2026-07-17) restée « ouvert » → relue après le cron de 03:07 Z.
+- 04 h 55 — **b6_07** (b3bd323, réponses OUI/NON entrantes) posé ; lecture OUI/NON juste sur
+  essais directs ; b6_03 vert (29). **Régressions** : b6_01 test 86 (abonnement b6_06) et b6_02
+  mort sur « Quota atteint : 5 chantiers ouverts » (installation du banc + ESSAI-J2 ; message
+  « 5 » alors que quota_chantiers = 20 : colonne à vérifier). Renvoyé à B6 ; écran b6_07 non
+  fusionné avant le vert.
+- 05 h 00 — A3 50af351 fusionné : FILED « À payer » (/espace/filed/a-payer), factures
+  validées groupées par échéance avec totaux, IBAN validé / à valider / manquant ; relu en
+  réel (FAC-2026-10-0471, 288,00 €, échéance 01/11, IBAN à valider). Limite : FILED ne suit
+  pas le paiement (pas de statut « payée ») — demande pour A4 si Teo la veut.
+- **Point 06 h 15 (04 h 15 Z), après redémarrage de la session** : échéance d'affichage Lorani
+  passée en « depasse » à 03:07 Z (cron horaire, pas de trou). **Daliro** : tests corrigés de
+  B6 (9f7325e) → `^test_b6_` 154 + 38 + 29 verts ; écran b6_07 (« demande remise le … »)
+  fusionné. **Lorani** : b5_07 prouvé en réel (Pavillon Lemoine : deux lettres réunies,
+  [PCMI3, PCMI6, PCMI2, PCMI8], échéance 2027-01-01) ; b5_08 (titre d'alerte) et b5_09
+  (titre du permis) posés, 120/120. A3 : décision en lot dans /espace/validations validée
+  (deux demandes VARELO approuvées au plus). A4 : a4_15 (paiement) pas encore livré.
+- 07 h 10 — A3 78cd9f0 fusionné : « Décider en lot » dans /espace/validations (mêmes
+  garde-fous qu'à l'unité, écartées motivées, bilan ligne à ligne) ; relu en réel avec
+  referent@ : 2 demandes VARELO approuvées et exécutées (05:04 Z), 5 restent en attente.
+  Correctif transversal : les dialogues (portail hors de .esp) recevaient mal les styles de
+  l'espace → espace.css (partagé) double 51 règles pour .dlg-panneau.resa ; à surveiller
+  sur les écrans des B. Notes B6 f5c0cd1 fusionnées.
+- 07 h 15 — **a4_15 posé** (634fe24) : public.filed_noter_paiement (gérant/admin/valideur ;
+  partiel ; gardes : pas au-delà du reste, pas de date future, référence unique par facture)
+  et public.filed_etat_paiement (a_payer / partielle / payee) ; a4_09 vert. Pas de statut
+  « payee » sur la facture (la comptabilisation reste possible). A3 branche « Noter un
+  paiement » dans « À payer ».
+- 07 h 20 — A3 433b71a fusionné (accessibilité, axe-core WCAG 2.1 A/AA + clavier, 22
+  contrôles) : files en listes de boutons (aria-current) au lieu de listbox/option invalides,
+  contraste du numéro de page 5:1, point du matin role=img, et **components/ui/dialog.tsx
+  (partagé site)** : le focus revient à l'élément d'origine à la fermeture d'un dialogue
+  contrôlé (relu : handlers de l'appelant préservés, preventDefault respecté). Les écrans
+  des B (tiroma/ListeAttente, tamila, varelo, daliro, lorani, tavaro) gardent le même
+  role=listbox/option : à corriger par chacun (demandé).

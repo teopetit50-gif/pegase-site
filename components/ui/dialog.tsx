@@ -83,16 +83,43 @@ function DialogOverlay({
   );
 }
 
+/* Le focus rendu à la fermeture (06/10/2026, recette d'accessibilité de
+   l'espace client) : Radix le rend au `DialogTrigger` — mais nos dialogues
+   s'ouvrent presque tous en mode contrôlé, par un bouton ordinaire, sans
+   Trigger ; le focus tombait alors sur <body> et l'utilisateur au clavier
+   repartait du haut de la page. Le panneau retient l'élément qui avait le
+   focus à l'ouverture et le lui rend, sauf si l'appelant a décidé autrement
+   (preventDefault dans son propre onCloseAutoFocus). */
 function DialogContent({
   className,
   children,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>) {
+  const origine = React.useRef<HTMLElement | null>(null);
   return (
     <DialogPortal>
       <DialogOverlay />
       {/* `resa` sur le panneau : voir l'adaptation n° 6 en tête de fichier */}
-      <DialogPrimitive.Content className={cn("dlg-panneau resa", className)} {...props}>
+      <DialogPrimitive.Content
+        className={cn("dlg-panneau resa", className)}
+        onOpenAutoFocus={(e) => {
+          const actif = document.activeElement;
+          origine.current = actif instanceof HTMLElement && actif !== document.body ? actif : null;
+          onOpenAutoFocus?.(e);
+        }}
+        onCloseAutoFocus={(e) => {
+          onCloseAutoFocus?.(e);
+          const cible = origine.current;
+          origine.current = null;
+          if (!e.defaultPrevented && cible && cible.isConnected) {
+            e.preventDefault();
+            cible.focus();
+          }
+        }}
+        {...props}
+      >
         {children}
         <DialogPrimitive.Close className="dlg-fermer" aria-label="Fermer">
           <X width={16} height={16} strokeWidth={2} aria-hidden="true" />

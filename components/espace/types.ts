@@ -163,9 +163,12 @@ export type DocumentFiled = {
   motif: string | null;
   lu_le: string | null;
   traite_le: string | null;
+  depose_par?: string | null;
 };
 
-export type StatutFacture = "a_completer" | "bloquee" | "a_valider" | "ecartee";
+/* filed_factures_statut_v2 (a4_02) : après la validation, la facture est
+   validée, refusée ou comptabilisée */
+export type StatutFacture = "a_completer" | "bloquee" | "a_valider" | "ecartee" | "validee" | "refusee" | "comptabilisee";
 
 export type Facture = {
   id: string;
@@ -255,6 +258,23 @@ export type Fournisseur = {
   pays: string | null;
   statut: "a_confirmer" | "actif" | "bloque" | "refuse";
   regime_tva: string | null;
+  /* a4_10 : la pièce qui l'a fait naître, sa confirmation, et le verdict
+     sur son identité (registre public ou personne) */
+  document_origine?: string | null;
+  confirme_le?: string | null;
+  confirme_par?: string | null;
+  identite_verifiee_le?: string | null;
+  identite_source?: "sirene" | "vies" | "humain" | null;
+  identite_verdict?: VerdictIdentite | null;
+};
+
+export type VerdictIdentite = {
+  resultat?: "valide" | "invalide" | "indisponible" | string;
+  registre?: string;
+  identifiant?: string;
+  source?: string;
+  verifie_le?: string;
+  preuve?: Record<string, unknown> | null;
 };
 
 export type IbanFournisseur = {
@@ -359,6 +379,9 @@ export type DossierFiled = {
   piece: Piece | null;
   pages: PagePiece[];
   valeurs: ValeurPiece[];
+  /* qui a déposé la pièce d'origine du fournisseur : cette personne ne le
+     confirme pas (filed_confirmer_fournisseur, a4_10) */
+  origine_deposee_par?: string | null;
 };
 
 /* ——— le point du matin ——— */

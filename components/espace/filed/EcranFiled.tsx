@@ -14,21 +14,23 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Upload } from "lucide-react";
+import Link from "next/link";
+import { Building2, Upload, Wallet } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
-import { ENTITES, EXEMPLE_CLIENT_ID, SIEGE, nomEntite } from "../exemples/socle";
+import { ENTITES, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE, nomEntite } from "../exemples/socle";
 import { useSource } from "../source";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import type { Commande, DossierFiled, Fournisseur, LigneCommande, MotifRefus } from "../types";
-import { ETATS, FAMILLES, NATURES, STATUTS_FACTURE, famille, type Famille } from "./etats";
+import { FAMILLES, NATURES, etatDocument, famille, statutFacture, type Famille } from "./etats";
 import { chargerCommandes, chargerDossier, chargerFournisseurs, chargerListe, deposerDocument, monClient, type Apercu } from "./portes";
 import DossierVue from "./DossierVue";
+import { lireCible, trouverCible, type Cible } from "./lien";
 
-type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; commandes: Commande[]; lignesCommande: LigneCommande[]; dossiers: Record<string, DossierFiled> };
+type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; commandes: Commande[]; lignesCommande: LigneCommande[]; dossiers: Record<string, DossierFiled>; moi: string | null };
 
 export default function EcranFiled() {
   const { source } = useSource();
@@ -38,21 +40,29 @@ export default function EcranFiled() {
   const [filtre, setFiltre] = useState<Famille | null>(null);
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeDossier, setChargeDossier] = useState(false);
+  /* /espace/filed?objet=facture:<id> — le dossier qu'une demande de validation désigne */
+  const [cible, setCible] = useState<Cible | null>(null);
+  const [cibleIntrouvable, setCibleIntrouvable] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setCible(lireCible(window.location.search)), 0);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
     setErreur(null);
     setReel(null);
     try {
-      const [liste, fournisseurs, cmd] = await Promise.all([
+      const [liste, fournisseurs, cmd, compte] = await Promise.all([
         chargerListe(),
         chargerFournisseurs().catch(() => [] as Fournisseur[]),
         chargerCommandes().catch(() => ({ commandes: [] as Commande[], lignes: [] as LigneCommande[] })),
+        monClient().catch(() => null),
       ]);
-      setReel({ ...liste, fournisseurs, commandes: cmd.commandes, lignesCommande: cmd.lignes, dossiers: {} });
+      setReel({ ...liste, fournisseurs, commandes: cmd.commandes, lignesCommande: cmd.lignes, dossiers: {}, moi: compte?.user_id ?? null });
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ apercus: [], motifs: [], fournisseurs: [], commandes: [], lignesCommande: [], dossiers: {} });
+      setReel({ apercus: [], motifs: [], fournisseurs: [], commandes: [], lignesCommande: [], dossiers: {}, moi: null });
     }
   }, []);
 
@@ -72,7 +82,7 @@ export default function EcranFiled() {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, []);
-  useTempsReel(["filed_documents", "filed_factures", "filed_controles", "filed_historique"], source === "reelle", relire);
+  useTempsReel(["filed_documents", "filed_factures", "filed_controles", "filed_historique", "filed_fournisseurs"], source === "reelle", relire);
 
   /* ——— la liste, sous une forme commune aux deux sources ——— */
   const apercus: Apercu[] = useMemo(() => {
@@ -97,6 +107,23 @@ export default function EcranFiled() {
     for (const a of apercus) c[famille(a.document, a.facture)]++;
     return c;
   }, [apercus]);
+
+  /* la cible de l'URL s'ouvre dès que la liste qui la porte est là ; tant
+     qu'elle n'est pas trouvée, elle reste (la source peut passer de
+     l'exemple à la base réelle juste après le chargement) */
+  useEffect(() => {
+    if (!cible || (source === "reelle" && !reel)) return;
+    const t = window.setTimeout(() => {
+      const a = trouverCible(apercus, cible);
+      setCibleIntrouvable(!a);
+      if (!a) return;
+      setFiltre(null);
+      setChoix(a.document.id);
+      setCible(null);
+      if (window.matchMedia("(max-width: 1023px)").matches) document.getElementById("esp-dossier")?.scrollIntoView({ block: "start" });
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [cible, source, reel, apercus]);
 
   const choisi = choix && visibles.some((a) => a.document.id === choix) ? choix : (visibles[0]?.document.id ?? null);
   const apercu = visibles.find((a) => a.document.id === choisi) ?? null;
@@ -197,10 +224,14 @@ export default function EcranFiled() {
 
   /* en mode exemple, une correction remplace le dossier en mémoire ; en
      base réelle, on relit le dossier après la porte */
+  /* après une action, le dossier ouvert le reste, même s'il change de rang
+     dans la liste (une facture débloquée passe derrière les bloquées) */
   const remplacerLocal = useCallback((d: DossierFiled) => {
     setLocal((prev) => prev.map((x) => (x.document.id === d.document.id ? d : x)));
+    setChoix(d.document.id);
   }, []);
   const relireReel = useCallback(async (a: Apercu) => {
+    setChoix(a.document.id);
     const liste = await chargerListe();
     const frais = liste.apercus.find((x) => x.document.id === a.document.id) ?? a;
     const d = await chargerDossier(frais);
@@ -217,6 +248,8 @@ export default function EcranFiled() {
           </p>
         </div>
         <div className="esp-item-haut">
+          <Link href="/espace/filed/a-payer" className="r-btn r-btn--fil"><Wallet width={15} height={15} aria-hidden="true" /> À payer</Link>
+          <Link href="/espace/filed/fournisseurs" className="r-btn r-btn--fil"><Building2 width={15} height={15} aria-hidden="true" /> Fournisseurs</Link>
           <button type="button" className="r-btn r-btn--noir" onClick={ouvrirDepot}><Upload width={15} height={15} aria-hidden="true" /> Déposer un document</button>
           <Ruban source={source} />
         </div>
@@ -233,6 +266,12 @@ export default function EcranFiled() {
           </button>
         ))}
       </div>
+
+      {cibleIntrouvable ? (
+        <div style={{ marginBottom: 14 }}>
+          <Avis teinte="ambre" role="status"><strong>Document introuvable.</strong> Le document que désigne la demande n&apos;est pas dans cette liste{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.</Avis>
+        </div>
+      ) : null}
 
       {erreur ? (
         <div style={{ marginBottom: 14 }}>
@@ -251,16 +290,15 @@ export default function EcranFiled() {
           ) : visibles.length === 0 ? (
             <Vide titre="Aucun document">{filtre ? "Rien dans cette famille." : "Aucun document reçu pour l'instant."}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Documents reçus">
+            <ul className="esp-liste" aria-label="Documents reçus">
               {visibles.map((a) => {
                 const fam = famille(a.document, a.facture);
-                const e = ETATS[a.document.etat];
+                const e = etatDocument(a.document.etat);
                 return (
                   <li key={a.document.id}>
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={choisi === a.document.id}
+                      aria-current={choisi === a.document.id ? "true" : undefined}
                       className="esp-item"
                       onClick={() => {
                         setChoix(a.document.id);
@@ -269,7 +307,7 @@ export default function EcranFiled() {
                     >
                       <span className="esp-item-haut">
                         <span className="esp-mono" style={{ fontWeight: 600 }}>{a.document.reference}</span>
-                        {a.facture ? <Pastille teinte={STATUTS_FACTURE[a.facture.statut].teinte}>{STATUTS_FACTURE[a.facture.statut].libelle}</Pastille> : <Pastille teinte={e.teinte}>{e.libelle}</Pastille>}
+                        {a.facture ? <Pastille teinte={statutFacture(a.facture.statut).teinte}>{statutFacture(a.facture.statut).libelle}</Pastille> : <Pastille teinte={e.teinte}>{e.libelle}</Pastille>}
                         {fam === "litige" ? <Pastille teinte="ambre">Litige</Pastille> : null}
                         {a.facture?.nb_bloquants ? <Pastille teinte="rouge">{a.facture.nb_bloquants} bloquant{a.facture.nb_bloquants > 1 ? "s" : ""}</Pastille> : null}
                         {a.facture?.nb_attention ? <Pastille teinte="ambre">{a.facture.nb_attention} à vérifier</Pastille> : null}
@@ -305,6 +343,7 @@ export default function EcranFiled() {
               lignesCommande={lignesCommande}
               onLocal={remplacerLocal}
               relire={() => (apercu ? relireReel(apercu) : Promise.resolve())}
+              moi={source === "exemple" ? EXEMPLE_MOI : (reel?.moi ?? null)}
             />
           ) : chargeDossier || (source === "reelle" && apercu) ? (
             <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>

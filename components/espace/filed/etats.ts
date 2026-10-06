@@ -8,7 +8,7 @@ export type Famille = "bloquee" | "litige" | "attente" | "reste";
 
 export function famille(document: DocumentFiled, facture: Facture | null): Famille {
   if (facture?.statut === "bloquee") return "bloquee";
-  if (facture && (facture.statut === "ecartee" || facture.anomalies.some((c) => c.startsWith("rapprochement.")))) return "litige";
+  if (facture && (facture.statut === "ecartee" || facture.statut === "refusee" || facture.anomalies.some((c) => c.startsWith("rapprochement.")))) return "litige";
   if (document.etat === "en_lecture" || document.etat === "a_classer" || document.etat === "a_traiter") return "attente";
   if (facture && (facture.statut === "a_completer" || facture.statut === "a_valider") && document.etat !== "classe" && document.etat !== "integre") return "attente";
   return "reste";
@@ -16,7 +16,7 @@ export function famille(document: DocumentFiled, facture: Facture | null): Famil
 
 export const FAMILLES: { cle: Famille; libelle: string; sous: string; teinte: "rouge" | "ambre" | "bleu" | "gris" }[] = [
   { cle: "bloquee", libelle: "Bloquées", sous: "un contrôle bloquant a échoué", teinte: "rouge" },
-  { cle: "litige", libelle: "En litige", sous: "écart avec la commande ou facture écartée", teinte: "ambre" },
+  { cle: "litige", libelle: "En litige", sous: "écart avec la commande, facture écartée ou refusée", teinte: "ambre" },
   { cle: "attente", libelle: "En attente", sous: "en lecture, à classer, à valider", teinte: "bleu" },
   { cle: "reste", libelle: "Traitées", sous: "classées, intégrées, doublons", teinte: "gris" },
 ];
@@ -36,7 +36,15 @@ export const STATUTS_FACTURE: Record<StatutFacture, { libelle: string; teinte: "
   bloquee: { libelle: "Bloquée", teinte: "rouge" },
   a_valider: { libelle: "À valider", teinte: "bleu" },
   ecartee: { libelle: "Écartée", teinte: "gris" },
+  validee: { libelle: "Validée", teinte: "vert" },
+  refusee: { libelle: "Refusée", teinte: "rouge" },
+  comptabilisee: { libelle: "Comptabilisée", teinte: "vert" },
 };
+
+/* un statut ou un état que l'écran ne connaît pas encore (la base évolue)
+   s'affiche tel quel, sans casser le dossier */
+export const statutFacture = (s: string) => STATUTS_FACTURE[s as StatutFacture] ?? { libelle: s.replace(/_/g, " "), teinte: "gris" as const };
+export const etatDocument = (e: string) => ETATS[e as EtatDocument] ?? { libelle: e.replace(/_/g, " "), teinte: "gris" as const };
 
 export const NATURES: Record<NatureDocument, string> = {
   facture: "Facture",
@@ -85,16 +93,19 @@ export function grouperControles(controles: Controle[]) {
 }
 
 /* Les champs d'une facture qu'on peut corriger par filed_corriger_facture :
-   clé envoyée → libellé, type de saisie. */
-export const CHAMPS_CORRIGEABLES: { cle: string; libelle: string; type: "texte" | "date" | "montant" }[] = [
-  { cle: "numero", libelle: "Numéro de facture", type: "texte" },
-  { cle: "date_emission", libelle: "Date d'émission", type: "date" },
-  { cle: "echeance_lue", libelle: "Échéance", type: "date" },
-  { cle: "montant_ht", libelle: "Montant HT", type: "montant" },
-  { cle: "montant_tva", libelle: "Montant TVA", type: "montant" },
-  { cle: "montant_ttc", libelle: "Montant TTC", type: "montant" },
-  { cle: "net_a_payer", libelle: "Net à payer", type: "montant" },
-  { cle: "iban", libelle: "IBAN", type: "texte" },
+   la colonne de filed_factures (écran, exemple) → la clé que la porte
+   accepte (relue sur la recette le 06/10 : `date`, `echeance`,
+   `fournisseur.iban` — pas les noms de colonne), libellé, type de saisie.
+   Une autre clé est refusée par la base (22023). */
+export const CHAMPS_CORRIGEABLES: { cle: string; porte: string; libelle: string; type: "texte" | "date" | "montant" }[] = [
+  { cle: "numero", porte: "numero", libelle: "Numéro de facture", type: "texte" },
+  { cle: "date_emission", porte: "date", libelle: "Date d'émission", type: "date" },
+  { cle: "echeance_lue", porte: "echeance", libelle: "Échéance", type: "date" },
+  { cle: "montant_ht", porte: "montant_ht", libelle: "Montant HT", type: "montant" },
+  { cle: "montant_tva", porte: "montant_tva", libelle: "Montant TVA", type: "montant" },
+  { cle: "montant_ttc", porte: "montant_ttc", libelle: "Montant TTC", type: "montant" },
+  { cle: "net_a_payer", porte: "net_a_payer", libelle: "Net à payer", type: "montant" },
+  { cle: "iban", porte: "fournisseur.iban", libelle: "IBAN", type: "texte" },
 ];
 
 /* Les noms de champ des valeurs lues (pieces_valeurs.champ), par notion :
