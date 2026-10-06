@@ -261,6 +261,26 @@ export type Reglages = {
   conservation_audit_jours: number;
   conservation_exports_jours: number;
   maj_le: string;
+  /* b4_09 : l'en-tête des factures du cabinet (absent avant la pose) */
+  facture_entete?: EnteteFacture;
+};
+
+/* L'en-tête des factures du cabinet (b4_09) : ses mentions publiques, les mêmes pour toutes ses factures. */
+export type EnteteFacture = {
+  nom?: string;
+  forme?: string;
+  adresse?: string;
+  code_postal_ville?: string;
+  siren?: string;
+  tva_intracom?: string;
+  barreau?: string;
+  toque?: string;
+  telephone?: string;
+  courriel?: string;
+  iban?: string;
+  bic?: string;
+  delai_paiement_jours?: number;
+  mention_tva?: string;
 };
 
 export type RegleProcedure = {
@@ -334,3 +354,130 @@ export type DossierComplet = {
   /* la fenêtre de lecture tracée (tamila_consulter) : jusqu'à quand les parties se lisent */
   consulteJusqu: string | null;
 };
+
+/* ——— les honoraires (b4_06, 06/10/2026) ——— */
+export type ModeHonoraires = "temps_passe" | "forfait" | "mixte";
+export type NatureTemps = "consultation" | "redaction" | "recherche" | "audience" | "rendez_vous" | "correspondance" | "deplacement" | "negociation" | "autre";
+export type ModeReglement = "especes" | "cheque" | "virement" | "billet_a_ordre" | "carte";
+
+export type Convention = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  mode: ModeHonoraires;
+  taux_horaire_cents: number | null;
+  forfait_cents: number | null;
+  complement_resultat_pct: number | null;
+  taux_tva: number;
+  urgence: boolean;
+  statut: "proposee" | "signee" | "resiliee";
+  signee_le: string | null;
+  piece_id: string | null;
+  cree_par: string | null;
+  cree_le: string;
+  resiliee_le: string | null;
+  /* le temps prévu au forfait, en minutes (b4_12) */
+  minutes_prevues?: number | null;
+};
+
+export type Temps = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  user_id: string;
+  jour: string;
+  minutes: number;
+  nature: NatureTemps;
+  /* chiffrée avec la clé du dossier (hexadécimal « \x01… ») */
+  description_chiffree: string | null;
+  facturable: boolean;
+  statut: "saisi" | "facture" | "annule";
+  facture_id: string | null;
+  cree_le: string;
+  /* l'événement du dossier dont ce temps a été proposé (b4_12) : « audience:<id> », « acte:<id> », « avis:<id> » */
+  origine?: string | null;
+};
+
+export type Provision = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  montant_ttc_cents: number;
+  demandee_le: string;
+  recue_le: string | null;
+  mode_reglement: ModeReglement | null;
+  statut: "demandee" | "recue" | "annulee";
+  facture_id: string | null;
+  cree_par: string | null;
+  cree_le: string;
+};
+
+export type Facture = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  numero: string;
+  nature: "facture" | "compte_definitif";
+  emise_le: string;
+  jusqu_au: string;
+  minutes: number;
+  honoraires_temps_cents: number;
+  forfait_cents: number;
+  debours_cents: number;
+  total_ht_cents: number;
+  taux_tva: number;
+  tva_cents: number;
+  total_ttc_cents: number;
+  provisions_imputees_cents: number;
+  reste_du_cents: number;
+  statut: "emise" | "payee" | "annulee";
+  payee_le: string | null;
+  mode_reglement: ModeReglement | null;
+  motif_annulation: string | null;
+  emise_par: string | null;
+  cree_le: string;
+};
+
+export type Honoraires = {
+  convention: Convention | null;
+  conventions: Convention[];
+  temps: Temps[];
+  provisions: Provision[];
+  factures: Facture[];
+  /* les propositions de temps que je ne veux plus voir (b4_12) */
+  ecartes?: string[];
+};
+
+/* ——— conflits d'intérêts et vigilance LCB-FT (b4_07, 06/10/2026) ——— */
+export type ActiviteAssujettie = "transaction_immobiliere" | "transaction_financiere" | "gestion_fonds" | "constitution_societe" | "fiducie" | "cession_entreprise" | "autre_assujettie";
+
+export type Vigilance = {
+  dossier_id: string;
+  client_id: string;
+  assujetti: boolean;
+  activite: ActiviteAssujettie | null;
+  identification_le: string | null;
+  identification_piece: string | null;
+  beneficiaire_effectif_le: string | null;
+  risque: "faible" | "standard" | "eleve" | null;
+  revue_le: string | null;
+  par: string | null;
+  maj_le: string;
+};
+
+/* Ce que rend tamila_conformite. */
+export type Conformite = {
+  dossier: string;
+  index: boolean;
+  parties: number;
+  parties_indexees: number;
+  controles: number;
+  conflits_sans_decision: number;
+  dernier_controle: { le: string; correspondances: number; conflits: number; decision: string | null } | null;
+  vigilance: Vigilance | null;
+  vigilance_a_faire: boolean;
+};
+
+/* Une correspondance rendue par tamila_controler_conflits. */
+export type Trouve = { dossier: string | null; qualite: QualitePartie; statut: string | null; nature: "conflit" | "meme_cote" | "information" };
+export type ControleConflits = { controle: string; correspondances: number; conflits: number; hors_vue: number; trouves: Trouve[] };

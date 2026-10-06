@@ -166,3 +166,159 @@
   padding-left: 18px;
   font-size: 13px;
 }
+
+/* les honoraires (b4_06) : les trois chiffres, les sous-titres, l'aperçu de la facture */
+.esp .tam-honoraires-chiffres {
+  margin-bottom: 12px;
+}
+.esp .tam-sous-titre {
+  margin: 16px 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--r-faible);
+}
+.tam-honoraires-apercu {
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f6f6f4;
+  border: 1px solid var(--r-filet);
+}
+
+/* la notice de conservation de la carte des conflits (décision de Teo, 06/10) */
+.esp .tam-notice {
+  margin: 8px 0 4px;
+}
+
+/* la facture imprimable (b4_09) : un aperçu A4 dans un cadre isolé ; l'en-tête du cabinet en grille */
+/* trois classes : plus spécifique que `.dlg-panneau.resa` (460 px), quel que soit l'ordre des feuilles */
+.dlg-panneau.resa.tam-facture-dialogue {
+  max-width: 920px;
+}
+.tam-facture-apercu {
+  width: 100%;
+  height: min(70vh, 900px);
+  border: 1px solid var(--r-filet);
+  border-radius: 8px;
+  background: #fff;
+}
+.tam-entete {
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0;
+}
+.tam-entete legend {
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tam-entete-grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px 12px;
+}
+@media (min-width: 640px) {
+  .tam-entete-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tam-entete-large {
+    grid-column: 1 / -1;
+  }
+}
+
+/* les avis RPVA reçus par courriel, à rattacher (b4_10) : au-dessus des compteurs */
+.esp .tam-entrants {
+  margin-bottom: 14px;
+}
+.esp .tam-entrants .esp-carte-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.esp .tam-entrants .tam-ligne-titre {
+  overflow-wrap: anywhere;
+}
+/* le corps du courriel, cité dans le dialogue (porté hors de .esp) */
+.tam-citation {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--r-filet, #d9d9d4);
+  background: #f6f6f4;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-height: 180px;
+  overflow: auto;
+}
+
+/* le forfait consommé contre prévu (b4_12) : une jauge sous la ligne de la convention */
+.esp .tam-forfait .tam-ligne-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.esp .tam-jauge {
+  height: 8px;
+  margin: 8px 0 2px;
+  border-radius: 999px;
+  background: var(--r-filet, #e5e5e0);
+  overflow: hidden;
+}
+.esp .tam-jauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #2f7d4f;
+}
+.esp .tam-jauge[data-teinte="ambre"] > span {
+  background: #b7791f;
+}
+.esp .tam-jauge[data-teinte="rouge"] > span {
+  background: #c0392b;
+}
+/* le temps proposé à la saisie : en retrait, pour ne pas se confondre avec le temps saisi */
+.esp .tam-propositions {
+  margin-top: 6px;
+  padding-left: 10px;
+  border-left: 3px solid var(--r-filet, #e5e5e0);
+}
+
+/* le tableau des honoraires du cabinet : un dialogue large, un tableau qui défile seul sur un téléphone */
+.dlg-panneau.resa.tam-cabinet-dialogue {
+  max-width: 1100px;
+}
+.tam-cabinet-table {
+  overflow-x: auto;
+  border: 1px solid var(--r-filet, #e5e5e0);
+  border-radius: 10px;
+}
+.tam-cabinet-table table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tam-cabinet-table th,
+.tam-cabinet-table td {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--r-filet, #e5e5e0);
+}
+.tam-cabinet-table th {
+  font-weight: 600;
+  background: #f6f6f4;
+}
+.tam-cabinet-table .tam-num {
+  text-align: right;
+  white-space: nowrap;
+}
+.tam-cabinet-table td .esp-pastille {
+  margin: 0 4px 4px 0;
+}
+.tam-cabinet-filtres {
+  flex-wrap: wrap;
+}

@@ -3,12 +3,13 @@
 /* ══════════════════════════════════════════════════════════════════════
    Un dossier Tamila ouvert (05/10/2026, session B4)
 
-   Huit cartes : l'en-tête (identité déchiffrée, statut, décisions en
+   Les cartes : l'en-tête (identité déchiffrée, statut, décisions en
    attente, export, clôture), les parties, l'appel et ses délais (chaque
    délai avec son calcul en toutes lettres et les gestes de l'avocat :
    confirmer, corriger, interrompre, annuler, acte déposé), les audiences,
-   les avis RPVA, les membres et murailles, les exports, le journal des
-   accès.
+   les pièces, les honoraires (HonorairesTamila, b4_06), les conflits
+   d'intérêts et la vigilance (ConformiteTamila, b4_07), les avis RPVA,
+   les membres et murailles, les exports, le journal des accès.
 
    Chaque geste passe par une porte (portes.ts) ; en exemple il est
    appliqué en mémoire pour que l'écran réagisse. L'écran dit avant le
@@ -32,6 +33,8 @@ import {
   libelleMatiere, libelleTerritoire, type Moi,
 } from "./regles";
 import type { Audience, CalculDelai, Delai, DemandeTamila, DossierComplet, Partie, Personne, RegleProcedure, Reglages } from "./types";
+import HonorairesTamila from "./HonorairesTamila";
+import ConformiteTamila from "./ConformiteTamila";
 
 type Props = {
   complet: DossierComplet;
@@ -44,6 +47,8 @@ type Props = {
   clientId: string;
   onLocal: (c: DossierComplet) => void;
   relire: () => Promise<void>;
+  /* la référence en clair d'un autre dossier du cabinet, si on la connaît (contrôle des conflits) */
+  referenceDe?: (dossier: string) => string | null;
 };
 
 type Form =
@@ -72,8 +77,10 @@ const maintenant = () => new Date().toISOString();
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const CHIFFRE = "\\x01" + "00".repeat(28);
 
-export default function DossierTamila({ complet, source, moi, personnes, regles, reglages, cle, clientId, onLocal, relire }: Props) {
+export default function DossierTamila({ complet, source, moi, personnes, regles, reglages, cle, clientId, onLocal, relire, referenceDe = () => null }: Props) {
   const { dossier: d, clair, parties, appel, delais, audiences, avis, membres, murailles, exports, pieces, lectures, demandes } = complet;
+  /* les événements dont le temps se propose à la saisie (b4_12) */
+  const evenementsTemps = useMemo(() => ({ audiences, delais, avis }), [audiences, delais, avis]);
   const [fichier, setFichier] = useState<File | null>(null);
   const [form, setForm] = useState<Form>(null);
   const [envoi, setEnvoi] = useState(false);
@@ -685,6 +692,12 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           ))}
         </div>
       </section>
+
+      {/* ——— les honoraires (b4_06) ——— */}
+      <HonorairesTamila dossier={d} source={source} moi={moi} personnes={personnes} pieces={pieces} cle={cle} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} peutEncaisser={(peutGerer && avocat) || (associe && !murailles.some((m) => m.user_id === moi?.user_id && !m.leve_le))} clientId={clientId} gerant={gerant} entete={reglages?.facture_entete ?? {}} clair={clair} clientNom={(() => { const p = parties.find((x) => x.qualite === "client"); return p ? (complet.partiesClair[p.id]?.nom ?? null) : null; })()} evenements={evenementsTemps} />
+
+      {/* ——— conflits d'intérêts et vigilance LCB-FT (b4_07) ——— */}
+      <ConformiteTamila dossier={d} source={source} clientId={clientId} parties={parties} partiesClair={complet.partiesClair} pieces={pieces} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} gerant={gerant} referenceDe={referenceDe} />
 
       {/* ——— les avis RPVA ——— */}
       <section className="esp-carte" aria-label="Avis RPVA">

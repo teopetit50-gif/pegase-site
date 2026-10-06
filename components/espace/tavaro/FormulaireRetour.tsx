@@ -11,6 +11,10 @@
    Un dommage sans photo ne se facture pas : l'écran le dit avant le clic.
    En base réelle, la photo part dans le bucket omega-clients, sous
    <client>/loc_contrat/<contrat>/… ; en exemple, son nom suffit.
+   Avec un état des lieux (b2_05) : le carburant du départ signé est repris
+   et verrouillé, un retour clos sans signature coche « non signé », et un
+   dommage dans une zone déjà notée au départ signé est annoncé « pas
+   facturé » avant le clic — la base fait la même chose de son côté.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
@@ -20,9 +24,10 @@ import { Loader } from "@/components/ui/loader";
 import { Avis } from "../ui";
 import { montant } from "../format";
 import { UNITES } from "./etats";
-import type { Dossier, LigneBareme, Preuve, Retour } from "./types";
+import type { DommageConstate, Dossier, LigneBareme, Preuve, Retour, ZoneDommage } from "./types";
+import { ZONES, etatDe, libelleZone } from "./edl";
 
-type LigneSaisie = { cle: string; code: string; libelle: string; quantite: string; prix: string; devis: string; preuves: Preuve[]; fichiers: File[] };
+type LigneSaisie = { cle: string; zone?: ZoneDommage | ""; code: string; libelle: string; quantite: string; prix: string; devis: string; preuves: Preuve[]; fichiers: File[] };
 
 const HUITIEMES = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const AUTRE = "__autre__";
@@ -37,10 +42,20 @@ function versLocal(iso: string | null | undefined): string {
 
 const majLigne = (liste: LigneSaisie[], cle: string, patch: Partial<LigneSaisie>) => liste.map((l) => (l.cle === cle ? { ...l, ...patch } : l));
 
-function LigneVue({ l, liste, setListe, choix, nom }: { l: LigneSaisie; liste: LigneSaisie[]; setListe: (x: LigneSaisie[]) => void; choix: LigneBareme[]; nom: string }) {
+function LigneVue({ l, liste, setListe, choix, nom, depart }: { l: LigneSaisie; liste: LigneSaisie[]; setListe: (x: LigneSaisie[]) => void; choix: LigneBareme[]; nom: string; depart?: DommageConstate[] | null }) {
   const lb = choix.find((b) => b.code === l.code);
+  const deja = depart && l.zone ? depart.find((x) => x.zone === l.zone && (!x.code || !l.code || l.code === AUTRE || x.code === l.code)) : null;
   return (
     <div className="tav-ligne-saisie">
+      {depart !== undefined ? (
+        <label className="rv-libelle">Zone
+          <select className="rv-champ" value={l.zone ?? ""} onChange={(e) => setListe(majLigne(liste, l.cle, { zone: e.target.value as ZoneDommage }))}>
+            <option value="">— choisir —</option>
+            {ZONES.map((z) => <option key={z.cle} value={z.cle}>{z.libelle}</option>)}
+          </select>
+        </label>
+      ) : null}
+      {deja ? <Avis teinte="bleu">Déjà noté sur l&apos;état de départ signé ({libelleZone(deja.zone).toLowerCase()} : {deja.description}) : ce dommage ne sera pas facturé.</Avis> : null}
       <label className="rv-libelle">{nom}
         <select className="rv-champ" value={l.code} onChange={(e) => setListe(majLigne(liste, l.cle, { code: e.target.value }))}>
           <option value="">— choisir —</option>
@@ -81,12 +96,15 @@ export default function FormulaireRetour({ dossier, bareme, ouvert, envoi, erreu
   onSoumettre: (retour: Retour, fichiers: Map<string, File[]>) => Promise<void>;
 }) {
   const c = dossier.contrat;
+  const depart = etatDe(dossier.etats, "depart");
+  const departSigne = depart?.statut === "signe" ? depart : null;
+  const retourEtat = etatDe(dossier.etats, "retour");
   const [retourLe, setRetourLe] = useState(() => versLocal(c.retour_reel_le ?? new Date().toISOString()));
-  const [km, setKm] = useState(c.km_retour?.toString() ?? "");
-  const [dep8, setDep8] = useState("8");
-  const [ret8, setRet8] = useState("8");
+  const [km, setKm] = useState(c.km_retour?.toString() ?? (retourEtat?.statut === "signe" && retourEtat.km !== null ? retourEtat.km.toString() : ""));
+  const [dep8, setDep8] = useState(departSigne?.carburant_8 !== null && departSigne?.carburant_8 !== undefined ? String(departSigne.carburant_8) : "8");
+  const [ret8, setRet8] = useState(retourEtat?.statut === "signe" && retourEtat.carburant_8 !== null ? String(retourEtat.carburant_8) : "8");
   const [charge, setCharge] = useState("");
-  const [nonContra, setNonContra] = useState(false);
+  const [nonContra, setNonContra] = useState(retourEtat?.statut === "refuse");
   const [dommages, setDommages] = useState<LigneSaisie[]>([]);
   const [postes, setPostes] = useState<LigneSaisie[]>([]);
   const [photosCarburant, setPhotosCarburant] = useState<File[]>([]);
@@ -107,7 +125,7 @@ export default function FormulaireRetour({ dossier, bareme, ouvert, envoi, erreu
       const code = l.code === AUTRE ? l.libelle.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "AUTRE" : l.code;
       const cleFichiers = `${prefixe}:${i}`;
       if (l.fichiers.length) fichiers.set(cleFichiers, l.fichiers);
-      const base = { code, quantite: Number(l.quantite) || 1, preuves: [...l.preuves, ...l.fichiers.map((f) => ({ photo: f.name }))] };
+      const base = { code, ...(l.zone ? { zone: l.zone } : {}), quantite: Number(l.quantite) || 1, preuves: [...l.preuves, ...l.fichiers.map((f) => ({ photo: f.name }))] };
       return {
         ...base,
         ...(l.code === AUTRE ? { libelle: l.libelle.trim(), prix_eur: Number(l.prix.replace(",", ".")) } : {}),
@@ -155,7 +173,7 @@ export default function FormulaireRetour({ dossier, bareme, ouvert, envoi, erreu
             ) : (
               <div className="esp-form-ligne">
                 <label className="rv-libelle">Carburant au départ (huitièmes)
-                  <select className="rv-champ" value={dep8} onChange={(e) => setDep8(e.target.value)}>{HUITIEMES.map((h) => <option key={h} value={h}>{h}/8{h === 8 ? " (plein)" : ""}</option>)}</select>
+                  <select className="rv-champ" value={dep8} disabled={!!departSigne} title={departSigne ? "Repris de l'état des lieux de départ signé" : undefined} onChange={(e) => setDep8(e.target.value)}>{HUITIEMES.map((h) => <option key={h} value={h}>{h}/8{h === 8 ? " (plein)" : ""}</option>)}</select>
                 </label>
                 <label className="rv-libelle">Carburant au retour (huitièmes)
                   <select className="rv-champ" value={ret8} onChange={(e) => setRet8(e.target.value)}>{HUITIEMES.map((h) => <option key={h} value={h}>{h}/8{h === 8 ? " (plein)" : ""}</option>)}</select>
@@ -174,13 +192,15 @@ export default function FormulaireRetour({ dossier, bareme, ouvert, envoi, erreu
                 <span className="esp-kpi-sous">{photosKm.map((f) => f.name).join(", ") || "facultative"}</span>
               </div>
             </div>
+            {departSigne ? <Avis teinte="bleu">État de départ signé par {departSigne.signataire_nom} : carburant {departSigne.carburant_8}/8, {departSigne.dommages.length} dommage{departSigne.dommages.length > 1 ? "s" : ""} déjà noté{departSigne.dommages.length > 1 ? "s" : ""}{departSigne.dommages.length ? ` (${departSigne.dommages.map((d) => libelleZone(d.zone).toLowerCase()).join(", ")})` : ""}.</Avis>
+              : <Avis teinte="ambre">Aucun état de départ signé : un dommage facturé se contestera plus facilement.</Avis>}
             <label className="tav-coche">
-              <input type="checkbox" checked={nonContra} onChange={(e) => setNonContra(e.target.checked)} />
+              <input type="checkbox" checked={nonContra} disabled={retourEtat?.statut === "signe" || retourEtat?.statut === "refuse"} onChange={(e) => setNonContra(e.target.checked)} />
               <span>Le client n&apos;a pas signé l&apos;état des lieux de retour (les dommages iront à la direction, hors barème)</span>
             </label>
 
             <div className="esp-section-titre">Dommages constatés au retour</div>
-            {dommages.map((l) => <LigneVue key={l.cle} l={l} liste={dommages} setListe={setDommages} choix={lignesDommage} nom="Dommage" />)}
+            {dommages.map((l) => <LigneVue key={l.cle} l={l} liste={dommages} setListe={setDommages} choix={lignesDommage} nom="Dommage" depart={departSigne?.dommages ?? null} />)}
             <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setDommages([...dommages, nouvelle()])}><Plus width={14} height={14} aria-hidden="true" /> Ajouter un dommage</button>
 
             <div className="esp-section-titre">Autres postes</div>

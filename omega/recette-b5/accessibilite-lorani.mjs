@@ -19,6 +19,10 @@ const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) ech
 const ECRANS = [
   /* un permis ouvert (le premier de la liste), puis son dialogue « Régime » */
   ['lorani', '/espace/lorani', `[...document.querySelectorAll('#esp-detail button')].find(b => /Régime/.test(b.textContent))?.click()`],
+  /* le chantier (b5_13) : la façade rue Mercière, puis le dialogue « Nouveau marché » */
+  ['lorani-chantier', '/espace/lorani', `[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Nouveau marché')?.click()`, /Façade rue Mercière/],
+  /* le contrôle du dossier (b5_16) : la surélévation Dubois, puis le dialogue « Revérifier à l'indice suivant » */
+  ['lorani-controle', '/espace/lorani', `[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`, /Surélévation Dubois/],
 ];
 
 const analyser = (s, cible) => s.evaluer(`(async () => {
@@ -32,13 +36,13 @@ function dire(nom, violations) {
   ok(graves.length === 0, `${nom} : ${graves.length} écart(s) grave(s), ${violations.length - graves.length} mineur(s)`);
 }
 
-for (const [nom, chemin, ouvrir] of ECRANS) {
+for (const [nom, chemin, ouvrir, item] of ECRANS) {
   for (const largeur of [390, 1440]) {
     const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b5-axe-${nom}`, densite: 1 });
     console.log(`— ${chemin} à ${largeur}`);
     await s.aller(base + chemin);
     await s.dormir(800);
-    await s.evaluer(`document.querySelector('.esp-item')?.click()`);
+    await s.evaluer(item ? `[...document.querySelectorAll('.esp-item')].find(e => ${item}.test(e.textContent))?.click()` : `document.querySelector('.esp-item')?.click()`);
     await s.dormir(500);
     ok(await s.evaluer(`document.querySelectorAll('.esp-item[aria-current="true"]').length === 1 && !document.querySelector('[role="listbox"], [role="option"]')`), `${nom} ${largeur} : l'élément ouvert porte aria-current, plus de listbox ni d'option`);
     await s.evaluer(axe + ';true');

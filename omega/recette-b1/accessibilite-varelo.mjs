@@ -6,7 +6,10 @@
    un autre objet le prend quand on le choisit. Enfin les cadres de tableau
    qui défilent (codes de l'objet ouvert, lignes rejetées d'un dépôt dans son
    dialogue) : tabIndex 0, role region, aria-label ; axe repassé sur le
-   dialogue du dépôt avec son tableau des rejets.
+   dialogue du dépôt avec son tableau des rejets. Vague 3 : la nature
+   « clients » avec la carte de l'encours du groupe, et le dialogue du plafond ;
+   les contrats du groupe à dénoncer et le dialogue d'ajout ; les comptes
+   réciproques intragroupe et le dialogue de justification.
    usage : node omega/recette-b1/accessibilite-varelo.mjs [origine] */
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -60,6 +63,67 @@ for (const largeur of [390, 1440]) {
   const rejets = await s.evaluer(cadres(`document.querySelector('[role="dialog"]')`));
   ok(cadresBons(rejets), `varelo ${largeur}, cadre des lignes rejetées : ${JSON.stringify(rejets)}`);
   dire(`varelo ${largeur}, dialogue du dépôt avec ses rejets`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* vague 3 : la carte de l'encours du groupe (clients), son tableau et le dialogue du plafond */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(clic('.esp-filtres button', '/^Clients$/'));
+  await s.dormir(400);
+  const encours = await s.evaluer(cadres(`document.querySelector('section[aria-label="Encours du groupe, clients"]')`));
+  ok(cadresBons(encours), `varelo ${largeur}, cadre de l'encours par client : ${JSON.stringify(encours)}`);
+  dire(`varelo ${largeur}, clients avec l'encours du groupe`, await analyser(s, `document.querySelector('.esp')`));
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Encours du groupe, clients"] tbody button')].find(b => /^Plafond$/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue du plafond`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* vague 3 : les contrats du groupe à dénoncer, et le dialogue d'ajout */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  const contrats = await s.evaluer(cadres(`document.querySelector('section[aria-label="Contrats du groupe à dénoncer"]')`));
+  ok(cadresBons(contrats), `varelo ${largeur}, cadre des contrats : ${JSON.stringify(contrats)}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Contrats du groupe à dénoncer"] .esp-carte-tete button')].find(b => /Ajouter un contrat/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue d'ajout d'un contrat`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* vague 3 : les comptes réciproques intragroupe, et le dialogue de justification */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  const recip = await s.evaluer(cadres(`document.querySelector('section[aria-label="Comptes réciproques intragroupe"]')`));
+  ok(cadresBons(recip), `varelo ${largeur}, cadre des réciproques : ${JSON.stringify(recip)}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Comptes réciproques intragroupe"] tbody button')].find(b => /^Justifier$/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue de justification`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* b1_08 : le groupe sur une page, et le dialogue des objectifs */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  const page = await s.evaluer(cadres(`document.querySelector('section[aria-label="Le groupe sur une page"]')`));
+  ok(cadresBons(page), `varelo ${largeur}, cadre de la page du groupe : ${JSON.stringify(page)}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Le groupe sur une page"] tbody button')].find(b => /Objectifs/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue des objectifs`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* b1_09 : les reportings dus, et le dialogue d'ajout */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  const rep = await s.evaluer(cadres(`document.querySelector('section[aria-label="Reportings dus"]')`));
+  ok(cadresBons(rep), `varelo ${largeur}, cadre des reportings : ${JSON.stringify(rep)}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Reportings dus"] .esp-carte-tete button')].find(b => /Ajouter un reporting/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue d'ajout d'un reporting`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* b1_10 : brancher le logiciel d'une société */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })(document.querySelector('section[aria-label="Exports automatiques"] li button'))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue du branchement`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

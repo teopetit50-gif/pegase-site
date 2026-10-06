@@ -68,6 +68,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const impl = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { tacite: /Non-opposition tacite née/.test(d.innerText), bouton: !![...d.querySelectorAll('.r-btn')].find(b => /Confirmer la décision implicite/.test(b.textContent)) }; })()`);
   ok(impl.tacite && impl.bouton, 'la DP montre la non-opposition tacite née, à confirmer');
+  ok(await s.evaluer(`/ARE_DP06938326N0107\\.pdf[\\s\\S]{0,120}Reçu par courriel du guichet et rangé ici par son numéro de dossier/.test(document.querySelector('#esp-detail').innerText)`),
+     'son accusé de réception électronique est dit « reçu par courriel du guichet et rangé par son numéro » (b5_11)');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .r-btn')].find(b => /Confirmer la décision implicite/.test(b.textContent))?.click()`);
   await s.dormir(500);
   await s.capturer(`${dossier}lorani-implicite-1440.jpg`, { qualite: 55 });
@@ -98,6 +100,52 @@ for (const largeur of LARGEURS) {
   const deux = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail').innerText; return /Plusieurs demandes de pièces/.test(t) && /À fournir : PC5, PC8/.test(t) && /461958/.test(t); })()`);
   ok(deux, 'Maison Lemoine : deux lettres de demande, « À fournir : PC5, PC8 », le délai court depuis la première (b5_07)');
 
+  console.log('— les honoraires phase par phase (b5_12)');
+  const hon = await s.evaluer(`(() => { const t = document.querySelector('.lor-honoraires'); if (!t) return null; const txt = t.closest('.esp-carte-corps').innerText; return { lignes: t.querySelectorAll('tbody tr').length, surveiller: /Dossier de permis : 37,5 h pour 45 h prévues \\(83 %\\), avant la fin de la phase/.test(txt), appel: /Achevé, appel à émettre/.test(txt), total: /33 000 € HT d.honoraires/.test(txt.replace(/ | /g, ' ')) }; })()`);
+  ok(hon && hon.lignes === 6 && hon.surveiller && hon.appel && hon.total, `Maison Lemoine : six éléments, 33 000 € HT, le PC « à surveiller » (83 %), l'APD achevé « appel à émettre » (${JSON.stringify(hon)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Saisir du temps')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = [...d.querySelectorAll('input')].find(x => x.getAttribute('inputmode') === 'decimal'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '9'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  const dlgT = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { titre: /Saisir du temps/.test(d.innerText), choix: d.querySelector('select').selectedOptions[0]?.textContent, actif: [...d.querySelectorAll('button')].find(b => /Enregistrer/.test(b.textContent))?.disabled === false }; })()`);
+  ok(dlgT.titre && /PC/.test(dlgT.choix || '') && dlgT.actif, `dialogue « Saisir du temps » : l'élément en cours proposé (${dlgT.choix}), « Enregistrer » actif à 9 h`);
+  await s.capturer(`${dossier}lorani-temps-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const apresT = await s.evaluer(`(() => { const txt = document.querySelector('.lor-honoraires').closest('.esp-carte-corps').innerText; return { depasse: /Dossier de permis : 46,5 h pour 45 h prévues \\(103 %\\), les honoraires de la phase sont dépassés/.test(txt), ferme: !document.querySelector('[role="dialog"]') }; })()`);
+  ok(apresT.depasse && apresT.ferme, 'après 9 h de plus : le PC passe « dépassé » (46,5 h pour 45 h, 103 %)');
+  await s.evaluer(`[...document.querySelectorAll('.lor-honoraires tbody tr')].find(tr => /Dossier de permis/.test(tr.textContent))?.querySelector('.esp-lien-bouton')?.click()`);
+  await s.dormir(600);
+  ok(await s.evaluer(`/Achevé, appel à émettre/.test([...document.querySelectorAll('.lor-honoraires tbody tr')].find(tr => /Dossier de permis/.test(tr.textContent))?.innerText || '')`), '« Achevé » : le PC attend son appel d’honoraires');
+  await s.evaluer(`document.querySelector('.lor-honoraires')?.scrollIntoView({ block: 'center' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-honoraires-1440.jpg`, { qualite: 55 });
+
+  console.log('— le chantier : situations et visas (b5_13)');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Façade rue Mercière/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const ch = await s.evaluer(`(() => { const t = (document.querySelector('.lor-situation')?.closest('.esp-carte-corps')?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { cartes: document.querySelectorAll('.lor-situation').length, depasse: /Situation n° 3 · Pierres de Bourgogne SARL[\\s\\S]*dépasse le marché et ses avenants de 8 100 €/.test(t), recule: /Situation n° 2 · Échafaudages Rhône[\\s\\S]*recule par rapport à la situation n° 1 \\(12 000 €\\)/.test(t), mois: /201 500 € HT cumulés sur 193 400 € \\(104 %\\) · 106 000 € ce mois/.test(t), retard: /En retard : rendre l’avis/.test(t) }; })()`);
+  ok(ch.cartes === 2 && ch.depasse && ch.recule && ch.mois && ch.retard, `Façade rue Mercière : deux situations à viser, l'une dépasse le marché de 8 100 €, l'autre recule ; un visa en retard (${JSON.stringify(ch)})`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-situation')].find(c => /Situation n° 3/.test(c.textContent))?.querySelector('.r-btn--fil')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = (el, v) => { const p = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(p, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; set(d.querySelector('input[inputmode="decimal"]'), '190000'); set(d.querySelector('textarea'), 'Avenant n° 2 non signé : cumul ramené au marché'); })()`);
+  await s.dormir(200);
+  await s.capturer(`${dossier}lorani-situation-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Rectifier\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const rect = await s.evaluer(`(() => { const t = (document.querySelector('.lor-chantier')?.closest('.esp-carte-corps')?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { cartes: document.querySelectorAll('.lor-situation').length, admis: /rectifiée \\(190 000 € admis\\)/.test(t), ferme: !document.querySelector('[role="dialog"]') }; })()`);
+  ok(rect.cartes === 1 && rect.admis && rect.ferme, 'rectifiée : la situation n° 3 quitte la liste, le marché affiche « rectifiée (190 000 € admis) »');
+  await s.evaluer(`[...document.querySelectorAll('.lor-chantier .esp-lien-bouton')].find(b => /En retard/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const sel = d.querySelector('select'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'vao'); sel.dispatchEvent(new Event('change', { bubbles: true })); const ta = d.querySelector('textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Ancrages à justifier en pied de façade'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Rendre l’avis/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Visé avec observations/.test([...document.querySelectorAll('.lor-chantier tbody tr')].find(tr => /Plan d’échafaudage/.test(tr.textContent))?.innerText || '')`), 'avis rendu : « Plan d’échafaudage » visé avec observations');
+  await s.evaluer(`document.querySelector('.lor-situation')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-chantier-1440.jpg`, { qualite: 55 });
+
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
   await s.dormir(500);
@@ -109,6 +157,37 @@ for (const largeur of LARGEURS) {
   await s.dormir(800);
   const regle = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail')?.innerText || ''; const i = t.indexOf('sans réponse de la mairie'); return t.slice(i, i + 80); })()`);
   ok(regle.includes('rejet implicite (art. R*424-2, d)'), `le régime dit « rejet implicite (art. R*424-2, d) » après la saisie : « ${regle} »`);
+
+  console.log('— le contrôle du dossier (b5_16) : Surélévation Dubois, indice B revérifiant l’indice A');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Surélévation Dubois/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const ctl = await s.evaluer(`(() => { const c = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps'); const t = (c?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { tete: document.querySelector('.lor-controle-tete')?.innerText, cartes: document.querySelectorAll('.lor-constat').length, bloquant: document.querySelectorAll('.lor-constat[data-gravite="bloquant"]').length, resume: /2 constats ouverts, dont 1 bloquant\\. 2 constats de l’indice A corrigés\\./.test(t), citation: /PC2, p\\. 1 : « 3,20 m »/.test(t), regle: /Règle : au moins 4 m, article URm1 7 \\(PLU-H URm1, p\\. 41\\)/.test(t), correction: /Correction proposée : Ramener le recul sur limite séparative/.test(t), releve: /relevé depuis l’indice A/.test(t), corriges: /Corrigés depuis l’indice A \\(2\\)/.test(t), decides: /Décidés \\(1\\)/.test(t) }; })()`);
+  ok(/Dossier de permis · indice B/.test(ctl.tete) && ctl.cartes === 2 && ctl.bloquant === 1 && ctl.resume && ctl.citation && ctl.regle && ctl.correction && ctl.releve && ctl.corriges && ctl.decides,
+     `indice B : 2 constats ouverts dont 1 bloquant, page et texte cités, règle et article, correction proposée, 2 corrigés depuis l’indice A (${JSON.stringify(ctl)})`);
+  await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-controle-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.lor-constat')].find(c => /recul sur limite/.test(c.textContent))?.querySelectorAll('.r-btn--fil')[1]?.click()`);
+  await s.dormir(500);
+  const ec = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const b = [...(d?.querySelectorAll('button') || [])].find(x => /^\\s*Écarter\\s*$/.test(x.textContent)); return { titre: d?.querySelector('h2')?.textContent, gris: b?.disabled }; })()`);
+  ok(ec.titre === 'Écarter' && ec.gris === true, `dialogue « ${ec.titre} » : sans motif, « Écarter » reste grisé`);
+  await s.evaluer(`(() => { const ta = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Dérogation accordée par la mairie (art. L152-4)'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /^\\s*Écarter\\s*$/.test(x.textContent))?.click()`);
+  await s.dormir(700);
+  const ap = await s.evaluer(`(() => { const t = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps')?.textContent || ''; return { cartes: document.querySelectorAll('.lor-constat').length, decides: /Décidés \\(2\\)/.test(t), motif: /Motif : Dérogation accordée par la mairie/.test(t) }; })()`);
+  ok(ap.cartes === 1 && ap.decides && ap.motif, `le recul est écarté avec son motif : 1 constat ouvert, 2 décidés (${JSON.stringify(ap)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`);
+  await s.dormir(500);
+  const rv = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = d?.querySelectorAll('input:not([type="checkbox"])'); return { titre: d?.querySelector('h2')?.textContent, indice: i?.[1]?.value, cochees: d?.querySelectorAll('input[type="checkbox"]:checked').length }; })()`);
+  ok(rv.titre === 'Revérifier à l’indice suivant' && rv.indice === 'C' && rv.cochees === 6, `dialogue « ${rv.titre} » : indice ${rv.indice} proposé, ${rv.cochees} pièces reprises de l’indice B`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Préparer le contrôle/.test(x.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/indice C/.test(document.querySelector('.lor-controle-tete')?.innerText || '') && /Pièces en lecture/.test(document.querySelector('.lor-controle-tete')?.innerText || '')`), 'le contrôle de l’indice C est préparé, en attente de lecture');
+  await s.evaluer(`[...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].find(b => /Lancer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const c3 = await s.evaluer(`(() => ({ tete: document.querySelector('.lor-controle-tete')?.innerText || '', cartes: document.querySelectorAll('.lor-constat').length, onglets: document.querySelectorAll('.lor-controles .esp-filtre').length }))()`);
+  ok(/Contrôlé/.test(c3.tete) && c3.cartes === 1 && c3.onglets === 3, `lancé : l’indice C reconduit ce qui reste (1 ouvert), trois contrôles au projet (${JSON.stringify(c3)})`);
   s.fermer();
 }
 
@@ -120,6 +199,24 @@ for (const largeur of LARGEURS) {
   const t = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { titre: d.querySelector('h2')?.textContent, purge: /Purgé de tout recours/.test(d.innerText), chantier: /vous pouvez démarrer/.test(d.innerText), gracieux: /Recours gracieux/.test(d.innerText) }; })()`);
   ok(/Façade rue Mercière/.test(t.titre) && t.purge && t.chantier && t.gracieux, `le permis visé par l'URL est ouvert : ${t.titre}, purgé, chantier possible, recours gracieux rejeté dans l'historique`);
   await s.capturer(`${dossier}lorani-purge-1024.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b5-controle-390', densite: 1 });
+  console.log('— le contrôle du dossier à 390');
+  ok(await s.aller(base + chemin + '?projet=00000000-0000-4000-8000-00000000b005'), 'page chargée');
+  await s.dormir(700);
+  await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  const m = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !e.closest('.esp-tableau-cadre'); }).slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.')); return { deb: document.documentElement.scrollWidth - w, larges, cartes: document.querySelectorAll('.lor-constat').length }; })()`);
+  ok(m.deb === 0 && m.larges.length === 0 && m.cartes === 2, `Surélévation Dubois à 390 : pas de débordement, 2 constats lisibles (${JSON.stringify(m)})`);
+  await s.capturer(`${dossier}lorani-controle-390.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`);
+  await s.dormir(500);
+  const d = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const r = d?.getBoundingClientRect(); const larges = [...(d?.querySelectorAll('*') || [])].filter(e => { const x = e.getBoundingClientRect(); return x.width > 0 && x.right > r.right + 1; }).length; return { ouvert: !!d, larges }; })()`);
+  ok(d.ouvert && d.larges === 0, `dialogue de revérification à 390 : rien ne dépasse (${JSON.stringify(d)})`);
+  await s.capturer(`${dossier}lorani-controle-dialogue-390.jpg`, { qualite: 55 });
   s.fermer();
 }
 

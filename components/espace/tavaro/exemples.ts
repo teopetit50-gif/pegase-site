@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, dans, ilYa } from "../exemples/socle";
-import type { Agence, Amendement, Avoir, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import type { Agence, Amendement, AvisContravention, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const u = (p: string, n: number) => `00000000-0000-4000-8000-0000000${p}${n.toString(16).padStart(3, "0")}`;
@@ -272,7 +272,7 @@ export const JOURNAL_EXEMPLE: LigneJournal[] = [
 /* ——— les dossiers assemblés ——— */
 export function assemblerDossiers(contrats: Contrat[], o: {
   locataires: Locataire[]; vehicules: Vehicule[]; categories: Categorie[]; amendements: Amendement[]; propositions: Proposition[]; lignes: LigneProposition[];
-  factures: Facture[]; lignesFactures: LigneFacture[]; avoirs: Avoir[]; demandes: DemandeCourte[]; journal: LigneJournal[];
+  factures: Facture[]; lignesFactures: LigneFacture[]; avoirs: Avoir[]; demandes: DemandeCourte[]; journal: LigneJournal[]; etats?: EtatDesLieux[];
 }): Dossier[] {
   return contrats.map((contrat) => {
     const propositions = o.propositions.filter((p) => p.contrat_id === contrat.id);
@@ -294,12 +294,68 @@ export function assemblerDossiers(contrats: Contrat[], o: {
       avoirs,
       demandes: o.demandes.filter((d) => demandeIds.has(d.id)),
       journal: o.journal.filter((l) => (l.objet_id && ids.has(l.objet_id)) || (typeof l.donnees.contrat === "string" && ids.has(l.donnees.contrat))).sort((a, b) => a.survenu_le.localeCompare(b.survenu_le)),
+      etats: (o.etats ?? []).filter((e) => e.contrat_id === contrat.id),
     };
   });
 }
 
+/* ——— les états des lieux (b2_05) : le départ signé de la Clio avec une rayure déjà là et une caution prise ; le départ
+   signé de la Yaris (C-2026-0351, en litige : le pare-brise n'y figure pas) ; le départ et le retour signés de la Golf,
+   caution levée ; le départ signé du contrat en cours. ——— */
+const vues = (n: number, quand: string) => ["avant", "arriere", "flanc_gauche", "flanc_droit", "compteur", "jauge"].map((vue) => ({ vue, chemin: `${C}/loc_contrat/${u("co", n)}/${vue}.jpg`, prise_le: quand }));
+const etat = (n: number, contrat: number, o: Partial<EtatDesLieux> & Pick<EtatDesLieux, "moment" | "releve_le" | "entite_id">): EtatDesLieux => ({
+  id: u("ed", n), client_id: C, contrat_id: u("co", contrat), statut: "signe", km: null, carburant_8: 8, charge_pct: null, photos: vues(contrat, o.releve_le), dommages: [],
+  observations: null, caution_eur: null, caution_mode: null, caution_reference: null, caution_statut: null, caution_levee_le: null, caution_motif: null,
+  signataire_nom: null, signature_chemin: null, signe_le: o.releve_le, empreinte: null, refus_motif: null, refuse_le: null, etabli_par: SOFIA, cree_le: o.releve_le, ...o,
+});
+export const ETATS_EXEMPLE: EtatDesLieux[] = [
+  etat(1, 1, { moment: "depart", entite_id: LYON, releve_le: ilYa(4, 9), km: 12000, signataire_nom: "Marie Durand", empreinte: "3f2a9c41d07be6a15c88e2f0b4d93a7e61c5f08b2d4e7a9c13f6b80d52e4a7c9",
+    caution_eur: 800, caution_mode: "empreinte_carte", caution_reference: "AUT-448812", caution_statut: "prise",
+    dommages: [{ zone: "flanc_droit", code: "RAYURE_PORTIERE", description: "Rayure de 6 cm sur la portière arrière droite", preuves: [{ chemin: `${C}/loc_contrat/${u("co", 1)}/rayure-depart.jpg`, prise_le: ilYa(4, 9) }] }] }),
+  etat(4, 4, { moment: "depart", entite_id: LYON, releve_le: ilYa(16, 9), km: 7500, signataire_nom: "Samir Haddad", empreinte: "a81c07f3e95d2b46c0f1e8a7d3b5926e4c0a1f7d8e2b3c95a6f04d7e1b8c2a39",
+    caution_eur: 500, caution_mode: "empreinte_carte", caution_reference: "AUT-440190", caution_statut: "prise", observations: "Pare-brise contrôlé : aucun impact." }),
+  etat(5, 5, { moment: "depart", entite_id: LYON, releve_le: ilYa(21, 9), km: 33000, signataire_nom: "Camille Roux", empreinte: "5be0c2a9f41d73e8b6a05c9d2e7f13b84a6c0d95e2f17b3a8c4d60e9f2a1b7c5",
+    caution_eur: 800, caution_mode: "empreinte_carte", caution_reference: "AUT-437720", caution_statut: "levee", caution_levee_le: ilYa(16, 9), caution_motif: "Factures réglées par carte." }),
+  etat(6, 5, { moment: "retour", entite_id: LYON, releve_le: ilYa(18, 10), km: 33400, carburant_8: 2, signataire_nom: "Camille Roux", empreinte: "c4d81e2a07f9b35d6e0a1c8f72b4e93d5a6f0c1e8b2d7a94f3c05e6b1d8a2f70" }),
+  etat(7, 7, { moment: "depart", entite_id: LYON, releve_le: ilYa(1, 15), km: 5100, signataire_nom: "Luc Berger", empreinte: "e09b4c7a21d58f36a0c2e1b9d7f4a83c65e0b2d1f9a7c48e3b6d05a2c1f8e9b4",
+    caution_eur: 800, caution_mode: "cheque", caution_reference: "Chèque n° 0046612", caution_statut: "prise" }),
+];
+
 export const DOSSIERS_EXEMPLE: Dossier[] = assemblerDossiers(CONTRATS_EXEMPLE, {
   locataires: LOCATAIRES_EXEMPLE, vehicules: VEHICULES_EXEMPLE, categories: CATEGORIES_EXEMPLE, amendements: AMENDEMENTS_EXEMPLE,
   propositions: PROPOSITIONS_EXEMPLE, lignes: LIGNES_EXEMPLE, factures: FACTURES_EXEMPLE, lignesFactures: LIGNES_FACTURES_EXEMPLE,
-  avoirs: AVOIRS_EXEMPLE, demandes: DEMANDES_EXEMPLE, journal: JOURNAL_EXEMPLE,
+  avoirs: AVOIRS_EXEMPLE, demandes: DEMANDES_EXEMPLE, journal: JOURNAL_EXEMPLE, etats: ETATS_EXEMPLE,
 });
+
+/* ——— les avis de contravention (b2_03) : un à désigner bientôt (société), un à désigner, un à rapprocher en urgence,
+   un désigné, un classé, un désigné il y a plus d'un an dont l'identité est effacée (b2_04). L'échéance est la date d'envoi plus 45 jours, comme la base la calcule. ——— */
+const jourIso = (iso: string) => iso.slice(0, 10);
+const plus = (jour: string, n: number) => new Date(Date.parse(jour + "T12:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
+const avis = (n: number, o: Partial<AvisContravention> & Pick<AvisContravention, "numero_avis" | "immatriculation" | "infraction_le" | "avis_envoye_le" | "statut">): AvisContravention => ({
+  id: u("pv", n), client_id: C, entite_id: null, vehicule_id: null, lieu: null, nature: null, montant_eur: null, recu_le: o.avis_envoye_le,
+  echeance_le: plus(o.avis_envoye_le, 45), contrat_id: null, locataire_id: null, rapprochement: null, candidats: 0, designation: null,
+  mode_designation: null, reference_designation: null, designe_le: null, designe_par: null, hors_delai: null, motif_classement: null,
+  classe_le: null, classe_par: null, source: "saisie", cree_par: SOFIA, cree_le: o.avis_envoye_le + "T09:00:00Z", ...o,
+});
+export const AVIS_EXEMPLE: AvisContravention[] = [
+  avis(1, { numero_avis: "2026 0819 4471 02", immatriculation: VEHICULES_EXEMPLE[2].immatriculation, infraction_le: ilYa(48, 11), avis_envoye_le: jourIso(ilYa(40)), recu_le: jourIso(ilYa(37)),
+    lieu: "A48, Voreppe", nature: "Excès de vitesse inférieur à 20 km/h (limite 110)", montant_eur: 135, statut: "a_designer", entite_id: GRENOBLE,
+    vehicule_id: VEHICULES_EXEMPLE[2].id, contrat_id: u("co", 6), locataire_id: LOCATAIRES_EXEMPLE[5].id, rapprochement: "auto", candidats: 1 }),
+  avis(2, { numero_avis: "2026 0917 1023 88", immatriculation: VEHICULES_EXEMPLE[5].immatriculation, infraction_le: ilYa(20, 17), avis_envoye_le: jourIso(ilYa(12)), recu_le: jourIso(ilYa(9)),
+    lieu: "Lyon 3e, cours Gambetta", nature: "Franchissement de feu rouge", montant_eur: 135, statut: "a_designer", entite_id: LYON,
+    vehicule_id: VEHICULES_EXEMPLE[5].id, contrat_id: u("co", 5), locataire_id: LOCATAIRES_EXEMPLE[6].id, rapprochement: "auto", candidats: 1 }),
+  avis(3, { numero_avis: "2026 0822 5530 17", immatriculation: VEHICULES_EXEMPLE[3].immatriculation, infraction_le: ilYa(46, 8), avis_envoye_le: jourIso(ilYa(43)), recu_le: jourIso(ilYa(3)),
+    lieu: "Villeurbanne, boulevard du 11-Novembre", nature: "Stationnement gênant", montant_eur: 35, statut: "a_rapprocher", entite_id: LYON, vehicule_id: VEHICULES_EXEMPLE[3].id }),
+  avis(4, { numero_avis: "2026 0924 0310 45", immatriculation: VEHICULES_EXEMPLE[3].immatriculation, infraction_le: ilYa(14, 10), avis_envoye_le: jourIso(ilYa(9)), recu_le: jourIso(ilYa(6)),
+    lieu: "A43, Saint-Quentin-Fallavier", nature: "Excès de vitesse inférieur à 20 km/h (limite 90)", montant_eur: 68, statut: "designe", entite_id: LYON,
+    vehicule_id: VEHICULES_EXEMPLE[3].id, contrat_id: u("co", 4), locataire_id: LOCATAIRES_EXEMPLE[4].id, rapprochement: "auto", candidats: 1,
+    designation: { type: "personne", nom: "Haddad", prenom: "Samir", date_naissance: "1979-11-04", lieu_naissance: "Marseille", adresse: "45 avenue Berthelot, 69007 Lyon", permis_numero: "790469200123" },
+    mode_designation: "antai_en_ligne", reference_designation: "DES-2026-118842", designe_le: ilYa(2, 10), designe_par: EXEMPLE_MOI, hors_delai: false }),
+  avis(5, { numero_avis: "2026 0801 7712 30", immatriculation: VEHICULES_EXEMPLE[1].immatriculation, infraction_le: ilYa(60, 7), avis_envoye_le: jourIso(ilYa(55)), recu_le: jourIso(ilYa(50)),
+    lieu: "Grenoble, rocade sud", nature: "Excès de vitesse inférieur à 20 km/h (limite 90)", montant_eur: 68, statut: "classe", entite_id: GRENOBLE, vehicule_id: VEHICULES_EXEMPLE[1].id,
+    motif_classement: "Usurpation de plaque : la photo du radar montre une autre voiture, la Peugeot était au parc. Requête en exonération envoyée à l'ANTAI avec le dépôt de plainte.", classe_le: ilYa(48, 15), classe_par: CLAIRE }),
+  avis(6, { numero_avis: "2025 0812 6604 51", immatriculation: VEHICULES_EXEMPLE[0].immatriculation, infraction_le: ilYa(400, 16), avis_envoye_le: jourIso(ilYa(395)), recu_le: jourIso(ilYa(392)),
+    lieu: "A7, Vienne", nature: "Excès de vitesse inférieur à 20 km/h (limite 130)", montant_eur: 135, statut: "designe", entite_id: LYON, vehicule_id: VEHICULES_EXEMPLE[0].id,
+    rapprochement: "auto", candidats: 1, designation: { type: "personne", effacee_le: ilYa(20, 3) }, designation_effacee_le: ilYa(20, 3),
+    mode_designation: "antai_en_ligne", reference_designation: "DES-2025-074410", designe_le: ilYa(385, 10), designe_par: CLAIRE, hors_delai: false }),
+];

@@ -1,5 +1,5 @@
 -- TOUT_B2.sql — les tests pgTAP du module TAVARO (session B2), assemblés par assembler.sh.
--- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 et b2_02 posées.
+-- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_05 posées.
 -- Un seul appel execute_sql sur la RECETTE ; runtests() annule tout ce que les tests écrivent.
 
 -- ═══════════════════════════ 00_jeu_tavaro.sql
@@ -1008,6 +1008,240 @@ begin
     return next is((r ->> 'relance')::int, 1, 'C''est la première relance de cette facture');
     return next is((select x.relances from public.loc_factures x where x.id = f.id), 1::smallint, 'Comptée sur la facture');
   end if;
+end $f$;
+
+
+-- ═══════════════════════════ 12_avis_contravention.sql
+-- 12 — Les avis de contravention (vague 3, manque n° 1, migration b2_03) : l'avis reçu est rapproché du contrat par la
+-- plaque et l'heure, l'échéance de désignation (envoi + 45 jours) est tenue, la désignation est réservée à la direction
+-- et aux valideurs, le classement sans désignation à la direction seule ; un autre loueur ne voit rien.
+
+create or replace function tests.test_b2_12_avis_contravention() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_contrat uuid; r jsonb; v_avis uuid; v_parc uuid; v_tard uuid; n bigint;
+  v_jour date := (now() at time zone 'Europe/Paris')::date;
+  v_personne jsonb := jsonb_build_object('nom', 'Durand', 'prenom', 'Marie', 'date_naissance', '1985-03-02', 'lieu_naissance', 'Lyon',
+                                         'adresse', '3 rue des Lilas, 75011 Paris', 'permis_numero', '12AB34567');
+begin
+  if to_regprocedure('public.loc_enregistrer_avis(jsonb)') is null then
+    return next fail('La migration b2_03 (avis de contravention) n''est pas posée : public.loc_enregistrer_avis manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+  v_contrat := (jeu ->> 'contrat')::uuid;
+
+  -- Le collaborateur saisit l'avis reçu : la plaque (écrite autrement) et l'heure désignent le contrat C-2026-0001.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_enregistrer_avis(jsonb_build_object('numero_avis', '2026 1002 1412 01', 'immatriculation', 'ga 123 bc',
+         'infraction_le', '2026-10-02T14:12:00+02:00', 'lieu', 'A6, Auxerre', 'nature', 'Excès de vitesse inférieur à 20 km/h',
+         'montant_eur', 135, 'avis_envoye_le', v_jour - 1));
+  v_avis := (r ->> 'avis')::uuid;
+  return next is(r ->> 'statut', 'a_designer', 'L''avis est rapproché tout seul : conducteur à désigner');
+  return next is((r ->> 'contrat')::uuid, v_contrat, 'Le contrat retrouvé est celui où la voiture était dehors à cette heure');
+  return next is((r ->> 'echeance_le')::date, v_jour - 1 + 45, 'L''échéance est la date d''envoi plus 45 jours');
+  r := public.loc_enregistrer_avis(jsonb_build_object('numero_avis', '2026 1002 1412 01', 'immatriculation', 'GA-123-BC',
+         'infraction_le', '2026-10-02T14:12:00+02:00', 'avis_envoye_le', v_jour - 1));
+  return next ok((r ->> 'deja')::boolean and (r ->> 'avis')::uuid = v_avis, 'Le même avis saisi deux fois rend le premier');
+
+  -- Une infraction hors de tout contrat (véhicule au parc) : à rapprocher, l'agence est prévenue.
+  r := public.loc_enregistrer_avis(jsonb_build_object('numero_avis', 'PARC-0915', 'immatriculation', 'GA-123-BC',
+         'infraction_le', '2026-09-15T10:00:00+02:00', 'avis_envoye_le', v_jour - 1));
+  v_parc := (r ->> 'avis')::uuid;
+  return next is(r ->> 'statut', 'a_rapprocher', 'Aucun contrat à cette heure : l''avis est à rapprocher');
+  perform tests.redevenir_admin();
+  return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle_regroupement like %L', v_client, '%avis:a_rapprocher:' || v_parc::text)) >= 1,
+                 'Une alerte demande de rattacher l''avis');
+
+  -- Les saisies illisibles sont refusées.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_enregistrer_avis(%L::jsonb)', jsonb_build_object('numero_avis', 'SANS-HEURE', 'immatriculation', 'GA-123-BC',
+         'infraction_le', '2026-10-02', 'avis_envoye_le', v_jour - 1)), '22023', null, 'Sans l''heure de l''infraction, pas d''avis (c''est elle qui désigne le contrat)');
+  return next throws_ok(format('select public.loc_enregistrer_avis(%L::jsonb)', jsonb_build_object('numero_avis', 'SANS-ENVOI', 'immatriculation', 'GA-123-BC',
+         'infraction_le', '2026-10-02T14:12:00+02:00')), '22023', null, 'Sans la date d''envoi, pas d''échéance, pas d''avis');
+
+  -- Le collaborateur ne désigne pas : c'est un acte du représentant légal.
+  return next throws_ok(format('select public.loc_designer_conducteur(%L::uuid, %L::jsonb, %L)', v_avis, v_personne, 'antai_en_ligne'),
+                        '42501', null, 'Le collaborateur ne désigne pas le conducteur');
+  return next throws_ok(format('select public.loc_classer_avis(%L::uuid, %L)', v_parc, 'Usurpation de plaque : requête en exonération.'),
+                        '42501', null, 'Le collaborateur ne classe pas un avis');
+  -- Une écriture directe dans la table est refusée.
+  return next throws_ok(format('update public.loc_avis_contravention set statut = %L where id = %L', 'classe', v_avis), '42501', null,
+                        'Aucune écriture directe dans le registre des avis');
+  perform tests.redevenir_admin();
+
+  -- Un autre loueur ne voit ni ne touche rien.
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre-loueur@essai.invalid');
+  return next is(tests.compter('public', 'loc_avis_contravention', 'true'), 0::bigint, 'Un autre loueur ne voit aucun avis');
+  return next throws_ok(format('select public.loc_rattacher_avis(%L::uuid, %L::uuid)', v_parc, v_contrat), 'P0002', null, 'Un autre loueur ne rattache pas cet avis');
+  perform tests.redevenir_admin();
+
+  -- Le référent (valideur) désigne : incomplet refusé, complet consigné, dans le délai.
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  return next throws_ok(format('select public.loc_designer_conducteur(%L::uuid, %L::jsonb, %L)', v_avis, v_personne - 'permis_numero', 'antai_en_ligne'),
+                        '22023', null, 'Sans numéro de permis, la désignation est refusée');
+  return next throws_ok(format('select public.loc_designer_conducteur(%L::uuid, %L::jsonb, %L)', v_avis, v_personne, 'pigeon_voyageur'),
+                        '22023', null, 'Un mode de désignation inconnu est refusé');
+  r := public.loc_designer_conducteur(v_avis, v_personne, 'antai_en_ligne', 'ANTAI-778899');
+  return next is(r ->> 'statut', 'designe', 'Le conducteur est désigné');
+  return next ok(not (r ->> 'hors_delai')::boolean, 'Dans le délai');
+  return next throws_ok(format('select public.loc_designer_conducteur(%L::uuid, %L::jsonb, %L)', v_avis, v_personne, 'lrar'),
+                        '23514', null, 'Un avis désigné ne se désigne pas deux fois');
+  perform tests.redevenir_admin();
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.conducteur_designe') >= 1, 'Le journal opposable porte tavaro.conducteur_designe');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.avis_enregistre') >= 2, 'Le journal opposable porte tavaro.avis_enregistre');
+  select count(*) into n from public.journal_opposable j where j.client_id = v_client and j::text like '%Lilas%';
+  return next is(n, 0::bigint, 'L''identité désignée n''entre pas au journal');
+
+  -- Le gérant classe l'avis du parc, motif obligatoire.
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
+  return next throws_ok(format('select public.loc_classer_avis(%L::uuid, %L)', v_parc, 'court'), '22023', null, 'Un classement sans vrai motif est refusé');
+  r := public.loc_classer_avis(v_parc, 'Usurpation de plaque : requête en exonération envoyée avec la plainte.');
+  return next is(r ->> 'statut', 'classe', 'La direction classe l''avis avec son motif');
+
+  -- Un avis reçu tard (envoyé il y a 43 jours) : l'alerte J-3 part dès la saisie, puis « dépassé » au passage du cron.
+  r := public.loc_enregistrer_avis(jsonb_build_object('numero_avis', 'TARD-01', 'immatriculation', 'GA-123-BC',
+         'infraction_le', to_char(v_jour - 44, 'YYYY-MM-DD') || 'T10:00:00+02:00', 'avis_envoye_le', v_jour - 43));
+  v_tard := (r ->> 'avis')::uuid;
+  perform tests.redevenir_admin();
+  return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle_regroupement like %L', v_client, '%avis:j3:' || v_tard::text)) >= 1,
+                 'À deux jours de l''échéance, l''alerte critique part dès la saisie');
+  perform private.loc_surveiller_avis(now() + interval '4 days');
+  return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle_regroupement like %L', v_client, '%avis:depasse:' || v_tard::text)) >= 1,
+                 'Échéance passée : l''alerte « 675 € encourus » est levée par le passage quotidien');
+end $f$;
+
+
+-- ═══════════════════════════ 13_designation_conservation.sql
+-- 13 — L'identité désignée s'efface un an après la désignation (migration b2_04, art. 9 du code de procédure pénale) :
+-- l'avis reste (plaque, heure, montant, statut, mode, référence), seule l'identité part ; une désignation récente reste entière.
+
+create or replace function tests.test_b2_13_designation_conservation() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_vieux uuid; v_recent uuid; a public.loc_avis_contravention; n integer;
+  v_jour date := (now() at time zone 'Europe/Paris')::date;
+  v_personne jsonb := jsonb_build_object('nom', 'Durand', 'prenom', 'Marie', 'date_naissance', '1985-03-02', 'lieu_naissance', 'Lyon',
+                                         'adresse', '3 rue des Lilas, 75011 Paris', 'permis_numero', '12AB34567');
+begin
+  if to_regprocedure('private.loc_effacer_designations(timestamptz)') is null then
+    return next fail('La migration b2_04 (conservation de la désignation) n''est pas posée : private.loc_effacer_designations manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  v_vieux := (public.loc_enregistrer_avis(jsonb_build_object('numero_avis', 'VIEUX-01', 'immatriculation', 'GA-123-BC',
+               'infraction_le', '2026-10-02T14:12:00+02:00', 'montant_eur', 135, 'avis_envoye_le', v_jour - 1)) ->> 'avis')::uuid;
+  v_recent := (public.loc_enregistrer_avis(jsonb_build_object('numero_avis', 'RECENT-01', 'immatriculation', 'GA-123-BC',
+               'infraction_le', '2026-10-02T16:40:00+02:00', 'montant_eur', 68, 'avis_envoye_le', v_jour - 1)) ->> 'avis')::uuid;
+  perform public.loc_designer_conducteur(v_vieux, v_personne, 'antai_en_ligne', 'ANTAI-1');
+  perform public.loc_designer_conducteur(v_recent, v_personne, 'lrar', 'RAR-2');
+  perform tests.redevenir_admin();
+
+  -- Le premier a été désigné il y a treize mois, le second il y a six.
+  update public.loc_avis_contravention set designe_le = now() - interval '13 months' where id = v_vieux;
+  update public.loc_avis_contravention set designe_le = now() - interval '6 months' where id = v_recent;
+
+  n := private.loc_effacer_designations(now());
+  return next ok(n >= 1, format('Le passage efface au moins une désignation (%s)', n));
+  select * into a from public.loc_avis_contravention where id = v_vieux;
+  return next ok(a.designation_effacee_le is not null, 'Au-delà d''un an, la date d''effacement est posée');
+  return next ok(not (a.designation ? 'nom') and not (a.designation ? 'permis_numero') and not (a.designation ? 'date_naissance') and not (a.designation ? 'adresse'),
+                 'L''identité (nom, permis, naissance, adresse) est effacée');
+  return next is(a.designation ->> 'type', 'personne', 'La forme de la désignation reste (une personne)');
+  return next ok(a.statut = 'designe' and a.immatriculation = 'GA-123-BC' and a.montant_eur = 135 and a.mode_designation = 'antai_en_ligne'
+                 and a.reference_designation = 'ANTAI-1' and a.designe_le is not null and a.hors_delai is not null,
+                 'Le reste de l''avis reste : statut, plaque, montant, mode, référence, date, délai tenu');
+  select * into a from public.loc_avis_contravention where id = v_recent;
+  return next ok(a.designation ->> 'nom' = 'Durand' and a.designation_effacee_le is null, 'Une désignation de six mois reste entière');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.designations_effacees') >= 1, 'Le journal opposable compte l''effacement (sans identité)');
+  return next is((select count(*) from public.journal_opposable j where j.client_id = v_client and j::text like '%12AB34567%'), 0::bigint,
+                 'Aucune identité au journal');
+  n := private.loc_effacer_designations(now());
+  return next is((select count(*)::integer from public.loc_avis_contravention x where x.client_id = v_client and x.designation_effacee_le is not null), 1,
+                 'Rejoué, le passage n''efface rien de plus');
+end $f$;
+
+
+-- ═══════════════════════════ 14_etats_des_lieux.sql
+-- 14 — L'état des lieux contradictoire (vague 3, manque n° 3, migration b2_05) : départ signé avec quatre vues et ses
+-- dommages photographiés, empreinte du contenu signé, état figé ; retour non signé constaté ; le chiffrage du socle reçoit
+-- le carburant du départ signé, le caractère non contradictoire, et ne facture pas un dommage déjà noté au départ ;
+-- la caution se lève quand rien n'est dû.
+
+create or replace function tests.test_b2_14_etats_des_lieux() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_contrat uuid; v_dep uuid; v_ret uuid; r jsonb; e public.loc_etats_des_lieux; p public.loc_propositions; v_prop uuid; n bigint;
+  v_photos jsonb := '[{"vue":"avant","chemin":"edl/avant.jpg"},{"vue":"arriere","chemin":"edl/arriere.jpg"},{"vue":"flanc_gauche","chemin":"edl/gauche.jpg"},{"vue":"flanc_droit","chemin":"edl/droit.jpg"},{"vue":"compteur","chemin":"edl/compteur.jpg"}]';
+begin
+  if to_regprocedure('public.loc_etablir_etat(uuid, text, jsonb)') is null then
+    return next fail('La migration b2_05 (états des lieux) n''est pas posée : public.loc_etablir_etat manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+  v_contrat := (jeu ->> 'contrat')::uuid;
+
+  -- Le collaborateur établit le départ au comptoir.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  v_dep := public.loc_etablir_etat(v_contrat, 'depart', jsonb_build_object('km', 12000, 'carburant_8', 6, 'photos', '[{"vue":"avant","chemin":"edl/avant.jpg"}]'::jsonb));
+  return next throws_ok(format('select public.loc_signer_etat(%L::uuid, %L)', v_dep, 'Marie Durand'), '22023', null, 'Sans l''avant, l''arrière et les deux flancs en photo, pas de signature');
+  return next throws_ok(format('select public.loc_etablir_etat(%L::uuid, %L, %L::jsonb)', v_contrat, 'depart',
+           jsonb_build_object('km', 12000, 'carburant_8', 6, 'photos', v_photos, 'dommages', '[{"zone":"flanc_droit","description":"Rayure portière avant droite"}]'::jsonb)),
+         '22023', null, 'Un dommage noté sans photo est refusé');
+  return next throws_ok(format('select public.loc_etablir_etat(%L::uuid, %L, %L::jsonb)', v_contrat, 'depart',
+           jsonb_build_object('km', 12000, 'photos', v_photos, 'dommages', '[{"zone":"plafonnier","description":"x","preuves":[{"chemin":"edl/x.jpg"}]}]'::jsonb)),
+         '22023', null, 'Une zone inconnue est refusée');
+  v_dep := public.loc_etablir_etat(v_contrat, 'depart', jsonb_build_object('km', 12000, 'carburant_8', 6, 'photos', v_photos,
+             'caution_eur', 800, 'caution_mode', 'empreinte_carte', 'caution_reference', 'AUT-4411',
+             'dommages', '[{"zone":"flanc_droit","code":"RAYURE_PORTIERE","description":"Rayure portière avant droite","preuves":[{"chemin":"edl/rayure.jpg"}]}]'::jsonb));
+  r := public.loc_signer_etat(v_dep, 'Marie Durand', 'edl/signature.png');
+  return next is(r ->> 'statut', 'signe', 'La locataire signe l''état de départ');
+  return next ok(r ->> 'empreinte' ~ '^[0-9a-f]{64}$', 'Une empreinte SHA-256 du contenu signé est gardée');
+  return next throws_ok(format('select public.loc_etablir_etat(%L::uuid, %L, %L::jsonb)', v_contrat, 'depart', '{"km":1}'), '23514', null, 'Un départ signé ne se refait pas');
+  return next throws_ok(format('update public.loc_etats_des_lieux set km = 1 where id = %L', v_dep), '42501', null, 'Aucune écriture directe');
+  perform tests.redevenir_admin();
+  select * into e from public.loc_etats_des_lieux where id = v_dep;
+  return next is(encode(sha256(convert_to(private.loc_contenu_signe(e, e.signataire_nom, e.signe_le), 'UTF8')), 'hex'), e.empreinte, 'L''empreinte se recalcule à l''identique : rien n''a bougé depuis la signature');
+  return next is(e.caution_statut, 'prise', 'La caution de 800 € est prise');
+  return next throws_ok(format('update public.loc_etats_des_lieux set carburant_8 = 8 where id = %L', v_dep), '42501', null, 'Même le propriétaire de la base ne change pas un état signé');
+
+  -- Un autre loueur ne voit rien.
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre-loueur@essai.invalid');
+  return next is(tests.compter('public', 'loc_etats_des_lieux', 'true'), 0::bigint, 'Un autre loueur ne voit aucun état des lieux');
+  return next throws_ok(format('select public.loc_etablir_etat(%L::uuid, %L, %L::jsonb)', v_contrat, 'retour', '{}'), 'P0002', null, 'Ni n''en établit chez ce loueur');
+  perform tests.redevenir_admin();
+
+  -- Le retour : la locataire n'est pas là (boîte à clés).
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  v_ret := public.loc_etablir_etat(v_contrat, 'retour', jsonb_build_object('km', 12650, 'carburant_8', 5, 'photos', v_photos));
+  return next throws_ok(format('select public.loc_etablir_etat(%L::uuid, %L, %L::jsonb)', v_contrat, 'retour', '{"caution_eur":100}'), '22023', null, 'La caution ne se prend pas au retour');
+  r := public.loc_constater_refus(v_ret, 'Client absent : clés déposées dans la boîte.');
+  return next is(r ->> 'statut', 'refuse', 'Le retour non signé est constaté, avec son motif');
+
+  -- Le chiffrage : carburant du départ signé (6/8, pas 8/8), non contradictoire, la rayure du flanc droit n'est pas facturée.
+  v_prop := public.loc_chiffrer_retour(v_contrat, tests.tavaro_retour()
+              || jsonb_build_object('carburant_depart_8', 8, 'non_contradictoire', false,
+                                    'dommages', '[{"code":"RAYURE_PORTIERE","zone":"flanc_droit","preuves":[{"photo":"retour/portiere.jpg"}]}]'::jsonb));
+  perform tests.redevenir_admin();
+  select * into p from public.loc_propositions where id = v_prop;
+  return next is((p.entrees ->> 'carburant_depart_8')::int, 6, 'Le carburant au départ est celui de l''état signé');
+  return next ok(p.non_contradictoire, 'Le retour non signé rend la proposition non contradictoire');
+  return next is(tests.compter('public', 'loc_proposition_lignes', format('proposition_id = %L and nature = %L', v_prop, 'dommage')), 0::bigint,
+                 'La rayure déjà notée au départ signé n''est pas facturée');
+  return next ok(p.avertissements @> '[{"code":"deja_au_depart"}]' and p.avertissements @> '[{"code":"carburant_depart_signe"}]' and p.avertissements @> '[{"code":"retour_non_signe"}]',
+                 'La proposition dit pourquoi : déjà au départ, carburant signé, retour non signé');
+
+  -- La caution attend la facture.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_lever_caution(%L::uuid)', v_contrat), '23514', null, 'Le retour est en facturation : la caution ne se lève pas encore');
+  perform tests.redevenir_admin();
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.etat_signe') >= 1 and tests.tavaro_journal(v_client, 'tavaro.etat_non_signe') >= 1,
+                 'Le journal opposable porte tavaro.etat_signe et tavaro.etat_non_signe');
 end $f$;
 
 

@@ -22,6 +22,11 @@ import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, Link2,
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
+import SituationsCarte from "./SituationsCarte";
+import ReceptionCarte from "./ReceptionCarte";
+import HeuresCarte from "./HeuresCarte";
+import RecalageDialog from "./RecalageDialog";
+import SignatureLienDialog from "./SignatureLienDialog";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -40,6 +45,10 @@ type Form =
   | { type: "verifier"; marche: Marche }
   | { type: "reponse"; passage: Passage }
   | { type: "remplacants"; passage: Passage }
+  | { type: "recaler"; passage: Passage }
+  | { type: "sur_place"; avenant: Avenant }
+  | { type: "preuve"; avenant: Avenant }
+  | { type: "terminer"; passage: Passage }
   | { type: "avenant" }
   | { type: "chiffrer"; avenant: Avenant }
   | { type: "soumettre"; avenant: Avenant }
@@ -58,6 +67,7 @@ const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? cry
 export default function ChantierVue({ tableau, source, onLocal, relire }: Props) {
   const { chantier: c, lots, marches, passages, avenants, factures, debourse, tiers, bibliotheque, voit_prix } = tableau;
   const [form, setForm] = useState<Form>(null);
+  const planningVivant = c.statut === "ouvert" || c.statut === "suspendu";
   const [champs, setChamps] = useState<Record<string, string>>({});
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -456,13 +466,15 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                   return (
                     <tr key={p.id}>
                       <td>{dateCourte(p.debut)}{p.fin !== p.debut ? ` → ${dateCourte(p.fin)}` : ""}{p.exterieur ? <span className="esp-kpi-sous"> · extérieur</span> : null}</td>
-                      <td>{p.tache ?? "—"}{p.statut === "fait" ? <span className="esp-kpi-sous"> · fait</span> : null}</td>
+                      <td>{p.tache ?? "—"}{p.statut === "fait" ? <span className="esp-kpi-sous"> · fait</span> : p.statut === "prevu" && p.fin < aujourdhui() ? <div><Pastille teinte="ambre" contour>En retard</Pastille></div> : null}</td>
                       <td>{p.lot_code ? <span className="esp-mono">{p.lot_code}</span> : <span className="esp-obligatoire">aucun</span>}</td>
                       <td>{p.intervenant_nom ?? p.intervenant_lu ?? "—"}{p.intervenant_type === "inconnu" ? <div><Pastille teinte="ambre" contour>À ranger</Pastille></div> : p.rapprochement === "ressemblance" ? <div className="esp-kpi-sous">lu « {p.intervenant_lu} »</div> : null}</td>
                       <td>{p.intervenant_type === "tiers" ? <><Pastille teinte={k.teinte}>{k.libelle}</Pastille>{dernier ? <div className="esp-kpi-sous">{dateHeure(dernier.survenu_le)}{dernier.canal ? ` · ${dernier.canal}` : ""}{typeof dernier.detail.texte === "string" ? ` · « ${dernier.detail.texte} »` : ""}</div> : null}{p.envoi ? <div className="esp-kpi-sous">{libelleEnvoi(p.envoi, dateHeure)}</div> : null}</> : <span className="esp-kpi-sous">équipe interne</span>}</td>
                       <td>
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && p.confirmation !== "non_demandee" && p.confirmation !== "confirmee" ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "reponse", passage: p })}>Noter la réponse</button> : null}
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
+                        {p.statut === "prevu" && planningVivant ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
+                        {p.statut === "prevu" && planningVivant && p.debut <= aujourdhui() ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "terminer", passage: p })}>Noter fait</button></div> : null}
                       </td>
                     </tr>
                   );
@@ -518,7 +530,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                   </table>
                 </div>
               ) : <div className="esp-kpi-sous">Aucune ligne : chiffrez les travaux sur un prix validé de la bibliothèque.</div>}
-              {a.signe_le ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Signé le {dateCourte(a.signe_le)}{a.signe_libelle ? ` par ${a.signe_libelle}` : ""}.</div> : null}
+              {a.signe_le ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Signé le {dateCourte(a.signe_le)}{a.signe_libelle ? (a.signe_libelle.startsWith("Signé sur place") ? ` : ${a.signe_libelle.charAt(0).toLowerCase()}${a.signe_libelle.slice(1)}` : ` par ${a.signe_libelle}`) : ""}.{a.signe_libelle?.startsWith("Signé sur place") && voit_prix ? <> <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "preuve", avenant: a })}>Voir la preuve</button></> : null}</div> : null}
               {a.motif ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Motif : {a.motif}</div> : null}
               <div className="esp-controle-actions" style={{ marginTop: 8 }}>
                 {a.statut === "brouillon" ? <>
@@ -528,6 +540,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                 </> : null}
                 {a.statut === "soumis" ? <>
                   <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "signer", avenant: a })} disabled={a.demande_statut !== "approuvee" && a.demande_statut !== "executee"} title={a.demande_statut !== "approuvee" && a.demande_statut !== "executee" ? "La demande de validation n'est pas encore approuvée" : undefined}><PenLine width={14} height={14} aria-hidden="true" /> Signer</button>
+                  {a.demande_statut === "approuvee" && voit_prix ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "sur_place", avenant: a })}><FileSignature width={14} height={14} aria-hidden="true" /> Faire signer sur place</button> : null}
                   <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "abandonner", avenant: a })}>Abandonner</button>
                 </> : null}
                 {a.statut === "refuse" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "soumettre", avenant: a })}>Resoumettre</button> : null}
@@ -537,6 +550,15 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         })}
         {!avenants.length ? <div className="esp-kpi-sous">Un travail supplémentaire repéré (vocal, photo, visite) devient un avenant chiffré sur vos prix, signé avant exécution.</div> : null}
       </section>
+
+      {/* ——— situations de travaux (b6_12) ——— */}
+      <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
+
+      {/* ——— heures pointées et rentabilité (b6_17) ——— */}
+      <HeuresCarte key={tableau.chantier.id} tableau={tableau} source={source} />
+
+      {/* ——— réception, réserves, retenue, décompte (b6_13) ——— */}
+      <ReceptionCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
 
       {/* ——— factures ——— */}
       <section className="esp-carte" aria-label="Factures">
@@ -661,6 +683,13 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               </div></DialogBody>
               <DialogFooter><button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => faireReponse(form.passage)}>{envoi ? <Loader variant="spin" /> : null} Noter</button></DialogFooter>
             </>
+          ) : null}
+          {form?.type === "sur_place" || form?.type === "preuve" ? (
+            <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
+          ) : null}
+          {form?.type === "recaler" || form?.type === "terminer" ? (
+            <RecalageDialog key={`${form.type}-${form.passage.id}`} mode={form.type} passage={form.passage} tableau={tableau} source={source} onLocal={onLocal} relire={relire}
+                            fermer={(m) => { if (m) setFait(m); fermer(); }} />
           ) : null}
           {form?.type === "remplacants" ? (
             <>

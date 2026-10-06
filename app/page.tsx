@@ -597,7 +597,7 @@ const FAQ = [
   },
   {
     q: "Où sont hébergées mes données ?",
-    a: "Dans un espace dédié à votre entreprise, chiffré et hébergé dans l'Union européenne, strictement séparé de celui de chaque autre client. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et vous pouvez demander l'export complet ou la suppression à tout moment.",
+    a: "Dans un espace dédié à votre entreprise, chiffré et hébergé dans l'Union européenne, strictement séparé de celui de chaque autre client. Les modèles d'intelligence artificielle utilisés ne reçoivent que la pièce à lire, jamais le reste de votre espace, et vous pouvez demander l'export complet ou la suppression à tout moment.",
   },
   {
     q: "Je suis concerné par la facture électronique ?",
@@ -615,6 +615,11 @@ const FAQ = [
    reste dit (l'état chaque matin, la validation avant envoi), mais comme une
    garantie comprise, jamais comme un système de plus à découvrir. */
 const VEDETTES = ["CASHD", "OFFLOAD", "REPUT", "FILED"];
+
+/* 06/10/2026 (C5, décision du coordinateur) — CASHD (C2), OFFLOAD (C4) et la
+   réponse de REPUT (C3) se construisent : pastille « En préparation » sur la
+   carte. On retire le sigle d'ici quand l'ouvrier livre (omega/NOTES-C5.md). */
+const EN_PREPARATION = ["CASHD", "OFFLOAD", "REPUT"];
 
 const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
   .filter((m) => VEDETTES.includes(m.system))
@@ -694,9 +699,9 @@ const ACCROCHES_VITRINE: Record<
       "Relit votre base la nuit, remonte les comptes silencieux.",
   },
   REPUT: {
-    objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
+    objectif: "Une demande reçue à 21 h a sa réponse prête à 21 h.",
     texte:
-      "Lit le message dès son arrivée et répond dans la minute.",
+      "Réponse prête dans la minute ; seule sur les sujets autorisés.",
   },
   FILED: {
     objectif: "Vos équipes ne ressaisiront plus un seul document.",
@@ -1087,6 +1092,7 @@ export default function Home() {
                 objectif: ACCROCHES_VITRINE[m.system]?.objectif ?? m.title,
                 texte: ACCROCHES_VITRINE[m.system]?.texte ?? m.benefit,
                 href: `/offres/${m.slug}`,
+                preparation: EN_PREPARATION.includes(m.system),
               }))}
             />
             </Apparition>

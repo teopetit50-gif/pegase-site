@@ -23,10 +23,15 @@
    tapés sous la phrase (la clé ne change pas, son enveloppe si). Ensuite la
    clé d'un dossier vient du coffre (fonction tamila-coffre), à l'ouverture
    du dossier, pour qui le voit ; chaque déballage est journalisé.
+
+   Les avis reçus par courriel (b4_10, 06/10/2026) : au-dessus des
+   compteurs, la file « Avis RPVA à rattacher » (AvisEntrantsTamila).
+   Les honoraires du cabinet (06/10) : un tableau par dossier pour les
+   avocats (HonorairesCabinet), ouvert depuis l'en-tête.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FolderPlus, KeyRound, Lock, ShieldCheck, Unlock } from "lucide-react";
+import { FolderPlus, KeyRound, Lock, Scale, ShieldCheck, Unlock } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "../source";
@@ -39,6 +44,8 @@ import { MATIERES, STATUTS_DOSSIER, TERRITOIRES, delaiCourt, estAssocie, estGera
 import { chargerCabinet, chargerDossier, cleDossier, coffre, creerDossier, installer, type Cabinet, type EtatCoffre } from "./portes";
 import type { Clair, Dossier, DossierComplet } from "./types";
 import DossierTamila from "./DossierTamila";
+import AvisEntrantsTamila from "./AvisEntrantsTamila";
+import HonorairesCabinet from "./HonorairesCabinet";
 import "./tamila.css";
 
 type Filtre = "a_confirmer" | "proches" | "audiences" | "ouverts" | "clos";
@@ -72,6 +79,7 @@ export default function EcranTamila() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
   const [filtre, setFiltre] = useState<Filtre | null>(null);
+  const [tableauHonoraires, setTableauHonoraires] = useState(false);
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeDossier, setChargeDossier] = useState(false);
   const trousseau = useRef(new Trousseau());
@@ -265,6 +273,33 @@ export default function EcranTamila() {
     },
     [cabinet, phrase, auCoffre, cleParCoffre],
   );
+
+  /* la clé d'un dossier pour y chiffrer une pièce reçue : trousseau, puis coffre, puis phrase */
+  const cleDe = useCallback(
+    async (id: string): Promise<CryptoKey | null> => {
+      const deja = trousseau.current.lire(id);
+      if (deja || !cabinet) return deja;
+      const k = cabinet.cles.find((c) => c.dossier_id === id && c.statut === "active") ?? null;
+      if (k?.fournisseur === "scaleway" || (!k && auCoffre)) return cleParCoffre(id);
+      if (!phrase) return null;
+      const enveloppe = k?.enveloppe ?? (await cleDossier(id));
+      return enveloppe ? trousseau.current.ouvrir(id, enveloppe, phrase) : null;
+    },
+    [cabinet, phrase, auCoffre, cleParCoffre],
+  );
+
+  /* un avis rattaché : le dossier s'ouvre, relu (sa nouvelle pièce) */
+  const avisRattache = useCallback((id: string) => {
+    setFiltre(null);
+    setChoix(id);
+    if (source === "reelle") {
+      setComplets((prev) => {
+        const r = { ...prev };
+        delete r[id];
+        return r;
+      });
+    }
+  }, [source]);
 
   useEffect(() => {
     if (source !== "reelle" || !ligne || !cabinet || complets[ligne.dossier.id]) return;
@@ -533,6 +568,8 @@ export default function EcranTamila() {
   };
 
   const avocats = personnes.filter((p) => ["gerant", "admin", "valideur"].includes(p.role));
+  const estAvocatDuCabinet = !!moi && ["gerant", "admin", "valideur"].includes(moi.role);
+  const dossiersHonoraires = useMemo(() => lignes.map((x) => ({ dossier: x.dossier, clair: x.clair })), [lignes]);
   const reglages = source === "exemple" ? REGLAGES_EXEMPLE : (cabinet?.reglages ?? null);
 
   return (
@@ -553,6 +590,11 @@ export default function EcranTamila() {
           {etat && associe ? (
             <button type="button" className={`r-btn r-btn--fil tam-coffre${auCoffre ? " tam-coffre--actif" : ""}`} onClick={() => { setErreurCoffre(null); setCoffreEchecs([]); setFormCoffre(true); }}>
               <ShieldCheck width={15} height={15} aria-hidden="true" /> {etat.statut === "scaleway" ? "Coffre Scaleway" : etat.statut === "bascule" ? "Coffre : bascule" : "Coffre à clés"}
+            </button>
+          ) : null}
+          {estAvocatDuCabinet && (source === "exemple" || cabinet?.installe) ? (
+            <button type="button" className="r-btn r-btn--fil" onClick={() => setTableauHonoraires(true)}>
+              <Scale width={15} height={15} aria-hidden="true" /> Honoraires du cabinet
             </button>
           ) : null}
           <button type="button" className="r-btn r-btn--noir" onClick={ouvrirNouveau} disabled={source === "reelle" && (!cabinet?.installe || !moi || moi.role === "lecteur")}>
@@ -598,6 +640,18 @@ export default function EcranTamila() {
       ) : null}
       {source === "reelle" && cabinet?.horsVue ? (
         <div style={{ marginBottom: 14 }}><Avis teinte="gris">{cabinet.horsVue} dossier{cabinet.horsVue > 1 ? "s" : ""} du cabinet {cabinet.horsVue > 1 ? "sont" : "est"} hors de votre vue (muraille ou périmètre) : compté, jamais lu.</Avis></div>
+      ) : null}
+
+      {source === "exemple" || (cabinet?.installe && moi && ["gerant", "admin", "valideur"].includes(moi.role)) ? (
+        <AvisEntrantsTamila
+          key={source}
+          source={source}
+          clientId={source === "exemple" ? EXEMPLE_CLIENT : (cabinet?.moi.client_id ?? "")}
+          dossiers={lignes.filter((x) => ["attente", "ouvert", "audit"].includes(x.dossier.statut)).map((x) => ({ dossier: x.dossier, clair: x.clair }))}
+          cleDe={cleDe}
+          avocat={!!moi && ["gerant", "admin", "valideur"].includes(moi.role)}
+          onRattache={avisRattache}
+        />
       ) : null}
 
       <div className="esp-kpis tam-kpis" data-arrivee="">
@@ -674,6 +728,7 @@ export default function EcranTamila() {
               clientId={source === "exemple" ? EXEMPLE_CLIENT : (cabinet?.moi.client_id ?? "")}
               onLocal={remplacerLocal}
               relire={relireDossier}
+              referenceDe={(id) => (source === "exemple" ? (local.find((c) => c.dossier.id === id)?.clair?.reference ?? null) : (clairs[id]?.reference ?? null))}
             />
           ) : chargeDossier || (source === "reelle" && ligne) ? (
             <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>
@@ -682,6 +737,18 @@ export default function EcranTamila() {
           )}
         </section>
       </div>
+
+      {tableauHonoraires ? (
+        <HonorairesCabinet
+          ouvert
+          onFermer={() => setTableauHonoraires(false)}
+          source={source}
+          clientId={source === "exemple" ? EXEMPLE_CLIENT : (cabinet?.moi.client_id ?? "")}
+          dossiers={dossiersHonoraires}
+          nomDe={nomDe}
+          onOuvrir={(id) => { setFiltre(null); setChoix(id); }}
+        />
+      ) : null}
 
       {/* ——— le coffre à clés ——— */}
       <Dialog open={formCoffre} onOpenChange={(o) => !o && !coffreEnCours && setFormCoffre(false)}>

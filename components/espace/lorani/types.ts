@@ -253,7 +253,127 @@ export type PieceProjet = {
   type_piece: string | null;
   /* le motif du lecteur quand il n'a pas reconnu le courrier (a_classer) ou n'a pas pu le lire */
   motif?: string | null;
+  /* « courriel » : pièce jointe d'un courriel du guichet, rangée seule par son numéro de dossier (b5_11) */
+  source?: string | null;
+  /* le chemin du fichier dans omega-clients (base réelle) : le rapport du contrôle en rend les pages */
+  chemin?: string | null;
   cree_le?: string;
+};
+
+/* les honoraires d'un élément de mission (b5_12) et les temps passés dessus */
+export type ElementMission = "diag" | "esq" | "aps" | "apd" | "pc" | "pro" | "dce" | "act" | "visa" | "exe" | "det" | "opc" | "aor" | "autre";
+export type Honoraire = {
+  id: string;
+  projet_id: string;
+  element: ElementMission;
+  intitule: string | null;
+  montant_ht: number;
+  heures_prevues: number;
+  statut: "a_venir" | "en_cours" | "achevee" | "facturee";
+  achevee_le: string | null;
+  facturee_le: string | null;
+};
+export type Temps = {
+  id: string;
+  projet_id: string;
+  honoraire_id: string;
+  membre: string;
+  jour: string;
+  heures: number;
+  note: string | null;
+};
+
+/* le chantier (b5_13) : marchés par lot, situations de travaux, documents d'exécution à viser */
+export type Marche = {
+  id: string;
+  projet_id: string;
+  lot_id: string;
+  titulaire: string;
+  montant_ht: number;
+  avenants_ht: number;
+  retenue_pct: number;
+  delai_verification_jours: number | null;
+  actif: boolean;
+};
+export type Situation = {
+  id: string;
+  projet_id: string;
+  marche_id: string;
+  numero: number;
+  mois: string;
+  cumul_ht: number;
+  recue_le: string;
+  a_viser_avant: string | null;
+  statut: "a_viser" | "visee" | "rectifiee";
+  cumul_admis_ht: number | null;
+  observation: string | null;
+  visee_le: string | null;
+};
+export type Visa = {
+  id: string;
+  projet_id: string;
+  lot_id: string | null;
+  document: string;
+  indice: string;
+  recu_le: string;
+  commande_le: string | null;
+  delai_visa_jours: number;
+  a_viser_avant: string | null;
+  avis: "a_viser" | "vso" | "vao" | "ref";
+  observation: string | null;
+  vise_le: string | null;
+};
+
+/* le contrôle du dossier (b5_16) : les pièces croisées, ce qui est relevé, ce qui est décidé */
+export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "autre";
+export type Controle = {
+  id: string;
+  projet_id: string;
+  intitule: string;
+  indice: string;
+  precedent_id: string | null;
+  statut: "en_lecture" | "controle" | "clos";
+  lance_le: string | null;
+  constats_nb: number;
+  cree_le: string;
+};
+export type ControlePiece = {
+  id: string;
+  controle_id: string;
+  piece_id: string;
+  role: RolePieceControle;
+  reference: string | null;
+};
+/* une valeur citée : la pièce, la page, la boîte et le texte lu ; « regle » pour le seuil du PLU */
+export type ValeurCitee = {
+  piece?: string;
+  reference?: string | null;
+  page?: number | null;
+  valeur?: number | string | null;
+  texte?: string | null;
+  borne?: "max" | "min";
+  article?: string | null;
+  regle?: boolean;
+  /* fractions de la page, y depuis le haut (contrat de lecture) */
+  boite?: { x: number; y: number; l: number; h: number } | null;
+};
+export type Constat = {
+  id: string;
+  controle_id: string;
+  nature: "incoherence" | "plu" | "cctp_dpgf";
+  gravite: "bloquant" | "majeur" | "mineur";
+  grandeur: string | null;
+  objet: string | null;
+  titre: string;
+  correction: string | null;
+  article: string | null;
+  valeurs: ValeurCitee[];
+  statut: "ouvert" | "corrige" | "accepte" | "ecarte";
+  motif: string | null;
+  precedent_id: string | null;
+  corrige_au_controle: string | null;
+  decide_par: string | null;
+  decide_le: string | null;
 };
 
 /* tout ce que l'écran montre, d'une source ou de l'autre */
@@ -268,6 +388,14 @@ export type Dossier = {
   membres: MembreProjet[];
   casRejet: CasRejet[];
   pieces: PieceProjet[];
+  honoraires: Honoraire[];
+  temps: Temps[];
+  marches: Marche[];
+  situations: Situation[];
+  visas: Visa[];
+  controles: Controle[];
+  controlePieces: ControlePiece[];
+  constats: Constat[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

@@ -324,6 +324,202 @@ cascade s'écrit avec un mot interdit dans un fichier à poser ; si le coordinat
 - **Reste** : le branchement dans le lecteur (A1), la passerelle avis lu → `tamila_avis_lu` (le lecteur, ayant
   la clé, peut comparer le n° RG), la relecture en base réelle quand le coffre sera branché.
 
+## Vague 3 — les trois manques pour qu'un vrai cabinet paie Tamila (06/10, demande du coordinateur)
+
+Ce que Tamila fait déjà mieux que le marché : chiffrement par dossier (le serveur ne lit rien), délais de
+procédure d'appel calculés et confirmés par un avocat, murailles, journal des accès opposable. Ce qui manque
+pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
+
+1. **Honoraires : convention, temps passé, provisions, facture et compte détaillé.** C'est la raison n° 1
+   d'acheter un logiciel de cabinet : Jarvis Legal (LexisNexis) et Secib / Septeo vendent d'abord le suivi du
+   temps facturable et la facturation, 45 à 85 € HT par utilisateur et par mois
+   ([La Fabrique du Net, Jarvis Legal](https://www.lafabriquedunet.fr/logiciel/jarvis-legal),
+   [Secib Suite](https://www.lafabriquedunet.fr/logiciel/secib-suite),
+   [LexisNexis, Jarvis facturation](https://www.lexisnexis.com/fr-fr/ppc/jarvis-legal-facturation)). Et c'est
+   une obligation : la convention d'honoraires écrite est obligatoire en toute matière sauf urgence (loi
+   n° 71-1130 du 31/12/1971, art. 10, rédaction de la loi n° 2015-990 du 6/08/2015 ; décret n° 2017-1226 du
+   2/08/2017 qui l'inscrit dans le décret de déontologie)
+   ([Juritravail](https://www.juritravail.com/avocat/pratique/convention-d-honoraires-d-un-avocat-contrat-conditions/Id/10),
+   [Eurojuris, loi Macron](https://www.eurojuris.fr/gestion/articles/loi-macron-quels-impacts-pour-avocats-35825.htm)).
+   Le RIN fixe les critères (art. 11.2 : temps consacré, difficulté, résultat…), les modes de règlement
+   (art. 11.6) et le **compte détaillé définitif** avant tout règlement définitif, frais, émoluments et
+   honoraires distincts, provisions déduites (art. 11.7)
+   ([Cabinet ACI, les honoraires d'avocats](https://www.cabinetaci.com/les-honoraires-davocats/),
+   [CNB, guide d'évaluation de la prestation](https://www.cnb.avocat.fr/sites/default/files/documents/cnb_guide-pratique_evaluation-prestation-avocat_3e-ed.pdf)).
+   Sans cela, le cabinet garde un second logiciel, et Tamila reste un « plus ».
+2. **Le contrôle des conflits d'intérêts à l'ouverture d'un dossier** (RIN art. 4 : l'avocat vérifie,
+   avant d'accepter, qu'il ne défend pas des intérêts opposés à ceux d'un client actuel ou ancien), et la
+   vigilance LCB-FT pour les dossiers où l'avocat y est assujetti (CMF art. L.561-3 ; transactions
+   financières ou immobilières)
+   ([Swim Legal, déontologie](https://www.swim.legal/blog/deontologie-avocat-regles-obligations-entreprise),
+   [CNB, guide LCB-FT, 3e éd.](https://www.cnb.avocat.fr/sites/default/files/documents/cnb_guide_lutte-contre-blanchiment_3eme_edition.pdf)).
+   Difficulté propre à Tamila : les noms des parties sont chiffrés ; il faudra un index aveugle (HMAC du nom
+   normalisé sous une clé du cabinet) pour chercher sans lire.
+3. **L'arrivée automatique des avis RPVA** au lieu de la saisie à la main : e-barreau v2 se dit ouvert et
+   interopérable avec les logiciels de gestion de cabinet
+   ([CNB, atelier e-barreau v2](https://www.cnb.avocat.fr/sites/default/files/grand_atelier_des_avocats_-_atelier_e-barreau_v2.pdf)).
+   Les gabarits de lecture existent déjà (CHAMPS-LECTURE-TAMILA, lecteur d'A1), le coffre aussi (§ 10) ; il
+   manque la porte d'entrée (relevé de la boîte, ou transfert des notifications par courriel vers le socle)
+   et la passerelle avis lu → `tamila_avis_lu`.
+
+**N° 1 commencé le 06/10** (lot B4-7) : `b4_06_tamila_honoraires.sql`, test `15_honoraires.sql`, carte
+« Honoraires » du dossier. Voir § 11.
+
+## 11. Les honoraires (vague 3, n° 1 ; lot B4-7, 06/10)
+
+- **Base** (32479a4) : `b4_06_tamila_honoraires.sql`, test `15_honoraires.sql` (51 contrôles, souche locale ;
+  série complète 339/339). Convention (temps passé, forfait, mixte ; honoraire de résultat ; TVA ; urgence),
+  temps passé (description chiffrée), provisions (RIN 11.6), facture et compte détaillé définitif (RIN 11.7)
+  numérotés H-AAAA-NNNNNN sans trou, annulation qui garde le numéro, drapeau « ouvert depuis 15 jours sans
+  convention ». Effacement : seuls les temps partent avec le dossier ; factures, provisions, conventions restent
+  (pièces comptables, C. com. L.123-22).
+- **Écran** : carte « Honoraires » du dossier (`components/espace/tamila/HonorairesTamila.tsx`, insérée dans
+  DossierTamila après les pièces) : trois chiffres (à facturer HT et durée, provisions disponibles, reste dû),
+  la convention et sa signature (pièce du dossier), le temps de chacun (description déchiffrée avec la clé du
+  dossier), provisions et factures ; dialogues : saisir du temps, convention, signature, provision, reçue,
+  facturer (aperçu HT / TVA / TTC / provisions / reste avant d'émettre), payée, annuler. Sans b4_06 sur la
+  base, la carte ne s'affiche pas (la production aujourd'hui). Recette : 79 contrôles aux cinq largeurs, dont
+  13 sur les honoraires (saisie 1 h 30 → 687,50 € HT, facture H-2026-000042, dossier sans convention signalé,
+  « Facturer » gris sans convention, carte qui tient à 390) ; axe-core 0 écart sur le dialogue. La recette a
+  trouvé un vrai défaut avant la poussée (minutes par défaut affichées 30, lues 0) : corrigé.
+- **Pas fait** : l'édition imprimable de la facture (PDF : nom du client chiffré, donc à composer dans le
+  navigateur), le tableau des honoraires du cabinet (tous dossiers), le minuteur, l'export comptable.
+  **Pas rejoué en base réelle** : b4_06 à poser d'abord.
+
+## 12. Conflits d'intérêts et vigilance LCB-FT (vague 3, n° 2 ; lot B4-8, 06/10)
+
+- **Base** (875e83f) : `b4_07_tamila_conflits.sql`, test `16_conflits.sql` (47 contrôles ; série locale 386/386).
+  Index aveugle : clé d'index du cabinet (enveloppée sous la phrase, ou sous la clé maître Scaleway par
+  tamila-coffre), empreintes HMAC-SHA-256 des noms normalisés et des SIREN, jamais lisibles en direct ; contrôle
+  client ↔ adverse = conflit, même côté = signalé, anciens clients (dossiers effacés) compris, dossiers hors de
+  vue comptés sans être nommés, partie retirée ignorée ; décision de l'avocat (conflit levé ou refus ; « pas de
+  conflit » interdit quand un conflit est trouvé), motif en code ; vigilance LCB-FT (activité assujettie,
+  identification du client et du bénéficiaire effectif, risque, revue annuelle) ; résumé `tamila_conformite`.
+  Empreintes et contrôles conservés après l'effacement du dossier (registre des conflits) : **à confirmer par
+  Teo** (sinon une ligne de `private.tables_objets`). **Décision de Teo (06/10) : on les garde** ; la carte le dit en
+  une ligne (« les noms ne sont jamais conservés en clair ; une empreinte reste pour détecter un conflit avec un
+  ancien client »).
+- **Ouvrier** (2868bcb) : tamila-coffre `nouvelle_cle_index` (gérant) et `cle_index` (personne du cabinet), données
+  associées « index:<client> ». 20 tests Deno.
+- **Écran** : `components/espace/tamila/index.ts` (normalisation : accents, formes sociales, civilités, mots vides,
+  mots triés — « SCI du Moulin » = « Moulin (SCI du) » ; SIREN / SIRET ; HMAC) et la carte « Conflits d'intérêts
+  et vigilance » (`ConformiteTamila.tsx`, après les honoraires) : création de la clé d'index par le gérant,
+  indexation et contrôle des parties du dossier en un geste, résultats nommés (référence en clair du dossier si
+  on la connaît), décision, vigilance. Exemple : 2026-0430 « Garnier c/ SCI du Moulin » montre un conflit avec
+  2026-0412 (la SCI y est cliente). Recette cinq largeurs 90/90 (11 sur les conflits et la vigilance), axe-core
+  0 écart sur le dialogue de vigilance. **Pas rejoué en base réelle.**
+- **Limites** : un nom mal orthographié n'est pas trouvé (égalité stricte après normalisation, pas de
+  ressemblance : un index aveugle ne permet pas la recherche floue sans affaiblir l'aveuglement) ; la clé d'index
+  d'un cabinet local ne se ré-enveloppe pas encore au passage au coffre (à faire, comme les clés de dossier).
+
+## 13. Les avis RPVA lus (vague 3, n° 3 : la part faisable sans compte Scaleway ; lot B4-9, 06/10)
+
+- La porte d'entrée (relevé e-barreau ou transfert des notifications) reste à concevoir avec Teo : aucune API
+  publique e-barreau connue pour un logiciel tiers ; le socle a un canal courriel (`deposer_reception`) mais une
+  pièce arrivée par courriel est en clair et sans dossier : à rattacher puis chiffrer, ce qui suppose l'écran.
+- **Fait** : la passerelle « avis lu → délais » pour les pièces déposées dans un dossier, dès que le lecteur lit les
+  pièces chiffrées (coffre + A1). `b4_08_tamila_avis_lecteur.sql` (deux portes serveur : `tamila_dossier_pour_lecteur`,
+  `tamila_avis_du_lecteur`), test `17_avis_lecteur.sql` (15 contrôles : serveur seul, pièce lue, confiance,
+  **aucune valeur hors des sept clés** (un nom est refusé), avis idempotent, audience posée à l'heure de Paris, RG
+  différent → à vérifier + alerte critique) ; côté lecteur, `tamila-coffre/lecteur.ts` (`avisDepuisLecture`,
+  `rgConcorde`, `dossierPourLecteur`, `poserAvisLu`, 5 tests Deno de plus, 25 au total) ; CHAMPS-LECTURE-TAMILA
+  mis à jour. **À A1** : le branchement dans `lire_piece.ts` (mode d'emploi en tête de la section de `lecteur.ts`).
+
+## 14. La facture imprimable et l'en-tête du cabinet (suite du n° 1 ; lot B4-10, 06/10)
+
+- **Base** (71b54f3) : `b4_09_tamila_facture_entete.sql` (colonne `tamila_reglages.facture_entete`, ajoutée si
+  absente ; porte `tamila_poser_entete_facture`, gérant seul, clés connues, SIREN, TVA FR, IBAN, délai de paiement
+  0-60 jours) ; test `18_facture_entete.sql` (11 contrôles, verts sur la souche).
+- **Écran** : `facture.ts` (la facture en HTML autonome : mentions CGI 242 nonies A et C. com. L.441-9, détail
+  du temps avec répartition au centime près du total facturé, forfait, déboursés hors TVA, provisions déduites,
+  reste à payer ou trop-perçu, échéance, pénalités L.441-10 et indemnité de 40 € D.441-5, compte définitif RIN
+  11.7 ; tout échappé) et `FactureImprimable.tsx` (aperçu dans un cadre isolé sans script, impression ou PDF par
+  le navigateur ; adresse du client tapée, jamais enregistrée ; le gérant modifie l'en-tête sur place). Lien
+  « Imprimer » sur chaque facture de la carte Honoraires. Recette 99/99 (9 sur la facture imprimée), axe-core
+  0 écart. **Rien ne part au serveur** : nom du client et détail du temps restent dans le navigateur.
+
+## 15. La porte d'entrée automatique des avis : le canal courriel du socle (lot B4-11, 06/10)
+
+Décision du coordinateur : pas d'API e-barreau ouverte, on n'en invente pas. Le cabinet fait suivre ses
+notifications RPVA vers son adresse de réception (ligne `expediteurs`, module tamila, à créer par le
+coordinateur, du type `cabinet-x@recu.omegaai.fr`) ; `deposer_reception` publie `reception.nouvelle`.
+
+- **Base** (e39e4ef) : `b4_10_tamila_avis_entrants.sql` — table `tamila_avis_entrants` (une ligne par réception,
+  sans un mot en clair : type supposé en code, nombre de pièces, statut `a_rattacher|rattache|ecarte|expire`,
+  dossier, pièces chiffrées, échéance à 7 jours) ; abonnement `reception.nouvelle → tamila` ; portes
+  `tamila_rattacher_avis` (les pièces doivent être des pièces chiffrées du dossier), `tamila_ecarter_avis`
+  (avocats) ; purge : la réception passe `traitee`, sujet, corps et expéditeur vidés, et un travail
+  `tamila.purger_reception` est déposé ; passage `tamila-receptions` toutes les 5 min (pg_cron) : au-delà de 7
+  jours, `expire` + purge + alerte critique. Portes serveur `tamila_reception_a_purger` /
+  `tamila_reception_purgee` (service_role seul). Sans drop, sans effacement SQL, revoke from public partout.
+  Test `19_avis_entrants.sql` : 28 contrôles, verts sur la souche (série locale 440/440).
+- **Ouvrier** (b4b664e) : `omega/functions/tamila-purge/` — prend les travaux `tamila.purger_reception`,
+  efface au bucket les fichiers de `<client>/receptions/` (chemins hors de ce préfixe ignorés), puis
+  `tamila_reception_purgee`. 4 tests Deno. Aucun secret propre (clé service du socle). À déployer, et à
+  appeler toutes les 5 minutes comme les autres ouvriers.
+- **Écran** : `AvisEntrantsTamila.tsx`, au-dessus des compteurs (gérant, admin, valideur, collaborateur ; pas
+  le stagiaire). Le n° RG cité par le courriel est comparé dans le navigateur aux n° RG déchiffrés : dossier
+  proposé. L'avocat choisit ; chaque pièce jointe est téléchargée, chiffrée avec la clé du dossier (trousseau,
+  coffre ou phrase), déposée (`tamila_deposer_piece`, type d'avis choisi ou laissé au lecteur), puis
+  rattachée. Mention à l'écran : « L'avis transite en clair chez le prestataire de courriel et dans sa
+  réception le temps du rattachement, sept jours au plus ; dès qu'il est rattaché (ou écarté), cette copie
+  est effacée. » Recette 109/109 (10 sur la file), axe-core 0 écart grave (carte et dialogue).
+- **Limites, honnêtement** : (1) la politique RLS du socle sur `receptions` laisse tout membre du cabinet lire
+  la réception le temps qu'elle est en clair (stagiaire et membres murés compris) — à resserrer côté socle
+  si besoin ; (2) l'écran suppose que la politique SELECT du bucket laisse un membre télécharger
+  `<client>/receptions/…` — à vérifier en recette ; sinon il faut une URL signée par une fonction ;
+  (3) un courriel sans pièce jointe ne se rattache pas : il s'écarte et l'avis se saisit à la main.
+
+## 16. L'effacement réel des fichiers à la clôture (carnet du coordinateur, n° 1 ; lot B4-12, 06/10)
+
+Constat : la ronde horaire déposait `tamila.effacer_dossier`, `tamila.purger_export` et `tamila.detruire_cle`, mais
+aucun ouvrier ne les prenait ; et `tamila_effacer_dossier` posait sa preuve sans vérifier que les pièces chiffrées
+avaient quitté le bucket.
+
+- **Base** : `b4_11_tamila_effacement_fichiers.sql` — `tamila_dossier_a_effacer` (mêmes refus que
+  `tamila_effacer_dossier` : clôture approuvée, échéance atteinte ; prépare le manifeste ; rend les fichiers du
+  manifeste et tout objet resté sous `<client>/tamila_dossier/<dossier>/`, buckets des locataires seulement) ;
+  `tamila_effacer_dossier_verifie` (55000 tant qu'un fichier du dossier est au stockage, sinon
+  `tamila_effacer_dossier` et sa preuve) ; `tamila_fichiers_restants`. service_role seul, revoke from public.
+  Test `20_effacement_fichiers.sql` : 20 contrôles, verts sur la souche (la souche imite `preparer_effacement`).
+- **Ouvrier** : `tamila-purge` prend désormais quatre genres (réception, dossier, archive, clé). Dossier : liste →
+  effacement au bucket (rien hors de `<client>/`) → constat ; s'il reste un fichier, le travail est repris au
+  passage suivant, le dossier reste intact. Archive : fichier effacé puis `tamila_export_purge`. Clé :
+  `tamila_cle_detruite` (enveloppe mise à zéro). 8 tests Deno.
+- **Reste** : l'ancienne porte `tamila_effacer_dossier` reste appelable par le serveur sans la vérification (je ne
+  la réécris pas) ; l'ouvrier, lui, ne passe que par la porte vérifiée.
+
+## 17. Le temps proposé à la saisie, le forfait consommé (carnet du coordinateur, n° 2 ; lot B4-13, 06/10)
+
+- **Base** : `b4_12_tamila_temps_propose.sql` — `tamila_temps.origine` (« audience:<id> », « acte:<id> »,
+  « avis:<id> » ; un même événement une fois par personne tant que le temps n'est pas annulé) ;
+  `tamila_temps_ecartes` (ce que chacun a ignoré, lu par son auteur seul, effacé avec le dossier) ;
+  `tamila_conventions.minutes_prevues`. Portes `tamila_saisir_temps_propose` (l'événement doit être du dossier ;
+  passe par `tamila_saisir_temps`, mêmes règles), `tamila_ecarter_proposition`, `tamila_prevoir_forfait` (qui
+  gère le dossier, convention au forfait ou mixte). Test `21_temps_propose.sql` : 20 contrôles verts (souche).
+- **Écran** : `temps.ts` (propositions des soixante derniers jours : audience tenue ou passée — plaidoiries 2 h,
+  mise en état 30 min… ; acte déposé — conclusions 4 h, signification 30 min ; avis reçu — 15 min, conclusions
+  adverses 1 h de lecture ; l'accusé de dépôt n'est pas reproposé ; filtre par personne) et carte Honoraires :
+  « Proposé à la saisie » (Saisir ouvre le formulaire pré-rempli, Ignorer ne le propose plus) ; « Forfait
+  consommé » (jauge, temps passé de tous contre temps prévu, taux horaire effectif, alerte à 80 % et au
+  dépassement). Exemple : 2026-0377 au forfait, 17 h sur 20 h. Recette 124/124, axe 0 écart grave.
+- Les durées proposées sont des usages, corrigeables ; rien ne se saisit sans le geste de l'avocat.
+
+## 18. Avant le carnet : conflits automatiques, honoraires du cabinet, lecture des réceptions (06/10)
+
+- **Contrôle des conflits automatique** (5503ad6, écran seul) : dès qu'un client ou un adversaire entre au
+  dossier, la carte « Conflits d'intérêts » l'indexe et le contrôle sans geste (si la clé d'index s'ouvre) ; un
+  conflit s'annonce en alerte avec « Décider » ; les parties jamais indexées sont signalées. Recette : 6 contrôles.
+- **Tableau des honoraires du cabinet** (198cf78, écran seul, lecture RLS) : bouton « Honoraires du cabinet » dans
+  l'en-tête (avocats) ; une ligne par dossier visible, calculée comme la carte du dossier (`resumer`) ; totaux (à
+  facturer, reste dû, facturé et encaissé dans l'année) ; « À traiter » (sans convention, facture impayée à
+  30 jours, forfait à 80 %, clos avec du temps non facturé) ; export CSV composé dans le navigateur. Recette :
+  17 contrôles (1440 et 390), axe 0 écart grave.
+- **`private.tamila_peut_lire_reception(client, user)`** (b4_13, test 22, 10 contrôles) : avocat du cabinet
+  (gerant, admin, valideur) sous aucune muraille active. Pour le lot socle d'A5 (receptions et `receptions/`).
+  Conséquence à prévoir : quand A5 l'appellera, l'assistante verra la file des avis à rattacher (RLS de
+  `tamila_avis_entrants`) sans leur contenu ; à aligner alors (file réservée aux avocats).
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

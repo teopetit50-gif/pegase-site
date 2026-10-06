@@ -48,17 +48,30 @@ export interface AReenvelopper {
   temoin?: string;
 }
 
+/** Ce que rend tamila_coffre_demander_index (b4_07). */
+export interface DemandeIndex {
+  client: string;
+  journal: number;
+  region: string;
+  cle_maitre: string;
+  reference: string;
+}
+
 export interface PortesCoffre {
   // au nom de la personne
   demanderActivation(jeton: string, client: string): Promise<Activation>;
   pourNouvelleCle(jeton: string, client: string): Promise<NouvelleCle>;
   pourMembre(jeton: string, dossier: string, piece: string | null): Promise<Remise | null>;
   aReenvelopper(jeton: string, dossier: string): Promise<AReenvelopper>;
+  /** b4_07 : la clé d'index aveugle du cabinet (conflits d'intérêts). */
+  demanderIndex(jeton: string, client: string): Promise<DemandeIndex>;
+  indexPourMembre(jeton: string, client: string): Promise<{ fournisseur: Fournisseur; journal?: number; reference?: string; enveloppe?: string } | null>;
   // au nom du serveur
   activer(client: string, region: string, cleMaitre: string, par: string): Promise<{ statut: string; deja: boolean; dossiers_locaux?: number }>;
   pourLecteur(piece: string): Promise<Remise>;
   conclure(journal: number, issue: "deballe" | "emise" | "refuse" | "echec", detail?: Record<string, unknown>): Promise<void>;
   reenveloppe(journal: number, enveloppeHex: string): Promise<{ dossier: string; pieces_relancees: number; dossiers_locaux: number; statut: string }>;
+  poserIndex(journal: number, enveloppeHex: string): Promise<void>;
 }
 
 export interface ConfigSupabase {
@@ -122,6 +135,19 @@ export class PortesCoffreRpc implements PortesCoffre {
   }
   async conclure(journal: number, issue: "deballe" | "emise" | "refuse" | "echec", detail: Record<string, unknown> = {}) {
     await this.rpc<null>("tamila_coffre_conclure", { p_journal: journal, p_issue: issue, p_detail: detail }, null);
+  }
+  demanderIndex(jeton: string, client: string) {
+    return this.rpc<DemandeIndex>("tamila_coffre_demander_index", { p_client: client }, jeton);
+  }
+  indexPourMembre(jeton: string, client: string) {
+    return this.rpc<{ fournisseur: Fournisseur; journal?: number; reference?: string; enveloppe?: string } | null>(
+      "tamila_coffre_index_pour_membre",
+      { p_client: client },
+      jeton,
+    );
+  }
+  async poserIndex(journal: number, enveloppeHex: string) {
+    await this.rpc<null>("tamila_coffre_poser_index", { p_journal: journal, p_enveloppe: `\\x${enveloppeHex}` }, null);
   }
   reenveloppe(journal: number, enveloppeHex: string) {
     return this.rpc<{ dossier: string; pieces_relancees: number; dossiers_locaux: number; statut: string }>("tamila_coffre_reenveloppe", {

@@ -4,6 +4,14 @@
    /espace/varelo — le référentiel du groupe (05/10/2026, session B1)
 
    Ce que le client voit et fait, dans l'ordre du scénario (NOTES-B1.md) :
+     · en tête, « Ce matin » (vague 3, CeMatin.tsx) : les lignes du point
+       du matin Varelo — contrats à dénoncer, encours, réciproques ;
+     · « Le groupe sur une page » (GroupePage.tsx, b1_08) : ventes,
+       résultat, trésorerie et écarts de chaque société ;
+     · « Reportings dus » (Reportings.tsx, b1_09) : qui doit quoi, à qui,
+       pour quand, en retard ;
+     · en bas, « Exports automatiques » (Branchements.tsx, b1_10) : le
+       logiciel de chaque société branché, ses exports lus d'eux-mêmes ;
      · en haut, quatre compteurs pour la nature choisie (codes locaux,
        objets du groupe, lots à valider, taux de rattachement) ;
      · à gauche, les objets du groupe (F-00001 « Scieries du Jura »…) ;
@@ -11,6 +19,13 @@
        l'intragroupe, et les corrections qu'on peut proposer (nom,
        fusion, rattachement, détachement, scission), chacune ouvrant une
        demande de validation ;
+     · pour les clients et les fournisseurs, l'encours du groupe (vague 3,
+       Encours.tsx) : la dernière balance âgée de chaque société rangée
+       par objet du groupe, le plafond et son dépassement ;
+     · les contrats du groupe à dénoncer (vague 3, Contrats.tsx), rangés
+       par date limite de dénonciation ;
+     · les comptes réciproques intragroupe (vague 3, Reciproques.tsx) :
+       créance de l'une, dette reconnue de l'autre, écart, justification ;
      · dessous, les lots à valider (paires proposées par le calcul, avec
        la preuve ; « écarter cette paire » ; le lot se décide dans
        /espace/validations) et les sociétés du groupe par pôle (inscrire
@@ -38,6 +53,13 @@ import ObjetDetail from "./ObjetDetail";
 import Lots from "./Lots";
 import Societes from "./Societes";
 import Depot from "./Depot";
+import Encours from "./Encours";
+import Contrats from "./Contrats";
+import Reciproques from "./Reciproques";
+import CeMatin from "./CeMatin";
+import GroupePage from "./GroupePage";
+import Reportings from "./Reportings";
+import Branchements from "./Branchements";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -433,6 +455,10 @@ export default function EcranVarelo() {
         </div>
       ) : null}
 
+      {donnees && contexte ? <CeMatin source={source} client_id={client_id} actif={!!reel?.installation} codes={donnees.codes} objets={donnees.objets} /> : null}
+      {donnees && contexte ? <GroupePage source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
+      {donnees && contexte ? <Reportings source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
+
       <div className="esp-filtres" data-arrivee="" role="group" aria-label="Nature du référentiel" style={{ marginBottom: 12 }}>
         {NATURES.map((n) => (
           <button key={n} type="button" className="esp-filtre" aria-pressed={nature === n} onClick={() => setNature(n)}>
@@ -514,10 +540,51 @@ export default function EcranVarelo() {
         </section>
       </div>
 
+      {donnees && contexte && (nature === "client" || nature === "fournisseur") ? (
+        <Encours
+          source={source}
+          contexte={contexte}
+          client_id={client_id}
+          nature={nature}
+          societes={donnees.societes}
+          codes={donnees.codes}
+          objets={donnees.objets}
+          onOuvrir={(id) => {
+            setRecherche("");
+            setChoix(id);
+            document.getElementById("vrl-objet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onFait={(m) => setFait(m)}
+          inscrireExemple={deposer}
+          relireReferentiel={relire}
+        />
+      ) : null}
+
+      {donnees && contexte ? (
+        <Contrats
+          source={source}
+          contexte={contexte}
+          client_id={client_id}
+          societes={donnees.societes}
+          objets={donnees.objets}
+          onOuvrir={(id, n) => {
+            setNature(n);
+            setRecherche("");
+            setChoix(id);
+            document.getElementById("vrl-objet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onFait={(m) => setFait(m)}
+        />
+      ) : null}
+
+      {donnees && contexte ? <Reciproques source={source} contexte={contexte} client_id={client_id} onFait={(m) => setFait(m)} /> : null}
+
       <div className="esp-grille" style={{ marginTop: 16 }}>
         {donnees ? <Lots donnees={donnees} actions={actions} /> : null}
         {donnees ? <Societes donnees={donnees} actions={actions} majLocal={majLocal} onDepot={() => setDepot(true)} /> : null}
       </div>
+
+      {donnees && contexte ? <Branchements source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
 
       {donnees ? <Depot ouvert={depot} onFermer={() => setDepot(false)} societes={donnees.societes} deposer={deposer} onFait={(m) => setFait(m)} /> : null}
 

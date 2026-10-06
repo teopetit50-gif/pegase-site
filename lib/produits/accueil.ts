@@ -174,7 +174,7 @@ export const CAPACITES = {
       etiquette: "Réception",
       titre: "La réponse part avant la réouverture",
       texte:
-        "REPUT lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vos équipes relisent l'échange le lendemain.",
+        "REPUT lit le message dès qu'il arrive et sa réponse est prête dans la minute, tirée de la base que vous avez construite avec nous. Elle part seule seulement sur les sujets autorisés d'avance ; vos équipes relisent l'échange le lendemain.",
       panneau: "conversation",
     },
     {

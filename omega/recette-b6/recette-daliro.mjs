@@ -8,9 +8,17 @@
    un prix validé et la soumettre ; signer l'avenant validé ; noter la
    réponse d'un sous-traitant ; voir les remplaçants ; rattacher une facture
    (SIREN refusé sur le mauvais lot) ; l'accord permanent des J-2 (b6_08) :
-   révoquer avec un motif, puis le redonner (« à valider »).
+   révoquer avec un motif, puis le redonner (« à valider ») ; les situations de travaux (b6_12) : ouvrir
+   la n° 2 des Tilleuls, avancer une ligne, lire les totaux, soumettre ; axe-core sur la carte et sa fenêtre ;
+   l'encaissement (b6_16) : un paiement partiel sur la n° 1, le reste dû ;
+   la réception (b6_13) : prononcer avec deux réserves, en lever une, noter une opposition, préparer et envoyer
+   le décompte ; axe-core sur la carte et ses fenêtres ;
+   les heures (b6_17) : 11 h (alerte L3121-18), 12,5 h (refus), le coût horaire chargé, la rentabilité ; axe-core ;
+   le recalage (b6_19) : recaler la pose des fenêtres, voir la suite glisser, appliquer ; axe-core ;
+   la signature sur place (b6_20) : préparer le lien, puis /signer/exemple à 390 et 1440 (nom, tracé, lu et approuvé) ; axe-core.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const base = process.argv[2] ?? 'http://localhost:3012';
@@ -190,6 +198,239 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
   ok(deb === 0, `pas de débordement horizontal (${deb})`);
   s.fermer();
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-situ-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : situations de travaux (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Situations de travaux"]')`;
+    ok(await s.evaluer(`/1 validée/i.test(${carte}?.innerText || '')`), 'la situation n° 1 (validée) est listée');
+    // b6_16 : l'encaissement de la n° 1 (19 499,40 € nets, à échoir) — un paiement partiel de 10 000 €
+    ok(await s.evaluer(`/À échoir/.test(${carte}?.innerText || '')`), 'la situation n° 1 est « à échoir »');
+    ok(await s.evaluer(bouton('/Noter un paiement/', carte)) === true, 'clic sur « Noter un paiement »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const dp = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(dp.length === 0, `fenêtre « Paiement reçu » : aucun écart axe grave ${dp.length ? JSON.stringify(dp) : ''}`);
+    await s.evaluer(saisir('[role="dialog"] input[inputmode="decimal"]', '10000'));
+    await s.dormir(150);
+    await s.evaluer(`${dlgBouton('/Noter le paiement/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Reste 9[\\s\\u202f\\u00a0]499,40/.test(${carte}?.innerText || '')`), 'paiement partiel noté : reste 9 499,40 €');
+    ok(await s.evaluer(bouton('/Nouvelle situation/', carte)) === true, 'clic sur « Nouvelle situation »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const dlg = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(dlg.length === 0, `fenêtre « Nouvelle situation » : aucun écart axe grave ${dlg.length ? JSON.stringify(dlg) : ''}`);
+    await s.evaluer(`${dlgBouton('/Ouvrir la situation/')}?.click()`);
+    await s.dormir(600);
+    ok(await s.evaluer(`/Situation n° 2/.test(${carte}?.innerText || '')`), 'la situation n° 2 est ouverte');
+    const precedent = await s.evaluer(`(() => { const i = ${carte}?.querySelector('input[aria-label*="Fenêtre bois-alu"]'); return i?.value; })()`);
+    ok(precedent === '35', `l'avancement repart de la n° 1 (fenêtres : ${precedent} %)`);
+    await s.evaluer(`(() => { const i = ${carte}.querySelector('input[aria-label*="Fenêtre bois-alu"]'); i.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '60'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+    await s.dormir(150);
+    await s.evaluer(`${carte}.querySelector('input[aria-label*="Fenêtre bois-alu"]').blur()`);
+    await s.dormir(500);
+    const texte = await s.evaluer(`${carte}?.innerText || ''`);
+    // 28 320 × 25 % = 7 080 HT ; TVA 20 % 1 416 ; retenue 5 % du HT (marché M-2026-014) 354 ; net 8 142
+    ok(/7[\s\u202f\u00a0]080,00/.test(texte) && /8[\s\u202f\u00a0]142,00/.test(texte), 'période 7 080 € HT, net à payer 8 142 € (TVA 20 %, retenue 5 % HT)');
+    ok(/loi n° 71-584/.test(texte), 'la mention de la retenue de garantie est affichée');
+    await s.evaluer(axe + ';true');
+    const sit = await s.evaluer(graves(carte));
+    ok(sit.length === 0, `carte des situations : aucun écart axe grave ${sit.length ? JSON.stringify(sit) : ''}`);
+    ok(await s.evaluer(bouton('/Soumettre à la validation/', carte)) === true, 'clic sur « Soumettre à la validation »');
+    await s.dormir(500);
+    ok(await s.evaluer(`/Dans « À valider »/.test(${carte}?.innerText || '') && [...${carte}.querySelectorAll('button')].find(b => /Valider la situation/.test(b.textContent))?.disabled === true`),
+       'soumise : elle attend dans « À valider », « Valider la situation » reste gris');
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-recep-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : réception, réserves, retenue, décompte (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Réception des travaux"]')`;
+    ok(await s.evaluer(`/pas encore prononcée/i.test(${carte}?.innerText || '')`), 'la réception n\'est pas encore prononcée');
+    ok(await s.evaluer(bouton('/Prononcer la réception/', carte)) === true, 'clic sur « Prononcer la réception »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Prononcer la réception » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(saisir('[role="dialog"] textarea', 'Joint de la fenêtre du séjour à reprendre\nRayure sur la porte palière'));
+    await s.evaluer(`${dlgBouton('/Prononcer la réception/')}?.click()`);
+    await s.dormir(600);
+    const t1 = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/prononcée le/i.test(t1) && /2 réserves ouvertes/i.test(t1), 'réception prononcée, deux réserves ouvertes');
+    ok(/847,80/.test(t1) && /Due le/i.test(t1), 'la retenue de la situation n° 1 (847,80 €) est due dans un an');
+    ok(await s.evaluer(bouton('/Lever la réserve/', carte)) === true, 'clic sur « Lever la réserve »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/1 réserve ouverte/i.test(${carte}?.innerText || '') && /Levée le/.test(${carte}?.innerText || '')`), 'une réserve levée, une ouverte');
+    ok(await s.evaluer(bouton('/Noter une opposition/', carte)) === true, 'clic sur « Noter une opposition »');
+    await s.dormir(400);
+    await s.evaluer(saisir('[role="dialog"] input:not([type="date"])', 'Rayure sur la porte palière non reprise'));
+    await s.dormir(150);
+    await s.evaluer(`${dlgBouton('/Noter l.opposition/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Opposée le/i.test(${carte}?.innerText || '') && /non reprise/.test(${carte}?.innerText || '')`), 'retenue opposée, motif affiché');
+    ok(await s.evaluer(bouton('/Préparer le décompte/', carte)) === true, 'clic sur « Préparer le décompte »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/Reste à facturer HT/i.test(${carte}?.innerText || '')`), 'le projet de décompte affiche le reste à facturer');
+    ok(await s.evaluer(bouton('/Noter le décompte envoyé/', carte)) === true, 'clic sur « Noter le décompte envoyé »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/en attente de réponse/i.test(${carte}?.innerText || '')`), 'décompte envoyé, en attente de réponse');
+    await s.evaluer(axe + ';true');
+    const c1 = await s.evaluer(graves(carte));
+    ok(c1.length === 0, `carte de la réception : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  // la case du jour (la dernière case ouverte) de Lucas Morel : saisir puis quitter la case
+  const caseDuJour = (valeur) => `(() => { const c = [...document.querySelectorAll('section[aria-label="Heures et rentabilité"] input')].filter(i => /^Heures de Lucas Morel/.test(i.getAttribute('aria-label') || '') && !i.disabled).pop();
+    if (!c) return false; c.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(c, ${JSON.stringify(valeur)}); c.dispatchEvent(new Event('input', { bubbles: true })); c.blur(); return true; })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-heures-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : heures pointées et rentabilité (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Heures et rentabilité"]')`;
+    const t0 = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/h pointées/i.test(t0) && /Karim Haddad/.test(t0) && /Semaine du/.test(t0), 'la semaine de l\'équipe Pose A est affichée');
+    ok(/Rentabilité à date/i.test(t0) && /Marge à date/i.test(t0) && /Main-d.œuvre/.test(t0), 'la rentabilité à date est affichée');
+    ok(await s.evaluer(caseDuJour('11')), 'Lucas Morel : 11 h aujourd\'hui');
+    await s.dormir(400);
+    ok(await s.evaluer(`/au-delà de 10 h \\(L3121-18\\)/.test(${carte}?.innerText || '')`), 'au-delà de 10 h : pointé, avec l\'alerte du Code du travail');
+    ok(await s.evaluer(caseDuJour('12,5')), 'Lucas Morel : 12,5 h');
+    await s.dormir(400);
+    ok(await s.evaluer(`/de 0 à 12, au quart d.heure/.test(${carte}?.innerText || '')`), '12,5 h : refusé');
+    ok(await s.evaluer(bouton('/Coût horaire/', carte)) === true, 'clic sur « Coût horaire »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Coût horaire chargé » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(saisir('[role="dialog"] input[inputmode="decimal"]', '40'));
+    await s.dormir(150);
+    await s.evaluer(`${dlgBouton('/Poser le coût/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Coût horaire chargé de l.entreprise \\(par défaut\\) : 40,00/.test(${carte}?.innerText || '')`), 'le coût horaire par défaut passe à 40 €');
+    const c1 = await s.evaluer(graves(carte));
+    ok(c1.length === 0, `carte des heures : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    await s.evaluer(`${carte}?.scrollIntoView()`);
+    await s.capturer(`${dossier}daliro-heures-${largeur}.jpg`, { qualite: 55 });
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-recal-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : recaler la pose des fenêtres (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Planning"]')`;
+    ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tr')].find(t => /Pose des fenêtres/.test(t.textContent)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Recaler/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'clic sur « Recaler » (pose des fenêtres)');
+    await s.dormir(400);
+    await s.evaluer(`${dlgBouton('/Voir ce qui bouge/')}?.click()`);
+    await s.dormir(400);
+    const t = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/Pose des garde-corps/.test(t) && /Relevé des cotes garde-corps/.test(t) && /Peinture des menuiseries/.test(t), 'l\'aperçu montre la suite qui glisse (garde-corps, relevé, peinture)');
+    ok(/À reconfirmer/i.test(t) && /Dernier passage le/.test(t), 'les passages confirmés sont à reconfirmer ; la fin du planning est dite');
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Recaler » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(`${dlgBouton('/Recaler [0-9]+ passages/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Planning recalé : [0-9]+ passages déplacés/.test(document.body.innerText)`), 'planning recalé, message affiché');
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  {
+    const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b6-surplace', densite: 1 });
+    console.log('— Les Tilleuls : faire signer l\'avenant n° 1 sur place (1024)');
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    ok(await s.evaluer(bouton('/Faire signer sur place/', `document.querySelector('section[aria-label="Avenants"]')`)) === true, 'clic sur « Faire signer sur place »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Faire signer sur place » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(`${dlgBouton('/Préparer le lien/')}?.click()`);
+    await s.dormir(400);
+    ok(await s.evaluer(`/\\/signer\\/exemple$/.test(document.querySelector('[role="dialog"] input[readonly]')?.value || '') && /Lien prêt/.test(document.querySelector('[role="dialog"]')?.innerText || '')`), 'le lien est prêt (/signer/exemple)');
+    s.fermer();
+  }
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-signer-${largeur}`, densite: 1 });
+    console.log(`— /signer/exemple : le client signe sur le téléphone (${largeur})`);
+    ok(await s.aller(base + '/signer/exemple'), 'page chargée');
+    await s.dormir(600);
+    const page = `document.querySelector('section[aria-label="Signature de l\\'avenant"]')`;
+    const t0 = await s.evaluer(`${page}?.innerText || ''`);
+    ok(/Avenant n° 1/i.test(t0) && /1[\s\u202f\u00a0]884,00/.test(t0) && /SCI Lefèvre Patrimoine/.test(t0), 'l\'avenant est lisible : n° 1, 1 884,00 € HT, le maître d\'ouvrage');
+    await s.evaluer(`[...${page}.querySelectorAll('button')].find(b => /Signer l.avenant/.test(b.textContent))?.click()`);
+    await s.dormir(300);
+    ok(await s.evaluer(`/nom et prénom sont nécessaires/.test(${page}?.innerText || '')`), 'sans nom : refusé');
+    await s.evaluer(saisir('section input[autocomplete="name"]', 'Paul Lefèvre'));
+    await s.dormir(150);
+    // un tracé au doigt : trois événements pointeur dans le cadre
+    await s.evaluer(`(() => { const c = document.querySelector('canvas'); const r = c.getBoundingClientRect();
+      const ev = (t, x, y) => c.dispatchEvent(new PointerEvent(t, { bubbles: true, pointerId: 1, clientX: r.left + x, clientY: r.top + y }));
+      ev('pointerdown', 20, 60); ev('pointermove', 120, 90); ev('pointermove', 220, 50); ev('pointerup', 220, 50); return true; })()`);
+    await s.evaluer(`document.querySelector('section input[type="checkbox"]')?.click()`);
+    await s.dormir(150);
+    await s.evaluer(axe + ';true');
+    const c1 = await s.evaluer(graves(page));
+    ok(c1.length === 0, `page de signature : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
+    await s.evaluer(`[...${page}.querySelectorAll('button')].find(b => /Signer l.avenant/.test(b.textContent))?.click()`);
+    await s.dormir(400);
+    ok(await s.evaluer(`/Avenant n° 1 signé \\(exemple/.test(${page}?.innerText || '') && /rendre le téléphone/.test(${page}?.innerText || '')`), 'signé (exemple) : le client peut rendre le téléphone');
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    await s.capturer(`${dossier}daliro-signer-${largeur}.jpg`, { qualite: 55 });
+    s.fermer();
+  }
 }
 
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

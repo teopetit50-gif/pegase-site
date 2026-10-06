@@ -117,3 +117,101 @@
   align-items: flex-start;
   font-size: 13.5px;
 }
+
+/* l'encours du groupe (vague 3, 06/10/2026) */
+.esp .vrl-balances {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.esp .vrl-balances li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--r-filet);
+}
+.esp .vrl-balance-nom {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--r-texte);
+}
+.esp .vrl-balances .vrl-paire-sous {
+  display: inline;
+  flex: 1 1 220px;
+}
+.esp .vrl-masque {
+  /* masqué à l'œil, lu par les lecteurs d'écran ; pas de position absolue :
+     elle sortirait du cadre qui défile et élargirait la page */
+  display: inline-block;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+/* « Ce matin » (vague 3, 06/10/2026) */
+.esp .vrl-matin-blocs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px 22px;
+  margin-top: 8px;
+}
+@media (min-width: 768px) {
+  .esp .vrl-matin-blocs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1440px) {
+  .esp .vrl-matin-blocs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.esp .vrl-matin-bloc .esp-section-titre a {
+  color: inherit;
+}
+.esp .vrl-matin-liste {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.esp .vrl-matin-liste li {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--r-texte);
+  padding-left: 10px;
+  border-left: 3px solid var(--r-filet);
+  overflow-wrap: anywhere;
+}
+.esp .vrl-matin-liste li[data-gravite="critique"] {
+  border-left-color: var(--esp-rouge);
+}
+.esp .vrl-matin-liste li[data-gravite="attention"] {
+  border-left-color: var(--esp-ambre);
+}
+
+/* une case à cocher dans un formulaire (b1_09) */
+.esp-form .vrl-case,
+.dlg-panneau .vrl-case {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 400;
+}
+
+/* les exports attendus d'un branchement (b1_10) */
+.dlg-panneau .vrl-jeux,
+.esp .vrl-jeux {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}

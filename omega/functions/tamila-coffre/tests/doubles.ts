@@ -204,6 +204,42 @@ export class PortesMemoire implements PortesCoffre {
     };
   }
 
+  index: { fournisseur: "local" | "scaleway"; enveloppe: string; reference: string } | null = null;
+
+  async demanderIndex(jeton: string, client: string) {
+    const u = this.uid(jeton);
+    if (jeton !== GERANT) throw refus("42501", "La clé d'index du cabinet est demandée par son gérant.");
+    if (this.coffre.statut === "local") throw refus("55000", "Ce cabinet chiffre sous sa phrase.");
+    if (this.index) throw refus("55000", "Le cabinet a déjà sa clé d'index.");
+    return {
+      client,
+      journal: this.noter(client, null, "membre", u),
+      region: this.coffre.region!,
+      cle_maitre: this.coffre.cle_maitre!,
+      reference: `scaleway:${this.coffre.region}:${this.coffre.cle_maitre}`,
+    };
+  }
+
+  async poserIndex(journal: number, enveloppeHex: string) {
+    const l = this.journal.find((j) => j.id === journal);
+    if (!l || l.issue !== "demande") throw refus("55000", "Demande de clé d'index introuvable ou close.");
+    this.index = { fournisseur: "scaleway", enveloppe: enveloppeHex, reference: `scaleway:${this.coffre.region}:${this.coffre.cle_maitre}` };
+    l.issue = "emise";
+  }
+
+  async indexPourMembre(jeton: string, client: string) {
+    const u = this.uid(jeton);
+    if (jeton === VOISIN) throw refus("42501", "La clé d'index se remet à une personne du cabinet.");
+    if (!this.index) return null;
+    if (this.index.fournisseur === "local") return { fournisseur: "local" as const };
+    return {
+      fournisseur: "scaleway" as const,
+      journal: this.noter(client, null, "membre", u),
+      reference: this.index.reference,
+      enveloppe: this.index.enveloppe,
+    };
+  }
+
   async reenveloppe(journal: number, enveloppeHex: string) {
     const l = this.journal.find((j) => j.id === journal && j.pour === "reenveloppement");
     if (!l) throw refus("P0002", "Demande introuvable.");

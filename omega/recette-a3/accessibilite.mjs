@@ -19,6 +19,9 @@ const ECRANS = [
   ['filed', '/espace/filed', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`],
   ['fournisseurs', '/espace/filed/fournisseurs', `[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Proposer un IBAN/.test(b.textContent))?.click()`],
   ['a-payer', '/espace/filed/a-payer', `[...document.querySelectorAll('.esp-a-payer .r-btn')].find(b => /Noter un paiement/.test(b.textContent))?.click()`],
+  ['comptabilite', '/espace/filed/comptabilite', `[...document.querySelectorAll('.esp button')].find(b => /^Modifier le compte/.test(b.getAttribute('aria-label') ?? ''))?.click()`],
+  ['filed-electronique', '/espace/filed?objet=facture:R2026-000014', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Ouvrir un litige/.test(b.textContent))?.click()`],
+  ['boite', '/espace/filed/boite', null],
   ['point', '/espace/point', null],
 ];
 

@@ -28,6 +28,9 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte } from "../format";
 import { ETATS, FAMILLES, NATURES_INTERVENANT, NATURES_PROJET, PHASES, ROLES_PROJET, TYPES, TYPES_PIECE, famille, prochaineDate, titrePermis, type Famille } from "./etats";
 import { dossierExemple } from "./exemples";
+import Chantier from "./Chantier";
+import Controle from "./Controle";
+import Honoraires from "./Honoraires";
 import PermisVue from "./PermisVue";
 import { ajouterIntervenant, ajouterLot, ajouterMembre, chargerDossier, deposerCourrier, ouvrirPermis, ouvrirProjet } from "./portes";
 import type { Dossier, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet } from "./types";
@@ -59,7 +62,7 @@ export default function EcranLorani() {
       setReel(await chargerDossier());
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], moi: null });
+      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], controles: [], controlePieces: [], constats: [], moi: null });
     }
   }, []);
   useEffect(() => {
@@ -208,6 +211,15 @@ export default function EcranLorani() {
     }
   };
   const clientId = dossier.moi?.client_id ?? "";
+  /* les honoraires (b5_12) gèrent leurs propres dialogues : l'erreur de la base leur revient */
+  const agir = async (reel: () => Promise<void>, localFn: () => Dossier) => {
+    if (source === "reelle") {
+      await reel();
+      await relire();
+    } else {
+      setLocal(localFn());
+    }
+  };
 
   const soumettreProjet = async () => {
     const parcelles = np.parcelles.split(/[,;\n]+/).map((x) => x.trim().toUpperCase()).filter(Boolean);
@@ -410,10 +422,10 @@ export default function EcranLorani() {
                 onLocal={(d) => { setChoix(permis.id); setLocal(d); }}
                 relire={async () => { setChoix(permis.id); await relire(); }}
               />
-              <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} />
+              <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} agir={agir} />
             </div>
           ) : projet ? (
-            <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} />
+            <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} agir={agir} />
           ) : (
             <div className="esp-carte"><Vide titre="Choisissez un permis">Le calendrier, les dates lues sur les courriers et les recours s&apos;affichent ici.</Vide></div>
           )}
@@ -654,7 +666,7 @@ export default function EcranLorani() {
 }
 
 /* ——— le dossier du projet : équipe, lots, intervenants, actions ——— */
-function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm }: { projet: Projet; dossier: Dossier; nommer: (id: string | null | undefined) => string; peutEcrire: boolean; envoi: boolean; ouvrirForm: (f: Form) => void }) {
+function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, agir }: { projet: Projet; dossier: Dossier; nommer: (id: string | null | undefined) => string; peutEcrire: boolean; envoi: boolean; ouvrirForm: (f: Form) => void; agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void> }) {
   const membres = dossier.membres.filter((m) => m.projet_id === projet.id);
   const lots = dossier.lots.filter((l) => l.projet_id === projet.id);
   const intervenants = dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif);
@@ -754,6 +766,9 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm }:
           <div className="lor-tableau-vide">Aucun intervenant.</div>
         )}
       </div>
+      <Controle projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
+      <Honoraires projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
+      <Chantier projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
     </section>
   );
 }

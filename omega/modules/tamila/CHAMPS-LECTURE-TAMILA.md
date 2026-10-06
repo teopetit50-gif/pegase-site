@@ -82,11 +82,20 @@ L'avis d'audience du scénario (NOTES-B4 § 1, étape 9), une fois déchiffré :
  ]}
 ```
 
-## Ce qui manque côté socle (B4, à venir)
+## La passerelle « avis lu → délais » (b4_08, 06/10/2026)
 
-Il n'existe pas encore de passerelle « pièce lue → `tamila_avis_lu` » (Lorani a `private.lorani_lectures_passage`
-sur le genre `lorani.piece_lue`) : aujourd'hui les avis se saisissent à l'écran (confiance `saisie`). Elle viendra
-avec le coffre, puisqu'elle doit déchiffrer le n° RG du dossier pour calculer `p_rg_concorde`. La table ci-dessus
-est déjà le format qu'elle lira : `type_piece` → `p_type`, les `valeurs` vérifiées → `p_valeurs`
-(`{"date_avis": …, "date_audience": …, "date_limite": …, "date_cloture_previsible": …, "partie_visee": …,
-"rang": …, "depose_le": …}`).
+Une pièce chiffrée ne laisse rien en clair en base (enregistrer_lecture n'accepte, pour elle, que des pages et des
+valeurs chiffrées) : la base ne peut pas relire les dates d'un avis. La passerelle se fait donc DANS LE LECTEUR, au
+moment où il a la clé du dossier (rendue par le coffre, `clePourPiece`). Tout est prêt dans
+`omega/functions/tamila-coffre/lecteur.ts` :
+
+1. `dossierPourLecteur(cfg, piece)` (porte `tamila_dossier_pour_lecteur`, serveur) : le dossier, son n° RG **chiffré**,
+   et si l'avis est déjà posé ;
+2. `avisDepuisLecture(type_piece, valeurs)` : le type et les seules valeurs que `tamila_avis_lu` lit (dates, partie
+   visée, rang), **vérifiées** ; null si ce n'est pas un avis ou si `date_avis` manque ; confiance `gabarit` si tout
+   vient d'une règle, `modele` sinon ;
+3. `rgConcorde(numero_rg lu, RG du dossier déchiffré avec la clé)` ;
+4. `poserAvisLu(cfg, piece, avis, concorde)` (porte `tamila_avis_du_lecteur`, serveur) : le dossier se déduit de la
+   pièce, toute autre valeur est refusée ; idempotent.
+
+Le mode d'emploi est en tête de la section dans `lecteur.ts`. Le branchement dans `lire_piece.ts` revient à A1.

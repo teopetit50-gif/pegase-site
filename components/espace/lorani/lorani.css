@@ -295,3 +295,148 @@
   font-size: 13px;
   color: var(--r-faible);
 }
+
+/* ——— honoraires par élément de mission (b5_12) ——— */
+.esp .lor-honoraires-total {
+  margin: 0 0 10px;
+}
+.esp .lor-honoraires {
+  /* le texte « sr-only » de l'en-tête (position absolue) reste dans le cadre qui défile, sans élargir la page */
+  position: relative;
+}
+.esp .lor-honoraires td {
+  vertical-align: middle;
+}
+.esp .lor-jauge {
+  display: block;
+  width: 100%;
+  min-width: 88px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--r-filet);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.esp .lor-jauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--esp-vert);
+}
+.esp .lor-jauge[data-etat="a_surveiller"] > span {
+  background: var(--esp-ambre);
+}
+.esp .lor-jauge[data-etat="depasse"] > span {
+  background: var(--esp-rouge);
+}
+.esp .lor-temps-recents {
+  margin-top: 12px;
+}
+.esp .lor-temps-recents > summary {
+  cursor: pointer;
+  color: var(--r-doux);
+  font-size: 0.875rem;
+}
+.esp .lor-honoraires + * {
+  margin-top: 0;
+}
+
+/* ——— le chantier : situations à viser (b5_13) ——— */
+.esp .lor-situation {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--r-filet);
+}
+.esp .lor-situation[data-retard] {
+  box-shadow: 0 0 0 1px var(--esp-rouge);
+}
+.esp .lor-situation-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.esp .lor-situation .esp-actions {
+  margin: 0;
+}
+.esp .lor-chantier {
+  position: relative;
+}
+.esp .lor-chantier + * {
+  margin-top: 0;
+}
+.esp .esp-tableau-cadre + .esp-tableau-cadre {
+  margin-top: 12px;
+}
+
+/* ——— le contrôle du dossier (b5_16) ; le choix des pièces vit dans un dialogue, hors de .esp ——— */
+.esp .lor-controles {
+  margin-bottom: 10px;
+}
+.esp .lor-controle-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.esp .lor-controle-pieces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 12px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+.esp .lor-constat {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--r-filet);
+  overflow-wrap: anywhere;
+}
+.esp .lor-constat[data-gravite="bloquant"] {
+  box-shadow: 0 0 0 1px var(--esp-rouge);
+}
+.esp .lor-constat .esp-actions {
+  margin: 0;
+}
+.esp .lor-citations {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--r-doux);
+}
+.lor-choix-pieces {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.lor-choix-piece {
+  display: grid;
+  gap: 6px;
+}
+.lor-choix-case {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+.lor-choix-role {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 6px;
+  padding-left: 24px;
+}
+.esp .lor-rapport {
+  margin: 0 0 10px;
+}

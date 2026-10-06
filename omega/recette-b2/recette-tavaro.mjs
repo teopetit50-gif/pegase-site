@@ -6,7 +6,12 @@
    un retour avec un dommage sans photo (l'avis ambre), puis avec photo, et
    voir la proposition « À valider » ; passer une facture en litige ; demander
    un avoir (montant borné) ; relancer l'impayé ; publier un barème (direction
-   seule : « Vous » est valideur, le bouton est gris).
+   seule : « Vous » est valideur, le bouton est gris). Les avis de contravention
+   (vague 3, b2_03) : la liste par échéance, un avis saisi qui se rapproche
+   tout seul du contrat, la désignation consignée, le classement réservé à
+   la direction. L'état des lieux (b2_05) : le départ signé se lit dans le
+   dossier, l'état de retour se fait (quatre vues, signature au doigt) et
+   le chiffrage annonce « déjà au départ » pour la rayure notée.
    usage : node omega/recette-b2/recette-tavaro.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -134,6 +139,106 @@ for (const largeur of LARGEURS) {
   const bareme = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Barème de remise en état"]'); return { publier: [...c.querySelectorAll('.r-btn')].find(b => /Publier un barème/.test(b.textContent))?.disabled, retirer: [...c.querySelectorAll('.r-btn')].find(b => /Retirer/.test(b.textContent))?.disabled, vigueur: /en vigueur depuis/.test(c.innerText) }; })()`);
   ok(bareme.publier === true && bareme.retirer === true && bareme.vigueur, 'le barème en vigueur se lit ; publier et retirer sont réservés à la direction (gris pour un valideur)');
   await s.capturer(`${dossier}tavaro-bareme-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-avis', densite: 1 });
+  console.log('— /espace/tavaro : avis de contravention (exemple)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Avis de contravention"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; const l = [...c.querySelectorAll('.tav-avis')]; return { n: l.length, premier: l[0]?.innerText ?? '', urgent: /urgent/.test(c.querySelector('.esp-carte-tete').innerText), classer: [...c.querySelectorAll('.r-btn')].filter(b => /^Classer$/.test(b.textContent.trim())).every(b => b.disabled) }; })()`);
+  ok(etat.n === 3, `${etat.n} avis à traiter (3 attendus)`);
+  ok(/À rattacher/.test(etat.premier) && /2 j pour désigner/.test(etat.premier), 'le premier est le plus urgent : à rattacher, 2 jours');
+  ok(etat.urgent, 'la tête de la carte compte l\'urgent');
+  ok(etat.classer, 'classer est réservé à la direction (gris pour un valideur)');
+  /* saisir un avis : la Clio, avant-hier à 14 h 12, pendant le contrat C-2026-0412 */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => /Enregistrer un avis/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => {
+    const d = document.querySelector('[role="dialog"]');
+    const j = (n) => { const x = new Date(Date.now() - n * 86400000); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    const champs = [...d.querySelectorAll('input')];
+    const v = ['2026 1004 1412 77', 'ga 123 bc', j(2), '14:12', 'Excès de vitesse inférieur à 20 km/h', 'A6, Auxerre', '135', j(1)];
+    v.forEach((x, i) => { set.call(champs[i], x); champs[i].dispatchEvent(new Event('input', { bubbles: true })); });
+  })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  const apres = await s.evaluer(`(() => { const c = ${sect}; return { fait: c.querySelector('.esp-avis')?.innerText ?? '', n: c.querySelectorAll('.tav-avis').length }; })()`);
+  ok(/rapproché du contrat C-2026-0412/.test(apres.fait) && apres.n === 4, `l'avis saisi se rapproche tout seul : « ${apres.fait.slice(0, 90)} »`);
+  /* désigner : prérempli depuis la locataire, il manque la naissance et le permis */
+  await s.evaluer(`(() => { const a = [...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText)); [...a.querySelectorAll('.r-btn')].find(b => /Désigner/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  const pre = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = [...d.querySelectorAll('input')]; return { nom: i[0].value, prenom: i[1].value, gris: [...d.querySelectorAll('button')].find(b => /Consigner/.test(b.textContent)).disabled }; })()`);
+  ok(pre.nom === 'Durand' && pre.prenom === 'Marie' && pre.gris, 'la désignation est préremplie (Marie Durand) et reste grise tant qu\'il manque la naissance et le permis');
+  await s.evaluer(`(() => {
+    const d = document.querySelector('[role="dialog"]'); const i = [...d.querySelectorAll('input')];
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    [[2, '1985-03-02'], [3, 'Lyon'], [5, '12AB34567']].forEach(([k, v]) => { set.call(i[k], v); i[k].dispatchEvent(new Event('input', { bubbles: true })); });
+  })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Consigner/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  await s.evaluer(`[...${sect}.querySelectorAll('.esp-filtre')].find(b => /Traités/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const designe = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText))?.innerText ?? ''`);
+  ok(/Désigné : Marie Durand/.test(designe) && /dans le délai/.test(designe), 'l\'avis passe dans « Traités » : désigné, dans le délai');
+  const efface = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2025 0812 6604 51/.test(x.innerText))?.innerText ?? ''`);
+  ok(/identité effacée le/.test(efface) && /DES-2025-074410/.test(efface), 'désigné il y a plus d\'un an : l\'identité est effacée, la référence reste');
+  await s.capturer(`${dossier}tavaro-avis-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-edl', densite: 1 });
+  console.log('— /espace/tavaro : état des lieux contradictoire (exemple)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('#esp-dossier section[aria-label="États des lieux"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${sect}; return c ? c.innerText : ''; })()`);
+  ok(/Signé par Marie Durand/.test(lu) && /Flanc droit/.test(lu) && /Caution 800,00/.test(lu) && /prise/.test(lu), 'le départ signé se lit : signataire, rayure du flanc droit, caution prise');
+  ok(/empreinte [0-9a-f]{8}…/.test(lu), 'l\'empreinte du contenu signé est montrée');
+  /* l'état de retour : sans les quatre vues, le bouton reste gris ; avec, la signature */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => /Faire l.état de retour/.test(b.textContent)).click()`);
+  await s.dormir(500);
+  const gris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.disabled`);
+  ok(gris === true, 'sans les quatre côtés en photo, « Enregistrer et faire signer » reste gris');
+  const photo = new URL('tavaro-390.jpg', import.meta.url).pathname;
+  /* envoyer rend le message CDP entier : le résultat est sous .result */
+  const doc = (await s.envoyer('DOM.getDocument', { depth: -1 })).result;
+  for (const vue of ['avant', 'arriere', 'flanc_gauche', 'flanc_droit']) {
+    const { nodeId } = (await s.envoyer('DOM.querySelector', { nodeId: doc.root.nodeId, selector: `#edl-${vue}` })).result;
+    await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [photo] });
+  }
+  await s.dormir(300);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const signature = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { canvas: !!d.querySelector('canvas'), nom: d.querySelector('input')?.value, gris: [...d.querySelectorAll('button')].find(b => /Signer l.état/.test(b.textContent))?.disabled }; })()`);
+  ok(signature.canvas && signature.nom === 'Marie Durand' && signature.gris === true, 'la signature : nom prérempli, zone de signature, « Signer » gris tant que rien n\'est tracé');
+  const r = await s.evaluer(`(() => { const c = document.querySelector('[role="dialog"] canvas').getBoundingClientRect(); return { x: c.left + 40, y: c.top + 60 }; })()`);
+  await s.envoyer('Input.dispatchMouseEvent', { type: 'mousePressed', x: r.x, y: r.y, button: 'left', clickCount: 1 });
+  for (let i = 1; i <= 8; i++) await s.envoyer('Input.dispatchMouseEvent', { type: 'mouseMoved', x: r.x + i * 25, y: r.y + (i % 2 ? 20 : -10), button: 'left', buttons: 1 });
+  await s.envoyer('Input.dispatchMouseEvent', { type: 'mouseReleased', x: r.x + 200, y: r.y, button: 'left', clickCount: 1 });
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Signer l.état/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => ({ texte: ${sect}.innerText, fait: document.querySelector('#esp-dossier .esp-avis[data-teinte="vert"]')?.innerText ?? '' }))()`);
+  ok(/signé par Marie Durand : il ne change plus/.test(apres.fait) && (apres.texte.match(/Signé par Marie Durand/g) ?? []).length === 2, 'le retour est signé : les deux états portent la signature');
+  /* le chiffrage : carburant du départ verrouillé, la rayure du flanc droit annoncée « pas facturée » */
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-actions .r-btn')].find(b => /Chiffrer le retour/.test(b.textContent)).click()`);
+  await s.dormir(500);
+  const verrou = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] select')][0]?.disabled`);
+  ok(verrou === true, 'le carburant au départ est repris de l\'état signé et verrouillé');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Ajouter un dommage/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  await s.evaluer(`(() => { const sel = [...document.querySelectorAll('[role="dialog"] .tav-ligne-saisie select')]; const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel[0], 'flanc_droit'); sel[0].dispatchEvent(new Event('change', { bubbles: true })); set.call(sel[1], 'RAYURE_PORTIERE'); sel[1].dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  const deja = await s.evaluer(`document.querySelector('[role="dialog"] .tav-ligne-saisie')?.innerText ?? ''`);
+  ok(/Déjà noté sur l.état de départ signé/.test(deja) && /ne sera pas facturé/.test(deja), 'une rayure dans une zone déjà notée au départ : « ne sera pas facturé » avant le clic');
+  await s.capturer(`${dossier}tavaro-edl-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 
