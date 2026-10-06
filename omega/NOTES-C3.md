@@ -241,6 +241,11 @@ Test `omega/tests/reput/c3_06_cashd_escalade.sql` (27 ; souche 233/233). Il pose
 
 ## Journal de session
 
+- 06/10, ~22 h Z : C2 a posé son côté (worker-c2 ef9bc7d : événement cashd.facture_reglee ; 8b8fbb4 :
+  private.cashd_contact_en_litige, litige de compte, de facture ou contestation partielle). Charge et signature
+  conformes à c3_06 ; rien à changer chez REPUT. Facture soldée par disparition de l'export : non publiée (pas de
+  date de règlement sûre), décision C3.
+
 - 06/10, ~21 h 45 Z : c3_05 posé et vert (coordinateur). c3_06 écrit (CASHD, litige, délais, client reconnu,
   récurrents, avis par site) ; souche 233/233 ; recette 5 largeurs verte. Demandes envoyées à C2.
 
