@@ -305,7 +305,7 @@ export const DOSSIERS_EXEMPLE: Dossier[] = assemblerDossiers(CONTRATS_EXEMPLE, {
 });
 
 /* ——— les avis de contravention (b2_03) : un à désigner bientôt (société), un à désigner, un à rapprocher en urgence,
-   un désigné, un classé. L'échéance est la date d'envoi plus 45 jours, comme la base la calcule. ——— */
+   un désigné, un classé, un désigné il y a plus d'un an dont l'identité est effacée (b2_04). L'échéance est la date d'envoi plus 45 jours, comme la base la calcule. ——— */
 const jourIso = (iso: string) => iso.slice(0, 10);
 const plus = (jour: string, n: number) => new Date(Date.parse(jour + "T12:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
 const avis = (n: number, o: Partial<AvisContravention> & Pick<AvisContravention, "numero_avis" | "immatriculation" | "infraction_le" | "avis_envoye_le" | "statut">): AvisContravention => ({
@@ -331,4 +331,8 @@ export const AVIS_EXEMPLE: AvisContravention[] = [
   avis(5, { numero_avis: "2026 0801 7712 30", immatriculation: VEHICULES_EXEMPLE[1].immatriculation, infraction_le: ilYa(60, 7), avis_envoye_le: jourIso(ilYa(55)), recu_le: jourIso(ilYa(50)),
     lieu: "Grenoble, rocade sud", nature: "Excès de vitesse inférieur à 20 km/h (limite 90)", montant_eur: 68, statut: "classe", entite_id: GRENOBLE, vehicule_id: VEHICULES_EXEMPLE[1].id,
     motif_classement: "Usurpation de plaque : la photo du radar montre une autre voiture, la Peugeot était au parc. Requête en exonération envoyée à l'ANTAI avec le dépôt de plainte.", classe_le: ilYa(48, 15), classe_par: CLAIRE }),
+  avis(6, { numero_avis: "2025 0812 6604 51", immatriculation: VEHICULES_EXEMPLE[0].immatriculation, infraction_le: ilYa(400, 16), avis_envoye_le: jourIso(ilYa(395)), recu_le: jourIso(ilYa(392)),
+    lieu: "A7, Vienne", nature: "Excès de vitesse inférieur à 20 km/h (limite 130)", montant_eur: 135, statut: "designe", entite_id: LYON, vehicule_id: VEHICULES_EXEMPLE[0].id,
+    rapprochement: "auto", candidats: 1, designation: { type: "personne", effacee_le: ilYa(20, 3) }, designation_effacee_le: ilYa(20, 3),
+    mode_designation: "antai_en_ligne", reference_designation: "DES-2025-074410", designe_le: ilYa(385, 10), designe_par: CLAIRE, hors_delai: false }),
 ];

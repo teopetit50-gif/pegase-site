@@ -220,7 +220,11 @@ declare
   v_vehicule uuid;
   v_vehicule_entite uuid;
   v_n integer;
-  r record;
+  -- des scalaires, pas un record : un record jamais assigné ne se lit pas, même dans une branche case non prise
+  -- (« record "r" is not assigned yet » sur la recette le 06/10, quand aucun contrat ne correspond)
+  v_contrat uuid;
+  v_locataire uuid;
+  v_entite uuid;
   a public.loc_avis_contravention;
   v_statut text;
   v_aujourd_hui date := (p_maintenant at time zone 'Europe/Paris')::date;
@@ -285,18 +289,20 @@ begin
 
   select count(*) into v_n from private.loc_rapprocher_avis(p_client, v_plaque.plaque, v_instant);
   if v_n = 1 then
-    select * into r from private.loc_rapprocher_avis(p_client, v_plaque.plaque, v_instant);
+    select x.contrat_id, x.locataire_id, x.entite_id into v_contrat, v_locataire, v_entite
+    from private.loc_rapprocher_avis(p_client, v_plaque.plaque, v_instant) x;
     v_statut := 'a_designer';
   else
+    v_entite := v_vehicule_entite;
     v_statut := 'a_rapprocher';
   end if;
 
   insert into public.loc_avis_contravention (client_id, entite_id, numero_avis, immatriculation, vehicule_id, infraction_le, lieu, nature,
     montant_eur, avis_envoye_le, recu_le, echeance_le, contrat_id, locataire_id, rapprochement, candidats, statut, piece_id, source, cree_par)
-  values (p_client, case when v_n = 1 then r.entite_id else v_vehicule_entite end, v_numero, v_plaque.plaque, v_vehicule, v_instant,
+  values (p_client, v_entite, v_numero, v_plaque.plaque, v_vehicule, v_instant,
     private.loc_lire_texte(p_valeurs, 'lieu', 200), private.loc_lire_texte(p_valeurs, 'nature', 200),
     v_montant, v_envoye, v_recu, v_echeance,
-    case when v_n = 1 then r.contrat_id end, case when v_n = 1 then r.locataire_id end,
+    v_contrat, v_locataire,
     case when v_n = 1 then 'auto' end, least(v_n, 99), v_statut, v_piece, p_source, p_par)
   returning * into a;
 

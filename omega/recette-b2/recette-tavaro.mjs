@@ -184,6 +184,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   const designe = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText))?.innerText ?? ''`);
   ok(/Désigné : Marie Durand/.test(designe) && /dans le délai/.test(designe), 'l\'avis passe dans « Traités » : désigné, dans le délai');
+  const efface = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2025 0812 6604 51/.test(x.innerText))?.innerText ?? ''`);
+  ok(/identité effacée le/.test(efface) && /DES-2025-074410/.test(efface), 'désigné il y a plus d\'un an : l\'identité est effacée, la référence reste');
   await s.capturer(`${dossier}tavaro-avis-1440.jpg`, { qualite: 55 });
   s.fermer();
 }

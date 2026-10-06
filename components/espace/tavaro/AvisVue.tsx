@@ -203,7 +203,8 @@ export default function AvisVue({ avis, dossiers, role, nommer, nomAgence, geste
           <ul className="tav-avis-liste" aria-label={vue === "a_traiter" ? "Avis à traiter, par échéance" : "Avis traités"}>
             {montres.map((a) => {
               const d = dossierDe(a);
-              const nom = a.designation ? (a.designation.type === "societe" ? a.designation.raison_sociale : `${a.designation.prenom} ${a.designation.nom}`) : null;
+              const g = a.designation;
+              const nom = !g ? null : "effacee_le" in g ? `identité effacée le ${dateCourte(g.effacee_le)} (gardée un an)` : g.type === "societe" ? g.raison_sociale : `${g.prenom} ${g.nom}`;
               return (
                 <li key={a.id} className="tav-avis">
                   <div className="esp-item-haut">

@@ -319,6 +319,8 @@ export type Role = "gerant" | "admin" | "valideur" | "collaborateur" | "lecteur"
 export type StatutAvis = "a_rapprocher" | "a_designer" | "designe" | "classe";
 export type DesignationPersonne = { type: "personne"; nom: string; prenom: string; date_naissance: string; lieu_naissance: string; adresse: string; permis_numero: string; permis_delivre_le?: string; permis_lieu?: string };
 export type DesignationSociete = { type: "societe"; raison_sociale: string; siren: string; adresse: string };
+/* un an après la désignation, l'identité s'efface (b2_04, art. 9 du code de procédure pénale) : la forme reste */
+export type DesignationEffacee = { type: "personne" | "societe"; effacee_le: string };
 export type AvisContravention = {
   id: string;
   client_id: string;
@@ -338,7 +340,8 @@ export type AvisContravention = {
   rapprochement: "auto" | "manuel" | null;
   candidats: number;
   statut: StatutAvis;
-  designation: DesignationPersonne | DesignationSociete | null;
+  designation: DesignationPersonne | DesignationSociete | DesignationEffacee | null;
+  designation_effacee_le?: string | null;
   mode_designation: "antai_en_ligne" | "lrar" | null;
   reference_designation: string | null;
   designe_le: string | null;

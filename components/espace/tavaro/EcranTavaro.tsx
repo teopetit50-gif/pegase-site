@@ -88,7 +88,7 @@ export default function EcranTavaro() {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, []);
-  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs"], source === "reelle", relire);
+  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
     if (!id) return "Système";

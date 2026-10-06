@@ -147,3 +147,14 @@ Sources :
   - On classe, avec un motif.
   - Dans l'exemple, cinq avis ; le même rapprochement est joué en mémoire. tsc, eslint et build verts. `recette-tavaro.mjs` passe tout (65 contrôles, dont l'enchaînement saisir → rapproché → désigner). axe : 0 écart à 390 et 1440 px, sur l'écran comme dans le dialogue de désignation.
 - **Ensuite** : les frais de gestion d'un avis refacturés au locataire (une ligne du barème, la facture validée) ; la lecture de l'avis par le lecteur de pièces (`source = 'lecture'`, porte privée déjà prête) ; l'effacement de `designation` à l'anonymisation (à trancher avec le coordinateur) ; la section « avis à désigner » dans le point du matin (gabarit du socle).
+
+### 06/10, 16 h Z — TAP du test 12 rouge, corrigé ; b2_04 (désignation gardée un an)
+
+- **TAP du coordinateur** (b2_03 au SHA 8fd4e11) : tests 01 à 11 verts ; le 12 meurt avec « record "r" is not assigned yet » quand aucun contrat ne correspond. Un record PL/pgSQL jamais assigné ne se lit pas, même dans une branche `case` non prise. **Corrigé** avec des scalaires (v_contrat, v_locataire, v_entite).
+- **Pourquoi ma souche ne l'avait pas vu** : le scénario local commençait par un avis rapproché, et `r` était déjà assigné dans la même session. Je l'ai reproduit dans une session neuve, chemin « aucun contrat » d'abord, puis vérifié la correction de la même façon. **À retenir** : un scénario local doit ouvrir chaque chemin dans une session neuve.
+- **b2_04** (décision du coordinateur) : l'identité désignée est gardée un an après la désignation, puis effacée par `private.loc_effacer_designations` (cron `tavaro-avis-conservation`, 3 h 25 UTC).
+  - Fondement : l'article 9 du code de procédure pénale fixe la prescription de l'action publique des contraventions à un an révolu depuis l'infraction, interrompu par tout acte de poursuite. Partir de la désignation couvre au moins ce délai.
+  - Ce qui reste : la forme {type, effacee_le}, plaque, heure, montant, statut, mode, référence.
+  - `loc_avis_contravention` est ajoutée à la publication Realtime, et l'écran s'y abonne.
+  - Test 13 : 9 assertions. TOUT_B2 réassemblé : 13 tests.
+- **Écran** : une désignation effacée s'affiche « identité effacée le … (gardée un an) » ; un sixième avis d'exemple le montre. La recette passe tout, axe ne trouve aucun écart.
