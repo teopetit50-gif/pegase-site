@@ -106,7 +106,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 ### Après la vague 3 — ce qui manque encore à une vraie entreprise du BTP (06/10/2026)
 
 1. **L'encaissement des situations (pris, b6_16)** — Daliro sait facturer et ne sait pas si on a été payé : échéance (30 jours par défaut, plafond légal 60 jours, Code de commerce art. L441-10), paiements partiels, retard en jours, indemnité forfaitaire de 40 € et pénalités de retard dues de plein droit, relance au point du matin. Ne dépend ni de la plateforme ni de Teo.
-2. **La rentabilité réelle du chantier** — heures pointées par équipe × coût horaire + achats rattachés (FILED) face au facturé : la marge à date, lot par lot (Graneet en fait son argument n° 1). Il faut le pointage des heures (équipes terrain, mobile).
+2. **La rentabilité réelle du chantier (pris, b6_17)** — heures pointées par équipe × coût horaire + achats rattachés (FILED) face au facturé : la marge à date, lot par lot (Graneet en fait son argument n° 1). Il faut le pointage des heures (équipes terrain, mobile).
 3. **La facture électronique des situations** (attend la plateforme agréée) et la **révision de prix** (index BT01 de l'INSEE, formule du marché) — la seconde demande la source des index.
 
 ### Taux des pénalités de retard (réglage private.reglages « daliro_taux_penalites_retard »)
@@ -122,6 +122,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 06/10, 19 h 30 Paris : b6_17 heures et rentabilité. Tables btp_pointages (intervenant × jour × chantier × lot, au quart d'heure, portes seules, lecture par qui voit le chantier) et btp_couts_horaires (coût chargé daté, par intervenant ou défaut, lecture prix seulement). Portes btp_pointer (0 h efface ; 12 h/jour tous chantiers sinon refus, alerte > 10 h/jour ou > 48 h/semaine, L3121-18/19/20), btp_pointer_equipe, btp_poser_cout_horaire, btp_heures_chantier (semaine + rentabilité : vendu, facturé dernière situation validée, main-d'œuvre, achats FILED rattachés, marge par lot). Banc local hr : 800 € de MO sur le lot, refus 13 h, alerte 11,5 h, rejeu sans doublon. Test b6_11_heures (23). Écran HeuresCarte (grille de la semaine, pointer une équipe, coût horaire, rentabilité) ; recette 390/1440 + cinq largeurs verte. Suite possible : le relevé du soir par message au chef d'équipe (source 'message'), la marge négative au point du matin.
 - 06/10, 18 h Paris : b6_16 + b6_10 posés, ^test_b6_ 10/10. Taux des pénalités 2026 S2 = 12,40 % (BCE 2,40 % + 10), fichier reglages/taux_penalites_2026s2.sql. Suite : n° 2, pointage des heures.
 - 06/10, 17 h 45 Paris : b6_15 posé, ^test_b6_ 9/9. b6_16 encaissement des situations (L441-10) : échéance à 30 j posée à la validation (déclencheur), fixable jusqu'à 60 j ; paiements partiels (table btp_situations_paiements, portes seules, RLS prix) ; retard, indemnité 40 €, pénalités au taux posé dans private.reglages « daliro_taux_penalites_retard » (recopié à la validation), calculées paiement par paiement ; point du matin « situation impayée : relancez » ; tableau (paiements, encaissé). Exécuté en local (1 200 € : 7,99 € / 7,16 € de pénalités, refus des dépassements et des 61 jours). Test b6_10_encaissement (20). Écran : échéance, encaissé, état, « Noter un paiement ».
 
