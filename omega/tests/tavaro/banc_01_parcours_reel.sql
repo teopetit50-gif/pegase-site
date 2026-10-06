@@ -93,7 +93,7 @@ begin
 end $$;
 -- La décision déposée par le socle est appliquée par l'ouvrier de base : factures émises, courriel préparé.
 select private.loc_ouvrier(20);
-select f.reference, f.nature, f.total_ttc, f.statut, f.envoi_id, e.statut as envoi_statut, e.verrou, e.fournisseur, e.programme_le
+select f.reference, f.nature, f.total_ttc, f.statut, f.envoi_id, e.statut as envoi_statut, e.verrou, e.fournisseur, e.echeance, e.reprise_le, e.pret_le, e.envoye_le
 from public.loc_factures f left join public.envois e on e.id = f.envoi_id
 where f.client_id = 'cccccccc-0000-4000-8000-00000000000c' order by f.numero;
 -- → attendu : FA-2026-000001 (frais, 238.20) et FA-2026-000002 (dommages, 180.00), emise ; un envoi 'pret' (mode essai → adresse de Teo),
