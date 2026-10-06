@@ -18,26 +18,22 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 const LIGNES = {
-  /* TIROMA — ouvrier B3 */
+  /* TIROMA — ouvrier B3. Retirés le 06/10 au soir : synthèse de la semaine
+     (b3_15), réinscription (b3_16), absences probables (b3_17). */
   tiroma: [
     "Assistante absente : soins à basculer",
     "Demi-journées vides des collaborateurs",
     "Demi-journées vides",
-    "Absences probables",
-    "Synthèse de la semaine pour la direction",
-    "Synthèse de la semaine",
-    "Synthèse pour la direction",
     "Objectifs par fauteuil",
-    "Taux de réinscription",
-    "Taux de réinscription et d'acceptation des devis",
-    "Taux de réinscription et d'acceptation",
     "Un point du matin par centre",
     "Un point du matin par site",
     "Plusieurs sites",
   ],
 
   /* TAMILA — ouvrier B4 (pré-lecture avec A1 : lecture des pièces chiffrées,
-     chronologie, contradictions, bordereau, export) */
+     chronologie, contradictions, bordereau, export). Retirés le 06/10 au
+     soir : effacement à la clôture (b4_11), temps proposé et forfait
+     consommé (b4_12). */
   tamila: [
     // cartes « fonctionnalités »
     "Pièces adverses du jour",
@@ -68,39 +64,32 @@ const LIGNES = {
     "Source de chaque poste de préjudice",
     "Questions posées au dossier médical",
     "Pièces médicales scannées",
-    "Effacement à la clôture",
     // formule Cabinet
     "L'ensemble de la pré-lecture",
     "Pièces attendues du client et de l'expert",
-    "Forfaits dépassés",
-    "Conventions et forfaits",
     "Marge par dossier",
     "Contentieux en série comparés",
     "Dossiers en série comparés",
     "Dossiers sans diligence",
     "Charge par avocat",
-    "Temps passé proposé à la saisie",
   ],
 
-  /* LORANI — ouvrier B5 (le contrôle des planches avec A1). Seul le
-     calendrier du permis est construit (NOTES-B5). */
+  /* LORANI — ouvrier B5. Construits et retirés d'ici le 06/10 au soir :
+     calendrier du permis, contrôle des planches et du PLU avec
+     revérification à chaque indice (b5_16), situations et visas
+     (b5_13 à b5_15). */
   lorani: [
     "Plans croisés, rapport PDF annoté",
-    "Permis : PC1 à PC8 et PLU",
     "Accessibilité, ERP et RE2020",
     "PLU, servitudes et risques lus depuis l'adresse",
     "Surfaces recalculées contre le Cerfa",
     "RE2020 : attestation comparée aux plans",
     "Questions posées au dossier",
     "Analyse des offres sur DPGF",
-    "Visa des fiches techniques",
-    "Situations et décomptes",
-    "Visas calés sur les délais de commande",
     "Questions suivies jusqu'à la réponse",
     "Métré des plans contre la DPGF",
     "Décennales contrôlées contre le lot",
     "Ordres de service : montant et délai",
-    "Revérification à chaque indice",
     "Une question en un clic",
     "Checklists de l'agence",
     "Export Excel par lot",
@@ -110,19 +99,18 @@ const LIGNES = {
     "Réserves suivies jusqu'à la fin de la GPA",
     "Honoraires par phase contre temps passé",
     "Dossier de défense décennale",
-    "Registre daté des visas",
     "Historique des indices sans limite",
     "Contrôles définis avec vous",
     "Import depuis vos plateformes de projet",
     "Règles de votre charte intégrées",
   ],
 
-  /* DALIRO — ouvrier B6 (lecture des photos et vocaux avec A1 et A2) */
+  /* DALIRO — ouvrier B6 (lecture des photos et vocaux avec A1 et A2).
+     Retirés le 06/10 au soir : relance des avenants (b6_18), recalage des
+     lots (b6_19). */
   daliro: [
     "Lecture des photos et vocaux",
     "Signature sur place",
-    "Relance des avenants non signés",
-    "Ordre des lots recalé",
     "Alerte météo",
     "Liste cadencée depuis le devis",
     "Livraisons calées sur la pose",
@@ -131,11 +119,11 @@ const LIGNES = {
     "Avancement lu dans les photos",
   ],
 
-  /* VARELO — ouvrier B1 (réserves et lecture automatique des exports avec A1) */
+  /* VARELO — ouvrier B1 (réserves avec A1). Livrés et retirés d'ici le
+     06/10 au soir : le groupe sur une page (b1_08), les reportings dus
+     (b1_09) ; le point du matin par direction (b1_07) n'avait pas de pastille. */
   varelo: [
-    "Le groupe sur une page",
     "Les réserves à émettre",
-    "Les reportings dus",
   ],
 
   /* TAVARO — ouvrier B2, par paliers. Seuls 01 (facturation des retours),
