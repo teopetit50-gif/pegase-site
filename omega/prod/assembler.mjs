@@ -1,0 +1,210 @@
+#!/usr/bin/env node
+// omega/prod/assembler.mjs — étape 1 du dossier MISE-EN-PRODUCTION.md : assembler omega/prod/migrations/ à partir de
+// la sortie de omega/prod/exporter.sql (jouée sur la RECETTE par le coordinateur) et du dépôt git.
+// A5, 06/10/2026. Ne touche à aucune base : lit des fichiers JSON et le dépôt, écrit des fichiers.
+//
+// Usage :
+//   node omega/prod/assembler.mjs [--cloture] [--forcer] omega/prod/sortie/page-*.json
+//     --cloture : ajoute en dernier a5_01_private_execute.sql (étape C du dossier), lu sur origin/worker-a5.
+//     --forcer  : écrit même si un contrôle de contenu échoue (déconseillé ; le manifeste le signale).
+//
+// Entrée : chaque page est le tableau JSON rendu par execute_sql (objets {version, name, decision, source, provenance,
+// sql, octets}). La page 0 (sans texte) et les pages avec texte se fusionnent par version.
+//
+// Pour chaque ligne à emporter :
+//   · source « depot » : la provenance nomme un ou plusieurs fichiers (branche, SHA, chemin) ; chaque fichier est lu par
+//     `git show <sha>:<chemin>` (avec `git fetch origin <branche>` si le SHA manque), dans l'ordre de la provenance ;
+//   · source « sql » : le texte de statements.
+// Transformations, toujours notées dans l'en-tête et le manifeste :
+//   · URL de la recette réécrite en production (ygwbgpowzlbdaajlsqkn → noepmkkplxshjbmqqxft : crons 19b, 19v, 19aa…) ;
+//   · `create extension … pgtap` retiré (pgTAP ne va pas en production).
+// Contrôles (refus, sauf --forcer) : donnée du banc, comptes de recette, clé publique de la recette, outillage de pose
+// (depot_demander/depot_executer) ou de test (tests_en_tache, tester_sans_trace, schéma tests) dans un fichier emporté.
+
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const RECETTE = 'ygwbgpowzlbdaajlsqkn';
+const PRODUCTION = 'noepmkkplxshjbmqqxft';
+const ICI = dirname(fileURLToPath(import.meta.url));
+const RACINE = resolve(ICI, '..', '..');
+const SORTIE = join(ICI, 'migrations');
+
+const INTERDITS = [
+  [/cccccccc-0000-4000-8000-00000000000c/i, 'client du banc'],
+  [/banc-varelo\.test/i, 'compte de recette'],
+  [/Recette-Omega-2026/, 'mot de passe de recette'],
+  [/sb_publishable_[A-Za-z0-9_]+/, 'clé publique de la recette'],
+  [/function\s+private\.(depot_demander|depot_executer)\b/i, 'outillage de pose de la recette'],
+  [/function\s+private\.(tests_en_tache|tester_sans_trace)\b/i, 'outillage de test de la recette'],
+  [/create\s+schema\s+(if\s+not\s+exists\s+)?tests\b/i, 'schéma tests'],
+];
+
+function git(...args) {
+  return execFileSync('git', args, { cwd: RACINE, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
+}
+
+function commitPresent(sha) {
+  try { git('cat-file', '-e', `${sha}^{commit}`); return true; } catch { return false; }
+}
+
+function lireAuSha(branche, sha, chemin) {
+  if (!commitPresent(sha)) {
+    const cible = branche && branche !== '?' ? branche : null;
+    try { git('fetch', '--quiet', 'origin', ...(cible ? [cible] : [])); } catch { /* le message vient plus bas */ }
+  }
+  if (!commitPresent(sha)) throw new Error(`commit ${sha} introuvable (branche ${branche || '?'})`);
+  return git('show', `${sha}:${chemin}`);
+}
+
+// Provenance : « posé depuis le dépôt : <branche> <sha> <chemin> » — tolère plusieurs fichiers et un ordre libre.
+function lireProvenance(texte) {
+  const fichiers = [];
+  const motif = /(?:(worker-[a-z0-9]+|main)[\s,:]+)?([0-9a-f]{7,40})[\s,:]+(omega\/[^\s'",;)]+\.sql)/g;
+  for (const m of texte.matchAll(motif)) fichiers.push({ branche: m[1] || null, sha: m[2], chemin: m[3] });
+  if (fichiers.length === 0) {
+    // ordre « chemin … sha » : un chemin, puis le premier SHA qui suit
+    const motif2 = /(omega\/[^\s'",;)]+\.sql)[^0-9a-f]+(?:(worker-[a-z0-9]+|main)[\s,:]+)?([0-9a-f]{7,40})/g;
+    for (const m of texte.matchAll(motif2)) fichiers.push({ branche: m[2] || null, sha: m[3], chemin: m[1] });
+  }
+  const branche = (texte.match(/\b(worker-[a-z0-9]+|main)\b/) || [])[1] || null;
+  return fichiers.map((f) => ({ ...f, branche: f.branche || branche }));
+}
+
+function slug(nom) {
+  return nom.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
+}
+
+function transformer(texte) {
+  const notes = [];
+  const nUrl = texte.split(RECETTE).length - 1;
+  if (nUrl > 0) {
+    texte = texte.split(RECETTE).join(PRODUCTION);
+    notes.push(`URL de la recette réécrite en production (${nUrl} fois)`);
+  }
+  const avant = texte;
+  texte = texte.replace(/^[ \t]*create\s+extension\s+(if\s+not\s+exists\s+)?pgtap\b[^;]*;[ \t]*$/gim,
+    '-- (assembler.mjs) extension pgtap retirée : pgTAP ne va pas en production.');
+  if (texte !== avant) notes.push('create extension pgtap retiré');
+  return { texte, notes };
+}
+
+function controler(texte) {
+  return INTERDITS.filter(([re]) => re.test(texte)).map(([, motif]) => motif);
+}
+
+function lirePages(chemins) {
+  const parVersion = new Map();
+  for (const chemin of chemins) {
+    let donnees = JSON.parse(readFileSync(chemin, 'utf8'));
+    if (!Array.isArray(donnees)) donnees = donnees.rows || donnees.result || donnees.data || [];
+    for (const l of donnees) {
+      const v = String(l.version);
+      const deja = parVersion.get(v) || {};
+      parVersion.set(v, { ...deja, ...Object.fromEntries(Object.entries(l).filter(([, x]) => x !== null && x !== undefined)) });
+    }
+  }
+  return [...parVersion.values()].sort((a, b) => String(a.version).localeCompare(String(b.version)));
+}
+
+function principal() {
+  const args = process.argv.slice(2);
+  const cloture = args.includes('--cloture');
+  const forcer = args.includes('--forcer');
+  const pages = args.filter((a) => !a.startsWith('--'));
+  if (pages.length === 0) {
+    console.error('Usage : node omega/prod/assembler.mjs [--cloture] [--forcer] omega/prod/sortie/page-*.json');
+    process.exit(2);
+  }
+  const lignes = lirePages(pages);
+  mkdirSync(SORTIE, { recursive: true });
+  const manifeste = [];
+  const erreurs = [];
+  let derniere = '0';
+
+  for (const l of lignes) {
+    const version = String(l.version);
+    if (version > derniere) derniere = version;
+    if (l.decision !== 'emporter') {
+      manifeste.push({ version, name: l.name, decision: l.decision || '?', source: l.source || '?', fichier: '—', notes: [] });
+      continue;
+    }
+    let texte;
+    let origine;
+    try {
+      if (l.source === 'depot') {
+        const fichiers = lireProvenance(l.provenance || '');
+        if (fichiers.length === 0) throw new Error(`provenance illisible : ${JSON.stringify((l.provenance || '').slice(0, 200))}`);
+        texte = fichiers.map((f) => `-- ═══ ${f.chemin} @ ${f.sha} (${f.branche || '?'})\n${lireAuSha(f.branche, f.sha, f.chemin)}`).join('\n\n');
+        origine = 'dépôt : ' + fichiers.map((f) => `${f.branche || '?'} ${f.sha} ${f.chemin}`).join(' ; ');
+      } else {
+        if (typeof l.sql !== 'string' || l.sql.length === 0) throw new Error('texte absent : rejouer la page avec avec_texte = true');
+        texte = l.sql;
+        origine = 'statements de la recette';
+      }
+    } catch (e) {
+      erreurs.push(`${version} ${l.name} : ${e.message}`);
+      manifeste.push({ version, name: l.name, decision: 'ERREUR', source: l.source, fichier: '—', notes: [e.message] });
+      continue;
+    }
+    const { texte: final, notes } = transformer(texte);
+    const refus = controler(final);
+    if (refus.length && !forcer) {
+      erreurs.push(`${version} ${l.name} : contenu refusé (${refus.join(', ')})`);
+      manifeste.push({ version, name: l.name, decision: 'REFUSÉ', source: l.source, fichier: '—', notes: refus });
+      continue;
+    }
+    const nom = `${version}_${slug(l.name)}.sql`;
+    const entete = [
+      `-- ${version} ${l.name}`,
+      `-- Source : ${origine}.`,
+      `-- Assemblé par omega/prod/assembler.mjs pour la production (${PRODUCTION}). Transformations : ${notes.length ? notes.join(' ; ') : 'aucune'}.`,
+      ...(refus.length ? [`-- ATTENTION (--forcer) : ${refus.join(', ')}`] : []),
+      '',
+    ].join('\n');
+    const contenu = entete + final.replace(/\s*$/, '\n');
+    writeFileSync(join(SORTIE, nom), contenu);
+    manifeste.push({ version, name: l.name, decision: 'emporter', source: l.source, fichier: nom,
+                     sha256: createHash('sha256').update(contenu).digest('hex').slice(0, 16), notes: [...notes, ...refus.map((r) => 'ATTENTION ' + r)] });
+  }
+
+  if (cloture) {
+    // Étape C : a5_01 rejouée en dernier, une seconde après la dernière version de la recette.
+    const v = String(BigInt(derniere) + 1n);
+    const texte = git('show', 'origin/worker-a5:omega/migrations/a5_01_private_execute.sql');
+    const sha = git('rev-parse', '--short', 'origin/worker-a5').trim();
+    const nom = `${v}_a5_01_cloture.sql`;
+    const contenu = `-- ${v} a5_01_cloture\n-- Source : dépôt worker-a5 ${sha} omega/migrations/a5_01_private_execute.sql (étape C du dossier).\n\n` + texte;
+    writeFileSync(join(SORTIE, nom), contenu);
+    manifeste.push({ version: v, name: 'a5_01_cloture', decision: 'emporter', source: 'depot', fichier: nom,
+                     sha256: createHash('sha256').update(contenu).digest('hex').slice(0, 16), notes: ['étape C'] });
+  }
+
+  const lignesManif = [
+    '# Manifeste des migrations de production (assemblé, non posé)',
+    '',
+    `Assemblé par \`omega/prod/assembler.mjs\` depuis ${pages.length} page(s) de \`omega/prod/exporter.sql\` (recette ${RECETTE}).`,
+    `Fichiers écrits : ${manifeste.filter((m) => m.decision === 'emporter').length} ; exclus : ${manifeste.filter((m) => m.decision.startsWith('exclure')).length} ; erreurs : ${erreurs.length}.`,
+    '',
+    '| Version | Nom | Décision | Source | Fichier | sha256 (16) | Notes |',
+    '|---|---|---|---|---|---|---|',
+    ...manifeste.map((m) => `| ${m.version} | \`${m.name}\` | ${m.decision} | ${m.source} | ${m.fichier === '—' ? '—' : '`' + m.fichier + '`'} | ${m.sha256 || '—'} | ${(m.notes || []).join(' ; ') || ''} |`),
+    '',
+  ];
+  writeFileSync(join(SORTIE, 'MANIFESTE.md'), lignesManif.join('\n'));
+
+  const presents = existsSync(SORTIE) ? readdirSync(SORTIE).filter((f) => f.endsWith('.sql')) : [];
+  const attendus = new Set(manifeste.map((m) => m.fichier));
+  const orphelins = presents.filter((f) => !attendus.has(f));
+  if (orphelins.length) console.error(`Fichiers présents mais absents de cet assemblage (à relire) : ${orphelins.join(', ')}`);
+  if (erreurs.length) {
+    console.error(`${erreurs.length} erreur(s) :\n  ` + erreurs.join('\n  '));
+    process.exit(1);
+  }
+  console.log(`${manifeste.filter((m) => m.decision === 'emporter').length} fichier(s) écrit(s) dans omega/prod/migrations/ ; manifeste : omega/prod/migrations/MANIFESTE.md`);
+}
+
+principal();
