@@ -983,3 +983,17 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   /espace (racine) est en 404 en ligne comme avant : c'est la bascule qui le résoudra.
   Ouverts : export-complet appelle public.exporter_client (inexistante) → A5 ; « appel manqué par SMS » (lib/pub.ts)
   → A2 dit si l'ouvrier envoie réellement en brevo_sms, sinon C5 reformule.
+- 18 h 15 Z (Teo de retour vers 18 h) — Poses : b1_14 signatures + b1_17 (B1 d794f00), c3_07 dossiers et services + c3_03
+  + c3_07 (C3 588833e), b4_16 expertises + 25 (B4 55e15ed), c4_07 échéances + test (C4 5f2cc7e), b6_24 fil de chantier
+  + b6_18 (B6 b062478), c2_04 v4 (C2 2643451), 19ap widgets + test (A2 de501c4), test b2_18 étendu (B2 3856716).
+  Lot ^test_(b1_1[3-7]_|c3_0[37]_|b4_25_|c4_07_|b6_|c2_04_|socle_19ap) : 822 ok, 6 not ok →
+  ROUGES : test_b6_03_reponses n° 20 (régression de b6_24, → B6), test_c2_04 n° 38 (balance arrêtée, → C2),
+  test_c3_07 n° 9 (have bloquee, want a_valider, → C3). Écrans B6 et C3 NON fusionnés. 44/46/51/55 : 34 ok, 0.
+  b5_21 NON posé : il dépend d'un b5_16 amendé alors que b5_16 est déjà posé → B5 doit fournir un delta.
+  Redéployés : export-complet v2 (A5 66524c9 ; réglage export_origines_recette = http://localhost:3010, recette
+  seule), reput-reponse v2 (588833e), lecteur v29 (A1 e5436cc : lecteur.media), widget v1 (A2 de501c4, verify_jwt
+  false). FILED : filed_prochain_numero est un compteur en table (sans trou) ; drapeau d'effacement =
+  private.effacement_en_cours(client) ; preparer_delegation ne vérifie PAS que le délégataire est membre → A4.
+  Main : fusion b1, b4 (expertises), c4 (échéances), c5 passe 6, b2 (écran contestations) ; GUIDE-WIDGET ; pastille
+  Tamila « pièces attendues » retirée ; apostrophe échappée dans app/offres/page.tsx (eslint).
+  À décider par Teo : coffre Scaleway du banc (Key Manager), transcription Mistral, crédits SMS Brevo.

@@ -30,8 +30,8 @@ const LIGNES = {
      chronologie, contradictions, bordereau, export). Retirés le 06/10 au
      soir : effacement à la clôture (b4_11), temps proposé et forfait
      consommé (b4_12) ; point du matin (b4_14) ; marge, charge, séries et
-     dossiers sans diligence (pilotage, 0c0714d). « Pièces attendues » reste :
-     celles de l'expert ne sont pas suivies. */
+     dossiers sans diligence (pilotage, 0c0714d) ; pièces attendues du client et
+     de l'expert (b4_16, expertises). */
   tamila: [
     // cartes « fonctionnalités »
     "Pièces adverses du jour",
@@ -63,7 +63,6 @@ const LIGNES = {
     "Pièces médicales scannées",
     // formule Cabinet
     "L'ensemble de la pré-lecture",
-    "Pièces attendues du client et de l'expert",
   ],
 
   /* LORANI — ouvrier B5. Construits et retirés d'ici le 06/10 au soir :
