@@ -1,14 +1,14 @@
 # Session B6 — DALIRO, le module des entreprises du bâtiment
 
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 06/10/2026, 02 h 00 Paris (reprise après la pause de minuit).
+Dernière mise à jour : 06/10/2026, 02 h 20 Paris.
 
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **60 %** | lot 1 posé (b6_01 à b6_04) ; **garde-fous 38/38 verts** ; le parcours b6_01 avance étape par étape (deux alias masqués corrigés : `r`/`g` dans le test, `c`/`ch` dans btp_soumettre_avenant) → à rejouer sur 4611bc7 |
-| **Livrable client** (/espace/daliro en ligne, relu avec le compte du banc) | **70 %** | écran écrit, tsc ✓, eslint ✓, build ✓, recette cinq largeurs ✓ et **enchaînements d'exemple 56/56** ; **relecture réelle** avec `gerant@banc-varelo.test` : lecture ✓, création d'un vrai chantier ✓ ; le tableau du chantier a révélé un tri sur une colonne absente (corrigé, b6_04 à reposer) ; pas encore fusionné dans main |
+| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **65 %** | lot 1 posé (b6_01 à b6_04, reposés en v2) ; **garde-fous 38/38 verts** ; parcours b6_01 : passe désormais la soumission d'avenant (étape 16), mourait sur la seconde facture FILED (un document par facture, corrigé en cd3b831) → rejeu en cours chez le coordinateur |
+| **Livrable client** (/espace/daliro relu avec le compte du banc) | **85 %** | écran écrit, tsc ✓, eslint ✓, build ✓, recette d'exemple 56/56 ✓, **relecture réelle complète** : lecture sous RLS, création d'un chantier, saisie du marché (btp_ecrire_marche), ajout d'une ligne (btp_ecrire_ligne) avec le contrôle « montant ≠ quantité × PU » et « sans lot » calculés par la base — capture `omega/recette-b6/reel-daliro-ecriture-1440.jpg`. Reste : la fusion dans main et la vérification sur omegaai.fr |
 
 ### Relecture réelle (06/10, 00 h 45 UTC) — ce qui a été prouvé
 
@@ -16,7 +16,9 @@ Dernière mise à jour : 06/10/2026, 02 h 00 Paris (reprise après la pause de m
 - **Piège du conteneur** : le mandataire sortant ré-émet les certificats ; Node (curl) lit son autorité dans `/root/.ccr/ca-bundle.crt`, Chromium non (`ERR_CERT_AUTHORITY_INVALID` sur supabase.co, « Failed to fetch » à l'écran). Réglé SANS désactiver la vérification : `--ignore-certificate-errors-spki-list=<empreintes SPKI des seules autorités du mandataire>` (variable `B6_SPKI_MANDATAIRE`, calcul dans l'en-tête du script). A3 avait relevé le même symptôme sur le WebSocket Realtime.
 - **Lecture** : identité, « Base réelle », `btp_liste_chantiers()` et `btp_tableau_chantier()` répondent sous RLS, aucun refus de la base.
 - **Écriture** : « Nouveau chantier » a créé le chantier **« Essai B6 — 23:48 »** sur le banc (`65ff9951-71ef-4a48-9f45-ec5645bc444c`, entité site `aa990d63-…`, département 69, régime normal déduits par la base). Il reste sur le banc, comme la délégation d'essai d'A3.
-- **Défaut trouvé en réel** : `btp_tableau_chantier` rendait 400 « column m.cree_le does not exist » (la vue `btp_marches_chiffres` n'a pas `cree_le`). Corrigé dans b6_04 (tri sur `m.id`). Suite à rejouer après la pose : saisir le marché, une ligne, l'écart, la vérification depuis l'écran.
+- **Défaut trouvé en réel** : `btp_tableau_chantier` rendait 400 « column m.cree_le does not exist » (la vue `btp_marches_chiffres` n'a pas `cree_le`). Corrigé dans b6_04 (tri sur `m.id`), reposé.
+- **Écriture réelle complète (06/10, 00 h 15 UTC)** : chantier créé → « Saisir le marché » (porte `btp_ecrire_marche`, marché « à vérifier », contrôle bloquant posé par la base) → « Ajouter une ligne » (porte `btp_ecrire_ligne`, 10 × 100 ≠ 990 : la base dit « montant_faux », l'écran propose « Accepter l'écart avec un motif » ; « sans lot » bloquant lu de `btp_controle_marches`). Piège de recette : une saisie synthétique trop rapide juste après la relecture du tableau est absorbée par un rendu de React ; le script remplit champ par champ et relit chaque valeur.
+- **Scories sur le banc** : sept chantiers « Essai B6 — hh:mm » en préparation (un par passage du script d'écriture), avec un marché B6-M-001 et une ligne pour les derniers. Ils peuvent passer `annule` (préparation → annulé est un passage permis) si le coordinateur veut un banc propre ; rien n'oblige.
 
 ### Ce qu'il reste avant de dire « livré »
 
