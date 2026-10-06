@@ -624,3 +624,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (refusés 22023) → date / echeance / fournisseur.iban, prouvé en réel (daf2@, R2026-000003).
   Quatre SIREN d'exemple à clé fausse remplacés. B6 : feu vert b6_07 (réponse OUI/NON
   entrante) et statut de l'envoi à l'écran ; accord permanent des J-2 → décision de Teo.
+- 04 h 50 — **Lorani : six types de courriers sur six prouvés en réel** (lettre de délai :
+  instruction portée à 6 mois, décision attendue 2027-03-20 ; certificat tacite : DP accordée
+  tacitement le 02/07, retrait tenu). Jauge livrable B5 : 96 %. Question ouverte : échéance
+  d'affichage passée (2026-07-17) restée « ouvert » → relue après le cron de 03:07 Z.
