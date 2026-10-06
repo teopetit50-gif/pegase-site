@@ -45,9 +45,9 @@ begin
   return next ok(private.tamila_deposer_points(v_m) >= 1, 'à 8 h, le cabinet a son point');
 
   -- L'avocat (valideur, intervenant du dossier).
-  select string_agg(e ->> 'texte' || ' [' || (e ->> 'gravite') || ']', ' | ' order by (e ->> 'texte')) into v_txt
-    from public.points_sections s, jsonb_array_elements(s.items) e
-   where s.client_id = v_client and s.module = 'tamila' and s.destinataire = v_avocat and not s.retiree;
+  select string_agg(i.texte || ' [' || i.gravite || ']', ' | ' order by i.texte) into v_txt
+    from public.points_sections s join public.points_items i on i.section_id = s.id
+   where s.client_id = v_client and s.module = 'tamila' and s.destinataire = v_avocat;
   return next ok(v_txt like '%1 délai de procédure à confirmer%', 'l''avocat : ses délais à confirmer');
   return next ok(v_txt like format('%%Échéance le %s : remettre ses conclusions et les notifier (dans 2 jours), délai encore à confirmer [critique]%%', to_char(v_jour + 2, 'DD/MM/YYYY')),
                  'l''échéance des deux jours, critique');
@@ -57,9 +57,9 @@ begin
   return next ok(v_txt like '%1 avis RPVA reçu par courriel à rattacher%[critique]%', 'l''avis à rattacher, qui s''efface demain : critique');
 
   -- L'assistante (collaboratrice) : les échéances, pas la confirmation ni les avis.
-  select string_agg(e ->> 'texte', ' | ') into v_txt
-    from public.points_sections s, jsonb_array_elements(s.items) e
-   where s.client_id = v_client and s.module = 'tamila' and s.destinataire = v_assistante and not s.retiree;
+  select string_agg(i.texte, ' | ') into v_txt
+    from public.points_sections s join public.points_items i on i.section_id = s.id
+   where s.client_id = v_client and s.module = 'tamila' and s.destinataire = v_assistante;
   return next ok(coalesce(v_txt, '') like '%Échéance%' and coalesce(v_txt, '') not like '%à confirmer, le plus ancien%' and coalesce(v_txt, '') not like '%avis RPVA%',
                  'l''assistante : les échéances, ni la confirmation ni les avis');
   -- Le stagiaire (lecteur) n'a pas de section.
@@ -67,18 +67,18 @@ begin
   return next is(n, 0, 'le stagiaire n''a pas de point Tamila');
 
   -- Le gérant : la section du cabinet.
-  select string_agg(e ->> 'texte' || ' [' || (e ->> 'gravite') || ']', ' | ') into v_txt
-    from public.points_sections s, jsonb_array_elements(s.items) e
+  select string_agg(i.texte || ' [' || i.gravite || ']', ' | ') into v_txt
+    from public.points_sections s join public.points_items i on i.section_id = s.id
    where s.client_id = v_client and s.module = 'tamila' and s.role = 'gerant' and s.titre = 'Tamila : le cabinet';
   return next ok(v_txt like '%1 délai dépassé sans acte déposé dans le cabinet [critique]%', 'cabinet : le délai dépassé');
   return next ok(v_txt like '%1 dossier avec un conflit d''intérêts sans décision%', 'cabinet : le conflit sans décision');
   return next ok(v_txt like '%1 dossier ouvert depuis plus de quinze jours sans convention%', 'cabinet : le dossier sans convention');
 
   -- Aucun clair : ni la sentinelle des noms, ni la juridiction.
-  select count(*) into n from public.points_sections s where s.client_id = v_client
-     and (s.items::text like '%' || tests.tamila_sentinelle() || '%' or s.items::text like '%Cour d''appel%');
+  select count(*) into n from public.points_sections s join public.points_items i on i.section_id = s.id where s.client_id = v_client
+     and (i.texte like '%' || tests.tamila_sentinelle() || '%' or i.texte like '%Cour d''appel%' or s.titre like '%' || tests.tamila_sentinelle() || '%');
   return next is(n, 0, 'aucun nom, aucune juridiction dans le point');
-  select count(*) into n from public.points_sections s, jsonb_array_elements(s.items) e where s.client_id = v_client and s.module = 'tamila' and e ? 'objet_type';
+  select count(*) into n from public.points_sections s join public.points_items i on i.section_id = s.id where s.client_id = v_client and s.module = 'tamila' and i.objet_type is not null;
   return next is(n, 0, 'aucune ligne ne désigne un dossier chiffré');
 
   -- Plus rien à dire : la section se retire.
@@ -89,7 +89,7 @@ begin
   perform tests.redevenir_admin();
   update public.tamila_audiences set statut = 'annulee' where dossier_id = v_dossier;
   perform private.tamila_deposer_points(v_m);
-  select count(*) into n from public.points_sections s where s.client_id = v_client and s.destinataire = v_avocat and not s.retiree;
+  select count(*) into n from public.points_sections s where s.client_id = v_client and s.destinataire = v_avocat;
   return next is(n, 0, 'rien à signaler : la section de l''avocat est retirée');
 end $f$;
 

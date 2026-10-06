@@ -163,11 +163,15 @@ begin
   return jsonb_build_object('manifeste', v_m, 'fichiers', v_liste);
 end $$;
 
--- Le point du matin (souche de deposer_section et retirer_section : une ligne par section ; le vrai socle valide
--- les lignes, refuse le texte libre sur un objet chiffré et assemble le point).
+-- Le point du matin (souche de deposer_section et retirer_section, à la forme de la recette : la section dans
+-- points_sections, ses lignes dans points_items ; le vrai socle valide les lignes et refuse le texte libre sur un objet
+-- chiffré ; retirer une section la fait disparaître avec ses lignes).
 create table public.points_sections (id uuid primary key default gen_random_uuid(), client_id uuid not null, module text not null, jour date not null,
-  destinataire uuid, role text, titre text not null, items jsonb not null, ordre integer, retiree boolean not null default false,
+  destinataire uuid, role text, equipe_id uuid, entite_id uuid, titre text not null, ordre integer, nb_items integer not null default 0,
+  depose_le timestamptz not null default now(), maj_le timestamptz not null default now(),
   unique nulls not distinct (client_id, module, jour, destinataire, role, titre));
+create table public.points_items (id uuid primary key default gen_random_uuid(), client_id uuid not null, section_id uuid not null references public.points_sections(id) on delete cascade,
+  rang integer not null, texte text not null, lien text, gravite text not null, objet_type text, objet_id text, gabarit text, gabarit_version integer, valeurs jsonb);
 create or replace function private.deposer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_items jsonb, p_entite uuid default null, p_equipe uuid default null, p_sante boolean default false, p_donnees_du timestamptz default null, p_incomplete boolean default false, p_ordre integer default 100) returns uuid language plpgsql security definer set search_path to '' as $$
 declare v_id uuid;
 begin
@@ -176,15 +180,18 @@ begin
              or left(e ->> 'lien', 1) <> '/' or char_length(e ->> 'texte') > 300) then
     raise exception 'ligne refusée par la souche' using errcode = '22023';
   end if;
-  insert into public.points_sections (client_id, module, jour, destinataire, role, titre, items, ordre)
-  values (p_client, p_module, p_jour, p_destinataire, p_role, p_titre, p_items, p_ordre)
-  on conflict (client_id, module, jour, destinataire, role, titre) do update set items = excluded.items, retiree = false
+  insert into public.points_sections (client_id, module, jour, destinataire, role, titre, ordre, nb_items)
+  values (p_client, p_module, p_jour, p_destinataire, p_role, p_titre, p_ordre, jsonb_array_length(p_items))
+  on conflict (client_id, module, jour, destinataire, role, titre) do update set nb_items = excluded.nb_items, maj_le = now()
   returning id into v_id;
+  delete from public.points_items where section_id = v_id;
+  insert into public.points_items (client_id, section_id, rang, texte, lien, gravite)
+  select p_client, v_id, x.n, x.e ->> 'texte', x.e ->> 'lien', x.e ->> 'gravite' from jsonb_array_elements(p_items) with ordinality x(e, n);
   return v_id;
 end $$;
 create or replace function private.retirer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_entite uuid default null, p_equipe uuid default null) returns boolean language plpgsql security definer set search_path to '' as $$
 begin
-  update public.points_sections set retiree = true
+  delete from public.points_sections
    where client_id = p_client and module = p_module and jour = p_jour and destinataire is not distinct from p_destinataire
      and role is not distinct from p_role and titre = p_titre;
   return found;
