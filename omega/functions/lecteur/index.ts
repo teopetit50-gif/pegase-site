@@ -11,6 +11,7 @@ import { journal, messageDe } from "@partage/journal.ts";
 import { configSupabaseDepuisEnv, PortesRpc } from "@partage/portes.ts";
 import { ExtracteurClaude } from "./ia.ts";
 import { PortesAnalyseRpc } from "./analyse/travail.ts";
+import { analysesActives } from "./analyse/interrupteur.ts";
 import { CoffreRpc } from "./coffre.ts";
 import type { Contexte } from "./lire_piece.ts";
 import { configMistralDepuisEnv, OcrMistral } from "./ocr.ts";
@@ -30,8 +31,8 @@ export function contexteDepuisEnv(env: { get(n: string): string | undefined } = 
     coffre: new CoffreRpc(supabase),
     extracteur: claude ? new ExtracteurClaude(claude) : null,
     claude,
-    // Les lectures longues : seulement quand le socle a posé commencer_analyse / terminer_analyse (LECTEUR_ANALYSES=1).
-    portesAnalyse: env.get("LECTEUR_ANALYSES") === "1" ? new PortesAnalyseRpc(supabase) : null,
+    // Les lectures longues : allumées par contexteDuPassage (secret LECTEUR_ANALYSES, sinon réglage lecteur_analyses).
+    portesAnalyse: null,
     sourcePlu: new SourcePluRest(supabase),
     varelo: new PortesVareloRpc(supabase),
     ocr: mistral ? new OcrMistral(mistral) : null,
@@ -39,6 +40,13 @@ export function contexteDepuisEnv(env: { get(n: string): string | undefined } = 
     maintenant: () => new Date(),
     ouvrier: env.get("LECTEUR_NOM") || "lecteur",
   };
+}
+
+/** Le contexte d'un passage : celui de l'environnement, plus l'interrupteur des lectures longues lu au début. */
+export async function contexteDuPassage(env: { get(n: string): string | undefined } = Deno.env): Promise<Contexte> {
+  const ctx = contexteDepuisEnv(env);
+  if (await analysesActives(env, ctx.portes)) ctx.portesAnalyse = new PortesAnalyseRpc(configSupabaseDepuisEnv(env));
+  return ctx;
 }
 
 Deno.serve(async (req: Request) => {
@@ -49,7 +57,7 @@ Deno.serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
     const nombre = Number(url.searchParams.get("nombre") ?? "");
-    const ctx = contexteDepuisEnv();
+    const ctx = await contexteDuPassage();
     const bilan = await passage(ctx, Number.isInteger(nombre) && nombre > 0 ? { nombre: Math.min(nombre, 20) } : {});
     return new Response(JSON.stringify(bilan), { status: 200, headers: entetes });
   } catch (e) {
