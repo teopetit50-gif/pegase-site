@@ -539,3 +539,8 @@ export type Recalage = {
   fin_planning: string | null;
   fin_prevue_chantier: string | null;
 };
+
+/* b6_21 : la météo du chantier (public.btp_meteo_chantier) */
+export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; tmin: number | null; tmax: number | null };
+export type RisqueMeteo = { passage_id: string; tache: string | null; chantier_id: string; jour: string; motifs: string[]; texte: string };
+export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[] };

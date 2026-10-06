@@ -22,14 +22,15 @@
      btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17) ;
      btp_proposer_recalage (lecture), btp_recaler, btp_terminer_passage (b6_19) ;
      btp_preparer_signature, btp_preuve_signature (b6_20 ; la page /signer/<jeton> appelle btp_lire_a_signer et
-     btp_signer_sur_place sans compte).
+     btp_signer_sur_place sans compte) ;
+     btp_meteo_chantier (lecture, b6_21).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Chantier, FactureCandidate, HeuresChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Chantier, FactureCandidate, HeuresChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -238,4 +239,10 @@ export type PreuveSignature = {
 
 export async function preuveSignature(avenant: string): Promise<PreuveSignature | null> {
   return rpc<PreuveSignature | null>("btp_preuve_signature", { p_avenant: avenant });
+}
+
+/* b6_21 : la météo du chantier */
+export async function chargerMeteo(chantier: string): Promise<MeteoChantier | null> {
+  const m = await rpc<MeteoChantier | null>("btp_meteo_chantier", { p_chantier: chantier });
+  return m && typeof m === "object" ? m : null;
 }
