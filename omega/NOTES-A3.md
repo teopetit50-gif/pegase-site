@@ -644,6 +644,26 @@ Audit des promesses § 0 et § 1, accord du coordinateur pour `ecrans.ts`.
      qu'apercu_effacement (posée entre-temps) rend une autre forme. Corrigé
      (forme de 19am, lectures défensives).
 
+## 06/10 — mes scripts joués contre /espace2 (C1, tableau-de-bord-v2 @ 1ac8de9)
+
+`recette-espace.mjs` et `accessibilite.mjs` prennent désormais PREFIXE=/espace2,
+CAPTURES=<dossier> (pour ne pas écraser les captures de /espace) et
+SAUTER=a,b (enchaînements d'écrans absents). Build de production de 1ac8de9
+dans un arbre à part (node_modules en liens durs : un lien symbolique hors
+de la racine fait paniquer Turbopack), `next start -p 3020`.
+- accessibilité : tout passe ;
+- recette : tout passe SAUF « À payer », que C1 a réécrit
+  (components/espace2/filed/APayer, sans `.esp`) : mon enchaînement lit des
+  classes .esp-*, il ne s'y applique pas. Rejoué à la main avec des
+  sélecteurs neutres : mêmes groupes, mêmes lignes, dialogue « Noter un
+  paiement » au reste (1140), moyen « autre » sans IBAN, 5000 → bouton gris,
+  payée → sort de la liste, « Afficher les payées (1) ». Seule différence :
+  pas de message « C'est fait… la facture est payée ».
+- absents de 1ac8de9 (normal, plus récents) : boîte FILED, Demandes reçues,
+  mes Réglages. /espace2/reglages existe chez C1 (Apparence, Données,
+  Compte) : mes trois gestes (journal, export complet, effacement) sont à
+  mettre dans sa section Données.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
