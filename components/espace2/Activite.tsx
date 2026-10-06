@@ -7,44 +7,16 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, Inbox } from "lucide-react";
-import { nomPersonne } from "@/components/espace/exemples/socle";
-import { dateHeure, libelleModule, montant, relatif } from "@/components/espace/format";
-import { etatDocument } from "@/components/espace/filed/etats";
-import type { StatutDemande } from "@/components/espace/types";
-import { Etat, ItemMenu, MenuDeroulant, Note, Squelette, Vide, teinte, type Teinte } from "./ui";
+import { dateHeure, libelleModule, relatif } from "@/components/espace/format";
+import { Etat, ItemMenu, MenuDeroulant, Note, Squelette, Vide } from "./ui";
 import { useDonnees } from "./donnees";
-
-const STATUTS: Record<StatutDemande, { libelle: string; teinte: Teinte }> = {
-  en_attente: { libelle: "En attente", teinte: "ambre" },
-  approuvee: { libelle: "Approuvée", teinte: "vert" },
-  rejetee: { libelle: "Rejetée", teinte: "rouge" },
-  annulee: { libelle: "Annulée", teinte: "gris" },
-  expiree: { libelle: "Expirée", teinte: "gris" },
-  executee: { libelle: "Exécutée", teinte: "vert" },
-  echec_execution: { libelle: "Échec d'exécution", teinte: "rouge" },
-};
-
-type Ligne = { id: string; quand: string; quoi: string; detail: string; module: string; par: string; etat: { libelle: string; teinte: Teinte }; lien: string | null };
+import { evenements } from "./evenements";
 
 export default function Activite() {
   const { donnees, erreur } = useDonnees();
   const [module, setModule] = useState<string | null>(null);
 
-  const lignes = useMemo<Ligne[]>(() => {
-    if (!donnees) return [];
-    const l: Ligne[] = [];
-    for (const d of donnees.docs) {
-      const e = etatDocument(d.etat);
-      l.push({ id: `doc-${d.id}`, quand: d.recu_le, quoi: "Document reçu", detail: `${d.reference}${d.fournisseur ? ` · ${d.fournisseur}` : ""}`, module: "filed", par: d.fournisseur ?? "Expéditeur inconnu", etat: { libelle: e.libelle, teinte: teinte(e.teinte) }, lien: `/espace2/filed?objet=document:${encodeURIComponent(d.id)}` });
-    }
-    for (const d of donnees.demandes) {
-      const s = STATUTS[d.statut] ?? { libelle: d.statut, teinte: "gris" as const };
-      const par = d.demandeur_type === "systeme" ? "Omega" : nomPersonne(d.demandeur_id);
-      l.push({ id: `dem-${d.id}`, quand: d.cree_le, quoi: "Demande de validation", detail: `${d.resume}${d.montant !== null ? ` · ${montant(d.montant, d.devise)}` : ""}`, module: d.module, par, etat: d.decide_le ? { libelle: "Demandée", teinte: "gris" } : s, lien: "/espace2/validations" });
-      if (d.decide_le) l.push({ id: `dec-${d.id}`, quand: d.decide_le, quoi: "Décision", detail: d.resume, module: d.module, par: "Valideurs", etat: s, lien: "/espace2/validations" });
-    }
-    return l.sort((a, b) => b.quand.localeCompare(a.quand));
-  }, [donnees]);
+  const lignes = useMemo(() => (donnees ? evenements(donnees) : []), [donnees]);
 
   const modules = Array.from(new Set(lignes.map((l) => l.module))).sort();
   const visibles = lignes.filter((l) => !module || l.module === module);
