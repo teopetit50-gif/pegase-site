@@ -326,3 +326,29 @@
 .tam-cout {
   max-width: 340px;
 }
+
+/* les lectures longues (carnet n° 4) : constats et citations ; le document d'impression, caché */
+.tam-analyse-resume {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.tam-constat-texte {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+.tam-citations {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.tam-analyse-impression {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}

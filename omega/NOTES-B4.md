@@ -565,6 +565,19 @@ avaient quitté le bucket.
 - Limite : la marge ne connaît pas les déboursés engagés non refacturés ; le coût de revient est une estimation
   que le cabinet règle.
 
+## 22. L'écran des lectures longues (carnet n° 4, part écran ; lot B4-17, 06/10)
+
+- Carte « Lectures du dossier » (`AnalysesTamila.tsx`, `analyses.ts`) dans le dossier ouvert : un avocat qui écrit
+  dans le dossier demande une pré-lecture, une chronologie, les contradictions ou le bordereau
+  (`tamila_demander_analyse`) ; désactivé si la clé du dossier n'est pas au coffre (le lecteur ne peut pas lire).
+  La liste des analyses (statut, comptes par gravité, pièces non lues) ; « Lire » déchiffre `resultat_chiffre` avec
+  la clé du dossier, dans le navigateur, et montre résumé, constats (données propres au type : date à sa
+  précision, acteur, nature ; numéro de pièce…) et citations (pièce, page, lignes, extrait), chacune « Vérifiée »
+  ou « Non vérifiée ». Export Word (.doc HTML) et impression ou PDF, composés dans le navigateur.
+- Recette 181/181 (19 sur les lectures, 1440 et 390), axe 0 écart grave. Exemple : une chronologie prête sur
+  2026-0412 (en mémoire, non chiffrée). **Pas encore vu sur un vrai résultat du lecteur** : à recetter dès la
+  première analyse rendue en base.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
