@@ -1042,3 +1042,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   transversal.md et les fichiers par module).
 - Prospection Guadeloupe : session P1 (session_01Lv8Yz477zkrpiu5TWReysT), branche prospection-guadeloupe,
   sources ouvertes seulement (SIRENE, Annuaire Santé, ordres, sites officiels).
+- Pauses reçues ensuite : A2 e067bc6 (à fusionner : GUIDE-GMAIL, GUIDE-MICROSOFT, banc/mise_en_service_sms.sql ;
+  à déployer quand les secrets Google/Microsoft existent : messagerie + messagerie-oauth + cron omega-messagerie) ;
+  B7 68a01aa (à la reprise : poser omega/tests/identite/b7_07_etrangers.sql depuis a6101c9, rejouer ^test_b7_13,
+  lui rendre le résultat et le premier bilan taux-bce ; HMRC attend Teo). Restent sans réponse : B5, C1.
