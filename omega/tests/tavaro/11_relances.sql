@@ -1,10 +1,11 @@
 -- 11 — La relance des factures impayées (étape 15, migration b2_02) : jamais sur un litige, une facture réglée ou créditée ;
+-- le passage du cron relance toutes les organisations de la recette : on ne compte que les relances du loueur d'essai (06/10, rejeu après le parcours réel du banc).
 -- par le cron à l'échéance + 7 jours, trois fois au plus ; à la main par l'agence.
 
 create or replace function tests.test_b2_11_relances() returns setof text
 language plpgsql as $f$
 declare
-  jeu jsonb; v_client uuid; f public.loc_factures; f2 public.loc_factures; r jsonb; n integer;
+  jeu jsonb; v_client uuid; f public.loc_factures; f2 public.loc_factures; r jsonb; n integer; v_avant integer;
 begin
   if to_regprocedure('private.loc_relancer_factures(timestamptz)') is null then
     return next fail('La migration b2_02 (relances) n''est pas posée : private.loc_relancer_factures manque');
@@ -16,10 +17,14 @@ begin
   select * into f2 from public.loc_factures where client_id = v_client and nature = 'dommages';
 
   -- Le passage du cron le jour même : rien à relancer (échéance à réception, 7 jours de grâce).
-  n := private.loc_relancer_factures(now());
+  select coalesce(sum(x.relances), 0) into v_avant from public.loc_factures x where x.client_id = v_client;
+  perform private.loc_relancer_factures(now());
+  select coalesce(sum(x.relances), 0) - v_avant into n from public.loc_factures x where x.client_id = v_client;
   return next is(n, 0, 'Le jour de la facture, rien n''est relancé');
   -- Dix jours plus tard : les deux factures sont relancées (ou dites « non réglé » sans réglage d'envoi).
-  n := private.loc_relancer_factures(now() + interval '10 days');
+  select coalesce(sum(x.relances), 0) into v_avant from public.loc_factures x where x.client_id = v_client;
+  perform private.loc_relancer_factures(now() + interval '10 days');
+  select coalesce(sum(x.relances), 0) - v_avant into n from public.loc_factures x where x.client_id = v_client;
   select * into f from public.loc_factures where id = f.id;
   if f.relances = 1 then
     return next is(n, 2, 'Dix jours après l''échéance, les deux factures sont relancées');
@@ -27,15 +32,23 @@ begin
     return next ok(tests.tavaro_journal(v_client, 'tavaro.facture_relancee') >= 2, 'Le journal opposable porte tavaro.facture_relancee');
     return next is(tests.compter('public', 'envois', format('client_id = %L and module = %L and cle = %L', v_client, 'tavaro', 'tavaro:relance:' || f.id::text || ':1')), 1::bigint, 'Un envoi à la clé tavaro:relance:<facture>:1');
     -- Pas deux fois dans les quatorze jours ; puis la deuxième, la troisième et l'alerte de recouvrement.
-    n := private.loc_relancer_factures(now() + interval '12 days');
+    select coalesce(sum(x.relances), 0) into v_avant from public.loc_factures x where x.client_id = v_client;
+  perform private.loc_relancer_factures(now() + interval '12 days');
+  select coalesce(sum(x.relances), 0) - v_avant into n from public.loc_factures x where x.client_id = v_client;
     return next is(n, 0, 'Deux jours plus tard, pas de nouvelle relance (quatorze jours entre deux)');
-    n := private.loc_relancer_factures(now() + interval '25 days');
+    select coalesce(sum(x.relances), 0) into v_avant from public.loc_factures x where x.client_id = v_client;
+  perform private.loc_relancer_factures(now() + interval '25 days');
+  select coalesce(sum(x.relances), 0) - v_avant into n from public.loc_factures x where x.client_id = v_client;
     return next is(n, 2, 'Quinze jours après la première : la deuxième');
-    n := private.loc_relancer_factures(now() + interval '40 days');
+    select coalesce(sum(x.relances), 0) into v_avant from public.loc_factures x where x.client_id = v_client;
+  perform private.loc_relancer_factures(now() + interval '40 days');
+  select coalesce(sum(x.relances), 0) - v_avant into n from public.loc_factures x where x.client_id = v_client;
     return next is(n, 2, 'La troisième');
     return next is((select x.relances from public.loc_factures x where x.id = f.id), 3::smallint, 'Trois relances comptées');
     return next ok(tests.compter('public', 'alertes', format('client_id = %L and cle_regroupement like %L', v_client, '%facture:recouvrement:' || f.id::text)) >= 1, 'À la troisième, l''alerte de recouvrement est levée pour l''agence');
-    n := private.loc_relancer_factures(now() + interval '60 days');
+    select coalesce(sum(x.relances), 0) into v_avant from public.loc_factures x where x.client_id = v_client;
+  perform private.loc_relancer_factures(now() + interval '60 days');
+  select coalesce(sum(x.relances), 0) - v_avant into n from public.loc_factures x where x.client_id = v_client;
     return next is(n, 0, 'Pas de quatrième relance par le cron');
   else
     return next diag('Sans reglages_envois pour le loueur d''essai, la relance dit « non réglé » : ' || (select x.relances from public.loc_factures x where x.id = f.id));
@@ -53,7 +66,9 @@ begin
   perform public.loc_marquer_reglee(f.id, 'virement');
   return next throws_ok(format('select public.loc_relancer_facture(%L::uuid)', f.id), '23514', null, 'Une facture réglée ne se relance pas');
   perform tests.redevenir_admin();
-  n := private.loc_relancer_factures(now() + interval '100 days');
+  select coalesce(sum(x.relances), 0) into v_avant from public.loc_factures x where x.client_id = v_client;
+  perform private.loc_relancer_factures(now() + interval '100 days');
+  select coalesce(sum(x.relances), 0) - v_avant into n from public.loc_factures x where x.client_id = v_client;
   return next is(n, 0, 'Le cron ne relance ni la réglée ni le litige');
 
   -- La relance à la main par l'agence, hors délai de grâce ; un autre loueur ne peut pas.
