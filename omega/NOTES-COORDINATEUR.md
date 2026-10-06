@@ -548,3 +548,6 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   validée de bout en bout** : approuvée par daf2@ à 02:03:20 Z (A3), demande executee —
   posée juste avant a4_13, donc le correctif du demandeur reste à prouver sur la prochaine
   facture réelle.
+- 04 h 15 — b5_06 v2 (worker-b5 fcd1b1a) posé : lorani_valeurs_de_piece remonte un tableau en
+  jsonb (plus en chaîne) ; `^test_b5_` 114/114 ; fiche Lorani ligne 23 alignée sur la règle
+  commune ; branche fusionnée. B5 redépose une v3 par l'écran (lecteur v17).
