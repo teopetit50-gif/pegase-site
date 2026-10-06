@@ -324,6 +324,47 @@ cascade s'écrit avec un mot interdit dans un fichier à poser ; si le coordinat
 - **Reste** : le branchement dans le lecteur (A1), la passerelle avis lu → `tamila_avis_lu` (le lecteur, ayant
   la clé, peut comparer le n° RG), la relecture en base réelle quand le coffre sera branché.
 
+## Vague 3 — les trois manques pour qu'un vrai cabinet paie Tamila (06/10, demande du coordinateur)
+
+Ce que Tamila fait déjà mieux que le marché : chiffrement par dossier (le serveur ne lit rien), délais de
+procédure d'appel calculés et confirmés par un avocat, murailles, journal des accès opposable. Ce qui manque
+pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
+
+1. **Honoraires : convention, temps passé, provisions, facture et compte détaillé.** C'est la raison n° 1
+   d'acheter un logiciel de cabinet : Jarvis Legal (LexisNexis) et Secib / Septeo vendent d'abord le suivi du
+   temps facturable et la facturation, 45 à 85 € HT par utilisateur et par mois
+   ([La Fabrique du Net, Jarvis Legal](https://www.lafabriquedunet.fr/logiciel/jarvis-legal),
+   [Secib Suite](https://www.lafabriquedunet.fr/logiciel/secib-suite),
+   [LexisNexis, Jarvis facturation](https://www.lexisnexis.com/fr-fr/ppc/jarvis-legal-facturation)). Et c'est
+   une obligation : la convention d'honoraires écrite est obligatoire en toute matière sauf urgence (loi
+   n° 71-1130 du 31/12/1971, art. 10, rédaction de la loi n° 2015-990 du 6/08/2015 ; décret n° 2017-1226 du
+   2/08/2017 qui l'inscrit dans le décret de déontologie)
+   ([Juritravail](https://www.juritravail.com/avocat/pratique/convention-d-honoraires-d-un-avocat-contrat-conditions/Id/10),
+   [Eurojuris, loi Macron](https://www.eurojuris.fr/gestion/articles/loi-macron-quels-impacts-pour-avocats-35825.htm)).
+   Le RIN fixe les critères (art. 11.2 : temps consacré, difficulté, résultat…), les modes de règlement
+   (art. 11.6) et le **compte détaillé définitif** avant tout règlement définitif, frais, émoluments et
+   honoraires distincts, provisions déduites (art. 11.7)
+   ([Cabinet ACI, les honoraires d'avocats](https://www.cabinetaci.com/les-honoraires-davocats/),
+   [CNB, guide d'évaluation de la prestation](https://www.cnb.avocat.fr/sites/default/files/documents/cnb_guide-pratique_evaluation-prestation-avocat_3e-ed.pdf)).
+   Sans cela, le cabinet garde un second logiciel, et Tamila reste un « plus ».
+2. **Le contrôle des conflits d'intérêts à l'ouverture d'un dossier** (RIN art. 4 : l'avocat vérifie,
+   avant d'accepter, qu'il ne défend pas des intérêts opposés à ceux d'un client actuel ou ancien), et la
+   vigilance LCB-FT pour les dossiers où l'avocat y est assujetti (CMF art. L.561-3 ; transactions
+   financières ou immobilières)
+   ([Swim Legal, déontologie](https://www.swim.legal/blog/deontologie-avocat-regles-obligations-entreprise),
+   [CNB, guide LCB-FT, 3e éd.](https://www.cnb.avocat.fr/sites/default/files/documents/cnb_guide_lutte-contre-blanchiment_3eme_edition.pdf)).
+   Difficulté propre à Tamila : les noms des parties sont chiffrés ; il faudra un index aveugle (HMAC du nom
+   normalisé sous une clé du cabinet) pour chercher sans lire.
+3. **L'arrivée automatique des avis RPVA** au lieu de la saisie à la main : e-barreau v2 se dit ouvert et
+   interopérable avec les logiciels de gestion de cabinet
+   ([CNB, atelier e-barreau v2](https://www.cnb.avocat.fr/sites/default/files/grand_atelier_des_avocats_-_atelier_e-barreau_v2.pdf)).
+   Les gabarits de lecture existent déjà (CHAMPS-LECTURE-TAMILA, lecteur d'A1), le coffre aussi (§ 10) ; il
+   manque la porte d'entrée (relevé de la boîte, ou transfert des notifications par courriel vers le socle)
+   et la passerelle avis lu → `tamila_avis_lu`.
+
+**N° 1 commencé le 06/10** (lot B4-7) : `b4_06_tamila_honoraires.sql`, test `15_honoraires.sql`, carte
+« Honoraires » du dossier. Voir § 11.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
