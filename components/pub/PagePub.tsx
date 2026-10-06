@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import { EnPreparation } from "@/components/ui/en-preparation";
 
 /* ══════════════════════════════════════════════════════════════════════
    LA PAGE D'ATTERRISSAGE D'UNE ANNONCE — 21/09/2026
@@ -31,6 +32,10 @@ export type Accroche = {
   etapes: { titre: string; texte: string }[];
   note: string;
   produit?: { href: string; libelle: string };
+  /* 06/10/2026 (C5) — la promesse de la page n'est pas encore tenue : pastille
+     « En préparation » à côté du surtitre, et cette phrase sous le chapô.
+     On retire le champ quand le service est ouvert (omega/NOTES-C5.md). */
+  preparation?: string;
 };
 
 export const LIEN_DIAGNOSTIC = "/reserver?formule=diagnostic";
@@ -43,12 +48,18 @@ export default function PagePub({ a }: { a: Accroche }) {
         {/* ═══ 1 — premier écran ═══ */}
         <section data-monde="clair" className="r-wrap pb-14 pt-14 sm:pb-20 sm:pt-24">
           <div data-arrivee="titre">
-            <p className="ap-kicker">{a.kicker}</p>
+            <p className="ap-kicker">
+              {a.kicker}
+              {a.preparation ? <EnPreparation /> : null}
+            </p>
             <h1 className="r-h1 mt-4 max-w-[18ch]">{a.titre}</h1>
           </div>
           <p data-arrivee="chapo" className="r-lead mt-5 max-w-[52ch]">
             {a.chapo}
           </p>
+          {a.preparation ? (
+            <p className="ap-note mt-3 max-w-[52ch]">{a.preparation}</p>
+          ) : null}
           <div data-arrivee="bloc" className="mt-8 flex flex-wrap items-center gap-4">
             <Link href={LIEN_DIAGNOSTIC} className="r-btn r-btn--noir w-full sm:w-auto">
               {a.bouton}
