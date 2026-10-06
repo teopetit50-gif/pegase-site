@@ -23,10 +23,11 @@ PSQL="$PSQL -d socle_a5"
 $PSQL -c "create schema extensions" -c "alter database socle_a5 set search_path = \"\$user\", public, extensions"
 $PSQL -c "set search_path = extensions" -f "$PGTAP" >/dev/null
 $PSQL -f "$ICI/maquette.sql"
-# Lots du socle écrits par A5 et posables sur la maquette (19ai : compteurs de facturation ; 19aj : export complet ; 19ak : réceptions par module).
+# Lots du socle écrits par A5 et posables sur la maquette (19ai : compteurs de facturation ; 19aj : export complet ; 19ak : réceptions par module ; 19am : aperçu d'effacement, marquer une réception).
 $PSQL -f "$ICI/../../../modules/socle/migrations/19ai_compteurs_facturation.sql" 2>&1 | grep -v "NOTICE" || true
 $PSQL -f "$ICI/../../../modules/socle/migrations/19aj_export_complet.sql" 2>&1 | grep -v "NOTICE" || true
 $PSQL -f "$ICI/../../../modules/socle/migrations/19ak_receptions_confidentialite_module.sql" 2>&1 | grep -v "NOTICE" || true
+$PSQL -f "$ICI/../../../modules/socle/migrations/19am_apercu_effacement_reception_marquer.sql" 2>&1 | grep -v "NOTICE" || true
 $PSQL -f "$ICI/../../../migrations/a5_01_private_execute.sql" 2>&1 | grep -v "^NOTICE" || true
 # Une fonction créée APRÈS la migration ne doit plus naître avec EXECUTE à PUBLIC (défauts posés par a5_01)
 $PSQL -c "create or replace function private.nee_apres_a5_01() returns int language sql as 'select 1'"

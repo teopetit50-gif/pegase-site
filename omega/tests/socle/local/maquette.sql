@@ -350,7 +350,7 @@ insert into storage.buckets (id, name) values ('omega-clients', 'omega-clients')
 -- Réceptions et boîtes (18a, extraits du socle commun), pour la confidentialité par module (19ak).
 create table public.expediteurs (id uuid primary key default gen_random_uuid(), client_id uuid not null references public.clients(id), module text not null, canal text not null, identite text not null, fournisseur text, cree_le timestamptz not null default now());
 alter table public.expediteurs enable row level security;
-create table public.receptions (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), module text, canal text not null, boite text not null, identifiant_externe text not null, sujet text, pieces jsonb not null default '[]', recu_le timestamptz not null default now());
+create table public.receptions (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), entite_id uuid, module text, canal text not null, boite text not null, identifiant_externe text not null, sujet text, pieces jsonb not null default '[]', statut text not null default 'nouvelle' check (statut in ('nouvelle', 'lue', 'traitee', 'ignoree', 'indesirable')), traite_par uuid, recu_le timestamptz not null default now(), maj_le timestamptz not null default now());
 alter table public.receptions enable row level security;
 create policy "on voit les réceptions de son périmètre" on public.receptions for select to authenticated using (client_id in (select private.mes_clients()));
 grant select on public.receptions to authenticated;
@@ -362,4 +362,19 @@ create policy "les membres lisent les pièces de leurs organisations" on storage
          and (substring(name from 1 for 36))::uuid in (select private.mes_clients()));
 grant usage on schema storage to authenticated;
 grant select on storage.objects to authenticated;
+
+-- Portes du socle commun appelées par 19am (extraits : a_un_role et fichiers_de à l'identique en substance ;
+-- perimetre_couvre réduit à « membre », la maquette n'a pas d'entités).
+create or replace function private.a_un_role(p_client uuid, p_roles text[]) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.comptes c where c.user_id = (select auth.uid()) and c.client_id = p_client and c.role = any (p_roles))
+$$;
+create or replace function private.perimetre_couvre(p_user uuid, p_client uuid, p_entite uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.comptes c where c.user_id = p_user and c.client_id = p_client)
+$$;
+create or replace function private.fichiers_de(p_client uuid, p_objet_type text default null, p_objet_id text default null)
+returns table (bucket text, nom text, octets bigint, empreinte text, cree_le timestamptz) language sql stable security definer set search_path = '' as $$
+  select o.bucket_id, o.name, coalesce((o.metadata ->> 'size')::bigint, 0), o.metadata ->> 'eTag', o.created_at
+  from storage.objects o where o.name like p_client::text || '/%'
+$$;
+revoke all on function private.a_un_role(uuid, text[]), private.perimetre_couvre(uuid, uuid, uuid), private.fichiers_de(uuid, text, text) from public;
 
