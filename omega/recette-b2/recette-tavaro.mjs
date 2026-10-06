@@ -426,5 +426,48 @@ for (const largeur of LARGEURS) {
   s.fermer();
 }
 
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-flotte', densite: 1 });
+  console.log('— /espace/tavaro : flotte, sortie de flotte (exemple, b2_11)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Flotte : garder, vendre ou renouveler"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; if (!c) return null; const l = [...c.querySelectorAll('tbody tr')]; return { n: l.length, premier: l[0]?.innerText ?? '', tete: c.querySelector('.esp-carte-tete').innerText,
+    valider: [...c.querySelectorAll('.r-btn')].find(b => /Valider la mise en vente/.test(b.textContent))?.disabled }; })()`);
+  ok(etat && etat.n === 6, `${etat?.n} fiches de véhicules (6 attendues)`);
+  ok(/GK-789-FG/.test(etat?.premier ?? '') && /À sortir/.test(etat?.premier ?? '') && /-330,00/.test((etat?.premier ?? '').replace(/\s/g, '')), 'le premier est le Master : à sortir, marge négative sur douze mois');
+  ok(/1 à sortir/.test(etat?.tete ?? '') && /1 à restituer/.test(etat?.tete ?? '') && /1 mise en vente à valider/.test(etat?.tete ?? ''), 'la tête compte : à sortir, à restituer, à valider');
+  ok(etat?.valider === true, 'un valideur ne valide pas une mise en vente (bouton gris)');
+  /* la C3 : saisir la cote réelle, la fiche se recalcule */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => b.getAttribute('aria-label') === 'Fiche de GP-654-KL').click()`);
+  await s.dormir(400);
+  ok(/inconnue : saisissez la cote réelle/.test(await s.evaluer(`document.querySelector('[role="dialog"]').innerText`)), 'sans cote, la perte de valeur est dite inconnue');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '12500'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et recalculer/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  const c3 = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', ligne: [...${sect}.querySelectorAll('tbody tr')].find(t => /GP-654-KL/.test(t.innerText))?.innerText ?? '' }))()`);
+  ok(/recalculée/.test(c3.fait) && /12\s?500,00/.test(c3.ligne), 'la cote réelle est saisie et la fiche recalculée');
+  /* la 308 : proposer la mise en vente, motif prérempli depuis la fiche */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => b.getAttribute('aria-label') === 'Fiche de GH-456-DE').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Proposer la mise en vente/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const motif = await s.evaluer(`document.querySelector('[role="dialog"] textarea')?.value ?? ''`);
+  ok(/31 mois/.test(motif), `le motif est prérempli depuis la fiche : « ${motif.slice(0, 60)} »`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Proposer à la direction/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  const prop = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', ventes: ${sect}.querySelector('ul[aria-label="Mises en vente"]')?.innerText ?? '' }))()`);
+  ok(/proposée : la direction la valide/.test(prop.fait) && /GH-456-DE/.test(prop.ventes), 'la mise en vente de la 308 est proposée à la direction');
+  /* la retirer : la personne qui l'a proposée le peut */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label="Mises en vente"] > li')].find(x => /GH-456-DE/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Retirer/.test(b.textContent)).click(); })()`);
+  await s.dormir(600);
+  ok(!/GH-456-DE/.test(await s.evaluer(`${sect}.querySelector('ul[aria-label="Mises en vente"]')?.innerText ?? ''`)), 'la personne qui a proposé retire sa proposition');
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tavaro-flotte-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);
