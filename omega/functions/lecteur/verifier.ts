@@ -7,6 +7,7 @@ import type { Boite, PageLue, ValeurLue } from "@partage/portes.ts";
 import { dateIso, nombreDepuisTexte, retrouver, sirenValide, tvaFrValide } from "@partage/texte.ts";
 import { boiteDe, type PagePdf } from "./pdf.ts";
 import { CHAMPS_LIGNE, CHAMPS_PAR_NOM, CHAMPS_VENTILATION, MAX_LIGNES } from "./schemas/facture.ts";
+import type { ChampDeclare } from "./schemas/modules.ts";
 
 export interface ValeurBrute {
   champ: string;
@@ -34,14 +35,49 @@ export interface LigneBrute extends Record<string, unknown> {
   page?: number;
 }
 
-/** Met la valeur dans le type attendu par FILED ; null si elle n'y entre pas. */
-export function typerValeur(champ: string, valeur: unknown): { valeur: unknown; ok: boolean; detail?: string } {
-  const def = CHAMPS_PAR_NOM.get(champ);
+/** Un choix rendu sous une forme approchante (« Accordé », « non-opposition ») ramené à la valeur admise. */
+function normaliserChoix(v: unknown): string {
+  return String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+/** Met la valeur dans le type attendu par le module ; ok = false si elle n'y entre pas. */
+export function typerValeur(
+  champ: string,
+  valeur: unknown,
+  champs: ReadonlyMap<string, Pick<ChampDeclare, "type" | "min" | "maximum" | "choix">> = CHAMPS_PAR_NOM,
+): { valeur: unknown; ok: boolean; detail?: string } {
+  const def = champs.get(champ);
   if (!def) return { valeur, ok: false, detail: "champ inconnu du schéma" };
   switch (def.type) {
     case "nombre": {
       const n = nombreDepuisTexte(valeur);
       return n === null ? { valeur, ok: false, detail: "nombre illisible" } : { valeur: n, ok: true };
+    }
+    case "entier": {
+      const n = nombreDepuisTexte(typeof valeur === "string" ? valeur.replace(/\s*(mois|jours?|er|e|ème|eme)\b.*$/i, "") : valeur);
+      if (n === null || !Number.isInteger(n)) return { valeur, ok: false, detail: "entier illisible" };
+      if ((def.min !== undefined && n < def.min) || (def.maximum !== undefined && n > def.maximum)) {
+        return { valeur: n, ok: false, detail: `hors bornes (${def.min ?? "…"} à ${def.maximum ?? "…"})` };
+      }
+      return { valeur: n, ok: true };
+    }
+    case "choix": {
+      const c = normaliserChoix(valeur);
+      const admis = def.choix ?? [];
+      const exact = admis.find((a) => a === c);
+      if (exact) return { valeur: exact, ok: true };
+      const proche = admis.filter((a) => c.startsWith(a) || a.startsWith(c) || c.includes(a));
+      if (proche.length === 1 && c.length >= 4) return { valeur: proche[0], ok: true };
+      return { valeur, ok: false, detail: `choix hors liste (${admis.join(", ")})` };
+    }
+    case "liste": {
+      const elements = Array.isArray(valeur)
+        ? valeur.map((x) => String(x ?? "").trim())
+        : typeof valeur === "string"
+        ? valeur.split(/[\n;,]|\s+et\s+/).map((x) => x.trim())
+        : [];
+      const propres = elements.filter((x) => x !== "").map((x) => x.slice(0, 200)).slice(0, 100);
+      return propres.length === 0 ? { valeur, ok: false, detail: "liste vide" } : { valeur: propres, ok: true };
     }
     case "date": {
       const d = dateIso(valeur);
@@ -86,6 +122,8 @@ export function verifierValeurs(
   pages: PageLue[],
   pagesPdf: PagePdf[] | null,
   source: "ia" | "tableur" = "ia",
+  champs: ReadonlyMap<string, ChampDeclare | import("./schemas/facture.ts").ChampFacture> = CHAMPS_PAR_NOM,
+  cles: string[] = CHAMPS_FACTURE_CLES,
 ): Verification {
   const parNumero = new Map(pages.map((p) => [p.n, p]));
   const pdfParNumero = new Map((pagesPdf ?? []).map((p) => [p.n, p]));
@@ -94,11 +132,11 @@ export function verifierValeurs(
 
   for (const b of brutes) {
     if (!b || typeof b.champ !== "string" || !/^[a-z][a-z0-9_.]{1,79}$/.test(b.champ)) continue;
-    if (!CHAMPS_PAR_NOM.has(b.champ) || vus.has(b.champ)) continue;
+    if (!champs.has(b.champ) || vus.has(b.champ)) continue;
     if (b.valeur === null || b.valeur === undefined || b.valeur === "") continue;
     vus.add(b.champ);
 
-    const typage = typerValeur(b.champ, b.valeur);
+    const typage = typerValeur(b.champ, b.valeur, champs as ReadonlyMap<string, Pick<ChampDeclare, "type" | "min" | "maximum" | "choix">>);
     const citation = typeof b.texte === "string" ? b.texte.trim() : "";
     const page = Number.isInteger(b.page) ? (b.page as number) : undefined;
     const pageLue = page !== undefined ? parNumero.get(page) : undefined;
@@ -113,6 +151,15 @@ export function verifierValeurs(
       controle = "sans citation";
     } else if (!pageLue) {
       controle = page === undefined ? "page non citée" : `page ${page} inexistante`;
+    } else if (Array.isArray(typage.valeur)) {
+      // Une liste : chaque élément doit se retrouver sur la page citée.
+      const manquants = (typage.valeur as string[]).filter((x) => !retrouver(x, pageLue.texte).trouve);
+      if (manquants.length === 0) {
+        verifiee = true;
+        controle = `${(typage.valeur as string[]).length} élément(s) retrouvés page ${page}`;
+      } else {
+        controle = `éléments introuvables page ${page} : ${manquants.slice(0, 5).join(", ")}`;
+      }
     } else {
       const r = retrouver(citation, pageLue.texte);
       if (r.trouve) {
@@ -151,13 +198,15 @@ export function verifierValeurs(
   }
 
   const clesDouteuses: string[] = [];
-  for (const def of CHAMPS_PAR_NOM.values()) {
-    if (!def.cle) continue;
-    const v = valeurs.find((x) => x.champ === def.champ);
-    if (!v || !v.verifiee) clesDouteuses.push(def.champ);
+  for (const champ of cles) {
+    const v = valeurs.find((x) => x.champ === champ);
+    if (!v || !v.verifiee) clesDouteuses.push(champ);
   }
   return { valeurs, clesDouteuses };
 }
+
+/** Les champs clés d'une facture FILED (compte pour « lue »). */
+export const CHAMPS_FACTURE_CLES: string[] = [...CHAMPS_PAR_NOM.values()].filter((c) => c.cle).map((c) => c.champ);
 
 function nettoyerLigne(l: LigneBrute, colonnes: readonly string[]): Record<string, unknown> {
   const sortie: Record<string, unknown> = {};

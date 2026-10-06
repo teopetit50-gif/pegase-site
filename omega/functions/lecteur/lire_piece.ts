@@ -14,7 +14,7 @@ import { decouperSousLimite, PAGES_PAR_MORCEAU } from "./pdf_decouper.ts";
 import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
 import { controlerPlafond } from "./plafond.ts";
-import { type TypePiece, TYPES_PIECE } from "./schemas/facture.ts";
+import { champsPour, schemaPour } from "./schemas/modules.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
 import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
@@ -262,7 +262,7 @@ async function lirePdf(ctx: Contexte, piece: Piece, octets: Uint8Array, contexte
   const methode = sansTexte.length === analyse.pages.length ? "ocr" : "mixte";
   if (octets.length <= LIMITE_DOCUMENT_OCTETS && analyse.nbPages <= PAGES_PAR_MORCEAU) {
     const ia = await appelerIa(ctx, piece, { mode: "document", octets, nbPages: analyse.nbPages }, contexte);
-    return assembler(ia, analyse.pages, pagesNatives, methode, 0);
+    return assembler(ia, analyse.pages, pagesNatives, methode, 0, piece.module);
   }
   return await lirePdfParMorceaux(ctx, piece, octets, analyse.pages, analyse.nbPages, methode, contexte);
 }
@@ -344,7 +344,7 @@ async function lireImage(
     return await extraireDepuisTexte(ctx, piece, pages, null, "ocr", contexte, ocr.cout_eur);
   }
   const ia = await appelerIa(ctx, piece, { mode: "image", octets, format: det.formatImage ?? "jpeg" }, contexte);
-  return assembler(ia, null, [], "ocr", 0);
+  return assembler(ia, null, [], "ocr", 0, piece.module);
 }
 
 async function lireTableur(
@@ -379,7 +379,7 @@ async function extraireDepuisTexte(
     return { ...echec("Aucun texte lisible sur les pages."), cout_ocr: coutOcr, prealable };
   }
   const ia = await appelerIa(ctx, piece, { mode: "texte", pages: pages.map((p) => ({ n: p.n, texte: p.texte })) }, contexte);
-  return { ...assembler(ia, pagesPdf, pages, methode, coutOcr), prealable };
+  return { ...assembler(ia, pagesPdf, pages, methode, coutOcr, piece.module), prealable };
 }
 
 /** Du résultat brut de l'IA au résultat de lecture : pages, valeurs vérifiées, statut. */
@@ -389,6 +389,7 @@ export function assembler(
   pagesConnues: PageLue[],
   methode: "natif" | "ocr" | "mixte" | "tableur",
   coutOcr: number,
+  module: string | null = "filed",
 ): Bilan {
   const brut = ia.brut;
   // Les pages : celles qu'on connaît (texte natif, OCR), complétées par la transcription de l'IA pour les autres.
@@ -423,23 +424,27 @@ export function assembler(
     };
   }
 
-  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf);
+  const schema = schemaPour(module);
+  const typeDeclare = schema.types.find((t) => t.type === brut.type_piece);
+  const type_piece = typeDeclare ? typeDeclare.type : "autre";
+  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champsPour(module), typeDeclare?.cles ?? []);
   const valeurs: ValeurLue[] = [...verif.valeurs];
-  const lignes = valeurLignes(brut.lignes, pages);
-  if (lignes) valeurs.push(lignes);
-  const ventilation = valeurVentilation(brut.tva_ventilation, pages);
-  if (ventilation) valeurs.push(ventilation);
+  if (schema.lignes) {
+    const lignes = valeurLignes(brut.lignes, pages);
+    if (lignes) valeurs.push(lignes);
+    const ventilation = valeurVentilation(brut.tva_ventilation, pages);
+    if (ventilation) valeurs.push(ventilation);
+  }
 
-  const type_piece: TypePiece = (TYPES_PIECE as readonly string[]).includes(brut.type_piece) ? (brut.type_piece as TypePiece) : "autre";
   let statut: StatutLecture;
   let motif: string | undefined;
-  if (type_piece === "autre" || brut.confiance_type < SEUIL_TYPE_SUR) {
+  if (!typeDeclare || brut.confiance_type < SEUIL_TYPE_SUR) {
     statut = "a_classer";
     motif = brut.motif ||
-      (type_piece === "autre"
-        ? "Type de pièce non reconnu : une personne le tranche."
+      (!typeDeclare
+        ? `Type de pièce non reconnu pour le module ${schema.module} : une personne le tranche.`
         : `Type « ${type_piece} » incertain (${Math.round(brut.confiance_type * 100)} %) : une personne le tranche.`);
-  } else if (type_piece === "facture" || type_piece === "avoir") {
+  } else if (typeDeclare.cles.length > 0) {
     if (verif.clesDouteuses.length === 0) statut = "lue";
     else {
       statut = "a_verifier";

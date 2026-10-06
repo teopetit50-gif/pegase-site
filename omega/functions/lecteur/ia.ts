@@ -6,7 +6,8 @@
 import { base64, type ClientClaude, coutEur, type Usage } from "@partage/claude.ts";
 import { ErreurOuvrier } from "@partage/erreurs.ts";
 import type { FormatImage } from "./detecter.ts";
-import { SCHEMA_OUTIL_LECTURE, SCHEMA_OUTIL_TRANSCRIPTION, type TypePiece } from "./schemas/facture.ts";
+import { SCHEMA_OUTIL_TRANSCRIPTION, type TypePiece } from "./schemas/facture.ts";
+import { consignePour, schemaOutilPour } from "./schemas/modules.ts";
 import type { LigneBrute, ValeurBrute } from "./verifier.ts";
 
 export type EntreeIa =
@@ -74,19 +75,25 @@ export interface Extracteur {
 export const LIMITE_DOCUMENT_OCTETS = 4_500_000; // Bedrock Converse : 4,5 Mo par document.
 export const LIMITE_IMAGE_OCTETS = 3_750_000;
 
-export const CONSIGNE_SYSTEME =
-  `Tu es le lecteur d'Omega, une plateforme qui lit les pièces comptables des PME françaises (factures, avoirs, bons de commande, bons de livraison, devis, relevés, contrats, attestations d'assurance, tickets).
-
-Règles absolues :
+/** Les règles communes à tous les modules ; la consigne complète ajoute le module et ses types (schemas/modules.ts). */
+export const REGLES_COMMUNES = `Règles absolues :
 1. Tu ne devines jamais. Chaque valeur rendue est accompagnée de sa citation EXACTE, copiée caractère pour caractère du document (ponctuation, espaces, virgules comprises), et du numéro de la page où elle se trouve. Si une information n'est pas écrite dans le document, tu ne la rends pas.
 2. Les montants se rendent en nombre avec le point décimal (1234.56), les dates en AAAA-MM-JJ, les mentions en booléen. La citation garde la forme imprimée (« 1 234,56 € », « 05/03/2026 »).
 3. Les montants de tête (montant_ht, montant_tva, montant_ttc, net_a_payer) sont ceux du TOTAL du document, pas d'une ligne.
 4. Le fournisseur est l'émetteur du document ; l'acheteur, son destinataire. Un SIREN a 9 chiffres, un SIRET 14, un numéro de TVA français commence par FR.
 5. Si le fichier contient plusieurs documents distincts (plusieurs factures à la suite), tu décris le PREMIER dans les valeurs et tu rends le découpage complet dans « decoupage », avec les pages de chacun.
 6. Si le document est vide, flou ou illisible au point qu'aucune valeur ne peut être citée, tu rends lisible = false avec un motif court.
-7. Si le document est lisible mais n'est pas une pièce de gestion (photo quelconque, courrier sans montant), tu rends type_piece = "autre" avec un motif court.
+7. Si le document est lisible mais n'est d'aucun des types du module (photo quelconque, courrier sans rapport), tu rends type_piece = "autre" avec un motif court.
 8. Quand le document t'est fourni en image ou en PDF sans texte, tu rends d'abord dans « pages » la transcription fidèle et complète de chaque page, dans l'ordre de lecture, sans corriger ni compléter. Les citations des valeurs doivent se retrouver mot pour mot dans cette transcription. Indique manuscrit = true si l'essentiel est écrit à la main.
 9. Tu réponds uniquement par l'outil lire_piece, en français.`;
+
+/** La consigne système complète pour un module (FILED par défaut). */
+export function consigneSysteme(module?: string | null): string {
+  return consignePour(module, REGLES_COMMUNES);
+}
+
+/** Conservée pour la transcription seule : la consigne FILED. */
+export const CONSIGNE_SYSTEME = consigneSysteme("filed");
 
 function consigneTexte(pages: { n: number; texte: string }[], piece: ContextePiece): string {
   const corps = pages.map((p) => `===== Page ${p.n} =====\n${p.texte}`).join("\n\n");
@@ -136,12 +143,13 @@ export class ExtracteurClaude implements Extracteur {
       });
     }
     const rep = await this.client.converse({
-      system: CONSIGNE_SYSTEME,
+      system: consigneSysteme(piece.module),
       contenu,
       outil: {
         name: "lire_piece",
-        description: "Rend la lecture structurée de la pièce : nature, pages transcrites s'il y a lieu, valeurs citées, lignes, ventilation de TVA, découpage.",
-        schema: SCHEMA_OUTIL_LECTURE,
+        description:
+          "Rend la lecture structurée de la pièce : nature, pages transcrites s'il y a lieu, valeurs citées, lignes et ventilation de TVA s'il y a lieu, découpage.",
+        schema: schemaOutilPour(piece.module),
       },
       maxTokens: 16000,
     });

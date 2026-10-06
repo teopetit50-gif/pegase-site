@@ -150,6 +150,38 @@ Exemple : `[{"taux":20,"base":1234.4,"montant":246.88}]`
 
 `bon_commande`, `bon_livraison`, `devis`, `releve`, `contrat`, `attestation_assurance` : le lecteur rend les mêmes noms quand ils ont un sens (`numero`, `date`, `fournisseur.*`, `acheteur.*`, `montant_*`, `lignes`, `commande.reference`, `livraison.date`…). Le statut est `lue` dès qu'au moins une valeur est vérifiée. Les champs propres à ces natures (dates de validité d'un devis, période d'un relevé, garanties d'une attestation) ne sont **pas encore** rendus : à définir avec A4 quand les moteurs correspondants les liront.
 
+## Module Lorani — urbanisme (en service)
+
+Six types, tels que `private.lorani_propositions` les attend (B5, `omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`). Le lecteur choisit la table des types selon `pieces.module` (`omega/functions/lecteur/schemas/modules.ts`) ; une pièce Lorani d'un autre type (une facture, une photo) part en `a_classer`. `numero_dossier` est attendu sur tous les types. Les dates sont en `AAAA-MM-JJ`, les boîtes en fractions de page avec `y` depuis le haut.
+
+| `type_piece` | Ce que c'est | Champs | Clés (tous vérifiés → `lue`) |
+|---|---|---|---|
+| `lorani_recepisse_depot` | récépissé de dépôt d'une demande d'autorisation, remis par la mairie | `numero_dossier`, `date_depot` | les deux |
+| `lorani_lettre_delai` | lettre notifiant ou modifiant le délai d'instruction | `numero_dossier`, `delai_mois`, `date_lettre` | les trois |
+| `lorani_demande_pieces` | demande de pièces complémentaires | `numero_dossier`, `date_lettre`, `pieces` | les trois |
+| `lorani_arrete` | arrêté du maire ou du préfet | `numero_dossier`, `decision`, `date_decision` | les trois |
+| `lorani_certificat_tacite` | certificat de décision tacite acquise | `numero_dossier`, `date_tacite` | les deux |
+| `lorani_constat_affichage` | constat d'affichage par commissaire de justice | `numero_dossier`, `date_constat`, `passage` | les trois |
+
+| Champ | Type de `valeur` | Description | Exemple |
+|---|---|---|---|
+| `numero_dossier` | texte (≤ 60) | numéro de dossier tel qu'imprimé | `"PC 069 123 26 A0042"` |
+| `date_depot` | texte `AAAA-MM-JJ` | date de dépôt en mairie | `"2026-09-14"` |
+| `delai_mois` | nombre entier, 1 à 24 | délai d'instruction notifié ; hors bornes → non vérifié | `3` |
+| `date_lettre` | texte `AAAA-MM-JJ` | date du courrier | `"2026-10-02"` |
+| `pieces` | tableau de textes | les pièces demandées, telles qu'imprimées ; vérifié si chaque élément se retrouve sur la page | `["PC5", "PC 8"]` |
+| `decision` | texte parmi `accorde`, `refuse`, `non_opposition`, `opposition`, `sursis` | une forme approchante (« Accordé », « non-opposition ») est ramenée à la valeur admise | `"accorde"` |
+| `date_decision` | texte `AAAA-MM-JJ` | date de l'arrêté | `"2026-11-20"` |
+| `date_tacite` | texte `AAAA-MM-JJ` | date d'acquisition de la décision tacite | `"2026-11-15"` |
+| `date_constat` | texte `AAAA-MM-JJ` | date du constat | `"2026-12-10"` |
+| `passage` | nombre entier, 1 à 3 | numéro du passage de l'huissier | `2` |
+
+Pas de `lignes` ni de `tva.ventilation` pour ce module.
+
+## Ajouter un module : la table des types
+
+Un module déclare dans `omega/functions/lecteur/schemas/<module>.ts` sa présentation (ce que le modèle lit), ses types (`type`, description, champs, clés) et ses champs (`texte`, `nombre`, `entier` borné, `date`, `booleen`, `choix` avec valeurs admises, `liste`), puis s'inscrit dans `SCHEMAS_PAR_MODULE`. Le schéma d'outil, la consigne de Claude, le typage des valeurs et les règles de statut en découlent. Un module sans schéma propre est lu avec la table FILED.
+
 ## À venir — autres modules (proposition, à confirmer avec chaque moteur)
 
 Même contrat : noms en minuscules à points, `texte` + `page` + `verifiee` sur chaque valeur, dates en `AAAA-MM-JJ`, montants en nombre. Rien de tout cela n'est encore rendu ; ce sont les noms que je prévois, pour que les écrans et moteurs ne partent pas sur d'autres.
@@ -171,24 +203,9 @@ Même contrat : noms en minuscules à points, `texte` + `page` + `verifiee` sur 
 | `indexation.indice` | texte | ILC, ILAT, ICC… |
 | `bien.adresse`, `bien.surface_m2` | texte, nombre | |
 
-### Lorani — avis et arrêté (courriers d'administration)
+### Tamila — avis d'audience, ordonnance, accusé RPVA (B4 publiera ses champs)
 
-| Champ | Type | Description |
-|---|---|---|
-| `avis.type` | texte | `mise_en_demeure`, `avis_imposition`, `arrete`, `notification`… |
-| `avis.reference` | texte | numéro de dossier ou d'avis |
-| `avis.date` | date | date du courrier |
-| `avis.date_limite` | date | date limite de réponse ou de paiement |
-| `avis.delai_jours` | nombre | |
-| `emetteur.nom`, `emetteur.service` | texte | administration et service |
-| `destinataire.nom`, `destinataire.siren` | texte | |
-| `montant.du`, `montant.majoration`, `montant.total` | nombre | |
-| `arrete.numero`, `arrete.date_effet`, `arrete.objet` | texte, date, texte | pour un arrêté |
-| `voie_recours.delai_jours`, `voie_recours.juridiction` | nombre, texte | |
-
-### Tamila — ordonnance (pièces chiffrées : hors vague 1 du lecteur)
-
-Les pièces Tamila sont chiffrées sous la clé du dossier (`chiffrement = dossier:v1`) : le lecteur les reporte aujourd'hui (`CHIFFREMENT_NON_PRIS_EN_CHARGE`). Noms prévus pour le jour où la lecture chiffrée existe :
+Les pièces Tamila sont chiffrées sous la clé du dossier (`chiffrement = dossier:v1`) : le lecteur les reporte aujourd'hui (`CHIFFREMENT_NON_PRIS_EN_CHARGE`). B4 annoncera ses types (avis d'audience, ordonnance, accusé RPVA) ; ils entreront dans la table des types comme Lorani. Noms prévus pour l'ordonnance :
 
 | Champ | Type | Description |
 |---|---|---|
