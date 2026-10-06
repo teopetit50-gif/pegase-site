@@ -863,3 +863,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   exclues des prévisualisations Vercel (6dfeb11). Carnets envoyés à A1–A5, B1–B7.
   Main c239974 : voie C d'A5 (workflow de répétition, omega/prod ; omega-sauvegarde.yml NON repris :
   dumps hors UE), écran Rappels Tiroma (e79c729 + 19ah v2).
+- 16 h 35 Z — Poses : b4_09 facture_entete + test 18 (99d0467), test b2_15 v2 (7bb5c00), b1_07 + test b1_10
+  (7512a38, cron varelo-matin actif), b5_14 + b5_05 et b5_15 + b5_06 (d9000ea). Tests : b4_18 vert,
+  b1_10 2/2, b5_05/06 2/2, 44 vert ; **b2_15 rouge** (loc_completer_locataire l. 32 : 22P02 « malformed
+  array literal: siren » → B2 b2_06b). Main a264a45 : facture imprimable Tamila, Ce matin Varelo, lots
+  Lorani (en ligne au retour du quota). C1 informé des nouveaux écrans et des modules CASHD/REPUT/OFFLOAD.
