@@ -573,3 +573,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   00:24/00:26 Z) : antérieurs au garde-fou du lecteur v16, attendus. En attente : B6 (J-2
   réel + clôture des chantiers d'essai), A3 (vue Fournisseurs), Teo (Realtime de
   filed_fournisseurs, export Logos_w, SIRENE_API_KEY, HDS, coffre Tamila).
+- 04 h 20 — Lorani, second essai réel (lettre du 03/10, PCMI2+PCMI8) vert de bout en bout,
+  mais révèle que la seconde demande **écrase** la première (pieces_demandees et échéance).
+  B5 (NOTES-B5 § 6, R*423-38/39/41) : l'écrasement est faux ; une seconde demande ne fait
+  pas repartir le délai, au mieux complète la liste. **b5_07 validé** (union, première date
+  gardée, historique, avertissement). **Pour Teo / un juriste** : cas d'une seconde demande
+  DANS le mois.
