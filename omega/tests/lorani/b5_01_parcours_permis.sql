@@ -303,7 +303,7 @@ begin
   return next is((select etat from public.travaux where id = v_travail), 'fait', '10. travail clos');
   select titre into v_texte from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc);
   return next ok(v_texte is not null, '10. alerte de rappel levée au chef de projet');
-  return next ok(v_texte like 'PC « Maison Lemoine » : pièces manquantes à faire recevoir par la mairie au plus tard le ' || to_char(v_date, 'DD/MM/YYYY') || ' (dans 10 jours)%', '10. … qui dit la date butoir : ' || coalesce(v_texte, ''));
+  return next ok(v_texte like 'PC « Résidence Lemoine — six logements » : pièces manquantes à faire recevoir par la mairie au plus tard le ' || to_char(v_date, 'DD/MM/YYYY') || ' (dans 10 jours)%', '10. … qui dit la date butoir : ' || coalesce(v_texte, ''));
   return next is((select niveau from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc)), 'attention', '10. … niveau « attention » à J-10');
   return next is((select destinataire_id from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc)), v_referent, '10. … adressée au chef de projet');
   -- b5_03 : le rappel part au chef de projet par courriel, par la file des envois.
@@ -311,7 +311,7 @@ begin
                          and e.module = 'lorani' and e.canal = 'email' and e.statut <> 'bloque'),
                  '10. un envoi « rappel » est préparé au chef de projet (b5_03) : ' || coalesce((select e.statut || ' → ' || coalesce(e.destinataire_adresse, 'sans adresse') from public.envois e where e.client_id = v_client and e.cle_idempotence = format('lorani:permis:%s:pieces:rappel:10', v_pc)), 'aucun'));
   return next ok(exists (select 1 from public.envois e where e.client_id = v_client and e.cle_idempotence = format('lorani:permis:%s:pieces:rappel:10', v_pc)
-                         and e.sujet like 'Omega — PC « Maison Lemoine » : pièces manquantes%' and e.corps like '%PC5, PC8%' and e.corps like '%/espace/lorani?permis=' || v_pc::text || '%'),
+                         and e.sujet like 'Omega — PC « Résidence Lemoine — six logements » : pièces manquantes%' and e.corps like '%PC5, PC8%' and e.corps like '%/espace/lorani?permis=' || v_pc::text || '%'),
                  '10. … qui nomme les pièces et mène au dossier');
   return next ok(not exists (select 1 from public.alertes where client_id = v_client and interne and cle_regroupement like 'lorani:envoi_rappel:%'), '10. … sans alerte interne d''échec');
 

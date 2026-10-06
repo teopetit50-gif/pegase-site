@@ -374,4 +374,10 @@ A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confir
   (`b5_08_titre_alerte_seconde_demande.sql`, corps du trigger de b5_07, seuls les deux titres changent : articles
   avant la liste, intitulé borné à 60). Essayé en local par-dessus b5_07 : titres complets, règle inchangée. Le
   test 19 bis (titre `like '%seconde demande de pièces%'`) reste vrai.
+- Coordinateur, 04 h 15 Z : l'échéance d'affichage de « Clôture Garnier » (délai 6d71f93c…) est passée en
+  **dépassé** au passage horaire de 03 h 07 Z : pas de trou, c'était l'attente du cron (minute 7).
+- Relevé du coordinateur : son libellé disait « DP « Extension Garnier (banc) » » (nom du projet) → **b5_09**
+  (`b5_09_titre_du_permis.sql`) : `private.lorani_titre_permis` prend l'intitulé du permis, sinon le nom du projet ;
+  les sept appelants en profitent. Test étape 10 aligné (« PC « Résidence Lemoine — six logements » », alerte et
+  sujet du courriel de rappel) → toujours 120 assertions.
 
