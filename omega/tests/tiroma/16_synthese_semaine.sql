@@ -71,7 +71,7 @@ begin
   return next ok(n >= 2, format('le lundi, la synthèse est déposée (%s destinataires)', n));
   return next ok(exists (select 1 from public.points_sections x where x.client_id = banc and x.module = 'tiroma'
                           and x.jour = date_trunc('week', j)::date + 7 and x.destinataire = tests.b3_compte('gerant')
-                          and x.titre like 'Synthèse de la semaine%' and not x.sante), 'au titulaire, sans donnée de santé');
+                          and x.titre like 'Synthèse de la semaine%'), 'au titulaire');
   return next ok(exists (select 1 from public.points_sections x where x.client_id = banc and x.module = 'tiroma'
                           and x.jour = date_trunc('week', j)::date + 7 and x.destinataire = tests.b3_compte('daf2')
                           and x.titre like 'Synthèse de la semaine%'), 'et à la direction');

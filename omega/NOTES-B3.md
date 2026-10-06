@@ -365,3 +365,8 @@ logiciel métier qui la fait).
      - rejouer le dépôt ne double rien ;
      - une fois B coupé, les titres de A redeviennent nus et les suffixés partent.
    - Vérifié en local (sections simulées, même scénario) : 10 sections, rejouées à l'identique ; après la coupure de B, les titres nus reviennent.
+**Retour TAP du coordinateur (06/10, ~16 h 45 Z) et corrections :**
+- **Test 44 rouge**, à cause de `private.tiroma_duree_texte`, ouverte à authenticated. b3_19 la ferme désormais : service_role seul.
+- **Le socle classe toute section de Tiroma « santé ».** `deposer_section` fait `v_sante := p_sante or private.point_module_sante(module)`. Les assertions « sans donnée de santé » des tests 16, 20 et 22 étaient donc fausses : elles sont retirées. Le test 22 vérifie à la place que la direction ne reçoit que des compteurs. Les commentaires de b3_15 et b3_19 qui disent `sante = false` parlent de l'argument passé, pas de la section rendue.
+- **Test 19** : le soin de demain passe de 15 h à 11 h 15. À 15 h, le Fauteuil 2 est occupé par R012 (implant, 14 h 30 à 16 h) dans l'agenda du banc.
+- **Test 20** : D passe au-delà de l'agenda du banc, entre J+12 et J+18, lu sur 21 jours. Le banc donne à Dr Rousseau 50 min chaque matin (20,8 %) et à Dr Lacour 75 min chaque après-midi (25 %), au-dessus du seuil de 20 %. Le dépôt est appelé à D-3.

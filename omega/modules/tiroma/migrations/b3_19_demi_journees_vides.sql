@@ -24,7 +24,8 @@
 --       ('horaires' | 'habitude'), ouvert_min, prevu_min, libre_min, taux, attente}] }   (jours de 1 à 28)
 --   private.tiroma_deposer_demi_journees(p_maintenant) : chaque jour dès 5 h (heure du cabinet), au point du matin du
 --     titulaire, une section « Demi-journées vides — <centre> » pour les sept jours qui viennent (8 lignes au plus),
---     sans nom de patient (sante = false). Cron tiroma-demi-journees.
+--     sans nom de patient (le socle classe toute section de Tiroma « santé » : private.point_module_sante). Cron
+--     tiroma-demi-journees.
 -- Lecture seule pour les profils ; idempotent (create or replace, grant, cron s'il manque).
 
 create or replace function private.tiroma_ouvert_praticien(p_client uuid, p_entite uuid, p_praticien uuid, p_jour date)
@@ -265,7 +266,7 @@ begin
       loop
         perform private.deposer_section(k.client_id, 'tiroma', v_jour, m.user_id, null,
           'Demi-journées vides — ' || left(k.entite_nom, 80), v_items,
-          k.entite_id, null, false, null, false, 6);
+          k.entite_id, null, false, null, false, 6);  -- sante : le socle la force pour Tiroma
         n := n + 1;
       end loop;
     exception when others then
@@ -299,8 +300,8 @@ revoke all on function private.tiroma_ouvert_praticien(uuid, uuid, uuid, date) f
 grant execute on function private.tiroma_ouvert_praticien(uuid, uuid, uuid, date) to service_role;
 revoke all on function private.tiroma_deposer_demi_journees(timestamp with time zone) from public, anon, authenticated;
 grant execute on function private.tiroma_deposer_demi_journees(timestamp with time zone) to service_role;
-revoke all on function private.tiroma_duree_texte(integer) from public, anon;
-grant execute on function private.tiroma_duree_texte(integer) to authenticated, service_role;
+revoke all on function private.tiroma_duree_texte(integer) from public, anon, authenticated;
+grant execute on function private.tiroma_duree_texte(integer) to service_role;
 
 select cron.schedule('tiroma-demi-journees', '*/30 * * * *', $cron$select private.tiroma_deposer_demi_journees()$cron$)
 where not exists (select 1 from cron.job where jobname = 'tiroma-demi-journees');

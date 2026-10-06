@@ -1,5 +1,5 @@
 -- B3-19 — Assistante absente : les soins à basculer (b3_18). L'assistante du banc (Fauteuil 1) est absente ; un soin
--- prévu demain sur le Fauteuil 1 doit pouvoir basculer sur le Fauteuil 2 (équipé « soins », libre, avec Élodie).
+-- prévu demain à 11 h 15 sur le Fauteuil 1 doit pouvoir basculer sur le Fauteuil 2 (équipé « soins », libre, avec Élodie).
 -- Après 00, 00b, b3_01 à b3_18. runtests() annule tout.
 
 create or replace function tests.test_b3_19_assistante_absente() returns setof text
@@ -29,14 +29,15 @@ begin
   select id into v_assistante from public.tiroma_membres where entite_id = entite and prenom = 'Assistante (banc)';
   select id into v_type from public.tiroma_types_rdv where entite_id = entite and libelle_source = 'Soin composite';
 
-  -- Élodie, assistante du Fauteuil 2 ; un soin composite demain à 15 h sur le Fauteuil 1.
+  -- Élodie, assistante du Fauteuil 2 ; un soin composite demain à 11 h 15 sur le Fauteuil 1 (le Fauteuil 2 est libre à
+  -- cette heure : l'agenda du banc l'occupe à 9 h, 14 h, 14 h 30 et 16 h).
   perform tests.b3_endosser('gerant');
   insert into public.tiroma_membres (client_id, entite_id, prenom, fauteuil_habituel_id) values (banc, entite, 'Élodie', f2) returning id into v_elodie;
   perform tests.redevenir_admin();
   perform set_config('omega.tiroma_moteur', 'releve', true);
   insert into public.tiroma_rendez_vous (client_id, entite_id, source_ref, patient_id, fauteuil_id, type_rdv_id, debut, fin, statut)
   values (banc, entite, 'R-B3-19', (select id from public.tiroma_patients where entite_id = entite and source_ref = 'P009'), f1, v_type,
-          (j + 1 + time '15:00') at time zone v_fuseau, (j + 1 + time '15:30') at time zone v_fuseau, 'prevu')
+          (j + 1 + time '11:15') at time zone v_fuseau, (j + 1 + time '11:45') at time zone v_fuseau, 'prevu')
   returning id into v_rdv;
   perform set_config('omega.tiroma_moteur', '', true);
 
@@ -57,7 +58,7 @@ begin
   return next is(jsonb_array_length(x), 1, 'une absence touche les sept prochains jours');
   return next is(x -> 0 ->> 'fauteuil_nom', 'Fauteuil 1', 'elle concerne le Fauteuil 1');
   select v into s from jsonb_array_elements(x -> 0 -> 'soins') v where (v ->> 'rendez_vous_id')::uuid = v_rdv;
-  return next ok(s is not null, 'le soin composite de demain 15 h est à basculer');
+  return next ok(s is not null, 'le soin composite de demain 11 h 15 est à basculer');
   return next ok(exists (select 1 from jsonb_array_elements(s -> 'vers') v where v ->> 'fauteuil_nom' = 'Fauteuil 2' and v ->> 'assistante' = 'Élodie'),
                  'vers le Fauteuil 2, avec Élodie');
   return next ok(not exists (select 1 from jsonb_array_elements(s -> 'vers') v where v ->> 'fauteuil_nom' = 'Fauteuil 3'),

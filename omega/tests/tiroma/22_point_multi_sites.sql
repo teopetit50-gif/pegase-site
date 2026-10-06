@@ -71,14 +71,14 @@ begin
 
   -- La direction : les compteurs de chaque centre.
   return next ok(exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = j
-                          and s.destinataire = tests.b3_compte('daf2') and s.entite_id = entite and s.titre = 'Cabinet dentaire — ' || left(v_nom_a, 90) and not s.sante),
-                 'direction : les compteurs de A, sans santé');
+                          and s.destinataire = tests.b3_compte('daf2') and s.entite_id = entite and s.titre = 'Cabinet dentaire — ' || left(v_nom_a, 90)),
+                 'direction : les compteurs de A');
   return next ok(exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = j
-                          and s.destinataire = tests.b3_compte('daf2') and s.entite_id = v_b and s.titre = 'Cabinet dentaire — ' || v_nom_b and not s.sante),
+                          and s.destinataire = tests.b3_compte('daf2') and s.entite_id = v_b and s.titre = 'Cabinet dentaire — ' || v_nom_b),
                  'direction de A : les compteurs du site B qui en dépend');
   return next ok(not exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = j
-                              and s.destinataire = tests.b3_compte('daf2') and s.sante),
-                 'direction : aucune section de santé');
+                              and s.destinataire = tests.b3_compte('daf2') and s.titre not like 'Cabinet dentaire — %'),
+                 'direction : rien que les compteurs, aucune section nominative');
 
   -- Rejouer le dépôt ne double rien.
   select count(*) into n1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = j;

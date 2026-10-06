@@ -1,6 +1,7 @@
 -- B3-20 — Les demi-journées vides des collaborateurs (b3_19). Dr Rousseau consulte le matin d'un jour D (ses horaires
 -- propres) ; Dr Lacour, sans horaires propres, travaille d'habitude l'après-midi de ce jour de la semaine (trois
--- semaines sur huit). Après 00, 00b, b3_01 à b3_19. runtests() annule tout.
+-- semaines sur huit). D est pris au-delà de l'agenda du banc (J-5 à J+10), qui remplit ces demi-journées au-dessus du
+-- seuil. Après 00, 00b, b3_01 à b3_19. runtests() annule tout.
 
 create or replace function tests.test_b3_20_demi_journees_vides() returns setof text
 language plpgsql as $f$
@@ -27,8 +28,8 @@ begin
   select id into v_lacour from public.tiroma_praticiens where entite_id = entite and nom_affiche = 'Dr Lacour';
   select id into v_rousseau from public.tiroma_praticiens where entite_id = entite and nom_affiche = 'Dr Rousseau';
   select id into v_patient from public.tiroma_patients where entite_id = entite and source_ref = 'P001';
-  -- D : le premier jour ouvré, non férié, entre J+3 et J+7.
-  select g::date into d from generate_series(j + 3, j + 7, interval '1 day') g
+  -- D : le premier jour ouvré, non férié, entre J+12 et J+18.
+  select g::date into d from generate_series(j + 12, j + 18, interval '1 day') g
   where extract(isodow from g) between 1 and 5 and not public.jour_ferie(g::date, v_territoire) order by g limit 1;
 
   -- Dr Rousseau : le matin de D seulement. Dr Lacour : trois après-midi de ce jour de la semaine, les semaines passées.
@@ -52,7 +53,7 @@ begin
   return next throws_ok(format('select public.tiroma_demi_journees_vides(%L, %L, 0)', banc, entite), '22023', null, 'un horizon nul est refusé (22023)');
 
   -- Le titulaire voit les deux.
-  x := public.tiroma_demi_journees_vides(banc, entite, 7);
+  x := public.tiroma_demi_journees_vides(banc, entite, 21);
   select v into e from jsonb_array_elements(x -> 'demi_journees') v
   where (v ->> 'praticien_id')::uuid = v_rousseau and (v ->> 'jour')::date = d and v ->> 'moment' = 'matin';
   return next ok(e is not null, format('Dr Rousseau, le %s au matin : demi-journée vide', d));
@@ -68,7 +69,7 @@ begin
 
   -- Le collaborateur ne voit que son agenda.
   perform tests.b3_endosser('daf');
-  x := public.tiroma_demi_journees_vides(banc, entite, 7);
+  x := public.tiroma_demi_journees_vides(banc, entite, 21);
   return next ok(jsonb_array_length(x -> 'demi_journees') > 0
                  and not exists (select 1 from jsonb_array_elements(x -> 'demi_journees') v where (v ->> 'praticien_id')::uuid <> v_rousseau),
                  'Dr Rousseau ne voit que ses propres demi-journées');
@@ -78,19 +79,19 @@ begin
   perform public.tiroma_ajouter_attente(banc, entite, (select id from public.tiroma_patients where entite_id = entite and source_ref = 'P003'),
                                         null, 30, v_rousseau, null, null, false);
   perform tests.b3_endosser('gerant');
-  x := public.tiroma_demi_journees_vides(banc, entite, 7);
+  x := public.tiroma_demi_journees_vides(banc, entite, 21);
   select v into e from jsonb_array_elements(x -> 'demi_journees') v
   where (v ->> 'praticien_id')::uuid = v_rousseau and (v ->> 'jour')::date = d and v ->> 'moment' = 'matin';
   return next is((e ->> 'attente')::integer, n0 + 1, 'un patient de plus en liste d''attente pour lui');
 
-  -- Le point du matin du titulaire.
+  -- Le point du matin du titulaire, trois jours avant D (le dépôt regarde les sept jours qui viennent).
   perform tests.redevenir_admin();
   return next is(private.tiroma_deposer_demi_journees((j + time '04:00') at time zone v_fuseau), 0, 'avant 5 h, rien n''est déposé');
-  n := private.tiroma_deposer_demi_journees((j + time '07:00') at time zone v_fuseau);
+  n := private.tiroma_deposer_demi_journees((d - 3 + time '07:00') at time zone v_fuseau);
   return next ok(n >= 1, format('à 7 h, la section est déposée (%s destinataire(s))', n));
-  return next ok(exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = j
-                          and s.destinataire = tests.b3_compte('gerant') and s.titre like 'Demi-journées vides%' and not s.sante and s.nb_items >= 2),
-                 'au titulaire, sans donnée de santé, une ligne par demi-journée');
+  return next ok(exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = d - 3
+                          and s.destinataire = tests.b3_compte('gerant') and s.titre like 'Demi-journées vides%' and s.nb_items >= 2),
+                 'au titulaire, une ligne par demi-journée');
   return next ok(not exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma'
                               and s.destinataire in (tests.b3_compte('daf'), tests.b3_compte('referent')) and s.titre like 'Demi-journées vides%'),
                  'ni au collaborateur ni à l''assistante');
@@ -103,7 +104,7 @@ begin
   insert into public.tiroma_fermetures (client_id, entite_id, praticien_id, debut, fin, nature)
   values (banc, entite, v_lacour, d::timestamp at time zone v_fuseau, (d + 1)::timestamp at time zone v_fuseau, 'conge');
   perform tests.b3_endosser('gerant');
-  x := public.tiroma_demi_journees_vides(banc, entite, 7);
+  x := public.tiroma_demi_journees_vides(banc, entite, 21);
   return next ok(not exists (select 1 from jsonb_array_elements(x -> 'demi_journees') v
                              where (v ->> 'praticien_id')::uuid = v_rousseau and (v ->> 'jour')::date = d),
                  '3 h 30 réservées sur 4 h : le matin de Dr Rousseau n''est plus vide');
