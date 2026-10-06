@@ -223,3 +223,31 @@ export type AffaireCompte = {
   retire_le: string | null;
   decision: string | null;
 };
+
+/* c4_09 — pilotage */
+export type Vague = {
+  vague: string; comptes: number; en_jeu: number; messages: number; appels: number; reponses: number;
+  commandes: number; chiffre_repris: number; taux_reponse: number | null;
+};
+export type LigneTaux = { valeur: string; sollicites: number; reponses: number; taux: number | null };
+export type MoisSuivi = {
+  mois: string; echeances_honorees: number; echeances_apres_message: number; commandes_reprises: number;
+  chiffre_repris: number; affaires_retirees: number; valeur_liberee: number;
+};
+export type Resultats = {
+  comptes: number; en_jeu: number; reponses: number; commandes: number; chiffre_repris: number;
+  echeances_honorees: number; affaires_retirees: number;
+};
+export type Pilotage = {
+  depuis: string;
+  calcule_le: string;
+  vagues: Vague[];
+  taux: Partial<Record<"segment" | "niveau" | "canal" | "message", LigneTaux[]>>;
+  suivi: MoisSuivi[];
+  entites: {
+    par_entite: (Resultats & { societe_id: string; societe: string })[];
+    par_site: (Resultats & { societe_id: string; societe: string; site_id: string; site: string })[];
+    consolide: Resultats | null;
+  };
+};
+export type Arrete = { jour: string; pilotage: Pilotage; cree_le: string };

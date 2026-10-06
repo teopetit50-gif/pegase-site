@@ -76,6 +76,7 @@ export default function Courbe({ mois }: { mois: Mois[] }) {
                   height={H - marge.haut - marge.bas}
                   fill="transparent"
                   tabIndex={0}
+                  role="img"
                   aria-label={`${libelleMois(m.mois, true)} : ${montant(m.montant)}, ${m.pieces} pièce${m.pieces > 1 ? "s" : ""}`}
                   onMouseEnter={() => setSurvol(i)}
                   onMouseLeave={() => setSurvol(null)}

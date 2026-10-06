@@ -13,13 +13,14 @@
      offload_exclure, offload_lever_exclusion (c4_05) ;
      offload_noter_intervention (c4_07) ; lectures offload_echeances_tableau, offload_parc_compte ;
      offload_saisir_affaire, offload_retirer_affaire, offload_decider_affaire (c4_08) ;
-     lectures offload_affaires_liste, offload_affaires_compte.
+     lectures offload_affaires_liste, offload_affaires_compte ;
+     lectures offload_pilotage, offload_arretes_liste (c4_09).
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AffaireCompte, AffairesListe, EcheanceLigne, Fiche, ParcCompte, Tableau } from "./types";
+import type { AffaireCompte, AffairesListe, Arrete, EcheanceLigne, Fiche, ParcCompte, Pilotage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -121,4 +122,15 @@ export type DecisionAffaire = "relancer" | "garder" | "retour_stock" | "sans_sui
 
 export function deciderAffaire(affaire: string, decision: DecisionAffaire, motif: string) {
   return rpc<null>("offload_decider_affaire", { p_affaire: affaire, p_decision: decision, p_motif: motif });
+}
+
+/* c4_09 — pilotage et arrêtés à date fixe */
+export async function chargerPilotage(depuis: string | null): Promise<Pilotage | null> {
+  const p = await rpc<Pilotage | null>("offload_pilotage", { p_depuis: depuis });
+  return p && typeof p === "object" && Array.isArray(p.vagues) ? p : null;
+}
+
+export async function chargerArretes(): Promise<Arrete[]> {
+  const l = await rpc<Arrete[] | null>("offload_arretes_liste", {});
+  return Array.isArray(l) ? l : [];
 }

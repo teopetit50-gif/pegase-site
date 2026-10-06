@@ -28,6 +28,7 @@ import { A_RISQUE, NIVEAUX, STATUTS_REPRISE } from "./etats";
 import { exempleOffload } from "./exemples";
 import FicheCompte, { type Geste } from "./FicheCompte";
 import Affaires from "./Affaires";
+import Pilotage from "./Pilotage";
 import Echeances from "./Echeances";
 import { changerStatut, chargerFiche, chargerTableau, noterContact, noterTache, ouvrirReprise, recalculer, saisirAchat, trancherRapprochement } from "./portes";
 import type { Compte, Fiche, Tableau } from "./types";
@@ -330,6 +331,7 @@ export default function EcranOffload() {
             setChoix(id);
             if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }} />
+          <Pilotage source={source} />
 
           {(tableau?.rapprochements ?? []).length ? (
             <section className="esp-carte" aria-label="Doublons proposés">
