@@ -778,3 +778,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   exécutables par authenticated ; tamila_coffre_reference/serveur exécutables en trop) → A5 19ag ;
   test_46 rouge (vues btp_avenants_chiffres, btp_avenants_lignes_chiffrees sans security_invoker)
   → B6 b6_11.
+- 14 h 27 Z — **19ag posé** (A5 28a046b : EXECUTE rendu à authenticated sur filed_iban_valide,
+  filed_luhn, filed_siren_valide, filed_tva_intracom_analyser — oubli d'a4_14, un membre ne pouvait
+  plus saisir une valeur « humain » ; tamila_coffre_reference/serveur retirées à authenticated) ;
+  **b6_11** (6263048 : vues btp_avenants_* en security_invoker) + tests b6_05/b6_06. Rejeu socle
+  40–55 + `^test_b6_` : **22/22 verts**. Sources à corriger : A4 (a4_14 grants), B4 (b4_05
+  l. 669-670), A5 (liste figée + btp_prix_avenant, btp_prix_ligne_avenant). Accord J-2 clos.
