@@ -1,15 +1,15 @@
 # Répétition du SQL de mise en production dans un Postgres jetable (voie C de omega/prod/repetition.md).
 #
-# À chaque gel (tag prod-*) ou à la demande : une base supabase/postgres vierge dans le runner, la base de départ
-# (omega/prod/base/), puis les migrations assemblées (omega/prod/migrations/, assembler.mjs), chacune dans une
-# transaction, puis tous les tests pgTAP, un fichier par appel. Aucun secret : ni la production, ni la recette ne
-# sont jamais contactées. Pas d'Auth, de Storage ni de fonctions Edge : le SQL et ses tests seulement.
+# Mode d'emploi pour Teo : omega/prod/REPETITION-CI.md.
 #
-# La base de départ : les migrations assemblées ne sont que ce qui manque à la production (MISE-EN-PRODUCTION.md
-# § 1.3). Sur une base vierge, il faut d'abord ce que la production a déjà : `base_existante` (les 61 migrations
-# historiques écrasées) puis les lots jusqu'à 20260929092923, exportés de la recette au gel dans
-# omega/prod/base/<version>_<nom>.sql. Tant que ce dossier ou omega/prod/migrations/ est vide, la tâche échoue
-# proprement en le disant.
+# À chaque gel (tag prod-*) ou à la demande : une base supabase/postgres vierge dans le runner, remise « comme la
+# production » par le relevé de son schéma (omega/prod/base/01_extensions, 02_schema, 03_crons : relever-base.sh,
+# lecture seule, sans données), puis toutes les migrations assemblées (omega/prod/migrations/), chacune dans une
+# transaction, puis garde_fous.sql, tous les tests pgTAP un fichier par appel, et l'empreinte du catalogue comparée à
+# celle de la recette au gel. Aucun secret : ni la production, ni la recette ne sont contactées. Pas d'Auth, de
+# Storage ni de fonctions Edge, pas de données : le SQL et ses tests seulement.
+#
+# Tant que omega/prod/base/02_schema.sql ou omega/prod/migrations/ manque, la tâche échoue proprement en le disant.
 #
 # pg_cron et pg_net de l'image sont coupés avant toute pose : jobs désactivés au fil de l'eau, droit d'appel retiré.
 # Rien ne peut sortir du runner vers une fonction Edge.
@@ -25,6 +25,10 @@ on:
         description: 'Pourquoi cette répétition'
         required: false
         default: 'manuelle'
+      empreinte:
+        description: 'Empreinte de la recette à comparer (vide : la plus récente de omega/prod/empreintes/)'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -67,11 +71,12 @@ jobs:
 
       - name: Les fichiers à poser existent
         run: |
-          base=$(ls omega/prod/base/*.sql 2>/dev/null | wc -l)
           migrations=$(ls omega/prod/migrations/*.sql 2>/dev/null | wc -l)
-          echo "Base de départ : $base fichier(s) ; migrations assemblées : $migrations fichier(s)."
-          if [ "$base" -eq 0 ] || [ "$migrations" -eq 0 ]; then
-            echo "::error title=Rien à répéter::omega/prod/base/ ($base) ou omega/prod/migrations/ ($migrations) est vide. Les remplir au gel : voir l'en-tête de ce workflow et omega/prod/README.md."
+          echo "Relevé de la production : $(ls omega/prod/base/0[0-9]_*.sql 2>/dev/null | xargs -r -n1 basename | tr '\n' ' ')"
+          echo "Migrations assemblées : $migrations fichier(s)."
+          [ -f omega/prod/base/RELEVE.md ] && cat omega/prod/base/RELEVE.md
+          if [ ! -f omega/prod/base/02_schema.sql ] || [ "$migrations" -eq 0 ]; then
+            echo "::error title=Rien à répéter::omega/prod/base/02_schema.sql ou omega/prod/migrations/ manque. Les produire au gel : omega/prod/REPETITION-CI.md."
             exit 1
           fi
 
@@ -81,11 +86,18 @@ jobs:
           psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q <<'SQL'
             create extension if not exists pg_cron;
             create extension if not exists pg_net with schema extensions;
-            -- Tout job créé par une migration naît inactif ; ceux qui existent déjà sont désactivés.
-            create or replace function public.repetition_cron_inactif() returns trigger language plpgsql as $$
+            -- Tout job créé par le relevé ou une migration naît inactif ; ceux qui existent déjà sont désactivés.
+            -- Schéma à part : hors de public et private, donc hors de l'empreinte.
+            create schema if not exists repetition;
+            create or replace function repetition.cron_inactif() returns trigger language plpgsql as $$
             begin new.active := false; return new; end $$;
             create trigger repetition_cron_inactif before insert or update on cron.job
-              for each row execute function public.repetition_cron_inactif();
+              for each row execute function repetition.cron_inactif();
+            do $$ begin
+              if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+                create publication supabase_realtime;
+              end if;
+            end $$;
             update cron.job set active = false where active;
             do $$ declare r record; begin
               for r in select p.oid::regprocedure as f from pg_proc p join pg_namespace n on n.oid = p.pronamespace
@@ -96,11 +108,12 @@ jobs:
           SQL
           echo "pg_cron : $(psql "$ADMIN_URL" -XAtc 'select count(*) from cron.job where active') job(s) actif(s)."
 
-      - name: Poser la base de départ puis les migrations assemblées (une transaction par fichier)
+      - name: Poser le relevé de la production puis les migrations assemblées (une transaction par fichier)
+        id: pose
         run: |
           set -uo pipefail
           n=0
-          for f in $(ls omega/prod/base/*.sql | sort) $(ls omega/prod/migrations/*.sql | sort); do
+          for f in $(ls omega/prod/base/0[0-9]_*.sql | sort) $(ls omega/prod/migrations/*.sql | sort); do
             nom=$(basename "$f" .sql)
             if ! psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
               echo "::error title=Pose en échec::$f"
@@ -120,9 +133,15 @@ jobs:
           [ "$actifs" = 0 ] && [ "$partis" = 0 ] || { echo "::error::pg_cron ou pg_net n'est pas resté coupé"; exit 1; }
 
       - name: Garde-fous (omega/prod/garde_fous.sql)
-        run: psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -f omega/prod/garde_fous.sql | tee "$SORTIE/garde_fous.txt"
+        if: always() && steps.pose.outcome == 'success'
+        run: |
+          set -euo pipefail
+          psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -f omega/prod/garde_fous.sql | tee "$SORTIE/garde_fous.txt"
+          rouges=$(psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -At -F ' | ' -f omega/prod/garde_fous.sql | awk -F ' [|] ' '$4 == "f"' | tee "$SORTIE/garde_fous_rouges.txt" | wc -l)
+          [ "$rouges" -eq 0 ] || { echo "::error title=Garde-fous rouges::$rouges contrôle(s) : $(cut -d'|' -f1 "$SORTIE/garde_fous_rouges.txt" | tr '\n' ';')"; exit 1; }
 
       - name: Tests pgTAP, un fichier par appel
+        if: always() && steps.pose.outcome == 'success'
         run: |
           set -uo pipefail
           psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -c "create extension if not exists pgtap with schema extensions" -c "create schema if not exists tests"
@@ -150,6 +169,24 @@ jobs:
           echo "**$total résultats, $ko rouges, $so fichiers sans objet (banc de recette).**" >> "$GITHUB_STEP_SUMMARY"
           echo "Tests : $total résultats, $ko rouges, $so sans objet."
           [ "$ko" -eq 0 ] || { echo "::error title=Tests rouges::$ko résultat(s) rouge(s)"; exit 1; }
+
+      - name: Empreinte du catalogue, comparée à celle de la recette au gel
+        if: always() && steps.pose.outcome == 'success'
+        env:
+          EMPREINTE: ${{ github.event.inputs.empreinte }}
+        run: |
+          set -uo pipefail
+          ref="${EMPREINTE:-$(ls -t omega/prod/empreintes/recette-*.txt 2>/dev/null | head -1)}"
+          [ -f "$ref" ] || { echo "::error::aucune empreinte de la recette à comparer"; exit 1; }
+          psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -At -F ' | ' -f omega/prod/empreinte.sql > "$SORTIE/empreinte-ci.txt"
+          if diff <(grep -v '^#' "$ref" | sort) <(sort "$SORTIE/empreinte-ci.txt") > "$SORTIE/empreinte-diff.txt"; then
+            echo "Empreintes identiques à $(basename "$ref")." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            { echo; echo "### Empreinte : écarts avec $(basename "$ref") (< recette, > CI)"; echo '```'; cat "$SORTIE/empreinte-diff.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            cat "$SORTIE/empreinte-diff.txt"
+            echo "::error title=Empreinte différente::écarts avec $(basename "$ref") : détailler la catégorie avec empreinte.sql (niveau detail)"
+            exit 1
+          fi
 
       - name: Garder les sorties
         if: always()
