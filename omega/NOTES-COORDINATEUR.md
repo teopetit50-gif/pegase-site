@@ -208,6 +208,20 @@ fonctions Edge se déploient de même en coquille sur un SHA (voir lecteur).
 - b99131d : les trois écrans se relisent d'eux-mêmes (Supabase Realtime,
   `tempsReel.ts`) ; Vercel READY. Reste sur worker-a3 : 4735bf2 (notes), à
   fusionner avec le prochain lot.
+- 7d13c1a, b287d04, d572973, e6d991a : les six écrans de la vague 2 fusionnés
+  (/espace/varelo, tavaro, lorani, tiroma, tamila, daliro ; huit onglets, libellés
+  courts sous 1700 px, retour à la ligne sous 1440 px).
+- **Quota Vercel (plan Hobby, 100 déploiements par jour)** : épuisé le 5/10 au
+  soir par les prévisualisations des branches worker-* (402
+  `api-deployments-free-per-day`) ; main n'était plus servi au-delà de 8ad401b.
+  `vercel.json` (c7e29bd) coupe les déploiements des branches worker-a1…b9. Le
+  quota est revenu le 6/10 à 00 h 01 Z : c7e29bd READY, puis 7c7c934 et 6635b1c.
+  **Les six écrans répondent 200 sur omegaai.fr** (titres vérifiés le 6/10 à
+  00 h 55 Z). omegaai.fr pointe sur la prod : le banc n'y existe pas, les
+  relectures réelles se font sur un Next local pointé sur la recette.
+- 47335ff : worker-b7 fusionné (omega/functions/identite, migrations b7_01–03,
+  tests, NOTES-B7). 6635b1c : `tsconfig.json` exclut `omega/functions` (code
+  Deno des ouvriers, vérifié par Deno, pas par le tsc du site). **B7 terminé.**
 
 ## Branches des ouvriers
 
