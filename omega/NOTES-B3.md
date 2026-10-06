@@ -298,7 +298,7 @@ logiciel métier qui la fait).
      - `tiroma_noter_absence_membre(client, entité, membre, début, fin, motif)` → uuid. Elle écrit au journal `tiroma.absence_membre_notee` ;
      - `tiroma_retirer_absence_membre(absence)` clôt l'absence sans l'effacer ;
      - `tiroma_soins_a_basculer(client, entité, jours = 7)` rend, pour chaque absence ouverte, les rendez-vous prévus sur le fauteuil habituel du membre absent pendant l'absence quand le soin exige une assistante. Pour chacun, elle donne les fauteuils où le basculer : actifs, équipés pour ce soin, libres sur ce créneau, non fermés, avec une assistante habituelle présente.
-   - `19_assistante_absente.sql` : `test_b3_19_assistante_absente`, 14 assertions. Le test vérifie les droits et les refus (dates, motif). Il vérifie aussi :
+   - `19_assistante_absente.sql` : `test_b3_19_assistante_absente`, 16 assertions. Le test vérifie les droits et les refus (dates, motif). Il vérifie aussi :
      - le soin bascule vers le Fauteuil 2 avec Élodie, jamais vers le Fauteuil 3 (sans assistante), jamais vers celui de l'absente ;
      - si Élodie est absente aussi, il n'y a plus de fauteuil où basculer ;
      - une fois clôturée, l'absence n'apparaît plus mais reste dans l'historique ;
