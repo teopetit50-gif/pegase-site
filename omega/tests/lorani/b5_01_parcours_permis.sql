@@ -416,6 +416,12 @@ begin
   perform tests.b5_admin();
   return next is(v_calcul ->> 'etat', 'completude', '19. lorani_calendrier_permis : un PCMI déposé il y a dix jours est en complétude');
   return next is(jsonb_array_length(v_calcul -> 'etapes'), 3, '19. … trois étapes : dépôt, complétude, instruction');
+  -- b5_05 : une demande de pièces d'un PCMI (constatée vide le 06/10 sur la recette, demande-pieces.pdf)
+  return next is(private.lorani_propositions('lorani_demande_pieces',
+                   '{"date_lettre": {"valeur": "2026-10-01"}, "pieces": [{"valeur": "PCMI 3"}, {"valeur": "PCMI 6"}, {"valeur": "DPMI2"}, {"valeur": "plan en coupe"}]}'::jsonb)
+                   #> '{0,valeurs,pieces}',
+                 '[{"code": "PCMI3"}, {"code": "PCMI6"}, {"code": "DPMI2"}]'::jsonb,
+                 '19. b5_05 : les pièces « PCMI 3 », « PCMI 6 », « DPMI2 » d''une demande lue sont gardées, le texte libre écarté');
 
   -- ── 20. Le journal ──
   return next ok((select count(distinct action) from public.journal_opposable where client_id = v_client and action in
