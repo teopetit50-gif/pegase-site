@@ -23,6 +23,9 @@
    tapés sous la phrase (la clé ne change pas, son enveloppe si). Ensuite la
    clé d'un dossier vient du coffre (fonction tamila-coffre), à l'ouverture
    du dossier, pour qui le voit ; chaque déballage est journalisé.
+
+   Les avis reçus par courriel (b4_10, 06/10/2026) : au-dessus des
+   compteurs, la file « Avis RPVA à rattacher » (AvisEntrantsTamila).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -39,6 +42,7 @@ import { MATIERES, STATUTS_DOSSIER, TERRITOIRES, delaiCourt, estAssocie, estGera
 import { chargerCabinet, chargerDossier, cleDossier, coffre, creerDossier, installer, type Cabinet, type EtatCoffre } from "./portes";
 import type { Clair, Dossier, DossierComplet } from "./types";
 import DossierTamila from "./DossierTamila";
+import AvisEntrantsTamila from "./AvisEntrantsTamila";
 import "./tamila.css";
 
 type Filtre = "a_confirmer" | "proches" | "audiences" | "ouverts" | "clos";
@@ -265,6 +269,33 @@ export default function EcranTamila() {
     },
     [cabinet, phrase, auCoffre, cleParCoffre],
   );
+
+  /* la clé d'un dossier pour y chiffrer une pièce reçue : trousseau, puis coffre, puis phrase */
+  const cleDe = useCallback(
+    async (id: string): Promise<CryptoKey | null> => {
+      const deja = trousseau.current.lire(id);
+      if (deja || !cabinet) return deja;
+      const k = cabinet.cles.find((c) => c.dossier_id === id && c.statut === "active") ?? null;
+      if (k?.fournisseur === "scaleway" || (!k && auCoffre)) return cleParCoffre(id);
+      if (!phrase) return null;
+      const enveloppe = k?.enveloppe ?? (await cleDossier(id));
+      return enveloppe ? trousseau.current.ouvrir(id, enveloppe, phrase) : null;
+    },
+    [cabinet, phrase, auCoffre, cleParCoffre],
+  );
+
+  /* un avis rattaché : le dossier s'ouvre, relu (sa nouvelle pièce) */
+  const avisRattache = useCallback((id: string) => {
+    setFiltre(null);
+    setChoix(id);
+    if (source === "reelle") {
+      setComplets((prev) => {
+        const r = { ...prev };
+        delete r[id];
+        return r;
+      });
+    }
+  }, [source]);
 
   useEffect(() => {
     if (source !== "reelle" || !ligne || !cabinet || complets[ligne.dossier.id]) return;
@@ -598,6 +629,18 @@ export default function EcranTamila() {
       ) : null}
       {source === "reelle" && cabinet?.horsVue ? (
         <div style={{ marginBottom: 14 }}><Avis teinte="gris">{cabinet.horsVue} dossier{cabinet.horsVue > 1 ? "s" : ""} du cabinet {cabinet.horsVue > 1 ? "sont" : "est"} hors de votre vue (muraille ou périmètre) : compté, jamais lu.</Avis></div>
+      ) : null}
+
+      {source === "exemple" || (cabinet?.installe && moi && moi.role !== "lecteur") ? (
+        <AvisEntrantsTamila
+          key={source}
+          source={source}
+          clientId={source === "exemple" ? EXEMPLE_CLIENT : (cabinet?.moi.client_id ?? "")}
+          dossiers={lignes.filter((x) => ["attente", "ouvert", "audit"].includes(x.dossier.statut)).map((x) => ({ dossier: x.dossier, clair: x.clair }))}
+          cleDe={cleDe}
+          avocat={!!moi && ["gerant", "admin", "valideur"].includes(moi.role)}
+          onRattache={avisRattache}
+        />
       ) : null}
 
       <div className="esp-kpis tam-kpis" data-arrivee="">

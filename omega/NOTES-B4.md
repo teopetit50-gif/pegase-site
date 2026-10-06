@@ -438,6 +438,38 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   « Imprimer » sur chaque facture de la carte Honoraires. Recette 99/99 (9 sur la facture imprimée), axe-core
   0 écart. **Rien ne part au serveur** : nom du client et détail du temps restent dans le navigateur.
 
+## 15. La porte d'entrée automatique des avis : le canal courriel du socle (lot B4-11, 06/10)
+
+Décision du coordinateur : pas d'API e-barreau ouverte, on n'en invente pas. Le cabinet fait suivre ses
+notifications RPVA vers son adresse de réception (ligne `expediteurs`, module tamila, à créer par le
+coordinateur, du type `cabinet-x@recu.omegaai.fr`) ; `deposer_reception` publie `reception.nouvelle`.
+
+- **Base** (e39e4ef) : `b4_10_tamila_avis_entrants.sql` — table `tamila_avis_entrants` (une ligne par réception,
+  sans un mot en clair : type supposé en code, nombre de pièces, statut `a_rattacher|rattache|ecarte|expire`,
+  dossier, pièces chiffrées, échéance à 7 jours) ; abonnement `reception.nouvelle → tamila` ; portes
+  `tamila_rattacher_avis` (les pièces doivent être des pièces chiffrées du dossier), `tamila_ecarter_avis`
+  (avocats) ; purge : la réception passe `traitee`, sujet, corps et expéditeur vidés, et un travail
+  `tamila.purger_reception` est déposé ; passage `tamila-receptions` toutes les 5 min (pg_cron) : au-delà de 7
+  jours, `expire` + purge + alerte critique. Portes serveur `tamila_reception_a_purger` /
+  `tamila_reception_purgee` (service_role seul). Sans drop, sans effacement SQL, revoke from public partout.
+  Test `19_avis_entrants.sql` : 28 contrôles, verts sur la souche (série locale 440/440).
+- **Ouvrier** (b4b664e) : `omega/functions/tamila-purge/` — prend les travaux `tamila.purger_reception`,
+  efface au bucket les fichiers de `<client>/receptions/` (chemins hors de ce préfixe ignorés), puis
+  `tamila_reception_purgee`. 4 tests Deno. Aucun secret propre (clé service du socle). À déployer, et à
+  appeler toutes les 5 minutes comme les autres ouvriers.
+- **Écran** : `AvisEntrantsTamila.tsx`, au-dessus des compteurs (gérant, admin, valideur, collaborateur ; pas
+  le stagiaire). Le n° RG cité par le courriel est comparé dans le navigateur aux n° RG déchiffrés : dossier
+  proposé. L'avocat choisit ; chaque pièce jointe est téléchargée, chiffrée avec la clé du dossier (trousseau,
+  coffre ou phrase), déposée (`tamila_deposer_piece`, type d'avis choisi ou laissé au lecteur), puis
+  rattachée. Mention à l'écran : « L'avis transite en clair chez le prestataire de courriel et dans sa
+  réception le temps du rattachement, sept jours au plus ; dès qu'il est rattaché (ou écarté), cette copie
+  est effacée. » Recette 109/109 (10 sur la file), axe-core 0 écart grave (carte et dialogue).
+- **Limites, honnêtement** : (1) la politique RLS du socle sur `receptions` laisse tout membre du cabinet lire
+  la réception le temps qu'elle est en clair (stagiaire et membres murés compris) — à resserrer côté socle
+  si besoin ; (2) l'écran suppose que la politique SELECT du bucket laisse un membre télécharger
+  `<client>/receptions/…` — à vérifier en recette ; sinon il faut une URL signée par une fonction ;
+  (3) un courriel sans pièce jointe ne se rattache pas : il s'écarte et l'avis se saisit à la main.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
