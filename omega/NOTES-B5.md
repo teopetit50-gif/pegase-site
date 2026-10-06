@@ -1,6 +1,6 @@
 # Session B5 — LORANI, le calendrier du permis (vague 2)
 
-Branche `worker-b5`. Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5, depuis le 06/10 à 1 h 10 ; auparavant session_01B4JNQXyT69GytdvE9SjAnE).
+Branche `worker-b5`. Session B5 : session_018iNiXjY8eWmMjaGrXSGgma (Opus 5.5, reprise de session_013VSXzohLtDQS5bbWfRb4xR le 06/10 à 1 h 30 Z). Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5, depuis le 06/10 à 1 h 10 ; auparavant session_01B4JNQXyT69GytdvE9SjAnE).
 Dernière mise à jour : 05/10/2026, 23 h.
 
 ## Jauges
@@ -197,3 +197,8 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
 - 06/10, 0 h 54 (coordinateur) : b5_04 posée (avec b5_01 v2 et b5_03 v2), `^test_b5_` rejoué : **111/111**. worker-b5
   8f6d793 fusionné dans main (2e8bbf9). **Lot B5 clos** ; reprise si le lecteur d'A1 sort les six types de courriers
   (rejeu de `courrier-reel.mjs`) ou si un TAP tombe. Jauges : mécanique 90 %, livrable 85 %.
+- 06/10, 1 h 30 Z (reprise, session_018iNiXjY8eWmMjaGrXSGgma) : le lecteur d'A1 v14 (055b29c) connaît les six types.
+  Rejeu préparé (531d0b3) : `fabriquer-courrier.mjs` fabrique les courriers d'essai sans dépendance (récépissé v2,
+  demande de pièces PCMI 3 / PCMI 6 — nouvelles empreintes, l'ancien récépissé reste en `a_classer`) ;
+  `courrier-reel.mjs <session.json> <courrier.pdf> [origine] [nature]`. **Bloqué** : le conteneur neuf n'a ni la clé
+  publishable de la recette ni la session de `gerant@banc-varelo.test` ; demandées au coordinateur.
