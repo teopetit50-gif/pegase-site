@@ -117,7 +117,7 @@ language plpgsql as $f$
 declare
   jeu jsonb; v_client uuid; v_gerant uuid; v_referent uuid; v_daf uuid; v_daf2 uuid; v_entite uuid;
   v_autre_client uuid := gen_random_uuid(); v_autre_user uuid := gen_random_uuid();
-  v_projet uuid; v_lot1 uuid; v_pc uuid; v_dp uuid; v_piece uuid; v_prop uuid; v_delai uuid; v_recours uuid;
+  v_projet uuid; v_lot1 uuid; v_pc uuid; v_dp uuid; v_pcmi uuid; v_piece uuid; v_prop uuid; v_delai uuid; v_recours uuid;
   v_calcul jsonb; r jsonb; n integer; v_texte text; v_date date; v_travail bigint;
   x public.lorani_permis;
   v_d integer; v_j_demande integer; v_j_depot integer;
@@ -431,6 +431,30 @@ begin
   return next is(private.lorani_codes_pieces('[{"valeur": ["PC 8", "PC5"]}, {"valeur": "PC5; PA10-1"}]'::jsonb),
                  '["PC8", "PC5", "PA10-1"]'::jsonb,
                  '19. b5_06 : tableau jsonb et texte à virgules, dans l''ordre et sans doublon');
+
+  -- ── 19 bis (b5_07). Une seconde demande de pièces complète la première, elle ne la remplace pas ──
+  perform tests.b5_endosser(v_referent);
+  insert into public.lorani_permis (client_id, projet_id, type_autorisation, intitule, date_depot)
+  values (v_client, v_projet, 'pcmi', 'Garage Lemoine', current_date - 20) returning id into v_pcmi;
+  update public.lorani_permis set date_demande_pieces = current_date - 12, pieces_demandees = '[{"code": "PCMI3"}, {"code": "PCMI6"}]' where id = v_pcmi;
+  update public.lorani_permis set date_demande_pieces = current_date - 10, pieces_demandees = '[{"code": "PCMI2"}, {"code": "PCMI6"}]' where id = v_pcmi;
+  perform tests.b5_admin();
+  select * into x from public.lorani_permis where id = v_pcmi;
+  return next is(x.pieces_demandees, '[{"code": "PCMI3"}, {"code": "PCMI6"}, {"code": "PCMI2"}]'::jsonb, '19 bis. b5_07 : seconde lettre → union des pièces, la première lettre d''abord');
+  return next is(x.date_demande_pieces, current_date - 12, '19 bis. … la date reste celle de la première lettre (le délai de trois mois ne repart pas)');
+  return next is(jsonb_array_length(x.demandes_pieces), 2, '19 bis. … les deux lettres sont dans l''historique demandes_pieces');
+  return next ok(exists (select 1 from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:seconde_demande:2', v_pcmi)
+                         and titre like '%seconde demande de pièces%'), '19 bis. … alerte « seconde demande de pièces » levée');
+  return next ok(private.lorani_deja_saisi(x, 'demande_pieces', jsonb_build_object('date_demande_pieces', current_date - 10, 'pieces', '[{"code": "PCMI2"}, {"code": "PCMI6"}]'::jsonb)),
+                 '19 bis. … la seconde lettre relue ne repropose rien (lorani_deja_saisi lit l''historique)');
+  perform tests.b5_endosser(v_referent);
+  update public.lorani_permis set date_pieces_fournies = current_date - 3 where id = v_pcmi;
+  update public.lorani_permis set date_demande_pieces = current_date - 1, pieces_demandees = '[{"code": "PCMI9"}]' where id = v_pcmi;
+  perform tests.b5_admin();
+  select * into x from public.lorani_permis where id = v_pcmi;
+  return next ok(x.date_demande_pieces = current_date - 12 and x.pieces_demandees = '[{"code": "PCMI3"}, {"code": "PCMI6"}, {"code": "PCMI2"}]'::jsonb
+                 and jsonb_array_length(x.demandes_pieces) = 3,
+                 '19 bis. … une lettre arrivée après la remise des pièces ne change rien au permis, elle va à l''historique (art. R*423-41)');
 
   -- ── 20. Le journal ──
   return next ok((select count(distinct action) from public.journal_opposable where client_id = v_client and action in

@@ -48,6 +48,18 @@ type Props = {
 /* « PCMI 3, PC8 » ou « PCMI 3 PC 8 » → [PCMI3, PC8] : un espace suivi d'un chiffre reste dans le code */
 const decouperCodes = (brut: string) => brut.split(/[,;]+|\s+(?=[A-Za-z])/).map((c) => c.replace(/\s/g, "").toUpperCase()).filter(Boolean);
 
+/* Une lettre de demande de pièces, appliquée comme le fait le socle (b5_07, trigger lorani_permis_suivre_demandes) :
+   une seconde lettre complète la première (union, date de la première gardée) ; après la remise des pièces, elle ne va
+   qu'à l'historique ; à la même date, elle corrige la liste. */
+const unionPieces = (a: { code: string }[], b: { code: string }[]) => [...a, ...b.filter((x) => !a.some((y) => y.code === x.code))];
+function appliquerDemande(p: Permis, date: string, pieces: { code: string }[]): Partial<Permis> {
+  const hist = [...(p.demandes_pieces ?? (p.date_demande_pieces ? [{ date: p.date_demande_pieces, pieces: p.pieces_demandees }] : [])).filter((h) => h.date !== date), { date, pieces }].sort((x, y) => x.date.localeCompare(y.date));
+  if (!p.date_demande_pieces || p.date_demande_pieces === date) return { date_demande_pieces: date, pieces_demandees: pieces, demandes_pieces: hist, etat: "pieces_demandees" };
+  if (p.date_pieces_fournies) return { demandes_pieces: hist };
+  const premiere = date < p.date_demande_pieces;
+  return { date_demande_pieces: premiere ? date : p.date_demande_pieces, pieces_demandees: premiere ? unionPieces(pieces, p.pieces_demandees) : unionPieces(p.pieces_demandees, pieces), demandes_pieces: hist, etat: "pieces_demandees" };
+}
+
 type Quoi = "pieces_fournies" | "affichage" | "decision" | "delai" | "depot" | "demande_pieces";
 
 type Form =
@@ -191,7 +203,10 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
         calcul: cible ? { ...cible.calcul, regime: cible.calcul.regime ? { ...cible.calcul.regime, delai_notifie_mois: v.delai_notifie_mois as number } : undefined } : undefined,
       });
     }
-    if (d.nature === "demande_pieces") Object.assign(patch, { date_demande_pieces: v.date_demande_pieces as string, pieces_demandees: (v.pieces as { code: string }[]) ?? [], etat: "pieces_demandees" as const });
+    if (d.nature === "demande_pieces") {
+      const cible = dossier.permis.find((x) => x.id === permisVise);
+      if (cible) Object.assign(patch, appliquerDemande(cible, v.date_demande_pieces as string, (v.pieces as { code: string }[]) ?? []));
+    }
     if (d.nature === "decision") Object.assign(patch, { decision: v.decision as Permis["decision"], date_decision: v.date_decision as string, etat: v.decision === "favorable" ? ("accorde" as const) : ("refuse" as const) });
     if (d.nature === "decision_tacite") Object.assign(patch, { decision: "tacite" as const, date_decision: v.date_decision as string, etat: "accorde" as const });
     if (d.nature === "affichage") Object.assign(patch, { date_affichage: v.date_affichage as string });
@@ -269,7 +284,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
     } else if (q === "demande_pieces") {
       v.date_demande_pieces = date;
       v.pieces_demandees = decouperCodes(saisie.pieces).map((code) => ({ code }));
-      Object.assign(patch, { date_demande_pieces: date, pieces_demandees: v.pieces_demandees, etat: "pieces_demandees" as const });
+      Object.assign(patch, appliquerDemande(p, date, v.pieces_demandees as { code: string }[]));
       message = "Demande de pièces saisie : trois mois pour les adresser à la mairie.";
     }
     await appliquer(() => saisirPermis(p.id, v), () => majPermis(dossier, p.id, patch), message);
@@ -498,6 +513,16 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
           )}
         </div>
       </section>
+
+      {/* ——— 4 bis. les lettres de demande de pièces (b5_07) ——— */}
+      {(p.demandes_pieces?.length ?? 0) > 1 ? (
+        <Avis teinte="ambre">
+          <strong>Plusieurs demandes de pièces.</strong> À fournir : {p.pieces_demandees.map((x) => x.code).join(", ") || "—"}.{" "}
+          Lettres : {p.demandes_pieces!.map((h) => `du ${dateCourte(`${h.date}T12:00:00`)} (${h.pieces.map((x) => x.code).join(", ") || "aucune pièce"})`).join(" ; ")}.{" "}
+          La mairie doit tout réclamer en une fois (art. R*423-38) : une lettre de plus ne fait pas repartir le délai de trois mois, qui court depuis la première
+          {p.date_pieces_fournies ? " ; une lettre reçue après la remise des pièces ne modifie pas les délais (art. R*423-41)" : ""}.
+        </Avis>
+      ) : null}
 
       {/* ——— 5. les avertissements ——— */}
       {c.avertissements?.length ? (

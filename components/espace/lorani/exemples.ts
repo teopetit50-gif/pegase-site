@@ -124,6 +124,8 @@ export const PERMIS_EXEMPLE: Permis[] = [
     date_depot: j(-95),
     date_demande_pieces: j(-82),
     pieces_demandees: [{ code: "PC5" }, { code: "PC8" }],
+    /* deux lettres : la seconde a ajouté PC8, le délai court depuis la première (b5_07) */
+    demandes_pieces: [{ date: j(-82), pieces: [{ code: "PC5" }] }, { date: j(-78), pieces: [{ code: "PC5" }, { code: "PC8" }] }],
     etat: "pieces_demandees",
     calcul: {
       version: "lorani.m4.1",

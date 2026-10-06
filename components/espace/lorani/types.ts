@@ -127,6 +127,8 @@ export type Permis = {
   cree_le: string;
   maj_le: string;
   pieces_demandees: { code: string }[];
+  /* l'historique des lettres de demande de pièces (b5_07) ; pieces_demandees en est l'union */
+  demandes_pieces?: { date: string; pieces: { code: string }[] }[];
 };
 
 export type NatureDateLue = "depot" | "delai_notifie" | "demande_pieces" | "decision" | "decision_tacite" | "affichage";

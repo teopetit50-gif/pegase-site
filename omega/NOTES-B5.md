@@ -315,3 +315,27 @@ toucher « Pavillon Lemoine ». Courriers : `fabriquer-courrier.mjs arrete|const
 - Bilan : quatre des six types de courriers prouvés en réel (récépissé, demande de pièces, arrêté, constat
   d'affichage) ; restent la lettre de délai et le certificat tacite (couverts par le test, pas encore en réel).
 
+## 8. b5_07 — seconde demande de pièces (feu vert du coordinateur, 06/10, 2 h 17 Z)
+
+- `omega/modules/lorani/migrations/b5_07_seconde_demande_pieces.sql` : colonne `lorani_permis.demandes_pieces`
+  (add column if not exists, contrôle ≤ 24 lettres) ; `private.lorani_union_pieces`, `private.lorani_noter_demande`
+  (pures) ; trigger BEFORE `lorani_permis_suivre_demandes` → `private.lorani_suivre_demandes_pieces()` (security
+  definer) : seconde lettre avant la remise → union, première date gardée, alerte « attention » au chef de projet
+  (clé `permis:<id>:seconde_demande:<n>`) ; après la remise → historique seulement, alerte R*423-41 ; même date →
+  correction ; `private.lorani_deja_saisi` lit l'historique ; amorce de l'historique des permis existants. Les trois
+  nouvelles fonctions : `revoke execute from public`. Un seul trigger sert la confirmation d'une date lue ET la
+  saisie de l'écran. Écart à la proposition du § 6 : pas d'avertissement dans le calcul (fonction de 300 lignes à
+  recopier) ; l'alerte et l'écran le portent. Pas de `piece_id` dans l'historique (le lien est dans
+  `lorani_permis_dates_lues`).
+- Essayé sur Postgres 16 local (table réduite) : 1re lettre → historique ; 2e → [PCMI3, PCMI6, PCMI2], date de la
+  1re, deux lettres, alerte ; relue → `deja_saisi` vrai ; après remise → permis inchangé, trois lettres, alerte
+  R*423-41 ; même date → correction.
+- Test : étape 19 bis, six assertions (permis « Garage Lemoine » neuf, UPDATE sous RLS par le chef de projet) →
+  attendu **120/120**.
+- Écran : type `demandes_pieces`, `appliquerDemande` (même règle, pour l'exemple et l'affichage immédiat), avis
+  « Plusieurs demandes de pièces » (à fournir, lettres, R*423-38 / -41) ; exemple « Maison Lemoine » à deux lettres ;
+  recette : un contrôle de plus. tsc, eslint, build, recette aux cinq largeurs : verts.
+- **À faire valider par un juriste (remonté à Teo par le coordinateur)** : une seconde demande de pièces envoyée
+  DANS le mois qui suit le dépôt — complète-t-elle valablement la première (et fait-elle partir le délai de trois mois
+  de sa propre date pour les pièces qu'elle ajoute) ? b5_07 garde la date de la première lettre, le choix prudent.
+
