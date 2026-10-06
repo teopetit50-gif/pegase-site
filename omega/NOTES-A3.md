@@ -534,6 +534,42 @@ dit au lieu de planter.
   identite.tva_intracom, tva.taux) — attendu pour un exemple allemand fictif
   (TVA DE123456789, taux 7 % / 19 %), rien à corriger côté lecteur.
 
+## Lot du 06/10 (13) — l'écran FILED de la facture électronique (fiche d'A4, aa2e1fc)
+
+Dans `/espace/filed` seulement, la coquille et la barre ne bougent pas.
+- **Provenance** : pastille « Facture électronique » (structurée + reçue par
+  la plateforme : `filed_pa_flux` entrant déposé), « Fichier structuré »,
+  « Lue sur la pièce », « Saisie » ; repli `structuree` si une valeur xml
+  porte sur le numéro ou le TTC. Les valeurs xml disent « du fichier ».
+- **Corriger** : les champs xml sont grisés dans le dialogue (« — du fichier,
+  fait foi ») ; le bouton est grisé si tout fait foi. À côté : « Ouvrir un
+  litige » et « Refuser » (lien vers la file, à valider ou bloquée).
+- **Onglets** du dossier : Dossier · Cycle de vie (n) · Écritures. Frise de
+  `filed_cycle_vie_facture` (sens/erreur rapprochés de `filed_cycle_vie`),
+  « obligatoire » d'après `filed_cycle_vie_statuts`. Écritures : tableau
+  Journal · N° · Date · Compte · Libellé · Débit · Crédit · Lettrage, et
+  « Transmettre à la comptabilité » (`filed_comptabiliser_facture`).
+- **Litige** : motif normalisé (`filed_cycle_vie_motifs`, statut 207 ; AUTRE
+  = l'option vide), `p_motif = 'CODE : texte'` ; bandeau « En litige depuis… »
+  et « Clore le litige » (`filed_clore_litige`).
+- **Nouvelle page `/espace/filed/comptabilite`** (lien « Comptabilité » en
+  tête de FILED) : export FEC (`filed_exporter_fec`), titre et sous-titre
+  obligatoires, contenu téléchargé TEL QUEL (CRLF, UTF-8), bilan lignes /
+  écritures / débit = crédit ; les cinq comptes de FILED, « Modifier » pour
+  gérant/admin (`filed_regler_compte_systeme`, 3 à 12 chiffres).
+- Recette : `recette-espace.mjs` (+ comptabilité aux 5 largeurs, + deux
+  enchaînements : facture électronique, FEC/compte) tout passe ;
+  `accessibilite.mjs` tout passe ; `non-regression.mjs` 411/411 avec deux
+  écrans nouveaux (`filed-electronique`, `comptabilite`).
+- **Base réelle** (`relecture-facture-electronique.mjs`, gérant, R2026-000005) :
+  « Fichier structuré », 6 valeurs « du fichier », frise 204 « À transmettre
+  au fournisseur », Écritures vide, 12 motifs lus en base (le doublon
+  « Autre motif » corrigé à chaud), cinq comptes par défaut, export FEC
+  `500000013FEC20261231.txt` : 0 ligne (aucune écriture au banc). Rien
+  d'autre écrit (le litige n'a pas été ouvert ; l'export s'inscrit au journal).
+  « Corriger » reste actif sur R2026-000005 : certains champs n'y viennent pas
+  du xml — conforme.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

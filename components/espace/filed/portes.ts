@@ -30,6 +30,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
+import { chargerFactureElectronique } from "./factureElectronique";
 import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, IbanFournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
 
 export class ErreurPorte extends Error {}
@@ -103,6 +104,7 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
     appariements: (appar?.data ?? []) as DossierFiled["appariements"],
     origine_deposee_par: await deposantOrigine(a),
+    ...(await chargerFactureElectronique(a.document.id, fid ?? null).catch(() => ({}))),
   };
 }
 
@@ -165,15 +167,17 @@ export async function deposerDocument(o: { client_id: string; entite_id: string 
   return { document_id: texte(r.document) ?? document_id, reference: texte(r.reference), etat: texte(r.etat), doublon_de: texte(r.doublon_de) };
 }
 
-export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; entites: { id: string; nom: string }[] } | null> {
+export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; role: string | null; entites: { id: string; nom: string; siren?: string | null }[] } | null> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
-  const { data } = await supabase.from("comptes").select("client_id").eq("user_id", auth.user.id).limit(1);
-  const c = (data ?? [])[0] as { client_id: string } | undefined;
+  const { data } = await supabase.from("comptes").select("client_id, role").eq("user_id", auth.user.id).limit(1);
+  const c = (data ?? [])[0] as { client_id: string; role: string | null } | undefined;
   if (!c) return null;
-  const e = await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false });
-  return { user_id: auth.user.id, client_id: c.client_id, email: auth.user.email ?? null, entites: (e.data ?? []) as { id: string; nom: string }[] };
+  const e = await supabase.from("entites").select("id, nom, siren").eq("client_id", c.client_id).order("principale", { ascending: false });
+  /* le SIREN n'est peut-être pas lisible : on retombe sur id et nom */
+  const ent = e.error ? await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false }) : e;
+  return { user_id: auth.user.id, client_id: c.client_id, email: auth.user.email ?? null, role: c.role ?? null, entites: (ent.data ?? []) as { id: string; nom: string; siren?: string | null }[] };
 }
 
 export async function chargerFournisseurs(): Promise<Fournisseur[]> {

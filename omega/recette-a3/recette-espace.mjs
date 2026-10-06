@@ -16,7 +16,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['point', '/espace/point']];
+const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['comptabilite', '/espace/filed/comptabilite'], ['point', '/espace/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS) {
@@ -295,6 +295,66 @@ for (const [nom, chemin] of ECRANS) {
   ok(j1 && j2 && j1 !== j2, `le jour change : « ${j1} » → « ${j2} »`);
   const rien = await s.evaluer(`[...document.querySelectorAll('.esp-point-rien')].length`);
   ok(rien >= 1, `${rien} section(s) « rien à signaler » la veille`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-electronique', densite: 1 });
+  console.log('— /espace/filed : la facture électronique R2026-000014');
+  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000014'), 'page chargée');
+  await s.dormir(700);
+  const r = await s.evaluer(`(() => { const d = document.querySelector('#esp-dossier'); const c = [...d.querySelectorAll('button')].find(b => /Corriger une valeur/.test(b.textContent));
+    return { pastille: /Facture électronique/.test(d.innerText), fichier: (d.innerText.match(/du fichier/g) ?? []).length, corriger: c?.disabled, aide: c?.title, onglets: [...d.querySelectorAll('[role="tab"]')].map(t => t.textContent) }; })()`);
+  ok(r.pastille, 'la pastille « Facture électronique »');
+  ok(r.fichier >= 3, `les valeurs xml disent « du fichier » (${r.fichier})`);
+  ok(r.corriger === true && /fait foi/.test(r.aide ?? ''), `« Corriger une valeur » grisé, avec l'aide (${r.aide?.slice(0, 60)})`);
+  ok(/^Dossier\|Cycle de vie \(\d+\)\|Écritures/.test(r.onglets.join('|')), `onglets : ${r.onglets.join(', ')}`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier [role="tab"]')].find(t => /Cycle de vie/.test(t.textContent)).click()`);
+  await s.dormir(300);
+  const frise = await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-frise li')].map(l => l.innerText.replace(/\\s+/g, ' '))`);
+  ok(frise.length >= 2 && /204/.test(frise[0]) && frise.some(l => /205/.test(l) && /À transmettre au fournisseur/.test(l)), `la frise : ${frise.map(l => l.slice(0, 50)).join(' / ')}`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier [role="tab"]')].find(t => /Écritures/.test(t.textContent)).click()`);
+  await s.dormir(300);
+  const ecr = await s.evaluer(`document.querySelector('#esp-dossier').innerText`);
+  ok(/Pas encore d.écriture/.test(ecr) && /Transmettre à la comptabilité/.test(ecr), 'Écritures : vide, et « Transmettre à la comptabilité » pour la facture validée');
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier [role="tab"]')].find(t => /^Dossier/.test(t.textContent)).click()`);
+  await s.dormir(300);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier button')].find(b => /Ouvrir un litige/.test(b.textContent)).click()`);
+  await s.dormir(500);
+  const dlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const b = [...d.querySelectorAll('button')].find(x => /Ouvrir le litige/.test(x.textContent)); return { titre: d.querySelector('h2')?.textContent, motifs: d.querySelectorAll('select option').length, gris: b?.disabled }; })()`);
+  ok(dlg.titre === 'Ouvrir un litige' && dlg.motifs >= 9 && dlg.gris === true, `dialogue : ${dlg.motifs} motifs normalisés, bouton gris sans précision`);
+  await s.evaluer(`(() => { const t = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(t, 'Le toner facturé n\\'a pas été livré.'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Ouvrir le litige/.test(x.textContent)).click()`);
+  await s.dormir(800);
+  const apres = await s.evaluer(`(() => { const d = document.querySelector('#esp-dossier'); return { ouvert: !document.querySelector('[role="dialog"]'), litige: /En litige depuis/.test(d.innerText), clore: [...d.querySelectorAll('button')].some(b => /Clore le litige/.test(b.textContent)) }; })()`);
+  ok(apres.ouvert && apres.litige && apres.clore, `litige ouvert : « En litige depuis… » et « Clore le litige » (${JSON.stringify(apres)})`);
+  await s.capturer(`${dossier}filed-electronique-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-fec', densite: 1 });
+  console.log('— /espace/filed/comptabilite : exporter le FEC, régler un compte');
+  ok(await s.aller(base + '/espace/filed/comptabilite'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter le FEC/.test(b.textContent)).click()`);
+  await s.dormir(800);
+  const av = await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | ')`);
+  ok(/lignes/.test(av) && /écritures/.test(av) && /crédit/.test(av), `bilan de l'export : ${av.slice(0, 140)}`);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /^Modifier le compte : Banque/.test(b.getAttribute('aria-label') ?? '')).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '51'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  const g = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const b = [...d.querySelectorAll('button')].find(x => /Enregistrer/.test(x.textContent)); return { gris: b?.disabled, texte: d.innerText }; })()`);
+  ok(g.gris === true, `un numéro de 2 chiffres laisse « Enregistrer » gris`);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '512100'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Enregistrer/.test(x.textContent)).click()`);
+  await s.dormir(700);
+  const ligne = await s.evaluer(`[...document.querySelectorAll('.esp-tableau tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')).find(t => /Banque/.test(t)) ?? ''`);
+  ok(/512100/.test(ligne) && !/par défaut/.test(ligne), `le compte banque devient 512100 (${ligne})`);
+  await s.capturer(`${dossier}comptabilite-fec-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

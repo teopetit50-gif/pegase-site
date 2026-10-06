@@ -75,6 +75,28 @@ const ECRANS = [
     ],
   },
   {
+    /* la facture électronique (fiche d'A4, 06/10) : provenance, valeurs qui font foi, litige, onglets.
+       « Refuser » n'y est pas : R2026-000014 est validée (le lien ne s'offre qu'à valider ou bloquée). */
+    cle: 'filed-electronique', chemin: '/filed?objet=facture:R2026-000014', titre: 'Documents reçus',
+    textes: ['Facture électronique', 'du fichier'],
+    actions: [
+      { nom: 'Ouvrir un litige', dialogue: 'Ouvrir un litige' },
+      { nom: 'Cycle de vie' },
+      { nom: 'Écritures' },
+      { nom: 'Comptabilité', lien: '/filed/comptabilite' },
+    ],
+  },
+  {
+    cle: 'comptabilite', chemin: '/filed/comptabilite', titre: 'Comptabilité',
+    textes: ['Fichier des écritures comptables (FEC) — achats', 'Il ne remplace pas le FEC complet de votre comptabilité', 'Les comptes de FILED', 'par défaut'],
+    actions: [
+      { nom: 'Exporter le FEC' },
+      { nom: 'Modifier le compte', dialogue: 'Modifier le compte' },
+      { nom: 'Documents reçus', lien: '/filed' },
+      { nom: 'À payer', lien: '/filed/a-payer' },
+    ],
+  },
+  {
     cle: 'fournisseurs', chemin: '/filed/fournisseurs', titre: 'Fournisseurs',
     textes: ['À confirmer', 'Bloqués', 'Actifs', 'IBAN', 'Factures'],
     actions: [
