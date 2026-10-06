@@ -38,7 +38,7 @@ for (const largeur of LARGEURS) {
       .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
     return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent,
              kpis: [...document.querySelectorAll('.esp-kpi')].map(k => (k.querySelector('.esp-kpi-etiquette')?.textContent + ' = ' + k.querySelector('.esp-kpi-valeur')?.textContent)),
-             items: document.querySelectorAll('.esp-item').length, bareme: document.querySelectorAll('section[aria-label="Barème de remise en état"] tbody tr').length };
+             items: document.querySelectorAll('ul[aria-label="Contrats de location"] .esp-item').length, bareme: document.querySelectorAll('section[aria-label="Barème de remise en état"] tbody tr').length };
   })()`);
   ok(mesure.deb === 0, `pas de débordement horizontal (${mesure.deb})`);
   ok(mesure.larges.length === 0, `aucun élément plus large que l'écran ${mesure.larges.length ? JSON.stringify(mesure.larges) : ''}`);
