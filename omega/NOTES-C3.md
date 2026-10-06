@@ -187,6 +187,12 @@ propre hors /_vercel/insights) : **verte**. Captures 390 et 1440 dans `omega/rec
 
 ## Journal de session
 
+- 06/10, ~20 h Z : retour du coordinateur — c3_01 posé et vert ; c3_02, c3_03, banc_reput posés, reput-reponse
+  déployé (v1, fumée 200, ia_branchee true), cron omega-reput actif. Tests c3_02/c3_03 morts sur
+  « envoye réservé à l'ouvrier d'envoi » (garder_envoi) : la remise passe désormais par la voie du socle
+  (tests.c3_remettre : commencer_envoi puis confirmer_envoi, comme 19ab). Souche 175/175. Lot socle
+  c3_04_socle_consommation_ia.sql (reput.preparer compté dans le plafond IA du jour) écrit pour le coordinateur.
+
 - 06/10, ~19 h 40 Z : palier 4 (écran) écrit ; tsc, eslint, build verts ; recette 5 largeurs verte.
 
 - 06/10, ~18 h 50 Z : palier 3 écrit (c3_03) ; souche 173/173.
