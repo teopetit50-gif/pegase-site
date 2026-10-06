@@ -64,8 +64,8 @@ begin
                                                                        and x ->> 'texte' like '%' || to_char(v_j + 2, 'DD/MM') || ' : rafales 72 km/h (seuil 50)%'),
                  'Grue : ses propres seuils ; rafales de J+2 au-dessus de 50 km/h');
   update public.btp_passages set statut = 'annule' where chantier_id = v_ch and tache = 'Grue';
-  return next ok(exists (select 1 from jsonb_array_elements(private.btp_risques_meteo(v_client, v_j + 2, v_ch)) x where x ->> 'texte' like '%' || to_char(v_j + 3, 'DD/MM') || ' : gel, -3 °C sur « Couverture »%'),
-                 'Le gel de J+3 est signalé (minimale sous 0 °C)');
+  return next ok(exists (select 1 from jsonb_array_elements(private.btp_risques_meteo(v_client, v_j + 3, v_ch)) x where x ->> 'texte' like '%' || to_char(v_j + 3, 'DD/MM') || ' : gel, -3 °C sur « Couverture »%'),
+                 'Le gel de J+3 est signalé (minimale sous 0 °C) — vu de J+3 : à J+2, les rafales de 72 km/h passent avant');
 
   -- ── L'alerte et le point du matin ──
   perform private.btp_alerter_meteo(v_ch);
