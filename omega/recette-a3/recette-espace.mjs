@@ -99,6 +99,8 @@ for (const [nom, chemin] of ECRANS) {
   await s.dormir(500);
   const dlgF = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, avis: /ne confirme pas ce fournisseur/.test(d.textContent) } : null; })()`);
   ok(dlgF && /Confirmer le fournisseur/.test(dlgF.titre) && dlgF.avis, `dialogue « ${dlgF?.titre} », la règle du déposant est dite`);
+  const sansLevee = await s.evaluer(`(() => { const c = [...document.querySelectorAll('#esp-dossier .esp-controle')].find(e => /fournisseur\\.a_confirmer/.test(e.textContent)); return c ? !/Lever avec un motif/.test(c.textContent) && /Confirmer ce fournisseur/.test(c.textContent) : null; })()`);
+  ok(sansLevee === true, 'le contrôle « fournisseur à confirmer » ne se lève pas : il propose de confirmer le fournisseur (a4_12)');
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Confirmer le fournisseur/.test(b.textContent))?.click()`);
   await s.dormir(900);
   const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-dossier').innerText; return { fait: /est confirmé/.test(t), actif: /Actif/.test(t), plusBloque: !/Fournisseur nouveau/.test(t) }; })()`);
