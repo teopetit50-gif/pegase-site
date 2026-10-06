@@ -688,3 +688,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Rien de neuf à poser sur la recette. En attente de Teo : accord permanent des J-2 Daliro,
   Realtime de filed_fournisseurs, export Logos_w, SIRENE_API_KEY, HDS, coffre Tamila,
   juriste (seconde demande de pièces dans le mois), Vercel Pro.
+- **Point 12 h 15 (10 h 15 Z)** : aucune branche worker-* n'a bougé depuis 08 h 15 (B et A3
+  tout fusionnés ; A1/A2/A4/A5 = travail base déjà posé). main a91c572 toujours en ligne
+  (Vercel success). Recette saine : 0 échec cron, 0 erreur HTTP sur 2 h, cron vivant 10:16 Z.
+  Rien à poser. Notes commitées sans poussée (pas de déploiement Vercel pour une ligne de
+  journal ; partiront avec la prochaine vraie modification). Toujours en attente de Teo.
