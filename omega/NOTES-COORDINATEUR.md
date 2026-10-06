@@ -868,3 +868,14 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   b1_10 2/2, b5_05/06 2/2, 44 vert ; **b2_15 rouge** (loc_completer_locataire l. 32 : 22P02 « malformed
   array literal: siren » → B2 b2_06b). Main a264a45 : facture imprimable Tamila, Ce matin Varelo, lots
   Lorani (en ligne au retour du quota). C1 informé des nouveaux écrans et des modules CASHD/REPUT/OFFLOAD.
+- 16 h 55 Z — Poses (toutes vertes sauf mention) : a4_20 + a4_13 (e749aa5, courriel → FILED), a4_21 + a4_14
+  (f184edc, pièces filles), b2_07 + test 16 (0e2cc89), b4_10 + test 19 (e39e4ef, avis par courriel), b6_17 +
+  b6_11 (c706dcb, heures), b6_18 + b6_12 (c3ab533), c3_01 + c3_00 + c3_01_base (C3 0419e27), b3_15 + test 16
+  (72ec683 : **rouge**, préparation du test — daf2 valideur ne peut être direction → B3). 44, 46, 51 verts.
+  Fonctions : lecteur v24 (A1 df07435 : découpage, TVA débits, contre-valeur, mentions), identite v5 (B7
+  4ed0bff, sans effet tant que les CHECK ne sont pas élargis), tamila-purge v1 (b4b664e) + cron
+  omega-tamila-purge */5. Boîte cabinet-banc@recu.omegaai.fr (module tamila). Main f733c22.
+  Décisions : A5 19ai (réceptions lisibles selon le module, Tamila : pas les murés) ; A4 a4_22 (CHECK
+  uid_ch/hmrc, retrait de l'ancienne contrainte posé à part) ; A2 autorisé à écrire 19aj_messageries
+  (statut brouillon_depose) ; Gmail en régime Test, CASA = décision de Teo ; Microsoft 365 ensuite.
+  À dire à Teo : frais de gestion d'avis de contravention à mettre dans les CGV des loueurs.
