@@ -25,14 +25,15 @@
      btp_signer_sur_place sans compte) ;
      btp_meteo_chantier (lecture, b6_21) ;
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
-     btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23).
+     btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
+     btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, Chantier, FactureCandidate, HeuresChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -282,4 +283,27 @@ export async function recevoir(commande: string, livreeLe: string, quantite: num
 
 export async function noterRetour(commande: string, renduLe: string | null, retourPrevu: string | null): Promise<unknown> {
   return rpc("btp_noter_retour", { p_commande: commande, p_rendu_le: renduLe, p_retour_prevu: retourPrevu });
+}
+
+/* b6_24 : le fil du chantier */
+export async function chargerFil(chantier: string): Promise<MessageChantier[]> {
+  const f = await rpc<MessageChantier[] | null>("btp_fil_chantier", { p_chantier: chantier, p_nombre: 50 });
+  return Array.isArray(f) ? f : [];
+}
+
+export async function messagesARanger(client: string): Promise<MessageChantier[]> {
+  const f = await rpc<MessageChantier[] | null>("btp_messages_a_ranger", { p_client: client });
+  return Array.isArray(f) ? f : [];
+}
+
+export async function rangerMessage(message: string, chantier: string): Promise<unknown> {
+  return rpc("btp_ranger_message", { p_message: message, p_chantier: chantier });
+}
+
+export async function ecarterMessage(message: string, motif: string | null): Promise<unknown> {
+  return rpc("btp_ecarter_message", { p_message: message, p_motif: motif });
+}
+
+export async function avenantDepuisMessage(message: string, objet: string): Promise<string> {
+  return rpc<string>("btp_avenant_depuis_message", { p_message: message, p_objet: objet });
 }

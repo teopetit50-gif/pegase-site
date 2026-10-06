@@ -447,7 +447,7 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     await s.dormir(600);
     const carte = `document.querySelector('section[aria-label="Météo du chantier"]')`;
     const t = await s.evaluer(`${carte}?.innerText || ''`);
-    ok(/Météo des 7 jours/i.test(t) && /14,2 mm/.test(t) && /68 km\/h/.test(t), 'la prévision des 7 jours est affichée (14,2 mm, 68 km/h)');
+    ok(/Météo des 7 jours/i.test(t) && /14,2 mm/.test(t) && /45 km\/h/.test(t) && /Vent moyen/.test(t) && /MET Norway/.test(t) && /CC BY 4.0/.test(t), 'la prévision des 7 jours (14,2 mm, vent moyen 45 km/h) et l\'attribution MET Norway');
     ok(/décalez ou protégez|Aucun passage extérieur menacé/.test(t), 'les passages extérieurs sont confrontés à la prévision');
     await s.evaluer(axe + ';true');
     const c1 = await s.evaluer(graves(carte));
