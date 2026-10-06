@@ -395,6 +395,44 @@ d'où l'accord de Teo. Un seul « go » pour les trois :
   (demande → travail → `noter_identite` → verdict `identite_source = uid_ch` sur la fiche). Une vingtaine de lignes
   SQL, écrites dès que les contraintes sont élargies.
 
+## 15. L'ouvrier des taux de change BCE (`taux-bce`) — 6/10
+
+**Pourquoi.** A4 (a4_22) écrit les factures en devise en euros au taux du jour, lu dans `public.filed_taux_change`.
+Sans taux, la comptabilisation est refusée. La base ne fait aucun appel réseau : la fonction Edge `taux-bce` pose les
+taux de référence de la BCE chaque jour ouvré.
+
+**Les portes (`omega/modules/taux_bce/migrations/b7_07_taux_bce.sql`, service seul) :**
+- `taux_bce_etat()` → `{dernier_jour, devises, dernier_passage}` ;
+- `taux_bce_poser_lot([{devise, jour, taux}])` : un appel pour tout un lot, par `filed_poser_taux_change` (source
+  `bce`). Un taux identique n'est pas réécrit, une saisie humaine n'est jamais écrasée, une ligne fausse est refusée
+  seule. Rend `{recus, poses, inchanges, saisies_gardees, refuses}` ;
+- `taux_bce_noter_passage(detail, alerte)` : le battement. Une ligne est écrite dans `public.taux_bce_passages`, car
+  le battement du socle est par client et cet ouvrier n'en a pas. Si l'ouvrier signale une alerte, une alerte
+  **interne** est levée, une seule par jour de Francfort (clé `taux_bce:AAAA-MM-JJ`). Elle se referme seule quand un
+  passage suivant pose les taux du jour ;
+- `taux_bce_veiller()` : pour un cron SQL. Un jour ouvré après 18 h à Francfort, sans aucun passage depuis 30 heures,
+  elle lève une alerte interne (l'ouvrier n'a pas tourné).
+
+**L'ouvrier (`omega/functions/taux-bce/`) :**
+- **Flux lu :** le quotidien `eurofxref-daily.xml`, ou `eurofxref-hist-90d.xml` quand la base est vide ou qu'il
+  manque plus de quatre jours (le trou se comble seul).
+- **Envoi :** seuls les jours depuis le dernier en base partent, en un seul lot.
+- **Alerte :** un jour ouvré TARGET (hors week-ends, 1er janvier, Vendredi saint, lundi de Pâques, 1er mai, 25 et 26
+  décembre), après 16 h 15 à Francfort, sans taux du jour. Le message donne le dernier jour publié ou le motif de la
+  panne.
+- **Tests :** 15 tests Deno sur les flux réels du 6/10, verts avec check, lint et fmt.
+- **Essai réel :** 1 856 taux au premier passage (64 jours × 29 devises), 29 inchangés au second.
+
+**Pour le coordinateur :**
+1. Poser `b7_07_taux_bce.sql` (après a4_22), puis le test `omega/tests/taux_bce/b7_08_taux_bce.sql`
+   (`^test_b7_14`, 21 assertions vertes en local).
+2. Déployer `taux-bce` en coquille comme `identite` (verify_jwt true, `@partage` → 7425991,
+   `index.ts` → `…/<sha>/omega/functions/taux-bce/index.ts`).
+3. Cron, en UTC : `35 14,15 * * 1-5`, soit deux appels à une heure d'écart (16 h 35 puis 17 h 35 à Francfort en
+   été, 15 h 35 puis 16 h 35 en hiver). Le second couvre l'hiver et un retard de la BCE ; l'ouvrier est rejouable.
+   En plus, `select public.taux_bce_veiller()` à `0 17 * * 1-5`.
+4. Le premier appel remplit 90 jours d'historique.
+
 ## 11. Journal des étapes
 
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
@@ -506,3 +544,10 @@ d'où l'accord de Teo. Un seul « go » pour les trois :
   test `omega/tests/identite/b7_07_etrangers.sql` (test_b7_13, 26 assertions vertes en local avec les contraintes
   élargies simulées ; il échoue exprès tant qu'elles ne le sont pas). **À poser après le lot d'A4**, sinon le
   balayage heurte la contrainte à chaque passage dès qu'un fournisseur suisse ou britannique existe.
+- 6/10 16 h 16 Z (coordinateur) : b7_06 et b7_07 (tests) posés après le lot d'A4 (a4_24). Nouvelle tâche : l'ouvrier
+  des taux BCE.
+- 6/10 17 h 10 Z : lot `b7_07_taux_bce.sql` (portes, passages, alerte interne, veille), test `test_b7_14`, ouvrier
+  `taux-bce` (15 tests Deno) ; sondé en réel. Section 15. Attention : le test des étrangers s'appelle
+  `b7_07_etrangers.sql` (dans tests/identite), la migration des taux `b7_07_taux_bce.sql` (dans modules/taux_bce) :
+  même numéro, dossiers différents.
+
