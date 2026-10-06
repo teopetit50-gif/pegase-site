@@ -40,6 +40,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_13_filed_lot7_demandeur_systeme_iban.sql` | correctif (deux remontées d'A3, 06/10) : (a) déclencheur `demandes_validation_preparer_filed` (après celui du socle) : demandes `filed.valider_facture*` et `filed.valider_iban` déposées par le système, proposant de l'IBAN ajouté à `saisi_par` ; `filed_saisisseurs` ignore les étapes écrites par FILED (`controlee`, `identite_completee`…) ; reprise des demandes de facture ouvertes au nom d'une personne (`filed_reprendre_demandes_facture`, suffixe `:systeme`). (b) une demande d'IBAN annulée est reposée tant que l'IBAN est proposé chez un fournisseur actif (`filed_reproposer_iban`, déclencheur `demandes_validation_filed_iban_annulee`) ; reprise des IBAN déjà orphelins (`filed_reprendre_ibans_sans_demande`). Test `a4_07_demandeur_systeme_iban.sql`. |
 | `a4_14_filed_lot7_cle_valeurs_humaines.sql` | correctif (relevé du coordinateur, 06/10) : `filed_tva_intracom_analyser` (texte d'a4_04) déclare fausse une TVA FR dont le SIREN échoue au Luhn ; `filed_siren_de_tva_fr` nul dans ce cas ; déclencheur `pieces_valeurs_cle_humaine` : une valeur `humain` sur fournisseur/acheteur siren, siret, tva, iban (iban : fournisseur seul) refusée en 22023 si la clé est fausse, quelle que soit la porte. Test `a4_08_cle_valeurs_humaines.sql`. |
 | `a4_15_filed_lot8_paiements.sql` | suivi du paiement (vue « À payer » d'A3, 06/10) : pas de seconde table, `filed_reglements` (a4_06) suffit. `private.filed_marquer_reglee` gagne trois gardes (pas au-delà du reste, pas de date future, une référence notée une fois par facture) ; porte `public.filed_noter_paiement(p_facture, p_date, p_montant, p_moyen, p_reference)` (gérant, admin, valideur) ; lecture `public.filed_etat_paiement(p_facture)` → dû, réglé, reste, état `a_payer` / `partielle` / `payee`. Pas de statut « payee » sur la facture : l'état comptable reste. Test `a4_09_paiements.sql`. |
+| `a4_16_filed_lot9_facture_electronique.sql` | lot 9, facture électronique reçue (06/10) : référentiels `filed_cycle_vie_statuts` (200 à 213) et `filed_cycle_vie_motifs` ; `filed_factures.provenance` (`structuree` / `lue` / `saisie`, posée à l'insertion) ; la valeur xml fait foi (déclencheur `pieces_valeurs_xml_fait_foi`, 22023) ; `filed_cycle_vie` : 204 à l'intégration, 205 validée, 210 refusée (motif tiré des contrôles bloquants) ou écartée (DOUBLON), 207 litige, 211 règlement, `a_emettre` si structurée ; portes de l'ouvrier PA (`filed_cycle_vie_a_emettre`, `filed_noter_emission_cycle_vie`, service_role) ; frise `filed_cycle_vie_facture`. Tests pgTAP `a4_10_facture_electronique.sql` (`^test_a4_16_`). |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -175,6 +176,68 @@ Famille « Pilotage » :
 - « Le délai moyen de traitement se mesure de la réception au classement. »
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
+
+## PA — plateformes agréées : ce qu'il faut pour en brancher une (06/10, sans code)
+
+**Le cadre, vérifié sur impots.gouv.fr le 06/10/2026.**
+- Réception obligatoire pour toute entreprise assujettie depuis le **1er septembre 2026**.
+- Émission obligatoire au 1er septembre 2026 pour les grandes entreprises et les ETI, au **1er septembre 2027** pour
+  les PME et les micro-entreprises. Le report à 2028 a été rejeté le 11/04/2025.
+- Formats du socle, conformes à la norme EN 16931 : **UBL 2.1**, **CII D22B**, **Factur-X** (PDF/A-3 avec XML CII
+  joint).
+- Le PPF (portail public) ne fait plus transiter les factures : il tient l'**annuaire** et reçoit les données
+  fiscales. Les factures passent par des **plateformes agréées (PA, ex-PDP)**, immatriculées par la DGFiP : plus de
+  130 en juin 2026. La liste officielle est sur impots.gouv.fr, et en jeu ouvert sur data.gouv.fr (« Liste des
+  plateformes agréées pour la facturation électronique »).
+- Normes AFNOR :
+  - XP Z12-012 : formats, profils et statuts ;
+  - **XP Z12-013** : API normalisée entre le système d'information d'une entreprise ou d'un logiciel et une PA,
+    consultation de l'annuaire comprise ;
+  - XP Z12-014 : les cas d'usage B2B.
+- Cycle de vie : quatorze statuts, 200 à 213. Quatre sont obligatoires : 200 Déposée, 210 Refusée, 212 Encaissée,
+  213 Rejetée. Les statuts 200, 210 et 212 vont à l'administration ; 212 nourrit l'e-reporting de la TVA sur les
+  services.
+
+**Où en est FILED (a4_16).** FILED reçoit et lit les trois formats : A1 extrait le XML sans IA, et la valeur xml fait
+foi. Le cycle de vie côté acheteur est préparé : 204, 205, 207, 210 et 211 sont prêts à émettre. Aucun canal PA
+n'existe encore.
+
+**Trois façons de se brancher.** Omega n'a pas à devenir PA : l'immatriculation impose des audits et une
+certification ISO 27001.
+1. **Omega, opérateur de dématérialisation (OD) chez une PA « technique » en marque blanche, par API XP Z12-013.**
+   C'est la voie recommandée. Exemples relevés (immatriculation à vérifier sur la liste officielle le jour du
+   choix) : Iopole (PA technique, pensée pour les éditeurs) et B2Brouter (API en marque blanche ou grise).
+   Avantage : un seul contrat pour tous les clients d'Omega, et leur adresse dans l'annuaire pointe vers cette PA.
+2. **Chaque client garde sa propre PA** (Pennylane, Sage, Cegid, sa banque…), et Omega s'y raccorde, client par
+   client, par l'API XP Z12-013 ou par l'API propre à la PA. Cela demande plus d'intégrations, mais c'est
+   inévitable pour un client déjà équipé.
+3. **Une PA « EDI » de grand compte** (Generix, n° 0002 ; Esker ; Docaposte…). Pertinente pour un groupe, lourde
+   pour une PME.
+
+**Ce qu'il faudrait construire une fois la PA choisie** :
+1. **Contrat et accès.** Le compte OD chez la PA, ses clés d'API (en secret d'ouvrier, jamais en base), un bac à
+   sable.
+2. **Annuaire.** Pour chaque client et chaque société (SIREN, SIRET, code de routage), inscrire son adresse de
+   facturation électronique chez la PA choisie : une porte FILED pour l'enregistrer, et un ouvrier pour la pousser.
+3. **Réception.** Un ouvrier `pa` (Edge Function), par webhook ou interrogation :
+   - il dépose chaque facture reçue comme pièce (`pieces.source` = `connecteur`, fichier dans `omega-clients`) ;
+   - le lecteur d'A1 la lit en `xml` ;
+   - il note l'identifiant PA de la facture dans `filed_documents` (colonne à ajouter, pour relier les statuts) ;
+   - à ce moment seulement, les statuts deviennent `a_emettre`. Aujourd'hui, toute facture structurée l'est, même
+     arrivée par courriel : à restreindre aux factures arrivées par la PA quand le canal existera.
+4. **Statuts.** Le même ouvrier vide `filed_cycle_vie_a_emettre` et rend compte par
+   `filed_noter_emission_cycle_vie`. Il reçoit aussi les statuts des autres : 200, 213 Rejetée, et 209 Complétée
+   quand le fournisseur corrige.
+5. **Émission (septembre 2027).** C'est l'autre sens, pour les ventes : il sortira de FILED (côté achats) vers les
+   modules de facturation client.
+6. **E-reporting.** Les transactions hors réforme (B2C, international) et les données de paiement des services sont
+   déclarées par la PA du client, pas par FILED.
+
+**Choix à faire par Teo** : la voie 1 (et quelle PA) ou la voie 2. C'est ce choix qui fixe l'API exacte à brancher.
+
+Sources consultées : impots.gouv.fr (« Je passe à la facturation électronique », dossier de spécifications externes,
+norme XP Z12-012), AFNOR (XP Z12-013), documentation publique des statuts (invopop), b2brouter.net, presse
+spécialisée pour le nombre de PA.
 
 ## a4_15 (06/10) — posé sur la recette (~05:12 UTC, 634fe24)
 
