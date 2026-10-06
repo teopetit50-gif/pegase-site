@@ -22,13 +22,11 @@
    conjugué (OMEGA/DOCTRINE-TEXTES-SAAS.md, partie II : ni fragments, ni ternaires, ni antithèses en série).
    Règles maison : aucun client, logo, avis ni chiffre de traction inventé ; aucun prix public ; nos outils
    jamais nommés ; données des cartes étiquetées « exemple ».
-   Souveraineté — 06/10/2026 (C5, omega/AUDIT-PROMESSES.md § 3, points 2 et 3) : la page disait « hébergé en
-   France » et « lues en Europe » (décisions de Teo des 24 et 28/09). Les faits du code : les pièces sont
-   chiffrées dans le navigateur (AES-256-GCM, une clé par dossier), la base et le stockage sont à Francfort,
-   la clé maître du cabinet va chez Scaleway Key Manager (fr-par, NOTES-B4 § 10), et le modèle est interrogé
-   hors d'Europe tant que Bedrock UE n'est pas en production (MISE-EN-PRODUCTION). La page dit donc
-   « chiffrées sur votre poste, conservées dans l'UE, clés chez un prestataire français », et la même phrase
-   que l'accueil pour le modèle. Retour à l'ancienne formule : voir omega/NOTES-C5.md. */
+   Souveraineté — DÉCISION DE TEO DU 24/09/2026 : Tamila a un hébergeur français, les pièces sont stockées en
+   France. Par exception à la doctrine §6 (qui vaut pour les autres SaaS), on écrit donc « hébergé en France ».
+   DÉCISION DE TEO DU 28/09/2026 : les pièces sont lues par le meilleur modèle, qui n'est servi qu'en Europe,
+   sans aucune conservation. La page dit donc « stockées en France, lues en Europe ». L'infrastructure du
+   produit doit s'y conformer. */
 
 export const CONTACT = {
   audit: "/reserver-un-audit",
@@ -135,23 +133,22 @@ export const CONNEXIONS = {
 export const SECRET = {
   titreAvant: "Confier vos pièces à un logiciel engage",
   titreMot: "votre secret professionnel",
-  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Tamila les chiffre dossier par dossier avant qu'elles quittent votre poste, les conserve dans l'Union européenne et confie les clés à un prestataire français. Chacun de nos engagements figure dans le contrat que vous signez.",
-  badge: "Éditeur français, clés en France",
+  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Tamila les chiffre sur votre poste, les conserve dans l'Union européenne, et les lit en Europe, sans rien en conserver. Chacun de nos engagements figure dans le contrat que vous signez.",
+  badge: "Français, hébergé dans l'UE",
   accroche: "Le contrat précise les dossiers que Tamila lit, le lieu où les pièces sont conservées et la date de leur effacement.",
   faits: [
     ["Éditeur", "France"],
     ["Droit applicable", "Français"],
-    ["Hébergement", "Francfort, Union européenne"],
-    ["Clés de chiffrement", "Prestataire français"],
-    ["Lecture des pièces", "Modèle interrogé hors d'Europe"],
+    ["Hébergement", "France, hébergeur français"],
+    ["Lecture des pièces", "En Europe, sans conservation"],
     ["Statut", "Sous-traitant, art. 28 RGPD"],
   ],
   engagements: [
     { titre: "Vous choisissez les dossiers lus", texte: "Tamila ne lit que les dossiers que vous lui ouvrez, un par un, et ne parcourt jamais votre messagerie de lui-même." },
     { titre: "Aucun entraînement sur vos pièces", texte: "Vos pièces ne servent à entraîner aucun modèle, ni le nôtre ni celui d'un fournisseur. Cette exclusion est une clause du contrat." },
     { titre: "Effacement à la clôture", texte: "Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez l'export que vous avez téléchargé." },
-    { titre: "Chiffrées sur votre poste", texte: "Chaque pièce est chiffrée, dossier par dossier, avant de quitter votre poste, puis conservée dans l'Union européenne. Les clés sont chez un prestataire français. Le modèle qui la lit est interrogé hors d'Europe, sans entraînement sur vos pièces." },
-    { titre: "Chaque accès est journalisé", preparation: true, texte: "Le journal indique qui a consulté quel dossier, et à quelle date. Vous pouvez l'exporter à tout moment." },
+    { titre: "Stockées en France, lues en Europe", texte: "Les pièces sont chiffrées pendant leur transfert et pendant leur conservation. Elles sont conservées en France. Leur lecture se fait dans l'Union européenne, et aucune copie n'y est gardée." },
+    { titre: "Chaque accès est journalisé", texte: "Le journal indique qui a consulté quel dossier, et à quelle date. Vous pouvez l'exporter à tout moment." },
     { titre: "Aucune écriture dans vos outils", texte: "Tamila dispose d'un accès en lecture seule : il n'envoie aucun message, ne communique aucune pièce et ne modifie rien dans votre logiciel." },
   ],
   mention: "Loi n° 71-1130 du 31 décembre 1971, art. 66-5 · RIN, art. 2 · RGPD, art. 28",
@@ -171,7 +168,7 @@ export const FORMULES = {
       bouton: "Réserver un audit",
       note: { Contentieux: "Réalisé pendant l'audit, sur un dossier réel", "Dommage corporel": "Réalisé pendant l'audit, sur un dossier réel" },
       inclut: {
-        Contentieux: ["Dossier de faits daté et sourcé", "Contradictions entre pièces", "Bordereau contrôlé (art. 768)", "Dispositif contre motifs (art. 954)", "Prétentions nouvelles et concentration en appel", "Pièces citées jamais communiquées, sommation prête", "Dires à l'expert préparés sur le pré-rapport", "Trous de la chronologie et faits contredits", "Index des personnes et faits classés par moyen", "Questions posées au dossier", "Premier jet de l'exposé des faits", "Dossier de plaidoirie et renvois cliquables", "Pièces adverses du jour", "Pièces scannées et manuscrites", "Export Word et PDF", "Chiffré sur votre poste, conservé dans l'UE"],
+        Contentieux: ["Dossier de faits daté et sourcé", "Contradictions entre pièces", "Bordereau contrôlé (art. 768)", "Dispositif contre motifs (art. 954)", "Prétentions nouvelles et concentration en appel", "Pièces citées jamais communiquées, sommation prête", "Dires à l'expert préparés sur le pré-rapport", "Trous de la chronologie et faits contredits", "Index des personnes et faits classés par moyen", "Questions posées au dossier", "Premier jet de l'exposé des faits", "Dossier de plaidoirie et renvois cliquables", "Pièces adverses du jour", "Pièces scannées et manuscrites", "Export Word et PDF", "Hébergement en France"],
         "Dommage corporel": ["Chronologie des soins", "Interruptions de soins repérées", "Nomenclature Dintilhac pré-remplie", "Écarts entre rapports d'expertise", "Dires à l'expert préparés sur le pré-rapport", "Source de chaque poste de préjudice", "Questions posées au dossier médical", "Premier jet de l'exposé des faits", "Pièces médicales scannées", "Export Word et PDF", "Effacement à la clôture"],
       },
     },

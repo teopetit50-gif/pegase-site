@@ -40,7 +40,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check } from "lucide-react";
-import { SiEnPreparation } from "@/components/ui/en-preparation";
 import AnimationContainer from "./apparition";
 import { Button } from "./bouton";
 import { CONTACT, FORMULES } from "./textes";
@@ -122,10 +121,7 @@ export default function Formules() {
                       <div className="flex items-center justify-center">
                         <Check className="size-5" aria-hidden="true" />
                       </div>
-                      <span>
-                        {f}
-                        <SiEnPreparation pour="tamila" t={f} />
-                      </span>
+                      <span>{f}</span>
                     </div>
                   ))}
                 </div>

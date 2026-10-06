@@ -10,7 +10,6 @@
    (fauteuil vert d'eau) et la carte de charge d'un fauteuil (Photos.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 import { CircleCheck } from "lucide-react";
-import { SiEnPreparation } from "@/components/ui/en-preparation";
 import Apparition from "./Apparition";
 import { CarteFauteuil, PHOTOS, PhotoCarte } from "./Photos";
 import { Surtitre } from "./Surtitre";
@@ -53,10 +52,7 @@ export default function PourQui() {
                   {points.map((p) => (
                     <li key={p} className="flex items-start gap-3 text-sm text-slate-600">
                       <CircleCheck size={16} className="mt-0.5 shrink-0 text-[#3b7a6e]" />
-                      <span>
-                        {p}
-                        <SiEnPreparation pour="tiroma" t={p} />
-                      </span>
+                      {p}
                     </li>
                   ))}
                 </ul>

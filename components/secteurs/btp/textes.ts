@@ -135,7 +135,7 @@ export const LU = {
     { name: "Situations", fontFamily: "var(--font-geist-mono)", fontWeight: 600, fontSize: 15 },
     { name: "Avenants", fontFamily: "var(--font-jakarta)", fontWeight: 700, fontSize: 20 },
     { name: "PV", fontWeight: 800, fontSize: 20, letterSpacing: "0.08em" },
-    { name: "Courriel", fontFamily: "var(--font-geist-mono)", fontWeight: 500, fontSize: 16, uppercase: true, letterSpacing: "0.14em" },
+    { name: "SMS", fontFamily: "var(--font-geist-mono)", fontWeight: 500, fontSize: 16, uppercase: true, letterSpacing: "0.14em" },
   ],
 };
 
@@ -155,7 +155,7 @@ export const FORMULES = {
   ],
   groupes: [
     { title: "Travaux supplémentaires", description: "Daliro les repère dans ce que vos équipes envoient.", features: [
-      { name: "Lecture des photos et vocaux", description: "Daliro lit ce que vos équipes envoient au numéro WhatsApp professionnel de l'entreprise ou par courriel.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Lecture des photos et vocaux", description: "Daliro lit ce que vos équipes envoient déjà par WhatsApp, SMS ou courriel.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Avenants chiffrés sur vos prix", description: "Chaque avenant est chiffré avec les prix unitaires de vos devis.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Signature sur place", description: "Le client signe sur le téléphone du chef d'équipe.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Chantiers ouverts", description: "Nombre de chantiers suivis en même temps.", values: { demarrage: "5", chantiers: "20", entreprise: "Sur mesure" } },
@@ -200,7 +200,7 @@ export const FAQ = {
     { id: "general", label: "Général", items: [
       { question: "Qu'est-ce que Daliro ?", answer: "Daliro est un logiciel qui lit ce que vos équipes envoient déjà (photos, vocaux, messages) et le compare à vos marchés et à votre planning. Avant le départ sur chantier, vous savez ce qui est à facturer, à confirmer et à livrer, sans avoir changé de logiciel de gestion." },
       { question: "Faut-il changer de logiciel de devis ?", answer: "Non. Daliro lit vos devis là où ils sont, depuis votre logiciel ou un export. Il ne remplace ni votre outil de devis, ni votre planning." },
-      { question: "Les chefs d'équipe doivent-ils installer une application ?", answer: "Non. Ils continuent d'envoyer leurs photos et leurs vocaux comme aujourd'hui, et Daliro lit ces messages là où ils arrivent : au numéro WhatsApp professionnel de l'entreprise ou par courriel." },
+      { question: "Les chefs d'équipe doivent-ils installer une application ?", answer: "Non. Ils continuent d'envoyer leurs photos et leurs vocaux comme aujourd'hui, et Daliro lit ces messages là où ils arrivent : WhatsApp, SMS ou courriel." },
       { question: "Qu'est-ce que Daliro ne fait pas ?", answer: "Daliro ne signe rien à votre place et n'envoie aucun avenant sans votre accord. La paie, la comptabilité et l'établissement des devis restent dans vos outils actuels." },
     ] },
     { id: "chantier", label: "Chantier", items: [

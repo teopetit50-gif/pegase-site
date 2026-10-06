@@ -1,6 +1,5 @@
 "use client";
 
-import { EnPreparation } from "@/components/ui/en-preparation";
 import {
   useEffect,
   useRef,
@@ -80,9 +79,7 @@ import "./CartesGaranties.css";
      n'a jamais porté. Pas de seconde mécanique posée ici.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* `preparation` : pastille « En préparation » après le titre (C5, 06/10/2026,
-   omega/NOTES-C5.md). Le titre reste la clé de SIGNES, il ne change pas. */
-export type Garantie = { titre: string; texte: string; preparation?: boolean };
+export type Garantie = { titre: string; texte: string };
 
 type ComposantSigne = (p: { className?: string }) => ReactElement;
 
@@ -172,10 +169,7 @@ function Carte({ garantie, graine }: { garantie: Garantie; graine: number }) {
         </span>
       ) : null}
 
-      <h3 className="vd-h3 cg-titre">
-        {garantie.titre}
-        {garantie.preparation ? <EnPreparation /> : null}
-      </h3>
+      <h3 className="vd-h3 cg-titre">{garantie.titre}</h3>
       <p className="vd-small cg-texte">{garantie.texte}</p>
     </li>
   );

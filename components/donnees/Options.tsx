@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { EnPreparation } from "@/components/ui/en-preparation";
 import { useState } from "react";
 import { Coche } from "./Icones";
 
@@ -29,9 +28,7 @@ export type Option = {
   alt: string;
   chiffres: { valeur: string; libelle: string }[];
   principe: string;
-  /** Une ligne `{ t, preparation: true }` porte la pastille « En préparation »
-      (C5, 06/10/2026) : promesse gardée, pas encore livrée — omega/NOTES-C5.md. */
-  obtenez: (string | { t: string; preparation: true })[];
+  obtenez: string[];
 };
 
 export default function Options({ options }: { options: Option[] }) {
@@ -105,20 +102,14 @@ export default function Options({ options }: { options: Option[] }) {
 
           <p className="vd-eyebrow mt-7">CE QUE VOUS OBTENEZ</p>
           <ul className="mt-3 flex flex-col gap-2.5">
-            {o.obtenez.map((p) => {
-              const t = typeof p === "string" ? p : p.t;
-              return (
-                <li key={t} className="flex items-start gap-3">
-                  <span className="vd-check mt-0.5">
-                    <Coche className="h-3 w-3" />
-                  </span>
-                  <span className="vd-body flex-1">
-                    {t}
-                    {typeof p === "string" ? null : <EnPreparation />}
-                  </span>
-                </li>
-              );
-            })}
+            {o.obtenez.map((p) => (
+              <li key={p} className="flex items-start gap-3">
+                <span className="vd-check mt-0.5">
+                  <Coche className="h-3 w-3" />
+                </span>
+                <span className="vd-body flex-1">{p}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
