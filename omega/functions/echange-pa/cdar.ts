@@ -22,9 +22,17 @@ const NS = {
 /** Profil des échanges de cycle de vie entre plateformes (MDT-3). */
 export const PROFIL_CDV = "urn:cpro.gouv.fr:1p0:CDV:invoice";
 
+/**
+ * Une partie du message. Identifiant, dans cet ordre : SIREN (schéma 0002) ; sinon n° de TVA
+ * intracommunautaire (un n° FR rend son SIREN, schéma 0002 ; un autre pays de l'UE, schéma
+ * 0223 ; hors UE, schéma 0227) ; sinon `identifiant` explicite. Un fournisseur étranger n'a
+ * pas de SIREN : la TVA est alors obligatoire. Codes 0223 / 0227 : liste des identifiants de
+ * la réforme (XP Z12-012), à valider au bac à sable de la PA comme le reste du message.
+ */
 export type Partie = {
-  /** SIREN (schéma 0002). */
-  siren: string;
+  siren?: string | null;
+  tva?: string | null;
+  identifiant?: { valeur: string; schema: string } | null;
   nom?: string | null;
   /** Rôle UNTDID 3035 : BY acheteur, SE vendeur. */
   role: "BY" | "SE";
@@ -44,7 +52,9 @@ export type StatutAEmettre = {
     /** UNTDID 1001 : 380 facture, 381 avoir, 386 acompte… */
     type_code?: string | null;
     /** SIREN de l'émetteur de la facture. */
-    emetteur_siren: string;
+    /** SIREN de l'émetteur de la facture, ou à défaut son n° de TVA (fournisseur étranger). */
+    emetteur_siren?: string | null;
+    emetteur_tva?: string | null;
   };
   emetteur: Partie;
   destinataire: Partie;
@@ -82,12 +92,80 @@ function date102(jour: string): string {
   return jour.replace(/-/g, "");
 }
 
-function partie(balise: string, p: Partie): string {
-  if (!/^\d{9}$/.test(p.siren)) {
-    throw new ErreurCdar(`SIREN invalide : ${p.siren}`);
+const PAYS_UE = new Set([
+  "AT",
+  "BE",
+  "BG",
+  "CY",
+  "CZ",
+  "DE",
+  "DK",
+  "EE",
+  "EL",
+  "ES",
+  "FI",
+  "HR",
+  "HU",
+  "IE",
+  "IT",
+  "LT",
+  "LU",
+  "LV",
+  "MT",
+  "NL",
+  "PL",
+  "PT",
+  "RO",
+  "SE",
+  "SI",
+  "SK",
+  "XI",
+]);
+
+/** [schéma, valeur] de l'identifiant d'une partie, ou une ErreurCdar qui dit ce qui manque. */
+export function identifiantPartie(
+  p: {
+    siren?: string | null;
+    tva?: string | null;
+    identifiant?: { valeur: string; schema: string } | null;
+  },
+  quoi: string,
+): [string, string] {
+  const siren = (p.siren ?? "").replace(/\s/g, "");
+  if (siren !== "") {
+    if (!/^\d{9}$/.test(siren)) {
+      throw new ErreurCdar(`SIREN invalide pour ${quoi} : ${siren}`);
+    }
+    return ["0002", siren];
   }
+  const tva = (p.tva ?? "").replace(/[\s.-]/g, "").toUpperCase();
+  if (tva !== "") {
+    if (!/^[A-Z]{2}[0-9A-Z]{2,13}$/.test(tva)) {
+      throw new ErreurCdar(`n° de TVA invalide pour ${quoi} : ${tva}`);
+    }
+    if (tva.startsWith("FR")) {
+      if (!/^FR[0-9A-Z]{2}\d{9}$/.test(tva)) {
+        throw new ErreurCdar(`n° de TVA FR invalide pour ${quoi} : ${tva}`);
+      }
+      return ["0002", tva.slice(4)];
+    }
+    return [PAYS_UE.has(tva.slice(0, 2)) ? "0223" : "0227", tva];
+  }
+  if (p.identifiant?.valeur && /^\d{4}$/.test(p.identifiant.schema)) {
+    return [p.identifiant.schema, p.identifiant.valeur];
+  }
+  throw new ErreurCdar(
+    `${quoi} sans SIREN ni n° de TVA : identifiant impossible`,
+  );
+}
+
+function partie(balise: string, p: Partie): string {
+  const [schema, valeur] = identifiantPartie(
+    p,
+    p.role === "SE" ? "le vendeur" : "l'acheteur",
+  );
   return `<ram:${balise}>` +
-    `<ram:GlobalID schemeID="0002">${p.siren}</ram:GlobalID>` +
+    `<ram:GlobalID schemeID="${schema}">${echapper(valeur)}</ram:GlobalID>` +
     (p.nom ? `<ram:Name>${echapper(p.nom)}</ram:Name>` : "") +
     `<ram:RoleCode>${p.role}</ram:RoleCode>` +
     `</ram:${balise}>`;
@@ -191,9 +269,15 @@ export function fabriquerCdar(s: StatutAEmettre): string {
     }</qdt:DateTimeString></ram:FormattedIssueDateTime>` +
     `<ram:ProcessConditionCode>${s.code}</ram:ProcessConditionCode>` +
     `<ram:ProcessCondition>${echapper(libelle)}</ram:ProcessCondition>` +
-    `<ram:IssuerTradeParty><ram:GlobalID schemeID="0002">${
-      echapper(s.facture.emetteur_siren)
-    }</ram:GlobalID></ram:IssuerTradeParty>` +
+    (() => {
+      const [schema, valeur] = identifiantPartie(
+        { siren: s.facture.emetteur_siren, tva: s.facture.emetteur_tva },
+        "l'émetteur de la facture",
+      );
+      return `<ram:IssuerTradeParty><ram:GlobalID schemeID="${schema}">${
+        echapper(valeur)
+      }</ram:GlobalID></ram:IssuerTradeParty>`;
+    })() +
     statutDoc +
     "</ram:ReferenceReferencedDocument>" +
     "</rsm:AcknowledgementDocument>" +

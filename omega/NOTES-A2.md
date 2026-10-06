@@ -570,6 +570,25 @@ un travail `pa.*` dans la journée : pas de ligne tant qu'aucun statut n'a été
 exige la file de validation et BAC-0001 est bloquée ; bloc 210 conditionnel ; contrôles
 cycle de vie, travaux, accusé, battement).
 
+**Étape 5, premier essai (06/10, 15 h 24 Z) : 204 en échec « CDAR_INVALIDE : SIREN invalide :
+undefined »**. Facture BAC-0001 d'un fournisseur allemand (`fournisseur_lu` : TVA DE123456789,
+pas de SIREN) : `pa_commencer_statut` rend un `destinataire` et une `facture` sans SIREN, et le
+CDAR exigeait un SIREN. Vrai cas (fournisseurs UE et hors UE). Correctif A2 : `Partie` porte
+`siren` OU `tva` OU `identifiant {valeur, schema}` ; ordre : SIREN → schéma 0002 ; TVA FR → son
+SIREN, 0002 ; TVA d'un autre pays de l'UE → 0223 ; hors UE → 0227 (liste des identifiants de la
+réforme, à valider au bac à sable de la PA). Même règle pour l'émetteur de la facture
+(`facture.emetteur_tva`). Faute des deux : « <partie> sans SIREN ni n° de TVA ». Tests ajoutés
+(allemand, FR, suisse, rien ; passage avec la forme a4_18 sans SIREN).
+**Côté A4 (nécessaire, l'ouvrier ne peut pas inventer la TVA)** : `pa_commencer_statut` doit
+rendre aussi `destinataire.tva` et `facture.emetteur_tva` =
+`coalesce(v_f.fournisseur_lu ->> 'tva', <TVA de filed_fournisseurs>)`, et `emetteur.tva` pour
+l'acheteur si l'entité en a une (`jsonb_strip_nulls` garde le reste propre).
+**Relancer le 204 sans DELETE, une fois A4 posé et echange-pa redéployé** :
+`select public.pa_echouer_statut('<suivi>', 'Rejoué après correctif (TVA du fournisseur étranger)', false);`
+(remet `a_emettre`, puisque le statut n'est pas émis) puis
+`select public.deposer_travail('<client>', 'filed', 'pa.statut', jsonb_build_object('statut', '<suivi>'), 'pa.statut:<suivi>', 5::smallint);`
+(la clé ne bloque que contre un travail actif : l'ancien est « fait », un nouveau naît).
+
 Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).

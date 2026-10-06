@@ -441,3 +441,37 @@ Deno.test("battement : nom de module admis par battements.module (sans tiret)", 
   const { MODULE } = await import("./passage.ts");
   assertMatch(MODULE, /^[a-z][a-z_]{1,29}$/);
 });
+
+Deno.test("statut sur une facture d'un fournisseur allemand (forme a4_18, SIREN absent, TVA présente) : CDAR déposé", async () => {
+  const a = monter();
+  a.portes.statuts.set(STATUT, {
+    envoyer: true,
+    statut: 204,
+    client_id: CLIENT,
+    suivi: STATUT,
+    cdar: {
+      message: STATUT,
+      emis_le: "2026-10-06T15:24:00Z",
+      code: 204 as unknown as string,
+      facture: {
+        numero: "BAC-0001",
+        date: "2018-03-05",
+        type_code: "380",
+        emetteur_tva: "DE123456789",
+      },
+      emetteur: {
+        siren: "500000013",
+        nom: "Groupe Sogexal (banc)",
+        role: "BY",
+      },
+      destinataire: { tva: "DE123456789", nom: "Lieferant GmbH", role: "SE" },
+    },
+  });
+  a.portes.travaux = [travail(30, "pa.statut", { statut: STATUT })];
+  const bilan = await executerPassage(a.deps);
+  assertEquals(bilan.statuts, 1);
+  assertMatch(
+    new TextDecoder().decode(a.pa.depots[0].octets),
+    /schemeID="0223">DE123456789</,
+  );
+});

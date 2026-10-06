@@ -116,3 +116,58 @@ Deno.test("lecture : notre propre CDAR se relit ; préfixes quelconques accepté
   assertEquals(autre.libelle, "Rejetée");
   assertEquals(autre.message, "X");
 });
+
+Deno.test("fournisseur étranger sans SIREN : n° de TVA intracommunautaire, schéma 0223 (UE) ou 0227 (hors UE)", () => {
+  const allemand = fabriquerCdar(
+    statut("207", {
+      motif: { code: "TX_TVA_ERR" },
+      facture: {
+        numero: "BAC-0001",
+        date: "2018-03-05",
+        emetteur_siren: null,
+        emetteur_tva: "DE 123 456 789",
+      },
+      destinataire: { tva: "de123456789", nom: "Lieferant GmbH", role: "SE" },
+    }),
+  );
+  assertMatch(
+    allemand,
+    /<ram:RecipientTradeParty><ram:GlobalID schemeID="0223">DE123456789<\/ram:GlobalID><ram:Name>Lieferant GmbH<\/ram:Name><ram:RoleCode>SE<\/ram:RoleCode>/,
+  );
+  assertMatch(
+    allemand,
+    /<ram:IssuerTradeParty><ram:GlobalID schemeID="0223">DE123456789<\/ram:GlobalID><\/ram:IssuerTradeParty>/,
+  );
+  // Un n° de TVA FR rend son SIREN ; hors UE, 0227.
+  assertMatch(
+    fabriquerCdar(
+      statut("205", { destinataire: { tva: "FR40380129866", role: "SE" } }),
+    ),
+    /<ram:RecipientTradeParty><ram:GlobalID schemeID="0002">380129866<\/ram:GlobalID>/,
+  );
+  assertMatch(
+    fabriquerCdar(
+      statut("205", { destinataire: { tva: "CHE123456789", role: "SE" } }),
+    ),
+    /<ram:RecipientTradeParty><ram:GlobalID schemeID="0227">CHE123456789<\/ram:GlobalID>/,
+  );
+});
+
+Deno.test("partie sans SIREN ni TVA : erreur qui dit ce qui manque (et non « SIREN invalide : undefined »)", () => {
+  assertThrows(
+    () =>
+      fabriquerCdar(
+        statut("205", { destinataire: { nom: "Lieferant GmbH", role: "SE" } }),
+      ),
+    ErreurCdar,
+    "le vendeur sans SIREN ni n° de TVA",
+  );
+  assertThrows(
+    () =>
+      fabriquerCdar(
+        statut("205", { facture: { numero: "F", date: "2026-10-01" } }),
+      ),
+    ErreurCdar,
+    "l'émetteur de la facture sans SIREN ni n° de TVA",
+  );
+});
