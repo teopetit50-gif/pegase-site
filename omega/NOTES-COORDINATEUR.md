@@ -584,3 +584,13 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   attester, proposer un IBAN, bloquer), IBAN et factures liées. Relue en réel avec daf2@.
   Constat : Papeterie Delorme (R2026-000003) n'a ni SIREN ni TVA → « Revérifier »
   impossible (relayé à A1/A4).
+- 04 h 30 — **Vercel : « Deployment rate limited — retry in 24 hours »** (statut GitHub des
+  commits c13af96, 6bf7a86, 9b7ab27…). Seul f79663d (02:09 Z) est parti : il porte tout
+  jusqu'à lui (fiche fournisseur, PermisVue, statuts FILED). **Pas encore en ligne** :
+  libellés Daliro (c13af96) et vue Fournisseurs (6bf7a86) ; /espace/filed/fournisseurs
+  répond 404 sur omegaai.fr. Causes : (1) une poussée de notes sur main = un déploiement ;
+  (2) worker-a1/a2/a4/a5 n'ont pas le vercel.json qui coupe les prévisualisations (on voit
+  des déploiements worker-a4, worker-a1 cette nuit) — demandé aux quatre de le reprendre de
+  main. **Nouvelle règle** : les notes du coordinateur se commitent en local et partent avec
+  la prochaine vraie modification du site (ou au plus une poussée de notes par point de 2 h).
+  Vérifier l'état d'un commit : `gh api repos/teopetit50-gif/pegase-site/commits/<sha>/statuses`.
