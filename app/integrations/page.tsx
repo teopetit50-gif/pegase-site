@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import { type Outil } from "@/components/integrations/FamilleOutils";
 import OrbiteOutils from "@/components/integrations/OrbiteOutils";
-import GrilleOutils, { type Outil } from "@/components/integrations/GrilleOutils";
+import GrilleOutils from "@/components/integrations/GrilleOutils";
 import FriseRaccordement from "@/components/integrations/FriseRaccordement";
 import CartesSystemes from "@/components/integrations/CartesSystemes";
 import AppelOutil from "@/components/integrations/AppelOutil";
@@ -62,8 +63,8 @@ import {
      4. systèmes → <CartesSystemes>    (Aceternity « card-hover-effect » : le
                                         lavis glisse d'une carte à l'autre)
      5. clôture  → <AppelOutil>        (shadcnblocks « cta4 », carte claire)
-   <FamilleOutils> n'est plus appelé (orphelin, gardé le temps de la recette).
-   Le type Outil vient de <GrilleOutils> depuis le 06/10 (C5 : statut).
+   <FamilleOutils> n'est plus appelé (orphelin, gardé le temps de la recette) ;
+   seul son type Outil sert encore ici.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -88,7 +89,6 @@ const PAR_FAMILLE: { famille: Famille; outils: Outil[] }[] = FAMILLES_OUTILS.map
         path: o.path,
         famille: OUTIL_INFOS[o.title].famille,
         role: OUTIL_INFOS[o.title].role,
-        statut: OUTIL_INFOS[o.title].statut ?? null,
       })
     ),
   })
@@ -135,7 +135,7 @@ export default function Integrations() {
                 autour du noyau. La ligne ci-dessous devient sa légende. */}
             <OrbiteOutils className="mt-14" />
             <p data-reveal className="o-small mt-6">
-              {TOTAL} outils au catalogue, raccordés à la demande
+              {TOTAL} outils raccordés à ce jour
             </p>
           </div>
         </section>

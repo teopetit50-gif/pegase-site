@@ -21,7 +21,6 @@
    ══════════════════════════════════════════════════════════════════════ */
 import Link from "next/link";
 import { ArrowRight, Check, ChevronDown, MessageSquare, Sparkles, X } from "lucide-react";
-import { SiEnPreparation } from "@/components/ui/en-preparation";
 import { useState } from "react";
 import Apparition from "./Apparition";
 import Calculateur from "./Calculateur";
@@ -96,10 +95,7 @@ export default function Formules() {
                     {f.points.map((p) => (
                       <li key={p} className="flex items-start gap-3">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#3b7a6e]" />
-                        <span className="text-sm text-slate-600">
-                          {p}
-                          <SiEnPreparation pour="tiroma" t={p} />
-                        </span>
+                        <span className="text-sm text-slate-600">{p}</span>
                       </li>
                     ))}
                   </ul>
@@ -124,7 +120,6 @@ export default function Formules() {
                             )}
                             <span className={`text-xs ${d.inclus ? "text-slate-600" : "text-slate-400"}`}>
                               {d.libelle}
-                              <SiEnPreparation pour="tiroma" t={d.libelle} />
                               {d.indice && (
                                 <span className="ml-1.5 rounded bg-[#f3f8f7] px-1.5 py-0.5 text-[10px] font-semibold text-[#4f9587]">
                                   {d.indice}
@@ -164,8 +159,8 @@ export default function Formules() {
                   </span>
                   <h3 className="mb-1 font-sans text-lg sm:text-xl">Le point du matin arrive là où vous êtes</h3>
                   <p className="max-w-xl text-sm text-slate-600">
-                    Chaque jour ouvré à 7 h, dans votre espace sécurisé ; un courriel prévient le titulaire et
-                    l&apos;assistante, sans nom de patient. Rien à installer.
+                    Chaque jour ouvré à 7 h, par WhatsApp ou par e-mail, sur le téléphone du titulaire et de
+                    l&apos;assistante. Rien à ouvrir, rien à installer.
                   </p>
                 </div>
               </div>

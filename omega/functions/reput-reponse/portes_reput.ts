@@ -56,6 +56,10 @@ export interface Dossier {
     en_reponse_a: boolean;
   };
   canal_reponse?: string | null;
+  /** c3_07 : les messages précédents du même dossier (même personne, autre canal ou même canal, sept jours). */
+  precedents?: { canal: string; recu_le: string; sujet: string | null; corps: string; statut: string }[];
+  /** c3_06 : contact en litige ouvert (la base l'empêche de partir seul, quoi que rende le modèle). */
+  litige?: boolean;
   base?: Base;
 }
 

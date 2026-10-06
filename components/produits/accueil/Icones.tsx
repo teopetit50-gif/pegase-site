@@ -86,19 +86,7 @@ export function Etoile({ className = "" }: { className?: string }) {
   );
 }
 
-/* 06/10/2026 (C5) — le formulaire du site, troisième canal de réception
-   (A2). Même trait que les autres : cadre, deux champs, un bouton. */
-export function Formulaire({ className = "" }: { className?: string }) {
-  return (
-    <svg className={className} width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <rect x="5.5" y="4.5" width="17" height="19" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M9 9.5h10M9 13.5h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <rect x="9" y="17" width="5.5" height="3" rx="1" fill="currentColor" />
-    </svg>
-  );
-}
-
-export const ICONES = { bulle: Bulle, enveloppe: Enveloppe, agenda: Agenda, etoile: Etoile, formulaire: Formulaire };
+export const ICONES = { bulle: Bulle, enveloppe: Enveloppe, agenda: Agenda, etoile: Etoile };
 
 /* Les trois vignettes d'étape (46 px chez la référence, size-11.5). */
 export function Livre({ className = "" }: { className?: string }) {

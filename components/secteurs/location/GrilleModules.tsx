@@ -36,7 +36,6 @@
    2 colonnes puis 4 dès md, 20 cases = 10 rangées puis 5 rangées pleines ;
    la case « à venir » (Plan de flotte, n° 20) ferme la dernière rangée.
    ══════════════════════════════════════════════════════════════════════ */
-import { SiEnPreparation } from "@/components/ui/en-preparation";
 import { MOTEURS, type Moteur } from "./textes";
 import { SigneTuile } from "./marque";
 
@@ -116,9 +115,8 @@ export function GrilleMoteurs() {
                       <span className="font-mono text-[12px] tabular-nums text-[#6b7280]">{mo.numero}</span>
                       <Fleche />
                     </div>
-                    <div className="flex flex-1 flex-col items-center justify-center px-[4px] py-[8px]">
+                    <div className="flex flex-1 items-center justify-center px-[4px] py-[8px]">
                       <Nom mo={mo} />
-                      <SiEnPreparation pour="tavaro" t={mo.nom} style={{ marginLeft: 0, marginTop: 8 }} />
                     </div>
                     <p className="hidden truncate text-[10px] leading-relaxed text-[#4b5563] md:block">{mo.role}</p>
                   </div>
@@ -131,9 +129,8 @@ export function GrilleMoteurs() {
                       <span className="font-mono text-[12px] tabular-nums text-[#6b7280]">{mo.numero}</span>
                       <Fleche />
                     </div>
-                    <div className="flex flex-col items-center px-[4px] py-[12px]">
+                    <div className="flex justify-center px-[4px] py-[12px]">
                       <Nom mo={mo} fiche />
-                      <SiEnPreparation pour="tavaro" t={mo.nom} style={{ marginLeft: 0, marginTop: 8 }} />
                     </div>
                     <div className="flex min-w-0 items-baseline gap-[8px]">
                       <span className="f-syne shrink-0 text-[22px] font-semibold leading-none tracking-[-0.03em] text-[#1E3A8A]">{mo.chiffre}</span>

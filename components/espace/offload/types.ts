@@ -152,3 +152,74 @@ export type Fiche = {
   reprises: Reprise[];
   taches: Tache[];
 };
+
+/* c4_07 — échéances, parc, contrats */
+export type EcheanceLigne = {
+  id: string;
+  type: "entretien" | "contrat";
+  nature: "reglementaire" | "commerciale";
+  due_le: string;
+  base_le: string | null;
+  statut: "a_venir" | "a_valider" | "prevenue" | "appel" | "depassee" | "honoree" | "honoree_ailleurs" | "close";
+  s_eteint: boolean;
+  motif: string | null;
+  compte_id: string;
+  compte_nom: string;
+  equipement: { id: string; ref: string; designation: string; site: string | null; type_entretien: string | null } | null;
+  contrat: { id: string; numero: string; libelle: string | null; reconduction: string } | null;
+};
+
+export type Equipement = {
+  id: string;
+  ref: string;
+  designation: string;
+  site: string | null;
+  type_entretien: string | null;
+  periodicite_mois: number;
+  nature: "reglementaire" | "commerciale";
+  derniere_intervention: string | null;
+  interventions: { le: string; nature: string; ailleurs: boolean; reference: string | null }[];
+  echeance: { due_le: string; statut: EcheanceLigne["statut"]; base_le: string | null } | null;
+};
+
+export type Contrat = { id: string; numero: string; libelle: string | null; debut: string | null; fin: string; reconduction: string; statut: string; s_eteint: boolean };
+
+export type ParcCompte = { equipements: Equipement[]; contrats: Contrat[] };
+
+/* c4_08 — affaires restées en plan */
+export type StatutAffaire = "en_attente" | "relancee_1" | "relancee_2" | "decision" | "repondue" | "retiree" | "close_sans_suite";
+
+export type AffaireLigne = {
+  id: string;
+  type: "commande" | "intervention";
+  reference: string;
+  libelle: string | null;
+  compte_id: string;
+  compte_nom: string;
+  compte_niveau: string | null;
+  disponible_le: string;
+  jours: number;
+  valeur_ht: number | null;
+  statut: StatutAffaire;
+  motif: string | null;
+  plus_vue: boolean;
+};
+
+export type AffairesListe = {
+  total: { affaires: number; valeur_ht: number; a_decider: number; closes_sans_suite: number };
+  affaires: AffaireLigne[];
+};
+
+export type AffaireCompte = {
+  id: string;
+  type: "commande" | "intervention";
+  reference: string;
+  libelle: string | null;
+  disponible_le: string;
+  jours: number;
+  valeur_ht: number | null;
+  statut: StatutAffaire;
+  motif: string | null;
+  retire_le: string | null;
+  decision: string | null;
+};

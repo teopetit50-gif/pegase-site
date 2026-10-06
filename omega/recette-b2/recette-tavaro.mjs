@@ -38,7 +38,7 @@ for (const largeur of LARGEURS) {
       .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
     return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent,
              kpis: [...document.querySelectorAll('.esp-kpi')].map(k => (k.querySelector('.esp-kpi-etiquette')?.textContent + ' = ' + k.querySelector('.esp-kpi-valeur')?.textContent)),
-             items: document.querySelectorAll('.esp-item').length, bareme: document.querySelectorAll('section[aria-label="Barème de remise en état"] tbody tr').length };
+             items: document.querySelectorAll('ul[aria-label="Contrats de location"] .esp-item').length, bareme: document.querySelectorAll('section[aria-label="Barème de remise en état"] tbody tr').length };
   })()`);
   ok(mesure.deb === 0, `pas de débordement horizontal (${mesure.deb})`);
   ok(mesure.larges.length === 0, `aucun élément plus large que l'écran ${mesure.larges.length ? JSON.stringify(mesure.larges) : ''}`);
@@ -288,6 +288,141 @@ for (const largeur of LARGEURS) {
   await s.dormir(400);
   const prep2 = await s.evaluer(`document.querySelector('section[aria-label="Facture électronique : préparation 2027"]')?.innerText ?? ''`);
   ok(/1 client professionnel sans SIREN valide/.test(prep2), 'la préparation se met à jour : un seul client pro sans SIREN');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-contestations', densite: 1 });
+  console.log('— /espace/tavaro : contestations bancaires (exemple, b2_09)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Contestations bancaires"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; const l = [...c.querySelectorAll('.tav-avis')]; return { n: l.length, premier: l[0]?.innerText ?? '', tete: c.querySelector('.esp-carte-tete').innerText, forces: l[0]?.querySelector('.tav-forces summary')?.innerText ?? '' }; })()`);
+  ok(etat.n === 2, `${etat.n} contestations en cours (2 attendues)`);
+  ok(/CB-2026-88412/.test(etat.premier) && /Dossier prêt/.test(etat.premier) && /2 j pour répondre/.test(etat.premier), 'la première est la plus pressée : dossier prêt, 2 jours pour répondre');
+  ok(/1 urgente/.test(etat.tete), 'la tête de la carte compte l\'urgente');
+  ok(/7 points forts sur 7/.test(etat.forces), `les forces du dossier se lisent : « ${etat.forces.trim()} »`);
+  const issueGrise = await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].filter(b => /^(Gagnée|Perdue|Abandonner)$/.test(b.textContent.trim())).every(b => !b.disabled)`);
+  ok(issueGrise, 'un valideur consigne l\'issue (boutons actifs)');
+  /* envoyer le dossier prêt */
+  await s.evaluer(`(() => { const a = [...${sect}.querySelectorAll('.tav-avis')].find(x => /CB-2026-88412/.test(x.innerText)); [...a.querySelectorAll('.r-btn')].find(b => /Envoyer le dossier/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  const dlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { adresse: d.querySelector('input').value, actif: ![...d.querySelectorAll('button')].find(b => /Envoyer à la banque/.test(b.textContent)).disabled }; })()`);
+  ok(dlg.adresse === 'contestations@acquereur.example' && dlg.actif, 'l\'adresse réglée de la banque est préremplie ; le bouton est actif');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Envoyer à la banque/.test(b.textContent)).click()`);
+  await s.dormir(800);
+  const envoyee = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', k: [...${sect}.querySelectorAll('.tav-avis')].find(x => /CB-2026-88412/.test(x.innerText))?.innerText ?? '' }))()`);
+  ok(/part à contestations@acquereur\.example/.test(envoyee.fait) && /2 pièces jointes/.test(envoyee.fait) && /Envoyé à la banque/.test(envoyee.k), `le dossier part avec le PDF de la facture (pas de contrat scanné ici) : « ${envoyee.fait.slice(0, 100)} »`);
+  /* ouvrir une contestation : la facture de dommages FA-2026-000119, sans contrat scanné ni état des lieux de retour */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => /Ouvrir une contestation/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => {
+    const d = document.querySelector('[role="dialog"]');
+    const sel = d.querySelector('select'); const o = [...sel.options].find(x => /FA-2026-000119/.test(x.textContent));
+    const setS = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; setS.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await s.dormir(200);
+  await s.evaluer(`(() => {
+    const d = document.querySelector('[role="dialog"]'); const i = [...d.querySelectorAll('input')];
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    [[0, 'CB-2026-90001'], [1, '500'], [2, '10.4 — Fraude, carte absente']].forEach(([k, v]) => { set.call(i[k], v); i[k].dispatchEvent(new Event('input', { bubbles: true })); });
+  })()`);
+  await s.dormir(200);
+  const trop = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { gris: [...d.querySelectorAll('button')].find(b => /Ouvrir et composer/.test(b.textContent)).disabled, texte: d.innerText }; })()`);
+  ok(trop.gris && /ne dépasse pas la facture/.test(trop.texte), '500 € contestés sur une facture de 110 € : l\'écran le dit, bouton gris');
+  ok(/Ce que le dossier contiendra/.test(trop.texte) && /!/.test(trop.texte), 'avant d\'ouvrir, l\'écran montre ce que le dossier contiendra et ce qui manque');
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = d.querySelectorAll('input')[1]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Ouvrir et composer/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const ouverte = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', k: [...${sect}.querySelectorAll('.tav-avis')].find(x => /CB-2026-90001/.test(x.innerText))?.innerText ?? '' }))()`);
+  ok(/ouverte sur la facture FA-2026-000119/.test(ouverte.fait) && /Dossier en préparation/.test(ouverte.k) && /7 j pour répondre/.test(ouverte.k), 'la contestation s\'ouvre ; le délai réglé (7 jours) court ; le dossier se compose');
+  await s.dormir(1600);
+  const prete = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /CB-2026-90001/.test(x.innerText))?.innerText ?? ''`);
+  ok(/Dossier prêt/.test(prete) && /Dossier composé le/.test(prete) && /à renforcer/.test(prete), 'l\'ouvrier a composé le dossier ; ce qui est à renforcer reste dit');
+  /* abandonner : la direction ou un valideur */
+  await s.evaluer(`(() => { const a = [...${sect}.querySelectorAll('.tav-avis')].find(x => /CB-2026-90001/.test(x.innerText)); [...a.querySelectorAll('.r-btn')].find(b => /Abandonner/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Consigner/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  await s.evaluer(`[...${sect}.querySelectorAll('.esp-filtre')].find(b => /Closes/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const close = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /CB-2026-90001/.test(x.innerText))?.innerText ?? ''`);
+  ok(/Abandonnée le/.test(close) && /consignée par Vous/.test(close), 'abandonnée, consignée par « Vous », dans les closes');
+  await s.evaluer(`[...${sect}.querySelectorAll('.esp-filtre')].find(b => /En cours/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tavaro-contestations-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-parc', densite: 1 });
+  console.log('— /espace/tavaro : parc, remise en location et entretien (exemple, b2_10)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Parc : remise en location et entretien"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; const r = [...c.querySelectorAll('ul[aria-label^="Remises"] > li')]; return { n: r.length, premier: r[0]?.innerText ?? '', chiffres: c.querySelector('.tav-parc-chiffres')?.innerText ?? '', tete: c.querySelector('.esp-carte-tete').innerText }; })()`);
+  ok(etat.n === 2, `${etat.n} remises en cours (2 attendues)`);
+  ok(/GA-123-BC/.test(etat.premier) && /risque de manquer le départ/.test(etat.premier) && /R-55102/.test(etat.premier), 'la première est la Clio, qui risque de manquer son départ R-55102');
+  ok(/2 h 48/.test(etat.chiffres) && /3 \/ 3/.test(etat.chiffres), `la médiane de remise en location (2 h 48) et les prêtes à temps se lisent : « ${etat.chiffres.replace(/\s+/g, ' ').slice(0, 120)} »`);
+  ok(/1 en risque/.test(etat.tete), 'la tête de la carte compte la remise en risque');
+  /* l'anomalie confiée à Yanis : « Vous » êtes valideur, vous pouvez la clore */
+  await s.evaluer(`[...${sect}.querySelectorAll('.tav-anomalies .r-btn')].find(b => /Traitée/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  ok(/traitée/.test(await s.evaluer(`${sect}.querySelector('.tav-anomalies')?.innerText ?? ''`)), 'l\'anomalie confiée à Yanis Dupré est close par un valideur');
+  /* signaler une anomalie sur la 308 : bouton gris tant qu'il manque la personne */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GH-456-DE/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Signaler une anomalie/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const t = d.querySelector('textarea'); const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; set.call(t, 'Gilet de sécurité absent du coffre'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Signaler\\s*$/.test(b.textContent)).disabled`), 'sans personne nommée, « Signaler » reste gris');
+  await s.evaluer(`(() => { const sel = [...document.querySelectorAll('[role="dialog"] select')][1]; const o = [...sel.options].find(x => /Claire Morel/.test(x.textContent)); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Signaler\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const anomalie = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', li: [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GH-456-DE/.test(x.innerText))?.innerText ?? '' }))()`);
+  ok(/confiée à Claire Morel/.test(anomalie.fait) && /Gilet de sécurité/.test(anomalie.li), 'l\'anomalie est confiée à Claire Morel, nommée sur la remise');
+  /* finir la Clio : nettoyage, plein → prête, elle quitte la liste */
+  for (const etape of ['Nettoyage', 'Plein']) {
+    await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GA-123-BC/.test(x.innerText)); [...li.querySelectorAll('.tav-etape')].find(b => b.textContent.includes('${etape}')).click(); })()`);
+    await s.dormir(500);
+  }
+  const apres = await s.evaluer(`(() => ({ n: ${sect}.querySelectorAll('ul[aria-label^="Remises"] > li').length, chiffres: ${sect}.querySelector('.tav-parc-chiffres').innerText }))()`);
+  ok(apres.n === 1 && /4 retours/.test(apres.chiffres), 'les trois étapes faites : la Clio est prête, elle quitte la liste et entre dans la médiane');
+  /* immobiliser la 308 chez le carrossier : la date de retour est obligatoire */
+  await s.evaluer(`[...${sect}.querySelectorAll('.esp-carte-tete .r-btn')].find(b => /Immobiliser/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select'); const o = [...sel.options].find(x => /GH-456-DE/.test(x.textContent)); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Immobiliser\\s*$/.test(b.textContent)).disabled`), 'carrosserie sans date de retour : « Immobiliser » reste gris');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="datetime-local"]'); const d = new Date(Date.now() + 4 * 86400000); const v = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T17:00'; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, v); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Immobiliser\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const immo = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', n: ${sect}.querySelectorAll('ul[aria-label="Véhicules immobilisés"] > li').length }))()`);
+  ok(/GH-456-DE est immobilisé \(carrosserie\)/.test(immo.fait) && immo.n === 3, `la 308 part chez le carrossier avec sa date de retour : « ${immo.fait.slice(0, 90)} »`);
+  /* planifier la révision de la 308 dans un creux, atelier prévenu */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Entretiens"] > li')].find(x => /Révision 50 000 km/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Trouver un créneau/.test(b.textContent)).click(); })()`);
+  await s.dormir(900);
+  const creneaux = await s.evaluer(`document.querySelectorAll('[role="dialog"] .tav-creneau').length`);
+  ok(creneaux === 3, `${creneaux} créneaux proposés dans les creux (3 attendus), hors de l'immobilisation chez le carrossier`);
+  const premier = await s.evaluer(`document.querySelector('[role="dialog"] .tav-creneau')?.innerText ?? ''`);
+  const saisir = (k, v) => s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input:not([type="radio"])')][${k}]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '${v}'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir(0, 'Garage Lumière');
+  await saisir(1, 'pas-une-adresse');
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Planifier/.test(b.textContent)).disabled`), 'une adresse d\'atelier fausse : « Planifier » reste gris');
+  await saisir(1, 'atelier@garage-lumiere.example');
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Planifier/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const plan = await s.evaluer(`${sect}.querySelector('.esp-avis')?.innerText ?? ''`);
+  ok(/planifié le/.test(plan) && /l'atelier est prévenu/.test(plan), `la révision est planifiée dans un creux, l'atelier prévenu (${premier.trim().slice(0, 40)})`);
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tavaro-parc-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

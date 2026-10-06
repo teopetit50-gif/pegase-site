@@ -27,6 +27,8 @@ import { dateCourte, montant } from "../format";
 import { A_RISQUE, NIVEAUX, STATUTS_REPRISE } from "./etats";
 import { exempleOffload } from "./exemples";
 import FicheCompte, { type Geste } from "./FicheCompte";
+import Affaires from "./Affaires";
+import Echeances from "./Echeances";
 import { changerStatut, chargerFiche, chargerTableau, noterContact, noterTache, ouvrirReprise, recalculer, saisirAchat, trancherRapprochement } from "./portes";
 import type { Compte, Fiche, Tableau } from "./types";
 
@@ -318,6 +320,17 @@ export default function EcranOffload() {
               </div>
             )}
           </section>
+          <Echeances source={source} onChoisir={(id) => {
+            setFiltre("tous");
+            setChoix(id);
+            if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }} />
+          <Affaires source={source} onChoisir={(id) => {
+            setFiltre("tous");
+            setChoix(id);
+            if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }} />
+
           {(tableau?.rapprochements ?? []).length ? (
             <section className="esp-carte" aria-label="Doublons proposés">
               <div className="esp-carte-tete">
@@ -344,7 +357,7 @@ export default function EcranOffload() {
 
         <section id="esp-dossier" className="esp-detail-mobile" aria-label="Fiche du compte">
           {fiche ? (
-            <FicheCompte key={fiche.compte.id} fiche={fiche} onAgir={agir} />
+            <FicheCompte key={fiche.compte.id} fiche={fiche} onAgir={agir} source={source} />
           ) : chargeFiche || (source === "reelle" && choisi) ? (
             <div className="esp-carte"><Chargement texte="Lecture de la fiche…" /></div>
           ) : (

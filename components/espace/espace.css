@@ -787,7 +787,8 @@
   color: var(--esp-rouge);
   font-weight: 600;
 }
-.esp .esp-fichier {
+.esp .esp-fichier,
+.dlg-panneau .esp-fichier {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

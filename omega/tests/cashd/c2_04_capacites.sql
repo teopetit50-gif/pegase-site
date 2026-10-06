@@ -5,7 +5,7 @@ create or replace function tests.test_c2_04_capacites() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; v_client uuid; v_gerant uuid; v_daf uuid; v_collab uuid; p jsonb; j date := tests.c2_jour();
-  v_r jsonb; v_x uuid; v_f uuid; v_e record; r public.cashd_relances; v_d jsonb; v_dem uuid; v_samedi date; v_n integer;
+  v_r jsonb; v_x uuid; v_f uuid; v_e record; r public.cashd_relances; v_d jsonb; v_dem uuid; v_samedi date; v_n integer; v_arrete date;
 begin
   banc := tests.c2_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid; v_daf := (banc ->> 'daf')::uuid;
@@ -109,6 +109,14 @@ begin
   -- ── Délai moyen de règlement, dégradation, prévision ──
   return next is((select d.factures_payees || '/' || d.delai_moyen_jours from public.cashd_delais_reglement d where d.compte_id = (p ->> 'mairie')::uuid), '10/35.0',
                  'Le délai moyen de règlement se mesure compte par compte (mairie : 35 jours sur dix factures)');
+  -- Un compte qui se dégrade : la mairie paie d'habitude 5 jours après l'échéance ; une facture en retard de 30 jours le signale.
+  perform tests.redevenir_admin();
+  insert into public.cashd_factures (client_id, entite_id, compte_id, nature, numero, date_emission, echeance, montant_ttc, statut, source)
+  values (v_client, (banc ->> 'entite')::uuid, (p ->> 'mairie')::uuid, 'facture', 'F-2026-RETARD', j - 60, j - 30, 100, 'ouverte', 'saisie');
+  return next ok((select d.se_degrade and d.retard_actuel_jours = 30 and d.retard_moyen_jours = 5 from public.cashd_delais_reglement d where d.compte_id = (p ->> 'mairie')::uuid)
+                 and tests.c2_plat((select x ->> 'texte' from jsonb_array_elements(private.cashd_point_lignes(v_client, j)) x where x ->> 'texte' like 'Mairie de Caluire se dégrade%' limit 1))
+                     like '%30 jours de retard aujourd''hui, contre 5 jours en moyenne%',
+                 'Un compte qui se dégrade est signalé (30 jours de retard contre 5 d''habitude) au point du matin');
   v_r := public.cashd_prevision(v_client);
   return next ok((v_r ->> 'a_30_jours') is not null and (v_r ->> 'a_60_jours')::numeric >= (v_r ->> 'a_30_jours')::numeric and (v_r ->> 'tenu_a_part')::numeric > 0,
                  format('Prévision d''encaissement : %s € à 30 jours, %s € à 60 jours, %s € tenus à part (litiges, recouvrement)', v_r ->> 'a_30_jours', v_r ->> 'a_60_jours', v_r ->> 'tenu_a_part'));
@@ -161,10 +169,15 @@ begin
                  'Un samedi, le passage n''écrit aucune relance');
 
   -- ── L'arrêté de la balance à date fixe ──
-  update public.cashd_reglages set arrete_jour = least(extract(day from v_samedi + 2)::int, 28) where client_id = v_client;
-  v_n := private.cashd_passage(((v_samedi + 2)::timestamp + time '07:05') at time zone 'Europe/Paris');
-  return next ok(extract(day from v_samedi + 2)::int > 28
-                 or exists (select 1 from public.cashd_arretes a where a.client_id = v_client and a.jour = v_samedi + 2 and jsonb_array_length(a.balance) >= 1),
+  -- Un mois que le passage réel (cron cashd-matin du banc, où CASHD est installé) n'a pas encore pu arrêter : le
+  -- suivant ; son premier jour ouvré, qui devient le jour réglé.
+  v_arrete := (date_trunc('month', v_samedi + 2) + interval '1 month')::date;
+  while extract(isodow from v_arrete) > 5 or not coalesce(public.jour_ouvre(v_arrete, 'metropole'), true) loop
+    v_arrete := v_arrete + 1;
+  end loop;
+  update public.cashd_reglages set arrete_jour = extract(day from v_arrete)::int where client_id = v_client;
+  v_n := private.cashd_passage((v_arrete::timestamp + time '07:05') at time zone 'Europe/Paris');
+  return next ok(exists (select 1 from public.cashd_arretes a where a.client_id = v_client and a.jour = v_arrete and jsonb_array_length(a.balance) >= 1),
                  'Le jour du mois réglé, la balance âgée est arrêtée (à télécharger en tableur)');
 
   -- ── Une facture réglée publie cashd.facture_reglee (abonné : REPUT) ──

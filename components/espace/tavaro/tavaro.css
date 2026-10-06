@@ -270,3 +270,106 @@
   align-items: center;
   gap: 8px;
 }
+
+/* Le parc (b2_10) : les chiffres, les étapes de la remise, les anomalies, les créneaux d'atelier. */
+.esp .tav-parc-chiffres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.esp .tav-parc-chiffres > div {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  min-width: 0;
+}
+.esp .tav-parc-chiffres strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+.esp .tav-parc-titre {
+  margin: 18px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.esp .tav-avis[data-alerte="risque"],
+.esp .tav-avis[data-alerte="retard"] {
+  border-color: var(--r-rouge, #c62828);
+}
+.esp .tav-etapes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.esp .tav-etape {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+.esp .tav-etape[aria-pressed="true"] {
+  border-color: var(--r-vert, #2e7d32);
+  background: color-mix(in srgb, var(--r-vert, #2e7d32) 8%, transparent);
+}
+.esp .tav-etape:focus-visible {
+  outline: 2px solid var(--r-encre, currentColor);
+  outline-offset: 2px;
+}
+.esp .tav-etape:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.esp .tav-confier {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.esp .tav-confier .rv-champ {
+  min-width: 0;
+  width: auto;
+  max-width: 100%;
+}
+.esp .tav-anomalies {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.esp .tav-anomalies > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.esp .tav-creneaux {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.esp .tav-creneau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  cursor: pointer;
+}

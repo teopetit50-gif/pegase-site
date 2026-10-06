@@ -61,6 +61,8 @@ declare
     'echu_plus', jsonb_build_object('type', 'texte', 'facultative', true, 'entetes', jsonb_build_array('> 90', '+90', 'Plus de 90 jours', '91 et plus')),
     'echu', jsonb_build_object('type', 'texte', 'facultative', true, 'entetes', jsonb_build_array('Échu', 'Total échu', 'Échues')),
     'total', jsonb_build_object('type', 'texte', 'facultative', true, 'entetes', jsonb_build_array('Total', 'Solde', 'Encours', 'Reste dû')));
+  v_age_c jsonb;
+  v_age_f jsonb;
   v_bg jsonb := jsonb_build_object(
     'compte', jsonb_build_object('type', 'texte', 'obligatoire', true, 'entetes', jsonb_build_array('N° compte', 'Numéro de compte', 'Compte', 'CompteNum')),
     'libelle', jsonb_build_object('type', 'texte', 'facultative', true, 'entetes', jsonb_build_array('Intitulé', 'Libellé', 'Intitulé du compte', 'CompteLib')),
@@ -71,18 +73,21 @@ declare
 begin
   v_tiers_c := jsonb_set(v_tiers_f, '{code}', jsonb_build_object('type', 'texte', 'obligatoire', true, 'libelle', 'Code du client dans la société',
                  'entetes', jsonb_build_array('Code client', 'Code tiers', 'N° compte tiers', 'Compte tiers', 'Numéro', 'Code')));
+  -- b1_14 : chaque balance âgée ne reconnaît que son côté (signatures sans recouvrement)
+  v_age_c := jsonb_set(v_age, '{code,entetes}', '["Code client", "Code tiers", "Compte tiers", "N° compte tiers", "Compte", "Code"]'::jsonb);
+  v_age_f := jsonb_set(v_age, '{code,entetes}', '["Code fournisseur", "Code tiers", "Compte tiers", "N° compte tiers", "Compte", "Code"]'::jsonb);
   foreach l in array array['sage100', 'ebp', 'cegid', 'quadra', 'pennylane', 'tableur'] loop
     insert into public.modeles_jeux (module, logiciel, code, version, libelle, motif_fichier, entetes, colonnes, cle, complet, fenetre,
                                      confirmer_disparition, seuil_perte, perte_min, seuil_anomalies, options, accuse, source)
     values
       ('varelo', l, 'fournisseurs', 1, 'Fichier des fournisseurs', '^(fournisseurs?|frs|tiers[_ -]?fourn)',
-       array['Code fournisseur', 'Raison sociale'], v_tiers_f, array['code'], true, null, 2, 0.2, 1, 0.05, '{}'::jsonb, true, v_source),
+       array['Code fournisseur', 'Raison sociale', 'Code postal'], v_tiers_f, array['code'], true, null, 2, 0.2, 1, 0.05, '{}'::jsonb, true, v_source),
       ('varelo', l, 'clients', 1, 'Fichier des clients', '^(clients?|tiers[_ -]?cli)',
-       array['Code client', 'Raison sociale'], v_tiers_c, array['code'], true, null, 2, 0.2, 1, 0.05, '{}'::jsonb, true, v_source),
+       array['Code client', 'Raison sociale', 'Code postal'], v_tiers_c, array['code'], true, null, 2, 0.2, 1, 0.05, '{}'::jsonb, true, v_source),
       ('varelo', l, 'balance_agee_clients', 1, 'Balance âgée clients', '^(balance[_ -]?ag[ée]e[_ -]?cli|echeancier[_ -]?cli|bac[_ -])',
-       array['Non échu', 'Total'], v_age, array['code'], true, null, 1, 0.5, 1, 0.05, '{}'::jsonb, true, v_source),
+       array['Code client', 'Non échu', 'Total'], v_age_c, array['code'], true, null, 1, 0.5, 1, 0.05, '{}'::jsonb, true, v_source),
       ('varelo', l, 'balance_agee_fournisseurs', 1, 'Balance âgée fournisseurs', '^(balance[_ -]?ag[ée]e[_ -]?fou|echeancier[_ -]?fou|baf[_ -])',
-       array['Non échu', 'Total'], v_age, array['code'], true, null, 1, 0.5, 1, 0.05, '{}'::jsonb, true, v_source),
+       array['Code fournisseur', 'Non échu', 'Total'], v_age_f, array['code'], true, null, 1, 0.5, 1, 0.05, '{}'::jsonb, true, v_source),
       ('varelo', l, 'balance_generale', 1, 'Balance générale', '^(balance[_ -]?g[ée]n[ée]rale|bg[_ -])',
        array['Solde débit', 'Solde crédit'], v_bg, array['compte'], true, null, 1, 0.5, 1, 0.05, '{}'::jsonb, true, v_source)
     on conflict on constraint modeles_jeux_une_version do nothing;

@@ -631,7 +631,7 @@ export default function OffresPage() {
                     <h2 className="ofd-h3">Où que vous travailliez.</h2>
                     <p className="ofd-body">
                       Les systèmes tournent en ligne, pas sur un poste. Vos équipes les
-                      retrouvent où qu'elles soient.
+                      retrouvent où qu&apos;elles soient.
                     </p>
                   </div>
                   {/* 16/09 (Teo) — le motif à points calculé laisse la

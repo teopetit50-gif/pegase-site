@@ -20,6 +20,10 @@ const ECRANS = [
   ['tavaro-fe', '/espace/tavaro', `[...document.querySelectorAll('#esp-dossier .tav-facture .r-btn')].find(b => /Forme électronique/.test(b.textContent))?.click()`,
     `[...document.querySelectorAll('.esp-item')].find(b => /C-2026-0322/.test(b.textContent))?.click()`],
   ['tavaro-avis', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Avis de contravention"] .r-btn')].find(b => /Désigner le conducteur/.test(b.textContent) && !b.disabled)?.click()`],
+  ['tavaro-parc', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Parc : remise en location et entretien"] .r-btn')].find(b => /Trouver un créneau/.test(b.textContent) && !b.disabled)?.click()`],
+  ['tavaro-parc-anomalie', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Parc : remise en location et entretien"] .r-btn')].find(b => /Signaler une anomalie/.test(b.textContent) && !b.disabled)?.click()`],
+  ['tavaro-contestations', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Contestations bancaires"] .r-btn')].find(b => /Ouvrir une contestation/.test(b.textContent) && !b.disabled)?.click()`,
+    `(() => { const d = document.querySelector('section[aria-label="Contestations bancaires"] .tav-forces'); if (d) d.open = true; })()`],
 ];
 
 const analyser = (s, cible) => s.evaluer(`(async () => {

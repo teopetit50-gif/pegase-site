@@ -176,10 +176,14 @@ export const TYPES_PIECE: { cle: string; libelle: string }[] = [
   { cle: "lorani_plu_reglement", libelle: "Règlement du PLU" },
   { cle: "lorani_metre", libelle: "Métré" },
   { cle: "lorani_attestation_decennale", libelle: "Attestation décennale d’une entreprise" },
+  { cle: "lorani_cerfa", libelle: "Cerfa de la demande" },
+  { cle: "lorani_attestation_re2020", libelle: "Attestation RE2020" },
+  { cle: "lorani_plan_bet", libelle: "Fond de plan d’un BET" },
+  { cle: "lorani_notice", libelle: "Notice (accessibilité, sécurité)" },
 ];
 
 /* les pièces qui ne sont pas des courriers de la mairie : contrôle du dossier (b5_16), attestations (b5_18) */
-export const TYPES_CONTROLE = ["lorani_planche", "lorani_cctp", "lorani_dpgf", "lorani_plu_reglement", "lorani_metre", "lorani_attestation_decennale"];
+export const TYPES_CONTROLE = ["lorani_planche", "lorani_cctp", "lorani_dpgf", "lorani_plu_reglement", "lorani_metre", "lorani_attestation_decennale", "lorani_cerfa", "lorani_attestation_re2020", "lorani_plan_bet", "lorani_notice"];
 
 export function libelleTypePiece(cle: string | null | undefined): string {
   return TYPES_PIECE.find((t) => t.cle === cle)?.libelle ?? "Courrier";

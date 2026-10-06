@@ -119,7 +119,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/vos-donnees" },
   title: "Où vont vos données | Omega.AI",
   description:
-    "Hébergement dans l'Union européenne, à Francfort, ou, sur étude, sur vos propres serveurs. Sous-traitants, chiffrement, journalisation et réversibilité.",
+    "Hébergement dans l'Union européenne, à Francfort, ou sur vos propres serveurs. Sous-traitants, chiffrement, journalisation et réversibilité.",
 };
 
 
@@ -129,7 +129,7 @@ const GARANTIES = [
     icone: IconeLieu,
     titre: "Hébergement européen",
     texte:
-      "Notre base de données est hébergée dans la région eu-central-1, à Francfort, en Allemagne, et n'est répliquée nulle part hors de l'Union européenne. Nos sauvegardes chiffrées y auront aussi leur stockage.",
+      "Notre base de données est hébergée dans la région eu-central-1, à Francfort, en Allemagne. Aucune réplication n'est effectuée hors de l'Union européenne.",
   },
   {
     icone: IconeBarriere,
@@ -147,12 +147,11 @@ const GARANTIES = [
     icone: IconeOeil,
     titre: "Validation avant envoi",
     texte:
-      "Le système prépare chaque envoi, puis le soumet à la personne habilitée dans votre organisation. Tant que la validation n'a pas eu lieu, le message reste un brouillon dans votre file de validation Omega.",
+      "Le système prépare chaque envoi, puis le soumet à la personne habilitée dans votre organisation. Tant que la validation n'a pas eu lieu, le message reste un brouillon dans votre outil.",
   },
   {
     icone: IconeJournal,
     titre: "Tout est journalisé",
-    preparation: true,
     texte:
       "Chaque exécution inscrit une ligne au journal : date, système, décision et destinataire. Ce journal reste consultable et exportable à tout moment, y compris pour un contrôle.",
   },
@@ -170,7 +169,7 @@ const CHIFFRES = [
     icone: IconeServeur,
     etiquette: "HÉBERGEMENT",
     valeur: "eu-central-1",
-    texte: "Francfort, Allemagne : la base n'est répliquée nulle part hors de l'Union européenne",
+    texte: "Francfort, Allemagne : aucune réplication hors de l'Union européenne",
   },
   {
     icone: IconeZero,
@@ -248,17 +247,17 @@ const OPTIONS: Option[] = [
       "Votre environnement existant reste en place. Le système s'y connecte, lit les champs dont il a besoin, écrit son résultat dans la base, puis vous le soumet pour validation.",
     obtenez: [
       "Une base de données à Francfort, chiffrée au repos",
-      { t: "Les sauvegardes et la supervision comprises", preparation: true },
-      { t: "Un export complet en un clic, à tout moment", preparation: true },
+      "Les sauvegardes et la supervision comprises",
+      "Un export complet en un clic, à tout moment",
       "L'effacement de la base et des sauvegardes sur demande",
     ],
   },
   {
     cle: "local",
-    onglet: "Installation locale · sur étude",
+    onglet: "Installation locale · vos serveurs",
     titre: "Une installation sur vos propres serveurs",
     resume:
-      "Sur étude, pour les organisations qui l'exigent : ce dispositif s'adresse à celles dont la politique interne interdit toute sortie de données. Nous installons les systèmes sur un serveur qui vous appartient, en conteneurs isolés et sur disque chiffré, à l'intérieur de votre réseau.",
+      "Ce dispositif s'adresse aux organisations dont la politique interne interdit toute sortie de données. Nous installons les systèmes sur un serveur qui vous appartient, en conteneurs isolés et sur disque chiffré, à l'intérieur de votre réseau.",
     image: "/photos/donnees-rack-local.jpg",
     alt: "Baie de brassage vue de près, câble orange lové",
     chiffres: [
@@ -345,7 +344,7 @@ export default function VosDonnees() {
                   vos données
                 </h1>
                 <p className="vd-lead max-w-[42rem]">
-                  Vos données sont hébergées dans l&apos;Union européenne, à Francfort, ou, sur étude, sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
+                  Vos données sont hébergées dans l&apos;Union européenne, à Francfort, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
                 </p>
                 <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
@@ -364,7 +363,7 @@ export default function VosDonnees() {
                   référence pour cette section-là. Les autres sont centrées. */}
               <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-20">
                 <h2 className="vd-h2">
-                  Vos données sont hébergées à Francfort, sans réplication hors de l&apos;UE
+                  Vos données sont hébergées à Francfort, sans réplication ailleurs
                 </h2>
                 <p className="vd-body lg:pt-3">
                   Un système ne duplique ni votre messagerie ni vos fichiers. Il lit les champs nécessaires à la tâche en cours, écrit son résultat, puis laisse le reste à sa place. Le schéma ci-dessous suit une donnée d&apos;un bout à l&apos;autre du traitement.
@@ -408,7 +407,7 @@ export default function VosDonnees() {
               <h2 className="vd-h2 text-center">Ce que cette architecture garantit</h2>
 
               <CartesGaranties
-                garanties={GARANTIES.map(({ titre, texte, preparation }) => ({ titre, texte, preparation }))}
+                garanties={GARANTIES.map(({ titre, texte }) => ({ titre, texte }))}
               />
             </div>
           </section>

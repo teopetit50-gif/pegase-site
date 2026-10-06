@@ -21,10 +21,8 @@
      coûtent les créneaux perdus, avec les chiffres du visiteur.
    • Aucune promesse de lecture de radios ni d'aide au diagnostic : Tiroma
      lit l'agenda, les plans et les devis, rien de clinique.
-   • Aucun de nos outils techniques n'est nommé.
-   • 06/10/2026 (C5, décision D6) : le point du matin nominatif se lit dans
-     l'espace sécurisé du cabinet ; un courriel prévient, sans nom de
-     patient. Jamais WhatsApp ni SMS pour un contenu de santé.
+   • Aucun de nos outils techniques n'est nommé. WhatsApp et l'e-mail sont
+     les canaux où le CABINET reçoit son point du matin, pas notre pile.
    ══════════════════════════════════════════════════════════════════════ */
 import type { LucideIcon } from "lucide-react";
 import {
@@ -141,7 +139,7 @@ export const ETAPES = [
   {
     titre: "Tiroma lit l'agenda et les plans",
     texte:
-      "À chaque export de votre logiciel, Tiroma lit l'agenda, les plans, les devis, les travaux confiés au laboratoire et les réponses des mutuelles. Une annulation saisie à 8 h remonte au premier export qui la contient, en lecture seule.",
+      "Tout au long de la journée, Tiroma lit l'agenda, les plans, les devis, les travaux confiés au laboratoire et les réponses des mutuelles. Une annulation saisie à 8 h remonte dans les minutes qui suivent, en lecture seule.",
   },
   {
     titre: "Le créneau libéré est repris",
@@ -501,7 +499,7 @@ export const QUESTIONS = [
   },
   {
     q: "Une annulation du matin attend-elle le lendemain ?",
-    r: "Non. Tiroma lit l'agenda à chaque export de votre logiciel : une annulation saisie à 8 h remonte avec les patients qui peuvent la reprendre au premier export qui la contient, sans attendre le point du lendemain.",
+    r: "Non. Tiroma lit l'agenda tout au long de la journée : une annulation saisie à 8 h remonte avec les patients qui peuvent la reprendre dans les minutes qui suivent, sans attendre le point du lendemain.",
   },
   {
     q: "Tiroma suit-il l'orthodontie et les implants ?",

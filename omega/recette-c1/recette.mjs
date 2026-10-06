@@ -27,6 +27,7 @@ const ECRANS = [
   ['accueil', '/espace2'],
   ['validations', '/espace2/validations'],
   ['point', '/espace2/point'],
+  ['demandes', '/espace2/demandes'],
   ['activite', '/espace2/activite'],
   ['reglages', '/espace2/reglages'],
   ['filed', '/espace2/filed?objet=facture:R2026-000016'],
@@ -35,6 +36,8 @@ const ECRANS = [
   ['comptabilite', '/espace2/filed/comptabilite'],
   ['boite', '/espace2/filed/boite'],
   ['reput', '/espace2/reput'],
+  ['cashd', '/espace2/cashd'],
+  ['offload', '/espace2/offload'],
   ['filed-electronique', '/espace2/filed?objet=facture:R2026-000014'],
   ['varelo', '/espace2/varelo'],
   ['tavaro', '/espace2/tavaro'],
@@ -155,7 +158,12 @@ for (const largeur of LARGEURS) {
         await s.capturer(`${sortie}/compte-${largeur}-${theme}.jpg`, { qualite: 72 });
         juger('menu compte', await analyser(s, `document.querySelector('.v2-popover')`));
       }
-      const soucis = s.soucis.filter((x) => !/favicon|_vercel|va\.vercel|Failed to load resource/.test(x));
+      /* En local, en http : la politique de contenu de production porte
+         upgrade-insecure-requests, et le préchargement des liens /espace/…
+         (redirigés vers /espace2/… par la bascule) part alors en https sur
+         localhost, qui n'en a pas. Sur omegaai.fr (https) c'est sans effet. */
+      const httpLocal = /^http:\/\/localhost/.test(base);
+      const soucis = s.soucis.filter((x) => !/favicon|_vercel|va\.vercel|Failed to load resource/.test(x) && !(httpLocal && /ERR_SSL_PROTOCOL_ERROR/.test(x)));
       ok(!soucis.length, `console propre${soucis.length ? ' : ' + soucis.slice(0, 3).join(' / ') : ''}`);
     } finally {
       s.fermer();

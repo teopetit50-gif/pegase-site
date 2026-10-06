@@ -983,3 +983,39 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   /espace (racine) est en 404 en ligne comme avant : c'est la bascule qui le résoudra.
   Ouverts : export-complet appelle public.exporter_client (inexistante) → A5 ; « appel manqué par SMS » (lib/pub.ts)
   → A2 dit si l'ouvrier envoie réellement en brevo_sms, sinon C5 reformule.
+- 18 h 15 Z (Teo de retour vers 18 h) — Poses : b1_14 signatures + b1_17 (B1 d794f00), c3_07 dossiers et services + c3_03
+  + c3_07 (C3 588833e), b4_16 expertises + 25 (B4 55e15ed), c4_07 échéances + test (C4 5f2cc7e), b6_24 fil de chantier
+  + b6_18 (B6 b062478), c2_04 v4 (C2 2643451), 19ap widgets + test (A2 de501c4), test b2_18 étendu (B2 3856716).
+  Lot ^test_(b1_1[3-7]_|c3_0[37]_|b4_25_|c4_07_|b6_|c2_04_|socle_19ap) : 822 ok, 6 not ok →
+  ROUGES : test_b6_03_reponses n° 20 (régression de b6_24, → B6), test_c2_04 n° 38 (balance arrêtée, → C2),
+  test_c3_07 n° 9 (have bloquee, want a_valider, → C3). Écrans B6 et C3 NON fusionnés. 44/46/51/55 : 34 ok, 0.
+  b5_21 NON posé : il dépend d'un b5_16 amendé alors que b5_16 est déjà posé → B5 doit fournir un delta.
+  Redéployés : export-complet v2 (A5 66524c9 ; réglage export_origines_recette = http://localhost:3010, recette
+  seule), reput-reponse v2 (588833e), lecteur v29 (A1 e5436cc : lecteur.media), widget v1 (A2 de501c4, verify_jwt
+  false). FILED : filed_prochain_numero est un compteur en table (sans trou) ; drapeau d'effacement =
+  private.effacement_en_cours(client) ; preparer_delegation ne vérifie PAS que le délégataire est membre → A4.
+  Main : fusion b1, b4 (expertises), c4 (échéances), c5 passe 6, b2 (écran contestations) ; GUIDE-WIDGET ; pastille
+  Tamila « pièces attendues » retirée ; apostrophe échappée dans app/offres/page.tsx (eslint).
+  À décider par Teo : coffre Scaleway du banc (Key Manager), transcription Mistral, crédits SMS Brevo.
+- 19 h 05 Z — Teo est là. Décisions de Teo : BASCULE oui (a1f12b2 fusionnée + exception proxy.ts pour cashd, offload,
+  demandes absents de /espace2 ; Vercel « rate limited » : pas encore en ligne) ; Scaleway seulement si gratuit (A5 :
+  non, 0,008 à 0,016 €/Go/mois ; essai 90 j) → après le premier client ; météo gratuite → MET Norway (réglage posé) ;
+  clé Brevo : sujet clos. Modèles de page : aperçu de projet Vercel pour la vue d'ensemble, page Usage pour les suivis
+  (→ C1). Bug signalé par Teo sur la fenêtre Approuver : corrigé (36d475b).
+  Poses : b5_16b (DROP CONSTRAINT d'élargissement, accepté) + b5_07 v3 + b5_09, b5_21 + b5_12, b5_22 + b5_13 (B5
+  defb33a) ; b6_24b + b6_19, b6_21b + b6_20 + réglage MET Norway (B6 72ce4c9) ; b3t_01 v3 à b3t_04 + test (B3
+  f8d8bd2) ; b2_10 + test 19 (B2 1c467ef) ; a4_31 + a4_24 (A4 655d260) ; 19an_export_complet_gerant_seul + 57 (A5
+  7d64984) ; tests c2_01/c2_04 (C2 a693a81), c3_07 (C3 cffb6c5) ; c4_08 + test (C4 e4365bf). Lecteur v30 (A1 d52bc71).
+  Lots h1830lot 1630 ok / 2, h1900lot 860 ok / 2 : seul rouge test_b3t_02 n° 9 (journal tavaro.controle_conducteur_note)
+  → B3 ; écran B3 non fusionné. 44/46/51/55/57 verts. btp_meteo_demander() = 0 (aucun passage extérieur au banc).
+  Main : fusion b5, b6, b2, a4, c2, c3, a3, c5, c4. Pastilles retirées : alerte météo, 6 lignes Lorani, remise en
+  location et entretien. Restent volontairement : métré (phrase trop forte), PLU servitudes/risques, vocaux.
+- 19 h 40 Z — DÉCISION DE TEO (19 h 20) : sur omegaai.fr, aucune modification, aucune pastille « En préparation ».
+  Fait : composants EnPreparation / SiEnPreparation neutralisés (88d2402) ; puis, avec son accord explicite, les 42
+  fichiers de la vitrine remis à leur état de a6b5e7a (15 h 55), SAUF trois phrases inexactes corrigées avec son accord
+  (6f2a957) : Tamila « hébergé dans l'UE » au lieu de « en France » ; Tiroma « point du matin dans l'espace sécurisé »
+  au lieu de « sur WhatsApp » ; Tiroma « ne contacte un patient qu'avec un message validé ». 0 mention « préparation »
+  sur 34 pages publiques. C5 arrêté sur la vitrine ; sa passe 8 (972ccfda) n'est PAS fusionnée. Routine horaire
+  réécrite en conséquence. Poses : c3_08 (bb153a2), a4_32 (19d98ea), b2_10 v2 (66d8199), b2_11 (a8f17be), 19ao
+  (f10a4b0) ; lots h1915tav 501/0, h1930lot 85/0 (44/46/51/56 compris). Fusion c3, a4, b2, b3 (espace client).
+  worker-a5 non fusionnée (omega-sauvegarde.yml, non approuvé). Vercel toujours limité : en ligne demain.

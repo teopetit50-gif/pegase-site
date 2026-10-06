@@ -10,13 +10,16 @@
      offload_recalculer (c4_02) ;
      offload_ouvrir_reprise, offload_noter_tache (c4_03) ;
      offload_changer_statut, offload_noter_contact, offload_trancher_rapprochement,
-     offload_exclure, offload_lever_exclusion (c4_05).
+     offload_exclure, offload_lever_exclusion (c4_05) ;
+     offload_noter_intervention (c4_07) ; lectures offload_echeances_tableau, offload_parc_compte ;
+     offload_saisir_affaire, offload_retirer_affaire, offload_decider_affaire (c4_08) ;
+     lectures offload_affaires_liste, offload_affaires_compte.
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Fiche, Tableau } from "./types";
+import type { AffaireCompte, AffairesListe, EcheanceLigne, Fiche, ParcCompte, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -78,4 +81,44 @@ export function noterContact(compte: string, le: string, canal: string, par: str
 
 export function trancherRapprochement(rapprochement: string, accepter: boolean) {
   return rpc<null>("offload_trancher_rapprochement", { p_rapprochement: rapprochement, p_accepter: accepter });
+}
+
+/* c4_07 — échéances et parc */
+export async function chargerEcheances(): Promise<EcheanceLigne[]> {
+  const l = await rpc<EcheanceLigne[] | null>("offload_echeances_tableau", {});
+  return Array.isArray(l) ? l : [];
+}
+
+export async function chargerParcCompte(compte: string): Promise<ParcCompte> {
+  const p = await rpc<ParcCompte | null>("offload_parc_compte", { p_compte: compte });
+  return p && typeof p === "object" ? p : { equipements: [], contrats: [] };
+}
+
+export function noterIntervention(equipement: string, le: string, nature: string, ailleurs: boolean, reference: string | null) {
+  return rpc<string>("offload_noter_intervention", { p_equipement: equipement, p_le: le, p_nature: nature, p_ailleurs: ailleurs, p_reference: reference });
+}
+
+/* c4_08 — affaires restées en plan */
+export async function chargerAffaires(): Promise<AffairesListe> {
+  const l = await rpc<AffairesListe | null>("offload_affaires_liste", {});
+  return l && typeof l === "object" && Array.isArray(l.affaires) ? l : { total: { affaires: 0, valeur_ht: 0, a_decider: 0, closes_sans_suite: 0 }, affaires: [] };
+}
+
+export async function chargerAffairesCompte(compte: string): Promise<AffaireCompte[]> {
+  const l = await rpc<AffaireCompte[] | null>("offload_affaires_compte", { p_compte: compte });
+  return Array.isArray(l) ? l : [];
+}
+
+export function saisirAffaire(compte: string, reference: string, disponibleLe: string, champs: { type: string; libelle?: string; valeur_ht?: number }) {
+  return rpc<string>("offload_saisir_affaire", { p_compte: compte, p_reference: reference, p_disponible_le: disponibleLe, p_champs: champs });
+}
+
+export function retirerAffaire(affaire: string, retireLe: string | null) {
+  return rpc<null>("offload_retirer_affaire", { p_affaire: affaire, p_retire_le: retireLe });
+}
+
+export type DecisionAffaire = "relancer" | "garder" | "retour_stock" | "sans_suite";
+
+export function deciderAffaire(affaire: string, decision: DecisionAffaire, motif: string) {
+  return rpc<null>("offload_decider_affaire", { p_affaire: affaire, p_decision: decision, p_motif: motif });
 }

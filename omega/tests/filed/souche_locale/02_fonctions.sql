@@ -1309,5 +1309,15 @@ create policy f on public.filed_factures for select to authenticated using (exis
 grant anon, authenticated, service_role to postgres;
 
 -- Lot 12 (a4_20) : la numérotation du socle (corps absent des extraits ; souche).
-create or replace function private.filed_prochain_numero(p_client uuid, p_serie text, p_annee smallint) returns integer language sql as $$
-  select coalesce(max(d.numero_reception), 0) + 1 from public.filed_documents d where d.client_id = p_client and d.annee_reception = p_annee $$;
+-- Corps relevé sur la recette par le coordinateur (6/10) : compteur en table, sans trou.
+create or replace function private.filed_prochain_numero(p_client uuid, p_nature text, p_annee smallint) returns integer language plpgsql as $$
+declare v integer;
+begin
+  insert into public.filed_compteurs as c (client_id, nature, annee, dernier) values (p_client, p_nature, p_annee, 1)
+  on conflict (client_id, nature, annee) do update set dernier = c.dernier + 1 returning c.dernier into v;
+  return v;
+end $$;
+-- Drapeau d'effacement du socle (texte relevé sur la recette).
+create or replace function private.effacement_en_cours(p_client uuid) returns boolean language sql stable as $$
+  select p_client::text = coalesce(current_setting('omega.effacement_client', true), '')
+      or coalesce(current_setting('omega.effacement_objet', true), '') = 'oui' $$;

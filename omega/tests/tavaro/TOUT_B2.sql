@@ -1,5 +1,5 @@
 -- TOUT_B2.sql — les tests pgTAP du module TAVARO (session B2), assemblés par assembler.sh.
--- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_09 posées (avec b2_05b et b2_06b).
+-- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_11 posées (avec b2_05b, b2_06b et b2_09b).
 -- Un seul appel execute_sql sur la RECETTE ; runtests() annule tout ce que les tests écrivent.
 
 -- ═══════════════════════════ 00_jeu_tavaro.sql
@@ -1570,6 +1570,175 @@ begin
   r := public.loc_issue_contestation(v_k2, 'abandonnee');
   return next is(r ->> 'statut', 'abandonnee', 'Une contestation non défendue se classe « abandonnée »');
   perform tests.redevenir_admin();
+
+  -- b2_09b : la pièce du dossier suit la contestation (gardien), au lieu d'être visible de toute l'organisation.
+  if to_regprocedure('private.loc_gardien_contestation(uuid, uuid, text)') is null then
+    return next diag('b2_09b (gardien des pièces de contestation) n''est pas posée : non vérifié.');
+  else
+    return next ok(exists (select 1 from private.gardiens_objets g where g.objet_type = 'loc_contestations'), 'Le gardien des pièces de contestation est inscrit');
+    return next ok(private.voit_objet_pour((jeu ->> 'gerant')::uuid, v_client, 'loc_contestations', v_k::text), 'La direction voit la pièce du dossier');
+    return next ok(not private.voit_objet_pour((jeu ->> 'autre')::uuid, v_client, 'loc_contestations', v_k::text), 'Un autre loueur ne la voit pas');
+    return next ok(not private.loc_gardien_contestation((jeu ->> 'collab')::uuid, v_client, 'pas-un-uuid'), 'Un identifiant illisible ne passe pas');
+  end if;
+end $f$;
+
+
+-- ═══════════════════════════ 19_remise_entretien.sql
+-- 19 — Remise en location et entretien (migration b2_10) : le retour crée la remise en location (inspection, nettoyage,
+-- énergie) et l'immobilisation de préparation ; les trois étapes faites, le véhicule est prêt ; chaque anomalie va à une
+-- personne nommée ; une immobilisation de carrosserie garde sa date de retour ; l'entretien se place dans un creux et
+-- n'est jamais planifié sur une réservation du véhicule.
+
+create or replace function tests.test_b2_19_remise_entretien() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_contrat uuid; v_vehicule uuid; v_remise uuid; v_immo uuid; r jsonb; v_anomalie uuid; v_entretien uuid;
+  v_creneau timestamptz; v_resa timestamptz;
+begin
+  if to_regprocedure('public.loc_etape_remise(uuid, text, boolean)') is null then
+    return next fail('La migration b2_10 (remise en location et entretien) n''est pas posée : public.loc_etape_remise manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+  v_contrat := (jeu ->> 'contrat')::uuid;
+  select c.vehicule_id into v_vehicule from public.loc_contrats c where c.id = v_contrat;
+  return next ok(v_vehicule is not null, 'Le contrat d''essai porte son véhicule');
+
+  -- Le retour saisi à l'agence (il y a une heure) crée la remise en location.
+  jeu := tests.tavaro_chiffrer(jeu, 'collab', tests.tavaro_retour() || jsonb_build_object('retour_reel_le', to_char(now() - interval '1 hour', 'YYYY-MM-DD"T"HH24:MI:SSOF')));
+  select x.id, x.immobilisation_id into v_remise, v_immo from public.loc_remises x where x.client_id = v_client and x.contrat_id = v_contrat;
+  return next ok(v_remise is not null, 'Le retour crée la remise en location');
+  return next ok((select i.motif = 'preparation' and i.fin_le is null from public.loc_immobilisations i where i.id = v_immo), 'Le véhicule est immobilisé pour préparation');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.remise_creee') >= 1, 'Le journal porte tavaro.remise_creee');
+  perform private.loc_creer_remise(v_client, v_contrat, now());
+  return next is(tests.compter('public', 'loc_remises', format('client_id = %L and contrat_id = %L', v_client, v_contrat)), 1::bigint, 'Une seule remise par contrat');
+
+  -- Les gardes.
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre@essai.invalid');
+  return next throws_ok(format('select public.loc_etape_remise(%L::uuid, %L)', v_remise, 'inspection'), 'P0002', null, 'Un autre loueur ne voit pas la remise');
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select private.loc_creer_remise(%L::uuid, %L::uuid, now())', v_client, v_contrat), '42501', null, 'Une personne n''appelle pas la création directe');
+  return next throws_ok(format('select public.loc_etape_remise(%L::uuid, %L)', v_remise, 'lavage'), '22023', null, 'Une étape inconnue est refusée');
+
+  -- Les trois étapes : le véhicule est prêt, l'immobilisation close.
+  r := public.loc_etape_remise(v_remise, 'inspection');
+  return next is(r ->> 'statut', 'en_cours', 'Une étape faite : en cours');
+  perform public.loc_etape_remise(v_remise, 'nettoyage');
+  r := public.loc_etape_remise(v_remise, 'energie');
+  return next is(r ->> 'statut', 'prete', 'Les trois étapes faites : le véhicule est prêt');
+  perform tests.redevenir_admin();
+  return next ok((select i.fin_le is not null from public.loc_immobilisations i where i.id = v_immo), 'L''immobilisation de préparation est close');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.remise_prete') >= 1, 'Le journal porte tavaro.remise_prete (durée, à temps)');
+
+  -- Les anomalies : une personne nommée ; elle, ou la direction, la clôt.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_signaler_anomalie(%L::uuid, %L, %L, null)', v_remise, 'voyant', 'Voyant moteur allumé'), '22023', null, 'Une anomalie sans personne nommée est refusée');
+  v_anomalie := (public.loc_signaler_anomalie(v_remise, 'voyant', 'Voyant moteur allumé au retour', (jeu ->> 'referent')::uuid) ->> 'anomalie')::uuid;
+  return next ok(v_anomalie is not null, 'L''anomalie est confiée au référent');
+  perform tests.endosser((jeu ->> 'collab_nord')::uuid, 'b2-collab-nord@essai.invalid');
+  return next throws_ok(format('select public.loc_traiter_anomalie(%L::uuid, %L)', v_anomalie, 'vu'), '42501', null, 'Une autre personne ne la clôt pas');
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  r := public.loc_traiter_anomalie(v_anomalie, 'Garage prévenu');
+  return next is(r ->> 'statut', 'traitee', 'La personne nommée la clôt');
+
+  -- Une immobilisation de carrosserie garde sa date de retour.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_immobiliser(%L::uuid, %L::jsonb)', v_vehicule, '{"motif":"carrosserie"}'), '22023', null, 'Carrosserie sans date de retour : refusée');
+  r := public.loc_immobiliser(v_vehicule, jsonb_build_object('motif', 'carrosserie', 'fin_prevue_le', now() + interval '2 days', 'prestataire', 'Carrosserie du Parc'));
+  return next ok(r ? 'immobilisation', 'Le véhicule part chez le carrossier avec sa date de retour');
+  r := public.loc_lever_immobilisation((r ->> 'immobilisation')::uuid, 480, 'Portière reprise');
+  return next ok(r ? 'fin_le', 'Le véhicule revient : l''immobilisation est close');
+
+  -- L'entretien : un creux, jamais sur une réservation du véhicule.
+  r := public.loc_prevoir_entretien(v_vehicule, jsonb_build_object('nature', 'revision', 'libelle', 'Révision 15 000 km', 'echeance_le', (current_date + 20)::text, 'duree_h', 4));
+  v_entretien := (r ->> 'entretien')::uuid;
+  r := public.loc_creneaux_entretien(v_entretien, 3);
+  return next ok(jsonb_array_length(r -> 'creneaux') >= 1, 'Des créneaux libres sont proposés');
+  v_creneau := (r -> 'creneaux' -> 0 ->> 'debut')::timestamptz;
+  perform tests.redevenir_admin();
+  v_resa := v_creneau + interval '1 hour';
+  begin
+    perform tests.inserer_minimal('public', 'loc_reservations', jsonb_build_object('client_id', v_client, 'entite_id', jeu ->> 'siege', 'ref_source', 'R-B2-19',
+      'vehicule_id', v_vehicule, 'depart_prevu_le', v_resa, 'retour_prevu_le', v_resa + interval '2 days', 'statut', 'confirmee'));
+    perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+    return next throws_ok(format('select public.loc_planifier_entretien(%L::uuid, %L::timestamptz)', v_entretien, v_creneau), '23514', null, 'Un créneau qui touche une réservation du véhicule est refusé');
+  exception when others then
+    perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+    return next diag('Réservation d''essai non posée (' || sqlerrm || ') : le refus sur réservation n''est pas vérifié.');
+  end;
+  r := public.loc_creneaux_entretien(v_entretien, 1);
+  r := public.loc_planifier_entretien(v_entretien, (r -> 'creneaux' -> 0 ->> 'debut')::timestamptz, 'Garage Lumière', null);
+  return next is(r ->> 'statut', 'planifie', 'L''entretien est planifié dans un creux');
+  return next ok((select i.motif = 'entretien' and i.fin_prevue_le is not null from public.loc_immobilisations i
+                  where i.id = (select e.immobilisation_id from public.loc_entretiens e where e.id = v_entretien)), 'L''atelier immobilise le véhicule, retour prévu');
+  r := public.loc_entretien_fait(v_entretien, 15080, 210, 'RAS');
+  return next is(r ->> 'statut', 'fait', 'L''entretien est fait');
+  perform tests.redevenir_admin();
+
+  return next ok(private.loc_surveiller_parc() >= 0, 'La surveillance du parc passe sans erreur');
+end $f$;
+
+
+-- ═══════════════════════════ 20_sortie_flotte.sql
+-- 20 — Sortie de flotte (migration b2_11) : la fiche économique d'un véhicule (revenu, coûts, perte de valeur au prix
+-- de revente réel, avis, moment, canal), lue par la direction et les valideurs seulement ; la mise en vente proposée,
+-- validée par une autre personne de la direction, puis conclue : le véhicule sort de la flotte, tout est au journal.
+
+create or replace function tests.test_b2_20_sortie_flotte() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_vehicule uuid; r jsonb; v_fiches jsonb; v_sortie uuid;
+begin
+  if to_regprocedure('public.loc_fiches_flotte()') is null then
+    return next fail('La migration b2_11 (sortie de flotte) n''est pas posée : public.loc_fiches_flotte manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+  select c.vehicule_id into v_vehicule from public.loc_contrats c where c.id = (jeu ->> 'contrat')::uuid;
+  return next ok(v_vehicule is not null, 'Le contrat d''essai porte son véhicule');
+
+  -- La fiche se lit par la direction et les valideurs.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok('select public.loc_fiches_flotte()', '42501', null, 'Un collaborateur ne lit pas la fiche économique');
+  return next throws_ok(format('select public.loc_poser_economie(%L::uuid, %L::jsonb)', v_vehicule, '{"cote_eur": 9000, "cote_source": "argus"}'), '42501', null, 'Ni ne saisit la cote');
+
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  return next throws_ok(format('select public.loc_poser_economie(%L::uuid, %L::jsonb)', v_vehicule, '{"cote_eur": 9000}'), '22023', null, 'Une cote sans source est refusée');
+  r := public.loc_poser_economie(v_vehicule, jsonb_build_object('financement', 'achat', 'prix_achat_eur', 16500, 'cote_eur', 9000, 'cote_source', 'argus', 'valeur_comptable_eur', 7200));
+  return next is((r -> 'cote' ->> 'eur')::numeric, 9000::numeric, 'La cote réelle est sur la fiche');
+  return next is((r ->> 'ecart_cote_comptable')::numeric, 1800::numeric, 'La fiche montre l''écart entre la cote réelle et la valeur comptable');
+  return next ok(r ? 'avis' and r ->> 'avis' in ('sortir', 'surveiller', 'garder') and r ? 'canal' and r ? 'marge', 'La fiche donne un avis, un canal et une marge');
+  return next ok((r -> 'revenu' ->> 'jours_loues')::numeric >= 1, 'Le revenu compte les jours loués du contrat');
+  v_fiches := public.loc_fiches_flotte();
+  return next ok(jsonb_array_length(v_fiches) >= 1, 'Les fiches de la flotte se lisent');
+
+  -- La mise en vente : le gérant propose, il ne valide pas lui-même.
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
+  return next throws_ok(format('select public.loc_proposer_sortie(%L::uuid, %L::jsonb)', v_vehicule, '{}'), '22023', null, 'Une proposition sans motif est refusée');
+  v_sortie := (public.loc_proposer_sortie(v_vehicule, jsonb_build_object('motif', 'Marge négative sur douze mois et kilométrage au seuil')) ->> 'sortie')::uuid;
+  return next ok(v_sortie is not null, 'La direction propose la mise en vente');
+  return next throws_ok(format('select public.loc_proposer_sortie(%L::uuid, %L::jsonb)', v_vehicule, '{"motif": "une seconde fois"}'), '23505', null, 'Une seule sortie ouverte par véhicule');
+  return next throws_ok(format('select public.loc_decider_sortie(%L::uuid, true)', v_sortie), '42501', null, 'Celui qui propose ne valide pas lui-même');
+  perform public.loc_annuler_sortie(v_sortie, 'Proposée par le valideur à la place');
+
+  -- Le valideur propose ; le gérant valide ; la vente se conclut.
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  v_sortie := (public.loc_proposer_sortie(v_vehicule, jsonb_build_object('motif', 'Marge négative sur douze mois', 'canal', 'marchand')) ->> 'sortie')::uuid;
+  return next throws_ok(format('select public.loc_decider_sortie(%L::uuid, true)', v_sortie), '42501', null, 'Un valideur ne valide pas une mise en vente');
+  return next throws_ok(format('select public.loc_conclure_sortie(%L::uuid, 8800)', v_sortie), '23514', null, 'Une vente ne se conclut pas avant la validation');
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
+  r := public.loc_decider_sortie(v_sortie, true);
+  return next is(r ->> 'statut', 'validee', 'La direction valide la mise en vente');
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  r := public.loc_conclure_sortie(v_sortie, 8800, current_date, 'Marchand d''essai');
+  return next is(r ->> 'statut', 'vendue', 'La vente est conclue');
+  perform tests.redevenir_admin();
+  return next is((select v.statut from public.loc_vehicules v where v.id = v_vehicule), 'sorti', 'Le véhicule est sorti de la flotte');
+  return next ok((select (s.fiche ->> 'immatriculation') is not null from public.loc_sorties_flotte s where s.id = v_sortie), 'La fiche est figée sur la sortie');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.sortie_validee') >= 1 and tests.tavaro_journal(v_client, 'tavaro.sortie_conclue') >= 1,
+    'Le journal garde la validation et la vente');
 end $f$;
 
 

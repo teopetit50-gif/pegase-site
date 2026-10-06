@@ -32,8 +32,8 @@ import {
   ClipboardList,
   ListChecks,
   Mail,
+  MessageSquare,
   Phone,
-  ShieldCheck,
   Stethoscope,
   Users,
 } from "lucide-react";
@@ -154,7 +154,7 @@ export default function Schema() {
         <Noeud titre="Rendez-vous confirmé" sous="agenda à jour" Icone={CircleCheck} />
         <Branches nombre={3} sens="separe" />
         <div className="grid grid-cols-3 gap-2">
-          <Noeud petit titre="Espace sécurisé" Icone={ShieldCheck} />
+          <Noeud petit titre="WhatsApp" Icone={MessageSquare} />
           <Noeud petit titre="E-mail" Icone={Mail} />
           <Noeud petit titre="Tableau" Icone={ChartColumn} />
         </div>

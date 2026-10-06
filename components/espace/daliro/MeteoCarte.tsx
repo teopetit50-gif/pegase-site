@@ -4,7 +4,7 @@
    La météo des 7 jours du chantier (06/10/2026, session B6, b6_21)
 
    La prévision rangée par le serveur deux fois par jour (Météo-France,
-   par le service réglé dans private.reglages) et les passages extérieurs
+   par le service réglé dans private.reglages : MET Norway, b6_21b) et les passages extérieurs
    qu'elle met en risque : pluie, rafales, gel, chaleur — seuils du passage,
    sinon 5 mm, 60 km/h, 0 °C. En exemple, une prévision fictive.
    ══════════════════════════════════════════════════════════════════════ */
@@ -29,7 +29,7 @@ const plus = (iso: string, n: number) => { const d = jourDe(iso); d.setDate(d.ge
 function meteoExemple(tableau: Tableau): MeteoChantier {
   const auj = aujourdHui();
   const prevision: JourMeteo[] = [0, 1, 2, 3, 4, 5, 6].map((k) => ({
-    jour: plus(auj, k), pluie_mm: [0, 0.4, 14.2, 3.1, 0, 0, 1.2][k], rafales_kmh: [22, 30, 41, 68, 35, 18, 26][k],
+    jour: plus(auj, k), pluie_mm: [0, 0.4, 14.2, 3.1, 0, 0, 1.2][k], rafales_kmh: null, vent_kmh: [14, 20, 27, 45, 23, 12, 17][k],
     tmin: [9, 8, 7, 6, 4, 3, 5][k], tmax: [17, 16, 13, 12, 14, 15, 16][k],
   }));
   const risques: RisqueMeteo[] = [];
@@ -39,7 +39,8 @@ function meteoExemple(tableau: Tableau): MeteoChantier {
       if (d.jour < p.debut || d.jour > p.fin) continue;
       const motifs = [
         d.pluie_mm !== null && d.pluie_mm >= 5 ? `pluie ${nf(d.pluie_mm)} mm (seuil 5)` : null,
-        d.rafales_kmh !== null && d.rafales_kmh >= 60 ? `rafales ${Math.round(d.rafales_kmh)} km/h (seuil 60)` : null,
+        d.rafales_kmh != null && d.rafales_kmh >= 60 ? `rafales ${Math.round(d.rafales_kmh)} km/h (seuil 60)`
+          : d.rafales_kmh == null && d.vent_kmh != null && d.vent_kmh >= 40 ? `vent moyen ${Math.round(d.vent_kmh)} km/h, rafales probables au-delà de 60` : null,
         d.tmin !== null && d.tmin < 0 ? `gel, ${nf(d.tmin)} °C` : null,
       ].filter((m): m is string => !!m);
       if (motifs.length) {
@@ -49,7 +50,7 @@ function meteoExemple(tableau: Tableau): MeteoChantier {
       }
     }
   }
-  return { localise: true, ouverte: true, prevision, recue_le: new Date().toISOString(), erreur: null, risques };
+  return { localise: true, ouverte: true, prevision, recue_le: new Date().toISOString(), erreur: null, risques, fournisseur: "met_norway" };
 }
 
 export default function MeteoCarte({ tableau, source }: { tableau: Tableau; source: Source }) {
@@ -95,7 +96,9 @@ export default function MeteoCarte({ tableau, source }: { tableau: Tableau; sour
                 </thead>
                 <tbody>
                   <tr><td>Pluie</td>{m.prevision.map((d) => <td key={d.jour} className="esp-num" style={d.pluie_mm !== null && d.pluie_mm >= 5 ? { fontWeight: 600 } : undefined}>{d.pluie_mm === null ? "—" : `${nf(d.pluie_mm)} mm`}</td>)}</tr>
-                  <tr><td>Rafales</td>{m.prevision.map((d) => <td key={d.jour} className="esp-num" style={d.rafales_kmh !== null && d.rafales_kmh >= 60 ? { fontWeight: 600 } : undefined}>{d.rafales_kmh === null ? "—" : `${Math.round(d.rafales_kmh)} km/h`}</td>)}</tr>
+                  {m.prevision.some((d) => d.rafales_kmh != null)
+                    ? <tr><td>Rafales</td>{m.prevision.map((d) => <td key={d.jour} className="esp-num" style={d.rafales_kmh != null && d.rafales_kmh >= 60 ? { fontWeight: 600 } : undefined}>{d.rafales_kmh == null ? "—" : `${Math.round(d.rafales_kmh)} km/h`}</td>)}</tr>
+                    : <tr><td>Vent moyen</td>{m.prevision.map((d) => <td key={d.jour} className="esp-num" style={d.vent_kmh != null && d.vent_kmh >= 40 ? { fontWeight: 600 } : undefined}>{d.vent_kmh == null ? "—" : `${Math.round(d.vent_kmh)} km/h`}</td>)}</tr>}
                   <tr><td>Températures</td>{m.prevision.map((d) => <td key={d.jour} className="esp-num" style={{ whiteSpace: "nowrap" }}>{d.tmin === null || d.tmax === null ? "—" : `${nf(d.tmin)} / ${nf(d.tmax)} °C`}</td>)}</tr>
                 </tbody>
               </table>
@@ -103,7 +106,9 @@ export default function MeteoCarte({ tableau, source }: { tableau: Tableau; sour
             {m.risques.length ? m.risques.map((r) => <div key={r.passage_id} style={{ marginTop: 8 }}><Avis teinte="ambre">{r.texte}</Avis></div>)
               : <div style={{ marginTop: 8 }}><Avis teinte="vert">Aucun passage extérieur menacé dans les 7 jours.</Avis></div>}
             <p className="esp-kpi-sous" style={{ marginTop: 6 }}>
-              Prévision Météo-France{m.recue_le ? ` reçue le ${dateHeure(m.recue_le)}` : ""}{source !== "reelle" ? " (exemple fictif)" : ""}. Seuils du passage, sinon pluie 5 mm, rafales 60 km/h, gel.
+              {m.fournisseur === "met_norway"
+                ? <>Données météo : <a href="https://api.met.no/" target="_blank" rel="noreferrer">MET Norway</a>, licence <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" target="_blank" rel="noreferrer">CC BY 4.0</a></>
+                : "Prévision Météo-France"}{m.recue_le ? `, reçue le ${dateHeure(m.recue_le)}` : ""}{source !== "reelle" ? " (exemple fictif)" : ""}. Seuils du passage, sinon pluie 5 mm, rafales 60 km/h (vent moyen 40 km/h quand les rafales ne sont pas données), gel.
             </p>
           </>
         )}

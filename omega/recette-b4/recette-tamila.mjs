@@ -15,7 +15,8 @@
    des conflits lancé de lui-même à l'ajout d'une partie ; le tableau des
    honoraires du cabinet (1440 et 390 px, axe-core) ; le pilotage du cabinet
    (marge, charge, séries, sans diligence, pièces attendues) ; les lectures
-   longues du dossier (chronologie déchiffrée, citations, demande).
+   longues du dossier (chronologie déchiffrée, citations, demande) ;
+   l'expertise et les pièces attendues de l'expert (b4_16).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -525,6 +526,43 @@ for (const largeur of [1440, 390]) {
   } else {
     await s.capturer(`${dossier}tamila-analyse-390.jpg`, { qualite: 55 });
   }
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-expertise', densite: 1 });
+  console.log('— l\'expertise et ses pièces attendues (b4_16)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Pilotage/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .tam-cabinet-filtres .r-btn')].find(b => b.textContent.startsWith('Pièces attendues'))?.click()`);
+  await s.dormir(300);
+  const p = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  ok(/Le pré-rapport de l.expert, attendu le/.test(p) && /Nos dires à l.expert, au plus tard le/.test(p) && /2026-0398/.test(p), 'pilotage : le pré-rapport en retard et les dires à venir, dossier 2026-0398');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Fermer/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0398/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const carte = () => s.evaluer(`document.querySelector('section[aria-label="Expertise"]')?.innerText || ''`);
+  const t0 = await carte();
+  ok(/Expertise judiciaire, ordonnée le/.test(t0) && /En cours/.test(t0), 'la carte : expertise judiciaire en cours');
+  ok(/Consignation versée le/.test(t0) && /Pré-rapport : attendu depuis le/.test(t0) && /Dires : le/.test(t0), 'consignation versée, pré-rapport en retard, dires à venir');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Expertise"] .esp-lien-bouton')].find(b => /Pré-rapport reçu/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const t1 = await carte();
+  ok(/Pré-rapport reçu le/.test(t1) && /noté au/.test(t1), 'le pré-rapport noté reçu');
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Expertise"] .esp-lien-bouton')].find(b => /Dates/.test(b.textContent)))`);
+  await s.dormir(500);
+  const dlg = await s.evaluer(`document.querySelectorAll('[role="dialog"] input[type="date"]').length`);
+  ok(dlg === 6, `le dialogue des dates : ${dlg} champs`);
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  await s.evaluer(axe + ';true');
+  const g = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('[role="dialog"]'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+  ok(g.length === 0, `axe sur le dialogue de l'expertise : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
+  await s.capturer(`${dossier}tamila-expertise-1440.jpg`, { qualite: 55 });
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }

@@ -377,3 +377,70 @@ Tiroma déjà retirées par B3 (d091f77) ne sont pas touchées.
 Non touchés, signalés : `lib/pub.ts` (page /p/appels-manques, « Chaque appel manqué vous revient par SMS ») — hors
 des 13 points de l'audit, à vérifier avec A2 (fournisseur `brevo_sms`) ; la maquette Tavaro « Assistance » (« Je vous
 envoie le résumé par SMS ») porte déjà la pastille du module.
+
+## Passe 6 — 06/10, 17 h 25 Z : REPUT et OFFLOAD hors catalogue
+
+Base : worker-c5 (533da96) + origin/main 7399f41 fusionné (59f9396).
+
+### REPUT — lignes non tenues d'après C3, cherchées hors du catalogue
+
+Messagerie instantanée du site, réseaux sociaux, appel non décroché transcrit, contrat et interventions du client,
+demande sur deux canaux = un dossier, routage entre services, appel d'astreinte, rendez-vous, tableau à date fixe.
+Hors du catalogue (qui porte déjà `atteste: false`), seules deux traces restaient sur des pages servies :
+
+| Fichier | Avant | Après |
+|---|---|---|
+| app/offres/page.tsx (fiche REPUT de /offres) | « Prise de rendez-vous » | même ligne, pastille « En préparation » (liste `reput` de lib/en-preparation.ts) |
+| lib/produits/accueil.ts, MÉTIERS (Industrie) | « Demande qualifiée, transmise au commercial » (routage) | « Demande qualifiée, transférée à l'équipe » |
+
+Le reste avait déjà été traité aux passes 3 et 4 (astreinte, rendez-vous, avis, tuiles de canaux). `components/produits/accueil/Capacites.tsx`
+(« le téléphone de l'astreinte sonne ») n'est plus monté. La page /p/appels-manques (VOCAL v0, autre produit)
+reste en question ouverte.
+
+### OFFLOAD — 45 lignes (NOTES-C4 f9bf72d : 18 prouvées recette, 1 locale, 4 partielles, 22 non construites)
+
+| Fichier:ligne | Avant | Après | Ligne C4 |
+|---|---|---|---|
+| lib/produits/reprise.ts:157 | « OFFLOAD y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan. » | « … le compte qui n'a plus commandé. L'entretien redevenu dû et l'affaire restée en plan s'y ajoutent ensuite : leur lecture est en préparation. » | 17–32 non construites |
+| lib/produits/reprise.ts:173-174 (maquette) | « Entretien sauté deux fois », « Pièce arrivée, jamais posée » | « Sans commande depuis la révision », « Rythme de commande rompu » | 2, 3 prouvées |
+| lib/produits/reprise.ts, cartePalette | « RDV Entretien annuel redevenu dû », « PCE Pièce arrivée, jamais reprise » | inchangées, pastille « En préparation » (liste `offload`) | 17, 25 |
+| idem | « 1/T Un message par trimestre au plus » | « 2× Deux messages au plus par compte » | 12 (deux messages en tout) |
+| idem | « @ Par courriel, depuis votre adresse » | « @ Par courriel, après votre validation » | 15 partielle (boîte de l'entreprise : A2) |
+| idem | « 1× Jamais deux fois le même compte » | « 1× Un seul cycle par compte » | 10 |
+| lib/produits/reprise.ts:208 (citation) | « Vos règles de ton, vos interdits et vos tournures sont écrits … et il s'arrête au premier doute. » | « Vos interdits sont posés avant la première vague : comptes en litige, comptes suivis par un commercial, secteurs écartés. Le système n'en sort pas, et un import douteux n'est jamais appliqué. » | 11 partielle, 37 prouvée, 38 partielle |
+| lib/produits/reprise.ts:217 | « Vous n'avez aucune case à cocher : une phrase suffit … » | « Vous n'aurez aucune case à cocher … Ces règles écrites en français sont en préparation ; vos exclusions … s'appliquent déjà. » | 11 |
+| lib/produits/reprise.ts:241 (message d'exemple) | « … l'entretien annuel qui va avec est à refaire. Je vous garde un créneau ? » | « … cela fait un an. Voulez-vous que nous en reparlions ? » | 9 prouvée ; entretien et rendez-vous non construits |
+| lib/produits/reprise.ts:308 (Garage) | « OFFLOAD suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises. » | « OFFLOAD repère les comptes silencieux. Le suivi des entretiens … et des commandes que personne n'a reprises est en préparation. » | 17, 25 |
+| lib/produits/reprise.ts:332 (Maintenance) | « OFFLOAD tient la liste de vos installations … puis il écrit au client la semaine d'avant. » | « OFFLOAD repère les clients dont le dernier passage dépasse le délai que vous fixez. La liste de vos installations … est en préparation. » | 19, 22 |
+| lib/produits/reprise.ts:377 (FAQ) | trois listes ; « ce message part de votre adresse » ; « tout vous arrive dans votre messagerie » | une liste (comptes sans commande), message validé avant envoi ; les deux autres listes en préparation | 1–4 prouvées ; 15 partielle ; 17–32 |
+| lib/produits/reprise.ts:381 (FAQ) | « un message par compte et par trimestre, un seul canal à la fois » | « deux messages au plus par compte, espacés d'au moins trois jours, par courriel seulement » | 12 |
+| lib/produits/reprise.ts:393 (FAQ) | « Vous posez les règles en français … et elles s'appliquent à chaque message … jamais de tutoiement. » | « Aucun prix ni aucun délai n'est avancé sans que vous l'ayez écrit, et vos exclusions s'appliquent à chaque vague. Les règles de ton écrites en français … sont en préparation. » | 35 prouvée, 11 partielle |
+| lib/produits/reprise.ts:397 (FAQ) | « Un compte ne reçoit jamais deux relances … au premier doute la coupure est automatique … reçoit deux messages. » | « … jamais plus de deux messages … un import douteux n'est jamais appliqué … reçoit un message de trop. » | 10, 12, 38 |
+| app/offres/page.tsx (fiche OFFLOAD de /offres) | « Un message par trimestre » | « Deux messages au plus » | 12 |
+
+Laissés : « La base clients est relue chaque matin » et « À 7 h 30, votre liste de relances est prête » (cycle
+quotidien, C4) ; les cas BTP et cabinets (silence au-delà du délai : prouvé). Billets de blog (lib/content.ts, garage)
+non touchés : éditoriaux, à trancher.
+
+Recette : /offres et /offres/nouvelles-affaires aux 5 largeurs, aucun débordement ; anciennes phrases absentes.
+Eslint : une erreur préexistante sur main dans app/offres/page.tsx:635 (« où qu'elles soient », apostrophe non
+échappée), hors de mon diff.
+
+## Passe 7 — 06/10, 18 h 25 Z : OFFLOAD c4_07 livré (échéances et renouvellements)
+
+c4_07 (5f2cc7e, `^test_c4_07_` vert sur la recette d'après le coordinateur) rend vraies les lignes 8 et 17 à 24 de
+NOTES-C4. Seules les « affaires restées en plan » (25 à 32) restent en préparation.
+
+| Fichier:ligne | Passe 6 | Passe 7 |
+|---|---|---|
+| lib/produits/reprise.ts:157 | « … le compte qui n'a plus commandé. L'entretien redevenu dû et l'affaire restée en plan s'y ajoutent ensuite : leur lecture est en préparation. » | « … le compte qui n'a plus commandé et l'entretien redevenu dû. L'affaire restée en plan s'y ajoutera ensuite : sa lecture est en préparation. » |
+| lib/produits/reprise.ts:173 (maquette) | « Sans commande depuis la révision » | « Entretien sauté deux fois » (texte d'origine) |
+| lib/produits/reprise.ts:241 (message) | « … cela fait un an. Voulez-vous que nous en reparlions ? » | « … l'entretien annuel qui va avec est à refaire. Voulez-vous que nous le planifiions ? » (la prise de rendez-vous reste hors d'OFFLOAD) |
+| lib/produits/reprise.ts:308 (Garage) | entretiens et commandes non reprises en préparation | « OFFLOAD suit les entretiens qui arrivent à échéance et repère les comptes silencieux. Le suivi des commandes que personne n'a reprises est en préparation. » |
+| lib/produits/reprise.ts:332 (Maintenance) | liste des installations en préparation | « OFFLOAD tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il prépare le message au client la semaine d'avant. Un contrat qui s'éteint faute de reconduction vous est signalé. » |
+| lib/produits/reprise.ts:377 (FAQ) | une liste, deux en préparation | deux listes (comptes sans commande, entretiens dus), la troisième (affaires restées en plan) en préparation |
+| lib/en-preparation.ts, `offload` | « Entretien annuel redevenu dû », « Pièce arrivée, jamais reprise » | « Pièce arrivée, jamais reprise » seule |
+
+Pour la bascule `atteste: true` au palier de production : lib/produits/capacites/reprise.ts lignes 49 (contrats et
+équipements, n° 8 de C4) et 71 à 78 (n° 17 à 24), preuve c4_07 5f2cc7e, tests `test_c4_07_echeances`,
+`test_c4_07_contrats_et_parc`, `test_c4_07_import_et_groupe`.

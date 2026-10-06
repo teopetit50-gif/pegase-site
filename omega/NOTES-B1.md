@@ -605,3 +605,25 @@ piece_id)` ; la porte refuse une pièce d'une autre organisation (22023), et
 une pièce déjà enregistrée rend la livraison existante (`deja` = true), sans
 écrire ni journaliser ; une course de deux lectures bute sur l'index et rend
 la même livraison. Tests b1_16 : 9 assertions (maquette : 278 ok au total).
+
+### Les signatures des exports Varelo, essayées contre le lecteur d'A1 (b1_14, tests b1_17)
+
+Coordinateur 17 h 25 Z : « le modèle modeles_jeux Varelo pour lire les exports
+(avec A1, lecteur v28) ». Les modèles existent depuis b1_10 (posés, verts) ;
+j'ai rejoué le choix de jeu du lecteur (worker-a1,
+`omega/functions/lecteur-exports/lire_export.ts` choisirJeu + `entetes.ts`,
+recopiés sous tsx : motif du nom de fichier d'abord, sinon le seul jeu dont la
+signature est couverte) sur 13 fichiers types. Avec b1_10, **3 KO** : une
+balance âgée au nom quelconque (« BALAGEE.txt ») n'était pas reconnue — les
+deux balances âgées avaient la même signature (« Non échu », « Total »), et
+une balance avec « Code client » + « Raison sociale » couvrait aussi celle de
+clients. b1_14 : balances âgées signées « Code client » / « Code fournisseur »
++ « Non échu » + « Total » (chacune perd l'alias de l'autre côté) ; fichiers
+tiers + « Code postal ». Après : **13/13 reconnus**. Test b1_17 : aucun fichier
+d'un jeu (tous les alias de ses colonnes, normalisés comme le lecteur) ne
+couvre la signature d'un autre ; rouge sur l'état b1_10, vert après ; b1_14
+rejoué ne réécrit rien (24 modèles + les branchements déjà déclarés au
+premier passage, 0 ensuite). Limites dites : un fichier tiers au nom
+quelconque sans « Code postal », ou une balance âgée dont la colonne tiers
+s'appelle seulement « Compte tiers », ne se reconnaît que par son nom de
+fichier (motif) ou par le jeu donné au dépôt.

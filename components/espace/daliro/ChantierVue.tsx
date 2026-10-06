@@ -29,6 +29,7 @@ import RecalageDialog from "./RecalageDialog";
 import SignatureLienDialog from "./SignatureLienDialog";
 import MeteoCarte from "./MeteoCarte";
 import ApproCarte from "./ApproCarte";
+import FilCarte from "./FilCarte";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -558,6 +559,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         })}
         {!avenants.length ? <div className="esp-kpi-sous">Un travail supplémentaire repéré (vocal, photo, visite) devient un avenant chiffré sur vos prix, signé avant exécution.</div> : null}
       </section>
+
+      {/* ——— fil du chantier : photos, vocaux, messages (b6_24) ——— */}
+      <FilCarte key={`fil-${c.id}`} tableau={tableau} source={source} relire={relire} />
 
       {/* ——— situations de travaux (b6_12) ——— */}
       <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
