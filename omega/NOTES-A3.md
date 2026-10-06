@@ -269,6 +269,15 @@ sur la recette, cookie de session posé par
   premiers éléments ; une panne réseau à `getUser` n'est plus dite
   « Aucune session ouverte ».
 
+## Reprise du 06/10 (01 h 50 Paris)
+
+La pause de la veille est tombée après le dernier push : rien d'inachevé,
+`worker-a3` (03ba1c9) est entièrement dans `main`, omegaai.fr le sert.
+**Prochaine étape** : rejouer « Annuler ma demande » dès qu'une demande
+saisie par le gérant existe sur le banc (aucune au 06/10 01 h 50) ; brancher
+`filed_confirmer_fournisseur` quand la porte existera (demande 11). Je ne
+touche pas à `components/espace/ecrans.ts` (B3/B5 y ajoutent leurs onglets).
+
 ## Demain
 
 - Relecture en conditions réelles dès qu'un client a des lignes : premier
