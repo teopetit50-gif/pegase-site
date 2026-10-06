@@ -82,7 +82,7 @@ export const MARQUE = {
 
 export const HERO = {
   etiquette: "Demandes entrantes & avis",
-  titre: "Une demande reçue à 21 h obtient sa réponse à 21 h",
+  titre: "Une demande reçue à 21 h a sa réponse prête à 21 h",
   /* Le titre est le meilleur du parc : intact. Le chapô, lui, posait la
      scène en deux morceaux soudés (« Vous êtes sous un capot, ou déjà
      couché. ») puis finissait sur une chute sans verbe principal — c'est la
@@ -91,7 +91,7 @@ export const HERO = {
      phrase complète. Les canaux ont leur section, la minute revient dans
      APPORT. */
   chapo:
-    "Pendant que vos équipes sont en intervention ou que le service est fermé, votre client reçoit sa réponse, et elle ne dit rien que vous n'ayez validé.",
+    "Pendant que vos équipes sont en intervention ou que le service est fermé, la réponse est préparée dans la minute à partir de la base que vous avez validée. Elle part seule sur les sujets que vous avez autorisés, et attend votre accord sur tous les autres.",
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
   secondaire: { libelle: "Voir ce que REPUT répond", href: "#apport" },
 };
@@ -225,13 +225,13 @@ export const ETAPES = {
       numero: "02",
       titre: "L'intégration",
       texte:
-        "Nous connectons WhatsApp Business, votre messagerie et votre agenda, si bien que vos clients continuent d'écrire au même numéro qu'hier.",
+        "Nous connectons WhatsApp Business et votre messagerie, si bien que vos clients continuent d'écrire au même numéro qu'hier. Le raccordement de votre agenda est en préparation.",
     },
     {
       numero: "03",
-      titre: "Une semaine en double",
+      titre: "Une semaine sous votre contrôle",
       texte:
-        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. REPUT prend ensuite son rythme sur les postes que vous ouvrez.",
+        "La première semaine, chaque réponse attend votre validation, et nous corrigeons la base sur des cas réels. Vous autorisez ensuite, sujet par sujet, les réponses qui partent seules.",
     },
   ],
 };
@@ -262,7 +262,7 @@ export const CANAUX = {
      de ligne — le chapô tient en deux lignes à `max-w-lg`. */
   titre: "Vous n'avez aucun logiciel de plus à ouvrir",
   chapo:
-    "REPUT se place derrière les canaux que vous utilisez déjà, puis répond à partir de votre base.",
+    "REPUT se place derrière les canaux que vous utilisez déjà, puis prépare la réponse à partir de votre base.",
   bouton: { libelle: "Voir l'installation", href: "#etapes" },
   /* Deux libellés, comme la référence : la pastille flottante est centrée
      sur sa tuile, donc un nom long déborde sur le bouton du centre — les
@@ -382,7 +382,7 @@ export const JOURNEE = {
       heure: "23 h 05",
       canal: "WhatsApp",
       texte: "Mon pare-brise est fissuré, c'est urgent.",
-      issue: "Transféré : l'astreinte est appelée",
+      issue: "Transféré : alerte urgente à vos équipes",
       dehors: true,
       transfert: true,
     },
@@ -423,15 +423,15 @@ export const QUESTIONS = {
     },
     {
       q: "Que se passe-t-il si deux clients demandent le même créneau ?",
-      r: "La réservation s'écrit directement dans votre agenda, en temps réel. Le second créneau n'apparaît plus comme disponible, et le client se voit proposer les suivants.",
+      r: "La prise de rendez-vous dans votre agenda est en préparation. Une fois raccordée, la réservation s'écrit en temps réel : le second créneau n'apparaît plus comme disponible, et le client se voit proposer les suivants.",
     },
     {
       q: "Qui décide de ce qui part seul ?",
-      r: "C'est vous qui fixez la frontière. Les premières semaines, tout vous est soumis avant envoi. Ensuite, vous décidez poste par poste ce qui part seul et ce qui attend votre accord. Chaque échange, transféré ou non, reste archivé et consultable.",
+      r: "C'est vous qui fixez la frontière. Les premières semaines, tout vous est soumis avant envoi. Ensuite, vous autorisez sujet par sujet les réponses qui partent seules ; les réclamations, les urgences et les demandes de parler à quelqu'un restent toujours relues par vos équipes. Chaque échange, transféré ou non, reste archivé et consultable.",
     },
     {
       q: "Et les avis, comment sont-ils demandés ?",
-      r: "La demande part dans les trois jours qui suivent le règlement, avec deux relances au maximum et six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit toujours par se voir.",
+      r: "La demande d'avis est en préparation. Elle partira dans les trois jours qui suivent le règlement, avec deux relances au maximum et six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit toujours par se voir.",
     },
   ],
 } as const;
