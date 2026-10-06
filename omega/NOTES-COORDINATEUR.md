@@ -511,3 +511,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   à poser par Teo ou avec son accord (`alter publication supabase_realtime add table
   public.filed_fournisseurs;` ; RLS « membres lisent les fournisseurs », anon sans SELECT).
   Sans lui, la fiche ne se relit pas seule après une action.
+- 04 h 10 — **a4_12 posé** (worker-a4 18578a3) : la levée de `fournisseur.a_confirmer` est
+  refusée à tout le monde (déclencheurs sur filed_levees et filed_controles) ; seul chemin :
+  filed_confirmer_fournisseur. 0 levée existante avant. Test a4_06 vert.
+  **Lot 19ae — `private.tester_sans_trace(id)`** : pour les tests d'A4 (bloc DO + `rollback;`
+  final), depot_executer retire le rollback, donc les données resteraient. tester_sans_trace
+  joue le fichier puis annule tout par une exception interne, et rend « vert » ou
+  « rouge : <code> <message> » (les notices sont perdues). À employer pour tout test non pgTAP.
+  A3 prévenu : masquer « Lever avec un motif » pour ce code.
