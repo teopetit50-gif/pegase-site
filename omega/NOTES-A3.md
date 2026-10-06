@@ -376,6 +376,34 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   varelo) reprennent `role="listbox"` / `role="option"` sur des `li` — même
   écart axe ; je n'y ai pas touché.
 
+## Lot du 06/10 (8) — noter un paiement dans « À payer » (a4_15)
+
+- **`filed_noter_paiement`** (p_facture, p_date, p_montant — vide = le reste —,
+  p_moyen ∈ virement, prelevement, cheque, carte, especes, compensation,
+  autre, p_reference ; gérant, admin, valideur) et **`filed_etat_paiement`**
+  (du, regle, reste, etat a_payer | partielle | payee, dernier_le,
+  nb_reglements ; rendu en **ligne de table** — l'écran normalise objet ou
+  tableau) — `filed/portes.ts`.
+- « À payer » : le montant affiché est le **reste** (avec « sur X · Y
+  réglés » dès qu'un règlement existe), l'état « Payée en partie » / « Payée »,
+  la date du dernier règlement ; « **Noter un paiement** » par ligne (date au
+  plus aujourd'hui, montant proposé = le reste et refusé au-delà, moyen —
+  virement si un IBAN est validé, sinon « autre » —, référence). Une facture
+  **payée sort de la liste** ; « Afficher les payées (n) » la fait revenir.
+  Les totaux sont des restes. Le paiement est **noté, pas exécuté** : le
+  dialogue le dit. Un refus de la base (rôle collaborateur, 55000, 22023)
+  s'affiche tel quel.
+- Exemple : R2026-000018 (Rivière) porte un règlement partiel de 1 000 €.
+- **Relu en réel** (daf2@, 06/10 ~05 h 30 Z, `relecture-paiement.mjs`),
+  **partiel** comme demandé : 100 € par virement, référence « essai-a3 », sur
+  FAC-2026-10-0471 → « C'est fait. 100,00 € notés sur R2026-000004
+  (virement) ; reste 188,00 € », ligne « 188,00 € sur 288,00 € · 100,00 €
+  réglés · Payée en partie » ; `filed_etat_paiement` : du 288, regle 100,
+  reste 188, partielle, 1 règlement.
+- Recette 190 ✓ (règlement partiel visible ; montant au-delà du reste
+  refusé ; paiement complet → la facture sort, « Afficher les payées (1) ») ;
+  accessibilité 26 ✓ (dont le dialogue de paiement au clavier).
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
