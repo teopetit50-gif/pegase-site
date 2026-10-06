@@ -9,7 +9,7 @@ lit ce fichier.
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
-| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **25 %** | b1_01 est posée ; b1_02 (GRANT) à poser ; les 14 fonctions de test (6 lots) écrites et poussées, **aucune encore verte** : premier jeu mort sur une aide absente (corrigé), second jeu demandé. Ensuite : les trous que le rouge révélera, une migration par trou |
+| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **85 %** | b1_01 et b1_02 posées ; **12 des 14 tests verts** sur la recette le 06/10 (208 assertions : installation, pôles, sociétés, périmètre, dépôts, rapprochement, écart, approbation, deux approbations, refus, séparation, export, isolement). Restent : b1_05 (1 assertion sur 36 : un second nom proposé sur le même objet n'est pas refusé → migration b1_03 à poser), b1_06_journal (un cast pgTAP, corrigé). Puis rejeu des deux |
 | **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **80 %** | l'écran est écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓ (exemple), **relecture en base réelle ✓** avec gerant / referent / daf du banc (lecture, et une écriture par `grp_proposer_nom`) ; l'onglet est dans la barre (deux lignes dans les fichiers d'A3, à reporter sur main) ; **reste** : la fusion sur main et la vérification sur omegaai.fr, puis rejouer sur le banc un dépôt d'export et un passage depuis l'écran dès que b1_02 est posée (les portes étaient service_role) |
 
 ### Ce que Teo doit fournir ou décider lui-même
@@ -79,8 +79,15 @@ le veut (INSERT `grp_poles`, INSERT `approbations`). Lots :
 | `b1_06_garde_fous.sql` | 15, 16, 17 + battement — 3 tests | écrit, à rejouer |
 
 Premier jeu (05/10, 22 h 44) : 14 tests morts sur `tests.role_admis` absente de
-la recette → aides réécrites sans elle, sur le groupe vierge. Second jeu demandé
-avec la pose de b1_02.
+la recette → aides réécrites sans elle, sur le groupe vierge. Deuxième jeu
+(06/10, 01 h 50) : 1 vert, 13 morts : `tests.jeu()` de la recette ne rend pas
+`gerant_a` → le gérant est créé par `b1_banc`. **Troisième jeu (06/10,
+02 h 05) : 12 verts sur 14** — b1_01 ×4 (10, 8, 6, 15 assertions), b1_02 ×2
+(29, 6), b1_03 (62, passage `{demandes 2, objets_crees 6, codes_examines 9,
+places_d_office 3}`), b1_04 ×3 (24, 9, 9 ; exécution `{demandes 1,
+appliquees 1}`), b1_06_export (9), b1_06_isolement (21). Rouges : b1_05 (35/36,
+le second nom proposé non refusé → T7, migration b1_03) et b1_06_journal (cast
+`cmp_ok(bigint, …, integer)`, corrigé). Quatrième jeu demandé sur ces deux-là.
 
 ## 3. Trous du socle (relevés à la lecture, confirmés ou infirmés par le coordinateur le 05/10)
 
@@ -91,7 +98,9 @@ avec la pose de b1_02.
 | T3 | Pas de porte de lecture du lot. **Sans objet** : l'écran lit `grp_ref_propositions` × `grp_referentiel_codes` sous RLS ; `comptes_entites` porte le périmètre partiel (un collaborateur rattaché à une société ne voit que ses codes et leurs objets), testé en b1_01 et b1_03. | clos | — |
 | T4 | Aucune table `grp_*` dans Realtime. **Posé par le coordinateur** (lot 19n) : `grp_ref_propositions`, `grp_ref_codes`, `grp_ref_objets`, `grp_societes` publiées ; l'écran les écoute (`tempsReel.ts`) avec `demandes_validation`. | clos | — |
 | T5 | `private.grp_proposer` ne pose pas `payload.saisi_par` : la séparation saisie/approbation (lot 19c) ne peut tenir que si `demandes_validation.demandeur_id` est posé par le socle. **À prouver** par b1_04 (test « séparation ») et b1_05. | en attente du rejeu | si rouge : `b1_03_saisi_par.sql` (create or replace de `private.grp_proposer` avec `'saisi_par', v_uid` dans la charge) |
-| T6 | Les aides d'A5 sur la recette n'ont pas `tests.role_admis` (présente sur worker-a5, absente en base). Pas un trou du socle : mes aides n'en dépendent plus. | clos | — |
+| T5 bis | **Infirmé par le rejeu** : b1_04_refus_et_separation et b1_05 sont verts sur « celui qui a saisi la correction ne l'approuve pas » → le socle pose bien le demandeur (demandeur_id) et `preparer_approbation` le refuse. Pas de migration. | clos | — |
+| T6 | Les aides d'A5 sur la recette n'ont pas `tests.role_admis` ni `gerant_a` (présentes sur worker-a5, absentes en base). Pas un trou du socle : mes aides créent leur gérant. | clos | — |
+| T7 | `private.grp_proposer` accepte **deux noms proposés en même temps pour le même objet** (le test d'unicité ne regarde que les codes et les fusions) : deux demandes renommer_objet ouvertes, la dernière exécutée écrase l'autre. Révélé par b1_05 le 06/10. | à poser | `b1_03_proposer_nom_unique.sql` : la condition ajoutée au test d'unicité, même message 23514 |
 
 ## 4. Réponses du coordinateur (05/10, 22 h 30), recopiées
 
@@ -148,8 +157,9 @@ conteneur le navigateur d'essai doit ignorer le certificat du mandataire et
   deux codes (FRN-00021 seul, 40100010 proposé « même SIREN »). **Une
   écriture** : « Proposer un nom » → `grp_proposer_nom` accepté, la demande
   « Renommer un objet » apparaît aussitôt dans les lots (relecture après la
-  porte). Cette demande (nom « … (relecture B1) ») est **à refuser dans la
-  file de validation** par le référent du banc.
+  porte). Cette demande (nom « … (relecture B1) ») sert de demande saisie par
+  le gérant pour le test « Annuler ma demande » d'A3, qui l'annule lui-même
+  (coordinateur, 06/10).
 - **référent** (valideur, équipe Référent données) : même lecture, 59 paires /
   8 lots après l'écriture ; « Écarter cette paire » proposé sur 225 paires
   (toutes sauf le lot IBAN différent de la DF et la correction humaine).
@@ -165,6 +175,11 @@ conteneur le navigateur d'essai doit ignorer le certificat du mandataire et
   d'A3 et le mien ne se relisent pas d'eux-mêmes en production non plus, ce
   n'est pas le conteneur. Une entrée `wss://` à ajouter à `connect-src`.
 
-**Hors périmètre, demandé au coordinateur** : l'onglet dans
-`components/espace/ecrans.ts` (A3) et `varelo` dans `MODULES` de
-`components/espace/format.ts`.
+**Fusion** : demandée le 06/10 à 02 h 45 (4b55c1a, fusion propre avec
+main) ; en cours sur main par le coordinateur, avec l'onglet (`ecrans.ts`) et
+`MODULES.varelo` (`format.ts`) et la CSP `wss://`. omegaai.fr ne servira
+/espace/varelo qu'après la remise à zéro du quota Vercel (plan gratuit, 100
+déploiements par jour, consommés par les prévisualisations des branches
+worker-*, coupées depuis). **À vérifier en ligne dès que le déploiement passe** :
+« Référentiel du groupe » et le ruban « Données d'exemple » sur
+omegaai.fr/espace/varelo.
