@@ -5,6 +5,11 @@
 -- Un passage « Pose des menuiseries » dans 30 jours ; des fenêtres à 15 jours ouvrés de délai, des volets à 40,
 -- de la quincaillerie à commander vite. Les dates attendues sont calculées avec public.ajouter_jours, comme la porte.
 
+-- Les échéances se lisent par une fonction réservée au serveur ; le test, qui endosse des comptes, passe par cette
+-- passerelle du schéma tests (security definer).
+create or replace function tests.b6_echeances(p_commande uuid, p_jour date) returns jsonb
+language sql security definer set search_path to '' as $$ select private.btp_echeances_commande(p_commande, p_jour) $$;
+
 create or replace function tests.test_b6_16_appro() returns setof text
 language plpgsql as $f$
 declare
@@ -39,16 +44,16 @@ begin
                         'Un maître d''ouvrage n''est pas un fournisseur');
   v_k1 := public.btp_ecrire_commande(null, v_ch, jsonb_build_object('objet', 'Fenêtres sur mesure', 'quantite_texte', '14 châssis', 'fournisseur_id', v_four,
                                                                    'delai_jours', 15, 'passage_id', v_p, 'lot_id', v_lot));
-  v_e := private.btp_echeances_commande(v_k1, v_j);
+  v_e := tests.b6_echeances(v_k1, v_j);
   return next is(v_e ->> 'livrer_avant', v_livrer::text, 'Livrer avant : le jour ouvré qui précède le passage');
   return next is(v_e ->> 'commander_avant', public.ajouter_jours(v_livrer, -15, 'ouvres', 'metropole')::text, 'Commander avant : moins les 15 jours ouvrés du fournisseur');
   return next is(v_e ->> 'etat', 'a_commander', 'Il reste du temps : à commander');
 
   perform tests.endosser(v_collab, 'b6-appro-collab@banc-varelo.test');
   v_k2 := public.btp_ecrire_commande(null, v_ch, jsonb_build_object('objet', 'Volets roulants', 'fournisseur_libelle', 'Volets de l''appro', 'delai_jours', 40, 'passage_id', v_p));
-  return next is(private.btp_echeances_commande(v_k2, v_j) ->> 'etat', 'commande_en_retard', 'Le conducteur (collaborateur) commande ; 40 jours de délai : déjà en retard');
+  return next is(tests.b6_echeances(v_k2, v_j) ->> 'etat', 'commande_en_retard', 'Le conducteur (collaborateur) commande ; 40 jours de délai : déjà en retard');
   v_k3 := public.btp_ecrire_commande(null, v_ch, jsonb_build_object('objet', 'Quincaillerie', 'fournisseur_libelle', 'Quincaillerie de l''appro', 'delai_jours', 0, 'besoin_le', v_j + 2));
-  return next ok(private.btp_echeances_commande(v_k3, v_j) ->> 'etat' in ('a_commander_vite', 'commande_en_retard'), 'Besoin dans deux jours : à commander vite');
+  return next ok(tests.b6_echeances(v_k3, v_j) ->> 'etat' in ('a_commander_vite', 'commande_en_retard'), 'Besoin dans deux jours : à commander vite');
 
   -- ── Le point du matin ──
   perform tests.redevenir_admin();
@@ -63,13 +68,13 @@ begin
   return next throws_ok(format('select public.btp_noter_commande(%L, %L)', v_k1, v_j - 1), '22023', null, 'Une livraison promise avant la commande est refusée');
   return next is(public.btp_noter_commande(v_k1, v_livrer + 3, v_j, 'CDE-118') ->> 'etat', 'livraison_tardive', 'Promise après le jour où il les faut : livraison tardive');
   return next is(public.btp_noter_commande(v_k1, v_livrer - 2, v_j) ->> 'etat', 'commandee', 'Promise à temps : commandée');
-  return next is(private.btp_echeances_commande(v_k1, v_livrer) ->> 'etat', 'livraison_attendue', 'La date promise passée sans réception : livraison attendue');
+  return next is(tests.b6_echeances(v_k1, v_livrer) ->> 'etat', 'livraison_attendue', 'La date promise passée sans réception : livraison attendue');
   return next throws_ok(format('select public.btp_noter_livraison(%L, %L)', v_k1, v_j + 1), '22023', null, 'Une livraison ne se note pas dans le futur');
   return next is(public.btp_noter_livraison(v_k1, v_j, false, '10 châssis sur 14') ->> 'etat', 'livree_partielle', 'Livraison partielle');
   return next is(public.btp_noter_livraison(v_k1, v_j) ->> 'etat', 'livree', 'Le reste arrive : livrée');
 
   -- ── Le besoin suit le passage (et donc ses recalages, b6_19) ──
-  return next is(private.btp_echeances_commande(v_k2, v_j) ->> 'besoin_le', (select p.debut::text from public.btp_passages p where p.id = v_p), 'Le besoin est le début du passage');
+  return next is(tests.b6_echeances(v_k2, v_j) ->> 'besoin_le', (select p.debut::text from public.btp_passages p where p.id = v_p), 'Le besoin est le début du passage');
 
   -- ── Annuler ──
   return next throws_ok(format('select public.btp_annuler_commande(%L, '''')', v_k3), '22023', null, 'Une annulation sans motif est refusée');
