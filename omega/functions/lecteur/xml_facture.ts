@@ -66,6 +66,43 @@ function attribut(n: Noeud, nom: string): string | null {
   return null;
 }
 
+/** Les enfants « balise » d'un nœud, avec leur attribut currencyID : { devise, noeud }. */
+function montantsParDevise(parent: Noeud, balise: string): { devise: string | null; n: Noeud }[] {
+  return tous((premier(parent) as Record<string, Noeud>)?.[balise]).map((n) => ({ devise: attribut(n, "currencyID")?.toUpperCase() ?? null, n }));
+}
+
+/** La note de la norme française (code sujet) : CII IncludedNote/SubjectCode, UBL Note « #PMT#… ». */
+const NOTES_FR: Record<string, string> = { AAB: "mention.escompte", PMD: "mention.penalites", PMT: "mention.indemnite_recouvrement" };
+
+/** Le taux annuel d'une phrase de pénalités (« 3 fois le taux d'intérêt légal » n'en est pas un) ; l'indemnité en euros. */
+function tauxPenalites(t: string): number | null {
+  const m = t.match(/(\d+(?:[.,]\d+)?)\s*%/);
+  return m ? nombreDepuisTexte(m[1]) : null;
+}
+function montantIndemnite(t: string): number | null {
+  const m = t.match(/(\d+(?:[.,]\d+)?)\s*(?:€|euros?|EUR)/i);
+  return m ? nombreDepuisTexte(m[1]) : null;
+}
+
+/** Les mentions de paiement (escompte, pénalités, indemnité forfaitaire) tirées des notes codées. */
+function mentionsDesNotes(c: Collecteur, notes: { code: string | null; texte: string }[], balise: string) {
+  for (const { code, texte: t } of notes) {
+    const champ = code ? NOTES_FR[code.toUpperCase()] : undefined;
+    if (!champ) continue;
+    if (champ === "mention.indemnite_recouvrement") {
+      c.booleen(champ, true, t.slice(0, 300), `${balise} ${code}`);
+      const m = montantIndemnite(t);
+      if (m !== null) c.nombre("indemnite_recouvrement.montant", String(m), `${balise} ${code}`);
+    } else {
+      c.texte(champ, t.slice(0, 300), `${balise} ${code}`);
+      if (champ === "mention.penalites") {
+        const taux = tauxPenalites(t);
+        if (taux !== null) c.nombre("penalites.taux", String(taux), `${balise} ${code}`);
+      }
+    }
+  }
+}
+
 function dateDe(t: string | null): string | null {
   if (!t) return null;
   const m = t.match(/^(\d{4})-?(\d{2})-?(\d{2})/);
@@ -223,7 +260,16 @@ function lireCii(racine: Noeud): LectureXml {
   c.date("echeance", noeud(reglement, "SpecifiedTradePaymentTerms.DueDateDateTime.DateTimeString"), "SpecifiedTradePaymentTerms/DueDateDateTime");
   const somme = noeud(reglement, "SpecifiedTradeSettlementHeaderMonetarySummation");
   c.nombre("montant_ht", noeud(somme, "TaxBasisTotalAmount"), "TaxBasisTotalAmount");
-  c.nombre("montant_tva", noeud(somme, "TaxTotalAmount"), "TaxTotalAmount");
+  // Deux TaxTotalAmount quand la facture est en devise : celui de la devise de facture, et la contre-valeur en euros.
+  const devise = texte(noeud(reglement, "InvoiceCurrencyCode"))?.toUpperCase() ?? "EUR";
+  const tvas = montantsParDevise(somme, "TaxTotalAmount");
+  c.nombre("montant_tva", (tvas.find((x) => x.devise === devise) ?? tvas.find((x) => x.devise === null) ?? tvas[0])?.n, "TaxTotalAmount");
+  if (devise !== "EUR") {
+    const eur = tvas.find((x) => x.devise === "EUR");
+    if (eur) c.nombre("contre_valeur.montant_tva_eur", eur.n, "TaxTotalAmount currencyID=EUR");
+    const change = noeud(reglement, "TaxApplicableTradeCurrencyExchange");
+    if (texte(noeud(change, "TargetCurrencyCode"))?.toUpperCase() === "EUR") c.nombre("contre_valeur.taux_change", noeud(change, "ConversionRate"), "TaxApplicableTradeCurrencyExchange/ConversionRate");
+  }
   c.nombre("montant_ttc", noeud(somme, "GrandTotalAmount"), "GrandTotalAmount");
   c.nombre("montant_prepaye", noeud(somme, "TotalPrepaidAmount"), "TotalPrepaidAmount");
   c.nombre("net_a_payer", noeud(somme, "DuePayableAmount"), "DuePayableAmount");
@@ -251,6 +297,16 @@ function lireCii(racine: Noeud): LectureXml {
     });
   }
   c.tableau("tva.ventilation", ventilation, "ApplicableTradeTax");
+  // TVA exigible à la facturation (option pour les débits) : BT-8, DueDateTypeCode 5 (date de facture) en CII.
+  if (tous((premier(reglement) as Record<string, Noeud>)?.["ApplicableTradeTax"]).some((t) => texte(noeud(t, "DueDateTypeCode")) === "5")) {
+    c.booleen("mention.tva_debits", true, "DueDateTypeCode 5", "ApplicableTradeTax/DueDateTypeCode");
+  }
+  mentionsDesNotes(
+    c,
+    tous((premier(doc) as Record<string, Noeud>)?.["IncludedNote"]).map((n) => ({ code: texte(noeud(n, "SubjectCode")), texte: texte(noeud(n, "Content")) ?? "" }))
+      .filter((n) => n.texte !== ""),
+    "IncludedNote",
+  );
   if (autoliquidation) c.booleen("mention.autoliquidation", true, "CategoryCode AE", "ApplicableTradeTax/CategoryCode");
   if (franchise) c.booleen("mention.franchise_293b", true, "ExemptionReason 293 B", "ApplicableTradeTax/ExemptionReason");
 
@@ -332,7 +388,24 @@ function lireUbl(racine: Noeud, nomRacine: "Invoice" | "CreditNote"): LectureXml
 
   const total = noeud(racine, "LegalMonetaryTotal");
   c.nombre("montant_ht", noeud(total, "TaxExclusiveAmount"), "LegalMonetaryTotal/TaxExclusiveAmount");
-  c.nombre("montant_tva", noeud(racine, "TaxTotal.TaxAmount"), "TaxTotal/TaxAmount");
+  const deviseUbl = texte(noeud(racine, "DocumentCurrencyCode"))?.toUpperCase() ?? "EUR";
+  const totauxTva = tous((premier(racine) as Record<string, Noeud>)?.["TaxTotal"]).map((tt) => noeud(tt, "TaxAmount"));
+  const tvaDe = (d: string) => totauxTva.find((n) => attribut(n, "currencyID")?.toUpperCase() === d);
+  c.nombre("montant_tva", tvaDe(deviseUbl) ?? totauxTva[0], "TaxTotal/TaxAmount");
+  if (deviseUbl !== "EUR" && tvaDe("EUR")) c.nombre("contre_valeur.montant_tva_eur", tvaDe("EUR"), "TaxTotal/TaxAmount currencyID=EUR");
+  if (deviseUbl !== "EUR" && texte(noeud(racine, "TaxExchangeRate.TargetCurrencyCode"))?.toUpperCase() === "EUR") {
+    c.nombre("contre_valeur.taux_change", noeud(racine, "TaxExchangeRate.CalculationRate"), "TaxExchangeRate/CalculationRate");
+  }
+  // TVA exigible à la facturation (option pour les débits) : BT-8, InvoicePeriod/DescriptionCode 3 en UBL.
+  if (texte(noeud(racine, "InvoicePeriod.DescriptionCode")) === "3") c.booleen("mention.tva_debits", true, "DescriptionCode 3", "InvoicePeriod/DescriptionCode");
+  mentionsDesNotes(
+    c,
+    tous((premier(racine) as Record<string, Noeud>)?.["Note"]).map((n) => texte(n) ?? "").map((t) => {
+      const m = t.match(/^#([A-Z]{3})#\s*([\s\S]*)$/);
+      return m ? { code: m[1], texte: m[2].trim() } : { code: null, texte: t };
+    }).filter((n) => n.texte !== ""),
+    "Note",
+  );
   c.nombre("montant_ttc", noeud(total, "TaxInclusiveAmount"), "LegalMonetaryTotal/TaxInclusiveAmount");
   c.nombre("montant_prepaye", noeud(total, "PrepaidAmount"), "LegalMonetaryTotal/PrepaidAmount");
   c.nombre("net_a_payer", noeud(total, "PayableAmount"), "LegalMonetaryTotal/PayableAmount");

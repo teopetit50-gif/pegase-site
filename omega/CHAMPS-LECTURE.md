@@ -126,6 +126,22 @@ Sur un **avoir**, les montants sont rendus avec le signe du document (souvent n�
 
 Si le lecteur ne les rend pas, FILED les détecte lui-même par expression régulière dans le texte des pages.
 
+### TVA sur les débits, devise, conditions de paiement (06/10, n° 2 de l'audit)
+
+| Champ | Type | Description | Source XML (Factur-X / UBL) |
+|---|---|---|---|
+| `mention.tva_debits` | booléen | « option pour le paiement de la taxe d'après les débits » | BT-8 : CII `ApplicableTradeTax/DueDateTypeCode` = 5 (en-tête) ; UBL `InvoicePeriod/DescriptionCode` = 3 |
+| `contre_valeur.taux_change` | nombre | facture en devise : taux de conversion en euros | CII `TaxApplicableTradeCurrencyExchange/ConversionRate` (cible EUR) ; UBL `TaxExchangeRate/CalculationRate` |
+| `contre_valeur.montant_tva_eur` | nombre | facture en devise : TVA en euros | le `TaxTotalAmount` / `TaxTotal/TaxAmount` dont `currencyID = EUR` |
+| `contre_valeur.montant_ttc_eur` | nombre | facture en devise : TTC en euros, s'il est imprimé | lu sur le PDF seulement |
+| `mention.escompte` | texte (≤ 300) | conditions d'escompte, telles qu'écrites (« pas d'escompte… » compris) | note codée `AAB` (CII `IncludedNote/SubjectCode`, UBL `Note` « #AAB#… ») |
+| `mention.penalites` | texte (≤ 300) | conditions des pénalités de retard | note `PMD` |
+| `penalites.taux` | nombre | taux en %, seulement s'il est chiffré (« 3 fois le taux légal » n'en donne pas) | tiré de la note `PMD` |
+| `mention.indemnite_recouvrement` | booléen | mention de l'indemnité forfaitaire pour frais de recouvrement | note `PMT` |
+| `indemnite_recouvrement.montant` | nombre | son montant en euros (40) | tiré de la note `PMT` |
+
+Une facture en devise garde `montant_tva` dans la devise de facture (celle de `devise`) ; la contre-valeur est à part.
+
 ### Tableaux
 
 **`lignes`** : une seule valeur par pièce, `valeur` est un **tableau jsonb**, un objet par ligne du document, dans l'ordre (5 000 au plus). `page` = page de la première ligne. Colonnes d'un objet :

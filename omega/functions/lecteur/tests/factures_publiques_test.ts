@@ -186,3 +186,43 @@ Deno.test("cadre de facturation français (B1, S1, M1…) lu dans le contexte du
   assertEquals(cadre(avec("Baurechnung")), undefined);
   assertEquals(cadre(xml), undefined);
 });
+
+Deno.test("facture en devise (GBP) : TVA dans la devise de facture, contre-valeur en euros et taux de change", async () => {
+  const { issue, r } = await lire("zugferd_2p3_EXTENDED_Fremdwaehrung.xml", "application/xml");
+  assertEquals(issue, "lue");
+  regleCommune(r);
+  const v = valeursDe(r);
+  assertEquals(v.get("devise"), "GBP");
+  assertEquals(v.get("montant_tva"), 163.16);
+  assertEquals(v.get("contre_valeur.montant_tva_eur"), 183.14);
+  assertEquals(v.get("contre_valeur.taux_change"), 1.12244);
+});
+
+Deno.test("mentions françaises codées (AAB, PMD, PMT) et TVA sur les débits (BT-8) en CII et en UBL", async () => {
+  const cii = new TextDecoder().decode(await Deno.readFile(new URL("zugferd_2p3_EN16931_Einfach.xml", ici)))
+    .replace(
+      /<rsm:ExchangedDocument>([\s\S]*?)<ram:IncludedNote>/,
+      (_m, avant) =>
+        `<rsm:ExchangedDocument>${avant}<ram:IncludedNote><ram:Content>Pas d'escompte pour paiement anticipé.</ram:Content><ram:SubjectCode>AAB</ram:SubjectCode></ram:IncludedNote>` +
+        `<ram:IncludedNote><ram:Content>Pénalités de retard : 12 % l'an.</ram:Content><ram:SubjectCode>PMD</ram:SubjectCode></ram:IncludedNote>` +
+        `<ram:IncludedNote><ram:Content>Indemnité forfaitaire pour frais de recouvrement : 40 €.</ram:Content><ram:SubjectCode>PMT</ram:SubjectCode></ram:IncludedNote><ram:IncludedNote>`,
+    )
+    // L'exigibilité se déclare sur la TVA de l'en-tête (pas sur celle d'une ligne).
+    .replace(/(<ram:ApplicableHeaderTradeSettlement>[\s\S]*?<ram:ApplicableTradeTax>)/, "$1<ram:DueDateTypeCode>5</ram:DueDateTypeCode>");
+  const v = new Map(lireXmlFacture(cii)!.valeurs.map((x) => [x.champ, x.valeur]));
+  assertEquals(v.get("mention.escompte"), "Pas d'escompte pour paiement anticipé.");
+  assertEquals(v.get("mention.penalites"), "Pénalités de retard : 12 % l'an.");
+  assertEquals(v.get("penalites.taux"), 12);
+  assertEquals(v.get("mention.indemnite_recouvrement"), true);
+  assertEquals(v.get("indemnite_recouvrement.montant"), 40);
+  assertEquals(v.get("mention.tva_debits"), true);
+  assertEquals(v.has("contre_valeur.montant_tva_eur"), false, "facture en euros : pas de contre-valeur");
+
+  const ubl = new TextDecoder().decode(await Deno.readFile(new URL("XRECHNUNG_Einfach.ubl.xml", ici)))
+    .replace(/(<cbc:DocumentCurrencyCode>)/, "<cbc:Note>#PMT#Indemnité forfaitaire de 40 euros.</cbc:Note><cbc:Note>#PMD#3 fois le taux d'intérêt légal.</cbc:Note>$1");
+  const u = new Map(lireXmlFacture(ubl)!.valeurs.map((x) => [x.champ, x.valeur]));
+  assertEquals(u.get("mention.indemnite_recouvrement"), true);
+  assertEquals(u.get("indemnite_recouvrement.montant"), 40);
+  assertEquals(u.get("mention.penalites"), "3 fois le taux d'intérêt légal.");
+  assertEquals(u.has("penalites.taux"), false, "« 3 fois le taux légal » n'est pas un taux chiffré");
+});

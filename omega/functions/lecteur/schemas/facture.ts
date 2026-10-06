@@ -67,6 +67,30 @@ export const CHAMPS_FACTURE: ChampFacture[] = [
 
   { champ: "mention.autoliquidation", type: "booleen", description: "true si la pièce porte la mention « autoliquidation » (TVA due par le preneur)." },
   { champ: "mention.franchise_293b", type: "booleen", description: "true si la pièce porte « TVA non applicable, art. 293 B du CGI »." },
+  {
+    champ: "mention.tva_debits",
+    type: "booleen",
+    description: "true si la pièce porte « option pour le paiement de la taxe d'après les débits » (ou « TVA acquittée sur les débits »).",
+  },
+
+  { champ: "contre_valeur.taux_change", type: "nombre", description: "Facture en devise étrangère : le taux de conversion en euros imprimé." },
+  { champ: "contre_valeur.montant_tva_eur", type: "nombre", description: "Facture en devise étrangère : le montant de la TVA en euros (contre-valeur)." },
+  { champ: "contre_valeur.montant_ttc_eur", type: "nombre", description: "Facture en devise étrangère : le total TTC en euros, s'il est imprimé." },
+
+  {
+    champ: "mention.escompte",
+    type: "texte",
+    max: 300,
+    description: "Conditions d'escompte pour paiement anticipé, telles qu'imprimées (y compris « pas d'escompte pour paiement anticipé »).",
+  },
+  { champ: "mention.penalites", type: "texte", max: 300, description: "Conditions des pénalités de retard, telles qu'imprimées." },
+  { champ: "penalites.taux", type: "nombre", description: "Taux des pénalités de retard, en pourcentage, s'il est chiffré (pas « 3 fois le taux légal »)." },
+  {
+    champ: "mention.indemnite_recouvrement",
+    type: "booleen",
+    description: "true si la pièce mentionne l'indemnité forfaitaire pour frais de recouvrement (art. L.441-10 et D.441-5 du code de commerce).",
+  },
+  { champ: "indemnite_recouvrement.montant", type: "nombre", description: "Montant de l'indemnité forfaitaire pour frais de recouvrement, en euros (40 en général)." },
 ];
 
 /** Les colonnes d'une ligne de facture (filed_factures_lignes). */
