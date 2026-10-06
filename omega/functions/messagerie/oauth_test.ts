@@ -15,7 +15,7 @@ function monter(avecGmail = true) {
   const g = new GmailDouble();
   const servir = creerOAuth({
     portes,
-    gmail: avecGmail ? g : null,
+    messageries: avecGmail ? { gmail: g } : {},
     base: BASE,
     journal: journalMuet,
   });
@@ -99,6 +99,69 @@ Deno.test("retour : refus de l'utilisateur, code refusé (jeton jamais obtenu), 
 Deno.test("sans application Google configurée : 503", async () => {
   assertEquals(
     (await monter(false).get(`/google/debut?etat=${ETAT}`)).status,
+    503,
+  );
+});
+
+Deno.test("Microsoft : début et retour sur /microsoft/ ; un état préparé pour Gmail est refusé sur la route Microsoft", async () => {
+  const portes = new PortesDouble();
+  const ms = new GmailDouble("microsoft");
+  const g = new GmailDouble();
+  portes.etats.set(ETAT, {
+    client_id: "c",
+    fournisseur: "microsoft",
+    retour_ecran: null,
+  });
+  const servir = creerOAuth({
+    portes,
+    messageries: { gmail: g, microsoft: ms },
+    base: BASE,
+    journal: journalMuet,
+  });
+  const get = (c: string) => servir(new Request(`${BASE}${c}`));
+  const d = await get(`/microsoft/debut?etat=${ETAT}`);
+  assertEquals(d.status, 302);
+  assertMatch(
+    decodeURIComponent(d.headers.get("location")!),
+    /redirect_uri=https:\/\/p\.supabase\.co\/functions\/v1\/messagerie-oauth\/microsoft\/retour/,
+  );
+  assertEquals((await get(`/google/debut?etat=${ETAT}`)).status, 400);
+  const r = await get(
+    `/microsoft/retour?code=code-valide-0123456789&state=${ETAT}`,
+  );
+  assertEquals(r.status, 302);
+  assertEquals(portes.enregistrements[0].renouvellement, "renouv-1");
+  assertEquals(
+    (await servir(new Request(`${BASE}/microsoft/debut?etat=${ETAT}`)))
+      .status,
+    400,
+  );
+});
+
+Deno.test("Microsoft : enregistrement en panne → pas de révocation distante (impossible chez Microsoft) ; non configuré → 503", async () => {
+  const portes = new PortesDouble();
+  portes.etats.set(ETAT, {
+    client_id: "c",
+    fournisseur: "microsoft",
+    retour_ecran: null,
+  });
+  portes.enregistrer = () => Promise.reject(new Error("porte en panne"));
+  const ms = new GmailDouble("microsoft");
+  const servir = creerOAuth({
+    portes,
+    messageries: { microsoft: ms },
+    base: BASE,
+    journal: journalMuet,
+  });
+  const r = await servir(
+    new Request(
+      `${BASE}/microsoft/retour?code=code-valide-0123456789&state=${ETAT}`,
+    ),
+  );
+  assertEquals(r.status, 502);
+  assertEquals(ms.revoques, []);
+  assertEquals(
+    (await servir(new Request(`${BASE}/google/debut?etat=${ETAT}`))).status,
     503,
   );
 });

@@ -1,19 +1,20 @@
 // La connexion d'une messagerie par OAuth, côté navigateur (fonction `messagerie-oauth`,
-// verify_jwt false : c'est Google qui y renvoie l'utilisateur).
-//   GET …/google/debut?etat=<état>  : l'écran d'Omega (A3) a obtenu un état à usage unique par la
-//        porte socle `messagerie_preparer` (membre connecté, client, fournisseur) ; on le vérifie
-//        (messagerie_ouvrir) puis on renvoie vers le consentement Google.
-//   GET …/google/retour?code&state   : échange du code, profil (adresse, curseur), puis
-//        messagerie_enregistrer (jetons au Vault, état consommé, ligne expediteurs gmail) ; renvoi
-//        vers l'écran. Si l'enregistrement tombe après l'échange, le jeton obtenu est révoqué.
+// verify_jwt false : c'est Google ou Microsoft qui y renvoie l'utilisateur).
+//   GET …/{google|microsoft}/debut?etat=<état> : l'écran d'Omega (A3) a obtenu un état à usage
+//        unique par la porte socle `messagerie_preparer` (membre connecté, client, fournisseur) ;
+//        on le vérifie (messagerie_ouvrir, fournisseur de l'état = celui de la route) puis on
+//        renvoie vers le consentement du fournisseur.
+//   GET …/{google|microsoft}/retour?code&state : échange du code, profil (adresse, curseur), puis
+//        messagerie_enregistrer (jetons au Vault, état consommé, ligne expediteurs) ; renvoi vers
+//        l'écran. Si l'enregistrement tombe après l'échange, le jeton obtenu est révoqué (Google).
 // Aucun jeton n'apparaît dans une URL, un journal ou une page.
 
-import type { Messagerie } from "./fournisseur.ts";
+import type { Messagerie, NomMessagerie } from "./fournisseur.ts";
 import type { Portes } from "./portes.ts";
 
 export type DependancesOAuth = {
   portes: Portes;
-  gmail: Messagerie | null;
+  messageries: Partial<Record<NomMessagerie, Messagerie>>;
   /** URL publique de la fonction, sans barre finale : …/functions/v1/messagerie-oauth */
   base: string;
   journal: { erreur(message: string, detail?: Record<string, unknown>): void };
@@ -58,26 +59,40 @@ function retourSur(url: string | null | undefined): string | null {
   }
 }
 
+/** Segment d'URL → messagerie. Le segment reste « google » : c'est l'URI déclarée chez Google. */
+const ROUTES: Record<string, { nom: NomMessagerie; marque: string }> = {
+  google: { nom: "gmail", marque: "Google" },
+  microsoft: { nom: "microsoft", marque: "Microsoft" },
+};
+
 export function creerOAuth(
   deps: DependancesOAuth,
 ): (req: Request) => Promise<Response> {
-  const retourGoogle = `${deps.base}/google/retour`;
   return async (req) => {
     if (req.method !== "GET") return page(405, "Méthode non autorisée", "");
     const url = new URL(req.url);
-    const route = url.pathname.replace(
-      /^.*\/(google\/(?:debut|retour))\/?$/,
-      "$1",
+    const trouve = url.pathname.match(
+      /\/(google|microsoft)\/(debut|retour)\/?$/,
     );
-    if (!deps.gmail) {
+    if (!trouve) return page(404, "Page introuvable", "");
+    const { nom, marque } = ROUTES[trouve[1]];
+    const geste = trouve[2];
+    const m = deps.messageries[nom];
+    if (!m) {
       return page(
         503,
         "Connexion indisponible",
-        "L'application Google d'Omega n'est pas encore configurée.",
+        `L'application ${marque} d'Omega n'est pas encore configurée.`,
       );
     }
+    const retour = `${deps.base}/${trouve[1]}/retour`;
+    const verifier = async (etat: string) => {
+      const o = await deps.portes.ouvrir(etat);
+      if (o.fournisseur !== nom) throw new Error("fournisseur de l'état");
+      return o;
+    };
 
-    if (route === "google/debut") {
+    if (geste === "debut") {
       const etat = url.searchParams.get("etat") ?? "";
       if (!/^[A-Za-z0-9_-]{16,200}$/.test(etat)) {
         return page(
@@ -87,7 +102,7 @@ export function creerOAuth(
         );
       }
       try {
-        await deps.portes.ouvrir(etat);
+        await verifier(etat);
       } catch {
         return page(
           400,
@@ -95,69 +110,67 @@ export function creerOAuth(
           "Ce lien de connexion n'est plus valable. Relancez la connexion depuis Omega.",
         );
       }
-      return redirection(deps.gmail.urlConsentement(etat, retourGoogle));
+      return redirection(m.urlConsentement(etat, retour));
     }
 
-    if (route === "google/retour") {
-      const etat = url.searchParams.get("state") ?? "";
-      if (url.searchParams.get("error")) {
-        return page(
-          200,
-          "Connexion annulée",
-          "Aucune messagerie n'a été connectée. Vous pouvez fermer cette page.",
-        );
-      }
-      const code = url.searchParams.get("code") ?? "";
-      if (!code || !/^[A-Za-z0-9_-]{16,200}$/.test(etat)) {
-        return page(
-          400,
-          "Retour invalide",
-          "Relancez la connexion depuis Omega.",
-        );
-      }
-      try {
-        await deps.portes.ouvrir(etat);
-      } catch {
-        return page(
-          400,
-          "Lien expiré",
-          "Ce lien de connexion n'est plus valable. Relancez la connexion depuis Omega.",
-        );
-      }
-      let renouvellement: string | null = null;
-      try {
-        const c = await deps.gmail.echangerCode(code, retourGoogle);
-        renouvellement = c.renouvellement;
-        const p = await deps.gmail.profil(c.acces.jeton);
-        const r = await deps.portes.enregistrer({
-          etat,
-          adresse: p.adresse,
-          renouvellement: c.renouvellement,
-          acces: c.acces.jeton,
-          accesExpireLe: c.acces.expire_le,
-          portees: c.portees,
-          curseur: p.curseur,
-        });
-        const ecran = retourSur(r.retour_ecran);
-        return ecran ? redirection(ecran) : page(
-          200,
-          "Messagerie connectée",
-          `${p.adresse} est connectée à Omega. Vous pouvez fermer cette page.`,
-        );
-      } catch (e) {
-        deps.journal.erreur("connexion Gmail impossible", {
-          erreur: String((e as Error)?.message ?? e).slice(0, 300),
-        });
-        if (renouvellement) {
-          await deps.gmail.revoquer(renouvellement).catch(() => {});
-        }
-        return page(
-          502,
-          "Connexion impossible",
-          "La messagerie n'a pas pu être connectée. Réessayez dans un instant ; si cela persiste, prévenez Omega.",
-        );
-      }
+    // geste === "retour"
+    const etat = url.searchParams.get("state") ?? "";
+    if (url.searchParams.get("error")) {
+      return page(
+        200,
+        "Connexion annulée",
+        "Aucune messagerie n'a été connectée. Vous pouvez fermer cette page.",
+      );
     }
-    return page(404, "Page introuvable", "");
+    const code = url.searchParams.get("code") ?? "";
+    if (!code || !/^[A-Za-z0-9_-]{16,200}$/.test(etat)) {
+      return page(
+        400,
+        "Retour invalide",
+        "Relancez la connexion depuis Omega.",
+      );
+    }
+    try {
+      await verifier(etat);
+    } catch {
+      return page(
+        400,
+        "Lien expiré",
+        "Ce lien de connexion n'est plus valable. Relancez la connexion depuis Omega.",
+      );
+    }
+    let renouvellement: string | null = null;
+    try {
+      const c = await m.echangerCode(code, retour);
+      renouvellement = c.renouvellement;
+      const p = await m.profil(c.acces.jeton);
+      const r = await deps.portes.enregistrer({
+        etat,
+        adresse: p.adresse,
+        renouvellement: c.renouvellement,
+        acces: c.acces.jeton,
+        accesExpireLe: c.acces.expire_le,
+        portees: c.portees,
+        curseur: p.curseur,
+      });
+      const ecran = retourSur(r.retour_ecran);
+      return ecran ? redirection(ecran) : page(
+        200,
+        "Messagerie connectée",
+        `${p.adresse} est connectée à Omega. Vous pouvez fermer cette page.`,
+      );
+    } catch (e) {
+      deps.journal.erreur(`connexion ${nom} impossible`, {
+        erreur: String((e as Error)?.message ?? e).slice(0, 300),
+      });
+      if (renouvellement && m.revocationDistante) {
+        await m.revoquer(renouvellement).catch(() => {});
+      }
+      return page(
+        502,
+        "Connexion impossible",
+        "La messagerie n'a pas pu être connectée. Réessayez dans un instant ; si cela persiste, prévenez Omega.",
+      );
+    }
   };
 }

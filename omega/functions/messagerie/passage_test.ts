@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertMatch } from "@std/assert";
-import { executerPassage } from "./passage.ts";
+import { type Dependances, executerPassage } from "./passage.ts";
 import {
   CLIENT,
   CONNEXION,
@@ -30,9 +30,9 @@ function monter(avecGmail = true) {
     etiquette: null,
     curseur: "100",
   }];
-  const deps = {
+  const deps: Dependances = {
     portes,
-    gmail: avecGmail ? g : null,
+    messageries: avecGmail ? { gmail: g } : {},
     stockage,
     pieces: stockage,
     ouvrier: "messagerie@test",
@@ -67,9 +67,10 @@ Deno.test("relève : messages déposés en réceptions (boîte = adresse connect
     "Bonjour m1",
   ]);
   assertEquals(r.detail.en_reponse_a, "<omega-1@banc.test>");
-  assertEquals(r.detail.gmail_id, "g1");
+  assertEquals([r.detail.source, r.detail.id_fournisseur], ["gmail", "g1"]);
   assertEquals(a.portes.curseurs.get(CONNEXION), ["101", "102", "110"]);
-  assertEquals(a.portes.battements[0].gmail_branche, true);
+  assertEquals(a.portes.battements[0].branchees, ["gmail"]);
+  assertEquals(a.g.etiquettesDemandees, ["INBOX"]);
 });
 
 Deno.test("relève interrompue : le curseur s'arrête au dernier message déposé ; le passage suivant reprend sans doublon", async () => {
@@ -228,8 +229,8 @@ Deno.test("brouillon refusé : santé vers un fournisseur non agréé, connexion
   }];
   const bilan = await executerPassage(b.deps);
   assertEquals(bilan.reportes, 1);
-  assertMatch(b.portes.echoues.get(ENVOI)!.erreur, /^GMAIL_NON_BRANCHE/);
-  assertEquals(b.portes.battements[0].gmail_branche, false);
+  assertMatch(b.portes.echoues.get(ENVOI)!.erreur, /^MESSAGERIE_NON_BRANCHEE/);
+  assertEquals(b.portes.battements[0].branchees, []);
 });
 
 Deno.test("révocation : Vault vidé par la porte, jeton révoqué chez Google", async () => {
@@ -243,4 +244,87 @@ Deno.test("révocation : Vault vidé par la porte, jeton révoqué chez Google",
   assertEquals(bilan.revoques, 1);
   assertEquals(a.portes.oubliees, [CONNEXION]);
   assertEquals(a.g.revoques, ["renouv-0"]);
+});
+
+Deno.test("Microsoft : relève du dossier inbox, jeton de renouvellement tourné reposé au Vault, référence microsoft:brouillon", async () => {
+  const a = monter(false);
+  const ms = new GmailDouble("microsoft");
+  a.deps.messageries = { microsoft: ms };
+  a.portes.actives[0].fournisseur = "microsoft";
+  a.portes.jetonsParConnexion.set(CONNEXION, {
+    acces: null,
+    acces_expire_le: null,
+    renouvellement: "renouv-0",
+  });
+  ms.messages.set("x1", message("x1"));
+  ms.historique = {
+    messages: [{ id: "x1", curseur: "https://graph.microsoft.com/p1" }],
+    curseur: "https://graph.microsoft.com/delta1",
+  };
+  a.portes.envois.set(ENVOI, envoiGmail({ fournisseur: "microsoft" }));
+  a.portes.travaux = [{
+    id: 5,
+    genre: "envois.microsoft",
+    charge: { envoi: ENVOI },
+  }];
+  const bilan = await executerPassage(a.deps);
+  assertEquals([bilan.brouillons, bilan.recus], [1, 1]);
+  assertEquals(a.portes.confirmes.get(ENVOI), "microsoft:brouillon:r-1");
+  assertEquals(ms.etiquettesDemandees, ["inbox"]);
+  assertEquals(
+    a.portes.jetonsParConnexion.get(CONNEXION)!.renouvellement,
+    "renouv-tourne-1",
+  );
+  assertEquals(
+    a.portes.receptions.get("<x1@exemple.test>")!.detail.source,
+    "microsoft",
+  );
+  assertEquals(a.portes.battements[0].branchees, ["microsoft"]);
+});
+
+Deno.test("Microsoft : un envoi gmail sous un travail envois.microsoft est refusé ; Microsoft non branché : reporté", async () => {
+  const a = monter();
+  a.deps.messageries = { gmail: a.g, microsoft: new GmailDouble("microsoft") };
+  a.portes.envois.set(ENVOI, envoiGmail());
+  a.portes.travaux = [{
+    id: 6,
+    genre: "envois.microsoft",
+    charge: { envoi: ENVOI },
+  }];
+  await executerPassage(a.deps);
+  assertMatch(a.portes.echoues.get(ENVOI)!.erreur, /^FOURNISSEUR_INATTENDU/);
+  assertEquals(a.g.brouillons.length, 0);
+
+  const b = monter();
+  b.portes.envois.set(ENVOI, envoiGmail({ fournisseur: "microsoft" }));
+  b.portes.travaux = [{
+    id: 7,
+    genre: "envois.microsoft",
+    charge: { envoi: ENVOI },
+  }];
+  const bilan = await executerPassage(b.deps);
+  assertEquals(bilan.reportes, 1);
+  assertMatch(b.portes.echoues.get(ENVOI)!.erreur, /^MESSAGERIE_NON_BRANCHEE/);
+  assertEquals(b.portes.echoues.get(ENVOI)!.definitif, false);
+});
+
+Deno.test("révocation Microsoft : Vault vidé, aucun appel distant (le client retire l'autorisation de son compte)", async () => {
+  const a = monter(false);
+  const ms = new GmailDouble("microsoft");
+  a.deps.messageries = { microsoft: ms };
+  a.portes.fournisseurOublie = "microsoft";
+  a.portes.travaux = [{
+    id: 8,
+    genre: "messagerie.revoquer",
+    charge: { connexion: CONNEXION },
+  }];
+  const bilan = await executerPassage(a.deps);
+  assertEquals(bilan.revoques, 1);
+  assertEquals(a.portes.oubliees, [CONNEXION]);
+  assertEquals(ms.revoques, []);
+  assertEquals(a.portes.finis.get(8), {
+    revoquee: true,
+    fournisseur: "microsoft",
+    chez_le_fournisseur: false,
+  });
 });

@@ -599,12 +599,13 @@ Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; un
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).
 
-## Messageries connectées (06/10, demandé par le coordinateur) : Gmail d'abord
+## Messageries connectées (06/10, demandé par le coordinateur) : Gmail, puis Microsoft 365
 
 Promesses du site visées : « Vous connectez une messagerie, c'est la seule chose à faire »
 (FILED) et « le message reste un brouillon dans votre outil ». Code dans
-`omega/functions/messagerie/`, 21 tests Deno verts sur doubles, **rien de déployé, aucun appel
-réel** (pas d'application Google). Guide pour Teo : `omega/GUIDE-GMAIL.md`.
+`omega/functions/messagerie/`, 33 tests Deno verts sur doubles, **rien de déployé, aucun appel
+réel** (ni application Google ni application Microsoft). Guides pour Teo :
+`omega/GUIDE-GMAIL.md`, `omega/GUIDE-MICROSOFT.md`.
 
 - Deux fonctions : `messagerie` (cron chaque minute, verify_jwt true : relève + brouillons +
   révocations) et `messagerie-oauth` (verify_jwt false : `GET /google/debut?etat=` →
@@ -630,6 +631,32 @@ réel** (pas d'application Google). Guide pour Teo : `omega/GUIDE-GMAIL.md`.
   + évaluation de sécurité annuelle (payante) et URI de retour sur `omegaai.fr`. Décision Teo.
 - Secrets que seul Teo peut poser : `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
+### Microsoft 365 / Outlook.com (même interface `Messagerie`, `microsoft.ts`)
+
+- OAuth plateforme d'identité Microsoft, point `common` (comptes pro et personnels ;
+  `MICROSOFT_TENANT` facultatif pour le restreindre). Portées déléguées `offline_access`,
+  `User.Read`, `Mail.ReadWrite` (pas de portée « brouillons seulement » chez Microsoft).
+  Route `messagerie-oauth/microsoft/debut|retour` ; un état préparé pour un fournisseur est
+  refusé sur la route de l'autre.
+- Relève : `GET /me/mailFolders/{dossier}/messages/delta?changeType=created`, premier tour
+  filtré `receivedDateTime ge <date de connexion>` (pas d'import de l'historique), brouillons
+  et `@removed` écartés. Curseur = `depuis:<ISO>` puis l'URL nextLink / deltaLink (seules les
+  URL `https://graph.microsoft.com/` sont suivies). 410 → reprise « depuis maintenant ».
+  Dossier par défaut `inbox`. Message brut par `/messages/{id}/$value`.
+- Brouillon : `POST /me/messages`, MIME en base64, `text/plain` (≈ 4 Mo au plus, pièces
+  comprises) ; référence `microsoft:brouillon:<id>`.
+- **Le jeton de renouvellement tourne** à chaque usage : l'ouvrier repose le nouveau (voir
+  `messagerie_poser_acces` ci-dessous). Expire après 90 jours sans usage ; la relève chaque
+  minute le garde vivant. `invalid_grant` / `interaction_required` → « à reconnecter ».
+- **Pas de révocation distante** chez Microsoft pour une application tierce : la déconnexion
+  efface le Vault ; l'écran doit dire au client de retirer Omega de
+  myapps.microsoft.com (pro) ou account.live.com/consent/Manage (personnel).
+- Tenants professionnels : beaucoup d'entreprises bloquent le consentement par l'utilisateur
+  pour une application d'éditeur non vérifié → l'administrateur doit consentir, ou Omega fait
+  vérifier l'éditeur (Microsoft Partner Network, gratuit). Décision Teo, décrite au guide.
+- Secrets que seul Teo peut poser : `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`
+  (le secret client Azure expire : 24 mois au plus, à renouveler).
+
 ### Lot socle à écrire (pas par A2 : brief « aucune migration SQL »)
 
 Tables :
@@ -645,23 +672,27 @@ Tables :
 
 Portes pour l'écran (authenticated, gérant / admin) :
 - `messagerie_preparer(p_client, p_fournisseur, p_retour_ecran) → text` : l'état ; l'écran
-  ouvre `…/functions/v1/messagerie-oauth/google/debut?etat=<état>`.
+  ouvre `…/functions/v1/messagerie-oauth/google/debut?etat=<état>` (Gmail) ou
+  `…/microsoft/debut?etat=<état>` (Microsoft).
 - `messagerie_revoquer(p_connexion)` : état `revoquee`, ligne `expediteurs` suspendue, travail
   `messagerie.revoquer` {connexion} déposé.
 
 Portes pour l'ouvrier (service_role), contrat exact dans `messagerie/portes.ts` :
 `messagerie_connexions(p_fournisseur)`, `messagerie_jetons(p_connexion)` (lit le Vault),
-`messagerie_poser_acces`, `messagerie_poser_curseur`, `messagerie_a_reconnecter` (état +
+`messagerie_poser_acces(p_connexion, p_acces, p_expire_le, p_renouvellement)` (**p_renouvellement
+text, null = inchangé** ; non null = remplace le secret Vault, rotation Microsoft),
+`messagerie_poser_curseur` (curseur text sans limite courte : un deltaLink Graph fait ~1 Ko), `messagerie_a_reconnecter` (état +
 alerte au client), `messagerie_ouvrir(p_etat)` (vérifie sans consommer),
 `messagerie_enregistrer(p_etat, p_adresse, p_renouvellement, p_acces, p_acces_expire_le,
 p_portees, p_curseur)` (consomme l'état, `vault.create_secret`, crée ou met à jour la
-connexion et la ligne `expediteurs` : canal email, fournisseur `gmail`, identite = adresse,
-`parametres.connexion`), `messagerie_oublier(p_connexion) → {renouvellement}` (rend puis
-efface les secrets du Vault).
+connexion et la ligne `expediteurs` : canal email, fournisseur = celui de l'état (`gmail` |
+`microsoft`), identite = adresse, `parametres.connexion`), `messagerie_oublier(p_connexion) →
+{renouvellement, fournisseur}` (rend puis efface les secrets du Vault).
 
-Envois : fournisseur `gmail` dans `fournisseurs_envoi` (`branche` à vrai quand c'est prêt),
-`confier_envoi` dépose `envois.gmail`. **À trancher côté socle** : `confirmer_envoi` avec
-`gmail:brouillon:<id>` ne veut pas dire « envoyé » mais « brouillon déposé chez le client » ;
+Envois : fournisseurs `gmail` et `microsoft` dans `fournisseurs_envoi` (`branche` à vrai quand
+c'est prêt), `confier_envoi` dépose `envois.gmail` / `envois.microsoft` (genres pris par
+l'ouvrier `messagerie` ; un envoi dont le fournisseur ne correspond pas au genre est refusé). **À trancher côté socle** : `confirmer_envoi` avec
+`gmail:brouillon:<id>` / `microsoft:brouillon:<id>` ne veut pas dire « envoyé » mais « brouillon déposé chez le client » ;
 un statut distinct (`brouillon`) éviterait de compter comme envoyé ce que le client n'a pas
 encore envoyé.
 

@@ -1,8 +1,13 @@
 // Ouvrier MESSAGERIE — fonction Edge `messagerie`, appelée chaque minute (pg_cron → pg_net, clé de
-// service), verify_jwt true. Relève les messageries connectées (Gmail) et y dépose les brouillons.
-// Voir passage.ts. Sans GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET : travaux reportés, rien relevé.
+// service), verify_jwt true. Relève les messageries connectées (Gmail, Microsoft 365) et y dépose
+// les brouillons. Voir passage.ts. Sans GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (ou
+// MICROSOFT_CLIENT_ID / MICROSOFT_CLIENT_SECRET) : travaux de ce fournisseur reportés, rien relevé.
 
 import { configurationGoogleDepuisEnvironnement, gmail } from "./gmail.ts";
+import {
+  configurationMicrosoftDepuisEnvironnement,
+  microsoft,
+} from "./microsoft.ts";
 import { executerPassage } from "./passage.ts";
 import { portesDepuisEnvironnement } from "./portes.ts";
 import { stockageSupabase as stockageReception } from "../reception/commun.ts";
@@ -22,9 +27,13 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const cle = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const google = configurationGoogleDepuisEnvironnement();
+  const ms = configurationMicrosoftDepuisEnvironnement();
   const bilan = await executerPassage({
     portes: portesDepuisEnvironnement(),
-    gmail: google ? gmail(google) : null,
+    messageries: {
+      ...(google ? { gmail: gmail(google) } : {}),
+      ...(ms ? { microsoft: microsoft(ms) } : {}),
+    },
     stockage: stockageReception(url, cle),
     pieces: stockagePieces(url, cle),
     ouvrier: `messagerie@${Deno.env.get("DENO_DEPLOYMENT_ID") ?? "local"}:${

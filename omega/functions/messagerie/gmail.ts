@@ -139,6 +139,8 @@ export function gmail(
   return {
     nom: "gmail",
     portees: PORTEES_GMAIL,
+    etiquetteParDefaut: "INBOX",
+    revocationDistante: true,
 
     urlConsentement(etat, retour) {
       const u = new URL("https://accounts.google.com/o/oauth2/v2/auth");

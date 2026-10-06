@@ -65,7 +65,16 @@ export interface Portes {
 
   connexions(fournisseur: string): Promise<ConnexionActive[]>;
   jetons(connexion: string): Promise<Jetons>;
-  poserAcces(connexion: string, acces: string, expireLe: string): Promise<void>;
+  /**
+   * Repose le jeton d'accès ; `renouvellement` remplace celui du Vault quand le fournisseur
+   * l'a fait tourner (Microsoft), null sinon.
+   */
+  poserAcces(
+    connexion: string,
+    acces: string,
+    expireLe: string,
+    renouvellement: string | null,
+  ): Promise<void>;
   poserCurseur(connexion: string, curseur: string): Promise<void>;
   aReconnecter(connexion: string, motif: string): Promise<void>;
   /** Vérifie l'état OAuth (usage unique, quelques minutes) sans le consommer. */
@@ -79,8 +88,11 @@ export interface Portes {
     portees: string[];
     curseur: string;
   }): Promise<{ connexion: string; retour_ecran: string | null }>;
-  /** Rend le jeton de renouvellement à révoquer et l'efface du Vault. */
-  oublier(connexion: string): Promise<{ renouvellement: string | null }>;
+  /** Rend le jeton de renouvellement à révoquer (et son fournisseur) et l'efface du Vault. */
+  oublier(connexion: string): Promise<{
+    renouvellement: string | null;
+    fournisseur: "gmail" | "microsoft" | null;
+  }>;
 }
 
 export class ErreurPorte extends Error {
@@ -193,11 +205,12 @@ export function portesSupabase(rpc: AppelRpc): Portes {
         p_connexion: connexion,
       }) as Jetons;
     },
-    async poserAcces(connexion, acces, expireLe) {
+    async poserAcces(connexion, acces, expireLe, renouvellement) {
       await rpc("messagerie_poser_acces", {
         p_connexion: connexion,
         p_acces: acces,
         p_expire_le: expireLe,
+        p_renouvellement: renouvellement,
       });
     },
     async poserCurseur(connexion, curseur) {
@@ -229,8 +242,13 @@ export function portesSupabase(rpc: AppelRpc): Portes {
     async oublier(connexion) {
       const r = await rpc("messagerie_oublier", { p_connexion: connexion }) as {
         renouvellement?: string | null;
+        fournisseur?: string | null;
       } | null;
-      return { renouvellement: r?.renouvellement ?? null };
+      const f = r?.fournisseur;
+      return {
+        renouvellement: r?.renouvellement ?? null,
+        fournisseur: f === "gmail" || f === "microsoft" ? f : null,
+      };
     },
   };
 }

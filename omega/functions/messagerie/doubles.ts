@@ -1,9 +1,10 @@
-// Doubles pour les tests de la messagerie : portes du socle, Gmail en mémoire, bucket.
+// Doubles pour les tests de la messagerie : portes du socle, messagerie en mémoire, bucket.
 
 import {
   type Acces,
   ErreurMessagerie,
   type Messagerie,
+  type NomMessagerie,
   type Nouveautes,
 } from "./fournisseur.ts";
 import type {
@@ -36,6 +37,7 @@ export class PortesDouble implements Portes {
   etats = new Map<string, OuvertureOAuth>();
   enregistrements: Parameters<Portes["enregistrer"]>[0][] = [];
   oubliees: string[] = [];
+  fournisseurOublie: NomMessagerie = "gmail";
   deposerEnPanneApres: number | null = null;
 
   // deno-lint-ignore require-await
@@ -89,12 +91,18 @@ export class PortesDouble implements Portes {
     return j;
   }
   // deno-lint-ignore require-await
-  async poserAcces(connexion: string, acces: string, expireLe: string) {
+  async poserAcces(
+    connexion: string,
+    acces: string,
+    expireLe: string,
+    renouvellement: string | null,
+  ) {
     const j = this.jetonsParConnexion.get(connexion)!;
     this.jetonsParConnexion.set(connexion, {
       ...j,
       acces,
       acces_expire_le: expireLe,
+      renouvellement: renouvellement ?? j.renouvellement,
     });
   }
   // deno-lint-ignore require-await
@@ -129,14 +137,26 @@ export class PortesDouble implements Portes {
     this.oubliees.push(connexion);
     const j = this.jetonsParConnexion.get(connexion);
     this.jetonsParConnexion.delete(connexion);
-    return { renouvellement: j?.renouvellement ?? null };
+    return {
+      renouvellement: j?.renouvellement ?? null,
+      fournisseur: this.fournisseurOublie,
+    };
   }
 }
 
-/** Gmail en mémoire : boîte de messages bruts, historique programmable, brouillons gardés. */
+/**
+ * Messagerie en mémoire (Gmail par défaut) : boîte de messages bruts, historique programmable,
+ * brouillons gardés. En « microsoft », le jeton de renouvellement tourne et rien n'est révocable.
+ */
 export class GmailDouble implements Messagerie {
-  readonly nom = "gmail" as const;
   readonly portees = ["gmail.readonly", "gmail.compose"];
+  readonly etiquetteParDefaut: string;
+  readonly revocationDistante: boolean;
+  etiquettesDemandees: string[] = [];
+  constructor(readonly nom: NomMessagerie = "gmail") {
+    this.etiquetteParDefaut = nom === "gmail" ? "INBOX" : "inbox";
+    this.revocationDistante = nom === "gmail";
+  }
   renouvellements = 0;
   renouvellementRefuse = false;
   historique: Nouveautes = { messages: [], curseur: "100" };
@@ -171,6 +191,9 @@ export class GmailDouble implements Messagerie {
     return {
       jeton: `acces-neuf-${this.renouvellements}`,
       expire_le: "2026-10-06T17:00:00Z",
+      ...(this.nom === "microsoft"
+        ? { renouvellement: `renouv-tourne-${this.renouvellements}` }
+        : {}),
     };
   }
   // deno-lint-ignore require-await
@@ -178,7 +201,8 @@ export class GmailDouble implements Messagerie {
     return { adresse: "compta@banc.test", curseur: this.profilCurseur };
   }
   // deno-lint-ignore require-await
-  async nouveautes() {
+  async nouveautes(_a: string, _c: string, etiquette: string) {
+    this.etiquettesDemandees.push(etiquette);
     if (this.historiquePerime) {
       throw new ErreurMessagerie("CURSEUR_PERIME", "404");
     }

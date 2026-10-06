@@ -1,18 +1,23 @@
-// Un passage de l'ouvrier MESSAGERIE (Gmail d'abord) :
-//   1. travaux `envois.gmail` {envoi} : commencer_envoi → jetons de la connexion de l'expéditeur
-//      (expediteur.parametres.connexion) → brouillon fabriqué (mime.ts) → drafts.create →
-//      confirmer_envoi(envoi, "gmail:brouillon:<id>"). Le message RESTE un brouillon dans la
-//      messagerie du client : rien n'est envoyé par Omega.
+// Un passage de l'ouvrier MESSAGERIE (Gmail, Microsoft 365) :
+//   1. travaux `envois.gmail` / `envois.microsoft` {envoi} : commencer_envoi → jetons de la
+//      connexion de l'expéditeur (expediteur.parametres.connexion) → brouillon fabriqué (mime.ts)
+//      → dépôt dans la messagerie → confirmer_envoi(envoi, "<fournisseur>:brouillon:<id>"). Le
+//      message RESTE un brouillon dans la messagerie du client : rien n'est envoyé par Omega.
 //      travaux `messagerie.revoquer` {connexion} : messagerie_oublier (efface le Vault, rend le
-//      jeton) → révocation chez Google.
-//   2. relevé de chaque connexion active : jeton d'accès renouvelé s'il expire dans la minute,
-//      messages arrivés depuis le curseur (étiquette INBOX par défaut) → pièces au bucket →
+//      jeton et le fournisseur) → révocation chez Google (Microsoft n'en offre pas).
+//   2. relevé de chaque connexion active, fournisseur par fournisseur : jeton d'accès renouvelé
+//      s'il expire dans la minute (et jeton de renouvellement reposé s'il a tourné), messages
+//      arrivés depuis le curseur (INBOX / inbox par défaut) → pièces au bucket →
 //      deposer_reception (canal email, boîte = adresse connectée), curseur posé message par
 //      message : un passage interrompu reprend au suivant, et deposer_reception est idempotente.
 //      Jeton refusé → messagerie_a_reconnecter ; historique expiré → repart du curseur courant.
 //   3. battre_ouvrier('messagerie', …).
 
-import { ErreurMessagerie, type Messagerie } from "./fournisseur.ts";
+import {
+  ErreurMessagerie,
+  type Messagerie,
+  type NomMessagerie,
+} from "./fournisseur.ts";
 import { composerBrouillon, lireMessage } from "./mime.ts";
 import type {
   ConnexionActive,
@@ -28,7 +33,12 @@ import type { Stockage as StockagePieces } from "../expediteur/stockage.ts";
 import { corpsEstHtml } from "../expediteur/brevo.ts";
 
 export const MODULE = "messagerie";
-export const GENRES = ["envois.gmail", "messagerie.revoquer"] as const;
+export const GENRES = [
+  "envois.gmail",
+  "envois.microsoft",
+  "messagerie.revoquer",
+] as const;
+const NOMS: NomMessagerie[] = ["gmail", "microsoft"];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type Journal = {
@@ -38,8 +48,11 @@ export type Journal = {
 
 export type Dependances = {
   portes: Portes;
-  /** null tant que l'application Google n'est pas configurée : travaux reportés, rien relevé. */
-  gmail: Messagerie | null;
+  /**
+   * Messageries dont l'application OAuth est configurée. Une absente : ses brouillons sont
+   * reportés, ses connexions ne sont pas relevées.
+   */
+  messageries: Partial<Record<NomMessagerie, Messagerie>>;
   /** Dépôt des pièces reçues (bucket, upsert). */
   stockage: StockageReception;
   /** Lecture des pièces jointes des envois. */
@@ -54,7 +67,7 @@ export type Dependances = {
 
 export type Bilan = {
   ouvrier: string;
-  gmail_branche: boolean;
+  branchees: NomMessagerie[];
   pris: number;
   brouillons: number;
   revoques: number;
@@ -98,7 +111,7 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
   const debut = Date.now();
   const bilan: Bilan = {
     ouvrier: deps.ouvrier,
-    gmail_branche: deps.gmail !== null,
+    branchees: NOMS.filter((n) => deps.messageries[n]),
     pris: 0,
     brouillons: 0,
     revoques: 0,
@@ -124,27 +137,34 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
   }
   bilan.pris = travaux.length;
   for (const t of travaux) {
-    if (t.genre === "envois.gmail") await brouillon(t, deps, bilan);
-    else if (t.genre === "messagerie.revoquer") await revoquer(t, deps, bilan);
+    if (t.genre === "envois.gmail" || t.genre === "envois.microsoft") {
+      await brouillon(t, deps, bilan);
+    } else if (t.genre === "messagerie.revoquer") {
+      await revoquer(t, deps, bilan);
+    }
   }
 
-  if (deps.gmail) {
+  for (const nom of NOMS) {
+    const m = deps.messageries[nom];
+    if (!m) continue;
     let connexions: ConnexionActive[] = [];
     try {
-      connexions = await deps.portes.connexions("gmail");
+      connexions = await deps.portes.connexions(nom);
     } catch (e) {
-      bilan.erreurs.push(`messagerie_connexions : ${String(e).slice(0, 200)}`);
+      bilan.erreurs.push(
+        `messagerie_connexions(${nom}) : ${String(e).slice(0, 200)}`,
+      );
     }
     for (const c of connexions) {
       bilan.connexions++;
-      await relever(c, deps.gmail, deps, bilan);
+      await relever(c, m, deps, bilan);
     }
   }
 
   bilan.duree_ms = Date.now() - debut;
   try {
     await deps.portes.battreOuvrier(MODULE, [...GENRES], {
-      gmail_branche: bilan.gmail_branche,
+      branchees: bilan.branchees,
       connexions: bilan.connexions,
       brouillons: bilan.brouillons,
       recus: bilan.recus,
@@ -194,7 +214,12 @@ async function accesValable(
     );
   }
   const a = await m.renouveler(j.renouvellement);
-  await deps.portes.poserAcces(connexion, a.jeton, a.expire_le);
+  await deps.portes.poserAcces(
+    connexion,
+    a.jeton,
+    a.expire_le,
+    a.renouvellement ?? null,
+  );
   return a.jeton;
 }
 
@@ -221,14 +246,8 @@ async function brouillon(t: Travail, deps: Dependances, bilan: Bilan) {
     return;
   }
   const e = r as EnvoiAEnvoyer;
+  const attendu = t.genre.slice("envois.".length) as NomMessagerie;
   try {
-    if (!deps.gmail) {
-      throw new ErreurTravail(
-        "GMAIL_NON_BRANCHE",
-        "application Google non configurée, brouillon reporté",
-        false,
-      );
-    }
     if (e.canal !== "email") {
       throw new ErreurTravail(
         "CANAL_NON_PRIS_EN_CHARGE",
@@ -236,11 +255,19 @@ async function brouillon(t: Travail, deps: Dependances, bilan: Bilan) {
         true,
       );
     }
-    if (e.fournisseur !== "gmail") {
+    if (e.fournisseur !== attendu) {
       throw new ErreurTravail(
         "FOURNISSEUR_INATTENDU",
-        `fournisseur ${e.fournisseur}`,
+        `fournisseur ${e.fournisseur} pour un travail ${t.genre}`,
         true,
+      );
+    }
+    const m = deps.messageries[attendu];
+    if (!m) {
+      throw new ErreurTravail(
+        "MESSAGERIE_NON_BRANCHEE",
+        `application ${attendu} non configurée, brouillon reporté`,
+        false,
       );
     }
     // Même garde santé que l'expéditeur : la messagerie du client n'est pas un hébergeur agréé.
@@ -266,7 +293,7 @@ async function brouillon(t: Travail, deps: Dependances, bilan: Bilan) {
       );
     }
     if (!e.sujet) throw new ErreurTravail("SUJET_ABSENT", e.envoi, true);
-    const acces = await accesValable(connexion, deps.gmail, deps);
+    const acces = await accesValable(connexion, m, deps);
     const pieces = [];
     for (const p of e.pieces ?? []) {
       pieces.push({
@@ -288,11 +315,8 @@ async function brouillon(t: Travail, deps: Dependances, bilan: Bilan) {
       pieces,
       entetes: { "X-Omega-Envoi": e.envoi },
     });
-    const d = await deps.gmail.creerBrouillon(
-      acces,
-      new TextEncoder().encode(brut),
-    );
-    const reference = `gmail:brouillon:${d.brouillon}`;
+    const d = await m.creerBrouillon(acces, new TextEncoder().encode(brut));
+    const reference = `${m.nom}:brouillon:${d.brouillon}`;
     await deps.portes.confirmerEnvoi(e.envoi, reference);
     bilan.brouillons++;
     await finir(deps, t.id, {
@@ -340,15 +364,21 @@ async function revoquer(t: Travail, deps: Dependances, bilan: Bilan) {
     return;
   }
   try {
-    const { renouvellement } = await deps.portes.oublier(connexion);
-    if (renouvellement && deps.gmail) await deps.gmail.revoquer(renouvellement);
+    const { renouvellement, fournisseur } = await deps.portes.oublier(
+      connexion,
+    );
+    const m = fournisseur ? deps.messageries[fournisseur] : undefined;
+    const distante = renouvellement !== null && m !== undefined &&
+      m.revocationDistante;
+    if (distante) await m!.revoquer(renouvellement!);
     bilan.revoques++;
     await finir(deps, t.id, {
       revoquee: true,
-      chez_google: renouvellement !== null && deps.gmail !== null,
+      fournisseur,
+      chez_le_fournisseur: distante,
     });
   } catch (e) {
-    // Le Vault est déjà vidé si oublier a répondu : seule la révocation chez Google a échoué.
+    // Le Vault est déjà vidé si oublier a répondu : seule la révocation distante a échoué.
     bilan.reportes++;
     await finir(deps, t.id, {
       reporte: true,
@@ -373,7 +403,11 @@ async function relever(
     }
     let n;
     try {
-      n = await m.nouveautes(acces, c.curseur, c.etiquette || "INBOX");
+      n = await m.nouveautes(
+        acces,
+        c.curseur,
+        c.etiquette || m.etiquetteParDefaut,
+      );
     } catch (e) {
       if (e instanceof ErreurMessagerie && e.code === "CURSEUR_PERIME") {
         const p = await m.profil(acces);
@@ -403,7 +437,7 @@ async function relever(
       }
       if (brut) {
         const lu = lireMessage(brut);
-        const identifiant = lu.messageId ?? `gmail:${message.id}`;
+        const identifiant = lu.messageId ?? `${m.nom}:${message.id}`;
         const pieces = await deposerPieces(
           deps.stockage,
           c.client_id,
@@ -426,9 +460,9 @@ async function relever(
           corpsHtml: lu.html,
           pieces,
           detail: {
-            source: "gmail",
+            source: m.nom,
             connexion: c.connexion,
-            gmail_id: message.id,
+            id_fournisseur: message.id,
             message_id: lu.messageId,
             en_reponse_a: lu.enReponseA,
             fil: lu.references[0] ?? lu.messageId,
