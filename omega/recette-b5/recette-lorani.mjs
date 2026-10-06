@@ -121,6 +121,31 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-honoraires-1440.jpg`, { qualite: 55 });
 
+  console.log('— le chantier : situations et visas (b5_13)');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Façade rue Mercière/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const ch = await s.evaluer(`(() => { const t = (document.querySelector('.lor-situation')?.closest('.esp-carte-corps')?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { cartes: document.querySelectorAll('.lor-situation').length, depasse: /Situation n° 3 · Pierres de Bourgogne SARL[\\s\\S]*dépasse le marché et ses avenants de 8 100 €/.test(t), recule: /Situation n° 2 · Échafaudages Rhône[\\s\\S]*recule par rapport à la situation n° 1 \\(12 000 €\\)/.test(t), mois: /201 500 € HT cumulés sur 193 400 € \\(104 %\\) · 106 000 € ce mois/.test(t), retard: /En retard : rendre l’avis/.test(t) }; })()`);
+  ok(ch.cartes === 2 && ch.depasse && ch.recule && ch.mois && ch.retard, `Façade rue Mercière : deux situations à viser, l'une dépasse le marché de 8 100 €, l'autre recule ; un visa en retard (${JSON.stringify(ch)})`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-situation')].find(c => /Situation n° 3/.test(c.textContent))?.querySelector('.r-btn--fil')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = (el, v) => { const p = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(p, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; set(d.querySelector('input[inputmode="decimal"]'), '190000'); set(d.querySelector('textarea'), 'Avenant n° 2 non signé : cumul ramené au marché'); })()`);
+  await s.dormir(200);
+  await s.capturer(`${dossier}lorani-situation-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Rectifier\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const rect = await s.evaluer(`(() => { const t = (document.querySelector('.lor-chantier')?.closest('.esp-carte-corps')?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { cartes: document.querySelectorAll('.lor-situation').length, admis: /rectifiée \\(190 000 € admis\\)/.test(t), ferme: !document.querySelector('[role="dialog"]') }; })()`);
+  ok(rect.cartes === 1 && rect.admis && rect.ferme, 'rectifiée : la situation n° 3 quitte la liste, le marché affiche « rectifiée (190 000 € admis) »');
+  await s.evaluer(`[...document.querySelectorAll('.lor-chantier .esp-lien-bouton')].find(b => /En retard/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const sel = d.querySelector('select'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'vao'); sel.dispatchEvent(new Event('change', { bubbles: true })); const ta = d.querySelector('textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Ancrages à justifier en pied de façade'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Rendre l’avis/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Visé avec observations/.test([...document.querySelectorAll('.lor-chantier tbody tr')].find(tr => /Plan d’échafaudage/.test(tr.textContent))?.innerText || '')`), 'avis rendu : « Plan d’échafaudage » visé avec observations');
+  await s.evaluer(`document.querySelector('.lor-situation')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-chantier-1440.jpg`, { qualite: 55 });
+
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
   await s.dormir(500);

@@ -80,6 +80,9 @@ CREATE INDEX IF NOT EXISTS lorani_temps_honoraire_idx ON public.lorani_temps (ho
 CREATE INDEX IF NOT EXISTS lorani_temps_projet_jour_idx ON public.lorani_temps (projet_id, jour);
 ALTER TABLE public.lorani_temps ENABLE ROW LEVEL SECURITY;
 
+-- Les privilèges par défaut de Supabase donnent tout à authenticated et anon : on retire tout, puis on rend lire,
+-- ajouter et modifier (b5_13b, test 51).
+REVOKE ALL ON TABLE public.lorani_honoraires, public.lorani_temps FROM authenticated, anon;
 GRANT SELECT, INSERT, UPDATE ON public.lorani_honoraires TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.lorani_temps TO authenticated;
 
