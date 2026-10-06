@@ -376,7 +376,8 @@
 .esp .lor-controles {
   margin-bottom: 10px;
 }
-.esp .lor-controle-tete {
+.esp .lor-controle-tete,
+.esp .lor-plu-tete {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

@@ -17,7 +17,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { CasRejet, Constat, Controle, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
+import type { CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -579,6 +579,29 @@ export const CONSTATS_EXEMPLE: Constat[] = [
   constat({ id: id("9", 8), controle_id: CB, ...POSTE_27, precedent_id: id("9", 5), decide_le: ilYa(15) }),
 ];
 
+/* ——— le PLU trouvé depuis l'adresse (b5_17) : réponses du Géoportail de l'urbanisme, telles qu'au 06/10/2026 ——— */
+const zone = (z: Partial<Plu["zones"][number]>): Plu["zones"][number] => ({ libelle: null, libelong: null, typezone: "U", partition: null, idurba: null, nomfic: null, urlfic: null, datvalid: null, ...z });
+export const PLU_EXEMPLE: Plu[] = [
+  {
+    id: id("c", 1), projet_id: P_LEMOINE, statut: "trouve", methode: "adresse", requete: "12 rue des Hauts-Pavés 44000 Nantes", point_libelle: "Rue des Hauts Pavés 44000 Nantes", point_score: 0.822,
+    zones: [zone({ libelle: "UMa", libelong: "Secteur de développement des centralités actuelles ou en devenir", partition: "DU_244400404", idurba: "244400404_PLUI_20260518", nomfic: "244400404_reglement_20260518.pdf", urlfic: "https://metropole.nantes.fr/files/live/sites/metropolenantesfr/files/plum_appro/4_R%c3%a8glement/4-1_R%c3%a8glement_%c3%a9crit/4-1-1_R%c3%a8glement/R%c3%a8glement.pdf" })],
+    zone: "UMa", document: { du_type: "PLUi", titre: "PLUI NANTES METROPOLE", nom: "244400404_PLUi_20260518", partition: "DU_244400404" },
+    reglement_url: "https://metropole.nantes.fr/files/live/sites/metropolenantesfr/files/plum_appro/4_R%c3%a8glement/4-1_R%c3%a8glement_%c3%a9crit/4-1-1_R%c3%a8glement/R%c3%a8glement.pdf",
+    prescriptions: [
+      { libelle: "Orientation d'Aménagement et de Programmation Loire (OAP)", typepsc: "18", stypepsc: "03" },
+      { libelle: "Norme de stationnement applicable à la sous-destination Artisanat et commerce de détail", typepsc: "44", stypepsc: "00" },
+    ],
+    rnu: false, erreur: null, demande_le: ilYa(30), trouve_le: ilYa(30),
+  },
+  {
+    id: id("c", 2), projet_id: P_MERCIERE, statut: "trouve", methode: "adresse", requete: "31 rue Mercière 69002 Lyon 2e", point_libelle: "31 Rue Mercière 69002 Lyon", point_score: 0.97,
+    zones: [zone({ libelle: "UCe1b", libelong: "Tissu urbain dense à caractère patrimonial qui regroupe toutes les fonctions des centres urbains", partition: "DU_200046977", idurba: "200046977_PLUI_20260326" })],
+    zone: "UCe1b", document: { du_type: "PLUi", titre: "PLU-H MÉTROPOLE DE LYON", nom: "200046977_PLUi_20260326", partition: "DU_200046977" }, reglement_url: null,
+    prescriptions: [{ libelle: "Polarité commerciale", typepsc: "51", stypepsc: "00" }, { libelle: "Secteur de taille minimale des logements", typepsc: "23", stypepsc: "00" }],
+    rnu: false, erreur: null, demande_le: ilYa(200), trouve_le: ilYa(200),
+  },
+];
+
 export function dossierExemple(): Dossier {
   return {
     projets: PROJETS_EXEMPLE,
@@ -594,6 +617,7 @@ export function dossierExemple(): Dossier {
     controles: CONTROLES_EXEMPLE,
     controlePieces: CONTROLE_PIECES_EXEMPLE,
     constats: CONSTATS_EXEMPLE,
+    plu: PLU_EXEMPLE,
     honoraires: HONORAIRES_EXEMPLE,
     temps: TEMPS_EXEMPLE,
     marches: MARCHES_EXEMPLE,

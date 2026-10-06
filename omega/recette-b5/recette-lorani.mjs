@@ -161,6 +161,14 @@ for (const largeur of LARGEURS) {
   console.log('— le contrôle du dossier (b5_16) : Surélévation Dubois, indice B revérifiant l’indice A');
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Surélévation Dubois/.test(b.textContent))?.click()`);
   await s.dormir(600);
+  console.log('— le PLU depuis l’adresse (b5_17) : Surélévation Dubois, pas encore cherché');
+  ok(await s.evaluer(`/Lorani localise l’adresse/.test(document.querySelector('#esp-detail')?.innerText || '')`), 'avant recherche : l’écran dit ce que Lorani va chercher');
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Trouver le PLU')?.click()`);
+  await s.dormir(400);
+  ok(await s.evaluer(`/Adresse en cours de localisation/.test(document.querySelector('#esp-detail')?.innerText || '')`), 'recherche lancée : « Adresse en cours de localisation… »');
+  await s.dormir(3200);
+  const plu = await s.evaluer(`(() => { const t = document.querySelector('.lor-plu')?.innerText || ''; return { zone: /Zone URm1/.test(t), doc: /PLU-H MÉTROPOLE DE LYON/.test(t), type: /zone urbaine/.test(t), point: /Localisé par l’adresse : 8 Rue Francis de Pressensé 69100 Villeurbanne \\(confiance 96 %\\)/.test(t), sansLien: /déposez-le comme pièce « Règlement du PLU »/.test(t) }; })()`);
+  ok(Object.values(plu).every(Boolean), `trouvé : zone URm1 (zone urbaine) du PLU-H, point et confiance dits, pas de lien direct (${JSON.stringify(plu)})`);
   const ctl = await s.evaluer(`(() => { const c = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps'); const t = (c?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { tete: document.querySelector('.lor-controle-tete')?.innerText, cartes: document.querySelectorAll('.lor-constat').length, bloquant: document.querySelectorAll('.lor-constat[data-gravite="bloquant"]').length, resume: /2 constats ouverts, dont 1 bloquant\\. 2 constats de l’indice A corrigés\\./.test(t), citation: /PC2, p\\. 1 : « 3,20 m »/.test(t), regle: /Règle : au moins 4 m, article URm1 7 \\(PLU-H URm1, p\\. 41\\)/.test(t), correction: /Correction proposée : Ramener le recul sur limite séparative/.test(t), releve: /relevé depuis l’indice A/.test(t), corriges: /Corrigés depuis l’indice A \\(2\\)/.test(t), decides: /Décidés \\(1\\)/.test(t) }; })()`);
   ok(/Dossier de permis · indice B/.test(ctl.tete) && ctl.cartes === 2 && ctl.bloquant === 1 && ctl.resume && ctl.citation && ctl.regle && ctl.correction && ctl.releve && ctl.corriges && ctl.decides,
      `indice B : 2 constats ouverts dont 1 bloquant, page et texte cités, règle et article, correction proposée, 2 corrigés depuis l’indice A (${JSON.stringify(ctl)})`);
@@ -199,6 +207,21 @@ for (const largeur of LARGEURS) {
   const t = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { titre: d.querySelector('h2')?.textContent, purge: /Purgé de tout recours/.test(d.innerText), chantier: /vous pouvez démarrer/.test(d.innerText), gracieux: /Recours gracieux/.test(d.innerText) }; })()`);
   ok(/Façade rue Mercière/.test(t.titre) && t.purge && t.chantier && t.gracieux, `le permis visé par l'URL est ouvert : ${t.titre}, purgé, chantier possible, recours gracieux rejeté dans l'historique`);
   await s.capturer(`${dossier}lorani-purge-1024.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b5-plu', densite: 1 });
+  console.log('— le PLU trouvé (b5_17) : Maison Lemoine, ouverte par ?projet=');
+  ok(await s.aller(base + chemin + '?projet=00000000-0000-4000-8000-00000000b001'), 'page chargée');
+  await s.dormir(700);
+  const p = await s.evaluer(`(() => { const d = document.querySelector('.lor-plu'); const a = d?.querySelector('a'); return { t: (d?.innerText || '').replace(/\\s+/g, ' '), href: a?.href || '', cible: a?.target, rel: a?.rel }; })()`);
+  ok(/Zone UMa/.test(p.t) && /PLUI NANTES METROPOLE · PLUi/.test(p.t) && /Secteur de développement des centralités/.test(p.t) && /Prescriptions à cet endroit \(2\)/.test(p.t),
+     `zone UMa du PLUi Nantes Métropole, libellé long, 2 prescriptions (${p.t.slice(0, 160)})`);
+  ok(p.href.startsWith('https://metropole.nantes.fr/') && p.cible === '_blank' && /noopener/.test(p.rel), 'lien du règlement, dans un nouvel onglet, noopener');
+  await s.evaluer(`document.querySelector('.lor-plu')?.scrollIntoView({ block: 'center' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-plu-1024.jpg`, { qualite: 55 });
   s.fermer();
 }
 
