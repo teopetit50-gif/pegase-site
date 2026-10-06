@@ -561,7 +561,7 @@ begin
     'reception', (select to_jsonb(x) || jsonb_build_object(
         'retenue_etat', case when x.retenue_statut = 'bloquee' and current_date >= x.retenue_due_le then 'liberable' else x.retenue_statut end,
         'decompte_echeance', x.date_reception + 45,
-        'reserves', (select coalesce(jsonb_agg(to_jsonb(v) order by v.ordre), '[]'::jsonb) from public.btp_reserves v where v.reception_id = x.id))
+        'reserves', (select coalesce(jsonb_agg(to_jsonb(rv) order by rv.ordre), '[]'::jsonb) from public.btp_reserves rv where rv.reception_id = x.id))
       from public.btp_receptions x where x.chantier_id = c.id),
     'factures', (select coalesce(jsonb_agg(to_jsonb(f) order by f.date_emission desc nulls last, f.cree_le desc), '[]'::jsonb)
       from public.btp_factures_chantier_detail f where f.chantier_id = c.id and f.statut = 'rattachee'),
