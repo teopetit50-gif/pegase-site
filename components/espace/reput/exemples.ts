@@ -10,7 +10,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, EXEMPLE_CLIENT_ID, ilYa } from "../exemples/socle";
-import type { Demande, Fiche, Monde, Reception, Reponse, Sujet } from "./types";
+import type { AccordSujet, Demande, Fiche, Monde, Reception, Reponse, Sujet } from "./types";
 
 const F = {
   horaires: "00000000-0000-4000-8000-00000000c301",
@@ -96,6 +96,22 @@ export function mondeExemple(): Monde {
           { statut: "brouillon", valide_le: null, cree_le: ilYa(1) }),
   ];
   return {
+    reglages: {
+      id: "00000000-0000-4000-8000-00000000c3a1", signature: "L'équipe de l'Atelier Bertin", formule_appel: "Bonjour,", formule_politesse: "Bien cordialement,",
+      ton: "vouvoiement", mention_automatisee: MENTION, langues: ["fr", "en"], actif: true, accuse: true,
+      texte_accuse: "Nous avons bien reçu votre message. Notre équipe vous répond au plus vite.",
+      lien_avis: "https://g.page/r/atelier-bertin/review",
+      texte_avis: "Merci de nous avoir fait confiance. Votre avis aide d'autres clients à nous choisir : il prend une minute.",
+    },
+    avis: [
+      { id: "00000000-0000-4000-8000-00000000c3b1", canal: "email", adresse: "m.lefevre@exemple.fr", nom: "M. Lefèvre", reference: "F-2026-118",
+        regle_le: ilYa(5).slice(0, 10), statut: "sollicite", motif: null, prochain_le: dans(2), envois: ["x"], cree_le: ilYa(5) },
+      { id: "00000000-0000-4000-8000-00000000c3b2", canal: "whatsapp", adresse: "+33 6 98 76 54 32", nom: "Mme Chassaing", reference: "F-2026-121",
+        regle_le: ilYa(1).slice(0, 10), statut: "programme", motif: null, prochain_le: dans(2, 10), envois: [], cree_le: ilYa(1) },
+      { id: "00000000-0000-4000-8000-00000000c3b3", canal: "email", adresse: "k.ben@exemple.fr", nom: "Karim B.", reference: "F-2026-087",
+        regle_le: ilYa(40).slice(0, 10), statut: "avis_recu", motif: null, prochain_le: null, envois: ["y", "z"], cree_le: ilYa(40) },
+    ],
+    indicateurs: { recues: 41, repondues: 33, parties_seules: 14, hors_base: 6, delai_median_minutes: 47 },
     demandes: [d1, d2, d3, d4, d5],
     receptions,
     reponses,
@@ -104,14 +120,19 @@ export function mondeExemple(): Monde {
     accords: {
       peut_donner: true,
       seul_decideur: false,
-      sujets: SUJETS_EXEMPLE.map((s) => ({
+      sujets: [
+        { sujet: "accuse", libelle: "Accusés de réception", genre: "message" as const, autorisable: true, actif: true, statut: "active" as const,
+          fin: dans(300), active_le: ilYa(65), donne_par_libelle: "Claire Morel", envoyees_seules_mois: 27 },
+        { sujet: "avis", libelle: "Demandes d'avis", genre: "message" as const, autorisable: true, actif: true, statut: "aucun" as const,
+          fin: null, active_le: null, donne_par_libelle: null, envoyees_seules_mois: 0 },
+        ...SUJETS_EXEMPLE.map((s) => ({
         sujet: s.code, libelle: s.libelle, autorisable: s.autorisable, actif: true,
-        statut: s.code === "tarifs" ? "active" : "aucun",
+        statut: (s.code === "tarifs" ? "active" : "aucun") as AccordSujet["statut"],
         fin: s.code === "tarifs" ? dans(300) : null,
         active_le: s.code === "tarifs" ? ilYa(65) : null,
         donne_par_libelle: s.code === "tarifs" ? "Claire Morel" : null,
         envoyees_seules_mois: s.code === "tarifs" ? 14 : 0,
-      })),
+      }))],
     },
   };
 }

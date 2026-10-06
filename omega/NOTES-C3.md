@@ -19,7 +19,7 @@ sujet par sujet. Jamais de données de santé hors canal agréé (verrous 19ab e
 | 2 | Préparation : classement (sujet), brouillon sourcé, « je ne sais pas », langue ; dépôt en envoi `a_valider` sur le canal de la demande | **écrit** : c3_02 61/61 en local, fonction Edge `reput-reponse` 11/11 Deno — à poser et déployer |
 | 3 | Accord permanent par sujet (envoi seul) ; point du matin « reçues, en attente, répondues » | **écrit** : c3_03 46/46 en local — à poser |
 | 4 | Écran `/espace/reput` : demandes, réponses à valider (Valider / Corriger / Refuser), base, sujets autorisés | à faire |
-| 5 | Autres lignes de `lib/produits/capacites/accueil.ts` : rendez-vous, relance de devis, avis… | à faire |
+| 5 | Autres lignes : accusé de réception, relance des devis, demandes d'avis, indicateurs | **écrit** : c3_05 31/31 en local (souche 206/206), écran « Réglages et avis » — à poser |
 
 ## Palier 1 — `c3_01_base_connaissances.sql`
 
@@ -155,6 +155,28 @@ propre hors /_vercel/insights) : **verte**. Captures 390 et 1440 dans `omega/rec
 **Hors de mon périmètre** : l'onglet de navigation (`components/espace/ecrans.ts`, coquille refaite par C1) —
 à ajouter : `{ cle: "reput", href: "/espace/reput", libelle: "Demandes clients", court: "REPUT" }`.
 
+## Palier 5 — `c3_05_accuse_avis_indicateurs.sql`
+
+- **Accusé de réception** : réglages `accuse` (oui par défaut) et `texte_accuse`. Quand la réponse attend (à valider
+  ou à traiter), l'ouvrier de base dépose dans la minute un accusé fixe (formules, texte, signature, mention), sur
+  le canal de la demande, une seule fois. Il part seul avec l'accord « accuse » (`reput.accuser`), sinon il attend.
+  En français seulement.
+- **Relance d'un devis demandé** : au point du matin, chaque demande de devis sans réponse depuis plus de deux
+  jours (« Devis demandé par X il y a N jours : toujours sans réponse, relancez votre équipe »).
+- **Demandes d'avis** : `reput_avis`, porte `reput_programmer_avis` (serveur ou membre, après un règlement ; le
+  lien https de la page d'avis est obligatoire dans les réglages) ; envoi à J+3 10 h (Paris), relances à J+7 et
+  J+14 au plus, arrêt sur `reput_avis_recu` ; même adresse écartée pendant 183 jours. Message **non
+  transactionnel** : les verrous du socle (consentement, heures) s'appliquent. Accord « avis » (`reput.avis`).
+  Le règlement n'arrive pas encore tout seul : CASHD, FILED ou un module l'appellera (porte prête).
+- **Indicateurs** : vues `reput_indicateurs` (jour, canal, sujet : reçues, répondues, parties seules, hors base,
+  en attente, délai médian de première réponse) et `reput_volumes_heure`, security_invoker.
+- Les accords acceptent `accuse` et `avis` (garde, `reput_accords`, 19af).
+- Écran : onglet « Réglages et avis » (réglages, programmer une demande d'avis, liste, « Avis reçu ») ; ligne
+  d'indicateurs sur 7 jours et délai de réponse par demande. tsc, eslint, build, recette 5 largeurs verts.
+
+Ordre de pose : `c3_05_accuse_avis_indicateurs.sql` → test `omega/tests/reput/c3_05_accuse_avis.sql`
+(après c3_02 et c3_03, dont il reprend les aides) → 44, 46, 51, 55.
+
 ## Lignes de capacité (`lib/produits/capacites/accueil.ts`) : tenues et preuves
 
 | Ligne | État | Preuve |
@@ -171,6 +193,11 @@ propre hors /_vercel/insights) : **verte**. Captures 390 et 1440 dans `omega/rec
 | La mention d'une réponse automatisée figure dans les termes que vous choisissez. | **tenue** | réglage `mention_automatisee` ajouté au message ; c3_02 « mention choisies » |
 | Une réclamation est identifiée comme telle et sort du traitement courant. | **tenue** | sujet `reclamation` protégé, alerte ; c3_02 |
 | La demande de parler à une personne est honorée sans discussion. | **tenue côté file** (sujet `humain` protégé, alerte) | c3_02 (alerte) |
+| Un accusé de réception part dans la minute, sous votre signature. | **tenue** (c3_05) | c3_05 « accusé déposé… avec le texte et la signature », « avec l'accord, part seul » |
+| La demande d'avis part dans les trois jours qui suivent le règlement, relancée deux fois au maximum, pas la même personne avant six mois (accueil.ts, carte Avis). | **tenue** (c3_05), règlement déclaré par porte | c3_05 « une demande et deux relances au plus », « ne sollicite pas deux fois » |
+| Le délai de première réponse est mesuré, demande par demande. | **tenue** | `reput_demandes.envoyee_le - recu_le`, vue `reput_indicateurs` ; écran |
+| Le volume de demandes se lit par canal, par service et par heure de la journée. | **tenue** (canal, sujet, heure ; par service = entité) | vues `reput_indicateurs`, `reput_volumes_heure` |
+| La part des demandes traitées sans intervention humaine est suivie dans le temps. | **tenue** | `parties_seules` par jour |
 | Une demande hors périmètre est transférée avec la fiche de son escalade. | **tenue** | alerte au client portant la demande ; c3_02 |
 | Chaque échange reste archivé, transféré ou non, et reste consultable. | **tenue** | `reput_demandes` + `reput_reponses` (versions), RLS ; c3_02 « Le gérant lit » |
 
@@ -186,6 +213,15 @@ propre hors /_vercel/insights) : **verte**. Captures 390 et 1440 dans `omega/rec
 2. `private.politique_couvrante` : sa source aussi (le libellé du type d'action est-il comparé tel quel ?).
 
 ## Journal de session
+
+- 06/10, ~21 h Z : c3_02/c3_03 v2 et c3_04 posés et verts (coordinateur) ; écran fusionné dans main e197172.
+  Palier 5 écrit (c3_05 + onglet Réglages et avis) ; souche 206/206 ; recette 5 largeurs verte.
+
+- 06/10, ~20 h Z : retour du coordinateur — c3_01 posé et vert ; c3_02, c3_03, banc_reput posés, reput-reponse
+  déployé (v1, fumée 200, ia_branchee true), cron omega-reput actif. Tests c3_02/c3_03 morts sur
+  « envoye réservé à l'ouvrier d'envoi » (garder_envoi) : la remise passe désormais par la voie du socle
+  (tests.c3_remettre : commencer_envoi puis confirmer_envoi, comme 19ab). Souche 175/175. Lot socle
+  c3_04_socle_consommation_ia.sql (reput.preparer compté dans le plafond IA du jour) écrit pour le coordinateur.
 
 - 06/10, ~19 h 40 Z : palier 4 (écran) écrit ; tsc, eslint, build verts ; recette 5 largeurs verte.
 

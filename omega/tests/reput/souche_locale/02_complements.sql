@@ -163,3 +163,19 @@ create or replace function private.battre_ouvrier(p_module text, p_genres text[]
 returns integer language sql as $$ select 0 $$;
 create or replace function private.echouer_travail(p_id bigint, p_err text, p_reprendre boolean) returns text language sql as $$
   update public.travaux set etat = 'echec', erreur = p_err where id = p_id returning 'echec' $$;
+
+-- ── La remise par l'ouvrier d'envoi (lot 17) imitée : commencer (pret → en_cours), confirmer (en_cours → envoye) ──
+create or replace function private.commencer_envoi(p_envoi uuid) returns jsonb language plpgsql security definer set search_path to '' as $$
+declare e public.envois;
+begin
+  if (select auth.uid()) is not null then raise exception 'Réservé à l''ouvrier d''envoi (le serveur).' using errcode = '42501'; end if;
+  update public.envois set statut = 'en_cours' where id = p_envoi and statut = 'pret' returning * into e;
+  if e.id is null then return jsonb_build_object('envoyer', false, 'statut', (select x.statut from public.envois x where x.id = p_envoi)); end if;
+  return jsonb_build_object('envoyer', true, 'mode', 'essai');
+end $$;
+create or replace function private.confirmer_envoi(p_envoi uuid, p_reference text default null) returns void language plpgsql security definer set search_path to '' as $$
+begin
+  update public.envois set statut = 'envoye', envoye_le = now() where id = p_envoi and statut = 'en_cours';
+  if not found then raise exception 'Envoi introuvable, ou pas en cours d''envoi.' using errcode = 'P0002'; end if;
+end $$;
+create or replace function extensions.digest(text, text) returns bytea language sql immutable as $$ select public.digest($1, $2) $$;

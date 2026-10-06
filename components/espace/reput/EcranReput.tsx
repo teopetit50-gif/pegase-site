@@ -23,12 +23,13 @@ import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide, type Teinte } from "../ui";
 import { dateHeure, relatif } from "../format";
 import BaseConnaissances from "./BaseConnaissances";
+import ReglagesAvis from "./ReglagesAvis";
 import SujetsAutorises from "./SujetsAutorises";
 import { mondeExemple } from "./exemples";
 import { chargerMonde, corriger, decider, monClient } from "./portes";
 import type { Client, Demande, Monde, Reponse, StatutDemande } from "./types";
 
-type Onglet = "demandes" | "base" | "sujets";
+type Onglet = "demandes" | "base" | "sujets" | "reglages";
 type Famille = "a_valider" | "a_traiter" | "repondues" | "recues";
 
 export const STATUTS: Record<StatutDemande, { libelle: string; teinte: Teinte }> = {
@@ -142,7 +143,7 @@ export default function EcranReput() {
       ) : null}
 
       <div className="esp-onglets" role="tablist" aria-label="REPUT" style={{ marginBottom: 16 }}>
-        {([["demandes", "Demandes"], ["base", "Base de connaissances"], ["sujets", "Sujets autorisés"]] as [Onglet, string][]).map(([cle, libelle]) => (
+        {([["demandes", "Demandes"], ["base", "Base de connaissances"], ["sujets", "Sujets autorisés"], ["reglages", "Réglages et avis"]] as [Onglet, string][]).map(([cle, libelle]) => (
           <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => setOnglet(cle)}>{libelle}</button>
         ))}
       </div>
@@ -160,6 +161,12 @@ export default function EcranReput() {
               </button>
             ))}
           </div>
+          <p className="esp-kpi-sous" style={{ margin: "-4px 0 14px" }}>
+            Sur 7 jours : {monde.indicateurs.recues} reçue{monde.indicateurs.recues > 1 ? "s" : ""}, {monde.indicateurs.repondues} répondue{monde.indicateurs.repondues > 1 ? "s" : ""}
+            {monde.indicateurs.parties_seules ? ` dont ${monde.indicateurs.parties_seules} sans intervention` : ""}
+            {monde.indicateurs.hors_base ? `, ${monde.indicateurs.hors_base} hors de votre base` : ""}
+            {monde.indicateurs.delai_median_minutes !== null ? ` · première réponse en ${Math.round(monde.indicateurs.delai_median_minutes)} min (médiane)` : ""}.
+          </p>
           <div className="esp-grille esp-grille--large">
             <section className="esp-carte" aria-label="Demandes">
               <div className="esp-carte-tete">
@@ -212,6 +219,9 @@ export default function EcranReput() {
 
       {monde && onglet === "base" ? (
         <BaseConnaissances monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
+      ) : null}
+      {monde && onglet === "reglages" ? (
+        <ReglagesAvis key={`${source}:${monde.reglages?.id ?? ""}`} monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
       ) : null}
       {monde && onglet === "sujets" ? (
         <SujetsAutorises monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
@@ -282,7 +292,8 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
         <div className="esp-section-titre">Le message reçu</div>
         <p className="esp-kpi-sous" style={{ marginBottom: 8 }}>
           {CANAUX[demande.canal]}{rec?.de_adresse ? ` · ${rec.de_adresse}` : ""} · {dateHeure(demande.recu_le)}
-          {sujet ? ` · classé « ${sujet.libelle} »` : ""}{demande.langue && demande.langue !== "fr" ? ` · langue : ${demande.langue}` : ""}
+          {sujet ? ` · classé « ${sujet.libelle} »` : ""}
+          {demande.envoyee_le ? ` · répondue en ${Math.max(1, Math.round((new Date(demande.envoyee_le).getTime() - new Date(demande.recu_le).getTime()) / 60000))} min` : ""}{demande.langue && demande.langue !== "fr" ? ` · langue : ${demande.langue}` : ""}
         </p>
         {rec?.sujet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>{rec.sujet}</p> : null}
         <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{rec?.corps || "(message sans texte)"}</p>
