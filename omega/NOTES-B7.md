@@ -1,11 +1,11 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 3 h 15 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 3 h 35 Paris. **B7 terminé** (en attente seulement de la clé Sirene chez Teo).
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
-| **Mécanique** | 95 | Tout est posé sur la recette et vert (b7_01 v3, b7_02, 9 fichiers pgTAP, scénario de bout en bout), ouvrier `identite` **v2** déployé (e77fabb, avec le balayage), cron chaque minute, b7_03 posé et test_b7_10 16/16 sur la recette. Reste : le premier passage réel sur une pièce à vrai SIREN (dépôt de Teo à refaire) et la clé `SIRENE_API_KEY` (repli annuaire en attendant). |
-| **Livrable client** | 30 | La chaîne est en ligne sur la recette : la prochaine facture lue avec un SIREN ou une TVA valides portera « confirmé par Sirene / VIES le … » dans ses contrôles, sans geste humain. Pas encore vu sur une vraie pièce, pas en production, pas de bouton « revérifier » à l'écran. |
+| **Mécanique** | 100 | Trois lots posés sur la recette, dix fichiers pgTAP et le scénario verts, ouvrier v2 déployé (e77fabb), cron chaque minute, **premier passage réel réussi le 6/10 à 0 h 43 Z** (facture Orange SA : VIES valide + Sirene en complément, 1 travail, 1 recontrôle). Seul manque, hors de ma main : `SIRENE_API_KEY` (repli annuaire en attendant). |
+| **Livrable client** | 70 | Sur la recette, la facture Orange porte dans ses contrôles « Identité confirmée par VIES le 06/10/2026 », sans geste humain, et la fiche fournisseur son verdict ; ce qui manque est ailleurs : la production (coordinateur), le bouton « revérifier » et l'affichage « vérifié le … par … » sur la fiche (A3, contrat en section 9 b), la clé Sirene (Teo). |
 
 ## 1. Le scénario
 
@@ -267,7 +267,25 @@ français (nom de l'établissement dans la preuve) serait un confort, pas une v�
 l'ouvrier, pour une TVA FR, consulte Sirene en complément et note `coherence.noms_concordent` dans la preuve. Rien à
 ajouter sans cas réel.
 
-## 10. Journal des étapes
+## 10. Le premier passage réel (6/10, 0 h 43 Z, relevé par le coordinateur)
+
+Pièce déposée par l'écran d'A3 : facture **Orange SA** (FAC-2026-10-0471, SIREN 380 129 866, TVA FR89380129866,
+240 € HT / 288 € TTC), reçu R2026-000004, lue par le lecteur en ~80 s, facture `bloquee` (« Fournisseur nouveau
+(ORANGE SA) », le contrôle humain d'A4). Puis, sans geste humain :
+
+- `battements.identite` : `{"pris":1,"valide":1,"balayees":0,"version":"identite/2026-10-06","sirene":"repli"}` ;
+- travail 3214 `identite.verifier` : `fait`, 1 essai, résultat `{"source":"vies","resultat":"valide","complements":1,"recontrolees":1}` ;
+- `filed_verifications_tiers` : VIES `FR89380129866` → `valide` (nom « SA ORANGE », adresse du siège,
+  `coherence.siren_cle_ok` et `noms_concordent` vrais) ; complément Sirene `380129866` → `valide` (source
+  `recherche-entreprises`, repli sans clé INSEE, dénomination « ORANGE », état actif) ;
+- `filed_controles` `identite.registre` : **ok**, « Identité confirmée par VIES le 06/10/2026. » ;
+- `filed_fournisseurs` : `identite_source = vies`, verdict `{resultat: valide, registre: vies, identifiant, preuve}` ;
+- `identites_registre` : deux entrées (VIES et Sirene), valables trente jours pour tous les clients.
+
+Rien à corriger. Avec `SIRENE_API_KEY` posée, la source du complément passera de `recherche-entreprises` à `sirene`
+sans redéploiement (la clé est lue à chaque passage).
+
+## 11. Journal des étapes
 
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
   envoyés au coordinateur.
@@ -301,3 +319,6 @@ ajouter sans cas réel.
 - 6/10 2 h 29 Z (coordinateur) : b7_03 posé (`identite_b7_03_balayer`), test_b7_10 16/16, coquille `identite` **v2**
   redéployée à e77fabb. Attendus : `battements.identite` du prochain passage (balayees, issues), la pièce à vrai
   SIREN (Teo), `SIRENE_API_KEY` (Teo).
+- 6/10 0 h 49 Z (coordinateur) : **chaîne à vrai SIREN prouvée** (section 10). Rien à corriger.
+- 6/10 3 h 35 : notes closes, « terminé » envoyé au coordinateur. Reste chez Teo : `SIRENE_API_KEY` ; chez A3 : le
+  bouton « revérifier » (contrat en 9 b) ; chez le coordinateur : la production.
