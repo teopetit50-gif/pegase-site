@@ -412,6 +412,19 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   ressemblance : un index aveugle ne permet pas la recherche floue sans affaiblir l'aveuglement) ; la clé d'index
   d'un cabinet local ne se ré-enveloppe pas encore au passage au coffre (à faire, comme les clés de dossier).
 
+## 13. Les avis RPVA lus (vague 3, n° 3 : la part faisable sans compte Scaleway ; lot B4-9, 06/10)
+
+- La porte d'entrée (relevé e-barreau ou transfert des notifications) reste à concevoir avec Teo : aucune API
+  publique e-barreau connue pour un logiciel tiers ; le socle a un canal courriel (`deposer_reception`) mais une
+  pièce arrivée par courriel est en clair et sans dossier : à rattacher puis chiffrer, ce qui suppose l'écran.
+- **Fait** : la passerelle « avis lu → délais » pour les pièces déposées dans un dossier, dès que le lecteur lit les
+  pièces chiffrées (coffre + A1). `b4_08_tamila_avis_lecteur.sql` (deux portes serveur : `tamila_dossier_pour_lecteur`,
+  `tamila_avis_du_lecteur`), test `17_avis_lecteur.sql` (15 contrôles : serveur seul, pièce lue, confiance,
+  **aucune valeur hors des sept clés** (un nom est refusé), avis idempotent, audience posée à l'heure de Paris, RG
+  différent → à vérifier + alerte critique) ; côté lecteur, `tamila-coffre/lecteur.ts` (`avisDepuisLecture`,
+  `rgConcorde`, `dossierPourLecteur`, `poserAvisLu`, 5 tests Deno de plus, 25 au total) ; CHAMPS-LECTURE-TAMILA
+  mis à jour. **À A1** : le branchement dans `lire_piece.ts` (mode d'emploi en tête de la section de `lecteur.ts`).
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
