@@ -88,7 +88,7 @@ begin
 
   if cardinality(v_projets) <> 1 then
     if not v_lorani then
-      return jsonb_build_object('ignore', case when cardinality(v_numeros) = 0 then 'aucun numéro d''autorisation cité'
+      return jsonb_build_object('reception', r.id, 'module', r.module, 'ignore', case when cardinality(v_numeros) = 0 then 'aucun numéro d''autorisation cité'
                                                else 'numéros sans dossier Lorani' end, 'numeros', to_jsonb(v_numeros));
     end if;
     perform private.lever_alerte_module(r.client_id, 'lorani', 'attention',

@@ -36,12 +36,12 @@ begin
   perform tests.b5_admin();
 
   -- ── 3. L'ARE arrive par courriel sur la boîte Lorani, avec sa pièce jointe ──
-  v_chemin := format('%s/receptions/b5-02-are/ARE_PC0441092600199.pdf', v_client);
+  v_chemin := format('%s/receptions/b5-02-are/ARE_PC04410926A0199.pdf', v_client);
   perform tests.b5_ouvrier();
   r := public.deposer_reception(v_client, 'email', 'lorani@banc-varelo.test', 'b5-02-are', 'ne-pas-repondre@guichet.nantes.test',
          'Guichet numérique des autorisations d''urbanisme', 'Accusé de réception électronique — PC 044 109 26 A0199',
          'Votre demande de permis de construire a été enregistrée le 15/09/2026.', null,
-         jsonb_build_array(jsonb_build_object('nom', 'ARE_PC0441092600199.pdf', 'mime', 'application/pdf', 'taille', 18000, 'chemin', v_chemin)),
+         jsonb_build_array(jsonb_build_object('nom', 'ARE_PC04410926A0199.pdf', 'mime', 'application/pdf', 'taille', 18000, 'chemin', v_chemin)),
          '{"module": "lorani"}'::jsonb, now());
   perform tests.b5_admin();
   v_rec := (r ->> 'id')::bigint;
@@ -52,7 +52,7 @@ begin
   select id into v_piece from public.pieces
   where client_id = v_client and module = 'lorani' and objet_type = 'lorani_projet' and objet_id = v_projet::text and chemin = v_chemin;
   return next ok(v_piece is not null, '3. la pièce jointe devient une pièce du dossier « Atelier Ferrand »');
-  return next ok((select source = 'courriel' and depose_par is null and nom_fichier = 'ARE_PC0441092600199.pdf' and mime = 'application/pdf'
+  return next ok((select source = 'courriel' and depose_par is null and nom_fichier = 'ARE_PC04410926A0199.pdf' and mime = 'application/pdf'
                   from public.pieces where id = v_piece), '3. … source « courriel », sans déposant, nom et type gardés');
   return next ok(exists (select 1 from public.travaux where genre = 'lecteur.lire' and cle = 'piece:' || v_piece),
                  '3. … et le socle a déposé sa lecture (lecteur.lire) : la chaîne des courriers suit');
@@ -68,7 +68,7 @@ begin
   -- ── 5. Un courriel sans pièce jointe sur un dossier reconnu : à lire ──
   perform tests.b5_ouvrier();
   r := public.deposer_reception(v_client, 'email', 'lorani@banc-varelo.test', 'b5-02-corps', 'ne-pas-repondre@guichet.nantes.test',
-         'Guichet numérique', 'Dossier PC0441092600199 : votre dossier est complet', 'Le délai d''instruction court depuis le 15/09/2026.',
+         'Guichet numérique', 'Dossier PC04410926A0199 : votre dossier est complet', 'Le délai d''instruction court depuis le 15/09/2026.',
          null, '[]'::jsonb, '{"module": "lorani"}'::jsonb, now());
   perform tests.b5_admin();
   v_rec2 := (r ->> 'id')::bigint;
@@ -98,11 +98,13 @@ begin
 
   -- ── 7. Un courriel d'un autre module sans numéro Lorani : ignoré sans bruit ──
   perform tests.b5_ouvrier();
+  -- module donné explicitement : sur la recette, une boîte du banc peut se résoudre vers un expéditeur Lorani
   r := public.deposer_reception(v_client, 'email', 'compta@banc-varelo.test', 'b5-02-autre', 'fournisseur@test', 'Fournisseur',
-         'Facture 2026-118', 'Ci-joint notre facture.', null, '[]'::jsonb, '{}'::jsonb, now());
+         'Facture 2026-118', 'Ci-joint notre facture.', null, '[]'::jsonb, '{"module": "filed"}'::jsonb, now());
   perform tests.b5_admin();
-  r := private.lorani_rattacher_reception((r ->> 'id')::bigint);
-  return next ok(r ? 'ignore' and not exists (select 1 from public.alertes where client_id = v_client and cle_regroupement = 'lorani:courriel:' || (r ->> 'reception')),
+  v_rec := (r ->> 'id')::bigint;
+  r := private.lorani_rattacher_reception(v_rec);
+  return next ok(r ? 'ignore' and not exists (select 1 from public.alertes where client_id = v_client and cle_regroupement = 'lorani:courriel:' || v_rec),
                  '7. un courriel étranger à Lorani est ignoré, sans alerte : ' || r::text);
 end $f$;
 

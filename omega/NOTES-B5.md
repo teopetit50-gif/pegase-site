@@ -483,3 +483,8 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Reste à faire pour que ce soit réel chez une agence : une boîte de réception Lorani par agence (expéditeur `identite`
   = adresse, module lorani, chez A2) vers laquelle l'agence fait suivre les courriels du guichet ; l'écran n'affiche
   pas encore cette adresse (elle n'existe pas encore).
+- Coordinateur, 14 h 44 Z : b5_11 posé ; `test_b5_02` 14/16. Causes : (12) mon sujet citait « PC0441092600199 » (un 0 au
+  lieu du A) : le courriel partait en « à ranger », pas en « à lire » — test corrigé (PC04410926A0199, et le nom de la
+  pièce jointe aligné) ; (16) sans `detail.module`, `deposer_reception` prend le module de la boîte, et sur la recette
+  `compta@banc-varelo.test` se résout vers un expéditeur Lorani — le test passe `{"module": "filed"}` et filtre sur sa
+  propre réception ; la réponse « ignore » de `lorani_rattacher_reception` rend aussi `reception` et `module`.
