@@ -178,3 +178,4 @@ begin
   update public.envois set statut = 'envoye', envoye_le = now() where id = p_envoi and statut = 'en_cours';
   if not found then raise exception 'Envoi introuvable, ou pas en cours d''envoi.' using errcode = 'P0002'; end if;
 end $$;
+create or replace function extensions.digest(text, text) returns bytea language sql immutable as $$ select public.digest($1, $2) $$;
