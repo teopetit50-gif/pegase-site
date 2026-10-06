@@ -1,5 +1,5 @@
 -- TOUT_B2.sql — les tests pgTAP du module TAVARO (session B2), assemblés par assembler.sh.
--- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_09 posées (avec b2_05b et b2_06b).
+-- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_09 posées (avec b2_05b, b2_06b et b2_09b).
 -- Un seul appel execute_sql sur la RECETTE ; runtests() annule tout ce que les tests écrivent.
 
 -- ═══════════════════════════ 00_jeu_tavaro.sql
@@ -1570,6 +1570,16 @@ begin
   r := public.loc_issue_contestation(v_k2, 'abandonnee');
   return next is(r ->> 'statut', 'abandonnee', 'Une contestation non défendue se classe « abandonnée »');
   perform tests.redevenir_admin();
+
+  -- b2_09b : la pièce du dossier suit la contestation (gardien), au lieu d'être visible de toute l'organisation.
+  if to_regprocedure('private.loc_gardien_contestation(uuid, uuid, text)') is null then
+    return next diag('b2_09b (gardien des pièces de contestation) n''est pas posée : non vérifié.');
+  else
+    return next ok(exists (select 1 from private.gardiens_objets g where g.objet_type = 'loc_contestations'), 'Le gardien des pièces de contestation est inscrit');
+    return next ok(private.voit_objet_pour((jeu ->> 'gerant')::uuid, v_client, 'loc_contestations', v_k::text), 'La direction voit la pièce du dossier');
+    return next ok(not private.voit_objet_pour((jeu ->> 'autre')::uuid, v_client, 'loc_contestations', v_k::text), 'Un autre loueur ne la voit pas');
+    return next ok(not private.loc_gardien_contestation((jeu ->> 'collab')::uuid, v_client, 'pas-un-uuid'), 'Un identifiant illisible ne passe pas');
+  end if;
 end $f$;
 
 

@@ -228,3 +228,32 @@ Ordre décidé :
 - **L'expéditeur d'A2** joint déjà les pièces d'un envoi (Brevo `attachment`) : rien à changer chez lui ; à prouver sur le banc.
 - **Écran** : la facture dit « PDF et photos datées joints », ou « PDF en préparation » ; recette 85 contrôles verts.
 - **Suite du carnet** : le point 3, en commençant par le module 17 (contestations bancaires : le dossier de preuve en un clic).
+
+### Carnet, point 3 — module 17, contestations bancaires (06/10, 20 h Z)
+
+La promesse (textes.ts) : « Quand un client conteste auprès de sa banque le débit des dommages, le dossier part en un clic : état des lieux signé, photos datées, barème appliqué et contrat. »
+
+- **b2_06b** (42fdbe4) : `loc_completer_locataire` construisait sa liste de champs par `text[] || 'siren'`, que PL/pgSQL lit comme un littéral de tableau (22P02 au test 15). Corrigé avec `array_append`, et reporté dans la source b2_06.
+- **b2_09** (1ee1134, puis 3a79c20 qui ajoute `dossier_chemin`) :
+  - `loc_contestations`, avec RLS par agence et Realtime ;
+  - deux réglages : `contestation_delai_jours` (7 par défaut) et `contestation_adresse` ;
+  - les portes :
+    - `loc_ouvrir_contestation` rend les **forces du dossier** : contrat, états des lieux de départ et de retour, photos datées, barème, constat contradictoire, envoi de la facture ;
+    - `loc_produire_dossier`, puis `loc_envoyer_dossier`, qui passe par `preparer_envoi`, donc par la validation ; il refuse en 55000 si l'envoi par courriel n'est pas réglé ;
+    - `loc_issue_contestation`, par la direction ou un valideur ;
+    - pour l'ouvrier, au service seul : `loc_dossier_a_produire`, `loc_enregistrer_dossier`, `loc_dossier_impossible` ;
+  - le cron `tavaro-contestations` alerte à J-2, à J0 et au dépassement.
+  - Vérifié en local sur souche, chaque chemin dans une session neuve. Test 18 : 25 assertions quand l'envoi est réglé.
+- **Ouvrier tavaro-pdf** (6ea1694) : genre `tavaro.dossier_contestation`. Le PDF contient :
+  - la lettre et la chronologie (départ, retour, validation par une autre personne, envoi, débit) ;
+  - le contrat ;
+  - le barème ligne par ligne ;
+  - les deux états des lieux, avec l'empreinte SHA-256, la signature et les photos datées intégrées (budget de 9 Mo, pour laisser la place au PDF de la facture et au contrat dans les 15 Mo du courriel).
+
+  Les forces et faiblesses du dossier ne vont pas à la banque. deno test 12/12.
+- **Écran** (2da8695) : la carte « Contestations bancaires ».
+  - À l'ouverture, l'écran montre ce que le dossier contiendra et ce qui lui manque.
+  - Elle affiche le délai, le dossier composé, l'envoi en un clic, le téléchargement et l'issue.
+  - Recette : 98 contrôles verts aux cinq largeurs ; axe : 0 écart, dialogue compris.
+- **À confirmer sur la recette** : `private.lit_objet` connaît-il `objet_type = 'loc_contestations'` ? Sinon, la pièce du dossier reste invisible aux personnes. L'envoi et le téléchargement par chemin ne changent pas.
+- **Suite du carnet** : « Remise en location et entretien ».
