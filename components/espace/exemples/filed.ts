@@ -296,7 +296,8 @@ const D14: DossierFiled = {
     hist("integration", "Intégrée : demande de paiement créée dans la file de validation.", ilYa(4, 10)),
   ],
 };
-D14.facture!.statut = "a_valider";
+/* approuvée dans la file (demande « Payer la facture R2026-000014 ») : validée, à payer */
+D14.facture!.statut = "validee";
 
 /* ——— 2. R2026-000009 — Métallerie Roux : IBAN changé → bloquée ——— */
 const f09 = facture(9, {
@@ -650,6 +651,36 @@ const D17: DossierFiled = {
   ],
 };
 
+/* ——— 11 et 12. Deux factures validées, à payer : l'une en retard, l'autre
+   sans IBAN connu (pour l'écran « À payer ») ——— */
+function validee(n: number, o: { fournisseur: typeof DURAND; numero: string; emission: string; echeance: string; ht: number; designation: string; iban: boolean; expediteur: string }): DossierFiled {
+  const tva = Math.round(o.ht * 20) / 100;
+  const f = facture(n, { fournisseur: o.fournisseur, numero: o.numero, emission: o.emission, echeance: o.echeance, ht: o.ht, tva, ttc: Math.round((o.ht + tva) * 100) / 100, taux: 20, lignes: [{ designation: o.designation, quantite: 1, unite: "forfait", pu: o.ht }], verifiees: true });
+  f.facture.statut = "validee";
+  if (!o.iban) f.facture.iban = null;
+  return {
+    document: doc(n, { reference: `R2026-0000${n}`, nom_fichier: `${o.numero}.pdf`, recu_le: ilYa(12, 9), etat: "integre", expediteur: o.expediteur, traite_le: ilYa(10, 11) }),
+    ...f,
+    controles: [ctrl(f.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC.")],
+    levees: [],
+    ibans: o.iban ? [{ id: u("ib", n), fournisseur_id: f.fournisseur.id, iban_masque: masque(o.fournisseur.iban), statut: "valide", propose_le: ilYa(300) }] : [],
+    appariements: [],
+    rapprochement: null,
+    historique: [
+      hist("reception", `Reçue par courriel de ${o.expediteur}.`, ilYa(12, 9)),
+      hist("validee", "Validée par 1 personne(s) : classée, empreinte au journal.", ilYa(10, 11)),
+    ],
+  };
+}
+function masque(iban: string) {
+  const c = iban.replace(/\s+/g, "");
+  return `${c.slice(0, 4)} •••• •••• •••• ${c.slice(-4)}`;
+}
+const RIVIERE = { nom: "Transports Rivière", siren: "734 205 180", tva: "FR 80 734205180", adresse: "5 quai Perrache, 69002 Lyon", iban: "FR76 1468 9000 0100 2233 4455 618", code: "RIVIERE" };
+const FERRAND = { nom: "Cabinet Ferrand, expertise comptable", siren: "488 102 633", tva: "FR 82 488102633", adresse: "40 rue de la Charité, 69002 Lyon", iban: "", code: "FERRAND" };
+const D18 = validee(18, { fournisseur: RIVIERE, numero: "TR-2026-0712", emission: fr(ilYa(35)), echeance: fr(ilYa(5)), ht: 1840, designation: "Transport de mobilier — 2 rotations Lyon ↔ Grenoble", iban: true, expediteur: "compta@transports-riviere.fr" });
+const D19 = validee(19, { fournisseur: FERRAND, numero: "CF-26-118", emission: fr(ilYa(25)), echeance: fr(dans(3)), ht: 950, designation: "Honoraires — situation intermédiaire au 30/09", iban: false, expediteur: "cabinet@ferrand-expertise.fr" });
+
 /* Les commandes connues (filed_commandes) et leurs lignes : celles que les
    factures d'exemple citent, plus une ouverte sans facture. */
 export const COMMANDES_EXEMPLE: Commande[] = [
@@ -666,7 +697,7 @@ export const LIGNES_COMMANDE_EXEMPLE: LigneCommande[] = [
   { id: u("cl", 6), commande_id: u("bc", 80), rang: 1, designation: "Agencement comptoir d'accueil — chêne massif, fourniture et pose", quantite: 1, unite: "forfait", prix_unitaire: 4850, montant_ht: 4850 },
 ];
 
-export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D11, D13, D12, D14, D10, D08];
+export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D18, D19, D11, D13, D12, D14, D10, D08];
 
 /* Les fournisseurs d'exemple pour « rattacher » : les six connus. */
 export const FOURNISSEURS_EXEMPLE = [D14, D09, D11, D08, D16, D17].map((d) => d.fournisseur!);

@@ -284,6 +284,34 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   raison affichée, pas de confirmation d'une clé fausse, TVA d'un autre
   SIREN refusée avant l'envoi, saisie qui fait tomber le bloc).
 
+## Lot du 06/10 (5) — « À payer » dans FILED
+
+- **/espace/filed/a-payer** (`app/espace/filed/a-payer/page.tsx`,
+  `components/espace/filed/EcranAPayer.tsx`), liens « À payer » dans les
+  en-têtes de FILED et de Fournisseurs ; sous /espace/filed, la barre
+  d'onglets n'est pas touchée.
+- Les factures `validee` et `comptabilisee` (dernière version par document),
+  groupées par échéance — en retard, cette semaine (≤ 7 j), ce mois-ci
+  (≤ 30 j), plus tard, sans échéance — avec compteurs filtrants et total par
+  groupe et par devise. Montant à payer = net à payer, sinon TTC ; un avoir
+  vient en déduction. Par ligne : jours de retard ou restants, fournisseur
+  (« bloqué : ne pas payer »), lien vers le dossier, IBAN validé (masqué) /
+  « IBAN à valider » / « IBAN manquant » (et l'IBAN lu sur la facture, masqué).
+- Lecture seule, sans nouvelle porte : `chargerVueFournisseurs` lit en plus
+  `nature`, `net_a_payer`, `echeance_lue`, `iban`. **FILED ne suit pas le
+  paiement** (aucun statut « payée », aucune porte) : l'écran le dit ; une
+  facture payée reste dans la liste. À brancher quand un statut ou une porte
+  de paiement existera.
+- Exemple : R2026-000014 (Durand) passe `validee` (sa demande « Payer la
+  facture R2026-000014 » existe dans les validations d'exemple) ; deux
+  dossiers validés ajoutés : R2026-000018 (Transports Rivière, en retard,
+  IBAN validé) et R2026-000019 (Cabinet Ferrand, cette semaine, sans IBAN).
+- **Relu en réel** (daf2@) : FAC-2026-10-0471 d'ORANGE SA, 288,00 €,
+  échéance 01/11/2026 (« Ce mois-ci »), « IBAN à valider » (l'IBAN …0189
+  re-proposé par a4_13) ; aucun refus. Capture `reel-a-payer-1440.jpg`.
+- Recette : 180 contrôles ✓ (la vue aux cinq largeurs et l'enchaînement :
+  ordre des groupes, retard d'abord, IBAN manquant dit, avis).
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

@@ -186,7 +186,20 @@ export async function chargerFournisseurs(): Promise<Fournisseur[]> {
 /* La vue « Fournisseurs » : tous les fournisseurs, leurs IBAN, leurs
    factures (avec la référence du document), et qui a déposé la pièce
    d'origine de chacun (il ne le confirme pas). */
-export type FactureDuFournisseur = { id: string; numero: string | null; statut: Facture["statut"]; montant_ttc: number | null; devise: string; date_emission: string | null; fournisseur_id: string | null; reference: string | null };
+export type FactureDuFournisseur = {
+  id: string;
+  numero: string | null;
+  statut: Facture["statut"];
+  nature: Facture["nature"];
+  montant_ttc: number | null;
+  net_a_payer: number | null;
+  devise: string;
+  date_emission: string | null;
+  echeance_lue: string | null;
+  iban: string | null;
+  fournisseur_id: string | null;
+  reference: string | null;
+};
 export type VueFournisseurs = { fournisseurs: Fournisseur[]; ibans: IbanFournisseur[]; factures: FactureDuFournisseur[]; deposants: Record<string, string | null> };
 
 export async function chargerVueFournisseurs(): Promise<VueFournisseurs> {
@@ -194,7 +207,7 @@ export async function chargerVueFournisseurs(): Promise<VueFournisseurs> {
   const [fo, ib, fa] = await Promise.all([
     supabase.from("filed_fournisseurs").select("*").order("nom").limit(1000),
     supabase.from("filed_fournisseurs_ibans").select("id, fournisseur_id, iban_masque, statut, propose_le").limit(2000),
-    supabase.from("filed_factures").select("id, numero, statut, montant_ttc, devise, date_emission, fournisseur_id, document_id, version").not("fournisseur_id", "is", null).order("date_emission", { ascending: false }).limit(1000),
+    supabase.from("filed_factures").select("id, numero, statut, nature, montant_ttc, net_a_payer, devise, date_emission, echeance_lue, iban, fournisseur_id, document_id, version").not("fournisseur_id", "is", null).order("date_emission", { ascending: false }).limit(1000),
   ]);
   if (fo.error) throw new ErreurPorte(message(fo.error));
   const fournisseurs = (fo.data ?? []) as Fournisseur[];
@@ -209,7 +222,7 @@ export async function chargerVueFournisseurs(): Promise<VueFournisseurs> {
   return {
     fournisseurs,
     ibans: (ib.data ?? []) as IbanFournisseur[],
-    factures: Array.from(parDocument.values()).map((f) => ({ id: f.id, numero: f.numero, statut: f.statut, montant_ttc: f.montant_ttc, devise: f.devise ?? "EUR", date_emission: f.date_emission, fournisseur_id: f.fournisseur_id, reference: doc.get(f.document_id)?.reference ?? null })),
+    factures: Array.from(parDocument.values()).map((f) => ({ id: f.id, numero: f.numero, statut: f.statut, nature: f.nature ?? "facture", montant_ttc: f.montant_ttc, net_a_payer: f.net_a_payer, devise: f.devise ?? "EUR", date_emission: f.date_emission, echeance_lue: f.echeance_lue, iban: f.iban, fournisseur_id: f.fournisseur_id, reference: doc.get(f.document_id)?.reference ?? null })),
     deposants: Object.fromEntries(fournisseurs.map((f) => [f.id, f.document_origine ? (doc.get(f.document_origine)?.depose_par ?? null) : null])),
   };
 }
