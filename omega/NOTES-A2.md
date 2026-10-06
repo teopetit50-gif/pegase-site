@@ -789,6 +789,36 @@ comptable. **Décision : WebDAV**, servi par une fonction Edge `depot`.
   connexion_impossible | indisponible. Une page n'est montrée qu'en dernier recours, parce que
   la passerelle sert le HTML en texte brut. 35 tests verts.
 
+## Messagerie instantanée du site (REPUT, 06/10)
+
+Promesse REPUT : « La messagerie instantanée du site est tenue aux mêmes règles que le reste ».
+Il s'agit du site du **client**, donc d'un widget dans un navigateur sur un site tiers. Il ne
+peut garder aucun secret : l'entrée `reception/formulaire`, signée HMAC côté serveur, ne
+convient pas.
+
+- **Ce qui est écrit** :
+  - une fonction `widget` (verify_jwt false) qui sert le script `…/widget/<clé>/widget.js`,
+    répond au pré-vol CORS et reçoit les POST de `…/<clé>/message` ;
+  - le lot `19ap_widgets.sql` (numéro à confirmer) : `public.widgets` (clé publique, origines,
+    couleur, accueil), `private.widgets_appels` (plafonds), les portes `widget_regler` (gérant
+    ou admin), `widget_apparence` et `widget_deposer` (service_role).
+- **Protection** : l'origine du navigateur doit être dans la liste du widget. Plafonds : 10 par
+  10 minutes et par empreinte IP, 300 par jour. Un champ piège et 2,5 s de saisie minimale
+  écartent les robots (202 silencieux). L'accord est obligatoire. L'IP n'est gardée qu'en
+  empreinte salée du jour, effacée après 2 jours.
+- **Dépôt** : `private.deposer_reception` avec le canal `formulaire` (aucune contrainte à
+  changer), la boîte `widget:<clé>`, l'identifiant `widget:<message>` (rejouable sans
+  doublon), le module du widget (reput), le fil `widget:<conversation>` et la source
+  `messagerie_site`.
+- **Éprouvé dans un vrai Chromium** (Playwright, page sur une autre origine) : bulle, saisie,
+  accord, envoi, pré-vol CORS accepté, deux messages dans la même conversation, coordonnées
+  demandées une seule fois, aucune erreur JS, styles agressifs de la page sans effet sur la
+  bulle (Shadow DOM).
+- **Tests** : 6 tests Deno et 17 assertions pgTAP, verts sur la maquette locale.
+- **v1** : la réponse part par e-mail ou SMS. Répondre dans la bulle demanderait un canal
+  d'envoi « site » (DROP CONSTRAINT sur `envois_canal_check`) et une porte de lecture par
+  conversation. C'est à décider.
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
