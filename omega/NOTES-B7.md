@@ -1,11 +1,11 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 1 h 55 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 2 h 35 Paris.
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
-| **Mécanique** | 85 | Ouvrier écrit (43 tests Deno verts), migration b7_01 écrite et jouée sur une souche locale (8 tests pgTAP verts, scénario de bout en bout vert). b7_01 posé sur la recette (identite_b7_01_portes), fonction Edge `identite` v1 déployée en coquille, cron chaque minute. Reste : le correctif du verdict jsonb à reposer, le premier passage réel sur une pièce à vrai SIREN. |
-| **Livrable client** | 0 | Le client ne voit encore aucun « vérifié le … par … » : rien n'est posé ni déployé. Dès la pose + le déploiement, un vrai SIREN donne la ligne « SIREN confirmé par Sirene le … » dans les contrôles de la facture. |
+| **Mécanique** | 95 | Tout est posé sur la recette et vert (b7_01 v3, b7_02, 9 fichiers pgTAP, scénario de bout en bout), ouvrier `identite` v1 déployé (e4fd65f), cron chaque minute. Reste : le premier passage réel sur une pièce à vrai SIREN (dépôt de Teo à refaire) et la clé `SIRENE_API_KEY` (repli annuaire en attendant). |
+| **Livrable client** | 30 | La chaîne est en ligne sur la recette : la prochaine facture lue avec un SIREN ou une TVA valides portera « confirmé par Sirene / VIES le … » dans ses contrôles, sans geste humain. Pas encore vu sur une vraie pièce, pas en production, pas de bouton « revérifier » à l'écran. |
 
 ## 1. Le scénario
 
@@ -229,7 +229,39 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 5. Une pièce d'essai avec un vrai SIREN et sa TVA ; puis me coller `battements.identite`, le travail
    `identite.verifier` (resultat), la ligne `filed_verifications_tiers` et le contrôle `identite.registre`.
 
-## 9. Journal des étapes
+## 9. Lot 3 proposé (scénario d'abord, rien de codé)
+
+**a. Balayage périodique : « vérifié le … » ne vieillit pas.** Aujourd'hui une vérification n'est demandée qu'au
+contrôle d'une facture, et elle vaut 90 jours (`filed_verification_recente`). Un fournisseur qui n'envoie rien
+pendant six mois, puis cesse son activité, n'est pas revu avant sa prochaine facture. Scénario :
+`public.identite_balayer(p_jours int = 90, p_max int = 50) → int` : pour chaque fournisseur FILED `actif` ou
+`a_confirmer` qui porte un SIREN ou une TVA, si la dernière réponse `valide`/`invalide` pour (client, registre,
+identifiant) date de plus de p_jours (ou n'existe pas) et qu'aucune demande n'est ouverte → ouvre une demande
+(→ déclencheur → travail), p_max fournisseurs par appel pour lisser (INSEE : 30 requêtes/min). L'ouvrier l'appelle à
+chaque passage, après `identite_relancer`. Le cache global (30 jours) absorbe les SIREN communs à plusieurs clients.
+Effet client : la ligne « confirmé le … » a toujours moins de 90 jours ; une entreprise radiée bloque ses prochaines
+factures (`identite.registre` bloquant) et le verdict d'A4 (`identite_verdict`) sur la fiche passe `invalide`. Test
+pgTAP : fournisseur sans vérification → demande ouverte ; vérification de 10 jours → rien ; de 100 jours → demande ;
+demande déjà ouverte → rien ; p_max respecté. Coût : une porte SQL + 15 lignes d'ouvrier + tests. **À faire si le
+coordinateur confirme.**
+
+**b. Bouton « revérifier » et affichage (côté A3, pas moi).** Contrat pour l'écran fournisseur : lire
+`filed_fournisseurs.identite_verifiee_le`, `identite_source`, `identite_verdict` (a4_10) → « Vérifié le JJ/MM/AAAA
+par Sirene » / « VIES » / « Non vérifié » / « Invalide : <preuve.motif> » ; bouton « Revérifier » →
+`identite_demander(client, 'sirene', siren, fournisseur, true)` (ou `'vies'`, tva) ; la réponse arrive en une à
+deux minutes (cron), l'écran se relit par Realtime sur `filed_fournisseurs`. Rien à coder chez moi.
+
+**c. IBAN : je ne propose pas de lot.** La forme (ISO 13616, longueur par pays, clé mod 97) est déjà contrôlée en
+SQL par A4 (`iban.invalide`, `iban.pays`, `iban.partage`, `iban.nouveau`) et `iban.ts` est prêt côté ouvrier ; aucun
+registre public gratuit ne dit à qui appartient un compte, la seule vérification qui vaille (« cet IBAN est bien
+celui de ce fournisseur ») est humaine, et FILED la porte déjà (`filed.valider_iban`). Une table des codes banque
+français (nom de l'établissement dans la preuve) serait un confort, pas une vérification : à plus tard.
+
+**d. SIREN ↔ TVA sur la fiche fournisseur.** Déjà couvert : `identite.coherence` (A4, en SQL) sur chaque facture, et
+l'ouvrier, pour une TVA FR, consulte Sirene en complément et note `coherence.noms_concordent` dans la preuve. Rien à
+ajouter sans cas réel.
+
+## 10. Journal des étapes
 
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
   envoyés au coordinateur.
@@ -253,3 +285,8 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 - 5/10 23 h 01 Z : pause demandée par Teo (limite d'usage) ; tout était poussé (e5aa5dd). Reprise 6/10 1 h 40 Paris :
   le coordinateur repose b7_01 d'e5aa5dd et rejoue les tests.
 - 6/10 1 h 55 : lot b7_02 (`identite_demander`, force) écrit et testé en local.
+- 6/10 2 h 06 Z (coordinateur) : b7_02 et b7_03 posés, scénario vert ; test_b7_09 tombait sur `tests.role_admis`
+  (absente de la recette) → test rendu autonome (69a0ba9) → **16/16**. Bilan recette : 9/9 fichiers pgTAP verts +
+  scénario, b7_01 v3 et b7_02 posés, ouvrier v1 déployé, cron chaque minute. Manquent la pièce à vrai SIREN (dépôt
+  de Teo à refaire : rien n'est arrivé en base) et `SIRENE_API_KEY`.
+- 6/10 2 h 35 : jauges à jour ; scénario du lot 3 écrit (section 10), envoyé au coordinateur avant de coder.
