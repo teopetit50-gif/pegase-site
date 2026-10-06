@@ -1277,7 +1277,7 @@ begin
   return next ok(r ->> 'xml' like '<?xml%' and r ->> 'xml' like '%urn:cen.eu:en16931:2017%' and r ->> 'xml' like '%<ram:ID>' || f.reference || '</ram:ID>%'
                  and r ->> 'xml' like '%<ram:TypeCode>380</ram:TypeCode>%', 'Le XML CII porte le contexte EN 16931, le numéro et le type 380');
   return next ok(xml_is_well_formed_document(r ->> 'xml'), 'Le XML est bien formé');
-  return next ok(r ->> 'xml' like '%<ram:GrandTotalAmount>' || private.loc_dec(f.total_ttc, 2) || '</ram:GrandTotalAmount>%', 'Le total TTC est celui de la facture');
+  return next ok(r ->> 'xml' like '%<ram:GrandTotalAmount>' || to_char(f.total_ttc, 'FM999999999990.00') || '</ram:GrandTotalAmount>%', 'Le total TTC est celui de la facture');
   return next ok(jsonb_typeof(r -> 'manques') = 'array' and (r ->> 'pret')::boolean = (jsonb_array_length(r -> 'manques') = 0), 'Les manques sont listés et « prêt » en découle');
   perform tests.redevenir_admin();
 
