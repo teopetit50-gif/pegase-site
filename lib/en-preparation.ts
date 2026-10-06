@@ -18,17 +18,13 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 const LIGNES = {
-  /* TIROMA — ouvrier B3. Retirés le 06/10 au soir : synthèse de la semaine
-     (b3_15), réinscription (b3_16), absences probables (b3_17). */
-  tiroma: [
-    "Assistante absente : soins à basculer",
-    "Demi-journées vides des collaborateurs",
-    "Demi-journées vides",
-    "Objectifs par fauteuil",
-    "Un point du matin par centre",
-    "Un point du matin par site",
-    "Plusieurs sites",
-  ],
+  /* TIROMA — ouvrier B3. Tout est livré. Retirés le 06/10 au soir :
+     synthèse de la semaine (b3_15), réinscription (b3_16), absences
+     probables (b3_17) ; puis assistante absente (b3_18), demi-journées vides
+     des collaborateurs (b3_19), objectifs par fauteuil (b3_20), un point du
+     matin par centre / par site, plusieurs sites (b3_21, test à deux
+     centres). La clé reste : la page dentaire la nomme. */
+  tiroma: [] as string[],
 
   /* TAMILA — ouvrier B4 (pré-lecture avec A1 : lecture des pièces chiffrées,
      chronologie, contradictions, bordereau, export). Retirés le 06/10 au

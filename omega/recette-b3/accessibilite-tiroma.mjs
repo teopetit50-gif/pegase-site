@@ -76,6 +76,14 @@ for (const largeur of [390, 1440]) {
   await s.dormir(500);
   ok(await s.evaluer(`/Objectif —/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Objectif » est ouvert');
   dire(`tiroma ${largeur}, dialogue objectif`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+  /* b3_22 : le dialogue « Aligner sur … » */
+  await s.aller(base + '/espace/tiroma');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Règles communes"] button')].find(b => /Aligner sur ce centre/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Aligner sur/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Aligner » est ouvert');
+  dire(`tiroma ${largeur}, dialogue aligner les règles`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

@@ -370,3 +370,23 @@ logiciel métier qui la fait).
 - **Le socle classe toute section de Tiroma « santé ».** `deposer_section` fait `v_sante := p_sante or private.point_module_sante(module)`. Les assertions « sans donnée de santé » des tests 16, 20 et 22 étaient donc fausses : elles sont retirées. Le test 22 vérifie à la place que la direction ne reçoit que des compteurs. Les commentaires de b3_15 et b3_19 qui disent `sante = false` parlent de l'argument passé, pas de la section rendue.
 - **Test 19** : le soin de demain passe de 15 h à 11 h 15. À 15 h, le Fauteuil 2 est occupé par R012 (implant, 14 h 30 à 16 h) dans l'agenda du banc.
 - **Test 20** : D passe au-delà de l'agenda du banc, entre J+12 et J+18, lu sur 21 jours. Le banc donne à Dr Rousseau 50 min chaque matin (20,8 %) et à Dr Lacour 75 min chaque après-midi (25 %), au-dessus du seuil de 20 %. Le dépôt est appelé à D-3.
+
+## Après l'audit — les lignes Tiroma restantes du site (06/10, ~21 h 30 Z)
+
+Coordinateur : toutes les migrations sont posées, `^test_b3_` passe à 24/24 et tous les écrans sont fusionnés dans main. J'ai fusionné main dans worker-b3 (c3f1bf8) pour reprendre `lib/en-preparation.ts`.
+
+- **`lib/en-preparation.ts`** : les sept lignes Tiroma restantes sont retirées, car toutes sont livrées et posées (b3_18 à b3_21). La clé `tiroma` reste, vide, parce que la page dentaire la nomme. La page /secteurs/dentaire ne porte plus aucune pastille « En préparation ».
+- **Comparaison de `components/secteurs/dentaire/textes.ts` avec ce qui est livré.** Une seule promesse n'avait pas de code : « Mêmes règles de priorité partout » (offre Centre) et « Règles de priorité communes » (offre Réseau). Les règles sont propres à chaque centre (`tiroma_regles`) et rien ne les alignait.
+- **`b3_22_regles_communes.sql`** pose deux portes, pour le titulaire :
+  - `public.tiroma_regles_communes(client)` donne les règles de priorité de chacun de ses centres et la liste des écarts ;
+  - `public.tiroma_aligner_regles(client, source, cibles = null)` recopie ces règles du centre source sur les autres centres. Il faut être titulaire de la source et de chaque cible ; sinon 42501, et rien n'est changé. La porte écrit au journal `tiroma.regles_alignees`.
+  - Sont recopiés : l'ordre de priorité, les propositions, les délais, les seuils, les contrôles, les devis, le laboratoire, l'orthodontie et la demi-journée vide. Restent propres à chaque centre : la réserve d'urgences, les garde-fous d'import, la fenêtre de report et l'objectif de production.
+- **`23_regles_communes.sql`** : `test_b3_23_regles_communes`, 15 assertions sur deux centres (A et « Centre B3-23 Le Gosier », un site rattaché à A). Il couvre :
+  - les écarts nommés ;
+  - les refus (assistante, collaborateur, cible étrangère), sans aucune écriture ;
+  - l'alignement, objectif de production et garde-fous de B gardés ;
+  - plus aucun écart après l'alignement ;
+  - le journal ;
+  - daf2 qui ne voit aucune règle.
+- **Écran** : carte « Règles communes » (titulaire de plusieurs centres) avec le tableau des écarts et le dialogue « Aligner sur ce centre ». Recette : 104 contrôles, tout passe ; axe : 0 écart, dialogue compris.
+- **Vérifié en local** (tables simulées) : posée deux fois. Les écarts relevés sont `nb_propositions` et `ordre_priorite`. Une cible étrangère est refusée sans écriture. L'alignement donne 1 et laisse l'objectif de B à 4000 ; il ne reste ensuite aucun écart.
