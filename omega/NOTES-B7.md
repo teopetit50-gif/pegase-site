@@ -353,3 +353,7 @@ sans redéploiement (la clé est lue à chaque passage).
     `ViesRest`, enveloppe `errorWrappers`.
   - À faire par le coordinateur : poser b7_04, jouer `^test_b7_`, redéployer la coquille `identite` au nouveau SHA.
 
+- 6/10 14 h 09 Z (coordinateur) : coquille `identite` **v4** à 0b1be57 (déployée avant la migration), b7_04 et
+  b7_05 posés (`identite_b7_04_doute`), `^test_b7_` **11/11**. Cause confirmée par A3 : VIES répondait HTTP 200
+  `{actionSucceed:false, errorWrappers:[{error:"MS_MAX_CONCURRENT_REQ"}]}`, lu « invalide » par l'ancien `vies.ts`.
+  Rattrapage : ORANGE redemandée à 14:08:21 Z → **valide** (VIES), verdict du fournisseur 90cc1d86 rétabli.
