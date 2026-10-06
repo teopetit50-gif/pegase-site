@@ -2,13 +2,18 @@
 
 /* Les réglages : la page « avec barre latérale » de la référence. À
    gauche, les rubriques ; à droite, une carte par réglage, avec son pied
-   gris et son bouton. Ce qui est réglable ici l'est vraiment : le thème
-   et les données affichées. Le reste se règle encore dans le cockpit. */
+   gris et son bouton. Le thème et les données affichées sont à nous ; la
+   rubrique « Données » porte aussi l'écran Réglages de /espace (A3 :
+   journal, export complet, préparer l'effacement), repris tel quel — son
+   h1 « Réglages » est celui de la page. */
 
 import { useState } from "react";
 import Link from "next/link";
 import { Laptop, Moon, Sun } from "lucide-react";
 import { useSource } from "@/components/espace/source";
+import EcranReglages from "@/components/espace/reglages/EcranReglages";
+import "@/components/espace/espace.css";
+import "./habillage.css";
 import { Interrupteur, Note } from "./ui";
 import { changerTheme, useTheme, type Theme } from "./theme";
 import { useToast } from "./Toasts";
@@ -29,7 +34,6 @@ export default function Reglages() {
 
   return (
     <div className="v2-page v2-arrivee">
-      <h1 className="v2-sr">Réglages</h1>
       <div className="v2-avec-cote">
         <nav className="v2-cote" aria-label="Rubriques des réglages">
           {RUBRIQUES.map((r) => (
@@ -100,6 +104,10 @@ export default function Reglages() {
               {!connecte ? <Note teinte="bleu">Vous n&apos;êtes pas connecté : seul l&apos;exemple est visible. Connectez-vous depuis le cockpit pour voir vos données.</Note> : null}
             </div>
           </section>
+
+          <div id="donnees-export" className="resa esp">
+            <EcranReglages />
+          </div>
 
           <section id="compte" className="v2-carte" aria-labelledby="t-compte">
             <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
