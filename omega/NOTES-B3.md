@@ -1,13 +1,13 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
 Branche `worker-b3`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 06/10/2026 (reprise après la pause de Teo).
+Dernière mise à jour : 06/10/2026, soir (lot 2, troisième passage demandé).
 
 ## Les deux jauges
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
-| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **55 %** — lot 1 vert sur la recette (98/98 : installation, profils, fauteuils, horaires, fermetures, branchement, mode, journal, isolement) ; b3_01 à b3_06 posés ; lot 2 écrit (relevé initial, relevé courant, portes métier, point du matin + santé) mais **pas encore joué**. | Jouer le lot 2 jusqu'au vert (dépend de b3_07, b3_08 et d'une ligne reglages_envois tiroma pour le banc) ; tests des mesures du soir (horloge), du relevé en retard et de la purge ; la règle santé stricte dans verrous_envoi (socle commun). |
+| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **70 %** — lot 1 vert (98/98) ; b3_01 à b3_09 posés ; lot 2 joué deux fois : la chaîne d'export est prouvée (05 à un contrôle près, 09, 10 verts), 06/07/08/11 corrigés et à rejouer. | Le troisième passage du lot 2 jusqu'au vert (point du matin : 0 membre servi, cause à lire) ; b3_10 posé ; la règle santé stricte dans verrous_envoi (socle commun). |
 | **Livrable client** (un cabinet installe, branche, reçoit son point du matin, ouvre /espace/tiroma) | **45 %** — écran /espace/tiroma écrit, recetté aux cinq largeurs, en fusion sur main par le coordinateur ; le point du matin TIROMA existe (b3_06) ; la chaîne d'export est jouable par les portes. | **Aucun ouvrier ne lit les exports** (trou commun n° 1, confié à A1) ; aucun fournisseur d'envoi agréé santé → le point nominatif reste derrière l'authentification ; aucun export Logos_w réel (Teo). |
 
 ### Ce que Teo (le patron) doit fournir lui-même
@@ -16,13 +16,34 @@ Dernière mise à jour : 06/10/2026 (reprise après la pause de Teo).
 2. Le canal de remise du point du matin **agréé pour la santé** : aucun fournisseur d'envoi n'est `agree_sante` ; tant qu'il n'y en a pas, `verrous_envoi` bloque tout message nominatif (`SANTE_HORS_CANAL_AGREE`) et le point du matin TIROMA ne sort d'Omega que **sans donnée de santé** (compteurs + lien vers /espace/tiroma). Décision à prendre par Teo : ce repli convient-il, ou faut-il un canal HDS avant la première mise en route ?
 3. Le territoire des cabinets (code ISO sur l'entité) : `tiroma_installer_cabinet` refuse une entité sans territoire complet.
 
-## État exact au 06/10 et prochaine étape
+## État exact au 06/10 (soir) et prochaine étape
 
-- **Posé sur la recette** (par le coordinateur) : b3_01 (portes + droits), b3_02 à b3_05 (portes de lecture, avec variantes `_pour`), b3_06 (point du matin + cron tiroma-matin). Lot 1 (`^test_b3_0[1-4]`) : 98/98 verts.
-- **Écrit, pas encore posé** : `b3_07_mutuelle.sql` (porte `tiroma_noter_mutuelle`), `b3_08_heures_locales.sql` (correctif de `private.tiroma_v_instant` : les heures d'un export sont lues dans le fuseau du cabinet), `b3_09_liste_attente.sql` (portes `tiroma_ajouter_attente` / `tiroma_retirer_attente`), et `b3_02` à reposer (un patient, une voie).
-- **Écrit, pas encore joué** : `00b_export_logosw.sql` (export Logos_w d'exemple, dix jeux, dates relatives ; dépôt par `recevoir_releve` → `commencer_releve` → `deposer_lignes` → `terminer_lecture`, puis `avancer_releves()` et `tiroma_traiter_travaux()`), tests `05_releve_initial`, `06_releve_courant`, `07_portes_metier`, `08_point_du_matin`, `09_mesures_du_soir`, `10_retard_et_purge`, `11_liste_attente`.
-- **Prochaine étape** : le coordinateur pose b3_07 et b3_08, pose la ligne `reglages_envois (banc, tiroma, essai, sante=true)`, rejoue 00, 00b puis 05 → 08, me renvoie les sorties brutes ; je corrige jusqu'au vert. Puis : le gabarit validé du point sans santé (b3_10, forme des gabarits demandée), la règle santé stricte du socle commun, la relecture en base réelle de l'écran avec le compte du banc (comme A3 : omega/recette-a3/relecture-reelle.mjs).
-- **Écran** : /espace/tiroma, « prêt à fusionner » envoyé (dernier SHA de worker-b3 : la mutuelle se note depuis la carte Plans, la carte « Liste d'attente » inscrit et retire un patient par les portes b3_09 ; recette 67 contrôles) ; fichiers à prendre : `app/espace/tiroma/page.tsx`, `components/espace/tiroma/*` (types, exemple, portes, libelles, EcranTiroma, Creneaux, Plans, AvantRendezVous, ChargeFauteuils, ListeAttente, Cabinet), `omega/recette-b3/*` ; ligne à ajouter dans `components/espace/ecrans.ts` : `{ cle: "tiroma", href: "/espace/tiroma", libelle: "Cabinet dentaire", court: "TIROMA" }`.
+- **Posé sur la recette** (par le coordinateur) : b3_01 (portes + droits), b3_02 (reposé : une voie par patient), b3_03 (à reposer : booléen `mutuelle_accord_sans_rdv` jamais nul), b3_04, b3_05, b3_06 (point du matin + cron tiroma-matin), b3_07 (mutuelle), b3_08 (heures locales), b3_09 (liste d'attente). b3_10 (gabarit validé `tiroma.point_matin`) envoyé, pose à confirmer.
+- **Lot 1** (`^test_b3_0[1-4]`) : 98/98 verts.
+- **Lot 2** (`^test_b3_(05|06|07|08|09|10|11)_`) : joué deux fois par le coordinateur. Au second passage : 05 49/50 (le compteur de travaux additionne maintenant toutes les passes), 09 17/17, 10 13/13 ; 06, 07, 08, 11 corrigés d'après les sorties brutes (colonne `etat` des capacités, périmètre du collaborateur qui peut noter la mutuelle de son patient, envois transactionnels pour atteindre le verrou santé avant le consentement, patient gêné proposé avant le patient en attente). La chaîne relevé → instantané → travail → `tiroma_appliquer_releve` est **prouvée de bout en bout** sur la recette.
+- **Reste inexpliqué** : au second passage, `tiroma_deposer_points` a servi 0 membre sans qu'on lise pourquoi ; le test 08 imprime désormais le détail de l'alerte `tiroma:point:depot:<cabinet>` s'il y en a une. Troisième passage demandé (SHA 5220b21).
+- **Prochaine étape** : lire la troisième sortie, corriger jusqu'au vert ; puis la règle santé stricte du socle commun (proposition au coordinateur), la relecture de /espace/tiroma en base réelle avec le compte du banc (comme A3 : omega/recette-a3/relecture-reelle.mjs) quand omegaai.fr sert la page.
+- **Écran** : /espace/tiroma fusionné sur main par le coordinateur (d572973), avec la ligne de navigation dans `components/espace/ecrans.ts`.
+
+## Relecture de /espace/tiroma en base réelle — faite le 06/10 (00 h 37 Z)
+
+Comme A3 : serveur `next start` local pointé sur la recette (`.env.local`, non commité), session du
+compte du banc `gerant@banc-varelo.test` ouverte par l'appel même du formulaire du site
+(`POST /auth/v1/token?grant_type=password`, clé publique), cookie posé par
+`omega/recette-b3/relecture-reelle.mjs`, captures `omega/recette-b3/reel-tiroma-{1440,390}.jpg`.
+
+- **L'écran se charge avec la session** aux deux largeurs : identité affichée, interrupteur sur
+  « Base réelle », aucun avis rouge, aucun « permission denied » en console, aucun débordement.
+- **Le banc n'a pas de cabinet** (les tests pgTAP annulent tout) : l'écran montre le formulaire
+  d'installation, avec l'entité principale « Groupe Sogexal (banc) » (territoire posé) et Logos_w.
+  Je n'ai **pas** installé de cabinet durable sur le banc : le test 04 compte les cabinets du client
+  sans filtre d'entité, un cabinet permanent casserait le lot 1, et rien ne s'efface. Les écritures
+  de l'écran (installer, brancher, fauteuils, horaires, mutuelle, liste d'attente) sont prouvées par
+  les tests sous les jetons des membres, pas par cette relecture.
+- **Observation hors périmètre** (site, pas TIROMA) : en local sur la recette, le WebSocket Realtime
+  `wss://ygwbgpowzlbdaajlsqkn.supabase.co` est refusé par la CSP `connect-src` (next.config.ts n'écrit
+  que l'armoire de production et l'URL d'environnement en https). Sans effet sur omegaai.fr ; signalé
+  au coordinateur.
 
 ## Le scénario réel de bout en bout (ce que les tests jouent)
 
@@ -62,7 +83,7 @@ d'écriture directe hors RLS.
 7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte « permis_sante ET agree_sante » à proposer sur le socle commun après le lot 2.
 8. **Liste d'attente « commune »** (`source = 'tiroma'`) sans porte d'écriture : à faire (b3_09) après le lot 2.
 9. **`private.tiroma_trace_ecriture()` inexécutable par authenticated** (23 triggers) : corrigé côté socle par le coordinateur (lot 19u).
-10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** `gabarits_messages` (module tiroma, canal email, `donnees_sante = false`) : à écrire (b3_10) une fois la forme des gabarits connue (demande d'extrait au coordinateur).
+10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** sans variable libre : b3_10 pose `tiroma.point_matin` (global, courriel, compteurs + lien), validé par le serveur ; le test 08 vérifie qu'il part.
 11. **Un même patient pouvait être proposé deux fois** pour un créneau (par son plan et par la liste d'attente) : corrigé dans b3_02 (une voie par patient, la meilleure) — à reposer.
 
 ## Journal des échanges avec le coordinateur
@@ -72,3 +93,4 @@ d'écriture directe hors RLS.
 - 05/10, 20 h 49 — F7 : pas d'ouvrier d'export ; portes commencer_releve / deposer_lignes / terminer_lecture / recevoir_releve (service_role).
 - 05/10, 20 h 54 — b3_02 à b3_06 posés depuis f7194d6 ; Realtime publié sur cinq tables tiroma ; fusion de l'écran promise par le coordinateur.
 - 05/10, 20 h 58 — PAUSE demandée par Teo. 06/10 — REPRISE : F8 (13 indicateurs tiroma inscrits), F9 (tiroma_conservation et tiroma_passages existent).
+- 06/10 — b3_07 à b3_09 posés ; écran fusionné (d572973) ; lot 2 joué deux fois (retours : clé `jeu` de terminer_lecture, destinataire par `adresse`, somme des travaux, colonne `etat`, booléen mutuelle, périmètre du collaborateur, verrou consentement avant santé, patient gêné) ; b3_10 et le troisième passage demandés (5220b21).

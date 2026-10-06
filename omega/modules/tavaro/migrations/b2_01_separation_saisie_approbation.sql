@@ -5,9 +5,12 @@
 -- loc_demander_avoir ne posaient pas saisi_par : l'agent qui chiffre un retour pouvait,
 -- s'il est valideur, approuver sa propre facture ; celui qui demande un avoir pouvait
 -- l'approuver s'il est gérant. Les deux fonctions posent désormais payload.saisi_par
--- (celui qui a chiffré la proposition, celui qui a demandé l'avoir) et nomment le
+-- (celui qui a chiffré la proposition, celui qui a demandé l'avoir) — un TABLEAU d'identifiants,
+-- la forme que preparer_approbation lit (lot 19c : jsonb_typeof = 'array') — et nomment le
 -- demandeur (demandeur_type = 'utilisateur', demandeur_id) pour que l'écran le dise
 -- avant le clic, comme A3 le fait pour les autres modules.
+-- Révision du 06/10, 02 h 10 : saisi_par était un scalaire, que preparer_approbation ignore ;
+-- le troisième TAP (05 : le référent a approuvé sa propre facture) l'a montré.
 -- Corps identiques au socle photographié le 05/10 à 22 h 30, hors ces ajouts.
 
 CREATE OR REPLACE FUNCTION private.loc_deposer_demande(p_client uuid, p_proposition uuid, p_tentative integer DEFAULT 1, p_maintenant timestamp with time zone DEFAULT now())
@@ -53,7 +56,7 @@ begin
                              'lignes', v_nb, 'hors_bareme', p.hors_bareme, 'non_contradictoire', p.non_contradictoire,
                              'avertissements', p.avertissements,
                              -- b2_01 : celui qui a chiffré le retour n'approuve pas sa facture (preparer_approbation, lot 19c)
-                             'saisi_par', p.calculee_par, 'source', p.source)),
+                             'saisi_par', case when p.calculee_par is null then null else jsonb_build_array(p.calculee_par) end, 'source', p.source)),
           v_echeance, 'tavaro:proposition:' || p.id::text || ':t' || p_tentative,
           case when p.calculee_par is null then 'systeme' else 'utilisateur' end, p.calculee_par)
   returning id into v_demande;
@@ -141,7 +144,7 @@ begin
           jsonb_build_object('avoir', v_avoir, 'facture', f.id, 'reference', f.reference, 'contrat', f.contrat_numero, 'montant_ttc', v_ttc,
                              'total', v_total, 'motif', v_motif, 'facture_ttc', f.total_ttc, 'deja_credite', v_deja, 'lignes', v_lignes,
                              -- b2_01 : celui qui demande l'avoir ne l'approuve pas
-                             'saisi_par', v_uid),
+                             'saisi_par', jsonb_build_array(v_uid)),
           p_maintenant + interval '48 hours', 'tavaro:avoir:' || v_avoir::text, 'utilisateur', v_uid)
   returning id into v_demande;
   update public.loc_avoirs set demande_id = v_demande where id = v_avoir;

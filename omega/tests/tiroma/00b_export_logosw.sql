@@ -182,7 +182,8 @@ begin
     v_jeu := (select bj.code from public.instantanes x join public.branchements_jeux bj on bj.id = x.jeu_id where x.id = (i ->> 'instantane')::uuid);
     v_lignes := tests.b3_lignes(v_jeu, p_variante);
     perform public.deposer_lignes((i ->> 'instantane')::uuid, v_lignes);
-    v_fin := public.terminer_lecture((i ->> 'instantane')::uuid, jsonb_build_object('statut', 'lu', 'lignes', jsonb_array_length(v_lignes)), 'tests/b3/logosw');
+    -- Le socle exige la clé « jeu » (le code du jeu de l'instantané) pour un statut « lu » (relevé par le coordinateur le 06/10).
+    v_fin := public.terminer_lecture((i ->> 'instantane')::uuid, jsonb_build_object('statut', 'lu', 'jeu', v_jeu, 'lignes', jsonb_array_length(v_lignes)), 'tests/b3/logosw');
     v_res := v_res || jsonb_build_object('instantane', i ->> 'instantane', 'jeu', v_jeu, 'lignes', jsonb_array_length(v_lignes), 'fin', v_fin);
   end loop;
   return jsonb_build_object('releve', v_recu ->> 'releve', 'instantanes', v_res);
@@ -191,18 +192,36 @@ end $$;
 -- Fait avancer la file des relevés puis traite les travaux de Tiroma, comme les crons omega-releves-file et
 -- tiroma-releves le feraient. Rend le bilan de tiroma_traiter_travaux.
 create or replace function tests.b3_traiter() returns jsonb language plpgsql as $$
-declare r jsonb; k integer;
+declare r jsonb; k integer; n_faits integer := 0; n_echecs integer := 0;
 begin
   perform private.avancer_releves();
   for k in 1..3 loop
     r := private.tiroma_traiter_travaux(20);
+    n_faits := n_faits + (r ->> 'faits')::integer;
+    n_echecs := n_echecs + (r ->> 'echecs')::integer;
     exit when (r ->> 'faits')::integer = 0 and (r ->> 'echecs')::integer = 0;
   end loop;
-  return r;
+  return jsonb_build_object('faits', n_faits, 'echecs', n_echecs);
 end $$;
 
--- Le cabinet installé, équipé, horaires posés, branché, puis le premier relevé appliqué (tous les jeux). Rend
--- {cabinet, branchement, releve, bilan}. En admin à la sortie.
+-- La pendule du test. Dans une transaction, now() ne bouge pas : deux relevés déposés par le même test portent le
+-- même instant, et le socle prend alors un rendez-vous déjà connu pour un rendez-vous « nouveau » (report au lieu
+-- d'annulation ; patients « créés » comptés deux fois). On vieillit ce que le dernier relevé a posé, comme s'il
+-- datait de la veille. Fixture de test : en production, deux relevés n'ont jamais le même instant.
+create or replace function tests.b3_vieillir(p_de interval default interval '1 day') returns void language plpgsql as $$
+declare v_entite uuid := tests.b3_entite(); v_banc uuid := tests.b3_banc();
+begin
+  perform tests.redevenir_admin();
+  perform set_config('omega.tiroma_moteur', 'releve', true);
+  update public.tiroma_releves set recu_le = recu_le - p_de, fini_le = fini_le - p_de where client_id = v_banc and entite_id = v_entite and recu_le >= now();
+  update public.tiroma_rendez_vous set vu_premier_le = vu_premier_le - p_de, vu_dernier_le = vu_dernier_le - p_de where client_id = v_banc and entite_id = v_entite and vu_premier_le >= now();
+  update public.tiroma_patients set vu_premier_le = vu_premier_le - p_de, vu_dernier_le = vu_dernier_le - p_de where client_id = v_banc and entite_id = v_entite and vu_premier_le >= now();
+  update public.tiroma_plans set vu_premier_le = vu_premier_le - p_de, vu_dernier_le = vu_dernier_le - p_de where client_id = v_banc and entite_id = v_entite and vu_premier_le >= now();
+  perform set_config('omega.tiroma_moteur', '', true);
+end $$;
+
+-- Le cabinet installé, équipé, horaires posés, branché, puis le premier relevé appliqué (tous les jeux), daté de la
+-- veille (tests.b3_vieillir). Rend {cabinet, branchement, releve, bilan}. En admin à la sortie.
 create or replace function tests.b3_cabinet_releve(p_variante text default 'initial') returns jsonb language plpgsql as $$
 declare v_cabinet uuid; v_branchement uuid; v_depot jsonb; v_bilan jsonb;
 begin
@@ -213,6 +232,7 @@ begin
   perform tests.redevenir_admin();
   v_depot := tests.b3_deposer_releve(v_branchement, array['types_rdv', 'patients', 'agenda', 'devis', 'devis_lignes', 'actes', 'labo', 'stock', 'odf', 'attente'], p_variante, 'b3:' || p_variante);
   v_bilan := tests.b3_traiter();
+  perform tests.b3_vieillir();
   return jsonb_build_object('cabinet', v_cabinet, 'branchement', v_branchement, 'releve', v_depot ->> 'releve', 'depot', v_depot, 'bilan', v_bilan);
 end $$;
 

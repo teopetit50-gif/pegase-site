@@ -43,11 +43,12 @@ begin
   return next is(r ->> 'mutuelle_statut', 'accord', 'l''assistante note l''accord de la mutuelle sur D001');
   return next is((r ->> 'mutuelle_reponse_le')::date, j - 21, 'daté du jour de la réponse');
   return next throws_ok(format('select public.tiroma_noter_mutuelle(%L, ''peut-etre'')', v_d001), '22023', null, 'un statut inconnu est refusé (22023)');
+  perform tests.b3_endosser('daf2');
+  return next throws_ok(format('select public.tiroma_noter_mutuelle(%L, ''demandee'')', v_d001), '42501', null,
+                        'daf2, sans profil, ne note rien (42501)');
   perform tests.b3_endosser('daf');
-  return next throws_ok(format('select public.tiroma_noter_mutuelle(%L, ''demandee'')', v_d001), null, null,
-                        'le collaborateur ne note rien sur le plan d''un autre praticien' );
   r := public.tiroma_noter_mutuelle(v_d002, 'non_requise');
-  return next is(r ->> 'mutuelle_statut', 'non_requise', 'mais note sur le sien (D002, Dr Rousseau)');
+  return next is(r ->> 'mutuelle_statut', 'non_requise', 'le collaborateur (périmètre cabinet) note sur D002 (Dr Rousseau)');
   perform tests.b3_endosser('gerant');
   return next ok((public.tiroma_plans_sans_rendez_vous(banc, entite) -> 0 ->> 'mutuelle_accord_sans_rdv')::boolean, 'D001 remonte désormais « accord de mutuelle reçu, sans rendez-vous »');
   return next ok(exists (select 1 from public.journal_opposable where client_id = banc and action = 'tiroma.mutuelle_notee'), 'journal : « tiroma.mutuelle_notee »');

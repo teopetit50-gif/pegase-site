@@ -12,6 +12,8 @@ declare
   v_gerant uuid := (select id from auth.users where email = 'gerant@banc-varelo.test');
   v_siege uuid := (select id from public.entites where client_id = v_client and principale);
   v_bareme uuid;
+  -- lu AVANT d'endosser : authenticated n'exécute pas les fonctions de private (a5_01)
+  v_sans_bareme boolean := private.loc_bareme_en_vigueur(v_client, date '2026-10-01') is null;
 begin
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   -- l'agence du siège : TVA 20 (le siège n'a pas de territoire ; la base le demanderait)
@@ -22,7 +24,7 @@ begin
     insert into public.loc_reglages (client_id, tolerance_retard_min, emetteur)
     values (v_client, 59, jsonb_build_object('adresse', '1 rue du Banc, 97110 Pointe-à-Pitre', 'email', 'essais@omegaai.fr'));
   end if;
-  if private.loc_bareme_en_vigueur(v_client, date '2026-10-01') is null then
+  if v_sans_bareme then
     v_bareme := public.loc_publier_bareme('Barème banc 2026', date '2026-01-01', jsonb_build_array(
       jsonb_build_object('code', 'CARBURANT_8E', 'libelle', 'Carburant manquant, au huitième', 'famille', 'carburant', 'unite', 'huitieme', 'prix_eur', 12, 'regime_tva', 'taxable', 'taux_tva', 20),
       jsonb_build_object('code', 'KM_SUP', 'libelle', 'Kilomètre au-delà du forfait', 'famille', 'kilometres', 'unite', 'km', 'prix_eur', 0.25, 'regime_tva', 'taxable', 'taux_tva', 20),
@@ -68,8 +70,9 @@ end $$;
 select p.id, p.version, p.statut, p.total_ttc, p.demande_id, p.avertissements
 from public.loc_propositions p join public.loc_contrats c on c.id = p.contrat_id
 where c.client_id = 'cccccccc-0000-4000-8000-00000000000c' and c.numero = 'BANC-2026-0001' order by p.version;
--- → attendu : statut calculee, total 418.20, puis a_valider avec demande_id après le passage du cron (≤ 1 min).
--- Pour ne pas attendre : select private.loc_ouvrier(20);
+-- Le fichier se joue en une seule transaction : on passe l'ouvrier de base nous-mêmes (en postgres) pour ne pas attendre le cron.
+select private.loc_ouvrier(20);
+-- → attendu : statut a_valider, total 418.20, demande_id posé.
 
 -- ═══ C. La DAF approuve (le référent, qui a chiffré, serait refusé : b2_01) ; le cron émet les factures et prépare le courriel
 do $$
@@ -88,8 +91,9 @@ begin
   values (v_demande, v_client, v_daf, 'approuve', 'Vérifié avec les photos du retour (banc B2).');
   perform tests.redevenir_admin();
 end $$;
--- Après le cron (≤ 1 min), ou : select private.loc_ouvrier(20);
-select f.reference, f.nature, f.total_ttc, f.statut, f.envoi_id, e.statut as envoi_statut, e.verrou, e.fournisseur, e.programme_le
+-- La décision déposée par le socle est appliquée par l'ouvrier de base : factures émises, courriel préparé.
+select private.loc_ouvrier(20);
+select f.reference, f.nature, f.total_ttc, f.statut, f.envoi_id, e.statut as envoi_statut, e.verrou, e.fournisseur, e.echeance, e.reprise_le, e.pret_le, e.envoye_le
 from public.loc_factures f left join public.envois e on e.id = f.envoi_id
 where f.client_id = 'cccccccc-0000-4000-8000-00000000000c' order by f.numero;
 -- → attendu : FA-2026-000001 (frais, 238.20) et FA-2026-000002 (dommages, 180.00), emise ; un envoi 'pret' (mode essai → adresse de Teo),
@@ -108,8 +112,8 @@ begin
   raise notice 'relance : %', v_res;
   perform tests.redevenir_admin();
 end $$;
-select f.reference, f.relances, f.relance_le, e.statut as envoi_statut, e.cle
-from public.loc_factures f join public.envois e on e.client_id = f.client_id and e.cle = 'tavaro:relance:' || f.id::text || ':' || f.relances
+select f.reference, f.relances, f.relance_le, e.statut as envoi_statut, e.cle_idempotence
+from public.loc_factures f join public.envois e on e.client_id = f.client_id and e.cle_idempotence = 'tavaro:relance:' || f.id::text || ':' || f.relances
 where f.client_id = 'cccccccc-0000-4000-8000-00000000000c' and f.contrat_numero = 'BANC-2026-0001';
 
 -- ═══ E. Le journal opposable du banc pour ce contrat

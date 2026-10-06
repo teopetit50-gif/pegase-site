@@ -88,7 +88,7 @@ if (geste === 'completer' && releve.items > 0) {
   console.log('— geste réel : compléter les conditions du premier contrat');
   await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-actions .r-btn')].find(b => /Compléter les conditions/.test(b.textContent))?.click()`);
   await s.dormir(500);
-  await s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input')][0]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '600'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input')][0]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '650'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
   await s.dormir(300);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
   for (let i = 0; i < 30; i++) { await s.dormir(500); const encore = await s.evaluer(`!!document.querySelector('[role="dialog"] .esp-avis[data-teinte="rouge"]') || !document.querySelector('[role="dialog"]')`); if (encore) break; }

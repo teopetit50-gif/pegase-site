@@ -27,7 +27,7 @@ begin
   select * into d from public.demandes_validation where id = a.demande_id;
   return next is(d.type_action, 'avoir.emettre', 'La demande est avoir.emettre');
   return next ok(not (d.roles_autorises @> array['valideur']::text[]), format('La direction seule décide un avoir (%s)', d.roles_autorises));
-  return next is(d.payload ->> 'saisi_par', jeu ->> 'collab', 'La demande d''avoir porte qui l''a saisi (b2_01)');
+  return next ok(jsonb_typeof(d.payload -> 'saisi_par') = 'array' and d.payload -> 'saisi_par' ? (jeu ->> 'collab'), format('La demande d''avoir porte qui l''a saisi, en tableau (b2_01) : %s', d.payload -> 'saisi_par'));
   return next ok(tests.tavaro_journal(v_client, 'tavaro.avoir_demande') >= 1, 'Le journal opposable porte tavaro.avoir_demande');
   return next ok(private.loc_section_facturation(v_client, null, current_date) is not null, 'La section de facturation se calcule');
 

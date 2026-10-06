@@ -15,6 +15,8 @@
 --   · public.loc_relancer_facture(facture) : la relance à la main par l'agence (rôle et périmètre
 --     contrôlés par loc_facture_de_l_agence), même quand l'échéance n'est pas dépassée de 7 jours ;
 --   · le cron tavaro-relances à 9 h 15 UTC.
+-- Révision 06/10 (v2) : preparer_envoi n'admet que les options direct, repondre_a, demande, espacement ;
+--   la relance ne lui en passe plus aucune (« Option inconnue : origine » sur le banc).
 
 alter table public.loc_factures add column if not exists relances smallint not null default 0;
 alter table public.loc_factures add column if not exists relance_le timestamp with time zone;
@@ -117,7 +119,9 @@ begin
     v_envoi := private.preparer_envoi(p_client, 'tavaro', 'loc_factures', f.id::text, 'email',
       jsonb_build_object('adresse', l.email, 'nom', v_client_nom, 'ref', l.id::text, 'professionnel', v_pro, 'langue', 'fr'),
       null, '{}'::jsonb, v_sujet, v_corps, null::uuid[], 'tavaro:relance:' || f.id::text || ':' || v_n, f.entite_id, true, false, null::timestamptz,
-      jsonb_build_object('relance', v_n, 'origine', p_origine, 'reste_du', v_reste));
+      -- les options de preparer_envoi sont closes (direct, repondre_a, demande, espacement) : le numéro de relance,
+      -- l'origine et le reste dû vont au journal, pas ici (révision du 06/10 après le bloc D du parcours réel)
+      '{}'::jsonb);
   exception when others then
     v_erreur := left(sqlstate || ' ' || sqlerrm, 500);
     perform private.lever_alerte_module(p_client, 'tavaro', 'critique',

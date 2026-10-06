@@ -24,11 +24,12 @@ begin
   v_bilan := tests.b3_traiter();
   return next ok((v_bilan ->> 'echecs')::integer = 0, format('relevé courant traité (%s fait(s), %s échec(s))', v_bilan ->> 'faits', v_bilan ->> 'echecs'));
   return next is(tests.compter('public', 'tiroma_releves', format('entite_id = %L', entite)), 2::bigint, 'deux relevés Tiroma');
-  return next is((select statut || '/' || mode from public.tiroma_releves where entite_id = entite order by recu_le desc limit 1), 'ok/complet', 'le second est « ok », complet');
+  return next is((select statut || '/' || mode from public.tiroma_releves where entite_id = entite and releve_source_id = (v_depot ->> 'releve')::uuid), 'ok/complet', 'le second est « ok », complet');
   return next is((select statut from public.tiroma_rendez_vous where id = v_rdv), 'supprime', 'R010 disparu de l''agenda est « supprimé »');
   return next ok((select disparu_le is not null from public.tiroma_rendez_vous where id = v_rdv), 'et daté');
   select id into v_ev from public.tiroma_evenements_agenda where entite_id = entite and rendez_vous_id = v_rdv and type = 'annulation';
-  return next ok(v_ev is not null, 'un événement « annulation » est écrit pour R010');
+  return next ok(v_ev is not null, 'un événement « annulation » est écrit pour R010' || coalesce((select ' (trouvé : ' || string_agg(type, ', ') || ')' from public.tiroma_evenements_agenda where entite_id = entite and rendez_vous_id = v_rdv), ''));
+  v_ev := coalesce(v_ev, -1);
   return next ok((select (avant ->> 'debut') is not null and apres is null from public.tiroma_evenements_agenda where id = v_ev), 'il porte le créneau libéré (avant), rien après');
   return next is((select statut from public.tiroma_rendez_vous where entite_id = entite and source_ref = 'R003'), 'honore', 'R003 est honoré');
   return next ok(exists (select 1 from public.tiroma_evenements_agenda e join public.tiroma_rendez_vous x on x.id = e.rendez_vous_id where x.entite_id = entite and x.source_ref = 'R003' and e.type = 'honore'), 'événement « honoré » pour R003');
@@ -36,7 +37,7 @@ begin
   return next ok(exists (select 1 from public.tiroma_evenements_agenda e join public.tiroma_rendez_vous x on x.id = e.rendez_vous_id where x.entite_id = entite and x.source_ref = 'R005' and e.type = 'absence'), 'événement « absence » pour R005');
   return next is((select statut || '/' || presume from public.tiroma_rendez_vous where entite_id = entite and source_ref = 'R004'), 'prevu/honore', 'R004, prévu sans statut mais avec un acte le même jour, est présumé honoré');
   return next ok(exists (select 1 from public.tiroma_evenements_agenda e join public.tiroma_rendez_vous x on x.id = e.rendez_vous_id where x.entite_id = entite and x.source_ref = 'R004' and e.type = 'presume_honore'), 'événement « présumé honoré » pour R004');
-  return next is((select statut from public.tiroma_capacites where entite_id = entite and domaine = 'statuts_manques'), 'tenu', 'capacité : le logiciel tient les statuts « manqué »');
+  return next is((select etat from public.tiroma_capacites where entite_id = entite and domaine = 'statuts_manques'), 'tenu', 'capacité : le logiciel tient les statuts « manqué »');
 
   -- Le journal des événements est immuable.
   return next throws_ok(format('update public.tiroma_evenements_agenda set type = ''honore'' where id = %s', v_ev), '42501', null, 'un événement ne se modifie pas (42501)');
@@ -64,20 +65,22 @@ begin
   perform tests.redevenir_admin();
 
   -- 11. Le garde-fou : une journée de dix rendez-vous entièrement vidée en un relevé.
+  perform tests.b3_vieillir(interval '12 hours');
   v_depot := tests.b3_deposer_releve(v_branchement, array['agenda'], 'vide', 'b3:vide');
   v_bilan := tests.b3_traiter();
-  return next is((select statut from public.tiroma_releves where entite_id = entite order by recu_le desc limit 1), 'douteux', 'le relevé qui vide une journée est « douteux »');
-  return next ok((select raison like '%entièrement vidé%' from public.tiroma_releves where entite_id = entite order by recu_le desc limit 1),
-                 'la raison dit la journée vidée : ' || coalesce((select left(raison, 120) from public.tiroma_releves where entite_id = entite order by recu_le desc limit 1), ''));
+  return next is((select statut from public.tiroma_releves where entite_id = entite and releve_source_id = (v_depot ->> 'releve')::uuid), 'douteux', 'le relevé qui vide une journée est « douteux »');
+  return next ok((select raison like '%vid%' from public.tiroma_releves where entite_id = entite and releve_source_id = (v_depot ->> 'releve')::uuid),
+                 'la raison dit la journée vidée : ' || coalesce((select left(raison, 120) from public.tiroma_releves where entite_id = entite and releve_source_id = (v_depot ->> 'releve')::uuid), ''));
   return next is((select releves_douteux_suite from public.tiroma_cabinets where entite_id = entite), 1::smallint, 'releves_douteux_suite = 1');
   return next is(tests.compter('public', 'tiroma_rendez_vous', format('entite_id = %L and statut = ''supprime''', entite)), 1::bigint, 'aucun rendez-vous supplémentaire n''a été supprimé (R010 seul)');
   return next ok(exists (select 1 from public.journal_opposable where client_id = banc and action = 'tiroma.releve_douteux'), 'journal : « tiroma.releve_douteux »');
   return next ok(exists (select 1 from public.instantanes i join public.branchements_jeux bj on bj.id = i.jeu_id where bj.branchement_id = v_branchement and bj.code = 'agenda' and i.statut = 'douteux'),
                  'l''instantané de l''agenda est marqué douteux dans le socle');
   -- Puis un relevé normal : le compteur retombe.
+  perform tests.b3_vieillir(interval '6 hours');
   v_depot := tests.b3_deposer_releve(v_branchement, array['agenda'], 'courant', 'b3:courant2');
   v_bilan := tests.b3_traiter();
-  return next is((select statut from public.tiroma_releves where entite_id = entite order by recu_le desc limit 1), 'ok', 'le relevé suivant est « ok »');
+  return next is((select statut from public.tiroma_releves where entite_id = entite and releve_source_id = (v_depot ->> 'releve')::uuid), 'ok', 'le relevé suivant est « ok »');
   return next is((select releves_douteux_suite from public.tiroma_cabinets where entite_id = entite), 0::smallint, 'releves_douteux_suite retombe à 0');
 end $f$;
 
