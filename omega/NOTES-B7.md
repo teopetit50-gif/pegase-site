@@ -551,3 +551,7 @@ taux de référence de la BCE chaque jour ouvré.
   `b7_07_etrangers.sql` (dans tests/identite), la migration des taux `b7_07_taux_bce.sql` (dans modules/taux_bce) :
   même numéro, dossiers différents.
 
+- 6/10 16 h 29 Z (coordinateur) : b7_07 taux BCE et son test posés, `^test_b7_14` vert ; `taux-bce` **v1** déployé
+  (coquille 67fd7ff) ; crons `omega-taux-bce` (35 14,15 * * 1-5) et `taux-bce-veille` (0 17 * * 1-5). Le lot des
+  contraintes d'A4 sera **a4_25** ; b7_06 attend derrière. Signalé : les créneaux du jour étaient passés, la veille de
+  17 h Z lèverait une fausse alerte ; proposé un appel à la main avant 17 h Z.
