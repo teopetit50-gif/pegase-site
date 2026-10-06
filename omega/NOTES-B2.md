@@ -68,6 +68,8 @@ Lot 1 posé (b2_01, b2_02 inscrits), TOUT_B2 joué : **5 fichiers verts sur 11**
 
 Second TAP (66f1d09, 01 h 43 Paris) : **8 fichiers verts sur 11** (01, 02, 03, 04, 06 avec FA-2026-000001/000002, 08, 10, 11). Rouges : 05 (alias `p` ambigu avec la variable), 07 (`alertes.cle` n'existe pas : la clé est `cle_regroupement`, préfixée par le module), 09 (joué entre 0 h et 2 h Paris : `current_date` est en UTC, les factures sont datées au fuseau de l'agence). Les trois corrigés, SHA 30877c2 ; le coordinateur a posé `reglages_envois` tavaro (essai) sur le banc et enchaîne banc_01 après le troisième TAP.
 
+Troisième TAP (30877c2, 02 h 06 Paris) : **10 fichiers verts sur 11**. Le seul rouge, 05, a attrapé un vrai défaut de b2_01 : `preparer_approbation` (lot 19c) ne lit `payload.saisi_par` que sous forme de **tableau** d'identifiants, et b2_01 l'écrivait en scalaire ; le référent qui avait chiffré a donc pu approuver sa propre facture, l'ouvrier a facturé, et le rechiffrage hors barème a buté sur « déjà facturé ». Le garde-fou `demandeur_id` du socle ne joue pas non plus ici : la demande est déposée par l'ouvrier (sans `auth.uid`), donc demandeur « systeme ». b2_01 révisée (`jsonb_build_array(...)`, SHA c7f78ff), à reposer ; tests 05 et 08 vérifient le tableau. L'écran /espace/tavaro est fusionné sur main par le coordinateur (omegaai.fr le servira après la remise à zéro du quota Vercel).
+
 ## 4. Fait / en cours
 
 - 06/10 matin : lecture de CLAUDE.md, AGENTS.md, CONTRAT-OUVRIER, NOTES-COORDINATEUR, NOTES-A3, SOCLE-EXTRAITS-TAVARO (17 tables, 110 fonctions, 4 crons) et de la promesse du site ; scénario écrit (ci-dessus) et envoyé au coordinateur.
