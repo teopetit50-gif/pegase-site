@@ -281,4 +281,10 @@ export const DOSSIER_EXEMPLE: Dossier = {
       { patient_id: "pa-20", patient_nom: "Hugo Ternel", derniere_visite: aujourdHui(-6), praticien: "Dr Mathis Rousseau" },
     ],
   },
+  /* b3_17 : les absences probables des trois prochains jours */
+  absences: [
+    { rendez_vous_id: "rdv-12", debut: a(2, 9, 0), patient_id: "pa-13", patient_nom: "Georges Pétro", praticien_nom: "Dr Ambre Lacour", fauteuil_nom: "Fauteuil 2", score: 0, niveau: "annonce", raisons: ["a répondu NON au rappel : créneau à libérer"], annonce: true },
+    { rendez_vous_id: "rdv-21", debut: a(1, 16, 30), patient_id: "pa-21", patient_nom: "Dimitri Saint-Ange", praticien_nom: "Dr Mathis Rousseau", fauteuil_nom: "Fauteuil 1", score: 4, niveau: "fort", raisons: ["2 rendez-vous manqués en 18 mois", "créneau où les absences sont fréquentes au cabinet"], annonce: false },
+    { rendez_vous_id: "rdv-22", debut: a(1, 8, 30), patient_id: "pa-22", patient_nom: "Maëlys Darius", praticien_nom: "Dr Ambre Lacour", fauteuil_nom: "Fauteuil 3", score: 2, niveau: "moyen", raisons: ["nouveau patient", "pris il y a 74 jours"], annonce: false },
+  ],
 };

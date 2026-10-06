@@ -280,6 +280,7 @@ export type Dossier = {
   rappels: Rappels | null;
   synthese: Synthese | null;
   reinscription: Reinscription | null;
+  absences: AbsenceProbable[] | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -439,4 +440,19 @@ export type Reinscription = {
   precedent: { taux: number | null; visites: number | null };
   par_praticien: { praticien_id: string | null; nom: string | null; visites: number; reinscrits: number; taux: number | null }[];
   sans_suite: { patient_id: string; patient_nom: string; derniere_visite: string; praticien: string | null }[];
+};
+
+/* ——— les absences probables (b3_17) ——— */
+
+export type AbsenceProbable = {
+  rendez_vous_id: string;
+  debut: string;
+  patient_id: string;
+  patient_nom: string;
+  praticien_nom: string | null;
+  fauteuil_nom: string | null;
+  score: number;
+  niveau: "fort" | "moyen" | "annonce";
+  raisons: string[];
+  annonce: boolean;
 };

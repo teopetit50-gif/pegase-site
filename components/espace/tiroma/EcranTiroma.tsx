@@ -20,6 +20,7 @@ import { useSource } from "../source";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Ruban, Vide } from "../ui";
 import Appels, { DialogueAppel, type NoteAppel } from "./Appels";
+import Absences from "./Absences";
 import AvantRendezVous from "./AvantRendezVous";
 import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
@@ -374,6 +375,7 @@ export default function EcranTiroma() {
             <Creneaux creneaux={dossier.creneaux} horizon={dossier.regles?.horizon_creneaux_jours ?? 2} derniers={dossier.appels?.derniers} appeler={dossier.appels ? setCibleAppel : undefined} />
             <Plans plans={dossier.plans} noterMutuelle={noter} derniers={dossier.appels?.derniers} appeler={dossier.appels ? setCibleAppel : undefined} />
           </div>
+          <Absences absences={dossier.absences} appeler={dossier.appels ? setCibleAppel : undefined} />
           <Appels registre={dossier.appels} titulaire={titulaire} appeler={setCibleAppel} />
           <SyntheseSemaine synthese={dossier.profil === "titulaire" || dossier.profil === "direction" ? dossier.synthese : null} />
           <Reinscription reinscription={dossier.reinscription} appeler={dossier.appels ? setCibleAppel : undefined} />

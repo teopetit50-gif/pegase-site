@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -118,8 +118,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const synthese = profil === "titulaire" || profil === "direction" ? await quiet(rpc<Synthese | null>("tiroma_synthese_semaine", { p_client: c, p_entite: null, p_lundi: null }, null), null, "synthèse de la semaine") : null;
   /* b3_16 : la réinscription (titulaire, assistante, direction) */
   const reinscription = profil === "titulaire" || profil === "assistante" || profil === "direction" ? await quiet(rpc<Reinscription | null>("tiroma_reinscription", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "réinscription") : null;
+  /* b3_17 : les absences probables des trois prochains jours (titulaire, assistante, collaborateur) */
+  const absences = profil && profil !== "direction" ? await quiet(rpc<AbsenceProbable[] | null>("tiroma_absences_probables", { p_client: c, p_entite: e, p_jours: 3 }, null), null, "absences probables") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences },
     avis,
   };
 }
