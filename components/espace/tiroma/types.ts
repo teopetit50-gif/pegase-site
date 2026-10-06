@@ -284,6 +284,7 @@ export type Dossier = {
   equipe: AbsenceEquipe[] | null;
   demiJournees: DemiJournees | null;
   objectifs: Objectifs | null;
+  reglesCommunes: ReglesCommunes | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -519,4 +520,11 @@ export type ObjectifFauteuil = {
 export type Objectifs = {
   semaines: { lundi: string; nature: "realisee" | "prevue"; en_cours: boolean }[];
   fauteuils: ObjectifFauteuil[];
+};
+
+/* ——— les règles de priorité communes à plusieurs centres (b3_22) ——— */
+
+export type ReglesCommunes = {
+  centres: { entite_id: string; nom: string; regles: Record<string, unknown> }[];
+  ecarts: string[];
 };

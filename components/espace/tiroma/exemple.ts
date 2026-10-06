@@ -331,6 +331,14 @@ export const DOSSIER_EXEMPLE: Dossier = {
       objectifFauteuil(F3, "Fauteuil 3", 0.7, [0.72, 0.75, 0.7, 0.81, 0.69, 0.48]),
     ],
   },
+  /* b3_22 : les règles de priorité des deux centres du titulaire (deux écarts) */
+  reglesCommunes: {
+    centres: [
+      { entite_id: ENTITE_CABINET, nom: ENTITE_CABINET_NOM, regles: { ordre_priorite: ["plan", "attente", "controle"], nb_propositions: 3, seuil_controle_mois: 12, seuil_demi_journee_vide: 0.2 } },
+      { entite_id: "00000000-0000-4000-8000-0000000000e4", nom: "Centre dentaire du Gosier (exemple)", regles: { ordre_priorite: ["attente", "plan", "controle"], nb_propositions: 5, seuil_controle_mois: 12, seuil_demi_journee_vide: 0.2 } },
+    ],
+    ecarts: ["nb_propositions", "ordre_priorite"],
+  },
   /* b3_19 : les demi-journées vides des quatorze prochains jours */
   demiJournees: {
     du: aujourdHui(0), au: aujourdHui(14), seuil: 0.2,

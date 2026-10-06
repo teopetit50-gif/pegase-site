@@ -32,6 +32,7 @@ import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
 import Pilotage from "./Pilotage";
 import Plans, { type Mutuelle } from "./Plans";
 import Rappels, { type NouveauContact } from "./Rappels";
+import ReglesCommunes from "./ReglesCommunes";
 import Reinscription from "./Reinscription";
 import SyntheseSemaine from "./SyntheseSemaine";
 import { DOSSIER_EXEMPLE } from "./exemple";
@@ -39,7 +40,7 @@ import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
   ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
-  noterAppel, noterContact, retirerContact, noterAbsenceMembre, retirerAbsenceMembre, fixerObjectif,
+  noterAppel, noterContact, retirerContact, noterAbsenceMembre, retirerAbsenceMembre, fixerObjectif, alignerRegles,
 } from "./portes";
 import type { AbsenceEquipe, Cabinet as CabinetT, ObjectifFauteuil, CibleAppel, ContactPatient, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
 
@@ -307,6 +308,25 @@ export default function EcranTiroma() {
     await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
+  /* b3_22 : aligner les autres centres sur celui-ci ; en exemple, en mémoire */
+  const alignerLesRegles = useCallback(async (): Promise<number> => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => {
+        const rc = prev.reglesCommunes;
+        const src = rc?.centres.find((c) => c.entite_id === prev.cabinet.entite_id);
+        if (!rc || !src) return prev;
+        return { ...prev, reglesCommunes: { centres: rc.centres.map((c) => ({ ...c, regles: { ...c.regles, ...src.regles } })), ecarts: [] } };
+      });
+      return Math.max((local.reglesCommunes?.centres.length ?? 1) - 1, 0);
+    }
+    const d = reel?.dossier;
+    if (!d) throw new Error("Aucun cabinet ouvert.");
+    const n = await alignerRegles(d.cabinet);
+    await charger(d.cabinet.id);
+    return n;
+  }, [source, reel, charger, local]);
+
   const installer = async () => {
     if (!reel?.compte || !entiteInst) return;
     setInstalle(true);
@@ -443,6 +463,7 @@ export default function EcranTiroma() {
           <DemiJournees demiJournees={dossier.profil === "titulaire" || dossier.profil === "collaborateur" ? dossier.demiJournees : null} titulaire={titulaire} />
           <Rappels rappels={dossier.rappels} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} noter={noterUnContact} retirer={retirerUnContact} />
           <ListeAttente attente={dossier.attente} praticiens={dossier.praticiens} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} inscrire={inscrire} retirer={retirer} />
+          {titulaire ? <ReglesCommunes regles={dossier.reglesCommunes} entiteCourante={dossier.cabinet.entite_id} aligner={alignerLesRegles} /> : null}
           <Cabinet dossier={dossier} agir={agir} />
           <DialogueAppel cible={cibleAppel} jour={dossier.appels?.jour ?? new Date().toISOString().slice(0, 10)} fermer={() => setCibleAppel(null)} noter={noterUnAppel} />
         </div>
