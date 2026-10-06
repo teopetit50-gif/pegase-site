@@ -89,6 +89,13 @@ create table if not exists public.loc_contestations (
   constraint loc_contestations_issue check ((statut in ('gagnee', 'perdue', 'abandonnee')) = (issue_le is not null)),
   constraint loc_contestations_textes_check check (char_length(issue_note) <= 1000 and char_length(notes) <= 2000)
 );
+-- Le chemin du dossier dans omega-clients : l'écran le télécharge (lien signé) quand l'envoi n'est pas réglé.
+alter table public.loc_contestations add column if not exists dossier_chemin text;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'loc_contestations_chemin_check') then
+    alter table public.loc_contestations add constraint loc_contestations_chemin_check check (char_length(dossier_chemin) between 1 and 1024);
+  end if;
+end $$;
 comment on table public.loc_contestations is 'b2_09 : contestations bancaires d''une facture (rétrofacturation) et le dossier de réponse envoyé à la banque';
 
 create index if not exists loc_contestations_a_suivre on public.loc_contestations (client_id, repondre_avant) where statut in ('ouverte', 'dossier_pret');
@@ -431,7 +438,7 @@ begin
     where pc.client_id = k.client_id and pc.module = 'tavaro' and pc.objet_type = 'loc_contestations' and pc.objet_id = k.id::text and pc.sha256 = p_piece ->> 'sha256';
   end if;
   update public.loc_contestations
-     set dossier_piece_id = v_piece, dossier_sha256 = p_piece ->> 'sha256', dossier_le = now(),
+     set dossier_piece_id = v_piece, dossier_sha256 = p_piece ->> 'sha256', dossier_le = now(), dossier_chemin = left(p_piece ->> 'chemin', 1024),
          dossier_pages = case when jsonb_typeof(p_piece -> 'pages') = 'number' then (p_piece ->> 'pages')::integer end,
          statut = case when statut = 'ouverte' then 'dossier_pret' else statut end
    where id = k.id
