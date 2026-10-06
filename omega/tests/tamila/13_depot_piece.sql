@@ -54,7 +54,7 @@ begin
   -- Un dossier clos ne reçoit plus rien.
   update public.tamila_dossiers set statut = 'clos', statut_avant_cloture = 'ouvert', clos_le = now() where id = (jeu ->> 'dossier')::uuid;
   perform tests.endosser((jeu ->> 'gerant')::uuid, 'b4-delorme@essai.invalid');
-  return next throws_ok(format('select public.tamila_deposer_piece(%L::uuid, ''y.pdf'', ''application/pdf'', 10, %L, %L)', jeu ->> 'dossier', md5('y') || md5('y2'), (jeu ->> 'client') || '/tamila_dossier/' || (jeu ->> 'dossier') || '/y.pdf'), '55000', null, 'un dossier clos ne reçoit plus de pièce (55000)');
+  return next throws_ok(format('select public.tamila_deposer_piece(%L::uuid, ''y.pdf'', ''application/pdf'', 10, %L, %L)', jeu ->> 'dossier', md5('y') || md5('y2'), (jeu ->> 'client') || '/tamila_dossier/' || (jeu ->> 'dossier') || '/y.pdf'), '42501', null, 'un dossier clos ne reçoit plus de pièce : on n''y écrit plus (42501, le droit est vérifié avant l''état)');
   perform tests.redevenir_admin();
 end $f$;
 

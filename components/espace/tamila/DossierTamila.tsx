@@ -382,7 +382,9 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
             const clair = new Uint8Array(await fichier.arrayBuffer());
             const chiffre = await chiffrerOctets(cle, clair);
             const sha = await empreinte(chiffre);
-            const chemin = `${clientId}/tamila_dossier/${d.id}/${nom}.chiffre`;
+            /* le chemin porte le début de l'empreinte : deux dépôts du même nom ne se recouvrent jamais
+               (le bucket n'accorde que l'ajout aux membres, pas la réécriture) */
+            const chemin = `${clientId}/tamila_dossier/${d.id}/${nom}.${sha.slice(0, 12)}.chiffre`;
             await portes.televerser(chemin, chiffre);
             return portes.deposerPiece(d.id, nom, fichier.type || "application/octet-stream", chiffre.length, sha, chemin, type);
           },

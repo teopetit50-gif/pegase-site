@@ -7,8 +7,8 @@ Dernière mise à jour : 06/10/2026, matin (lot B4-2 : corrections du retour de 
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **60 %** — joué par le coordinateur sur a05d25c : 6 fichiers verts sur 11 (01, 02, 03, 06, 07, 08) ; les 5 rouges corrigés (3 défauts de mes tests, 1 trou du socle → b4_04) ; 12 et 13 écrits, pas encore joués | 00 à 13 verts sur la recette après b4_01 à b4_04 |
-| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **50 %** — écran complet (9 cartes, dépôt de pièce chiffrée), onglet dans la navigation, vert (tsc, eslint, build, recette cinq largeurs) ; la base réelle n'a pas encore été appelée | fusion sur main, relecture avec le compte du banc (tamila_installer puis un dossier réel), le coffre |
+| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **65 %** — en plus des tests : la chaîne complète rejouée pour de vrai sur la recette depuis l'écran (voir § 8) — joué par le coordinateur sur a05d25c : 6 fichiers verts sur 11 (01, 02, 03, 06, 07, 08) ; les 5 rouges corrigés (3 défauts de mes tests, 1 trou du socle → b4_04) ; 12 et 13 écrits, pas encore joués | 00 à 13 verts sur la recette après b4_01 à b4_04 |
+| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **80 %** — écran complet, et **rejoué en base réelle avec les comptes du banc** (§ 8) : installation, dossier chiffré, partie, appel, délai calculé par le socle, pièce chiffrée déposée, membre, confirmation par l'avocat ; pas encore en ligne | fusion sur main et vérification sur omegaai.fr ; le coffre (lecture des pièces chiffrées) ; audiences, murailles, export et clôture rejoués en réel |
 
 ## Ce qui manque, ce que Teo doit fournir
 
@@ -221,13 +221,43 @@ restent valables). **Écran prêt à fusionner** : `app/espace/tamila/page.tsx`,
 `components/espace/tamila/{EcranTamila,DossierTamila}.tsx`, `components/espace/tamila/tamila.css`,
 `components/espace/ecrans.ts` (ligne tamila + son type), `omega/recette-b4/*`.
 
+## 8. Relecture en base réelle — faite le 06/10 (recette, comptes du banc)
+
+`node omega/recette-b4/relecture-reelle.mjs <session-gerant.json> <session-referent.json>` (dev
+pointé sur la recette, `RECETTE_MANDATAIRE=1` pour que Chromium passe le mandataire TLS du
+conteneur ; `TAMILA_REF=BANC-10060001` pour rejouer sur le dossier existant). Résultat : **tout
+passe**, captures `omega/recette-b4/reel-*-1440.jpg`.
+
+- Gérant : « Installer Tamila » a posé les réglages et les règles du banc ; phrase du cabinet
+  mémorisée ; dossier `BANC-10060001` ouvert (clé tirée et enveloppée dans le navigateur, référence,
+  intitulé et RG chiffrés), relu déchiffré ; partie « SCI du Moulin », client appelant demeurant en
+  Guadeloupe (nom chiffré, relu déchiffré) ; appel déclaré au 15/09/2026 → le socle a posé le délai
+  de l'art. 908 : **15/01/2027, « 3 mois … augmentés d'un mois (partie demeurant outre-mer devant une
+  juridiction de métropole, art. 915-4) »**, à confirmer ; pièce chiffrée dans le navigateur, envoyée
+  au bucket sous `<client>/tamila_dossier/<dossier>/<nom>.<sha12>.chiffre`, déposée par
+  `tamila_deposer_piece` (b4_01 posée par le coordinateur) ; Me Referent ajouté en intervenant.
+- Referent (valideur) : voit le dossier (chiffré sans la phrase), tape la phrase → la clé lui vient
+  par `tamila_cle_dossier` (b4_03) et la référence se déchiffre ; **confirme le délai** → « Approuvé :
+  la décision est exécutée », délai « Confirmé », compteur à 0.
+- Deux leçons prises à chaud : le bucket n'accorde que l'ajout (pas la réécriture) aux membres → le
+  chemin d'une pièce porte le début de son empreinte, jamais d'`upsert` ; l'annuaire ne donne ni nom
+  ni courriel au gérant du banc → repli « Vous » / rôle, jamais un identifiant brut.
+- Trois dossiers d'essai restent sur le banc (`BANC-10052357`, `BANC-10052359`, `BANC-10060001`) :
+  données du banc, à clôturer un jour par le gérant.
+- Suite rejouée en réel (`TAMILA_SUITE=1`, mêmes comptes, 06/10) : audience de mise en état posée
+  (12/11/2026) ; avis d'audience saisi → le socle l'applique et pose l'audience du 04/02/2027 ;
+  muraille sur Daf (motif chiffré) → « En place », levée demandée → décision du gérant → « Levée » ;
+  export demandé → « En préparation » (le travail `tamila.exporter` attend son ouvrier, qui n'existe
+  pas encore) ; clôture demandée → approuvée par le gérant → « Clos », effacement daté → annulation
+  → « Ouvert » ; le journal des accès (b4_02) liste les consultations. Captures
+  `reel-audiences`, `reel-muraille`, `reel-cloture`, `reel-journal`. **Tout le scénario est donc
+  prouvé en réel, sauf l'effacement à l'échéance et l'archive (ouvriers absents).**
+
 ## 7. Prochaine étape
 
-1. Relecture en base réelle avec le compte du banc (dev pointé sur la recette, variables
-   NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY données par le coordinateur) :
-   installer Tamila, ouvrir un dossier chiffré, parties, appel, confirmer un délai avec referent,
-   déposer une pièce ; captures `omega/recette-b4/reel-*.jpg`.
-2. Souche locale (`omega/tests/tamila/souche_locale/`, en cours) : finir 03_pgtap et jouer.sh pour
+1. Fusion sur main par le coordinateur, puis vérification sur omegaai.fr/espace/tamila.
+2. Relire les sorties pgTAP du lot B4-2 ; corriger jusqu'au vert.
+3. Souche locale (`omega/tests/tamila/souche_locale/`, en cours) : finir 03_pgtap et jouer.sh pour
    jouer les tests ici avant chaque lot.
 
 ## 5 bis. Lot B4-1 au coordinateur (05/10, 23 h)
@@ -249,3 +279,4 @@ restent valables). **Écran prêt à fusionner** : `app/espace/tamila/page.tsx`,
 - 05/10, 23 h — pause demandée par le coordinateur (limite d'usage) ; reprise le 06/10.
 - 06/10, matin — retour de recette traité (00, 11, b4_04), b4_01 + test 13, carte Pièces et dépôt
   chiffré à l'écran, onglet dans ecrans.ts, souche locale commencée. Lot B4-2 envoyé (367fc44).
+- 06/10 — relecture en base réelle, tout passe (§ 8).
