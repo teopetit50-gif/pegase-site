@@ -840,3 +840,14 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Fusionnés dans main : Daliro encaissement (187e1c1), notice Tamila (3d0e1a0) → 93ff8ee.
   **Vercel : 93ff8ee refusé « Deployment rate limited — retry in 24 hours »** (quota gratuit). En ligne :
   1f6427c. C1 limité à 2–3 pushes par jour. Les fusions suivantes partiront au retour du quota.
+- 16 h 05 Z — **Teo absent plusieurs heures : décisions par le coordinateur** (son autorisation ;
+  objectif « livrer tout ce que le site promet »). Routine passée à toutes les heures ; audit des
+  promesses du site lancé (agent en lecture). Poses : b4_08 + test 17 (2556214), test 19ah corrigé
+  (631ea79), b1_06 + test b1_09 (ccc8f8f), b5_13b (7515fbd). Tests : b4_17 vert, b1_09 2/2, 51 vert,
+  44 vert, **19ah 19/20** (n° 16 : donnees_fictives vrai sur un envoi ordinaire → B3 corrige le lot).
+  Fusionnés dans main 26cdd66 (build vert, en ligne au retour du quota) : Lorani chantier (7515fbd),
+  Varelo réciproques (ccc8f8f), FILED facture électronique + Comptabilité/FEC (A3 5091088), lecteur
+  Tamila (2556214). Décision Tamila : avis RPVA par le canal courriel (file « à rattacher », chiffrés
+  au rattachement, copie en clair purgée, 7 j max) → B4 b4_09. A4 : TVA dans le cdar (fournisseur
+  étranger) → a4_19, puis echange-pa 21466c7 et rejeu du 204. A1 : branchement avis Tamila.
+  B2 b2_06 annoncé mais pas poussé.
