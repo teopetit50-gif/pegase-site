@@ -3,7 +3,11 @@
 Branche `worker-a4`. Périmètre : `omega/migrations/a4_*.sql`, `omega/tests/filed/`.
 Recette seulement (omega-recette) ; la production est au coordinateur.
 
-## Organisation (05/10/2026)
+## Organisation (05/10/2026, passation le 06/10 à 01:10 UTC)
+
+- **Coordinateur depuis le 06/10** : la session `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) remplace
+  la session Fable `session_01B4JNQXyT69GytdvE9SjAnE`. Tout (SHA à poser, résultats, questions) lui est
+  adressé désormais ; les règles ne changent pas.
 
 - Le coordinateur applique sur la recette : chaque appel direct à l'outil Supabase bloquait la
   session. Les migrations et les tests sont écrits ici, commités et poussés sur `worker-a4`.
