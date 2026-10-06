@@ -15,6 +15,8 @@ import { CoffreRpc } from "./coffre.ts";
 import type { Contexte } from "./lire_piece.ts";
 import { configMistralDepuisEnv, OcrMistral } from "./ocr.ts";
 import { passage } from "./passage.ts";
+import { SourcePluRest } from "./lorani_plu.ts";
+import { PortesVareloRpc } from "./reception_varelo.ts";
 
 export function contexteDepuisEnv(env: { get(n: string): string | undefined } = Deno.env): Contexte {
   const supabase = configSupabaseDepuisEnv(env);
@@ -30,6 +32,8 @@ export function contexteDepuisEnv(env: { get(n: string): string | undefined } = 
     claude,
     // Les lectures longues : seulement quand le socle a posé commencer_analyse / terminer_analyse (LECTEUR_ANALYSES=1).
     portesAnalyse: env.get("LECTEUR_ANALYSES") === "1" ? new PortesAnalyseRpc(supabase) : null,
+    sourcePlu: new SourcePluRest(supabase),
+    varelo: new PortesVareloRpc(supabase),
     ocr: mistral ? new OcrMistral(mistral) : null,
     env,
     maintenant: () => new Date(),

@@ -8,6 +8,7 @@
 import { CHAMPS_FACTURE, SCHEMA_OUTIL_LECTURE, TYPES_PIECE } from "./facture.ts";
 import { SCHEMA_LORANI } from "./lorani.ts";
 import { SCHEMA_TAMILA } from "./tamila.ts";
+import { CHAMPS_VARELO, TYPE_BON_LIVRAISON_VARELO } from "./varelo.ts";
 
 export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "dateheure" | "mois" | "booleen" | "choix" | "liste";
 
@@ -90,10 +91,21 @@ export const SCHEMA_FILED: SchemaModule = {
   lignes: true,
 };
 
+/** Varelo : les pièces de FILED, le bon de livraison avec ses champs de réception (schemas/varelo.ts). */
+export const SCHEMA_VARELO: SchemaModule = {
+  ...SCHEMA_FILED,
+  module: "varelo",
+  presentation:
+    "une plateforme qui lit les pièces des sociétés d'un groupe de distribution (factures, avoirs, bons de livraison et lettres de voiture, devis, relevés, contrats)",
+  types: SCHEMA_FILED.types.map((t) => t.type === "bon_livraison" ? TYPE_BON_LIVRAISON_VARELO : t),
+  champs: [...SCHEMA_FILED.champs, ...CHAMPS_VARELO],
+};
+
 export const SCHEMAS_PAR_MODULE: Record<string, SchemaModule> = {
   filed: SCHEMA_FILED,
   lorani: SCHEMA_LORANI,
   tamila: SCHEMA_TAMILA,
+  varelo: SCHEMA_VARELO,
 };
 
 /** Le schéma d'un module ; FILED pour un module sans schéma propre (les factures se lisent partout). */

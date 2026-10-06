@@ -200,6 +200,7 @@ Deno.test("table des types par module : schémas d'outil et consignes", () => {
     "lorani_planche",
     "lorani_cctp",
     "lorani_dpgf",
+    "lorani_metre",
     "lorani_plu_reglement",
     "autre",
   ]);

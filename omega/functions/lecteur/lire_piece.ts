@@ -8,7 +8,7 @@ import { ErreurOuvrier } from "@partage/erreurs.ts";
 import { journal, messageDe } from "@partage/journal.ts";
 import type { PageLue, Piece, Portes, ResultatLecture, StatutLecture, Travail, ValeurLue } from "@partage/portes.ts";
 import { detecter, type Detection } from "./detecter.ts";
-import type { EntreeIa, Extracteur, PageTranscrite, SortieIa } from "./ia.ts";
+import type { ContextePiece, EntreeIa, Extracteur, PageTranscrite, SortieIa } from "./ia.ts";
 import { LIMITE_DOCUMENT_OCTETS } from "./ia.ts";
 import { decouperSousLimite, PAGES_PAR_MORCEAU } from "./pdf_decouper.ts";
 import type { Ocr } from "./ocr.ts";
@@ -23,6 +23,8 @@ import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts"
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
+import { controlerZone, indicationPlu, type SourcePlu, zonesPourPiece } from "./lorani_plu.ts";
+import { type BilanReception, type PortesVarelo, poserReception } from "./reception_varelo.ts";
 
 export interface Environnement {
   get(nom: string): string | undefined;
@@ -37,6 +39,10 @@ export interface Contexte {
   claude?: ClientClaude | null;
   /** Les portes des lectures longues (commencer_analyse, terminer_analyse). */
   portesAnalyse?: Pick<PortesAnalyse, "commencerAnalyse" | "terminerAnalyse"> | null;
+  /** Lorani : la zone PLU du terrain du projet, donnée au modèle avant de lire un règlement (b5_17). */
+  sourcePlu?: SourcePlu | null;
+  /** Varelo : un bon de livraison lu pré-remplit la réception (grp_enregistrer_reception, b1_11). */
+  varelo?: PortesVarelo | null;
   extracteur: Extracteur | null;
   ocr: Ocr | null;
   env: Environnement;
@@ -155,6 +161,17 @@ async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace
       journal("alerte", "découpage en pièces filles impossible : les documents suivants restent dans la mère", { ...trace, erreur: code });
     }
   }
+  // Un bon de livraison Varelo pré-remplit la réception et sa date limite de protestation (b1_11).
+  let reception: BilanReception | { reception: "erreur"; erreur: string } | undefined;
+  if (ctx.varelo && piece.module === "varelo" && bilan.resultat.type_piece === "bon_livraison" && ["lue", "a_verifier"].includes(bilan.resultat.statut)) {
+    try {
+      reception = await poserReception(ctx.varelo, piece, bilan.resultat, ctx.maintenant().toISOString().slice(0, 10));
+    } catch (e) {
+      const code = e instanceof ErreurOuvrier ? e.code : "ERREUR_INTERNE";
+      reception = { reception: "erreur", erreur: `${code} : ${messageDe(e, 200)}` };
+      journal("alerte", "bon de livraison lu mais réception non posée : à saisir à la main", { ...trace, erreur: code });
+    }
+  }
   const prealable = bilan.prealable ?? SANS_PREALABLE;
   const cout = Math.round(((bilan.ia?.cout_eur ?? 0) + bilan.cout_ocr + prealable.cout_eur) * 1e6) / 1e6;
   await ctx.portes.finirTravail(travail.id, {
@@ -173,6 +190,7 @@ async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace
       : {}),
     ...(dechiffree ? { dechiffree: true } : {}),
     ...(avis ? { avis_rpva: avis } : {}),
+    ...(reception ? { reception_varelo: reception } : {}),
     ...(filles ? { filles: filles.filles, ...("raison" in filles ? { filles_raison: filles.raison } : {}), ...("erreur" in filles ? { filles_erreur: filles.erreur } : {}) } : {}),
   });
   journal("info", "pièce lue", {
@@ -208,7 +226,14 @@ export function sembleXml(piece: Pick<Piece, "mime" | "nom_fichier">): boolean {
 }
 
 async function lire(ctx: Contexte, piece: Piece): Promise<Bilan> {
-  const contexte = { nom_fichier: piece.nom_fichier, mime: piece.mime, module: piece.module };
+  // Lorani : la zone du terrain, quand la base la connaît, guide la lecture d'un règlement de PLUi.
+  const zones = await zonesPourPiece(ctx.sourcePlu, piece);
+  const contexte: ContextePiece = { nom_fichier: piece.nom_fichier, mime: piece.mime, module: piece.module, indication: zones ? indicationPlu(zones) : null };
+  const bilan = await lireFichier(ctx, piece, contexte);
+  return zones ? { ...bilan, resultat: controlerZone(bilan.resultat, zones) } : bilan;
+}
+
+async function lireFichier(ctx: Contexte, piece: Piece, contexte: ContextePiece): Promise<Bilan> {
   // Sans IA, inutile de télécharger ce qu'on ne saura pas lire : on le dit tout de suite.
   if (!ctx.extracteur && !sembleXml(piece)) exigerIa(ctx);
   const tele = await ctx.depot.telecharger(piece.chemin);
@@ -283,13 +308,13 @@ function exigerIa(ctx: Contexte): Extracteur {
   return ctx.extracteur;
 }
 
-async function appelerIa(ctx: Contexte, piece: Piece, entree: EntreeIa, contexte: { nom_fichier: string; mime: string; module: string }): Promise<SortieIa> {
+async function appelerIa(ctx: Contexte, piece: Piece, entree: EntreeIa, contexte: ContextePiece): Promise<SortieIa> {
   const ia = exigerIa(ctx);
   await controlerPlafond(ctx.portes, ctx.env, piece.client_id, ia.estimer(entree));
   return await ia.extraire(entree, contexte);
 }
 
-async function lirePdf(ctx: Contexte, piece: Piece, octets: Uint8Array, contexte: { nom_fichier: string; mime: string; module: string }): Promise<Bilan> {
+async function lirePdf(ctx: Contexte, piece: Piece, octets: Uint8Array, contexte: ContextePiece): Promise<Bilan> {
   let analyse;
   try {
     analyse = await analyserPdf(octets);
@@ -348,7 +373,7 @@ async function lirePdfParMorceaux(
   pagesPdf: PagePdf[],
   nbPages: number,
   methode: "ocr" | "mixte",
-  contexte: { nom_fichier: string; mime: string; module: string },
+  contexte: ContextePiece,
 ): Promise<Bilan> {
   const ia = exigerIa(ctx);
   // Le plafond se contrôle une fois, sur le coût de toute la lecture : transcriptions, puis extraction.
@@ -406,7 +431,7 @@ async function lireImage(
   piece: Piece,
   octets: Uint8Array,
   det: Detection,
-  contexte: { nom_fichier: string; mime: string; module: string },
+  contexte: ContextePiece,
 ): Promise<Bilan> {
   exigerIa(ctx);
   if (ctx.ocr) {
@@ -425,7 +450,7 @@ async function lireTableur(
   piece: Piece,
   octets: Uint8Array,
   det: Detection,
-  contexte: { nom_fichier: string; mime: string; module: string },
+  contexte: ContextePiece,
 ): Promise<Bilan> {
   let feuilles;
   try {
@@ -444,7 +469,7 @@ async function extraireDepuisTexte(
   pages: PageLue[],
   pagesPdf: PagePdf[] | null,
   methode: "natif" | "ocr" | "mixte" | "tableur",
-  contexte: { nom_fichier: string; mime: string; module: string },
+  contexte: ContextePiece,
   coutOcr: number,
   prealable: Prealable = SANS_PREALABLE,
 ): Promise<Bilan> {

@@ -56,6 +56,22 @@ const FAMILLES_CONTROLE: FamilleChamps[] = [
     description: "un poste chiffré à la DPGF : valeur = sa quantité, en nombre ; <référence> normalisée comme au CCTP.",
   },
   {
+    famille: "quantite.<référence>",
+    motif: "^quantite\\.[a-z0-9_]{1,40}$",
+    type: "nombre",
+    types: ["lorani_metre", "lorani_planche"],
+    description:
+      "une quantité mesurée pour un poste (surface, longueur, volume, nombre), en nombre sans unité ; <référence> normalisée comme au CCTP. Sur une planche, seulement la quantité écrite pour ce poste (tu ne mesures rien sur le dessin).",
+  },
+  {
+    famille: "unite.<référence>",
+    motif: "^unite\\.[a-z0-9_]{1,40}$",
+    type: "texte",
+    max: 10,
+    types: ["lorani_metre", "lorani_dpgf"],
+    description: "l'unité du poste, ramenée à m2, ml, m3, u, kg, t, ens ou h (m² → m2, mètre linéaire → ml, unité / pièce → u, forfait / ensemble → ens).",
+  },
+  {
     famille: "regle.<grandeur>.max|min",
     motif: `^regle\\.(${G})\\.(max|min)$`,
     type: "nombre",
@@ -162,7 +178,15 @@ export const SCHEMA_LORANI: SchemaModule = {
     {
       type: "lorani_dpgf",
       libelle: "DPGF",
-      description: "la décomposition du prix global et forfaitaire d'un lot : le lot et une ligne par poste chiffré (poste.<référence>, valeur = quantité)",
+      description: "la décomposition du prix global et forfaitaire d'un lot : le lot, une ligne par poste chiffré (poste.<référence>, valeur = quantité) et son unité (unite.<référence>)",
+      champs: ["lot"],
+      cles: [],
+    },
+    {
+      type: "lorani_metre",
+      libelle: "métré",
+      description:
+        "le métré d'un lot (par l'économiste) : le lot, et par poste sa quantité mesurée (quantite.<référence>) et son unité (unite.<référence>)",
       champs: ["lot"],
       cles: [],
     },
@@ -170,7 +194,7 @@ export const SCHEMA_LORANI: SchemaModule = {
       type: "lorani_plu_reglement",
       libelle: "règlement du PLU",
       description:
-        "le règlement écrit du PLU pour la zone du terrain : la zone, et par règle chiffrée regle.<grandeur>.max ou .min (la valeur) et regle.<grandeur>.article (l'article)",
+        "le règlement écrit du PLU (ou du PLUi) pour la zone du terrain : la zone, et par règle chiffrée regle.<grandeur>.max ou .min (la valeur) et regle.<grandeur>.article (l'article). Un règlement qui couvre plusieurs zones : seulement les règles de la zone du terrain, quand elle est indiquée dans le message",
       champs: ["zone"],
       cles: [],
     },

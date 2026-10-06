@@ -221,6 +221,26 @@ Les clés sont les champs « obligatoires » de la fiche de B5 ; `numero_dossier
 
 Pas de `lignes` ni de `tva.ventilation` pour ce module.
 
+**Métré et PLUi (B5, worker-b5 3c838eb)** : `lorani_metre` (`lot`), avec par poste `quantite.<référence>` (nombre ; aussi sur une planche, la quantité écrite pour ce poste) et `unite.<référence>` (texte ≤ 10, ramené à `m2`, `ml`, `m3`, `u`, `kg`, `t`, `ens`, `h` ; aussi sur une DPGF). Pour une pièce rattachée à un projet (`objet_type = 'lorani_projet'`), le lecteur lit la zone du terrain dans `public.lorani_plu` (`zone`, puis les `libelle` de `zones`, clé de service) et la donne au modèle : un règlement de PLUi ne rend que les `regle.*` de cette zone, `zone` = cette zone. Une `zone` lue qui n'est pas une zone du terrain envoie la pièce `a_verifier` (« Zone lue « UB » : le terrain est en « UMa » ; les règles rendues sont à vérifier. »). Sans ligne `lorani_plu`, rien ne change : la zone se lit sur la pièce.
+
+## Module Varelo — bon de livraison et réception (B1, b1_11)
+
+Les pièces d'une société du groupe se lisent comme dans FILED (factures, avoirs… mêmes champs et clés), sauf `bon_livraison`, qui porte les champs de la réception (fiche : `omega/NOTES-B1.md`, worker-b1 306d644). Clés : `transporteur`, `date_livraison`.
+
+| Champ | Type de `valeur` | Description | Exemple |
+|---|---|---|---|
+| `transporteur` | texte (≤ 200) | le transporteur qui a livré | `"Transports Caraïbes Express"` |
+| `document_transport` | texte (≤ 80) | n° de lettre de voiture, CMR, connaissement, LTA | `"LV-2026-0915"` |
+| `date_livraison` | texte `AAAA-MM-JJ` | date de la livraison | `"2026-10-03"` |
+| `colis_annonces` | entier, 0 à 100 000 | colis (ou palettes) annoncés | `12` |
+| `colis_recus` | entier, 0 à 100 000 | colis reçus, s'il est écrit | `10` |
+| `reserves_ecrites` | texte (≤ 1000) | réserves portées sur le bon, mot pour mot | `"2 colis manquants, 1 carton écrasé"` |
+| `expediteur` | texte (≤ 200) | l'expéditeur (fournisseur) | `"Sodimat SA"` |
+| `expediteur_siren` | texte (9 chiffres) | son SIREN, s'il est imprimé | `"412345678"` |
+| `mode` | texte parmi `routier`, `cmr`, `maritime`, `aerien` | mode de transport (règle de délai de la protestation) | `"routier"` |
+
+**Passerelle réception (b1_11)** : après l'enregistrement d'un `bon_livraison` lu ou à vérifier, si la pièce est rattachée à une société (`objet_type = 'grp_societes'`, `objet_id` = l'entité), le lecteur appelle `grp_enregistrer_reception(p_client, p_entite, p_champs)` avec les **seules valeurs vérifiées** : `date_reception` ← `date_livraison`, `transporteur`, `document_transport`, `mode`, `expediteur` (« Nom (SIREN …) »), `colis_attendus` ← `colis_annonces`, `colis_recus`, `reserves_sur_bon` ← `reserves_ecrites` sauf formule vague (« sous réserve de déballage » ne vaut pas réserve), `piece_id`. `manquant` = moins de colis reçus qu'annoncés ; une réserve précise sans manquant compte comme `avarie` (la livraison part « à examiner », une personne confirme) ; `constat` = « Lu sur le bon de livraison, à confirmer : … ». `travaux.resultat.reception_varelo` dit `posee` (id, statut, échéance), `non_posee` (`societe_inconnue`, `transporteur_non_verifie`, `date_non_verifiee`, `date_future`) ou `erreur` (la lecture reste, la réception est à saisir à la main).
+
 ## Module Tamila — avis RPVA des cabinets d'avocats (lecture par le coffre serveur)
 
 Dix types d'avis, un par valeur de `tamila_avis.type_avis`, plus `tamila_piece_autre`, conformes à la fiche de B4 (`omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md`, worker-b4 66ec6fb), et des champs qui portent **le nom exact des clés de `p_valeurs`** de `public.tamila_avis_lu(p_client, p_dossier, p_piece, p_type, p_valeurs, p_confiance, p_rg_concorde)` (B4, `omega/SOCLE-EXTRAITS-TAMILA.sql`) : celui qui applique une lecture passe `type_piece` en `p_type` et l'objet `{champ: valeur}` des valeurs vérifiées en `p_valeurs`, `p_confiance = 'modele'`. `numero_rg` n'est pas lu par `tamila_avis_lu` : il sert à calculer `p_rg_concorde` contre le n° RG du dossier, qui est chiffré (le lecteur ne le voit pas, la comparaison se fait là où la clé du dossier est déballée).

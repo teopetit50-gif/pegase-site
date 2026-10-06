@@ -40,6 +40,12 @@ export interface ContextePiece {
   nom_fichier: string;
   mime: string;
   module: string;
+  /** Ce que la base sait déjà de l'objet de la pièce et que le modèle doit suivre (Lorani : la zone PLU du terrain). */
+  indication?: string | null;
+}
+
+function suffixe(piece: ContextePiece): string {
+  return piece.indication ? `\n\nÀ savoir sur ce dossier : ${piece.indication}` : "";
 }
 
 export interface PageTranscrite {
@@ -97,7 +103,7 @@ export const CONSIGNE_SYSTEME = consigneSysteme("filed");
 
 function consigneTexte(pages: { n: number; texte: string }[], piece: ContextePiece): string {
   const corps = pages.map((p) => `===== Page ${p.n} =====\n${p.texte}`).join("\n\n");
-  return `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}. Voici le texte du document, page par page. Lis-le et rends l'outil lire_piece.\n\n${corps}`;
+  return `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}. Voici le texte du document, page par page. Lis-le et rends l'outil lire_piece.${suffixe(piece)}\n\n${corps}`;
 }
 
 export class ExtracteurClaude implements Extracteur {
@@ -130,7 +136,7 @@ export class ExtracteurClaude implements Extracteur {
       contenu.push({ document: { format: "pdf" as const, name: "piece", source: { bytes: base64(e.octets) } } });
       contenu.push({
         text:
-          `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}, ${e.nbPages} page(s) sans texte extractible. Transcris chaque page dans « pages », puis rends l'outil lire_piece.`,
+          `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}, ${e.nbPages} page(s) sans texte extractible. Transcris chaque page dans « pages », puis rends l'outil lire_piece.${suffixe(piece)}`,
       });
     } else {
       if (e.octets.length > LIMITE_IMAGE_OCTETS) {
@@ -139,7 +145,7 @@ export class ExtracteurClaude implements Extracteur {
       contenu.push({ image: { format: e.format, source: { bytes: base64(e.octets) } } });
       contenu.push({
         text:
-          `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}. Une image : transcris-la dans « pages » (page 1), puis rends l'outil lire_piece.`,
+          `Fichier : ${piece.nom_fichier} (${piece.mime}), module ${piece.module}. Une image : transcris-la dans « pages » (page 1), puis rends l'outil lire_piece.${suffixe(piece)}`,
       });
     }
     const rep = await this.client.converse({
