@@ -3,18 +3,45 @@
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
   ✓ axe accueil page : 0 écart grave
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
-  ✓ axe a-payer page : 0 écart grave
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ axe validations page : 0 écart grave
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
+  ✓ axe point page : 0 écart grave
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ axe activite page : 0 écart grave
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
   ✓ axe reglages page : 0 écart grave
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
-  ✓ axe a-venir page : 0 écart grave
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ axe filed page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ axe fournisseurs page : 0 écart grave
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ axe varelo page : 0 écart grave
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ axe tavaro page : 0 écart grave
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ axe tiroma page : 0 écart grave
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ axe tamila page : 0 écart grave
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ axe lorani page : 0 écart grave
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
+  ✓ axe daliro page : 0 écart grave
   ✓ Entrée ouvre le menu « … »
   ✓ le focus est sur le premier choix (Noter un paiement…)
   ✓ axe menu ouvert : 0 écart grave
@@ -40,18 +67,45 @@
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
   ✓ axe accueil page : 0 écart grave
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
-  ✓ axe a-payer page : 0 écart grave
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ axe validations page : 0 écart grave
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
+  ✓ axe point page : 0 écart grave
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ axe activite page : 0 écart grave
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
   ✓ axe reglages page : 0 écart grave
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
-  ✓ axe a-venir page : 0 écart grave
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ axe filed page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ axe fournisseurs page : 0 écart grave
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ axe varelo page : 0 écart grave
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ axe tavaro page : 0 écart grave
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ axe tiroma page : 0 écart grave
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ axe tamila page : 0 écart grave
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ axe lorani page : 0 écart grave
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
+  ✓ axe daliro page : 0 écart grave
   ✓ Entrée ouvre le menu « … »
   ✓ le focus est sur le premier choix (Noter un paiement…)
   ✓ axe menu ouvert : 0 écart grave
@@ -76,71 +130,170 @@
 — 768 px, clair
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
   ✓ console propre
 
 — 768 px, sombre
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
   ✓ console propre
 
 — 1024 px, clair
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
   ✓ console propre
 
 — 1024 px, sombre
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
   ✓ console propre
 
 — 1440 px, clair
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
   ✓ axe accueil page : 0 écart grave
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
-  ✓ axe a-payer page : 0 écart grave
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ axe validations page : 0 écart grave
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
+  ✓ axe point page : 0 écart grave
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ axe activite page : 0 écart grave
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
   ✓ axe reglages page : 0 écart grave
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
-  ✓ axe a-venir page : 0 écart grave
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ axe filed page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ axe fournisseurs page : 0 écart grave
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ axe varelo page : 0 écart grave
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ axe tavaro page : 0 écart grave
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ axe tiroma page : 0 écart grave
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ axe tamila page : 0 écart grave
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ axe lorani page : 0 écart grave
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
+  ✓ axe daliro page : 0 écart grave
   ✓ Entrée ouvre le menu « … »
   ✓ le focus est sur le premier choix (Noter un paiement…)
   ✓ axe menu ouvert : 0 écart grave
@@ -163,18 +316,45 @@
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
   ✓ axe accueil page : 0 écart grave
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
-  ✓ axe a-payer page : 0 écart grave
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ axe validations page : 0 écart grave
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
+  ✓ axe point page : 0 écart grave
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ axe activite page : 0 écart grave
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
   ✓ axe reglages page : 0 écart grave
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
-  ✓ axe a-venir page : 0 écart grave
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ axe filed page : 0 écart grave
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ axe a-payer page : 0 écart grave
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ axe fournisseurs page : 0 écart grave
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ axe varelo page : 0 écart grave
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ axe tavaro page : 0 écart grave
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ axe tiroma page : 0 écart grave
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ axe tamila page : 0 écart grave
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ axe lorani page : 0 écart grave
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
+  ✓ axe daliro page : 0 écart grave
   ✓ Entrée ouvre le menu « … »
   ✓ le focus est sur le premier choix (Noter un paiement…)
   ✓ axe menu ouvert : 0 écart grave
@@ -196,27 +376,63 @@
 — 1700 px, clair
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
   ✓ console propre
 
 — 1700 px, sombre
   ✓ accueil se rend
   ✓ accueil : aucun débordement horizontal (0 px)
-  ✓ a-payer se rend
-  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ validations se rend
+  ✓ validations : aucun débordement horizontal (0 px)
+  ✓ point se rend
+  ✓ point : aucun débordement horizontal (0 px)
   ✓ activite se rend
   ✓ activite : aucun débordement horizontal (0 px)
   ✓ reglages se rend
   ✓ reglages : aucun débordement horizontal (0 px)
-  ✓ a-venir se rend
-  ✓ a-venir : aucun débordement horizontal (0 px)
+  ✓ filed se rend
+  ✓ filed : aucun débordement horizontal (0 px)
+  ✓ a-payer se rend
+  ✓ a-payer : aucun débordement horizontal (0 px)
+  ✓ fournisseurs se rend
+  ✓ fournisseurs : aucun débordement horizontal (0 px)
+  ✓ varelo se rend
+  ✓ varelo : aucun débordement horizontal (0 px)
+  ✓ tavaro se rend
+  ✓ tavaro : aucun débordement horizontal (0 px)
+  ✓ tiroma se rend
+  ✓ tiroma : aucun débordement horizontal (0 px)
+  ✓ tamila se rend
+  ✓ tamila : aucun débordement horizontal (0 px)
+  ✓ lorani se rend
+  ✓ lorani : aucun débordement horizontal (0 px)
+  ✓ daliro se rend
+  ✓ daliro : aucun débordement horizontal (0 px)
   ✓ console propre
 
 ✓ 0 échec

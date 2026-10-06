@@ -25,10 +25,19 @@ const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) ech
 
 const ECRANS = [
   ['accueil', '/espace2'],
-  ['a-payer', '/espace2/filed/a-payer'],
+  ['validations', '/espace2/validations'],
+  ['point', '/espace2/point'],
   ['activite', '/espace2/activite'],
   ['reglages', '/espace2/reglages'],
-  ['a-venir', '/espace2/tavaro'],
+  ['filed', '/espace2/filed?objet=facture:R2026-000016'],
+  ['a-payer', '/espace2/filed/a-payer'],
+  ['fournisseurs', '/espace2/filed/fournisseurs'],
+  ['varelo', '/espace2/varelo'],
+  ['tavaro', '/espace2/tavaro'],
+  ['tiroma', '/espace2/tiroma'],
+  ['tamila', '/espace2/tamila'],
+  ['lorani', '/espace2/lorani'],
+  ['daliro', '/espace2/daliro'],
 ];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
@@ -56,7 +65,7 @@ for (const largeur of LARGEURS) {
     console.log(`\n— ${largeur} px, ${theme}`);
     try {
       for (const [nom, chemin] of ECRANS) {
-        const pret = await s.aller(base + chemin, { signe: `document.readyState === 'complete' && !!document.querySelector('.v2 h1, .v2 h2')` });
+        const pret = await s.aller(base + chemin, { signe: `document.readyState === 'complete' && !!document.querySelector('.v2 main h1')` });
         ok(pret, `${nom} se rend`);
         await s.dormir(500);
         const deb = await s.evaluer(`document.documentElement.scrollWidth - window.innerWidth`);
