@@ -174,6 +174,56 @@ Famille « Pilotage » :
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
 
+## Ce qui manquerait pour une vraie PME (relecture après FAC-2026-10-0471, 06/10 — sans code)
+
+Relecture des règles d'a4_01 à a4_13 (une cinquantaine de codes de contrôle, circuit, imputation, archivage,
+pilotage) face à la première facture réelle validée : Orange, abonnement télécom, petit montant, payé par
+prélèvement. Classé du plus coûteux au moins coûteux pour une PME.
+
+1. **Pas d'écritures comptables.** « comptabilisee » marque une facture transmise, mais aucune écriture n'est
+   produite (6xx / 44566 au débit, 401-auxiliaire au crédit). Rien ne sort au format FEC ni vers les logiciels des
+   cabinets (Pennylane, Sage, Cegid, ACD). L'expert-comptable ressaisit donc tout. C'est le premier manque : sans lui,
+   FILED reste un circuit d'approbation, pas un outil comptable.
+2. **Réforme de la facture électronique.** Depuis le 1/09/2026, toute entreprise doit pouvoir recevoir ses factures
+   par une plateforme agréée. FILED ne lit ni Factur-X, ni UBL, ni CII (factures.ts 33 à false). Le refus ne remonte
+   pas de statut de cycle de vie (rejetée, refusée, encaissée) à la plateforme. Les codes de refus normalisés sont
+   pourtant déjà là (`filed_motifs_refus` : EMMET_INC, TX_TVA_ERR…). Il manque le canal.
+3. **Mode de règlement inconnu.** Orange est prélevé. Les contrôles d'IBAN (`iban.nouveau`, `iban.partage` bloquants)
+   supposent un virement à émettre. Or sur une facture prélevée, l'IBAN imprimé est souvent celui du CLIENT (compte
+   débité). Il risque d'être lu comme `fournisseur.iban`, d'où une fausse alerte de fraude, ou un IBAN client
+   « validé » chez le fournisseur. Il faudrait :
+   - un champ mode de règlement (virement, prélèvement, carte, déjà payé) ;
+   - la distinction entre IBAN créancier et IBAN débiteur ;
+   - l'ICS (identifiant créancier SEPA) comme identifiant du fournisseur ;
+   - l'échéancier : une facture prélevée sort de la prévision de virements, mais sa date de prélèvement y reste.
+4. **Tout passe par un clic humain.** Le socle refuse l'accord permanent sur `filed.valider_facture` (« jamais validée
+   d'office »). Un abonnement mensuel déjà reconnu (`recurrence.reconnue`), chez un fournisseur actif, avec un IBAN
+   validé et un montant dans la tolérance, devrait pouvoir se valider seul, ou au moins par lot en un geste. Sinon
+   une PME de 40 factures récurrentes par mois abandonne.
+5. **Petite organisation.** La séparation saisie / approbation et la règle « le déposant ne confirme pas le
+   fournisseur » rendent FILED inutilisable pour un artisan seul ou un couple gérant + conjoint qui dépose. Il faut
+   un mode déclaré « une seule personne » : approbation par soi-même, tracée au journal opposable avec mention. Ou
+   bien l'expert-comptable invité comme second regard.
+6. **TVA déductible au bon moment.** Pour une prestation de services, la TVA n'est déductible qu'au paiement, sauf
+   option pour les débits. Les télécoms d'Orange sont des services. Rien ne date l'exigibilité : la CA3 préparée à
+   partir de FILED serait fausse sur ce point. `tva.regime` est seulement informatif.
+7. **Durée de conservation contre effacement.** L'archive probante n'a pas de durée légale attachée : 10 ans en
+   droit commercial (L123-22), 6 ans en droit fiscal (LPF L102 B). Il faut vérifier que l'effacement du socle
+   (`tables_locataires`, RGPD) ne purge pas une pièce archivée avant son terme. Non vérifié ici.
+8. **Fournisseurs étrangers et particuliers.** SaaS hors UE (Google, AWS : autoliquidation sans numéro de TVA
+   français), auto-entrepreneurs en franchise (art. 293 B, sans TVA ni SIREN parfois lisible). Les contrôles
+   existent en « attention » (`tva.autoliquidation_attendue`, `tva.sans_mention`), mais `fournisseur.a_confirmer` et
+   l'identité au registre (VIES, Sirene) n'ont pas de voie pour un fournisseur sans SIREN ni TVA UE. Il ne reste que
+   l'attestation humaine (`filed_attester_identite`), qui gagnerait à être proposée d'emblée.
+9. **Acomptes et avoirs imputés.** Le règlement partiel existe (`filed_reglements`). Le lien facture d'acompte ↔
+   facture de solde, et avoir ↔ facture d'origine, n'existe pas. L'échéancier double alors le décaissement.
+10. **Délais légaux de paiement.** `date.echeance` signale une échéance au-delà de l'usage. Ni le plafond légal
+    (60 jours, ou 45 jours fin de mois), ni les pénalités et l'indemnité de 40 € pour retard ne sont calculés côté
+    payeur. Utile pour l'indicateur de délai de paiement que les sociétés auditées publient.
+
+Déjà corrigé grâce à FAC-0471 : le demandeur système (a4_13), le contrôle « fournisseur à confirmer » non levable
+(a4_12), l'IBAN jamais orphelin (a4_13).
+
 ## Papeterie Delorme / R2026-000003 (06/10, 02:20 UTC) — pas d'a4_14
 
 - A3 : fiche « Sans identifiant ». Hypothèse « lue avant a4_10 » fausse : le recontrôle du 05/10 20:50 a déjà tourné.
