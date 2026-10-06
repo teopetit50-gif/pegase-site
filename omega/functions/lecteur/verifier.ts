@@ -40,6 +40,42 @@ function normaliserChoix(v: unknown): string {
   return String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
+/**
+ * Une date et heure locale, sans fuseau : « AAAA-MM-JJTHH:MM », ou « AAAA-MM-JJ »
+ * quand l'heure n'est pas donnée (Tamila lit alors « heure inconnue »). Admet
+ * « 2027-02-04T09:30 », « 04/02/2027 à 9h30 », « 4 février 2027 à 9 h 30 »,
+ * « 04/02/2027 09:30:00 ». Un fuseau ou un « Z » rendu par le modèle est refusé :
+ * l'heure imprimée est locale et c'est le socle qui pose le fuseau.
+ */
+export function dateHeureLocale(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.trim();
+  const iso = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/);
+  let jour: string | null;
+  let h: string | undefined;
+  let m: string | undefined;
+  if (iso) {
+    jour = dateIso(iso[1]);
+    h = iso[2];
+    m = iso[3];
+  } else {
+    if (/(?:Z|[+-]\d{2}:?\d{2})$/.test(s) && /\d{4}-\d{2}-\d{2}T/.test(s)) return null;
+    const heure = s.match(/^(.*?)(?:\s*(?:,|à|a|-))?\s+(\d{1,2})\s*(?:h|:)\s*(\d{2})?(?::\d{2})?\s*$/i);
+    if (heure) {
+      jour = dateIso(heure[1].trim());
+      h = heure[2];
+      m = heure[3] ?? "00";
+    } else {
+      jour = dateIso(s);
+    }
+  }
+  if (jour === null) return null;
+  if (h === undefined) return jour;
+  const hh = Number(h), mm = Number(m);
+  if (!(hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59)) return null;
+  return `${jour}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
+
 /** Met la valeur dans le type attendu par le module ; ok = false si elle n'y entre pas. */
 export function typerValeur(
   champ: string,
@@ -82,6 +118,10 @@ export function typerValeur(
     case "date": {
       const d = dateIso(valeur);
       return d === null ? { valeur, ok: false, detail: "date illisible" } : { valeur: d, ok: true };
+    }
+    case "dateheure": {
+      const d = dateHeureLocale(valeur);
+      return d === null ? { valeur, ok: false, detail: "date et heure illisibles" } : { valeur: d, ok: true };
     }
     case "booleen": {
       if (typeof valeur === "boolean") return { valeur, ok: true };

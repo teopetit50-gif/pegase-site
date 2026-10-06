@@ -178,9 +178,41 @@ Six types, tels que `private.lorani_propositions` les attend (B5, `omega/modules
 
 Pas de `lignes` ni de `tva.ventilation` pour ce module.
 
+## Module Tamila — avis RPVA des cabinets d'avocats (table prête, lecture en attente du coffre)
+
+Dix types, un par valeur de `tamila_avis.type_avis`, et des champs qui portent **le nom exact des clés de `p_valeurs`** de `public.tamila_avis_lu(p_client, p_dossier, p_piece, p_type, p_valeurs, p_confiance, p_rg_concorde)` (B4, `omega/SOCLE-EXTRAITS-TAMILA.sql`) : celui qui applique une lecture passe `type_piece` en `p_type` et l'objet `{champ: valeur}` des valeurs vérifiées en `p_valeurs`, `p_confiance = 'modele'`. `numero_rg` n'est pas lu par `tamila_avis_lu` : il sert à calculer `p_rg_concorde` contre le n° RG du dossier, qui est chiffré (le lecteur ne le voit pas, la comparaison se fait là où la clé du dossier est déballée).
+
+**Limite actuelle** : les pièces déposées par `tamila_deposer_piece` sont chiffrées (`chiffrement = dossier:v1`) et le lecteur les reporte (`CHIFFREMENT_NON_PRIS_EN_CHARGE`) tant qu'il n'y a pas de coffre pour déballer la clé du dossier. La table sert dès qu'une pièce Tamila arrive en clair (`pieces.module = 'tamila'`, sans chiffrement) ou que le coffre existe.
+
+| `type_piece` | Ce que c'est | Champs | Clés (toutes vérifiées → `lue`) |
+|---|---|---|---|
+| `rpva_declaration_appel` | avis d'enregistrement (ou notification) d'une déclaration d'appel | `numero_rg`, `date_avis`, `partie_visee` | `date_avis` |
+| `rpva_avis_902` | avis d'avoir à signifier la déclaration d'appel (art. 902) | `numero_rg`, `date_avis` | `date_avis` |
+| `rpva_avis_fixation` | avis de fixation à bref délai (art. 906) | `numero_rg`, `date_avis`, `date_audience`, `date_cloture_previsible` | `date_avis`, `date_audience` |
+| `rpva_conclusions` | notification de conclusions entre avocats | `numero_rg`, `date_avis`, `partie_visee`, `rang` | `date_avis`, `partie_visee` |
+| `rpva_appel_incident` | conclusions portant appel incident ou provoqué | `numero_rg`, `date_avis` | `date_avis` |
+| `rpva_intervention` | intervention forcée ou volontaire | `numero_rg`, `date_avis` | `date_avis` |
+| `rpva_ordonnance_mee` | ordonnance ou avis du conseiller de la mise en état | `numero_rg`, `date_avis`, `date_limite`, `date_cloture_previsible` | `date_avis` |
+| `rpva_avis_audience` | avis fixant ou renvoyant une audience | `numero_rg`, `date_avis`, `date_audience`, `date_cloture_previsible` | `date_avis`, `date_audience` |
+| `rpva_accuse_depot` | accusé de réception RPVA d'un dépôt du cabinet | `numero_rg`, `date_avis`, `depose_le` | `date_avis`, `depose_le` |
+| `rpva_interruption` | avis d'un événement interruptif d'instance | `numero_rg`, `date_avis` | `date_avis` |
+
+| Champ | Type de `valeur` | Description | Exemple |
+|---|---|---|---|
+| `numero_rg` | texte (≤ 30) | n° RG tel qu'imprimé | `"26/04512"` |
+| `date_avis` | texte `AAAA-MM-JJ` | date de l'avis, de la notification ou de l'ordonnance | `"2026-10-02"` |
+| `date_audience` | texte `AAAA-MM-JJTHH:MM`, ou `AAAA-MM-JJ` si l'heure n'est pas imprimée | **heure locale de la cour, sans fuseau** : `tamila_avis_lu` pose le fuseau du territoire, et lit une date seule comme « heure inconnue » ; un fuseau ou un `Z` rendu par le modèle → non retenu | `"2027-02-04T09:30"` |
+| `date_cloture_previsible` | texte `AAAA-MM-JJ` | clôture prévisible | `"2027-01-21"` |
+| `date_limite` | texte `AAAA-MM-JJ` | date limite fixée par le conseiller de la mise en état | `"2026-12-15"` |
+| `partie_visee` | texte parmi `appelant`, `intime`, `intervenant` | conclusions : la partie qui conclut ; déclaration d'appel : la qualité de la partie défendue par l'avocat destinataire ; « Intimé », « l'intimée » ramenés à `intime` | `"intime"` |
+| `rang` | nombre entier, 1 à 99 | rang des conclusions (1 = premières) | `2` |
+| `depose_le` | comme `date_audience` | date et heure du dépôt accusé | `"2026-10-03T16:12"` |
+
+Pas de `lignes` ni de `tva.ventilation` pour ce module.
+
 ## Ajouter un module : la table des types
 
-Un module déclare dans `omega/functions/lecteur/schemas/<module>.ts` sa présentation (ce que le modèle lit), ses types (`type`, description, champs, clés) et ses champs (`texte`, `nombre`, `entier` borné, `date`, `booleen`, `choix` avec valeurs admises, `liste`), puis s'inscrit dans `SCHEMAS_PAR_MODULE`. Le schéma d'outil, la consigne de Claude, le typage des valeurs et les règles de statut en découlent. Un module sans schéma propre est lu avec la table FILED.
+Un module déclare dans `omega/functions/lecteur/schemas/<module>.ts` sa présentation (ce que le modèle lit), ses types (`type`, description, champs, clés) et ses champs (`texte`, `nombre`, `entier` borné, `date`, `dateheure` locale, `booleen`, `choix` avec valeurs admises, `liste`), puis s'inscrit dans `SCHEMAS_PAR_MODULE`. Le schéma d'outil, la consigne de Claude, le typage des valeurs et les règles de statut en découlent. Un module sans schéma propre est lu avec la table FILED.
 
 ## À venir — autres modules (proposition, à confirmer avec chaque moteur)
 
@@ -202,19 +234,6 @@ Même contrat : noms en minuscules à points, `texte` + `page` + `verifiee` sur 
 | `depot_garantie.montant` | nombre | |
 | `indexation.indice` | texte | ILC, ILAT, ICC… |
 | `bien.adresse`, `bien.surface_m2` | texte, nombre | |
-
-### Tamila — avis d'audience, ordonnance, accusé RPVA (B4 publiera ses champs)
-
-Les pièces Tamila sont chiffrées sous la clé du dossier (`chiffrement = dossier:v1`) : le lecteur les reporte aujourd'hui (`CHIFFREMENT_NON_PRIS_EN_CHARGE`). B4 annoncera ses types (avis d'audience, ordonnance, accusé RPVA) ; ils entreront dans la table des types comme Lorani. Noms prévus pour l'ordonnance :
-
-| Champ | Type | Description |
-|---|---|---|
-| `ordonnance.date` | date | |
-| `ordonnance.numero` | texte | |
-| `prescripteur.nom`, `prescripteur.rpps`, `prescripteur.specialite` | texte | |
-| `patient.nom`, `patient.date_naissance` | texte, date | chiffrés, jamais en clair |
-| `prescription[]` | tableau | `{designation, posologie, duree_jours, quantite, renouvellements, ald}` |
-| `mention.ald`, `mention.non_substituable` | booléen | |
 
 ## Comment faire évoluer ce référentiel
 

@@ -1,13 +1,15 @@
 // La table des types de pièce par module : ce que le lecteur sait classer et
 // extraire selon le module de la pièce (pieces.module). FILED (factures) est
-// le module par défaut ; Lorani (urbanisme) est en service ; Tamila viendra.
+// le module par défaut ; Lorani (urbanisme) et Tamila (avis RPVA des cabinets
+// d'avocats) ont leurs types.
 // Le schéma d'outil et la consigne de Claude se construisent à partir d'ici,
 // ainsi que les règles de statut (champs clés d'un type).
 
 import { CHAMPS_FACTURE, SCHEMA_OUTIL_LECTURE, TYPES_PIECE } from "./facture.ts";
 import { SCHEMA_LORANI } from "./lorani.ts";
+import { SCHEMA_TAMILA } from "./tamila.ts";
 
-export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "booleen" | "choix" | "liste";
+export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "dateheure" | "booleen" | "choix" | "liste";
 
 export interface ChampDeclare {
   champ: string;
@@ -72,6 +74,7 @@ export const SCHEMA_FILED: SchemaModule = {
 export const SCHEMAS_PAR_MODULE: Record<string, SchemaModule> = {
   filed: SCHEMA_FILED,
   lorani: SCHEMA_LORANI,
+  tamila: SCHEMA_TAMILA,
 };
 
 /** Le schéma d'un module ; FILED pour un module sans schéma propre (les factures se lisent partout). */
@@ -105,8 +108,9 @@ export function schemaOutilPour(module: string | null | undefined): Record<strin
   itemProps.valeur = {
     type: ["string", "number", "boolean", "array"],
     items: { type: "string" },
-    description:
-      "AAAA-MM-JJ pour les dates, nombre entier pour les durées et les numéros de passage, l'une des valeurs admises pour un choix, tableau de textes pour une liste, texte sinon.",
+    description: "AAAA-MM-JJ pour les dates" +
+      (s.champs.some((c) => c.type === "dateheure") ? ", AAAA-MM-JJTHH:MM (heure locale, sans fuseau) pour une date et heure, AAAA-MM-JJ seul si l'heure n'est pas imprimée" : "") +
+      ", nombre entier pour les durées, rangs et numéros de passage, l'une des valeurs admises pour un choix, tableau de textes pour une liste, texte sinon.",
   };
   if (!s.lignes) {
     delete props.lignes;
@@ -127,6 +131,8 @@ export function consignePour(module: string | null | undefined, reglesCommunes: 
       ? ` (valeurs admises : ${c.choix.join(", ")})`
       : c.type === "entier" && c.min !== undefined
       ? ` (entier de ${c.min} à ${c.maximum})`
+      : c.type === "dateheure"
+      ? " (AAAA-MM-JJTHH:MM, heure locale sans fuseau ; AAAA-MM-JJ si l'heure n'est pas imprimée)"
       : "";
     return `- ${c.champ} (${c.type}${bornes}) : ${c.description}`;
   }).join("\n");
