@@ -138,16 +138,38 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 - Validation : tsc ✓, eslint ✓, build ✓, recette aux cinq largeurs ✓
   (103 contrôles, dont l'enchaînement « confirmer le fournisseur »).
 
+### Rejoué en réel après la fusion (c2ee390), 06/10 01 h 53–01 h 55 Z
+
+- **Confirmer** (`daf@banc-varelo.test`, valideur, fourni par le
+  coordinateur ; `relecture-fournisseur.mjs … --confirmer`) : « Confirmer ce
+  fournisseur » actif pour daf, ORANGE SA → **Actif** (`confirme_par` = daf,
+  01:53:30 Z), la facture FAC-2026-10-0471 passe de `bloquee` à
+  **`a_valider`** (0 bloquant, 0 attention) et la demande
+  `filed.valider_fournisseur` est annulée d'office. Capture
+  `reel-fournisseur-confirme-1440.jpg`.
+- **Annuler ma demande** : la demande du gérant est née par l'écran — le
+  gérant propose un IBAN à ORANGE SA, désormais actif (`--iban=`, l'IBAN
+  d'exemple public FR76 3000 6000 0112 3456 7890 189) → `filed.valider_iban`
+  avec `demandeur_id` = gérant (le déclencheur `preparer_demande` lit
+  `auth.uid()` même sous une porte security definer). Puis
+  `relecture-annulation.mjs` : la demande est trouvée, « Annuler ma
+  demande » est offert, l'annulation passe (« Votre demande est annulée »),
+  `statut = annulee` en base. L'IBAN d'essai reste `propose` sur le banc,
+  sans demande (voir plus bas).
+- Le dossier se relit à 1, 2 et 4 minutes après « Revérifier » (le
+  coordinateur ne peut pas publier `filed_fournisseurs` : laissé à Teo).
+
 ### Reste
 
-- **Confirmer en réel** : il faut une **autre personne** que le gérant
-  (gérant, admin ou valideur, pas `referent` s'il n'a pas ce rôle) avec son
-  mot de passe, pour confirmer ORANGE SA sur le banc. Demandé au coordinateur.
-- **Annuler ma demande** : toujours aucune demande saisie par le gérant sur
-  le banc (10 en attente au 06/10 01 h 45 Z, toutes `demandeur_type =
-  systeme`). Le code est en place depuis le lot 19 ; à rejouer dès qu'une
-  demande du gérant existe.
-- Publication Realtime de `filed_fournisseurs` (avec la demande 9).
+- Publication Realtime de `filed_fournisseurs` (Teo).
+- Pour A4 / le coordinateur : (a) la demande `filed.valider_facture` née du
+  recontrôle lancé par la confirmation est **attribuée à daf**
+  (`demandeur_type = utilisateur`, `demandeur_id` = daf) et non au système —
+  `auth.uid()` dans `preparer_demande` ; daf ne pourra pas la valider
+  (séparation saisie / approbation) alors qu'il ne l'a pas saisie ; (b) un
+  IBAN `propose` dont la demande est annulée reste `propose` sans demande
+  ouverte (ici FR76 •••• 0189 d'ORANGE SA sur le banc) : rien ne le refuse ni
+  ne le repropose.
 - À voir par A4 / le coordinateur, pas par l'écran : `fournisseur.a_confirmer`
   porte « Lever avec un motif » comme tout contrôle ; si le déposant peut le
   lever, il contourne la séparation de `filed_confirmer_fournisseur`.

@@ -4,9 +4,13 @@
    « Confirmer ce fournisseur » (gris pour qui a déposé la pièce d'origine),
    et, avec --reverifier, clique « Revérifier » puis attend la réponse de
    l'ouvrier identite (jusqu'à trois minutes, l'écran se relit par Realtime
-   ou à la main).
+   ou à la main). Avec --confirmer, clique « Confirmer ce fournisseur » (à
+   faire avec une AUTRE personne que le déposant) et relève le statut après.
+   Avec --iban=<IBAN>, propose cet IBAN au fournisseur (« Proposer un IBAN ») :
+   sur un fournisseur actif, la base dépose une demande « filed.valider_iban »
+   dont la personne connectée est la demandeuse.
 
-   usage : node omega/recette-a3/relecture-fournisseur.mjs <session.json> <référence> [origine] [--reverifier]
+   usage : node omega/recette-a3/relecture-fournisseur.mjs <session.json> <référence> [origine] [--reverifier] [--confirmer] [--iban=FR76…]
    Le cookie est posé comme dans relecture-reelle.mjs ; le fichier de
    session ne se commite jamais. */
 import { readFileSync } from 'node:fs';
@@ -14,6 +18,9 @@ import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const reverifier = process.argv.includes('--reverifier');
+const confirmer = process.argv.includes('--confirmer');
+const iban = (process.argv.find((a) => a.startsWith('--iban=')) ?? '').slice(7);
+const remplir = (selecteur, texte) => s.evaluer(`(() => { const t = document.querySelector('[role="dialog"] ${selecteur}'); if (!t) return false; const proto = t.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto, 'value').set.call(t, ${JSON.stringify(texte)}); t.dispatchEvent(new Event('input', { bubbles: true })); return true; })()`);
 const [fichier, reference, base = 'http://localhost:3010'] = args;
 if (!fichier || !reference) { console.error('usage : node relecture-fournisseur.mjs <session.json> <référence> [origine] [--reverifier]'); process.exit(2); }
 const session = JSON.parse(readFileSync(fichier, 'utf8'));
@@ -96,6 +103,36 @@ if (reverifier && avant.reverifier) {
   await s.dormir(300);
   await s.capturer(`${dossier}reel-fournisseur-reverifie-1440.jpg`, { qualite: 55 });
 }
+if (confirmer) {
+  ok(avant.confirmer === 'actif', `« Confirmer ce fournisseur » est actif pour cette personne (${avant.confirmer})`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent) && !b.disabled)?.click()`);
+  await s.dormir(600);
+  await remplir('textarea', 'Fournisseur connu : contrat de téléphonie en cours (recette A3).');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Confirmer le fournisseur/.test(b.textContent))?.click()`);
+  let dit = '';
+  for (let i = 0; i < 30; i++) { await s.dormir(500); dit = await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-avis, [role="dialog"] .esp-avis')].map(a => a.textContent.trim()).join(' / ')`); if (/C'est fait|Refusé|refus/i.test(dit) && !(await s.evaluer(`!!document.querySelector('[role="dialog"] .loader, [role="dialog"] [data-variant="spin"]')`))) break; }
+  console.log('    après la confirmation :', dit);
+  await s.dormir(1500);
+  const apres = await relever();
+  console.log('    fiche après :', apres.texte);
+  ok(/est confirmé/.test(dit) && /Actif/.test(apres.texte ?? ''), 'le fournisseur est confirmé et passe « Actif »');
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-section-titre')].find(e => /^Fournisseur/.test(e.textContent))?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}reel-fournisseur-confirme-1440.jpg`, { qualite: 55 });
+}
+
+if (iban) {
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Proposer un IBAN/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  ok(await remplir('input', iban), 'dialogue « Proposer un IBAN » ouvert, IBAN saisi');
+  await remplir('textarea', 'Essai de recette A3 : demande à annuler ensuite.');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Proposer/.test(b.textContent))?.click()`);
+  let dit = '';
+  for (let i = 0; i < 30; i++) { await s.dormir(500); dit = await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-avis, [role="dialog"] .esp-avis')].map(a => a.textContent.trim()).join(' / ')`); if (/C'est fait|Refusé/.test(dit)) break; }
+  console.log('    après la proposition :', dit);
+  ok(/IBAN est proposé/.test(dit), 'l\'IBAN est proposé');
+}
+
 s.fermer();
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);
