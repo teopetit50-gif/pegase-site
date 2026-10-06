@@ -713,3 +713,15 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - SIREN d'exemple corrigés (clé de Luhn) : 538765439, 412345670, 812345676, 216902569.
 - Fiche : boîte nullable (OCR sans positions), cotes écrites seulement.
 - b5_22 : public.lorani_objets_controle(piece) pour A1 (objets des pièces sœurs, service_role seul) ; test b5_13 (6 assertions).
+
+## b5_23 — servitudes et risques lus depuis l'adresse (06/10, soir)
+
+- `omega/modules/lorani/migrations/b5_23_servitudes_risques.sql`, test `omega/tests/lorani/b5_14_servitudes_risques.sql` (10 assertions).
+- Volet indépendant de la machine d'états de b5_17 : dès que `lorani_plu.geom` arrive (trigger), 7 demandes pg_net :
+  GPU assiette-sup-s (délai 60 s : 1,7 Mo / 27 s à Lyon), -l, -p ; Géorisques gaspar/risques, zonage_sismique,
+  radon (code_insee), rga (latlon). Lecture tolérante (jsonpath `lax $.**.<champ>`). Panne d'un service = noté dans
+  risques.erreurs, statut « partiel ». Bilan : alerte secteur protégé (AC1/AC2/AC4 : ABF, R423-24) et PPR (PM1/PM3 :
+  L562-4) ; journal lorani.servitudes_risques. `lorani_suivre_plu` et le passage relèvent aussi ces demandes.
+- Géorisques NON JOIGNABLE depuis mon conteneur (connexion coupée, 503 par WebFetch) : formes des réponses écrites
+  d'après le public (rapport par adresse réputé instable → non utilisé). Servitudes : vraie réponse IGN relevée.
+- Écran : bloc « servitudes et risques » dans PluProjet ; relève tant que complements_statut = en_cours.

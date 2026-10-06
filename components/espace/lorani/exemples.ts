@@ -612,6 +612,16 @@ export const PLU_EXEMPLE: Plu[] = [
     zone: "UCe1b", document: { du_type: "PLUi", titre: "PLU-H MÉTROPOLE DE LYON", nom: "200046977_PLUi_20260326", partition: "DU_200046977" }, reglement_url: null,
     prescriptions: [{ libelle: "Polarité commerciale", typepsc: "51", stypepsc: "00" }, { libelle: "Secteur de taille minimale des logements", typepsc: "23", stypepsc: "00" }],
     rnu: false, erreur: null, demande_le: ilYa(200), trouve_le: ilYa(200),
+    /* b5_23 : relevé réel du Géoportail de l'urbanisme au 31 rue Mercière (135 abords de monuments historiques, dont trois cités) */
+    servitudes: [
+      { categorie: "AC1", libelle_categorie: "Abords de monument historique", nom: "Cathédrale Saint-Jean et ancienne manécanterie", assiette: "Périmètre des abords", acte: "AC1_Cathedrale-Saint-Jean-et-ancienne-manecanterie-I8KE0R_19140418_act.pdf" },
+      { categorie: "AC1", libelle_categorie: "Abords de monument historique", nom: "Façades", assiette: "Périmètre des abords", acte: null },
+      { categorie: "AC1", libelle_categorie: "Abords de monument historique", nom: "Maison", assiette: "Périmètre des abords", acte: null },
+      { categorie: "AC2", libelle_categorie: "Site inscrit ou classé", nom: "CENTRE HISTORIQUE DE LYON", assiette: "Enceinte du site", acte: null },
+      { categorie: "PM1", libelle_categorie: "Plan de prévention des risques naturels", nom: "PPRNi Grand Lyon secteur Lyon Villeurbanne", assiette: "Enveloppe des zonages réglementaires", acte: null },
+    ],
+    risques: { commune: ["Inondation", "Séisme"], sismicite: "2 - FAIBLE", argiles: "Exposition faible", radon: "1" },
+    secteur_protege: true, complements_statut: "fait",
   },
 ];
 

@@ -307,6 +307,14 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.querySelector('.lor-plu')?.scrollIntoView({ block: 'center' })`);
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-plu-1024.jpg`, { qualite: 55 });
+  console.log('— servitudes et risques (b5_23) : Façade rue Mercière');
+  ok(await s.aller(base + chemin + '?projet=00000000-0000-4000-8000-00000000b004'), 'page chargée');
+  await s.dormir(700);
+  const sr = await s.evaluer(`(() => { const t = (document.querySelector('.lor-servitudes')?.textContent || '').replace(/[\\u202f\\u00a0]/g, ' '); return { abf: /Secteur protégé : l’avis de l’architecte des Bâtiments de France est requis/.test(t), ppr: /Plan de prévention des risques : son règlement s’impose au projet/.test(t), nb: /5 servitudes d’utilité publique à cet endroit\\./.test(t), risques: /Risques : risques recensés dans la commune : Inondation, Séisme · sismicité 2 - faible · argiles : exposition faible · radon : potentiel de catégorie 1\\./.test(t), groupe: /Abords de monument historique \\(3\\) : Cathédrale Saint-Jean/.test(t) }; })()`);
+  ok(Object.values(sr).every(Boolean), `secteur protégé (ABF), PPR, 5 servitudes groupées, risques de la commune, sismicité, argiles, radon (${JSON.stringify(sr)})`);
+  await s.evaluer(`document.querySelector('.lor-servitudes')?.scrollIntoView({ block: 'center' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-servitudes-1024.jpg`, { qualite: 55 });
   s.fermer();
 }
 

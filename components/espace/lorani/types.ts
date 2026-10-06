@@ -402,6 +402,11 @@ export type Plu = {
   erreur: string | null;
   demande_le: string;
   trouve_le: string | null;
+  /* b5_23 : servitudes d'utilité publique (Géoportail de l'urbanisme) et risques (Géorisques) */
+  servitudes?: { categorie: string; libelle_categorie: string; nom: string | null; assiette: string | null; acte: string | null }[];
+  risques?: { commune?: string[]; sismicite?: string | null; radon?: string | null; argiles?: string | null; erreurs?: string[] };
+  secteur_protege?: boolean | null;
+  complements_statut?: "a_faire" | "en_cours" | "fait" | "partiel";
 };
 
 /* une attestation décennale d'entreprise, contrôlée contre le lot (b5_18) */
