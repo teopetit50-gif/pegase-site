@@ -34,6 +34,7 @@ import {
 } from "./regles";
 import type { Audience, CalculDelai, Delai, DemandeTamila, DossierComplet, Partie, Personne, RegleProcedure, Reglages } from "./types";
 import HonorairesTamila from "./HonorairesTamila";
+import AnalysesTamila from "./AnalysesTamila";
 import ConformiteTamila from "./ConformiteTamila";
 
 type Props = {
@@ -667,6 +668,9 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           })}
         </div>
       </section>
+
+      {/* ——— les lectures longues (carnet n° 4, b4_15, lecteur d'A1) ——— */}
+      <AnalysesTamila dossier={d} source={source} cle={cle} pieces={pieces} clair={clair} peutDemander={peutEcrire && avocat} auCoffre={complet.cle?.fournisseur === "scaleway"} />
 
       {/* ——— les pièces ——— */}
       <section className="esp-carte" aria-label="Pièces">

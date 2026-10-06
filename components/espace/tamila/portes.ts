@@ -395,6 +395,36 @@ export const poserVigilance = (p_dossier: string, p_assujetti: boolean, p_activi
 /* ——— l'en-tête des factures du cabinet (b4_09) ——— */
 export const poserEnteteFacture = (p_client: string, p_entete: EnteteFacture) => rpc<EnteteFacture>("tamila_poser_entete_facture", { p_client, p_entete });
 
+/* ——— les lectures longues d'un dossier (b4_15, socle 19an, lecteur d'A1) ——— */
+export type TypeAnalyse = "prelecture" | "chronologie" | "contradictions" | "bordereau";
+export type Analyse = {
+  id: string;
+  type: string;
+  statut: "demandee" | "en_cours" | "finie" | "partielle" | "echec";
+  comptes: { info?: number; attention?: number; critique?: number } | null;
+  sans_source: number | null;
+  pieces: string[];
+  pieces_lues: number | null;
+  pieces_non_lues: string[] | null;
+  cout_eur: number | null;
+  motif: string | null;
+  demandee_le: string;
+  finie_le: string | null;
+  /* hexadécimal « \x01… » : le JSON du résultat, chiffré sous la clé du dossier */
+  resultat_chiffre: string | null;
+};
+/** null : la table des analyses n'existe pas sur cette base. */
+export async function chargerAnalyses(p_dossier: string): Promise<Analyse[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("analyses")
+    .select("id, type, statut, comptes, sans_source, pieces, pieces_lues, pieces_non_lues, cout_eur, motif, demandee_le, finie_le, resultat_chiffre")
+    .eq("module", "tamila").eq("objet_type", "tamila_dossier").eq("objet_id", p_dossier).order("demandee_le", { ascending: false }).limit(30);
+  if (error) return null;
+  return (data ?? []) as Analyse[];
+}
+export const demanderAnalyse = (p_dossier: string, p_type: TypeAnalyse, p_pieces: string[] | null = null) =>
+  rpc<string>("tamila_demander_analyse", { p_dossier, p_type, p_pieces });
+
 /* ——— le temps proposé à la saisie, le forfait prévu (b4_12) ——— */
 export const saisirTempsPropose = (p_dossier: string, p_origine: string, p_jour: string, p_minutes: number, p_nature: NatureTemps, p_description: string | null, p_facturable: boolean) =>
   rpc<string>("tamila_saisir_temps_propose", { p_dossier, p_origine, p_jour, p_minutes, p_nature, p_description, p_facturable });
