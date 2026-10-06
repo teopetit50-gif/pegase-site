@@ -105,6 +105,8 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 06/10, 16 h 50 Paris : Vague 3 n° 1 — b6_12 situations de travaux (tables btp_situations / _lignes écrites par les portes seules, lues sous RLS entité + voir_prix ; ouvrir / avancer / soumettre / valider / annuler ; retenue 71-584, autoliquidation 283-2 nonies, TVA par zone ; validation à deux personnes par la file du socle ; tableau du chantier « situations »). Calcul vérifié sur un Postgres local jetable (5 090 / 1 018 / 254,50 / 5 853,50 ; autoliquidation 0 TVA + mention). Test b6_07_situations (38). Écran : SituationsCarte (avancement par ligne, totaux, mentions, soumettre, valider, annuler) ; exemple : n° 1 validée aux Tilleuls. tsc, eslint, build, recette 5 largeurs + situations 390/1440 + axe verts.
+
 - 06/10, 16 h 27 Paris : b6_11 + b6_05 + b6_06 posés ; socle 40–55 + ^test_b6_ : 22/22 ok (test_46 security_invoker compris). Écran « Activer moi-même » en ligne sur omegaai.fr (25f4105). A5 ajoute btp_prix_avenant / btp_prix_ligne_avenant à la liste figée. **Lot accord J-2 clos.** Rien n'est attendu de B6 ; rappel du 07/10 02:50 Z (vérif « Demande remise le … » en ligne) toujours armé.
 
 - 06/10, 16 h 30 Paris : 19af + b6_10 posés ; b6_05 25/26 (le socle préfixe le commentaire « [seul décideur] » : filtre du test élargi). b6_11 : security_invoker sur btp_avenants_chiffres et btp_avenants_lignes_chiffrees (test socle 46), EXECUTE de btp_prix_avenant / btp_prix_ligne_avenant pour authenticated (à inscrire dans a5_01_liste_figee.txt). Test b6_06_vues_invoker (12).
