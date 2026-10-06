@@ -1,6 +1,43 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 3 h 35 Paris. **B7 terminé** (en attente seulement de la clé Sirene chez Teo).
+## REPRISE (pause demandée par Teo, 6/10 21 h Z) — lire d'abord
+
+Branche `worker-b7`, rien en cours, arbre propre. Session : session_01967jUehrY7tLAXLn9pBaSw (Opus 5.5).
+
+**Posé sur la recette (par le coordinateur) :**
+- migrations b7_01 à b7_05 et leurs tests, verts ;
+- b7_04 (refus VIES douteux, panne VIES jamais lue « invalide ») : Orange rétablie valide ;
+- b7_05 (`filed_verification_recente` ignore un indisponible) ;
+- b7_06 (fournisseurs suisses et britanniques), après a4_26 et a4_26b (contraintes élargies) ;
+- b7_07 (taux BCE) et son test `^test_b7_14` vert.
+
+**Déployé :**
+- ouvrier `identite` v5 (4ed0bff) : Sirene avec clé, VIES, registre IDE suisse, HMRC ;
+- ouvrier `taux-bce` v1 (67fd7ff), crons `35 14,15 * * 1-5` et veille `0 17 * * 1-5`, premier appel manuel le 6/10
+  avant 17 h Z.
+
+**Attend le coordinateur :**
+- reposer le test corrigé `omega/tests/identite/b7_07_etrangers.sql` (a6101c9), puis rejouer `^test_b7_13`. Il était
+  rouge sur 4 assertions à cause d'un rôle manquant dans le test, pas dans le code ;
+- me renvoyer le premier bilan de `taux-bce` (`taux_bce_passages`, `filed_taux_change` : environ 1 856 taux attendus) ;
+- fusionner `worker-b7` sur main quand il le jugera bon.
+
+**Attend Teo :**
+- les identifiants HMRC (`omega/GUIDE-HMRC.md`) : compte développeur, application de test, `HMRC_CLIENT_ID` et
+  `HMRC_CLIENT_SECRET`, puis demande de production (environ deux semaines). Sans eux, les fournisseurs GB restent
+  « indisponible » ;
+- la clé Sirene (`SIRENE_API_KEY`) est posée depuis le 6/10 vers 13 h 55 Z : rien d'autre à fournir.
+
+**Attend A3 :** le bouton « revérifier » et l'affichage « vérifié le … par … » sur la fiche fournisseur (section 9 b),
+y compris `identite_source = uid_ch | hmrc`.
+
+**Prochaine étape exacte au réveil :**
+1. lire le résultat de `^test_b7_13` et le bilan `taux-bce` ;
+2. corriger si rouge ;
+3. sinon, essayer HMRC dans le bac à sable dès que Teo a posé les identifiants (section 13).
+
+
+Branche `worker-b7`. (En-tête du 6/10 3 h 35 Paris, gardé pour l'historique ; l'état à jour est dans REPRISE ci-dessus.)
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
