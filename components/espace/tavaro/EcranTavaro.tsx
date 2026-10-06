@@ -657,17 +657,17 @@ export default function EcranTavaro() {
         </section>
       </div>
 
-      {/* b3t_01 à b3t_03 (renfort B3) : véhicules inactifs, réservations et contrats à risque, montée en gamme, plan de flotte */}
-      <div style={{ marginTop: 16 }}>
-        <AnalysesParc source={source} moi={moi} role={role} />
-      </div>
-
       <div style={{ marginTop: 16 }}>
         <AvisVue avis={monde?.avis ?? []} dossiers={dossiers} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesAvis} />
       </div>
 
       <div style={{ marginTop: 16 }}>
         <ContestationsVue contestations={monde?.contestations ?? []} dossiers={dossiers} reglages={monde?.reglages ?? null} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesContestations} />
+      </div>
+
+      {/* b3t_01 à b3t_03 (renfort B3) : véhicules inactifs, réservations et contrats à risque, montée en gamme, plan de flotte */}
+      <div style={{ marginTop: 16 }}>
+        <AnalysesParc source={source} moi={moi} role={role} />
       </div>
 
       {role === "gerant" || role === "admin" || role === "valideur" ? (
