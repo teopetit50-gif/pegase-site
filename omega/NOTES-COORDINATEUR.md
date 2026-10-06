@@ -476,3 +476,12 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   sans santé → seulement HORS_HEURES. Question ouverte d'A5 soumise à A2 : verrous_envoi juge
   le fournisseur de l'expéditeur actif, commencer_envoi rend fournisseur_hds d'après
   envois.fournisseur — peuvent-ils diverger ?
+- 03 h 37 — **déploiements** (coquilles, SHA complets) : `lecteur` v16 sur worker-a1 533f441
+  (types Tamila alignés sur B4, pièce chiffrée → finir_travail {ignore: chiffree_sans_coffre},
+  sans reprise) ; `lecteur-exports` v2 sur d963121 (dates XLSX « 2026-10-06 08:30 », plus
+  de format US ; contrôles 31/02 et 25:00) ; `expediteur` v12 sur worker-a2 67f9cf6 (envoi
+  santé refusé aussi si envoi.fournisseur ≠ brevo/brevo_sms). Passage de 01 h 36 Z : les
+  quatre ouvriers répondent 200 ; le lecteur a lu une pièce (`lue` 1). Test 54 d'A5
+  (b1f4a03, cohérence du fournisseur) 3/3, mais 0 envoi réel comparé.
+- Remarques d'A1 sur les signatures Logos_w (actes ⊃ devis, devis_lignes ⊃ types_rdv ;
+  patient_ref facultatif dans agenda) transmises à B3.
