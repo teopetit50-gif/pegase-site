@@ -2034,7 +2034,8 @@ end $f$;
 -- 56 — lot 19ai : compteurs de facturation par client et par mois (pièces lues, part reprise par un opérateur)
 -- Exécutable tel quel par execute_sql sur la RECETTE, après 00_installation.sql et le lot 19ai.
 -- runtests() annule tout ce que le test écrit (pièces du client fictif A, compteurs).
--- Les pièces sont posées par tests.inserer_minimal, puis leur statut suit le parcours du lecteur.
+-- Les pièces sont posées par tests.inserer_minimal (sha256 tiré au hasard : pieces_une_fois ne doit pas buter sur une
+-- ligne existante), puis leur statut suit le parcours du lecteur.
 
 create or replace function tests.test_56_compteurs_facturation() returns setof text
 language plpgsql as $f$
@@ -2061,9 +2062,9 @@ begin
                  'authenticated n''exécute pas le compteur');
 
   -- ── Parcours de lecture ──
-  p1 := (tests.inserer_minimal('public', 'pieces', jsonb_build_object('client_id', client_a)) ->> 'id');
-  p2 := (tests.inserer_minimal('public', 'pieces', jsonb_build_object('client_id', client_a)) ->> 'id');
-  p3 := (tests.inserer_minimal('public', 'pieces', jsonb_build_object('client_id', client_a)) ->> 'id');
+  p1 := (tests.inserer_minimal('public', 'pieces', jsonb_build_object('client_id', client_a, 'sha256', encode(sha256(gen_random_uuid()::text::bytea), 'hex'))) ->> 'id');
+  p2 := (tests.inserer_minimal('public', 'pieces', jsonb_build_object('client_id', client_a, 'sha256', encode(sha256(gen_random_uuid()::text::bytea), 'hex'))) ->> 'id');
+  p3 := (tests.inserer_minimal('public', 'pieces', jsonb_build_object('client_id', client_a, 'sha256', encode(sha256(gen_random_uuid()::text::bytea), 'hex'))) ->> 'id');
   select count(*) into n from public.facturation_mesures where client_id = client_a and mois = v_mois;
   return next is(n, 0::bigint, 'une pièce reçue ne compte pas');
 
@@ -2220,7 +2221,8 @@ begin
   c_r3 := client_a || '/receptions/essai58-r3/devis.pdf';    -- module sans règle propre
   c_autre := client_a || '/filed_document/essai58.pdf';      -- hors réceptions
   perform tests.inserer_minimal('public', 'expediteurs', jsonb_build_object('client_id', client_a, 'module', 'essai_huit',
-                                'canal', 'email', 'identite', 'essai58@boite.invalid'));
+                                'canal', 'email', 'identite', 'essai58@boite.invalid',
+                                'fournisseur', 'brevo'));   -- un fournisseur connu : preparer_expediteur le vérifie
   perform tests.inserer_minimal('public', 'receptions', jsonb_build_object('client_id', client_a, 'module', 'essai_huit', 'canal', 'email',
           'boite', 'autre@boite.invalid', 'identifiant_externe', 'essai58-r1', 'pieces', jsonb_build_array(jsonb_build_object('chemin', c_r1))));
   perform tests.inserer_minimal('public', 'receptions', jsonb_build_object('client_id', client_a, 'canal', 'email',

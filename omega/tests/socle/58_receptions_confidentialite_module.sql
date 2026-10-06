@@ -44,7 +44,8 @@ begin
   c_r3 := client_a || '/receptions/essai58-r3/devis.pdf';    -- module sans règle propre
   c_autre := client_a || '/filed_document/essai58.pdf';      -- hors réceptions
   perform tests.inserer_minimal('public', 'expediteurs', jsonb_build_object('client_id', client_a, 'module', 'essai_huit',
-                                'canal', 'email', 'identite', 'essai58@boite.invalid'));
+                                'canal', 'email', 'identite', 'essai58@boite.invalid',
+                                'fournisseur', 'brevo'));   -- un fournisseur connu : preparer_expediteur le vérifie
   perform tests.inserer_minimal('public', 'receptions', jsonb_build_object('client_id', client_a, 'module', 'essai_huit', 'canal', 'email',
           'boite', 'autre@boite.invalid', 'identifiant_externe', 'essai58-r1', 'pieces', jsonb_build_array(jsonb_build_object('chemin', c_r1))));
   perform tests.inserer_minimal('public', 'receptions', jsonb_build_object('client_id', client_a, 'canal', 'email',
