@@ -1,5 +1,13 @@
 # NOTES — worker A4 (FILED : comptabilité, archivage, pilotage, circuit de validation)
 
+## REPRISE (pause demandée par Teo, 06/10/2026 21 h Z)
+
+- **Fait** : `worker-a4` @ `578da6d` (dernier code : `19d98ea`, a4_32). Lots a4_01 → a4_32 (plus a4_26b) écrits et testés ; 64 fonctions pgTAP `^test_a4_` vertes en local. Fonction Deno `omega/functions/compta/` écrite (25 tests Deno verts). Chiffrage : `omega/CHIFFRAGE/filed.md` (131 promesses ; environ 73 jours jusqu'à un produit livrable).
+- **Recette** : tout est posé jusqu'à a4_32 inclus et vert (confirmé par le coordinateur). Rien en production.
+- **Attend le coordinateur** : la fusion de `worker-a4` dans main, à faire seulement pour `omega/` ; aucun fichier du site n'est touché. La pose en production des a4_* dans l'ordre (a4_26b à poser à la main : il contient des `drop constraint`). Le déploiement de la fonction `compta`.
+- **Attend Teo** : les identifiants des éditeurs (Pennylane, QuickBooks/Intuit, Cegid Loop), la clé Sirene et l'application HMRC, la vérification Google (CASA) et Microsoft pour lire une boîte existante, la plateforme agréée de la voie 1, le prix des paliers. Les contradictions de la page à trancher sont listées dans la synthèse du chiffrage (ligne 3).
+- **Prochaine étape exacte** : à la reprise, relire `omega/CHIFFRAGE/filed.md` et attaquer les lignes en état D dans l'ordre que fixera Teo. Sans consigne : l'export de sortie complet (D, aucune dépendance tiers). D'abord, relancer le PG local (`/tmp/pga4`, port 5444) ou le recréer à partir de `omega/tests/filed/souche_locale/`.
+
 Branche `worker-a4`. Périmètre : `omega/migrations/a4_*.sql`, `omega/tests/filed/`.
 Recette seulement (omega-recette) ; la production est au coordinateur.
 
