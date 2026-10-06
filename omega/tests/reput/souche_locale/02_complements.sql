@@ -179,3 +179,14 @@ begin
   if not found then raise exception 'Envoi introuvable, ou pas en cours d''envoi.' using errcode = 'P0002'; end if;
 end $$;
 create or replace function extensions.digest(text, text) returns bytea language sql immutable as $$ select public.digest($1, $2) $$;
+create or replace function private.publier_evenement(p_client uuid, p_evenement text, p_charge jsonb default '{}', p_cle text default null)
+returns integer language plpgsql security definer set search_path to '' as $$
+declare r record; n integer := 0;
+begin
+  for r in select a.module, a.genre from private.abonnements a where a.evenement = p_evenement loop
+    perform private.deposer_travail(p_client, r.module, r.genre, coalesce(p_charge, '{}') || jsonb_build_object('evenement', p_evenement),
+                                    case when p_cle is null then null else p_evenement || ':' || p_cle end, 0::smallint);
+    n := n + 1;
+  end loop;
+  return n;
+end $$;

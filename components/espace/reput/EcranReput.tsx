@@ -295,8 +295,23 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
           {sujet ? ` · classé « ${sujet.libelle} »` : ""}
           {demande.envoyee_le ? ` · répondue en ${Math.max(1, Math.round((new Date(demande.envoyee_le).getTime() - new Date(demande.recu_le).getTime()) / 60000))} min` : ""}{demande.langue && demande.langue !== "fr" ? ` · langue : ${demande.langue}` : ""}
         </p>
+        {(() => {
+          const precedentes = demande.de_empreinte ? monde.demandes.filter((x) => x.id !== demande.id && x.de_empreinte === demande.de_empreinte) : [];
+          return precedentes.length || demande.litige || demande.escaladee_le ? (
+            <p style={{ marginBottom: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {precedentes.length ? <Pastille contour>Client connu · {precedentes.length} demande{precedentes.length > 1 ? "s" : ""} avant celle-ci</Pastille> : null}
+              {demande.litige ? <Pastille teinte="rouge">Litige ouvert : jamais de réponse automatique</Pastille> : null}
+              {demande.escaladee_le ? <Pastille teinte="rouge">Délai dépassé, remontée au responsable</Pastille> : null}
+            </p>
+          ) : null;
+        })()}
         {rec?.sujet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>{rec.sujet}</p> : null}
         <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{rec?.corps || "(message sans texte)"}</p>
+        {Array.isArray(rec?.pieces) && rec.pieces.length ? (
+          <p className="esp-kpi-sous" style={{ marginTop: 8, overflowWrap: "anywhere" }}>
+            Pièces jointes conservées : {(rec.pieces as { nom?: string }[]).map((x) => x?.nom ?? "pièce").join(", ")}
+          </p>
+        ) : null}
       </div>
 
       <div className="esp-carte-corps">
