@@ -26,7 +26,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 
 ## Fichiers groupés pour le coordinateur
 
-- `TOUT.sql` : `00_installation.sql` suivi des 56 tests (la règle « pas de
+- `TOUT.sql` : `00_installation.sql` suivi des 57 tests (la règle « pas de
   DELETE en clair » est levée depuis que les fichiers sont posés depuis le
   dépôt), terminé par un seul `runtests()` qui rend une ligne `ok` / `not ok`
   par test. Un seul appel.
@@ -35,7 +35,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
   un seul appel est trop gros.
 - Ils sont générés depuis les fichiers numérotés ; pour les refaire après une
   modification d'un test, relancer le script de la section « Régénérer ».
-- Validés sur la maquette locale : `TOUT.sql` rend `1..56`, 56 `ok`.
+- Validés sur la maquette locale : `TOUT.sql` rend `1..57`, 57 `ok`.
 
 ## Ce que chaque test vérifie
 
@@ -69,6 +69,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 | 54 | Sur les envois existants (lecture seule), `envois.fournisseur` (rendu à l'ouvrier comme `fournisseur_hds`) est celui que `verrous_envoi` a jugé : `envois_essai_fournisseur` en essai, l'expéditeur retenu en réel ; aucun envoi de santé prêt ou parti vers un fournisseur non agréé |
 | 55 | Lot 19af : un gérant **seul décideur** (aucun autre gérant, admin ni valideur actif) active lui-même un accord permanent de la liste blanche (Daliro J-2), commentaire marqué « [seul décideur] » ; refusé (42501) avec une DAF valideur active, hors liste blanche, pour un autre type d'action, au nom d'un autre ; liste blanche et `seul_decideur` fermées à anon/authenticated. Sans objet sur la maquette (pas de politiques) : éprouvé sur une souche locale de `preparer_approbation` |
 | 56 | Lot 19ai : **compteurs de facturation**. Une pièce compte une fois dans `pieces_lues` quand sa lecture aboutit (`lue`, `a_verifier`, `a_classer`), et une fois dans `pieces_reprises` quand elle part chez un opérateur (`a_verifier`, `a_classer`). Ni une relecture, ni une validation, ni un `echec` ne recomptent. `facturation_mois` rend la part reprise. Le client B ne lit pas les compteurs de A ; anon et authenticated n'écrivent rien. 10/10 sur la maquette |
+| 57 | Lot 19aj : **export complet**. Seul le gérant (ou un admin) du client demande ; une seconde demande en cours est refusée (55P03). Les fichiers listés sont ceux du client dans `omega-clients`, et seulement les siens. L'issue est inscrite puis expire. Les portes du service (privées et leurs enveloppes publiques) sont fermées à anon et authenticated ; le client B ne voit pas les exports de A. 12/12 sur la maquette. La fonction Edge `export-complet` (zip AES-256, lien signé 24 h) a ses 7 tests Deno |
 
 ## Mécanique réelle du socle prise en compte (retours de la recette du 5 octobre)
 
@@ -121,7 +122,7 @@ import re, glob
 fichiers = sorted(f for f in glob.glob('[0-9][0-9]_*.sql') if f[:2] != '00')
 corps = lambda f: re.sub(r"\nselect \* from runtests\('tests'::name, '\^test_\d\d_'\);\n", "\n", open(f).read())
 zero = open('00_installation.sql').read()
-open('TOUT.sql', 'w').write("-- TOUT.sql — installation + les 56 tests.\n\n" + zero + "\n\n" + "\n\n".join(map(corps, fichiers)) + "\n\nselect * from runtests('tests'::name, '^test_');\n")
+open('TOUT.sql', 'w').write("-- TOUT.sql — installation + les 57 tests.\n\n" + zero + "\n\n" + "\n\n".join(map(corps, fichiers)) + "\n\nselect * from runtests('tests'::name, '^test_');\n")
 for i, p in enumerate([fichiers[:13], fichiers[13:26], fichiers[26:39], fichiers[39:]], 1):
     nums = '|'.join(f[:2] for f in p)
     open(f'TOUT_{i}.sql', 'w').write(f"-- TOUT_{i}.sql — partie {i}/4.\n\n" + (zero + "\n\n" if i == 1 else "") + "\n\n".join(map(corps, p)) + f"\n\nselect * from runtests('tests'::name, '^test_({nums})_');\n")

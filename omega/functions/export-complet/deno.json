@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "@zip.js/zip.js": "npm:@zip.js/zip.js@2.23.0",
+    "@std/assert": "jsr:@std/assert@^1.0.14"
+  },
+  "tasks": {
+    "test": "deno test -A tests/"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}

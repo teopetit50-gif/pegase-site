@@ -241,7 +241,7 @@ create view public.v_envois_libelles with (security_invoker = on) as select e.id
 grant select on public.v_envois_libelles to authenticated;
 
 -- Pièces : lisibles par lit_objet() (droits par objet) ------------------------------------
-create table public.pieces (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text, objet_id uuid, nom text not null, statut text not null default 'recue', cree_le timestamptz not null default now());
+create table public.pieces (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text, objet_id uuid, nom text not null, statut text not null default 'recue', chemin text, cree_le timestamptz not null default now());
 
 -- Approbations (au nom de soi, ou par délégation) -------------------------------------
 create table public.approbations (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), objet_type text not null default 'decision', objet_id text, approuve_par uuid not null, cree_le timestamptz not null default now());
@@ -340,3 +340,9 @@ revoke insert, update, delete, truncate on all tables in schema public from anon
 grant insert on public.acces_objets, public.oppositions, public.envois, public.approbations, public.notes_internes to authenticated;
 -- les preuves d'effacement n'ont pas de client_id (le client n'existe plus) : RLS activée, lecture par personne côté client
 alter table public.effacements enable row level security;
+
+-- Storage (le strict nécessaire de Supabase) : buckets et objets, pour l'export complet (19aj).
+create schema if not exists storage;
+create table storage.buckets (id text primary key, name text not null, public boolean default false);
+create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id), name text not null, metadata jsonb, created_at timestamptz default now());
+insert into storage.buckets (id, name) values ('omega-clients', 'omega-clients');
