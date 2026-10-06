@@ -934,3 +934,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Main : écrans Tiroma (synthèse, réinscription, absences, équipe absente, demi-journées, objectifs), Tavaro
   facture électronique + contestations, Lorani PLU, route OAuth app/api/messagerie + guides Gmail/Microsoft.
   C2 / C4 : c2_01 et c4_01 TOUJOURS non corrigés (lots 2 à 5 en attente derrière).
+- 19 h 20 Z — **OFFLOAD posé** : c4_01 à c4_05 + tests (C4 f99562d). ^test_c4_ 8/19 : la plupart des rouges
+  viennent de throws_ok à 3 arguments (le 3e est le message attendu) ; vrais écarts : source de consentement
+  hors CHECK (décision : source 'contrat' + preuve de la base légale, pas d'élargissement du socle),
+  « en essai, rien n'est préparé si le module est réglé en réel » non levé → C4 c4_06. b2_09b gardien des
+  contestations (3856716, b2_18 vert). b4_14 point du matin Tamila (baedbd9 ; test 23 lit s.items → points_items).
+  44 : seul rouge = private.grp_exiger_decideur_reception (B1). WebDAV : la passerelle Supabase laisse passer
+  PROPFIND/MKCOL/LOCK → A2 lot 19ao_depots. Main 5c3362c : vitrine passe 3 (C5).
+  B6 a proposé meteo_url Open-Meteo : NON posé (décision Météo-France).
