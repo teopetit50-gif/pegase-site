@@ -39,6 +39,13 @@ for (const largeur of [390, 1440]) {
   const t0 = await s.evaluer(`${fil}?.innerText || ''`);
   ok(/prise de plus dans le garage/.test(t0) && /Karim Haddad/.test(t0) && /passage en cours de l'expéditeur/.test(t0), 'le message de Karim, rangé par son passage en cours');
   ok(/Vocal/.test(t0) && await s.evaluer(`!!${fil}?.querySelector('img[alt^="Photo envoyée par Karim Haddad"]')`), 'la photo (avec son texte de remplacement) et le vocal');
+  ok(/Transcription du vocal \(14 s\)/.test(t0) && /deux portes de placard en plus/.test(t0) && /à confirmer/.test(t0) && /vérifié/.test(t0), 'la lecture du vocal : transcription, demande à confirmer, problème vérifié');
+  ok(await s.evaluer(`(() => { const b = [...${fil}.querySelectorAll('button')].find(b => /Ouvrir l.avenant/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'clic sur « Ouvrir l\'avenant » (demande à confirmer)');
+  await s.dormir(400);
+  ok(await s.evaluer(`/Deux portes de placard, chambre du fond — 2 u/.test(document.querySelector('[role="dialog"] textarea')?.value || '')`), 'l\'objet reprend la demande lue');
+  await s.evaluer(`document.querySelector('[role="dialog"] button[aria-label="Fermer"], [role="dialog"] [data-fermer]')?.click() ?? document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+  await s.evaluer(`document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+  await s.dormir(400);
   ok(await s.evaluer(`(() => { const b = [...${fil}.querySelectorAll('button')].find(b => /Ouvrir un avenant/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'clic sur « Ouvrir un avenant »');
   await s.dormir(400);
   await s.evaluer(axe + ';true');

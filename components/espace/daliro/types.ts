@@ -601,4 +601,22 @@ export type MessageChantier = {
   statut: "a_ranger" | "range" | "ecarte";
   avenant_id: string | null;
   recu_le: string;
+  /* b6_24b : la lecture rendue par le lecteur (CONTRAT-MEDIA d'A1) */
+  lecture?: LectureMedia | null;
+  lu_le?: string | null;
+  avenants?: string[];
+};
+export type DemandeLue = {
+  nature: "travail_supplementaire" | "probleme" | "question" | "information";
+  texte: string;
+  quantite?: number | null;
+  unite?: string | null;
+  lieu?: string | null;
+  source?: { media: number; extrait: string };
+  verifiee: boolean;
+};
+export type LectureMedia = {
+  resume?: string | null;
+  medias?: { n: number; chemin?: string; nature: "vocal" | "photo" | string; statut: string; transcription?: string | null; duree_s?: number | null }[];
+  demandes?: DemandeLue[];
 };

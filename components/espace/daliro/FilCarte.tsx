@@ -8,8 +8,10 @@
    la base (chantier nommé, passage en cours de l'expéditeur) ou à la main.
    Un travail supplémentaire vu sur place devient un avenant brouillon
    dont le message est l'origine. Les médias sont servis par une URL
-   signée de dix minutes (app/espace/daliro/actions.ts). La lecture du
-   contenu (transcription, description) viendra du lecteur.
+   signée de dix minutes (app/espace/daliro/actions.ts). b6_24b : la
+   lecture du lecteur (transcription des vocaux, résumé, demandes) s'affiche
+   sous le message ; une demande vérifiée a déjà ouvert son avenant
+   brouillon, une demande « à confirmer » s'ouvre ici à la main.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useState } from "react";
@@ -41,7 +43,12 @@ function exemple(tableau: Tableau): MessageChantier[] {
       texte: "Le client demande une prise de plus dans le garage, à côté de l'établi.",
       pieces: [{ nom: "image.jpg", mime: "image/jpeg", taille: 84000, chemin: "exemple/photo", vocal: false }] },
     { ...base, id: "00000000-0000-4000-8000-00000000f002", reception_id: 2, canal: "whatsapp", de_nom: "Lucas Morel", rangement: "nom", recu_le: ilYa(1, 16),
-      texte: null, pieces: [{ nom: "vocal.ogg", mime: "audio/ogg", taille: 21000, chemin: "exemple/vocal", vocal: true }] },
+      texte: null, pieces: [{ nom: "vocal.ogg", mime: "audio/ogg", taille: 21000, chemin: "exemple/vocal", vocal: true }],
+      lu_le: ilYa(1, 16), avenants: [],
+      lecture: { resume: "Le client demande deux portes de placard en plus ; il manque une palette de plaques.",
+                 medias: [{ n: 1, chemin: "exemple/vocal", nature: "vocal", statut: "lu", transcription: "Le client voudrait deux portes de placard en plus dans la chambre du fond. Et il nous manque une palette de plaques.", duree_s: 14 }],
+                 demandes: [{ nature: "travail_supplementaire", texte: "Deux portes de placard, chambre du fond", quantite: 2, unite: "u", source: { media: 1, extrait: "deux portes de placard en plus" }, verifiee: false },
+                            { nature: "probleme", texte: "Palette de plaques manquante", source: { media: 1, extrait: "il nous manque une palette de plaques" }, verifiee: true }] } },
   ];
 }
 
@@ -159,6 +166,29 @@ export default function FilCarte({ tableau, source, relire }: Props) {
                       {m.pieces.map((p) => <Media key={p.chemin} piece={p} source={source} auteur={m.de_nom ?? "l'expéditeur"} recu={recu} />)}
                     </div>
                   ) : null}
+                  {m.lecture ? (
+                    <div style={{ margin: "4px 0 6px", paddingLeft: 10, borderLeft: "2px solid #d9d9d9" }}>
+                      {(m.lecture.medias ?? []).filter((x) => x.transcription).map((x) => (
+                        <div key={x.n} className="esp-kpi-sous">Transcription du vocal{x.duree_s ? ` (${x.duree_s} s)` : ""} : « {x.transcription} »</div>
+                      ))}
+                      {(m.lecture.medias ?? []).some((x) => x.statut === "non_transcrit") ? <div className="esp-kpi-sous">Vocal non transcrit (service de transcription pas encore branché).</div> : null}
+                      {m.lecture.resume ? <div className="esp-kpi-sous"><strong>Lu :</strong> {m.lecture.resume}</div> : null}
+                      {(m.lecture.demandes ?? []).length ? (
+                        <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+                          {(m.lecture.demandes ?? []).map((d, k) => (
+                            <li key={k} className="esp-kpi-sous">
+                              {d.nature === "travail_supplementaire" ? "Travail supplémentaire" : d.nature === "probleme" ? "Problème" : d.nature === "question" ? "Question" : "Information"} : {d.texte}
+                              {d.quantite != null ? ` — ${d.quantite} ${d.unite ?? ""}` : ""}{" "}
+                              {d.verifiee ? <Pastille teinte="vert" contour>vérifié</Pastille> : <Pastille teinte="ambre" contour>à confirmer</Pastille>}
+                              {d.nature === "travail_supplementaire" && !d.verifiee && !m.avenant_id
+                                ? <> <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => { setErreur(null); setObjet(`${d.texte}${d.quantite != null ? ` — ${d.quantite} ${d.unite ?? ""}`.trimEnd() : ""}`); setAvenant(m); }}>Ouvrir l&apos;avenant</button></>
+                                : null}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ) : m.pieces.length && source === "reelle" ? <div className="esp-kpi-sous">Lecture des médias demandée au lecteur.</div> : null}
                   <div className="esp-fil-meta">
                     {recu} · {m.canal === "whatsapp" ? "WhatsApp" : m.canal === "sms" ? "SMS" : "courriel"}{m.rangement ? ` · ${RANGEMENTS[m.rangement]}` : ""}
                     {m.avenant_id ? <> · <Pastille teinte="bleu" contour>Avenant ouvert</Pastille></> : null}
