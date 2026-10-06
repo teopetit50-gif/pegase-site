@@ -736,3 +736,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   154+38+29+40 verts. Auto-activation par le gérant donneur **refusée** (42501 « Le demandeur ne
   décide pas de sa propre demande ») → il faut une seconde personne pour activer : question à
   Teo. Écran AccordJ2 fusionné.
+- 14 h 05 Z — **Teo, activation de l'accord J-2 : entre-deux** → B6 écrit b6_09 : règle
+  politique.activer (gérant/admin/valideur, demandeur exclu) ; si le gérant est le SEUL décideur,
+  porte btp_activer_accord_j2_seul, tracée, limitée aux politiques J-2, refusée dès qu'un second
+  décideur existe. **b4_05 coffre Tamila posé** (e0c4bcc, depots 4403/4404) : `^test_b4_` 13/14,
+  le 14 meurt sur « permission denied for function tamila_cle_maitre » (défaut du test, renvoyé).
+  A1 : brancher lecteur.ts du coffre. **A3 6cb0135 fusionné** : vue Fournisseurs écoute aussi
+  filed_historique ; témoin « En direct » / « Relue toutes les 30 s » (le conteneur refuse le
+  WebSocket ; à rejouer d'un poste ordinaire). VIES MS_MAX_CONCURRENT_REQ relayé à B7.
