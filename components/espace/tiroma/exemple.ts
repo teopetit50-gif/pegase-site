@@ -251,17 +251,34 @@ export const DOSSIER_EXEMPLE: Dossier = {
         rdv: { passes: 148, honores: 141, manques: 7, annules: 12, taux_manques: 0.047 }, creneaux: { liberes: 12 },
         devis: { presentes: 9, signes: 6, taux: 0.667, montant_signe: 9860 }, plans_sans_rdv: { nombre: 4, montant: 4865 },
         appels: { appels: 17, rdv_pris: 6, confirmes: 5 }, rappels: { prepares: 61, envoyes: 0, retenus: 61 },
-        precedent: { taux_manques: 0.061, devis_signes: 4, devis_taux: 0.5, passes: 152 },
+        reinscription: { visites: 131, reinscrits: 98, taux: 0.748 },
+        precedent: { taux_manques: 0.061, devis_signes: 4, devis_taux: 0.5, passes: 152, reinscription_taux: 0.712 },
       },
       {
         entite_id: "00000000-0000-4000-8000-0000000000e2", nom: "Centre de Jarry",
         rdv: { passes: 212, honores: 204, manques: 8, annules: 15, taux_manques: 0.038 }, creneaux: { liberes: 15 },
         devis: { presentes: 14, signes: 8, taux: 0.571, montant_signe: 13420 }, plans_sans_rdv: { nombre: 7, montant: 9310 },
         appels: { appels: 23, rdv_pris: 9, confirmes: 8 }, rappels: { prepares: 88, envoyes: 0, retenus: 88 },
-        precedent: { taux_manques: 0.042, devis_signes: 9, devis_taux: 0.6, passes: 205 },
+        reinscription: { visites: 190, reinscrits: 151, taux: 0.795 },
+        precedent: { taux_manques: 0.042, devis_signes: 9, devis_taux: 0.6, passes: 205, reinscription_taux: 0.781 },
       },
     ],
     total: { passes: 360, manques: 15, taux_manques: 0.042, creneaux_liberes: 27, devis_presentes: 23, devis_signes: 14, montant_signe: 23280,
-             plans_sans_rdv: 11, montant_plans_sans_rdv: 14175, appels: 40, rdv_confirmes: 13 },
+             plans_sans_rdv: 11, montant_plans_sans_rdv: 14175, appels: 40, rdv_confirmes: 13, visites: 321, reinscrits: 249, reinscription_taux: 0.776 },
+  },
+  /* b3_16 : trente jours de réinscription */
+  reinscription: {
+    periode: { du: aujourdHui(-29), au: aujourdHui(0), jours: 30 },
+    visites: 548, reinscrits: 409, taux: 0.746,
+    precedent: { taux: 0.718, visites: 531 },
+    par_praticien: [
+      { praticien_id: P1, nom: "Dr Ambre Lacour", visites: 302, reinscrits: 236, taux: 0.781 },
+      { praticien_id: P2, nom: "Dr Mathis Rousseau", visites: 246, reinscrits: 173, taux: 0.703 },
+    ],
+    sans_suite: [
+      { patient_id: "pa-18", patient_nom: "Firmin Bellance", derniere_visite: aujourdHui(-21), praticien: "Dr Ambre Lacour" },
+      { patient_id: "pa-19", patient_nom: "Joëlle Céleste", derniere_visite: aujourdHui(-14), praticien: "Dr Mathis Rousseau" },
+      { patient_id: "pa-20", patient_nom: "Hugo Ternel", derniere_visite: aujourdHui(-6), praticien: "Dr Mathis Rousseau" },
+    ],
   },
 };

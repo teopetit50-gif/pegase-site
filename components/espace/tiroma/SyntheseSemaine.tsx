@@ -3,7 +3,7 @@
 /* La section « Synthèse de la semaine » (06/10/2026, session B3, b3_15) :
    pour le titulaire et la direction, la dernière semaine complète de chaque
    centre et leur total. Rendez-vous et manqués (et l'écart avec la semaine
-   d'avant), créneaux libérés, devis signés, plans signés sans rendez-vous,
+   d'avant), réinscription (b3_16), créneaux libérés, devis signés, plans signés sans rendez-vous,
    appels et rendez-vous repris. Des chiffres, jamais un nom. Le lundi, la
    même ligne part au point du matin. */
 
@@ -65,7 +65,7 @@ export default function SyntheseSemaine({ synthese }: { synthese: Synthese | nul
         <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Synthèse par centre (tableau qui défile)">
           <table className="esp-tableau">
             <thead>
-              <tr><th>Centre</th><th>Rendez-vous</th><th>Manqués</th><th>Écart</th><th>Créneaux libérés</th><th>Devis signés</th><th>Sans rendez-vous</th><th>Appels</th></tr>
+              <tr><th>Centre</th><th>Rendez-vous</th><th>Manqués</th><th>Écart</th><th>Réinscription</th><th>Créneaux libérés</th><th>Devis signés</th><th>Sans rendez-vous</th><th>Appels</th></tr>
             </thead>
             <tbody>
               {synthese.cabinets.map((c) => (
@@ -74,6 +74,7 @@ export default function SyntheseSemaine({ synthese }: { synthese: Synthese | nul
                   <td>{c.rdv.passes}</td>
                   <td>{c.rdv.manques} ({taux(c.rdv.taux_manques)})</td>
                   <td>{ecart(c) ?? "—"}</td>
+                  <td>{taux(c.reinscription?.taux)}</td>
                   <td>{c.creneaux.liberes}</td>
                   <td>{c.devis.signes}/{c.devis.presentes} · {euros(c.devis.montant_signe)}</td>
                   <td>{c.plans_sans_rdv.nombre} · {euros(c.plans_sans_rdv.montant)}</td>

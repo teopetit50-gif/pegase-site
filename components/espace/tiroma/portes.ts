@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -116,8 +116,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const rappels = profil && profil !== "direction" ? await quiet(rpc<Rappels | null>("tiroma_rappels", { p_client: c, p_entite: e }, null), null, "rappels aux patients") : null;
   /* b3_15 : la synthèse de la semaine, pour le titulaire et la direction (tous leurs centres) */
   const synthese = profil === "titulaire" || profil === "direction" ? await quiet(rpc<Synthese | null>("tiroma_synthese_semaine", { p_client: c, p_entite: null, p_lundi: null }, null), null, "synthèse de la semaine") : null;
+  /* b3_16 : la réinscription (titulaire, assistante, direction) */
+  const reinscription = profil === "titulaire" || profil === "assistante" || profil === "direction" ? await quiet(rpc<Reinscription | null>("tiroma_reinscription", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "réinscription") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription },
     avis,
   };
 }

@@ -279,6 +279,7 @@ export type Dossier = {
   pilotage: Pilotage | null;
   rappels: Rappels | null;
   synthese: Synthese | null;
+  reinscription: Reinscription | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -414,7 +415,8 @@ export type SyntheseCabinet = {
   plans_sans_rdv: { nombre: number; montant: number };
   appels: { appels: number; rdv_pris: number; confirmes: number };
   rappels: { prepares: number; envoyes: number; retenus: number };
-  precedent?: { taux_manques: number | null; devis_signes: number | null; devis_taux: number | null; passes: number | null };
+  reinscription?: { visites: number; reinscrits: number; taux: number | null };
+  precedent?: { taux_manques: number | null; devis_signes: number | null; devis_taux: number | null; passes: number | null; reinscription_taux?: number | null };
 };
 
 export type Synthese = {
@@ -423,5 +425,18 @@ export type Synthese = {
   total: {
     passes: number; manques: number; taux_manques: number | null; creneaux_liberes: number; devis_presentes: number; devis_signes: number;
     montant_signe: number; plans_sans_rdv: number; montant_plans_sans_rdv: number; appels: number; rdv_confirmes: number;
+    visites?: number; reinscrits?: number; reinscription_taux?: number | null;
   };
+};
+
+/* ——— la réinscription (b3_16) ——— */
+
+export type Reinscription = {
+  periode: { du: string; au: string; jours: number };
+  visites: number;
+  reinscrits: number;
+  taux: number | null;
+  precedent: { taux: number | null; visites: number | null };
+  par_praticien: { praticien_id: string | null; nom: string | null; visites: number; reinscrits: number; taux: number | null }[];
+  sans_suite: { patient_id: string; patient_nom: string; derniere_visite: string; praticien: string | null }[];
 };

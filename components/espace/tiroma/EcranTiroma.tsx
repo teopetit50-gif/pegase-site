@@ -28,6 +28,7 @@ import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
 import Pilotage from "./Pilotage";
 import Plans, { type Mutuelle } from "./Plans";
 import Rappels, { type NouveauContact } from "./Rappels";
+import Reinscription from "./Reinscription";
 import SyntheseSemaine from "./SyntheseSemaine";
 import { DOSSIER_EXEMPLE } from "./exemple";
 import { LOGICIELS, libelleLogiciel } from "./libelles";
@@ -375,6 +376,7 @@ export default function EcranTiroma() {
           </div>
           <Appels registre={dossier.appels} titulaire={titulaire} appeler={setCibleAppel} />
           <SyntheseSemaine synthese={dossier.profil === "titulaire" || dossier.profil === "direction" ? dossier.synthese : null} />
+          <Reinscription reinscription={dossier.reinscription} appeler={dossier.appels ? setCibleAppel : undefined} />
           <Pilotage pilotage={dossier.profil === "titulaire" || dossier.profil === "direction" ? dossier.pilotage : null} appeler={dossier.appels ? setCibleAppel : undefined} />
           <div className="esp-grille">
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />

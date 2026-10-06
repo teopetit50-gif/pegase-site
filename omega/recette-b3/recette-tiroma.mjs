@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Synthèse de la semaine', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les dix cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les onze cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -150,6 +150,15 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-synthese')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-synthese-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : la réinscription (exemple, b3_16)');
+  const rei = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Réinscription"]'); if (!c) return null;
+    return { texte: c.innerText, sans: c.querySelectorAll('ul[aria-label="Patients vus sans prochain rendez-vous"] > li').length }; })()`);
+  ok(rei && /74,6 %/.test(rei.texte) && /\+2,8 pt sur la période d'avant/.test(rei.texte), 'le taux de réinscription (74,6 %) et son écart (+2,8 pt)');
+  ok(rei && rei.sans === 3, `trois patients vus sans prochain rendez-vous (${rei?.sans})`);
+  await s.evaluer(`document.getElementById('tiroma-reinscription')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-reinscription-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : le pilotage du titulaire (exemple, b3_13)');
   const pil = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Pilotage"]'); if (!c) return null;
