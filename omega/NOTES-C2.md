@@ -231,6 +231,13 @@ CASHD étant vert.
 
 ## Journal de session
 
+- 06/10, nuit : **c2_01 refusé à la pose** par le coordinateur (modeles_jeux_coherent : une clé de jeu ne peut pas être
+  une colonne facultative ; factures avait {nature, numero} avec nature facultative, règlements {date, montant,
+  reference, facture_numero}). Corrigé : factures {numero}, règlements {date, montant, libelle} (libellé rendu attendu).
+  Le socle réduit local porte désormais la même contrainte : l'ancien c2_01 y est refusé, le nouveau passe ; 150/150.
+  garder_demande lu (SOCLE-EXTRAITS-ENVOIS, main) : une fonction SECURITY DEFINER passe en_attente → annulee. Ajout de
+  `omega/recette-c2/banc_cashd.sql` (CASHD en essai sur le banc + reglages_envois cashd en essai, adresse d'essai).
+
 - 06/10, nuit : palier 4, `c2_03_capacites.sql` + test `c2_04_capacites` (39) + écran (échéancier, contestation
   partielle, plafond proposé, dossier, prévision, pilotage, tableur). Défaut trouvé en local et corrigé : rejouer c2_01
   ou c2_02 après c2_03 échouait (vues étendues par c2_03 : « cannot drop columns from view ») → vues de c2_01 et c2_02
