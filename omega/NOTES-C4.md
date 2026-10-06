@@ -80,6 +80,49 @@ vraies portes du relevé comme le lecteur d'A1), `c4_01_donnees.sql` — 5 tests
 - Q2. Le module `offload` doit-il être déclaré quelque part (`moteurs_reconnus`, `modules_envois`) avant le palier 3
   (envois) ? Je le demanderai avec le lot des reprises.
 
+## Palier 2 — la détection (lot c4_02)
+
+**Ce qui est posé** (`omega/modules/offload/migrations/c4_02_detection.sql`) :
+
+- `public.offload_signaux` : l'état du jour, un par compte (RLS du compte, lecture seule) — niveau, `depuis_le`,
+  score, priorité en euros, valeur annuelle attendue, nombre d'achats, premier et dernier achat, rythme (écart
+  médian en jours), panier moyen, date attendue du prochain achat, jours de silence, retard (× rythme), chiffre des
+  douze derniers mois et des douze d'avant, date de clôture, `avant_cloture`, et **`raisons`** : un tableau de
+  `{code, points, phrase}`.
+- `private.offload_detecter(client, jour)`, set par set (une requête pour tous les comptes), puis cinq constats :
+  - `retard` — dès 1,5 fois le rythme (et 14 jours) : « Il achetait en moyenne tous les 30 jours ; rien depuis
+    60 jours, depuis le 22/08/2026 (2,0 fois son rythme). » — (retard − 1) × 30 points, 50 au plus ;
+  - `silence` — le client s'est tu : au-delà de 3 fois son rythme et du délai fixé ; pour moins de trois achats,
+    au-delà du délai seul (« Un seul achat connu, le 04/04/2026 : rien depuis 200 jours, au-delà de votre délai de
+    90 jours. ») — 60 points (50 sans rythme connu) ;
+  - `baisse` — chiffre des douze derniers mois ≤ 60 % des douze d'avant, avec les deux montants et le pourcentage ;
+  - `ralenti` / `panier` — écarts récents 1,5 fois plus longs, panier récent ≤ 60 % de l'ancien (6 achats au moins) ;
+  - `saison` — « Il achète chaque année en septembre (2023, 2024, 2025) ; rien en septembre 2026 à ce jour. »
+    (mois écoulé, ou mois en cours passé le 20 ; au moins deux des trois années ; seulement pour un client qui
+    achète quelques fois par an — pour un client mensuel, le retard dit déjà tout) ;
+  - `avant_cloture` — un compte éteint, en retard ou en saison manquée, dont l'achat était attendu avant la
+    clôture, dans les N jours qui la précèdent : « La clôture du mois tombe le 31/10/2026 : il reste 10 jours pour
+    qu'une commande compte dans le mois. »
+- **Score = somme des points des raisons, plafonnée à 100** (vérifié par un test sur tous les comptes) ; **priorité =
+  valeur annuelle attendue × score / 100** ; la liste se trie par priorité. Niveaux : `eteint`, `decroche`,
+  `saison`, `ralentit`, `ok`, et à part `sans_achat` (rien ne le date), `sous_seuil` (sous le montant minimal).
+- Journal `offload.signal` à l'entrée dans un niveau à risque (une fois : recalculer le même jour n'ajoute rien).
+- Cron `offload-detection` (4 h 41 UTC, avant 7 h à Paris) sur toutes les organisations installées ; une
+  organisation en échec lève une alerte du module et n'arrête pas les autres. Détection recalculée **à la fin de
+  chaque import** (`offload_traiter_travaux` redéfini). Porte `offload_recalculer(client)` (gérant, admin,
+  valideur, collaborateur).
+
+**Tests** : `omega/tests/offload/c4_02_detection.sql` — `test_c4_02_detection` (jour fixé au 21/10/2026 : régulier,
+décroche, s'est tu, baisse, saison, achat unique, sans achat, sous le seuil ; phrases exactes, score = somme,
+priorité, journal, retour à « ok » après une commande, hors fenêtre de clôture), `test_c4_02_reglages_et_droits`,
+`test_c4_02_apres_import`. Banc local : 8 tests, 104 assertions vertes (paliers 1 et 2), migrations posées deux fois.
+
+**Ordre de pose (recette)**, après le lot c4_01 :
+1. `omega/modules/offload/migrations/c4_02_detection.sql`
+2. `omega/tests/offload/c4_02_detection.sql` (`runtests('tests', '^test_c4_02_')`)
+
+**À inscrire dans `a5_01_liste_figee.txt`** : `offload_recalculer(p_client uuid)`.
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`) — tenue et preuve
 
 Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve posée en recette.
@@ -88,11 +131,15 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 |---|---|---|
 | Le système croise votre historique de facturation et le référentiel clients de votre CRM. | **palier 1 livré (à poser)** | jeux `clients` + `ventes`, `test_c4_01_import` (comptes du référentiel, ventes rattachées, client absent créé) |
 | Un tableur sans colonne de date est exploité à partir des dates de facture. | **partiel** : le fichier clients sans date prend ses dates dans les factures (palier 1) ; « un compte que rien ne date est présenté à part » viendra avec l'écran (palier 4) | `test_c4_01_import` |
-| Les autres lignes | à venir (paliers 2 à 5) | — |
+| Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez. | **palier 2 livré (à poser)** — dernier contact = dernier achat pour l'instant ; les reprises du palier 3 s'y ajouteront | `offload_signaux.dernier_achat`, `jours_silence`, réglage `delai_silence_jours` ; `test_c4_02_detection` |
+| La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté. | **palier 2 livré (à poser)** | `rythme_jours`, raisons `retard` / `silence` / `ralenti` ; `test_c4_02_detection` |
+| Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique. | **palier 2 livré (à poser)** | `priorite` = valeur annuelle × score ; assertion « le premier de la liste est celui qui pèse le plus » |
+| Les autres lignes | à venir (paliers 3 à 5) | — |
 
 ## Journal
 
 - 06/10 — prise de poste. Lecture : AUDIT-PROMESSES § 1, `app/page.tsx` (accroche OFFLOAD), `lib/produits/reprise.ts`,
   `lib/produits/capacites/reprise.ts` (46 lignes), SOCLE-EXTRAITS-COMMUN (relevés, jeux, instantanés, travaux,
   journal), NOTES-A1 (lecteur-exports), migrations Tiroma et Daliro pour les conventions.
-- 06/10 — palier 1 écrit, vérifié sur le banc local (pose ×2, 62 assertions vertes), poussé sur `worker-c4`.
+- 06/10 — palier 1 écrit, vérifié sur le banc local (pose ×2, 62 assertions vertes), poussé sur `worker-c4` (7c8c520), envoyé au coordinateur.
+- 06/10 — palier 2 (détection) écrit et vérifié sur le banc local (104 assertions vertes au total).
