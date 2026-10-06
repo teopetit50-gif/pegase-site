@@ -530,3 +530,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   un motif », seulement « Confirmer ce fournisseur » (gris pour le déposant). Lot FILED
   fournisseur clos ; en attente d'A4 (a4_13 : demandeur des demandes nées d'un recontrôle,
   IBAN « propose » orphelin).
+- 04 h 25 — **Règle commune des valeurs lues (décision du coordinateur)** : une ligne par
+  (piece_id, champ), jamais deux ; une liste = une seule ligne dont la valeur est un tableau
+  jsonb dans l'ordre du document (ex. ["PCMI 3","PCMI 6"]) ; le socle lit avec
+  jsonb_array_elements_text quand jsonb_typeof = 'array'. Écrit dans omega/CHAMPS-LECTURE.md
+  (worker-a1 9ebefca). Cause : second courrier Lorani réel (pièce 059e705e…, lue, date et
+  pièces justes) → 0 proposition, car lorani_propositions attendait une ligne par code et
+  lorani_valeurs_de_piece remonte le tableau en chaîne JSON. B5 écrit b5_06 (deux formes
+  acceptées, fiche corrigée) ; A1 ajoute les champs facultatifs Lorani de la fiche de B5.
