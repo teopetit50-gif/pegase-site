@@ -53,7 +53,6 @@ export default function Activite() {
     <div className="v2-page v2-arrivee">
       <div className="v2-tete">
         <div>
-          <h1>Activité</h1>
           <p>Ce qui s&apos;est passé dans l&apos;organisation, du plus récent au plus ancien.</p>
         </div>
         <MenuDeroulant

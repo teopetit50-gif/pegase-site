@@ -5,12 +5,12 @@ import Link from "next/link";
 import { ArrowUpRight, Hammer } from "lucide-react";
 import { Vide } from "./ui";
 
-export default function AVenir({ titre, description, ancien }: { titre: string; description: string; ancien: string }) {
+/* le titre de la page est le h1 de la barre du haut (Coquille) */
+export default function AVenir({ description, ancien }: { titre?: string; description: string; ancien: string }) {
   return (
     <div className="v2-page v2-arrivee">
       <div className="v2-tete">
         <div>
-          <h1>{titre}</h1>
           <p>{description}</p>
         </div>
       </div>

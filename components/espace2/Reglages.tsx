@@ -29,11 +29,6 @@ export default function Reglages() {
 
   return (
     <div className="v2-page v2-arrivee">
-      <div className="v2-tete">
-        <div>
-          <h1>Réglages</h1>
-        </div>
-      </div>
       <div className="v2-avec-cote">
         <nav className="v2-cote" aria-label="Rubriques des réglages">
           {RUBRIQUES.map((r) => (

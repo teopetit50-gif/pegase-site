@@ -77,9 +77,10 @@ export function porteeDe(chemin: string): ModuleV2 | null {
   return moduleDe(seg) ?? null;
 }
 
-export function ongletActif(onglets: Onglet[], chemin: string): string | null {
-  const actif = onglets
-    .filter((o) => (o.exact ? chemin === o.href : chemin === o.href || chemin.startsWith(`${o.href}/`)))
-    .sort((a, b) => b.href.length - a.href.length)[0];
-  return actif?.href ?? null;
+/* le titre de la page, au centre de la barre du haut (c'est le h1 de la page) */
+export function titreDe(chemin: string): string {
+  const portee = porteeDe(chemin);
+  /* un module sans sous-pages porte son nom ; avec, le nom de la sous-page */
+  const onglets = portee ? (portee.onglets.length > 1 ? portee.onglets : []) : ONGLETS_ORGANISATION;
+  return onglets.find((o) => o.href === chemin)?.libelle ?? portee?.libelle ?? "Espace client";
 }

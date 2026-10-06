@@ -5,8 +5,10 @@
    page entière, débordement horizontal, erreurs de la console. Puis, à
    390 et 1440 : axe-core (WCAG 2.1 A et AA) sur la page, sur un menu
    ouvert, sur la palette ⌘K et sur la fenêtre « Noter un paiement » ;
-   et le clavier : Tab atteint les onglets, Ctrl+K ouvre la palette,
-   Échap la ferme, Entrée ouvre le menu « … », Échap rend le focus.
+   et le clavier : Tab part du lien d'évitement puis entre dans la barre
+   latérale, Ctrl+K et F ouvrent la palette, Entrée ouvre le menu « … »,
+   Échap rend le focus ; à 390, le tiroir de navigation s'ouvre et se
+   ferme (capture tiroir-390-*).
    Un écart axe « serious » ou « critical » fait échouer.
 
    usage : node omega/recette-c1/recette.mjs [origine] [dossier des captures] */
@@ -105,15 +107,37 @@ for (const largeur of LARGEURS) {
         await s.dormir(1200);
         ok(await s.evaluer(`location.pathname === '/espace2/filed/a-payer'`), `Entrée ouvre le premier résultat (${await s.evaluer('location.pathname')})`);
 
-        /* Tab : du lien d'évitement aux onglets */
+        /* F ouvre aussi la palette (hors d'un champ) */
+        await s.aller(base + '/espace2');
+        await touche(s, 'f', 'KeyF', 0, 70);
+        await s.dormir(400);
+        ok(await s.evaluer(`!!document.querySelector('.v2-palette')`), 'la touche F ouvre la palette');
+        await touche(s, 'Escape', 'Escape', 0, 27);
+        await s.dormir(300);
+        ok(await s.evaluer(`!document.querySelector('.v2-palette')`), 'Échap ferme la palette');
+
+        /* Tab : du lien d'évitement à la navigation */
         await s.aller(base + '/espace2');
         const vus = [];
         for (let i = 0; i < 6; i++) { await touche(s, 'Tab', 'Tab', 0, 9); vus.push(await focus(s)); }
         ok(vus[0] === 'Aller au contenu', `Tab : d'abord « Aller au contenu » (${vus.join(' → ')})`);
-        ok(vus.includes('Vue d\'ensemble') || vus.some((v) => /Rechercher/.test(v ?? '')), 'Tab atteint la recherche et les onglets');
+        ok(vus.some((v) => /^(Organisation|Ouvrir la navigation)/.test(v ?? '')), 'Tab entre dans la navigation');
 
-        /* le menu du compte et du thème */
-        await s.evaluer(`document.querySelector('.v2-avatar').click()`);
+        if (largeur === 390) {
+          /* le tiroir de navigation */
+          await s.evaluer(`document.querySelector('[aria-label="Ouvrir la navigation"]').click()`);
+          await s.dormir(600);
+          ok(await s.evaluer(`!!document.querySelector('.v2-tiroir .v2-lien')`), 'le bouton menu ouvre le tiroir de navigation');
+          await s.capturer(`${sortie}/tiroir-${largeur}-${theme}.jpg`, { qualite: 72 });
+          juger('tiroir', await analyser(s, `document.querySelector('.v2-voile')`));
+          await touche(s, 'Escape', 'Escape', 0, 27);
+          await s.dormir(400);
+          ok(await s.evaluer(`!document.querySelector('.v2-tiroir')`), 'Échap ferme le tiroir');
+        }
+
+        /* le menu du compte (« … » en bas de la barre latérale) */
+        if (largeur === 390) { await s.evaluer(`document.querySelector('[aria-label="Ouvrir la navigation"]').click()`); await s.dormir(600); }
+        await s.evaluer(`[...document.querySelectorAll('[aria-label="Menu du compte"]')].pop().click()`);
         await s.dormir(400);
         await s.capturer(`${sortie}/compte-${largeur}-${theme}.jpg`, { qualite: 72 });
         juger('menu compte', await analyser(s, `document.querySelector('.v2-popover')`));

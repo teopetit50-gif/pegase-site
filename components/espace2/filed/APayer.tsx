@@ -156,7 +156,6 @@ export default function APayer() {
     <div className="v2-page v2-arrivee">
       <div className="v2-tete">
         <div>
-          <h1>À payer</h1>
           <p>Les factures validées, par échéance : le retard d&apos;abord, le reste à payer, et ce qui empêcherait de payer.</p>
         </div>
         <div className="v2-actions">

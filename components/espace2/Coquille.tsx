@@ -3,30 +3,37 @@
 /* ══════════════════════════════════════════════════════════════════════
    La coquille du nouvel espace client (06/10/2026, session C1)
 
-   La disposition du tableau de bord de référence : une barre du haut de
-   64 px — le logo, une barre oblique, le sélecteur d'organisation, et,
-   dans un module, une seconde oblique et le sélecteur de module — puis,
-   collée dessous, la rangée d'onglets de la portée. À droite : la
-   recherche (⌘K), le compte. Le tout reste collé en haut au défilement.
+   La disposition du tableau de bord de référence, version 2026 (retour de
+   Teo sur le palier 1, captures de son propre tableau de bord) :
+     · à GAUCHE, une barre latérale de 255 px, pleine hauteur : le
+       sélecteur d'organisation, le champ « Rechercher » (touche F), trois
+       groupes de liens séparés par un filet — l'organisation, les modules
+       (ceux qui ont des sous-pages se déplient), l'aide et les réglages —
+       et, tout en bas, la personne, son menu « … » et la cloche ;
+     · à DROITE, une barre du haut de 64 px : la portée (⌃⌄) à gauche, le
+       titre de la page au centre, « Nouveau… » et « Assistant » à droite ;
+       puis le contenu.
+   Sous 768 px, la barre latérale devient un tiroir ouvert par un bouton.
 
    Les écrans lisent la source (exemple ou base réelle) par le même
-   contexte que l'ancien espace (components/espace/source.tsx) : rien
-   n'est dupliqué côté données. Sans session, l'espace montre l'exemple.
+   contexte que l'ancien espace (components/espace/source.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Check, ChevronsUpDown, Database, ExternalLink, Home, Laptop, Moon, Search, Settings, Sun } from "lucide-react";
-import { RouterProvider } from "react-aria-components";
+import { Activity, Banknote, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, Laptop, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
+import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { SourceFournisseur, useSource } from "@/components/espace/source";
+import { relatif } from "@/components/espace/format";
 import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
-import Onglets from "./Onglets";
 import Palette from "./Palette";
-import { MODULES, ONGLETS_ORGANISATION, RACINE, ongletActif, porteeDe } from "./modules";
+import { MODULES, RACINE, porteeDe, titreDe } from "./modules";
 import { changerTheme, useTheme } from "./theme";
+import { useDonnees } from "./donnees";
+import { A_PAYER, groupeDe, minuit } from "./filed/calculs";
 import "./espace2.css";
 
 function initiales(u: Utilisateur): string {
@@ -34,13 +41,8 @@ function initiales(u: Utilisateur): string {
   return i || u.email.charAt(0).toUpperCase();
 }
 
-const Oblique = () => (
-  <svg className="v2-oblique" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-    <path d="M16.88 3.549L7.12 20.451" />
-  </svg>
-);
-
 const coche = (oui: boolean) => (oui ? <Check width={16} height={16} aria-label="choisi" /> : null);
+const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
 
 export default function Coquille({ utilisateur, police, children }: { utilisateur: Utilisateur | null; police: string; children: React.ReactNode }) {
   const router = useRouter();
@@ -64,27 +66,154 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
   );
 }
 
+/* les alertes de la cloche : ce qui est en retard, tiré des mêmes données que la vue d'ensemble */
+function useAlertes() {
+  const { donnees } = useDonnees();
+  const [aujourdhui] = useState(minuit);
+  if (!donnees) return { alertes: [], enAttente: 0 };
+  const enAttente = donnees.demandes.filter((d) => d.statut === "en_attente");
+  const alertes: { id: string; texte: string; quand: string | null; lien: string }[] = [];
+  for (const f of donnees.vue.factures) {
+    if (!A_PAYER.has(f.statut) || f.nature === "avoir" || donnees.etats[f.id]?.etat === "payee") continue;
+    if (groupeDe(f, aujourdhui) === "retard") alertes.push({ id: `f-${f.id}`, texte: `Facture ${f.reference ?? ""} en retard de paiement`, quand: f.echeance_lue, lien: `${RACINE}/filed/a-payer` });
+  }
+  for (const d of enAttente) {
+    if (d.echeance && new Date(d.echeance).getTime() < aujourdhui) alertes.push({ id: `d-${d.id}`, texte: `Décision en retard : ${d.resume}`, quand: d.echeance, lien: `${RACINE}/validations` });
+  }
+  return { alertes, enAttente: enAttente.length };
+}
+
 function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; children: React.ReactNode }) {
   const chemin = usePathname() ?? RACINE;
-  const theme = useTheme();
-  const toast = useToast();
-  const { source, changer, connecte } = useSource();
   const [palette, setPalette] = useState(false);
+  const [tiroir, setTiroir] = useState(false);
   const portee = porteeDe(chemin);
-  const onglets = portee ? portee.onglets : ONGLETS_ORGANISATION;
-  const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
-  const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
+  /* ⌘K / Ctrl+K partout ; F hors des champs de saisie */
   useEffect(() => {
     const touche = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setPalette((v) => !v);
+        return;
+      }
+      const cible = e.target as HTMLElement | null;
+      const saisie = cible && (cible.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(cible.tagName));
+      if (!saisie && !e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === "f" && !document.querySelector(".v2-voile")) {
+        e.preventDefault();
+        setPalette(true);
       }
     };
     window.addEventListener("keydown", touche);
     return () => window.removeEventListener("keydown", touche);
   }, []);
+
+  /* le tiroir se referme à la navigation */
+  const [cheminVu, setCheminVu] = useState(chemin);
+  if (cheminVu !== chemin) {
+    setCheminVu(chemin);
+    setTiroir(false);
+  }
+
+  return (
+    <>
+      <a href="#contenu" className="v2-evitement">
+        Aller au contenu
+      </a>
+      <div className="v2-app">
+        <aside className="v2-laterale v2-laterale--fixe" aria-label="Navigation de l'espace client">
+          <BarreLaterale utilisateur={utilisateur} chemin={chemin} ouvrirPalette={() => setPalette(true)} />
+        </aside>
+        <div className="v2-colonne-principale">
+          <header className="v2-haut">
+            <div className="v2-haut-gauche">
+              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-seul-mobile" aria-label="Ouvrir la navigation" onClick={() => setTiroir(true)}>
+                <IconeMenu {...I} />
+              </button>
+              <MenuDeroulant
+                etiquette={`Portée : ${portee ? portee.nom : "tous les modules"}. Changer de module`}
+                classe="v2-portee"
+                placement="bottom start"
+                largeur={300}
+                declencheur={
+                  <>
+                    {portee ? <portee.icone {...I} /> : <LayoutGrid {...I} />}
+                    <span className="v2-portee-nom">{portee ? portee.nom : "Tous les modules"}</span>
+                    <ChevronsUpDown width={14} height={14} aria-hidden="true" />
+                  </>
+                }
+              >
+                <ItemMenu id="tous" href={RACINE} textValue="Tous les modules" icone={<LayoutGrid {...I} />} suffixe={coche(!portee)}>
+                  Tous les modules
+                </ItemMenu>
+                <SeparateurMenu />
+                <SectionMenu titre="Modules">
+                  {MODULES.map((m) => (
+                    <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
+                      {m.nom} <span className="v2-gris">· {m.libelle}</span>
+                    </ItemMenu>
+                  ))}
+                </SectionMenu>
+              </MenuDeroulant>
+            </div>
+            <h1 className="v2-haut-titre">{titreDe(chemin)}</h1>
+            <div className="v2-haut-droite">
+              <MenuDeroulant
+                etiquette="Nouveau"
+                classe="v2-btn v2-btn--petit v2-btn--primaire"
+                largeur={260}
+                declencheur={
+                  <>
+                    <span aria-hidden="true" style={{ fontSize: 16, lineHeight: 1 }}>
+                      +
+                    </span>
+                    <span className="v2-masque-mobile">Nouveau…</span>
+                  </>
+                }
+              >
+                <ItemMenu id="paiement" href={`${RACINE}/filed/a-payer`} icone={<Banknote {...I} />}>
+                  Noter un paiement
+                </ItemMenu>
+                <ItemMenu id="document" href="/espace/filed" icone={<FileText {...I} />}>
+                  Déposer un document
+                </ItemMenu>
+                <ItemMenu id="valider" href={`${RACINE}/validations`} icone={<CheckCheck {...I} />}>
+                  Décider d&apos;une validation
+                </ItemMenu>
+              </MenuDeroulant>
+              <button type="button" className="v2-btn v2-btn--petit v2-masque-mobile" disabled title="L'assistant arrive bientôt">
+                <Sparkles {...I} /> Assistant
+                <span className="v2-badge">bientôt</span>
+              </button>
+            </div>
+          </header>
+          <main id="contenu" tabIndex={-1} style={{ outline: "none" }}>
+            {children}
+          </main>
+        </div>
+      </div>
+
+      <ModalOverlay isOpen={tiroir} onOpenChange={setTiroir} isDismissable className="v2-jetons v2-voile v2-voile--tiroir">
+        <Modal className="v2-tiroir">
+          <Dialog className="v2-modale-dialogue v2-laterale" aria-label="Navigation de l'espace client">
+            <BarreLaterale utilisateur={utilisateur} chemin={chemin} ouvrirPalette={() => setPalette(true)} fermer={() => setTiroir(false)} />
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+      <Palette ouverte={palette} changer={setPalette} />
+    </>
+  );
+}
+
+type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; compteur?: number; sous?: { libelle: string; href: string }[] };
+
+function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisateur: Utilisateur | null; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
+  const theme = useTheme();
+  const toast = useToast();
+  const { source, changer, connecte } = useSource();
+  const { alertes, enAttente } = useAlertes();
+  const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
+  const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
   const choisirTheme = (t: "systeme" | "clair" | "sombre") => {
     changerTheme(t);
@@ -95,135 +224,226 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
     changer(s);
     toast(s === "reelle" ? "Base réelle affichée" : "Données d'exemple affichées");
   };
+  /* /auth/signout n'accepte qu'un POST (une déconnexion ne suit jamais un simple lien) */
+  const deconnecter = () => {
+    const f = document.createElement("form");
+    f.method = "post";
+    f.action = "/auth/signout";
+    document.body.append(f);
+    f.submit();
+  };
+
+  const groupes: Lien[][] = [
+    [
+      { libelle: "Vue d'ensemble", href: RACINE, icone: <LayoutGrid {...I} />, exact: true },
+      { libelle: "À valider", href: `${RACINE}/validations`, icone: <CheckCheck {...I} />, compteur: enAttente },
+      { libelle: "Point du matin", href: `${RACINE}/point`, icone: <Sun {...I} /> },
+      { libelle: "Activité", href: `${RACINE}/activite`, icone: <Activity {...I} /> },
+    ],
+    MODULES.map((m) => ({
+      libelle: m.nom,
+      href: `${RACINE}/${m.cle}`,
+      icone: <m.icone {...I} />,
+      sous: m.onglets.length > 1 ? m.onglets.map((o) => ({ libelle: o.libelle, href: o.href })) : undefined,
+    })),
+    [
+      { libelle: "Aide", href: "/contact", icone: <LifeBuoy {...I} /> },
+      {
+        libelle: "Réglages",
+        href: `${RACINE}/reglages`,
+        icone: <Settings {...I} />,
+        sous: [
+          { libelle: "Apparence", href: `${RACINE}/reglages#apparence` },
+          { libelle: "Données", href: `${RACINE}/reglages#donnees` },
+          { libelle: "Compte", href: `${RACINE}/reglages#compte` },
+        ],
+      },
+    ],
+  ];
 
   return (
-    <>
-      <a href="#contenu" className="v2-sr" onFocus={(e) => e.currentTarget.classList.remove("v2-sr")} onBlur={(e) => e.currentTarget.classList.add("v2-sr")} style={{ position: "fixed", top: 8, left: 8, zIndex: 60, padding: "8px 12px", borderRadius: 6, background: "var(--v2-bg-100)" }}>
-        Aller au contenu
-      </a>
-      <header className="v2-entete">
-        <div className="v2-barre">
-          <Link href={RACINE} className="v2-logo" aria-label="Omega — vue d'ensemble">
-            {/* eslint-disable-next-line @next/next/no-img-element -- un logo de 26 px, déjà à sa taille */}
-            <img src="/logo-pegase-blanc.png" alt="" width={26} height={26} />
-          </Link>
-          <Oblique />
-          <MenuDeroulant
-            etiquette={`Organisation : ${organisation}. Changer d'organisation ou de données`}
-            classe="v2-portee"
-            placement="bottom start"
-            largeur={280}
-            declencheur={
-              <>
-                <span className="v2-pastille-ronde" aria-hidden="true">
-                  {organisation.charAt(0).toUpperCase()}
-                </span>
-                <span className={`v2-portee-nom${portee ? " v2-portee-nom--replie" : ""}`}>{organisation}</span>
-                <span className="v2-badge v2-masque-mobile" data-teinte={source === "reelle" ? "bleu" : "gris"}>
-                  {source === "reelle" ? "Base réelle" : "Exemple"}
-                </span>
-                <ChevronsUpDown width={14} height={14} aria-hidden="true" />
-              </>
-            }
-          >
-            <SectionMenu titre="Organisations">
-              <ItemMenu id="org" href={RACINE} textValue={organisation} icone={<span className="v2-pastille-ronde">{organisation.charAt(0).toUpperCase()}</span>} suffixe={coche(true)}>
-                {organisation}
-              </ItemMenu>
-            </SectionMenu>
-            <SeparateurMenu />
-            <SectionMenu titre="Données affichées">
-              <ItemMenu id="exemple" onAction={() => choisirSource("exemple")} icone={<Database width={16} height={16} aria-hidden="true" />} suffixe={coche(source === "exemple")}>
-                Données d&apos;exemple
-              </ItemMenu>
-              <ItemMenu id="reelle" isDisabled={!connecte} onAction={() => choisirSource("reelle")} textValue="Base réelle" icone={<Database width={16} height={16} aria-hidden="true" />} suffixe={connecte ? coche(source === "reelle") : <span>connexion requise</span>}>
-                Base réelle
-              </ItemMenu>
-            </SectionMenu>
-          </MenuDeroulant>
-          {portee ? (
+    <div className="v2-laterale-int">
+      <div className="v2-laterale-haut">
+        <MenuDeroulant
+          etiquette={`Organisation : ${organisation}. Changer d'organisation ou de données`}
+          classe="v2-equipe"
+          placement="bottom start"
+          largeur={260}
+          declencheur={
             <>
-              <Oblique />
-              <MenuDeroulant
-                etiquette={`Module : ${portee.nom}. Changer de module`}
-                classe="v2-portee"
-                placement="bottom start"
-                largeur={300}
-                declencheur={
-                  <>
-                    <portee.icone width={16} height={16} aria-hidden="true" />
-                    <span className="v2-portee-nom">{portee.nom}</span>
-                    <ChevronsUpDown width={14} height={14} aria-hidden="true" />
-                  </>
-                }
-              >
-                <SectionMenu titre="Modules">
-                  {MODULES.map((m) => (
-                    <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}`} textValue={m.nom} icone={<m.icone width={16} height={16} aria-hidden="true" />} suffixe={coche(m.cle === portee.cle)}>
-                      {m.nom} <span className="v2-gris">· {m.libelle}</span>
-                    </ItemMenu>
-                  ))}
-                </SectionMenu>
-              </MenuDeroulant>
+              <span className="v2-pastille-ronde" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, 16 px, déjà à sa taille */}
+                <img src="/logo-pegase-blanc.png" alt="" width={16} height={16} />
+              </span>
+              <span className="v2-equipe-nom">{organisation}</span>
+              <span className="v2-badge" data-teinte={source === "reelle" ? "bleu" : "gris"}>
+                {source === "reelle" ? "Base réelle" : "Exemple"}
+              </span>
+              <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
             </>
-          ) : null}
+          }
+        >
+          <SectionMenu titre="Organisations">
+            <ItemMenu id="org" href={RACINE} textValue={organisation} icone={<span className="v2-pastille-ronde">{organisation.charAt(0).toUpperCase()}</span>} suffixe={coche(true)}>
+              {organisation}
+            </ItemMenu>
+          </SectionMenu>
+          <SeparateurMenu />
+          <SectionMenu titre="Données affichées">
+            <ItemMenu id="exemple" onAction={() => choisirSource("exemple")} icone={<Database {...I} />} suffixe={coche(source === "exemple")}>
+              Données d&apos;exemple
+            </ItemMenu>
+            <ItemMenu id="reelle" isDisabled={!connecte} onAction={() => choisirSource("reelle")} textValue="Base réelle" icone={<Database {...I} />} suffixe={connecte ? coche(source === "reelle") : <span>connexion requise</span>}>
+              Base réelle
+            </ItemMenu>
+          </SectionMenu>
+        </MenuDeroulant>
+        {fermer ? (
+          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome" aria-label="Fermer la navigation" onClick={fermer}>
+            <X {...I} />
+          </button>
+        ) : null}
+      </div>
 
-          <div className="v2-barre-droite">
-            <button type="button" className="v2-recherche-bouton" onClick={() => setPalette(true)} aria-label="Rechercher (Ctrl K)" aria-keyshortcuts="Meta+K Control+K">
-              <Search width={16} height={16} aria-hidden="true" />
-              <span>Rechercher…</span>
-              <Kbd>⌘K</Kbd>
-            </button>
-            <MenuDeroulant
-              etiquette={nom ? `Compte : ${nom}` : "Compte : non connecté"}
-              classe="v2-avatar"
-              largeur={260}
-              entete={
-                <div className="v2-menu-entete" style={{ padding: "16px 16px 4px" }}>
-                  <strong>{nom ?? "Non connecté"}</strong>
-                  <small>{utilisateur ? utilisateur.email : "Vous voyez l'exemple : Atelier Bertin"}</small>
-                </div>
-              }
-              declencheur={<span data-vide={utilisateur ? undefined : ""}>{utilisateur ? initiales(utilisateur) : "?"}</span>}
-            >
-              <SectionMenu>
-                <ItemMenu id="tableau" href={RACINE} icone={<Home width={16} height={16} aria-hidden="true" />}>
-                  Tableau de bord
-                </ItemMenu>
-                <ItemMenu id="reglages" href={`${RACINE}/reglages`} icone={<Settings width={16} height={16} aria-hidden="true" />}>
-                  Réglages
-                </ItemMenu>
-              </SectionMenu>
-              <SeparateurMenu />
-              <SectionMenu titre="Thème">
-                <ItemMenu id="t-systeme" onAction={() => choisirTheme("systeme")} icone={<Laptop width={16} height={16} aria-hidden="true" />} suffixe={coche(theme === "systeme")}>
-                  Système
-                </ItemMenu>
-                <ItemMenu id="t-clair" onAction={() => choisirTheme("clair")} icone={<Sun width={16} height={16} aria-hidden="true" />} suffixe={coche(theme === "clair")}>
-                  Clair
-                </ItemMenu>
-                <ItemMenu id="t-sombre" onAction={() => choisirTheme("sombre")} icone={<Moon width={16} height={16} aria-hidden="true" />} suffixe={coche(theme === "sombre")}>
-                  Sombre
-                </ItemMenu>
-              </SectionMenu>
-              <SeparateurMenu />
-              <SectionMenu>
-                <ItemMenu id="ancien" href="/espace/validations" icone={<ExternalLink width={16} height={16} aria-hidden="true" />}>
-                  Ancien espace client
-                </ItemMenu>
-                <ItemMenu id="site" href="/" icone={<ExternalLink width={16} height={16} aria-hidden="true" />}>
-                  Retour au site
-                </ItemMenu>
-              </SectionMenu>
-            </MenuDeroulant>
-          </div>
+      <button
+        type="button"
+        className="v2-trouver"
+        onClick={() => {
+          fermer?.();
+          ouvrirPalette();
+        }}
+        aria-label="Rechercher (touche F)"
+        aria-keyshortcuts="F Meta+K Control+K"
+      >
+        <Search {...I} />
+        <span>Rechercher…</span>
+        <Kbd>F</Kbd>
+      </button>
+
+      <nav className="v2-laterale-nav" aria-label="Pages et modules">
+        {groupes.map((g, i) => (
+          <ul key={i} className="v2-groupe">
+            {g.map((l) => (
+              <LienLateral key={l.href} lien={l} chemin={chemin} />
+            ))}
+          </ul>
+        ))}
+      </nav>
+
+      <div className="v2-laterale-bas">
+        <span className="v2-moi">
+          <span className="v2-avatar" aria-hidden="true" data-vide={utilisateur ? undefined : ""}>
+            {utilisateur ? initiales(utilisateur) : "?"}
+          </span>
+          <span className="v2-moi-nom">{nom ?? "Non connecté"}</span>
+        </span>
+        <MenuDeroulant
+          etiquette="Menu du compte"
+          classe="v2-rond"
+          placement="top end"
+          largeur={260}
+          entete={
+            <div className="v2-menu-entete" style={{ padding: "16px 16px 4px" }}>
+              <strong>{nom ?? "Non connecté"}</strong>
+              <small>{utilisateur ? utilisateur.email : "Vous voyez l'exemple : Atelier Bertin"}</small>
+            </div>
+          }
+          declencheur={<MoreHorizontal {...I} />}
+        >
+          <SectionMenu titre="Thème">
+            <ItemMenu id="t-systeme" onAction={() => choisirTheme("systeme")} icone={<Laptop {...I} />} suffixe={coche(theme === "systeme")}>
+              Système
+            </ItemMenu>
+            <ItemMenu id="t-clair" onAction={() => choisirTheme("clair")} icone={<Sun {...I} />} suffixe={coche(theme === "clair")}>
+              Clair
+            </ItemMenu>
+            <ItemMenu id="t-sombre" onAction={() => choisirTheme("sombre")} icone={<Moon {...I} />} suffixe={coche(theme === "sombre")}>
+              Sombre
+            </ItemMenu>
+          </SectionMenu>
+          <SeparateurMenu />
+          <SectionMenu>
+            <ItemMenu id="ancien" href="/espace/validations" icone={<ExternalLink {...I} />}>
+              Ancien espace client
+            </ItemMenu>
+            <ItemMenu id="site" href="/" icone={<ExternalLink {...I} />}>
+              Retour au site
+            </ItemMenu>
+            {utilisateur ? (
+              <ItemMenu id="sortir" onAction={deconnecter} icone={<LogOut {...I} />}>
+                Se déconnecter
+              </ItemMenu>
+            ) : null}
+          </SectionMenu>
+        </MenuDeroulant>
+        <DialogTrigger>
+          <Button className="v2-rond" aria-label={alertes.length ? `Alertes : ${alertes.length}` : "Alertes : aucune"}>
+            <Bell {...I} />
+            {alertes.length ? <span className="v2-rond-pastille" aria-hidden="true" /> : null}
+          </Button>
+          <Popover placement="top end" offset={8} className="v2-jetons v2-popover" style={{ width: 320 }}>
+            <Dialog className="v2-modale-dialogue" aria-label="Alertes">
+              <div className="v2-menu-entete" style={{ padding: "14px 16px 10px", borderBottom: "1px solid var(--v2-a-400)" }}>
+                <strong>Alertes</strong>
+              </div>
+              {alertes.length ? (
+                <ul className="v2-liste">
+                  {alertes.map((a) => (
+                    <li key={a.id} className="v2-liste-item">
+                      <span className="v2-point" data-teinte="rouge" aria-hidden="true" />
+                      <span className="v2-liste-texte">
+                        <Link href={a.lien}>{a.texte}</Link>
+                        <small>{relatif(a.quand)}</small>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="v2-gris" style={{ margin: 0, padding: "24px 16px", textAlign: "center" }}>
+                  Rien d&apos;urgent.
+                </p>
+              )}
+            </Dialog>
+          </Popover>
+        </DialogTrigger>
+      </div>
+    </div>
+  );
+}
+
+function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
+  const dedans = lien.exact ? chemin === lien.href : chemin === lien.href || chemin.startsWith(`${lien.href}/`);
+  const [ouvert, setOuvert] = useState(dedans);
+  const id = `sous-${lien.href.replace(/\W+/g, "-")}`;
+  if (lien.sous) {
+    return (
+      <li>
+        <button type="button" className="v2-lien" aria-expanded={ouvert} aria-controls={id} data-dedans={dedans ? "" : undefined} onClick={() => setOuvert((v) => !v)}>
+          {lien.icone}
+          <span>{lien.libelle}</span>
+          <ChevronRight width={14} height={14} aria-hidden="true" className="v2-lien-chevron" />
+        </button>
+        <div className="v2-sous-menu" id={id} data-ouvert={ouvert ? "" : undefined}>
+          <ul inert={!ouvert}>
+            {lien.sous.map((s) => (
+              <li key={s.href}>
+                <Link href={s.href} className="v2-lien v2-lien--sous" aria-current={!s.href.includes("#") && chemin === s.href ? "page" : undefined}>
+                  {s.libelle}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-        <Onglets key={portee?.cle ?? "organisation"} onglets={onglets} actif={ongletActif(onglets, chemin)} etiquette={portee ? `Écrans de ${portee.nom}` : "Écrans de l'organisation"} />
-      </header>
-      <main id="contenu" tabIndex={-1} style={{ outline: "none" }}>
-        {children}
-      </main>
-      <Palette ouverte={palette} changer={setPalette} />
-    </>
+      </li>
+    );
+  }
+  return (
+    <li>
+      <Link href={lien.href} className="v2-lien" aria-current={dedans ? "page" : undefined}>
+        {lien.icone}
+        <span>{lien.libelle}</span>
+        {lien.compteur ? <span className="v2-lien-compteur">{lien.compteur}</span> : null}
+      </Link>
+    </li>
   );
 }

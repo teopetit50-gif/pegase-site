@@ -86,7 +86,7 @@ export function MenuDeroulant({
   declencheur: React.ReactNode;
   etiquette: string;
   classe?: string;
-  placement?: "bottom start" | "bottom end" | "bottom";
+  placement?: "bottom start" | "bottom end" | "bottom" | "top end" | "top start";
   largeur?: number;
   entete?: React.ReactNode;
   children: React.ReactNode;

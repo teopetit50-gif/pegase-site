@@ -15,7 +15,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Banknote, CheckCheck, ChevronDown, Copy, ExternalLink, FileText, LayoutGrid, List, MoreHorizontal, Search, Sun } from "lucide-react";
+import { ArrowUpRight, Copy, ExternalLink, LayoutGrid, List, MoreHorizontal, Search } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { nomPersonne } from "@/components/espace/exemples/socle";
 import { dateCourte, libelleModule, montant, relatif } from "@/components/espace/format";
@@ -78,7 +78,6 @@ export default function Accueil() {
 
   return (
     <div className="v2-page v2-arrivee">
-      <h1 className="v2-sr">Vue d&apos;ensemble</h1>
       <div className="v2-outils">
         <label className="v2-champ">
           <Search width={16} height={16} aria-hidden="true" />
@@ -93,31 +92,6 @@ export default function Accueil() {
             <List width={16} height={16} aria-hidden="true" />
           </button>
         </div>
-        <MenuDeroulant
-          etiquette="Nouveau"
-          classe="v2-btn v2-btn--primaire"
-          largeur={260}
-          declencheur={
-            <>
-              <span>Nouveau…</span>
-              <ChevronDown width={16} height={16} aria-hidden="true" />
-            </>
-          }
-        >
-          <ItemMenu id="paiement" href={`${RACINE}/filed/a-payer`} icone={<Banknote width={16} height={16} aria-hidden="true" />}>
-            Noter un paiement
-          </ItemMenu>
-          <ItemMenu id="document" href="/espace/filed" icone={<FileText width={16} height={16} aria-hidden="true" />}>
-            Déposer un document
-          </ItemMenu>
-          <ItemMenu id="valider" href={`${RACINE}/validations`} icone={<CheckCheck width={16} height={16} aria-hidden="true" />}>
-            Décider d&apos;une validation
-          </ItemMenu>
-          <SeparateurMenu />
-          <ItemMenu id="point" href={`${RACINE}/point`} icone={<Sun width={16} height={16} aria-hidden="true" />}>
-            Lire le point du matin
-          </ItemMenu>
-        </MenuDeroulant>
       </div>
 
       {erreur ? (

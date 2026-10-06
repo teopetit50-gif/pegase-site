@@ -26,8 +26,13 @@
   ✓ la frappe filtre la liste (1 résultat pour « payer »)
   ✓ axe palette : 0 écart grave
   ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
-  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
-  ✓ Tab atteint la recherche et les onglets
+  ✓ la touche F ouvre la palette
+  ✓ Échap ferme la palette
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Ouvrir la navigation → Portée : tous les modules. Changer de module → Nouveau → INPUT → À valider8)
+  ✓ Tab entre dans la navigation
+  ✓ le bouton menu ouvre le tiroir de navigation
+  ✓ axe tiroir : 0 écart grave
+  ✓ Échap ferme le tiroir
   ✓ axe menu compte : 0 écart grave
   ✓ console propre
 
@@ -58,8 +63,13 @@
   ✓ la frappe filtre la liste (1 résultat pour « payer »)
   ✓ axe palette : 0 écart grave
   ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
-  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
-  ✓ Tab atteint la recherche et les onglets
+  ✓ la touche F ouvre la palette
+  ✓ Échap ferme la palette
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Ouvrir la navigation → Portée : tous les modules. Changer de module → Nouveau → INPUT → À valider8)
+  ✓ Tab entre dans la navigation
+  ✓ le bouton menu ouvre le tiroir de navigation
+  ✓ axe tiroir : 0 écart grave
+  ✓ Échap ferme le tiroir
   ✓ axe menu compte : 0 écart grave
   ✓ console propre
 
@@ -142,8 +152,10 @@
   ✓ la frappe filtre la liste (1 résultat pour « payer »)
   ✓ axe palette : 0 écart grave
   ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
-  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
-  ✓ Tab atteint la recherche et les onglets
+  ✓ la touche F ouvre la palette
+  ✓ Échap ferme la palette
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (touche F) → Vue d'ensemble → À valider8 → Point du matin)
+  ✓ Tab entre dans la navigation
   ✓ axe menu compte : 0 écart grave
   ✓ console propre
 
@@ -174,8 +186,10 @@
   ✓ la frappe filtre la liste (1 résultat pour « payer »)
   ✓ axe palette : 0 écart grave
   ✓ Entrée ouvre le premier résultat (/espace2/filed/a-payer)
-  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Omega — vue d'ensemble → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (Ctrl K) → Compte : non connecté → Vue d'ensemble)
-  ✓ Tab atteint la recherche et les onglets
+  ✓ la touche F ouvre la palette
+  ✓ Échap ferme la palette
+  ✓ Tab : d'abord « Aller au contenu » (Aller au contenu → Organisation : Atelier Bertin. Changer d'organisation ou de  → Rechercher (touche F) → Vue d'ensemble → À valider8 → Point du matin)
+  ✓ Tab entre dans la navigation
   ✓ axe menu compte : 0 écart grave
   ✓ console propre
 
