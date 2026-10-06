@@ -12,12 +12,15 @@
 --
 -- Pagination : send_message est borné à 64 Ko. D'abord la page 0 (avec_texte = false) : versions, décisions, provenances,
 -- tailles. Puis, avec avec_texte = true, une page par tranche de versions dont la somme des « octets » des lignes 'sql'
--- à emporter reste sous ~55 Ko.
+-- à emporter reste sous ~55 Ko. Un texte plus long que taille_tranche (tiroma_releve, varelo_referentiel…) sort en
+-- plusieurs lignes (partie 1..parties) : une seule version par page, et partie_de = partie_a pour une tranche par page.
 -- Rendre la sortie BRUTE de execute_sql (le tableau JSON) ; A5 la range dans omega/prod/sortie/page-<n>.json.
 
 with bornes as (
   select '00000000000000'::text as de, '99999999999999'::text as a,     -- ← bornes de la page (versions incluses)
-         false as avec_texte                                            -- ← false : inventaire (page 0) ; true : avec le SQL
+         false as avec_texte,                                           -- ← false : inventaire (page 0) ; true : avec le SQL
+         1 as partie_de, 1000 as partie_a,                              -- ← tranches du texte rendues (1 = la première)
+         40000 as taille_tranche                                        -- ← caractères par tranche (une tranche ≈ 45 Ko en JSON)
 ),
 base_modules(name) as (
   values ('daliro_m0a_referentiel'), ('daliro_m0b_marches'), ('daliro_m0c_planning'),
@@ -51,7 +54,14 @@ classees as (
 select c.version, c.name, c.decision,
        case when c.est_note then 'note' else 'sql' end as source,
        case when c.est_note then c.texte end as provenance,
-       case when not c.est_note and c.decision = 'emporter' and (select avec_texte from bornes) then c.texte end as sql,
+       t.partie,
+       greatest(1, ceil(length(c.texte)::numeric / (select taille_tranche from bornes))::int) as parties,
+       case when not c.est_note and c.decision = 'emporter' and (select avec_texte from bornes)
+            then substr(c.texte, (t.partie - 1) * (select taille_tranche from bornes) + 1, (select taille_tranche from bornes)) end as sql,
        octet_length(c.texte) as octets
 from classees c
-order by c.version;
+cross join lateral generate_series(1, case when (select avec_texte from bornes) and not c.est_note and c.decision = 'emporter'
+                                           then greatest(1, ceil(length(c.texte)::numeric / (select taille_tranche from bornes))::int)
+                                           else 1 end) as t(partie)
+where t.partie between (select partie_de from bornes) and (select partie_a from bornes)
+order by c.version, t.partie;

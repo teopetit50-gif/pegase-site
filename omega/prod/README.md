@@ -10,7 +10,12 @@ Rien ici ne touche une base. Deux outils, en deux temps.
      poses « depuis le dépôt » et la taille.
    - **Pages suivantes** (`avec_texte = true`) : le texte SQL des lignes `sql` à
      emporter. Les bornes de versions découpent l'export pour rester sous 64 Ko
-     par message.
+     par message. Un texte plus long que `taille_tranche` (40 000 caractères :
+     `tiroma_releve`, `varelo_referentiel`, les bases Daliro…) sort en tranches
+     (`partie` sur `parties`). Il faut alors une version par page et une tranche
+     par page (`partie_de = partie_a`). L'assembleur recolle les tranches, et
+     refuse un texte dont il manque une tranche. Essayé sur 116 492 caractères :
+     texte recollé identique.
 
    La sortie brute (tableau JSON) va dans `omega/prod/sortie/page-<n>.json`.
 2. **`assembler.mjs`** est lancé par A5 sur `worker-a5` :

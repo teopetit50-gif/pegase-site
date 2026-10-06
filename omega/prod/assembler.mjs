@@ -160,9 +160,20 @@ function lirePages(chemins) {
     if (!Array.isArray(donnees)) donnees = donnees.rows || donnees.result || donnees.data || [];
     for (const l of donnees) {
       const v = String(l.version);
-      const deja = parVersion.get(v) || {};
-      parVersion.set(v, { ...deja, ...Object.fromEntries(Object.entries(l).filter(([, x]) => x !== null && x !== undefined)) });
+      const deja = parVersion.get(v) || { tranches: {} };
+      const { sql, partie, ...reste } = l;
+      const fusion = { ...deja, ...Object.fromEntries(Object.entries(reste).filter(([, x]) => x !== null && x !== undefined)) };
+      if (typeof sql === 'string') fusion.tranches = { ...deja.tranches, [Number(partie) || 1]: sql };
+      parVersion.set(v, fusion);
     }
+  }
+  // Les tranches se recollent dans l'ordre ; il les faut toutes (parties), sinon le texte reste absent.
+  for (const l of parVersion.values()) {
+    const n = Number(l.parties) || 1;
+    const t = l.tranches || {};
+    const presentes = Object.keys(t).length;
+    if (presentes === n) l.sql = Array.from({ length: n }, (_, i) => t[i + 1]).join('');
+    else if (presentes > 0) l.tranchesManquantes = `${presentes}/${n} tranche(s)`;
   }
   return [...parVersion.values()].sort((a, b) => String(a.version).localeCompare(String(b.version)));
 }
@@ -214,6 +225,7 @@ function principal() {
         origine = 'dépôt : ' + migrations.map((f) => `${f.sha} ${f.chemin}`).join(' ; ');
         notesLigne.unshift('fichiers : ' + migrations.map((f) => `${f.chemin.split('/').pop()} @ ${f.sha}`).join(', '));
       } else {
+        if (l.tranchesManquantes) throw new Error(`texte incomplet : ${l.tranchesManquantes} reçue(s)`);
         if (typeof l.sql !== 'string' || l.sql.length === 0) throw new Error('texte absent : rejouer la page avec avec_texte = true');
         texte = l.sql;
         origine = 'statements de la recette';
