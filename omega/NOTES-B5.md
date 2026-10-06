@@ -8,7 +8,7 @@ Dernière mise à jour : 05/10/2026, 23 h.
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
 | **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 80 % | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges sont corrigés (b5_04 + lecture du point), rejoué à 9ba2900 ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 80 % | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
 **Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
 la fusion dans `main` ; la vérification sur omegaai.fr. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
@@ -187,4 +187,11 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   ordre des pièces non déterministe (→ b5_04) et la lecture du point du matin (→ `points_sections` / `points_items`).
   Corrigés dans 9ba2900, renvoyé.
 - 06/10, 0 h : un vrai récépissé PDF déposé par l'écran sur le banc (`omega/recette-b5/courrier-reel.mjs`) : fichier
-  dans le bucket, pièce créée par `lorani_deposer_piece`, prise par le lecteur en 35 s ; attente de la proposition.
+  dans le bucket, pièce créée par `lorani_deposer_piece`, prise par le lecteur en 35 s, lue en 70 s en `a_classer`
+  (types Lorani inconnus du lecteur) ; aucune proposition en neuf minutes, comme attendu. Spécification écrite pour A1.
+- 06/10, 0 h 52 (coordinateur) : **en ligne**. `main` déployé (7c7c934 puis 6635b1c) ; vérifié par curl à 1 h :
+  https://omegaai.fr/espace/lorani répond 200 et sert « Calendrier des permis », « Vous savez quand le chantier peut
+  démarrer », le ruban « Données d'exemple » et l'onglet « Permis ». omegaai.fr pointe sur la production (sans banc) :
+  la base réelle s'y verra avec un compte de production ; la relecture réelle reste sur le Next local pointé sur la
+  recette. Dernier SHA de worker-b5 envoyé au coordinateur : voir le journal git. Jauges : mécanique 80 %, livrable
+  85 % (en ligne ; reste le lecteur et le rejeu du dépôt réel).
