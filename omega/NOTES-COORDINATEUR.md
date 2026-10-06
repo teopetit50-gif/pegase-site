@@ -618,3 +618,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   électronique (Factur-X/UBL/CII, statuts de cycle de vie), mode de règlement/ICS, validation
   auto des charges récurrentes, organisation d'une seule personne, TVA sur encaissements,
   conservation vs effacement, fournisseurs étrangers, acomptes/avoirs, délais de paiement.
+- 04 h 45 — A3 be87d0b fusionné : FILED « Identifiants lus sur la pièce, non retenus »
+  (Confirmer seulement si la clé est juste, sinon « Saisir les vrais identifiants ») ;
+  **défaut corrigé** : « Corriger une valeur » envoyait date_emission / echeance_lue / iban
+  (refusés 22023) → date / echeance / fournisseur.iban, prouvé en réel (daf2@, R2026-000003).
+  Quatre SIREN d'exemple à clé fausse remplacés. B6 : feu vert b6_07 (réponse OUI/NON
+  entrante) et statut de l'envoi à l'écran ; accord permanent des J-2 → décision de Teo.
