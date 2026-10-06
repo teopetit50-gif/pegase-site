@@ -17,7 +17,8 @@
      btp_ouvrir_situation, btp_avancer_situation, btp_soumettre_situation, btp_valider_situation,
      btp_annuler_situation (b6_12) ;
      btp_prononcer_reception, btp_lever_reserve, btp_opposer_retenue, btp_liberer_retenue,
-     btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13).
+     btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13) ;
+     btp_noter_paiement, btp_fixer_echeance (b6_16).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -182,4 +183,9 @@ export async function envoyerDecompte(reception: string): Promise<unknown> {
 }
 export async function repondreDecompte(reception: string, accepte: boolean, motif: string | null): Promise<unknown> {
   return rpc("btp_repondre_decompte", { p_reception: reception, p_accepte: accepte, p_motif: motif });
+}
+
+/* L'encaissement des situations (b6_16). */
+export async function noterPaiement(situation: string, montant: number, date: string, reference: string | null): Promise<unknown> {
+  return rpc("btp_noter_paiement", { p_situation: situation, p_montant: montant, p_date: date, p_reference: reference });
 }
