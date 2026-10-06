@@ -191,6 +191,80 @@ r = await releve(s, 'membre');
 }
 ok(/referent/i.test(await s.evaluer(`document.querySelector('section[aria-label="Membres et murailles"]')?.innerText || ''`)), 'Me Referent est intervenant du dossier');
 await s.capturer(`${dossier}reel-membres-1440.jpg`, { qualite: 55 });
+
+/* ——— la suite, avec TAMILA_SUITE=1 : audience, avis saisi, muraille et sa levée, export, clôture puis annulation ——— */
+if (process.env.TAMILA_SUITE) {
+  console.log('— suite réelle : audience, avis, muraille, export, clôture');
+  ok((await cliquer(s, 'section[aria-label="Audiences"] .r-btn', /Ajouter/)) === true, 'ouverture « Ajouter une audience »');
+  await s.dormir(400);
+  await taper(s, '[role="dialog"] input[type="date"]', '2026-11-12');
+  await taper(s, '[role="dialog"] input[placeholder="Pôle 4 – chambre 5"]', 'Pôle 4 – chambre 5');
+  ok((await cliquer(s, '[role="dialog"] button', /Enregistrer/)) === true, 'clic « Enregistrer » l\'audience');
+  await finDialogue(s, 1500);
+  r = await releve(s, 'audience');
+  ok(/12\/11\/2026/.test(await s.evaluer(`document.querySelector('section[aria-label="Audiences"]')?.innerText || ''`)), 'l\'audience du 12/11/2026 est posée pour de vrai');
+  /* un avis d'audience saisi : le socle ajoute l'audience depuis l'avis */
+  ok((await cliquer(s, 'section[aria-label="Avis RPVA"] .r-btn', /Saisir un avis/)) === true, 'ouverture « Saisir un avis »');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const dates = [...d.querySelectorAll('input[type="date"]')]; const set = (e, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(e, v); e.dispatchEvent(new Event('input', { bubbles: true })); }; set(dates[0], '2026-10-02'); set(dates[1], '2027-02-04'); })()`);
+  ok((await cliquer(s, '[role="dialog"] button', /Enregistrer/)) === true, 'clic « Enregistrer » l\'avis');
+  await finDialogue(s, 2000);
+  r = await releve(s, 'avis');
+  const avisTxt = await s.evaluer(`document.querySelector('section[aria-label="Avis RPVA"]')?.innerText || ''`);
+  ok(/Avis d'audience/.test(avisTxt) && /Appliqué/.test(avisTxt), 'l\'avis d\'audience est appliqué par le socle');
+  ok(/04\/02\/2027/.test(await s.evaluer(`document.querySelector('section[aria-label="Audiences"]')?.innerText || ''`)), 'l\'audience du 04/02/2027 vient de l\'avis');
+  await s.capturer(`${dossier}reel-audiences-1440.jpg`, { qualite: 55 });
+  /* la muraille sur Daf (valideur), puis sa levée par décision du gérant */
+  ok((await cliquer(s, 'section[aria-label="Membres et murailles"] .esp-carte-tete .r-btn', /Muraille/)) === true, 'ouverture « Poser une muraille »');
+  await s.dormir(400);
+  const daf = await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select'); const o = [...sel.options].find(o => /^daf\b|daf@|daf ·/i.test(o.textContent) && !/daf2/i.test(o.textContent)) || [...sel.options].find(o => /daf/i.test(o.textContent)); if (!o) return null; sel.value = o.value; sel.dispatchEvent(new Event('change', { bubbles: true })); return o.textContent; })()`);
+  ok(!!daf, `personne écartée : ${daf}`);
+  await taper(s, '[role="dialog"] textarea', 'Conflit d\'intérêts (essai de recette, motif chiffré).');
+  ok((await cliquer(s, '[role="dialog"] button', /Poser la muraille/)) === true, 'clic « Poser la muraille »');
+  await finDialogue(s, 2000);
+  r = await releve(s, 'muraille');
+  ok(/En place/.test(await s.evaluer(`document.querySelector('section[aria-label="Membres et murailles"]')?.innerText || ''`)), 'la muraille est en place');
+  await s.capturer(`${dossier}reel-muraille-1440.jpg`, { qualite: 55 });
+  ok((await cliquer(s, 'section[aria-label="Membres et murailles"] .tam-ligne-actions .r-btn', /Demander la levée/)) === true, 'clic « Demander la levée »');
+  await attendre(s, 2500);
+  r = await releve(s, 'levée demandée');
+  const decider = await cliquer(s, '.esp-avis .r-btn', /Approuver/);
+  ok(decider === true, `la demande de levée est proposée à la décision du gérant (${decider})`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Approuver\\s*$/.test(b.textContent))?.click()`);
+  await finDialogue(s, 2500);
+  r = await releve(s, 'levée');
+  ok(/Levée/.test(await s.evaluer(`document.querySelector('section[aria-label="Membres et murailles"]')?.innerText || ''`)), 'la muraille est levée par décision');
+  /* l'export */
+  ok((await cliquer(s, 'section[aria-label="Identité du dossier"] .r-btn', /Exporter le dossier/)) === true, 'ouverture « Exporter »');
+  await s.dormir(400);
+  ok((await cliquer(s, '[role="dialog"] button', /Demander l'export/)) === true, 'clic « Demander l\'export »');
+  await finDialogue(s, 2000);
+  r = await releve(s, 'export');
+  ok(/En préparation/.test(await s.evaluer(`document.querySelector('section[aria-label="Exports"]')?.innerText || ''`)), 'l\'export est demandé : en préparation (le travail tamila.exporter attend son ouvrier)');
+  /* la clôture : demande, décision, puis annulation (le dossier reste ouvert sur le banc) */
+  ok((await cliquer(s, 'section[aria-label="Identité du dossier"] .r-btn', /Clôturer le dossier/)) === true, 'ouverture « Clôturer »');
+  await s.dormir(400);
+  ok((await cliquer(s, '[role="dialog"] button', /Demander la clôture/)) === true, 'clic « Demander la clôture »');
+  await finDialogue(s, 2500);
+  r = await releve(s, 'clôture demandée');
+  const dec2 = await cliquer(s, '.esp-avis .r-btn', /Approuver/);
+  ok(dec2 === true, `la clôture est proposée à la décision d\'un associé (${dec2})`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Approuver\\s*$/.test(b.textContent))?.click()`);
+  await finDialogue(s, 2500);
+  r = await releve(s, 'clos');
+  const tete = await s.evaluer(`document.querySelector('section[aria-label="Identité du dossier"]')?.innerText || ''`);
+  ok(/Clos/.test(tete) && /Effacement prévu/.test(tete), 'le dossier est clos, l\'effacement est daté');
+  await s.capturer(`${dossier}reel-cloture-1440.jpg`, { qualite: 55 });
+  ok((await cliquer(s, 'section[aria-label="Identité du dossier"] .r-btn', /Annuler la clôture/)) === true, 'clic « Annuler la clôture » (gérant)');
+  await attendre(s, 2500);
+  r = await releve(s, 'rouvert');
+  ok(/Ouvert/.test(await s.evaluer(`document.querySelector('section[aria-label="Identité du dossier"] .esp-pastille')?.textContent || ''`)), 'le dossier est rouvert : rien ne sera effacé');
+  const journal = await s.evaluer(`document.querySelector('section[aria-label="Journal des accès"]')?.innerText || ''`);
+  ok(/a consulté le dossier/.test(journal), 'le journal des accès (b4_02) montre les consultations');
+  await s.capturer(`${dossier}reel-journal-1440.jpg`, { qualite: 55 });
+}
 s.fermer();
 
 /* ——— l'avocat (referent) confirme le délai ——— */
