@@ -21,6 +21,7 @@ import { Avis, Pastille } from "../ui";
 import { dateHeure, montant, nombreFr } from "../format";
 import { nomLocataire } from "./etats";
 import { MODES_CAUTION, VUES_OBLIGATOIRES, VUES_UTILES, ZONES, etatDe, libelleZone } from "./edl";
+import { NETTETE_MIN_DEFAUT, mesurerNettete } from "./nettete";
 import type { Dossier, EtatDesLieux, LigneBareme, Role, ZoneDommage } from "./types";
 
 export type GestesEtats = {
@@ -98,13 +99,15 @@ function Signature({ onChange }: { onChange: (vide: boolean) => void }) {
   );
 }
 
-export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, onFait }: {
+export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, onFait, netteteMin }: {
   dossier: Dossier;
   role: Role | null;
   bareme: LigneBareme[];
   nommer: (id: string | null | undefined) => string;
   gestes: GestesEtats;
   onFait: (message: string) => void;
+  /* b2_07 : le seuil du loueur ; une photo plus floue est refusée avant l'envoi */
+  netteteMin?: number;
 }) {
   const c = dossier.contrat;
   const dep = etatDe(dossier.etats, "depart");
@@ -124,6 +127,27 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const canevas = useRef<HTMLDivElement | null>(null);
+  /* la netteté de chaque photo retenue, mesurée au choix du fichier ; les photos floues sont écartées et nommées */
+  const mesures = useRef(new Map<File, number | null>());
+  const [floues, setFloues] = useState<string[]>([]);
+  const [mesure, setMesure] = useState(false);
+  const seuil = netteteMin ?? NETTETE_MIN_DEFAUT;
+  const retenir = async (fichiers: File[], quoi: string): Promise<File[]> => {
+    setMesure(true);
+    const gardees: File[] = [];
+    const refus: string[] = [];
+    for (const f of fichiers) {
+      const n = await mesurerNettete(f);
+      if (n !== null && n < seuil) refus.push(`${quoi} : « ${f.name} » est floue (netteté ${n.toLocaleString("fr-FR")}, minimum ${seuil.toLocaleString("fr-FR")})`);
+      else {
+        mesures.current.set(f, n);
+        gardees.push(f);
+      }
+    }
+    setFloues((x) => [...x.filter((t) => !t.startsWith(`${quoi} :`)), ...refus]);
+    setMesure(false);
+    return gardees;
+  };
   const peut = role === "gerant" || role === "admin" || role === "valideur" || role === "collaborateur";
   const lignesDommage = bareme.filter((l) => l.nature === "dommage");
 
@@ -141,6 +165,7 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
     setSignataire(dossier.locataire && !dossier.locataire.anonymise_le ? nomLocataire(dossier.locataire) : "");
     setVide(true);
     setRefus(null);
+    setFloues([]);
     /* un brouillon déjà posé (photos comprises) passe droit à la signature */
     setEtape({ moment, pas: e?.statut === "brouillon" && e.photos.length ? "signature" : "constat", etat: e?.statut === "brouillon" ? e.id : null });
   };
@@ -164,16 +189,16 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
 
   const enregistrerConstat = () => etape && faire(async () => {
     const fichiers = new Map<string, File[]>();
-    const vuesFaites: { vue: string; photo: string }[] = [];
+    const vuesFaites: { vue: string; photo: string; nettete?: number }[] = [];
     for (const [vue, fs] of Object.entries(photos)) {
       if (!fs.length) continue;
       fichiers.set(`vue:${vue}`, fs);
-      fs.forEach((f) => vuesFaites.push({ vue, photo: f.name }));
+      fs.forEach((f) => vuesFaites.push({ vue, photo: f.name, ...(typeof mesures.current.get(f) === "number" ? { nettete: mesures.current.get(f) as number } : {}) }));
     }
     dommages.forEach((d, i) => fichiers.set(`dommage:${i}`, d.fichiers));
     const valeurs: Record<string, unknown> = {
       km: kmNombre, carburant_8: Number(c8), observations: observations.trim() || undefined,
-      photos: vuesFaites, dommages: dommages.map((d) => ({ zone: d.zone, code: d.code || undefined, description: d.description.trim(), preuves: d.fichiers.map((f) => ({ photo: f.name })) })),
+      photos: vuesFaites, dommages: dommages.map((d) => ({ zone: d.zone, code: d.code || undefined, description: d.description.trim(), preuves: d.fichiers.map((f) => ({ photo: f.name, ...(typeof mesures.current.get(f) === "number" ? { nettete: mesures.current.get(f) as number } : {}) })) })),
       ...(etape.moment === "depart" ? { caution_eur: caution.trim() ? Number(caution.replace(",", ".")) : undefined, caution_mode: modeCaution, caution_reference: refCaution.trim() || undefined } : {}),
     };
     const id = await gestes.etablir(etape.moment, valeurs, fichiers);
@@ -246,7 +271,7 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
                   <legend className="rv-libelle">Photos du véhicule — les quatre côtés sont obligatoires</legend>
                   {[...VUES_OBLIGATOIRES, ...VUES_UTILES].map((v) => (
                     <div key={v.cle} className="esp-fichier">
-                      <input id={`edl-${v.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => setPhotos((p) => ({ ...p, [v.cle]: Array.from(e.target.files ?? []) }))} />
+                      <input id={`edl-${v.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => { const fs = Array.from(e.target.files ?? []); void retenir(fs, v.libelle).then((g) => setPhotos((p) => ({ ...p, [v.cle]: g }))); }} />
                       <label htmlFor={`edl-${v.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{v.libelle}{VUES_OBLIGATOIRES.some((o) => o.cle === v.cle) ? " *" : ""}</label>
                       <span className="esp-kpi-sous">{photos[v.cle]?.length ? photos[v.cle].map((f) => f.name).join(", ") : "aucune photo"}</span>
                     </div>
@@ -272,7 +297,7 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
                       </div>
                       <label className="rv-libelle">Description<input className="rv-champ" value={d.description} onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, description: e.target.value } : x)))} placeholder="Rayure de 6 cm sur la portière arrière droite" /></label>
                       <div className="esp-fichier">
-                        <input id={`edl-d-${d.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, fichiers: Array.from(e.target.files ?? []) } : x)))} />
+                        <input id={`edl-d-${d.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => { const fs = Array.from(e.target.files ?? []); void retenir(fs, `Dommage ${i + 1}`).then((g) => setDommages((l) => l.map((x) => (x.cle === d.cle ? { ...x, fichiers: g } : x)))); }} />
                         <label htmlFor={`edl-d-${d.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>Photo du dommage *</label>
                         <span className="esp-kpi-sous">{d.fichiers.length ? d.fichiers.map((f) => f.name).join(", ") : "obligatoire"}</span>
                         <button type="button" className="r-btn r-btn--fil r-btn--petit" aria-label={`Retirer le dommage ${i + 1}`} onClick={() => setDommages(dommages.filter((x) => x.cle !== d.cle))}><Trash2 width={14} height={14} aria-hidden="true" /></button>
@@ -293,6 +318,8 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
                   </div>
                 ) : null}
                 <label className="rv-libelle">Observations<textarea className="rv-champ" rows={2} value={observations} onChange={(e) => setObservations(e.target.value)} /></label>
+                {mesure ? <p className="esp-kpi-sous" role="status">Mesure de la netteté…</p> : null}
+                {floues.length ? <Avis teinte="rouge" role="alert"><strong>Photo floue refusée : reprenez-la.</strong><ul className="tav-avert">{floues.map((t) => <li key={t}><span>{t}</span></li>)}</ul></Avis> : null}
                 {vuesManquantes.length ? <p className="esp-kpi-sous">Photos manquantes : {vuesManquantes.join(", ")}.</p> : null}
                 {dommagesIncomplets ? <Avis teinte="ambre">Chaque dommage a une zone, une description et sa photo : sans photo, il ne protège personne.</Avis> : null}
                 {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
@@ -313,7 +340,7 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
           </DialogBody>
           <DialogFooter>
             {etape?.pas === "constat" ? (
-              <button type="button" className="r-btn r-btn--noir" disabled={envoi || !constatPret} onClick={enregistrerConstat}>{envoi ? <Loader variant="spin" /> : null} Enregistrer et faire signer</button>
+              <button type="button" className="r-btn r-btn--noir" disabled={envoi || mesure || !constatPret} onClick={enregistrerConstat}>{envoi ? <Loader variant="spin" /> : null} Enregistrer et faire signer</button>
             ) : refus === null ? (
               <>
                 <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setRefus("")}>Le client ne signe pas</button>

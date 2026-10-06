@@ -180,3 +180,51 @@ Sources :
   - la préautorisation bancaire réelle (un prestataire de paiement, à choisir par Teo) ;
   - l'état des lieux envoyé en PDF au locataire après la signature (lié au PDF de facture) ;
   - le n° 2, la facture électronique ; les mentions (SIREN client, catégorie d'opération) peuvent commencer dans le module, le raccordement à une plateforme agréée relève du socle.
+
+### Manque n° 2 — la facture électronique, partie module : état au 06/10, 17 h 45 Z
+
+- **Recette** : b2_05 et b2_05b sont posés ; `^test_(b2_|44_)` passe 15/15. L'écran de l'état des lieux est fusionné dans main (1f6427c).
+- **Base** (03a86fa) : `b2_06_facture_electronique.sql`. Aucune table touchée, rien d'effacé ; l'émission du socle ne change pas (il met déjà le SIREN client, la nature des opérations et l'option débits dans les mentions).
+  - Le CII D16B, profil EN 16931, de chaque facture et de chaque avoir.
+  - Un contrôle par pièce : le flux (e_invoicing, e_reporting, a_completer) et ce qui ferait rejeter la pièce.
+  - Les portes `loc_facture_electronique`, `loc_avoir_electronique`, `loc_completer_locataire` (SIREN avec clé de Luhn) et `loc_preparation_2027`.
+  - **Validé hors base** avec le XSD Factur-X EN 16931 et les schematrons EN 16931 et BR-FR Flux 2 du paquet `factur-x` (Saxon) : 0 erreur, 0 avertissement pour une facture de frais pro, une facture de dommages pro (catégorie O) et un avoir pro. Le BR-FR avait d'abord trouvé quatre manques, corrigés :
+    - le cadre de facturation BT-23 = S1 ;
+    - les notes PMD, PMT et AAB ;
+    - les adresses électroniques BT-34 et BT-49 = SIREN au schéma 0225 ;
+    - la date de livraison = la restitution.
+  - L'outil : `omega/recette-b2/valider_cii.py`, avec trois XML d'exemple dans `omega/recette-b2/cii/`. Test 15 : 18 assertions.
+- **Écran** :
+  - un bouton « Forme électronique » sur chaque facture et chaque avoir émis ; le dialogue montre le flux, ce qui manque, le XML lisible et téléchargeable, et un champ pour compléter le SIREN du client, contrôlé avant le clic ;
+  - une carte « Facture électronique : prêt pour le 1er septembre 2027 ? », pour la direction et les valideurs ;
+  - `cii.ts` est le port exact du constructeur pour l'exemple : ses six pièces d'exemple, données à un pro, passent elles aussi XSD, EN 16931 et BR-FR ;
+  - le SIREN d'exemple de l'émetteur est corrigé (512345679, clé valide ; TVA FR75…) ;
+  - tsc, eslint et build verts ; recette 82 contrôles verts ; axe : 0 écart, dialogue compris.
+- **Reste au socle (coordinateur)** : le raccordement à une plateforme agréée et le dépôt ; le PDF/A-3 Factur-X qui embarque ce XML ; la transmission du e-reporting B2C ; les statuts de cycle de vie renvoyés par la plateforme.
+
+### Carnet de l'audit des promesses (coordinateur, 06/10, 15 h 58 Z) — point 1 fait
+
+Ordre décidé :
+1. les deux petits (faits ci-dessous) ;
+2. la facture qui part avec son PDF et les photos datées en pièces jointes (avec A2) ;
+3. les modules promis : 17 Contestations bancaires, puis Remise en location et entretien, puis Sortie de flotte, puis 02–11, 13, 15, 16, 18, 20 ;
+4. Assistance et 19 Relevés constructeur, en contrat d'interface seulement, le tiers à noter pour Teo ;
+5. le contrat d'interface du paiement de la caution (préautorisation, capture, libération), sans fournisseur ; le coordinateur choisira le fournisseur avec Teo.
+
+- **Test 15** : il mourait sur un appel à `private.loc_dec` sous le rôle endossé. Le test calcule maintenant la valeur attendue sans fonction privée (7bb5c00). `loc_dec` est mon formateur de décimaux, pas un déchiffrement.
+- **b2_07** (0e2cc89) et son écran :
+  - **la photo floue est refusée**. L'écran mesure la netteté dans le navigateur (`nettete.ts` : variance du laplacien sur l'image réduite à 512 px ; fixtures `omega/recette-b2/photos` : nette 2 554, légère 350, floue 8 ; seuil 40, réglable par `loc_reglages.nettete_min`) et écarte la photo floue dès son choix, en la nommant. La base garde la mesure et une garde refuse de signer un état dont une photo mesurée est sous le seuil.
+  - **les frais de dossier d'un avis sont refacturés** : `loc_refacturer_avis` crée une proposition d'une ligne (FRAIS_AVIS du barème), qui suit validation, facture et courriel. L'écran a un bouton « Refacturer les frais de dossier » sur un avis désigné. Test 16 : 12 assertions, jusqu'à la facture émise.
+  - Recette : 84 contrôles verts, dont la photo floue refusée (vraie fixture déposée par CDP) et la refacturation ; axe : 0 écart.
+
+### Carnet, point 2 — la facture part avec son PDF et ses photos datées (06/10, 18 h 30 Z)
+
+- **b2_08** (8c928e4) :
+  - `loc_envoyer_factures` attend les PDF quand un courriel doit vraiment partir (travail `tavaro.pdf_factures`), puis joint PDF et photos (10 pièces et 15 Mo au plus, règles du socle) ;
+  - les pièces sont créées au statut « lue » : pas de lecture IA ;
+  - le filet `loc_pdf_en_souffrance` (cron toutes les 15 minutes) fait partir le courriel sans pièce jointe au bout de 30 minutes si l'ouvrier ne répond pas ;
+  - test 17 : 16 assertions.
+- **Ouvrier `omega/functions/tavaro-pdf`** (Deno, pdf-lib) : un PDF A4 par facture, déposé dans omega-clients ; les photos sont mesurées (taille, SHA-256) ; au dernier essai, envoi sans pièce jointe. deno test 7/7, check, lint et fmt OK ; PDF relu à l'œil. **À déployer par le coordinateur, avant la pose de b2_08.**
+- **L'expéditeur d'A2** joint déjà les pièces d'un envoi (Brevo `attachment`) : rien à changer chez lui ; à prouver sur le banc.
+- **Écran** : la facture dit « PDF et photos datées joints », ou « PDF en préparation » ; recette 85 contrôles verts.
+- **Suite du carnet** : le point 3, en commençant par le module 17 (contestations bancaires : le dossier de preuve en un clic).

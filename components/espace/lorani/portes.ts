@@ -23,12 +23,14 @@
        (b5_01) ; la pièce part en lecture, la date lue revient dans la liste ;
      · le calcul pur, sans écrire : RPC lorani_calendrier_permis(p_faits, p_aujourdhui) ;
      · contrôle du dossier (b5_16) : INSERT lorani_controles + lorani_controle_pieces,
-       RPC lorani_lancer_controle(p_controle), UPDATE lorani_constats (statut, motif).
+       RPC lorani_lancer_controle(p_controle), UPDATE lorani_constats (statut, motif) ;
+     · PLU depuis l'adresse (b5_17) : RPC lorani_chercher_plu(p_projet), puis
+       lorani_suivre_plu(p_projet) jusqu'à « trouvé » (la base appelle l'IGN).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Calcul, CasRejet, Constat, Controle, ControlePiece, DateLue, Dossier, Echeance, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
+import type { Calcul, CasRejet, Constat, Plu, Controle, ControlePiece, DateLue, Dossier, Echeance, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -53,7 +55,7 @@ export async function chargerDossier(): Promise<Dossier> {
   const supabase = createClient();
   const moi = await monCompte();
   if (!moi) throw new ErreurPorte("Aucune session ouverte : connectez-vous depuis le cockpit.");
-  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps, marches, situations, visas, controles, controlePieces, constats] = await Promise.all([
+  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps, marches, situations, visas, controles, controlePieces, constats, plu] = await Promise.all([
     supabase.from("lorani_projets").select("*").order("maj_le", { ascending: false }).limit(300),
     supabase.from("lorani_permis").select("*").order("cree_le", { ascending: false }).limit(600),
     supabase.from("lorani_permis_dates_lues").select("*").order("cree_le", { ascending: false }).limit(600),
@@ -77,6 +79,8 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_controles").select("id, projet_id, intitule, indice, precedent_id, statut, lance_le, constats_nb, cree_le").order("cree_le", { ascending: false }).limit(1000),
     supabase.from("lorani_controle_pieces").select("id, controle_id, piece_id, role, reference").limit(10000),
     supabase.from("lorani_constats").select("id, controle_id, nature, gravite, grandeur, objet, titre, correction, article, valeurs, statut, motif, precedent_id, corrige_au_controle, decide_par, decide_le").limit(10000),
+    /* b5_17 : absente tant que la migration n'est pas posée ; le PLU est alors « non cherché » */
+    supabase.from("lorani_plu").select("id, projet_id, statut, methode, requete, point_libelle, point_score, zones, zone, document, reglement_url, prescriptions, rnu, erreur, demande_le, trouve_le").limit(1000),
   ]);
   /* le premier refus de la base est dit tel quel ; les lectures secondaires manquantes ne cachent pas les permis */
   for (const r of [projets, permis, dates]) if (r.error) throw new ErreurPorte(message(r.error));
@@ -100,6 +104,7 @@ export async function chargerDossier(): Promise<Dossier> {
     controles: (controles.data ?? []) as Controle[],
     controlePieces: (controlePieces.data ?? []) as ControlePiece[],
     constats: (constats.data ?? []) as Constat[],
+    plu: ((plu.data ?? []) as Plu[]).map((x) => ({ ...x, point_score: x.point_score === null ? null : Number(x.point_score) })),
     pieces: ((pieces.data ?? []) as (Omit<PieceProjet, "cree_le"> & { recue_le: string | null })[]).map(({ recue_le, ...x }) => ({ ...x, cree_le: recue_le ?? undefined })),
     noms,
     moi,
@@ -338,4 +343,20 @@ export async function octetsPiece(chemin: string): Promise<Uint8Array> {
   const r = await fetch(data.signedUrl);
   if (!r.ok) throw new ErreurPorte(`Fichier illisible (${r.status}).`);
   return new Uint8Array(await r.arrayBuffer());
+}
+
+/* ——— le PLU depuis l'adresse (b5_17) ——— */
+
+export async function chercherPlu(projet: string): Promise<Plu> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("lorani_chercher_plu", { p_projet: projet });
+  if (error) throw new ErreurPorte(message(error));
+  return data as Plu;
+}
+
+export async function suivrePlu(projet: string): Promise<Plu | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("lorani_suivre_plu", { p_projet: projet });
+  if (error) throw new ErreurPorte(message(error));
+  return (data ?? null) as Plu | null;
 }

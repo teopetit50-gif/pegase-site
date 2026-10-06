@@ -203,3 +203,70 @@
   touch-action: none;
   cursor: crosshair;
 }
+
+/* La facture électronique (b2_06) : le XML lisible dans le dialogue, la liste de préparation 2027. */
+.tav-xml {
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  background: #fafafa;
+}
+.tav-xml pre {
+  margin: 0;
+  padding: 10px 12px;
+  font: 11.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.esp .tav-preparation {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+.esp .tav-preparation li span {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  margin-right: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #14532d;
+}
+.esp .tav-preparation li[data-ok="non"] span {
+  background: #fef3c7;
+  color: #78350f;
+}
+
+/* Les contestations bancaires (b2_09) : les forces du dossier, dépliables ; la composition en cours. */
+.esp .tav-forces {
+  margin-top: 4px;
+}
+.esp .tav-forces > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 24px;
+}
+.esp .tav-forces > summary:focus-visible {
+  outline: 2px solid var(--r-encre, currentColor);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.esp .tav-forces .tav-preparation {
+  margin-top: 6px;
+}
+.esp .tav-en-cours {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

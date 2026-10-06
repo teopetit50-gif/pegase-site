@@ -17,6 +17,8 @@ const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) ech
 const ECRANS = [
   ['tavaro', '/espace/tavaro', `[...document.querySelectorAll('#esp-dossier .esp-actions .r-btn')].find(b => /Chiffrer le retour/.test(b.textContent) && !b.disabled)?.click()`],
   ['tavaro-edl', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="États des lieux"] .r-btn')].find(b => /Faire l.état de retour/.test(b.textContent) && !b.disabled)?.click()`],
+  ['tavaro-fe', '/espace/tavaro', `[...document.querySelectorAll('#esp-dossier .tav-facture .r-btn')].find(b => /Forme électronique/.test(b.textContent))?.click()`,
+    `[...document.querySelectorAll('.esp-item')].find(b => /C-2026-0322/.test(b.textContent))?.click()`],
   ['tavaro-avis', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Avis de contravention"] .r-btn')].find(b => /Désigner le conducteur/.test(b.textContent) && !b.disabled)?.click()`],
 ];
 
@@ -31,12 +33,14 @@ function dire(nom, violations) {
   ok(graves.length === 0, `${nom} : ${graves.length} écart(s) grave(s), ${violations.length - graves.length} mineur(s)`);
 }
 
-for (const [nom, chemin, ouvrir] of ECRANS) {
+for (const [nom, chemin, ouvrir, avant] of ECRANS) {
   for (const largeur of [390, 1440]) {
     const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b2-axe-${nom}`, densite: 1 });
     console.log(`— ${chemin} à ${largeur}`);
     await s.aller(base + chemin);
     await s.dormir(800);
+    /* une étape avant la mesure, si l'écran l'exige (ouvrir le bon dossier) */
+    if (avant) { await s.evaluer(avant); await s.dormir(500); }
     await s.evaluer(axe + ';true');
     dire(`${nom} ${largeur}`, await analyser(s, `document.querySelector('.esp')`));
     if (ouvrir) {
