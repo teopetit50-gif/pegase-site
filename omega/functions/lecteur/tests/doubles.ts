@@ -20,6 +20,8 @@ export class PortesMemoire implements Portes {
   battements: { module: string; genres: string[]; detail: unknown }[] = [];
   /** Pour simuler une porte en panne. */
   panne: Partial<Record<keyof Portes, Error>> = {};
+  /** La porte de découpage : absente par défaut (comme avant qu'A4 la pose), un test la branche. */
+  creerPiecesFilles?: Portes["creerPiecesFilles"];
 
   private noter(porte: keyof Portes, ...args: unknown[]) {
     this.appels.push({ porte, args });
@@ -103,6 +105,8 @@ export class PortesMemoire implements Portes {
 export class DepotMemoire implements Depot {
   fichiers = new Map<string, Uint8Array>();
   telechargements = 0;
+  /** L'écriture au dépôt : absente par défaut, un test la branche. */
+  deposer?: Depot["deposer"];
   async telecharger(chemin: string): Promise<Telechargement> {
     this.telechargements++;
     const o = this.fichiers.get(chemin);

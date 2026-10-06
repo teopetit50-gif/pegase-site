@@ -19,6 +19,7 @@ import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, p
 import { lireCsv, lireXlsx } from "./tableur.ts";
 import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
+import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
 
 export interface Environnement {
@@ -136,6 +137,18 @@ async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace
       journal("alerte", "avis RPVA lu mais non posé : à saisir à la main", { ...trace, erreur: code });
     }
   }
+  // Plusieurs documents dans le fichier : les suivants deviennent des pièces filles (la mère garde le premier).
+  // Comme l'avis, un échec ici ne défait pas la lecture : il est dit dans le résultat et journalisé.
+  let filles: BilanDecoupage | { filles: "erreur"; erreur: string } | undefined;
+  if (bilan.decoupage && bilan.decoupage.length > 1 && ["lue", "a_verifier", "a_classer"].includes(bilan.resultat.statut)) {
+    try {
+      filles = await creerPiecesFilles(ctx.portes, ctx.depot, piece, bilan.decoupage, bilan.resultat.nb_pages ?? bilan.resultat.pages.length);
+    } catch (e) {
+      const code = e instanceof ErreurOuvrier ? e.code : "ERREUR_INTERNE";
+      filles = { filles: "erreur", erreur: `${code} : ${messageDe(e, 200)}` };
+      journal("alerte", "découpage en pièces filles impossible : les documents suivants restent dans la mère", { ...trace, erreur: code });
+    }
+  }
   const prealable = bilan.prealable ?? SANS_PREALABLE;
   const cout = Math.round(((bilan.ia?.cout_eur ?? 0) + bilan.cout_ocr + prealable.cout_eur) * 1e6) / 1e6;
   await ctx.portes.finirTravail(travail.id, {
@@ -154,6 +167,7 @@ async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace
       : {}),
     ...(dechiffree ? { dechiffree: true } : {}),
     ...(avis ? { avis_rpva: avis } : {}),
+    ...(filles ? { filles: filles.filles, ...("raison" in filles ? { filles_raison: filles.raison } : {}), ...("erreur" in filles ? { filles_erreur: filles.erreur } : {}) } : {}),
   });
   journal("info", "pièce lue", {
     ...trace,

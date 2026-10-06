@@ -31,6 +31,27 @@ export interface Piece {
   chemin: string;
   statut: string;
   chiffrement: string | null;
+  /** La pièce dont celle-ci a été découpée (absente si piece_a_lire ne la rend pas). */
+  piece_mere_id?: string | null;
+}
+
+/** Une pièce fille à créer par découpage d'un fichier à plusieurs documents. */
+export interface FilleADeposer {
+  document: string;
+  chemin: string;
+  nom_fichier: string;
+  octets: number;
+  sha256: string;
+  pages: number[];
+  type_piece: string | null;
+}
+
+export interface FilleCreee {
+  pages: number[];
+  piece: string;
+  document?: string;
+  reference?: string;
+  deja?: boolean;
 }
 
 /** Une page lue, au format exact de private.enregistrer_lecture. */
@@ -94,7 +115,15 @@ export interface Portes {
   consommationIaDuJour(client: string): Promise<number>;
   /** lire_parametre : un réglage global (private.reglages) ; null s'il n'existe pas. */
   lireParametre(cle: string): Promise<string | null>;
+  /**
+   * La porte de découpage du module (filed_creer_pieces_filles pour FILED) : crée les pièces filles ;
+   * null si la porte n'existe pas encore (le lecteur garde alors le découpage dans le résultat du travail).
+   */
+  creerPiecesFilles?(module: string, mere: string, filles: FilleADeposer[]): Promise<FilleCreee[] | null>;
 }
+
+/** Les portes de découpage par module : un module absent ne découpe pas. */
+export const PORTES_DECOUPAGE: Record<string, string> = { filed: "filed_creer_pieces_filles" };
 
 export interface ConfigSupabase {
   url: string;
@@ -201,6 +230,19 @@ export class PortesRpc implements Portes {
   async consommationIaDuJour(client: string): Promise<number> {
     const n = Number(await this.rpc<number | string | null>("consommation_ia_jour", { p_client: client }));
     return Number.isFinite(n) ? n : 0;
+  }
+
+  async creerPiecesFilles(module: string, mere: string, filles: FilleADeposer[]): Promise<FilleCreee[] | null> {
+    const porte = PORTES_DECOUPAGE[module];
+    if (!porte) return null;
+    try {
+      const r = await this.rpc<FilleCreee[] | { filles?: FilleCreee[] } | null>(porte, { p_mere: mere, p_filles: filles });
+      return Array.isArray(r) ? r : r?.filles ?? [];
+    } catch (e) {
+      // Porte pas encore posée : PostgREST répond 404 (PGRST202). Ce n'est pas une panne.
+      if (e instanceof ErreurOuvrier && /HTTP 404|PGRST202/.test(e.message)) return null;
+      throw e;
+    }
   }
 
   async lireParametre(cle: string): Promise<string | null> {

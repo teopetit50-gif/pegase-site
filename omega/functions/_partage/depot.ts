@@ -10,6 +10,8 @@ export type Telechargement = { present: true; octets: Uint8Array; mime: string |
 
 export interface Depot {
   telecharger(chemin: string): Promise<Telechargement>;
+  /** Range un fichier (pièces filles d'un découpage). Un fichier déjà présent au même chemin est laissé tel quel. */
+  deposer?(chemin: string, octets: Uint8Array, mime: string): Promise<void>;
 }
 
 export class DepotStorage implements Depot {
@@ -38,5 +40,26 @@ export class DepotStorage implements Depot {
       throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `dépôt : HTTP ${rep.status} ${t.slice(0, 200)}`);
     }
     return { present: true, octets: new Uint8Array(await rep.arrayBuffer()), mime: rep.headers.get("content-type") };
+  }
+
+  async deposer(chemin: string, octets: Uint8Array, mime: string): Promise<void> {
+    const url = `${this.cfg.url}/storage/v1/object/${this.bucket}/${chemin.split("/").map(encodeURIComponent).join("/")}`;
+    let rep: Response;
+    try {
+      rep = await this.fetchFn(url, {
+        method: "POST",
+        headers: { apikey: this.cfg.cleService, Authorization: `Bearer ${this.cfg.cleService}`, "Content-Type": mime, "x-upsert": "false" },
+        body: new Blob([octets as unknown as ArrayBuffer], { type: mime }),
+      });
+    } catch (e) {
+      throw new ErreurOuvrier("FOURNISSEUR_INDISPONIBLE", `dépôt injoignable : ${(e as Error).message}`);
+    }
+    const t = await rep.text();
+    // Déjà là (rejeu d'un travail) : le chemin porte le n° des pages, le contenu est le même.
+    if (rep.ok || rep.status === 409 || /already exists|Duplicate/i.test(t)) return;
+    throw new ErreurOuvrier(
+      rep.status >= 500 || rep.status === 429 ? "FOURNISSEUR_INDISPONIBLE" : "ERREUR_INTERNE",
+      `dépôt (écriture) : HTTP ${rep.status} ${t.slice(0, 200)}`,
+    );
   }
 }
