@@ -301,10 +301,11 @@ for (const largeur of LARGEURS) {
   ok(await s.aller(base + '/espace/varelo'), 'page chargée');
   await s.dormir(500);
   const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Ce matin"]'); if (!c) return null; return { blocs: [...c.querySelectorAll('.vrl-matin-bloc')].map(b => ({ titre: b.querySelector('h3')?.innerText.replace(/\\s+/g, ' '), lignes: [...b.querySelectorAll('li[data-gravite]')].map(li => li.dataset.gravite + ' | ' + li.innerText) })), avant: c.compareDocumentPosition(document.querySelector('section[aria-label="Objets du groupe"]')) & 4 }; })()`);
-  ok(!!m && m.blocs.length === 4 && !!m.avant, '« Ce matin » est en tête, avec ses quatre blocs');
-  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[1].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[1].lignes[0]), `contrats : ${m?.blocs[1].lignes[0]}`);
-  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[2].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[2].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
-  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[3].lignes.join(' ')) && m.blocs[3].lignes.length === 3, `réciproques : ${m?.blocs[3].lignes.length} lignes`);
+  ok(!!m && m.blocs.length === 5 && !!m.avant, '« Ce matin » est en tête, avec ses cinq blocs');
+  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[2].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[2].lignes[0]), `contrats : ${m?.blocs[2].lignes[0]}`);
+  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[3].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[3].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
+  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[4].lignes.join(' ')) && m.blocs[4].lignes.length === 3, `réciproques : ${m?.blocs[4].lignes.length} lignes`);
+  ok(m && /Reportings dus/i.test(m.blocs[1].titre) && m.blocs[1].lignes.some(l => /^critique \| En retard depuis le .* pour /.test(l)), `reportings : ${m?.blocs[1].lignes[0]}`);
   ok(m && m.blocs[0].lignes.length === 3 && /Agence de Grenoble : trésorerie de 18\s500\s€, sous son plancher de 25\s000\s€/.test(m.blocs[0].lignes.join(' ')) && /Bertin Menuiserie \(Annecy\) date du .* \(37 jours\)/.test(m.blocs[0].lignes.join(' ')), `le groupe ce matin : ${m?.blocs[0].lignes.join(' / ')}`);
   ok(await s.evaluer(`(() => { const a = document.querySelector('section[aria-label="Ce matin"] a[href="#vrl-contrats"]'); return !!a && !!document.getElementById('vrl-contrats'); })()`), 'le titre « Contrats à dénoncer » mène à la carte des contrats');
   s.fermer();
@@ -346,6 +347,40 @@ for (const largeur of LARGEURS) {
   await s.dormir(400);
   const fin = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' '))`);
   ok(fin.some(l => /400\s000,00\s€/.test(l)), 'la nouvelle balance remplace la précédente sur la page');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 768, hauteur: 900, marque: 'b1-reportings', densite: 1 });
+  console.log('— les reportings dus (b1_09)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Reportings dus"]')`;
+  const lire = `(() => { const c = ${carte}; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), retard: (c.querySelector('dl div')?.innerText.match(/(\\d+) reporting/) || [0, 0])[1] * 1 }; })()`;
+  const lu = await s.evaluer(lire);
+  ok(lu.lignes.length >= 3 && lu.retard >= 1 && /En retard/.test(lu.lignes[0]), `la carte « Reportings dus » : ${lu.lignes.length} à faire, ${lu.retard} en retard, le plus ancien en tête`);
+  ok(lu.lignes.some(l => /Fabricant Alpicuisine/.test(l) && /vous en êtes responsable/.test(l)), 'le reporting dont on est responsable le dit');
+  ok(lu.lignes.some(l => /Réseau Menuisiers de France/.test(l) && /chaque semaine/.test(l)), 'un reporting hebdomadaire');
+  ok(await s.evaluer(`(() => { const b = [...${carte}.querySelectorAll('tbody tr')][0]?.querySelector('button'); if (!b || !/Envoyé/.test(b.textContent)) return null; b.click(); return true; })()`) === true, 'clic « Envoyé… » sur le plus ancien');
+  await s.dormir(400);
+  ok(!!(await s.evaluer(`/Noter l.envoi/.test(${dlg()}?.innerText || '')`)) && !!(await s.evaluer(`/après l.échéance/i.test(${dlg()}?.innerText || '')`)), 'le dialogue s\'ouvre et prévient que l\'envoi sera en retard');
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Noter\\s*$/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(lire);
+  ok(apres.lignes.length === lu.lignes.length - 1 && apres.retard === lu.retard - 1, `noté : ${apres.lignes.length} à faire, ${apres.retard} en retard`);
+  await s.evaluer(clic(`section[aria-label="Reportings dus"] .esp-filtres button`, '/Envoyés ou dispensés/'));
+  await s.dormir(300);
+  const faits = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' '))`);
+  ok(faits.length === 2 && faits.every(l => /Envoyé en retard/.test(l)), `« Envoyés ou dispensés » : ${faits.length}, envoyés en retard`);
+  await s.evaluer(clic(`section[aria-label="Reportings dus"] .esp-filtres button`, '/^À faire$/'));
+  ok(await s.evaluer(clic(`section[aria-label="Reportings dus"] .esp-carte-tete button`, '/Ajouter un reporting/')) === true, 'clic « Ajouter un reporting »');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const ch = [...${dlg()}.querySelectorAll('input.rv-champ:not([type="date"])')]; const poser = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; poser(ch[0], 'Expert-comptable du groupe'); poser(ch[1], 'Liasse mensuelle'); })()`);
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Enregistrer le reporting/'));
+  await s.dormir(600);
+  const ajoute = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].filter(tr => /Liasse mensuelle/.test(tr.innerText)).length`);
+  ok(ajoute >= 1, `le reporting ajouté a ses échéances (${ajoute})`);
   s.fermer();
 }
 
