@@ -290,7 +290,7 @@ export default function EcranFiled() {
           ) : visibles.length === 0 ? (
             <Vide titre="Aucun document">{filtre ? "Rien dans cette famille." : "Aucun document reçu pour l'instant."}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Documents reçus">
+            <ul className="esp-liste" aria-label="Documents reçus">
               {visibles.map((a) => {
                 const fam = famille(a.document, a.facture);
                 const e = etatDocument(a.document.etat);
@@ -298,8 +298,7 @@ export default function EcranFiled() {
                   <li key={a.document.id}>
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={choisi === a.document.id}
+                      aria-current={choisi === a.document.id ? "true" : undefined}
                       className="esp-item"
                       onClick={() => {
                         setChoix(a.document.id);

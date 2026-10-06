@@ -345,6 +345,37 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   2 demandes saisies par vous, « Approuver » gris sans le commentaire exigé,
   bilan 5/5, message de la file) — **186 contrôles ✓**.
 
+## Lot du 06/10 (7) — accessibilité de l'espace client
+
+- **`omega/recette-a3/accessibilite.mjs`** : axe-core (celui de
+  `node_modules`, tiré par eslint-plugin-jsx-a11y, 4.12.1) sur la zone `.esp`
+  de cinq écrans (validations, FILED, fournisseurs, à payer, point) à 390 et
+  1440 px, règles WCAG 2.1 A et AA ; puis sur un dialogue ouvert par écran ;
+  puis le **clavier** : le focus entre dans le dialogue, Tab y reste, Échap
+  le ferme et rend le focus au bouton qui l'a ouvert. Un écart « serious » ou
+  « critical » fait échouer. **22 contrôles ✓.**
+- Ce qu'axe a trouvé, et corrigé :
+  - les trois files (validations, FILED, fournisseurs) : `ul role="listbox"`
+    › `li` › `button role="option"` est invalide (listitem, required-children,
+    required-parent : 3 écarts critiques ou graves par écran). Les listes sont
+    redevenues des listes de boutons ; l'élément ouvert porte
+    `aria-current="true"` (le style suit, `espace.css`) ;
+  - le numéro de page de la visionneuse (`.esp-page-numero`) : contraste 2,5:1
+    → #6b6b75, 5:1 ;
+  - le point du matin : `aria-label` sur un `span` sans rôle (11 pastilles de
+    gravité) → `role="img"` quand la pastille dit quelque chose,
+    `aria-hidden` sinon.
+- **Focus rendu à la fermeture des dialogues** (`components/ui/dialog.tsx`,
+  composant partagé du site) : Radix rend le focus au `DialogTrigger`, mais
+  presque tous nos dialogues s'ouvrent en mode contrôlé, sans Trigger ; le
+  focus tombait sur `<body>`. `DialogContent` retient l'élément focalisé à
+  l'ouverture et le lui rend (sauf `preventDefault` de l'appelant). Vaut pour
+  tous les dialogues du site.
+- Recette générale inchangée : 186 contrôles ✓.
+- À signaler aux B : leurs écrans (lorani, tavaro, tiroma, tamila, daliro,
+  varelo) reprennent `role="listbox"` / `role="option"` sur des `li` — même
+  écart axe ; je n'y ai pas touché.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

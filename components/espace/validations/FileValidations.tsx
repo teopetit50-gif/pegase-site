@@ -374,7 +374,7 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
                         <span>{g.libelle}</span>
                         <span>{liste.length}</span>
                       </div>
-                      <ul className="esp-liste" role="listbox" aria-label={g.libelle}>
+                      <ul className="esp-liste" aria-label={g.libelle}>
                         {liste.map((d) => {
                           const c = compteApprobations(d, etat.approbations);
                           const grp = groupeDe(d);
@@ -386,8 +386,7 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
                               ) : null}
                               <button
                                 type="button"
-                                role="option"
-                                aria-selected={choisie === d.id}
+                                aria-current={choisie === d.id ? "true" : undefined}
                                 className="esp-item"
                                 onClick={() => {
                                   setChoix(d.id);
