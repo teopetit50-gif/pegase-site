@@ -10,6 +10,8 @@
        résultat, trésorerie et écarts de chaque société ;
      · « Reportings dus » (Reportings.tsx, b1_09) : qui doit quoi, à qui,
        pour quand, en retard ;
+     · en bas, « Exports automatiques » (Branchements.tsx, b1_10) : le
+       logiciel de chaque société branché, ses exports lus d'eux-mêmes ;
      · en haut, quatre compteurs pour la nature choisie (codes locaux,
        objets du groupe, lots à valider, taux de rattachement) ;
      · à gauche, les objets du groupe (F-00001 « Scieries du Jura »…) ;
@@ -57,6 +59,7 @@ import Reciproques from "./Reciproques";
 import CeMatin from "./CeMatin";
 import GroupePage from "./GroupePage";
 import Reportings from "./Reportings";
+import Branchements from "./Branchements";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -580,6 +583,8 @@ export default function EcranVarelo() {
         {donnees ? <Lots donnees={donnees} actions={actions} /> : null}
         {donnees ? <Societes donnees={donnees} actions={actions} majLocal={majLocal} onDepot={() => setDepot(true)} /> : null}
       </div>
+
+      {donnees && contexte ? <Branchements source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
 
       {donnees ? <Depot ouvert={depot} onFermer={() => setDepot(false)} societes={donnees.societes} deposer={deposer} onFait={(m) => setFait(m)} /> : null}
 
