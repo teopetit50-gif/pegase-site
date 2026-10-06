@@ -47,6 +47,8 @@ export type Projet = {
   phase: PhaseProjet;
   territoire: string | null;
   actif: boolean;
+  /* la déclaration d'ouverture du chantier (b5_18) : la date que les décennales doivent couvrir */
+  ouverture_chantier?: string | null;
   cree_le: string;
   maj_le: string;
 };
@@ -325,7 +327,7 @@ export type Visa = {
 };
 
 /* le contrôle du dossier (b5_16) : les pièces croisées, ce qui est relevé, ce qui est décidé */
-export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "autre";
+export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "metre" | "autre";
 export type Controle = {
   id: string;
   projet_id: string;
@@ -360,7 +362,7 @@ export type ValeurCitee = {
 export type Constat = {
   id: string;
   controle_id: string;
-  nature: "incoherence" | "plu" | "cctp_dpgf";
+  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf";
   gravite: "bloquant" | "majeur" | "mineur";
   grandeur: string | null;
   objet: string | null;
@@ -397,6 +399,27 @@ export type Plu = {
   trouve_le: string | null;
 };
 
+/* une attestation décennale d'entreprise, contrôlée contre le lot (b5_18) */
+export type ConstatAttestation = { code: string; gravite: "bloquant" | "majeur" | "mineur"; texte: string; activites?: string[] };
+export type Attestation = {
+  id: string;
+  projet_id: string;
+  intervenant_id: string | null;
+  lot_id: string | null;
+  piece_id: string | null;
+  assureur: string | null;
+  numero_police: string | null;
+  assure: string | null;
+  siren: string | null;
+  activites: string[];
+  debut: string | null;
+  fin: string | null;
+  plafond_eur: number | null;
+  statut: "a_verifier" | "conforme" | "non_conforme" | "expiree";
+  constats: ConstatAttestation[];
+  verifie_le: string | null;
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -418,6 +441,7 @@ export type Dossier = {
   controlePieces: ControlePiece[];
   constats: Constat[];
   plu: Plu[];
+  attestations: Attestation[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

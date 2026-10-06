@@ -174,10 +174,12 @@ export const TYPES_PIECE: { cle: string; libelle: string }[] = [
   { cle: "lorani_cctp", libelle: "CCTP" },
   { cle: "lorani_dpgf", libelle: "DPGF" },
   { cle: "lorani_plu_reglement", libelle: "Règlement du PLU" },
+  { cle: "lorani_metre", libelle: "Métré" },
+  { cle: "lorani_attestation_decennale", libelle: "Attestation décennale d’une entreprise" },
 ];
 
-/* les pièces du contrôle du dossier (b5_16) : pas des courriers de la mairie */
-export const TYPES_CONTROLE = ["lorani_planche", "lorani_cctp", "lorani_dpgf", "lorani_plu_reglement"];
+/* les pièces qui ne sont pas des courriers de la mairie : contrôle du dossier (b5_16), attestations (b5_18) */
+export const TYPES_CONTROLE = ["lorani_planche", "lorani_cctp", "lorani_dpgf", "lorani_plu_reglement", "lorani_metre", "lorani_attestation_decennale"];
 
 export function libelleTypePiece(cle: string | null | undefined): string {
   return TYPES_PIECE.find((t) => t.cle === cle)?.libelle ?? "Courrier";
@@ -242,3 +244,43 @@ export function libelleRappel(j: number): string {
   if (j === 1) return "la veille";
   return `${j} jours avant`;
 }
+
+/* Les activités garanties par une décennale et requises par un lot (b5_18) : le vocabulaire de private.lorani_activite,
+   repris de la nomenclature des activités du BTP de France Assureurs, simplifiée. */
+export const ACTIVITES: Record<string, string> = {
+  demolition: "Démolition",
+  terrassement: "Terrassement",
+  vrd: "Voirie et réseaux divers",
+  amelioration_sols: "Amélioration des sols",
+  fondations_speciales: "Fondations spéciales",
+  maconnerie_beton_arme: "Maçonnerie et béton armé",
+  pierre_taille: "Taille de pierre et maçonnerie de pierre",
+  charpente_bois: "Charpente et structure en bois",
+  charpente_metallique: "Charpente et structure métallique",
+  couverture: "Couverture",
+  etancheite_toiture: "Étanchéité de toiture, terrasse et plancher intérieur",
+  etancheite_cuvelage: "Cuvelage et étanchéité des parties enterrées",
+  facades_rideaux: "Façades-rideaux",
+  bardage: "Bardage de façade",
+  menuiseries_exterieures: "Menuiseries extérieures",
+  ite: "Isolation thermique par l’extérieur",
+  ravalement: "Ravalement et revêtement de façade",
+  menuiseries_interieures: "Menuiseries intérieures",
+  platrerie: "Plâtrerie, staff, cloisons",
+  serrurerie: "Serrurerie et métallerie",
+  vitrerie: "Vitrerie et miroiterie",
+  peinture: "Peinture",
+  revetements_durs: "Revêtements en matériaux durs (carrelage, pierre)",
+  revetements_souples: "Revêtements en matériaux souples",
+  isolation_interieure: "Isolation thermique et acoustique intérieure",
+  plomberie: "Plomberie et installations sanitaires",
+  chauffage: "Installations de chauffage",
+  ventilation: "Ventilation et climatisation",
+  electricite: "Électricité et télécommunications",
+  photovoltaique: "Installations photovoltaïques",
+  ascenseurs: "Ascenseurs",
+  ssi: "Systèmes de sécurité incendie",
+  piscines: "Piscines",
+  amiante: "Traitement de l’amiante",
+};
+export const libelleActivite = (a: string) => ACTIVITES[a] ?? a;

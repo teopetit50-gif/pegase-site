@@ -22,6 +22,8 @@ const ECRANS = [
   /* le chantier (b5_13) : la façade rue Mercière, puis le dialogue « Nouveau marché » */
   ['lorani-chantier', '/espace/lorani', `[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Nouveau marché')?.click()`, /Façade rue Mercière/],
   /* le contrôle du dossier (b5_16) : la surélévation Dubois, puis le dialogue « Revérifier à l'indice suivant » */
+  /* les décennales (b5_18) : la façade rue Mercière, puis le dialogue « Saisir une attestation » (34 cases) */
+  ['lorani-decennales', '/espace/lorani', `[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Saisir une attestation')?.click()`, /Façade rue Mercière/],
   ['lorani-controle', '/espace/lorani', `[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`, /Surélévation Dubois/],
 ];
 

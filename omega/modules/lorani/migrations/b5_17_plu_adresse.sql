@@ -419,7 +419,7 @@ begin
         v_res := private.lorani_visa_rappeler(t);
       elsif v_type = 'lorani_situation_travaux' then
         v_res := private.lorani_poser_situation_lue((t.charge ->> 'piece')::uuid);
-      elsif v_type in ('lorani_planche', 'lorani_cctp', 'lorani_dpgf', 'lorani_plu_reglement')
+      elsif v_type in ('lorani_planche', 'lorani_cctp', 'lorani_dpgf', 'lorani_plu_reglement', 'lorani_metre')
             or exists (select 1 from public.lorani_controle_pieces cp where cp.piece_id = (t.charge ->> 'piece')::uuid) then
         v_res := private.lorani_piece_controle_lue((t.charge ->> 'piece')::uuid);
       else

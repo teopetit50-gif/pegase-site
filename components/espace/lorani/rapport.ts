@@ -33,7 +33,7 @@ export type DonneesRapport = {
 };
 
 const GRAVITE: Record<Constat["gravite"], string> = { bloquant: "Bloquant", majeur: "Majeur", mineur: "Mineur" };
-const NATURE: Record<Constat["nature"], string> = { incoherence: "Entre les planches", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF" };
+const NATURE: Record<Constat["nature"], string> = { incoherence: "Entre les planches", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF" };
 const STATUT: Record<Constat["statut"], string> = { ouvert: "Ouvert", corrige: "Corrigé", accepte: "Accepté", ecarte: "Écarté" };
 const RANG: Record<Constat["gravite"], number> = { bloquant: 0, majeur: 1, mineur: 2 };
 
@@ -161,7 +161,7 @@ export function excelControle(d: DonneesRapport): { nom: string; octets: Uint8Ar
   if (d.precedent) for (const k of d.corriges) lignes.push([null, GRAVITE[k.gravite], NATURE[k.nature], k.titre, k.correction, k.article, null, null, null, null, `Corrigé à l'indice ${d.controle.indice}`, k.motif, null, `indice ${d.precedent.indice}`]);
   const pieces: (string | number | null)[][] = [["Référence", "Rôle", "Fichier", "Lecture"], ...d.pieces.map((x) => {
     const p = d.pieceDe(x.piece_id);
-    return [x.reference, { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", autre: "Autre" }[x.role], p?.nom_fichier ?? null, p?.statut ?? null];
+    return [x.reference, { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", metre: "Métré", autre: "Autre" }[x.role], p?.nom_fichier ?? null, p?.statut ?? null];
   })];
   const enc = new TextEncoder();
   const f = (nom: string, s: string) => ({ nom, donnees: enc.encode(s) });
@@ -408,7 +408,7 @@ export async function pdfControle(d: DonneesRapport): Promise<{ nom: string; oct
   m.texte([d.projet.reference, d.projet.adresse, [d.projet.code_postal, d.projet.commune].filter(Boolean).join(" ")].filter(Boolean).join(" · "), { gris: true, apres: 8 });
   m.texte(`${ouverts.length} constat${ouverts.length > 1 ? "s" : ""} ouvert${ouverts.length > 1 ? "s" : ""}, dont ${ouverts.filter((k) => k.gravite === "bloquant").length} bloquant(s) · ${tous.length - ouverts.length} décidé(s)${d.precedent ? ` · ${d.corriges.length} corrigé(s) depuis l'indice ${d.precedent.indice}` : ""}.`, { gras: true, apres: 6 });
   m.texte("Pièces croisées", { gras: true });
-  for (const x of d.pieces) m.texte(`${x.reference ?? "—"} · ${{ planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", autre: "Autre pièce" }[x.role]} · ${d.pieceDe(x.piece_id)?.nom_fichier ?? "pièce"}`, { retrait: 10, gris: true });
+  for (const x of d.pieces) m.texte(`${x.reference ?? "—"} · ${{ planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", metre: "Métré", autre: "Autre pièce" }[x.role]} · ${d.pieceDe(x.piece_id)?.nom_fichier ?? "pièce"}`, { retrait: 10, gris: true });
   m.texte("", { apres: 4 });
   m.filet();
   tous.forEach((k, i) => {
