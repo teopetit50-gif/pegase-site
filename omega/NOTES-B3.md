@@ -273,3 +273,10 @@ logiciel métier qui la fait).
      Vérifié en local (tables simulées) : idempotente ; 2 rendez-vous dont 1 manqué sur la semaine du 28/09 au 04/10 ; dépôt le lundi, rien le mardi.
    - `16_synthese_semaine.sql` : `test_b3_16_synthese_semaine`, 22 assertions (droits, chiffres comparés à la base, profil direction, dépôt du lundi, pas à l'assistante, rien le mardi).
    - Écran : carte « Synthèse de la semaine » (4 tuiles, tableau par centre avec l'écart de manqués). Recette : 83 contrôles, tout passe ; axe : 0 écart.
+2. **Taux de réinscription** (06/10, ~17 h 30 Z) :
+   - Définition : parmi les patients VUS dans la période (honoré ou présumé honoré, une visite par patient et par jour), la part qui a déjà un prochain rendez-vous (après la visite, ni annulé ni supprimé). On ne dépend pas de la date de création des rendez-vous, souvent absente des exports.
+   - `private.tiroma_reinscription_calc` est posée **dans b3_15** (pas encore posé au moment de l'écrire) : la synthèse de la semaine donne aussi la réinscription, par centre et au total, et elle figure dans la ligne du lundi.
+   - `b3_16_reinscription.sql` : `public.tiroma_reinscription(client, entité, jours = 30)`, pour le titulaire, l'assistante et la direction. Elle rend le taux, la période d'avant, le détail par praticien (titulaire et direction seulement) et `sans_suite` : 25 patients vus au plus, sans prochain rendez-vous, sans plan en cours, joignables, et sans appel noté depuis 14 jours. La direction n'y voit aucun nom.
+   - `17_reinscription.sql` : `test_b3_17_reinscription`, 18 assertions.
+   - Écran : carte « Réinscription » (taux et écart, détail par praticien, « Vus sans prochain rendez-vous » avec « Noter l'appel ») et une colonne réinscription dans la synthèse. Recette : 85 contrôles, tout passe ; axe : 0 écart.
+   - Vérifié en local : b3_15 et b3_16 posées deux fois ; 2 visites, 1 réinscrit, taux 0,5, Hugo dans la liste ; la direction voit « Patient du cabinet ».

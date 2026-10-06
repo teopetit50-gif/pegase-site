@@ -13,6 +13,7 @@
 --       plans_sans_rdv {nombre, montant}                              (à la date de lecture)
 --       appels   {appels, rdv_pris, confirmes}                        (registre b3_12)
 --       rappels  {prepares, envoyes, retenus}                         (b3_14)
+--       reinscription {visites, reinscrits, taux}                      (patients vus qui ont déjà un prochain rendez-vous)
 --       precedent {taux_manques, devis_signes, devis_taux}            (la semaine d'avant)
 --   · public.tiroma_synthese_semaine(p_client, p_entite = null, p_lundi = null) → jsonb : titulaire et direction.
 --     Sans entité : tous les cabinets du client où la personne est titulaire ou direction (la direction voit ses
@@ -22,6 +23,47 @@
 --     titulaire et de la direction une section « Synthèse de la semaine » (une ligne de chiffres, sans nom, sante =
 --     false). Cron tiroma-synthese, toutes les 30 minutes (rien à faire hors du lundi).
 -- Lecture seule sur les données du cabinet ; idempotent (create or replace, cron s'il manque).
+
+-- La réinscription (audit § 2 Tiroma, n° 2 ; aussi rendue par la synthèse) : parmi les patients VUS dans la période
+-- (rendez-vous honoré, ou présumé honoré), la part qui a déjà un prochain rendez-vous (commençant après la visite,
+-- ni annulé ni supprimé). Une visite par patient et par jour. On ne s'appuie pas sur la date de création des
+-- rendez-vous : beaucoup d'exports ne la portent pas (capacité « dates_creation »).
+create or replace function private.tiroma_reinscription_calc(p_client uuid, p_entite uuid, p_du date, p_au date)
+ returns jsonb
+ language sql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+  with fz as (
+    select coalesce((select e.fuseau from public.entites e where e.client_id = p_client and e.id = p_entite), 'Europe/Paris') as f
+  ),
+  visites as (
+    select distinct on (r.patient_id, (r.debut at time zone fz.f)::date)
+           r.patient_id, r.debut, r.praticien_id, (r.debut at time zone fz.f)::date as jour
+    from public.tiroma_rendez_vous r, fz
+    where r.client_id = p_client and r.entite_id = p_entite and r.patient_id is not null
+      and (r.statut = 'honore' or (r.statut = 'prevu' and r.presume = 'honore'))
+      and (r.debut at time zone fz.f)::date between p_du and p_au and r.debut < now()
+    order by r.patient_id, (r.debut at time zone fz.f)::date, r.debut desc
+  ),
+  v as (
+    select x.*, exists (select 1 from public.tiroma_rendez_vous n
+                        where n.client_id = p_client and n.entite_id = p_entite and n.patient_id = x.patient_id
+                          and n.debut > x.debut and n.statut not in ('annule', 'supprime') and n.disparu_le is null) as reinscrit
+    from visites x
+  )
+  select jsonb_build_object(
+    'visites', (select count(*) from v),
+    'reinscrits', (select count(*) from v where reinscrit),
+    'taux', (select case when count(*) = 0 then null else round(count(*) filter (where reinscrit)::numeric / count(*), 3) end from v),
+    'par_praticien', (select coalesce(jsonb_agg(jsonb_build_object('praticien_id', y.praticien_id, 'nom', y.nom, 'visites', y.n, 'reinscrits', y.r,
+                                                                   'taux', case when y.n = 0 then null else round(y.r::numeric / y.n, 3) end)
+                                                order by y.nom nulls last), '[]'::jsonb)
+                      from (select v.praticien_id, pr.nom_affiche as nom, count(*) as n, count(*) filter (where v.reinscrit) as r
+                            from v left join public.tiroma_praticiens pr on pr.id = v.praticien_id
+                            group by v.praticien_id, pr.nom_affiche) y))
+$function$;
 
 create or replace function private.tiroma_indicateurs_semaine(p_client uuid, p_entite uuid, p_lundi date, p_avec_precedent boolean default true)
  returns jsonb
@@ -104,11 +146,13 @@ begin
   if p_avec_precedent then
     v_prec := private.tiroma_indicateurs_semaine(p_client, p_entite, p_lundi - 7, false);
     v_prec := jsonb_build_object('taux_manques', v_prec #> '{rdv,taux_manques}', 'devis_signes', v_prec #> '{devis,signes}',
-                                 'devis_taux', v_prec #> '{devis,taux}', 'passes', v_prec #> '{rdv,passes}');
+                                 'devis_taux', v_prec #> '{devis,taux}', 'passes', v_prec #> '{rdv,passes}',
+                                 'reinscription_taux', v_prec #> '{reinscription,taux}');
   end if;
 
   return jsonb_build_object('semaine', jsonb_build_object('du', p_lundi, 'au', p_lundi + 6),
-    'rdv', v_rdv, 'creneaux', v_creneaux, 'devis', v_devis, 'plans_sans_rdv', v_plans, 'appels', v_appels, 'rappels', v_rappels)
+    'rdv', v_rdv, 'creneaux', v_creneaux, 'devis', v_devis, 'plans_sans_rdv', v_plans, 'appels', v_appels, 'rappels', v_rappels,
+    'reinscription', private.tiroma_reinscription_calc(p_client, p_entite, p_lundi, p_lundi + 6) - 'par_praticien')
     || case when p_avec_precedent then jsonb_build_object('precedent', v_prec) else '{}'::jsonb end;
 end $function$;
 
@@ -173,6 +217,10 @@ begin
         'plans_sans_rdv', coalesce(sum((c #>> '{plans_sans_rdv,nombre}')::integer), 0),
         'montant_plans_sans_rdv', coalesce(sum((c #>> '{plans_sans_rdv,montant}')::numeric), 0),
         'appels', coalesce(sum((c #>> '{appels,appels}')::integer), 0),
+        'visites', coalesce(sum((c #>> '{reinscription,visites}')::integer), 0),
+        'reinscrits', coalesce(sum((c #>> '{reinscription,reinscrits}')::integer), 0),
+        'reinscription_taux', case when coalesce(sum((c #>> '{reinscription,visites}')::integer), 0) = 0 then null
+                                   else round(sum((c #>> '{reinscription,reinscrits}')::integer)::numeric / sum((c #>> '{reinscription,visites}')::integer), 3) end,
         'rdv_confirmes', coalesce(sum((c #>> '{appels,confirmes}')::integer), 0))
       from jsonb_array_elements(v_cabinets) c));
 end $function$;
@@ -216,9 +264,12 @@ begin
       v := private.tiroma_indicateurs_semaine(k.client_id, k.entite_id, v_lundi, true);
       pct := case when v #>> '{rdv,taux_manques}' is null then '—'
                   else replace(to_char(round((v #>> '{rdv,taux_manques}')::numeric * 100, 1), 'FM990.0'), '.', ',') || ' %' end;
-      v_texte := format('Semaine du %s au %s : %s rendez-vous, %s manqué(s) (%s) ; %s créneau(x) libéré(s) ; %s devis signé(s) sur %s présenté(s) (%s €) ; %s plan(s) signé(s) sans rendez-vous (%s €) ; %s appel(s), %s rendez-vous repris.',
+      v_texte := format('Semaine du %s au %s : %s rendez-vous, %s manqué(s) (%s) ; réinscription %s ; %s créneau(x) libéré(s) ; %s devis signé(s) sur %s présenté(s) (%s €) ; %s plan(s) signé(s) sans rendez-vous (%s €) ; %s appel(s), %s rendez-vous repris.',
         to_char(v_lundi, 'DD/MM'), to_char(v_lundi + 6, 'DD/MM'),
-        v #>> '{rdv,passes}', v #>> '{rdv,manques}', pct, v #>> '{creneaux,liberes}',
+        v #>> '{rdv,passes}', v #>> '{rdv,manques}', pct,
+        case when v #>> '{reinscription,taux}' is null then '—'
+             else replace(to_char(round((v #>> '{reinscription,taux}')::numeric * 100, 1), 'FM990.0'), '.', ',') || ' %' end,
+        v #>> '{creneaux,liberes}',
         v #>> '{devis,signes}', v #>> '{devis,presentes}', to_char((v #>> '{devis,montant_signe}')::numeric, 'FM999G999G990'),
         v #>> '{plans_sans_rdv,nombre}', to_char((v #>> '{plans_sans_rdv,montant}')::numeric, 'FM999G999G990'),
         v #>> '{appels,appels}', v #>> '{appels,confirmes}');
@@ -266,6 +317,8 @@ revoke all on function public.tiroma_synthese_semaine(uuid, uuid, date) from pub
 grant execute on function public.tiroma_synthese_semaine(uuid, uuid, date) to authenticated, service_role;
 revoke all on function private.tiroma_synthese_semaine_lire(uuid, uuid, date) from public, anon;
 grant execute on function private.tiroma_synthese_semaine_lire(uuid, uuid, date) to authenticated, service_role;
+revoke all on function private.tiroma_reinscription_calc(uuid, uuid, date, date) from public, anon, authenticated;
+grant execute on function private.tiroma_reinscription_calc(uuid, uuid, date, date) to service_role;
 revoke all on function private.tiroma_indicateurs_semaine(uuid, uuid, date, boolean) from public, anon, authenticated;
 grant execute on function private.tiroma_indicateurs_semaine(uuid, uuid, date, boolean) to service_role;
 revoke all on function private.tiroma_deposer_synthese(timestamp with time zone) from public, anon, authenticated;
