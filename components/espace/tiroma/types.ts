@@ -277,6 +277,7 @@ export type Dossier = {
   charge: Charge | null;
   appels: RegistreAppels | null;
   pilotage: Pilotage | null;
+  rappels: Rappels | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -354,4 +355,48 @@ export type Pilotage = {
     precedent: { passes: number; manques: number; taux_manques: number | null };
   };
   appels: { appels: number; rdv_pris: number };
+};
+
+/* ——— les rappels aux patients (b3_14) ——— */
+
+export type CanalPatient = "email" | "sms";
+
+export type ContactPatient = {
+  id: string;
+  patient_id: string;
+  patient_nom: string;
+  canal: CanalPatient;
+  adresse: string;
+  rappels: boolean;
+  relances: boolean;
+  source: "oral" | "ecrit" | "formulaire";
+  cree_le: string;
+};
+
+export type EnvoiRappel = {
+  id: string;
+  type: "j2" | "plan" | "devis";
+  canal: CanalPatient;
+  mode: "essai" | "reel";
+  statut: string;
+  verrou: string | null;
+  cree_le: string;
+  envoye_le: string | null;
+  patient_nom: string;
+};
+
+export type ReponseRappel = {
+  id: string;
+  reponse: "confirme" | "annule" | "a_lire" | "autre_adresse";
+  recue_le: string;
+  rendez_vous_id: string | null;
+  debut: string | null;
+  patient_nom: string;
+};
+
+export type Rappels = {
+  reglage: { mode: "coupe" | "essai" | "reel"; essai: boolean; canaux: string[] | null } | null;
+  contacts: ContactPatient[];
+  envois: EnvoiRappel[];
+  reponses: ReponseRappel[];
 };
