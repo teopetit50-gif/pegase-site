@@ -231,6 +231,11 @@ CASHD étant vert.
 
 ## Journal de session
 
+- 06/10, soir : c2_01 → c2_03 POSÉS sur la recette (6c29b77) ; ^test_c2_ 3/4, 44/46/51 verts. Rouge : test_c2_03 « Préparations
+  et coupures sont au journal ». Cause : sans réglage d'envoi cashd (banc_cashd pas encore posé), la relance passe
+  « non_reglee » et sortait de la boucle avant sa ligne de journal. Reproduit en local, corrigé (journal juste après le dépôt
+  de la demande, dans c2_02 et c2_03) ; 150/150 avec et sans réglage d'envoi.
+
 - 06/10, nuit : **c2_01 refusé à la pose** par le coordinateur (modeles_jeux_coherent : une clé de jeu ne peut pas être
   une colonne facultative ; factures avait {nature, numero} avec nature facultative, règlements {date, montant,
   reference, facture_numero}). Corrigé : factures {numero}, règlements {date, montant, libelle} (libellé rendu attendu).

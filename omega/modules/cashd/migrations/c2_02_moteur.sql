@@ -648,6 +648,10 @@ begin
         continue;
       end;
       update public.cashd_relances set demande_id = v_demande, statut = 'a_valider', maj_le = now() where id = v_rel;
+      -- Toute relance écrite et déposée dans la file est au journal, quel que soit le réglage d'envoi.
+      perform private.journaliser_module(p_client, 'cashd', 'cashd.relance_preparee', 'cashd_relances', v_rel::text,
+        jsonb_build_object('compte', c.reference, 'palier', v_palier_max, 'montant', (v_texte ->> 'montant')::numeric, 'pieces', (v_texte ->> 'pieces')::integer,
+                           'demande', v_demande, 'jour', p_jour), c.entite_id);
 
       -- La mise en demeure exige une validation explicite : un accord permanent ne la couvre jamais.
       if v_type = 'cashd.mise_en_demeure' and v_dstatut = 'approuvee' and v_dpolitique is not null then
@@ -682,9 +686,6 @@ begin
           jsonb_build_object('relance', v_rel, 'erreur', v_erreur), 'relance:envoi:' || v_rel::text, true, null);
         v_n_bloq := v_n_bloq + 1;
       end;
-      perform private.journaliser_module(p_client, 'cashd', 'cashd.relance_preparee', 'cashd_relances', v_rel::text,
-        jsonb_build_object('compte', c.reference, 'palier', v_palier_max, 'montant', (v_texte ->> 'montant')::numeric, 'pieces', (v_texte ->> 'pieces')::integer,
-                           'demande', v_demande, 'jour', p_jour), c.entite_id);
     end loop;
   end loop;
   perform private.battre(p_client, 'cashd_relances', jsonb_build_object('jour', p_jour, 'preparees', v_n_prep), interval '1 day');
