@@ -328,3 +328,28 @@ sans redéploiement (la clé est lue à chaque passage).
   Les autres tests lisent le cache filtré sur leur propre identifiant. À reposer : `omega/tests/identite/b7_01_portes.sql`.
 - 6/10 1 h 35 Z : reprise par session_01967jUehrY7tLAXLn9pBaSw (Opus 5.5), Fable à court de crédit.
 - 6/10 1 h 31 Z (coordinateur) : b7_01_portes.sql reposé depuis 91b919d, `^test_b7_` rejoué → **10/10**. Identité verte.
+- 6/10 13 h 55 Z (coordinateur) : `SIRENE_API_KEY` posée par Teo, battement `sirene+repli`, complément Orange servi
+  par l'INSEE (source `sirene`). **Faux négatif VIES** : ORANGE FR89380129866 valide à 13:48:06 Z, invalide à
+  13:54:29 Z (« non assujetti probable »), verdict du fournisseur 90cc1d86 écrasé. Les deux demandes étaient
+  forcées (cache ignoré) : pas de moi.
+- 6/10 14 h 30 Z : **lot b7_04** écrit, testé en local (Postgres 16 jetable, souche minimale : b7_01 à b7_04 + les
+  tests 01, 04 et 05 verts, 33 assertions dans test_b7_11 ; migration rejouée deux fois ; rattrapage idempotent),
+  ouvrier 48 tests Deno verts (check, lint, fmt).
+  - `omega/modules/identite/migrations/b7_04_doute.sql` : `private.identite_doute` (la règle) ; `noter_identite`
+    remplacée : un refus est **douteux** s'il contredit une réponse valide de moins de 30 jours (cache ou
+    vérification, tous clients) ou s'il est marqué `suspect` par l'ouvrier ; il ne conclut que s'il confirme un refus
+    d'au moins 1 h (deux refus espacés d'au moins 1 h, sans valide entre les deux). Sinon : écrit `indisponible`,
+    `preuve.doute {motif, premier_refus_le, rang, valide_le}`, `preuve.resultat_registre = invalide`, pas de verdict,
+    pas de recontrôle ; même règle pour les compléments. La porte rend en plus `resultat` et `doute`.
+    `identite_memoriser` : un `indisponible` n'écrase plus une réponse du registre dans le cache.
+    `identite_relancer` : un doute est redemandé **forcé** (sans cache) 1 h après le premier, 6 h ensuite.
+    Rattrapage : les refus VIES de 30 jours à clé juste et SIREN actif (ancienne remarque) sont redemandés forcés,
+    une fois (Orange compris).
+  - Ouvrier : `vies.ts` lit `errorWrappers[0].error` / `actionSucceed: false` (réponse d'erreur REST en HTTP 200) et
+    rend `indisponible` sans `valid` booléen (avant : lu « invalide ») ; `code_vies` dans la preuve d'un refus.
+    `verifier.ts` : refus VIES + clé juste + SIREN actif → `preuve.suspect` et nouvelle remarque (« panne de VIES
+    possible, revérifié avant de conclure ») ; issue `doute` quand la porte met le refus en doute.
+  - Tests : `omega/tests/identite/b7_05_doute.sql` (test_b7_11), Deno : double VIES `valid:false` derrière le vrai
+    `ViesRest`, enveloppe `errorWrappers`.
+  - À faire par le coordinateur : poser b7_04, jouer `^test_b7_`, redéployer la coquille `identite` au nouveau SHA.
+
