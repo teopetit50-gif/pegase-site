@@ -181,6 +181,9 @@ Famille « Pilotage » :
 - Choix : refus pour **tout le monde**, pas seulement pour le déposant. Lever revient à confirmer sans journal,
   sans valider l'IBAN, pour une seule facture ; les personnes habilitées ont `filed_confirmer_fournisseur`.
 - Local : a4_01→a4_12 deux fois, six tests verts ; le cas 2 (porte réelle) ne se joue que sur la recette.
+- **Posé sur la recette (06/10, ~01:56 UTC)** depuis 18578a3 ; refus pour tous validé par le coordinateur ;
+  0 levée de ce code avant et après ; test a4_06 vert (cas 2 joué contre la vraie `filed_lever_anomalie`), joué par
+  `private.tester_sans_trace` (lot 19ae) qui annule tout — la pose depuis le dépôt retire le `rollback;` final.
 - À A3 : masquer « Lever avec un motif » pour ce code et montrer « Confirmer le fournisseur ».
 
 ## factures.ts : lignes exactes à passer à `atteste: true` (06/10, relevé sur origin/main 70f9b7c)
