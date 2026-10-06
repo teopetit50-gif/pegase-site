@@ -24,7 +24,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
-import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleUnite } from "./etats";
+import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleStatutFacture, libelleUnite } from "./etats";
 import { FACTURES_CANDIDATES_EXEMPLE } from "./exemples";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
@@ -553,7 +553,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                     <td>{f.lot_code ? <><span className="esp-mono">{f.lot_code}</span> {f.lot_libelle}</> : "—"}</td>
                     <td>{dateCourte(f.date_emission)}</td>
                     {voit_prix ? <td className="esp-num">{montant(f.montant_ht)}</td> : null}
-                    <td>{f.facture_statut === "a_valider" ? "À valider" : f.facture_statut === "bloquee" ? "Bloquée" : f.facture_statut === "a_completer" ? "À compléter" : f.facture_statut ?? "—"}</td>
+                    <td>{libelleStatutFacture(f.facture_statut)}</td>
                     <td><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "detacher", facture_id: f.facture_id })}>Détacher</button></td>
                   </tr>
                 ))}

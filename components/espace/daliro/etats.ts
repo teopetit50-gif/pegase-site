@@ -114,3 +114,21 @@ export const FAMILLES: { cle: Famille; libelle: string; sous: string; teinte: "r
   { cle: "a_confirmer", libelle: "Passages à confirmer", sous: "J-2 demandé, sans réponse ou décliné", teinte: "bleu" },
   { cle: "ouvert", libelle: "Chantiers ouverts", sous: "sur le quota de la formule", teinte: "vert" },
 ];
+
+/* Le statut d'une facture FILED rattachée au chantier (filed_factures.statut,
+   a4_02 compris). Un statut que l'écran ne connaît pas encore s'affiche tel
+   quel plutôt que de casser. */
+export const STATUTS_FACTURE: Record<string, string> = {
+  a_completer: "À compléter",
+  bloquee: "Bloquée",
+  a_valider: "À valider",
+  validee: "Validée",
+  refusee: "Refusée",
+  ecartee: "Écartée",
+  comptabilisee: "Comptabilisée",
+};
+
+export function libelleStatutFacture(s: string | null | undefined): string {
+  if (!s) return "—";
+  return STATUTS_FACTURE[s] ?? s;
+}
