@@ -207,6 +207,43 @@ ordre de la liste, phrases servies, compteurs, message lisible, courbe 24 mois, 
 **Ordre de pose (recette)** : `c4_04_ecran.sql`, puis `omega/tests/offload/c4_04_ecran.sql`
 (`runtests('tests', '^test_c4_04_')`).
 
+## Palier 5, lot c4_05 — garde-fous commerciaux et doublons
+
+**Ce qui est posé** (`omega/modules/offload/migrations/c4_05_garde_fous.sql`) :
+- `offload_changer_statut(compte, 'exclu' | 'suivi', motif)` : **reprendre la main d'un seul geste** — la reprise en
+  cours est close (`reprise_en_main`), ses messages en attente annulés au socle (`private.annuler_envoi`),
+  l'historique reste attaché ; motif obligatoire ; un compte retiré à sa demande ne revient dans le circuit que par
+  le gérant ou l'admin (la désinscription du socle se lève à part).
+- `public.offload_exclusions` (compte, secteur, commercial, groupe ; levée, jamais effacée), portes `offload_exclure`,
+  `offload_lever_exclusion`.
+- `public.offload_contacts` + `offload_comptes.dernier_contact`, porte `offload_noter_contact` : un contact d'un
+  commercial dans la quarantaine écarte le compte de la vague.
+- Plafond **au groupe** : une reprise à la fois par groupe (colonne `groupe` lue dans les exports), quarantaine
+  comprise.
+- `private.offload_ecarte(compte)` : la phrase qui dit pourquoi un compte est écarté (fusionné, suivi en direct,
+  retiré, liste d'exclusion, contacté le…, groupe déjà sollicité). `offload_cycle` redéfini : chaque candidat y
+  passe au moment où il vient (le plafond du jour compte les ouvertures réelles), bilan `ecartes`.
+- **Doublons** : `public.offload_rapprochements`, proposés chaque nuit (`offload_detecter_tout` redéfini) — même
+  courriel, même téléphone (9 derniers chiffres), même raison sociale sans forme juridique ni accents — avec leurs
+  raisons en phrases ; `offload_trancher_rapprochement` (gérant, admin, valideur) : accepté, les pièces passent à
+  la fiche gardée, l'autre est marquée `fusionne_dans` et ne sort plus ; une demande d'arrêt sur l'une vaut pour
+  l'autre ; refusé, plus proposé. `offload_rapprocher(client)` à la demande. `offload_tableau` redéfini : sans les
+  fiches fusionnées, avec les doublons proposés et les exclusions.
+- Écran : « Reprendre la main » / « Remettre dans le cycle » (motif), « Noter un contact », carte « Doublons
+  proposés » (fusionner, ou « ce sont deux clients »).
+
+**Tests** : `omega/tests/offload/c4_05_garde_fous.sql` — `test_c4_05_reprise_en_main`, `test_c4_05_exclusions`,
+`test_c4_05_doublons`. Banc local : 18 tests, 207 assertions vertes (lots 1 à 5), migrations posées deux fois ;
+tsc, eslint, build verts ; recette 5 largeurs sans débordement.
+
+**Ordre de pose** : `c4_05_garde_fous.sql`, puis `omega/tests/offload/c4_05_garde_fous.sql`
+(`runtests('tests', '^test_c4_05_')`).
+
+**À inscrire dans `a5_01`** : `offload_changer_statut(p_compte uuid, p_statut text, p_motif text)`,
+`offload_exclure(p_client uuid, p_type text, p_valeur text, p_motif text)`, `offload_lever_exclusion(p_exclusion uuid)`,
+`offload_noter_contact(p_compte uuid, p_le date, p_canal text, p_par text, p_note text)`,
+`offload_rapprocher(p_client uuid)`, `offload_trancher_rapprochement(p_rapprochement uuid, p_accepter boolean)`.
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`) — tenue et preuve
 
 Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve posée en recette.
@@ -229,7 +266,13 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **palier 3 livré (à poser)** | issue `commande` ; `test_c4_03_issues` |
 | Les messages partent par courriel, depuis la boîte de votre entreprise. | **partiel** : OFFLOAD prépare des courriels ; l'expéditeur (boîte de l'entreprise) est celui du socle (A2 : Gmail / Microsoft 365 pas encore branchés) | — |
 | Le système s'arrête de lui-même au premier doute, et vous le signale. | **partiel** : import douteux non appliqué, essai contre réel, verrous du socle ; d'autres doutes au palier 5 | `test_c4_01_garde_fou`, `test_c4_03_issues` |
-| Les autres lignes | à venir (palier 5) | — |
+| Les doublons de fiches sont rapprochés quand deux lignes désignent le même client. | **c4_05 livré (à poser)** | rapprochements proposés avec raisons, fusion après accord ; `test_c4_05_doublons` |
+| Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | **partiel** : `groupe` lu dans les exports, plafond au groupe ; pas encore de vue consolidée par groupe | `test_c4_05_exclusions` |
+| Un compte suivi en direct par un commercial est exclu du cycle automatique. | **c4_05 livré (à poser)** | statut `exclu`, `offload_ecarte` ; `test_c4_05_reprise_en_main` |
+| Le commercial en charge reprend la main sur un compte d'un seul geste. | **c4_05 livré (à poser)** | `offload_changer_statut` : reprise close, messages annulés ; `test_c4_05_reprise_en_main` |
+| Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **c4_05 livré (à poser)** | `offload_exclusions` (+ groupe) ; `test_c4_05_exclusions` |
+| Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | **c4_05 livré (à poser)** | `offload_contacts` ; `test_c4_05_exclusions` |
+| Les autres lignes (échéances et renouvellements, affaires restées en plan, pilotage, contrats et équipements, règles de ton en français) | à venir (lots suivants) | — |
 
 ## Journal
 
@@ -239,4 +282,5 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 - 06/10 — palier 1 écrit, vérifié sur le banc local (pose ×2, 62 assertions vertes), poussé sur `worker-c4` (7c8c520), envoyé au coordinateur.
 - 06/10 — palier 2 (détection) écrit et vérifié sur le banc local, poussé (ce6cd3c), envoyé au coordinateur.
 - 06/10 — palier 3 (reprise) poussé (376387e), envoyé au coordinateur.
-- 06/10 — palier 4 (écran) : 15 tests SQL verts en local, écran recetté aux cinq largeurs.
+- 06/10 — palier 4 (écran) poussé (963b991), envoyé au coordinateur.
+- 06/10 — palier 5, lot c4_05 (garde-fous, doublons) : 207 assertions vertes en local, écran recetté.

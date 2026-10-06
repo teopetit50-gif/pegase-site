@@ -60,6 +60,7 @@ export type Compte = {
   source: "import" | "saisie";
   statut: "suivi" | "exclu" | "arrete";
   statut_motif: string | null;
+  dernier_contact?: string | null;
   signal: Signal | null;
   reprise?: Reprise | null;
 };
@@ -112,8 +113,14 @@ export type Compteurs = Record<
   number
 >;
 
+export type Rapprochement = { id: string; a: string; a_nom: string; a_ref: string; b: string; b_nom: string; b_ref: string; raisons: string[] };
+
+export type Exclusion = { id: string; type: "compte" | "secteur" | "commercial" | "groupe"; valeur: string; motif: string; cree_le: string };
+
 export type Tableau = {
   client: string | null;
+  rapprochements?: Rapprochement[];
+  exclusions?: Exclusion[];
   reglages: Reglages | null;
   compteurs: Compteurs;
   comptes: Compte[];

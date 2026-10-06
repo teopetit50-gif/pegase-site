@@ -26,7 +26,9 @@ const BLOC: React.CSSProperties = { border: "1px solid var(--r-filet)", borderRa
 export type Geste =
   | { type: "reprise"; compte: string }
   | { type: "tache"; tache: string; statut: "faite" | "abandonnee"; compteRendu: string | null }
-  | { type: "achat"; compte: string; date: string; montant: number; reference: string | null; libelle: string | null; nature: string };
+  | { type: "achat"; compte: string; date: string; montant: number; reference: string | null; libelle: string | null; nature: string }
+  | { type: "statut"; compte: string; statut: "suivi" | "exclu"; motif: string }
+  | { type: "contact"; compte: string; le: string; canal: string; par: string | null; note: string | null };
 
 export default function FicheCompte({ fiche, onAgir }: { fiche: Fiche; onAgir: (g: Geste) => Promise<string> }) {
   const { compte, signal } = fiche;
@@ -37,6 +39,9 @@ export default function FicheCompte({ fiche, onAgir }: { fiche: Fiche; onAgir: (
   const [compteRendu, setCompteRendu] = useState("");
   const [ajout, setAjout] = useState(false);
   const [a, setA] = useState({ date: "", montant: "", reference: "", libelle: "", nature: "facture" });
+  const [suivi, setSuivi] = useState<null | "statut" | "contact">(null);
+  const [motif, setMotif] = useState("");
+  const [k, setK] = useState({ le: "", canal: "appel", par: "", note: "" });
 
   const agir = async (g: Geste) => {
     setEnvoi(true);
@@ -47,6 +52,8 @@ export default function FicheCompte({ fiche, onAgir }: { fiche: Fiche; onAgir: (
       setTacheOuverte(null);
       setCompteRendu("");
       setAjout(false);
+      setSuivi(null);
+      setMotif("");
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base a refusé.");
     } finally {
@@ -137,6 +144,57 @@ export default function FicheCompte({ fiche, onAgir }: { fiche: Fiche; onAgir: (
             </li>
           ))}
         </ul>
+      ) : null}
+
+      <div className="esp-actions" style={{ flexWrap: "wrap" }}>
+        <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => { setSuivi(suivi === "statut" ? null : "statut"); setMotif(""); }}>
+          {compte.statut === "suivi" ? "Reprendre la main (suivi en direct)" : "Remettre dans le cycle"}
+        </button>
+        <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setSuivi(suivi === "contact" ? null : "contact")}>Noter un contact</button>
+        {compte.dernier_contact ? <span className="esp-kpi-sous">Dernier contact noté : {dateCourte(compte.dernier_contact)}</span> : null}
+      </div>
+      {suivi === "statut" ? (
+        <div className="esp-form" style={{ margin: "8px 0 12px" }}>
+          <label className="rv-libelle">Pourquoi <span className="esp-obligatoire">(obligatoire)</span>
+            <input className="rv-champ" value={motif} onChange={(e) => setMotif(e.target.value)}
+              placeholder={compte.statut === "suivi" ? "Sophie le suit en direct : rendez-vous prévu." : "Le client a redemandé nos offres par écrit."} />
+          </label>
+          {compte.statut === "arrete" ? <span className="esp-kpi-sous">Ce client a demandé l&apos;arrêt : seul un gérant ou un administrateur le remet dans le circuit.</span> : null}
+          <div className="esp-actions">
+            <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={envoi || !motif.trim()}
+              onClick={() => agir({ type: "statut", compte: compte.id, statut: compte.statut === "suivi" ? "exclu" : "suivi", motif: motif.trim() })}>
+              {compte.statut === "suivi" ? "Reprendre la main" : "Remettre dans le cycle"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {suivi === "contact" ? (
+        <div className="esp-form" style={{ margin: "8px 0 12px" }}>
+          <div className="esp-form-ligne">
+            <label className="rv-libelle">Le <span className="esp-obligatoire">(obligatoire)</span>
+              <input className="rv-champ" type="date" value={k.le} onChange={(e) => setK({ ...k, le: e.target.value })} />
+            </label>
+            <label className="rv-libelle">Comment
+              <select className="rv-champ" value={k.canal} onChange={(e) => setK({ ...k, canal: e.target.value })}>
+                <option value="appel">Appel</option><option value="visite">Visite</option><option value="courriel">Courriel</option>
+                <option value="salon">Salon</option><option value="autre">Autre</option>
+              </select>
+            </label>
+          </div>
+          <label className="rv-libelle">Par
+            <input className="rv-champ" value={k.par} onChange={(e) => setK({ ...k, par: e.target.value })} placeholder="Sophie" />
+          </label>
+          <label className="rv-libelle">Note
+            <input className="rv-champ" value={k.note} onChange={(e) => setK({ ...k, note: e.target.value })} placeholder="Passée en clientèle, devis en cours." />
+          </label>
+          <span className="esp-kpi-sous">Un compte contacté par un commercial est écarté de la vague en cours.</span>
+          <div className="esp-actions">
+            <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={envoi || !/^\d{4}-\d{2}-\d{2}$/.test(k.le)}
+              onClick={() => agir({ type: "contact", compte: compte.id, le: k.le, canal: k.canal, par: k.par.trim() || null, note: k.note.trim() || null })}>
+              Noter le contact
+            </button>
+          </div>
+        </div>
       ) : null}
 
       <div className="esp-section-titre">Tâches</div>

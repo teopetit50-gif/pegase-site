@@ -8,7 +8,9 @@
    (les tables OFFLOAD n'en acceptent aucune) :
      offload_saisir_compte, offload_saisir_achat, offload_annuler_achat (c4_01) ;
      offload_recalculer (c4_02) ;
-     offload_ouvrir_reprise, offload_noter_tache (c4_03).
+     offload_ouvrir_reprise, offload_noter_tache (c4_03) ;
+     offload_changer_statut, offload_noter_contact, offload_trancher_rapprochement,
+     offload_exclure, offload_lever_exclusion (c4_05).
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
    ══════════════════════════════════════════════════════════════════════ */
@@ -64,4 +66,16 @@ export function annulerAchat(achat: string, motif: string) {
 
 export function saisirCompte(client: string, ref: string | null, nom: string, champs: Record<string, string>) {
   return rpc<string>("offload_saisir_compte", { p_client: client, p_entite: null, p_ref: ref, p_nom: nom, p_champs: champs });
+}
+
+export function changerStatut(compte: string, statut: "suivi" | "exclu", motif: string) {
+  return rpc<null>("offload_changer_statut", { p_compte: compte, p_statut: statut, p_motif: motif });
+}
+
+export function noterContact(compte: string, le: string, canal: string, par: string | null, note: string | null) {
+  return rpc<string>("offload_noter_contact", { p_compte: compte, p_le: le, p_canal: canal, p_par: par, p_note: note });
+}
+
+export function trancherRapprochement(rapprochement: string, accepter: boolean) {
+  return rpc<null>("offload_trancher_rapprochement", { p_rapprochement: rapprochement, p_accepter: accepter });
 }

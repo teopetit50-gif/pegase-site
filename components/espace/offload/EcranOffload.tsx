@@ -27,7 +27,7 @@ import { dateCourte, montant } from "../format";
 import { A_RISQUE, NIVEAUX, STATUTS_REPRISE } from "./etats";
 import { exempleOffload } from "./exemples";
 import FicheCompte, { type Geste } from "./FicheCompte";
-import { chargerFiche, chargerTableau, noterTache, ouvrirReprise, recalculer, saisirAchat } from "./portes";
+import { changerStatut, chargerFiche, chargerTableau, noterContact, noterTache, ouvrirReprise, recalculer, saisirAchat, trancherRapprochement } from "./portes";
 import type { Compte, Fiche, Tableau } from "./types";
 
 type Filtre = "cloture" | "risque" | "a_valider" | "appels" | "tous";
@@ -127,6 +127,8 @@ export default function EcranOffload() {
     if (source === "reelle") {
       if (g.type === "reprise") await ouvrirReprise(g.compte);
       else if (g.type === "tache") await noterTache(g.tache, g.statut, g.compteRendu);
+      else if (g.type === "statut") await changerStatut(g.compte, g.statut, g.motif);
+      else if (g.type === "contact") await noterContact(g.compte, g.le, g.canal, g.par, g.note);
       else await saisirAchat(g.compte, g.date, g.montant, g.reference, g.libelle, g.nature);
       const compte = g.type === "tache" ? reel?.tableau?.taches.find((t) => t.id === g.tache)?.compte_id ?? choisi : g.compte;
       const [tb, f] = await Promise.all([chargerTableau(), compte ? chargerFiche(compte) : Promise.resolve(null)]);
@@ -150,6 +152,19 @@ export default function EcranOffload() {
             const x = f.taches.find((y) => y.id === g.tache);
             if (x) Object.assign(x, { statut: g.statut, compte_rendu: g.compteRendu, faite_le: new Date().toISOString() });
           }
+        } else if (g.type === "statut") {
+          for (const c of [suivant.fiches[g.compte]?.compte, t.comptes.find((x) => x.id === g.compte)]) {
+            if (c) Object.assign(c, { statut: g.statut, statut_motif: g.motif });
+          }
+          const f = suivant.fiches[g.compte];
+          const r = f?.reprises.find((x) => ["a_valider", "appel", "envoyee", "relance_a_valider", "relancee"].includes(x.statut));
+          if (g.statut === "exclu" && r) Object.assign(r, { statut: "close", issue: "reprise_en_main", motif: g.motif });
+          t.a_valider = t.a_valider.filter((v) => v.compte_id !== g.compte || g.statut !== "exclu");
+          t.compteurs.a_valider = t.a_valider.length;
+        } else if (g.type === "contact") {
+          for (const c of [suivant.fiches[g.compte]?.compte, t.comptes.find((x) => x.id === g.compte)]) {
+            if (c) c.dernier_contact = g.le;
+          }
         } else {
           const f = suivant.fiches[g.compte];
           f.achats.unshift({ id: crypto.randomUUID(), compte_id: g.compte, date_achat: g.date, montant_ht: g.nature === "avoir" ? -Math.abs(g.montant) : g.montant, reference: g.reference, libelle: g.libelle, nature: g.nature as "facture", source: "saisie", annule_le: null, annule_motif: null });
@@ -161,6 +176,8 @@ export default function EcranOffload() {
       });
     }
     return g.type === "reprise" ? "La reprise est préparée : le message attend votre validation dans « À valider », et l'appel est posé."
+      : g.type === "statut" ? (g.statut === "exclu" ? "Le compte est suivi en direct : la reprise en cours est close et ses messages en attente annulés." : "Le compte revient dans le cycle.")
+      : g.type === "contact" ? "Le contact est noté : le compte est écarté de la vague en cours."
       : g.type === "tache" ? "C'est noté." : "La pièce est ajoutée ; la détection en tiendra compte à son prochain calcul.";
   }, [source, reel, choisi]);
 
@@ -174,6 +191,15 @@ export default function EcranOffload() {
       setErreur(e instanceof Error ? e.message : "Le calcul a échoué.");
     } finally {
       setRecalcul(false);
+    }
+  };
+
+  const trancher = async (id: string, accepter: boolean) => {
+    try {
+      await trancherRapprochement(id, accepter);
+      await relire();
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé.");
     }
   };
 
@@ -292,6 +318,28 @@ export default function EcranOffload() {
               </div>
             )}
           </section>
+          {(tableau?.rapprochements ?? []).length ? (
+            <section className="esp-carte" aria-label="Doublons proposés">
+              <div className="esp-carte-tete">
+                <h2 className="esp-carte-titre">Doublons proposés</h2>
+                <span className="esp-kpi-sous">la fusion n&apos;a lieu qu&apos;après votre accord</span>
+              </div>
+              <div className="esp-carte-corps" style={{ display: "grid", gap: 8 }}>
+                {(tableau?.rapprochements ?? []).map((x) => (
+                  <div key={x.id} style={{ border: "1px solid var(--r-filet)", borderRadius: 12, padding: "10px 12px" }}>
+                    <strong>{x.a_nom}</strong> <span className="esp-mono">{x.a_ref}</span> et <strong>{x.b_nom}</strong> <span className="esp-mono">{x.b_ref}</span>
+                    <ul style={{ margin: "6px 0", paddingLeft: 18 }}>{x.raisons.map((r) => <li key={r} className="esp-kpi-sous">{r}</li>)}</ul>
+                    {source === "reelle" ? (
+                      <div className="esp-actions">
+                        <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => void trancher(x.id, true)}>Fusionner dans {x.a_nom}</button>
+                        <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void trancher(x.id, false)}>Ce sont deux clients</button>
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <section id="esp-dossier" className="esp-detail-mobile" aria-label="Fiche du compte">
