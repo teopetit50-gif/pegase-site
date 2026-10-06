@@ -233,3 +233,30 @@ logiciel métier qui la fait).
 - `omega/tests/tiroma/14_pilotage.sql` : `test_b3_14_pilotage`, 27 assertions.
 - Écran : carte « Pilotage » (titulaire et direction) avec 4 tuiles (devis acceptés et écart en points, signé sans rendez-vous, devis sans réponse, rendez-vous manqués), deux tableaux (par panier, manqués par praticien) et la liste des devis à relancer, chacun avec son bouton « Noter l'appel » (motif devis). Recette aux cinq largeurs : 76 contrôles, tout passe ; axe : 0 écart.
 - Reste pour le n° 2 : le rapport mensuel déposé au point du matin du 1er (agrégats seuls, sans nom). Ce sera une section de `tiroma_deposer_points`, après accord.
+
+### Vague 3, n° 3 : les rappels aux patients (06/10, ~16 h Z)
+- Décision de Teo (par le coordinateur, 15 h 17 Z) : tout construire maintenant et tester sur la recette, en mode essai, avec des patients fictifs ; le prestataire HDS sera branché au premier client ; le verrou du socle reste intact en production.
+- **Voie d'essai proposée au coordinateur, en attente de son accord** : `reglages_envois.essai_donnees_fictives`, vrai seulement sur la recette et en mode essai. Il ne lève les verrous santé qu'en essai ; le message part à `essai_adresse`, jamais au patient ; l'expéditeur d'A2 l'accepte de même. J'ai écarté l'idée d'un fournisseur d'essai « agréé » : ce serait une fausse déclaration HDS, et le réglage `envois_essai_fournisseur` vaut pour toute la recette.
+- `omega/modules/tiroma/migrations/b3_14_rappels_patients.sql` (module seul, rien dans le socle) :
+  - `tiroma_contacts` et ses portes `tiroma_noter_contact` / `tiroma_retirer_contact` : l'accord passe par `private.noter_consentement` (module tiroma, source oral, écrit ou formulaire, avec preuve) ;
+  - 6 gabarits globaux validés, `donnees_sante = true` : `tiroma.rappel_j2_{email,sms}`, `tiroma.relance_plan_{email,sms}`, `tiroma.rappel_devis_{email,sms}` ;
+  - `private.tiroma_preparer_rappels` (cron tiroma-rappels, à h:07) prépare :
+    - le rappel J-2, clé `tiroma:j2:<rdv>:<début>` ;
+    - la relance d'un plan signé sans rendez-vous depuis 21 jours, une fois par tranche de 30 jours ;
+    - le rappel d'un devis présenté depuis 10 jours, une seule fois ;
+  - les réponses : abonnement `reception.nouvelle` → `tiroma.reception`, lecture stricte OUI / NON, `tiroma_reponses_rappels`. Une réponse NON lève une alerte « libérez le créneau dans le logiciel », sans nom dans le titre (cron tiroma-reponses) ;
+  - `public.tiroma_rappels` : la porte de lecture de l'écran.
+
+  Rejouée deux fois sur un Postgres local avec des tables simulées : idempotente, gabarits validés, crons inscrits, lecture OUI / NON conforme.
+- `omega/tests/tiroma/15_rappels_patients.sql` : `test_b3_15_rappels_patients` (35 assertions). Il vérifie notamment que le rappel J-2 de R011 (Dorville) est **bloqué SANTE_HORS_CANAL_AGREE** tant qu'aucun fournisseur n'est agréé, et que les réponses OUI, NON et la question sont lues comme attendu.
+- Écran : carte « Rappels aux patients » (mode essai ou en service, moyens de contact, réponses reçues, derniers rappels avec la raison du verrou) et dialogue « Ajouter un moyen de contact ». Recette : 81 contrôles, tout passe ; axe : 0 écart.
+- 06/10, ~16 h 30 Z — **voie d'essai acceptée** par le coordinateur ; extraits de la recette reçus. Conséquences :
+  - **Décision D6** : pas de SMS dans Tiroma (`modules_envois.tiroma` : email, whatsapp, appel ; `canaux_envoi.sms.permis_sante = false`). b3_14 passe au **courriel seul** : contacts en `email`, 3 gabarits au lieu de 6, refus 22023 d'un SMS, écran sans SMS. Le drapeau 19ah ne rouvre pas le SMS.
+  - `exiger_reglage_destinataire` admet gerant, admin, valideur et collaborateur (rôle socle). `referent@` est valideur : l'assistante du banc note donc les accords. **Une assistante « lecteur » serait refusée (42501)** : à l'installation d'un vrai cabinet, lui donner le rôle valideur ou collaborateur.
+  - **Lot socle écrit par B3** :
+    - `omega/modules/socle/migrations/19ah_essai_donnees_fictives.sql` : colonne `reglages_envois.essai_donnees_fictives`, CHECK (essai seulement), déclencheur (vrai refusé hors `environnement = recette`), réécriture par repères de `verrous_envoi` (SANTE_HORS_CANAL_AGREE sauté seulement en essai, drapeau posé sur la ligne du module, et environnement = recette) et de `commencer_envoi` (`donnees_fictives`). Le lot se rejoue (un repère déjà réécrit est sauté) ;
+    - `19ah_recette_seulement.sql` : `private.reglages('environnement') = 'recette'`, exclu de la prod par A5 ;
+    - `omega/tests/socle/19ah_essai_donnees_fictives.sql` (21 assertions) : sans drapeau bloqué ; avec drapeau accepté en essai et `donnees_fictives` rendu ; SMS toujours CANAL_NON_PERMIS ; réel refusé (CHECK) ; hors recette, l'envoi est bloqué et le drapeau ne se pose pas.
+
+    Réécriture vérifiée en local sur des fonctions simulées portant les repères de 19ab : posée deux fois, puis les cas sans drapeau, avec drapeau, réel et hors recette.
+  - Test 15 : second test `test_b3_15_rappels_essai_fictif` (5 assertions ; total 40). Avec 19ah, le rappel J-2 de R011 passe en essai, et `commencer_envoi` rend `donnees_fictives = true` et `fournisseur_hds = false`.
