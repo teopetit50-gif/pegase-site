@@ -25,6 +25,7 @@ import AvantRendezVous from "./AvantRendezVous";
 import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
 import Creneaux from "./Creneaux";
+import DemiJournees from "./DemiJournees";
 import EquipeAbsente, { type NouvelleAbsence } from "./EquipeAbsente";
 import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
 import Pilotage from "./Pilotage";
@@ -414,6 +415,7 @@ export default function EcranTiroma() {
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />
             <ChargeFauteuils charge={dossier.charge} titulaire={titulaire} />
           </div>
+          <DemiJournees demiJournees={dossier.profil === "titulaire" || dossier.profil === "collaborateur" ? dossier.demiJournees : null} titulaire={titulaire} />
           <Rappels rappels={dossier.rappels} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} noter={noterUnContact} retirer={retirerUnContact} />
           <ListeAttente attente={dossier.attente} praticiens={dossier.praticiens} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} inscrire={inscrire} retirer={retirer} />
           <Cabinet dossier={dossier} agir={agir} />

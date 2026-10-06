@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -122,8 +122,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const absences = profil && profil !== "direction" ? await quiet(rpc<AbsenceProbable[] | null>("tiroma_absences_probables", { p_client: c, p_entite: e, p_jours: 3 }, null), null, "absences probables") : null;
   /* b3_18 : l'équipe absente et les soins à basculer, sur sept jours (titulaire, assistante) */
   const equipe = profil === "titulaire" || profil === "assistante" ? await quiet(rpc<AbsenceEquipe[] | null>("tiroma_soins_a_basculer", { p_client: c, p_entite: e, p_jours: 7 }, null), null, "soins à basculer") : null;
+  /* b3_19 : les demi-journées vides des quatorze prochains jours (titulaire : tous ; collaborateur : les siennes) */
+  const demiJournees = profil === "titulaire" || profil === "collaborateur" ? await quiet(rpc<DemiJournees | null>("tiroma_demi_journees_vides", { p_client: c, p_entite: e, p_jours: 14 }, null), null, "demi-journées vides") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees },
     avis,
   };
 }

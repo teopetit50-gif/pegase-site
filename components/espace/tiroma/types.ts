@@ -282,6 +282,7 @@ export type Dossier = {
   reinscription: Reinscription | null;
   absences: AbsenceProbable[] | null;
   equipe: AbsenceEquipe[] | null;
+  demiJournees: DemiJournees | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -482,3 +483,20 @@ export type AbsenceEquipe = {
   fauteuil_nom: string | null;
   soins: SoinABasculer[];
 };
+
+/* ——— les demi-journées vides des praticiens (b3_19) ——— */
+
+export type DemiJourneeVide = {
+  praticien_id: string;
+  praticien: string;
+  jour: string;
+  moment: "matin" | "apres_midi";
+  source: "horaires" | "habitude";
+  ouvert_min: number;
+  prevu_min: number;
+  libre_min: number;
+  taux: number;
+  attente: number;
+};
+
+export type DemiJournees = { du: string; au: string; seuil: number | null; demi_journees: DemiJourneeVide[] };

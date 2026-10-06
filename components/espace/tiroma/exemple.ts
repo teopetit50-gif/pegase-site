@@ -300,4 +300,13 @@ export const DOSSIER_EXEMPLE: Dossier = {
       ],
     },
   ],
+  /* b3_19 : les demi-journées vides des quatorze prochains jours */
+  demiJournees: {
+    du: aujourdHui(0), au: aujourdHui(14), seuil: 0.2,
+    demi_journees: [
+      { praticien_id: P2, praticien: "Dr Mathis Rousseau", jour: aujourdHui(2), moment: "apres_midi", source: "horaires", ouvert_min: 300, prevu_min: 30, libre_min: 270, taux: 0.1, attente: 3 },
+      { praticien_id: P2, praticien: "Dr Mathis Rousseau", jour: aujourdHui(6), moment: "matin", source: "horaires", ouvert_min: 240, prevu_min: 0, libre_min: 240, taux: 0, attente: 2 },
+      { praticien_id: P1, praticien: "Dr Ambre Lacour", jour: aujourdHui(9), moment: "matin", source: "habitude", ouvert_min: 240, prevu_min: 40, libre_min: 200, taux: 0.167, attente: 4 },
+    ],
+  },
 };
