@@ -154,7 +154,7 @@ export const FONCTIONNALITES = {
      pour toutes ; le reste de la page s'y adosse sans les redire en bloc. */
   titre: "Une relance se lit dans votre historique.",
   suite:
-    "OFFLOAD y cherche le compte qui n'a plus commandé et l'entretien redevenu dû. L'affaire restée en plan s'y ajoutera ensuite : sa lecture est en préparation.",
+    "OFFLOAD y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan.",
 
   /* ── Carte 1 · la lecture du fichier ────────────────────────────────── */
   carteCarte: {
@@ -170,7 +170,7 @@ export const FONCTIONNALITES = {
          Garder ces valeurs COURTES : l'étiquette est en `whitespace-nowrap`
          et celle posée à 68 % sort du cadre au-delà de ~30 signes au total. */
       { gauche: "18%", haut: "38%", delai: 0, drapeau: "18 mois", texte: "Entretien sauté deux fois" },
-      { gauche: "44%", haut: "24%", delai: 200, drapeau: "6 sem.", texte: "Rythme de commande rompu" },
+      { gauche: "44%", haut: "24%", delai: 200, drapeau: "6 sem.", texte: "Pièce arrivée, jamais reprise" },
       { gauche: "68%", haut: "46%", delai: 400, drapeau: "3 ans", texte: "4 200 € puis plus rien" },
     ],
   },
@@ -305,7 +305,7 @@ export const METIERS = {
       echappe:
         "La révision d'un client tombe pendant un mois chargé, personne ne l'appelle, et il finit par la faire dans un centre auto en passant.",
       cherche:
-        "OFFLOAD suit les entretiens qui arrivent à échéance et repère les comptes silencieux. Le suivi des commandes que personne n'a reprises est en préparation.",
+        "OFFLOAD suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises.",
       reste:
         "Votre planning d'atelier et votre stock de pièces restent dans votre DMS, parce qu'OFFLOAD ne s'y substitue pas : il le lit, puis il écrit ailleurs.",
     },
@@ -374,7 +374,7 @@ export const QUESTIONS = {
   items: [
     {
       q: "Qu'est-ce qu'OFFLOAD, concrètement ?",
-      r: "OFFLOAD lit votre base clients tous les matins, et il en sort deux listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les plus précieux d'abord, et les entretiens qui redeviennent dus. Pour chacun, il rédige un message ancré sur son dernier passage, que vous validez avant qu'il parte. Une troisième liste est en préparation : les affaires restées en plan, comme une pièce arrivée que personne n'est venu chercher.",
+      r: "OFFLOAD lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les plus précieux d'abord, les entretiens qui redeviennent dus, et les affaires restées en plan, comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, que vous validez avant qu'il parte.",
     },
     {
       q: "Nos clients vont-ils se sentir sollicités de trop près ?",
