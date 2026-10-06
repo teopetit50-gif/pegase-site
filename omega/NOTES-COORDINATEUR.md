@@ -755,3 +755,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   locale annulée, rien poussé). Suite : **A5 écrit le socle 19af** (exception étroite dans
   preparer_approbation : seul décideur + liste blanche daliro envoi.*), puis B6 b6_10 (la porte
   insère une approbation au lieu de forcer le statut).
+- 14 h 15 Z — **Demande de Teo : nouveau tableau de bord au design de Vercel** (disposition,
+  boutons, animations ; marque Omega gardée, rien de propriétaire copié). Nouvel ouvrier
+  **C1 session_013U6ss7Vw2rKrDY5C7ax656**, branche **tableau-de-bord-v2** (jamais main),
+  construit à côté de l'ancien (/espace2), données d'exemple d'abord ; premier palier = coquille
+  + FILED « À payer », montré à Teo par prévisualisation Vercel et captures ; migration de /espace
+  seulement après son accord.
