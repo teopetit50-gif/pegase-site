@@ -129,8 +129,8 @@
 .esp .esp-nav-court {
   display: inline;
 }
-/* onze onglets depuis le 06/10 (Demandes, Réglages) : les libellés longs à 1920 px seulement */
-@media (min-width: 1920px) {
+/* treize onglets depuis le 06/10 (REPUT, CASHD, Demandes, Réglages) : les libellés longs à 2240 px seulement */
+@media (min-width: 2240px) {
   .esp .esp-nav-long {
     display: inline;
   }
