@@ -243,7 +243,7 @@ La promesse (textes.ts) : « Quand un client conteste auprès de sa banque le d�
     - `loc_issue_contestation`, par la direction ou un valideur ;
     - pour l'ouvrier, au service seul : `loc_dossier_a_produire`, `loc_enregistrer_dossier`, `loc_dossier_impossible` ;
   - le cron `tavaro-contestations` alerte à J-2, à J0 et au dépassement.
-  - Vérifié en local sur souche, chaque chemin dans une session neuve. Test 18 : 21 assertions.
+  - Vérifié en local sur souche, chaque chemin dans une session neuve. Test 18 : 25 assertions quand l'envoi est réglé.
 - **Ouvrier tavaro-pdf** (6ea1694) : genre `tavaro.dossier_contestation`. Le PDF contient :
   - la lettre et la chronologie (départ, retour, validation par une autre personne, envoi, débit) ;
   - le contrat ;
