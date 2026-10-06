@@ -310,9 +310,18 @@ cascade s'écrit avec un mot interdit dans un fichier à poser ; si le coordinat
 - **Souche locale terminée** (`omega/tests/tamila/souche_locale/jouer.sh`) : PostgreSQL 16 local, socle
   imité, socle Tamila extrait, b4_01 à b4_05, aides d'A5, pgTAP imité. Le 06/10 : 01, 02, 03, 05, 07, 08,
   09, 12, 13, 14 verts (288 contrôles) ; 04, 06, 10, 11 attendent les 26 règles de procédure dans la souche.
-- **Reste** : l'écran (bouton « Passer au coffre » du gérant, ré-enveloppement dossier par dossier, clé par
-  le coffre au lieu de la phrase), le branchement dans le lecteur (A1), la passerelle avis lu →
-  `tamila_avis_lu` (le lecteur, ayant la clé, peut désormais comparer le n° RG).
+- 06/10 après-midi : b4_05 posé par le coordinateur, 1 à 13 verts (388 ok). Le test 14 était mort sur un 42501
+  (`tests.tamila_cle_maitre()` appelée sous service_role) : corrigé en a90cd97, à rejouer.
+- **Écran (lot B4-6, eaed84b)** : bouton « Coffre à clés » pour les associés (état, dossiers sous la phrase et au
+  coffre) ; « Passer au coffre Scaleway » (gérant) ; « Ré-envelopper N dossiers » (la phrase déballe chaque clé
+  ici, le coffre la vérifie et l'enveloppe ; échecs listés, un dossier perso ou muré se fait par son
+  responsable) ; au coffre, la clé d'un dossier vient de `tamila-coffre` à son ouverture, les références de la
+  liste se lisent à la demande (une ouverture de clé journalisée par dossier) ; un nouveau dossier prend sa clé
+  au coffre. Sans b4_05 (la production aujourd'hui), `tamila_coffre_etat` manque : pas de bouton, mode phrase.
+  Recette cinq largeurs 67/67 (dont 9 contrôles du coffre à 390), axe-core 0 écart sur le dialogue du coffre.
+  **Pas rejoué en base réelle** : il faut la fonction déployée et les secrets Scaleway.
+- **Reste** : le branchement dans le lecteur (A1), la passerelle avis lu → `tamila_avis_lu` (le lecteur, ayant
+  la clé, peut comparer le n° RG), la relecture en base réelle quand le coffre sera branché.
 
 ## 7. Prochaine étape
 
