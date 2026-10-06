@@ -77,8 +77,11 @@ il cite.
   `niveau_r1`, `limite_nord`, `voie_rue_x`… Deux pièces qui mesurent la même chose doivent rendre le **même objet** :
   c'est la clé du croisement. Pour une grandeur du projet entier (`surface_plancher_m2`), `projet`.
 - `<référence>` d'un poste : le numéro d'article tel qu'écrit, normalisé (`2.3.1` → `2_3_1`, `GO.04` → `go_04`).
-- Valeurs canoniques : nombre avec un point (`9.85`, `312.40`), sans unité. `page` et `boite` obligatoires sur
-  chaque mesure : le constat renvoie l'architecte à l'endroit exact.
+- Valeurs canoniques : nombre avec un point (`9.85`, `312.40`), sans unité. `page` obligatoire sur chaque mesure ;
+  `boite` quand le lecteur l'a (exacte sur un PDF natif, estimée en vision, **absente après OCR** — A1, 06/10) : le
+  socle accepte une boîte nulle, le constat cite alors la page et le texte sans cadre dans le rapport annoté.
+- Seules les cotes et quantités **écrites** sont lues (A1 ne mesure rien sur le dessin) : un métré « mesuré sur les
+  plans » vient d'un métré déposé, ou des quantités écrites sur les planches.
 - Métré contre DPGF : une DPGF rend aussi `unite.<référence>` ; une planche peut rendre `quantite.<référence>` (surface,
   longueur, volume mesuré pour ce poste sur cette planche) — le socle additionne les planches quand il n'y a pas de
   métré. Écart de plus de 5 % = constat ; DPGF sous le métré de plus de 10 % = majeur.
@@ -98,7 +101,7 @@ Type `lorani_attestation_decennale` — l'attestation d'assurance de responsabil
 | `assureur` | la compagnie | « SMABTP » |
 | `numero_police` | le numéro du contrat | « 123456 B 1234 » |
 | `assure` | la raison sociale de l'assuré, telle qu'écrite | « PIERRES DE BOURGOGNE » |
-| `siren` | neuf chiffres (espaces admis) | « 538765432 » |
+| `siren` | neuf chiffres (espaces admis) | « 538765439 » |
 | `activites` | **tableau jsonb** des activités garanties, dans le vocabulaire ci-dessous | `["ravalement", "pierre_taille"]` |
 | `debut`, `fin` | période de validité, AAAA-MM-JJ | « 2026-01-01 », « 2026-12-31 » |
 | `plafond_eur` | plafond de garantie par sinistre (ouvrages non soumis à l'obligation), nombre | « 1500000 » |

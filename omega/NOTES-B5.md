@@ -701,3 +701,14 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Fiche de lecture : 4 types ajoutés et les nouvelles grandeurs.
 - Écran : libellés des rôles et natures, `Doe.tsx` (liste, reçu / sans objet, demander les pièces manquantes = points
   suivis), exemple ERP sur le Pôle enfance, DOE sur Mercière.
+
+## Reprise b5_16b (06/10, soir) — b5_16 était posé avant ses amendements
+
+- Le coordinateur avait posé b5_16 dès a05f77c (16 h 55 Z) : mes trois amendements de la source n'y sont pas.
+  `omega/modules/lorani/migrations/b5_16b_reprise_controle.sql` : fonctions de validation, contraintes _v2 NOT VALID
+  puis VALIDATE, retrait des anciennes (élargissement pur, accord du coordinateur), point d'extension posé seulement
+  s'il manque, `lorani_controler` de la source. Joué deux fois en local sur la version posée : idempotent, métré vert.
+  Ordre : b5_16b avant b5_21. Test : b5_07 (31 assertions, § 10 = métré).
+- Leçon : ne jamais amender une migration envoyée sans la réponse « posé / pas posé » du coordinateur.
+- SIREN d'exemple corrigés (clé de Luhn) : 538765439, 412345670, 812345676, 216902569.
+- Fiche : boîte nullable (OCR sans positions), cotes écrites seulement.

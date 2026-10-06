@@ -433,14 +433,14 @@ export const LOTS_EXEMPLE: Lot[] = [
 
 export const INTERVENANTS_EXEMPLE: Intervenant[] = [
   { id: id("2", 1), projet_id: P_LEMOINE, nature: "maitre_ouvrage", organisme: "M. et Mme Lemoine", contact: "Pierre Lemoine", email: "p.lemoine@exemple.fr", telephone: "06 12 34 56 78", siren: null, lot_id: null, actif: true },
-  { id: id("2", 2), projet_id: P_LEMOINE, nature: "bet_structure", organisme: "BET Structures de Loire", contact: "Hélène Cadot", email: "h.cadot@bet-loire.exemple", telephone: null, siren: "812345678", lot_id: id("1", 1), actif: true },
+  { id: id("2", 2), projet_id: P_LEMOINE, nature: "bet_structure", organisme: "BET Structures de Loire", contact: "Hélène Cadot", email: "h.cadot@bet-loire.exemple", telephone: null, siren: "812345676", lot_id: id("1", 1), actif: true },
   { id: id("2", 3), projet_id: P_LEMOINE, nature: "geometre", organisme: "Cabinet Géomètres Nantais", contact: null, email: null, telephone: "02 40 00 00 00", siren: "423456789", lot_id: null, actif: true },
-  { id: id("2", 4), projet_id: P_ENFANCE, nature: "maitre_ouvrage", organisme: "Ville de Vaulx-en-Velin — direction du patrimoine", contact: "Nadia Benali", email: "n.benali@vaulx.exemple", telephone: null, siren: "216902563", lot_id: null, actif: true },
+  { id: id("2", 4), projet_id: P_ENFANCE, nature: "maitre_ouvrage", organisme: "Ville de Vaulx-en-Velin — direction du patrimoine", contact: "Nadia Benali", email: "n.benali@vaulx.exemple", telephone: null, siren: "216902569", lot_id: null, actif: true },
   { id: id("2", 5), projet_id: P_ENFANCE, nature: "controleur_technique", organisme: "Bureau Véritas construction", contact: "Olivier Tassin", email: null, telephone: null, siren: "775690621", lot_id: null, actif: true },
   { id: id("2", 6), projet_id: P_ENFANCE, nature: "coordonnateur_sps", organisme: "SPS Rhône", contact: null, email: null, telephone: null, siren: null, lot_id: null, actif: true },
   { id: id("2", 7), projet_id: P_MARTIN, nature: "maitre_ouvrage", organisme: "Famille Martin", contact: "Julie Martin", email: "j.martin@exemple.fr", telephone: null, siren: null, lot_id: null, actif: true },
-  { id: id("2", 8), projet_id: P_MERCIERE, nature: "entreprise", organisme: "Pierres de Bourgogne SARL", contact: "Marc Roussel", email: null, telephone: null, siren: "538765432", lot_id: id("1", 8), actif: true },
-  { id: id("2", 9), projet_id: P_MERCIERE, nature: "entreprise", organisme: "Échafaudages Rhône", contact: null, email: null, telephone: null, siren: "412345678", lot_id: id("1", 9), actif: true },
+  { id: id("2", 8), projet_id: P_MERCIERE, nature: "entreprise", organisme: "Pierres de Bourgogne SARL", contact: "Marc Roussel", email: null, telephone: null, siren: "538765439", lot_id: id("1", 8), actif: true },
+  { id: id("2", 9), projet_id: P_MERCIERE, nature: "entreprise", organisme: "Échafaudages Rhône", contact: null, email: null, telephone: null, siren: "412345670", lot_id: id("1", 9), actif: true },
 ];
 
 export const MEMBRES_EXEMPLE: MembreProjet[] = [
@@ -618,12 +618,12 @@ export const PLU_EXEMPLE: Plu[] = [
 /* ——— les décennales (b5_18) : la façade rue Mercière, chantier ouvert il y a cent jours ——— */
 export const ATTESTATIONS_EXEMPLE: Attestation[] = [
   {
-    id: id("d", 1), projet_id: P_MERCIERE, intervenant_id: id("2", 8), lot_id: id("1", 8), piece_id: null, assureur: "SMABTP", numero_police: "123456 B 1234", assure: "PIERRES DE BOURGOGNE", siren: "538765432",
+    id: id("d", 1), projet_id: P_MERCIERE, intervenant_id: id("2", 8), lot_id: id("1", 8), piece_id: null, assureur: "SMABTP", numero_police: "123456 B 1234", assure: "PIERRES DE BOURGOGNE", siren: "538765439",
     activites: ["maconnerie_beton_arme", "ravalement"], debut: j(-280), fin: j(85), plafond_eur: 1500000, statut: "non_conforme",
     constats: [{ code: "activite", gravite: "bloquant", texte: "Activité du lot 01 non couverte : Taille de pierre et maçonnerie de pierre.", activites: ["pierre_taille"] }], verifie_le: ilYa(40),
   },
   {
-    id: id("d", 2), projet_id: P_MERCIERE, intervenant_id: id("2", 9), lot_id: id("1", 9), piece_id: null, assureur: "AXA France IARD", numero_police: "7701 4482 11", assure: "ECHAFAUDAGES RHONE", siren: "412345678",
+    id: id("d", 2), projet_id: P_MERCIERE, intervenant_id: id("2", 9), lot_id: id("1", 9), piece_id: null, assureur: "AXA France IARD", numero_police: "7701 4482 11", assure: "ECHAFAUDAGES RHONE", siren: "412345670",
     activites: ["maconnerie_beton_arme"], debut: j(-377), fin: j(-12), plafond_eur: null, statut: "expiree",
     constats: [{ code: "activites_lot", gravite: "mineur", texte: "Les activités requises du lot 02 ne sont pas renseignées : la couverture ne peut pas être vérifiée." }], verifie_le: ilYa(12),
   },
