@@ -594,3 +594,14 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   main. **Nouvelle règle** : les notes du coordinateur se commitent en local et partent avec
   la prochaine vraie modification du site (ou au plus une poussée de notes par point de 2 h).
   Vérifier l'état d'un commit : `gh api repos/teopetit50-gif/pegase-site/commits/<sha>/statuses`.
+- 04 h 35 — Vercel : redéploiement direct par l'API refusé « 402 api-deployments-free-per-day,
+  remaining 0, reset 1791340078 » (= 2026-10-07 ~02:27 Z). Relance programmée (send_later
+  trig_01JenpvhuDuobgoCD34qwKi5, 02:32 Z). Pour débloquer avant : Teo passe pegase-site2 en
+  Pro. A1/A2/A4/A5 ont repris vercel.json (dc918ce, 907f180, bd4dfd4, b81d0f7).
+- B6 : b6_06_envoi_j2 posé (cron daliro-ouvrier, abonnement, btp_ouvrier service_role seul).
+  banc_j2_reel : A OK (réglage essai), **B en échec** « Daliro n'est pas installé pour cette
+  organisation » (rien d'écrit) → B6 ajoute un bloc d'installation. Clôture non jouée.
+- A4 : Delorme sans SIREN, c'est juste (SIREN lu 842115763 faux au Luhn, non vérifié) ; piste
+  écran (« Corriger / confirmer sur la pièce ») confiée à A3, puis « À payer ».
+- B5 : arrêté et constat d'affichage réels verts (Extension Garnier, échéances justes) ; 4
+  types sur 6 prouvés ; b5_07 en cours.
