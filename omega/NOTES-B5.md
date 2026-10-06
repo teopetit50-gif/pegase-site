@@ -8,7 +8,7 @@ Dernière mise à jour : 05/10/2026, 23 h.
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
 | **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 95 % (114/114 le 06/10 à 2 h 05 Z, b5_05 et b5_06 posées ; avant :) 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 92 % (06/10, 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 94 % (06/10, 2 h 26 Z : arrêté et constat d'affichage réels aussi ; 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
 **Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
 la fusion dans `main` ; la vérification sur omegaai.fr. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
@@ -297,4 +297,21 @@ suit l'écran ne fournirait que PCMI2 et PCMI8 et se ferait opposer un rejet tac
 
 Je ne code pas b5_07 avant ta réponse (et idéalement celle d'un juriste sur le point « seconde demande dans le
 mois »). Le permis « Pavillon Lemoine » du banc garde l'état écrasé, utile pour rejouer b5_07.
+
+## 7. Essai réel arrêté + constat d'affichage (06/10, 2 h 17–2 h 26 Z, lecteur v17)
+
+Nouveau projet du banc « Extension Garnier (banc) » (7ef5d6aa…) et PC « Extension Garnier » (0a8ac86c…, PC 044109 26
+A0077, déposé le 2026-06-02), créés sous RLS avec la session du gérant (mêmes écritures que l'écran), pour ne pas
+toucher « Pavillon Lemoine ». Courriers : `fabriquer-courrier.mjs arrete|constat_affichage` ; script :
+`PERMIS='Extension Garnier' NUMERO='PC04410926A0077' node omega/recette-b5/courrier-reel.mjs … lorani_arrete`.
+- `arrete-garnier.pdf` : `lue`, `lorani_arrete` 0,97 ; proposition à 70 s « Décision : Accordé — 20/08/2026 »
+  (citations « le permis de construire est ACCORDÉ », « Fait à Nantes, le 20/08/2026 ») → `{decision: favorable,
+  date_decision: 2026-08-20}`, vérifiée, confirmée.
+- `constat-affichage-garnier.pdf` : `lue`, `lorani_constat_affichage` 0,97 ; proposition à 282 s « Premier jour
+  d'affichage : 28/08/2026 » (citation « Le 28/08/2026 à 10 h 15 ») → `{date_affichage: 2026-08-28}`, confirmée.
+- Permis : `accorde`, décision favorable du 2026-08-20, affichage 2026-08-28, **purge 2026-11-20** ; échéances :
+  complétude 07-02 tenu, instruction 09-02 tenu, affichage 09-04 tenu, **recours 10-29** (deux mois francs depuis le
+  premier jour d'affichage) ouvert, **retrait 11-20** (trois mois après l'arrêté) ouvert, purge 11-20 ouvert. Juste.
+- Bilan : quatre des six types de courriers prouvés en réel (récépissé, demande de pièces, arrêté, constat
+  d'affichage) ; restent la lettre de délai et le certificat tacite (couverts par le test, pas encore en réel).
 
