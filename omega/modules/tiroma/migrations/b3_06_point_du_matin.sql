@@ -70,9 +70,10 @@ begin
     v := private.tiroma_avant_rendez_vous_pour(p_client, p_entite, null, p_voit_tous, p_praticien);
     for e in select x.value from jsonb_array_elements(v) x where x.value ->> 'gravite' <> 'info' loop
       exit when n >= 20;
-      v_items := v_items || jsonb_build_object('texte', left(coalesce((e ->> 'patient_nom') || ' — ', '') || (e ->> 'texte'), 300),
+      -- (les parenthèses comptent : tableau || objet || objet ajouterait deux éléments au lieu d'un objet fusionné)
+      v_items := v_items || (jsonb_build_object('texte', left(coalesce((e ->> 'patient_nom') || ' — ', '') || (e ->> 'texte'), 300),
         'gravite', e ->> 'gravite', 'lien', '/espace/tiroma')
-        || case when e ->> 'objet_id' is not null then jsonb_build_object('objet_type', e ->> 'objet_type', 'objet_id', e ->> 'objet_id') else '{}'::jsonb end;
+        || case when e ->> 'objet_id' is not null then jsonb_build_object('objet_type', e ->> 'objet_type', 'objet_id', e ->> 'objet_id') else '{}'::jsonb end);
       n := n + 1;
     end loop;
   elsif p_quoi = 'charge' then
