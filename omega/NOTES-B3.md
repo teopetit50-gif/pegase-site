@@ -332,3 +332,18 @@ logiciel métier qui la fait).
      - le point du matin : rien avant 5 h, la section au titulaire seul, sans santé ;
      - un rendez-vous de 3 h 30 remplit le matin, un congé efface l'après-midi.
    - Vérifié en local (tables simulées) : posée deux fois. Le jour D, on trouve Rousseau le matin (horaires, 240 min, attente 1) et Lacour l'après-midi (habitude, 300 min). Le collaborateur ne voit que Rousseau, l'assistante est refusée et rien n'est déposé à 4 h. Après le rendez-vous et le congé, il ne reste rien pour D.
+6. **Objectifs par fauteuil** (06/10, ~20 h 30 Z) :
+   - `b3_20_objectifs_fauteuils.sql` pose `public.tiroma_objectifs_fauteuils(client, entité, semaines = 4)`, pour le titulaire seul, sur 1 à 12 semaines. Par fauteuil actif et par semaine :
+     - les heures ouvertes viennent de `private.tiroma_ouvert` (un jour au calendrier inconnu ne compte pas) ;
+     - pour les semaines passées, l'occupation est le **réalisé** (honoré, `tiroma_reserve 'realisee'`) : un manqué n'occupe pas le fauteuil. Pour la semaine en cours et la suivante, c'est le **prévu** ;
+     - `atteint` vaut taux ≥ objectif, s'il y a un objectif et au moins une heure ouverte. Le résultat donne aussi la moyenne des semaines passées et le compte atteintes / comptées.
+   - L'objectif lui-même se fixe sous RLS : le titulaire fait l'`update` de `tiroma_fauteuils.objectif_occupation`. Il n'y a pas de nouvelle porte d'écriture.
+   - `private.tiroma_occupation_semaine` n'est ouvert qu'au service_role.
+   - `21_objectifs_fauteuils.sql` : `test_b3_21_objectifs_fauteuils`, 14 assertions :
+     - droits : l'assistante, le collaborateur et daf2 sont refusés ;
+     - six semaines, natures « réalisé » / « prévu » ;
+     - +120 min honorées comptées, l'heure manquée non, +60 min prévues la semaine suivante ;
+     - objectif à 1 % atteint, à 100 % non, sans objectif ni l'un ni l'autre ;
+     - aucun nom.
+   - Écran : carte « Objectifs par fauteuil » (titulaire). Un tableau fauteuils × six semaines, en pastilles vert/ambre pour le passé ; une semaine à venir sous l'objectif reste neutre, son agenda se remplit encore. Colonne « Tenu », et « Fixer / Changer » ouvre le dialogue d'objectif. Le cadre du tableau est en `position: relative` : sans cela, le texte `sr-only` en position absolue débordait la page à 390, 768 et 1024. Recette : 101 contrôles, tout passe ; axe : 0 écart, dialogue compris.
+   - Vérifié en local (tables simulées) : posée deux fois. 120 min honorées et 60 prévues sont comptées, l'heure manquée non ; objectif 1 % → atteint.
