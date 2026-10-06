@@ -497,3 +497,12 @@ d'où l'accord de Teo. Un seul « go » pour les trois :
   l'ouvrier (`uid_ch`, `hmrc`, registre inconnu ignoré), `hmrcDepuisEnv`, `hmrc` dans le battement ; 69 tests Deno
   verts. Ce qui manque en base, section 14 : trois contraintes à élargir (accord de Teo), puis un lot A4 et un lot B7.
 
+- 6/10 16 h 08 Z (coordinateur) : coquille `identite` **v5** à 4ed0bff. Accord (délégué par Teo) pour élargir les trois
+  contraintes : A4 écrit le lot (nouvelle contrainte NOT VALID, VALIDATE, retrait de l'ancienne posé à part par le
+  coordinateur), la mienne (`identites_registre.registre`) dans le même fichier. Demandé : mon lot et `GUIDE-HMRC.md`.
+- 6/10 16 h 40 Z : `omega/GUIDE-HMRC.md` (pour Teo, court) ; `omega/modules/identite/migrations/b7_06_etrangers.sql`
+  (`private.identite_cible_etrangere` : TVA `CHE…` → uid_ch + MWST, TVA `GB…` → hmrc, IDE en `id_etranger` →
+  uid_ch ; `identite_demander` admet uid_ch et hmrc ; `identite_balayer` les revérifie, VIES d'abord pour l'Union) ;
+  test `omega/tests/identite/b7_07_etrangers.sql` (test_b7_13, 26 assertions vertes en local avec les contraintes
+  élargies simulées ; il échoue exprès tant qu'elles ne le sont pas). **À poser après le lot d'A4**, sinon le
+  balayage heurte la contrainte à chaque passage dès qu'un fournisseur suisse ou britannique existe.
