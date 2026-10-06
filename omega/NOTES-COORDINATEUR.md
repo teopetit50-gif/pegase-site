@@ -637,3 +637,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   validées groupées par échéance avec totaux, IBAN validé / à valider / manquant ; relu en
   réel (FAC-2026-10-0471, 288,00 €, échéance 01/11, IBAN à valider). Limite : FILED ne suit
   pas le paiement (pas de statut « payée ») — demande pour A4 si Teo la veut.
+- **Point 06 h 15 (04 h 15 Z), après redémarrage de la session** : échéance d'affichage Lorani
+  passée en « depasse » à 03:07 Z (cron horaire, pas de trou). **Daliro** : tests corrigés de
+  B6 (9f7325e) → `^test_b6_` 154 + 38 + 29 verts ; écran b6_07 (« demande remise le … »)
+  fusionné. **Lorani** : b5_07 prouvé en réel (Pavillon Lemoine : deux lettres réunies,
+  [PCMI3, PCMI6, PCMI2, PCMI8], échéance 2027-01-01) ; b5_08 (titre d'alerte) et b5_09
+  (titre du permis) posés, 120/120. A3 : décision en lot dans /espace/validations validée
+  (deux demandes VARELO approuvées au plus). A4 : a4_15 (paiement) pas encore livré.
