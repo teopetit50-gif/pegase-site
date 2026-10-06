@@ -544,3 +544,29 @@ export type Recalage = {
 export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; tmin: number | null; tmax: number | null };
 export type RisqueMeteo = { passage_id: string; tache: string | null; chantier_id: string; jour: string; motifs: string[]; texte: string };
 export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[] };
+
+/* b6_22 : l'approvisionnement (public.btp_appro_chantier) */
+export type EtatCommande = "a_commander" | "a_commander_vite" | "commande_en_retard" | "commandee" | "livraison_tardive" | "livraison_attendue" | "livree_partielle" | "livree" | "annulee";
+export type Commande = {
+  id: string;
+  chantier_id: string;
+  lot_id: string | null;
+  lot_code?: string | null;
+  passage_id: string | null;
+  passage_tache?: string | null;
+  fournisseur_id: string | null;
+  fournisseur_nom: string | null;
+  objet: string;
+  quantite_texte: string | null;
+  reference: string | null;
+  delai_jours: number;
+  besoin_le: string | null;
+  statut: "a_commander" | "commandee" | "livree_partielle" | "livree" | "annulee";
+  commandee_le: string | null;
+  livraison_prevue: string | null;
+  livree_le: string | null;
+  note: string | null;
+  motif: string | null;
+  echeances: { besoin_le: string | null; livrer_avant: string | null; commander_avant: string | null; etat: EtatCommande };
+};
+export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[] };

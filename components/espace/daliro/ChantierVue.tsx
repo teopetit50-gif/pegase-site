@@ -28,6 +28,7 @@ import HeuresCarte from "./HeuresCarte";
 import RecalageDialog from "./RecalageDialog";
 import SignatureLienDialog from "./SignatureLienDialog";
 import MeteoCarte from "./MeteoCarte";
+import ApproCarte from "./ApproCarte";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -498,6 +499,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </div>
         ) : null}
       </section>
+
+      {/* ——— approvisionnement (b6_22) ——— */}
+      <ApproCarte key={`appro-${c.id}`} tableau={tableau} source={source} />
 
       {/* ——— avenants ——— */}
       <section className="esp-carte" aria-label="Avenants">
