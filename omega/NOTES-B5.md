@@ -202,3 +202,19 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   demande de pièces PCMI 3 / PCMI 6 — nouvelles empreintes, l'ancien récépissé reste en `a_classer`) ;
   `courrier-reel.mjs <session.json> <courrier.pdf> [origine] [nature]`. **Bloqué** : le conteneur neuf n'a ni la clé
   publishable de la recette ni la session de `gerant@banc-varelo.test` ; demandées au coordinateur.
+- 06/10, 1 h 31–1 h 45 Z : **dépôt réel rejoué** avec le lecteur v14 (compte `gerant@banc-varelo.test`, Next local
+  pointé sur la recette, permis « Pavillon Lemoine »).
+  - `recepisse-depot-v2.pdf`, nature « Récépissé de dépôt » : pièce `Lue` en 35 s ; proposition au passage suivant
+    (214 s) : « Date de dépôt — Citation retrouvée — Date de dépôt : 15/09/2026, Numéro du dossier : PC04410926A0042 »,
+    citations « Dossier déposé le 15/09/2026 en mairie de Nantes. (page 1) » et « PC 044109 26 A0042 (page 1) ».
+    Confirmée par l'écran : le permis porte le numéro, plus rien à confirmer. **La chaîne réelle est complète.**
+  - `demande-pieces.pdf` (PCMI 3, PCMI 6, lettre du 01/10/2026) : `Lue` en 35 s, proposition à 280 s : « Date de la
+    demande : 01/10/2026 — **Pièces réclamées : aucune** », citation « PCMI 3 : plan en coupe… (page 1) ». Le lecteur
+    reconnaît le type et cite les pièces ; **le socle les jette** : `private.lorani_propositions` ne garde que
+    `^(PC|PA|PD|DP|CU)\s*\d…`, donc pas les codes PCMI / DPMI. Le contrôle du script (trop lâche, il lisait la citation)
+    a laissé passer et la demande a été confirmée **vide** sur le banc (permis en `pieces_demandees`, `pieces_demandees = []`).
+  - Corrections : **b5_05** (`omega/modules/lorani/migrations/b5_05_codes_pcmi.sql`, une ligne du filtre :
+    `(PCMI|DPMI|PC|PA|PD|DP|CU)`) ; une assertion de plus dans le test (étape 19, b5_05) ; l'écran exige la liste des
+    pièces pour confirmer une demande et ne coupe plus « PCMI 3 » en deux (`decouperCodes`) ; le script vérifie la liste
+    elle-même. tsc, eslint, build, recette aux cinq largeurs : verts.
+

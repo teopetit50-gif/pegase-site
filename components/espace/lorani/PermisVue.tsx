@@ -45,6 +45,9 @@ type Props = {
   relire: () => Promise<void>;
 };
 
+/* « PCMI 3, PC8 » ou « PCMI 3 PC 8 » → [PCMI3, PC8] : un espace suivi d'un chiffre reste dans le code */
+const decouperCodes = (brut: string) => brut.split(/[,;]+|\s+(?=[A-Za-z])/).map((c) => c.replace(/\s/g, "").toUpperCase()).filter(Boolean);
+
 type Quoi = "pieces_fournies" | "affichage" | "decision" | "delai" | "depot" | "demande_pieces";
 
 type Form =
@@ -161,7 +164,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
     setErreur(null);
     setForm({ type: "confirmer", date: d });
   };
-  const confirmationComplete = form?.type === "confirmer" && NATURES_DATE_LUE[form.date.nature].champs.every((ch) => ch.type === "pieces" || ch.cle === "numero" || ch.cle === "date_notification_delai" || (valeurs[ch.cle] ?? "").trim() !== "") && !!permisVise;
+  const confirmationComplete = form?.type === "confirmer" && NATURES_DATE_LUE[form.date.nature].champs.every((ch) => ch.cle === "numero" || ch.cle === "date_notification_delai" || (valeurs[ch.cle] ?? "").trim() !== "") && !!permisVise;
 
   const soumettreConfirmation = async () => {
     if (form?.type !== "confirmer") return;
@@ -171,7 +174,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
     for (const ch of NATURES_DATE_LUE[d.nature].champs) {
       const brut = (valeurs[ch.cle] ?? "").trim();
       let x: unknown;
-      if (ch.type === "pieces") x = brut ? brut.split(/[,;\s]+/).filter(Boolean).map((code) => ({ code: code.toUpperCase().replace(/\s/g, "") })) : [];
+      if (ch.type === "pieces") x = brut ? decouperCodes(brut).map((code) => ({ code })) : [];
       else if (ch.type === "entier") x = brut ? Number(brut) : null;
       else x = brut || null;
       if (JSON.stringify(x) !== JSON.stringify(d.proposition[ch.cle] ?? null)) corrige = true;
@@ -265,7 +268,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       message = "Dépôt saisi : la mairie a un mois pour réclamer des pièces.";
     } else if (q === "demande_pieces") {
       v.date_demande_pieces = date;
-      v.pieces_demandees = saisie.pieces.split(/[,;\s]+/).filter(Boolean).map((code) => ({ code: code.toUpperCase() }));
+      v.pieces_demandees = decouperCodes(saisie.pieces).map((code) => ({ code }));
       Object.assign(patch, { date_demande_pieces: date, pieces_demandees: v.pieces_demandees, etat: "pieces_demandees" as const });
       message = "Demande de pièces saisie : trois mois pour les adresser à la mairie.";
     }
@@ -597,7 +600,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
                   </label>
                 ) : null}
                 {NATURES_DATE_LUE[form.date.nature].champs.map((ch) => (
-                  <label key={ch.cle} className="rv-libelle">{ch.libelle}{ch.type === "pieces" || ch.cle === "numero" || ch.cle === "date_notification_delai" ? null : <> <span className="esp-obligatoire">(obligatoire)</span></>}
+                  <label key={ch.cle} className="rv-libelle">{ch.libelle}{ch.cle === "numero" || ch.cle === "date_notification_delai" ? null : <> <span className="esp-obligatoire">(obligatoire)</span></>}
                     {ch.type === "decision" ? (
                       <select className="rv-champ" value={valeurs[ch.cle] ?? ""} onChange={(e) => setValeurs((v) => ({ ...v, [ch.cle]: e.target.value }))}>
                         <option value="favorable">{dp ? "Non-opposition" : "Accordé"}</option>

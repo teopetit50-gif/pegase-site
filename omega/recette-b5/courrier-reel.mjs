@@ -23,7 +23,8 @@ const nomPdf = basename(pdf);
 /* ce que la proposition doit porter, selon la nature (les courriers de fabriquer-courrier.mjs) */
 const ATTENDU = {
   lorani_recepisse_depot: { re: /Date de dépôt/, valeurs: /15\/09\/2026|PC04410926A0042/, dit: 'la date de dépôt du récépissé et le numéro de dossier' },
-  lorani_demande_pieces: { re: /pièces|Pièces/, valeurs: /PCMI ?3|PCMI ?6/, dit: 'la demande de pièces et les codes PCMI3, PCMI6' },
+  /* la liste elle-même, pas la citation : le 06/10 la citation portait « PCMI 3 » et la liste était « aucune » */
+  lorani_demande_pieces: { re: /Demande de pièces/, valeurs: /Pièces réclamées : PCMI3, PCMI6/, dit: 'la demande de pièces et la liste PCMI3, PCMI6' },
 }[nature];
 if (!ATTENDU) { console.error(`nature inconnue : ${nature}`); process.exit(2); }
 const session = JSON.parse(readFileSync(fichier, 'utf8'));
