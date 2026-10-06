@@ -761,3 +761,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   construit à côté de l'ancien (/espace2), données d'exemple d'abord ; premier palier = coquille
   + FILED « À payer », montré à Teo par prévisualisation Vercel et captures ; migration de /espace
   seulement après son accord.
+- 14 h 20 Z — **Écran du coffre Tamila fusionné** (worker-b4 9377b33 : « Coffre à clés »,
+  « Passer au coffre Scaleway », ré-enveloppement). Fonction **tamila-coffre v1** déployée en
+  coquille sur la recette (9377b33, verify_jwt true) ; fumée : 400 CLIENT_ILLISIBLE sur un corps
+  vide (elle démarre). Sans secrets SCALEWAY_*, KM_ABSENT. b6_10 (79cb08a) écrit d'avance : à poser
+  APRÈS 19af. C1 : peut utiliser les skills et saasui.design (inspiration, rien de copié).
