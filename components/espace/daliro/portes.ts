@@ -24,7 +24,8 @@
      btp_preparer_signature, btp_preuve_signature (b6_20 ; la page /signer/<jeton> appelle btp_lire_a_signer et
      btp_signer_sur_place sans compte) ;
      btp_meteo_chantier (lecture, b6_21) ;
-     btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22).
+     btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
+     btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -268,4 +269,17 @@ export async function noterLivraison(commande: string, livreeLe: string, complet
 
 export async function annulerCommande(commande: string, motif: string): Promise<unknown> {
   return rpc("btp_annuler_commande", { p_commande: commande, p_motif: motif });
+}
+
+/* b6_23 : la liste depuis le devis, les bons de livraison, les retours */
+export async function preparerListe(chantier: string): Promise<{ creees: number; deja: number }> {
+  return rpc("btp_preparer_liste", { p_chantier: chantier });
+}
+
+export async function recevoir(commande: string, livreeLe: string, quantite: number | null, bon: string | null, note: string | null): Promise<{ rapprochement: string; etat: string; ecart: number | null }> {
+  return rpc("btp_recevoir", { p_commande: commande, p_livree_le: livreeLe, p_quantite: quantite, p_bon_reference: bon, p_piece: null, p_note: note });
+}
+
+export async function noterRetour(commande: string, renduLe: string | null, retourPrevu: string | null): Promise<unknown> {
+  return rpc("btp_noter_retour", { p_commande: commande, p_rendu_le: renduLe, p_retour_prevu: retourPrevu });
 }
