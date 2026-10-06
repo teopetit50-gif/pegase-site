@@ -7,7 +7,7 @@ import type { PageLue, ResultatLecture } from "@partage/portes.ts";
 import { concorder, formesImprimees } from "../concordance.ts";
 import { detecter } from "../detecter.ts";
 import { lirePiece } from "../lire_piece.ts";
-import { estXmlFacture } from "../xml_facture.ts";
+import { estXmlFacture, lireXmlFacture, typeDepuisCode } from "../xml_facture.ts";
 import { contexteDeTest, pieceDeTest, travailDeTest } from "./doubles.ts";
 
 const ici = new URL("../banc/publics/", import.meta.url);
@@ -153,4 +153,36 @@ Deno.test("un XML qui ouvre sur un long commentaire (licence FeRD) est reconnu",
   assert(texte.indexOf("CrossIndustryInvoice") > 4000, "la racine est bien loin dans le fichier");
   assert(estXmlFacture(texte));
   assertEquals(detecter(octets, "application/octet-stream", "facture").famille, "xml", "sans extension ni MIME XML");
+});
+
+Deno.test("facture rectificative (384) à total négatif : un avoir, avec son code et son total signé", async () => {
+  const { issue, r } = await lire("zugferd_2p3_EN16931_Rechnungskorrektur.xml", "application/xml");
+  assertEquals(issue, "lue");
+  assertEquals(r.type_piece, "avoir");
+  regleCommune(r);
+  const v = valeursDe(r);
+  assertEquals(v.get("type_code"), "384");
+  assertEquals(v.get("montant_ttc"), -8.79);
+});
+
+Deno.test("nature d'après le code UNTDID 1001 : avoirs, rectificative, factures", () => {
+  for (const code of ["381", "261", "262", "396", "502", "503"]) assertEquals(typeDepuisCode(code, null), "avoir", code);
+  for (const code of ["380", "386", "389", "393", "501", "751"]) assertEquals(typeDepuisCode(code, null), "facture", code);
+  assertEquals(typeDepuisCode("384", null, 120), "facture", "rectificative positive : une facture");
+  assertEquals(typeDepuisCode("384", null, -8.79), "avoir", "rectificative négative : un avoir de fait");
+  assertEquals(typeDepuisCode("380", "CreditNote"), "avoir", "racine UBL CreditNote");
+});
+
+Deno.test("cadre de facturation français (B1, S1, M1…) lu dans le contexte du document, pas un autre processus", async () => {
+  const xml = new TextDecoder().decode(await Deno.readFile(new URL("zugferd_2p3_EN16931_Einfach.xml", ici)));
+  const avec = (id: string) =>
+    xml.replace(
+      /<rsm:ExchangedDocumentContext>/,
+      `<rsm:ExchangedDocumentContext><ram:BusinessProcessSpecifiedDocumentContextParameter><ram:ID>${id}</ram:ID></ram:BusinessProcessSpecifiedDocumentContextParameter>`,
+    );
+  const cadre = (x: string) => lireXmlFacture(x)!.valeurs.find((v) => v.champ === "cadre_facturation")?.valeur;
+  assertEquals(cadre(avec("B1")), "B1");
+  assertEquals(cadre(avec("S1")), "S1");
+  assertEquals(cadre(avec("Baurechnung")), undefined);
+  assertEquals(cadre(xml), undefined);
 });

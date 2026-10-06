@@ -79,6 +79,8 @@ Conséquences côté métier (FILED) : le fournisseur n'est **reconnu** que sur 
 | `type_code` | texte (≤ 10) | | code UNTDID 1001 s'il est imprimé (380 facture, 381 avoir) | `"380"` |
 | `cadre_facturation` | texte (≤ 10) | | cadre de facturation (B1, S1…) s'il est imprimé | `"B1"` |
 
+**Nature d'une facture électronique (XML)** : `avoir` si la racine est un UBL `CreditNote` ou si le code UNTDID 1001 (`type_code`) est un code d'avoir (381, 261, 262, 296, 308, 396, 420, 458, 502, 503, 532, 81, 83) ; une **facture rectificative 384** est un `avoir` si son total TTC est négatif, une `facture` sinon (son `type_code` reste 384, `facture_origine.*` quand le XML cite la facture corrigée). `cadre_facturation` (B1, S1, M1…) est lu dans le contexte du document (CII `BusinessProcessSpecifiedDocumentContextParameter/ID`, UBL `ProfileID`) seulement s'il a cette forme.
+
 Sur un **avoir**, les montants sont rendus avec le signe du document (souvent négatif) ; FILED les range en valeur absolue, le sens étant dans la nature `avoir`.
 
 ### Fournisseur (l'émetteur)

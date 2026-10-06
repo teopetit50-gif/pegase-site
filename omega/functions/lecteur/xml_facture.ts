@@ -72,9 +72,21 @@ function dateDe(t: string | null): string | null {
   return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
 }
 
-function typeDepuisCode(code: string | null, racine: "Invoice" | "CreditNote" | null): TypePiece {
-  if (code === "381" || racine === "CreditNote") return "avoir";
+/** Les codes UNTDID 1001 d'avoir (EN 16931 et norme française) : avoir, avoir autofacturé, avoir global, avoir d'affacturage… */
+export const CODES_AVOIR = new Set(["81", "83", "261", "262", "296", "308", "381", "396", "420", "458", "502", "503", "532"]);
+/** Facture rectificative : elle corrige une facture ; un total négatif en fait un avoir de fait. */
+export const CODE_RECTIFICATIVE = "384";
+
+/** La nature d'après le code de type, la racine UBL et le signe du total. */
+export function typeDepuisCode(code: string | null, racine: "Invoice" | "CreditNote" | null, ttc: number | null = null): TypePiece {
+  if (racine === "CreditNote" || (code !== null && CODES_AVOIR.has(code))) return "avoir";
+  if (code === CODE_RECTIFICATIVE && ttc !== null && ttc < 0) return "avoir";
   return "facture";
+}
+
+function totalTtc(c: Collecteur): number | null {
+  const v = c.valeurs.find((x) => x.champ === "montant_ttc")?.valeur;
+  return typeof v === "number" ? v : null;
 }
 
 /** Le début utile d'un XML : sans prologue ni commentaires (les exemples officiels FeRD ouvrent sur 5 Ko de licence). */
@@ -179,6 +191,14 @@ function lireCii(racine: Noeud): LectureXml {
   c.texte("numero", noeud(doc, "ID"), "ExchangedDocument/ID");
   c.texte("type_code", noeud(doc, "TypeCode"), "ExchangedDocument/TypeCode");
   c.date("date", noeud(doc, "IssueDateTime.DateTimeString"), "ExchangedDocument/IssueDateTime");
+  // Le cadre de facturation français (B1, S1, M1…) est porté par le contexte du document ; un autre processus
+  // (« urn:… », « Baurechnung ») n'en est pas un.
+  c.texte(
+    "cadre_facturation",
+    noeud(racine, "ExchangedDocumentContext.BusinessProcessSpecifiedDocumentContextParameter.ID"),
+    "BusinessProcessSpecifiedDocumentContextParameter/ID",
+    (s) => /^[A-Z][0-9]$/.test(s.trim()) ? s.trim() : null,
+  );
 
   const tx = noeud(racine, "SupplyChainTradeTransaction");
   const accord = noeud(tx, "ApplicableHeaderTradeAgreement");
@@ -257,7 +277,7 @@ function lireCii(racine: Noeud): LectureXml {
   }
   c.tableau("lignes", lignes, "IncludedSupplyChainTradeLineItem");
 
-  return { norme: "cii", type_piece: typeDepuisCode(code, null), valeurs: c.valeurs };
+  return { norme: "cii", type_piece: typeDepuisCode(code, null, totalTtc(c)), valeurs: c.valeurs };
 }
 
 function partieUbl(c: Collecteur, p: Noeud, prefixe: "fournisseur" | "acheteur", balise: string) {
@@ -291,6 +311,7 @@ function lireUbl(racine: Noeud, nomRacine: "Invoice" | "CreditNote"): LectureXml
   c.texte("numero", noeud(racine, "ID"), `${nomRacine}/ID`);
   c.texte("type_code", code, `${nomRacine}TypeCode`);
   c.date("date", noeud(racine, "IssueDate"), "IssueDate");
+  c.texte("cadre_facturation", noeud(racine, "ProfileID"), "ProfileID", (s) => /^[A-Z][0-9]$/.test(s.trim()) ? s.trim() : null);
   c.date("echeance", noeud(racine, "DueDate"), "DueDate");
   c.texte("devise", noeud(racine, "DocumentCurrencyCode"), "DocumentCurrencyCode", (s) => s.toUpperCase());
   c.texte("acheteur.reference", noeud(racine, "BuyerReference"), "BuyerReference");
@@ -363,5 +384,5 @@ function lireUbl(racine: Noeud, nomRacine: "Invoice" | "CreditNote"): LectureXml
   }
   c.tableau("lignes", lignes, nomLigne);
 
-  return { norme: "ubl", type_piece: typeDepuisCode(code, nomRacine), valeurs: c.valeurs };
+  return { norme: "ubl", type_piece: typeDepuisCode(code, nomRacine, totalTtc(c)), valeurs: c.valeurs };
 }
