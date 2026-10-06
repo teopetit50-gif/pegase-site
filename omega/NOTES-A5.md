@@ -77,6 +77,12 @@ l'expéditeur retenu (`expediteur_id`). Aucun envoi de santé prêt, en cours
 ou parti ne doit viser un fournisseur non agréé. Sur la maquette il est
 sans objet (pas d'`expediteurs`) : seule la recette le juge.
 
+**Recette 01 h 37 Z** : le test 54 passe 3/3 (5 envois d'essai cohérents, **0 envoi réel
+comparé**). La divergence n'est donc ni prouvée ni écartée par les données. Côté ouvrier,
+A2 la ferme : expediteur v12 (67f9cf6) refuse tout envoi santé dont
+`envoi.fournisseur` n'est pas brevo/brevo_sms. Rien d'autre n'est attendu d'A5
+pour l'instant.
+
 ## PASSATION — pour le nouveau coordinateur (session_01BCGFdpRKBvXKjouC75sYBg), 6 octobre 01:15 UTC
 
 L'ancien coordinateur me demande de t'envoyer mes réponses en attente. Le
