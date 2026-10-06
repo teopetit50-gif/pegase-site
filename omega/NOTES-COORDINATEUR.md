@@ -628,3 +628,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   instruction portée à 6 mois, décision attendue 2027-03-20 ; certificat tacite : DP accordée
   tacitement le 02/07, retrait tenu). Jauge livrable B5 : 96 %. Question ouverte : échéance
   d'affichage passée (2026-07-17) restée « ouvert » → relue après le cron de 03:07 Z.
+- 04 h 55 — **b6_07** (b3bd323, réponses OUI/NON entrantes) posé ; lecture OUI/NON juste sur
+  essais directs ; b6_03 vert (29). **Régressions** : b6_01 test 86 (abonnement b6_06) et b6_02
+  mort sur « Quota atteint : 5 chantiers ouverts » (installation du banc + ESSAI-J2 ; message
+  « 5 » alors que quota_chantiers = 20 : colonne à vérifier). Renvoyé à B6 ; écran b6_07 non
+  fusionné avant le vert.
