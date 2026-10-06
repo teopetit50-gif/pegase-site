@@ -3,6 +3,46 @@
 Branche `worker-b5`. Session B5 : session_018iNiXjY8eWmMjaGrXSGgma (Opus 5.5, reprise de session_013VSXzohLtDQS5bbWfRb4xR le 06/10 à 1 h 30 Z). Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5, depuis le 06/10 à 1 h 10 ; auparavant session_01B4JNQXyT69GytdvE9SjAnE).
 Dernière mise à jour : 05/10/2026, 23 h.
 
+## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
+
+**Branche `worker-b5`, dernier SHA de travail : 6082922.** Aucun fichier du site public n'a été modifié.
+
+**Fait et posé sur la recette (vert, rapports du coordinateur) :**
+- b5_01 à b5_23 ;
+- les tests b5_01 à b5_14 ;
+- b5_23 (servitudes et risques) et b5_14 v1 : posés à 20 h 15 Z, verts.
+- **Servitudes prouvées en vrai** : `lorani_chercher_plu` sur « Extension Garnier (banc) », à Nantes. Résultat : zone UMa du PLUi, servitude AC1 (abords de la salle Saint-Joseph de Bel-Air), `secteur_protege` vrai.
+- Le cron `lorani-lectures` (toutes les 5 min) tourne et fait avancer les recherches PLU. Il n'y a rien à corriger.
+
+**Écrit et poussé, PAS posé** (à poser par le coordinateur, dans cet ordre) :
+1. `omega/modules/lorani/migrations/b5_24_risques_donnees_ouvertes.sql` (6082922). L'API Géorisques n'aboutit pas depuis nos hébergeurs, car les IP de cloud sont filtrées. Les risques de la commune viennent donc de tables chargées depuis des fichiers ouverts : GASPAR/DDRM, zonage sismique de 2011, radon de 2018.
+2. Les 15 lots de données `omega/modules/lorani/donnees/b5_24_*.sql`. Attendu ensuite dans `lorani_ref_sources` : libelles 49, risques 31 733, radon 32 771, sismicite 35 346.
+3. `omega/tests/lorani/b5_14_servitudes_risques.sql` v2 : 13/13 en local, sur des doubles avec pgTAP émulé.
+4. Puis un relevé réel : relancer `lorani_chercher_plu` à Nantes, qui doit finir « fait » avec sismicité 3, radon 3 et argiles recensées.
+
+NB : b5_24 a été construit après la demande de pause, parce que j'ai lu le message trop tard. Il est complet et testé, mais pas posé : le coordinateur décide s'il le pose.
+
+**Chiffrage de la page** : `omega/CHIFFRAGE/lorani.md` (6082922).
+- 69 lignes : A 1, B 23, C 29, D 13, T 3.
+- Tout en B : ≈ 95 j. De B vers A : ≈ 69 j bruts, ≈ 45 réalistes.
+- Première agence réelle : ≈ 9,5 j. Les chiffres du lecteur sont confirmés par A1.
+
+**Ce qui attend le coordinateur :**
+- poser b5_24, ses données et b5_14 v2 ;
+- décider si l'on rafraîchit GASPAR chaque mois automatiquement (≈ 1 j) ou à la main (`omega/recette-b5/risques/generer.mjs`).
+
+**Ce qui attend Teo :**
+- 5 vrais DWG d'agence (plan de masse, façade, coupe, plan de niveau, fond de plan BET), pour rejouer `omega/recette-b5/dwg/lire-dwg.mjs` ;
+- 5 jeux de planches PDF réels, pour qu'A1 mesure sa lecture ;
+- la région UE du fournisseur du modèle de lecture.
+
+**Prochaine étape exacte, au réveil :**
+1. Lire les résultats de la pose de b5_24.
+2. Corriger si rouge, sinon retirer « PLU, servitudes et risques lus depuis l'adresse » de la liste « en préparation » de `lib/en-preparation.ts`. C'est au coordinateur de le faire, le site étant interdit.
+3. Ensuite, par ordre de valeur, selon `omega/CHIFFRAGE/lorani.md` :
+   - les trois petites choses de la première agence (rappel J-10, « 8 jours le matin », bouton constat → question) ;
+   - puis l'analyse des offres.
+
 ## Jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
