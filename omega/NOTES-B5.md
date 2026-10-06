@@ -411,4 +411,6 @@ A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confir
 - Écran : l'avis « Plusieurs demandes de pièces » cite la décision ; recette (contrôle b5_07 : « 461958 ») et axe :
   verts. Test 19 bis : l'alerte doit porter « 2e demande de pièces » et la référence. Essai local (b5_07 + b5_08 +
   b5_10) : titres de 175 et 162 caractères, règle inchangée.
+- Coordinateur, 13 h 49 Z : b5_10 posée (027eca3), `^test_b5_` **120/120** (ok 116 : l'alerte cite CE 30 avril 2024,
+  n° 461958) ; écran fusionné dans main, en ligne avec la prochaine poussée groupée. b5_01 à b5_10 posées.
 

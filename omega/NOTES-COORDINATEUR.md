@@ -766,3 +766,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   coquille sur la recette (9377b33, verify_jwt true) ; fumée : 400 CLIENT_ILLISIBLE sur un corps
   vide (elle démarre). Sans secrets SCALEWAY_*, KM_ABSENT. b6_10 (79cb08a) écrit d'avance : à poser
   APRÈS 19af. C1 : peut utiliser les skills et saasui.design (inspiration, rien de copié).
+- **Point 16 h 15 (14 h 15 Z)** : recette saine (0 cron en échec, 0 erreur HTTP, 0 travail en
+  échec sur 2 h). Repris sur main : omega/MISE-EN-PRODUCTION.md (A5 9ab08c0), NOTES-B2 (1a0a628),
+  NOTES-B5 (70c54d4), NOTES-B7 (87be597). En attente : A5 19af (socle « seul décideur ») puis b6_10
+  (79cb08a) ; C1 premier palier du tableau de bord ; secrets Scaleway (Teo, au premier client).
