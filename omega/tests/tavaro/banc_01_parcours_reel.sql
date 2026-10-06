@@ -12,6 +12,8 @@ declare
   v_gerant uuid := (select id from auth.users where email = 'gerant@banc-varelo.test');
   v_siege uuid := (select id from public.entites where client_id = v_client and principale);
   v_bareme uuid;
+  -- lu AVANT d'endosser : authenticated n'exécute pas les fonctions de private (a5_01)
+  v_sans_bareme boolean := private.loc_bareme_en_vigueur(v_client, date '2026-10-01') is null;
 begin
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   -- l'agence du siège : TVA 20 (le siège n'a pas de territoire ; la base le demanderait)
@@ -22,7 +24,7 @@ begin
     insert into public.loc_reglages (client_id, tolerance_retard_min, emetteur)
     values (v_client, 59, jsonb_build_object('adresse', '1 rue du Banc, 97110 Pointe-à-Pitre', 'email', 'essais@omegaai.fr'));
   end if;
-  if private.loc_bareme_en_vigueur(v_client, date '2026-10-01') is null then
+  if v_sans_bareme then
     v_bareme := public.loc_publier_bareme('Barème banc 2026', date '2026-01-01', jsonb_build_array(
       jsonb_build_object('code', 'CARBURANT_8E', 'libelle', 'Carburant manquant, au huitième', 'famille', 'carburant', 'unite', 'huitieme', 'prix_eur', 12, 'regime_tva', 'taxable', 'taux_tva', 20),
       jsonb_build_object('code', 'KM_SUP', 'libelle', 'Kilomètre au-delà du forfait', 'famille', 'kilometres', 'unite', 'km', 'prix_eur', 0.25, 'regime_tva', 'taxable', 'taux_tva', 20),
