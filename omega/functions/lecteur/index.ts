@@ -16,7 +16,7 @@ import { CoffreRpc } from "./coffre.ts";
 import type { Contexte } from "./lire_piece.ts";
 import { configMistralDepuisEnv, OcrMistral } from "./ocr.ts";
 import { passage } from "./passage.ts";
-import { SourcePluRest } from "./lorani_plu.ts";
+import { SourceObjetsRpc, SourcePluRest } from "./lorani_plu.ts";
 import { PortesVareloRpc } from "./reception_varelo.ts";
 import { configTranscriptionDepuisEnv, TranscripteurMistral } from "./media/transcription.ts";
 
@@ -36,6 +36,7 @@ export function contexteDepuisEnv(env: { get(n: string): string | undefined } = 
     // Les lectures longues : allumées par contexteDuPassage (secret LECTEUR_ANALYSES, sinon réglage lecteur_analyses).
     portesAnalyse: null,
     sourcePlu: new SourcePluRest(supabase),
+    sourceObjets: new SourceObjetsRpc(supabase),
     varelo: new PortesVareloRpc(supabase),
     transcripteur: transcription ? new TranscripteurMistral(transcription) : null,
     // La porte de retour est nommée par le module dans la charge (ex. daliro_media_lu) : p_reception, p_lecture.

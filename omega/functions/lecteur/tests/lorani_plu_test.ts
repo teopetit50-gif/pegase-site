@@ -5,7 +5,7 @@ import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { ecrirePdf, type LigneTexte } from "../banc/pdf_minimal.ts";
 import type { SortieOutil } from "../ia.ts";
 import { lirePiece } from "../lire_piece.ts";
-import { indicationPlu, type SourcePlu, SourcePluRest, zonesDe } from "../lorani_plu.ts";
+import { indicationPlu, SourceObjetsRpc, type SourcePlu, SourcePluRest, zonesDe } from "../lorani_plu.ts";
 import { champsPour, schemaPour } from "../schemas/modules.ts";
 import { contexteDeTest, pieceDeTest, travailDeTest } from "./doubles.ts";
 
@@ -133,4 +133,27 @@ Deno.test("lorani : zones de lorani_plu — la principale d'abord, libellés san
   assertStringIncludes(url, `projet_id=eq.${PROJET}`);
   const ko = await new SourcePluRest({ url: "https://x.supabase.co", cleService: "k" }, () => Promise.resolve(new Response("{}", { status: 404 }))).zonesDuProjet("c", PROJET);
   assertEquals(ko, null);
+});
+
+Deno.test("lorani : objets des pièces sœurs donnés au modèle ; porte absente (404) → rien", async () => {
+  const { ctx, portes, depot, ia } = contexteDeTest();
+  ctx.sourceObjets = { objetsSoeurs: () => Promise.resolve([{ grandeur: "hauteur_faitage_m", objet: "batiment_a" }, { grandeur: "hauteur_faitage_m", objet: "batiment_b" }]) };
+  const piece = pieceDeTest("cccccccc-0000-4000-8000-000000000082", "pc5.pdf", "application/pdf", { module: "lorani", objet_type: "lorani_projet", objet_id: PROJET });
+  portes.pieces.set(piece.id, piece);
+  depot.fichiers.set(piece.chemin, pdf(["FAÇADE SUD", "Hauteur au faîtage bâtiment A : 11,80 m"]));
+  ia!.prochaine = { lisible: true, type_piece: "lorani_planche", confiance_type: 0.9, valeurs: [{ champ: "mesure.hauteur_faitage_m.batiment_a", valeur: 11.8, texte: "Hauteur au faîtage bâtiment A : 11,80 m", page: 1 }] };
+  assertEquals(await lirePiece(ctx, travailDeTest(82, piece.id)), "lue");
+  assertStringIncludes(ia!.appels[0].piece.indication!, "hauteur_faitage_m : batiment_a, batiment_b");
+  const absente = await new SourceObjetsRpc({ url: "https://x.supabase.co", cleService: "k" }, () => Promise.resolve(new Response("{}", { status: 404 }))).objetsSoeurs("p");
+  assertEquals(absente, null);
+});
+
+Deno.test("lorani b5_21 : Cerfa, RE2020 (valeur et seuil), notice — grandeurs d'accessibilité et d'incendie", () => {
+  assertEquals(champsPour("lorani", "lorani_cerfa").get("mesure.surface_plancher_m2.projet")!.type, "nombre");
+  assertEquals(champsPour("lorani", "lorani_attestation_re2020").get("re2020.bbio")!.type, "nombre");
+  assertEquals(champsPour("lorani", "lorani_attestation_re2020").get("re2020.ic_construction_max")!.type, "nombre");
+  assertEquals(champsPour("lorani", "lorani_attestation_re2020").get("re2020.inconnu"), undefined);
+  assertEquals(champsPour("lorani", "lorani_notice").get("mesure.largeur_porte_m.entree_erp")!.type, "nombre");
+  assertEquals(champsPour("lorani", "lorani_plan_bet").get("mesure.effectif_nb.projet")!.type, "nombre");
+  assertEquals(champsPour("lorani", "lorani_dpgf").get("re2020.bbio"), undefined);
 });

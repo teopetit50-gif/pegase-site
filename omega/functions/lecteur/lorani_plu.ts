@@ -73,3 +73,49 @@ export function controlerZone(r: ResultatLecture, zones: string[] | null): Resul
   const motif = `Zone lue « ${lue.valeur} » : le terrain est en ${zones.map((z) => `« ${z} »`).join(", ")} ; les règles rendues sont à vérifier.`;
   return { ...r, statut: "a_verifier", motif: (r.motif ? `${r.motif} ${motif}` : motif).slice(0, 500) };
 }
+
+// ─── Les objets déjà nommés par les pièces sœurs du même contrôle (porte lorani_objets_controle de B5) ───
+// Deux pièces qui mesurent la même chose doivent rendre le même <objet> : c'est la clé du croisement. Le modèle
+// reçoit donc les objets déjà rendus par les autres pièces du contrôle. Porte absente (pas encore posée) : rien.
+
+export interface SourceObjets {
+  /** Les {grandeur, objet} déjà rendus par les autres pièces du même contrôle ; null si la porte n'existe pas. */
+  objetsSoeurs(piece: string): Promise<{ grandeur: string; objet: string }[] | null>;
+}
+
+export class SourceObjetsRpc implements SourceObjets {
+  constructor(private readonly cfg: ConfigSupabase, private readonly fetchFn: typeof fetch = fetch) {}
+  async objetsSoeurs(piece: string) {
+    const rep = await this.fetchFn(`${this.cfg.url}/rest/v1/rpc/lorani_objets_controle`, {
+      method: "POST",
+      headers: { apikey: this.cfg.cleService, Authorization: `Bearer ${this.cfg.cleService}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_piece: piece }),
+    });
+    if (!rep.ok) {
+      await rep.body?.cancel();
+      return null;
+    }
+    const l = await rep.json();
+    return Array.isArray(l)
+      ? l.filter((x) => x && typeof x.grandeur === "string" && typeof x.objet === "string").slice(0, 200).map((x) => ({ grandeur: x.grandeur, objet: x.objet }))
+      : null;
+  }
+}
+
+export async function objetsPourPiece(source: SourceObjets | null | undefined, piece: Pick<Piece, "id" | "module" | "objet_type">): Promise<{ grandeur: string; objet: string }[] | null> {
+  if (!source || piece.module !== "lorani" || piece.objet_type !== "lorani_projet") return null;
+  try {
+    const l = await source.objetsSoeurs(piece.id);
+    return l && l.length > 0 ? l : null;
+  } catch (e) {
+    journal("alerte", "objets du contrôle illisibles : la pièce se lit sans eux", { piece: piece.id, erreur: messageDe(e, 200) });
+    return null;
+  }
+}
+
+export function indicationObjets(objets: { grandeur: string; objet: string }[]): string {
+  const parGrandeur = new Map<string, Set<string>>();
+  for (const o of objets) parGrandeur.set(o.grandeur, (parGrandeur.get(o.grandeur) ?? new Set()).add(o.objet));
+  const liste = [...parGrandeur].map(([g, os]) => `${g} : ${[...os].join(", ")}`).join(" ; ");
+  return `les autres pièces de ce contrôle ont déjà nommé ces objets (grandeur : objets) — ${liste}. Quand ta mesure porte sur la même chose, reprends exactement le même objet.`;
+}

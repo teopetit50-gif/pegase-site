@@ -23,7 +23,7 @@ import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts"
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
-import { controlerZone, indicationPlu, type SourcePlu, zonesPourPiece } from "./lorani_plu.ts";
+import { controlerZone, indicationObjets, indicationPlu, objetsPourPiece, type SourceObjets, type SourcePlu, zonesPourPiece } from "./lorani_plu.ts";
 import { type BilanReception, type PortesVarelo, poserReception } from "./reception_varelo.ts";
 import type { Transcripteur } from "./media/transcription.ts";
 import type { LectureMedia } from "./media/lire_media.ts";
@@ -43,6 +43,8 @@ export interface Contexte {
   portesAnalyse?: Pick<PortesAnalyse, "commencerAnalyse" | "terminerAnalyse"> | null;
   /** Lorani : la zone PLU du terrain du projet, donnée au modèle avant de lire un règlement (b5_17). */
   sourcePlu?: SourcePlu | null;
+  /** Lorani : les objets déjà nommés par les pièces sœurs du contrôle (porte lorani_objets_controle de B5). */
+  sourceObjets?: SourceObjets | null;
   /** Varelo : un bon de livraison lu pré-remplit la réception (grp_enregistrer_reception, b1_11). */
   varelo?: PortesVarelo | null;
   /** Photos et vocaux (lecteur.media) : la transcription des vocaux, et la porte de retour du module. */
@@ -233,7 +235,15 @@ export function sembleXml(piece: Pick<Piece, "mime" | "nom_fichier">): boolean {
 async function lire(ctx: Contexte, piece: Piece): Promise<Bilan> {
   // Lorani : la zone du terrain, quand la base la connaît, guide la lecture d'un règlement de PLUi.
   const zones = await zonesPourPiece(ctx.sourcePlu, piece);
-  const contexte: ContextePiece = { nom_fichier: piece.nom_fichier, mime: piece.mime, module: piece.module, indication: zones ? indicationPlu(zones) : null };
+  // … et les objets déjà nommés par les autres pièces du contrôle, pour que le croisement retrouve les mêmes.
+  const objets = await objetsPourPiece(ctx.sourceObjets, piece);
+  const indications = [zones ? indicationPlu(zones) : "", objets ? indicationObjets(objets) : ""].filter((x) => x !== "");
+  const contexte: ContextePiece = {
+    nom_fichier: piece.nom_fichier,
+    mime: piece.mime,
+    module: piece.module,
+    indication: indications.length > 0 ? indications.join("\n") : null,
+  };
   const bilan = await lireFichier(ctx, piece, contexte);
   return zones ? { ...bilan, resultat: controlerZone(bilan.resultat, zones) } : bilan;
 }

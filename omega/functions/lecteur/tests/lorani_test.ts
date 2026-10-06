@@ -202,6 +202,10 @@ Deno.test("table des types par module : schémas d'outil et consignes", () => {
     "lorani_dpgf",
     "lorani_metre",
     "lorani_attestation_decennale",
+    "lorani_cerfa",
+    "lorani_attestation_re2020",
+    "lorani_plan_bet",
+    "lorani_notice",
     "lorani_plu_reglement",
     "autre",
   ]);

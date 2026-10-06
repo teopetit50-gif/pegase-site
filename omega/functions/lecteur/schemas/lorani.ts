@@ -28,7 +28,21 @@ export const GRANDEURS = [
   "longueur_m",
   "largeur_m",
   "cote_altimetrique_m",
+  // b5_21 : RE2020, accessibilité, sécurité incendie
+  "surface_habitable_m2",
+  "sref_m2",
+  "largeur_porte_m",
+  "largeur_cheminement_m",
+  "largeur_degagement_m",
+  "pente_rampe_pct",
+  "ressaut_m",
+  "distance_escalier_m",
+  "effectif_nb",
+  "degagements_nb",
 ] as const;
+
+/** Les indicateurs d'une attestation RE2020 (b5_21) : valeur du projet, et seuil sous le suffixe _max. */
+export const INDICATEURS_RE2020 = ["bbio", "cep", "cep_nr", "ic_energie", "ic_construction", "dh"] as const;
 const G = GRANDEURS.join("|");
 
 const FAMILLES_CONTROLE: FamilleChamps[] = [
@@ -36,7 +50,7 @@ const FAMILLES_CONTROLE: FamilleChamps[] = [
     famille: "mesure.<grandeur>.<objet>",
     motif: `^mesure\\.(${G})\\.[a-z0-9_]{1,40}$`,
     type: "nombre",
-    types: ["lorani_planche", "lorani_cctp"],
+    types: ["lorani_planche", "lorani_cctp", "lorani_cerfa", "lorani_attestation_re2020", "lorani_plan_bet", "lorani_notice"],
     description:
       `une mesure lue (cote, surface, nombre), en nombre sans unité. <grandeur> parmi : ${GRANDEURS.join(", ")} ; <objet> = ce qu'elle qualifie, en minuscules sans accent (projet pour le tout, batiment_a, facade_sud, niveau_r1, limite_nord, voie_rue_x…) : deux pièces qui mesurent la même chose rendent le même objet. Une ligne par mesure, avec sa citation et sa page.`,
   },
@@ -70,6 +84,14 @@ const FAMILLES_CONTROLE: FamilleChamps[] = [
     max: 10,
     types: ["lorani_metre", "lorani_dpgf"],
     description: "l'unité du poste, ramenée à m2, ml, m3, u, kg, t, ens ou h (m² → m2, mètre linéaire → ml, unité / pièce → u, forfait / ensemble → ens).",
+  },
+  {
+    famille: "re2020.<indicateur>[_max]",
+    motif: `^re2020\\.(${INDICATEURS_RE2020.join("|")})(_max)?$`,
+    type: "nombre",
+    types: ["lorani_attestation_re2020"],
+    description:
+      `un indicateur de l'attestation RE2020, en nombre sans unité : la valeur du projet (re2020.bbio) et le seuil réglementaire (re2020.bbio_max). Indicateurs : ${INDICATEURS_RE2020.join(", ")}.`,
   },
   {
     famille: "regle.<grandeur>.max|min",
@@ -206,6 +228,38 @@ export const SCHEMA_LORANI: SchemaModule = {
         "l'attestation d'assurance de responsabilité civile décennale d'une entreprise (modèle de l'arrêté du 5 janvier 2016) : assureur, police, assuré, SIREN, activités garanties, période de validité, plafond par sinistre",
       champs: ["assureur", "numero_police", "assure", "siren", "activites", "debut", "fin", "plafond_eur"],
       cles: ["assure", "activites", "debut", "fin", "plafond_eur"],
+    },
+    {
+      type: "lorani_cerfa",
+      libelle: "formulaire Cerfa",
+      description:
+        "le formulaire Cerfa de la demande (13406, 13409…) : les surfaces et nombres déclarés, en mesure.<grandeur>.projet (surface_plancher_m2, emprise_sol_m2, surface_taxable_m2, logements_nb, stationnement_nb, niveaux_nb)",
+      champs: ["numero_dossier", "type_autorisation", "commune", "demandeur"],
+      cles: [],
+    },
+    {
+      type: "lorani_attestation_re2020",
+      libelle: "attestation RE2020",
+      description:
+        "l'attestation de prise en compte de la RE2020 (au dépôt du permis ou à l'achèvement) : par indicateur re2020.<indicateur> et son seuil re2020.<indicateur>_max, et les surfaces en mesure.sref_m2.projet, mesure.surface_plancher_m2.projet",
+      champs: [],
+      cles: [],
+    },
+    {
+      type: "lorani_plan_bet",
+      libelle: "plan de bureau d'études",
+      description:
+        "un plan ou fond de plan d'un bureau d'études (structure, fluides) : les mesures écrites en mesure.<grandeur>.<objet>, avec les MÊMES objets que les planches de l'architecte (trémies, cotes, largeurs)",
+      champs: ["reference", "indice", "lot"],
+      cles: [],
+    },
+    {
+      type: "lorani_notice",
+      libelle: "notice",
+      description:
+        "une notice (accessibilité, sécurité incendie, descriptive) : les mesures qu'elle chiffre (effectif, dégagements, largeurs de portes et de cheminements, pentes de rampes, ressauts) en mesure.<grandeur>.<objet>",
+      champs: ["reference"],
+      cles: [],
     },
     {
       type: "lorani_plu_reglement",
