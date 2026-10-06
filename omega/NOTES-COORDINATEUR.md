@@ -784,3 +784,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   **b6_11** (6263048 : vues btp_avenants_* en security_invoker) + tests b6_05/b6_06. Rejeu socle
   40–55 + `^test_b6_` : **22/22 verts**. Sources à corriger : A4 (a4_14 grants), B4 (b4_05
   l. 669-670), A5 (liste figée + btp_prix_avenant, btp_prix_ligne_avenant). Accord J-2 clos.
+- 14 h 35 Z — **Vague 3 lancée** (Teo : « pourquoi les ouvriers n'ont plus de travail ») :
+  A4 + A1 facture électronique en réception (Factur-X / UBL / CII, cycle de vie, note sur les PA),
+  puis FEC ; A2 guide d'inbound Brevo pour Teo + preuve de reception par formulaire signé ; A3
+  suite de non-régression /espace vs /espace2 ; A5 export des migrations pour la prod
+  (omega/prod) ; B1–B6 « 3 manques pour un vrai client » + n° 1 codé ; B7 indisponibles ignorés
+  dans filed_verification_recente + tiers étrangers ; C1 nouveau tableau de bord. Routine de
+  2 h mise à jour.
