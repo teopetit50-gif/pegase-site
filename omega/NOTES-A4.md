@@ -53,6 +53,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_25_filed_lot17_envoi_logiciels_comptables.sql` | carnet n° 6, premier temps (06/10) : `public.filed_exporter_ecritures(client, entite, format, exercice?, du?, au?)` gérant/admin/valideur, formats `pennylane` (CSV « ; » du modèle « Importer des écritures », 401 alphanumérique), `sage` (Écritures Sage .pnm, 138 car.), `cegid` (.TRA journal STD : en-tête, CAE, mouvements de 222 car.), `quickbooks` (CSV « , », < 1 000 lignes par fichier, écriture jamais coupée). Sans période : les écritures pas encore envoyées dans ce format (curseur `filed_envois_comptables`). Journalisé `filed.envoi_comptable`. Tests pgTAP `a4_18_envoi_comptable.sql` (`^test_a4_25_`). |
 | `a4_26_filed_lot18_registres_hors_union.sql` | demande du coordinateur pour B7 (6/10) : contraintes élargies posées NOT VALID puis validées sous un nom `_v2` (`filed_verifications_tiers.registre` + uid_ch, hmrc ; `filed_fournisseurs.identite_source` idem ; `identites_registre.registre` de B7 si la table existe ; `filed_comptes_systeme.role` + tva_due_intracom, tva_autoliquidee, perte_change, gain_change). `private.filed_identifiant_etranger` (IDE suisse CHE + clé mod 11, TVA GB clé mod 97, autre pays hors Union sans registre). `filed_controles_identite` réécrite : uid_ch pour CHE…, hmrc pour GB…, attestation humaine pour un fournisseur hors Union sans registre (attention levée par `filed_attester_identite`). `filed_repondre_verification` retrouve le fournisseur par sa TVA suisse ou britannique. Tests pgTAP `a4_19_registres_hors_union.sql` (`^test_a4_26_`), à jouer après a4_26b. |
 | `a4_26b_filed_lot18_retrait_anciennes_contraintes.sql` | **contient des `drop constraint`**, à poser par le coordinateur (accord du 6/10) après a4_26 : retire sur chaque colonne les CHECK autres que la `_v2` validée ; annonce chaque retrait ; rejouable. |
+| `a4_27_filed_lot19_mentions_et_contre_valeur.sql` | point (a) du coordinateur (6/10) : les neuf champs du lecteur v24 lus par `private.filed_controles_mentions` (appelée par `filed_controles_comptables`), recopiés dans `filed_factures.mentions` ; `mentions.penalites` et `mentions.indemnite` en attention (absentes, ou indemnité < 40 €), `mentions.escompte` en info, pour un fournisseur français quand la lecture permet d'en juger (champ v24 rendu ou texte des pages) ; `tva.debits` (info) ; `devise.tva_eur` (attention sans TVA en euros, ou à plus de 2 % du BCE). `private.filed_taux_facture` : TTC en euros imprimé, sinon taux imprimé (sens choisi au plus près du BCE), sinon BCE ; écarté au-delà de 10 % du BCE. `filed_ecrire_facture` (TVA déductible = TVA en euros lue) et `filed_ecrire_reglement` (fournisseur soldé à sa valeur d'achat) reprennent le texte d'a4_22. Généré par gen27.py depuis a4_22 et a4_24. Tests pgTAP `a4_20_mentions_contre_valeur.sql` (`^test_a4_27_`). |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -321,6 +322,19 @@ b2brouter.net/fr/tarifs ; documentation docs.invopop.com ; comparatif digitiz.fr
 Sources consultées : impots.gouv.fr (« Je passe à la facturation électronique », dossier de spécifications externes,
 norme XP Z12-012), AFNOR (XP Z12-013), documentation publique des statuts (invopop), b2brouter.net, presse
 spécialisée pour le nombre de PA.
+
+## Lecteur v24 (a4_27) — preuves pour factures.ts
+
+- Ligne 45 « La devise, le taux de change et la contre-valeur en euros au jour d'émission. » : A1 lit devise, taux et
+  contre-valeur ; a4_27 les porte à l'écriture (taux de la pièce, ou BCE du jour d'émission, `test_a4_27_03` et `04`).
+  Attestable quand a4_27 est posé et que l'ouvrier BCE de B7 pose les cours (sans cours ni contre-valeur lue, la
+  comptabilisation est refusée, a4_22).
+- Ligne 48 « Les mentions d'escompte, de pénalité de retard et d'indemnité forfaitaire. » : lues par A1, contrôlées par
+  a4_27 (`test_a4_27_01` et `02`). Attestable quand a4_27 est posé.
+- Ligne 44 (« … et la TVA sur les débits ») : la mention est lue et signalée (`tva.debits`) ; le reste de la ligne
+  (multi-taux, autoliquidation, exonération) est déjà couvert par a4_11 et a4_22.
+- À revoir côté site (pas mon fichier) : le cas limite « La facture est libellée dans une autre devise » (l. 131-132)
+  dit que « la contre-valeur en euros reste à la charge de votre comptabilité » ; ce n'est plus vrai après a4_22 et a4_27.
 
 ## Carnet de l'audit des promesses (06/10, ordre du coordinateur) — preuves pour factures.ts
 
