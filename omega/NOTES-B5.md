@@ -624,3 +624,44 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Écran : `components/espace/lorani/PluProjet.tsx` (« Règles d'urbanisme », avant le contrôle). Exemple : Lemoine (UMa,
   Nantes) et Mercière (UCe1b, Lyon) trouvés ; Dubois a une réponse préparée (URm1, PLU-H) au clic.
 - Fiche de lecture : paragraphe pour A1 — ne rendre que les règles de la zone de `lorani_plu.zone`.
+
+## n° 3 a — métré contre DPGF (dans b5_16, amendé AVANT pose) — 06/10/2026
+
+- b5_16 n'étant pas posé, je l'ai amendé plutôt que d'écrire un ALTER (élargir un CHECK demanderait de retirer
+  l'ancien : mot interdit). Rôle `metre`, nature `metre_dpgf`. Si b5_16 avait déjà été posé dans l'ancienne version :
+  le dire, il faudra un lot de reprise.
+- Règle : quantité mesurée = `quantite.<réf>` du métré (rôle metre) ou, sans métré, somme des planches ; DPGF
+  `poste.<réf>` (quantité) + `unite.<réf>` ; écart > 5 % = constat ; DPGF < 90 % du mesuré = majeur (sous-estimé).
+- Test b5_07 § 10 (2 assertions, 31 au total) ; type de pièce `lorani_metre` dans la fiche, le dépôt et le passage.
+
+## b5_18 — les décennales (carnet n° 3 b) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_18_decennales.sql`, test `omega/tests/lorani/b5_09_decennales.sql` (18 assertions).
+- `public.lorani_attestations` (entreprise = intervenant, lot repris de l'entreprise, pièce lue, assureur, police, assuré,
+  SIREN, activités, début/fin, plafond) ; trigger `lorani_attestation_verifier` : activités requises du lot couvertes
+  (vocabulaire fermé `private.lorani_activite`, 34 activités, nomenclature France Assureurs simplifiée), date
+  d'ouverture du chantier (`lorani_projets.ouverture_chantier`, ajoutée ; sinon aujourd'hui) dans la période
+  (C. assur. L241-1), plafond ≥ marché du lot (HT + avenants), SIREN / nom de l'assuré ; statut conforme | non_conforme
+  | expiree. Échéance = fin de validité au registre (J-30, J-7, J), remplacée si la fin change. Journal
+  lorani.attestation_controlee (la date du contrôle), alerte « attention » si non conforme / échue.
+- Revue automatique quand les activités d'un lot, l'ouverture du chantier ou le marché changent.
+- Lecture : type `lorani_attestation_decennale` (fiche § « Les attestations décennales ») → passage → ligne.
+- Abonnements delai.proche/depasse.lorani → lorani.attestation.rappel/.depasse (chaque gestionnaire ignore les délais
+  qui ne sont pas les siens). `lorani_lectures_passage` redéfini (corps b5_17 + attestations).
+- Essayé en local sur doubles (vert). Écran : `components/espace/lorani/Assurances.tsx` (après Chantier) ; exemple
+  Mercière (taille de pierre non couverte, échafaudage échu). Activités des lots d'exemple remises au vocabulaire.
+
+## b5_19 — OS, réserves, GPA (carnet n° 4, première partie) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_19_os_reserves_gpa.sql`, test `omega/tests/lorani/b5_10_os_reserves.sql` (21 assertions).
+- `lorani_ordres_service` (numérotés par marché, nature démarrage/modificatifs/supplémentaires/arrêt/reprise/autre,
+  incidence HT et jours, statut, réserves de l'entreprise jusqu'à notification + 15 j — CCAG 2021 art. 3.8.2) ;
+  vue `lorani_os_incidence` (security_invoker) : montant à date, part du marché initial, jours d'OS, jours d'arrêt
+  (arrêt → reprise suivante, ou aujourd'hui) ; `private.lorani_fin_contractuelle` = démarrage + délai + OS + arrêts.
+  Alerte cumul > 15 % (public, CCP R2194-8) / > 10 % (privé) ; alerte info à chaque incidence sur le délai.
+- `lorani_reserves` (numérotées par projet, lot repris du marché, à lever avant = échéance J-7/J, levée = tenue,
+  contestée = motif obligatoire) ; `lorani_projets.reception_le` → échéance fin de GPA (1 an, J-60/J-30/J-7/J) ;
+  rappel GPA = compte des réserves ouvertes par lot + retenue de garantie à conserver (loi 71-584 art. 2).
+- Nouveaux genres lorani.chantier.rappel/.depasse ; passage redéfini (corps b5_18 + chantier).
+- Écran : `OrdresService.tsx`, `Reserves.tsx` (après Chantier, avant Assurances). Leçon : `esp-fil` est une frise à
+  deux colonnes (point + texte) — pour du texte libre, `lor-liste`.

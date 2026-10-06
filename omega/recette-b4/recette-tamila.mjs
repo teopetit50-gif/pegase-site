@@ -13,7 +13,8 @@
    courriel, à rattacher (b4_10), avec axe-core sur la carte et le dialogue ;
    le temps proposé à la saisie et le forfait consommé (b4_12) ; le contrôle
    des conflits lancé de lui-même à l'ajout d'une partie ; le tableau des
-   honoraires du cabinet (1440 et 390 px, axe-core).
+   honoraires du cabinet (1440 et 390 px, axe-core) ; le pilotage du cabinet
+   (marge, charge, séries, sans diligence, pièces attendues).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -442,6 +443,44 @@ for (const largeur of [1440, 390]) {
     ok(ref === '2026-0377', `un clic sur la référence ouvre le dossier (${ref})`);
   } else {
     await s.capturer(`${dossier}tamila-honoraires-cabinet-390.jpg`, { qualite: 55 });
+  }
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-pilotage', densite: 1 });
+  console.log(`— le pilotage du cabinet à ${largeur}`);
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Pilotage/.test(b.textContent)))`);
+  await s.dormir(900);
+  const texte = () => s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  const vue = async (nom) => { await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .tam-cabinet-filtres .r-btn')].find(b => b.textContent.startsWith(${JSON.stringify(nom)}))?.click()`); await s.dormir(300); return texte(); };
+  const t0 = await texte();
+  ok(/Pilotage du cabinet/.test(t0) && ['Marge', 'Charge', 'Séries', 'Sans diligence', 'Pièces attendues'].every((v) => t0.includes(v)), 'le dialogue et ses cinq vues');
+  ok(/2026-0412/.test(t0) && /738\s€/.test(t0), '2026-0412 : 1 187,50 € HT contre 5 h à 90 € → marge 738 €');
+  ok(/2026-0377/.test(t0) && /1\s470\s€/.test(t0), '2026-0377 : forfait de 3 000 € contre 17 h à 90 € → marge 1 470 €');
+  const d = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; const d = document.querySelector('[role="dialog"]'); return { deb: document.documentElement.scrollWidth - w, bord: Math.round(d.getBoundingClientRect().right) <= w + 1 }; })()`);
+  ok(d.deb === 0 && d.bord, `le dialogue tient dans ${largeur} px`);
+  if (largeur === 1440) {
+    const t1 = await vue('Charge');
+    ok(/Me Claire Delorme/.test(t1) && /Temps saisi \(30 jours\)/.test(t1), 'la charge par personne');
+    const t2 = await vue('Séries');
+    ok(/SCI du Moulin/.test(t2) && /Même partie/.test(t2) && /2026-0430/.test(t2), 'une série : deux dossiers où figure la SCI du Moulin');
+    const t3 = await vue('Pièces attendues');
+    ok(/exemplaire signé de la convention/.test(t3), 'la convention signée dont l\'exemplaire manque');
+    const t4 = await vue('Sans diligence');
+    ok(/jours sans diligence|a bougé dans les 45 derniers jours/.test(t4), 'la vue « sans diligence » répond');
+    const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+    await s.evaluer(axe + ';true');
+    await vue('Marge');
+    const g = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('[role="dialog"]'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+      return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+    ok(g.length === 0, `axe sur le pilotage : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
+    await s.capturer(`${dossier}tamila-pilotage-1440.jpg`, { qualite: 55 });
+  } else {
+    await s.capturer(`${dossier}tamila-pilotage-390.jpg`, { qualite: 55 });
   }
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();

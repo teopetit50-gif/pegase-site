@@ -17,7 +17,7 @@ import { useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { dateCourte } from "../format";
 import { Avis, Pastille, type Teinte } from "../ui";
-import { activerAccordSeul, donnerAccord, revoquerAccord } from "./portes";
+import { activerAccordSeul, donnerAccord, fixerDelai, revoquerAccord } from "./portes";
 import type { AccordSujet, Client, Monde } from "./types";
 
 const ETATS: Record<AccordSujet["statut"], { libelle: string; teinte: Teinte }> = {
@@ -66,6 +66,25 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
     }
   };
 
+  const changerDelai = async (sujet: string, actuel: number) => {
+    const saisi = window.prompt("Délai de traitement en heures (1 à 720) : passé ce délai, la demande remonte au responsable.", String(actuel));
+    const heures = Number(saisi);
+    if (!saisi || !Number.isInteger(heures) || heures < 1 || heures > 720) return;
+    setEnvoi(sujet);
+    setErreur(null);
+    try {
+      if (source === "reelle" && client) {
+        await fixerDelai(client.client_id, sujet, heures);
+        await relire();
+      } else modifierLocal((m) => ({ ...m, sujets: m.sujets.map((x) => (x.code === sujet ? { ...x, delai_heures: heures } : x)) }));
+      setFait(`Délai de traitement fixé à ${heures} h.`);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    } finally {
+      setEnvoi(null);
+    }
+  };
+
   return (
     <section className="esp-carte" aria-label="Sujets autorisés">
       <div className="esp-carte-tete">
@@ -89,6 +108,16 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
                     <strong>{a.libelle}</strong>
                     {a.autorisable ? <Pastille teinte={e.teinte}>{e.libelle}</Pastille> : <Pastille contour>Toujours relu, par principe</Pastille>}
                   </span>
+                  {(() => {
+                    const delai = monde.sujets.find((x) => x.code === a.sujet)?.delai_heures;
+                    return delai ? (
+                      <span className="esp-kpi-sous">
+                        Délai de traitement : {delai} h{dirige ? (
+                          <> · <button type="button" className="esp-lien-bouton" disabled={envoi !== null} onClick={() => void changerDelai(a.sujet, delai)}>changer</button></>
+                        ) : null}
+                      </span>
+                    ) : null;
+                  })()}
                   {a.statut === "active" ? (
                     <span className="esp-kpi-sous">
                       Jusqu&apos;au {dateCourte(a.fin)}{a.donne_par_libelle ? ` · donné par ${a.donne_par_libelle}` : ""} · {a.envoyees_seules_mois} réponse{a.envoyees_seules_mois > 1 ? "s" : ""} partie{a.envoyees_seules_mois > 1 ? "s" : ""} seule{a.envoyees_seules_mois > 1 ? "s" : ""} ce mois-ci

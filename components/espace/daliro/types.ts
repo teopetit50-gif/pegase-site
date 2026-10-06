@@ -539,3 +539,47 @@ export type Recalage = {
   fin_planning: string | null;
   fin_prevue_chantier: string | null;
 };
+
+/* b6_21 : la météo du chantier (public.btp_meteo_chantier) */
+export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; tmin: number | null; tmax: number | null };
+export type RisqueMeteo = { passage_id: string; tache: string | null; chantier_id: string; jour: string; motifs: string[]; texte: string };
+export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[] };
+
+/* b6_22 : l'approvisionnement (public.btp_appro_chantier) */
+export type EtatCommande = "a_commander" | "a_commander_vite" | "commande_en_retard" | "commandee" | "livraison_tardive" | "livraison_trop_tot" | "livraison_attendue" | "livree_partielle" | "livree" | "annulee";
+export type Commande = {
+  id: string;
+  chantier_id: string;
+  lot_id: string | null;
+  lot_code?: string | null;
+  passage_id: string | null;
+  passage_tache?: string | null;
+  fournisseur_id: string | null;
+  fournisseur_nom: string | null;
+  objet: string;
+  quantite_texte: string | null;
+  reference: string | null;
+  delai_jours: number;
+  besoin_le: string | null;
+  statut: "a_commander" | "commandee" | "livree_partielle" | "livree" | "annulee";
+  commandee_le: string | null;
+  livraison_prevue: string | null;
+  livree_le: string | null;
+  note: string | null;
+  motif: string | null;
+  /* b6_23 : quantité du devis, matériel à rendre, bons de livraison */
+  ligne_marche_id?: string | null;
+  quantite?: number | null;
+  unite?: string | null;
+  a_retourner?: boolean;
+  retour_prevu?: string | null;
+  retourne_le?: string | null;
+  livraisons?: LivraisonCommande[];
+  echeances: {
+    besoin_le: string | null; livrer_avant: string | null; livrer_le?: string | null; commander_avant: string | null; etat: EtatCommande;
+    quantite_commandee?: number | null; quantite_livree?: number | null; ecart?: number | null;
+    retour_prevu?: string | null; retour?: "sur_chantier" | "a_rendre" | "rendu" | null;
+  };
+};
+export type LivraisonCommande = { id: string; livree_le: string; quantite: number | null; bon_reference: string | null; piece_id: string | null; note: string | null };
+export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[]; devis_verifie?: boolean };

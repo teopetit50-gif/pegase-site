@@ -340,3 +340,22 @@ Laissés tels quels, mais à signaler : la conversation d'exemple du haut de la 
 (MÉTIERS, JOURNÉE) montrent la prise de rendez-vous, qui n'est pas construite ; les tuiles « Fiche Google Business »
 et « Google Agenda » de CANAUX (positionnées en absolu, pas de place pour une pastille). Les catalogues portent la
 pastille sur ces lignes. Retour aux anciennes phrases : quand C3 livre le palier 5 (rendez-vous, avis, astreinte).
+
+## Passe 4 — 06/10, après 16 h 54 Z : les exemples REPUT ne montrent que ce qui est construit
+
+Décision du coordinateur : remplacer tout de suite les exemples qui montrent une prise de rendez-vous (C3 palier 5,
+pas construit) par des issues construites, et ne garder que les canaux de réception existants (A2 : courriel,
+formulaire, WhatsApp). Retour aux anciens exemples : quand C3 livre le palier 5 (rendez-vous, rappel, avis) et A2
+les fournisseurs Gmail / Microsoft.
+
+| Fichier | Avant | Après |
+|---|---|---|
+| lib/produits/accueil.ts, CONVERSATION (panneau du haut) | « … Je peux vous réserver samedi 9 h 30 ? » / « Parfait pour 9h30 » / « C'est réservé, samedi 9 h 30. Vous recevrez un rappel vendredi soir. » ; issue « Rendez-vous créé dans l'agenda du service · client confirmé » | « … Votre demande de créneau est transmise à l'atelier, qui vous le confirme dès l'ouverture. » / « Parfait, merci » ; issue « Répondu depuis la base · créneau transféré à l'équipe » |
+| lib/produits/accueil.ts, MÉTIERS (Après-vente) | issue « Créneau réservé, rappel la veille » | « Réponse prête, en attente de votre accord » |
+| lib/produits/accueil.ts, JOURNÉE (21 h 47) | « Rendez-vous posé samedi 9 h 30 » | « Réponse prête, en attente de votre accord » |
+| lib/produits/accueil.ts, JOURNÉE (dimanche) | « Créneau réservé, rappel la veille » | « Répondu : ouvert lundi jusqu'à 19 h » |
+| lib/produits/accueil.ts, CANAUX.tuiles | WhatsApp Business, Fiche Google Business, Google Agenda, Gmail / Outlook | WhatsApp Business, Courriel, Formulaire de votre site |
+| components/produits/accueil/Canaux.tsx | quatre tuiles flottantes en absolu (xl) et deux filets décoratifs | la rangée de tuiles sous le texte, à toutes les largeurs (trois tuiles ne tiennent pas une constellation à quatre places) |
+| components/produits/accueil/Icones.tsx | — | icône `formulaire` (même trait) |
+
+Restent (code mort, non servi) : `CAPACITES.titreFin` « son rappel la veille » dans lib/produits/accueil.ts.

@@ -1,6 +1,6 @@
 -- c3_03 — REPUT : l'accord permanent par sujet, Valider / Corriger / Refuser, le point du matin (migration c3_03).
 -- Exécutable tel quel par execute_sql sur la RECETTE, après c3_00_jeu.sql, c3_02_preparation.sql (pour
--- tests.c3_reception) et les migrations c3_01 à c3_03. Banc en mode essai ; runtests() annule tout.
+-- tests.c3_reception et tests.c3_remettre) et les migrations c3_01 à c3_03. Banc en mode essai ; runtests() annule tout.
 
 create or replace function tests.c3_repondre(p_client uuid, p_de text, p_nom text, p_corps text, p_sujet text, p_couverte boolean,
                                              p_sources uuid[], p_reponse text) returns jsonb
@@ -82,7 +82,7 @@ begin
   return next is(v_r ->> 'politique', v_pol::text, 'La demande de validation naît approuvée par l''accord');
   return next isnt(v_r ->> 'envoi_statut', 'a_valider', 'L''envoi n''attend pas : il part (verrous du socle compris)');
   return next is(v_r ->> 'statut', 'validee', 'La demande est validée sans personne');
-  update public.envois set statut = 'envoye', envoye_le = now() where id = (v_r ->> 'envoi')::uuid;   -- l'expéditeur l'a remis
+  return next is(tests.c3_remettre((v_r ->> 'envoi')::uuid), 'envoye', 'L''ouvrier d''envoi la remet (voie du socle)');
   perform private.reput_synchroniser(v_client);
   return next is((select d.statut from public.reput_demandes d where d.id = (v_r ->> 'demande')::uuid), 'envoyee', 'Partie seule : répondue');
   v_r := tests.c3_repondre(v_client, 'c@exemple.test', 'C', 'Ouvert le 25 décembre ?', 'horaires', false, null, 'Nous vérifions et revenons vers vous.');

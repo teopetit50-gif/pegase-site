@@ -47,6 +47,10 @@ export type Projet = {
   phase: PhaseProjet;
   territoire: string | null;
   actif: boolean;
+  /* la déclaration d'ouverture du chantier (b5_18) : la date que les décennales doivent couvrir */
+  ouverture_chantier?: string | null;
+  /* la réception (b5_19) : la garantie de parfait achèvement court un an */
+  reception_le?: string | null;
   cree_le: string;
   maj_le: string;
 };
@@ -294,6 +298,9 @@ export type Marche = {
   retenue_pct: number;
   delai_verification_jours: number | null;
   actif: boolean;
+  /* b5_19 : le délai contractuel et la date de l'OS de démarrage */
+  delai_execution_jours?: number | null;
+  demarrage_le?: string | null;
 };
 export type Situation = {
   id: string;
@@ -325,7 +332,7 @@ export type Visa = {
 };
 
 /* le contrôle du dossier (b5_16) : les pièces croisées, ce qui est relevé, ce qui est décidé */
-export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "autre";
+export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "metre" | "autre";
 export type Controle = {
   id: string;
   projet_id: string;
@@ -360,7 +367,7 @@ export type ValeurCitee = {
 export type Constat = {
   id: string;
   controle_id: string;
-  nature: "incoherence" | "plu" | "cctp_dpgf";
+  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf";
   gravite: "bloquant" | "majeur" | "mineur";
   grandeur: string | null;
   objet: string | null;
@@ -397,6 +404,60 @@ export type Plu = {
   trouve_le: string | null;
 };
 
+/* une attestation décennale d'entreprise, contrôlée contre le lot (b5_18) */
+export type ConstatAttestation = { code: string; gravite: "bloquant" | "majeur" | "mineur"; texte: string; activites?: string[] };
+export type Attestation = {
+  id: string;
+  projet_id: string;
+  intervenant_id: string | null;
+  lot_id: string | null;
+  piece_id: string | null;
+  assureur: string | null;
+  numero_police: string | null;
+  assure: string | null;
+  siren: string | null;
+  activites: string[];
+  debut: string | null;
+  fin: string | null;
+  plafond_eur: number | null;
+  statut: "a_verifier" | "conforme" | "non_conforme" | "expiree";
+  constats: ConstatAttestation[];
+  verifie_le: string | null;
+};
+
+/* les ordres de service et les réserves (b5_19) */
+export type NatureOs = "demarrage" | "travaux_modificatifs" | "travaux_supplementaires" | "arret" | "reprise" | "autre";
+export type OrdreService = {
+  id: string;
+  projet_id: string;
+  marche_id: string;
+  numero: number;
+  nature: NatureOs;
+  objet: string;
+  emis_le: string;
+  notifie_le: string | null;
+  montant_ht: number;
+  delai_jours: number;
+  statut: "emis" | "signe" | "signe_reserves" | "refuse";
+  reserves_entreprise: string | null;
+  reserves_jusquau: string | null;
+};
+export type Reserve = {
+  id: string;
+  projet_id: string;
+  lot_id: string | null;
+  marche_id: string | null;
+  numero: number;
+  intitule: string;
+  localisation: string | null;
+  origine: "reception" | "opr" | "gpa";
+  constatee_le: string;
+  lever_avant: string | null;
+  statut: "ouverte" | "levee" | "contestee";
+  levee_le: string | null;
+  motif: string | null;
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -418,6 +479,9 @@ export type Dossier = {
   controlePieces: ControlePiece[];
   constats: Constat[];
   plu: Plu[];
+  attestations: Attestation[];
+  ordresService: OrdreService[];
+  reserves: Reserve[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

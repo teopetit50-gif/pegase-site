@@ -18,14 +18,14 @@ import { deciderConstat, lancerControle, octetsPiece, preparerControle } from ".
 import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
 import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Projet, RolePieceControle } from "./types";
 
-const ROLES: Record<RolePieceControle, string> = { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", autre: "Autre pièce" };
-const ROLE_DU_TYPE: Record<string, RolePieceControle> = { lorani_planche: "planche", lorani_cctp: "cctp", lorani_dpgf: "dpgf", lorani_plu_reglement: "plu" };
+const ROLES: Record<RolePieceControle, string> = { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", metre: "Métré", autre: "Autre pièce" };
+const ROLE_DU_TYPE: Record<string, RolePieceControle> = { lorani_planche: "planche", lorani_cctp: "cctp", lorani_dpgf: "dpgf", lorani_plu_reglement: "plu", lorani_metre: "metre" };
 const GRAVITES: Record<Constat["gravite"], { libelle: string; teinte: "rouge" | "ambre" | "gris"; rang: number }> = {
   bloquant: { libelle: "Bloquant", teinte: "rouge", rang: 0 },
   majeur: { libelle: "Majeur", teinte: "ambre", rang: 1 },
   mineur: { libelle: "Mineur", teinte: "gris", rang: 2 },
 };
-const NATURES: Record<Constat["nature"], string> = { incoherence: "Entre les planches", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF" };
+const NATURES: Record<Constat["nature"], string> = { incoherence: "Entre les planches", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF" };
 const DECISIONS: Record<Exclude<Constat["statut"], "ouvert">, { libelle: string; verbe: string; teinte: "vert" | "bleu" | "gris" }> = {
   corrige: { libelle: "Corrigé", verbe: "Marquer corrigé", teinte: "vert" },
   accepte: { libelle: "Accepté", verbe: "Accepter", teinte: "bleu" },
@@ -278,7 +278,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           {corrigesIci.length ? (
             <details className="lor-temps-recents">
               <summary>Corrigés depuis l’indice {precedent?.indice ?? "précédent"} ({corrigesIci.length})</summary>
-              <ul className="esp-fil">
+              <ul className="lor-liste">
                 {corrigesIci.map((k) => <li key={k.id}><Pastille teinte="vert">Corrigé à l’indice {c.indice}</Pastille> {k.titre}</li>)}
               </ul>
             </details>
@@ -286,7 +286,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           {decides.length ? (
             <details className="lor-temps-recents">
               <summary>Décidés ({decides.length})</summary>
-              <ul className="esp-fil">
+              <ul className="lor-liste">
                 {decides.map((k) => {
                   const d = DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
                   return (
@@ -312,7 +312,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
             <DialogDescription>
               {form?.type === "nouveau" && form.precedent
                 ? `Remplacez les planches qui ont changé d’indice. Ce qui ne se retrouve plus passera « corrigé » sur l’indice ${form.precedent.indice} ; ce qui reste gardera la décision prise.`
-                : "Les pièces à croiser : les planches entre elles, contre le règlement du PLU, le CCTP contre la DPGF. Le contrôle se lance quand toutes sont lues."}
+                : "Les pièces à croiser : les planches entre elles, contre le règlement du PLU, le CCTP et le métré contre la DPGF. Le contrôle se lance quand toutes sont lues."}
             </DialogDescription>
           </DialogHeader>
           <DialogBody>

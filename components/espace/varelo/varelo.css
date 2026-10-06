@@ -215,3 +215,43 @@
   display: grid;
   gap: 6px;
 }
+
+/* la lettre de protestation au transporteur (b1_11) */
+.dlg-panneau .vrl-lettre,
+.esp .vrl-lettre {
+  width: 100%;
+  min-height: 280px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  resize: vertical;
+}
+
+/* les photos du constat (b1_12) */
+.dlg-panneau .vrl-photos,
+.esp .vrl-photos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+.vrl-photos li {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.vrl-photos img,
+.vrl-photo-attente {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--esp-fond-doux, rgba(127, 127, 127, 0.12));
+}
+.vrl-photos .vrl-paire-sous {
+  overflow-wrap: anywhere;
+}

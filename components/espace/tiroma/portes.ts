@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees, Objectifs,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees, Objectifs, ReglesCommunes,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -126,8 +126,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const demiJournees = profil === "titulaire" || profil === "collaborateur" ? await quiet(rpc<DemiJournees | null>("tiroma_demi_journees_vides", { p_client: c, p_entite: e, p_jours: 14 }, null), null, "demi-journées vides") : null;
   /* b3_20 : les objectifs par fauteuil, quatre semaines passées et deux à venir (titulaire) */
   const objectifs = profil === "titulaire" ? await quiet(rpc<Objectifs | null>("tiroma_objectifs_fauteuils", { p_client: c, p_entite: e, p_semaines: 4 }, null), null, "objectifs par fauteuil") : null;
+  /* b3_22 : les règles de priorité de tous les centres dont la personne est titulaire */
+  const reglesCommunes = profil === "titulaire" ? await quiet(rpc<ReglesCommunes | null>("tiroma_regles_communes", { p_client: c }, null), null, "règles communes") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees, objectifs },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees, objectifs, reglesCommunes },
     avis,
   };
 }
@@ -209,6 +211,14 @@ export async function ajouterFauteuil(cabinet: Cabinet, f: { nom: string; capaci
   const supabase = createClient();
   const { error } = await supabase.from("tiroma_fauteuils").insert({ client_id: cabinet.client_id, entite_id: cabinet.entite_id, nom: f.nom, capacites: f.capacites, objectif_occupation: f.objectif });
   if (error) throw new ErreurPorte(message(error));
+}
+
+/** b3_22 : recopier les règles de priorité de ce centre sur les autres centres dont on est titulaire. */
+export async function alignerRegles(cabinet: Cabinet): Promise<number> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("tiroma_aligner_regles", { p_client: cabinet.client_id, p_source: cabinet.entite_id, p_cibles: null });
+  if (error) throw new ErreurPorte(message(error));
+  return data as number;
 }
 
 /** b3_20 : l'objectif d'occupation d'un fauteuil (le titulaire, sous RLS) ; null le retire. */

@@ -10,7 +10,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, EXEMPLE_CLIENT_ID, ilYa } from "../exemples/socle";
-import type { Demande, Fiche, Monde, Reception, Reponse, Sujet } from "./types";
+import type { AccordSujet, Demande, Fiche, Monde, Reception, Reponse, Sujet } from "./types";
 
 const F = {
   horaires: "00000000-0000-4000-8000-00000000c301",
@@ -33,7 +33,8 @@ export const SUJETS_EXEMPLE: Sujet[] = [
   ["devis", "Demande de devis", true], ["information", "Renseignement", true], ["suivi", "Suivi d'un dossier", true],
   ["avis", "Avis et retours", true], ["reclamation", "Réclamation", false], ["urgence", "Urgence", false],
   ["humain", "Parler à une personne", false], ["autre", "Autre", false],
-].map(([code, libelle, autorisable], i) => ({ code: code as string, libelle: libelle as string, description: null, autorisable: autorisable as boolean, actif: true, ordre: (i + 1) * 10 }));
+].map(([code, libelle, autorisable], i) => ({ code: code as string, libelle: libelle as string, description: null, autorisable: autorisable as boolean, actif: true, ordre: (i + 1) * 10,
+               delai_heures: code === "urgence" ? 1 : code === "reclamation" || code === "humain" ? 4 : 24 }));
 
 function demande(n: number, canal: Demande["canal"], nom: string, adresse: string | null, recu: string, extra: Partial<Demande>): Demande {
   return {
@@ -57,7 +58,8 @@ export function mondeExemple(): Monde {
   const d1 = demande(1, "email", "Marie Durand", "marie.durand@exemple.fr", ilYa(1, 21), { objet: "Ouverts samedi ?", sujet: "horaires" });
   const d2 = demande(2, "whatsapp", "Karim B.", "+33 6 12 34 56 78", ilYa(1, 19), { sujet: "tarifs", statut: "envoyee", decidee_le: ilYa(1, 19), envoyee_le: ilYa(1, 19) });
   const d3 = demande(3, "formulaire", "Luc Martin", "luc.martin@exemple.fr", ilYa(0, 7), { objet: "Formulaire du site", sujet: "devis", couverte: false });
-  const d4 = demande(4, "email", "Hélène Roux", "h.roux@exemple.fr", ilYa(0, 8), { objet: "Pose non terminée", sujet: "reclamation", urgence: false });
+  const d4 = demande(4, "email", "Hélène Roux", "h.roux@exemple.fr", ilYa(0, 8), { objet: "Pose non terminée", sujet: "reclamation", urgence: false,
+                                                                                  de_empreinte: "exemple-roux", litige: true, escaladee_le: ilYa(0, 12) });
   const d5 = demande(5, "formulaire", "Bernard", null, ilYa(0, 6), { objet: "Formulaire du site", sujet: "rendez_vous", statut: "a_traiter", couverte: false,
                                                                      motif: "Aucune adresse de réponse : à traiter par une personne." });
   const receptions: Record<number, Reception> = {
@@ -67,8 +69,9 @@ export function mondeExemple(): Monde {
             corps: "Bonsoir, c'est combien pour que vous veniez voir ma porte d'entrée qui frotte ?" },
     9003: { id: 9003, canal: "formulaire", de_nom: "Luc Martin", de_adresse: "luc.martin@exemple.fr", sujet: "Formulaire du site", recu_le: d3.recu_le, pieces: [],
             corps: "Bonjour, je refais ma cuisine (4 m linéaires, chêne). Pouvez-vous me faire un devis pour les façades et le plan de travail ?" },
-    9004: { id: 9004, canal: "email", de_nom: "Hélène Roux", de_adresse: "h.roux@exemple.fr", sujet: "Pose non terminée", recu_le: d4.recu_le, pieces: [],
-            corps: "Votre poseur devait finir le dressing mardi, personne n'est venu et personne ne m'a prévenue. Je commence à perdre patience." },
+    9004: { id: 9004, canal: "email", de_nom: "Hélène Roux", de_adresse: "h.roux@exemple.fr", sujet: "Pose non terminée", recu_le: d4.recu_le,
+            corps: "Votre poseur devait finir le dressing mardi, personne n'est venu et personne ne m'a prévenue. Je commence à perdre patience.",
+            pieces: [{ nom: "photo-dressing.jpg" }] },
     9005: { id: 9005, canal: "formulaire", de_nom: "Bernard", de_adresse: null, sujet: "Formulaire du site", recu_le: d5.recu_le, pieces: [],
             corps: "Rappelez-moi pour un rendez-vous, au 06 00 00 00 00." },
   };
@@ -96,6 +99,23 @@ export function mondeExemple(): Monde {
           { statut: "brouillon", valide_le: null, cree_le: ilYa(1) }),
   ];
   return {
+    reglages: {
+      id: "00000000-0000-4000-8000-00000000c3a1", signature: "L'équipe de l'Atelier Bertin", formule_appel: "Bonjour,", formule_politesse: "Bien cordialement,",
+      ton: "vouvoiement", mention_automatisee: MENTION, langues: ["fr", "en"], actif: true, accuse: true,
+      texte_accuse: "Nous avons bien reçu votre message. Notre équipe vous répond au plus vite.",
+      lien_avis: "https://g.page/r/atelier-bertin/review",
+      texte_avis: "Merci de nous avoir fait confiance. Votre avis aide d'autres clients à nous choisir : il prend une minute.",
+      avis_auto_reglement: true,
+    },
+    avis: [
+      { id: "00000000-0000-4000-8000-00000000c3b1", canal: "email", adresse: "m.lefevre@exemple.fr", nom: "M. Lefèvre", reference: "F-2026-118",
+        regle_le: ilYa(5).slice(0, 10), statut: "sollicite", motif: null, prochain_le: dans(2), envois: ["x"], cree_le: ilYa(5) },
+      { id: "00000000-0000-4000-8000-00000000c3b2", canal: "whatsapp", adresse: "+33 6 98 76 54 32", nom: "Mme Chassaing", reference: "F-2026-121",
+        regle_le: ilYa(1).slice(0, 10), statut: "programme", motif: null, prochain_le: dans(2, 10), envois: [], cree_le: ilYa(1) },
+      { id: "00000000-0000-4000-8000-00000000c3b3", canal: "email", adresse: "k.ben@exemple.fr", nom: "Karim B.", reference: "F-2026-087",
+        regle_le: ilYa(40).slice(0, 10), statut: "avis_recu", motif: null, prochain_le: null, envois: ["y", "z"], cree_le: ilYa(40) },
+    ],
+    indicateurs: { recues: 41, repondues: 33, parties_seules: 14, hors_base: 6, delai_median_minutes: 47 },
     demandes: [d1, d2, d3, d4, d5],
     receptions,
     reponses,
@@ -104,14 +124,19 @@ export function mondeExemple(): Monde {
     accords: {
       peut_donner: true,
       seul_decideur: false,
-      sujets: SUJETS_EXEMPLE.map((s) => ({
+      sujets: [
+        { sujet: "accuse", libelle: "Accusés de réception", genre: "message" as const, autorisable: true, actif: true, statut: "active" as const,
+          fin: dans(300), active_le: ilYa(65), donne_par_libelle: "Claire Morel", envoyees_seules_mois: 27 },
+        { sujet: "avis", libelle: "Demandes d'avis", genre: "message" as const, autorisable: true, actif: true, statut: "aucun" as const,
+          fin: null, active_le: null, donne_par_libelle: null, envoyees_seules_mois: 0 },
+        ...SUJETS_EXEMPLE.map((s) => ({
         sujet: s.code, libelle: s.libelle, autorisable: s.autorisable, actif: true,
-        statut: s.code === "tarifs" ? "active" : "aucun",
+        statut: (s.code === "tarifs" ? "active" : "aucun") as AccordSujet["statut"],
         fin: s.code === "tarifs" ? dans(300) : null,
         active_le: s.code === "tarifs" ? ilYa(65) : null,
         donne_par_libelle: s.code === "tarifs" ? "Claire Morel" : null,
         envoyees_seules_mois: s.code === "tarifs" ? 14 : 0,
-      })),
+      }))],
     },
   };
 }

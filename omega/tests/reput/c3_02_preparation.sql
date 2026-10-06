@@ -15,6 +15,25 @@ begin
   return v_id;
 end $$;
 
+-- La remise d'un envoi par la voie du socle (comme le test 19ab d'A5) : le serveur le commence, puis le confirme.
+-- Rend le statut final de l'envoi (envoye si les verrous l'ont laissé partir).
+create or replace function tests.c3_remettre(p_envoi uuid) returns text
+language plpgsql as $$
+declare r jsonb;
+begin
+  if to_regprocedure('tests.endosser_serveur()') is not null then
+    execute 'select tests.endosser_serveur()';
+  else
+    perform tests.redevenir_admin();
+  end if;
+  r := private.commencer_envoi(p_envoi);
+  if coalesce((r ->> 'envoyer')::boolean, false) then
+    perform private.confirmer_envoi(p_envoi, 'essai:c3:' || p_envoi::text);
+  end if;
+  perform tests.redevenir_admin();
+  return (select e.statut || coalesce(' / ' || e.verrou, '') from public.envois e where e.id = p_envoi);
+end $$;
+
 create or replace function tests.test_c3_02_preparation() returns setof text
 language plpgsql as $f$
 declare
@@ -96,7 +115,7 @@ begin
   perform private.reput_synchroniser(v_client);
   return next is((select p.statut from public.reput_reponses p where p.id = v_rep), 'approuvee', 'Validée : la réponse est approuvée');
   return next is((select d.statut from public.reput_demandes d where d.id = v_dem), 'validee', 'et la demande validée');
-  update public.envois set statut = 'envoye', envoye_le = now() where id = v_env;
+  return next is(tests.c3_remettre(v_env), 'envoye', 'L''ouvrier d''envoi le remet (voie du socle)');
   perform private.reput_synchroniser(v_client);
   return next is((select d.statut from public.reput_demandes d where d.id = v_dem), 'envoyee', 'Partie : la demande est répondue');
   return next is((select r.statut from public.receptions r where r.id = v_rec), 'traitee', 'et la réception traitée');

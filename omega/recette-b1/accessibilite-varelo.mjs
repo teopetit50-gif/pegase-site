@@ -117,6 +117,20 @@ for (const largeur of [390, 1440]) {
   await s.dormir(500);
   dire(`varelo ${largeur}, dialogue d'ajout d'un reporting`, await analyser(s, `document.querySelector('[role="dialog"]')`));
 
+  /* b1_11 : les réserves à émettre, la lettre et la suite */
+  for (const [bouton, nom] of [[`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] .esp-carte-tete button')].find(b => /Enregistrer une livraison/.test(b.textContent))`, "d'enregistrement d'une livraison"], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Lettre/.test(b.textContent))`, 'de la lettre de protestation'], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Suite/.test(b.textContent))`, 'de la suite donnée'], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Photos/.test(b.textContent))`, 'des photos du constat']]) {
+    await s.aller(base + '/espace/varelo');
+    await s.dormir(800);
+    await s.evaluer(axe + ';true');
+    if (nom.startsWith("d'enr")) {
+      const res = await s.evaluer(cadres(`document.querySelector('section[aria-label="Réserves à émettre"]')`));
+      ok(cadresBons(res), `varelo ${largeur}, cadre des réserves : ${JSON.stringify(res)}`);
+    }
+    await s.evaluer(`(e => { e?.focus(); e?.click(); })(${bouton})`);
+    await s.dormir(500);
+    dire(`varelo ${largeur}, dialogue ${nom}`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+  }
+
   /* b1_10 : brancher le logiciel d'une société */
   await s.aller(base + '/espace/varelo');
   await s.dormir(800);

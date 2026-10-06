@@ -18,22 +18,20 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 const LIGNES = {
-  /* TIROMA — ouvrier B3. Retirés le 06/10 au soir : synthèse de la semaine
-     (b3_15), réinscription (b3_16), absences probables (b3_17). */
-  tiroma: [
-    "Assistante absente : soins à basculer",
-    "Demi-journées vides des collaborateurs",
-    "Demi-journées vides",
-    "Objectifs par fauteuil",
-    "Un point du matin par centre",
-    "Un point du matin par site",
-    "Plusieurs sites",
-  ],
+  /* TIROMA — ouvrier B3. Tout est livré. Retirés le 06/10 au soir :
+     synthèse de la semaine (b3_15), réinscription (b3_16), absences
+     probables (b3_17) ; puis assistante absente (b3_18), demi-journées vides
+     des collaborateurs (b3_19), objectifs par fauteuil (b3_20), un point du
+     matin par centre / par site, plusieurs sites (b3_21, test à deux
+     centres). La clé reste : la page dentaire la nomme. */
+  tiroma: [] as string[],
 
   /* TAMILA — ouvrier B4 (pré-lecture avec A1 : lecture des pièces chiffrées,
      chronologie, contradictions, bordereau, export). Retirés le 06/10 au
      soir : effacement à la clôture (b4_11), temps proposé et forfait
-     consommé (b4_12). */
+     consommé (b4_12) ; point du matin (b4_14) ; marge, charge, séries et
+     dossiers sans diligence (pilotage, 0c0714d). « Pièces attendues » reste :
+     celles de l'expert ne sont pas suivies. */
   tamila: [
     // cartes « fonctionnalités »
     "Pièces adverses du jour",
@@ -41,7 +39,6 @@ const LIGNES = {
     "Bordereau contrôlé",
     "Contradictions relevées",
     // section « point du matin »
-    "Point du matin à 7 h",
     // formule Pré-lecture
     "Dossier de faits daté et sourcé",
     "Contradictions entre pièces",
@@ -67,17 +64,12 @@ const LIGNES = {
     // formule Cabinet
     "L'ensemble de la pré-lecture",
     "Pièces attendues du client et de l'expert",
-    "Marge par dossier",
-    "Contentieux en série comparés",
-    "Dossiers en série comparés",
-    "Dossiers sans diligence",
-    "Charge par avocat",
   ],
 
   /* LORANI — ouvrier B5. Construits et retirés d'ici le 06/10 au soir :
      calendrier du permis, contrôle des planches et du PLU avec
      revérification à chaque indice (b5_16), situations et visas
-     (b5_13 à b5_15). */
+     (b5_13 à b5_15) ; ordres de service et réserves jusqu'à la GPA (b5_19). */
   lorani: [
     "Plans croisés, rapport PDF annoté",
     "Accessibilité, ERP et RE2020",
@@ -89,14 +81,12 @@ const LIGNES = {
     "Questions suivies jusqu'à la réponse",
     "Métré des plans contre la DPGF",
     "Décennales contrôlées contre le lot",
-    "Ordres de service : montant et délai",
     "Une question en un clic",
     "Checklists de l'agence",
     "Export Excel par lot",
     "Fonds de plan BET croisés",
     "Complétude du DOE à la réception",
     "Comptes rendus de chantier rédigés",
-    "Réserves suivies jusqu'à la fin de la GPA",
     "Honoraires par phase contre temps passé",
     "Dossier de défense décennale",
     "Historique des indices sans limite",
@@ -107,24 +97,19 @@ const LIGNES = {
 
   /* DALIRO — ouvrier B6 (lecture des photos et vocaux avec A1 et A2).
      Retirés le 06/10 au soir : relance des avenants (b6_18), recalage des
-     lots (b6_19). */
+     lots (b6_19), signature sur place (b6_20), liste cadencée, livraisons
+     calées, retours et bons rapprochés (b6_23). */
   daliro: [
     "Lecture des photos et vocaux",
-    "Signature sur place",
     "Alerte météo",
-    "Liste cadencée depuis le devis",
-    "Livraisons calées sur la pose",
-    "Suivi des retours",
-    "Bons de livraison rapprochés",
     "Avancement lu dans les photos",
   ],
 
   /* VARELO — ouvrier B1 (réserves avec A1). Livrés et retirés d'ici le
      06/10 au soir : le groupe sur une page (b1_08), les reportings dus
-     (b1_09) ; le point du matin par direction (b1_07) n'avait pas de pastille. */
-  varelo: [
-    "Les réserves à émettre",
-  ],
+     (b1_09), les réserves à émettre avec les photos du constat (b1_11, b1_12) ;
+     le point du matin par direction (b1_07) n'avait pas de pastille. */
+  varelo: [] as string[],
 
   /* TAVARO — ouvrier B2, par paliers. Seuls 01 (facturation des retours),
      12 (état des lieux signé) et 14 (amendes) existent. 19 (relevés

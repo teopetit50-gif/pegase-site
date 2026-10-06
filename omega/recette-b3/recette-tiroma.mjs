@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Objectifs par fauteuil', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Objectifs par fauteuil', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Règles communes', 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les quinze cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les seize cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -203,6 +203,21 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-objectifs')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-objectifs-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les règles communes à deux centres (exemple, b3_22)');
+  const rc = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Règles communes"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, texte: c.innerText }; })()`);
+  ok(rc && rc.lignes === 2 && /2 écarts/.test(rc.texte) && /attente → plan → contrôle/.test(rc.texte), `deux règles diffèrent entre les centres (${rc?.lignes})`);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Règles communes"] button')].find(b => /Aligner sur ce centre/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Aligner sur/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Aligner sur … » s\'ouvre');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Aligner/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const rc2 = await s.evaluer(`document.querySelector('section[aria-label="Règles communes"]')?.innerText || ''`);
+  ok(/Mêmes règles partout/.test(rc2) && /1 centre aligné/.test(rc2), 'après l\'alignement : mêmes règles partout, un centre aligné');
+  await s.evaluer(`document.getElementById('tiroma-regles-communes')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tiroma-regles-communes-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : la synthèse de la semaine (exemple, b3_15)');
   const syn = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Synthèse de la semaine"]'); if (!c) return null;

@@ -51,6 +51,9 @@ export type Demande = {
   langue: string | null;
   urgence: boolean;
   couverte: boolean | null;
+  de_empreinte?: string | null;
+  litige?: boolean;
+  escaladee_le?: string | null;
   motif: string | null;
   recu_le: string;
   preparee_le: string | null;
@@ -85,10 +88,12 @@ export type Sujet = {
   autorisable: boolean;
   actif: boolean;
   ordre: number;
+  delai_heures?: number | null;
 };
 
 export type AccordSujet = {
   sujet: string;
+  genre?: "sujet" | "message";
   libelle: string;
   autorisable: boolean;
   actif: boolean;
@@ -101,7 +106,42 @@ export type AccordSujet = {
 
 export type Accords = { sujets: AccordSujet[]; peut_donner: boolean; seul_decideur: boolean };
 
+export type Reglages = {
+  id: string;
+  signature: string;
+  formule_appel: string;
+  formule_politesse: string;
+  ton: "vouvoiement" | "tutoiement";
+  mention_automatisee: string | null;
+  langues: string[];
+  actif: boolean;
+  accuse: boolean;
+  texte_accuse: string;
+  lien_avis: string | null;
+  texte_avis: string;
+  avis_auto_reglement?: boolean;
+};
+
+export type Avis = {
+  id: string;
+  canal: "email" | "whatsapp" | "sms";
+  adresse: string;
+  nom: string | null;
+  reference: string | null;
+  regle_le: string;
+  statut: "programme" | "sollicite" | "termine" | "avis_recu" | "ecarte";
+  motif: string | null;
+  prochain_le: string | null;
+  envois: string[];
+  cree_le: string;
+};
+
+export type Indicateurs = { recues: number; repondues: number; parties_seules: number; hors_base: number; delai_median_minutes: number | null };
+
 export type Monde = {
+  reglages: Reglages | null;
+  avis: Avis[];
+  indicateurs: Indicateurs;
   demandes: Demande[];
   receptions: Record<number, Reception>;
   reponses: Reponse[];
