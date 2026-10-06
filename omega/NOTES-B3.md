@@ -347,3 +347,21 @@ logiciel métier qui la fait).
      - aucun nom.
    - Écran : carte « Objectifs par fauteuil » (titulaire). Un tableau fauteuils × six semaines, en pastilles vert/ambre pour le passé ; une semaine à venir sous l'objectif reste neutre, son agenda se remplit encore. Colonne « Tenu », et « Fixer / Changer » ouvre le dialogue d'objectif. Le cadre du tableau est en `position: relative` : sans cela, le texte `sr-only` en position absolue débordait la page à 390, 768 et 1024. Recette : 101 contrôles, tout passe ; axe : 0 écart, dialogue compris.
    - Vérifié en local (tables simulées) : posée deux fois. 120 min honorées et 60 prévues sont comptées, l'heure manquée non ; objectif 1 % → atteint.
+7. **Point du matin multi-sites** (06/10, ~21 h Z) :
+   - Deux trous dans b3_06 :
+     - une personne présente dans deux centres recevait deux « Créneaux à sauver » sans savoir de quel centre ;
+     - une direction posée sur l'entité de tête ne recevait rien. Seul un profil sur l'entité même du cabinet était servi, alors que la synthèse (b3_15) suit déjà la hiérarchie.
+   - `b3_21_point_multi_sites.sql` remplace `private.tiroma_deposer_points` (même signature, même cron, mêmes droits) :
+     - un membre servi dans plus d'un cabinet actif voit « — <centre> » au bout de chaque titre ;
+     - la variante qui ne vaut plus est retirée, dans les deux sens ;
+     - la direction d'une entité parente reçoit « Cabinet dentaire — <centre> » pour chaque centre qui en dépend ;
+     - le reste est inchangé : un membre d'un seul centre garde les titres de toujours, le compte rendu ne compte pas la direction, et les tests 08, 16 et 20 ne bougent pas.
+   - `22_point_multi_sites.sql` : `test_b3_22_point_multi_sites`, 12 assertions, **sur deux centres**. Le centre du banc A, et B, « Centre B3-22 Les Abymes », un site rattaché à A créé dans le test : son cabinet, un fauteuil ouvert aujourd'hui, le gérant titulaire des deux, daf2 admin et direction sur A. Le test vérifie :
+     - 4 services ;
+     - les titres suffixés pour le gérant, et aucun titre nu ;
+     - « Charge des fauteuils — Centre B3-22 Les Abymes » (passé si aujourd'hui est férié) ;
+     - l'assistante garde les titres nus et ne reçoit pas B ;
+     - la direction reçoit les compteurs de A et de B, sans santé ;
+     - rejouer le dépôt ne double rien ;
+     - une fois B coupé, les titres de A redeviennent nus et les suffixés partent.
+   - Vérifié en local (sections simulées, même scénario) : 10 sections, rejouées à l'identique ; après la coupure de B, les titres nus reviennent.
