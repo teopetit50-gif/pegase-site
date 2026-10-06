@@ -24,6 +24,8 @@ begin
   -- 1. La cible d'un fournisseur hors Union.
   select * into e from private.identite_cible_etrangere('CHE-999.999.996', null);
   return next is(e.registre || ':' || e.identifiant, 'uid_ch:CHE999999996MWST', 'TVA suisse → uid_ch, suffixe MWST (on vérifie la TVA)');
+  select * into e from private.identite_cible_etrangere('CHE116281710', null);
+  return next is(e.registre || ':' || e.identifiant, 'uid_ch:CHE116281710MWST', 'la forme normalisée qu''A4 stocke (CHE + 9 chiffres, sans suffixe) est acceptée');
   select * into e from private.identite_cible_etrangere('CHE999999996 TVA', null);
   return next is(e.identifiant, 'CHE999999996TVA', 'le suffixe donné est gardé');
   select * into e from private.identite_cible_etrangere('GB 980 7806 84', null);
@@ -43,10 +45,14 @@ begin
   return next is(v.registre || ':' || v.identifiant, 'uid_ch:CHE999999985MWST', 'Une demande uid_ch s''ouvre, identifiant normalisé');
   select * into t from public.travaux where cle = 'verification:' || v_id::text order by id desc limit 1;
   return next is(t.charge ->> 'registre', 'uid_ch', 'et son travail porte le registre');
+  -- Les formes refusées, appelées par le service (la garde d'identité de FILED passe avant la forme : un
+  -- non-membre n'apprend rien de la forme attendue).
+  execute 'set local role service_role';
   return next throws_ok(format('select public.identite_demander(%L, %L, %L)', v_cl, 'uid_ch', 'CH123'), '22023', null, 'uid_ch : forme refusée');
   return next throws_ok(format('select public.identite_demander(%L, %L, %L)', v_cl, 'hmrc', 'XI980780684'), '22023', null, 'hmrc : XI refusé (VIES)');
   return next throws_ok(format('select public.identite_demander(%L, %L, %L)', v_cl, 'hmrc', 'GB12345'), '22023', null, 'hmrc : forme refusée');
   return next throws_ok(format('select public.identite_demander(%L, %L, %L)', v_cl, 'irs', 'US1'), '22023', null, 'registre inconnu refusé');
+  execute 'reset role';
 
   -- 3. Balayer : un fournisseur suisse, un britannique, une IDE seule, XI à VIES, un américain ignoré.
   f_ch := tests.b7_fournisseur('B7-CH', null, 'CHE999999996');
