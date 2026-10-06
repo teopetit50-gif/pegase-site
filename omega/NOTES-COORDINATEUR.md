@@ -1046,3 +1046,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   à déployer quand les secrets Google/Microsoft existent : messagerie + messagerie-oauth + cron omega-messagerie) ;
   B7 68a01aa (à la reprise : poser omega/tests/identite/b7_07_etrangers.sql depuis a6101c9, rejouer ^test_b7_13,
   lui rendre le résultat et le premier bilan taux-bce ; HMRC attend Teo). Restent sans réponse : B5, C1.
+- B5 (pause, dernier lot terminé avant l'arrêt) : worker-b5 6082922 — risques par données ouvertes (GASPAR, sismicité,
+  radon ; Géorisques et BRGM filtrent les IP de cloud). À la reprise : poser b5_24_risques_donnees_ouvertes.sql, puis
+  les 15 fichiers omega/modules/lorani/donnees/b5_24_*.sql (lorani_ref_sources attendu : libelles 49, risques 31 733,
+  radon 32 771, sismicite 35 346), puis test b5_14 v2 ; relevé réel : lorani_chercher_plu sur « Extension Garnier
+  (banc) » doit finir « fait » avec les risques de Nantes. Seul C1 n'a pas encore confirmé sa pause.
