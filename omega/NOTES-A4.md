@@ -49,6 +49,14 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_21_filed_lot13_pieces_filles.sql` | carnet n° 2, avec A1 (06/10) : `public.filed_creer_pieces_filles(p_mere, p_filles)` (contrat de `lecteur/decoupage.ts` d'A1 : sonde à vide, filles `{document, chemin, nom_fichier, octets, sha256, pages, type_piece}`, rend `[{pages, piece, document, reference, deja}]`) ; chaque fille : pièce (`piece_mere_id`) + document FILED à elle, lu ensuite ; rejouable ; service_role. Tests pgTAP `a4_14_pieces_filles.sql` (`^test_a4_21_`). |
 | `a4_22_filed_lot14_fec_autoliquidation_devise_extourne.sql` | carnet n° 3 (06/10) : autoliquidation (regime_tva autoliquidation / intracom / hors_ue sans TVA facturée → TVA au taux normal, débit 44566/44562, crédit 4452 ou 4457, fournisseur au HT) ; contre-valeur en euros (`filed_taux_change`, `filed_poser_taux_change` service_role, taux du jour ou des 10 jours précédents ; sans taux, comptabilisation refusée) ; écart de change au règlement (666 / 766) ; extourne (`public.filed_extourner_facture`, gérant/admin, colonne `extourne_de`, la facture revient validée). Tests pgTAP `a4_15_fec_complements.sql` (`^test_a4_22_`). |
 | `a4_23_filed_lot15_recontrole_rapprochement.sql` | carnet n° 4 (06/10) : le rapprochement commande / réception / facture se refait quand la pièce manquante arrive. Déclencheurs par instruction : lignes de réception ajoutées ou statut d'une réception changé → factures ouvertes de la commande ; commande arrivée → factures ouvertes qui la citent (et bloquées / à compléter du même fournisseur sans commande) ; lignes de commande arrivées → factures rattachées ou qui la citent. `private.filed_recontroler_factures(uuid[], text)` rejoue `filed_controler_facture` et historise « recontrolee ». Tout definer, revoke all. Tests pgTAP `a4_16_rapprochement_3voies.sql` (`^test_a4_23_`). |
+| `a4_24_filed_lot16_reprise_exercices.sql` | carnet n° 5 (06/10) : reprise en une fois des FEC des exercices passés. `public.filed_reprendre_historique(client, entite, [{nom_fichier, contenu, debut?}])` gérant/admin : par fichier (du plus ancien au plus récent), contrôles (nom SirenFECAAAAMMJJ et SIREN de la société, en-tête, colonnes, dates et montants, équilibre, clôture passée), exercice créé clos, lignes gardées (`filed_reprise_ecritures`), comptes 2 et 6 posés au plan (source import), tiers fournisseurs des comptes 40 et leurs comptes habituels (`filed_reprise_tiers`) ; un fichier refusé l'est seul ; rejouable par empreinte. Tiers liés à un fournisseur FILED par code ou nom (aussi plus tard, déclencheur sur `filed_fournisseurs`) → `filed_imputations_apprises`. `filed_controles_comptables` réécrite : `doublon.historique` bloquant si la facture (même fournisseur, même n° de pièce) est déjà dans l'historique. Tests pgTAP `a4_17_reprise_exercices.sql` (`^test_a4_24_`). |
+| `a4_25_filed_lot17_envoi_logiciels_comptables.sql` | carnet n° 6, premier temps (06/10) : `public.filed_exporter_ecritures(client, entite, format, exercice?, du?, au?)` gérant/admin/valideur, formats `pennylane` (CSV « ; » du modèle « Importer des écritures », 401 alphanumérique), `sage` (Écritures Sage .pnm, 138 car.), `cegid` (.TRA journal STD : en-tête, CAE, mouvements de 222 car.), `quickbooks` (CSV « , », < 1 000 lignes par fichier, écriture jamais coupée). Sans période : les écritures pas encore envoyées dans ce format (curseur `filed_envois_comptables`). Journalisé `filed.envoi_comptable`. Tests pgTAP `a4_18_envoi_comptable.sql` (`^test_a4_25_`). |
+| `a4_26_filed_lot18_registres_hors_union.sql` | demande du coordinateur pour B7 (6/10) : contraintes élargies posées NOT VALID puis validées sous un nom `_v2` (`filed_verifications_tiers.registre` + uid_ch, hmrc ; `filed_fournisseurs.identite_source` idem ; `identites_registre.registre` de B7 si la table existe ; `filed_comptes_systeme.role` + tva_due_intracom, tva_autoliquidee, perte_change, gain_change). `private.filed_identifiant_etranger` (IDE suisse CHE + clé mod 11, TVA GB clé mod 97, autre pays hors Union sans registre). `filed_controles_identite` réécrite : uid_ch pour CHE…, hmrc pour GB…, attestation humaine pour un fournisseur hors Union sans registre (attention levée par `filed_attester_identite`). `filed_repondre_verification` retrouve le fournisseur par sa TVA suisse ou britannique. Tests pgTAP `a4_19_registres_hors_union.sql` (`^test_a4_26_`), à jouer après a4_26b. |
+| `a4_26b_filed_lot18_retrait_anciennes_contraintes.sql` | **contient des `drop constraint`**, à poser par le coordinateur (accord du 6/10) après a4_26 : retire sur chaque colonne les CHECK autres que la `_v2` validée ; annonce chaque retrait ; rejouable. |
+| `a4_27_filed_lot19_mentions_et_contre_valeur.sql` | point (a) du coordinateur (6/10) : les neuf champs du lecteur v24 lus par `private.filed_controles_mentions` (appelée par `filed_controles_comptables`), recopiés dans `filed_factures.mentions` ; `mentions.penalites` et `mentions.indemnite` en attention (absentes, ou indemnité < 40 €), `mentions.escompte` en info, pour un fournisseur français quand la lecture permet d'en juger (champ v24 rendu ou texte des pages) ; `tva.debits` (info) ; `devise.tva_eur` (attention sans TVA en euros, ou à plus de 2 % du BCE). `private.filed_taux_facture` : TTC en euros imprimé, sinon taux imprimé (sens choisi au plus près du BCE), sinon BCE ; écarté au-delà de 10 % du BCE. `filed_ecrire_facture` (TVA déductible = TVA en euros lue) et `filed_ecrire_reglement` (fournisseur soldé à sa valeur d'achat) reprennent le texte d'a4_22. Généré par gen27.py depuis a4_22 et a4_24. Tests pgTAP `a4_20_mentions_contre_valeur.sql` (`^test_a4_27_`). |
+| `a4_28_filed_lot20_envoi_api_comptable.sql` | carnet n° 6, second temps (feu vert du 6/10) : `filed_connexions_comptables` (une par société et éditeur : pennylane, quickbooks, cegid_loop ; paramètres sans secret, contrainte qui l'interdit ; secret au coffre sous `compta:<id>`), `filed_envois_api` (une ligne par écriture : en_cours, a_reprendre, envoye, refuse). Personnes : `filed_connecter_logiciel` (depuis une date, sinon les seules écritures futures), `filed_preparer_autorisation` (nonce à usage unique, empreinte seule gardée), `filed_suspendre_connexion`, `filed_reprendre_connexion`. Ouvrier (service_role) : `compta_consommer_autorisation`, `compta_activer_connexion`, `compta_secret`, `compta_poser_secret`, `compta_a_envoyer`, `compta_commencer_envoi` (reprise = un essai a déjà eu lieu), `compta_reference_envoi`, `compta_noter_envoi`, `compta_echouer_envoi` (refus après 8 essais ou rejet, alerte), `compta_connexion_en_panne` (alerte). Tests pgTAP `a4_21_envoi_api.sql` (`^test_a4_28_`). Ouvrier Deno `omega/functions/compta` (Pennylane v2, QuickBooks v3 avec requestid, Cegid Loop import TRA ETE), 25 tests sur doubles ; dépend de `omega/functions/_partage` (A1). Accès : `omega/GUIDE-LOGICIELS-COMPTABLES.md`. |
+| `a4_29_filed_lot21_tva_etrangere_normalisee.sql` | remontée du coordinateur (6/10) : `filed_fournisseurs_tva_check` (^[A-Z]{2}[0-9A-Z]{2,13}$) refusait une TVA lue telle qu'imprimée (« CHE-116.281.710 MWST »). Déclencheur BEFORE insert/update of tva : forme compacte (`private.filed_tva_normaliser` : majuscules, sans séparateurs, sans MWST/TVA/IVA ni MVA) ; ce qui ne tient toujours pas va dans id_etranger, tva vide. Couvre le socle (filed_creer_fournisseur), la saisie et l'import. Tests pgTAP `a4_22_tva_etrangere.sql` (`^test_a4_29_`). |
+| `a4_30_filed_lot22_alerte_changement_iban.sql` | ligne 57 de factures.ts (6/10, « la plus importante » des lignes restantes) : déclencheurs sur `filed_fournisseurs_ibans`. Un IBAN proposé pour un fournisseur qui a déjà un IBAN validé = changement : alerte **critique adressée au client** (ancien et nouveau IBAN masqués, pièce d'origine, « ne rien payer avant confirmation par un contact connu »), journal `filed.iban.changement`, historique du fournisseur. Validé ou refusé par une personne : alerte acquittée, décision historisée. Toutes voies (facture lue, saisie, import, reproposition). Premier IBAN : pas d'alerte (validation ordinaire). Tests pgTAP `a4_23_alerte_iban.sql` (`^test_a4_30_`). |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -318,6 +326,19 @@ Sources consultées : impots.gouv.fr (« Je passe à la facturation électroniqu
 norme XP Z12-012), AFNOR (XP Z12-013), documentation publique des statuts (invopop), b2brouter.net, presse
 spécialisée pour le nombre de PA.
 
+## Lecteur v24 (a4_27) — preuves pour factures.ts
+
+- Ligne 45 « La devise, le taux de change et la contre-valeur en euros au jour d'émission. » : A1 lit devise, taux et
+  contre-valeur ; a4_27 les porte à l'écriture (taux de la pièce, ou BCE du jour d'émission, `test_a4_27_03` et `04`).
+  Attestable quand a4_27 est posé et que l'ouvrier BCE de B7 pose les cours (sans cours ni contre-valeur lue, la
+  comptabilisation est refusée, a4_22).
+- Ligne 48 « Les mentions d'escompte, de pénalité de retard et d'indemnité forfaitaire. » : lues par A1, contrôlées par
+  a4_27 (`test_a4_27_01` et `02`). Attestable quand a4_27 est posé.
+- Ligne 44 (« … et la TVA sur les débits ») : la mention est lue et signalée (`tva.debits`) ; le reste de la ligne
+  (multi-taux, autoliquidation, exonération) est déjà couvert par a4_11 et a4_22.
+- À revoir côté site (pas mon fichier) : le cas limite « La facture est libellée dans une autre devise » (l. 131-132)
+  dit que « la contre-valeur en euros reste à la charge de votre comptabilité » ; ce n'est plus vrai après a4_22 et a4_27.
+
 ## Carnet de l'audit des promesses (06/10, ordre du coordinateur) — preuves pour factures.ts
 
 1. **Courriel → document FILED** (a4_20) : preuve de la ligne 28 « Une adresse dédiée reçoit les pièces, et
@@ -338,8 +359,29 @@ spécialisée pour le nombre de PA.
    à la livraison complète, à valider → bloquée si la réception est annulée). Attestable quand a4_23 est posé et
    `test_a4_23_01` à `03` verts. Réserve : la ligne n'est vraie que pour une organisation qui règle
    `reception_exigee` (ou `commande_exigee`) ; à défaut, une facture sans commande passe au circuit sans rapprochement.
-5. Reprise de plusieurs exercices — à faire (ligne 35).
-6. Envoi vers Pennylane, Sage, Cegid, QuickBooks — à faire.
+5. **Reprise de plusieurs exercices** (a4_24) : preuve de la ligne 35 « Un historique de plusieurs exercices se
+   reprend en une fois à l'installation. » Un appel, `public.filed_reprendre_historique`, reprend les FEC de tous les
+   exercices passés : exercices clos, plan comptable, fournisseurs de l'ancien logiciel et leurs comptes habituels
+   (la première facture d'un fournisseur repris se voit proposer son compte de toujours), et une facture déjà
+   comptabilisée avant l'installation est bloquée (`doublon.historique`). Attestable quand a4_24 est posé,
+   `test_a4_24_01` à `03` verts, ET que l'écran d'installation (A3) envoie les fichiers. Limites : la reprise porte
+   sur la comptabilité (les FEC), pas sur les PDF des factures passées ; le fichier arrive en texte UTF-8 (l'écran
+   décode l'ISO 8859-15) ; vingt exercices au plus par appel ; la taille d'un appel est bornée par la passerelle.
+   Prouve aussi la ligne 81 « L'imputation analytique s'apprend sur vos écritures passées, fournisseur par
+   fournisseur. » pour le compte de charge (`test_a4_24_02` : 606100 appris deux fois, 613200 une fois, depuis les FEC) ;
+   le centre de coût ne s'apprend que des imputations validées dans Omega (a4_01), pas des FEC.
+6. **Envoi vers Pennylane, Sage, Cegid, QuickBooks** — premier temps fait (a4_25) : le fichier d'import de chacun.
+   Sources des formats : Pennylane, centre d'aide « Importer des écritures » (articles 18793 ; Pennylane importe aussi
+   le FEC et le TRA) ; Sage 100, « Écritures Sage (*.pnm) », Fichier > Importer > Format Sage (description OpenSi
+   Sage.pdf, 138 caractères) ; Cegid, « Description du fichier de mouvements .TRA » Yourcegid (positions 1 à 222) et
+   en-tête/CAE d'OpenSi Cegid.pdf ; QuickBooks en ligne, « Importer des écritures de journal » (colonnes Numéro de
+   journal, Date du journal, Nom du compte, Description, Débits, Crédits, Nom). Réserves honnêtes : aucun fichier n'a
+   encore été importé dans un vrai logiciel ; Sage et Cegid attendent de l'ANSI (l'écran encode en Windows-1252) ;
+   QuickBooks rapproche les comptes par leur NOM (libellé du plan Omega) et le fournisseur par la colonne Nom ; le
+   TRA est en mode journal STD sans lignes PS1-PS5/EXO, ce que d'autres outils produisent aussi mais qu'il faut
+   vérifier sur un dossier Cegid. Second temps : les API (Pennylane API v2, Cegid Loop « Écritures comptables
+   (import TRA) », QuickBooks Online JournalEntry, Sage selon l'édition). Pas de ligne propre dans factures.ts à
+   ma connaissance : à rapprocher de la promesse d'export comptable de la page.
 
 ## a4_15 (06/10) — posé sur la recette (~05:12 UTC, 634fe24)
 
@@ -465,9 +507,8 @@ Sous condition supplémentaire :
 | 71 | « Une délégation d'approbation se pose pour une absence, avec sa date de fin. » | Porte du socle (testée par FILED, test a4_02) : à attester par le coordinateur, pas par A4. |
 | 87 | « Le journal des pièces reçues est numéroté en continu et ne se modifie pas. » | Lot F1 du socle (`filed_documents` R2026-…, `filed_historique` immuable) : au coordinateur. |
 
-Hors A4, à laisser tels quels : 57 (alerte changement d'IBAN : `filed_fournisseurs_ibans` /
-`filed.valider_iban` du socle F1 — A4 ne fait que valider l'IBAN proposé avec un fournisseur
-confirmé), 59 (rapprochement à trois voies commande / réception / facture : la réception n'est
+Ligne 57 (alerte au changement d'IBAN) : prouvée par a4_30 (`test_a4_30_01` à `03`) ; avant a4_30, le
+changement bloquait la facture sans lever d'alerte. Hors A4, à laisser tels quels : 59 (rapprochement à trois voies commande / réception / facture : la réception n'est
 pas rapprochée par A4), lignes 31–48 (lecture : A1).
 
 ## Demain
