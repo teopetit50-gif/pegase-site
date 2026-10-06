@@ -190,3 +190,66 @@
 .esp .tam-notice {
   margin: 8px 0 4px;
 }
+
+/* la facture imprimable (b4_09) : un aperçu A4 dans un cadre isolé ; l'en-tête du cabinet en grille */
+/* trois classes : plus spécifique que `.dlg-panneau.resa` (460 px), quel que soit l'ordre des feuilles */
+.dlg-panneau.resa.tam-facture-dialogue {
+  max-width: 920px;
+}
+.tam-facture-apercu {
+  width: 100%;
+  height: min(70vh, 900px);
+  border: 1px solid var(--r-filet);
+  border-radius: 8px;
+  background: #fff;
+}
+.tam-entete {
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0;
+}
+.tam-entete legend {
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tam-entete-grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px 12px;
+}
+@media (min-width: 640px) {
+  .tam-entete-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tam-entete-large {
+    grid-column: 1 / -1;
+  }
+}
+
+/* les avis RPVA reçus par courriel, à rattacher (b4_10) : au-dessus des compteurs */
+.esp .tam-entrants {
+  margin-bottom: 14px;
+}
+.esp .tam-entrants .esp-carte-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.esp .tam-entrants .tam-ligne-titre {
+  overflow-wrap: anywhere;
+}
+/* le corps du courriel, cité dans le dialogue (porté hors de .esp) */
+.tam-citation {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--r-filet, #d9d9d4);
+  background: #f6f6f4;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-height: 180px;
+  overflow: auto;
+}

@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Pilotage', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les huit cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les neuf cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -152,6 +152,26 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-pilotage')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-pilotage-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : noter le moyen de contact d\'un patient (exemple, b3_14)');
+  const avantCt = await s.evaluer(`document.querySelectorAll('section[aria-label="Rappels aux patients"] ul[aria-label="Moyens de contact"] > li').length`);
+  ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('section[aria-label="Rappels aux patients"] button')].find(b => /Ajouter un moyen de contact/.test(b.textContent)); if (!b) return null; b.focus(); b.click(); return true; })()`) === true, 'bouton « Ajouter un moyen de contact » cliqué');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'Nes'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] ul[aria-label="Patients trouvés pour le contact"] button')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'Rosalie Nestor trouvée, choisie');
+  await s.dormir(200);
+  await s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input.rv-champ')].find(x => x.getAttribute('inputmode') === 'email'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'rosalie.nestor@exemple.test'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apresCt = await s.evaluer(`document.querySelectorAll('section[aria-label="Rappels aux patients"] ul[aria-label="Moyens de contact"] > li').length`);
+  ok(apresCt === avantCt + 1, `les moyens de contact passent de ${avantCt} à ${apresCt} (en mémoire)`);
+  ok(await s.evaluer(`/Essai/.test(document.querySelector('section[aria-label="Rappels aux patients"] .esp-carte-tete')?.innerText || '')`), 'la carte dit le mode « Essai »');
+  ok(await s.evaluer(`/aucun prestataire agréé HDS/.test(document.querySelector('section[aria-label="Rappels aux patients"]')?.innerText || '')`), 'un rappel retenu dit pourquoi : « aucun prestataire agréé HDS »');
+  await s.evaluer(`document.getElementById('tiroma-rappels')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-rappels-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : repasser à blanc puis en mode réel (exemple)');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Le cabinet"] button')].find(b => /Repasser à blanc/.test(b.textContent))?.click()`);

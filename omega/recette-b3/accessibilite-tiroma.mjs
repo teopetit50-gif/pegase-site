@@ -50,6 +50,16 @@ for (const largeur of [390, 1440]) {
   await s.dormir(300);
   ok(await s.evaluer(`!!document.querySelector('[role="dialog"] input[type="date"]')`), 'le dialogue « Noter l\'appel » est ouvert, date de rappel visible');
   dire(`tiroma ${largeur}, dialogue noter l'appel`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+  /* b3_14 : le dialogue « Ajouter un moyen de contact », patients trouvés ouverts */
+  await s.aller(base + '/espace/tiroma');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Rappels aux patients"] button')].find(b => /Ajouter un moyen de contact/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'Nes'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`!!document.querySelector('[role="dialog"] ul[aria-label="Patients trouvés pour le contact"]')`), 'le dialogue « Ajouter un moyen de contact » est ouvert, patients trouvés');
+  dire(`tiroma ${largeur}, dialogue moyen de contact`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
