@@ -11,7 +11,8 @@
    les conflits d'intérêts et la vigilance LCB-FT (b4_07) ; la facture
    imprimable et l'en-tête du cabinet (b4_09) ; les avis RPVA reçus par
    courriel, à rattacher (b4_10), avec axe-core sur la carte et le dialogue ;
-   le temps proposé à la saisie et le forfait consommé (b4_12).
+   le temps proposé à la saisie et le forfait consommé (b4_12) ; le contrôle
+   des conflits lancé de lui-même à l'ajout d'une partie.
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -371,6 +372,38 @@ for (const largeur of LARGEURS) {
   await s.dormir(700);
   const h3 = await hono();
   ok(!/Proposé à la saisie/.test(h3) && /0 h 15 de correspondance saisies/.test(h3), 'saisie : le temps entre au dossier, la proposition disparaît');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-conflit-auto', densite: 1 });
+  console.log('— le contrôle des conflits, automatique à l\'ajout d\'une partie');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0398/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const carte = () => s.evaluer(`document.querySelector('section[aria-label="Conflits d\\'intérêts et vigilance"]')?.innerText || ''`);
+  const ajouter = async (nom, qualite) => {
+    await s.evaluer(`[...document.querySelectorAll('section[aria-label="Parties"] .r-btn')].find(b => /Ajouter/.test(b.textContent))?.click()`);
+    await s.dormir(400);
+    await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const champ = (l) => [...d.querySelectorAll('label')].find(x => x.textContent.startsWith(l))?.querySelector('input,select');
+      const i = champ('Nom'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(nom)}); i.dispatchEvent(new Event('input', { bubbles: true }));
+      const q = champ('Qualité'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(q, ${JSON.stringify(qualite)}); q.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    await s.dormir(200);
+    await s.evaluer(`document.querySelector('[role="dialog"] .r-btn--noir')?.click()`);
+    await s.dormir(1300);
+  };
+  await ajouter('Moulin (SCI du)', 'adverse');
+  const t1 = await carte();
+  ok(/Contrôle automatique de « Moulin \(SCI du\) » : 1 conflit/.test(t1), 'l\'adversaire ajouté est contrôlé sans geste : un conflit (cliente dans 2026-0412)');
+  ok(/Conflit : client dans le dossier 2026-0412/.test(t1) && /Décider/.test(t1), 'le conflit est nommé, la décision est proposée');
+  const alerte = await s.evaluer(`[...document.querySelectorAll('section[aria-label="Conflits d\\'intérêts et vigilance"] [role="alert"]')].length`);
+  ok(alerte >= 1, 'annoncé comme une alerte');
+  await ajouter('Mme Paule Neuve', 'client');
+  const t2 = await carte();
+  ok(/Nouvelle partie contrôlée d.elle-même : aucun conflit/.test(t2) && /Paule Neuve[\s\S]*Aucune correspondance/.test(t2), 'un client jamais vu : contrôlé de lui-même, aucun conflit');
+  ok(/Moulin \(SCI du\)/.test(t2), 'le conflit précédent reste affiché');
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }
