@@ -19,6 +19,7 @@ import { Loader } from "@/components/ui/loader";
 import { useSource } from "../source";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Ruban, Vide } from "../ui";
+import Appels, { DialogueAppel, type NoteAppel } from "./Appels";
 import AvantRendezVous from "./AvantRendezVous";
 import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
@@ -30,8 +31,9 @@ import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
   ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
+  noterAppel,
 } from "./portes";
-import type { Cabinet as CabinetT, Dossier, Logiciel, PatientCourt } from "./types";
+import type { Cabinet as CabinetT, CibleAppel, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
 
 type Reel = { compte: Compte | null; cabinets: CabinetT[]; dossier: Dossier | null; avis: string[] };
 
@@ -190,6 +192,34 @@ export default function EcranTiroma() {
     await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
+  /* b3_12 : le registre des appels ; en exemple, la ligne s'ajoute en mémoire */
+  const [cibleAppel, setCibleAppel] = useState<CibleAppel | null>(null);
+  const noterUnAppel = useCallback(async (n: NoteAppel) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => {
+        if (!prev.appels) return prev;
+        const maintenant = new Date().toISOString();
+        const dernier = { motif: n.cible.motif, issue: n.issue, appele_le: maintenant, rappeler_le: n.rappeler_le, par: "vous" };
+        const autres = prev.appels.a_reprendre.filter((s) => !(s.patient_id === n.cible.patient_id && s.motif === n.cible.motif && s.plan_id === n.cible.plan_id));
+        const avant = prev.appels.a_reprendre.find((s) => s.patient_id === n.cible.patient_id && s.motif === n.cible.motif && s.plan_id === n.cible.plan_id);
+        const suit = n.issue === "message" || n.issue === "pas_de_reponse" || n.issue === "rappeler";
+        const registre: RegistreAppels = {
+          ...prev.appels,
+          a_reprendre: suit ? [...autres, { ...dernier, patient_id: n.cible.patient_id, patient_nom: n.cible.patient_nom, plan_id: n.cible.plan_id, tentatives: (avant?.tentatives ?? 0) + 1, du: n.issue === "rappeler" ? (n.rappeler_le ?? "") <= prev.appels.jour : false }] : autres,
+          derniers: { ...prev.appels.derniers, [n.cible.patient_id]: dernier },
+          bilan: { ...prev.appels.bilan, appels: prev.appels.bilan.appels + 1, rdv_pris: prev.appels.bilan.rdv_pris + (n.issue === "rdv_pris" ? 1 : 0), refus: prev.appels.bilan.refus + (n.issue === "refus" ? 1 : 0) },
+        };
+        return { ...prev, appels: registre };
+      });
+      return;
+    }
+    const d = reel?.dossier;
+    if (!d) throw new Error("Aucun cabinet ouvert.");
+    await noterAppel(d.cabinet, n);
+    await charger(d.cabinet.id);
+  }, [source, reel, charger]);
+
   const installer = async () => {
     if (!reel?.compte || !entiteInst) return;
     setInstalle(true);
@@ -308,15 +338,17 @@ export default function EcranTiroma() {
       ) : (
         <div style={{ display: "grid", gap: 14 }}>
           <div className="esp-grille">
-            <Creneaux creneaux={dossier.creneaux} horizon={dossier.regles?.horizon_creneaux_jours ?? 2} />
-            <Plans plans={dossier.plans} noterMutuelle={noter} />
+            <Creneaux creneaux={dossier.creneaux} horizon={dossier.regles?.horizon_creneaux_jours ?? 2} derniers={dossier.appels?.derniers} appeler={dossier.appels ? setCibleAppel : undefined} />
+            <Plans plans={dossier.plans} noterMutuelle={noter} derniers={dossier.appels?.derniers} appeler={dossier.appels ? setCibleAppel : undefined} />
           </div>
+          <Appels registre={dossier.appels} titulaire={titulaire} appeler={setCibleAppel} />
           <div className="esp-grille">
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />
             <ChargeFauteuils charge={dossier.charge} titulaire={titulaire} />
           </div>
           <ListeAttente attente={dossier.attente} praticiens={dossier.praticiens} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} inscrire={inscrire} retirer={retirer} />
           <Cabinet dossier={dossier} agir={agir} />
+          <DialogueAppel cible={cibleAppel} jour={dossier.appels?.jour ?? new Date().toISOString().slice(0, 10)} fermer={() => setCibleAppel(null)} noter={noterUnAppel} />
         </div>
       )}
     </>

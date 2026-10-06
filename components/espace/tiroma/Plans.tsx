@@ -12,12 +12,13 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, Dia
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
+import { DernierAppelLigne } from "./Appels";
 import { FAMILLES, MUTUELLES } from "./libelles";
-import type { PlanSansRdv } from "./types";
+import type { CibleAppel, DernierAppel, PlanSansRdv } from "./types";
 
 export type Mutuelle = { plan: PlanSansRdv; statut: NonNullable<PlanSansRdv["mutuelle_statut"]>; le: string | null; motif: string | null };
 
-export default function Plans({ plans, noterMutuelle }: { plans: PlanSansRdv[]; noterMutuelle?: (m: Mutuelle) => Promise<void> }) {
+export default function Plans({ plans, noterMutuelle, derniers, appeler }: { plans: PlanSansRdv[]; noterMutuelle?: (m: Mutuelle) => Promise<void>; derniers?: Record<string, DernierAppel>; appeler?: (c: CibleAppel) => void }) {
   const [choix, setChoix] = useState<PlanSansRdv | null>(null);
   const [statut, setStatut] = useState<Mutuelle["statut"]>("accord");
   const [le, setLe] = useState("");
@@ -75,7 +76,9 @@ export default function Plans({ plans, noterMutuelle }: { plans: PlanSansRdv[]; 
                   <span>{p.lignes_faites} faite{p.lignes_faites > 1 ? "s" : ""} · {p.lignes_a_faire} à faire{p.prochaine?.duree_min ? ` · ${p.prochaine.duree_min} min` : ""}</span>
                   {p.proches_a_planifier ? <span>Famille : {p.proches_a_planifier} proche{p.proches_a_planifier > 1 ? "s" : ""} à planifier dans la foulée</span> : null}
                   {noterMutuelle ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir(p)}>Noter la mutuelle</button> : null}
+                  {appeler && !p.ne_pas_contacter ? <button type="button" className="esp-lien-bouton" onClick={() => appeler({ patient_id: p.patient_id, patient_nom: p.patient_nom, motif: "plan", plan_id: p.plan_id, evenement_id: null })}>Noter l&apos;appel</button> : null}
                 </span>
+                {derniers?.[p.patient_id] ? <span style={{ gridColumn: "1 / -1" }}><DernierAppelLigne d={derniers[p.patient_id]} /></span> : null}
               </li>
             ))}
           </ul>

@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -30,7 +30,7 @@ for (const largeur of LARGEURS) {
     const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
       .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
     return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent,
-             kpis: document.querySelectorAll('.esp-kpi').length,
+             kpis: document.querySelector('.esp-kpis')?.querySelectorAll('.esp-kpi').length ?? 0,
              cartes: [...document.querySelectorAll('.esp-carte[aria-label]')].map(e => e.getAttribute('aria-label')),
              ruban: document.querySelector('.esp-ruban')?.textContent };
   })()`);
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les six cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les sept cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -124,6 +124,23 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-attente')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-attente-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : noter un appel depuis un créneau à sauver (exemple, b3_12)');
+  const avantApp = await s.evaluer(`document.querySelectorAll('section[aria-label="Appels"] ul[aria-label="Appels à reprendre"] > li').length`);
+  ok(await s.evaluer(`(() => { const li = [...document.querySelectorAll('section[aria-label="Créneaux à sauver"] ol > li')].find(l => /Rosalie Nestor/.test(l.textContent)); const b = li && [...li.querySelectorAll('button')].find(b => /Noter l.appel/.test(b.textContent)); if (!b) return null; b.focus(); b.click(); return true; })()`) === true, 'bouton « Noter l\'appel » de Rosalie Nestor (créneau) cliqué');
+  await s.dormir(500);
+  ok(await s.evaluer(`!!document.querySelector('[role="dialog"]') && /Rosalie Nestor/.test(document.querySelector('[role="dialog"]').textContent)`), 'le dialogue « Noter l\'appel » s\'ouvre sur elle');
+  await s.evaluer(`document.querySelector('[role="dialog"] input[type="radio"][value="rappeler"]')?.click()`);
+  await s.dormir(300);
+  ok(await s.evaluer(`!!document.querySelector('[role="dialog"] input[type="date"]')`), '« À rappeler » demande une date');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apresApp = await s.evaluer(`document.querySelectorAll('section[aria-label="Appels"] ul[aria-label="Appels à reprendre"] > li').length`);
+  ok(apresApp === avantApp + 1, `les appels à reprendre passent de ${avantApp} à ${apresApp} (en mémoire)`);
+  ok(await s.evaluer(`(() => { const li = [...document.querySelectorAll('section[aria-label="Créneaux à sauver"] ol > li')].find(l => /Rosalie Nestor/.test(l.textContent)); return li ? /À rappeler/.test(li.textContent) : null; })()`) === true, 'le créneau dit « À rappeler » sous Rosalie Nestor');
+  await s.evaluer(`document.getElementById('tiroma-appels')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-appels-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : repasser à blanc puis en mode réel (exemple)');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Le cabinet"] button')].find(b => /Repasser à blanc/.test(b.textContent))?.click()`);
