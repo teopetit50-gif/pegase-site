@@ -488,3 +488,28 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
   pièce jointe aligné) ; (16) sans `detail.module`, `deposer_reception` prend le module de la boîte, et sur la recette
   `compta@banc-varelo.test` se résout vers un expéditeur Lorani — le test passe `{"module": "filed"}` et filtre sur sa
   propre réception ; la réponse « ignore » de `lorani_rattacher_reception` rend aussi `reception` et `module`.
+
+### Vague 3, n° 1 posé ; n° 2 livré à poser — b5_12, les honoraires phase par phase (06/10)
+
+- Coordinateur, 14 h 49 Z : 218a777 reposé, `^test_b5_` vert (1..2 : b5_01 et b5_02). A1 : ARE / AEE lus comme
+  `lorani_recepisse_depot` (lecteur v21, recette). La boîte Lorani par agence attend l'inbound (MX posés par Teo).
+- `omega/modules/lorani/migrations/b5_12_honoraires_phases.sql` : `public.lorani_honoraires` (élément de mission MOP,
+  honoraires HT, heures prévues, statut a_venir / en_cours / achevee / facturee, dates) et `public.lorani_temps` (un
+  membre, un jour, un élément, des heures ≤ 24, une note) ; droits comme les autres tables Lorani (voit / écrit le
+  projet ; chacun saisit et corrige SES temps, même un assistant en lecture ; pas de retrait : 0 h annule) ; triggers :
+  le projet vient de l'élément, pas de temps futur, l'élément passe « en cours » à la première saisie, alertes
+  « attention » au chef de projet à 80 % puis 100 % des heures prévues (une par seuil, avec l'écart et le taux
+  réalisé), « appel d'honoraires à émettre » à l'achèvement (journal `lorani.element_acheve`) ;
+  `public.lorani_honoraires_projet(projet)` (tableau de bord sous RLS). Sans `drop` ni `delete` : clés étrangères sans
+  cascade (un projet porteur d'honoraires ne s'efface pas, il s'archive par `actif`). Essayée en local (doublures du
+  socle) : seuils, textes (« 33,5 h pour 30 h prévues (+3,5 h) … taux réalisé 90 € HT de l'heure »), appel
+  (« 3 000,00 € HT »), refus d'un temps futur, tableau de bord.
+- Test : `omega/tests/lorani/b5_03_honoraires.sql` (`test_b5_03_honoraires`, 24 assertions, aides de b5_01) →
+  `^test_b5_` attendu **160/160**.
+- Écran (`components/espace/lorani` seulement) : `Honoraires.tsx` dans la carte du projet — totaux (honoraires,
+  heures, facturé, appels à émettre), avertissement ambre / rouge par phase qui dérive, tableau par élément (jauge,
+  taux réalisé, état), « Saisir du temps », « Ajouter un élément », « Achevé », « Facturé », derniers temps saisis ;
+  exemple « Maison Lemoine » (six éléments, 33 000 € HT) et « Pôle enfance » ; recette +4 contrôles (saisie de 9 h →
+  le PC passe dépassé, puis achevé), captures `lorani-temps-1440.jpg`, `lorani-honoraires-1440.jpg`. Débordement à 390
+  trouvé et corrigé (texte `sr-only` en position absolue hors du cadre défilant). tsc, eslint, build, recette cinq
+  largeurs, axe : verts.
