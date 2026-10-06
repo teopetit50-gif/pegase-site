@@ -243,3 +243,59 @@ page (6 à 8 sous 768 px, où chaque famille se replie à deux lignes), intégra
 Tiroma 12, Tamila 31, Lorani 31, Daliro 10, Varelo 4, Tavaro 34 (grille + fiches de survol ; 17 sous 768 px).
 Relu à l'œil : la pastille passe à la ligne proprement dans les listes étroites (Lorani et Tiroma à 390), ne casse pas
 les rangées à hauteur fixe du comparatif Daliro, et reste lisible sur les titres de cartes Tamila.
+
+## Passe 2 — réponses du coordinateur (06/10, après 16 h 27 Z)
+
+Base : `worker-c5` (a803fd1) avec `origin/main` 959f115 fusionné (dbf427c). Chaque livraison a été vérifiée par
+son commit sur la branche de l'ouvrier avant de retirer la pastille.
+
+### Questions tranchées
+
+| Question | Décision | Fait |
+|---|---|---|
+| 1. Accueil, cartes CASHD / OFFLOAD / REPUT | pastille sur la carte (C2, C4, C3 construisent) | `app/page.tsx` : `EN_PREPARATION = ["CASHD", "OFFLOAD", "REPUT"]` ; `components/accueil/TuilesCatalogue.tsx` : champ `preparation`, pastille à côté du nom. Retrait : enlever le sigle du tableau. |
+| 2. Varelo, point du matin par direction | livré (b1_07, 7512a38) ; pas de pastille dans le héros | aucune pastille n'existait pour lui |
+| 3. Tavaro 01, 12, 14 | livrés (b2_07 0e2cc89 ; b2_08 8c928e4) | sans pastille, inchangé |
+| 4. Tavaro, onglets « Solutions » | pastille | `components/secteurs/location/Solutions.tsx` : onglet et titre du panneau pour Remise en location, Assistance, Sortie de flotte (même liste `tavaro`) ; « Facturation des retours » et « Le point du matin » sans pastille |
+
+### Pastilles retirées (livraisons vérifiées)
+
+| Module | Libellés retirés de `lib/en-preparation.ts` | Preuve |
+|---|---|---|
+| Tiroma | Synthèse de la semaine (pour la direction), Synthèse pour la direction | b3_15, 72ec683 (test 16) |
+| Tiroma | Taux de réinscription (×3 libellés) | b3_16, 3dd4b88 (test 17) |
+| Tiroma | Absences probables | b3_17, ea1a91f (test 18) — **réserve du coordinateur** : b3_16/17, compte « daf2 direction » refusé, renvoyé à B3 (NOTES-COORDINATEUR) |
+| Tamila | Effacement à la clôture (liste et `preparation: true` de l'engagement) | b4_11, 814adee (test 20) |
+| Tamila | Temps passé proposé à la saisie, Forfaits dépassés, Conventions et forfaits | b4_12, 385e77c (test 21) et 4736d71 (écran) |
+| Lorani | Permis : PC1 à PC8 et PLU ; Revérification à chaque indice | b5_16, a05f77c (test b5_07) |
+| Lorani | Situations et décomptes ; Visa des fiches techniques ; Visas calés sur les délais de commande ; Registre daté des visas | b5_13 à b5_15 (53bc500, b9cd972, d9000ea ; tests b5_04 à b5_06) |
+| Daliro | Relance des avenants non signés | b6_18, c3ab533 |
+| Daliro | Ordre des lots recalé | b6_19, 9ad8930 |
+| Varelo | Le groupe sur une page | b1_08, fdd8e5c (tests b1_11) |
+| Varelo | Les reportings dus | b1_09, 68f7d46 (tests b1_12) |
+
+Gardés, faute de preuve : Lorani « Plans croisés, rapport PDF annoté » (b5_16 croise les planches, mais le rapport
+PDF annoté n'existe pas), « Fonds de plan BET croisés », « Analyse des offres sur DPGF » (b5_16 contrôle les planches
+contre la DPGF, pas les offres), DWG, export Excel, DOE, comptes rendus, réserves et GPA, décennales, RE2020/ERP/Cerfa ;
+Daliro : pointage des heures et rentabilité (b6_17) n'avaient pas de pastille ; Varelo : comptes réciproques (b1_06)
+n'avaient pas de pastille, « Les réserves à émettre » reste.
+
+Restent : Tiroma 7, Tamila 33, Lorani 24, Daliro 8, Varelo 1, Tavaro 17.
+
+### FILED — lignes de `lib/produits/capacites/factures.ts` pour la bascule `atteste: true` (au coordinateur)
+
+Numéros à dbf427c (identiques à ceux de NOTES-A4 sur worker-a4). Condition commune posée par A4 : migration posée
+en production et tests verts là-bas ; aujourd'hui la recette seulement.
+
+| Ligne | Texte | Preuve | À basculer ? |
+|---|---|---|---|
+| 31 | « Un fichier qui contient plusieurs factures est découpé pièce par pièce. » | a4_21 f184edc (`test_a4_21_01`, `02`) + `lecteur/decoupage.ts` d'A1 | **oui**, quand le lecteur d'A1 avec le découpage est déployé (sinon la porte reste `porte_absente`) |
+| 35 | « Un historique de plusieurs exercices se reprend en une fois à l'installation. » | a4_24 e3eaac3 (`test_a4_24_01` à `03`) | **oui**, quand l'écran d'installation (A3) envoie les FEC ; la reprise porte sur les FEC, pas sur les PDF |
+| 44 | « La TVA multi-taux, l'autoliquidation, l'exonération et la TVA sur les débits. » | a4_22 30d3991 (autoliquidation à 20 %) | **non** : la TVA sur les débits (A1) manque encore |
+| 45 | « La devise, le taux de change et la contre-valeur en euros au jour d'émission. » | a4_22 30d3991 (contre-valeur, écart de change) | **oui avec réserve** : les taux BCE attendent un ouvrier qui les pose chaque jour (B7 ou A2) |
+| 59 | « La commande, la réception et la facture sont rapprochées avant toute validation. » | a4_08 + a4_23 11c1f8b (`test_a4_23_01` à `03`) | **oui avec réserve** : vrai seulement si l'organisation règle `reception_exigee` ou `commande_exigee` |
+| 81 | « L'imputation analytique s'apprend sur vos écritures passées, fournisseur par fournisseur. » | a4_02 (test a4_01) + a4_24 (`test_a4_24_02`) | **oui** (déjà dans la liste « dès la production » de NOTES-A4) |
+
+La réception par courriel (a4_20, e749aa5) prouve la ligne 28, déjà à `true`. L'extourne (a4_22) n'a pas de ligne
+propre. Le reste de la liste « dès la production posée » de NOTES-A4 (lignes 60, 62, 69, 70, 72 à 74, 82, 85, 86,
+94 à 98) est à basculer dans le même geste.
