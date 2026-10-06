@@ -217,4 +217,25 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
     `(PCMI|DPMI|PC|PA|PD|DP|CU)`) ; une assertion de plus dans le test (étape 19, b5_05) ; l'écran exige la liste des
     pièces pour confirmer une demande et ne coupe plus « PCMI 3 » en deux (`decouperCodes`) ; le script vérifie la liste
     elle-même. tsc, eslint, build, recette aux cinq largeurs : verts.
+- 06/10, 1 h 49 Z (coordinateur) : b5_05 posée, `^test_b5_` **112/112**, PermisVue.tsx fusionné dans main (9b7ab27).
+- 06/10, 1 h 50–2 h 00 Z : second dépôt réel, `demande-pieces-v2.pdf` (même lettre + une ligne de pied, autre
+  empreinte ; `fabriquer-courrier.mjs … [mention]`) : `Lue` à 71 s, **aucune proposition en 9 min** (deux passages de
+  `lorani_lectures_passage`). `lorani_deja_saisi` ne devrait pas l'écarter (permis `pieces_demandees = []`, lu
+  `[PCMI3, PCMI6]`) ; l'écran montre toute proposition du permis. Lignes brutes demandées au coordinateur (pièce,
+  `pieces_valeurs`, travail `lorani.piece_lue`, `lorani_permis_dates_lues`).
+- 06/10, 2 h 01 Z (coordinateur, brut) : pièce 059e705e… `lue`, `lorani_demande_pieces` 0,97 ; `pieces_valeurs` :
+  `date_lettre` "2026-10-01", `numero_dossier`, et **une seule ligne `pieces` dont la valeur est le tableau
+  ["PCMI 3","PCMI 6"]** ; `lorani_valeurs_de_piece` la rend en texte, `lorani_propositions` la rejette → `pieces = []`
+  → `lorani_deja_saisi` (le permis porte déjà []) → 0 proposition. C'est aussi la cause du « aucune » de 1 h 40.
+- **b5_06** (`omega/modules/lorani/migrations/b5_06_pieces_en_tableau.sql`) : `private.lorani_codes_pieces(jsonb)`,
+  pure, accepte une valeur par code, une valeur tableau jsonb, une valeur texte tableau JSON (JSON illisible = texte),
+  un texte à virgules ; ordre gardé, sans doublon, filtre de b5_05 ; `lorani_propositions` (corps de b5_05) l'appelle.
+  Essayé sur un Postgres 16 local jetable : sept formes, toutes justes ; la proposition rend [PCMI3, PCMI6].
+  Test : deux assertions de plus (étape 19, b5_06) → 114 attendues.
+- 06/10, 2 h 02 Z (coordinateur) : décision commune (A1, `omega/CHAMPS-LECTURE.md` 9ebefca, « Une ligne par champ,
+  jamais deux ») : une liste = UNE ligne dont la valeur est un tableau jsonb. Suites : b5_06 recopie aussi
+  `lorani_valeurs_de_piece` (corps de b5_04) pour remonter le tableau tel quel (jsonb) ; l'ancienne forme reste lue.
+  Essayé en local (table `pieces_valeurs` réduite) : tableau → [PCMI3, PCMI6] ; deux lignes → [PC5, PC8] dans l'ordre
+  des boîtes. Test, étape 7 : la demande de pièces s'écrit désormais en une ligne `["PC5", "PC 8"]` (vraie chaîne
+  `enregistrer_lecture` → `lorani_lectures_passage`). Fiche `CHAMPS-LECTURE-LORANI.md` ligne 23 : une seule forme écrite.
 

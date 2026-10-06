@@ -239,8 +239,8 @@ begin
   v_piece := tests.b5_lire(v_referent, v_projet, 'demande-pieces.pdf', 'lorani_demande_pieces', jsonb_build_array(
     jsonb_build_object('champ', 'date_lettre', 'valeur', tests.b5_iso(v_j_demande), 'texte', 'Nantes, le ' || tests.b5_fr(v_j_demande)),
     jsonb_build_object('champ', 'numero_dossier', 'valeur', 'PC 044109 26 A0042', 'texte', 'Dossier n° PC 044109 26 A0042'),
-    jsonb_build_object('champ', 'pieces', 'valeur', 'PC5', 'texte', 'PC5 — plan des façades'),
-    jsonb_build_object('champ', 'pieces', 'valeur', 'PC 8', 'texte', 'PC 8 — photographie du terrain')));
+    -- une ligne par champ : la liste est UNE valeur tableau, dans l'ordre de la lettre (CHAMPS-LECTURE.md, b5_06)
+    jsonb_build_object('champ', 'pieces', 'valeur', jsonb_build_array('PC5', 'PC 8'), 'texte', 'PC5 — plan des façades ; PC 8 — photographie du terrain')));
   r := private.lorani_lectures_passage();
   select id into v_prop from public.lorani_permis_dates_lues where piece_id = v_piece and nature = 'demande_pieces';
   return next ok(v_prop is not null, '7. une proposition « demande_pieces » est née');
@@ -422,6 +422,15 @@ begin
                    #> '{0,valeurs,pieces}',
                  '[{"code": "PCMI3"}, {"code": "PCMI6"}, {"code": "DPMI2"}]'::jsonb,
                  '19. b5_05 : les pièces « PCMI 3 », « PCMI 6 », « DPMI2 » d''une demande lue sont gardées, le texte libre écarté');
+  -- b5_06 : la forme que rend le lecteur v14, UNE valeur tableau passée en texte par lorani_valeurs_de_piece (06/10, pièce 059e705e…)
+  return next is(private.lorani_propositions('lorani_demande_pieces',
+                   '{"date_lettre": {"valeur": "2026-10-01"}, "pieces": [{"valeur": "[\"PCMI 3\", \"PCMI 6\"]", "texte": "- PCMI 3 : plan en coupe", "page": 1, "verifiee": true}]}'::jsonb)
+                   #> '{0,valeurs,pieces}',
+                 '[{"code": "PCMI3"}, {"code": "PCMI6"}]'::jsonb,
+                 '19. b5_06 : une seule valeur « pieces » portant le tableau ["PCMI 3", "PCMI 6"] donne les deux pièces');
+  return next is(private.lorani_codes_pieces('[{"valeur": ["PC 8", "PC5"]}, {"valeur": "PC5; PA10-1"}]'::jsonb),
+                 '["PC8", "PC5", "PA10-1"]'::jsonb,
+                 '19. b5_06 : tableau jsonb et texte à virgules, dans l''ordre et sans doublon');
 
   -- ── 20. Le journal ──
   return next ok((select count(distinct action) from public.journal_opposable where client_id = v_client and action in
