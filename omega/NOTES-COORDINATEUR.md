@@ -567,3 +567,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   propositions : oui à un J-2 réel sur le banc en mode essai (remis à l'adresse de Teo,
   comme Tavaro) et à la clôture (annule) des sept chantiers « Essai B6 » — B6 écrit les
   fichiers, le coordinateur pose.
+- **Point automatique 04 h 15 (02 h 15 Z)** : rien de neuf à poser. Battements frais
+  (lecteur, identite, expediteur, lorani_lecture 02:15 ; filed 02:14) ; 0 erreur HTTP et
+  0 cron en échec sur 30 min. 2 travaux en échec (lecteur.lire, pièces Tamila chiffrées,
+  00:24/00:26 Z) : antérieurs au garde-fou du lecteur v16, attendus. En attente : B6 (J-2
+  réel + clôture des chantiers d'essai), A3 (vue Fournisseurs), Teo (Realtime de
+  filed_fournisseurs, export Logos_w, SIRENE_API_KEY, HDS, coffre Tamila).
