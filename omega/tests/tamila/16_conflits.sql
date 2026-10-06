@@ -147,12 +147,15 @@ begin
   return next throws_ok(format('select public.tamila_coffre_demander_index(%L::uuid)', v_client), '55000', null,
                         'un cabinet local tire sa clé d''index dans le navigateur (55000)');
   perform tests.redevenir_admin();
-  jeu2 := tests.tamila_jeu();
-  perform tests.tamila_installe(jeu2);
+  -- Le cabinet voisin du jeu (déjà créé avec son gérant : pas de second tamila_jeu, auth.users a ses courriels uniques).
+  jeu2 := jsonb_build_object('client', jeu ->> 'autre_client', 'gerant', jeu ->> 'autre_gerant');
+  perform tests.endosser((jeu2 ->> 'gerant')::uuid, 'b4-voisin@essai.invalid');
+  perform public.tamila_installer((jeu2 ->> 'client')::uuid);
+  perform tests.redevenir_admin();
   perform tests.endosser_serveur();
   perform public.tamila_coffre_activer((jeu2 ->> 'client')::uuid, 'fr-par', v_maitre, (jeu2 ->> 'gerant')::uuid);
   perform tests.redevenir_admin();
-  perform tests.endosser((jeu2 ->> 'gerant')::uuid, 'b4-delorme2@essai.invalid');
+  perform tests.endosser((jeu2 ->> 'gerant')::uuid, 'b4-voisin@essai.invalid');
   return next throws_ok(format('select public.tamila_poser_index_cle(%L::uuid, null, %L::bytea)', jeu2 ->> 'client', v_env), '55000', null,
                         'au coffre, pas de clé d''index sous la phrase (55000)');
   r := public.tamila_coffre_demander_index((jeu2 ->> 'client')::uuid);
@@ -164,15 +167,15 @@ begin
   return next throws_ok(format('select public.tamila_coffre_poser_index(%s, %L::bytea)', r ->> 'journal', v_env), '55000', null,
                         'une demande ne sert qu''une fois (55000)');
   perform tests.redevenir_admin();
-  perform tests.endosser((jeu2 ->> 'avocat')::uuid, 'b4-rousseau2@essai.invalid');
+  perform tests.endosser((jeu2 ->> 'gerant')::uuid, 'b4-voisin@essai.invalid');
   r := public.tamila_coffre_index_pour_membre((jeu2 ->> 'client')::uuid);
   return next ok(r ->> 'fournisseur' = 'scaleway' and r ->> 'enveloppe' = repeat('7c', 90) and (r ->> 'journal') is not null,
-                 'un avocat reçoit l''enveloppe Scaleway de la clé d''index, remise journalisée');
+                 'une personne du cabinet reçoit l''enveloppe Scaleway de la clé d''index, remise journalisée');
   return next is(public.tamila_index_cle((jeu2 ->> 'client')::uuid) ->> 'enveloppe', null, 'la porte locale ne rend pas l''enveloppe d''une clé au coffre');
   perform tests.redevenir_admin();
-  perform tests.endosser((jeu2 ->> 'stagiaire')::uuid, 'b4-stagiaire2@essai.invalid');
+  perform tests.endosser((jeu ->> 'avocat')::uuid, 'b4-rousseau@essai.invalid');
   return next throws_ok(format('select public.tamila_coffre_index_pour_membre(%L::uuid)', jeu2 ->> 'client'), '42501', null,
-                        'pas au stagiaire (42501)');
+                        'pas à une personne d''un autre cabinet (42501)');
   perform tests.redevenir_admin();
   select count(*) into n from public.tamila_coffre_journal where client_id = (jeu2 ->> 'client')::uuid and detail ? 'index';
   return next is(n, 2::bigint, 'la création et la remise de la clé d''index sont au journal du coffre');
