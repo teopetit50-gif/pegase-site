@@ -41,6 +41,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_14_filed_lot7_cle_valeurs_humaines.sql` | correctif (relevé du coordinateur, 06/10) : `filed_tva_intracom_analyser` (texte d'a4_04) déclare fausse une TVA FR dont le SIREN échoue au Luhn ; `filed_siren_de_tva_fr` nul dans ce cas ; déclencheur `pieces_valeurs_cle_humaine` : une valeur `humain` sur fournisseur/acheteur siren, siret, tva, iban (iban : fournisseur seul) refusée en 22023 si la clé est fausse, quelle que soit la porte. Test `a4_08_cle_valeurs_humaines.sql`. |
 | `a4_15_filed_lot8_paiements.sql` | suivi du paiement (vue « À payer » d'A3, 06/10) : pas de seconde table, `filed_reglements` (a4_06) suffit. `private.filed_marquer_reglee` gagne trois gardes (pas au-delà du reste, pas de date future, une référence notée une fois par facture) ; porte `public.filed_noter_paiement(p_facture, p_date, p_montant, p_moyen, p_reference)` (gérant, admin, valideur) ; lecture `public.filed_etat_paiement(p_facture)` → dû, réglé, reste, état `a_payer` / `partielle` / `payee`. Pas de statut « payee » sur la facture : l'état comptable reste. Test `a4_09_paiements.sql`. |
 | `a4_16_filed_lot9_facture_electronique.sql` | lot 9, facture électronique reçue (06/10) : référentiels `filed_cycle_vie_statuts` (200 à 213) et `filed_cycle_vie_motifs` ; `filed_factures.provenance` (`structuree` / `lue` / `saisie`, posée à l'insertion) ; la valeur xml fait foi (déclencheur `pieces_valeurs_xml_fait_foi`, 22023) ; `filed_cycle_vie` : 204 à l'intégration, 205 validée, 210 refusée (motif tiré des contrôles bloquants) ou écartée (DOUBLON), 207 litige, 211 règlement, `a_emettre` si structurée ; portes de l'ouvrier PA (`filed_cycle_vie_a_emettre`, `filed_noter_emission_cycle_vie`, service_role) ; frise `filed_cycle_vie_facture`. Tests pgTAP `a4_10_facture_electronique.sql` (`^test_a4_16_`). |
+| `a4_17_filed_lot10_ecritures_fec.sql` | lot 10, écritures et FEC (06/10) : `filed_comptes_systeme` (401, 44566, 44562, 512, 530 par défaut, réglables) ; `filed_ecritures` (on ajoute ; seul le lettrage se pose ensuite) écrites à la comptabilisation (HA : charges des imputations validées, TVA au prorata, 44562 pour la classe 2, TVA non déductible dans la charge, 401 + auxiliaire au crédit ; avoir inversé ; HT non couvert → 55000) et à chaque règlement (BQ, CA pour les espèces) ; lettrage `L000001` quand la facture est soldée ; numérotation continue par société et par exercice, EcritureDate = date d'enregistrement bornée à l'exercice ; `public.filed_exporter_fec` (A47 A-1 : 18 champs, tabulation, UTF-8, virgule, AAAAMMJJ, SirenFECAAAAMMJJ, journalisé avec empreinte) ; `public.filed_rattraper_ecritures` (service_role, à lancer à la main). Tests pgTAP `a4_11_ecritures_fec.sql` (`^test_a4_17_`). |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -178,6 +179,22 @@ Famille « Pilotage » :
 - « Le délai moyen de traitement se mesure de la réception au classement. »
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
+
+## FEC (06/10) — ce que fait et ne fait pas a4_17
+
+- Référence : A. 47 A-1 du LPF (Légifrance) et BOI-CF-IOR-60-40-20 (07/06/2017). Noms de champs du texte légal :
+  `CompAuxNum` et `CompAuxLib` (le BOFiP écrit `CompteAuxNum` dans ses exemples ; on suit l'arrêté).
+- Le FEC de FILED est un **journal d'achats** (HA, BQ, CA pour les achats et leurs règlements) : sans ventes, à-nouveaux,
+  paie, immobilisations amorties ni inventaire. Il se fusionne dans le FEC du cabinet. Il n'est pas le FEC complet de
+  l'entreprise, et l'écran doit le dire.
+- Manque encore :
+  - l'autoliquidation : 4452 TVA due au crédit, 44566 au débit ;
+  - la contre-valeur des factures en devise (aujourd'hui, montant en devise seulement, Debit = Credit = 0) ;
+  - l'écriture de correction (extourne) quand une facture comptabilisée est annulée ;
+  - le choix du séparateur « | » ou de l'encodage ISO 8859-15 (seuls tabulation et UTF-8 sont produits, tous deux
+    admis).
+- Les factures comptabilisées avant le lot 10 n'ont pas d'écritures : `filed_rattraper_ecritures(p_client)` les écrit
+  (date du jour) et liste celles dont les imputations ne couvrent pas le HT.
 
 ## PA — plateformes agréées : ce qu'il faut pour en brancher une (06/10, sans code)
 
