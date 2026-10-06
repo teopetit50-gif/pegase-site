@@ -519,3 +519,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   joue le fichier puis annule tout par une exception interne, et rend « vert » ou
   « rouge : <code> <message> » (les notices sont perdues). À employer pour tout test non pgTAP.
   A3 prévenu : masquer « Lever avec un motif » pour ce code.
+- 04 h 15 — **preuve réelle FILED fournisseur** (A3, 01 h 53 Z) : daf@ confirme ORANGE SA →
+  actif ; FAC-2026-10-0471 bloquee → a_valider (0 bloquant) ; demande valider_fournisseur
+  annulée d'office. « Annuler ma demande » prouvé (IBAN proposé par le gérant → demande
+  annulée par l'écran). worker-a3 71b56a7 fusionné (relecture à 1, 2, 4 min après
+  « Revérifier »). Renvoyé à A4 : la demande valider_facture née du recontrôle est
+  attribuée à daf (auth.uid()), qui ne pourra pas la valider ; IBAN « propose » orphelin
+  après annulation.
