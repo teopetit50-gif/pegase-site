@@ -254,7 +254,62 @@ certification ISO 27001.
 6. **E-reporting.** Les transactions hors réforme (B2C, international) et les données de paiement des services sont
    déclarées par la PA du client, pas par FILED.
 
-**Choix à faire par Teo** : la voie 1 (et quelle PA) ou la voie 2. C'est ce choix qui fixe l'API exacte à brancher.
+**Choix de Teo (06/10) : voie 1.** ~~Choix à faire par Teo~~ : la voie 1 (et quelle PA) ou la voie 2. C'est ce choix qui fixe l'API exacte à brancher.
+
+### Liste courte pour Teo (voie 1 choisie le 06/10) — les trois PA techniques à contacter
+
+**Vérification.** Liste officielle téléchargée le 06/10/2026 sur impots.gouv.fr, « Je consulte la liste des
+plateformes agréées », mise à jour du 22/09/2026 : 149 opérateurs immatriculés, avec leur date d'immatriculation. Les
+trois PA ci-dessous y figurent.
+
+| | 1. **Iopole** (Pérols, 34) | 2. **Super PDP** (Paris 20ᵉ) | 3. **B2Brouter** (Barcelone) |
+|---|---|---|---|
+| Immatriculée le | 11/12/2025 | 22/12/2025 | 12/12/2025 |
+| Pour qui | PA « technique » pour éditeurs et opérateurs, API d'abord ; marque blanche (question de sa FAQ, réponse à obtenir) | API pour éditeurs ; compte web gratuit | offre « PDP marque blanche » pour éditeurs, par API |
+| Prix public | non : sur devis | **oui** : API 0,0025 € par facture (dégressif), compte web gratuit jusqu'à 1 000 factures par mois | web seul : 0 €, 110 € ou 300 € par an ; API éditeur sur devis |
+| XP Z12-013 | non affichée sur le site : **à demander** | API propre et API AFNOR (selon un comparatif public) : **à confirmer** | non mentionnée : **à demander** (formats UBL et Peppol confirmés) |
+| Bac à sable | oui, « en un clic » | non affiché | non affiché |
+| Sécurité, hébergement | SecNumCloud, ISO 27001, en France | ISO 27001, point d'accès Peppol | société espagnole : lieu d'hébergement à demander |
+| Contact | contact@iopole.com | contact@superpdp.tech | comercial@b2brouter.net |
+
+En réserve, aussi immatriculées : Invopop (Madrid, 15/01/2026, API pour développeurs, offre Pro à partir de 500 € par
+mois plus l'usage) et Seqino (Gif-sur-Yvette, 15/01/2026).
+
+**Les questions à poser aux trois, par écrit :**
+1. L'API AFNOR XP Z12-013, version de juin 2026 : service Flow (POST /flows, POST /flows/search, GET /flows/{id}),
+   webhooks, OAuth2 en client credentials. L'ouvrier d'A2 est écrit pour cette API. Une API propre demande un second
+   adaptateur : 1 à 2 semaines d'A2.
+2. Le statut d'Omega : « opérateur de dématérialisation » ou « solution compatible » raccordée. Une seule connexion
+   pour tous nos clients ?
+3. L'annuaire : la PA inscrit-elle par API l'adresse de facturation de chaque société (SIREN, SIRET, code de routage) ?
+4. Le KYC/KYB de chaque client : qui le fait, par quelle API, en combien de temps ?
+5. Le prix pour un opérateur : au flux, au client ou forfait ; frais de mise en service ; engagement minimal.
+6. L'hébergement (France ou UE) ; la réversibilité (portabilité vers une autre PA) ; l'archivage ; l'e-reporting.
+7. Le bac à sable ouvert avant signature, et le délai de mise en production.
+
+**Ce qu'il faudra signer :**
+1. Le contrat de service entre Omega et la PA (opérateur, ou partenaire « solution compatible ») : niveau de service,
+   prix, durée, réversibilité.
+2. L'accord de sous-traitance des données personnelles (article 28 du RGPD), et la liste des sous-traitants ultérieurs.
+3. Pour **chaque client** : le mandat qui permet à la PA, par Omega, de recevoir et d'émettre ses factures. Il est
+   signé par le client (en ligne, dans l'écran d'Omega), avec sa vérification d'identité (KYB) chez la PA. Les
+   conditions générales d'Omega doivent le prévoir.
+4. Côté Omega : une clause de ses conditions générales sur la plateforme employée et la réversibilité.
+
+**Délai, à confirmer avec chacune** (estimation, rien de signé) :
+- prise de contact et devis : 1 à 2 semaines ;
+- bac à sable : immédiat chez Iopole, à obtenir chez les autres ;
+- contrat et accord de sous-traitance : 2 à 4 semaines ;
+- branchement : quelques jours si la PA expose XP Z12-013, car l'ouvrier, le faux serveur et les portes sont prêts ;
+  1 à 2 semaines de plus avec une API propre ;
+- puis, par client : mandat, KYB et inscription à l'annuaire, quelques jours chacun.
+
+Au total, compter **4 à 8 semaines** jusqu'au premier client réel. L'obligation de réception court déjà depuis le
+1er septembre 2026 : un client d'Omega doit d'ici là avoir sa propre PA. Le dire aux premiers clients.
+
+Sources : liste officielle impots.gouv.fr (fichier XLSX du 22/09/2026) ; sites iopole.com, superpdp.tech,
+b2brouter.net/fr/tarifs ; documentation docs.invopop.com ; comparatif digitiz.fr (pour l'API AFNOR de Super PDP).
+
 
 Sources consultées : impots.gouv.fr (« Je passe à la facturation électronique », dossier de spécifications externes,
 norme XP Z12-012), AFNOR (XP Z12-013), documentation publique des statuts (invopop), b2brouter.net, presse
