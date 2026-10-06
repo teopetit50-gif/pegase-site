@@ -3,7 +3,7 @@
 **Synthèse**
 1. Deux lectures sont **prouvées sur de vrais documents**, une seule pièce chacune : une facture PDF (13 valeurs justes sur 13, 0,0145 €) et un Factur-X (17 valeurs, sans IA, 0 €). Aucune mesure de qualité sur un corpus.
 2. Tout le reste est **B** : construit et testé sur des doubles et des exemples (136 tests du lecteur, 16 de lecteur-exports), jamais passé sur un vrai document de client.
-3. Trois chemins **dépendent d'un compte ou d'une décision (T)** : le coffre Tamila (aucun dossier n'a sa clé chez Scaleway), la transcription des vocaux (clé Mistral non posée, refusée pour l'instant) et WhatsApp (application Meta), ainsi qu'un vrai export Logos_w (Teo).
+3. **« Lu en Europe »** n'est pas vrai aujourd'hui : la recette appelle l'API Anthropic en direct. Bedrock UE est déjà codé, il manque le compte AWS (T). Trois autres chemins **dépendent d'un compte ou d'une décision (T)** : le coffre Tamila (aucun dossier n'a sa clé chez Scaleway), la transcription des vocaux (clé Mistral non posée, refusée pour l'instant) et WhatsApp (application Meta), ainsi qu'un vrai export Logos_w (Teo).
 4. **Pas construit (D)** : documents médicaux (ordonnances, comptes rendus), DWG, attestations d'assurance FILED avec leurs champs, mesures prises sur le dessin d'un plan.
 5. Passer de B à A, c'est d'abord **un corpus réel par famille** (20 à 30 pièces, fournies par Teo ou les clients pilotes) et une mesure champ par champ : environ **17 jours** côté lecteur (16 jours de lignes + 1 jour pour l'outil de mesure), plus le temps des modules.
 6. **Coût IA** mesuré ou estimé : 0 € pour Factur-X, UBL et les exports ; environ 0,015 € pour une facture PDF d'une page ; 0,02 à 0,03 € par page scannée ; 0,01 à 0,02 € pour un message avec photo ; de 1 à 5 € pour une lecture longue de dossier, plafonnée à 15 €.
@@ -38,6 +38,7 @@ Légende : **A** prouvé sur de vrais documents en recette ; **B** testé sur do
 | Mesures prises sur le dessin d'un plan | **D** | — | Non promis honnêtement aujourd'hui (seules les cotes écrites) | — | — | — |
 
 ## Ce qui vaut pour toutes les lignes
+- **Où tourne le modèle** : la recette appelle aujourd'hui l'API Anthropic en direct. L'hébergement en UE n'est pas garanti, et il n'y a pas de non-conservation contractuelle sans accord avec Anthropic. Toute promesse « lu en Europe, sans conservation » est donc **T** : le code sait déjà passer par AWS Bedrock en région UE (profil `eu.anthropic…`). Il suffit de retirer la clé Anthropic et de poser les identifiants AWS, soit 0,5 jour pour basculer et vérifier, avec un compte AWS et l'accès au modèle.
 - Chaque valeur cite sa page et son texte ; elle n'est « vérifiée » que si la citation se retrouve dans la pièce. Une pièce passe « à vérifier » dès qu'une clé manque.
 - Plafond par client et par jour (`plafond_ia_jour_client`, 5 € sur la recette) : au-delà, la lecture attend le lendemain.
 - Prix utilisés : Claude Sonnet 5.5 (≈ 3 $ et 15 $ par million de jetons en entrée et en sortie), 1 $ = 0,92 €. Une facture d'une page coûte ≈ 3 800 jetons en entrée et 800 en sortie.
