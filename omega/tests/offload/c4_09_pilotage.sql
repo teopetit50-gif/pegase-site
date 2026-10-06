@@ -1,6 +1,29 @@
 -- c4_09 — OFFLOAD : le pilotage (session C4, 06/10/2026). Après c4_00, c4_02, c4_03, c4_07, c4_08 (aides) et les
 -- migrations c4_01 à c4_09. runtests() annule tout. Dates relatives au jour du test.
 
+-- La remise d'un envoi par la voie du socle (comme C3 et le test 19ab d'A5) : une personne l'approuve, puis
+-- l'ouvrier d'envoi le commence et le confirme. Rend le statut final de l'envoi.
+create or replace function tests.c4_remettre(p_envoi uuid, p_valideur uuid, p_email text) returns text
+language plpgsql as $$
+declare
+  e public.envois;
+  r jsonb;
+begin
+  select * into e from public.envois where id = p_envoi;
+  perform tests.endosser(p_valideur, p_email);
+  insert into public.approbations (demande_id, client_id, user_id, decision) values (e.demande_id, e.client_id, p_valideur, 'approuve');
+  perform tests.redevenir_admin();
+  if to_regprocedure('tests.endosser_serveur()') is not null then
+    execute 'select tests.endosser_serveur()';
+  end if;
+  r := private.commencer_envoi(p_envoi);
+  if coalesce((r ->> 'envoyer')::boolean, false) then
+    perform private.confirmer_envoi(p_envoi, 'essai:c4:' || p_envoi::text);
+  end if;
+  perform tests.redevenir_admin();
+  return (select x.statut || coalesce(' / ' || x.verrou, '') from public.envois x where x.id = p_envoi);
+end $$;
+
 create or replace function tests.test_c4_09_pilotage() returns setof text
 language plpgsql as $f$
 declare
@@ -41,12 +64,14 @@ begin
   perform public.offload_saisir_achat(v_b, current_date, 900, 'F-9001', 'Détartreur', 'facture');
   perform tests.redevenir_admin();
 
-  -- Un rappel de retrait, parti, auquel le client répond.
-  v_aff := tests.c4_affaire(v_a, 'CMD-P1', 9, '{"valeur_ht": 200}');
+  -- Un rappel de retrait, parti, auquel le client répond (sur le compte B : A, qui a répondu à sa reprise, est en pause
+  -- au socle pendant 30 jours, et son rappel serait retenu).
+  v_aff := tests.c4_affaire(v_b, 'CMD-P1', 9, '{"valeur_ht": 200}');
   perform private.offload_affaires_cycle(v_client, null);
   a := tests.c4_affaire_lue(v_aff);
-  update public.envois set statut = 'envoye', envoye_le = now() where id = a.envoi1_id;
-  perform public.deposer_reception(v_client, 'email', 'contact@sogexal.test', 'msg-c4-p2', 'achats@bati.test', 'Martin',
+  return next is(tests.c4_remettre(a.envoi1_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test'), 'envoye',
+                 'Le rappel de retrait part par la voie du socle (approbation, puis ouvrier d''envoi)');
+  perform public.deposer_reception(v_client, 'email', 'contact@sogexal.test', 'msg-c4-p2', 'cabinet@morin.test', 'Martin',
     'Re : votre commande', E'Je passe demain.', null, '[]'::jsonb, jsonb_build_object('envoi_id', a.envoi1_id), now());
   perform private.offload_traiter_travaux(50);
   return next ok((tests.c4_affaire_lue(v_aff)).repondu_le is not null, 'La réponse à un rappel de retrait est datée');
