@@ -67,6 +67,16 @@ Reçu : a5_01 v2 posée depuis 97853cb, test 44 5/5, test 51 3/3.
   diverger, l'ouvrier d'A2 reçoit un `fournisseur_hds` qui n'est pas celui
   que le verrou a jugé.
 
+**Recette (coordinateur, 01 h 35 Z)** : 52 ok 4/4, 53 ok 5/5. Les témoins
+sortent `HORS_HEURES`, pas le verrou santé : c'est attendu.
+
+**Test 54 `sante_fournisseur_coherent`** (lecture seule) : il vérifie la
+divergence ci-dessus sur les envois existants. En essai, `envois.fournisseur`
+doit valoir `envois_essai_fournisseur` ; en réel, le fournisseur de
+l'expéditeur retenu (`expediteur_id`). Aucun envoi de santé prêt, en cours
+ou parti ne doit viser un fournisseur non agréé. Sur la maquette il est
+sans objet (pas d'`expediteurs`) : seule la recette le juge.
+
 ## PASSATION — pour le nouveau coordinateur (session_01BCGFdpRKBvXKjouC75sYBg), 6 octobre 01:15 UTC
 
 L'ancien coordinateur me demande de t'envoyer mes réponses en attente. Le
