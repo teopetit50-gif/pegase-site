@@ -7,7 +7,8 @@
    vérifier le marché de la Maison Rolland ; chiffrer une ligne d'avenant sur
    un prix validé et la soumettre ; signer l'avenant validé ; noter la
    réponse d'un sous-traitant ; voir les remplaçants ; rattacher une facture
-   (SIREN refusé sur le mauvais lot).
+   (SIREN refusé sur le mauvais lot) ; l'accord permanent des J-2 (b6_08) :
+   révoquer avec un motif, puis le redonner (« à valider »).
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -165,6 +166,27 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   await s.dormir(800);
   ok(await s.evaluer(`/F-45812/.test(document.querySelector('#esp-dossier')?.innerText || '')`), 'la facture est rattachée au lot 01 et paraît dans la liste');
   ok(await s.evaluer(`/14[\\s\\u202f\\u00a0]260,00/.test(document.querySelector('#esp-dossier')?.innerText || '')`), 'le déboursé du lot 01 porte 14 260 € facturés');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b6-accord', densite: 1 });
+  console.log('— L\'accord permanent des confirmations J-2 (390)');
+  ok(await s.aller(base + chemin), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Accord permanent des confirmations J-2"]')`;
+  ok(await s.evaluer(`/Actif jusqu.au/.test(${carte}?.innerText || '')`), 'l\'exemple montre un accord actif, avec sa date de fin');
+  ok(await s.evaluer(bouton('/^\\s*Révoquer\\s*$/', carte)) !== null, 'clic sur « Révoquer »');
+  await s.dormir(400);
+  await s.evaluer(saisir('[role="dialog"] input', 'Nous reprenons la main sur les confirmations'));
+  await s.evaluer(`${dlgBouton('/Révoquer l.accord/')}?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Révoqué/.test(${carte}?.innerText || '') && /reprenons la main/.test(${carte}?.innerText || '')`), 'l\'accord est « Révoqué », le motif est dit');
+  ok(await s.evaluer(bouton('/Donner l.accord permanent/', carte)) !== null, 'clic sur « Donner l\'accord permanent »');
+  await s.dormir(400);
+  ok(await s.evaluer(`/À valider/.test(${carte}?.innerText || '')`), 'redonné, il attend son activation (« À valider »)');
+  const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+  ok(deb === 0, `pas de débordement horizontal (${deb})`);
   s.fermer();
 }
 

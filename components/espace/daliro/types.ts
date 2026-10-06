@@ -177,6 +177,7 @@ export type EnvoiPassage = {
   envoye_le: string | null;
   remise: string | null;
   remise_le: string | null;
+  accord?: { politique: string; active_le: string | null } | null;
 };
 
 export type Dependance = {
@@ -338,4 +339,27 @@ export type Tableau = {
   tiers: Tiers[];
   equipes: { id: string; nom: string }[];
   bibliotheque: Prix[];
+};
+
+/* L'accord permanent des confirmations J-2 (b6_08) : trois politiques du socle, une par canal. */
+export type CanalAccordJ2 = {
+  canal: "email" | "whatsapp" | "sms";
+  statut: "aucun" | "a_valider" | "active" | "refusee" | "revoquee";
+  politique: string | null;
+  debut: string | null;
+  fin: string | null;
+  active_le: string | null;
+  cree_le: string | null;
+  donne_par_libelle: string | null;
+  demande_statut: string | null;
+  revoquee_le: string | null;
+  revoquee_par_libelle: string | null;
+  motif_revocation: string | null;
+  nombre_mensuel: number | null;
+  utilises_mois: number | null;
+};
+export type AccordJ2 = {
+  etat: "aucun" | "a_valider" | "actif" | "partiel" | "revoque";
+  fin: string | null;
+  canaux: CanalAccordJ2[];
 };
