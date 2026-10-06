@@ -166,7 +166,9 @@ export type DocumentFiled = {
   depose_par?: string | null;
 };
 
-export type StatutFacture = "a_completer" | "bloquee" | "a_valider" | "ecartee";
+/* filed_factures_statut_v2 (a4_02) : après la validation, la facture est
+   validée, refusée ou comptabilisée */
+export type StatutFacture = "a_completer" | "bloquee" | "a_valider" | "ecartee" | "validee" | "refusee" | "comptabilisee";
 
 export type Facture = {
   id: string;

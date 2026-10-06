@@ -181,6 +181,40 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   porte « Lever avec un motif » comme tout contrôle ; si le déposant peut le
   lever, il contourne la séparation de `filed_confirmer_fournisseur`.
 
+## Lot du 06/10 (2) — de la demande à son dossier ; la chaîne FILED complète en réel
+
+- **Validations → FILED** : une demande dont l'objet est FILED (`filed_facture`,
+  `filed_document`, `filed_fournisseur`, `filed_iban` → son fournisseur) montre
+  « Le dossier » (`validations/ApercuFiled.tsx`) : référence, statut de la
+  facture, bloquants / à vérifier / levés, n°, fournisseur, TTC (lus sous RLS
+  en base réelle, dans les dossiers d'exemple sinon), et **« Ouvrir le
+  dossier »** → `/espace/filed?objet=facture:<id>` (`filed/lien.ts`).
+  L'écran FILED ouvre d'office le dossier désigné, et garde la cible tant
+  qu'elle n'est pas trouvée (la source passe de l'exemple à la base réelle
+  juste après le chargement) ; une cible absente est dite (« Document
+  introuvable »).
+- **Défaut réel trouvé et corrigé** : une facture validée a le statut
+  `validee` (`filed_factures_statut_v2` d'a4_02 : aussi `refusee`,
+  `comptabilisee`) ; l'écran n'en connaissait que quatre et **le dossier
+  plantait**. Les trois statuts sont ajoutés (`refusee` va en « litige »), et
+  un statut ou un état de document inconnu s'affiche tel quel au lieu de
+  casser (`statutFacture`, `etatDocument`). À signaler à B6 :
+  `daliro/ChantierVue.tsx` affiche le statut brut (« validee ») pour ces trois.
+- **Chaîne complète en réel** (06/10, 02 h 03–02 h 04 Z,
+  `relecture-decision.mjs`, compte `daf2@`, valideur — pas daf, demandeur de
+  la demande, voir plus haut) : la demande « Valider la facture
+  FAC-2026-10-0471 de ORANGE SA : 288,00 € TTC » montre son dossier
+  (R2026-000004, À valider, contrôles passés) ; **approuvée** avec
+  commentaire (02:03:20 Z), **exécutée** par le socle (02:04:00 Z) ; la
+  facture est **`validee`**, le fil dit « Archivée : empreinte … inscrite au
+  journal (ligne 76967) » puis « Validée par 1 personne(s) : classée ». Le
+  lien de la demande ouvre ce dossier (capture `reel-decision-dossier-1440.jpg`).
+  La première vraie facture du banc a donc fait tout le parcours : dépôt par
+  l'écran → lecture → contrôles → identité VIES → fournisseur confirmé par une
+  autre personne → validée par une troisième → archivée.
+- Recette aux cinq largeurs : 112 contrôles ✓ (dont « de la demande à son
+  dossier » : aperçu, lien, ouverture par l'URL, cible inconnue).
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

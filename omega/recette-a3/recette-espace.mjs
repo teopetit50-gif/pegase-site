@@ -144,6 +144,29 @@ for (const [nom, chemin] of ECRANS) {
 }
 
 {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lien', densite: 1 });
+  console.log('— /espace/validations → /espace/filed : de la demande à son dossier');
+  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  await s.dormir(500);
+  const choisie = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Lever le contrôle IBAN sur R2026-000009/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`);
+  ok(choisie, 'la demande « Lever le contrôle IBAN sur R2026-000009 » est ouverte');
+  await s.dormir(500);
+  const apercu = await s.evaluer(`(() => { const a = document.querySelector('.esp-apercu-filed'); if (!a) return null; return { texte: a.innerText.replace(/\\s+/g, ' '), lien: a.querySelector('a')?.getAttribute('href') }; })()`);
+  ok(apercu && /R2026-000009/.test(apercu.texte) && /Bloquée/.test(apercu.texte) && /Métallerie Roux/.test(apercu.texte), `aperçu du dossier dans la demande (${apercu?.texte})`);
+  ok(apercu?.lien === '/espace/filed?objet=facture:R2026-000009', `lien « Ouvrir le dossier » : ${apercu?.lien}`);
+  await s.capturer(`${dossier}validations-dossier-1440.jpg`, { qualite: 55 });
+  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000011'), 'FILED ouvert par l\'URL d\'une demande');
+  await s.dormir(900);
+  const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
+  ok(ref === 'R2026-000011', `le dossier désigné s'ouvre d'office (${ref})`);
+  ok(await s.aller(base + '/espace/filed?objet=facture:inconnue'), 'FILED ouvert avec une cible inconnue');
+  await s.dormir(900);
+  const introuvable = await s.evaluer(`/Document introuvable/.test(document.querySelector('.esp').innerText)`);
+  ok(introuvable, 'une cible inconnue est dite, sans erreur');
+  s.fermer();
+}
+
+{
   const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'a3-point', densite: 1 });
   console.log('— /espace/point : reculer d\'un jour');
   ok(await s.aller(base + '/espace/point'), 'page chargée');

@@ -23,7 +23,7 @@ import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, masquerIban, montant, nombreFr, pourcent } from "../format";
 import type { Commande, Controle, DossierFiled, Fournisseur, LigneCommande, LigneFacture, MotifRefus, NatureDocument } from "../types";
-import { CHAMPS_CORRIGEABLES, CHAMPS_PAR_NOTION, ETATS, FAMILLES_CONTROLE, NATURES, NOTION_PAR_COLONNE, STATUTS_FACTURE, grouperControles, libelleChamp } from "./etats";
+import { CHAMPS_CORRIGEABLES, CHAMPS_PAR_NOTION, FAMILLES_CONTROLE, NATURES, NOTION_PAR_COLONNE, etatDocument, grouperControles, libelleChamp, statutFacture } from "./etats";
 import { apparierLigne, attesterIdentite, bloquerFournisseur, classerDocument, confirmerFournisseur, confirmerValeurs, corrigerFacture, demanderVerification, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
 import VisionneusePiece from "./VisionneusePiece";
 
@@ -337,7 +337,7 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     );
   };
 
-  const e = ETATS[doc.etat];
+  const e = etatDocument(doc.etat);
 
   return (
     <div className="esp-dossier" style={{ display: "grid", gap: 14 }}>
@@ -346,7 +346,7 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
           <div className="esp-item-haut">
             <span className="esp-mono" style={{ fontWeight: 700, fontSize: 15 }}>{doc.reference}</span>
             <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
-            {facture ? <Pastille teinte={STATUTS_FACTURE[facture.statut].teinte}>{STATUTS_FACTURE[facture.statut].libelle}</Pastille> : null}
+            {facture ? <Pastille teinte={statutFacture(facture.statut).teinte}>{statutFacture(facture.statut).libelle}</Pastille> : null}
             {doc.nature ? <Pastille contour>{NATURES[doc.nature]}{doc.nature_source === "humain" ? " · classé à la main" : ""}</Pastille> : <Pastille teinte="ambre">Nature à classer</Pastille>}
             {facture ? <Pastille contour>version {facture.version}</Pastille> : null}
           </div>
