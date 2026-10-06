@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { BadgeCheck, Ban, FileText, Landmark, Unlock, UserCheck } from "lucide-react";
+import { BadgeCheck, Ban, FileText, Landmark, Unlock, UserCheck, Wallet } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { DOSSIERS_EXEMPLE } from "../exemples/filed";
@@ -44,7 +44,7 @@ type Form = { type: "confirmer" } | { type: "attester" } | { type: "bloquer"; bl
 /* l'exemple : les fournisseurs des dossiers d'exemple (un même fournisseur
    porte un identifiant par dossier : on les réunit par leur code), leurs
    IBAN et leurs factures */
-function vueExemple(): VueFournisseurs {
+export function vueExemple(): VueFournisseurs {
   const fournisseurs = new Map<string, Fournisseur>();
   const parCode = new Map<string, string>();
   const ibans = new Map<string, IbanFournisseur>();
@@ -57,7 +57,7 @@ function vueExemple(): VueFournisseurs {
     if (!fournisseurs.has(id)) fournisseurs.set(id, { ...d.fournisseur, id });
     for (const i of d.ibans) if (![...ibans.values()].some((x) => x.fournisseur_id === id && x.iban_masque === i.iban_masque)) ibans.set(i.id, { ...i, fournisseur_id: id });
     if (d.origine_deposee_par !== undefined) deposants[id] = d.origine_deposee_par ?? null;
-    if (d.facture) factures.push({ id: d.facture.id, numero: d.facture.numero, statut: d.facture.statut, montant_ttc: d.facture.montant_ttc, devise: d.facture.devise, date_emission: d.facture.date_emission, fournisseur_id: id, reference: d.document.reference });
+    if (d.facture) factures.push({ id: d.facture.id, numero: d.facture.numero, statut: d.facture.statut, nature: d.facture.nature, montant_ttc: d.facture.montant_ttc, net_a_payer: d.facture.net_a_payer, devise: d.facture.devise, date_emission: d.facture.date_emission, echeance_lue: d.facture.echeance_lue, iban: d.facture.iban, fournisseur_id: id, reference: d.document.reference });
   }
   return { fournisseurs: Array.from(fournisseurs.values()), ibans: Array.from(ibans.values()), factures, deposants };
 }
@@ -221,6 +221,7 @@ export default function EcranFournisseurs() {
         </div>
         <div className="esp-item-haut">
           <Link href="/espace/filed" className="r-btn r-btn--fil"><FileText width={15} height={15} aria-hidden="true" /> Documents reçus</Link>
+          <Link href="/espace/filed/a-payer" className="r-btn r-btn--fil"><Wallet width={15} height={15} aria-hidden="true" /> À payer</Link>
           <Ruban source={source} />
         </div>
       </div>
