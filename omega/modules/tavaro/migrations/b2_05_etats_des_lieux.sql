@@ -481,6 +481,9 @@ revoke all on function public.loc_signer_etat(uuid, text, text) from public, ano
 revoke all on function public.loc_constater_refus(uuid, text) from public, anon;
 revoke all on function public.loc_lever_caution(uuid, text) from public, anon;
 revoke all on function public.loc_chiffrer_retour(uuid, jsonb) from public, anon;
+-- (b2_05b) la porte est maintenant definer : la fonction privée qu'elle appelle n'a plus à être exécutable par authenticated
+revoke all on function private.loc_chiffrer_retour_agence(uuid, jsonb) from public, anon, authenticated;
+grant execute on function private.loc_chiffrer_retour_agence(uuid, jsonb) to service_role;
 grant execute on function public.loc_etablir_etat(uuid, text, jsonb) to authenticated, service_role;
 grant execute on function public.loc_signer_etat(uuid, text, text) to authenticated, service_role;
 grant execute on function public.loc_constater_refus(uuid, text) to authenticated, service_role;
