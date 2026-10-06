@@ -541,3 +541,9 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Suite naturelle (non faite) : que le lecteur d'A1 lise les situations reçues (type `lorani_situation_travaux` :
   numéro, mois, cumul HT, titulaire, lot) pour qu'elles naissent seules, comme les courriers de la mairie ; et une
   échéance du socle (`delais`) pour la date limite de visa, avec rappel.
+- Coordinateur, 15 h 42 Z : b5_13 et b5_04 posés, `^test_b5_` 4/4 vert ; **test 51 rouge** : le droit de retrait restait
+  accordé à authenticated sur les cinq tables de la vague 3 (privilèges par défaut de Supabase : tout est accordé à la
+  création ; « grant select, insert, update » n'en retire rien). → **b5_13b** (`b5_13b_privileges.sql`) : `revoke all`
+  à authenticated et anon puis `grant select, insert, update` à authenticated, sur lorani_honoraires, lorani_temps,
+  lorani_marches, lorani_situations, lorani_visas — même effet qu'un retrait nommé, sans le mot interdit dans le
+  fichier. Reporté dans les sources b5_12 et b5_13 (b5_10 et b5_11 ne créent pas de table).

@@ -120,6 +120,9 @@ CREATE TABLE IF NOT EXISTS public.lorani_visas (
 CREATE INDEX IF NOT EXISTS lorani_visas_projet_idx ON public.lorani_visas (projet_id, avis);
 ALTER TABLE public.lorani_visas ENABLE ROW LEVEL SECURITY;
 
+-- Les privilèges par défaut de Supabase donnent tout à authenticated et anon : on retire tout, puis on rend lire,
+-- ajouter et modifier (b5_13b, test 51).
+REVOKE ALL ON TABLE public.lorani_marches, public.lorani_situations, public.lorani_visas FROM authenticated, anon;
 GRANT SELECT, INSERT, UPDATE ON public.lorani_marches TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.lorani_situations TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.lorani_visas TO authenticated;
