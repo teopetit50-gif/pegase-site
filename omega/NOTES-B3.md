@@ -262,3 +262,111 @@ logiciel métier qui la fait).
   - Test 15 : second test `test_b3_15_rappels_essai_fictif` (5 assertions ; total 40). Avec 19ah, le rappel J-2 de R011 passe en essai, et `commencer_envoi` rend `donnees_fictives = true` et `fournisseur_hds = false`.
   - Test socle 19ah, n° 15 : le second envoi allait au même destinataire, donc il était différé (espacement) et commencer_envoi ne rendait pas la réponse d'un envoi prêt (have NULL). Corrigé : autre destinataire, donnees_sante lu sur l'envoi, et donnees_fictives jamais vrai pour un envoi ordinaire. 20 assertions.
   - Test socle 19ah, n° 16 : un vrai défaut, relevé par le coordinateur. commencer_envoi rendait donnees_fictives = le drapeau du module, même pour un envoi sans donnée de santé. **19ah v2** : v_fictif := e.donnees_sante and … ; l'étape 4, rejouable, corrige une pose v1 (vérifié en local : la v1 posée est corrigée, un envoi de santé donne true, un envoi ordinaire false, et une seconde pose ne change rien).
+
+### Suite de la vague 3 (audit des promesses, § 2 Tiroma), dans l'ordre du coordinateur
+1. **Synthèse de la semaine pour la direction** (06/10, ~17 h Z) :
+   - `b3_15_synthese_semaine.sql` :
+     - `private.tiroma_indicateurs_semaine` donne, par cabinet et du lundi au dimanche : rendez-vous, manqués et taux, créneaux libérés, devis présentés et signés (montant), plans sans rendez-vous, appels et rendez-vous repris, rappels, plus la semaine d'avant ;
+     - `public.tiroma_synthese_semaine(client, entité = null, lundi = null)` est réservée au titulaire et à la direction. Sans entité, elle couvre tous leurs centres (la direction voit ses sous-entités), avec un total. Aucune donnée nominative ;
+     - `private.tiroma_deposer_synthese` : le lundi dès 5 h, une ligne de chiffres « Synthèse de la semaine — <centre> » au point du matin du titulaire et de la direction (de l'entité ou d'un parent), `sante = false`. Cron tiroma-synthese.
+
+     Vérifié en local (tables simulées) : idempotente ; 2 rendez-vous dont 1 manqué sur la semaine du 28/09 au 04/10 ; dépôt le lundi, rien le mardi.
+   - `16_synthese_semaine.sql` : `test_b3_16_synthese_semaine`, 22 assertions (droits, chiffres comparés à la base, profil direction, dépôt du lundi, pas à l'assistante, rien le mardi).
+   - Écran : carte « Synthèse de la semaine » (4 tuiles, tableau par centre avec l'écart de manqués). Recette : 83 contrôles, tout passe ; axe : 0 écart.
+2. **Taux de réinscription** (06/10, ~17 h 30 Z) :
+   - Définition : parmi les patients VUS dans la période (honoré ou présumé honoré, une visite par patient et par jour), la part qui a déjà un prochain rendez-vous (après la visite, ni annulé ni supprimé). On ne dépend pas de la date de création des rendez-vous, souvent absente des exports.
+   - `private.tiroma_reinscription_calc` est posée **dans b3_15** (pas encore posé au moment de l'écrire) : la synthèse de la semaine donne aussi la réinscription, par centre et au total, et elle figure dans la ligne du lundi.
+   - `b3_16_reinscription.sql` : `public.tiroma_reinscription(client, entité, jours = 30)`, pour le titulaire, l'assistante et la direction. Elle rend le taux, la période d'avant, le détail par praticien (titulaire et direction seulement) et `sans_suite` : 25 patients vus au plus, sans prochain rendez-vous, sans plan en cours, joignables, et sans appel noté depuis 14 jours. La direction n'y voit aucun nom.
+   - `17_reinscription.sql` : `test_b3_17_reinscription`, 18 assertions.
+   - Écran : carte « Réinscription » (taux et écart, détail par praticien, « Vus sans prochain rendez-vous » avec « Noter l'appel ») et une colonne réinscription dans la synthèse. Recette : 85 contrôles, tout passe ; axe : 0 écart.
+   - Vérifié en local : b3_15 et b3_16 posées deux fois ; 2 visites, 1 réinscrit, taux 0,5, Hugo dans la liste ; la direction voit « Patient du cabinet ».
+3. **Absences probables** (06/10, ~18 h Z) :
+   - `b3_17_absences_probables.sql` : `public.tiroma_absences_probables(client, entité, jours = 3)` (titulaire, assistante, collaborateur pour ses patients). C'est un score à règles lisible, chaque point avec sa raison :
+     - +3 pour deux manqués ou plus en 18 mois, +2 pour un seul ;
+     - +1 pour un nouveau patient ;
+     - +1 pour un créneau à risque (même jour et même demi-journée, au moins 10 rendez-vous sur 180 jours, taux de manqués au moins 1,5 fois celui du cabinet) ;
+     - +1 pour un rendez-vous pris 60 jours avant ou plus (si l'export donne la date de création) ;
+     - −3 si le patient a confirmé au rappel.
+
+     Niveau « fort » à partir de 3 points, « moyen » à 2. Un NON au rappel est rendu en tête (« annonce »).
+   - `18_absences_probables.sql` : `test_b3_18_absences_probables`, 13 assertions (Jean Absent fort, Lina Nouvelle et ses raisons, confirmation qui efface, NON en tête, horizon).
+   - Écran : carte « Absences probables » (niveau, raisons, « Noter l'appel »). Recette : 88 contrôles, tout passe ; axe : 0 écart.
+   - Vérifié en local : Jean 4 points (fort), Lina 2 (moyen) ; après la confirmation de Jean et le NON de Lina, seule Lina reste, en « annonce ».
+4. **Assistante absente : soins à basculer** (06/10, ~19 h Z) :
+   - `b3_18_assistante_absente.sql` pose la table `public.tiroma_absences_membres` : membre, du, au, motif (congé, maladie, formation ou autre ; aucune raison médicale n'est demandée), `close_le`. L'équipe la lit sous RLS ; on n'y écrit que par les portes.
+   - Les portes, pour le titulaire et l'assistante :
+     - `tiroma_noter_absence_membre(client, entité, membre, début, fin, motif)` → uuid. Elle écrit au journal `tiroma.absence_membre_notee` ;
+     - `tiroma_retirer_absence_membre(absence)` clôt l'absence sans l'effacer ;
+     - `tiroma_soins_a_basculer(client, entité, jours = 7)` rend, pour chaque absence ouverte, les rendez-vous prévus sur le fauteuil habituel du membre absent pendant l'absence quand le soin exige une assistante. Pour chacun, elle donne les fauteuils où le basculer : actifs, équipés pour ce soin, libres sur ce créneau, non fermés, avec une assistante habituelle présente.
+   - `19_assistante_absente.sql` : `test_b3_19_assistante_absente`, 16 assertions. Le test vérifie les droits et les refus (dates, motif). Il vérifie aussi :
+     - le soin bascule vers le Fauteuil 2 avec Élodie, jamais vers le Fauteuil 3 (sans assistante), jamais vers celui de l'absente ;
+     - si Élodie est absente aussi, il n'y a plus de fauteuil où basculer ;
+     - une fois clôturée, l'absence n'apparaît plus mais reste dans l'historique ;
+     - daf2 ne voit rien ;
+     - la ligne est au journal.
+   - Écran : carte « Équipe absente » (titulaire et assistante) avec :
+     - les absences et les soins à basculer (« Vers Fauteuil 2 (avec Karine) » ou « Aucun fauteuil libre ») ;
+     - le dialogue « Noter une absence » (qui, du, au inclus, motif) ;
+     - « Clore l'absence ».
+
+     Recette : 94 contrôles, tout passe ; axe : 0 écart, dialogue compris.
+   - Vérifié en local : la porte rend le rendez-vous avec le Fauteuil 2 et Élodie ; après clôture, plus rien. Un premier essai a montré qu'une absence clôturée jouait encore dans la même transaction, parce que now() y est constant : d'où `close_le`.
+5. **Demi-journées vides des collaborateurs** (06/10, ~20 h Z) :
+   - `b3_19_demi_journees_vides.sql` pose `public.tiroma_demi_journees_vides(client, entité, jours = 14)`, de 1 à 28 jours. Pour chaque praticien actif et chaque demi-journée (matin avant 13 h), on calcule :
+     - les heures où il consulte : ses horaires propres s'il en a. Sinon, les horaires du cabinet réduits à ses demi-journées habituelles, c'est-à-dire des rendez-vous à ce créneau au moins 3 des 8 dernières semaines (`source` vaut alors « habitude ») ;
+     - à ces heures on retire les fériés, ses fermetures et celles du cabinet, et ses plages « personnel ». Un horaire exceptionnel du jour l'emporte ;
+     - la demi-journée est « vide » à partir d'une heure ouverte et sous le seuil du cabinet. Aujourd'hui, seul ce qui reste compte ;
+     - avec la demi-journée vide, on rend les minutes libres et le nombre de patients en liste d'attente qui la rempliraient.
+   - Qui la voit :
+     - le titulaire voit tous les praticiens ; un collaborateur ne voit que son agenda, même si le périmètre du cabinet est partagé ;
+     - ni l'assistante ni la direction : la page dit « jamais par personne, seul le titulaire » ;
+     - on ne regarde que l'avenir, sans taux passé.
+   - `private.tiroma_deposer_demi_journees` : chaque jour dès 5 h, au point du matin du titulaire seulement, une section « Demi-journées vides — <centre> » pour les sept jours qui viennent (8 lignes au plus), `sante = false`. Les lignes de J et J+1 sont en « attention ». Cron tiroma-demi-journees.
+   - Les calculs internes (`tiroma_ouvert_praticien`, `tiroma_demi_journees_calc`, le dépôt) ne sont ouverts qu'au service_role.
+   - `20_demi_journees_vides.sql` : `test_b3_20_demi_journees_vides`, 15 assertions :
+     - les droits, l'horizon ;
+     - le matin vide de Dr Rousseau (ses horaires, 240 min) et rien l'après-midi ;
+     - l'après-midi habituel de Dr Lacour ;
+     - le collaborateur ne voit que lui ;
+     - le décompte de la liste d'attente ;
+     - le point du matin : rien avant 5 h, la section au titulaire seul, sans santé ;
+     - un rendez-vous de 3 h 30 remplit le matin, un congé efface l'après-midi.
+   - Vérifié en local (tables simulées) : posée deux fois. Le jour D, on trouve Rousseau le matin (horaires, 240 min, attente 1) et Lacour l'après-midi (habitude, 300 min). Le collaborateur ne voit que Rousseau, l'assistante est refusée et rien n'est déposé à 4 h. Après le rendez-vous et le congé, il ne reste rien pour D.
+6. **Objectifs par fauteuil** (06/10, ~20 h 30 Z) :
+   - `b3_20_objectifs_fauteuils.sql` pose `public.tiroma_objectifs_fauteuils(client, entité, semaines = 4)`, pour le titulaire seul, sur 1 à 12 semaines. Par fauteuil actif et par semaine :
+     - les heures ouvertes viennent de `private.tiroma_ouvert` (un jour au calendrier inconnu ne compte pas) ;
+     - pour les semaines passées, l'occupation est le **réalisé** (honoré, `tiroma_reserve 'realisee'`) : un manqué n'occupe pas le fauteuil. Pour la semaine en cours et la suivante, c'est le **prévu** ;
+     - `atteint` vaut taux ≥ objectif, s'il y a un objectif et au moins une heure ouverte. Le résultat donne aussi la moyenne des semaines passées et le compte atteintes / comptées.
+   - L'objectif lui-même se fixe sous RLS : le titulaire fait l'`update` de `tiroma_fauteuils.objectif_occupation`. Il n'y a pas de nouvelle porte d'écriture.
+   - `private.tiroma_occupation_semaine` n'est ouvert qu'au service_role.
+   - `21_objectifs_fauteuils.sql` : `test_b3_21_objectifs_fauteuils`, 14 assertions :
+     - droits : l'assistante, le collaborateur et daf2 sont refusés ;
+     - six semaines, natures « réalisé » / « prévu » ;
+     - +120 min honorées comptées, l'heure manquée non, +60 min prévues la semaine suivante ;
+     - objectif à 1 % atteint, à 100 % non, sans objectif ni l'un ni l'autre ;
+     - aucun nom.
+   - Écran : carte « Objectifs par fauteuil » (titulaire). Un tableau fauteuils × six semaines, en pastilles vert/ambre pour le passé ; une semaine à venir sous l'objectif reste neutre, son agenda se remplit encore. Colonne « Tenu », et « Fixer / Changer » ouvre le dialogue d'objectif. Le cadre du tableau est en `position: relative` : sans cela, le texte `sr-only` en position absolue débordait la page à 390, 768 et 1024. Recette : 101 contrôles, tout passe ; axe : 0 écart, dialogue compris.
+   - Vérifié en local (tables simulées) : posée deux fois. 120 min honorées et 60 prévues sont comptées, l'heure manquée non ; objectif 1 % → atteint.
+7. **Point du matin multi-sites** (06/10, ~21 h Z) :
+   - Deux trous dans b3_06 :
+     - une personne présente dans deux centres recevait deux « Créneaux à sauver » sans savoir de quel centre ;
+     - une direction posée sur l'entité de tête ne recevait rien. Seul un profil sur l'entité même du cabinet était servi, alors que la synthèse (b3_15) suit déjà la hiérarchie.
+   - `b3_21_point_multi_sites.sql` remplace `private.tiroma_deposer_points` (même signature, même cron, mêmes droits) :
+     - un membre servi dans plus d'un cabinet actif voit « — <centre> » au bout de chaque titre ;
+     - la variante qui ne vaut plus est retirée, dans les deux sens ;
+     - la direction d'une entité parente reçoit « Cabinet dentaire — <centre> » pour chaque centre qui en dépend ;
+     - le reste est inchangé : un membre d'un seul centre garde les titres de toujours, le compte rendu ne compte pas la direction, et les tests 08, 16 et 20 ne bougent pas.
+   - `22_point_multi_sites.sql` : `test_b3_22_point_multi_sites`, 12 assertions, **sur deux centres**. Le centre du banc A, et B, « Centre B3-22 Les Abymes », un site rattaché à A créé dans le test : son cabinet, un fauteuil ouvert aujourd'hui, le gérant titulaire des deux, daf2 admin et direction sur A. Le test vérifie :
+     - 4 services ;
+     - les titres suffixés pour le gérant, et aucun titre nu ;
+     - « Charge des fauteuils — Centre B3-22 Les Abymes » (passé si aujourd'hui est férié) ;
+     - l'assistante garde les titres nus et ne reçoit pas B ;
+     - la direction reçoit les compteurs de A et de B, sans santé ;
+     - rejouer le dépôt ne double rien ;
+     - une fois B coupé, les titres de A redeviennent nus et les suffixés partent.
+   - Vérifié en local (sections simulées, même scénario) : 10 sections, rejouées à l'identique ; après la coupure de B, les titres nus reviennent.
+**Retour TAP du coordinateur (06/10, ~16 h 45 Z) et corrections :**
+- **Test 44 rouge**, à cause de `private.tiroma_duree_texte`, ouverte à authenticated. b3_19 la ferme désormais : service_role seul.
+- **Le socle classe toute section de Tiroma « santé ».** `deposer_section` fait `v_sante := p_sante or private.point_module_sante(module)`. Les assertions « sans donnée de santé » des tests 16, 20 et 22 étaient donc fausses : elles sont retirées. Le test 22 vérifie à la place que la direction ne reçoit que des compteurs. Les commentaires de b3_15 et b3_19 qui disent `sante = false` parlent de l'argument passé, pas de la section rendue.
+- **Test 19** : le soin de demain passe de 15 h à 11 h 15. À 15 h, le Fauteuil 2 est occupé par R012 (implant, 14 h 30 à 16 h) dans l'agenda du banc.
+- **Test 20** : D passe au-delà de l'agenda du banc, entre J+12 et J+18, lu sur 21 jours. Le banc donne à Dr Rousseau 50 min chaque matin (20,8 %) et à Dr Lacour 75 min chaque après-midi (25 %), au-dessus du seuil de 20 %. Le dépôt est appelé à D-3.

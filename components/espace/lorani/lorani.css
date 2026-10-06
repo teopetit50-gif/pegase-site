@@ -376,7 +376,8 @@
 .esp .lor-controles {
   margin-bottom: 10px;
 }
-.esp .lor-controle-tete {
+.esp .lor-controle-tete,
+.esp .lor-plu-tete {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -436,4 +437,7 @@
   grid-template-columns: minmax(0, 1fr) 96px;
   gap: 6px;
   padding-left: 24px;
+}
+.esp .lor-rapport {
+  margin: 0 0 10px;
 }

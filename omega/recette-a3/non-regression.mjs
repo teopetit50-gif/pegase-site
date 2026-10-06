@@ -64,6 +64,7 @@ const ECRANS = [
       { nom: 'Revérifier auprès de VIES' },
       { nom: 'Fournisseurs', lien: '/filed/fournisseurs' },
       { nom: 'À payer', lien: '/filed/a-payer' },
+      { nom: 'Boîte de réception', lien: '/filed/boite' },
     ],
   },
   {
@@ -94,6 +95,16 @@ const ECRANS = [
       { nom: 'Modifier le compte', dialogue: 'Modifier le compte' },
       { nom: 'Documents reçus', lien: '/filed' },
       { nom: 'À payer', lien: '/filed/a-payer' },
+    ],
+  },
+  {
+    cle: 'boite', chemin: '/filed/boite', titre: 'Boîte de réception',
+    textes: ['Vos fournisseurs envoient leurs factures à', 'Nouveaux', 'Écartés', 'Pièces jointes', 'Devenue le document'],
+    actions: [
+      { nom: "Copier l'adresse" },
+      { nom: 'Ouvrir la pièce' },
+      { nom: 'Documents reçus', lien: '/filed' },
+      { nom: 'Comptabilité', lien: '/filed/comptabilite' },
     ],
   },
   {

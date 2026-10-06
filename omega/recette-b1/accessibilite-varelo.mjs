@@ -116,6 +116,14 @@ for (const largeur of [390, 1440]) {
   await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Reportings dus"] .esp-carte-tete button')].find(b => /Ajouter un reporting/.test(b.textContent)))`);
   await s.dormir(500);
   dire(`varelo ${largeur}, dialogue d'ajout d'un reporting`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* b1_10 : brancher le logiciel d'une société */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })(document.querySelector('section[aria-label="Exports automatiques"] li button'))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue du branchement`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

@@ -243,3 +243,100 @@ page (6 à 8 sous 768 px, où chaque famille se replie à deux lignes), intégra
 Tiroma 12, Tamila 31, Lorani 31, Daliro 10, Varelo 4, Tavaro 34 (grille + fiches de survol ; 17 sous 768 px).
 Relu à l'œil : la pastille passe à la ligne proprement dans les listes étroites (Lorani et Tiroma à 390), ne casse pas
 les rangées à hauteur fixe du comparatif Daliro, et reste lisible sur les titres de cartes Tamila.
+
+## Passe 2 — réponses du coordinateur (06/10, après 16 h 27 Z)
+
+Base : `worker-c5` (a803fd1) avec `origin/main` 959f115 fusionné (dbf427c). Chaque livraison a été vérifiée par
+son commit sur la branche de l'ouvrier avant de retirer la pastille.
+
+### Questions tranchées
+
+| Question | Décision | Fait |
+|---|---|---|
+| 1. Accueil, cartes CASHD / OFFLOAD / REPUT | pastille sur la carte (C2, C4, C3 construisent) | `app/page.tsx` : `EN_PREPARATION = ["CASHD", "OFFLOAD", "REPUT"]` ; `components/accueil/TuilesCatalogue.tsx` : champ `preparation`, pastille à côté du nom. Retrait : enlever le sigle du tableau. |
+| 2. Varelo, point du matin par direction | livré (b1_07, 7512a38) ; pas de pastille dans le héros | aucune pastille n'existait pour lui |
+| 3. Tavaro 01, 12, 14 | livrés (b2_07 0e2cc89 ; b2_08 8c928e4) | sans pastille, inchangé |
+| 4. Tavaro, onglets « Solutions » | pastille | `components/secteurs/location/Solutions.tsx` : onglet et titre du panneau pour Remise en location, Assistance, Sortie de flotte (même liste `tavaro`) ; « Facturation des retours » et « Le point du matin » sans pastille |
+
+### Pastilles retirées (livraisons vérifiées)
+
+| Module | Libellés retirés de `lib/en-preparation.ts` | Preuve |
+|---|---|---|
+| Tiroma | Synthèse de la semaine (pour la direction), Synthèse pour la direction | b3_15, 72ec683 (test 16) |
+| Tiroma | Taux de réinscription (×3 libellés) | b3_16, 3dd4b88 (test 17) |
+| Tiroma | Absences probables | b3_17, ea1a91f (test 18) — **réserve du coordinateur** : b3_16/17, compte « daf2 direction » refusé, renvoyé à B3 (NOTES-COORDINATEUR) |
+| Tamila | Effacement à la clôture (liste et `preparation: true` de l'engagement) | b4_11, 814adee (test 20) |
+| Tamila | Temps passé proposé à la saisie, Forfaits dépassés, Conventions et forfaits | b4_12, 385e77c (test 21) et 4736d71 (écran) |
+| Lorani | Permis : PC1 à PC8 et PLU ; Revérification à chaque indice | b5_16, a05f77c (test b5_07) |
+| Lorani | Situations et décomptes ; Visa des fiches techniques ; Visas calés sur les délais de commande ; Registre daté des visas | b5_13 à b5_15 (53bc500, b9cd972, d9000ea ; tests b5_04 à b5_06) |
+| Daliro | Relance des avenants non signés | b6_18, c3ab533 |
+| Daliro | Ordre des lots recalé | b6_19, 9ad8930 |
+| Varelo | Le groupe sur une page | b1_08, fdd8e5c (tests b1_11) |
+| Varelo | Les reportings dus | b1_09, 68f7d46 (tests b1_12) |
+
+Gardés, faute de preuve : Lorani « Plans croisés, rapport PDF annoté » (b5_16 croise les planches, mais le rapport
+PDF annoté n'existe pas), « Fonds de plan BET croisés », « Analyse des offres sur DPGF » (b5_16 contrôle les planches
+contre la DPGF, pas les offres), DWG, export Excel, DOE, comptes rendus, réserves et GPA, décennales, RE2020/ERP/Cerfa ;
+Daliro : pointage des heures et rentabilité (b6_17) n'avaient pas de pastille ; Varelo : comptes réciproques (b1_06)
+n'avaient pas de pastille, « Les réserves à émettre » reste.
+
+Restent : Tiroma 7, Tamila 33, Lorani 24, Daliro 8, Varelo 1, Tavaro 17.
+
+### FILED — lignes de `lib/produits/capacites/factures.ts` pour la bascule `atteste: true` (au coordinateur)
+
+Numéros à dbf427c (identiques à ceux de NOTES-A4 sur worker-a4). Condition commune posée par A4 : migration posée
+en production et tests verts là-bas ; aujourd'hui la recette seulement.
+
+| Ligne | Texte | Preuve | À basculer ? |
+|---|---|---|---|
+| 31 | « Un fichier qui contient plusieurs factures est découpé pièce par pièce. » | a4_21 f184edc (`test_a4_21_01`, `02`) + `lecteur/decoupage.ts` d'A1 | **oui**, quand le lecteur d'A1 avec le découpage est déployé (sinon la porte reste `porte_absente`) |
+| 35 | « Un historique de plusieurs exercices se reprend en une fois à l'installation. » | a4_24 e3eaac3 (`test_a4_24_01` à `03`) | **oui**, quand l'écran d'installation (A3) envoie les FEC ; la reprise porte sur les FEC, pas sur les PDF |
+| 44 | « La TVA multi-taux, l'autoliquidation, l'exonération et la TVA sur les débits. » | a4_22 30d3991 (autoliquidation à 20 %) | **non** : la TVA sur les débits (A1) manque encore |
+| 45 | « La devise, le taux de change et la contre-valeur en euros au jour d'émission. » | a4_22 30d3991 (contre-valeur, écart de change) | **oui avec réserve** : les taux BCE attendent un ouvrier qui les pose chaque jour (B7 ou A2) |
+| 59 | « La commande, la réception et la facture sont rapprochées avant toute validation. » | a4_08 + a4_23 11c1f8b (`test_a4_23_01` à `03`) | **oui avec réserve** : vrai seulement si l'organisation règle `reception_exigee` ou `commande_exigee` |
+| 81 | « L'imputation analytique s'apprend sur vos écritures passées, fournisseur par fournisseur. » | a4_02 (test a4_01) + a4_24 (`test_a4_24_02`) | **oui** (déjà dans la liste « dès la production » de NOTES-A4) |
+
+La réception par courriel (a4_20, e749aa5) prouve la ligne 28, déjà à `true`. L'extourne (a4_22) n'a pas de ligne
+propre. Le reste de la liste « dès la production posée » de NOTES-A4 (lignes 60, 62, 69, 70, 72 à 74, 82, 85, 86,
+94 à 98) est à basculer dans le même geste.
+
+## Passe 3 — 06/10, après 16 h 45 Z (main e197172)
+
+### Décision du coordinateur sur `atteste`
+
+**Aucune ligne de catalogue ne passe à `atteste: true` avant la production.** « En préparation » reste vrai pour le
+client tant qu'il ne peut pas s'en servir. Le coordinateur bascule tout au palier de mise en production, avec la liste
+ci-dessus (passe 2, FILED) tenue à jour ici. Ajouts depuis a4_27 (467f423, lecteur v24) :
+
+| Ligne de factures.ts | Texte | Preuve | État |
+|---|---|---|---|
+| 44 | « La TVA multi-taux, l'autoliquidation, l'exonération et la TVA sur les débits. » | a4_11, a4_22, a4_27 (mention `tva.debits` lue et signalée) | passe à **oui** (était « non ») |
+| 45 | « La devise, le taux de change et la contre-valeur en euros au jour d'émission. » | a4_22 + a4_27 (`test_a4_27_03`, `04`) | oui, une fois que l'ouvrier BCE de B7 pose les cours |
+| 48 | « Les mentions d'escompte, de pénalité de retard et d'indemnité forfaitaire. » | a4_27 (`test_a4_27_01`, `02`) | oui |
+
+REPUT (`lib/produits/capacites/accueil.ts`) : lignes tenues d'après NOTES-C3 § « Lignes de capacité » (base versionnée,
+réponse tirée de la base, transfert hors base, classement, langue, plusieurs langues, mention automatisée,
+réclamation, demande de parler à quelqu'un, hors périmètre, archive) ; à basculer au même palier.
+
+### Corrections
+
+| Fichier:ligne | Avant | Après | Raison |
+|---|---|---|---|
+| lib/produits/capacites/factures.ts:132 | « Les montants sont lus tels qu'ils figurent sur la pièce, sans conversion. La contre-valeur en euros reste à la charge de votre comptabilité. » | « … avec la devise et le taux. L'écriture porte la contre-valeur en euros, au taux de la pièce ou au cours BCE du jour d'émission, et l'écart de change ; sans taux connu, la pièce attend au lieu d'être comptabilisée. » | a4_22 30d3991, a4_27 467f423 (NOTES-A4 § lecteur v24) |
+| lib/produits/accueil.ts:85 (héros /offres/demandes-clients) | « Une demande reçue à 21 h obtient sa réponse à 21 h » | « … a sa réponse prête à 21 h » | C3 : réponse préparée, envoi seul sur sujet autorisé |
+| lib/produits/accueil.ts (chapô du héros) | « … votre client reçoit sa réponse, et elle ne dit rien que vous n'ayez validé. » | « … la réponse est préparée dans la minute à partir de la base que vous avez validée. Elle part seule sur les sujets que vous avez autorisés, et attend votre accord sur tous les autres. » | C3 paliers 2 et 3 |
+| lib/produits/accueil.ts (ÉTAPES 02) | « Nous connectons WhatsApp Business, votre messagerie et votre agenda … » | « Nous connectons WhatsApp Business et votre messagerie … Le raccordement de votre agenda est en préparation. » | rendez-vous : C3 palier 5, pas construit |
+| lib/produits/accueil.ts (ÉTAPES 03) | « Une semaine en double » ; « Vos équipes reçoivent copie de chaque réponse la première semaine … sur les postes que vous ouvrez. » | « Une semaine sous votre contrôle » ; « La première semaine, chaque réponse attend votre validation, et nous corrigeons la base sur des cas réels. Vous autorisez ensuite, sujet par sujet, les réponses qui partent seules. » | C3 : file de validation, accord par sujet |
+| lib/produits/accueil.ts (CANAUX, chapô) | « … puis répond à partir de votre base. » | « … puis prépare la réponse à partir de votre base. » | idem |
+| lib/produits/accueil.ts (FAQ « même créneau ») | « La réservation s'écrit directement dans votre agenda … » | « La prise de rendez-vous dans votre agenda est en préparation. Une fois raccordée, la réservation s'écrit en temps réel … » | palier 5 |
+| lib/produits/accueil.ts (FAQ « qui décide ») | « … vous décidez poste par poste ce qui part seul … » | « … vous autorisez sujet par sujet les réponses qui partent seules ; les réclamations, les urgences et les demandes de parler à quelqu'un restent toujours relues par vos équipes. » | C3 c3_01 (sujets jamais autorisables), c3_03 (garde) |
+| lib/produits/accueil.ts (FAQ avis) | « La demande part dans les trois jours … » | « La demande d'avis est en préparation. Elle partira dans les trois jours … » | palier 5 |
+| lib/produits/accueil.ts (JOURNÉE, 23 h 05) | « Transféré : l'astreinte est appelée » | « Transféré : alerte urgente à vos équipes » | C3 : alerte critique ; l'appel d'astreinte est au palier 5 |
+| app/offres/demandes-clients/page.tsx:72 (meta) | « … obtiennent une réponse à toute heure … » | « … ont leur réponse prête à toute heure …, et validée par vous. » | idem |
+| lib/content.ts:127 (benefit REPUT) | « … reçoit sa réponse à 21 h, sur son canal. » | « … a sa réponse prête à 21 h, sur son canal. » | idem |
+
+Laissés tels quels, mais à signaler : la conversation d'exemple du haut de la page (« Je peux vous réserver samedi
+9 h 30 ? », « Rendez-vous créé dans l'agenda ») et les issues d'exemple « Créneau réservé, rappel la veille »
+(MÉTIERS, JOURNÉE) montrent la prise de rendez-vous, qui n'est pas construite ; les tuiles « Fiche Google Business »
+et « Google Agenda » de CANAUX (positionnées en absolu, pas de place pour une pastille). Les catalogues portent la
+pastille sur ces lignes. Retour aux anciennes phrases : quand C3 livre le palier 5 (rendez-vous, avis, astreinte).

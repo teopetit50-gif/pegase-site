@@ -468,3 +468,39 @@ reformulé par C5.
 - Limite : le responsable se désigne « moi » à l'écran (la liste des comptes
   n'est pas lisible par un membre) ; la porte accepte tout compte de
   l'organisation.
+
+### 3. Les exports lus d'eux-mêmes (b1_10)
+
+- **La chaîne du socle** (lue dans SOCLE-EXTRAITS-COMMUN et NOTES-A1) : un
+  export arrive (`recevoir_releve`, courriel ou passerelle) → le lecteur
+  d'exports d'A1 le lit d'après les jeux du branchement (`branchements_jeux`,
+  copiés de `modeles_jeux` par `brancher`) et dépose ses lignes
+  (`instantanes_lignes`, valeurs en texte par clé de colonne) → le socle publie
+  `releve.pret.<module>` → l'abonné applique, puis `acquitter_instantane`.
+- **Migration** `omega/modules/varelo/migrations/b1_10_releves.sql` : 30
+  `modeles_jeux` (module varelo × sage100, ebp, cegid, quadra, pennylane,
+  tableur × fournisseurs, clients, balance_agee_clients,
+  balance_agee_fournisseurs, balance_generale ; montants en `texte`, lus par
+  `grp_montant` ; IBAN `sensible` ; reconnaissance par nom de fichier puis par
+  en-têtes signature) ; abonnement `releve.pret.varelo → varelo.appliquer_releve`
+  ; `private.grp_appliquer_jeu` (verse un jeu dans grp_deposer_codes /
+  grp_deposer_encours / grp_deposer_balance ; arrêté = jour de réception, heure
+  de la société) ; `private.grp_appliquer_releve` (instantanés « a_appliquer »,
+  tiers d'abord ; jeu inconnu ou société non inscrite → « douteux » motivé ;
+  journal `varelo.releve.applique`) ; `private.grp_traiter_travaux` et cron
+  **`varelo-releves`** (chaque minute, comme tiroma-releves).
+- **À faire par A1 / le coordinateur** : les en-têtes des modèles sont des
+  hypothèses (exports usuels) ; à confirmer par l'essai à blanc d'A1 (`deno task
+  essai`) sur un vrai fichier de chaque logiciel. Les deux balances âgées ont la
+  même signature d'en-têtes : sous un nom de fichier neutre, elles partent « à
+  classer » (le nom les départage : `balance_agee_clients_…`, `bac_…`).
+- **Tests** `omega/tests/varelo/b1_13_releves.sql` (motif `^test_b1_13_`) :
+  `_modeles` (13 : les 30 modèles passent les contrôles du socle, abonnement,
+  `public.brancher` déclare les cinq jeux, un collaborateur ne branche pas),
+  `_application` (6). Maquette : 19/19 ; 225 assertions de b1_07 à b1_13. La
+  chaîne complète se joue par l'essai réel (un `recevoir_releve` sur un
+  branchement Varelo de la recette).
+- **Écran** `Branchements.tsx` : carte « Exports automatiques » (chaque
+  société, son logiciel branché, ses jeux et leur dernier export ; « Brancher »
+  par la porte du socle `public.brancher`, voie `exports`, cinq jeux cochés).
+  Recette 149 contrôles, cinq largeurs ✓ ; axe 0 écart.

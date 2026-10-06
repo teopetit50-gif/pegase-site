@@ -205,3 +205,13 @@
   gap: 8px;
   font-weight: 400;
 }
+
+/* les exports attendus d'un branchement (b1_10) */
+.dlg-panneau .vrl-jeux,
+.esp .vrl-jeux {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}

@@ -20,7 +20,9 @@
      btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13) ;
      btp_noter_paiement, btp_fixer_echeance (b6_16) ;
      btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17) ;
-     btp_proposer_recalage (lecture), btp_recaler, btp_terminer_passage (b6_19).
+     btp_proposer_recalage (lecture), btp_recaler, btp_terminer_passage (b6_19) ;
+     btp_preparer_signature, btp_preuve_signature (b6_20 ; la page /signer/<jeton> appelle btp_lire_a_signer et
+     btp_signer_sur_place sans compte).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -221,4 +223,19 @@ export async function recaler(passage: string, nouvelleFin: string, motif: strin
 
 export async function terminerPassage(passage: string, finReelle: string): Promise<unknown> {
   return rpc("btp_terminer_passage", { p_passage: passage, p_fin_reelle: finReelle });
+}
+
+/* b6_20 : la signature sur place */
+export async function preparerSignature(avenant: string, heures: number): Promise<{ signature_id: string; jeton: string; lien: string; expire_le: string; empreinte: string }> {
+  return rpc("btp_preparer_signature", { p_avenant: avenant, p_heures: heures });
+}
+
+export type PreuveSignature = {
+  signature_id: string; statut: "ouverte" | "signee" | "annulee"; empreinte: string; expire_le: string; prepare_le: string;
+  signataire_nom: string | null; signataire_qualite: string | null; trace: string | null; trace_empreinte: string | null;
+  appareil: string | null; signee_le: string | null; preuve_empreinte: string | null; annulee_motif: string | null;
+};
+
+export async function preuveSignature(avenant: string): Promise<PreuveSignature | null> {
+  return rpc<PreuveSignature | null>("btp_preuve_signature", { p_avenant: avenant });
 }

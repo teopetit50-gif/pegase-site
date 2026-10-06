@@ -12,7 +12,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, dans, ilYa } from "../exemples/socle";
-import type { Agence, Amendement, AvisContravention, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import type { Agence, Amendement, AvisContravention, Avoir, Contestation, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import { forcesLocales } from "./contestations";
 
 const C = EXEMPLE_CLIENT_ID;
 const u = (p: string, n: number) => `00000000-0000-4000-8000-0000000${p}${n.toString(16).padStart(3, "0")}`;
@@ -49,7 +50,9 @@ export const REGLAGES_EXEMPLE: Reglages = {
   tolerance_retard_min: 59,
   echeance_pro_jours: 30,
   tva_sur_debits: false,
-  emetteur: { adresse: "18 rue de la Villette, 69003 Lyon", numero_tva: "FR42 512 345 678", rcs: "RCS Lyon 512 345 678", email: "facturation@autoloc-bertin.example" },
+  emetteur: { adresse: "18 rue de la Villette, 69003 Lyon", numero_tva: "FR75 512 345 679", rcs: "RCS Lyon 512 345 679", email: "facturation@autoloc-bertin.example" },
+  contestation_delai_jours: 7,
+  contestation_adresse: "contestations@acquereur.example",
 };
 
 export const CATEGORIES_EXEMPLE: Categorie[] = [
@@ -206,9 +209,9 @@ export const LIGNES_EXEMPLE: LigneProposition[] = [
 ];
 
 const fac = (n: number, o: Partial<Facture> & Pick<Facture, "contrat_id" | "contrat_numero" | "proposition_id" | "nature" | "reference" | "emise_le" | "echeance_le" | "statut" | "total_ht" | "total_tva" | "total_ttc" | "destinataire">): Facture => ({
-  id: u("fa", n), demande_id: u("de", n), date_facture: o.emise_le.slice(0, 10), a_debiter_avant: null, emetteur: { nom: "Autoloc Bertin", siren: "512345678", ...REGLAGES_EXEMPLE.emetteur },
+  id: u("fa", n), demande_id: u("de", n), date_facture: o.emise_le.slice(0, 10), a_debiter_avant: null, emetteur: { nom: "Autoloc Bertin", siren: "512345679", ...REGLAGES_EXEMPLE.emetteur },
   mentions: { mandat: "Facture établie par Omega au nom et pour le compte de Autoloc Bertin.", objet: o.nature === "frais" ? "Frais complémentaires de location" : "Dommages constatés à la restitution", contrat: o.contrat_numero, ...(o.nature === "dommages" ? { tva: "Indemnité hors du champ de la TVA (BOI-TVA-BASE-10-10-50, § 300)." } : {}) },
-  regle_le: null, mode_reglement: null, litige_motif: null, envoi_id: u("en", n), relances: 0, relance_le: null, ...o,
+  regle_le: null, mode_reglement: null, litige_motif: null, envoi_id: u("en", n), pdf_piece_id: u("pd", n), relances: 0, relance_le: null, ...o,
 });
 
 const dest = (l: Locataire) => ({ type: l.type, nom: [l.prenom, l.nom].filter(Boolean).join(" "), raison_sociale: l.raison_sociale ?? "", adresse: l.adresse ?? "", email: l.email ?? "" });
@@ -222,7 +225,8 @@ export const FACTURES_EXEMPLE: Facture[] = [
     mentions: { mandat: "Facture établie par Omega au nom et pour le compte de Autoloc Bertin.", objet: "Frais complémentaires de location", contrat: "C-2026-0322", penalites: "En cas de retard de paiement : pénalités au taux de la BCE majoré de 10 points, et indemnité forfaitaire de recouvrement de 40 € (C. com. L441-10)." } }),
 ];
 
-const lf = (n: number, facture_id: string, rang: number, l: LigneProposition): LigneFacture => ({ id: u("fl", n), facture_id, rang, code: l.code, libelle: l.libelle, famille: l.famille, unite: l.unite, quantite: l.quantite, prix_unitaire: l.prix_unitaire, montant_ht: l.montant_ht, regime_tva: l.regime_tva, taux_tva: l.taux_tva, montant_tva: l.montant_tva, montant_ttc: l.montant_ttc, preuves: l.preuves });
+const lf = (n: number, facture_id: string, rang: number, l: LigneProposition): LigneFacture => ({ id: u("fl", n), facture_id, rang, code: l.code, libelle: l.libelle, famille: l.famille, unite: l.unite, quantite: l.quantite, prix_unitaire: l.prix_unitaire, montant_ht: l.montant_ht, regime_tva: l.regime_tva, taux_tva: l.taux_tva, montant_tva: l.montant_tva, montant_ttc: l.montant_ttc, preuves: l.preuves,
+  bareme_ligne_id: l.hors_bareme ? null : (LIGNES_BAREME_EXEMPLE.find((b) => b.code === l.code)?.id ?? null) });
 export const LIGNES_FACTURES_EXEMPLE: LigneFacture[] = [
   lf(1, u("fa", 41), 1, LIGNES_EXEMPLE[6]), lf(2, u("fa", 41), 2, LIGNES_EXEMPLE[7]), lf(3, u("fa", 41), 3, LIGNES_EXEMPLE[8]),
   lf(4, u("fa", 42), 1, LIGNES_EXEMPLE[9]),
@@ -359,3 +363,28 @@ export const AVIS_EXEMPLE: AvisContravention[] = [
     rapprochement: "auto", candidats: 1, designation: { type: "personne", effacee_le: ilYa(20, 3) }, designation_effacee_le: ilYa(20, 3),
     mode_designation: "antai_en_ligne", reference_designation: "DES-2025-074410", designe_le: ilYa(385, 10), designe_par: CLAIRE, hors_delai: false }),
 ];
+
+/* ——— les contestations bancaires (b2_09) : la facture de dommages FA-2026-000105, débitée par carte, contestée par le
+   client auprès de sa banque — dossier prêt, réponse due dans deux jours ; la facture de frais FA-2026-000104, dossier
+   envoyé il y a neuf jours, en attente de la décision de la banque. ——— */
+const contestation = (n: number, facture: Facture, o: Partial<Contestation> & Pick<Contestation, "reference_banque" | "motif_banque" | "recue_le" | "repondre_avant" | "statut">): Contestation => {
+  const d = DOSSIERS_EXEMPLE.find((x) => x.contrat.id === facture.contrat_id)!;
+  return {
+    id: u("cb", n), client_id: C, entite_id: d.contrat.entite_id, facture_id: facture.id, contrat_id: facture.contrat_id, montant_eur: facture.total_ttc,
+    adresse_banque: "contestations@acquereur.example", forces: forcesLocales(d, facture), dossier_piece_id: null, dossier_sha256: null, dossier_pages: null,
+    dossier_le: null, dossier_chemin: null, envoi_id: null, envoyee_le: null, envoyee_par: null, issue_le: null, issue_par: null, issue_note: null, notes: null,
+    cree_par: SOFIA, cree_le: o.recue_le + "T09:30:00Z", ...o,
+  };
+};
+const FA105 = FACTURES_EXEMPLE.find((f) => f.reference === "FA-2026-000105")!;
+const FA104 = FACTURES_EXEMPLE.find((f) => f.reference === "FA-2026-000104")!;
+export const CONTESTATIONS_EXEMPLE: Contestation[] = [
+  contestation(1, FA105, { reference_banque: "CB-2026-88412", motif_banque: "13.1 — Prestation non conforme (le client dit la rayure antérieure)", recue_le: jourIso(ilYa(5)), repondre_avant: plus(jourIso(ilYa(5)), 7),
+    statut: "dossier_pret", dossier_piece_id: u("pc", 1), dossier_sha256: "7d1e0c4b9a2f83e65c0d1b7a4f9e2c38d6a5b10f7e3c9d24a8b6f01e5c7d3a92", dossier_pages: 6, dossier_le: ilYa(5, 10),
+    dossier_chemin: `${C}/loc_contestations/${u("cb", 1)}/dossier-CB-2026-88412.pdf` }),
+  contestation(2, FA104, { reference_banque: "CB-2026-87105", motif_banque: "13.6 — Crédit non traité (le client cite l'avoir AV-2026-000007)", montant_eur: 126, recue_le: jourIso(ilYa(12)), repondre_avant: plus(jourIso(ilYa(12)), 7),
+    statut: "envoyee", dossier_piece_id: u("pc", 2), dossier_sha256: "c08f3a7e19d24b56a0e7c1d93f5b28a46e0d7c3b91f5a2e48d6c0b7a3e1f9d25", dossier_pages: 5, dossier_le: ilYa(12, 10),
+    dossier_chemin: `${C}/loc_contestations/${u("cb", 2)}/dossier-CB-2026-87105.pdf`, envoi_id: u("en", 90), envoyee_le: ilYa(9, 11), envoyee_par: SOFIA,
+    notes: "Le client a déjà reçu un avoir de 72 € : seuls 126 € restent contestés." }),
+];
+

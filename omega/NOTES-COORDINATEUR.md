@@ -907,3 +907,38 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Lorani contrôle du dossier → a4521d5 (non poussé : test 44 en cours).
   **Test 44 dépasse 2 min** sur la recette → relancé avec statement_timeout 15 min (job g60) ; A5 doit
   l'accélérer. Numéros : A4 a4_25 = CHECK uid_ch/hmrc + comptes système ; A2 19al.
+- 18 h 50 Z — Poses : 00_installation + 44 v2 (A5 3018e1d, 44 en moins d'une minute), 56 v3 (9f44233, vert),
+  b2_06b (42fdbe4) + b2_09 + 18 (1ee1134) → Tavaro tout vert ; tests b3_16/17 v2 (e15aa42), b3_18 + 19
+  (3240cb3), b3_19 + 20 (0c3976a) → 17, 18 verts, 16/19/20 rouges + **44 rouge (private.tiroma_duree_texte
+  exécutable)** → B3 ; b4_13 + 22 + 19 (f4b2ba1, vert) ; b1_10 + b1_13 (e1c4eae, vert) ; a4 tests v2 (e020969),
+  a4_25 + a4_18 (b2ee58c, vert), a4_26 + a4_26b (DROP CONSTRAINT accepté : élargissement) + a4_19 (3172b44 :
+  01/03/05 verts, 02/04 rouges tva_check → normaliser les TVA étrangères), a4_23 rouges (filed_receptions_lignes
+  client_id) → A4 ; **a4_27 REFUSÉ** (pieces_pages.page → n) → A4 ; b7_06 + b7_07 (faf9247 : 4 assertions
+  42501 au lieu de 22023) → B7 ; C3 tests v2 + c3_04 (cd1aaa2, verts) ; **19al messageries** (A2 e9f4ebc, DROP
+  CONSTRAINT d'élargissement accepté, vert) ; b6_20 + b6_14 (6dc34a7, vert ; exception anon accordée).
+  taux-bce appelé à la main (net 5289) avant 17 h Z. 46/51 verts.
+  Main e197172 : boîte de réception FILED (A3), Tamila conflits auto + honoraires du cabinet + file des avis,
+  Lorani rapport PDF/Excel, écran REPUT (C3), vitrine passe 2 (C5), Varelo branchements, Daliro signature sur
+  place (+ app/signer). C2 et C4 : c2_01 / c4_01 toujours pas corrigés (relancés).
+  Décisions : atteste:true basculé seulement au palier de production ; A1 écrit 19an_analyses ; A5 19am
+  (apercu_effacement, reception_marquer) ; A3 a la main sur ecrans.ts pour l'ancien /espace ; C4 consentement
+  = intérêt légitime B2B / soft opt-in clients existants ; A4 API logiciels comptables sur doubles (identifiants
+  de bac à sable = Teo).
+- 19 h 05 Z — Poses : a4_27 (3656d23 ; test 02 : pieces_pages.methode NOT NULL → A4), b7 test 07 v2 (a6101c9,
+  vert), 19am + test 59 (A5 79f0e58, vert), a5_01 v3 linéaire (b65dafa), Tiroma b3_19 v2 / b3_20 / b3_21 + tests
+  (2da76ec : ^test_b3_ 24/24), b1_11 + b1_14 (306d644 : 10/10, mais 44 rouge sur
+  private.grp_exiger_decideur_reception → B1 b1_11b), b6_21 météo + b6_15 (c33c69c : 14/15, gel J+3 → B6 ;
+  source = API Météo-France, Open-Meteo gratuit interdit en commercial), b5_17 + b5_08 (10a59bf, vert),
+  b2_09 v2 + 18 (2dba750, vert). tavaro-pdf v2 (6ea1694). b5_16 amendé par B5 alors qu'il était déjà posé
+  → lot de reprise b5_16b demandé. Loc_contestations : aucun gardien (visible de tous les membres) → B2 b2_09b.
+  Main : écrans Tiroma (synthèse, réinscription, absences, équipe absente, demi-journées, objectifs), Tavaro
+  facture électronique + contestations, Lorani PLU, route OAuth app/api/messagerie + guides Gmail/Microsoft.
+  C2 / C4 : c2_01 et c4_01 TOUJOURS non corrigés (lots 2 à 5 en attente derrière).
+- 19 h 20 Z — **OFFLOAD posé** : c4_01 à c4_05 + tests (C4 f99562d). ^test_c4_ 8/19 : la plupart des rouges
+  viennent de throws_ok à 3 arguments (le 3e est le message attendu) ; vrais écarts : source de consentement
+  hors CHECK (décision : source 'contrat' + preuve de la base légale, pas d'élargissement du socle),
+  « en essai, rien n'est préparé si le module est réglé en réel » non levé → C4 c4_06. b2_09b gardien des
+  contestations (3856716, b2_18 vert). b4_14 point du matin Tamila (baedbd9 ; test 23 lit s.items → points_items).
+  44 : seul rouge = private.grp_exiger_decideur_reception (B1). WebDAV : la passerelle Supabase laisse passer
+  PROPFIND/MKCOL/LOCK → A2 lot 19ao_depots. Main 5c3362c : vitrine passe 3 (C5).
+  B6 a proposé meteo_url Open-Meteo : NON posé (décision Météo-France).

@@ -255,6 +255,8 @@ export type PieceProjet = {
   motif?: string | null;
   /* « courriel » : pièce jointe d'un courriel du guichet, rangée seule par son numéro de dossier (b5_11) */
   source?: string | null;
+  /* le chemin du fichier dans omega-clients (base réelle) : le rapport du contrôle en rend les pages */
+  chemin?: string | null;
   cree_le?: string;
 };
 
@@ -352,6 +354,8 @@ export type ValeurCitee = {
   borne?: "max" | "min";
   article?: string | null;
   regle?: boolean;
+  /* fractions de la page, y depuis le haut (contrat de lecture) */
+  boite?: { x: number; y: number; l: number; h: number } | null;
 };
 export type Constat = {
   id: string;
@@ -370,6 +374,27 @@ export type Constat = {
   corrige_au_controle: string | null;
   decide_par: string | null;
   decide_le: string | null;
+};
+
+/* le PLU du projet trouvé depuis son adresse (b5_17), Géoportail de l'urbanisme */
+export type ZonePlu = { libelle: string | null; libelong: string | null; typezone: string | null; partition: string | null; idurba: string | null; nomfic: string | null; urlfic: string | null; datvalid: string | null };
+export type Plu = {
+  id: string;
+  projet_id: string;
+  statut: "a_chercher" | "geocodage" | "zonage" | "trouve" | "introuvable" | "erreur";
+  methode: "adresse" | "parcelle" | null;
+  requete: string | null;
+  point_libelle: string | null;
+  point_score: number | null;
+  zones: ZonePlu[];
+  zone: string | null;
+  document: { du_type: string | null; titre: string | null; nom: string | null; partition: string | null } | null;
+  reglement_url: string | null;
+  prescriptions: { libelle: string | null; typepsc: string | null; stypepsc: string | null }[];
+  rnu: boolean | null;
+  erreur: string | null;
+  demande_le: string;
+  trouve_le: string | null;
 };
 
 /* tout ce que l'écran montre, d'une source ou de l'autre */
@@ -392,6 +417,7 @@ export type Dossier = {
   controles: Controle[];
   controlePieces: ControlePiece[];
   constats: Constat[];
+  plu: Plu[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

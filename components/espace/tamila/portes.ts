@@ -322,6 +322,26 @@ export async function chargerHonoraires(p_dossier: string): Promise<Honoraires |
   };
 }
 
+/** Les honoraires de tous les dossiers que je vois (RLS), par dossier ; null si b4_06 n'est pas posée. */
+export async function chargerHonorairesCabinet(p_client: string): Promise<Record<string, Honoraires> | null> {
+  const supabase = createClient();
+  const [c, t, p, f] = await Promise.all([
+    supabase.from("tamila_conventions").select("*").eq("client_id", p_client).order("cree_le", { ascending: false }),
+    supabase.from("tamila_temps").select("*").eq("client_id", p_client).neq("statut", "annule").limit(20000),
+    supabase.from("tamila_provisions").select("*").eq("client_id", p_client),
+    supabase.from("tamila_factures").select("*").eq("client_id", p_client),
+  ]);
+  if (c.error || t.error || p.error || f.error) return null;
+  const par: Record<string, Honoraires> = {};
+  const de = (id: string) => (par[id] ??= { convention: null, conventions: [], temps: [], provisions: [], factures: [] });
+  for (const x of (c.data ?? []) as Convention[]) de(x.dossier_id).conventions.push(x);
+  for (const x of (t.data ?? []) as Temps[]) de(x.dossier_id).temps.push(x);
+  for (const x of (p.data ?? []) as Provision[]) de(x.dossier_id).provisions.push(x);
+  for (const x of (f.data ?? []) as Facture[]) de(x.dossier_id).factures.push(x);
+  for (const h of Object.values(par)) h.convention = h.conventions.find((x) => x.statut !== "resiliee") ?? null;
+  return par;
+}
+
 export const poserConvention = (p_dossier: string, p_mode: ModeHonoraires, p_taux_horaire_cents: number | null, p_forfait_cents: number | null, p_complement_pct: number | null, p_taux_tva: number, p_urgence: boolean) =>
   rpc<string>("tamila_poser_convention", { p_dossier, p_mode, p_taux_horaire_cents, p_forfait_cents, p_complement_pct, p_taux_tva, p_urgence });
 export const signerConvention = (p_convention: string, p_signee_le: string, p_piece: string | null) => rpc<void>("tamila_signer_convention", { p_convention, p_signee_le, p_piece });
