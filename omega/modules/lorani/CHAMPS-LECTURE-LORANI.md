@@ -59,13 +59,20 @@ il cite.
 | `lorani_cctp` | Le cahier des clauses techniques particulières (par lot) | `lot` ; une ligne par poste décrit : `poste.<référence>` (valeur = intitulé du poste, texte = la citation) ; et les mesures écrites : `mesure.<grandeur>.<objet>` |
 | `lorani_dpgf` | La décomposition du prix global et forfaitaire (par lot) | `lot` ; une ligne par poste chiffré : `poste.<référence>` (valeur = quantité canonique, texte = la ligne) |
 | `lorani_metre` | Le métré d'un lot (quantités mesurées sur les plans, par l'économiste ou le lecteur) | `lot` ; par poste : `quantite.<référence>` (quantité canonique), `unite.<référence>` (« m2 », « ml », « m3 », « u ») |
+| `lorani_cerfa` | Le formulaire de la demande (Cerfa 13406, 13409…) | les surfaces et nombres déclarés en `mesure.<grandeur>.projet` : `surface_plancher_m2`, `emprise_sol_m2`, `surface_taxable_m2`, `logements_nb`, `stationnement_nb`, `niveaux_nb` |
+| `lorani_attestation_re2020` | L'attestation RE2020 (dépôt du PC ou achèvement) | par indicateur : `re2020.<indicateur>` et `re2020.<indicateur>_max` (valeurs canoniques) — `bbio`, `cep`, `cep_nr`, `ic_energie`, `ic_construction`, `dh` ; les surfaces en `mesure.sref_m2.projet`, `mesure.surface_plancher_m2.projet` |
+| `lorani_plan_bet` | Un fond de plan ou plan d'un bureau d'études (structure, fluides) | les mêmes `mesure.<grandeur>.<objet>` que les planches de l'architecte, avec les **mêmes objets** (trémies, cotes, largeurs) |
+| `lorani_notice` | Une notice (accessibilité, sécurité incendie, descriptive) | `mesure.<grandeur>.<objet>` qu'elle chiffre (effectif, dégagements, largeurs) |
 | `lorani_plu_reglement` | Le règlement écrit du PLU (zone du terrain) | `zone` (« UB ») ; par règle chiffrée : `regle.<grandeur>.max` ou `regle.<grandeur>.min` (valeur canonique), et `regle.<grandeur>.article` (« UB 10 ») |
 
 - `<grandeur>` (vocabulaire fermé, l'unité fait partie du nom) : `hauteur_faitage_m`, `hauteur_egout_m`,
   `hauteur_acrotere_m`, `recul_voie_m`, `recul_limite_m`, `distance_batiments_m`, `emprise_sol_m2`,
   `emprise_sol_pct`, `surface_plancher_m2`, `surface_taxable_m2`, `espaces_verts_pct`, `pleine_terre_pct`,
   `stationnement_nb`, `logements_nb`, `niveaux_nb`, `pente_toiture_pct`, `longueur_m`, `largeur_m`,
-  `cote_altimetrique_m` (NGF). Une grandeur hors liste est ignorée par le socle (à demander au coordinateur).
+  `cote_altimetrique_m` (NGF) ; depuis b5_21 : `surface_habitable_m2`, `sref_m2`, `largeur_porte_m` (passage utile),
+  `largeur_cheminement_m`, `largeur_degagement_m`, `pente_rampe_pct`, `ressaut_m`, `distance_escalier_m`, `effectif_nb`,
+  `degagements_nb`. Une grandeur hors liste est ignorée par le socle (à demander au coordinateur). Les règles fixes
+  d'accessibilité (ERP, logement collectif) et de sécurité incendie (ERP) s'appliquent seules à ces mesures.
 - `<objet>` : ce que la mesure qualifie, en minuscules sans accent : `projet` (le tout), `batiment_a`, `facade_sud`,
   `niveau_r1`, `limite_nord`, `voie_rue_x`… Deux pièces qui mesurent la même chose doivent rendre le **même objet** :
   c'est la clé du croisement. Pour une grandeur du projet entier (`surface_plancher_m2`), `projet`.

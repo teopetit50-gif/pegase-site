@@ -681,3 +681,23 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - `private.lorani_chantier_rappeler` redéfini (corps b5_19 + points en retard).
 - Écran : `ComptesRendus.tsx` + `cr.ts` (lireNotes : ?, !, =, @entreprise, lot NN, avant le JJ/MM ; contenu ; PDF via
   `rapport.ts` exporté). Exemple Mercière : CR n° 1-2 diffusés, n° 3 en brouillon avec 4 lignes de notes.
+
+## b5_21 — RE2020, accessibilité, sécurité incendie, Cerfa, BET, DOE (carnet n° 5) — 06/10/2026
+
+- b5_16 amendé une troisième fois AVANT pose : les CHECK rôle/nature appellent `private.lorani_role_controle_valide`
+  et `private.lorani_nature_constat_valide` (redéfinissables par CREATE OR REPLACE : plus jamais besoin de retirer
+  une contrainte pour élargir) ; point d'extension `private.lorani_constats_supplementaires(controle)` (vide dans
+  b5_16, uni au croisement).
+- Socle : `omega/modules/lorani/migrations/b5_21_conformite_doe.sql`, test `omega/tests/lorani/b5_12_conformite_doe.sql` (18 assertions).
+  · grandeurs ajoutées (largeurs porte/cheminement/dégagement, pente de rampe, ressaut, distance à un escalier,
+    effectif, dégagements, surface habitable, Sref) ;
+  · rôles cerfa et bet : croisés comme les planches (incohérence), rien d'autre à faire ;
+  · RE2020 : `re2020.<ind>` > `re2020.<ind>_max` → bloquant (Bbio, Cep, Cep,nr, Ic énergie, Ic construction, DH) ;
+  · règles fixes `private.lorani_regles_fixes(nature du projet)` : ERP (arrêté 20/04/2017 : cheminement 1,40 ; porte
+    0,90 ; rampe 5 % ; ressaut 2 cm) ; logement collectif (arrêté 24/12/2015 : 1,20 ; 0,90 ; 5 % ; 2 cm) ; sécurité
+    incendie ERP (dégagement ≥ 0,90 CO 36 ; escalier ≤ 40 m CO 43 ; dégagements selon effectif CO 38) ;
+  · DOE : `lorani_doe` + `lorani_preparer_doe` (5 pièces par lot + DIUO) ; à la réception, alerte par lot incomplet.
+  · passage redéfini (types lorani_cerfa, lorani_attestation_re2020, lorani_plan_bet, lorani_notice → contrôle).
+- Fiche de lecture : 4 types ajoutés et les nouvelles grandeurs.
+- Écran : libellés des rôles et natures, `Doe.tsx` (liste, reçu / sans objet, demander les pièces manquantes = points
+  suivis), exemple ERP sur le Pôle enfance, DOE sur Mercière.

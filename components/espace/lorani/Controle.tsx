@@ -18,14 +18,14 @@ import { deciderConstat, lancerControle, octetsPiece, preparerControle } from ".
 import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
 import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Projet, RolePieceControle } from "./types";
 
-const ROLES: Record<RolePieceControle, string> = { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", metre: "Métré", autre: "Autre pièce" };
-const ROLE_DU_TYPE: Record<string, RolePieceControle> = { lorani_planche: "planche", lorani_cctp: "cctp", lorani_dpgf: "dpgf", lorani_plu_reglement: "plu", lorani_metre: "metre" };
+const ROLES: Record<RolePieceControle, string> = { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", metre: "Métré", cerfa: "Cerfa de la demande", re2020: "Attestation RE2020", bet: "Fond de plan BET", notice: "Notice", autre: "Autre pièce" };
+const ROLE_DU_TYPE: Record<string, RolePieceControle> = { lorani_planche: "planche", lorani_cctp: "cctp", lorani_dpgf: "dpgf", lorani_plu_reglement: "plu", lorani_metre: "metre", lorani_cerfa: "cerfa", lorani_attestation_re2020: "re2020", lorani_plan_bet: "bet", lorani_notice: "notice" };
 const GRAVITES: Record<Constat["gravite"], { libelle: string; teinte: "rouge" | "ambre" | "gris"; rang: number }> = {
   bloquant: { libelle: "Bloquant", teinte: "rouge", rang: 0 },
   majeur: { libelle: "Majeur", teinte: "ambre", rang: 1 },
   mineur: { libelle: "Mineur", teinte: "gris", rang: 2 },
 };
-const NATURES: Record<Constat["nature"], string> = { incoherence: "Entre les planches", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF" };
+const NATURES: Record<Constat["nature"], string> = { incoherence: "Entre les pièces", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF", re2020: "RE2020", accessibilite: "Accessibilité", securite_incendie: "Sécurité incendie" };
 const DECISIONS: Record<Exclude<Constat["statut"], "ouvert">, { libelle: string; verbe: string; teinte: "vert" | "bleu" | "gris" }> = {
   corrige: { libelle: "Corrigé", verbe: "Marquer corrigé", teinte: "vert" },
   accepte: { libelle: "Accepté", verbe: "Accepter", teinte: "bleu" },

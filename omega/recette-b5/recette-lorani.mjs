@@ -220,6 +220,17 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-cr-1440.jpg`, { qualite: 55 });
 
+  console.log('— le DOE (b5_21) : Façade rue Mercière, réception prononcée');
+  const doe = await s.evaluer(`(() => { const st = [...document.querySelectorAll('.esp-section-titre')].find(x => /DOE/.test(x.textContent))?.closest('.esp-carte-corps'); const t = (st?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { statut: /2 pièces reçues sur 5 \\(40 %\\) · 3 attendues · 2 sans objet\\./.test(t), avis: /Réception prononcée le .* : le DOE est incomplet \\(3 pièces attendues\\)/.test(t), lots: /Lot 01 · Ravalement — pierre de taille · Pierres de Bourgogne SARL/i.test(t), diuo: /DIUO/.test(t) }; })()`);
+  ok(Object.values(doe).every(Boolean), `DOE : 2 reçues sur 5 (40 %), 3 attendues, 2 sans objet ; réception prononcée, DOE incomplet (${JSON.stringify(doe)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Demander les pièces manquantes')?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/2 demandes posées, suivies jusqu’à la réponse\\./.test([...document.querySelectorAll('.esp-section-titre')].find(x => /DOE/.test(x.textContent))?.closest('.esp-carte-corps')?.innerText || '')`),
+     'pièces manquantes demandées : 2 questions (lot 01, DIUO du projet), suivies jusqu’à la réponse');
+  await s.evaluer(`[...document.querySelectorAll('.esp-section-titre')].find(x => /DOE/.test(x.textContent))?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-doe-1440.jpg`, { qualite: 55 });
+
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
   await s.dormir(500);
@@ -296,6 +307,19 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.querySelector('.lor-plu')?.scrollIntoView({ block: 'center' })`);
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-plu-1024.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b5-erp', densite: 1 });
+  console.log('— le contrôle étendu (b5_21) : Pôle enfance (ERP), RE2020, accessibilité, sécurité incendie, Cerfa');
+  ok(await s.aller(base + chemin + '?projet=00000000-0000-4000-8000-00000000b002'), 'page chargée');
+  await s.dormir(700);
+  const erp = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-constat')].filter(x => x.closest('.esp-carte-corps')?.querySelector('.lor-controle-tete')); const t = c.map(x => x.innerText).join(' | '); return { n: c.length, re: /RE2020[\\s\\S]*Bbio\\) : 78,3/.test(t), si: /Sécurité incendie[\\s\\S]*il en faut au moins 2/.test(t), acc: /Accessibilité[\\s\\S]*arrêté du 20 avril 2017, art\\. 10/.test(t), cerfa: /Entre les pièces[\\s\\S]*1212 m² sur Cerfa/.test(t), pieces: /Cerfa de la demande/.test(document.querySelector('.lor-controle-pieces')?.innerText || '') }; })()`);
+  ok(erp.n === 4 && erp.re && erp.si && erp.acc && erp.cerfa && erp.pieces, `4 constats : RE2020 (Bbio), sécurité incendie (dégagements), accessibilité (porte), Cerfa contre PC4 (${JSON.stringify(erp)})`);
+  await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-erp-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

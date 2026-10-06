@@ -506,3 +506,8 @@
   font-size: 13.5px;
   overflow-wrap: anywhere;
 }
+
+/* ——— le DOE (b5_21) ——— */
+.esp .lor-doe-ligne .lor-point-actions {
+  margin-left: 6px;
+}
