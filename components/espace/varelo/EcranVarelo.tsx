@@ -4,6 +4,8 @@
    /espace/varelo — le référentiel du groupe (05/10/2026, session B1)
 
    Ce que le client voit et fait, dans l'ordre du scénario (NOTES-B1.md) :
+     · en tête, « Ce matin » (vague 3, CeMatin.tsx) : les lignes du point
+       du matin Varelo — contrats à dénoncer, encours, réciproques ;
      · en haut, quatre compteurs pour la nature choisie (codes locaux,
        objets du groupe, lots à valider, taux de rattachement) ;
      · à gauche, les objets du groupe (F-00001 « Scieries du Jura »…) ;
@@ -48,6 +50,7 @@ import Depot from "./Depot";
 import Encours from "./Encours";
 import Contrats from "./Contrats";
 import Reciproques from "./Reciproques";
+import CeMatin from "./CeMatin";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -442,6 +445,8 @@ export default function EcranVarelo() {
           </Avis>
         </div>
       ) : null}
+
+      {donnees && contexte ? <CeMatin source={source} client_id={client_id} actif={!!reel?.installation} codes={donnees.codes} objets={donnees.objets} /> : null}
 
       <div className="esp-filtres" data-arrivee="" role="group" aria-label="Nature du référentiel" style={{ marginBottom: 12 }}>
         {NATURES.map((n) => (
