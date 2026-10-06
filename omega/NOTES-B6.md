@@ -97,6 +97,8 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 
 ## Journal de session
 
+- 06/10, 04 h 15 Paris (session Opus 5.5 session_013Vf6v9HerZzPG1w9ErbfMw, reprise de Fable) : libellés des statuts de facture FILED (bf18d74, fusionné). Sur accord du coordinateur : `b6_06_envoi_j2.sql` (abonnement daliro.confirmation_demandee → daliro.confirmation, ouvrier `private.btp_ouvrier` par preparer_envoi, cron daliro-ouvrier chaque minute), `recette-b6/banc_j2_reel.sql` (reglages_envois daliro en ESSAI sur le banc, tiers fictif, chantier ESSAI-J2 à J+2 ouvrés, demande + ouvrier + validation DAF + tache_envois), `recette-b6/banc_cloture_essais.sql` (les sept « Essai B6 — hh:mm » passent annule par le gérant). En attente de pose.
+
 - 06/10, 00 h 55 → 01 h 35 UTC : écriture réelle complète depuis l'écran, lot « écran » fusionné sur main (d572973), parcours 153/154, b6_05 écrit (compte « à ranger » de l'import, défaut du socle).
 - 06/10, 02 h 25 Paris : b6_05 posé, **parcours 154/154**. Mécanique prouvée en entier sur la recette.
 - 06/10, 02 h 52 Paris : omegaai.fr/espace/daliro en ligne (200). **Lot B6 terminé** : 5 migrations, 3 fichiers de tests (192 assertions vertes), l'écran et sa recette.
