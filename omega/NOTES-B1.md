@@ -577,3 +577,21 @@ lecture (`piece_lue.varelo`), Varelo pré-remplit la réception par
   reserves_ecrites, expediteur, mode) et, à la lecture, l'appel de
   `private.grp_enregistrer_reception` — rien n'est branché tant que A1
   n'a pas posé le type.
+
+### 4 bis. Les photos du constat (b1_12, tests b1_15) — ce qui restait sur la page
+
+La page groupes (`components/secteurs/groupes/textes.ts`, survol-reserves)
+promet « le transport, les colis et les photos du constat » ; b1_11 n'avait
+pas les photos. b1_12 : colonne `grp_receptions.photos` (20 au plus), vue
+`grp_reserves` qui la rend (en dernière colonne), porte
+`grp_joindre_photo(reception, chemin, nom)` — le fichier est d'abord déposé
+dans `omega-clients/<client>/grp_receptions/<livraison>/…` (politique Storage
+INSERT 19o du socle), la porte vérifie le chemin, l'objet dans
+`storage.objects` et son type (image), l'inscrit et journalise
+`varelo.reception.photo_jointe` ; la lettre dit « N photographies du constat
+sont jointes à la présente ». Écran : champ photos à l'enregistrement,
+bouton « Photos (n) » par livraison, dialogue avec vignettes (adresses
+signées 10 min) et ajout. Tests b1_15 : 11 assertions (maquette : 269 ok au
+total, storage.objects simulé). Recette 171 ✓, axe 0 écart sur le dialogue.
+Avec cela, la ligne « Les réserves à émettre » de `lib/en-preparation.ts`
+peut tomber (fichier partagé : retrait par le coordinateur à la pose).
