@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Pilotage', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les sept cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les huit cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -141,6 +141,17 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-appels')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-appels-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : le pilotage du titulaire (exemple, b3_13)');
+  const pil = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Pilotage"]'); if (!c) return null;
+    return { texte: c.innerText, relancer: c.querySelectorAll('ul[aria-label="Devis à relancer"] > li').length, tableaux: c.querySelectorAll('table').length }; })()`);
+  ok(pil && /Devis acceptés/.test(pil.texte) && /63,2 %/.test(pil.texte), 'le taux d\'acceptation des devis est affiché (63,2 %)');
+  ok(pil && /\+7,3 pts sur la période d'avant/.test(pil.texte), 'avec l\'écart sur la période d\'avant (+7,3 pts)');
+  ok(pil && pil.tableaux === 2, 'deux tableaux : par panier, manqués par praticien');
+  ok(pil && pil.relancer === 3, `trois devis à relancer (${pil?.relancer})`);
+  await s.evaluer(`document.getElementById('tiroma-pilotage')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-pilotage-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : repasser à blanc puis en mode réel (exemple)');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Le cabinet"] button')].find(b => /Repasser à blanc/.test(b.textContent))?.click()`);

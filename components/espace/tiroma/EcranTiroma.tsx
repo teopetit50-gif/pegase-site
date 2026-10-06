@@ -25,6 +25,7 @@ import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
 import Creneaux from "./Creneaux";
 import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
+import Pilotage from "./Pilotage";
 import Plans, { type Mutuelle } from "./Plans";
 import { DOSSIER_EXEMPLE } from "./exemple";
 import { LOGICIELS, libelleLogiciel } from "./libelles";
@@ -342,6 +343,7 @@ export default function EcranTiroma() {
             <Plans plans={dossier.plans} noterMutuelle={noter} derniers={dossier.appels?.derniers} appeler={dossier.appels ? setCibleAppel : undefined} />
           </div>
           <Appels registre={dossier.appels} titulaire={titulaire} appeler={setCibleAppel} />
+          <Pilotage pilotage={dossier.profil === "titulaire" || dossier.profil === "direction" ? dossier.pilotage : null} appeler={dossier.appels ? setCibleAppel : undefined} />
           <div className="esp-grille">
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />
             <ChargeFauteuils charge={dossier.charge} titulaire={titulaire} />
