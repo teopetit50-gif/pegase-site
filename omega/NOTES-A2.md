@@ -716,6 +716,47 @@ renvoi sur omegaai.fr.
 - Cron à poser après le déploiement de la fonction (sur le modèle d'`omega-expediteur`) :
   `omega-messagerie`, chaque minute, `net.http_post` vers `…/functions/v1/messagerie`.
 
+## Dépôt par lot (06/10, demandé par le coordinateur) : WebDAV, et pourquoi pas SFTP
+
+Promesse de FILED (`factures.ts`, ligne 34) : « dépôt par lot depuis un dossier partagé ou un
+transfert de fichiers ». Le coordinateur m'a laissé choisir le plus simple pour un cabinet
+comptable. **Décision : WebDAV**, servi par une fonction Edge `depot`.
+
+- **Pourquoi pas SFTP.** Il faut un serveur qui écoute en permanence sur le port TCP 22. Omega
+  n'a que Vercel et les fonctions Edge de Supabase, qui ne parlent que HTTP. Il faudrait louer
+  et maintenir une machine, ou un SFTP géré (AWS Transfer Family : de l'ordre de 0,30 $ de
+  l'heure par point d'entrée, soit environ 200 $ par mois avant tout transfert), et lui confier
+  des secrets. C'est trop lourd pour la valeur rendue.
+- **Pourquoi WebDAV.** C'est du HTTPS. Le dépôt se monte sans rien installer, comme un lecteur
+  réseau dans l'Explorateur Windows et dans le Finder : on y glisse ses fichiers. Les outils
+  qui automatisent les dépôts (WinSCP, rclone, Cyberduck) le parlent tous, pour l'export
+  planifié du logiciel comptable ou le dossier d'un scanner. Il ne dépend d'aucune application
+  tierce ni d'aucun secret de Teo : il peut être éprouvé sur la recette dès aujourd'hui.
+- **Plan B**, si la passerelle de Supabase bloque les méthodes WebDAV (PROPFIND, LOCK…) ou si
+  l'Explorateur Windows refuse un chemin `/functions/v1/depot` : un dossier OneDrive ou
+  SharePoint partagé, relevé par le connecteur Microsoft (même OAuth, permission Files.Read en
+  plus). WinSCP et rclone restent un recours pour le dépôt WebDAV.
+- **Ce qui est écrit :**
+  - `omega/functions/depot/` : `webdav.ts` (OPTIONS, PROPFIND, PUT, MKCOL, MOVE, LOCK,
+    UNLOCK, PROPPATCH ; GET et DELETE refusés), `portes.ts`, 7 tests Deno verts ;
+  - lot SQL `omega/modules/socle/migrations/19am_depots.sql` (numéro à confirmer) et son test
+    `omega/tests/socle/19am_depots.sql`, 25 assertions vertes sur la maquette locale ;
+  - le guide du cabinet, `omega/GUIDE-DEPOT.md`.
+- **Comportements :**
+  - le PUT de 0 octet de l'Explorateur réserve le nom sans rien importer ;
+  - les fichiers système sont ignorés ;
+  - les types acceptés sont PDF, images et XML, 25 Mo au plus ;
+  - chaque pièce va dans `<client>/filed_document/<uuid>/<nom>`, puis `depot_deposer_filed` impose
+    le client et la société du dépôt avant `private.filed_deposer_piece` (source « connecteur ») ;
+  - le doublon est reconnu par l'empreinte ;
+  - le mot de passe est tiré au hasard (128 bits), montré une fois, et seule son empreinte
+    SHA-256 est gardée ; 10 échecs en 15 minutes ferment l'identifiant 15 minutes ;
+  - l'authentification est gardée une minute en mémoire : un lot de fichiers ne fait qu'un
+    appel à `depot_ouvrir`.
+- **Non vérifié** (pas d'accès à un Windows ni à la passerelle depuis ici) : le passage des
+  méthodes WebDAV par la passerelle de Supabase, et le montage dans l'Explorateur Windows. C'est
+  au coordinateur de les éprouver au déploiement (`curl -X PROPFIND`).
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
