@@ -642,7 +642,7 @@ export default function EcranTamila() {
         <div style={{ marginBottom: 14 }}><Avis teinte="gris">{cabinet.horsVue} dossier{cabinet.horsVue > 1 ? "s" : ""} du cabinet {cabinet.horsVue > 1 ? "sont" : "est"} hors de votre vue (muraille ou périmètre) : compté, jamais lu.</Avis></div>
       ) : null}
 
-      {source === "exemple" || (cabinet?.installe && moi && moi.role !== "lecteur") ? (
+      {source === "exemple" || (cabinet?.installe && moi && ["gerant", "admin", "valideur"].includes(moi.role)) ? (
         <AvisEntrantsTamila
           key={source}
           source={source}

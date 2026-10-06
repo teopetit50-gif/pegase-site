@@ -30,3 +30,14 @@ comment on function private.tamila_peut_lire_reception(uuid, uuid) is
 
 revoke execute on function private.tamila_peut_lire_reception(uuid, uuid) from public, anon;
 grant execute on function private.tamila_peut_lire_reception(uuid, uuid) to authenticated, service_role;
+
+-- La file des avis à rattacher suit la même règle : qui ne lit pas la réception ne voit pas la file (la politique de
+-- b4_10 ouvrait aussi l'assistante). La politique est modifiée sur place, rien n'est retiré.
+do $p$
+begin
+  if exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'tamila_avis_entrants'
+               and policyname = 'qui ouvre des dossiers voit la file des avis') then
+    alter policy "qui ouvre des dossiers voit la file des avis" on public.tamila_avis_entrants
+      using (private.tamila_peut_lire_reception(client_id, (select auth.uid())));
+  end if;
+end $p$;

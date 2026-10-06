@@ -25,6 +25,16 @@ begin
   update public.tamila_murailles set leve_le = now(), leve_par = (jeu ->> 'gerant')::uuid where client_id = v_client and user_id = (jeu ->> 'avocat')::uuid;
   return next ok(private.tamila_peut_lire_reception(v_client, (jeu ->> 'avocat')::uuid), 'muraille levée : il la lit de nouveau');
 
+  -- La file des avis à rattacher : les mêmes personnes.
+  insert into public.tamila_avis_entrants (client_id, reception_id, recu_le, nb_pieces, expire_le)
+  values (v_client, 990001, now(), 0, now() + interval '7 days');
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b4-delorme@essai.invalid');
+  return next is((select count(*) from public.tamila_avis_entrants where reception_id = 990001), 1::bigint, 'le gérant voit l''avis à rattacher');
+  perform tests.redevenir_admin();
+  perform tests.endosser((jeu ->> 'assistante')::uuid, 'b4-assistante@essai.invalid');
+  return next is((select count(*) from public.tamila_avis_entrants where reception_id = 990001), 0::bigint, 'l''assistante ne voit plus la file');
+  perform tests.redevenir_admin();
+
   return next ok(not has_function_privilege('anon', 'private.tamila_peut_lire_reception(uuid, uuid)', 'execute')
                  and has_function_privilege('authenticated', 'private.tamila_peut_lire_reception(uuid, uuid)', 'execute'),
                  'appelable par les politiques (authenticated), pas par anon');
