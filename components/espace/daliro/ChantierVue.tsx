@@ -23,6 +23,7 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, Dia
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import SituationsCarte from "./SituationsCarte";
+import ReceptionCarte from "./ReceptionCarte";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -541,6 +542,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
 
       {/* ——— situations de travaux (b6_12) ——— */}
       <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
+
+      {/* ——— réception, réserves, retenue, décompte (b6_13) ——— */}
+      <ReceptionCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
 
       {/* ——— factures ——— */}
       <section className="esp-carte" aria-label="Factures">
