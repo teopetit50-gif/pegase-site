@@ -26,7 +26,7 @@ export default function Courbe({ mois }: { mois: Mois[] }) {
   const [survol, setSurvol] = useState<number | null>(null);
   const L = 640;
   const H = 180;
-  const marge = { haut: 22, bas: 30, gauche: 4, droite: 4 };
+  const marge = { haut: 8, bas: 4, gauche: 4, droite: 4 };
   const max = Math.max(1, ...mois.map((m) => Math.max(0, m.montant)));
   const largeur = (L - marge.gauche - marge.droite) / Math.max(1, mois.length);
   const y = (v: number) => marge.haut + (H - marge.haut - marge.bas) * (1 - Math.max(0, v) / max);
@@ -41,8 +41,14 @@ export default function Courbe({ mois }: { mois: Mois[] }) {
 
   return (
     <figure style={{ margin: 0 }}>
-      <figcaption className="esp-kpi-sous" style={{ marginBottom: 6 }}>
-        Chiffre d&apos;affaires HT par mois, sur 24 mois
+      <figcaption className="esp-kpi-sous" style={{ marginBottom: 6, display: "flex", flexWrap: "wrap", gap: "2px 14px" }}>
+        <span>Chiffre d&apos;affaires HT par mois, sur 24 mois</span>
+        {moyenne > 0 ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <svg width="18" height="6" aria-hidden="true"><line x1="0" x2="18" y1="3" y2="3" stroke="var(--r-faible)" strokeWidth="1.5" strokeDasharray="4 3" /></svg>
+            moyenne d&apos;un mois il y a un an : {montant(Math.round(moyenne))}
+          </span>
+        ) : null}
       </figcaption>
       <div style={{ position: "relative" }}>
         <svg viewBox={`0 0 ${L} ${H}`} width="100%" role="img" aria-label="Chiffre d'affaires HT par mois sur 24 mois" style={{ display: "block", overflow: "visible" }}>
@@ -76,23 +82,20 @@ export default function Courbe({ mois }: { mois: Mois[] }) {
                   onFocus={() => setSurvol(i)}
                   onBlur={() => setSurvol(null)}
                 />
-                {i % 6 === 0 ? (
-                  <text x={marge.gauche + i * largeur + largeur / 2} y={H - 6} textAnchor="middle" fontSize={16} fill="var(--r-faible)">
-                    {libelleMois(m.mois, true)}
-                  </text>
-                ) : null}
+
               </g>
             );
           })}
           {moyenne > 0 ? (
             <g>
               <line x1={marge.gauche} x2={L - marge.droite} y1={y(moyenne)} y2={y(moyenne)} stroke="var(--r-faible)" strokeWidth={1.5} strokeDasharray="4 4" />
-              <text x={L - marge.droite} y={y(moyenne) - 4} textAnchor="end" fontSize={16} fill="var(--r-faible)">
-                moyenne il y a un an : {montant(Math.round(moyenne))}
-              </text>
+
             </g>
           ) : null}
         </svg>
+        <div aria-hidden="true" style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--r-faible)", marginTop: 4 }}>
+          {mois.filter((_, i) => i % 6 === 0 || i === mois.length - 1).map((m) => <span key={m.mois}>{libelleMois(m.mois, true)}</span>)}
+        </div>
         {actif ? (
           <div
             role="status"

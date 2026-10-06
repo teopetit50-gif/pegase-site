@@ -18,6 +18,8 @@ import { Loader } from "@/components/ui/loader";
 import { dateCourte, montant, nombreFr } from "../format";
 import { Avis, Def, Pastille, Vide } from "../ui";
 import Courbe from "./Courbe";
+import ParcCompte from "./ParcCompte";
+import type { Source } from "../source";
 import { ISSUES, NIVEAUX, STATUTS_COMPTE, STATUTS_REPRISE } from "./etats";
 import type { Fiche, Tache } from "./types";
 
@@ -30,7 +32,7 @@ export type Geste =
   | { type: "statut"; compte: string; statut: "suivi" | "exclu"; motif: string }
   | { type: "contact"; compte: string; le: string; canal: string; par: string | null; note: string | null };
 
-export default function FicheCompte({ fiche, onAgir }: { fiche: Fiche; onAgir: (g: Geste) => Promise<string> }) {
+export default function FicheCompte({ fiche, onAgir, source = "exemple" }: { fiche: Fiche; onAgir: (g: Geste) => Promise<string>; source?: Source }) {
   const { compte, signal } = fiche;
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -195,6 +197,13 @@ export default function FicheCompte({ fiche, onAgir }: { fiche: Fiche; onAgir: (
             </button>
           </div>
         </div>
+      ) : null}
+
+      {source === "reelle" ? (
+        <>
+          <div className="esp-section-titre">Parc installé et contrats</div>
+          <ParcCompte key={compte.id} compte={compte.id} source={source} />
+        </>
       ) : null}
 
       <div className="esp-section-titre">Tâches</div>

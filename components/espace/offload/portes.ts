@@ -10,13 +10,14 @@
      offload_recalculer (c4_02) ;
      offload_ouvrir_reprise, offload_noter_tache (c4_03) ;
      offload_changer_statut, offload_noter_contact, offload_trancher_rapprochement,
-     offload_exclure, offload_lever_exclusion (c4_05).
+     offload_exclure, offload_lever_exclusion (c4_05) ;
+     offload_noter_intervention (c4_07) ; lectures offload_echeances_tableau, offload_parc_compte.
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Fiche, Tableau } from "./types";
+import type { EcheanceLigne, Fiche, ParcCompte, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -78,4 +79,19 @@ export function noterContact(compte: string, le: string, canal: string, par: str
 
 export function trancherRapprochement(rapprochement: string, accepter: boolean) {
   return rpc<null>("offload_trancher_rapprochement", { p_rapprochement: rapprochement, p_accepter: accepter });
+}
+
+/* c4_07 — échéances et parc */
+export async function chargerEcheances(): Promise<EcheanceLigne[]> {
+  const l = await rpc<EcheanceLigne[] | null>("offload_echeances_tableau", {});
+  return Array.isArray(l) ? l : [];
+}
+
+export async function chargerParcCompte(compte: string): Promise<ParcCompte> {
+  const p = await rpc<ParcCompte | null>("offload_parc_compte", { p_compte: compte });
+  return p && typeof p === "object" ? p : { equipements: [], contrats: [] };
+}
+
+export function noterIntervention(equipement: string, le: string, nature: string, ailleurs: boolean, reference: string | null) {
+  return rpc<string>("offload_noter_intervention", { p_equipement: equipement, p_le: le, p_nature: nature, p_ailleurs: ailleurs, p_reference: reference });
 }
