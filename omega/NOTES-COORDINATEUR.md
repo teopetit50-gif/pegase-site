@@ -719,3 +719,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   fonctions d'accord relayés) — à vérifier si le créateur peut activer seul. A5 : sorties
   brutes (migrations recette/prod en noms, crons, fonctions Edge) relayées. Une lecture de
   ces notes a été refusée par le classifieur (« Production Reads ») : non contournée.
+- 14 h 00 Z — **A5 : omega/MISE-EN-PRODUCTION.md complet** (worker-a5 92893fb, rien posé, prod
+  non touchée) : rejouer la séquence exacte de la recette (~110 lignes, exclusions listées),
+  exporter d'abord en fichiers les lots posés sans fichier, réécrire les URL de recette en dur
+  (19b, 19v, 19aa), répétition générale sur une copie de la prod, puis supabase db push par
+  paliers P1–P6 ; crons de la prod à relever en P1 par Teo ou une session autorisée.
+  Fonctions **reception v10** (4114a69) et **webhooks-brevo v10** (87a1112) passées en coquille
+  sur la recette, verify_jwt false gardé ; fumée : 401 « jeton invalide » sans jeton.
