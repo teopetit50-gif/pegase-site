@@ -46,6 +46,7 @@ const INTERDITS = [
   [/function\s+private\.(depot_demander|depot_executer)\b/i, 'outillage de pose de la recette'],
   [/function\s+private\.(tests_en_tache|tester_sans_trace)\b/i, 'outillage de test de la recette'],
   [/create\s+schema\s+(if\s+not\s+exists\s+)?tests\b/i, 'schéma tests'],
+  [/\(\s*'environnement'\s*,\s*'recette'\s*\)/i, "réglage d'environnement de la recette (19ah_recette_seulement)"],
 ];
 
 function git(...args) {
@@ -284,9 +285,12 @@ function principal() {
       } else if (l.source === 'note' || l.source === 'depot') {
         const { fichiers, avertissements } = lireNote(l.provenance || '');
         notesLigne.push(...avertissements);
-        const migrations = fichiers.filter((f) => !f.test);
+        // 19ah_recette_seulement (environnement = recette) ne part jamais en production, même cité dans une note.
+        const recetteSeule = fichiers.filter((f) => /recette_seulement/i.test(f.chemin));
+        if (recetteSeule.length) notesLigne.push(`exclu (propre à la recette) : ${recetteSeule.map((f) => f.chemin).join(', ')}`);
+        const migrations = fichiers.filter((f) => !f.test && !/recette_seulement/i.test(f.chemin));
         if (fichiers.length > 0 && migrations.length === 0) {
-          manifeste.push({ version, name: l.name, decision: 'exclure: pose de tests (omega/tests/)', source: l.source, fichier: '—',
+          manifeste.push({ version, name: l.name, decision: recetteSeule.length ? 'exclure: propre à la recette (19ah)' : 'exclure: pose de tests (omega/tests/)', source: l.source, fichier: '—',
                            notes: fichiers.map((f) => `${f.chemin} @ ${f.sha}`) });
           continue;
         }
@@ -343,6 +347,16 @@ function principal() {
     writeFileSync(join(SORTIE, nom), contenu);
     manifeste.push({ version: v, name: 'a5_01_cloture', decision: 'emporter', source: 'depot', fichier: nom,
                      sha256: createHash('sha256').update(contenu).digest('hex').slice(0, 16), notes: ['étape C'] });
+    // Puis le réglage d'environnement de la production : sans lui, rien ne distingue la production de la recette, et
+    // le déclencheur de 19ah (essai_donnees_fictives) s'appuie dessus. Contrôlé par garde_fous.sql.
+    const ve = String(BigInt(v) + 1n);
+    const nomE = `${ve}_environnement_production.sql`;
+    const contenuE = `-- ${ve} environnement_production\n-- Source : assembler.mjs --cloture (A5). Pose environnement = 'production' dans private.reglages.\n\n` +
+      `do $$\nbegin\n  update private.reglages set valeur = 'production' where cle = 'environnement';\n` +
+      `  if not found then insert into private.reglages (cle, valeur) values ('environnement', 'production'); end if;\nend $$;\n`;
+    writeFileSync(join(SORTIE, nomE), contenuE);
+    manifeste.push({ version: ve, name: 'environnement_production', decision: 'emporter', source: 'assembleur', fichier: nomE,
+                     sha256: createHash('sha256').update(contenuE).digest('hex').slice(0, 16), notes: ['étape C, après a5_01'] });
   }
 
   const lignesManif = [

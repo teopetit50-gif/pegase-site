@@ -46,6 +46,22 @@ outillage_recette as (
   where n.nspname = 'private' and p.proname in ('depot_demander', 'depot_executer', 'tests_en_tache', 'tester_sans_trace')
   union all
   select 'schéma ' || nspname from pg_namespace where nspname in ('scories')
+),
+-- 19ah : l'essai de données fictives n'existe que sur la recette ; la production porte environnement = 'production'.
+essai as (
+  select n.nspname, c.relname from pg_attribute a join pg_class c on c.oid = a.attrelid join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'private') and c.relname = 'reglages_envois' and c.relkind = 'r'
+    and a.attname = 'essai_donnees_fictives' and not a.attisdropped
+),
+essai_vrai as (
+  select coalesce(sum((xpath('/row/c/text()', query_to_xml(format('select count(*) as c from %I.%I where essai_donnees_fictives', nspname, relname), false, true, '')))[1]::text::bigint), 0) as n,
+         count(*) as colonnes
+  from essai
+),
+environnement as (
+  select case when to_regclass('private.reglages') is not null
+              then (xpath('/row/v/text()', query_to_xml('select string_agg(valeur::text, '','' order by valeur::text) as v from private.reglages where cle = ''environnement''', false, true, '')))[1]::text
+         end as valeur
 )
 select 'anon exécute dans private' as controle, '0' as attendu,
        (select executables::text from exec_private where rolname = 'anon') as constate,
@@ -75,4 +91,14 @@ select 'URL de la recette en base', '0', (select count(*)::text from url_recette
        (select string_agg(ou, ', ') from url_recette)
 union all
 select 'outillage de la recette présent', '0', (select count(*)::text from outillage_recette), (select count(*) = 0 from outillage_recette),
-       (select string_agg(f, ', ') from outillage_recette);
+       (select string_agg(f, ', ') from outillage_recette)
+union all
+select 'essai de données fictives activé (19ah)', '0', (select n::text from essai_vrai), (select n = 0 from essai_vrai),
+       (select case when colonnes = 0 then 'colonne absente (19ah pas encore posé)' end from essai_vrai)
+union all
+select 'réglage environnement = recette', '0',
+       (select coalesce(valeur, '—') from environnement), (select coalesce(valeur, '') !~ '(^|,)recette(,|$)' from environnement), null
+union all
+select 'réglage environnement = production posé', 'production',
+       (select coalesce(valeur, 'absent') from environnement), (select coalesce(valeur = 'production', false) from environnement),
+       'posé par la migration de clôture environnement_production (assembler --cloture) : rouge attendu avant le dernier palier';

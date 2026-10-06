@@ -185,6 +185,13 @@ sont livrés : leurs bases partent. **Teo confirme.**
 - `socle_lot19i_brevo_branche_recette` : à remplacer par la décision de production
   (§ 2).
 - Dans `socle_lot19b`, la ligne `create extension pgtap` : retirée.
+- `19ah_recette_seulement` (B3) : pose `environnement = 'recette'`, qui autorise
+  l'essai de données fictives (19ah). Il est exclu par le nom dans `exporter.sql`,
+  écarté par l'assembleur même s'il est cité dans une note, et refusé si le tuple
+  `('environnement', 'recette')` apparaît dans un fichier. `19ah_essai_donnees_fictives`
+  (colonne, CHECK, déclencheur) part, lui. À la place, la clôture de
+  l'assembleur pose `environnement = 'production'`
+  (`<version>_environnement_production.sql`, juste après a5_01).
 
 Le reste est rejoué tel quel, y compris 19j, 19r, 19s, 19t, 19u, 19w et 19z. a5_01
 (étape C) rétablit ensuite la règle exacte, et le test 44 le prouve.
@@ -440,6 +447,13 @@ select j.jobname, d.status, d.return_message, d.start_time
 from cron.job_run_details d join cron.job j on j.jobid = d.jobid
 where d.start_time > now() - interval '15 minutes' and d.status <> 'succeeded';
 ```
+
+`omega/prod/garde_fous.sql` porte ces contrôles, plus ceux de 19ah. Ils sont joués
+à chaque palier, sur la répétition comme sur la production :
+- aucune ligne de `reglages_envois` avec `essai_donnees_fictives = true` ;
+- aucun réglage `environnement = 'recette'` ;
+- `environnement = 'production'` posé. Ce contrôle est rouge, comme prévu, avant
+  le dernier palier, et doit être vert après la clôture.
 
 À compléter à chaque étape :
 - **Advisors** : `get_advisors security` et `get_advisors performance`. Aucune

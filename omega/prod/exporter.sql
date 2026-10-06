@@ -41,6 +41,7 @@ classees as (
       when l.name ~* '19ac'                                   then 'exclure: outil de test (sorties_tests, tests_en_tache)'
       when l.name ~* '19ae'                                   then 'exclure: outil de test (tester_sans_trace)'
       when l.name ~* '19i'  and l.name ~* 'brevo'             then 'exclure: réglage Brevo de la recette (décision de production à part)'
+      when l.name ~* 'recette_seulement'                      then 'exclure: réglage propre à la recette (19ah, environnement = recette)'
       when l.name ~* '(^|_)tests?($|_)' or l.name ~* 'pgtap_seul' then 'exclure: pose de tests, pas une migration'
       when l.texte ~* 'create\s+(or\s+replace\s+)?function\s+private\.(depot_demander|depot_executer|tests_en_tache|tester_sans_trace)'
                                                               then 'exclure: outillage de pose ou de test de la recette'
