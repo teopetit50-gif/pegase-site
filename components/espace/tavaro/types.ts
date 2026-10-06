@@ -207,6 +207,8 @@ export type LigneFacture = {
   taux_tva: number | null;
   montant_tva: number;
   montant_ttc: number;
+  /* la ligne du barème appliquée (null : hors barème, sur devis) */
+  bareme_ligne_id?: string | null;
   preuves: Preuve[];
 };
 
@@ -265,6 +267,9 @@ export type Reglages = {
   emetteur: Record<string, string>;
   /* b2_07 : netteté minimale d'une photo d'état des lieux (absente tant que la migration n'est pas posée) */
   nettete_min?: number;
+  /* b2_09 : le délai laissé par la banque pour répondre à une contestation, et l'adresse de son service */
+  contestation_delai_jours?: number;
+  contestation_adresse?: string | null;
 };
 
 /* l'état d'une demande de validation du socle, tel que l'écran le montre */
@@ -396,5 +401,38 @@ export type EtatDesLieux = {
   refus_motif: string | null;
   refuse_le: string | null;
   etabli_par: string | null;
+  cree_le: string;
+};
+
+/* b2_09 : les contestations bancaires d'une facture (rétrofacturation) et le dossier de réponse envoyé à la banque */
+export type StatutContestation = "ouverte" | "dossier_pret" | "envoyee" | "gagnee" | "perdue" | "abandonnee";
+export type ForceDossier = { code: "contrat" | "edl_depart" | "edl_retour" | "photos" | "bareme" | "contradictoire" | "envoi"; ok: boolean; libelle: string };
+export type Contestation = {
+  id: string;
+  client_id: string;
+  entite_id: string;
+  facture_id: string;
+  contrat_id: string;
+  reference_banque: string;
+  motif_banque: string;
+  montant_eur: number;
+  recue_le: string;
+  repondre_avant: string;
+  adresse_banque: string | null;
+  statut: StatutContestation;
+  forces: ForceDossier[];
+  dossier_piece_id: string | null;
+  dossier_sha256: string | null;
+  dossier_pages: number | null;
+  dossier_le: string | null;
+  dossier_chemin: string | null;
+  envoi_id: string | null;
+  envoyee_le: string | null;
+  envoyee_par: string | null;
+  issue_le: string | null;
+  issue_par: string | null;
+  issue_note: string | null;
+  notes: string | null;
+  cree_par: string | null;
   cree_le: string;
 };

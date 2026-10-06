@@ -25,14 +25,16 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
-import { AGENCES_EXEMPLE, AVIS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, avoirElectronique, chargerMonde, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
-import type { AvisContravention, Avoir, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
+import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
+import { amenderContrat, avoirElectronique, chargerMonde, envoyerDossier, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import type { AvisContravention, Avoir, Contestation, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
 import { appliquerEtats, empreinte } from "./edl";
 import BaremeVue from "./BaremeVue";
 import AvisVue, { type GestesAvis } from "./AvisVue";
+import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
+import { forcesLocales } from "./contestations";
 import { Preparation2027, type Preparation } from "./FactureElectronique";
 import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
 import "./tavaro.css";
@@ -46,6 +48,7 @@ const MONDE_EXEMPLE: Monde = {
   reglages: REGLAGES_EXEMPLE,
   entites: AGENCES_EXEMPLE.map((a) => ({ id: a.entite_id, nom: a.nom })),
   avis: AVIS_EXEMPLE,
+  contestations: CONTESTATIONS_EXEMPLE,
 };
 
 const ids = () => crypto.randomUUID();
@@ -75,7 +78,7 @@ export default function EcranTavaro() {
       setMoi(compte);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [] });
+      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [], contestations: [] });
     }
   }, []);
 
@@ -121,7 +124,7 @@ export default function EcranTavaro() {
   }, [local]);
   const preparation = source === "exemple" ? prepExemple : prepReelle;
 
-  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux"], source === "reelle", relire);
+  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux", "loc_contestations"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
     if (!id) return "Système";
@@ -476,6 +479,77 @@ export default function EcranTavaro() {
     };
   }, [source, local, moiId, role, relire]);
 
+  /* ——— les contestations bancaires : la porte en base réelle ; en exemple, l'ouvrier est simulé (le dossier est prêt une seconde plus tard) ——— */
+  const gestesContestations: GestesContestations = useMemo(() => {
+    const changer = (id: string, f: (k: Contestation) => Contestation) => setLocal((prev) => ({ ...prev, contestations: prev.contestations.map((k) => (k.id === id ? f(k) : k)) }));
+    const attendre = () => new Promise((r) => setTimeout(r, 350));
+    const composer = (id: string) => window.setTimeout(() => changer(id, (k) => ({
+      ...k, statut: k.statut === "ouverte" ? "dossier_pret" : k.statut, dossier_le: maintenant(), dossier_pages: 6, dossier_piece_id: k.dossier_piece_id ?? ids(),
+      dossier_sha256: Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join(""),
+      dossier_chemin: `${EXEMPLE_CLIENT_ID}/loc_contestations/${k.id}/dossier-${k.reference_banque}.pdf`,
+    })), 1200);
+    return {
+      ouvrir: async (facture, valeurs) => {
+        if (source === "reelle") {
+          const r = await ouvrirContestation(facture.id, valeurs);
+          await relire();
+          return r;
+        }
+        await attendre();
+        const ref = String(valeurs.reference_banque);
+        const deja = local.contestations.find((k) => k.facture_id === facture.id && k.reference_banque === ref);
+        if (deja) return { contestation: deja.id, statut: deja.statut, deja: true };
+        const d = local.dossiers.find((x) => x.contrat.id === facture.contrat_id)!;
+        const k: Contestation = {
+          id: ids(), client_id: EXEMPLE_CLIENT_ID, entite_id: d.contrat.entite_id, facture_id: facture.id, contrat_id: facture.contrat_id, reference_banque: ref,
+          motif_banque: String(valeurs.motif_banque), montant_eur: typeof valeurs.montant_eur === "number" ? valeurs.montant_eur : facture.total_ttc,
+          recue_le: String(valeurs.recue_le), repondre_avant: String(valeurs.repondre_avant), adresse_banque: (valeurs.adresse_banque as string) ?? local.reglages?.contestation_adresse ?? null,
+          statut: "ouverte", forces: forcesLocales(d, facture), dossier_piece_id: null, dossier_sha256: null, dossier_pages: null, dossier_le: null, dossier_chemin: null,
+          envoi_id: null, envoyee_le: null, envoyee_par: null, issue_le: null, issue_par: null, issue_note: null, notes: (valeurs.notes as string) ?? null, cree_par: moiId, cree_le: maintenant(),
+        };
+        setLocal((prev) => ({ ...prev, contestations: [...prev.contestations, k] }));
+        composer(k.id);
+        return { contestation: k.id, statut: k.statut, deja: false };
+      },
+      produire: async (k) => {
+        if (source === "reelle") {
+          await produireDossier(k.id);
+          await relire();
+          return;
+        }
+        await attendre();
+        const d = local.dossiers.find((x) => x.contrat.id === k.contrat_id);
+        const f = d?.factures.find((x) => x.id === k.facture_id);
+        if (d && f) changer(k.id, (x) => ({ ...x, forces: forcesLocales(d, f) }));
+        composer(k.id);
+      },
+      envoyer: async (k, adresse) => {
+        if (source === "reelle") {
+          const r = await envoyerDossier(k.id, adresse);
+          await relire();
+          return r;
+        }
+        await attendre();
+        if (k.statut === "envoyee") return { deja: true };
+        const d = local.dossiers.find((x) => x.contrat.id === k.contrat_id);
+        const f = d?.factures.find((x) => x.id === k.facture_id);
+        changer(k.id, (x) => ({ ...x, statut: "envoyee", envoi_id: ids(), envoyee_le: maintenant(), envoyee_par: moiId, adresse_banque: adresse }));
+        return { deja: false, pieces_jointes: 1 + (f?.pdf_piece_id ? 1 : 0) + (d?.contrat.piece_id ? 1 : 0) };
+      },
+      issue: async (k, issue, note) => {
+        if (source === "reelle") {
+          await issueContestation(k.id, issue, note);
+          await relire();
+          return;
+        }
+        await attendre();
+        if (role !== "gerant" && role !== "admin" && role !== "valideur") throw new Error("L'issue d'une contestation se consigne par la direction ou un valideur.");
+        changer(k.id, (x) => ({ ...x, statut: issue, issue_le: maintenant(), issue_par: moiId, issue_note: note }));
+      },
+      lien: async (k) => (source === "reelle" && k.dossier_chemin ? lienDossier(k.dossier_chemin) : null),
+    };
+  }, [source, local, moiId, role, relire]);
+
   const agences = monde?.agences ?? [];
   const nomAgenceDe = (entite_id: string) => agences.find((a) => a.entite_id === entite_id)?.nom ?? agences.find((a) => a.entite_id === entite_id)?.code ?? entite_id.slice(0, 8);
 
@@ -584,6 +658,10 @@ export default function EcranTavaro() {
 
       <div style={{ marginTop: 16 }}>
         <AvisVue avis={monde?.avis ?? []} dossiers={dossiers} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesAvis} />
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <ContestationsVue contestations={monde?.contestations ?? []} dossiers={dossiers} reglages={monde?.reglages ?? null} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesContestations} />
       </div>
 
       {role === "gerant" || role === "admin" || role === "valideur" ? (

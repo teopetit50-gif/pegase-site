@@ -243,3 +243,30 @@
   background: #fef3c7;
   color: #78350f;
 }
+
+/* Les contestations bancaires (b2_09) : les forces du dossier, dépliables ; la composition en cours. */
+.esp .tav-forces {
+  margin-top: 4px;
+}
+.esp .tav-forces > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 24px;
+}
+.esp .tav-forces > summary:focus-visible {
+  outline: 2px solid var(--r-encre, currentColor);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.esp .tav-forces .tav-preparation {
+  margin-top: 6px;
+}
+.esp .tav-en-cours {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

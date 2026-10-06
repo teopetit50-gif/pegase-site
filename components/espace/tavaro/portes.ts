@@ -36,7 +36,7 @@ import { createClient } from "@/lib/supabase/client";
 import { assemblerDossiers } from "./exemples";
 import type { FormeElectronique } from "./cii";
 import type { Preparation } from "./FactureElectronique";
-import type { Agence, Amendement, AvisContravention, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
+import type { Agence, Amendement, AvisContravention, Contestation, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -69,6 +69,8 @@ export type Monde = {
   entites: { id: string; nom: string }[];
   /* les avis de contravention (b2_03) : vide sans erreur tant que la migration n'est pas posée */
   avis: AvisContravention[];
+  /* les contestations bancaires (b2_09) : vide sans erreur tant que la migration n'est pas posée */
+  contestations: Contestation[];
 };
 
 /* Tout le parking en une passe : les tables sont petites par client, et la RLS
@@ -84,7 +86,10 @@ export async function chargerMonde(): Promise<Monde> {
     supabase.from("loc_reglages").select("*").limit(1),
     supabase.from("entites").select("id, nom"),
   ]);
-  const avisLus = await supabase.from("loc_avis_contravention").select("*").order("echeance_le").limit(500);
+  const [avisLus, contestationsLues] = await Promise.all([
+    supabase.from("loc_avis_contravention").select("*").order("echeance_le").limit(500),
+    supabase.from("loc_contestations").select("*").order("repondre_avant").limit(300),
+  ]);
   if (contrats.error) throw new ErreurPorte(message(contrats.error));
   const liste = (contrats.data ?? []) as Contrat[];
   const ids = liste.map((c) => c.id);
@@ -144,6 +149,7 @@ export async function chargerMonde(): Promise<Monde> {
     reglages: ((reglages.data ?? [])[0] as Reglages | undefined) ?? null,
     entites: ents,
     avis: avisLus.error ? [] : ((avisLus.data ?? []) as AvisContravention[]),
+    contestations: contestationsLues.error ? [] : ((contestationsLues.data ?? []) as Contestation[]),
   };
 }
 
@@ -178,6 +184,17 @@ export const avoirElectronique = (p_avoir: string) => rpc<FormeElectronique>("lo
 export const completerLocataire = (p_locataire: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_completer_locataire", { p_locataire, p_valeurs });
 export const preparation2027 = () => rpc<Preparation>("loc_preparation_2027", {});
 export const refacturerAvis = (p_avis: string) => rpc<Record<string, unknown>>("loc_refacturer_avis", { p_avis });
+export const ouvrirContestation = (p_facture: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_ouvrir_contestation", { p_facture, p_valeurs });
+export const produireDossier = (p_contestation: string) => rpc<Record<string, unknown>>("loc_produire_dossier", { p_contestation });
+export const envoyerDossier = (p_contestation: string, p_adresse: string | null) => rpc<Record<string, unknown>>("loc_envoyer_dossier", { p_contestation, p_adresse });
+export const issueContestation = (p_contestation: string, p_issue: string, p_note: string | null) => rpc<Record<string, unknown>>("loc_issue_contestation", { p_contestation, p_issue, p_note });
+/* Le dossier composé par l'ouvrier, par un lien signé de dix minutes (politique Storage du bucket omega-clients). */
+export async function lienDossier(chemin: string): Promise<string> {
+  const supabase = createClient();
+  const r = await supabase.storage.from("omega-clients").createSignedUrl(chemin, 600, { download: true });
+  if (r.error || !r.data?.signedUrl) throw new ErreurPorte(r.error ? message(r.error) : "Le lien du dossier n'a pas pu être fait.");
+  return r.data.signedUrl;
+}
 export const anonymiserLocataire = (p_locataire: string) => rpc<Record<string, unknown>>("loc_anonymiser_locataire", { p_locataire, p_motif: "demande" });
 
 /* Les réglages du module : la seule écriture directe, ouverte par la RLS au gérant. */
