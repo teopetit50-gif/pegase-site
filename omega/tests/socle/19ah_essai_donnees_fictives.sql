@@ -53,16 +53,19 @@ begin
                'socle19ah:sms:' || suffixe, entite, true, true, null, '{}'::jsonb);
   return next is((select statut || '/' || coalesce(verrou, '') from public.envois where id = v_envoi), 'bloque/CANAL_NON_PERMIS',
                  'avec le drapeau, le SMS de santé reste bloqué : CANAL_NON_PERMIS');
-  -- Un envoi ordinaire, sans donnée de santé : donnees_fictives reste faux.
+  -- Un envoi ordinaire, sans donnée de santé, à un autre destinataire (le précédent est encore « en route » vers le
+  -- premier : l'espacement le différerait et commencer_envoi ne rendrait pas la réponse d'un envoi prêt).
   v_envoi := private.preparer_envoi(banc, 'tavaro', null, null, 'email',
-               jsonb_build_object('adresse', 'gerant@banc-varelo.test', 'nom', 'Essai 19ah'), null, '{}'::jsonb,
+               jsonb_build_object('adresse', 'daf@banc-varelo.test', 'nom', 'Essai 19ah bis'), null, '{}'::jsonb,
                'Votre facture', 'Votre facture est disponible.', null,
                'socle19ah:ordinaire:' || suffixe, entite, true, false, null, '{}'::jsonb);
+  return next ok((select not donnees_sante from public.envois where id = v_envoi), 'un envoi ordinaire reste sans donnée de santé');
   perform private.envoi_valide(v_envoi);
   perform tests.endosser_serveur();
   r := private.commencer_envoi(v_envoi);
   perform tests.redevenir_admin();
-  return next is(r ->> 'donnees_sante', 'false', 'un envoi ordinaire reste sans donnée de santé');
+  return next ok(coalesce(r ->> 'donnees_fictives', 'false') = 'false',
+                 'et il n''est jamais « fictif » (' || coalesce(r ->> 'statut', r ->> 'raison', r ->> 'verrou', r ->> 'mode', '') || ')');
 
   -- 4. Jamais en réel.
   return next throws_ok(format('update public.reglages_envois set mode = ''reel'' where client_id = %L and module = ''tavaro''', banc),

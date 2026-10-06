@@ -260,3 +260,4 @@ logiciel métier qui la fait).
 
     Réécriture vérifiée en local sur des fonctions simulées portant les repères de 19ab : posée deux fois, puis les cas sans drapeau, avec drapeau, réel et hors recette.
   - Test 15 : second test `test_b3_15_rappels_essai_fictif` (5 assertions ; total 40). Avec 19ah, le rappel J-2 de R011 passe en essai, et `commencer_envoi` rend `donnees_fictives = true` et `fournisseur_hds = false`.
+  - Test socle 19ah, n° 15 : le second envoi allait au même destinataire, donc il était différé (espacement) et commencer_envoi ne rendait pas la réponse d'un envoi prêt (have NULL). Corrigé : autre destinataire, donnees_sante lu sur l'envoi, et donnees_fictives jamais vrai pour un envoi ordinaire. 20 assertions.
