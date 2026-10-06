@@ -211,9 +211,9 @@ Deno.test("passage à vide : battre_ouvrier appelé quand même", async () => {
   assertEquals(bilan.pris, 0);
   assertEquals(portes.battements.length, 1);
   assertEquals(portes.battements[0].module, "lecteur");
-  assertEquals(portes.battements[0].genres, ["lecteur.lire"]);
+  assertEquals(portes.battements[0].genres, ["lecteur.lire", "lecteur.media"]);
   assertEquals((portes.battements[0].detail as { ia_branchee: boolean }).ia_branchee, false);
-  assertEquals(portes.appels[0].args, [["lecteur.lire"], 5, "10 minutes", "lecteur-test"]);
+  assertEquals(portes.appels[0].args, [["lecteur.lire", "lecteur.media"], 5, "10 minutes", "lecteur-test"]);
 });
 
 Deno.test("passage avec deux travaux : l'un lu, l'autre chiffré clos sans lecture, battement avec le bilan", async () => {

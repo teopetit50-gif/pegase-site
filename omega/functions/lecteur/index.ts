@@ -8,7 +8,7 @@ import { MOTIF_IA_NON_BRANCHEE } from "@partage/claude.ts";
 import { DepotStorage } from "@partage/depot.ts";
 import { clientClaudeDepuisEnv } from "@partage/fournisseur_ia.ts";
 import { journal, messageDe } from "@partage/journal.ts";
-import { configSupabaseDepuisEnv, PortesRpc } from "@partage/portes.ts";
+import { configSupabaseDepuisEnv, PortesRpc, rpc } from "@partage/portes.ts";
 import { ExtracteurClaude } from "./ia.ts";
 import { PortesAnalyseRpc } from "./analyse/travail.ts";
 import { analysesActives } from "./analyse/interrupteur.ts";
@@ -18,11 +18,13 @@ import { configMistralDepuisEnv, OcrMistral } from "./ocr.ts";
 import { passage } from "./passage.ts";
 import { SourcePluRest } from "./lorani_plu.ts";
 import { PortesVareloRpc } from "./reception_varelo.ts";
+import { configTranscriptionDepuisEnv, TranscripteurMistral } from "./media/transcription.ts";
 
 export function contexteDepuisEnv(env: { get(n: string): string | undefined } = Deno.env): Contexte {
   const supabase = configSupabaseDepuisEnv(env);
   const claude = clientClaudeDepuisEnv(env);
   const mistral = configMistralDepuisEnv(env);
+  const transcription = configTranscriptionDepuisEnv(env);
   if (!claude) journal("alerte", `IA non branchée : ${MOTIF_IA_NON_BRANCHEE} Les lectures seront reprises plus tard (IA_NON_BRANCHEE).`);
   else journal("info", "IA branchée", { fournisseur: claude.fournisseur, modele: claude.modele });
   return {
@@ -35,6 +37,9 @@ export function contexteDepuisEnv(env: { get(n: string): string | undefined } = 
     portesAnalyse: null,
     sourcePlu: new SourcePluRest(supabase),
     varelo: new PortesVareloRpc(supabase),
+    transcripteur: transcription ? new TranscripteurMistral(transcription) : null,
+    // La porte de retour est nommée par le module dans la charge (ex. daliro_media_lu) : p_reception, p_lecture.
+    rendreMedia: (porte, reception, lecture) => rpc(supabase, fetch, porte, { p_reception: reception, p_lecture: lecture }),
     ocr: mistral ? new OcrMistral(mistral) : null,
     env,
     maintenant: () => new Date(),

@@ -4,10 +4,11 @@
 import { journal, messageDe } from "@partage/journal.ts";
 import { analyserTravail, GENRE_ANALYSE } from "./analyse/travail.ts";
 import { type Contexte, type Issue, lirePiece, versionLecteur } from "./lire_piece.ts";
+import { GENRE_MEDIA, lireMedia } from "./media/lire_media.ts";
 
 export const MODULE = "lecteur";
-/** Les lectures de pièces ; les lectures longues seulement si leurs portes sont branchées. */
-export const GENRES = ["lecteur.lire"];
+/** Les lectures de pièces et des photos / vocaux reçus ; les lectures longues seulement si leurs portes sont branchées. */
+export const GENRES = ["lecteur.lire", GENRE_MEDIA];
 export function genresPour(ctx: Contexte): string[] {
   return ctx.portesAnalyse ? [...GENRES, GENRE_ANALYSE] : GENRES;
 }
@@ -27,6 +28,8 @@ export interface BilanPassage {
   reportes: number;
   /** Les lectures longues : issue → nombre. */
   analyses: Record<string, number>;
+  /** Les photos et vocaux : issue → nombre. */
+  medias: Record<string, number>;
   duree_ms: number;
   version: string;
   ia_branchee: boolean;
@@ -43,6 +46,7 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
     issues: { lue: 0, a_verifier: 0, a_classer: 0, rejetee: 0, echec: 0, ignore: 0, repris: 0, abandon: 0, erreur: 0 },
     reportes: 0,
     analyses: {},
+    medias: {},
     duree_ms: 0,
     version: versionLecteur(ctx.maintenant(), ctx.extracteur?.modele ?? null),
     ia_branchee: ctx.extracteur !== null,
@@ -68,6 +72,14 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
           reste,
         );
         bilan.analyses[issue] = (bilan.analyses[issue] ?? 0) + 1;
+        continue;
+      }
+      if (t.genre === GENRE_MEDIA) {
+        const issue = await lireMedia(
+          { portes: ctx.portes, depot: ctx.depot, claude: ctx.claude ?? null, transcripteur: ctx.transcripteur ?? null, env: ctx.env, maintenant: ctx.maintenant, rendre: ctx.rendreMedia },
+          t,
+        );
+        bilan.medias[issue] = (bilan.medias[issue] ?? 0) + 1;
         continue;
       }
       const issue = await lirePiece(ctx, t);

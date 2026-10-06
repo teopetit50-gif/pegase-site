@@ -25,6 +25,8 @@ import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
 import { controlerZone, indicationPlu, type SourcePlu, zonesPourPiece } from "./lorani_plu.ts";
 import { type BilanReception, type PortesVarelo, poserReception } from "./reception_varelo.ts";
+import type { Transcripteur } from "./media/transcription.ts";
+import type { LectureMedia } from "./media/lire_media.ts";
 
 export interface Environnement {
   get(nom: string): string | undefined;
@@ -43,6 +45,9 @@ export interface Contexte {
   sourcePlu?: SourcePlu | null;
   /** Varelo : un bon de livraison lu pré-remplit la réception (grp_enregistrer_reception, b1_11). */
   varelo?: PortesVarelo | null;
+  /** Photos et vocaux (lecteur.media) : la transcription des vocaux, et la porte de retour du module. */
+  transcripteur?: Transcripteur | null;
+  rendreMedia?: (porte: string, reception: string | number, lecture: LectureMedia) => Promise<unknown>;
   extracteur: Extracteur | null;
   ocr: Ocr | null;
   env: Environnement;
