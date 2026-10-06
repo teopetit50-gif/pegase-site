@@ -32,7 +32,7 @@ for (const largeur of LARGEURS) {
     await s.capturer(`${DOSSIER}/reput-demandes-${largeur}.jpg`, { pleine: true });
     verifier(await s.evaluer(cliquer('Marie Durand', '.esp-item')), `${largeur} : ouvrir la demande de Marie Durand`);
     await s.dormir(300);
-    verifier(await s.evaluer(`document.body.innerText.includes('Valider et envoyer') && document.body.innerText.toLowerCase().includes('ses sources dans la base')`), `${largeur} : réponse prête, sources, Valider`);
+    verifier(await s.evaluer(`document.body.innerText.includes('Valider et envoyer') && document.body.innerText.includes('Exporter vers un tableur') && document.body.innerText.toLowerCase().includes('ses sources dans la base')`), `${largeur} : réponse prête, sources, Valider`);
     verifier(await s.evaluer(cliquer('Corriger')), `${largeur} : Corriger ouvre l'éditeur`);
     await s.dormir(300);
     verifier(await s.evaluer(`!!document.querySelector('textarea')`), `${largeur} : l'éditeur est là`);

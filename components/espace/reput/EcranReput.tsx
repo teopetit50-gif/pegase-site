@@ -26,6 +26,7 @@ import BaseConnaissances from "./BaseConnaissances";
 import ReglagesAvis from "./ReglagesAvis";
 import SujetsAutorises from "./SujetsAutorises";
 import { mondeExemple } from "./exemples";
+import { csvDemandes, telecharger } from "./export";
 import { chargerMonde, corriger, decider, monClient } from "./portes";
 import type { Client, Demande, Monde, Reponse, StatutDemande } from "./types";
 
@@ -132,6 +133,11 @@ export default function EcranReput() {
           </p>
         </div>
         <div className="esp-item-haut">
+          {monde ? (
+            <button type="button" className="r-btn" onClick={() => telecharger(`demandes-clients-${new Date().toISOString().slice(0, 10)}.csv`, csvDemandes(monde))}>
+              Exporter vers un tableur
+            </button>
+          ) : null}
           <Ruban source={source} />
         </div>
       </div>

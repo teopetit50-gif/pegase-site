@@ -224,6 +224,7 @@ Test `omega/tests/reput/c3_06_cashd_escalade.sql` (27 ; souche 233/233). Il pose
 | Les sujets qui reviennent sont remontés, et ils nourrissent la base de connaissances. | **tenue** | c3_06 point du matin |
 | Les avis obtenus après intervention sont comptés par service et par site. | **tenue** | vue reput_avis_indicateurs |
 | Les pièces jointes sont conservées et rattachées à la demande. | **tenue** (A2 les dépose ; l'écran les montre) | écran |
+| Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | **tenue à la demande** (CSV « ; », UTF-8, depuis l'écran) ; à date fixe : non | écran « Exporter vers un tableur » |
 | Une demande hors périmètre est transférée avec la fiche de son escalade. | **tenue** | alerte au client portant la demande ; c3_02 |
 | Chaque échange reste archivé, transféré ou non, et reste consultable. | **tenue** | `reput_demandes` + `reput_reponses` (versions), RLS ; c3_02 « Le gérant lit » |
 
