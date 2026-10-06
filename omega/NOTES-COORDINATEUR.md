@@ -423,3 +423,15 @@ relire la nuit.
   (cron.unschedule) ; lire `select lot, ligne from private.sorties_tests order by id`.
   Attention : execute_sql ne rend que le résultat de la DERNIÈRE requête.
 - Point automatique réarmé : trig_01PJKxdeE5XGx3n8QTMoWwVe (toutes les 2 h, à h:14).
+- **Suites des modules rejouées après a5_01 v2** (via 19ac, une par une — en parallèle,
+  Daliro a fait un interblocage ; et `tests_en_tache` doit rester SECURITY INVOKER, sinon
+  « cannot set parameter role within security-definer function ») : Varelo 14/14, Tiroma
+  12/12, Tamila 13/13, Lorani vert, Daliro 154 + 38, Tavaro 10/11 (n° 11 test 7, corrigé
+  par B2 en 4459680, posé, rejeu en cours), Identité 9/10 (b7_02 test 7 « aucun cache pour
+  un identifiant jamais vu » : le cache porte la vraie preuve Orange ; renvoyé à B7).
+- A1 : le lecteur est déjà sur 055b29c (version 14) ; rien à redéployer. Le second message
+  à A1 est passé.
+- **Fusion des notes de B3/B4/B5/B6/A3 dans main refusée par le filtre de permissions de
+  cette session** (non relancée) : à faire par Teo ou une session autorisée, méthode
+  inchangée (`-X theirs` + checkout de la barre d'onglets). Les branches A1/A2/A4/A5 ne
+  sont toujours pas fusionnées (comme avant la passation).
