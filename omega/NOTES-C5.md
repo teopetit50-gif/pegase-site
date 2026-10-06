@@ -444,3 +444,20 @@ NOTES-C4. Seules les « affaires restées en plan » (25 à 32) restent en prép
 Pour la bascule `atteste: true` au palier de production : lib/produits/capacites/reprise.ts lignes 49 (contrats et
 équipements, n° 8 de C4) et 71 à 78 (n° 17 à 24), preuve c4_07 5f2cc7e, tests `test_c4_07_echeances`,
 `test_c4_07_contrats_et_parc`, `test_c4_07_import_et_groupe`.
+
+## Passe 8 — 06/10, 19 h 05 Z : OFFLOAD c4_08, métré Lorani, appels manqués sans SMS
+
+| Fichier | Avant | Après | Raison |
+|---|---|---|---|
+| lib/produits/reprise.ts:157 | « … et l'entretien redevenu dû. L'affaire restée en plan s'y ajoutera ensuite : sa lecture est en préparation. » | « OFFLOAD y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan. » | c4_08 (e4365bfb), lignes C4 25 à 32, vert sur la recette |
+| lib/produits/reprise.ts:174 (maquette) | « Rythme de commande rompu » | « Pièce arrivée, jamais reprise » | idem |
+| lib/produits/reprise.ts:308 (Garage) | « … Le suivi des commandes que personne n'a reprises est en préparation. » | « OFFLOAD suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises. » | idem |
+| lib/produits/reprise.ts:377 (FAQ) | deux listes, la troisième en préparation | trois listes, chaque message validé avant de partir | idem |
+| lib/en-preparation.ts, `offload` | « Pièce arrivée, jamais reprise » | liste vide | idem |
+| components/secteurs/architectes/Questions.tsx:73 (FAQ « metre ») | « Oui. Il mesure les surfaces et les longueurs sur les plans, puis les compare aux quantités de la DPGF, lot par lot. » | « Oui. Le métré que vous déposez, ou les quantités écrites sur les planches, est comparé aux quantités de la DPGF, lot par lot. » | b5_16 amendé (3c838eb8) : rôle `metre`, nature `metre_dpgf` ; le lecteur ne mesure pas le dessin |
+| components/secteurs/architectes/Formules.tsx:411 | « Métré des plans contre la DPGF » + pastille | « Métré déposé contre la DPGF », sans pastille (retiré de la liste `lorani`) | idem |
+| components/secteurs/architectes/Fonctionnement.tsx:554 | « Métré des plans contre les quantités » | « Métré déposé contre les quantités » | idem |
+| lib/pub.ts + components/pub/PagePub.tsx (/p/appels-manques) | « Chaque appel manqué vous revient par SMS, avec le numéro. » sans réserve | même promesse, pastille « En préparation » sur le surtitre et, sous le chapô : « L'envoi par SMS est en préparation : cette page décrit le service tel qu'il ouvrira. Le diagnostic, lui, est disponible dès aujourd'hui. » (champ `preparation` de l'accroche) | décision de Teo : pas de SMS pour l'instant (crédits SMS). Toute la page repose sur le SMS : une reformulation sans SMS ne tenait pas. Retour : retirer `preparation` quand l'envoi SMS est ouvert |
+
+Pour la bascule au palier de production : lib/produits/capacites/reprise.ts, lignes « Affaires restées en plan »
+(n° 25 à 32 de C4), preuve c4_08 e4365bfb.
