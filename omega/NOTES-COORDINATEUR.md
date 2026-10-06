@@ -511,3 +511,166 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   à poser par Teo ou avec son accord (`alter publication supabase_realtime add table
   public.filed_fournisseurs;` ; RLS « membres lisent les fournisseurs », anon sans SELECT).
   Sans lui, la fiche ne se relit pas seule après une action.
+- 04 h 10 — **a4_12 posé** (worker-a4 18578a3) : la levée de `fournisseur.a_confirmer` est
+  refusée à tout le monde (déclencheurs sur filed_levees et filed_controles) ; seul chemin :
+  filed_confirmer_fournisseur. 0 levée existante avant. Test a4_06 vert.
+  **Lot 19ae — `private.tester_sans_trace(id)`** : pour les tests d'A4 (bloc DO + `rollback;`
+  final), depot_executer retire le rollback, donc les données resteraient. tester_sans_trace
+  joue le fichier puis annule tout par une exception interne, et rend « vert » ou
+  « rouge : <code> <message> » (les notices sont perdues). À employer pour tout test non pgTAP.
+  A3 prévenu : masquer « Lever avec un motif » pour ce code.
+- 04 h 15 — **preuve réelle FILED fournisseur** (A3, 01 h 53 Z) : daf@ confirme ORANGE SA →
+  actif ; FAC-2026-10-0471 bloquee → a_valider (0 bloquant) ; demande valider_fournisseur
+  annulée d'office. « Annuler ma demande » prouvé (IBAN proposé par le gérant → demande
+  annulée par l'écran). worker-a3 71b56a7 fusionné (relecture à 1, 2, 4 min après
+  « Revérifier »). Renvoyé à A4 : la demande valider_facture née du recontrôle est
+  attribuée à daf (auth.uid()), qui ne pourra pas la valider ; IBAN « propose » orphelin
+  après annulation.
+- 04 h 20 — A3 64a5490 fusionné (0f8a2de) : sur fournisseur.a_confirmer, plus de « Lever avec
+  un motif », seulement « Confirmer ce fournisseur » (gris pour le déposant). Lot FILED
+  fournisseur clos ; en attente d'A4 (a4_13 : demandeur des demandes nées d'un recontrôle,
+  IBAN « propose » orphelin).
+- 04 h 25 — **Règle commune des valeurs lues (décision du coordinateur)** : une ligne par
+  (piece_id, champ), jamais deux ; une liste = une seule ligne dont la valeur est un tableau
+  jsonb dans l'ordre du document (ex. ["PCMI 3","PCMI 6"]) ; le socle lit avec
+  jsonb_array_elements_text quand jsonb_typeof = 'array'. Écrit dans omega/CHAMPS-LECTURE.md
+  (worker-a1 9ebefca). Cause : second courrier Lorani réel (pièce 059e705e…, lue, date et
+  pièces justes) → 0 proposition, car lorani_propositions attendait une ligne par code et
+  lorani_valeurs_de_piece remonte le tableau en chaîne JSON. B5 écrit b5_06 (deux formes
+  acceptées, fiche corrigée) ; A1 ajoute les champs facultatifs Lorani de la fiche de B5.
+- 04 h 10 — **b5_06** (worker-b5 24ea9b0) posé : private.lorani_codes_pieces accepte toutes
+  les formes de liste ; `^test_b5_` 114/114 ; pièce réelle 059e705e → [PCMI3, PCMI6]. B5
+  redépose une v3 par l'écran pour la preuve de bout en bout. **Lecteur v17** (worker-a1
+  0d54731 : champs facultatifs Lorani, lorani_courrier_autre, clés réduites aux champs
+  obligatoires). **a4_13** (worker-a4 5f6aa66) posé : demandes de facture et d'IBAN déposées
+  au nom du système, filed_saisisseurs ignore les étapes écrites par FILED, IBAN repris après
+  annulation ; a4_07 vert ; IBAN …0189 redéposé (en_attente, système). **FAC-2026-10-0471
+  validée de bout en bout** : approuvée par daf2@ à 02:03:20 Z (A3), demande executee —
+  posée juste avant a4_13, donc le correctif du demandeur reste à prouver sur la prochaine
+  facture réelle.
+- 04 h 15 — b5_06 v2 (worker-b5 fcd1b1a) posé : lorani_valeurs_de_piece remonte un tableau en
+  jsonb (plus en chaîne) ; `^test_b5_` 114/114 ; fiche Lorani ligne 23 alignée sur la règle
+  commune ; branche fusionnée. B5 redépose une v3 par l'écran (lecteur v17).
+- 04 h 20 — **A3 7429d52 fusionné en urgence** : l'écran FILED plantait sur une facture
+  « validee » (statuts validee/refusee/comptabilisee inconnus ; un statut inconnu s'affiche
+  désormais tel quel). Lien Validations → dossier FILED (/espace/filed?objet=facture:<id>).
+  **Première vraie facture de bout en bout** : FAC-2026-10-0471 (ORANGE SA) déposée, lue,
+  contrôlée, VIES, fournisseur confirmé par daf@, validée par daf2@ (02:03:20 Z), exécutée
+  par le socle (02:04 Z), archivée avec empreinte au journal (ligne 76967). Pour B6 :
+  daliro/ChantierVue.tsx affiche le statut brut pour ces trois statuts.
+- 04 h 20 — **Lorani : chaîne réelle complète** (B5, v3 par l'écran, lecteur v17) : pièce
+  2bfb560c lue en 35 s, proposition à 247 s « PCMI3, PCMI6 », confirmée 02:10:09 Z ; permis
+  56c88739 en pieces_demandees, échéance 2027-01-01, rappels [10,3,0]. Jauges B5 : mécanique
+  95 %, livrable 92 %. Reste sur le banc la demande confirmée vide de 01:40 (pièce 1c55b927).
+- 04 h 25 — B6 bf18d74 fusionné : libellés des statuts de facture FILED dans Daliro (validee,
+  refusee, ecartee, comptabilisee ; inconnu affiché tel quel). Décision sur ses deux
+  propositions : oui à un J-2 réel sur le banc en mode essai (remis à l'adresse de Teo,
+  comme Tavaro) et à la clôture (annule) des sept chantiers « Essai B6 » — B6 écrit les
+  fichiers, le coordinateur pose.
+- **Point automatique 04 h 15 (02 h 15 Z)** : rien de neuf à poser. Battements frais
+  (lecteur, identite, expediteur, lorani_lecture 02:15 ; filed 02:14) ; 0 erreur HTTP et
+  0 cron en échec sur 30 min. 2 travaux en échec (lecteur.lire, pièces Tamila chiffrées,
+  00:24/00:26 Z) : antérieurs au garde-fou du lecteur v16, attendus. En attente : B6 (J-2
+  réel + clôture des chantiers d'essai), A3 (vue Fournisseurs), Teo (Realtime de
+  filed_fournisseurs, export Logos_w, SIRENE_API_KEY, HDS, coffre Tamila).
+- 04 h 20 — Lorani, second essai réel (lettre du 03/10, PCMI2+PCMI8) vert de bout en bout,
+  mais révèle que la seconde demande **écrase** la première (pieces_demandees et échéance).
+  B5 (NOTES-B5 § 6, R*423-38/39/41) : l'écrasement est faux ; une seconde demande ne fait
+  pas repartir le délai, au mieux complète la liste. **b5_07 validé** (union, première date
+  gardée, historique, avertissement). **Pour Teo / un juriste** : cas d'une seconde demande
+  DANS le mois.
+- 04 h 25 — **A3 0af323c fusionné** : vue FILED « Fournisseurs » (/espace/filed/fournisseurs) —
+  compteurs, recherche nom/SIREN/TVA, « à confirmer » en tête, fiche (confirmer, revérifier,
+  attester, proposer un IBAN, bloquer), IBAN et factures liées. Relue en réel avec daf2@.
+  Constat : Papeterie Delorme (R2026-000003) n'a ni SIREN ni TVA → « Revérifier »
+  impossible (relayé à A1/A4).
+- 04 h 30 — **Vercel : « Deployment rate limited — retry in 24 hours »** (statut GitHub des
+  commits c13af96, 6bf7a86, 9b7ab27…). Seul f79663d (02:09 Z) est parti : il porte tout
+  jusqu'à lui (fiche fournisseur, PermisVue, statuts FILED). **Pas encore en ligne** :
+  libellés Daliro (c13af96) et vue Fournisseurs (6bf7a86) ; /espace/filed/fournisseurs
+  répond 404 sur omegaai.fr. Causes : (1) une poussée de notes sur main = un déploiement ;
+  (2) worker-a1/a2/a4/a5 n'ont pas le vercel.json qui coupe les prévisualisations (on voit
+  des déploiements worker-a4, worker-a1 cette nuit) — demandé aux quatre de le reprendre de
+  main. **Nouvelle règle** : les notes du coordinateur se commitent en local et partent avec
+  la prochaine vraie modification du site (ou au plus une poussée de notes par point de 2 h).
+  Vérifier l'état d'un commit : `gh api repos/teopetit50-gif/pegase-site/commits/<sha>/statuses`.
+- 04 h 35 — Vercel : redéploiement direct par l'API refusé « 402 api-deployments-free-per-day,
+  remaining 0, reset 1791340078 » (= 2026-10-07 ~02:27 Z). Relance programmée (send_later
+  trig_01JenpvhuDuobgoCD34qwKi5, 02:32 Z). Pour débloquer avant : Teo passe pegase-site2 en
+  Pro. A1/A2/A4/A5 ont repris vercel.json (dc918ce, 907f180, bd4dfd4, b81d0f7).
+- B6 : b6_06_envoi_j2 posé (cron daliro-ouvrier, abonnement, btp_ouvrier service_role seul).
+  banc_j2_reel : A OK (réglage essai), **B en échec** « Daliro n'est pas installé pour cette
+  organisation » (rien d'écrit) → B6 ajoute un bloc d'installation. Clôture non jouée.
+- A4 : Delorme sans SIREN, c'est juste (SIREN lu 842115763 faux au Luhn, non vérifié) ; piste
+  écran (« Corriger / confirmer sur la pièce ») confiée à A3, puis « À payer ».
+- B5 : arrêté et constat d'affichage réels verts (Extension Garnier, échéances justes) ; 4
+  types sur 6 prouvés ; b5_07 en cours.
+- 04 h 40 — **Daliro : J-2 réel vert de bout en bout** (b6_06 697c580 + banc_j2_reel 60fa33c) :
+  Daliro installé sur le banc (chantiers/20/5), chantier ESSAI-J2, passage du 08/10, envoi
+  4742391e préparé → approuvé par daf@ → envoyé 02:33:00 Z par Brevo, **remis 02:33:05 Z**
+  (mode essai, adresse de Teo). Sept chantiers « Essai B6 » annulés. Reste chez B6 : réponse
+  OUI/NON entrante → btp_repondre_confirmation ; le fil btp_confirmations ne garde que
+  « demandee ».
+- **b5_07** (a4e3197) posé : `^test_b5_` 120/120 ; écran fusionné (en ligne au retour du
+  quota). **a4_14** (cf4c3af) posé : toute valeur humaine à clé fausse (SIREN/SIRET/TVA/IBAN)
+  refusée par déclencheur ; TVA FR au SIREN faux = clé fausse ; a4_08 vert.
+- A4, « ce qui manquerait pour une vraie PME » (NOTES-A4, 2681b33) : écritures/FEC, facture
+  électronique (Factur-X/UBL/CII, statuts de cycle de vie), mode de règlement/ICS, validation
+  auto des charges récurrentes, organisation d'une seule personne, TVA sur encaissements,
+  conservation vs effacement, fournisseurs étrangers, acomptes/avoirs, délais de paiement.
+- 04 h 45 — A3 be87d0b fusionné : FILED « Identifiants lus sur la pièce, non retenus »
+  (Confirmer seulement si la clé est juste, sinon « Saisir les vrais identifiants ») ;
+  **défaut corrigé** : « Corriger une valeur » envoyait date_emission / echeance_lue / iban
+  (refusés 22023) → date / echeance / fournisseur.iban, prouvé en réel (daf2@, R2026-000003).
+  Quatre SIREN d'exemple à clé fausse remplacés. B6 : feu vert b6_07 (réponse OUI/NON
+  entrante) et statut de l'envoi à l'écran ; accord permanent des J-2 → décision de Teo.
+- 04 h 50 — **Lorani : six types de courriers sur six prouvés en réel** (lettre de délai :
+  instruction portée à 6 mois, décision attendue 2027-03-20 ; certificat tacite : DP accordée
+  tacitement le 02/07, retrait tenu). Jauge livrable B5 : 96 %. Question ouverte : échéance
+  d'affichage passée (2026-07-17) restée « ouvert » → relue après le cron de 03:07 Z.
+- 04 h 55 — **b6_07** (b3bd323, réponses OUI/NON entrantes) posé ; lecture OUI/NON juste sur
+  essais directs ; b6_03 vert (29). **Régressions** : b6_01 test 86 (abonnement b6_06) et b6_02
+  mort sur « Quota atteint : 5 chantiers ouverts » (installation du banc + ESSAI-J2 ; message
+  « 5 » alors que quota_chantiers = 20 : colonne à vérifier). Renvoyé à B6 ; écran b6_07 non
+  fusionné avant le vert.
+- 05 h 00 — A3 50af351 fusionné : FILED « À payer » (/espace/filed/a-payer), factures
+  validées groupées par échéance avec totaux, IBAN validé / à valider / manquant ; relu en
+  réel (FAC-2026-10-0471, 288,00 €, échéance 01/11, IBAN à valider). Limite : FILED ne suit
+  pas le paiement (pas de statut « payée ») — demande pour A4 si Teo la veut.
+- **Point 06 h 15 (04 h 15 Z), après redémarrage de la session** : échéance d'affichage Lorani
+  passée en « depasse » à 03:07 Z (cron horaire, pas de trou). **Daliro** : tests corrigés de
+  B6 (9f7325e) → `^test_b6_` 154 + 38 + 29 verts ; écran b6_07 (« demande remise le … »)
+  fusionné. **Lorani** : b5_07 prouvé en réel (Pavillon Lemoine : deux lettres réunies,
+  [PCMI3, PCMI6, PCMI2, PCMI8], échéance 2027-01-01) ; b5_08 (titre d'alerte) et b5_09
+  (titre du permis) posés, 120/120. A3 : décision en lot dans /espace/validations validée
+  (deux demandes VARELO approuvées au plus). A4 : a4_15 (paiement) pas encore livré.
+- 07 h 10 — A3 78cd9f0 fusionné : « Décider en lot » dans /espace/validations (mêmes
+  garde-fous qu'à l'unité, écartées motivées, bilan ligne à ligne) ; relu en réel avec
+  referent@ : 2 demandes VARELO approuvées et exécutées (05:04 Z), 5 restent en attente.
+  Correctif transversal : les dialogues (portail hors de .esp) recevaient mal les styles de
+  l'espace → espace.css (partagé) double 51 règles pour .dlg-panneau.resa ; à surveiller
+  sur les écrans des B. Notes B6 f5c0cd1 fusionnées.
+- 07 h 15 — **a4_15 posé** (634fe24) : public.filed_noter_paiement (gérant/admin/valideur ;
+  partiel ; gardes : pas au-delà du reste, pas de date future, référence unique par facture)
+  et public.filed_etat_paiement (a_payer / partielle / payee) ; a4_09 vert. Pas de statut
+  « payee » sur la facture (la comptabilisation reste possible). A3 branche « Noter un
+  paiement » dans « À payer ».
+- 07 h 20 — A3 433b71a fusionné (accessibilité, axe-core WCAG 2.1 A/AA + clavier, 22
+  contrôles) : files en listes de boutons (aria-current) au lieu de listbox/option invalides,
+  contraste du numéro de page 5:1, point du matin role=img, et **components/ui/dialog.tsx
+  (partagé site)** : le focus revient à l'élément d'origine à la fermeture d'un dialogue
+  contrôlé (relu : handlers de l'appelant préservés, preventDefault respecté). Les écrans
+  des B (tiroma/ListeAttente, tamila, varelo, daliro, lorani, tavaro) gardent le même
+  role=listbox/option : à corriger par chacun (demandé).
+- 07 h 25 — A3 04efcda fusionné : « Noter un paiement » dans « À payer » (reste à payer,
+  « Payée en partie / Payée », payées masquées). Relu en réel : 100 € par virement sur
+  FAC-2026-10-0471 (daf2@) → reste 188,00 € sur 288,00 €, filed_etat_paiement partielle.
+- 07 h 30 — **Accessibilité des six écrans B fusionnée** (B1 be56d79, B2 3b3708e, B3 8d20e49,
+  B4 71c9463, B5 afebaaf, B6 6131c1a) : listbox/option → listes de boutons (aria-current),
+  pastilles role=img, cadres défilants tabIndex/region/aria-label ; scripts axe par module.
+  Restent des cadres défilants sans tabIndex : tiroma/Cabinet (B3), varelo/Depot et
+  ObjetDetail (B1), filed/EcranAPayer (A3) — demandés. A3 prépare
+  omega/recette-a3/verifier-en-ligne.mjs (13 écrans sur omegaai.fr).
+- **Vercel** : 4d1e26d est passé (statut success) — le quota glisse sur 24 h, des créneaux se
+  libèrent ; 05c7391 et fccee92 refusés de nouveau. À chaque point : regarder le statut du
+  HEAD et, s'il est refusé, retenter plus tard (une poussée suffit, elle emporte tout).

@@ -117,7 +117,7 @@ language plpgsql as $f$
 declare
   jeu jsonb; v_client uuid; v_gerant uuid; v_referent uuid; v_daf uuid; v_daf2 uuid; v_entite uuid;
   v_autre_client uuid := gen_random_uuid(); v_autre_user uuid := gen_random_uuid();
-  v_projet uuid; v_lot1 uuid; v_pc uuid; v_dp uuid; v_piece uuid; v_prop uuid; v_delai uuid; v_recours uuid;
+  v_projet uuid; v_lot1 uuid; v_pc uuid; v_dp uuid; v_pcmi uuid; v_piece uuid; v_prop uuid; v_delai uuid; v_recours uuid;
   v_calcul jsonb; r jsonb; n integer; v_texte text; v_date date; v_travail bigint;
   x public.lorani_permis;
   v_d integer; v_j_demande integer; v_j_depot integer;
@@ -239,8 +239,8 @@ begin
   v_piece := tests.b5_lire(v_referent, v_projet, 'demande-pieces.pdf', 'lorani_demande_pieces', jsonb_build_array(
     jsonb_build_object('champ', 'date_lettre', 'valeur', tests.b5_iso(v_j_demande), 'texte', 'Nantes, le ' || tests.b5_fr(v_j_demande)),
     jsonb_build_object('champ', 'numero_dossier', 'valeur', 'PC 044109 26 A0042', 'texte', 'Dossier n° PC 044109 26 A0042'),
-    jsonb_build_object('champ', 'pieces', 'valeur', 'PC5', 'texte', 'PC5 — plan des façades'),
-    jsonb_build_object('champ', 'pieces', 'valeur', 'PC 8', 'texte', 'PC 8 — photographie du terrain')));
+    -- une ligne par champ : la liste est UNE valeur tableau, dans l'ordre de la lettre (CHAMPS-LECTURE.md, b5_06)
+    jsonb_build_object('champ', 'pieces', 'valeur', jsonb_build_array('PC5', 'PC 8'), 'texte', 'PC5 — plan des façades ; PC 8 — photographie du terrain')));
   r := private.lorani_lectures_passage();
   select id into v_prop from public.lorani_permis_dates_lues where piece_id = v_piece and nature = 'demande_pieces';
   return next ok(v_prop is not null, '7. une proposition « demande_pieces » est née');
@@ -303,7 +303,7 @@ begin
   return next is((select etat from public.travaux where id = v_travail), 'fait', '10. travail clos');
   select titre into v_texte from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc);
   return next ok(v_texte is not null, '10. alerte de rappel levée au chef de projet');
-  return next ok(v_texte like 'PC « Maison Lemoine » : pièces manquantes à faire recevoir par la mairie au plus tard le ' || to_char(v_date, 'DD/MM/YYYY') || ' (dans 10 jours)%', '10. … qui dit la date butoir : ' || coalesce(v_texte, ''));
+  return next ok(v_texte like 'PC « Résidence Lemoine — six logements » : pièces manquantes à faire recevoir par la mairie au plus tard le ' || to_char(v_date, 'DD/MM/YYYY') || ' (dans 10 jours)%', '10. … qui dit la date butoir : ' || coalesce(v_texte, ''));
   return next is((select niveau from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc)), 'attention', '10. … niveau « attention » à J-10');
   return next is((select destinataire_id from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:pieces:rappel:10', v_pc)), v_referent, '10. … adressée au chef de projet');
   -- b5_03 : le rappel part au chef de projet par courriel, par la file des envois.
@@ -311,7 +311,7 @@ begin
                          and e.module = 'lorani' and e.canal = 'email' and e.statut <> 'bloque'),
                  '10. un envoi « rappel » est préparé au chef de projet (b5_03) : ' || coalesce((select e.statut || ' → ' || coalesce(e.destinataire_adresse, 'sans adresse') from public.envois e where e.client_id = v_client and e.cle_idempotence = format('lorani:permis:%s:pieces:rappel:10', v_pc)), 'aucun'));
   return next ok(exists (select 1 from public.envois e where e.client_id = v_client and e.cle_idempotence = format('lorani:permis:%s:pieces:rappel:10', v_pc)
-                         and e.sujet like 'Omega — PC « Maison Lemoine » : pièces manquantes%' and e.corps like '%PC5, PC8%' and e.corps like '%/espace/lorani?permis=' || v_pc::text || '%'),
+                         and e.sujet like 'Omega — PC « Résidence Lemoine — six logements » : pièces manquantes%' and e.corps like '%PC5, PC8%' and e.corps like '%/espace/lorani?permis=' || v_pc::text || '%'),
                  '10. … qui nomme les pièces et mène au dossier');
   return next ok(not exists (select 1 from public.alertes where client_id = v_client and interne and cle_regroupement like 'lorani:envoi_rappel:%'), '10. … sans alerte interne d''échec');
 
@@ -422,6 +422,39 @@ begin
                    #> '{0,valeurs,pieces}',
                  '[{"code": "PCMI3"}, {"code": "PCMI6"}, {"code": "DPMI2"}]'::jsonb,
                  '19. b5_05 : les pièces « PCMI 3 », « PCMI 6 », « DPMI2 » d''une demande lue sont gardées, le texte libre écarté');
+  -- b5_06 : la forme que rend le lecteur v14, UNE valeur tableau passée en texte par lorani_valeurs_de_piece (06/10, pièce 059e705e…)
+  return next is(private.lorani_propositions('lorani_demande_pieces',
+                   '{"date_lettre": {"valeur": "2026-10-01"}, "pieces": [{"valeur": "[\"PCMI 3\", \"PCMI 6\"]", "texte": "- PCMI 3 : plan en coupe", "page": 1, "verifiee": true}]}'::jsonb)
+                   #> '{0,valeurs,pieces}',
+                 '[{"code": "PCMI3"}, {"code": "PCMI6"}]'::jsonb,
+                 '19. b5_06 : une seule valeur « pieces » portant le tableau ["PCMI 3", "PCMI 6"] donne les deux pièces');
+  return next is(private.lorani_codes_pieces('[{"valeur": ["PC 8", "PC5"]}, {"valeur": "PC5; PA10-1"}]'::jsonb),
+                 '["PC8", "PC5", "PA10-1"]'::jsonb,
+                 '19. b5_06 : tableau jsonb et texte à virgules, dans l''ordre et sans doublon');
+
+  -- ── 19 bis (b5_07). Une seconde demande de pièces complète la première, elle ne la remplace pas ──
+  perform tests.b5_endosser(v_referent);
+  insert into public.lorani_permis (client_id, projet_id, type_autorisation, intitule, date_depot)
+  values (v_client, v_projet, 'pcmi', 'Garage Lemoine', current_date - 20) returning id into v_pcmi;
+  update public.lorani_permis set date_demande_pieces = current_date - 12, pieces_demandees = '[{"code": "PCMI3"}, {"code": "PCMI6"}]' where id = v_pcmi;
+  update public.lorani_permis set date_demande_pieces = current_date - 10, pieces_demandees = '[{"code": "PCMI2"}, {"code": "PCMI6"}]' where id = v_pcmi;
+  perform tests.b5_admin();
+  select * into x from public.lorani_permis where id = v_pcmi;
+  return next is(x.pieces_demandees, '[{"code": "PCMI3"}, {"code": "PCMI6"}, {"code": "PCMI2"}]'::jsonb, '19 bis. b5_07 : seconde lettre → union des pièces, la première lettre d''abord');
+  return next is(x.date_demande_pieces, current_date - 12, '19 bis. … la date reste celle de la première lettre (le délai de trois mois ne repart pas)');
+  return next is(jsonb_array_length(x.demandes_pieces), 2, '19 bis. … les deux lettres sont dans l''historique demandes_pieces');
+  return next ok(exists (select 1 from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:seconde_demande:2', v_pcmi)
+                         and titre like '%seconde demande de pièces%'), '19 bis. … alerte « seconde demande de pièces » levée');
+  return next ok(private.lorani_deja_saisi(x, 'demande_pieces', jsonb_build_object('date_demande_pieces', current_date - 10, 'pieces', '[{"code": "PCMI2"}, {"code": "PCMI6"}]'::jsonb)),
+                 '19 bis. … la seconde lettre relue ne repropose rien (lorani_deja_saisi lit l''historique)');
+  perform tests.b5_endosser(v_referent);
+  update public.lorani_permis set date_pieces_fournies = current_date - 3 where id = v_pcmi;
+  update public.lorani_permis set date_demande_pieces = current_date - 1, pieces_demandees = '[{"code": "PCMI9"}]' where id = v_pcmi;
+  perform tests.b5_admin();
+  select * into x from public.lorani_permis where id = v_pcmi;
+  return next ok(x.date_demande_pieces = current_date - 12 and x.pieces_demandees = '[{"code": "PCMI3"}, {"code": "PCMI6"}, {"code": "PCMI2"}]'::jsonb
+                 and jsonb_array_length(x.demandes_pieces) = 3,
+                 '19 bis. … une lettre arrivée après la remise des pièces ne change rien au permis, elle va à l''historique (art. R*423-41)');
 
   -- ── 20. Le journal ──
   return next ok((select count(distinct action) from public.journal_opposable where client_id = v_client and action in

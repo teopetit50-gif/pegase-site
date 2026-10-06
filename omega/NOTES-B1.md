@@ -187,3 +187,23 @@ déploiements par jour, consommés par les prévisualisations des branches
 worker-*, coupées depuis). **À vérifier en ligne dès que le déploiement passe** :
 « Référentiel du groupe » et le ruban « Données d'exemple » sur
 omegaai.fr/espace/varelo.
+
+## 6. Accessibilité (06/10, demande du coordinateur après la mesure axe-core d'A3)
+
+Session Opus 5.5 (`session_018XzgEK2qPbPzZBtrX7BdWB`), reprise de
+`session_01CrMrfRwPXbEdP2cxzcaCNh`. La liste des objets d'`EcranVarelo.tsx`
+était un `role="listbox"` dont les boutons portaient `role="option"` dans des
+`<li>` (écart critique) : c'est maintenant une liste de boutons, l'objet ouvert
+porte `aria-current="true"` (même style que `.esp-item[aria-selected]`, déjà
+prévu dans `espace.css`). Aucun autre listbox/option dans le module.
+Vérifié : tsc ✓, eslint ✓, build ✓, `recette-varelo.mjs` aux cinq largeurs ✓,
+`omega/recette-b1/accessibilite-varelo.mjs` (axe-core WCAG 2.1 A/AA à 390 et
+1440) : 0 écart, un seul objet courant, il suit le choix.
+
+**Suite (06/10, remarque de B6, axe `scrollable-region-focusable` à 390 px)** :
+les deux cadres `.esp-tableau-cadre` qui défilent — codes locaux de l'objet
+(`ObjetDetail.tsx`) et lignes rejetées d'un dépôt (`Depot.tsx`) — portent
+`tabIndex={0}`, `role="region"` et un `aria-label` (modèle
+`daliro/ChantierVue.tsx`). `accessibilite-varelo.mjs` contrôle les deux cadres
+et repasse axe sur le dialogue du dépôt avec son tableau des rejets, à 390 et
+1440 : 0 écart. tsc ✓ eslint ✓ build ✓, recette cinq largeurs ✓.

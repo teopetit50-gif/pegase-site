@@ -8,7 +8,7 @@ create or replace function tests.test_b6_02_garde_fous() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; jeu jsonb; v_client uuid; v_gerant uuid; v_daf uuid; v_collab uuid; v_autre uuid; v_autre_client uuid;
-  v_mo uuid; v_ch uuid; v_entite uuid; v_lot uuid; v_m uuid; v_l uuid; v_av uuid; v_ce text; n bigint; v_j jsonb;
+  v_mo uuid; v_ch uuid; v_entite uuid; v_lot uuid; v_m uuid; v_l uuid; v_av uuid; v_ce text; n bigint; v_j jsonb; v_ouverts integer;
 begin
   banc := tests.b6_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid; v_daf := (banc ->> 'daf')::uuid;
@@ -86,8 +86,10 @@ begin
   -- ── Le quota de la formule ──
   perform tests.redevenir_admin();
   perform public.btp_installer(v_client, 'demarrage');
+  -- Le banc peut porter d'autres chantiers ouverts (ESSAI-J2 depuis le 06/10) : on remplit jusqu'à cinq, pas « quatre de plus ».
+  select count(*) into v_ouverts from public.btp_chantiers c where c.client_id = v_client and c.statut in ('ouvert', 'suspendu');
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
-  for n in 1..4 loop
+  for n in 1..greatest(0, 5 - v_ouverts) loop
     insert into public.btp_chantiers (client_id, nom, code_postal, commune, maitre_ouvrage_type, place_client, maitre_ouvrage_id, statut)
     values (v_client, 'Chantier quota ' || n, '69100', 'Villeurbanne', 'professionnel', 'titulaire', v_mo, 'ouvert');
   end loop;

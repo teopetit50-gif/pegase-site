@@ -240,7 +240,7 @@ begin
   return next ok((v_j ->> 'demandees')::int >= 1, format('14. %s confirmation(s) demandée(s) pour J-2 (serveur)', v_j ->> 'demandees'));
   return next is((select p.confirmation from public.btp_passages p where p.id = v_p4), 'demandee', '14. P4 (Dumont, dans deux jours ouvrés) : confirmation demandée');
   return next is((select p.confirmation from public.btp_passages p where p.id = v_p2), 'non_demandee', '14. P2 (dans douze jours) : pas encore');
-  return next ok(exists (select 1 from public.travaux t where t.client_id = v_client and t.cle like 'confirmation:' || v_p4::text || '%') or not exists (select 1 from private.abonnements a where a.evenement = 'daliro.confirmation_demandee'),
+  return next ok(exists (select 1 from public.travaux t where t.client_id = v_client and t.cle like 'daliro.confirmation_demandee:confirmation:' || v_p4::text || ':%') or not exists (select 1 from private.abonnements a where a.evenement = 'daliro.confirmation_demandee'),
                  '14. L''événement daliro.confirmation_demandee est publié (ou personne n''y est abonné)');
   return next ok(public.btp_repondre_confirmation(v_p4, 'confirmee', 'wa:msg-0001', '{"canal": "whatsapp"}'::jsonb), '14. Dumont confirme (réception)');
   return next is((select p.confirmation from public.btp_passages p where p.id = v_p4), 'confirmee', '14. P4 confirmé');

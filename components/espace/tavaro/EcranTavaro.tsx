@@ -322,7 +322,7 @@ export default function EcranTavaro() {
           ) : visibles.length === 0 ? (
             <Vide titre="Aucun contrat">{filtre ? "Rien dans cette famille." : "Aucun contrat connu pour l'instant : ils arrivent par l'export de votre logiciel, par un contrat PDF lu, ou au comptoir."}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Contrats de location">
+            <ul className="esp-liste" aria-label="Contrats de location">
               {visibles.map((d) => {
                 const fam = famille(d.contrat, d.propositions, d.factures);
                 const p = propositionVivante(d.propositions);
@@ -330,7 +330,7 @@ export default function EcranTavaro() {
                 const litige = d.factures.some((f) => f.statut === "litige");
                 return (
                   <li key={d.contrat.id}>
-                    <button type="button" role="option" aria-selected={choisi === d.contrat.id} className="esp-item"
+                    <button type="button" aria-current={choisi === d.contrat.id ? "true" : undefined} className="esp-item"
                       onClick={() => { setChoix(d.contrat.id); if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>
                       <span className="esp-item-haut">
                         <span className="esp-mono" style={{ fontWeight: 600 }}>{d.contrat.numero}</span>

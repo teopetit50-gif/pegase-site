@@ -1,7 +1,7 @@
 /* Les libellés et teintes de l'écran DALIRO — pur (05/10/2026). */
 
 import type { Teinte } from "../ui";
-import type { Confirmation, ControleLigne, Gravite, Lot, StatutAvenant, StatutChantier, Vigilance } from "./types";
+import type { Confirmation, ControleLigne, EnvoiPassage, Gravite, Lot, StatutAvenant, StatutChantier, Vigilance } from "./types";
 
 export const STATUTS_CHANTIER: Record<StatutChantier, { libelle: string; teinte: Teinte }> = {
   preparation: { libelle: "En préparation", teinte: "bleu" },
@@ -114,3 +114,32 @@ export const FAMILLES: { cle: Famille; libelle: string; sous: string; teinte: "r
   { cle: "a_confirmer", libelle: "Passages à confirmer", sous: "J-2 demandé, sans réponse ou décliné", teinte: "bleu" },
   { cle: "ouvert", libelle: "Chantiers ouverts", sous: "sur le quota de la formule", teinte: "vert" },
 ];
+
+/* Le statut d'une facture FILED rattachée au chantier (filed_factures.statut,
+   a4_02 compris). Un statut que l'écran ne connaît pas encore s'affiche tel
+   quel plutôt que de casser. */
+export const STATUTS_FACTURE: Record<string, string> = {
+  a_completer: "À compléter",
+  bloquee: "Bloquée",
+  a_valider: "À valider",
+  validee: "Validée",
+  refusee: "Refusée",
+  ecartee: "Écartée",
+  comptabilisee: "Comptabilisée",
+};
+
+export function libelleStatutFacture(s: string | null | undefined): string {
+  if (!s) return "—";
+  return STATUTS_FACTURE[s] ?? s;
+}
+
+/* Où en est la demande J-2 d'un passage (l'envoi du socle), en une ligne. */
+export function libelleEnvoi(e: EnvoiPassage, date: (iso: string) => string): string {
+  const essai = e.mode === "essai" ? " (essai)" : "";
+  if (e.remise === "remis") return `Demande remise${e.remise_le ? ` le ${date(e.remise_le)}` : ""}${essai}`;
+  if (e.remise === "rebond" || e.remise === "plainte" || e.remise === "refuse") return `Demande non remise (${e.remise === "rebond" ? "adresse en échec" : e.remise === "plainte" ? "signalée comme indésirable" : "refusée"})${essai}`;
+  if (e.statut === "envoye") return `Demande envoyée${e.envoye_le ? ` le ${date(e.envoye_le)}` : ""}${essai}`;
+  if (e.statut === "a_valider") return `Demande à valider dans « À valider »${essai}`;
+  if (e.statut === "differe" || e.statut === "pret" || e.statut === "en_cours") return `Demande en partance${essai}`;
+  return `Demande non partie${e.verrou ? ` (${e.verrou})` : ""}${essai}`;
+}

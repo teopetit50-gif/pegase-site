@@ -267,7 +267,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                 <div className="tav-total" data-fort="true"><span>Total TTC</span><span>{montant(p.total_ttc)}</span></div>
               </div>
               {lignes.length ? (
-                <div className="esp-tableau-cadre">
+                <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de la proposition">
                   <table className="esp-tableau">
                     <thead><tr><th>Poste</th><th className="esp-num">Quantité</th><th className="esp-num">HT</th><th className="esp-num">TVA</th><th className="esp-num">TTC</th><th>Preuves</th></tr></thead>
                     <tbody>
@@ -336,7 +336,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                   <div>
                     <button type="button" className="esp-lien-bouton" onClick={() => setLignesOuvertes(lignesOuvertes === f.id ? null : f.id)}>{lignesOuvertes === f.id ? "Masquer les lignes" : `Voir les ${lf.length} ligne${lf.length > 1 ? "s" : ""}`}</button>
                     {lignesOuvertes === f.id ? (
-                      <div className="esp-tableau-cadre" style={{ marginTop: 8 }}>
+                      <div className="esp-tableau-cadre" style={{ marginTop: 8 }} tabIndex={0} role="region" aria-label={`Lignes de la facture ${f.reference}`}>
                         <table className="esp-tableau">
                           <thead><tr><th>Ligne</th><th className="esp-num">Quantité</th><th className="esp-num">HT</th><th className="esp-num">TTC</th><th>Preuves</th></tr></thead>
                           <tbody>{lf.map((l) => <tr key={l.id}><td>{l.libelle}</td><td className="esp-num">{nombreFr(l.quantite)}{l.unite ? ` ${UNITES[l.unite]}` : ""}</td><td className="esp-num">{montant(l.montant_ht)}</td><td className="esp-num">{montant(l.montant_ttc)}</td><td><Preuves preuves={l.preuves} /></td></tr>)}</tbody>

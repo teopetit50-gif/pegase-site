@@ -338,14 +338,14 @@ export default function EcranLorani() {
                       <span className="lor-projet-nom">{pr?.nom ?? "Projet"}{pr?.reference ? <span className="esp-kpi-sous"> · {pr.reference}</span> : null}</span>
                       <span className="lor-projet-lieu">{[pr?.commune, pr && NATURES_PROJET[pr.nature]].filter(Boolean).join(" · ")}</span>
                     </div>
-                    <ul className="esp-liste" role="listbox" aria-label={pr?.nom ?? "Projet"}>
+                    <ul className="esp-liste" aria-label={pr?.nom ?? "Projet"}>
                       {liste.map((p) => {
                         const n = proposeesPar[p.id] ?? 0;
                         const e = ETATS[p.etat] ?? ETATS.a_deposer;
                         const prochaine = prochaineDate(p);
                         return (
                           <li key={p.id}>
-                            <button type="button" role="option" aria-selected={choisi === p.id} className="esp-item" onClick={() => ouvrir(p.id)}>
+                            <button type="button" aria-current={choisi === p.id ? "true" : undefined} className="esp-item" onClick={() => ouvrir(p.id)}>
                               <span className="esp-item-haut">
                                 <Pastille teinte="noir">{TYPES[p.type_autorisation].court}</Pastille>
                                 <Pastille teinte={e.teinte}>{e.court}</Pastille>
@@ -379,9 +379,9 @@ export default function EcranLorani() {
                     <span className="lor-projet-nom">{pr.nom}{pr.reference ? <span className="esp-kpi-sous"> · {pr.reference}</span> : null}</span>
                     <span className="lor-projet-lieu">{[pr.commune, NATURES_PROJET[pr.nature]].filter(Boolean).join(" · ")}</span>
                   </div>
-                  <ul className="esp-liste" role="listbox" aria-label={pr.nom}>
+                  <ul className="esp-liste" aria-label={pr.nom}>
                     <li>
-                      <button type="button" role="option" aria-selected={choisi === `projet:${pr.id}`} className="esp-item" onClick={() => ouvrir(`projet:${pr.id}`)}>
+                      <button type="button" aria-current={choisi === `projet:${pr.id}` ? "true" : undefined} className="esp-item" onClick={() => ouvrir(`projet:${pr.id}`)}>
                         <span className="esp-item-haut"><Pastille teinte="gris">Sans permis</Pastille></span>
                         <span className="esp-item-titre">Aucun permis saisi pour ce projet</span>
                         <span className="esp-item-bas"><span>Phase : {PHASES[pr.phase]}</span></span>
@@ -727,7 +727,8 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm }:
           <button type="button" className="esp-lien-bouton" disabled={gris} onClick={() => ouvrirForm({ type: "intervenant", projet: projet.id })}>Ajouter</button>
         </div>
         {intervenants.length ? (
-          <div className="esp-tableau-cadre">
+          /* le tableau défile à 390 : focusable au clavier, nommé (axe, scrollable-region-focusable) */
+          <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Intervenants du projet">
             <table className="esp-tableau">
               <thead>
                 <tr>

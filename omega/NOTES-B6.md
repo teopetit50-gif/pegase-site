@@ -97,6 +97,14 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 
 ## Journal de session
 
+- 06/10, 06 h 58 Paris : tests 9f7325e reposés, `^test_b6_` vert (b6_01 154/154, b6_02 38/38, b6_03 29/29). b6_07 et l'écran fusionnés dans main (tsc/eslint/build verts) ; en ligne au retour du quota Vercel (~04 h 30 Paris le 07/10). Accord permanent des J-2 : en attente de Teo. Rien n'est attendu de B6.
+
+- 06/10, 04 h 45 Paris : b6_07 (réponse OUI/NON lue → btp_repondre_confirmation ; tableau du chantier : « envoi » par passage) + test b6_03_reponses + écran (ligne « Demande remise le … »). Syntaxe des migrations et lecture OUI/NON vérifiées sur un Postgres 16 local jetable (pas Supabase) ; tsc, eslint, build, recette verts. Accord permanent pour les J-2 : NON pour l'instant (décision de Teo).
+
+- 06/10, 04 h 33 Paris : **J-2 réel vert de bout en bout sur la recette** (coordinateur, depuis 60fa33c). Daliro installé sur le banc (chantiers/20/5) ; chantier ESSAI-J2 (d5671933…) ouvert, passage 4a850610… du 08/10 ; demande J-2 → travail daliro.confirmation 3695 fait → envoi 4742391e… email, mode essai, validé par la DAF → brevo, envoyé 02:33:00 Z, référence <202610060233.94075144052@smtp-relay.mailin.fr>, remis 02:33:05 Z. Les sept « Essai B6 — hh:mm » sont annulés. Restent ouverts : (1) la réponse OUI/NON reçue → btp_repondre_confirmation ; (2) le fil du passage ne montre pas « envoyée / remise » (lisible dans envois) ; (3) le moteur passe par la validation « À valider » : un accord permanent pour les J-2 serait une décision du coordinateur.
+
+- 06/10, 04 h 15 Paris (session Opus 5.5 session_013Vf6v9HerZzPG1w9ErbfMw, reprise de Fable) : libellés des statuts de facture FILED (bf18d74, fusionné). Sur accord du coordinateur : `b6_06_envoi_j2.sql` (abonnement daliro.confirmation_demandee → daliro.confirmation, ouvrier `private.btp_ouvrier` par preparer_envoi, cron daliro-ouvrier chaque minute), `recette-b6/banc_j2_reel.sql` (reglages_envois daliro en ESSAI sur le banc, tiers fictif, chantier ESSAI-J2 à J+2 ouvrés, demande + ouvrier + validation DAF + tache_envois), `recette-b6/banc_cloture_essais.sql` (les sept « Essai B6 — hh:mm » passent annule par le gérant). En attente de pose.
+
 - 06/10, 00 h 55 → 01 h 35 UTC : écriture réelle complète depuis l'écran, lot « écran » fusionné sur main (d572973), parcours 153/154, b6_05 écrit (compte « à ranger » de l'import, défaut du socle).
 - 06/10, 02 h 25 Paris : b6_05 posé, **parcours 154/154**. Mécanique prouvée en entier sur la recette.
 - 06/10, 02 h 52 Paris : omegaai.fr/espace/daliro en ligne (200). **Lot B6 terminé** : 5 migrations, 3 fichiers de tests (192 assertions vertes), l'écran et sa recette.

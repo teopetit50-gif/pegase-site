@@ -104,17 +104,20 @@ const MARCHE_ROL: Marche = {
 
 const PASSAGES_TIL: Passage[] = [
   { id: P4, chantier_id: TILLEULS, lot_id: LOT2, lot_code: "02", lot_libelle: "Garde-corps", equipe_id: null, tiers_id: DUMONT, intervenant_type: "tiers", intervenant_lu: "Dumont Serrurerie SARL", intervenant_nom: "Serrurerie Dumont", rapprochement: "ressemblance", tache: "Relevé des cotes garde-corps", debut: aujourdHui(2), fin: aujourdHui(2), exterieur: true, statut: "prevu", confirmation: "confirmee", confirmation_le: ilYa(0, 8), source: "tableur", source_ref: "P4", version: 1,
+    envoi: { id: id("251"), canal: "whatsapp", mode: "reel", statut: "envoye", verrou: null, cree_le: ilYa(1, 17), envoye_le: ilYa(1, 17), remise: "remis", remise_le: ilYa(1, 17) },
     confirmations: [
       { id: id("201"), passage_id: P4, evenement: "demandee", canal: "whatsapp", cle: "demande:P4", detail: {}, survenu_le: ilYa(1, 17) },
       { id: id("202"), passage_id: P4, evenement: "confirmee", canal: "whatsapp", cle: "wa:msg-0001", detail: { texte: "OK pour mercredi 7 h 30" }, survenu_le: ilYa(0, 8) },
     ] },
   { id: P7, chantier_id: TILLEULS, lot_id: LOT2, lot_code: "02", lot_libelle: "Garde-corps", equipe_id: null, tiers_id: DUMONT, intervenant_type: "tiers", intervenant_lu: "Serrurerie Dumont", intervenant_nom: "Serrurerie Dumont", rapprochement: "identique", tache: "Pose des platines", debut: aujourdHui(1), fin: aujourdHui(1), exterieur: true, statut: "prevu", confirmation: "sans_reponse", confirmation_le: ilYa(0, 17), source: "tableur", source_ref: "P7", version: 1,
+    envoi: { id: id("252"), canal: "whatsapp", mode: "reel", statut: "envoye", verrou: null, cree_le: ilYa(2, 17), envoye_le: ilYa(2, 17), remise: null, remise_le: null },
     confirmations: [
       { id: id("203"), passage_id: P7, evenement: "demandee", canal: "whatsapp", cle: "demande:P7", detail: {}, survenu_le: ilYa(2, 17) },
       { id: id("204"), passage_id: P7, evenement: "sans_reponse", canal: null, cle: "sans_reponse:P7", detail: { remplacants: [{ tiers: ROCHAT, nom: "Métallerie Rochat", canal: "sms", vigilance: "a_renouveler" }] }, survenu_le: ilYa(0, 17) },
     ] },
   { id: P1, chantier_id: TILLEULS, lot_id: LOT1, lot_code: "01", lot_libelle: "Menuiseries extérieures", equipe_id: EQUIPE_A, tiers_id: null, intervenant_type: "equipe", intervenant_lu: "Pose A", intervenant_nom: "Pose A", rapprochement: "identique", tache: "Pose des fenêtres", debut: aujourdHui(4), fin: aujourdHui(11), exterieur: false, statut: "prevu", confirmation: "non_demandee", confirmation_le: null, source: "tableur", source_ref: "P1", version: 2, confirmations: [] },
   { id: P2, chantier_id: TILLEULS, lot_id: LOT2, lot_code: "02", lot_libelle: "Garde-corps", equipe_id: null, tiers_id: DUMONT, intervenant_type: "tiers", intervenant_lu: "Serrurerie Dumont", intervenant_nom: "Serrurerie Dumont", rapprochement: "identique", tache: "Pose des garde-corps", debut: aujourdHui(12), fin: aujourdHui(16), exterieur: true, statut: "prevu", confirmation: "declinee", confirmation_le: ilYa(0, 11), source: "tableur", source_ref: "P2", version: 1,
+    envoi: { id: id("253"), canal: "whatsapp", mode: "reel", statut: "envoye", verrou: null, cree_le: ilYa(0, 9), envoye_le: ilYa(0, 9), remise: "remis", remise_le: ilYa(0, 9) },
     confirmations: [
       { id: id("205"), passage_id: P2, evenement: "demandee", canal: "whatsapp", cle: "demande:P2", detail: {}, survenu_le: ilYa(0, 9) },
       { id: id("206"), passage_id: P2, evenement: "declinee", canal: "whatsapp", cle: "wa:msg-0003", detail: { texte: "Impossible la semaine 42, équipe sur Vénissieux" }, survenu_le: ilYa(0, 11) },
