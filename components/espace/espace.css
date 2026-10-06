@@ -53,6 +53,10 @@
 @media (min-width: 1024px) {
   .esp .esp-barre-int {
     padding: 10px 32px;
+  }
+}
+@media (min-width: 1440px) {
+  .esp .esp-barre-int {
     flex-wrap: nowrap;
   }
 }
@@ -82,7 +86,14 @@
   order: 3;
   width: 100%;
 }
-@media (min-width: 1024px) {
+/* Huit onglets : la barre passe à la ligne tant qu'elle n'a pas 1440 px, et
+   garde ses libellés courts tant qu'elle n'a pas 1700 px. */
+@media (max-width: 1439px) {
+  .esp .esp-nav {
+    flex-wrap: wrap;
+  }
+}
+@media (min-width: 1440px) {
   .esp .esp-nav {
     order: 0;
     width: auto;
@@ -90,11 +101,12 @@
   }
 }
 .esp .esp-nav-lien {
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 10px;
   font-size: 14px;
   line-height: 20px;
@@ -111,15 +123,18 @@
   color: var(--r-texte);
   box-shadow: 0 1px 2px rgba(5, 5, 5, 0.06);
 }
-.esp .esp-nav-court {
+.esp .esp-nav-long {
   display: none;
 }
-@media (max-width: 479px) {
+.esp .esp-nav-court {
+  display: inline;
+}
+@media (min-width: 1700px) {
   .esp .esp-nav-long {
-    display: none;
+    display: inline;
   }
   .esp .esp-nav-court {
-    display: inline;
+    display: none;
   }
 }
 .esp .esp-barre-droite {
