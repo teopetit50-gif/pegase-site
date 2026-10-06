@@ -26,7 +26,12 @@ const ATTENDU = {
   /* la liste elle-même, pas la citation : le 06/10 la citation portait « PCMI 3 » et la liste était « aucune » ;
      PIECES_ATTENDUES (« PCMI2, PCMI8 ») pour une autre lettre que celle par défaut */
   lorani_demande_pieces: ((l) => ({ re: /Demande de pièces/, valeurs: new RegExp(`Pièces réclamées : ${l}`), dit: `la demande de pièces et la liste ${l}` }))(process.env.PIECES_ATTENDUES ?? 'PCMI3, PCMI6'),
+  lorani_arrete: { re: /Décision de la mairie/, valeurs: /20\/08\/2026/, dit: 'la décision du 20/08/2026' },
+  lorani_constat_affichage: { re: /Premier jour d'affichage/, valeurs: /28\/08\/2026/, dit: 'le premier jour d\'affichage, 28/08/2026' },
 }[nature];
+/* le permis visé (PERMIS, son intitulé) et le numéro qu'il doit porter après la confirmation (NUMERO) */
+const PERMIS = process.env.PERMIS ?? 'Pavillon Lemoine';
+const NUMERO = process.env.NUMERO ?? 'PC04410926A0042';
 if (!ATTENDU) { console.error(`nature inconnue : ${nature}`); process.exit(2); }
 const session = JSON.parse(readFileSync(fichier, 'utf8'));
 const ref = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://ygwbgpowzlbdaajlsqkn.supabase.co').hostname.split('.')[0];
@@ -50,13 +55,13 @@ const ouvrirReel = async () => {
   await s.evaluer(`(() => { const b = document.querySelector('.esp-bascule [role="switch"]'); if (b && !b.disabled && b.getAttribute('aria-checked') !== 'true') b.click(); })()`);
   for (let i = 0; i < 40; i++) { await s.dormir(500); if (!(await s.evaluer(`!!document.querySelector('.esp-charge')`))) break; }
   await s.dormir(1200);
-  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(e => e.textContent.includes('Pavillon Lemoine'))?.click()`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(e => e.textContent.includes(${JSON.stringify(PERMIS)}))?.click()`);
   await s.dormir(800);
 };
 
 console.log('— déposer le récépissé par l\'écran');
 await ouvrirReel();
-ok(await s.evaluer(`(document.querySelector('#esp-detail h2')?.textContent || '').includes('Pavillon Lemoine')`), 'le permis du banc est ouvert en base réelle');
+ok(await s.evaluer(`(document.querySelector('#esp-detail h2')?.textContent || '').includes(${JSON.stringify(PERMIS)})`), `le permis du banc « ${PERMIS} » est ouvert en base réelle`);
 const dejaLu = await s.evaluer(`[...document.querySelectorAll('.lor-lecture')].length`);
 if (dejaLu === 0 && !(await s.evaluer(`(document.querySelector('#esp-detail')?.innerText || '').includes(${JSON.stringify(nomPdf)})`))) {
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .r-btn')].find(b => /Déposer un courrier de la mairie/.test(b.textContent))?.click()`);
@@ -102,7 +107,7 @@ if (lecture) {
   for (let i = 0; i < 40; i++) { await s.dormir(500); if (!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`))) break; err = await s.evaluer(`document.querySelector('[role="dialog"] .esp-avis[data-teinte="rouge"]')?.textContent || ''`); if (err) break; }
   ok(!err, err ? `la base a refusé la confirmation : ${err}` : 'confirmée par lorani_confirmer_date_lue');
   await s.dormir(2500);
-  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail')?.innerText || ''; return { numero: t.includes('PC04410926A0042') || t.includes('PC 044109 26 A0042'), lectures: document.querySelectorAll('.lor-lecture').length, journal: t.includes('confirmée par') }; })()`);
+  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail')?.innerText || ''; return { numero: t.replace(/\\s/g, '').includes(${JSON.stringify(NUMERO)}), lectures: document.querySelectorAll('.lor-lecture').length, journal: t.includes('confirmée par') }; })()`);
   ok(apres.numero && apres.lectures === 0, `le permis porte le numéro lu (${apres.numero}), plus rien à confirmer (${apres.lectures}) ; la décision est dans le fil des courriers (${apres.journal})`);
   await s.capturer(`${dossier}reel-courrier-confirme-1440.jpg`, { qualite: 55 });
 }

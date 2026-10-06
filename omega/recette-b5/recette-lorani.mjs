@@ -95,6 +95,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const lem = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { pieces: /Pièces à fournir avant le/i.test(d.innerText), rappel: /10 jours avant \\(parti\\)/.test(d.innerText), bouton: !![...d.querySelectorAll('.r-btn')].find(b => /Pièces reçues par la mairie/.test(b.textContent)) }; })()`);
   ok(lem.pieces && lem.rappel && lem.bouton, 'Maison Lemoine : pièces à fournir, rappel J-10 parti, « Pièces reçues » à saisir');
+  const deux = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail').innerText; return /Plusieurs demandes de pièces/.test(t) && /À fournir : PC5, PC8/.test(t) && /R\\*423-38/.test(t); })()`);
+  ok(deux, 'Maison Lemoine : deux lettres de demande, « À fournir : PC5, PC8 », le délai court depuis la première (b5_07)');
 
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);

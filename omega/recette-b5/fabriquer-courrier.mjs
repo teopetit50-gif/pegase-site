@@ -3,7 +3,7 @@
    passent), offsets de la table xref calculés. Sert à courrier-reel.mjs : chaque nature donne un fichier
    d'empreinte différente (la base refuse deux fois le même sha256 sur un même projet).
 
-   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2> <sortie.pdf> [mention]
+   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage> <sortie.pdf> [mention]
    mention : une ligne de plus en pied de page (« Réf. 2 »…), pour redéposer le même courrier sous une autre empreinte. */
 import { writeFileSync } from 'node:fs';
 
@@ -60,8 +60,48 @@ MODELES.demande_pieces_2 = MODELES.demande_pieces.map(([c, t]) => [c, t
   .replace('PCMI 3 : plan en coupe du terrain et de la construction', 'PCMI 2 : plan de masse des constructions à édifier')
   .replace('PCMI 6 : document graphique', 'PCMI 8 : photographie situant le terrain dans le paysage proche, et document graphique')]);
 
+/* un second permis du banc, « Extension Garnier » (PC 044109 26 A0077, déposé le 02/06/2026) : l'arrêté qui l'accorde,
+   puis le constat du premier passage du commissaire de justice */
+MODELES.arrete = [
+  [16, 'VILLE DE NANTES'],
+  [11, 'Arrêté municipal n° URB-2026-0815'],
+  [0, ''],
+  [14, 'ARRÊTÉ ACCORDANT UN PERMIS DE CONSTRUIRE'],
+  [12, 'Dossier n° PC 044109 26 A0077'],
+  [12, 'Demandeur : Mme Garnier - 3, rue des Hauts-Pavés, 44000 Nantes - parcelle CE 42'],
+  [12, 'Objet : extension d\'une maison individuelle (32 m²)'],
+  [0, ''],
+  [11, 'Le Maire de Nantes,'],
+  [11, 'Vu la demande de permis de construire déposée le 02/06/2026 ;'],
+  [11, 'Vu le code de l\'urbanisme, notamment ses articles L.421-1 et suivants et R.421-1 et suivants ;'],
+  [11, 'Vu le plan local d\'urbanisme métropolitain ;'],
+  [0, ''],
+  [12, 'ARRÊTE'],
+  [11, 'Article 1 : le permis de construire est ACCORDÉ pour le projet décrit dans la demande susvisée.'],
+  [11, 'Article 2 : les eaux pluviales seront gérées à la parcelle (prescription).'],
+  [0, ''],
+  [12, 'Fait à Nantes, le 20/08/2026'],
+  [11, 'Pour le Maire et par délégation, l\'adjointe à l\'urbanisme'],
+];
+MODELES.constat_affichage = [
+  [16, 'SCP BERTAUD & ASSOCIÉS - COMMISSAIRES DE JUSTICE'],
+  [11, '12, quai de la Fosse - 44000 Nantes'],
+  [0, ''],
+  [14, 'PROCÈS-VERBAL DE CONSTAT D\'AFFICHAGE - PREMIER PASSAGE'],
+  [12, 'Permis de construire n° PC 044109 26 A0077 accordé le 20/08/2026'],
+  [12, 'Requérante : Mme Garnier'],
+  [0, ''],
+  [11, 'Le 28/08/2026 à 10 h 15, nous nous sommes transportés 3, rue des Hauts-Pavés à Nantes,'],
+  [11, 'où nous avons constaté la présence d\'un panneau d\'affichage du permis de construire,'],
+  [11, 'visible depuis la voie publique, de dimensions supérieures à 80 cm, comportant les mentions'],
+  [11, 'prévues aux articles A.424-15 à A.424-19 du code de l\'urbanisme.'],
+  [0, ''],
+  [11, 'Constat du premier passage dressé le 28/08/2026. Deux passages suivront à un mois d\'intervalle.'],
+  [11, 'Maître Bertaud, commissaire de justice'],
+];
+
 const [nature, sortie, mention] = process.argv.slice(2);
-if (!MODELES[nature] || !sortie) { console.error('usage : node fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2> <sortie.pdf>'); process.exit(2); }
+if (!MODELES[nature] || !sortie) { console.error('usage : node fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage> <sortie.pdf>'); process.exit(2); }
 
 const echapper = (t) => t.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
 let y = 790;

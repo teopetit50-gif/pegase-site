@@ -8,7 +8,7 @@ Dernière mise à jour : 05/10/2026, 23 h.
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
 | **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 95 % (114/114 le 06/10 à 2 h 05 Z, b5_05 et b5_06 posées ; avant :) 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 92 % (06/10, 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 94 % (06/10, 2 h 26 Z : arrêté et constat d'affichage réels aussi ; 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
 **Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
 la fusion dans `main` ; la vérification sur omegaai.fr. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
@@ -253,4 +253,89 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   par `lorani_deja_saisi`), pièce 03cb0753… `lue`, `lorani_demande_pieces` 0,97, motif nul ; proposition à 211 s
   [PCMI2, PCMI8] du 2026-10-03, confirmée par l'écran ; permis : `pieces_demandees = [PCMI2, PCMI8]`, demande
   2026-10-03, échéance `pieces` 2027-01-03 ouverte, rappels [10, 3, 0]. `courrier-reel.mjs` : `PIECES_ATTENDUES`.
+
+## 6. Question métier : une seconde demande de pièces (06/10, posée par le coordinateur) — proposition b5_07, pas de code
+
+**Constat sur le banc** : la demande du 03/10 (PCMI2, PCMI8) a **remplacé** celle du 01/10 (PCMI3, PCMI6) :
+`lorani_confirmer_date_lue` fait `set date_demande_pieces = <nouvelle>, pieces_demandees = <nouvelle liste>`. Les
+pièces PCMI3 et PCMI6 ont disparu du permis et l'échéance « pièces » a glissé du 2027-01-01 au 2027-01-03.
+
+**Ce que dit le code de l'urbanisme** (à faire valider par un juriste urbaniste avant de coder) :
+- R*423-38 : dans le mois qui suit le dépôt, la mairie adresse UNE lettre indiquant **de façon exhaustive** les
+  pièces manquantes. La pratique et la jurisprudence en déduisent que la liste doit être complète en une fois.
+- R*423-39 : le demandeur a trois mois à compter de la réception de la lettre pour tout fournir ; à défaut, décision
+  tacite de rejet (ou d'opposition). Le délai d'instruction part de la réception de **toutes** les pièces.
+- R*423-41 : une demande notifiée **après le délai d'un mois**, ou qui porte sur une pièce **non prévue par le
+  code**, ne modifie pas les délais d'instruction (le socle le traite déjà : avertissement du calcul quand
+  `date_demande_pieces` dépasse la fin de complétude ; le Conseil d'État en tire qu'une telle demande n'empêche pas
+  le permis tacite).
+- Une seconde demande dans le mois : le texte ne l'interdit pas en toutes lettres, mais elle ne fait pas repartir
+  un délai que la première a déjà ouvert ; au mieux elle complète la liste.
+
+**Donc l'écrasement est faux** sur deux points : on perd des pièces que la mairie attend toujours (le demandeur qui
+suit l'écran ne fournirait que PCMI2 et PCMI8 et se ferait opposer un rejet tacite), et on retarde l'échéance.
+
+**b5_07 proposée** (un `create or replace` de `lorani_confirmer_date_lue`, une colonne, l'écran) :
+1. Une demande confirmée sur un permis qui a déjà `date_demande_pieces` et pas de `date_pieces_fournies` :
+   `pieces_demandees` = **union**, dans l'ordre (d'abord la première liste, puis les nouveaux codes) ;
+   `date_demande_pieces` **garde la première date** (le délai de trois mois ne repart pas ; c'est aussi le côté sûr
+   pour le demandeur : les rappels tombent plus tôt).
+2. Nouvelle colonne `lorani_permis.demandes_pieces jsonb` (historique `[{date, pieces, piece_id, dates_lue_id}]`),
+   tracée comme les autres ; `pieces_demandees` reste la liste à fournir.
+3. Avertissement du calcul : « Seconde demande de pièces reçue le … : la mairie doit tout réclamer en une fois
+   (art. R*423-38) ; elle ne fait pas repartir le délai de trois mois. Si elle arrive après le délai d'un mois ou
+   porte sur une pièce non prévue par le code, elle ne modifie pas les délais (art. R*423-41). Fournissez quand même
+   toutes les pièces. »
+4. Une demande qui arrive **après** `date_pieces_fournies` : ne rien écraser, la garder dans l'historique avec
+   l'avertissement R*423-41 ; c'est au membre de décider (saisir de nouvelles pièces fournies s'il les envoie).
+5. `lorani_deja_saisi('demande_pieces')` : déjà saisi si la date est dans l'historique avec la même liste (une
+   lettre relue ne repropose rien), plus seulement si elle égale la liste courante.
+6. L'écran : la ligne « Pièces à fournir » montre la liste fusionnée et, dessous, les demandes successives (date,
+   pièces, courrier) ; la saisie manuelle « Demande de pièces reçue » suit la même règle (union).
+7. Test : étape 7 bis, une seconde demande dans le mois → union, date et échéance inchangées, avertissement ; une
+   demande après les pièces fournies → historique seulement.
+
+Je ne code pas b5_07 avant ta réponse (et idéalement celle d'un juriste sur le point « seconde demande dans le
+mois »). Le permis « Pavillon Lemoine » du banc garde l'état écrasé, utile pour rejouer b5_07.
+
+## 7. Essai réel arrêté + constat d'affichage (06/10, 2 h 17–2 h 26 Z, lecteur v17)
+
+Nouveau projet du banc « Extension Garnier (banc) » (7ef5d6aa…) et PC « Extension Garnier » (0a8ac86c…, PC 044109 26
+A0077, déposé le 2026-06-02), créés sous RLS avec la session du gérant (mêmes écritures que l'écran), pour ne pas
+toucher « Pavillon Lemoine ». Courriers : `fabriquer-courrier.mjs arrete|constat_affichage` ; script :
+`PERMIS='Extension Garnier' NUMERO='PC04410926A0077' node omega/recette-b5/courrier-reel.mjs … lorani_arrete`.
+- `arrete-garnier.pdf` : `lue`, `lorani_arrete` 0,97 ; proposition à 70 s « Décision : Accordé — 20/08/2026 »
+  (citations « le permis de construire est ACCORDÉ », « Fait à Nantes, le 20/08/2026 ») → `{decision: favorable,
+  date_decision: 2026-08-20}`, vérifiée, confirmée.
+- `constat-affichage-garnier.pdf` : `lue`, `lorani_constat_affichage` 0,97 ; proposition à 282 s « Premier jour
+  d'affichage : 28/08/2026 » (citation « Le 28/08/2026 à 10 h 15 ») → `{date_affichage: 2026-08-28}`, confirmée.
+- Permis : `accorde`, décision favorable du 2026-08-20, affichage 2026-08-28, **purge 2026-11-20** ; échéances :
+  complétude 07-02 tenu, instruction 09-02 tenu, affichage 09-04 tenu, **recours 10-29** (deux mois francs depuis le
+  premier jour d'affichage) ouvert, **retrait 11-20** (trois mois après l'arrêté) ouvert, purge 11-20 ouvert. Juste.
+- Bilan : quatre des six types de courriers prouvés en réel (récépissé, demande de pièces, arrêté, constat
+  d'affichage) ; restent la lettre de délai et le certificat tacite (couverts par le test, pas encore en réel).
+
+## 8. b5_07 — seconde demande de pièces (feu vert du coordinateur, 06/10, 2 h 17 Z)
+
+- `omega/modules/lorani/migrations/b5_07_seconde_demande_pieces.sql` : colonne `lorani_permis.demandes_pieces`
+  (add column if not exists, contrôle ≤ 24 lettres) ; `private.lorani_union_pieces`, `private.lorani_noter_demande`
+  (pures) ; trigger BEFORE `lorani_permis_suivre_demandes` → `private.lorani_suivre_demandes_pieces()` (security
+  definer) : seconde lettre avant la remise → union, première date gardée, alerte « attention » au chef de projet
+  (clé `permis:<id>:seconde_demande:<n>`) ; après la remise → historique seulement, alerte R*423-41 ; même date →
+  correction ; `private.lorani_deja_saisi` lit l'historique ; amorce de l'historique des permis existants. Les trois
+  nouvelles fonctions : `revoke execute from public`. Un seul trigger sert la confirmation d'une date lue ET la
+  saisie de l'écran. Écart à la proposition du § 6 : pas d'avertissement dans le calcul (fonction de 300 lignes à
+  recopier) ; l'alerte et l'écran le portent. Pas de `piece_id` dans l'historique (le lien est dans
+  `lorani_permis_dates_lues`).
+- Essayé sur Postgres 16 local (table réduite) : 1re lettre → historique ; 2e → [PCMI3, PCMI6, PCMI2], date de la
+  1re, deux lettres, alerte ; relue → `deja_saisi` vrai ; après remise → permis inchangé, trois lettres, alerte
+  R*423-41 ; même date → correction.
+- Test : étape 19 bis, six assertions (permis « Garage Lemoine » neuf, UPDATE sous RLS par le chef de projet) →
+  attendu **120/120**.
+- Écran : type `demandes_pieces`, `appliquerDemande` (même règle, pour l'exemple et l'affichage immédiat), avis
+  « Plusieurs demandes de pièces » (à fournir, lettres, R*423-38 / -41) ; exemple « Maison Lemoine » à deux lettres ;
+  recette : un contrôle de plus. tsc, eslint, build, recette aux cinq largeurs : verts.
+- **À faire valider par un juriste (remonté à Teo par le coordinateur)** : une seconde demande de pièces envoyée
+  DANS le mois qui suit le dépôt — complète-t-elle valablement la première (et fait-elle partir le délai de trois mois
+  de sa propre date pour les pièces qu'elle ajoute) ? b5_07 garde la date de la première lettre, le choix prudent.
 
