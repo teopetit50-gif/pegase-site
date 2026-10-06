@@ -253,9 +253,18 @@ passe**, captures `omega/recette-b4/reel-*-1440.jpg`.
   `reel-audiences`, `reel-muraille`, `reel-cloture`, `reel-journal`. **Tout le scénario est donc
   prouvé en réel, sauf l'effacement à l'échéance et l'archive (ouvriers absents).**
 
+## 9. Fusion
+
+- 06/10, 02 h 17 Paris — `/espace/tamila` (ef08aaf) est **fusionné sur main (b287d04)** par le
+  coordinateur, avec l'onglet « Dossiers du cabinet » ; recette cinq largeurs verte sur son build.
+  omegaai.fr ne servira le commit qu'après la remise à zéro du quota Vercel (plan gratuit, 02 h Paris) :
+  **vérification de la page servie encore à faire**, puis donner l'URL.
+- Lot B4-3 (2d2839d) : les deux derniers contrôles rouges (04 test 60, 13 test 20) corrigés dans
+  les tests ; attendu 13/13.
+
 ## 7. Prochaine étape
 
-1. Fusion sur main par le coordinateur, puis vérification sur omegaai.fr/espace/tamila.
+1. Vérifier omegaai.fr/espace/tamila une fois le quota Vercel remis à zéro (fusion faite, b287d04).
 2. Relire les sorties pgTAP du lot B4-2 ; corriger jusqu'au vert.
 3. Souche locale (`omega/tests/tamila/souche_locale/`, en cours) : finir 03_pgtap et jouer.sh pour
    jouer les tests ici avant chaque lot.
