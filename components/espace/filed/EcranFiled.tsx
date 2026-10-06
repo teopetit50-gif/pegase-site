@@ -24,9 +24,10 @@ import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import type { Commande, DossierFiled, Fournisseur, LigneCommande, MotifRefus } from "../types";
-import { ETATS, FAMILLES, NATURES, STATUTS_FACTURE, famille, type Famille } from "./etats";
+import { FAMILLES, NATURES, etatDocument, famille, statutFacture, type Famille } from "./etats";
 import { chargerCommandes, chargerDossier, chargerFournisseurs, chargerListe, deposerDocument, monClient, type Apercu } from "./portes";
 import DossierVue from "./DossierVue";
+import { lireCible, trouverCible, type Cible } from "./lien";
 
 type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; commandes: Commande[]; lignesCommande: LigneCommande[]; dossiers: Record<string, DossierFiled>; moi: string | null };
 
@@ -38,6 +39,13 @@ export default function EcranFiled() {
   const [filtre, setFiltre] = useState<Famille | null>(null);
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeDossier, setChargeDossier] = useState(false);
+  /* /espace/filed?objet=facture:<id> — le dossier qu'une demande de validation désigne */
+  const [cible, setCible] = useState<Cible | null>(null);
+  const [cibleIntrouvable, setCibleIntrouvable] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setCible(lireCible(window.location.search)), 0);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
@@ -98,6 +106,23 @@ export default function EcranFiled() {
     for (const a of apercus) c[famille(a.document, a.facture)]++;
     return c;
   }, [apercus]);
+
+  /* la cible de l'URL s'ouvre dès que la liste qui la porte est là ; tant
+     qu'elle n'est pas trouvée, elle reste (la source peut passer de
+     l'exemple à la base réelle juste après le chargement) */
+  useEffect(() => {
+    if (!cible || (source === "reelle" && !reel)) return;
+    const t = window.setTimeout(() => {
+      const a = trouverCible(apercus, cible);
+      setCibleIntrouvable(!a);
+      if (!a) return;
+      setFiltre(null);
+      setChoix(a.document.id);
+      setCible(null);
+      if (window.matchMedia("(max-width: 1023px)").matches) document.getElementById("esp-dossier")?.scrollIntoView({ block: "start" });
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [cible, source, reel, apercus]);
 
   const choisi = choix && visibles.some((a) => a.document.id === choix) ? choix : (visibles[0]?.document.id ?? null);
   const apercu = visibles.find((a) => a.document.id === choisi) ?? null;
@@ -239,6 +264,12 @@ export default function EcranFiled() {
         ))}
       </div>
 
+      {cibleIntrouvable ? (
+        <div style={{ marginBottom: 14 }}>
+          <Avis teinte="ambre" role="status"><strong>Document introuvable.</strong> Le document que désigne la demande n&apos;est pas dans cette liste{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.</Avis>
+        </div>
+      ) : null}
+
       {erreur ? (
         <div style={{ marginBottom: 14 }}>
           <Avis teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreur}</Avis>
@@ -259,7 +290,7 @@ export default function EcranFiled() {
             <ul className="esp-liste" role="listbox" aria-label="Documents reçus">
               {visibles.map((a) => {
                 const fam = famille(a.document, a.facture);
-                const e = ETATS[a.document.etat];
+                const e = etatDocument(a.document.etat);
                 return (
                   <li key={a.document.id}>
                     <button
@@ -274,7 +305,7 @@ export default function EcranFiled() {
                     >
                       <span className="esp-item-haut">
                         <span className="esp-mono" style={{ fontWeight: 600 }}>{a.document.reference}</span>
-                        {a.facture ? <Pastille teinte={STATUTS_FACTURE[a.facture.statut].teinte}>{STATUTS_FACTURE[a.facture.statut].libelle}</Pastille> : <Pastille teinte={e.teinte}>{e.libelle}</Pastille>}
+                        {a.facture ? <Pastille teinte={statutFacture(a.facture.statut).teinte}>{statutFacture(a.facture.statut).libelle}</Pastille> : <Pastille teinte={e.teinte}>{e.libelle}</Pastille>}
                         {fam === "litige" ? <Pastille teinte="ambre">Litige</Pastille> : null}
                         {a.facture?.nb_bloquants ? <Pastille teinte="rouge">{a.facture.nb_bloquants} bloquant{a.facture.nb_bloquants > 1 ? "s" : ""}</Pastille> : null}
                         {a.facture?.nb_attention ? <Pastille teinte="ambre">{a.facture.nb_attention} à vérifier</Pastille> : null}
