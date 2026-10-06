@@ -25,6 +25,7 @@ import {
   normaliserNumeroSms,
 } from "./brevo.ts";
 import { versBase64 } from "./stockage.ts";
+import type { EnvoiAEnvoyer } from "./portes.ts";
 
 const SMS = "44444444-4444-4444-8444-444444444444";
 
@@ -604,4 +605,33 @@ Deno.test("outils Brevo : html, numéro, émetteur, GSM-7, base64", () => {
   assert(necessiteUnicode("cœur"));
   assert(necessiteUnicode("tiret – long"));
   assertEquals(versBase64(new Uint8Array([104, 105])), "aGk=");
+});
+
+Deno.test("santé, essai sur données fictives (19ah) : remis seulement si mode essai ET donnees_fictives, et vers un fournisseur que l'ouvrier remet", async () => {
+  const cas: [Partial<EnvoiAEnvoyer>, boolean][] = [
+    [{ mode: "essai", donnees_fictives: true }, true],
+    [{ mode: "reel", donnees_fictives: true }, false],
+    [{ mode: "essai", donnees_fictives: false }, false],
+    [{ mode: "essai" }, false],
+    [{ mode: "essai", donnees_fictives: true, fournisseur: "manuel" }, false],
+  ];
+  let n = 40;
+  for (const [partiel, remis] of cas) {
+    const a = monter();
+    a.portes.envois.set(
+      ENVOI,
+      envoiExemple({ donnees_sante: true, fournisseur_hds: false, ...partiel }),
+    );
+    a.portes.travaux = [travailExemple(n, "envois.brevo", ENVOI)];
+    await executerPassage(a.deps);
+    assertEquals(a.brevo.emails.length, remis ? 1 : 0, JSON.stringify(partiel));
+    if (!remis) {
+      assertMatch(
+        a.portes.envoisEchoues.get(ENVOI)!.erreur,
+        /^SANTE_FOURNISSEUR_NON_HDS/,
+      );
+      assertEquals(a.portes.envoisEchoues.get(ENVOI)!.definitif, true);
+    }
+    n++;
+  }
 });

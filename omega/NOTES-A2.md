@@ -348,6 +348,16 @@ n'est pas `brevo` / `brevo_sms` (`FOURNISSEURS_REMIS`). Test ajouté (cas « e �
 Commit 67f9cf6, redéployé par le coordinateur le 06/10 à 01 h 35 Z (version 12, passage
 de 01 h 36 : 200, pris 0). Test 54 d'A5 (cohérence fournisseur) vert 3/3 sur la recette.
 
+**Essai sur données de santé fictives (06/10, lot socle 19ah de B3, pour Tiroma)** : quand
+`commencer_envoi` rend `mode = 'essai'` ET `donnees_fictives = true` (drapeau
+`reglages_envois.essai_donnees_fictives`, vrai seulement sur la recette et en essai),
+l'expéditeur accepte un envoi de santé vers un fournisseur non agréé ; la remise va à
+l'adresse d'essai (c'est `commencer_envoi` qui la rend). Il n'exempte que l'agrément HDS :
+le fournisseur doit toujours être `brevo` / `brevo_sms`. En réel, ou sans le drapeau, refus
+`SANTE_FOURNISSEUR_NON_HDS` comme avant. Test : cinq cas (essai+fictives → remis ; réel+fictives,
+essai sans drapeau, essai+drapeau faux, essai+fictives vers `manuel` → refus). **À déployer
+seulement après la pose de 19ah.**
+
 **Migration du lot : demandée à A2 le 06/10, NON écrite par A2, finalement posée par
 le coordinateur.**
 Deux raisons : le brief de Teo pose « aucune migration SQL » et un périmètre limité à

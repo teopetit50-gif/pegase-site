@@ -341,10 +341,15 @@ async function remettre(
   // n'expose pas donnees_sante. fournisseur_hds est jugé sur envoi.fournisseur : s'il
   // nomme un autre fournisseur que Brevo (verrou et envoi divergents), son agrément ne
   // couvre pas ce que l'ouvrier ferait réellement, on refuse aussi.
+  // Seule exception (lot 19ah, Tiroma) : un essai sur données de santé FICTIVES, qui part à
+  // l'adresse d'essai. Il exige mode = 'essai' ET donnees_fictives = true, tous deux rendus
+  // par commencer_envoi ; il n'exempte que l'agrément HDS, jamais la cohérence du fournisseur.
+  // En réel, refus toujours.
+  const essaiFictif = envoi.mode === "essai" && envoi.donnees_fictives === true;
   if (
     envoi.donnees_sante === true &&
-    (envoi.fournisseur_hds !== true ||
-      !FOURNISSEURS_REMIS.has(envoi.fournisseur))
+    (!FOURNISSEURS_REMIS.has(envoi.fournisseur) ||
+      (envoi.fournisseur_hds !== true && !essaiFictif))
   ) {
     throw new ErreurRemise(
       "SANTE_FOURNISSEUR_NON_HDS",

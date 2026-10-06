@@ -63,6 +63,11 @@ export type EnvoiAEnvoyer = {
   /** Clés du lot santé (trou commun n° 7), absentes tant que le socle ne les expose pas. */
   donnees_sante?: boolean | null;
   fournisseur_hds?: boolean | null;
+  /**
+   * Lot socle 19ah : vrai seulement sur la recette, en mode essai, quand le client a déclaré
+   * des données de santé fictives (reglages_envois.essai_donnees_fictives). Absent ailleurs.
+   */
+  donnees_fictives?: boolean | null;
   /** = id de l'envoi : clé d'idempotence côté fournisseur. */
   cle: string;
   objet: { type: string | null; id: string | null } | null;
