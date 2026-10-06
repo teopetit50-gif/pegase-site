@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Synthèse de la semaine', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les neuf cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les dix cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -141,6 +141,15 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-appels')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-appels-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : la synthèse de la semaine (exemple, b3_15)');
+  const syn = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Synthèse de la semaine"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, texte: c.innerText }; })()`);
+  ok(syn && syn.lignes === 2, `deux centres dans la synthèse (${syn?.lignes})`);
+  ok(syn && /4,2 %/.test(syn.texte) && !/(Dorville|Delannoy|Bazile)/.test(syn.texte), 'le taux de manqués des deux centres (4,2 %), sans nom de patient');
+  await s.evaluer(`document.getElementById('tiroma-synthese')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-synthese-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : le pilotage du titulaire (exemple, b3_13)');
   const pil = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Pilotage"]'); if (!c) return null;

@@ -278,6 +278,7 @@ export type Dossier = {
   appels: RegistreAppels | null;
   pilotage: Pilotage | null;
   rappels: Rappels | null;
+  synthese: Synthese | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -400,4 +401,27 @@ export type Rappels = {
   contacts: ContactPatient[];
   envois: EnvoiRappel[];
   reponses: ReponseRappel[];
+};
+
+/* ——— la synthèse de la semaine (b3_15) ——— */
+
+export type SyntheseCabinet = {
+  entite_id: string;
+  nom: string;
+  rdv: { passes: number; honores: number; manques: number; annules: number; taux_manques: number | null };
+  creneaux: { liberes: number };
+  devis: { presentes: number; signes: number; taux: number | null; montant_signe: number };
+  plans_sans_rdv: { nombre: number; montant: number };
+  appels: { appels: number; rdv_pris: number; confirmes: number };
+  rappels: { prepares: number; envoyes: number; retenus: number };
+  precedent?: { taux_manques: number | null; devis_signes: number | null; devis_taux: number | null; passes: number | null };
+};
+
+export type Synthese = {
+  semaine: { du: string; au: string };
+  cabinets: SyntheseCabinet[];
+  total: {
+    passes: number; manques: number; taux_manques: number | null; creneaux_liberes: number; devis_presentes: number; devis_signes: number;
+    montant_signe: number; plans_sans_rdv: number; montant_plans_sans_rdv: number; appels: number; rdv_confirmes: number;
+  };
 };

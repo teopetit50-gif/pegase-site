@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -114,8 +114,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const pilotage = profil === "titulaire" || profil === "direction" ? await quiet(rpc<Pilotage | null>("tiroma_pilotage", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "pilotage") : null;
   /* b3_14 : les rappels aux patients (titulaire, assistante, collaborateur) */
   const rappels = profil && profil !== "direction" ? await quiet(rpc<Rappels | null>("tiroma_rappels", { p_client: c, p_entite: e }, null), null, "rappels aux patients") : null;
+  /* b3_15 : la synthèse de la semaine, pour le titulaire et la direction (tous leurs centres) */
+  const synthese = profil === "titulaire" || profil === "direction" ? await quiet(rpc<Synthese | null>("tiroma_synthese_semaine", { p_client: c, p_entite: null, p_lundi: null }, null), null, "synthèse de la semaine") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese },
     avis,
   };
 }
