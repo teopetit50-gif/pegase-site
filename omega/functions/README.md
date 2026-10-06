@@ -12,6 +12,8 @@ RPC et le contrat des portes, `doubles.ts` les doubles de test.
 | `expediteur` | `expediteur/` | ouvrier `envois.brevo`, `envois.brevo_sms`, `envois.confirmer` ; appelé chaque minute | `true` |
 | `webhooks-brevo` | `webhooks/brevo/` | événements de remise Brevo (remis, rebond, plainte, refus) | `false` |
 | `reception` | `reception/` | e-mail entrant Brevo, WhatsApp Cloud API, formulaire du site | `false` |
+| `messagerie` | `messagerie/` (`index.ts`) | ouvrier des messageries connectées : relève Gmail → réceptions, brouillons `envois.gmail`, révocations ; chaque minute. Portes `messagerie_*` à poser | `true` |
+| `messagerie-oauth` | `messagerie/` (`entree_oauth.ts`) | connexion OAuth Google (début, retour) | `false` |
 | `pa-bac-a-sable` | `pa-bac-a-sable/` | faux serveur AFNOR XP Z12-013 (recette seulement) pour jouer `echange-pa` sans compte PA | `false` |
 | `echange-pa` | `echange-pa/` | ouvrier `pa.statut` (et `pa.deposer`, refusé par FILED tant qu'Omega n'émet pas de factures) + relevé de la plateforme agréée ; appelé chaque minute. Portes `pa_*` : a4_18 | `true` |
 
@@ -27,6 +29,7 @@ cd omega/functions/expediteur     && deno fmt --check && deno lint && deno check
 cd omega/functions/webhooks/brevo && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 cd omega/functions/reception      && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 cd omega/functions/echange-pa     && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
+cd omega/functions/messagerie     && deno fmt --check && deno lint && deno check index.ts entree_oauth.ts && deno test --allow-env
 cd omega/functions/pa-bac-a-sable && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 ```
 

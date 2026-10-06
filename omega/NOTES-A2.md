@@ -599,6 +599,72 @@ Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; un
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).
 
+## Messageries connectées (06/10, demandé par le coordinateur) : Gmail d'abord
+
+Promesses du site visées : « Vous connectez une messagerie, c'est la seule chose à faire »
+(FILED) et « le message reste un brouillon dans votre outil ». Code dans
+`omega/functions/messagerie/`, 21 tests Deno verts sur doubles, **rien de déployé, aucun appel
+réel** (pas d'application Google). Guide pour Teo : `omega/GUIDE-GMAIL.md`.
+
+- Deux fonctions : `messagerie` (cron chaque minute, verify_jwt true : relève + brouillons +
+  révocations) et `messagerie-oauth` (verify_jwt false : `GET /google/debut?etat=` →
+  consentement Google ; `GET /google/retour?code&state` → échange, profil, enregistrement,
+  renvoi vers l'écran ; jeton révoqué si l'enregistrement tombe ; aucun jeton dans une URL,
+  un journal ou une page).
+- `mime.ts` : lecture RFC 5322 / MIME sans dépendance (multipart imbriqués, base64,
+  quoted-printable, RFC 2047, RFC 2231, utf-8 / latin-1) ; fabrication du brouillon (CRLF,
+  corps base64 UTF-8, pièces jointes, en-têtes sans saut de ligne : pas d'injection).
+- `gmail.ts` : profil, `history.list` (messageAdded, étiquette, brouillons et envoyés écartés,
+  curseur par enregistrement), `messages.get?format=raw`, `drafts.create`, jetons et
+  révocation. `invalid_grant` → `JETON_REVOQUE` → connexion « à reconnecter » ; historique
+  404 → reprise au curseur courant (pas de réimport massif).
+- Relève : réceptions canal `email`, boîte = adresse connectée, pièces sous
+  `<client>/receptions/<message-id>/`, curseur posé message par message (reprise exacte).
+  Première relève sans curseur : on part de maintenant.
+- Brouillon : travail `envois.gmail` {envoi} → `commencer_envoi` →
+  `expediteur.parametres.connexion` → jetons → brouillon → `confirmer_envoi(envoi,
+  "gmail:brouillon:<id>")`. Même garde santé que l'expéditeur (données fictives d'essai
+  comprises).
+- Google : `gmail.readonly` et `gmail.compose` sont des portées **restreintes**. Régime
+  « Test » : 100 comptes, jetons de renouvellement de **7 jours**. Production : vérification
+  + évaluation de sécurité annuelle (payante) et URI de retour sur `omegaai.fr`. Décision Teo.
+- Secrets que seul Teo peut poser : `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+
+### Lot socle à écrire (pas par A2 : brief « aucune migration SQL »)
+
+Tables :
+- `public.messageries` : `id uuid`, `client_id`, `entite_id`, `fournisseur` ('gmail' |
+  'microsoft'), `adresse`, `etiquette` (défaut 'INBOX'), `curseur text`, `etat` ('active' |
+  'a_reconnecter' | 'revoquee'), `portees text[]`, `secret_renouvellement uuid` et
+  `secret_acces uuid` (ids Vault, **jamais lisibles par authenticated**), `acces_expire_le`,
+  `connecte_par`, `connecte_le`, `erreur`, `maj_le`. RLS : lecture par les membres du client
+  d'une vue sans les colonnes de secret ; écriture par les portes seules.
+- `private.messageries_etats` : `etat text` (aléatoire, 32 octets base64url), `client_id`,
+  `fournisseur`, `demande_par`, `retour_ecran` (https), `cree_le`, `consomme_le` ; valable
+  15 minutes, usage unique.
+
+Portes pour l'écran (authenticated, gérant / admin) :
+- `messagerie_preparer(p_client, p_fournisseur, p_retour_ecran) → text` : l'état ; l'écran
+  ouvre `…/functions/v1/messagerie-oauth/google/debut?etat=<état>`.
+- `messagerie_revoquer(p_connexion)` : état `revoquee`, ligne `expediteurs` suspendue, travail
+  `messagerie.revoquer` {connexion} déposé.
+
+Portes pour l'ouvrier (service_role), contrat exact dans `messagerie/portes.ts` :
+`messagerie_connexions(p_fournisseur)`, `messagerie_jetons(p_connexion)` (lit le Vault),
+`messagerie_poser_acces`, `messagerie_poser_curseur`, `messagerie_a_reconnecter` (état +
+alerte au client), `messagerie_ouvrir(p_etat)` (vérifie sans consommer),
+`messagerie_enregistrer(p_etat, p_adresse, p_renouvellement, p_acces, p_acces_expire_le,
+p_portees, p_curseur)` (consomme l'état, `vault.create_secret`, crée ou met à jour la
+connexion et la ligne `expediteurs` : canal email, fournisseur `gmail`, identite = adresse,
+`parametres.connexion`), `messagerie_oublier(p_connexion) → {renouvellement}` (rend puis
+efface les secrets du Vault).
+
+Envois : fournisseur `gmail` dans `fournisseurs_envoi` (`branche` à vrai quand c'est prêt),
+`confier_envoi` dépose `envois.gmail`. **À trancher côté socle** : `confirmer_envoi` avec
+`gmail:brouillon:<id>` ne veut pas dire « envoyé » mais « brouillon déposé chez le client » ;
+un statut distinct (`brouillon`) éviterait de compter comme envoyé ce que le client n'a pas
+encore envoyé.
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
