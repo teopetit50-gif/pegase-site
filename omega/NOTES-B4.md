@@ -294,3 +294,7 @@ passe**, captures `omega/recette-b4/reel-*-1440.jpg`.
 - 06/10, matin — retour de recette traité (00, 11, b4_04), b4_01 + test 13, carte Pièces et dépôt
   chiffré à l'écran, onglet dans ecrans.ts, souche locale commencée. Lot B4-2 envoyé (367fc44).
 - 06/10 — relecture en base réelle, tout passe (§ 8).
+- 06/10, 03 h 30 Paris — reprise par session_01ACKfUXKSgnD521nunHBY1w (Opus 5.5) après l'arrêt de
+  session_01HRJ7AmG9hKtDenMRTt1eW6 (crédit Fable). Écrit `omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md` pour A1 :
+  les dix avis RPVA (`type_piece` = code `rpva_*` de `tamila_avis_lu`), leurs champs, `tamila_piece_autre`, et le
+  rappel qu'aucune pièce Tamila n'est lisible avant le coffre. Passerelle pièce lue → avis : à venir avec le coffre.
