@@ -17,7 +17,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { Attestation, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
+import type { Attestation, OrdreService, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -496,8 +496,8 @@ export const TEMPS_EXEMPLE: Temps[] = [
 /* ——— le chantier (b5_13) : la façade rue Mercière, en travaux ——— */
 const M = (n: number) => id("m", n);
 export const MARCHES_EXEMPLE: Marche[] = [
-  { id: M(1), projet_id: P_MERCIERE, lot_id: id("1", 8), titulaire: "Pierres de Bourgogne SARL", montant_ht: 186000, avenants_ht: 7400, retenue_pct: 5, delai_verification_jours: 15, actif: true },
-  { id: M(2), projet_id: P_MERCIERE, lot_id: id("1", 9), titulaire: "Échafaudages Rhône", montant_ht: 24000, avenants_ht: 0, retenue_pct: 5, delai_verification_jours: 15, actif: true },
+  { id: M(1), projet_id: P_MERCIERE, lot_id: id("1", 8), titulaire: "Pierres de Bourgogne SARL", montant_ht: 186000, avenants_ht: 7400, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 180, demarrage_le: j(-100) },
+  { id: M(2), projet_id: P_MERCIERE, lot_id: id("1", 9), titulaire: "Échafaudages Rhône", montant_ht: 24000, avenants_ht: 0, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 210, demarrage_le: j(-102) },
 ];
 const mois = (n: number) => `${j(n).slice(0, 7)}-01`;
 export const SITUATIONS_EXEMPLE: Situation[] = [
@@ -629,6 +629,27 @@ export const ATTESTATIONS_EXEMPLE: Attestation[] = [
   },
 ];
 
+/* ——— les ordres de service et les réserves (b5_19) : la façade rue Mercière ——— */
+const os = (o: Partial<OrdreService> & Pick<OrdreService, "id" | "marche_id" | "numero" | "nature" | "objet" | "emis_le">): OrdreService => ({
+  projet_id: P_MERCIERE, notifie_le: null, montant_ht: 0, delai_jours: 0, statut: "signe", reserves_entreprise: null, reserves_jusquau: null, ...o,
+});
+export const OS_EXEMPLE: OrdreService[] = [
+  os({ id: id("e", 1), marche_id: M(1), numero: 1, nature: "demarrage", objet: "Démarrage des travaux de ravalement", emis_le: j(-102), notifie_le: j(-100), reserves_jusquau: j(-85) }),
+  os({ id: id("e", 2), marche_id: M(1), numero: 2, nature: "travaux_supplementaires", objet: "Remplacement de 14 pierres de corniche", emis_le: j(-61), notifie_le: j(-60), montant_ht: 12600, delai_jours: 10, statut: "signe_reserves", reserves_entreprise: "Délai demandé : 15 jours", reserves_jusquau: j(-45) }),
+  os({ id: id("e", 3), marche_id: M(1), numero: 3, nature: "arret", objet: "Arrêt pour intempéries (gel)", emis_le: j(-40) }),
+  os({ id: id("e", 4), marche_id: M(1), numero: 4, nature: "reprise", objet: "Reprise après intempéries", emis_le: j(-33) }),
+  os({ id: id("e", 5), marche_id: M(1), numero: 5, nature: "travaux_modificatifs", objet: "Joints à la chaux teintée au lieu de la chaux blanche", emis_le: j(-3), notifie_le: j(-2), montant_ht: 4100, statut: "emis", reserves_jusquau: j(13) }),
+  os({ id: id("e", 6), marche_id: M(2), numero: 1, nature: "demarrage", objet: "Montage de l’échafaudage", emis_le: j(-103), notifie_le: j(-102), reserves_jusquau: j(-87) }),
+];
+const reserve = (r: Partial<Reserve> & Pick<Reserve, "id" | "numero" | "intitule">): Reserve => ({
+  projet_id: P_MERCIERE, lot_id: id("1", 8), marche_id: M(1), localisation: null, origine: "opr", constatee_le: j(-6), lever_avant: null, statut: "ouverte", levee_le: null, motif: null, ...r,
+});
+export const RESERVES_EXEMPLE: Reserve[] = [
+  reserve({ id: id("f", 1), numero: 1, intitule: "Épaufrure sur l’appui de la baie 3", localisation: "Façade sud, 2e étage", lever_avant: j(9) }),
+  reserve({ id: id("f", 2), numero: 2, intitule: "Coulures de laitance sous la corniche", localisation: "Façade sud, travées 4 à 6", lever_avant: j(-1) }),
+  reserve({ id: id("f", 3), numero: 3, intitule: "Joint ouvert en pied de façade", localisation: "Façade sud, soubassement", lever_avant: j(-3), statut: "levee", levee_le: j(-4) }),
+];
+
 export function dossierExemple(): Dossier {
   return {
     projets: PROJETS_EXEMPLE,
@@ -646,6 +667,8 @@ export function dossierExemple(): Dossier {
     constats: CONSTATS_EXEMPLE,
     plu: PLU_EXEMPLE,
     attestations: ATTESTATIONS_EXEMPLE,
+    ordresService: OS_EXEMPLE,
+    reserves: RESERVES_EXEMPLE,
     honoraires: HONORAIRES_EXEMPLE,
     temps: TEMPS_EXEMPLE,
     marches: MARCHES_EXEMPLE,

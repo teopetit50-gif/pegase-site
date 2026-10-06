@@ -136,7 +136,7 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
           {plu.prescriptions.length ? (
             <details className="lor-temps-recents">
               <summary>Prescriptions à cet endroit ({plu.prescriptions.length})</summary>
-              <ul className="esp-fil">
+              <ul className="lor-liste">
                 {plu.prescriptions.map((x, i) => <li key={i}>{x.libelle}</li>)}
               </ul>
             </details>
