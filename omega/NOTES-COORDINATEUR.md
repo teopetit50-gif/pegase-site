@@ -674,3 +674,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
 - **Vercel** : 4d1e26d est passé (statut success) — le quota glisse sur 24 h, des créneaux se
   libèrent ; 05c7391 et fccee92 refusés de nouveau. À chaque point : regarder le statut du
   HEAD et, s'il est refusé, retenter plus tard (une poussée suffit, elle emporte tout).
+- 08 h 05 — A3 9efadfe fusionné : derniers cadres défilants (FILED dossier, À payer) au
+  clavier ; contrôle « zone qui défile atteignable » ajouté à accessibilite.mjs et
+  verifier-en-ligne.mjs. Vérifié dans le code de main : plus aucun role=listbox ni cadre
+  .esp-tableau-cadre sans tabIndex dans components/espace. (Les 15 constats d'A3 sur les B
+  venaient de sa branche sans main.)
