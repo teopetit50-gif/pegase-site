@@ -300,7 +300,8 @@ grant execute on function public.tiroma_noter_appel(uuid, uuid, uuid, text, text
 grant execute on function public.tiroma_appels(uuid, uuid, integer) to authenticated, service_role;
 grant execute on function private.tiroma_noter_appel(uuid, uuid, uuid, text, text, uuid, bigint, date) to authenticated, service_role;
 grant execute on function private.tiroma_appels_lire(uuid, uuid, integer) to authenticated, service_role;
-revoke all on function private.tiroma_appelant(uuid, uuid, uuid) from public, anon;
-grant execute on function private.tiroma_appelant(uuid, uuid, uuid) to authenticated, service_role;
+-- tiroma_appelant n'est appelée que par tiroma_appels_lire (security definer) : service_role seul (b3_12c).
+revoke all on function private.tiroma_appelant(uuid, uuid, uuid) from public, anon, authenticated;
+grant execute on function private.tiroma_appelant(uuid, uuid, uuid) to service_role;
 
 select 'b3_12 v2 registre des appels posé' as resultat, (select count(*) from pg_constraint where conrelid = 'public.tiroma_appels'::regclass and contype = 'f' and convalidated) as cles_validees;
