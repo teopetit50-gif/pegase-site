@@ -234,7 +234,7 @@ export default function Cabinet({ dossier, agir }: Props) {
             {!horairesCabinet.length ? (
               <p className="esp-fil-meta">Aucun horaire : sans eux, Tiroma ne sait pas quand un fauteuil est ouvert.</p>
             ) : (
-              <div className="esp-tableau-cadre">
+              <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Horaires (tableau qui défile)">
                 <table className="esp-tableau">
                   <thead><tr><th>Jour</th><th>De</th><th>À</th><th>Pour</th>{titulaire ? <th aria-label="Retirer" /> : null}</tr></thead>
                   <tbody>
@@ -278,7 +278,7 @@ export default function Cabinet({ dossier, agir }: Props) {
             <span className="esp-kpi-sous">{aClasser.length ? `${aClasser.length} type${aClasser.length > 1 ? "s" : ""} de rendez-vous à confirmer` : `${types.length} type${types.length > 1 ? "s" : ""}, tous validés`}</span>
           </div>
           {!types.length ? <p className="esp-fil-meta">Les types de rendez-vous arrivent avec le premier relevé ; Tiroma propose une famille, le titulaire confirme.</p> : (
-            <div className="esp-tableau-cadre">
+            <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Vocabulaire du logiciel (tableau qui défile)">
               <table className="esp-tableau">
                 <thead><tr><th>Dans le logiciel</th><th>Famille</th><th>Durée</th><th>État</th>{titulaire ? <th aria-label="Classer" /> : null}</tr></thead>
                 <tbody>

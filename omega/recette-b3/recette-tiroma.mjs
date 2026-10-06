@@ -108,7 +108,7 @@ for (const largeur of LARGEURS) {
   await s.dormir(400);
   await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'Nes'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
   await s.dormir(600);
-  const choixPat = await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] [role="option"]')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  const choixPat = await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] ul[aria-label="Patients trouvés"] button')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
   ok(choixPat === true, 'la recherche propose Rosalie Nestor, choisie');
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Inscrire/.test(b.textContent))?.click()`);

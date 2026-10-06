@@ -12,14 +12,15 @@
      btp_ouvrir_avenant, btp_chiffrer_ligne_avenant, btp_retirer_ligne_avenant,
      btp_soumettre_avenant, btp_signer_avenant, btp_abandonner_avenant (b6_01) ;
      btp_repondre_confirmation, btp_proposer_remplacants (b6_02) ;
-     btp_rattacher_facture, btp_detacher_facture (b6_03).
+     btp_rattacher_facture, btp_detacher_facture (b6_03) ;
+     btp_accord_j2, btp_donner_accord_j2, btp_revoquer_accord_j2 (b6_08), btp_activer_accord_j2_seul (b6_09).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Chantier, FactureCandidate, Remplacant, Tableau } from "./types";
+import type { AccordJ2, Chantier, FactureCandidate, Remplacant, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -123,4 +124,18 @@ export async function noterAcceptation(o: { id?: string; client_id: string; chan
     const { error } = await supabase.from("btp_acceptations").insert({ client_id: o.client_id, chantier_id: o.chantier_id, tiers_id: o.tiers_id, mode: o.mode, paiement_direct: o.paiement_direct, statut: o.statut });
     if (error) throw new ErreurPorte(message(error));
   }
+}
+
+/* L'accord permanent des confirmations J-2 (b6_08) : gérant et administrateurs seulement. */
+export async function chargerAccordJ2(client: string): Promise<AccordJ2> {
+  return rpc<AccordJ2>("btp_accord_j2", { p_client: client });
+}
+export async function donnerAccordJ2(client: string): Promise<AccordJ2> {
+  return rpc<AccordJ2>("btp_donner_accord_j2", { p_client: client });
+}
+export async function revoquerAccordJ2(client: string, motif: string | null): Promise<AccordJ2> {
+  return rpc<AccordJ2>("btp_revoquer_accord_j2", { p_client: client, p_motif: motif });
+}
+export async function activerAccordJ2Seul(client: string): Promise<AccordJ2> {
+  return rpc<AccordJ2>("btp_activer_accord_j2_seul", { p_client: client });
 }

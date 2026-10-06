@@ -519,7 +519,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
         <Avis teinte="ambre">
           <strong>Plusieurs demandes de pièces.</strong> À fournir : {p.pieces_demandees.map((x) => x.code).join(", ") || "—"}.{" "}
           Lettres : {p.demandes_pieces!.map((h) => `du ${dateCourte(`${h.date}T12:00:00`)} (${h.pieces.map((x) => x.code).join(", ") || "aucune pièce"})`).join(" ; ")}.{" "}
-          La mairie doit tout réclamer en une fois (art. R*423-38) : une lettre de plus ne fait pas repartir le délai de trois mois, qui court depuis la première
+          Une nouvelle invitation à compléter le dossier est sans incidence sur le cours du délai et sur la naissance d’une décision tacite (CE, 30 avril 2024, n° 461958 ; art. R*423-38) : le délai de trois mois court depuis la première lettre
           {p.date_pieces_fournies ? " ; une lettre reçue après la remise des pièces ne modifie pas les délais (art. R*423-41)" : ""}.
         </Avis>
       ) : null}
@@ -852,7 +852,7 @@ function EtapeLigne({ e, avant }: { e: Etape; avant: React.ReactNode }) {
           {e.date ? dateCourte(`${e.date}T12:00:00`) : "—"}
           <small>{e.date ? (e.statut === "fait" ? "fait" : quand(e.date)) : "sans date"}{prevision && e.date ? " · prévision" : ""}</small>
         </div>
-        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} aria-label={s.libelle} />
+        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} role="img" aria-label={s.libelle} />
         <div className="lor-etape-texte">
           {e.libelle}
           {e.statut === "manque" ? <> <Pastille teinte="rouge">En retard</Pastille></> : null}

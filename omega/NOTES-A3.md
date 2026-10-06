@@ -376,6 +376,119 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   varelo) reprennent `role="listbox"` / `role="option"` sur des `li` — même
   écart axe ; je n'y ai pas touché.
 
+## Lot du 06/10 (8) — noter un paiement dans « À payer » (a4_15)
+
+- **`filed_noter_paiement`** (p_facture, p_date, p_montant — vide = le reste —,
+  p_moyen ∈ virement, prelevement, cheque, carte, especes, compensation,
+  autre, p_reference ; gérant, admin, valideur) et **`filed_etat_paiement`**
+  (du, regle, reste, etat a_payer | partielle | payee, dernier_le,
+  nb_reglements ; rendu en **ligne de table** — l'écran normalise objet ou
+  tableau) — `filed/portes.ts`.
+- « À payer » : le montant affiché est le **reste** (avec « sur X · Y
+  réglés » dès qu'un règlement existe), l'état « Payée en partie » / « Payée »,
+  la date du dernier règlement ; « **Noter un paiement** » par ligne (date au
+  plus aujourd'hui, montant proposé = le reste et refusé au-delà, moyen —
+  virement si un IBAN est validé, sinon « autre » —, référence). Une facture
+  **payée sort de la liste** ; « Afficher les payées (n) » la fait revenir.
+  Les totaux sont des restes. Le paiement est **noté, pas exécuté** : le
+  dialogue le dit. Un refus de la base (rôle collaborateur, 55000, 22023)
+  s'affiche tel quel.
+- Exemple : R2026-000018 (Rivière) porte un règlement partiel de 1 000 €.
+- **Relu en réel** (daf2@, 06/10 ~05 h 30 Z, `relecture-paiement.mjs`),
+  **partiel** comme demandé : 100 € par virement, référence « essai-a3 », sur
+  FAC-2026-10-0471 → « C'est fait. 100,00 € notés sur R2026-000004
+  (virement) ; reste 188,00 € », ligne « 188,00 € sur 288,00 € · 100,00 €
+  réglés · Payée en partie » ; `filed_etat_paiement` : du 288, regle 100,
+  reste 188, partielle, 1 règlement.
+- Recette 190 ✓ (règlement partiel visible ; montant au-delà du reste
+  refusé ; paiement complet → la facture sort, « Afficher les payées (1) ») ;
+  accessibilité 26 ✓ (dont le dialogue de paiement au clavier).
+
+## Lot du 06/10 (9) — vérifier le site servi : `verifier-en-ligne.mjs`
+
+- `node omega/recette-a3/verifier-en-ligne.mjs [origine]` (défaut
+  https://omegaai.fr), lecture seule, sans session : les onze écrans de
+  l'espace (A3 : validations, filed, filed?objet=…R2026-000017, fournisseurs,
+  à payer, point ; B : varelo, tavaro, tiroma, tamila, lorani, daliro) —
+  200, titre, débordement aux cinq largeurs, axe à 390 et 1440, et pour A3
+  une phrase de chaque lot de la nuit. Un défaut A3 fait échouer ; un défaut
+  B est un constat listé à la fin.
+- Essai contre le Next local (06/10 ~05 h 45 Z) : **écrans d'A3, tout passe
+  (157 ✓)** ; **12 constats sur les B**, tous axe, aucun débordement :
+  varelo, tavaro, tamila, lorani, daliro — `listbox`/`option` sur des `li`
+  (required-children, required-parent, listitem) ; tiroma et lorani —
+  `aria-prohibited-attr` (aria-label sur un élément sans rôle) ; tavaro,
+  lorani, daliro à 390 — `scrollable-region-focusable` (une zone qui défile
+  sans être atteignable au clavier : `tabIndex={0}` sur le cadre).
+- À jouer contre omegaai.fr au retour du quota Vercel (07/10 ~04 h 30
+  Paris), au signal du coordinateur.
+
+## Lot du 06/10 (10) — cadres qui défilent, atteignables au clavier (remarque de B6)
+
+- Les deux cadres de tableau qui défilent dans mes écrans (lignes de la
+  facture dans le dossier FILED, tableaux de « À payer ») portent
+  `tabIndex={0}`, `role="region"` et un `aria-label` ; leur focus se voit
+  (`.esp-tableau-cadre:focus-visible`). Validations, fournisseurs et point
+  n'ont pas de cadre défilant.
+- Contrôle ajouté à 390 px dans `accessibilite.mjs` et `verifier-en-ligne.mjs` :
+  toute zone qui défile (overflow auto/scroll et contenu plus grand) doit
+  avoir tabIndex ≥ 0 avec un rôle et un nom, ou contenir un élément
+  focalisable. Mes cinq écrans passent ; le contrôle relève bien, comme axe,
+  les cadres de tavaro, lorani et daliro.
+- `verifier-en-ligne.mjs` nomme désormais l'écran dans chaque constat. Contre
+  le Next local : écrans d'A3 tout passe ; 15 constats sur les B (12 axe +
+  3 cadres défilants). Recette 190 ✓, accessibilité ✓.
+
+## Vérifié en ligne (06/10, ~06 h 15 Z) — omegaai.fr, main 99c37b6
+
+`node omega/recette-a3/verifier-en-ligne.mjs https://omegaai.fr`, après
+reprise de main : **181 ✓, 0 échec, 0 constat** — les onze écrans (A3 et
+B) répondent 200, sans débordement aux cinq largeurs, sans écart axe grave
+à 390 et 1440, zones défilantes atteignables ; les phrases des lots de la
+nuit sont dans les pages servies (« Décider en lot », « Le dossier »,
+« Ouvrir le dossier », « Fournisseurs », « À payer », « Identifiants lus sur
+la pièce, non retenus », « Saisir les vrais identifiants », « Les
+fournisseurs que FILED connaît », « Noter un paiement », « Payée en
+partie »…). Sortie brute : `omega/recette-a3/en-ligne-2026-10-06.txt`.
+Correctif du script : sur le site servi (plus lent), attendre que l'espace
+soit rendu (`.esp h1`) plutôt qu'un délai fixe ; un axe qui ne tourne pas est
+dit au lieu de planter.
+
+## Lot du 06/10 (11) — la vue Fournisseurs en temps réel (filed_fournisseurs publiée)
+
+- `filed_fournisseurs` est dans la publication `supabase_realtime` (accord de
+  Teo, 06/10). La vue Fournisseurs écoutait déjà la table ; elle écoute aussi
+  `filed_historique` (publiée), qui reçoit une ligne à chaque IBAN proposé,
+  confirmation ou attestation — c'est elle qui fait apparaître un nouvel IBAN
+  tant que `filed_fournisseurs_ibans` n'est pas publiée (**à publier**).
+- `useTempsReel` rend désormais l'état du canal (`inactif` | `connexion` |
+  `en_direct` | `coupe`) ; la vue Fournisseurs l'affiche : « En direct »
+  (point vert) ou, si le réseau refuse le WebSocket, « Relue toutes les
+  30 s » — dans ce cas l'écran **se relit seul toutes les 30 s**
+  (`RELECTURE_SANS_DIRECT_MS`), pour que « sans recharger » reste vrai. Vaut
+  pour tous les écrans qui utilisent `useTempsReel`.
+- **`omega/recette-a3/relecture-temps-reel.mjs`** : deux navigateurs ; A
+  (daf2@) ouvre la fiche d'ORANGE SA et ne recharge jamais ; B (gérant)
+  clique « Revérifier » ; A doit voir la ligne « Identité » changer.
+  **Joué le 06/10 à 13 h 54 Z** : ce conteneur refuse le WebSocket (le
+  mandataire ne fait pas d'Upgrade : `…supabase.co/realtime/v1/websocket` →
+  500) ; canal « coupe », témoin « Relue toutes les 30 s », et la fiche de A
+  a changé **en 55 s sans rechargement** (une seule navigation). L'événement
+  Realtime lui-même n'est **pas vérifiable d'ici** : rejouer le script depuis
+  un poste ordinaire (il dit laquelle des deux voies a servi).
+- **Défaut trouvé chez B7 (VIES)** pendant l'essai : le service VIES français
+  était saturé ; l'API répond **HTTP 200** avec `{"actionSucceed": false,
+  "errorWrappers": [{"error": "MS_MAX_CONCURRENT_REQ"}]}` — sans `valid` ni
+  `userError`. `lireReponseVies` (omega/functions/identite/vies.ts) ne lit
+  que `userError` : la réponse devient **« invalide »** au lieu
+  d'« indisponible ». Effet réel sur le banc : ORANGE SA (4 réponses
+  « valide » cette nuit, la dernière à 13 h 49) est passée « Invalide : VIES
+  ne reconnaît pas ce numéro de TVA » à 13 h 55 et 13 h 57, alors que
+  Sirene le dit actif dans la même réponse. Sa facture (validée) n'est pas
+  touchée ; une prochaine facture serait bloquée. Transmis au coordinateur
+  pour B7 ; un « Revérifier » quand VIES répond remettra le verdict.
+- Recette 190 ✓.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

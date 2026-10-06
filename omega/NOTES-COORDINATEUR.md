@@ -662,3 +662,132 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   contrôlé (relu : handlers de l'appelant préservés, preventDefault respecté). Les écrans
   des B (tiroma/ListeAttente, tamila, varelo, daliro, lorani, tavaro) gardent le même
   role=listbox/option : à corriger par chacun (demandé).
+- 07 h 25 — A3 04efcda fusionné : « Noter un paiement » dans « À payer » (reste à payer,
+  « Payée en partie / Payée », payées masquées). Relu en réel : 100 € par virement sur
+  FAC-2026-10-0471 (daf2@) → reste 188,00 € sur 288,00 €, filed_etat_paiement partielle.
+- 07 h 30 — **Accessibilité des six écrans B fusionnée** (B1 be56d79, B2 3b3708e, B3 8d20e49,
+  B4 71c9463, B5 afebaaf, B6 6131c1a) : listbox/option → listes de boutons (aria-current),
+  pastilles role=img, cadres défilants tabIndex/region/aria-label ; scripts axe par module.
+  Restent des cadres défilants sans tabIndex : tiroma/Cabinet (B3), varelo/Depot et
+  ObjetDetail (B1), filed/EcranAPayer (A3) — demandés. A3 prépare
+  omega/recette-a3/verifier-en-ligne.mjs (13 écrans sur omegaai.fr).
+- **Vercel** : 4d1e26d est passé (statut success) — le quota glisse sur 24 h, des créneaux se
+  libèrent ; 05c7391 et fccee92 refusés de nouveau. À chaque point : regarder le statut du
+  HEAD et, s'il est refusé, retenter plus tard (une poussée suffit, elle emporte tout).
+- 08 h 05 — A3 9efadfe fusionné : derniers cadres défilants (FILED dossier, À payer) au
+  clavier ; contrôle « zone qui défile atteignable » ajouté à accessibilite.mjs et
+  verifier-en-ligne.mjs. Vérifié dans le code de main : plus aucun role=listbox ni cadre
+  .esp-tableau-cadre sans tabIndex dans components/espace. (Les 15 constats d'A3 sur les B
+  venaient de sa branche sans main.)
+- **Point 08 h 15 (06 h 15 Z)** : main 99c37b6 **déployé** (Vercel success ~06:08 Z) — tout le
+  travail de la nuit est en ligne. **Contrôle sur omegaai.fr (A3, verifier-en-ligne) : 181 ✓,
+  0 échec, 0 constat** sur onze écrans (5 d'A3 + filed?objet, 6 des B) : 200, titres, aucun
+  débordement aux cinq largeurs, axe sans écart grave à 390/1440, zones défilantes au
+  clavier, phrases de chaque lot présentes. B1 (varelo) et B3 (tiroma) l'ont confirmé par
+  lecture des chunks servis. Sortie brute : omega/recette-a3/en-ligne-2026-10-06.txt.
+  Rien de neuf à poser sur la recette. En attente de Teo : accord permanent des J-2 Daliro,
+  Realtime de filed_fournisseurs, export Logos_w, SIRENE_API_KEY, HDS, coffre Tamila,
+  juriste (seconde demande de pièces dans le mois), Vercel Pro.
+- **Point 12 h 15 (10 h 15 Z)** : aucune branche worker-* n'a bougé depuis 08 h 15 (B et A3
+  tout fusionnés ; A1/A2/A4/A5 = travail base déjà posé). main a91c572 toujours en ligne
+  (Vercel success). Recette saine : 0 échec cron, 0 erreur HTTP sur 2 h, cron vivant 10:16 Z.
+  Rien à poser. Notes commitées sans poussée (pas de déploiement Vercel pour une ligne de
+  journal ; partiront avec la prochaine vraie modification). Toujours en attente de Teo.
+- **Décisions de Teo (06/10, ~13 h 40 Z)** :
+  1. J-2 Daliro : **accord permanent OUI** → B6 écrit b6_08 (réglage par organisation,
+     révocable, approbation tracée « par accord permanent », mode essai prioritaire).
+  2. Realtime filed_fournisseurs : **OUI** → posé sur la recette (version 20261006134231
+     filed_realtime_fournisseurs) ; A3 branche l'abonnement sur la vue Fournisseurs.
+  3. Export Logos_w : reporté à la fin (introuvable pour l'instant).
+  4. SIRENE_API_KEY : à obtenir (compte INSEE au nom de Teo) ; le repli recherche-entreprises
+     fonctionne déjà sans clé.
+  5. HDS : **Scaleway** choisi par le coordinateur (certifié HDS depuis juillet 2024 ; il faut un
+     support Business/Enterprise et un contrat HDS) — souscrit au premier client santé.
+  6. Coffre Tamila : choix délégué → **Scaleway Key Manager** (même fournisseur que HDS),
+     « local » gardé en repli ; B4 écrit b4_05 + ouvrier tamila-coffre, tests avec faux KMS.
+  7. Juriste (seconde demande de pièces) : recherche du coordinateur — **CE 30 avril 2024
+     n° 461958** : une nouvelle demande est possible mais sans incidence sur le délai ni sur le
+     rejet tacite ; CE 4 février 2025 : une seule pièce prévue par le code suffit à interrompre.
+     b5_07 est donc juste ; B5 ajoute la référence à l'avertissement.
+  8. Courriel d'essai Tavaro : **reçu** par Teo → chaîne validée par un humain.
+  9. Vercel Pro : **non**. On ne pousse sur main qu'à la fin d'un gros chantier.
+  Préparation de la production confiée à A5 (omega/MISE-EN-PRODUCTION.md, prod non touchée).
+- 13 h 50 Z — **b5_10 posé** (worker-b5 027eca3, depot 4343 + tests 4344) : l'alerte de
+  seconde demande cite CE 30 avril 2024 n° 461958 ; `^test_b5_` 120/120. Écran fusionné et
+  poussé (f8ba169, Vercel success) ; « 461958 » relu dans les chunks servis par
+  omegaai.fr/espace/lorani. B6 : voie (A) retenue pour b6_08 (public.politiques ; corps des
+  fonctions d'accord relayés) — à vérifier si le créateur peut activer seul. A5 : sorties
+  brutes (migrations recette/prod en noms, crons, fonctions Edge) relayées. Une lecture de
+  ces notes a été refusée par le classifieur (« Production Reads ») : non contournée.
+- 14 h 00 Z — **A5 : omega/MISE-EN-PRODUCTION.md complet** (worker-a5 92893fb, rien posé, prod
+  non touchée) : rejouer la séquence exacte de la recette (~110 lignes, exclusions listées),
+  exporter d'abord en fichiers les lots posés sans fichier, réécrire les URL de recette en dur
+  (19b, 19v, 19aa), répétition générale sur une copie de la prod, puis supabase db push par
+  paliers P1–P6 ; crons de la prod à relever en P1 par Teo ou une session autorisée.
+  Fonctions **reception v10** (4114a69) et **webhooks-brevo v10** (87a1112) passées en coquille
+  sur la recette, verify_jwt false gardé ; fumée : 401 « jeton invalide » sans jeton.
+- 14 h 00 Z — **Coquille webhooks-brevo prouvée** (banc A2 051862b) : envoi b109eea1 en essai,
+  envoyé 13:59:01 Z <202610061359.72974083619@smtp-relay.mailin.fr>, « remis » noté par la
+  coquille à 13:59:05 Z. reception v10 : chemin utile non prouvé (inbound non branché ; pas de
+  FORMULAIRE_SECRET) → trou au dossier A5. **SIRENE_API_KEY posée par Teo** : identite sirene
+  « sirene+repli », vérification 380129866 source « sirene » à 13:55 Z. **Faux négatif VIES**
+  (ORANGE invalide à 13:54 après valide à 13:48, demande forcée) → B7 écrit b7_04.
+- 14 h 01 Z — **b6_08 accord permanent J-2 posé** (bc7ca7c, depots 4389/4390) : `^test_b6_`
+  154+38+29+40 verts. Auto-activation par le gérant donneur **refusée** (42501 « Le demandeur ne
+  décide pas de sa propre demande ») → il faut une seconde personne pour activer : question à
+  Teo. Écran AccordJ2 fusionné.
+- 14 h 05 Z — **Teo, activation de l'accord J-2 : entre-deux** → B6 écrit b6_09 : règle
+  politique.activer (gérant/admin/valideur, demandeur exclu) ; si le gérant est le SEUL décideur,
+  porte btp_activer_accord_j2_seul, tracée, limitée aux politiques J-2, refusée dès qu'un second
+  décideur existe. **b4_05 coffre Tamila posé** (e0c4bcc, depots 4403/4404) : `^test_b4_` 13/14,
+  le 14 meurt sur « permission denied for function tamila_cle_maitre » (défaut du test, renvoyé).
+  A1 : brancher lecteur.ts du coffre. **A3 6cb0135 fusionné** : vue Fournisseurs écoute aussi
+  filed_historique ; témoin « En direct » / « Relue toutes les 30 s » (le conteneur refuse le
+  WebSocket ; à rejouer d'un poste ordinaire). VIES MS_MAX_CONCURRENT_REQ relayé à B7.
+- 14 h 10 Z — **b7_04 doute VIES posé** (0b1be57, depots 4429/4430) ; coquille **identite v4**
+  (0b1be57, _partage 7425991) déployée AVANT la migration ; `^test_b7_` 11/11. Le rattrapage a
+  redemandé ORANGE à 14:08:21 Z → **valide**, verdict du fournisseur 90cc1d86 rétabli.
+  **Coffre Tamila** : test 14 corrigé (a90cd97) → 64/64 ; `^test_b4_` 14/14.
+- 14 h 12 Z — **Lecteur v19** (coquille 2bf6c298, _partage idem) : pièces chiffrées Tamila lues
+  via le coffre (scaleway), sinon ignore chiffree_sans_coffre comme avant ; battement 14:12 Z sain.
+  **b6_09 posé** (4fbd941) mais **test_b6_05 meurt** : le socle refuse d'approuver sans
+  approbation de personne (garder_demande 23514) — voulu. Écran b6_09 retiré de main (fusion
+  locale annulée, rien poussé). Suite : **A5 écrit le socle 19af** (exception étroite dans
+  preparer_approbation : seul décideur + liste blanche daliro envoi.*), puis B6 b6_10 (la porte
+  insère une approbation au lieu de forcer le statut).
+- 14 h 15 Z — **Demande de Teo : nouveau tableau de bord au design de Vercel** (disposition,
+  boutons, animations ; marque Omega gardée, rien de propriétaire copié). Nouvel ouvrier
+  **C1 session_013U6ss7Vw2rKrDY5C7ax656**, branche **tableau-de-bord-v2** (jamais main),
+  construit à côté de l'ancien (/espace2), données d'exemple d'abord ; premier palier = coquille
+  + FILED « À payer », montré à Teo par prévisualisation Vercel et captures ; migration de /espace
+  seulement après son accord.
+- 14 h 20 Z — **Écran du coffre Tamila fusionné** (worker-b4 9377b33 : « Coffre à clés »,
+  « Passer au coffre Scaleway », ré-enveloppement). Fonction **tamila-coffre v1** déployée en
+  coquille sur la recette (9377b33, verify_jwt true) ; fumée : 400 CLIENT_ILLISIBLE sur un corps
+  vide (elle démarre). Sans secrets SCALEWAY_*, KM_ABSENT. b6_10 (79cb08a) écrit d'avance : à poser
+  APRÈS 19af. C1 : peut utiliser les skills et saasui.design (inspiration, rien de copié).
+- **Point 16 h 15 (14 h 15 Z)** : recette saine (0 cron en échec, 0 erreur HTTP, 0 travail en
+  échec sur 2 h). Repris sur main : omega/MISE-EN-PRODUCTION.md (A5 9ab08c0), NOTES-B2 (1a0a628),
+  NOTES-B5 (70c54d4), NOTES-B7 (87be597). En attente : A5 19af (socle « seul décideur ») puis b6_10
+  (79cb08a) ; C1 premier palier du tableau de bord ; secrets Scaleway (Teo, au premier client).
+- 14 h 22 Z — **19af posé** (A5 430cf0e : exception « seul décideur » dans preparer_approbation,
+  liste blanche daliro envoi.*), test 55 vert ; **b6_09 + b6_10 posés** (79cb08a : la porte insère
+  une approbation) ; test_b6_05 25/26 (le commentaire est préfixé « [seul décideur] » par le socle,
+  test à corriger). Écran Daliro « Activer moi-même » fusionné. **Rejeu socle 40–55** : test_44
+  rouge (filed_iban_valide, filed_luhn, filed_siren_valide, filed_tva_intracom_analyser non
+  exécutables par authenticated ; tamila_coffre_reference/serveur exécutables en trop) → A5 19ag ;
+  test_46 rouge (vues btp_avenants_chiffres, btp_avenants_lignes_chiffrees sans security_invoker)
+  → B6 b6_11.
+- 14 h 27 Z — **19ag posé** (A5 28a046b : EXECUTE rendu à authenticated sur filed_iban_valide,
+  filed_luhn, filed_siren_valide, filed_tva_intracom_analyser — oubli d'a4_14, un membre ne pouvait
+  plus saisir une valeur « humain » ; tamila_coffre_reference/serveur retirées à authenticated) ;
+  **b6_11** (6263048 : vues btp_avenants_* en security_invoker) + tests b6_05/b6_06. Rejeu socle
+  40–55 + `^test_b6_` : **22/22 verts**. Sources à corriger : A4 (a4_14 grants), B4 (b4_05
+  l. 669-670), A5 (liste figée + btp_prix_avenant, btp_prix_ligne_avenant). Accord J-2 clos.
+- 14 h 35 Z — **Vague 3 lancée** (Teo : « pourquoi les ouvriers n'ont plus de travail ») :
+  A4 + A1 facture électronique en réception (Factur-X / UBL / CII, cycle de vie, note sur les PA),
+  puis FEC ; A2 guide d'inbound Brevo pour Teo + preuve de reception par formulaire signé ; A3
+  suite de non-régression /espace vs /espace2 ; A5 export des migrations pour la prod
+  (omega/prod) ; B1–B6 « 3 manques pour un vrai client » + n° 1 codé ; B7 indisponibles ignorés
+  dans filed_verification_recente + tiers étrangers ; C1 nouveau tableau de bord. Routine de
+  2 h mise à jour.

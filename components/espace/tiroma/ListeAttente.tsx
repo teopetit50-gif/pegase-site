@@ -146,10 +146,10 @@ export default function ListeAttente({ attente, praticiens, peutEcrire, chercher
                 <input className="rv-champ" value={patient ? [patient.prenom, patient.nom].filter(Boolean).join(" ") : texte} onChange={(e) => { setPatient(null); setTexte(e.target.value); }} placeholder="Les premières lettres du nom" autoComplete="off" />
               </label>
               {!patient && trouves.length ? (
-                <ul className="esp-liste" role="listbox" aria-label="Patients trouvés" style={{ maxHeight: 180, overflowY: "auto" }}>
+                <ul className="esp-liste" aria-label="Patients trouvés" style={{ maxHeight: 180, overflowY: "auto" }}>
                   {trouves.map((p) => (
                     <li key={p.id}>
-                      <button type="button" role="option" aria-selected={false} className="esp-item" disabled={p.ne_pas_contacter} onClick={() => setPatient(p)}>
+                      <button type="button" className="esp-item" disabled={p.ne_pas_contacter} onClick={() => setPatient(p)}>
                         <span className="esp-item-titre">{[p.prenom, p.nom].filter(Boolean).join(" ")}{p.ne_pas_contacter ? " — ne pas contacter" : ""}</span>
                       </button>
                     </li>

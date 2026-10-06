@@ -18,9 +18,21 @@ const ECRANS = [
   ['validations', '/espace/validations', `[...document.querySelectorAll('.esp-actions .r-btn')].find(b => /^\\s*Approuver/.test(b.textContent))?.click()`],
   ['filed', '/espace/filed', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`],
   ['fournisseurs', '/espace/filed/fournisseurs', `[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Proposer un IBAN/.test(b.textContent))?.click()`],
-  ['a-payer', '/espace/filed/a-payer', null],
+  ['a-payer', '/espace/filed/a-payer', `[...document.querySelectorAll('.esp-a-payer .r-btn')].find(b => /Noter un paiement/.test(b.textContent))?.click()`],
   ['point', '/espace/point', null],
 ];
+
+/* une zone qui défile (horizontalement ou verticalement) doit se rejoindre au
+   clavier : elle a tabIndex ≥ 0 (et alors un rôle et un nom), ou contient un
+   élément focalisable — ce que mesure aussi axe (scrollable-region-focusable) */
+const DEFILANTES = `(() => [...document.querySelectorAll('.esp *')].filter(e => {
+  const st = getComputedStyle(e);
+  const defile = (/(auto|scroll)/.test(st.overflowX) && e.scrollWidth > e.clientWidth + 1) || (/(auto|scroll)/.test(st.overflowY) && e.scrollHeight > e.clientHeight + 1);
+  if (!defile) return false;
+  const atteinte = e.tabIndex >= 0 && e.getAttribute('role') && (e.getAttribute('aria-label') || e.getAttribute('aria-labelledby'));
+  const contient = !!e.querySelector('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  return !atteinte && !contient;
+}).map(e => e.tagName + '.' + [...e.classList].join('.')))()`;
 
 const analyser = (s, cible) => s.evaluer(`(async () => {
   const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
@@ -41,6 +53,7 @@ for (const [nom, chemin, ouvrir] of ECRANS) {
     await s.dormir(800);
     await s.evaluer(axe + ';true');
     dire(`${nom} ${largeur}`, await analyser(s, `document.querySelector('.esp')`));
+    if (largeur === 390) { const d = await s.evaluer(DEFILANTES); ok(d.length === 0, `${nom} 390 : zones qui défilent atteignables au clavier${d.length ? ' — sauf ' + d.join(', ') : ''}`); }
     if (ouvrir) {
       /* comme au clavier : le bouton a le focus quand on l'active */
       await s.evaluer(`(e => { e?.focus(); e?.click(); })(${ouvrir.replace(/\?\.click\(\)$/, '')})`);

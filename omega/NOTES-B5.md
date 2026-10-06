@@ -380,4 +380,37 @@ A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confir
   (`b5_09_titre_du_permis.sql`) : `private.lorani_titre_permis` prend l'intitulé du permis, sinon le nom du projet ;
   les sept appelants en profitent. Test étape 10 aligné (« PC « Résidence Lemoine — six logements » », alerte et
   sujet du courriel de rappel) → toujours 120 assertions.
+- Coordinateur, 04 h 58 Z : fbf4c98 posé (b5_08, b5_09), `^test_b5_` **120/120**, worker-b5 fusionné dans main.
+  État du lot : b5_01 à b5_09 posées ; six types de courriers prouvés en réel ; rien d'ouvert côté B5, sauf
+  l'avis d'un juriste sur la seconde demande de pièces dans le mois (remonté à Teo).
+
+## 11. Accessibilité (06/10, demande du coordinateur après la mesure axe-core d'A3)
+
+- `main` fusionné dans worker-b5 (5b3a7a9) pour avoir le style commun `.esp-item[aria-current="true"]`.
+- `EcranLorani.tsx` : les deux listes (permis par projet, dossiers) ne sont plus `role="listbox"` / `role="option"` +
+  `aria-selected` mais une liste de boutons ; l'élément ouvert porte `aria-current="true"` (modèle FileValidations).
+- axe a relevé deux autres écarts graves, corrigés : la pastille d'étape du calendrier (`aria-label` sur un span
+  sans rôle → `role="img"`) ; le tableau des intervenants qui défile à 390 (`tabIndex={0}`, `role="region"`, nommé).
+- `omega/recette-b5/accessibilite-lorani.mjs` (copie du script d'A3, réduite à /espace/lorani) : 390 et 1440,
+  **0 écart** sur la page et dans le dialogue « Régime » ; clavier : focus dans le dialogue, piégé, Échap ferme et
+  rend le focus à « Régime ». tsc, eslint, build, recette aux cinq largeurs : verts. Pas touché : dialog.tsx,
+  barre d'onglets.
+
+## 12. Jurisprudence de la seconde demande (06/10, 13 h 43 Z, recherche du coordinateur) — b5_10
+
+- CE, 30 avril 2024, n° 461958 : la mairie peut inviter de nouveau à compléter le dossier, mais cette demande est
+  sans incidence sur le cours du délai et sur la naissance d'une décision tacite ; l'instruction part de la dernière
+  pièce reçue. CE, 4 février 2025 : une seule pièce prévue par le code suffit à interrompre valablement le délai.
+  **La règle de b5_07 est confirmée** ; le point « juriste » du § 8 est clos.
+- `b5_10_jurisprudence_seconde_demande.sql` : corps du trigger (b5_08) ; titre « 2e demande de pièces du …, sans
+  effet sur les délais (CE 30 avril 2024, n° 461958) ; délai depuis la lettre du … » (≤ 200, intitulé borné à 50) ;
+  le détail de l'alerte cite la décision et R*423-38 / R*423-39 ; l'alerte « après la remise » ajoute la décision.
+- « Pièce non prévue par le code » : Lorani n'a aucun avertissement de ce genre sur une demande entière (le socle garde
+  les codes, écarte le texte libre sans le signaler) ; R*423-41 n'apparaît que pour une demande hors du mois (calcul)
+  ou après la remise des pièces. Rien à retirer.
+- Écran : l'avis « Plusieurs demandes de pièces » cite la décision ; recette (contrôle b5_07 : « 461958 ») et axe :
+  verts. Test 19 bis : l'alerte doit porter « 2e demande de pièces » et la référence. Essai local (b5_07 + b5_08 +
+  b5_10) : titres de 175 et 162 caractères, règle inchangée.
+- Coordinateur, 13 h 49 Z : b5_10 posée (027eca3), `^test_b5_` **120/120** (ok 116 : l'alerte cite CE 30 avril 2024,
+  n° 461958) ; écran fusionné dans main, en ligne avec la prochaine poussée groupée. b5_01 à b5_10 posées.
 

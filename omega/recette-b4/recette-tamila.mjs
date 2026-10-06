@@ -5,7 +5,8 @@
    des dossiers, une capture légère (jpeg, densité 1) dans omega/recette-b4/.
    Puis quatre enchaînements sur l'exemple : ouvrir le dossier en tête et lire
    le calcul d'un délai (art. 908 + 915-4) ; confirmer ce délai ; déclarer un
-   acte déposé ; poser une muraille ; ouvrir un nouveau dossier.
+   acte déposé ; poser une muraille ; ouvrir un nouveau dossier ; passer le
+   cabinet au coffre Scaleway et ré-envelopper ses dossiers (b4_05).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -114,6 +115,41 @@ for (const largeur of LARGEURS) {
   const items = await s.evaluer(`document.querySelectorAll('.esp-item').length`);
   ok(items === 7, `${items} dossiers dans la liste`);
   await s.capturer(`${dossier}tamila-nouveau-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b4-coffre', densite: 1 });
+  console.log('— le coffre à clés (à 390 : le dialogue doit tenir sur un téléphone)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  const bouton = await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Coffre/.test(b.textContent))?.textContent?.trim()`);
+  ok(bouton === 'Coffre à clés', `le gérant voit le bouton du coffre (${bouton})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Coffre/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const local = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  ok(/Phrase du cabinet/.test(local) && /Sous la phrase\s*6 dossiers/.test(local), 'état : phrase du cabinet, 6 dossiers sous la phrase');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Passer au coffre Scaleway/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const bascule = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  ok(/Bascule en cours/.test(bascule) && /Paris/.test(bascule), 'le coffre est activé : bascule en cours, clé maître à Paris');
+  const deb = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const r = d.getBoundingClientRect(); return r.left >= 0 && r.right <= document.documentElement.clientWidth + 1; })()`);
+  ok(deb, 'le dialogue tient dans la largeur du téléphone');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Ré-envelopper 6 dossiers/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const progres = await s.evaluer(`!!document.querySelector('[role="dialog"] progress')`);
+  ok(progres, 'l\'avancement du ré-enveloppement s\'affiche');
+  await s.dormir(1200);
+  const fini = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  ok(/Toutes les clés au coffre/.test(fini) && /Au coffre\s*6 dossiers/.test(fini), 'toutes les clés au coffre, 6 dossiers');
+  await s.capturer(`${dossier}tamila-coffre-390.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Fermer/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const tete = await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Coffre/.test(b.textContent))?.textContent?.trim()`);
+  ok(tete === 'Coffre Scaleway', `l'en-tête dit « ${tete} »`);
+  const debPage = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+  ok(debPage === 0, `pas de débordement horizontal avec le bouton du coffre (${debPage})`);
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }
 

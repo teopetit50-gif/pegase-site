@@ -1454,3 +1454,40 @@
   display: grid;
   gap: 4px;
 }
+
+/* un cadre de tableau qui défile se rejoint au clavier (tabIndex 0) : son focus se voit */
+.esp .esp-tableau-cadre:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ——— le témoin du temps réel (« En direct », 06/10/2026) ——— */
+.esp .esp-direct {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3f3f46;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--r-filet, #e5e5e5);
+  background: #fff;
+}
+.esp .esp-direct-point {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a1a1aa;
+}
+.esp .esp-direct[data-etat="en_direct"] .esp-direct-point {
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
+.esp .esp-direct[data-etat="coupe"] {
+  color: #92400e;
+}
+.esp .esp-direct[data-etat="coupe"] .esp-direct-point {
+  background: #d97706;
+}
