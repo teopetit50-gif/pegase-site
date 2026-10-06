@@ -15,7 +15,7 @@
    la contrainte de filed_levees).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Ban, BadgeCheck, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, RefreshCw, ShieldCheck, Unlock, UserCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
@@ -308,11 +308,21 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     );
   };
 
+  /* la réponse du registre arrive en une à deux minutes (cron de l'ouvrier
+     identite) : sans attendre l'événement Realtime (filed_fournisseurs n'est
+     pas encore publiée), le dossier se relit à 1, 2 et 4 minutes */
+  const relectures = useRef<number[]>([]);
+  useEffect(() => () => relectures.current.forEach((t) => window.clearTimeout(t)), []);
+  const relireApres = () => {
+    relectures.current.forEach((t) => window.clearTimeout(t));
+    relectures.current = [60, 120, 240].map((sec) => window.setTimeout(() => void relire().catch(() => undefined), sec * 1000));
+  };
+
   const reverifier = () => {
     if (!fournisseur || !registre) return;
     const nom = registre.nom === "vies" ? "VIES" : "Sirene";
     return envoyer(
-      () => demanderVerification(doc.client_id, registre.nom, registre.identifiant, fournisseur.id).then(() => undefined),
+      () => demanderVerification(doc.client_id, registre.nom, registre.identifiant, fournisseur.id).then(() => relireApres()),
       () => {
         const quand = maintenant();
         return ajouterFil(
