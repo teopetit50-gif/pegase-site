@@ -1,5 +1,6 @@
--- b6_05 — DALIRO : qui active l'accord permanent des J-2 (session B6, 06/10/2026), b6_09.
--- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_09.
+-- b6_05 — DALIRO : qui active l'accord permanent des J-2 (session B6, 06/10/2026), b6_09 et b6_10.
+-- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql, le lot 19af du socle et les
+-- migrations b6_01 à b6_10.
 -- runtests() annule tout. Pour jouer « seul décideur » sur le banc, le test passe le temps du test les
 -- autres décideurs (referent, daf, daf2…) en collaborateurs, puis rend son rôle à la DAF.
 
@@ -31,9 +32,6 @@ begin
   return next ok((select bool_and(d.roles_autorises @> array['valideur']) from public.politiques p join public.demandes_validation d on d.id = p.demande_id
                   where p.client_id = v_client and p.module = 'daliro' and p.statut = 'a_valider'),
                  'Les demandes d''activation sont ouvertes aux valideurs');
-  return next throws_ok(format('insert into public.approbations (demande_id, client_id, user_id, decision) select p.demande_id, %L, %L, ''approuve'' from public.politiques p where p.client_id = %L and p.module = ''daliro'' and p.type_action = ''envoi.email'' and p.statut = ''a_valider''',
-                               v_client, v_gerant, v_client),
-                        '42501', null, 'Même seul, le gérant ne décide pas de sa demande par la file (socle)');
   perform tests.endosser(v_collab, 'b6-seul-collab@banc-varelo.test');
   return next throws_ok(format('select public.btp_activer_accord_j2_seul(%L)', v_client), '42501', null, 'Un collaborateur n''active pas l''accord');
   perform tests.redevenir_admin();
@@ -41,10 +39,14 @@ begin
   return next ok(not has_function_privilege('anon', 'public.btp_activer_accord_j2_seul(uuid)', 'execute'), 'anon n''exécute pas btp_activer_accord_j2_seul');
   return next ok(not has_function_privilege('authenticated', 'private.btp_autres_decideurs(uuid, uuid)', 'execute'), 'authenticated n''exécute pas btp_autres_decideurs');
 
-  -- Une politique daliro HORS J-2, proposée à la main par le gérant : la porte « seul » ne la touche pas.
+  -- Une politique daliro HORS J-2, proposée à la main par le gérant : ni la file (liste blanche de 19af),
+  -- ni la porte « seul » ne la lui font activer lui-même.
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   insert into public.politiques (client_id, module, type_action, libelle, nombre_mensuel, fin)
   values (v_client, 'daliro', 'daliro.signer_avenant', 'Autre accord (hors J-2)', 10, now() + interval '30 days');
+  return next throws_ok(format('insert into public.approbations (demande_id, client_id, user_id, decision) select p.demande_id, %L, %L, ''approuve'' from public.politiques p where p.client_id = %L and p.type_action = ''daliro.signer_avenant''',
+                               v_client, v_gerant, v_client),
+                        '42501', null, 'Même seul, le gérant n''active pas lui-même une politique hors liste blanche (socle 19af)');
   v_etat := public.btp_activer_accord_j2_seul(v_client);
   return next is((v_etat ->> 'activees')::int, 3, 'Seul : le gérant active lui-même les trois politiques J-2');
   return next is(v_etat ->> 'etat', 'actif', 'Seul : l''accord est actif');
@@ -53,6 +55,10 @@ begin
   return next ok((select bool_and(d.statut in ('approuvee', 'executee')) from public.politiques p join public.demandes_validation d on d.id = p.demande_id
                   where p.client_id = v_client and p.module = 'daliro' and p.type_action like 'envoi.%' and p.statut = 'active'),
                  'Leurs demandes d''activation sont décidées (par la voie du socle)');
+  return next is((select count(*)::int from public.approbations a join public.politiques p on p.demande_id = a.demande_id
+                  where p.client_id = v_client and p.type_action like 'envoi.%' and p.statut = 'active' and a.user_id = v_gerant
+                    and a.commentaire like 'activé par le seul décideur de l''organisation, %'), 3,
+                 'Chaque activation est une approbation du gérant, commentée « activé par le seul décideur de l''organisation »');
   return next is((select p.statut from public.politiques p where p.client_id = v_client and p.type_action = 'daliro.signer_avenant'), 'a_valider',
                  'La politique hors J-2 n''est pas activée par la porte « seul »');
   perform tests.redevenir_admin();
