@@ -34,8 +34,9 @@ Légende : **A** prouvé sur de vrais documents en recette ; **B** testé sur do
 | Photos de chantier (Daliro) : travaux en plus, problèmes, avancement | B | — | B6 dépose `lecteur.media` ; WhatsApp branché (Meta, Teo) ; vraies photos | — | 1 | 0,01–0,02 € par message avec une photo |
 | Vocaux (Daliro) | B / **T** | — | Clé Mistral et accord de Teo (refusé pour l'instant) ; WhatsApp | — | 0,5 | ≈ 0,002 € la minute + 0,01 € |
 | Documents médicaux (ordonnances, comptes rendus) | **D** | — | Aucun type ; à cadrer (hébergement de données de santé, HDS) avant tout code | 3 | 2 | ≈ 0,015–0,03 € |
-| DWG (plans natifs) | **D** | — | Étude de B5 : LibreDWG lit, rendu inexploitable ; chemin côté serveur à choisir | 5+ | 2 | — |
-| Mesures prises sur le dessin d'un plan | **D** | — | Non promis honnêtement aujourd'hui (seules les cotes écrites) | — | — | — |
+| DWG (plans natifs) | **D** / T | — | Étude de B5 corrigée : LibreDWG (GPL) dans un petit service serveur à part, car une fonction Edge ne tient pas les gros fichiers ; hébergement à prévoir. Lecture serveur 3–4 j, dépôt 0,5 j, recalage PDF↔DWG 1–2 j, infrastructure 1–2 j | 6–9 | 2 | 0 € (géométrie, sans IA) |
+| Offres d'entreprises (Excel, PDF : prix par poste) | **D** | — | Type `lorani_offre` (entreprise, lot, total HT, prix unitaire, montant, quantité et unité par poste) ; Excel de plus de 500 lignes à découper (+0,5 j) | 1 | 1 | 0,02–0,05 € (PDF court) ; 0,1–0,3 € (gros Excel) |
+| Métré mesuré sur les plans (surfaces et longueurs prises sur le dessin) | **D** | — | Seule la géométrie vectorielle (PDF ou DWG) peut le donner : tracés, échelle du cartouche, pièces. La vision ne donne que des ordres de grandeur. À ne pas promettre avant | 10–15 | ? | 0 € (géométrie) |
 
 ## Ce qui vaut pour toutes les lignes
 - **Où tourne le modèle** : la recette appelle aujourd'hui l'API Anthropic en direct. L'hébergement en UE n'est pas garanti, et il n'y a pas de non-conservation contractuelle sans accord avec Anthropic. Toute promesse « lu en Europe, sans conservation » est donc **T** : le code sait déjà passer par AWS Bedrock en région UE (profil `eu.anthropic…`). Il suffit de retirer la clé Anthropic et de poser les identifiants AWS, soit 0,5 jour pour basculer et vérifier, avec un compte AWS et l'accès au modèle.
