@@ -726,3 +726,13 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   paliers P1–P6 ; crons de la prod à relever en P1 par Teo ou une session autorisée.
   Fonctions **reception v10** (4114a69) et **webhooks-brevo v10** (87a1112) passées en coquille
   sur la recette, verify_jwt false gardé ; fumée : 401 « jeton invalide » sans jeton.
+- 14 h 00 Z — **Coquille webhooks-brevo prouvée** (banc A2 051862b) : envoi b109eea1 en essai,
+  envoyé 13:59:01 Z <202610061359.72974083619@smtp-relay.mailin.fr>, « remis » noté par la
+  coquille à 13:59:05 Z. reception v10 : chemin utile non prouvé (inbound non branché ; pas de
+  FORMULAIRE_SECRET) → trou au dossier A5. **SIRENE_API_KEY posée par Teo** : identite sirene
+  « sirene+repli », vérification 380129866 source « sirene » à 13:55 Z. **Faux négatif VIES**
+  (ORANGE invalide à 13:54 après valide à 13:48, demande forcée) → B7 écrit b7_04.
+- 14 h 01 Z — **b6_08 accord permanent J-2 posé** (bc7ca7c, depots 4389/4390) : `^test_b6_`
+  154+38+29+40 verts. Auto-activation par le gérant donneur **refusée** (42501 « Le demandeur ne
+  décide pas de sa propre demande ») → il faut une seconde personne pour activer : question à
+  Teo. Écran AccordJ2 fusionné.
