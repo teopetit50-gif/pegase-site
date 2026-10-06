@@ -971,6 +971,16 @@ begin
   if f.statut = 'ouverte' and v_brut <= 0.005 then
     update public.cashd_factures set statut = 'soldee', statut_motif = 'réglée (lettrage)', statut_le = now(), maj_le = now() where id = f.id;
     v_statut := 'soldee';
+    -- Une facture réglée publie un événement du socle (abonné : REPUT, la demande d'avis après règlement). Aucun module
+    -- ne lit les tables de l'autre ; clé idempotente par facture.
+    perform private.publier_evenement(f.client_id, 'cashd.facture_reglee',
+      (select jsonb_build_object('facture', f.id, 'numero', f.numero, 'compte', f.compte_id, 'entite', f.entite_id,
+                                 'regle_le', coalesce((select max(r.recu_le) from public.cashd_imputations x join public.cashd_reglements r on r.id = x.reglement_id
+                                                       where x.facture_id = f.id and x.annulee_le is null), (now() at time zone 'Europe/Paris')::date),
+                                 'email', c.contact_facturation_email, 'telephone', c.contact_facturation_telephone, 'nom', c.nom,
+                                 'particulier', c.particulier, 'langue', c.langue)
+       from public.cashd_comptes c where c.id = f.compte_id),
+      'facture:' || f.id::text);
   elsif f.statut = 'soldee' and f.statut_motif = 'réglée (lettrage)' and v_brut > 0.005 then
     update public.cashd_factures set statut = 'ouverte', statut_motif = null, statut_le = now(), maj_le = now() where id = f.id;
     v_statut := 'ouverte';

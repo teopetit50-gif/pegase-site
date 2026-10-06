@@ -167,6 +167,13 @@ begin
                  or exists (select 1 from public.cashd_arretes a where a.client_id = v_client and a.jour = v_samedi + 2 and jsonb_array_length(a.balance) >= 1),
                  'Le jour du mois réglé, la balance âgée est arrêtée (à télécharger en tableur)');
 
+  -- ── Une facture réglée publie cashd.facture_reglee (abonné : REPUT) ──
+  return next ok(exists (select 1 from public.travaux t where t.client_id = v_client and t.charge ->> 'evenement' = 'cashd.facture_reglee'
+                         and t.charge ->> 'facture' = p ->> 'f4' and t.charge ->> 'numero' = 'F-2026-150' and t.charge ->> 'email' = 'mandatement@caluire.test'
+                         and t.charge ->> 'regle_le' = j::text)
+                 or not exists (select 1 from private.abonnements a where a.evenement = 'cashd.facture_reglee'),
+                 'La facture réglée par le lien publie cashd.facture_reglee (numéro, adresse, date du règlement)');
+
   -- ── Historique des réglages ──
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   return next ok((select count(*) from public.cashd_historique_reglages h where h.client_id = v_client and h.action in ('cashd.reglages', 'cashd.plafond', 'cashd.echeancier')) >= 3,

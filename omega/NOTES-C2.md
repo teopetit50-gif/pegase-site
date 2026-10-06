@@ -231,6 +231,11 @@ CASHD étant vert.
 
 ## Journal de session
 
+- 06/10, soir : à la demande de C3 (REPUT, via le coordinateur), une facture soldée par lettrage publie l'événement du
+  socle `cashd.facture_reglee` (facture, numero, compte, entite, regle_le, email, telephone, nom, particulier, langue ;
+  clé `facture:<id>`) — REPUT s'y abonne pour la demande d'avis après règlement. Aucun module ne lit les tables de l'autre.
+  Test c2_04 (40) vert avec et sans abonné.
+
 - 06/10, soir : c2_01 → c2_03 POSÉS sur la recette (6c29b77) ; ^test_c2_ 3/4, 44/46/51 verts. Rouge : test_c2_03 « Préparations
   et coupures sont au journal ». Cause : sans réglage d'envoi cashd (banc_cashd pas encore posé), la relance passe
   « non_reglee » et sortait de la boucle avant sa ligne de journal. Reproduit en local, corrigé (journal juste après le dépôt
