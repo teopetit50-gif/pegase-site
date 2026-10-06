@@ -12,15 +12,15 @@ begin
 
   -- Le serveur ne clôt que sur un accusé de dépôt ; une date future est refusée ; la pièce doit être du dossier.
   perform tests.endosser_serveur();
-  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour)', t.id), '42501', null, 'le serveur clôt un délai sur un accusé de dépôt seulement (42501)');
+  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date)', t.id), '42501', null, 'le serveur clôt un délai sur un accusé de dépôt seulement (42501)');
   perform tests.redevenir_admin();
   perform tests.endosser((jeu ->> 'avocat')::uuid, 'b4-rousseau@essai.invalid');
-  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour + 1)', t.id), '22023', null, 'la date du dépôt est passée ou du jour (22023)');
-  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour, gen_random_uuid())', t.id), '22023', null, 'la pièce doit être dans le dossier (22023)');
+  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date + 1)', t.id), '22023', null, 'la date du dépôt est passée ou du jour (22023)');
+  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date, gen_random_uuid())', t.id), '22023', null, 'la pièce doit être dans le dossier (22023)');
   perform tests.redevenir_admin();
   -- L'assistante (pas avocat) ne déclare pas un acte sans pièce.
   perform tests.endosser((jeu ->> 'assistante')::uuid, 'b4-assistante@essai.invalid');
-  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour)', t.id), '42501', null, 'une déclaration sans pièce revient à un avocat (42501)');
+  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date)', t.id), '42501', null, 'une déclaration sans pièce revient à un avocat (42501)');
   perform tests.redevenir_admin();
 
   -- L'accusé de dépôt RPVA, lu comme pièce, puis rattaché par l'acte.
@@ -28,7 +28,7 @@ begin
   perform tests.endosser((jeu ->> 'avocat')::uuid, 'b4-rousseau@essai.invalid');
   r := public.tamila_avis_lu((jeu ->> 'client')::uuid, v_dossier, v_piece, 'rpva_accuse_depot', jsonb_build_object('date_avis', v_jour, 'depose_le', v_jour::text || 'T11:05:00'));
   return next is(r ->> 'statut', 'a_rattacher', 'l''accusé attend son délai');
-  return next lives_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour, %L::uuid)', t.id, v_piece), 'l''avocat déclare l''acte déposé, preuve : l''accusé RPVA');
+  return next lives_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date, %L::uuid)', t.id, v_piece), 'l''avocat déclare l''acte déposé, preuve : l''accusé RPVA');
   perform tests.redevenir_admin();
   select * into t from public.tamila_delais where id = t.id;
   return next is(t.statut, 'clos', 'le délai est clos');
@@ -41,17 +41,17 @@ begin
   return next is((select statut from public.demandes_validation where id = t.demande_id), 'annulee', 'la demande de confirmation, devenue sans objet, est annulée');
   return next ok(exists (select 1 from public.journal_opposable j where j.client_id = (jeu ->> 'client')::uuid and j.action = 'tamila.delai.clos' and j.objet_id = v_dossier::text),
     'la clôture du délai est au journal (tamila.delai.clos)');
-  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour)', t.id), '42501', null, 'clos : rien ne se rejoue par le serveur (42501)');
+  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date)', t.id), '42501', null, 'clos : rien ne se rejoue par le serveur (42501)');
   perform tests.endosser((jeu ->> 'avocat')::uuid, 'b4-rousseau@essai.invalid');
-  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour)', t.id), '55000', null, 'ni par l''avocat : déjà clos (55000)');
-  return next throws_ok(format('select public.tamila_corriger_delai(%L::uuid, v_jour + 10, ''autre'')', t.id), '55000', null, 'ni corrigé (55000)');
+  return next throws_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date)', t.id), '55000', null, 'ni par l''avocat : déjà clos (55000)');
+  return next throws_ok(format('select public.tamila_corriger_delai(%L::uuid, (now() at time zone ''Europe/Paris'')::date + 10, ''autre'')', t.id), '55000', null, 'ni corrigé (55000)');
   perform tests.redevenir_admin();
-  return next throws_ok(format('update public.tamila_delais set acte_depose_le = v_jour - 1 where id = %L', t.id), '55000', null, 'un délai clos ne change plus, même pour postgres (déclencheur)');
+  return next throws_ok(format('update public.tamila_delais set acte_depose_le = (now() at time zone ''Europe/Paris'')::date - 1 where id = %L', t.id), '55000', null, 'un délai clos ne change plus, même pour postgres (déclencheur)');
 
   -- Un acte déposé après l'échéance : clos quand même, mais une alerte critique.
   perform tests.endosser((jeu ->> 'avocat')::uuid, 'b4-rousseau@essai.invalid');
   v_tard := public.tamila_poser_date(v_dossier, v_jour - 10, 'autre', 'saisie');
-  return next lives_ok(format('select public.tamila_declarer_acte(%L::uuid, v_jour)', v_tard), 'un acte déclaré après la date fixée est enregistré');
+  return next lives_ok(format('select public.tamila_declarer_acte(%L::uuid, (now() at time zone ''Europe/Paris'')::date)', v_tard), 'un acte déclaré après la date fixée est enregistré');
   perform tests.redevenir_admin();
   return next is((select statut from public.tamila_delais where id = v_tard), 'clos', 'clos, motif déclaration');
   return next is((select motif_cloture from public.tamila_delais where id = v_tard), 'declaration', 'motif : déclaration de l''avocat');
