@@ -9,7 +9,8 @@
    société (territoire obligatoire), déposer un export (lecture des colonnes,
    lignes rejetées), lancer un passage (les codes à traiter ouvrent leurs
    objets), changer de nature, l'export CSV ; l'encours du groupe (vague 3 :
-   plafond, dépassement, dépôt d'une balance âgée).
+   plafond, dépassement, dépôt d'une balance âgée) ; les contrats du groupe
+   à dénoncer (date limite, reconduction tacite, dénonciation, ajout).
    usage : node omega/recette-b1/recette-varelo.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -221,6 +222,47 @@ for (const largeur of LARGEURS) {
   const fin = await s.evaluer(`(() => { const c = ${carte}; return [...c.querySelectorAll('tbody tr')].find(tr => /Hôtel des Alpes/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' '); })()`);
   ok(fin && /101\s000,00\s€/.test(fin) && /Au-dessus du plafond/.test(fin), `la nouvelle balance du siège : 70 000 + 31 000 = 101 000 €, au-dessus des 90 000 (${fin})`);
   ok(!(await s.evaluer(`/Erreur|undefined|NaN/.test(${carte}.innerText)`)), 'aucun « NaN », « undefined » ni « Erreur » dans la carte');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b1-contrats', densite: 1 });
+  console.log('— les contrats du groupe à dénoncer (vague 3)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Contrats du groupe à dénoncer"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(!!lu, 'la carte « Contrats du groupe à dénoncer » est là');
+  ok(lu && /Location de deux chariots/.test(lu.lignes[0]) && /dans 2 jours/.test(lu.lignes[0]) && /Moins de 30 jours/.test(lu.lignes[0]), `en tête, le contrat à dénoncer dans 2 jours (${lu?.lignes[0]})`);
+  ok(lu && /À dénoncer sous 30 jours 2 contrats/.test(lu.texte), 'deux contrats à dénoncer sous 30 jours');
+  ok(lu && lu.lignes.some(l => /Vérifications électriques/.test(l) && /reconduit \(échéance d.origine/.test(l)), 'le contrat dont l\'échéance est passée sans dénonciation est dit reconduit');
+  ok(lu && lu.lignes.some(l => /Livraisons régionales/.test(l) && /2 contrats chez ce tiers, 2 sociétés/.test(l)), 'Transports Deschamps : deux contrats dans deux sociétés, une négociation de groupe');
+  ok(lu && !lu.lignes.some(l => /Flotte automobile/.test(l)), 'le contrat déjà dénoncé n\'est pas « à surveiller »');
+  ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tbody tr')].find(t => /Livraisons régionales/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Dénoncé/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Dénoncé… » sur Livraisons régionales');
+  await s.dormir(400);
+  ok(!!(await s.evaluer(`/Noter la dénonciation — Livraisons régionales/.test(${dlg()}?.innerText || '')`)), 'le dialogue de la dénonciation s\'ouvre');
+  await s.evaluer(saisir('[role="dialog"] input.rv-champ:not([type="date"])', 'Appel d\'offres transport du groupe'));
+  await s.evaluer(clic('[role="dialog"] button', '/Noter la dénonciation/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(`(() => { const c = ${carte}; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), texte: c.innerText.replace(/\\s+/g, ' '), avis: document.querySelector('.esp [role="status"]')?.innerText || '' }; })()`);
+  ok(!apres.lignes.some(l => /Livraisons régionales/.test(l)) && /À dénoncer sous 30 jours 1 contrat/.test(apres.texte) && /dans le délai/.test(apres.avis), 'noté : le contrat sort de la liste, un seul reste sous 30 jours');
+  await s.evaluer(clic(`section[aria-label="Contrats du groupe à dénoncer"] .esp-filtres button`, '/^Dénoncés$/'));
+  await s.dormir(300);
+  const denonces = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' '))`);
+  ok(denonces.length === 2 && denonces.some(l => /Livraisons régionales/.test(l) && /Dénoncé le/.test(l)), `le filtre « Dénoncés » : ${denonces.length} contrats`);
+  await s.evaluer(clic(`section[aria-label="Contrats du groupe à dénoncer"] .esp-filtres button`, '/^À surveiller$/'));
+  ok(await s.evaluer(clic(`section[aria-label="Contrats du groupe à dénoncer"] .esp-carte-tete button`, '/Ajouter un contrat/')) === true, 'clic « Ajouter un contrat »');
+  await s.dormir(400);
+  const gris = await s.evaluer(`[...${dlg()}.querySelectorAll('button')].find(b => /Enregistrer le contrat/.test(b.textContent))?.disabled`);
+  ok(gris === true, 'vide, « Enregistrer le contrat » reste gris');
+  const dans40 = new Date(Date.now() + 40 * 86400000).toISOString().slice(0, 10);
+  await s.evaluer(`(() => { const d = ${dlg()}; const champs = [...d.querySelectorAll('input.rv-champ')]; const poser = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; poser(champs[0], 'Maintenance des climatisations'); poser(champs[1], 'Froid Caraïbes'); poser(d.querySelector('input[type="date"]'), '${dans40}'); const p = champs.find(x => x.getAttribute('inputmode') === 'numeric' && x.value === '3'); poser(p, '1'); })()`);
+  await s.dormir(300);
+  await s.evaluer(clic('[role="dialog"] button', '/Enregistrer le contrat/'));
+  await s.dormir(600);
+  const ajoute = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].find(tr => /Maintenance des climatisations/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' ')`);
+  ok(!!ajoute && /Froid Caraïbes/.test(ajoute) && /Moins de 30 jours/.test(ajoute), `le contrat ajouté (échéance J+40, préavis d'un mois) est à dénoncer sous 30 jours (${ajoute})`);
+  ok(!(await s.evaluer(`/NaN|undefined|Invalid/.test(${carte}.innerText)`)), 'aucun « NaN », « undefined » ni « Invalid » dans la carte');
   s.fermer();
 }
 

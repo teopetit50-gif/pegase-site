@@ -14,6 +14,8 @@
      · pour les clients et les fournisseurs, l'encours du groupe (vague 3,
        Encours.tsx) : la dernière balance âgée de chaque société rangée
        par objet du groupe, le plafond et son dépassement ;
+     · les contrats du groupe à dénoncer (vague 3, Contrats.tsx), rangés
+       par date limite de dénonciation ;
      · dessous, les lots à valider (paires proposées par le calcul, avec
        la preuve ; « écarter cette paire » ; le lot se décide dans
        /espace/validations) et les sociétés du groupe par pôle (inscrire
@@ -42,6 +44,7 @@ import Lots from "./Lots";
 import Societes from "./Societes";
 import Depot from "./Depot";
 import Encours from "./Encours";
+import Contrats from "./Contrats";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -535,6 +538,23 @@ export default function EcranVarelo() {
           onFait={(m) => setFait(m)}
           inscrireExemple={deposer}
           relireReferentiel={relire}
+        />
+      ) : null}
+
+      {donnees && contexte ? (
+        <Contrats
+          source={source}
+          contexte={contexte}
+          client_id={client_id}
+          societes={donnees.societes}
+          objets={donnees.objets}
+          onOuvrir={(id, n) => {
+            setNature(n);
+            setRecherche("");
+            setChoix(id);
+            document.getElementById("vrl-objet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onFait={(m) => setFait(m)}
         />
       ) : null}
 
