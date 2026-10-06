@@ -434,3 +434,37 @@ reformulé par C5.
   dialogues Objectifs et Déposer une balance générale — en-têtes Sage « N°
   compte », « Solde débit/crédit » reconnus). « Ce matin » passe à quatre blocs.
   Recette 133 contrôles, cinq largeurs ✓ ; axe 0 écart.
+
+### 2. Les reportings dus (b1_09)
+
+- **Promesse** : « Les reportings attendus par chaque marque, rangés par
+  échéance ». Une obligation = une société doit, à un destinataire (marque,
+  banque, réseau ; objet du référentiel s'il y est), tel reporting, à telle
+  périodicité (hebdomadaire, mensuelle, trimestrielle, annuelle — périodes
+  calendaires), tant de jours après la fin de la période, par tel canal, sous
+  la responsabilité de quelqu'un.
+- **Migration** `omega/modules/varelo/migrations/b1_09_reportings.sql` :
+  `grp_reportings` (actif → arrêté, rien ne s'efface), `grp_reportings_echeances`
+  (une par période, créée d'avance jusqu'à 45 jours par
+  `private.grp_generer_echeances` ; à faire → envoyé | dispensé motivé ; un
+  délai corrigé recale les échéances à faire), vue `grp_reportings_dus` (état
+  en_retard / aujourdhui / semaine / a_venir / envoye / envoye_en_retard /
+  dispense) ; portes `grp_enregistrer_reporting` (toute personne de la société
+  sauf lecteur), `grp_marquer_reporting` (le responsable, ou gérant/admin/
+  valideur de la société), `grp_arreter_reporting` (gérant, admin) ; alerte par
+  échéance en retard adressée au responsable (`varelo:reporting.<échéance>`),
+  fermée à l'envoi ; journal `varelo.reporting.*` ; cron **`varelo-reportings`**
+  (`23 4 * * *`). Point du matin : « Reportings dus » au gérant, à la DF et à la
+  direction des opérations, « Mes reportings dus » au responsable nommé
+  (`grp_ce_matin`, `grp_deposer_points` remplacés).
+- **Tests** `omega/tests/varelo/b1_12_reportings.sql` (motif `^test_b1_12_`) :
+  `_echeances` (24), `_droits` (11) ; le nombre d'échéances attendu se calcule
+  dans le test. Maquette : 35/35 ; 206 assertions de b1_07 à b1_12.
+- **Écran** `Reportings.tsx` + `reportings.ts` : carte « Reportings dus » (en
+  retard, 7 jours, obligations ; filtres À faire / Envoyés ou dispensés / Tous ;
+  dialogues Ajouter un reporting et Noter l'envoi ; Ne plus suivre). « Ce
+  matin » passe à cinq blocs. Recette 144 contrôles, cinq largeurs ✓ ; axe 0
+  écart.
+- Limite : le responsable se désigne « moi » à l'écran (la liste des comptes
+  n'est pas lisible par un membre) ; la porte accepte tout compte de
+  l'organisation.
