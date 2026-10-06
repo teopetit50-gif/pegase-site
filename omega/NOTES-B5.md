@@ -223,4 +223,13 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   `lorani_lectures_passage`). `lorani_deja_saisi` ne devrait pas l'écarter (permis `pieces_demandees = []`, lu
   `[PCMI3, PCMI6]`) ; l'écran montre toute proposition du permis. Lignes brutes demandées au coordinateur (pièce,
   `pieces_valeurs`, travail `lorani.piece_lue`, `lorani_permis_dates_lues`).
+- 06/10, 2 h 01 Z (coordinateur, brut) : pièce 059e705e… `lue`, `lorani_demande_pieces` 0,97 ; `pieces_valeurs` :
+  `date_lettre` "2026-10-01", `numero_dossier`, et **une seule ligne `pieces` dont la valeur est le tableau
+  ["PCMI 3","PCMI 6"]** ; `lorani_valeurs_de_piece` la rend en texte, `lorani_propositions` la rejette → `pieces = []`
+  → `lorani_deja_saisi` (le permis porte déjà []) → 0 proposition. C'est aussi la cause du « aucune » de 1 h 40.
+- **b5_06** (`omega/modules/lorani/migrations/b5_06_pieces_en_tableau.sql`) : `private.lorani_codes_pieces(jsonb)`,
+  pure, accepte une valeur par code, une valeur tableau jsonb, une valeur texte tableau JSON (JSON illisible = texte),
+  un texte à virgules ; ordre gardé, sans doublon, filtre de b5_05 ; `lorani_propositions` (corps de b5_05) l'appelle.
+  Essayé sur un Postgres 16 local jetable : sept formes, toutes justes ; la proposition rend [PCMI3, PCMI6].
+  Test : deux assertions de plus (étape 19, b5_06) → 114 attendues.
 
