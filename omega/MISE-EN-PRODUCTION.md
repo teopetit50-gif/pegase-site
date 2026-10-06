@@ -320,12 +320,22 @@ fonctions de la recette sont passées en coquille.
 `reception/brevo` 401, `webhooks-brevo` 401 `{"erreur":"jeton invalide"}`. C'est le
 code du dépôt qui répond.
 
-**Encore à faire sur la recette, avant la répétition** : un passage réel de bout en
-bout, c'est-à-dire un envoi d'essai, puis le webhook Brevo `delivered` reçu avec le
-vrai jeton, puis la ligne `envois_evenements` `remis`. Plus un courriel entrant sur
-la boîte formulaire si Brevo inbound est branché. Les empreintes de la v9 n'ont pas
-été comparées ; c'est désormais sans objet, puisque la recette tourne sur le code
-du dépôt. Seul ce passage réel prouve que rien ne manquait à la v9.
+**Chemin utile, 6/10 vers 14 h Z (coordinateur)** :
+- **`webhooks-brevo` v10 : prouvé.** Envoi d'essai `b109eea1` parti à 13:59:01 Z
+  (référence `<202610061359.72974083619@smtp-relay.mailin.fr>`). Webhook
+  `delivered` reçu, et ligne `envois_evenements` « remis » écrite à 13:59:05.66 Z
+  (clé `brevo:email:<…>:delivered:2026-10-06T13:59:04.000Z`).
+- **`reception` v10 : pas prouvé, c'est un trou.** L'inbound Brevo n'est pas
+  branché sur la recette. Un POST signé sur `/reception/formulaire` demande la valeur
+  de `FORMULAIRE_SECRET`, que le coordinateur n'a pas. Il faut le prouver :
+  - pendant la répétition, par un formulaire signé (outil
+    `omega/functions/reception/outils/` de worker-a2, avec le secret posé par
+    Teo) ;
+  - ou au branchement de l'inbound : un sous-domaine dont le MX pointe vers Brevo,
+    vers `/functions/v1/reception/brevo`.
+
+  Tant que ce n'est pas fait, la réception (courriel entrant, WhatsApp, formulaire
+  du site) ne part pas en production comme « prouvée ».
 
 ---
 
@@ -506,6 +516,8 @@ Restent ouverts :
 - la provenance de chaque ligne « dépôt », lue dans `statements` à l'export (§ 1.5) ;
 - les crons de la production, relevés à P1 par Teo ou la session autorisée (la
   lecture de la production est refusée au coordinateur, à juste titre) ;
-- `reception` et `webhooks-brevo` : figées en coquille (87a1112, 4114a69) ; reste
-  un passage réel de bout en bout sur la recette (§ 2.3) ;
+- `reception` et `webhooks-brevo` : figées en coquille (4114a69, 87a1112).
+  `webhooks-brevo` est prouvée de bout en bout. `reception` est un **trou** :
+  son chemin utile reste à prouver, par un formulaire signé à la répétition ou au
+  branchement de l'inbound Brevo (§ 2.3) ;
 - `tamila_m10b_porte_etroite` : emporter ou non, à juger sur son texte.
