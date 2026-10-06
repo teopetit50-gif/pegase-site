@@ -11,7 +11,9 @@
    tout seul du contrat, la désignation consignée, le classement réservé à
    la direction. L'état des lieux (b2_05) : le départ signé se lit dans le
    dossier, l'état de retour se fait (quatre vues, signature au doigt) et
-   le chiffrage annonce « déjà au départ » pour la rayure notée.
+   le chiffrage annonce « déjà au départ » pour la rayure notée. La
+   facture électronique (b2_06) : la préparation 2027, la forme
+   électronique d'une facture pro sans SIREN, le SIREN contrôlé.
    usage : node omega/recette-b2/recette-tavaro.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -99,6 +101,7 @@ for (const largeur of LARGEURS) {
   const factures = await s.evaluer(`(() => { const f = [...document.querySelectorAll('#esp-dossier .tav-facture')]; return f.map(x => ({ ref: x.querySelector('.esp-mono')?.textContent, litige: [...x.querySelectorAll('.r-btn')].find(b => /Litige/.test(b.textContent))?.disabled, avoir: [...x.querySelectorAll('.r-btn')].find(b => /avoir/.test(b.textContent))?.disabled })); })()`);
   ok(factures.length === 2 && factures[0].ref === 'FA-2026-000118' && factures[1].ref === 'FA-2026-000119', `deux factures : ${factures.map(f => f.ref).join(', ')}`);
   ok(factures[0].litige === false && factures[1].litige === true, 'la facture envoyée peut passer en litige ; celle déjà en litige non');
+  ok(/PDF et photos datées joints/.test(await s.evaluer(`document.querySelector('#esp-dossier .tav-facture')?.innerText ?? ''`)), 'la facture dit que le PDF et les photos datées sont joints au courriel');
   await s.evaluer(`[...document.querySelectorAll('#esp-dossier .tav-facture')[0].querySelectorAll('.r-btn')].find(b => /Litige/.test(b.textContent)).click()`);
   await s.dormir(400);
   const litigeGris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Mettre en litige/.test(b.textContent))?.disabled`);
@@ -186,6 +189,10 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   const designe = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText))?.innerText ?? ''`);
   ok(/Désigné : Marie Durand/.test(designe) && /dans le délai/.test(designe), 'l\'avis passe dans « Traités » : désigné, dans le délai');
+  await s.evaluer(`(() => { const a = [...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText)); [...a.querySelectorAll('.r-btn')].find(b => /Refacturer les frais/.test(b.textContent)).click(); })()`);
+  await s.dormir(700);
+  const refacture = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', avis: [...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText))?.innerText ?? '' }))()`);
+  ok(/proposés à la facturation/.test(refacture.fait) && /Frais de dossier refacturés au locataire/.test(refacture.avis), 'les frais de dossier de l\'avis désigné sont proposés à la facturation, par la validation');
   const efface = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2025 0812 6604 51/.test(x.innerText))?.innerText ?? ''`);
   ok(/identité effacée le/.test(efface) && /DES-2025-074410/.test(efface), 'désigné il y a plus d\'un an : l\'identité est effacée, la référence reste');
   await s.capturer(`${dossier}tavaro-avis-1440.jpg`, { qualite: 55 });
@@ -206,9 +213,18 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const gris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.disabled`);
   ok(gris === true, 'sans les quatre côtés en photo, « Enregistrer et faire signer » reste gris');
-  const photo = new URL('tavaro-390.jpg', import.meta.url).pathname;
+  const photo = new URL('photos/nette.jpg', import.meta.url).pathname;
+  const floue = new URL('photos/floue.jpg', import.meta.url).pathname;
   /* envoyer rend le message CDP entier : le résultat est sous .result */
   const doc = (await s.envoyer('DOM.getDocument', { depth: -1 })).result;
+  /* la photo floue est refusée dès le choix du fichier (b2_07) */
+  {
+    const { nodeId } = (await s.envoyer('DOM.querySelector', { nodeId: doc.root.nodeId, selector: '#edl-avant' })).result;
+    await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [floue] });
+    await s.dormir(900);
+    const refus = await s.evaluer(`document.querySelector('[role="dialog"]').innerText`);
+    ok(/Photo floue refusée/.test(refus) && /floue\.jpg » est floue/.test(refus) && /Photos manquantes : Avant/.test(refus), 'une photo floue est refusée dès son choix : nommée, mesurée, la vue reste manquante');
+  }
   for (const vue of ['avant', 'arriere', 'flanc_gauche', 'flanc_droit']) {
     const { nodeId } = (await s.envoyer('DOM.querySelector', { nodeId: doc.root.nodeId, selector: `#edl-${vue}` })).result;
     await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [photo] });
@@ -239,6 +255,39 @@ for (const largeur of LARGEURS) {
   const deja = await s.evaluer(`document.querySelector('[role="dialog"] .tav-ligne-saisie')?.innerText ?? ''`);
   ok(/Déjà noté sur l.état de départ signé/.test(deja) && /ne sera pas facturé/.test(deja), 'une rayure dans une zone déjà notée au départ : « ne sera pas facturé » avant le clic');
   await s.capturer(`${dossier}tavaro-edl-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-fe', densite: 1 });
+  console.log('— /espace/tavaro : facture électronique (exemple)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const prep = await s.evaluer(`document.querySelector('section[aria-label="Facture électronique : préparation 2027"]')?.innerText ?? ''`);
+  ok(/prêt pour le 1er septembre 2027/.test(prep) && /2 clients professionnels sans SIREN valide/.test(prep) && /à préparer/.test(prep), 'la préparation 2027 se lit : deux clients pros sans SIREN, « à préparer »');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /C-2026-0322/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .tav-facture .r-btn')].find(b => /Forme électronique/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  const forme = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { texte: d.innerText, xml: d.querySelector('.tav-xml pre')?.textContent ?? '' }; })()`);
+  ok(/à compléter avant envoi/.test(forme.texte) && /le SIREN du client professionnel/.test(forme.texte), 'une facture pro sans SIREN : « à compléter », le SIREN du client manque');
+  ok(/urn:cen\.eu:en16931:2017/.test(forme.xml) && /<ram:ID>FA-2026-000071<\/ram:ID>/.test(forme.xml) && /<ram:ID>S1<\/ram:ID>/.test(forme.xml), 'le XML CII se lit : contexte EN 16931, cadre S1, numéro de la facture');
+  const saisir = (v) => s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="numeric"]'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '${v}'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const bouton = () => s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer le SIREN/.test(b.textContent))?.disabled`);
+  await saisir('123 456 789');
+  await s.dormir(200);
+  ok(await bouton() === true && /clé de contrôle de ce SIREN est fausse/.test(await s.evaluer(`document.querySelector('[role="dialog"]').innerText`)), 'un SIREN à la clé fausse : bouton gris, l\'écran le dit');
+  await saisir('552 100 554');
+  await s.dormir(200);
+  ok(await bouton() === false, 'un SIREN valide : le bouton s\'active');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer le SIREN/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  ok(/les prochaines factures le porteront/.test(await s.evaluer(`document.querySelector('[role="dialog"]').innerText`)), 'le SIREN est enregistré ; la facture émise ne change pas');
+  await s.capturer(`${dossier}tavaro-fe-1440.jpg`, { qualite: 55 });
+  await s.envoyer('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await s.dormir(400);
+  const prep2 = await s.evaluer(`document.querySelector('section[aria-label="Facture électronique : préparation 2027"]')?.innerText ?? ''`);
+  ok(/1 client professionnel sans SIREN valide/.test(prep2), 'la préparation se met à jour : un seul client pro sans SIREN');
   s.fermer();
 }
 

@@ -25,14 +25,18 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
-import { AGENCES_EXEMPLE, AVIS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, chargerMonde, chiffrerRetour, classerAvis, completerContrat, constaterRefus, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
-import type { AvisContravention, Avoir, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
+import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
+import { amenderContrat, avoirElectronique, chargerMonde, envoyerDossier, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import type { AvisContravention, Avoir, Contestation, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
 import { appliquerEtats, empreinte } from "./edl";
 import BaremeVue from "./BaremeVue";
 import AvisVue, { type GestesAvis } from "./AvisVue";
+import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
+import { forcesLocales } from "./contestations";
+import { Preparation2027, type Preparation } from "./FactureElectronique";
+import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
 import "./tavaro.css";
 
 const MONDE_EXEMPLE: Monde = {
@@ -44,6 +48,7 @@ const MONDE_EXEMPLE: Monde = {
   reglages: REGLAGES_EXEMPLE,
   entites: AGENCES_EXEMPLE.map((a) => ({ id: a.entite_id, nom: a.nom })),
   avis: AVIS_EXEMPLE,
+  contestations: CONTESTATIONS_EXEMPLE,
 };
 
 const ids = () => crypto.randomUUID();
@@ -73,7 +78,7 @@ export default function EcranTavaro() {
       setMoi(compte);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [] });
+      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [], contestations: [] });
     }
   }, []);
 
@@ -90,7 +95,36 @@ export default function EcranTavaro() {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, []);
-  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux"], source === "reelle", relire);
+  /* la préparation au 1er septembre 2027 : la porte en base réelle (direction et valideurs), le même calcul pour l'exemple */
+  const [prepReelle, setPrepReelle] = useState<Preparation | null>(null);
+  useEffect(() => {
+    if (source !== "reelle" || !reel) return;
+    let vivant = true;
+    preparation2027().then((p) => { if (vivant) setPrepReelle(p); }).catch(() => { if (vivant) setPrepReelle(null); });
+    return () => { vivant = false; };
+  }, [source, reel]);
+  const prepExemple = useMemo<Preparation | null>(() => {
+    const factures = local.dossiers.flatMap((d) => d.factures.map((f) => ({ f, d })));
+    const e = factures[0]?.f.emetteur ?? {};
+    const parFlux = new Map<string, { flux: string; n: number; prets: number }>();
+    for (const { f, d } of factures) {
+      const c = controler(docFacture(f, d.lignesFactures));
+      const g = parFlux.get(c.flux) ?? { flux: c.flux, n: 0, prets: 0 };
+      g.n += 1;
+      if (c.pret) g.prets += 1;
+      parFlux.set(c.flux, g);
+    }
+    const sansSiren = new Set(local.dossiers.filter((d) => d.locataire?.type === "professionnel" && !d.locataire.anonymise_le && !sirenValide(d.locataire.siren)).map((d) => d.locataire!.id)).size;
+    return {
+      echeance_emission: "2027-09-01",
+      emetteur: { siren: sirenValide(e.siren), numero_tva: !!e.numero_tva, adresse: /[0-9]{5}\s+\S/.test(e.adresse ?? "") },
+      clients_pro_sans_siren: sansSiren,
+      pieces_90_jours: [...parFlux.values()],
+    };
+  }, [local]);
+  const preparation = source === "exemple" ? prepExemple : prepReelle;
+
+  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux", "loc_contestations"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
     if (!id) return "Système";
@@ -243,6 +277,25 @@ export default function EcranTavaro() {
           remplacerLocal(journaliser({ ...d, factures: d.factures.map((f) => (f.id === facture.id ? { ...f, relances: n, relance_le: maintenant() } : f)) }, "tavaro.facture_relancee", "loc_factures", facture.id, { reference: facture.reference, relance: n, origine: "agence", reste_du: resteDu(facture, d.avoirs) }));
         },
       ),
+      electronique: async (facture) => (source === "reelle" ? factureElectronique(facture.id) : formeLocale(docFacture(facture, d0().lignesFactures))),
+      electroniqueAvoir: async (avoir) => {
+        if (source === "reelle") return avoirElectronique(avoir.id);
+        const f = d0().factures.find((x) => x.id === avoir.facture_id);
+        if (!f) throw new Error("Facture d'origine introuvable.");
+        return formeLocale(docAvoir(avoir, f));
+      },
+      completerClient: async (valeurs) => {
+        const d = d0();
+        if (!d.locataire) throw new Error("Ce contrat n'a pas de client connu.");
+        if (source === "reelle") {
+          await completerLocataire(d.locataire.id, valeurs);
+          await relire();
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 350));
+        if (valeurs.siren && !sirenValide(valeurs.siren)) throw new Error("Ce SIREN n'est pas valide (neuf chiffres, clé de contrôle).");
+        remplacerLocal(journaliser({ ...d, locataire: { ...d.locataire, siren: valeurs.siren ?? d.locataire.siren ?? null, type: "professionnel" } }, "tavaro.locataire_complete", "loc_locataires", d.locataire.id, { champs: Object.keys(valeurs) }));
+      },
     };
   }, [source, dossier, moi, moiId, local, relire, remplacerLocal]);
 
@@ -278,16 +331,20 @@ export default function EcranTavaro() {
     return {
       etablir: async (moment, valeurs, fichiers) => {
         const d = d0();
+        /* la netteté mesurée par l'écran suit chaque photo, dans l'ordre des fichiers de sa vue (b2_07) */
+        const nettetes = new Map<string, (number | undefined)[]>();
+        for (const ph of (valeurs.photos as { vue: string; nettete?: number }[]) ?? []) nettetes.set(ph.vue, [...(nettetes.get(ph.vue) ?? []), ph.nettete]);
+        const nettetePreuve = (i: number, j: number) => ((valeurs.dommages as { preuves?: { nettete?: number }[] }[]) ?? [])[i]?.preuves?.[j]?.nettete;
         if (source === "reelle") {
           const client = moi?.client_id;
           if (!client) throw new Error("Compte introuvable : reconnectez-vous.");
           const photos: Record<string, unknown>[] = [];
           for (const [cle, fs] of fichiers) {
             if (!cle.startsWith("vue:")) continue;
-            for (const f of fs) photos.push({ vue: cle.slice(4), chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString() });
+            for (const [j, f] of fs.entries()) photos.push({ vue: cle.slice(4), chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString(), nettete: nettetes.get(cle.slice(4))?.[j] });
           }
           const dommages = await Promise.all(((valeurs.dommages as Record<string, unknown>[]) ?? []).map(async (x, i) => ({
-            ...x, preuves: await Promise.all((fichiers.get(`dommage:${i}`) ?? []).map(async (f) => ({ chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString() }))),
+            ...x, preuves: await Promise.all((fichiers.get(`dommage:${i}`) ?? []).map(async (f, j) => ({ chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString(), nettete: nettetePreuve(i, j) }))),
           })));
           const id = await etablirEtat(d.contrat.id, moment, { ...valeurs, photos, dommages });
           await relire();
@@ -295,8 +352,8 @@ export default function EcranTavaro() {
         }
         await attendre();
         const exist = d.etats.find((e) => e.moment === moment);
-        const photos = [...fichiers].filter(([k]) => k.startsWith("vue:")).flatMap(([k, fs]) => fs.map((f) => ({ vue: k.slice(4), chemin: f.name, prise_le: maintenant() })));
-        const dommages = ((valeurs.dommages as Record<string, unknown>[]) ?? []).map((x, i) => ({ ...x, preuves: (fichiers.get(`dommage:${i}`) ?? []).map((f) => ({ chemin: f.name, prise_le: maintenant() })) })) as EtatDesLieux["dommages"];
+        const photos = [...fichiers].filter(([k]) => k.startsWith("vue:")).flatMap(([k, fs]) => fs.map((f, j) => ({ vue: k.slice(4), chemin: f.name, prise_le: maintenant(), nettete: nettetes.get(k.slice(4))?.[j] })));
+        const dommages = ((valeurs.dommages as Record<string, unknown>[]) ?? []).map((x, i) => ({ ...x, preuves: (fichiers.get(`dommage:${i}`) ?? []).map((f, j) => ({ chemin: f.name, prise_le: maintenant(), nettete: nettetePreuve(i, j) })) })) as EtatDesLieux["dommages"];
         const caution = typeof valeurs.caution_eur === "number" ? valeurs.caution_eur : null;
         const mode = (valeurs.caution_mode as EtatDesLieux["caution_mode"]) ?? null;
         const e: EtatDesLieux = {
@@ -410,6 +467,86 @@ export default function EcranTavaro() {
         if (role !== "gerant" && role !== "admin") throw new Error("Classer un avis sans désigner engage l'entreprise : la direction seule le fait.");
         changerAvis(avis.id, (a) => ({ ...a, statut: "classe", motif_classement: motif, classe_le: maintenant(), classe_par: moiId }));
       },
+      refacturer: async (avis) => {
+        if (source === "reelle") {
+          await refacturerAvis(avis.id);
+          await relire();
+          return;
+        }
+        await attendre();
+        changerAvis(avis.id, (a) => ({ ...a, refacture_proposition_id: ids() }));
+      },
+    };
+  }, [source, local, moiId, role, relire]);
+
+  /* ——— les contestations bancaires : la porte en base réelle ; en exemple, l'ouvrier est simulé (le dossier est prêt une seconde plus tard) ——— */
+  const gestesContestations: GestesContestations = useMemo(() => {
+    const changer = (id: string, f: (k: Contestation) => Contestation) => setLocal((prev) => ({ ...prev, contestations: prev.contestations.map((k) => (k.id === id ? f(k) : k)) }));
+    const attendre = () => new Promise((r) => setTimeout(r, 350));
+    const composer = (id: string) => window.setTimeout(() => changer(id, (k) => ({
+      ...k, statut: k.statut === "ouverte" ? "dossier_pret" : k.statut, dossier_le: maintenant(), dossier_pages: 6, dossier_piece_id: k.dossier_piece_id ?? ids(),
+      dossier_sha256: Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join(""),
+      dossier_chemin: `${EXEMPLE_CLIENT_ID}/loc_contestations/${k.id}/dossier-${k.reference_banque}.pdf`,
+    })), 1200);
+    return {
+      ouvrir: async (facture, valeurs) => {
+        if (source === "reelle") {
+          const r = await ouvrirContestation(facture.id, valeurs);
+          await relire();
+          return r;
+        }
+        await attendre();
+        const ref = String(valeurs.reference_banque);
+        const deja = local.contestations.find((k) => k.facture_id === facture.id && k.reference_banque === ref);
+        if (deja) return { contestation: deja.id, statut: deja.statut, deja: true };
+        const d = local.dossiers.find((x) => x.contrat.id === facture.contrat_id)!;
+        const k: Contestation = {
+          id: ids(), client_id: EXEMPLE_CLIENT_ID, entite_id: d.contrat.entite_id, facture_id: facture.id, contrat_id: facture.contrat_id, reference_banque: ref,
+          motif_banque: String(valeurs.motif_banque), montant_eur: typeof valeurs.montant_eur === "number" ? valeurs.montant_eur : facture.total_ttc,
+          recue_le: String(valeurs.recue_le), repondre_avant: String(valeurs.repondre_avant), adresse_banque: (valeurs.adresse_banque as string) ?? local.reglages?.contestation_adresse ?? null,
+          statut: "ouverte", forces: forcesLocales(d, facture), dossier_piece_id: null, dossier_sha256: null, dossier_pages: null, dossier_le: null, dossier_chemin: null,
+          envoi_id: null, envoyee_le: null, envoyee_par: null, issue_le: null, issue_par: null, issue_note: null, notes: (valeurs.notes as string) ?? null, cree_par: moiId, cree_le: maintenant(),
+        };
+        setLocal((prev) => ({ ...prev, contestations: [...prev.contestations, k] }));
+        composer(k.id);
+        return { contestation: k.id, statut: k.statut, deja: false };
+      },
+      produire: async (k) => {
+        if (source === "reelle") {
+          await produireDossier(k.id);
+          await relire();
+          return;
+        }
+        await attendre();
+        const d = local.dossiers.find((x) => x.contrat.id === k.contrat_id);
+        const f = d?.factures.find((x) => x.id === k.facture_id);
+        if (d && f) changer(k.id, (x) => ({ ...x, forces: forcesLocales(d, f) }));
+        composer(k.id);
+      },
+      envoyer: async (k, adresse) => {
+        if (source === "reelle") {
+          const r = await envoyerDossier(k.id, adresse);
+          await relire();
+          return r;
+        }
+        await attendre();
+        if (k.statut === "envoyee") return { deja: true };
+        const d = local.dossiers.find((x) => x.contrat.id === k.contrat_id);
+        const f = d?.factures.find((x) => x.id === k.facture_id);
+        changer(k.id, (x) => ({ ...x, statut: "envoyee", envoi_id: ids(), envoyee_le: maintenant(), envoyee_par: moiId, adresse_banque: adresse }));
+        return { deja: false, pieces_jointes: 1 + (f?.pdf_piece_id ? 1 : 0) + (d?.contrat.piece_id ? 1 : 0) };
+      },
+      issue: async (k, issue, note) => {
+        if (source === "reelle") {
+          await issueContestation(k.id, issue, note);
+          await relire();
+          return;
+        }
+        await attendre();
+        if (role !== "gerant" && role !== "admin" && role !== "valideur") throw new Error("L'issue d'une contestation se consigne par la direction ou un valideur.");
+        changer(k.id, (x) => ({ ...x, statut: issue, issue_le: maintenant(), issue_par: moiId, issue_note: note }));
+      },
+      lien: async (k) => (source === "reelle" && k.dossier_chemin ? lienDossier(k.dossier_chemin) : null),
     };
   }, [source, local, moiId, role, relire]);
 
@@ -522,6 +659,16 @@ export default function EcranTavaro() {
       <div style={{ marginTop: 16 }}>
         <AvisVue avis={monde?.avis ?? []} dossiers={dossiers} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesAvis} />
       </div>
+
+      <div style={{ marginTop: 16 }}>
+        <ContestationsVue contestations={monde?.contestations ?? []} dossiers={dossiers} reglages={monde?.reglages ?? null} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesContestations} />
+      </div>
+
+      {role === "gerant" || role === "admin" || role === "valideur" ? (
+        <div style={{ marginTop: 16 }}>
+          <Preparation2027 preparation={preparation} />
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 16 }}>
         <BaremeVue baremes={monde?.baremes ?? []} lignes={monde?.lignesBareme ?? []} categories={monde?.categories ?? []} role={role} onPublier={publier} onRetirer={retirer} />
