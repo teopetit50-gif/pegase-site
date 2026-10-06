@@ -1,4 +1,4 @@
-// L'export complet d'un client (lot socle 19aj) : les données en base (exporter_client) et tous ses fichiers du
+// L'export complet d'un client (lot socle 19aj) : les données en base (exporter_donnees_client) et tous ses fichiers du
 // bucket omega-clients, dans un zip chiffré AES-256 par un mot de passe tiré au hasard, rendu une seule fois.
 // Le zip est déposé dans le bucket privé omega-exports ; le gérant reçoit un lien signé valable 24 heures.
 // Ce module ne parle à Supabase qu'à travers `Acces` : index.ts branche le vrai, les tests un faux.
@@ -75,6 +75,7 @@ export async function purgerExpires(acces: Acces): Promise<number> {
 export async function produireExport(
   acces: Acces,
   client: string,
+  demandeur: string,
   options: { maxOctets?: number; maintenant?: () => Date } = {},
 ): Promise<Resultat> {
   const maxOctets = options.maxOctets ?? MAX_OCTETS_DEFAUT;
@@ -83,8 +84,9 @@ export async function produireExport(
   // 1. La demande, au nom du gérant : refusée en base s'il n'est pas gérant du client (42501) ou si un export est en cours.
   const exportId = (await acces.rpcGerant("demander_export_complet", { p_client: client })) as string;
   try {
-    // 2. Les données en base, au nom du gérant (exporter_client vérifie lui aussi ses droits).
-    const donnees = await acces.rpcGerant("exporter_client", { p_client: client });
+    // 2. Les données en base : la porte du service exporter_donnees_client (exporter_client n'est pas exposée), qui
+    //    vérifie elle aussi que le demandeur est gérant du client. Le demandeur est le sujet du jeton vérifié.
+    const donnees = await acces.rpcService("exporter_donnees_client", { p_client: client, p_demandeur: demandeur });
 
     // 3. Les fichiers.
     const fichiers = (await acces.rpcService("export_complet_fichiers", { p_export: exportId })) as {

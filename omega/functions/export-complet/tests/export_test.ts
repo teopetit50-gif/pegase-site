@@ -4,6 +4,7 @@ import { BlobReader, TextWriter, Uint8ArrayReader, Uint8ArrayWriter, ZipReader }
 import { type Acces, ErreurExport, motDePasse, produireExport, purgerExpires } from "../export.ts";
 
 const CLIENT = "11111111-1111-4111-8111-111111111111";
+const GERANT = "33333333-3333-4333-8333-333333333333";
 
 function faux(options: { refus?: string; fichiers?: { chemin: string; octets: number }[]; absents?: string[] } = {}) {
   const appels: { nom: string; args: Record<string, unknown> }[] = [];
@@ -20,12 +21,12 @@ function faux(options: { refus?: string; fichiers?: { chemin: string; octets: nu
         if (options.refus) return Promise.reject(new ErreurExport(403, options.refus));
         return Promise.resolve("22222222-2222-4222-8222-222222222222");
       }
-      if (nom === "exporter_client") return Promise.resolve({ client: CLIENT, factures: [{ n: 1 }] });
       return Promise.reject(new Error("rpc inattendue " + nom));
     },
     rpcService(nom, args) {
       appels.push({ nom, args });
       if (nom === "export_complet_fichiers") return Promise.resolve(fichiers);
+      if (nom === "exporter_donnees_client") return Promise.resolve({ client: CLIENT, factures: [{ n: 1 }] });
       if (nom === "exports_complets_expires") return Promise.resolve([{ id: "e1", chemin: `${CLIENT}/e1.zip` }]);
       return Promise.resolve(null);
     },
@@ -60,7 +61,7 @@ async function ouvrir(zip: Uint8Array, mdp: string): Promise<Map<string, string>
 
 Deno.test("le zip contient les données, les fichiers, le manifeste, et s'ouvre avec le mot de passe rendu", async () => {
   const { acces, appels, depots } = faux();
-  const r = await produireExport(acces, CLIENT, { maintenant: () => new Date("2026-10-06T16:00:00Z") });
+  const r = await produireExport(acces, CLIENT, GERANT, { maintenant: () => new Date("2026-10-06T16:00:00Z") });
   assertEquals(r.nb_fichiers, 2);
   assertEquals(r.fichiers_manquants, 0);
   assertEquals(r.expire_le, "2026-10-07T16:00:00.000Z");
@@ -72,6 +73,12 @@ Deno.test("le zip contient les données, les fichiers, le manifeste, et s'ouvre 
   assertEquals(JSON.parse(c.get("donnees/export.json")!).factures[0].n, 1);
   assert(c.get("MANIFESTE.csv")!.includes(`${CLIENT}/tamila/acte.bin;3;`));
   assert(c.get("LISEZMOI.txt")!.includes("Aucun fichier manquant"));
+  const exp = appels.find((a) => a.nom === "exporter_donnees_client")!;
+  assertEquals(
+    exp.args,
+    { p_client: CLIENT, p_demandeur: GERANT },
+    "les données viennent de la porte du service, au nom du gérant",
+  );
   const fini = appels.find((a) => a.nom === "export_complet_fini")!;
   assertEquals(fini.args.p_sha256, r.sha256);
   assert(!JSON.stringify(appels).includes(r.mot_de_passe), "le mot de passe n'est transmis à aucune porte");
@@ -79,7 +86,7 @@ Deno.test("le zip contient les données, les fichiers, le manifeste, et s'ouvre 
 
 Deno.test("sans le bon mot de passe, le contenu ne se lit pas", async () => {
   const { acces, depots } = faux();
-  const r = await produireExport(acces, CLIENT);
+  const r = await produireExport(acces, CLIENT, GERANT);
   const zip = depots.get(`omega-exports/${CLIENT}/${r.export_id}.zip`)!;
   await assertRejects(() => ouvrir(zip, "mauvais-mot-de-passe"));
   // Et rien n'est lisible en clair dans le zip.
@@ -93,7 +100,7 @@ Deno.test("sans le bon mot de passe, le contenu ne se lit pas", async () => {
 
 Deno.test("un fichier absent est signalé, pas fatal", async () => {
   const { acces, depots } = faux({ absents: [`${CLIENT}/tamila/acte.bin`] });
-  const r = await produireExport(acces, CLIENT);
+  const r = await produireExport(acces, CLIENT, GERANT);
   assertEquals(r.nb_fichiers, 1);
   assertEquals(r.fichiers_manquants, 1);
   const c = await ouvrir(depots.get(`omega-exports/${CLIENT}/${r.export_id}.zip`)!, r.mot_de_passe);
@@ -102,7 +109,7 @@ Deno.test("un fichier absent est signalé, pas fatal", async () => {
 
 Deno.test("refus en base : rien n'est produit", async () => {
   const { acces, depots, appels } = faux({ refus: "export complet réservé au gérant du client" });
-  const e = await assertRejects(() => produireExport(acces, CLIENT), ErreurExport);
+  const e = await assertRejects(() => produireExport(acces, CLIENT, GERANT), ErreurExport);
   assertEquals(e.statut, 403);
   assertEquals(depots.size, 0);
   assert(!appels.some((a) => a.nom === "export_complet_fichiers"));
@@ -110,7 +117,7 @@ Deno.test("refus en base : rien n'est produit", async () => {
 
 Deno.test("au-delà du plafond : échec inscrit, rien déposé", async () => {
   const { acces, depots, appels } = faux({ fichiers: [{ chemin: `${CLIENT}/gros.bin`, octets: 2_000_000 }] });
-  const e = await assertRejects(() => produireExport(acces, CLIENT, { maxOctets: 1_000_000 }), ErreurExport);
+  const e = await assertRejects(() => produireExport(acces, CLIENT, GERANT, { maxOctets: 1_000_000 }), ErreurExport);
   assertEquals(e.statut, 413);
   assertEquals(depots.size, 0);
   assert(appels.some((a) => a.nom === "export_complet_echec"));

@@ -2,15 +2,36 @@
 // Rend { export_id, lien, mot_de_passe, expire_le, nb_fichiers, fichiers_manquants, octets, sha256 }.
 // Le mot de passe n'est rendu qu'ici, une fois, et n'est gardé nulle part. verify_jwt = true.
 // Variables : SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (fournies par Supabase) ;
-// EXPORT_ORIGINES (origines autorisées, séparées par des virgules ; défaut https://omegaai.fr) ;
+// EXPORT_ORIGINES (origines autorisées, séparées par des virgules ; défaut https://omegaai.fr), complétées par le
+// réglage private.reglages « export_origines_recette » (lu par la porte lire_parametre, gardé 5 minutes) : posé sur la
+// recette seulement (http://localhost:3010 pour A3), absent en production ;
 // EXPORT_MAX_OCTETS (plafond des fichiers, défaut 150 Mo).
 
 import { type Acces, ErreurExport, MAX_OCTETS_DEFAUT, produireExport, purgerExpires } from "./export.ts";
+import { listeOrigines, sujetDuJeton } from "./origines.ts";
 
 const URL_BASE = Deno.env.get("SUPABASE_URL") ?? "";
 const CLE_ANON = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const CLE_SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const ORIGINES = (Deno.env.get("EXPORT_ORIGINES") ?? "https://omegaai.fr").split(",").map((o) => o.trim());
+const ORIGINES_ENV = Deno.env.get("EXPORT_ORIGINES") ?? "https://omegaai.fr";
+const REGLAGE_ORIGINES = "export_origines_recette";
+let originesEnCache: { liste: string[]; jusqua: number } | null = null;
+
+/** Les origines autorisées : la variable, plus le réglage de la recette. Une panne du réglage laisse la variable seule. */
+async function originesAutorisees(): Promise<string[]> {
+  if (originesEnCache && originesEnCache.jusqua > Date.now()) return originesEnCache.liste;
+  let reglage: string | null = null;
+  try {
+    const rep = await fetch(`${URL_BASE}/rest/v1/rpc/lire_parametre`, {
+      method: "POST",
+      headers: { apikey: CLE_SERVICE, Authorization: `Bearer ${CLE_SERVICE}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_cle: REGLAGE_ORIGINES }),
+    });
+    reglage = rep.ok ? ((await rep.json()) as string | null) : (await rep.body?.cancel(), null);
+  } catch { /* réglage illisible : la variable seule */ }
+  originesEnCache = { liste: listeOrigines(ORIGINES_ENV, reglage), jusqua: Date.now() + 5 * 60 * 1000 };
+  return originesEnCache.liste;
+}
 const MAX_OCTETS = Number(Deno.env.get("EXPORT_MAX_OCTETS") ?? MAX_OCTETS_DEFAUT);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -85,13 +106,13 @@ function accesSupabase(jetonGerant: string): Acces {
   };
 }
 
-function entetes(origine: string | null): Record<string, string> {
+function entetes(origine: string | null, origines: string[]): Record<string, string> {
   const h: Record<string, string> = {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
     "Vary": "Origin",
   };
-  if (origine && ORIGINES.includes(origine)) {
+  if (origine && origines.includes(origine)) {
     h["Access-Control-Allow-Origin"] = origine;
     h["Access-Control-Allow-Headers"] = "authorization, apikey, content-type";
     h["Access-Control-Allow-Methods"] = "POST, OPTIONS";
@@ -100,13 +121,14 @@ function entetes(origine: string | null): Record<string, string> {
 }
 
 Deno.serve(async (req) => {
-  const h = entetes(req.headers.get("Origin"));
+  const h = entetes(req.headers.get("Origin"), await originesAutorisees());
   const reponse = (statut: number, corps: unknown) =>
     new Response(JSON.stringify(corps), { status: statut, headers: h });
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
   if (req.method !== "POST") return reponse(405, { erreur: "POST seulement" });
   const jeton = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
-  if (!jeton || jeton === CLE_ANON) return reponse(401, { erreur: "connexion requise" });
+  const demandeur = jeton && jeton !== CLE_ANON ? sujetDuJeton(jeton) : null;
+  if (!demandeur) return reponse(401, { erreur: "connexion requise" });
   let client = "";
   try {
     client = String((await req.json()).client_id ?? "");
@@ -116,7 +138,7 @@ Deno.serve(async (req) => {
   const acces = accesSupabase(jeton);
   await purgerExpires(acces).catch((e) => console.error(JSON.stringify({ niveau: "avertissement", purge: String(e) })));
   try {
-    const r = await produireExport(acces, client, { maxOctets: MAX_OCTETS });
+    const r = await produireExport(acces, client, demandeur, { maxOctets: MAX_OCTETS });
     // Le journal ne porte ni le lien ni le mot de passe.
     console.log(
       JSON.stringify({
