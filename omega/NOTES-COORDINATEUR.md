@@ -679,3 +679,12 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   verifier-en-ligne.mjs. Vérifié dans le code de main : plus aucun role=listbox ni cadre
   .esp-tableau-cadre sans tabIndex dans components/espace. (Les 15 constats d'A3 sur les B
   venaient de sa branche sans main.)
+- **Point 08 h 15 (06 h 15 Z)** : main 99c37b6 **déployé** (Vercel success ~06:08 Z) — tout le
+  travail de la nuit est en ligne. **Contrôle sur omegaai.fr (A3, verifier-en-ligne) : 181 ✓,
+  0 échec, 0 constat** sur onze écrans (5 d'A3 + filed?objet, 6 des B) : 200, titres, aucun
+  débordement aux cinq largeurs, axe sans écart grave à 390/1440, zones défilantes au
+  clavier, phrases de chaque lot présentes. B1 (varelo) et B3 (tiroma) l'ont confirmé par
+  lecture des chunks servis. Sortie brute : omega/recette-a3/en-ligne-2026-10-06.txt.
+  Rien de neuf à poser sur la recette. En attente de Teo : accord permanent des J-2 Daliro,
+  Realtime de filed_fournisseurs, export Logos_w, SIRENE_API_KEY, HDS, coffre Tamila,
+  juriste (seconde demande de pièces dans le mois), Vercel Pro.
