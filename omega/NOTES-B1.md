@@ -1,8 +1,8 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
-Branche `worker-b1`. Dernière mise à jour : 06/10/2026, 02 h 30 UTC — **les
-14 tests sont verts sur la recette**, les trois migrations sont posées,
-/espace/varelo est sur main (b287d04) et attend le déploiement Vercel. Le
+Branche `worker-b1`. Dernière mise à jour : 06/10/2026, 03 h UTC — **terminé** :
+les 14 tests sont verts sur la recette, les trois migrations sont posées,
+/espace/varelo est sur main (b287d04) et **en ligne sur omegaai.fr**. Le
 coordinateur lit ce fichier.
 
 ## Les deux jauges
@@ -10,7 +10,7 @@ coordinateur lit ce fichier.
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
 | **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **100 %** | **14 tests sur 14 verts** le 06/10 à 02 h 24 UTC (253 assertions) : les 17 étapes du scénario jouées par les portes publiques sur un groupe vierge, avec RLS, rôles, périmètre partiel, séparation saisie/approbation, deux approbations, journal, isolement. Trois migrations posées (varelo_b1_01, _02, _03). Pour la production : les trois migrations à reposer par le coordinateur |
-| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **90 %** | écran écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓, relecture en base réelle ✓ (gerant / referent / daf du banc), fusionné sur main (b287d04) avec l'onglet. **Reste** : la page servie par omegaai.fr à vérifier dès la remise à zéro du quota Vercel (06/10, 02 h Paris), et, en option, rejouer sur le banc un dépôt d'export et un passage depuis l'écran maintenant que b1_02 ouvre ces portes |
+| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **100 %** | écran écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓, relecture en base réelle ✓ (gerant / referent / daf du banc), fusionné sur main (b287d04) avec l'onglet, **en ligne et vérifié le 06/10 à 02 h 55 UTC** : https://omegaai.fr/espace/varelo répond 200 et sert « Référentiel du groupe », le ruban « Données d'exemple », « Lots à valider », « Sociétés et pôles » et l'onglet de la barre (relevé par curl sur le HTML servi). Rappel : la production n'a pas de client Varelo ; la base réelle se relit sur la recette. Ce qui reste est à Teo (§ ci-dessous) |
 
 ### Ce que Teo doit fournir ou décider lui-même
 
@@ -176,6 +176,8 @@ conteneur le navigateur d'essai doit ignorer le certificat du mandataire et
   d'A3 et le mien ne se relisent pas d'eux-mêmes en production non plus, ce
   n'est pas le conteneur. Une entrée `wss://` à ajouter à `connect-src`.
 
+**En ligne** : omegaai.fr/espace/varelo vérifié le 06/10 à 02 h 55 UTC (200,
+phrases de l'écran et onglet présents dans le HTML servi).
 **Fusion faite** : main b287d04 (06/10, 02 h 17 UTC) porte /espace/varelo,
 l'onglet « Référentiel du groupe » (court VARELO), `MODULES.varelo` et la CSP
 `wss://` ; la barre de l'espace a été refaite à huit onglets par le
