@@ -380,4 +380,19 @@ A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confir
   (`b5_09_titre_du_permis.sql`) : `private.lorani_titre_permis` prend l'intitulé du permis, sinon le nom du projet ;
   les sept appelants en profitent. Test étape 10 aligné (« PC « Résidence Lemoine — six logements » », alerte et
   sujet du courriel de rappel) → toujours 120 assertions.
+- Coordinateur, 04 h 58 Z : fbf4c98 posé (b5_08, b5_09), `^test_b5_` **120/120**, worker-b5 fusionné dans main.
+  État du lot : b5_01 à b5_09 posées ; six types de courriers prouvés en réel ; rien d'ouvert côté B5, sauf
+  l'avis d'un juriste sur la seconde demande de pièces dans le mois (remonté à Teo).
+
+## 11. Accessibilité (06/10, demande du coordinateur après la mesure axe-core d'A3)
+
+- `main` fusionné dans worker-b5 (5b3a7a9) pour avoir le style commun `.esp-item[aria-current="true"]`.
+- `EcranLorani.tsx` : les deux listes (permis par projet, dossiers) ne sont plus `role="listbox"` / `role="option"` +
+  `aria-selected` mais une liste de boutons ; l'élément ouvert porte `aria-current="true"` (modèle FileValidations).
+- axe a relevé deux autres écarts graves, corrigés : la pastille d'étape du calendrier (`aria-label` sur un span
+  sans rôle → `role="img"`) ; le tableau des intervenants qui défile à 390 (`tabIndex={0}`, `role="region"`, nommé).
+- `omega/recette-b5/accessibilite-lorani.mjs` (copie du script d'A3, réduite à /espace/lorani) : 390 et 1440,
+  **0 écart** sur la page et dans le dialogue « Régime » ; clavier : focus dans le dialogue, piégé, Échap ferme et
+  rend le focus à « Régime ». tsc, eslint, build, recette aux cinq largeurs : verts. Pas touché : dialog.tsx,
+  barre d'onglets.
 
