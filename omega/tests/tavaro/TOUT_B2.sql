@@ -539,7 +539,7 @@ begin
   return next ok(tests.tavaro_journal(v_client, 'tavaro.demande_deposee') >= 1, 'Le journal opposable porte tavaro.demande_deposee');
 
   -- Trou H1 : celui qui a chiffré (ici le référent, valideur) ne doit pas pouvoir approuver sa propre facture.
-  return next is(d.payload ->> 'saisi_par', jeu ->> 'referent', 'La demande porte qui a saisi (payload.saisi_par = calculee_par) — migration b2_01');
+  return next ok(jsonb_typeof(d.payload -> 'saisi_par') = 'array' and d.payload -> 'saisi_par' ? (jeu ->> 'referent'), format('La demande porte qui a saisi, en tableau (payload.saisi_par = [calculee_par]) — migration b2_01 : %s', d.payload -> 'saisi_par'));
   return next throws_ok(format('select tests.tavaro_decider(%L::jsonb, %L::uuid, %L)', jeu::text, d.id, 'referent'), '42501', null,
     'Celui qui a chiffré le retour n''approuve pas sa facture (séparation saisie / approbation, 42501)');
   return next is((select x.statut from public.demandes_validation x where x.id = d.id), 'en_attente', 'La demande reste en attente');
@@ -747,7 +747,7 @@ begin
   select * into d from public.demandes_validation where id = a.demande_id;
   return next is(d.type_action, 'avoir.emettre', 'La demande est avoir.emettre');
   return next ok(not (d.roles_autorises @> array['valideur']::text[]), format('La direction seule décide un avoir (%s)', d.roles_autorises));
-  return next is(d.payload ->> 'saisi_par', jeu ->> 'collab', 'La demande d''avoir porte qui l''a saisi (b2_01)');
+  return next ok(jsonb_typeof(d.payload -> 'saisi_par') = 'array' and d.payload -> 'saisi_par' ? (jeu ->> 'collab'), format('La demande d''avoir porte qui l''a saisi, en tableau (b2_01) : %s', d.payload -> 'saisi_par'));
   return next ok(tests.tavaro_journal(v_client, 'tavaro.avoir_demande') >= 1, 'Le journal opposable porte tavaro.avoir_demande');
   return next ok(private.loc_section_facturation(v_client, null, current_date) is not null, 'La section de facturation se calcule');
 
