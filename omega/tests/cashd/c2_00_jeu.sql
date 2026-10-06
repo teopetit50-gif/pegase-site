@@ -70,6 +70,11 @@ begin
   return jsonb_build_object('client', v_client, 'gerant', v_gerant);
 end $$;
 
+-- Un texte de CASHD avec ses espaces insécables (milliers, devant « € ») rendues ordinaires, pour comparer.
+create or replace function tests.c2_plat(p text) returns text language sql immutable as $$
+  select translate(p, chr(8239) || chr(160), '  ')
+$$;
+
 -- La dernière ligne du journal d'une action (et d'un objet).
 create or replace function tests.c2_journal(p_client uuid, p_action text, p_objet_id text default null) returns jsonb
 language sql stable as $$

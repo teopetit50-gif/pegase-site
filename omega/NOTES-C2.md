@@ -9,7 +9,7 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (pgTAP sur la recette) | palier 1 écrit, **69/69 vert en local** (Postgres 16 jetable + socle réduit), à poser | c2_01 posé et `^test_c2_` vert sur la recette ; puis paliers 2 et 4 |
+| **Mécanique** (pgTAP sur la recette) | paliers 1 et 2 écrits, **111/111 verts en local** (Postgres 16 jetable + socle réduit ; trois passes, ordre des travaux aléatoire), à poser | c2_01 et c2_02 posés et `^test_c2_` vert sur la recette ; puis palier 4 |
 | **Livrable client** (/espace/cashd en ligne) | 0 % | palier 3 (écran), après la pose |
 
 ## Paliers
@@ -17,17 +17,17 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 1. **Données** — `c2_01_donnees.sql` (écrit, à poser). Comptes clients, factures / acomptes / avoirs / devis, règlements,
    lettrage simple ; balance âgée ; deux voies d'entrée (export du facturier par la chaîne de relevés du socle, dépôt
    CSV depuis l'écran) ; saisie à la main.
-2. **Moteur de relance** — à faire : scénarios par compte (J+0, J+7, J+15, mise en demeure), textes écrits à 7 h dans la
-   file de validation (`preparer_envoi` du socle, `reglages_envois` cashd, mode essai), pénalités et indemnité de 40 €
-   (règles de b6_16), plafond d'encours, compte en litige suspendu, point du matin « qui doit quoi, où en est la relance ».
+2. **Moteur de relance** — `c2_02_moteur.sql` (écrit, à poser). Voir plus bas.
 3. **Écran** — à faire : `components/espace/cashd/`, `app/espace/cashd/`.
 4. **Les autres lignes de `capacites/relances.ts`**, une à une.
 
-## Ordre de pose (palier 1)
+## Ordre de pose
 
-1. `omega/modules/cashd/migrations/c2_01_donnees.sql` (rejouable ; posé deux fois de suite en local sans écart).
-2. Tests : `omega/tests/cashd/c2_00_jeu.sql` (aides), puis `c2_01_donnees.sql` et `c2_02_export.sql` ;
-   `select * from runtests('^test_c2_')` ; puis les tests du socle 44, 46 et 51.
+1. `omega/modules/cashd/migrations/c2_01_donnees.sql` (palier 1 ; rejouable).
+2. `omega/modules/cashd/migrations/c2_02_moteur.sql` (palier 2 ; rejouable ; redéfinit `cashd_importer` et
+   `cashd_traiter_travaux` de c2_01 en y ajoutant le relettrage et la relecture des relances).
+3. Tests : `omega/tests/cashd/c2_00_jeu.sql` (aides, à rejouer : `tests.c2_plat` ajoutée), puis `c2_01_donnees.sql`,
+   `c2_02_export.sql`, `c2_03_moteur.sql` ; `select * from runtests('^test_c2_')` ; puis les tests du socle 44, 46 et 51.
 
 ## Ce que pose c2_01 (palier 1)
 
@@ -53,6 +53,43 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - Lecture des montants et dates tels que les facturiers les écrivent (`1 234,56`, `(12,00)`, `12,00-`, `JJ/MM/AA`,
   numéro de série de tableur), vérifiée en local.
 
+## Ce que pose c2_02 (palier 2, le moteur)
+
+- **Paliers, ceux que le site promet** (`lib/produits/relances.ts`, PROTOCOLE et CHIFFRES) : facture — rappel courtois
+  à J+7 de l'échéance, relance ferme à J+21, mise en demeure à J+30 ; devis — J+3 puis J+10. Réglables
+  (`cashd_regler_relances` : scénario de l'organisation ; `cashd_regler_compte` : scénario d'un compte). Un palier
+  manqué n'est pas sauté : un cran à la fois, cinq jours au moins entre deux paliers d'une même facture.
+- **Un message par compte et par jour** (`cashd_relances`), qui reprend chaque facture arrivée à un palier de SA séquence
+  (`cashd_relances_pieces`, un palier par facture une seule fois). Une relance plus ferme remplace celle encore en
+  attente pour le même compte.
+- **Le texte** (`private.cashd_ecrire_texte`) : le ton suit le palier, le montant, l'ancienneté et l'historique de
+  paiement (un compte qui a déjà payé en retard n'a pas le « simple oubli ») ; il reprend le secteur du compte, sa
+  référence, chaque facture (numéro, date, TTC, échéance, retard, reste dû) ; la relance ferme récapitule, fixe une
+  échéance et rappelle l'indemnité et les pénalités ; la mise en demeure cite L441-10 et D441-5. Formule et signature
+  de l'organisation ; ses mots interdits bloquent le message. Français et anglais (`cashd_comptes.langue`).
+- **Pénalités et indemnité** (règles de b6_16, L441-10) : indemnité de 40 € par facture en retard (sauf compte
+  `particulier`), pénalités au taux réglé sur le reste dû, de l'échéance au jour du calcul.
+- **La file de validation** : chaque relance dépose une `demandes_validation` (module cashd ; type `cashd.relance`,
+  `cashd.mise_en_demeure` ou `cashd.devis` ; objet `cashd_relances` ; **montant** ; payload : sujet, corps,
+  destinataire), puis `private.preparer_envoi` ADOSSÉ à cette demande. Le seuil de la direction
+  (`seuil_direction`) pose une `regles_validation` cashd (gérant, admin) au-delà du montant. La mise en demeure exige un
+  commentaire, et si un accord permanent l'approuvait d'office, elle n'est pas préparée (alerte).
+- **Ce qui suspend** : compte en pause / litige / recouvrement / hors périmètre / attente de contact / réciproque ;
+  facture en litige ; règlement du compte non lettré ; reste dû sous le seuil ; sans adresse (« sans_adresse »).
+- **Ce qui coupe ce qui est prêt** : un règlement, une sortie de l'export, un devis accepté, un litige, une pause — la
+  demande en attente passe « annulee » (le socle annule l'envoi adossé), la relance « coupee ».
+- **Avoirs** : les avoirs ouverts du compte sont imputés sur ses factures échues avant d'écrire.
+- **Relettrage** : chaque intégration retente le lettrage des règlements arrivés avant leurs factures.
+- **7 h** : cron `cashd-matin` (toutes les 10 min) → `private.cashd_passage` : à l'heure réglée (Paris), une fois par
+  jour et par organisation, relire, écrire, déposer la section « Impayés : qui doit quoi » du point du matin (gérant,
+  admin, valideur) : ce qui attend la validation, le facturier non relu, les dix comptes les plus en retard avec leur
+  palier et le suivant, les règlements à rapprocher, les plafonds dépassés.
+- **Vues** `cashd_relances_etat` (état vu de la file : à valider, validée, refusée, envoyée, coupée) et `cashd_suivi`
+  (chaque pièce : palier atteint, palier suivant et sa date, état de la séquence).
+- **Portes** : `cashd_preparer_maintenant`, `cashd_statut_compte` (toute reprise exige un motif ; remettre un compte hors
+  périmètre : gérant ou admin), `cashd_litige`, `cashd_regler_relances`, `cashd_regler_compte`,
+  `cashd_relances_du_jour`.
+
 ## Lignes de `lib/produits/capacites/relances.ts` tenues (preuve)
 
 Une ligne est « tenue » quand sa preuve passe sur la recette ; d'ici là, « écrite, verte en local ».
@@ -67,6 +104,27 @@ Une ligne est « tenue » quand sa preuve passe sur la recette ; d'ici là, « �
 | Le lettrage rapproche chaque encaissement de la facture qu'il solde. | écrite, verte en local | test_c2_01 (numéro cité, montant exact, lettrage manuel, annulation) |
 | Un virement sans référence est proposé au rapprochement avec les factures probables. | écrite, verte en local | `cashd_propositions` ; test_c2_01 « La facture probable est proposée » (la suspension de la séquence viendra au palier 2) |
 | Les avoirs et les acomptes sont déduits avant tout calcul du solde dû. | écrite, verte en local | `cashd_imputer_avoir` ; crédits de la balance ; test_c2_01 « L'avoir de 600 € est déduit » |
+| Le système relit votre facturier chaque matin, avant d'écrire la moindre relance. | écrite, verte en local | `cashd_passage` relit (`cashd_verifier_relances`) avant d'écrire ; point du matin « facturier non relu » ; test_c2_03 |
+| Chaque ligne indique l'état de la relance et le palier suivant. | écrite, verte en local | vue `cashd_suivi` ; test_c2_03 « palier atteint et palier suivant » |
+| Les devis sans réponse sont suivis au même titre que les factures échues. | écrite, verte en local | test_c2_03 « Le devis de 5 jours est relancé » |
+| Une facture échue suit trois paliers : deux relances, puis la mise en demeure. | écrite, verte en local | test_c2_03 (rappel, relance ferme, mise en demeure, puis plus rien) |
+| Un devis sans réponse est relancé au troisième jour, puis sept jours après ce rappel. | écrite, verte en local | scénario devis 3 / 10 ; test_c2_03 |
+| La fermeté du message suit le palier atteint, du rappel à la mise en demeure. | écrite, verte en local | `cashd_ecrire_texte` ; test_c2_03 (trois textes) |
+| Chaque message reprend le secteur du compte, sa référence, son montant et son retard. | écrite, verte en local | test_c2_03 « Le message reprend… » |
+| Les relances partent par courriel, depuis la boîte de votre entreprise. | écrite (courriel) ; la boîte de l'entreprise attend Gmail / Microsoft (A2) | `preparer_envoi` canal email |
+| Au-delà d'un montant que vous fixez, la relance remonte à la direction avant l'envoi. | écrite, verte en local | `seuil_direction` → `regles_validation` ; test_c2_03 « de la direction (3 000 € > 2 000 €) » |
+| Chaque facture suit sa propre séquence, avec son palier et son échéance. | écrite, verte en local | `cashd_relances_pieces` (palier par facture) ; `cashd_suivi` |
+| Un compte se met en pause ou sort du périmètre à tout moment. | écrite, verte en local | `cashd_statut_compte` ; test_c2_03 « pause coupe la mise en demeure prête » |
+| La mise en demeure est préparée, puis elle attend une validation explicite. | écrite, verte en local | type `cashd.mise_en_demeure`, commentaire exigé, jamais d'accord permanent ; test_c2_03 |
+| Un règlement enregistré interrompt la séquence avant le prochain envoi. | écrite, verte en local | `cashd_suivre_solde` → `cashd_couper` ; test_c2_03 « Le règlement de F-2026-101 coupe la relance prête » |
+| Les pénalités de retard et l'indemnité forfaitaire de recouvrement sont calculées. | écrite, verte en local | `cashd_penalites` ; test_c2_03 (40 € ; 3 000 × 105 j × 12,15 % / 365) |
+| Vos règles de communication et vos interdits sont repris dans chaque message. | écrite, verte en local | formule, signature, interdits ; test_c2_03 « mot interdit… bloqué » |
+| Un compte se met en pause, et il n'y revient que sur votre décision. | écrite, verte en local | reprise motivée, journalisée ; test_c2_03 |
+| Chaque relance partie est datée et consignée, avec son objet et son destinataire. | écrite (socle) | `envois` du socle + journal `cashd.relance_preparee` |
+| Une contestation écrite bascule la facture en litige et la sort du cycle. | écrite, verte en local (la bascule se fait par `cashd_litige` ; la lecture de la contestation écrite reçue viendra avec la réception d'A2) | test_c2_03 « Une facture en litige sort du cycle » |
+| La reprise des relances demande une décision, jamais un simple délai écoulé. | écrite, verte en local | `cashd_statut_compte` / `cashd_litige` exigent un motif |
+| Le contact de facturation reçoit les relances, le contact commercial reçoit les alertes. | moitié : les relances vont au contact de facturation ; l'alerte au commercial reste à faire | — |
+| Les comptes export reçoivent leur relance dans leur langue de facturation. | écrite (fr, en) | `cashd_ecrire_texte` |
 | Deux filiales du même groupe client relancées séparément (cas tordu) | écrite | un compte par entité juridique, `groupe` pour le consolidé |
 | Le client est aussi l'un de vos fournisseurs (cas tordu) | écrite | `reciproque` met le compte en pause à la saisie |
 
@@ -84,6 +142,10 @@ Une ligne est « tenue » quand sa preuve passe sur la recette ; d'ici là, « �
   dans `components/espace/ecrans.ts` (fichier de la coquille, à C1).
 
 ## Journal de session
+
+- 06/10, nuit : palier 2 écrit, `c2_02_moteur.sql`, test `c2_03_moteur` (42). Défaut trouvé en local et corrigé : quand
+  le journal des encaissements arrive avant l'export des factures (ordre des travaux non garanti), le règlement restait
+  sans lettrage → `private.cashd_relettrer` après chaque intégration. 111/111 sur trois passes.
 
 - 06/10, soir : lecture (audit, promesses, socle commun, b2_02, b6_16, a4_15, b1_04, lecteur d'exports d'A1). Palier 1
   écrit : `c2_01_donnees.sql`, tests `c2_00_jeu`, `c2_01_donnees` (39), `c2_02_export` (30). Exécutés sur un Postgres 16
