@@ -179,6 +179,34 @@ suivi. Banc local : 14 tests verts sur les trois paliers.
 - Q4. `reglages_envois` du module `offload` pour le banc (mode `essai`, `essai_adresse`) : le test le pose lui-même
   dans sa transaction ; pour un essai réel sur la recette, il faut la ligne (comme `recette-b6/banc_j2_reel.sql`).
 
+## Palier 4 — l'écran (lot c4_04)
+
+**SQL** (`omega/modules/offload/migrations/c4_04_ecran.sql`) : deux lectures SECURITY INVOKER (RLS du lecteur) —
+`public.offload_tableau(p_client)` (réglages, compteurs, comptes à risque d'abord par priorité, 500 au plus, avec
+signal et dernière reprise ; messages en attente de validation avec sujet et corps ; tâches à faire) et
+`public.offload_fiche(p_compte)` (compte, signal, courbe sur 24 mois, 60 dernières pièces, reprises avec l'état de
+leurs envois, tâches ; null hors périmètre). Test `omega/tests/offload/c4_04_ecran.sql` (`test_c4_04_lectures` :
+ordre de la liste, phrases servies, compteurs, message lisible, courbe 24 mois, autre organisation → rien).
+
+**Écran** `/espace/offload` (`app/espace/offload/page.tsx`, `components/espace/offload/`) :
+- quatre compteurs qui filtrent : avant la clôture, clients à risque, messages à valider, appels à passer ;
+- la liste des comptes à risque par priorité, chacun avec sa première raison en clair, son score, sa reprise ;
+- les messages de reprise à valider (sujet, destinataire, corps dépliable ; lien vers « À valider », où se prend la
+  décision du socle) ;
+- la fiche : raisons avec leurs points (le score en est la somme), rythme, dernier achat, achat attendu, panier,
+  douze mois, priorité ; la **courbe** du chiffre HT par mois sur 24 mois (une série, une teinte, moyenne d'il y a
+  un an en pointillé, info-bulle au survol et au clavier, tableau équivalent) ; la reprise (préparer → validation) ;
+  les tâches (noter le résultat d'un appel, abandonner en disant pourquoi) ; les pièces (et en ajouter une à la main).
+- Deux sources comme les autres écrans (exemple en mémoire / base réelle), temps réel sur les tables OFFLOAD.
+- tsc, eslint, build verts ; recette aux 5 largeurs (390, 768, 1024, 1440, 1700) par `outils/recette-mobile.mjs`
+  sur un `next start` local : aucun débordement, aucune erreur console (hors script Vercel absent en local) ;
+  captures 390 et 1440 relues.
+- **La coquille n'est pas touchée** : l'entrée de navigation (`components/espace/ecrans.ts`, `{ cle: "offload",
+  href: "/espace/offload", libelle: "Clients qui décrochent", court: "OFFLOAD" }`) est à ajouter par C1.
+
+**Ordre de pose (recette)** : `c4_04_ecran.sql`, puis `omega/tests/offload/c4_04_ecran.sql`
+(`runtests('tests', '^test_c4_04_')`).
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`) — tenue et preuve
 
 Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve posée en recette.
@@ -186,7 +214,7 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 | Ligne | État | Preuve |
 |---|---|---|
 | Le système croise votre historique de facturation et le référentiel clients de votre CRM. | **palier 1 livré (à poser)** | jeux `clients` + `ventes`, `test_c4_01_import` (comptes du référentiel, ventes rattachées, client absent créé) |
-| Un tableur sans colonne de date est exploité à partir des dates de facture. | **partiel** : le fichier clients sans date prend ses dates dans les factures (palier 1) ; « un compte que rien ne date est présenté à part » viendra avec l'écran (palier 4) | `test_c4_01_import` |
+| Un tableur sans colonne de date est exploité à partir des dates de facture. | **palier 1 + 2 livrés (à poser)** : le fichier clients sans date prend ses dates dans les factures ; un compte que rien ne date est `sans_achat`, présenté à part | `test_c4_01_import`, `test_c4_02_detection` |
 | Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez. | **palier 2 livré (à poser)** — dernier contact = dernier achat pour l'instant ; les reprises du palier 3 s'y ajouteront | `offload_signaux.dernier_achat`, `jours_silence`, réglage `delai_silence_jours` ; `test_c4_02_detection` |
 | La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté. | **palier 2 livré (à poser)** | `rythme_jours`, raisons `retard` / `silence` / `ralenti` ; `test_c4_02_detection` |
 | Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique. | **palier 2 livré (à poser)** | `priorite` = valeur annuelle × score ; assertion « le premier de la liste est celui qui pèse le plus » |
@@ -201,7 +229,7 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **palier 3 livré (à poser)** | issue `commande` ; `test_c4_03_issues` |
 | Les messages partent par courriel, depuis la boîte de votre entreprise. | **partiel** : OFFLOAD prépare des courriels ; l'expéditeur (boîte de l'entreprise) est celui du socle (A2 : Gmail / Microsoft 365 pas encore branchés) | — |
 | Le système s'arrête de lui-même au premier doute, et vous le signale. | **partiel** : import douteux non appliqué, essai contre réel, verrous du socle ; d'autres doutes au palier 5 | `test_c4_01_garde_fou`, `test_c4_03_issues` |
-| Les autres lignes | à venir (paliers 4 et 5) | — |
+| Les autres lignes | à venir (palier 5) | — |
 
 ## Journal
 
@@ -210,4 +238,5 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
   journal), NOTES-A1 (lecteur-exports), migrations Tiroma et Daliro pour les conventions.
 - 06/10 — palier 1 écrit, vérifié sur le banc local (pose ×2, 62 assertions vertes), poussé sur `worker-c4` (7c8c520), envoyé au coordinateur.
 - 06/10 — palier 2 (détection) écrit et vérifié sur le banc local, poussé (ce6cd3c), envoyé au coordinateur.
-- 06/10 — palier 3 (reprise) écrit et vérifié sur le banc local (14 tests verts sur les trois paliers).
+- 06/10 — palier 3 (reprise) poussé (376387e), envoyé au coordinateur.
+- 06/10 — palier 4 (écran) : 15 tests SQL verts en local, écran recetté aux cinq largeurs.
