@@ -17,7 +17,7 @@ sujet par sujet. Jamais de données de santé hors canal agréé (verrous 19ab e
 |---|---|---|
 | 1 | Base de connaissances par client (questions-réponses, horaires, tarifs, documents ; source et validité ; versions) ; sujets ; réglages par entité ; abonnement `reception.nouvelle → reput` | **écrit, 66/66 en local** — à poser |
 | 2 | Préparation : classement (sujet), brouillon sourcé, « je ne sais pas », langue ; dépôt en envoi `a_valider` sur le canal de la demande | **écrit** : c3_02 61/61 en local, fonction Edge `reput-reponse` 11/11 Deno — à poser et déployer |
-| 3 | Accord permanent par sujet (envoi seul) ; point du matin « reçues, en attente, répondues » | à faire |
+| 3 | Accord permanent par sujet (envoi seul) ; point du matin « reçues, en attente, répondues » | **écrit** : c3_03 46/46 en local — à poser |
 | 4 | Écran `/espace/reput` : demandes, réponses à valider (Valider / Corriger / Refuser), base, sujets autorisés | à faire |
 | 5 | Autres lignes de `lib/produits/capacites/accueil.ts` : rendez-vous, relance de devis, avis… | à faire |
 
@@ -102,6 +102,41 @@ depuis cette branche ; à la fusion, la version d'A1 fait foi.
 Demande au socle : `consommation_ia_jour` ne compte que `lecteur.lire` (CONTRAT-OUVRIER § 2) ; il faudrait y
 ajouter `reput.preparer` (même clé `cout_eur` dans le résultat) pour que le plafond de 5 € soit commun.
 
+## Palier 3 — `c3_03_accords_decisions_point.sql`
+
+- **Accord permanent par sujet**, par le mécanisme du socle (`public.politiques`, comme b6_08) :
+  `reput_donner_accord(p_client, p_sujet, p_entite)` (gérant / admin, une personne) propose la politique
+  `reput.repondre.<sujet>` (1 000 par mois, un an) et ouvre l'activation aux gérant / admin / valideur
+  (règle `politique.activer` du module reput, le demandeur exclu par le socle) ;
+  `reput_activer_accord_seul` pour le gérant seul décideur (19af : les sept sujets autorisables par défaut
+  inscrits dans `private.activation_seul_autorisee`) ; `reput_revoquer_accord` ; `reput_accords` (état par sujet,
+  envois partis seuls dans le mois).
+- **Garde** `politiques_reput_garde` (BEFORE INSERT sur `public.politiques`, module reput seulement) : une
+  politique REPUT ne porte que sur `reput.repondre.<sujet actif et autorisable>` — jamais `reput.transferer`,
+  jamais réclamation / urgence / humain / litige / autre, **même par un INSERT direct du gérant** (la politique
+  RLS du socle le lui permet).
+- **Valider / Refuser** : `reput_decider(p_reponse, 'valider' | 'refuser', p_motif)` — une approbation du socle au
+  nom de la personne (motif obligatoire pour refuser), puis synchronisation immédiate.
+- **Corriger** : `reput_corriger(p_reponse, p_corps, p_objet)` — l'ancienne version est rejetée dans la file
+  (son envoi ne part plus), une version n+1 `redigee_par` la personne est redéposée par le serveur
+  (`reput.redeposer`, demandeur « système », type `reput.transferer` : jamais d'envoi seul) ; le correcteur
+  peut la valider lui-même. L'ouvrier de base `private.reput_ouvrier` (cron `reput-synchro`, chaque minute)
+  redépose et synchronise.
+- **Point du matin** : section « Demandes clients : reçues, en attente, répondues » (gérant, valideurs ; dès
+  5 h Paris ; cron `reput-matin` toutes les 30 min) : « Hier : N demandes reçues, M répondues (dont K parties
+  seules par accord). En attente de votre validation : X. À traiter vous-même : Y. », puis une ligne par
+  demande en attente (urgentes d'abord).
+
+Test : `omega/tests/reput/c3_03_accords.sql` (46, souche locale 46/46 ; total souche 173/173).
+Note recette : c3_02 et c3_03 font `update public.envois set statut = 'envoye'` pour simuler la remise ; si
+`garder_envoi` le refuse même à postgres, me le dire et je passe par la voie du socle.
+
+### Ordre de pose (palier 3)
+
+1. `omega/modules/reput/migrations/c3_03_accords_decisions_point.sql` (après 19af ; remplace la commande du
+   cron reput-synchro par l'ouvrier de base ; pose reput-matin)
+2. `omega/tests/reput/c3_03_accords.sql` → `^test_c3_03_`, puis 44, 46, 51, 55.
+
 ## Lignes de capacité (`lib/produits/capacites/accueil.ts`) : tenues et preuves
 
 | Ligne | État | Preuve |
@@ -133,6 +168,8 @@ ajouter `reput.preparer` (même clé `cout_eur` dans le résultat) pour que le p
 2. `private.politique_couvrante` : sa source aussi (le libellé du type d'action est-il comparé tel quel ?).
 
 ## Journal de session
+
+- 06/10, ~18 h 50 Z : palier 3 écrit (c3_03) ; souche 173/173.
 
 - 06/10, ~18 h 15 Z : palier 2 écrit (c3_02 + fonction Edge reput-reponse) ; souche 127/127, Deno 11/11.
 

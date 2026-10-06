@@ -78,9 +78,88 @@ create trigger demandes_validation_envois after update of statut on public.deman
 create schema if not exists cron;
 create table if not exists cron.job (jobid bigserial primary key, jobname text unique, schedule text, command text);
 create or replace function cron.schedule(p_nom text, p_quand text, p_commande text) returns bigint language sql as $$
-  insert into cron.job (jobname, schedule, command) values (p_nom, p_quand, p_commande) on conflict (jobname) do update set schedule = excluded.schedule returning jobid $$;
+  insert into cron.job (jobname, schedule, command) values (p_nom, p_quand, p_commande) on conflict (jobname) do update set schedule = excluded.schedule, command = excluded.command returning jobid $$;
 create table if not exists public.reglages_envois (id uuid primary key default gen_random_uuid(), client_id uuid not null, module text,
   mode text not null default 'essai', essai_adresse text, canaux text[]);
 -- Droits du socle sur la file (comme la recette) : authenticated décide en son nom, lit les demandes.
 grant select, insert on public.approbations to authenticated;
 grant select on public.demandes_validation to authenticated;
+
+-- ── Accords permanents (public.politiques, lot 16) imités : proposer → demande politique.activer → active ──
+create table if not exists public.politiques (
+  id uuid primary key default gen_random_uuid(), client_id uuid not null, entite_id uuid, module text not null, type_action text not null,
+  libelle text not null, plafond_operation numeric, plafond_mensuel numeric, nombre_mensuel integer, debut timestamptz not null default now(),
+  fin timestamptz not null, fuseau text not null default 'Europe/Paris', statut text not null default 'a_valider'
+  check (statut in ('a_valider', 'active', 'refusee', 'revoquee')), demande_id uuid, cree_par uuid, cree_le timestamptz not null default now(),
+  active_le timestamptz, revoquee_le timestamptz, revoquee_par uuid, motif_revocation text,
+  check (plafond_operation is not null or nombre_mensuel is not null));
+grant select, insert on public.politiques to authenticated;
+create or replace function private.souche_preparer_politique() returns trigger language plpgsql security definer set search_path to '' as $$
+begin new.statut := 'a_valider'; new.cree_par := (select auth.uid()); new.cree_le := now(); return new; end $$;
+create or replace function private.souche_deposer_activation() returns trigger language plpgsql security definer set search_path to '' as $$
+declare v uuid;
+begin
+  insert into public.demandes_validation (client_id, entite_id, module, type_action, objet_type, objet_id, resume, cle_idempotence)
+  values (new.client_id, new.entite_id, new.module, 'politique.activer', 'politique', new.id::text, left('Activer : ' || new.libelle, 500), 'politique:' || new.id)
+  returning id into v;
+  update public.politiques set demande_id = v where id = new.id;
+  return null;
+end $$;
+create or replace function private.souche_suivre_activation() returns trigger language plpgsql security definer set search_path to '' as $$
+begin
+  if new.type_action = 'politique.activer' and new.statut = 'approuvee' and old.statut = 'en_attente' then
+    update public.politiques set statut = 'active', active_le = now() where id = new.objet_id::uuid and statut = 'a_valider';
+  end if;
+  return null;
+end $$;
+create trigger politiques_preparer before insert on public.politiques for each row execute function private.souche_preparer_politique();
+create trigger politiques_deposer_activation after insert on public.politiques for each row execute function private.souche_deposer_activation();
+create trigger demandes_validation_suivre_activation after update of statut on public.demandes_validation for each row execute function private.souche_suivre_activation();
+create or replace function private.politique_couvrante(p_client uuid, p_module text, p_type text, p_entite uuid, p_montant numeric, p_quand timestamptz)
+returns uuid language sql stable security definer set search_path to '' as $$
+  select p.id from public.politiques p
+  where p.client_id = p_client and p.module = p_module and p.type_action = p_type and p.statut = 'active'
+    and (p.entite_id is null or p.entite_id = p_entite) and p_quand >= p.debut and p_quand < p.fin
+    and (p.nombre_mensuel is null or (select count(*) from public.demandes_validation d where d.politique_id = p.id) < p.nombre_mensuel)
+  order by p.entite_id nulls last limit 1 $$;
+create or replace function private.revoquer_politique(p_id uuid, p_motif text) returns void language sql security definer set search_path to '' as $$
+  update public.politiques set statut = 'revoquee', revoquee_le = now(), revoquee_par = (select auth.uid()), motif_revocation = p_motif where id = p_id $$;
+-- 19af imité : le gérant seul décideur approuve sa propre demande d'activation.
+create or replace function private.preparer_approbation() returns trigger language plpgsql security definer set search_path to '' as $function$
+declare v_d public.demandes_validation; v_uid uuid := (select auth.uid());
+begin
+  select * into v_d from public.demandes_validation where id = new.demande_id;
+  if not found then raise exception 'Demande introuvable.' using errcode = 'P0002'; end if;
+  if v_d.statut <> 'en_attente' then raise exception 'Cette demande n''attend plus de décision (%).', v_d.statut using errcode = '55000'; end if;
+  new.user_id := coalesce(new.user_id, v_uid);
+  if new.user_id is null then raise exception 'Une décision vient d''une personne.' using errcode = '42501'; end if;
+  new.client_id := v_d.client_id;
+  if v_d.demandeur_id is not null and v_d.demandeur_id = new.user_id then
+    if not (v_d.type_action = 'politique.activer' and private.reput_seul_decideur(v_d.client_id, new.user_id)) then
+      raise exception 'Le demandeur ne décide pas de sa propre demande.' using errcode = '42501';
+    end if;
+    new.commentaire := left('[seul décideur] ' || coalesce(new.commentaire, ''), 2000);
+  end if;
+  perform private.exiger_decideur(v_d, coalesce(new.au_nom_de, new.user_id));
+  new.decide_le := now();
+  return new;
+end $function$;
+
+-- ── Points du matin (lot 15) imités ──
+create table if not exists public.points_sections (client_id uuid, module text, jour date, role text, titre text, items jsonb, ordre int,
+  primary key (client_id, module, jour, role, titre));
+create or replace function private.deposer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_items jsonb,
+  p_entite uuid default null, p_equipe uuid default null, p_sante boolean default false, p_donnees_du timestamptz default null,
+  p_incomplete boolean default false, p_ordre integer default 100) returns uuid language plpgsql security definer set search_path to '' as $$
+begin
+  insert into public.points_sections values (p_client, p_module, p_jour, p_role, p_titre, p_items, p_ordre)
+  on conflict (client_id, module, jour, role, titre) do update set items = excluded.items;
+  return gen_random_uuid();
+end $$;
+create or replace function private.retirer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text,
+  p_entite uuid, p_equipe uuid) returns void language sql security definer set search_path to '' as $$
+  update public.points_sections set items = '[]' where client_id = p_client and module = p_module and jour = p_jour and role = p_role and titre = p_titre $$;
+create or replace function private.battre_ouvrier(p_module text, p_genres text[], p_detail jsonb, p_attendu interval default '15 minutes')
+returns integer language sql as $$ select 0 $$;
+create or replace function private.echouer_travail(p_id bigint, p_err text, p_reprendre boolean) returns text language sql as $$
+  update public.travaux set etat = 'echec', erreur = p_err where id = p_id returning 'echec' $$;
