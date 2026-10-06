@@ -275,3 +275,8 @@ CASHD étant vert.
   écrit : `c2_01_donnees.sql`, tests `c2_00_jeu`, `c2_01_donnees` (39), `c2_02_export` (30). Exécutés sur un Postgres 16
   local jetable avec un socle réduit (mêmes signatures que la photographie du 05/10) : 69/69. La migration se rejoue sans
   écart.
+- 06/10, 18 h Z : rouge au rejeu de `test_c2_04` (n° 38, arrêté de la balance) après `banc_cashd.sql`. Cause : CASHD
+  désormais installé pour de bon sur le banc, le cron `cashd-matin` y arrête la balance du mois courant ; le test
+  attendait un arrêté le lundi suivant du même mois. Le test vise maintenant le premier jour ouvré du mois suivant.
+  Même cause latente dans `test_c2_01` (« avant l'installation ») : il vise une organisation sans CASHD. Les quatre
+  tests passent (154/154) sur base vierge comme avec CASHD installé, un arrêté et un passage du jour déjà posés.

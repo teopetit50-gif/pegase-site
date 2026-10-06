@@ -5,7 +5,7 @@ create or replace function tests.test_c2_04_capacites() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; v_client uuid; v_gerant uuid; v_daf uuid; v_collab uuid; p jsonb; j date := tests.c2_jour();
-  v_r jsonb; v_x uuid; v_f uuid; v_e record; r public.cashd_relances; v_d jsonb; v_dem uuid; v_samedi date; v_n integer;
+  v_r jsonb; v_x uuid; v_f uuid; v_e record; r public.cashd_relances; v_d jsonb; v_dem uuid; v_samedi date; v_n integer; v_arrete date;
 begin
   banc := tests.c2_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid; v_daf := (banc ->> 'daf')::uuid;
@@ -169,10 +169,15 @@ begin
                  'Un samedi, le passage n''écrit aucune relance');
 
   -- ── L'arrêté de la balance à date fixe ──
-  update public.cashd_reglages set arrete_jour = least(extract(day from v_samedi + 2)::int, 28) where client_id = v_client;
-  v_n := private.cashd_passage(((v_samedi + 2)::timestamp + time '07:05') at time zone 'Europe/Paris');
-  return next ok(extract(day from v_samedi + 2)::int > 28
-                 or exists (select 1 from public.cashd_arretes a where a.client_id = v_client and a.jour = v_samedi + 2 and jsonb_array_length(a.balance) >= 1),
+  -- Un mois que le passage réel (cron cashd-matin du banc, où CASHD est installé) n'a pas encore pu arrêter : le
+  -- suivant ; son premier jour ouvré, qui devient le jour réglé.
+  v_arrete := (date_trunc('month', v_samedi + 2) + interval '1 month')::date;
+  while extract(isodow from v_arrete) > 5 or not coalesce(public.jour_ouvre(v_arrete, 'metropole'), true) loop
+    v_arrete := v_arrete + 1;
+  end loop;
+  update public.cashd_reglages set arrete_jour = extract(day from v_arrete)::int where client_id = v_client;
+  v_n := private.cashd_passage((v_arrete::timestamp + time '07:05') at time zone 'Europe/Paris');
+  return next ok(exists (select 1 from public.cashd_arretes a where a.client_id = v_client and a.jour = v_arrete and jsonb_array_length(a.balance) >= 1),
                  'Le jour du mois réglé, la balance âgée est arrêtée (à télécharger en tableur)');
 
   -- ── Une facture réglée publie cashd.facture_reglee (abonné : REPUT) ──

@@ -6,7 +6,7 @@ create or replace function tests.test_c2_01_donnees() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; v_client uuid; v_gerant uuid; v_daf uuid; v_collab uuid; p jsonb; j date := tests.c2_jour();
-  v_r jsonb; v_reg uuid; v_imp uuid; v_t jsonb; v_b record; v_e record;
+  v_r jsonb; v_reg uuid; v_imp uuid; v_t jsonb; v_b record; v_e record; v_autre jsonb;
 begin
   banc := tests.c2_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid; v_daf := (banc ->> 'daf')::uuid;
@@ -16,9 +16,13 @@ begin
   -- ── Installer ──
   perform tests.endosser(v_daf, 'daf@banc-varelo.test');
   return next throws_ok(format('select public.cashd_installer(%L)', v_client), '42501', null, 'Un valideur n''installe pas CASHD');
-  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
-  return next throws_ok(format('select public.cashd_ecrire_compte(null, %L, %L)', v_client, '{"reference":"X","nom":"X"}'), '55000', null,
+  -- Une organisation où CASHD n'est pas installé (sur le banc de recette, banc_cashd.sql l'installe pour de bon).
+  perform tests.redevenir_admin();
+  v_autre := tests.c2_autre_client();
+  perform tests.endosser((v_autre ->> 'gerant')::uuid, 'c2-etranger-' || left(v_autre ->> 'client', 8) || '@banc-varelo.test');
+  return next throws_ok(format('select public.cashd_ecrire_compte(null, %L, %L)', v_autre ->> 'client', '{"reference":"X","nom":"X"}'), '55000', null,
                         'Avant l''installation, aucun compte ne se saisit');
+  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   v_r := public.cashd_installer(v_client);
   return next is(v_r ->> 'mode' || '/' || (v_r ->> 'delai_paiement_jours') || '/' || (v_r ->> 'indemnite_forfaitaire')::numeric, 'essai/30/40.00',
                  'Installé en mode essai, délai de 30 jours, indemnité de 40 €');
