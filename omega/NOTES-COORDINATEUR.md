@@ -953,3 +953,12 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Décisions : météo = abonnement Open-Meteo à décider par Teo (Météo-France n'a pas d'API par point) ; pas d'agenda
   pour REPUT maintenant ; LECTEUR_ANALYSES à lire en base (pas de moyen de poser un secret Edge ici) → A1.
   Main 4238c6c : Varelo réserves + compteur d'exemple, REPUT réglages et avis, Lorani décennales, GUIDE-DEPOT.
+- 17 h 10 Z (horloge serveur ; les entrées précédentes marquées « Z » étaient à l'heure de Paris) — Poses :
+  b3_22 règles communes + test 23 (B3 4295ff8), c4_06 consentement en source « contrat » + tests c4_01/02/03/05
+  (C4 4e6b417), b4_15 v2 politique PERMISSIVE + test 24 (B4 fad9015), test b6_16 v2 (B6 06026f4).
+  ^test_(b3_|c4_|b4_24_|b6_16_) : 834 ok, 0 échec. 44/46/51 : 32 ok, 0 échec.
+  Banc OFFLOAD installé (essai, courriel seul, jeux clients + ventes). Lecteur v27 (A1 6f57d5e : bon de livraison
+  Varelo, métré et zone PLUi Lorani).
+  Main : fusion worker-b3 (écran Règles communes, en-préparation), worker-c4 (écran /espace/offload),
+  worker-b6 (météo, appro), worker-c5 passe 4. tsc, eslint, build verts ; 6 pages × 5 largeurs sans débord.
+  Bascule C1 (0d36f55) NON fusionnée : attend Teo, après l'aperçu.
