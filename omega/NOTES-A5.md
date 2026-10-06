@@ -40,6 +40,27 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Lot 19af — activation par un seul décideur (6 octobre, demande du coordinateur, décision de Teo)
+
+- `omega/modules/socle/migrations/19af_activation_seul_decideur.sql` :
+  - liste blanche `private.activation_seul_autorisee` (Daliro J-2 : envoi.email,
+    whatsapp, sms) ;
+  - `private.seul_decideur(client, user)` : gérant ou admin, et aucun autre
+    gérant, admin ou valideur actif (auth.users non supprimé, non banni) ;
+  - `private.activation_par_seul_decideur(demande, au_nom_de, uid)` ;
+  - `preparer_approbation` réécrite par repère (regex tolérante aux blancs,
+    1 occurrence exigée). Seule la règle du demandeur reçoit l'exception, le
+    commentaire est forcé à « [seul décideur] … ». 19c, exiger_decideur,
+    périmètre et objet restent inchangés ;
+  - rejouable : un corps qui porte déjà l'exception n'est pas retouché. Rien
+    n'est supprimé.
+- Test `omega/tests/socle/55_activation_seul_decideur.sql`, 21 assertions. Sur la
+  maquette, il est sans objet (pas de politiques). Sur une souche locale qui porte
+  le vrai corps de `preparer_approbation` et la mécanique des politiques
+  simplifiée, il passe 21/21. Sans la réécriture, 10, 11 et 12 sont rouges. Ce
+  n'est pas encore joué sur la recette.
+- TOUT.sql à 55 tests ; TOUT_4 = 40 à 55.
+
 ## Reprise (session_01BnmsMXfPeMf55k32si4Zdd, 6 octobre) — tests santé des envois 52 et 53
 
 Reçu : a5_01 v2 posée depuis 97853cb, test 44 5/5, test 51 3/3.
