@@ -712,3 +712,4 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Leçon : ne jamais amender une migration envoyée sans la réponse « posé / pas posé » du coordinateur.
 - SIREN d'exemple corrigés (clé de Luhn) : 538765439, 412345670, 812345676, 216902569.
 - Fiche : boîte nullable (OCR sans positions), cotes écrites seulement.
+- b5_22 : public.lorani_objets_controle(piece) pour A1 (objets des pièces sœurs, service_role seul) ; test b5_13 (6 assertions).
