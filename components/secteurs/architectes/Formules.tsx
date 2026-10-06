@@ -38,6 +38,7 @@ import React from "react";
 import Link from "next/link";
 import StarButton from "./bouton-etoile";
 import { CONTACT } from "./textes";
+import { SiEnPreparation } from "@/components/ui/en-preparation";
 
 export default function Formules() {
   return (
@@ -100,7 +101,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Plans croisés, rapport PDF annoté
+                    <span>
+                      Plans croisés, rapport PDF annoté
+                      <SiEnPreparation pour="lorani" t="Plans croisés, rapport PDF annoté" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -118,7 +122,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Permis : PC1 à PC8 et PLU
+                    <span>
+                      Permis : PC1 à PC8 et PLU
+                      <SiEnPreparation pour="lorani" t="Permis : PC1 à PC8 et PLU" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -136,7 +143,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Accessibilité, ERP et RE2020
+                    <span>
+                      Accessibilité, ERP et RE2020
+                      <SiEnPreparation pour="lorani" t="Accessibilité, ERP et RE2020" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -154,7 +164,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    PLU, servitudes et risques lus depuis l&apos;adresse
+                    <span>
+                      PLU, servitudes et risques lus depuis l&apos;adresse
+                      <SiEnPreparation pour="lorani" t="PLU, servitudes et risques lus depuis l'adresse" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -172,7 +185,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Calendrier du permis jusqu&apos;à la purge des recours
+                    <span>
+                      Calendrier du permis jusqu&apos;à la purge des recours
+                      <SiEnPreparation pour="lorani" t="Calendrier du permis jusqu'à la purge des recours" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -190,7 +206,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Surfaces recalculées contre le Cerfa
+                    <span>
+                      Surfaces recalculées contre le Cerfa
+                      <SiEnPreparation pour="lorani" t="Surfaces recalculées contre le Cerfa" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -208,7 +227,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    RE2020 : attestation comparée aux plans
+                    <span>
+                      RE2020 : attestation comparée aux plans
+                      <SiEnPreparation pour="lorani" t="RE2020 : attestation comparée aux plans" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -226,7 +248,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Questions posées au dossier
+                    <span>
+                      Questions posées au dossier
+                      <SiEnPreparation pour="lorani" t="Questions posées au dossier" />
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -256,7 +281,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Tout ce que contient Agence
+                    <span>
+                      Tout ce que contient Agence
+                      <SiEnPreparation pour="lorani" t="Tout ce que contient Agence" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -274,7 +302,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Analyse des offres sur DPGF
+                    <span>
+                      Analyse des offres sur DPGF
+                      <SiEnPreparation pour="lorani" t="Analyse des offres sur DPGF" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -292,7 +323,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Visa des fiches techniques
+                    <span>
+                      Visa des fiches techniques
+                      <SiEnPreparation pour="lorani" t="Visa des fiches techniques" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -310,7 +344,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Situations et décomptes
+                    <span>
+                      Situations et décomptes
+                      <SiEnPreparation pour="lorani" t="Situations et décomptes" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -328,7 +365,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Visas calés sur les délais de commande
+                    <span>
+                      Visas calés sur les délais de commande
+                      <SiEnPreparation pour="lorani" t="Visas calés sur les délais de commande" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -346,7 +386,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Questions suivies jusqu&apos;à la réponse
+                    <span>
+                      Questions suivies jusqu&apos;à la réponse
+                      <SiEnPreparation pour="lorani" t="Questions suivies jusqu'à la réponse" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -364,7 +407,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Métré des plans contre la DPGF
+                    <span>
+                      Métré des plans contre la DPGF
+                      <SiEnPreparation pour="lorani" t="Métré des plans contre la DPGF" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -382,7 +428,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Décennales contrôlées contre le lot
+                    <span>
+                      Décennales contrôlées contre le lot
+                      <SiEnPreparation pour="lorani" t="Décennales contrôlées contre le lot" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -400,7 +449,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Ordres de service : montant et délai
+                    <span>
+                      Ordres de service : montant et délai
+                      <SiEnPreparation pour="lorani" t="Ordres de service : montant et délai" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -418,7 +470,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Revérification à chaque indice
+                    <span>
+                      Revérification à chaque indice
+                      <SiEnPreparation pour="lorani" t="Revérification à chaque indice" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -436,7 +491,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Une question en un clic
+                    <span>
+                      Une question en un clic
+                      <SiEnPreparation pour="lorani" t="Une question en un clic" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -454,7 +512,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Checklists de l&apos;agence
+                    <span>
+                      Checklists de l&apos;agence
+                      <SiEnPreparation pour="lorani" t="Checklists de l'agence" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -472,7 +533,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Export Excel par lot
+                    <span>
+                      Export Excel par lot
+                      <SiEnPreparation pour="lorani" t="Export Excel par lot" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -490,7 +554,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Utilisateurs sans supplément
+                    <span>
+                      Utilisateurs sans supplément
+                      <SiEnPreparation pour="lorani" t="Utilisateurs sans supplément" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -508,7 +575,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Hébergement dans l&apos;UE
+                    <span>
+                      Hébergement dans l&apos;UE
+                      <SiEnPreparation pour="lorani" t="Hébergement dans l'UE" />
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -541,7 +611,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Tout ce que contient Cabinet
+                    <span>
+                      Tout ce que contient Cabinet
+                      <SiEnPreparation pour="lorani" t="Tout ce que contient Cabinet" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -559,7 +632,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Bureaux d&apos;études invités
+                    <span>
+                      Bureaux d&apos;études invités
+                      <SiEnPreparation pour="lorani" t="Bureaux d'études invités" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -577,7 +653,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Fonds de plan BET croisés
+                    <span>
+                      Fonds de plan BET croisés
+                      <SiEnPreparation pour="lorani" t="Fonds de plan BET croisés" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -595,7 +674,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Complétude du DOE à la réception
+                    <span>
+                      Complétude du DOE à la réception
+                      <SiEnPreparation pour="lorani" t="Complétude du DOE à la réception" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -613,7 +695,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Comptes rendus de chantier rédigés
+                    <span>
+                      Comptes rendus de chantier rédigés
+                      <SiEnPreparation pour="lorani" t="Comptes rendus de chantier rédigés" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -631,7 +716,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Réserves suivies jusqu&apos;à la fin de la GPA
+                    <span>
+                      Réserves suivies jusqu&apos;à la fin de la GPA
+                      <SiEnPreparation pour="lorani" t="Réserves suivies jusqu'à la fin de la GPA" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -649,7 +737,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Honoraires par phase contre temps passé
+                    <span>
+                      Honoraires par phase contre temps passé
+                      <SiEnPreparation pour="lorani" t="Honoraires par phase contre temps passé" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -667,7 +758,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Dossier de défense décennale
+                    <span>
+                      Dossier de défense décennale
+                      <SiEnPreparation pour="lorani" t="Dossier de défense décennale" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -685,7 +779,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Registre daté des visas
+                    <span>
+                      Registre daté des visas
+                      <SiEnPreparation pour="lorani" t="Registre daté des visas" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -703,7 +800,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Historique des indices sans limite
+                    <span>
+                      Historique des indices sans limite
+                      <SiEnPreparation pour="lorani" t="Historique des indices sans limite" />
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -738,7 +838,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Tout ce que contient Groupement
+                    <span>
+                      Tout ce que contient Groupement
+                      <SiEnPreparation pour="lorani" t="Tout ce que contient Groupement" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -756,7 +859,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Contrôles définis avec vous
+                    <span>
+                      Contrôles définis avec vous
+                      <SiEnPreparation pour="lorani" t="Contrôles définis avec vous" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -774,7 +880,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Import depuis vos plateformes de projet
+                    <span>
+                      Import depuis vos plateformes de projet
+                      <SiEnPreparation pour="lorani" t="Import depuis vos plateformes de projet" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -792,7 +901,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Accès sans limite d&apos;équipe
+                    <span>
+                      Accès sans limite d&apos;équipe
+                      <SiEnPreparation pour="lorani" t="Accès sans limite d'équipe" />
+                    </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <svg
@@ -810,7 +922,10 @@ export default function Formules() {
                     >
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
-                    Règles de votre charte intégrées
+                    <span>
+                      Règles de votre charte intégrées
+                      <SiEnPreparation pour="lorani" t="Règles de votre charte intégrées" />
+                    </span>
                   </li>
                 </ul>
               </div>

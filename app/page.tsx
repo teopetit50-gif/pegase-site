@@ -597,7 +597,7 @@ const FAQ = [
   },
   {
     q: "Où sont hébergées mes données ?",
-    a: "Dans un espace dédié à votre entreprise, chiffré et hébergé dans l'Union européenne, strictement séparé de celui de chaque autre client. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et vous pouvez demander l'export complet ou la suppression à tout moment.",
+    a: "Dans un espace dédié à votre entreprise, chiffré et hébergé dans l'Union européenne, strictement séparé de celui de chaque autre client. Les modèles d'intelligence artificielle utilisés ne reçoivent que la pièce à lire, jamais le reste de votre espace, et vous pouvez demander l'export complet ou la suppression à tout moment.",
   },
   {
     q: "Je suis concerné par la facture électronique ?",
@@ -694,9 +694,9 @@ const ACCROCHES_VITRINE: Record<
       "Relit votre base la nuit, remonte les comptes silencieux.",
   },
   REPUT: {
-    objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
+    objectif: "Une demande reçue à 21 h a sa réponse prête à 21 h.",
     texte:
-      "Lit le message dès son arrivée et répond dans la minute.",
+      "Réponse prête dans la minute ; seule sur les sujets autorisés.",
   },
   FILED: {
     objectif: "Vos équipes ne ressaisiront plus un seul document.",

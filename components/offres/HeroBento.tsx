@@ -338,7 +338,7 @@ export function HeroBento() {
         icone={MessagesSquare}
         href="/offres/demandes-clients"
         titre="Répondu pendant la nuit"
-        texte="Une demande entre à 21 h 46. La réponse part dans la minute, la pièce chiffrée attend votre accord au matin."
+        texte="Une demande entre à 21 h 46. La réponse est prête dans la minute et part seule sur un sujet autorisé d'avance ; la pièce chiffrée attend votre accord au matin."
       >
         <div className="o-demo !rounded-[12px] !shadow-none">
           <div className="o-demo-sep flex items-center justify-between gap-2 px-3.5 py-2.5">
