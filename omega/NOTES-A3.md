@@ -454,6 +454,41 @@ Correctif du script : sur le site servi (plus lent), attendre que l'espace
 soit rendu (`.esp h1`) plutôt qu'un délai fixe ; un axe qui ne tourne pas est
 dit au lieu de planter.
 
+## Lot du 06/10 (11) — la vue Fournisseurs en temps réel (filed_fournisseurs publiée)
+
+- `filed_fournisseurs` est dans la publication `supabase_realtime` (accord de
+  Teo, 06/10). La vue Fournisseurs écoutait déjà la table ; elle écoute aussi
+  `filed_historique` (publiée), qui reçoit une ligne à chaque IBAN proposé,
+  confirmation ou attestation — c'est elle qui fait apparaître un nouvel IBAN
+  tant que `filed_fournisseurs_ibans` n'est pas publiée (**à publier**).
+- `useTempsReel` rend désormais l'état du canal (`inactif` | `connexion` |
+  `en_direct` | `coupe`) ; la vue Fournisseurs l'affiche : « En direct »
+  (point vert) ou, si le réseau refuse le WebSocket, « Relue toutes les
+  30 s » — dans ce cas l'écran **se relit seul toutes les 30 s**
+  (`RELECTURE_SANS_DIRECT_MS`), pour que « sans recharger » reste vrai. Vaut
+  pour tous les écrans qui utilisent `useTempsReel`.
+- **`omega/recette-a3/relecture-temps-reel.mjs`** : deux navigateurs ; A
+  (daf2@) ouvre la fiche d'ORANGE SA et ne recharge jamais ; B (gérant)
+  clique « Revérifier » ; A doit voir la ligne « Identité » changer.
+  **Joué le 06/10 à 13 h 54 Z** : ce conteneur refuse le WebSocket (le
+  mandataire ne fait pas d'Upgrade : `…supabase.co/realtime/v1/websocket` →
+  500) ; canal « coupe », témoin « Relue toutes les 30 s », et la fiche de A
+  a changé **en 55 s sans rechargement** (une seule navigation). L'événement
+  Realtime lui-même n'est **pas vérifiable d'ici** : rejouer le script depuis
+  un poste ordinaire (il dit laquelle des deux voies a servi).
+- **Défaut trouvé chez B7 (VIES)** pendant l'essai : le service VIES français
+  était saturé ; l'API répond **HTTP 200** avec `{"actionSucceed": false,
+  "errorWrappers": [{"error": "MS_MAX_CONCURRENT_REQ"}]}` — sans `valid` ni
+  `userError`. `lireReponseVies` (omega/functions/identite/vies.ts) ne lit
+  que `userError` : la réponse devient **« invalide »** au lieu
+  d'« indisponible ». Effet réel sur le banc : ORANGE SA (4 réponses
+  « valide » cette nuit, la dernière à 13 h 49) est passée « Invalide : VIES
+  ne reconnaît pas ce numéro de TVA » à 13 h 55 et 13 h 57, alors que
+  Sirene le dit actif dans la même réponse. Sa facture (validée) n'est pas
+  touchée ; une prochaine facture serait bloquée. Transmis au coordinateur
+  pour B7 ; un « Revérifier » quand VIES répond remettra le verdict.
+- Recette 190 ✓.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
