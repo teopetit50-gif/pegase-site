@@ -2,7 +2,7 @@
 // spécification OpenAPI de HMRC, v2.0), le jeton OAuth (demandé une fois, renouvelé), un faux fetch. Aucun appel réel.
 
 import { assert, assertEquals } from "@std/assert";
-import { analyserTvaGb, cleTvaGbValide, HMRC_BAC_A_SABLE, HmrcRest, lireReponseHmrc } from "../hmrc.ts";
+import { analyserTvaGb, cleTvaGbValide, HMRC_BAC_A_SABLE, hmrcDepuisEnv, HmrcRest, lireReponseHmrc } from "../hmrc.ts";
 import { HmrcFactice } from "./doubles.ts";
 
 const QUAND = new Date("2026-10-06T15:00:00Z");
@@ -157,4 +157,24 @@ Deno.test("HmrcFactice : le double rend ce qu'on lui a préparé et note les app
   assertEquals((await d.consulter("553557881")).etat, "valide");
   assertEquals((await d.consulter("980780684")).etat, "indisponible");
   assertEquals(d.appels, ["553557881", "980780684"]);
+});
+
+Deno.test("hmrcDepuisEnv : null sans identifiants ; bac à sable par HMRC_BASE ; requérant nettoyé", async () => {
+  const env = (v: Record<string, string>) => ({ get: (n: string) => v[n] });
+  assertEquals(hmrcDepuisEnv(env({})), null);
+  assertEquals(hmrcDepuisEnv(env({ HMRC_CLIENT_ID: "a" })), null);
+  const appels: string[] = [];
+  const f = async (entree: string | URL | Request): Promise<Response> => {
+    appels.push(String(entree));
+    const corps = String(entree).endsWith("/oauth/token") ? { access_token: "j", expires_in: 14400 } : EXEMPLE;
+    return await Promise.resolve(new Response(JSON.stringify(corps), { status: 200 }));
+  };
+  const h = hmrcDepuisEnv(
+    env({ HMRC_CLIENT_ID: "a", HMRC_CLIENT_SECRET: "b", HMRC_BASE: "https://test-api.service.hmrc.gov.uk/", HMRC_VRN_REQUERANT: "GB 146 2959 99727" }),
+    f as typeof fetch,
+  );
+  assert(h);
+  await h.consulter("553557881");
+  assertEquals(appels[0], "https://test-api.service.hmrc.gov.uk/oauth/token");
+  assertEquals(appels[1], "https://test-api.service.hmrc.gov.uk/organisations/vat/check-vat-number/lookup/553557881/146295999727");
 });

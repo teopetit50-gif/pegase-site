@@ -102,6 +102,16 @@ export function lireReponseHmrc(vrn: string, statut: number, corps: Record<strin
   return { etat: "indisponible", preuve: {}, motif: `HMRC : HTTP ${statut}${code ? ` ${code}` : ""}` };
 }
 
+/** HMRC depuis l'environnement : HMRC_CLIENT_ID et HMRC_CLIENT_SECRET (secrets Edge), HMRC_BASE (bac à sable), HMRC_VRN_REQUERANT ; null s'il en manque. */
+export function hmrcDepuisEnv(env: { get(n: string): string | undefined }, fetchFn: typeof fetch = fetch): HmrcRest | null {
+  const clientId = env.get("HMRC_CLIENT_ID")?.trim();
+  const clientSecret = env.get("HMRC_CLIENT_SECRET")?.trim();
+  if (!clientId || !clientSecret) return null;
+  const requerant = env.get("HMRC_VRN_REQUERANT")?.replace(/[^0-9]/g, "") || undefined;
+  const base = env.get("HMRC_BASE")?.trim().replace(/\/+$/, "") || HMRC_PRODUCTION;
+  return new HmrcRest({ clientId, clientSecret, requerant }, fetchFn, base);
+}
+
 /** Le jeton : demandé à la première consultation, gardé jusqu'à une minute avant son expiration. */
 export class HmrcRest implements RegistreHmrc {
   readonly nom = "hmrc";

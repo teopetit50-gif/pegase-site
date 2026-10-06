@@ -5,7 +5,8 @@
 
 import { type ConfigSupabase, type Portes, PortesRpc, rpc } from "@partage/portes.ts";
 
-export type Registre = "sirene" | "vies";
+/** uid_ch (registre IDE suisse) et hmrc (TVA britannique) : branchés côté ouvrier, en attente des contraintes de la base. */
+export type Registre = "sirene" | "vies" | "uid_ch" | "hmrc";
 export type ResultatRegistre = "valide" | "invalide" | "indisponible";
 
 /** Ce que rend identite_a_verifier. */

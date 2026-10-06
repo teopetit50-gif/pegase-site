@@ -272,3 +272,53 @@ Deno.test("vies : valid:false avec une clé de TVA fausse ou un SIREN cessé n'e
   assertEquals(await verifierTravail(ctx, travailDeTest(1, V)), "invalide");
   assertEquals(portes.notations[0].preuve.suspect, undefined);
 });
+
+Deno.test("uid_ch : une IDE suisse est confirmée par le registre IDE ; la forme fausse est refusée sans appel ; non branché → reporté", async () => {
+  const { ctx, portes, uidCh, vies } = contexteDeTest();
+  uidCh.reponses.set("116068369", { etat: "valide", preuve: { registre: "uid_ch", uid: "CHE-116.068.369", nom: "X", tva: { statut: "inscrit" } } });
+  portes.demandes.set(V, demandeDeTest(V, "uid_ch", "CHE116068369MWST"));
+  assertEquals(await verifierTravail(ctx, travailDeTest(1, V)), "valide");
+  assertEquals(uidCh.appels, [{ uid: "116068369", tva: true }]);
+  assertEquals(portes.notations[0].source, "uid_ch");
+  assertEquals(vies.appels.length, 0, "une IDE suisse ne part jamais chez VIES");
+
+  const W = "11111111-0000-4000-8000-000000000002";
+  portes.demandes.set(W, demandeDeTest(W, "uid_ch", "CH123"));
+  assertEquals(await verifierTravail(ctx, travailDeTest(2, W)), "invalide");
+  assertEquals(uidCh.appels.length, 1);
+
+  const X = "11111111-0000-4000-8000-000000000003";
+  portes.demandes.set(X, demandeDeTest(X, "uid_ch", "CHE116068369"));
+  ctx.uidCh = undefined;
+  assertEquals(await verifierTravail(ctx, travailDeTest(3, X)), "repris");
+  assert(portes.echoues[0].erreur.includes("non branché"));
+});
+
+Deno.test("hmrc : une TVA GB est confirmée par HMRC ; sans identifiants HMRC, reportée ; XI et forme fausse refusées sans appel", async () => {
+  const { ctx, portes, hmrc } = contexteDeTest();
+  hmrc.reponses.set("980780684", { etat: "valide", preuve: { registre: "hmrc", numero: "GB980780684", nom: "X LTD" } });
+  portes.demandes.set(V, demandeDeTest(V, "hmrc", "GB980780684"));
+  assertEquals(await verifierTravail(ctx, travailDeTest(1, V)), "valide");
+  assertEquals(hmrc.appels, ["980780684"]);
+  assertEquals(portes.notations[0].source, "hmrc");
+
+  const W = "11111111-0000-4000-8000-000000000002";
+  portes.demandes.set(W, demandeDeTest(W, "hmrc", "XI980780684"));
+  assertEquals(await verifierTravail(ctx, travailDeTest(2, W)), "invalide");
+  assert(String(portes.notations[1].preuve.motif).includes("XI passe par VIES"));
+  assertEquals(hmrc.appels.length, 1);
+
+  const X = "11111111-0000-4000-8000-000000000003";
+  portes.demandes.set(X, demandeDeTest(X, "hmrc", "GB980780684"));
+  ctx.hmrc = null;
+  assertEquals(await verifierTravail(ctx, travailDeTest(3, X, { essais: 5, essais_max: 5 })), "indisponible");
+  assert(String(portes.notations[2].preuve.motif).includes("HMRC non configuré"));
+});
+
+Deno.test("registre inconnu de l'ouvrier : le travail est fini, ignoré, sans deviner un registre", async () => {
+  const { ctx, portes, vies, sirene } = contexteDeTest();
+  portes.demandes.set(V, demandeDeTest(V, "zz" as unknown as "vies", "ZZ123"));
+  assertEquals(await verifierTravail(ctx, travailDeTest(1, V)), "ignore");
+  assertEquals(vies.appels.length + sirene.appels.length, 0);
+  assertEquals((portes.finis[0].resultat as Record<string, unknown>).ignore, "registre inconnu de l'ouvrier");
+});

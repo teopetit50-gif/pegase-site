@@ -44,6 +44,8 @@ export interface BilanPassage {
   version: string;
   sirene: string;
   vies: string;
+  /** « hmrc » quand les identifiants HMRC sont posés, « absent » sinon. */
+  hmrc: string;
   battus: number | null;
   erreur?: string;
 }
@@ -61,6 +63,7 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
     version: versionIdentite(ctx.env, ctx.maintenant()),
     sirene: ctx.sirene.nom,
     vies: ctx.vies.nom,
+    hmrc: ctx.hmrc ? ctx.hmrc.nom : "absent",
     battus: null,
   };
   try {
@@ -103,6 +106,7 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
         duree_ms: bilan.duree_ms,
         sirene: bilan.sirene,
         vies: bilan.vies,
+        hmrc: bilan.hmrc,
         ...(bilan.erreur ? { erreur: bilan.erreur } : {}),
       });
     } catch (e) {

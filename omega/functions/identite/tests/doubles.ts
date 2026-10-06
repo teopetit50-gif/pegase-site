@@ -3,7 +3,7 @@
 // qu'on leur a préparé. Ils enregistrent chaque appel. Aucun appel réseau.
 
 import type { Travail } from "@partage/portes.ts";
-import type { Complement, Demande, Notation, PortesIdentite, ResultatRegistre } from "../portes.ts";
+import type { Complement, Demande, Notation, PortesIdentite, Registre, ResultatRegistre } from "../portes.ts";
 import type { ReponseSirene, Sirene } from "../sirene.ts";
 import type { Contexte } from "../verifier.ts";
 import type { RegistreHmrc, ReponseHmrc } from "../hmrc.ts";
@@ -165,7 +165,7 @@ export function viesValide(pays: string, numero: string, nom = "SAS ATELIER DURA
   };
 }
 
-export function demandeDeTest(id: string, registre: "sirene" | "vies", identifiant: string, extra: Partial<Demande> = {}): Demande {
+export function demandeDeTest(id: string, registre: Registre, identifiant: string, extra: Partial<Demande> = {}): Demande {
   return {
     id,
     client_id: CLIENT_BANC,
@@ -200,10 +200,14 @@ export function contexteDeTest(options: { env?: Record<string, string>; cacheJou
   portes: PortesMemoire;
   sirene: SireneFactice;
   vies: ViesFactice;
+  uidCh: UidChFactice;
+  hmrc: HmrcFactice;
 } {
   const portes = new PortesMemoire();
   const sirene = new SireneFactice();
   const vies = new ViesFactice();
+  const uidCh = new UidChFactice();
+  const hmrc = new HmrcFactice();
   const ctx: Contexte = {
     portes,
     sirene,
@@ -212,8 +216,10 @@ export function contexteDeTest(options: { env?: Record<string, string>; cacheJou
     maintenant: () => new Date("2026-10-05T10:00:00Z"),
     ouvrier: "identite-test",
     cacheJours: options.cacheJours ?? 30,
+    uidCh,
+    hmrc,
   };
-  return { ctx, portes, sirene, vies };
+  return { ctx, portes, sirene, vies, uidCh, hmrc };
 }
 
 /** Capture ce que le journal écrit pendant une fonction, pour vérifier qu'aucune donnée n'y passe. */

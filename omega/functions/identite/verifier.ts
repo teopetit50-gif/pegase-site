@@ -8,6 +8,8 @@ import type { Travail } from "@partage/portes.ts";
 import { analyserTvaFr, nomsConcordent, normaliser, sirenValide } from "./coherence.ts";
 import type { Complement, Demande, PortesIdentite, ResultatRegistre } from "./portes.ts";
 import type { ReponseSirene, Sirene } from "./sirene.ts";
+import { analyserTvaGb, type RegistreHmrc } from "./hmrc.ts";
+import { analyserUidCh, type RegistreUidCh } from "./uid_ch.ts";
 import { paysEtNumero, type Vies } from "./vies.ts";
 
 export interface Contexte {
@@ -19,6 +21,10 @@ export interface Contexte {
   ouvrier: string;
   /** Au-delà, une réponse en cache ne compte plus. */
   cacheJours: number;
+  /** Registre IDE suisse (sans clé). Absent : les demandes uid_ch sont reportées. */
+  uidCh?: RegistreUidCh;
+  /** HMRC (TVA GB) ; null tant que HMRC_CLIENT_ID / HMRC_CLIENT_SECRET manquent : les demandes hmrc sont reportées. */
+  hmrc?: RegistreHmrc | null;
 }
 
 /** « doute » : le registre a refusé, la porte l'a écrit « indisponible » à revérifier (b7_04 : un refus isolé n'est pas un verdict). */
@@ -128,6 +134,60 @@ export async function verifierVies(ctx: Contexte, tva: string, demande: Demande)
   return { resultat: r.etat, source: "vies", preuve, complements };
 }
 
+/** Registre IDE suisse : « CHE-123.456.789 », avec le suffixe MWST/TVA/IVA quand c'est un numéro de TVA. */
+export async function verifierUidCh(ctx: Contexte, identifiant: string): Promise<Verdict> {
+  const a = analyserUidCh(identifiant);
+  if (!a) {
+    return {
+      resultat: "invalide",
+      source: "uid_ch",
+      preuve: { registre: "uid_ch", numero: identifiant, motif: "Pas une IDE suisse (CHE puis neuf chiffres)." },
+      complements: [],
+    };
+  }
+  if (!ctx.uidCh) return { resultat: "indisponible", source: "uid_ch", preuve: {}, complements: [], motif: "Registre IDE non branché." };
+  const r = await ctx.uidCh.consulter(a.uid, a.tva);
+  if (r.etat === "indisponible") {
+    return { resultat: "indisponible", source: "uid_ch", preuve: {}, complements: [], motif: r.motif ?? "Registre IDE indisponible." };
+  }
+  return { resultat: r.etat, source: "uid_ch", preuve: r.preuve, complements: [] };
+}
+
+/** HMRC : un numéro de TVA britannique (GB, 9 ou 12 chiffres). */
+export async function verifierHmrc(ctx: Contexte, identifiant: string): Promise<Verdict> {
+  const a = analyserTvaGb(identifiant);
+  if (!a || a.pays !== "GB") {
+    return {
+      resultat: "invalide",
+      source: "hmrc",
+      preuve: { registre: "hmrc", numero: identifiant, motif: "Pas un numéro de TVA britannique (GB puis 9 ou 12 chiffres ; XI passe par VIES)." },
+      complements: [],
+    };
+  }
+  if (!ctx.hmrc) {
+    return { resultat: "indisponible", source: "hmrc", preuve: {}, complements: [], motif: "HMRC non configuré (HMRC_CLIENT_ID, HMRC_CLIENT_SECRET)." };
+  }
+  const r = await ctx.hmrc.consulter(a.vrn);
+  if (r.etat === "indisponible") return { resultat: "indisponible", source: "hmrc", preuve: {}, complements: [], motif: r.motif ?? "HMRC indisponible." };
+  return { resultat: r.etat, source: "hmrc", preuve: r.preuve, complements: [] };
+}
+
+/** Le registre de la demande ; un registre inconnu de cet ouvrier n'est pas deviné. */
+async function consulterRegistre(ctx: Contexte, d: Demande): Promise<Verdict | null> {
+  switch (d.registre) {
+    case "sirene":
+      return await verifierSirene(ctx, d.identifiant);
+    case "vies":
+      return await verifierVies(ctx, d.identifiant, d);
+    case "uid_ch":
+      return await verifierUidCh(ctx, d.identifiant);
+    case "hmrc":
+      return await verifierHmrc(ctx, d.identifiant);
+    default:
+      return null;
+  }
+}
+
 /** Traite un travail et le rend toujours (fini ou échoué). */
 export async function verifierTravail(ctx: Contexte, t: Travail): Promise<Issue> {
   const debut = Date.now();
@@ -164,7 +224,11 @@ export async function verifierTravail(ctx: Contexte, t: Travail): Promise<Issue>
       return (issue = "cache");
     }
 
-    const v = d.registre === "sirene" ? await verifierSirene(ctx, d.identifiant) : await verifierVies(ctx, d.identifiant, d);
+    const v = await consulterRegistre(ctx, d);
+    if (!v) {
+      await ctx.portes.finirTravail(t.id, { ignore: "registre inconnu de l'ouvrier", registre: d.registre });
+      return (issue = "ignore");
+    }
     source = v.source;
     if (v.resultat === "indisponible") {
       if (t.essais < t.essais_max) {
