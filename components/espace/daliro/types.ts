@@ -541,9 +541,9 @@ export type Recalage = {
 };
 
 /* b6_21 : la météo du chantier (public.btp_meteo_chantier) */
-export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; tmin: number | null; tmax: number | null };
+export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; vent_kmh?: number | null; tmin: number | null; tmax: number | null };
 export type RisqueMeteo = { passage_id: string; tache: string | null; chantier_id: string; jour: string; motifs: string[]; texte: string };
-export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[] };
+export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[]; fournisseur?: "met_norway" | "open_meteo" | null };
 
 /* b6_22 : l'approvisionnement (public.btp_appro_chantier) */
 export type EtatCommande = "a_commander" | "a_commander_vite" | "commande_en_retard" | "commandee" | "livraison_tardive" | "livraison_trop_tot" | "livraison_attendue" | "livree_partielle" | "livree" | "annulee";
