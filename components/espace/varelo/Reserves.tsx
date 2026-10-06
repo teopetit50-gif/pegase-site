@@ -4,7 +4,7 @@
    Les réserves à émettre — VARELO (06/10/2026, B1)
 
    Une livraison reçue avec avarie ou manquant : le transport, les colis, le
-   constat, et le compte à rebours de la protestation au transporteur
+   constat avec ses photos (b1_12), et le compte à rebours de la protestation au transporteur
    (trois jours ouvrables en routier, C. com. art. L133-3 ; sept en CMR ;
    trois en maritime ; quatorze en aérien). Varelo prépare la lettre de
    protestation motivée ; on note son envoi, ou on classe sans suite.
@@ -16,7 +16,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FileText, PackageX } from "lucide-react";
+import { Camera, FileText, PackageX } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -26,20 +26,25 @@ import { lireMontant } from "./encours";
 import {
   LIBELLE_ETAT_RESERVE,
   LIBELLE_MOYEN,
+  PHOTO_MAX_OCTETS,
   REGLES,
   RESERVES_EXEMPLE,
+  adressePhoto,
   aujourdhui,
   chargerReserves,
   classerReception,
   enregistrerReception,
   etatDe,
+  joindrePhoto,
   lettreExemple,
   lettreReserve,
   noterProtestation,
+  photoExemple,
   reserveExemple,
   type ChampsReception,
   type Mode,
   type Moyen,
+  type Photo,
   type Reserve,
 } from "./reserves";
 import type { Contexte, Objet, Societe } from "./types";
@@ -88,15 +93,45 @@ export default function Reserves({ source, contexte, client_id, societes, objets
       if (source === "reelle") {
         const r = await enregistrerReception(client_id, entite_id, c);
         await charger();
-        return { statut: r.statut, echeance: r.echeance };
+        return { id: r.reception, statut: r.statut, echeance: r.echeance };
       }
       await new Promise((x) => setTimeout(x, 300));
       const r = reserveExemple(nouvelId(), entite_id, c, c.objet_id ? (objets.find((o) => o.id === c.objet_id)?.nom_groupe ?? null) : null);
       setLocales((prev) => [...prev, r]);
-      return { statut: r.statut, echeance: r.echeance };
+      return { id: r.id, statut: r.statut, echeance: r.echeance };
     },
     [source, client_id, charger, objets],
   );
+  /* les photos du constat : rend le nombre joint et la première erreur */
+  const ajouterPhotos = useCallback(
+    async (reception_id: string, fichiers: File[]): Promise<{ jointes: number; erreur: string | null }> => {
+      let jointes = 0;
+      let erreur: string | null = null;
+      for (const f of fichiers) {
+        if (!f.type.startsWith("image/")) {
+          erreur ??= `« ${f.name} » n'est pas une image.`;
+          continue;
+        }
+        if (f.size > PHOTO_MAX_OCTETS) {
+          erreur ??= `« ${f.name} » dépasse 15 Mo.`;
+          continue;
+        }
+        try {
+          if (source === "reelle") await joindrePhoto(client_id, reception_id, f);
+          else setLocales((prev) => prev.map((x) => (x.id === reception_id && x.photos.length < 20 ? { ...x, photos: [...x.photos, photoExemple(f)] } : x)));
+          jointes++;
+        } catch (e) {
+          erreur ??= e instanceof Error ? e.message : "La photo n'a pas été jointe.";
+        }
+      }
+      if (source === "reelle" && jointes) await charger();
+      return { jointes, erreur };
+    },
+    [source, client_id, charger],
+  );
+  const [photos, setPhotos] = useState<string | null>(null);
+  const reservePhotos = photos ? toutes.find((x) => x.id === photos) ?? null : null;
+
   const ouvrirLettre = async (r: Reserve) => {
     try {
       const texte = source === "reelle" ? await lettreReserve(r.id) : lettreExemple(r);
@@ -180,7 +215,7 @@ export default function Reserves({ source, contexte, client_id, societes, objets
                       <td>{r.societe}</td>
                       <td>
                         {r.avarie ? <Pastille teinte="ambre">Avarie</Pastille> : null} {r.manquant ? <Pastille teinte="ambre">Manquant</Pastille> : null}
-                        <span className="vrl-paire-sous">{r.colis_attendus !== null && r.colis_recus !== null ? `${r.colis_recus}/${r.colis_attendus} colis · ` : ""}{r.constat ?? "conforme"}{r.montant_estime !== null ? ` · ${montant(r.montant_estime)}` : ""}</span>
+                        <span className="vrl-paire-sous">{r.colis_attendus !== null && r.colis_recus !== null ? `${r.colis_recus}/${r.colis_attendus} colis · ` : ""}{r.constat ?? "conforme"}{r.montant_estime !== null ? ` · ${montant(r.montant_estime)}` : ""}{r.photos.length ? ` · ${r.photos.length} photo${r.photos.length > 1 ? "s" : ""}` : ""}</span>
                       </td>
                       <td>
                         <Pastille teinte={LIBELLE_ETAT_RESERVE[r.etat].teinte}>{LIBELLE_ETAT_RESERVE[r.etat].libelle}</Pastille>
@@ -188,6 +223,7 @@ export default function Reserves({ source, contexte, client_id, societes, objets
                       </td>
                       <td>
                         <span className="esp-item-haut">
+                          <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setPhotos(r.id)} aria-label={`Photos du constat, livraison de ${r.transporteur} du ${dateCourte(r.date_reception)} (${r.photos.length})`}><Camera width={14} height={14} aria-hidden="true" /> Photos{r.photos.length ? ` (${r.photos.length})` : ""}</button>
                           {r.statut === "a_examiner" ? (
                             <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void ouvrirLettre(r)} aria-label={`Préparer la lettre de protestation à ${r.transporteur}, livraison du ${dateCourte(r.date_reception)}`}><FileText width={14} height={14} aria-hidden="true" /> Lettre</button>
                           ) : null}
@@ -206,18 +242,20 @@ export default function Reserves({ source, contexte, client_id, societes, objets
           )}
         </>
       )}
-      {ajout ? <DialogueReception societes={societes} objets={objets} onFermer={() => setAjout(false)} enregistrer={enregistrer} onFait={onFait} /> : null}
+      {ajout ? <DialogueReception societes={societes} objets={objets} onFermer={() => setAjout(false)} enregistrer={enregistrer} ajouterPhotos={ajouterPhotos} onFait={onFait} /> : null}
+      {reservePhotos ? <DialoguePhotos r={reservePhotos} source={source} peutAjouter={peutSaisir} ajouterPhotos={ajouterPhotos} onFermer={() => setPhotos(null)} /> : null}
       {lettre ? <DialogueLettre r={lettre.r} texte={lettre.texte} onFermer={() => setLettre(null)} /> : null}
       {suite ? <DialogueSuite r={suite} onFermer={() => setSuite(null)} decider={decider} onFait={onFait} /> : null}
     </section>
   );
 }
 
-function DialogueReception({ societes, objets, onFermer, enregistrer, onFait }: {
+function DialogueReception({ societes, objets, onFermer, enregistrer, ajouterPhotos, onFait }: {
   societes: Societe[];
   objets: Objet[];
   onFermer: () => void;
-  enregistrer: (entite_id: string, c: ChampsReception) => Promise<{ statut: string; echeance: string }>;
+  enregistrer: (entite_id: string, c: ChampsReception) => Promise<{ id: string; statut: string; echeance: string }>;
+  ajouterPhotos: (reception_id: string, fichiers: File[]) => Promise<{ jointes: number; erreur: string | null }>;
   onFait: (m: string) => void;
 }) {
   const fournisseurs = useMemo(() => objets.filter((o) => o.nature === "fournisseur" && o.statut === "actif" && !o.intragroupe), [objets]);
@@ -235,6 +273,7 @@ function DialogueReception({ societes, objets, onFermer, enregistrer, onFait }: 
   const [constat, setConstat] = useState("");
   const [surBon, setSurBon] = useState("");
   const [montantTxt, setMontantTxt] = useState("");
+  const [fichiers, setFichiers] = useState<File[]>([]);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const nA = attendus.trim() ? Number(attendus) : null;
@@ -247,7 +286,9 @@ function DialogueReception({ societes, objets, onFermer, enregistrer, onFait }: 
     setErreur(null);
     try {
       const r = await enregistrer(entite, { date_reception: date, mode, transporteur: transporteur.trim(), document_transport: document.trim() || null, objet_id: objet || null, expediteur: objet ? null : expediteur.trim() || null, colis_attendus: nA, colis_recus: nR, avarie, manquant, constat: constat.trim() || null, reserves_sur_bon: surBon.trim() || null, montant_estime: m });
-      onFait(r.statut === "sans_suite" ? "Livraison conforme enregistrée : rien à protester." : `Livraison enregistrée : la protestation à ${transporteur.trim()} doit partir avant le ${dateCourte(r.echeance)}. La lettre est prête.`);
+      const p = fichiers.length ? await ajouterPhotos(r.id, fichiers) : { jointes: 0, erreur: null };
+      const dePhotos = p.jointes ? ` ${p.jointes} photo${p.jointes > 1 ? "s" : ""} du constat jointe${p.jointes > 1 ? "s" : ""}.` : "";
+      onFait((r.statut === "sans_suite" ? "Livraison conforme enregistrée : rien à protester." : `Livraison enregistrée : la protestation à ${transporteur.trim()} doit partir avant le ${dateCourte(r.echeance)}. La lettre est prête.`) + dePhotos + (p.erreur ? ` Une photo n'a pas suivi : ${p.erreur}` : ""));
       onFermer();
     } catch (x) {
       setErreur(x instanceof Error ? x.message : "La livraison n'a pas été enregistrée.");
@@ -324,6 +365,10 @@ function DialogueReception({ societes, objets, onFermer, enregistrer, onFait }: 
                 <input className="rv-champ" inputMode="decimal" value={montantTxt} onChange={(x) => setMontantTxt(x.target.value)} />
               </label>
             </div>
+            <label className="rv-libelle">Photos du constat
+              <input type="file" className="rv-champ" accept="image/*" multiple onChange={(x) => setFichiers(Array.from(x.target.files ?? []).slice(0, 20))} />
+              <span className="esp-kpi-sous">{fichiers.length ? `${fichiers.length} photo${fichiers.length > 1 ? "s" : ""} choisie${fichiers.length > 1 ? "s" : ""}` : "l'emballage, l'étiquette, le dommage : vingt au plus, 15 Mo chacune"}</span>
+            </label>
             {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
           </div>
         </DialogBody>
@@ -425,6 +470,80 @@ function DialogueSuite({ r, onFermer, decider, onFait }: { r: Reserve; onFermer:
         <DialogFooter>
           <button type="button" className="r-btn r-btn--noir" disabled={!valide || envoi} onClick={envoyer}>{envoi ? <Loader variant="spin" /> : null} Noter</button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DialoguePhotos({ r, source, peutAjouter, ajouterPhotos, onFermer }: {
+  r: Reserve;
+  source: Source;
+  peutAjouter: boolean;
+  ajouterPhotos: (reception_id: string, fichiers: File[]) => Promise<{ jointes: number; erreur: string | null }>;
+  onFermer: () => void;
+}) {
+  const [adresses, setAdresses] = useState<Record<string, string>>({});
+  const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [fait, setFait] = useState<string | null>(null);
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let vivant = true;
+    void Promise.all(r.photos.filter((p) => !(p.chemin in adresses)).map(async (p) => [p.chemin, await adressePhoto(p.chemin).catch(() => "")] as const)).then((l) => {
+      if (vivant && l.length) setAdresses((prev) => ({ ...prev, ...Object.fromEntries(l) }));
+    });
+    return () => {
+      vivant = false;
+    };
+  }, [source, r.photos, adresses]);
+  const ajouter = async (fichiers: File[]) => {
+    if (!fichiers.length) return;
+    setEnvoi(true);
+    setErreur(null);
+    setFait(null);
+    const p = await ajouterPhotos(r.id, fichiers);
+    setEnvoi(false);
+    if (p.jointes) setFait(`${p.jointes} photo${p.jointes > 1 ? "s" : ""} jointe${p.jointes > 1 ? "s" : ""}.`);
+    if (p.erreur) setErreur(p.erreur);
+  };
+  const url = (p: Photo) => p.url ?? adresses[p.chemin];
+  return (
+    <Dialog open onOpenChange={(o) => !o && !envoi && onFermer()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><Camera width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Photos du constat — {r.transporteur}, livraison du {dateCourte(r.date_reception)}</DialogTitle>
+          <DialogDescription>Elles accompagnent la lettre de protestation : l&apos;emballage avant ouverture, l&apos;étiquette, chaque dommage. Gardées dans l&apos;espace du groupe, jamais transmises au transporteur sans vous.</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          {r.photos.length ? (
+            <ul className="vrl-photos" aria-label="Photos jointes">
+              {r.photos.map((p) => (
+                <li key={p.chemin}>
+                  {url(p) ? (
+                    <a href={url(p)} target="_blank" rel="noreferrer">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- adresse signée du bucket, sans optimisation d'image */}
+                      <img src={url(p)} alt={`Photo du constat : ${p.nom}`} />
+                    </a>
+                  ) : (
+                    <span className="vrl-photo-attente" aria-hidden="true" />
+                  )}
+                  <span className="vrl-paire-sous">{p.nom}{p.octets ? ` · ${Math.max(1, Math.round(p.octets / 1024))} ko` : ""} · {dateCourte(p.depose_le)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="esp-kpi-sous">Aucune photo jointe : la lettre dira qu&apos;elles sont tenues à disposition.</p>
+          )}
+          {peutAjouter ? (
+            <label className="rv-libelle" style={{ marginTop: 12 }}>Ajouter des photos
+              <input type="file" className="rv-champ" accept="image/*" multiple disabled={envoi || r.photos.length >= 20} onChange={(x) => void ajouter(Array.from(x.target.files ?? []).slice(0, 20 - r.photos.length))} />
+            </label>
+          ) : null}
+          {envoi ? <Chargement texte="Envoi des photos…" /> : null}
+          {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
+          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+        </DialogBody>
       </DialogContent>
     </Dialog>
   );

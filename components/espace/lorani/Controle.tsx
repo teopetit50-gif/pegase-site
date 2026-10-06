@@ -278,7 +278,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           {corrigesIci.length ? (
             <details className="lor-temps-recents">
               <summary>Corrigés depuis l’indice {precedent?.indice ?? "précédent"} ({corrigesIci.length})</summary>
-              <ul className="esp-fil">
+              <ul className="lor-liste">
                 {corrigesIci.map((k) => <li key={k.id}><Pastille teinte="vert">Corrigé à l’indice {c.indice}</Pastille> {k.titre}</li>)}
               </ul>
             </details>
@@ -286,7 +286,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           {decides.length ? (
             <details className="lor-temps-recents">
               <summary>Décidés ({decides.length})</summary>
-              <ul className="esp-fil">
+              <ul className="lor-liste">
                 {decides.map((k) => {
                   const d = DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
                   return (

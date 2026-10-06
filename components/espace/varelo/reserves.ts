@@ -3,7 +3,8 @@
 
    Formes décalquées de omega/modules/varelo/migrations/b1_11_reserves.sql :
    vue grp_reserves ; portes grp_enregistrer_reception, grp_lettre_reserve,
-   grp_noter_protestation, grp_classer_reception. En base réelle, la date
+   grp_noter_protestation, grp_classer_reception ; et b1_12_photos.sql :
+   les photos du constat (colonne photos, porte grp_joindre_photo). En base réelle, la date
    limite vient du moteur de délais du socle (public.echeance_de, fériés du
    territoire de la société) ; l'exemple la calcule sans les fériés.
    ══════════════════════════════════════════════════════════════════════ */
@@ -16,6 +17,8 @@ import { ANNECY, SOCIETES_EXEMPLE } from "./exemples";
 export type Mode = "routier" | "cmr" | "maritime" | "aerien";
 export type EtatReserve = "depasse" | "aujourdhui" | "demain" | "a_venir" | "protestee" | "protestee_hors_delai" | "sans_suite";
 export type Moyen = "lrar" | "acte" | "lre" | "courriel" | "portail";
+/* une photo du constat : son chemin dans le bucket omega-clients (base réelle) ou une adresse locale (exemple) */
+export type Photo = { chemin: string; nom: string; octets: number | null; type: string; depose_le: string; url?: string };
 
 /* une ligne de grp_reserves */
 export type Reserve = {
@@ -48,6 +51,7 @@ export type Reserve = {
   protestation_moyen: Moyen | null;
   motif: string | null;
   etat: EtatReserve;
+  photos: Photo[];
 };
 
 export const REGLES: Record<Mode, { libelle: string; jours: number; ouvrables: boolean; source: string }> = {
@@ -131,6 +135,7 @@ export function reserveExemple(id: string, entite_id: string, c: ChampsReception
     regle_source: REGLES[c.mode].source, echeance: ech, jours_restants: ecart(ech, aujourdhui()),
     calcul_detail: `${REGLES[c.mode].jours} jours${REGLES[c.mode].ouvrables ? " ouvrables" : ""} à compter du ${c.date_reception.split("-").reverse().join("/")} (exemple : sans les jours fériés)`,
     statut, protestation_le: null, protestation_moyen: null, motif: statut === "sans_suite" ? "livraison conforme : ni avarie ni manquant" : null, etat: etatDe(base),
+    photos: [],
   };
 }
 
@@ -152,7 +157,7 @@ export function lettreExemple(r: Reserve): string {
     `Nous avons reçu le ${dr} la livraison${r.expediteur ? ` expédiée par ${r.expediteur}` : ""}${r.colis_attendus !== null && r.colis_recus !== null ? ` : ${r.colis_attendus} colis annoncés, ${r.colis_recus} reçus` : ""}. ${r.reserves_sur_bon ? `Les réserves suivantes ont été portées sur le bon de livraison : « ${r.reserves_sur_bon} ».` : "Aucune réserve n'a pu être portée sur le bon au moment de la livraison."}`, "",
     `Constat : ${r.constat ?? "—"}`,
     ...(r.montant_estime !== null ? [`Préjudice estimé à ce jour : ${r.montant_estime.toLocaleString("fr-FR")} €.`] : []),
-    "Les photographies du constat sont tenues à votre disposition.", "",
+    r.photos.length === 0 ? "Les photographies du constat sont tenues à votre disposition." : r.photos.length === 1 ? "Une photographie du constat est jointe à la présente." : `${r.photos.length} photographies du constat sont jointes à la présente.`, "",
     `Nous vous adressons, par la présente, notre protestation motivée pour ${nature}, et réservons tous nos droits à indemnisation${r.montant_estime !== null ? ", à hauteur du préjudice subi" : ""}.`, "",
     `Cette protestation vous est notifiée dans le délai prévu : ${r.regle_source ?? ""} (${r.calcul_detail ?? ""}).`, "",
     "Veuillez agréer, Madame, Monsieur, nos salutations distinguées.", "", r.societe,
@@ -167,7 +172,7 @@ function message(e: unknown): string {
 export async function chargerReserves(client_id: string): Promise<Reserve[]> {
   const { data, error } = await createClient().from("grp_reserves").select("*").eq("client_id", client_id).order("echeance").limit(1000);
   if (error) throw new ErreurPorte(message(error));
-  return ((data ?? []) as Reserve[]).map((r) => ({ ...r, montant_estime: r.montant_estime === null ? null : Number(r.montant_estime) }));
+  return ((data ?? []) as Reserve[]).map((r) => ({ ...r, montant_estime: r.montant_estime === null ? null : Number(r.montant_estime), photos: Array.isArray(r.photos) ? r.photos : [] }));
 }
 async function rpc<T>(nom: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await createClient().rpc(nom, args);
@@ -180,3 +185,23 @@ export const lettreReserve = (id: string) => rpc<string>("grp_lettre_reserve", {
 export const noterProtestation = (id: string, date: string, moyen: Moyen, motif: string | null) =>
   rpc<{ hors_delai: boolean; avertissement: string | null }>("grp_noter_protestation", { p_reception: id, p_date: date, p_moyen: moyen, p_motif: motif });
 export const classerReception = (id: string, motif: string) => rpc<null>("grp_classer_reception", { p_reception: id, p_motif: motif });
+
+/* Une photo du constat : le fichier part dans le bucket omega-clients sous
+   <client>/grp_receptions/<livraison>/… (politique Storage INSERT du socle,
+   lot 19o), puis la porte grp_joindre_photo vérifie et l'inscrit. */
+export const PHOTO_MAX_OCTETS = 15 * 1024 * 1024;
+export async function joindrePhoto(client_id: string, reception_id: string, fichier: File): Promise<number> {
+  const supabase = createClient();
+  const nom = fichier.name.replace(/[^\w.\-]+/g, "_").slice(0, 120) || "photo";
+  const chemin = `${client_id}/grp_receptions/${reception_id}/${Date.now()}-${nom}`;
+  const envoi = await supabase.storage.from("omega-clients").upload(chemin, fichier, { upsert: false, contentType: fichier.type || "application/octet-stream" });
+  if (envoi.error) throw new ErreurPorte(message(envoi.error));
+  const r = await rpc<{ photos: number }>("grp_joindre_photo", { p_reception: reception_id, p_chemin: chemin, p_nom: fichier.name.slice(0, 200) });
+  return r.photos;
+}
+export async function adressePhoto(chemin: string): Promise<string> {
+  const { data, error } = await createClient().storage.from("omega-clients").createSignedUrl(chemin, 600);
+  if (error || !data) throw new ErreurPorte(error ? message(error) : "La photo n'a pas pu être lue.");
+  return data.signedUrl;
+}
+export const photoExemple = (f: File): Photo => ({ chemin: `exemple/${Date.now()}-${f.name}`, nom: f.name, octets: f.size, type: f.type, depose_le: new Date().toISOString(), url: URL.createObjectURL(f) });

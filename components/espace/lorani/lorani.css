@@ -342,7 +342,9 @@
 }
 
 /* ——— le chantier : situations à viser (b5_13) ——— */
-.esp .lor-situation {
+.esp .lor-situation,
+.esp .lor-os,
+.esp .lor-reserve {
   display: grid;
   gap: 8px;
   padding: 12px 14px;
@@ -350,7 +352,8 @@
   border-radius: 12px;
   box-shadow: 0 0 0 1px var(--r-filet);
 }
-.esp .lor-situation[data-retard] {
+.esp .lor-situation[data-retard],
+.esp .lor-reserve[data-retard] {
   box-shadow: 0 0 0 1px var(--esp-rouge);
 }
 .esp .lor-situation-tete {
@@ -359,7 +362,8 @@
   align-items: center;
   gap: 6px 10px;
 }
-.esp .lor-situation .esp-actions {
+.esp .lor-situation .esp-actions,
+.esp .lor-reserve .esp-actions {
   margin: 0;
 }
 .esp .lor-chantier {
@@ -447,4 +451,27 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 6px 14px;
+}
+
+/* ——— ordres de service et réserves (b5_19) ——— */
+/* une liste simple (esp-fil est une frise à deux colonnes : pas pour du texte libre) */
+.esp .lor-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.esp .lor-liste > li {
+  padding: 7px 0;
+  border-top: 1px solid var(--r-filet);
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.esp .lor-liste > li:first-child {
+  border-top: 0;
+}
+/* une réserve levée ou contestée : fond grisé, sans baisser le contraste du texte */
+.esp .lor-reserve[data-statut="levee"],
+.esp .lor-reserve[data-statut="contestee"] {
+  background: #fafafa;
 }

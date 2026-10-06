@@ -118,7 +118,7 @@ for (const largeur of [390, 1440]) {
   dire(`varelo ${largeur}, dialogue d'ajout d'un reporting`, await analyser(s, `document.querySelector('[role="dialog"]')`));
 
   /* b1_11 : les réserves à émettre, la lettre et la suite */
-  for (const [bouton, nom] of [[`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] .esp-carte-tete button')].find(b => /Enregistrer une livraison/.test(b.textContent))`, "d'enregistrement d'une livraison"], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Lettre/.test(b.textContent))`, 'de la lettre de protestation'], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Suite/.test(b.textContent))`, 'de la suite donnée']]) {
+  for (const [bouton, nom] of [[`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] .esp-carte-tete button')].find(b => /Enregistrer une livraison/.test(b.textContent))`, "d'enregistrement d'une livraison"], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Lettre/.test(b.textContent))`, 'de la lettre de protestation'], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Suite/.test(b.textContent))`, 'de la suite donnée'], [`[...document.querySelectorAll('section[aria-label="Réserves à émettre"] tbody button')].find(b => /Photos/.test(b.textContent))`, 'des photos du constat']]) {
     await s.aller(base + '/espace/varelo');
     await s.dormir(800);
     await s.evaluer(axe + ';true');

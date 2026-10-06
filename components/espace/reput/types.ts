@@ -51,6 +51,9 @@ export type Demande = {
   langue: string | null;
   urgence: boolean;
   couverte: boolean | null;
+  de_empreinte?: string | null;
+  litige?: boolean;
+  escaladee_le?: string | null;
   motif: string | null;
   recu_le: string;
   preparee_le: string | null;
@@ -85,6 +88,7 @@ export type Sujet = {
   autorisable: boolean;
   actif: boolean;
   ordre: number;
+  delai_heures?: number | null;
 };
 
 export type AccordSujet = {
@@ -115,6 +119,7 @@ export type Reglages = {
   texte_accuse: string;
   lien_avis: string | null;
   texte_avis: string;
+  avis_auto_reglement?: boolean;
 };
 
 export type Avis = {

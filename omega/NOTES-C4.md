@@ -277,35 +277,65 @@ tsc, eslint, build verts ; recette 5 largeurs sans débordement.
 `offload_noter_contact(p_compte uuid, p_le date, p_canal text, p_par text, p_note text)`,
 `offload_rapprocher(p_client uuid)`, `offload_trancher_rapprochement(p_rapprochement uuid, p_accepter boolean)`.
 
-## Lignes de capacité (`lib/produits/capacites/reprise.ts`) — tenue et preuve
+## Lignes de capacité (`lib/produits/capacites/reprise.ts`, 45 lignes) — tenue et preuve
 
-Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve posée en recette.
+Recette du 06/10, 17 h 10 Z (coordinateur) : `^test_(b3_|c4_|b4_24_|b6_16_)` → 834 ok, 0 not ok ; migrations
+c4_01 à c4_06 posées ; `banc_offload.sql` joué (essai, branché, jeux « clients, ventes ») ; écran fusionné dans main.
+Le fichier compte 45 lignes (8+8+8+8+7+6), et non 46 comme l’audit l’indiquait. Bilan : **18 prouvées sur la recette**, 1 prouvée en local (assertion à rejouer), 4 partielles, 22 non
+construites. Rien n'est basculé `atteste: true` par moi ; c'est au coordinateur. Les lignes prouvées se voient à
+l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, tâches, doublons, reprise en main, contact).
 
-| Ligne | État | Preuve |
-|---|---|---|
-| Le système croise votre historique de facturation et le référentiel clients de votre CRM. | **palier 1 livré (à poser)** | jeux `clients` + `ventes`, `test_c4_01_import` (comptes du référentiel, ventes rattachées, client absent créé) |
-| Un tableur sans colonne de date est exploité à partir des dates de facture. | **palier 1 + 2 livrés (à poser)** : le fichier clients sans date prend ses dates dans les factures ; un compte que rien ne date est `sans_achat`, présenté à part | `test_c4_01_import`, `test_c4_02_detection` |
-| Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez. | **palier 2 livré (à poser)** — dernier contact = dernier achat pour l'instant ; les reprises du palier 3 s'y ajouteront | `offload_signaux.dernier_achat`, `jours_silence`, réglage `delai_silence_jours` ; `test_c4_02_detection` |
-| La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté. | **palier 2 livré (à poser)** | `rythme_jours`, raisons `retard` / `silence` / `ralenti` ; `test_c4_02_detection` |
-| Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique. | **palier 2 livré (à poser)** | `priorite` = valeur annuelle × score ; assertion « le premier de la liste est celui qui pèse le plus » |
-| Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | **palier 3 livré (à poser)** | `private.offload_message` ; `test_c4_03_message` |
-| Un compte sans réponse reçoit un second message, puis il sort du cycle. | **palier 3 livré (à poser)** | cycle : relance puis `sans_reponse` ; `test_c4_03_cycle` |
-| Un compte reçoit deux messages en tout, espacés d'au moins trois jours. | **palier 3 livré (à poser)** | `delai_relance_jours` ≥ 3 (contrainte) ; « deux messages en tout, jamais un troisième » ; quarantaine |
-| Une réponse, même négative, arrête la séquence et vous rend la conversation. | **palier 3 livré (à poser)** | `offload_lire_reponse` : pause socle, tâche « répondre » ; `test_c4_03_reponse` |
-| Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit. | **palier 3 livré (à poser)** | message tiré de l'historique seul ; assertion « aucun prix, aucune remise, aucun délai » |
-| Une demande d'arrêt vaut retrait immédiat et définitif du cycle. | **palier 3 livré (à poser)** | désinscription socle + compte `arrete` ; `test_c4_03_reponse` |
-| Chaque message parti reste au journal, daté et consultable. | **palier 3 livré (à poser)** | `offload.message_envoye` au journal opposable + l'envoi du socle |
-| Les vagues s'enchaînent au rythme convenu, et chaque exécution laisse son bilan. | **palier 3 livré (à poser)** | cycle quotidien, `plafond_reprises_jour`, bilan `offload.cycle` au journal |
-| Les comptes réactivés sont suivis jusqu'à leur première commande. | **palier 3 livré (à poser)** | issue `commande` ; `test_c4_03_issues` |
-| Les messages partent par courriel, depuis la boîte de votre entreprise. | **partiel** : OFFLOAD prépare des courriels ; l'expéditeur (boîte de l'entreprise) est celui du socle (A2 : Gmail / Microsoft 365 pas encore branchés) | — |
-| Le système s'arrête de lui-même au premier doute, et vous le signale. | **partiel** : import douteux non appliqué, essai contre réel, verrous du socle ; d'autres doutes au palier 5 | `test_c4_01_garde_fou`, `test_c4_03_issues` |
-| Les doublons de fiches sont rapprochés quand deux lignes désignent le même client. | **c4_05 livré (à poser)** | rapprochements proposés avec raisons, fusion après accord ; `test_c4_05_doublons` |
-| Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | **partiel** : `groupe` lu dans les exports, plafond au groupe ; pas encore de vue consolidée par groupe | `test_c4_05_exclusions` |
-| Un compte suivi en direct par un commercial est exclu du cycle automatique. | **c4_05 livré (à poser)** | statut `exclu`, `offload_ecarte` ; `test_c4_05_reprise_en_main` |
-| Le commercial en charge reprend la main sur un compte d'un seul geste. | **c4_05 livré (à poser)** | `offload_changer_statut` : reprise close, messages annulés ; `test_c4_05_reprise_en_main` |
-| Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **c4_05 livré (à poser)** | `offload_exclusions` (+ groupe) ; `test_c4_05_exclusions` |
-| Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | **c4_05 livré (à poser)** | `offload_contacts` ; `test_c4_05_exclusions` |
-| Les autres lignes (échéances et renouvellements, affaires restées en plan, pilotage, contrats et équipements, règles de ton en français) | à venir (lots suivants) | — |
+| # | Ligne | État | Preuve |
+|---|---|---|---|
+| 1 | Le système croise votre historique de facturation et le référentiel clients de votre CRM. | **prouvée (recette)** | test_c4_01_import |
+| 2 | Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez. | **prouvée (recette)** | test_c4_02_detection (seuil `delai_silence_jours`, dernier achat) ; test_c4_05_exclusions (`dernier_contact`) |
+| 3 | La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté. | **prouvée (recette)** | test_c4_02_detection |
+| 4 | Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique. | **prouvée (recette)** | test_c4_02_detection (« le premier de la liste est celui qui pèse le plus ») ; test_c4_04_lectures |
+| 5 | Les doublons de fiches sont rapprochés quand deux lignes désignent le même client. | **prouvée (recette)** | test_c4_05_doublons |
+| 6 | Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | partielle | `groupe` lu dans les exports, plafond au groupe (test_c4_05_exclusions) ; pas de vue consolidée par raison sociale mère |
+| 7 | Un tableur sans colonne de date est exploité à partir des dates de facture. | **prouvée (recette)** | test_c4_01_import ; test_c4_02_detection (`sans_achat` présenté à part) |
+| 8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | non construite | — |
+| 9 | Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | **prouvée (recette)** | test_c4_03_message |
+| 10 | Un compte sans réponse reçoit un second message, puis il sort du cycle. | **prouvée (recette)** | test_c4_03_cycle |
+| 11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | partielle | seule la signature se règle ; pas de règles de ton appliquées au message |
+| 12 | Un compte reçoit deux messages en tout, espacés d'au moins trois jours. | **prouvée (recette)** | test_c4_03_cycle (« deux messages en tout, jamais un troisième » ; contrainte `delai_relance_jours` ≥ 3) |
+| 13 | Une réponse, même négative, arrête la séquence et vous rend la conversation. | **prouvée (recette)** | test_c4_03_reponse |
+| 14 | Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | **prouvée (recette)** | test_c4_05_exclusions |
+| 15 | Les messages partent par courriel, depuis la boîte de votre entreprise. | partielle | OFFLOAD prépare des courriels validés ; la boîte de l'entreprise dépend de l'expéditeur du socle (A2 : Gmail / Microsoft 365 pas branchés) ; rien n'est parti en réel |
+| 16 | Les vagues s'enchaînent au rythme convenu, et chaque exécution laisse son bilan. | **prouvée (recette)** | test_c4_03_cycle (bilan `offload.cycle`) ; test_c4_05_exclusions (bilan des écartés) |
+| 17 | Les entretiens, révisions et contrôles périodiques sont suivis jusqu'à leur échéance. | non construite | — |
+| 18 | Chaque échéance est datée à partir de la dernière intervention enregistrée. | non construite | — |
+| 19 | Le client est prévenu la semaine qui précède, pas le jour où l'échéance tombe. | non construite | — |
+| 20 | Une échéance déjà honorée ailleurs sort du cycle dès que la date est connue. | non construite | — |
+| 21 | Les contrats d'entretien qui s'éteignent faute de reconduction sont signalés. | non construite | — |
+| 22 | Les équipements installés sont rattachés au compte qui les exploite. | non construite | — |
+| 23 | Un parc réparti sur plusieurs sites se lit site par site et en consolidé. | non construite | — |
+| 24 | Les échéances réglementaires sont distinguées des échéances commerciales. | non construite | — |
+| 25 | Les commandes arrivées qu'aucun client n'est venu reprendre sont listées. | non construite | — |
+| 26 | Les interventions terminées et non retirées sont relancées après le délai que vous fixez. | non construite | — |
+| 27 | Le stock immobilisé par une commande non reprise est chiffré. | non construite | — |
+| 28 | Une pièce commandée pour un compte inactif est rattachée à sa fiche. | non construite | — |
+| 29 | Les affaires closes sans suite sont distinguées de celles qui attendent encore. | non construite | — |
+| 30 | Un compte relancé deux fois sans réponse passe en décision manuelle. | non construite | — |
+| 31 | La relance de retrait ne porte aucune mention de paiement, qui relève de CASHD. | non construite | — |
+| 32 | Le magasin voit en une liste ce qui dort et depuis combien de temps. | non construite | — |
+| 33 | Un compte suivi en direct par un commercial est exclu du cycle automatique. | **prouvée (recette)** | test_c4_05_reprise_en_main ; test_c4_03_cycle |
+| 34 | Le commercial en charge reprend la main sur un compte d'un seul geste. | **prouvée (recette)** | test_c4_05_reprise_en_main |
+| 35 | Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit. | **prouvée (recette)** | test_c4_03_message |
+| 36 | Une demande d'arrêt vaut retrait immédiat et définitif du cycle. | **prouvée (recette)** | test_c4_03_reponse |
+| 37 | Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **prouvée (recette)** | test_c4_05_exclusions |
+| 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | partielle | import douteux non appliqué et journalisé (test_c4_01_garde_fou) ; essai contre réel (test_c4_03_issues) ; verrous du socle. Pas un arrêt général du module |
+| 39 | Chaque message parti reste au journal, daté et consultable. | **prouvée (local)** | test_c4_03_cycle — assertion ajoutée le 06/10 (17 h 30), verte en local, **à rejouer** sur la recette |
+| 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | non construite | — |
+| 41 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **prouvée (recette)** | test_c4_03_issues |
+| 42 | Le taux de réponse se compare par segment, par canal et par message. | non construite | — |
+| 43 | Les échéances honorées et les commandes reprises alimentent un tableau de suivi. | non construite | — |
+| 44 | Les résultats se lisent par entité, par site et en consolidé. | non construite | — |
+| 45 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | non construite | — |
+
+Non construites : les huit lignes « Échéances et renouvellements » et les huit « Affaires restées en plan » (moteur
+CYCLE), le suivi des contrats et équipements, et quatre lignes de « Pilotage » (chiffre remis en jeu par vague,
+taux de réponse par segment, tableau des échéances et commandes reprises, résultats par entité, export tableur).
 
 ## Journal
 
@@ -320,6 +350,7 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 - 06/10 — c4_01 refusé à la pose (clé facultative) : corrigé ; Q2, Q3, Q4 appliqués (f99562d).
 - 06/10 — coordinateur : c4_01 à c4_05 et leurs tests POSÉS sur la recette (f99562d) ; test 44 sans aucune fonction C4.
 - 06/10 — c4_06 (source « contrat ») poussé (1421d9f).
+- 06/10, 17 h 10 Z — recette verte (834 ok, 0 not ok), banc posé, écran fusionné dans main (23a5bd9). Assertion « message parti au journal » ajoutée (222 vertes en local).
 - 06/10 — recette : 8 tests verts sur 19. Cause principale, dans MES tests : `throws_ok(sql, code, 'phrase')` — à trois
   arguments, pgTAP lit le 3e comme le message d'erreur attendu. Tous les appels passent à
   `throws_ok(sql, code, null, 'description')` ; le pgTAP factice local imite désormais ce comportement (il

@@ -163,6 +163,130 @@ begin
   return jsonb_build_object('manifeste', v_m, 'fichiers', v_liste);
 end $$;
 
+-- Le point du matin (souche de deposer_section et retirer_section, à la forme de la recette : la section dans
+-- points_sections, ses lignes dans points_items ; le vrai socle valide les lignes et refuse le texte libre sur un objet
+-- chiffré ; retirer une section la fait disparaître avec ses lignes).
+create table public.points_sections (id uuid primary key default gen_random_uuid(), client_id uuid not null, module text not null, jour date not null,
+  destinataire uuid, role text, equipe_id uuid, entite_id uuid, titre text not null, ordre integer, nb_items integer not null default 0,
+  depose_le timestamptz not null default now(), maj_le timestamptz not null default now(),
+  unique nulls not distinct (client_id, module, jour, destinataire, role, titre));
+create table public.points_items (id uuid primary key default gen_random_uuid(), client_id uuid not null, section_id uuid not null references public.points_sections(id) on delete cascade,
+  rang integer not null, texte text not null, lien text, gravite text not null, objet_type text, objet_id text, gabarit text, gabarit_version integer, valeurs jsonb);
+create or replace function private.deposer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_items jsonb, p_entite uuid default null, p_equipe uuid default null, p_sante boolean default false, p_donnees_du timestamptz default null, p_incomplete boolean default false, p_ordre integer default 100) returns uuid language plpgsql security definer set search_path to '' as $$
+declare v_id uuid;
+begin
+  if num_nonnulls(p_destinataire, p_role, p_equipe) <> 1 then raise exception 'un seul destinataire' using errcode = '22023'; end if;
+  if exists (select 1 from jsonb_array_elements(p_items) e where e ? 'objet_type' or coalesce(e ->> 'gravite', '') not in ('info', 'attention', 'critique')
+             or left(e ->> 'lien', 1) <> '/' or char_length(e ->> 'texte') > 300) then
+    raise exception 'ligne refusée par la souche' using errcode = '22023';
+  end if;
+  insert into public.points_sections (client_id, module, jour, destinataire, role, titre, ordre, nb_items)
+  values (p_client, p_module, p_jour, p_destinataire, p_role, p_titre, p_ordre, jsonb_array_length(p_items))
+  on conflict (client_id, module, jour, destinataire, role, titre) do update set nb_items = excluded.nb_items, maj_le = now()
+  returning id into v_id;
+  delete from public.points_items where section_id = v_id;
+  insert into public.points_items (client_id, section_id, rang, texte, lien, gravite)
+  select p_client, v_id, x.n, x.e ->> 'texte', x.e ->> 'lien', x.e ->> 'gravite' from jsonb_array_elements(p_items) with ordinality x(e, n);
+  return v_id;
+end $$;
+create or replace function private.retirer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_entite uuid default null, p_equipe uuid default null) returns boolean language plpgsql security definer set search_path to '' as $$
+begin
+  delete from public.points_sections
+   where client_id = p_client and module = p_module and jour = p_jour and destinataire is not distinct from p_destinataire
+     and role is not distinct from p_role and titre = p_titre;
+  return found;
+end $$;
+
+-- voit_objet, imitée au plus large (tout membre du cabinet voit) : le pire cas, celui d'un objet sans gardien inscrit.
+create or replace function private.voit_objet(p_client uuid, p_type text, p_id text) returns boolean language sql stable security definer set search_path to '' as $$
+  select exists (select 1 from public.comptes c where c.user_id = (select auth.uid()) and c.client_id = p_client) $$;
+-- Les analyses longues (copie de omega/modules/socle/migrations/19an_analyses.sql, worker-a1 fd0bb0e : la table et
+-- private.demander_analyse ; la RLS du socle passe par voit_objet, non imitée ici).
+create table if not exists public.analyses (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null references public.clients(id),
+  module text not null check (module ~ '^[a-z][a-z_]{1,29}$'),
+  objet_type text check (objet_type ~ '^[a-z][a-z0-9_]{1,59}$'),
+  objet_id text check (char_length(objet_id) <= 200),
+  type text not null check (type ~ '^[a-z][a-z_]{1,29}\.[a-z][a-z0-9_]{1,59}$'),
+  statut text not null default 'demandee' check (statut in ('demandee', 'en_cours', 'finie', 'partielle', 'echec')),
+  pieces uuid[] not null default '{}',
+  chiffrement text check (chiffrement = 'dossier:v1'),
+  resultat jsonb,
+  resultat_chiffre bytea,
+  etat jsonb,
+  etat_chiffre bytea,
+  comptes jsonb,
+  sans_source integer check (sans_source >= 0),
+  pieces_lues integer check (pieces_lues >= 0),
+  pieces_non_lues uuid[],
+  cout_eur numeric(12, 6) check (cout_eur >= 0),
+  appels_ia integer check (appels_ia >= 0),
+  modele text check (char_length(modele) <= 120),
+  version text check (char_length(version) <= 40),
+  motif text check (char_length(motif) <= 500),
+  paliers integer not null default 0 check (paliers >= 0),
+  demandee_par uuid,
+  demandee_le timestamptz not null default now(),
+  commencee_le timestamptz,
+  finie_le timestamptz,
+  constraint analyses_client_id_id_key unique (client_id, id),
+  -- Un module chiffré : rien en clair ; un module en clair : rien de chiffré.
+  constraint analyses_clair_ou_chiffre check (
+    (chiffrement is null or (resultat is null and etat is null))
+    and (chiffrement is not null or (resultat_chiffre is null and etat_chiffre is null))),
+  -- Tamila (B4) : toujours chiffré.
+  constraint analyses_tamila_chiffree check (module <> 'tamila' or (chiffrement is not null and resultat is null and etat is null))
+);
+
+create index if not exists analyses_objet on public.analyses (client_id, module, objet_type, objet_id, demandee_le desc);
+
+alter table public.analyses enable row level security;
+do $p$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'analyses'
+                 and policyname = 'on voit les analyses des objets qu''on voit') then
+    create policy "on voit les analyses des objets qu'on voit" on public.analyses
+      for select to authenticated using (private.voit_objet(client_id, objet_type, objet_id));
+  end if;
+end $p$;
+revoke all on table public.analyses from public, anon, authenticated;
+grant select on table public.analyses to authenticated;
+grant all on table public.analyses to service_role;
+
+comment on table public.analyses is
+  'Lectures longues d''un dossier (lecteur.analyser, 19an). Écriture par les portes seulement ; un module chiffré n''a ni résultat ni état en clair.';
+
+-- ─── private.demander_analyse : pour les portes des modules ───
+create or replace function private.demander_analyse(
+  p_client uuid, p_module text, p_objet_type text, p_objet_id text, p_type text, p_pieces uuid[],
+  p_chiffrement text default null, p_par uuid default null)
+returns uuid language plpgsql security definer set search_path to '' as $$
+declare v_id uuid; v_inconnues integer;
+begin
+  if p_client is null or p_module is null or p_type is null then
+    raise exception 'Organisation, module et type d''analyse sont nécessaires.' using errcode = '22023';
+  end if;
+  if split_part(p_type, '.', 1) <> p_module then
+    raise exception 'Le type % n''est pas du module %.', p_type, p_module using errcode = '22023';
+  end if;
+  if coalesce(cardinality(p_pieces), 0) = 0 then
+    raise exception 'Une analyse porte sur au moins une pièce.' using errcode = '22023';
+  end if;
+  select count(*) into v_inconnues from unnest(p_pieces) x(id)
+   where not exists (select 1 from public.pieces p where p.id = x.id and p.client_id = p_client);
+  if v_inconnues > 0 then
+    raise exception '% pièce(s) hors de cette organisation.', v_inconnues using errcode = '22023';
+  end if;
+  insert into public.analyses (client_id, module, objet_type, objet_id, type, pieces, chiffrement, demandee_par)
+  values (p_client, p_module, p_objet_type, p_objet_id, p_type, p_pieces, p_chiffrement, p_par)
+  returning id into v_id;
+  perform private.deposer_travail(p_client, p_module, 'lecteur.analyser', jsonb_build_object('analyse', v_id),
+                                  'analyse:' || v_id::text || ':0', 0::smallint);
+  return v_id;
+end $$;
+
+
 -- ── B5, les délais (souche fidèle au calcul attendu par Tamila) ──
 create or replace function public.ajouter_mois(p_date date, p_mois int) returns date language sql immutable as $$ select (p_date + make_interval(months => p_mois))::date $$;
 -- Prorogation (art. 642) : samedi, dimanche et jours fériés de métropole → premier jour ouvrable suivant.

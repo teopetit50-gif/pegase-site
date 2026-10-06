@@ -27,11 +27,13 @@
    Les avis reçus par courriel (b4_10, 06/10/2026) : au-dessus des
    compteurs, la file « Avis RPVA à rattacher » (AvisEntrantsTamila).
    Les honoraires du cabinet (06/10) : un tableau par dossier pour les
-   avocats (HonorairesCabinet), ouvert depuis l'en-tête.
+   avocats (HonorairesCabinet), ouvert depuis l'en-tête ; le pilotage
+   (PilotageCabinet : marge, charge, séries, sans diligence, pièces
+   attendues), à côté.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FolderPlus, KeyRound, Lock, Scale, ShieldCheck, Unlock } from "lucide-react";
+import { FolderPlus, Gauge, KeyRound, Lock, Scale, ShieldCheck, Unlock } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "../source";
@@ -46,6 +48,7 @@ import type { Clair, Dossier, DossierComplet } from "./types";
 import DossierTamila from "./DossierTamila";
 import AvisEntrantsTamila from "./AvisEntrantsTamila";
 import HonorairesCabinet from "./HonorairesCabinet";
+import PilotageCabinet from "./PilotageCabinet";
 import "./tamila.css";
 
 type Filtre = "a_confirmer" | "proches" | "audiences" | "ouverts" | "clos";
@@ -80,6 +83,7 @@ export default function EcranTamila() {
   const [fait, setFait] = useState<string | null>(null);
   const [filtre, setFiltre] = useState<Filtre | null>(null);
   const [tableauHonoraires, setTableauHonoraires] = useState(false);
+  const [pilotage, setPilotage] = useState(false);
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeDossier, setChargeDossier] = useState(false);
   const trousseau = useRef(new Trousseau());
@@ -570,6 +574,8 @@ export default function EcranTamila() {
   const avocats = personnes.filter((p) => ["gerant", "admin", "valideur"].includes(p.role));
   const estAvocatDuCabinet = !!moi && ["gerant", "admin", "valideur"].includes(moi.role);
   const dossiersHonoraires = useMemo(() => lignes.map((x) => ({ dossier: x.dossier, clair: x.clair })), [lignes]);
+  const delaisCabinet = useMemo(() => (source === "exemple" ? local.flatMap((c) => c.delais) : (cabinet?.delais ?? [])), [source, local, cabinet]);
+  const audiencesCabinet = useMemo(() => (source === "exemple" ? local.flatMap((c) => c.audiences) : (cabinet?.audiences ?? [])), [source, local, cabinet]);
   const reglages = source === "exemple" ? REGLAGES_EXEMPLE : (cabinet?.reglages ?? null);
 
   return (
@@ -595,6 +601,11 @@ export default function EcranTamila() {
           {estAvocatDuCabinet && (source === "exemple" || cabinet?.installe) ? (
             <button type="button" className="r-btn r-btn--fil" onClick={() => setTableauHonoraires(true)}>
               <Scale width={15} height={15} aria-hidden="true" /> Honoraires du cabinet
+            </button>
+          ) : null}
+          {estAvocatDuCabinet && (source === "exemple" || cabinet?.installe) ? (
+            <button type="button" className="r-btn r-btn--fil" onClick={() => setPilotage(true)}>
+              <Gauge width={15} height={15} aria-hidden="true" /> Pilotage
             </button>
           ) : null}
           <button type="button" className="r-btn r-btn--noir" onClick={ouvrirNouveau} disabled={source === "reelle" && (!cabinet?.installe || !moi || moi.role === "lecteur")}>
@@ -746,6 +757,21 @@ export default function EcranTamila() {
           clientId={source === "exemple" ? EXEMPLE_CLIENT : (cabinet?.moi.client_id ?? "")}
           dossiers={dossiersHonoraires}
           nomDe={nomDe}
+          onOuvrir={(id) => { setFiltre(null); setChoix(id); }}
+        />
+      ) : null}
+
+      {pilotage ? (
+        <PilotageCabinet
+          ouvert
+          onFermer={() => setPilotage(false)}
+          source={source}
+          clientId={source === "exemple" ? EXEMPLE_CLIENT : (cabinet?.moi.client_id ?? "")}
+          dossiers={dossiersHonoraires}
+          delais={delaisCabinet}
+          audiences={audiencesCabinet}
+          personnes={personnes}
+          exemple={local}
           onOuvrir={(id) => { setFiltre(null); setChoix(id); }}
         />
       ) : null}

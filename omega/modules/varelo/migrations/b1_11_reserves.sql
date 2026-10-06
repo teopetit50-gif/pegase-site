@@ -583,13 +583,13 @@ grant execute on function private.grp_tache_reserves() to service_role;
 
 revoke execute on function private.grp_enregistrer_reception(uuid, uuid, jsonb) from public, anon;
 revoke execute on function private.grp_lettre_reserve(uuid) from public, anon;
-revoke execute on function private.grp_exiger_decideur_reception(uuid, uuid) from public, anon;
+revoke execute on function private.grp_exiger_decideur_reception(uuid, uuid) from public, anon, authenticated;
 revoke execute on function private.grp_noter_protestation(uuid, date, text, text) from public, anon;
 revoke execute on function private.grp_classer_reception(uuid, text) from public, anon;
 revoke execute on function private.grp_lignes_reserves(uuid) from public, anon;
 grant execute on function private.grp_enregistrer_reception(uuid, uuid, jsonb) to authenticated, service_role;
 grant execute on function private.grp_lettre_reserve(uuid) to authenticated, service_role;
-grant execute on function private.grp_exiger_decideur_reception(uuid, uuid) to authenticated, service_role;
+grant execute on function private.grp_exiger_decideur_reception(uuid, uuid) to service_role;
 grant execute on function private.grp_noter_protestation(uuid, date, text, text) to authenticated, service_role;
 grant execute on function private.grp_classer_reception(uuid, text) to authenticated, service_role;
 grant execute on function private.grp_lignes_reserves(uuid) to authenticated, service_role;

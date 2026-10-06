@@ -109,3 +109,4 @@ export const programmerAvis = (client: string, canal: string, adresse: string, n
     p_client: client, p_canal: canal, p_adresse: adresse, p_nom: nom, p_reference: reference, p_regle_le: regleLe, p_entite: null,
   });
 export const avisRecu = (avis: string) => rpc("reput_avis_recu", { p_avis: avis });
+export const fixerDelai = (client: string, sujet: string, heures: number) => rpc("reput_fixer_delai", { p_client: client, p_sujet: sujet, p_heures: heures });
