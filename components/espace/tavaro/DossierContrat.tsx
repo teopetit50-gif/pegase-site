@@ -540,7 +540,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
           <DialogHeader>
             <DialogIcone><Send width={18} height={18} aria-hidden="true" /></DialogIcone>
             <DialogTitle>Relancer {form?.type === "relancer" ? form.facture.reference : ""}</DialogTitle>
-            <DialogDescription>Un rappel part au locataire, avec le reste dû. Sans geste de votre part, Tavaro relance de lui-même sept jours après l&apos;échéance, puis toutes les deux semaines, trois fois au plus avant le recouvrement.</DialogDescription>
+            <DialogDescription>Un rappel est préparé pour le locataire, avec le reste dû ; comme tout courriel qui n&apos;est pas adossé à une décision déjà prise, il attend un accord dans « À valider » avant de partir. Sans geste de votre part, Tavaro prépare de lui-même une relance sept jours après l&apos;échéance, puis toutes les deux semaines, trois fois au plus avant le recouvrement.</DialogDescription>
           </DialogHeader>
           <DialogBody>
             {form?.type === "relancer" ? (
@@ -552,7 +552,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
             {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
           </DialogBody>
           <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => form?.type === "relancer" && envoyer(() => gestes.relancer(form.facture), "La relance est préparée : elle part selon les réglages d'envoi du loueur.")}>{envoi ? <Loader variant="spin" /> : null} Envoyer la relance</button>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => form?.type === "relancer" && envoyer(() => gestes.relancer(form.facture), "La relance est préparée : elle part dès qu'une personne habilitée l'approuve dans « À valider ».")}>{envoi ? <Loader variant="spin" /> : null} Envoyer la relance</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
