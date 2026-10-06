@@ -57,6 +57,8 @@ begin
 
   -- La direction : un profil direction sur l'entité, sans profil de cabinet.
   perform tests.redevenir_admin();
+  -- Une direction est gérante ou administratrice (tiroma_profil_coherent) : daf2, valideur sur le banc, devient admin le temps du test.
+  update public.comptes set role = 'admin' where client_id = banc and user_id = tests.b3_compte('daf2');
   insert into public.tiroma_profils (client_id, user_id, entite_id, profil) values (banc, tests.b3_compte('daf2'), entite, 'direction');
   perform tests.b3_endosser('daf2');
   s := public.tiroma_synthese_semaine(banc, null, v_lundi);
