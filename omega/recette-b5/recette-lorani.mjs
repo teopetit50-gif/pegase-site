@@ -163,6 +163,38 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-decennales-1440.jpg`, { qualite: 55 });
 
+  console.log('— les ordres de service et les réserves (b5_19) : Façade rue Mercière');
+  const osm = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-os')]; const t = c.map(x => x.innerText).join(' | ').replace(/[\\u202f\\u00a0]/g, ' '); return { n: c.length, montant: /210 100 € HT à date \\(\\+13 % du marché initial de 186 000 €, avenants compris\\)/.test(t), delai: /délai 180 j \\+10 j d’OS \\+ 7 j d’arrêt/.test(t), avenant: /OS cumulés : \\+13 % du marché initial\\. Un avenant est à envisager/.test(t), reserves: /Réserves : Délai demandé : 15 jours|réserves : Délai demandé : 15 jours/.test(t), retour: /Retour de l’entreprise/.test(t) }; })()`);
+  ok(osm.n === 2 && Object.values(osm).every(Boolean), `OS : 210 100 € HT à date (+13 %), +10 j d’OS + 7 j d’arrêt, avenant à envisager (marché privé, > 10 %), réserves de l’entreprise dites (${JSON.stringify(osm)})`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-os')].find(x => /Échafaudages Rhône/.test(x.innerText))?.querySelectorAll('.esp-lien-bouton')[1]?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = (el, v) => { const p = el.tagName === 'SELECT' ? HTMLSelectElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(p, 'value').set.call(el, v); el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); }; set(d.querySelector('select'), 'travaux_supplementaires'); })()`);
+  await s.dormir(200);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; const i = d.querySelectorAll('input:not([type="date"])'); set(i[0], 'Prolongation de location de l’échafaudage'); set(i[1], '3000'); set(i[2], '21'); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Émettre\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/OS n° 2 · Travaux supplémentaires · Prolongation de location/.test([...document.querySelectorAll('.lor-os')].find(x => /Échafaudages Rhône/.test(x.innerText))?.innerText || '') && /27 000 € HT à date \\(\\+12,5 %/.test(([...document.querySelectorAll('.lor-os')].find(x => /Échafaudages Rhône/.test(x.innerText))?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '))`),
+     'OS n° 2 émis pour l’échafaudage : +3 000 € HT, 27 000 € à date (+12,5 %), +21 j');
+  const res = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-reserve')]; return { n: c.length, retard: c.filter(x => x.hasAttribute('data-retard')).length, levee: c.filter(x => x.dataset.statut === 'levee').length, statut: document.querySelector('.lor-reserve')?.closest('.esp-carte-corps')?.querySelector('[role="status"]')?.innerText }; })()`);
+  ok(res.n === 3 && res.retard === 1 && res.levee === 1 && /Réception non prononcée\. 2 réserves non levées sur 3\./.test(res.statut), `réserves : 3 (1 en retard, 1 levée), « ${res.statut} »`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-reserve')].find(x => /Réserve n° 1/.test(x.innerText))?.querySelector('.r-btn--noir')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Levée le/.test([...document.querySelectorAll('.lor-reserve')].find(x => /Réserve n° 1/.test(x.innerText))?.innerText || '')`), 'réserve n° 1 : levée constatée');
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Prononcer la réception')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="date"]'); const d = new Date(); d.setDate(d.getDate() - 1); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, d.toISOString().slice(0, 10)); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Réception le .* · garantie de parfait achèvement jusqu’au .*\\. 1 réserve non levée sur 3\\./.test(document.querySelector('.lor-reserve')?.closest('.esp-carte-corps')?.querySelector('[role="status"]')?.innerText || '')`),
+     'réception prononcée : la garantie de parfait achèvement court un an, 1 réserve non levée');
+  await s.evaluer(`document.querySelector('.lor-os')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-os-reserves-1440.jpg`, { qualite: 55 });
+
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
   await s.dormir(500);
