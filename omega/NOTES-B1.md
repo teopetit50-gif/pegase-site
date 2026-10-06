@@ -1,16 +1,16 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
-Branche `worker-b1`. Dernière mise à jour : 06/10/2026, 02 h 30 (écran relu
-en base réelle avec les trois comptes du banc : prêt à fusionner ; b1_02 et
-les tests en cours de pose et de rejeu par le coordinateur). Le coordinateur
-lit ce fichier.
+Branche `worker-b1`. Dernière mise à jour : 06/10/2026, 02 h 30 UTC — **les
+14 tests sont verts sur la recette**, les trois migrations sont posées,
+/espace/varelo est sur main (b287d04) et attend le déploiement Vercel. Le
+coordinateur lit ce fichier.
 
 ## Les deux jauges
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
-| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **85 %** | b1_01 et b1_02 posées ; **12 des 14 tests verts** sur la recette le 06/10 (208 assertions : installation, pôles, sociétés, périmètre, dépôts, rapprochement, écart, approbation, deux approbations, refus, séparation, export, isolement). Restent : b1_05 (1 assertion sur 36 : un second nom proposé sur le même objet n'est pas refusé → migration b1_03 à poser), b1_06_journal (un cast pgTAP, corrigé). Puis rejeu des deux |
-| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **80 %** | l'écran est écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓ (exemple), **relecture en base réelle ✓** avec gerant / referent / daf du banc (lecture, et une écriture par `grp_proposer_nom`) ; l'onglet est dans la barre (deux lignes dans les fichiers d'A3, à reporter sur main) ; **reste** : la fusion sur main et la vérification sur omegaai.fr, puis rejouer sur le banc un dépôt d'export et un passage depuis l'écran dès que b1_02 est posée (les portes étaient service_role) |
+| **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **100 %** | **14 tests sur 14 verts** le 06/10 à 02 h 24 UTC (253 assertions) : les 17 étapes du scénario jouées par les portes publiques sur un groupe vierge, avec RLS, rôles, périmètre partiel, séparation saisie/approbation, deux approbations, journal, isolement. Trois migrations posées (varelo_b1_01, _02, _03). Pour la production : les trois migrations à reposer par le coordinateur |
+| **Livrable client** (un gérant du banc fait le parcours complet dans /espace/varelo, en base réelle) | **90 %** | écran écrit, tsc ✓ eslint ✓ build ✓ recette cinq largeurs ✓, relecture en base réelle ✓ (gerant / referent / daf du banc), fusionné sur main (b287d04) avec l'onglet. **Reste** : la page servie par omegaai.fr à vérifier dès la remise à zéro du quota Vercel (06/10, 02 h Paris), et, en option, rejouer sur le banc un dépôt d'export et un passage depuis l'écran maintenant que b1_02 ouvre ces portes |
 
 ### Ce que Teo doit fournir ou décider lui-même
 
@@ -87,7 +87,8 @@ la recette → aides réécrites sans elle, sur le groupe vierge. Deuxième jeu
 places_d_office 3}`), b1_04 ×3 (24, 9, 9 ; exécution `{demandes 1,
 appliquees 1}`), b1_06_export (9), b1_06_isolement (21). Rouges : b1_05 (35/36,
 le second nom proposé non refusé → T7, migration b1_03) et b1_06_journal (cast
-`cmp_ok(bigint, …, integer)`, corrigé). Quatrième jeu demandé sur ces deux-là.
+`cmp_ok(bigint, …, integer)`, corrigé). **Quatrième jeu (06/10, 02 h 24) :
+b1_05 36/36, b1_06_journal 9/9 — 14 sur 14 verts.**
 
 ## 3. Trous du socle (relevés à la lecture, confirmés ou infirmés par le coordinateur le 05/10)
 
@@ -100,7 +101,7 @@ le second nom proposé non refusé → T7, migration b1_03) et b1_06_journal (ca
 | T5 | `private.grp_proposer` ne pose pas `payload.saisi_par` : la séparation saisie/approbation (lot 19c) ne peut tenir que si `demandes_validation.demandeur_id` est posé par le socle. **À prouver** par b1_04 (test « séparation ») et b1_05. | en attente du rejeu | si rouge : `b1_03_saisi_par.sql` (create or replace de `private.grp_proposer` avec `'saisi_par', v_uid` dans la charge) |
 | T5 bis | **Infirmé par le rejeu** : b1_04_refus_et_separation et b1_05 sont verts sur « celui qui a saisi la correction ne l'approuve pas » → le socle pose bien le demandeur (demandeur_id) et `preparer_approbation` le refuse. Pas de migration. | clos | — |
 | T6 | Les aides d'A5 sur la recette n'ont pas `tests.role_admis` ni `gerant_a` (présentes sur worker-a5, absentes en base). Pas un trou du socle : mes aides créent leur gérant. | clos | — |
-| T7 | `private.grp_proposer` accepte **deux noms proposés en même temps pour le même objet** (le test d'unicité ne regarde que les codes et les fusions) : deux demandes renommer_objet ouvertes, la dernière exécutée écrase l'autre. Révélé par b1_05 le 06/10. | à poser | `b1_03_proposer_nom_unique.sql` : la condition ajoutée au test d'unicité, même message 23514 |
+| T7 | `private.grp_proposer` acceptait **deux noms proposés en même temps pour le même objet** (le test d'unicité ne regardait que les codes et les fusions) : deux demandes renommer_objet ouvertes, la dernière exécutée écrasait l'autre. Révélé par b1_05 le 06/10. | **posée** (varelo_b1_03), b1_05 36/36 | `b1_03_proposer_nom_unique.sql` : la condition ajoutée au test d'unicité, même message 23514 |
 
 ## 4. Réponses du coordinateur (05/10, 22 h 30), recopiées
 
