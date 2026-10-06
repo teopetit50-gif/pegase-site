@@ -1,5 +1,39 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## REPRISE — pause demandée par Teo le 06/10/2026, 21 h Z
+
+**Branche `worker-a1`, tête au moment de la pause : voir le dernier commit (« NOTES-A1 : section REPRISE »).**
+Tout est commité et poussé. Aucun fichier du site public n'est touché. Lecteur déployé sur la recette : **v31 sur e0932e3**.
+Les commits suivants sont de la documentation seulement : 6c2edd2, 80abdb1, 6383f59 (chiffrage) et ce commit.
+
+**Ce qui est fait.** États : A = prouvé sur de vrais documents en recette ; B = testé sur doubles ou exemples.
+- A : facture PDF natif (travail 2152, 13/13 valeurs) ; Factur-X (R2026-000005, 17/17, sans IA).
+- B, en ligne (v31) :
+  - UBL / CII, avoirs ; scans en lecture visuelle ;
+  - Lorani : courriers, situation, contrôle du dossier (planche, CCTP, DPGF, métré, plan BET, notice, Cerfa, RE2020), PLU / PLUi avec la zone du terrain, attestation décennale, objets des pièces sœurs ;
+  - Varelo : bon de livraison et réception pré-remplie ;
+  - Tamila : 10 types d'avis, coffre et passerelle avis RPVA, lecture longue (19an posé, `lecteur_analyses = oui`) ;
+  - découpage en pièces filles (a4_21) ;
+  - photos et vocaux `lecteur.media`, natures dont `avancement` (b6_25).
+- lecteur-exports v2 : B, aucun export réel lu.
+- Détail par type : `omega/CHIFFRAGE/lecteur.md`. Contrats : `omega/CONTRAT-ANALYSE.md`, `omega/CONTRAT-MEDIA.md`, `omega/CHAMPS-LECTURE.md`.
+
+**Posé sur la recette.** 19an (analyses), b4_15, b5_22, b1_13, b6_25 ; réglage `lecteur_analyses = oui`. Rien d'A1 n'attend une pose SQL.
+
+**Attend le coordinateur.**
+- (1) Jouer `omega/banc/decoupage_reel.mjs` (ou `decoupage_reel_controle.sql`), pour la preuve réelle du découpage.
+- (2) Jouer `omega/banc/analyse_reelle.sql` quand B4 aura un dossier Tamila au coffre.
+- (3) Fusionner `worker-a1` dans main s'il le souhaite. Seuls `omega/` et des fichiers de fonctions sont concernés : pas de .ts hors `omega/functions`.
+
+**Attend Teo.**
+- Accord pour la première lecture longue Tamila et un dossier au coffre Scaleway.
+- `MISTRAL_API_KEY` : transcription des vocaux, refusée pour l'instant ; OCR facultatif.
+- Compte AWS Bedrock UE, si la promesse « lu en Europe, sans conservation » doit être vraie : aujourd'hui, API Anthropic en direct.
+- Un vrai export Logos_w ; des corpus réels par famille pour passer de B à A.
+- Décisions : médical (HDS), DWG, métré mesuré sur plan.
+
+**Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
+
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.
 Dernière mise à jour : 06/10/2026 (reprise par session_01HaFWLmwpsdUSHC7X6raEZU, Opus 5.5, après l'arrêt de session_01XQrgbohqqVEJwGK724wJ7h).
 
