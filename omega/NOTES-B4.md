@@ -8,7 +8,7 @@ Dernière mise à jour : 06/10/2026, matin (lot B4-2 : corrections du retour de 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
 | **Mécanique** (le socle fait ce qu'il dit, prouvé par pgTAP sur la recette) | **90 %** — **13 fichiers verts sur 13** sur la recette (06/10, 02 h 25 Paris, ≈ 340 contrôles), plus la chaîne complète rejouée en réel depuis l'écran (§ 8) ; manquent l'effacement à l'échéance et l'archive (ouvriers absents), la lecture des pièces chiffrées (coffre) | 00 à 13 verts sur la recette après b4_01 à b4_04 |
-| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **85 %** — fusionné sur main (d572973), prouvé en réel ; pas encore servi par omegaai.fr (quota Vercel) — écran complet, et **rejoué en base réelle avec les comptes du banc** (§ 8) : installation, dossier chiffré, partie, appel, délai calculé par le socle, pièce chiffrée déposée, membre, confirmation par l'avocat ; pas encore en ligne | fusion sur main et vérification sur omegaai.fr ; le coffre (lecture des pièces chiffrées) ; audiences, murailles, export et clôture rejoués en réel |
+| **Livrable client** (un cabinet peut s'en servir depuis /espace/tamila) | **90 %** — **en ligne sur omegaai.fr/espace/tamila**, prouvé en réel sur la recette ; manquent le coffre (lecture des pièces chiffrées), les ouvriers d'export et d'effacement, et l'installation chez un vrai cabinet en production — écran complet, et **rejoué en base réelle avec les comptes du banc** (§ 8) : installation, dossier chiffré, partie, appel, délai calculé par le socle, pièce chiffrée déposée, membre, confirmation par l'avocat ; pas encore en ligne | fusion sur main et vérification sur omegaai.fr ; le coffre (lecture des pièces chiffrées) ; audiences, murailles, export et clôture rejoués en réel |
 
 ## Ce qui manque, ce que Teo doit fournir
 
@@ -257,15 +257,18 @@ passe**, captures `omega/recette-b4/reel-*-1440.jpg`.
 
 - 06/10, 02 h 17 Paris — `/espace/tamila` (ef08aaf) est **fusionné sur main (b287d04)** par le
   coordinateur, avec l'onglet « Dossiers du cabinet » ; recette cinq largeurs verte sur son build.
-  omegaai.fr ne servira le commit qu'après la remise à zéro du quota Vercel (plan gratuit, 02 h Paris) :
-  **vérification de la page servie encore à faire**, puis donner l'URL.
+  omegaai.fr ne servait le commit qu'après la remise à zéro du quota Vercel.
+- 06/10, 02 h 55 Paris — **en ligne** : https://omegaai.fr/espace/tamila répond 200 et sert
+  « Dossiers du cabinet » et « Chaque dossier est chiffré avec sa propre clé » (relevé par curl sur
+  le HTML servi, déploiement de main 6635b1c). omegaai.fr pointe sur la production (pas de banc) :
+  l'écran y montre l'exemple ; la base réelle se relit sur un Next local pointé sur la recette.
 - Lot B4-3 (2d2839d puis d2d2338) : les deux derniers contrôles rouges (04 test 60, 13 test 20)
   corrigés, puis 06 (le jour de Paris écrit dans le SQL des throws_ok). **Résultat du coordinateur,
   06/10 à 02 h 25 Paris : 13 fichiers verts sur 13.** Plus rien à poser.
 
 ## 7. Prochaine étape
 
-1. Vérifier omegaai.fr/espace/tamila une fois le quota Vercel remis à zéro (fusion faite, b287d04).
+1. (fait : en ligne, vérifié le 06/10.)
 2. (fait : 13/13 verts).
 3. Souche locale (`omega/tests/tamila/souche_locale/`, en cours) : finir 03_pgtap et jouer.sh pour
    jouer les tests ici avant chaque lot.
