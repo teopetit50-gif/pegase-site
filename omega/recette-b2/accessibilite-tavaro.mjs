@@ -16,6 +16,7 @@ const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) ech
 
 const ECRANS = [
   ['tavaro', '/espace/tavaro', `[...document.querySelectorAll('#esp-dossier .esp-actions .r-btn')].find(b => /Chiffrer le retour/.test(b.textContent) && !b.disabled)?.click()`],
+  ['tavaro-edl', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="États des lieux"] .r-btn')].find(b => /Faire l.état de retour/.test(b.textContent) && !b.disabled)?.click()`],
   ['tavaro-avis', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Avis de contravention"] .r-btn')].find(b => /Désigner le conducteur/.test(b.textContent) && !b.disabled)?.click()`],
 ];
 

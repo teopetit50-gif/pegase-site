@@ -158,3 +158,25 @@ Sources :
   - `loc_avis_contravention` est ajoutée à la publication Realtime, et l'écran s'y abonne.
   - Test 13 : 9 assertions. TOUT_B2 réassemblé : 13 tests.
 - **Écran** : une désignation effacée s'affiche « identité effacée le … (gardée un an) » ; un sixième avis d'exemple le montre. La recette passe tout, axe ne trouve aucun écart.
+
+### Manque n° 3 — l'état des lieux contradictoire : état au 06/10, 16 h 45 Z
+
+- **Avis et test 13 sur la recette** : b2_03 v2, b2_04 et les tests 12 et 13 sont posés (7e97d91) ; `^test_b2_` passe 1..13. L'écran des avis part sur main à la prochaine poussée du coordinateur.
+- **Base** (a4c95e6) : `b2_05_etats_des_lieux.sql`, sans drop, rejouable.
+  - Une table `loc_etats_des_lieux` : un état par contrat et par moment (départ, retour), à l'état brouillon puis signé ou refusé. Une garde fige un état signé ou refusé ; seul le suivi de la caution avance ensuite.
+  - Les portes établir, signer, constater le refus et lever la caution.
+  - La signature exige l'avant, l'arrière et les deux flancs en photo. L'heure est celle du serveur et une empreinte SHA-256 du contenu signé est gardée, recalculable à l'identique.
+  - **`public.loc_chiffrer_retour` est remplacée**, même signature. Elle applique les états avant le chiffrage du socle : le carburant du départ signé fait foi, un retour refusé est non contradictoire, et une zone déjà notée au départ signé n'est pas facturée. Les raisons vont aux avertissements de la proposition.
+  - Test 14 : 20 assertions, à travers le vrai chiffrage. TOUT_B2 réassemblé : 14 tests. En local, la migration et le scénario passent.
+- **Écran** :
+  - un composant `EtatsDesLieux.tsx` dans le dossier du contrat, avec deux colonnes, départ et retour ;
+  - le constat : compteur, carburant, quatre vues obligatoires plus compteur, jauge et intérieur, dommages par zone avec leur photo, caution au départ ;
+  - la signature au doigt sur un canevas ; le refus se constate avec un motif ;
+  - la caution se lève quand rien n'est dû ;
+  - dans le formulaire de retour : une zone par dommage, le carburant du départ signé repris et verrouillé, un avis « déjà noté au départ : ne sera pas facturé » ;
+  - dans l'exemple, cinq états des lieux, et le chiffrage en mémoire applique les états comme la base (`edl.ts`).
+  - tsc, eslint et build verts ; `recette-tavaro.mjs` passe tout (74 contrôles, dont l'état de retour avec de vrais fichiers déposés par CDP et une signature tracée) ; axe : 0 écart à 390 et 1440 px, dialogue de l'état des lieux compris.
+- **Restent ouverts** :
+  - la préautorisation bancaire réelle (un prestataire de paiement, à choisir par Teo) ;
+  - l'état des lieux envoyé en PDF au locataire après la signature (lié au PDF de facture) ;
+  - le n° 2, la facture électronique ; les mentions (SIREN client, catégorie d'opération) peuvent commencer dans le module, le raccordement à une plateforme agréée relève du socle.

@@ -19,6 +19,10 @@
      loc_rattacher_avis(p_avis, p_contrat) → jsonb
      loc_designer_conducteur(p_avis, p_designation jsonb, p_mode, p_reference) → jsonb
      loc_classer_avis(p_avis, p_motif) → jsonb
+     loc_etablir_etat(p_contrat, p_moment, p_valeurs jsonb) → uuid (migration b2_05)
+     loc_signer_etat(p_etat, p_signataire, p_signature) → jsonb
+     loc_constater_refus(p_etat, p_motif) → jsonb
+     loc_lever_caution(p_contrat, p_motif) → jsonb
    Deux exceptions, que le socle ouvre par une politique RLS au gérant
    seul : loc_reglages (INSERT/UPDATE) et loc_agences (INSERT/UPDATE).
    Signatures lues dans omega/SOCLE-EXTRAITS-TAVARO.sql ; si la base
@@ -27,7 +31,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { assemblerDossiers } from "./exemples";
-import type { Agence, Amendement, AvisContravention, Avoir, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
+import type { Agence, Amendement, AvisContravention, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -94,6 +98,8 @@ export async function chargerMonde(): Promise<Monde> {
   const facs = (factures.data ?? []) as Facture[];
   const avs = (avoirs.data ?? []) as Avoir[];
   const demandeIds = [...props.map((p) => p.demande_id), ...avs.map((a) => a.demande_id)].filter(Boolean) as string[];
+  /* les états des lieux (b2_05) : vides sans erreur tant que la migration n'est pas posée */
+  const etatsLus = ids.length ? await supabase.from("loc_etats_des_lieux").select("*").in("contrat_id", ids) : { data: [], error: null };
   const [lignes, lignesFactures, demandes, journal] = await Promise.all([
     props.length ? supabase.from("loc_proposition_lignes").select("*").in("proposition_id", props.map((p) => p.id)).order("rang") : vide,
     facs.length ? supabase.from("loc_facture_lignes").select("*").in("facture_id", facs.map((f) => f.id)).order("rang") : vide,
@@ -121,6 +127,7 @@ export async function chargerMonde(): Promise<Monde> {
     avoirs: avs,
     demandes: (demandes.data ?? []) as DemandeCourte[],
     journal: journalLignes,
+    etats: etatsLus.error ? [] : ((etatsLus.data ?? []) as EtatDesLieux[]),
   });
   const ents = (entites.data ?? []) as { id: string; nom: string }[];
   return {
@@ -157,6 +164,10 @@ export const rattacherAvis = (p_avis: string, p_contrat: string) => rpc<Record<s
 export const designerConducteur = (p_avis: string, p_designation: Record<string, unknown>, p_mode: string, p_reference: string | null) =>
   rpc<Record<string, unknown>>("loc_designer_conducteur", { p_avis, p_designation, p_mode, p_reference });
 export const classerAvis = (p_avis: string, p_motif: string) => rpc<Record<string, unknown>>("loc_classer_avis", { p_avis, p_motif });
+export const etablirEtat = (p_contrat: string, p_moment: "depart" | "retour", p_valeurs: Record<string, unknown>) => rpc<string>("loc_etablir_etat", { p_contrat, p_moment, p_valeurs });
+export const signerEtat = (p_etat: string, p_signataire: string, p_signature: string | null) => rpc<Record<string, unknown>>("loc_signer_etat", { p_etat, p_signataire, p_signature });
+export const constaterRefus = (p_etat: string, p_motif: string) => rpc<Record<string, unknown>>("loc_constater_refus", { p_etat, p_motif });
+export const leverCaution = (p_contrat: string, p_motif: string | null) => rpc<Record<string, unknown>>("loc_lever_caution", { p_contrat, p_motif });
 export const anonymiserLocataire = (p_locataire: string) => rpc<Record<string, unknown>>("loc_anonymiser_locataire", { p_locataire, p_motif: "demande" });
 
 /* Les réglages du module : la seule écriture directe, ouverte par la RLS au gérant. */
