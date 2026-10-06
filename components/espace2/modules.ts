@@ -56,12 +56,14 @@ export const MODULES: ModuleV2[] = [
     FileText,
     [
       { libelle: "Documents reçus", href: `${RACINE}/filed`, exact: true },
+      { libelle: "Boîte de réception", href: `${RACINE}/filed/boite` },
       { libelle: "À payer", href: `${RACINE}/filed/a-payer` },
       { libelle: "Fournisseurs", href: `${RACINE}/filed/fournisseurs` },
       { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` },
     ],
     true,
   ),
+  m("reput", "REPUT", "Demandes clients", "Demandes reçues et réponses préparées", MessageSquareText),
   m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
   m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp),
@@ -73,7 +75,6 @@ export const MODULES: ModuleV2[] = [
 /* les modules annoncés, sans écran encore : une place dans la navigation, sans lien */
 export const MODULES_A_VENIR: { cle: string; nom: string; libelle: string; icone: LucideIcon }[] = [
   { cle: "cashd", nom: "CASHD", libelle: "Relances d'impayés", icone: HandCoins },
-  { cle: "reput", nom: "REPUT", libelle: "Demandes reçues et réponses", icone: MessageSquareText },
   { cle: "offload", nom: "OFFLOAD", libelle: "Clients qui décrochent", icone: UserMinus },
 ];
 
