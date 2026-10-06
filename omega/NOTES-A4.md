@@ -47,6 +47,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_19_filed_lot11b_pa_fournisseur_etranger.sql` | vendeur étranger sans SIREN (demande d'A2, BAC-0001) : `pa_commencer_statut` met dans le CDAR `facture.emetteur_tva`, `destinataire.tva`, `emetteur.tva` ; `pa_noter_flux` rapproche un CDAR entrant par SIREN ou TVA. Source d'a4_18 alignée. Test `test_a4_19_01`. |
 | `a4_20_filed_lot12_reception_courriel.sql` | carnet de l'audit, n° 1 (06/10) : abonnement `reception.nouvelle → filed.reception` ; `private.filed_rattacher_reception` (pièces jointes lisibles d'une boîte FILED → documents FILED, source courriel, expéditeur, doublon par empreinte, idempotent sur le chemin, alerte si aucune pièce lisible, réception « traitee ») ; `filed_traiter` (texte d'a4_08) prend `filed.reception`. Tests pgTAP `a4_13_reception_courriel.sql` (`^test_a4_20_`). |
 | `a4_21_filed_lot13_pieces_filles.sql` | carnet n° 2, avec A1 (06/10) : `public.filed_creer_pieces_filles(p_mere, p_filles)` (contrat de `lecteur/decoupage.ts` d'A1 : sonde à vide, filles `{document, chemin, nom_fichier, octets, sha256, pages, type_piece}`, rend `[{pages, piece, document, reference, deja}]`) ; chaque fille : pièce (`piece_mere_id`) + document FILED à elle, lu ensuite ; rejouable ; service_role. Tests pgTAP `a4_14_pieces_filles.sql` (`^test_a4_21_`). |
+| `a4_22_filed_lot14_fec_autoliquidation_devise_extourne.sql` | carnet n° 3 (06/10) : autoliquidation (regime_tva autoliquidation / intracom / hors_ue sans TVA facturée → TVA au taux normal, débit 44566/44562, crédit 4452 ou 4457, fournisseur au HT) ; contre-valeur en euros (`filed_taux_change`, `filed_poser_taux_change` service_role, taux du jour ou des 10 jours précédents ; sans taux, comptabilisation refusée) ; écart de change au règlement (666 / 766) ; extourne (`public.filed_extourner_facture`, gérant/admin, colonne `extourne_de`, la facture revient validée). Tests pgTAP `a4_15_fec_complements.sql` (`^test_a4_22_`). |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -192,10 +193,8 @@ Famille « Pilotage » :
 - Le FEC de FILED est un **journal d'achats** (HA, BQ, CA pour les achats et leurs règlements) : sans ventes, à-nouveaux,
   paie, immobilisations amorties ni inventaire. Il se fusionne dans le FEC du cabinet. Il n'est pas le FEC complet de
   l'entreprise, et l'écran doit le dire.
+- Fait depuis par a4_22 : l'autoliquidation, la contre-valeur en devise (avec écart de change), l'extourne.
 - Manque encore :
-  - l'autoliquidation : 4452 TVA due au crédit, 44566 au débit ;
-  - la contre-valeur des factures en devise (aujourd'hui, montant en devise seulement, Debit = Credit = 0) ;
-  - l'écriture de correction (extourne) quand une facture comptabilisée est annulée ;
   - le choix du séparateur « | » ou de l'encodage ISO 8859-15 (seuls tabulation et UTF-8 sont produits, tous deux
     admis).
 - Les factures comptabilisées avant le lot 10 n'ont pas d'écritures : `filed_rattraper_ecritures(p_client)` les écrit
@@ -327,7 +326,10 @@ spécialisée pour le nombre de PA.
    fichier qui contient plusieurs factures est découpé pièce par pièce. » — attestable quand a4_21 est posé ET que le
    lecteur d'A1 avec `decoupage.ts` est déployé (sa sonde passe alors de `porte_absente` à la création). Tests
    `test_a4_21_01` et `02`.
-3. FEC : autoliquidation, devise, extourne — à faire.
+3. **FEC : autoliquidation, devise, extourne** (a4_22). Pas de ligne propre dans factures.ts ; complète les lignes
+   « La TVA multi-taux, l'autoliquidation… » (43, côté lecture d'A1) et l'export FEC. Limites : taux d'autoliquidation
+   fixé au taux normal (20 %) ; nouveaux comptes système non réglables tant que la contrainte `role` n'est pas élargie
+   (drop, à Teo) ; les taux BCE attendent un ouvrier qui les pose chaque jour (B7 ou A2). Tests `test_a4_22_01` à `03`.
 4. Rapprochement commande / réception / facture — à faire (ligne 59).
 5. Reprise de plusieurs exercices — à faire (ligne 35).
 6. Envoi vers Pennylane, Sage, Cegid, QuickBooks — à faire.
