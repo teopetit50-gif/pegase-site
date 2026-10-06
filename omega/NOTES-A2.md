@@ -345,6 +345,8 @@ Trou restant, fermé côté ouvrier : l'expéditeur remet **toujours par Brevo**
 par exemple) mais qui arriverait en `envois.brevo` passait la garde. Désormais, un envoi
 de santé est aussi refusé (`SANTE_FOURNISSEUR_NON_HDS`, définitif) si `envoi.fournisseur`
 n'est pas `brevo` / `brevo_sms` (`FOURNISSEURS_REMIS`). Test ajouté (cas « e »).
+Commit 67f9cf6, redéployé par le coordinateur le 06/10 à 01 h 35 Z (version 12, passage
+de 01 h 36 : 200, pris 0). Test 54 d'A5 (cohérence fournisseur) vert 3/3 sur la recette.
 
 **Migration du lot : demandée à A2 le 06/10, NON écrite par A2, finalement posée par
 le coordinateur.**
