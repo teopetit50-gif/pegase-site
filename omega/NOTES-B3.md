@@ -311,3 +311,24 @@ logiciel métier qui la fait).
 
      Recette : 94 contrôles, tout passe ; axe : 0 écart, dialogue compris.
    - Vérifié en local : la porte rend le rendez-vous avec le Fauteuil 2 et Élodie ; après clôture, plus rien. Un premier essai a montré qu'une absence clôturée jouait encore dans la même transaction, parce que now() y est constant : d'où `close_le`.
+5. **Demi-journées vides des collaborateurs** (06/10, ~20 h Z) :
+   - `b3_19_demi_journees_vides.sql` pose `public.tiroma_demi_journees_vides(client, entité, jours = 14)`, de 1 à 28 jours. Pour chaque praticien actif et chaque demi-journée (matin avant 13 h), on calcule :
+     - les heures où il consulte : ses horaires propres s'il en a. Sinon, les horaires du cabinet réduits à ses demi-journées habituelles, c'est-à-dire des rendez-vous à ce créneau au moins 3 des 8 dernières semaines (`source` vaut alors « habitude ») ;
+     - à ces heures on retire les fériés, ses fermetures et celles du cabinet, et ses plages « personnel ». Un horaire exceptionnel du jour l'emporte ;
+     - la demi-journée est « vide » à partir d'une heure ouverte et sous le seuil du cabinet. Aujourd'hui, seul ce qui reste compte ;
+     - avec la demi-journée vide, on rend les minutes libres et le nombre de patients en liste d'attente qui la rempliraient.
+   - Qui la voit :
+     - le titulaire voit tous les praticiens ; un collaborateur ne voit que son agenda, même si le périmètre du cabinet est partagé ;
+     - ni l'assistante ni la direction : la page dit « jamais par personne, seul le titulaire » ;
+     - on ne regarde que l'avenir, sans taux passé.
+   - `private.tiroma_deposer_demi_journees` : chaque jour dès 5 h, au point du matin du titulaire seulement, une section « Demi-journées vides — <centre> » pour les sept jours qui viennent (8 lignes au plus), `sante = false`. Les lignes de J et J+1 sont en « attention ». Cron tiroma-demi-journees.
+   - Les calculs internes (`tiroma_ouvert_praticien`, `tiroma_demi_journees_calc`, le dépôt) ne sont ouverts qu'au service_role.
+   - `20_demi_journees_vides.sql` : `test_b3_20_demi_journees_vides`, 15 assertions :
+     - les droits, l'horizon ;
+     - le matin vide de Dr Rousseau (ses horaires, 240 min) et rien l'après-midi ;
+     - l'après-midi habituel de Dr Lacour ;
+     - le collaborateur ne voit que lui ;
+     - le décompte de la liste d'attente ;
+     - le point du matin : rien avant 5 h, la section au titulaire seul, sans santé ;
+     - un rendez-vous de 3 h 30 remplit le matin, un congé efface l'après-midi.
+   - Vérifié en local (tables simulées) : posée deux fois. Le jour D, on trouve Rousseau le matin (horaires, 240 min, attente 1) et Lacour l'après-midi (habitude, 300 min). Le collaborateur ne voit que Rousseau, l'assistante est refusée et rien n'est déposé à 4 h. Après le rendez-vous et le congé, il ne reste rien pour D.
