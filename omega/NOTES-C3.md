@@ -197,6 +197,23 @@ Ordre de pose : `c3_05_accuse_avis_indicateurs.sql` → test `omega/tests/reput/
 Test `omega/tests/reput/c3_06_cashd_escalade.sql` (27 ; souche 233/233). Il pose sa propre
 `private.cashd_contact_en_litige` dans sa transaction (annulée) : indépendant de l'état de CASHD.
 
+## c3_07 — un dossier sur deux canaux, le routage par service
+
+- **Deux canaux, un dossier** : clés de contact par demande (SHA-256 du courriel en minuscules et des neuf derniers
+  chiffres du téléphone ; un formulaire qui donne les deux porte les deux). Clé commune dans les sept jours → même
+  `dossier_id`. Le dossier préparé joint les trois messages précédents (fonction Edge : bloc « messages précédents »,
+  leurs nombres permis) ; la réponse part sur le canal du dernier message ; l'ouvrier annule les réponses plus
+  anciennes encore en attente (file « annulee » par le serveur, envoi clos, demande « ignoree », regroupée avec…).
+- **Routage** : `reput_router_sujet(p_client, p_sujet, p_equipe)` pose les règles de validation du socle (module
+  reput, `reput.repondre.<sujet>` et `reput.transferer.<sujet>`, équipe) : seuls les membres de l'équipe décident.
+  La file porte maintenant le sujet aussi pour le « à relire » (`reput.transferer.<sujet>`, toujours refusé aux
+  accords par la garde). Le premier sujet concerné est celui que le modèle retient (consigne).
+- **Correctif c3_05** : le message « demandes d'avis » s'appelle `demande_avis` (il masquait le sujet « avis »).
+- Écran : « Un seul dossier · N messages », service qui décide par sujet.
+
+Test `omega/tests/reput/c3_07_dossiers.sql` (20 ; souche 253/253) ; c3_03 ajusté (type de file `reput.transferer.tarifs`).
+Fonction Edge : 12/12 Deno, **à redéployer** (precedents dans la question).
+
 ## Lignes de capacité (`lib/produits/capacites/accueil.ts`) : tenues et preuves
 
 | Ligne | État | Preuve |
@@ -225,6 +242,8 @@ Test `omega/tests/reput/c3_06_cashd_escalade.sql` (27 ; souche 233/233). Il pose
 | Les avis obtenus après intervention sont comptés par service et par site. | **tenue** | vue reput_avis_indicateurs |
 | Les pièces jointes sont conservées et rattachées à la demande. | **tenue** (A2 les dépose ; l'écran les montre) | écran |
 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | **tenue à la demande** (CSV « ; », UTF-8, depuis l'écran) ; à date fixe : non | écran « Exporter vers un tableur » |
+| Une même demande reçue sur deux canaux est reconnue comme un seul dossier (une réponse, sur le dernier canal). | **tenue** (c3_07 ; rapprochement par courriel / téléphone connus) | c3_07 « WhatsApp rejoint le dossier du formulaire », « une réponse, pas deux » |
+| Chaque demande est aiguillée selon sa catégorie ; une demande qui relève de deux services va au premier concerné. | **tenue** (sujet → équipe du socle) | c3_07 « un valideur hors de l'équipe ne décide pas » |
 | Une demande hors périmètre est transférée avec la fiche de son escalade. | **tenue** | alerte au client portant la demande ; c3_02 |
 | Chaque échange reste archivé, transféré ou non, et reste consultable. | **tenue** | `reput_demandes` + `reput_reponses` (versions), RLS ; c3_02 « Le gérant lit » |
 

@@ -86,6 +86,12 @@ export function contenuDemande(d: Dossier): string {
   const sujets = b.sujets.map((s) => ({ code: s.code, libelle: s.libelle, description: s.description }));
   const r = d.reception!;
   const corps = (r.corps ?? "").slice(0, LIMITE_DEMANDE);
+  const precedents = (d.precedents ?? []).map((m) => [
+    `<message_precedent canal="${m.canal}" recu_le="${m.recu_le}">`,
+    m.sujet ? `Objet : ${m.sujet}` : "",
+    (m.corps ?? "").slice(0, 2000),
+    "</message_precedent>",
+  ].filter((l) => l !== "").join("\n"));
   return [
     "SUJETS :",
     JSON.stringify(sujets),
@@ -93,6 +99,9 @@ export function contenuDemande(d: Dossier): string {
     `BASE DE CONNAISSANCES (${fiches.length} fiche${fiches.length > 1 ? "s" : ""} en vigueur) :`,
     fiches.length ? JSON.stringify(fiches) : "(vide : rien ne peut être affirmé)",
     "",
+    ...(precedents.length
+      ? ["MESSAGES PRÉCÉDENTS DU MÊME CLIENT (même dossier, encore sans réponse envoyée ou déjà traités) : une seule réponse doit couvrir tout le dossier.", ...precedents, ""]
+      : []),
     `MESSAGE REÇU par ${r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
     "<message>",
     r.de_nom ? `De : ${r.de_nom}` : "",
@@ -152,6 +161,7 @@ export function controler(d: Dossier, brut: unknown): { redaction: Redaction; co
       for (const n of nombres(`${f.titre} ${f.contenu}`)) permis.add(n);
     }
     for (const n of nombres(`${d.reception?.sujet ?? ""} ${d.reception?.corps ?? ""}`)) permis.add(n);
+    for (const m of d.precedents ?? []) for (const n of nombres(`${m.sujet ?? ""} ${m.corps ?? ""}`)) permis.add(n);
     const inventes = nombres(corps).filter((n) => !permis.has(n));
     if (inventes.length) {
       couverte = false;

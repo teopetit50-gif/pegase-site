@@ -54,6 +54,8 @@ export type Demande = {
   de_empreinte?: string | null;
   litige?: boolean;
   escaladee_le?: string | null;
+  dossier_id?: string | null;
+  regroupee_avec?: string | null;
   motif: string | null;
   recu_le: string;
   preparee_le: string | null;
@@ -89,6 +91,7 @@ export type Sujet = {
   actif: boolean;
   ordre: number;
   delai_heures?: number | null;
+  equipe_id?: string | null;
 };
 
 export type AccordSujet = {
@@ -138,7 +141,10 @@ export type Avis = {
 
 export type Indicateurs = { recues: number; repondues: number; parties_seules: number; hors_base: number; delai_median_minutes: number | null };
 
+export type Equipe = { id: string; nom: string };
+
 export type Monde = {
+  equipes?: Equipe[];
   reglages: Reglages | null;
   avis: Avis[];
   indicateurs: Indicateurs;
