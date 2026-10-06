@@ -113,17 +113,16 @@ const LIGNES = {
 
   /* TAVARO — ouvrier B2, par paliers. Seuls 01 (facturation des retours),
      12 (état des lieux signé) et 14 (amendes) existent. 19 (relevés
-     constructeur) et l'assistance téléphonique (04) dépendent de tiers. */
+     constructeur) et l'assistance téléphonique (04) dépendent de tiers.
+     Retirés le 06/10 au soir (renfort B3, b3t_01 à b3t_04) : réservations à
+     risque (07), montée en gamme (08), contrats à risque (09), véhicules
+     inactifs (10), plan de flotte (20). */
   tavaro: [
     "Remise en location",
     "Entretien",
     "Assistance",
     "Sortie de flotte",
     "Questions",
-    "Réservations à risque",
-    "Montée en gamme",
-    "Contrats à risque",
-    "Véhicules inactifs",
     "Transferts",
     "Péages",
     "Rappels",
@@ -131,7 +130,6 @@ const LIGNES = {
     "Contestations bancaires",
     "Sinistres et recours",
     "Relevés constructeur",
-    "Plan de flotte",
   ],
 };
 
