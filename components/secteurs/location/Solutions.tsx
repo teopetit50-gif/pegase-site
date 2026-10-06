@@ -19,6 +19,7 @@ import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useScrollSpy } from "./espion-defilement";
 import { Miniature } from "./Miniature";
+import { SiEnPreparation } from "@/components/ui/en-preparation";
 import { SOLUTIONS } from "./textes";
 import { ApercuCerveau } from "./apercus/ApercuCerveau";
 import { ApercuInactivite } from "./apercus/ApercuFacturation";
@@ -96,6 +97,7 @@ export function Solutions() {
                     transition={{ duration: 0.6, delay: 0.06 * i, ease: COURBE }}
                   >
                     {s.label}
+                    <SiEnPreparation pour="tavaro" t={s.label} />
                   </motion.a>
                 ))}
               </nav>
@@ -117,7 +119,10 @@ export function Solutions() {
                   >
                     {p.kicker ? <p className="f-onest AgentSolutions_panelKicker">{p.kicker}</p> : null}
                     <div className="AgentSolutions_panelMeta">
-                      <h3 className="f-onest AgentSolutions_panelHeadline">{p.titre}</h3>
+                      <h3 className="f-onest AgentSolutions_panelHeadline">
+                        {p.titre}
+                        <SiEnPreparation pour="tavaro" t={p.lien} />
+                      </h3>
                       <a className="f-onest AgentSolutions_panelLink" href={p.lienHref}>
                         {p.lienTexte} <span aria-hidden="true">↗</span>
                       </a>
